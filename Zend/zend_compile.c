@@ -1805,6 +1805,17 @@ static zend_string *zend_resolve_const_class_name_reference(zend_ast *ast, const
 	return zend_resolve_class_name(class_name, ast->attr);
 }
 
+static zend_string *zend_resolve_const_class_name_reference_with_generics(zend_ast *ast, const char *type)
+{
+	zend_string *class_name = zend_ast_get_str(ast->child[0]);
+	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type_ast(ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use \"%s\" as %s, as it is reserved",
+			ZSTR_VAL(class_name), type);
+	}
+	return zend_resolve_class_name(class_name, ast->attr);
+}
+
 static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 {
 	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && zend_is_scope_known()) {
@@ -2107,6 +2118,10 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	ce->properties_info_table = NULL;
 	ce->attributes = NULL;
 	ce->associated_types = NULL;
+	ce->bound_types = NULL;
+	// TODO Should these be inside nullify_handlers?
+	ce->generic_parameters = NULL;
+	ce->num_generic_parameters = 0;
 	ce->enum_backing_type = IS_UNDEF;
 	ce->backed_enum_table = NULL;
 
@@ -7031,8 +7046,17 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			const char *correct_name;
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 
+			// TODO Old version to remove
 			if (ce && ce->associated_types && zend_hash_exists(ce->associated_types, type_name)) {
 				return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(type_name), /* allow null */ false, _ZEND_TYPE_ASSOCIATED_BIT);
+			}
+			if (ce && ce->num_generic_parameters > 0) {
+				for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
+					const zend_generic_parameter *genric_param = &ce->generic_parameters[generic_param_index];
+					if (zend_string_equals(type_name, genric_param->name)) {
+						return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(type_name), /* allow null */ false, _ZEND_TYPE_ASSOCIATED_BIT);
+					}
+				}
 			}
 
 			zend_string *class_name = type_name;
@@ -9074,6 +9098,7 @@ static void zend_associated_table_ht_dtor(zval *val) {
 	}
 }
 
+// TODO Remove
 static void zend_compile_associated_type(zend_ast *ast) {
 	zend_class_entry *ce = CG(active_class_entry);
 	HashTable *associated_types = ce->associated_types;
@@ -9106,20 +9131,53 @@ static void zend_compile_associated_type(zend_ast *ast) {
 	}
 }
 
+static void zend_bound_types_ht_dtor(zval *ptr) {
+	HashTable *interface_bound_types = Z_PTR_P(ptr);
+	zend_hash_destroy(interface_bound_types);
+	efree(interface_bound_types);
+}
+
+static void zend_types_ht_dtor(zval *ptr) {
+	zend_type *type = Z_PTR_P(ptr);
+	// TODO Figure out persistency?
+	zend_type_release(*type, false);
+	efree(type);
+}
+
 static void zend_compile_implements(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
 	zend_class_name *interface_names;
-	uint32_t i;
 
 	interface_names = emalloc(sizeof(zend_class_name) * list->children);
 
-	for (i = 0; i < list->children; ++i) {
-		zend_ast *class_ast = list->child[i];
+	for (uint32_t i = 0; i < list->children; ++i) {
+		zend_ast *interface_ast = list->child[i];
 		interface_names[i].name =
-			zend_resolve_const_class_name_reference(class_ast, "interface name");
+			zend_resolve_const_class_name_reference_with_generics(interface_ast, "interface name");
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
+
+		// TODO, need the list to a type list
+		if (interface_ast->child[1]) {
+			const zend_ast_list *generics_list = zend_ast_get_list(interface_ast->child[1]);
+			const uint32_t num_generic_args = generics_list->children;
+
+			// TODO Check that we have the same number of generic args?
+			if (ce->bound_types == NULL) {
+				ALLOC_HASHTABLE(ce->bound_types);
+				zend_hash_init(ce->bound_types, list->children-i, NULL, zend_bound_types_ht_dtor, false /* todo depend on internal or not */);
+			}
+
+			HashTable *bound_interface_types;
+			ALLOC_HASHTABLE(bound_interface_types);
+			zend_hash_init(bound_interface_types, num_generic_args, NULL, zend_types_ht_dtor, false /* todo depend on internal or not */);
+			for (uint32_t generic_param = 0; generic_param < num_generic_args; ++generic_param) {
+				zend_type bound_type = zend_compile_typename(generics_list->child[generic_param]);
+				zend_hash_index_add_mem(bound_interface_types, generic_param, &bound_type, sizeof(bound_type));
+			}
+			zend_hash_add_new_ptr(ce->bound_types, interface_names[i].lc_name, bound_interface_types);
+		}
 	}
 
 	ce->num_interfaces = list->children;
@@ -9165,6 +9223,45 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 		ce->enum_backing_type = IS_STRING;
 	}
 	zend_type_release(type, 0);
+}
+
+
+static void zend_compile_generic_params(zend_ast *params_ast)
+{
+	const zend_ast_list *list = zend_ast_get_list(params_ast);
+	zend_generic_parameter *generic_params = emalloc(list->children * sizeof(zend_generic_parameter));
+	CG(active_class_entry)->generic_parameters = generic_params;
+
+	for (uint32_t i = 0; i < list->children; i++) {
+		const zend_ast *param_ast = list->child[i];
+		zend_string *name = zend_ast_get_str(param_ast->child[0]);
+		zend_type constraint_type = zend_mixed_type;
+
+		if (zend_string_equals(name, CG(active_class_entry)->name)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Generic parameter %s has same name as class", ZSTR_VAL(name));
+		}
+
+		for (uint32_t j = 0; j < i; j++) {
+			if (zend_string_equals(name, generic_params[j].name)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Duplicate generic parameter %s", ZSTR_VAL(name));
+			}
+		}
+
+		if (param_ast->child[1]) {
+			// TODO Need to free this
+			constraint_type = zend_compile_typename(param_ast->child[1]);
+			// TODO Validate that void, static, never are not used in the constraint?
+		}
+
+		generic_params[i].name = zend_string_copy(name);
+		generic_params[i].constraint = constraint_type;
+
+		/* Update number of parameters on the fly, so that previous parameters can be
+		 * referenced in the type constraint of following parameters. */
+		CG(active_class_entry)->num_generic_parameters = i + 1;
+	}
 }
 
 static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ */
@@ -9259,6 +9356,10 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	if (decl->child[3]) {
 		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
+	}
+
+	if (ce->ce_flags & ZEND_ACC_INTERFACE && decl->child[4]) {
+		zend_compile_generic_params(decl->child[4]);
 	}
 
 	if (implements_ast) {

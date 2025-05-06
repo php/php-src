@@ -220,6 +220,9 @@ struct _zend_class_entry {
 
 	/* Only for interfaces */
 	HashTable *associated_types;
+	HashTable *bound_types;
+	zend_generic_parameter *generic_parameters;
+	uint32_t num_generic_parameters;
 
 	uint32_t enum_backing_type;
 	HashTable *backed_enum_table;
