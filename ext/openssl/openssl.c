@@ -438,6 +438,9 @@ PHP_GINIT_FUNCTION(openssl)
 #endif
 	openssl_globals->errors = NULL;
 	openssl_globals->errors_mark = NULL;
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	php_openssl_backend_init_libctx(&openssl_globals->libctx, &openssl_globals->propq);
+#endif
 }
 /* }}} */
 
@@ -450,6 +453,9 @@ PHP_GSHUTDOWN_FUNCTION(openssl)
 	if (openssl_globals->errors_mark) {
 		pefree(openssl_globals->errors_mark, 1);
 	}
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	php_openssl_backend_destroy_libctx(openssl_globals->libctx, openssl_globals->propq);
+#endif
 }
 /* }}} */
 
@@ -2036,19 +2042,19 @@ PHP_FUNCTION(openssl_pkey_new)
 #if PHP_OPENSSL_API_VERSION >= 0x30000
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "x25519", sizeof("x25519") - 1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
-			php_openssl_pkey_object_curve_25519_448(return_value, EVP_PKEY_X25519, data);
+			php_openssl_pkey_object_curve_25519_448(return_value, "X25519", data);
 			return;
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "ed25519", sizeof("ed25519") - 1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
-			php_openssl_pkey_object_curve_25519_448(return_value, EVP_PKEY_ED25519, data);
+			php_openssl_pkey_object_curve_25519_448(return_value, "ED25519", data);
 			return;
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "x448", sizeof("x448") - 1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
-			php_openssl_pkey_object_curve_25519_448(return_value, EVP_PKEY_X448, data);
+			php_openssl_pkey_object_curve_25519_448(return_value, "X448", data);
 			return;
 		} else if ((data = zend_hash_str_find(Z_ARRVAL_P(args), "ed448", sizeof("ed448") - 1)) != NULL &&
 			Z_TYPE_P(data) == IS_ARRAY) {
-			php_openssl_pkey_object_curve_25519_448(return_value, EVP_PKEY_ED448, data);
+			php_openssl_pkey_object_curve_25519_448(return_value, "ED448", data);
 			return;
 #endif
 		}
