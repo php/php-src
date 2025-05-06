@@ -502,7 +502,7 @@ PHP 8.5 UPGRADE NOTES
 - Core:
   . Remove OPcodes for identity comparisons against booleans, particularly
     for the match(true) pattern.
-  . Creating exceptions objects is now much faster.
+  . Creating exception objects is now much faster.
 
 - ReflectionProperty:
   . Improved performance of the following methods: getValue(), getRawValue(),
