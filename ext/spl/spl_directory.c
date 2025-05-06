@@ -211,7 +211,6 @@ static inline bool spl_intern_is_glob(const spl_filesystem_object *intern)
 
 PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *intern) /* {{{ */
 {
-#ifdef HAVE_GLOB
 	if (intern->type == SPL_FS_DIR && spl_intern_is_glob(intern)) {
 		size_t len = 0;
 		char *tmp = php_glob_stream_get_path(intern->u.dir.dirp, &len);
@@ -220,7 +219,6 @@ PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *
 		}
 		return zend_string_init(tmp, len, /* persistent */ false);
 	}
-#endif
 	if (!intern->path) {
 		return NULL;
 	}
@@ -641,14 +639,12 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 		spl_set_private_debug_info_property(spl_ce_SplFileInfo, "fileName", strlen("fileName"), debug_info, &tmp);
 	}
 	if (intern->type == SPL_FS_DIR) {
-#ifdef HAVE_GLOB
 		if (spl_intern_is_glob(intern)) {
 			ZVAL_STR_COPY(&tmp, intern->path);
 		} else {
 			ZVAL_FALSE(&tmp);
 		}
 		spl_set_private_debug_info_property(spl_ce_DirectoryIterator, "glob", strlen("glob"), debug_info, &tmp);
-#endif
 		if (intern->u.dir.sub_path) {
 			ZVAL_STR_COPY(&tmp, intern->u.dir.sub_path);
 		} else {
@@ -721,16 +717,12 @@ static void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_l
 
 	/* spl_filesystem_dir_open() may emit an E_WARNING */
 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
-#ifdef HAVE_GLOB
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && !zend_string_starts_with_literal(path, "glob://")) {
 		path = zend_strpprintf(0, "glob://%s", ZSTR_VAL(path));
 		spl_filesystem_dir_open(intern, path);
 		zend_string_release(path);
-	} else
-#endif
-	{
+	} else {
 		spl_filesystem_dir_open(intern, path);
-
 	}
 	zend_restore_error_handling(&error_handling);
 }
@@ -1582,7 +1574,6 @@ PHP_METHOD(RecursiveDirectoryIterator, __construct)
 }
 /* }}} */
 
-#ifdef HAVE_GLOB
 /* {{{ Cronstructs a new dir iterator from a glob expression (no glob:// needed). */
 PHP_METHOD(GlobIterator, __construct)
 {
@@ -1607,7 +1598,6 @@ PHP_METHOD(GlobIterator, count)
 	}
 }
 /* }}} */
-#endif /* HAVE_GLOB */
 
 /* {{{ forward declarations to the iterator handlers */
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter);
@@ -2782,11 +2772,9 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_filesystem_object_check_handlers.clone_obj = NULL;
 	spl_filesystem_object_check_handlers.get_method = spl_filesystem_object_get_method_check;
 
-#ifdef HAVE_GLOB
 	spl_ce_GlobIterator = register_class_GlobIterator(spl_ce_FilesystemIterator, zend_ce_countable);
 	spl_ce_GlobIterator->create_object = spl_filesystem_object_new;
 	spl_ce_GlobIterator->default_object_handlers = &spl_filesystem_object_check_handlers;
-#endif
 
 	spl_ce_SplFileObject = register_class_SplFileObject(spl_ce_SplFileInfo, spl_ce_RecursiveIterator, spl_ce_SeekableIterator);
 	spl_ce_SplFileObject->default_object_handlers = &spl_filesystem_object_check_handlers;
