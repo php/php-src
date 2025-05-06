@@ -3283,7 +3283,15 @@ class ClassInfo {
         $code .= "{\n";
 
         $flagCodes = generateVersionDependentFlagCode("%s", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
-        $flags = implode("", $flagCodes);
+        if (count($flagCodes) > 1) {
+            // If we have more than one entry, there will be preprocessor conditions,
+            // thus we need to start with a newline.
+            $flags = "\n" . implode("\n", $flagCodes);
+        } else if (count($flagCodes) === 1) {
+            $flags = " " . $flagCodes[0];
+        } else {
+            $flags = "";
+        }
 
         $classMethods = ($this->funcInfos === []) ? 'NULL' : "class_{$escapedName}_methods";
         if ($this->type === "enum") {
@@ -3292,7 +3300,7 @@ class ClassInfo {
                 ? $this->enumBackingType->toTypeCode() : "IS_UNDEF";
             $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, $classMethods);\n";
             if ($flags !== "") {
-                $code .= "\tclass_entry->ce_flags |= $flags\n";
+                $code .= "\tclass_entry->ce_flags |=$flags\n";
             }
         } else {
             $code .= "\tzend_class_entry ce, *class_entry;\n\n";
@@ -3310,21 +3318,21 @@ class ClassInfo {
                     $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
                 }
 
-                $code .= "\tclass_entry = zend_register_internal_class_with_flags(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ", " . ($flags ?: 0) . ");\n";
+                $code .= "\tclass_entry = zend_register_internal_class_with_flags(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . "," . ($flags ?: " 0") . ");\n";
 
                 if (!$php84MinimumCompatibility) {
                     $code .= "#else\n";
 
                     $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
                     if ($flags !== "") {
-                        $code .= "\tclass_entry->ce_flags |= $flags;\n";
+                        $code .= "\tclass_entry->ce_flags |=$flags;\n";
                     }
                     $code .= "#endif\n";
                 }
             } else {
                 $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
                 if ($flags !== "") {
-                    $code .= "\tclass_entry->ce_flags |= $flags\n";
+                    $code .= "\tclass_entry->ce_flags |=$flags\n";
                 }
             }
         }
@@ -5391,12 +5399,16 @@ function generateVersionDependentFlagCode(string $codeTemplate, array $flagsByPh
         $code = "";
 
         $if = $i === 0 ? "#if" : "#elif";
-        $endif = $i === $flagCount - 1 ? "#endif\n" : "";
 
         $code .= "$if (PHP_VERSION_ID >= $version)\n";
 
         $code .= sprintf($codeTemplate, implode("|", $versionFlags));
-        $code .= $endif;
+        if ($i === $flagCount - 1) {
+            if (!str_ends_with($code, "\n")) {
+                $code .= "\n";
+            }
+            $code .= "#endif\n";
+        }
 
         $result[] = $code;
         $i++;

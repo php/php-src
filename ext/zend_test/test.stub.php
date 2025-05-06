@@ -85,6 +85,13 @@ namespace {
         public function returnsThrowable(): Exception {}
     }
 
+    /**
+     * @not-serializable
+     */
+    final class ZendTestGenStubFlagCompatibilityTest {
+
+    }
+
     class ZendAttributeTest {
         /** @var int */
         #[ZendTestRepeatableAttribute]
