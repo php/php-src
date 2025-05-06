@@ -83,7 +83,7 @@ make -j4
 
 On Unix system:
 ```shell
-make -j$(nproc)
+make -j4
 ```
 
 The number of jobs should usually match the number of available cores, which
