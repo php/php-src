@@ -780,22 +780,14 @@ static zend_class_entry *register_class_ZendTestGenStubFlagCompatibilityTest(voi
 
 	INIT_CLASS_ENTRY(ce, "ZendTestGenStubFlagCompatibilityTest", NULL);
 #if (PHP_VERSION_ID >= 80400)
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL,
-#if (PHP_VERSION_ID >= 80100)
-ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE
-#elif (PHP_VERSION_ID >= 80000)
-ZEND_ACC_FINAL
-#endif
-);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |=
 #if (PHP_VERSION_ID >= 80100)
-ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 #elif (PHP_VERSION_ID >= 80000)
-ZEND_ACC_FINAL
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
-;
 #endif
 
 	return class_entry;
