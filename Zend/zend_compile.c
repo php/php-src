@@ -5746,6 +5746,10 @@ static void zend_compile_throw(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 
+    if (expr_ast->kind == ZEND_AST_THROW) {
+        zend_error_noreturn(E_COMPILE_ERROR, "Cannot throw throw expression");
+    }
+
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
