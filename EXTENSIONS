@@ -170,56 +170,56 @@ EXTENSION:           dom
 PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net> (2003 - 2011)
                      Rob Richards <rrichards@php.net> (2003 - 2012)
                      Marcus Börger <helly@php.net> (2003 - 2006)
-                     Niels Dossche <nielsdos@php.net> (2023 - 2024)
+                     Niels Dossche <nielsdos@php.net> (2023 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           simplexml
 PRIMARY MAINTAINER:  Marcus Börger <helly@php.net> (2003 - 2008)
-                     Niels Dossche <nielsdos@php.net> (2023 - 2024)
+                     Niels Dossche <nielsdos@php.net> (2023 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           soap
 PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2004 - 2018)
-                     Niels Dossche <nielsdos@php.net> (2024 - 2024)
+                     Niels Dossche <nielsdos@php.net> (2024 - 2025)
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xml
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net> (1999 - 2002)
                      Rob Richards <rrichards@php.net> (2003 - 2013)
-                     Niels Dossche <nielsdos@php.net> (2023 - 2024)
+                     Niels Dossche <nielsdos@php.net> (2023 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           libxml
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2003 - 2009)
                      Christian Stocker <chregu@php.net> (2004 - 2011)
-                     Niels Dossche <nielsdos@php.net> (2023 - 2024)
+                     Niels Dossche <nielsdos@php.net> (2023 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xmlreader
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2004 - 2010)
                      Christian Stocker <chregu@php.net> (2004 - 2004)
-                     Niels Dossche <nielsdos@php.net> (2023 - 2024)
+                     Niels Dossche <nielsdos@php.net> (2023 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xmlwriter
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2004 - 2010)
                      Pierre-Alain Joye <pajoye@php.net> (2005-2009)
-                     Niels Dossche <nielsdos@php.net> (2023 - 2024)
+                     Niels Dossche <nielsdos@php.net> (2023 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xsl
 PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net> (2003 - 2011)
                      Rob Richards <rrichards@php.net> (2003 - 2010)
-                     Niels Dossche <nielsdos@php.net> (2023 - 2024)
+                     Niels Dossche <nielsdos@php.net> (2023 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0
