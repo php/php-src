@@ -692,6 +692,7 @@ static inheritance_status zend_is_type_subtype_of_associated_type(
 
 	zend_string *associated_type_name = ZEND_TYPE_NAME(associated_type);
 	const zend_type *bound_type_ptr = zend_hash_find_ptr(CG(bound_associated_types), associated_type_name);
+	ZEND_ASSERT(bound_type_ptr != NULL);
 	if (bound_type_ptr == NULL) {
 		const zend_type *constraint = zend_hash_find_ptr(associated_type_scope->associated_types, associated_type_name);
 		ZEND_ASSERT(constraint != NULL);
@@ -2231,6 +2232,7 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 			ZEND_INHERITANCE_RESET_CHILD_OVERRIDE;
 	}
 
+	// TODO Old way to remove
 	if (iface->associated_types) {
 		const uint32_t num_associated_types = zend_hash_num_elements(iface->associated_types);
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
@@ -2258,6 +2260,90 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 		HashTable *ht = emalloc(sizeof(HashTable));
 		zend_hash_init(ht, num_associated_types, NULL, NULL, false);
 		CG(bound_associated_types) = ht;
+	}
+	if (iface->num_generic_parameters > 0) {
+		if (UNEXPECTED(ce->bound_types == NULL)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot implement %s as it has generic parameters which are not specified",
+				ZSTR_VAL(iface->name)
+			);
+		}
+		const HashTable *bound_types = zend_hash_find_ptr_lc(ce->bound_types, iface->name);
+		if (UNEXPECTED(bound_types == NULL)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot implement %s as it has generic parameters which are not specified",
+				ZSTR_VAL(iface->name)
+			);
+		}
+		const uint32_t num_bound_types = zend_hash_num_elements(bound_types);
+		if (UNEXPECTED(num_bound_types != iface->num_generic_parameters)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot implement %s as the number of generic arguments specified (%" PRIu32 ") does not match the number of generic parameters declared on the interface (%" PRIu32 ")",
+				ZSTR_VAL(iface->name),
+				num_bound_types,
+				iface->num_generic_parameters
+			);
+		}
+		HashTable *ht = emalloc(sizeof(HashTable));
+		zend_hash_init(ht, num_bound_types, NULL, NULL, false);
+		CG(bound_associated_types) = ht;
+		for (uint32_t i = 0; i < num_bound_types; i++) {
+			const zend_generic_parameter *generic_parameter = &iface->generic_parameters[i];
+			const zend_type* generic_constraint = &generic_parameter->constraint;
+			zend_type *bound_type_ptr = zend_hash_index_find_ptr(bound_types, i);
+			ZEND_ASSERT(bound_type_ptr != NULL);
+
+			/* We are currently extending another interface */
+			if (ZEND_TYPE_IS_ASSOCIATED(*bound_type_ptr)) {
+				ZEND_ASSERT(ce->ce_flags & ZEND_ACC_INTERFACE);
+				ZEND_ASSERT(ce->num_generic_parameters > 0);
+				ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*bound_type_ptr));
+				const zend_string *current_generic_param_name = ZEND_TYPE_NAME(*bound_type_ptr);
+				for (uint32_t j = 0; j < ce->num_generic_parameters; j++) {
+					const zend_generic_parameter *current_ce_generic_parameter = &ce->generic_parameters[j];
+					if (!zend_string_equals(current_ce_generic_parameter->name, current_generic_param_name)) {
+						continue;
+					}
+					const zend_type *current_ce_generic_type_constraint = &current_ce_generic_parameter->constraint;
+					ZEND_ASSERT(current_ce_generic_type_constraint != NULL);
+					if (zend_perform_covariant_type_check(ce, current_ce_generic_type_constraint, iface, generic_constraint) != INHERITANCE_SUCCESS) {
+						zend_string *current_ce_constraint_type_str = zend_type_to_string(*current_ce_generic_type_constraint);
+						zend_string *constraint_type_str = zend_type_to_string(generic_parameter->constraint);
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Constraint type %s of generic type %s of interface %s is not a subtype of the constraint type %s of generic type %s of interface %s",
+							ZSTR_VAL(current_ce_constraint_type_str),
+							ZSTR_VAL(current_ce_generic_parameter->name),
+							ZSTR_VAL(ce->name),
+							ZSTR_VAL(constraint_type_str),
+							ZSTR_VAL(generic_parameter->name),
+							ZSTR_VAL(iface->name)
+						);
+						zend_string_release(current_ce_constraint_type_str);
+						zend_string_release(constraint_type_str);
+						return;
+					}
+					/* Loosing const qualifier here is OK because this hashtable never frees or does anything with the value */
+					zend_hash_add_new_ptr(ht, generic_parameter->name, (void*)current_ce_generic_type_constraint);
+					break;
+				}
+			} else {
+				if (zend_perform_covariant_type_check(ce, bound_type_ptr, iface, generic_constraint) != INHERITANCE_SUCCESS) {
+					zend_string *bound_type_str = zend_type_to_string(*bound_type_ptr);
+					zend_string *constraint_type_str = zend_type_to_string(generic_parameter->constraint);
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Bound type %s is not a subtype of the constraint type %s of generic type %s of interface %s",
+						ZSTR_VAL(bound_type_str),
+						ZSTR_VAL(constraint_type_str),
+						ZSTR_VAL(generic_parameter->name),
+						ZSTR_VAL(iface->name)
+					);
+					zend_string_release(bound_type_str);
+					zend_string_release(constraint_type_str);
+					return;
+				}
+				zend_hash_add_new_ptr(ht, generic_parameter->name, bound_type_ptr);
+			}
+		}
 	}
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
 		do_inherit_iface_constant(key, c, ce, iface);
