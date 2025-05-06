@@ -141,6 +141,11 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
+typedef struct {
+	zend_string *name;
+	zend_type constraint;
+} zend_generic_parameter;
+
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 26
 #define _ZEND_TYPE_MASK ((1u << 26) - 1)
 /* Only one of these bits may be set. */
