@@ -321,7 +321,7 @@ ZEND_METHOD(Exception, __construct)
 
 	if (message) {
 		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 0, ZSTR_KNOWN(ZEND_STR_MESSAGE));
-		zval_ptr_dtor(tmp);
+		zval_ptr_safe_dtor(tmp);
 		ZVAL_STR_COPY(tmp, message);
 	}
 
@@ -333,7 +333,7 @@ ZEND_METHOD(Exception, __construct)
 
 	if (previous) {
 		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 6, ZSTR_KNOWN(ZEND_STR_PREVIOUS));
-		zval_ptr_dtor(tmp);
+		zval_ptr_safe_dtor(tmp);
 		ZVAL_COPY(tmp, previous);
 	}
 }
@@ -374,7 +374,7 @@ ZEND_METHOD(ErrorException, __construct)
 
 	if (message) {
 		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 0, ZSTR_KNOWN(ZEND_STR_MESSAGE));
-		zval_ptr_dtor(tmp);
+		zval_ptr_safe_dtor(tmp);
 		ZVAL_STR_COPY(tmp, message);
 	}
 
@@ -386,7 +386,7 @@ ZEND_METHOD(ErrorException, __construct)
 
 	if (previous) {
 		zval *tmp = zend_obj_prop_num_checked(Z_OBJ_P(object), 6, ZSTR_KNOWN(ZEND_STR_PREVIOUS));
-		zval_ptr_dtor(tmp);
+		zval_ptr_safe_dtor(tmp);
 		ZVAL_COPY(tmp, previous);
 	}
 
