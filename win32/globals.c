@@ -17,6 +17,7 @@
 #include "php.h"
 #include "php_win32_globals.h"
 #include "syslog.h"
+#include "signal.h"
 
 #ifdef ZTS
 PHPAPI int php_win32_core_globals_id;
