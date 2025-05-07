@@ -4323,7 +4323,7 @@ PHP_FUNCTION(openssl_digest)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &data, &data_len, &method, &method_len, &raw_output) == FAILURE) {
 		RETURN_THROWS();
 	}
-	mdtype = EVP_get_digestbyname(method);
+	mdtype = php_openssl_get_evp_md_by_name(method);
 	if (!mdtype) {
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
