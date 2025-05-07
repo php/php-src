@@ -19,7 +19,7 @@
 #include "fastcgi.h"
 #include "zlog.h"
 
-#define FPM_LOG_BUFFER 1024
+#define FPM_LOG_BUFFER fpm_global_config.log_limit
 
 static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
@@ -108,8 +108,13 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 int fpm_log_write(char *log_format) /* {{{ */
 {
 	char *s, *b;
-	char buffer[FPM_LOG_BUFFER+1];
-	int token, test;
+	char *buffer = malloc(FPM_LOG_BUFFER + 1);
+ 		if (!buffer) {
+   		zlog(ZLOG_WARNING, "unable to allocate memory for log buffer");
+   		return -1;
+ 	}
+ 	memset(buffer, '\0', FPM_LOG_BUFFER + 1);
+ 	int token, test;
 	size_t len, len2;
 	struct fpm_scoreboard_proc_s proc, *proc_p;
 	struct fpm_scoreboard_s *scoreboard;
@@ -121,6 +126,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 #endif
 
 	if (!log_format && (!fpm_log_format || fpm_log_fd == -1)) {
+		free(buffer);
 		return -1;
 	}
 
@@ -137,24 +143,26 @@ int fpm_log_write(char *log_format) /* {{{ */
 		scoreboard = fpm_scoreboard_get();
 		if (!scoreboard) {
 			zlog(ZLOG_WARNING, "unable to get scoreboard while preparing the access log");
+			free(buffer);
 			return -1;
 		}
 		proc_p = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 		if (!proc_p) {
 			zlog(ZLOG_WARNING, "[pool %s] Unable to acquire shm slot while preparing the access log", scoreboard->pool);
+			free(buffer);
 			return -1;
 		}
 		proc = *proc_p;
 		fpm_scoreboard_proc_release(proc_p);
 
 		if (UNEXPECTED(fpm_access_log_suppress(&proc))) {
+			free(buffer);
 			return -1;
 		}
 	}
 
 	token = 0;
 
-	memset(buffer, '\0', sizeof(buffer));
 	b = buffer;
 	len = 0;
 
@@ -202,6 +210,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 						}
 					} else {
 						zlog(ZLOG_WARNING, "only 'total', 'user' or 'system' are allowed as a modifier for %%%c ('%s')", *s, format);
+						free(buffer);
 						return -1;
 					}
 
@@ -236,6 +245,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 					} else {
 						zlog(ZLOG_WARNING, "only 'seconds', 'milli', 'milliseconds', 'micro' or 'microseconds' are allowed as a modifier for %%%c ('%s')", *s, format);
+						free(buffer);
 						return -1;
 					}
 					format[0] = '\0';
@@ -244,6 +254,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 				case 'e': /* fastcgi env  */
 					if (format[0] == '\0') {
 						zlog(ZLOG_WARNING, "the name of the environment variable must be set between embraces for %%%c", *s);
+						free(buffer);
 						return -1;
 					}
 
@@ -293,6 +304,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 					} else {
 						zlog(ZLOG_WARNING, "only 'bytes', 'kilo', 'kilobytes', 'mega' or 'megabytes' are allowed as a modifier for %%%c ('%s')", *s, format);
+						free(buffer);
 						return -1;
 					}
 					format[0] = '\0';
@@ -307,6 +319,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 				case 'o': /* header output  */
 					if (format[0] == '\0') {
 						zlog(ZLOG_WARNING, "the name of the header must be set between embraces for %%%c", *s);
+						free(buffer);
 						return -1;
 					}
 					if (!test) {
@@ -444,6 +457,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 						}
 						if (s[1] == '\0') {
 							zlog(ZLOG_WARNING, "missing closing embrace in the access.format");
+							free(buffer);
 							return -1;
 						}
 					}
@@ -451,11 +465,13 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 				default:
 					zlog(ZLOG_WARNING, "Invalid token in the access.format (%%%c)", *s);
+					free(buffer);
 					return -1;
 			}
 
 			if (*s != '}' && format[0] != '\0') {
 				zlog(ZLOG_WARNING, "embrace is not allowed for modifier %%%c", *s);
+				free(buffer);
 				return -1;
 			}
 			s++;
@@ -485,6 +501,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 		zend_quiet_write(fpm_log_fd, buffer, len + 1);
 	}
 
+	free(buffer);
 	return 0;
 }
 /* }}} */
