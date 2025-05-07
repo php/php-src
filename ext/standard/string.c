@@ -2818,7 +2818,7 @@ static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const c
 		char *input = ZSTR_VAL(str);
 		size_t len = ZSTR_LEN(str);
 
-#ifdef ZEND_HAVE_VECTOR_128
+#ifdef XSSE2
 		if (ZSTR_LEN(str) >= sizeof(__m128i)) {
 			__m128i search = _mm_set1_epi8(ch_from);
 			__m128i delta = _mm_set1_epi8(ch_to - ch_from);
@@ -3038,7 +3038,7 @@ static zend_always_inline zend_long count_chars(const char *p, zend_long length,
 	zend_long count = 0;
 	const char *endp;
 
-#ifdef ZEND_HAVE_VECTOR_128
+#ifdef XSSE2
 	if (length >= sizeof(__m128i)) {
 		__m128i search = _mm_set1_epi8(ch);
 
@@ -5836,7 +5836,7 @@ static zend_string *php_str_rot13(zend_string *str)
 	e = p + ZSTR_LEN(str);
 	target = ZSTR_VAL(ret);
 
-#ifdef ZEND_HAVE_VECTOR_128
+#ifdef XSSE2
 	if (e - p > 15) {
 		const __m128i a_minus_1 = _mm_set1_epi8('a' - 1);
 		const __m128i m_plus_1 = _mm_set1_epi8('m' + 1);

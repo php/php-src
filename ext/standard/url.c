@@ -457,7 +457,7 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 	start = zend_string_safe_alloc(3, len, 0, 0);
 	to = (unsigned char*)ZSTR_VAL(start);
 
-#ifdef ZEND_HAVE_VECTOR_128
+#ifdef XSSE2
 	while (from + 16 < end) {
 		__m128i mask;
 		uint32_t bits;

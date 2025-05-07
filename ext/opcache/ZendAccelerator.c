@@ -173,7 +173,7 @@ static void bzero_aligned(void *mem, size_t size)
 		_mm256_store_si256((__m256i*)(p+32), ymm0);
 		p += 64;
 	}
-#elif defined(ZEND_HAVE_VECTOR_128)
+#elif defined(XSSE2)
 	char *p = (char*)mem;
 	char *end = p + size;
 	__m128i xmm0 = _mm_setzero_si128();
