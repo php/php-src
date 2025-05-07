@@ -1408,7 +1408,7 @@ PHP_FUNCTION(localtime)
 	ts->zone_type = TIMELIB_ZONETYPE_ID;
 	timelib_unixtime2local(ts, (timelib_sll) timestamp);
 
-	array_init(return_value);
+	array_init_size(return_value, 9);
 
 	if (associative) {
 		add_assoc_long(return_value, "tm_sec",   ts->s);
@@ -1421,6 +1421,7 @@ PHP_FUNCTION(localtime)
 		add_assoc_long(return_value, "tm_yday",  timelib_day_of_year(ts->y, ts->m, ts->d));
 		add_assoc_long(return_value, "tm_isdst", ts->dst);
 	} else {
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		add_next_index_long(return_value, ts->s);
 		add_next_index_long(return_value, ts->i);
 		add_next_index_long(return_value, ts->h);
@@ -1462,7 +1463,7 @@ PHP_FUNCTION(getdate)
 	ts->zone_type = TIMELIB_ZONETYPE_ID;
 	timelib_unixtime2local(ts, (timelib_sll) timestamp);
 
-	array_init(return_value);
+	array_init_size(return_value, 11);
 
 	add_assoc_long(return_value, "seconds", ts->s);
 	add_assoc_long(return_value, "minutes", ts->i);
@@ -3059,14 +3060,14 @@ static void zval_from_error_container(zval *z, const timelib_error_container *er
 	zval element;
 
 	add_assoc_long(z, "warning_count", error->warning_count);
-	array_init(&element);
+	array_init_size(&element, error->warning_count);
 	for (i = 0; i < error->warning_count; i++) {
 		add_index_string(&element, error->warning_messages[i].position, error->warning_messages[i].message);
 	}
 	add_assoc_zval(z, "warnings", &element);
 
 	add_assoc_long(z, "error_count", error->error_count);
-	array_init(&element);
+	array_init_size(&element, error->error_count);
 	for (i = 0; i < error->error_count; i++) {
 		add_index_string(&element, error->error_messages[i].position, error->error_messages[i].message);
 	}
@@ -4275,7 +4276,7 @@ PHP_FUNCTION(timezone_transitions_get)
 	}
 
 #define add_nominal() \
-		array_init(&element); \
+		array_init_size(&element, 5); \
 		add_assoc_long(&element, "ts",     timestamp_begin); \
 		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, timestamp_begin, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[0].offset); \
@@ -4284,7 +4285,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_next_index_zval(return_value, &element);
 
 #define add(i,ts) \
-		array_init(&element); \
+		array_init_size(&element, 5); \
 		add_assoc_long(&element, "ts",     ts); \
 		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
@@ -4293,7 +4294,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_next_index_zval(return_value, &element);
 
 #define add_by_index(i,ts) \
-		array_init(&element); \
+		array_init_size(&element, 5); \
 		add_assoc_long(&element, "ts",     ts); \
 		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[i].offset); \
@@ -4302,7 +4303,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_next_index_zval(return_value, &element);
 
 #define add_from_tto(to,ts) \
-		array_init(&element); \
+		array_init_size(&element, 5); \
 		add_assoc_long(&element, "ts",     ts); \
 		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", (to)->offset); \
@@ -5336,6 +5337,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 	table = timelib_timezone_identifiers_list((timelib_tzdb*) tzdb, &item_count);
 
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (i = 0; i < item_count; ++i) {
 		if (what == PHP_DATE_TIMEZONE_PER_COUNTRY) {
