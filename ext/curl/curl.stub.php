@@ -3657,6 +3657,16 @@ const CURLOPT_WS_OPTIONS = UNKNOWN;
  * @cvalue CURLWS_RAW_MODE
  */
 const CURLWS_RAW_MODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLWS_CONT
+ */
+const CURLWS_CONT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLWS_OFFSET
+ */
+const CURLWS_OFFSET = UNKNOWN;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0 */
@@ -3685,6 +3695,14 @@ const CURL_HTTP_VERSION_3ONLY  = UNKNOWN;
  * @cvalue CURLOPT_SAFE_UPLOAD
  */
 const CURLOPT_SAFE_UPLOAD = UNKNOWN;
+
+#if LIBCURL_VERSION_NUM >= 0x080e00 /* Available since 8.14.0 */
+/**
+ * @var int
+ * @cvalue CURLWS_NOAUTOPONG
+ */
+const CURLWS_NOAUTOPONG = UNKNOWN;
+#endif
 
 /**
  * @strict-properties
@@ -3717,6 +3735,28 @@ final class CurlShareHandle
 final class CurlSharePersistentHandle
 {
     public readonly array $options;
+}
+
+enum CurlWsMessageType
+{
+    case Binary;
+    case Text;
+    case Close;
+    case Ping;
+    case Pong;
+}
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final readonly class CurlWsFrame
+{
+    public CurlWsMessageType $type;
+    public bool $continued;
+    public int $offset;
+    public int $bytesLeft;
+    public int $length;
 }
 
 function curl_close(CurlHandle $handle): void {}
@@ -3812,3 +3852,16 @@ function curl_strerror(int $error_code): ?string {}
  * @refcount 1
  */
 function curl_version(): array|false {}
+
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+/** @refcount 1 */
+function curl_ws_meta(CurlHandle $handle): CurlWsFrame {}
+
+/**
+ * @param CurlWsFrame $meta
+ * @refcount 1
+ */
+function curl_ws_recv(CurlHandle $handle, int $length, &$meta = null): string|false {}
+
+function curl_ws_send(CurlHandle $handle, string $buffer, CurlWsMessageType $type = CurlWsMessageType::Text, int $frag_size = 0, int $flags = 0): int {}
+#endif
