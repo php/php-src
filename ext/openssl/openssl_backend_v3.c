@@ -696,6 +696,89 @@ zend_string *php_openssl_dh_compute_key(EVP_PKEY *pkey, char *pub_str, size_t pu
 	return result;
 }
 
+const EVP_MD *php_openssl_get_evp_md_by_name(const char *name)
+{
+	return EVP_MD_fetch(OPENSSL_G(libctx), name, OPENSSL_G(propq));
+}
+
+static const char *php_openssl_digest_names[] = {
+	[OPENSSL_ALGO_SHA1]   = "SHA1",
+	[OPENSSL_ALGO_MD5]    = "MD5",
+#ifndef OPENSSL_NO_MD4
+	[OPENSSL_ALGO_MD4]    = "MD4",
+#endif
+#ifndef OPENSSL_NO_MD2
+	[OPENSSL_ALGO_MD2]    = "MD2",
+#endif
+	[OPENSSL_ALGO_SHA224] = "SHA224",
+	[OPENSSL_ALGO_SHA256] = "SHA256",
+	[OPENSSL_ALGO_SHA384] = "SHA384",
+	[OPENSSL_ALGO_SHA512] = "SHA512",
+#ifndef OPENSSL_NO_RMD160
+	[OPENSSL_ALGO_RMD160] = "RIPEMD160",
+#endif
+};
+
+const EVP_MD *php_openssl_get_evp_md_from_algo(zend_long algo)
+{
+	if (algo < 0 || algo >= (zend_long)(sizeof(php_openssl_digest_names) / sizeof(*php_openssl_digest_names))) {
+		return NULL;
+	}
+
+	const char *name = php_openssl_digest_names[algo];
+	if (!name) {
+		return NULL;
+	}
+
+	return php_openssl_get_evp_md_by_name(name);
+}
+
+void php_openssl_release_evp_md(const EVP_MD *md)
+{
+	if (md != NULL) {
+		// It is fine to remove const as the md is from EVP_MD_fetch
+		EVP_MD_free((EVP_MD *) md);
+	}
+}
+
+static const char *php_openssl_cipher_names[] = {
+	[PHP_OPENSSL_CIPHER_RC2_40]     = "RC2-40-CBC",
+	[PHP_OPENSSL_CIPHER_RC2_128]    = "RC2-CBC",
+	[PHP_OPENSSL_CIPHER_RC2_64]     = "RC2-64-CBC",
+	[PHP_OPENSSL_CIPHER_DES]        = "DES-CBC",
+	[PHP_OPENSSL_CIPHER_3DES]       = "DES-EDE3-CBC",
+	[PHP_OPENSSL_CIPHER_AES_128_CBC]= "AES-128-CBC",
+	[PHP_OPENSSL_CIPHER_AES_192_CBC]= "AES-192-CBC",
+	[PHP_OPENSSL_CIPHER_AES_256_CBC]= "AES-256-CBC",
+};
+
+const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *name)
+{
+	return EVP_CIPHER_fetch(OPENSSL_G(libctx), name, OPENSSL_G(propq));
+}
+
+const EVP_CIPHER *php_openssl_get_evp_cipher_from_algo(zend_long algo)
+{
+	if (algo < 0 || algo >= (zend_long)(sizeof(php_openssl_cipher_names) / sizeof(*php_openssl_cipher_names))) {
+		return NULL;
+	}
+
+	const char *name = php_openssl_cipher_names[algo];
+	if (!name) {
+		return NULL;
+	}
+
+	return php_openssl_get_evp_cipher_by_name(name);
+}
+
+void php_openssl_release_evp_cipher(const EVP_CIPHER *cipher)
+{
+	if (cipher != NULL) {
+		// It is fine to remove const as the cipher is from EVP_CIPHER_fetch
+		EVP_CIPHER_free((EVP_CIPHER *) cipher);
+	}
+}
+
 static void php_openssl_add_cipher_name(const char *name, void *arg)
 {
 	size_t len = strlen(name);
@@ -722,7 +805,7 @@ static int php_openssl_compare_func(Bucket *a, Bucket *b)
 void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 {
 	array_init(return_value);
-	EVP_CIPHER_do_all_provided(NULL,
+	EVP_CIPHER_do_all_provided(OPENSSL_G(libctx),
 		aliases ? php_openssl_add_cipher_or_alias : php_openssl_add_cipher,
 		return_value);
 	zend_hash_sort(Z_ARRVAL_P(return_value), php_openssl_compare_func, 1);
