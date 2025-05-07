@@ -180,6 +180,9 @@ PHP 8.5 UPGRADE NOTES
     number formats.
   . Added Locale::addLikelySubtags and Locale::minimizeSubtags to
     handle likely tags on a given locale.
+  . Added IntlListFormatter class to format, order, punctuates 
+    a list of items with a given locale, AND/OR and UNIT operands.
+    It is supported from icu 67.
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
@@ -415,6 +418,12 @@ PHP 8.5 UPGRADE NOTES
 - Intl:
   . DECIMAL_COMPACT_SHORT.
   . DECIMAL_COMPACT_LONG.
+  . TYPE_AND.
+  . TYPE_OR.
+  . TYPE_UNITS.
+  . WIDTH_WIDE.
+  . WIDTH_SHORT.
+  . WIDTH_NARROW.
 
 - POSIX:
   . POSIX_SC_OPEN_MAX.
