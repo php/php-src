@@ -14,6 +14,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Core
+  . PG(arg_separator).input and PG(arg_separator).output are now `zend_string*`
+    instead of `char*`.
+
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
     a value to a non-reference zval.
@@ -64,6 +68,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 - ext/standard
   . Added php_url_decode_ex() and php_raw_url_decode_ex() that unlike their
     non-ex counterparts do not work in-place.
+  . Added php_url_encode_to_smart_str() to encode a URL to a smart_str buffer.
 
 ========================
 4. OpCode changes
