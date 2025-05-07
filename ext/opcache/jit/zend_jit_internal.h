@@ -27,6 +27,8 @@
 #include "Zend/Optimizer/zend_func_info.h"
 #include "Zend/Optimizer/zend_call_graph.h"
 
+typedef struct _zend_jit_ctx zend_jit_ctx;
+
 /* Address Encoding */
 typedef uintptr_t zend_jit_addr;
 
@@ -61,6 +63,14 @@ typedef uintptr_t zend_jit_addr;
 
 #define Z_SSA_VAR(addr)  ((addr)>>_ZEND_ADDR_REG_SHIFT)
 #define Z_IR_REF(addr)   ((addr)>>_ZEND_ADDR_REG_SHIFT)
+
+#define ZEND_ADDR_ARG(call, var) ZEND_ADDR_REF_ZVAL(ir_ADD_OFFSET(call, var))
+
+#define Z_IS_ARG_ADDR(addr)                                         \
+	(Z_MODE(addr) == IS_REF_ZVAL && (                               \
+		Z_IR_REF(addr) == jit->call                                 \
+		|| (jit->ctx.ir_base[Z_IR_REF(addr)].op == IR_ADD           \
+			&& jit->ctx.ir_base[Z_IR_REF(addr)].op1 == jit->call)))
 
 #define Z_STORE(addr) \
 	((jit->ra && jit->ra[Z_SSA_VAR(addr)].ref) ? \
@@ -240,9 +250,9 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper(ZEND_OPCODE_HANDLER_ARGS);
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(ZEND_OPCODE_HANDLER_ARGS);
-bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
-bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D);
-bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D);
+bool ZEND_FASTCALL zend_jit_deprecated_helper(zend_execute_data *call);
+bool ZEND_FASTCALL zend_jit_nodiscard_helper(zend_execute_data *call);
+bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(zend_execute_data *call);
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D);
 void ZEND_FASTCALL zend_jit_undefined_long_key_ex(zend_long key EXECUTE_DATA_DC);
 void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D);
@@ -447,6 +457,8 @@ typedef struct _zend_jit_trace_exit_info {
 	int32_t              poly_this_ref;
 	int8_t               poly_func_reg;
 	int8_t               poly_this_reg;
+	int32_t              call_ref;
+	int8_t               call_reg;
 } zend_jit_trace_exit_info;
 
 typedef struct _zend_jit_trace_stack {

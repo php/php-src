@@ -102,7 +102,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLE
 
 static int zend_jit_trace_op_len(const zend_op *opline);
 static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
-static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t flags);
+
+static uint32_t zend_jit_trace_get_exit_point(zend_jit_ctx *ctx, const zend_op *to_opline, uint32_t flags);
 static const void *zend_jit_trace_get_exit_addr(uint32_t n);
 static void zend_jit_trace_add_code(const void *start, uint32_t size);
 static zend_string *zend_jit_func_name(const zend_op_array *op_array);
@@ -801,6 +802,9 @@ static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_ar
 # pragma clang diagnostic ignored "-Wtautological-compare"
 # pragma clang diagnostic ignored "-Wstring-compare"
 #endif
+
+static bool zend_jit_inc_call_level(uint8_t opcode);
+static bool zend_jit_dec_call_level(uint8_t opcode);
 
 #include "jit/zend_jit_ir.c"
 
@@ -1608,6 +1612,18 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				call_level++;
 			}
 
+#if ZEND_DEBUG && 0
+			{
+				const void *handler;
+				if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+					handler = zend_get_opcode_handler_func(opline);
+				} else {
+					handler = opline->handler;
+				}
+				ir_RSTORE(8, jit_CONST_FUNC(&ctx, (uintptr_t)handler, IR_FASTCALL_FUNC));
+			}
+#endif
+
 			if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
 				switch (opline->opcode) {
 					case ZEND_PRE_INC:
@@ -1675,10 +1691,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 && zend_jit_next_is_send_result(opline)) {
 							i++;
 							res_use_info = -1;
-							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-							if (!zend_jit_reuse_ip(&ctx)) {
-								goto jit_failure;
-							}
+							res_addr = ZEND_ADDR_ARG(jit_EX_CALL(jit), (opline+1)->result.var);
 						} else {
 							res_use_info = -1;
 
@@ -1729,10 +1742,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 && zend_jit_next_is_send_result(opline)) {
 							i++;
 							res_use_info = -1;
-							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-							if (!zend_jit_reuse_ip(&ctx)) {
-								goto jit_failure;
-							}
+							res_addr = ZEND_ADDR_ARG(jit_EX_CALL(jit), (opline+1)->result.var);
 						} else {
 							res_use_info = -1;
 
@@ -1785,10 +1795,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if ((i + 1) <= end
 						 && zend_jit_next_is_send_result(opline)) {
 							i++;
-							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-							if (!zend_jit_reuse_ip(&ctx)) {
-								goto jit_failure;
-							}
+							res_addr = ZEND_ADDR_ARG(jit_EX_CALL(jit), (opline+1)->result.var);
 						}
 						if (!zend_jit_concat(&ctx, opline,
 								op1_info, op2_info, res_addr,
@@ -2039,10 +2046,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							 && zend_jit_next_is_send_result(opline)
 							 && (!(op1_info & MAY_HAVE_DTOR) || !(op1_info & MAY_BE_RC1))) {
 								i++;
-								res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-								if (!zend_jit_reuse_ip(&ctx)) {
-									goto jit_failure;
-								}
+								res_addr = ZEND_ADDR_ARG(jit_EX_CALL(jit), (opline+1)->result.var);
 							}
 						}
 						if (!zend_jit_assign(&ctx, opline,
