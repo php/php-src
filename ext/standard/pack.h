@@ -17,6 +17,4 @@
 #ifndef PACK_H
 #define PACK_H
 
-PHP_MINIT_FUNCTION(pack);
-
 #endif /* PACK_H */
