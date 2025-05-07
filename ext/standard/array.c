@@ -4513,6 +4513,32 @@ PHP_FUNCTION(array_key_last)
 }
 /* }}} */
 
+PHP_FUNCTION(array_first)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_HASH_FOREACH_VAL(array, zval *zv) {
+		RETURN_COPY_DEREF(zv);
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_FUNCTION(array_last)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_HASH_REVERSE_FOREACH_VAL(array, zval *zv) {
+		RETURN_COPY_DEREF(zv);
+	} ZEND_HASH_FOREACH_END();
+}
+
 /* {{{ Return just the values from the input array */
 PHP_FUNCTION(array_values)
 {

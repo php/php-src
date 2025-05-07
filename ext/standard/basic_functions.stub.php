@@ -1713,6 +1713,16 @@ function array_key_first(array $array): int|string|null {}
 function array_key_last(array $array): int|string|null {}
 
 /**
+ * @compile-time-eval
+ */
+function array_first(array $array): mixed {}
+
+/**
+ * @compile-time-eval
+ */
+function array_last(array $array): mixed {}
+
+/**
  * @return array<int, mixed|ref>
  * @compile-time-eval
  */

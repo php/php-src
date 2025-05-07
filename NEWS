@@ -211,6 +211,7 @@ PHP                                                                        NEWS
     (Michael Orlitzky).
   . Fixed bug GH-18062 (is_callable(func(...), callable_name: $name) for first
     class callables returns wrong name). (timwolla)
+  . Added array_first() and array_last(). (nielsdos)
 
 - Streams:
   . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
