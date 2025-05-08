@@ -9,4 +9,4 @@ interface I<T> {
 
 ?>
 --EXPECTF--
-Fatal error: Associated type cannot be part of a union type in %s on line %d
+Fatal error: Generic type cannot be part of a union type in %s on line %d
