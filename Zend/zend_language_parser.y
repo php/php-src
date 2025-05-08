@@ -167,7 +167,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_TRAIT         "'trait'"
 %token <ident> T_INTERFACE     "'interface'"
 %token <ident> T_ENUM          "'enum'"
-%token <ident> T_TYPE          "'type'"
 %token <ident> T_EXTENDS       "'extends'"
 %token <ident> T_IMPLEMENTS    "'implements'"
 %token <ident> T_NAMESPACE     "'namespace'"
@@ -287,7 +286,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list
-%type <ast> associated_type
 %type <ast> optional_generic_params generic_params generic_param class_name_with_generics_list
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
@@ -687,13 +685,6 @@ generic_param:
 	        { $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, $3); }
 ;
 
-associated_type:
-        T_TYPE name ':' type_expr_without_static ';'
-			{ $$ = zend_ast_create(ZEND_AST_ASSOCIATED_TYPE, $2, $4); }
-	|	T_TYPE name ';'
-			{ $$ = zend_ast_create(ZEND_AST_ASSOCIATED_TYPE, $2, NULL); }
-;
-
 extends_from:
 		%empty				{ $$ = NULL; }
 	|	T_EXTENDS simple_class_name	{ $$ = $2; }
@@ -995,7 +986,6 @@ attributed_class_statement:
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
 	|	enum_case { $$ = $1; }
-	|   associated_type { $$ = $1; }
 ;
 
 class_statement:

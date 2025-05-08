@@ -351,9 +351,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 					zend_hash_release(ce->attributes);
 				}
 
-				if (ce->associated_types) {
-					zend_hash_release(ce->associated_types);
-				}
 				if (ce->bound_types) {
 					zend_hash_release(ce->bound_types);
 				}
@@ -541,9 +538,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->attributes) {
 				zend_hash_release(ce->attributes);
-			}
-			if (ce->associated_types) {
-				zend_hash_release(ce->associated_types);
 			}
 			if (ce->bound_types) {
 				zend_hash_release(ce->bound_types);

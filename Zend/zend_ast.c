@@ -2724,16 +2724,17 @@ simple_list:
 			smart_str_appends(str, ": ");
 			ast = ast->child[1];
 			goto tail_call;
-		case ZEND_AST_ASSOCIATED_TYPE:
-			smart_str_appends(str, "type ");
-			zend_ast_export_name(str, ast->child[0], 0, indent);
-			if (ast->child[1]) {
-				smart_str_appends(str, " : ");
-				smart_str_appends(str, " : ");
-				zend_ast_export_type(str, ast->child[1], indent);
-			}
-			smart_str_appendc(str, ';');
-		break;
+		// TODO Export generic types
+		//case ZEND_AST_ASSOCIATED_TYPE:
+		//	smart_str_appends(str, "type ");
+		//	zend_ast_export_name(str, ast->child[0], 0, indent);
+		//	if (ast->child[1]) {
+		//		smart_str_appends(str, " : ");
+		//		smart_str_appends(str, " : ");
+		//		zend_ast_export_type(str, ast->child[1], indent);
+		//	}
+		//	smart_str_appendc(str, ';');
+		//break;
 
 		/* 3 child nodes */
 		case ZEND_AST_METHOD_CALL:

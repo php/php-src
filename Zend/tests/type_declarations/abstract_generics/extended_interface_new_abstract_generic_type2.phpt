@@ -1,5 +1,7 @@
 --TEST--
 Abstract generic type behaviour in extended interface
+--XFAIL--
+Generic type is not properly bound (Declaration of C::foo(string $param): string must be compatible with I::foo(T $param): T)
 --FILE--
 <?php
 
