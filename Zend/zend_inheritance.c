@@ -679,25 +679,24 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
 		zend_class_entry *proto_scope, const zend_type *proto_type_ptr);
 
-static inheritance_status zend_is_type_subtype_of_associated_type(
+static inheritance_status zend_is_type_subtype_of_generic_type(
 	zend_class_entry *concrete_scope,
 	const zend_type *concrete_type_ptr,
-	zend_class_entry *associated_type_scope,
-	const zend_type *associated_type_ptr
+	zend_class_entry *generic_type_scope,
+	const zend_type *generic_type_ptr
 ) {
-	const zend_type associated_type = *associated_type_ptr;
+	const zend_type generic_type = *generic_type_ptr;
 
-	ZEND_ASSERT(CG(bound_associated_types) && "Have associated type");
-	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(associated_type));
+	ZEND_ASSERT(CG(bound_generic_types) && "Have generic type");
+	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(generic_type));
 
-	zend_string *associated_type_name = ZEND_TYPE_NAME(associated_type);
-	const zend_type *bound_type_ptr = zend_hash_find_ptr(CG(bound_associated_types), associated_type_name);
+	const zend_type *bound_type_ptr = zend_hash_find_ptr(CG(bound_generic_types), ZEND_TYPE_NAME(generic_type));
 	ZEND_ASSERT(bound_type_ptr != NULL);
 	/* Generic type must be invariant */
 	const inheritance_status sub_type_status = zend_perform_covariant_type_check(
-		concrete_scope, concrete_type_ptr, associated_type_scope, bound_type_ptr);
+		concrete_scope, concrete_type_ptr, generic_type_scope, bound_type_ptr);
 	const inheritance_status super_type_status = zend_perform_covariant_type_check(
-		associated_type_scope, bound_type_ptr, concrete_scope, concrete_type_ptr);
+		generic_type_scope, bound_type_ptr, concrete_scope, concrete_type_ptr);
 
 	if (sub_type_status != super_type_status) {
 		return INHERITANCE_ERROR;
@@ -723,12 +722,12 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 
 	/* If we check for concrete return type */
 	if (ZEND_TYPE_IS_ASSOCIATED(proto_type)) {
-		return zend_is_type_subtype_of_associated_type(
+		return zend_is_type_subtype_of_generic_type(
 			fe_scope, fe_type_ptr, proto_scope, proto_type_ptr);
 	}
 	/* If we check for concrete parameter type */
 	if (ZEND_TYPE_IS_ASSOCIATED(fe_type)) {
-		return zend_is_type_subtype_of_associated_type(
+		return zend_is_type_subtype_of_generic_type(
 			proto_scope, proto_type_ptr, fe_scope, fe_type_ptr);
 	}
 
@@ -2241,7 +2240,7 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 		}
 		HashTable *ht = emalloc(sizeof(HashTable));
 		zend_hash_init(ht, num_bound_types, NULL, NULL, false);
-		CG(bound_associated_types) = ht;
+		CG(bound_generic_types) = ht;
 		for (uint32_t i = 0; i < num_bound_types; i++) {
 			const zend_generic_parameter *generic_parameter = &iface->generic_parameters[i];
 			const zend_type* generic_constraint = &generic_parameter->constraint;
@@ -2321,10 +2320,10 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	if (iface->num_interfaces) {
 		zend_do_inherit_interfaces(ce, iface);
 	}
-	if (CG(bound_associated_types)) {
-		zend_hash_destroy(CG(bound_associated_types));
-		efree(CG(bound_associated_types));
-		CG(bound_associated_types) = NULL;
+	if (CG(bound_generic_types)) {
+		zend_hash_destroy(CG(bound_generic_types));
+		efree(CG(bound_generic_types));
+		CG(bound_generic_types) = NULL;
 	}
 }
 /* }}} */
