@@ -178,7 +178,11 @@ PHP_FUNCTION(assert)
 	zend_string *description_str = NULL;
 	zend_object *description_obj = NULL;
 
-	if (!ASSERTG(active)) {
+	/* EG(assertions) <= 0 is only reachable by dynamic calls to assert(),
+	 * since calls known at compile time will skip the entire call when
+	 * assertions are disabled.
+	 */
+	if (!ASSERTG(active) || EG(assertions) <= 0) {
 		RETURN_TRUE;
 	}
 
