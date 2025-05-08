@@ -2,8 +2,9 @@
 
 /** @generate-class-entries */
 
-
-class IntlListFormatter {
+/** @not-serializable */
+/** @strict-properties */
+final class IntlListFormatter {
 
     /**  @cvalue ULISTFMT_TYPE_OR */
     public const int TYPE_OR = UNKNOWN;

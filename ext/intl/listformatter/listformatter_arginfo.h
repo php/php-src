@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f76592ef6796059904d6b23b194d789d506823d2 */
+ * Stub hash: e4296eb4864ae04804515cf597878e3efb4660ca */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlListFormatter___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -35,7 +35,7 @@ static zend_class_entry *register_class_IntlListFormatter(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlListFormatter", class_IntlListFormatter_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_TYPE_OR_value;
 	ZVAL_LONG(&const_TYPE_OR_value, ULISTFMT_TYPE_OR);
