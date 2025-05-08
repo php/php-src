@@ -29,7 +29,6 @@
 #include "php_ext_syslog.h"
 #include "php_filestat.h"
 #include "php_browscap.h"
-#include "pack.h"
 #include "url.h"
 #include "pageinfo.h"
 #include "fsock.h"

@@ -619,6 +619,7 @@ PHP 8.5 UPGRADE NOTES
   . Improved performance of urlencode() and rawurlencode().
   . Improved unpack() performance with nameless repetitions by avoiding
     creating temporary strings and reparsing them.
+  . Improved pack() performance.
 
 - XMLReader:
   . Improved property access performance.

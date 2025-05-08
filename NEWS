@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha2
 
+- Standard:
+  . Optimized pack(). (nielsdos, divinity76)
+
 - URI:
   . Return the singleton UrlValidationErrorType instances from Uri\WhatWg\Url
     instead of creating new objects that are different from the singleton.
