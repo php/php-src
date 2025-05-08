@@ -186,6 +186,8 @@ PHP_METHOD(IntlListFormatter, format)
 /* {{{ listformatter_getErrorCode */
 PHP_METHOD(IntlListFormatter, getErrorCode)
 {
+    ZEND_PARSE_PARAMETERS_NONE();
+
     ListFormatter_object *obj = Z_INTL_LISTFORMATTER_P(ZEND_THIS);
 
     UErrorCode status = intl_error_get_code(LISTFORMATTER_ERROR_P(obj));
@@ -197,6 +199,8 @@ PHP_METHOD(IntlListFormatter, getErrorCode)
 /* {{{ listformatter_getErrorMessage */
 PHP_METHOD(IntlListFormatter, getErrorMessage)
 {
+     ZEND_PARSE_PARAMETERS_NONE();
+
     ListFormatter_object *obj = Z_INTL_LISTFORMATTER_P(ZEND_THIS);
 
     zend_string *message = intl_error_get_message(LISTFORMATTER_ERROR_P(obj));
