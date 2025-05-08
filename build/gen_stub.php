@@ -133,19 +133,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
         }
 
         if ($fileInfo->shouldGenerateLegacyArginfo()) {
-            $legacyFileInfo = clone $fileInfo;
-            $legacyFileInfo->legacyArginfoGeneration = true;
-            $phpVersionIdMinimumCompatibility = $legacyFileInfo->getMinimumPhpVersionIdCompatibility();
-
-            foreach ($legacyFileInfo->getAllFuncInfos() as $funcInfo) {
-                $funcInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
-            }
-            foreach ($legacyFileInfo->getAllClassInfos() as $classInfo) {
-                $classInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
-            }
-            foreach ($legacyFileInfo->getAllConstInfos() as $constInfo) {
-                $constInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
-            }
+            $legacyFileInfo = $fileInfo->getLegacyVersion();
 
             $arginfoCode = generateArgInfoCode(
                 basename($stubFilenameWithoutExtension),
@@ -4199,7 +4187,7 @@ class FileInfo {
     public string $declarationPrefix = "";
     public bool $generateClassEntries = false;
     public bool $isUndocumentable = false;
-    public bool $legacyArginfoGeneration = false;
+    private bool $legacyArginfoGeneration = false;
     private ?int $minimumPhpVersionIdCompatibility = null;
 
     /** @param array<int, DocCommentTag> $fileTags */
@@ -4259,15 +4247,6 @@ class FileInfo {
         return $result;
     }
 
-    /**
-     * @return iterable<ClassInfo>
-     */
-    public function getAllClassInfos(): iterable {
-        foreach ($this->classInfos as $classInfo) {
-            yield $classInfo;
-        }
-    }
-
     public function __clone()
     {
         foreach ($this->constInfos as $key => $constInfo) {
@@ -4297,6 +4276,23 @@ class FileInfo {
 
     public function shouldGenerateLegacyArginfo(): bool {
         return $this->minimumPhpVersionIdCompatibility !== null && $this->minimumPhpVersionIdCompatibility < PHP_80_VERSION_ID;
+    }
+
+    public function getLegacyVersion(): FileInfo {
+        $legacyFileInfo = clone $this;
+        $legacyFileInfo->legacyArginfoGeneration = true;
+        $phpVersionIdMinimumCompatibility = $legacyFileInfo->getMinimumPhpVersionIdCompatibility();
+
+        foreach ($legacyFileInfo->getAllFuncInfos() as $funcInfo) {
+            $funcInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
+        }
+        foreach ($legacyFileInfo->classInfos as $classInfo) {
+            $classInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
+        }
+        foreach ($legacyFileInfo->getAllConstInfos() as $constInfo) {
+            $constInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
+        }
+        return $legacyFileInfo;
     }
 
     public function handleStatements(array $stmts, PrettyPrinterAbstract $prettyPrinter): void {
