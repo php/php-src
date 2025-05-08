@@ -7,11 +7,9 @@ Levi Morrison
 
 namespace Sequence;
 
-interface Sequence
+// No null. This is probably going to be painful, but let's try it.
+interface Sequence<Item : object|array|string|float|int|bool>
 {
-    // No null. This is probably going to be painful, but let's try it.
-    type Item: object|array|string|float|int|bool;
-
     function next(): ?Item;
 
     /**
@@ -29,7 +27,7 @@ final class StringTablePair
     ) {}
 }
 
-final class StringTableSequence implements Sequence
+final class StringTableSequence implements Sequence<StringTablePair>
 {
     private array $strings;
 
@@ -99,4 +97,4 @@ final class StringTable
 
 ?>
 --EXPECTF--
-Fatal error: Associated type cannot be part of a union type in %s on line %d
+Fatal error: Generic type cannot be part of a union type in %s on line %d

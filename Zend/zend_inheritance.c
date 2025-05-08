@@ -693,32 +693,16 @@ static inheritance_status zend_is_type_subtype_of_associated_type(
 	zend_string *associated_type_name = ZEND_TYPE_NAME(associated_type);
 	const zend_type *bound_type_ptr = zend_hash_find_ptr(CG(bound_associated_types), associated_type_name);
 	ZEND_ASSERT(bound_type_ptr != NULL);
-	if (bound_type_ptr == NULL) {
-		const zend_type *constraint = zend_hash_find_ptr(associated_type_scope->associated_types, associated_type_name);
-		ZEND_ASSERT(constraint != NULL);
-		/* Check that the provided type is a subtype of the constraint */
-		const inheritance_status status = zend_perform_covariant_type_check(
-			concrete_scope, concrete_type_ptr,
-			associated_type_scope, constraint);
-		if (status != INHERITANCE_SUCCESS) {
-			return status;
-		}
+	/* Generic type must be invariant */
+	const inheritance_status sub_type_status = zend_perform_covariant_type_check(
+		concrete_scope, concrete_type_ptr, associated_type_scope, bound_type_ptr);
+	const inheritance_status super_type_status = zend_perform_covariant_type_check(
+		associated_type_scope, bound_type_ptr, concrete_scope, concrete_type_ptr);
 
-		/* Loosing const qualifier here is OK because this hashtable never frees or does anything with the value */
-		zend_hash_add_new_ptr(CG(bound_associated_types), associated_type_name, (void*)concrete_type_ptr);
-		return INHERITANCE_SUCCESS;
+	if (sub_type_status != super_type_status) {
+		return INHERITANCE_ERROR;
 	} else {
-		/* Associated type must be invariant */
-		const inheritance_status sub_type_status = zend_perform_covariant_type_check(
-			concrete_scope, concrete_type_ptr, associated_type_scope, bound_type_ptr);
-		const inheritance_status super_type_status = zend_perform_covariant_type_check(
-			associated_type_scope, bound_type_ptr, concrete_scope, concrete_type_ptr);
-
-		if (sub_type_status != super_type_status) {
-			return INHERITANCE_ERROR;
-		} else {
-			return sub_type_status;
-		}
+		return sub_type_status;
 	}
 }
 
@@ -2232,35 +2216,6 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 			ZEND_INHERITANCE_RESET_CHILD_OVERRIDE;
 	}
 
-	// TODO Old way to remove
-	if (iface->associated_types) {
-		const uint32_t num_associated_types = zend_hash_num_elements(iface->associated_types);
-		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-			const bool persistent = ce->type == ZEND_INTERNAL_CLASS;
-			if (ce->associated_types) {
-				zend_string *associated_type_name;
-				zend_type *associated_type_ptr;
-				ZEND_HASH_FOREACH_STR_KEY_PTR(iface->associated_types, associated_type_name, associated_type_ptr) {
-					if (zend_hash_exists(ce->associated_types, associated_type_name)) {
-						zend_error_noreturn(E_ERROR,
-							"Cannot redeclare associated type %s in interface %s inherited from interface %s",
-							ZSTR_VAL(associated_type_name), ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
-					}
-					/* Deep copy the type information */
-					zend_type_copy_ctor(associated_type_ptr, /* use_arena */ !persistent, /* persistent */ persistent);
-					zend_hash_add_new_mem(ce->associated_types, associated_type_name, associated_type_ptr, sizeof(*associated_type_ptr));
-				} ZEND_HASH_FOREACH_END();
-			} else {
-				ce->associated_types = pemalloc(sizeof(HashTable), persistent);
-				zend_hash_init(ce->associated_types, num_associated_types, NULL, NULL, false);
-				zend_hash_copy(ce->associated_types, iface->associated_types, NULL);
-			}
-			return;
-		}
-		HashTable *ht = emalloc(sizeof(HashTable));
-		zend_hash_init(ht, num_associated_types, NULL, NULL, false);
-		CG(bound_associated_types) = ht;
-	}
 	if (iface->num_generic_parameters > 0) {
 		if (UNEXPECTED(ce->bound_types == NULL)) {
 			zend_error_noreturn(E_COMPILE_ERROR,

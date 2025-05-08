@@ -1441,29 +1441,6 @@ static zend_string *add_intersection_type(zend_string *str,
 	return str;
 }
 
-static zend_string *add_associated_type(zend_string *associated_type, zend_class_entry *scope)
-{
-	const zend_type *constraint = zend_hash_find_ptr(scope->associated_types, associated_type);
-	ZEND_ASSERT(constraint != NULL);
-
-	zend_string *constraint_type_str = zend_type_to_string_resolved(*constraint, scope);
-
-	size_t len = ZSTR_LEN(associated_type) + ZSTR_LEN(constraint_type_str) + strlen("< : >");
-	zend_string *result = zend_string_alloc(len, 0);
-
-	ZSTR_VAL(result)[0] = '<';
-	memcpy(ZSTR_VAL(result) + strlen("<"), ZSTR_VAL(associated_type), ZSTR_LEN(associated_type));
-	ZSTR_VAL(result)[ZSTR_LEN(associated_type) + 1] = ' ';
-	ZSTR_VAL(result)[ZSTR_LEN(associated_type) + 2] = ':';
-	ZSTR_VAL(result)[ZSTR_LEN(associated_type) + 3] = ' ';
-	memcpy(ZSTR_VAL(result) + ZSTR_LEN(associated_type) + strlen("< : "), ZSTR_VAL(constraint_type_str), ZSTR_LEN(constraint_type_str));
-	ZSTR_VAL(result)[len-1] = '>';
-	ZSTR_VAL(result)[len] = '\0';
-
-	zend_string_release(constraint_type_str);
-	return result;
-}
-
 zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
 
@@ -1487,8 +1464,9 @@ zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry
 			str = add_type_string(str, resolved, /* is_intersection */ false);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
-	} else if (ZEND_TYPE_IS_ASSOCIATED(type)) {
-		str = add_associated_type(ZEND_TYPE_NAME(type), scope);
+	// TODO Is this still required?
+	//} else if (ZEND_TYPE_IS_ASSOCIATED(type)) {
+	//	str = add_associated_type(ZEND_TYPE_NAME(type), scope);
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
@@ -2117,7 +2095,6 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	ce->default_static_members_count = 0;
 	ce->properties_info_table = NULL;
 	ce->attributes = NULL;
-	ce->associated_types = NULL;
 	ce->bound_types = NULL;
 	// TODO Should these be inside nullify_handlers?
 	ce->generic_parameters = NULL;
@@ -7046,10 +7023,6 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			const char *correct_name;
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 
-			// TODO Old version to remove
-			if (ce && ce->associated_types && zend_hash_exists(ce->associated_types, type_name)) {
-				return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(type_name), /* allow null */ false, _ZEND_TYPE_ASSOCIATED_BIT);
-			}
 			if (ce && ce->num_generic_parameters > 0) {
 				for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
 					const zend_generic_parameter *genric_param = &ce->generic_parameters[generic_param_index];
@@ -7255,7 +7228,7 @@ static zend_type zend_compile_typename_ex(
 			uint32_t single_type_mask = ZEND_TYPE_PURE_MASK(single_type);
 
 			if (ZEND_TYPE_IS_ASSOCIATED(single_type)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Associated type cannot be part of a union type");
+				zend_error_noreturn(E_COMPILE_ERROR, "Generic type cannot be part of a union type");
 			}
 			if (single_type_mask == MAY_BE_ANY) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Type mixed can only be used as a standalone type");
@@ -7340,7 +7313,7 @@ static zend_type zend_compile_typename_ex(
 			zend_type single_type = zend_compile_single_typename(type_ast);
 
 			if (ZEND_TYPE_IS_ASSOCIATED(single_type)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Associated type cannot be part of an intersection type");
+				zend_error_noreturn(E_COMPILE_ERROR, "Generic type cannot be part of an intersection type");
 			}
 			/* An intersection of union types cannot exist so invalidate it
 			 * Currently only can happen with iterable getting canonicalized to Traversable|array */
@@ -7409,10 +7382,10 @@ static zend_type zend_compile_typename_ex(
 		zend_error_noreturn(E_COMPILE_ERROR, "null cannot be marked as nullable");
 	}
 	if (ZEND_TYPE_IS_ASSOCIATED(type) && is_marked_nullable) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Associated type cannot be part of a union type");
+		zend_error_noreturn(E_COMPILE_ERROR, "Generic type cannot be part of a union type");
 	}
 	if (ZEND_TYPE_IS_ASSOCIATED(type) && force_allow_null) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Associated type cannot be part of a union type (implicitly nullable due to default null value)");
+		zend_error_noreturn(E_COMPILE_ERROR, "Generic type cannot be part of a union type (implicitly nullable due to default null value)");
 	}
 
 	if (force_allow_null && !is_marked_nullable && !(type_mask & MAY_BE_NULL)) {
@@ -9087,49 +9060,6 @@ static void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 	}
 }
 /* }}} */
-
-static void zend_associated_table_ht_dtor(zval *val) {
-	/* NO OP as we only use it to be able to refer and save pointers to zend_types */
-	// TODO do we actually want to store copies of types?
-	zend_type *associated_type = Z_PTR_P(val);
-	if (associated_type != &zend_mixed_type) {
-		zend_type_release(*associated_type, false);
-		efree(associated_type);
-	}
-}
-
-// TODO Remove
-static void zend_compile_associated_type(zend_ast *ast) {
-	zend_class_entry *ce = CG(active_class_entry);
-	HashTable *associated_types = ce->associated_types;
-	zend_ast *name_ast = ast->child[0];
-	zend_ast *type_ast = ast->child[1];
-	zend_string *name = zend_ast_get_str(name_ast);
-
-	if ((ce->ce_flags & ZEND_ACC_INTERFACE) == 0) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot use associated types outside of interfaces, used in %s", ZSTR_VAL(ce->name));
-	}
-
-	ZEND_ASSERT(name != NULL);
-	bool persistent = ce->type == ZEND_INTERNAL_CLASS;
-	if (associated_types == NULL) {
-		ce->associated_types = pemalloc(sizeof(HashTable), persistent);
-		zend_hash_init(ce->associated_types, 8, NULL, zend_associated_table_ht_dtor, persistent);
-		associated_types = ce->associated_types;
-	}
-	if (zend_hash_exists(associated_types, name)) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Cannot have two associated types with the same name \"%s\"", ZSTR_VAL(name));
-	}
-
-	if (type_ast != NULL) {
-		zend_type type = zend_compile_typename(type_ast);
-		zend_hash_add_new_mem(associated_types, name, &type, sizeof(type));
-	} else {
-		zend_hash_add_new_ptr(associated_types, name, (void*) &zend_mixed_type);
-	}
-}
 
 static void zend_bound_types_ht_dtor(zval *ptr) {
 	HashTable *interface_bound_types = Z_PTR_P(ptr);
@@ -11790,9 +11720,6 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_USE_TRAIT:
 			zend_compile_use_trait(ast);
-			break;
-		case ZEND_AST_ASSOCIATED_TYPE:
-			zend_compile_associated_type(ast);
 			break;
 		case ZEND_AST_CLASS:
 			zend_compile_class_decl(NULL, ast, 0);

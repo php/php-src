@@ -9,4 +9,4 @@ interface I<T> {
 
 ?>
 --EXPECTF--
-Fatal error: Associated type cannot be part of an intersection type in %s on line %d
+Fatal error: Generic type cannot be part of an intersection type in %s on line %d
