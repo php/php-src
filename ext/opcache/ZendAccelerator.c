@@ -1732,13 +1732,6 @@ static void zend_accel_set_auto_globals(int mask)
 	ZCG(auto_globals_mask) |= mask;
 }
 
-static void replay_warnings(uint32_t num_warnings, zend_error_info **warnings) {
-	for (uint32_t i = 0; i < num_warnings; i++) {
-		zend_error_info *warning = warnings[i];
-		zend_error_zstr_at(warning->type, warning->filename, warning->lineno, warning->message);
-	}
-}
-
 static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, zend_op_array **op_array_p)
 {
 	zend_persistent_script *new_persistent_script;
@@ -1812,11 +1805,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	orig_functions_count = EG(function_table)->nNumUsed;
 	orig_class_count = EG(class_table)->nNumUsed;
 
-	/* Override them with ours */
-	if (ZCG(accel_directives).record_warnings) {
-		zend_begin_record_errors();
-	}
-
 	zend_try {
 		orig_compiler_options = CG(compiler_options);
 		CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
@@ -1845,12 +1833,12 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 
 	/* Restore originals */
 	CG(active_op_array) = orig_active_op_array;
-	EG(record_errors) = 0;
 
 	if (!op_array) {
 		/* compilation failed */
-		zend_free_recorded_errors();
 		if (do_bailout) {
+			EG(record_errors) = false;
+			zend_free_recorded_errors();
 			zend_bailout();
 		}
 		return NULL;
@@ -1865,10 +1853,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	zend_accel_move_user_functions(CG(function_table), CG(function_table)->nNumUsed - orig_functions_count, &new_persistent_script->script);
 	zend_accel_move_user_classes(CG(class_table), CG(class_table)->nNumUsed - orig_class_count, &new_persistent_script->script);
 	zend_accel_build_delayed_early_binding_list(new_persistent_script);
-	new_persistent_script->num_warnings = EG(num_errors);
-	new_persistent_script->warnings = EG(errors);
-	EG(num_errors) = 0;
-	EG(errors) = NULL;
 
 	efree(op_array); /* we have valid persistent_script, so it's safe to free op_array */
 
@@ -1950,7 +1934,7 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 				}
 			}
 		}
-		replay_warnings(persistent_script->num_warnings, persistent_script->warnings);
+		zend_emit_recorded_errors_ex(persistent_script->num_warnings, persistent_script->warnings);
 
 	    if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
 			zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask));
@@ -1959,11 +1943,22 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 		return zend_accel_load_script(persistent_script, 1);
 	}
 
+	zend_begin_record_errors();
+
 	persistent_script = opcache_compile_file(file_handle, type, &op_array);
 
 	if (persistent_script) {
+		if (ZCG(accel_directives).record_warnings) {
+			persistent_script->num_warnings = EG(num_errors);
+			persistent_script->warnings = EG(errors);
+		}
+
 		from_memory = false;
 		persistent_script = cache_script_in_file_cache(persistent_script, &from_memory);
+
+		zend_emit_recorded_errors();
+		zend_free_recorded_errors();
+
 		return zend_accel_load_script(persistent_script, from_memory);
 	}
 
@@ -2162,6 +2157,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			return accelerator_orig_compile_file(file_handle, type);
 		}
 
+		zend_begin_record_errors();
+
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		persistent_script = opcache_compile_file(file_handle, type, &op_array);
@@ -2173,6 +2170,11 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		 */
 		from_shared_memory = false;
 		if (persistent_script) {
+			if (ZCG(accel_directives).record_warnings) {
+				persistent_script->num_warnings = EG(num_errors);
+				persistent_script->warnings = EG(errors);
+			}
+
 			/* See GH-17246: we disable GC so that user code cannot be executed during the optimizer run. */
 			bool orig_gc_state = gc_enable(false);
 			persistent_script = cache_script_in_shared_memory(persistent_script, key, &from_shared_memory);
@@ -2185,6 +2187,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		if (!persistent_script) {
 			SHM_PROTECT();
 			HANDLE_UNBLOCK_INTERRUPTIONS();
+			zend_emit_recorded_errors();
+			zend_free_recorded_errors();
 			return op_array;
 		}
 		if (from_shared_memory) {
@@ -2198,6 +2202,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		persistent_script->dynamic_members.last_used = ZCG(request_time);
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();
+
+		zend_emit_recorded_errors();
+		zend_free_recorded_errors();
 	} else {
 
 #ifndef ZEND_WIN32
@@ -2240,7 +2247,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
-		replay_warnings(persistent_script->num_warnings, persistent_script->warnings);
+		zend_emit_recorded_errors_ex(persistent_script->num_warnings, persistent_script->warnings);
 		from_shared_memory = true;
 	}
 
@@ -2307,7 +2314,7 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 		entry = zend_accel_inheritance_cache_find(entry, ce, parent, traits_and_interfaces, &needs_autoload);
 		if (entry) {
 			if (!needs_autoload) {
-				replay_warnings(entry->num_warnings, entry->warnings);
+				zend_emit_recorded_errors_ex(entry->num_warnings, entry->warnings);
 				if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
 					zend_map_ptr_extend(ZCSG(map_ptr_last));
 				}
@@ -2460,9 +2467,6 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	entry->warnings = zend_persist_warnings(EG(num_errors), EG(errors));
 	entry->next = proto->inheritance_cache;
 	proto->inheritance_cache = entry;
-
-	EG(num_errors) = 0;
-	EG(errors) = NULL;
 
 	ZCSG(map_ptr_last) = CG(map_ptr_last);
 

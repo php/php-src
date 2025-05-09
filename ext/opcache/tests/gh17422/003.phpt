@@ -22,9 +22,11 @@ warning();
 ?>
 --EXPECTF--
 Fatal error: Allowed memory size of 2097152 bytes exhausted %s on line 6
-array(2) {
+array(3) {
   [0]=>
   string(7) "003.php"
   [1]=>
   string(12) "shutdown.inc"
+  [2]=>
+  string(11) "warning.inc"
 }

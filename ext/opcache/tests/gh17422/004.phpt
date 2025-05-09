@@ -28,9 +28,11 @@ warning();
 ?>
 --EXPECTF--
 Fatal error: Cannot redeclare %Swarning() (previously declared in %s(8) : eval()'d code:1) in %swarning.inc on line 2
-array(2) {
+array(3) {
   [0]=>
   string(7) "004.php"
   [1]=>
   string(12) "shutdown.inc"
+  [2]=>
+  string(11) "warning.inc"
 }
