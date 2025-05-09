@@ -19,14 +19,11 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif
-
 #include "php.h"
 
 #include "url.h"
 #include "file.h"
+#include "zend_simd.h"
 
 /* {{{ free_url */
 PHPAPI void php_url_free(php_url *theurl)
@@ -460,7 +457,7 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 	start = zend_string_safe_alloc(3, len, 0, 0);
 	to = (unsigned char*)ZSTR_VAL(start);
 
-#ifdef __SSE2__
+#ifdef XSSE2
 	while (from + 16 < end) {
 		__m128i mask;
 		uint32_t bits;
