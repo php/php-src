@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8022d3e8b34d0ebd71f1be19eeb720947bea67ed */
+ * Stub hash: 1fd4c80ed74efcc50698748b2afc89391ed69c72 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -838,6 +838,25 @@ static zend_class_entry *register_class__ZendTestChildClass(zend_class_entry *cl
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry__ZendTestClass, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, class_entry__ZendTestClass);
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestGenStubFlagCompatibilityTest(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestGenStubFlagCompatibilityTest", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#if (PHP_VERSION_ID >= 80100)
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+#elif (PHP_VERSION_ID >= 80000)
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
 #endif
 
 	return class_entry;
