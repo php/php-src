@@ -974,11 +974,12 @@ PHP_FUNCTION(dba_close)
 	CHECK_DBA_CONNECTION(connection->info);
 
 	bool persistent = connection->info->flags & DBA_PERSISTENT;
+	void *info_ptr = connection->info;
 
 	dba_close_connection(connection);
 
 	if (persistent) {
-		zend_hash_apply_with_argument(&EG(persistent_list), remove_pconnection_from_list, (void *) connection->info);
+		zend_hash_apply_with_argument(&EG(persistent_list), remove_pconnection_from_list, info_ptr);
 	}
 }
 /* }}} */
