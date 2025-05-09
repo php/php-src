@@ -64,6 +64,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 - ext/standard
   . Added php_url_decode_ex() and php_raw_url_decode_ex() that unlike their
     non-ex counterparts do not work in-place.
+  . The php_std_date() function has been removed. Use php_format_date() with
+    the "D, d M Y H:i:s \\G\\M\\T" format instead.
 
 ========================
 4. OpCode changes
