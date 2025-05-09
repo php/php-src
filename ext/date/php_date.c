@@ -5438,7 +5438,7 @@ PHP_FUNCTION(date_default_timezone_get)
  */
 static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_sunset)
 {
-	double latitude, longitude, zenith, gmt_offset, altitude;
+	double latitude, longitude, zenith, gmt_offset = 0, altitude;
 	bool latitude_is_null = 1, longitude_is_null = 1, zenith_is_null = 1, gmt_offset_is_null = 1;
 	double h_rise, h_set, N;
 	timelib_sll rise, set, transit;

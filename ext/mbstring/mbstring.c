@@ -2317,7 +2317,7 @@ out:
 PHP_FUNCTION(mb_substr)
 {
 	zend_string *str, *encoding = NULL;
-	zend_long from, len;
+	zend_long from, len = 0;
 	size_t real_from, real_len;
 	bool len_is_null = true;
 
