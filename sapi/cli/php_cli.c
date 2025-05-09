@@ -1106,14 +1106,14 @@ do_repeat:
 
 		case PHP_CLI_MODE_SHOW_INI_CONFIG:
 			{
-				zend_printf("Configuration File (php.ini) Path: `%s`\n", PHP_CONFIG_FILE_PATH);
+				zend_printf("Configuration File (php.ini) Path: \"%s\"\n", PHP_CONFIG_FILE_PATH);
 				if (php_ini_scanned_path) {
-					zend_printf("Loaded Configuration File:         `%s`\n", php_ini_scanned_path);
+					zend_printf("Loaded Configuration File:         \"%s\"\n", php_ini_scanned_path);
 				} else {
 					zend_printf("Loaded Configuration File:         (none)\n");
 				}
 				if (php_ini_opened_path) {
-					zend_printf("Scan for additional .ini files in: `%s`\n", php_ini_opened_path);
+					zend_printf("Scan for additional .ini files in: \"%s\"\n", php_ini_opened_path);
 				} else {
 					zend_printf("Scan for additional .ini files in: (none)\n");
 				}
