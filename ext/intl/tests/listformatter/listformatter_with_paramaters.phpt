@@ -3,7 +3,7 @@ IntlListFormatter: Test AND, OR and Width parameters
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '67.0') >= 0) die('skip for ICU < 67.0'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '67.0') <= 0) die('skip for ICU < 67.0'); ?>
 --FILE--
 <?php
 

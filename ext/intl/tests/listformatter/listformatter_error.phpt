@@ -14,15 +14,15 @@ try {
 echo PHP_EOL;
 
 try {
-    $formatter = new IntlListFormatter('ro', IntlListFormatter::TYPE_AND, 23);
-} catch (IntlException $exception) {
-    echo $exception->getMessage() .PHP_EOL;
-    echo intl_get_error_code();
+    $formatter = new IntlListFormatter('ro_thisiswaytooooooooooooooooooooooooooooooooooooooooooooolongtobevaliditneedstobeatleast157characterstofailthevalidationinthelistformattercodeimplementation', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
+} catch(ValueError $exception) {
+    echo $exception->getMessage();
 }
+
+echo PHP_EOL;
 
 $formatter = new IntlListFormatter('ro', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
 
-echo PHP_EOL;
 try {
     echo $formatter->format([new stdClass()]);
 } catch(Error $error) {
@@ -31,6 +31,5 @@ try {
 
 --EXPECT--
 IntlListFormatter::__construct(): Argument #1 ($locale) "f" is invalid
-Constructor failed
-1
+IntlListFormatter::__construct(): Argument #1 ($locale) Locale string too long, should be no longer than 156 characters
 Object of class stdClass could not be converted to string

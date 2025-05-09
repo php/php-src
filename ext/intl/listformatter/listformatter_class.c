@@ -19,7 +19,6 @@
 #include "listformatter_class.h"
 #include "intl_convert.h"
 
-
 static zend_object_handlers listformatter_handlers;
 
 /* {{{ listformatter_free_obj */
@@ -48,26 +47,45 @@ static zend_object *listformatter_create_object(zend_class_entry *class_type)
 PHP_METHOD(IntlListFormatter, __construct)
 {
     ListFormatter_object *obj = Z_INTL_LISTFORMATTER_P(ZEND_THIS);
-    zend_string *locale;
+    char* locale;
+    size_t locale_len = 0;
     zend_long type = ULISTFMT_TYPE_AND;
     zend_long width = ULISTFMT_WIDTH_WIDE;
     ZEND_PARSE_PARAMETERS_START(1, 3)
-        Z_PARAM_STR(locale)
+        Z_PARAM_STRING(locale, locale_len)
         Z_PARAM_OPTIONAL
         Z_PARAM_LONG(type)
         Z_PARAM_LONG(width)
     ZEND_PARSE_PARAMETERS_END();
 
-    if (strlen(uloc_getISO3Language(ZSTR_VAL(locale))) == 0) {
-		zend_argument_value_error(1, "\"%s\" is invalid", ZSTR_VAL(locale));
-		RETURN_THROWS();
-	}
+    if(locale_len == 0) {
+        locale = (char *)intl_locale_get_default();
+    }
+
+    if (strlen(uloc_getISO3Language(locale)) == 0) {
+        zend_argument_value_error(1, "\"%s\" is invalid", locale);
+        RETURN_THROWS();
+    }
+
+    if (locale_len > INTL_MAX_LOCALE_LEN) {
+        zend_argument_value_error(1, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);
+        RETURN_THROWS();
+    }
 
     UErrorCode status = U_ZERO_ERROR;
-    if (U_ICU_VERSION_MAJOR_NUM >= 67) {
+    #if U_ICU_VERSION_MAJOR_NUM >= 67
+        if (type != ULISTFMT_TYPE_AND && type != ULISTFMT_TYPE_OR && type != ULISTFMT_TYPE_UNITS) {
+            zend_argument_value_error(2, "must be one of IntlListFormatter::TYPE_AND, IntlListFormatter::TYPE_OR, or IntlListFormatter::TYPE_UNITS");
+            RETURN_THROWS();
+        }
+        
+        if (width != ULISTFMT_WIDTH_WIDE && width != ULISTFMT_WIDTH_SHORT && width != ULISTFMT_WIDTH_NARROW) {
+            zend_argument_value_error(3, "must be one of IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT, or IntlListFormatter::WIDTH_NARROW");
+            RETURN_THROWS();
+        }
 
-        LISTFORMATTER_OBJECT(obj) = ulistfmt_openForType(ZSTR_VAL(locale), type, width, &status);
-    } else {
+        LISTFORMATTER_OBJECT(obj) = ulistfmt_openForType(locale, type, width, &status);
+    #else
         if (type != ULISTFMT_TYPE_AND) {
             zend_argument_value_error(2, "ICU 66 and below only support IntlListFormatter::TYPE_AND");
             RETURN_THROWS();
@@ -78,8 +96,9 @@ PHP_METHOD(IntlListFormatter, __construct)
             RETURN_THROWS();
         }
 
-        LISTFORMATTER_OBJECT(obj) = ulistfmt_open(ZSTR_VAL(locale), &status);
-    }
+        LISTFORMATTER_OBJECT(obj) = ulistfmt_open(locale, &status);
+    #endif
+
     if (U_FAILURE(status)) {
         intl_error_set(NULL, status, "Constructor failed", 0);
         zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
