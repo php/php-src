@@ -469,92 +469,6 @@ zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int se
 	return SUCCESS;
 }
 
-EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo) {
-	EVP_MD *mdtype;
-
-	switch (algo) {
-		case OPENSSL_ALGO_SHA1:
-			mdtype = (EVP_MD *) EVP_sha1();
-			break;
-		case OPENSSL_ALGO_MD5:
-			mdtype = (EVP_MD *) EVP_md5();
-			break;
-#ifndef OPENSSL_NO_MD4
-		case OPENSSL_ALGO_MD4:
-			mdtype = (EVP_MD *) EVP_md4();
-			break;
-#endif
-#ifndef OPENSSL_NO_MD2
-		case OPENSSL_ALGO_MD2:
-			mdtype = (EVP_MD *) EVP_md2();
-			break;
-#endif
-		case OPENSSL_ALGO_SHA224:
-			mdtype = (EVP_MD *) EVP_sha224();
-			break;
-		case OPENSSL_ALGO_SHA256:
-			mdtype = (EVP_MD *) EVP_sha256();
-			break;
-		case OPENSSL_ALGO_SHA384:
-			mdtype = (EVP_MD *) EVP_sha384();
-			break;
-		case OPENSSL_ALGO_SHA512:
-			mdtype = (EVP_MD *) EVP_sha512();
-			break;
-#ifndef OPENSSL_NO_RMD160
-		case OPENSSL_ALGO_RMD160:
-			mdtype = (EVP_MD *) EVP_ripemd160();
-			break;
-#endif
-		default:
-			return NULL;
-			break;
-	}
-	return mdtype;
-}
-
-const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo) {
-	switch (algo) {
-#ifndef OPENSSL_NO_RC2
-		case PHP_OPENSSL_CIPHER_RC2_40:
-			return EVP_rc2_40_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_RC2_64:
-			return EVP_rc2_64_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_RC2_128:
-			return EVP_rc2_cbc();
-			break;
-#endif
-
-#ifndef OPENSSL_NO_DES
-		case PHP_OPENSSL_CIPHER_DES:
-			return EVP_des_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_3DES:
-			return EVP_des_ede3_cbc();
-			break;
-#endif
-
-#ifndef OPENSSL_NO_AES
-		case PHP_OPENSSL_CIPHER_AES_128_CBC:
-			return EVP_aes_128_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_AES_192_CBC:
-			return EVP_aes_192_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_AES_256_CBC:
-			return EVP_aes_256_cbc();
-			break;
-#endif
-
-
-		default:
-			return NULL;
-			break;
-	}
-}
-
 void php_openssl_backend_init(void)
 {
 #ifdef LIBRESSL_VERSION_NUMBER
@@ -1931,7 +1845,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(tag_len, tag_len);
 
 
-	cipher_type = EVP_get_cipherbyname(method);
+	cipher_type = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return NULL;
@@ -2023,7 +1937,7 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(tag_len, tag);
 
 
-	cipher_type = EVP_get_cipherbyname(method);
+	cipher_type = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return NULL;
@@ -2079,11 +1993,11 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	return outbuf;
 }
 
-const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method)
+const EVP_CIPHER *php_openssl_get_evp_cipher_by_name_with_warning(const char *method)
 {
 	const EVP_CIPHER *cipher_type;
 
-	cipher_type = EVP_get_cipherbyname(method);
+	cipher_type = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return NULL;
@@ -2095,14 +2009,14 @@ const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method)
 
 PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
 {
-	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name(method);
+	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name_with_warning(method);
 
 	return cipher_type == NULL ? -1 : EVP_CIPHER_iv_length(cipher_type);
 }
 
 PHP_OPENSSL_API zend_long php_openssl_cipher_key_length(const char *method)
 {
-	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name(method);
+	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name_with_warning(method);
 
 	return cipher_type == NULL ? -1 : EVP_CIPHER_key_length(cipher_type);
 }
