@@ -310,7 +310,7 @@ eval `echo h.$opt_spec |\
 eval `echo h:help,$opt_alias |\
       sed -e 's/-/_/g' -e 's/\([a-zA-Z0-9]\):\([^,]*\),*/opt_ALIAS_\2=\1;/g'`
 
-#   interate over argument line
+#   iterate over argument line
 opt_PREV=''
 while [ $# -gt 0 ]; do
     #   special option stops processing
@@ -1583,9 +1583,9 @@ platform )
                            sed -e 's/^://' \
                                -e 's;\[\([^]]*\)\];\1;g' \
                                -e 's;<\([^>]*\)>;\1;g' \
-                               -e "s; ;§§;g" \
+                               -e "s; ;Â§Â§;g" \
                                -e "s;/;%%;g" \
-                               -e "s;§§;${opt_S};g" \
+                               -e "s;Â§Â§;${opt_S};g" \
                                -e "s;%%;${opt_C};g"`
                     eval "${var_uc}_V=\"\${val_V}\""
                     ;;
@@ -1596,9 +1596,9 @@ platform )
                            sed -e 's/^://' \
                                -e 's;\[\([^]]*\)\];;g' \
                                -e 's;<\([^>]*\)>;\1;g' \
-                               -e "s; ;§§;g" \
+                               -e "s; ;Â§Â§;g" \
                                -e "s;/;%%;g" \
-                               -e "s;§§;${opt_S};g" \
+                               -e "s;Â§Â§;${opt_S};g" \
                                -e "s;%%;${opt_C};g"`
                     eval "${var_uc}_N=\"\${val_N}\""
                     ;;
@@ -1609,9 +1609,9 @@ platform )
                            sed -e 's/^://' \
                                -e 's;\[\([^]]*\)\];;g' \
                                -e 's;[^<]*<\([^>]*\)>[^<]*;\1;g' \
-                               -e "s; ;§§;g" \
+                               -e "s; ;Â§Â§;g" \
                                -e "s;/;%%;g" \
-                               -e "s;§§;${opt_S};g" \
+                               -e "s;Â§Â§;${opt_S};g" \
                                -e "s;%%;${opt_C};g"`
                     eval "${var_uc}_C=\"\${val_C}\""
                     ;;
