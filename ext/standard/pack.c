@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -63,30 +64,125 @@ typedef ZEND_SET_ALIGNED(1, unsigned int unaligned_uint);
 typedef ZEND_SET_ALIGNED(1, int unaligned_int);
 
 /* Mapping of byte from char (8bit) to long for machine endian */
-static int byte_map[1];
+static const int byte_map[1] = {
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 1
+#else
+	0
+#endif
+};
 
 /* Mappings of bytes from int (machine dependent) to int for machine endian */
-static int int_map[sizeof(int)];
+static const int int_map[sizeof(int)] = {
+#ifdef WORDS_BIGENDIAN
+#if UINT_MAX == 0xFFFFFFFFU
+	sizeof(Z_LVAL_P((zval *)0)) - 4, sizeof(Z_LVAL_P((zval *)0)) - 3,
+	sizeof(Z_LVAL_P((zval *)0)) - 2, sizeof(Z_LVAL_P((zval *)0)) - 1
+#elif UINT_MAX == 0xFFFFFFFFFFFFFFFFU
+	sizeof(Z_LVAL_P((zval *)0)) - 8, sizeof(Z_LVAL_P((zval *)0)) - 7,
+	sizeof(Z_LVAL_P((zval *)0)) - 6, sizeof(Z_LVAL_P((zval *)0)) - 5,
+	sizeof(Z_LVAL_P((zval *)0)) - 4, sizeof(Z_LVAL_P((zval *)0)) - 3,
+	sizeof(Z_LVAL_P((zval *)0)) - 2, sizeof(Z_LVAL_P((zval *)0)) - 1
+#else
+#error "Unsupported size of int: not 4 or 8 bytes"
+#endif
+#else // little endian
+#if UINT_MAX == 0xFFFFFFFFU
+	0, 1, 2, 3
+#elif UINT_MAX == 0xFFFFFFFFFFFFFFFFU
+	0, 1, 2, 3, 4, 5, 6, 7
+#else
+#error "Unsupported size of int: not 4 or 8 bytes"
+#endif
+#endif
+};
 
 /* Mappings of bytes from shorts (16bit) for all endian environments */
-static int machine_endian_short_map[2];
-static int big_endian_short_map[2];
-static int little_endian_short_map[2];
+static const int machine_endian_short_map[2] = {
+#ifdef WORDS_BIGENDIAN
+    sizeof(Z_LVAL_P((zval *)0)) - 2, sizeof(Z_LVAL_P((zval *)0)) - 1
+#else
+    0, 1
+#endif
+};
+
+static const int big_endian_short_map[2] = {
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 2, sizeof(Z_LVAL_P((zval *)0)) - 1
+#else
+	1, 0
+#endif
+};
+static const int little_endian_short_map[2] = {
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 1, sizeof(Z_LVAL_P((zval *)0)) - 2
+#else
+	0, 1
+#endif
+};
 
 /* Mappings of bytes from longs (32bit) for all endian environments */
-static int machine_endian_long_map[4];
-static int big_endian_long_map[4];
-static int little_endian_long_map[4];
+static const int machine_endian_long_map[4] = {
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 4, sizeof(Z_LVAL_P((zval *)0)) - 3,
+	sizeof(Z_LVAL_P((zval *)0)) - 2, sizeof(Z_LVAL_P((zval *)0)) - 1
+#else
+	0, 1, 2, 3
+#endif
+};
+static const int big_endian_long_map[4] ={
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 4, sizeof(Z_LVAL_P((zval *)0)) - 3,
+	sizeof(Z_LVAL_P((zval *)0)) - 2, sizeof(Z_LVAL_P((zval *)0)) - 1
+#else
+	3, 2, 1, 0
+#endif
+};
+static const int little_endian_long_map[4] = {
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 1, sizeof(Z_LVAL_P((zval *)0)) - 2,
+	sizeof(Z_LVAL_P((zval *)0)) - 3, sizeof(Z_LVAL_P((zval *)0)) - 4
+#else
+	0, 1, 2, 3
+#endif
+};
 
 #if SIZEOF_ZEND_LONG > 4
 /* Mappings of bytes from quads (64bit) for all endian environments */
-static int machine_endian_longlong_map[8];
-static int big_endian_longlong_map[8];
-static int little_endian_longlong_map[8];
+static const int machine_endian_longlong_map[8] = {
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 8, sizeof(Z_LVAL_P((zval *)0)) - 7,
+	sizeof(Z_LVAL_P((zval *)0)) - 6, sizeof(Z_LVAL_P((zval *)0)) - 5,
+	sizeof(Z_LVAL_P((zval *)0)) - 4, sizeof(Z_LVAL_P((zval *)0)) - 3,
+	sizeof(Z_LVAL_P((zval *)0)) - 2, sizeof(Z_LVAL_P((zval *)0)) - 1
+#else
+	0, 1, 2, 3, 4, 5, 6, 7
+#endif
+};
+static const int big_endian_longlong_map[8] = {
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 8, sizeof(Z_LVAL_P((zval *)0)) - 7,
+	sizeof(Z_LVAL_P((zval *)0)) - 6, sizeof(Z_LVAL_P((zval *)0)) - 5,
+	sizeof(Z_LVAL_P((zval *)0)) - 4, sizeof(Z_LVAL_P((zval *)0)) - 3,
+	sizeof(Z_LVAL_P((zval *)0)) - 2, sizeof(Z_LVAL_P((zval *)0)) - 1
+#else
+	7, 6, 5, 4, 3, 2, 1, 0
+#endif
+};
+static const int little_endian_longlong_map[8] = {
+#ifdef WORDS_BIGENDIAN
+	sizeof(Z_LVAL_P((zval *)0)) - 1, sizeof(Z_LVAL_P((zval *)0)) - 2,
+	sizeof(Z_LVAL_P((zval *)0)) - 3, sizeof(Z_LVAL_P((zval *)0)) - 4,
+	sizeof(Z_LVAL_P((zval *)0)) - 5, sizeof(Z_LVAL_P((zval *)0)) - 6,
+	sizeof(Z_LVAL_P((zval *)0)) - 7, sizeof(Z_LVAL_P((zval *)0)) - 8
+#else
+	0, 1, 2, 3, 4, 5, 6, 7
+#endif
+};
 #endif
 
 /* {{{ php_pack */
-static void php_pack(zval *val, size_t size, int *map, char *output)
+static void php_pack(zval *val, size_t size, const int *const map, char *output)
 {
 	size_t i;
 	char *v;
@@ -538,7 +634,7 @@ too_few_args:
 			case 'S':
 			case 'n':
 			case 'v': {
-				int *map = machine_endian_short_map;
+				const int *map = machine_endian_short_map;
 
 				if (code == 'n') {
 					map = big_endian_short_map;
@@ -565,7 +661,7 @@ too_few_args:
 			case 'L':
 			case 'N':
 			case 'V': {
-				int *map = machine_endian_long_map;
+				const int *map = machine_endian_long_map;
 
 				if (code == 'N') {
 					map = big_endian_long_map;
@@ -585,7 +681,7 @@ too_few_args:
 			case 'Q':
 			case 'J':
 			case 'P': {
-				int *map = machine_endian_longlong_map;
+				const int *map = machine_endian_longlong_map;
 
 				if (code == 'J') {
 					map = big_endian_longlong_map;
@@ -1197,129 +1293,5 @@ PHP_FUNCTION(unpack)
 			format++;
 		}
 	}
-}
-/* }}} */
-
-/* {{{ PHP_MINIT_FUNCTION */
-PHP_MINIT_FUNCTION(pack)
-{
-	int i;
-
-	if (MACHINE_LITTLE_ENDIAN) {
-		/* Where to get lo to hi bytes from */
-		byte_map[0] = 0;
-
-		for (i = 0; i < (int)sizeof(int); i++) {
-			int_map[i] = i;
-		}
-
-		machine_endian_short_map[0] = 0;
-		machine_endian_short_map[1] = 1;
-		big_endian_short_map[0] = 1;
-		big_endian_short_map[1] = 0;
-		little_endian_short_map[0] = 0;
-		little_endian_short_map[1] = 1;
-
-		machine_endian_long_map[0] = 0;
-		machine_endian_long_map[1] = 1;
-		machine_endian_long_map[2] = 2;
-		machine_endian_long_map[3] = 3;
-		big_endian_long_map[0] = 3;
-		big_endian_long_map[1] = 2;
-		big_endian_long_map[2] = 1;
-		big_endian_long_map[3] = 0;
-		little_endian_long_map[0] = 0;
-		little_endian_long_map[1] = 1;
-		little_endian_long_map[2] = 2;
-		little_endian_long_map[3] = 3;
-
-#if SIZEOF_ZEND_LONG > 4
-		machine_endian_longlong_map[0] = 0;
-		machine_endian_longlong_map[1] = 1;
-		machine_endian_longlong_map[2] = 2;
-		machine_endian_longlong_map[3] = 3;
-		machine_endian_longlong_map[4] = 4;
-		machine_endian_longlong_map[5] = 5;
-		machine_endian_longlong_map[6] = 6;
-		machine_endian_longlong_map[7] = 7;
-		big_endian_longlong_map[0] = 7;
-		big_endian_longlong_map[1] = 6;
-		big_endian_longlong_map[2] = 5;
-		big_endian_longlong_map[3] = 4;
-		big_endian_longlong_map[4] = 3;
-		big_endian_longlong_map[5] = 2;
-		big_endian_longlong_map[6] = 1;
-		big_endian_longlong_map[7] = 0;
-		little_endian_longlong_map[0] = 0;
-		little_endian_longlong_map[1] = 1;
-		little_endian_longlong_map[2] = 2;
-		little_endian_longlong_map[3] = 3;
-		little_endian_longlong_map[4] = 4;
-		little_endian_longlong_map[5] = 5;
-		little_endian_longlong_map[6] = 6;
-		little_endian_longlong_map[7] = 7;
-#endif
-	}
-	else {
-		zval val;
-		int size = sizeof(Z_LVAL(val));
-		Z_LVAL(val)=0; /*silence a warning*/
-
-		/* Where to get hi to lo bytes from */
-		byte_map[0] = size - 1;
-
-		for (i = 0; i < (int)sizeof(int); i++) {
-			int_map[i] = size - (sizeof(int) - i);
-		}
-
-		machine_endian_short_map[0] = size - 2;
-		machine_endian_short_map[1] = size - 1;
-		big_endian_short_map[0] = size - 2;
-		big_endian_short_map[1] = size - 1;
-		little_endian_short_map[0] = size - 1;
-		little_endian_short_map[1] = size - 2;
-
-		machine_endian_long_map[0] = size - 4;
-		machine_endian_long_map[1] = size - 3;
-		machine_endian_long_map[2] = size - 2;
-		machine_endian_long_map[3] = size - 1;
-		big_endian_long_map[0] = size - 4;
-		big_endian_long_map[1] = size - 3;
-		big_endian_long_map[2] = size - 2;
-		big_endian_long_map[3] = size - 1;
-		little_endian_long_map[0] = size - 1;
-		little_endian_long_map[1] = size - 2;
-		little_endian_long_map[2] = size - 3;
-		little_endian_long_map[3] = size - 4;
-
-#if SIZEOF_ZEND_LONG > 4
-		machine_endian_longlong_map[0] = size - 8;
-		machine_endian_longlong_map[1] = size - 7;
-		machine_endian_longlong_map[2] = size - 6;
-		machine_endian_longlong_map[3] = size - 5;
-		machine_endian_longlong_map[4] = size - 4;
-		machine_endian_longlong_map[5] = size - 3;
-		machine_endian_longlong_map[6] = size - 2;
-		machine_endian_longlong_map[7] = size - 1;
-		big_endian_longlong_map[0] = size - 8;
-		big_endian_longlong_map[1] = size - 7;
-		big_endian_longlong_map[2] = size - 6;
-		big_endian_longlong_map[3] = size - 5;
-		big_endian_longlong_map[4] = size - 4;
-		big_endian_longlong_map[5] = size - 3;
-		big_endian_longlong_map[6] = size - 2;
-		big_endian_longlong_map[7] = size - 1;
-		little_endian_longlong_map[0] = size - 1;
-		little_endian_longlong_map[1] = size - 2;
-		little_endian_longlong_map[2] = size - 3;
-		little_endian_longlong_map[3] = size - 4;
-		little_endian_longlong_map[4] = size - 5;
-		little_endian_longlong_map[5] = size - 6;
-		little_endian_longlong_map[6] = size - 7;
-		little_endian_longlong_map[7] = size - 8;
-#endif
-	}
-
-	return SUCCESS;
 }
 /* }}} */
