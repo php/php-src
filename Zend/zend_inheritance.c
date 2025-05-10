@@ -685,12 +685,14 @@ static inheritance_status zend_is_type_subtype_of_generic_type(
 	zend_class_entry *generic_type_scope,
 	const zend_type *generic_type_ptr
 ) {
+	ZEND_ASSERT(concrete_scope->bound_types);
 	const zend_type generic_type = *generic_type_ptr;
+	const HashTable *bound_generic_types = zend_hash_find_ptr_lc(concrete_scope->bound_types, generic_type_scope->name);
 
-	ZEND_ASSERT(CG(bound_generic_types) && "Have generic type");
+	ZEND_ASSERT(bound_generic_types && "Have generic type");
 	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(generic_type));
 
-	const zend_type *bound_type_ptr = zend_hash_find_ptr(CG(bound_generic_types), ZEND_TYPE_NAME(generic_type));
+	const zend_type *bound_type_ptr = zend_hash_find_ptr(bound_generic_types, ZEND_TYPE_NAME(generic_type));
 	ZEND_ASSERT(bound_type_ptr != NULL);
 	/* Generic type must be invariant */
 	const inheritance_status sub_type_status = zend_perform_covariant_type_check(
@@ -1638,6 +1640,57 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
+// TODO Merge with the one in zend_compile
+static void zend_types_ht_dtor(zval *ptr) {
+	zend_type *type = Z_PTR_P(ptr);
+	// TODO Figure out persistency?
+	zend_type_release(*type, false);
+	efree(type);
+}
+
+static void interface_bind_generic_types_for_interfaces(zend_class_entry *ce, const zend_class_entry *iface) {
+	zend_string *iface_lc_name = zend_string_tolower(iface->name);
+	const HashTable *ce_bound_types = ce->bound_types ? zend_hash_find_ptr(ce->bound_types, iface_lc_name) : NULL;
+	for (uint32_t i = 0; i < iface->num_interfaces; i++) {
+		zend_class_entry *entry = iface->interfaces[i];
+		/* Bind generic types */
+		/* We need to propagate the bound generic parameters to the inherited interfaces */
+		if (entry->num_generic_parameters == 0) {
+			continue;
+		}
+		zend_string *inherited_iface_lc_name = zend_string_tolower(entry->name);
+		const HashTable *interface_bound_types = zend_hash_find_ptr(iface->bound_types, inherited_iface_lc_name);
+		HashTable *ce_bound_types_to_inherited_iface = zend_hash_find_ptr(ce->bound_types, inherited_iface_lc_name);
+		ZEND_ASSERT(interface_bound_types != NULL && "This must exist at this point");
+		if (ce_bound_types_to_inherited_iface == NULL) {
+			ALLOC_HASHTABLE(ce_bound_types_to_inherited_iface);
+			zend_hash_init(ce_bound_types_to_inherited_iface, entry->num_generic_parameters, NULL, zend_types_ht_dtor, false /* todo depend on internal or not */);
+			zend_hash_add_new_ptr(ce->bound_types, inherited_iface_lc_name, ce_bound_types_to_inherited_iface);
+		}
+		for (
+			uint32_t inherited_iface_generic_param_index = 0;
+			inherited_iface_generic_param_index < entry->num_generic_parameters;
+			inherited_iface_generic_param_index++
+		) {
+			const zend_generic_parameter *inherited_generic_parameter = &entry->generic_parameters[inherited_iface_generic_param_index];
+			const zend_type *iface_bound_type_ptr = zend_hash_index_find_ptr(interface_bound_types, inherited_iface_generic_param_index);
+			ZEND_ASSERT(iface_bound_type_ptr != NULL);
+			zend_type bound_type;
+			if (ZEND_TYPE_IS_ASSOCIATED(*iface_bound_type_ptr)) {
+				memcpy(&bound_type, zend_hash_find_ptr(ce_bound_types, ZEND_TYPE_NAME(*iface_bound_type_ptr)), sizeof(zend_type));
+			} else {
+				bound_type = *iface_bound_type_ptr;
+			}
+			/* Deep type copy */
+			zend_type_copy_ctor(&bound_type, true, false);
+			zend_hash_add_mem(ce_bound_types_to_inherited_iface, inherited_generic_parameter->name,
+				&bound_type, sizeof(bound_type));
+		}
+		zend_string_release_ex(inherited_iface_lc_name, false);
+	}
+	zend_string_release_ex(iface_lc_name, false);
+}
+
 static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface) /* {{{ */
 {
 	/* expects interface to be contained in ce's interface list already */
@@ -1656,6 +1709,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 		zend_class_entry *entry = iface->interfaces[if_num];
 		for (i = 0; i < ce_num; i++) {
 			if (ce->interfaces[i] == entry) {
+				// TODO Check bound generic types match? Or is this done before?
 				break;
 			}
 		}
@@ -2222,7 +2276,7 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 				ZSTR_VAL(iface->name)
 			);
 		}
-		const HashTable *bound_types = zend_hash_find_ptr_lc(ce->bound_types, iface->name);
+		HashTable *bound_types = zend_hash_find_ptr_lc(ce->bound_types, iface->name);
 		if (UNEXPECTED(bound_types == NULL)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot implement %s as it has generic parameters which are not specified",
@@ -2238,9 +2292,6 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 				iface->num_generic_parameters
 			);
 		}
-		HashTable *ht = emalloc(sizeof(HashTable));
-		zend_hash_init(ht, num_bound_types, NULL, NULL, false);
-		CG(bound_generic_types) = ht;
 		for (uint32_t i = 0; i < num_bound_types; i++) {
 			const zend_generic_parameter *generic_parameter = &iface->generic_parameters[i];
 			const zend_type* generic_constraint = &generic_parameter->constraint;
@@ -2260,7 +2311,14 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 					}
 					const zend_type *current_ce_generic_type_constraint = &current_ce_generic_parameter->constraint;
 					ZEND_ASSERT(current_ce_generic_type_constraint != NULL);
-					if (zend_perform_covariant_type_check(ce, current_ce_generic_type_constraint, iface, generic_constraint) != INHERITANCE_SUCCESS) {
+					if (
+						zend_perform_covariant_type_check(
+							ce,
+							current_ce_generic_type_constraint,
+							iface,
+							generic_constraint
+						) != INHERITANCE_SUCCESS
+					) {
 						zend_string *current_ce_constraint_type_str = zend_type_to_string(*current_ce_generic_type_constraint);
 						zend_string *constraint_type_str = zend_type_to_string(generic_parameter->constraint);
 						zend_error_noreturn(E_COMPILE_ERROR,
@@ -2276,8 +2334,6 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 						zend_string_release(constraint_type_str);
 						return;
 					}
-					/* Loosing const qualifier here is OK because this hashtable never frees or does anything with the value */
-					zend_hash_add_new_ptr(ht, generic_parameter->name, (void*)current_ce_generic_type_constraint);
 					break;
 				}
 			} else {
@@ -2295,10 +2351,17 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 					zend_string_release(constraint_type_str);
 					return;
 				}
-				zend_hash_add_new_ptr(ht, generic_parameter->name, bound_type_ptr);
+				/* Change key from index to generic parameter name */
+				/* Deep type copy */
+				zend_type bound_type = *bound_type_ptr;
+				zend_type_copy_ctor(&bound_type, true, false);
+				zend_hash_add_mem(bound_types, generic_parameter->name,
+					&bound_type, sizeof(bound_type));
+				//zend_hash_index_del(bound_types, i);
 			}
 		}
 	}
+	interface_bind_generic_types_for_interfaces(ce, iface);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
 		do_inherit_iface_constant(key, c, ce, iface);
 	} ZEND_HASH_FOREACH_END();
@@ -2319,11 +2382,6 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	do_implement_interface(ce, iface);
 	if (iface->num_interfaces) {
 		zend_do_inherit_interfaces(ce, iface);
-	}
-	if (CG(bound_generic_types)) {
-		zend_hash_destroy(CG(bound_generic_types));
-		efree(CG(bound_generic_types));
-		CG(bound_generic_types) = NULL;
 	}
 }
 /* }}} */
