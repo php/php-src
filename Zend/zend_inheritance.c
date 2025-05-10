@@ -428,16 +428,16 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 
 /* Check whether any type in the fe_type intersection type is a subtype of the proto class. */
 static inheritance_status zend_is_intersection_subtype_of_class(
-		zend_class_entry *fe_scope, const zend_type fe_type,
+		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
 		zend_class_entry *proto_scope, zend_string *proto_class_name, zend_class_entry *proto_ce)
 {
-	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(fe_type));
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(*fe_type_ptr));
 	bool have_unresolved = false;
 	const zend_type *single_type;
 
 	/* Traverse the list of child types and check that at least one is
 	 * a subtype of the parent type being checked */
-	ZEND_TYPE_FOREACH(fe_type, single_type) {
+	ZEND_TYPE_FOREACH(*fe_type_ptr, single_type) {
 		zend_class_entry *fe_ce;
 		zend_string *fe_class_name = NULL;
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
@@ -473,7 +473,9 @@ static inheritance_status zend_is_intersection_subtype_of_class(
 /* Check whether a single class proto type is a subtype of a potentially complex fe_type. */
 static inheritance_status zend_is_class_subtype_of_type(
 		zend_class_entry *fe_scope, zend_string *fe_class_name,
-		zend_class_entry *proto_scope, const zend_type proto_type) {
+		zend_class_entry *proto_scope, const zend_type *proto_type_ptr
+) {
+	const zend_type proto_type = *proto_type_ptr;
 	zend_class_entry *fe_ce = NULL;
 	bool have_unresolved = 0;
 
@@ -521,7 +523,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 	ZEND_TYPE_FOREACH(proto_type, single_type) {
 		if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
 			inheritance_status subtype_status = zend_is_class_subtype_of_type(
-				fe_scope, fe_class_name, proto_scope, *single_type);
+				fe_scope, fe_class_name, proto_scope, single_type);
 
 			switch (subtype_status) {
 				case INHERITANCE_ERROR:
@@ -606,9 +608,11 @@ static void register_unresolved_classes(zend_class_entry *scope, const zend_type
 }
 
 static inheritance_status zend_is_intersection_subtype_of_type(
-	zend_class_entry *fe_scope, const zend_type fe_type,
-	zend_class_entry *proto_scope, const zend_type proto_type)
-{
+		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
+		zend_class_entry *proto_scope, const zend_type *proto_type_ptr
+) {
+	const zend_type fe_type = *fe_type_ptr;
+	const zend_type proto_type = *proto_type_ptr;
 	bool have_unresolved = false;
 	const zend_type *single_type;
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
@@ -644,7 +648,7 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 
 		if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
 			status = zend_is_intersection_subtype_of_type(
-				fe_scope, fe_type, proto_scope, *single_type);
+				fe_scope, fe_type_ptr, proto_scope, single_type);
 		} else {
 			zend_string *proto_class_name = get_class_from_type(proto_scope, *single_type);
 			if (!proto_class_name) {
@@ -653,7 +657,7 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 
 			zend_class_entry *proto_ce = NULL;
 			status = zend_is_intersection_subtype_of_class(
-				fe_scope, fe_type, proto_scope, proto_class_name, proto_ce);
+				fe_scope, fe_type_ptr, proto_scope, proto_class_name, proto_ce);
 		}
 
 		if (status == early_exit_status) {
@@ -672,9 +676,43 @@ static inheritance_status zend_is_intersection_subtype_of_type(
 }
 
 ZEND_API inheritance_status zend_perform_covariant_type_check(
-		zend_class_entry *fe_scope, const zend_type fe_type,
-		zend_class_entry *proto_scope, const zend_type proto_type)
+		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
+		zend_class_entry *proto_scope, const zend_type *proto_type_ptr);
+
+static inheritance_status zend_is_type_subtype_of_generic_type(
+	zend_class_entry *concrete_scope,
+	const zend_type *concrete_type_ptr,
+	zend_class_entry *generic_type_scope,
+	const zend_type *generic_type_ptr
+) {
+	ZEND_ASSERT(concrete_scope->bound_types);
+	const zend_type generic_type = *generic_type_ptr;
+	const HashTable *bound_generic_types = zend_hash_find_ptr_lc(concrete_scope->bound_types, generic_type_scope->name);
+
+	ZEND_ASSERT(bound_generic_types && "Have generic type");
+	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(generic_type));
+
+	const zend_type *bound_type_ptr = zend_hash_find_ptr(bound_generic_types, ZEND_TYPE_NAME(generic_type));
+	ZEND_ASSERT(bound_type_ptr != NULL);
+	/* Generic type must be invariant */
+	const inheritance_status sub_type_status = zend_perform_covariant_type_check(
+		concrete_scope, concrete_type_ptr, generic_type_scope, bound_type_ptr);
+	const inheritance_status super_type_status = zend_perform_covariant_type_check(
+		generic_type_scope, bound_type_ptr, concrete_scope, concrete_type_ptr);
+
+	if (sub_type_status != super_type_status) {
+		return INHERITANCE_ERROR;
+	} else {
+		return sub_type_status;
+	}
+}
+
+ZEND_API inheritance_status zend_perform_covariant_type_check(
+		zend_class_entry *fe_scope, const zend_type *fe_type_ptr,
+		zend_class_entry *proto_scope, const zend_type *proto_type_ptr)
 {
+	const zend_type fe_type = *fe_type_ptr;
+	const zend_type proto_type = *proto_type_ptr;
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type) && ZEND_TYPE_IS_SET(proto_type));
 
 	/* Apart from void, everything is trivially covariant to the mixed type.
@@ -682,6 +720,17 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 	if (ZEND_TYPE_PURE_MASK(proto_type) == MAY_BE_ANY &&
 			!ZEND_TYPE_CONTAINS_CODE(fe_type, IS_VOID)) {
 		return INHERITANCE_SUCCESS;
+	}
+
+	/* If we check for concrete return type */
+	if (ZEND_TYPE_IS_ASSOCIATED(proto_type)) {
+		return zend_is_type_subtype_of_generic_type(
+			fe_scope, fe_type_ptr, proto_scope, proto_type_ptr);
+	}
+	/* If we check for concrete parameter type */
+	if (ZEND_TYPE_IS_ASSOCIATED(fe_type)) {
+		return zend_is_type_subtype_of_generic_type(
+			proto_scope, proto_type_ptr, fe_scope, fe_type_ptr);
 	}
 
 	/* Builtin types may be removed, but not added */
@@ -713,7 +762,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 		early_exit_status =
 			ZEND_TYPE_IS_INTERSECTION(proto_type) ? INHERITANCE_ERROR : INHERITANCE_SUCCESS;
 		inheritance_status status = zend_is_intersection_subtype_of_type(
-			fe_scope, fe_type, proto_scope, proto_type);
+			fe_scope, fe_type_ptr, proto_scope, proto_type_ptr);
 
 		if (status == early_exit_status) {
 			return status;
@@ -733,7 +782,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 			/* Union has an intersection type as it's member */
 			if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
 				status = zend_is_intersection_subtype_of_type(
-					fe_scope, *single_type, proto_scope, proto_type);
+					fe_scope, single_type, proto_scope, proto_type_ptr);
 			} else {
 				zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
 				if (!fe_class_name) {
@@ -741,7 +790,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 				}
 
 				status = zend_is_class_subtype_of_type(
-					fe_scope, fe_class_name, proto_scope, proto_type);
+					fe_scope, fe_class_name, proto_scope, proto_type_ptr);
 			}
 
 			if (status == early_exit_status) {
@@ -763,7 +812,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 }
 
 static inheritance_status zend_do_perform_arg_type_hint_check(
-		zend_class_entry *fe_scope, zend_arg_info *fe_arg_info,
+		zend_class_entry *fe_scope, const zend_arg_info *fe_arg_info,
 		zend_class_entry *proto_scope, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {
@@ -779,7 +828,7 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 	/* Contravariant type check is performed as a covariant type check with swapped
 	 * argument order. */
 	return zend_perform_covariant_type_check(
-		proto_scope, proto_arg_info->type, fe_scope, fe_arg_info->type);
+		proto_scope, &proto_arg_info->type, fe_scope, &fe_arg_info->type);
 }
 /* }}} */
 
@@ -881,7 +930,7 @@ static inheritance_status zend_do_perform_implementation_check(
 		}
 
 		local_status = zend_perform_covariant_type_check(
-			fe_scope, fe->common.arg_info[-1].type, proto_scope, proto->common.arg_info[-1].type);
+			fe_scope, &fe->common.arg_info[-1].type, proto_scope, &proto->common.arg_info[-1].type);
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
 			if (local_status == INHERITANCE_ERROR
@@ -1297,10 +1346,10 @@ static inheritance_status full_property_types_compatible(
 	/* Perform a covariant type check in both directions to determined invariance. */
 	inheritance_status status1 = variance == PROP_CONTRAVARIANT ? INHERITANCE_SUCCESS :
 		zend_perform_covariant_type_check(
-			child_info->ce, child_info->type, parent_info->ce, parent_info->type);
+			child_info->ce, &child_info->type, parent_info->ce, &parent_info->type);
 	inheritance_status status2 = variance == PROP_COVARIANT ? INHERITANCE_SUCCESS :
 		zend_perform_covariant_type_check(
-			parent_info->ce, parent_info->type, child_info->ce, child_info->type);
+			parent_info->ce, &parent_info->type, child_info->ce, &child_info->type);
 	if (status1 == INHERITANCE_SUCCESS && status2 == INHERITANCE_SUCCESS) {
 		return INHERITANCE_SUCCESS;
 	}
@@ -1357,7 +1406,7 @@ static inheritance_status verify_property_type_compatibility(
 		 && (!child_info->hooks || !child_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
 			zend_type set_type = parent_info->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0].type;
 			inheritance_status result = zend_perform_covariant_type_check(
-				parent_info->ce, set_type, child_info->ce, child_info->type);
+				parent_info->ce, &set_type, child_info->ce, &child_info->type);
 			if ((result == INHERITANCE_ERROR && throw_on_error) || (result == INHERITANCE_UNRESOLVED && throw_on_unresolved)) {
 				emit_set_hook_type_error(child_info, parent_info);
 			}
@@ -1591,6 +1640,57 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
+// TODO Merge with the one in zend_compile
+static void zend_types_ht_dtor(zval *ptr) {
+	zend_type *type = Z_PTR_P(ptr);
+	// TODO Figure out persistency?
+	zend_type_release(*type, false);
+	efree(type);
+}
+
+static void interface_bind_generic_types_for_interfaces(zend_class_entry *ce, const zend_class_entry *iface) {
+	zend_string *iface_lc_name = zend_string_tolower(iface->name);
+	const HashTable *ce_bound_types = ce->bound_types ? zend_hash_find_ptr(ce->bound_types, iface_lc_name) : NULL;
+	for (uint32_t i = 0; i < iface->num_interfaces; i++) {
+		zend_class_entry *entry = iface->interfaces[i];
+		/* Bind generic types */
+		/* We need to propagate the bound generic parameters to the inherited interfaces */
+		if (entry->num_generic_parameters == 0) {
+			continue;
+		}
+		zend_string *inherited_iface_lc_name = zend_string_tolower(entry->name);
+		const HashTable *interface_bound_types = zend_hash_find_ptr(iface->bound_types, inherited_iface_lc_name);
+		HashTable *ce_bound_types_to_inherited_iface = zend_hash_find_ptr(ce->bound_types, inherited_iface_lc_name);
+		ZEND_ASSERT(interface_bound_types != NULL && "This must exist at this point");
+		if (ce_bound_types_to_inherited_iface == NULL) {
+			ALLOC_HASHTABLE(ce_bound_types_to_inherited_iface);
+			zend_hash_init(ce_bound_types_to_inherited_iface, entry->num_generic_parameters, NULL, zend_types_ht_dtor, false /* todo depend on internal or not */);
+			zend_hash_add_new_ptr(ce->bound_types, inherited_iface_lc_name, ce_bound_types_to_inherited_iface);
+		}
+		for (
+			uint32_t inherited_iface_generic_param_index = 0;
+			inherited_iface_generic_param_index < entry->num_generic_parameters;
+			inherited_iface_generic_param_index++
+		) {
+			const zend_generic_parameter *inherited_generic_parameter = &entry->generic_parameters[inherited_iface_generic_param_index];
+			const zend_type *iface_bound_type_ptr = zend_hash_index_find_ptr(interface_bound_types, inherited_iface_generic_param_index);
+			ZEND_ASSERT(iface_bound_type_ptr != NULL);
+			zend_type bound_type;
+			if (ZEND_TYPE_IS_ASSOCIATED(*iface_bound_type_ptr)) {
+				memcpy(&bound_type, zend_hash_find_ptr(ce_bound_types, ZEND_TYPE_NAME(*iface_bound_type_ptr)), sizeof(zend_type));
+			} else {
+				bound_type = *iface_bound_type_ptr;
+			}
+			/* Deep type copy */
+			zend_type_copy_ctor(&bound_type, true, false);
+			zend_hash_add_mem(ce_bound_types_to_inherited_iface, inherited_generic_parameter->name,
+				&bound_type, sizeof(bound_type));
+		}
+		zend_string_release_ex(inherited_iface_lc_name, false);
+	}
+	zend_string_release_ex(iface_lc_name, false);
+}
+
 static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_entry *iface) /* {{{ */
 {
 	/* expects interface to be contained in ce's interface list already */
@@ -1609,6 +1709,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 		zend_class_entry *entry = iface->interfaces[if_num];
 		for (i = 0; i < ce_num; i++) {
 			if (ce->interfaces[i] == entry) {
+				// TODO Check bound generic types match? Or is this done before?
 				break;
 			}
 		}
@@ -1645,7 +1746,7 @@ static inheritance_status class_constant_types_compatible(const zend_class_const
 		return INHERITANCE_ERROR;
 	}
 
-	return zend_perform_covariant_type_check(child->ce, child->type, parent->ce, parent->type);
+	return zend_perform_covariant_type_check(child->ce, &child->type, parent->ce, &parent->type);
 }
 
 static bool do_inherit_constant_check(
@@ -1791,7 +1892,7 @@ ZEND_API inheritance_status zend_verify_property_hook_variance(const zend_proper
 {
 	ZEND_ASSERT(prop_info->hooks && prop_info->hooks[ZEND_PROPERTY_HOOK_SET] == func);
 
-	zend_arg_info *value_arg_info = &func->op_array.arg_info[0];
+	const zend_arg_info *value_arg_info = &func->op_array.arg_info[0];
 	if (!ZEND_TYPE_IS_SET(value_arg_info->type)) {
 		return INHERITANCE_SUCCESS;
 	}
@@ -1801,7 +1902,7 @@ ZEND_API inheritance_status zend_verify_property_hook_variance(const zend_proper
 	}
 
 	zend_class_entry *ce = prop_info->ce;
-	return zend_perform_covariant_type_check(ce, prop_info->type, ce, value_arg_info->type);
+	return zend_perform_covariant_type_check(ce, &prop_info->type, ce, &value_arg_info->type);
 }
 
 #ifdef ZEND_OPCACHE_SHM_REATTACHMENT
@@ -2168,6 +2269,99 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 			ZEND_INHERITANCE_RESET_CHILD_OVERRIDE;
 	}
 
+	if (iface->num_generic_parameters > 0) {
+		if (UNEXPECTED(ce->bound_types == NULL)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot implement %s as it has generic parameters which are not specified",
+				ZSTR_VAL(iface->name)
+			);
+		}
+		HashTable *bound_types = zend_hash_find_ptr_lc(ce->bound_types, iface->name);
+		if (UNEXPECTED(bound_types == NULL)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot implement %s as it has generic parameters which are not specified",
+				ZSTR_VAL(iface->name)
+			);
+		}
+		const uint32_t num_bound_types = zend_hash_num_elements(bound_types);
+		if (UNEXPECTED(num_bound_types != iface->num_generic_parameters)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot implement %s as the number of generic arguments specified (%" PRIu32 ") does not match the number of generic parameters declared on the interface (%" PRIu32 ")",
+				ZSTR_VAL(iface->name),
+				num_bound_types,
+				iface->num_generic_parameters
+			);
+		}
+		for (uint32_t i = 0; i < num_bound_types; i++) {
+			const zend_generic_parameter *generic_parameter = &iface->generic_parameters[i];
+			const zend_type* generic_constraint = &generic_parameter->constraint;
+			zend_type *bound_type_ptr = zend_hash_index_find_ptr(bound_types, i);
+			ZEND_ASSERT(bound_type_ptr != NULL);
+
+			/* We are currently extending another interface */
+			if (ZEND_TYPE_IS_ASSOCIATED(*bound_type_ptr)) {
+				ZEND_ASSERT(ce->ce_flags & ZEND_ACC_INTERFACE);
+				ZEND_ASSERT(ce->num_generic_parameters > 0);
+				ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*bound_type_ptr));
+				const zend_string *current_generic_param_name = ZEND_TYPE_NAME(*bound_type_ptr);
+				for (uint32_t j = 0; j < ce->num_generic_parameters; j++) {
+					const zend_generic_parameter *current_ce_generic_parameter = &ce->generic_parameters[j];
+					if (!zend_string_equals(current_ce_generic_parameter->name, current_generic_param_name)) {
+						continue;
+					}
+					const zend_type *current_ce_generic_type_constraint = &current_ce_generic_parameter->constraint;
+					ZEND_ASSERT(current_ce_generic_type_constraint != NULL);
+					if (
+						zend_perform_covariant_type_check(
+							ce,
+							current_ce_generic_type_constraint,
+							iface,
+							generic_constraint
+						) != INHERITANCE_SUCCESS
+					) {
+						zend_string *current_ce_constraint_type_str = zend_type_to_string(*current_ce_generic_type_constraint);
+						zend_string *constraint_type_str = zend_type_to_string(generic_parameter->constraint);
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"Constraint type %s of generic type %s of interface %s is not a subtype of the constraint type %s of generic type %s of interface %s",
+							ZSTR_VAL(current_ce_constraint_type_str),
+							ZSTR_VAL(current_ce_generic_parameter->name),
+							ZSTR_VAL(ce->name),
+							ZSTR_VAL(constraint_type_str),
+							ZSTR_VAL(generic_parameter->name),
+							ZSTR_VAL(iface->name)
+						);
+						zend_string_release(current_ce_constraint_type_str);
+						zend_string_release(constraint_type_str);
+						return;
+					}
+					break;
+				}
+			} else {
+				if (zend_perform_covariant_type_check(ce, bound_type_ptr, iface, generic_constraint) != INHERITANCE_SUCCESS) {
+					zend_string *bound_type_str = zend_type_to_string(*bound_type_ptr);
+					zend_string *constraint_type_str = zend_type_to_string(generic_parameter->constraint);
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Bound type %s is not a subtype of the constraint type %s of generic type %s of interface %s",
+						ZSTR_VAL(bound_type_str),
+						ZSTR_VAL(constraint_type_str),
+						ZSTR_VAL(generic_parameter->name),
+						ZSTR_VAL(iface->name)
+					);
+					zend_string_release(bound_type_str);
+					zend_string_release(constraint_type_str);
+					return;
+				}
+				/* Change key from index to generic parameter name */
+				/* Deep type copy */
+				zend_type bound_type = *bound_type_ptr;
+				zend_type_copy_ctor(&bound_type, true, false);
+				zend_hash_add_mem(bound_types, generic_parameter->name,
+					&bound_type, sizeof(bound_type));
+				//zend_hash_index_del(bound_types, i);
+			}
+		}
+	}
+	interface_bind_generic_types_for_interfaces(ce, iface);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
 		do_inherit_iface_constant(key, c, ce, iface);
 	} ZEND_HASH_FOREACH_END();
@@ -2777,8 +2971,8 @@ static bool do_trait_constant_check(
 		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
 		return false;
 	} else if (ZEND_TYPE_IS_SET(trait_constant->type)) {
-		inheritance_status status1 = zend_perform_covariant_type_check(ce, existing_constant->type, traits[current_trait], trait_constant->type);
-		inheritance_status status2 = zend_perform_covariant_type_check(traits[current_trait], trait_constant->type, ce, existing_constant->type);
+		inheritance_status status1 = zend_perform_covariant_type_check(ce, &existing_constant->type, traits[current_trait], &trait_constant->type);
+		inheritance_status status2 = zend_perform_covariant_type_check(traits[current_trait], &trait_constant->type, ce, &existing_constant->type);
 		if (status1 == INHERITANCE_ERROR || status2 == INHERITANCE_ERROR) {
 			emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
 			return false;

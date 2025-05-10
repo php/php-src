@@ -351,6 +351,18 @@ ZEND_API void destroy_zend_class(zval *zv)
 					zend_hash_release(ce->attributes);
 				}
 
+				if (ce->bound_types) {
+					zend_hash_release(ce->bound_types);
+				}
+				if (ce->num_generic_parameters > 0) {
+					for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
+						const zend_generic_parameter generic_param = ce->generic_parameters[generic_param_index];
+						zend_string_release_ex(generic_param.name, false);
+						zend_type_release(generic_param.constraint, false);
+					}
+					efree(ce->generic_parameters);
+				}
+
 				if (ce->num_interfaces > 0 && !(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 					uint32_t i;
 
@@ -526,6 +538,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->attributes) {
 				zend_hash_release(ce->attributes);
+			}
+			if (ce->bound_types) {
+				zend_hash_release(ce->bound_types);
+			}
+			if (ce->num_generic_parameters > 0) {
+				for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
+					const zend_generic_parameter generic_param = ce->generic_parameters[generic_param_index];
+					zend_string_release(generic_param.name);
+					zend_type_release(generic_param.constraint, true);
+				}
+				free(ce->generic_parameters);
 			}
 			free(ce);
 			break;
