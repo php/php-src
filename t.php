@@ -1,6 +1,6 @@
 <?php
 
-class RandomAssSerializableContaier!🥖T, K : Serializer!🥖T, K, A!🥥!🥥 {
+class RandomAssSerializableContaier<T, K : Serialize<T, K, A>> {
 
     private array $content = [];
 

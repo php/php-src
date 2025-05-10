@@ -1,8 +1,6 @@
 <?php
 
-function
-
-class GenericTestClass<T> {
+class GenericTestClass<T: Serializable> {
     // T can be used as type alias inside of 'GenericTestClass'
     public function __construct(
         private T $property

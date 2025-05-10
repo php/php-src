@@ -1,5 +1,10 @@
 <?php
-$tokens = token_get_all('<?php
-function noOp(): void {}');
+$classTokens = token_get_all(
+'<?php
+class Test<T: Serializable, K> {
+    public Serializable<T> $test;
+    function __construct<T>() {}
+}
+');
 
-var_export($tokens);
+var_export($classTokens);
