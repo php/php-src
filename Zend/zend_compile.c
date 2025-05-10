@@ -465,7 +465,7 @@ void init_compiler(void) /* {{{ */
 	CG(delayed_autoloads) = NULL;
 	CG(unlinked_uses) = NULL;
 	CG(current_linking_class) = NULL;
-	CG(bound_associated_types) = NULL;
+	CG(bound_generic_types) = NULL;
 }
 /* }}} */
 
@@ -495,10 +495,10 @@ void shutdown_compiler(void) /* {{{ */
 	}
 	CG(current_linking_class) = NULL;
 	/* This can happen during a fatal error */
-	if (CG(bound_associated_types)) {
-		zend_hash_destroy(CG(bound_associated_types));
-		FREE_HASHTABLE(CG(bound_associated_types));
-		CG(bound_associated_types) = NULL;
+	if (CG(bound_generic_types)) {
+		zend_hash_destroy(CG(bound_generic_types));
+		FREE_HASHTABLE(CG(bound_generic_types));
+		CG(bound_generic_types) = NULL;
 	}
 }
 /* }}} */
@@ -9180,9 +9180,18 @@ static void zend_compile_generic_params(zend_ast *params_ast)
 		}
 
 		if (param_ast->child[1]) {
-			// TODO Need to free this
+			// TODO Need to free this?
 			constraint_type = zend_compile_typename(param_ast->child[1]);
-			// TODO Validate that void, static, never are not used in the constraint?
+			if (ZEND_TYPE_IS_ASSOCIATED(constraint_type)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use generic parameter %s to constrain generic parameter %s",
+					ZSTR_VAL(ZEND_TYPE_NAME(constraint_type)), ZSTR_VAL(name));
+			}
+			if (ZEND_TYPE_FULL_MASK(constraint_type) & (MAY_BE_STATIC|MAY_BE_VOID|MAY_BE_NEVER)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use static, void, or never to constrain generic parameter %s",
+					ZSTR_VAL(name));
+			}
 		}
 
 		generic_params[i].name = zend_string_copy(name);
