@@ -21,4 +21,5 @@ class RandomAssSerializableContaier<T, K : Serialize<T, K, A>> {
         );
     }
 }
+
 echo "hi\n";
