@@ -10,131 +10,86 @@ intl
 echo 'EN_US' .PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
-echo $formatter->format([1,2,3]);
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_NARROW);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_WIDE);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_NARROW);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_WIDE);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('EN_US', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_NARROW);
-echo $formatter->format([1,2,3]);
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
-echo PHP_EOL . 'GB' . PHP_EOL;
-
-$formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-echo PHP_EOL;
+echo 'GB' . PHP_EOL;
 
 $formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
-echo PHP_EOL;
+$formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_SHORT);
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_NARROW);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_WIDE);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_NARROW);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_WIDE);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('en_GB', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_NARROW);
-echo $formatter->format([1,2,3]);
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
-echo PHP_EOL . 'FR' . PHP_EOL;
-
-$formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-echo PHP_EOL;
+echo 'FR' . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
-echo PHP_EOL;
+$formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_SHORT);
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_NARROW);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_WIDE);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_OR, IntlListFormatter::WIDTH_NARROW);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_WIDE);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_SHORT);
-echo $formatter->format([1,2,3]);
-
-echo PHP_EOL;
+echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_NARROW);
 echo $formatter->format([1,2,3]);

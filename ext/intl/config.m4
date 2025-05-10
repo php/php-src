@@ -40,7 +40,6 @@ if test "$PHP_INTL" != "no"; then
       locale/locale_methods.c
       locale/locale.c
       listformatter/listformatter_class.c
-      listformatter/listformatter_data.c
       msgformat/msgformat_attr.c
       msgformat/msgformat_class.c
       msgformat/msgformat_data.c

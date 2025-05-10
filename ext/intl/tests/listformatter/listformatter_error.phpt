@@ -8,18 +8,14 @@ intl
 try {
     $formatter = new IntlListFormatter('f', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
 } catch(ValueError $exception) {
-    echo $exception->getMessage();
+    echo $exception->getMessage() . PHP_EOL;
 }
-
-echo PHP_EOL;
 
 try {
     $formatter = new IntlListFormatter('ro_thisiswaytooooooooooooooooooooooooooooooooooooooooooooolongtobevaliditneedstobeatleast157characterstofailthevalidationinthelistformattercodeimplementation', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
 } catch(ValueError $exception) {
-    echo $exception->getMessage();
+    echo $exception->getMessage() .  PHP_EOL;
 }
-
-echo PHP_EOL;
 
 $formatter = new IntlListFormatter('ro', IntlListFormatter::TYPE_AND, IntlListFormatter::WIDTH_WIDE);
 

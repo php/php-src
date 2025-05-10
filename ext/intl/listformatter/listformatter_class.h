@@ -20,7 +20,16 @@
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
-#include "listformatter_data.h"
+
+#include <unicode/ulistformatter.h>
+
+typedef struct {
+    // error handling
+    intl_error      error;
+
+    // formatter handling
+    UListFormatter*  ulistfmt;
+} listformatter_data;
 
 typedef struct {
     listformatter_data  lf_data;
@@ -32,22 +41,10 @@ static inline ListFormatter_object *php_intl_listformatter_fetch_object(zend_obj
 }
 #define Z_INTL_LISTFORMATTER_P(zv) php_intl_listformatter_fetch_object(Z_OBJ_P(zv))
 
-#define LISTFORMATTER_ERROR(lfo)		(lfo)->lf_data.error
-#define LISTFORMATTER_ERROR_P(lfo)	&(LISTFORMATTER_ERROR(lfo))
+#define LISTFORMATTER_ERROR(lfo) (lfo)->lf_data.error
+#define LISTFORMATTER_ERROR_P(lfo) &(LISTFORMATTER_ERROR(lfo))
 
-#define LISTFORMATTER_ERROR_CODE(lfo)	INTL_ERROR_CODE(LISTFORMATTER_ERROR(lfo))
-#define LISTFORMATTER_ERROR_CODE_P(lfo)	&(INTL_ERROR_CODE(LISTFORMATTER_ERROR(lfo)))
-
-#define LISTFORMATTER_METHOD_INIT_VARS		        INTL_METHOD_INIT_VARS(ListFormatter, lfo)
-#define LISTFORMATTER_OBJECT(lfo)                    (lfo)->lf_data.ulistfmt
-#define LISTFORMATTER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_LISTFORMATTER, lfo)
-#define LISTFORMATTER_METHOD_FETCH_OBJECT \
-	LISTFORMATTER_METHOD_FETCH_OBJECT_NO_CHECK; \
-	if (LISTFORMATTER_OBJECT(lfo) == NULL) \
-	{ \
-		zend_throw_error(NULL, "Found unconstructed ListFormatter"); \
-		RETURN_THROWS(); \
-	}
+#define LISTFORMATTER_OBJECT(lfo) (lfo)->lf_data.ulistfmt
 
 void listformatter_register_class( void );
 extern zend_class_entry *ListFormatter_ce_ptr;

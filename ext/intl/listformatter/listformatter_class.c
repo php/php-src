@@ -25,7 +25,13 @@ static zend_object_handlers listformatter_handlers;
 static void listformatter_free_obj(zend_object *object)
 {
     ListFormatter_object *obj = php_intl_listformatter_fetch_object(object);
-    listformatter_data_free(&obj->lf_data);
+
+    if( obj->lf_data.ulistfmt )
+        ulistfmt_close( obj->lf_data.ulistfmt );
+
+    obj->lf_data.ulistfmt = NULL;
+    intl_error_reset( &obj->lf_data.error );
+
     zend_object_std_dtor(&obj->zo);
 }
 /* }}} */
@@ -35,7 +41,10 @@ static zend_object *listformatter_create_object(zend_class_entry *class_type)
 {
     ListFormatter_object *obj;
     obj = zend_object_alloc(sizeof(ListFormatter_object), class_type);
-    listformatter_data_init(&obj->lf_data);
+
+    obj->lf_data.ulistfmt = NULL;
+    intl_error_reset( &obj->lf_data.error );
+
     zend_object_std_init(&obj->zo, class_type);
     object_properties_init(&obj->zo, class_type);
     obj->zo.handlers = &listformatter_handlers;
@@ -62,13 +71,13 @@ PHP_METHOD(IntlListFormatter, __construct)
         locale = (char *)intl_locale_get_default();
     }
 
-    if (strlen(uloc_getISO3Language(locale)) == 0) {
-        zend_argument_value_error(1, "\"%s\" is invalid", locale);
+    if (locale_len > INTL_MAX_LOCALE_LEN) {
+        zend_argument_value_error(1, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);
         RETURN_THROWS();
     }
 
-    if (locale_len > INTL_MAX_LOCALE_LEN) {
-        zend_argument_value_error(1, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);
+    if (strlen(uloc_getISO3Language(locale)) == 0) {
+        zend_argument_value_error(1, "\"%s\" is invalid", locale);
         RETURN_THROWS();
     }
 
@@ -145,6 +154,9 @@ PHP_METHOD(IntlListFormatter, format)
         
         intl_convert_utf8_to_utf16(&ustr, &ustr_len, ZSTR_VAL(str_val), ZSTR_LEN(str_val), &status);
         if (U_FAILURE(status)) {
+            for (uint32_t j = 0; j < i; j++) {
+                efree((void *)items[j]);
+            }
             efree(items);
             efree(itemLengths);
             zend_string_release(str_val);
@@ -198,7 +210,7 @@ PHP_METHOD(IntlListFormatter, format)
         RETURN_FALSE;
     }
 
-    RETURN_STR(ret);
+    RETURN_NEW_STR(ret);
 }
 /* }}} */
 
