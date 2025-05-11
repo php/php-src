@@ -745,6 +745,7 @@ AC_DEFUN([PHP_REQUIRE_CXX],[
     case "$CXX" in
       *clang++*)
     	PHP_ADD_LIBRARY(c++)
+    	PHP_ADD_LIBRARY(c++abi)
 	;;
       *)
     	PHP_ADD_LIBRARY(stdc++)
