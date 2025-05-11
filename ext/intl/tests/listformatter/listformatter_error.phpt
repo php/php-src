@@ -22,10 +22,17 @@ $formatter = new IntlListFormatter('ro', IntlListFormatter::TYPE_AND, IntlListFo
 try {
     echo $formatter->format([new stdClass()]);
 } catch(Error $error) {
-    echo $error->getMessage();
+    echo $error->getMessage() . PHP_EOL;
+}
+
+try {
+    echo $formatter->format([1, 2, new stdClass(), 4]);
+} catch(Error $error) {
+    echo $error->getMessage()  . PHP_EOL;
 }
 
 --EXPECT--
 IntlListFormatter::__construct(): Argument #1 ($locale) "f" is invalid
 IntlListFormatter::__construct(): Argument #1 ($locale) Locale string too long, should be no longer than 156 characters
+Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
