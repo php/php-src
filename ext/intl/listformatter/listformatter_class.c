@@ -153,20 +153,21 @@ PHP_METHOD(IntlListFormatter, format)
         UErrorCode status = U_ZERO_ERROR;
         
         intl_convert_utf8_to_utf16(&ustr, &ustr_len, ZSTR_VAL(str_val), ZSTR_LEN(str_val), &status);
+        zend_string_release(str_val);
+
         if (U_FAILURE(status)) {
+            // We can't use goto cleanup because items and itemLengths are incompletely allocated
             for (uint32_t j = 0; j < i; j++) {
                 efree((void *)items[j]);
             }
             efree(items);
             efree(itemLengths);
-            zend_string_release(str_val);
             intl_error_set(NULL, status, "Failed to convert string to UTF-16", 0);
             RETURN_FALSE;
         }
         
         items[i] = ustr;
         itemLengths[i] = ustr_len;
-        zend_string_release(str_val);
         i++;
     } ZEND_HASH_FOREACH_END();
 
@@ -178,7 +179,8 @@ PHP_METHOD(IntlListFormatter, format)
 
     if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
         intl_error_set(NULL, status, "Failed to format list", 0);
-        RETURN_FALSE;
+        RETVAL_FALSE;
+        goto cleanup;
     }
 
     // Allocate buffer and try again
@@ -186,19 +188,13 @@ PHP_METHOD(IntlListFormatter, format)
     result = (UChar *)emalloc((resultLength + 1) * sizeof(UChar));
     ulistfmt_format(LISTFORMATTER_OBJECT(obj), items, itemLengths, count, result, resultLength, &status);
 
-    // Clean up input strings
-    for (i = 0; i < count; i++) {
-        efree((void *)items[i]);
-    }
-    efree(items);
-    efree(itemLengths);
-
     if (U_FAILURE(status)) {
         if (result) {
             efree(result);
         }
         intl_error_set(NULL, status, "Failed to format list", 0);
-        RETURN_FALSE;
+        RETVAL_FALSE;
+        goto cleanup;
     }
 
     // Convert result back to UTF-8
@@ -207,10 +203,17 @@ PHP_METHOD(IntlListFormatter, format)
     
     if (!ret) {
         intl_error_set(NULL, status, "Failed to convert result to UTF-8", 0);
-        RETURN_FALSE;
+        RETVAL_FALSE;
+    } else {
+        RETVAL_NEW_STR(ret);
     }
 
-    RETURN_NEW_STR(ret);
+    cleanup:
+        for (i = 0; i < count; i++) {
+            efree((void *)items[i]);
+        }
+        efree(items);
+        efree(itemLengths);
 }
 /* }}} */
 
