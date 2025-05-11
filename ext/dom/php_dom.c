@@ -33,8 +33,8 @@
 #include "dom_properties.h"
 #include "token_list.h"
 #include "zend_interfaces.h"
-#include "lexbor/lexbor/core/types.h"
-#include "lexbor/lexbor/core/lexbor.h"
+#include <lexbor/core/types.h>
+#include <lexbor/core/lexbor.h>
 
 #include "ext/standard/info.h"
 

@@ -195,6 +195,13 @@ PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net> (1999 - 2002)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           lexbor
+PRIMARY MAINTAINER:  Niels Dossche <nielsdos@php.net> (2023 - 2025)
+                     Mate Kocsis <kocsismate@php.net> (2025 - 2025)
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.0
+-------------------------------------------------------------------------------
 EXTENSION:           libxml
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2003 - 2009)
                      Christian Stocker <chregu@php.net> (2004 - 2011)
