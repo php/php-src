@@ -465,7 +465,6 @@ void init_compiler(void) /* {{{ */
 	CG(delayed_autoloads) = NULL;
 	CG(unlinked_uses) = NULL;
 	CG(current_linking_class) = NULL;
-	CG(bound_generic_types) = NULL;
 }
 /* }}} */
 
@@ -494,12 +493,6 @@ void shutdown_compiler(void) /* {{{ */
 		CG(unlinked_uses) = NULL;
 	}
 	CG(current_linking_class) = NULL;
-	/* This can happen during a fatal error */
-	if (CG(bound_generic_types)) {
-		zend_hash_destroy(CG(bound_generic_types));
-		FREE_HASHTABLE(CG(bound_generic_types));
-		CG(bound_generic_types) = NULL;
-	}
 }
 /* }}} */
 
