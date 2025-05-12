@@ -732,7 +732,6 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 
 	compiler_globals->script_encoding_list = NULL;
 	compiler_globals->current_linking_class = NULL;
-	compiler_globals->bound_associated_types = NULL;
 
 	/* Map region is going to be created and resized at run-time. */
 	compiler_globals->map_ptr_real_base = NULL;
