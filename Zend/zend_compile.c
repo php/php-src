@@ -1778,13 +1778,14 @@ static zend_string *zend_resolve_const_class_name_reference(zend_ast *ast, const
 
 static zend_string *zend_resolve_const_class_name_reference_with_generics(zend_ast *ast, const char *type)
 {
-	zend_string *class_name = zend_ast_get_str(ast->child[0]);
-	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type_ast(ast)) {
+	zend_ast *name_ast = ast->child[0];
+	zend_string *class_name = zend_ast_get_str(name_ast);
+	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type_ast(name_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot use \"%s\" as %s, as it is reserved",
 			ZSTR_VAL(class_name), type);
 	}
-	return zend_resolve_class_name(class_name, ast->attr);
+	return zend_resolve_class_name(class_name, name_ast->attr);
 }
 
 static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
