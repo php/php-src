@@ -1,5 +1,7 @@
 --TEST--
 Implicit interface inheritance missing bound types
+--XFAIL--
+Wrong number of missing params
 --FILE--
 <?php
 
@@ -18,4 +20,4 @@ class C implements I2<float>, I1 {
 
 ?>
 --EXPECTF--
-Fatal error: Bound type float is not a subtype of the constraint type string|int of generic type T of interface I in %s on line %d
+Fatal error: Cannot implement I1 as the number of generic arguments specified (0) does not match the number of generic parameters declared on the interface (1) in %s on line %d

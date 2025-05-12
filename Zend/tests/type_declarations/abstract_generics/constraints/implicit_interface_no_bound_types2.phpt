@@ -1,5 +1,5 @@
 --TEST--
-Implicit interface inheritance with different bound types
+Implicit interface inheritance missing bound types 2
 --FILE--
 <?php
 
@@ -11,11 +11,11 @@ interface I2<T> extends I1<T> {
     public function bar(int $o, T $param): T;
 }
 
-class C implements I2<float>, I1<string> {
+class C implements I1, I2<float> {
     public function foo(float $param): float {}
     public function bar(int $o, float $param): float {}
 }
 
 ?>
 --EXPECTF--
-Fatal error: Bound types for implicitly and explicitly implemented interfaces must match in %s on line %d
+Fatal error: Cannot implement I1 as it has generic parameters which are not specified in %s on line %d
