@@ -2210,27 +2210,27 @@ ZEND_ATTRIBUTE_NONNULL static void bind_generic_types_for_inherited_interfaces(z
 	zend_string *iface_lc_name = zend_string_tolower(iface->name);
 	const HashTable *ce_bound_types = ce->bound_types ? zend_hash_find_ptr(ce->bound_types, iface_lc_name) : NULL;
 	for (uint32_t i = 0; i < iface->num_interfaces; i++) {
-		zend_class_entry *entry = iface->interfaces[i];
+		const zend_class_entry *inherited_iface = iface->interfaces[i];
 		/* Bind generic types */
 		/* We need to propagate the bound generic parameters to the inherited interfaces */
-		if (entry->num_generic_parameters == 0) {
+		if (inherited_iface->num_generic_parameters == 0) {
 			continue;
 		}
-		zend_string *inherited_iface_lc_name = zend_string_tolower(entry->name);
+		zend_string *inherited_iface_lc_name = zend_string_tolower(inherited_iface->name);
 		const HashTable *interface_bound_types = zend_hash_find_ptr(iface->bound_types, inherited_iface_lc_name);
 		HashTable *ce_bound_types_to_inherited_iface = zend_hash_find_ptr(ce->bound_types, inherited_iface_lc_name);
 		ZEND_ASSERT(interface_bound_types != NULL && "This must exist at this point");
 		if (ce_bound_types_to_inherited_iface == NULL) {
 			ALLOC_HASHTABLE(ce_bound_types_to_inherited_iface);
-			zend_hash_init(ce_bound_types_to_inherited_iface, entry->num_generic_parameters, NULL, zend_types_ht_dtor, false /* todo depend on internal or not */);
+			zend_hash_init(ce_bound_types_to_inherited_iface, inherited_iface->num_generic_parameters, NULL, zend_types_ht_dtor, false /* todo depend on internal or not */);
 			zend_hash_add_new_ptr(ce->bound_types, inherited_iface_lc_name, ce_bound_types_to_inherited_iface);
 		}
 		for (
 			uint32_t inherited_iface_generic_param_index = 0;
-			inherited_iface_generic_param_index < entry->num_generic_parameters;
+			inherited_iface_generic_param_index < inherited_iface->num_generic_parameters;
 			inherited_iface_generic_param_index++
 		) {
-			const zend_generic_parameter *inherited_generic_parameter = &entry->generic_parameters[inherited_iface_generic_param_index];
+			const zend_generic_parameter *inherited_generic_parameter = &inherited_iface->generic_parameters[inherited_iface_generic_param_index];
 			const zend_type *iface_bound_type_ptr = zend_hash_index_find_ptr(interface_bound_types, inherited_iface_generic_param_index);
 			ZEND_ASSERT(iface_bound_type_ptr != NULL);
 			zend_type bound_type;
