@@ -185,7 +185,7 @@ PHP_METHOD(IntlListFormatter, format)
 
     // Allocate buffer and try again
     status = U_ZERO_ERROR;
-    result = (UChar *)emalloc((resultLength + 1) * sizeof(UChar));
+    result = (UChar *)safe_emalloc(resultLength + 1, sizeof(UChar), 0);
     ulistfmt_format(LISTFORMATTER_OBJECT(obj), items, itemLengths, count, result, resultLength, &status);
 
     if (U_FAILURE(status)) {
