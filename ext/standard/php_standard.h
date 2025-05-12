@@ -30,7 +30,6 @@
 #include "php_filestat.h"
 #include "php_browscap.h"
 #include "pack.h"
-#include "datetime.h"
 #include "url.h"
 #include "pageinfo.h"
 #include "fsock.h"
