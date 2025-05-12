@@ -1,5 +1,5 @@
 --TEST--
-Abstract generic type behaviour in extended interface
+Abstract generic type behaviour in extended interface violates type constraint
 --FILE--
 <?php
 
