@@ -227,7 +227,17 @@ static zend_string *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const zend_string 
 static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	char *quoted;
-	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
+
+	if (UNEXPECTED(ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2)) {
+		if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) {
+			zend_throw_exception_ex(
+				php_pdo_get_exception(), 0,
+				"SQLite PDO::quote: string is too long to quote");
+		} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
+			php_error_docref(
+				NULL, E_WARNING,
+				"SQLite PDO::quote: string is too long to quote");
+		}
 		return NULL;
 	}
 
