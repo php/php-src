@@ -22,7 +22,7 @@ try{
 }
 ?>
 --EXPECTF--
-Warning: PDO::quote(): SQLite PDO::quote: string is too long to quote in %s on line %d
+Warning: PDO::quote(): string is too long to quote in %s on line %d
 bool(false)
 
 Fatal error: Uncaught PDOException: SQLite PDO::quote: string is too long to quote in %s:%d

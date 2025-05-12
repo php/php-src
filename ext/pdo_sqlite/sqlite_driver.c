@@ -236,7 +236,7 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 		} else if (dbh->error_mode == PDO_ERRMODE_WARNING) {
 			php_error_docref(
 				NULL, E_WARNING,
-				"SQLite PDO::quote: string is too long to quote");
+				"string is too long to quote");
 		}
 		return NULL;
 	}
