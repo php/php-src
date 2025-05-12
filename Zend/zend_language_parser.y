@@ -279,7 +279,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> isset_variable type return_type type_expr type_without_static
 %type <ast> identifier type_expr_without_static union_type_without_static_element union_type_without_static intersection_type_without_static
 %type <ast> inline_function union_type_element union_type intersection_type
-%type <ast> attributed_statement attributed_class_statement attributed_parameter
+%type <ast> attributed_statement attributed_top_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
@@ -391,13 +391,17 @@ attributed_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	enum_declaration_statement			{ $$ = $1; }
+;
+
+attributed_top_statement:
+		attributed_statement				{ $$ = $1; }
 	|	T_CONST const_list ';'				{ $$ = $2; }
 ;
 
 top_statement:
 		statement							{ $$ = $1; }
-	|	attributed_statement					{ $$ = $1; }
-	|	attributes attributed_statement		{ $$ = zend_ast_with_attributes($2, $1); }
+	|	attributed_top_statement			{ $$ = $1; }
+	|	attributes attributed_top_statement	{ $$ = zend_ast_with_attributes($2, $1); }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
 			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
