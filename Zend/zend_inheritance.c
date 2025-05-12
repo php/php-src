@@ -2251,7 +2251,6 @@ ZEND_ATTRIBUTE_NONNULL static void bind_generic_types_for_inherited_interfaces(z
 			if (ZEND_TYPE_IS_ASSOCIATED(bound_type)) {
 				ZEND_ASSERT(ce_bound_types_for_direct_iface != NULL &&
 					"If a bound type is generic then we must have bound types for the current interface");
-				// TODO Resolve
 				const zend_type *ce_bound_type_ptr = zend_hash_find_ptr(ce_bound_types_for_direct_iface, ZEND_TYPE_NAME(bound_type));
 				ZEND_ASSERT(ce_bound_type_ptr != NULL);
 				bound_type = *ce_bound_type_ptr;
@@ -2267,9 +2266,32 @@ ZEND_ATTRIBUTE_NONNULL static void bind_generic_types_for_inherited_interfaces(z
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		// TODO Check we don't already have the bound types for the inherited CE
-		//HashTable *
-
+		const HashTable *existing_bound_types_for_inherited_iface = zend_hash_find_ptr(ce->bound_types, lc_inherited_iface_name);
+		if (EXPECTED(existing_bound_types_for_inherited_iface == NULL)) {
+		} else {
+			zend_ulong idx;
+			zend_string *bound_name;
+			const zend_type *ptr;
+			ZEND_HASH_FOREACH_KEY_PTR(existing_bound_types_for_inherited_iface, idx, bound_name, ptr) {
+				if (bound_name != NULL) {
+					continue;
+				}
+				const zend_type t1 = *ptr;
+				const zend_type *ptr2 = zend_hash_index_find_ptr(ce_bound_types_for_inherited_iface, idx);
+				ZEND_ASSERT(ptr2 != NULL);
+				const zend_type t2 = *ptr2;
+				if (
+					ZEND_TYPE_FULL_MASK(t1) != ZEND_TYPE_FULL_MASK(t2)
+					|| (ZEND_TYPE_HAS_NAME(t1) && !zend_string_equals(ZEND_TYPE_NAME(t1), ZEND_TYPE_NAME(t2)))
+					// || ZEND_TYPE_HAS_LIST(t1) && TODO Check list types are equal
+				) {
+					// TODO Improve this error message
+					zend_error_noreturn(E_COMPILE_ERROR, "Bound types for implicitly and explicitly implemented interfaces must match");
+				}
+			} ZEND_HASH_FOREACH_END();
+			/* Remove current ones as they may be incomplete without the type name binding */
+			zend_hash_del(ce->bound_types, lc_inherited_iface_name);
+		}
 		zend_hash_add_new_ptr(ce->bound_types, lc_inherited_iface_name, ce_bound_types_for_inherited_iface);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -2310,6 +2332,7 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 		}
 		const uint32_t num_bound_types = zend_hash_num_elements(bound_types);
 		if (UNEXPECTED(num_bound_types != iface->num_generic_parameters)) {
+			// TODO Need to handle implicit inherited interfaces
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot implement %s as the number of generic arguments specified (%" PRIu32 ") does not match the number of generic parameters declared on the interface (%" PRIu32 ")",
 				ZSTR_VAL(iface->name),

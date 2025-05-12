@@ -1,5 +1,5 @@
 --TEST--
-Implicit interface inheritance with different bound types
+Implicit interface inheritance with different bound types 2
 --FILE--
 <?php
 
@@ -11,8 +11,8 @@ interface I2<T> extends I1<T> {
     public function bar(int $o, T $param): T;
 }
 
-class C implements I2<float>, I1<string> {
-    public function foo(float $param): float {}
+class C implements I1<string>, I2<float> {
+    public function foo(string $param): string {}
     public function bar(int $o, float $param): float {}
 }
 
