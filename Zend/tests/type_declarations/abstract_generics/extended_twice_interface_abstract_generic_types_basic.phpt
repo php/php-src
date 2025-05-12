@@ -25,11 +25,3 @@ class C implements I3<string> {
 DONE
 --EXPECT--
 DONE
-
-
-
-Fatal error: CE: I3, Iface: I2, binding to Iface: I1, Generic type name: T2
-Binding generic types for CE: I2 for interface: I1
-Binding generic types for CE: I3 for interface: I2
-Binding generic types for CE: I3 for inherited interface: I1
-Binding generic types to generic type: T2 for inherited interface: I1
