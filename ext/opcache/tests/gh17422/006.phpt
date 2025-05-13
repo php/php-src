@@ -1,5 +1,13 @@
 --TEST--
-GH-17422 (OPcache bypasses the user-defined error handler for deprecations)
+GH-17422 (OPcache bypasses the user-defined error handler for deprecations) - File cache
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.file_cache={TMP}
+opcache.file_cache_only=1
+opcache.record_warnings=1
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

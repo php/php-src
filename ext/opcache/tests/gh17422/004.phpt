@@ -1,15 +1,7 @@
 --TEST--
 GH-17422 (OPcache bypasses the user-defined error handler for deprecations) - eval
---INI--
-opcache.enable=1
-opcache.enable_cli=1
-memory_limit=2M
---EXTENSIONS--
-opcache
 --FILE--
 <?php
-
-require __DIR__ . "/shutdown.inc";
 
 set_error_handler(static function (int $errno, string $errstr, string $errfile, int $errline) {
 	eval(
@@ -27,12 +19,4 @@ warning();
 
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare %Swarning() (previously declared in %s(8) : eval()'d code:1) in %swarning.inc on line 2
-array(3) {
-  [0]=>
-  string(7) "004.php"
-  [1]=>
-  string(12) "shutdown.inc"
-  [2]=>
-  string(11) "warning.inc"
-}
+Fatal error: Cannot redeclare function warning() %s

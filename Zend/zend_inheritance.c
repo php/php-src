@@ -3543,8 +3543,6 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 #endif
 
-	bool orig_record_errors = EG(record_errors);
-
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE && is_cacheable) {
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
 			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent, traits_and_interfaces);
@@ -3556,14 +3554,19 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				Z_CE_P(zv) = ret;
 				return ret;
 			}
-
-			/* Make sure warnings (such as deprecations) thrown during inheritance
-			 * will be recorded in the inheritance cache. */
-			zend_begin_record_errors();
 		} else {
 			is_cacheable = 0;
 		}
 		proto = ce;
+	}
+
+	/* Delay and record warnings (such as deprecations) thrown during
+	 * inheritance, so they will be recorded in the inheritance cache.
+	 * Warnings must be delayed in all cases so that we get a consistent
+	 * behavior regardless of cacheability. */
+	bool orig_record_errors = EG(record_errors);
+	if (!orig_record_errors) {
+		zend_begin_record_errors();
 	}
 
 	zend_try {
@@ -3917,10 +3920,12 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 		orig_linking_class = CG(current_linking_class);
 		CG(current_linking_class) = is_cacheable ? ce : NULL;
 
+		bool orig_record_errors = EG(record_errors);
+
 		zend_try{
 			CG(zend_lineno) = ce->info.user.line_start;
 
-			if (is_cacheable) {
+			if (!orig_record_errors) {
 				zend_begin_record_errors();
 			}
 
@@ -3942,12 +3947,12 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 
 			CG(current_linking_class) = orig_linking_class;
 		} zend_catch {
-			EG(record_errors) = false;
-			zend_free_recorded_errors();
+			if (!orig_record_errors) {
+				EG(record_errors) = false;
+				zend_free_recorded_errors();
+			}
 			zend_bailout();
 		} zend_end_try();
-
-		EG(record_errors) = false;
 
 		if (is_cacheable) {
 			HashTable *ht = (HashTable*)ce->inheritance_cache;
@@ -3964,6 +3969,11 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 				zend_hash_destroy(ht);
 				FREE_HASHTABLE(ht);
 			}
+		}
+
+		if (!orig_record_errors) {
+			zend_emit_recorded_errors();
+			zend_free_recorded_errors();
 		}
 
 		if (ZSTR_HAS_CE_CACHE(ce->name)) {
