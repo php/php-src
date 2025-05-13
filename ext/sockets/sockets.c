@@ -2330,6 +2330,11 @@ PHP_FUNCTION(socket_set_option)
 
 			ENSURE_SOCKET_VALID(php_sock);
 
+			if (php_max < 0) {
+				zend_argument_value_error(4, "\"max\" key must be greater than equal to 0");
+				RETURN_THROWS();
+			}
+
 			zval *tv_sec;
 			zval *tv_usec;
 
@@ -2342,10 +2347,16 @@ PHP_FUNCTION(socket_set_option)
 				RETURN_THROWS();
 			}
 
+			if (Z_LVAL_P(tv_sec) > 999999) {
+				s.sp_idle.tv_sec = Z_LVAL_P(tv_sec) + (Z_LVAL_P(tv_usec) / 1000000);
+				s.sp_idle.tv_usec = Z_LVAL_P(tv_usec) % 1000000;
+			} else {
+				s.sp_idle.tv_sec = Z_LVAL_P(tv_sec);
+				s.sp_idle.tv_usec = Z_LVAL_P(tv_usec);
+			}
+
 			s.sp_fd = (int)php_sock->bsd_socket;
 			s.sp_max = (off_t)php_max;
-			s.sp_idle.tv_sec = Z_LVAL_P(tv_sec);
-			s.sp_idle.tv_usec = Z_LVAL_P(tv_usec);
 
 			opt_ptr = &s;
 			optlen = sizeof(s);
