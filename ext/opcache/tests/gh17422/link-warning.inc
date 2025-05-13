@@ -1,7 +1,7 @@
 <?php
 
-interface DiableEarlyBinding {}
+interface DisableEarlyBinding {}
 
-class C extends DateTime implements DiableEarlyBinding {
+class C extends DateTime implements DisableEarlyBinding {
     public function getTimezone() {}
 }
