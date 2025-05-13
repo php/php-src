@@ -9120,7 +9120,7 @@ static zend_string *zend_generate_anon_class_name(zend_ast_decl *decl)
 		prefix = zend_resolve_const_class_name_reference(decl->child[0], "class name");
 	} else if (decl->child[1]) {
 		zend_ast_list *list = zend_ast_get_list(decl->child[1]);
-		prefix = zend_resolve_const_class_name_reference(list->child[0], "interface name");
+		prefix = zend_resolve_const_class_name_reference_with_generics(list->child[0], "interface name");
 	}
 
 	zend_string *result = zend_strpprintf(0, "%s@anonymous%c%s:%" PRIu32 "$%" PRIx32,
