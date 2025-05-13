@@ -22,8 +22,8 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "../php_dom.h"
 
-#include "lexbor/css/parser.h"
-#include "lexbor/selectors-adapted/selectors.h"
+#include "ext/lexbor/lexbor/css/parser.h"
+#include "../lexbor/selectors-adapted/selectors.h"
 
 // TODO: optimization idea: cache the parsed selectors in an LRU fashion?
 

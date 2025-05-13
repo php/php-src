@@ -5,7 +5,6 @@ ARG_WITH("dom", "DOM support", "yes");
 if (PHP_DOM == "yes") {
 	if (PHP_LIBXML == "yes" &&
 		ADD_EXTENSION_DEP('dom', 'libxml') &&
-		ADD_EXTENSION_DEP('dom', 'lexbor') &&
 		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c infra.c \
@@ -17,7 +16,9 @@ if (PHP_DOM == "yes") {
 			entityreference.c \
 			token_list.c \
 			notation.c xpath.c dom_iterators.c \
-			namednodemap.c xpath_callbacks.c", null, "");
+			namednodemap.c xpath_callbacks.c", null, "/I ext/lexbor");
+
+		ADD_EXTENSION_DEP('dom', 'lexbor');
 
 		ADD_SOURCES("ext/dom/parentnode", "tree.c css_selectors.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/selectors-adapted", "selectors.c", "dom");
@@ -35,7 +36,8 @@ if (PHP_DOM == "yes") {
 			"dom_ce.h " +
 			"namespace_compat.h " +
 			"xml_common.h " +
-			"xpath_callbacks.h "
+			"xpath_callbacks.h " +
+			"lexbor/selectors-adapted/selectors.h "
 		);
 	} else {
 		WARNING("dom support can't be enabled, libxml is not enabled")

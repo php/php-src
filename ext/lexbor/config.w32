@@ -3,7 +3,7 @@
 ARG_ENABLE("lexbor", "Lexbor support", "yes");
 
 if (PHP_LEXBOR == "yes") {
-    EXTENSION("lexbor", "php_lexbor.c", null, "-Iext/lexbor /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+    EXTENSION("lexbor", "php_lexbor.c", null, "/I " + configure_module_dirname + " /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
     ADD_SOURCES("ext/lexbor", "php_lexbor.c", "lexbor");
     ADD_SOURCES("ext/lexbor/lexbor/ports/windows_nt/lexbor/core", "memory.c", "lexbor");
@@ -22,9 +22,9 @@ if (PHP_LEXBOR == "yes") {
     ADD_SOURCES("ext/lexbor/lexbor/css/syntax/tokenizer", "error.c","lexbor");
     ADD_SOURCES("ext/lexbor/lexbor/ns", "ns.c","lexbor");
     ADD_SOURCES("ext/lexbor/lexbor/tag", "tag.c","lexbor");
-    ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_STATIC");
+    ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_STATIC /utf-8");
 
     AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
 
-    PHP_INSTALL_HEADERS("ext/lexbor", "php_lexbor.h");
+    PHP_INSTALL_HEADERS("ext/lexbor", "php_lexbor.h lexbor/");
 }
