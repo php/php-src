@@ -21,7 +21,6 @@
 
 static zend_object_handlers listformatter_handlers;
 
-/* {{{ listformatter_free_obj */
 static void listformatter_free_obj(zend_object *object)
 {
     ListFormatter_object *obj = php_intl_listformatter_fetch_object(object);
@@ -34,9 +33,7 @@ static void listformatter_free_obj(zend_object *object)
 
     zend_object_std_dtor(&obj->zo);
 }
-/* }}} */
 
-/* {{{ listformatter_create_object */
 static zend_object *listformatter_create_object(zend_class_entry *class_type)
 {
     ListFormatter_object *obj;
@@ -50,9 +47,7 @@ static zend_object *listformatter_create_object(zend_class_entry *class_type)
     obj->zo.handlers = &listformatter_handlers;
     return &obj->zo;
 }
-/* }}} */
 
-/* {{{ listformatter_create_object */
 PHP_METHOD(IntlListFormatter, __construct)
 {
     ListFormatter_object *obj = Z_INTL_LISTFORMATTER_P(ZEND_THIS);
@@ -114,9 +109,7 @@ PHP_METHOD(IntlListFormatter, __construct)
         RETURN_THROWS();
     }
 }
-/* }}} */
 
-/* {{{ listformatter_format */
 PHP_METHOD(IntlListFormatter, format)
 {
     ListFormatter_object *obj = Z_INTL_LISTFORMATTER_P(ZEND_THIS);
@@ -215,9 +208,7 @@ PHP_METHOD(IntlListFormatter, format)
         efree(items);
         efree(itemLengths);
 }
-/* }}} */
 
-/* {{{ listformatter_getErrorCode */
 PHP_METHOD(IntlListFormatter, getErrorCode)
 {
     ZEND_PARSE_PARAMETERS_NONE();
@@ -228,9 +219,7 @@ PHP_METHOD(IntlListFormatter, getErrorCode)
 
     RETURN_LONG(status);
 }
-/* }}} */
 
-/* {{{ listformatter_getErrorMessage */
 PHP_METHOD(IntlListFormatter, getErrorMessage)
 {
      ZEND_PARSE_PARAMETERS_NONE();
@@ -240,9 +229,7 @@ PHP_METHOD(IntlListFormatter, getErrorMessage)
     zend_string *message = intl_error_get_message(LISTFORMATTER_ERROR_P(obj));
     RETURN_STR(message);
 }
-/* }}} */
 
-/* {{{ listformatter_register_class */
 void listformatter_register_class(void)
 {
     zend_class_entry *class_entry = register_class_IntlListFormatter();
@@ -252,4 +239,3 @@ void listformatter_register_class(void)
     listformatter_handlers.offset = XtOffsetOf(ListFormatter_object, zo);
     listformatter_handlers.free_obj = listformatter_free_obj;
 }
-/* }}} */
