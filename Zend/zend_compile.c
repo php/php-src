@@ -9153,7 +9153,7 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 static void zend_compile_generic_params(zend_ast *params_ast)
 {
 	const zend_ast_list *list = zend_ast_get_list(params_ast);
-	zend_generic_parameter *generic_params = emalloc(list->children * sizeof(zend_generic_parameter));
+	zend_generic_parameter *generic_params = safe_pemalloc(list->children, sizeof(zend_generic_parameter), 0, CG(active_class_entry)->type & ZEND_INTERNAL_CLASS);
 	CG(active_class_entry)->generic_parameters = generic_params;
 
 	for (uint32_t i = 0; i < list->children; i++) {
@@ -9174,7 +9174,6 @@ static void zend_compile_generic_params(zend_ast *params_ast)
 		}
 
 		if (param_ast->child[1]) {
-			// TODO Need to free this?
 			constraint_type = zend_compile_typename(param_ast->child[1]);
 			if (ZEND_TYPE_IS_ASSOCIATED(constraint_type)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
