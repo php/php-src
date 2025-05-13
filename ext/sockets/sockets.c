@@ -2312,17 +2312,16 @@ PHP_FUNCTION(socket_set_option)
 #ifdef SO_SPLICE
 		case SO_SPLICE: {
 			if (Z_TYPE_P(arg4) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(arg4), socket_so_splice_ce)) {
-					zend_argument_type_error(4, "must be of type object, %s given", zend_zval_value_name(arg4));
+					zend_argument_type_error(4, "must be of type SocketSoSplice, %s given", zend_zval_value_name(arg4));
 					RETURN_THROWS();
 			}
 
-			struct splice s = {0};
 			zend_object *so_splice_obj = Z_OBJ_P(arg4);
-			zval tmp;
+			zval tmpA, tmpB, tmpC;
 
-			zval *socket = zend_read_property(socket_so_splice_ce, so_splice_obj, "socket", strlen("socket"), 0, &tmp);
-			zval *max = zend_read_property(socket_so_splice_ce, so_splice_obj, "max", strlen("max"), 0, &tmp);
-			zval *array = zend_read_property(socket_so_splice_ce, so_splice_obj, "time", strlen("time"), 0, &tmp);
+			zval *socket = zend_read_property(socket_so_splice_ce, so_splice_obj, "socket", strlen("socket"), 0, &tmpA);
+			zval *max = zend_read_property(socket_so_splice_ce, so_splice_obj, "max", strlen("max"), 0, &tmpB);
+			zval *array = zend_read_property(socket_so_splice_ce, so_splice_obj, "time", strlen("time"), 0, &tmpC);
 
 			php_socket *php_sock = Z_SOCKET_P(socket);
 			zend_long php_max = Z_LVAL_P(max);
@@ -2331,22 +2330,25 @@ PHP_FUNCTION(socket_set_option)
 			ENSURE_SOCKET_VALID(php_sock);
 
 			if (php_max < 0) {
-				zend_argument_value_error(4, "\"max\" key must be greater than equal to 0");
+				zend_argument_value_error(4, "\"max\" key must be greater than or equal to 0");
 				RETURN_THROWS();
 			}
 
 			zval *tv_sec;
 			zval *tv_usec;
 
-			if ((tv_sec = zend_hash_str_find(php_arr, "tv_sec", strlen("tv_sec"))) == NULL) {
-				zend_argument_value_error(4, "time must have key \"tv_sec\"");
+			if ((tv_sec = zend_hash_str_find(php_arr, "sec", strlen("sec"))) == NULL) {
+				zend_argument_value_error(4, "time must have key \"sec\"");
 				RETURN_THROWS();
 			}
-			if ((tv_usec = zend_hash_str_find(php_arr, "tv_usec", strlen("tv_usec"))) == NULL) {
-				zend_argument_value_error(4, "time must have key \"tv_sec\"");
+			if ((tv_usec = zend_hash_str_find(php_arr, "usec", strlen("usec"))) == NULL) {
+				zend_argument_value_error(4, "time must have key \"usec\"");
 				RETURN_THROWS();
 			}
 
+			struct splice s;
+			s.sp_fd = (int)php_sock->bsd_socket;
+			s.sp_max = (off_t)php_max;
 			if (Z_LVAL_P(tv_sec) > 999999) {
 				s.sp_idle.tv_sec = Z_LVAL_P(tv_sec) + (Z_LVAL_P(tv_usec) / 1000000);
 				s.sp_idle.tv_usec = Z_LVAL_P(tv_usec) % 1000000;
@@ -2354,9 +2356,6 @@ PHP_FUNCTION(socket_set_option)
 				s.sp_idle.tv_sec = Z_LVAL_P(tv_sec);
 				s.sp_idle.tv_usec = Z_LVAL_P(tv_usec);
 			}
-
-			s.sp_fd = (int)php_sock->bsd_socket;
-			s.sp_max = (off_t)php_max;
 
 			opt_ptr = &s;
 			optlen = sizeof(s);
