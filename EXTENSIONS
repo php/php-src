@@ -200,7 +200,7 @@ PRIMARY MAINTAINER:  Niels Dossche <nielsdos@php.net> (2023 - 2025)
                      Mate Kocsis <kocsismate@php.net> (2025 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
-SINCE:               5.0
+SINCE:               8.5
 -------------------------------------------------------------------------------
 EXTENSION:           libxml
 PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2003 - 2009)
