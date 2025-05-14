@@ -12,12 +12,14 @@ PHP                                                                        NEWS
   . Add support for CURLINFO_QUEUE_TIME_T in curl_getinfo() (thecaliskan)
   . Add support for CURLOPT_SSL_SIGNATURE_ALGORITHMS. (Ayesh Karunaratne)
 
+- FPM:
+  . Make FPM access log limit configurable using log_limit. (Jakub Zelenka)
+
 - GD:
   . Fix incorrect comparison with result of php_stream_can_cast(). (Girgias)
 
 - Intl:
   . Fix return value on failure for resourcebundle count handler. (Girgias)
-
 
 - OPcache:
   . Disallow changing opcache.memory_consumption when SHM is already set up.
