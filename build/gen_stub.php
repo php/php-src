@@ -4579,6 +4579,17 @@ class FileInfo {
     
         return empty($conds) ? null : implode(' && ', $conds);
     }
+
+    /** @param array<string, ConstInfo> $allConstInfos */
+    public function generateClassEntryCode(array $allConstInfos): string {
+        $code = "";
+
+        foreach ($this->classInfos as $class) {
+            $code .= "\n" . $class->getRegistration($allConstInfos);
+        }
+
+        return $code;
+    }
 }
 
 class DocCommentTag {
@@ -5297,18 +5308,7 @@ function generateArgInfoCode(
             $code .= "}\n";
         }
 
-        $code .= generateClassEntryCode($fileInfo, $allConstInfos);
-    }
-
-    return $code;
-}
-
-/** @param array<string, ConstInfo> $allConstInfos */
-function generateClassEntryCode(FileInfo $fileInfo, array $allConstInfos): string {
-    $code = "";
-
-    foreach ($fileInfo->classInfos as $class) {
-        $code .= "\n" . $class->getRegistration($allConstInfos);
+        $code .= $fileInfo->generateClassEntryCode($allConstInfos);
     }
 
     return $code;
