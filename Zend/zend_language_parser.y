@@ -51,7 +51,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
-%precedence T_THROW
+%precedence T_RETURN T_BREAK T_CONTINUE T_THROW
 %precedence PREC_ARROW_FUNCTION
 %precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
 %left T_LOGICAL_OR
@@ -255,7 +255,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
 %type <ast> unprefixed_use_declarations const_decl inner_statement
-%type <ast> expr optional_expr while_statement for_statement foreach_variable
+%type <ast> expr optional_expr while_statement for_statement foreach_variable early_return
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type_without_static argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
@@ -516,7 +516,7 @@ statement:
 			{ $$ = zend_ast_create(ZEND_AST_FOR, $3, $5, $7, $9); }
 	|	T_SWITCH '(' expr ')' switch_case_list
 			{ $$ = zend_ast_create(ZEND_AST_SWITCH, $3, $5); }
-	|	T_BREAK optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
+    |	T_BREAK optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
 	|	T_CONTINUE optional_expr ';'	{ $$ = zend_ast_create(ZEND_AST_CONTINUE, $2); }
 	|	T_RETURN optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
 	|	T_GLOBAL global_var_list ';'	{ $$ = $2; }
@@ -1314,7 +1314,11 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, $3, $5); }
 	|	expr '?' ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, NULL, $4); }
+	|	expr '?' ':' early_return
+			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, NULL, $4); }
 	|	expr T_COALESCE expr
+			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
+	|	expr T_COALESCE early_return
 			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(IS_LONG, $2); }
@@ -1331,19 +1335,28 @@ expr:
 		}
 	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2); }
 	|	scalar { $$ = $1; }
-	|	'`' backticks_expr '`' { $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }
-	|	T_PRINT expr { $$ = zend_ast_create(ZEND_AST_PRINT, $2); }
-	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_THROW expr { $$ = zend_ast_create(ZEND_AST_THROW, $2); }
-	|	inline_function { $$ = $1; }
-	|	attributes inline_function { $$ = zend_ast_with_attributes($2, $1); }
-	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+	|	'`' backticks_expr '`' 				{ $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }
+	|	T_PRINT expr 						{ $$ = zend_ast_create(ZEND_AST_PRINT, $2); }
+	|	T_YIELD 							{ $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD expr 						{ $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD expr T_DOUBLE_ARROW expr 	{ $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD_FROM expr 				 	{ $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_THROW expr 						{ $$ = zend_ast_create(ZEND_AST_THROW, $2); }
+	|	inline_function 					{ $$ = $1; }
+	|	attributes inline_function 			{ $$ = zend_ast_with_attributes($2, $1); }
+	|	T_STATIC inline_function 			{ $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
 	|	attributes T_STATIC inline_function
 			{ $$ = zend_ast_with_attributes($3, $1); ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
 	|	match { $$ = $1; }
+;
+
+early_return:
+        T_RETURN							{ $$ = zend_ast_create(ZEND_AST_RETURN, NULL); }
+	|	T_RETURN expr						{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
+    |   T_BREAK								{ $$ = zend_ast_create(ZEND_AST_BREAK, NULL); }
+    |	T_BREAK expr						{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
+    |   T_CONTINUE							{ $$ = zend_ast_create(ZEND_AST_CONTINUE, NULL); }
+    |	T_CONTINUE expr						{ $$ = zend_ast_create(ZEND_AST_CONTINUE, $2); }
 ;
 
 
