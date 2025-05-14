@@ -24,9 +24,9 @@
 
 typedef struct {
 	zend_object_iterator it;
+	zval declared_props;
 	bool by_ref;
 	bool declared_props_done;
-	zval declared_props;
 	bool dynamic_props_done;
 	uint32_t dynamic_prop_offset;
 	uint32_t dynamic_prop_it;

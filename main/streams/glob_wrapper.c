@@ -36,14 +36,14 @@
 typedef struct {
 	glob_t   glob;
 	size_t   index;
-	int      flags;
 	char     *path;
 	size_t   path_len;
 	char     *pattern;
 	size_t   pattern_len;
+	int      flags;
+	bool     open_basedir_used;
 	size_t   *open_basedir_indexmap;
 	size_t   open_basedir_indexmap_size;
-	bool     open_basedir_used;
 } glob_s_t;
 
 PHPAPI char* _php_glob_stream_get_path(php_stream *stream, size_t *plen STREAMS_DC) /* {{{ */

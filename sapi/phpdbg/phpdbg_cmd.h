@@ -92,11 +92,11 @@ struct _phpdbg_command_t {
 	const char *tip;                    /* Menu tip */
 	size_t tip_len;                     /* Menu tip length */
 	char alias;                         /* Alias */
+	bool flags;                    /* General flags */
 	phpdbg_command_handler_t handler;   /* Command handler */
 	const phpdbg_command_t *subs;       /* Sub Commands */
 	char *args;                         /* Argument Spec */
 	const phpdbg_command_t *parent;     /* Parent Command */
-	bool flags;                    /* General flags */
 };
 /* }}} */
 
@@ -156,13 +156,13 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 #define PHPDBG_COMMAND_HANDLER(name) phpdbg_do_##name
 
 #define PHPDBG_COMMAND_D_EXP(name, tip, alias, handler, children, args, parent, flags) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, parent, flags}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, flags, alias, phpdbg_do_##handler, children, args, parent}
 
 #define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, args, flags) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, NULL, flags}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, flags, alias, phpdbg_do_##handler, children, args, NULL}
 
 #define PHPDBG_COMMAND_D(name, tip, alias, children, args, flags) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args, NULL, flags}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, flags, alias, phpdbg_do_##name, children, args, NULL}
 
 #define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param)
 

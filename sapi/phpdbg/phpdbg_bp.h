@@ -38,10 +38,10 @@ typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
 
 /* {{{ breakpoint base structure */
 #define phpdbg_breakbase(name) \
-	int         id; \
 	uint8_t  type; \
-	zend_ulong  hits; \
 	bool   disabled; \
+	int         id; \
+	zend_ulong  hits; \
 	const char *name /* }}} */
 
 /* {{{ breakpoint base */
@@ -107,9 +107,9 @@ typedef struct _phpdbg_breakop_t {
  * Breakpoint condition based representation
  */
 typedef struct _phpdbg_breakcond_t {
+	bool       paramed;
 	phpdbg_breakbase(code);
 	size_t          code_len;
-	bool       paramed;
 	phpdbg_param_t  param;
 	zend_ulong      hash;
 	zend_op_array  *ops;

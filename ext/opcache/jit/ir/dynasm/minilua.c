@@ -357,12 +357,12 @@ typedef struct Table{
 GCObject*next;lu_byte tt;lu_byte marked;
 lu_byte flags;
 lu_byte lsizenode;
+int sizearray;
 struct Table*metatable;
 TValue*array;
 Node*node;
 Node*lastfree;
 GCObject*gclist;
-int sizearray;
 }Table;
 #define lmod(s,size)(check_exp((size&(size-1))==0,(cast(int,(s)&((size)-1)))))
 #define twoto(x)((size_t)1<<(x))
