@@ -654,7 +654,7 @@ namespace {
     /** @param LDAP\Connection|array $ldap */
     function ldap_search($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null): LDAP\Result|array|false {}
 
-    function ldap_free_result(LDAP\Result $result): bool {}
+    function ldap_free_result(LDAP\Result $result): true {}
 
     function ldap_count_entries(LDAP\Connection $ldap, LDAP\Result $result): int {}
 
