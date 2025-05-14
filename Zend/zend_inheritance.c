@@ -723,12 +723,12 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 	}
 
 	/* If we check for concrete return type */
-	if (ZEND_TYPE_IS_ASSOCIATED(proto_type)) {
+	if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(proto_type)) {
 		return zend_is_type_subtype_of_generic_type(
 			fe_scope, fe_type_ptr, proto_scope, proto_type_ptr);
 	}
 	/* If we check for concrete parameter type */
-	if (ZEND_TYPE_IS_ASSOCIATED(fe_type)) {
+	if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(fe_type)) {
 		return zend_is_type_subtype_of_generic_type(
 			proto_scope, proto_type_ptr, fe_scope, fe_type_ptr);
 	}
@@ -2248,7 +2248,7 @@ ZEND_ATTRIBUTE_NONNULL static void bind_generic_types_for_inherited_interfaces(z
 		);
 		ZEND_HASH_FOREACH_KEY_PTR(interface_bound_types_for_inherited_iface, generic_param_index, generic_param_name, bound_type_ptr) {
 			zend_type bound_type = *bound_type_ptr;
-			if (ZEND_TYPE_IS_ASSOCIATED(bound_type)) {
+			if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(bound_type)) {
 				ZEND_ASSERT(ce_bound_types_for_direct_iface != NULL &&
 					"If a bound type is generic then we must have bound types for the current interface");
 				const zend_type *ce_bound_type_ptr = zend_hash_find_ptr(ce_bound_types_for_direct_iface, ZEND_TYPE_NAME(bound_type));
@@ -2347,7 +2347,7 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 			ZEND_ASSERT(bound_type_ptr != NULL);
 
 			/* We are currently extending another interface */
-			if (ZEND_TYPE_IS_ASSOCIATED(*bound_type_ptr)) {
+			if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(*bound_type_ptr)) {
 				ZEND_ASSERT(ce->ce_flags & ZEND_ACC_INTERFACE);
 				ZEND_ASSERT(ce->num_generic_parameters > 0);
 				ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*bound_type_ptr));

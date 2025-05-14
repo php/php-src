@@ -1437,6 +1437,7 @@ static zend_string *add_intersection_type(zend_string *str,
 zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
 
+	ZEND_ASSERT(!ZEND_TYPE_IS_GENERIC_PARAM_NAME(type) && "Generic type declarations do not exist yet");
 	/* Pure intersection type */
 	if (ZEND_TYPE_IS_INTERSECTION(type)) {
 		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
@@ -1457,8 +1458,6 @@ zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry
 			str = add_type_string(str, resolved, /* is_intersection */ false);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
-	} else if (ZEND_TYPE_IS_ASSOCIATED(type)) {
-		ZEND_ASSERT(false && "Generic type declarations do not exist yet");
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
@@ -7020,7 +7019,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
 					const zend_generic_parameter *genric_param = &ce->generic_parameters[generic_param_index];
 					if (zend_string_equals(type_name, genric_param->name)) {
-						return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(type_name), /* allow null */ false, _ZEND_TYPE_ASSOCIATED_BIT);
+						return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(type_name), /* allow null */ false, _ZEND_TYPE_GENERIC_PARAM_NAME_BIT);
 					}
 				}
 			}
@@ -7220,7 +7219,7 @@ static zend_type zend_compile_typename_ex(
 			single_type = zend_compile_single_typename(type_ast);
 			uint32_t single_type_mask = ZEND_TYPE_PURE_MASK(single_type);
 
-			if (ZEND_TYPE_IS_ASSOCIATED(single_type)) {
+			if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(single_type)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Generic type cannot be part of a union type");
 			}
 			if (single_type_mask == MAY_BE_ANY) {
@@ -7305,7 +7304,7 @@ static zend_type zend_compile_typename_ex(
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
 
-			if (ZEND_TYPE_IS_ASSOCIATED(single_type)) {
+			if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(single_type)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Generic type cannot be part of an intersection type");
 			}
 			/* An intersection of union types cannot exist so invalidate it
@@ -7374,10 +7373,10 @@ static zend_type zend_compile_typename_ex(
 	if ((type_mask & MAY_BE_NULL) && is_marked_nullable) {
 		zend_error_noreturn(E_COMPILE_ERROR, "null cannot be marked as nullable");
 	}
-	if (ZEND_TYPE_IS_ASSOCIATED(type) && is_marked_nullable) {
+	if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(type) && is_marked_nullable) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Generic type cannot be part of a union type");
 	}
-	if (ZEND_TYPE_IS_ASSOCIATED(type) && force_allow_null) {
+	if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(type) && force_allow_null) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Generic type cannot be part of a union type (implicitly nullable due to default null value)");
 	}
 
@@ -9173,7 +9172,7 @@ static void zend_compile_generic_params(zend_ast *params_ast)
 
 		if (param_ast->child[1]) {
 			constraint_type = zend_compile_typename(param_ast->child[1]);
-			if (ZEND_TYPE_IS_ASSOCIATED(constraint_type)) {
+			if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(constraint_type)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use generic parameter %s to constrain generic parameter %s",
 					ZSTR_VAL(ZEND_TYPE_NAME(constraint_type)), ZSTR_VAL(name));
