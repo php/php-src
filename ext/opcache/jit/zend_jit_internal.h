@@ -437,16 +437,22 @@ struct _zend_jit_trace_rec {
 
 #define ZEND_JIT_TRACE_START_REC_SIZE 2
 
+typedef struct _zend_jit_ref_snapshot {
+	union {
+		int32_t ref;        /* While generating code: The ir_ref to snapshot */
+		int32_t offset;     /* After compilation / during deopt: C stack offset if 'reg' is spilled */
+	};
+	int8_t reg;             /* Set after compilation by zend_jit_snapshot_handler() */
+} zend_jit_ref_snapshot;
+
 typedef struct _zend_jit_trace_exit_info {
-	const zend_op       *opline;     /* opline where VM should continue execution */
-	const zend_op_array *op_array;
-	uint32_t             flags;      /* set of ZEND_JIT_EXIT_... */
-	uint32_t             stack_size;
-	uint32_t             stack_offset;
-	int32_t              poly_func_ref;
-	int32_t              poly_this_ref;
-	int8_t               poly_func_reg;
-	int8_t               poly_this_reg;
+	const zend_op          *opline;     /* opline where VM should continue execution */
+	const zend_op_array    *op_array;
+	uint32_t                flags;      /* set of ZEND_JIT_EXIT_... */
+	uint32_t                stack_size;
+	uint32_t                stack_offset;
+	zend_jit_ref_snapshot   poly_func;
+	zend_jit_ref_snapshot   poly_this;
 } zend_jit_trace_exit_info;
 
 typedef struct _zend_jit_trace_stack {
