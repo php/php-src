@@ -24,5 +24,5 @@ try {
 }
 
 ?>
---EXPECTF--
-Fatal error: SoapClient::__setSoapHeaders(): Invalid SOAP header in %s on line %d
+--EXPECT--
+TypeError: SoapClient::__setSoapHeaders(): Argument #1 ($headers) must be on array of SoapHeader objects
