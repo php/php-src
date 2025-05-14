@@ -1527,24 +1527,23 @@ class FuncInfo {
                 $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
             }
 
-            $php84AndAboveFlags = array_slice($flagsByPhpVersions, 5, null, true);
             $docComment = $this->exposedDocComment ? '"' . $this->exposedDocComment->escape() . '"' : "NULL";
             $framelessFuncInfosName = !empty($this->framelessFunctionInfos) ? $this->getFramelessFunctionInfosName() : "NULL";
 
             $code .= generateVersionDependentFlagCode(
                 "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s, $framelessFuncInfosName, $docComment)\n",
-                $php84AndAboveFlags,
+                $flagsByPhpVersions,
                 PHP_84_VERSION_ID
             );
 
             if (!$php84MinimumCompatibility) {
                 $code .= "#else\n";
 
-                $flags = array_slice($flagsByPhpVersions, 0, 4, true);
                 $code .= generateVersionDependentFlagCode(
                     "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n",
-                    $flags,
-                    $this->minimumPhpVersionIdCompatibility
+                    $flagsByPhpVersions,
+                    $this->minimumPhpVersionIdCompatibility,
+                    PHP_83_VERSION_ID
                 );
 
                 $code .= "#endif\n";
@@ -5477,8 +5476,12 @@ function generateOptimizerInfo(array $funcMap): string {
  * @param array<int, string[]> $flagsByPhpVersions
  * @return string
  */
-function generateVersionDependentFlagCode(string $codeTemplate, array $flagsByPhpVersions, ?int $phpVersionIdMinimumCompatibility): string
-{
+function generateVersionDependentFlagCode(
+    string $codeTemplate,
+    array $flagsByPhpVersions,
+    ?int $phpVersionIdMinimumCompatibility,
+    ?int $phpVersionIdMaxCompatibility = null
+): string {
     $phpVersions = ALL_PHP_VERSION_IDS;
     sort($phpVersions);
     $currentPhpVersion = end($phpVersions);
@@ -5492,13 +5495,21 @@ function generateVersionDependentFlagCode(string $codeTemplate, array $flagsByPh
         return sprintf($codeTemplate, implode("|", $flagsByPhpVersions[$currentPhpVersion]));
     }
 
-    // Remove flags which depend on a PHP version below the minimally supported one
     ksort($flagsByPhpVersions);
+    // Remove flags which depend on a PHP version below the minimally supported one
     $index = array_search($phpVersionIdMinimumCompatibility, array_keys($flagsByPhpVersions));
     if ($index === false) {
         throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMinimumCompatibility\"");
     }
     $flagsByPhpVersions = array_slice($flagsByPhpVersions, $index, null, true);
+    if ($phpVersionIdMaxCompatibility !== null) {
+        // Remove flags which depend on a PHP version above the maximally supported one
+        $index = array_search($phpVersionIdMaxCompatibility, array_keys($flagsByPhpVersions));
+        if ($index === false) {
+            throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMaxCompatibility\"");
+        }
+        $flagsByPhpVersions = array_slice($flagsByPhpVersions, 0, $index, true);
+    }
 
     // Remove empty version-specific flags
     $flagsByPhpVersions = array_filter($flagsByPhpVersions);
