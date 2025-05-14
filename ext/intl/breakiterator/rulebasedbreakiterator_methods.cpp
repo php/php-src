@@ -28,8 +28,9 @@ extern "C" {
 using icu::RuleBasedBreakIterator;
 using icu::Locale;
 
-static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
-	return (RuleBasedBreakIterator*)bio->biter;
+static inline RuleBasedBreakIterator *fetch_rbbi(const BreakIterator_object *bio) {
+	ZEND_ASSERT(bio != nullptr);
+	return static_cast<RuleBasedBreakIterator *>(bio->biter);
 }
 
 static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
@@ -54,7 +55,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_er
 	}
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
-	*error_handling_replaced = 1;
+	*error_handling_replaced = true;
 
 	// instantiation of ICU object
 	RuleBasedBreakIterator *rbbi;
@@ -84,7 +85,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_er
 			RETURN_THROWS();
 		}
 	} else { // compiled
-		rbbi = new RuleBasedBreakIterator((uint8_t*)rules, rules_len, status);
+		rbbi = new RuleBasedBreakIterator(reinterpret_cast<uint8_t *>(rules), rules_len, status);
 		if (U_FAILURE(status)) {
 			zend_throw_exception(IntlException_ce_ptr,
 				"IntlRuleBasedBreakIterator::__construct(): "
@@ -100,7 +101,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS, zend_er
 U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 {
 	zend_error_handling error_handling;
-	bool error_handling_replaced = 0;
+	bool error_handling_replaced = false;
 
 	return_value = ZEND_THIS;
 	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, &error_handling, &error_handling_replaced);
@@ -159,7 +160,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 	ZEND_ASSERT(BREAKITER_ERROR_CODE(bio) == U_BUFFER_OVERFLOW_ERROR);
 	BREAKITER_ERROR_CODE(bio) = U_ZERO_ERROR;
 
-	std::unique_ptr<int32_t[]> rules = std::unique_ptr<int32_t[]>(new int32_t[num_rules]);
+	const std::unique_ptr<int32_t[]> rules = std::unique_ptr<int32_t[]>(new int32_t[num_rules]);
 	num_rules = fetch_rbbi(bio)->getRuleStatusVec(rules.get(), num_rules,
 			BREAKITER_ERROR_CODE(bio));
 	if (U_FAILURE(BREAKITER_ERROR_CODE(bio))) {

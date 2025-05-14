@@ -25,7 +25,6 @@ extern "C" {
 #include "../php_intl.h"
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
-#include "../locale/locale.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 }
@@ -58,7 +57,7 @@ static void _breakiter_factory(const char *func_name,
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (locale_str == NULL) {
-		locale_str = (char *)intl_locale_get_default();
+		locale_str = const_cast<char *>(intl_locale_get_default());
 	}
 
 	biter = func(Locale::createFromName(locale_str), status);
@@ -178,7 +177,7 @@ static void _breakiter_no_args_ret_int32(
 
 	int32_t res = (bio->biter->*func)();
 
-	RETURN_LONG((zend_long)res);
+	RETURN_LONG(static_cast<zend_long>(res));
 }
 
 static void _breakiter_int32_ret_int32(
@@ -200,9 +199,9 @@ static void _breakiter_int32_ret_int32(
 		RETURN_THROWS();
 	}
 
-	int32_t res = (bio->biter->*func)((int32_t)arg);
+	int32_t res = (bio->biter->*func)(static_cast<int32_t>(arg));
 
-	RETURN_LONG((zend_long)res);
+	RETURN_LONG(static_cast<zend_long>(res));
 }
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, first)
@@ -253,7 +252,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, current)
 
 	int32_t res = bio->biter->current();
 
-	RETURN_LONG((zend_long)res);
+	RETURN_LONG(static_cast<zend_long>(res));
 }
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, following)
@@ -287,9 +286,9 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, isBoundary)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	UBool res = bio->biter->isBoundary((int32_t)offset);
+	UBool res = bio->biter->isBoundary(static_cast<int32_t>(offset));
 
-	RETURN_BOOL((zend_long)res);
+	RETURN_BOOL(static_cast<zend_long>(res));
 }
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, getLocale)
@@ -311,7 +310,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getLocale)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	Locale locale = bio->biter->getLocale((ULocDataLocaleType)locale_type,
+	Locale locale = bio->biter->getLocale(static_cast<ULocDataLocaleType>(locale_type),
 		BREAKITER_ERROR_CODE(bio));
 	INTL_METHOD_CHECK_STATUS(bio,
 		"breakiter_get_locale: Call to ICU method has failed");
@@ -341,7 +340,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getPartsIterator)
 	BREAKITER_METHOD_FETCH_OBJECT;
 
 	IntlIterator_from_BreakIterator_parts(
-		object, return_value, (parts_iter_key_type)key_type);
+		object, return_value, static_cast<parts_iter_key_type>(key_type));
 }
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, getErrorCode)
@@ -353,7 +352,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getErrorCode)
 
 	/* Fetch the object (without resetting its last error code ). */
 	bio = Z_INTL_BREAKITERATOR_P(object);
-	RETURN_LONG((zend_long)BREAKITER_ERROR_CODE(bio));
+	RETURN_LONG(static_cast<zend_long>(BREAKITER_ERROR_CODE(bio)));
 }
 
 U_CFUNC PHP_METHOD(IntlBreakIterator, getErrorMessage)
