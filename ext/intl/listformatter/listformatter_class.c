@@ -91,12 +91,12 @@ PHP_METHOD(IntlListFormatter, __construct)
         LISTFORMATTER_OBJECT(obj) = ulistfmt_openForType(locale, type, width, &status);
     #else
         if (type != ULISTFMT_TYPE_AND) {
-            zend_argument_value_error(2, "ICU 66 and below only support IntlListFormatter::TYPE_AND");
+            zend_argument_value_error(2, "contains an unsupported type. ICU 66 and below only support IntlListFormatter::TYPE_AND");
             RETURN_THROWS();
         }
 
         if (width != ULISTFMT_WIDTH_WIDE) {
-            zend_argument_value_error(3, "ICU 66 and below only support IntlListFormatter::WIDTH_WIDE");
+            zend_argument_value_error(3, "contains an unsupported width. ICU 66 and below only support IntlListFormatter::WIDTH_WIDE");
             RETURN_THROWS();
         }
 
