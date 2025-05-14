@@ -5321,19 +5321,13 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
         return '';
     }
 
-    $code = "\n";
-
-    if ($cond) {
-        $code .= "#if {$cond}\n";
-    }
-
     $functionEntryName = "ext_functions";
     if ($className) {
         $underscoreName = implode("_", $className->getParts());
         $functionEntryName = "class_{$underscoreName}_methods";
     }
 
-    $code .= "static const zend_function_entry {$functionEntryName}[] = {\n";
+    $code = "\nstatic const zend_function_entry {$functionEntryName}[] = {\n";
     $code .= generateCodeWithConditions($funcInfos, "", static function (FuncInfo $funcInfo) {
         return $funcInfo->getFunctionEntry();
     }, $cond);
@@ -5341,7 +5335,7 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
     $code .= "};\n";
 
     if ($cond) {
-        $code .= "#endif\n";
+        $code = "\n#if {$cond}{$code}#endif\n";
     }
 
     return $code;
