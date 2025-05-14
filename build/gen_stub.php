@@ -898,8 +898,6 @@ interface VariableLikeName {
 
 abstract class AbstractConstName implements VariableLikeName
 {
-    abstract public function isClassConst(): bool;
-
     public function isUnknown(): bool
     {
         return strtolower($this->__toString()) === "unknown";
@@ -915,11 +913,6 @@ class ConstName extends AbstractConstName {
             $const = $namespace->toString() . '\\' . $const;
         }
         $this->const = $const;
-    }
-
-    public function isClassConst(): bool
-    {
-        return false;
     }
 
     public function isUnknown(): bool
@@ -950,11 +943,6 @@ class ClassConstName extends AbstractConstName {
     {
         $this->class = $class;
         $this->const = $const;
-    }
-
-    public function isClassConst(): bool
-    {
-        return true;
     }
 
     public function __toString(): string
@@ -2810,7 +2798,7 @@ class ConstInfo extends VariableLike
 
         // Condition will be added by generateCodeWithConditions()
 
-        if ($this->name->isClassConst()) {
+        if ($this->name instanceof ClassConstName) {
             $code = $this->getClassConstDeclaration($value, $allConstInfos);
         } else {
             $code = $this->getGlobalConstDeclaration($value);
@@ -6388,7 +6376,7 @@ if ($generateOptimizerInfo) {
 
 if ($verifyManual) {
     foreach ($undocumentedConstMap as $constName => $info) {
-        if ($info->name->isClassConst() || $info->isUndocumentable) {
+        if ($info->name instanceof ClassConstName || $info->isUndocumentable) {
             continue;
         }
 
