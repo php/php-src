@@ -883,22 +883,6 @@ PHP_METHOD(XMLReader, next)
 }
 /* }}} */
 
-static bool xmlreader_valid_encoding(const char *encoding)
-{
-	if (!encoding) {
-		return true;
-	}
-
-	/* Normally we could use xmlTextReaderConstEncoding() afterwards but libxml2 < 2.12.0 has a bug of course
-	 * where it returns NULL for some valid encodings instead. */
-	xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding);
-	if (!handler) {
-		return false;
-	}
-	xmlCharEncCloseFunc(handler);
-	return true;
-}
-
 /* {{{ Sets the URI that the XMLReader will parse. */
 static void xml_reader_from_uri(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *instance_ce, bool use_exceptions)
 {
@@ -927,7 +911,7 @@ static void xml_reader_from_uri(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *
 		RETURN_THROWS();
 	}
 
-	if (!xmlreader_valid_encoding(encoding)) {
+	if (!php_libxml_is_valid_encoding(encoding)) {
 		zend_argument_value_error(2, "must be a valid character encoding");
 		RETURN_THROWS();
 	}
@@ -1015,7 +999,7 @@ PHP_METHOD(XMLReader, fromStream)
 
 	php_stream_from_res(stream, Z_RES_P(stream_zv));
 
-	if (!xmlreader_valid_encoding(encoding_name)) {
+	if (!php_libxml_is_valid_encoding(encoding_name)) {
 		zend_argument_value_error(2, "must be a valid character encoding");
 		RETURN_THROWS();
 	}
@@ -1199,7 +1183,7 @@ static void xml_reader_from_string(INTERNAL_FUNCTION_PARAMETERS, zend_class_entr
 		RETURN_THROWS();
 	}
 
-	if (!xmlreader_valid_encoding(encoding)) {
+	if (!php_libxml_is_valid_encoding(encoding)) {
 		zend_argument_value_error(2, "must be a valid character encoding");
 		RETURN_THROWS();
 	}
