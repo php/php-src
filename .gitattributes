@@ -31,3 +31,17 @@
 
 # Vendored libraries
 /ext/dom/lexbor/lexbor linguist-vendored
+
+# Exclude from Export for source code on: https://www.php.net/downloads.php
+/.circleci export-ignore
+/.github export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.editorconfig export-ignore
+/codecov.yml export-ignore
+/benchmark export-ignore
+/CODING_STANDARDS.md export-ignore
+/CONTRIBUTING.md export-ignore
+/docs export-ignore
+/docs-old export-ignore
+/README.md export-ignore
