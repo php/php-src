@@ -898,11 +898,6 @@ interface VariableLikeName {
 
 abstract class AbstractConstName implements VariableLikeName
 {
-    public function equals(AbstractConstName $const): bool
-    {
-        return $this->__toString() === $const->__toString();
-    }
-
     abstract public function isClassConst(): bool;
 
     public function isUnknown(): bool
