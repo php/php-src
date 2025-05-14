@@ -4401,11 +4401,23 @@ class FileInfo {
         $stmts = $parser->parse($code);
         $nodeTraverser->traverse($stmts);
     
-        $fileTags = DocCommentTag::parseDocComments(getFileDocComments($stmts));
+        $fileTags = DocCommentTag::parseDocComments(self::getFileDocComments($stmts));
         $fileInfo = new FileInfo($fileTags);
     
         $fileInfo->handleStatements($stmts, $prettyPrinter);
         return $fileInfo;
+    }
+
+    /** @return DocComment[] */
+    private static function getFileDocComments(array $stmts): array {
+        if (empty($stmts)) {
+            return [];
+        }
+
+        return array_filter(
+            $stmts[0]->getComments(),
+            static fn ($comment): bool => $comment instanceof DocComment
+        );
     }
 
     private function handleStatements(array $stmts, PrettyPrinterAbstract $prettyPrinter): void {
@@ -5140,18 +5152,6 @@ function parseClass(
         $cond,
         $minimumPhpVersionIdCompatibility,
         $isUndocumentable
-    );
-}
-
-/** @return DocComment[] */
-function getFileDocComments(array $stmts): array {
-    if (empty($stmts)) {
-        return [];
-    }
-
-    return array_filter(
-        $stmts[0]->getComments(),
-        static fn ( $comment ): bool => $comment instanceof DocComment
     );
 }
 
