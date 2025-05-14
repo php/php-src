@@ -1457,9 +1457,8 @@ zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry
 			str = add_type_string(str, resolved, /* is_intersection */ false);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
-	// TODO Is this still required?
-	//} else if (ZEND_TYPE_IS_ASSOCIATED(type)) {
-	//	str = add_associated_type(ZEND_TYPE_NAME(type), scope);
+	} else if (ZEND_TYPE_IS_ASSOCIATED(type)) {
+		ZEND_ASSERT(false && "Generic type declarations do not exist yet");
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
@@ -9082,20 +9081,19 @@ static void zend_compile_implements(zend_ast *ast) /* {{{ */
 			zend_resolve_const_class_name_reference_with_generics(interface_ast, "interface name");
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
 
-		// TODO, need the list to a type list
 		if (interface_ast->child[1]) {
 			const zend_ast_list *generics_list = zend_ast_get_list(interface_ast->child[1]);
 			const uint32_t num_generic_args = generics_list->children;
 
-			// TODO Check that we have the same number of generic args?
+			// TODO Can we already check that we have correct number of generic args?
 			if (ce->bound_types == NULL) {
 				ALLOC_HASHTABLE(ce->bound_types);
-				zend_hash_init(ce->bound_types, list->children-i, NULL, zend_bound_types_ht_dtor, false /* todo depend on internal or not */);
+				zend_hash_init(ce->bound_types, list->children-i, NULL, zend_bound_types_ht_dtor, false /* todo depend on internal or not? */);
 			}
 
 			HashTable *bound_interface_types;
 			ALLOC_HASHTABLE(bound_interface_types);
-			zend_hash_init(bound_interface_types, num_generic_args, NULL, zend_types_ht_dtor, false /* todo depend on internal or not */);
+			zend_hash_init(bound_interface_types, num_generic_args, NULL, zend_types_ht_dtor, false /* todo depend on internal or not? */);
 			for (uint32_t generic_param = 0; generic_param < num_generic_args; ++generic_param) {
 				zend_type bound_type = zend_compile_typename(generics_list->child[generic_param]);
 				zend_hash_index_add_mem(bound_interface_types, generic_param, &bound_type, sizeof(bound_type));

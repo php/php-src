@@ -335,9 +335,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 	bool persistent = ce->type == ZEND_INTERNAL_CLASS;
 	/* Common to internal and user classes */
-	if (ce->attributes) {
-		zend_hash_release(ce->attributes);
-	}
 	if (ce->bound_types) {
 		zend_hash_release(ce->bound_types);
 	}
@@ -362,6 +359,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 				if (ce->doc_comment) {
 					zend_string_release_ex(ce->doc_comment, 0);
+				}
+
+				if (ce->attributes) {
+					zend_hash_release(ce->attributes);
 				}
 
 				if (ce->num_interfaces > 0 && !(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
@@ -536,6 +537,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->properties_info_table) {
 				free(ce->properties_info_table);
+			}
+			if (ce->attributes) {
+				zend_hash_release(ce->attributes);
 			}
 			free(ce);
 			break;
