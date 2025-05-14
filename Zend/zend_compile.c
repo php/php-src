@@ -8306,12 +8306,6 @@ static zend_op_array *zend_compile_func_decl_ex(
 
 	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
-		/* Set the closure scope at compile time as an optimization to
-		 * prevent creating a separate runtime cache for every initialization
-		 * of this closure. Most closures are expected not to change their
-		 * scope in practice.
-		 */
-		op_array->scope = CG(active_class_entry);
 	}
 
 	if (is_hook) {
@@ -8467,6 +8461,15 @@ static zend_op_array *zend_compile_func_decl_ex(
 
 	/* Pop the loop variable stack separator */
 	zend_stack_del_top(&CG(loop_var_stack));
+
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		/* Set the closure scope at compile time as an optimization to
+		 * prevent creating a separate runtime cache for every initialization
+		 * of this closure. Most closures are expected not to change their
+		 * scope in practice.
+		 */
+		op_array->scope = CG(active_class_entry);
+	}
 
 	if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		zend_observer_function_declared_notify(op_array, lcname);
