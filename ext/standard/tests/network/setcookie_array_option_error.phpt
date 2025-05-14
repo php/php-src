@@ -37,6 +37,12 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
+// Partitioned without secure
+try {
+    setcookie('name', 'value', ['partitioned' => true]);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 // Arguments after options array (will not be set)
 try {
@@ -66,6 +72,7 @@ setcookie(): option array cannot have numeric keys
 setcookie(): option "foo" is invalid
 setcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+setcookie(): "partitioned" option cannot be used without "secure" option
 setcookie(): Expects exactly 3 arguments when argument #3 ($expires_or_options) is an array
 bool(true)
 array(1) {
