@@ -48,6 +48,8 @@ enum {
 
 #define ZLOG_LEVEL_MASK 7
 
+#define ZLOG_ACCESS_LOG 16
+
 #define ZLOG_HAVE_ERRNO 0x100
 
 #define ZLOG_SYSERROR (ZLOG_ERROR | ZLOG_HAVE_ERRNO)
@@ -74,6 +76,7 @@ struct zlog_stream {
 	unsigned int msg_quote:1;
 	unsigned int decorate:1;
 	unsigned int is_stdout:1;
+	unsigned int over_limit:1;
 	int fd;
 	int line;
 	int child_pid;
@@ -103,14 +106,22 @@ zlog_bool zlog_stream_set_msg_suffix(
 		struct zlog_stream *stream, const char *suffix, const char *final_suffix);
 #define zlog_stream_prefix(stream) \
 	zlog_stream_prefix_ex(stream, __func__, __LINE__)
+void zlog_stream_start(struct zlog_stream *stream);
 ssize_t zlog_stream_prefix_ex(struct zlog_stream *stream, const char *function, int line);
 ssize_t zlog_stream_format(struct zlog_stream *stream, const char *fmt, ...)
 		__attribute__ ((format(printf,2,3)));
 ssize_t zlog_stream_vformat(struct zlog_stream *stream, const char *fmt, va_list args);
 ssize_t zlog_stream_str(struct zlog_stream *stream, const char *str, size_t str_len);
+ssize_t zlog_stream_char(struct zlog_stream *stream, char c);
 zlog_bool zlog_stream_finish(struct zlog_stream *stream);
 void zlog_stream_destroy(struct zlog_stream *stream);
 zlog_bool zlog_stream_close(struct zlog_stream *stream);
+zlog_bool zlog_stream_is_over_limit(struct zlog_stream *stream);
+
+static inline ssize_t zlog_stream_cstr(struct zlog_stream *stream, const char *cstr)
+{
+	return zlog_stream_str(stream, cstr, strlen(cstr));
+}
 
 /* default log limit */
 #define ZLOG_DEFAULT_LIMIT 1024
