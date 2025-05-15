@@ -2672,41 +2672,35 @@ class ConstInfo extends VariableLike
         return $this->valueString;
     }
 
-    public function getPredefinedConstantTerm(DOMDocument $doc, int $indentationLevel): DOMElement {
+    private function getPredefinedConstantElement(
+        DOMDocument $doc,
+        int $indentationLevel,
+        string $name
+    ): DOMElement {
         $indentation = str_repeat(" ", $indentationLevel);
 
-        $termElement = $doc->createElement("term");
+        $element = $doc->createElement($name);
 
         $constantElement = $doc->createElement("constant");
         $constantElement->textContent = $this->name->__toString();
 
         $typeElement = ($this->phpDocType ?? $this->type)->getTypeForDoc($doc);
 
-        $termElement->appendChild(new DOMText("\n$indentation "));
-        $termElement->appendChild($constantElement);
-        $termElement->appendChild(new DOMText("\n$indentation ("));
-        $termElement->appendChild($typeElement);
-        $termElement->appendChild(new DOMText(")\n$indentation"));
+        $element->appendChild(new DOMText("\n$indentation "));
+        $element->appendChild($constantElement);
+        $element->appendChild(new DOMText("\n$indentation ("));
+        $element->appendChild($typeElement);
+        $element->appendChild(new DOMText(")\n$indentation"));
 
-        return $termElement;
+        return $element;
+    }
+
+    public function getPredefinedConstantTerm(DOMDocument $doc, int $indentationLevel): DOMElement {
+        return $this->getPredefinedConstantElement($doc, $indentationLevel, "term");
     }
 
     public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel): DOMElement {
-        $indentation = str_repeat(" ", $indentationLevel);
-
-        $entryElement = $doc->createElement("entry");
-
-        $constantElement = $doc->createElement("constant");
-        $constantElement->textContent = $this->name->__toString();
-        $typeElement = ($this->phpDocType ?? $this->type)->getTypeForDoc($doc);
-
-        $entryElement->appendChild(new DOMText("\n$indentation "));
-        $entryElement->appendChild($constantElement);
-        $entryElement->appendChild(new DOMText("\n$indentation ("));
-        $entryElement->appendChild($typeElement);
-        $entryElement->appendChild(new DOMText(")\n$indentation"));
-
-        return $entryElement;
+        return $this->getPredefinedConstantElement($doc, $indentationLevel, "entry");
     }
 
     public function discardInfoForOldPhpVersions(?int $phpVersionIdMinimumCompatibility): void {
