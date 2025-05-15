@@ -120,7 +120,7 @@ PHP_METHOD(IntlListFormatter, format)
     ZEND_PARSE_PARAMETERS_END();
 
     if (!LISTFORMATTER_OBJECT(obj)) {
-        intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "ListFormatter not properly constructed", 0);
+        zend_throw_exception(NULL, "ListFormatter not properly constructed", 0);
         RETURN_FALSE;
     }
 
