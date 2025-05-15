@@ -725,8 +725,6 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 {
 	zend_long lval;
 	double dval;
-	zend_string *str;
-	bool bval;
 
 	/* Type preference order: int -> float -> string -> bool */
 	if (type_mask & MAY_BE_LONG) {
@@ -744,27 +742,36 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 				ZVAL_DOUBLE(arg, dval);
 				return 1;
 			}
-		} else if (zend_parse_arg_long_weak(arg, &lval, 0)) {
-			zval_ptr_dtor(arg);
-			ZVAL_LONG(arg, lval);
-			return 1;
-		} else if (UNEXPECTED(EG(exception))) {
-			return 0;
+		} else {
+			zend_opt_long result = zend_parse_arg_long_weak(arg, 0);
+			if (result.has_value) {
+				zval_ptr_dtor(arg);
+				ZVAL_LONG(arg, result.value);
+				return 1;
+			} else if (UNEXPECTED(EG(exception))) {
+				return 0;
+			}
 		}
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
-		zval_ptr_dtor(arg);
-		ZVAL_DOUBLE(arg, dval);
-		return 1;
+	if ((type_mask & MAY_BE_DOUBLE)) {
+		zend_opt_double result = zend_parse_arg_double_weak(arg, 0);
+		if (result.has_value) {
+			zval_ptr_dtor(arg);
+			ZVAL_DOUBLE(arg, result.value);
+			return 1;
+		}
 	}
-	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, &str, 0)) {
+	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, 0)) {
 		/* on success "arg" is converted to IS_STRING */
 		return 1;
 	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, 0)) {
-		zval_ptr_dtor(arg);
-		ZVAL_BOOL(arg, bval);
-		return 1;
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
+		zend_opt_bool result = zend_parse_arg_bool_weak(arg, 0);
+		if (result.has_value) {
+			zval_ptr_dtor(arg);
+			ZVAL_BOOL(arg, result.value);
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -784,22 +791,18 @@ static bool can_convert_to_string(const zval *zv) {
 /* Used to sanity-check internal arginfo types without performing any actual type conversions. */
 static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, const zval *arg)
 {
-	zend_long lval;
-	double dval;
-	bool bval;
-
 	/* Pass (uint32_t)-1 as arg_num to indicate to ZPP not to emit any deprecation notice,
 	 * this is needed because the version with side effects also uses 0 (e.g. for typed properties) */
-	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval, (uint32_t)-1)) {
+	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, (uint32_t)-1).has_value) {
 		return 1;
 	}
-	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, (uint32_t)-1)) {
+	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, (uint32_t)-1).has_value) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_STRING) && can_convert_to_string(arg)) {
 		return 1;
 	}
-	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, (uint32_t)-1)) {
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, (uint32_t)-1).has_value) {
 		return 1;
 	}
 	return 0;

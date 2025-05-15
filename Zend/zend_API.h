@@ -2174,22 +2174,37 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
 
+typedef struct {
+	zend_long value;
+	bool has_value;
+} zend_opt_long;
+
+typedef struct {
+	bool value;
+	bool has_value;
+} zend_opt_bool;
+
+typedef struct {
+	double value;
+	bool has_value;
+} zend_opt_double;
+
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(const zval *arg, bool *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(const zval *arg, bool *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, double *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, double *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **dest, uint32_t arg_num);
+ZEND_API zend_opt_bool ZEND_FASTCALL zend_parse_arg_bool_slow(const zval *arg, uint32_t arg_num);
+ZEND_API zend_opt_bool ZEND_FASTCALL zend_parse_arg_bool_weak(const zval *arg, uint32_t arg_num);
+ZEND_API zend_opt_long ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, uint32_t arg_num);
+ZEND_API zend_opt_long ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, uint32_t arg_num);
+ZEND_API zend_opt_double ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, uint32_t arg_num);
+ZEND_API zend_opt_double ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, uint32_t arg_num);
+ZEND_API zend_string * ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, uint32_t arg_num);
+ZEND_API zend_string * ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long, uint32_t arg_num);
 
-ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_bool_slow(const zval *arg, bool *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num);
+ZEND_API zend_opt_bool ZEND_FASTCALL zend_flf_parse_arg_bool_slow(const zval *arg, uint32_t arg_num);
+ZEND_API zend_string * ZEND_FASTCALL zend_flf_parse_arg_str_slow(zval *arg, uint32_t arg_num);
+ZEND_API zend_opt_long ZEND_FASTCALL zend_flf_parse_arg_long_slow(const zval *arg, uint32_t arg_num);
 
 static zend_always_inline bool zend_parse_arg_bool_ex(const zval *arg, bool *dest, bool *is_null, bool check_null, uint32_t arg_num, bool frameless)
 {
@@ -2204,10 +2219,16 @@ static zend_always_inline bool zend_parse_arg_bool_ex(const zval *arg, bool *des
 		*is_null = 1;
 		*dest = 0;
 	} else {
+		zend_opt_bool result;
 		if (frameless) {
-			return zend_flf_parse_arg_bool_slow(arg, dest, arg_num);
+			result = zend_flf_parse_arg_bool_slow(arg, arg_num);
 		} else {
-			return zend_parse_arg_bool_slow(arg, dest, arg_num);
+			result = zend_parse_arg_bool_slow(arg, arg_num);
+		}
+		if (result.has_value) {
+			*dest = result.value;
+		} else {
+			return 0;
 		}
 	}
 	return 1;
@@ -2229,10 +2250,16 @@ static zend_always_inline bool zend_parse_arg_long_ex(zval *arg, zend_long *dest
 		*is_null = 1;
 		*dest = 0;
 	} else {
+		zend_opt_long result;
 		if (frameless) {
-			return zend_flf_parse_arg_long_slow(arg, dest, arg_num);
+			result = zend_flf_parse_arg_long_slow(arg, arg_num);
 		} else {
-			return zend_parse_arg_long_slow(arg, dest, arg_num);
+			result = zend_parse_arg_long_slow(arg, arg_num);
+		}
+		if (result.has_value) {
+			*dest = result.value;
+		} else {
+			return 0;
 		}
 	}
 	return 1;
@@ -2254,7 +2281,12 @@ static zend_always_inline bool zend_parse_arg_double(const zval *arg, double *de
 		*is_null = 1;
 		*dest = 0.0;
 	} else {
-		return zend_parse_arg_double_slow(arg, dest, arg_num);
+		zend_opt_double result = zend_parse_arg_double_slow(arg, arg_num);
+		if (result.has_value) {
+			*dest = result.value;
+		} else {
+			return 0;
+		}
 	}
 	return 1;
 }
@@ -2266,7 +2298,11 @@ static zend_always_inline bool zend_parse_arg_number(zval *arg, zval **dest, boo
 	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*dest = NULL;
 	} else {
-		return zend_parse_arg_number_slow(arg, dest, arg_num);
+		if (zend_parse_arg_number_slow(arg, arg_num)) {
+			*dest = arg;
+		} else {
+			return 0;
+		}
 	}
 	return 1;
 }
@@ -2278,7 +2314,11 @@ static zend_always_inline bool zend_parse_arg_number_or_str(zval *arg, zval **de
 	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		*dest = NULL;
 	} else {
-		return zend_parse_arg_number_or_str_slow(arg, dest, arg_num);
+		if (zend_parse_arg_number_or_str_slow(arg, arg_num)) {
+			*dest = arg;
+		} else {
+			return false;
+		}
 	}
 	return true;
 }
@@ -2290,10 +2330,16 @@ static zend_always_inline bool zend_parse_arg_str_ex(zval *arg, zend_string **de
 	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*dest = NULL;
 	} else {
+		zend_string *str;
 		if (frameless) {
-			return zend_flf_parse_arg_str_slow(arg, dest, arg_num);
+			str = zend_flf_parse_arg_str_slow(arg, arg_num);
 		} else {
-			return zend_parse_arg_str_slow(arg, dest, arg_num);
+			str = zend_parse_arg_str_slow(arg, arg_num);
+		}
+		if (str) {
+			*dest = str;
+		} else {
+			return 0;
 		}
 	}
 	return 1;
@@ -2415,7 +2461,12 @@ static zend_always_inline bool zend_parse_arg_array_ht_or_long(
 		*is_null = 1;
 	} else {
 		*dest_ht = NULL;
-		return zend_parse_arg_long_slow(arg, dest_long, arg_num);
+		zend_opt_long result = zend_parse_arg_long_slow(arg, arg_num);
+		if (result.has_value) {
+			*dest_long = result.value;
+		} else {
+			return 0;
+		}
 	}
 
 	return 1;
@@ -2464,7 +2515,12 @@ static zend_always_inline bool zend_parse_arg_obj_or_long(
 		*is_null = 1;
 	} else {
 		*dest_obj = NULL;
-		return zend_parse_arg_long_slow(arg, dest_long, arg_num);
+		zend_opt_long result = zend_parse_arg_long_slow(arg, arg_num);
+		if (result.has_value) {
+			*dest_long = result.value;
+		} else {
+			return 0;
+		}
 	}
 
 	return 1;
@@ -2527,7 +2583,12 @@ static zend_always_inline bool zend_parse_arg_array_ht_or_str(
 		*dest_str = NULL;
 	} else {
 		*dest_ht = NULL;
-		return zend_parse_arg_str_slow(arg, dest_str, arg_num);
+		zend_string *str = zend_parse_arg_str_slow(arg, arg_num);
+		if (str) {
+			*dest_str = str;
+		} else {
+			return 0;
+		}
 	}
 	return 1;
 }
