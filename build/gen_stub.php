@@ -1513,14 +1513,6 @@ class FuncInfo {
     }
 
     public function getFunctionEntry(): string {
-        $code = "";
-
-        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
-        $isVanillaEntry = $this->alias === null && !$this->supportsCompileTimeEval && $this->exposedDocComment === null && empty($this->framelessFunctionInfos);
-        $argInfoName = $this->getArgInfoName();
-        $flagsByPhpVersions = $this->getArginfoFlagsByPhpVersions();
-        $functionEntryCode = null;
-
         if (!empty($this->framelessFunctionInfos)) {
             if ($this->isMethod()) {
                 throw new Exception('Frameless methods are not supported yet');
@@ -1533,6 +1525,10 @@ class FuncInfo {
             }
         }
 
+        $isVanillaEntry = $this->alias === null && !$this->supportsCompileTimeEval && $this->exposedDocComment === null && empty($this->framelessFunctionInfos);
+        $argInfoName = $this->getArgInfoName();
+        $flagsByPhpVersions = $this->getArginfoFlagsByPhpVersions();
+
         if ($this->isMethod()) {
             $zendName = '"' . $this->name->methodName . '"';
             if ($this->alias) {
@@ -1543,69 +1539,60 @@ class FuncInfo {
                 } else {
                     throw new Error("Cannot happen");
                 }
+            } elseif ($this->flags & Modifiers::ABSTRACT) {
+                $name = "NULL";
             } else {
-                if ($this->flags & Modifiers::ABSTRACT) {
-                    $name = "NULL";
-                } else {
-                    $name = "zim_" . $this->name->getDeclarationClassName() . "_" . $this->name->methodName;
+                $name = "zim_" . $this->name->getDeclarationClassName() . "_" . $this->name->methodName;
 
-                    if ($isVanillaEntry) {
-                        $template = "\tZEND_ME(" . $this->name->getDeclarationClassName() . ", " . $this->name->methodName . ", $argInfoName, %s)\n";
-                        $flagsCode = $flagsByPhpVersions->generateVersionDependentFlagCode(
-                            $template,
-                            $this->minimumPhpVersionIdCompatibility
-                        );
-                        $functionEntryCode = rtrim($flagsCode);
-                    }
+                if ($isVanillaEntry) {
+                    $template = "\tZEND_ME(" . $this->name->getDeclarationClassName() . ", " . $this->name->methodName . ", $argInfoName, %s)\n";
+                    $flagsCode = $flagsByPhpVersions->generateVersionDependentFlagCode(
+                        $template,
+                        $this->minimumPhpVersionIdCompatibility
+                    );
+                    return rtrim($flagsCode) . "\n";
                 }
             }
         } else if ($this->name instanceof FunctionName) {
             $functionName = $this->name->getFunctionName();
             $declarationName = $this->alias ? $this->alias->getNonNamespacedName() : $this->name->getDeclarationName();
+            $name = "zif_$declarationName";
 
             if ($this->name->getNamespace()) {
                 $namespace = addslashes($this->name->getNamespace());
                 $zendName = "ZEND_NS_NAME(\"$namespace\", \"$functionName\")";
-                $name = "zif_$declarationName";
             } else {
-                $zendName = '"' . $functionName . '"';
-                $name = "zif_$declarationName";
-
                 // Can only use ZEND_FE() if we have no flags for *all* versions
                 if ($isVanillaEntry && $flagsByPhpVersions->isEmpty()) {
-                    $functionEntryCode = "\tZEND_FE($declarationName, $argInfoName)";
+                    return "\tZEND_FE($declarationName, $argInfoName)\n";
                 }
+                $zendName = '"' . $functionName . '"';
             }
         } else {
             throw new Error("Cannot happen");
         }
 
-        if ($functionEntryCode !== null) {
-            $code .= "$functionEntryCode\n";
-        } else {
-            if (!$php84MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
-            }
+        $docComment = $this->exposedDocComment ? '"' . $this->exposedDocComment->escape() . '"' : "NULL";
+        $framelessFuncInfosName = !empty($this->framelessFunctionInfos) ? $this->getFramelessFunctionInfosName() : "NULL";
 
-            $docComment = $this->exposedDocComment ? '"' . $this->exposedDocComment->escape() . '"' : "NULL";
-            $framelessFuncInfosName = !empty($this->framelessFunctionInfos) ? $this->getFramelessFunctionInfosName() : "NULL";
+        // Assume 8.4+ here, if older versions are supported this is conditional
+        $code = $flagsByPhpVersions->generateVersionDependentFlagCode(
+            "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s, $framelessFuncInfosName, $docComment)\n",
+            PHP_84_VERSION_ID
+        );
+
+        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
+        if (!$php84MinimumCompatibility) {
+            $code = "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n$code";
+            $code .= "#else\n";
 
             $code .= $flagsByPhpVersions->generateVersionDependentFlagCode(
-                "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s, $framelessFuncInfosName, $docComment)\n",
-                PHP_84_VERSION_ID
+                "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n",
+                $this->minimumPhpVersionIdCompatibility,
+                PHP_83_VERSION_ID
             );
 
-            if (!$php84MinimumCompatibility) {
-                $code .= "#else\n";
-
-                $code .= $flagsByPhpVersions->generateVersionDependentFlagCode(
-                    "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n",
-                    $this->minimumPhpVersionIdCompatibility,
-                    PHP_83_VERSION_ID
-                );
-
-                $code .= "#endif\n";
-            }
+            $code .= "#endif\n";
         }
 
         return $code;
