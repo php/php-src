@@ -84,7 +84,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
 
             $stubCode = file_get_contents($stubFile);
-            $stubHash = computeStubHash($stubCode);
+            $stubHash = sha1(str_replace("\r\n", "\n", $stubCode));
             $oldStubHash = extractStubHash($arginfoFile);
             if ($stubHash === $oldStubHash && !$context->forceParse) {
                 /* Stub file did not change, do not regenerate. */
@@ -151,10 +151,6 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
         echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
     }
-}
-
-function computeStubHash(string $stubCode): string {
-    return sha1(str_replace("\r\n", "\n", $stubCode));
 }
 
 function extractStubHash(string $arginfoFile): ?string {
