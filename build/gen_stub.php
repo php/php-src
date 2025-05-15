@@ -955,7 +955,6 @@ interface FunctionOrMethodName {
     public function getMethodSynopsisFilename(): string;
     public function getNameForAttributes(): string;
     public function __toString(): string;
-    public function isMethod(): bool;
     public function isConstructor(): bool;
     public function isDestructor(): bool;
 }
@@ -1018,10 +1017,6 @@ class FunctionName implements FunctionOrMethodName {
         return $this->name->toString();
     }
 
-    public function isMethod(): bool {
-        return false;
-    }
-
     public function isConstructor(): bool {
         return false;
     }
@@ -1065,10 +1060,6 @@ class MethodName implements FunctionOrMethodName {
 
     public function __toString(): string {
         return "$this->className::$this->methodName";
-    }
-
-    public function isMethod(): bool {
-        return true;
     }
 
     public function isConstructor(): bool {
@@ -1385,7 +1376,7 @@ class FuncInfo {
 
     public function isMethod(): bool
     {
-        return $this->name->isMethod();
+        return $this->name instanceof MethodName;
     }
 
     public function isFinalMethod(): bool
