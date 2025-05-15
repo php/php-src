@@ -361,77 +361,49 @@ class SimpleType {
         return $this->isBuiltin && $this->name === 'mixed';
     }
 
-    public function toTypeCode(): string {
+    private function toTypeInfo(): array {
         assert($this->isBuiltin);
+
         switch ($this->name) {
-            case "bool":
-                return "_IS_BOOL";
-            case "int":
-                return "IS_LONG";
-            case "float":
-                return "IS_DOUBLE";
-            case "string":
-                return "IS_STRING";
-            case "array":
-                return "IS_ARRAY";
-            case "object":
-                return "IS_OBJECT";
-            case "void":
-                return "IS_VOID";
-            case "callable":
-                return "IS_CALLABLE";
-            case "mixed":
-                return "IS_MIXED";
-            case "static":
-                return "IS_STATIC";
-            case "never":
-                return "IS_NEVER";
             case "null":
-                return "IS_NULL";
+                return ["IS_NULL", "MAY_BE_NULL"];
             case "false":
-                return "IS_FALSE";
+                return ["IS_FALSE", "MAY_BE_FALSE"];
             case "true":
-                return "IS_TRUE";
+                return ["IS_TRUE", "MAY_BE_TRUE"];
+            case "bool":
+                return ["_IS_BOOL", "MAY_BE_BOOL"];
+            case "int":
+                return ["IS_LONG", "MAY_BE_LONG"];
+            case "float":
+                return ["IS_DOUBLE", "MAY_BE_DOUBLE"];
+            case "string":
+                return ["IS_STRING", "MAY_BE_STRING"];
+            case "array":
+                return ["IS_ARRAY", "MAY_BE_ARRAY"];
+            case "object":
+                return ["IS_OBJECT", "MAY_BE_OBJECT"];
+            case "callable":
+                return ["IS_CALLABLE", "MAY_BE_CALLABLE"];
+            case "mixed":
+                return ["IS_MIXED", "MAY_BE_ANY"];
+            case "void":
+                return ["IS_VOID", "MAY_BE_VOID"];
+            case "static":
+                return ["IS_STATIC", "MAY_BE_STATIC"];
+            case "never":
+                return ["IS_NEVER", "MAY_BE_NEVER"];
             default:
                 throw new Exception("Not implemented: $this->name");
         }
     }
 
-    public function toTypeMask(): string {
-        assert($this->isBuiltin);
+    public function toTypeCode(): string {
+        return $this->toTypeInfo()[0];
+    }
 
-        switch ($this->name) {
-            case "null":
-                return "MAY_BE_NULL";
-            case "false":
-                return "MAY_BE_FALSE";
-            case "true":
-                return "MAY_BE_TRUE";
-            case "bool":
-                return "MAY_BE_BOOL";
-            case "int":
-                return "MAY_BE_LONG";
-            case "float":
-                return "MAY_BE_DOUBLE";
-            case "string":
-                return "MAY_BE_STRING";
-            case "array":
-                return "MAY_BE_ARRAY";
-            case "object":
-                return "MAY_BE_OBJECT";
-            case "callable":
-                return "MAY_BE_CALLABLE";
-            case "mixed":
-                return "MAY_BE_ANY";
-            case "void":
-                return "MAY_BE_VOID";
-            case "static":
-                return "MAY_BE_STATIC";
-            case "never":
-                return "MAY_BE_NEVER";
-            default:
-                throw new Exception("Not implemented: $this->name");
-        }
+    public function toTypeMask(): string {
+        return $this->toTypeInfo()[1];
     }
 
     public function toOptimizerTypeMaskForArrayKey(): string {
