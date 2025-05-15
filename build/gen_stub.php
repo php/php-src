@@ -3594,11 +3594,17 @@ class ClassInfo {
         foreach ($this->propertyInfos as $property) {
             $code .= $property->getDeclaration($allConstInfos);
         }
+        // Reusable strings for wrapping conditional PHP 8.0+ code
+        if ($php80MinimumCompatibility) {
+            $php80CondStart = '';
+            $php80CondEnd = '';
+        } else {
+            $php80CondStart = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
+            $php80CondEnd = "#endif\n";
+        }
 
         if (!empty($this->attributes)) {
-            if (!$php80MinimumCompatibility) {
-                $code .= "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
-            }
+            $code .= $php80CondStart;
 
             foreach ($this->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
@@ -3609,45 +3615,25 @@ class ClassInfo {
                 );
             }
 
-            if (!$php80MinimumCompatibility) {
-                $code .= "#endif\n";
-            }
+            $code .= $php80CondEnd;
         }
 
         if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond)) {
-            if (!$php80MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
-            }
-
+            $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
-
-            if (!$php80MinimumCompatibility) {
-                $code .= "#endif\n";
-            }
+            $code .= $php80CondEnd;
         }
 
         if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility)) {
-            if (!$php80MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
-            }
-
+            $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
-
-            if (!$php80MinimumCompatibility) {
-                $code .= "#endif\n";
-            }
+            $code .= $php80CondEnd;
         }
 
         if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond)) {
-            if (!$php80MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")\n";
-            }
-
+            $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
-
-            if (!$php80MinimumCompatibility) {
-                $code .= "#endif\n";
-            }
+            $code .= $php80CondEnd;
         }
 
         $code .= "\n\treturn class_entry;\n";
