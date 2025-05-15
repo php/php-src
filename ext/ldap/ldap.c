@@ -3708,15 +3708,56 @@ PHP_FUNCTION(ldap_rename_ext)
 /* }}} */
 
 #ifdef HAVE_LDAP_START_TLS_S
+/*
+  Force new tls context creation with string options inherited from global
+  Workaround to https://bugs.openldap.org/show_bug.cgi?id=10337
+ */
+static int _php_ldap_tls_newctx(LDAP *ld)
+{
+	int val = 0, i, opts[] = {
+#if (LDAP_API_VERSION > 2000)
+		LDAP_OPT_X_TLS_CACERTDIR,
+		LDAP_OPT_X_TLS_CACERTFILE,
+		LDAP_OPT_X_TLS_CERTFILE,
+		LDAP_OPT_X_TLS_CIPHER_SUITE,
+		LDAP_OPT_X_TLS_KEYFILE,
+		LDAP_OPT_X_TLS_RANDOM_FILE,
+#endif
+#ifdef LDAP_OPT_X_TLS_CRLFILE
+		LDAP_OPT_X_TLS_CRLFILE,
+#endif
+#ifdef LDAP_OPT_X_TLS_DHFILE
+		LDAP_OPT_X_TLS_DHFILE,
+#endif
+#ifdef LDAP_OPT_X_TLS_ECNAME
+		LDAP_OPT_X_TLS_ECNAME,
+#endif
+	0};
+
+	for (i=0 ; opts[i] ; i++) {
+		char *path = NULL;
+
+		ldap_get_option(ld, opts[i], &path);
+		if (path) {			/* already set locally */
+			ldap_memfree(path);
+		} else {
+			ldap_get_option(NULL, opts[i], &path);
+			if (path) { 	/* set globally, inherit */
+				ldap_set_option(ld, opts[i], path);
+				ldap_memfree(path);
+			}
+		}
+	}
+
+	return ldap_set_option(ld, LDAP_OPT_X_TLS_NEWCTX, &val);
+}
+
 /* {{{ Start TLS */
 PHP_FUNCTION(ldap_start_tls)
 {
 	zval *link;
 	ldap_linkdata *ld;
 	int rc, protocol = LDAP_VERSION3;
-#ifdef LDAP_OPT_X_TLS_NEWCTX
-	int val = 0;
-#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &link, ldap_link_ce) != SUCCESS) {
 		RETURN_THROWS();
@@ -3727,7 +3768,7 @@ PHP_FUNCTION(ldap_start_tls)
 
 	if (((rc = ldap_set_option(ld->link, LDAP_OPT_PROTOCOL_VERSION, &protocol)) != LDAP_SUCCESS) ||
 #ifdef LDAP_OPT_X_TLS_NEWCTX
-		(LDAPG(tls_newctx) && (rc = ldap_set_option(ld->link, LDAP_OPT_X_TLS_NEWCTX, &val)) != LDAP_OPT_SUCCESS) ||
+		(LDAPG(tls_newctx) && (rc = _php_ldap_tls_newctx(ld->link)) != LDAP_OPT_SUCCESS) ||
 #endif
 		((rc = ldap_start_tls_s(ld->link, NULL, NULL)) != LDAP_SUCCESS)
 	) {
