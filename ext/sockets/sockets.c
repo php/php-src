@@ -2321,13 +2321,13 @@ PHP_FUNCTION(socket_set_option)
 
 			zval *socket = zend_read_property(socket_so_splice_ce, so_splice_obj, "socket", strlen("socket"), false, &tmpA);
 			if (Z_TYPE_P(socket) == IS_NULL) {
-					zend_argument_type_error(4, "invalid SocketSoSplice socket member value");
+					zend_argument_type_error(4, "socket cannot be null");
 					RETURN_THROWS();
 			}
 			zval *max = zend_read_property(socket_so_splice_ce, so_splice_obj, "max", strlen("max"), false, &tmpB);
 			zval *array = zend_read_property(socket_so_splice_ce, so_splice_obj, "time", strlen("time"), false, &tmpC);
 			if (Z_TYPE_P(array) == IS_NULL) {
-					zend_argument_type_error(4, "invalid SocketSoSplice time member value");
+					zend_argument_type_error(4, "time cannot be null");
 					RETURN_THROWS();
 			}
 
