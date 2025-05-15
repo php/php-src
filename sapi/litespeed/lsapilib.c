@@ -2652,8 +2652,8 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
     {
     case '/':
         pAddr->sa_family = AF_UNIX;
-        strncpy( ((struct sockaddr_un *)pAddr)->sun_path, p,
-                sizeof(((struct sockaddr_un *)pAddr)->sun_path) );
+        memccpy(((struct sockaddr_un *)pAddr)->sun_path, p, 0,
+                sizeof(((struct sockaddr_un *)pAddr)->sun_path));
         return 0;
 
     case '[':
