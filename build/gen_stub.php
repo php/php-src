@@ -54,7 +54,7 @@ function processDirectory(string $dir, Context $context): array {
     );
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-        if (preg_match('/\.stub\.php$/', $pathName)) {
+        if (substr($pathName, -9) === '.stub.php') {
             $pathNames[] = $pathName;
         }
     }
