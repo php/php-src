@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fix various reference issues. (nielsdos)
 
+- LDAP:
+  . Fixed bug GH-18529 (ldap no longer respects TLS_CACERT from ldaprc in
+    ldap_start_tls()). (Remi)
+
 - Opcache:
   . Fixed bug GH-18417 (Windows SHM reattachment fails when increasing
     memory_consumption or jit_buffer_size). (nielsdos)
