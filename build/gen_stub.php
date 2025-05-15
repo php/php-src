@@ -1381,7 +1381,7 @@ class FuncInfo {
         return $this->name instanceof MethodName;
     }
 
-    public function isFinalMethod(): bool
+    private function isFinalMethod(): bool
     {
         return ($this->flags & Modifiers::FINAL) || ($this->classFlags & Modifiers::FINAL);
     }
@@ -1392,7 +1392,7 @@ class FuncInfo {
     }
 
     /** @return string[] */
-    public function getModifierNames(): array
+    private function getModifierNames(): array
     {
         if (!$this->isMethod()) {
             return [];
@@ -1432,7 +1432,7 @@ class FuncInfo {
         return false;
     }
 
-    public function equalsApartFromNameAndRefcount(FuncInfo $other): bool {
+    private function equalsApartFromNameAndRefcount(FuncInfo $other): bool {
         if (count($this->args) !== count($other->args)) {
             return false;
         }
