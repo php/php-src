@@ -946,10 +946,10 @@ static inheritance_status zend_do_perform_implementation_check(
 /* }}} */
 
 static ZEND_COLD void zend_append_type_hint(
-		smart_str *str, zend_class_entry *scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
+		smart_str *str, zend_class_entry *scope, const HashTable *bound_types_to_scope, const zend_arg_info *arg_info, bool return_hint) /* {{{ */
 {
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
-		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, scope);
+		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, scope, bound_types_to_scope);
 		smart_str_append(str, type_str);
 		zend_string_release(type_str);
 		if (!return_hint) {
@@ -960,7 +960,7 @@ static ZEND_COLD void zend_append_type_hint(
 /* }}} */
 
 static ZEND_COLD zend_string *zend_get_function_declaration(
-		const zend_function *fptr, zend_class_entry *scope) /* {{{ */
+		const zend_function *fptr, zend_class_entry *scope, const HashTable *bound_types_to_scope) /* {{{ */
 {
 	smart_str str = {0};
 
@@ -991,7 +991,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 			num_args++;
 		}
 		for (uint32_t i = 0; i < num_args;) {
-			zend_append_type_hint(&str, scope, arg_info, 0);
+			zend_append_type_hint(&str, scope, bound_types_to_scope, arg_info, 0);
 
 			if (ZEND_ARG_SEND_MODE(arg_info)) {
 				smart_str_appendc(&str, '&');
@@ -1088,7 +1088,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		smart_str_appends(&str, ": ");
-		zend_append_type_hint(&str, scope, fptr->common.arg_info - 1, 1);
+		zend_append_type_hint(&str, scope, bound_types_to_scope, fptr->common.arg_info - 1, 1);
 	}
 	smart_str_0(&str);
 
@@ -1108,8 +1108,12 @@ static void ZEND_COLD emit_incompatible_method_error(
 		const zend_function *child, zend_class_entry *child_scope,
 		const zend_function *parent, zend_class_entry *parent_scope,
 		inheritance_status status) {
-	zend_string *parent_prototype = zend_get_function_declaration(parent, parent_scope);
-	zend_string *child_prototype = zend_get_function_declaration(child, child_scope);
+	const HashTable *bound_types_to_parent = NULL;
+	if (child_scope->bound_types) {
+		bound_types_to_parent = zend_hash_find_ptr_lc(child_scope->bound_types, parent_scope->name);
+	}
+	zend_string *parent_prototype = zend_get_function_declaration(parent, parent_scope, bound_types_to_parent);
+	zend_string *child_prototype = zend_get_function_declaration(child, child_scope, NULL);
 	if (status == INHERITANCE_UNRESOLVED) {
 		// TODO Improve error message if first unresolved class is present in child and parent?
 		/* Fetch the first unresolved class from registered autoloads */
@@ -1362,7 +1366,7 @@ static inheritance_status full_property_types_compatible(
 
 static ZEND_COLD void emit_incompatible_property_error(
 		const zend_property_info *child, const zend_property_info *parent, prop_variance variance) {
-	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
+	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce, /* TODO? */ NULL);
 	zend_error_noreturn(E_COMPILE_ERROR,
 		"Type of %s::$%s must be %s%s (as in class %s)",
 		ZSTR_VAL(child->ce->name),
@@ -1376,7 +1380,7 @@ static ZEND_COLD void emit_incompatible_property_error(
 static ZEND_COLD void emit_set_hook_type_error(const zend_property_info *child, const zend_property_info *parent)
 {
 	zend_type set_type = parent->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0].type;
-	zend_string *type_str = zend_type_to_string_resolved(set_type, parent->ce);
+	zend_string *type_str = zend_type_to_string_resolved(set_type, parent->ce, /* TODO? */ NULL);
 	zend_error_noreturn(E_COMPILE_ERROR,
 		"Set type of %s::$%s must be supertype of %s (as in %s %s)",
 		ZSTR_VAL(child->ce->name),
@@ -1677,7 +1681,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 
 static void emit_incompatible_class_constant_error(
 		const zend_class_constant *child, const zend_class_constant *parent, const zend_string *const_name) {
-	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
+	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce, NULL);
 	zend_error_noreturn(E_COMPILE_ERROR,
 		"Type of %s::%s must be compatible with %s::%s of type %s",
 		ZSTR_VAL(child->ce->name),

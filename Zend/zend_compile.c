@@ -1434,10 +1434,31 @@ static zend_string *add_intersection_type(zend_string *str,
 	return str;
 }
 
-zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry *scope) {
+static zend_string* resolve_bound_generic_type(zend_string *type_name, zend_class_entry *scope, const HashTable *bound_types) {
+	const zend_type *constraint = zend_hash_find_ptr(bound_types, type_name);
+	ZEND_ASSERT(constraint != NULL);
+
+	zend_string *constraint_type_str = zend_type_to_string_resolved(*constraint, scope, /* need the bound types? */NULL);
+
+	size_t len = ZSTR_LEN(type_name) + ZSTR_LEN(constraint_type_str) + strlen("< : >");
+	zend_string *result = zend_string_alloc(len, 0);
+
+	ZSTR_VAL(result)[0] = '<';
+	memcpy(ZSTR_VAL(result) + strlen("<"), ZSTR_VAL(type_name), ZSTR_LEN(type_name));
+	ZSTR_VAL(result)[ZSTR_LEN(type_name) + 1] = ' ';
+	ZSTR_VAL(result)[ZSTR_LEN(type_name) + 2] = ':';
+	ZSTR_VAL(result)[ZSTR_LEN(type_name) + 3] = ' ';
+	memcpy(ZSTR_VAL(result) + ZSTR_LEN(type_name) + strlen("< : "), ZSTR_VAL(constraint_type_str), ZSTR_LEN(constraint_type_str));
+	ZSTR_VAL(result)[len-1] = '>';
+	ZSTR_VAL(result)[len] = '\0';
+
+	zend_string_release(constraint_type_str);
+	return result;
+}
+
+zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry *scope, const HashTable *bound_types_to_scope) {
 	zend_string *str = NULL;
 
-	ZEND_ASSERT(!ZEND_TYPE_IS_GENERIC_PARAM_NAME(type) && "Generic type declarations do not exist yet");
 	/* Pure intersection type */
 	if (ZEND_TYPE_IS_INTERSECTION(type)) {
 		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
@@ -1458,6 +1479,8 @@ zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry
 			str = add_type_string(str, resolved, /* is_intersection */ false);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(type)) {
+		str = resolve_bound_generic_type(ZEND_TYPE_NAME(type), scope, bound_types_to_scope);
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
@@ -1527,7 +1550,7 @@ zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry
 }
 
 ZEND_API zend_string *zend_type_to_string(zend_type type) {
-	return zend_type_to_string_resolved(type, NULL);
+	return zend_type_to_string_resolved(type, NULL, NULL);
 }
 
 static bool is_generator_compatible_class_type(const zend_string *name) {
