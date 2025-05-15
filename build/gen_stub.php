@@ -1482,27 +1482,21 @@ class FuncInfo {
             return null;
         }
 
-        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
-
         $code = '';
-
-        if (!$php84MinimumCompatibility) {
-            $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
-        }
-
+        $infos = '';
         foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
             $code .= "ZEND_FRAMELESS_FUNCTION({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity});\n";
+            $infos .= "\t{ ZEND_FRAMELESS_FUNCTION_NAME({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity}), {$framelessFunctionInfo->arity} },\n";
         }
 
         $code .= 'static const zend_frameless_function_info ' . $this->getFramelessFunctionInfosName() . "[] = {\n";
-        foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
-            $code .= "\t{ ZEND_FRAMELESS_FUNCTION_NAME({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity}), {$framelessFunctionInfo->arity} },\n";
-        }
+        $code .= $infos;
         $code .= "\t{ 0 },\n";
         $code .= "};\n";
 
+        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
         if (!$php84MinimumCompatibility) {
-            $code .= "#endif\n";
+            return "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n$code#endif\n";
         }
 
         return $code;
