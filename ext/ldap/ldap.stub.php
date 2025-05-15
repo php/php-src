@@ -740,7 +740,7 @@ namespace {
     function ldap_rename_ext(LDAP\Connection $ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null): LDAP\Result|false {}
 
     /** @param array|string|int $value */
-    function ldap_get_option(LDAP\Connection $ldap, int $option, &$value = null): bool {}
+    function ldap_get_option(?LDAP\Connection $ldap, int $option, &$value = null): bool {}
 
     /** @param array|string|int|bool $value */
     function ldap_set_option(?LDAP\Connection $ldap, int $option, $value): bool {}
