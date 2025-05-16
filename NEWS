@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-18417 (Windows SHM reattachment fails when increasing
     memory_consumption or jit_buffer_size). (nielsdos)
+  . Fixed bug GH-18567 (Preloading with internal class alias triggers assertion
+    failure). (nielsdos)
 
 - PDO_OCI:
   . Fixed bug GH-18494 (PDO OCI segfault in statement GC). (nielsdos)
