@@ -14971,8 +14971,9 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			ZEND_ASSERT(slow_inputs == IR_UNUSED);
 			goto slow_path;
 		}
+
 		// Undefined property with potential magic __get()/__set() or lazy object
-		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && prop_type != IS_UNDEF) {
 			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
