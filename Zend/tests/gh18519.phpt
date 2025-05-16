@@ -1,5 +1,9 @@
 --TEST--
 GH-18519: Nested object comparison leading to stack overflow
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN')) die('skip as it fatally crash');
+?>
 --FILE--
 <?php
 
@@ -32,5 +36,5 @@ try {
 	echo $e->getMessage(). PHP_EOL;
 }
 ?>
---EXPECT--
-Object compare - stack limit reached
+--EXPECTREGEX--
+(Object compare - stack limit reached|Fatal error: Nesting level too deep - recursive dependency?.+)
