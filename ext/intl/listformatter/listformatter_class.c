@@ -200,12 +200,12 @@ PHP_METHOD(IntlListFormatter, format)
         RETVAL_NEW_STR(ret);
     }
 
-    cleanup:
-        for (i = 0; i < count; i++) {
-            efree((void *)items[i]);
-        }
-        efree(items);
-        efree(itemLengths);
+cleanup:
+    for (i = 0; i < count; i++) {
+        efree((void *)items[i]);
+    }
+    efree(items);
+    efree(itemLengths);
 }
 
 PHP_METHOD(IntlListFormatter, getErrorCode)
