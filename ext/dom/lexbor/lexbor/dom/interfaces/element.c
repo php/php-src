@@ -444,7 +444,9 @@ lxb_dom_element_attr_by_local_name_data(lxb_dom_element_t *element,
     lxb_dom_attr_t *attr = element->first_attr;
 
     while (attr != NULL) {
-        if (attr->node.local_name == data->attr_id) {
+        if (attr->node.local_name == data->attr_id
+            || attr->qualified_name == data->attr_id)
+        {
             return attr;
         }
 
