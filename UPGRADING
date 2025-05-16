@@ -460,6 +460,9 @@ PHP 8.5 UPGRADE NOTES
     Note: A cache generated with a different build of PHP, a different file
     path, or different settings (including which extensions are loaded), may be
     ignored.
+  . The default value of opcache.jit_hot_loop is now 61 (a prime) to prevent it
+    from being a multiple of loop iteration counts.
+    It is recommended that this parameter is set to a prime number.
 
 ========================================
 12. Windows Support

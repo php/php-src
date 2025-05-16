@@ -111,9 +111,10 @@ PHP                                                                        NEWS
   . Added mysqlnd.collect_memory_statistics to ini quick reference.
     (hauk92)
 
-- OPcache:
+- Opcache:
   . Fixed ZTS OPcache build on Cygwin. (cmb)
   . Added opcache.file_cache_read_only. (Samuel Melrose)
+  . Updated default value of opcache.jit_hot_loop. (Arnaud)
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
