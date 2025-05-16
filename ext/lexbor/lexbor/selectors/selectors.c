@@ -845,7 +845,7 @@ lxb_selectors_state_has_relative(lxb_dom_node_t *node,
             break;
         }
 
-        while (node !=root && node->next == NULL) {
+        while (node !=root && node->next == NULL && node->parent != NULL) {
             node = node->parent;
         }
 

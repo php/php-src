@@ -1,4 +1,4 @@
-From ce1cb529bb5415e4ea17332731c20d2c78adc601 Mon Sep 17 00:00:00 2001
+From eb5e3769950cd9c0bc59066d94d6da9291f43af8 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Mon, 14 Aug 2023 20:18:51 +0200
 Subject: [PATCH 2/6] Track implied added nodes for options use in PHP
@@ -11,7 +11,7 @@ Subject: [PATCH 2/6] Track implied added nodes for options use in PHP
  4 files changed, 8 insertions(+)
 
 diff --git a/source/lexbor/html/tree.h b/source/lexbor/html/tree.h
-index 2a43f8b..d964f01 100644
+index 9564608..8ad32a4 100644
 --- a/source/lexbor/html/tree.h
 +++ b/source/lexbor/html/tree.h
 @@ -55,6 +55,9 @@ struct lxb_html_tree {
@@ -50,10 +50,10 @@ index 14621f2..cd2ac2a 100644
  
              break;
 diff --git a/source/lexbor/html/tree/insertion_mode/before_html.c b/source/lexbor/html/tree/insertion_mode/before_html.c
-index ed5e367..b078ac5 100644
+index 05fe738..1e09cda 100644
 --- a/source/lexbor/html/tree/insertion_mode/before_html.c
 +++ b/source/lexbor/html/tree/insertion_mode/before_html.c
-@@ -79,6 +79,8 @@ lxb_html_tree_insertion_mode_before_html_open(lxb_html_tree_t *tree,
+@@ -78,6 +78,8 @@ lxb_html_tree_insertion_mode_before_html_open(lxb_html_tree_t *tree,
                  return lxb_html_tree_process_abort(tree);
              }
  
@@ -63,5 +63,5 @@ index ed5e367..b078ac5 100644
  
              break;
 -- 
-2.44.0
+2.49.0
 

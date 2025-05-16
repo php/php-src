@@ -225,7 +225,7 @@ lxb_html_tokenizer_state_comment(lxb_html_tokenizer_t *tkz,
 
                 if (tkz->is_eof) {
                     if (tkz->token->begin != NULL) {
-                        lxb_html_tokenizer_state_token_set_end_oef(tkz);
+                        lxb_html_tokenizer_state_token_set_end_eof(tkz);
                     }
 
                     lxb_html_tokenizer_error_add(tkz->parse_errors, tkz->token->end,

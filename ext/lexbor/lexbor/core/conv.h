@@ -37,7 +37,8 @@ LXB_API unsigned
 lexbor_conv_data_to_uint(const lxb_char_t **data, size_t length);
 
 LXB_API size_t
-lexbor_conv_dec_to_hex(uint32_t number, lxb_char_t *out, size_t length);
+lexbor_conv_dec_to_hex(uint32_t number, lxb_char_t *out, size_t length,
+                       bool upper);
 
 lxb_inline long
 lexbor_conv_double_to_long(double number)

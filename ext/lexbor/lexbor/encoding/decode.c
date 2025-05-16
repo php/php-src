@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alexander Borisov
+ * Copyright (C) 2019-2024 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -356,7 +356,7 @@ lxb_encoding_decode_big5(lxb_encoding_decode_t *ctx,
                 continue;
         }
 
-        ctx->codepoint = lxb_encoding_multi_index_big5[index].codepoint;
+        ctx->codepoint = lxb_encoding_multi_big5_map[index];
         if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
             LXB_ENCODING_DECODE_FAILED(ctx->u.lead);
             continue;
@@ -479,24 +479,24 @@ lxb_encoding_decode_euc_jp(lxb_encoding_decode_t *ctx,
         ctx->codepoint = (lead - 0xA1) * 94 + byte - 0xA1;
 
         if (is_jis0212) {
-            if ((sizeof(lxb_encoding_multi_index_jis0212)
-                 / sizeof(lxb_encoding_multi_index_t)) <= ctx->codepoint)
+            if ((sizeof(lxb_encoding_multi_jis0212_map)
+                 / sizeof(lxb_codepoint_t)) <= ctx->codepoint)
             {
                 LXB_ENCODING_DECODE_FAILED(ctx->u.euc_jp.lead);
                 continue;
             }
 
-            ctx->codepoint = lxb_encoding_multi_index_jis0212[ctx->codepoint].codepoint;
+            ctx->codepoint = lxb_encoding_multi_jis0212_map[ctx->codepoint];
         }
         else {
-            if ((sizeof(lxb_encoding_multi_index_jis0208)
-                 / sizeof(lxb_encoding_multi_index_t)) <= ctx->codepoint)
+            if ((sizeof(lxb_encoding_multi_jis0208_map)
+                 / sizeof(lxb_codepoint_t)) <= ctx->codepoint)
             {
                 LXB_ENCODING_DECODE_FAILED(ctx->u.euc_jp.lead);
                 continue;
             }
 
-            ctx->codepoint = lxb_encoding_multi_index_jis0208[ctx->codepoint].codepoint;
+            ctx->codepoint = lxb_encoding_multi_jis0208_map[ctx->codepoint];
         }
 
         if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
@@ -582,14 +582,14 @@ lxb_encoding_decode_euc_kr(lxb_encoding_decode_t *ctx,
         /* Max index == (0xFE - 0x81) * 190 + (0xFE - 0x41) == 23939 */
         ctx->codepoint = (lead - 0x81) * 190 + (byte - 0x41);
 
-        if (ctx->codepoint >= sizeof(lxb_encoding_multi_index_euc_kr)
-                              / sizeof(lxb_encoding_multi_index_t))
+        if (ctx->codepoint >= sizeof(lxb_encoding_multi_euc_kr_map)
+                              / sizeof(lxb_codepoint_t))
         {
             LXB_ENCODING_DECODE_FAILED(ctx->u.lead);
             continue;
         }
 
-        ctx->codepoint = lxb_encoding_multi_index_euc_kr[ctx->codepoint].codepoint;
+        ctx->codepoint = lxb_encoding_multi_euc_kr_map[ctx->codepoint];
         if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
             LXB_ENCODING_DECODE_FAILED(ctx->u.lead);
             continue;
@@ -837,7 +837,7 @@ lxb_encoding_decode_iso_2022_jp(lxb_encoding_decode_t *ctx,
                     /* Max index == (0x7E - 0x21) * 94 + 0x7E - 0x21 == 8835 */
                     ctx->codepoint = (iso->lead - 0x21) * 94 + byte - 0x21;
 
-                    ctx->codepoint = lxb_encoding_multi_index_jis0208[ctx->codepoint].codepoint;
+                    ctx->codepoint = lxb_encoding_multi_jis0208_map[ctx->codepoint];
 
                     if (ctx->codepoint != LXB_ENCODING_ERROR_CODEPOINT) {
                         LXB_ENCODING_DECODE_APPEND_WO_CHECK(ctx, ctx->codepoint);
@@ -1176,8 +1176,8 @@ lxb_encoding_decode_shift_jis(lxb_encoding_decode_t *ctx,
         ctx->codepoint = (lead - ctx->second_codepoint) * 188
                           + byte - ctx->codepoint;
 
-        if (ctx->codepoint >= (sizeof(lxb_encoding_multi_index_jis0208)
-                               / sizeof(lxb_encoding_multi_index_t)))
+        if (ctx->codepoint >= (sizeof(lxb_encoding_multi_jis0208_map)
+                               / sizeof(lxb_codepoint_t)))
         {
             LXB_ENCODING_DECODE_FAILED(ctx->u.lead);
             continue;
@@ -1188,7 +1188,7 @@ lxb_encoding_decode_shift_jis(lxb_encoding_decode_t *ctx,
             continue;
         }
 
-        ctx->codepoint = lxb_encoding_multi_index_jis0208[ctx->codepoint].codepoint;
+        ctx->codepoint = lxb_encoding_multi_jis0208_map[ctx->codepoint];
         if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
             LXB_ENCODING_DECODE_FAILED(ctx->u.lead);
             continue;
@@ -1680,7 +1680,7 @@ lxb_encoding_decode_gb18030(lxb_encoding_decode_t *ctx,
             }
 
             /* Max pointer value == (0xFE - 0x81) * 190 + (0xFE - 0x41) == 23939 */
-            ctx->codepoint = lxb_encoding_multi_index_gb18030[pointer].codepoint;
+            ctx->codepoint = lxb_encoding_multi_gb18030_map[pointer];
             if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
                 if (second < 0x80) {
                     (*data)--;
@@ -2040,7 +2040,7 @@ lead_state:
             goto failed;
     }
 
-    ctx->codepoint = lxb_encoding_multi_index_big5[index].codepoint;
+    ctx->codepoint = lxb_encoding_multi_big5_map[index];
     if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
         goto failed;
     }
@@ -2133,22 +2133,22 @@ lead_jis_state:
     ctx->codepoint = (lead - 0xA1) * 94 + byte - 0xA1;
 
     if (is_jis0212) {
-        if ((sizeof(lxb_encoding_multi_index_jis0212)
-             / sizeof(lxb_encoding_multi_index_t)) <= ctx->codepoint)
+        if ((sizeof(lxb_encoding_multi_jis0212_map)
+             / sizeof(lxb_codepoint_t)) <= ctx->codepoint)
         {
             goto failed;
         }
 
-        ctx->codepoint = lxb_encoding_multi_index_jis0212[ctx->codepoint].codepoint;
+        ctx->codepoint = lxb_encoding_multi_jis0212_map[ctx->codepoint];
     }
     else {
-        if ((sizeof(lxb_encoding_multi_index_jis0208)
-             / sizeof(lxb_encoding_multi_index_t)) <= ctx->codepoint)
+        if ((sizeof(lxb_encoding_multi_jis0208_map)
+             / sizeof(lxb_codepoint_t)) <= ctx->codepoint)
         {
             goto failed;
         }
 
-        ctx->codepoint = lxb_encoding_multi_index_jis0208[ctx->codepoint].codepoint;
+        ctx->codepoint = lxb_encoding_multi_jis0208_map[ctx->codepoint];
     }
 
     if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
@@ -2205,13 +2205,13 @@ lead_state:
     /* Max index == (0xFE - 0x81) * 190 + (0xFE - 0x41) == 23939 */
     ctx->codepoint = (lead - 0x81) * 190 + (byte - 0x41);
 
-    if (ctx->codepoint >= sizeof(lxb_encoding_multi_index_euc_kr)
-                          / sizeof(lxb_encoding_multi_index_t))
+    if (ctx->codepoint >= sizeof(lxb_encoding_multi_euc_kr_map)
+                          / sizeof(lxb_codepoint_t))
     {
         goto failed;
     }
 
-    ctx->codepoint = lxb_encoding_multi_index_euc_kr[ctx->codepoint].codepoint;
+    ctx->codepoint = lxb_encoding_multi_euc_kr_map[ctx->codepoint];
     if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
         goto failed;
     }
@@ -2373,7 +2373,7 @@ lxb_encoding_decode_iso_2022_jp_single(lxb_encoding_decode_t *ctx,
                     /* Max index == (0x7E - 0x21) * 94 + 0x7E - 0x21 == 8835 */
                     ctx->codepoint = (iso->lead - 0x21) * 94 + byte - 0x21;
 
-                    return lxb_encoding_multi_index_jis0208[ctx->codepoint].codepoint;
+                    return lxb_encoding_multi_jis0208_map[ctx->codepoint];
                 }
 
                 return LXB_ENCODING_DECODE_ERROR;
@@ -2667,8 +2667,8 @@ lead_state:
         ctx->codepoint = (lead - ctx->second_codepoint) * 188
                           + byte - ctx->codepoint;
 
-        if (ctx->codepoint >= (sizeof(lxb_encoding_multi_index_jis0208)
-            / sizeof(lxb_encoding_multi_index_t)))
+        if (ctx->codepoint >= (sizeof(lxb_encoding_multi_jis0208_map)
+            / sizeof(lxb_codepoint_t)))
         {
             goto failed;
         }
@@ -2677,7 +2677,7 @@ lead_state:
             return 0xE000 - 8836 + ctx->codepoint;
         }
 
-        ctx->codepoint = lxb_encoding_multi_index_jis0208[ctx->codepoint].codepoint;
+        ctx->codepoint = lxb_encoding_multi_jis0208_map[ctx->codepoint];
         if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
             goto failed;
         }
@@ -3135,7 +3135,7 @@ first_state:
         }
 
         /* Max pointer value == (0xFE - 0x81) * 190 + (0xFE - 0x41) == 23939 */
-        ctx->codepoint = lxb_encoding_multi_index_gb18030[pointer].codepoint;
+        ctx->codepoint = lxb_encoding_multi_gb18030_map[pointer];
         if (ctx->codepoint == LXB_ENCODING_ERROR_CODEPOINT) {
             goto failed;
         }

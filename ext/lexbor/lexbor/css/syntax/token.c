@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -25,10 +25,6 @@
 lxb_css_syntax_token_t *
 lxb_css_syntax_tokenizer_token(lxb_css_syntax_tokenizer_t *tkz);
 
-lxb_status_t
-lxb_css_syntax_tokenizer_cache_push(lxb_css_syntax_tokenizer_cache_t *cache,
-                                    lxb_css_syntax_token_t *value);
-
 
 typedef struct {
     lexbor_str_t  *str;
@@ -40,14 +36,16 @@ lxb_css_syntax_token_ctx_t;
 static lxb_status_t
 lxb_css_syntax_token_str_cb(const lxb_char_t *data, size_t len, void *ctx);
 
+static int8_t
+lxb_css_syntax_token_encode_utf_8(lxb_char_t *data, const lxb_char_t *end,
+                                  lxb_codepoint_t cp);
+
 
 lxb_css_syntax_token_t *
 lxb_css_syntax_token(lxb_css_syntax_tokenizer_t *tkz)
 {
-    if (tkz->cache_pos < tkz->cache->length
-        && (tkz->prepared == 0 || tkz->cache_pos < tkz->prepared))
-    {
-        return tkz->cache->list[tkz->cache_pos];
+    if (tkz->first != NULL) {
+        return tkz->first;
     }
 
     return lxb_css_syntax_tokenizer_token(tkz);
@@ -64,22 +62,16 @@ lxb_css_syntax_token_consume(lxb_css_syntax_tokenizer_t *tkz)
 {
     lxb_css_syntax_token_t *token;
 
-    if (tkz->cache_pos < tkz->cache->length) {
-        if (tkz->prepared != 0 && tkz->cache_pos >= tkz->prepared) {
-            return;
-        }
+    if (tkz->first) {
+        token = tkz->first;
+        tkz->first = token->next;
 
-        token = tkz->cache->list[tkz->cache_pos];
+        if (tkz->last == token) {
+            tkz->last = NULL;
+        }
 
         lxb_css_syntax_token_string_free(tkz, token);
         lexbor_dobject_free(tkz->tokens, token);
-
-        tkz->cache_pos += 1;
-
-        if (tkz->cache_pos >= tkz->cache->length) {
-            tkz->cache->length = 0;
-            tkz->cache_pos = 0;
-        }
     }
 }
 
@@ -161,30 +153,6 @@ copy:
     return LXB_STATUS_OK;
 }
 
-lxb_css_syntax_token_t *
-lxb_css_syntax_token_cached_create(lxb_css_syntax_tokenizer_t *tkz)
-{
-    lxb_status_t status;
-    lxb_css_syntax_token_t *token;
-
-    token = lexbor_dobject_alloc(tkz->tokens);
-    if (token == NULL) {
-        tkz->status = LXB_STATUS_ERROR_MEMORY_ALLOCATION;
-        return NULL;
-    }
-
-    status = lxb_css_syntax_tokenizer_cache_push(tkz->cache, token);
-    if (status != LXB_STATUS_OK) {
-        tkz->status = status;
-        return NULL;
-    }
-
-    token->cloned = false;
-
-    return token;
-}
-
-
 void
 lxb_css_syntax_token_string_free(lxb_css_syntax_tokenizer_t *tkz,
                                  lxb_css_syntax_token_t *token)
@@ -225,6 +193,8 @@ lxb_css_syntax_token_type_name_by_id(lxb_css_syntax_token_type_t type)
             return (lxb_char_t *) "bad-url";
         case LXB_CSS_SYNTAX_TOKEN_DELIM:
             return (lxb_char_t *) "delim";
+        case LXB_CSS_SYNTAX_TOKEN_UNICODE_RANGE:
+            return (lxb_char_t *) "unicode-range";
         case LXB_CSS_SYNTAX_TOKEN_NUMBER:
             return (lxb_char_t *) "number";
         case LXB_CSS_SYNTAX_TOKEN_PERCENTAGE:
@@ -293,10 +263,30 @@ lxb_css_syntax_token_serialize(const lxb_css_syntax_token_t *token,
 
     switch (token->type) {
         case LXB_CSS_SYNTAX_TOKEN_DELIM:
-            buf[0] = token->types.delim.character;
-            buf[1] = 0x00;
+            len = lxb_css_syntax_token_encode_utf_8(buf, buf + 5,
+                                                    token->types.delim.character);
+            buf[len] = 0x00;
 
-            return cb(buf, 1, ctx);
+            return cb(buf, len, ctx);
+
+        case LXB_CSS_SYNTAX_TOKEN_UNICODE_RANGE:
+            /* Start */
+            buf[0] = 'U';
+            buf[1] = '+';
+            len = 2;
+            len += lexbor_conv_dec_to_hex(token->types.unicode_range.start,
+                                          &buf[len], (sizeof(buf) - 1) - len,
+                                          true);
+
+            /* End */
+            buf[len] = '-';
+            len += 1;
+            len += lexbor_conv_dec_to_hex(token->types.unicode_range.end,
+                                          &buf[len], (sizeof(buf) - 1) - len,
+                                          true);
+            buf[len] = 0x00;
+
+            return cb(buf, len, ctx);
 
         case LXB_CSS_SYNTAX_TOKEN_NUMBER:
             len = lexbor_conv_float_to_data(token->types.number.num,
@@ -611,6 +601,47 @@ lxb_css_syntax_token_error(lxb_css_parser_t *parser,
     lexbor_free(name);
 
     return msg;
+}
+
+static int8_t
+lxb_css_syntax_token_encode_utf_8(lxb_char_t *data, const lxb_char_t *end,
+                                  lxb_codepoint_t cp)
+{
+    if (cp < 0x80) {
+        /* 0xxxxxxx */
+        *data = (lxb_char_t) cp;
+
+        return 1;
+    }
+
+    if (cp < 0x800) {
+        /* 110xxxxx 10xxxxxx */
+        *data++ = (lxb_char_t) (0xC0 | (cp >> 6  ));
+        *data   = (lxb_char_t) (0x80 | (cp & 0x3F));
+
+        return 2;
+    }
+
+    if (cp < 0x10000) {
+        /* 1110xxxx 10xxxxxx 10xxxxxx */
+        *data++ = (lxb_char_t) (0xE0 | ((cp >> 12)));
+        *data++ = (lxb_char_t) (0x80 | ((cp >> 6 ) & 0x3F));
+        *data   = (lxb_char_t) (0x80 | ( cp        & 0x3F));
+
+        return 3;
+    }
+
+    if (cp < 0x110000) {
+        /* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
+        *data++ = (lxb_char_t) (0xF0 | ( cp >> 18));
+        *data++ = (lxb_char_t) (0x80 | ((cp >> 12) & 0x3F));
+        *data++ = (lxb_char_t) (0x80 | ((cp >> 6 ) & 0x3F));
+        *data   = (lxb_char_t) (0x80 | ( cp        & 0x3F));
+
+        return 4;
+    }
+
+    return 0;
 }
 
 /*

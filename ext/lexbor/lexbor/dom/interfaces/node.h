@@ -19,6 +19,31 @@ extern "C" {
 typedef lexbor_action_t
 (*lxb_dom_node_simple_walker_f)(lxb_dom_node_t *node, void *ctx);
 
+/*
+ * Callbacks for node events.
+ */
+
+/*
+ * insert, remove, destroy:
+ *     Can be called for any node. When inserting an element, attribute,
+ *     comment and so on.
+ *
+ * set_value:
+ *     Can be called only when the attribute value is changed.
+ */
+typedef lxb_status_t
+(*lxb_dom_node_cb_insert_f)(lxb_dom_node_t *node);
+
+typedef lxb_status_t
+(*lxb_dom_node_cb_remove_f)(lxb_dom_node_t *node);
+
+typedef lxb_status_t
+(*lxb_dom_node_cb_destroy_f)(lxb_dom_node_t *node);
+
+typedef lxb_status_t
+(*lxb_dom_node_cb_set_value_f)(lxb_dom_node_t *node,
+                               const lxb_char_t *value, size_t length);
+
 
 typedef enum {
     LXB_DOM_NODE_TYPE_UNDEF                  = 0x00,

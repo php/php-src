@@ -129,7 +129,7 @@ lxb_html_tokenizer_state_doctype_before(lxb_html_tokenizer_t *tkz,
         lxb_html_tokenizer_state_token_set_end(tkz, data);
     }
     else {
-        lxb_html_tokenizer_state_token_set_end_oef(tkz);
+        lxb_html_tokenizer_state_token_set_end_eof(tkz);
     }
 
     tkz->token->tag_id = LXB_TAG__EM_DOCTYPE;

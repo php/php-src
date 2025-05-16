@@ -1,4 +1,4 @@
-From 16daa8e860e393ff39613b908550b0982a2210f2 Mon Sep 17 00:00:00 2001
+From 065923a993a004b8891ad3992c99e7e63e77bad3 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Wed, 29 Nov 2023 21:29:31 +0100
 Subject: [PATCH 5/6] Shrink size of static binary search tree
@@ -8,9 +8,9 @@ This also makes it more efficient on the data cache.
  source/lexbor/core/sbst.h                   | 10 +++++-----
  source/lexbor/html/tokenizer/state.c        |  2 +-
  utils/lexbor/html/tmp/tokenizer_res.h       |  2 +-
- utils/lexbor/html/tokenizer_entities_bst.py |  8 ++++----
+ utils/lexbor/html/tokenizer_entities_bst.py | 10 +++++-----
  utils/lexbor/lexbor/LXB.py                  |  2 +-
- 5 files changed, 12 insertions(+), 12 deletions(-)
+ 5 files changed, 13 insertions(+), 13 deletions(-)
 
 diff --git a/source/lexbor/core/sbst.h b/source/lexbor/core/sbst.h
 index b0fbc54..40e0e91 100644
@@ -35,10 +35,10 @@ index b0fbc54..40e0e91 100644
  lexbor_sbst_entry_static_t;
  
 diff --git a/source/lexbor/html/tokenizer/state.c b/source/lexbor/html/tokenizer/state.c
-index 70ca391..2f3414f 100644
+index 158aade..207b909 100644
 --- a/source/lexbor/html/tokenizer/state.c
 +++ b/source/lexbor/html/tokenizer/state.c
-@@ -1815,7 +1815,7 @@ lxb_html_tokenizer_state_char_ref_named(lxb_html_tokenizer_t *tkz,
+@@ -1820,7 +1820,7 @@ lxb_html_tokenizer_state_char_ref_named(lxb_html_tokenizer_t *tkz,
              goto done;
          }
  
@@ -61,7 +61,7 @@ index b3701d5..73ab66e 100644
   * Do not change this file!
   */
 diff --git a/utils/lexbor/html/tokenizer_entities_bst.py b/utils/lexbor/html/tokenizer_entities_bst.py
-index ee7dcb4..7cd1335 100755
+index 4fa0999..7cd1335 100755
 --- a/utils/lexbor/html/tokenizer_entities_bst.py
 +++ b/utils/lexbor/html/tokenizer_entities_bst.py
 @@ -1,6 +1,6 @@
@@ -90,6 +90,15 @@ index ee7dcb4..7cd1335 100755
          else:
              value = '"{}"'.format(toHex(index[ split[0] ]['values'][0]['characters']))
  
+@@ -146,7 +146,7 @@ def toHex(s):
+     lst = []
+ 
+     for ch in bytes(s, 'utf-8'):
+-        hv = hex(ch).replace('0x', '\\\\x')
++        hv = hex(ch).replace('0x', '\\x')
+         lst.append(hv)
+ 
+     return ''.join(lst)
 @@ -210,5 +210,5 @@ def entities_bst_print(bst):
  
  if __name__ == "__main__":
@@ -111,5 +120,5 @@ index 2370c66..c41e645 100755
          fh.close()
  
 -- 
-2.44.0
+2.49.0
 

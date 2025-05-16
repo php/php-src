@@ -59,15 +59,10 @@ if test "$PHP_LEXBOR" != "no" || test "$PHP_LEXBOR_ENABLED" = "yes"; then
     $LEXBOR_DIR/dom/interfaces/processing_instruction.c
     $LEXBOR_DIR/dom/interfaces/shadow_root.c
     $LEXBOR_DIR/dom/interfaces/text.c
-    $LEXBOR_DIR/encoding/big5.c
     $LEXBOR_DIR/encoding/decode.c
     $LEXBOR_DIR/encoding/encode.c
     $LEXBOR_DIR/encoding/encoding.c
-    $LEXBOR_DIR/encoding/euc_kr.c
-    $LEXBOR_DIR/encoding/gb18030.c
-    $LEXBOR_DIR/encoding/iso_2022_jp_katakana.c
-    $LEXBOR_DIR/encoding/jis0208.c
-    $LEXBOR_DIR/encoding/jis0212.c
+    $LEXBOR_DIR/encoding/multi.c
     $LEXBOR_DIR/encoding/range.c
     $LEXBOR_DIR/encoding/res.c
     $LEXBOR_DIR/encoding/single.c

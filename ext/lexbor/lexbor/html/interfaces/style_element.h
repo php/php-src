@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2023 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -17,7 +17,7 @@ extern "C" {
 
 struct lxb_html_style_element {
     lxb_html_element_t   element;
-    lxb_css_stylesheet_t *stylesheet;
+    void                 *stylesheet;  /* lxb_css_stylesheet_t */
 };
 
 

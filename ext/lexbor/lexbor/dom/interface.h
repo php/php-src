@@ -68,19 +68,6 @@ typedef lxb_dom_interface_t *
 typedef lxb_dom_interface_t *
 (*lxb_dom_interface_destroy_f)(lxb_dom_interface_t *intrfc);
 
-typedef lxb_status_t
-(*lxb_dom_event_insert_f)(lxb_dom_node_t *node);
-
-typedef lxb_status_t
-(*lxb_dom_event_remove_f)(lxb_dom_node_t *node);
-
-typedef lxb_status_t
-(*lxb_dom_event_destroy_f)(lxb_dom_node_t *node);
-
-typedef lxb_status_t
-(*lxb_dom_event_set_value_f)(lxb_dom_node_t *node,
-                             const lxb_char_t *value, size_t length);
-
 
 LXB_API lxb_dom_interface_t *
 lxb_dom_interface_create(lxb_dom_document_t *document, lxb_tag_id_t tag_id,

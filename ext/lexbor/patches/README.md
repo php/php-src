@@ -1,7 +1,7 @@
 # Lexbor patches
 
 Upon syncing the Lexbor sources, the patches in this directory need to be applied.
-The current Lexbor version is 2.4.0.
+The current Lexbor version is 2.5.0.
 
 ## Overview
 

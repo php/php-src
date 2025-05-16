@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -28,6 +28,7 @@ extern "C" {
 #define lxb_css_syntax_token_bad_url(token) ((lxb_css_syntax_token_bad_url_t *) (token))
 #define lxb_css_syntax_token_delim(token) ((lxb_css_syntax_token_delim_t *) (token))
 #define lxb_css_syntax_token_delim_char(token) (((lxb_css_syntax_token_delim_t *) (token))->character)
+#define lxb_css_syntax_token_unicode_range(token) ((lxb_css_syntax_token_unicode_range_t *) (token))
 #define lxb_css_syntax_token_number(token) ((lxb_css_syntax_token_number_t *) (token))
 #define lxb_css_syntax_token_percentage(token) ((lxb_css_syntax_token_percentage_t *) (token))
 #define lxb_css_syntax_token_dimension(token) ((lxb_css_syntax_token_dimension_t *) (token))
@@ -85,6 +86,7 @@ typedef enum {
 
     /* Other tokens. */
     LXB_CSS_SYNTAX_TOKEN_DELIM,
+    LXB_CSS_SYNTAX_TOKEN_UNICODE_RANGE,
     LXB_CSS_SYNTAX_TOKEN_NUMBER,
     LXB_CSS_SYNTAX_TOKEN_PERCENTAGE,
     LXB_CSS_SYNTAX_TOKEN_CDO,
@@ -138,9 +140,16 @@ lxb_css_syntax_token_dimension_t;
 
 typedef struct lxb_css_syntax_token_delim {
     lxb_css_syntax_token_base_t base;
-    lxb_char_t                  character;
+    lxb_codepoint_t             character;
 }
 lxb_css_syntax_token_delim_t;
+
+typedef struct lxb_css_syntax_token_unicode_range {
+    lxb_css_syntax_token_base_t base;
+    lxb_codepoint_t             start;
+    lxb_codepoint_t             end;
+}
+lxb_css_syntax_token_unicode_range_t;
 
 typedef lxb_css_syntax_token_string_t lxb_css_syntax_token_ident_t;
 typedef lxb_css_syntax_token_string_t lxb_css_syntax_token_function_t;
@@ -176,6 +185,7 @@ struct lxb_css_syntax_token {
         lxb_css_syntax_token_string_t        string;
         lxb_css_syntax_token_bad_string_t    bad_string;
         lxb_css_syntax_token_delim_t         delim;
+        lxb_css_syntax_token_unicode_range_t unicode_range;
         lxb_css_syntax_token_l_parenthesis_t lparenthesis;
         lxb_css_syntax_token_r_parenthesis_t rparenthesis;
         lxb_css_syntax_token_cdc_t           cdc;
@@ -192,6 +202,8 @@ struct lxb_css_syntax_token {
     lxb_css_syntax_token_type_t type;
     uintptr_t                   offset;
     bool                        cloned;
+
+    lxb_css_syntax_token_t      *next;
 };
 
 
@@ -214,9 +226,6 @@ lxb_css_syntax_token_string_dup(lxb_css_syntax_token_string_t *token,
 LXB_API lxb_status_t
 lxb_css_syntax_token_string_make(lxb_css_syntax_tokenizer_t *tkz,
                                  lxb_css_syntax_token_t *token);
-
-LXB_API lxb_css_syntax_token_t *
-lxb_css_syntax_token_cached_create(lxb_css_syntax_tokenizer_t *tkz);
 
 LXB_API void
 lxb_css_syntax_token_string_free(lxb_css_syntax_tokenizer_t *tkz,

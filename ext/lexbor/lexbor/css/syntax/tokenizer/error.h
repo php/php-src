@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -24,6 +24,8 @@ typedef enum {
     LXB_CSS_SYNTAX_TOKENIZER_ERROR_EOINST,
     /* eof-in-url */
     LXB_CSS_SYNTAX_TOKENIZER_ERROR_EOINUR,
+    /* eof-in-escaped */
+    LXB_CSS_SYNTAX_TOKENIZER_ERROR_EOINES,
     /* qo-in-url */
     LXB_CSS_SYNTAX_TOKENIZER_ERROR_QOINUR,
     /* wrong-escape-in-url */

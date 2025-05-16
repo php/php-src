@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alexander Borisov
+ * Copyright (C) 2019-2024 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -16,7 +16,7 @@ extern "C" {
 
 
 #define LXB_TAG_VERSION_MAJOR 1
-#define LXB_TAG_VERSION_MINOR 2
+#define LXB_TAG_VERSION_MINOR 3
 #define LXB_TAG_VERSION_PATCH 0
 
 #define LXB_TAG_VERSION_STRING                                                 \
