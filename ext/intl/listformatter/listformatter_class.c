@@ -113,10 +113,10 @@ PHP_METHOD(IntlListFormatter, __construct)
 PHP_METHOD(IntlListFormatter, format)
 {
     ListFormatter_object *obj = Z_INTL_LISTFORMATTER_P(ZEND_THIS);
-    zval *strings;
+    HashTable *ht;
 
     ZEND_PARSE_PARAMETERS_START(1, 1)
-        Z_PARAM_ARRAY(strings)
+        Z_PARAM_ARRAY_HT(ht)
     ZEND_PARSE_PARAMETERS_END();
 
     if (!LISTFORMATTER_OBJECT(obj)) {
@@ -124,8 +124,7 @@ PHP_METHOD(IntlListFormatter, format)
         RETURN_FALSE;
     }
 
-    HashTable *ht = Z_ARRVAL_P(strings);
-    uint32_t count = zend_array_count(ht);
+    uint32_t count = zend_hash_num_elements(ht);
     if (count == 0) {
         RETURN_EMPTY_STRING();
     }
@@ -238,4 +237,5 @@ void listformatter_register_class(void)
     memcpy(&listformatter_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     listformatter_handlers.offset = XtOffsetOf(ListFormatter_object, zo);
     listformatter_handlers.free_obj = listformatter_free_obj;
+    listformatter_handlers.clone_obj = NULL;
 }
