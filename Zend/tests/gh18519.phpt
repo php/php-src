@@ -3,6 +3,8 @@ GH-18519: Nested object comparison leading to stack overflow
 --FILE--
 <?php
 
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 class Node {
     public $next;
     // forcing dynamic property creation is key
