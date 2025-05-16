@@ -129,7 +129,7 @@ struct lxb_selectors {
  *
  * @return LXB_STATUS_OK if successful, otherwise an error status value.
  */
-LXB_API lxb_status_t
+lxb_status_t
 lxb_selectors_init(lxb_selectors_t *selectors);
 
 /*
@@ -141,7 +141,7 @@ lxb_selectors_init(lxb_selectors_t *selectors);
  *
  * @param[in] lxb_url_parser_t *
  */
-LXB_API void
+void
 lxb_selectors_clean(lxb_selectors_t *selectors);
 
 /*
@@ -152,7 +152,7 @@ lxb_selectors_clean(lxb_selectors_t *selectors);
  * @param[in] lxb_selectors_t *. Can be NULL.
  * if true: destroys the lxb_selectors_t object and all internal caches.
  */
-LXB_API void
+void
 lxb_selectors_destroy(lxb_selectors_t *selectors);
 
 /*
@@ -178,7 +178,7 @@ lxb_selectors_destroy(lxb_selectors_t *selectors);
  *
  * @return LXB_STATUS_OK if successful, otherwise an error status value.
  */
-LXB_API lxb_status_t
+lxb_status_t
 lxb_selectors_find(lxb_selectors_t *selectors, const xmlNode *root,
 				   const lxb_css_selector_list_t *list,
 				   lxb_selectors_cb_f cb, void *ctx);
@@ -209,7 +209,7 @@ lxb_selectors_find(lxb_selectors_t *selectors, const xmlNode *root,
  *
  * @return LXB_STATUS_OK if successful, otherwise an error status value.
  */
-LXB_API lxb_status_t
+lxb_status_t
 lxb_selectors_match_node(lxb_selectors_t *selectors, const xmlNode *node,
 						 const lxb_css_selector_list_t *list,
 						 lxb_selectors_cb_f cb, void *ctx);
