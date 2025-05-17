@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed GH-18480 (array_splice with large values for offset/length arguments).
     (nielsdos/David Carlier)
+  . Partially fixed GH-18572 (nested object comparisons leading to stack overflow).
+    (David Carlier)
 
 - Curl:
   . Fixed GH-18460 (curl_easy_setopt with CURLOPT_USERPWD/CURLOPT_USERNAME/
