@@ -43,9 +43,9 @@
 #define SEC_IN_MIN 60
 
 #ifdef HAVE_GETTIMEOFDAY
-static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, bool mode)
 {
-	bool get_as_float = 0;
+	bool get_as_float = false;
 	struct timeval tp = {0};
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
@@ -66,7 +66,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info());
 
-		array_init(return_value);
+		array_init_size(return_value, 4);
 		add_assoc_long(return_value, "sec", tp.tv_sec);
 		add_assoc_long(return_value, "usec", tp.tv_usec);
 
@@ -82,14 +82,14 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 /* {{{ Returns either a string or a float containing the current time in seconds and microseconds */
 PHP_FUNCTION(microtime)
 {
-	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
 /* {{{ Returns the current time as array */
 PHP_FUNCTION(gettimeofday)
 {
-	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 #endif
 /* }}} */
