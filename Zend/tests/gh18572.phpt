@@ -36,4 +36,4 @@ try {
 }
 ?>
 --EXPECTREGEX--
-(Maximum call stack size reached during object comparison|Fatal error: Nesting level too deep - recursive dependency?.+)
+(Maximum call stack size reached during object comparison|Nesting level too deep - recursive dependency?)
