@@ -7,8 +7,7 @@ if (getenv('SKIP_ASAN')) die('skip as it fatally crash');
 --FILE--
 <?php
 
-error_reporting(E_ALL & ~E_DEPRECATED);
-
+#[AllowDynamicProperties]
 class Node {
     public $next;
     // forcing dynamic property creation is key
@@ -37,4 +36,4 @@ try {
 }
 ?>
 --EXPECTREGEX--
-(Object compare - stack limit reached|Fatal error: Nesting level too deep - recursive dependency?.+)
+(Maximum call stack size reached during object comparison|Fatal error: Nesting level too deep - recursive dependency?.+)

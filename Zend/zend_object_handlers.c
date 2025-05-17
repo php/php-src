@@ -1724,7 +1724,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 	zend_object *zobj1, *zobj2;
 
 	if (zend_objects_check_stack_limit()) {
-		zend_throw_error(NULL, "Object compare - stack limit reached");
+		zend_throw_error(NULL, "Maximum call stack size reached during object comparison");
 		return ZEND_UNCOMPARABLE;
 	}
 
