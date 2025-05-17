@@ -11,6 +11,7 @@ if test "$PHP_LEXBOR" != "no" || test "$PHP_LEXBOR_ENABLED" = "yes"; then
   LEXBOR_DIR="lexbor"
 
   AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])
+  AC_DEFINE([LEXBOR_VERSION], ["2.5.0"], [Define the main Lexbor version])
 
   PHP_NEW_EXTENSION([lexbor], m4_normalize([
     php_lexbor.c

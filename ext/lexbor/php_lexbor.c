@@ -39,6 +39,7 @@ static PHP_MINFO_FUNCTION(lexbor)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Lexbor support", "active");
+	php_info_print_table_row(2, "Lexbor version", LEXBOR_VERSION);
 	php_info_print_table_end();
 }
 

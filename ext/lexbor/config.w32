@@ -25,6 +25,7 @@ if (PHP_LEXBOR == "yes") {
     ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_STATIC /utf-8");
 
     AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
+    AC_DEFINE("LEXBOR_VERSION", "2.5.0", "Define the main Lexbor version")
 
     PHP_INSTALL_HEADERS("ext/lexbor", "php_lexbor.h lexbor/");
 }
