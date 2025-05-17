@@ -76,6 +76,9 @@ typedef struct {
 } php_socket;
 
 extern PHP_SOCKETS_API zend_class_entry *socket_ce;
+#ifdef SO_SPLICE
+extern PHP_SOCKETS_API zend_class_entry *socket_so_splice_ce;
+#endif
 
 static inline php_socket *socket_from_obj(zend_object *obj) {
 	return (php_socket *)((char *)(obj) - XtOffsetOf(php_socket, std));

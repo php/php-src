@@ -1907,6 +1907,13 @@ const SO_EXCLUSIVEADDRUSE = UNKNOWN;
  * @cvalue SO_NOSIGPIPE
  */
 const SO_NOSIGPIPE = UNKNOWN;
+#if defined(SO_SPLICE)
+/**
+ * @var int
+ * @cvalue SO_SPLICE
+ */
+const SO_SPLICE = UNKNOWN;
+#endif
 #endif
 #if defined(TCP_QUICKACK)
 /**
@@ -2037,6 +2044,15 @@ final class Socket
 final class AddressInfo
 {
 }
+
+#ifdef SO_SPLICE
+final class SocketSoSplice
+{
+	public \Socket $socket;
+	public int $max;
+	public array $time;
+}
+#endif
 
 function socket_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
 
