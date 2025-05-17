@@ -190,8 +190,8 @@ struct lxb_css_syntax_token {
     types;
 
     lxb_css_syntax_token_type_t type;
-    uintptr_t                   offset;
     bool                        cloned;
+    uintptr_t                   offset;
 };
 
 

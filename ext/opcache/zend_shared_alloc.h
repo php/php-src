@@ -104,12 +104,12 @@ typedef struct _zend_smm_shared_globals {
     zend_shared_segment      **shared_segments;
     /* Number of allocated shared segments */
     int                        shared_segments_count;
+	/* No more shared memory flag */
+	bool                  memory_exhausted;
     /* Amount of free shared memory */
     size_t                     shared_free;
     /* Amount of shared memory allocated by garbage */
     size_t                     wasted_shared_memory;
-    /* No more shared memory flag */
-    bool                  memory_exhausted;
     /* Saved Shared Allocator State */
     zend_shared_memory_state   shared_memory_state;
 	/* Pointer to the application's shared data structures */

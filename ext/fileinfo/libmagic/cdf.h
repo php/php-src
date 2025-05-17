@@ -105,10 +105,10 @@ typedef struct {
 	cdf_dirid_t	d_storage;
 	uint64_t	d_storage_uuid[2];
 	uint32_t	d_flags;
+	uint32_t	d_size;
 	cdf_timestamp_t d_created;
 	cdf_timestamp_t d_modified;
 	cdf_secid_t	d_stream_first_sector;
-	uint32_t	d_size;
 	uint32_t	d_unused0;
 } cdf_directory_t;
 

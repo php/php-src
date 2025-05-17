@@ -94,9 +94,9 @@ lxb_encoding_ctx_euc_jp_t;
 typedef struct {
     lxb_char_t lead;
     lxb_char_t prepand;
+    bool       out_flag;
     unsigned   state;
     unsigned   out_state;
-    bool       out_flag;
 }
 lxb_encoding_ctx_2022_jp_t;
 

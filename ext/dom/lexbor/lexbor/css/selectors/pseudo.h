@@ -20,9 +20,9 @@ typedef struct {
     lxb_char_t                          *name;
     size_t                              length;
     unsigned                            id;
-    bool                                empty;
     lxb_css_selector_combinator_t       combinator;
     const lxb_css_syntax_cb_function_t  cb;
+    bool                                empty;
     bool                                forgiving;
     bool                                comma;
 }
