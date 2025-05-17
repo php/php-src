@@ -24,12 +24,12 @@ This contains the following patch files in mailbox format.
   A PHP specific patch to remove CSS style and selector bindings from the Lexbor document.
 
   **Note** for this patch the utilities to generate the tables are also patched.
-  Make sure to apply on a fresh Lexbor clone and run (in `lexbor/utils/encoding`): `python3 single-byte.py` and `python3 multi-byte.py` to generate the tables.
-  Also run `python3 tokenizer_entities_bst.py` to generate the static binary search tree for entities.
+  Make sure to apply on a fresh Lexbor clone and run (in `lexbor/utils/encoding`): `python3 single-byte.py` to generate the tables.
+  Also run (in `lexbor/utils/lexbor/html`) `python3 tokenizer_entities_bst.py` to generate the static binary search tree for entities.
 
 ## How to apply
 
-* cd into `ext/dom/lexbor/lexbor`
+* cd into `ext/lexbor/lexbor`
 * `git am -3 ../patches/0001-Expose-line-and-column-information-for-use-in-PHP.patch`
 * `git am -3 ../patches/0002-Track-implied-added-nodes-for-options-use-in-PHP.patch`
 * `git am -3 ../patches/0003-Patch-utilities-and-data-structure-to-be-able-to-gen.patch`
