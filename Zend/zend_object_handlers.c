@@ -46,6 +46,15 @@
 #define IN_ISSET	ZEND_GUARD_PROPERTY_ISSET
 #define IN_HOOK		ZEND_GUARD_PROPERTY_HOOK
 
+static zend_always_inline bool zend_objects_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 /*
   __X accessors explanation:
 
@@ -2121,6 +2130,11 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
+
+	if (zend_objects_check_stack_limit()) {
+		zend_throw_error(NULL, "Maximum call stack size reached during object comparison");
+		return ZEND_UNCOMPARABLE;
+	}
 
 	if (Z_TYPE_P(o1) != Z_TYPE_P(o2)) {
 		/* Object and non-object */
