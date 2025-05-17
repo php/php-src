@@ -333,6 +333,20 @@ ZEND_API void destroy_zend_class(zval *zv)
 		return;
 	}
 
+	bool persistent = ce->type == ZEND_INTERNAL_CLASS;
+	/* Common to internal and user classes */
+	if (ce->bound_types) {
+		zend_hash_release(ce->bound_types);
+	}
+	if (ce->num_generic_parameters > 0) {
+		for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
+			const zend_generic_parameter generic_param = ce->generic_parameters[generic_param_index];
+			zend_string_release(generic_param.name);
+			zend_type_release(generic_param.constraint, persistent);
+		}
+		pefree(ce->generic_parameters, persistent);
+	}
+
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
 			if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
