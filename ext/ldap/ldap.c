@@ -2984,16 +2984,22 @@ cleanup:
 /* {{{ Get the current value of various session-wide parameters */
 PHP_FUNCTION(ldap_get_option)
 {
-	zval *link, *retval;
+	zval *link = NULL, *retval;
 	ldap_linkdata *ld;
 	zend_long option;
+	LDAP *ldap;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olz", &link, ldap_link_ce, &option, &retval) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!lz", &link, ldap_link_ce, &option, &retval) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
-	ld = Z_LDAP_LINK_P(link);
-	VERIFY_LDAP_LINK_CONNECTED(ld);
+	if (!link) {
+		ldap = NULL;
+	} else {
+		ld = Z_LDAP_LINK_P(link);
+		VERIFY_LDAP_LINK_CONNECTED(ld);
+		ldap = ld->link;
+	}
 
 	switch (option) {
 	/* options with int value */
@@ -3029,7 +3035,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			int val;
 
-			if (ldap_get_option(ld->link, option, &val)) {
+			if (ldap_get_option(ldap, option, &val)) {
 				RETURN_FALSE;
 			}
 			ZEND_TRY_ASSIGN_REF_LONG(retval, val);
@@ -3039,7 +3045,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			struct timeval *timeout = NULL;
 
-			if (ldap_get_option(ld->link, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
+			if (ldap_get_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
 				if (timeout) {
 					ldap_memfree(timeout);
 				}
@@ -3056,7 +3062,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			int timeout;
 
-			if (ldap_get_option(ld->link, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
+			if (ldap_get_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
 				RETURN_FALSE;
 			}
 			ZEND_TRY_ASSIGN_REF_LONG(retval, (timeout / 1000));
@@ -3067,7 +3073,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			struct timeval *timeout = NULL;
 
-			if (ldap_get_option(ld->link, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
+			if (ldap_get_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
 				if (timeout) {
 					ldap_memfree(timeout);
 				}
@@ -3117,7 +3123,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			char *val = NULL;
 
-			if (ldap_get_option(ld->link, option, &val) || val == NULL || *val == '\0') {
+			if (ldap_get_option(ldap, option, &val) || val == NULL || *val == '\0') {
 				if (val) {
 					ldap_memfree(val);
 				}
@@ -3131,13 +3137,13 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			LDAPControl **ctrls = NULL;
 
-			if (ldap_get_option(ld->link, option, &ctrls) || ctrls == NULL) {
+			if (ldap_get_option(ldap, option, &ctrls) || ctrls == NULL) {
 				if (ctrls) {
 					ldap_memfree(ctrls);
 				}
 				RETURN_FALSE;
 			}
-			_php_ldap_controls_to_array(ld->link, ctrls, retval, 1);
+			_php_ldap_controls_to_array(ldap, ctrls, retval, 1);
 		} break;
 /* options not implemented
 	case LDAP_OPT_API_INFO:
