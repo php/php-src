@@ -37,8 +37,7 @@ static lxb_status_t
 lxb_css_syntax_token_str_cb(const lxb_char_t *data, size_t len, void *ctx);
 
 static int8_t
-lxb_css_syntax_token_encode_utf_8(lxb_char_t *data, const lxb_char_t *end,
-                                  lxb_codepoint_t cp);
+lxb_css_syntax_token_encode_utf_8(lxb_char_t *data, lxb_codepoint_t cp);
 
 
 lxb_css_syntax_token_t *
@@ -263,7 +262,7 @@ lxb_css_syntax_token_serialize(const lxb_css_syntax_token_t *token,
 
     switch (token->type) {
         case LXB_CSS_SYNTAX_TOKEN_DELIM:
-            len = lxb_css_syntax_token_encode_utf_8(buf, buf + 5,
+            len = lxb_css_syntax_token_encode_utf_8(buf,
                                                     token->types.delim.character);
             buf[len] = 0x00;
 
@@ -604,8 +603,7 @@ lxb_css_syntax_token_error(lxb_css_parser_t *parser,
 }
 
 static int8_t
-lxb_css_syntax_token_encode_utf_8(lxb_char_t *data, const lxb_char_t *end,
-                                  lxb_codepoint_t cp)
+lxb_css_syntax_token_encode_utf_8(lxb_char_t *data, lxb_codepoint_t cp)
 {
     if (cp < 0x80) {
         /* 0xxxxxxx */

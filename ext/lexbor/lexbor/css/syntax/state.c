@@ -1284,7 +1284,7 @@ again:
                 while (data < end && *data == 0x3F && count > 0);
 
                 range_start = cp << (4 * question);
-                range_end = range_start | (1 << (4 * question)) - 1;
+                range_end = range_start | ((1 << (4 * question)) - 1);
 
                 lxb_css_syntax_token_unicode_range(token)->start = range_start;
                 lxb_css_syntax_token_unicode_range(token)->end = range_end;
