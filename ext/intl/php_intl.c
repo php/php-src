@@ -41,6 +41,8 @@
 #include "locale/locale.h"
 #include "locale/locale_class.h"
 
+#include "listformatter/listformatter_class.h"
+
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
 #include "dateformat/dateformat_data.h"
@@ -155,6 +157,9 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'NumberFormatter' PHP class */
 	formatter_register_class(  );
+
+	/* Register 'ListFormatter' PHP class */
+	listformatter_register_class(  );
 
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
