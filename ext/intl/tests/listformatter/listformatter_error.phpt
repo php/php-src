@@ -30,7 +30,7 @@ try {
 } catch(Error $error) {
     echo $error->getMessage()  . PHP_EOL;
 }
-
+?>
 --EXPECT--
 IntlListFormatter::__construct(): Argument #1 ($locale) "f" is invalid
 IntlListFormatter::__construct(): Argument #1 ($locale) Locale string too long, should be no longer than 156 characters

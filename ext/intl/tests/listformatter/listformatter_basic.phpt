@@ -44,8 +44,7 @@ echo $formatter->format([1,2,3]) . PHP_EOL;
 
 // Make it clear that numbers are not converted automatically to the locale. Use NumberFormatter for each value.
 echo $formatter->format([1.2,2.3,3.4]) . PHP_EOL;
-
-
+?>
 --EXPECT--
 EN_US
 1, 2, and 3

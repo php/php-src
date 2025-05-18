@@ -93,6 +93,7 @@ echo $formatter->format([1,2,3]) . PHP_EOL;
 
 $formatter = new IntlListFormatter('FR', IntlListFormatter::TYPE_UNITS, IntlListFormatter::WIDTH_NARROW);
 echo $formatter->format([1,2,3]);
+?>
 --EXPECT--
 EN_US
 1, 2, and 3

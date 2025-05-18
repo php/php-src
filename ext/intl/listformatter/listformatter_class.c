@@ -119,11 +119,6 @@ PHP_METHOD(IntlListFormatter, format)
         Z_PARAM_ARRAY_HT(ht)
     ZEND_PARSE_PARAMETERS_END();
 
-    if (!LISTFORMATTER_OBJECT(obj)) {
-        zend_throw_exception(NULL, "ListFormatter not properly constructed", 0);
-        RETURN_FALSE;
-    }
-
     uint32_t count = zend_hash_num_elements(ht);
     if (count == 0) {
         RETURN_EMPTY_STRING();

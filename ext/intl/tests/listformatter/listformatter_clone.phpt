@@ -16,7 +16,6 @@ try {
 } catch(Error $error) {
     echo $error->getMessage();
 }
-
 ?>
 --EXPECT--
 Trying to clone an uncloneable object of class IntlListFormatter
