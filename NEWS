@@ -41,6 +41,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-18567 (Preloading with internal class alias triggers assertion
     failure). (nielsdos)
+  . Fixed bug GH-18534 (FPM exit code 70 with enabled opcache and hooked
+    properties in traits). (nielsdos)
 
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
