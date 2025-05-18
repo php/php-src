@@ -463,7 +463,7 @@ PHP 8.5 UPGRADE NOTES
   worked for in-tree builds); some extension builds (especially when using
   Makefile.frag.w32) may need adjustments.
 
-* --enable-sanitzer is now supported for MSVC builds.  This enables ASan and
+* --enable-sanitizer is now supported for MSVC builds.  This enables ASan and
   debug assertions, and is supported as of MSVC 16.10 and Windows 10.
 
 * The --with-uncritical-warn-choke configuration option for clang builds is
