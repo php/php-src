@@ -18,9 +18,13 @@ var_dump($reflection->getTrace());
 --EXPECTF--
 string(%d) "%sReflectionFiber_notrace_2.php"
 int(5)
-array(3) {
+array(2) {
   [0]=>
-  array(4) {
+  array(6) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(5)
     ["function"]=>
     string(7) "suspend"
     ["class"]=>
@@ -32,25 +36,6 @@ array(3) {
     }
   }
   [1]=>
-  array(4) {
-    ["file"]=>
-    string(%d) "%sReflectionFiber_notrace_2.php"
-    ["line"]=>
-    int(5)
-    ["function"]=>
-    string(14) "call_user_func"
-    ["args"]=>
-    array(1) {
-      [0]=>
-      array(2) {
-        [0]=>
-        string(5) "Fiber"
-        [1]=>
-        string(7) "suspend"
-      }
-    }
-  }
-  [2]=>
   array(2) {
     ["function"]=>
     string(%d) "{closure:%s:%d}"
