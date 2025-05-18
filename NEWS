@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (nielsdos/David Carlier)
   . Partially fixed GH-18572 (nested object comparisons leading to stack overflow).
     (David Carlier)
+  . Fixed OSS-Fuzz #417078295. (nielsdos)
 
 - Curl:
   . Fixed GH-18460 (curl_easy_setopt with CURLOPT_USERPWD/CURLOPT_USERNAME/
