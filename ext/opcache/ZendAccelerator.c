@@ -2964,9 +2964,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 
 static void accel_globals_dtor(zend_accel_globals *accel_globals)
 {
-#ifdef ZTS
 	zend_string_free(accel_globals->key);
-#endif
 	if (accel_globals->preloaded_internal_run_time_cache) {
 		pefree(accel_globals->preloaded_internal_run_time_cache, 1);
 	}

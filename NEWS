@@ -43,6 +43,7 @@ PHP                                                                        NEWS
     failure). (nielsdos)
   . Fixed bug GH-18534 (FPM exit code 70 with enabled opcache and hooked
     properties in traits). (nielsdos)
+  . Fix leak of accel_globals->key. (nielsdos)
 
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
