@@ -362,7 +362,7 @@ object(Socket\EthernetPacket)#%d (7) {
     ["headerSize"]=>
     int(40)
     ["rawPacket"]=>
-    string(%d) "%sunable to retrieve"
+    string(%d) "%s"
     ["srcAddr"]=>
     string(15) "%s.%s.%s.%s"
     ["dstAddr"]=>

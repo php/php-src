@@ -1778,7 +1778,7 @@ PHP_FUNCTION(socket_recvfrom)
 					if (tlayer < sizeof(*ip) || totalip < tlayer || totalip < slen) {
 						ZVAL_NULL(&zpayload);
 						zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-						zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf));
+						zend_update_property_stringl(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf), ZSTR_LEN(recv_buf));
 						zend_string_efree(dst_buf);
 						zend_string_efree(recv_buf);
 						ZEND_TRY_ASSIGN_REF_VALUE(arg2, &obj);
@@ -1833,7 +1833,7 @@ PHP_FUNCTION(socket_recvfrom)
 						}
 						default:
 							zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-							zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf));
+							zend_update_property_stringl(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf), ZSTR_LEN(recv_buf));
 							zend_string_efree(recv_buf);
 							zend_string_efree(dst_buf);
 							Z_DELREF(zpayload);
@@ -1920,7 +1920,7 @@ PHP_FUNCTION(socket_recvfrom)
 						// TODO IPPROTO_ICMPV6 support
 						default:
 							zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-							zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf));
+							zend_update_property_stringl(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf), ZSTR_LEN(recv_buf));
 							zend_string_efree(recv_buf);
 							zend_string_efree(dst_buf);
 							Z_DELREF(zpayload);
@@ -1990,7 +1990,7 @@ PHP_FUNCTION(socket_recvfrom)
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("srcMac"), ether_ntoa((struct ether_addr *)e->h_source));
 			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("dstMac"), ether_ntoa((struct ether_addr *)e->h_dest));
 			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
-			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf));
+			zend_update_property_stringl(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf), ZSTR_LEN(recv_buf));
 			Z_DELREF(zpayload);
 			zend_string_efree(recv_buf);
 			zend_string_free(dst_buf);
