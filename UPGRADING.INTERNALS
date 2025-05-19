@@ -46,6 +46,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     without duplicate build rules.  It is up to the SAPI maintainers to ensure
     that appropriate build rules are created.
 
+- Linux build system changes
+  . libdir is properly set when --libdir (ex: /usr/lib64) and --with-libdir (ex lib64)
+    configure options are used to ${libdir}/php (ex: /usr/lib64/php)
+
 ========================
 3. Module changes
 ========================
