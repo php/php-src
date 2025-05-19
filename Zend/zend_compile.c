@@ -7040,8 +7040,8 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 			if (ce && ce->num_generic_parameters > 0) {
 				for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
-					const zend_generic_parameter *genric_param = &ce->generic_parameters[generic_param_index];
-					if (zend_string_equals(type_name, genric_param->name)) {
+					const zend_generic_parameter *generic_param = &ce->generic_parameters[generic_param_index];
+					if (zend_string_equals(type_name, generic_param->name)) {
 						return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(type_name), /* allow null */ false, _ZEND_TYPE_GENERIC_PARAM_NAME_BIT);
 					}
 				}
