@@ -626,9 +626,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 				/* op1 > op2 is the same as op2 < op1 */
 				binary_op_type op = ast->kind == ZEND_AST_GREATER
 					? is_smaller_function : is_smaller_or_equal_function;
-				ret = op(result, &op2, &op1);
+				op(result, &op2, &op1);
 				zval_ptr_dtor_nogc(&op1);
 				zval_ptr_dtor_nogc(&op2);
+				ret = EG(exception) ? FAILURE : SUCCESS;
 			}
 			break;
 		case ZEND_AST_UNARY_OP:
