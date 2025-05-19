@@ -38,6 +38,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-18297 (Exception not handled when jit guard is triggered).
     (Arnaud)
   . Fixed bug GH-18408 (Snapshotted poly_func / poly_this may be spilled).
+    (Arnaud)
+  . Fixed bug GH-18567 (Preloading with internal class alias triggers assertion
+    failure). (nielsdos)
 
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
