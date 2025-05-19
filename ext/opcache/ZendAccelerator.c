@@ -2937,12 +2937,10 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	GC_MAKE_PERSISTENT_LOCAL(accel_globals->key);
 }
 
-#ifdef ZTS
 static void accel_globals_dtor(zend_accel_globals *accel_globals)
 {
 	zend_string_free(accel_globals->key);
 }
-#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 # ifndef _WIN32
@@ -3384,6 +3382,8 @@ void accel_shutdown(void)
 	if (!ZCG(enabled) || !accel_startup_ok) {
 #ifdef ZTS
 		ts_free_id(accel_globals_id);
+#else
+		accel_globals_dtor(&accel_globals);
 #endif
 		return;
 	}
@@ -3398,6 +3398,8 @@ void accel_shutdown(void)
 
 #ifdef ZTS
 	ts_free_id(accel_globals_id);
+#else
+	accel_globals_dtor(&accel_globals);
 #endif
 
 	if (!_file_cache_only) {
