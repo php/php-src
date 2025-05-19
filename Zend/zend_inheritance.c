@@ -813,7 +813,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 
 static inheritance_status zend_do_perform_arg_type_hint_check(
 		zend_class_entry *fe_scope, const zend_arg_info *fe_arg_info,
-		zend_class_entry *proto_scope, zend_arg_info *proto_arg_info) /* {{{ */
+		zend_class_entry *proto_scope, const zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {
 		/* Child with no type or mixed type is always compatible */
@@ -881,10 +881,10 @@ static inheritance_status zend_do_perform_implementation_check(
 
 	status = INHERITANCE_SUCCESS;
 	for (uint32_t i = 0; i < num_args; i++) {
-		zend_arg_info *proto_arg_info =
+		const zend_arg_info *proto_arg_info =
 			i < proto_num_args ? &proto->common.arg_info[i] :
 			proto_is_variadic ? &proto->common.arg_info[proto_num_args - 1] : NULL;
-		zend_arg_info *fe_arg_info =
+		const zend_arg_info *fe_arg_info =
 			i < fe_num_args ? &fe->common.arg_info[i] :
 			fe_is_variadic ? &fe->common.arg_info[fe_num_args - 1] : NULL;
 		if (!proto_arg_info) {
