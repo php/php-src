@@ -516,6 +516,7 @@ PHP 8.5 UPGRADE NOTES
 - Core:
   . Remove OPcodes for identity comparisons against booleans, particularly
     for the match(true) pattern.
+  . Add OPcode specialization for `=== []` and `!== []` comparisons.
 
 - ReflectionProperty:
   . Improved performance of the following methods: getValue(), getRawValue(),
