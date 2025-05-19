@@ -1312,10 +1312,10 @@ AS_VAR_IF([program_suffix], [NONE], [program_suffix=])
 
 orig_libdir=$libdir
 AS_CASE([$libdir],
-  ['${exec_prefix}/lib'], [libdir=$libdir/php])
+  [${prefix}/${PHP_LIBDIR}], [libdir=$libdir/php])
 
 AS_CASE([$(eval echo $datadir)],
-  ['${prefix}/share'], [datadir=$datadir/php])
+  [${prefix}/share], [datadir=$datadir/php])
 
 phptempdir=$(pwd)/libs
 
