@@ -1960,6 +1960,19 @@ PHP_FUNCTION(socket_get_option)
 				return;
 			}
 #endif
+#ifdef SO_SPLICE
+			case SO_SPLICE: {
+				off_t splice;
+				optlen = sizeof(splice);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&splice, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				RETURN_LONG(splice);
+			}
+#endif
 
 		}
 	}
