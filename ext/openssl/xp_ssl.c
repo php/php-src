@@ -2092,8 +2092,9 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 				if (php_openssl_compare_timeval(elapsed_time, *timeout) > 0 ) {
 					/* If the socket was originally blocking, set it back. */
 					if (began_blocked) {
-						php_set_sock_blocking(sslsock->s.socket, 1);
-						sslsock->s.is_blocked = 1;
+						if (php_set_sock_blocking(sslsock->s.socket, 1) == SUCCESS) {
+							sslsock->s.is_blocked = 1;
+						}
 					}
 					sslsock->s.timeout_event = 1;
 					return -1;
@@ -2520,8 +2521,9 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 								if (php_openssl_compare_timeval(elapsed_time, *timeout) > 0 ) {
 									/* If the socket was originally blocking, set it back. */
 									if (began_blocked) {
-										php_set_sock_blocking(sslsock->s.socket, 1);
-										sslsock->s.is_blocked = 1;
+										if (php_set_sock_blocking(sslsock->s.socket, 1) == SUCCESS) {
+											sslsock->s.is_blocked = 1;
+										}
 									}
 									sslsock->s.timeout_event = 1;
 									return PHP_STREAM_OPTION_RETURN_ERR;
@@ -2572,8 +2574,9 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 						if (began_blocked && !sslsock->s.is_blocked) {
 							// Set it back to blocking
-							php_set_sock_blocking(sslsock->s.socket, 1);
-							sslsock->s.is_blocked = 1;
+							if (php_set_sock_blocking(sslsock->s.socket, 1) == SUCCESS) {
+								sslsock->s.is_blocked = 1;
+							}
 						}
 					} else {
 #ifdef PHP_WIN32
