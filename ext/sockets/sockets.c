@@ -1456,7 +1456,7 @@ static zend_result php_socket_get_chunk(zend_string *dst, const zend_string *src
 		return FAILURE;
 	}
 
-	memcpy(ZSTR_VAL(dst), ZSTR_VAL(src) + offset, len);
+	memcpy(ZSTR_VAL(dst), ZSTR_VAL(src) + offset, len + 1);
 	ZSTR_LEN(dst) = len;
 	return SUCCESS;
 }
@@ -1465,8 +1465,8 @@ static zend_result php_socket_afpacket_add_tcp(unsigned char *ipdata, struct soc
 					       size_t slen, zval *szpayload,  zval *zpayload, zval *obj, zval *arg2, zval *arg5, zval *arg6) {
 	struct tcphdr a;
 	ETH_SUB_CHECKLENGTH(a, "TCP");
-	memcpy(&a, ipdata, sizeof(a));
 	struct tcphdr *tcp = &a;
+	memcpy(tcp, ipdata, sizeof(*tcp));
 	object_init_ex(szpayload, tcppacket_ce);
 	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("srcPort"), ntohs(tcp->th_sport));
 	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("dstPort"), ntohs(tcp->th_dport));
@@ -1481,8 +1481,8 @@ static zend_result php_socket_afpacket_add_udp(unsigned char *ipdata, struct soc
 					       size_t slen, zval *szpayload,  zval *zpayload, zval *obj, zval *arg2, zval *arg5, zval *arg6) {
 	struct udphdr a;
 	ETH_SUB_CHECKLENGTH(a, "UDP");
-	memcpy(&a, ipdata, sizeof(a));
 	struct udphdr *udp = &a;
+	memcpy(udp, ipdata, sizeof(*udp));
 	size_t headersize = sizeof(*udp);
 	object_init_ex(szpayload, udppacket_ce);
 	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("srcPort"), ntohs(udp->uh_sport));
@@ -1748,8 +1748,8 @@ PHP_FUNCTION(socket_recvfrom)
 			}
 
 			struct ethhdr a;
-			memcpy(&a, ZSTR_VAL(dst_buf), ETH_HLEN);
 			struct ethhdr *e = &a;
+			memcpy(e, ZSTR_VAL(dst_buf), ETH_HLEN);
 			unsigned short protocol = ntohs(e->h_proto);
 			unsigned char *payload;
 
@@ -1770,8 +1770,8 @@ PHP_FUNCTION(socket_recvfrom)
 					}
 					payload = ((unsigned char *)ZSTR_VAL(dst_buf));
 					struct iphdr a;
-					memcpy(&a, payload, sizeof(a));
 					struct iphdr *ip = &a;
+					memcpy(ip, payload, sizeof(*ip));
 					size_t tlayer = ip->ihl * 4;
 					size_t totalip = ntohs(ip->tot_len);
 
@@ -1798,7 +1798,7 @@ PHP_FUNCTION(socket_recvfrom)
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("srcAddr"), inet_ntoa(s));
 					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("dstAddr"), inet_ntoa(d));
 					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headerSize"), totalip);
-					zend_update_property_stringl(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)payload, totalip);
+					zend_update_property_stringl(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)payload, ZSTR_LEN(dst_buf));
 
 					switch (ip->protocol) {
 						case IPPROTO_TCP: {
@@ -1956,8 +1956,8 @@ PHP_FUNCTION(socket_recvfrom)
 						zend_value_error("invalid LOOP header");
 						RETURN_THROWS();
 					}
-					memcpy(&a, payload, sizeof(a));
 					struct ethhdr *innere = &a;
+					memcpy(innere, payload, sizeof(a));
 					zval innerp;
 					ZVAL_NULL(&innerp);
 					object_init_ex(&zpayload, ethpacket_ce);
