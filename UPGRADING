@@ -239,6 +239,10 @@ PHP 8.5 UPGRADE NOTES
     have dropped the false from the return type union. Returning false
     was actually never possible.
 
+- LDAP:
+  . ldap_get_option() now accept a NULL connection, as ldap_set_option(),
+    to allow retrieval of global options.
+
 - libxml:
   . libxml_set_external_entity_loader() now has a formal return type of true.
 

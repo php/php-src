@@ -99,6 +99,10 @@ PHP                                                                        NEWS
   . Added IntlListFormatter class to format a list of items with a locale
     , operands types and units. (BogdanUngureanu)
 
+- LDAP:
+  . Allow ldap_get_option to retrieve global option by allowing NULL for
+    connection instance ($ldap). (Remi)
+
 - MySQLi:
   . Fixed bugs GH-17900 and GH-8084 (calling mysqli::__construct twice).
     (nielsdos)
