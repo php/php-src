@@ -1,5 +1,7 @@
 --TEST--
 Try to instantiate all classes without arguments
+--EXTENSIONS--
+*
 --FILE--
 <?php
 
