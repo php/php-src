@@ -1,0 +1,8 @@
+EXTENSION("uri", "php_lexbor.c php_uri.c php_uri_common.c php_uriparser.c", false /* never shared */, "/I ext/lexbor /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+
+AC_DEFINE("URI_ENABLE_ANSI", 1, "Define to 1 for enabling ANSI support of uriparser.")
+AC_DEFINE("URI_NO_UNICODE", 1, "Define to 1 for disabling unicode support of uriparser.")
+
+ADD_EXTENSION_DEP('uri', 'lexbor');
+ADD_SOURCES("ext/uri/uriparser/src", "UriCommon.c UriCompare.c UriEscape.c UriFile.c UriIp4.c UriIp4Base.c UriMemory.c UriNormalize.c UriNormalizeBase.c UriParse.c UriQuery.c UriRecompose.c UriShorten.c", "lexbor");
+PHP_INSTALL_HEADERS("ext/uri", "php_lexbor.h php_uri.h php_uri_common.h php_uriparser.h uriparser/src uriparser/include");

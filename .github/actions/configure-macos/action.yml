@@ -48,7 +48,6 @@ runs:
           --enable-pcntl \
           --with-readline="$BREW_OPT"/readline \
           --enable-mbstring \
-          --enable-uri \
           --with-curl \
           --with-gettext="$BREW_OPT"/gettext \
           --enable-sockets \
