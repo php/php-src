@@ -6374,6 +6374,7 @@ ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|CV|UNUSED, CONST|TMPVAR|UNUSE
 	uint32_t size;
 	USE_OPLINE
 
+	SAVE_OPLINE();
 	array = EX_VAR(opline->result.var);
 	if (OP1_TYPE != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
