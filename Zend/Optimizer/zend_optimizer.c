@@ -1556,7 +1556,7 @@ void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void 
 			if (property->ce == ce && property->hooks) {
 				for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
 					zend_function *hook = hooks[i];
-					if (hook && hook->common.scope == ce) {
+					if (hook && hook->common.scope == ce && !(hooks[i]->op_array.fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 						zend_foreach_op_array_helper(&hooks[i]->op_array, func, context);
 					}
 				}
