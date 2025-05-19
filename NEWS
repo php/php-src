@@ -36,6 +36,9 @@ PHP                                                                        NEWS
     failure). (nielsdos)
   . Fix leak of accel_globals->key. (nielsdos)
 
+- OpenSSL:
+  . Fix missing checks against php_set_blocking() in xp_ssl.c. (nielsdos)
+
 - PDO_OCI:
   . Fixed bug GH-18494 (PDO OCI segfault in statement GC). (nielsdos)
 

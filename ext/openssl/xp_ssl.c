@@ -1901,6 +1901,15 @@ static int php_openssl_capture_peer_certs(php_stream *stream,
 }
 /* }}} */
 
+static zend_result php_openssl_set_blocking(php_openssl_netstream_data_t *sslsock, int block)
+{
+	zend_result result = php_set_sock_blocking(sslsock->s.socket, block);
+	if (EXPECTED(SUCCESS == result)) {
+		sslsock->s.is_blocked = block;
+	}
+	return result;
+}
+
 static int php_openssl_enable_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_crypto_param *cparam) /* {{{ */
@@ -1929,8 +1938,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 			sslsock->state_set = 1;
 		}
 
-		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0)) {
-			sslsock->s.is_blocked = 0;
+		if (SUCCESS == php_openssl_set_blocking(sslsock, 0)) {
 			/* The following mode are added only if we are able to change socket
 			 * to non blocking mode which is also used for read and write */
 			SSL_set_mode(sslsock->ssl_handle, SSL_MODE_ENABLE_PARTIAL_WRITE | SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
@@ -1983,8 +1991,8 @@ static int php_openssl_enable_crypto(php_stream *stream,
 			}
 		} while (retry);
 
-		if (sslsock->s.is_blocked != blocked && SUCCESS == php_set_sock_blocking(sslsock->s.socket, blocked)) {
-			sslsock->s.is_blocked = blocked;
+		if (sslsock->s.is_blocked != blocked) {
+			php_openssl_set_blocking(sslsock, blocked);
 		}
 
 		if (n == 1) {
@@ -2067,8 +2075,8 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 			timeout = &sslsock->s.timeout;
 		}
 
-		if (timeout && php_set_sock_blocking(sslsock->s.socket, 0) == SUCCESS) {
-			sslsock->s.is_blocked = 0;
+		if (timeout) {
+			php_openssl_set_blocking(sslsock, 0);
 		}
 
 		if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
@@ -2092,9 +2100,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 				if (php_openssl_compare_timeval(elapsed_time, *timeout) > 0 ) {
 					/* If the socket was originally blocking, set it back. */
 					if (began_blocked) {
-						if (php_set_sock_blocking(sslsock->s.socket, 1) == SUCCESS) {
-							sslsock->s.is_blocked = 1;
-						}
+						php_openssl_set_blocking(sslsock, 1);
 					}
 					sslsock->s.timeout_event = 1;
 					return -1;
@@ -2189,8 +2195,8 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		}
 
 		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
-		if (began_blocked && php_set_sock_blocking(sslsock->s.socket, 1) == SUCCESS) {
-			sslsock->s.is_blocked = 1;
+		if (began_blocked) {
+			php_openssl_set_blocking(sslsock, 1);
 		}
 
 		return 0 > nr_bytes ? 0 : nr_bytes;
@@ -2496,8 +2502,8 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 							timeout = &tv;
 						}
 
-						if (timeout && php_set_sock_blocking(sslsock->s.socket, 0) == SUCCESS) {
-							sslsock->s.is_blocked = 0;
+						if (timeout) {
+							php_openssl_set_blocking(sslsock, 0);
 						}
 
 						if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
@@ -2521,9 +2527,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 								if (php_openssl_compare_timeval(elapsed_time, *timeout) > 0 ) {
 									/* If the socket was originally blocking, set it back. */
 									if (began_blocked) {
-										if (php_set_sock_blocking(sslsock->s.socket, 1) == SUCCESS) {
-											sslsock->s.is_blocked = 1;
-										}
+										php_openssl_set_blocking(sslsock, 1);
 									}
 									sslsock->s.timeout_event = 1;
 									return PHP_STREAM_OPTION_RETURN_ERR;
@@ -2574,9 +2578,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 						if (began_blocked && !sslsock->s.is_blocked) {
 							// Set it back to blocking
-							if (php_set_sock_blocking(sslsock->s.socket, 1) == SUCCESS) {
-								sslsock->s.is_blocked = 1;
-							}
+							php_openssl_set_blocking(sslsock, 1);
 						}
 					} else {
 #ifdef PHP_WIN32
