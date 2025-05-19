@@ -1,38 +1,36 @@
 --TEST--
-ldap_start_tls() - Basic ldap_start_tls test
---CREDITS--
-Patrick Allaert <patrickallaert@php.net>
-# Belgian PHP Testfest 2009
+ldap_start_tls() - Basic ldap_start_tls test with TLS_CACERTFILE
 --EXTENSIONS--
 ldap
---ENV--
-LDAPNOINIT=1
 --SKIPIF--
-<?php require_once __DIR__ .'/skipifbindfailure.inc'; ?>
+<?php
+require_once __DIR__ .'/skipifbindfailure.inc'; 
+if (!ldap_get_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, $val)) die('skip missing TLS_CACERTFILE');
+?>
 --FILE--
 <?php
 require_once "connect.inc";
 
 // CI uses self signed certificate
 
-// No cert option - fails
+// No cert option
 $link = ldap_connect($uri);
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 var_dump(@ldap_start_tls($link));
 
-// No cert check - passes
+// No cert check
 $link = ldap_connect($uri);
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 ldap_set_option($link, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_NEVER);
 var_dump(@ldap_start_tls($link));
 
-// With cert check - fails
+// With cert check
 $link = ldap_connect($uri);
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 ldap_set_option($link, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_DEMAND);
 var_dump(@ldap_start_tls($link));
 ?>
 --EXPECT--
-bool(false)
 bool(true)
-bool(false)
+bool(true)
+bool(true)

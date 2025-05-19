@@ -180,6 +180,12 @@ PHP 8.5 UPGRADE NOTES
     number formats.
   . Added Locale::addLikelySubtags and Locale::minimizeSubtags to
     handle likely tags on a given locale.
+  . Added IntlListFormatter class to format, order, punctuates 
+    a list of items with a given locale, IntlListFormatter::TYPE_AND,
+    IntlListFormatter::TYPE_OR, IntlListFormatter::TYPE_UNITS operands and 
+    IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT and
+    IntlListFormatter::WIDTH_NARROW widths.
+    It is supported from icu 67.
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
@@ -232,6 +238,10 @@ PHP 8.5 UPGRADE NOTES
     TransLiterator::getErrorCode(), and TransLiterator::getErrorMessage()
     have dropped the false from the return type union. Returning false
     was actually never possible.
+
+- LDAP:
+  . ldap_get_option() now accept a NULL connection, as ldap_set_option(),
+    to allow retrieval of global options.
 
 - libxml:
   . libxml_set_external_entity_loader() now has a formal return type of true.
@@ -463,7 +473,7 @@ PHP 8.5 UPGRADE NOTES
   worked for in-tree builds); some extension builds (especially when using
   Makefile.frag.w32) may need adjustments.
 
-* --enable-sanitzer is now supported for MSVC builds.  This enables ASan and
+* --enable-sanitizer is now supported for MSVC builds.  This enables ASan and
   debug assertions, and is supported as of MSVC 16.10 and Windows 10.
 
 * The --with-uncritical-warn-choke configuration option for clang builds is

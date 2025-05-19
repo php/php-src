@@ -417,7 +417,9 @@ static int LSCRIU_Native_Dump(pid_t iPid,
     memset(&criu_native_dump, 0, sizeof(criu_native_dump));
     criu_native_dump.m_iPidToDump = iPid;
     strncpy(criu_native_dump.m_chImageDirectory, pchImagePath,
-            sizeof(criu_native_dump.m_chImageDirectory));
+            sizeof(criu_native_dump.m_chImageDirectory) - 1);
+    criu_native_dump.m_chImageDirectory[
+        sizeof(criu_native_dump.m_chImageDirectory) - 1] = '\0';
     pchLastSlash = strrchr(criu_native_dump.m_chSocketDir,'/');
     if (pchLastSlash) {
         pchLastSlash++;
