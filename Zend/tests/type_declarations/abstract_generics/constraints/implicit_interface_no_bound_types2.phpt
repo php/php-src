@@ -18,4 +18,4 @@ class C implements I1, I2<float> {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot implement I1 as it has generic parameters which are not specified in %s on line %d
+Fatal error: Interface I1 expects 1 generic parameters, 0 given in %s on line %d

@@ -20,4 +20,4 @@ class C implements I2<float>, I1 {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot implement I1 as the number of generic arguments specified (0) does not match the number of generic parameters declared on the interface (1) in %s on line %d
+Fatal error: Interface I1 expects 1 generic parameters, 0 given in %s on line %d

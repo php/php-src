@@ -2323,25 +2323,27 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	if (iface->num_generic_parameters > 0) {
 		if (UNEXPECTED(ce->bound_types == NULL)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot implement %s as it has generic parameters which are not specified",
-				ZSTR_VAL(iface->name)
+				"Interface %s expects %" PRIu32 " generic parameters, 0 given",
+				ZSTR_VAL(iface->name),
+				iface->num_generic_parameters
 			);
 		}
 		HashTable *bound_types = zend_hash_find_ptr_lc(ce->bound_types, iface->name);
 		if (UNEXPECTED(bound_types == NULL)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot implement %s as it has generic parameters which are not specified",
-				ZSTR_VAL(iface->name)
+				"Interface %s expects %" PRIu32 " generic parameters, 0 given",
+				ZSTR_VAL(iface->name),
+				iface->num_generic_parameters
 			);
 		}
 		const uint32_t num_bound_types = zend_hash_num_elements(bound_types);
 		if (UNEXPECTED(num_bound_types != iface->num_generic_parameters)) {
 			// TODO Need to handle implicit inherited interfaces
 			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot implement %s as the number of generic arguments specified (%" PRIu32 ") does not match the number of generic parameters declared on the interface (%" PRIu32 ")",
+				"Interface %s expects %" PRIu32 " generic parameters, %" PRIu32 " given",
 				ZSTR_VAL(iface->name),
-				num_bound_types,
-				iface->num_generic_parameters
+				iface->num_generic_parameters,
+				num_bound_types
 			);
 		}
 		for (uint32_t i = 0; i < num_bound_types; i++) {

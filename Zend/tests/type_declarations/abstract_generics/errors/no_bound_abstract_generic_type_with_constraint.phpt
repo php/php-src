@@ -13,4 +13,4 @@ class C implements I {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot implement I as it has generic parameters which are not specified in %s on line %d
+Fatal error: Interface I expects 1 generic parameters, 0 given in %s on line %d
