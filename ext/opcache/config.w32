@@ -15,7 +15,7 @@ if (PHP_OPCACHE != "no") {
 		zend_persist_calc.c \
 		zend_file_cache.c \
 		zend_shared_alloc.c \
-		shared_alloc_win32.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		shared_alloc_win32.c", PHP_OPCACHE_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 	ADD_EXTENSION_DEP('opcache', 'date');
 	ADD_EXTENSION_DEP('opcache', 'hash');
