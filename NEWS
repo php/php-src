@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - OPcache:
   . Disallow changing opcache.memory_consumption when SHM is already set up.
     (timwolla)
+  . Fixed GH-15074 (Compiling opcache statically into ZTS PHP fails). (Arnaud)
+  . Make OPcache non-optional (Arnaud, timwolla)
 
 - OpenSSL:
   . Add $digest_algo parameter to openssl_public_encrypt() and

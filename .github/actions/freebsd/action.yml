@@ -113,8 +113,7 @@ runs:
             --offline \
             --show-diff \
             --show-slow 1000 \
-            --set-timeout 120 \
-            -d zend_extension=opcache.so
+            --set-timeout 120
 
           if test "${{ inputs.runExtraTests }}" = "true"; then
             sapi/cli/php run-extra-tests.php

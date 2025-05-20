@@ -25,6 +25,8 @@
 #include "ZendAccelerator.h"
 #include "zend_API.h"
 #include "zend_closures.h"
+#include "zend_extensions.h"
+#include "zend_modules.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
 #include "zend_file_cache.h"
@@ -432,11 +434,17 @@ static ZEND_NAMED_FUNCTION(accel_is_readable)
 
 static ZEND_MINIT_FUNCTION(zend_accelerator)
 {
-	(void)type; /* keep the compiler happy */
-
-	REGISTER_INI_ENTRIES();
+	start_accel_extension();
 
 	return SUCCESS;
+}
+
+void zend_accel_register_ini_entries(void)
+{
+	zend_module_entry *module = zend_hash_str_find_ptr_lc(&module_registry,
+			ACCELERATOR_PRODUCT_NAME, strlen(ACCELERATOR_PRODUCT_NAME));
+
+	zend_register_ini_entries_ex(ini_entries, module->module_number, module->type);
 }
 
 void zend_accel_override_file_functions(void)
@@ -469,6 +477,7 @@ static ZEND_MSHUTDOWN_FUNCTION(zend_accelerator)
 
 	UNREGISTER_INI_ENTRIES();
 	accel_shutdown();
+
 	return SUCCESS;
 }
 
@@ -581,7 +590,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	DISPLAY_INI_ENTRIES();
 }
 
-static zend_module_entry accel_module_entry = {
+zend_module_entry opcache_module_entry = {
 	STANDARD_MODULE_HEADER,
 	ACCELERATOR_PRODUCT_NAME,
 	ext_functions,
@@ -595,11 +604,6 @@ static zend_module_entry accel_module_entry = {
 	accel_post_deactivate,
 	STANDARD_MODULE_PROPERTIES_EX
 };
-
-int start_accel_module(void)
-{
-	return zend_startup_module(&accel_module_entry);
-}
 
 /* {{{ Get the scripts which are accelerated by ZendAccelerator */
 static int accelerator_get_scripts(zval *return_value)

@@ -71,6 +71,16 @@ PHP 8.5 UPGRADE NOTES
   . Calling the mysqli constructor on an already-constructed object
     is now no longer possible and throws an Error.
 
+- Opcache:
+  . The Opcache extension is now always built into the PHP binary and is always
+    loaded. The INI directives opcache.enable and opcache.enable_cli are still
+    honored.
+    The --enable-opcache/--disable-opcache configure flags have been removed,
+    and the build does not produce opcache.so or php_opcache.dll objects
+    anymore.
+    Using zend_extension=opcache.so or zend_extension=php_opcache.dll INI
+    directives will emit a warning.
+
 - PCNTL:
   . pcntl_exec() now throws ValueErrors when entries of the $args parameter
     contain null bytes.
@@ -522,6 +532,11 @@ PHP 8.5 UPGRADE NOTES
     library that was separated from ext/dom for being reused among other
     extensions. The new extension is not directly exposed to userland.
 
+- Opcache:
+  . The Opcache extension is now always built into the PHP binary and is always
+    loaded. The INI directives opcache.enable and opcache.enable_cli are still
+    honored.
+
 - URI:
   . An always enabled uri extension is added that can be used for handling
     URIs and URLs according to RFC 3986 and WHATWG URL.
@@ -692,6 +707,10 @@ PHP 8.5 UPGRADE NOTES
 - MBString:
   . The parts of the code that used SSE2 have been adapted to use SIMD
     with ARM NEON as well.
+
+- Opcache:
+  . Improved performance of fetching TLS variables in JIT'ed code in non-Glibc
+    builds.
 
 - ReflectionProperty:
   . Improved performance of the following methods: getValue(), getRawValue(),
