@@ -851,7 +851,7 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 		return(PHP_GLOB_NOSPACE);
 	}
 
-	pathv = safe_erealloc_rel(pglob->gl_pathv, newn, sizeof(*pathv), 0);
+	pathv = safe_erealloc(pglob->gl_pathv, newn, sizeof(*pathv), 0);
 	if (pglob->gl_pathv == NULL && pglob->gl_offs > 0) {
 		/* first time around -- clear initial gl_offs items */
 		pathv += pglob->gl_offs;
@@ -861,7 +861,7 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 	pglob->gl_pathv = pathv;
 
 	if ((pglob->gl_flags & PHP_GLOB_KEEPSTAT) != 0) {
-		statv = safe_erealloc_rel(pglob->gl_statv, newn, sizeof(*statv), 0);
+		statv = safe_erealloc(pglob->gl_statv, newn, sizeof(*statv), 0);
 		if (statv == NULL)
 			goto nospace;
 		if (pglob->gl_statv == NULL && pglob->gl_offs > 0) {
