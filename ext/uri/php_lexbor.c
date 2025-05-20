@@ -52,8 +52,8 @@ const uri_handler_t lexbor_uri_handler = {
 	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) { \
 		lexbor_str_init_append(&str, lexbor_parser->mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value)); \
 	} else if (Z_TYPE_P(value) == IS_LONG && Z_LVAL_P(value) != 0) { \
-        ZVAL_STR(value, zend_long_to_str(Z_LVAL_P(value))); \
-    	lexbor_str_init_append(&str, lexbor_parser->mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value)); \
+	    ZVAL_STR(value, zend_long_to_str(Z_LVAL_P(value))); \
+		lexbor_str_init_append(&str, lexbor_parser->mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value)); \
 	} else { \
 		lexbor_str_init(&str, lexbor_parser->mraw, 0); \
 	} \
@@ -73,7 +73,7 @@ const uri_handler_t lexbor_uri_handler = {
 		case URI_COMPONENT_READ_NORMALIZED_UNICODE: /* Intentional fallthrough */ \
 		case URI_COMPONENT_READ_NORMALIZED_ASCII: { \
 			ZVAL_STRINGL(retval, (const char *) start, len);  \
-        	break; \
+			break; \
 		} \
 		EMPTY_SWITCH_DEFAULT_CASE() \
 	} \
@@ -415,9 +415,7 @@ static zend_result lexbor_read_path(const uri_internal_t *internal_uri, uri_comp
 {
 	lxb_url_t *lexbor_uri = (lxb_url_t *) internal_uri->uri;
 
-	if (lexbor_uri->path.opaque) {
-		LEXBOR_READ_ASCII_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
-	} else if (lexbor_uri->path.str.length) {
+	if (lexbor_uri->path.str.length) {
 		LEXBOR_READ_ASCII_URI_COMPONENT(lexbor_uri->path.str.data, lexbor_uri->path.str.length, read_mode, retval);
 	} else {
 		ZVAL_EMPTY_STRING(retval);

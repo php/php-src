@@ -20,7 +20,7 @@
 #include "Zend/zend_smart_str.h"
 
 static zend_result uriparser_init_parser(void);
-static void *uriparser_parse_uri(const zend_string *uri_str, const void *base_uri, zval *errors);
+static void *uriparser_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors);
 static void uriparser_create_invalid_uri_exception(zval *exception_zv, zval *errors);
 static void *uriparser_clone_uri(void *uri);
 static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
@@ -43,7 +43,7 @@ const uri_handler_t uriparser_uri_handler = {
 };
 
 #define URIPARSER_PARSE_STR(uri_str, internal_uri, errors) do { \
-    zend_string *str = smart_str_extract(&uri_str); \
+	zend_string *str = smart_str_extract(&uri_str); \
 	uriparser_uris_t *new_uriparser_uris = uriparser_parse_uri(str, NULL, errors); \
 	if (new_uriparser_uris == NULL) { \
 		smart_str_free(&uri_str); \
@@ -138,17 +138,17 @@ static zend_result uriparser_normalize_uri(UriUriA *uriparser_uri)
 
 #define URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode) do { \
 	if (read_mode == URI_COMPONENT_READ_RAW) { \
-        uriparser_uri = (UriUriA *) uriparser_uris->uri; \
-    } else if (read_mode == URI_COMPONENT_READ_NORMALIZED_UNICODE || read_mode == URI_COMPONENT_READ_NORMALIZED_ASCII) { \
-        if (uriparser_uris->normalized_uri == NULL) { \
+		uriparser_uri = (UriUriA *) uriparser_uris->uri; \
+	} else if (read_mode == URI_COMPONENT_READ_NORMALIZED_UNICODE || read_mode == URI_COMPONENT_READ_NORMALIZED_ASCII) { \
+		if (uriparser_uris->normalized_uri == NULL) { \
 			uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri); \
 			if (uriparser_normalize_uri(uriparser_uris->normalized_uri) == FAILURE) { \
 				return FAILURE; \
 			} \
-        } \
+		} \
 		uriparser_uri = uriparser_uris->normalized_uri; \
 	} else { \
-    	ZEND_UNREACHABLE(); \
+		ZEND_UNREACHABLE(); \
 	} \
 } while (0)
 
@@ -641,8 +641,8 @@ static void *uriparser_parse_uri(const zend_string *uri_str, const void *base_ur
 
 	if (uriAddBaseUriExMmA(absolute_uri, uriparser_uri, uriparser_base_url, URI_RESOLVE_STRICTLY, &uriparser_memory_manager) != URI_SUCCESS) {
 		zend_string_release(original_uri_str);
-		uriFreeUriMembersA(uriparser_uri);
-		uriFreeUriMembersA(uriparser_base_url);
+		uriFreeUriMembersMmA(uriparser_uri, &uriparser_memory_manager);
+		uriFreeUriMembersMmA(uriparser_base_url, &uriparser_memory_manager);
 		efree(uriparser_uri);
 		efree(uriparser_base_url);
 		efree(absolute_uri);
@@ -650,6 +650,7 @@ static void *uriparser_parse_uri(const zend_string *uri_str, const void *base_ur
 		return NULL;
 	}
 
+	uriFreeUriMembersMmA(uriparser_base_url, &uriparser_memory_manager);
 	efree(uriparser_uri);
 	efree(uriparser_base_url);
 
