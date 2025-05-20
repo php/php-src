@@ -1505,7 +1505,7 @@ static zend_string *php_libxml_default_dump_doc_to_str(xmlDocPtr doc, int option
 	}
 
 	long status = xmlSaveDoc(ctxt, doc);
-	(void) xmlSaveClose(ctxt);
+	status |= xmlSaveClose(ctxt);
 	if (status < 0) {
 		smart_str_free_ex(&str, false);
 		return NULL;

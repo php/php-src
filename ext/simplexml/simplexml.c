@@ -1403,7 +1403,8 @@ PHP_METHOD(SimpleXMLElement, asXML)
 	if (!result) {
 		RETURN_FALSE;
 	} else {
-		RETURN_NEW_STR(result);
+		/* Defense-in-depth: don't use the NEW variant in case somehow an empty string gets returned */
+		RETURN_STR(result);
 	}
 }
 /* }}} */
