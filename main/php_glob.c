@@ -906,7 +906,6 @@ static int globextend(const Char *path, php_glob_t *pglob, struct glob_lim *limi
 		errno = 0;
 		return(PHP_GLOB_NOSPACE);
 	}
- copy_error:
 	return(copy == NULL ? PHP_GLOB_NOSPACE : 0);
 }
 
