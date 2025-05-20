@@ -92,7 +92,6 @@
 #endif
 #define SIZEOF_OFF_T 4
 #define HAVE_FNMATCH
-#define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
 #define PHP_SHLIB_EXT_PREFIX "php_"
 

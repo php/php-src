@@ -45,13 +45,7 @@
 #endif
 #endif
 
-#ifdef HAVE_GLOB
-#ifdef PHP_WIN32
-#include "win32/glob.h"
-#else
-#include <glob.h>
-#endif
-#endif
+#include "php_glob.h"
 
 #ifndef __BIGGEST_ALIGNMENT__
 /* XXX need something better, perhaps with regard to SIMD, etc. */
@@ -5360,16 +5354,15 @@ ZEND_INI_END()
 
 static zend_result zend_ffi_preload_glob(const char *filename) /* {{{ */
 {
-#ifdef HAVE_GLOB
-	glob_t globbuf;
+	php_glob_t globbuf;
 	int    ret;
 	unsigned int i;
 
-	memset(&globbuf, 0, sizeof(glob_t));
+	memset(&globbuf, 0, sizeof(globbuf));
 
-	ret = glob(filename, 0, NULL, &globbuf);
-#ifdef GLOB_NOMATCH
-	if (ret == GLOB_NOMATCH || !globbuf.gl_pathc) {
+	ret = php_glob(filename, 0, NULL, &globbuf);
+#ifdef PHP_GLOB_NOMATCH
+	if (ret == PHP_GLOB_NOMATCH || !globbuf.gl_pathc) {
 #else
 	if (!globbuf.gl_pathc) {
 #endif
@@ -5378,20 +5371,13 @@ static zend_result zend_ffi_preload_glob(const char *filename) /* {{{ */
 		for(i=0 ; i<globbuf.gl_pathc; i++) {
 			zend_ffi *ffi = zend_ffi_load(globbuf.gl_pathv[i], 1);
 			if (!ffi) {
-				globfree(&globbuf);
+				php_globfree(&globbuf);
 				return FAILURE;
 			}
 			efree(ffi);
 		}
-		globfree(&globbuf);
+		php_globfree(&globbuf);
 	}
-#else
-	zend_ffi *ffi = zend_ffi_load(filename, 1);
-	if (!ffi) {
-		return FAILURE;
-	}
-	efree(ffi);
-#endif
 
 	return SUCCESS;
 }

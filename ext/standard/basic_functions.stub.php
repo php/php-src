@@ -2697,13 +2697,11 @@ function readdir($dir_handle = null): string|false {}
  */
 function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING, $context = null): array|false {}
 
-#ifdef HAVE_GLOB
 /**
  * @return array<int, string>|false
  * @refcount 1
  */
 function glob(string $pattern, int $flags = 0): array|false {}
-#endif
 
 /* exec.c */
 
