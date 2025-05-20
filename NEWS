@@ -45,6 +45,9 @@ PHP                                                                        NEWS
     properties in traits). (nielsdos)
   . Fix leak of accel_globals->key. (nielsdos)
 
+- OpenSSL:
+  . Fix missing checks against php_set_blocking() in xp_ssl.c. (nielsdos)
+
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
     (nielsdos)
