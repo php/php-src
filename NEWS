@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.23
 
+- Phar:
+  . Add missing filter cleanups on phar failure. (nielsdos)
 
 05 Jun 2025, PHP 8.3.22
 
