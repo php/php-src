@@ -98,7 +98,7 @@ zend_result dom_element_inner_html_read(dom_object *obj, zval *retval)
 				status |= xmlOutputBufferFlush(out);
 				status |= xmlOutputBufferClose(out);
 			}
-			(void) xmlSaveClose(ctxt);
+			status |= xmlSaveClose(ctxt);
 			xmlCharEncCloseFunc(handler);
 		}
 		if (UNEXPECTED(status < 0)) {
