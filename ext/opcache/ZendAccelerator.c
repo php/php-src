@@ -25,6 +25,7 @@
 #include "zend_extensions.h"
 #include "zend_compile.h"
 #include "ZendAccelerator.h"
+#include "zend_modules.h"
 #include "zend_persist.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_module.h"
@@ -100,7 +101,13 @@ typedef int gid_t;
 
 #include "zend_simd.h"
 
+#ifdef COMPILE_DL_OPCACHE
 ZEND_EXTENSION();
+ZEND_EXT_API zend_extension zend_extension_entry;
+#define opcache_extension_entry zend_extension_entry
+#else
+zend_extension opcache_extension_entry;
+#endif
 
 #ifndef ZTS
 zend_accel_globals accel_globals;
@@ -118,6 +125,7 @@ zend_accel_shared_globals *accel_shared_globals = NULL;
 #ifdef ZEND_WIN32
 char accel_uname_id[32];
 #endif
+bool accel_starting = false;
 bool accel_startup_ok = false;
 static const char *zps_failure_reason = NULL;
 const char *zps_api_failure_reason = NULL;
@@ -3154,8 +3162,21 @@ static void accel_move_code_to_huge_pages(void)
 # endif /* defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE) */
 #endif /* HAVE_HUGE_CODE_PAGES */
 
+void start_accel_extension(void)
+{
+	if (accel_starting) {
+		return;
+	}
+
+	accel_starting = true;
+
+	zend_register_extension(&opcache_extension_entry, NULL);
+}
+
 static int accel_startup(zend_extension *extension)
 {
+	accel_starting = true;
+
 #ifdef ZTS
 	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
 #else
@@ -3172,11 +3193,14 @@ static int accel_startup(zend_extension *extension)
 # endif
 #endif
 
-	if (start_accel_module() == FAILURE) {
+	zend_module_entry *module = start_accel_module();
+	if (module == NULL) {
 		accel_startup_ok = false;
 		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": module registration failed!");
 		return FAILURE;
 	}
+
+	accel_register_ini_entries(module);
 
 #ifdef ZEND_WIN32
 	if (UNEXPECTED(accel_gen_uname_id() == FAILURE)) {
@@ -5037,7 +5061,11 @@ static void accel_activate(void) {
 	}
 }
 
+#ifdef COMPILE_DL_OPCACHE
 ZEND_EXT_API zend_extension zend_extension_entry = {
+#else
+zend_extension opcache_extension_entry = {
+#endif
 	ACCELERATOR_PRODUCT_NAME,               /* name */
 	PHP_VERSION,							/* version */
 	"Zend Technologies",					/* author */

@@ -314,6 +314,7 @@ extern const char *zps_api_failure_reason;
 
 BEGIN_EXTERN_C()
 
+void start_accel_extension(void);
 void accel_shutdown(void);
 ZEND_RINIT_FUNCTION(zend_accelerator);
 zend_result accel_post_deactivate(void);
@@ -335,6 +336,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
+
+#ifndef COMPILE_DL_OPCACHE
+extern zend_extension opcache_extension_entry;
+#endif
 
 END_EXTERN_C()
 

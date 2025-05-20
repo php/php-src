@@ -25,6 +25,8 @@
 #include "ZendAccelerator.h"
 #include "zend_API.h"
 #include "zend_closures.h"
+#include "zend_extensions.h"
+#include "zend_modules.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
 #include "php_ini.h"
@@ -54,6 +56,9 @@
 	(SIZE_MAX - sizeof(zend_accel_shared_globals)) / (1024 * 1024) \
 ))
 #define TOKENTOSTR(X) #X
+
+static zend_module_entry *accel_module_loaded = NULL;
+zend_module_entry opcache_module_entry;
 
 static zif_handler orig_file_exists = NULL;
 static zif_handler orig_is_file = NULL;
@@ -405,11 +410,17 @@ static ZEND_NAMED_FUNCTION(accel_is_readable)
 
 static ZEND_MINIT_FUNCTION(zend_accelerator)
 {
-	(void)type; /* keep the compiler happy */
+	accel_module_loaded = zend_hash_str_find_ptr_lc(&module_registry,
+			opcache_module_entry.name, strlen(opcache_module_entry.name));
 
-	REGISTER_INI_ENTRIES();
+	start_accel_extension();
 
 	return SUCCESS;
+}
+
+void accel_register_ini_entries(zend_module_entry *module)
+{
+	zend_register_ini_entries_ex(ini_entries, module->module_number, module->type);
 }
 
 void zend_accel_override_file_functions(void)
@@ -554,7 +565,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	DISPLAY_INI_ENTRIES();
 }
 
-static zend_module_entry accel_module_entry = {
+zend_module_entry opcache_module_entry = {
 	STANDARD_MODULE_HEADER,
 	ACCELERATOR_PRODUCT_NAME,
 	ext_functions,
@@ -569,9 +580,22 @@ static zend_module_entry accel_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
-int start_accel_module(void)
+zend_module_entry *start_accel_module(void)
 {
-	return zend_startup_module(&accel_module_entry);
+	if (accel_module_loaded) {
+		return accel_module_loaded;
+	}
+
+	accel_module_loaded = zend_register_internal_module(&opcache_module_entry);
+	if (!accel_module_loaded) {
+		return NULL;
+	}
+
+	if (zend_startup_module_ex(accel_module_loaded) == FAILURE) {
+		return NULL;
+	}
+
+	return accel_module_loaded;
 }
 
 /* {{{ Get the scripts which are accelerated by ZendAccelerator */

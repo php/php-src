@@ -22,7 +22,14 @@
 #ifndef ZEND_ACCELERATOR_MODULE_H
 #define ZEND_ACCELERATOR_MODULE_H
 
-int start_accel_module(void);
+#include "Zend/zend_modules.h"
+
+#define phpext_opcache_ptr &opcache_module_entry
+extern zend_module_entry opcache_module_entry;
+
+zend_module_entry *start_accel_module(void);
+
+void accel_register_ini_entries(zend_module_entry *module);
 
 void zend_accel_override_file_functions(void);
 
