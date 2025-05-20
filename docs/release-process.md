@@ -306,10 +306,33 @@ slightly different steps. We'll call attention where the steps differ.
     >
     > Local-only release branches should not be pushed!
 
-    Do not forget to merge up PHP-X.Y all the way to master. When resolving
-    the conflicts, ignore the changes from PHP-X.Y in higher branches. It
-    means using something like `git checkout --ours .` when on PHP.X.Y+1 or
-    master after the merge resulting in the conflicts.
+    Do not forget to merge up PHP-X.Y all the way to master, including any
+    intermediate version branches.
+
+    ```shell
+    # No intermediate version, merge directly to master
+    git checkout master
+    git merge PHP-X.Y
+    ```
+
+    ```shell
+    # One intermediate version, merge upward into master
+    git checkout PHP-X.Y+1
+    git merge PHP-X.Y
+    git checkout master
+    git merge PHP-X.Y+1
+    ```
+
+   > 🗒 **Note** \
+   >  When resolving the conflicts, ignore the changes from PHP-X.Y in higher
+   >  branches. It means using something like `git checkout --ours .` when on
+   >  PHP.X.Y+1 or master after the merge resulting in the conflicts.
+
+   >  ```shell
+   >  git checkout --ours .
+   >  git add -p
+   >  git commit
+   >  ```
 
 11. Run the following using the release tag to export the tree, create the
     `configure` script, and build and compress three tarballs (`.tar.gz`,
