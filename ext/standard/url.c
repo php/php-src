@@ -936,9 +936,5 @@ no_name_header:
 
 PHP_MINIT_FUNCTION(url)
 {
-	if (uri_handler_register(&parse_url_uri_handler) == FAILURE) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return uri_handler_register(&parse_url_uri_handler);
 }

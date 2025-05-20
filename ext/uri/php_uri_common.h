@@ -77,7 +77,7 @@ static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 
 #define URI_PARSER_RFC3986 "Uri\\Rfc3986\\Uri"
 #define URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
-#define URI_SERIALIZED_PROPERTY_NAME "__uri"
+#define URI_SERIALIZED_PROPERTY_NAME "uri"
 
 typedef zend_result (*uri_read_t)(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
 
@@ -103,14 +103,14 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler);
 uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name);
 void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors);
 
-#define URI_CHECK_INITIALIZATION(internal_uri) do { \
+#define URI_ASSERT_INITIALIZATION(internal_uri) do { \
 	ZEND_ASSERT(internal_uri != NULL && internal_uri->uri != NULL); \
 } while (0)
 
 #define URI_GETTER(property_name, component_read_mode) do { \
 	ZEND_PARSE_PARAMETERS_NONE(); \
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS); \
-	URI_CHECK_INITIALIZATION(internal_uri); \
+	URI_ASSERT_INITIALIZATION(internal_uri); \
 	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
 	ZEND_ASSERT(property_handler != NULL); \
 	if (UNEXPECTED(property_handler->read_func(internal_uri, component_read_mode, return_value) == FAILURE)) { \
@@ -121,7 +121,7 @@ void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
 
 #define URI_WITHER_COMMON(property_name, property_zv, return_value) \
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS); \
-	URI_CHECK_INITIALIZATION(internal_uri); \
+	URI_ASSERT_INITIALIZATION(internal_uri); \
 	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name); \
 	ZEND_ASSERT(property_handler != NULL); \
 	zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS)); \
@@ -131,7 +131,7 @@ void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
 		RETURN_THROWS(); \
 	} \
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object); \
-	URI_CHECK_INITIALIZATION(new_internal_uri); /* TODO fix memory leak of new_object */ \
+	URI_ASSERT_INITIALIZATION(new_internal_uri); /* TODO fix memory leak of new_object */ \
 	if (property_handler->write_func == NULL) { \
 		zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name)); \
 		zend_object_release(new_object); \
@@ -175,7 +175,7 @@ void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
 	URI_WITHER_COMMON(property_name, &zv, return_value) \
 } while (0)
 
-#define URI_WITHER_LONG(property_name) do { \
+#define URI_WITHER_LONG_OR_NULL(property_name) do { \
 	zend_long value; \
 	bool value_is_null; \
 	ZEND_PARSE_PARAMETERS_START(1, 1) \

@@ -364,7 +364,7 @@ PHPAPI void php_uri_instantiate_uri(
 	void *base_url = NULL;
 	if (base_url_object != NULL) {
 		uri_internal_t *internal_base_url = uri_internal_from_obj(base_url_object);
-		URI_CHECK_INITIALIZATION(internal_base_url);
+		URI_ASSERT_INITIALIZATION(internal_base_url);
 		base_url = internal_base_url->uri;
 	}
 
@@ -522,7 +522,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, getPort)
 
 PHP_METHOD(Uri_Rfc3986_Uri, withPort)
 {
-	URI_WITHER_LONG(ZSTR_KNOWN(ZEND_STR_PORT));
+	URI_WITHER_LONG_OR_NULL(ZSTR_KNOWN(ZEND_STR_PORT));
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getPath)
@@ -574,10 +574,10 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, z
 {
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *this_internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION(this_internal_uri);
+	URI_ASSERT_INITIALIZATION(this_internal_uri);
 
 	uri_internal_t *that_internal_uri = uri_internal_from_obj(that_object);
-	URI_CHECK_INITIALIZATION(that_internal_uri);
+	URI_ASSERT_INITIALIZATION(that_internal_uri);
 
 	if (this_object->ce != that_object->ce &&
 		!instanceof_function(this_object->ce, that_object->ce) &&
@@ -595,15 +595,16 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, z
 	}
 
 	zend_string *this_str = this_internal_uri->handler->uri_to_string(
-			this_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
+		this_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
 	if (this_str == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
 		RETURN_THROWS();
 	}
 
 	zend_string *that_str = that_internal_uri->handler->uri_to_string(
-			that_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
+		that_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
 	if (that_str == NULL) {
+		zend_string_release(this_str);
 		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(that_object->ce->name));
 		RETURN_THROWS();
 	}
@@ -634,7 +635,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION(internal_uri);
+	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
 	if (uri_str == NULL) {
@@ -651,7 +652,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION(internal_uri);
+	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, false);
 	if (uri_str == NULL) {
@@ -672,7 +673,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, resolve)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION(internal_uri);
+	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, this_object, true, false, NULL);
 }
@@ -683,71 +684,63 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION(internal_uri);
+	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	HashTable *result = zend_array_dup(this_object->handlers->get_properties(this_object));
-	if (zend_hash_str_find_ind(result, URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1) != NULL) {
-		zend_hash_destroy(result);
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object: $__uri property is not allowed", ZSTR_VAL(this_object->ce->name));
-		RETURN_THROWS();
-	}
-
+	/* Serialize state: "uri" key in the first array */
 	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
 	if (uri_str == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
 		RETURN_THROWS();
 	}
+	zval tmp;
+	ZVAL_STR(&tmp, uri_str);
 
-	zval uri_zv;
-	ZVAL_STR(&uri_zv, uri_str);
-	zend_hash_str_add_new(result, URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1, &uri_zv);
+	array_init(return_value);
 
-	ZVAL_ARR(return_value, result);
-}
+	zval arr;
+	array_init(&arr);
+	zend_hash_str_add_new(Z_ARRVAL(arr), URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1, &tmp);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 
-static void uri_restore_custom_properties(zend_object *object, uri_internal_t *internal_uri, HashTable *ht)
-{
-	zend_string *prop_name;
-	zval *prop_val;
-
-	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, prop_name, prop_val) {
-		if (!prop_name || Z_TYPE_P(prop_val) == IS_REFERENCE ||
-			zend_string_equals_literal(prop_name, URI_SERIALIZED_PROPERTY_NAME)
-		) {
-			continue;
-		}
-
-		zend_update_property_ex(object->ce, object, prop_name, prop_val);
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			break;
-		}
-	} ZEND_HASH_FOREACH_END();
+	/* Serialize regular properties: second array */
+	ZVAL_ARR(&arr, this_object->handlers->get_properties(this_object));
+	Z_TRY_ADDREF(arr);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 }
 
 static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_name)
 {
-	HashTable *properties;
+	HashTable *data;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_HT(properties)
+		Z_PARAM_ARRAY_HT(data)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 
-	zval *uri_zv = zend_hash_str_find_ind(properties, URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1);
-	if (uri_zv == NULL) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object: missing \"__uri\" field", ZSTR_VAL(object->ce->name));
+	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
+	if (zend_hash_num_elements(data) != 2) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
 		RETURN_THROWS();
 	}
-	if (Z_TYPE_P(uri_zv) != IS_STRING) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object: \"__uri\" field is not a string", ZSTR_VAL(object->ce->name));
+
+	/* Unserialize state: "uri" key in the first array */
+	zval *arr = zend_hash_index_find(data, 0);
+	if (arr == NULL || Z_TYPE_P(arr) != IS_ARRAY) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		RETURN_THROWS();
+	}
+
+	zval *uri_zv = zend_hash_str_find_ind(Z_ARRVAL_P(arr), URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1);
+	if (uri_zv == NULL || Z_TYPE_P(uri_zv) != IS_STRING) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
 		RETURN_THROWS();
 	}
 
 	zval errors;
 	ZVAL_UNDEF(&errors);
 
+	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	internal_uri->handler = uri_handler_by_name(handler_name, strlen(handler_name));
 	if (internal_uri->uri != NULL) {
 		internal_uri->handler->free_uri(internal_uri->uri);
@@ -756,12 +749,22 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_na
 	if (internal_uri->uri == NULL) {
 		throw_invalid_uri_exception(internal_uri->handler, &errors);
 		zval_ptr_dtor(&errors);
-		zval_ptr_dtor(uri_zv);
 		RETURN_THROWS();
 	}
 	zval_ptr_dtor(&errors);
 
-	uri_restore_custom_properties(object, internal_uri, properties);
+	/* Unserialize regular properties: second array */
+	arr = zend_hash_index_find(data, 1);
+	if (arr == NULL || Z_TYPE_P(arr) != IS_ARRAY) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		RETURN_THROWS();
+	}
+
+	object_properties_load(object, Z_ARRVAL_P(arr));
+	if (EG(exception)) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		RETURN_THROWS();
+	}
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, __unserialize)
@@ -822,7 +825,7 @@ PHP_METHOD(Uri_WhatWg_Url, withHost)
 		ZVAL_STR_COPY(&zv, value);
 	}
 
-	URI_WITHER_COMMON(ZSTR_KNOWN(ZEND_STR_HOST), &zv, return_value) \
+	URI_WITHER_COMMON(ZSTR_KNOWN(ZEND_STR_HOST), &zv, return_value);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, equals)
@@ -845,7 +848,7 @@ PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION(internal_uri);
+	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_UNICODE, false));
 }
@@ -856,7 +859,7 @@ PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION(internal_uri);
+	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false));
 }
@@ -874,7 +877,7 @@ PHP_METHOD(Uri_WhatWg_Url, resolve)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
-	URI_CHECK_INITIALIZATION(internal_uri);
+	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, this_object, true, false, errors);
 }
@@ -920,7 +923,7 @@ static zend_object *uri_clone_obj_handler(zend_object *object)
 	ZEND_ASSERT(new_object != NULL);
 	uri_object_t *new_uri_object = uri_object_from_obj(new_object);
 
-	URI_CHECK_INITIALIZATION(internal_uri);
+	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	new_uri_object->internal.handler = internal_uri->handler;
 
