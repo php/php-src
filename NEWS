@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.9
 
+- SimpleXML:
+  . Fixed bug GH-18597 (Heap-buffer-overflow in zend_alloc.c when assigning
+    string with UTF-8 bytes). (nielsdos)
 
 06 Jun 2025, PHP 8.4.8
 
