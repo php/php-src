@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.8
+?? ??? ????, PHP 8.4.9
+
+
+06 Jun 2025, PHP 8.4.8
 
 - Core:
   . Fixed GH-18480 (array_splice with large values for offset/length arguments).
