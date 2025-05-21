@@ -1459,6 +1459,7 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 
 			if (!socket_import_file_descriptor(fd, sock)) {
 				do_to_zval_err(ctx, "error getting protocol descriptor %d: getsockopt() call failed with errno %d", fd, errno);
+				zval_ptr_dtor(&elem);
 				return;
 			}
 		} else {
