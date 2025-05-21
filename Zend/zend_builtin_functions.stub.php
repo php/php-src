@@ -7,6 +7,8 @@ class stdClass
 {
 }
 
+function _array(mixed ...$entries): array {}
+
 function exit(string|int $status = 0): never {}
 
 /** @alias exit */
