@@ -926,9 +926,14 @@ interface FunctionOrMethodName {
 
 class FunctionName implements FunctionOrMethodName {
 
-    public function __construct(
-        private readonly Name $name,
-    ) {}
+    private readonly Name $name;
+
+    public function __construct(Name $name) {
+        if ($name->name === '_array') {
+            $name = new Name('array', $name->getAttributes());
+        }
+        $this->name = $name;
+    }
 
     public function getNamespace(): ?string {
         if ($this->name->isQualified()) {
