@@ -47,6 +47,10 @@ PHP                                                                        NEWS
 - PDO_OCI:
   . Fixed bug GH-18494 (PDO OCI segfault in statement GC). (nielsdos)
 
+- Sockets:
+  - Fixed bug GH-18617 (socket_import_file_descriptor return value
+    unchecked). (David Carlier)
+
 - SPL:
   . Fixed bug GH-18421 (Integer overflow with large numbers in LimitIterator).
     (nielsdos)

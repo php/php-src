@@ -1457,7 +1457,11 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 			object_init_ex(&elem, socket_ce);
 			php_socket *sock = Z_SOCKET_P(&elem);
 
-			socket_import_file_descriptor(fd, sock);
+			if (!socket_import_file_descriptor(fd, sock)) {
+				do_to_zval_err(ctx, "error getting protocol descriptor %d: getsockopt() call failed with errno %d", fd, errno);
+				zval_ptr_dtor(&elem);
+				return;
+			}
 		} else {
 			php_stream *stream = php_stream_fopen_from_fd(fd, "rw", NULL);
 			php_stream_to_zval(stream, &elem);
