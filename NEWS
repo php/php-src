@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.9
 
+- Phar:
+  . Add missing filter cleanups on phar failure. (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-18597 (Heap-buffer-overflow in zend_alloc.c when assigning
     string with UTF-8 bytes). (nielsdos)

@@ -674,6 +674,7 @@ foundit:
 				}
 
 				if (!entry.uncompressed_filesize || !actual_alias) {
+					php_stream_filter_remove(filter, 1);
 					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
@@ -706,6 +707,7 @@ foundit:
 				}
 
 				if (!entry.uncompressed_filesize || !actual_alias) {
+					php_stream_filter_remove(filter, 1);
 					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
@@ -999,6 +1001,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		entry->cfp = php_stream_fopen_tmpfile();
 
 		if (!entry->cfp) {
+			php_stream_filter_free(filter);
 			spprintf(p->error, 0, "unable to create temporary file for file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -1006,6 +1009,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		php_stream_flush(efp);
 
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
+			php_stream_filter_free(filter);
 			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -1013,6 +1017,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
 
 		if (SUCCESS != php_stream_copy_to_stream_ex(efp, entry->cfp, entry->uncompressed_filesize, NULL)) {
+			php_stream_filter_remove(filter, 1);
 			spprintf(p->error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
