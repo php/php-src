@@ -111,11 +111,6 @@
 #else
 
 #include "php.h"
-
-#ifndef PHP_WIN32
-# include <sys/cdefs.h>
-#endif
-
 #include "Zend/zend_stream.h"
 
 typedef struct {
