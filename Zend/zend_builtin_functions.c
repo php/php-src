@@ -115,6 +115,43 @@ ZEND_FUNCTION(clone)
 	}
 }
 
+ZEND_FUNCTION(array)
+{
+	zval *args;
+	uint32_t argc;
+	HashTable *named_params;
+
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC_WITH_NAMED(args, argc, named_params);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (EXPECTED(argc == 0)) {
+		if (EXPECTED(named_params != NULL)) {
+			GC_ADDREF(named_params);
+			RETURN_ARR(named_params);
+		} else {
+			RETURN_EMPTY_ARRAY();
+		}
+	} else {
+		HashTable *entries;
+
+		ALLOC_HASHTABLE(entries);
+		zend_hash_init(entries, argc + (named_params ? zend_hash_num_elements(named_params) : 0), NULL, NULL, false);
+		for (uint32_t i = 0; i < argc; i++) {
+			zend_hash_index_add_new(entries, i, &args[i]);
+		}
+		if (named_params != NULL) {
+			zend_string *key;
+			zval *val;
+			ZEND_HASH_FOREACH_STR_KEY_VAL(named_params, key, val) {
+				zend_hash_update(entries, key, val);
+			} ZEND_HASH_FOREACH_END();
+		}
+
+		RETURN_ARR(entries);
+	}
+}
+
 ZEND_FUNCTION(exit)
 {
 	zend_string *str = NULL;
