@@ -118,7 +118,7 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 		if (!ZEND_TYPE_USES_ARENA(type)) {
 			pefree(ZEND_TYPE_LIST(type), persistent);
 		}
-	} else if (ZEND_TYPE_HAS_NAME(type)) {
+	} else if (ZEND_TYPE_HAS_NAME(type) || ZEND_TYPE_IS_GENERIC_PARAM_NAME(type)) {
 		zend_string_release(ZEND_TYPE_NAME(type));
 	}
 }

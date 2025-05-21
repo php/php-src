@@ -20,4 +20,4 @@ class C implements I<string, int> {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of C::set(int $key, string $value): void must be compatible with I::set(<K : string> $key, <V : int> $value): void in %s on line %d
+Fatal error: Declaration of C::set(int $key, string $value): void must be compatible with I<K : string, V : int>::set(<K : string> $key, <V : int> $value): void in %s on line %d

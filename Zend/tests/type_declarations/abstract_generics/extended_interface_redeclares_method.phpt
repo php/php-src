@@ -7,8 +7,8 @@ interface I<T> {
     public function foo(T $param): int;
 }
 
-interface J<S> extends I<S> {
-    public function foo(S $param): int;
+interface J extends I<float> {
+    public function foo(float $param): int;
 }
 
 ?>

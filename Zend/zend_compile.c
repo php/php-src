@@ -1389,7 +1389,7 @@ static zend_string *add_type_string(zend_string *type, zend_string *new_type, bo
 	return result;
 }
 
-static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scope) {
+static zend_string *resolve_class_name(zend_string *name, const zend_class_entry *scope) {
 	if (scope) {
 		if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_SELF))) {
 			name = scope->name;
@@ -1409,7 +1409,7 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 }
 
 static zend_string *add_intersection_type(zend_string *str,
-	const zend_type_list *intersection_type_list, zend_class_entry *scope,
+	const zend_type_list *intersection_type_list, const zend_class_entry *scope,
 	bool is_bracketed)
 {
 	const zend_type *single_type;
@@ -1434,11 +1434,21 @@ static zend_string *add_intersection_type(zend_string *str,
 	return str;
 }
 
-static zend_string* resolve_bound_generic_type(zend_string *type_name, zend_class_entry *scope, const HashTable *bound_types) {
+static zend_string* resolve_bound_generic_type(zend_string *type_name, const zend_class_entry *scope, const HashTable *bound_types) {
+	if (bound_types == NULL) {
+		const size_t len = ZSTR_LEN(type_name) + strlen("<>");
+		zend_string *result = zend_string_alloc(len, 0);
+		ZSTR_VAL(result)[0] = '<';
+		memcpy(ZSTR_VAL(result) + strlen("<"), ZSTR_VAL(type_name), ZSTR_LEN(type_name));
+		ZSTR_VAL(result)[len-1] = '>';
+		ZSTR_VAL(result)[len] = '\0';
+		return result;
+	}
+
 	const zend_type *constraint = zend_hash_find_ptr(bound_types, type_name);
 	ZEND_ASSERT(constraint != NULL);
 
-	zend_string *constraint_type_str = zend_type_to_string_resolved(*constraint, scope, /* need the bound types? */NULL);
+	zend_string *constraint_type_str = zend_type_to_string_resolved(*constraint, scope, NULL);
 
 	size_t len = ZSTR_LEN(type_name) + ZSTR_LEN(constraint_type_str) + strlen("< : >");
 	zend_string *result = zend_string_alloc(len, 0);
@@ -1456,7 +1466,7 @@ static zend_string* resolve_bound_generic_type(zend_string *type_name, zend_clas
 	return result;
 }
 
-zend_string *zend_type_to_string_resolved(const zend_type type, zend_class_entry *scope, const HashTable *bound_types_to_scope) {
+zend_string *zend_type_to_string_resolved(const zend_type type, const zend_class_entry *scope, const HashTable *bound_types_to_scope) {
 	zend_string *str = NULL;
 
 	/* Pure intersection type */
@@ -7042,7 +7052,8 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
 					const zend_generic_parameter *generic_param = &ce->generic_parameters[generic_param_index];
 					if (zend_string_equals(type_name, generic_param->name)) {
-						return (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(type_name), /* allow null */ false, _ZEND_TYPE_GENERIC_PARAM_NAME_BIT);
+						// TODO Add ZEND_TYPE_INIT_GENERIC() macro that takes an index
+						return (zend_type) ZEND_TYPE_INIT_PTR(zend_string_copy(type_name), _ZEND_TYPE_GENERIC_PARAM_NAME_BIT, /* allow null */ false, 0);
 					}
 				}
 			}
