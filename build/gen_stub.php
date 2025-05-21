@@ -1012,6 +1012,9 @@ class FunctionName implements FunctionOrMethodName {
         if ($name->name === '_clone') {
             $name = new Name('clone', $name->getAttributes());
         }
+        if ($name->name === '_array') {
+            $name = new Name('array', $name->getAttributes());
+        }
         $this->name = $name;
     }
 
