@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed GH-18460 (curl_easy_setopt with CURLOPT_USERPWD/CURLOPT_USERNAME/
     CURLOPT_PASSWORD set the Authorization header when set to NULL).
     (David Carlier)
+  . Fixed bugs GH-17711 and GH-18022 (Infinite recursion on deprecated attribute
+    evaluation) and GH-18464 (Recursion protection for deprecation constants not
+    released on bailout). (DanielEScherzer and ilutov)
 
 - Date:
   . Fixed bug GH-18076 (Since PHP 8, the date_sun_info() function returns
