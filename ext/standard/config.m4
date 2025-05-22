@@ -89,6 +89,9 @@ AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
     crypt_sha256.c
     crypt_sha512.c
     php_crypt_r.c
+    yescrypt/yescrypt-opt.c
+    yescrypt/yescrypt-common.c
+    yescrypt/sha256.c
   "])
 ], [
 AC_SEARCH_LIBS([crypt], [crypt],
@@ -206,6 +209,33 @@ int main(void) {
   [ac_cv_crypt_blowfish=no],
   [ac_cv_crypt_blowfish=no])])
 
+AC_CACHE_CHECK([for Yescrypt crypt], [ac_cv_crypt_yescrypt],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
+#include <stdlib.h>
+#include <string.h>
+
+int main(void) {
+  char answer[128];
+  char *encrypted;
+  char salt[] = "\$y\$j9T\$fFqB7ZKMpdoOep2IXlKMuBnGplYOF/\$";
+
+  strcpy(answer, salt);
+  strcpy(&answer[sizeof(salt) - 1], "YUbFz9cPA2OISKzl1FhXHQP556fm3v7K1PBuIcVwyL/");
+  encrypted = crypt("rasmuslerdorf", salt);
+  return !encrypted || strcmp(encrypted, answer);
+}]])],
+  [ac_cv_crypt_yescrypt=yes],
+  [ac_cv_crypt_yescrypt=no],
+  [ac_cv_crypt_yescrypt=no])])
+
 AC_CACHE_CHECK([for SHA512 crypt], [ac_cv_crypt_sha512],
   [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #ifdef HAVE_UNISTD_H
@@ -260,7 +290,7 @@ int main(void) {
   [ac_cv_crypt_sha256=no],
   [ac_cv_crypt_sha256=no])])
 
-  if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no"; then
+  if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_yescrypt" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no"; then
     AC_MSG_FAILURE([Cannot use external libcrypt as some algo are missing.])
   fi
 
@@ -396,6 +426,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     crc32.c
     credits.c
     crypt.c
+    yescrypt/yescrypt-config.c
     css.c
     datetime.c
     dir.c
@@ -456,6 +487,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_BUILD_DIR([$ext_builddir/libavifinfo])
+PHP_ADD_BUILD_DIR([$ext_builddir/yescrypt])
 
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])

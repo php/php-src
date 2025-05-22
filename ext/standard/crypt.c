@@ -27,6 +27,7 @@
 #if PHP_USE_PHP_CRYPT_R
 # include "php_crypt_r.h"
 # include "crypt_freesec.h"
+# include "yescrypt/yescrypt.h"
 #else
 # ifdef HAVE_CRYPT_H
 #  if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
@@ -74,6 +75,19 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 
 	if (salt[0] == '*' && (salt[1] == '0' || salt[1] == '1')) {
 		return NULL;
+	}
+
+	if (salt[0] == '$' && (salt[1] == 'y' || salt[1] == '7') && salt[2] == '$') {
+		/* Reference yescrypt can handle NUL bytes in the password, but sytem crypt cannot.
+		 * Return NULL for both cases for consistency. */
+		if (zend_char_has_nul_byte(password, (size_t) pass_len)) {
+			return NULL;
+		}
+
+		/* Neither reference yescrypt nor system crypt can handle NUL bytes in the salt. */
+		if (zend_char_has_nul_byte(salt, (size_t) salt_len)) {
+			return NULL;
+		}
 	}
 
 /* Windows (win32/crypt) has a stripped down version of libxcrypt and
@@ -138,6 +152,33 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return result;
 			}
+		} else if (salt[0] == '$' && (salt[1] == 'y' || salt[1] == '7') && salt[2] == '$') {
+			yescrypt_local_t local;
+			uint8_t buf[PREFIX_LEN + 1 + HASH_LEN + 1]; /* prefix, '$', hash, NUL */
+
+			if (yescrypt_init_local(&local)) {
+				return NULL;
+			}
+
+			uint8_t *hash = yescrypt_r(
+				NULL,
+				&local,
+				(const uint8_t *) password,
+				(size_t) pass_len,
+				(const uint8_t *) salt,
+				NULL /* no key */,
+				buf,
+				sizeof(buf)
+			);
+
+			if (yescrypt_free_local(&local) || !hash) {
+				ZEND_SECURE_ZERO(buf, sizeof(buf));
+				return NULL;
+			}
+
+			result = zend_string_init((const char *) hash, strlen((const char *) hash), false);
+			ZEND_SECURE_ZERO(buf, sizeof(buf));
+			return result;
 		} else if (salt[0] == '_'
 				|| (IS_VALID_SALT_CHARACTER(salt[0]) && IS_VALID_SALT_CHARACTER(salt[1]))) {
 			/* DES Fallback */
