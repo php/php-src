@@ -1434,7 +1434,8 @@ static zend_string *add_intersection_type(zend_string *str,
 	return str;
 }
 
-static zend_string* resolve_bound_generic_type(zend_string *type_name, const zend_class_entry *scope, const HashTable *bound_types) {
+static zend_string* resolve_bound_generic_type(const zend_type *type, const zend_class_entry *scope, const HashTable *bound_types) {
+	const zend_string *type_name = ZEND_TYPE_NAME(*type);
 	if (bound_types == NULL) {
 		const size_t len = ZSTR_LEN(type_name) + strlen("<>");
 		zend_string *result = zend_string_alloc(len, 0);
@@ -1445,7 +1446,7 @@ static zend_string* resolve_bound_generic_type(zend_string *type_name, const zen
 		return result;
 	}
 
-	const zend_type *constraint = zend_hash_find_ptr(bound_types, type_name);
+	const zend_type *constraint = zend_hash_index_find_ptr(bound_types, type->generic_param_index);
 	ZEND_ASSERT(constraint != NULL);
 
 	zend_string *constraint_type_str = zend_type_to_string_resolved(*constraint, scope, NULL);
@@ -1490,7 +1491,7 @@ zend_string *zend_type_to_string_resolved(const zend_type type, const zend_class
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(type)) {
-		str = resolve_bound_generic_type(ZEND_TYPE_NAME(type), scope, bound_types_to_scope);
+		str = resolve_bound_generic_type(&type, scope, bound_types_to_scope);
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}

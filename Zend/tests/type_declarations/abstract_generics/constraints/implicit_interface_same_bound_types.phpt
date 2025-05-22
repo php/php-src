@@ -1,7 +1,5 @@
 --TEST--
 Implicit interface inheritance with same bound types
---XFAIL--
-This emits an error when it shouldn't
 --FILE--
 <?php
 
