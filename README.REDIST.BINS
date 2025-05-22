@@ -19,6 +19,7 @@
 19. xxHash (ext/hash/xxhash)
 20. Lexbor (ext/dom/lexbor/lexbor) see ext/dom/lexbor/LICENSE
 21. Portions of libcperciva (ext/hash/hash_sha_{ni,sse2}.c) see the header in the source file
+22. BLAKE3 (ext/hash/blake3) see ext/hash/blake3/upstream_blake3/LICENSE_CC0
 
 3. pcre2lib (ext/pcre)
 
