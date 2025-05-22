@@ -84,7 +84,7 @@ static inline uint32_t zend_alloc_cache_slot(void) {
 	return zend_alloc_cache_slots(1);
 }
 
-const zend_type zend_mixed_type = { NULL, MAY_BE_ANY };
+const zend_type zend_mixed_type = { NULL, MAY_BE_ANY, 0 };
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename, zend_compile_position position);
@@ -7052,8 +7052,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				for (uint32_t generic_param_index = 0; generic_param_index < ce->num_generic_parameters; generic_param_index++) {
 					const zend_generic_parameter *generic_param = &ce->generic_parameters[generic_param_index];
 					if (zend_string_equals(type_name, generic_param->name)) {
-						// TODO Add ZEND_TYPE_INIT_GENERIC() macro that takes an index
-						return (zend_type) ZEND_TYPE_INIT_PTR(zend_string_copy(type_name), _ZEND_TYPE_GENERIC_PARAM_NAME_BIT, /* allow null */ false, 0);
+						return (zend_type) ZEND_TYPE_INIT_GENERIC_PARAM(zend_string_copy(type_name), generic_param_index);
 					}
 				}
 			}
