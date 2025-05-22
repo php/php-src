@@ -2796,7 +2796,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	X509 *cert = NULL;
 	zend_object *cert_obj;
 	zend_string *cert_str;
-	zval *zprivkey, * zheaders;
+	zval *zprivkey, * zheaders = NULL;
 	zval * hval;
 	EVP_PKEY * privkey = NULL;
 	zend_long flags = PKCS7_DETACHED;
