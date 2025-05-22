@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.23
 
+- Date:
+  . Fix leaks with multiple calls to DatePeriod iterator current(). (nielsdos)
+
 - Intl:
   . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
 
