@@ -121,6 +121,10 @@ static PHP_RSHUTDOWN_FUNCTION(sockets);
 zend_class_entry *socket_ce;
 static zend_object_handlers socket_object_handlers;
 
+#ifdef SO_SPLICE
+zend_class_entry *socket_so_splice_ce;
+#endif
+
 static zend_object *socket_create_object(zend_class_entry *class_type) {
 	php_socket *intern = zend_object_alloc(sizeof(php_socket), class_type);
 
@@ -481,6 +485,10 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.clone_obj = NULL;
 	socket_object_handlers.get_gc = socket_get_gc;
 	socket_object_handlers.compare = zend_objects_not_comparable;
+
+#if defined(SO_SPLICE)
+	socket_so_splice_ce = register_class_SocketSoSplice();
+#endif
 
 	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
@@ -1952,6 +1960,19 @@ PHP_FUNCTION(socket_get_option)
 				return;
 			}
 #endif
+#ifdef SO_SPLICE
+			case SO_SPLICE: {
+				off_t splice;
+				optlen = sizeof(splice);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&splice, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				RETURN_LONG(splice);
+			}
+#endif
 
 		}
 	}
@@ -2297,6 +2318,68 @@ PHP_FUNCTION(socket_set_option)
 				optlen = sizeof(bpfprog);
 				opt_ptr = &bpfprog;
 			}
+			break;
+		}
+#endif
+
+#ifdef SO_SPLICE
+		case SO_SPLICE: {
+			if (Z_TYPE_P(arg4) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(arg4), socket_so_splice_ce)) {
+					zend_argument_type_error(4, "must be of type SocketSoSplice, %s given", zend_zval_value_name(arg4));
+					RETURN_THROWS();
+			}
+
+			zend_object *so_splice_obj = Z_OBJ_P(arg4);
+			zval tmpA, tmpB, tmpC;
+
+			zval *socket = zend_read_property(socket_so_splice_ce, so_splice_obj, "socket", strlen("socket"), false, &tmpA);
+			if (Z_TYPE_P(socket) == IS_NULL) {
+					zend_argument_type_error(4, "socket cannot be null");
+					RETURN_THROWS();
+			}
+			zval *max = zend_read_property(socket_so_splice_ce, so_splice_obj, "max", strlen("max"), false, &tmpB);
+			zval *array = zend_read_property(socket_so_splice_ce, so_splice_obj, "time", strlen("time"), false, &tmpC);
+			if (Z_TYPE_P(array) == IS_NULL) {
+					zend_argument_type_error(4, "time cannot be null");
+					RETURN_THROWS();
+			}
+
+			php_socket *php_sock = Z_SOCKET_P(socket);
+			zend_long php_max = Z_LVAL_P(max);
+			zend_array *php_arr = Z_ARRVAL_P(array);
+
+			ENSURE_SOCKET_VALID(php_sock);
+
+			if (php_max < 0) {
+				zend_argument_value_error(4, "\"max\" key must be greater than or equal to 0");
+				RETURN_THROWS();
+			}
+
+			zval *tv_sec;
+			zval *tv_usec;
+
+			if ((tv_sec = zend_hash_str_find(php_arr, "sec", strlen("sec"))) == NULL) {
+				zend_argument_value_error(4, "time must have key \"sec\"");
+				RETURN_THROWS();
+			}
+			if ((tv_usec = zend_hash_str_find(php_arr, "usec", strlen("usec"))) == NULL) {
+				zend_argument_value_error(4, "time must have key \"usec\"");
+				RETURN_THROWS();
+			}
+
+			struct splice s;
+			s.sp_fd = (int)php_sock->bsd_socket;
+			s.sp_max = (off_t)php_max;
+			if (Z_LVAL_P(tv_sec) > 999999) {
+				s.sp_idle.tv_sec = Z_LVAL_P(tv_sec) + (Z_LVAL_P(tv_usec) / 1000000);
+				s.sp_idle.tv_usec = Z_LVAL_P(tv_usec) % 1000000;
+			} else {
+				s.sp_idle.tv_sec = Z_LVAL_P(tv_sec);
+				s.sp_idle.tv_usec = Z_LVAL_P(tv_usec);
+			}
+
+			opt_ptr = &s;
+			optlen = sizeof(s);
 			break;
 		}
 #endif

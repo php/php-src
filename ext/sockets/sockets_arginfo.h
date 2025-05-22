@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 42d486d2666d23569e70860e2b1ef203161792b3 */
+ * Stub hash: 1350cf0464d5dbcf3bec0ad0f26445da8153aedc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1057,6 +1057,9 @@ static void register_sockets_symbols(int module_number)
 #if defined(SO_NOSIGPIPE)
 	REGISTER_LONG_CONSTANT("SO_NOSIGPIPE", SO_NOSIGPIPE, CONST_PERSISTENT);
 #endif
+#if defined(SO_NOSIGPIPE) && defined(SO_SPLICE)
+	REGISTER_LONG_CONSTANT("SO_SPLICE", SO_SPLICE, CONST_PERSISTENT);
+#endif
 #if defined(TCP_QUICKACK)
 	REGISTER_LONG_CONSTANT("TCP_QUICKACK", TCP_QUICKACK, CONST_PERSISTENT);
 #endif
@@ -1129,3 +1132,34 @@ static zend_class_entry *register_class_AddressInfo(void)
 
 	return class_entry;
 }
+
+#if defined(SO_SPLICE)
+static zend_class_entry *register_class_SocketSoSplice(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SocketSoSplice", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	zval property_socket_default_value;
+	ZVAL_UNDEF(&property_socket_default_value);
+	zend_string *property_socket_name = zend_string_init("socket", sizeof("socket") - 1, 1);
+	zend_string *property_socket_class_Socket = zend_string_init("Socket", sizeof("Socket")-1, 1);
+	zend_declare_typed_property(class_entry, property_socket_name, &property_socket_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_socket_class_Socket, 0, 0));
+	zend_string_release(property_socket_name);
+
+	zval property_max_default_value;
+	ZVAL_UNDEF(&property_max_default_value);
+	zend_string *property_max_name = zend_string_init("max", sizeof("max") - 1, 1);
+	zend_declare_typed_property(class_entry, property_max_name, &property_max_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_max_name);
+
+	zval property_time_default_value;
+	ZVAL_UNDEF(&property_time_default_value);
+	zend_string *property_time_name = zend_string_init("time", sizeof("time") - 1, 1);
+	zend_declare_typed_property(class_entry, property_time_name, &property_time_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release(property_time_name);
+
+	return class_entry;
+}
+#endif
