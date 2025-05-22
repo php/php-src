@@ -1727,6 +1727,15 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 	do_implement_interface_ex(ce, iface, iface);
 }
 
+static ZEND_COLD void emit_incompatible_generic_arg_count_error(const zend_class_entry *iface, uint32_t given_args) {
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"Interface %s expects %" PRIu32 " generic parameters, %" PRIu32 " given",
+		ZSTR_VAL(iface->name),
+		iface->num_generic_parameters,
+		given_args
+	);
+}
+
 static void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	/* expects interface to be contained in ce's interface list already */
@@ -1745,7 +1754,19 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *i
 		zend_class_entry *entry = iface->interfaces[if_num];
 		for (i = 0; i < ce_num; i++) {
 			if (ce->interfaces[i] == entry) {
-				// TODO Check bound generic types match? Or is this done before?
+				if (entry->num_generic_parameters) {
+					if (UNEXPECTED(ce->bound_types == NULL)) {
+						emit_incompatible_generic_arg_count_error(entry, 0);
+					}
+					const HashTable *bound_types = zend_hash_find_ptr_lc(ce->bound_types, entry->name);
+					if (UNEXPECTED(bound_types == NULL)) {
+						emit_incompatible_generic_arg_count_error(entry, 0);
+					}
+					const uint32_t num_bound_types = zend_hash_num_elements(bound_types);
+					if (UNEXPECTED(num_bound_types != entry->num_generic_parameters)) {
+						emit_incompatible_generic_arg_count_error(entry, num_bound_types);
+					}
+				}
 				break;
 			}
 		}
@@ -2433,29 +2454,15 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 
 	if (iface->num_generic_parameters > 0) {
 		if (UNEXPECTED(ce->bound_types == NULL)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Interface %s expects %" PRIu32 " generic parameters, 0 given",
-				ZSTR_VAL(iface->name),
-				iface->num_generic_parameters
-			);
+			emit_incompatible_generic_arg_count_error(iface, 0);
 		}
 		HashTable *bound_types = zend_hash_find_ptr_lc(ce->bound_types, iface->name);
 		if (UNEXPECTED(bound_types == NULL)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Interface %s expects %" PRIu32 " generic parameters, 0 given",
-				ZSTR_VAL(iface->name),
-				iface->num_generic_parameters
-			);
+			emit_incompatible_generic_arg_count_error(iface, 0);
 		}
 		const uint32_t num_bound_types = zend_hash_num_elements(bound_types);
 		if (UNEXPECTED(num_bound_types != iface->num_generic_parameters)) {
-			// TODO Need to handle implicit inherited interfaces
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Interface %s expects %" PRIu32 " generic parameters, %" PRIu32 " given",
-				ZSTR_VAL(iface->name),
-				iface->num_generic_parameters,
-				num_bound_types
-			);
+			emit_incompatible_generic_arg_count_error(iface, num_bound_types);
 		}
 		for (uint32_t i = 0; i < num_bound_types; i++) {
 			const zend_generic_parameter *generic_parameter = &iface->generic_parameters[i];
