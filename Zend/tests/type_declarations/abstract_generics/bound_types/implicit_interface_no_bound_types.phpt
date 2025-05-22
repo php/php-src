@@ -1,7 +1,5 @@
 --TEST--
 Implicit interface inheritance missing bound types
---XFAIL--
-Wrong number of missing params
 --FILE--
 <?php
 
