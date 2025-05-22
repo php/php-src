@@ -18,4 +18,4 @@ class C implements I1<string>, I2<float> {
 
 ?>
 --EXPECTF--
-Fatal error: Bound types for implicitly and explicitly implemented interfaces must match in %s on line %d
+Fatal error: Bound type T for interface I1 implemented explicitly in C with type string must match the implicitly bound type float from interface I2 in %s on line %d

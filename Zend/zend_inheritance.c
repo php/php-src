@@ -2328,61 +2328,74 @@ ZEND_ATTRIBUTE_NONNULL static void bind_generic_types_for_inherited_interfaces(z
 	ZEND_HASH_FOREACH_STR_KEY_PTR(iface_bound_types, lc_inherited_iface_name, interface_bound_types_for_inherited_iface) {
 		ZEND_ASSERT(lc_inherited_iface_name != NULL);
 
-		zend_string *generic_param_name = NULL;
-		zend_ulong generic_param_index = 0;
-		zend_type *bound_type_ptr = NULL;
-		HashTable *ce_bound_types_for_inherited_iface = NULL;
-		ALLOC_HASHTABLE(ce_bound_types_for_inherited_iface);
-		zend_hash_init(
-			ce_bound_types_for_inherited_iface,
-			zend_hash_num_elements(interface_bound_types_for_inherited_iface),
-			NULL,
-			zend_types_ht_dtor,
-			false /* TODO depends on internals */
-		);
-		ZEND_HASH_FOREACH_KEY_PTR(interface_bound_types_for_inherited_iface, generic_param_index, generic_param_name, bound_type_ptr) {
-			ZEND_ASSERT(generic_param_name == NULL); // TODO Change foreach macro;
-			zend_type bound_type = *bound_type_ptr;
-			if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(bound_type)) {
-				ZEND_ASSERT(ce_bound_types_for_direct_iface != NULL &&
-					"If a bound type is generic then we must have bound types for the current interface");
-				const zend_type *ce_bound_type_ptr = zend_hash_index_find_ptr(ce_bound_types_for_direct_iface, bound_type_ptr->generic_param_index);
-				ZEND_ASSERT(ce_bound_type_ptr != NULL);
-				bound_type = *ce_bound_type_ptr;
-			}
-
-			zend_type_copy_ctor(&bound_type, true, false /* TODO Depends on internal or not? */);
-			zend_hash_index_add_mem(ce_bound_types_for_inherited_iface, generic_param_index,
-				&bound_type, sizeof(bound_type));
-		} ZEND_HASH_FOREACH_END();
-
 		const HashTable *existing_bound_types_for_inherited_iface = zend_hash_find_ptr(ce->bound_types, lc_inherited_iface_name);
 		if (EXPECTED(existing_bound_types_for_inherited_iface == NULL)) {
-		} else {
-			zend_ulong idx;
-			zend_string *bound_name;
-			const zend_type *ptr;
-			ZEND_HASH_FOREACH_KEY_PTR(existing_bound_types_for_inherited_iface, idx, bound_name, ptr) {
-				if (bound_name != NULL) {
-					continue;
+			HashTable *ce_bound_types_for_inherited_iface = NULL;
+			ALLOC_HASHTABLE(ce_bound_types_for_inherited_iface);
+			zend_hash_init(
+				ce_bound_types_for_inherited_iface,
+				zend_hash_num_elements(interface_bound_types_for_inherited_iface),
+				NULL,
+				zend_types_ht_dtor,
+				false /* TODO depends on internals */
+			);
+
+			zend_ulong generic_param_index = 0;
+			const zend_type *bound_type_ptr = NULL;
+			ZEND_HASH_FOREACH_NUM_KEY_PTR(interface_bound_types_for_inherited_iface, generic_param_index, bound_type_ptr) {
+				zend_type bound_type = *bound_type_ptr;
+				if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(bound_type)) {
+					ZEND_ASSERT(ce_bound_types_for_direct_iface != NULL &&
+						"If a bound type is generic then we must have bound types for the current interface");
+					const zend_type *ce_bound_type_ptr = zend_hash_index_find_ptr(ce_bound_types_for_direct_iface, bound_type_ptr->generic_param_index);
+					ZEND_ASSERT(ce_bound_type_ptr != NULL);
+					bound_type = *ce_bound_type_ptr;
 				}
-				const zend_type t1 = *ptr;
-				const zend_type *ptr2 = zend_hash_index_find_ptr(ce_bound_types_for_inherited_iface, idx);
-				ZEND_ASSERT(ptr2 != NULL);
-				const zend_type t2 = *ptr2;
+
+				zend_type_copy_ctor(&bound_type, true, false /* TODO Depends on internal or not? */);
+				zend_hash_index_add_mem(ce_bound_types_for_inherited_iface, generic_param_index,
+					&bound_type, sizeof(bound_type));
+			} ZEND_HASH_FOREACH_END();
+			zend_hash_add_new_ptr(ce->bound_types, lc_inherited_iface_name, ce_bound_types_for_inherited_iface);
+		} else {
+			const uint32_t num_generic_types = zend_hash_num_elements(interface_bound_types_for_inherited_iface);
+			ZEND_ASSERT(zend_hash_num_elements(existing_bound_types_for_inherited_iface) == num_generic_types && "Existing bound types should have errored before");
+
+			for (zend_ulong bound_type_index = 0; bound_type_index < num_generic_types; bound_type_index++) {
+				const zend_type *iface_bound_type_ptr = zend_hash_index_find_ptr(interface_bound_types_for_inherited_iface, bound_type_index);
+				const zend_type *ce_bound_type_ptr = zend_hash_index_find_ptr(existing_bound_types_for_inherited_iface, bound_type_index);
+				ZEND_ASSERT(iface_bound_type_ptr != NULL && ce_bound_type_ptr != NULL);
+				if (ZEND_TYPE_IS_GENERIC_PARAM_NAME(*iface_bound_type_ptr)) {
+					iface_bound_type_ptr = zend_hash_index_find_ptr(ce_bound_types_for_direct_iface, iface_bound_type_ptr->generic_param_index);
+					ZEND_ASSERT(iface_bound_type_ptr != NULL);
+				}
+				const zend_type t1 = *iface_bound_type_ptr;
+				const zend_type t2 = *ce_bound_type_ptr;
 				if (
 					ZEND_TYPE_FULL_MASK(t1) != ZEND_TYPE_FULL_MASK(t2)
 					|| (ZEND_TYPE_HAS_NAME(t1) && !zend_string_equals(ZEND_TYPE_NAME(t1), ZEND_TYPE_NAME(t2)))
 					// || ZEND_TYPE_HAS_LIST(t1) && TODO Check list types are equal
 				) {
-					// TODO Improve this error message
-					zend_error_noreturn(E_COMPILE_ERROR, "Bound types for implicitly and explicitly implemented interfaces must match");
+					const zend_class_entry *inherited_iface = zend_hash_find_ptr(CG(class_table), lc_inherited_iface_name);
+					ZEND_ASSERT(inherited_iface != NULL);
+					const zend_generic_parameter param = inherited_iface->generic_parameters[bound_type_index];
+
+					zend_string *ce_bound_type_str = zend_type_to_string_resolved(t2, ce, NULL);
+					zend_string *iface_bound_type_str = zend_type_to_string_resolved(t1, iface, NULL);
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Bound type %s for interface %s implemented explicitly in %s with type %s must match the implicitly bound type %s from interface %s",
+						ZSTR_VAL(param.name),
+						ZSTR_VAL(inherited_iface->name),
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(ce_bound_type_str),
+						ZSTR_VAL(iface_bound_type_str),
+						ZSTR_VAL(iface->name)
+					);
+					zend_string_release_ex(ce_bound_type_str, false);
+					zend_string_release_ex(iface_bound_type_str, false);
 				}
-			} ZEND_HASH_FOREACH_END();
-			/* Remove current ones as they may be incomplete without the type name binding */
-			zend_hash_del(ce->bound_types, lc_inherited_iface_name);
+			}
 		}
-		zend_hash_add_new_ptr(ce->bound_types, lc_inherited_iface_name, ce_bound_types_for_inherited_iface);
 	} ZEND_HASH_FOREACH_END();
 }
 
