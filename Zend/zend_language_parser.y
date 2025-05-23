@@ -959,6 +959,10 @@ attributed_class_statement:
 		return_type backup_fn_flags method_body backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
+	|	method_modifiers fn returns_ref identifier backup_doc_comment '(' parameter_list ')'
+		return_type T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags ';'
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $14, $2, $5,
+				  zend_ast_get_str($4), $7, NULL, zend_ast_create(ZEND_AST_RETURN, $13), $9, NULL); CG(extra_fn_flags) = $11; }
 	|	enum_case { $$ = $1; }
 ;
 
