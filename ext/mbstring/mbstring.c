@@ -67,11 +67,6 @@
 
 #include "zend_simd.h"
 
-#ifdef __SSE3__
-#include <immintrin.h>
-#include <pmmintrin.h>
-#endif
-
 /* }}} */
 
 /* {{{ prototypes */
