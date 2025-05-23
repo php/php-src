@@ -30,4 +30,4 @@
 /ext/date/tests/ossfuzz*.txt binary
 
 # Vendored libraries
-/ext/dom/lexbor/lexbor linguist-vendored
+/ext/lexbor/lexbor linguist-vendored

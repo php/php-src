@@ -1,19 +1,10 @@
-PHP_ARG_ENABLE([lexbor],
-  [whether to enable lexbor],
-  [AS_HELP_STRING([--enable-lexbor],
-    [Enable lexbor explicitly, will be done implicitly when required by other
-    extensions])],
-  [no],
-  [yes])
+PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/ -DLEXBOR_STATIC"
+LEXBOR_DIR="lexbor"
 
-if test "$PHP_LEXBOR" != "no" || test "$PHP_LEXBOR_ENABLED" = "yes"; then
-  PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/ -DLEXBOR_STATIC"
-  LEXBOR_DIR="lexbor"
+AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])
+AC_DEFINE([LEXBOR_VERSION], ["2.5.0"], [Define the main Lexbor version])
 
-  AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])
-  AC_DEFINE([LEXBOR_VERSION], ["2.5.0"], [Define the main Lexbor version])
-
-  PHP_NEW_EXTENSION([lexbor], m4_normalize([
+PHP_NEW_EXTENSION([lexbor], m4_normalize([
     php_lexbor.c
     $LEXBOR_DIR/core/array_obj.c
     $LEXBOR_DIR/core/array.c
@@ -185,29 +176,28 @@ if test "$PHP_LEXBOR" != "no" || test "$PHP_LEXBOR_ENABLED" = "yes"; then
     $LEXBOR_DIR/ports/posix/lexbor/core/memory.c
     $LEXBOR_DIR/tag/tag.c
   ]),
-  [$ext_shared],,
+  [no],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $PHP_LEXBOR_CFLAGS])
 
-  PHP_ADD_BUILD_DIR([
-    $ext_builddir/
-    $ext_builddir/$LEXBOR_DIR/core
-    $ext_builddir/$LEXBOR_DIR/css/selectors
-    $ext_builddir/$LEXBOR_DIR/css/syntax/tokenizer
-    $ext_builddir/$LEXBOR_DIR/css/tokenizer
-    $ext_builddir/$LEXBOR_DIR/dom/interfaces
-    $ext_builddir/$LEXBOR_DIR/encoding
-    $ext_builddir/$LEXBOR_DIR/html
-    $ext_builddir/$LEXBOR_DIR/html/interfaces
-    $ext_builddir/$LEXBOR_DIR/html/tokenizer
-    $ext_builddir/$LEXBOR_DIR/html/tree/insertion_mode
-    $ext_builddir/$LEXBOR_DIR/ns
-    $ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core
-    $ext_builddir/$LEXBOR_DIR/tag
-  ])
-  PHP_ADD_INCLUDE([$ext_srcdir])
-  PHP_INSTALL_HEADERS([ext/lexbor], m4_normalize([
-    php_lexbor.h
-  ]))
+PHP_ADD_BUILD_DIR([
+  $ext_builddir/
+  $ext_builddir/$LEXBOR_DIR/core
+  $ext_builddir/$LEXBOR_DIR/css/selectors
+  $ext_builddir/$LEXBOR_DIR/css/syntax/tokenizer
+  $ext_builddir/$LEXBOR_DIR/css/tokenizer
+  $ext_builddir/$LEXBOR_DIR/dom/interfaces
+  $ext_builddir/$LEXBOR_DIR/encoding
+  $ext_builddir/$LEXBOR_DIR/html
+  $ext_builddir/$LEXBOR_DIR/html/interfaces
+  $ext_builddir/$LEXBOR_DIR/html/tokenizer
+  $ext_builddir/$LEXBOR_DIR/html/tree/insertion_mode
+  $ext_builddir/$LEXBOR_DIR/ns
+  $ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core
+  $ext_builddir/$LEXBOR_DIR/tag
+])
+PHP_ADD_INCLUDE([$ext_srcdir])
+PHP_INSTALL_HEADERS([ext/lexbor], m4_normalize([
+  php_lexbor.h
+]))
 
-  PHP_SUBST([LEXBOR_SHARED_LIBADD])
-fi
+PHP_SUBST([LEXBOR_SHARED_LIBADD])
