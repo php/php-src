@@ -23,6 +23,9 @@
 #include "sendrecvmsg.h"
 #include "conversions.h"
 #include <limits.h>
+#ifdef HAVE_IPV6
+# include <netinet/ip6.h>
+#endif
 #include <Zend/zend_llist.h>
 #ifdef ZTS
 #include <TSRM/TSRM.h>
@@ -107,19 +110,31 @@ static void init_ancillary_registry(void)
 	key.cmsg_type		= type; \
 	zend_hash_str_update_mem(&ancillary_registry.ht, (char*)&key, sizeof(key), (void*)&entry, sizeof(entry))
 
-#if defined(IPV6_PKTINFO) && defined(HAVE_IPV6)
+#if defined(HAVE_IPV6)
+#if defined(IPV6_PKTINFO)
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
 			to_zval_read_in6_pktinfo, IPPROTO_IPV6, IPV6_PKTINFO);
 #endif
 
-#if defined(IPV6_HOPLIMIT) && defined(HAVE_IPV6)
+#if defined(IPV6_HOPLIMIT)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_HOPLIMIT);
 #endif
 
-#if defined(IPV6_TCLASS) && defined(HAVE_IPV6)
+#if defined(IPV6_TCLASS)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
+#endif
+
+#if defined(IPV6_HOPOPTS)
+	PUT_ENTRY(sizeof(struct ip6_hbh), 0, 0, from_zval_write_ip6_hbh,
+			to_zval_read_ip6_hbh, IPPROTO_IPV6, IPV6_HOPOPTS);
+#endif
+
+#if defined(IPV6_DSTPOPTS)
+	PUT_ENTRY(sizeof(struct ip6_dest), 0, 0, from_zval_write_ip6_dest,
+			to_zval_read_ip6_dest, IPPROTO_IPV6, IPV6_DSTOPTS);
+#endif
 #endif
 
 #ifdef SO_PASSCRED
@@ -156,7 +171,6 @@ static void destroy_ancillary_registry(void)
 ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
 {
 	anc_reg_key			key = { cmsg_level, msg_type };
-	ancillary_reg_entry	*entry;
 
 #ifdef ZTS
 	tsrm_mutex_lock(ancillary_mutex);
@@ -168,11 +182,7 @@ ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
 	tsrm_mutex_unlock(ancillary_mutex);
 #endif
 
-	if ((entry = zend_hash_str_find_ptr(&ancillary_registry.ht, (char*)&key, sizeof(key))) != NULL) {
-		return entry;
-	} else {
-		return NULL;
-	}
+	return zend_hash_str_find_ptr(&ancillary_registry.ht, (char*)&key, sizeof(key));
 }
 
 PHP_FUNCTION(socket_sendmsg)
@@ -393,6 +403,18 @@ int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 	case IPV6_PKTINFO:
 		size = sizeof(struct in6_pktinfo);
 		reader = &to_zval_read_in6_pktinfo;
+		break;
+#endif
+#ifdef IPV6_HOPOPTS
+	case IPV6_HOPOPTS:
+		size = sizeof(struct ip6_hbh);
+		reader = &to_zval_read_ip6_hbh;
+		break;
+#endif
+#ifdef IPV6_DSTOPTS
+	case IPV6_DSTOPTS:
+		size = sizeof(struct ip6_dest);
+		reader = &to_zval_read_ip6_dest;
 		break;
 #endif
 	default:
