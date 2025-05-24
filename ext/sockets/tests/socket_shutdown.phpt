@@ -19,24 +19,29 @@ $port = 80;
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,0));
+var_dump(socket_shutdown($socket,SHUT_RD));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,1));
+var_dump(socket_shutdown($socket,SHUT_WR));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,2));
+var_dump(socket_shutdown($socket,SHUT_RDWR));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-var_dump(socket_shutdown($socket,0));
+var_dump(socket_shutdown($socket,SHUT_RD));
 
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,-1));
+
+try {
+	socket_shutdown($socket,-1);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
 socket_close($socket);
 ?>
 --CLEAN--
@@ -54,5 +59,4 @@ bool(true)
 Warning: socket_shutdown(): Unable to shutdown socket [%d]: %s in %s on line %d
 bool(false)
 
-Warning: socket_shutdown(): Unable to shutdown socket [%d]: Invalid argument in %s on line %d
-bool(false)
+must be one of SHUT_RD, SHUT_WR or SHUT_RDWR

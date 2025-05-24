@@ -2434,6 +2434,11 @@ PHP_FUNCTION(socket_shutdown)
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
 
+	if (how_shutdown < SHUT_RD || how_shutdown > SHUT_RDWR) {
+		zend_argument_value_error(2, "must be one of SHUT_RD, SHUT_WR or SHUT_RDWR");
+		RETURN_THROWS();
+	}
+
 	if (shutdown(php_sock->bsd_socket, how_shutdown) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to shutdown socket", errno);
 		RETURN_FALSE;
