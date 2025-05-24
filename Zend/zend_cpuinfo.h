@@ -126,7 +126,7 @@ ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
  * functions */
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_sse2(void) {
-#if (defined(__APPLE__) && defined(__aarch64__) && defined(__clang_major__) && __clang_major__ >= 17)
+#ifdef __aarch64__
 	return 0;
 #else
 #if PHP_HAVE_BUILTIN_CPU_INIT
@@ -138,7 +138,7 @@ static inline int zend_cpu_supports_sse2(void) {
 
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_sse3(void) {
-#if (defined(__APPLE__) && defined(__aarch64__) && defined(__clang_major__) && __clang_major__ >= 17)
+#ifdef __aarch64__
 	return 0;
 #else
 #if PHP_HAVE_BUILTIN_CPU_INIT
@@ -150,7 +150,7 @@ static inline int zend_cpu_supports_sse3(void) {
 
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_ssse3(void) {
-#if (defined(__APPLE__) && defined(__aarch64__) && defined(__clang_major__) && __clang_major__ >= 17)
+#ifdef __aarch64__
 	return 0;
 #else
 #if PHP_HAVE_BUILTIN_CPU_INIT
@@ -162,7 +162,7 @@ static inline int zend_cpu_supports_ssse3(void) {
 
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_sse41(void) {
-#if (defined(__APPLE__) && defined(__aarch64__) && defined(__clang_major__) && __clang_major__ >= 17)
+#ifdef __aarch64__
 	return 0;
 #else
 #if PHP_HAVE_BUILTIN_CPU_INIT
@@ -174,7 +174,7 @@ static inline int zend_cpu_supports_sse41(void) {
 
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_sse42(void) {
-#if (defined(__APPLE__) && defined(__aarch64__) && defined(__clang_major__) && __clang_major__ >= 17)
+#ifdef __aarch64__
 	return 0;
 #else
 #if PHP_HAVE_BUILTIN_CPU_INIT
@@ -186,7 +186,7 @@ static inline int zend_cpu_supports_sse42(void) {
 
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_avx(void) {
-#if (defined(__APPLE__) && defined(__aarch64__) && defined(__clang_major__) && __clang_major__ >= 17)
+#ifdef __aarch64__
 	return 0;
 #else
 #if PHP_HAVE_BUILTIN_CPU_INIT
@@ -198,7 +198,7 @@ static inline int zend_cpu_supports_avx(void) {
 
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_avx2(void) {
-#if (defined(__APPLE__) && defined(__aarch64__) && defined(__clang_major__) && __clang_major__ >= 17)
+#ifdef __aarch64__
 	return 0;
 #else
 #if PHP_HAVE_BUILTIN_CPU_INIT
