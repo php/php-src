@@ -984,8 +984,6 @@ PHP_FUNCTION(ldap_connect)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, ldap_link_ce);
-	ld = Z_LDAP_LINK_P(return_value);
 
 	{
 		int rc = LDAP_SUCCESS;
@@ -1008,13 +1006,17 @@ PHP_FUNCTION(ldap_connect)
 
 			/* ensure all pending TLS options are applied in a new context */
 			if (ldap_set_option(NULL, LDAP_OPT_X_TLS_NEWCTX, &val) != LDAP_OPT_SUCCESS) {
-				zval_ptr_dtor(return_value);
+				if (url != host) {
+					efree(url);
+				}
 				php_error_docref(NULL, E_WARNING, "Could not create new security context");
 				RETURN_FALSE;
 			}
 			LDAPG(tls_newctx) = false;
 		}
 #endif
+		object_init_ex(return_value, ldap_link_ce);
+		ld = Z_LDAP_LINK_P(return_value);
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
 		/* ldap_init() is deprecated, use ldap_initialize() instead.
@@ -1027,6 +1029,9 @@ PHP_FUNCTION(ldap_connect)
 		ldap = ldap_init(host, port);
 		if (ldap == NULL) {
 			zval_ptr_dtor(return_value);
+			if (url != host) {
+				efree(url);
+			}
 			php_error_docref(NULL, E_WARNING, "Could not create session handle");
 			RETURN_FALSE;
 		}
