@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.9
 
+- Intl:
+  . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
+
 - Phar:
   . Add missing filter cleanups on phar failure. (nielsdos)
 
