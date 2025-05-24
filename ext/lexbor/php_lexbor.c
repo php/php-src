@@ -22,6 +22,8 @@
 #include "php.h"
 #include "zend_globals.h"
 #include "ext/standard/info.h"
+#include "lexbor/core/types.h"
+#include "lexbor/core/lexbor.h"
 
 #ifdef HAVE_LEXBOR
 
@@ -35,6 +37,26 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(lexbor)
 #endif /* COMPILE_DL_LEXBOR */
 
+static void *php_lexbor_malloc(size_t size)
+{
+	return emalloc(size);
+}
+
+static void *php_lexbor_realloc(void *dst, size_t size)
+{
+	return erealloc(dst, size);
+}
+
+static void *php_lexbor_calloc(size_t num, size_t size)
+{
+	return ecalloc(num, size);
+}
+
+static void php_lexbor_free(void *ptr)
+{
+	efree(ptr);
+}
+
 static PHP_MINFO_FUNCTION(lexbor)
 {
 	php_info_print_table_start();
@@ -43,11 +65,17 @@ static PHP_MINFO_FUNCTION(lexbor)
 	php_info_print_table_end();
 }
 
+static PHP_MINIT_FUNCTION(lexbor)
+{
+	lexbor_memory_setup(php_lexbor_malloc, php_lexbor_realloc, php_lexbor_calloc, php_lexbor_free);
+	return SUCCESS;
+}
+
 zend_module_entry lexbor_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"lexbor",                   /* extension name */
 	NULL,                       /* extension function list */
-	NULL,                       /* extension-wide startup function */
+	PHP_MINIT(lexbor),          /* extension-wide startup function */
 	NULL,                       /* extension-wide shutdown function */
 	NULL,                       /* per-request startup function */
 	NULL,                       /* per-request shutdown function */

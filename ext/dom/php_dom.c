@@ -33,8 +33,6 @@
 #include "dom_properties.h"
 #include "token_list.h"
 #include "zend_interfaces.h"
-#include <lexbor/core/types.h>
-#include <lexbor/core/lexbor.h>
 
 #include "ext/standard/info.h"
 
@@ -739,22 +737,6 @@ void dom_xpath_objects_free_storage(zend_object *object);
 HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n);
 #endif
 
-static void *dom_malloc(size_t size) {
-	return emalloc(size);
-}
-
-static void *dom_realloc(void *dst, size_t size) {
-	return erealloc(dst, size);
-}
-
-static void *dom_calloc(size_t num, size_t size) {
-	return ecalloc(num, size);
-}
-
-static void dom_free(void *ptr) {
-	efree(ptr);
-}
-
 /* {{{ PHP_MINIT_FUNCTION(dom) */
 PHP_MINIT_FUNCTION(dom)
 {
@@ -1324,8 +1306,6 @@ PHP_MINIT_FUNCTION(dom)
 
 	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
 	php_libxml_register_export(dom_modern_node_class_entry, php_dom_export_node);
-
-	lexbor_memory_setup(dom_malloc, dom_realloc, dom_calloc, dom_free);
 
 	return SUCCESS;
 }
