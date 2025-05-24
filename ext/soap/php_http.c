@@ -416,6 +416,7 @@ int make_http_soap_request(zval        *this_ptr,
 			} else {
 				zval_ptr_dtor(&params[0]);
 				zval_ptr_dtor(&func);
+				zval_ptr_dtor(&retval);
 				if (request != buf) {
 					zend_string_release_ex(request, 0);
 				}
@@ -1314,6 +1315,7 @@ try_again:
 		} else {
 			zval_ptr_dtor(&params[0]);
 			zval_ptr_dtor(&func);
+			zval_ptr_dtor(&retval);
 			efree(content_encoding);
 			zend_string_release_ex(http_headers, 0);
 			zend_string_release_ex(http_body, 0);
