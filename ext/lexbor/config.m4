@@ -1,4 +1,4 @@
-PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/ -DLEXBOR_STATIC"
+PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/"
 LEXBOR_DIR="lexbor"
 
 AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])
