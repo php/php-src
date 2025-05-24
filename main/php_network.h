@@ -314,8 +314,8 @@ END_EXTERN_C()
 struct _php_netstream_data_t	{
 	php_socket_t socket;
 	char is_blocked;
-	struct timeval timeout;
 	char timeout_event;
+	struct timeval timeout;
 	size_t ownsize;
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;

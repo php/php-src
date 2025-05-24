@@ -288,8 +288,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 		bool active;
 		int type;
 		int fd;
-		char *msg;
 		int msglen;
+		char *msg;
 	} err_buf;                                   /* error buffer */
 	zend_ulong req_id;                           /* "request id" to keep track of commands */
 

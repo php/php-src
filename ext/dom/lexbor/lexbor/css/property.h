@@ -228,8 +228,8 @@ typedef struct {
 lxb_css_property_float_reference_t;
 
 typedef struct {
-    lxb_css_float_type_t        type;
     lxb_css_value_length_type_t length;
+    lxb_css_float_type_t        type;
     lxb_css_float_type_t        snap_type;
 }
 lxb_css_property_float_t;
