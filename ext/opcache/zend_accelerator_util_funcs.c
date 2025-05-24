@@ -27,10 +27,7 @@
 #include "zend_shared_alloc.h"
 #include "zend_observer.h"
 
-#ifdef __SSE2__
-/* For SSE2 adler32 */
-#include <immintrin.h>
-#endif
+#include "zend_simd.h"
 
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
@@ -466,7 +463,7 @@ static zend_always_inline void adler32_do16_loop(unsigned char *buf, unsigned ch
 	unsigned int s1 = *s1_out;
 	unsigned int s2 = *s2_out;
 
-#ifdef __SSE2__
+#ifdef XSSE2
 	const __m128i zero = _mm_setzero_si128();
 
 	__m128i accumulate_s2 = zero;
