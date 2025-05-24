@@ -1681,6 +1681,20 @@ const IPPROTO_IP = UNKNOWN;
  */
 const IPPROTO_IPV6 = UNKNOWN;
 #endif
+#ifdef IPPROTO_UDP
+/**
+ * @var int
+ * @cvalue IPPROTO_UDP
+ */
+const IPPROTO_UDP = UNKNOWN;
+#endif
+#ifdef IPPROTO_RAW
+/**
+ * @var int
+ * @cvalue IPPROTO_RAW
+ */
+const IPPROTO_RAW = UNKNOWN;
+#endif
 
 /**
  * @var int

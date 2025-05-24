@@ -372,6 +372,32 @@ int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 		optlen = sizeof(struct in6_pktinfo);
 		goto dosockopt;
 #endif
+#ifndef PHP_WIN32 // set but seems more like for "future implementation" ?
+#ifdef IPV6_HOPOPTS
+	case IPV6_HOPOPTS:
+		opt_ptr = from_zval_run_conversions(arg4, php_sock, from_zval_write_ip6_hbh,
+				sizeof(struct ip6_hbh),	"ip6_hbh", &allocations, &err);
+		if (err.has_error) {
+			err_msg_dispose(&err);
+			return FAILURE;
+		}
+
+		optlen = sizeof(struct ip6_hbh);
+		goto dosockopt;
+#endif
+#ifdef IPV6_DSTOPTS
+	case IPV6_DSTOPTS:
+		opt_ptr = from_zval_run_conversions(arg4, php_sock, from_zval_write_ip6_dest,
+				sizeof(struct ip6_dest), "ip6_dest", &allocations, &err);
+		if (err.has_error) {
+			err_msg_dispose(&err);
+			return FAILURE;
+		}
+
+		optlen = sizeof(struct ip6_dest);
+		goto dosockopt;
+#endif
+#endif
 	}
 
 	/* we also support IPV6_TCLASS, but that can be handled by the default
