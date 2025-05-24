@@ -26,7 +26,7 @@ if (PHP_DOM == "yes") {
 		AC_DEFINE("HAVE_DOM", 1, "Define to 1 if the PHP extension 'dom' is available.");
 
 		if (!PHP_DOM_SHARED) {
-			ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");
+			ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC /D LEXBOR_STATIC ");
 		} else {
 			if (!CHECK_LIB("libxml2.lib", "dom")) {
 				WARNING("dom support can't be enabled, libxml is not found")
