@@ -2,7 +2,6 @@
 
 EXTENSION("lexbor", "php_lexbor.c", false, "/I " + configure_module_dirname + " /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 PHP_LEXBOR="yes";
-ADD_SOURCES("ext/lexbor", "php_lexbor.c", "lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/ports/windows_nt/lexbor/core", "memory.c", "lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/core", "array_obj.c array.c avl.c bst.c diyfp.c conv.c dobject.c dtoa.c hash.c mem.c mraw.c print.c serialize.c shs.c str.c strtod.c", "lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/dom", "interface.c", "lexbor");
