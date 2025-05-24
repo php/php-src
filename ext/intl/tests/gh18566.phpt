@@ -1,5 +1,7 @@
 --TEST--
 GH-18566 ([intl] Weird numeric sort in Collator)
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
