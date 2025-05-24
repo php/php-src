@@ -1109,6 +1109,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				} else {
 					if (!EG(exception)) {
 						zend_throw_error(NULL, "Unable to call custom replacement function");
+						onig_region_free(regs, 1);
 						zval_ptr_dtor(&subpats);
 						RETURN_THROWS();
 					}
