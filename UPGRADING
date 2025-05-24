@@ -523,6 +523,10 @@ PHP 8.5 UPGRADE NOTES
   . Add OPcode specialization for `=== []` and `!== []` comparisons.
   . Creating exception objects is now much faster.
 
+- Intl:
+  . Now avoids creating extra string copies when converting strings
+    for use in the collator.
+
 - ReflectionProperty:
   . Improved performance of the following methods: getValue(), getRawValue(),
     isInitialized(), setValue(), setRawValue().
