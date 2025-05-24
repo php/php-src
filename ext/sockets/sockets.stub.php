@@ -1681,6 +1681,20 @@ const IPPROTO_IP = UNKNOWN;
  */
 const IPPROTO_IPV6 = UNKNOWN;
 #endif
+#ifdef IPPROTO_UDP
+/**
+ * @var int
+ * @cvalue IPPROTO_UDP
+ */
+const IPPROTO_UDP = UNKNOWN;
+#endif
+#ifdef IPPROTO_RAW
+/**
+ * @var int
+ * @cvalue IPPROTO_RAW
+ */
+const IPPROTO_RAW = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -1783,7 +1797,8 @@ const AI_NUMERICSERV = UNKNOWN;
 const SOL_LOCAL = UNKNOWN;
 #endif
 
-#if (defined(IPV6_RECVPKTINFO) && defined(HAVE_IPV6))
+#if defined(HAVE_IPV6)
+#if defined(IPV6_RECVPKTINFO)
 /**
  * IPv6 ancillary data
  * @var int
@@ -1796,7 +1811,7 @@ const IPV6_RECVPKTINFO = UNKNOWN;
  */
 const IPV6_PKTINFO = UNKNOWN;
 #endif
-#if (defined(IPV6_RECVHOPLIMIT) && defined(HAVE_IPV6))
+#if defined(IPV6_RECVHOPLIMIT)
 /**
  * @var int
  * @cvalue IPV6_RECVHOPLIMIT
@@ -1809,7 +1824,7 @@ const IPV6_RECVHOPLIMIT = UNKNOWN;
 const IPV6_HOPLIMIT = UNKNOWN;
 #endif
 
-#if (defined(IPV6_RECVTCLASS) && defined(HAVE_IPV6))
+#if defined(IPV6_RECVTCLASS)
 /**
  * @var int
  * @cvalue IPV6_RECVTCLASS
@@ -1820,6 +1835,31 @@ const IPV6_RECVTCLASS = UNKNOWN;
  * @cvalue IPV6_TCLASS
  */
 const IPV6_TCLASS = UNKNOWN;
+#endif
+#if defined(IPV6_RECVHOPOPTS)
+/**
+ * @var int
+ * @cvalue IPV6_RECVHOPOPTS
+ */
+const IPV6_RECVHOPOPTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IPV6_HOPOPTS
+ */
+const IPV6_HOPOPTS = UNKNOWN;
+#endif
+#if defined(IPV6_RECVDSTOPTS)
+/**
+ * @var int
+ * @cvalue IPV6_RECVDSTOPTS
+ */
+const IPV6_RECVDSTOPTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IPV6_DSTOPTS
+ */
+const IPV6_DSTOPTS = UNKNOWN;
+#endif
 #endif
 
 #ifdef SCM_RIGHTS
