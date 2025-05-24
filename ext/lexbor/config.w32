@@ -18,7 +18,7 @@ ADD_SOURCES("ext/lexbor/lexbor/css/syntax", "state.c parser.c syntax.c anb.c tok
 ADD_SOURCES("ext/lexbor/lexbor/css/syntax/tokenizer", "error.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/ns", "ns.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/tag", "tag.c","lexbor");
-ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_STATIC /utf-8");
+ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_BUILDING /utf-8");
 
 AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
 AC_DEFINE("LEXBOR_VERSION", "2.5.0", "Define the main Lexbor version")
