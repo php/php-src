@@ -53,6 +53,9 @@ PHP 8.5 UPGRADE NOTES
 
 - Intl:
   . The extension now requires at least ICU 57.1.
+  . The behaviour of Collator::SORT_REGULAR with respect to handling numeric
+    strings is now aligned with the behaviour of SORT_REGULAR in ext/standard.
+    This is a consequence of fixing bug GH-18566.
 
 - LDAP:
   . ldap_get_option() and ldap_set_option() now throw a ValueError when
