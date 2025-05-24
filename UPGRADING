@@ -452,6 +452,9 @@ PHP 8.5 UPGRADE NOTES
   . IP_BINDANY (FreeBSD/NetBSD/OpenBSD only).
   . SO_BUSY_POLL (Linux only).
   . UDP_SEGMENT (Linux only).
+  - SHUT_RD.
+  - SHUT_WR.
+  - SHUT_RDWR.
 
 ========================================
 11. Changes to INI File Handling

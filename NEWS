@@ -214,6 +214,8 @@ PHP                                                                        NEWS
   . Added SO_BUSY_POOL to reduce packets poll latency. (David Carlier)
   - Added UDP_SEGMENT support to optimise multiple large datagrams over UDP
     if the kernel and hardware supports it. (David Carlier)
+  - Added SHUT_RD, SHUT_WR and SHUT_RDWR constants for socket_shutdown().
+    (David Carlier)
 
 - Sodium:
   . Fix overall theorical overflows on zend_string buffer allocations.
