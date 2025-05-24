@@ -698,6 +698,7 @@ static zend_object *dom_token_list_new(zend_class_entry *class_type)
 
 static const zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("lexbor")
 	ZEND_MOD_CONFLICTS("domxml")
 	ZEND_MOD_END
 };
