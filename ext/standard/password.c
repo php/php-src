@@ -49,7 +49,7 @@ void php_password_algo_unregister(const char *ident) {
 static int php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
 {
 	size_t pos = 0;
-	zend_string *buffer;
+	zend_string ZEND_STRUB *buffer;
 	if ((int) str_len < 0) {
 		return FAILURE;
 	}
@@ -76,7 +76,8 @@ static int php_password_salt_to64(const char *str, const size_t str_len, const s
 
 static zend_string* php_password_make_salt(size_t length) /* {{{ */
 {
-	zend_string *ret, *buffer;
+	zend_string *ret;
+	zend_string ZEND_STRUB *buffer;
 
 	if (length > (INT_MAX / 3)) {
 		zend_value_error("Length is too large to safely generate");

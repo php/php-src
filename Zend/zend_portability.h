@@ -759,6 +759,14 @@ extern "C++" {
 # define ZEND_INDIRECT_RETURN
 #endif
 
+#if __has_attribute(strub)
+# define ZEND_STRUB __attribute__((strub))
+# define ZEND_STRUB_OPT(o) __attribute__((strub(o)))
+#else
+# define ZEND_STRUB
+# define ZEND_STRUB_OPT(o)
+#endif
+
 #define __ZEND_DO_PRAGMA(x) _Pragma(#x)
 #define _ZEND_DO_PRAGMA(x) __ZEND_DO_PRAGMA(x)
 #if defined(__clang__)
