@@ -9,10 +9,12 @@ dom
 $dom = new ReflectionExtension('dom');
 var_dump($dom->getDependencies());
 ?>
---EXPECTF--
-array(2) {
+--EXPECT--
+array(3) {
   ["libxml"]=>
-  %s(8) "Required"
+  string(8) "Required"
+  ["lexbor"]=>
+  string(8) "Required"
   ["domxml"]=>
-  %s(9) "Conflicts"
+  string(9) "Conflicts"
 }
