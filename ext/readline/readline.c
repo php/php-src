@@ -473,13 +473,14 @@ char **php_readline_completion_cb(const char *text, int start, int end)
 				/* libedit will read matches[2] */
 				matches = calloc(3, sizeof(char *));
 				if (!matches) {
-					return NULL;
+					goto out;
 				}
 				matches[0] = strdup("");
 			}
 		}
 	}
 
+out:
 	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&_readline_array);
 
