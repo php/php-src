@@ -971,6 +971,12 @@ static zval *bcmath_number_read_property(zend_object *obj, zend_string *name, in
 	return zend_std_read_property(obj, name, type, cache_slot, rv);
 }
 
+static zval *bcmath_number_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
+{
+	/* Must always go through read property because all properties are virtual, and no dynamic properties are allowed. */
+	return NULL;
+}
+
 static int bcmath_number_has_property(zend_object *obj, zend_string *name, int check_empty, void **cache_slot)
 {
 	if (check_empty == ZEND_PROPERTY_NOT_EMPTY) {
@@ -1014,6 +1020,7 @@ static void bcmath_number_register_class(void)
 	bcmath_number_obj_handlers.unset_property = bcmath_number_unset_property;
 	bcmath_number_obj_handlers.has_property = bcmath_number_has_property;
 	bcmath_number_obj_handlers.read_property = bcmath_number_read_property;
+	bcmath_number_obj_handlers.get_property_ptr_ptr = bcmath_number_get_property_ptr_ptr;
 	bcmath_number_obj_handlers.get_properties_for = bcmath_number_get_properties_for;
 	bcmath_number_obj_handlers.cast_object = bcmath_number_cast_object;
 }
