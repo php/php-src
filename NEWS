@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fix memory leak when calloc() fails in php_readline_completion_cb().
     (nielsdos)
 
+- Soap:
+  . Fix memory leaks in php_http.c when call_user_function() fails. (nielsdos)
+
 05 Jun 2025, PHP 8.3.22
 
 - Core:
