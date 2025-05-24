@@ -23,7 +23,7 @@
 #include "sendrecvmsg.h"
 #include "conversions.h"
 #include <limits.h>
-#ifdef HAVE_IPV6
+#if !defined(PHP_WIN32) && defined(HAVE_IPV6)
 # include <netinet/ip6.h>
 #endif
 #include <Zend/zend_llist.h>
@@ -126,12 +126,12 @@ static void init_ancillary_registry(void)
 			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
 #endif
 
-#if defined(IPV6_HOPOPTS)
+#if defined(IPV6_HOPOPTS) && !defined(PHP_WIN32)
 	PUT_ENTRY(sizeof(struct ip6_hbh), 0, 0, from_zval_write_ip6_hbh,
 			to_zval_read_ip6_hbh, IPPROTO_IPV6, IPV6_HOPOPTS);
 #endif
 
-#if defined(IPV6_DSTPOPTS)
+#if defined(IPV6_DSTPOPTS) && !defined(PHP_WIN32)
 	PUT_ENTRY(sizeof(struct ip6_dest), 0, 0, from_zval_write_ip6_dest,
 			to_zval_read_ip6_dest, IPPROTO_IPV6, IPV6_DSTOPTS);
 #endif
@@ -405,13 +405,13 @@ int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 		reader = &to_zval_read_in6_pktinfo;
 		break;
 #endif
-#ifdef IPV6_HOPOPTS
+#if defined(IPV6_HOPOPTS) && !defined(PHP_WIN32)
 	case IPV6_HOPOPTS:
 		size = sizeof(struct ip6_hbh);
 		reader = &to_zval_read_ip6_hbh;
 		break;
 #endif
-#ifdef IPV6_DSTOPTS
+#if defined(IPV6_DSTOPTS) && !defined(PHP_WIN32)
 	case IPV6_DSTOPTS:
 		size = sizeof(struct ip6_dest);
 		reader = &to_zval_read_ip6_dest;

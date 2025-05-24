@@ -1337,16 +1337,20 @@ static const field_descriptor descriptors_in6_pktinfo[] = {
 		{0}
 };
 
-static const field_descriptor descriptors_in6_hbh[] = {
+#if defined(IPV6_HOPOPTS) && !defined(PHP_WIN32)
+static const field_descriptor descriptors_ip6_hbh[] = {
 		{"nxt", sizeof("nxt"), true, offsetof(struct ip6_hbh, ip6h_nxt), from_zval_write_uint8, to_zval_read_uint8},
 		{"len", sizeof("len"), true, offsetof(struct ip6_hbh, ip6h_len), from_zval_write_uint8, to_zval_read_uint8},
 		{0}
 };
-static const field_descriptor descriptors_in6_dest[] = {
+#endif
+#if defined(IPV6_DSTOPTS) && !defined(PHP_WIN32)
+static const field_descriptor descriptors_ip6_dest[] = {
 		{"nxt", sizeof("nxt"), true, offsetof(struct ip6_dest, ip6d_nxt), from_zval_write_uint8, to_zval_read_uint8},
 		{"len", sizeof("len"), true, offsetof(struct ip6_dest, ip6d_len), from_zval_write_uint8, to_zval_read_uint8},
 		{0}
 };
+#endif
 
 void from_zval_write_in6_pktinfo(const zval *container, char *in6_pktinfo_c, ser_context *ctx)
 {
@@ -1359,29 +1363,33 @@ void to_zval_read_in6_pktinfo(const char *data, zval *zv, res_context *ctx)
 	to_zval_read_aggregation(data, zv, descriptors_in6_pktinfo, ctx);
 }
 
+#if defined(IPV6_HOPOPTS) && !defined(PHP_WIN32)
 void from_zval_write_ip6_hbh(const zval *container, char *in6_hbh_c, ser_context *ctx)
 {
-	from_zval_write_aggregation(container, in6_hbh_c, descriptors_in6_hbh, ctx);
+	from_zval_write_aggregation(container, in6_hbh_c, descriptors_ip6_hbh, ctx);
 }
 
 void to_zval_read_ip6_hbh(const char *data, zval *zv, res_context *ctx)
 {
 	array_init_size(zv, 2);
 
-	to_zval_read_aggregation(data, zv, descriptors_in6_hbh, ctx);
+	to_zval_read_aggregation(data, zv, descriptors_ip6_hbh, ctx);
 }
+#endif
 
+#if defined(IPV6_DSTOPTS) && !defined(PHP_WIN32)
 void from_zval_write_ip6_dest(const zval *container, char *in6_dest_c, ser_context *ctx)
 {
-	from_zval_write_aggregation(container, in6_dest_c, descriptors_in6_dest, ctx);
+	from_zval_write_aggregation(container, in6_dest_c, descriptors_ip6_dest, ctx);
 }
 
 void to_zval_read_ip6_dest(const char *data, zval *zv, res_context *ctx)
 {
 	array_init_size(zv, 2);
 
-	to_zval_read_aggregation(data, zv, descriptors_in6_dest, ctx);
+	to_zval_read_aggregation(data, zv, descriptors_ip6_dest, ctx);
 }
+#endif
 #endif
 
 /* CONVERSIONS for struct ucred */
