@@ -2578,3 +2578,23 @@ PHP_FUNCTION(sys_getloadavg)
 }
 /* }}} */
 #endif
+
+PHP_FUNCTION(num_available_processors)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+#if defined(_SC_NPROCESSORS_ONLN)
+	int nprocs = sysconf(_SC_NPROCESSORS_ONLN);
+	if (nprocs > 0) {
+		RETURN_LONG(nprocs);
+	}
+#elif defined _WIN32 && ! defined __CYGWIN__
+	SYSTEM_INFO system_info;
+	GetSystemInfo (&system_info);
+	if (system_info.dwNumberOfProcessors > 0) {
+		RETURN_LONG(system_info.dwNumberOfProcessors);
+	}
+#endif
+
+	RETURN_NULL();
+}
