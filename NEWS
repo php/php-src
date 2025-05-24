@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.9
 
+- BcMath:
+  . Fixed bug GH-18641 (Accessing a BcMath\Number property by ref crashes).
+    (nielsdos)
+
 - Intl:
   . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
 
