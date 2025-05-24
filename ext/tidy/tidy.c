@@ -124,7 +124,7 @@ static zend_string *php_tidy_file_to_mem(const char *, bool);
 static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
-static zval *tidy_instantiate(zend_class_entry *, zval *);
+static void tidy_instantiate(zend_class_entry *, zval *);
 static zend_result tidy_doc_cast_handler(zend_object *, zval *, int);
 static zend_result tidy_node_cast_handler(zend_object *, zval *, int);
 static void tidy_doc_update_properties(PHPTidyObj *);
@@ -469,10 +469,9 @@ static zend_object *tidy_object_new_doc(zend_class_entry *class_type)
 	return tidy_object_new(class_type, &tidy_object_handlers_doc, is_doc);
 }
 
-static zval *tidy_instantiate(zend_class_entry *pce, zval *object)
+static void tidy_instantiate(zend_class_entry *pce, zval *object)
 {
 	object_init_ex(object, pce);
-	return object;
 }
 
 static zend_result tidy_doc_cast_handler(zend_object *in, zval *out, int type)
