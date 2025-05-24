@@ -200,6 +200,14 @@ static zend_long collator_u_strtol(const UChar *nptr, UChar **endptr, int base)
 }
 /* }}} */
 
+/* Consume (trailing) whitespace just like collator_u_strtol() consumes leading whitespace */
+static zend_always_inline UChar *collator_skip_ws(UChar *end_ptr)
+{
+	while (u_isspace(*end_ptr)) {
+		end_ptr++;
+	}
+	return end_ptr;
+}
 
 /* {{{ collator_is_numeric]
  * Taken from PHP6:is_numeric_unicode()
@@ -217,6 +225,7 @@ uint8_t collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double
 	errno=0;
 	local_lval = collator_u_strtol(str, &end_ptr_long, 10);
 	if (errno != ERANGE) {
+		end_ptr_long = collator_skip_ws(end_ptr_long);
 		if (end_ptr_long == str+length) { /* integer string */
 			if (lval) {
 				*lval = local_lval;
@@ -233,6 +242,7 @@ uint8_t collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double
 	if (local_dval == 0 && end_ptr_double == str) {
 		end_ptr_double = NULL;
 	} else {
+		end_ptr_double = collator_skip_ws(end_ptr_double);
 		if (end_ptr_double == str+length) { /* floating point string */
 			if (!zend_finite(local_dval)) {
 				/* "inf","nan" and maybe other weird ones */
