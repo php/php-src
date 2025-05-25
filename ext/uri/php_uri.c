@@ -33,6 +33,7 @@ zend_class_entry *uri_exception_ce;
 zend_class_entry *invalid_uri_exception_ce;
 zend_class_entry *whatwg_invalid_url_exception_ce;
 
+#define URIPARSER_VERSION PACKAGE_VERSION
 
 static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_REQUIRED("lexbor")
