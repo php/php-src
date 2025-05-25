@@ -737,6 +737,12 @@ extern "C++" {
 # define ZEND_INDIRECT_RETURN
 #endif
 
+#if __has_attribute(nonstring)
+# define ZEND_NONSTRING __attribute__((nonstring))
+#else
+# define ZEND_NONSTRING
+#endif
+
 #define __ZEND_DO_PRAGMA(x) _Pragma(#x)
 #define _ZEND_DO_PRAGMA(x) __ZEND_DO_PRAGMA(x)
 #if defined(__clang__)
