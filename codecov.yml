@@ -9,3 +9,5 @@ ignore:
   - "ext/lexbor/lexbor/ports"
   - "ext/lexbor/lexbor/tag"
   - "ext/pcre/pcre2lib"
+  - "ext/uri/uriparser/include"
+  - "ext/uri/uriparser/src"
