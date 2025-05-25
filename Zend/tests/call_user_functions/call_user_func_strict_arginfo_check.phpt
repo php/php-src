@@ -10,5 +10,9 @@ namespace Foo;
 var_dump(call_user_func('strlen', false));
 
 ?>
---EXPECT--
-int(0)
+--EXPECTF--
+Fatal error: Uncaught TypeError: strlen(): Argument #1 ($string) must be of type string, false given in %s:%d
+Stack trace:
+#0 %s(%d): strlen(false)
+#1 {main}
+  thrown in %s on line %d
