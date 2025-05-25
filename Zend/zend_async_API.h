@@ -19,7 +19,7 @@
 #include "zend_fibers.h"
 #include "zend_globals.h"
 
-#define ZEND_ASYNC_API "ZendAsync API v1.0.0-dev"
+#define ZEND_ASYNC_API "TrueAsync API v1.0.0-dev"
 #define ZEND_ASYNC_API_VERSION_MAJOR 1
 #define ZEND_ASYNC_API_VERSION_MINOR 0
 #define ZEND_ASYNC_API_VERSION_PATCH 0
