@@ -20,8 +20,5 @@
 extern zend_module_entry uri_module_entry;
 #define phpext_uri_ptr &uri_module_entry
 
-#if defined(ZTS) && defined(COMPILE_DL_URI)
-ZEND_TSRMLS_CACHE_EXTERN()
-#endif
 
 #endif

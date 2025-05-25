@@ -70,6 +70,7 @@
 
 /* Used to point to from empty path segments.
  * X.first and X.afterLast must be the same non-NULL value then. */
+extern const URI_CHAR * const URI_FUNC(SafeToPointTo);
 extern const URI_CHAR * const URI_FUNC(ConstPwd);
 extern const URI_CHAR * const URI_FUNC(ConstParent);
 
@@ -89,6 +90,8 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri,
 unsigned char URI_FUNC(HexdigToInt)(URI_CHAR hexdig);
 URI_CHAR URI_FUNC(HexToLetter)(unsigned int value);
 URI_CHAR URI_FUNC(HexToLetterEx)(unsigned int value, UriBool uppercase);
+
+UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri);
 
 UriBool URI_FUNC(CopyPath)(URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source,
 		UriMemoryManager * memory);

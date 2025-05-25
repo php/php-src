@@ -53,6 +53,7 @@ static PHP_MINFO_FUNCTION(uri)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "uri support", "active");
+	php_info_print_table_row(2, "uriparser library version", URIPARSER_VERSION);
 	php_info_print_table_end();
 }
 
@@ -64,9 +65,6 @@ static PHP_MSHUTDOWN_FUNCTION(uri)
 
 PHP_RINIT_FUNCTION(uri)
 {
-#if defined(COMPILE_DL_URI) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
 
 	return SUCCESS;
 }
@@ -89,10 +87,3 @@ zend_module_entry uri_module_entry = {
 	PHP_VERSION,                    /* Version */
 	STANDARD_MODULE_PROPERTIES
 };
-
-#ifdef COMPILE_DL_URI
-#ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
-#endif
-ZEND_GET_MODULE(uri)
-#endif

@@ -85,7 +85,7 @@ extern "C" {
 # include "UriBase.h"
 #endif
 
-extern const URI_CHAR * const URI_FUNC(SafeToPointTo);
+
 
 /**
  * Specifies a range of characters within a string.
@@ -200,11 +200,7 @@ typedef struct URI_TYPE(QueryListStruct) {
 	struct URI_TYPE(QueryListStruct) * next; /**< Pointer to the next key/value pair in the list, can be NULL if last already */
 } URI_TYPE(QueryList); /**< @copydoc UriQueryListStructA */
 
-URI_PUBLIC UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri);
 
-URI_PUBLIC UriBool URI_FUNC(PushPathSegment)(URI_TYPE(ParserState) * state,
-		const URI_CHAR * first, const URI_CHAR * afterLast,
-		UriMemoryManager * memory);
 
 /**
  * Parses a RFC 3986 %URI.
@@ -354,7 +350,7 @@ URI_PUBLIC int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri,
 
 
 /**
- * Percent-encodes all unreserved characters from the input string and
+ * Percent-encodes all but unreserved characters from the input string and
  * writes the encoded version to the output string.
  *
  * NOTE: Be sure to allocate <b>3 times</b> the space of the input buffer for
@@ -388,7 +384,7 @@ URI_PUBLIC URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst,
 
 
 /**
- * Percent-encodes all unreserved characters from the input string and
+ * Percent-encodes all but unreserved characters from the input string and
  * writes the encoded version to the output string.
  *
  * NOTE: Be sure to allocate <b>3 times</b> the space of the input buffer for
@@ -465,7 +461,7 @@ URI_PUBLIC const URI_CHAR * URI_FUNC(UnescapeInPlace)(URI_CHAR * inout);
 
 /**
  * Performs reference resolution as described in
- * <a href="http://tools.ietf.org/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
+ * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
  * Uses default libc-based memory manager.
  * NOTE: On success you have to call uriFreeUriMembersA on \p absoluteDest manually later.
  *
@@ -488,7 +484,7 @@ URI_PUBLIC int URI_FUNC(AddBaseUri)(URI_TYPE(Uri) * absoluteDest,
 
 /**
  * Performs reference resolution as described in
- * <a href="http://tools.ietf.org/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
+ * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
  * Uses default libc-based memory manager.
  * NOTE: On success you have to call uriFreeUriMembersA on \p absoluteDest manually later.
  *
@@ -512,7 +508,7 @@ URI_PUBLIC int URI_FUNC(AddBaseUriEx)(URI_TYPE(Uri) * absoluteDest,
 
 /**
  * Performs reference resolution as described in
- * <a href="http://tools.ietf.org/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
+ * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2">section 5.2.2 of RFC 3986</a>.
  * NOTE: On success you have to call uriFreeUriMembersMmA on \p absoluteDest manually later.
  *
  * @param absoluteDest     <b>OUT</b>: Result %URI
@@ -628,10 +624,10 @@ URI_PUBLIC int URI_FUNC(ToStringCharsRequired)(const URI_TYPE(Uri) * uri,
 
 /**
  * Converts a %URI structure back to text as described in
- * <a href="http://tools.ietf.org/html/rfc3986#section-5.3">section 5.3 of RFC 3986</a>.
+ * <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-5.3">section 5.3 of RFC 3986</a>.
  *
  * NOTE: Scheme-based normalization
- * (<a href="http://tools.ietf.org/html/rfc3986#section-6.2.3">section 6.2.3 of RFC 3986</a>)
+ * (<a href="https://datatracker.ietf.org/doc/html/rfc3986#section-6.2.3">section 6.2.3 of RFC 3986</a>)
  * is not applied and is considered a responsibility of the application using uriparser.
  *
  * @param dest           <b>OUT</b>: Output destination
