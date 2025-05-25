@@ -1,4 +1,4 @@
-EXTENSION("uri", "php_uri.c", false /* never shared */, "/I ext/lexbor /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+EXTENSION("uri", "php_uri.c", false /* never shared */, "/I ext/lexbor /I ext/uri/uriparser/include /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 AC_DEFINE("URI_ENABLE_ANSI", 1, "Define to 1 for enabling ANSI support of uriparser.")
 AC_DEFINE("URI_NO_UNICODE", 1, "Define to 1 for disabling unicode support of uriparser.")
