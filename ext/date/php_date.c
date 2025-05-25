@@ -1581,7 +1581,7 @@ static zval *date_period_it_current_data(zend_object_iterator *iter)
 	php_date_obj   *newdateobj;
 
 	/* Create new object */
-	php_date_instantiate(get_base_date_class(object->start_ce), &iterator->current);
+	object_init_ex(&iterator->current, get_base_date_class(object->start_ce));
 	newdateobj = Z_PHPDATE_P(&iterator->current);
 	newdateobj->time = timelib_time_ctor();
 	*newdateobj->time = *it_time;
@@ -2316,13 +2316,6 @@ static void add_common_properties(HashTable *myht, zend_object *zobj)
 	} ZEND_HASH_FOREACH_END();
 }
 
-/* Advanced Interface */
-PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object) /* {{{ */
-{
-	object_init_ex(object, pce);
-	return object;
-} /* }}} */
-
 /* Helper function used to store the latest found warnings and errors while
  * parsing, from either strtotime or parse_from_format. */
 static void update_errors_warnings(timelib_error_container **last_errors) /* {{{ */
@@ -2551,7 +2544,7 @@ PHP_FUNCTION(date_create)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(date_ce_date, return_value);
+	object_init_ex(return_value, date_ce_date);
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, NULL, timezone_object, 0)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -2572,7 +2565,7 @@ PHP_FUNCTION(date_create_immutable)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(date_ce_immutable, return_value);
+	object_init_ex(return_value, date_ce_immutable);
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, NULL, timezone_object, 0)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -2594,7 +2587,7 @@ PHP_FUNCTION(date_create_from_format)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
+	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date);
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, PHP_DATE_INIT_FORMAT)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -2616,7 +2609,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
+	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable);
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, PHP_DATE_INIT_FORMAT)) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -2672,7 +2665,7 @@ PHP_METHOD(DateTime, createFromImmutable)
 	old_obj = Z_PHPDATE_P(datetimeimmutable_object);
 	DATE_CHECK_INITIALIZED(old_obj->time, Z_OBJCE_P(datetimeimmutable_object));
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
+	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2693,7 +2686,7 @@ PHP_METHOD(DateTime, createFromInterface)
 	old_obj = Z_PHPDATE_P(datetimeinterface_object);
 	DATE_CHECK_INITIALIZED(old_obj->time, Z_OBJCE_P(datetimeinterface_object));
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
+	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2711,7 +2704,7 @@ PHP_METHOD(DateTime, createFromTimestamp)
 		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, &new_object);
+	object_init_ex(&new_object, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date);
 	new_dateobj = Z_PHPDATE_P(&new_object);
 
 	switch (Z_TYPE_P(value)) {
@@ -2747,7 +2740,7 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 	old_obj = Z_PHPDATE_P(datetime_object);
 	DATE_CHECK_INITIALIZED(old_obj->time, Z_OBJCE_P(datetime_object));
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
+	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2768,7 +2761,7 @@ PHP_METHOD(DateTimeImmutable, createFromInterface)
 	old_obj = Z_PHPDATE_P(datetimeinterface_object);
 	DATE_CHECK_INITIALIZED(old_obj->time, Z_OBJCE_P(datetimeinterface_object));
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
+	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2786,7 +2779,7 @@ PHP_METHOD(DateTimeImmutable, createFromTimestamp)
 		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, &new_object);
+	object_init_ex(&new_object, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable);
 	new_dateobj = Z_PHPDATE_P(&new_object);
 
 	switch (Z_TYPE_P(value)) {
@@ -2852,7 +2845,8 @@ static bool php_date_initialize_from_hash(php_date_obj **dateobj, const HashTabl
 				return false;
 			}
 
-			tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, &tmp_obj));
+			object_init_ex(&tmp_obj, date_ce_timezone);
+			tzobj = Z_PHPTIMEZONE_P(&tmp_obj);
 			tzobj->type = TIMELIB_ZONETYPE_ID;
 			tzobj->tzi.tz = tzi;
 			tzobj->initialized = 1;
@@ -2878,7 +2872,7 @@ PHP_METHOD(DateTime, __set_state)
 
 	myht = Z_ARRVAL_P(array);
 
-	php_date_instantiate(date_ce_date, return_value);
+	object_init_ex(return_value, date_ce_date);
 	dateobj = Z_PHPDATE_P(return_value);
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
@@ -2900,7 +2894,7 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 
 	myht = Z_ARRVAL_P(array);
 
-	php_date_instantiate(date_ce_immutable, return_value);
+	object_init_ex(return_value, date_ce_immutable);
 	dateobj = Z_PHPDATE_P(return_value);
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
@@ -3535,7 +3529,7 @@ PHP_FUNCTION(date_timezone_get)
 	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
 	if (dateobj->time->is_localtime) {
 		php_timezone_obj *tzobj;
-		php_date_instantiate(date_ce_timezone, return_value);
+		object_init_ex(return_value, date_ce_timezone);
 		tzobj = Z_PHPTIMEZONE_P(return_value);
 		set_timezone_from_timelib_time(tzobj, dateobj->time);
 	} else {
@@ -3956,7 +3950,7 @@ PHP_FUNCTION(date_diff)
 	DATE_CHECK_INITIALIZED(dateobj1->time, Z_OBJCE_P(object1));
 	DATE_CHECK_INITIALIZED(dateobj2->time, Z_OBJCE_P(object2));
 
-	php_date_instantiate(date_ce_interval, return_value);
+	object_init_ex(return_value, date_ce_interval);
 	interval = Z_PHPINTERVAL_P(return_value);
 	interval->diff = timelib_diff(dateobj1->time, dateobj2->time);
 	if (absolute) {
@@ -4024,7 +4018,8 @@ PHP_FUNCTION(timezone_open)
 		Z_PARAM_PATH_STR(tz) /* To prevent null bytes */
 	ZEND_PARSE_PARAMETERS_END();
 
-	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value));
+	object_init_ex(return_value, date_ce_timezone);
+	tzobj = Z_PHPTIMEZONE_P(return_value);
 	if (!timezone_initialize(tzobj, ZSTR_VAL(tz), ZSTR_LEN(tz), &warning_message)) {
 		php_error_docref(NULL, E_WARNING, "%s", warning_message);
 		efree(warning_message);
@@ -4090,7 +4085,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(date_ce_timezone, return_value);
+	object_init_ex(return_value, date_ce_timezone);
 	tzobj = Z_PHPTIMEZONE_P(return_value);
 	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
@@ -4738,7 +4733,7 @@ PHP_METHOD(DateInterval, __set_state)
 		Z_PARAM_ARRAY_HT(myht)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(date_ce_interval, return_value);
+	object_init_ex(return_value, date_ce_interval);
 	intobj = Z_PHPINTERVAL_P(return_value);
 	php_date_interval_initialize_from_hash(&return_value, &intobj, myht);
 }
@@ -4837,7 +4832,7 @@ static void date_interval_instantiate_from_time(zval *return_value, timelib_time
 {
 	php_interval_obj *diobj;
 
-	php_date_instantiate(date_ce_interval, return_value);
+	object_init_ex(return_value, date_ce_interval);
 	diobj = Z_PHPINTERVAL_P(return_value);
 	diobj->diff = timelib_rel_time_clone(&time->relative);
 	diobj->initialized = 1;
@@ -5212,7 +5207,7 @@ PHP_METHOD(DatePeriod, getStartDate)
 	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 	DATE_CHECK_INITIALIZED(dpobj->start, Z_OBJCE_P(ZEND_THIS));
 
-	php_date_instantiate(dpobj->start_ce, return_value);
+	object_init_ex(return_value, dpobj->start_ce);
 	dateobj = Z_PHPDATE_P(return_value);
 	dateobj->time = timelib_time_ctor();
 	*dateobj->time = *dpobj->start;
@@ -5239,7 +5234,7 @@ PHP_METHOD(DatePeriod, getEndDate)
 		return;
 	}
 
-	php_date_instantiate(dpobj->start_ce, return_value);
+	object_init_ex(return_value, dpobj->start_ce);
 	dateobj = Z_PHPDATE_P(return_value);
 	dateobj->time = timelib_time_ctor();
 	*dateobj->time = *dpobj->end;
@@ -5263,7 +5258,7 @@ PHP_METHOD(DatePeriod, getDateInterval)
 	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 	DATE_CHECK_INITIALIZED(dpobj->interval, Z_OBJCE_P(ZEND_THIS));
 
-	php_date_instantiate(date_ce_interval, return_value);
+	object_init_ex(return_value, date_ce_interval);
 	diobj = Z_PHPINTERVAL_P(return_value);
 	diobj->diff = timelib_rel_time_clone(dpobj->interval);
 	diobj->initialized = 1;
