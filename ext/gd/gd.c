@@ -1073,8 +1073,6 @@ PHP_FUNCTION(imagecopyresampled)
 	dstW = DW;
 
 	gdImageCopyResampled(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
