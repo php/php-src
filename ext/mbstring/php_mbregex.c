@@ -1106,13 +1106,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
 					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);
-				} else {
-					if (!EG(exception)) {
-						zend_throw_error(NULL, "Unable to call custom replacement function");
-						onig_region_free(regs, 1);
-						zval_ptr_dtor(&subpats);
-						RETURN_THROWS();
-					}
 				}
 				zval_ptr_dtor(&subpats);
 			}
