@@ -901,7 +901,11 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_class_ce_t get_class_ce_fn
+    zend_async_get_class_ce_t get_class_ce_fn,
+    zend_async_context_set_t context_set_fn,
+    zend_async_context_get_t context_get_fn,
+    zend_async_context_has_t context_has_fn,
+    zend_async_context_delete_t context_delete_fn
 );
 
 ZEND_API void zend_async_reactor_register(
