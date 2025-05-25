@@ -400,6 +400,10 @@ PHP 8.5 UPGRADE NOTES
   . The return type of finfo_close() has been changed to true, rather
     than bool.
 
+- Lexbor:
+  . An always enabled lexbor extension is added. It contains the lexbor
+    library that was separated from ext/dom for being reused among other
+    extensions. The new extension is not directly exposed to userland.
 
 - PCRE:
   . Upgraded to pcre2lib from 10.44 to 10.45.
