@@ -1,0 +1,124 @@
+From fbb1e8945c4b12d43e7fddc3c34670b5792e2dca Mon Sep 17 00:00:00 2001
+From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
+Date: Sun, 7 Jan 2024 21:59:28 +0100
+Subject: [PATCH 6/6] Patch out unused CSS style code
+
+---
+ source/lexbor/css/rule.h                       |  2 ++
+ source/lexbor/style/dom/interfaces/document.c  | 12 ++++++++----
+ source/lexbor/style/html/interfaces/document.h |  2 ++
+ 3 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/source/lexbor/css/rule.h b/source/lexbor/css/rule.h
+index 7cc4f0b..bd191f9 100644
+--- a/source/lexbor/css/rule.h
++++ b/source/lexbor/css/rule.h
+@@ -339,6 +339,7 @@ lxb_css_rule_ref_dec(lxb_css_rule_t *rule)
+ lxb_inline void
+ lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
+ {
++#if 0
+     if (rule->ref_count > 0) {
+         rule->ref_count--;
+     }
+@@ -346,6 +347,7 @@ lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
+     if (rule->ref_count == 0) {
+         (void) lxb_css_rule_destroy(rule, true);
+     }
++#endif
+ }
+ 
+ lxb_inline void
+diff --git a/source/lexbor/style/dom/interfaces/document.c b/source/lexbor/style/dom/interfaces/document.c
+index 8a63e8e..f885dc3 100644
+--- a/source/lexbor/style/dom/interfaces/document.c
++++ b/source/lexbor/style/dom/interfaces/document.c
+@@ -280,6 +280,7 @@ lxb_status_t
+ lxb_dom_document_stylesheet_apply(lxb_dom_document_t *document,
+                                   lxb_css_stylesheet_t *sst)
+ {
++#if 0
+     lxb_status_t status = LXB_STATUS_OK;
+     lxb_css_rule_t *rule;
+     lxb_css_rule_list_t *list;
+@@ -310,7 +311,7 @@ lxb_dom_document_stylesheet_apply(lxb_dom_document_t *document,
+ 
+         rule = rule->next;
+     }
+-
++#endif
+     return LXB_STATUS_OK;
+ }
+ 
+@@ -329,6 +330,7 @@ lxb_status_t
+ lxb_dom_document_stylesheet_remove(lxb_dom_document_t *document,
+                                    lxb_css_stylesheet_t *sst)
+ {
++#if 0
+     size_t i, length;
+     lxb_status_t status = LXB_STATUS_OK;
+     lxb_css_rule_t *rule;
+@@ -372,13 +374,14 @@ lxb_dom_document_stylesheet_remove(lxb_dom_document_t *document,
+             length = lexbor_array_length(document->css->stylesheets);
+         }
+     }
+-
++#endif
+     return LXB_STATUS_OK;
+ }
+ 
+ lxb_status_t
+ lxb_dom_document_element_styles_attach(lxb_dom_element_t *element)
+ {
++#if 0
+     lxb_status_t status = LXB_STATUS_OK;
+     lxb_css_rule_t *rule;
+     lexbor_array_t *ssts;
+@@ -413,7 +416,7 @@ lxb_dom_document_element_styles_attach(lxb_dom_element_t *element)
+             rule = rule->next;
+         }
+     }
+-
++#endif
+     return LXB_STATUS_OK;
+ }
+ 
+@@ -521,6 +524,7 @@ lxb_dom_document_style_attach_cb(lxb_dom_node_t *node,
+ lxb_status_t
+ lxb_document_apply_stylesheets(lxb_dom_document_t *document)
+ {
++#if 0
+     size_t i, length;
+     lxb_status_t status;
+     lxb_css_stylesheet_t *sst;
+@@ -539,6 +543,6 @@ lxb_document_apply_stylesheets(lxb_dom_document_t *document)
+             return status;
+         }
+     }
+-
++#endif
+     return LXB_STATUS_OK;
+ }
+diff --git a/source/lexbor/style/html/interfaces/document.h b/source/lexbor/style/html/interfaces/document.h
+index 0307cd9..127c4cd 100644
+--- a/source/lexbor/style/html/interfaces/document.h
++++ b/source/lexbor/style/html/interfaces/document.h
+@@ -134,6 +134,7 @@ lxb_html_document_stylesheet_destroy_all(lxb_html_document_t *document,
+                                             destroy_memory);
+ }
+ 
++#if 0
+ lxb_inline lxb_status_t
+ lxb_html_document_style_attach(lxb_html_document_t *document,
+                                lxb_css_rule_style_t *style)
+@@ -158,6 +159,7 @@ lxb_html_document_style_attach_by_element(lxb_html_document_t *document,
+     return lxb_dom_document_style_attach_by_element(lxb_dom_interface_document(document),
+                                                     element, style);
+ }
++#endif
+ 
+ lxb_inline lxb_status_t
+ lxb_html_document_apply_stylesheets(lxb_html_document_t *document)
+-- 
+2.49.0
+
