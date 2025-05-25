@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - Soap:
   . Fix memory leaks in php_http.c when call_user_function() fails. (nielsdos)
 
+- Tidy:
+  . Fix memory leak in tidy output handler on error. (nielsdos)
+
 05 Jun 2025, PHP 8.3.22
 
 - Core:
