@@ -229,6 +229,14 @@ PHP 8.5 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- GD:
+  . imagethickness, imagefilledeclipse, imagefilledarc, imagealphablending,
+    imagesavealpha, imagelayereffect, imagecopyresampled, imagesetpixel,
+    imageline, imagedashedline, imagerectangle, imagefilledrectangle,
+    imagearc, imageellipse, imagefill, imagechar*, iamgestring*,
+    imagecopy, imagecopymerge, imagecopymergegray, imagecopyresized,
+    imagesetclip, imgeflip and imageantialias no return true.
+
 - Intl:
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone()
     throws an IntlException on uninitialised classes/clone failures.
