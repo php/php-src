@@ -90,12 +90,25 @@ typedef enum {
 
 typedef enum
 {
-	ZEND_ASYNC_EXCEPTION_DEFAULT = 0,
-	ZEND_ASYNC_EXCEPTION_CANCELLATION = 1,
-	ZEND_ASYNC_EXCEPTION_TIMEOUT = 2,
-	ZEND_ASYNC_EXCEPTION_INPUT_OUTPUT = 3,
-	ZEND_ASYNC_EXCEPTION_POLL = 4
-} zend_async_exception_type;
+	ZEND_ASYNC_CLASS_NO = 0,
+	ZEND_ASYNC_CLASS_AWAITABLE = 1,
+	ZEND_ASYNC_CLASS_COROUTINE = 2,
+	ZEND_ASYNC_CLASS_SCOPE = 3,
+	ZEND_ASYNC_CLASS_CONTEXT = 4,
+	ZEND_ASYNC_CLASS_SCOPE_PROVIDER = 5,
+	ZEND_ASYNC_CLASS_SPAWN_STRATEGY = 6,
+	ZEND_ASYNC_CLASS_TIMEOUT = 7,
+
+	ZEND_ASYNC_CLASS_CHANNEL = 10,
+	ZEND_ASYNC_CLASS_FUTURE = 11,
+
+	ZEND_ASYNC_EXCEPTION_DEFAULT = 30,
+	ZEND_ASYNC_EXCEPTION_CANCELLATION = 31,
+	ZEND_ASYNC_EXCEPTION_TIMEOUT = 32,
+	ZEND_ASYNC_EXCEPTION_INPUT_OUTPUT = 33,
+	ZEND_ASYNC_EXCEPTION_POLL = 34,
+	ZEND_ASYNC_EXCEPTION_DNS = 35,
+} zend_async_class;
 
 /**
  * zend_coroutine_t is a Basic data structure that represents a coroutine in the Zend Engine.
@@ -151,7 +164,7 @@ typedef void (*zend_async_shutdown_t)(void);
 typedef zend_array* (*zend_async_get_coroutines_t)(void);
 typedef void (*zend_async_add_microtask_t)(zend_async_microtask_t *microtask);
 typedef zend_array* (*zend_async_get_awaiting_info_t)(zend_coroutine_t * coroutine);
-typedef zend_class_entry* (*zend_async_get_exception_ce_t)(zend_async_exception_type type);
+typedef zend_class_entry* (*zend_async_get_class_ce_t)(zend_async_class type);
 
 typedef void (*zend_async_reactor_startup_t)(void);
 typedef void (*zend_async_reactor_shutdown_t)(void);
@@ -814,8 +827,8 @@ void zend_async_globals_dtor(void);
 ZEND_API const char * zend_async_get_api_version(void);
 ZEND_API int zend_async_get_api_version_number(void);
 
-ZEND_API ZEND_COLD zend_object * zend_async_new_exception(zend_async_exception_type type, const char *format, ...);
-ZEND_API ZEND_COLD zend_object * zend_async_throw(zend_async_exception_type type, const char *format, ...);
+ZEND_API ZEND_COLD zend_object * zend_async_new_exception(zend_async_class type, const char *format, ...);
+ZEND_API ZEND_COLD zend_object * zend_async_throw(zend_async_class type, const char *format, ...);
 ZEND_API ZEND_COLD zend_object * zend_async_throw_cancellation(const char *format, ...);
 ZEND_API ZEND_COLD zend_object * zend_async_throw_timeout(const char *format, const zend_long timeout);
 
@@ -831,7 +844,7 @@ ZEND_API extern zend_async_shutdown_t zend_async_shutdown_fn;
 ZEND_API extern zend_async_get_coroutines_t zend_async_get_coroutines_fn;
 ZEND_API extern zend_async_add_microtask_t zend_async_add_microtask_fn;
 ZEND_API extern zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn;
-ZEND_API extern zend_async_get_exception_ce_t zend_async_get_exception_ce_fn;
+ZEND_API extern zend_async_get_class_ce_t zend_async_get_class_ce_fn;
 
 /* Reactor API */
 
@@ -874,7 +887,7 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_exception_ce_t get_exception_ce_fn
+    zend_async_get_class_ce_t get_class_ce_fn
 );
 
 ZEND_API void zend_async_reactor_register(
@@ -949,7 +962,8 @@ END_EXTERN_C()
 #define ZEND_ASYNC_GET_COROUTINES() zend_async_get_coroutines_fn()
 #define ZEND_ASYNC_ADD_MICROTASK(microtask) zend_async_add_microtask_fn(microtask)
 #define ZEND_ASYNC_GET_AWAITING_INFO(coroutine) zend_async_get_awaiting_info_fn(coroutine)
-#define ZEND_ASYNC_GET_EXCEPTION_CE(type) zend_async_get_exception_ce_fn(type)
+#define ZEND_ASYNC_GET_CE(type) zend_async_get_class_ce_fn(type)
+#define ZEND_ASYNC_GET_EXCEPTION_CE(type) zend_async_get_class_ce_fn(type)
 
 #define ZEND_ASYNC_REACTOR_IS_ENABLED() zend_async_reactor_is_enabled()
 #define ZEND_ASYNC_REACTOR_STARTUP() zend_async_reactor_startup_fn()

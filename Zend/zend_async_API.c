@@ -34,9 +34,19 @@ static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_pr
 
 static void suspend(bool from_main) {}
 
-static zend_class_entry * get_exception_ce(zend_async_exception_type type)
+static zend_class_entry * get_class_ce(zend_async_class type)
 {
-	return zend_ce_exception;
+	if (type == ZEND_ASYNC_EXCEPTION_DEFAULT
+		|| type == ZEND_ASYNC_EXCEPTION_DNS
+		|| type == ZEND_ASYNC_EXCEPTION_POLL
+		|| type == ZEND_ASYNC_EXCEPTION_TIMEOUT
+		|| type == ZEND_ASYNC_EXCEPTION_INPUT_OUTPUT) {
+		return zend_ce_exception;
+	} else if (type == ZEND_ASYNC_EXCEPTION_CANCELLATION) {
+		return zend_ce_cancellation_exception;
+	}
+
+	return NULL;
 }
 
 static zend_string * scheduler_module_name = NULL;
@@ -50,7 +60,7 @@ zend_async_shutdown_t zend_async_shutdown_fn = NULL;
 zend_async_get_coroutines_t zend_async_get_coroutines_fn = NULL;
 zend_async_add_microtask_t zend_async_add_microtask_fn = NULL;
 zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = NULL;
-zend_async_get_exception_ce_t zend_async_get_exception_ce_fn = get_exception_ce;
+zend_async_get_class_ce_t zend_async_get_class_ce_fn = get_class_ce;
 
 static zend_string * reactor_module_name = NULL;
 zend_async_reactor_startup_t zend_async_reactor_startup_fn = NULL;
@@ -161,7 +171,7 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_exception_ce_t get_exception_ce_fn
+    zend_async_get_class_ce_t get_class_ce_fn
 )
 {
 	if (scheduler_module_name != NULL && false == allow_override) {
@@ -188,7 +198,7 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_get_coroutines_fn = get_coroutines_fn;
     zend_async_add_microtask_fn = add_microtask_fn;
 	zend_async_get_awaiting_info_fn = get_awaiting_info_fn;
-	zend_async_get_exception_ce_fn = get_exception_ce_fn;
+	zend_async_get_class_ce_fn = get_class_ce_fn;
 }
 
 ZEND_API void zend_async_reactor_register(
@@ -594,8 +604,12 @@ ZEND_API zend_async_waker_t * zend_async_waker_new_with_timeout(
 /* Exception API */
 //////////////////////////////////////////////////////////////////////
 
-ZEND_API ZEND_COLD zend_object * zend_async_new_exception(zend_async_exception_type type, const char *format, ...)
+ZEND_API ZEND_COLD zend_object * zend_async_new_exception(zend_async_class type, const char *format, ...)
 {
+	if (type == ZEND_ASYNC_CLASS_NO) {
+		type = ZEND_ASYNC_EXCEPTION_DEFAULT;
+	}
+
 	zend_class_entry *exception_ce = ZEND_ASYNC_GET_EXCEPTION_CE(type);
 	zval exception, message_val;
 
@@ -619,8 +633,12 @@ ZEND_API ZEND_COLD zend_object * zend_async_new_exception(zend_async_exception_t
 	return Z_OBJ(exception);
 }
 
-ZEND_API ZEND_COLD zend_object * zend_async_throw(zend_async_exception_type type, const char *format, ...)
+ZEND_API ZEND_COLD zend_object * zend_async_throw(zend_async_class type, const char *format, ...)
 {
+	if (type == ZEND_ASYNC_CLASS_NO) {
+		type = ZEND_ASYNC_EXCEPTION_DEFAULT;
+	}
+
 	va_list args;
 	va_start(args, format);
 	zend_string *message = zend_vstrpprintf(0, format, args);
