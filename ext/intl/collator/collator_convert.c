@@ -317,7 +317,7 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 		COLLATOR_CONVERT_RETURN_FAILED( str );
 	}
 
-	if ( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, /* allow_errors */ 1 ) ) )
+	if ( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, /* allow_errors */ false ) ) )
 	{
 		if( is_numeric == IS_LONG ) {
 			ZVAL_LONG(rv, lval);
