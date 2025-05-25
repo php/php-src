@@ -7669,9 +7669,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
 			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
-				CONST_PROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					/* Recursion protection only applied to user constants, GH-18463 */
+					CONST_PROTECT_RECURSION(c);
+				}
 				zend_deprecated_class_constant(c, constant_name);
-				CONST_UNPROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					CONST_UNPROTECT_RECURSION(c);
+				}
 
 				if (EG(exception)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -8874,9 +8879,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
 			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
-				CONST_PROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					/* Recursion protection only applied to user constants, GH-18463 */
+					CONST_PROTECT_RECURSION(c);
+				}
 				zend_deprecated_class_constant(c, constant_name);
-				CONST_UNPROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					CONST_UNPROTECT_RECURSION(c);
+				}
 
 				if (EG(exception)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -25970,9 +25980,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
 			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
-				CONST_PROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					/* Recursion protection only applied to user constants, GH-18463 */
+					CONST_PROTECT_RECURSION(c);
+				}
 				zend_deprecated_class_constant(c, constant_name);
-				CONST_UNPROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					CONST_UNPROTECT_RECURSION(c);
+				}
 
 				if (EG(exception)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -26542,9 +26557,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
 			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
-				CONST_PROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					/* Recursion protection only applied to user constants, GH-18463 */
+					CONST_PROTECT_RECURSION(c);
+				}
 				zend_deprecated_class_constant(c, constant_name);
-				CONST_UNPROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					CONST_UNPROTECT_RECURSION(c);
+				}
 
 				if (EG(exception)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -35385,9 +35405,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
 			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
-				CONST_PROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					/* Recursion protection only applied to user constants, GH-18463 */
+					CONST_PROTECT_RECURSION(c);
+				}
 				zend_deprecated_class_constant(c, constant_name);
-				CONST_UNPROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					CONST_UNPROTECT_RECURSION(c);
+				}
 
 				if (EG(exception)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -35747,9 +35772,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
 			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
-				CONST_PROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					/* Recursion protection only applied to user constants, GH-18463 */
+					CONST_PROTECT_RECURSION(c);
+				}
 				zend_deprecated_class_constant(c, constant_name);
-				CONST_UNPROTECT_RECURSION(c);
+				if (c->ce->type == ZEND_USER_CLASS) {
+					CONST_UNPROTECT_RECURSION(c);
+				}
 
 				if (EG(exception)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
