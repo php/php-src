@@ -31,3 +31,4 @@
 
 # Vendored libraries
 /ext/lexbor/lexbor linguist-vendored
+/ext/uri/uriparser linguist-vendored

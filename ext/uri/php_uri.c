@@ -42,6 +42,11 @@ zend_class_entry *whatwg_invalid_url_exception_ce;
 zend_class_entry *whatwg_url_validation_error_type_ce;
 zend_class_entry *whatwg_url_validation_error_ce;
 
+static const zend_module_dep uri_deps[] = {
+	ZEND_MOD_REQUIRED("lexbor")
+	ZEND_MOD_END
+};
+
 static zend_array uri_handlers;
 
 static zend_object *uri_clone_obj_handler(zend_object *object);
@@ -1037,15 +1042,16 @@ PHP_RSHUTDOWN_FUNCTION(uri)
 }
 
 zend_module_entry uri_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"uri",                             /* Extension name */
+	STANDARD_MODULE_HEADER_EX, NULL,
+	uri_deps,
+	"uri",                          /* Extension name */
 	NULL,                           /* zend_function_entry */
-	PHP_MINIT(uri),         /* PHP_MINIT - Module initialization */
-	PHP_MSHUTDOWN(uri),   /* PHP_MSHUTDOWN - Module shutdown */
-	PHP_RINIT(uri),         /* PHP_RINIT - Request initialization */
-	PHP_RSHUTDOWN(uri),   /* PHP_RSHUTDOWN - Request shutdown */
-	PHP_MINFO(uri),                  /* PHP_MINFO - Module info */
-	PHP_VERSION,                      /* Version */
+	PHP_MINIT(uri),                 /* PHP_MINIT - Module initialization */
+	PHP_MSHUTDOWN(uri),             /* PHP_MSHUTDOWN - Module shutdown */
+	PHP_RINIT(uri),                 /* PHP_RINIT - Request initialization */
+	PHP_RSHUTDOWN(uri),             /* PHP_RSHUTDOWN - Request shutdown */
+	PHP_MINFO(uri),                 /* PHP_MINFO - Module info */
+	PHP_VERSION,                    /* Version */
 	STANDARD_MODULE_PROPERTIES
 };
 

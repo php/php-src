@@ -75,7 +75,7 @@ static void uriparser_copy_text_range(UriTextRangeA *text_range, UriTextRangeA *
 	}
 }
 
-static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri)
+static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri) // TODO add to uriparser
 {
 	UriUriA *new_uriparser_uri = emalloc(sizeof(UriUriA));
 
@@ -574,7 +574,7 @@ static void *uriparser_reallocarray(UriMemoryManager *memory_manager, void *ptr,
 	return erealloc(ptr, total_size);
 }
 
-static void uriparser_free(UriMemoryManager *memory_manager, void * ptr)
+static void uriparser_free(UriMemoryManager *memory_manager, void *ptr)
 {
 	efree(ptr);
 }
