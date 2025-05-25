@@ -27,6 +27,17 @@
 #define CONST_NO_FILE_CACHE		(1<<1)				/* Can't be saved in file cache */
 #define CONST_DEPRECATED		(1<<2)				/* Deprecated */
 #define CONST_OWNED				(1<<3)				/* constant should be destroyed together with class */
+#define CONST_RECURSIVE			(1<<4)				/* Recursion protection for constant evaluation */
+
+#define CONST_IS_RECURSIVE(c) (Z_CONSTANT_FLAGS((c)->value) & CONST_RECURSIVE)
+#define CONST_PROTECT_RECURSION(c) \
+	do { \
+		Z_CONSTANT_FLAGS((c)->value) |= CONST_RECURSIVE; \
+	} while (0)
+#define CONST_UNPROTECT_RECURSION(c) \
+	do { \
+		Z_CONSTANT_FLAGS((c)->value) &= ~CONST_RECURSIVE; \
+	} while (0)
 
 #define	PHP_USER_CONSTANT   0x7fffff /* a constant defined in user space */
 
