@@ -20,7 +20,7 @@ ADD_SOURCES("ext/lexbor/lexbor/ns", "ns.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/punycode", "punycode.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/tag", "tag.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/unicode", "idna.c unicode.c","lexbor");
-ADD_SOURCES("ext/lexbor/lexbor/url", "url.c unicode.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/url", "url.c","lexbor");
 ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_BUILDING /utf-8");
 
 AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
