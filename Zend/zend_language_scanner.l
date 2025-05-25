@@ -650,7 +650,17 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			}
 		}
 	} else {
+		bool orig_record_errors = EG(record_errors);
+		if (!orig_record_errors) {
+			zend_begin_record_errors();
+		}
+
 		op_array = zend_compile(ZEND_USER_FUNCTION);
+
+		if (!orig_record_errors) {
+			zend_emit_recorded_errors();
+			zend_free_recorded_errors();
+		}
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
