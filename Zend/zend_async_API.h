@@ -166,6 +166,12 @@ typedef void (*zend_async_add_microtask_t)(zend_async_microtask_t *microtask);
 typedef zend_array* (*zend_async_get_awaiting_info_t)(zend_coroutine_t * coroutine);
 typedef zend_class_entry* (*zend_async_get_class_ce_t)(zend_async_class type);
 
+/* Context API - Key-Value map for coroutines */
+typedef bool (*zend_async_context_set_t)(const char *str_key, zend_object *obj_key, zval *value);
+typedef bool (*zend_async_context_get_t)(const char *str_key, zend_object *obj_key, zval *result);
+typedef bool (*zend_async_context_has_t)(const char *str_key, zend_object *obj_key);
+typedef bool (*zend_async_context_delete_t)(const char *str_key, zend_object *obj_key);
+
 typedef void (*zend_async_reactor_startup_t)(void);
 typedef void (*zend_async_reactor_shutdown_t)(void);
 typedef bool (*zend_async_reactor_execute_t)(bool no_wait);
@@ -846,6 +852,14 @@ ZEND_API extern zend_async_add_microtask_t zend_async_add_microtask_fn;
 ZEND_API extern zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn;
 ZEND_API extern zend_async_get_class_ce_t zend_async_get_class_ce_fn;
 
+/* Context API */
+ZEND_API extern zend_async_context_set_t zend_async_context_set_fn;
+ZEND_API extern zend_async_context_get_t zend_async_context_get_fn;
+ZEND_API extern zend_async_context_has_t zend_async_context_has_fn;
+ZEND_API extern zend_async_context_delete_t zend_async_context_delete_fn;
+
+
+
 /* Reactor API */
 
 ZEND_API bool zend_async_reactor_is_enabled(void);
@@ -998,5 +1012,15 @@ END_EXTERN_C()
 	zend_async_exec_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, timeout)
 
 #define ZEND_ASYNC_QUEUE_TASK(task) zend_async_queue_task_fn(task)
+
+/* Context API Macros */
+#define ZEND_ASYNC_CONTEXT_SET_STR(str_key, value) zend_async_context_set_fn(str_key, NULL, value)
+#define ZEND_ASYNC_CONTEXT_SET_OBJ(obj_key, value) zend_async_context_set_fn(NULL, obj_key, value)
+#define ZEND_ASYNC_CONTEXT_GET_STR(str_key, result) zend_async_context_get_fn(str_key, NULL, result)
+#define ZEND_ASYNC_CONTEXT_GET_OBJ(obj_key, result) zend_async_context_get_fn(NULL, obj_key, result)
+#define ZEND_ASYNC_CONTEXT_HAS_STR(str_key) zend_async_context_has_fn(str_key, NULL)
+#define ZEND_ASYNC_CONTEXT_HAS_OBJ(obj_key) zend_async_context_has_fn(NULL, obj_key)
+#define ZEND_ASYNC_CONTEXT_DELETE_STR(str_key) zend_async_context_delete_fn(str_key, NULL)
+#define ZEND_ASYNC_CONTEXT_DELETE_OBJ(obj_key) zend_async_context_delete_fn(NULL, obj_key)
 
 #endif //ZEND_ASYNC_API_H
