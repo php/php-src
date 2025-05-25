@@ -1,4 +1,4 @@
-PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/"
+PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/ -Wno-missing-field-initializers"
 LEXBOR_DIR="lexbor"
 
 AC_DEFINE([HAVE_LEXBOR], [1], [Define to 1 if the PHP extension 'lexbor' is available.])
