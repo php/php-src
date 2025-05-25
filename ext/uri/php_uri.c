@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include <config.h>
 #endif
 
 #include "php.h"
@@ -23,6 +23,7 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_attributes.h"
 #include "main/php_ini.h"
+#include "ext/standard/info.h"
 
 #include "php_uri.h"
 #include "php_uri_arginfo.h"
@@ -52,13 +53,11 @@ static PHP_MINFO_FUNCTION(uri)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "uri support", "active");
-	php_info_print_table_row(2, "uriparser version", URIPARSER_VERSION);
 	php_info_print_table_end();
 }
 
 static PHP_MSHUTDOWN_FUNCTION(uri)
 {
-	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
