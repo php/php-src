@@ -90,7 +90,6 @@ jobs:
               --prefix=/usr \
               --enable-phpdbg \
               --enable-fpm \
-              --enable-opcache \
               --with-pdo-mysql=mysqlnd \
               --with-mysqli=mysqlnd \
               --with-pgsql \
