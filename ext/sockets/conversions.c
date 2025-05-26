@@ -17,6 +17,9 @@
 # include <sys/socket.h>
 # include <arpa/inet.h>
 # include <netinet/in.h>
+# ifdef HAVE_IPV6
+#  include <netinet/ip6.h>
+# endif
 # include <sys/un.h>
 # include <sys/ioctl.h>
 # include <net/if.h>
@@ -404,6 +407,25 @@ static void from_zval_write_uint32(const zval *arr_value, char *field, ser_conte
 	ival = (uint32_t)lval;
 	memcpy(field, &ival, sizeof(ival));
 }
+static void from_zval_write_uint8(const zval *arr_value, char *field, ser_context *ctx)
+{
+	zend_long lval;
+	uint8_t ival;
+
+	lval = from_zval_integer_common(arr_value, ctx);
+	if (ctx->err.has_error) {
+		return;
+	}
+
+	if (lval < 0 || lval > 0xFF) {
+		do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
+				"for an unsigned 8-bit integer");
+		return;
+	}
+
+	ival = (uint8_t)lval;
+	memcpy(field, &ival, sizeof(ival));
+}
 static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_context *ctx)
 {
 	zend_long lval;
@@ -525,6 +547,13 @@ static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
 static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
 {
 	uint32_t ival;
+	memcpy(&ival, data, sizeof(ival));
+
+	ZVAL_LONG(zv, (zend_long)ival);
+}
+static void to_zval_read_uint8(const char *data, zval *zv, res_context *ctx)
+{
+	uint8_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
 	ZVAL_LONG(zv, (zend_long)ival);
@@ -1307,6 +1336,22 @@ static const field_descriptor descriptors_in6_pktinfo[] = {
 		{"ifindex", sizeof("ifindex"), true, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_ifindex, to_zval_read_unsigned},
 		{0}
 };
+
+#if defined(IPV6_HOPOPTS) && !defined(PHP_WIN32)
+static const field_descriptor descriptors_ip6_hbh[] = {
+		{"nxt", sizeof("nxt"), true, offsetof(struct ip6_hbh, ip6h_nxt), from_zval_write_uint8, to_zval_read_uint8},
+		{"len", sizeof("len"), true, offsetof(struct ip6_hbh, ip6h_len), from_zval_write_uint8, to_zval_read_uint8},
+		{0}
+};
+#endif
+#if defined(IPV6_DSTOPTS) && !defined(PHP_WIN32)
+static const field_descriptor descriptors_ip6_dest[] = {
+		{"nxt", sizeof("nxt"), true, offsetof(struct ip6_dest, ip6d_nxt), from_zval_write_uint8, to_zval_read_uint8},
+		{"len", sizeof("len"), true, offsetof(struct ip6_dest, ip6d_len), from_zval_write_uint8, to_zval_read_uint8},
+		{0}
+};
+#endif
+
 void from_zval_write_in6_pktinfo(const zval *container, char *in6_pktinfo_c, ser_context *ctx)
 {
 	from_zval_write_aggregation(container, in6_pktinfo_c, descriptors_in6_pktinfo, ctx);
@@ -1317,6 +1362,34 @@ void to_zval_read_in6_pktinfo(const char *data, zval *zv, res_context *ctx)
 
 	to_zval_read_aggregation(data, zv, descriptors_in6_pktinfo, ctx);
 }
+
+#if defined(IPV6_HOPOPTS) && !defined(PHP_WIN32)
+void from_zval_write_ip6_hbh(const zval *container, char *in6_hbh_c, ser_context *ctx)
+{
+	from_zval_write_aggregation(container, in6_hbh_c, descriptors_ip6_hbh, ctx);
+}
+
+void to_zval_read_ip6_hbh(const char *data, zval *zv, res_context *ctx)
+{
+	array_init_size(zv, 2);
+
+	to_zval_read_aggregation(data, zv, descriptors_ip6_hbh, ctx);
+}
+#endif
+
+#if defined(IPV6_DSTOPTS) && !defined(PHP_WIN32)
+void from_zval_write_ip6_dest(const zval *container, char *in6_dest_c, ser_context *ctx)
+{
+	from_zval_write_aggregation(container, in6_dest_c, descriptors_ip6_dest, ctx);
+}
+
+void to_zval_read_ip6_dest(const char *data, zval *zv, res_context *ctx)
+{
+	array_init_size(zv, 2);
+
+	to_zval_read_aggregation(data, zv, descriptors_ip6_dest, ctx);
+}
+#endif
 #endif
 
 /* CONVERSIONS for struct ucred */
