@@ -453,6 +453,8 @@ static ZEND_MSHUTDOWN_FUNCTION(zend_accelerator)
 
 	UNREGISTER_INI_ENTRIES();
 	accel_shutdown();
+	accel_module_loaded = false;
+
 	return SUCCESS;
 }
 

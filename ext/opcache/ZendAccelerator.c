@@ -3485,6 +3485,8 @@ void accel_shutdown(void)
 	zend_ini_entry *ini_entry;
 	bool _file_cache_only = false;
 
+	accel_starting = false;
+
 #ifdef HAVE_JIT
 	zend_jit_shutdown();
 #endif
