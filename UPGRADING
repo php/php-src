@@ -101,6 +101,10 @@ PHP 8.5 UPGRADE NOTES
   . A ValueError is now thrown when trying to set a cursor name that is too
     long on a PDOStatement resulting from the Firebird driver.
 
+- Session:
+  . Attempting to write session data where $_SESSION has a key containing
+    the pipe character will now emit a warning instead of silently failing.
+
 - SimpleXML:
   . Passing an XPath expression that returns something other than a node set
     to SimpleXMLElement::xpath() will now emit a warning and return false,
