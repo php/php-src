@@ -99,8 +99,6 @@ static void register_dba_symbols(int module_number)
 {
 #if defined(DBA_LMDB)
 	REGISTER_LONG_CONSTANT("DBA_LMDB_USE_SUB_DIR", 0, CONST_PERSISTENT);
-#endif
-#if defined(DBA_LMDB)
 	REGISTER_LONG_CONSTANT("DBA_LMDB_NO_SUB_DIR", MDB_NOSUBDIR, CONST_PERSISTENT);
 #endif
 }
