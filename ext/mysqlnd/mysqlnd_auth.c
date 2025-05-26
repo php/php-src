@@ -1005,7 +1005,15 @@ void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * con
 static size_t
 mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
 {
-	size_t server_public_key_len = (size_t) EVP_PKEY_size(server_public_key);
+	int pkey_size = EVP_PKEY_size(server_public_key);
+
+	if (pkey_size <= 0) {
+		EVP_PKEY_free(server_public_key);
+		DBG_ERR("invalid public key size");
+		DBG_RETURN(0);
+	}
+
+	size_t server_public_key_len = (size_t) pkey_size;
 
 	DBG_ENTER("mysqlnd_caching_sha2_public_encrypt");
 	/*
