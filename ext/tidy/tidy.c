@@ -955,17 +955,17 @@ static zend_result php_tidy_output_handler(void **nothing, php_output_context *o
 	TidyBuffer inbuf, outbuf, errbuf;
 
 	if (TG(clean_output) && (output_context->op & PHP_OUTPUT_HANDLER_START) && (output_context->op & PHP_OUTPUT_HANDLER_FINAL)) {
+		if (ZEND_SIZE_T_UINT_OVFL(output_context->in.used)) {
+			php_error_docref(NULL, E_WARNING, "Input string is too long");
+			return status;
+		}
+
 		doc = tidyCreate();
 		tidyBufInit(&errbuf);
 
 		if (0 == tidySetErrorBuffer(doc, &errbuf)) {
 			tidyOptSetBool(doc, TidyForceOutput, yes);
 			tidyOptSetBool(doc, TidyMark, no);
-
-			if (ZEND_SIZE_T_UINT_OVFL(output_context->in.used)) {
-				php_error_docref(NULL, E_WARNING, "File content is too long");
-				return status;
-			}
 
 			TIDY_SET_DEFAULT_CONFIG(doc);
 

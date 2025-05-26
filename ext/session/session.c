@@ -1059,6 +1059,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 			PHP_VAR_SERIALIZE_DESTROY(var_hash);
 			smart_str_free(&buf);
 			fail = true;
+			php_error_docref(NULL, E_WARNING, "Failed to write session data. Data contains invalid key \"%s\"", ZSTR_VAL(key));
 			break;
 		}
 		smart_str_appendc(&buf, PS_DELIMITER);
