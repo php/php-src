@@ -168,7 +168,6 @@ jobs:
           no_output_timeout: 30m
           command: |
             sapi/cli/php run-tests.php \
-              -d zend_extension=opcache.so \
               -d opcache.enable_cli=1 \
               -d opcache.jit_buffer_size=64M \
               -d opcache.jit=tracing \
