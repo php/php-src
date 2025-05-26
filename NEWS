@@ -11,6 +11,9 @@ PHP                                                                        NEWS
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
 
+- Date:
+  . Fix leaks with multiple calls to DatePeriod iterator current(). (nielsdos)
+
 - Intl:
   . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
 
@@ -27,6 +30,9 @@ PHP                                                                        NEWS
 
 - Soap:
   . Fix memory leaks in php_http.c when call_user_function() fails. (nielsdos)
+
+- Tidy:
+  . Fix memory leak in tidy output handler on error. (nielsdos)
 
 06 Jun 2025, PHP 8.4.8
 
