@@ -1336,8 +1336,6 @@ PHP_METHOD(SoapServer, handle)
 		}
 	}
 
-	ZVAL_NULL(&retval);
-
 	if (php_output_start_default() != SUCCESS) {
 		php_error_docref(NULL, E_ERROR,"ob_start failed");
 	}
@@ -1388,7 +1386,6 @@ PHP_METHOD(SoapServer, handle)
 				php_stream_filter_remove(zf, 1);
 			}
 		} else {
-			zval_ptr_dtor(&retval);
 			SOAP_SERVER_END_CODE();
 			return;
 		}
@@ -1433,6 +1430,8 @@ PHP_METHOD(SoapServer, handle)
 	} zend_end_try();
 
 	xmlFreeDoc(doc_request);
+
+	ZVAL_NULL(&retval);
 
 	if (EG(exception)) {
 		if (!zend_is_unwind_exit(EG(exception))) {
