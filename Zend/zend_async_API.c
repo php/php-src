@@ -34,6 +34,12 @@ static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_pr
 
 static void suspend(bool from_main) {}
 
+static zend_async_context_t * new_context(zend_async_context_t *parent_context)
+{
+	ASYNC_THROW_ERROR("Context API is not enabled");
+	return NULL;
+}
+
 static zend_class_entry * get_class_ce(zend_async_class type)
 {
 	if (type == ZEND_ASYNC_EXCEPTION_DEFAULT
@@ -62,12 +68,6 @@ zend_async_add_microtask_t zend_async_add_microtask_fn = NULL;
 zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = NULL;
 zend_async_get_class_ce_t zend_async_get_class_ce_fn = get_class_ce;
 
-/* Context API */
-zend_async_context_set_t zend_async_context_set_fn = NULL;
-zend_async_context_get_t zend_async_context_get_fn = NULL;
-zend_async_context_has_t zend_async_context_has_fn = NULL;
-zend_async_context_delete_t zend_async_context_delete_fn = NULL;
-
 static zend_string * reactor_module_name = NULL;
 zend_async_reactor_startup_t zend_async_reactor_startup_fn = NULL;
 zend_async_reactor_shutdown_t zend_async_reactor_shutdown_fn = NULL;
@@ -89,6 +89,9 @@ zend_async_exec_t zend_async_exec_fn = NULL;
 
 static zend_string * thread_pool_module_name = NULL;
 zend_async_queue_task_t zend_async_queue_task_fn = NULL;
+
+/* Context API */
+zend_async_new_context_t zend_async_new_context_fn = new_context;
 
 ZEND_API bool zend_async_is_enabled(void)
 {
@@ -115,6 +118,7 @@ static void ts_globals_ctor(zend_async_globals_t * globals)
 	globals->active_event_count = 0;
 	globals->coroutine = NULL;
 	globals->scope = NULL;
+	globals->context = NULL;
 	globals->scheduler = NULL;
 	globals->exit_exception = NULL;
 }
@@ -178,10 +182,7 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
     zend_async_get_class_ce_t get_class_ce_fn,
-    zend_async_context_set_t context_set_fn,
-    zend_async_context_get_t context_get_fn,
-    zend_async_context_has_t context_has_fn,
-    zend_async_context_delete_t context_delete_fn
+    zend_async_new_context_t new_context_fn
 )
 {
 	if (scheduler_module_name != NULL && false == allow_override) {
@@ -209,10 +210,7 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_add_microtask_fn = add_microtask_fn;
 	zend_async_get_awaiting_info_fn = get_awaiting_info_fn;
 	zend_async_get_class_ce_fn = get_class_ce_fn;
-	zend_async_context_set_fn = context_set_fn;
-	zend_async_context_get_fn = context_get_fn;
-	zend_async_context_has_fn = context_has_fn;
-	zend_async_context_delete_fn = context_delete_fn;
+	zend_async_new_context_fn = new_context_fn;
 }
 
 ZEND_API void zend_async_reactor_register(
