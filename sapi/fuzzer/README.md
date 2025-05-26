@@ -31,8 +31,8 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-mbstring`: Fuzzing `mb_convert_encoding()` (requires `--enable-mbstring`)
 * `php-fuzz-mbregex`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
 * `php-fuzz-execute`: Fuzzing the executor
-* `php-fuzz-function-jit`: Fuzzing the function JIT (requires --enable-opcache)
-* `php-fuzz-tracing-jit`: Fuzzing the tracing JIT (requires --enable-opcache)
+* `php-fuzz-function-jit`: Fuzzing the function JIT
+* `php-fuzz-tracing-jit`: Fuzzing the tracing JIT
 
 Some fuzzers have a seed corpus in `sapi/fuzzer/corpus`. You can use it as follows:
 

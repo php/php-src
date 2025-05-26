@@ -296,7 +296,6 @@ jobs:
           ./configure \
             --disable-debug \
             --enable-mbstring \
-            --enable-opcache \
             --enable-option-checking=fatal \
             --enable-sockets \
             --enable-werror \

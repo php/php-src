@@ -12,4 +12,4 @@ ADD . /php-src/
 WORKDIR /php-src
 RUN ./buildconf
 # Compile a minimal debug build. --enable-debug adds runtime assertions and is slower than regular builds.
-RUN ./configure --enable-debug --disable-all --enable-opcache && make clean && make -j$(nproc)
+RUN ./configure --enable-debug --disable-all && make clean && make -j$(nproc)
