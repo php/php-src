@@ -17,6 +17,7 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/core/hash.c
     $LEXBOR_DIR/core/mem.c
     $LEXBOR_DIR/core/mraw.c
+    $LEXBOR_DIR/core/plog.c
     $LEXBOR_DIR/core/print.c
     $LEXBOR_DIR/core/serialize.c
     $LEXBOR_DIR/core/shs.c
@@ -174,7 +175,11 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/html/tree/open_elements.c
     $LEXBOR_DIR/ns/ns.c
     $LEXBOR_DIR/ports/posix/lexbor/core/memory.c
+    $LEXBOR_DIR/punycode/punycode.c
     $LEXBOR_DIR/tag/tag.c
+    $LEXBOR_DIR/unicode/idna.c
+    $LEXBOR_DIR/unicode/unicode.c
+    $LEXBOR_DIR/url/url.c
   ]),
   [no],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $PHP_LEXBOR_CFLAGS])
@@ -193,7 +198,10 @@ PHP_ADD_BUILD_DIR([
   $ext_builddir/$LEXBOR_DIR/html/tree/insertion_mode
   $ext_builddir/$LEXBOR_DIR/ns
   $ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core
+  $ext_builddir/$LEXBOR_DIR/punycode
   $ext_builddir/$LEXBOR_DIR/tag
+  $ext_builddir/$LEXBOR_DIR/unicode
+  $ext_builddir/$LEXBOR_DIR/url
 ])
 PHP_ADD_INCLUDE([$ext_srcdir])
 PHP_INSTALL_HEADERS([ext/lexbor], m4_normalize([
