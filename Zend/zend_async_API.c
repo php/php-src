@@ -117,7 +117,6 @@ static void ts_globals_ctor(zend_async_globals_t * globals)
 	globals->active_coroutine_count = 0;
 	globals->active_event_count = 0;
 	globals->coroutine = NULL;
-	globals->scope = NULL;
 	globals->scheduler = NULL;
 	globals->exit_exception = NULL;
 }

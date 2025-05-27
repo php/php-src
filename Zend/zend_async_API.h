@@ -813,7 +813,7 @@ END_EXTERN_C()
 #define ZEND_ASYNC_GRACEFUL_SHUTDOWN ZEND_ASYNC_G(graceful_shutdown)
 #define ZEND_ASYNC_EXIT_EXCEPTION ZEND_ASYNC_G(exit_exception)
 #define ZEND_ASYNC_CURRENT_COROUTINE ZEND_ASYNC_G(coroutine)
-#define ZEND_ASYNC_CURRENT_SCOPE ZEND_ASYNC_G(scope)
+#define ZEND_ASYNC_CURRENT_SCOPE ZEND_ASYNC_G(coroutine)->scope
 #define ZEND_ASYNC_SCHEDULER ZEND_ASYNC_G(scheduler)
 
 #define ZEND_ASYNC_INCREASE_EVENT_COUNT  if (ZEND_ASYNC_G(active_event_count) < UINT_MAX) { \
@@ -1032,6 +1032,6 @@ END_EXTERN_C()
 
 /* Context API Macros */
 #define ZEND_ASYNC_NEW_CONTEXT(parent) zend_async_new_context_fn(parent)
-#define ZEND_ASYNC_CURRENT_CONTEXT ZEND_ASYNC_G(scope)->context
+#define ZEND_ASYNC_CURRENT_CONTEXT (ZEND_ASYNC_G(coroutine) != NULL ? ZEND_ASYNC_G(coroutine)->scope->context : NULL)
 
 #endif //ZEND_ASYNC_API_H
