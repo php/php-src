@@ -46,7 +46,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %define api.pure full
 %define api.value.type {zend_parser_stack_elem}
 %define parse.error verbose
-%expect 1
+%expect 0
 
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
@@ -285,7 +285,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
-%type <ast> optional_parameter_list
+%type <ast> optional_parameter_list parens_less_argument_list non_empty_parens_less_argument_list
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -905,6 +905,22 @@ argument_list:
 	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create_fcc(); }
 ;
 
+parens_less_argument_list:
+		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
+	|	'(' non_empty_parens_less_argument_list possible_comma ')' { $$ = $2; }
+	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create_fcc(); }
+;
+
+non_empty_parens_less_argument_list:
+		expr ',' argument
+			{ $$ = zend_ast_list_add(zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1), $3); }
+	|	identifier ':' expr
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3)); }
+	|	T_ELLIPSIS expr	{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create(ZEND_AST_UNPACK, $2)); }
+	|	non_empty_parens_less_argument_list ',' argument
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
 non_empty_argument_list:
 		argument
 			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
@@ -1226,7 +1242,7 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	T_CLONE argument_list {
+	|	T_CLONE parens_less_argument_list {
 			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
 			name->attr = ZEND_NAME_FQ;
 			$$ = zend_ast_create(ZEND_AST_CALL, name, $2);
