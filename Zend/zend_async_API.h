@@ -538,6 +538,8 @@ struct _zend_async_scope_s {
 
 	zend_async_scopes_vector_t scopes;
 	zend_async_scope_t *parent_scope;
+	/* Scope context object */
+	zend_async_context_t *context;
 
 	zend_async_before_coroutine_enqueue_t before_coroutine_enqueue;
 	zend_async_after_coroutine_enqueue_t after_coroutine_enqueue;
@@ -729,18 +731,21 @@ static zend_always_inline zend_string *zend_coroutine_callable_name(const zend_c
 /// Async Context Structures
 ///////////////////////////////////////////////////////////////
 
-typedef zend_async_context_t * (*zend_async_new_context_t)(zend_async_context_t *parent_context);
-typedef void (*zend_async_context_find_t)(zend_async_context_t *context, zval *key, zval *result);
+typedef zend_async_context_t * (*zend_async_new_context_t)(void);
+typedef bool (*zend_async_context_find_t)(zend_async_context_t *context, zval *key, zval *result, bool include_parent);
 typedef void (*zend_async_context_set_t)(zend_async_context_t *context, zval *key, zval *value);
-typedef void (*zend_async_context_unset_t)(zend_async_context_t *context, zval *key);
+typedef bool (*zend_async_context_unset_t)(zend_async_context_t *context, zval *key);
 typedef void (*zend_async_context_dispose_t)(zend_async_context_t *context);
 
 struct _zend_async_context_s {
+	/* flags for the context: reserved */
+	uint32_t flags;
+	/* offset of the context zend object */
+	uint32_t offset;
 	zend_async_context_find_t find;
 	zend_async_context_set_t set;
 	zend_async_context_unset_t unset;
 	zend_async_context_dispose_t dispose;
-	uint32_t offset; /* offset of the context zend object */
 };
 
 ///////////////////////////////////////////////////////////////
@@ -774,8 +779,6 @@ typedef struct {
 	zend_coroutine_t *coroutine;
 	/* The current async scope. */
 	zend_async_scope_t *scope;
-	/* The current async context. */
-	zend_async_context_t *context;
 	/* Scheduler coroutine */
 	zend_coroutine_t *scheduler;
 	/* Exit exception object */
@@ -906,6 +909,7 @@ ZEND_API void zend_async_scheduler_register(
 	bool allow_override,
 	zend_async_new_coroutine_t new_coroutine_fn,
 	zend_async_new_scope_t new_scope_fn,
+	zend_async_new_context_t new_context_fn,
     zend_async_spawn_t spawn_fn,
     zend_async_suspend_t suspend_fn,
     zend_async_resume_t resume_fn,
@@ -914,8 +918,7 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_class_ce_t get_class_ce_fn,
-    zend_async_new_context_t new_context_fn
+    zend_async_get_class_ce_t get_class_ce_fn
 );
 
 ZEND_API void zend_async_reactor_register(
@@ -1029,6 +1032,6 @@ END_EXTERN_C()
 
 /* Context API Macros */
 #define ZEND_ASYNC_NEW_CONTEXT(parent) zend_async_new_context_fn(parent)
-#define ZEND_ASYNC_CURRENT_CONTEXT ZEND_ASYNC_G(context)
+#define ZEND_ASYNC_CURRENT_CONTEXT ZEND_ASYNC_G(scope)->context
 
 #endif //ZEND_ASYNC_API_H

@@ -34,7 +34,7 @@ static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_pr
 
 static void suspend(bool from_main) {}
 
-static zend_async_context_t * new_context(zend_async_context_t *parent_context)
+static zend_async_context_t * new_context(void)
 {
 	ASYNC_THROW_ERROR("Context API is not enabled");
 	return NULL;
@@ -118,7 +118,6 @@ static void ts_globals_ctor(zend_async_globals_t * globals)
 	globals->active_event_count = 0;
 	globals->coroutine = NULL;
 	globals->scope = NULL;
-	globals->context = NULL;
 	globals->scheduler = NULL;
 	globals->exit_exception = NULL;
 }
@@ -173,6 +172,7 @@ ZEND_API void zend_async_scheduler_register(
 	bool allow_override,
 	zend_async_new_coroutine_t new_coroutine_fn,
 	zend_async_new_scope_t new_scope_fn,
+	zend_async_new_context_t new_context_fn,
     zend_async_spawn_t spawn_fn,
     zend_async_suspend_t suspend_fn,
     zend_async_resume_t resume_fn,
@@ -181,8 +181,7 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_class_ce_t get_class_ce_fn,
-    zend_async_new_context_t new_context_fn
+    zend_async_get_class_ce_t get_class_ce_fn
 )
 {
 	if (scheduler_module_name != NULL && false == allow_override) {
@@ -201,6 +200,7 @@ ZEND_API void zend_async_scheduler_register(
 
 	zend_async_new_coroutine_fn = new_coroutine_fn;
 	zend_async_new_scope_fn = new_scope_fn;
+	zend_async_new_context_fn = new_context_fn;
     zend_async_spawn_fn = spawn_fn;
     zend_async_suspend_fn = suspend_fn;
     zend_async_resume_fn = resume_fn;
@@ -210,7 +210,6 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_add_microtask_fn = add_microtask_fn;
 	zend_async_get_awaiting_info_fn = get_awaiting_info_fn;
 	zend_async_get_class_ce_fn = get_class_ce_fn;
-	zend_async_new_context_fn = new_context_fn;
 }
 
 ZEND_API void zend_async_reactor_register(
