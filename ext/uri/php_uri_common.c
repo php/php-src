@@ -14,14 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_URI_H
-#define PHP_URI_H
-
+#include "php.h"
+#include "Zend/zend_interfaces.h"
+#include "Zend/zend_exceptions.h"
 #include "php_uri_common.h"
 
-extern zend_module_entry uri_module_entry;
-#define phpext_uri_ptr &uri_module_entry
+void uri_register_property_handler(HashTable *property_handlers, zend_string *name, const uri_property_handler_t *handler)
+{
+	zend_hash_add_new_ptr(property_handlers, name, (void *) handler);
+	zend_string_release_ex(name, true);
+}
 
-PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers);
+uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name)
+{
+	return zend_hash_find_ptr(internal_uri->handler->property_handlers, name);
+}
 
-#endif
+void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
+{
+	zval exception_zv;
+
+	uri_handler->create_invalid_uri_exception(&exception_zv, errors);
+
+	zend_throw_exception_object(&exception_zv);
+}
