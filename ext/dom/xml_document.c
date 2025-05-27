@@ -131,7 +131,76 @@ oom:
 	RETURN_THROWS();
 }
 
-static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void load_from_helper(zval *return_value, int mode, dom_source_union source, size_t options, const char *override_encoding, const char *override_document_uri)
+{
+	xmlCharEncodingHandlerPtr encoding = NULL;
+	if (override_encoding != NULL) {
+		encoding = xmlFindCharEncodingHandler(override_encoding);
+		if (!encoding) {
+			zend_argument_value_error(3, "must be a valid document encoding");
+			RETURN_THROWS();
+		}
+		options |= XML_PARSE_IGNORE_ENC;
+	}
+
+	xmlDocPtr lxml_doc = dom_document_parser(NULL, mode, source, options, encoding, override_document_uri);
+	if (UNEXPECTED(lxml_doc == NULL || lxml_doc == DOM_DOCUMENT_MALFORMED)) {
+		if (!EG(exception)) {
+			if (lxml_doc == DOM_DOCUMENT_MALFORMED) {
+				php_dom_throw_error_with_message(SYNTAX_ERR, "XML fragment is not well-formed", true);
+			} else {
+				if (mode == DOM_LOAD_FILE) {
+					zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", source.str);
+				} else {
+					php_dom_throw_error(INVALID_STATE_ERR, true);
+				}
+			}
+		}
+		RETURN_THROWS();
+	}
+	if (lxml_doc->encoding == NULL) {
+		if (override_encoding) {
+			lxml_doc->encoding = xmlStrdup((const xmlChar *) override_encoding);
+		} else {
+			lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
+		}
+	}
+	if ((mode == DOM_LOAD_FILE || mode == DOM_LOAD_STREAM) && lxml_doc->URL != NULL) {
+		if (!php_is_stream_path((char *) lxml_doc->URL)) {
+			/* Check for "file:/" instead of "file://" because of libxml2 quirk */
+			if (strncmp((const char *) lxml_doc->URL, "file:/", sizeof("file:/") - 1) != 0) {
+#ifdef PHP_WIN32
+				xmlChar *buffer = xmlStrdup((const xmlChar *) "file:///");
+#else
+				xmlChar *buffer = xmlStrdup((const xmlChar *) "file://");
+#endif
+				if (buffer != NULL) {
+					xmlChar *new_buffer = xmlStrcat(buffer, lxml_doc->URL);
+					if (new_buffer != NULL) {
+						xmlFree(BAD_CAST lxml_doc->URL);
+						lxml_doc->URL = new_buffer;
+					} else {
+						xmlFree(buffer);
+					}
+				}
+			} else {
+#ifdef PHP_WIN32
+				lxml_doc->URL = php_dom_libxml_fix_file_path(BAD_CAST lxml_doc->URL);
+#endif
+			}
+		}
+	}
+	dom_object *intern = php_dom_instantiate_object_helper(
+		return_value,
+		dom_xml_document_class_entry,
+		(xmlNodePtr) lxml_doc,
+		NULL
+	);
+	dom_set_xml_class(intern->document);
+	dom_document_convert_to_modern(intern->document, lxml_doc);
+}
+
+static void load_from_string_or_file_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	const char *source, *override_encoding = NULL;
 	size_t source_len, override_encoding_len;
@@ -168,71 +237,10 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_THROWS();
 	}
 
-	xmlCharEncodingHandlerPtr encoding = NULL;
-	if (override_encoding != NULL) {
-		encoding = xmlFindCharEncodingHandler(override_encoding);
-		if (!encoding) {
-			zend_argument_value_error(3, "must be a valid document encoding");
-			RETURN_THROWS();
-		}
-		options |= XML_PARSE_IGNORE_ENC;
-	}
-
-	xmlDocPtr lxml_doc = dom_document_parser(NULL, mode, source, source_len, options, encoding);
-	if (UNEXPECTED(lxml_doc == NULL || lxml_doc == DOM_DOCUMENT_MALFORMED)) {
-		if (!EG(exception)) {
-			if (lxml_doc == DOM_DOCUMENT_MALFORMED) {
-				php_dom_throw_error_with_message(SYNTAX_ERR, "XML fragment is not well-formed", true);
-			} else {
-				if (mode == DOM_LOAD_FILE) {
-					zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", source);
-				} else {
-					php_dom_throw_error(INVALID_STATE_ERR, true);
-				}
-			}
-		}
-		RETURN_THROWS();
-	}
-	if (lxml_doc->encoding == NULL) {
-		if (override_encoding) {
-			lxml_doc->encoding = xmlStrdup((const xmlChar *) override_encoding);
-		} else {
-			lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
-		}
-	}
-	if (mode == DOM_LOAD_FILE && lxml_doc->URL != NULL) {
-		if (!php_is_stream_path((char *) lxml_doc->URL)) {
-			/* Check for "file:/" instead of "file://" because of libxml2 quirk */
-			if (strncmp((const char *) lxml_doc->URL, "file:/", sizeof("file:/") - 1) != 0) {
-#ifdef PHP_WIN32
-				xmlChar *buffer = xmlStrdup((const xmlChar *) "file:///");
-#else
-				xmlChar *buffer = xmlStrdup((const xmlChar *) "file://");
-#endif
-				if (buffer != NULL) {
-					xmlChar *new_buffer = xmlStrcat(buffer, lxml_doc->URL);
-					if (new_buffer != NULL) {
-						xmlFree(BAD_CAST lxml_doc->URL);
-						lxml_doc->URL = new_buffer;
-					} else {
-						xmlFree(buffer);
-					}
-				}
-			} else {
-#ifdef PHP_WIN32
-				lxml_doc->URL = php_dom_libxml_fix_file_path(BAD_CAST lxml_doc->URL);
-#endif
-			}
-		}
-	}
-	dom_object *intern = php_dom_instantiate_object_helper(
-		return_value,
-		dom_xml_document_class_entry,
-		(xmlNodePtr) lxml_doc,
-		NULL
-	);
-	dom_set_xml_class(intern->document);
-	dom_document_convert_to_modern(intern->document, lxml_doc);
+	dom_source_union source_union;
+	source_union.str = source;
+	source_union.str_len = source_len;
+	load_from_helper(return_value, mode, source_union, options, override_encoding, NULL);
 }
 
 void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc)
@@ -245,12 +253,41 @@ void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml
 
 PHP_METHOD(Dom_XMLDocument, createFromString)
 {
-	load_from_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
+	load_from_string_or_file_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
 
 PHP_METHOD(Dom_XMLDocument, createFromFile)
 {
-	load_from_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
+	load_from_string_or_file_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
+}
+
+PHP_METHOD(Dom_XMLDocument, createFromStream)
+{
+	zval *stream_zv;
+	dom_source_union source_union;
+	const char *document_uri = NULL, *override_encoding = NULL;
+	size_t document_uri_len = 0, override_encoding_len = 0;
+	zend_long options = 0;
+	if (zend_parse_parameters(
+		ZEND_NUM_ARGS(),
+		"r|p!lp!",
+		&stream_zv,
+		&document_uri,
+		&document_uri_len,
+		&options,
+		&override_encoding,
+		&override_encoding_len
+	) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	php_stream_from_res(source_union.stream, Z_RES_P(stream_zv));
+
+	if (!check_options_validity(3, options)) {
+		RETURN_THROWS();
+	}
+
+	load_from_helper(return_value, DOM_LOAD_STREAM, source_union, options, override_encoding, document_uri);
 }
 
 static int php_new_dom_write_smart_str(void *context, const char *buffer, int len)
