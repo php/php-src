@@ -11608,6 +11608,12 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_match(result, ast);
 			return;
 		default:
+			zend_error(
+					E_ERROR,
+					"Unknown AST node kind %d. Expression: \"%s\".",
+					ast->kind,
+					ZSTR_VAL(zend_ast_export("", ast, ""))
+			);
 			ZEND_ASSERT(0 /* not supported */);
 	}
 }
