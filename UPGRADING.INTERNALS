@@ -31,6 +31,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     runtime.
   . Removed the cache_slot argument of zend_check_user_type_slow() because
     now it only relies on the CE cache.
+  . Changed several zend_parse_arg_*_{weak,slow} functions to no longer have an
+    output pointer argument, but instead return a struct or a sentinel value.
 
 ========================
 2. Build system changes

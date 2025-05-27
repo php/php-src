@@ -2314,9 +2314,9 @@ PHP_FUNCTION(substr_replace)
 	zend_string *str, *repl_str;
 	HashTable *str_ht, *repl_ht;
 	HashTable *from_ht;
-	zend_long from_long;
+	zend_long from_long = 0;
 	HashTable *len_ht = NULL;
-	zend_long len_long;
+	zend_long len_long = 0;
 	bool len_is_null = 1;
 	zend_long l = 0;
 	zend_long f;

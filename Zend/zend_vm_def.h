@@ -5501,18 +5501,22 @@ ZEND_VM_C_LABEL(send_array):
 			uint32_t skip = opline->extended_value;
 			uint32_t count = zend_hash_num_elements(ht);
 			zend_long len;
+			zend_opt_long result;
 			if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 				len = Z_LVAL_P(op2);
 			} else if (Z_TYPE_P(op2) == IS_NULL) {
 				len = count - skip;
 			} else if (EX_USES_STRICT_TYPES()
-					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
+					|| !(result = zend_parse_arg_long_weak(op2, /* arg_num */ 3)).has_value) {
 				zend_type_error(
 					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
 					zend_zval_value_name(op2));
 				FREE_OP2();
 				FREE_OP1();
 				HANDLE_EXCEPTION();
+			} else {
+				ZEND_ASSERT(result.has_value);
+				len = result.value;
 			}
 
 			if (len < 0) {
@@ -8767,7 +8771,7 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1))) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;

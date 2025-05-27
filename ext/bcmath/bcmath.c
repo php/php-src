@@ -1211,8 +1211,14 @@ static zend_result bcmath_number_parse_num(const zval *zv, zend_object **obj, ze
 				*lval = 0;
 				return FAILURE;
 
-			default:
-				return zend_parse_arg_long_slow(zv, lval, 1 /* dummy */) ? SUCCESS : FAILURE;
+			default: {
+				zend_opt_long result = zend_parse_arg_long_slow(zv, 1 /* dummy */);
+				if (result.has_value) {
+					*lval = result.value;
+					return SUCCESS;
+				}
+				return FAILURE;
+			}
 		}
 	}
 }

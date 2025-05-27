@@ -2627,18 +2627,22 @@ send_array:
 			uint32_t skip = opline->extended_value;
 			uint32_t count = zend_hash_num_elements(ht);
 			zend_long len;
+			zend_opt_long result;
 			if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 				len = Z_LVAL_P(op2);
 			} else if (Z_TYPE_P(op2) == IS_NULL) {
 				len = count - skip;
 			} else if (EX_USES_STRICT_TYPES()
-					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
+					|| !(result = zend_parse_arg_long_weak(op2, /* arg_num */ 3)).has_value) {
 				zend_type_error(
 					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
 					zend_zval_value_name(op2));
 				FREE_OP(opline->op2_type, opline->op2.var);
 				FREE_OP(opline->op1_type, opline->op1.var);
 				HANDLE_EXCEPTION();
+			} else {
+				ZEND_ASSERT(result.has_value);
+				len = result.value;
 			}
 
 			if (len < 0) {
@@ -5967,7 +5971,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1))) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -15710,7 +15714,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1))) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -41710,7 +41714,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1))) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
