@@ -24,8 +24,14 @@
 #include "php_pdo.h"
 #include "php_pdo_driver.h"
 
+#if __has_attribute(nonstring)
+# define ZEND_NONSTRING __attribute__((nonstring))
+#else
+# define ZEND_NONSTRING
+#endif
+
 struct pdo_sqlstate_info {
-	const char state[5];
+	const char state[5] ZEND_NONSTRING;
 	const char *desc;
 };
 

@@ -185,6 +185,12 @@ private struct {
 	{ NULL, 0, NULL }
 };
 
+#if __has_attribute(nonstring)
+# define ZEND_NONSTRING __attribute__((nonstring))
+#else
+# define ZEND_NONSTRING
+#endif
+
 #include "../data_file.c"
 
 #ifdef COMPILE_ONLY
