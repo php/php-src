@@ -377,7 +377,6 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 						/* Recursion protection only applied to user constants, GH-18463 */
 						CONST_PROTECT_RECURSION(c);
 					}
-					CONST_PROTECT_RECURSION(c);
 					zend_deprecated_class_constant(c, constant_name);
 					if (c->ce->type == ZEND_USER_CLASS) {
 						CONST_UNPROTECT_RECURSION(c);

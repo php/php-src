@@ -187,9 +187,9 @@ PHP 8.5 UPGRADE NOTES
     number formats.
   . Added Locale::addLikelySubtags and Locale::minimizeSubtags to
     handle likely tags on a given locale.
-  . Added IntlListFormatter class to format, order, punctuates 
+  . Added IntlListFormatter class to format, order, punctuates
     a list of items with a given locale, IntlListFormatter::TYPE_AND,
-    IntlListFormatter::TYPE_OR, IntlListFormatter::TYPE_UNITS operands and 
+    IntlListFormatter::TYPE_OR, IntlListFormatter::TYPE_UNITS operands and
     IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT and
     IntlListFormatter::WIDTH_NARROW widths.
     It is supported from icu 67.
@@ -536,10 +536,16 @@ PHP 8.5 UPGRADE NOTES
     for the match(true) pattern.
   . Add OPcode specialization for `=== []` and `!== []` comparisons.
   . Creating exception objects is now much faster.
+  . The parts of the code that used SSE2 have been adapted to use SIMD
+    with ARM NEON as well.
 
 - Intl:
   . Now avoids creating extra string copies when converting strings
     for use in the collator.
+
+MBString:
+  . The parts of the code that used SSE2 have been adapted to use SIMD
+    with ARM NEON as well.
 
 - ReflectionProperty:
   . Improved performance of the following methods: getValue(), getRawValue(),
