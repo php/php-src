@@ -27,7 +27,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install system dependencies (including libuv)
+          name: Install system dependencies (including true async + libuv)
           command: |
             export DEBIAN_FRONTEND=noninteractive
             sudo apt-get update -y
@@ -77,7 +77,7 @@ jobs:
               libjpeg-dev \
               libpng-dev \
               libfreetype6-dev \
-              libuv1-dev         # <-- ДОБАВЛЕНО
+              libuv1-dev
       - run:
           name: Download php-async (main) into ext/
           command: |
