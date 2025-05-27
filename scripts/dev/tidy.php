@@ -24,6 +24,7 @@ $excludes = [
     // Bundled libraries / files.
     'ext/date/lib/',
     'ext/lexbor/lexbor/',
+    'ext/uri/uriparser/',
     'ext/fileinfo/data_file.c',
     'ext/fileinfo/libmagic/',
     'ext/gd/libgd/',

@@ -17,7 +17,10 @@ ADD_SOURCES("ext/lexbor/lexbor/css/selectors", "state.c selectors.c selector.c p
 ADD_SOURCES("ext/lexbor/lexbor/css/syntax", "state.c parser.c syntax.c anb.c tokenizer.c token.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/css/syntax/tokenizer", "error.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/ns", "ns.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/punycode", "punycode.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/tag", "tag.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/unicode", "idna.c unicode.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/url", "url.c unicode.c","lexbor");
 ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_BUILDING /utf-8");
 
 AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
