@@ -454,6 +454,13 @@ const SO_BPF_EXTENSIONS = UNKNOWN;
  */
 const SO_EXCLBIND = UNKNOWN;
 #endif
+#ifdef SO_BUSY_POLL
+/**
+ * @var int
+ * @cvalue SO_BUSY_POLL
+ */
+const SO_BUSY_POLL = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int
@@ -1915,6 +1922,13 @@ const TCP_QUICKACK = UNKNOWN;
  */
 const TCP_REPAIR = UNKNOWN;
 #endif
+#if defined(IP_BINDANY)
+/**
+ * @var int
+ * @cvalue IP_BINDANY
+ */
+const IP_BINDANY = UNKNOWN;
+#endif
 #if defined(IP_DONTFRAG)
 /**
  * @var int
@@ -2006,6 +2020,33 @@ const ETH_P_LOOP = UNKNOWN;
  * @cvalue ETH_P_ALL
  */
 const ETH_P_ALL = UNKNOWN;
+#endif
+
+#ifdef UDP_SEGMENT
+/**
+ * @var int
+ * @cvalue UDP_SEGMENT
+ */
+const UDP_SEGMENT = UNKNOWN;
+#endif
+
+#ifdef SHUT_RDWR
+/**
+ * @var int
+ * @cvalue SHUT_RD
+ */
+const SHUT_RD = UNKNOWN;
+/**
+/**
+ * @var int
+ * @cvalue SHUT_WR
+ */
+const SHUT_WR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SHUT_RDWR
+ */
+const SHUT_RDWR = UNKNOWN;
 #endif
 
 /**

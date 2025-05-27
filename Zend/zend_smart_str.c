@@ -131,6 +131,13 @@ ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...) 
 	va_end(arg);
 }
 
+ZEND_API void smart_string_append_printf(smart_string *dest, const char *format, ...) {
+	va_list arg;
+	va_start(arg, format);
+	zend_printf_to_smart_string(dest, format, arg);
+	va_end(arg);
+}
+
 #define SMART_STRING_OVERHEAD   (ZEND_MM_OVERHEAD + 1)
 #define SMART_STRING_START_SIZE 256
 #define SMART_STRING_START_LEN  (SMART_STRING_START_SIZE - SMART_STRING_OVERHEAD)

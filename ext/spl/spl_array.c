@@ -665,12 +665,14 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 		}
 	}
 
+	/* empty() check the value is not falsy, isset() only check it is not null */
+	bool result = check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
+
 	if (value == &rv) {
 		zval_ptr_dtor(&rv);
 	}
 
-	/* empty() check the value is not falsy, isset() only check it is not null */
-	return check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
+	return result;
 } /* }}} */
 
 static int spl_array_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */
@@ -861,6 +863,10 @@ static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *na
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
+		if (cache_slot) {
+			cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+		}
+
 		/* If object has offsetGet() overridden, then fallback to read_property,
 		 * which will call offsetGet(). */
 		zval member;

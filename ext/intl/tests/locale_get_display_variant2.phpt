@@ -248,9 +248,9 @@ disp_locale=fr :  display_variant=
 disp_locale=de :  display_variant=
 -----------------
 locale='zh-CN-a-myExt-x-private'
-disp_locale=en :  display_variant=(A_MYEXT_X_PRIVATE)?
-disp_locale=fr :  display_variant=(A_MYEXT_X_PRIVATE)?
-disp_locale=de :  display_variant=(A_MYEXT_X_PRIVATE)?
+disp_locale=en :  display_variant=(A_MYEXT(_X_PRIVATE)?)?
+disp_locale=fr :  display_variant=(A_MYEXT(_X_PRIVATE)?)?
+disp_locale=de :  display_variant=(A_MYEXT(_X_PRIVATE)?)?
 -----------------
 locale='en-a-myExt-b-another'
 disp_locale=en :  display_variant=((A_)?MYEXT_B_ANOTHER)?

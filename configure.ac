@@ -557,6 +557,7 @@ AC_CHECK_FUNCS(m4_normalize([
   getwd
   glob
   gmtime_r
+  issetugid
   lchown
   localtime_r
   memcntl
@@ -571,6 +572,7 @@ AC_CHECK_FUNCS(m4_normalize([
   poll
   pthread_jit_write_protect_np
   putenv
+  reallocarray
   scandir
   setenv
   setitimer
@@ -590,6 +592,17 @@ AC_CHECK_FUNCS(m4_normalize([
   utime
   vasprintf
 ]))
+
+PHP_ARG_ENABLE([system-glob],
+  [whether to use the system glob function],
+  [AS_HELP_STRING([--enable-system-glob],
+    [Use the system glob function instead of the PHP provided replacement.])],
+  [no],
+  [no])
+
+AS_VAR_IF([PHP_SYSTEM_GLOB], [yes],
+  [AC_DEFINE([PHP_SYSTEM_GLOB], [1],
+    [Define to 1 if PHP will use the system glob function instead of php_glob.])])
 
 AC_CHECK_FUNC([inet_ntop],, [AC_MSG_FAILURE([Required inet_ntop not found.])])
 AC_CHECK_FUNC([inet_pton],, [AC_MSG_FAILURE([Required inet_pton not found.])])
@@ -1631,6 +1644,7 @@ PHP_ADD_SOURCES([main], m4_normalize([
     php_content_types.c
     php_ini_builder.c
     php_ini.c
+    php_glob.c
     php_odbc_utils.c
     php_open_temporary_file.c
     php_scandir.c

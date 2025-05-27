@@ -83,7 +83,7 @@ void zend_startup_hrtime(void);
 static zend_always_inline zend_hrtime_t zend_hrtime(void)
 {
 #if ZEND_HRTIME_PLATFORM_WINDOWS
-	LARGE_INTEGER lt = {0};
+	LARGE_INTEGER lt = {{0}};
 	QueryPerformanceCounter(&lt);
 	return (zend_hrtime_t)((zend_hrtime_t)lt.QuadPart * zend_hrtime_timer_scale);
 #elif ZEND_HRTIME_PLATFORM_APPLE_GETTIME_NSEC

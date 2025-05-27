@@ -527,7 +527,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	switch (arg) {
 		case PARSE_GET:
 		case PARSE_STRING:
-			separator = PG(arg_separator).input;
+			separator = ZSTR_VAL(PG(arg_separator).input);
 			break;
 		case PARSE_COOKIE:
 			separator = ";\0";

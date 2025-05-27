@@ -42,9 +42,6 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 	zval cookie_array;
 	zval env_array;
 	zval server_array;
-#if 0
-	zval session_array;
-#endif
 	zend_long default_filter;
 	zend_long default_filter_flags;
 ZEND_END_MODULE_GLOBALS(filter)

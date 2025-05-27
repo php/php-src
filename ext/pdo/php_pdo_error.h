@@ -26,7 +26,8 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt);
 	memcpy(dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE)); \
 	if (dbh->query_stmt) { \
 		dbh->query_stmt = NULL; \
-		zval_ptr_dtor(&dbh->query_stmt_zval); \
+		OBJ_RELEASE(dbh->query_stmt_obj); \
+		dbh->query_stmt_obj = NULL; \
 	} \
 } while (0)
 #define PDO_STMT_CLEAR_ERR() do { \

@@ -2134,7 +2134,7 @@ static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is below the offset " ZEND_LONG_FMT, pos, intern->u.limit.offset);
 		return;
 	}
-	if (pos >= intern->u.limit.offset + intern->u.limit.count && intern->u.limit.count != -1) {
+	if (pos - intern->u.limit.offset >= intern->u.limit.count && intern->u.limit.count != -1) {
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is behind offset " ZEND_LONG_FMT " plus count " ZEND_LONG_FMT, pos, intern->u.limit.offset, intern->u.limit.count);
 		return;
 	}

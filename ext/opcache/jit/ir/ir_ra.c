@@ -1901,7 +1901,6 @@ int ir_coalesce(ir_ctx *ctx)
 	qsort(list, count, sizeof(ir_coalesce_block), ir_block_cmp);
 
 	while (count > 0) {
-		uint32_t i;
 
 		count--;
 		b = list[count].b;
@@ -1913,7 +1912,7 @@ int ir_coalesce(ir_ctx *ctx)
 		k = ir_phi_input_number(ctx, succ_bb, b);
 		use_list = &ctx->use_lists[succ_bb->start];
 		n = use_list->count;
-		for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
+		for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 			use = *p;
 			insn = &ctx->ir_base[use];
 			if (insn->op == IR_PHI) {
@@ -2061,7 +2060,7 @@ int ir_coalesce(ir_ctx *ctx)
 
 int ir_compute_dessa_moves(ir_ctx *ctx)
 {
-	uint32_t b, i, n;
+	uint32_t b, n;
 	ir_ref j, k, *p, use;
 	ir_block *bb;
 	ir_use_list *use_list;
@@ -2076,7 +2075,7 @@ int ir_compute_dessa_moves(ir_ctx *ctx)
 			if (n > 1) {
 				IR_ASSERT(k == ctx->ir_base[bb->start].inputs_count);
 				k++;
-				for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
+				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 					use = *p;
 					insn = &ctx->ir_base[use];
 					if (insn->op == IR_PHI) {
@@ -2136,7 +2135,7 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 	len = ir_bitset_len(ctx->vregs_count + 1);
 	todo = ir_bitset_malloc(ctx->vregs_count + 1);
 
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
+	for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 		ref = *p;
 		insn = &ctx->ir_base[ref];
 		if (insn->op == IR_PHI) {
@@ -2205,7 +2204,7 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 	ir_mem_free(loc);
 
 	if (have_constants_or_addresses) {
-		for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
+		for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 			ref = *p;
 			insn = &ctx->ir_base[ref];
 			if (insn->op == IR_PHI) {

@@ -49,6 +49,7 @@ typedef enum php_cli_mode {
 	PHP_CLI_MODE_REFLECTION_EXT_INFO = 11,
 	PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION = 12,
 	PHP_CLI_MODE_SHOW_INI_CONFIG = 13,
+	PHP_CLI_MODE_SHOW_INI_DIFF = 14,
 } php_cli_mode;
 
 typedef struct php_cli_server_context {

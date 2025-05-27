@@ -15,6 +15,7 @@
 */
 
 #include "zend_modules.h"
+#include "zend_types.h"
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -48,6 +49,7 @@ ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
+static zend_class_entry *zend_test_gen_stub_flag_compatibility_test;
 static zend_class_entry *zend_attribute_test_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
@@ -123,6 +125,20 @@ static ZEND_FUNCTION(zend_test_deprecated_attr)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+static ZEND_FUNCTION(zend_test_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
+static ZEND_FUNCTION(zend_test_deprecated_nodiscard)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(1);
+}
+
 /* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
@@ -180,6 +196,19 @@ static ZEND_FUNCTION(zend_leak_variable)
 	}
 
 	Z_ADDREF_P(zv);
+}
+
+static ZEND_FUNCTION(zend_delref)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	Z_TRY_DELREF_P(zv);
+
+	RETURN_NULL();
 }
 
 /* Tests Z_PARAM_OBJ_OR_STR */
@@ -243,7 +272,7 @@ static ZEND_FUNCTION(zend_test_compile_string)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(source_string)
-		Z_PARAM_STR(filename)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_LONG(position)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -697,6 +726,15 @@ void * zend_test_custom_realloc(void * ptr, size_t len ZEND_FILE_LINE_DC ZEND_FI
 	return _zend_mm_realloc(ZT_G(zend_orig_heap), ptr, len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
+static void zend_test_reset_heap(zend_zend_test_globals *zend_test_globals)
+{
+	if (zend_test_globals->zend_test_heap) {
+		free(zend_test_globals->zend_test_heap);
+		zend_test_globals->zend_test_heap = NULL;
+		zend_mm_set_heap(zend_test_globals->zend_orig_heap);
+	}
+}
+
 static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 {
 	if (new_value == NULL) {
@@ -718,10 +756,8 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 		);
 		ZT_G(zend_orig_heap) = zend_mm_get_heap();
 		zend_mm_set_heap(ZT_G(zend_test_heap));
-	} else if (ZT_G(zend_test_heap))  {
-		free(ZT_G(zend_test_heap));
-		ZT_G(zend_test_heap) = NULL;
-		zend_mm_set_heap(ZT_G(zend_orig_heap));
+	} else {
+		zend_test_reset_heap(ZEND_MODULE_GLOBALS_BULK(zend_test));
 	}
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
@@ -1258,6 +1294,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
 
+	zend_test_gen_stub_flag_compatibility_test = register_class_ZendTestGenStubFlagCompatibilityTest();
+
 	zend_attribute_test_class = register_class_ZendAttributeTest();
 
 	zend_test_trait = register_class__ZendTestTrait();
@@ -1387,6 +1425,7 @@ static PHP_GINIT_FUNCTION(zend_test)
 static PHP_GSHUTDOWN_FUNCTION(zend_test)
 {
 	zend_test_observer_gshutdown(zend_test_globals);
+	zend_test_reset_heap(zend_test_globals);
 }
 
 PHP_MINFO_FUNCTION(zend_test)
@@ -1554,4 +1593,23 @@ static PHP_FUNCTION(zend_test_create_throwing_resource)
 	ZEND_PARSE_PARAMETERS_NONE();
 	zend_resource *res = zend_register_resource(NULL, le_throwing_resource);
 	ZVAL_RES(return_value, res);
+}
+
+static PHP_FUNCTION(zend_test_compile_to_ast)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_arena *ast_arena;
+	zend_ast *ast = zend_compile_string_to_ast(str, &ast_arena, ZSTR_EMPTY_ALLOC());
+	
+	zend_string *result = zend_ast_export("", ast, "");
+
+	zend_ast_destroy(ast);
+	zend_arena_destroy(ast_arena);
+
+	RETVAL_STR(result);
 }

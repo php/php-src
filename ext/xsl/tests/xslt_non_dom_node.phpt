@@ -28,4 +28,4 @@ try {
 }
 ?>
 --EXPECT--
-Only objects that are instances of DOMNode can be converted to an XPath expression
+Only objects that are instances of DOM nodes can be converted to an XPath expression

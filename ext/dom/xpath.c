@@ -499,14 +499,14 @@ PHP_METHOD(DOMXPath, quote) {
 		memcpy(ZSTR_VAL(output) + 1, input, input_len);
 		ZSTR_VAL(output)[input_len + 1] = '\'';
 		ZSTR_VAL(output)[input_len + 2] = '\0';
-		RETURN_STR(output);
+		RETURN_NEW_STR(output);
 	} else if (memchr(input, '"', input_len) == NULL) {
 		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
 		ZSTR_VAL(output)[0] = '"';
 		memcpy(ZSTR_VAL(output) + 1, input, input_len);
 		ZSTR_VAL(output)[input_len + 1] = '"';
 		ZSTR_VAL(output)[input_len + 2] = '\0';
-		RETURN_STR(output);
+		RETURN_NEW_STR(output);
 	} else {
 		smart_str output = {0};
 		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
@@ -527,8 +527,8 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendc(&output, ',');
 		}
 		ZEND_ASSERT(ptr == end);
-		ZSTR_VAL(output.s)[output.s->len - 1] = ')';
-		RETURN_STR(smart_str_extract(&output));
+		ZSTR_VAL(output.s)[ZSTR_LEN(output.s) - 1] = ')';
+		RETURN_NEW_STR(smart_str_extract(&output));
 	}
 }
 /* }}} */

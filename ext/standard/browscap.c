@@ -291,10 +291,7 @@ static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *e
 
 	if (entry->parent) {
 		ZVAL_STR_COPY(&tmp, entry->parent);
-		key = ZSTR_INIT_LITERAL("parent", 0);
-		ZSTR_H(key) = zend_inline_hash_func("parent", sizeof("parent")-1);
-		zend_hash_add_new(ht, key, &tmp);
-		zend_string_release_ex(key, false);
+		zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_PARENT), &tmp);
 	}
 
 	browscap_entry_add_kv_to_existing_array(bdata, entry, ht);
@@ -333,7 +330,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					new_value = browscap_intern_str(ctx, Z_STR_P(arg2), persistent);
 				}
 
-				if (zend_string_equals_literal_ci(Z_STR_P(arg1), "parent")) {
+				if (zend_string_equals_ci(Z_STR_P(arg1), ZSTR_KNOWN(ZEND_STR_PARENT))) {
 					/* parent entry cannot be same as current section -> causes infinite loop! */
 					if (ctx->current_section_name != NULL &&
 						zend_string_equals_ci(ctx->current_section_name, Z_STR_P(arg2))

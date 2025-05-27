@@ -198,10 +198,10 @@ getValue(): string(5) "value"
 ## Property [ public static $static = 'static' ]
 
 skipInitializerForProperty():
-ReflectionException: Can not use skipLazyInitialization on static property B::$static
+ReflectionException: Can not use skipLazyInitialization on static property A::$static
 
 setRawValueWithoutLazyInitialization():
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on static property B::$static
+ReflectionException: Can not use setRawValueWithoutLazyInitialization on static property A::$static
 
 ## Property [ public $noDefault = NULL ]
 
@@ -238,10 +238,10 @@ getValue(): string(5) "value"
 ## Property [ public $virtual ]
 
 skipInitializerForProperty():
-ReflectionException: Can not use skipLazyInitialization on virtual property B::$virtual
+ReflectionException: Can not use skipLazyInitialization on virtual property A::$virtual
 
 setRawValueWithoutLazyInitialization():
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on virtual property B::$virtual
+ReflectionException: Can not use setRawValueWithoutLazyInitialization on virtual property A::$virtual
 
 ## Property [ $dynamicProp ]
 
@@ -295,10 +295,10 @@ getValue(): string(5) "value"
 ## Property [ public static $static = 'static' ]
 
 skipInitializerForProperty():
-ReflectionException: Can not use skipLazyInitialization on static property B::$static
+ReflectionException: Can not use skipLazyInitialization on static property A::$static
 
 setRawValueWithoutLazyInitialization():
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on static property B::$static
+ReflectionException: Can not use setRawValueWithoutLazyInitialization on static property A::$static
 
 ## Property [ public $noDefault = NULL ]
 
@@ -335,10 +335,10 @@ getValue(): string(5) "value"
 ## Property [ public $virtual ]
 
 skipInitializerForProperty():
-ReflectionException: Can not use skipLazyInitialization on virtual property B::$virtual
+ReflectionException: Can not use skipLazyInitialization on virtual property A::$virtual
 
 setRawValueWithoutLazyInitialization():
-ReflectionException: Can not use setRawValueWithoutLazyInitialization on virtual property B::$virtual
+ReflectionException: Can not use setRawValueWithoutLazyInitialization on virtual property A::$virtual
 
 ## Property [ $dynamicProp ]
 

@@ -60,6 +60,7 @@ struct _zend_ini_entry {
 	uint8_t orig_modifiable;
 	uint8_t modified;
 
+	const zend_ini_entry_def *def;
 };
 
 BEGIN_EXTERN_C()

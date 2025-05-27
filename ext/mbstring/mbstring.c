@@ -65,14 +65,7 @@
 
 #include "rare_cp_bitvec.h"
 
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif
-
-#ifdef __SSE3__
-#include <immintrin.h>
-#include <pmmintrin.h>
-#endif
+#include "zend_simd.h"
 
 /* }}} */
 
@@ -390,7 +383,8 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 	size_t n = 0;
 	zval *hash_entry;
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-		zend_string *encoding_str = zval_try_get_string(hash_entry);
+		zend_string *tmp_encoding_str;
+		zend_string *encoding_str = zval_try_get_tmp_string(hash_entry, &tmp_encoding_str);
 		if (UNEXPECTED(!encoding_str)) {
 			efree(ZEND_VOIDP(list));
 			return FAILURE;
@@ -415,12 +409,12 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 				n++;
 			} else {
 				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
-				zend_string_release(encoding_str);
+				zend_tmp_string_release(tmp_encoding_str);
 				efree(ZEND_VOIDP(list));
 				return FAILURE;
 			}
 		}
-		zend_string_release(encoding_str);
+		zend_tmp_string_release(tmp_encoding_str);
 	} ZEND_HASH_FOREACH_END();
 	*return_list = list;
 	*return_size = n;
@@ -1536,7 +1530,7 @@ PHP_FUNCTION(mb_parse_str)
 	encstr = estrndup(encstr, encstr_len);
 
 	info.data_type              = PARSE_STRING;
-	info.separator              = PG(arg_separator).input;
+	info.separator              = ZSTR_VAL(PG(arg_separator).input);
 	info.report_errors          = true;
 	info.to_encoding            = MBSTRG(current_internal_encoding);
 	info.from_encodings         = MBSTRG(http_input_list);
@@ -1572,7 +1566,9 @@ PHP_FUNCTION(mb_output_handler)
 		char *mimetype = NULL;
 
 		/* Analyze mime type */
-		if (SG(sapi_headers).mimetype && _php_mb_match_regex(MBSTRG(http_output_conv_mimetypes), SG(sapi_headers).mimetype, strlen(SG(sapi_headers).mimetype))) {
+		if (SG(sapi_headers).mimetype
+		 && MBSTRG(http_output_conv_mimetypes)
+		 && _php_mb_match_regex(MBSTRG(http_output_conv_mimetypes), SG(sapi_headers).mimetype, strlen(SG(sapi_headers).mimetype))) {
 			char *s;
 			if ((s = strchr(SG(sapi_headers).mimetype, ';')) == NULL) {
 				mimetype = estrdup(SG(sapi_headers).mimetype);
@@ -1746,7 +1742,7 @@ PHP_FUNCTION(mb_str_split)
 	}
 }
 
-#ifdef __SSE2__
+#ifdef XSSE2
 /* Thanks to StackOverflow user 'Paul R' (https://stackoverflow.com/users/253056/paul-r)
  * From: https://stackoverflow.com/questions/36998538/fastest-way-to-horizontally-sum-sse-unsigned-byte-vector
  * Takes a 128-bit XMM register, treats each byte as an 8-bit integer, and sums up all
@@ -1777,7 +1773,7 @@ static size_t mb_fast_strlen_utf8(unsigned char *p, size_t len)
 {
 	unsigned char *e = p + len;
 
-#ifdef __SSE2__
+#ifdef XSSE2
 	if (len >= sizeof(__m128i)) {
 		e -= sizeof(__m128i);
 
@@ -3348,7 +3344,8 @@ try_next_encoding:;
 	}
 
 	for (size_t i = 0; i < length; i++) {
-		array[i].demerits = (uint64_t) (array[i].demerits * array[i].multiplier);
+		double demerits = array[i].demerits * (double) array[i].multiplier;
+		array[i].demerits = demerits < (double) UINT64_MAX ? (uint64_t) demerits : UINT64_MAX;
 	}
 
 	return length;
@@ -4915,7 +4912,7 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 static bool mb_fast_check_utf8_default(zend_string *str)
 {
 	unsigned char *p = (unsigned char*)ZSTR_VAL(str);
-# ifdef __SSE2__
+# ifdef XSSE2
 	/* `e` points 1 byte past the last full 16-byte block of string content
 	 * Note that we include the terminating null byte which is included in each zend_string
 	 * as part of the content to check; this ensures that multi-byte characters which are

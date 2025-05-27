@@ -38,7 +38,7 @@ PHP_METHOD(com, __construct)
 	OLECHAR *moniker;
 	CLSID clsid;
 	CLSCTX ctx = CLSCTX_SERVER;
-	HRESULT res = E_FAIL;
+	HRESULT res = E_FAIL, res2;
 	ITypeLib *TL = NULL;
 	COSERVERINFO	info;
 	COAUTHIDENTITY	authid = {0};
@@ -142,7 +142,7 @@ PHP_METHOD(com, __construct)
 		}
 	}
 
-	if (FAILED(CLSIDFromString(moniker, &clsid))) {
+	if (FAILED(res2 = CLSIDFromString(moniker, &clsid))) {
 		/* try to use it as a moniker */
 		IBindCtx *pBindCtx = NULL;
 		IMoniker *pMoniker = NULL;
@@ -181,6 +181,9 @@ PHP_METHOD(com, __construct)
 		}
 		if (pBindCtx) {
 			IBindCtx_Release(pBindCtx);
+		}
+		if (FAILED(res) && res2 == CO_E_CLASSSTRING && !wcspbrk(moniker, L"\\:")) {
+			res = res2;
 		}
 	} else if (server_name) {
 		MULTI_QI		qi;

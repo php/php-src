@@ -249,6 +249,8 @@ static const sljit_u8 freg_map[SLJIT_NUMBER_OF_FLOAT_REGISTERS + 4] = {
 #define LDL		(HI(26))
 #define LDR		(HI(27))
 #define LDC1		(HI(53))
+#define LL		(HI(48))
+#define LLD		(HI(52))
 #define LUI		(HI(15))
 #define LW		(HI(35))
 #define LWL		(HI(34))
@@ -288,6 +290,8 @@ static const sljit_u8 freg_map[SLJIT_NUMBER_OF_FLOAT_REGISTERS + 4] = {
 #define ROTR		(HI(0) | (1 << 21) | LO(2))
 #define ROTRV		(HI(0) | (1 << 6) | LO(6))
 #endif /* SLJIT_MIPS_REV >= 2 */
+#define SC		(HI(56))
+#define SCD		(HI(60))
 #define SD		(HI(63))
 #define SDL		(HI(44))
 #define SDR		(HI(45))
@@ -308,6 +312,7 @@ static const sljit_u8 freg_map[SLJIT_NUMBER_OF_FLOAT_REGISTERS + 4] = {
 #define SWL		(HI(42))
 #define SWR		(HI(46))
 #define SWC1		(HI(57))
+#define SYNC		(HI(0) | LO(15))
 #define TRUNC_W_S	(HI(17) | FMT_S | LO(13))
 #if defined(SLJIT_MIPS_REV) && SLJIT_MIPS_REV >= 2
 #define WSBH		(HI(31) | (2 << 6) | LO(32))
@@ -381,9 +386,19 @@ static sljit_s32 function_check_is_freg(struct sljit_compiler *compiler, sljit_s
 	if (is_32 && fr >= SLJIT_F64_SECOND(SLJIT_FR0))
 		fr -= SLJIT_F64_SECOND(0);
 
-	return (fr >= SLJIT_FR0 && fr < (SLJIT_FR0 + compiler->fscratches))
-		|| (fr > (SLJIT_FS0 - compiler->fsaveds) && fr <= SLJIT_FS0)
+	return (fr >= SLJIT_FR0 && fr < (SLJIT_FR0 + compiler->real_fscratches))
+		|| (fr > (SLJIT_FS0 - compiler->real_fsaveds) && fr <= SLJIT_FS0)
 		|| (fr >= SLJIT_TMP_FREGISTER_BASE && fr < (SLJIT_TMP_FREGISTER_BASE + SLJIT_NUMBER_OF_TEMPORARY_FLOAT_REGISTERS));
+}
+
+static sljit_s32 function_check_is_vreg(struct sljit_compiler *compiler, sljit_s32 vr, sljit_s32 type)
+{
+	SLJIT_UNUSED_ARG(compiler);
+	SLJIT_UNUSED_ARG(vr);
+	SLJIT_UNUSED_ARG(type);
+
+	/* SIMD is not supported. */
+	return 0;
 }
 
 #endif /* SLJIT_CONFIG_MIPS_32 && SLJIT_ARGUMENT_CHECKS */
@@ -857,6 +872,8 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
 	case SLJIT_HAS_CLZ:
 	case SLJIT_HAS_CMOV:
 	case SLJIT_HAS_PREFETCH:
+	case SLJIT_HAS_ATOMIC:
+	case SLJIT_HAS_MEMORY_BARRIER:
 		return 1;
 
 	case SLJIT_HAS_CTZ:
@@ -928,17 +945,22 @@ static sljit_s32 emit_stack_frame_release(struct sljit_compiler *compiler, sljit
 #endif
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compiler,
-	sljit_s32 options, sljit_s32 arg_types, sljit_s32 scratches, sljit_s32 saveds,
-	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
+	sljit_s32 options, sljit_s32 arg_types,
+	sljit_s32 scratches, sljit_s32 saveds, sljit_s32 local_size)
 {
+	sljit_s32 fscratches = ENTER_GET_FLOAT_REGS(scratches);
+	sljit_s32 fsaveds = ENTER_GET_FLOAT_REGS(saveds);
 	sljit_ins base;
 	sljit_s32 i, tmp, offset;
 	sljit_s32 arg_count, word_arg_count, float_arg_count;
 	sljit_s32 saved_arg_count = SLJIT_KEPT_SAVEDS_COUNT(options);
 
 	CHECK_ERROR();
-	CHECK(check_sljit_emit_enter(compiler, options, arg_types, scratches, saveds, fscratches, fsaveds, local_size));
-	set_emit_enter(compiler, options, arg_types, scratches, saveds, fscratches, fsaveds, local_size);
+	CHECK(check_sljit_emit_enter(compiler, options, arg_types, scratches, saveds, local_size));
+	set_emit_enter(compiler, options, arg_types, scratches, saveds, local_size);
+
+	scratches = ENTER_GET_REGS(scratches);
+	saveds = ENTER_GET_REGS(saveds);
 
 	local_size += GET_SAVED_REGISTERS_SIZE(scratches, saveds - saved_arg_count, 1);
 #if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
@@ -1138,12 +1160,18 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_set_context(struct sljit_compiler *compiler,
-	sljit_s32 options, sljit_s32 arg_types, sljit_s32 scratches, sljit_s32 saveds,
-	sljit_s32 fscratches, sljit_s32 fsaveds, sljit_s32 local_size)
+	sljit_s32 options, sljit_s32 arg_types,
+	sljit_s32 scratches, sljit_s32 saveds, sljit_s32 local_size)
 {
+	sljit_s32 fscratches = ENTER_GET_FLOAT_REGS(scratches);
+	sljit_s32 fsaveds = ENTER_GET_FLOAT_REGS(saveds);
+
 	CHECK_ERROR();
-	CHECK(check_sljit_set_context(compiler, options, arg_types, scratches, saveds, fscratches, fsaveds, local_size));
-	set_set_context(compiler, options, arg_types, scratches, saveds, fscratches, fsaveds, local_size);
+	CHECK(check_sljit_set_context(compiler, options, arg_types, scratches, saveds, local_size));
+	set_emit_enter(compiler, options, arg_types, scratches, saveds, local_size);
+
+	scratches = ENTER_GET_REGS(scratches);
+	saveds = ENTER_GET_REGS(saveds);
 
 	local_size += GET_SAVED_REGISTERS_SIZE(scratches, saveds - SLJIT_KEPT_SAVEDS_COUNT(options), 1);
 #if (defined SLJIT_CONFIG_MIPS_32 && SLJIT_CONFIG_MIPS_32)
@@ -2462,6 +2490,12 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op0(struct sljit_compiler *compile
 		FAIL_IF(push_inst(compiler, MFLO | D(SLJIT_R0), DR(SLJIT_R0)));
 		return (op >= SLJIT_DIV_UW) ? SLJIT_SUCCESS : push_inst(compiler, MFHI | D(SLJIT_R1), DR(SLJIT_R1));
 #endif /* SLJIT_MIPS_REV >= 6 */
+	case SLJIT_MEMORY_BARRIER:
+#if (defined SLJIT_MIPS_REV && SLJIT_MIPS_REV >= 1)
+		return push_inst(compiler, SYNC, UNMOVABLE_INS);
+#else /* SLJIT_MIPS_REV < 1 */
+		return SLJIT_ERR_UNSUPPORTED;
+#endif /* SLJIT_MIPS_REV >= 1 */
 	case SLJIT_ENDBR:
 	case SLJIT_SKIP_FRAMES_BEFORE_RETURN:
 		return SLJIT_SUCCESS;
@@ -3312,6 +3346,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 	case SLJIT_SIG_GREATER:
 	case SLJIT_OVERFLOW:
 	case SLJIT_CARRY:
+	case SLJIT_ATOMIC_STORED:
 		BR_Z(OTHER_FLAG);
 		break;
 	case SLJIT_GREATER_EQUAL:
@@ -3320,6 +3355,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 	case SLJIT_SIG_LESS_EQUAL:
 	case SLJIT_NOT_OVERFLOW:
 	case SLJIT_NOT_CARRY:
+	case SLJIT_ATOMIC_NOT_STORED:
 		BR_NZ(OTHER_FLAG);
 		break;
 	case SLJIT_F_NOT_EQUAL:
@@ -4208,6 +4244,80 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fmem(struct sljit_compiler *compil
 #undef MEM_CHECK_UNALIGNED
 
 #undef TO_ARGW_HI
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_atomic_load(struct sljit_compiler *compiler, sljit_s32 op,
+	sljit_s32 dst_reg,
+	sljit_s32 mem_reg)
+{
+	sljit_ins ins;
+
+	CHECK_ERROR();
+	CHECK(check_sljit_emit_atomic_load(compiler, op, dst_reg, mem_reg));
+
+	if (op & SLJIT_ATOMIC_USE_CAS)
+		return SLJIT_ERR_UNSUPPORTED;
+
+	switch (GET_OPCODE(op)) {
+	case SLJIT_MOV:
+	case SLJIT_MOV_P:
+#if (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+		ins = LLD;
+		break;
+#endif /* SLJIT_CONFIG_MIPS_64 */
+	case SLJIT_MOV_S32:
+	case SLJIT_MOV32:
+		ins = LL;
+		break;
+
+	default:
+		return SLJIT_ERR_UNSUPPORTED;
+	}
+
+	if (op & SLJIT_ATOMIC_TEST)
+		return SLJIT_SUCCESS;
+
+	return push_inst(compiler, ins | T(dst_reg) | S(mem_reg), DR(dst_reg));
+}
+
+SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_atomic_store(struct sljit_compiler *compiler, sljit_s32 op,
+	sljit_s32 src_reg,
+	sljit_s32 mem_reg,
+	sljit_s32 temp_reg)
+{
+	sljit_ins ins;
+
+	/* temp_reg == mem_reg is undefined so use another temp register */
+	SLJIT_UNUSED_ARG(temp_reg);
+
+	CHECK_ERROR();
+	CHECK(check_sljit_emit_atomic_store(compiler, op, src_reg, mem_reg, temp_reg));
+
+	if (op & SLJIT_ATOMIC_USE_CAS)
+		return SLJIT_ERR_UNSUPPORTED;
+
+	switch (GET_OPCODE(op)) {
+	case SLJIT_MOV:
+	case SLJIT_MOV_P:
+#if (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
+		ins = SCD;
+		break;
+#endif /* SLJIT_CONFIG_RISCV_64 */
+	case SLJIT_MOV_S32:
+	case SLJIT_MOV32:
+		op |= SLJIT_32;
+		ins = SC;
+		break;
+
+	default:
+		return SLJIT_ERR_UNSUPPORTED;
+	}
+
+	if (op & SLJIT_ATOMIC_TEST)
+		return SLJIT_SUCCESS;
+
+	FAIL_IF(push_inst(compiler, SELECT_OP(DADDU, ADDU) | S(src_reg) | TA(0) | DA(OTHER_FLAG), OTHER_FLAG));
+	return push_inst(compiler, ins | TA(OTHER_FLAG) | S(mem_reg), OTHER_FLAG);
+}
 
 SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compiler *compiler, sljit_s32 dst, sljit_sw dstw, sljit_sw init_value)
 {

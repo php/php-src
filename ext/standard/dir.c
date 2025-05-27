@@ -59,39 +59,6 @@ static zend_function *dir_class_get_constructor(zend_object *object)
 	return NULL;
 }
 
-#define FETCH_DIRP() \
-	myself = getThis(); \
-	if (!myself) { \
-		ZEND_PARSE_PARAMETERS_START(0, 1) \
-			Z_PARAM_OPTIONAL \
-			Z_PARAM_RESOURCE_OR_NULL(id) \
-		ZEND_PARSE_PARAMETERS_END(); \
-		if (id) { \
-			if ((dirp = (php_stream *)zend_fetch_resource(Z_RES_P(id), "Directory", php_file_le_stream())) == NULL) { \
-				RETURN_THROWS(); \
-			} \
-		} else { \
-			if (!DIRG(default_dir)) { \
-				zend_type_error("No resource supplied"); \
-				RETURN_THROWS(); \
-			} \
-			if ((dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
-				RETURN_THROWS(); \
-			} \
-		} \
-	} else { \
-		ZEND_PARSE_PARAMETERS_NONE(); \
-		zval *handle_zv = Z_DIRECTORY_HANDLE_P(myself); \
-		if (Z_TYPE_P(handle_zv) != IS_RESOURCE) { \
-			zend_throw_error(NULL, "Unable to find my handle property"); \
-			RETURN_THROWS(); \
-		} \
-		if ((dirp = (php_stream *)zend_fetch_resource_ex(handle_zv, "Directory", php_file_le_stream())) == NULL) { \
-			RETURN_THROWS(); \
-		} \
-	}
-
-
 static void php_set_default_dir(zend_resource *res)
 {
 	if (DIRG(default_dir)) {
@@ -189,28 +156,158 @@ PHP_FUNCTION(dir)
 }
 /* }}} */
 
+
+static php_stream* php_dir_get_directory_stream_from_user_arg(php_stream *dir_stream)
+{
+	if (dir_stream == NULL) {
+		if (UNEXPECTED(DIRG(default_dir) == NULL)) {
+			zend_type_error("No resource supplied");
+			return NULL;
+		}
+		zend_resource *res = DIRG(default_dir);
+		ZEND_ASSERT(res->type == php_file_le_stream());
+		dir_stream = (php_stream*) res->ptr;
+	}
+
+	if (UNEXPECTED((dir_stream->flags & PHP_STREAM_FLAG_IS_DIR)) == 0) {
+		zend_argument_type_error(1, "must be a valid Directory resource");
+		return NULL;
+	}
+	return dir_stream;
+}
+
+static php_stream* php_dir_get_directory_stream_from_this(zval *this_z)
+{
+	zval *handle_zv = Z_DIRECTORY_HANDLE_P(this_z);
+	if (UNEXPECTED(Z_TYPE_P(handle_zv) != IS_RESOURCE)) {
+		zend_throw_error(NULL, "Internal directory stream has been altered");
+		return NULL;
+	}
+	zend_resource *res = Z_RES_P(handle_zv);
+	/* Assume the close() method was called
+	 * (instead of the hacky case where a different resource would have been set via the ArrayObject "hack") */
+	if (UNEXPECTED(res->type != php_file_le_stream())) {
+		/* TypeError is used for BC, TODO: Use base Error in PHP 9 */
+		zend_type_error("Directory::%s(): cannot use Directory resource after it has been closed", get_active_function_name());
+		return NULL;
+	}
+	php_stream *dir_stream = (php_stream*) res->ptr;
+	if (UNEXPECTED((dir_stream->flags & PHP_STREAM_FLAG_IS_DIR)) == 0) {
+		zend_throw_error(NULL, "Internal directory stream has been altered");
+		return NULL;
+	}
+	return dir_stream;
+}
+
 /* {{{ Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
-	zval *id = NULL, *myself;
-	php_stream *dirp;
-	zend_resource *res;
+	php_stream *dirp = NULL;
 
-	FETCH_DIRP();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_argument_type_error(1, "must be a valid Directory resource");
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
+	if (UNEXPECTED(dirp == NULL)) {
 		RETURN_THROWS();
 	}
-
-	res = dirp->res;
-	zend_list_close(dirp->res);
+	zend_resource *res = dirp->res;
+	zend_list_close(res);
 
 	if (res == DIRG(default_dir)) {
 		php_set_default_dir(NULL);
 	}
 }
 /* }}} */
+
+PHP_METHOD(Directory, close)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_stream *dirp = php_dir_get_directory_stream_from_this(ZEND_THIS);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	zend_resource *res = dirp->res;
+	zend_list_close(res);
+
+	if (res == DIRG(default_dir)) {
+		php_set_default_dir(NULL);
+	}
+}
+
+/* {{{ Rewind dir_handle back to the start */
+PHP_FUNCTION(rewinddir)
+{
+	php_stream *dirp = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	php_stream_rewinddir(dirp);
+}
+/* }}} */
+
+PHP_METHOD(Directory, rewind)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_stream *dirp = php_dir_get_directory_stream_from_this(ZEND_THIS);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	php_stream_rewinddir(dirp);
+}
+
+/* {{{ Read directory entry from dir_handle */
+PHP_FUNCTION(readdir)
+{
+	php_stream *dirp = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		PHP_Z_PARAM_STREAM_OR_NULL(dirp)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dirp = php_dir_get_directory_stream_from_user_arg(dirp);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	php_stream_dirent entry;
+	if (php_stream_readdir(dirp, &entry)) {
+		RETURN_STRING(entry.d_name);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+PHP_METHOD(Directory, read)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_stream *dirp = php_dir_get_directory_stream_from_this(ZEND_THIS);
+	if (UNEXPECTED(dirp == NULL)) {
+		RETURN_THROWS();
+	}
+
+	php_stream_dirent entry;
+	if (php_stream_readdir(dirp, &entry)) {
+		RETURN_STRING(entry.d_name);
+	}
+	RETURN_FALSE;
+}
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 /* {{{ Change root directory */
@@ -300,45 +397,6 @@ PHP_FUNCTION(getcwd)
 }
 /* }}} */
 
-/* {{{ Rewind dir_handle back to the start */
-PHP_FUNCTION(rewinddir)
-{
-	zval *id = NULL, *myself;
-	php_stream *dirp;
-
-	FETCH_DIRP();
-
-	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_argument_type_error(1, "must be a valid Directory resource");
-		RETURN_THROWS();
-	}
-
-	php_stream_rewinddir(dirp);
-}
-/* }}} */
-
-/* {{{ Read directory entry from dir_handle */
-PHP_FUNCTION(readdir)
-{
-	zval *id = NULL, *myself;
-	php_stream *dirp;
-	php_stream_dirent entry;
-
-	FETCH_DIRP();
-
-	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_argument_type_error(1, "must be a valid Directory resource");
-		RETURN_THROWS();
-	}
-
-	if (php_stream_readdir(dirp, &entry)) {
-		RETURN_STRINGL(entry.d_name, strlen(entry.d_name));
-	}
-	RETURN_FALSE;
-}
-/* }}} */
-
-#ifdef HAVE_GLOB
 /* {{{ Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
@@ -351,7 +409,7 @@ PHP_FUNCTION(glob)
 	char *pattern = NULL;
 	size_t pattern_len;
 	zend_long flags = 0;
-	glob_t globbuf;
+	php_glob_t globbuf;
 	size_t n;
 	int ret;
 	bool basedir_limit = 0;
@@ -368,7 +426,7 @@ PHP_FUNCTION(glob)
 		RETURN_FALSE;
 	}
 
-	if ((GLOB_AVAILABLE_FLAGS & flags) != flags) {
+	if ((PHP_GLOB_AVAILABLE_FLAGS & flags) != flags) {
 		php_error_docref(NULL, E_WARNING, "At least one of the passed flags is invalid or not supported on this platform");
 		RETURN_FALSE;
 	}
@@ -392,14 +450,14 @@ PHP_FUNCTION(glob)
 #endif
 
 
-	memset(&globbuf, 0, sizeof(glob_t));
+	memset(&globbuf, 0, sizeof(globbuf));
 	globbuf.gl_offs = 0;
-	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
-#ifdef GLOB_NOMATCH
-		if (GLOB_NOMATCH == ret) {
+	if (0 != (ret = php_glob(pattern, flags & PHP_GLOB_FLAGMASK, NULL, &globbuf))) {
+#ifdef PHP_GLOB_NOMATCH
+		if (PHP_GLOB_NOMATCH == ret) {
 			/* Some glob implementation simply return no data if no matches
-			   were found, others return the GLOB_NOMATCH error code.
-			   We don't want to treat GLOB_NOMATCH as an error condition
+			   were found, others return the PHP_GLOB_NOMATCH error code.
+			   We don't want to treat PHP_GLOB_NOMATCH as an error condition
 			   so that PHP glob() behaves the same on both types of
 			   implementations and so that 'foreach (glob() as ...'
 			   can be used for simple glob() calls without further error
@@ -413,7 +471,7 @@ PHP_FUNCTION(glob)
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
-#ifdef GLOB_NOMATCH
+#ifdef PHP_GLOB_NOMATCH
 no_results:
 #endif
 		array_init(return_value);
@@ -428,7 +486,7 @@ no_results:
 				continue;
 			}
 		}
-		/* we need to do this every time since GLOB_ONLYDIR does not guarantee that
+		/* we need to do this every time since PHP_GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
 		 * following:
 		 * If the information about the type of the file is easily available
@@ -436,7 +494,7 @@ no_results:
 		 * determine the information for each file. I.e., the caller must still be
 		 * able to filter directories out.
 		 */
-		if (flags & GLOB_ONLYDIR) {
+		if (flags & PHP_GLOB_ONLYDIR) {
 			zend_stat_t s = {0};
 
 			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
@@ -451,7 +509,7 @@ no_results:
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	}
 
-	globfree(&globbuf);
+	php_globfree(&globbuf);
 
 	if (basedir_limit && !zend_hash_num_elements(Z_ARRVAL_P(return_value))) {
 		zend_array_destroy(Z_ARR_P(return_value));
@@ -459,7 +517,6 @@ no_results:
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ List files & directories inside the specified path */
 PHP_FUNCTION(scandir)

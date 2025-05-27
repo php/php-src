@@ -19,7 +19,7 @@ class test_wrapper extends test_wrapper_base {
 }
 function test($name, $fd, $mode) {
     echo "------ $name: -------\n";
-    flock($fd, $mode);
+    (void)flock($fd, $mode);
     $data = stream_get_meta_data($fd);
     var_dump($data['wrapper_data']->mode === $mode);
 }

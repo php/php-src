@@ -2088,8 +2088,8 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 		return;
 	}
 
-	if (zend_string_equals_literal_ci(type_name, "self")
-			|| zend_string_equals_literal_ci(type_name, "parent")) {
+	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_SELF))
+			|| zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return;
 	}
 

@@ -1,5 +1,5 @@
 --TEST--
-using multiple access modifiers (attributes)
+using multiple access modifiers (properties)
 --FILE--
 <?php
 
