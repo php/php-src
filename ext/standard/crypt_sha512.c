@@ -349,8 +349,14 @@ static const char sha512_rounds_prefix[] = "rounds=";
 /* Maximum number of rounds.  */
 #define ROUNDS_MAX 999999999
 
+#if __has_attribute(nonstring)
+# define ZEND_NONSTRING __attribute__((nonstring))
+#else
+# define ZEND_NONSTRING
+#endif
+
 /* Table with characters for base64 transformation.  */
-static const char b64t[64] =
+static const char b64t[64] ZEND_NONSTRING =
 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 
