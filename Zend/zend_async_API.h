@@ -777,8 +777,8 @@ typedef struct {
 	unsigned int active_event_count;
 	/* The current coroutine context. */
 	zend_coroutine_t *coroutine;
-	/* The current async scope. */
-	zend_async_scope_t *scope;
+	/* The main async scope. */
+	zend_async_scope_t *main_scope;
 	/* Scheduler coroutine */
 	zend_coroutine_t *scheduler;
 	/* Exit exception object */
@@ -813,7 +813,8 @@ END_EXTERN_C()
 #define ZEND_ASYNC_GRACEFUL_SHUTDOWN ZEND_ASYNC_G(graceful_shutdown)
 #define ZEND_ASYNC_EXIT_EXCEPTION ZEND_ASYNC_G(exit_exception)
 #define ZEND_ASYNC_CURRENT_COROUTINE ZEND_ASYNC_G(coroutine)
-#define ZEND_ASYNC_CURRENT_SCOPE ZEND_ASYNC_G(coroutine)->scope
+#define ZEND_ASYNC_CURRENT_SCOPE (ZEND_ASYNC_G(coroutine) ? ZEND_ASYNC_G(coroutine)->scope : NULL)
+#define ZEND_ASYNC_MAIN_SCOPE ZEND_ASYNC_G(main_scope)
 #define ZEND_ASYNC_SCHEDULER ZEND_ASYNC_G(scheduler)
 
 #define ZEND_ASYNC_INCREASE_EVENT_COUNT  if (ZEND_ASYNC_G(active_event_count) < UINT_MAX) { \
