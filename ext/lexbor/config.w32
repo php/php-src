@@ -3,7 +3,7 @@
 EXTENSION("lexbor", "php_lexbor.c", false, "/I " + configure_module_dirname + " /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 PHP_LEXBOR="yes";
 ADD_SOURCES("ext/lexbor/lexbor/ports/windows_nt/lexbor/core", "memory.c", "lexbor");
-ADD_SOURCES("ext/lexbor/lexbor/core", "array_obj.c array.c avl.c bst.c diyfp.c conv.c dobject.c dtoa.c hash.c mem.c mraw.c print.c serialize.c shs.c str.c strtod.c", "lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/core", "array_obj.c array.c avl.c bst.c diyfp.c conv.c dobject.c dtoa.c hash.c mem.c mraw.c plog.c print.c serialize.c shs.c str.c strtod.c", "lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/dom", "interface.c", "lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/dom/interfaces", "attr.c cdata_section.c character_data.c comment.c document.c document_fragment.c document_type.c element.c node.c processing_instruction.c shadow_root.c text.c", "lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/html/tokenizer", "error.c state_comment.c state_doctype.c state_rawtext.c state_rcdata.c state_script.c state.c", "lexbor");
@@ -17,7 +17,10 @@ ADD_SOURCES("ext/lexbor/lexbor/css/selectors", "state.c selectors.c selector.c p
 ADD_SOURCES("ext/lexbor/lexbor/css/syntax", "state.c parser.c syntax.c anb.c tokenizer.c token.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/css/syntax/tokenizer", "error.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/ns", "ns.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/punycode", "punycode.c","lexbor");
 ADD_SOURCES("ext/lexbor/lexbor/tag", "tag.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/unicode", "idna.c unicode.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/url", "url.c","lexbor");
 ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_BUILDING /utf-8");
 
 AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
