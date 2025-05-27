@@ -175,8 +175,8 @@ PHP_NEW_EXTENSION([lexbor], m4_normalize([
     $LEXBOR_DIR/html/tree/open_elements.c
     $LEXBOR_DIR/ns/ns.c
     $LEXBOR_DIR/ports/posix/lexbor/core/memory.c
-    $LEXBOR_DIR/tag/tag.c
     $LEXBOR_DIR/punycode/punycode.c
+    $LEXBOR_DIR/tag/tag.c
     $LEXBOR_DIR/unicode/idna.c
     $LEXBOR_DIR/unicode/unicode.c
     $LEXBOR_DIR/url/url.c
