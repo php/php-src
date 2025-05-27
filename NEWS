@@ -2,7 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.25
 
-OpenSSL:
+- LDAP:
+  . Fixed bug GH-18529 (additional inheriting of TLS int options).
+    (Jakub Zelenka)
+
+- OpenSSL:
   . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
     return value check). (nielsdos, botovq)
   . Fix error return check of EVP_CIPHER_CTX_ctrl(). (nielsdos)
