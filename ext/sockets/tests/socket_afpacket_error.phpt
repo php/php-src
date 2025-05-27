@@ -60,6 +60,6 @@ if (!function_exists("posix_getuid") || posix_getuid() != 0) {
 ?>
 --EXPECTF--
 int(1084)
-unsupported ethernet protocol
+unsupported %s protocol
 int(60)
 invalid transport header length
