@@ -29,14 +29,6 @@
 
 #include "php_lexbor.h"
 
-/* Dynamically loadable module stuff */
-#ifdef COMPILE_DL_LEXBOR
-#ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
-#endif
-ZEND_GET_MODULE(lexbor)
-#endif /* COMPILE_DL_LEXBOR */
-
 static void *php_lexbor_malloc(size_t size)
 {
 	return emalloc(size);
