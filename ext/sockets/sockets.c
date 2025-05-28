@@ -2379,26 +2379,22 @@ PHP_FUNCTION(socket_create_pair)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(&retval[0], socket_ce);
-	php_sock[0] = Z_SOCKET_P(&retval[0]);
-
-	object_init_ex(&retval[1], socket_ce);
-	php_sock[1] = Z_SOCKET_P(&retval[1]);
-
 	if (socketpair(domain, type, protocol, fds_array) != 0) {
 		SOCKETS_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Unable to create socket pair [%d]: %s", errno, sockets_strerror(errno));
-		zval_ptr_dtor(&retval[0]);
-		zval_ptr_dtor(&retval[1]);
 		RETURN_FALSE;
 	}
 
 	fds_array_zval = zend_try_array_init_size(fds_array_zval, 2);
 	if (!fds_array_zval) {
-		zval_ptr_dtor(&retval[0]);
-		zval_ptr_dtor(&retval[1]);
 		RETURN_THROWS();
 	}
+
+	object_init_ex(&retval[0], socket_ce);
+	php_sock[0] = Z_SOCKET_P(&retval[0]);
+
+	object_init_ex(&retval[1], socket_ce);
+	php_sock[1] = Z_SOCKET_P(&retval[1]);
 
 	php_sock[0]->bsd_socket = fds_array[0];
 	php_sock[1]->bsd_socket = fds_array[1];
