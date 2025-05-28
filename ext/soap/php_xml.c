@@ -183,6 +183,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	return ret;
 }
 
+/* FIXME: this is wrong, attributes don't inherit the namespace of the node they're in! */
 xmlNsPtr attr_find_ns(xmlAttrPtr node)
 {
 	if (node->ns) {
