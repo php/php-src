@@ -759,7 +759,7 @@ extern "C++" {
 # define ZEND_INDIRECT_RETURN
 #endif
 
-#if __has_attribute(nonstring)
+#if __has_attribute(nonstring) && defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 15
 # define ZEND_NONSTRING __attribute__((nonstring))
 #else
 # define ZEND_NONSTRING
