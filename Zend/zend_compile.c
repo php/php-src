@@ -101,6 +101,8 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 static void zend_compile_expr(znode *result, zend_ast *ast);
 static void zend_compile_stmt(zend_ast *ast);
 static void zend_compile_assign(znode *result, zend_ast *ast);
+static zend_result zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type);
+static bool zend_is_special_func(const zend_string *name);
 
 #ifdef ZEND_CHECK_STACK_LIMIT
 zend_never_inline static void zend_stack_limit_error(void)
@@ -4709,6 +4711,7 @@ static uint32_t zend_compile_frameless_icall(znode *result, zend_ast_list *args,
 static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno, uint32_t type) /* {{{ */
 {
 	int name_constants = zend_add_ns_func_name_literal(Z_STR(name_node->u.constant));
+	bool special_func_handler = false;
 
 	/* Find frameless function with same name. */
 	zend_function *frameless_function = NULL;
@@ -4725,7 +4728,13 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 	const zend_frameless_function_info *frameless_function_info = NULL;
 	if (frameless_function) {
 		frameless_function_info = find_frameless_function_info(zend_ast_get_list(args_ast), frameless_function, type);
-		if (frameless_function_info) {
+
+		if (!frameless_function_info) {
+			/* Check for dedicated special function. */
+			special_func_handler = zend_is_special_func(frameless_function->common.function_name);
+		}
+
+		if (frameless_function_info || special_func_handler) {
 			CG(context).in_jmp_frameless_branch = true;
 			znode op1;
 			op1.op_type = IS_CONST;
@@ -4758,6 +4767,44 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 		zend_op *flf_icall = &CG(active_op_array)->opcodes[flf_icall_opnum];
 		SET_NODE(flf_icall->result, result);
 		zend_update_jump_target_to_next(jmp_end_opnum);
+
+		CG(context).in_jmp_frameless_branch = false;
+	} else if (special_func_handler) {
+		CG(zend_lineno) = lineno;
+
+		uint32_t jmp_end_opnum = zend_emit_jump(0);
+		uint32_t jmp_fl_target = get_next_op_number();
+
+		znode tmp_result;
+		if (zend_try_compile_special_func(&tmp_result, frameless_function->common.function_name, zend_ast_get_list(args_ast), frameless_function, type) != SUCCESS) {
+			zend_op *ops = CG(active_op_array)->opcodes;
+
+			/* Undo work */
+			zend_op *jmp_fl = &ops[jmp_fl_opnum];
+			jmp_fl->opcode = ZEND_NOP;
+			SET_UNUSED(jmp_fl->op1);
+			zend_op *jmp_end = &ops[jmp_end_opnum];
+			jmp_end->opcode = ZEND_NOP;
+			SET_UNUSED(jmp_end->op1);
+		} else {
+			uint32_t result_target = get_next_op_number() - 1;
+
+			zend_op *jmp_fl = &CG(active_op_array)->opcodes[jmp_fl_opnum];
+			jmp_fl->op2.opline_num = jmp_fl_target;
+			jmp_fl->extended_value = zend_alloc_cache_slot();
+
+			if (tmp_result.op_type == IS_CONST || 1 /* TODO ? */) {
+				zend_op *qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN, &tmp_result, NULL);
+				SET_NODE(qm_assign->result, result);
+			} else {
+				// TODO: we're left with a useless tmp?
+				zend_op *res_op = &CG(active_op_array)->opcodes[result_target];
+				res_op->result_type = result->op_type;
+				res_op->result = result->u.op;
+			}
+
+			zend_update_jump_target_to_next(jmp_end_opnum);
+		}
 
 		CG(context).in_jmp_frameless_branch = false;
 	}
@@ -4936,6 +4983,62 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	return SUCCESS;
 }
 
+typedef struct zend_special_func {
+	const char *name;
+	size_t name_len;
+	// zend_result (*handler)(znode *, zend_ast_list *);
+} zend_special_func;
+
+static const zend_special_func zend_special_func_compile_handlers[] = {
+	{ZEND_STRL("strlen")},
+	{ZEND_STRL("is_null")},
+	{ZEND_STRL("is_bool")},
+	{ZEND_STRL("is_long")},
+	{ZEND_STRL("is_int")},
+	{ZEND_STRL("is_integer")},
+	{ZEND_STRL("is_float")},
+	{ZEND_STRL("is_double")},
+	{ZEND_STRL("is_string")},
+	{ZEND_STRL("is_array")},
+	{ZEND_STRL("is_object")},
+	{ZEND_STRL("is_resource")},
+	{ZEND_STRL("is_scalar")},
+	{ZEND_STRL("boolval")},
+	{ZEND_STRL("intval")},
+	{ZEND_STRL("floatval")},
+	{ZEND_STRL("doubleval")},
+	{ZEND_STRL("strval")},
+	{ZEND_STRL("defined")},
+	{ZEND_STRL("chr")},
+	{ZEND_STRL("ord")},
+	{ZEND_STRL("call_user_func_array")},
+	{ZEND_STRL("call_user_func")},
+	{ZEND_STRL("in_array")},
+	{ZEND_STRL("count")},
+	{ZEND_STRL("sizeof")},
+	{ZEND_STRL("get_class")},
+	{ZEND_STRL("get_called_class")},
+	{ZEND_STRL("gettype")},
+	{ZEND_STRL("func_num_args")},
+	{ZEND_STRL("func_get_args")},
+	{ZEND_STRL("array_slice")},
+	{ZEND_STRL("array_key_exists")},
+	{ZEND_STRL("sprintf")},
+	{NULL, 0},
+};
+
+static bool zend_is_special_func(const zend_string *name)
+{
+	const zend_special_func *entry = &zend_special_func_compile_handlers[0];
+	for (; entry->name; entry++) {
+		if (zend_string_equals_cstr(name, entry->name, entry->name_len)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// TODO: maybe this can migrate to use 'zend_special_func_compile_handlers'
 static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
 {
 	if (zend_string_equals_literal(lcname, "strlen")) {
