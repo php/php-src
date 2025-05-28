@@ -80,10 +80,6 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 	xmlDocPtr ret;
 	bool old_allow_url_fopen;
 
-/*
-	xmlInitParser();
-*/
-
 	old_allow_url_fopen = PG(allow_url_fopen);
 	PG(allow_url_fopen) = 1;
 	ctxt = xmlCreateFileParserCtxt(filename);
@@ -120,10 +116,6 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 		ret = NULL;
 	}
 
-/*
-	xmlCleanupParser();
-*/
-
 	if (ret) {
 		cleanup_xml_node((xmlNodePtr)ret);
 	}
@@ -135,10 +127,6 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
 
-
-/*
-	xmlInitParser();
-*/
 	ctxt = xmlCreateMemoryParserCtxt(buf, buf_size);
 	if (ctxt) {
 		bool old;
@@ -170,10 +158,6 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	} else {
 		ret = NULL;
 	}
-
-/*
-	xmlCleanupParser();
-*/
 
 /*
 	if (ret) {
