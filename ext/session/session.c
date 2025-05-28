@@ -1335,11 +1335,6 @@ static int php_session_cache_limiter(void)
    * Cookie Management *
    ********************* */
 
-/*
- * Remove already sent session ID cookie.
- * It must be directly removed from SG(sapi_header) because sapi_add_header_ex()
- * removes all of matching cookie. i.e. It deletes all of Set-Cookie headers.
- */
 static void php_session_remove_cookie(void) {
 	char *session_cookie;
 	sapi_header_line header_line = {0};
