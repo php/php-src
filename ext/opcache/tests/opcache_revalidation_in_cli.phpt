@@ -16,7 +16,7 @@ file_put_contents($file, <<<PHP
 return 42;
 PHP);
 
-var_dump(opcache_invalidate($file));
+var_dump(opcache_invalidate($file, true));
 
 var_dump(include $file);
 
