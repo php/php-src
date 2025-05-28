@@ -39,7 +39,7 @@
     $chunks = str_split($dta, CHUNK_SIZE);
     $chunks[count($chunks) - 1] = str_pad($chunks[count($chunks) - 1], CHUNK_SIZE, chr(0));
 
-    echo 'const unsigned char php_magic_database[' . count($chunks) . '][' . CHUNK_SIZE . "] = {\n";
+    echo 'const unsigned char php_magic_database[' . count($chunks) . '][' . CHUNK_SIZE . "] ZEND_NONSTRING = {\n";
     foreach ($chunks as $chunk) {
         echo '"' . strtr($chunk, $map) . '",' . "\n";
     }
