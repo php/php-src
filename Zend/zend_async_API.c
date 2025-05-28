@@ -298,7 +298,7 @@ ZEND_API zend_string* zend_coroutine_gen_info(zend_coroutine_t *coroutine, char 
 		zend_coroutine_name = "";
 	}
 
-	if (coroutine->waker != NULL) {
+	if (ZEND_COROUTINE_SUSPENDED(coroutine)) {
 		return zend_strpprintf(0,
 			"Coroutine spawned at %s:%d, suspended at %s:%d (%s)",
 			coroutine->filename ? ZSTR_VAL(coroutine->filename) : "",

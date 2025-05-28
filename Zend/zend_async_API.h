@@ -81,11 +81,11 @@ typedef int zend_socket_t;
  * If type==4, output will be saved to a memory buffer (shell_exec)
  */
 typedef enum {
-	ZEND_ASYNC_EXEC_MODE_EXEC = 0,
-	ZEND_ASYNC_EXEC_MODE_SYSTEM = 1,
-	ZEND_ASYNC_EXEC_MODE_EXEC_ARRAY = 2,
-	ZEND_ASYNC_EXEC_MODE_PASSTHRU = 3,
-	ZEND_ASYNC_EXEC_MODE_SHELL_EXEC = 4
+	ZEND_ASYNC_EXEC_MODE_EXEC,
+	ZEND_ASYNC_EXEC_MODE_SYSTEM,
+	ZEND_ASYNC_EXEC_MODE_EXEC_ARRAY,
+	ZEND_ASYNC_EXEC_MODE_PASSTHRU,
+	ZEND_ASYNC_EXEC_MODE_SHELL_EXEC
 } zend_async_exec_mode;
 
 typedef enum
@@ -624,10 +624,11 @@ zend_async_scope_free_children(zend_async_scope_t *parent_scope)
 typedef void (*zend_async_waker_dtor)(zend_coroutine_t *coroutine);
 
 typedef enum {
-	ZEND_ASYNC_WAKER_NO_STATUS = 0,
-	ZEND_ASYNC_WAKER_WAITING = 1,
-	ZEND_ASYNC_WAKER_QUEUED = 2,
-	ZEND_ASYNC_WAKER_IGNORED = 3
+	ZEND_ASYNC_WAKER_NO_STATUS,
+	ZEND_ASYNC_WAKER_WAITING,
+	ZEND_ASYNC_WAKER_QUEUED,
+	ZEND_ASYNC_WAKER_IGNORED,
+	ZEND_ASYNC_WAKER_RESULT
 } ZEND_ASYNC_WAKER_STATUS;
 
 struct _zend_async_waker_s {
@@ -648,6 +649,8 @@ struct _zend_async_waker_s {
 	/* The waker destructor. */
 	zend_async_waker_dtor dtor;
 };
+
+#define ZEND_ASYNC_WAKER_WAITING(waker) ((waker)->status < ZEND_ASYNC_WAKER_RESULT)
 
 /**
  * Coroutine destructor. Called when the coroutine needs to clean up all its data.
@@ -689,6 +692,12 @@ struct _zend_coroutine_s {
 	/* Extended dispose handler */
 	zend_async_coroutine_dispose extended_dispose;
 };
+
+/**
+ * The macro evaluates to TRUE if the coroutine is in a waiting state —
+ * either waiting for events or waiting in the execution queue.
+ */
+#define ZEND_COROUTINE_SUSPENDED(coroutine) ((coroutine)->waker != NULL && ZEND_ASYNC_WAKER_WAITING((coroutine)->waker))
 
 /* Coroutine flags */
 #define ZEND_COROUTINE_F_STARTED (1u << 10) /* coroutine is started */
@@ -757,11 +766,11 @@ struct _zend_async_context_s {
  */
 typedef enum {
 	// The module is inactive.
-	ZEND_ASYNC_OFF = 0,
+	ZEND_ASYNC_OFF,
 	// The module is ready for use but has not been activated yet.
-	ZEND_ASYNC_READY = 1,
+	ZEND_ASYNC_READY,
 	// The module is active and can be used.
-	ZEND_ASYNC_ACTIVE = 2
+	ZEND_ASYNC_ACTIVE
 } zend_async_state_t;
 
 typedef struct {
