@@ -1,14 +1,14 @@
 --TEST--
-Short method function declaration
+Short function method declaration
 --FILE--
 <?php
 class Decorator {
   public $proxy;
-  function getId() = $this->proxy->id;
-  function getName() = $this->proxy->name;
+  function getId() => $this->proxy->id;
+  function getName() => $this->proxy->name;
 
-  function setId($value) = $this->proxy->id = $value;
-  function setName($value) = $this->proxy->name = $value;
+  function setId($value) => $this->proxy->id = $value;
+  function setName($value) => $this->proxy->name = $value;
 }
 
 $decorated = new stdClass;

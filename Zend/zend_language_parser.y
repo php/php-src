@@ -585,7 +585,8 @@ function_declaration_statement:
 
 function_body:
         '{' inner_statement_list '}'    { $$ = $2; }
-    |   '=' statement                   { $$ = $2; }
+    |   T_DOUBLE_ARROW expr ';'
+			{ $$ = $2; CG(extra_fn_flags) |= ZEND_ACC_SHORT_DECLARATION; }
 ;
 
 is_reference:
@@ -1035,7 +1036,8 @@ absolute_trait_method_reference:
 method_body:
 		';' /* abstract method */		{ $$ = NULL; }
 	|	'{' inner_statement_list '}'	{ $$ = $2; }
-	|	'=' statement	{ $$ = $2; }
+	|	T_DOUBLE_ARROW expr ';'
+	        { $$ = $2; CG(extra_fn_flags) |= ZEND_ACC_SHORT_DECLARATION; }
 ;
 
 property_modifiers:
@@ -1347,7 +1349,7 @@ inline_function:
 				  $5, $7, $11, $8, NULL); CG(extra_fn_flags) = $9; }
 	|	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
 		T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $3,
+			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12 | ZEND_ACC_SHORT_DECLARATION, $1, $3,
 				  NULL, $5, NULL, $11, $7, NULL);
 				  CG(extra_fn_flags) = $9; }
 ;
