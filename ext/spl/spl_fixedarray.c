@@ -29,12 +29,12 @@
 #include "spl_exceptions.h"
 #include "ext/json/php_json.h" /* For php_json_serializable_ce */
 
-static zend_object_handlers spl_handler_SplFixedArray;
+static zend_object_handlers spl_handler_SplFixedArray_base, spl_handler_SplFixedArray_proxied;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
 
 /* Check if the object is an instance of a subclass of SplFixedArray that overrides method's implementation.
- * Expect subclassing SplFixedArray to be rare and check that first. */
-#define HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, method) UNEXPECTED((object)->ce != spl_ce_SplFixedArray && (object)->ce->arrayaccess_funcs_ptr->method->common.scope != spl_ce_SplFixedArray)
+ * This is only done if we know for sure the instance is a subclass of SplFixedArray. */
+#define HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, method) UNEXPECTED((object)->ce->arrayaccess_funcs_ptr->method->common.scope != spl_ce_SplFixedArray)
 
 typedef struct _spl_fixedarray {
 	zend_long size;
@@ -290,6 +290,8 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	}
 
 	if (UNEXPECTED(class_type != spl_ce_SplFixedArray)) {
+		intern->std.handlers = &spl_handler_SplFixedArray_proxied;
+
 		/* Find count() method */
 		zend_function *fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (fptr_count->common.scope == spl_ce_SplFixedArray) {
@@ -383,11 +385,22 @@ static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *
 	}
 }
 
-static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset, int check_empty);
+static int spl_fixedarray_object_has_dimension_proxied(zend_object *object, zval *offset, int check_empty);
+static int spl_fixedarray_object_has_dimension_base(zend_object *object, zval *offset, int check_empty);
 
-static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+static zval *spl_fixedarray_object_read_dimension_base(zend_object *object, zval *offset, int type, zval *rv)
 {
-	if (type == BP_VAR_IS && !spl_fixedarray_object_has_dimension(object, offset, 0)) {
+	if (type == BP_VAR_IS && !spl_fixedarray_object_has_dimension_base(object, offset, 0)) {
+		return &EG(uninitialized_zval);
+	}
+
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
+	return spl_fixedarray_object_read_dimension_helper(intern, offset);
+}
+
+static zval *spl_fixedarray_object_read_dimension_proxied(zend_object *object, zval *offset, int type, zval *rv)
+{
+	if (type == BP_VAR_IS && !spl_fixedarray_object_has_dimension_proxied(object, offset, 0)) {
 		return &EG(uninitialized_zval);
 	}
 
@@ -433,7 +446,13 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 	}
 }
 
-static void spl_fixedarray_object_write_dimension(zend_object *object, zval *offset, zval *value)
+static void spl_fixedarray_object_write_dimension_base(zend_object *object, zval *offset, zval *value)
+{
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
+	spl_fixedarray_object_write_dimension_helper(intern, offset, value);
+}
+
+static void spl_fixedarray_object_write_dimension_proxied(zend_object *object, zval *offset, zval *value)
 {
 	if (HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, zf_offsetset)) {
 		zval tmp;
@@ -446,8 +465,7 @@ static void spl_fixedarray_object_write_dimension(zend_object *object, zval *off
 		return;
 	}
 
-	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
-	spl_fixedarray_object_write_dimension_helper(intern, offset, value);
+	spl_fixedarray_object_write_dimension_base(object, offset, value);
 }
 
 static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *intern, zval *offset)
@@ -466,15 +484,20 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 	}
 }
 
-static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *offset)
+static void spl_fixedarray_object_unset_dimension_base(zend_object *object, zval *offset)
+{
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
+	spl_fixedarray_object_unset_dimension_helper(intern, offset);
+}
+
+static void spl_fixedarray_object_unset_dimension_proxied(zend_object *object, zval *offset)
 {
 	if (UNEXPECTED(HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, zf_offsetunset))) {
 		zend_call_known_instance_method_with_1_params(object->ce->arrayaccess_funcs_ptr->zf_offsetunset, object, NULL, offset);
 		return;
 	}
 
-	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
-	spl_fixedarray_object_unset_dimension_helper(intern, offset);
+	spl_fixedarray_object_unset_dimension_base(object, offset);
 }
 
 static bool spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset, bool check_empty)
@@ -495,7 +518,13 @@ static bool spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *in
 	return Z_TYPE(intern->array.elements[index]) != IS_NULL;
 }
 
-static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset, int check_empty)
+static int spl_fixedarray_object_has_dimension_base(zend_object *object, zval *offset, int check_empty)
+{
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
+	return spl_fixedarray_object_has_dimension_helper(intern, offset, check_empty);
+}
+
+static int spl_fixedarray_object_has_dimension_proxied(zend_object *object, zval *offset, int check_empty)
 {
 	if (HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, zf_offsetexists)) {
 		zval rv;
@@ -506,9 +535,7 @@ static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset
 		return result;
 	}
 
-	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
-
-	return spl_fixedarray_object_has_dimension_helper(intern, offset, check_empty);
+	return spl_fixedarray_object_has_dimension_base(object, offset, check_empty);
 }
 
 static zend_result spl_fixedarray_object_count_elements(zend_object *object, zend_long *count)
@@ -961,21 +988,28 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_ce_SplFixedArray = register_class_SplFixedArray(
 		zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_countable, php_json_serializable_ce);
 	spl_ce_SplFixedArray->create_object = spl_fixedarray_new;
-	spl_ce_SplFixedArray->default_object_handlers = &spl_handler_SplFixedArray;
+	spl_ce_SplFixedArray->default_object_handlers = &spl_handler_SplFixedArray_base;
 	spl_ce_SplFixedArray->get_iterator = spl_fixedarray_get_iterator;
 
-	memcpy(&spl_handler_SplFixedArray, &std_object_handlers, sizeof(zend_object_handlers));
+	memcpy(&spl_handler_SplFixedArray_base, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplFixedArray.offset          = XtOffsetOf(spl_fixedarray_object, std);
-	spl_handler_SplFixedArray.clone_obj       = spl_fixedarray_object_clone;
-	spl_handler_SplFixedArray.read_dimension  = spl_fixedarray_object_read_dimension;
-	spl_handler_SplFixedArray.write_dimension = spl_fixedarray_object_write_dimension;
-	spl_handler_SplFixedArray.unset_dimension = spl_fixedarray_object_unset_dimension;
-	spl_handler_SplFixedArray.has_dimension   = spl_fixedarray_object_has_dimension;
-	spl_handler_SplFixedArray.count_elements  = spl_fixedarray_object_count_elements;
-	spl_handler_SplFixedArray.get_properties_for = spl_fixedarray_object_get_properties_for;
-	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
-	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;
+	spl_handler_SplFixedArray_base.offset          = XtOffsetOf(spl_fixedarray_object, std);
+	spl_handler_SplFixedArray_base.clone_obj       = spl_fixedarray_object_clone;
+	spl_handler_SplFixedArray_base.read_dimension  = spl_fixedarray_object_read_dimension_base;
+	spl_handler_SplFixedArray_base.write_dimension = spl_fixedarray_object_write_dimension_base;
+	spl_handler_SplFixedArray_base.unset_dimension = spl_fixedarray_object_unset_dimension_base;
+	spl_handler_SplFixedArray_base.has_dimension   = spl_fixedarray_object_has_dimension_base;
+	spl_handler_SplFixedArray_base.count_elements  = spl_fixedarray_object_count_elements;
+	spl_handler_SplFixedArray_base.get_properties_for = spl_fixedarray_object_get_properties_for;
+	spl_handler_SplFixedArray_base.get_gc          = spl_fixedarray_object_get_gc;
+	spl_handler_SplFixedArray_base.free_obj        = spl_fixedarray_object_free_storage;
+
+	memcpy(&spl_handler_SplFixedArray_proxied, &spl_handler_SplFixedArray_base, sizeof(zend_object_handlers));
+
+	spl_handler_SplFixedArray_proxied.read_dimension  = spl_fixedarray_object_read_dimension_proxied;
+	spl_handler_SplFixedArray_proxied.write_dimension = spl_fixedarray_object_write_dimension_proxied;
+	spl_handler_SplFixedArray_proxied.unset_dimension = spl_fixedarray_object_unset_dimension_proxied;
+	spl_handler_SplFixedArray_proxied.has_dimension   = spl_fixedarray_object_has_dimension_proxied;
 
 	return SUCCESS;
 }
