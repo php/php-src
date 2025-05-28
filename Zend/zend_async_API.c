@@ -34,6 +34,11 @@ static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_pr
 
 static void suspend(bool from_main) {}
 
+static void enqueue_coroutine(zend_coroutine_t *coroutine)
+{
+	ASYNC_THROW_ERROR("Async API is not enabled");
+}
+
 static zend_async_context_t * new_context(void)
 {
 	ASYNC_THROW_ERROR("Context API is not enabled");
@@ -60,6 +65,7 @@ zend_async_spawn_t zend_async_spawn_fn = spawn;
 zend_async_new_coroutine_t zend_async_new_coroutine_fn = NULL;
 zend_async_new_scope_t zend_async_new_scope_fn = NULL;
 zend_async_suspend_t zend_async_suspend_fn = suspend;
+zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn = enqueue_coroutine;
 zend_async_resume_t zend_async_resume_fn = NULL;
 zend_async_cancel_t zend_async_cancel_fn = NULL;
 zend_async_shutdown_t zend_async_shutdown_fn = NULL;
@@ -175,6 +181,7 @@ ZEND_API void zend_async_scheduler_register(
 	zend_async_new_context_t new_context_fn,
     zend_async_spawn_t spawn_fn,
     zend_async_suspend_t suspend_fn,
+    zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
     zend_async_resume_t resume_fn,
     zend_async_cancel_t cancel_fn,
     zend_async_shutdown_t shutdown_fn,
@@ -203,6 +210,7 @@ ZEND_API void zend_async_scheduler_register(
 	zend_async_new_context_fn = new_context_fn;
     zend_async_spawn_fn = spawn_fn;
     zend_async_suspend_fn = suspend_fn;
+    zend_async_enqueue_coroutine_fn = enqueue_coroutine_fn;
     zend_async_resume_fn = resume_fn;
     zend_async_cancel_fn = cancel_fn;
     zend_async_shutdown_fn = shutdown_fn;

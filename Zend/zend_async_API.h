@@ -159,6 +159,7 @@ typedef zend_coroutine_t * (*zend_async_new_coroutine_t)(zend_async_scope_t *sco
 typedef zend_async_scope_t * (*zend_async_new_scope_t)(zend_async_scope_t * parent_scope);
 typedef zend_coroutine_t * (*zend_async_spawn_t)(zend_async_scope_t *scope, zend_object *scope_provider);
 typedef void (*zend_async_suspend_t)(bool from_main);
+typedef void (*zend_async_enqueue_coroutine_t)(zend_coroutine_t *coroutine);
 typedef void (*zend_async_resume_t)(zend_coroutine_t *coroutine, zend_object * error, const bool transfer_error);
 typedef void (*zend_async_cancel_t)(zend_coroutine_t *coroutine, zend_object * error, const bool transfer_error, const bool is_safely);
 typedef void (*zend_async_shutdown_t)(void);
@@ -866,6 +867,7 @@ ZEND_API extern zend_async_spawn_t zend_async_spawn_fn;
 ZEND_API extern zend_async_new_coroutine_t zend_async_new_coroutine_fn;
 ZEND_API extern zend_async_new_scope_t zend_async_new_scope_fn;
 ZEND_API extern zend_async_suspend_t zend_async_suspend_fn;
+ZEND_API extern zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn;
 ZEND_API extern zend_async_resume_t zend_async_resume_fn;
 ZEND_API extern zend_async_cancel_t zend_async_cancel_fn;
 ZEND_API extern zend_async_shutdown_t zend_async_shutdown_fn;
@@ -913,6 +915,7 @@ ZEND_API void zend_async_scheduler_register(
 	zend_async_new_context_t new_context_fn,
     zend_async_spawn_t spawn_fn,
     zend_async_suspend_t suspend_fn,
+    zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
     zend_async_resume_t resume_fn,
     zend_async_cancel_t cancel_fn,
     zend_async_shutdown_t shutdown_fn,
@@ -986,6 +989,7 @@ END_EXTERN_C()
 #define ZEND_ASYNC_NEW_SCOPE(parent) zend_async_new_scope_fn(parent)
 #define ZEND_ASYNC_SUSPEND() zend_async_suspend_fn(false)
 #define ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN() zend_async_suspend_fn(true)
+#define ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine) zend_async_enqueue_coroutine_fn(coroutine)
 #define ZEND_ASYNC_RESUME(coroutine) zend_async_resume_fn(coroutine, NULL, false)
 #define ZEND_ASYNC_RESUME_WITH_ERROR(coroutine, error, transfer_error) zend_async_resume_fn(coroutine, error, transfer_error)
 #define ZEND_ASYNC_CANCEL(coroutine, error, transfer_error) zend_async_cancel_fn(coroutine, error, transfer_error, false)
