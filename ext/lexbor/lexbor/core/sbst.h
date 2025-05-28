@@ -15,11 +15,21 @@ extern "C" {
 
 #include "lexbor/core/base.h"
 
+#ifdef __has_attribute
+# if __has_attribute(nonstring) && defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 15
+#  define LXB_NONSTRING __attribute__((nonstring))
+# else
+#  define LXB_NONSTRING
+# endif
+#else
+# define LXB_NONSTRING
+#endif
+
 
 typedef struct {
     lxb_char_t key;
 
-    lxb_char_t         value[6];
+    lxb_char_t         value[6] LXB_NONSTRING;
     unsigned char      value_len;
 
     unsigned short     left;
