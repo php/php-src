@@ -83,7 +83,6 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data);
 static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 
-static int is_map(zval *array);
 static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *out_type);
 
 static xmlNodePtr check_and_resolve_href(xmlNodePtr data);
@@ -1664,7 +1663,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				enc = model->u.element->encode;
 				if ((model->max_occurs == -1 || model->max_occurs > 1) &&
 				    Z_TYPE_P(data) == IS_ARRAY &&
-				    !is_map(data)) {
+				    zend_array_is_list(Z_ARRVAL_P(data))) {
 					HashTable *ht = Z_ARRVAL_P(data);
 					zval *val;
 
@@ -1743,7 +1742,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				enc = get_conversion(XSD_ANYXML);
 				if ((model->max_occurs == -1 || model->max_occurs > 1) &&
 				    Z_TYPE_P(data) == IS_ARRAY &&
-				    !is_map(data)) {
+				    zend_array_is_list(Z_ARRVAL_P(data))) {
 					HashTable *ht = Z_ARRVAL_P(data);
 					zval *val;
 
@@ -1918,7 +1917,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			sdlTypePtr array_el;
 
 			if (Z_TYPE_P(data) == IS_ARRAY &&
-		      !is_map(data) &&
+		      zend_array_is_list(Z_ARRVAL_P(data)) &&
 		      sdlType->attributes == NULL &&
 		      sdlType->model != NULL &&
 		      (array_el = model_array_element(sdlType->model)) != NULL) {
@@ -2028,7 +2027,7 @@ static xmlNodePtr guess_array_map(encodeTypePtr type, zval *data, int style, xml
 	encodePtr enc = NULL;
 
 	if (data && Z_TYPE_P(data) == IS_ARRAY) {
-		if (is_map(data)) {
+		if (!zend_array_is_list(Z_ARRVAL_P(data))) {
 			enc = get_conversion(APACHE_MAP);
 		} else {
 			enc = get_conversion(SOAP_ENC_ARRAY);
@@ -3551,25 +3550,6 @@ encodePtr get_conversion(int encode)
 	}
 }
 
-static int is_map(zval *array)
-{
-	zend_ulong index;
-	zend_string *key;
-	zend_ulong i = 0;
-
-	if (HT_IS_PACKED(Z_ARRVAL_P(array)) && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(array))) {
-		return FALSE;
-	}
-
-	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(array), index, key) {
-		if (key || index != i) {
-			return TRUE;
-		}
-		i++;
-	} ZEND_HASH_FOREACH_END();
-	return FALSE;
-}
-
 static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 {
 	HashTable *ht;
@@ -3611,7 +3591,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 				cur_ns = NULL;
 			}
 
-		} else if (Z_TYPE_P(tmp) == IS_ARRAY && is_map(tmp)) {
+		} else if (Z_TYPE_P(tmp) == IS_ARRAY && !zend_array_is_list(Z_ARRVAL_P(tmp))) {
 			cur_type = APACHE_MAP;
 			cur_stype = NULL;
 			cur_ns = NULL;
