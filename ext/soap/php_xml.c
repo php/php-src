@@ -203,7 +203,7 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 	}
 }
 
-int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
+int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
 {
 	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
@@ -219,7 +219,7 @@ int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 	return FALSE;
 }
 
-int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
+int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
 {
 	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
@@ -236,7 +236,7 @@ int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
 }
 
 
-xmlAttrPtr get_attribute_ex(xmlAttrPtr node, char *name, char *ns)
+xmlAttrPtr get_attribute_ex(xmlAttrPtr node, const char *name, const char *ns)
 {
 	while (node!=NULL) {
 		if (attr_is_equal_ex(node, name, ns)) {
@@ -247,7 +247,7 @@ xmlAttrPtr get_attribute_ex(xmlAttrPtr node, char *name, char *ns)
 	return NULL;
 }
 
-xmlNodePtr get_node_ex(xmlNodePtr node, char *name, char *ns)
+xmlNodePtr get_node_ex(xmlNodePtr node, const char *name, const char *ns)
 {
 	while (node!=NULL) {
 		if (node_is_equal_ex(node, name, ns)) {
@@ -258,7 +258,7 @@ xmlNodePtr get_node_ex(xmlNodePtr node, char *name, char *ns)
 	return NULL;
 }
 
-xmlNodePtr get_node_recurisve_ex(xmlNodePtr node, char *name, char *ns)
+xmlNodePtr get_node_recurisve_ex(xmlNodePtr node, const char *name, const char *ns)
 {
 	while (node != NULL) {
 		if (node_is_equal_ex(node, name, ns)) {
@@ -274,7 +274,7 @@ xmlNodePtr get_node_recurisve_ex(xmlNodePtr node, char *name, char *ns)
 	return NULL;
 }
 
-xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns)
+xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, const char *name, const char *name_ns, const char *attribute, const char *value, const char *attr_ns)
 {
 	xmlAttrPtr attr;
 
@@ -295,7 +295,7 @@ xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns
 	return NULL;
 }
 
-xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns)
+xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, const char *name, const char *name_ns, const char *attribute, const char *value, const char *attr_ns)
 {
 	while (node != NULL) {
 		if (node_is_equal_ex(node, name, name_ns)) {
