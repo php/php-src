@@ -37,6 +37,12 @@ try {
 }
 
 try {
+    unserialize('O:14:"Uri\WhatWg\Url":2:{i:0;a:2:{s:3:"uri";s:19:"https://example.com";s:1:"a";i:1;}i:1;a:0:{}}'); // "uri" key in first array contains more than 1 item
+} catch (Exception $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
     unserialize('O:14:"Uri\WhatWg\Url":2:{i:0;a:1:{s:3:"uri";i:1;}i:1;a:0:{}}'); // "uri" key in first array is not a string
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";
@@ -44,7 +50,7 @@ try {
 
 try {
     unserialize('O:14:"Uri\WhatWg\Url":2:{i:0;a:1:{s:3:"uri";s:11:"invalid-url";}i:1;a:0:{}}'); // "uri" key in first array contains invalid URL
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -86,6 +92,7 @@ Invalid serialization data for Uri\WhatWg\Url object
 Invalid serialization data for Uri\WhatWg\Url object
 Invalid serialization data for Uri\WhatWg\Url object
 Invalid serialization data for Uri\WhatWg\Url object
-URL parsing failed
+Invalid serialization data for Uri\WhatWg\Url object
+Invalid serialization data for Uri\WhatWg\Url object
 Invalid serialization data for Uri\WhatWg\Url object
 Invalid serialization data for Uri\WhatWg\Url object

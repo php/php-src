@@ -144,8 +144,8 @@ void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
 		zval_ptr_dtor(property_zv); \
 		RETURN_THROWS(); \
 	} \
-	ZEND_ASSERT(Z_TYPE(errors) == IS_UNDEF); \
-	ZVAL_OBJ(return_value, new_object); \
+	ZEND_ASSERT(Z_ISUNDEF(errors)); \
+	RETVAL_OBJ(new_object); \
 	zval_ptr_dtor(property_zv);
 
 #define URI_WITHER_STR(property_name) do { \
