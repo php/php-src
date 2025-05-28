@@ -2209,7 +2209,6 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 	bool   ret = true;
 	char  *buf;
 	int    buf_size;
-	zval   func;
 	zval  params[5];
 	bool  _bailout = false;
 
@@ -2228,7 +2227,6 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 			ZVAL_STRINGL(Z_CLIENT_LAST_REQUEST_P(this_ptr), buf, buf_size);
 		}
 
-		ZVAL_STRINGL(&func,"__doRequest",sizeof("__doRequest")-1);
 		ZVAL_STRINGL(&params[0], buf, buf_size);
 		ZVAL_STRING(&params[1], location);
 		if (action == NULL) {
@@ -2239,10 +2237,12 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 		ZVAL_LONG(&params[3], version);
 		ZVAL_BOOL(&params[4], one_way);
 
-		if (call_user_function(NULL, this_ptr, &func, response, 5, params) != SUCCESS) {
-			add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() failed", NULL, NULL);
-			ret = false;
-		} else if (Z_TYPE_P(response) != IS_STRING) {
+		zend_function *func = zend_hash_str_find_ptr(&Z_OBJCE_P(this_ptr)->function_table, ZEND_STRL("__dorequest"));
+		ZEND_ASSERT(func != NULL);
+
+		zend_call_known_instance_method(func, Z_OBJ_P(this_ptr), response, 5, params);
+
+		if (Z_TYPE_P(response) != IS_STRING) {
 			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_error)) {
 				/* Programmer error in __doRequest() implementation, let it bubble up. */
 			} else if (Z_TYPE_P(Z_CLIENT_SOAP_FAULT_P(this_ptr)) != IS_OBJECT) {
@@ -2256,7 +2256,6 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 	} zend_catch {
 		_bailout = true;
 	} zend_end_try();
-	zval_ptr_dtor(&func);
 	zval_ptr_dtor(&params[2]);
 	zval_ptr_dtor(&params[1]);
 	zval_ptr_dtor(&params[0]);
