@@ -5,24 +5,37 @@ Subject: [PATCH 5/6] Shrink size of static binary search tree
 
 This also makes it more efficient on the data cache.
 ---
- source/lexbor/core/sbst.h                   | 10 +++++-----
+ source/lexbor/core/sbst.h                   | 19 ++++++++++++++-----
  source/lexbor/html/tokenizer/state.c        |  2 +-
  utils/lexbor/html/tmp/tokenizer_res.h       |  2 +-
  utils/lexbor/html/tokenizer_entities_bst.py |  8 ++++----
  utils/lexbor/lexbor/LXB.py                  |  2 +-
- 5 files changed, 12 insertions(+), 12 deletions(-)
+ 5 files changed, 21 insertions(+), 12 deletions(-)
 
 diff --git a/source/lexbor/core/sbst.h b/source/lexbor/core/sbst.h
-index b0fbc54..40e0e91 100644
+index b0fbc54..15a1d40 100644
 --- a/source/lexbor/core/sbst.h
 +++ b/source/lexbor/core/sbst.h
-@@ -19,12 +19,12 @@ extern "C" {
+@@ -15,16 +15,25 @@ extern "C" {
+ 
+ #include "lexbor/core/base.h"
+ 
++#ifdef __has_attribute
++# if __has_attribute(nonstring) && defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 15
++#  define LXB_NONSTRING __attribute__((nonstring))
++# else
++#  define LXB_NONSTRING
++# endif
++#else
++# define LXB_NONSTRING
++#endif
+ 
  typedef struct {
      lxb_char_t key;
  
 -    void       *value;
 -    size_t     value_len;
-+    lxb_char_t         value[6];
++    lxb_char_t         value[6] LXB_NONSTRING;
 +    unsigned char      value_len;
  
 -    size_t     left;
@@ -35,10 +48,10 @@ index b0fbc54..40e0e91 100644
  lexbor_sbst_entry_static_t;
  
 diff --git a/source/lexbor/html/tokenizer/state.c b/source/lexbor/html/tokenizer/state.c
-index 70ca391..2f3414f 100644
+index 158aade..207b909 100644
 --- a/source/lexbor/html/tokenizer/state.c
 +++ b/source/lexbor/html/tokenizer/state.c
-@@ -1815,7 +1815,7 @@ lxb_html_tokenizer_state_char_ref_named(lxb_html_tokenizer_t *tkz,
+@@ -1820,7 +1820,7 @@ lxb_html_tokenizer_state_char_ref_named(lxb_html_tokenizer_t *tkz,
              goto done;
          }
  
@@ -61,7 +74,7 @@ index b3701d5..73ab66e 100644
   * Do not change this file!
   */
 diff --git a/utils/lexbor/html/tokenizer_entities_bst.py b/utils/lexbor/html/tokenizer_entities_bst.py
-index ee7dcb4..7cd1335 100755
+index 4fa0999..8bd83b2 100755
 --- a/utils/lexbor/html/tokenizer_entities_bst.py
 +++ b/utils/lexbor/html/tokenizer_entities_bst.py
 @@ -1,6 +1,6 @@
@@ -98,7 +111,7 @@ index ee7dcb4..7cd1335 100755
 +                 "../../../source/lexbor/html/tokenizer/res.h",
                   "data/entities.json");
 diff --git a/utils/lexbor/lexbor/LXB.py b/utils/lexbor/lexbor/LXB.py
-index 2370c66..c41e645 100755
+index 3e75812..b068ea3 100755
 --- a/utils/lexbor/lexbor/LXB.py
 +++ b/utils/lexbor/lexbor/LXB.py
 @@ -27,7 +27,7 @@ class Temp:
@@ -111,5 +124,5 @@ index 2370c66..c41e645 100755
          fh.close()
  
 -- 
-2.44.0
+2.49.0
 
