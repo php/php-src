@@ -15,7 +15,7 @@ extern "C" {
 
 #include "lexbor/core/base.h"
 
-#ifdef(__has_attribute)
+#ifdef __has_attribute
 # if __has_attribute(nonstring) && defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 15
 #  define LXB_NONSTRING __attribute__((nonstring))
 # else
