@@ -1630,8 +1630,10 @@ tail_call:
 	smart_str_appendc(str, '}');
 }
 
-static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int indent)
+static ZEND_COLD void zend_ast_export_zval(smart_str *str, zend_ast *ast, int priority, int indent)
 {
+	zval *zv = zend_ast_get_zval(ast);
+
 	ZVAL_DEREF(zv);
 	switch (Z_TYPE_P(zv)) {
 		case IS_NULL:
@@ -1651,9 +1653,15 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priorit
 				str, Z_DVAL_P(zv), (int) EG(precision), /* zero_fraction */ false);
 			break;
 		case IS_STRING:
-			smart_str_appendc(str, '\'');
-			zend_ast_export_str(str, Z_STR_P(zv));
-			smart_str_appendc(str, '\'');
+			if (ast->attr & ZEND_NAME_HEREDOC) {
+				smart_str_appends(str, "<<<HEREDOC\n");
+				zend_ast_export_str(str, Z_STR_P(zv));
+				smart_str_appends(str, "\nHEREDOC");
+			} else {
+				smart_str_appendc(str, '\'');
+				zend_ast_export_str(str, Z_STR_P(zv));
+				smart_str_appendc(str, '\'');
+			}
 			break;
 		case IS_ARRAY: {
 			zend_long idx;
@@ -1878,7 +1886,7 @@ tail_call:
 	switch (ast->kind) {
 		/* special nodes */
 		case ZEND_AST_ZVAL:
-			zend_ast_export_zval(str, zend_ast_get_zval(ast), priority, indent);
+			zend_ast_export_zval(str, ast, priority, indent);
 			break;
 		case ZEND_AST_CONSTANT: {
 			zend_string *name = zend_ast_get_constant_name(ast);

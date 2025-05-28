@@ -3132,6 +3132,10 @@ emit_token_with_val:
 	if (PARSER_MODE()) {
 		ZEND_ASSERT(Z_TYPE_P(zendlval) != IS_UNDEF);
 		elem->ast = zend_ast_create_zval_with_lineno(zendlval, start_line);
+        zend_ptr_stack *stack = &SCNG(heredoc_label_stack);
+        if (stack->elements) {
+            elem->ast->attr |= ZEND_NAME_HEREDOC;
+        }
 	}
 
 emit_token:
