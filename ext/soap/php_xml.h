@@ -41,20 +41,6 @@ xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns
 xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns);
 void parse_namespace(const xmlChar *inval, const char **value, char **namespace);
 
-#define FOREACHATTRNODE(n,c,i)      FOREACHATTRNODEEX(n,c,NULL,i)
-#define FOREACHATTRNODEEX(n,c,ns,i) \
-	do { \
-		if (n == NULL) { \
-			break; \
-		} \
-		if (c) { \
-			i = get_attribute_ex(n,c,ns); \
-		} else { \
-			i = n; \
-		} \
-		if (i != NULL) { \
-			n = i;
-
 #define FOREACHNODE(n,c,i)      FOREACHNODEEX(n,c,NULL,i)
 #define FOREACHNODEEX(n,c,ns,i) \
 	do { \
