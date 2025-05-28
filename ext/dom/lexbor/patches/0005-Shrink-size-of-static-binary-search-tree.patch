@@ -5,23 +5,27 @@ Subject: [PATCH 5/6] Shrink size of static binary search tree
 
 This also makes it more efficient on the data cache.
 ---
- source/lexbor/core/sbst.h                   | 15 ++++++++++-----
+ source/lexbor/core/sbst.h                   | 19 ++++++++++++++-----
  source/lexbor/html/tokenizer/state.c        |  2 +-
  utils/lexbor/html/tmp/tokenizer_res.h       |  2 +-
  utils/lexbor/html/tokenizer_entities_bst.py |  8 ++++----
  utils/lexbor/lexbor/LXB.py                  |  2 +-
- 5 files changed, 17 insertions(+), 12 deletions(-)
+ 5 files changed, 21 insertions(+), 12 deletions(-)
 
 diff --git a/source/lexbor/core/sbst.h b/source/lexbor/core/sbst.h
-index b0fbc54..6a57835 100644
+index b0fbc54..15a1d40 100644
 --- a/source/lexbor/core/sbst.h
 +++ b/source/lexbor/core/sbst.h
-@@ -15,16 +15,21 @@ extern "C" {
+@@ -15,16 +15,25 @@ extern "C" {
  
  #include "lexbor/core/base.h"
  
-+#if __has_attribute(nonstring) && defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 15
-+# define LXB_NONSTRING __attribute__((nonstring))
++#ifdef __has_attribute
++# if __has_attribute(nonstring) && defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 15
++#  define LXB_NONSTRING __attribute__((nonstring))
++# else
++#  define LXB_NONSTRING
++# endif
 +#else
 +# define LXB_NONSTRING
 +#endif
