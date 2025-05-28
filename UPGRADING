@@ -198,6 +198,8 @@ PHP 8.5 UPGRADE NOTES
     request spent in libcurl’s connection queue before it was sent.
     This value can also be retrieved by passing CURLINFO_QUEUE_TIME_T to the
     curl_getinfo() $option parameter.
+  . Added support for CURLOPT_SSL_SIGNATURE_ALGORITHMS to specify the signature
+    algorithms to use for TLS.
 
 - DOM:
   . Added Dom\Element::$outerHTML.

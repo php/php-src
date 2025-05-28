@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Curl:
   . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
   . Add support for CURLINFO_QUEUE_TIME_T in curl_getinfo() (thecaliskan)
+  . Add support for CURLOPT_SSL_SIGNATURE_ALGORITHMS. (Ayesh Karunaratne)
 
 - OPcache:
   . Disallow changing opcache.memory_consumption when SHM is already set up.
