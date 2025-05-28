@@ -41,7 +41,7 @@ $_main:
 0000 V2 = NEW 0 string("Other")
 0001 DO_FCALL
 0002 ASSIGN CV0($o) V2
-0003 INIT_FCALL 1 112 string("_test1")
+0003 INIT_FCALL 1 %d string("_test1")
 0004 SEND_VAL int(5) 1
 0005 T2 = DO_UCALL
 0006 INIT_METHOD_CALL 1 CV0($o) string("foo")
@@ -52,7 +52,7 @@ $_main:
 0011 SEND_VAL T2 1
 0012 V2 = DO_UCALL
 0013 ASSIGN CV1($res1) V2
-0014 INIT_FCALL 1 96 string("var_dump")
+0014 INIT_FCALL 1 %d string("var_dump")
 0015 SEND_VAR CV1($res1) 1
 0016 DO_ICALL
 0017 RETURN int(1)
