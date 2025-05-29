@@ -1118,29 +1118,27 @@ static xmlNodePtr to_xml_double(encodeTypePtr type, zval *data, int style, xmlNo
 
 static zval *to_zval_bool(zval *ret, encodeTypePtr type, xmlNodePtr data)
 {
-	ZVAL_NULL(ret);
 	FIND_XML_NULL(data, ret);
 
-	if (data && data->children) {
-		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			whiteSpace_collapse(data->children->content);
-			if (stricmp((char*)data->children->content, "true") == 0 ||
-				stricmp((char*)data->children->content, "t") == 0 ||
-				strcmp((char*)data->children->content, "1") == 0) {
-				ZVAL_TRUE(ret);
-			} else if (stricmp((char*)data->children->content, "false") == 0 ||
-				stricmp((char*)data->children->content, "f") == 0 ||
-				strcmp((char*)data->children->content, "0") == 0) {
-				ZVAL_FALSE(ret);
-			} else {
-				ZVAL_STRING(ret, (char*)data->children->content);
-				convert_to_boolean(ret);
-			}
-		} else {
-			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
-		}
-	} else {
+	if (!data->children) {
 		ZVAL_NULL(ret);
+		return ret;
+	}
+	if (data->children->type != XML_TEXT_NODE || data->children->next != NULL) {
+		// TODO Convert to exception?
+		soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+	}
+
+	whiteSpace_collapse(data->children->content);
+	if (
+		data->children->content[0] == '\0' /* Check for empty string */
+		|| strcmp((const char*)data->children->content, "0") == 0
+		|| stricmp((const char*)data->children->content, "f") == 0
+		|| stricmp((const char*)data->children->content, "false") == 0
+	) {
+		ZVAL_FALSE(ret);
+	} else {
+		ZVAL_TRUE(ret);
 	}
 	return ret;
 }
