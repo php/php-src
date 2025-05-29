@@ -5,11 +5,6 @@ if /i "%GITHUB_ACTIONS%" neq "True" (
     exit /b 3
 )
 
-del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-
 call %~dp0find-target-branch.bat
 set STABILITY=staging
 set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VS%-%PHP_SDK_ARCH%
@@ -32,7 +27,11 @@ if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 if "%ASAN%" equ "1" set ADD_CONF=%ADD_CONF% --enable-sanitizer --enable-debug-pack
 
-set CFLAGS=/W2 /WX /w14013 /wd4146 /wd4244
+rem C4018: comparison: signed/unsigned mismatch
+rem C4146: unary minus operator applied to unsigned type
+rem C4244: type conversion, possible loss of data
+rem C4267: 'size_t' type conversion, possible loss of data
+set CFLAGS=/W3 /WX /wd4018 /wd4146 /wd4244 /wd4267
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
@@ -45,6 +44,8 @@ cmd /c configure.bat ^
 if %errorlevel% neq 0 exit /b 3
 
 nmake /NOLOGO
+if %errorlevel% neq 0 exit /b 3
+nmake /NOLOGO comtest.dll
 if %errorlevel% neq 0 exit /b 3
 
 exit /b 0

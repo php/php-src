@@ -445,7 +445,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	const char *hdr = headers;
 	char *ahdr = NULL;
 #if PHP_SIGCHILD
-	void (*sig_handler)() = NULL;
+	void (*sig_handler)(int) = NULL;
 #endif
 
 #define MAIL_RET(val) \

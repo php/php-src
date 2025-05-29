@@ -1670,7 +1670,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 				break;
 			}
 			parent = parent->parent;
-  	}
+  		}
 		if (parent == NULL) {
 			cur_type->form = XSD_FORM_UNQUALIFIED;
 		}

@@ -21,6 +21,8 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
+#include "Zend/zend_portability.h"
+
 #define ZEND_VM_SPEC		1
 #define ZEND_VM_LINES		0
 #define ZEND_VM_KIND_CALL	1
@@ -291,7 +293,8 @@ END_EXTERN_C()
 #define ZEND_FRAMELESS_ICALL_3              207
 #define ZEND_JMP_FRAMELESS                  208
 #define ZEND_INIT_PARENT_PROPERTY_HOOK_CALL 209
+#define ZEND_DECLARE_ATTRIBUTED_CONST       210
 
-#define ZEND_VM_LAST_OPCODE                 209
+#define ZEND_VM_LAST_OPCODE                 210
 
 #endif

@@ -28,7 +28,6 @@
 #include <stdint.h>
 
 #ifdef __SSE2__
-# include <mmintrin.h>
 # include <emmintrin.h>
 #endif
 #if defined(__AVX2__)
@@ -209,8 +208,14 @@ typedef struct {
 
 /* This iterates over a zend_type_list. */
 #define ZEND_TYPE_LIST_FOREACH(list, type_ptr) do { \
+	const zend_type *_list = (list)->types; \
+	const zend_type *_end = _list + (list)->num_types; \
+	for (; _list < _end; _list++) { \
+		type_ptr = _list;
+
+#define ZEND_TYPE_LIST_FOREACH_MUTABLE(list, type_ptr) do { \
 	zend_type *_list = (list)->types; \
-	zend_type *_end = _list + (list)->num_types; \
+	const zend_type *_end = _list + (list)->num_types; \
 	for (; _list < _end; _list++) { \
 		type_ptr = _list;
 
@@ -221,7 +226,22 @@ typedef struct {
 /* This iterates over any zend_type. If it's a type list, all list elements will
  * be visited. If it's a single type, only the single type is visited. */
 #define ZEND_TYPE_FOREACH(type, type_ptr) do { \
-	zend_type *_cur, *_end; \
+	const zend_type *_cur, *_end; \
+	if (ZEND_TYPE_HAS_LIST(type)) { \
+		zend_type_list *_list = ZEND_TYPE_LIST(type); \
+		_cur = _list->types; \
+		_end = _cur + _list->num_types; \
+	} else { \
+		_cur = &(type); \
+		_end = _cur + 1; \
+	} \
+	do { \
+		type_ptr = _cur;
+
+
+#define ZEND_TYPE_FOREACH_MUTABLE(type, type_ptr) do { \
+	zend_type *_cur; \
+	const zend_type *_end; \
 	if (ZEND_TYPE_HAS_LIST(type)) { \
 		zend_type_list *_list = ZEND_TYPE_LIST(type); \
 		_cur = _list->types; \

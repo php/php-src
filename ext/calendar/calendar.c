@@ -131,8 +131,10 @@ static void _php_cal_info(int cal, zval *ret)
 	calendar = &cal_conversion_table[cal];
 	array_init(ret);
 
-	array_init(&months);
-	array_init(&smonths);
+	array_init_size(&months, calendar->num_months + 1);
+	array_init_size(&smonths, calendar->num_months + 1);
+	zend_hash_real_init_packed(Z_ARRVAL(months));
+	zend_hash_real_init_packed(Z_ARRVAL(smonths));
 
 	for (i = 1; i <= calendar->num_months; i++) {
 		add_index_string(&months, i, calendar->month_name_long[i]);
@@ -160,7 +162,8 @@ PHP_FUNCTION(cal_info)
 		int i;
 		zval val;
 
-		array_init(return_value);
+		array_init_size(return_value, CAL_NUM_CALS);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 		for (i = 0; i < CAL_NUM_CALS; i++) {
 			_php_cal_info(i, &val);

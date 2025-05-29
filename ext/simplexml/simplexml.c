@@ -631,6 +631,10 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 	SXE_ITER        type;
 	zval            member;
 
+	if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
+
 	sxe = php_sxe_fetch_object(object);
 	GET_NODE(sxe, node);
 	if (UNEXPECTED(!node)) {
@@ -1213,6 +1217,21 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 }
 /* }}} */
 
+static const char *sxe_get_object_type_name(xmlXPathObjectType type)
+{
+	switch (type) {
+		case XPATH_BOOLEAN: return "bool";
+		case XPATH_NUMBER: return "number";
+		case XPATH_STRING: return "string";
+#ifdef LIBXML_XPTR_LOCS_ENABLED
+		case XPATH_POINT: return "point";
+		case XPATH_RANGE: return "range";
+		case XPATH_LOCATIONSET: return "location set";
+#endif
+		default: return "undefined";
+	}
+}
+
 /* {{{ Runs XPath query on the XML data */
 PHP_METHOD(SimpleXMLElement, xpath)
 {
@@ -1266,6 +1285,13 @@ PHP_METHOD(SimpleXMLElement, xpath)
 	}
 
 	if (!retval) {
+		RETURN_FALSE;
+	}
+
+	if (UNEXPECTED(retval->type != XPATH_NODESET)) {
+		php_error_docref(NULL, E_WARNING, "XPath expression must return a node set, %s returned",
+			sxe_get_object_type_name(retval->type));
+		xmlXPathFreeObject(retval);
 		RETURN_FALSE;
 	}
 
@@ -1377,7 +1403,8 @@ PHP_METHOD(SimpleXMLElement, asXML)
 	if (!result) {
 		RETURN_FALSE;
 	} else {
-		RETURN_NEW_STR(result);
+		/* Defense-in-depth: don't use the NEW variant in case somehow an empty string gets returned */
+		RETURN_STR(result);
 	}
 }
 /* }}} */

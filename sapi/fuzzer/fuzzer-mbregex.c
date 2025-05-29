@@ -30,14 +30,15 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 #ifdef HAVE_MBREGEX
-	char *args[2];
-	char *data = malloc(Size+1);
-	memcpy(data, Data, Size);
-	data[Size] = '\0';
 
 	if (fuzzer_request_startup() == FAILURE) {
 		return 0;
 	}
+
+	char *args[2];
+	char *data = malloc(Size+1);
+	memcpy(data, Data, Size);
+	data[Size] = '\0';
 
 	fuzzer_setup_dummy_frame();
 

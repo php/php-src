@@ -30,13 +30,7 @@
 #include "php_zip.h"
 #include "php_zip_arginfo.h"
 
-#ifdef HAVE_GLOB
-#ifndef PHP_WIN32
-#include <glob.h>
-#else
-#include "win32/glob.h"
-#endif
-#endif
+#include "php_glob.h"
 
 /* {{{ Resource le */
 static int le_zip_dir;
@@ -353,13 +347,13 @@ typedef struct {
 #endif
 } zip_options;
 
+/* Expects opts to be zero-initialized. */
 static int php_zip_parse_options(HashTable *options, zip_options *opts)
 /* {{{ */
 {
 	zval *option;
 
 	/* default values */
-	memset(opts, 0, sizeof(zip_options));
 	opts->flags = ZIP_FL_OVERWRITE;
 	opts->comp_method = -1; /* -1 to not change default */
 #ifdef HAVE_ENCRYPTION
@@ -580,48 +574,15 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
-#ifdef HAVE_GLOB /* {{{ */
-#ifndef GLOB_ONLYDIR
-#define GLOB_ONLYDIR (1<<30)
-#define GLOB_EMULATE_ONLYDIR
-#define GLOB_FLAGMASK (~GLOB_ONLYDIR)
-#else
-#define GLOB_FLAGMASK (~0)
-#endif
-#ifndef GLOB_BRACE
-# define GLOB_BRACE 0
-#endif
-#ifndef GLOB_MARK
-# define GLOB_MARK 0
-#endif
-#ifndef GLOB_NOSORT
-# define GLOB_NOSORT 0
-#endif
-#ifndef GLOB_NOCHECK
-# define GLOB_NOCHECK 0
-#endif
-#ifndef GLOB_NOESCAPE
-# define GLOB_NOESCAPE 0
-#endif
-#ifndef GLOB_ERR
-# define GLOB_ERR 0
-#endif
-
-/* This is used for checking validity of passed flags (passing invalid flags causes segfault in glob()!! */
-#define GLOB_AVAILABLE_FLAGS (0 | GLOB_BRACE | GLOB_MARK | GLOB_NOSORT | GLOB_NOCHECK | GLOB_NOESCAPE | GLOB_ERR | GLOB_ONLYDIR)
-
-#endif /* }}} */
-
 int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_value) /* {{{ */
 {
-#ifdef HAVE_GLOB
 	int cwd_skip = 0;
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
 	char *result;
 #endif
-	glob_t globbuf;
+	php_glob_t globbuf;
 	size_t n;
 	int ret;
 
@@ -630,7 +591,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 		return -1;
 	}
 
-	if ((GLOB_AVAILABLE_FLAGS & flags) != flags) {
+	if ((PHP_GLOB_AVAILABLE_FLAGS & flags) != flags) {
 
 		php_error_docref(NULL, E_WARNING, "At least one of the passed flags is invalid or not supported on this platform");
 		return -1;
@@ -655,12 +616,12 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 #endif
 
 	globbuf.gl_offs = 0;
-	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
-#ifdef GLOB_NOMATCH
-		if (GLOB_NOMATCH == ret) {
+	if (0 != (ret = php_glob(pattern, flags & PHP_GLOB_FLAGMASK, NULL, &globbuf))) {
+#ifdef PHP_GLOB_NOMATCH
+		if (PHP_GLOB_NOMATCH == ret) {
 			/* Some glob implementation simply return no data if no matches
-			   were found, others return the GLOB_NOMATCH error code.
-			   We don't want to treat GLOB_NOMATCH as an error condition
+			   were found, others return the PHP_GLOB_NOMATCH error code.
+			   We don't want to treat PHP_GLOB_NOMATCH as an error condition
 			   so that PHP glob() behaves the same on both types of
 			   implementations and so that 'foreach (glob() as ...'
 			   can be used for simple glob() calls without further error
@@ -687,7 +648,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
-		/* we need to do this every time since GLOB_ONLYDIR does not guarantee that
+		/* we need to do this every time since PHP_GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
 		 * following:
 		 * If the information about the type of the file is easily available
@@ -695,7 +656,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 		 * determine the information for each file. I.e., the caller must still be
 		 * able to filter directories out.
 		 */
-		if (flags & GLOB_ONLYDIR) {
+		if (flags & PHP_GLOB_ONLYDIR) {
 			zend_stat_t s = {0};
 
 			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
@@ -710,12 +671,8 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 	}
 
 	ret = globbuf.gl_pathc;
-	globfree(&globbuf);
+	php_globfree(&globbuf);
 	return ret;
-#else
-	zend_throw_error(NULL, "Glob support is not available");
-	return 0;
-#endif  /* HAVE_GLOB */
 }
 /* }}} */
 
@@ -760,6 +717,10 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 		re = pcre_get_compiled_regex(regexp, &capture_count);
 		if (!re) {
+			for (i = 0; i < files_cnt; i++) {
+				zend_string_release_ex(namelist[i], 0);
+			}
+			efree(namelist);
 			php_error_docref(NULL, E_WARNING, "Invalid expression");
 			return -1;
 		}
@@ -897,6 +858,8 @@ static zval *php_zip_get_property_ptr_ptr(zend_object *object, zend_string *name
 
 	if (hnd == NULL) {
 		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+	} else if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	}
 
 	return retval;
@@ -1045,9 +1008,6 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	ze_zip_object * intern = php_zip_fetch_object(object);
 	int i;
 
-	if (!intern) {
-		return;
-	}
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
@@ -1734,7 +1694,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	size_t  path_len = 1;
 	zend_long glob_flags = 0;
 	HashTable *options = NULL;
-	zip_options opts;
+	zip_options opts = {0};
 	int found;
 	zend_string *pattern;
 
@@ -1798,6 +1758,9 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 
 				if (opts.add_path) {
 					if ((opts.add_path_len + file_stripped_len) > MAXPATHLEN) {
+						if (basename) {
+							zend_string_release_ex(basename, 0);
+						}
 						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %zd given)",
 						MAXPATHLEN - 1, (opts.add_path_len + file_stripped_len));
 						zend_array_destroy(Z_ARR_P(return_value));
@@ -1836,6 +1799,10 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 #endif
 			}
 		}
+	} else if (found == 0) {
+		RETURN_EMPTY_ARRAY();
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -3048,14 +3015,11 @@ PHP_METHOD(ZipArchive, registerProgressCallback)
 		RETURN_THROWS();
 	}
 
-	/* free if called twice */
-	php_zip_progress_callback_free(obj);
-
 	/* register */
-	zend_fcc_dup(&obj->progress_callback, &fcc);
 	if (zip_register_progress_callback_with_state(intern, rate, php_zip_progress_callback, php_zip_progress_callback_free, obj)) {
 		RETURN_FALSE;
 	}
+	zend_fcc_dup(&obj->progress_callback, &fcc);
 
 	RETURN_TRUE;
 }
@@ -3074,10 +3038,12 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 		return -1;
 	}
 	bool failed = false;
-	zend_long retval = zval_try_get_long(&cb_retval, &failed);
+	zval *cb_retval_ptr = &cb_retval;
+	ZVAL_DEREF(cb_retval_ptr);
+	zend_long retval = zval_try_get_long(cb_retval_ptr, &failed);
 	if (failed) {
 		zend_type_error("Return value of callback provided to ZipArchive::registerCancelCallback()"
-			" must be of type int, %s returned", zend_zval_value_name(&cb_retval));
+			" must be of type int, %s returned", zend_zval_value_name(cb_retval_ptr));
 		zval_ptr_dtor(&cb_retval);
 		return -1;
 	}
@@ -3106,14 +3072,11 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 		RETURN_THROWS();
 	}
 
-	/* free if called twice */
-	php_zip_cancel_callback_free(obj);
-
 	/* register */
-	zend_fcc_dup(&obj->cancel_callback, &fcc);
 	if (zip_register_cancel_callback_with_state(intern, php_zip_cancel_callback, php_zip_cancel_callback_free, obj)) {
 		RETURN_FALSE;
 	}
+	zend_fcc_dup(&obj->cancel_callback, &fcc);
 
 	RETURN_TRUE;
 }

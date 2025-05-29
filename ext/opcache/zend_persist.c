@@ -195,6 +195,9 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		zend_persist_op_array(&z);
 		copy->op_array = Z_PTR(z);
 		node = (zend_ast *) copy;
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *copy = zend_shared_memdup(ast, sizeof(zend_ast_fcc));
+		node = (zend_ast *) copy;
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();
@@ -277,6 +280,8 @@ static void zend_persist_zval(zval *z)
 				efree(old_ref);
 			}
 			break;
+		case IS_PTR:
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;
@@ -328,8 +333,8 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name)
 {
 	uint32_t ret;
 
-	if (zend_string_equals_literal_ci(type_name, "self") ||
-			zend_string_equals_literal_ci(type_name, "parent")) {
+	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_SELF)) ||
+			zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return 0;
 	}
 
@@ -364,7 +369,7 @@ static void zend_persist_type(zend_type *type) {
 	}
 
 	zend_type *single_type;
-	ZEND_TYPE_FOREACH(*type, single_type) {
+	ZEND_TYPE_FOREACH_MUTABLE(*type, single_type) {
 		if (ZEND_TYPE_HAS_LIST(*single_type)) {
 			zend_persist_type(single_type);
 			continue;
@@ -609,6 +614,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				}
 			}
 #endif
+			if (opline->opcode == ZEND_OP_DATA && (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST) {
+				zval *literal = RT_CONSTANT(opline, opline->op1);
+				HashTable *attributes = Z_PTR_P(literal);
+				attributes = zend_persist_attributes(attributes);
+				ZVAL_PTR(literal, attributes);
+			}
 		}
 
 		efree(op_array->opcodes);
@@ -745,7 +756,11 @@ static zend_op_array *zend_persist_class_method(zend_op_array *op_array, zend_cl
 				// Real dynamically created internal functions like enum methods must have their own run_time_cache pointer. They're always on the same scope as their defining class.
 				// However, copies - as caused by inheritance of internal methods - must retain the original run_time_cache pointer, shared with the source function.
 				if (!op_array->scope || (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))) {
-					ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+					if (op_array->fn_flags & ZEND_ACC_PRELOADED) {
+						ZEND_MAP_PTR_NEW_STATIC(op_array->run_time_cache);
+					} else {
+						ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+					}
 				}
 			}
 		}
@@ -1423,6 +1438,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 	if (for_shm) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
+		ZCSG(map_ptr_static_last) = zend_map_ptr_static_last;
 	}
 
 #ifdef HAVE_JIT

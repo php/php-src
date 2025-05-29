@@ -50,6 +50,7 @@ typedef struct {
 	pdo_sqlite_error_info einfo;
 	struct pdo_sqlite_func *funcs;
 	struct pdo_sqlite_collation *collations;
+	zend_fcall_info_cache authorizer_fcc;
 } pdo_sqlite_db_handle;
 
 typedef struct {

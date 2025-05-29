@@ -55,7 +55,7 @@ $document->documentElement->textContent = "quote 'test'";
 var_dump($document->documentElement->textContent);
 var_dump($document->saveHTML());
 ?>
---EXPECT--
+--EXPECTF--
 -- Attribute tests --
 string(38) "<element attribute="value"></element>
 "
@@ -67,10 +67,10 @@ string(13) "hello & world"
 string(50) "<element attribute="hello &amp; world"></element>
 "
 string(9) "<b>hi</b>"
-string(54) "<element attribute="&lt;b&gt;hi&lt;/b&gt;"></element>
+string(%d) "<element attribute=%r("&lt;b&gt;hi&lt;\/b&gt;"|"<b>hi<\/b>")%r></element>
 "
 string(12) "quote "test""
-string(45) "<element attribute='quote "test"'></element>
+string(%d) "<element attribute=%r('quote "test"'|"quote &quot;test&quot;")%r></element>
 "
 string(12) "quote 'test'"
 string(45) "<element attribute="quote 'test'"></element>

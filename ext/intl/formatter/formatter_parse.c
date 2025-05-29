@@ -135,7 +135,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
 		RETURN_THROWS();
@@ -165,8 +165,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */
 	u8str = intl_convert_utf16_to_utf8(currency, u_strlen(currency), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-8 failed" );
-	zval_ptr_dtor( zcurrency );
-	ZVAL_NEW_STR(zcurrency, u8str);
+	ZEND_TRY_ASSIGN_REF_NEW_STR(zcurrency, u8str);
 
 	RETVAL_DOUBLE( number );
 }

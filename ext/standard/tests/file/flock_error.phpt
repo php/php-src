@@ -70,4 +70,4 @@ flock(): Argument #2 ($operation) must be of type int, string given
 flock(): Argument #2 ($operation) must be of type int, string given
 --- Iteration 7 ---
 flock(): Argument #2 ($operation) must be of type int, string given
-flock(): supplied resource is not a valid stream resource
+flock(): Argument #1 ($stream) must be an open stream resource

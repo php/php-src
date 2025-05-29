@@ -283,13 +283,12 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						if ((prop_info->flags & ZEND_ACC_VIRTUAL) && !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
 							continue;
 						}
-						zend_read_property_ex(prop_info->ce, Z_OBJ_P(val), prop_info->name, /* silent */ true, &tmp);
+						data = zend_read_property_ex(prop_info->ce, Z_OBJ_P(val), prop_info->name, /* silent */ true, &tmp);
 						if (EG(exception)) {
 							PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
 							zend_release_properties(prop_ht);
 							return FAILURE;
 						}
-						data = &tmp;
 					}
 
 					if (need_comma) {

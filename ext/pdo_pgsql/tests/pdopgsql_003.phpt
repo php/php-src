@@ -26,6 +26,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 
---EXPECT--
+--EXPECTF--
 "This is a quote"""
-SQLSTATE[HY000]: General error: 7 incomplete multibyte character
+SQLSTATE[HY000]: General error: 7 %r(incomplete|invalid)%r multibyte character

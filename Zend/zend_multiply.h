@@ -290,6 +290,19 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 	return (size_t) res;
 }
 
+#elif defined(_MSC_VER)
+
+static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)
+{
+	size_t res;
+	if (UNEXPECTED(FAILED(ULongLongMult(nmemb, size, &res)) || FAILED(ULongLongAdd(res, offset, &res)))) {
+		*overflow = 1;
+		return 0;
+	}
+	*overflow = 0;
+	return res;
+}
+
 #else
 
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)

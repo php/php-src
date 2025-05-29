@@ -53,10 +53,6 @@ ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
-/* true globals */
-ZEND_API const zend_fcall_info empty_fcall_info = {0};
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = {0};
-
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
 #endif
@@ -303,6 +299,9 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 				}
 				if (c->filename) {
 					zend_string_release_ex(c->filename, 0);
+				}
+				if (c->attributes) {
+					zend_hash_release(c->attributes);
 				}
 				efree(c);
 				zend_string_release_ex(key, 0);

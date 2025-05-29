@@ -83,6 +83,18 @@ function ut_main()
         $res_str .= "-----------------\n";
     }
 
+    try {
+	    ut_loc_get_display_script("a-D\0E", "locale=a-DE");
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(). PHP_EOL;
+    }
+
+    try {
+	    ut_loc_get_display_script("a-DE", "locale=a\0-DE");
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(). PHP_EOL;
+    }
+
     return $res_str;
 
 }
@@ -92,6 +104,10 @@ ut_run();
 
 ?>
 --EXPECT--
+Locale::getDisplayScript(): Argument #1 ($locale) must not contain any null bytes
+Locale::getDisplayScript(): Argument #2 ($displayLocale) must not contain any null bytes
+locale_get_display_script(): Argument #1 ($locale) must not contain any null bytes
+locale_get_display_script(): Argument #2 ($displayLocale) must not contain any null bytes
 locale='uk-ua_CALIFORNIA@currency=;currency=GRN'
 disp_locale=en :  display_script=
 disp_locale=fr :  display_script=

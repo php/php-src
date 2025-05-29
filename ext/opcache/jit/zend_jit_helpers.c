@@ -42,7 +42,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_tim
 {
 	void **run_time_cache;
 
-	if (op_array->type == ZEND_USER_FUNCTION && !RUN_TIME_CACHE(op_array)) {
+	if (!RUN_TIME_CACHE(op_array)) {
 		run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 		memset(run_time_cache, 0, op_array->cache_size);
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
@@ -120,11 +120,6 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call_tmp(zval *objec
 
 	zend_jit_invalid_method_call(object);
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-}
-
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method)
-{
-	zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
 }
 
 static void ZEND_FASTCALL zend_jit_unref_helper(zval *zv)
@@ -1723,7 +1718,7 @@ static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op
 	zend_string *result_str;
 	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(Z_STR_P(op1), Z_STR_P(op2));
 
-	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+	if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
 		return;
 	}
@@ -1759,7 +1754,7 @@ static void ZEND_FASTCALL zend_jit_fast_concat_helper(zval *result, zval *op1, z
 	zend_string *result_str;
 	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(Z_STR_P(op1), Z_STR_P(op2));
 
-	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+	if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
 		return;
 	}
@@ -1783,7 +1778,7 @@ static void ZEND_FASTCALL zend_jit_fast_concat_tmp_helper(zval *result, zval *op
 	zend_string *result_str;
 	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(Z_STR_P(op1), Z_STR_P(op2));
 
-	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
+	if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
 		return;
 	}
@@ -1905,9 +1900,8 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
-	void **cache_slot = CACHE_ADDR(opline->extended_value);
 	bool ret = zend_check_user_type_slow(
-		&arg_info->type, arg, /* ref */ NULL, cache_slot, /* is_return_type */ false);
+		&arg_info->type, arg, /* ref */ NULL, /* is_return_type */ false);
 	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
 		return 0;
@@ -1915,7 +1909,7 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 	return ret;
 }
 
-static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
+static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info)
 {
     if (Z_TYPE_P(arg) == IS_NULL) {
 		ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
@@ -1924,7 +1918,7 @@ static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_a
 		}
 	}
 	if (UNEXPECTED(!zend_check_user_type_slow(
-			&arg_info->type, arg, /* ref */ NULL, cache_slot, /* is_return_type */ true))) {
+			&arg_info->type, arg, /* ref */ NULL, /* is_return_type */ true))) {
 		zend_verify_return_error((zend_function*)op_array, arg);
 	}
 }

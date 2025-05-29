@@ -33,8 +33,6 @@
 #include "dom_properties.h"
 #include "token_list.h"
 #include "zend_interfaces.h"
-#include "lexbor/lexbor/core/types.h"
-#include "lexbor/lexbor/core/lexbor.h"
 
 #include "ext/standard/info.h"
 
@@ -357,6 +355,9 @@ static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, in
 		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
 
+	if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
 	return NULL;
 }
 
@@ -366,13 +367,14 @@ static zend_always_inline const dom_prop_handler *dom_get_prop_handler(const dom
 
 	if (obj->prop_handler != NULL) {
 		if (cache_slot && *cache_slot == obj->prop_handler) {
-			hnd = *(cache_slot + 1);
+			hnd = cache_slot[1];
 		}
 		if (!hnd) {
 			hnd = zend_hash_find_ptr(obj->prop_handler, name);
 			if (cache_slot) {
-				*cache_slot = obj->prop_handler;
-				*(cache_slot + 1) = (void *) hnd;
+				cache_slot[0] = obj->prop_handler;
+				cache_slot[1] = (void *) hnd;
+				cache_slot[2] = NULL;
 			}
 		}
 	}
@@ -694,6 +696,7 @@ static zend_object *dom_token_list_new(zend_class_entry *class_type)
 
 static const zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("lexbor")
 	ZEND_MOD_CONFLICTS("domxml")
 	ZEND_MOD_END
 };
@@ -733,22 +736,6 @@ static int dom_modern_nodemap_has_dimension(zend_object *object, zval *member, i
 void dom_xpath_objects_free_storage(zend_object *object);
 HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n);
 #endif
-
-static void *dom_malloc(size_t size) {
-	return emalloc(size);
-}
-
-static void *dom_realloc(void *dst, size_t size) {
-	return erealloc(dst, size);
-}
-
-static void *dom_calloc(size_t num, size_t size) {
-	return ecalloc(num, size);
-}
-
-static void dom_free(void *ptr) {
-	efree(ptr);
-}
 
 /* {{{ PHP_MINIT_FUNCTION(dom) */
 PHP_MINIT_FUNCTION(dom)
@@ -1319,8 +1306,6 @@ PHP_MINIT_FUNCTION(dom)
 
 	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
 	php_libxml_register_export(dom_modern_node_class_entry, php_dom_export_node);
-
-	lexbor_memory_setup(dom_malloc, dom_realloc, dom_calloc, dom_free);
 
 	return SUCCESS;
 }

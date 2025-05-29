@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c01c9337e58601ff9e6c85072a62f68cc7fec9ba */
+ * Stub hash: 0c838fed60b29671fe04e63315ab662d8cb16f0c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -68,7 +68,6 @@ ZEND_METHOD(SplFixedArray, offsetGet);
 ZEND_METHOD(SplFixedArray, offsetSet);
 ZEND_METHOD(SplFixedArray, offsetUnset);
 ZEND_METHOD(SplFixedArray, getIterator);
-ZEND_METHOD(SplFixedArray, jsonSerialize);
 
 static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, __construct, arginfo_class_SplFixedArray___construct, ZEND_ACC_PUBLIC)
@@ -85,7 +84,7 @@ static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, offsetSet, arginfo_class_SplFixedArray_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetUnset, arginfo_class_SplFixedArray_offsetUnset, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, getIterator, arginfo_class_SplFixedArray_getIterator, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFixedArray, jsonSerialize, arginfo_class_SplFixedArray_jsonSerialize, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("jsonSerialize", zim_SplFixedArray_toArray, arginfo_class_SplFixedArray_jsonSerialize, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

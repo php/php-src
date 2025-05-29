@@ -132,7 +132,7 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 	/* Only dtd named node maps, i.e. the ones based on a libxml hash table or attribute collections,
 	 * are keyed by the name because in that case the name is unique. */
 	if (!objmap->ht && objmap->nodetype != XML_ATTRIBUTE_NODE) {
-		ZVAL_LONG(key, iter->index);
+		ZVAL_LONG(key, iterator->index);
 	} else {
 		dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 
@@ -179,6 +179,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 		return;
 	}
 
+	iterator->index++;
+
 	dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 	dom_nnodemap_object *objmap = php_dom_iterator_get_nnmap(iterator);
 
@@ -187,9 +189,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
 				HashTable *nodeht = Z_ARRVAL_P(&objmap->baseobj_zv);
-				zval *entry;
-				zend_hash_move_forward_ex(nodeht, &iterator->pos);
-				if ((entry = zend_hash_get_current_data_ex(nodeht, &iterator->pos))) {
+				zval *entry = zend_hash_index_find(nodeht, iterator->index);
+				if (entry) {
 					zval_ptr_dtor(&iterator->curobj);
 					ZVAL_COPY(&iterator->curobj, entry);
 					return;
@@ -203,7 +204,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 						php_dom_mark_cache_tag_up_to_date_from_doc_ref(&iterator->cache_tag, intern->document);
 						curnode = dom_fetch_first_iteration_item(objmap);
 						zend_ulong index = 0;
-						while (curnode != NULL && index++ < iter->index) {
+						while (curnode != NULL && index++ < iterator->index) {
 							curnode = curnode->next;
 						}
 					} else {
@@ -224,15 +225,15 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 						previndex = 0;
 						curnode = php_dom_first_child_of_container_node(basenode);
 					} else {
-						previndex = iter->index - 1;
+						previndex = iterator->index - 1;
 						curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 					}
 					curnode = dom_get_elements_by_tag_name_ns_raw(
-						basenode, curnode, objmap->ns, objmap->local, objmap->local_lower, &previndex, iter->index);
+						basenode, curnode, objmap->ns, objmap->local, objmap->local_lower, &previndex, iterator->index);
 				}
 			}
 		} else {
-			curnode = php_dom_libxml_hash_iter(objmap, iter->index);
+			curnode = php_dom_libxml_hash_iter(objmap, iterator->index);
 		}
 	}
 
@@ -261,22 +262,18 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
 	xmlNodePtr curnode=NULL;
-	HashTable *nodeht;
-	zval *entry;
 	php_dom_iterator *iterator;
 
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
-	iterator = emalloc(sizeof(php_dom_iterator));
+	iterator = emalloc(sizeof(*iterator));
+	memset(iterator, 0, sizeof(*iterator));
 	zend_iterator_init(&iterator->intern);
-	iterator->cache_tag.modification_nr = 0;
 
 	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_dom_iterator_funcs;
-
-	ZVAL_UNDEF(&iterator->curobj);
 
 	intern = Z_DOMOBJ_P(object);
 	objmap = (dom_nnodemap_object *)intern->ptr;
@@ -284,9 +281,9 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 		if (objmap->nodetype != XML_ENTITY_NODE &&
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
-				nodeht = Z_ARRVAL_P(&objmap->baseobj_zv);
-				zend_hash_internal_pointer_reset_ex(nodeht, &iterator->pos);
-				if ((entry = zend_hash_get_current_data_ex(nodeht, &iterator->pos))) {
+				HashTable *nodeht = Z_ARRVAL_P(&objmap->baseobj_zv);
+				zval *entry = zend_hash_index_find(nodeht, 0);
+				if (entry) {
 					ZVAL_COPY(&iterator->curobj, entry);
 				}
 			} else {

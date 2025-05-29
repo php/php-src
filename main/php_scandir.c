@@ -83,7 +83,7 @@ PHPAPI int php_scandir(const char *dirname, struct dirent **namelist[], int (*se
 
 			newv = (struct dirent **) realloc (vector, vector_size * sizeof (struct dirent *));
 			if (!newv) {
-				return -1;
+				goto fail;
 			}
 			vector = newv;
 		}
@@ -113,6 +113,7 @@ fail:
 		free(vector[nfiles]);
 	}
 	free(vector);
+	closedir(dirp);
 	return -1;
 }
 #endif

@@ -196,7 +196,7 @@ PHP_LIBXML_API unsigned int php_libxml_increment_doc_ref(php_libxml_node_object 
 PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document);
 PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object);
-PHP_LIBXML_API zval *php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function);
+PHP_LIBXML_API zval *php_libxml_register_export(const zend_class_entry *ce, php_libxml_export_node export_function);
 /* When an explicit freeing of node and children is required */
 PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node);
 PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node);
@@ -207,8 +207,8 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...);
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_error_handler_va(php_libxml_error_level error_type, void *ctx, const char *msg, va_list args);
-PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
-PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext);
+PHP_LIBXML_API bool php_libxml_xmlCheckUTF8(const unsigned char *s);
+PHP_LIBXML_API void php_libxml_switch_context(const zval *context, zval *oldcontext);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg);
 PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable);
 PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns);
