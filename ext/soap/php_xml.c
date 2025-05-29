@@ -90,7 +90,7 @@ static xmlDocPtr soap_xmlParse_ex(xmlParserCtxtPtr ctxt)
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
-		bool old = php_libxml_disable_entity_loader(1);
+		bool old = php_libxml_disable_entity_loader(true);
 		xmlParseDocument(ctxt);
 		php_libxml_disable_entity_loader(old);
 		if (ctxt->wellFormed) {
@@ -113,7 +113,7 @@ static xmlDocPtr soap_xmlParse_ex(xmlParserCtxtPtr ctxt)
 xmlDocPtr soap_xmlParseFile(const char *filename)
 {
 	bool old_allow_url_fopen = PG(allow_url_fopen);
-	PG(allow_url_fopen) = 1;
+	PG(allow_url_fopen) = true;
 	xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
 	PG(allow_url_fopen) = old_allow_url_fopen;
 
