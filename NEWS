@@ -52,6 +52,7 @@ PHP                                                                        NEWS
   . Fixed bugs GH-17711 and GH-18022 (Infinite recursion on deprecated attribute
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
+  . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)

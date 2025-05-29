@@ -2424,12 +2424,20 @@ simple_list:
 			smart_str_appends(str, "::$");
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			break;
-		case ZEND_AST_CALL:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+		case ZEND_AST_CALL: {
+			zend_ast *left = ast->child[0];
+			if (left->kind == ZEND_AST_ARROW_FUNC || left->kind == ZEND_AST_CLOSURE) {
+				smart_str_appends(str, "(");
+				zend_ast_export_ns_name(str, left, 0, indent);
+				smart_str_appends(str, ")");
+			} else {
+				zend_ast_export_ns_name(str, left, 0, indent);
+			}
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, ast->child[1], 0, indent);
 			smart_str_appendc(str, ')');
 			break;
+		}
 		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
 			smart_str_append(str, Z_STR_P(zend_ast_get_zval(ast->child[0])));
 			smart_str_appendc(str, '(');
