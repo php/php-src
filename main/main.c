@@ -1542,6 +1542,22 @@ try_again:
 }
 #endif
 
+PHPAPI char *php_get_current_running_user(size_t *len)
+{
+#ifdef PHP_WIN32
+	char *name = php_win32_get_username();
+	if (!name) {
+		return NULL;
+	}
+	*len = strlen(name);
+	char *result = estrndup(name, *len);
+	free(name);
+	return result;
+#else
+	return php_translate_uid_to_username(geteuid(), len);
+#endif
+}
+
 /* {{{ php_get_current_user */
 PHPAPI char *php_get_current_user(void)
 {
