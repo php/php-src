@@ -164,8 +164,12 @@
 
 # if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
 #  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
-# elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__) && !__has_feature(memory_sanitizer) && (!defined(LM_ID_NEWLM) || defined(PHP_USE_RTLD_DEEPBIND))
-#  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_DEEPBIND)
+# elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__) && !__has_feature(memory_sanitizer)
+#  if defined(LM_ID_NEWLM)
+#    define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | (sapi_module.isolate_symbols ? RTLD_DEEPBIND : 0))
+#  else
+#    define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_DEEPBIND)
+#  endif
 # else
 #  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL)
 # endif

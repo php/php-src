@@ -287,6 +287,8 @@ struct _sapi_module_struct {
 	const char *ini_entries;
 	const zend_function_entry *additional_functions;
 	unsigned int (*input_filter_init)(void);
+
+	bool isolate_symbols;
 };
 
 struct _sapi_post_entry {
@@ -337,6 +339,7 @@ END_EXTERN_C()
 	0,    /* phpinfo_as_text;        */ \
 	NULL, /* ini_entries;            */ \
 	NULL, /* additional_functions    */ \
-	NULL  /* input_filter_init       */
+	NULL, /* input_filter_init       */ \
+	false /* isolate_symbols         */
 
 #endif /* SAPI_H */
