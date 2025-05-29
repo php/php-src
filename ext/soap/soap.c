@@ -4404,6 +4404,22 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 				smart_str_appendl(buf, "anyType ", sizeof("anyType ")-1);
 			}
 			smart_str_appendl(buf, type->name, strlen(type->name));
+
+			if (type->restrictions && type->restrictions->enumeration) {
+				zend_string *key;
+				bool first = true;
+
+				smart_str_appends(buf, " {");
+				ZEND_HASH_MAP_FOREACH_STR_KEY(type->restrictions->enumeration, key) {
+					if (first) {
+						first = false;
+					} else {
+						smart_str_appends(buf, ", ");
+					}
+					smart_str_append(buf, key);
+				} ZEND_HASH_FOREACH_END();
+				smart_str_appendc(buf, '}');
+			}
 			break;
 		case XSD_TYPEKIND_LIST:
 			smart_str_appendl(buf, "list ", 5);
