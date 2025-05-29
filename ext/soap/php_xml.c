@@ -178,11 +178,11 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 
 int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
 {
-	if (node->name && strcmp((char*)node->name, name) == 0) {
+	if (node->name && strcmp((const char *) node->name, name) == 0) {
 		xmlNsPtr nsPtr = node->ns;
 		if (ns) {
 			if (nsPtr) {
-				return (strcmp((char*)nsPtr->href, ns) == 0);
+				return (strcmp((const char *) nsPtr->href, ns) == 0);
 			} else {
 				return FALSE;
 			}
