@@ -1149,8 +1149,8 @@ static zval *to_zval_bool(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	if (
 		data->children->content[0] == '\0' /* Check for empty string */
 		|| strcmp((const char*)data->children->content, "0") == 0
-		|| strcmp((const char*)data->children->content, "f") == 0
-		|| strcmp((const char*)data->children->content, "false") == 0
+		|| stricmp((const char*)data->children->content, "f") == 0
+		|| stricmp((const char*)data->children->content, "false") == 0
 	) {
 		ZVAL_FALSE(ret);
 	} else {
