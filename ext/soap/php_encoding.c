@@ -1134,29 +1134,43 @@ static xmlNodePtr to_xml_double(encodeTypePtr type, zval *data, int style, xmlNo
 
 static zval *to_zval_bool(zval *ret, encodeTypePtr type, xmlNodePtr data)
 {
-	ZVAL_NULL(ret);
 	FIND_XML_NULL(data, ret);
 
-	if (data && data->children) {
-		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			whiteSpace_collapse(data->children->content);
-			if (stricmp((char*)data->children->content, "true") == 0 ||
-				stricmp((char*)data->children->content, "t") == 0 ||
-				strcmp((char*)data->children->content, "1") == 0) {
-				ZVAL_TRUE(ret);
-			} else if (stricmp((char*)data->children->content, "false") == 0 ||
-				stricmp((char*)data->children->content, "f") == 0 ||
-				strcmp((char*)data->children->content, "0") == 0) {
-				ZVAL_FALSE(ret);
-			} else {
-				ZVAL_STRING(ret, (char*)data->children->content);
-				convert_to_boolean(ret);
-			}
-		} else {
-			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
-		}
-	} else {
+	if (!data || !data->children) {
 		ZVAL_NULL(ret);
+		return ret;
+	}
+	if (data->children->type != XML_TEXT_NODE || data->children->next != NULL) {
+		// TODO Convert to exception?
+		soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+	}
+
+	whiteSpace_collapse(data->children->content);
+	size_t len = strlen((const char*)data->children->content);
+	if (len == 0) {
+		ZVAL_FALSE(ret);
+	} else if (len == 1) {
+		switch (data->children->content[0]) {
+			case 'f':
+			case 'F':
+			case '0':
+				ZVAL_FALSE(ret);
+				break;
+			default:
+				ZVAL_TRUE(ret);
+				break;
+		}
+	} else if (
+		len == 5
+		&& (data->children->content[0] == 'f' || data->children->content[0] == 'F')
+		&& (data->children->content[1] == 'a' || data->children->content[1] == 'A')
+		&& (data->children->content[2] == 'l' || data->children->content[2] == 'L')
+		&& (data->children->content[3] == 's' || data->children->content[3] == 'S')
+		&& (data->children->content[4] == 'e' || data->children->content[4] == 'E')
+	) {
+		ZVAL_FALSE(ret);
+	} else {
+		ZVAL_TRUE(ret);
 	}
 	return ret;
 }
