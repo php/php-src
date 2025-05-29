@@ -35,7 +35,7 @@
 #define SOAP_1_2_ENC_NAMESPACE "http://www.w3.org/2003/05/soap-encoding"
 #define SOAP_1_2_ENC_NS_PREFIX "enc"
 
-#define SCHEMA_NAMESPACE "http://www.w3.org/2001/XMLSchema"
+#define XSD_DRAFT_2000_NAMESPACE "http://www.w3.org/2000/10/XMLSchema"
 #define XSD_NAMESPACE "http://www.w3.org/2001/XMLSchema"
 #define XSD_NS_PREFIX "xsd"
 #define XSI_NAMESPACE "http://www.w3.org/2001/XMLSchema-instance"

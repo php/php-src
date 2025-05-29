@@ -167,18 +167,6 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	return ret;
 }
 
-/* FIXME: this is wrong, attributes don't inherit the namespace of the node they're in! */
-xmlNsPtr attr_find_ns(xmlAttrPtr node)
-{
-	if (node->ns) {
-		return node->ns;
-	} else if (node->parent->ns) {
-		return node->parent->ns;
-	} else {
-		return xmlSearchNs(node->doc, node->parent, NULL);
-	}
-}
-
 xmlNsPtr node_find_ns(xmlNodePtr node)
 {
 	if (node->ns) {
@@ -190,14 +178,16 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 
 int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
 {
-	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
+	if (node->name && strcmp((const char *) node->name, name) == 0) {
+		xmlNsPtr nsPtr = node->ns;
 		if (ns) {
-			xmlNsPtr nsPtr = attr_find_ns(node);
 			if (nsPtr) {
-				return (strcmp((char*)nsPtr->href, ns) == 0);
+				return (strcmp((const char *) nsPtr->href, ns) == 0);
 			} else {
 				return FALSE;
 			}
+		} else if (nsPtr) {
+			return FALSE;
 		}
 		return TRUE;
 	}
@@ -210,7 +200,7 @@ int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
 		if (ns) {
 			xmlNsPtr nsPtr = node_find_ns(node);
 			if (nsPtr) {
-				return (strcmp((char*)nsPtr->href, ns) == 0);
+				return strcmp((const char *) nsPtr->href, ns) == 0;
 			} else {
 				return FALSE;
 			}
@@ -220,10 +210,41 @@ int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
 	return FALSE;
 }
 
+int node_is_equal_ex_one_of(xmlNodePtr node, const char *name, const char *const *namespaces)
+{
+	if ((node->name) && strcmp((char*)node->name, name) == 0) {
+		xmlNsPtr nsPtr = node_find_ns(node);
+		if (nsPtr) {
+			do {
+				if (strcmp((const char *) nsPtr->href, *namespaces) == 0) {
+					return TRUE;
+				}
+				namespaces++;
+			} while (*namespaces != NULL);
+		}
+		return FALSE;
+	}
+	return FALSE;
+}
 
-xmlAttrPtr get_attribute_ex(xmlAttrPtr node, const char *name, const char *ns)
+xmlAttrPtr get_attribute_any_ns(xmlAttrPtr node, const char *name)
 {
 	while (node!=NULL) {
+		if (node->name && strcmp((const char *) node->name, name) == 0) {
+			return node;
+		}
+		node = node->next;
+	}
+	return NULL;
+}
+
+/* Finds an attribute by name and namespace.
+ * If ns is NULL, the attribute must not be in any namespace.
+ * If ns is not NULL, the attribute must be in the specified namespace.
+ */
+xmlAttrPtr get_attribute_ex(xmlAttrPtr node, const char *name, const char *ns)
+{
+	while (node != NULL) {
 		if (attr_is_equal_ex(node, name, ns)) {
 			return node;
 		}

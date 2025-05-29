@@ -184,6 +184,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)
+  . Fix namespace handling of WSDL and XML schema in SOAP,
+    fixing at least GH-16320 and bug #68576. (nielsdos)
 
 - Sockets:
   . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
