@@ -1236,32 +1236,6 @@ PHP_FUNCTION(libxml_get_external_entity_loader)
 /* }}} */
 
 /* {{{ Common functions shared by extensions */
-bool php_libxml_xmlCheckUTF8(const unsigned char *s)
-{
-	size_t i;
-	unsigned char c;
-
-	for (i = 0; (c = s[i++]);) {
-		if ((c & 0x80) == 0) {
-		} else if ((c & 0xe0) == 0xc0) {
-			if ((s[i++] & 0xc0) != 0x80) {
-				return false;
-			}
-		} else if ((c & 0xf0) == 0xe0) {
-			if ((s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80) {
-				return false;
-			}
-		} else if ((c & 0xf8) == 0xf0) {
-			if ((s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80) {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
-	return true;
-}
-
 zval *php_libxml_register_export(const zend_class_entry *ce, php_libxml_export_node export_function)
 {
 	/* Initialize in case this module hasn't been loaded yet */

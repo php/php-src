@@ -62,6 +62,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 
 - ext/libxml
   . The refcount APIs now return an `unsigned int` instead of an `int`.
+  . Removed php_libxml_xmlCheckUTF8(). Use xmlCheckUTF8() from libxml instead.
 
 - ext/pdo
   . Added `php_pdo_stmt_valid_db_obj_handle()` to check if the database object
