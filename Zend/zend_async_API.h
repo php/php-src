@@ -173,20 +173,28 @@ typedef void (*zend_async_reactor_shutdown_t)(void);
 typedef bool (*zend_async_reactor_execute_t)(bool no_wait);
 typedef bool (*zend_async_reactor_loop_alive_t)(void);
 
-typedef zend_async_poll_event_t* (*zend_async_new_socket_event_t)(zend_socket_t socket, async_poll_event events, size_t size);
-typedef zend_async_poll_event_t* (*zend_async_new_poll_event_t)(
-	zend_file_descriptor_t fh, zend_socket_t socket, async_poll_event events, size_t size
+typedef zend_async_poll_event_t* (*zend_async_new_socket_event_t)(
+	zend_socket_t socket, async_poll_event events, size_t extra_size
 );
-typedef zend_async_timer_event_t* (*zend_async_new_timer_event_t)(const zend_ulong timeout, const bool is_periodic, size_t size);
-typedef zend_async_signal_event_t* (*zend_async_new_signal_event_t)(int signum, size_t size);
-typedef zend_async_process_event_t* (*zend_async_new_process_event_t)(zend_process_t process_handle, size_t size);
-typedef void (*zend_async_thread_entry_t)(void *arg, size_t size);
-typedef zend_async_thread_event_t* (*zend_async_new_thread_event_t)(zend_async_thread_entry_t entry, void *arg, size_t size);
-typedef zend_async_filesystem_event_t* (*zend_async_new_filesystem_event_t)(zend_string * path, const unsigned int flags, size_t size);
+typedef zend_async_poll_event_t* (*zend_async_new_poll_event_t)(
+	zend_file_descriptor_t fh, zend_socket_t socket, async_poll_event events, size_t extra_size
+);
+typedef zend_async_timer_event_t* (*zend_async_new_timer_event_t)(
+	const zend_ulong timeout, const bool is_periodic, size_t extra_size
+);
+typedef zend_async_signal_event_t* (*zend_async_new_signal_event_t)(int signum, size_t extra_size);
+typedef zend_async_process_event_t* (*zend_async_new_process_event_t)(zend_process_t process_handle, size_t extra_size);
+typedef void (*zend_async_thread_entry_t)(void *arg, size_t extra_size);
+typedef zend_async_thread_event_t* (*zend_async_new_thread_event_t)(
+	zend_async_thread_entry_t entry, void *arg, size_t extra_size
+);
+typedef zend_async_filesystem_event_t* (*zend_async_new_filesystem_event_t)(
+	zend_string * path, const unsigned int flags, size_t extra_size
+);
 
-typedef zend_async_dns_nameinfo_t* (*zend_async_getnameinfo_t)(const struct sockaddr* addr, int flags, size_t size);
+typedef zend_async_dns_nameinfo_t* (*zend_async_getnameinfo_t)(const struct sockaddr* addr, int flags, size_t extra_size);
 typedef zend_async_dns_addrinfo_t* (*zend_async_getaddrinfo_t)(
-	const char *node, const char *service, const struct addrinfo *hints, size_t size
+	const char *node, const char *service, const struct addrinfo *hints, size_t extra_size
 );
 
 typedef zend_async_exec_event_t* (*zend_async_new_exec_event_t) (
@@ -197,7 +205,7 @@ typedef zend_async_exec_event_t* (*zend_async_new_exec_event_t) (
 	zval *std_error,
 	const char *cwd,
 	const char *env,
-	size_t size
+	size_t extra_size
 );
 
 typedef int (* zend_async_exec_t) (
@@ -267,6 +275,8 @@ typedef struct _zend_async_callbacks_vector_s {
 struct _zend_async_event_s {
 	/* If event is closed, it cannot be started or stopped. */
 	uint32_t flags;
+	/* Offset to the beginning of additional data associated with the event (used for extensions) */
+	uint32_t extra_offset;
 	union
 	{
 		/* The refcount of the event. */
@@ -276,6 +286,7 @@ struct _zend_async_event_s {
 	};
 	/* The Event loop reference count. */
 	uint32_t loop_ref_count;
+	/* Events callbacks */
 	zend_async_callbacks_vector_t callbacks;
 	/* Methods */
 	zend_async_event_add_callback_t add_callback;
@@ -1018,27 +1029,29 @@ END_EXTERN_C()
 #define ZEND_ASYNC_REACTOR_LOOP_ALIVE() zend_async_reactor_loop_alive_fn()
 
 #define ZEND_ASYNC_NEW_SOCKET_EVENT(socket, events) zend_async_new_socket_event_fn(socket, events, 0)
-#define ZEND_ASYNC_NEW_SOCKET_EVENT_EX(socket, events, size) zend_async_new_socket_event_fn(socket, events, size)
+#define ZEND_ASYNC_NEW_SOCKET_EVENT_EX(socket, events, extra_size) zend_async_new_socket_event_fn(socket, events, extra_size)
 #define ZEND_ASYNC_NEW_POLL_EVENT(fh, socket, events) zend_async_new_poll_event_fn(fh, socket, events, 0)
-#define ZEND_ASYNC_NEW_POLL_EVENT_EX(fh, socket, events, size) zend_async_new_poll_event_fn(fh, socket, events, size)
+#define ZEND_ASYNC_NEW_POLL_EVENT_EX(fh, socket, events, extra_size) zend_async_new_poll_event_fn(fh, socket, events, extra_size)
 #define ZEND_ASYNC_NEW_TIMER_EVENT(timeout, is_periodic) zend_async_new_timer_event_fn(timeout, is_periodic, 0)
-#define ZEND_ASYNC_NEW_TIMER_EVENT_EX(timeout, is_periodic, size) zend_async_new_timer_event_fn(timeout, is_periodic, size)
+#define ZEND_ASYNC_NEW_TIMER_EVENT_EX(timeout, is_periodic, extra_size) zend_async_new_timer_event_fn(timeout, is_periodic, extra_size)
 #define ZEND_ASYNC_NEW_SIGNAL_EVENT(signum) zend_async_new_signal_event_fn(signum, 0)
-#define ZEND_ASYNC_NEW_SIGNAL_EVENT_EX(signum, size) zend_async_new_signal_event_fn(signum, size)
-#define ZEND_ASYNC_NEW_PROCESS_EVENT() zend_async_new_process_event_fn()
-#define ZEND_ASYNC_NEW_PROCESS_EVENT_EX() zend_async_new_process_event_fn()
-#define ZEND_ASYNC_NEW_THREAD_EVENT() zend_async_new_thread_event_fn()
+#define ZEND_ASYNC_NEW_SIGNAL_EVENT_EX(signum, extra_size) zend_async_new_signal_event_fn(signum, extra_size)
+#define ZEND_ASYNC_NEW_PROCESS_EVENT(process_handle) zend_async_new_process_event_fn(process_handle, 0)
+#define ZEND_ASYNC_NEW_PROCESS_EVENT_EX(process_handle, extra_size) zend_async_new_process_event_fn(process_handle, extra_size)
+#define ZEND_ASYNC_NEW_THREAD_EVENT(entry, arg) zend_async_new_thread_event_fn(entry, arg, 0)
 #define ZEND_ASYNC_NEW_THREAD_EVENT_EX(entry, arg) zend_async_new_thread_event_fn(entry, arg, 0)
 #define ZEND_ASYNC_NEW_FILESYSTEM_EVENT(path, flags) zend_async_new_filesystem_event_fn(path, flags, 0)
-#define ZEND_ASYNC_NEW_FILESYSTEM_EVENT_EX(path, flags, size) zend_async_new_filesystem_event_fn(path, flags, size)
+#define ZEND_ASYNC_NEW_FILESYSTEM_EVENT_EX(path, flags, extra_size) zend_async_new_filesystem_event_fn(path, flags, extra_size)
 
 #define ZEND_ASYNC_GETNAMEINFO(addr, flags) zend_async_getnameinfo_fn(addr, flags, 0)
-#define ZEND_ASYNC_GETNAMEINFO_EX(addr, flags, size) zend_async_getnameinfo_fn(addr, flags, size)
+#define ZEND_ASYNC_GETNAMEINFO_EX(addr, flags, extra_size) zend_async_getnameinfo_fn(addr, flags, extra_size)
 #define ZEND_ASYNC_GETADDRINFO(node, service, hints, flags) zend_async_getaddrinfo_fn(node, service, hints, flags, 0)
-#define ZEND_ASYNC_GETADDRINFO_EX(node, service, hints, flags, size) zend_async_getaddrinfo_fn(node, service, hints, flags, size)
+#define ZEND_ASYNC_GETADDRINFO_EX(node, service, hints, flags, extra_size) zend_async_getaddrinfo_fn(node, service, hints, flags, extra_size)
 
 #define ZEND_ASYNC_NEW_EXEC_EVENT(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env) \
 	zend_async_new_exec_event_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, 0)
+#define ZEND_ASYNC_NEW_EXEC_EVENT_EX(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, extra_size) \
+	zend_async_new_exec_event_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, extra_size)
 #define ZEND_ASYNC_EXEC(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, timeout) \
 	zend_async_exec_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, timeout)
 
