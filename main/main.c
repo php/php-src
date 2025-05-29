@@ -1492,6 +1492,56 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 }
 /* }}} */
 
+#ifndef PHP_WIN32
+static char *php_translate_uid_to_username(uid_t uid, size_t *len)
+{
+	struct passwd *pwd;
+#if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
+	struct passwd _pw;
+	struct passwd *retpwptr = NULL;
+	int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+	char *pwbuf;
+	int err;
+
+	if (pwbuflen < 1) {
+		pwbuflen = 1024;
+	}
+# if ZEND_DEBUG
+	/* Test retry logic */
+	pwbuflen = 1;
+# endif
+	pwbuf = emalloc(pwbuflen);
+
+try_again:
+	err = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
+	if (err != 0) {
+		if (err == ERANGE) {
+			pwbuflen *= 2;
+			pwbuf = erealloc(pwbuf, pwbuflen);
+			goto try_again;
+		}
+		efree(pwbuf);
+		return NULL;
+	}
+	if (retpwptr == NULL) {
+		efree(pwbuf);
+		return NULL;
+	}
+	pwd = &_pw;
+#else
+	if ((pwd=getpwuid(uid))==NULL) {
+		return NULL;
+	}
+#endif
+	*len = strlen(pwd->pw_name);
+	char *result = estrndup(pwd->pw_name, *len);
+#if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
+	efree(pwbuf);
+#endif
+	return result;
+}
+#endif
+
 /* {{{ php_get_current_user */
 PHPAPI char *php_get_current_user(void)
 {
@@ -1524,50 +1574,14 @@ PHPAPI char *php_get_current_user(void)
 		free(name);
 		return SG(request_info).current_user;
 #else
-		struct passwd *pwd;
-#if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
-		struct passwd _pw;
-		struct passwd *retpwptr = NULL;
-		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-		char *pwbuf;
-		int err;
-
-		if (pwbuflen < 1) {
-			pwbuflen = 1024;
-		}
-# if ZEND_DEBUG
-		/* Test retry logic */
-		pwbuflen = 1;
-# endif
-		pwbuf = emalloc(pwbuflen);
-
-try_again:
-		err = getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr);
-		if (err != 0) {
-			if (err == ERANGE) {
-				pwbuflen *= 2;
-				pwbuf = erealloc(pwbuf, pwbuflen);
-				goto try_again;
-			}
-			efree(pwbuf);
+		size_t len;
+		char *username = php_translate_uid_to_username(pstat->st_uid, &len);
+		if (!username) {
 			return "";
 		}
-		if (retpwptr == NULL) {
-			efree(pwbuf);
-			return "";
-		}
-		pwd = &_pw;
-#else
-		if ((pwd=getpwuid(pstat->st_uid))==NULL) {
-			return "";
-		}
-#endif
-		SG(request_info).current_user_length = strlen(pwd->pw_name);
-		SG(request_info).current_user = estrndup(pwd->pw_name, SG(request_info).current_user_length);
-#if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
-		efree(pwbuf);
-#endif
-		return SG(request_info).current_user;
+		SG(request_info).current_user_length = (int) len;
+		SG(request_info).current_user = username;
+		return username;
 #endif
 	}
 }
