@@ -74,19 +74,11 @@ static void soap_Comment(void *ctx, const xmlChar *value)
 {
 }
 
-xmlDocPtr soap_xmlParseFile(const char *filename)
+/* Consumes `ctxt` */
+static xmlDocPtr soap_xmlParse_ex(xmlParserCtxtPtr ctxt)
 {
-	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
-	bool old_allow_url_fopen;
-
-	old_allow_url_fopen = PG(allow_url_fopen);
-	PG(allow_url_fopen) = 1;
-	ctxt = xmlCreateFileParserCtxt(filename);
-	PG(allow_url_fopen) = old_allow_url_fopen;
 	if (ctxt) {
-		bool old;
-
 		php_libxml_sanitize_parse_ctxt_options(ctxt);
 		/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
 		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
@@ -98,7 +90,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
-		old = php_libxml_disable_entity_loader(1);
+		bool old = php_libxml_disable_entity_loader(1);
 		xmlParseDocument(ctxt);
 		php_libxml_disable_entity_loader(old);
 		if (ctxt->wellFormed) {
@@ -115,6 +107,17 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 	} else {
 		ret = NULL;
 	}
+	return ret;
+}
+
+xmlDocPtr soap_xmlParseFile(const char *filename)
+{
+	bool old_allow_url_fopen = PG(allow_url_fopen);
+	PG(allow_url_fopen) = 1;
+	xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
+	PG(allow_url_fopen) = old_allow_url_fopen;
+
+	xmlDocPtr ret = soap_xmlParse_ex(ctxt);
 
 	if (ret) {
 		cleanup_xml_node((xmlNodePtr)ret);
@@ -124,40 +127,8 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 
 xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 {
-	xmlParserCtxtPtr ctxt = NULL;
-	xmlDocPtr ret;
-
-	ctxt = xmlCreateMemoryParserCtxt(buf, buf_size);
-	if (ctxt) {
-		bool old;
-
-		php_libxml_sanitize_parse_ctxt_options(ctxt);
-		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
-		ctxt->sax->comment = soap_Comment;
-		ctxt->sax->warning = NULL;
-		ctxt->sax->error = NULL;
-		/*ctxt->sax->fatalError = NULL;*/
-		/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
-		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
-		ctxt->options |= XML_PARSE_HUGE;
-		ZEND_DIAGNOSTIC_IGNORED_END
-		old = php_libxml_disable_entity_loader(1);
-		xmlParseDocument(ctxt);
-		php_libxml_disable_entity_loader(old);
-		if (ctxt->wellFormed) {
-			ret = ctxt->myDoc;
-			if (ret->URL == NULL && ctxt->directory != NULL) {
-				ret->URL = xmlCharStrdup(ctxt->directory);
-			}
-		} else {
-			ret = NULL;
-			xmlFreeDoc(ctxt->myDoc);
-			ctxt->myDoc = NULL;
-		}
-		xmlFreeParserCtxt(ctxt);
-	} else {
-		ret = NULL;
-	}
+	xmlParserCtxtPtr ctxt = xmlCreateMemoryParserCtxt(buf, buf_size);
+	xmlDocPtr ret = soap_xmlParse_ex(ctxt);
 
 /*
 	if (ret) {
