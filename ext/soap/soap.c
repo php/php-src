@@ -390,16 +390,18 @@ STD_PHP_INI_ENTRY("soap.wsdl_cache_limit",       "5", PHP_INI_ALL, OnUpdateLong,
                   cache_limit, zend_soap_globals, soap_globals)
 PHP_INI_END()
 
-static HashTable defEnc, defEncIndex, defEncNs;
+/* Real globals shared for the entire processes across threads, only written during init. */
+HashTable php_soap_defEncNs; /* mapping of default namespaces to prefixes */
+HashTable php_soap_defEnc, php_soap_defEncIndex;
 
 static void php_soap_prepare_globals(void)
 {
 	int i;
 	encode* enc;
 
-	zend_hash_init(&defEnc, 0, NULL, NULL, 1);
-	zend_hash_init(&defEncIndex, 0, NULL, NULL, 1);
-	zend_hash_init(&defEncNs, 0, NULL, NULL, 1);
+	zend_hash_init(&php_soap_defEnc, 0, NULL, NULL, 1);
+	zend_hash_init(&php_soap_defEncIndex, 0, NULL, NULL, 1);
+	zend_hash_init(&php_soap_defEncNs, 0, NULL, NULL, 1);
 
 	i = 0;
 	do {
@@ -412,25 +414,25 @@ static void php_soap_prepare_globals(void)
 				size_t clark_notation_len = spprintf(&clark_notation, 0, "{%s}%s", enc->details.ns, enc->details.type_str);
 				enc->details.clark_notation = zend_string_init(clark_notation, clark_notation_len, true);
 				size_t ns_type_len = spprintf(&ns_type, 0, "%s:%s", enc->details.ns, enc->details.type_str);
-				zend_hash_str_add_ptr(&defEnc, ns_type, ns_type_len, (void*)enc);
+				zend_hash_str_add_ptr(&php_soap_defEnc, ns_type, ns_type_len, (void*)enc);
 				efree(clark_notation);
 				efree(ns_type);
 			} else {
-				zend_hash_str_add_ptr(&defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), (void*)enc);
+				zend_hash_str_add_ptr(&php_soap_defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), (void*)enc);
 			}
 		}
 		/* Index everything by number */
-		zend_hash_index_add_ptr(&defEncIndex, defaultEncoding[i].details.type, (void*)enc);
+		zend_hash_index_add_ptr(&php_soap_defEncIndex, defaultEncoding[i].details.type, (void*)enc);
 		i++;
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 
 	/* hash by namespace */
-	zend_hash_str_add_ptr(&defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE)-1, XSD_NS_PREFIX);
-	zend_hash_str_add_ptr(&defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1, XSD_NS_PREFIX);
-	zend_hash_str_add_ptr(&defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE)-1, XSI_NS_PREFIX);
-	zend_hash_str_add_ptr(&defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE)-1, XML_NS_PREFIX);
-	zend_hash_str_add_ptr(&defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1, SOAP_1_1_ENC_NS_PREFIX);
-	zend_hash_str_add_ptr(&defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1, SOAP_1_2_ENC_NS_PREFIX);
+	zend_hash_str_add_ptr(&php_soap_defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE)-1, XSD_NS_PREFIX);
+	zend_hash_str_add_ptr(&php_soap_defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1, XSD_NS_PREFIX);
+	zend_hash_str_add_ptr(&php_soap_defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE)-1, XSI_NS_PREFIX);
+	zend_hash_str_add_ptr(&php_soap_defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE)-1, XML_NS_PREFIX);
+	zend_hash_str_add_ptr(&php_soap_defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1, SOAP_1_1_ENC_NS_PREFIX);
+	zend_hash_str_add_ptr(&php_soap_defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1, SOAP_1_2_ENC_NS_PREFIX);
 }
 
 static void php_soap_init_globals(zend_soap_globals *soap_globals)
@@ -438,9 +440,6 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 #if defined(COMPILE_DL_SOAP) && defined(ZTS)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	soap_globals->defEnc = defEnc;
-	soap_globals->defEncIndex = defEncIndex;
-	soap_globals->defEncNs = defEncNs;
 	soap_globals->typemap = NULL;
 	soap_globals->use_soap_error_handler = 0;
 	soap_globals->error_code = NULL;
@@ -461,9 +460,9 @@ PHP_MSHUTDOWN_FUNCTION(soap)
 		i++;
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 	zend_error_cb = old_error_handler;
-	zend_hash_destroy(&SOAP_GLOBAL(defEnc));
-	zend_hash_destroy(&SOAP_GLOBAL(defEncIndex));
-	zend_hash_destroy(&SOAP_GLOBAL(defEncNs));
+	zend_hash_destroy(&php_soap_defEnc);
+	zend_hash_destroy(&php_soap_defEncIndex);
+	zend_hash_destroy(&php_soap_defEncNs);
 	if (SOAP_GLOBAL(mem_cache)) {
 		zend_hash_destroy(SOAP_GLOBAL(mem_cache));
 		free(SOAP_GLOBAL(mem_cache));
@@ -765,7 +764,7 @@ PHP_METHOD(SoapVar, __construct)
 	if (type_is_null) {
 		ZVAL_LONG(Z_VAR_ENC_TYPE_P(this_ptr), UNKNOWN_TYPE);
 	} else {
-		if (zend_hash_index_exists(&SOAP_GLOBAL(defEncIndex), type)) {
+		if (zend_hash_index_exists(&php_soap_defEncIndex, type)) {
 			ZVAL_LONG(Z_VAR_ENC_TYPE_P(this_ptr), type);
 		} else {
 			zend_argument_value_error(2, "is not a valid encoding");

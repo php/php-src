@@ -3456,7 +3456,7 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 	if (xmlns == NULL) {
 		xmlChar* prefix;
 
-		if ((prefix = zend_hash_str_find_ptr(&SOAP_GLOBAL(defEncNs), (char*)ns, strlen(ns))) != NULL) {
+		if ((prefix = zend_hash_str_find_ptr(&php_soap_defEncNs, (char*)ns, strlen(ns))) != NULL) {
 			xmlns = xmlNewNs(node->doc->children, BAD_CAST(ns), prefix);
 		} else {
 			smart_str prefix = {0};
@@ -3531,7 +3531,7 @@ encodePtr get_conversion(int encode)
 {
 	encodePtr enc;
 
-	if ((enc = zend_hash_index_find_ptr(&SOAP_GLOBAL(defEncIndex), encode)) == NULL) {
+	if ((enc = zend_hash_index_find_ptr(&php_soap_defEncIndex, encode)) == NULL) {
 		soap_error0(E_ERROR,  "Encoding: Cannot find encoding");
 		return NULL;
 	} else {
