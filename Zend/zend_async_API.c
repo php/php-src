@@ -407,7 +407,8 @@ ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine)
 	}
 
 	if (waker->triggered_events != NULL) {
-		zend_array_release(waker->triggered_events);
+		zend_hash_destroy(waker->triggered_events);
+		efree(waker->triggered_events);
 		waker->triggered_events = NULL;
 	}
 
@@ -424,9 +425,13 @@ ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine)
 
 static void event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
 {
-	if (callback->ref_count != 0) {
+	if (callback->ref_count > 1) {
+		// If the callback is still referenced, we cannot dispose it yet
+		callback->ref_count--;
 		return;
 	}
+
+	callback->ref_count = 0;
 
 	zend_async_waker_t * waker = ((zend_coroutine_event_callback_t *) callback)->coroutine->waker;
 
@@ -449,7 +454,7 @@ ZEND_API void zend_async_waker_add_triggered_event(zend_coroutine_t *coroutine, 
 	}
 
 	if (coroutine->waker->triggered_events == NULL) {
-		coroutine->waker->triggered_events = (HashTable *) malloc(sizeof(HashTable));
+		coroutine->waker->triggered_events = (HashTable *) emalloc(sizeof(HashTable));
 		zend_hash_init(coroutine->waker->triggered_events, 2, NULL, waker_triggered_events_dtor, 0);
 	}
 
@@ -529,7 +534,7 @@ ZEND_API void zend_async_waker_callback_resolve(
 	if (exception == NULL && coroutine->waker != NULL) {
 
 		if (coroutine->waker->triggered_events == NULL) {
-			coroutine->waker->triggered_events = (HashTable *) malloc(sizeof(HashTable));
+			coroutine->waker->triggered_events = (HashTable *) emalloc(sizeof(HashTable));
 			zend_hash_init(coroutine->waker->triggered_events, 2, NULL, waker_triggered_events_dtor, 0);
 		}
 
@@ -538,7 +543,7 @@ ZEND_API void zend_async_waker_callback_resolve(
 		}
 
 		// Copy the result to the waker if it is not NULL
-		if (ZEND_ASYNC_EVENT_WILL_RESULT_USED(event) && result != NULL) {
+		if (ZEND_ASYNC_EVENT_WILL_ZVAL_RESULT(event) && result != NULL) {
 			ZVAL_COPY(&coroutine->waker->result, result);
 		}
 	}
