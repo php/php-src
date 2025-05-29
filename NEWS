@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Add missing filter cleanups on phar failure. (nielsdos)
   . Fixed bug GH-18642 (Signed integer overflow in ext/phar fseek). (nielsdos)
 
+- PGSQL:
+  . Fix warning not being emitted when failure to cancel a query with
+    pg_cancel_query(). (Girgias)
+
 - Readline:
   . Fix memory leak when calloc() fails in php_readline_completion_cb().
     (nielsdos)
