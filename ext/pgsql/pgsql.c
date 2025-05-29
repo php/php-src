@@ -3879,7 +3879,12 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	switch(entry_type) {
 		case PHP_PG_ASYNC_IS_BUSY:
 			PQconsumeInput(pgsql);
-			RETVAL_LONG(PQisBusy(pgsql));
+			/* PQisBusy
+			 * Returns 1 if a command is busy, that is, PQgetResult would block waiting for input.
+			 * A 0 return indicates that PQgetResult can be called with assurance of not blocking.
+			 * https://www.postgresql.org/docs/current/libpq-async.html#LIBPQ-PQISBUSY
+			 */
+			RETVAL_BOOL(PQisBusy(pgsql));
 			break;
 		case PHP_PG_ASYNC_REQUEST_CANCEL: {
 			PGcancel *c;
@@ -3893,7 +3898,8 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			 * errbuf must be a char array of size errbufsize (the recommended size is 256 bytes).
 			 * https://www.postgresql.org/docs/current/libpq-cancel.html#LIBPQ-PQCANCEL
 			 */
-			RETVAL_LONG((rc = PQcancel(c, err, sizeof(err))));
+			rc = PQcancel(c, err, sizeof(err));
+			RETVAL_BOOL(rc);
 			if (rc == 0) {
 				zend_error(E_WARNING, "cannot cancel the query: %s", err);
 			}
@@ -3908,7 +3914,6 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
 	}
-	convert_to_boolean(return_value);
 }
 /* }}} */
 
@@ -4929,8 +4934,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 			break; /* break out for() */
 		}
 
-		convert_to_boolean(is_enum);
-		if (Z_TYPE_P(is_enum) == IS_TRUE) {
+		if (zval_is_true(is_enum)) {
 			/* enums need to be treated like strings */
 			data_type = PG_TEXT;
 		} else {
