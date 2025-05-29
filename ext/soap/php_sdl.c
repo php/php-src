@@ -3185,22 +3185,23 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		unsigned char digest[16];
 		size_t len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
-		char *user = php_get_current_user();
-		size_t user_len = user ? strlen(user) + 1 : 0;
+		size_t user_len = 0;
+		char *user = php_get_current_running_user(&user_len);
 
 		md5str[0] = '\0';
 		PHP_MD5Init(&md5_context);
 		PHP_MD5Update(&md5_context, (unsigned char*)uri, uri_len);
 		PHP_MD5Final(digest, &md5_context);
 		make_digest(md5str, digest);
-		key = emalloc(len+sizeof("/wsdl-")-1+user_len+2+sizeof(md5str));
+		key = emalloc(len+sizeof("/wsdl-")-1+user_len+1+2+sizeof(md5str));
 		memcpy(key,SOAP_GLOBAL(cache_dir),len);
 		memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
 		len += sizeof("/wsdl-")-1;
 		if (user_len) {
-			memcpy(key+len, user, user_len-1);
-			len += user_len-1;
+			memcpy(key+len, user, user_len);
+			len += user_len;
 			key[len++] = '-';
+			efree(user);
 		}
 		if (WSDL_CACHE_VERSION <= 0x9f) {
 			key[len++] = (WSDL_CACHE_VERSION >> 8) + '0';
