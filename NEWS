@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Drop support for -z CLI/CGI flag. (nielsdos)
   . Fixed GH-17956 - development server 404 page does not adapt to mobiles.
     (pascalchevrel)
+  . Changed `php --ini` to quotes some values with double quotes, to
+    help humans debug unexpected whitespace, when stdout is a tty.
+    (schneems)
 
 - CURL:
   . Added CURLFOLLOW_ALL, CURLFOLLOW_OBEYCODE and CURLFOLLOW_FIRSTONLY
