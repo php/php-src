@@ -112,22 +112,6 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 		} \
 	}
 
-#define CHECK_XML_NULL(xml) \
-	{ \
-		xmlAttrPtr null; \
-		if (!xml) { \
-			ZVAL_NULL(ret); \
-			return ret; \
-		} \
-		if (xml->properties) { \
-			null = get_attribute(xml->properties, "nil"); \
-			if (null) { \
-				ZVAL_NULL(ret); \
-				return ret; \
-			} \
-		} \
-	}
-
 #define FIND_ZVAL_NULL(zval, xml, style) \
 { \
 	if (!zval || Z_TYPE_P(zval) == IS_NULL) { \
@@ -1480,7 +1464,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 
-				CHECK_XML_NULL(data);
+				FIND_XML_NULL(data, ret);
 				if (soap_check_xml_ref(ret, data)) {
 					return ret;
 				}
