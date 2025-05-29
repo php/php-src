@@ -201,6 +201,11 @@ PHP 8.5 UPGRADE NOTES
 
 - SOAP:
   . Enumeration cases are now dumped in __getTypes().
+  . Implemented request #61105:
+    support for Soap 1.2 Reason Text xml:lang attribute.
+    The signature of SoapFault::__construct() and SoapServer::fault() therefore
+    now have an optional $lang parameter.
+    This support solves compatibility with .NET SOAP clients.
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
