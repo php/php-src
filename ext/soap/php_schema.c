@@ -48,6 +48,7 @@ static bool node_is_equal_xsd(xmlNodePtr node, const char *name)
 	static const char *ns[] = {
 		XSD_NAMESPACE,
 		XSD_DRAFT_2000_NAMESPACE,
+		XSD_1999_NAMESPACE,
 		NULL
 	};
 
