@@ -53,6 +53,8 @@ PHP                                                                        NEWS
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
   . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
+  . Fixed GH-18695 (zend_ast_export() - float number is not preserved).
+    (Oleg Efimov)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
