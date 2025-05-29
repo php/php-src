@@ -25,7 +25,7 @@
 #include "php_pdo_driver.h"
 
 struct pdo_sqlstate_info {
-	const char state[5];
+	const char state[5] ZEND_NONSTRING;
 	const char *desc;
 };
 

@@ -118,7 +118,7 @@ PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
-	void (*sig_handler)() = signal(SIGCHLD, SIG_DFL);
+	void (*sig_handler)(int) = signal(SIGCHLD, SIG_DFL);
 #endif
 
 #ifdef PHP_WIN32

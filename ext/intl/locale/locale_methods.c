@@ -315,7 +315,7 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 	char *default_locale = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(locale_name)
+		Z_PARAM_PATH_STR(locale_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(locale_name) == 0) {
@@ -481,7 +481,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(loc_name_len == 0) {
@@ -568,9 +568,9 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(disp_loc_name, disp_loc_name_len)
+		Z_PARAM_PATH_OR_NULL(disp_loc_name, disp_loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(loc_name_len > ULOC_FULLNAME_CAPACITY) {
@@ -735,7 +735,7 @@ PHP_FUNCTION( locale_get_keywords )
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
@@ -807,7 +807,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 {
 	zval *ele_value;
 
-	if ((ele_value = zend_hash_str_find(hash_arr , key_name, strlen(key_name))) != NULL ) {
+	if ((ele_value = zend_hash_str_find_deref(hash_arr , key_name, strlen(key_name))) != NULL ) {
 		if(Z_TYPE_P(ele_value)!= IS_STRING ){
 			/* element value is not a string */
 			return FAILURE;
@@ -850,7 +850,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 	int 	isFirstSubtag 	= 0;
 
 	/* Variant/ Extlang/Private etc. */
-	if ((ele_value = zend_hash_str_find( hash_arr , key_name , strlen(key_name))) != NULL) {
+	if ((ele_value = zend_hash_str_find_deref( hash_arr , key_name , strlen(key_name))) != NULL) {
 		if( Z_TYPE_P(ele_value) == IS_STRING ){
 			add_prefix( loc_name , key_name);
 
@@ -862,6 +862,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			zval *data;
 
 			ZEND_HASH_FOREACH_VAL(arr, data) {
+				ZVAL_DEREF(data);
 				if(Z_TYPE_P(data) != IS_STRING) {
 					return FAILURE;
 				}
@@ -893,7 +894,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 		isFirstSubtag = 0;
 		for( i=0 ; i< max_value; i++ ){
 			snprintf( cur_key_name , 30, "%s%d", key_name , i);
-			if ((ele_value = zend_hash_str_find( hash_arr , cur_key_name , strlen(cur_key_name))) != NULL) {
+			if ((ele_value = zend_hash_str_find_deref( hash_arr , cur_key_name , strlen(cur_key_name))) != NULL) {
 				if( Z_TYPE_P(ele_value)!= IS_STRING ){
 					/* variant is not a string */
 					return FAILURE;
@@ -1125,7 +1126,7 @@ PHP_FUNCTION(locale_parse)
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
@@ -1165,7 +1166,7 @@ PHP_FUNCTION(locale_get_all_variants)
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(loc_name, loc_name_len)
+		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(loc_name_len == 0) {
@@ -1259,8 +1260,8 @@ PHP_FUNCTION(locale_filter_matches)
 	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(lang_tag, lang_tag_len)
-		Z_PARAM_STRING(loc_range,  loc_range_len)
+		Z_PARAM_PATH(lang_tag, lang_tag_len)
+		Z_PARAM_PATH(loc_range,  loc_range_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(boolCanonical)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1426,10 +1427,15 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	char **cur_arr = ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *));
 	ZEND_HASH_FOREACH_VAL(hash_arr, ele_value) {
+		ZVAL_DEREF(ele_value);
 	/* convert the array to lowercase , also replace hyphens with the underscore and store it in cur_arr */
 		if(Z_TYPE_P(ele_value)!= IS_STRING) {
 			/* element value is not a string */
 			zend_argument_type_error(2, "must only contain string values");
+			LOOKUP_CLEAN_RETURN(NULL);
+		}
+		if (zend_str_has_nul_byte(Z_STR_P(ele_value))) {
+			zend_argument_value_error(2, "must not contain any null bytes");
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
 		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
@@ -1533,10 +1539,10 @@ PHP_FUNCTION(locale_lookup)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY(arr)
-		Z_PARAM_STRING(loc_range, loc_range_len)
+		Z_PARAM_PATH(loc_range, loc_range_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(boolCanonical)
-		Z_PARAM_STR_OR_NULL(fallback_loc_str)
+		Z_PARAM_PATH_STR_OR_NULL(fallback_loc_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(loc_range_len == 0) {
@@ -1617,3 +1623,65 @@ PHP_FUNCTION(locale_accept_from_http)
 	RETURN_STRINGL(resultLocale, len);
 }
 /* }}} */
+
+PHP_FUNCTION(locale_is_right_to_left)
+{
+	char *locale;
+	size_t locale_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(locale, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!locale_len) {
+		locale = (char *)intl_locale_get_default();
+	}
+
+	RETURN_BOOL(uloc_isRightToLeft(locale));
+}
+
+PHP_FUNCTION(locale_add_likely_subtags)
+{
+	char *locale, maximized_locale[ULOC_FULLNAME_CAPACITY];
+	UErrorCode status = 0;
+	size_t locale_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(locale, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!locale_len) {
+		locale = (char *)intl_locale_get_default();
+	}
+
+	int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
+	INTL_CHECK_STATUS(status, "locale_add_likely_subtags: invalid locale");
+	if (maximized_locale_len < 0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(maximized_locale, maximized_locale_len);
+}
+
+PHP_FUNCTION(locale_minimize_subtags)
+{
+	char *locale, minimized_locale[ULOC_FULLNAME_CAPACITY];
+	UErrorCode status = 0;
+	size_t locale_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(locale, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!locale_len) {
+		locale = (char *)intl_locale_get_default();
+	}
+
+	int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
+	INTL_CHECK_STATUS(status, "locale_minimize_subtags: invalid locale");
+	if (minimized_locale_len < 0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(minimized_locale, minimized_locale_len);
+}

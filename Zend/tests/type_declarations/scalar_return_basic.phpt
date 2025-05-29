@@ -44,7 +44,7 @@ $values = [
     [],
     new StdClass,
     new StringCapable,
-    fopen("data:text/plain,foobar", "r")
+    STDERR,
 ];
 
 foreach ($functions as $type => $function) {
@@ -92,13 +92,13 @@ int(0)
 *** Trying array(0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type int, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type int, stdClass returned in %s on line %d
-*** Trying object(StringCapable)#7 (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type int, StringCapable returned in %s on line %d
-*** Trying resource(5) of type (stream)
+*** Trying resource(%d) of type (stream)
 *** Caught {closure:%s:%d}(): Return value must be of type int, resource returned in %s on line %d
 
 Testing 'float' type:
@@ -129,13 +129,13 @@ float(0)
 *** Trying array(0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type float, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type float, stdClass returned in %s on line %d
-*** Trying object(StringCapable)#7 (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type float, StringCapable returned in %s on line %d
-*** Trying resource(5) of type (stream)
+*** Trying resource(%d) of type (stream)
 *** Caught {closure:%s:%d}(): Return value must be of type float, resource returned in %s on line %d
 
 Testing 'string' type:
@@ -166,13 +166,13 @@ string(0) ""
 *** Trying array(0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type string, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type string, stdClass returned in %s on line %d
-*** Trying object(StringCapable)#7 (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 string(6) "foobar"
-*** Trying resource(5) of type (stream)
+*** Trying resource(%d) of type (stream)
 *** Caught {closure:%s:%d}(): Return value must be of type string, resource returned in %s on line %d
 
 Testing 'bool' type:
@@ -203,13 +203,13 @@ bool(false)
 *** Trying array(0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type bool, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type bool, stdClass returned in %s on line %d
-*** Trying object(StringCapable)#7 (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Return value must be of type bool, StringCapable returned in %s on line %d
-*** Trying resource(5) of type (stream)
+*** Trying resource(%d) of type (stream)
 *** Caught {closure:%s:%d}(): Return value must be of type bool, resource returned in %s on line %d
 
 Done

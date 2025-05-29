@@ -148,7 +148,6 @@ const opt_struct OPTIONS[] = {
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
-	{'z', 1, "zend-extension"},
 	{10,  1, "rf"},
 	{10,  1, "rfunction"},
 	{11,  1, "rc"},
@@ -159,7 +158,7 @@ const opt_struct OPTIONS[] = {
 	{13,  1, "rzendextension"},
 	{14,  1, "ri"},
 	{14,  1, "rextinfo"},
-	{15,  0, "ini"},
+	{15,  2, "ini"},
 	/* Internal testing option -- may be changed or removed without notice,
 	 * including in patch releases. */
 	{16,  1, "repeat"},
@@ -221,6 +220,7 @@ static void print_extensions(void) /* {{{ */
 #define STDERR_FILENO 2
 #endif
 
+#ifdef PHP_WRITE_STDOUT
 static inline bool sapi_cli_select(php_socket_t fd)
 {
 	fd_set wfd;
@@ -238,6 +238,7 @@ static inline bool sapi_cli_select(php_socket_t fd)
 
 	return ret != -1;
 }
+#endif
 
 PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /* {{{ */
 {
@@ -494,12 +495,12 @@ static void php_cli_usage(char *argv0)
 				"  -s               Output HTML syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Output source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
 				"\n"
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
 				"\n"
 				"  --ini            Show configuration file names\n"
+				"  --ini=diff       Show INI entries that differ from the built-in default\n"
 				"\n"
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"
@@ -587,6 +588,14 @@ BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
 }
 #endif
 /*}}}*/
+
+static int zend_ini_entry_cmp(Bucket *a, Bucket *b)
+{
+	zend_ini_entry *A = Z_PTR(a->val);
+	zend_ini_entry *B = Z_PTR(b->val);
+
+	return zend_binary_strcasecmp(ZSTR_VAL(A->name), ZSTR_LEN(A->name), ZSTR_VAL(B->name), ZSTR_LEN(B->name));
+}
 
 static int do_cli(int argc, char **argv) /* {{{ */
 {
@@ -790,9 +799,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				context.mode = PHP_CLI_MODE_STRIP;
 				break;
 
-			case 'z': /* load extension file */
-				zend_load_extension(php_optarg);
-				break;
 			case 'H':
 				hide_argv = true;
 				break;
@@ -817,7 +823,15 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				reflection_what = php_optarg;
 				break;
 			case 15:
-				context.mode = PHP_CLI_MODE_SHOW_INI_CONFIG;
+				if (php_optarg) {
+					if (strcmp(php_optarg, "diff") == 0) {
+						context.mode = PHP_CLI_MODE_SHOW_INI_DIFF;
+					} else {
+						param_error = "Unknown argument for --ini\n";
+					}
+				} else {
+					context.mode = PHP_CLI_MODE_SHOW_INI_CONFIG;
+				}
 				break;
 			case 16:
 				num_repeats = atoi(php_optarg);
@@ -840,9 +854,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			is essential to mitigate buggy console info. */
 			interactive = php_win32_console_is_own() &&
 				!(script_file ||
-					argc > php_optind && context.mode != PHP_CLI_MODE_CLI_DIRECT &&
+					(argc > php_optind && context.mode != PHP_CLI_MODE_CLI_DIRECT &&
 					context.mode != PHP_CLI_MODE_PROCESS_STDIN &&
-					strcmp(argv[php_optind-1],"--")
+					strcmp(argv[php_optind-1],"--"))
 				);
 		}
 #endif
@@ -1092,10 +1106,46 @@ do_repeat:
 
 		case PHP_CLI_MODE_SHOW_INI_CONFIG:
 			{
-				zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
-				zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
-				zend_printf("Scan for additional .ini files in: %s\n", php_ini_scanned_path  ? php_ini_scanned_path : "(none)");
+				zend_printf("Configuration File (php.ini) Path: \"%s\"\n", PHP_CONFIG_FILE_PATH);
+				if (php_ini_opened_path) {
+					zend_printf("Loaded Configuration File:         \"%s\"\n", php_ini_opened_path);
+				} else {
+					zend_printf("Loaded Configuration File:         (none)\n");
+				}
+				if (php_ini_scanned_path) {
+					zend_printf("Scan for additional .ini files in: \"%s\"\n", php_ini_scanned_path);
+				} else {
+					zend_printf("Scan for additional .ini files in: (none)\n");
+				}
 				zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
+				break;
+			}
+		case PHP_CLI_MODE_SHOW_INI_DIFF:
+			{
+				zend_printf("Non-default INI settings:\n");
+				zend_ini_entry *ini_entry;
+				HashTable *sorted = zend_array_dup(EG(ini_directives));
+				zend_array_sort(sorted, zend_ini_entry_cmp, 1);
+				ZEND_HASH_PACKED_FOREACH_PTR(sorted, ini_entry) {
+					if (ini_entry->value == NULL && ini_entry->def->value == NULL) {
+						continue;
+					}
+					if (ini_entry->value != NULL && ini_entry->def->value != NULL && zend_string_equals_cstr(ini_entry->value, ini_entry->def->value, ini_entry->def->value_length)) {
+						continue;
+					}
+
+					zend_printf(
+						"%s: %s%s%s -> %s%s%s\n",
+						ZSTR_VAL(ini_entry->name),
+						ini_entry->def->value ? "\"" : "",
+						ini_entry->def->value ? ini_entry->def->value : "(none)",
+						ini_entry->def->value ? "\"" : "",
+						ini_entry->value ? "\"" : "",
+						ini_entry->value ? ZSTR_VAL(ini_entry->value) : "(none)",
+						ini_entry->value ? "\"" : ""
+					);
+				} ZEND_HASH_FOREACH_END();
+				zend_array_destroy(sorted);
 				break;
 			}
 		}

@@ -83,7 +83,6 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data);
 static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 
-static int is_map(zval *array);
 static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *out_type);
 
 static xmlNodePtr check_and_resolve_href(xmlNodePtr data);
@@ -105,26 +104,10 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 			return zval; \
 		} \
 		if (xml->properties) { \
-			null = get_attribute(xml->properties, "nil"); \
+			null = get_attribute_ex(xml->properties, "nil", XSI_NAMESPACE); \
 			if (null) { \
 				ZVAL_NULL(zval); \
 				return zval; \
-			} \
-		} \
-	}
-
-#define CHECK_XML_NULL(xml) \
-	{ \
-		xmlAttrPtr null; \
-		if (!xml) { \
-			ZVAL_NULL(ret); \
-			return ret; \
-		} \
-		if (xml->properties) { \
-			null = get_attribute(xml->properties, "nil"); \
-			if (null) { \
-				ZVAL_NULL(ret); \
-				return ret; \
 			} \
 		} \
 	}
@@ -304,13 +287,7 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 				return 0;
 			}
 			if (SOAP_GLOBAL(soap_version) == SOAP_1_1) {
-				while (1) {
-					attr = get_attribute(attr, "id");
-					if (attr == NULL || attr->ns == NULL) {
-						break;
-					}
-					attr = attr->next;
-				}
+				attr = get_attribute(attr, "id");
 				if (attr) {
 					id = (char*)attr->children->content;
 					smart_str_appendc(&prefix, '#');
@@ -1135,29 +1112,27 @@ static xmlNodePtr to_xml_double(encodeTypePtr type, zval *data, int style, xmlNo
 
 static zval *to_zval_bool(zval *ret, encodeTypePtr type, xmlNodePtr data)
 {
-	ZVAL_NULL(ret);
 	FIND_XML_NULL(data, ret);
 
-	if (data && data->children) {
-		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			whiteSpace_collapse(data->children->content);
-			if (stricmp((char*)data->children->content, "true") == 0 ||
-				stricmp((char*)data->children->content, "t") == 0 ||
-				strcmp((char*)data->children->content, "1") == 0) {
-				ZVAL_TRUE(ret);
-			} else if (stricmp((char*)data->children->content, "false") == 0 ||
-				stricmp((char*)data->children->content, "f") == 0 ||
-				strcmp((char*)data->children->content, "0") == 0) {
-				ZVAL_FALSE(ret);
-			} else {
-				ZVAL_STRING(ret, (char*)data->children->content);
-				convert_to_boolean(ret);
-			}
-		} else {
-			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
-		}
-	} else {
+	if (!data->children) {
 		ZVAL_NULL(ret);
+		return ret;
+	}
+	if (data->children->type != XML_TEXT_NODE || data->children->next != NULL) {
+		// TODO Convert to exception?
+		soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
+	}
+
+	whiteSpace_collapse(data->children->content);
+	if (
+		data->children->content[0] == '\0' /* Check for empty string */
+		|| strcmp((const char*)data->children->content, "0") == 0
+		|| stricmp((const char*)data->children->content, "f") == 0
+		|| stricmp((const char*)data->children->content, "false") == 0
+	) {
+		ZVAL_FALSE(ret);
+	} else {
+		ZVAL_TRUE(ret);
 	}
 	return ret;
 }
@@ -1481,7 +1456,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 
-				CHECK_XML_NULL(data);
+				FIND_XML_NULL(data, ret);
 				if (soap_check_xml_ref(ret, data)) {
 					return ret;
 				}
@@ -1549,7 +1524,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 
 			ZEND_HASH_FOREACH_PTR(sdlType->attributes, attr) {
 				if (attr->name) {
-					xmlAttrPtr val = get_attribute(data->properties, attr->name);
+					xmlAttrPtr val = get_attribute_any_ns(data->properties, attr->name);
 					char *str_val = NULL;
 
 					if (val && val->children && val->children->content) {
@@ -1664,7 +1639,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				enc = model->u.element->encode;
 				if ((model->max_occurs == -1 || model->max_occurs > 1) &&
 				    Z_TYPE_P(data) == IS_ARRAY &&
-				    !is_map(data)) {
+				    zend_array_is_list(Z_ARRVAL_P(data))) {
 					HashTable *ht = Z_ARRVAL_P(data);
 					zval *val;
 
@@ -1743,7 +1718,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				enc = get_conversion(XSD_ANYXML);
 				if ((model->max_occurs == -1 || model->max_occurs > 1) &&
 				    Z_TYPE_P(data) == IS_ARRAY &&
-				    !is_map(data)) {
+				    zend_array_is_list(Z_ARRVAL_P(data))) {
 					HashTable *ht = Z_ARRVAL_P(data);
 					zval *val;
 
@@ -1918,7 +1893,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			sdlTypePtr array_el;
 
 			if (Z_TYPE_P(data) == IS_ARRAY &&
-		      !is_map(data) &&
+		      zend_array_is_list(Z_ARRVAL_P(data)) &&
 		      sdlType->attributes == NULL &&
 		      sdlType->model != NULL &&
 		      (array_el = model_array_element(sdlType->model)) != NULL) {
@@ -2028,7 +2003,7 @@ static xmlNodePtr guess_array_map(encodeTypePtr type, zval *data, int style, xml
 	encodePtr enc = NULL;
 
 	if (data && Z_TYPE_P(data) == IS_ARRAY) {
-		if (is_map(data)) {
+		if (!zend_array_is_list(Z_ARRVAL_P(data))) {
 			enc = get_conversion(APACHE_MAP);
 		} else {
 			enc = get_conversion(SOAP_ENC_ARRAY);
@@ -2504,6 +2479,26 @@ iterator_failed_to_get:
 	return xmlParam;
 }
 
+static xmlAttrPtr get_soap_1_1_enc_attribute(xmlAttrPtr props, const char *name)
+{
+	return get_attribute_ex(props, name, SOAP_1_1_ENC_NAMESPACE);
+}
+
+static xmlAttrPtr get_soap_1_2_enc_attribute(xmlAttrPtr props, const char *name)
+{
+	return get_attribute_ex(props, name, SOAP_1_2_ENC_NAMESPACE);
+}
+
+/* Be forgiving for BC */
+static xmlAttrPtr get_soap_enc_attribute(xmlAttrPtr props, const char *name)
+{
+	xmlAttrPtr res = get_soap_1_1_enc_attribute(props, name);
+	if (!res) {
+		res = get_soap_1_2_enc_attribute(props, name);
+	}
+	return res;
+}
+
 static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 {
 	xmlNodePtr trav;
@@ -2520,7 +2515,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	FIND_XML_NULL(data, ret);
 
 	if (data &&
-	    (attr = get_attribute(data->properties,"arrayType")) &&
+	    (attr = get_soap_enc_attribute(data->properties,"arrayType")) &&
 	    attr->children && attr->children->content) {
 		const char *type;
 		char *end, *ns;
@@ -2540,7 +2535,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		}
 		if (ns) {efree(ns);}
 
-	} else if ((attr = get_attribute(data->properties,"itemType")) &&
+	} else if ((attr = get_soap_enc_attribute(data->properties,"itemType")) &&
 	    attr->children &&
 	    attr->children->content) {
 		const char *type;
@@ -2554,7 +2549,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		}
 		if (ns) {efree(ns);}
 
-		if ((attr = get_attribute(data->properties,"arraySize")) &&
+		if ((attr = get_soap_enc_attribute(data->properties,"arraySize")) &&
 		    attr->children && attr->children->content) {
 			dimension = calc_dimension_12((char*)attr->children->content);
 			dims = get_position_12(dimension, (char*)attr->children->content);
@@ -2563,7 +2558,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			*dims = 0;
 		}
 
-	} else if ((attr = get_attribute(data->properties,"arraySize")) &&
+	} else if ((attr = get_soap_enc_attribute(data->properties,"arraySize")) &&
 	    attr->children && attr->children->content) {
 
 		dimension = calc_dimension_12((char*)attr->children->content);
@@ -2642,7 +2637,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	pos = safe_emalloc(sizeof(int), dimension, 0);
 	memset(pos,0,sizeof(int)*dimension);
 	if (data &&
-	    (attr = get_attribute(data->properties,"offset")) &&
+	    (attr = get_soap_enc_attribute(data->properties,"offset")) &&
 	     attr->children && attr->children->content) {
 		char* tmp = strrchr((char*)attr->children->content,'[');
 
@@ -2658,7 +2653,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (trav->type == XML_ELEMENT_NODE) {
 			int i;
 			zval tmpVal, *ar;
-			xmlAttrPtr position = get_attribute(trav->properties,"position");
+			xmlAttrPtr position = get_soap_enc_attribute(trav->properties,"position");
 
 			ZVAL_NULL(&tmpVal);
 			master_to_zval(&tmpVal, enc, trav);
@@ -2873,9 +2868,9 @@ static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			/* Logic: has children = IS_OBJECT else IS_STRING */
 			xmlNodePtr trav;
 
-			if (get_attribute(data->properties, "arrayType") ||
-			    get_attribute(data->properties, "itemType") ||
-			    get_attribute(data->properties, "arraySize")) {
+			if (get_soap_enc_attribute(data->properties, "arrayType") ||
+			    get_soap_enc_attribute(data->properties, "itemType") ||
+			    get_soap_enc_attribute(data->properties, "arraySize")) {
 				enc = get_conversion(SOAP_ENC_ARRAY);
 			} else {
 				enc = get_conversion(XSD_STRING);
@@ -3359,14 +3354,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 static xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 {
 	if (data && data->properties) {
-		xmlAttrPtr href;
-
-		href = data->properties;
-		while (1) {
-			href = get_attribute(href, "href");
-			if (href == NULL || href->ns == NULL) {break;}
-			href = href->next;
-		}
+		xmlAttrPtr href = get_attribute(data->properties, "href");
 		if (href) {
 			/*  Internal href try and find node */
 			if (href->children->content[0] == '#') {
@@ -3551,25 +3539,6 @@ encodePtr get_conversion(int encode)
 	}
 }
 
-static int is_map(zval *array)
-{
-	zend_ulong index;
-	zend_string *key;
-	zend_ulong i = 0;
-
-	if (HT_IS_PACKED(Z_ARRVAL_P(array)) && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(array))) {
-		return FALSE;
-	}
-
-	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(array), index, key) {
-		if (key || index != i) {
-			return TRUE;
-		}
-		i++;
-	} ZEND_HASH_FOREACH_END();
-	return FALSE;
-}
-
 static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 {
 	HashTable *ht;
@@ -3611,7 +3580,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 				cur_ns = NULL;
 			}
 
-		} else if (Z_TYPE_P(tmp) == IS_ARRAY && is_map(tmp)) {
+		} else if (Z_TYPE_P(tmp) == IS_ARRAY && !zend_array_is_list(Z_ARRVAL_P(tmp))) {
 			cur_type = APACHE_MAP;
 			cur_stype = NULL;
 			cur_ns = NULL;

@@ -124,7 +124,6 @@ static zend_string *php_tidy_file_to_mem(const char *, bool);
 static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
-static zval *tidy_instantiate(zend_class_entry *, zval *);
 static zend_result tidy_doc_cast_handler(zend_object *, zval *, int);
 static zend_result tidy_node_cast_handler(zend_object *, zval *, int);
 static void tidy_doc_update_properties(PHPTidyObj *);
@@ -273,7 +272,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value)
 
 static void tidy_create_node_object(zval *zv, PHPTidyDoc *ptdoc, TidyNode node)
 {
-	tidy_instantiate(tidy_ce_node, zv);
+	object_init_ex(zv, tidy_ce_node);
 	PHPTidyObj *newobj = Z_TIDY_P(zv);
 	newobj->node = node;
 	newobj->type = is_node;
@@ -467,12 +466,6 @@ static zend_object *tidy_object_new_node(zend_class_entry *class_type)
 static zend_object *tidy_object_new_doc(zend_class_entry *class_type)
 {
 	return tidy_object_new(class_type, &tidy_object_handlers_doc, is_doc);
-}
-
-static zval *tidy_instantiate(zend_class_entry *pce, zval *object)
-{
-	object_init_ex(object, pce);
-	return object;
 }
 
 static zend_result tidy_doc_cast_handler(zend_object *in, zval *out, int type)
@@ -705,6 +698,7 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 
 	if (tempnode) {
 		array_init(&children);
+		zend_hash_real_init_packed(Z_ARRVAL(children));
 		do {
 			tidy_create_node_object(&temp, obj->ptdoc, tempnode);
 			add_next_index_zval(&children, &temp);
@@ -961,17 +955,17 @@ static zend_result php_tidy_output_handler(void **nothing, php_output_context *o
 	TidyBuffer inbuf, outbuf, errbuf;
 
 	if (TG(clean_output) && (output_context->op & PHP_OUTPUT_HANDLER_START) && (output_context->op & PHP_OUTPUT_HANDLER_FINAL)) {
+		if (ZEND_SIZE_T_UINT_OVFL(output_context->in.used)) {
+			php_error_docref(NULL, E_WARNING, "Input string is too long");
+			return status;
+		}
+
 		doc = tidyCreate();
 		tidyBufInit(&errbuf);
 
 		if (0 == tidySetErrorBuffer(doc, &errbuf)) {
 			tidyOptSetBool(doc, TidyForceOutput, yes);
 			tidyOptSetBool(doc, TidyMark, no);
-
-			if (ZEND_SIZE_T_UINT_OVFL(output_context->in.used)) {
-				php_error_docref(NULL, E_WARNING, "File content is too long");
-				return status;
-			}
 
 			TIDY_SET_DEFAULT_CONFIG(doc);
 
@@ -1017,7 +1011,7 @@ PHP_FUNCTION(tidy_parse_string)
 		RETURN_THROWS();
 	}
 
-	tidy_instantiate(tidy_ce_doc, return_value);
+	object_init_ex(return_value, tidy_ce_doc);
 	obj = Z_TIDY_P(return_value);
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS
@@ -1085,7 +1079,7 @@ PHP_FUNCTION(tidy_parse_file)
 		RETURN_THROWS();
 	}
 
-	tidy_instantiate(tidy_ce_doc, return_value);
+	object_init_ex(return_value, tidy_ce_doc);
 	obj = Z_TIDY_P(return_value);
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS

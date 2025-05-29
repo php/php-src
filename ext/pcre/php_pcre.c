@@ -199,13 +199,6 @@ static void php_pcre_efree(void *block, void *data)
 	efree(block);
 }
 
-#ifdef PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
-	/* pcre 10.38 needs PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, disabled by default */
-#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
-#else
-#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS 0
-#endif
-
 #define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
 static void php_pcre_init_pcre2(uint8_t jit)
@@ -225,8 +218,6 @@ static void php_pcre_init_pcre2(uint8_t jit)
 			return;
 		}
 	}
-
-	pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
 
 	if (!mctx) {
 		mctx = pcre2_match_context_create(gctx);
@@ -590,7 +581,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 #else
 	uint32_t			 coptions = 0;
 #endif
-	uint32_t			 eoptions = PHP_PCRE_DEFAULT_EXTRA_COPTIONS;
+	uint32_t			 eoptions = 0;
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -1563,9 +1554,12 @@ static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cach
 	fci->params = &arg;
 	zend_call_function(fci, fcc);
 	zval_ptr_dtor(&arg);
+	if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
+		return Z_STR(retval);
+	}
 	/* No Exception has occurred */
-	if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
-		result_str = zval_try_get_string(&retval);
+	else if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
+		result_str = zval_try_get_string_func(&retval);
 	}
 	zval_ptr_dtor(&retval);
 

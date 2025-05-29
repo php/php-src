@@ -4,26 +4,33 @@ class CertificateGenerator
 {
     const CONFIG = __DIR__. DIRECTORY_SEPARATOR . 'openssl.cnf';
 
-    /** @var OpenSSLCertificate */
-    private $ca;
+    /** @var OpenSSLCertificate|false */
+    private $ca = false;
 
-    /** @var resource */
-    private $caKey;
+    /** @var OpenSSLAsymmetricKey|false */
+    private $caKey = false;
 
-    /** @var resource|null */
+    /** @var bool */
+    private $useSelfSignedCert;
+
+    /** @var OpenSSLCertificate|null */
     private $lastCert;
 
-    /** @var resource|null */
+    /** @var OpenSSLAsymmetricKey|null */
     private $lastKey;
 
-    public function __construct()
+    public function __construct(bool $useSelfSignedCert = false)
     {
         if (!extension_loaded('openssl')) {
             throw new RuntimeException(
                 'openssl extension must be loaded to generate certificates'
             );
         }
-        $this->generateCa();
+        $this->useSelfSignedCert = $useSelfSignedCert;
+
+        if (!$this->useSelfSignedCert) {
+            $this->generateCa();
+        }
     }
 
     /**
@@ -54,40 +61,32 @@ class CertificateGenerator
             'commonName' => 'CA for PHP Tests'
         ];
 
-        $this->ca = openssl_csr_sign(
-            openssl_csr_new(
-                $dn,
-                $this->caKey,
-                [
-                    'x509_extensions' => 'v3_ca',
-                    'config' => self::CONFIG,
-                ]
-            ),
-            null,
-            $this->caKey,
-            2,
-            [
-                'config' => self::CONFIG,
-            ]
-        );
+        $csr = openssl_csr_new($dn, $this->caKey, ['config' => self::CONFIG]);
+        $this->ca = openssl_csr_sign($csr, null, $this->caKey, 365, ['config' => self::CONFIG]);
     }
 
     public function getCaCert()
     {
+        if ($this->useSelfSignedCert) {
+            throw new RuntimeException("CA is not generated in self-signed mode.");
+        }
+
         $output = '';
         openssl_x509_export($this->ca, $output);
-
         return $output;
     }
 
     public function saveCaCert($file)
     {
+        if ($this->useSelfSignedCert) {
+            throw new RuntimeException("CA is not available in self-signed mode.");
+        }
+
         openssl_x509_export_to_file($this->ca, $file);
     }
 
-    private function generateCertAndKey(
-        $commonNameForCert, $file, $keyLength = null, $subjectAltName = null
-    ) {
+    private function generateCertAndKey($commonNameForCert, $file, $keyLength = null, $subjectAltName = null)
+    {
         $dn = [
             'countryName' => 'BY',
             'stateOrProvinceName' => 'Minsk',
@@ -98,8 +97,7 @@ class CertificateGenerator
             $dn['commonName'] = $commonNameForCert;
         }
 
-        $subjectAltNameConfig =
-            $subjectAltName ? "subjectAltName = $subjectAltName" : "";
+        $subjectAltNameConfig = $subjectAltName ? "subjectAltName = $subjectAltName" : "";
         $configCode = <<<CONFIG
 [ req ]
 distinguished_name = req_distinguished_name
@@ -128,12 +126,17 @@ CONFIG;
 
         $this->lastKey = self::generateKey($keyLength);
         $csr = openssl_csr_new($dn, $this->lastKey, $config);
+
+        // If in self-signed mode, sign with the same key, otherwise use CA
+        $signingCert = $this->useSelfSignedCert ? null : $this->ca;
+        $signingKey = $this->useSelfSignedCert ? $this->lastKey : $this->caKey;
+
         $this->lastCert = openssl_csr_sign(
             $csr,
-            $this->ca,
-            $this->caKey,
-            /* days */ 2,
-            $config,
+            $signingCert,
+            $signingKey,
+            365, // 1 year validity
+            $config
         );
 
         return $config;
@@ -163,6 +166,22 @@ CONFIG;
         openssl_x509_export_to_file($this->lastCert, $certFile);
         openssl_pkey_export_to_file($this->lastKey, $keyFile, null, $config);
 
+        unlink($config['config']);
+    }
+
+    public function saveNewCertAndPubKey(
+        $commonNameForCert, $certFile, $pubKeyFile, $keyLength = null, $subjectAltName = null
+    ) {
+        $config = $this->generateCertAndKey($commonNameForCert, $certFile, $keyLength, $subjectAltName);
+
+        openssl_x509_export_to_file($this->lastCert, $certFile);
+
+        $keyDetails = openssl_pkey_get_details($this->lastKey);
+        if ($keyDetails === false || !isset($keyDetails['key'])) {
+            throw new RuntimeException("Failed to extract public key.");
+        }
+
+        file_put_contents($pubKeyFile, $keyDetails['key']);
         unlink($config['config']);
     }
 

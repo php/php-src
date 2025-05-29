@@ -2,6 +2,10 @@
 Bug GH-17373 (imagefttext() ignores clipping rect for palette images)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if(!function_exists('imagefttext')) die('skip imagefttext() not available');
+?>
 --FILE--
 <?php
 $im = imagecreate(64, 32);

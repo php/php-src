@@ -18,7 +18,8 @@
 #include "private.h"
 #include <stddef.h>
 
-void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
+/* Returns the scale of the value after rounding. */
+size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 {
 	/* clear result */
 	bc_free_num(result);
@@ -43,19 +44,19 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			case PHP_ROUND_HALF_ODD:
 			case PHP_ROUND_TOWARD_ZERO:
 				*result = bc_copy_num(BCG(_zero_));
-				return;
+				return 0;
 
 			case PHP_ROUND_CEILING:
 				if (num->n_sign == MINUS) {
 					*result = bc_copy_num(BCG(_zero_));
-					return;
+					return 0;
 				}
 				break;
 
 			case PHP_ROUND_FLOOR:
 				if (num->n_sign == PLUS) {
 					*result = bc_copy_num(BCG(_zero_));
-					return;
+					return 0;
 				}
 				break;
 
@@ -67,7 +68,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 
 		if (bc_is_zero(num)) {
 			*result = bc_copy_num(BCG(_zero_));
-			return;
+			return 0;
 		}
 
 		/* If precision is -3, it becomes 1000. */
@@ -78,7 +79,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 		}
 		(*result)->n_value[0] = 1;
 		(*result)->n_sign = num->n_sign;
-		return;
+		return 0;
 	}
 
 	/* Just like bcadd('1', '1', 4) becomes '2.0000', it pads with zeros at the end if necessary. */
@@ -90,7 +91,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			(*result)->n_sign = num->n_sign;
 			memcpy((*result)->n_value, num->n_value, num->n_len + num->n_scale);
 		}
-		return;
+		return precision;
 	}
 
 	/*
@@ -222,7 +223,12 @@ up:
 	}
 
 check_zero:
-	if (bc_is_zero(*result)) {
-		(*result)->n_sign = PLUS;
+	{
+		size_t scale = (*result)->n_scale;
+		if (bc_is_zero(*result)) {
+			(*result)->n_sign = PLUS;
+			(*result)->n_scale = 0;
+		}
+		return scale;
 	}
 }

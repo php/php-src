@@ -35,7 +35,7 @@ static bool is_blank(const xmlChar* str)
 	return true;
 }
 
-/* removes all empty text, comments and other insignoficant nodes */
+/* removes all empty text, comments and other insignificant nodes */
 static void cleanup_xml_node(xmlNodePtr node)
 {
 	xmlNodePtr trav;
@@ -80,10 +80,6 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 	xmlDocPtr ret;
 	bool old_allow_url_fopen;
 
-/*
-	xmlInitParser();
-*/
-
 	old_allow_url_fopen = PG(allow_url_fopen);
 	PG(allow_url_fopen) = 1;
 	ctxt = xmlCreateFileParserCtxt(filename);
@@ -120,10 +116,6 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 		ret = NULL;
 	}
 
-/*
-	xmlCleanupParser();
-*/
-
 	if (ret) {
 		cleanup_xml_node((xmlNodePtr)ret);
 	}
@@ -135,10 +127,6 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
 
-
-/*
-	xmlInitParser();
-*/
 	ctxt = xmlCreateMemoryParserCtxt(buf, buf_size);
 	if (ctxt) {
 		bool old;
@@ -172,26 +160,11 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	}
 
 /*
-	xmlCleanupParser();
-*/
-
-/*
 	if (ret) {
 		cleanup_xml_node((xmlNodePtr)ret);
 	}
 */
 	return ret;
-}
-
-xmlNsPtr attr_find_ns(xmlAttrPtr node)
-{
-	if (node->ns) {
-		return node->ns;
-	} else if (node->parent->ns) {
-		return node->parent->ns;
-	} else {
-		return xmlSearchNs(node->doc, node->parent, NULL);
-	}
 }
 
 xmlNsPtr node_find_ns(xmlNodePtr node)
@@ -203,29 +176,31 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 	}
 }
 
-int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
+int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
 {
-	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
+	if (node->name && strcmp((const char *) node->name, name) == 0) {
+		xmlNsPtr nsPtr = node->ns;
 		if (ns) {
-			xmlNsPtr nsPtr = attr_find_ns(node);
 			if (nsPtr) {
-				return (strcmp((char*)nsPtr->href, ns) == 0);
+				return (strcmp((const char *) nsPtr->href, ns) == 0);
 			} else {
 				return FALSE;
 			}
+		} else if (nsPtr) {
+			return FALSE;
 		}
 		return TRUE;
 	}
 	return FALSE;
 }
 
-int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
+int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
 {
 	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
 			xmlNsPtr nsPtr = node_find_ns(node);
 			if (nsPtr) {
-				return (strcmp((char*)nsPtr->href, ns) == 0);
+				return strcmp((const char *) nsPtr->href, ns) == 0;
 			} else {
 				return FALSE;
 			}
@@ -235,10 +210,41 @@ int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
 	return FALSE;
 }
 
+int node_is_equal_ex_one_of(xmlNodePtr node, const char *name, const char *const *namespaces)
+{
+	if ((node->name) && strcmp((char*)node->name, name) == 0) {
+		xmlNsPtr nsPtr = node_find_ns(node);
+		if (nsPtr) {
+			do {
+				if (strcmp((const char *) nsPtr->href, *namespaces) == 0) {
+					return TRUE;
+				}
+				namespaces++;
+			} while (*namespaces != NULL);
+		}
+		return FALSE;
+	}
+	return FALSE;
+}
 
-xmlAttrPtr get_attribute_ex(xmlAttrPtr node, char *name, char *ns)
+xmlAttrPtr get_attribute_any_ns(xmlAttrPtr node, const char *name)
 {
 	while (node!=NULL) {
+		if (node->name && strcmp((const char *) node->name, name) == 0) {
+			return node;
+		}
+		node = node->next;
+	}
+	return NULL;
+}
+
+/* Finds an attribute by name and namespace.
+ * If ns is NULL, the attribute must not be in any namespace.
+ * If ns is not NULL, the attribute must be in the specified namespace.
+ */
+xmlAttrPtr get_attribute_ex(xmlAttrPtr node, const char *name, const char *ns)
+{
+	while (node != NULL) {
 		if (attr_is_equal_ex(node, name, ns)) {
 			return node;
 		}
@@ -247,7 +253,7 @@ xmlAttrPtr get_attribute_ex(xmlAttrPtr node, char *name, char *ns)
 	return NULL;
 }
 
-xmlNodePtr get_node_ex(xmlNodePtr node, char *name, char *ns)
+xmlNodePtr get_node_ex(xmlNodePtr node, const char *name, const char *ns)
 {
 	while (node!=NULL) {
 		if (node_is_equal_ex(node, name, ns)) {
@@ -258,23 +264,7 @@ xmlNodePtr get_node_ex(xmlNodePtr node, char *name, char *ns)
 	return NULL;
 }
 
-xmlNodePtr get_node_recurisve_ex(xmlNodePtr node, char *name, char *ns)
-{
-	while (node != NULL) {
-		if (node_is_equal_ex(node, name, ns)) {
-			return node;
-		} else if (node->children != NULL) {
-			xmlNodePtr tmp = get_node_recurisve_ex(node->children, name, ns);
-			if (tmp) {
-				return tmp;
-			}
-		}
-		node = node->next;
-	}
-	return NULL;
-}
-
-xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns)
+xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, const char *name, const char *name_ns, const char *attribute, const char *value, const char *attr_ns)
 {
 	xmlAttrPtr attr;
 
@@ -295,7 +285,7 @@ xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns
 	return NULL;
 }
 
-xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns)
+xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, const char *name, const char *name_ns, const char *attribute, const char *value, const char *attr_ns)
 {
 	while (node != NULL) {
 		if (node_is_equal_ex(node, name, name_ns)) {

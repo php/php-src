@@ -23,7 +23,8 @@ $it = new RecursiveIteratorIterator(
 $excludes = [
     // Bundled libraries / files.
     'ext/date/lib/',
-    'ext/dom/lexbor/',
+    'ext/lexbor/lexbor/',
+    'ext/uri/uriparser/',
     'ext/fileinfo/data_file.c',
     'ext/fileinfo/libmagic/',
     'ext/gd/libgd/',

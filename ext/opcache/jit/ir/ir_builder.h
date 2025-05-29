@@ -528,7 +528,7 @@ extern "C" {
 
 #define ir_ALLOCA(_size)                  _ir_ALLOCA(_ir_CTX, (_size))
 #define ir_AFREE(_size)                   _ir_AFREE(_ir_CTX, (_size))
-#define ir_VADDR(_var)                    ir_emit1(_ir_CTX, IR_OPT(IR_VADDR, IR_ADDR), (_var))
+#define ir_VADDR(_var)                    ir_fold1(_ir_CTX, IR_OPT(IR_VADDR, IR_ADDR), (_var))
 #define ir_VLOAD(_type, _var)             _ir_VLOAD(_ir_CTX, (_type), (_var))
 #define ir_VLOAD_B(_var)                  _ir_VLOAD(_ir_CTX, IR_BOOL, (_var))
 #define ir_VLOAD_U8(_var)                 _ir_VLOAD(_ir_CTX, IR_U8, (_var))

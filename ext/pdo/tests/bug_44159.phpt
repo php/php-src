@@ -40,9 +40,9 @@ foreach ($attrs as $attr) {
 
 ?>
 --EXPECT--
-TypeError: PDO::ATTR_STATEMENT_CLASS value must be of type array, null given
-TypeError: PDO::ATTR_STATEMENT_CLASS value must be of type array, int given
-TypeError: PDO::ATTR_STATEMENT_CLASS value must be of type array, string given
+TypeError: PDO::setAttribute(): Argument #2 ($value) PDO::ATTR_STATEMENT_CLASS value must be of type array, null given
+TypeError: PDO::setAttribute(): Argument #2 ($value) PDO::ATTR_STATEMENT_CLASS value must be of type array, int given
+TypeError: PDO::setAttribute(): Argument #2 ($value) PDO::ATTR_STATEMENT_CLASS value must be of type array, string given
 TypeError: Attribute value must be of type bool for selected attribute, null given
 bool(true)
 TypeError: Attribute value must be of type bool for selected attribute, string given

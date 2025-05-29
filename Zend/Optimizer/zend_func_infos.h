@@ -518,9 +518,7 @@ static const func_info_t func_infos[] = {
 	F1("getcwd", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("readdir", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("scandir", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#if defined(HAVE_GLOB)
 	F1("glob", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#endif
 	F1("exec", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("system", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("escapeshellcmd", MAY_BE_STRING),

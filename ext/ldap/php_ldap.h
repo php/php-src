@@ -39,6 +39,7 @@ PHP_MINFO_FUNCTION(ldap);
 ZEND_BEGIN_MODULE_GLOBALS(ldap)
 	zend_long num_links;
 	zend_long max_links;
+	bool tls_newctx; /* create new TLS context before connect */
 ZEND_END_MODULE_GLOBALS(ldap)
 
 #if defined(ZTS) && defined(COMPILE_DL_LDAP)

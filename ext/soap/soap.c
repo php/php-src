@@ -1336,8 +1336,6 @@ PHP_METHOD(SoapServer, handle)
 		}
 	}
 
-	ZVAL_NULL(&retval);
-
 	if (php_output_start_default() != SUCCESS) {
 		php_error_docref(NULL, E_ERROR,"ob_start failed");
 	}
@@ -1388,7 +1386,6 @@ PHP_METHOD(SoapServer, handle)
 				php_stream_filter_remove(zf, 1);
 			}
 		} else {
-			zval_ptr_dtor(&retval);
 			SOAP_SERVER_END_CODE();
 			return;
 		}
@@ -1433,6 +1430,8 @@ PHP_METHOD(SoapServer, handle)
 	} zend_end_try();
 
 	xmlFreeDoc(doc_request);
+
+	ZVAL_NULL(&retval);
 
 	if (EG(exception)) {
 		if (!zend_is_unwind_exit(EG(exception))) {
@@ -2210,7 +2209,6 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 	bool   ret = true;
 	char  *buf;
 	int    buf_size;
-	zval   func;
 	zval  params[5];
 	bool  _bailout = false;
 
@@ -2223,13 +2221,6 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 	}
 
 	zend_try {
-		zval *trace = Z_CLIENT_TRACE_P(this_ptr);
-		if (Z_TYPE_P(trace) == IS_TRUE) {
-			zval_ptr_dtor(Z_CLIENT_LAST_REQUEST_P(this_ptr));
-			ZVAL_STRINGL(Z_CLIENT_LAST_REQUEST_P(this_ptr), buf, buf_size);
-		}
-
-		ZVAL_STRINGL(&func,"__doRequest",sizeof("__doRequest")-1);
 		ZVAL_STRINGL(&params[0], buf, buf_size);
 		ZVAL_STRING(&params[1], location);
 		if (action == NULL) {
@@ -2240,10 +2231,18 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 		ZVAL_LONG(&params[3], version);
 		ZVAL_BOOL(&params[4], one_way);
 
-		if (call_user_function(NULL, this_ptr, &func, response, 5, params) != SUCCESS) {
-			add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() failed", NULL, NULL);
-			ret = false;
-		} else if (Z_TYPE_P(response) != IS_STRING) {
+		zval *trace = Z_CLIENT_TRACE_P(this_ptr);
+		if (Z_TYPE_P(trace) == IS_TRUE) {
+			zval_ptr_dtor(Z_CLIENT_LAST_REQUEST_P(this_ptr));
+			ZVAL_COPY(Z_CLIENT_LAST_REQUEST_P(this_ptr), &params[0]);
+		}
+
+		zend_function *func = zend_hash_str_find_ptr(&Z_OBJCE_P(this_ptr)->function_table, ZEND_STRL("__dorequest"));
+		ZEND_ASSERT(func != NULL);
+
+		zend_call_known_instance_method(func, Z_OBJ_P(this_ptr), response, 5, params);
+
+		if (Z_TYPE_P(response) != IS_STRING) {
 			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_error)) {
 				/* Programmer error in __doRequest() implementation, let it bubble up. */
 			} else if (Z_TYPE_P(Z_CLIENT_SOAP_FAULT_P(this_ptr)) != IS_OBJECT) {
@@ -2257,7 +2256,6 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 	} zend_catch {
 		_bailout = true;
 	} zend_end_try();
-	zval_ptr_dtor(&func);
 	zval_ptr_dtor(&params[2]);
 	zval_ptr_dtor(&params[1]);
 	zval_ptr_dtor(&params[0]);

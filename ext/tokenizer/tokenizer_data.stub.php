@@ -644,6 +644,11 @@ const T_BOOL_CAST = UNKNOWN;
 const T_UNSET_CAST = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_VOID_CAST
+ */
+const T_VOID_CAST = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_OBJECT_OPERATOR
  */
 const T_OBJECT_OPERATOR = UNKNOWN;

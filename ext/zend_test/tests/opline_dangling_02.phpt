@@ -4,6 +4,12 @@ possible segfault in `ZEND_FUNC_GET_ARGS`
 zend_test
 --ENV--
 USE_ZEND_ALLOC=1
+--SKIPIF--
+<?php
+if (getenv("ZEND_MM_DEBUG")) {
+    die("skip zend_test.observe_opline_in_zendmm not compatible with ZEND_MM_DEBUG");
+}
+?>
 --INI--
 zend_test.observe_opline_in_zendmm=1
 --FILE--

@@ -86,6 +86,13 @@ namespace {
         public function returnsThrowable(): Exception {}
     }
 
+    /**
+     * @not-serializable
+     */
+    final class ZendTestGenStubFlagCompatibilityTest {
+
+    }
+
     class ZendAttributeTest {
         /** @var int */
         #[ZendTestRepeatableAttribute]
@@ -218,6 +225,13 @@ namespace {
     #[\Deprecated(message: "custom message")]
     function zend_test_deprecated_attr(): void {}
 
+    #[\NoDiscard(message: "custom message")]
+    function zend_test_nodiscard(): int {}
+
+    #[\Deprecated(message: "custom message")]
+    #[\NoDiscard(message: "custom message 2")]
+    function zend_test_deprecated_nodiscard(): int {}
+
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}
 
@@ -234,6 +248,8 @@ namespace {
     function zend_leak_variable(mixed $variable): void {}
 
     function zend_leak_bytes(int $bytes = 3): void {}
+
+    function zend_delref(mixed $variable): void {}
 
     function zend_string_or_object(object|string $param): object|string {}
 
@@ -310,6 +326,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_is_zend_ptr(int $addr): bool {}
 
     function zend_test_log_err_debug(string $str): void {}
+
+    function zend_test_compile_to_ast(string $str): string {}
 }
 
 namespace ZendTestNS {

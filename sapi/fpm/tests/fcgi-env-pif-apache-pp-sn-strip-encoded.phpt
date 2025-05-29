@@ -39,7 +39,7 @@ $tester
         scriptFilename: "proxy:fcgi://" . $tester->getAddr() . $sourceFilePath . '/1%202',
         scriptName: $scriptName . '/1 2'
     )
-    ->expectBody([$scriptName, $scriptName . '/1 2', $sourceFilePath, '/1%202', $scriptName . '/1%202']);
+    ->expectBody([$scriptName, $scriptName . '/1 2', $sourceFilePath, '/1 2', $scriptName . '/1 2']);
 $tester->terminate();
 $tester->close();
 

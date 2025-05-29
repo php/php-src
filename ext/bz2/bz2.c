@@ -303,16 +303,15 @@ static PHP_MINFO_FUNCTION(bz2)
 /* {{{ Reads up to length bytes from a BZip2 stream, or 1024 bytes if length is not specified */
 PHP_FUNCTION(bzread)
 {
-	zval *bz;
 	zend_long len = 1024;
 	php_stream *stream;
 	zend_string *data;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &bz, &len)) {
-		RETURN_THROWS();
-	}
-
-	php_stream_from_zval(stream, bz);
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		PHP_Z_PARAM_STREAM(stream)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (len  < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
@@ -563,17 +562,14 @@ PHP_FUNCTION(bzdecompress)
    The central error handling interface, does the work for bzerrno, bzerrstr and bzerror */
 static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
-	zval         *bzp;     /* BZip2 Resource Pointer */
 	php_stream   *stream;
 	const char   *errstr;  /* Error string */
 	int           errnum;  /* Error number */
 	struct php_bz2_stream_data_t *self;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &bzp) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	php_stream_from_zval(stream, bzp);
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		PHP_Z_PARAM_STREAM(stream)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!php_stream_is(stream, PHP_STREAM_IS_BZIP2)) {
 		zend_argument_type_error(1, "must be a bz2 stream");

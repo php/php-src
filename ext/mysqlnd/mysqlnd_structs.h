@@ -297,11 +297,11 @@ typedef struct st_mysqlnd_stats MYSQLND_STATS;
 
 struct st_mysqlnd_stats
 {
-	uint64_t				*values;
 	size_t					count;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
+	uint64_t values[] ZEND_ELEMENT_COUNT(count);
 };
 
 
@@ -890,10 +890,6 @@ struct st_mysqlnd_connection_data
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory;
 
 /* Information related */
-	MYSQLND_STRING	hostname;
-	MYSQLND_STRING	unix_socket;
-	MYSQLND_STRING	username;
-	MYSQLND_STRING	password;
 	MYSQLND_STRING	scheme;
 	uint64_t		thread_id;
 	char			*server_version;
@@ -901,7 +897,6 @@ struct st_mysqlnd_connection_data
 	MYSQLND_STRING	authentication_plugin_data;
 	const MYSQLND_CHARSET *charset;
 	const MYSQLND_CHARSET *greet_charset;
-	MYSQLND_STRING	connect_or_select_db;
 	MYSQLND_INFILE	infile;
 	unsigned int	protocol_version;
 	unsigned int	port;

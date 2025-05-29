@@ -60,12 +60,12 @@ static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static void php_filter_encode_url(zval *value, const unsigned char* chars, const int char_len, int high, int low, int encode_nul)
+static void php_filter_encode_url(zval *value, const unsigned char* chars, const int char_len)
 {
 	unsigned char *p;
 	unsigned char tmp[256];
-	unsigned char *s = (unsigned char *)chars;
-	unsigned char *e = s + char_len;
+	const unsigned char *s = chars;
+	const unsigned char *e = s + char_len;
 	zend_string *str;
 
 	memset(tmp, 1, sizeof(tmp)-1);
@@ -75,8 +75,8 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 	}
 
 	str = zend_string_safe_alloc(Z_STRLEN_P(value), 3, 0, 0);
-	p = (unsigned char *) ZSTR_VAL(str);
-	s = (unsigned char *) Z_STRVAL_P(value);
+	p = (unsigned char*)ZSTR_VAL(str);
+	s = (const unsigned char*)Z_STRVAL_P(value);
 	e = s + Z_STRLEN_P(value);
 
 	while (s < e) {
@@ -90,15 +90,14 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		s++;
 	}
 	*p = '\0';
-	ZSTR_LEN(str) = p - (unsigned char *)ZSTR_VAL(str);
+	ZSTR_LEN(str) = p - (const unsigned char *)ZSTR_VAL(str);
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, str);
 }
 
 static void php_filter_strip(zval *value, zend_long flags)
 {
-	unsigned char *str;
-	size_t i;
+	const unsigned char *str;
 	size_t c;
 	zend_string *buf;
 
@@ -107,10 +106,10 @@ static void php_filter_strip(zval *value, zend_long flags)
 		return;
 	}
 
-	str = (unsigned char *)Z_STRVAL_P(value);
+	str = (const unsigned char *)Z_STRVAL_P(value);
 	buf = zend_string_alloc(Z_STRLEN_P(value), 0);
 	c = 0;
-	for (i = 0; i < Z_STRLEN_P(value); i++) {
+	for (size_t i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((str[i] >= 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
 		} else if ((str[i] < 32) && (flags & FILTER_FLAG_STRIP_LOW)) {
 		} else if ((str[i] == '`') && (flags & FILTER_FLAG_STRIP_BACKTICK)) {
@@ -143,9 +142,9 @@ static void filter_map_update(filter_map *map, int flag, const unsigned char *al
 	}
 }
 
-static void filter_map_apply(zval *value, filter_map *map)
+static void filter_map_apply(zval *value, const filter_map *map)
 {
-	unsigned char *str;
+	const unsigned char *str;
 	size_t i, c;
 	zend_string *buf;
 
@@ -216,7 +215,7 @@ void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 	/* apply strip_high and strip_low filters */
 	php_filter_strip(value, flags);
 	/* urlencode */
-	php_filter_encode_url(value, (unsigned char *)DEFAULT_URL_ENCODE, sizeof(DEFAULT_URL_ENCODE)-1, flags & FILTER_FLAG_ENCODE_HIGH, flags & FILTER_FLAG_ENCODE_LOW, 1);
+	php_filter_encode_url(value, (unsigned char *)DEFAULT_URL_ENCODE, sizeof(DEFAULT_URL_ENCODE)-1);
 }
 /* }}} */
 
