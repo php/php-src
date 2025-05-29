@@ -878,7 +878,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 		xmlBufferFree(in);
 	}
 
-	if (!xmlCheckUTF8(str)) {
+	if (!xmlCheckUTF8(BAD_CAST str)) {
 		char *err = emalloc(new_len + 8);
 		char c;
 		int i;
