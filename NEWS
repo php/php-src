@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bugs GH-17711 and GH-18022 (Infinite recursion on deprecated attribute
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
+  . Fixed GH-18695 (zend_ast_export() - float number is not preserved).
+    (Oleg Efimov)
 
 - Date:
   . Fix leaks with multiple calls to DatePeriod iterator current(). (nielsdos)
