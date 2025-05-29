@@ -369,8 +369,7 @@ ZEND_API zend_async_waker_t *zend_async_waker_new(zend_coroutine_t *coroutine)
 	}
 
 	if (UNEXPECTED(coroutine->waker != NULL)) {
-		coroutine->waker->dtor(coroutine);
-		coroutine->waker = NULL;
+		zend_async_waker_destroy(coroutine);
 	}
 
 	zend_async_waker_t *waker = pecalloc(1, sizeof(zend_async_waker_t), 0);
