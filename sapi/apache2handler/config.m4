@@ -7,7 +7,6 @@ PHP_ARG_WITH([apxs2],
   [no])
 
 if test "$PHP_APXS2" != "no"; then
-  AC_DEFINE(PHP_USE_RTLD_DEEPBIND, 1, [ Use dlopen with RTLD_DEEPBIND instead of delegating isolation to the user via dlmopen ])
   AS_VAR_IF([PHP_APXS2], [yes], [
     APXS=apxs
     $APXS -q CFLAGS >/dev/null 2>&1
