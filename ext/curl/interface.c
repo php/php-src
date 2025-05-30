@@ -2220,12 +2220,14 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			ZEND_HASH_FOREACH_VAL(ph, current) {
 				ZVAL_DEREF(current);
 				val = zval_get_tmp_string(current, &tmp_val);
-				slist = curl_slist_append(slist, ZSTR_VAL(val));
+				struct curl_slist *new_slist = curl_slist_append(slist, ZSTR_VAL(val));
 				zend_tmp_string_release(tmp_val);
-				if (!slist) {
+				if (!new_slist) {
+					curl_slist_free_all(slist);
 					php_error_docref(NULL, E_WARNING, "Could not build curl_slist");
 					return FAILURE;
 				}
+				slist = new_slist;
 			} ZEND_HASH_FOREACH_END();
 
 			if (slist) {

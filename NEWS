@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed GH-18695 (zend_ast_export() - float number is not preserved).
     (Oleg Efimov)
 
+- Curl:
+  . Fix memory leak when setting a list via curl_setopt fails. (nielsdos)
+
 - Date:
   . Fix leaks with multiple calls to DatePeriod iterator current(). (nielsdos)
 
