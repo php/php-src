@@ -17,8 +17,8 @@
 #ifndef PHP_LEXBOR_H
 #define PHP_LEXBOR_H
 
-#include <php_uri_common.h>
-#include <lexbor/url/url.h>
+#include "php_uri_common.h"
+#include "lexbor/url/url.h"
 
 extern const uri_handler_t lexbor_uri_handler;
 
