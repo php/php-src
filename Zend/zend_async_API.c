@@ -547,6 +547,14 @@ ZEND_API void zend_async_waker_callback_resolve(
 		}
 	}
 
+	if (exception != NULL) {
+		//
+		// This handler always captures the exception as handled because it passes it to another coroutine.
+		// As a result, the exception will not propagate further.
+		//
+		ZEND_ASYNC_EVENT_SET_EXCEPTION_HANDLED(event);
+	}
+
 	ZEND_ASYNC_RESUME_WITH_ERROR(coroutine, exception, false);
 }
 

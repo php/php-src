@@ -311,6 +311,7 @@ struct _zend_async_event_s {
 #define ZEND_ASYNC_EVENT_F_ZVAL_RESULT   (1u << 3)
 #define ZEND_ASYNC_EVENT_F_ZEND_OBJ 	 (1u << 4)  /* event is a zend object */
 #define ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY (1u << 5) /* event will not free memory in dispose handler */
+#define ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED (1u << 6) /* exception has been caught and processed */
 
 #define ZEND_ASYNC_EVENT_IS_CLOSED(ev)         (((ev)->flags & ZEND_ASYNC_EVENT_F_CLOSED) != 0)
 #define ZEND_ASYNC_EVENT_WILL_RESULT_USED(ev)  (((ev)->flags & ZEND_ASYNC_EVENT_F_RESULT_USED) != 0)
@@ -318,6 +319,7 @@ struct _zend_async_event_s {
 #define ZEND_ASYNC_EVENT_WILL_ZVAL_RESULT(ev)  (((ev)->flags & ZEND_ASYNC_EVENT_F_ZVAL_RESULT) != 0)
 #define ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev)      (((ev)->flags & ZEND_ASYNC_EVENT_F_ZEND_OBJ) != 0)
 #define ZEND_ASYNC_EVENT_IS_NO_FREE_MEMORY(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY) != 0)
+#define ZEND_ASYNC_EVENT_IS_EXCEPTION_HANDLED(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED) != 0)
 
 #define ZEND_ASYNC_EVENT_SET_CLOSED(ev)        ((ev)->flags |=  ZEND_ASYNC_EVENT_F_CLOSED)
 #define ZEND_ASYNC_EVENT_CLR_CLOSED(ev)        ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_CLOSED)
@@ -335,6 +337,9 @@ struct _zend_async_event_s {
 #define ZEND_ASYNC_EVENT_SET_ZEND_OBJ_OFFSET(ev, offset) ((ev)->zend_object_offset = (unsigned int) (offset))
 
 #define ZEND_ASYNC_EVENT_SET_NO_FREE_MEMORY(ev) ((ev)->flags |=  ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY)
+
+#define ZEND_ASYNC_EVENT_SET_EXCEPTION_HANDLED(ev) ((ev)->flags |=  ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED)
+#define ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(ev) ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED)
 
 // Convert awaitable Zend object to zend_async_event_t pointer
 #define ZEND_ASYNC_OBJECT_TO_EVENT(obj) ((zend_async_event_t *)((char *)(obj) - (obj)->handlers->offset))
@@ -728,8 +733,7 @@ struct _zend_coroutine_s {
 #define ZEND_COROUTINE_F_CANCELLED (1u << 11) /* coroutine is cancelled */
 #define ZEND_COROUTINE_F_ZOMBIE (1u << 12) /* coroutine is a zombie */
 #define ZEND_COROUTINE_F_PROTECTED (1u << 13) /* coroutine is protected */
-#define ZEND_COROUTINE_F_EXCEPTION_HANDLED (1u << 14) /* exception has been caught and processed */
-#define ZEND_COROUTINE_F_MAIN (1u << 15) /* coroutine is a main coroutine */
+#define ZEND_COROUTINE_F_MAIN (1u << 14) /* coroutine is a main coroutine */
 
 #define ZEND_COROUTINE_IS_ZOMBIE(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_ZOMBIE) != 0)
 #define ZEND_COROUTINE_SET_ZOMBIE(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_ZOMBIE)
@@ -737,7 +741,7 @@ struct _zend_coroutine_s {
 #define ZEND_COROUTINE_IS_CANCELLED(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_CANCELLED) != 0)
 #define ZEND_COROUTINE_IS_FINISHED(coroutine) (((coroutine)->event.flags & ZEND_ASYNC_EVENT_F_CLOSED) != 0)
 #define ZEND_COROUTINE_IS_PROTECTED(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_PROTECTED) != 0)
-#define ZEND_COROUTINE_IS_EXCEPTION_HANDLED(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_EXCEPTION_HANDLED) != 0)
+#define ZEND_COROUTINE_IS_EXCEPTION_HANDLED(coroutine) ZEND_ASYNC_EVENT_IS_EXCEPTION_HANDLED(&(coroutine)->event)
 #define ZEND_COROUTINE_IS_MAIN(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_MAIN) != 0)
 #define ZEND_COROUTINE_SET_STARTED(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_STARTED)
 #define ZEND_COROUTINE_SET_CANCELLED(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_CANCELLED)
@@ -745,8 +749,8 @@ struct _zend_coroutine_s {
 #define ZEND_COROUTINE_SET_PROTECTED(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_PROTECTED)
 #define ZEND_COROUTINE_SET_MAIN(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_MAIN)
 #define ZEND_COROUTINE_CLR_PROTECTED(coroutine) ((coroutine)->event.flags &= ~ZEND_COROUTINE_F_PROTECTED)
-#define ZEND_COROUTINE_SET_EXCEPTION_HANDLED(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_EXCEPTION_HANDLED)
-#define ZEND_COROUTINE_CLR_EXCEPTION_HANDLED(coroutine) ((coroutine)->event.flags &= ~ZEND_COROUTINE_F_EXCEPTION_HANDLED)
+#define ZEND_COROUTINE_SET_EXCEPTION_HANDLED(coroutine) ZEND_ASYNC_EVENT_SET_EXCEPTION_HANDLED(&(coroutine)->event)
+#define ZEND_COROUTINE_CLR_EXCEPTION_HANDLED(coroutine) ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(&(coroutine)->event)
 
 static zend_always_inline zend_string *zend_coroutine_callable_name(const zend_coroutine_t *coroutine)
 {
