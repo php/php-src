@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - Date:
   . Fix leaks with multiple calls to DatePeriod iterator current(). (nielsdos)
 
+- FPM:
+  . Fixed GH-18662 (fpm_get_status segfault). (txuna)
+
 - Intl:
   . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
 
