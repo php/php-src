@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 94822f6472750c646fc138f383278ca692b39d27 */
+ * Stub hash: 99ff034c826a6d392267f0b0b79ebb5a31bbb014 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -35,12 +35,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolormatch, 0, 2, IS_TRUE, 
 	ZEND_ARG_OBJ_INFO(0, image2, GdImage, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetthickness, 0, 2, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetthickness, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, thickness, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilledellipse, 0, 6, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilledellipse, 0, 6, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, center_x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, center_y, IS_LONG, 0)
@@ -49,7 +49,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilledellipse, 0, 6, IS_TRU
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilledarc, 0, 9, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilledarc, 0, 9, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, center_x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, center_y, IS_LONG, 0)
@@ -61,14 +61,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilledarc, 0, 9, IS_TRUE, 0
 	ZEND_ARG_TYPE_INFO(0, style, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagealphablending, 0, 2, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagealphablending, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_imagesavealpha arginfo_imagealphablending
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagelayereffect, 0, 2, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagelayereffect, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, effect, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -93,7 +93,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagecolorexactalpha arginfo_imagecolorresolvealpha
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyresampled, 0, 10, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyresampled, 0, 10, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, dst_image, GdImage, 0)
 	ZEND_ARG_OBJ_INFO(0, src_image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, dst_x, IS_LONG, 0)
@@ -334,14 +334,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegammacorrect, 0, 3, IS_TRUE
 	ZEND_ARG_TYPE_INFO(0, output_gamma, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetpixel, 0, 4, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetpixel, 0, 4, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageline, 0, 6, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageline, 0, 6, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, x1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y1, IS_LONG, 0)
@@ -356,7 +356,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagefilledrectangle arginfo_imageline
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagearc, 0, 8, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagearc, 0, 8, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, center_x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, center_y, IS_LONG, 0)
@@ -369,7 +369,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imageellipse arginfo_imagefilledellipse
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilltoborder, 0, 5, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagefilltoborder, 0, 5, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
@@ -410,7 +410,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagefontheight arginfo_imagefontwidth
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagechar, 0, 6, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagechar, 0, 6, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
@@ -421,7 +421,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagecharup arginfo_imagechar
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagestring, 0, 6, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagestring, 0, 6, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, font, GdFont, MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
@@ -432,7 +432,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagestringup arginfo_imagestring
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopy, 0, 8, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopy, 0, 8, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, dst_image, GdImage, 0)
 	ZEND_ARG_OBJ_INFO(0, src_image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, dst_x, IS_LONG, 0)
@@ -443,7 +443,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopy, 0, 8, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, src_height, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopymerge, 0, 9, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopymerge, 0, 9, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, dst_image, GdImage, 0)
 	ZEND_ARG_OBJ_INFO(0, src_image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, dst_x, IS_LONG, 0)
@@ -463,7 +463,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagesy arginfo_imagecolorstotal
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetclip, 0, 5, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetclip, 0, 5, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, x1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y1, IS_LONG, 0)
@@ -514,7 +514,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageconvolution, 0, 4, _IS_BOOL
 	ZEND_ARG_TYPE_INFO(0, offset, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageflip, 0, 2, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageflip, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
