@@ -583,7 +583,7 @@ PHP_FUNCTION(openssl_spki_new)
 	zval *zpkey = NULL;
 	EVP_PKEY *pkey = NULL;
 	NETSCAPE_SPKI *spki=NULL;
-	const EVP_MD *mdtype;
+	const EVP_MD *mdtype = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|l", &zpkey, php_openssl_pkey_ce, &challenge, &challenge_len, &algo) == FAILURE) {
 		RETURN_THROWS();
@@ -647,6 +647,7 @@ PHP_FUNCTION(openssl_spki_new)
 	goto cleanup;
 
 cleanup:
+	php_openssl_release_evp_md(mdtype);
 	EVP_PKEY_free(pkey);
 	if (spki != NULL) {
 		NETSCAPE_SPKI_free(spki);
@@ -1821,7 +1822,6 @@ cleanup:
 		X509_free(new_cert);
 	}
 
-	PHP_SSL_REQ_DISPOSE(&req);
 	EVP_PKEY_free(priv_key);
 	EVP_PKEY_free(key);
 	if (csr_str) {
@@ -1830,6 +1830,7 @@ cleanup:
 	if (cert_str && cert && cert != new_cert) {
 		X509_free(cert);
 	}
+	PHP_SSL_REQ_DISPOSE(&req);
 }
 /* }}} */
 
@@ -2104,7 +2105,8 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	}
 
 	if (!php_openssl_check_path(filename, filename_len, file_path, 2)) {
-		goto clean_exit_key;
+		EVP_PKEY_free(key);
+		return;
 	}
 
 	PHP_SSL_REQ_INIT(&req);
@@ -2139,10 +2141,9 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	}
 
 clean_exit:
-	PHP_SSL_REQ_DISPOSE(&req);
 	BIO_free(bio_out);
-clean_exit_key:
 	EVP_PKEY_free(key);
+	PHP_SSL_REQ_DISPOSE(&req);
 }
 /* }}} */
 
@@ -2204,9 +2205,9 @@ PHP_FUNCTION(openssl_pkey_export)
 			php_openssl_store_errors();
 		}
 	}
-	PHP_SSL_REQ_DISPOSE(&req);
 	EVP_PKEY_free(key);
 	BIO_free(bio_out);
+	PHP_SSL_REQ_DISPOSE(&req);
 }
 /* }}} */
 
@@ -2686,6 +2687,7 @@ clean_exit:
 	if (recipcerts) {
 		sk_X509_pop_free(recipcerts, X509_free);
 	}
+	php_openssl_release_evp_cipher(cipher);
 }
 /* }}} */
 
@@ -3334,6 +3336,7 @@ clean_exit:
 	if (recipcerts) {
 		sk_X509_pop_free(recipcerts, X509_free);
 	}
+	php_openssl_release_evp_cipher(cipher);
 }
 /* }}} */
 
@@ -3969,7 +3972,7 @@ PHP_FUNCTION(openssl_sign)
 	}
 
 	if (method_str) {
-		mdtype = EVP_get_digestbyname(ZSTR_VAL(method_str));
+		mdtype = php_openssl_get_evp_md_by_name(ZSTR_VAL(method_str));
 	} else {
 		mdtype = php_openssl_get_evp_md_from_algo(method_long);
 	}
@@ -3996,6 +3999,7 @@ PHP_FUNCTION(openssl_sign)
 		RETVAL_FALSE;
 	}
 	EVP_MD_CTX_destroy(md_ctx);
+	php_openssl_release_evp_md(mdtype);
 	EVP_PKEY_free(pkey);
 }
 /* }}} */
@@ -4027,7 +4031,7 @@ PHP_FUNCTION(openssl_verify)
 	PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(signature_len, signature, 2);
 
 	if (method_str) {
-		mdtype = EVP_get_digestbyname(ZSTR_VAL(method_str));
+		mdtype = php_openssl_get_evp_md_by_name(ZSTR_VAL(method_str));
 	} else {
 		mdtype = php_openssl_get_evp_md_from_algo(method_long);
 	}
@@ -4041,6 +4045,7 @@ PHP_FUNCTION(openssl_verify)
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_WARNING, "Supplied key param cannot be coerced into a public key");
 		}
+		php_openssl_release_evp_md(mdtype);
 		RETURN_FALSE;
 	}
 
@@ -4051,6 +4056,7 @@ PHP_FUNCTION(openssl_verify)
 		php_openssl_store_errors();
 	}
 	EVP_MD_CTX_destroy(md_ctx);
+	php_openssl_release_evp_md(mdtype);
 	EVP_PKEY_free(pkey);
 	RETURN_LONG(err);
 }
@@ -4323,7 +4329,7 @@ PHP_FUNCTION(openssl_digest)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &data, &data_len, &method, &method_len, &raw_output) == FAILURE) {
 		RETURN_THROWS();
 	}
-	mdtype = EVP_get_digestbyname(method);
+	mdtype = php_openssl_get_evp_md_by_name(method);
 	if (!mdtype) {
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
@@ -4356,6 +4362,7 @@ PHP_FUNCTION(openssl_digest)
 	}
 
 	EVP_MD_CTX_destroy(md_ctx);
+	php_openssl_release_evp_md(mdtype);
 }
 /* }}} */
 
