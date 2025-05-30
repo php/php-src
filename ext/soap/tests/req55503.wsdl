@@ -20,5 +20,11 @@
 	<portType name="testPortType">
 	</portType>
 	<binding name="testBinding" type="tns:testPortType">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
 	</binding>
+	<service name="test">
+		<port name="testPort" binding="tns:testBinding">
+			<soap:address location="http://localhost:81/test/interface.php?class=test"/>
+		</port>
+	</service>
 </definitions>

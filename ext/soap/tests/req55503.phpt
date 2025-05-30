@@ -2,6 +2,8 @@
 Request #55503 (Extend __getTypes to support enumerations)
 --EXTENSIONS--
 soap
+--INI--
+soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $client = new SoapClient(__DIR__.'/req55503.wsdl');
