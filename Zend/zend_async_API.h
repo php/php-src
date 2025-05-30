@@ -135,7 +135,7 @@ typedef void (*zend_async_event_callback_fn)
 typedef void (*zend_async_event_callback_dispose_fn)(zend_async_event_callback_t *callback, zend_async_event_t * event);
 typedef void (*zend_async_event_add_callback_t)(zend_async_event_t *event, zend_async_event_callback_t *callback);
 typedef void (*zend_async_event_del_callback_t)(zend_async_event_t *event, zend_async_event_callback_t *callback);
-typedef bool (*zend_async_event_callbacks_notify_t)(zend_async_event_t *event, void *result, zend_object *exception);
+typedef bool (*zend_async_event_callbacks_notify_t)(zend_async_event_t *event, void **result, zend_object **exception);
 typedef void (*zend_async_event_start_t) (zend_async_event_t *event);
 typedef void (*zend_async_event_stop_t) (zend_async_event_t *event);
 typedef void (*zend_async_event_dispose_t) (zend_async_event_t *event);
@@ -411,8 +411,10 @@ static zend_always_inline void
 zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception)
 {
 	// If pre-notify returns false, we stop notifying callbacks
-	if (event->before_notify != NULL && false == event->before_notify(event, result, exception)) {
-		return;
+	if (event->before_notify != NULL) {
+		if (false == event->before_notify(event, &result, &exception)) {
+			return;
+		}
 	}
 
 	if (event->callbacks.data == NULL) {
