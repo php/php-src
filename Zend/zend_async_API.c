@@ -559,16 +559,9 @@ ZEND_API void zend_async_waker_callback_cancel(
 	if (UNEXPECTED(exception != NULL)) {
 		ZEND_ASYNC_RESUME_WITH_ERROR(coroutine, exception, false);
 	} else {
-
-		if (result == NULL) {
-			exception = zend_async_new_exception(
-				ZEND_ASYNC_EXCEPTION_CANCELLATION, "Operation has been cancelled"
-			);
-		} else {
-			exception = result;
-		}
-
-		ZEND_ASYNC_RESUME_WITH_ERROR(coroutine, exception, false);
+		ZEND_ASYNC_RESUME_WITH_ERROR(coroutine, zend_async_new_exception(
+			ZEND_ASYNC_EXCEPTION_CANCELLATION, "Operation has been cancelled"
+		), true);
 	}
 }
 
