@@ -491,6 +491,8 @@ extern "C++" {
 
 #ifdef ZEND_WIN32
 #define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
+#elif defined(HAVE_MEMSET_EXPLICIT)
+#define ZEND_SECURE_ZERO(var, size) memset_explicit((var), 0, (size))
 #else
 #define ZEND_SECURE_ZERO(var, size) explicit_bzero((var), (size))
 #endif
