@@ -71,6 +71,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%left T_PIPE
 %left '.'
 %left T_SL T_SR
 %left '+' '-'
@@ -237,6 +238,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
+%token T_PIPE         "'|>'"
 /* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
  * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
  * or shift to continue parsing an intersection type. */
@@ -1292,6 +1294,8 @@ expr:
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_EQUAL, $1, $3); }
 	|	expr T_IS_NOT_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
+	|	expr T_PIPE expr
+			{ $$ = zend_ast_create(ZEND_AST_PIPE, $1, $3); }
 	|	expr '<' expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, $3); }
 	|	expr T_IS_SMALLER_OR_EQUAL expr
