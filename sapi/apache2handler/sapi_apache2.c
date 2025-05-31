@@ -431,7 +431,7 @@ static sapi_module_struct apache2_sapi_module = {
 	NULL, /* ini_entries;            */
 	NULL, /* additional_functions    */
 	NULL, /* input_filter_init       */
-	true /* isolate_symbols         */
+	true  /* isolate_symbols         */
 };
 
 static apr_status_t php_apache_server_shutdown(void *tmp)
