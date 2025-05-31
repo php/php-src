@@ -320,15 +320,24 @@ ZEND_METHOD(Exception, __construct)
 	if (message) {
 		ZVAL_STR(&tmp, message);
 		zend_update_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (code) {
 		ZVAL_LONG(&tmp, code);
 		zend_update_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (previous) {
 		zend_update_property_ex(base_ce, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 }
 /* }}} */
@@ -370,32 +379,53 @@ ZEND_METHOD(ErrorException, __construct)
 		ZVAL_STR_COPY(&tmp, message);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
 		zval_ptr_dtor(&tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (code) {
 		ZVAL_LONG(&tmp, code);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (previous) {
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	ZVAL_LONG(&tmp, severity);
 	zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
 
 	if (filename) {
 		ZVAL_STR_COPY(&tmp, filename);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		zval_ptr_dtor(&tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (!lineno_is_null) {
 		ZVAL_LONG(&tmp, lineno);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	} else if (filename) {
 		ZVAL_LONG(&tmp, 0);
 		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(object), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 }
 /* }}} */
