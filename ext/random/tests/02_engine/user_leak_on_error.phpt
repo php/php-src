@@ -1,5 +1,5 @@
 --TEST--
-User engine leak on error
+Random: Engine: User: Empty strings do not leak
 --FILE--
 <?php
 
@@ -16,7 +16,7 @@ $randomizer = new Random\Randomizer(new MyEngine);
 try {
     $randomizer->getBytes(64);
 } catch (Random\BrokenRandomEngineError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage(), PHP_EOL;
 }
 
 ?>

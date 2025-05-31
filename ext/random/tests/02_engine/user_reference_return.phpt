@@ -3,7 +3,11 @@ User engine reference return value
 --FILE--
 <?php
 
-class MyEngine implements Random\Engine {
+use Random\Engine;
+use Random\Randomizer;
+
+final class ReferenceEngine implements Engine
+{
 	private $field = 'abcdef';
 
 	public function &generate(): string
@@ -12,7 +16,8 @@ class MyEngine implements Random\Engine {
 	}
 }
 
-$randomizer = new Random\Randomizer(new MyEngine);
+$randomizer = new Randomizer(new ReferenceEngine());
+
 var_dump($randomizer->getBytes(64));
 
 ?>
