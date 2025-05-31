@@ -65,7 +65,6 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, zend_string *pr
 	zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS));
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_object_release(new_object);
-		zval_ptr_dtor(property_zv);
 		RETURN_THROWS();
 	}
 
@@ -74,7 +73,6 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, zend_string *pr
 	if (property_handler->write_func == NULL) {
 		zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name));
 		zend_object_release(new_object);
-		zval_ptr_dtor(property_zv);
 		RETURN_THROWS();
 	}
 
@@ -84,13 +82,11 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, zend_string *pr
 		throw_invalid_uri_exception(new_internal_uri->handler, &errors);
 		zval_ptr_dtor(&errors);
 		zend_object_release(new_object);
-		zval_ptr_dtor(property_zv);
 		RETURN_THROWS();
 	}
 
 	ZEND_ASSERT(Z_ISUNDEF(errors));
 	RETVAL_OBJ(new_object);
-	zval_ptr_dtor(property_zv);
 }
 
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name)
@@ -102,7 +98,7 @@ void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, zend_string *property
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval zv;
-	ZVAL_STR_COPY(&zv, value);
+	ZVAL_STR(&zv, value);
 
 	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }
@@ -119,7 +115,7 @@ void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, zend_string *
 	if (value == NULL) {
 		ZVAL_NULL(&zv);
 	} else {
-		ZVAL_STR_COPY(&zv, value);
+		ZVAL_STR(&zv, value);
 	}
 
 	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);

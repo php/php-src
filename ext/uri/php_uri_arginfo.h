@@ -1,5 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 24e5f7ae5b0f3938a6c3e5e733131a05d10e4e3b */
+ * Stub hash: 1945c28deef13c2af552b18c2a5a6c7798d4aeec */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWg_InvalidUrlException___construct, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, errors, IS_ARRAY, 0, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_LONG, 0, "0")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_WhatWg_UrlValidationError___construct, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, context, IS_STRING, 0)
@@ -95,6 +102,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url___debugInfo arginfo_class_Uri_WhatWg_Url___serialize
 
+ZEND_METHOD(Uri_WhatWg_InvalidUrlException, __construct);
 ZEND_METHOD(Uri_WhatWg_UrlValidationError, __construct);
 ZEND_METHOD(Uri_WhatWg_Url, parse);
 ZEND_METHOD(Uri_WhatWg_Url, __construct);
@@ -122,6 +130,11 @@ ZEND_METHOD(Uri_WhatWg_Url, resolve);
 ZEND_METHOD(Uri_WhatWg_Url, __serialize);
 ZEND_METHOD(Uri_WhatWg_Url, __unserialize);
 ZEND_METHOD(Uri_WhatWg_Url, __debugInfo);
+
+static const zend_function_entry class_Uri_WhatWg_InvalidUrlException_methods[] = {
+	ZEND_ME(Uri_WhatWg_InvalidUrlException, __construct, arginfo_class_Uri_WhatWg_InvalidUrlException___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
 
 static const zend_function_entry class_Uri_WhatWg_UrlValidationError_methods[] = {
 	ZEND_ME(Uri_WhatWg_UrlValidationError, __construct, arginfo_class_Uri_WhatWg_UrlValidationError___construct, ZEND_ACC_PUBLIC)
@@ -193,7 +206,7 @@ static zend_class_entry *register_class_Uri_WhatWg_InvalidUrlException(zend_clas
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Uri\\WhatWg", "InvalidUrlException", NULL);
+	INIT_NS_CLASS_ENTRY(ce, "Uri\\WhatWg", "InvalidUrlException", class_Uri_WhatWg_InvalidUrlException_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Uri_InvalidUriException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	zval property_errors_default_value;

@@ -85,6 +85,56 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	return result;
 }
 
+PHP_METHOD(Uri_WhatWg_InvalidUrlException, __construct)
+{
+	zend_string *message = NULL;
+	zval *errors = NULL;
+	zend_long code = 0;
+	zval *previous = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 4)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(message)
+		Z_PARAM_ARRAY(errors)
+		Z_PARAM_LONG(code)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(previous, zend_ce_throwable)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval tmp;
+	if (message != NULL) {
+		ZVAL_STR(&tmp, message);
+		zend_update_property_ex(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	}
+
+	if (errors == NULL) {
+		ZVAL_EMPTY_ARRAY(&tmp);
+		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), &tmp);
+	} else {
+		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), errors);
+	}
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	if (code != 0) {
+		ZVAL_LONG(&tmp, code);
+		zend_update_property_ex(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	}
+
+	if (previous != NULL) {
+		zend_update_property_ex(zend_ce_exception, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	}
+}
+
 PHP_METHOD(Uri_WhatWg_UrlValidationError, __construct)
 {
 	zend_string *context;
@@ -101,10 +151,12 @@ PHP_METHOD(Uri_WhatWg_UrlValidationError, __construct)
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
+
 	zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("type"), type);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
+
 	zval failure_zv;
 	ZVAL_BOOL(&failure_zv, failure);
 	zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("failure"), &failure_zv);
@@ -519,7 +571,6 @@ static zend_object *uri_create_object_handler(zend_class_entry *class_type)
 static void uri_free_obj_handler(zend_object *object)
 {
 	uri_object_t *uri_object = uri_object_from_obj(object);
-	ZEND_ASSERT(uri_object != NULL);
 
 	if (UNEXPECTED(uri_object->internal.uri != NULL)) {
 		uri_object->internal.handler->free_uri(uri_object->internal.uri);
@@ -568,13 +619,11 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler)
 	zend_string *key = zend_string_init_interned(uri_handler->name, strlen(uri_handler->name), 1);
 
 	ZEND_ASSERT(uri_handler->name != NULL);
-	ZEND_ASSERT(uri_handler->init_parser != NULL);
 	ZEND_ASSERT(uri_handler->parse_uri != NULL);
 	ZEND_ASSERT(uri_handler->create_invalid_uri_exception != NULL);
 	ZEND_ASSERT(uri_handler->clone_uri != NULL);
 	ZEND_ASSERT(uri_handler->uri_to_string != NULL);
 	ZEND_ASSERT(uri_handler->free_uri != NULL);
-	ZEND_ASSERT(uri_handler->destroy_parser != NULL);
 	ZEND_ASSERT(uri_handler->property_handlers != NULL);
 
 	zend_result result = zend_hash_add_ptr(&uri_handlers, key, (void *) uri_handler) != NULL ? SUCCESS : FAILURE;
@@ -602,6 +651,8 @@ static PHP_MINIT_FUNCTION(uri)
 		return FAILURE;
 	}
 
+	lexbor_module_init();
+
 	return SUCCESS;
 }
 
@@ -615,6 +666,8 @@ static PHP_MINFO_FUNCTION(uri)
 
 static PHP_MSHUTDOWN_FUNCTION(uri)
 {
+	lexbor_module_shutdown();
+
 	zend_hash_destroy(&uri_handlers);
 
 	return SUCCESS;
@@ -622,26 +675,16 @@ static PHP_MSHUTDOWN_FUNCTION(uri)
 
 PHP_RINIT_FUNCTION(uri)
 {
-	uri_handler_t *handler;
-
-	ZEND_HASH_MAP_FOREACH_PTR(&uri_handlers, handler) {
-		if (handler->init_parser() == FAILURE) {
-			return FAILURE;
-		}
-	} ZEND_HASH_FOREACH_END();
+	if (lexbor_request_init() == FAILURE) {
+		return FAILURE;
+	}
 
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(uri)
 {
-	uri_handler_t *handler;
-
-	ZEND_HASH_MAP_FOREACH_PTR(&uri_handlers, handler) {
-		if (handler->destroy_parser() == FAILURE) {
-			return FAILURE;
-		}
-	} ZEND_HASH_FOREACH_END();
+	lexbor_request_shutdown();
 
 	return SUCCESS;
 }

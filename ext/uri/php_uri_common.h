@@ -43,13 +43,12 @@ typedef enum {
 typedef struct uri_handler_t {
 	const char *name;
 
-	zend_result (*init_parser)(void);
 	void *(*parse_uri)(const zend_string *uri_str, const void *base_url, zval *errors);
 	void (*create_invalid_uri_exception)(zval *exception_zv, zval *errors);
 	void *(*clone_uri)(void *uri);
 	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
 	void (*free_uri)(void *uri);
-	zend_result (*destroy_parser)(void);
+
 	HashTable *property_handlers;
 } uri_handler_t;
 

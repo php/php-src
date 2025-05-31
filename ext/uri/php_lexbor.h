@@ -22,4 +22,10 @@
 
 extern const uri_handler_t lexbor_uri_handler;
 
+void lexbor_module_init(void);
+void lexbor_module_shutdown(void);
+
+zend_result lexbor_request_init(void);
+void lexbor_request_shutdown(void);
+
 #endif
