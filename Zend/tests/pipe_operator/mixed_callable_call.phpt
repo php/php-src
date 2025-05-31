@@ -3,60 +3,72 @@ Pipe operator handles all callable styles
 --FILE--
 <?php
 
-function _add(int $x, int $y): int {
-    return $x + $y;
-}
-
-function _area(int $x, int $y): int {
-    return $x * $y;
-}
-
-class _Test
+function times3(int $x): int
 {
-    public function message(string $which): string
+    return $x * 3;
+}
+
+function times5(int $x): int
+{
+    return $x * 5;
+}
+
+class Test
+{
+    public function times7(int $x): int
     {
-        if ($which == 1) {
-            return "Hello";
-        }
-        else if ($which == 2) {
-            return "Goodbye";
-        }
-        else {
-            return "World";
-        }
+        return $x * 7;
+    }
+
+    public function times11(int $x): int
+    {
+        return $x * 11;
     }
 }
 
-class StaticTest {
-    public static function oneMore(int $x): int {
-        return $x + 1;
-    }
-}
-
-function _double(int $x): int {
-    return $x * 2;
-}
-
-function multiplier(int $x): \Closure
+class StaticTest
 {
-    return fn($y) => $x * $y;
+    public static function times13(int $x): int
+    {
+        return $x * 13;
+    }
+
+    public static function times17(int $x): int
+    {
+        return $x * 17;
+    }
 }
 
-$test = new _Test();
+function times23(int $x): int
+{
+   return $x * 23;
+}
+
+class Times27
+{
+    function __invoke(int $x): int
+    {
+        return $x * 27;
+    }
+}
+
+
+$test = new Test();
 
 $add3 = fn($x) => _add($x, 3);
 
-$res1 = 2
-    |> [$test, 'message']
-    |> 'strlen'
-    |> $add3
-    |> fn($x) => _area($x, 2)
-    |> _double(...)
-    |> multiplier(3)
-    |> StaticTest::oneMore(...)
+$res1 = 1
+    |> times3(...)
+    |> 'times5'
+    |> $test->times7(...)
+    |> [$test, 'times11']
+    |> StaticTest::times13(...)
+    |> [StaticTest::class, 'times17']
+    |> fn($x) => times23($x)
+    |> new Times27()
 ;
 
 var_dump($res1);
 ?>
 --EXPECT--
-int(121)
+int(158513355)
