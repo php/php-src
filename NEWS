@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fix warning not being emitted when failure to cancel a query with
     pg_cancel_query(). (Girgias)
 
+- Random:
+  . Fix reference type confusion and leak in user random engine.
+    (nielsdos, timwolla)
+
 - Readline:
   . Fix memory leak when calloc() fails in php_readline_completion_cb().
     (nielsdos)
