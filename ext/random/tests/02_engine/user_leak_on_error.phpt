@@ -7,12 +7,12 @@ use Random\Engine;
 use Random\Randomizer;
 use Random\BrokenRandomEngineError;
 
-class MyEngine implements Engine {
-    private $field = '';
-
-    public function &generate(): string
+final class MyEngine implements Engine
+{
+    public function generate(): string
     {
-        return $this->field;
+        // Create a non-interned empty string.
+        return preg_replace('/./', '', random_bytes(4));
     }
 }
 
