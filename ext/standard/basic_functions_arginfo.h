@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 824ccb41163307bd0fad452b705a8222b6f42d09 */
+ * Stub hash: b319a1197f131279574718e1308146a106dd55a2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2007,6 +2007,18 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_get_debug_type arginfo_gettype
 
+#define arginfo_atom arginfo_constant
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_string, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, atom, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_get_defined_atoms arginfo_ob_list_handlers
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_atom_exists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_settype, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(1, var, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
@@ -2823,6 +2835,10 @@ ZEND_FUNCTION(stream_set_timeout);
 #endif
 ZEND_FUNCTION(gettype);
 ZEND_FUNCTION(get_debug_type);
+ZEND_FUNCTION(atom);
+ZEND_FUNCTION(string);
+ZEND_FUNCTION(get_defined_atoms);
+ZEND_FUNCTION(atom_exists);
 ZEND_FUNCTION(settype);
 ZEND_FUNCTION(intval);
 ZEND_FUNCTION(floatval);
@@ -3431,6 +3447,10 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_RAW_FENTRY("gettype", zif_gettype, arginfo_gettype, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("get_debug_type", zif_get_debug_type, arginfo_get_debug_type, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_FE(atom, arginfo_atom)
+	ZEND_FE(string, arginfo_string)
+	ZEND_FE(get_defined_atoms, arginfo_get_defined_atoms)
+	ZEND_FE(atom_exists, arginfo_atom_exists)
 	ZEND_FE(settype, arginfo_settype)
 	ZEND_RAW_FENTRY("intval", zif_intval, arginfo_intval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("floatval", zif_floatval, arginfo_floatval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

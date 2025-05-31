@@ -19,6 +19,11 @@ const T_DNUMBER = UNKNOWN;
 const T_STRING = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_ATOM
+ */
+const T_ATOM = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_NAME_FULLY_QUALIFIED
  */
 const T_NAME_FULLY_QUALIFIED = UNKNOWN;

@@ -38,6 +38,7 @@
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
 #include "zend_hrtime.h"
+#include "zend_atom.h"
 #include "Optimizer/zend_optimizer.h"
 #include "php.h"
 #include "php_globals.h"
@@ -1055,6 +1056,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	zend_interned_strings_init();
 	zend_startup_builtin_functions();
+	zend_startup_atoms();
 	zend_register_standard_constants();
 	zend_register_auto_global(zend_string_init_interned("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
 

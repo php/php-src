@@ -3597,6 +3597,14 @@ function gettype(mixed $value): string {}
  */
 function get_debug_type(mixed $value): string {}
 
+function atom(string $name): mixed {}
+
+function string(mixed $atom): string {}
+
+function get_defined_atoms(): array {}
+
+function atom_exists(string $name): bool {}
+
 function settype(mixed &$var, string $type): bool {}
 
 /**

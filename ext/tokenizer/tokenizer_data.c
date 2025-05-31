@@ -28,6 +28,7 @@ char *get_token_type_name(int token_type)
 		case T_LNUMBER: return "T_LNUMBER";
 		case T_DNUMBER: return "T_DNUMBER";
 		case T_STRING: return "T_STRING";
+		case T_ATOM: return "T_ATOM";
 		case T_NAME_FULLY_QUALIFIED: return "T_NAME_FULLY_QUALIFIED";
 		case T_NAME_RELATIVE: return "T_NAME_RELATIVE";
 		case T_NAME_QUALIFIED: return "T_NAME_QUALIFIED";

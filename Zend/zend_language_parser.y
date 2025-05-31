@@ -89,6 +89,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ast> T_LNUMBER   "integer"
 %token <ast> T_DNUMBER   "floating-point number"
 %token <ast> T_STRING    "identifier"
+%token <ast> T_ATOM      "atom"
 %token <ast> T_NAME_FULLY_QUALIFIED "fully qualified name"
 %token <ast> T_NAME_RELATIVE "namespace-relative name"
 %token <ast> T_NAME_QUALIFIED "namespaced name"
@@ -1443,6 +1444,7 @@ dereferenceable_scalar:
 scalar:
 		T_LNUMBER 	{ $$ = $1; }
 	|	T_DNUMBER 	{ $$ = $1; }
+	|	T_ATOM		{ $$ = $1; }
 	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
 	|	T_START_HEREDOC T_END_HEREDOC
 			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }

@@ -606,6 +606,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_INTEGER,                "integer") \
 	_(ZEND_STR_DOUBLE,                 "double") \
 	_(ZEND_STR_ARRAY,                  "array") \
+	_(ZEND_STR_ATOM,                   "atom") \
 	_(ZEND_STR_RESOURCE,               "resource") \
 	_(ZEND_STR_CLOSED_RESOURCE,        "resource (closed)") \
 	_(ZEND_STR_NAME,                   "name") \

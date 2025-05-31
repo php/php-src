@@ -326,6 +326,7 @@ typedef union _zend_value {
 	void             *ptr;
 	zend_class_entry *ce;
 	zend_function    *func;
+	uint32_t          atom_id;			/* atom identifier */
 	struct {
 		uint32_t w1;
 		uint32_t w2;
@@ -609,25 +610,26 @@ struct _zend_ast_ref {
 #define IS_RESOURCE					9
 #define IS_REFERENCE				10
 #define IS_CONSTANT_AST				11 /* Constant expressions */
+#define IS_ATOM						12 /* Atom type */
 
 /* Fake types used only for type hinting.
  * These are allowed to overlap with the types below. */
-#define IS_CALLABLE					12
-#define IS_ITERABLE					13
-#define IS_VOID						14
-#define IS_STATIC					15
-#define IS_MIXED					16
-#define IS_NEVER					17
+#define IS_CALLABLE					13
+#define IS_ITERABLE					14
+#define IS_VOID						15
+#define IS_STATIC					16
+#define IS_MIXED					17
+#define IS_NEVER					18
 
 /* internal types */
-#define IS_INDIRECT             	12
-#define IS_PTR						13
-#define IS_ALIAS_PTR				14
-#define _IS_ERROR					15
+#define IS_INDIRECT             	13
+#define IS_PTR						14
+#define IS_ALIAS_PTR				15
+#define _IS_ERROR					16
 
 /* used for casts */
-#define _IS_BOOL					18
-#define _IS_NUMBER					19
+#define _IS_BOOL					19
+#define _IS_NUMBER					20
 
 /* guard flags */
 #define ZEND_GUARD_PROPERTY_GET		(1<<0)
@@ -1045,6 +1047,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_PTR(zval)					(zval).value.ptr
 #define Z_PTR_P(zval_p)				Z_PTR(*(zval_p))
 
+#define Z_ATOM_ID(zval)				(zval).value.atom_id
+#define Z_ATOM_ID_P(zval_p)			Z_ATOM_ID(*(zval_p))
+
 #define ZVAL_UNDEF(z) do {				\
 		Z_TYPE_INFO_P(z) = IS_UNDEF;	\
 	} while (0)
@@ -1259,6 +1264,12 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define ZVAL_ALIAS_PTR(z, p) do {								\
 		Z_PTR_P(z) = (p);										\
 		Z_TYPE_INFO_P(z) = IS_ALIAS_PTR;						\
+	} while (0)
+
+#define ZVAL_ATOM(z, id) do {									\
+		zval *__z = (z);										\
+		Z_ATOM_ID_P(__z) = (id);								\
+		Z_TYPE_INFO_P(__z) = IS_ATOM;							\
 	} while (0)
 
 #define ZVAL_ERROR(z) do {				\

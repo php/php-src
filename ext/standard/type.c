@@ -15,6 +15,7 @@
 */
 
 #include "php.h"
+#include "zend_atom.h"
 
 /* {{{ Returns the type of the variable */
 PHP_FUNCTION(gettype)
@@ -59,6 +60,8 @@ PHP_FUNCTION(get_debug_type)
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_STRING));
 		case IS_ARRAY:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_ARRAY));
+		case IS_ATOM:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_ATOM));
 		case IS_OBJECT:
 			if (Z_OBJ_P(arg)->ce->ce_flags & ZEND_ACC_ANON_CLASS) {
 				name = ZSTR_VAL(Z_OBJ_P(arg)->ce->name);
@@ -463,5 +466,80 @@ PHP_FUNCTION(is_countable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_BOOL(zend_is_countable(var));
+}
+/* }}} */
+
+/* {{{ Creates an atom from a string */
+PHP_FUNCTION(atom)
+{
+	zend_string *str;
+	uint32_t atom_id;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	atom_id = zend_atom_create(str);
+	if (atom_id == ZEND_ATOM_INVALID_ID) {
+		zend_argument_value_error(1, "must be a valid atom identifier");
+		RETURN_THROWS();
+	}
+
+	ZVAL_ATOM(return_value, atom_id);
+}
+/* }}} */
+
+/* {{{ Converts an atom to its string representation */
+PHP_FUNCTION(string)
+{
+	zval *arg;
+	zend_string *atom_name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(arg) != IS_ATOM) {
+		zend_argument_type_error(1, "must be an atom, %s given", zend_zval_type_name(arg));
+		RETURN_THROWS();
+	}
+
+	atom_name = zend_atom_name(Z_ATOM_ID_P(arg));
+	if (!atom_name) {
+		zend_throw_error(NULL, "Invalid atom");
+		RETURN_THROWS();
+	}
+
+	RETURN_STR_COPY(atom_name);
+}
+/* }}} */
+
+/* {{{ Returns an array of all defined atoms */
+PHP_FUNCTION(get_defined_atoms)
+{
+	zval *entry;
+	zend_atom *atom;
+	
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	array_init(return_value);
+	
+	ZEND_HASH_FOREACH_VAL(&atom_table, entry) {
+		atom = (zend_atom *)Z_PTR_P(entry);
+		add_next_index_str(return_value, zend_string_copy(atom->name));
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+/* {{{ Checks if an atom with the given name exists */
+PHP_FUNCTION(atom_exists)
+{
+	zend_string *name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_atom_exists(name));
 }
 /* }}} */
