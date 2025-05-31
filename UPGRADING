@@ -194,6 +194,9 @@ PHP 8.5 UPGRADE NOTES
     IntlListFormatter::WIDTH_NARROW widths.
     It is supported from icu 67.
 
+- SOAP:
+  . Enumeration cases are now dumped in __getTypes().
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()
