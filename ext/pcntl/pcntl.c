@@ -125,7 +125,15 @@ typedef psetid_t cpu_set_t;
 #include <pthread/qos.h>
 #endif
 
-#ifdef HAVE_PIDFD_OPEN
+#if defined(__linux__) && defined(HAVE_DECL_SYS_WAITID) && HAVE_DECL_SYS_WAITID == 1 && defined(HAVE_SYSCALL)
+#define HAVE_LINUX_RAW_SYSCALL_WAITID 1
+#endif
+
+#if defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
+#include <unistd.h>
+#endif
+
+#if defined(HAVE_PIDFD_OPEN) || defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
 #include <sys/syscall.h>
 #endif
 
@@ -401,19 +409,49 @@ PHP_FUNCTION(pcntl_waitid)
 	bool id_is_null = 1;
 	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
+	zval *z_rusage = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(0, 4)
+	siginfo_t siginfo;
+	int status;
+
+	ZEND_PARSE_PARAMETERS_START(0, 5)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(idtype)
 		Z_PARAM_LONG_OR_NULL(id, id_is_null)
 		Z_PARAM_ZVAL(user_siginfo)
 		Z_PARAM_LONG(options)
+		Z_PARAM_ZVAL(z_rusage)
 	ZEND_PARSE_PARAMETERS_END();
 
 	errno = 0;
-	siginfo_t siginfo;
+	memset(&siginfo, 0, sizeof(siginfo_t));
 
-	int status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+#if defined(HAVE_WAIT6) || defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
+	if (z_rusage) {
+		z_rusage = zend_try_array_init(z_rusage);
+		if (!z_rusage) {
+			RETURN_THROWS();
+		}
+		struct rusage rusage;
+# if defined(HAVE_WAIT6) /* FreeBSD */
+		struct __wrusage wrusage;
+		memset(&wrusage, 0, sizeof(struct __wrusage));
+		pid_t pid = wait6((idtype_t) idtype, (id_t) id, &status, (int) options, &wrusage, &siginfo);
+		status = pid > 0 ? 0 : pid;
+		memcpy(&rusage, &wrusage.wru_self, sizeof(struct rusage));
+# else /* Linux */
+		memset(&rusage, 0, sizeof(struct rusage));
+		status = syscall(SYS_waitid, (idtype_t) idtype, (id_t) id, &siginfo, (int) options, &rusage);
+# endif
+		if (status == 0) {
+			PHP_RUSAGE_TO_ARRAY(rusage, z_rusage);
+		}
+	} else { /* POSIX */
+		status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+	}
+#else /* POSIX */
+	status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+#endif
 
 	if (status == -1) {
 		PCNTL_G(last_error) = errno;
