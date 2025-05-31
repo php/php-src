@@ -10,7 +10,8 @@ final class EmptyStringEngine implements Engine
 {
     public function generate(): string
     {
-        return '';
+        // Create a non-interned empty string.
+        return preg_replace('/./', '', random_bytes(4));
     }
 }
 
