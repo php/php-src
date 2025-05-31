@@ -10,10 +10,10 @@ use Random\BrokenRandomEngineError;
 class MyEngine implements Engine {
     private $field = '';
 
-	public function &generate(): string
-	{
-		return $this->field;
-	}
+    public function &generate(): string
+    {
+        return $this->field;
+    }
 }
 
 $randomizer = new Randomizer(new MyEngine());
