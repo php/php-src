@@ -829,8 +829,8 @@ ZEND_API extern int zend_async_globals_id;
 ZEND_API extern size_t zend_async_globals_offset;
 #define ZEND_ASYNC_G(v) ZEND_TSRMG_FAST(zend_async_globals_offset, zend_async_globals_t *, v)
 #else
-#define ZEND_ASYNC_G(v) (zend_async_globals.v)
-ZEND_API extern zend_async_globals_t zend_async_globals;
+#define ZEND_ASYNC_G(v) (zend_async_globals_api.v)
+ZEND_API extern zend_async_globals_t zend_async_globals_api;
 #endif
 END_EXTERN_C()
 

@@ -21,7 +21,7 @@ int zend_async_globals_id = 0;
 size_t zend_async_globals_offset = 0;
 #else
 // The default data structure that is used when no other extensions are present.
-zend_async_globals_t zend_async_globals = {0};
+zend_async_globals_t zend_async_globals_api = {0};
 #endif
 
 #define ASYNC_THROW_ERROR(error) zend_throw_error(NULL, error);
@@ -147,7 +147,7 @@ void zend_async_globals_ctor(void)
 	ZEND_ASSERT(zend_async_globals_id != 0 && "zend_async_globals allocation failed");
 
 #else
-	ts_globals_ctor(zend_async_globals);
+	ts_globals_ctor(&zend_async_globals_api);
 #endif
 }
 
@@ -159,7 +159,7 @@ void zend_async_globals_dtor(void)
 {
 #ifdef ZTS
 #else
-	ts_globals_dtor(zend_async_globals);
+	ts_globals_dtor(&zend_async_globals_api);
 #endif
 }
 
