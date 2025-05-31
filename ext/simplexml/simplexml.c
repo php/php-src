@@ -2156,27 +2156,14 @@ static void sxe_object_free_storage(zend_object *object)
 /* {{{ php_sxe_find_fptr_count() */
 static zend_function* php_sxe_find_fptr_count(zend_class_entry *ce)
 {
-	zend_function *fptr_count = NULL;
-	zend_class_entry *parent = ce;
-	int inherited = 0;
-
-	while (parent) {
-		if (parent == ce_SimpleXMLElement) {
-			break;
-		}
-		parent = parent->parent;
-		inherited = 1;
-	}
-
-	if (inherited) {
-		/* Find count() method */
-		fptr_count = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
-		if (fptr_count->common.scope == parent) {
-			fptr_count = NULL;
+	if (ce->type == ZEND_USER_CLASS) {
+		zend_function *fptr_count = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+		if (fptr_count->common.scope != ce_SimpleXMLElement) {
+			return fptr_count;
 		}
 	}
 
-	return fptr_count;
+	return NULL;
 }
 /* }}} */
 
