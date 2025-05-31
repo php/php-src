@@ -21,3 +21,8 @@ basic_auth /http-basic-auth {
 	# bcrypt password hash for "password", calculated with 'caddy hash-password'
 	user $2a$14$yUKl9SGqVTAAqPTzLup.DefsbXXx3kfreNnzpJOUHcIrKnr5lgef2
 }
+
+route /ping {
+	templates
+	respond `pong`
+}
