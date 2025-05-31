@@ -2441,6 +2441,11 @@ function str_contains(string $haystack, string $needle): bool {}
 
 /**
  * @compile-time-eval
+ */
+function str_icontains(string $haystack, string $needle): bool {}
+
+/**
+ * @compile-time-eval
  * @frameless-function {"arity": 2}
  */
 function str_starts_with(string $haystack, string $needle): bool {}
