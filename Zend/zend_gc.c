@@ -1856,11 +1856,15 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 				GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
 				GC_ADDREF(obj);
 #ifdef PHP_ASYNC_API
-				ZEND_ASYNC_CURRENT_COROUTINE->extended_data = obj;
+				if (in_coroutine) {
+					ZEND_ASYNC_CURRENT_COROUTINE->extended_data = obj;
+				}
 #endif
 				obj->handlers->dtor_obj(obj);
 #ifdef PHP_ASYNC_API
-				ZEND_ASYNC_CURRENT_COROUTINE->extended_data = NULL;
+				if (in_coroutine) {
+					ZEND_ASYNC_CURRENT_COROUTINE->extended_data = NULL;
+				}
 #endif
 				GC_TRACE_REF(obj, "returned from destructor");
 				GC_DELREF(obj);
