@@ -3,7 +3,11 @@ Random: Engine: User: Empty strings do not leak
 --FILE--
 <?php
 
-class MyEngine implements Random\Engine {
+use Random\Engine;
+use Random\Randomizer;
+use Random\BrokenRandomEngineError;
+
+class MyEngine implements Engine {
     private $field = '';
 
 	public function &generate(): string
@@ -12,10 +16,10 @@ class MyEngine implements Random\Engine {
 	}
 }
 
-$randomizer = new Random\Randomizer(new MyEngine);
+$randomizer = new Randomizer(new MyEngine());
 try {
     $randomizer->getBytes(64);
-} catch (Random\BrokenRandomEngineError $e) {
+} catch (BrokenRandomEngineError $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 

@@ -1,5 +1,5 @@
 --TEST--
-User engine reference return value
+Random: Engine: User: Returning by reference works
 --FILE--
 <?php
 
