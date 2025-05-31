@@ -25,6 +25,8 @@ namespace Uri\WhatWg {
     class InvalidUrlException extends \Uri\InvalidUriException
     {
         public readonly array $errors;
+
+        public function __construct(string $message = "", array $errors = [], int $code = 0, ?\Throwable $previous = null) {}
     }
 
     enum UrlValidationErrorType
