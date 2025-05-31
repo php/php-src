@@ -334,6 +334,8 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
                                        zend_jit_addr   ref_addr,
                                        bool       check_exception);
 
+static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags);
+
 typedef struct _zend_jit_stub {
 	const char *name;
 	int (*stub)(zend_jit_ctx *jit);
@@ -463,6 +465,10 @@ static const char* zend_reg_name(int8_t reg)
 /* IR helpers */
 
 #ifdef ZTS
+static void * ZEND_FASTCALL zend_jit_get_tsrm_ls_cache(void) {
+	return _tsrm_ls_cache;
+}
+
 static ir_ref jit_TLS(zend_jit_ctx *jit)
 {
 	ZEND_ASSERT(jit->ctx.control);
@@ -482,9 +488,13 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 			ref = insn->op1;
 		}
 	}
-	jit->tls = ir_TLS(
-		tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
-		tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
+	if (tsrm_ls_cache_tcb_offset == 0 && tsrm_tls_index == -1 && tsrm_tls_offset == -1) {
+		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
+	} else {
+		jit->tls = ir_TLS(
+			tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
+			tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
+	}
 	return jit->tls;
 }
 #endif
@@ -3113,6 +3123,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_fcall_interrupt);
 
 #ifndef ZTS
+
 	REGISTER_DATA(EG(current_execute_data));
 	REGISTER_DATA(EG(exception));
 	REGISTER_DATA(EG(opline_before_exception));
@@ -3127,6 +3138,8 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_DATA(EG(symbol_table));
 
 	REGISTER_DATA(CG(map_ptr_base));
+#else /* ZTS */
+	REGISTER_HELPER(zend_jit_get_tsrm_ls_cache);
 #endif
 #endif
 }
@@ -3293,6 +3306,535 @@ static void zend_jit_setup_unwinder(void)
 }
 #endif
 
+#if defined(ZTS)
+# if defined(IR_TARGET_AARCH64)
+
+/* https://developer.arm.com/documentation/ddi0602/2025-03/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page- */
+#  define AARCH64_ADRP_IMM_MASK          0x60ffffe0 /* bits 30-29, 23-5 */
+#  define AARCH64_LDR_UNSIGNED_IMM_MASK  0x003ffc00 /* bits 21-10 */
+#  define AARCH64_ADD_IMM_MASK           0x003ffc00 /* bits 21-10 */
+#  define AARCH64_MOVZ_IMM_MASK          0x001fffe0 /* bits 20-5 */
+#  define AARCH64_MOVZ_HW_MASK           0x00600000 /* bits 22-21 */
+#  define AARCH64_MOVK_IMM_MASK          0x001fffe0 /* bits 20-5 */
+#  define AARCH64_MOVK_HW_MASK           0x00600000 /* bits 22-21 */
+#  define AARCH64_NOP                    0xd503201f
+
+#  ifdef __MUSL__
+
+#   define DTV_OFFSET -8
+#   define DTV_INDEX_GAP 0
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+} dtv_pointer_t;
+
+typedef struct TLSDescriptor {
+	size_t index;
+	size_t offset;
+} TLSDescriptor;
+
+#  elif defined(__FreeBSD__)
+
+#   define DTV_OFFSET 0
+/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/22ca6db50f4e6bd75a141f57cf953d8de6531a06/lib/libc/gen/tls.c#L88) */
+#   define DTV_INDEX_GAP 1
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+} dtv_pointer_t;
+
+/* https://github.com/freebsd/freebsd-src/blob/c52ca7dd09066648b1cc40f758289404d68ab886/libexec/rtld-elf/aarch64/reloc.c#L180-L184 */
+typedef struct TLSDescriptor {
+	void*   thunk;
+	int     index;
+	size_t  offset;
+} TLSDescriptor;
+
+#  else /* Glibc */
+
+#   define DTV_OFFSET 0
+#   define DTV_INDEX_GAP 0
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+	uintptr_t _;
+} dtv_pointer_t;
+
+typedef struct TLSDescriptor {
+	size_t index;
+	size_t offset;
+} TLSDescriptor;
+
+#  endif
+
+ZEND_ATTRIBUTE_UNUSED static zend_result zend_jit_resolve_tsrm_ls_cache_offsets(void) {
+	void *addr;
+	uint32_t *insn;
+	void *thread_pointer;
+
+	__asm__ __volatile__(
+		/* Load thread pointer address */
+		"mrs   %0, tpidr_el0\n"
+		/* Load next instruction address */
+		"adr   %1, .+4\n\t"
+		/* General Dynamic code sequence as expected by linkers */
+		"adrp  x0, :tlsdesc:_tsrm_ls_cache\n"
+		"ldr   x1, [x0, #:tlsdesc_lo12:_tsrm_ls_cache]\n"
+		"add   x0, x0, :tlsdesc_lo12:_tsrm_ls_cache\n"
+		".tlsdesccall    _tsrm_ls_cache\n"
+		"blr   x1\n"
+		"mrs   x8, tpidr_el0\n"
+		"add   %2, x8, x0\n"
+		: "=r" (thread_pointer), "=r" (insn), "=r" (addr)
+		:
+		: "x0", "x1", "x8");
+
+	ZEND_ASSERT(addr == &_tsrm_ls_cache);
+
+	/* Check if the general dynamic code was relaxed by the linker */
+
+	// adrp x0, #any
+	if ((insn[0] & ~AARCH64_ADRP_IMM_MASK) != 0x90000000) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "adrp insn does not match: 0x%08x\n", insn[0]);
+		goto code_changed;
+	}
+
+	// ldr x1, [x0, #any]
+	if ((insn[1] & ~AARCH64_LDR_UNSIGNED_IMM_MASK) != 0xf9400001) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "ldr insn does not match: 0x%08x\n", insn[1]);
+		goto code_changed;
+	}
+
+	// add x0, x0, any
+	if ((insn[2] & ~AARCH64_ADD_IMM_MASK) != 0x91000000) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "add insn does not match: 0x%08x\n", insn[2]);
+		goto code_changed;
+	}
+
+	/* Code is intact, we can extract immediate values */
+
+	uint64_t adrp_imm = (uint64_t)( ((insn[0] & 0x00ffffe0) >> 3) | ((insn[0] & 0x60000000) >> 29) ) << 12;
+	uint64_t add_imm = (uint64_t)(insn[2] & AARCH64_ADD_IMM_MASK) >> 10;
+	uint64_t pc = (uint64_t)insn;
+	uintptr_t **where = (uintptr_t**)((pc & ~(4096-1)) + adrp_imm + add_imm);
+
+	/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst
+	 * section "Relocations for thread-local storage".
+	 * The first entry holds a pointer to the variable's TLS descriptor resolver
+	 * function and the second entry holds a platform-specific offset or
+	 * pointer. */
+	TLSDescriptor *tlsdesc = (TLSDescriptor*)(where[1]);
+
+	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == (uintptr_t)tlsdesc) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "static tls at offset %p from thread pointer (inferred from tlsdesc)\n", tlsdesc);
+		tsrm_ls_cache_tcb_offset = (uintptr_t)tlsdesc;
+		return SUCCESS;
+	}
+
+	/* We've got the TLS descriptor. Double check: */
+
+#   if ZEND_DEBUG
+	dtv_pointer_t *dtv = *(dtv_pointer_t**)((uintptr_t)thread_pointer + DTV_OFFSET);
+	addr = (void*) (dtv[tlsdesc->index + DTV_INDEX_GAP].val + tlsdesc->offset);
+
+	ZEND_ASSERT(addr == &_tsrm_ls_cache);
+#   endif
+
+	zend_accel_error(ACCEL_LOG_DEBUG, "dynamic tls module idx %zu offset %zu (inferred from code)\n", (size_t)tlsdesc->index, tlsdesc->offset);
+
+	tsrm_tls_index = (tlsdesc->index + DTV_INDEX_GAP) * sizeof(dtv_pointer_t);
+	tsrm_tls_offset = tlsdesc->offset;
+
+	return SUCCESS;
+
+code_changed:
+
+	/* Code was changed by the linker. Check if we recognize the updated code */
+
+	// movz	x0, #0, lsl #16
+	if ((insn[0] & ~AARCH64_MOVZ_IMM_MASK) != 0xd2a00000) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "movz insn does not match: 0x%08x\n", insn[0]);
+		return FAILURE;
+	}
+
+	// movk	x0, #0x10
+	if ((insn[1] & ~AARCH64_MOVK_IMM_MASK) != 0xf2800000) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "movk insn does not match: 0x%08x\n", insn[1]);
+		return FAILURE;
+	}
+
+	// nop
+	for (int i = 0; i < 2; i++) {
+		if (insn[2+i] != 0xd503201f) {
+			zend_accel_error(ACCEL_LOG_DEBUG, "nop(%d) insn does not match: 0x%08x\n", i, insn[2+i]);
+			return FAILURE;
+		}
+	}
+
+	/* Extract immediate values */
+
+	uint64_t movz_imm = (insn[0] & AARCH64_MOVZ_IMM_MASK) >> 5;
+	uint64_t movz_shift = (((insn[0] & AARCH64_MOVZ_HW_MASK) >> 21) << 4);
+	uint64_t mozk_imm = (insn[1] & AARCH64_MOVK_IMM_MASK) >> 5;
+	uint64_t offset = (movz_imm << movz_shift) | mozk_imm;
+
+	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == offset) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "static tls at offset %" PRIx64 " from thread pointer (inferred from code)\n", offset);
+		tsrm_ls_cache_tcb_offset = offset;
+		return SUCCESS;
+	}
+
+	return FAILURE;
+}
+
+# elif defined(__GNUC__) && defined(__i386__)
+
+#  ifdef __MUSL__
+
+#   define DTV_OFFSET 4
+#   define DTV_INDEX_GAP 0
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+} dtv_pointer_t;
+
+typedef struct TLSDescriptor {
+	size_t index;
+	size_t offset;
+} TLSDescriptor;
+
+#  elif defined(__FreeBSD__)
+
+#   define DTV_OFFSET 4
+#   define DTV_INDEX_GAP 1
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+} dtv_pointer_t;
+
+/* https://github.com/freebsd/freebsd-src/blob/6b94546a7ea2dc593f5765bd5465a8b7bb80c325/libexec/rtld-elf/i386/rtld_machdep.h#L65 */
+typedef struct TLSDescriptor {
+	unsigned long index;
+	unsigned long offset;
+} TLSDescriptor;
+
+#  else
+
+#   define DTV_OFFSET 4
+#   define DTV_INDEX_GAP 0
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+	uintptr_t _;
+} dtv_pointer_t;
+
+typedef struct TLSDescriptor {
+	size_t index;
+	size_t offset;
+} TLSDescriptor;
+
+#  endif
+
+ZEND_ATTRIBUTE_UNUSED static zend_result zend_jit_resolve_tsrm_ls_cache_offsets(void) {
+#  if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
+	size_t ret;
+
+	asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
+		: "=a" (ret));
+	tsrm_ls_cache_tcb_offset = ret;
+
+	return SUCCESS;
+
+#  else
+
+	void *t_addr;
+	unsigned char *code;
+	void *thread_pointer;
+
+	__asm__ __volatile__(
+			/* Load next instruction address */
+			"call   1f\n"
+			".subsection 1\n"
+			"1:\n"
+			"movl (%%esp), %%ebx\n"
+			"movl %%ebx, %%esi\n"
+			"ret\n"
+			".previous\n"
+			/* General Dynamic code sequence as expected by linkers */
+			"addl   $_GLOBAL_OFFSET_TABLE_, %%ebx\n"
+			"leal   _tsrm_ls_cache@TLSGD(,%%ebx,1), %%eax\n"
+			"call   ___tls_get_addr@PLT\n"
+			/* Load thread pointer address */
+			"movl   %%gs:0, %%ebx\n"
+			: "=a" (t_addr), "=S" (code), "=b" (thread_pointer)
+	);
+
+	ZEND_ASSERT(t_addr == &_tsrm_ls_cache);
+
+	/* Check if the general dynamic code was relaxed by the linker */
+
+	// addl any,%ebx
+	if (code[0] != 0x81 || code[1] != 0xc3) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[0], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "addl insn does not match: 0x%16" PRIx64 "\n", bytes);
+		goto code_changed;
+	}
+
+	// leal any(,%ebx,1),%eax
+	if (code[6] != 0x8d || code[7] != 0x04 || code[8] != 0x1d) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[6], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "leal insn does not match: 0x%16" PRIx64 "\n", bytes);
+		goto code_changed;
+	}
+
+	// call any
+	if (code[13] != 0xe8) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[13], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "call insn does not match: 0x%16" PRIx64 "\n", bytes);
+		goto code_changed;
+	}
+
+	/* Code is intact, we can extract immediate values */
+
+	uint32_t addl_imm = ((uint32_t)code[5] << 24)
+		| ((uint32_t)code[4] << 16)
+		| ((uint32_t)code[3] << 8)
+		| ((uint32_t)code[2]);
+	uint32_t leal_imm = ((uint32_t)code[12] << 24)
+		| ((uint32_t)code[11] << 16)
+		| ((uint32_t)code[10] << 8)
+		| ((uint32_t)code[9]);
+
+	TLSDescriptor *tlsdesc = (TLSDescriptor*)(leal_imm + addl_imm + (uintptr_t)code);
+
+	/* We've got the TLS descriptor. Double check: */
+
+#   if ZEND_DEBUG
+	dtv_pointer_t *dtv = *(dtv_pointer_t**)((uintptr_t)thread_pointer + DTV_OFFSET);
+	void *addr = (void*) (dtv[tlsdesc->index + DTV_INDEX_GAP].val + tlsdesc->offset);
+
+	ZEND_ASSERT((void*)addr == &_tsrm_ls_cache);
+#   endif
+
+	zend_accel_error(ACCEL_LOG_DEBUG, "dynamic tls module idx %zu offset %zu (inferred from code)\n", (size_t)tlsdesc->index, (size_t)tlsdesc->offset);
+
+	tsrm_tls_index = tlsdesc->index * 8;
+	tsrm_tls_offset = tlsdesc->offset;
+
+	return SUCCESS;
+
+code_changed:
+
+	/* Code was changed by the linker. Check if we recognize the updated code */
+
+	/*
+	 * 81 c3 98 2d 00 00  	addl    $0x2d98,%ebx
+	 * 65 a1 00 00 00 00  	movl    %gs:0x0,%eax
+	 * 81 e8 04 00 00 00  	subl    $0x4,%eax
+	 */
+
+	// movl %gs:0x0,%eax
+	if (memcmp(&code[6], "\x65\xa1\x00\x00\x00\x00", 6) != 0) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[6], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "movl insn does not match: 0x%16" PRIx64 "\n", bytes);
+		return FAILURE;
+	}
+
+	// subl $any,%eax
+	if (code[12] != 0x81 || code[13] != 0xe8) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[6], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "subl insn does not match: 0x%16" PRIx64 "\n", bytes);
+		return FAILURE;
+	}
+
+	/* Extract immediate values */
+
+	uint32_t offset = -(((uint32_t)code[17] << 24)
+		| ((uint32_t)code[16] << 16)
+		| ((uint32_t)code[15] << 8)
+		| ((uint32_t)code[14]));
+
+	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == offset) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "static tls at offset %" PRIx32 " from thread pointer (inferred from code)\n", offset);
+		tsrm_ls_cache_tcb_offset = offset;
+		return SUCCESS;
+	}
+
+	zend_accel_error(ACCEL_LOG_DEBUG, "static tls offset does not match: 0x%08" PRIx32 " (expected 0x%08" PRIx32 ")\n", offset, (uint32_t)((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer));
+
+	return FAILURE;
+
+#  endif
+}
+# elif defined(__GNUC__) && defined(__x86_64__)
+#  ifdef __MUSL__
+
+#   define DTV_OFFSET 8
+#   define DTV_INDEX_GAP 0
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+} dtv_pointer_t;
+
+typedef struct TLSDescriptor {
+	size_t index;
+	size_t offset;
+} TLSDescriptor;
+
+#  elif defined(__FreeBSD__)
+
+#   define DTV_OFFSET 4
+#   define DTV_INDEX_GAP 1
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+} dtv_pointer_t;
+
+/* https://github.com/freebsd/freebsd-src/blob/6b94546a7ea2dc593f5765bd5465a8b7bb80c325/libexec/rtld-elf/amd64/rtld_machdep.h#L65 */
+typedef struct TLSDescriptor {
+	unsigned long index;
+	unsigned long offset;
+} TLSDescriptor;
+
+#  else
+
+#   define DTV_OFFSET 8
+#   define DTV_INDEX_GAP 0
+
+typedef struct _dtv_pointer_t {
+	uintptr_t val;
+	uintptr_t _;
+} dtv_pointer_t;
+
+typedef struct TLSDescriptor {
+	size_t index;
+	size_t offset;
+} TLSDescriptor;
+
+#  endif
+
+ZEND_ATTRIBUTE_UNUSED static zend_result zend_jit_resolve_tsrm_ls_cache_offsets(void) {
+#  if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && \
+	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
+		size_t ret;
+
+		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
+			: "=r" (ret));
+		tsrm_ls_cache_tcb_offset = ret;
+
+		return SUCCESS;
+#  else
+
+	void *addr;
+	unsigned char *code;
+	void *thread_pointer;
+
+	__asm__ __volatile__(
+			/* Load next instruction address */
+			"leaq   (%%rip), %%rbx\n"
+			/* General Dynamic code sequence as expected by linkers */
+			".byte  0x66\n"
+			"leaq   _tsrm_ls_cache@tlsgd(%%rip), %%rdi\n"
+			".word  0x6666\n"
+			"rex64\n"
+			"call   __tls_get_addr\n"
+			/* Load thread pointer address */
+			"movq   %%fs:0, %%rsi\n"
+			: "=a" (addr), "=b" (code), "=S" (thread_pointer)
+	);
+
+	ZEND_ASSERT(addr == &_tsrm_ls_cache);
+
+	/* Check if the general dynamic code was relaxed by the linker */
+
+	// data16 leaq any(%rip),%rdi
+	if (code[0] != 0x66 || code[1] != 0x48 || code[2] != 0x8d || code[3] != 0x3d) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[0], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "leaq insn does not match: 0x%016" PRIx64 "\n", bytes);
+		goto code_changed;
+	}
+
+	// data16 data16 rex.W call any
+	if (code[8] != 0x66 || code[9] != 0x66 || code[10] != 0x48 || code[11] != 0xe8) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[8], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "call insn does not match: 0x%016" PRIx64 "\n", bytes);
+		goto code_changed;
+	}
+
+	/* Code is intact, we can extract immediate values */
+
+	uintptr_t leaq_imm = (uintptr_t)(int32_t)((uint32_t)code[7] << 24)
+		| ((uint32_t)code[6] << 16)
+		| ((uint32_t)code[5] << 8)
+		| ((uint32_t)code[4]);
+
+	TLSDescriptor *tlsdesc = (TLSDescriptor*)(leaq_imm + (uintptr_t)code + 8 /* leaq */);
+
+	/* We've got the TLS descriptor. Double check: */
+
+#   if ZEND_DEBUG
+	dtv_pointer_t *dtv = *(dtv_pointer_t**)((uintptr_t)thread_pointer + DTV_OFFSET);
+	addr = (void*) (dtv[tlsdesc->index + DTV_INDEX_GAP].val + tlsdesc->offset);
+
+	ZEND_ASSERT((void*)addr == &_tsrm_ls_cache);
+#   endif
+
+	zend_accel_error(ACCEL_LOG_DEBUG, "dynamic tls module idx %zu offset %zu (infered from code)\n", (size_t)tlsdesc->index, (size_t)tlsdesc->offset);
+
+	return SUCCESS;
+
+code_changed:
+
+	/* Code was changed by the linker. Check if we recognize the updated code */
+
+	/*
+	 * 64 48 8b 04 25 00 00 00 00	movq    %fs:0x0,%rax
+	 * 48 8d 80 f8 ff ff ff	        leaq    -0x8(%rax),%rax
+	 */
+
+	// movq %fs:0x0,%rax
+	if (memcmp(&code[0], "\x64\x48\x8b\x04\x25\x00\x00\x00\x00", 9) != 0) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[0], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "movq insn does not match: 0x%016" PRIx64 "\n", bytes);
+		return FAILURE;
+	}
+
+	// leaq any(%rax),$rax
+	if (code[9] != 0x48 || code[10] != 0x8d || code[11] != 0x80) {
+		uint64_t bytes;
+		memcpy(&bytes, &code[10], 8);
+		zend_accel_error(ACCEL_LOG_DEBUG, "leaq insn does not match: 0x%016" PRIx64 "\n", bytes);
+		return FAILURE;
+	}
+
+	/* Extract immediate values */
+
+	uintptr_t offset = (uintptr_t)(int32_t)(((uint32_t)code[15] << 24)
+		| ((uint32_t)code[14] << 16)
+		| ((uint32_t)code[13] << 8)
+		| ((uint32_t)code[12]));
+
+	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == offset) {
+		tsrm_ls_cache_tcb_offset = offset;
+		zend_accel_error(ACCEL_LOG_DEBUG, "static tls at offset 0x%" PRIxPTR " from thread pointer (inferred from code)\n", offset);
+		return SUCCESS;
+	}
+
+	zend_accel_error(ACCEL_LOG_DEBUG, "static tls offset does not match: 0x%016" PRIxPTR " (expected 0x%016" PRIxPTR ")\n", offset, ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer));
+
+	return FAILURE;
+#  endif
+}
+# endif
+#endif /* ZTS */
 
 static void zend_jit_setup(bool reattached)
 {
@@ -3313,40 +3855,16 @@ static void zend_jit_setup(bool reattached)
 # endif
 #endif
 #ifdef ZTS
+
 #if defined(IR_TARGET_AARCH64)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 
-# ifdef __FreeBSD__
+# if defined(__FreeBSD__) || defined(__MUSL__)
 	if (tsrm_ls_cache_tcb_offset == 0) {
-		TLSDescriptor **where;
-
-		__asm__(
-			"adrp %0, :tlsdesc:_tsrm_ls_cache\n"
-			"add %0, %0, :tlsdesc_lo12:_tsrm_ls_cache\n"
-			: "=r" (where));
-		/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst
-		 * section "Relocations for thread-local storage".
-		 * The first entry holds a pointer to the variable's TLS descriptor resolver function and the second entry holds
-		 * a platform-specific offset or pointer. */
-		TLSDescriptor *tlsdesc = where[1];
-
-		tsrm_tls_offset = tlsdesc->offset;
-		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/22ca6db50f4e6bd75a141f57cf953d8de6531a06/lib/libc/gen/tls.c#L88) */
-		tsrm_tls_index = (tlsdesc->index + 1) * 8;
-	}
-# elif defined(__MUSL__)
-	if (tsrm_ls_cache_tcb_offset == 0) {
-		size_t **where;
-
-		__asm__(
-			"adrp %0, :tlsdesc:_tsrm_ls_cache\n"
-			"add %0, %0, :tlsdesc_lo12:_tsrm_ls_cache\n"
-			: "=r" (where));
-		/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst */
-		size_t *tlsdesc = where[1];
-
-		tsrm_tls_offset = tlsdesc[1];
-		tsrm_tls_index = tlsdesc[0] * 8;
+		if (zend_jit_resolve_tsrm_ls_cache_offsets() == FAILURE) {
+			tsrm_tls_offset = -1;
+			tsrm_tls_index = -1;
+		}
 	}
 # else
 	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
@@ -3407,69 +3925,13 @@ static void zend_jit_setup(bool reattached)
 		tsrm_tls_offset = ti[2];
 		tsrm_tls_index = ti[1] * 8;
 	}
-# elif defined(__GNUC__) && defined(__x86_64__)
+# elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && \
-	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
-		size_t ret;
-
-		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
-			: "=r" (ret));
-		tsrm_ls_cache_tcb_offset = ret;
-#elif defined(__MUSL__)
-		size_t *ti;
-
-		__asm__(
-			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
-		tsrm_tls_offset = ti[1];
-		tsrm_tls_index = ti[0] * 8;
-#elif defined(__FreeBSD__)
-		size_t *ti;
-
-		__asm__(
-			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
-		tsrm_tls_offset = ti[1];
-		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/bf56e8b9c8639ac4447d223b83cdc128107cc3cd/libexec/rtld-elf/rtld.c#L5260) */
-		tsrm_tls_index = (ti[0] + 1) * 8;
-#else
-		size_t *ti;
-
-		__asm__(
-			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
-		tsrm_tls_offset = ti[1];
-		tsrm_tls_index = ti[0] * 16;
-#endif
-	}
-# elif defined(__GNUC__) && defined(__i386__)
-	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
-	if (tsrm_ls_cache_tcb_offset == 0) {
-#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
-		size_t ret;
-
-		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
-			: "=a" (ret));
-		tsrm_ls_cache_tcb_offset = ret;
-#else
-		size_t *ti, _ebx, _ecx, _edx;
-
-		__asm__(
-			"call 1f\n"
-			".subsection 1\n"
-			"1:\tmovl (%%esp), %%ebx\n\t"
-			"ret\n"
-			".previous\n\t"
-			"addl $_GLOBAL_OFFSET_TABLE_, %%ebx\n\t"
-			"leal _tsrm_ls_cache@tlsldm(%%ebx), %0\n\t"
-			"call ___tls_get_addr@plt\n\t"
-			"leal _tsrm_ls_cache@tlsldm(%%ebx), %0\n"
-			: "=a" (ti), "=&b" (_ebx), "=&c" (_ecx), "=&d" (_edx));
-		tsrm_tls_offset = ti[1];
-		tsrm_tls_index = ti[0] * 8;
-#endif
+		if (zend_jit_resolve_tsrm_ls_cache_offsets() == FAILURE) {
+			tsrm_tls_index = -1;
+			tsrm_tls_offset = -1;
+		}
 	}
 # endif
 #endif
