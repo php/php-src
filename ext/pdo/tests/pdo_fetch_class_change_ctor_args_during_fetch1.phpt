@@ -27,13 +27,13 @@ class Test {
     }
 }
 
-$db->exec('CREATE TABLE pdo_fetch_class_change_ctor_one(id int NOT NULL PRIMARY KEY, val1 VARCHAR(10), val2 VARCHAR(10))');
-$db->exec("INSERT INTO pdo_fetch_class_change_ctor_one VALUES(1, 'A', 'alpha')");
-$db->exec("INSERT INTO pdo_fetch_class_change_ctor_one VALUES(2, 'B', 'beta')");
-$db->exec("INSERT INTO pdo_fetch_class_change_ctor_one VALUES(3, 'C', 'gamma')");
-$db->exec("INSERT INTO pdo_fetch_class_change_ctor_one VALUES(4, 'D', 'delta')");
+$db->exec('CREATE TABLE pdo_fetch_class_change_ctor1(id int NOT NULL PRIMARY KEY, val1 VARCHAR(10), val2 VARCHAR(10))');
+$db->exec("INSERT INTO pdo_fetch_class_change_ctor1 VALUES(1, 'A', 'alpha')");
+$db->exec("INSERT INTO pdo_fetch_class_change_ctor1 VALUES(2, 'B', 'beta')");
+$db->exec("INSERT INTO pdo_fetch_class_change_ctor1 VALUES(3, 'C', 'gamma')");
+$db->exec("INSERT INTO pdo_fetch_class_change_ctor1 VALUES(4, 'D', 'delta')");
 
-$stmt = $db->prepare('SELECT val1, val2 FROM pdo_fetch_class_change_ctor_one');
+$stmt = $db->prepare('SELECT val1, val2 FROM pdo_fetch_class_change_ctor1');
 $stmt->setFetchMode(PDO::FETCH_CLASS, 'Test', [$stmt]);
 
 $stmt->execute();
@@ -44,12 +44,12 @@ var_dump($stmt->fetch());
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-PDOTest::dropTableIfExists($db, "pdo_fetch_class_change_ctor_one");
+PDOTest::dropTableIfExists($db, "pdo_fetch_class_change_ctor1");
 ?>
 --EXPECTF--
 object(PDOStatement)#%d (1) {
   ["queryString"]=>
-  string(54) "SELECT val1, val2 FROM pdo_fetch_class_change_ctor_one"
+  string(54) "SELECT val1, val2 FROM pdo_fetch_class_change_ctor1"
 }
 object(Test)#%d (2) {
   ["val1"]=>
