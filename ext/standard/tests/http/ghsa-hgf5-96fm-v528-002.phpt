@@ -44,7 +44,7 @@ array(6) {
   [0]=>
   string(14) "GET / HTTP/1.1"
   [1]=>
-  string(21) "Host: 127.0.0.1:%d"
+  string(%d) "Host: 127.0.0.1:%d"
   [2]=>
   string(17) "Connection: close"
   [3]=>

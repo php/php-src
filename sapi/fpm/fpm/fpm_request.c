@@ -22,6 +22,7 @@
 #include "zlog.h"
 
 static const char *requests_stages[] = {
+	[FPM_REQUEST_CREATING]        = "Creating",
 	[FPM_REQUEST_ACCEPTING]       = "Idle",
 	[FPM_REQUEST_READING_HEADERS] = "Reading headers",
 	[FPM_REQUEST_INFO]            = "Getting request information",
