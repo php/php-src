@@ -262,10 +262,12 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 	struct in_addr	if_addr;
 	void 			*opt_ptr;
 	socklen_t		optlen;
-	unsigned char	ip_mcast_ttl;
 	int ip_mcast_loop_back;
 	int ip_mcast_hops;
 	int				retval;
+#if IP_MULTICAST_LOOP != IPV6_MULTICAST_LOOP
+	unsigned char	ip_mcast_ttl;
+#endif
 
 	switch (optname) {
 	case PHP_MCAST_JOIN_GROUP:
@@ -279,7 +281,10 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		return php_do_mcast_opt(php_sock, level, optname, arg4);
 
 	case IP_MULTICAST_IF:
+/* On MacOS and Windows those have the same values */
+#if IP_MULTICAST_LOOP != IPV6_MULTICAST_LOOP
 	case IPV6_MULTICAST_IF:
+#endif
 		if (php_get_if_index_from_zval(arg4, &if_index) == FAILURE) {
 			return FAILURE;
 		}
@@ -297,12 +302,17 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		goto dosockopt;
 
 	case IP_MULTICAST_LOOP:
+/* On MacOS and Windows those have the same values */
+#if IP_MULTICAST_LOOP != IPV6_MULTICAST_LOOP
 	case IPV6_MULTICAST_LOOP:
+#endif
 		ip_mcast_loop_back = zval_is_true(arg4);
 		opt_ptr = &ip_mcast_loop_back;
 		optlen	= sizeof(ip_mcast_loop_back);
 		goto dosockopt;
 
+/* On MacOS and Windows those have the same values */
+#if IP_MULTICAST_TTL != IPV6_MULTICAST_HOPS
 	case IP_MULTICAST_TTL:
 		convert_to_long(arg4);
 		if (Z_LVAL_P(arg4) < 0L || Z_LVAL_P(arg4) > 255L) {
@@ -313,6 +323,7 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		opt_ptr = &ip_mcast_ttl;
 		optlen	= sizeof(ip_mcast_ttl);
 		goto dosockopt;
+#endif
 
 	case IPV6_MULTICAST_HOPS:
 		convert_to_long(arg4);
