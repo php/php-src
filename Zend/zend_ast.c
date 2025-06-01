@@ -279,7 +279,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_va(
 	ast->attr = attr;
 	for (uint32_t i = 0; i < children; i++) {
 		ast->child[i] = va_arg(*va, zend_ast *);
-		if (lineno != (uint32_t)-1 && ast->child[i]) {
+		if (lineno == (uint32_t)-1 && ast->child[i]) {
 			lineno = zend_ast_get_lineno(ast->child[i]);
 		}
 	}
