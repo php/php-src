@@ -49,7 +49,7 @@ PDOTest::dropTableIfExists($db, "pdo_fetch_class_change_ctor3");
 --EXPECTF--
 object(PDOStatement)#%d (1) {
   ["queryString"]=>
-  string(56) "SELECT val1, val2 FROM pdo_fetch_class_change_ctor3"
+  string(51) "SELECT val1, val2 FROM pdo_fetch_class_change_ctor3"
 }
 string(5) "alpha"
 string(5) "alpha"
