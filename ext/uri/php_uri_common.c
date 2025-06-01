@@ -19,14 +19,31 @@
 #include "Zend/zend_exceptions.h"
 #include "php_uri_common.h"
 
-void uri_register_property_handler(HashTable *property_handlers, zend_string *name, const uri_property_handler_t *handler)
+const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name)
 {
-	zend_hash_add_new_ptr(property_handlers, name, (void *) handler);
-}
-
-uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name)
-{
-	return zend_hash_find_ptr(internal_uri->handler->property_handlers, name);
+	switch (ZSTR_VAL(name)[0]) {
+		case 's': /* scheme */
+			return &internal_uri->handler->property_handlers.scheme;
+		case 'u': /* username */
+			return &internal_uri->handler->property_handlers.username;
+		case 'p': /* password, port, path */
+			if (name == ZSTR_KNOWN(ZEND_STR_PASSWORD)) {
+				return &internal_uri->handler->property_handlers.password;
+			} else if (name == ZSTR_KNOWN(ZEND_STR_PORT)) {
+				return &internal_uri->handler->property_handlers.port;
+			} else if (name == ZSTR_KNOWN(ZEND_STR_PATH)) {
+				return &internal_uri->handler->property_handlers.path;
+			} else {
+				ZEND_UNREACHABLE();
+			}
+		case 'h': /* host */
+			return &internal_uri->handler->property_handlers.host;
+		case 'q': /* query */
+			return &internal_uri->handler->property_handlers.query;
+		case 'f': /* fragment */
+			return &internal_uri->handler->property_handlers.fragment;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
 }
 
 void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
