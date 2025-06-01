@@ -5969,7 +5969,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, UNUSED|CLASS_FETCH|CONST|VAR, UNUSED|CACHE_SLOT, N
 		/* If there are no arguments, skip over the DO_FCALL opcode. We check if the next
 		 * opcode is DO_FCALL in case EXT instructions are used. */
 		if (EXPECTED(opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL)) {
-			ZEND_VM_NEXT_OPCODE_EX(1, 2);
+			ZEND_VM_NEXT_OPCODE_EX(0, 2);
 		}
 
 		/* Perform a dummy function call */
