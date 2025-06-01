@@ -415,23 +415,7 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_get_request_time,		/* Request Time */
 	NULL,						/* Child Terminate */
 
-	NULL, /* php_ini_path_override   */
-	NULL, /* default_post_reader     */
-	NULL, /* treat_data              */
-	NULL, /* executable_location     */
-	0,    /* php_ini_ignore          */
-	0,    /* php_ini_ignore_cwd      */
-	NULL, /* get_fd                  */
-	NULL, /* force_http_10           */
-	NULL, /* get_target_uid          */
-	NULL, /* get_target_gid          */
-	NULL, /* input_filter            */
-	NULL, /* ini_defaults            */
-	0,    /* phpinfo_as_text;        */
-	NULL, /* ini_entries;            */
-	NULL, /* additional_functions    */
-	NULL, /* input_filter_init       */
-	true  /* isolate_symbols         */
+	STANDARD_SAPI_MODULE_PROPERTIES_WITH_FLAGS(SAPI_MODULE_FLAG_ISOLATE_SYMBOLS)
 };
 
 static apr_status_t php_apache_server_shutdown(void *tmp)

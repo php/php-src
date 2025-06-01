@@ -234,6 +234,8 @@ SAPI_API double sapi_get_request_time(void);
 SAPI_API void sapi_terminate_process(void);
 END_EXTERN_C()
 
+#define SAPI_MODULE_FLAG_ISOLATE_SYMBOLS (1<<0)
+
 struct _sapi_module_struct {
 	char *name;
 	char *pretty_name;
@@ -288,7 +290,7 @@ struct _sapi_module_struct {
 	const zend_function_entry *additional_functions;
 	unsigned int (*input_filter_init)(void);
 
-	bool isolate_symbols;
+	unsigned int flags;
 };
 
 struct _sapi_post_entry {
@@ -323,23 +325,25 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter);
 END_EXTERN_C()
 
-#define STANDARD_SAPI_MODULE_PROPERTIES \
-	NULL, /* php_ini_path_override   */ \
-	NULL, /* default_post_reader     */ \
-	NULL, /* treat_data              */ \
-	NULL, /* executable_location     */ \
-	0,    /* php_ini_ignore          */ \
-	0,    /* php_ini_ignore_cwd      */ \
-	NULL, /* get_fd                  */ \
-	NULL, /* force_http_10           */ \
-	NULL, /* get_target_uid          */ \
-	NULL, /* get_target_gid          */ \
-	NULL, /* input_filter            */ \
-	NULL, /* ini_defaults            */ \
-	0,    /* phpinfo_as_text;        */ \
-	NULL, /* ini_entries;            */ \
-	NULL, /* additional_functions    */ \
-	NULL, /* input_filter_init       */ \
-	false /* isolate_symbols         */
+#define STANDARD_SAPI_MODULE_PROPERTIES STANDARD_SAPI_MODULE_PROPERTIES_WITH_FLAGS(0)
+
+#define STANDARD_SAPI_MODULE_PROPERTIES_WITH_FLAGS(_flags) \
+	NULL,    /* php_ini_path_override   */ \
+	NULL,    /* default_post_reader     */ \
+	NULL,    /* treat_data              */ \
+	NULL,    /* executable_location     */ \
+	0,       /* php_ini_ignore          */ \
+	0,       /* php_ini_ignore_cwd      */ \
+	NULL,    /* get_fd                  */ \
+	NULL,    /* force_http_10           */ \
+	NULL,    /* get_target_uid          */ \
+	NULL,    /* get_target_gid          */ \
+	NULL,    /* input_filter            */ \
+	NULL,    /* ini_defaults            */ \
+	0,       /* phpinfo_as_text;        */ \
+	NULL,    /* ini_entries;            */ \
+	NULL,    /* additional_functions    */ \
+	NULL,    /* input_filter_init       */ \
+	(_flags) /* flags                   */
 
 #endif /* SAPI_H */
