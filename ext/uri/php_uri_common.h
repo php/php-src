@@ -40,6 +40,28 @@ typedef enum {
 	URI_COMPONENT_READ_NORMALIZED_UNICODE,
 } uri_component_read_mode_t;
 
+struct uri_internal_t;
+
+typedef zend_result (*uri_read_t)(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
+
+typedef zend_result (*uri_write_t)(struct uri_internal_t *internal_uri, zval *value, zval *errors);
+
+typedef struct uri_property_handler_t {
+	uri_read_t read_func;
+	uri_write_t write_func;
+} uri_property_handler_t;
+
+typedef struct uri_property_handlers_t {
+	uri_property_handler_t scheme;
+	uri_property_handler_t username;
+	uri_property_handler_t password;
+	uri_property_handler_t host;
+	uri_property_handler_t port;
+	uri_property_handler_t path;
+	uri_property_handler_t query;
+	uri_property_handler_t fragment;
+} uri_property_handlers_t;
+
 typedef struct uri_handler_t {
 	const char *name;
 
@@ -49,7 +71,7 @@ typedef struct uri_handler_t {
 	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
 	void (*free_uri)(void *uri);
 
-	HashTable *property_handlers;
+	const uri_property_handlers_t property_handlers;
 } uri_handler_t;
 
 typedef struct uri_internal_t {
@@ -76,28 +98,8 @@ static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 #define URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 
-typedef zend_result (*uri_read_t)(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
-
-typedef zend_result (*uri_write_t)(uri_internal_t *internal_uri, zval *value, zval *errors);
-
-typedef struct uri_property_handler_t {
-	uri_read_t read_func;
-	uri_write_t write_func;
-} uri_property_handler_t;
-
-#define URI_REGISTER_PROPERTY_READ_HANDLER(property_handlers, name, property_read_func) do { \
-	static const uri_property_handler_t handler = {.read_func = property_read_func, .write_func = NULL}; \
-	uri_register_property_handler(property_handlers, name, &handler); \
-} while (0)
-
-#define URI_REGISTER_PROPERTY_READ_WRITE_HANDLER(property_handlers, name, property_read_func, property_write_func) do { \
-	static const uri_property_handler_t handler = {.read_func = property_read_func, .write_func = property_write_func}; \
-	uri_register_property_handler(property_handlers, name, &handler); \
-} while (0)
-
-void uri_register_property_handler(HashTable *property_handlers, zend_string *name, const uri_property_handler_t *handler);
 zend_result uri_handler_register(const uri_handler_t *uri_handler);
-uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name);
+const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name);
 void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors);
 void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name, uri_component_read_mode_t component_read_mode);
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name);

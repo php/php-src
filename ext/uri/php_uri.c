@@ -59,9 +59,6 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	ZEND_ASSERT(internal_uri != NULL);
 
-	zend_string *string_key;
-	uri_property_handler_t *property_handler;
-
 	HashTable *std_properties = zend_std_get_properties(object);
 	HashTable *result = zend_array_dup(std_properties);
 
@@ -69,18 +66,40 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 		return result;
 	}
 
-	const HashTable *property_handlers = internal_uri->handler->property_handlers;
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(property_handlers, string_key, property_handler) {
-		zval value;
+	const uri_property_handlers_t property_handlers = internal_uri->handler->property_handlers;
 
-		ZEND_ASSERT(string_key != NULL);
+	zval tmp;
+	if (property_handlers.scheme.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_SCHEME), &tmp);
+	}
 
-		if (property_handler->read_func(internal_uri, URI_COMPONENT_READ_RAW, &value) == FAILURE) {
-			continue;
-		}
+	if (property_handlers.username.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_USERNAME), &tmp);
+	}
 
-		zend_hash_update(result, string_key, &value);
-	} ZEND_HASH_FOREACH_END();
+	if (property_handlers.password.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PASSWORD), &tmp);
+	}
+
+	if (property_handlers.host.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
+	}
+
+	if (property_handlers.port.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
+	}
+
+	if (property_handlers.path.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PATH), &tmp);
+	}
+
+	if (property_handlers.query.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_QUERY), &tmp);
+	}
+
+	if (property_handlers.fragment.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_FRAGMENT), &tmp);
+	}
 
 	return result;
 }
@@ -173,17 +192,13 @@ static zend_result pass_errors_by_ref(zval *errors_zv, zval *errors)
 		return SUCCESS;
 	}
 
-	if (errors_zv != NULL) {
-		errors_zv = zend_try_array_init(errors_zv);
-		if (!errors_zv) {
-			return FAILURE;
-		}
+	if (errors_zv == NULL) {
+		return SUCCESS;
+	}
 
-		zval *error;
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(errors), error) {
-			Z_ADDREF_P(error);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(errors_zv), error);
-		} ZEND_HASH_FOREACH_END();
+	ZEND_TRY_ASSIGN_REF_ARR(errors_zv, Z_ARRVAL_P(errors));
+	if (EG(exception)) {
+		return FAILURE;
 	}
 
 	return SUCCESS;
@@ -210,14 +225,16 @@ PHPAPI void php_uri_instantiate_uri(
 			zval_ptr_dtor(&errors);
 			RETURN_THROWS();
 		} else {
-			pass_errors_by_ref(errors_zv, &errors);
-			zval_ptr_dtor(&errors);
+			if (pass_errors_by_ref(errors_zv, &errors) == FAILURE) {
+				RETURN_THROWS();
+			}
 			RETURN_NULL();
 		}
 	}
 
-	pass_errors_by_ref(errors_zv, &errors);
-	zval_ptr_dtor(&errors);
+	if (pass_errors_by_ref(errors_zv, &errors) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	uri_object_t *uri_object;
 	if (should_update_this_object) {
@@ -362,8 +379,8 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_na
 		RETURN_THROWS();
 	}
 
-	object_properties_load(object, Z_ARRVAL_P(arr));
-	if (EG(exception)) {
+	/* Verify that there is no regular property in the second array, because the URI classes have no properties and they are final. */
+	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) > 0) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
 		RETURN_THROWS();
 	}
@@ -624,11 +641,10 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler)
 	ZEND_ASSERT(uri_handler->clone_uri != NULL);
 	ZEND_ASSERT(uri_handler->uri_to_string != NULL);
 	ZEND_ASSERT(uri_handler->free_uri != NULL);
-	ZEND_ASSERT(uri_handler->property_handlers != NULL);
 
 	zend_result result = zend_hash_add_ptr(&uri_handlers, key, (void *) uri_handler) != NULL ? SUCCESS : FAILURE;
 
-	zend_string_release(key);
+	zend_string_release_ex(key, true);
 
 	return result;
 }
@@ -651,8 +667,6 @@ static PHP_MINIT_FUNCTION(uri)
 		return FAILURE;
 	}
 
-	lexbor_module_init();
-
 	return SUCCESS;
 }
 
@@ -666,8 +680,6 @@ static PHP_MINFO_FUNCTION(uri)
 
 static PHP_MSHUTDOWN_FUNCTION(uri)
 {
-	lexbor_module_shutdown();
-
 	zend_hash_destroy(&uri_handlers);
 
 	return SUCCESS;
