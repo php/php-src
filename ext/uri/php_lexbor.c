@@ -50,6 +50,7 @@ const uri_handler_t lexbor_uri_handler = {
 	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) { \
 		lexbor_str_init_append(&str, lexbor_parser->mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value)); \
 	} else { \
+		ZEND_ASSERT(Z_ISNULL_P(value) || (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) == 0)); \
 		lexbor_str_init(&str, lexbor_parser->mraw, 0); \
 	} \
 } while (0)
@@ -58,7 +59,9 @@ const uri_handler_t lexbor_uri_handler = {
 	if (Z_TYPE_P(value) == IS_LONG) { \
 		ZVAL_STR(value, zend_long_to_str(Z_LVAL_P(value))); \
 		lexbor_str_init_append(&str, lexbor_parser->mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value)); \
+		zval_ptr_dtor(value); \
 	} else { \
+		ZEND_ASSERT(Z_ISNULL_P(value)); \
 		lexbor_str_init(&str, lexbor_parser->mraw, 0); \
 	} \
 } while (0)
