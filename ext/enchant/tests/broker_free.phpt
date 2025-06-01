@@ -4,10 +4,6 @@ enchant_broker_free() function
 marcosptf - <marcosptf@yahoo.com.br>
 --EXTENSIONS--
 enchant
---SKIPIF--
-<?php
-if (!is_object(enchant_broker_init())) {die("skip, resource dont load\n");}
-?>
 --FILE--
 <?php
 $broker = enchant_broker_init();
