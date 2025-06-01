@@ -42,8 +42,8 @@ PHP 8.5 UPGRADE NOTES
     have run and the output handlers have been cleaned up.
     This is a consequence of fixing GH-18033.
   . Traits are now bound before the parent class. This is a subtle behavioral
-    change, but should closer match user expectations, demonstrated by GH-15753
-    and GH-16198.
+    change, but should more closely match user expectations, demonstrated by
+    GH-15753 and GH-16198.
 
 - FileInfo:
   . finfo_file() and finfo::file() now throws a ValueError instead of a
@@ -91,7 +91,7 @@ PHP 8.5 UPGRADE NOTES
     argument when fetching into an object, will now throw an Error.
   . The value of the constants PDO::FETCH_GROUP, PDO::FETCH_UNIQUE,
     PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, and PDO::FETCH_SERIALIZE
-    has changed.
+    have changed.
   . A ValueError is now thrown if PDO::FETCH_PROPS_LATE is used with a fetch
     mode different than PDO::FETCH_CLASS, consistent with other fetch flags.
   . A ValueError is now thrown if PDO::FETCH_INTO is used as a fetch mode in
@@ -158,7 +158,7 @@ PHP 8.5 UPGRADE NOTES
     CURLINFO_USED_PROXY gets zero set if no proxy was used in the
     previous transfer or a non-zero value if a proxy was used.
     CURLINFO_HTTPAUTH_USED and CURLINFO_PROXYAUTH_USED get bitmasks
-    indicating the http and proxy authentication methods that were
+    indicating the HTTP and proxy authentication methods that were
     used in the previous request. See CURLAUTH_* constants for
     possible values.
   . Added CURLOPT_INFILESIZE_LARGE Curl option, which is a safe
@@ -168,10 +168,10 @@ PHP 8.5 UPGRADE NOTES
     accepts the largest integer value the system can handle.
   . Added CURLFOLLOW_OBEYCODE, CURLFOLLOW_FIRSTONLY and CURLFOLLOW_ALL values for
     CURLOPT_FOLLOWLOCATION curl_easy_setopt option.
-    CURLFOLLOW_OBEYCODE to follow more strictly in regard of redirect
+    CURLFOLLOW_OBEYCODE to follow more strictly in regard to redirect
     if they are allowed. CURLFOLLOW_FIRSTONLY to follow only the
-    first redirect thus if there any follow up redirect, it won't go
-    any further. CURLFOLLOW_ALL is equivalent to set CURLOPT_FOLLOWLOCATION
+    first redirect thus if there is any follow up redirect, it won't go
+    any further. CURLFOLLOW_ALL is equivalent to setting CURLOPT_FOLLOWLOCATION
     to true.
 
 - DOM:
@@ -187,7 +187,7 @@ PHP 8.5 UPGRADE NOTES
     number formats.
   . Added Locale::addLikelySubtags and Locale::minimizeSubtags to
     handle likely tags on a given locale.
-  . Added IntlListFormatter class to format, order, punctuates
+  . Added IntlListFormatter class to format, order, and punctuate
     a list of items with a given locale, IntlListFormatter::TYPE_AND,
     IntlListFormatter::TYPE_OR, IntlListFormatter::TYPE_UNITS operands and
     IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT and
@@ -247,7 +247,7 @@ PHP 8.5 UPGRADE NOTES
     was actually never possible.
 
 - LDAP:
-  . ldap_get_option() now accept a NULL connection, as ldap_set_option(),
+  . ldap_get_option() now accepts a NULL connection, as ldap_set_option(),
     to allow retrieval of global options.
 
 - libxml:
@@ -260,7 +260,7 @@ PHP 8.5 UPGRADE NOTES
   . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
   . Pdo\Pgsql::setAttribute and Pdo\Pgsql::prepare supports
     PDO::ATTR_PREFETCH sets to 0 which set to lazy fetch mode.
-    In this mode, statements cannot be run parallely.
+    In this mode, statements cannot be run in parallel.
 
 - PDO_SQLITE:
   . SQLite PDO::quote() will now throw an exception or emit a warning,
@@ -287,7 +287,7 @@ PHP 8.5 UPGRADE NOTES
     are enum cases rather than normal class constants.
 
 - Session:
-  . session_start is stricter in regard of the option argument.
+  . session_start is stricter in regard to the option argument.
     It throws a ValueError if the whole is not a hashmap or
     a TypeError if read_on_close value is not a valid type
     compatible with int.
@@ -304,7 +304,7 @@ PHP 8.5 UPGRADE NOTES
     ValueError if the port is lower than 0 or greater than 65535,
     also if any of the hints array entry is indexes numerically.
   . socket_addrinfo_lookup throws a TypeError if any of the hints
-    values cannot be cast to a int and can throw a ValueError if
+    values cannot be cast to int and can throw a ValueError if
     any of these values overflow.
   . socket_set_option with MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
     options will throw an exception if the value isn't a valid object
