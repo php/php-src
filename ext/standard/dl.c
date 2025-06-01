@@ -22,7 +22,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#include "main/SAPI.h"
+#include "SAPI.h"
 
 #ifdef HAVE_LIBDL
 #include <stdlib.h>
