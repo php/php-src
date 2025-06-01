@@ -1833,6 +1833,7 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 #define RESUMED_AFTER_SUSPENSION (fiber != NULL && GC_G(dtor_fiber) != fiber) \
 	|| (in_coroutine && GC_G(dtor_coroutine) != ZEND_ASYNC_CURRENT_COROUTINE)
 #else
+	const bool in_coroutine = false;
 #define RESUMED_AFTER_SUSPENSION fiber != NULL && GC_G(dtor_fiber) != fiber
 #endif
 
