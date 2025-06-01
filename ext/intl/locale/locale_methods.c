@@ -1488,6 +1488,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 		zend_string_release_ex(can_loc_range, 0);
 	}
 	if(result == 0) {
+		efree(cur_loc_range);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
 		LOOKUP_CLEAN_RETURN(NULL);
 	}
