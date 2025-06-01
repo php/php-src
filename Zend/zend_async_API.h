@@ -944,8 +944,8 @@ ZEND_API extern zend_async_exec_t zend_async_exec_fn;
 ZEND_API bool zend_async_thread_pool_is_enabled(void);
 ZEND_API extern zend_async_queue_task_t zend_async_queue_task_fn;
 
-ZEND_API void zend_async_scheduler_register(
-	zend_string *module,
+ZEND_API bool zend_async_scheduler_register(
+	char *module,
 	bool allow_override,
 	zend_async_new_coroutine_t new_coroutine_fn,
 	zend_async_new_scope_t new_scope_fn,
@@ -962,8 +962,8 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_get_class_ce_t get_class_ce_fn
 );
 
-ZEND_API void zend_async_reactor_register(
-	zend_string *module,
+ZEND_API bool zend_async_reactor_register(
+	char *module,
 	bool allow_override,
 	zend_async_reactor_startup_t reactor_startup_fn,
 	zend_async_reactor_shutdown_t reactor_shutdown_fn,

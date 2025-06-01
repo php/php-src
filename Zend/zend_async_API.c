@@ -60,7 +60,8 @@ static zend_class_entry * get_class_ce(zend_async_class type)
 	return NULL;
 }
 
-static zend_string * scheduler_module_name = NULL;
+static zend_atomic_bool scheduler_lock = {0};
+static char * scheduler_module_name = NULL;
 zend_async_spawn_t zend_async_spawn_fn = spawn;
 zend_async_new_coroutine_t zend_async_new_coroutine_fn = NULL;
 zend_async_new_scope_t zend_async_new_scope_fn = NULL;
@@ -74,7 +75,8 @@ zend_async_add_microtask_t zend_async_add_microtask_fn = NULL;
 zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = NULL;
 zend_async_get_class_ce_t zend_async_get_class_ce_fn = get_class_ce;
 
-static zend_string * reactor_module_name = NULL;
+static zend_atomic_bool reactor_lock = {0};
+static char * reactor_module_name = NULL;
 zend_async_reactor_startup_t zend_async_reactor_startup_fn = NULL;
 zend_async_reactor_shutdown_t zend_async_reactor_shutdown_fn = NULL;
 zend_async_reactor_execute_t zend_async_reactor_execute_fn = NULL;
@@ -173,8 +175,8 @@ ZEND_API int zend_async_get_api_version_number(void)
 	return ZEND_ASYNC_API_VERSION_NUMBER;
 }
 
-ZEND_API void zend_async_scheduler_register(
-	zend_string *module,
+ZEND_API bool zend_async_scheduler_register(
+	char *module,
 	bool allow_override,
 	zend_async_new_coroutine_t new_coroutine_fn,
 	zend_async_new_scope_t new_scope_fn,
@@ -191,19 +193,24 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_get_class_ce_t get_class_ce_fn
 )
 {
+	if (zend_atomic_bool_exchange(&scheduler_lock, 1)) {
+		return false;
+	}
+
+	if (scheduler_module_name == module) {
+		return true;
+	}
+
 	if (scheduler_module_name != NULL && false == allow_override) {
+		zend_atomic_bool_store(&scheduler_lock, 0);
 		zend_error(
 			E_CORE_ERROR, "The module %s is trying to override Scheduler, which was registered by the module %s.",
-			ZSTR_VAL(module), ZSTR_VAL(scheduler_module_name)
+			module, scheduler_module_name
 		);
-		return;
+		return false;
 	}
 
-	if (scheduler_module_name != NULL) {
-		zend_string_release(scheduler_module_name);
-	}
-
-	scheduler_module_name = zend_string_copy(module);
+	scheduler_module_name = module;
 
 	zend_async_new_coroutine_fn = new_coroutine_fn;
 	zend_async_new_scope_fn = new_scope_fn;
@@ -218,10 +225,14 @@ ZEND_API void zend_async_scheduler_register(
     zend_async_add_microtask_fn = add_microtask_fn;
 	zend_async_get_awaiting_info_fn = get_awaiting_info_fn;
 	zend_async_get_class_ce_fn = get_class_ce_fn;
+
+	zend_atomic_bool_store(&scheduler_lock, 0);
+
+	return true;
 }
 
-ZEND_API void zend_async_reactor_register(
-	zend_string *module,
+ZEND_API bool zend_async_reactor_register(
+	char *module,
 	bool allow_override,
 	zend_async_reactor_startup_t reactor_startup_fn,
 	zend_async_reactor_shutdown_t reactor_shutdown_fn,
@@ -240,19 +251,23 @@ ZEND_API void zend_async_reactor_register(
     zend_async_exec_t exec_fn
 )
 {
+	if (zend_atomic_bool_exchange(&reactor_lock, 1)) {
+		return false;
+	}
+
+	if (reactor_module_name == module) {
+		return true;
+	}
+
 	if (reactor_module_name != NULL && false == allow_override) {
 		zend_error(
 			E_CORE_ERROR, "The module %s is trying to override Reactor, which was registered by the module %s.",
-			ZSTR_VAL(module), ZSTR_VAL(reactor_module_name)
+			module, reactor_module_name
 		);
-		return;
+		return false;
 	}
 
-	if (reactor_module_name != NULL) {
-		zend_string_release(reactor_module_name);
-	}
-
-	reactor_module_name = zend_string_copy(module);
+	reactor_module_name = module;
 
 	zend_async_reactor_startup_fn = reactor_startup_fn;
 	zend_async_reactor_shutdown_fn = reactor_shutdown_fn;
@@ -273,6 +288,10 @@ ZEND_API void zend_async_reactor_register(
 
 	zend_async_new_exec_event_fn = new_exec_event_fn;
 	zend_async_exec_fn = exec_fn;
+
+	zend_atomic_bool_store(&reactor_lock, 0);
+
+	return true;
 }
 
 ZEND_API void zend_async_thread_pool_register(zend_string *module, bool allow_override, zend_async_queue_task_t queue_task_fn)
