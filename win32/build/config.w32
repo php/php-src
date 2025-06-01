@@ -422,3 +422,10 @@ toolset_setup_intrinsic_cflags();
 ARG_ENABLE('snapshot-build', 'Build a snapshot: turns on everything it can and ignores build errors', 'no');
 
 ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');
+
+ARG_ENABLE("experimental-async-api", "Enable experimental async API support", "no");
+
+if (PHP_EXPERIMENTAL_ASYNC_API == "yes") {
+    AC_DEFINE('PHP_ASYNC_API', 1, 'Enable experimental async API support');
+    ADD_SOURCES("Zend", "zend_async_API.c");
+}
