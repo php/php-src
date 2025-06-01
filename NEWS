@@ -71,6 +71,7 @@ PHP                                                                        NEWS
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
   . Added enchant_dict_remove(). (nielsdos)
+  . Fix missing empty string checks. (nielsdos)
 
 - EXIF:
   . Add OffsetTime* Exif tags. (acc987)
