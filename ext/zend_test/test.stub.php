@@ -17,6 +17,12 @@ namespace {
     /** @var string */
     const ZEND_CONSTANT_A = "global";
 
+    /**
+     * @var int
+     */
+    #[\Deprecated(message: "use something else", since: "version 1.5")]
+    const ZEND_TEST_ATTRIBUTED_CONSTANT = 42;
+
     interface _ZendTestInterface
     {
         /** @var int */
