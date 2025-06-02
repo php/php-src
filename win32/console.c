@@ -12,105 +12,98 @@
    +----------------------------------------------------------------------+
    | Author: Michele Locati <mlocati@gmail.com>                           |
    +----------------------------------------------------------------------+
- */
+*/
 
 #include "php.h"
 #include "SAPI.h"
 #include "win32/console.h"
 
-
 PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno)
-{/*{{{*/
-	BOOL result = FALSE;
-	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
+{
+    HANDLE handle = (HANDLE)_get_osfhandle(fileno);
+    
+    if (handle == INVALID_HANDLE_VALUE) {
+        return FALSE;
+    }
 
-	if (handle != INVALID_HANDLE_VALUE) {
-		DWORD mode;
-		if (GetConsoleMode(handle, &mode)) {
-			result = TRUE;
-		}
-	}
-	return result;
-}/*}}}*/
+    DWORD mode;
+    return GetConsoleMode(handle, &mode);
+}
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
-{/*{{{*/
-	BOOL result = FALSE;
-	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
+{
+    HANDLE handle = (HANDLE)_get_osfhandle(fileno);
+    
+    if (handle == INVALID_HANDLE_VALUE) {
+        return FALSE;
+    }
 
-	if (handle != INVALID_HANDLE_VALUE) {
-		DWORD events;
+    // Skip STDIN check for non-input handles
+    if (fileno != 0) {
+        DWORD mode;
+        if (GetConsoleMode(handle, &mode)) {
+            return (mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0;
+        }
+    }
 
-		if (fileno != 0 && !GetNumberOfConsoleInputEvents(handle, &events)) {
-			// Not STDIN
-			DWORD mode;
-
-			if (GetConsoleMode(handle, &mode)) {
-				if (mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) {
-					result = TRUE;
-				}
-			}
-		}
-	}
-	return result;
-}/*}}}*/
+    return FALSE;
+}
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL enable)
-{/*{{{*/
-	BOOL result = FALSE;
-	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
+{
+    HANDLE handle = (HANDLE)_get_osfhandle(fileno);
+    
+    if (handle == INVALID_HANDLE_VALUE) {
+        return FALSE;
+    }
 
-	if (handle != INVALID_HANDLE_VALUE) {
-		DWORD events;
+    // Skip STDIN check for non-input handles
+    if (fileno != 0) {
+        DWORD mode;
+        if (!GetConsoleMode(handle, &mode)) {
+            return FALSE;
+        }
 
-		if (fileno != 0 && !GetNumberOfConsoleInputEvents(handle, &events)) {
-			// Not STDIN
-			DWORD mode;
+        const DWORD newMode = enable 
+            ? (mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+            : (mode & ~ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 
-			if (GetConsoleMode(handle, &mode)) {
-				DWORD newMode;
+        if (newMode == mode) {
+            return TRUE;
+        }
 
-				if (enable) {
-					newMode = mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-				}
-				else {
-					newMode = mode & ~ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-				}
-				if (newMode == mode) {
-					result = TRUE;
-				}
-				else {
-					if (SetConsoleMode(handle, newMode)) {
-						result = TRUE;
-					}
-				}
-			}
-		}
-	}
-	return result;
-}/*}}}*/
+        return SetConsoleMode(handle, newMode);
+    }
+
+    return FALSE;
+}
 
 PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
-{/*{{{*/
-	if (!IsDebuggerPresent()) {
-		CONSOLE_SCREEN_BUFFER_INFO csbi;
-		DWORD pl[1];
-		BOOL ret0 = FALSE, ret1 = FALSE;
+{
+    if (IsDebuggerPresent()) {
+        return FALSE;
+    }
 
-		if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
-			ret0 = !csbi.dwCursorPosition.X && !csbi.dwCursorPosition.Y;
-		}
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    const HANDLE stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    
+    // Check cursor position
+    BOOL atOrigin = FALSE;
+    if (GetConsoleScreenBufferInfo(stdoutHandle, &csbi)) {
+        atOrigin = (csbi.dwCursorPosition.X == 0 && csbi.dwCursorPosition.Y == 0);
+    }
 
-		ret1 = GetConsoleProcessList(pl, 1) == 1;
+    // Check process count
+    DWORD processList[1];
+    const DWORD processCount = GetConsoleProcessList(processList, 1);
 
-		return ret0 && ret1;
-	}
-
-	return FALSE;
-}/*}}}*/
+    return atOrigin && (processCount == 1);
+}
 
 PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void)
-{/*{{{*/
-	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
-}/*}}}*/
-
+{
+    static const char CLI_SAPI_NAME[] = "cli";
+    static const size_t CLI_SAPI_NAME_LEN = sizeof(CLI_SAPI_NAME) - 1;
+    
+    return strncasecmp(sapi_module.name, CLI_SAPI_NAME, CLI_SAPI_NAME_LEN) == 0;
+}
