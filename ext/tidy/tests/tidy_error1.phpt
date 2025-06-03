@@ -7,12 +7,24 @@ tidy
 --FILE--
 <?php
 $buffer = '<html></html>';
-$config = array('bogus' => 'willnotwork');
+$config = ['bogus' => 'willnotwork'];
 
 $tidy = new tidy();
-var_dump($tidy->parseString($buffer, $config));
+
+try {
+	$tidy->parseString($buffer, $config);
+} catch (\Error $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+
+$config = ['neither'];
+try {
+	$tidy->parseString($buffer, $config);
+} catch (\Error $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Warning: tidy::parseString(): Unknown Tidy configuration option "bogus" in %s on line %d
-bool(true)
+tidy::parseString(): Argument #2 ($config) Unknown Tidy configuration option "bogus"
+tidy::parseString(): Argument #2 ($config) must be of type array with keys as string
