@@ -244,6 +244,10 @@ PHP                                                                        NEWS
 - Tests:
   . Allow to shuffle tests even in non-parallell mode. (dhuang00)
 
+- Tidy:
+  . tidy::__construct/parseFile/parseString methods throw an exception if
+    the configuration argument is invalid. (David Carlier)
+
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
     nielsdos)
