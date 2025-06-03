@@ -67,13 +67,19 @@ static void lexbor_cleanup_parser(void)
 
 /**
  * Creates a Uri\WhatWg\UrlValidationError class by mapping error codes listed in
- * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum
+ * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum.
+ * The result is passed by reference to the errors parameter.
+ *
+ * When errors is NULL, the caller is not interested in the additional error information,
+ * so the function does nothing.
  */
 static void fill_errors(zval *errors)
 {
 	if (errors == NULL) {
 		return;
 	}
+
+	ZEND_ASSERT(Z_ISUNDEF_P(errors));
 
 	array_init(errors);
 
@@ -550,6 +556,8 @@ static void *lexbor_parse_uri(const zend_string *uri_str, const void *base_url, 
 
 static void lexbor_create_invalid_uri_exception(zval *exception_zv, zval *errors)
 {
+	ZEND_ASSERT(Z_TYPE_P(errors) == IS_ARRAY && "Lexbor always returns an array of errors when URI parsing fails");
+
 	object_init_ex(exception_zv, uri_whatwg_invalid_url_exception_ce);
 
 	zval value;
