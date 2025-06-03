@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
   . Fix memory leak in locale lookup on failure. (nielsdos)
 
+- OpenSSL:
+  . Fix memory leak of X509_STORE in php_openssl_setup_verify() on failure.
+    (nielsdos)
+
 - Phar:
   . Add missing filter cleanups on phar failure. (nielsdos)
   . Fixed bug GH-18642 (Signed integer overflow in ext/phar fseek). (nielsdos)
