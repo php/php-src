@@ -25,6 +25,10 @@
 #include "ext/date/php_date.h"
 #include "zend_smart_str.h"
 
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
 #ifdef HAVE_SYSEXITS_H
 # include <sysexits.h>
 #endif
@@ -562,6 +566,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	}
 
 	if (sendmail) {
+		int ret;
 #ifndef PHP_WIN32
 		if (EACCES == errno) {
 			php_error_docref(NULL, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
@@ -582,24 +587,41 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 			fprintf(sendmail, "%s%s", hdr, line_sep);
 		}
 		fprintf(sendmail, "%s%s%s", line_sep, message, line_sep);
-		int ret = pclose(sendmail);
+#ifdef PHP_WIN32
+		ret = pclose(sendmail);
 
 #if PHP_SIGCHILD
 		if (sig_handler) {
 			signal(SIGCHLD, sig_handler);
 		}
 #endif
-
-#ifdef PHP_WIN32
-		if (ret == -1)
 #else
+		int wstatus = pclose(sendmail);
+#if PHP_SIGCHILD
+		if (sig_handler) {
+			signal(SIGCHLD, sig_handler);
+		}
+#endif
+		/* Determine the wait(2) exit status */
+		if (wstatus == -1) {
+			MAIL_RET(false);
+		} else if (WIFSIGNALED(wstatus)) {
+			MAIL_RET(false);
+		} else {
+			if (WIFEXITED(wstatus)) {
+				ret = WEXITSTATUS(wstatus);
+			} else {
+				MAIL_RET(false);
+			}
+		}
+#endif
+
 #if defined(EX_TEMPFAIL)
 		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL))
 #elif defined(EX_OK)
 		if (ret != EX_OK)
 #else
 		if (ret != 0)
-#endif
 #endif
 		{
 			MAIL_RET(false);
