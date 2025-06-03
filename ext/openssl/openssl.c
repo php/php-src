@@ -2443,6 +2443,7 @@ static X509_STORE *php_openssl_setup_verify(zval *calist, uint32_t arg_num)
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(calist), item) {
 			zend_string *str = zval_try_get_string(item);
 			if (UNEXPECTED(!str)) {
+				X509_STORE_free(store);
 				return NULL;
 			}
 
