@@ -177,10 +177,7 @@ zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 }
 /* }}} */
 
-/* {{{ classList	TokenList
-URL: https://dom.spec.whatwg.org/#dom-element-classlist
-*/
-zend_result dom_element_class_list_read(dom_object *obj, zval *retval)
+zval *dom_element_class_list_zval(dom_object *obj)
 {
 	const uint32_t PROP_INDEX = 0;
 
@@ -191,7 +188,15 @@ zend_result dom_element_class_list_read(dom_object *obj, zval *retval)
 	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
 #endif
 
-	zval *cached_token_list = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	return OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+}
+
+/* {{{ classList	TokenList
+URL: https://dom.spec.whatwg.org/#dom-element-classlist
+*/
+zend_result dom_element_class_list_read(dom_object *obj, zval *retval)
+{
+	zval *cached_token_list = dom_element_class_list_zval(obj);
 	if (Z_ISUNDEF_P(cached_token_list)) {
 		object_init_ex(cached_token_list, dom_token_list_class_entry);
 		dom_token_list_object *intern = php_dom_token_list_from_obj(Z_OBJ_P(cached_token_list));

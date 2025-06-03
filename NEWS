@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - Date:
   . Fix leaks with multiple calls to DatePeriod iterator current(). (nielsdos)
 
+- DOM:
+  . Fixed bug GH-18744 (classList works not correctly if copy HTMLElement by
+    clone keyword). (nielsdos)
+
 - FPM:
   . Fixed GH-18662 (fpm_get_status segfault). (txuna)
 
