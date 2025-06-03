@@ -17,6 +17,8 @@ $subject = 'Test Subject';
 $message = 'A Message';
 var_dump(mail($to, $subject, $message));
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mail() : variation ***
+
+Warning: mail(): Sendmail killed by signal %d (%s) in %smail_variation4.php on line %d
 bool(false)
