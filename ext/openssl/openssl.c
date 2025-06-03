@@ -651,10 +651,6 @@ cleanup:
 	if (spki != NULL) {
 		NETSCAPE_SPKI_free(spki);
 	}
-
-	if (s && ZSTR_LEN(s) <= 0) {
-		RETVAL_FALSE;
-	}
 }
 /* }}} */
 
