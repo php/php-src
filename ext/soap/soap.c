@@ -3980,8 +3980,10 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, 
 	}
 	xmlParam = master_to_xml(enc, val, style, parent);
 	zval_ptr_dtor(&defval);
-	if (!strcmp((char*)xmlParam->name, "BOGUS")) {
-		xmlNodeSetName(xmlParam, BAD_CAST(paramName));
+	if (xmlParam != NULL) { 
+		if (xmlParam->name == NULL || strcmp((char*)xmlParam->name, "BOGUS") == 0) {
+			xmlNodeSetName(xmlParam, BAD_CAST(paramName));
+		}
 	}
 	return xmlParam;
 }
