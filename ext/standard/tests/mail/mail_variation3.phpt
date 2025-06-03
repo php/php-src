@@ -1,7 +1,7 @@
 --TEST--
-Test mail() function : variation invalid program for sendmail
+Test mail() function : variation sendmail temp fail
 --INI--
-sendmail_path=rubbish 2>/dev/null
+sendmail_path=exit 75
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
@@ -17,8 +17,6 @@ $subject = 'Test Subject';
 $message = 'A Message';
 var_dump( mail($to, $subject, $message) );
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mail() : variation ***
-
-Warning: mail(): Sendmail exited with non-zero exit code 127 in %smail_variation1.php on line %d
-bool(false)
+bool(true)

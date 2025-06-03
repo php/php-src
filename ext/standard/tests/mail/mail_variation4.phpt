@@ -1,7 +1,7 @@
 --TEST--
-Test mail() function : variation invalid program for sendmail
+Test mail() function : variation sigkill
 --INI--
-sendmail_path=rubbish 2>/dev/null
+sendmail_path="kill \$\$"
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
@@ -20,5 +20,5 @@ var_dump( mail($to, $subject, $message) );
 --EXPECTF--
 *** Testing mail() : variation ***
 
-Warning: mail(): Sendmail exited with non-zero exit code 127 in %smail_variation1.php on line %d
+Warning: mail(): Sendmail killed by signal 15 (Terminated) in %smail_variation4.php on line %d
 bool(false)
