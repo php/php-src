@@ -46,6 +46,17 @@ typedef zend_result (*uri_read_t)(const struct uri_internal_t *internal_uri, uri
 
 typedef zend_result (*uri_write_t)(struct uri_internal_t *internal_uri, zval *value, zval *errors);
 
+typedef enum {
+	URI_PROPERTY_NAME_SCHEME,
+	URI_PROPERTY_NAME_USERNAME,
+	URI_PROPERTY_NAME_PASSWORD,
+	URI_PROPERTY_NAME_HOST,
+	URI_PROPERTY_NAME_PORT,
+	URI_PROPERTY_NAME_PATH,
+	URI_PROPERTY_NAME_QUERY,
+	URI_PROPERTY_NAME_FRAGMENT,
+} uri_property_name_t;
+
 typedef struct uri_property_handler_t {
 	uri_read_t read_func;
 	uri_write_t write_func;
@@ -65,7 +76,25 @@ typedef struct uri_property_handlers_t {
 typedef struct uri_handler_t {
 	const char *name;
 
+	/**
+	 * Parse a URI string into a URI.
+	 *
+	 * If the URI string is valid, a URI is returned. In case of failure, NULL is
+	 * returned.
+	 *
+	 * The errors by-ref parameter can contain errors that occurred during parsing.
+	 * If the input value is NULL, or there were no errors, errors should not be changed.
+	 *
+	 * If the URI string is valid and the base_url URI is not NULL, the URI object
+	 * is resolved against the base_url.
+	 */
 	void *(*parse_uri)(const zend_string *uri_str, const void *base_url, zval *errors);
+	/**
+	 * Create a Uri\InvalidUriException instance based on the errors parameter.
+	 * The errors parameter is either an array or an UNDEF zval.
+	 *
+	 * The exception object is passed by ref to the exception_zv parameter.
+	 */
 	void (*create_invalid_uri_exception)(zval *exception_zv, zval *errors);
 	void *(*clone_uri)(void *uri);
 	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
@@ -99,12 +128,12 @@ static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 
 zend_result uri_handler_register(const uri_handler_t *uri_handler);
-const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name);
+const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, uri_property_name_t property_name);
 void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors);
-void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name, uri_component_read_mode_t component_read_mode);
-void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name);
-void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name);
-void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name);
+void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, uri_component_read_mode_t component_read_mode);
+void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
+void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
+void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
 
 #define URI_ASSERT_INITIALIZATION(internal_uri) do { \
 	ZEND_ASSERT(internal_uri != NULL && internal_uri->uri != NULL); \

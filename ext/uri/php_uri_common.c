@@ -19,29 +19,48 @@
 #include "Zend/zend_exceptions.h"
 #include "php_uri_common.h"
 
-const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, zend_string *name)
+const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, uri_property_name_t property_name)
 {
-	switch (ZSTR_VAL(name)[0]) {
-		case 's': /* scheme */
+	switch (property_name) {
+		case URI_PROPERTY_NAME_SCHEME:
 			return &internal_uri->handler->property_handlers.scheme;
-		case 'u': /* username */
+		case URI_PROPERTY_NAME_USERNAME:
 			return &internal_uri->handler->property_handlers.username;
-		case 'p': /* password, port, path */
-			if (name == ZSTR_KNOWN(ZEND_STR_PASSWORD)) {
-				return &internal_uri->handler->property_handlers.password;
-			} else if (name == ZSTR_KNOWN(ZEND_STR_PORT)) {
-				return &internal_uri->handler->property_handlers.port;
-			} else if (name == ZSTR_KNOWN(ZEND_STR_PATH)) {
-				return &internal_uri->handler->property_handlers.path;
-			} else {
-				ZEND_UNREACHABLE();
-			}
-		case 'h': /* host */
+		case URI_PROPERTY_NAME_PASSWORD:
+			return &internal_uri->handler->property_handlers.password;
+		case URI_PROPERTY_NAME_HOST:
 			return &internal_uri->handler->property_handlers.host;
-		case 'q': /* query */
+		case URI_PROPERTY_NAME_PORT:
+			return &internal_uri->handler->property_handlers.port;
+		case URI_PROPERTY_NAME_PATH:
+			return &internal_uri->handler->property_handlers.path;
+		case URI_PROPERTY_NAME_QUERY:
 			return &internal_uri->handler->property_handlers.query;
-		case 'f': /* fragment */
+		case URI_PROPERTY_NAME_FRAGMENT:
 			return &internal_uri->handler->property_handlers.fragment;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+static zend_string *get_known_string_by_property_name(uri_property_name_t property_name)
+{
+	switch (property_name) {
+		case URI_PROPERTY_NAME_SCHEME:
+			return ZSTR_KNOWN(ZEND_STR_SCHEME);
+		case URI_PROPERTY_NAME_USERNAME:
+			return ZSTR_KNOWN(ZEND_STR_USERNAME);
+		case URI_PROPERTY_NAME_PASSWORD:
+			return ZSTR_KNOWN(ZEND_STR_PASSWORD);
+		case URI_PROPERTY_NAME_HOST:
+			return ZSTR_KNOWN(ZEND_STR_HOST);
+		case URI_PROPERTY_NAME_PORT:
+			return ZSTR_KNOWN(ZEND_STR_PORT);
+		case URI_PROPERTY_NAME_PATH:
+			return ZSTR_KNOWN(ZEND_STR_PATH);
+		case URI_PROPERTY_NAME_QUERY:
+			return ZSTR_KNOWN(ZEND_STR_QUERY);
+		case URI_PROPERTY_NAME_FRAGMENT:
+			return ZSTR_KNOWN(ZEND_STR_FRAGMENT);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -55,7 +74,7 @@ void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
 	zend_throw_exception_object(&exception_zv);
 }
 
-void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name, uri_component_read_mode_t component_read_mode)
+void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, uri_component_read_mode_t component_read_mode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -66,12 +85,13 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name
 	ZEND_ASSERT(property_handler != NULL);
 
 	if (UNEXPECTED(property_handler->read_func(internal_uri, component_read_mode, return_value) == FAILURE)) {
-		zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name));
+		zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name),
+			ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		RETURN_THROWS();
 	}
 }
 
-static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name, zval *property_zv)
+static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, zval *property_zv)
 {
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
 	URI_ASSERT_INITIALIZATION(internal_uri);
@@ -88,7 +108,8 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, zend_string *pr
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
 	URI_ASSERT_INITIALIZATION(new_internal_uri);
 	if (property_handler->write_func == NULL) {
-		zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name), ZSTR_VAL(property_name));
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name),
+			ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		zend_object_release(new_object);
 		RETURN_THROWS();
 	}
@@ -106,7 +127,7 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, zend_string *pr
 	RETVAL_OBJ(new_object);
 }
 
-void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name)
+void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name)
 {
 	zend_string *value;
 
@@ -120,7 +141,7 @@ void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, zend_string *property
 	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }
 
-void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name)
+void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name)
 {
 	zend_string *value;
 
@@ -138,7 +159,7 @@ void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, zend_string *
 	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }
 
-void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, zend_string *property_name)
+void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name)
 {
 	zend_long value;
 	bool value_is_null;
