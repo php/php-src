@@ -234,7 +234,11 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value)
 		return FAILURE;
 	}
 
+#if defined(HAVE_TIDYOPTGETCATEGORY)
+	if (tidyOptGetCategory(opt) == TidyInternalCategory) {
+#else
 	if (tidyOptIsReadOnly(opt)) {
+#endif
 		php_error_docref(NULL, E_WARNING, "Attempting to set read-only option \"%s\"", optname);
 		return FAILURE;
 	}
