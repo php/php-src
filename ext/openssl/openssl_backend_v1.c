@@ -561,6 +561,114 @@ zend_string *php_openssl_dh_compute_key(EVP_PKEY *pkey, char *pub_str, size_t pu
 	return data;
 }
 
+const EVP_MD *php_openssl_get_evp_md_by_name(const char *name)
+{
+	return EVP_get_digestbyname(name);
+}
+
+const EVP_MD *php_openssl_get_evp_md_from_algo(zend_long algo)
+{
+	EVP_MD *mdtype;
+
+	switch (algo) {
+		case OPENSSL_ALGO_SHA1:
+			mdtype = (EVP_MD *) EVP_sha1();
+			break;
+		case OPENSSL_ALGO_MD5:
+			mdtype = (EVP_MD *) EVP_md5();
+			break;
+#ifndef OPENSSL_NO_MD4
+		case OPENSSL_ALGO_MD4:
+			mdtype = (EVP_MD *) EVP_md4();
+			break;
+#endif
+#ifndef OPENSSL_NO_MD2
+		case OPENSSL_ALGO_MD2:
+			mdtype = (EVP_MD *) EVP_md2();
+			break;
+#endif
+		case OPENSSL_ALGO_SHA224:
+			mdtype = (EVP_MD *) EVP_sha224();
+			break;
+		case OPENSSL_ALGO_SHA256:
+			mdtype = (EVP_MD *) EVP_sha256();
+			break;
+		case OPENSSL_ALGO_SHA384:
+			mdtype = (EVP_MD *) EVP_sha384();
+			break;
+		case OPENSSL_ALGO_SHA512:
+			mdtype = (EVP_MD *) EVP_sha512();
+			break;
+#ifndef OPENSSL_NO_RMD160
+		case OPENSSL_ALGO_RMD160:
+			mdtype = (EVP_MD *) EVP_ripemd160();
+			break;
+#endif
+		default:
+			return NULL;
+			break;
+	}
+	return mdtype;
+}
+
+void php_openssl_release_evp_md(const EVP_MD *md)
+{
+	// Do nothing as MD is static
+}
+
+const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *name)
+{
+	return EVP_get_cipherbyname(name);
+}
+
+const EVP_CIPHER *php_openssl_get_evp_cipher_from_algo(zend_long algo)
+{
+	switch (algo) {
+#ifndef OPENSSL_NO_RC2
+		case PHP_OPENSSL_CIPHER_RC2_40:
+			return EVP_rc2_40_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_RC2_64:
+			return EVP_rc2_64_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_RC2_128:
+			return EVP_rc2_cbc();
+			break;
+#endif
+
+#ifndef OPENSSL_NO_DES
+		case PHP_OPENSSL_CIPHER_DES:
+			return EVP_des_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_3DES:
+			return EVP_des_ede3_cbc();
+			break;
+#endif
+
+#ifndef OPENSSL_NO_AES
+		case PHP_OPENSSL_CIPHER_AES_128_CBC:
+			return EVP_aes_128_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_AES_192_CBC:
+			return EVP_aes_192_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_AES_256_CBC:
+			return EVP_aes_256_cbc();
+			break;
+#endif
+
+
+		default:
+			return NULL;
+			break;
+	}
+}
+
+void php_openssl_release_evp_cipher(const EVP_CIPHER *cipher)
+{
+	// Do nothing as the cipher is static
+}
+
 void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 {
 	array_init(return_value);

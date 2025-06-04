@@ -369,11 +369,11 @@ int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args
 		if (strcmp(req->digest_name, "null") == 0) {
 			req->digest = req->md_alg = EVP_md_null();
 		} else {
-			req->digest = req->md_alg = EVP_get_digestbyname(req->digest_name);
+			req->digest = req->md_alg = php_openssl_get_evp_md_by_name(req->digest_name);
 		}
 	}
 	if (req->md_alg == NULL) {
-		req->md_alg = req->digest = EVP_sha1();
+		req->md_alg = req->digest = php_openssl_get_evp_md_by_name("sha1");
 		php_openssl_store_errors();
 	}
 
@@ -417,6 +417,10 @@ void php_openssl_dispose_config(struct php_x509_request * req)
 		NCONF_free(req->req_config);
 		req->req_config = NULL;
 	}
+	if (req->md_alg != NULL && req->md_alg != EVP_md_null()) {
+		php_openssl_release_evp_md(req->md_alg);
+	}
+	php_openssl_release_evp_cipher(req->priv_key_encrypt_cipher);
 }
 
 zend_result php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded)
@@ -467,92 +471,6 @@ zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int se
 		return FAILURE;
 	}
 	return SUCCESS;
-}
-
-EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo) {
-	EVP_MD *mdtype;
-
-	switch (algo) {
-		case OPENSSL_ALGO_SHA1:
-			mdtype = (EVP_MD *) EVP_sha1();
-			break;
-		case OPENSSL_ALGO_MD5:
-			mdtype = (EVP_MD *) EVP_md5();
-			break;
-#ifndef OPENSSL_NO_MD4
-		case OPENSSL_ALGO_MD4:
-			mdtype = (EVP_MD *) EVP_md4();
-			break;
-#endif
-#ifndef OPENSSL_NO_MD2
-		case OPENSSL_ALGO_MD2:
-			mdtype = (EVP_MD *) EVP_md2();
-			break;
-#endif
-		case OPENSSL_ALGO_SHA224:
-			mdtype = (EVP_MD *) EVP_sha224();
-			break;
-		case OPENSSL_ALGO_SHA256:
-			mdtype = (EVP_MD *) EVP_sha256();
-			break;
-		case OPENSSL_ALGO_SHA384:
-			mdtype = (EVP_MD *) EVP_sha384();
-			break;
-		case OPENSSL_ALGO_SHA512:
-			mdtype = (EVP_MD *) EVP_sha512();
-			break;
-#ifndef OPENSSL_NO_RMD160
-		case OPENSSL_ALGO_RMD160:
-			mdtype = (EVP_MD *) EVP_ripemd160();
-			break;
-#endif
-		default:
-			return NULL;
-			break;
-	}
-	return mdtype;
-}
-
-const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo) {
-	switch (algo) {
-#ifndef OPENSSL_NO_RC2
-		case PHP_OPENSSL_CIPHER_RC2_40:
-			return EVP_rc2_40_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_RC2_64:
-			return EVP_rc2_64_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_RC2_128:
-			return EVP_rc2_cbc();
-			break;
-#endif
-
-#ifndef OPENSSL_NO_DES
-		case PHP_OPENSSL_CIPHER_DES:
-			return EVP_des_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_3DES:
-			return EVP_des_ede3_cbc();
-			break;
-#endif
-
-#ifndef OPENSSL_NO_AES
-		case PHP_OPENSSL_CIPHER_AES_128_CBC:
-			return EVP_aes_128_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_AES_192_CBC:
-			return EVP_aes_192_cbc();
-			break;
-		case PHP_OPENSSL_CIPHER_AES_256_CBC:
-			return EVP_aes_256_cbc();
-			break;
-#endif
-
-
-		default:
-			return NULL;
-			break;
-	}
 }
 
 void php_openssl_backend_init(void)
@@ -1932,7 +1850,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(tag_len, tag_len);
 
 
-	cipher_type = EVP_get_cipherbyname(method);
+	cipher_type = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return NULL;
@@ -1940,6 +1858,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 
 	cipher_ctx = EVP_CIPHER_CTX_new();
 	if (!cipher_ctx) {
+		php_openssl_release_evp_cipher(cipher_type);
 		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
 		return NULL;
 	}
@@ -1998,6 +1917,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	}
 	EVP_CIPHER_CTX_reset(cipher_ctx);
 	EVP_CIPHER_CTX_free(cipher_ctx);
+	php_openssl_release_evp_cipher(cipher_type);
 	return outbuf;
 }
 
@@ -2024,7 +1944,7 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(tag_len, tag);
 
 
-	cipher_type = EVP_get_cipherbyname(method);
+	cipher_type = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return NULL;
@@ -2032,6 +1952,7 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 
 	cipher_ctx = EVP_CIPHER_CTX_new();
 	if (!cipher_ctx) {
+		php_openssl_release_evp_cipher(cipher_type);
 		php_error_docref(NULL, E_WARNING, "Failed to create cipher context");
 		return NULL;
 	}
@@ -2077,14 +1998,15 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	}
 	EVP_CIPHER_CTX_reset(cipher_ctx);
 	EVP_CIPHER_CTX_free(cipher_ctx);
+	php_openssl_release_evp_cipher(cipher_type);
 	return outbuf;
 }
 
-const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method)
+const EVP_CIPHER *php_openssl_get_evp_cipher_by_name_with_warning(const char *method)
 {
 	const EVP_CIPHER *cipher_type;
 
-	cipher_type = EVP_get_cipherbyname(method);
+	cipher_type = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		return NULL;
@@ -2096,16 +2018,26 @@ const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method)
 
 PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
 {
-	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name(method);
+	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name_with_warning(method);
+	if (cipher_type == NULL) {
+		return -1;
+	}
+	int iv_length = EVP_CIPHER_iv_length(cipher_type);
+	php_openssl_release_evp_cipher(cipher_type);
 
-	return cipher_type == NULL ? -1 : EVP_CIPHER_iv_length(cipher_type);
+	return iv_length;
 }
 
 PHP_OPENSSL_API zend_long php_openssl_cipher_key_length(const char *method)
 {
-	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name(method);
+	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name_with_warning(method);
+	if (cipher_type == NULL) {
+		return -1;
+	}
+	int key_length = EVP_CIPHER_key_length(cipher_type);
+	php_openssl_release_evp_cipher(cipher_type);
 
-	return cipher_type == NULL ? -1 : EVP_CIPHER_key_length(cipher_type);
+	return key_length;
 }
 
 PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_length)
