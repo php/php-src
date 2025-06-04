@@ -2255,12 +2255,13 @@ static zval *row_dim_read(zend_object *object, zval *offset, int type, zval *rv)
 		}
 		return rv;
 	} else {
-		zend_string *member = zval_try_get_string(offset);
+		zend_string *tmp_member;
+		zend_string *member = zval_try_get_tmp_string(offset, &tmp_member);
 		if (!member) {
 			return NULL;
 		}
 		zval *result = row_prop_read(object, member, type, NULL, rv);
-		zend_string_release_ex(member, false);
+		zend_tmp_string_release(tmp_member);
 		return result;
 	}
 }
@@ -2330,12 +2331,13 @@ static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 		zval_ptr_dtor_nogc(retval);
 		return res;
 	} else {
-		zend_string *member = zval_try_get_string(offset);
+		zend_string *tmp_member;
+		zend_string *member = zval_try_get_tmp_string(offset, &tmp_member);
 		if (!member) {
 			return 0;
 		}
 		int result = row_prop_exists(object, member, check_empty, NULL);
-		zend_string_release_ex(member, false);
+		zend_tmp_string_release(tmp_member);
 		return result;
 	}
 }
