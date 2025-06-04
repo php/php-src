@@ -181,7 +181,7 @@ typedef zend_async_poll_event_t* (*zend_async_new_poll_event_t)(
 	zend_file_descriptor_t fh, zend_socket_t socket, async_poll_event events, size_t extra_size
 );
 typedef zend_async_timer_event_t* (*zend_async_new_timer_event_t)(
-	const zend_ulong timeout, const bool is_periodic, size_t extra_size
+	const zend_ulong timeout, const zend_ulong nanoseconds, const bool is_periodic, size_t extra_size
 );
 typedef zend_async_signal_event_t* (*zend_async_new_signal_event_t)(int signum, size_t extra_size);
 typedef zend_async_process_event_t* (*zend_async_new_process_event_t)(zend_process_t process_handle, size_t extra_size);
@@ -1049,8 +1049,10 @@ END_EXTERN_C()
 #define ZEND_ASYNC_NEW_SOCKET_EVENT_EX(socket, events, extra_size) zend_async_new_socket_event_fn(socket, events, extra_size)
 #define ZEND_ASYNC_NEW_POLL_EVENT(fh, socket, events) zend_async_new_poll_event_fn(fh, socket, events, 0)
 #define ZEND_ASYNC_NEW_POLL_EVENT_EX(fh, socket, events, extra_size) zend_async_new_poll_event_fn(fh, socket, events, extra_size)
-#define ZEND_ASYNC_NEW_TIMER_EVENT(timeout, is_periodic) zend_async_new_timer_event_fn(timeout, is_periodic, 0)
-#define ZEND_ASYNC_NEW_TIMER_EVENT_EX(timeout, is_periodic, extra_size) zend_async_new_timer_event_fn(timeout, is_periodic, extra_size)
+#define ZEND_ASYNC_NEW_TIMER_EVENT(timeout, is_periodic) zend_async_new_timer_event_fn(timeout, 0, is_periodic, 0)
+#define ZEND_ASYNC_NEW_TIMER_EVENT_EX(timeout, is_periodic, extra_size) zend_async_new_timer_event_fn(timeout, 0, is_periodic, extra_size)
+#define ZEND_ASYNC_NEW_TIMER_EVENT_NS(timeout, nanoseconds, is_periodic) zend_async_new_timer_event_fn(timeout, nanoseconds, is_periodic, 0)
+#define ZEND_ASYNC_NEW_TIMER_EVENT_NS_EX(timeout, nanoseconds, is_periodic, extra_size) zend_async_new_timer_event_fn(timeout, nanoseconds, is_periodic, extra_size)
 #define ZEND_ASYNC_NEW_SIGNAL_EVENT(signum) zend_async_new_signal_event_fn(signum, 0)
 #define ZEND_ASYNC_NEW_SIGNAL_EVENT_EX(signum, extra_size) zend_async_new_signal_event_fn(signum, extra_size)
 #define ZEND_ASYNC_NEW_PROCESS_EVENT(process_handle) zend_async_new_process_event_fn(process_handle, 0)
