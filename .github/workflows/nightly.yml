@@ -360,10 +360,11 @@ jobs:
       matrix:
         debug: [true, false]
         zts: [true, false]
-        os: ['13', '14']
+        os: ['14', '15']
         exclude:
           - os: ${{ !inputs.run_macos_arm64 && '14' || '*never*' }}
-    name: "MACOS_${{ matrix.os == '13' && 'X64' || 'ARM64' }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+          - os: ${{ !inputs.run_macos_arm64 && '15' || '*never*' }}
+    name: "MACOS_ARM64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
@@ -387,7 +388,7 @@ jobs:
       - name: Test
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: matrix.os != '14' || !matrix.zts
+        if: !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: tracing
@@ -401,7 +402,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
-        if: matrix.os != '14' || !matrix.zts
+        if: !matrix.zts
         uses: ./.github/actions/test-macos
         with:
           jitType: function
