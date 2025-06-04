@@ -13,8 +13,8 @@ $tidy = new tidy();
 
 try {
 	$tidy->parseString($buffer, $config);
-} catch (\Error $e) {
-	echo $e->getMessage(), PHP_EOL;
+} catch (\ValueError $e) {
+	echo get_class($e) . ": " . $e->getMessage(), PHP_EOL;
 }
 
 $config = ['neither'];
@@ -32,8 +32,17 @@ try {
 	echo $e->getMessage(), PHP_EOL;
 }
 
+$config = ['doctype' => 'php', 0 => 'value2'];
+
+try {
+	var_dump($tidy->parseString($buffer, $config));
+} catch (\TypeError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+
 ?>
 --EXPECT--
-tidy::parseString(): Argument #2 ($config) Unknown Tidy configuration option "bogus"
+ValueError: tidy::parseString(): Argument #2 ($config) Unknown Tidy configuration option "bogus"
 tidy::parseString(): Argument #2 ($config) must be of type array with keys as string
 tidy::parseString(): Argument #2 ($config) Attempting to set read-only option "doctype-mode"
+tidy::parseString(): Argument #2 ($config) must be of type array with keys as string

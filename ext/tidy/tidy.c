@@ -130,8 +130,8 @@ static void tidy_doc_update_properties(PHPTidyObj *);
 static void tidy_add_node_default_properties(PHPTidyObj *);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType *);
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes);
-static int _php_tidy_set_tidy_opt(TidyDoc, const char *, zval *, int arg);
-static int _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht_options, int arg);
+static zend_result _php_tidy_set_tidy_opt(TidyDoc, const char *, zval *, uint32_t arg);
+static zend_result _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht_options, uint32_t arg);
 static PHP_INI_MH(php_tidy_set_clean_output);
 static void php_tidy_clean_output_start(const char *name, size_t name_len);
 static php_output_handler *php_tidy_output_handler_init(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
@@ -209,7 +209,7 @@ static void php_tidy_load_config(TidyDoc doc, const char *path)
 	}
 }
 
-static zend_result php_tidy_apply_config(TidyDoc doc, const zend_string *str_string, const HashTable *ht_options, int arg)
+static zend_result php_tidy_apply_config(TidyDoc doc, const zend_string *str_string, const HashTable *ht_options, uint32_t arg)
 {
 	if (ht_options) {
 		return _php_tidy_apply_config_array(doc, ht_options, arg);
@@ -222,7 +222,7 @@ static zend_result php_tidy_apply_config(TidyDoc doc, const zend_string *str_str
 	return SUCCESS;
 }
 
-static int _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value, int arg)
+static zend_result _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value, uint32_t arg)
 {
 	TidyOption opt = tidyGetOptionByName(doc, optname);
 	zend_string *str, *tmp_str;
@@ -783,7 +783,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 	tidy_create_node_object(return_value, obj->ptdoc, node);
 }
 
-static int _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht_options, int arg)
+static zend_result _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht_options, uint32_t arg)
 {
 	zval *opt_val;
 	zend_string *opt_name;
@@ -791,7 +791,8 @@ static int _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht_options
 	if (!HT_IS_PACKED(ht_options)) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht_options, opt_name, opt_val) {
 			if (opt_name == NULL) {
-				continue;
+				zend_argument_type_error(arg, "must be of type array with keys as string");
+				return FAILURE;
 			}
 			_php_tidy_set_tidy_opt(doc, ZSTR_VAL(opt_name), opt_val, arg);
 		} ZEND_HASH_FOREACH_END();
