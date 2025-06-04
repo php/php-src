@@ -1068,7 +1068,6 @@ PHP_FUNCTION(odbc_execute)
 					RETURN_FALSE;
 				}
 				filename = estrndup(&ZSTR_VAL(tmpstr)[1], ZSTR_LEN(tmpstr) - 2);
-				filename[strlen(filename)] = '\0';
 
 				/* Check the basedir */
 				if (php_check_open_basedir(filename)) {
