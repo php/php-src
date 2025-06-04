@@ -174,6 +174,9 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 	}
 
 	zend_call_known_instance_method_with_0_params(ce->__debugInfo, object, &retval);
+	if (UNEXPECTED(Z_ISREF(retval))) {
+		zend_unwrap_reference(&retval);
+	}
 	if (Z_TYPE(retval) == IS_ARRAY) {
 		if (!Z_REFCOUNTED(retval)) {
 			*is_temp = 1;
