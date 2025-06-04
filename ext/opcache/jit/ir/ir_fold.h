@@ -486,10 +486,36 @@ IR_FOLD(MUL(C_FLOAT, C_FLOAT))
 }
 
 IR_FOLD(DIV(C_U8, C_U8))
+{
+	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
+	if (op2_insn->val.u64 == 0) {
+		/* division by zero */
+		IR_FOLD_EMIT;
+	}
+	IR_FOLD_CONST_U(op1_insn->val.u8 / op2_insn->val.u8);
+}
+
 IR_FOLD(DIV(C_U16, C_U16))
+{
+	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
+	if (op2_insn->val.u64 == 0) {
+		/* division by zero */
+		IR_FOLD_EMIT;
+	}
+	IR_FOLD_CONST_U(op1_insn->val.u16 / op2_insn->val.u16);
+}
+
 IR_FOLD(DIV(C_U32, C_U32))
+{
+	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
+	if (op2_insn->val.u64 == 0) {
+		/* division by zero */
+		IR_FOLD_EMIT;
+	}
+	IR_FOLD_CONST_U(op1_insn->val.u32 / op2_insn->val.u32);
+}
+
 IR_FOLD(DIV(C_U64, C_U64))
-IR_FOLD(DIV(C_ADDR, C_ADDR))
 {
 	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
 	if (op2_insn->val.u64 == 0) {
@@ -499,9 +525,46 @@ IR_FOLD(DIV(C_ADDR, C_ADDR))
 	IR_FOLD_CONST_U(op1_insn->val.u64 / op2_insn->val.u64);
 }
 
+IR_FOLD(DIV(C_ADDR, C_ADDR))
+{
+	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
+	if (op2_insn->val.u64 == 0) {
+		/* division by zero */
+		IR_FOLD_EMIT;
+	}
+	IR_FOLD_CONST_U(op1_insn->val.addr / op2_insn->val.addr);
+}
+
 IR_FOLD(DIV(C_I8, C_I8))
+{
+	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
+	if (op2_insn->val.i64 == 0) {
+		/* division by zero */
+		IR_FOLD_EMIT;
+	}
+	IR_FOLD_CONST_I(op1_insn->val.i8 / op2_insn->val.i8);
+}
+
 IR_FOLD(DIV(C_I16, C_I16))
+{
+	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
+	if (op2_insn->val.i64 == 0) {
+		/* division by zero */
+		IR_FOLD_EMIT;
+	}
+	IR_FOLD_CONST_I(op1_insn->val.i16 / op2_insn->val.i16);
+}
+
 IR_FOLD(DIV(C_I32, C_I32))
+{
+	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
+	if (op2_insn->val.i64 == 0) {
+		/* division by zero */
+		IR_FOLD_EMIT;
+	}
+	IR_FOLD_CONST_I(op1_insn->val.i32 / op2_insn->val.i32);
+}
+
 IR_FOLD(DIV(C_I64, C_I64))
 {
 	IR_ASSERT(IR_OPT_TYPE(opt) == op1_insn->type);
@@ -1135,6 +1198,7 @@ IR_FOLD(MAX(C_FLOAT, C_FLOAT))
 IR_FOLD(SEXT(C_I8))
 IR_FOLD(SEXT(C_U8))
 IR_FOLD(SEXT(C_BOOL))
+IR_FOLD(SEXT(C_CHAR))
 {
 	IR_ASSERT(IR_IS_TYPE_INT(IR_OPT_TYPE(opt)));
 	IR_ASSERT(ir_type_size[IR_OPT_TYPE(opt)] > ir_type_size[op1_insn->type]);
@@ -1160,6 +1224,7 @@ IR_FOLD(SEXT(C_U32))
 IR_FOLD(ZEXT(C_I8))
 IR_FOLD(ZEXT(C_U8))
 IR_FOLD(ZEXT(C_BOOL))
+IR_FOLD(ZEXT(C_CHAR))
 {
 	IR_ASSERT(IR_IS_TYPE_INT(IR_OPT_TYPE(opt)));
 	IR_ASSERT(ir_type_size[IR_OPT_TYPE(opt)] > ir_type_size[op1_insn->type]);
@@ -1195,12 +1260,14 @@ IR_FOLD(TRUNC(C_U64))
 		default:
 			IR_ASSERT(0);
 		case IR_I8:
+		case IR_CHAR:
 			IR_FOLD_CONST_I(op1_insn->val.i8);
 		case IR_I16:
 			IR_FOLD_CONST_I(op1_insn->val.i16);
 		case IR_I32:
 			IR_FOLD_CONST_I(op1_insn->val.i32);
 		case IR_U8:
+		case IR_BOOL:
 			IR_FOLD_CONST_U(op1_insn->val.u8);
 		case IR_U16:
 			IR_FOLD_CONST_U(op1_insn->val.u16);
@@ -1474,6 +1541,10 @@ IR_FOLD(EQ(SEXT, C_ADDR))
 	} else {
 		ir_type type = ctx->ir_base[op1_insn->op1].type;
 
+		if (op1_insn->op == IR_ZEXT
+		 && (op2_insn->val.u64 >> (ir_type_size[type] * 8)) != 0) {
+			IR_FOLD_NEXT;
+		}
 		if (IR_IS_TYPE_SIGNED(type)) {
 			switch (ir_type_size[type]) {
 				case 1:  val.i64 = op2_insn->val.i8;  break;
@@ -1493,6 +1564,7 @@ IR_FOLD(EQ(SEXT, C_ADDR))
 		op2 = ir_const(ctx, val, type);
 		IR_FOLD_RESTART;
 	}
+
 	IR_FOLD_NEXT;
 }
 
@@ -1518,6 +1590,10 @@ IR_FOLD(NE(SEXT, C_ADDR))
 	} else {
 		ir_type type = ctx->ir_base[op1_insn->op1].type;
 
+		if (op1_insn->op == IR_ZEXT
+		 && (op2_insn->val.u64 >> (ir_type_size[type] * 8)) != 0) {
+			IR_FOLD_NEXT;
+		}
 		if (IR_IS_TYPE_SIGNED(type)) {
 			switch (ir_type_size[type]) {
 				case 1:  val.i64 = op2_insn->val.i8;  break;

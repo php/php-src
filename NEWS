@@ -71,6 +71,7 @@ PHP                                                                        NEWS
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
   . Added enchant_dict_remove(). (nielsdos)
+  . Fix missing empty string checks. (nielsdos)
 
 - EXIF:
   . Add OffsetTime* Exif tags. (acc987)
@@ -120,6 +121,8 @@ PHP                                                                        NEWS
   . Fixed ZTS OPcache build on Cygwin. (cmb)
   . Added opcache.file_cache_read_only. (Samuel Melrose)
   . Updated default value of opcache.jit_hot_loop. (Arnaud)
+  . Log a warning when opcache lock file permissions could not be changed.
+    (Taavi Eomäe)
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
