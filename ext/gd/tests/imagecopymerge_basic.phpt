@@ -20,7 +20,7 @@ $color_src = imagecolorallocate($src, 255, 255, 255);
 imagefill($des, 0, 0, $color_des);
 imagefill($src, 0, 0, $color_src);
 
-var_dump(imagecopymerge($des, $src, 20, 20, 0, 0, 50, 50, 75));
+imagecopymerge($des, $src, 20, 20, 0, 0, 50, 50, 75);
 
 $color = imagecolorat($des, 30, 30);
 $rgb = imagecolorsforindex($des, $color);
@@ -28,5 +28,4 @@ echo $rgb['red'], ", ", $rgb['green'], ", ", $rgb['blue'], "\n";
 
 ?>
 --EXPECT--
-bool(true)
 203, 203, 241

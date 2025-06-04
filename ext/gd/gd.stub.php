@@ -498,17 +498,17 @@ function imagepalettetotruecolor(GdImage $image): bool {}
 
 function imagecolormatch(GdImage $image1, GdImage $image2): true {}
 
-function imagesetthickness(GdImage $image, int $thickness): true {}
+function imagesetthickness(GdImage $image, int $thickness): void {}
 
-function imagefilledellipse(GdImage $image, int $center_x, int $center_y, int $width, int $height, int $color): true {}
+function imagefilledellipse(GdImage $image, int $center_x, int $center_y, int $width, int $height, int $color): void {}
 
-function imagefilledarc(GdImage $image, int $center_x, int $center_y, int $width, int $height, int $start_angle, int $end_angle, int $color, int $style): true {}
+function imagefilledarc(GdImage $image, int $center_x, int $center_y, int $width, int $height, int $start_angle, int $end_angle, int $color, int $style): void {}
 
-function imagealphablending(GdImage $image, bool $enable): true {}
+function imagealphablending(GdImage $image, bool $enable): void {}
 
-function imagesavealpha(GdImage $image, bool $enable): true {}
+function imagesavealpha(GdImage $image, bool $enable): void {}
 
-function imagelayereffect(GdImage $image, int $effect): true {}
+function imagelayereffect(GdImage $image, int $effect): void {}
 
 function imagecolorallocatealpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
 
@@ -518,7 +518,7 @@ function imagecolorclosestalpha(GdImage $image, int $red, int $green, int $blue,
 
 function imagecolorexactalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int {}
 
-function imagecopyresampled(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_width, int $dst_height, int $src_width, int $src_height): true {}
+function imagecopyresampled(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_width, int $dst_height, int $src_width, int $src_height): void {}
 
 #ifdef PHP_WIN32
 
@@ -663,23 +663,23 @@ function imagecolorsforindex(GdImage $image, int $color): array {}
 
 function imagegammacorrect(GdImage $image, float $input_gamma, float $output_gamma): true {}
 
-function imagesetpixel(GdImage $image, int $x, int $y, int $color): true {}
+function imagesetpixel(GdImage $image, int $x, int $y, int $color): void {}
 
-function imageline(GdImage $image, int $x1, int $y1, int $x2, int $y2, int $color): true {}
+function imageline(GdImage $image, int $x1, int $y1, int $x2, int $y2, int $color): void {}
 
-function imagedashedline(GdImage $image, int $x1, int $y1, int $x2, int $y2, int $color): true {}
+function imagedashedline(GdImage $image, int $x1, int $y1, int $x2, int $y2, int $color): void {}
 
-function imagerectangle(GdImage $image, int $x1, int $y1, int $x2, int $y2, int $color): true {}
+function imagerectangle(GdImage $image, int $x1, int $y1, int $x2, int $y2, int $color): void {}
 
-function imagefilledrectangle(GdImage $image, int $x1, int $y1, int $x2, int $y2, int $color): true {}
+function imagefilledrectangle(GdImage $image, int $x1, int $y1, int $x2, int $y2, int $color): void {}
 
-function imagearc(GdImage $image, int $center_x, int $center_y, int $width, int $height, int $start_angle, int $end_angle, int $color): true {}
+function imagearc(GdImage $image, int $center_x, int $center_y, int $width, int $height, int $start_angle, int $end_angle, int $color): void {}
 
-function imageellipse(GdImage $image, int $center_x, int $center_y, int $width, int $height, int $color): true {}
+function imageellipse(GdImage $image, int $center_x, int $center_y, int $width, int $height, int $color): void {}
 
-function imagefilltoborder(GdImage $image, int $x, int $y, int $border_color, int $color): true {}
+function imagefilltoborder(GdImage $image, int $x, int $y, int $border_color, int $color): void {}
 
-function imagefill(GdImage $image, int $x, int $y, int $color): true {}
+function imagefill(GdImage $image, int $x, int $y, int $color): void {}
 
 function imagecolorstotal(GdImage $image): int {}
 
@@ -697,27 +697,27 @@ function imagefontwidth(GdFont|int $font): int {}
 
 function imagefontheight(GdFont|int $font): int {}
 
-function imagechar(GdImage $image, GdFont|int $font, int $x, int $y, string $char, int $color): true {}
+function imagechar(GdImage $image, GdFont|int $font, int $x, int $y, string $char, int $color): void {}
 
-function imagecharup(GdImage $image, GdFont|int $font, int $x, int $y, string $char, int $color): true {}
+function imagecharup(GdImage $image, GdFont|int $font, int $x, int $y, string $char, int $color): void {}
 
-function imagestring(GdImage $image, GdFont|int $font, int $x, int $y, string $string, int $color): true {}
+function imagestring(GdImage $image, GdFont|int $font, int $x, int $y, string $string, int $color): void {}
 
-function imagestringup(GdImage $image, GdFont|int $font, int $x, int $y, string $string, int $color): true {}
+function imagestringup(GdImage $image, GdFont|int $font, int $x, int $y, string $string, int $color): void {}
 
-function imagecopy(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_width, int $src_height): true {}
+function imagecopy(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_width, int $src_height): void {}
 
-function imagecopymerge(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_width, int $src_height, int $pct): true {}
+function imagecopymerge(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_width, int $src_height, int $pct): void {}
 
-function imagecopymergegray(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_width, int $src_height, int $pct): true {}
+function imagecopymergegray(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_width, int $src_height, int $pct): void {}
 
-function imagecopyresized(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_width, int $dst_height, int $src_width, int $src_height): true {}
+function imagecopyresized(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_width, int $dst_height, int $src_width, int $src_height): void {}
 
 function imagesx(GdImage $image): int {}
 
 function imagesy(GdImage $image): int {}
 
-function imagesetclip(GdImage $image, int $x1, int $y1, int $x2, int $y2): true {}
+function imagesetclip(GdImage $image, int $x1, int $y1, int $x2, int $y2): void {}
 
 /**
  * @return array<int, int>
@@ -756,9 +756,9 @@ function imagefilter(GdImage $image, int $filter, ...$args): bool {}
 
 function imageconvolution(GdImage $image, array $matrix, float $divisor, float $offset): bool {}
 
-function imageflip(GdImage $image, int $mode): true {}
+function imageflip(GdImage $image, int $mode): void {}
 
-function imageantialias(GdImage $image, bool $enable): true {}
+function imageantialias(GdImage $image, bool $enable): void {}
 
 /** @refcount 1 */
 function imagecrop(GdImage $image, array $rectangle): GdImage|false {}

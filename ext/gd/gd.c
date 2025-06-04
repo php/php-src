@@ -809,8 +809,6 @@ PHP_FUNCTION(imagesetthickness)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageSetThickness(im, thick);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -833,7 +831,6 @@ PHP_FUNCTION(imagefilledellipse)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageFilledEllipse(im, cx, cy, w, h, color);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -870,8 +867,6 @@ PHP_FUNCTION(imagefilledarc)
 	}
 
 	gdImageFilledArc(im, cx, cy, w, h, st, e, col, style);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -890,8 +885,6 @@ PHP_FUNCTION(imagealphablending)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageAlphaBlending(im, blend);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -910,8 +903,6 @@ PHP_FUNCTION(imagesavealpha)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageSaveAlpha(im, save);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -930,8 +921,6 @@ PHP_FUNCTION(imagelayereffect)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageAlphaBlending(im, effect);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1084,8 +1073,6 @@ PHP_FUNCTION(imagecopyresampled)
 	dstW = DW;
 
 	gdImageCopyResampled(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2522,7 +2509,6 @@ PHP_FUNCTION(imagesetpixel)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageSetPixel(im, x, y, col);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2550,7 +2536,6 @@ PHP_FUNCTION(imageline)
 		col = gdAntiAliased;
 	}
 	gdImageLine(im, x1, y1, x2, y2, col);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2573,7 +2558,6 @@ PHP_FUNCTION(imagedashedline)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageDashedLine(im, x1, y1, x2, y2, col);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2596,7 +2580,6 @@ PHP_FUNCTION(imagerectangle)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageRectangle(im, x1, y1, x2, y2, col);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2618,7 +2601,6 @@ PHP_FUNCTION(imagefilledrectangle)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 	gdImageFilledRectangle(im, x1, y1, x2, y2, col);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2654,7 +2636,6 @@ PHP_FUNCTION(imagearc)
 	}
 
 	gdImageArc(im, cx, cy, w, h, st, e, col);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2677,7 +2658,6 @@ PHP_FUNCTION(imageellipse)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageEllipse(im, cx, cy, w, h, color);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2699,7 +2679,6 @@ PHP_FUNCTION(imagefilltoborder)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageFillToBorder(im, x, y, border, col);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2720,7 +2699,6 @@ PHP_FUNCTION(imagefill)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageFill(im, x, y, col);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3038,7 +3016,6 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (str) {
 		efree(str);
 	}
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3100,7 +3077,6 @@ PHP_FUNCTION(imagecopy)
 	dstY = DY;
 
 	gdImageCopy(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3136,7 +3112,6 @@ PHP_FUNCTION(imagecopymerge)
 	pct  = PCT;
 
 	gdImageCopyMerge(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3172,7 +3147,6 @@ PHP_FUNCTION(imagecopymergegray)
 	pct  = PCT;
 
 	gdImageCopyMergeGray(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3230,7 +3204,6 @@ PHP_FUNCTION(imagecopyresized)
 	}
 
 	gdImageCopyResized(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3284,7 +3257,6 @@ PHP_FUNCTION(imagesetclip)
 	im = php_gd_libgdimageptr_from_zval_p(im_zval);
 
 	gdImageSetClip(im, x1, y1, x2, y2);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3744,8 +3716,6 @@ PHP_FUNCTION(imageflip)
 			zend_argument_value_error(2, "must be one of IMG_FLIP_VERTICAL, IMG_FLIP_HORIZONTAL, or IMG_FLIP_BOTH");
 			RETURN_THROWS();
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3765,8 +3735,6 @@ PHP_FUNCTION(imageantialias)
 	if (im->trueColor) {
 		im->AA = alias;
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
