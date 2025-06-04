@@ -262,6 +262,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_is_zend_ptr(int $addr): bool {}
 
     function zend_test_log_err_debug(string $str): void {}
+
+    function zend_test_gh18756(): void {}
 }
 
 namespace ZendTestNS {
