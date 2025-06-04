@@ -227,7 +227,7 @@ function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime):
  * @refcount 1
  */
 function timezone_transitions_get(
-    DateTimeZone $object, int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false {}
+    DateTimeZone $object, int $timestampBegin = PHP_INT_MIN, int $timestampEnd = 2147483647): array|false {}
 
 /**
  * @return array<string, float|string>|false
@@ -615,7 +615,7 @@ class DateTimeZone
      * @tentative-return-type
      * @alias timezone_transitions_get
      */
-    public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false {}
+    public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = 2147483647): array|false {}
 
     /**
      * @return array<string, float|string>|false
