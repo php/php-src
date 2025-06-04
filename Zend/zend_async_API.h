@@ -1063,7 +1063,7 @@ END_EXTERN_C()
 #define ZEND_ASYNC_GETNAMEINFO(addr, flags) zend_async_getnameinfo_fn(addr, flags, 0)
 #define ZEND_ASYNC_GETNAMEINFO_EX(addr, flags, extra_size) zend_async_getnameinfo_fn(addr, flags, extra_size)
 #define ZEND_ASYNC_GETADDRINFO(node, service, hints) zend_async_getaddrinfo_fn(node, service, hints, 0)
-#define ZEND_ASYNC_GETADDRINFO_EX(node, service, hints, flags, extra_size) zend_async_getaddrinfo_fn(node, service, hints, flags, extra_size)
+#define ZEND_ASYNC_GETADDRINFO_EX(node, service, hints, extra_size) zend_async_getaddrinfo_fn(node, service, hints, extra_size)
 
 #define ZEND_ASYNC_NEW_EXEC_EVENT(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env) \
 	zend_async_new_exec_event_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, 0)
