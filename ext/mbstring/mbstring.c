@@ -3930,7 +3930,7 @@ static uint32_t *make_conversion_map(HashTable *target_hash, size_t *conversion_
 	uint32_t *mapelm = convmap;
 
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-		bool failed = true;
+		bool failed;
 		zend_long tmp = zval_try_get_long(hash_entry, &failed);
 		if (failed) {
 			efree(convmap);
