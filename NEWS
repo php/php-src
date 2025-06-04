@@ -53,6 +53,7 @@ PHP                                                                        NEWS
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
   . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
+  . Property hooks are now allowed on backed readonly properties. (Crell, NickSdot and iluuu1994)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
