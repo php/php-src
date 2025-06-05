@@ -58,12 +58,6 @@
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
-#ifdef WORDS_BIGENDIAN
-#  define BC_LITTLE_ENDIAN 0
-#else
-#  define BC_LITTLE_ENDIAN 1
-#endif
-
 /* 64-bytes for 64-bit */
 #define BC_STACK_VECTOR_SIZE 8
 

@@ -73,4 +73,10 @@ typedef zend_long bc_long;
 #define BC_BYTES_SWAP64(x) ZEND_BYTES_SWAP64(x)
 #define BC_BYTES_SWAP32(x) ZEND_BYTES_SWAP32(x)
 
+#ifdef WORDS_BIGENDIAN
+#  define BC_LITTLE_ENDIAN 0
+#else
+#  define BC_LITTLE_ENDIAN 1
+#endif
+
 #endif
