@@ -91,7 +91,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 
 bc_num bc_long2num(zend_long lval);
 
-zend_string *bc_num2str_ex(bc_num num, size_t scale);
+bc_string *bc_num2str_ex(bc_num num, size_t scale);
 
 void bc_int2num(bc_num *num, int val);
 

@@ -31,12 +31,11 @@
 
 #include "bcmath.h"
 #include "convert.h"
-#include "zend_string.h"
 
 /* Convert a numbers to a string.  Base 10 only.*/
-zend_string *bc_num2str_ex(bc_num num, size_t scale)
+bc_string *bc_num2str_ex(bc_num num, size_t scale)
 {
-	zend_string *str;
+	bc_string *str;
 	char *sptr;
 	size_t index;
 	bool signch;
@@ -46,13 +45,13 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 	signch = num->n_sign != PLUS && !bc_is_zero_for_scale(num, min_scale);
 	/* Allocate the string memory. */
 	if (scale > 0) {
-		str = zend_string_alloc(num->n_len + scale + signch + 1, 0);
+		str = bc_string_alloc(num->n_len + scale + signch + 1, 0);
 	} else {
-		str = zend_string_alloc(num->n_len + signch, 0);
+		str = bc_string_alloc(num->n_len + signch, 0);
 	}
 
 	/* The negative sign if needed. */
-	sptr = ZSTR_VAL(str);
+	sptr = BC_STR_VAL(str);
 	if (signch) *sptr++ = '-';
 
 	/* Load the whole number. */
@@ -71,6 +70,6 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 
 	/* Terminate the string and return it! */
 	*sptr = '\0';
-	ZSTR_LEN(str) = sptr - (char *)ZSTR_VAL(str);
+	BC_STR_LEN(str) = sptr - (char *)BC_STR_VAL(str);
 	return str;
 }

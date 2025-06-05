@@ -29,4 +29,9 @@
 /* Needed for BCG() macro and PHP_ROUND_XXX */
 #include "../../php_bcmath.h"
 
+typedef zend_string bc_string;
+#define BC_STR_VAL(s) ZSTR_VAL(s)
+#define BC_STR_LEN(s) ZSTR_LEN(s)
+#define bc_string_alloc(len, persistent) zend_string_alloc((len), (persistent))
+
 #endif
