@@ -44,8 +44,8 @@ namespace {
     /**
      * @var int
      * @cvalue SOAP_FUNCTIONS_ALL
-     * @deprecated since 8.4
      */
+    #[\Deprecated(since: '8.4', message: 'as enabling all functions is a possible security concern')]
     const SOAP_FUNCTIONS_ALL = UNKNOWN;
 
     /**

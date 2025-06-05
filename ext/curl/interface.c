@@ -65,6 +65,7 @@
 # pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+#include "zend_attributes.h"
 #include "curl_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(curl)

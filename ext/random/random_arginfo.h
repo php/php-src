@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8b30f08404f2912d40f4cb61b76ec283af19b79c */
+ * Stub hash: 11b860c627ade31e1ed4185b6dccd303b7bfa508 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -240,6 +240,19 @@ static void register_random_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0_arg1, attribute_Deprecated_func_lcg_value_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_lcg_value_0->args[1].value, &attribute_Deprecated_func_lcg_value_0_arg1);
 	attribute_Deprecated_func_lcg_value_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_MT_RAND_PHP = zend_hash_str_find_ptr(EG(zend_constants), "MT_RAND_PHP", sizeof("MT_RAND_PHP") - 1);
+
+	zend_attribute *attribute_Deprecated_const_MT_RAND_PHP_0 = zend_add_global_constant_attribute(const_MT_RAND_PHP, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_MT_RAND_PHP_0_arg0;
+	zend_string *attribute_Deprecated_const_MT_RAND_PHP_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_MT_RAND_PHP_0_arg0, attribute_Deprecated_const_MT_RAND_PHP_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_MT_RAND_PHP_0->args[0].value, &attribute_Deprecated_const_MT_RAND_PHP_0_arg0);
+	attribute_Deprecated_const_MT_RAND_PHP_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_MT_RAND_PHP_0_arg1;
+	zend_string *attribute_Deprecated_const_MT_RAND_PHP_0_arg1_str = zend_string_init("as it uses a problematic version of Mt19937", strlen("as it uses a problematic version of Mt19937"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_MT_RAND_PHP_0_arg1, attribute_Deprecated_const_MT_RAND_PHP_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_MT_RAND_PHP_0->args[1].value, &attribute_Deprecated_const_MT_RAND_PHP_0_arg1);
+	attribute_Deprecated_const_MT_RAND_PHP_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *class_entry_Random_Engine)

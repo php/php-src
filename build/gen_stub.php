@@ -5321,7 +5321,7 @@ function generateGlobalConstantAttributeInitialization(
             $constName = str_replace('\\', '\\\\', $constInfo->name->__toString());
             $constVarName = 'const_' . $constName;
 
-            $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            $code = "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
             foreach ($constInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_global_constant_attribute($constVarName",
