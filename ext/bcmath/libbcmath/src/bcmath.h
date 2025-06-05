@@ -32,6 +32,7 @@
 #ifndef _BCMATH_H_
 #define _BCMATH_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 
 typedef enum {PLUS, MINUS} sign;
@@ -46,16 +47,7 @@ typedef struct bc_struct {
 	sign          n_sign;
 } bc_struct;
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "zend.h"
-#include <stdbool.h>
-#include "zend_string.h"
-
-/* Needed for BCG() macro and PHP_ROUND_XXX */
-#include "../../php_bcmath.h"
+#include "adapter.h"
 
 /* The base used in storing the numbers in n_value above.
    Currently, this MUST be 10. */
