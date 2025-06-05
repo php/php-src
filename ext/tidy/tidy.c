@@ -62,7 +62,7 @@
 	TIDY_FETCH_OBJECT; \
 	if (!obj->ptdoc->initialized) { \
 		zend_throw_error(NULL, "tidy object is not initialized"); \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 #define TIDY_FETCH_ONLY_OBJECT	\
