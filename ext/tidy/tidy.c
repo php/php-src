@@ -50,9 +50,6 @@
 /* {{{ ext/tidy macros */
 #define FIX_BUFFER(bptr) do { if ((bptr)->size) { (bptr)->bp[(bptr)->size-1] = '\0'; } } while(0)
 
-#define TIDY_SET_CONTEXT \
-    zval *object = getThis();
-
 #define TIDY_FETCH_OBJECT	\
 	PHPTidyObj *obj;	\
 	zval *object; \
@@ -70,11 +67,10 @@
 
 #define TIDY_FETCH_ONLY_OBJECT	\
 	PHPTidyObj *obj;	\
-	TIDY_SET_CONTEXT; \
 	if (zend_parse_parameters_none() != SUCCESS) {	\
 		RETURN_THROWS();	\
 	}	\
-	obj = Z_TIDY_P(object);	\
+	obj = Z_TIDY_P(ZEND_THIS);	\
 
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
 	if (TG(default_config) && TG(default_config)[0]) { \
@@ -1368,8 +1364,7 @@ PHP_METHOD(tidy, __construct)
 		Z_PARAM_BOOL(use_include_path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	TIDY_SET_CONTEXT;
-	obj = Z_TIDY_P(object);
+	obj = Z_TIDY_P(ZEND_THIS);
 
 	if (inputfile) {
 		if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
@@ -1415,8 +1410,7 @@ PHP_METHOD(tidy, parseFile)
 		Z_PARAM_BOOL(use_include_path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	TIDY_SET_CONTEXT;
-	obj = Z_TIDY_P(object);
+	obj = Z_TIDY_P(ZEND_THIS);
 
 	if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
 		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
@@ -1455,8 +1449,7 @@ PHP_METHOD(tidy, parseString)
 		RETURN_THROWS();
 	}
 
-	TIDY_SET_CONTEXT;
-	obj = Z_TIDY_P(object);
+	obj = Z_TIDY_P(ZEND_THIS);
 
 	RETURN_BOOL(php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) == SUCCESS
 				&& php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == SUCCESS);
