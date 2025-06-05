@@ -223,6 +223,9 @@ struct _php_stream  {
 	/* whether stdio cast flushing is in progress */
 	uint16_t fclose_stdiocast_flush_in_progress:1;
 
+	/* whether fatal error happened and all operations should terminates as soon as possible */
+	uint16_t fatal_error:1;
+
 	char mode[16];			/* "rwb" etc. ala stdio */
 
 	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
