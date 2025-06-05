@@ -23,7 +23,7 @@
 #include <arpa/inet.h>
 #endif
 
-ZEND_TLS lxb_url_parser_t *lexbor_parser;
+ZEND_TLS lxb_url_parser_t lexbor_parser;
 ZEND_TLS int lexbor_urls;
 
 #define LEXBOR_MAX_URL_COUNT 500
@@ -45,7 +45,7 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexb
 {
 	if (Z_TYPE_P(value) == IS_LONG) {
 		ZVAL_STR(value, zend_long_to_str(Z_LVAL_P(value)));
-		lexbor_str_init_append(lexbor_str, lexbor_parser->mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value));
+		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value));
 		zval_ptr_dtor_str(value);
 	} else {
 		ZEND_ASSERT(Z_ISNULL_P(value));
@@ -57,10 +57,10 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexb
 static void lexbor_cleanup_parser(void)
 {
 	if (++lexbor_urls % LEXBOR_MAX_URL_COUNT == 0) {
-		lexbor_mraw_clean(lexbor_parser->mraw);
+		lexbor_mraw_clean(lexbor_parser.mraw);
 	}
 
-	lxb_url_parser_clean(lexbor_parser);
+	lxb_url_parser_clean(&lexbor_parser);
 }
 
 /**
@@ -81,12 +81,12 @@ static void fill_errors(zval *errors)
 
 	array_init(errors);
 
-	if (lexbor_parser->log == NULL) {
+	if (lexbor_parser.log == NULL) {
 		return;
 	}
 
 	lexbor_plog_entry_t *lxb_error;
-	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser->log->list)) != NULL) {
+	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
 		zval error;
 		object_init_ex(&error, uri_whatwg_url_validation_error_ce);
 		zend_update_property_string(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZEND_STRL("context"), (const char *) lxb_error->data);
@@ -254,7 +254,7 @@ static zend_result lexbor_write_scheme(struct uri_internal_t *internal_uri, zval
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
-	if (lxb_url_api_protocol_set(lexbor_uri, lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
+	if (lxb_url_api_protocol_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		fill_errors(errors);
 
 		return FAILURE;
@@ -323,13 +323,13 @@ static zend_result lexbor_write_password(struct uri_internal_t *internal_uri, zv
 
 static zend_result init_idna(void)
 {
-	if (lexbor_parser->idna != NULL) {
+	if (lexbor_parser.idna != NULL) {
 		return SUCCESS;
 	}
 
-	lexbor_parser->idna = lxb_unicode_idna_create();
+	lexbor_parser.idna = lxb_unicode_idna_create();
 
-	return lxb_unicode_idna_init(lexbor_parser->idna) == LXB_STATUS_OK ? SUCCESS : FAILURE;
+	return lxb_unicode_idna_init(lexbor_parser.idna) == LXB_STATUS_OK ? SUCCESS : FAILURE;
 }
 
 static zend_result lexbor_read_host(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
@@ -357,8 +357,8 @@ static zend_result lexbor_read_host(const struct uri_internal_t *internal_uri, u
 				if (init_idna() == FAILURE) {
 					return FAILURE;
 				}
-				lxb_url_serialize_host_unicode(lexbor_parser->idna, &lexbor_uri->host, lexbor_serialize_callback, &host_str);
-				lxb_unicode_idna_clean(lexbor_parser->idna);
+				lxb_url_serialize_host_unicode(lexbor_parser.idna, &lexbor_uri->host, lexbor_serialize_callback, &host_str);
+				lxb_unicode_idna_clean(lexbor_parser.idna);
 
 				ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 				break;
@@ -384,7 +384,7 @@ static zend_result lexbor_write_host(struct uri_internal_t *internal_uri, zval *
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
-	if (lxb_url_api_hostname_set(lexbor_uri, lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
+	if (lxb_url_api_hostname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		fill_errors(errors);
 
 		return FAILURE;
@@ -413,7 +413,7 @@ static zend_result lexbor_write_port(struct uri_internal_t *internal_uri, zval *
 
 	zval_long_or_null_to_lexbor_str(value, &str);
 
-	if (lxb_url_api_port_set(lexbor_uri, lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
+	if (lxb_url_api_port_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		fill_errors(errors);
 
 		return FAILURE;
@@ -442,7 +442,7 @@ static zend_result lexbor_write_path(struct uri_internal_t *internal_uri, zval *
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
-	if (lxb_url_api_pathname_set(lexbor_uri, lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
+	if (lxb_url_api_pathname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		fill_errors(errors);
 
 		return FAILURE;
@@ -471,7 +471,7 @@ static zend_result lexbor_write_query(struct uri_internal_t *internal_uri, zval 
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
-	if (lxb_url_api_search_set(lexbor_uri, lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
+	if (lxb_url_api_search_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		fill_errors(errors);
 
 		return FAILURE;
@@ -500,7 +500,7 @@ static zend_result lexbor_write_fragment(struct uri_internal_t *internal_uri, zv
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
-	if (lxb_url_api_hash_set(lexbor_uri, lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
+	if (lxb_url_api_hash_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		fill_errors(errors);
 
 		return FAILURE;
@@ -518,11 +518,9 @@ zend_result lexbor_request_init(void)
 		return FAILURE;
 	}
 
-	lexbor_parser = lxb_url_parser_create();
-	status = lxb_url_parser_init(lexbor_parser, mraw);
+	status = lxb_url_parser_init(&lexbor_parser, mraw);
 	if (status != LXB_STATUS_OK) {
-		lxb_url_parser_destroy(lexbor_parser, true);
-		lexbor_parser = NULL;
+		lxb_url_parser_destroy(&lexbor_parser, false);
 		lexbor_mraw_destroy(mraw, true);
 		return FAILURE;
 	}
@@ -534,10 +532,9 @@ zend_result lexbor_request_init(void)
 
 void lexbor_request_shutdown(void)
 {
-	lxb_url_parser_memory_destroy(lexbor_parser);
-	lxb_url_parser_destroy(lexbor_parser, true);
+	lxb_url_parser_memory_destroy(&lexbor_parser);
+	lxb_url_parser_destroy(&lexbor_parser, false);
 
-	lexbor_parser = NULL;
 	lexbor_urls = 0;
 }
 
@@ -546,7 +543,7 @@ static void *lexbor_parse_uri(const zend_string *uri_str, const void *base_url, 
 	lexbor_cleanup_parser();
 
 	const lxb_url_t *lexbor_base_url = base_url;
-	lxb_url_t *url = lxb_url_parse(lexbor_parser, lexbor_base_url, (unsigned char *) ZSTR_VAL(uri_str), ZSTR_LEN(uri_str));
+	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) ZSTR_VAL(uri_str), ZSTR_LEN(uri_str));
 	fill_errors(errors);
 
 	return url;
@@ -570,7 +567,7 @@ static void *lexbor_clone_uri(void *uri)
 {
 	lxb_url_t *lexbor_uri = (lxb_url_t *) uri;
 
-	return lxb_url_clone(lexbor_parser->mraw, lexbor_uri);
+	return lxb_url_clone(lexbor_parser.mraw, lexbor_uri);
 }
 
 static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
@@ -585,8 +582,8 @@ static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t rec
 			if (init_idna() == FAILURE) {
 				return NULL;
 			}
-			lxb_url_serialize_idna(lexbor_parser->idna, lexbor_uri, lexbor_serialize_callback, &uri_str, exclude_fragment);
-			lxb_unicode_idna_clean(lexbor_parser->idna);
+			lxb_url_serialize_idna(lexbor_parser.idna, lexbor_uri, lexbor_serialize_callback, &uri_str, exclude_fragment);
+			lxb_unicode_idna_clean(lexbor_parser.idna);
 			break;
 		case URI_RECOMPOSITION_RAW_ASCII:
 			ZEND_FALLTHROUGH;
