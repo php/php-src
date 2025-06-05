@@ -1323,8 +1323,7 @@ PHP_FUNCTION(tidy_getopt)
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
 	switch (optt) {
 		case TidyString:
-			RETVAL_STR((zend_string*)optval);
-			return;
+			RETURN_STR((zend_string*)optval);
 
 		case TidyInteger:
 			RETURN_LONG((zend_long)optval);
