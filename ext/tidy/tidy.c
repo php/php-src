@@ -798,7 +798,7 @@ static zend_result _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht
 	}
 }
 
-static int php_tidy_parse_string(PHPTidyObj *obj, const char *string, uint32_t len, const char *enc)
+static zend_result php_tidy_parse_string(PHPTidyObj *obj, const char *string, uint32_t len, const char *enc)
 {
 	TidyBuffer buf;
 
