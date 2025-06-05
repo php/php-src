@@ -99,10 +99,10 @@ typedef enum {
 } tidy_base_nodetypes;
 
 struct _PHPTidyDoc {
-	TidyDoc			doc;
-	TidyBuffer		*errbuf;
-	unsigned int	ref_count;
-	unsigned int    initialized:1;
+	TidyDoc     doc;
+	TidyBuffer *errbuf;
+	uint32_t    ref_count;
+	bool        initialized;
 };
 
 struct _PHPTidyObj {
@@ -412,7 +412,7 @@ static void tidy_object_free_storage(zend_object *object)
 	if (intern->ptdoc) {
 		intern->ptdoc->ref_count--;
 
-		if (intern->ptdoc->ref_count <= 0) {
+		if (intern->ptdoc->ref_count == 0) {
 			tidyBufFree(intern->ptdoc->errbuf);
 			efree(intern->ptdoc->errbuf);
 			tidyRelease(intern->ptdoc->doc);
@@ -437,7 +437,7 @@ static zend_object *tidy_object_new(zend_class_entry *class_type, zend_object_ha
 			intern->ptdoc = emalloc(sizeof(PHPTidyDoc));
 			intern->ptdoc->doc = tidyCreate();
 			intern->ptdoc->ref_count = 1;
-			intern->ptdoc->initialized = 0;
+			intern->ptdoc->initialized = false;
 			intern->ptdoc->errbuf = emalloc(sizeof(TidyBuffer));
 			tidyBufInit(intern->ptdoc->errbuf);
 
@@ -814,7 +814,7 @@ static int php_tidy_parse_string(PHPTidyObj *obj, const char *string, uint32_t l
 		}
 	}
 
-	obj->ptdoc->initialized = 1;
+	obj->ptdoc->initialized = true;
 
 	tidyBufInit(&buf);
 	tidyBufAttach(&buf, (byte *) string, len);
