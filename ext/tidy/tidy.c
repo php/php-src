@@ -666,17 +666,16 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 	tempattr = tidyAttrFirst(obj->node);
 
 	if (tempattr) {
-		const char *name, *val;
 		array_init(&attribute);
 
 		do {
-			name = (const char *)tidyAttrName(tempattr);
-			val = (const char *)tidyAttrValue(tempattr);
-			if (name) {
+			const char *attr_name = tidyAttrName(tempattr);
+			if (attr_name) {
+				const char *val = tidyAttrValue(tempattr);
 				if (val) {
-					add_assoc_string(&attribute, name, val);
+					add_assoc_string(&attribute, attr_name, val);
 				} else {
-					add_assoc_str(&attribute, name, zend_empty_string);
+					add_assoc_str(&attribute, attr_name, zend_empty_string);
 				}
 			}
 		} while((tempattr = tidyAttrNext(tempattr)));
