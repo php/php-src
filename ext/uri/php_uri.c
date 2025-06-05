@@ -152,7 +152,7 @@ PHP_METHOD(Uri_WhatWg_UrlValidationError, __construct)
 		RETURN_THROWS();
 	}
 
-	zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("type"), type);
+	zend_update_property_ex(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_TYPE), type);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
@@ -347,21 +347,16 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_na
 		RETURN_THROWS();
 	}
 
-	zval errors;
-	ZVAL_UNDEF(&errors);
-
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	internal_uri->handler = uri_handler_by_name(handler_name, strlen(handler_name));
 	if (internal_uri->uri != NULL) {
 		internal_uri->handler->free_uri(internal_uri->uri);
 	}
-	internal_uri->uri = internal_uri->handler->parse_uri(Z_STR_P(uri_zv), NULL, &errors);
+	internal_uri->uri = internal_uri->handler->parse_uri(Z_STR_P(uri_zv), NULL, NULL);
 	if (internal_uri->uri == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
-		zval_ptr_dtor(&errors);
 		RETURN_THROWS();
 	}
-	zval_ptr_dtor(&errors);
 
 	/* Unserialize regular properties: second array */
 	arr = zend_hash_index_find(data, 1);
