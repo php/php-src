@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fix memory leaks when returning refcounted value from curl callback.
     (nielsdos)
 
+- Streams:
+  . Fixed GH-13264 (fgets() and stream_get_line() do not return false on filter
+    fatal error). (Jakub Zelenka)
+
 03 Jul 2025, PHP 8.3.23
 
 - Core:

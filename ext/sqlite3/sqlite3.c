@@ -1165,6 +1165,7 @@ static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int wh
 					sqlite3_stream->position = sqlite3_stream->position + offset;
 					*newoffs = sqlite3_stream->position;
 					stream->eof = 0;
+					stream->fatal_error = 0;
 					return 0;
 				}
 			} else {
@@ -1176,6 +1177,7 @@ static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int wh
 					sqlite3_stream->position = sqlite3_stream->position + offset;
 					*newoffs = sqlite3_stream->position;
 					stream->eof = 0;
+					stream->fatal_error = 0;
 					return 0;
 				}
 			}
@@ -1188,6 +1190,7 @@ static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int wh
 				sqlite3_stream->position = offset;
 				*newoffs = sqlite3_stream->position;
 				stream->eof = 0;
+				stream->fatal_error = 0;
 				return 0;
 			}
 		case SEEK_END:
@@ -1203,6 +1206,7 @@ static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int wh
 				sqlite3_stream->position = sqlite3_stream->size + offset;
 				*newoffs = sqlite3_stream->position;
 				stream->eof = 0;
+				stream->fatal_error = 0;
 				return 0;
 			}
 		default:
