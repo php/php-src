@@ -52,6 +52,7 @@ void free_zend_constant(zval *zv)
 		}
 		if (c->attributes) {
 			zend_hash_release(c->attributes);
+			c->attributes = NULL;
 		}
 		efree(c);
 	} else {
@@ -64,6 +65,7 @@ void free_zend_constant(zval *zv)
 		}
 		if (c->attributes) {
 			zend_hash_release(c->attributes);
+			c->attributes = NULL;
 		}
 		free(c);
 	}
