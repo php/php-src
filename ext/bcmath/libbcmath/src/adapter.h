@@ -21,7 +21,11 @@
 #define _BCMATH_ADAPTER_H_
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#  ifdef PHP_WIN32
+#    include "../../../../main/config.w32.h"
+#  else
+#    include <php_config.h>
+#  endif
 #endif
 
 #include "zend.h"
