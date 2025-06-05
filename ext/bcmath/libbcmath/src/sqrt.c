@@ -60,14 +60,8 @@ bool bc_sqrt(bc_num *num, size_t scale)
 
 	/* Initialize the variables. */
 	size_t cscale;
-	bc_num guess, guess1, point5, diff;
+	bc_num guess;
 	size_t rscale = MAX(scale, (*num)->n_scale);
-
-	bc_init_num(&guess1);
-	bc_init_num(&diff);
-	point5 = bc_new_num (1, 1);
-	point5->n_value[1] = 5;
-
 
 	/* Calculate the initial guess. */
 	if (num_cmp_one == BCMATH_RIGHT_GREATER) {
@@ -86,6 +80,11 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		bc_free_num (&guess1);
 		cscale = 3;
 	}
+
+	bc_num guess1 = NULL;
+	bc_num point5 = bc_new_num (1, 1);
+	point5->n_value[1] = 5;
+	bc_num diff = NULL;
 
 	/* Find the square root using Newton's algorithm. */
 	bool done = false;
