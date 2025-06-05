@@ -63,7 +63,7 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 			case BC_ROUND_AWAY_FROM_ZERO:
 				break;
 
-			EMPTY_SWITCH_DEFAULT_CASE()
+			BC_EMPTY_SWITCH_DEFAULT_CASE()
 		}
 
 		if (bc_is_zero(num)) {
@@ -164,7 +164,7 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 			/* if *nptr == 0, a loop is required for judgment. */
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		BC_EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	/* Loop through the remaining digits. */
@@ -198,7 +198,7 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		BC_EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 up:
