@@ -38,4 +38,13 @@ typedef zend_string bc_string;
 #define BC_STR_LEN(s) ZSTR_LEN(s)
 #define bc_string_alloc(len, persistent) zend_string_alloc((len), (persistent))
 
+#define bc_safe_emalloc(n, size, offset) (safe_emalloc((n), (size), (offset)))
+#define bc_efree(ptr) (efree((ptr)))
+
+#define bc_pemalloc(size, persistent) (pemalloc((size), (persistent)))
+#define bc_pefree(ptr, persistent) (pefree((ptr), (persistent)))
+
+#define bc_safe_address_guarded(n, size, offset) (zend_safe_address_guarded((n), (size), (offset)))
+#define BC_MM_ALIGNMENT ZEND_MM_ALIGNMENT
+
 #endif

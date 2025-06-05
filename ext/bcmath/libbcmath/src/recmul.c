@@ -35,7 +35,6 @@
 #include <stdbool.h>
 #include "private.h"
 #include "convert.h"
-#include "zend_alloc.h"
 
 
 /* Multiply utility routines */
@@ -135,7 +134,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
 		 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
 		 */
-		n1_vector = safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
+		n1_vector = bc_safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
 	}
 	BC_VECTOR *n2_vector = n1_vector + n1_arr_size;
 	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
@@ -154,7 +153,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	bc_convert_vector_to_char(prod_vector, pptr, pend, prod_arr_size);
 
 	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
-		efree(n1_vector);
+		bc_efree(n1_vector);
 	}
 }
 

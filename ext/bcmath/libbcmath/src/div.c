@@ -35,7 +35,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-#include "zend_alloc.h"
 
 /*
  * This function should be used when the divisor is not split into multiple chunks, i.e. when the size of the array is one.
@@ -267,7 +266,7 @@ static void bc_do_div(
 	if (allocation_arr_size <= BC_STACK_VECTOR_SIZE) {
 		numerator_vectors = stack_vectors;
 	} else {
-		numerator_vectors = safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
+		numerator_vectors = bc_safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
 	}
 	BC_VECTOR *divisor_vectors = numerator_vectors + numerator_arr_size;
 	BC_VECTOR *quot_vectors = divisor_vectors + divisor_arr_size;
@@ -296,7 +295,7 @@ static void bc_do_div(
 	bc_convert_vector_to_char(quot_vectors, qptr, qend, quot_real_arr_size);
 
 	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
-		efree(numerator_vectors);
+		bc_efree(numerator_vectors);
 	}
 }
 

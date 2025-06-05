@@ -33,12 +33,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-#include "zend_alloc.h"
 
 static bc_num _bc_new_num_nonzeroed_ex_internal(size_t length, size_t scale, bool persistent)
 {
-	size_t required_size = zend_safe_address_guarded(1, sizeof(bc_struct) + (ZEND_MM_ALIGNMENT - 1) + length, scale);
-	required_size &= -ZEND_MM_ALIGNMENT;
+	size_t required_size = bc_safe_address_guarded(1, sizeof(bc_struct) + (BC_MM_ALIGNMENT - 1) + length, scale);
+	required_size &= -BC_MM_ALIGNMENT;
 	bc_num temp;
 
 	if (!persistent && BCG(arena) && required_size <= BC_ARENA_SIZE - BCG(arena_offset)) {
@@ -46,8 +45,7 @@ static bc_num _bc_new_num_nonzeroed_ex_internal(size_t length, size_t scale, boo
 		BCG(arena_offset) += required_size;
 		temp->n_refs = 2; /* prevent freeing */
 	} else {
-		/* PHP Change: malloc() -> pemalloc(), removed free_list code, merged n_ptr and n_value */
-		temp = pemalloc(required_size, persistent);
+		temp = bc_pemalloc(required_size, persistent);
 		temp->n_refs = 1;
 	}
 
@@ -80,7 +78,7 @@ void _bc_free_num_ex(bc_num *num, bool persistent)
 	}
 	(*num)->n_refs--;
 	if ((*num)->n_refs == 0) {
-		pefree(*num, persistent);
+		bc_pefree(*num, persistent);
 	}
 	*num = NULL;
 }
@@ -99,7 +97,7 @@ void bc_init_numbers(void)
 
 void bc_force_free_number(bc_num *num)
 {
-	pefree(*num, 1);
+	bc_pefree(*num, 1);
 	*num = NULL;
 }
 

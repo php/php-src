@@ -112,7 +112,7 @@ static bc_num bc_standard_raise(
 	size_t max_power_arr_size =	base_arr_size * exponent;
 
 	/* The allocated memory area is reused on a rotational basis, so the same size is required. */
-	BC_VECTOR *buf = safe_emalloc(max_power_arr_size, sizeof(BC_VECTOR) * 3, 0);
+	BC_VECTOR *buf = bc_safe_emalloc(max_power_arr_size, sizeof(BC_VECTOR) * 3, 0);
 	BC_VECTOR *base_vector = buf;
 	BC_VECTOR *power_vector = base_vector + max_power_arr_size;
 	BC_VECTOR *tmp_result_vector = power_vector + max_power_arr_size;
@@ -162,7 +162,7 @@ static bc_num bc_standard_raise(
 
 	bc_convert_vector_to_char(power_vector, pptr, pend, power_arr_size);
 
-	efree(buf);
+	bc_efree(buf);
 
 	return power;
 }
