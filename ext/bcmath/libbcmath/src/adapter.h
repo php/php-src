@@ -68,4 +68,9 @@ typedef zend_long bc_long;
 #  define BC_HAVE_BUILTIN_CTZL
 #endif
 
+#define BC_ASSERT(cond) ZEND_ASSERT(cond)
+
+#define BC_BYTES_SWAP64(x) ZEND_BYTES_SWAP64(x)
+#define BC_BYTES_SWAP32(x) ZEND_BYTES_SWAP32(x)
+
 #endif

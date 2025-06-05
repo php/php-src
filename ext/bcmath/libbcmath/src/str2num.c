@@ -112,7 +112,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 	const char *fractional_end = NULL;
 	bool zero_int = false;
 
-	ZEND_ASSERT(*num == NULL);
+	BC_ASSERT(*num == NULL);
 
 	/* Check for valid number and count digits. */
 	if ((*ptr == '+') || (*ptr == '-')) {

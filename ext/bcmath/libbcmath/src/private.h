@@ -45,13 +45,13 @@
 #define SWAR_REPEAT(x) (SWAR_ONES * (x))
 
 #if SIZEOF_SIZE_T >= 8
-#  define BC_BSWAP(u) ZEND_BYTES_SWAP64(u)
+#  define BC_BSWAP(u) BC_BYTES_SWAP64(u)
    typedef uint64_t BC_VECTOR;
 #  define BC_VECTOR_SIZE 8
 /* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
 #else
-#  define BC_BSWAP(u) ZEND_BYTES_SWAP32(u)
+#  define BC_BSWAP(u) BC_BYTES_SWAP32(u)
    typedef uint32_t BC_VECTOR;
 #  define BC_VECTOR_SIZE 4
 /* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
