@@ -1085,5 +1085,11 @@ END_EXTERN_C()
 /* Context API Macros */
 #define ZEND_ASYNC_NEW_CONTEXT(parent) zend_async_new_context_fn(parent)
 #define ZEND_ASYNC_CURRENT_CONTEXT (ZEND_ASYNC_G(coroutine) != NULL ? ZEND_ASYNC_G(coroutine)->scope->context : NULL)
+#define ZEND_ASYNC_GET_COROUTINE_CONTEXT() \
+	((ZEND_ASYNC_G(coroutine)) ? \
+		(ZEND_ASYNC_G(coroutine)->context ? \
+			ZEND_ASYNC_G(coroutine)->context : \
+			(ZEND_ASYNC_G(coroutine)->context = ZEND_ASYNC_NEW_CONTEXT(NULL))) \
+		: NULL)
 
 #endif //ZEND_ASYNC_API_H
