@@ -508,16 +508,18 @@ struct _zend_async_filesystem_event_s {
 
 struct _zend_async_dns_nameinfo_s {
 	zend_async_event_t base;
-	const char *hostname;
-	const char *service;
+	/* These structure fields store the RESULT of the operation.
+	 * It will be automatically freed when the structure is destroyed. */
+	zend_string *hostname;
+	zend_string *service;
 };
 
 struct _zend_async_dns_addrinfo_s {
 	zend_async_event_t base;
 	const char *node;
 	const char *service;
-	const struct addrinfo *hints;
-	int flags;
+	/* The DNS resolution result must be explicitly and mandatorily freed using the ZEND_ASYNC_FREEADDRINFO method! */
+	struct addrinfo *result;
 };
 
 struct _zend_async_exec_event_s {
