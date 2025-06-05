@@ -197,6 +197,7 @@ typedef zend_async_dns_nameinfo_t* (*zend_async_getnameinfo_t)(const struct sock
 typedef zend_async_dns_addrinfo_t* (*zend_async_getaddrinfo_t)(
 	const char *node, const char *service, const struct addrinfo *hints, size_t extra_size
 );
+typedef void (*zend_async_freeaddrinfo_t)(struct addrinfo *ai);
 
 typedef zend_async_exec_event_t* (*zend_async_new_exec_event_t) (
 	zend_async_exec_mode exec_mode,
@@ -935,6 +936,7 @@ ZEND_API extern zend_async_new_filesystem_event_t zend_async_new_filesystem_even
 
 ZEND_API extern zend_async_getnameinfo_t zend_async_getnameinfo_fn;
 ZEND_API extern zend_async_getaddrinfo_t zend_async_getaddrinfo_fn;
+ZEND_API extern zend_async_freeaddrinfo_t zend_async_freeaddrinfo_fn;
 
 /* Exec API */
 ZEND_API extern zend_async_new_exec_event_t zend_async_new_exec_event_fn;
@@ -978,6 +980,7 @@ ZEND_API bool zend_async_reactor_register(
     zend_async_new_filesystem_event_t new_filesystem_event_fn,
     zend_async_getnameinfo_t getnameinfo_fn,
     zend_async_getaddrinfo_t getaddrinfo_fn,
+    zend_async_freeaddrinfo_t freeaddrinfo_fn,
     zend_async_new_exec_event_t new_exec_event_fn,
     zend_async_exec_t exec_fn
 );
@@ -1066,6 +1069,7 @@ END_EXTERN_C()
 #define ZEND_ASYNC_GETNAMEINFO_EX(addr, flags, extra_size) zend_async_getnameinfo_fn(addr, flags, extra_size)
 #define ZEND_ASYNC_GETADDRINFO(node, service, hints) zend_async_getaddrinfo_fn(node, service, hints, 0)
 #define ZEND_ASYNC_GETADDRINFO_EX(node, service, hints, extra_size) zend_async_getaddrinfo_fn(node, service, hints, extra_size)
+#define ZEND_ASYNC_FREEADDRINFO(ai) zend_async_freeaddrinfo_fn(ai)
 
 #define ZEND_ASYNC_NEW_EXEC_EVENT(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env) \
 	zend_async_new_exec_event_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, 0)

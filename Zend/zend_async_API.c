@@ -91,6 +91,7 @@ zend_async_new_filesystem_event_t zend_async_new_filesystem_event_fn = NULL;
 
 zend_async_getnameinfo_t zend_async_getnameinfo_fn = NULL;
 zend_async_getaddrinfo_t zend_async_getaddrinfo_fn = NULL;
+zend_async_freeaddrinfo_t zend_async_freeaddrinfo_fn = NULL;
 
 zend_async_new_exec_event_t zend_async_new_exec_event_fn = NULL;
 zend_async_exec_t zend_async_exec_fn = NULL;
@@ -247,6 +248,7 @@ ZEND_API bool zend_async_reactor_register(
     zend_async_new_filesystem_event_t new_filesystem_event_fn,
     zend_async_getnameinfo_t getnameinfo_fn,
     zend_async_getaddrinfo_t getaddrinfo_fn,
+    zend_async_freeaddrinfo_t freeaddrinfo_fn,
     zend_async_new_exec_event_t new_exec_event_fn,
     zend_async_exec_t exec_fn
 )
@@ -285,6 +287,7 @@ ZEND_API bool zend_async_reactor_register(
 
 	zend_async_getnameinfo_fn = getnameinfo_fn;
 	zend_async_getaddrinfo_fn = getaddrinfo_fn;
+	zend_async_freeaddrinfo_fn = freeaddrinfo_fn;
 
 	zend_async_new_exec_event_fn = new_exec_event_fn;
 	zend_async_exec_fn = exec_fn;
