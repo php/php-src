@@ -24,6 +24,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fix memory leak on php_odbc_fetch_hash() failure. (nielsdos)
 
+- Opcache:
+  . Fixed bug GH-18743 (Incompatibility in Inline TLS Assembly on Alpine 3.22).
+    (nielsdos, Arnaud)
+
 - OpenSSL:
   . Fix memory leak of X509_STORE in php_openssl_setup_verify() on failure.
     (nielsdos)
