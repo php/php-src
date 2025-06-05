@@ -52,7 +52,6 @@ void free_zend_constant(zval *zv)
 		}
 		if (c->attributes) {
 			zend_hash_release(c->attributes);
-			c->attributes = NULL;
 		}
 		efree(c);
 	} else {
@@ -65,7 +64,6 @@ void free_zend_constant(zval *zv)
 		}
 		if (c->attributes) {
 			zend_hash_release(c->attributes);
-			c->attributes = NULL;
 		}
 		free(c);
 	}
@@ -87,7 +85,8 @@ static void copy_zend_constant(zval *zv)
 		c->filename = zend_string_copy(c->filename);
 	}
 	if (c->attributes != NULL) {
-		c->attributes = zend_array_dup(c->attributes);
+		// Use the same attributes table
+		GC_ADDREF(c->attributes);
 	}
 	if (Z_TYPE(c->value) == IS_STRING) {
 		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
