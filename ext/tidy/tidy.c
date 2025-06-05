@@ -124,7 +124,7 @@ static zend_result tidy_doc_cast_handler(zend_object *, zval *, int);
 static zend_result tidy_node_cast_handler(zend_object *, zval *, int);
 static void tidy_doc_update_properties(PHPTidyObj *);
 static void tidy_add_node_default_properties(PHPTidyObj *);
-static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType *);
+static void *php_tidy_get_opt_val(const PHPTidyDoc *, TidyOption, TidyOptionType *);
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes);
 static zend_result _php_tidy_set_tidy_opt(TidyDoc, const char *, zval *, uint32_t arg);
 static zend_result _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht_options, uint32_t arg);
@@ -417,7 +417,7 @@ static void tidy_object_free_storage(zend_object *object)
 	}
 }
 
-static zend_object *tidy_object_new(zend_class_entry *class_type, zend_object_handlers *handlers, tidy_obj_type objtype)
+static zend_object *tidy_object_new(zend_class_entry *class_type, const zend_object_handlers *handlers, tidy_obj_type objtype)
 {
 	PHPTidyObj *intern;
 
@@ -718,13 +718,13 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 	zval_ptr_dtor(&children);
 }
 
-static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionType *type)
+static void *php_tidy_get_opt_val(const PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionType *type)
 {
 	*type = tidyOptGetType(opt);
 
 	switch (*type) {
 		case TidyString: {
-			char *val = (char *) tidyOptGetValue(ptdoc->doc, tidyOptGetId(opt));
+			const char *val = tidyOptGetValue(ptdoc->doc, tidyOptGetId(opt));
 			if (val) {
 				return (void *) zend_string_init(val, strlen(val), 0);
 			} else {
