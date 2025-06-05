@@ -56,7 +56,7 @@ static inline const char *bc_count_digits(const char *str, const char *end)
 		int mask = bc_simd_movemask_8x16(bytes);
 		if (mask != 0xffff) {
 			/* At least one of the bytes is not within range. Move to the first offending byte. */
-#ifdef PHP_HAVE_BUILTIN_CTZL
+#ifdef BC_HAVE_BUILTIN_CTZL
 			return str + __builtin_ctz(~mask);
 #else
 			break;

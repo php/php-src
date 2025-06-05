@@ -64,4 +64,8 @@ typedef zend_long bc_long;
 
 #define BC_EMPTY_SWITCH_DEFAULT_CASE() EMPTY_SWITCH_DEFAULT_CASE()
 
+#ifdef PHP_HAVE_BUILTIN_CTZL
+#  define BC_HAVE_BUILTIN_CTZL
+#endif
+
 #endif
