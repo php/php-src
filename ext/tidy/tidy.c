@@ -1330,11 +1330,7 @@ PHP_FUNCTION(tidy_getopt)
 			break;
 
 		case TidyBoolean:
-			if (optval) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
+			RETURN_BOOL(optval);
 			break;
 
 		default:
@@ -1488,11 +1484,7 @@ PHP_METHOD(tidyNode, hasChildren)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (tidyGetChild(obj->node)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(tidyGetChild(obj->node));
 }
 /* }}} */
 
@@ -1501,11 +1493,7 @@ PHP_METHOD(tidyNode, hasSiblings)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (obj->node && tidyGetNext(obj->node)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(obj->node && tidyGetNext(obj->node));
 }
 /* }}} */
 
@@ -1514,11 +1502,7 @@ PHP_METHOD(tidyNode, isComment)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (tidyNodeGetType(obj->node) == TidyNode_Comment) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(tidyNodeGetType(obj->node) == TidyNode_Comment);
 }
 /* }}} */
 
@@ -1543,11 +1527,7 @@ PHP_METHOD(tidyNode, isText)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (tidyNodeGetType(obj->node) == TidyNode_Text) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(tidyNodeGetType(obj->node) == TidyNode_Text);
 }
 /* }}} */
 
@@ -1556,11 +1536,7 @@ PHP_METHOD(tidyNode, isJste)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (tidyNodeGetType(obj->node) == TidyNode_Jste) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(tidyNodeGetType(obj->node) == TidyNode_Jste);
 }
 /* }}} */
 
@@ -1569,11 +1545,7 @@ PHP_METHOD(tidyNode, isAsp)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (tidyNodeGetType(obj->node) == TidyNode_Asp) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(tidyNodeGetType(obj->node) == TidyNode_Asp);
 }
 /* }}} */
 
@@ -1582,11 +1554,7 @@ PHP_METHOD(tidyNode, isPhp)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
-	if (tidyNodeGetType(obj->node) == TidyNode_Php) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(tidyNodeGetType(obj->node) == TidyNode_Php);
 }
 /* }}} */
 
