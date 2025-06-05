@@ -79,4 +79,7 @@ typedef zend_long bc_long;
 #  define BC_LITTLE_ENDIAN 1
 #endif
 
+/* SIZEOF_SIZE_T, EXPECTED, UNEXPECTED, and BCG() have clear meanings and
+ * would not be difficult to modify if needed, so they will not be replaced. */
+
 #endif
