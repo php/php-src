@@ -76,14 +76,12 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		cscale = (*num)->n_scale;
 	} else {
 		/* The number is greater than 1.  Guess should start at 10^(exp/2). */
-		bc_init_num(&guess);
-		bc_int2num(&guess, 10);
+		/* If just divide size_t by 2 it will not overflow. */
+		size_t exponent_for_initial_guess = (size_t) (*num)->n_len >> 1;
 
-		bc_int2num(&guess1, (*num)->n_len);
-		bc_multiply_ex(guess1, point5, &guess1, 0);
-		guess1->n_scale = 0;
-		bc_raise_bc_exponent(guess, guess1, &guess, 0);
-		bc_free_num (&guess1);
+		/* 10^n is a 1 followed by n zeros. */
+		guess = bc_new_num(exponent_for_initial_guess + 1, 0);
+		guess->n_value[0] = 1;
 		cscale = 3;
 	}
 
