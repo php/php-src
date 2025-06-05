@@ -33,7 +33,6 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include "zend_portability.h"
 
 #ifndef _BCMATH_PRIV_H_
 #define _BCMATH_PRIV_H_
