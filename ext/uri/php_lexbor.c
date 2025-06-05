@@ -215,7 +215,7 @@ static void fill_errors(zval *errors)
 
 		zval error_type;
 		zend_enum_new(&error_type, uri_whatwg_url_validation_error_type_ce, error_str, NULL);
-		zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZEND_STRL("type"), &error_type);
+		zend_update_property_ex(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZSTR_KNOWN(ZEND_STR_TYPE), &error_type);
 		zend_string_release_ex(error_str, false);
 		zval_ptr_dtor(&error_type);
 
@@ -321,7 +321,7 @@ static zend_result lexbor_write_password(struct uri_internal_t *internal_uri, zv
 	return SUCCESS;
 }
 
-static ZEND_RESULT_CODE init_idna(void)
+static zend_result init_idna(void)
 {
 	if (lexbor_parser->idna != NULL) {
 		return SUCCESS;
@@ -471,7 +471,7 @@ static zend_result lexbor_write_query(struct uri_internal_t *internal_uri, zval 
 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
-	if ( lxb_url_api_search_set(lexbor_uri, lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
+	if (lxb_url_api_search_set(lexbor_uri, lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
 		fill_errors(errors);
 
 		return FAILURE;
