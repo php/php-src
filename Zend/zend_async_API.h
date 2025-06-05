@@ -156,11 +156,7 @@ typedef struct _zend_async_exec_event_s zend_async_exec_event_t;
 
 typedef struct _zend_async_task_s zend_async_task_t;
 
-typedef uint32_t (*zend_async_internal_context_key_alloc_t)(const char *key_name);
-typedef const char* (*zend_async_internal_context_key_name_t)(uint32_t key);
-typedef bool (*zend_async_internal_context_get_t)(zend_coroutine_t *coroutine, uint32_t key, zval *result);
-typedef void (*zend_async_internal_context_set_t)(zend_coroutine_t *coroutine, uint32_t key, zval *value);
-typedef bool (*zend_async_internal_context_unset_t)(zend_coroutine_t *coroutine, uint32_t key);
+/* Internal context typedefs removed - using direct functions */
 
 typedef zend_coroutine_t * (*zend_async_new_coroutine_t)(zend_async_scope_t *scope);
 typedef zend_async_scope_t * (*zend_async_new_scope_t)(zend_async_scope_t * parent_scope);
@@ -928,12 +924,18 @@ ZEND_API extern zend_async_get_class_ce_t zend_async_get_class_ce_fn;
 /* Context API */
 ZEND_API extern zend_async_new_context_t zend_async_new_context_fn;
 
-/* Internal Context API */
-ZEND_API extern zend_async_internal_context_key_alloc_t zend_async_internal_context_key_alloc_fn;
-ZEND_API extern zend_async_internal_context_key_name_t zend_async_internal_context_key_name_fn;
-ZEND_API extern zend_async_internal_context_get_t zend_async_internal_context_get_fn;
-ZEND_API extern zend_async_internal_context_set_t zend_async_internal_context_set_fn;
-ZEND_API extern zend_async_internal_context_unset_t zend_async_internal_context_unset_fn;
+/* Internal Context API - Direct Functions */
+ZEND_API uint32_t zend_async_internal_context_key_alloc(const char *key_name);
+ZEND_API const char* zend_async_internal_context_key_name(uint32_t key);
+ZEND_API bool zend_async_internal_context_get(zend_coroutine_t *coroutine, uint32_t key, zval *result);
+ZEND_API void zend_async_internal_context_set(zend_coroutine_t *coroutine, uint32_t key, zval *value);
+ZEND_API bool zend_async_internal_context_unset(zend_coroutine_t *coroutine, uint32_t key);
+
+/* Internal Context initialization and cleanup */
+ZEND_API void zend_async_init_internal_context_api(void);
+ZEND_API void zend_async_coroutine_dispose_internal_context(zend_coroutine_t *coroutine);
+ZEND_API void zend_async_shutdown_internal_context_api(void);
+ZEND_API void zend_async_coroutine_init_internal_context(zend_coroutine_t *coroutine);
 
 /* Reactor API */
 
@@ -970,11 +972,6 @@ ZEND_API bool zend_async_scheduler_register(
 	zend_async_new_coroutine_t new_coroutine_fn,
 	zend_async_new_scope_t new_scope_fn,
 	zend_async_new_context_t new_context_fn,
-	zend_async_internal_context_key_alloc_t internal_context_key_alloc_fn,
-	zend_async_internal_context_key_name_t internal_context_key_name_fn,
-	zend_async_internal_context_get_t internal_context_get_fn,
-	zend_async_internal_context_set_t internal_context_set_fn,
-	zend_async_internal_context_unset_t internal_context_unset_fn,
     zend_async_spawn_t spawn_fn,
     zend_async_suspend_t suspend_fn,
     zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
@@ -1114,10 +1111,10 @@ END_EXTERN_C()
 		: NULL)
 
 /* Internal Context API Macros */
-#define ZEND_ASYNC_INTERNAL_CONTEXT_KEY_ALLOC(key_name) zend_async_internal_context_key_alloc_fn(key_name)
-#define ZEND_ASYNC_INTERNAL_CONTEXT_KEY_NAME(key) zend_async_internal_context_key_name_fn(key)
-#define ZEND_ASYNC_INTERNAL_CONTEXT_GET(coro, key, result) zend_async_internal_context_get_fn(coro, key, result)
-#define ZEND_ASYNC_INTERNAL_CONTEXT_SET(coro, key, value) zend_async_internal_context_set_fn(coro, key, value)
-#define ZEND_ASYNC_INTERNAL_CONTEXT_UNSET(coro, key) zend_async_internal_context_unset_fn(coro, key)
+#define ZEND_ASYNC_INTERNAL_CONTEXT_KEY_ALLOC(key_name) zend_async_internal_context_key_alloc(key_name)
+#define ZEND_ASYNC_INTERNAL_CONTEXT_KEY_NAME(key) zend_async_internal_context_key_name(key)
+#define ZEND_ASYNC_INTERNAL_CONTEXT_GET(coro, key, result) zend_async_internal_context_get(coro, key, result)
+#define ZEND_ASYNC_INTERNAL_CONTEXT_SET(coro, key, value) zend_async_internal_context_set(coro, key, value)
+#define ZEND_ASYNC_INTERNAL_CONTEXT_UNSET(coro, key) zend_async_internal_context_unset(coro, key)
 
 #endif //ZEND_ASYNC_API_H

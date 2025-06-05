@@ -45,34 +45,7 @@ static zend_async_context_t * new_context(void)
 	return NULL;
 }
 
-static uint32_t internal_context_key_alloc(const char *key_name)
-{
-	ASYNC_THROW_ERROR("Internal Context API is not enabled");
-	return 0;
-}
-
-static const char* internal_context_key_name(uint32_t key)
-{
-	ASYNC_THROW_ERROR("Internal Context API is not enabled");
-	return NULL;
-}
-
-static bool internal_context_get(zend_coroutine_t *coroutine, uint32_t key, zval *result)
-{
-	ASYNC_THROW_ERROR("Internal Context API is not enabled");
-	return false;
-}
-
-static void internal_context_set(zend_coroutine_t *coroutine, uint32_t key, zval *value)
-{
-	ASYNC_THROW_ERROR("Internal Context API is not enabled");
-}
-
-static bool internal_context_unset(zend_coroutine_t *coroutine, uint32_t key)
-{
-	ASYNC_THROW_ERROR("Internal Context API is not enabled");
-	return false;
-}
+/* Internal context stubs removed - using direct implementation */
 
 static zend_class_entry * get_class_ce(zend_async_class type)
 {
@@ -131,12 +104,7 @@ zend_async_queue_task_t zend_async_queue_task_fn = NULL;
 /* Context API */
 zend_async_new_context_t zend_async_new_context_fn = new_context;
 
-/* Internal Context API */
-zend_async_internal_context_key_alloc_t zend_async_internal_context_key_alloc_fn = internal_context_key_alloc;
-zend_async_internal_context_key_name_t zend_async_internal_context_key_name_fn = internal_context_key_name;
-zend_async_internal_context_get_t zend_async_internal_context_get_fn = internal_context_get;
-zend_async_internal_context_set_t zend_async_internal_context_set_fn = internal_context_set;
-zend_async_internal_context_unset_t zend_async_internal_context_unset_fn = internal_context_unset;
+/* Internal Context API - now uses direct functions */
 
 ZEND_API bool zend_async_is_enabled(void)
 {
@@ -205,6 +173,7 @@ void zend_async_globals_dtor(void)
 void zend_async_shutdown(void)
 {
 	zend_async_globals_dtor();
+	zend_async_shutdown_internal_context_api();
 }
 
 ZEND_API int zend_async_get_api_version_number(void)
@@ -218,11 +187,6 @@ ZEND_API bool zend_async_scheduler_register(
 	zend_async_new_coroutine_t new_coroutine_fn,
 	zend_async_new_scope_t new_scope_fn,
 	zend_async_new_context_t new_context_fn,
-	zend_async_internal_context_key_alloc_t internal_context_key_alloc_fn,
-	zend_async_internal_context_key_name_t internal_context_key_name_fn,
-	zend_async_internal_context_get_t internal_context_get_fn,
-	zend_async_internal_context_set_t internal_context_set_fn,
-	zend_async_internal_context_unset_t internal_context_unset_fn,
     zend_async_spawn_t spawn_fn,
     zend_async_suspend_t suspend_fn,
     zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
@@ -257,11 +221,6 @@ ZEND_API bool zend_async_scheduler_register(
 	zend_async_new_coroutine_fn = new_coroutine_fn;
 	zend_async_new_scope_fn = new_scope_fn;
 	zend_async_new_context_fn = new_context_fn;
-	zend_async_internal_context_key_alloc_fn = internal_context_key_alloc_fn;
-	zend_async_internal_context_key_name_fn = internal_context_key_name_fn;
-	zend_async_internal_context_get_fn = internal_context_get_fn;
-	zend_async_internal_context_set_fn = internal_context_set_fn;
-	zend_async_internal_context_unset_fn = internal_context_unset_fn;
     zend_async_spawn_fn = spawn_fn;
     zend_async_suspend_fn = suspend_fn;
     zend_async_enqueue_coroutine_fn = enqueue_coroutine_fn;
@@ -773,4 +732,158 @@ ZEND_API ZEND_COLD zend_object * zend_async_throw_timeout(const char *format, co
 
 //////////////////////////////////////////////////////////////////////
 /* Exception API end */
+//////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+/* Internal Context API */
+//////////////////////////////////////////////////////////////////////
+
+// Global variables for internal context key management
+static HashTable *zend_async_context_key_names = NULL;
+
+#ifdef TSRM
+static MUTEX_T zend_async_context_mutex = NULL;
+#endif
+
+void zend_async_init_internal_context_api(void) 
+{
+#ifdef TSRM
+    zend_async_context_mutex = tsrm_mutex_alloc();
+#endif
+    // Initialize key names table - stores string pointers directly
+    zend_async_context_key_names = pemalloc(sizeof(HashTable), 1);
+    zend_hash_init(zend_async_context_key_names, 8, NULL, NULL, 1);  // No destructor - we don't own the strings
+}
+
+uint32_t zend_async_internal_context_key_alloc(const char *key_name) 
+{
+#ifdef TSRM
+    tsrm_mutex_lock(zend_async_context_mutex);
+#endif
+    
+    // Check if this string address already has a key
+    const char **existing_ptr;
+    ZEND_HASH_FOREACH_NUM_KEY_PTR(zend_async_context_key_names, zend_ulong existing_key, existing_ptr) {
+        if (*existing_ptr == key_name) {
+            // Found existing key for this string address
+#ifdef TSRM
+            tsrm_mutex_unlock(zend_async_context_mutex);
+#endif
+            return (uint32_t)existing_key;
+        }
+    } ZEND_HASH_FOREACH_END();
+    
+    // Use next available index as key
+    uint32_t key = zend_hash_num_elements(zend_async_context_key_names) + 1;
+    
+    // Store string pointer directly
+    zend_hash_index_add_ptr(zend_async_context_key_names, key, (void*)key_name);
+    
+#ifdef TSRM
+    tsrm_mutex_unlock(zend_async_context_mutex);
+#endif
+    
+    return key;
+}
+
+const char* zend_async_internal_context_key_name(uint32_t key) 
+{
+    if (zend_async_context_key_names == NULL) {
+        return NULL;
+    }
+    
+#ifdef TSRM
+    tsrm_mutex_lock(zend_async_context_mutex);
+#endif
+    
+    const char *name = zend_hash_index_find_ptr(zend_async_context_key_names, key);
+    
+#ifdef TSRM
+    tsrm_mutex_unlock(zend_async_context_mutex);
+#endif
+    
+    return name;
+}
+
+bool zend_async_internal_context_get(zend_coroutine_t *coroutine, uint32_t key, zval *result) 
+{
+    if (coroutine == NULL || coroutine->internal_context == NULL) {
+        return false;
+    }
+    
+    zval *value = zend_hash_index_find(coroutine->internal_context, key);
+    if (value == NULL) {
+        return false;
+    }
+    
+    ZVAL_COPY(result, value);
+    return true;
+}
+
+void zend_async_internal_context_set(zend_coroutine_t *coroutine, uint32_t key, zval *value) 
+{
+    if (coroutine == NULL) {
+        return;
+    }
+    
+    // Initialize internal_context if needed
+    if (coroutine->internal_context == NULL) {
+        coroutine->internal_context = emalloc(sizeof(HashTable));
+        zend_hash_init(coroutine->internal_context, 8, NULL, ZVAL_PTR_DTOR, 0);
+    }
+    
+    // Set the value
+    zval copy;
+    ZVAL_COPY(&copy, value);
+    zend_hash_index_update(coroutine->internal_context, key, &copy);
+}
+
+bool zend_async_internal_context_unset(zend_coroutine_t *coroutine, uint32_t key) 
+{
+    if (coroutine == NULL || coroutine->internal_context == NULL) {
+        return false;
+    }
+    
+    return zend_hash_index_del(coroutine->internal_context, key) == SUCCESS;
+}
+
+void zend_async_coroutine_dispose_internal_context(zend_coroutine_t *coroutine) 
+{
+    if (coroutine->internal_context != NULL) {
+        zend_hash_destroy(coroutine->internal_context);
+        efree(coroutine->internal_context);
+        coroutine->internal_context = NULL;
+    }
+}
+
+void zend_async_shutdown_internal_context_api(void) 
+{
+#ifdef TSRM
+    if (zend_async_context_mutex != NULL) {
+        tsrm_mutex_lock(zend_async_context_mutex);
+    }
+#endif
+    
+    if (zend_async_context_key_names != NULL) {
+        zend_hash_destroy(zend_async_context_key_names);
+        pefree(zend_async_context_key_names, 1);
+        zend_async_context_key_names = NULL;
+    }
+    
+#ifdef TSRM
+    if (zend_async_context_mutex != NULL) {
+        tsrm_mutex_unlock(zend_async_context_mutex);
+        tsrm_mutex_free(zend_async_context_mutex);
+        zend_async_context_mutex = NULL;
+    }
+#endif
+}
+
+void zend_async_coroutine_init_internal_context(zend_coroutine_t *coroutine)
+{
+    coroutine->internal_context = NULL;
+}
+
+//////////////////////////////////////////////////////////////////////
+/* Internal Context API end */
 //////////////////////////////////////////////////////////////////////
