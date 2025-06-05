@@ -5,6 +5,9 @@ openssl
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die("skip not reliable on Windows due to proxy wait limitation");
+}
 ?>
 --FILE--
 <?php
