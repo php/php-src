@@ -2622,6 +2622,13 @@ class ConstInfo extends VariableLike
         ?ExposedDocComment $exposedDocComment,
         bool $isFileCacheAllowed
     ) {
+        foreach ($attributes as $attr) {
+            if ($attr->class === "Deprecated") {
+                $isDeprecated = true;
+                break;
+            }
+        }
+
         $this->name = $name;
         $this->value = $value;
         $this->valueString = $valueString;
@@ -2915,15 +2922,9 @@ class ConstInfo extends VariableLike
     {
         $flags = parent::getFlagsByPhpVersion();
 
+        // $this->isDeprecated also accounts for any #[\Deprecated] attributes
         if ($this->isDeprecated) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
-        }
-
-        foreach ($this->attributes as $attr) {
-            if ($attr->class === "Deprecated") {
-                $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
-                break;
-            }
         }
 
         if ($this->flags & Modifiers::FINAL) {
@@ -4340,7 +4341,7 @@ class FileInfo {
                         $cond,
                         $this->isUndocumentable,
                         $this->getMinimumPhpVersionIdCompatibility(),
-                        []
+                        AttributeInfo::createFromGroups($stmt->attrGroups)
                     );
                 }
                 continue;
@@ -5177,7 +5178,9 @@ function generateArgInfoCode(
     $php80MinimumCompatibility = $fileInfo->getMinimumPhpVersionIdCompatibility() === null || $fileInfo->getMinimumPhpVersionIdCompatibility() >= PHP_80_VERSION_ID;
 
     if ($fileInfo->generateClassEntries) {
-        if ($attributeInitializationCode = generateFunctionAttributeInitialization($fileInfo->funcInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null)) {
+        $attributeInitializationCode = generateFunctionAttributeInitialization($fileInfo->funcInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null);
+        $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($fileInfo->constInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null);
+        if ($attributeInitializationCode) {
             if (!$php80MinimumCompatibility) {
                 $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
             }
@@ -5287,6 +5290,51 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
         },
         $parentCond
     );
+}
+
+/**
+ * @param iterable<ConstInfo> $constInfos
+ * @param array<string, ConstInfo> $allConstInfos
+ */
+function generateGlobalConstantAttributeInitialization(
+    iterable $constInfos,
+    array $allConstInfos,
+    ?int $phpVersionIdMinimumCompatibility,
+    ?string $parentCond = null
+): string {
+    $isConditional = false;
+    if ($phpVersionIdMinimumCompatibility !== null && $phpVersionIdMinimumCompatibility < PHP_85_VERSION_ID) {
+        $isConditional = true;
+        $phpVersionIdMinimumCompatibility = PHP_85_VERSION_ID;
+    }
+    $code = generateCodeWithConditions(
+        $constInfos,
+        "",
+        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+            if ($constInfo->attributes === []) {
+                return null;
+            }
+            $constName = str_replace('\\', '\\\\', $constInfo->name->__toString());
+            $constVarName = 'const_' . $constName;
+
+            $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            foreach ($constInfo->attributes as $key => $attribute) {
+                $code .= $attribute->generateCode(
+                    "zend_add_global_constant_attribute($constVarName",
+                    $constVarName . "_$key",
+                    $allConstInfos,
+                    $phpVersionIdMinimumCompatibility
+                );
+            }
+
+            return $code;
+        },
+        $parentCond
+    );
+    if ($code && $isConditional) {
+        return "\n#if (PHP_VERSION_ID >= " . PHP_85_VERSION_ID . ")\n" . $code . "#endif\n";
+    }
+    return $code;
 }
 
 /**
@@ -6030,7 +6078,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "5.3.1";
+    $version = "5.5.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
