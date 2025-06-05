@@ -147,9 +147,9 @@ namespace
 
     /**
      * @var int
-     * @deprecated is no longer used since 8.4
      * @cvalue PHP_ERR
      */
+    #[\Deprecated(since: '8.4', message: 'as it is no longer used')]
     const DOM_PHP_ERR = UNKNOWN;
     /**
      * @var int
