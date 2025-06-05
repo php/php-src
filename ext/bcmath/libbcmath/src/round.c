@@ -38,29 +38,29 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 	/* e.g. value is 0.1 and precision is -3, ret is 0 or 1000  */
 	if (precision < 0 && num->n_len < (size_t) (-(precision + BC_L(1))) + 1) {
 		switch (mode) {
-			case PHP_ROUND_HALF_UP:
-			case PHP_ROUND_HALF_DOWN:
-			case PHP_ROUND_HALF_EVEN:
-			case PHP_ROUND_HALF_ODD:
-			case PHP_ROUND_TOWARD_ZERO:
+			case BC_ROUND_HALF_UP:
+			case BC_ROUND_HALF_DOWN:
+			case BC_ROUND_HALF_EVEN:
+			case BC_ROUND_HALF_ODD:
+			case BC_ROUND_TOWARD_ZERO:
 				*result = bc_copy_num(BCG(_zero_));
 				return 0;
 
-			case PHP_ROUND_CEILING:
+			case BC_ROUND_CEILING:
 				if (num->n_sign == MINUS) {
 					*result = bc_copy_num(BCG(_zero_));
 					return 0;
 				}
 				break;
 
-			case PHP_ROUND_FLOOR:
+			case BC_ROUND_FLOOR:
 				if (num->n_sign == PLUS) {
 					*result = bc_copy_num(BCG(_zero_));
 					return 0;
 				}
 				break;
 
-			case PHP_ROUND_AWAY_FROM_ZERO:
+			case BC_ROUND_AWAY_FROM_ZERO:
 				break;
 
 			EMPTY_SWITCH_DEFAULT_CASE()
@@ -117,7 +117,7 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 
 	/* Check cases that can be determined without looping. */
 	switch (mode) {
-		case PHP_ROUND_HALF_UP:
+		case BC_ROUND_HALF_UP:
 			if (*nptr >= 5) {
 				goto up;
 			} else if (*nptr < 5) {
@@ -125,9 +125,9 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 			}
 			break;
 
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_HALF_EVEN:
-		case PHP_ROUND_HALF_ODD:
+		case BC_ROUND_HALF_DOWN:
+		case BC_ROUND_HALF_EVEN:
+		case BC_ROUND_HALF_ODD:
 			if (*nptr > 5) {
 				goto up;
 			} else if (*nptr < 5) {
@@ -136,7 +136,7 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 			/* if *nptr == 5, we need to look-up further digits before making a decision. */
 			break;
 
-		case PHP_ROUND_CEILING:
+		case BC_ROUND_CEILING:
 			if (num->n_sign != PLUS) {
 				goto check_zero;
 			} else if (*nptr > 0) {
@@ -145,7 +145,7 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 			/* if *nptr == 0, a loop is required for judgment. */
 			break;
 
-		case PHP_ROUND_FLOOR:
+		case BC_ROUND_FLOOR:
 			if (num->n_sign != MINUS) {
 				goto check_zero;
 			} else if (*nptr > 0) {
@@ -154,10 +154,10 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 			/* if *nptr == 0, a loop is required for judgment. */
 			break;
 
-		case PHP_ROUND_TOWARD_ZERO:
+		case BC_ROUND_TOWARD_ZERO:
 			goto check_zero;
 
-		case PHP_ROUND_AWAY_FROM_ZERO:
+		case BC_ROUND_AWAY_FROM_ZERO:
 			if (*nptr > 0) {
 				goto up;
 			}
@@ -180,19 +180,19 @@ size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 	}
 
 	switch (mode) {
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_CEILING:
-		case PHP_ROUND_FLOOR:
-		case PHP_ROUND_AWAY_FROM_ZERO:
+		case BC_ROUND_HALF_DOWN:
+		case BC_ROUND_CEILING:
+		case BC_ROUND_FLOOR:
+		case BC_ROUND_AWAY_FROM_ZERO:
 			goto check_zero;
 
-		case PHP_ROUND_HALF_EVEN:
+		case BC_ROUND_HALF_EVEN:
 			if (rounded_len == 0 || num->n_value[rounded_len - 1] % 2 == 0) {
 				goto check_zero;
 			}
 			break;
 
-		case PHP_ROUND_HALF_ODD:
+		case BC_ROUND_HALF_ODD:
 			if (rounded_len != 0 && num->n_value[rounded_len - 1] % 2 == 1) {
 				goto check_zero;
 			}

@@ -53,4 +53,13 @@ typedef zend_long bc_long;
 #define bc_safe_address_guarded(n, size, offset) (zend_safe_address_guarded((n), (size), (offset)))
 #define BC_MM_ALIGNMENT ZEND_MM_ALIGNMENT
 
+#define BC_ROUND_HALF_UP        PHP_ROUND_HALF_UP
+#define BC_ROUND_HALF_DOWN      PHP_ROUND_HALF_DOWN
+#define BC_ROUND_HALF_EVEN      PHP_ROUND_HALF_EVEN
+#define BC_ROUND_HALF_ODD       PHP_ROUND_HALF_ODD
+#define BC_ROUND_CEILING        PHP_ROUND_CEILING
+#define BC_ROUND_FLOOR          PHP_ROUND_FLOOR
+#define BC_ROUND_TOWARD_ZERO    PHP_ROUND_TOWARD_ZERO
+#define BC_ROUND_AWAY_FROM_ZERO PHP_ROUND_AWAY_FROM_ZERO
+
 #endif
