@@ -45,6 +45,35 @@ static zend_async_context_t * new_context(void)
 	return NULL;
 }
 
+static uint32_t internal_context_key_alloc(const char *key_name)
+{
+	ASYNC_THROW_ERROR("Internal Context API is not enabled");
+	return 0;
+}
+
+static const char* internal_context_key_name(uint32_t key)
+{
+	ASYNC_THROW_ERROR("Internal Context API is not enabled");
+	return NULL;
+}
+
+static bool internal_context_get(zend_coroutine_t *coroutine, uint32_t key, zval *result)
+{
+	ASYNC_THROW_ERROR("Internal Context API is not enabled");
+	return false;
+}
+
+static void internal_context_set(zend_coroutine_t *coroutine, uint32_t key, zval *value)
+{
+	ASYNC_THROW_ERROR("Internal Context API is not enabled");
+}
+
+static bool internal_context_unset(zend_coroutine_t *coroutine, uint32_t key)
+{
+	ASYNC_THROW_ERROR("Internal Context API is not enabled");
+	return false;
+}
+
 static zend_class_entry * get_class_ce(zend_async_class type)
 {
 	if (type == ZEND_ASYNC_EXCEPTION_DEFAULT
@@ -101,6 +130,13 @@ zend_async_queue_task_t zend_async_queue_task_fn = NULL;
 
 /* Context API */
 zend_async_new_context_t zend_async_new_context_fn = new_context;
+
+/* Internal Context API */
+zend_async_internal_context_key_alloc_t zend_async_internal_context_key_alloc_fn = internal_context_key_alloc;
+zend_async_internal_context_key_name_t zend_async_internal_context_key_name_fn = internal_context_key_name;
+zend_async_internal_context_get_t zend_async_internal_context_get_fn = internal_context_get;
+zend_async_internal_context_set_t zend_async_internal_context_set_fn = internal_context_set;
+zend_async_internal_context_unset_t zend_async_internal_context_unset_fn = internal_context_unset;
 
 ZEND_API bool zend_async_is_enabled(void)
 {
@@ -182,6 +218,11 @@ ZEND_API bool zend_async_scheduler_register(
 	zend_async_new_coroutine_t new_coroutine_fn,
 	zend_async_new_scope_t new_scope_fn,
 	zend_async_new_context_t new_context_fn,
+	zend_async_internal_context_key_alloc_t internal_context_key_alloc_fn,
+	zend_async_internal_context_key_name_t internal_context_key_name_fn,
+	zend_async_internal_context_get_t internal_context_get_fn,
+	zend_async_internal_context_set_t internal_context_set_fn,
+	zend_async_internal_context_unset_t internal_context_unset_fn,
     zend_async_spawn_t spawn_fn,
     zend_async_suspend_t suspend_fn,
     zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
@@ -216,6 +257,11 @@ ZEND_API bool zend_async_scheduler_register(
 	zend_async_new_coroutine_fn = new_coroutine_fn;
 	zend_async_new_scope_fn = new_scope_fn;
 	zend_async_new_context_fn = new_context_fn;
+	zend_async_internal_context_key_alloc_fn = internal_context_key_alloc_fn;
+	zend_async_internal_context_key_name_fn = internal_context_key_name_fn;
+	zend_async_internal_context_get_fn = internal_context_get_fn;
+	zend_async_internal_context_set_fn = internal_context_set_fn;
+	zend_async_internal_context_unset_fn = internal_context_unset_fn;
     zend_async_spawn_fn = spawn_fn;
     zend_async_suspend_fn = suspend_fn;
     zend_async_enqueue_coroutine_fn = enqueue_coroutine_fn;
