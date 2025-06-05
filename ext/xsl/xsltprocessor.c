@@ -21,6 +21,7 @@
 
 #include "php.h"
 #include "php_xsl.h"
+#include "Zend/zend_exceptions.h"
 #include <libxslt/variables.h>
 #include "ext/libxml/php_libxml.h"
 #include "ext/dom/namespace_compat.h"
@@ -480,6 +481,66 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 	}
 }
 /* }}} end XSLTProcessor::transformToDoc */
+
+static int xsl_stream_write(void *context, const char *buffer, int len)
+{
+	zend_resource *resource = context;
+	if (EXPECTED(resource->ptr)) {
+		php_stream *stream = resource->ptr;
+		return php_stream_write(stream, buffer, len);
+	}
+	return -1;
+}
+
+PHP_METHOD(XSLTProcessor, transformToStream)
+{
+	zval *docp, *stream_zv;
+	php_stream *stream;
+	const char *encoding = NULL;
+	size_t encoding_len;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "or|p!", &docp, &stream_zv, &encoding, &encoding_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	php_stream_from_res(stream, Z_RES_P(stream_zv));
+
+	xmlCharEncodingHandlerPtr handler = NULL;
+	if (encoding) {
+		handler = xmlFindCharEncodingHandler(encoding);
+		if (UNEXPECTED(!handler)) {
+			zend_argument_value_error(3, "is not a valid document encoding");
+			RETURN_THROWS();
+		}
+	}
+
+	xsl_object *intern = Z_XSL_P(ZEND_THIS);
+	xsltStylesheetPtr sheetp = intern->ptr;
+
+	xmlOutputBufferPtr out = xmlOutputBufferCreateIO(xsl_stream_write, NULL, stream->res, handler);
+	if (UNEXPECTED(!out)) {
+		zend_throw_error(zend_ce_exception, "Failed to create output buffer");
+		RETURN_THROWS();
+	}
+
+	xmlDocPtr newdocp = php_xsl_apply_stylesheet(ZEND_THIS, intern, sheetp, docp);
+
+	int ret = -1;
+	if (newdocp) {
+		ret = xsltSaveResultTo(out, newdocp, sheetp);
+		xmlFreeDoc(newdocp);
+	}
+
+	xmlOutputBufferClose(out);
+
+	if (ret < 0) {
+		if (!EG(exception)) {
+			zend_throw_error(zend_ce_exception, "Failed to transform and write document");
+		}
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(ret);
+}
 
 /* {{{ */
 PHP_METHOD(XSLTProcessor, transformToUri)

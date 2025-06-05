@@ -1072,6 +1072,22 @@ PHP_LIBXML_API bool php_libxml_uses_internal_errors(void)
 	return xmlStructuredError == php_libxml_structured_error_handler;
 }
 
+PHP_LIBXML_API bool php_libxml_is_valid_encoding(const char *encoding)
+{
+	if (!encoding) {
+		return true;
+	}
+
+	/* Normally we could use xmlTextReaderConstEncoding() afterwards but libxml2 < 2.12.0 has a bug of course
+	 * where it returns NULL for some valid encodings instead. */
+	xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding);
+	if (!handler) {
+		return false;
+	}
+	xmlCharEncCloseFunc(handler);
+	return true;
+}
+
 /* {{{ Disable libxml errors and allow user to fetch error information as needed */
 PHP_FUNCTION(libxml_use_internal_errors)
 {

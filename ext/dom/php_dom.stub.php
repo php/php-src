@@ -2042,6 +2042,9 @@ namespace Dom
 
         public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
 
+        /** @param resource $stream */
+        public static function createFromStream($stream, ?string $documentURI = null, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
+
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
 
         /** @implementation-alias Dom\XMLDocument::saveXml */
@@ -2064,6 +2067,9 @@ namespace Dom
         public static function createEmpty(string $version = "1.0", string $encoding = "UTF-8"): XMLDocument {}
 
         public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
+
+        /** @param resource $stream */
+        public static function createFromStream($stream, ?string $documentURI = null, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
 
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
 
