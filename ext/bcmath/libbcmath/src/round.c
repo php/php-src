@@ -19,7 +19,7 @@
 #include <stddef.h>
 
 /* Returns the scale of the value after rounding. */
-size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
+size_t bc_round(bc_num num, bc_long precision, bc_long mode, bc_num *result)
 {
 	/* clear result */
 	bc_free_num(result);
@@ -36,7 +36,7 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	*/
 
 	/* e.g. value is 0.1 and precision is -3, ret is 0 or 1000  */
-	if (precision < 0 && num->n_len < (size_t) (-(precision + Z_L(1))) + 1) {
+	if (precision < 0 && num->n_len < (size_t) (-(precision + BC_L(1))) + 1) {
 		switch (mode) {
 			case PHP_ROUND_HALF_UP:
 			case PHP_ROUND_HALF_DOWN:
@@ -72,8 +72,8 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 		}
 
 		/* If precision is -3, it becomes 1000. */
-		if (UNEXPECTED(precision == ZEND_LONG_MIN)) {
-			*result = bc_new_num((size_t) ZEND_LONG_MAX + 2, 0);
+		if (UNEXPECTED(precision == BC_LONG_MIN)) {
+			*result = bc_new_num((size_t) BC_LONG_MAX + 2, 0);
 		} else {
 			*result = bc_new_num(-precision + 1, 0);
 		}

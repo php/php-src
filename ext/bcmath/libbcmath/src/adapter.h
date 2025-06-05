@@ -38,6 +38,12 @@ typedef zend_string bc_string;
 #define BC_STR_LEN(s) ZSTR_LEN(s)
 #define bc_string_alloc(len, persistent) zend_string_alloc((len), (persistent))
 
+typedef zend_long bc_long;
+#define BC_LONG_MIN_DIGITS LONG_MIN_DIGITS
+#define BC_L(i) Z_L(i)
+#define BC_LONG_MAX ZEND_LONG_MAX
+#define BC_LONG_MIN ZEND_LONG_MIN
+
 #define bc_safe_emalloc(n, size, offset) (safe_emalloc((n), (size), (offset)))
 #define bc_efree(ptr) (efree((ptr)))
 

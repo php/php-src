@@ -89,7 +89,7 @@ void bc_init_num(bc_num *num);
 
 bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, size_t *full_scale, bool auto_scale);
 
-bc_num bc_long2num(zend_long lval);
+bc_num bc_long2num(bc_long lval);
 
 bc_string *bc_num2str_ex(bc_num num, size_t scale);
 
@@ -147,7 +147,7 @@ bool bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale)
 
 bc_num bc_floor_or_ceil(bc_num num, bool is_floor);
 
-size_t bc_round(bc_num num, zend_long places, zend_long mode, bc_num *result);
+size_t bc_round(bc_num num, bc_long places, bc_long mode, bc_num *result);
 
 typedef enum {
 	BC_RAISE_STATUS_OK,

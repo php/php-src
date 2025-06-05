@@ -18,9 +18,9 @@
 #include <stdbool.h>
 #include "convert.h"
 
-#define BC_LONG_MAX_DIGITS (sizeof(LONG_MIN_DIGITS) - 1)
+#define BC_LONG_MAX_DIGITS (sizeof(BC_LONG_MIN_DIGITS) - 1)
 
-bc_num bc_long2num(zend_long lval)
+bc_num bc_long2num(bc_long lval)
 {
 	bc_num num;
 
@@ -30,9 +30,9 @@ bc_num bc_long2num(zend_long lval)
 	}
 
 	bool negative = lval < 0;
-	if (UNEXPECTED(lval == ZEND_LONG_MIN)) {
+	if (UNEXPECTED(lval == BC_LONG_MIN)) {
 		num = bc_new_num_nonzeroed(BC_LONG_MAX_DIGITS, 0);
-		const char *ptr = LONG_MIN_DIGITS;
+		const char *ptr = BC_LONG_MIN_DIGITS;
 		bc_copy_and_toggle_bcd(num->n_value, ptr, ptr + BC_LONG_MAX_DIGITS);
 		num->n_sign = MINUS;
 		return num;
@@ -40,7 +40,7 @@ bc_num bc_long2num(zend_long lval)
 		lval = -lval;
 	}
 
-	zend_long tmp = lval;
+	bc_long tmp = lval;
 	size_t len = 0;
 	while (tmp > 0) {
 		tmp /= BASE;
