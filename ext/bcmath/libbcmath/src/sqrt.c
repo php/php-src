@@ -38,20 +38,19 @@
 
 bool bc_sqrt(bc_num *num, size_t scale)
 {
-	const bc_num local_num = *num;
 	/* Initial checks. */
-	if (bc_is_neg(local_num)) {
+	if (bc_is_neg(*num)) {
 		/* Cannot take the square root of a negative number */
 		return false;
 	}
 	/* Square root of 0 is 0 */
-	if (bc_is_zero(local_num)) {
+	if (bc_is_zero(*num)) {
 		bc_free_num (num);
 		*num = bc_copy_num(BCG(_zero_));
 		return true;
 	}
 
-	bcmath_compare_result num_cmp_one = bc_compare(local_num, BCG(_one_), local_num->n_scale);
+	bcmath_compare_result num_cmp_one = bc_compare(*num, BCG(_one_), (*num)->n_scale);
 	/* Square root of 1 is 1 */
 	if (num_cmp_one == BCMATH_EQUAL) {
 		bc_free_num (num);
@@ -62,7 +61,7 @@ bool bc_sqrt(bc_num *num, size_t scale)
 	/* Initialize the variables. */
 	size_t cscale;
 	bc_num guess, guess1, point5, diff;
-	size_t rscale = MAX(scale, local_num->n_scale);
+	size_t rscale = MAX(scale, (*num)->n_scale);
 
 	bc_init_num(&guess1);
 	bc_init_num(&diff);
@@ -74,13 +73,13 @@ bool bc_sqrt(bc_num *num, size_t scale)
 	if (num_cmp_one == BCMATH_RIGHT_GREATER) {
 		/* The number is between 0 and 1.  Guess should start at 1. */
 		guess = bc_copy_num(BCG(_one_));
-		cscale = local_num->n_scale;
+		cscale = (*num)->n_scale;
 	} else {
 		/* The number is greater than 1.  Guess should start at 10^(exp/2). */
 		bc_init_num(&guess);
 		bc_int2num(&guess, 10);
 
-		bc_int2num(&guess1, local_num->n_len);
+		bc_int2num(&guess1, (*num)->n_len);
 		bc_multiply_ex(guess1, point5, &guess1, 0);
 		guess1->n_scale = 0;
 		bc_raise_bc_exponent(guess, guess1, &guess, 0);
