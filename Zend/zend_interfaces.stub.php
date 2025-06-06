@@ -83,3 +83,12 @@ final class InternalIterator implements Iterator
 
     public function rewind(): void {}
 }
+
+final class ComposedCallable {
+    public function __construct(array|callable|\ComposedCallable $callable) {}
+    public function __invoke(mixed ...$args): mixed {}
+    public function __debugInfo(): array {}
+    public function append(callable|\ComposedCallable $callable): \ComposedCallable {}
+    public function insert(callable|\ComposedCallable $callable, int $idx): \ComposedCallable {}
+    public function prepend(callable|\ComposedCallable $callable): \ComposedCallable {}
+}

@@ -18,6 +18,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_composed_callable.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces_arginfo.h"
@@ -676,5 +677,7 @@ ZEND_API void zend_register_interfaces(void)
 		sizeof(zend_object_handlers));
 	zend_internal_iterator_handlers.clone_obj = NULL;
 	zend_internal_iterator_handlers.free_obj = zend_internal_iterator_free;
+
+    zend_register_composed_callable(register_class_ComposedCallable());
 }
 /* }}} */
