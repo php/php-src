@@ -85,16 +85,16 @@ static inline void bc_convert_to_vector_with_zero_pad(BC_VECTOR *n_vector, const
 	bc_convert_to_vector(n_vector, nend, nlen);
 }
 
-static inline void bc_convert_vector_to_char(const BC_VECTOR *vector, char *nptr, char *nend, size_t arr_size)
+static inline void bc_convert_vector_to_char(const bc_vector_arr *vector, char *nptr, char *nend)
 {
 	size_t i = 0;
-	while (i < arr_size - 1) {
+	while (i < vector->size - 1) {
 #if BC_VECTOR_SIZE == 4
 		bc_write_bcd_representation(vector[i], nend - 3);
 		nend -= 4;
 #else
-		bc_write_bcd_representation(vector[i] / 10000, nend - 7);
-		bc_write_bcd_representation(vector[i] % 10000, nend - 3);
+		bc_write_bcd_representation(vector->values[i] / 10000, nend - 7);
+		bc_write_bcd_representation(vector->values[i] % 10000, nend - 3);
 		nend -= 8;
 #endif
 		i++;
@@ -104,7 +104,7 @@ static inline void bc_convert_vector_to_char(const BC_VECTOR *vector, char *nptr
 	 * The last digit may carry over.
 	 * Also need to fill it to the end with zeros, so loop until the end of the string.
 	 */
-	BC_VECTOR last = vector[i];
+	BC_VECTOR last = vector->values[i];
 	while (nend >= nptr) {
 		*nend-- = last % BASE;
 		last /= BASE;
