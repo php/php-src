@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 792cdfa8a8ce190d73dffe679c51a41a2ee46cd7 */
+ * Stub hash: bc4fcaf534ad5625a4314bc867649ccf23a216e7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -937,6 +937,9 @@ static void register_curl_symbols(int module_number)
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */
 	REGISTER_LONG_CONSTANT("CURLOPT_SSL_EC_CURVES", CURLOPT_SSL_EC_CURVES, CONST_PERSISTENT);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */ && LIBCURL_VERSION_NUM >= 0x080e00 /* Available since 8.14.0 */
+	REGISTER_LONG_CONSTANT("CURLOPT_SSL_SIGNATURE_ALGORITHMS", CURLOPT_SSL_SIGNATURE_ALGORITHMS, CONST_PERSISTENT);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */
 	REGISTER_LONG_CONSTANT("CURLPX_BAD_ADDRESS_TYPE", CURLPX_BAD_ADDRESS_TYPE, CONST_PERSISTENT);
