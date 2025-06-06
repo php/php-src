@@ -104,6 +104,7 @@ static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, zval *result)
 		zend_string *str = zend_string_alloc(ret, 0);
 		ret = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR) Z_STRVAL_P(result), Z_STRLEN_P(result)/sizeof(WCHAR), ZSTR_VAL(str), ZSTR_LEN(str), NULL, NULL);
 		if (ret == 0) {
+			zend_string_efree(str);
 			return PDO_ODBC_CONV_FAIL;
 		}
 
