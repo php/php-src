@@ -20,6 +20,7 @@
 */
 
 #include "zend_API.h"
+#include "zend_class_alias.h"
 #include "zend_constants.h"
 #include "zend_inheritance.h"
 #include "zend_accelerator_util_funcs.h"
@@ -122,10 +123,14 @@ void zend_accel_move_user_classes(HashTable *src, uint32_t count, zend_script *s
 	p = end - count;
 	for (; p != end; p++) {
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
-		ce = Z_PTR(p->val);
+		Z_CE_FROM_ZVAL(ce, p->val);
 		if (EXPECTED(ce->type == ZEND_USER_CLASS)
 		 && EXPECTED(ce->info.user.filename == filename)) {
-			_zend_hash_append_ptr(dst, p->key, ce);
+			if (Z_TYPE(p->val) == IS_ALIAS_PTR) {
+				_zend_hash_append(dst, p->key, &p->val);
+			} else {
+				_zend_hash_append_ptr(dst, p->key, ce);
+			}
 			zend_hash_del_bucket(src, p);
 		}
 	}
@@ -209,19 +214,32 @@ static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, co
 				 * value. */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
-				const zend_class_entry *ce1 = Z_PTR(p->val);
+				zend_class_entry *ce1;
+				Z_CE_FROM_ZVAL(ce1, p->val);
 				if (!(ce1->ce_flags & ZEND_ACC_ANON_CLASS)) {
 					CG(in_compilation) = 1;
 					zend_set_compiled_filename(ce1->info.user.filename);
 					CG(zend_lineno) = ce1->info.user.line_start;
-					zend_class_redeclaration_error(E_ERROR, Z_PTR_P(t));
+					if (Z_TYPE_P(t) == IS_ALIAS_PTR) {
+						zend_class_redeclaration_error(E_ERROR, Z_CLASS_ALIAS(p->val)->ce);
+					} else {
+						ZEND_ASSERT(Z_TYPE_P(t) == IS_PTR);
+						zend_class_redeclaration_error(E_ERROR, Z_PTR_P(t));
+					}
 					return;
 				}
 				continue;
 			}
 		} else {
-			zend_class_entry *ce = Z_PTR(p->val);
-			_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+			zend_class_entry *ce;
+			if (Z_TYPE(p->val) == IS_ALIAS_PTR) {
+				_zend_hash_append_ex(target, p->key, &p->val, 1);
+				ce = Z_CLASS_ALIAS(p->val)->ce;
+			} else {
+				ZEND_ASSERT(Z_TYPE(p->val) == IS_PTR);
+				ce = Z_PTR(p->val);
+				_zend_hash_append_ptr_ex(target, p->key, ce, 1);
+			}
 			if ((ce->ce_flags & ZEND_ACC_LINKED) && ZSTR_VAL(p->key)[0]) {
 				if (ZSTR_HAS_CE_CACHE(ce->name)) {
 					ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);

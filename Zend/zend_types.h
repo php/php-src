@@ -88,6 +88,7 @@ typedef struct _zend_resource   zend_resource;
 typedef struct _zend_reference  zend_reference;
 typedef struct _zend_ast_ref    zend_ast_ref;
 typedef struct _zend_ast        zend_ast;
+typedef struct _zend_class_alias zend_class_alias;
 
 typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*swap_func_t)(void *, void *);
@@ -335,6 +336,7 @@ typedef union _zend_value {
 	void             *ptr;
 	zend_class_entry *ce;
 	zend_function    *func;
+	zend_class_alias *class_alias;
 	struct {
 		uint32_t w1;
 		uint32_t w2;
@@ -1066,6 +1068,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_PTR(zval)					(zval).value.ptr
 #define Z_PTR_P(zval_p)				Z_PTR(*(zval_p))
 
+#define Z_CLASS_ALIAS(zval)         (zval).value.class_alias
+#define Z_CLASS_ALIAS_P(zval_p)     Z_CLASS_ALIAS(*(zval_p))
+
 #define ZVAL_UNDEF(z) do {				\
 		Z_TYPE_INFO_P(z) = IS_UNDEF;	\
 	} while (0)
@@ -1278,7 +1283,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	} while (0)
 
 #define ZVAL_ALIAS_PTR(z, p) do {								\
-		Z_PTR_P(z) = (p);										\
+		Z_CLASS_ALIAS_P(z) = (p);										\
 		Z_TYPE_INFO_P(z) = IS_ALIAS_PTR;						\
 	} while (0)
 

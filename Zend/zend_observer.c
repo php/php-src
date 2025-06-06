@@ -20,6 +20,7 @@
 
 #include "zend_observer.h"
 
+#include "zend_class_alias.h"
 #include "zend_extensions.h"
 #include "zend_llist.h"
 #include "zend_vm.h"
@@ -89,7 +90,9 @@ ZEND_API void zend_observer_post_startup(void)
 			++zif->T;
 		} ZEND_HASH_FOREACH_END();
 		zend_class_entry *ce;
-		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
+		zval *ce_or_alias;
+		ZEND_HASH_MAP_FOREACH_VAL(CG(class_table), ce_or_alias) {
+			Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zif) {
 				++zif->T;
 			} ZEND_HASH_FOREACH_END();

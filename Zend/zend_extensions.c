@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_class_alias.h"
 #include "zend_extensions.h"
 #include "zend_system_id.h"
 
@@ -327,7 +328,9 @@ ZEND_API void zend_init_internal_run_time_cache(void) {
 	if (rt_size) {
 		size_t functions = zend_hash_num_elements(CG(function_table));
 		zend_class_entry *ce;
-		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
+		zval *ce_or_alias;
+		ZEND_HASH_MAP_FOREACH_VAL(CG(class_table), ce_or_alias) {
+			Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 			functions += zend_hash_num_elements(&ce->function_table);
 		} ZEND_HASH_FOREACH_END();
 
@@ -344,7 +347,8 @@ ZEND_API void zend_init_internal_run_time_cache(void) {
 				ptr += rt_size;
 			}
 		} ZEND_HASH_FOREACH_END();
-		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
+		ZEND_HASH_MAP_FOREACH_VAL(CG(class_table), ce_or_alias) {
+			Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zif) {
 				if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL) {
 					ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
