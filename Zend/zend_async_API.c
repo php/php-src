@@ -344,6 +344,47 @@ ZEND_API zend_string* zend_coroutine_gen_info(zend_coroutine_t *coroutine, char 
 	}
 }
 
+static void event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
+{
+	if (callback->ref_count > 1) {
+		// If the callback is still referenced, we cannot dispose it yet
+		callback->ref_count--;
+		return;
+	}
+
+	callback->ref_count = 0;
+	efree(callback);
+}
+
+ZEND_API zend_async_event_callback_t * zend_async_event_callback_new(zend_async_event_callback_fn callback, size_t size)
+{
+	zend_async_event_callback_t * event_callback = ecalloc(1, size == 0 ? size : sizeof(zend_async_event_callback_t));
+
+	event_callback->ref_count = 1;
+	event_callback->callback = callback;
+	event_callback->dispose = event_callback_dispose;
+
+	return event_callback;
+}
+
+static void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event);
+
+ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_event_new(
+	zend_coroutine_t * coroutine, zend_async_event_callback_fn callback, size_t size
+)
+{
+	zend_coroutine_event_callback_t * coroutine_callback = ecalloc(
+		1, size != 0 ? size : sizeof(zend_coroutine_event_callback_t)
+	);
+
+	coroutine_callback->base.ref_count = 1;
+	coroutine_callback->base.callback = callback;
+	coroutine_callback->coroutine = coroutine;
+	coroutine_callback->base.dispose = coroutine_event_callback_dispose;
+
+	return coroutine_callback;
+}
+
 //////////////////////////////////////////////////////////////////////
 /* Waker API */
 //////////////////////////////////////////////////////////////////////
@@ -449,7 +490,7 @@ ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine)
 	efree(waker);
 }
 
-static void event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
+static void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
 {
 	if (callback->ref_count > 1) {
 		// If the callback is still referenced, we cannot dispose it yet
@@ -516,12 +557,12 @@ ZEND_API void zend_async_resume_when(
 		event_callback = emalloc(sizeof(zend_coroutine_event_callback_t));
 		event_callback->base.ref_count = 1;
 		event_callback->base.callback = callback;
-		event_callback->base.dispose = event_callback_dispose;
+		event_callback->base.dispose = coroutine_event_callback_dispose;
 	}
 
 	// Set up the default dispose function if not set
 	if (event_callback->base.dispose == NULL) {
-		event_callback->base.dispose = event_callback_dispose;
+		event_callback->base.dispose = coroutine_event_callback_dispose;
 	}
 
 	event_callback->coroutine = coroutine;
