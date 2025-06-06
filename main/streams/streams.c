@@ -636,6 +636,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* some fatal error. Theoretically, the stream is borked, so all
 					 * further reads should fail. */
 					stream->eof = 1;
+					stream->fatal_error = 1;
 					/* free all data left in brigades */
 					while ((bucket = brig_inp->head)) {
 						/* Remove unconsumed buckets from the input brigade */
@@ -1009,7 +1010,12 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 				}
 			}
 
-			php_stream_fill_read_buffer(stream, toread);
+			if (php_stream_fill_read_buffer(stream, toread) == FAILURE && stream->fatal_error) {
+				if (grow_mode) {
+					efree(bufstart);
+				}
+				return NULL;
+			}
 
 			if (stream->writepos - stream->readpos == 0) {
 				break;
@@ -1084,7 +1090,9 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 
 		to_read_now = MIN(maxlen - buffered_len, stream->chunk_size);
 
-		php_stream_fill_read_buffer(stream, buffered_len + to_read_now);
+		if (php_stream_fill_read_buffer(stream, buffered_len + to_read_now) == FAILURE && stream->fatal_error) {
+			return NULL;
+		}
 
 		just_read = STREAM_BUFFERED_AMOUNT(stream) - buffered_len;
 
@@ -1357,6 +1365,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					stream->readpos += offset; /* if offset = ..., then readpos = writepos */
 					stream->position += offset;
 					stream->eof = 0;
+					stream->fatal_error = 0;
 					return 0;
 				}
 				break;
@@ -1366,6 +1375,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 					stream->readpos += offset - stream->position;
 					stream->position = offset;
 					stream->eof = 0;
+					stream->fatal_error = 0;
 					return 0;
 				}
 				break;
@@ -1400,6 +1410,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0) {
 			if (ret == 0) {
 				stream->eof = 0;
+				stream->fatal_error = 0;
 			}
 
 			/* invalidate the buffer contents */
@@ -1422,6 +1433,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 			offset -= didread;
 		}
 		stream->eof = 0;
+		stream->fatal_error = 0;
 		return 0;
 	}
 
