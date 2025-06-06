@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Add missing filter cleanups on phar failure. (nielsdos)
   . Fixed bug GH-18642 (Signed integer overflow in ext/phar fseek). (nielsdos)
 
+- PDO ODBC:
+  . Fix memory leak if WideCharToMultiByte() fails. (nielsdos)
+
 - PGSQL:
   . Fix warning not being emitted when failure to cancel a query with
     pg_cancel_query(). (Girgias)
