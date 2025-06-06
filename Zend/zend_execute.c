@@ -126,6 +126,7 @@ typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 #define get_zval_ptr_ptr(op_type, node, type) _get_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 #define get_zval_ptr_ptr_undef(op_type, node, type) _get_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 #define get_obj_zval_ptr(op_type, node, type) _get_obj_zval_ptr(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_obj_zval_ptr_deref(op_type, node, type) _get_obj_zval_ptr_deref(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_obj_zval_ptr_undef(op_type, node, type) _get_obj_zval_ptr_undef(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_obj_zval_ptr_ptr(op_type, node, type) _get_obj_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 
@@ -535,6 +536,14 @@ static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr(int op_type, znode_o
 		return &EX(This);
 	}
 	return get_zval_ptr(op_type, op, type);
+}
+
+static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_deref(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_UNUSED) {
+		return &EX(This);
+	}
+	return get_zval_ptr_deref(op_type, op, type);
 }
 
 static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_undef(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
