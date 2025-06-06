@@ -814,19 +814,13 @@ const char* zend_async_internal_context_key_name(uint32_t key)
     return name;
 }
 
-bool zend_async_internal_context_get(zend_coroutine_t *coroutine, uint32_t key, zval *result) 
+zval* zend_async_internal_context_find(zend_coroutine_t *coroutine, uint32_t key)
 {
     if (coroutine == NULL || coroutine->internal_context == NULL) {
-        return false;
+        return NULL;
     }
     
-    zval *value = zend_hash_index_find(coroutine->internal_context, key);
-    if (value == NULL) {
-        return false;
-    }
-    
-    ZVAL_COPY(result, value);
-    return true;
+    return zend_hash_index_find(coroutine->internal_context, key);
 }
 
 void zend_async_internal_context_set(zend_coroutine_t *coroutine, uint32_t key, zval *value) 
