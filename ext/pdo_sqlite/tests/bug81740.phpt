@@ -14,7 +14,19 @@ memory_limit=-1
 <?php
 $pdo = new PDO("sqlite::memory:");
 $string = str_repeat("a", 0x80000000);
-var_dump($pdo->quote($string));
+try{
+    var_dump($pdo->quote($string));
+} finally {
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    var_dump($pdo->quote($string));
+}
 ?>
---EXPECT--
+--EXPECTF--
+Warning: PDO::quote(): string is too long to quote in %s on line %d
 bool(false)
+
+Fatal error: Uncaught PDOException: SQLite PDO::quote: string is too long to quote in %s:%d
+Stack trace:
+#0 %s(%d): PDO->quote('aaaaaaaaaaaaaaa...')
+#1 {main}
+  thrown in %s on line %d
