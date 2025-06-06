@@ -40,11 +40,11 @@
 
 /* Multiply utility routines */
 
-static inline void bc_mul_carry_calc(BC_VECTOR *prod_vector, size_t prod_arr_size)
+static inline void bc_mul_carry_calc(bc_vector_arr *prod_vector)
 {
-	for (size_t i = 0; i < prod_arr_size - 1; i++) {
-		prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
-		prod_vector[i] %= BC_VECTOR_BOUNDARY_NUM;
+	for (size_t i = 0; i < prod_vector->size - 1; i++) {
+		prod_vector->values[i + 1] += prod_vector->values[i] / BC_VECTOR_BOUNDARY_NUM;
+		prod_vector->values[i] %= BC_VECTOR_BOUNDARY_NUM;
 	}
 }
 
@@ -72,29 +72,27 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	}
 }
 
-static inline void bc_standard_vector_mul(
-	const BC_VECTOR *n1_vector, size_t n1_arr_size, const BC_VECTOR *n2_vector, size_t n2_arr_size,
-	BC_VECTOR *prod_vector, size_t prod_arr_size)
+static inline void bc_standard_vector_mul(const bc_vector_arr *n1_vector, const bc_vector_arr *n2_vector, bc_vector_arr *prod_vector)
 {
-	for (size_t i = 0; i < prod_arr_size; i++) {
-		prod_vector[i] = 0;
+	for (size_t i = 0; i < prod_vector->size; i++) {
+		prod_vector->values[i] = 0;
 	}
 
 	/* Multiplication and addition */
 	size_t count = 0;
-	for (size_t i = 0; i < n1_arr_size; i++) {
+	for (size_t i = 0; i < n1_vector->size; i++) {
 		/*
 		 * This calculation adds the result multiple times to the array entries.
 		 * When multiplying large numbers of digits, there is a possibility of
 		 * overflow, so digit adjustment is performed beforehand.
 		 */
 		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
-			bc_mul_carry_calc(prod_vector, prod_arr_size);
+			bc_mul_carry_calc(prod_vector);
 			count = 0;
 		}
 		count++;
-		for (size_t j = 0; j < n2_arr_size; j++) {
-			prod_vector[i + j] += n1_vector[i] * n2_vector[j];
+		for (size_t j = 0; j < n2_vector->size; j++) {
+			prod_vector->values[i + j] += n1_vector->values[i] * n2_vector->values[j];
 		}
 	}
 
@@ -102,7 +100,7 @@ static inline void bc_standard_vector_mul(
 	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
 	 */
-	bc_mul_carry_calc(prod_vector, prod_arr_size);
+	bc_mul_carry_calc(prod_vector);
 }
 
 /*
@@ -119,42 +117,45 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = BC_ARR_SIZE_FROM_LEN(n1len);
-	size_t n2_arr_size = BC_ARR_SIZE_FROM_LEN(n2len);
-	size_t prod_arr_size = BC_ARR_SIZE_FROM_LEN(prodlen);
+	bc_vector_arr n1_vector;
+	bc_vector_arr n2_vector;
+	bc_vector_arr prod_vector;
+
+	n1_vector.size = BC_ARR_SIZE_FROM_LEN(n1len);
+	n2_vector.size = BC_ARR_SIZE_FROM_LEN(n2len);
+	prod_vector.size = BC_ARR_SIZE_FROM_LEN(prodlen);
 
 	BC_VECTOR stack_vectors[BC_STACK_VECTOR_SIZE];
-	size_t allocation_arr_size = n1_arr_size + n2_arr_size + prod_arr_size;
+	size_t allocation_arr_size = n1_vector.size + n2_vector.size + prod_vector.size;
 
-	BC_VECTOR *n1_vector;
 	if (allocation_arr_size <= BC_STACK_VECTOR_SIZE) {
-		n1_vector = stack_vectors;
+		n1_vector.values = stack_vectors;
 	} else {
 		/*
 		 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
 		 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
 		 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
 		 */
-		n1_vector = safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
+		n1_vector.values = safe_emalloc(allocation_arr_size, sizeof(BC_VECTOR), 0);
 	}
-	BC_VECTOR *n2_vector = n1_vector + n1_arr_size;
-	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
+	n2_vector.values = n1_vector.values + n1_vector.size;
+	prod_vector.values = n2_vector.values + n2_vector.size;
 
 	/* Convert to BC_VECTOR[] */
-	bc_convert_to_vector(n1_vector, n1end, n1len);
-	bc_convert_to_vector(n2_vector, n2end, n2len);
+	bc_convert_to_vector(n1_vector.values, n1end, n1len);
+	bc_convert_to_vector(n2_vector.values, n2end, n2len);
 
 	/* Do multiply */
-	bc_standard_vector_mul(n1_vector, n1_arr_size, n2_vector, n2_arr_size, prod_vector, prod_arr_size);
+	bc_standard_vector_mul(&n1_vector, &n2_vector, &prod_vector);
 
 	/* Convert to bc_num */
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
 	char *pptr = (*prod)->n_value;
 	char *pend = pptr + prodlen - 1;
-	bc_convert_vector_to_char(prod_vector, pptr, pend, prod_arr_size);
+	bc_convert_vector_to_char(&prod_vector, pptr, pend);
 
 	if (allocation_arr_size > BC_STACK_VECTOR_SIZE) {
-		efree(n1_vector);
+		efree(n1_vector.values);
 	}
 }
 
@@ -187,17 +188,15 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	return prod;
 }
 
-void bc_multiply_vector(
-	const BC_VECTOR *n1_vector, size_t n1_arr_size, const BC_VECTOR *n2_vector, size_t n2_arr_size,
-	BC_VECTOR *prod_vector, size_t prod_arr_size)
+void bc_multiply_vector(const bc_vector_arr *n1_vector, const bc_vector_arr *n2_vector, bc_vector_arr *prod_vector)
 {
-	if (n1_arr_size == 1 && n2_arr_size == 1) {
-		prod_vector[0] = *n1_vector * *n2_vector;
-		if (prod_arr_size == 2) {
-			prod_vector[1] = prod_vector[0] / BC_VECTOR_BOUNDARY_NUM;
-			prod_vector[0] %= BC_VECTOR_BOUNDARY_NUM;
+	if (n1_vector->size == 1 && n2_vector->size == 1) {
+		prod_vector->values[0] = n1_vector->values[0] * n2_vector->values[0];
+		if (prod_vector->size == 2) {
+			prod_vector->values[1] = prod_vector->values[0] / BC_VECTOR_BOUNDARY_NUM;
+			prod_vector->values[0] %= BC_VECTOR_BOUNDARY_NUM;
 		}
 	} else {
-		bc_standard_vector_mul(n1_vector, n1_arr_size, n2_vector, n2_arr_size, prod_vector, prod_arr_size);
+		bc_standard_vector_mul(n1_vector, n2_vector, prod_vector);
 	}
 }
