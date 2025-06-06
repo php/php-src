@@ -18,6 +18,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_class_alias.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_lazy_objects.h"
@@ -6790,7 +6791,9 @@ ZEND_METHOD(ReflectionExtension, getClasses)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+	zval *ce_or_alias;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, ce_or_alias) {
+		Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 		add_extension_class(ce, key, return_value, module, 1);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -6808,7 +6811,9 @@ ZEND_METHOD(ReflectionExtension, getClassNames)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+	zval *ce_or_alias;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, ce_or_alias) {
+		Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 		add_extension_class(ce, key, return_value, module, 0);
 	} ZEND_HASH_FOREACH_END();
 }
