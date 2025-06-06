@@ -1,5 +1,7 @@
 --TEST--
 Bug GH-18756: Zend MM may delete the main chunk
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

@@ -1517,8 +1517,10 @@ static PHP_FUNCTION(zend_test_create_throwing_resource)
 	ZVAL_RES(return_value, res);
 }
 
-PHP_FUNCTION(zend_test_gh18756)
+static PHP_FUNCTION(zend_test_gh18756)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_mm_heap *heap = zend_mm_startup();
 	zend_mm_gc(heap);
 	zend_mm_gc(heap);
