@@ -36,28 +36,27 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-static inline size_t bc_multiply_vector_ex(
-	BC_VECTOR **n1_vector, size_t n1_arr_size, BC_VECTOR *n2_vector, size_t n2_arr_size, BC_VECTOR **result_vector)
+static inline size_t bc_multiply_vector_ex(bc_vector_arr *n1_vector, bc_vector_arr *n2_vector, bc_vector_arr *result_vector)
 {
-	size_t result_arr_size = n1_arr_size + n2_arr_size;
-	bc_multiply_vector(*n1_vector, n1_arr_size, n2_vector, n2_arr_size, *result_vector, result_arr_size);
+	result_vector->size = n1_vector->size + n2_vector->size;
+	bc_multiply_vector(n1_vector, n2_vector, result_vector);
 
 	/* Eliminate extra zeros because they increase the number of calculations. */
-	while ((*result_vector)[result_arr_size - 1] == 0) {
-		result_arr_size--;
+	while (result_vector->values[result_vector->size - 1] == 0) {
+		result_vector->size--;
 	}
 
-	/* Swap n1_vector and result_vector. */
-	BC_VECTOR *tmp = *n1_vector;
-	*n1_vector = *result_vector;
-	*result_vector = tmp;
+	/* Swap n1_vector->values and result_vector->values. */
+	BC_VECTOR *tmp = n1_vector->values;
+	n1_vector->values = result_vector->values;
+	result_vector->values = tmp;
 
-	return result_arr_size;
+	return result_vector->size;
 }
 
-static inline size_t bc_square_vector_ex(BC_VECTOR **base_vector, size_t base_arr_size, BC_VECTOR **result_vector)
+static inline size_t bc_square_vector_ex(bc_vector_arr *base_vector, bc_vector_arr *result_vector)
 {
-	return bc_multiply_vector_ex(base_vector, base_arr_size, *base_vector, base_arr_size, result_vector);
+	return bc_multiply_vector_ex(base_vector, base_vector, result_vector);
 }
 
 /* Use "exponentiation by squaring". This is the fast path when the results are small. */
@@ -107,35 +106,39 @@ static bc_num bc_standard_raise(
 		base_len--;
 	}
 
-	size_t base_arr_size = BC_ARR_SIZE_FROM_LEN(base_len);
+	bc_vector_arr base_vector;
+	bc_vector_arr power_vector;
+	bc_vector_arr tmp_result_vector;
+
+	base_vector.size = BC_ARR_SIZE_FROM_LEN(base_len);
 	/* Since it is guaranteed that base_len * exponent does not overflow, there is no possibility of overflow here. */
-	size_t max_power_arr_size =	base_arr_size * exponent;
+	size_t max_power_arr_size =	base_vector.size * exponent;
 
 	/* The allocated memory area is reused on a rotational basis, so the same size is required. */
 	BC_VECTOR *buf = safe_emalloc(max_power_arr_size, sizeof(BC_VECTOR) * 3, 0);
-	BC_VECTOR *base_vector = buf;
-	BC_VECTOR *power_vector = base_vector + max_power_arr_size;
-	BC_VECTOR *tmp_result_vector = power_vector + max_power_arr_size;
+	base_vector.values = buf;
+	power_vector.values = base_vector.values + max_power_arr_size;
+	tmp_result_vector.values = power_vector.values + max_power_arr_size;
 
 	/* Convert to BC_VECTOR[] */
-	bc_convert_to_vector(base_vector, base_end, base_len);
+	bc_convert_to_vector(base_vector.values, base_end, base_len);
 
 	while ((exponent & 1) == 0) {
-		base_arr_size = bc_square_vector_ex(&base_vector, base_arr_size, &tmp_result_vector);
+		base_vector.size = bc_square_vector_ex(&base_vector, &tmp_result_vector);
 		exponent >>= 1;
 	}
 
 	/* copy base to power */
-	size_t power_arr_size = base_arr_size;
-	for (size_t i = 0; i < base_arr_size; i++) {
-		power_vector[i] = base_vector[i];
+	power_vector.size = base_vector.size;
+	for (size_t i = 0; i < base_vector.size; i++) {
+		power_vector.values[i] = base_vector.values[i];
 	}
 	exponent >>= 1;
 
 	while (exponent > 0) {
-		base_arr_size = bc_square_vector_ex(&base_vector, base_arr_size, &tmp_result_vector);
+		base_vector.size = bc_square_vector_ex(&base_vector, &tmp_result_vector);
 		if ((exponent & 1) == 1) {
-			power_arr_size = bc_multiply_vector_ex(&power_vector, power_arr_size, base_vector, base_arr_size, &tmp_result_vector);
+			power_vector.size = bc_multiply_vector_ex(&power_vector, &base_vector, &tmp_result_vector);
 		}
 		exponent >>= 1;
 	}
@@ -143,7 +146,7 @@ static bc_num bc_standard_raise(
 	/* Convert to bc_num */
 	size_t power_leading_zeros = 0;
 	size_t power_len;
-	size_t power_full_len = power_arr_size * BC_VECTOR_SIZE;
+	size_t power_full_len = power_vector.size * BC_VECTOR_SIZE;
 	if (power_full_len > power_scale) {
 		power_len = power_full_len - power_scale;
 	} else {
@@ -160,7 +163,7 @@ static bc_num bc_standard_raise(
 	memset(pptr, 0, power_leading_zeros);
 	pptr += power_leading_zeros;
 
-	bc_convert_vector_to_char(power_vector, pptr, pend, power_arr_size);
+	bc_convert_vector_to_char(&power_vector, pptr, pend);
 
 	efree(buf);
 
