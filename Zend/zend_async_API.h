@@ -933,9 +933,9 @@ ZEND_API bool zend_async_internal_context_unset(zend_coroutine_t *coroutine, uin
 
 /* Internal Context initialization and cleanup */
 ZEND_API void zend_async_init_internal_context_api(void);
-ZEND_API void zend_async_coroutine_dispose_internal_context(zend_coroutine_t *coroutine);
-ZEND_API void zend_async_shutdown_internal_context_api(void);
-ZEND_API void zend_async_coroutine_init_internal_context(zend_coroutine_t *coroutine);
+ZEND_API void zend_async_coroutine_internal_context_dispose(zend_coroutine_t *coroutine);
+ZEND_API void zend_async_internal_context_api_shutdown(void);
+ZEND_API void zend_async_coroutine_internal_context_init(zend_coroutine_t *coroutine);
 
 /* Reactor API */
 
