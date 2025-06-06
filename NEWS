@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
   . Fix memory leak in locale lookup on failure. (nielsdos)
 
+- ODBC:
+  . Fix memory leak on php_odbc_fetch_hash() failure. (nielsdos)
+
 - OpenSSL:
   . Fix memory leak of X509_STORE in php_openssl_setup_verify() on failure.
     (nielsdos)
