@@ -58,6 +58,11 @@
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
+typedef struct bc_vector_arr {
+	BC_VECTOR *values;
+	size_t     size;
+} bc_vector_arr;
+
 #ifdef WORDS_BIGENDIAN
 #  define BC_LITTLE_ENDIAN 0
 #else
