@@ -52,7 +52,7 @@
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
-ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
+ZEND_API zval *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
@@ -1275,7 +1275,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 	zend_exception_save();
-	ce = zend_autoload(autoload_name, lc_name);
+	zval *ce_zval = zend_autoload(autoload_name, lc_name);
+	if (ce_zval) {
+		ce = Z_PTR_P(ce_zval);
+	}
 	zend_exception_restore();
 	EG(filename_override) = previous_filename;
 	EG(lineno_override) = previous_lineno;
