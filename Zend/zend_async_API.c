@@ -968,7 +968,7 @@ zend_async_callbacks_adjust_iterator(zend_async_callbacks_vector_t *vector, uint
 
 /* Remove a specific callback; order is NOT preserved, but iterator is safely adjusted */
 ZEND_API void
-zend_async_callbacks_remove(zend_async_event_t *event, const zend_async_event_callback_t *callback)
+zend_async_callbacks_remove(zend_async_event_t *event, zend_async_event_callback_t *callback)
 {
 	zend_async_callbacks_vector_t *vector = &event->callbacks;
 
@@ -1045,17 +1045,37 @@ zend_async_callbacks_notify_and_close(zend_async_event_t *event, void *result, z
 ZEND_API void
 zend_async_callbacks_free(zend_async_event_t *event)
 {
-	if (event->callbacks.data != NULL) {
-		for (uint32_t i = 0; i < event->callbacks.length; ++i) {
-			event->callbacks.data[i]->dispose(event->callbacks.data[i], event);
-		}
-
-		efree(event->callbacks.data);
+	if (event->callbacks.data == NULL) {
+		return;
 	}
 
+	zend_async_callbacks_vector_t *vector = &event->callbacks;
+	uint32_t current_index = 0;
+	
+	// Register iterator - prevents concurrent iterations
+	if (!zend_async_callbacks_register_iterator(vector, &current_index)) {
+		zend_error(E_CORE_WARNING,
+			"Concurrent callback iteration detected - nested free() calls are not allowed"
+		);
+		return;
+	}
+
+	// Dispose all callbacks
+	while (current_index < vector->length) {
+		zend_async_event_callback_t *callback = vector->data[current_index];
+		current_index++;
+		callback->dispose(callback, event);
+	}
+
+	// Free memory
+	efree(vector->data);
+
+	// Unregister iterator
+	zend_async_callbacks_unregister_iterator(vector);
+
 	// Reset all fields
-	event->callbacks.data            = NULL;
-	event->callbacks.length          = 0;
-	event->callbacks.capacity        = 0;
-	event->callbacks.current_iterator = NULL;
+	vector->data            = NULL;
+	vector->length          = 0;
+	vector->capacity        = 0;
+	vector->current_iterator = NULL;
 }

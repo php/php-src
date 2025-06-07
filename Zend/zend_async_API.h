@@ -382,7 +382,7 @@ struct _zend_async_event_s {
 
 /* Public callback vector functions - implementations in zend_async_API.c */
 ZEND_API void zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception);
-ZEND_API void zend_async_callbacks_remove(zend_async_event_t *event, const zend_async_event_callback_t *callback);
+ZEND_API void zend_async_callbacks_remove(zend_async_event_t *event, zend_async_event_callback_t *callback);
 ZEND_API void zend_async_callbacks_free(zend_async_event_t *event);
 ZEND_API void zend_async_callbacks_notify_and_close(zend_async_event_t *event, void *result, zend_object *exception);
 
