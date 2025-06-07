@@ -1236,8 +1236,10 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 		zend_string *key;
 		zend_class_entry *ce;
 		int num_classes = 0;
+		zval *ce_or_alias;
 
-		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, ce_or_alias) {
+			Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 			_extension_class_string(ce, key, &str_classes, ZSTR_VAL(sub_indent), module, &num_classes);
 		} ZEND_HASH_FOREACH_END();
 		if (num_classes) {
@@ -5439,9 +5441,11 @@ ZEND_METHOD(ReflectionClass, getTraitAliases)
 					zend_string *lcname = zend_string_tolower(cur_ref->method_name);
 
 					for (j = 0; j < ce->num_traits; j++) {
-						zend_class_entry *trait =
-							zend_hash_find_ptr(CG(class_table), ce->trait_names[j].lc_name);
-						ZEND_ASSERT(trait && "Trait must exist");
+						zval *trait_entry =
+							zend_hash_find(CG(class_table), ce->trait_names[j].lc_name);
+						ZEND_ASSERT(trait_entry && "Trait must exist");
+						zend_class_entry *trait;
+						Z_CE_FROM_ZVAL_P(trait, trait_entry);
 						if (zend_hash_exists(&trait->function_table, lcname)) {
 							class_name = trait->name;
 							break;
