@@ -7,6 +7,5 @@ Validation of attribute repetition (not allowed; internal attribute)
 class Demo {}
 
 ?>
---EXPECT--
-
-e
+--EXPECTF--
+Fatal error: Attribute "Deprecated" must not be repeated in %s on line %d
