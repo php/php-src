@@ -433,19 +433,19 @@ zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t
 
 /* Remove a specific callback; order is NOT preserved, but iterator is safely adjusted */
 static zend_always_inline void
-zend_async_callbacks_remove(zend_async_event_t *event, const zend_async_event_callback_t *callback)
+zend_async_callbacks_remove(zend_async_event_t *event, zend_async_event_callback_t *callback)
 {
 	zend_async_callbacks_vector_t *vector = &event->callbacks;
 
 	for (uint32_t i = 0; i < vector->length; ++i) {
 		if (vector->data[i] == callback) {
-			callback->dispose(vector->data[i], event);
 			
 			// Adjust the active iterator before performing the removal
 			zend_async_callbacks_adjust_iterator(vector, i);
 			
 			// O(1) removal: move last element to current position
 			vector->data[i] = vector->length > 0 ? vector->data[--vector->length] : NULL;
+			callback->dispose(callback, event);
 			return;
 		}
 	}
@@ -481,18 +481,18 @@ zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object
 	while (current_index < vector->length) {
 		// Store current callback (it might be moved during execution)
 		zend_async_event_callback_t *callback = vector->data[current_index];
-		
+
+		// Move to next callback
+		// Note: current_index may have been adjusted by zend_async_callbacks_adjust_iterator
+		// if a callback was removed during this iteration
+		current_index++;
+
 		// Execute callback
 		callback->callback(event, callback, result, exception);
 		
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			break;
 		}
-		
-		// Move to next callback
-		// Note: current_index may have been adjusted by zend_async_callbacks_adjust_iterator
-		// if a callback was removed during this iteration
-		current_index++;
 	}
 
 	// Unregister iterator
