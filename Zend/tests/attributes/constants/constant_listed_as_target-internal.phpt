@@ -8,4 +8,4 @@ class Example {}
 
 ?>
 --EXPECTF--
-Fatal error: Attribute "Deprecated" cannot target class (allowed targets: function, method, class constant, constant) in %s on line %d
+Fatal error: Attribute "Deprecated" cannot target class (allowed targets: function, method, class constant, constant, class alias) in %s on line %d

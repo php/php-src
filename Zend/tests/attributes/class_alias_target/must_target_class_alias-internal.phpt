@@ -7,5 +7,5 @@ Error when attribute does not target class alias (internal attribute)
 class Demo {}
 
 ?>
---EXPECT--
-NO
+--EXPECTF--
+Fatal error: Attribute "Override" cannot target class alias (allowed targets: method) in %s on line %d
