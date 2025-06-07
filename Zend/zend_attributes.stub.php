@@ -97,3 +97,14 @@ final class NoDiscard
 
     public function __construct(?string $message = null) {}
 }
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_CLASS|Attribute::IS_REPEATABLE)]
+final class ClassAlias
+{
+    public readonly string $alias;
+
+    public function __construct(string $alias) {}
+}

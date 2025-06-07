@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9aee3d8f2ced376f5929048444eaa2529ff90311 */
+ * Stub hash: 5c2a6f7f4c9872fa94ae22fa3f2f947388b63a38 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -33,6 +33,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NoDiscard___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ClassAlias___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Attribute, __construct);
 ZEND_METHOD(ReturnTypeWillChange, __construct);
 ZEND_METHOD(AllowDynamicProperties, __construct);
@@ -43,6 +47,7 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo);
 ZEND_METHOD(Override, __construct);
 ZEND_METHOD(Deprecated, __construct);
 ZEND_METHOD(NoDiscard, __construct);
+ZEND_METHOD(ClassAlias, __construct);
 
 static const zend_function_entry class_Attribute_methods[] = {
 	ZEND_ME(Attribute, __construct, arginfo_class_Attribute___construct, ZEND_ACC_PUBLIC)
@@ -83,6 +88,11 @@ static const zend_function_entry class_Deprecated_methods[] = {
 
 static const zend_function_entry class_NoDiscard_methods[] = {
 	ZEND_ME(NoDiscard, __construct, arginfo_class_NoDiscard___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_ClassAlias_methods[] = {
+	ZEND_ME(ClassAlias, __construct, arginfo_class_ClassAlias___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -287,6 +297,29 @@ static zend_class_entry *register_class_NoDiscard(void)
 	zval attribute_Attribute_class_NoDiscard_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_NoDiscard_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_NoDiscard_0->args[0].value, &attribute_Attribute_class_NoDiscard_0_arg0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ClassAlias(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ClassAlias", class_ClassAlias_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zval property_alias_default_value;
+	ZVAL_UNDEF(&property_alias_default_value);
+	zend_string *property_alias_name = zend_string_init("alias", sizeof("alias") - 1, 1);
+	zend_declare_typed_property(class_entry, property_alias_name, &property_alias_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_alias_name);
+
+	zend_string *attribute_name_Attribute_class_ClassAlias_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ClassAlias_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ClassAlias_0, 1);
+	zend_string_release(attribute_name_Attribute_class_ClassAlias_0);
+	zval attribute_Attribute_class_ClassAlias_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ClassAlias_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS | ZEND_ATTRIBUTE_IS_REPEATABLE);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ClassAlias_0->args[0].value, &attribute_Attribute_class_ClassAlias_0_arg0);
 
 	return class_entry;
 }
