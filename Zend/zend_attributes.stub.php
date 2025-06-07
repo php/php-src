@@ -103,3 +103,14 @@ final class NoDiscard
  */
 #[Attribute(Attribute::TARGET_ALL)]
 final class DelayedTargetValidation {}
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_CLASS|Attribute::IS_REPEATABLE)]
+final class ClassAlias
+{
+    public readonly string $alias;
+
+    public function __construct(string $alias) {}
+}

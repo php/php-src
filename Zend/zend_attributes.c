@@ -33,6 +33,7 @@ ZEND_API zend_class_entry *zend_ce_override;
 ZEND_API zend_class_entry *zend_ce_deprecated;
 ZEND_API zend_class_entry *zend_ce_nodiscard;
 ZEND_API zend_class_entry *zend_ce_delayed_target_validation;
+ZEND_API zend_class_entry *zend_ce_class_alias;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -127,6 +128,46 @@ static zend_string *validate_deprecated(
 	scope->ce_flags |= ZEND_ACC_DEPRECATED;
 	return NULL;
 
+}
+
+static void validate_class_alias(
+		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	zval alias_obj;
+	ZVAL_UNDEF(&alias_obj);
+	zend_result result = zend_get_attribute_object(
+		&alias_obj,
+		zend_ce_class_alias,
+		attr,
+		scope,
+		scope->info.user.filename
+	);
+	if (result == FAILURE) {
+		ZEND_ASSERT(EG(exception));
+		return;
+	}
+
+	zval *alias_name = zend_read_property(
+		zend_ce_class_alias,
+		Z_OBJ(alias_obj),
+		ZEND_STRL("alias"),
+		false,
+		NULL
+	);
+	result = zend_register_class_alias_ex(
+		Z_STRVAL_P(alias_name),
+		Z_STRLEN_P(alias_name),
+		scope,
+		false
+	);
+	if (result == FAILURE) {
+		zend_error_noreturn(E_ERROR, "Unable to declare alias '%s' for '%s'",
+			Z_STRVAL_P(alias_name),
+			ZSTR_VAL(scope->name)
+		);
+	}
+	zval_ptr_dtor(alias_name);
+	zval_ptr_dtor(&alias_obj);
 }
 
 ZEND_METHOD(Attribute, __construct)
@@ -258,6 +299,24 @@ ZEND_METHOD(NoDiscard, __construct)
 		ZVAL_NULL(&value);
 	}
 	zend_update_property_ex(zend_ce_nodiscard, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+}
+
+ZEND_METHOD(ClassAlias, __construct)
+{
+	zend_string *alias = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(alias)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval value;
+	ZVAL_STR(&value, alias);
+	zend_update_property(zend_ce_class_alias, Z_OBJ_P(ZEND_THIS), ZEND_STRL("alias"), &value);
 
 	/* The assignment might fail due to 'readonly'. */
 	if (UNEXPECTED(EG(exception))) {
@@ -602,10 +661,17 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_nodiscard = register_class_NoDiscard();
 	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
+<<<<<<< HEAD
 	attr->validator = validate_nodiscard;
 
 	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
 	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
+=======
+
+	zend_ce_class_alias = register_class_ClassAlias();
+	attr = zend_mark_internal_attribute(zend_ce_class_alias);
+	attr->validator = validate_class_alias;
+>>>>>>> e1a37a8b7b7 (Add #[ClassAlias])
 }
 
 void zend_attributes_shutdown(void)
