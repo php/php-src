@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5c2a6f7f4c9872fa94ae22fa3f2f947388b63a38 */
+ * Stub hash: c5a70b37073a6986229f62d801bddbabfada5474 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -35,6 +35,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ClassAlias___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, attributes, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Attribute, __construct);
@@ -144,6 +145,12 @@ static zend_class_entry *register_class_Attribute(void)
 	zend_string *const_TARGET_CONSTANT_name = zend_string_init_interned("TARGET_CONSTANT", sizeof("TARGET_CONSTANT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TARGET_CONSTANT_name, &const_TARGET_CONSTANT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_CONSTANT_name);
+
+	zval const_TARGET_CLASS_ALIAS_value;
+	ZVAL_LONG(&const_TARGET_CLASS_ALIAS_value, ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS);
+	zend_string *const_TARGET_CLASS_ALIAS_name = zend_string_init_interned("TARGET_CLASS_ALIAS", sizeof("TARGET_CLASS_ALIAS") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_CLASS_ALIAS_name, &const_TARGET_CLASS_ALIAS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_TARGET_CLASS_ALIAS_name);
 
 	zval const_TARGET_ALL_value;
 	ZVAL_LONG(&const_TARGET_ALL_value, ZEND_ATTRIBUTE_TARGET_ALL);
@@ -274,7 +281,7 @@ static zend_class_entry *register_class_Deprecated(void)
 	zend_attribute *attribute_Attribute_class_Deprecated_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Deprecated_0, 1);
 	zend_string_release(attribute_name_Attribute_class_Deprecated_0);
 	zval attribute_Attribute_class_Deprecated_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST | ZEND_ATTRIBUTE_TARGET_CONST);
+	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST | ZEND_ATTRIBUTE_TARGET_CONST | ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_Deprecated_0->args[0].value, &attribute_Attribute_class_Deprecated_0_arg0);
 
 	return class_entry;
