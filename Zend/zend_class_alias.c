@@ -25,6 +25,7 @@ zend_class_alias * zend_class_alias_init(zend_class_entry *ce) {
 
 	alias->ce = ce;
 	alias->attributes = NULL;
+	alias->alias_flags = 0;
 
 	return alias;
 }
