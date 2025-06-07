@@ -404,6 +404,10 @@ lxb_url_serialize(const lxb_url_t *url, lexbor_serialize_cb_f cb, void *ctx,
                   bool exclude_fragment);
 
 LXB_API lxb_status_t
+lxb_url_serialize_idna(lxb_unicode_idna_t *idna, const lxb_url_t *url, lexbor_serialize_cb_f cb,
+                       void *ctx, bool exclude_fragment);
+
+LXB_API lxb_status_t
 lxb_url_serialize_scheme(const lxb_url_t *url,
                          lexbor_serialize_cb_f cb, void *ctx);
 

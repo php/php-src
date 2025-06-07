@@ -14,14 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_URI_H
-#define PHP_URI_H
+#ifndef PHP_LEXBOR_H
+#define PHP_LEXBOR_H
 
 #include "php_uri_common.h"
+#include "lexbor/url/url.h"
 
-extern zend_module_entry uri_module_entry;
-#define phpext_uri_ptr &uri_module_entry
+extern const uri_handler_t lexbor_uri_handler;
 
-PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers);
+lxb_url_t *lexbor_parse_uri_ex(const zend_string *uri_str, const lxb_url_t *lexbor_base_url, zval *errors, bool silent);
+
+zend_result lexbor_request_init(void);
+void lexbor_request_shutdown(void);
 
 #endif
