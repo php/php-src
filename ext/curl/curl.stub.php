@@ -13,9 +13,9 @@
 const CURLOPT_AUTOREFERER = UNKNOWN;
 /**
  * @var int
- * @deprecated has no effect since 5.1.2
  * @cvalue CURLOPT_BINARYTRANSFER
  */
+#[\Deprecated(since: '8.4', message: 'as it had no effect since 5.1.2')]
 const CURLOPT_BINARYTRANSFER = UNKNOWN;
 /**
  * @var int

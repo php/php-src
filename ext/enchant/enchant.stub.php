@@ -5,14 +5,14 @@
 /**
  * @var int
  * @cvalue PHP_ENCHANT_MYSPELL
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated')]
 const ENCHANT_MYSPELL = UNKNOWN;
 /**
  * @var int
  * @cvalue PHP_ENCHANT_ISPELL
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated')]
 const ENCHANT_ISPELL = UNKNOWN;
 #ifdef HAVE_ENCHANT_GET_VERSION
 /**

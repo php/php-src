@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4e61617ca7c877aa3811d674d47850f23157074b */
+ * Stub hash: c9dba59a68085579d18948963a979d63eecff204 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -860,6 +860,45 @@ static void register_php_date_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_date_sunset_0_arg1, attribute_Deprecated_func_date_sunset_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunset_0->args[1].value, &attribute_Deprecated_func_date_sunset_0_arg1);
 	attribute_Deprecated_func_date_sunset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_SUNFUNCS_RET_TIMESTAMP = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_TIMESTAMP", sizeof("SUNFUNCS_RET_TIMESTAMP") - 1);
+
+	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_TIMESTAMP, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0;
+	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[0].value, &attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0);
+	attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1;
+	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str = zend_string_init("as date_sunrise() and date_sunset() were deprecated in 8.1", strlen("as date_sunrise() and date_sunset() were deprecated in 8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].value, &attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1);
+	attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_SUNFUNCS_RET_STRING = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_STRING", sizeof("SUNFUNCS_RET_STRING") - 1);
+
+	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_STRING_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_STRING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0;
+	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0, attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[0].value, &attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0);
+	attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1;
+	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1_str = zend_string_init("as date_sunrise() and date_sunset() were deprecated in 8.1", strlen("as date_sunrise() and date_sunset() were deprecated in 8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1, attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].value, &attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1);
+	attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_SUNFUNCS_RET_DOUBLE = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_DOUBLE", sizeof("SUNFUNCS_RET_DOUBLE") - 1);
+
+	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_DOUBLE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0;
+	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0, attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[0].value, &attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0);
+	attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1;
+	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1_str = zend_string_init("as date_sunrise() and date_sunset() were deprecated in 8.1", strlen("as date_sunrise() and date_sunset() were deprecated in 8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1, attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[1].value, &attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1);
+	attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_DateTimeInterface(void)
