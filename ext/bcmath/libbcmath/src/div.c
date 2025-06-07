@@ -429,3 +429,27 @@ quot_zero:
 	*quot = bc_copy_num(BCG(_zero_));
 	return true;
 }
+
+bool bc_divide_vector(
+	BC_VECTOR *numerator_vectors, size_t numerator_arr_size,
+	const BC_VECTOR *divisor_vectors, size_t divisor_arr_size,
+	BC_VECTOR *quot_vectors, size_t quot_arr_size
+) {
+	ZEND_ASSERT(divisor_vectors[divisor_arr_size - 1] != 0);
+	ZEND_ASSERT(quot_arr_size >= numerator_arr_size - divisor_arr_size + 1);
+
+	size_t divisor_size = (divisor_arr_size - 1) * BC_VECTOR_SIZE;
+	BC_VECTOR tmp_divisor_top = divisor_vectors[divisor_arr_size - 1];
+	while (tmp_divisor_top > 0) {
+		divisor_size++;
+		tmp_divisor_top /= BASE;
+	}
+
+	/* Do the division */
+	if (divisor_arr_size == 1) {
+		bc_fast_div(numerator_vectors, numerator_arr_size, divisor_vectors[0], quot_vectors, quot_arr_size);
+	} else {
+		bc_standard_div(numerator_vectors, numerator_arr_size, divisor_vectors, divisor_arr_size, divisor_size, quot_vectors, quot_arr_size);
+	}
+	return true;
+}
