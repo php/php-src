@@ -7645,38 +7645,7 @@ static void zend_compile_attributes(
 
 			/* Populate arguments */
 			if (args) {
-				ZEND_ASSERT(args->kind == ZEND_AST_ARG_LIST);
-
-				bool uses_named_args = false;
-				for (j = 0; j < args->children; j++) {
-					zend_ast **arg_ast_ptr = &args->child[j];
-					zend_ast *arg_ast = *arg_ast_ptr;
-
-					if (arg_ast->kind == ZEND_AST_UNPACK) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"Cannot use unpacking in attribute argument list");
-					}
-
-					if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
-						attr->args[j].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
-						arg_ast_ptr = &arg_ast->child[1];
-						uses_named_args = true;
-
-						for (uint32_t k = 0; k < j; k++) {
-							if (attr->args[k].name &&
-									zend_string_equals(attr->args[k].name, attr->args[j].name)) {
-								zend_error_noreturn(E_COMPILE_ERROR, "Duplicate named parameter $%s",
-									ZSTR_VAL(attr->args[j].name));
-							}
-						}
-					} else if (uses_named_args) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"Cannot use positional argument after named argument");
-					}
-
-					zend_const_expr_to_zval(
-						&attr->args[j].value, arg_ast_ptr, /* allow_dynamic */ true);
-				}
+				zend_attribute_populate_arguments(attr, args);
 			}
 		}
 	}

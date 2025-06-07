@@ -101,6 +101,7 @@ ZEND_API zend_attribute *zend_add_attribute(
 uint32_t zend_attribute_attribute_get_flags(const zend_attribute *attr, zend_class_entry *scope);
 
 ZEND_API void zend_apply_internal_attribute_validation(HashTable *attributes, uint32_t offset, uint32_t target);
+ZEND_API void zend_attribute_populate_arguments(zend_attribute *attr, zend_ast_list *args);
 
 END_EXTERN_C()
 
