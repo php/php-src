@@ -6001,7 +6001,6 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 	zend_object *zobj;
 	zend_class_entry *ce, *scope;
 	zend_function *clone;
-	zend_object_clone_obj_t clone_call;
 
 	SAVE_OPLINE();
 	obj = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -6024,6 +6023,7 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 			}
 			zend_throw_error(NULL, "__clone method called on non-object");
 			FREE_OP1();
+			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
 	} while (0);
@@ -6031,10 +6031,10 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 	zobj = Z_OBJ_P(obj);
 	ce = zobj->ce;
 	clone = ce->clone;
-	clone_call = zobj->handlers->clone_obj;
-	if (UNEXPECTED(clone_call == NULL)) {
+	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
 		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
 		FREE_OP1();
+		FREE_OP2();
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
 		HANDLE_EXCEPTION();
 	}
@@ -6046,15 +6046,55 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
 				zend_wrong_clone_call(clone, scope);
 				FREE_OP1();
+				FREE_OP2();
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned;
+	if (zobj->handlers->clone_obj_with) {
+		scope = EX(func)->op_array.scope;
+		if (OP2_TYPE != IS_UNUSED) {
+			zval *properties = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			if (Z_TYPE_P(properties) != IS_ARRAY) {
+				zend_type_error("Updated properties must be of type array, %s given", zend_zval_value_name(properties));
+				FREE_OP1();
+				FREE_OP2();
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+				HANDLE_EXCEPTION();
+			}
+			
+			cloned = zobj->handlers->clone_obj_with(zobj, scope, Z_ARR_P(properties));
+		} else {
+			cloned = zobj->handlers->clone_obj_with(zobj, scope, NULL);
+		}
 
+		if (UNEXPECTED(EG(exception))) {
+			if (cloned) {
+				OBJ_RELEASE(cloned);
+			}
+			FREE_OP1();
+			FREE_OP2();
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		if (OP2_TYPE != IS_UNUSED) {
+			zend_throw_error(NULL, "Trying to clone an object with updated properties that is not compatible %s", ZSTR_VAL(ce->name));
+			FREE_OP1();
+			FREE_OP2();
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
+		}
+
+		cloned = zobj->handlers->clone_obj(zobj);
+	}
+
+	ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
 	FREE_OP1();
+	FREE_OP2();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
