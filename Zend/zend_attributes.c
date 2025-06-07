@@ -267,12 +267,7 @@ static void validate_class_alias(
 	if (attr->argc < 1 || attr->argc > 2) {
 		zend_wrong_parameters_count_error(1, 2);
 
-		EG(current_execute_data) = constructor_call->prev_execute_data;
-		zend_vm_stack_free_call_frame(constructor_call);
-		
-		EG(current_execute_data) = call->prev_execute_data;
-		zend_vm_stack_free_call_frame(call);
-		return;
+		goto restore_execution_data;
 	}
 
 	zval *found = NULL;
@@ -290,11 +285,7 @@ static void validate_class_alias(
 		}
 		if (found == NULL) {
 			zend_argument_error(zend_ce_argument_count_error, 1, "not passed");
-			EG(current_execute_data) = constructor_call->prev_execute_data;
-			zend_vm_stack_free_call_frame(constructor_call);
-			EG(current_execute_data) = call->prev_execute_data;
-			zend_vm_stack_free_call_frame(call);
-			return;
+			goto restore_execution_data;
 		}
 	}
 
@@ -307,11 +298,7 @@ static void validate_class_alias(
 			Z_EXPECTED_STRING,
 			found
 		);
-		EG(current_execute_data) = constructor_call->prev_execute_data;
-		zend_vm_stack_free_call_frame(constructor_call);
-		EG(current_execute_data) = call->prev_execute_data;
-		zend_vm_stack_free_call_frame(call);
-		return;
+		goto restore_execution_data;
 	}
 
 	zend_result result = zend_register_class_alias_ex(
@@ -325,11 +312,7 @@ static void validate_class_alias(
 			ZSTR_VAL(alias),
 			ZSTR_VAL(scope->name)
 		);
-		EG(current_execute_data) = constructor_call->prev_execute_data;
-		zend_vm_stack_free_call_frame(constructor_call);
-		EG(current_execute_data) = call->prev_execute_data;
-		zend_vm_stack_free_call_frame(call);
-		return;
+		goto restore_execution_data;
 	}
 
 	zend_string *lc_name;
@@ -365,11 +348,7 @@ static void validate_class_alias(
 					break;
 				}
 				zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(attr->args[i].name));
-				EG(current_execute_data) = constructor_call->prev_execute_data;
-				zend_vm_stack_free_call_frame(constructor_call);
-				EG(current_execute_data) = call->prev_execute_data;
-				zend_vm_stack_free_call_frame(call);
-				return;
+				goto restore_execution_data;
 			}
 		}
 		ZEND_ASSERT(nested_attribs != NULL);
@@ -388,13 +367,11 @@ static void validate_class_alias(
 		}
 	}
 
-	// zval_ptr_dtor(alias_name);
-	// zval_ptr_dtor(&alias_obj);
+restore_execution_data:
 	EG(current_execute_data) = constructor_call->prev_execute_data;
 	zend_vm_stack_free_call_frame(constructor_call);
 	EG(current_execute_data) = call->prev_execute_data;
 	zend_vm_stack_free_call_frame(call);
-	return;
 }
 
 ZEND_METHOD(Attribute, __construct)
