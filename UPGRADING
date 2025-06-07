@@ -555,7 +555,10 @@ PHP 8.5 UPGRADE NOTES
     TransLiterator::getErrorCode(), and TransLiterator::getErrorMessage()
     have dropped the false from the return type union. Returning false
     was actually never possible.
-
+  . grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
+    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
+    grapheme_levenshtein() functions add $locale parameter.
+    RFC: https://wiki.php.net/rfc/grapheme_add_locale_for_case_insensitive
 - LDAP:
   . ldap_get_option() now accepts a NULL connection, as ldap_set_option(),
     to allow retrieval of global options.
