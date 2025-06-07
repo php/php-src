@@ -65,15 +65,6 @@ static zend_string *get_known_string_by_property_name(uri_property_name_t proper
 	}
 }
 
-void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors)
-{
-	zval exception_zv;
-
-	uri_handler->create_invalid_uri_exception(&exception_zv, errors);
-
-	zend_throw_exception_object(&exception_zv);
-}
-
 void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, uri_component_read_mode_t component_read_mode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -117,7 +108,6 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_na
 	zval errors;
 	ZVAL_UNDEF(&errors);
 	if (property_handler->write_func(new_internal_uri, property_zv, &errors) == FAILURE) {
-		throw_invalid_uri_exception(new_internal_uri->handler, &errors);
 		zval_ptr_dtor(&errors);
 		zend_object_release(new_object);
 		RETURN_THROWS();

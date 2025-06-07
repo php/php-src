@@ -209,10 +209,9 @@ PHPAPI void php_uri_instantiate_uri(
 		base_url = internal_base_url->uri;
 	}
 
-	void *uri = handler->parse_uri(uri_str, base_url, should_throw || errors_zv != NULL ? &errors : NULL);
+	void *uri = handler->parse_uri(uri_str, base_url, should_throw || errors_zv != NULL ? &errors : NULL, !should_throw);
 	if (UNEXPECTED(uri == NULL)) {
 		if (should_throw) {
-			throw_invalid_uri_exception(handler, &errors);
 			zval_ptr_dtor(&errors);
 			RETURN_THROWS();
 		} else {
@@ -352,7 +351,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_na
 	if (internal_uri->uri != NULL) {
 		internal_uri->handler->free_uri(internal_uri->uri);
 	}
-	internal_uri->uri = internal_uri->handler->parse_uri(Z_STR_P(uri_zv), NULL, NULL);
+	internal_uri->uri = internal_uri->handler->parse_uri(Z_STR_P(uri_zv), NULL, NULL, true);
 	if (internal_uri->uri == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
 		RETURN_THROWS();
@@ -617,7 +616,6 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler)
 
 	ZEND_ASSERT(uri_handler->name != NULL);
 	ZEND_ASSERT(uri_handler->parse_uri != NULL);
-	ZEND_ASSERT(uri_handler->create_invalid_uri_exception != NULL);
 	ZEND_ASSERT(uri_handler->clone_uri != NULL);
 	ZEND_ASSERT(uri_handler->uri_to_string != NULL);
 	ZEND_ASSERT(uri_handler->free_uri != NULL);

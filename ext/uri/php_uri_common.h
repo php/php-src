@@ -83,19 +83,16 @@ typedef struct uri_handler_t {
 	 * returned.
 	 *
 	 * The errors by-ref parameter can contain errors that occurred during parsing.
-	 * If the input value is NULL, or there were no errors, errors should not be changed.
+	 * If the input value is NULL, or there were no errors, the errors parameter should
+	 * not be modified.
 	 *
 	 * If the URI string is valid and the base_url URI is not NULL, the URI object
 	 * is resolved against the base_url.
-	 */
-	void *(*parse_uri)(const zend_string *uri_str, const void *base_url, zval *errors);
-	/**
-	 * Create a Uri\InvalidUriException instance based on the errors parameter.
-	 * The errors parameter is either an array or an UNDEF zval.
 	 *
-	 * The exception object is passed by ref to the exception_zv parameter.
+	 * If the silent parameter is true, a Uri\InvalidUriException instance must be thrown.
+	 * If the parameter is false, the possible errors should be handled by the caller.
 	 */
-	void (*create_invalid_uri_exception)(zval *exception_zv, zval *errors);
+	void *(*parse_uri)(const zend_string *uri_str, const void *base_url, zval *errors, bool silent);
 	void *(*clone_uri)(void *uri);
 	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
 	void (*free_uri)(void *uri);
@@ -129,7 +126,6 @@ static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 
 zend_result uri_handler_register(const uri_handler_t *uri_handler);
 const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, uri_property_name_t property_name);
-void throw_invalid_uri_exception(const uri_handler_t *uri_handler, zval *errors);
 void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, uri_component_read_mode_t component_read_mode);
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
 void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
