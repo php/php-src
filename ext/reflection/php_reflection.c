@@ -7919,8 +7919,9 @@ ZEND_METHOD(ReflectionClassAlias, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	// First use zend_lookup_class() which will also take care of autoloading,
-	// but that will always return the underlying class entry
-	zend_class_entry *ce = zend_lookup_class(name);
+	// but that will always return the underlying class entry; don't complain
+	// about deprecations here
+	zend_class_entry *ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_SILENT);
 	if (ce == NULL) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(reflection_exception_ptr, -1, "Class \"%s\" does not exist", ZSTR_VAL(name));

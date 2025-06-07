@@ -1209,6 +1209,11 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			zend_string_release_ex(lc_name, 0);
 		}
 		Z_CE_FROM_ZVAL_P(ce, zv);
+		zend_class_alias *alias = NULL;
+		if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
+			ce_cache = 0;
+			alias = Z_CLASS_ALIAS_P(zv);
+		}
 		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
 			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
 				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&
@@ -1218,6 +1223,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 					zend_hash_init(CG(unlinked_uses), 0, NULL, NULL, 0);
 				}
 				zend_hash_index_add_empty_element(CG(unlinked_uses), (zend_long)(uintptr_t)ce);
+				if (!(flags & ZEND_FETCH_CLASS_SILENT) && alias && (alias->alias_flags & ZEND_ACC_DEPRECATED)) {
+					zend_deprecated_class_alias(alias);
+				}
 				return ce;
 			}
 			return NULL;
@@ -1227,6 +1235,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		if (ce_cache &&
 				(!CG(in_compilation) || (ce->ce_flags & ZEND_ACC_IMMUTABLE))) {
 			SET_CE_CACHE(ce_cache, ce);
+		}
+		if (!(flags & ZEND_FETCH_CLASS_SILENT) && alias && (alias->alias_flags & ZEND_ACC_DEPRECATED)) {
+			zend_deprecated_class_alias(alias);
 		}
 		return ce;
 	}
@@ -1276,8 +1287,16 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	EG(lineno_override) = -1;
 	zend_exception_save();
 	zval *ce_zval = zend_autoload(autoload_name, lc_name);
+	zend_class_alias *alias = NULL;
 	if (ce_zval) {
-		ce = Z_PTR_P(ce_zval);
+		if (Z_TYPE_P(ce_zval) == IS_ALIAS_PTR) {
+			ce_cache = 0;
+			alias = Z_CLASS_ALIAS_P(ce_zval);
+			ce = alias->ce;
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(ce_zval) == IS_PTR);
+			ce = Z_PTR_P(ce_zval);
+		}
 	}
 	zend_exception_restore();
 	EG(filename_override) = previous_filename;
@@ -1294,6 +1313,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		if (ce_cache) {
 			SET_CE_CACHE(ce_cache, ce);
 		}
+	}
+	if (!(flags & ZEND_FETCH_CLASS_SILENT) && alias && (alias->alias_flags & ZEND_ACC_DEPRECATED)) {
+		zend_deprecated_class_alias(alias);
 	}
 	return ce;
 }

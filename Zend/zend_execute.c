@@ -1799,7 +1799,7 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 	zend_throw_error(NULL, "%s", msg);
 }
 
-ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, zend_class_entry* scope, zend_string **message_suffix)
+ZEND_COLD zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, zend_class_entry* scope, zend_string **message_suffix)
 {
 	*message_suffix = ZSTR_EMPTY_ALLOC();
 

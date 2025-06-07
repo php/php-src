@@ -39,6 +39,7 @@
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
 #include "zend_property_hooks.h"
+#include "zend_class_alias.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -1867,8 +1868,23 @@ static bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name, zend
 	if (class_name_refers_to_active_ce(class_name, fetch_type)) {
 		cc = zend_hash_find_ptr(&CG(active_class_entry)->constants_table, name);
 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
-		const zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), class_name);
-		if (ce) {
+		zend_string *lc_key = zend_string_tolower(class_name);
+		zval *ce_or_alias = zend_hash_find(CG(class_table), lc_key);
+		zend_string_release(lc_key);
+
+		if (ce_or_alias) {
+			zend_class_entry *ce;
+			if (Z_TYPE_P(ce_or_alias) == IS_ALIAS_PTR) {
+				zend_class_alias *alias = Z_CLASS_ALIAS_P(ce_or_alias);
+				if (alias->alias_flags & ZEND_ACC_DEPRECATED) {
+					// Cannot evaluate at compile time
+					return 0;
+				}
+				ce = alias->ce;
+			} else {
+				ZEND_ASSERT(Z_TYPE_P(ce_or_alias) == IS_PTR);
+				ce = Z_PTR_P(ce_or_alias);
+			}
 			cc = zend_hash_find_ptr(&ce->constants_table, name);
 		} else {
 			return 0;
@@ -5449,7 +5465,10 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		zend_class_entry *ce = NULL;
 		if (opline->op1_type == IS_CONST) {
 			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op1) + 1);
-			ce = zend_hash_find_ptr(CG(class_table), lcname);
+			zval *ce_or_alias = zend_hash_find(CG(class_table), lcname);
+			if (ce_or_alias) {
+				Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
+			}
 			if (ce) {
 				if (zend_compile_ignore_class(ce, CG(active_op_array)->filename)) {
 					ce = NULL;
