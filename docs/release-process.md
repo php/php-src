@@ -209,7 +209,7 @@ slightly different steps. We'll call attention where the steps differ.
    # With ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -217,7 +217,7 @@ slightly different steps. We'll call attention where the steps differ.
    # Without ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -528,7 +528,7 @@ slightly different steps. We'll call attention where the steps differ.
    # With ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -536,7 +536,7 @@ slightly different steps. We'll call attention where the steps differ.
    # Without ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
