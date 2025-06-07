@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: c80946cc8c8215bb6527e09bb71b3a97a76a6a98
+ * Stub hash: 555ee6c07adcf2ae85c26d551eb1b64bffbd2449
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
@@ -735,6 +735,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionConstant_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
 
+#define arginfo_class_ReflectionClassAlias___construct arginfo_class_ReflectionExtension___construct
+
+#define arginfo_class_ReflectionClassAlias___toString arginfo_class_ReflectionFunction___toString
+
+#define arginfo_class_ReflectionClassAlias_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
+
 ZEND_METHOD(Reflection, getModifierNames);
 ZEND_METHOD(ReflectionClass, __clone);
 ZEND_METHOD(ReflectionFunctionAbstract, inNamespace);
@@ -1009,6 +1015,9 @@ ZEND_METHOD(ReflectionConstant, getExtension);
 ZEND_METHOD(ReflectionConstant, getExtensionName);
 ZEND_METHOD(ReflectionConstant, __toString);
 ZEND_METHOD(ReflectionConstant, getAttributes);
+ZEND_METHOD(ReflectionClassAlias, __construct);
+ZEND_METHOD(ReflectionClassAlias, __toString);
+ZEND_METHOD(ReflectionClassAlias, getAttributes);
 
 static const zend_function_entry class_Reflection_methods[] = {
 	ZEND_ME(Reflection, getModifierNames, arginfo_class_Reflection_getModifierNames, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -1383,6 +1392,13 @@ static const zend_function_entry class_ReflectionConstant_methods[] = {
 	ZEND_ME(ReflectionConstant, getExtensionName, arginfo_class_ReflectionConstant_getExtensionName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionConstant, __toString, arginfo_class_ReflectionConstant___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionConstant, getAttributes, arginfo_class_ReflectionConstant_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_ReflectionClassAlias_methods[] = {
+	ZEND_ME(ReflectionClassAlias, __construct, arginfo_class_ReflectionClassAlias___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassAlias, __toString, arginfo_class_ReflectionClassAlias___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassAlias, getAttributes, arginfo_class_ReflectionClassAlias_getAttributes, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1915,6 +1931,21 @@ static zend_class_entry *register_class_ReflectionConstant(zend_class_entry *cla
 
 	INIT_CLASS_ENTRY(ce, "ReflectionConstant", class_ReflectionConstant_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+	zend_class_implements(class_entry, 1, class_entry_Reflector);
+
+	zval property_name_default_value;
+	ZVAL_UNDEF(&property_name_default_value);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_NAME), &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ReflectionClassAlias(zend_class_entry *class_entry_Reflector)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ReflectionClassAlias", class_ReflectionClassAlias_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval property_name_default_value;
