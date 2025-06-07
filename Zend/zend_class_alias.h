@@ -24,6 +24,7 @@
 struct _zend_class_alias {
     zend_refcounted_h gc;
     zend_class_entry *ce;
+    zend_string *name;
     HashTable *attributes;
     uint32_t alias_flags;
 };
