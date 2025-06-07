@@ -407,8 +407,8 @@ zend_async_callbacks_remove(zend_async_event_t *event, const zend_async_event_ca
 
 	for (uint32_t i = 0; i < vector->length; ++i) {
 		if (vector->data[i] == callback) {
-			vector->data[i] = vector->data[--vector->length]; /* O(1) removal */
 			callback->dispose(vector->data[i], event);
+			vector->data[i] = vector->length > 0 ? vector->data[--vector->length] : NULL; /* O(1) removal */
 			return;
 		}
 	}
