@@ -7981,11 +7981,23 @@ ZEND_METHOD(ReflectionClassAlias, __toString)
 
 	smart_str_append_printf(
 		&str,
-		"%s - alias for %s",
+		"%s - %salias for %s",
 		Z_STRVAL_P(reflection_prop_name(ZEND_THIS)),
+		(alias->alias_flags & ZEND_ACC_DEPRECATED) ? "deprecated " : "",
 		ZSTR_VAL(alias->ce->name)
 	);
 	RETURN_STR(smart_str_extract(&str));
+}
+
+ZEND_METHOD(ReflectionClassAlias, isDeprecated)
+{
+	reflection_object *intern;
+	zend_class_alias *alias;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(alias);
+	RETURN_BOOL(alias->alias_flags & ZEND_ACC_DEPRECATED);
 }
 
 PHP_MINIT_FUNCTION(reflection) /* {{{ */

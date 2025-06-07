@@ -400,6 +400,16 @@ static void validate_class_alias(
 		} else {
 			zend_ast *attributes_ast = Z_ASTVAL_P(nested_attribs);
 			compile_alias_attributes(&( alias_obj->attributes), attributes_ast);
+
+			zend_attribute *deprecated_attribute = zend_get_attribute_str(
+				alias_obj->attributes,
+				"deprecated",
+				strlen("deprecated")
+			);
+
+			if (deprecated_attribute) {
+				alias_obj->alias_flags |= ZEND_ACC_DEPRECATED;
+			}
 		}
 	}
 
