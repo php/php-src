@@ -141,6 +141,8 @@ PHP                                                                        NEWS
 - PDO_SQLITE:
   . throw on null bytes / resolve GH-13952 (divinity76).
   . Implement GH-17321: Add setAuthorizer to Pdo\Sqlite. (nielsdos)
+  . PDO::sqliteCreateCollation now throws a TypeError if the callback
+    has a wrong return type. (David Carlier)
 
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing

@@ -268,6 +268,9 @@ PHP 8.5 UPGRADE NOTES
 - PDO_SQLITE:
   . SQLite PDO::quote() will now throw an exception or emit a warning,
     depending on the error mode, if the string contains a null byte.
+  . PDO::sqliteCreateCollation will now throw an exception
+    if the callback has the wrong return type, making it more
+    in line with Pdo_Sqlite::createCollation behavior.
 
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
