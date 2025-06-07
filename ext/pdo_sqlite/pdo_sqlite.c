@@ -346,6 +346,9 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 
 	zend_call_known_fcc(&collation->callback, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
 
+	zval_ptr_dtor(&zargs[0]);
+	zval_ptr_dtor(&zargs[1]);
+
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			zend_string *func_name = get_active_function_or_method_name();
@@ -361,9 +364,6 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 			ret = -1;
 		}
 	}
-
-	zval_ptr_dtor(&zargs[0]);
-	zval_ptr_dtor(&zargs[1]);
 
 	return ret;
 }
