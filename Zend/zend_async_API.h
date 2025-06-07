@@ -259,11 +259,14 @@ struct _zend_async_waker_trigger_s {
 	zend_async_event_callback_t *callback;
 };
 
-/* Dynamic array of async event callbacks */
+/* Dynamic array of async event callbacks with single iterator protection */
 typedef struct _zend_async_callbacks_vector_s {
-	uint32_t                      length;   /* current number of callbacks          */
-	uint32_t                      capacity; /* allocated slots in the array         */
-	zend_async_event_callback_t  **data;    /* dynamically allocated callback array */
+	uint32_t                      length;          /* current number of callbacks          */
+	uint32_t                      capacity;        /* allocated slots in the array         */
+	zend_async_event_callback_t  **data;           /* dynamically allocated callback array */
+	
+	/* Single iterator tracking - NULL means no active iteration */
+	uint32_t                     *current_iterator; /* pointer to active iterator index     */
 } zend_async_callbacks_vector_t;
 
 /**
@@ -377,6 +380,35 @@ struct _zend_async_event_s {
 	} \
 } while (0)
 
+/* Register the single iterator - prevents concurrent iterations */
+static zend_always_inline bool
+zend_async_callbacks_register_iterator(zend_async_callbacks_vector_t *vector, uint32_t *iterator_index)
+{
+	if (vector->current_iterator != NULL) {
+		// Concurrent iteration detected - this is not allowed
+		return false;
+	}
+	
+	vector->current_iterator = iterator_index;
+	return true;
+}
+
+/* Unregister the iterator after iteration completes */
+static zend_always_inline void
+zend_async_callbacks_unregister_iterator(zend_async_callbacks_vector_t *vector)
+{
+	vector->current_iterator = NULL;
+}
+
+/* Adjust the active iterator when an element is removed */
+static zend_always_inline void
+zend_async_callbacks_adjust_iterator(zend_async_callbacks_vector_t *vector, uint32_t removed_index)
+{
+	if (vector->current_iterator != NULL && *vector->current_iterator > removed_index) {
+		(*vector->current_iterator)--;
+	}
+}
+
 /* Append a callback; grows the buffer when needed */
 static zend_always_inline void
 zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t *callback)
@@ -399,7 +431,7 @@ zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t
 	vector->data[vector->length++] = callback;
 }
 
-/* Remove a specific callback; order is NOT preserved */
+/* Remove a specific callback; order is NOT preserved, but iterator is safely adjusted */
 static zend_always_inline void
 zend_async_callbacks_remove(zend_async_event_t *event, const zend_async_event_callback_t *callback)
 {
@@ -408,13 +440,18 @@ zend_async_callbacks_remove(zend_async_event_t *event, const zend_async_event_ca
 	for (uint32_t i = 0; i < vector->length; ++i) {
 		if (vector->data[i] == callback) {
 			callback->dispose(vector->data[i], event);
-			vector->data[i] = vector->length > 0 ? vector->data[--vector->length] : NULL; /* O(1) removal */
+			
+			// Adjust the active iterator before performing the removal
+			zend_async_callbacks_adjust_iterator(vector, i);
+			
+			// O(1) removal: move last element to current position
+			vector->data[i] = vector->length > 0 ? vector->data[--vector->length] : NULL;
 			return;
 		}
 	}
 }
 
-/* Call all callbacks */
+/* Call all callbacks with safe iterator tracking to handle concurrent modifications */
 static zend_always_inline void
 zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception)
 {
@@ -425,20 +462,41 @@ zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object
 		}
 	}
 
-	if (event->callbacks.data == NULL) {
+	if (event->callbacks.data == NULL || event->callbacks.length == 0) {
 		return;
 	}
 
-	// TODO: Consider the case when the callback is removed during iteration!
+	zend_async_callbacks_vector_t *vector = &event->callbacks;
+	uint32_t current_index = 0;
+	
+	// Register iterator - prevents concurrent iterations
+	if (!zend_async_callbacks_register_iterator(vector, &current_index)) {
+		zend_error(E_CORE_WARNING,
+			"Concurrent callback iteration detected - nested notify() calls are not allowed"
+		);
+		return;
+	}
 
-	const zend_async_callbacks_vector_t *vector = &event->callbacks;
-
-	for (uint32_t i = 0; i < vector->length; ++i) {
-		vector->data[i]->callback(event, vector->data[i], result, exception);
+	// Iterate through callbacks with safe index tracking
+	while (current_index < vector->length) {
+		// Store current callback (it might be moved during execution)
+		zend_async_event_callback_t *callback = vector->data[current_index];
+		
+		// Execute callback
+		callback->callback(event, callback, result, exception);
+		
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			break;
 		}
+		
+		// Move to next callback
+		// Note: current_index may have been adjusted by zend_async_callbacks_adjust_iterator
+		// if a callback was removed during this iteration
+		current_index++;
 	}
+
+	// Unregister iterator
+	zend_async_callbacks_unregister_iterator(vector);
 }
 
 /* Call all callbacks and close the event (Like future) */
@@ -461,9 +519,11 @@ zend_async_callbacks_free(zend_async_event_t *event)
 		efree(event->callbacks.data);
 	}
 
-	event->callbacks.data     = NULL;
-	event->callbacks.length   = 0;
-	event->callbacks.capacity = 0;
+	// Reset all fields
+	event->callbacks.data            = NULL;
+	event->callbacks.length          = 0;
+	event->callbacks.capacity        = 0;
+	event->callbacks.current_iterator = NULL;
 }
 
 struct _zend_async_poll_event_s {
