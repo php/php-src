@@ -23,11 +23,11 @@ MyAlias::doNothing();
 
 ?>
 --EXPECTF--
-Deprecated: Alias is deprecated since 8.4, don't use the alias in %s on line %d
+Deprecated: Alias MyAlias for class Clazz is deprecated since 8.4, don't use the alias in %s on line %d
 int(1)
 
-Deprecated: Alias is deprecated since 8.4, don't use the alias in %s on line %d
+Deprecated: Alias MyAlias for class Clazz is deprecated since 8.4, don't use the alias in %s on line %d
 
-Deprecated: Alias is deprecated since 8.4, don't use the alias in %s on line %d
+Deprecated: Alias MyAlias for class Clazz is deprecated since 8.4, don't use the alias in %s on line %d
 
-Deprecated: Alias is deprecated since 8.4, don't use the alias in %s on line %d
+Deprecated: Alias MyAlias for class Clazz is deprecated since 8.4, don't use the alias in %s on line %d
