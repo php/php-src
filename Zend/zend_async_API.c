@@ -395,6 +395,12 @@ static void waker_events_dtor(zval *item)
 
 	trigger->event->del_callback(trigger->event, trigger->callback);
 
+	//
+	// At this point, we explicitly stop the event because it is no longer being listened to by our handlers.
+	// However, this does not mean the object is destroyed—it may remain in memory if something still holds a reference to it.
+	//
+	trigger->event->stop(trigger->event);
+
 	ZEND_ASYNC_EVENT_RELEASE(trigger->event);
 
 	efree(trigger);
