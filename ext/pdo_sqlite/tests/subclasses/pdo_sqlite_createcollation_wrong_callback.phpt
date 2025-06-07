@@ -21,4 +21,4 @@ try {
 }
 ?>
 --EXPECT--
-PDO::query(): Return value of the callback must be of type int, string returned
+PDO::query(): Return value of the collation callback must be of type int, string returned
