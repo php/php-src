@@ -123,36 +123,41 @@ void compile_alias_attributes(
 	}
 
 	if (*attributes != NULL) {
-		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
-		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
-			if (attr->offset != 0 || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
-				continue;
-			}
-
-			uint32_t target = ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS;
-
-			if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
-				zend_string *location = zend_get_attribute_target_names(target);
-				zend_string *allowed = zend_get_attribute_target_names(config->flags);
-
-				zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
-					ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
-				);
-			}
-
-			if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
-				if (zend_is_attribute_repeated(*attributes, attr)) {
-					zend_error_noreturn(E_ERROR, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->name));
-				}
-			}
-
-			if (config->validator != NULL) {
-				config->validator(attr, target, CG(active_class_entry));
-			}
-		} ZEND_HASH_FOREACH_END();
+		zend_apply_internal_attribute_validation(*attributes, 0, ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS);
 	}
 }
 /* }}} */
+
+ZEND_API void zend_apply_internal_attribute_validation(HashTable *attributes, uint32_t offset, uint32_t target) {
+	zend_attribute *attr;
+	zend_internal_attribute *config;
+
+	/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
+	ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
+		if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
+			continue;
+		}
+
+		if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+			zend_string *location = zend_get_attribute_target_names(target);
+			zend_string *allowed = zend_get_attribute_target_names(config->flags);
+
+			zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+				ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
+			);
+		}
+
+		if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
+			if (zend_is_attribute_repeated(attributes, attr)) {
+				zend_error_noreturn(E_ERROR, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->name));
+			}
+		}
+
+		if (config->validator != NULL) {
+			config->validator(attr, target, CG(active_class_entry));
+		}
+	} ZEND_HASH_FOREACH_END();
+}
 
 uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope)
 {
