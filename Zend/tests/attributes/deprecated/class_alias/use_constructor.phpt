@@ -14,5 +14,5 @@ $o = new MyAlias();
 
 ?>
 --EXPECTF--
-Deprecated: Alias is deprecated in %s on line %d
+Deprecated: Alias MyAlias for class Clazz is deprecated in %s on line %d
 Clazz::__construct

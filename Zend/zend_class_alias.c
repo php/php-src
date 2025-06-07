@@ -27,6 +27,7 @@ zend_class_alias * zend_class_alias_init(zend_class_entry *ce) {
 	GC_SET_REFCOUNT(alias, 1);
 
 	alias->ce = ce;
+	alias->name = NULL;
 	alias->attributes = NULL;
 	alias->alias_flags = 0;
 
@@ -42,7 +43,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_alias(const zend_cla
 		return;
 	}
 
-	zend_error_unchecked(E_USER_DEPRECATED, "Alias is deprecated%S",
+	zend_error_unchecked(E_USER_DEPRECATED, "Alias %s for class %s is deprecated%S",
+		ZSTR_VAL(alias->name),
+		ZSTR_VAL(alias->ce->name),
 		message_suffix
 	);
 

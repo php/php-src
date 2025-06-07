@@ -12,4 +12,4 @@ MyAlias::$v = true;
 
 ?>
 --EXPECTF--
-Deprecated: Alias is deprecated in %s on line %d
+Deprecated: Alias MyAlias for class Clazz is deprecated in %s on line %d
