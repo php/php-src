@@ -395,8 +395,6 @@ static void waker_events_dtor(zval *item)
 	zend_async_event_t *event = trigger->event;
 	trigger->event = NULL;
 
-	printf("waker_events_dtor event %p\n", trigger);
-
 	if (event != NULL) {
 		event->del_callback(event, trigger->callback);
 		//
@@ -506,6 +504,11 @@ static void coroutine_event_callback_dispose(zend_async_event_callback_t *callba
 		// If the callback is still referenced, we cannot dispose it yet
 		callback->ref_count--;
 		return;
+	} else if (UNEXPECTED(callback->ref_count == 0)) {
+		// Circular free from destructor
+		return;
+	} else {
+		ZEND_ASSERT(callback->ref_count > 0 && "Callback ref_count must be greater than 0. Memory corruption detected.");
 	}
 
 	callback->ref_count = 0;
@@ -574,6 +577,12 @@ ZEND_API void zend_async_resume_when(
 	if (event_callback->base.dispose == NULL) {
 		event_callback->base.dispose = coroutine_event_callback_dispose;
 	}
+
+	if (event_callback->base.ref_count == 0) {
+		event_callback->base.ref_count = 1;
+	}
+
+	ZEND_ASSERT(event_callback->base.ref_count > 0 && "Callback ref_count must be greater than 0.");
 
 	event_callback->coroutine = coroutine;
 	event->add_callback(event, &event_callback->base);
