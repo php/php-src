@@ -1737,6 +1737,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_call_stack.c
     zend_closures.c
     zend_compile.c
+    zend_composed_callable.c
     zend_constants.c
     zend_cpuinfo.c
     zend_default_classes.c
