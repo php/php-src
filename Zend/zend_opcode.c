@@ -28,6 +28,7 @@
 #include "zend_sort.h"
 #include "zend_constants.h"
 #include "zend_observer.h"
+#include "zend_class_alias.h"
 
 #include "zend_vm.h"
 
@@ -292,17 +293,25 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 
 ZEND_API void destroy_zend_class(zval *zv)
 {
+	/* We don't increase the refcount for class aliases,
+	 * so we don't need to destroy the underlying ->ce here, but we do need
+	 * to free the attributes and the storage for the 
+	 * skip the destruction of aliases entirely. */
+	if (UNEXPECTED(Z_TYPE_INFO_P(zv) == IS_ALIAS_PTR)) {
+		zend_class_alias *class_alias = Z_CLASS_ALIAS_P(zv);
+
+		if (class_alias->attributes) {
+			zend_hash_release(class_alias->attributes);
+			class_alias->attributes = NULL;
+		}
+		return;
+	}
+
 	zend_property_info *prop_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
 	zend_function *fn;
 
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-		return;
-	}
-
-	/* We don't increase the refcount for class aliases,
-	 * skip the destruction of aliases entirely. */
-	if (UNEXPECTED(Z_TYPE_INFO_P(zv) == IS_ALIAS_PTR)) {
 		return;
 	}
 

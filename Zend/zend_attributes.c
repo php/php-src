@@ -23,6 +23,7 @@
 #include "zend_attributes_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_smart_str.h"
+#include "zend_class_alias.h"
 
 ZEND_API zend_class_entry *zend_ce_attribute;
 ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
@@ -39,7 +40,121 @@ static zend_object_handlers attributes_object_handlers_sensitive_parameter_value
 
 static HashTable internal_attributes;
 
-uint32_t zend_attribute_attribute_get_flags(const zend_attribute *attr, zend_class_entry *scope)
+// zend_compile.c not interface
+zend_string *zend_resolve_class_name_ast(zend_ast *ast);
+
+// Based on zend_compile.c but not part of the interface
+void compile_alias_attributes(
+	HashTable **attributes, zend_ast *ast
+) /* {{{ */ {
+	zend_attribute *attr;
+	zend_internal_attribute *config;
+
+	zend_ast_list *list = zend_ast_get_list(ast);
+	uint32_t j;
+
+	ZEND_ASSERT(ast->kind == ZEND_AST_ARRAY);
+
+	for (uint32_t elem_idx = 0; elem_idx < list->children; elem_idx++) {
+		zend_ast *array_elem = list->child[elem_idx];
+		ZEND_ASSERT(array_elem->kind == ZEND_AST_ARRAY_ELEM);
+
+		zend_ast *array_content = array_elem->child[0];
+		if (array_content->kind != ZEND_AST_NEW) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Attribute must be declared with `new`");
+		}
+
+		if (array_content->child[1] &&
+			array_content->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot create Closure as attribute argument");
+		}
+
+		zend_string *name = zend_resolve_class_name_ast(array_content->child[0]);
+		zend_string *lcname = zend_string_tolower_ex(name, false);
+		zend_ast_list *args = array_content->child[1] ? zend_ast_get_list(array_content->child[1]) : NULL;
+
+		config = zend_internal_attribute_get(lcname);
+		zend_string_release(lcname);
+
+		uint32_t flags = (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)
+			? ZEND_ATTRIBUTE_STRICT_TYPES : 0;
+		attr = zend_add_attribute(
+			attributes, name, args ? args->children : 0, flags, 0, array_content->lineno);
+		zend_string_release(name);
+
+		/* Populate arguments */
+		if (!args) {
+			continue;
+		}
+		ZEND_ASSERT(args->kind == ZEND_AST_ARG_LIST);
+
+		bool uses_named_args = 0;
+		for (j = 0; j < args->children; j++) {
+			zend_ast **arg_ast_ptr = &args->child[j];
+			zend_ast *arg_ast = *arg_ast_ptr;
+
+			if (arg_ast->kind == ZEND_AST_UNPACK) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use unpacking in attribute argument list");
+			}
+
+			if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
+				attr->args[j].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
+				arg_ast_ptr = &arg_ast->child[1];
+				uses_named_args = 1;
+
+				for (uint32_t k = 0; k < j; k++) {
+					if (attr->args[k].name &&
+							zend_string_equals(attr->args[k].name, attr->args[j].name)) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Duplicate named parameter $%s",
+							ZSTR_VAL(attr->args[j].name));
+					}
+				}
+			} else if (uses_named_args) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use positional argument after named argument");
+			}
+
+			zend_const_expr_to_zval(
+				&attr->args[j].value, arg_ast_ptr, /* allow_dynamic */ true);
+		}
+	}
+
+	if (*attributes != NULL) {
+		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
+		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
+			if (attr->offset != 0 || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
+				continue;
+			}
+
+			uint32_t target = ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS;
+
+			if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+				zend_string *location = zend_get_attribute_target_names(target);
+				zend_string *allowed = zend_get_attribute_target_names(config->flags);
+
+				zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+					ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
+				);
+			}
+
+			if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
+				if (zend_is_attribute_repeated(*attributes, attr)) {
+					zend_error_noreturn(E_ERROR, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->name));
+				}
+			}
+
+			if (config->validator != NULL) {
+				config->validator(attr, target, CG(active_class_entry));
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+/* }}} */
+
+uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope)
 {
 	// TODO: More proper signature validation: Too many args, incorrect arg names.
 	if (attr->argc > 0) {
@@ -71,7 +186,42 @@ uint32_t zend_attribute_attribute_get_flags(const zend_attribute *attr, zend_cla
 	return ZEND_ATTRIBUTE_TARGET_ALL;
 }
 
-static zend_string *validate_allow_dynamic_properties(
+static zend_execute_data *setup_dummy_call_frame(zend_string *filename, zend_attribute *attribute_data) {
+	/* Set up dummy call frame that makes it look like the attribute was invoked
+		* from where it occurs in the code. */
+	zend_function dummy_func;
+	zend_op *opline;
+
+	memset(&dummy_func, 0, sizeof(zend_function));
+
+	zend_execute_data *call = zend_vm_stack_push_call_frame_ex(
+		ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_execute_data), sizeof(zval)) +
+		ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op), sizeof(zval)) +
+		ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_function), sizeof(zval)),
+		0, &dummy_func, 0, NULL);
+
+	opline = (zend_op*)(call + 1);
+	memset(opline, 0, sizeof(zend_op));
+	opline->opcode = ZEND_DO_FCALL;
+	opline->lineno = attribute_data->lineno;
+
+	call->opline = opline;
+	call->call = NULL;
+	call->return_value = NULL;
+	call->func = (zend_function*)(call->opline + 1);
+	call->prev_execute_data = EG(current_execute_data);
+
+	memset(call->func, 0, sizeof(zend_function));
+	call->func->type = ZEND_USER_FUNCTION;
+	call->func->op_array.fn_flags =
+		attribute_data->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
+	call->func->op_array.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
+	call->func->op_array.filename = filename;
+
+	return call;
+}
+
+static void validate_allow_dynamic_properties(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	ZEND_ASSERT(scope != NULL);
@@ -133,41 +283,152 @@ static zend_string *validate_deprecated(
 static void validate_class_alias(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
-	zval alias_obj;
-	ZVAL_UNDEF(&alias_obj);
-	zend_result result = zend_get_attribute_object(
-		&alias_obj,
-		zend_ce_class_alias,
-		attr,
-		scope,
-		scope->info.user.filename
+	// Do NOT construct the attribute yet, that would require any of the
+	// attributes that are used to exist; at this point, access the alias name
+	// based on the arguments, and do our own validation
+	zend_execute_data *call = setup_dummy_call_frame(scope->info.user.filename, attr);
+	EG(current_execute_data) = call;
+
+	zend_execute_data *constructor_call = zend_vm_stack_push_call_frame(
+		ZEND_CALL_TOP_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_HAS_THIS,
+		zend_ce_class_alias->constructor,
+		attr->argc,
+		scope
 	);
-	if (result == FAILURE) {
-		ZEND_ASSERT(EG(exception));
+	constructor_call->prev_execute_data = EG(current_execute_data);
+	EG(current_execute_data) = constructor_call;
+
+	if (attr->argc < 1 || attr->argc > 2) {
+		zend_wrong_parameters_count_error(1, 2);
+
+		EG(current_execute_data) = constructor_call->prev_execute_data;
+		zend_vm_stack_free_call_frame(constructor_call);
+		
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
 		return;
 	}
 
-	zval *alias_name = zend_read_property(
-		zend_ce_class_alias,
-		Z_OBJ(alias_obj),
-		ZEND_STRL("alias"),
-		false,
-		NULL
-	);
-	result = zend_register_class_alias_ex(
-		Z_STRVAL_P(alias_name),
-		Z_STRLEN_P(alias_name),
+	zval *found = NULL;
+
+	// Looking for either the first parameter, or if the first parameter
+	// is named, the 'alias' parameter
+	if (attr->args[0].name == NULL) {
+		found = &( attr->args[0].value );
+	} else {
+		for (uint32_t i = 0; i < attr->argc; i++) {
+			if (zend_string_equals_literal( attr->args[i].name, "alias")) {
+				found = &( attr->args[i].value );
+				break;
+			}
+		}
+		if (found == NULL) {
+			zend_argument_error(zend_ce_argument_count_error, 1, "not passed");
+			EG(current_execute_data) = constructor_call->prev_execute_data;
+			zend_vm_stack_free_call_frame(constructor_call);
+			EG(current_execute_data) = call->prev_execute_data;
+			zend_vm_stack_free_call_frame(call);
+			return;
+		}
+	}
+
+	zend_string *alias;
+	if (UNEXPECTED(!zend_parse_arg_str(found, &alias, false, 0))) {
+		zend_wrong_parameter_error(
+			ZPP_ERROR_WRONG_ARG,
+			1,
+			"alias",
+			Z_EXPECTED_STRING,
+			found
+		);
+		EG(current_execute_data) = constructor_call->prev_execute_data;
+		zend_vm_stack_free_call_frame(constructor_call);
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
+		return;
+	}
+
+	zend_result result = zend_register_class_alias_ex(
+		ZSTR_VAL(alias),
+		ZSTR_LEN(alias),
 		scope,
 		false
 	);
 	if (result == FAILURE) {
 		zend_error_noreturn(E_ERROR, "Unable to declare alias '%s' for '%s'",
-			Z_STRVAL_P(alias_name),
+			ZSTR_VAL(alias),
 			ZSTR_VAL(scope->name)
 		);
+		EG(current_execute_data) = constructor_call->prev_execute_data;
+		zend_vm_stack_free_call_frame(constructor_call);
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
+		return;
 	}
-	zval_ptr_dtor(alias_name);
-	zval_ptr_dtor(&alias_obj);
+
+	zend_string *lc_name;
+	if (ZSTR_VAL(alias)[0] == '\\') {
+		lc_name = zend_string_alloc(ZSTR_LEN(alias) - 1, 0);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(alias) + 1, ZSTR_LEN(alias) - 1);
+	} else {
+		lc_name = zend_string_tolower(alias);
+	}
+
+	zval *entry = zend_hash_find(EG(class_table), lc_name);
+	zend_string_release_ex(lc_name, /* persistent */ false);
+	ZEND_ASSERT(entry != NULL);
+	ZEND_ASSERT(Z_TYPE_P(entry) == IS_ALIAS_PTR);
+
+	zend_class_alias *alias_obj = Z_CLASS_ALIAS_P(entry);
+
+	// Compile attributes
+	if (attr->argc == 2) {
+		zval *nested_attribs = NULL;
+		if (attr->args[0].name == NULL && attr->args[1].name == NULL) {
+			nested_attribs = &( attr->args[1].value );
+		} else {
+			for (uint32_t i = 0; i < attr->argc; i++) {
+				if ( attr->args[i].name == NULL ) {
+					continue;
+				}
+				if (zend_string_equals_literal( attr->args[i].name, "alias")) {
+					continue;
+				}
+				if (zend_string_equals_literal( attr->args[i].name, "attributes")) {
+					nested_attribs = &( attr->args[i].value );
+					break;
+				}
+				zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(attr->args[i].name));
+				EG(current_execute_data) = constructor_call->prev_execute_data;
+				zend_vm_stack_free_call_frame(constructor_call);
+				EG(current_execute_data) = call->prev_execute_data;
+				zend_vm_stack_free_call_frame(call);
+				return;
+			}
+		}
+		ZEND_ASSERT(nested_attribs != NULL);
+		if (UNEXPECTED(!Z_OPT_CONSTANT_P(nested_attribs))) {
+			zend_wrong_parameter_error(
+				ZPP_ERROR_WRONG_ARG,
+				2,
+				"attributes",
+				Z_EXPECTED_ARRAY,
+				nested_attribs
+			);
+			// Something with an invalid parameter
+		} else {
+			zend_ast *attributes_ast = Z_ASTVAL_P(nested_attribs);
+			compile_alias_attributes(&( alias_obj->attributes), attributes_ast);
+		}
+	}
+
+	// zval_ptr_dtor(alias_name);
+	// zval_ptr_dtor(&alias_obj);
+	EG(current_execute_data) = constructor_call->prev_execute_data;
+	zend_vm_stack_free_call_frame(constructor_call);
+	EG(current_execute_data) = call->prev_execute_data;
+	zend_vm_stack_free_call_frame(call);
+	return;
 }
 
 ZEND_METHOD(Attribute, __construct)
@@ -397,6 +658,10 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, const zend_attribute *a
 	ZVAL_COPY_OR_DUP(ret, &attr->args[i].value);
 
 	if (Z_TYPE_P(ret) == IS_CONSTANT_AST) {
+		// Delayed validation for attributes in class aliases
+		if (CG(in_compilation) && i == 1 && zend_string_equals(attr->name, zend_ce_class_alias->name)) {
+			return SUCCESS;
+		}
 		if (SUCCESS != zval_update_constant_ex(ret, scope)) {
 			zval_ptr_dtor(ret);
 			return FAILURE;
@@ -411,37 +676,7 @@ ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attr
 	zend_execute_data *call = NULL;
 
 	if (filename) {
-		/* Set up dummy call frame that makes it look like the attribute was invoked
-		 * from where it occurs in the code. */
-		zend_function dummy_func;
-		zend_op *opline;
-
-		memset(&dummy_func, 0, sizeof(zend_function));
-
-		call = zend_vm_stack_push_call_frame_ex(
-			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_execute_data), sizeof(zval)) +
-			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op), sizeof(zval)) +
-			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_function), sizeof(zval)),
-			0, &dummy_func, 0, NULL);
-
-		opline = (zend_op*)(call + 1);
-		memset(opline, 0, sizeof(zend_op));
-		opline->opcode = ZEND_DO_FCALL;
-		opline->lineno = attribute_data->lineno;
-
-		call->opline = opline;
-		call->call = NULL;
-		call->return_value = NULL;
-		call->func = (zend_function*)(call->opline + 1);
-		call->prev_execute_data = EG(current_execute_data);
-
-		memset(call->func, 0, sizeof(zend_function));
-		call->func->type = ZEND_USER_FUNCTION;
-		call->func->op_array.fn_flags =
-			attribute_data->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
-		call->func->op_array.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
-		call->func->op_array.filename = filename;
-
+		call = setup_dummy_call_frame(filename, attribute_data);
 		EG(current_execute_data) = call;
 	}
 
@@ -676,17 +911,14 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_nodiscard = register_class_NoDiscard();
 	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
-<<<<<<< HEAD
 	attr->validator = validate_nodiscard;
 
 	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
 	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
-=======
 
 	zend_ce_class_alias = register_class_ClassAlias();
 	attr = zend_mark_internal_attribute(zend_ce_class_alias);
 	attr->validator = validate_class_alias;
->>>>>>> e1a37a8b7b7 (Add #[ClassAlias])
 }
 
 void zend_attributes_shutdown(void)

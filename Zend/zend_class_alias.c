@@ -19,11 +19,12 @@
 #include "zend_class_alias.h"
 
 zend_class_alias * zend_class_alias_init(zend_class_entry *ce) {
-   	zend_class_alias *alias = malloc(sizeof(zend_class_alias));
+	zend_class_alias *alias = malloc(sizeof(zend_class_alias));
 	// refcount field is only there for compatibility with other structures
 	GC_SET_REFCOUNT(alias, 1);
 
 	alias->ce = ce;
+	alias->attributes = NULL;
 
 	return alias;
 }

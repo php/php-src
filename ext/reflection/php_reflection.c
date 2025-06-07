@@ -7938,6 +7938,7 @@ ZEND_METHOD(ReflectionClassAlias, __construct)
 	}
 
 	zval *entry = zend_hash_find(EG(class_table), lc_name);
+	zend_string_release_ex(lc_name, /* persistent */ false);
 	ZEND_ASSERT(entry != NULL);
 
 	if (Z_TYPE_P(entry) != IS_ALIAS_PTR) {
@@ -7947,8 +7948,6 @@ ZEND_METHOD(ReflectionClassAlias, __construct)
 	}
 
 	zend_class_alias *alias = Z_CLASS_ALIAS_P(entry);
-
-	zend_string_release_ex(lc_name, /* persistent */ false);
 
 	intern->ptr = alias;
 	intern->ref_type = REF_TYPE_OTHER;
@@ -7966,7 +7965,7 @@ ZEND_METHOD(ReflectionClassAlias, getAttributes)
 	GET_REFLECTION_OBJECT_PTR(alias);
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		NULL, 0, alias->ce, ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS,
+		alias->attributes, 0, alias->ce, ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS,
 		NULL);
 }
 
@@ -7980,8 +7979,12 @@ ZEND_METHOD(ReflectionClassAlias, __toString)
 
 	GET_REFLECTION_OBJECT_PTR(alias);
 
-	smart_str_appends(&str, "TODO ReflectionClassAlias::__toString()");
-	// _const_string(&str, ZSTR_VAL(const_->name), &const_->value, "");
+	smart_str_append_printf(
+		&str,
+		"%s - alias for %s",
+		Z_STRVAL_P(reflection_prop_name(ZEND_THIS)),
+		ZSTR_VAL(alias->ce->name)
+	);
 	RETURN_STR(smart_str_extract(&str));
 }
 
