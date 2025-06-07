@@ -547,13 +547,23 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	int32_t ret_pos, uchar_pos;
 	bool part = false;
 
-	ZEND_PARSE_PARAMETERS_START(2, 4)
-		Z_PARAM_STRING(haystack, haystack_len)
-		Z_PARAM_STRING(needle, needle_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(part)
-		Z_PARAM_STRING_OR_NULL(locale, locale_len)
-	ZEND_PARSE_PARAMETERS_END();
+	if (f_ignore_case == 1) {
+		ZEND_PARSE_PARAMETERS_START(2, 4)
+			Z_PARAM_STRING(haystack, haystack_len)
+			Z_PARAM_STRING(needle, needle_len)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_BOOL(part)
+			Z_PARAM_STRING_OR_NULL(locale, locale_len)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(2, 3)
+			Z_PARAM_STRING(haystack, haystack_len)
+			Z_PARAM_STRING(needle, needle_len)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_BOOL(part)
+			Z_PARAM_STRING_OR_NULL(locale, locale_len)
+		ZEND_PARSE_PARAMETERS_END();
+	}
 
 	if ( !f_ignore_case ) {
 
