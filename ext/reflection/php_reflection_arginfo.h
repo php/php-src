@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dbf38d44c7ce5005899a77535bfbb2856ffa14b4 */
+ * Stub hash: 13417094b53f28c193b21ca0d0eac88df18e7aa7 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -725,6 +725,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassAlias___toString arginfo_class_ReflectionFunction___toString
 
+#define arginfo_class_ReflectionClassAlias_isDeprecated arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
 #define arginfo_class_ReflectionClassAlias_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
 
 ZEND_METHOD(Reflection, getModifierNames);
@@ -998,6 +1000,7 @@ ZEND_METHOD(ReflectionConstant, __toString);
 ZEND_METHOD(ReflectionConstant, getAttributes);
 ZEND_METHOD(ReflectionClassAlias, __construct);
 ZEND_METHOD(ReflectionClassAlias, __toString);
+ZEND_METHOD(ReflectionClassAlias, isDeprecated);
 ZEND_METHOD(ReflectionClassAlias, getAttributes);
 
 static const zend_function_entry class_Reflection_methods[] = {
@@ -1374,6 +1377,7 @@ static const zend_function_entry class_ReflectionConstant_methods[] = {
 static const zend_function_entry class_ReflectionClassAlias_methods[] = {
 	ZEND_ME(ReflectionClassAlias, __construct, arginfo_class_ReflectionClassAlias___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassAlias, __toString, arginfo_class_ReflectionClassAlias___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassAlias, isDeprecated, arginfo_class_ReflectionClassAlias_isDeprecated, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassAlias, getAttributes, arginfo_class_ReflectionClassAlias_getAttributes, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
