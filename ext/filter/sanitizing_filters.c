@@ -31,6 +31,7 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 	size_t len = Z_STRLEN_P(value);
 	unsigned char *s = (unsigned char *)Z_STRVAL_P(value);
 	unsigned char *e = s + len;
+	unsigned char *last_output = s;
 
 	if (Z_STRLEN_P(value) == 0) {
 		return;
@@ -38,15 +39,16 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 
 	while (s < e) {
 		if (chars[*s]) {
+			smart_str_appendl(&str, (const char *) last_output, s - last_output);
 			smart_str_appendl(&str, "&#", 2);
 			smart_str_append_unsigned(&str, (zend_ulong)*s);
 			smart_str_appendc(&str, ';');
-		} else {
-			/* XXX: this needs to be optimized to work with blocks of 'safe' chars */
-			smart_str_appendc(&str, *s);
+			last_output = s + 1;
 		}
 		s++;
 	}
+
+	smart_str_appendl(&str, (const char *) last_output, s - last_output);
 
 	zval_ptr_dtor(value);
 	ZVAL_NEW_STR(value, smart_str_extract(&str));
