@@ -19,6 +19,7 @@
 #include "php_uri_common.h"
 #include "Zend/zend_enum.h"
 #include "Zend/zend_smart_str.h"
+#include "Zend/zend_exceptions.h"
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -225,6 +226,30 @@ static void fill_errors(zval *errors)
 	}
 }
 
+static void throw_invalid_url_exception(zval *errors)
+{
+	ZEND_ASSERT(errors != NULL && Z_TYPE_P(errors) == IS_ARRAY);
+
+	zval exception;
+
+	object_init_ex(&exception, uri_whatwg_invalid_url_exception_ce);
+
+	zval value;
+	ZVAL_STRING(&value, "URL parsing failed");
+	zend_update_property_ex(uri_whatwg_invalid_url_exception_ce, Z_OBJ(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
+	zval_ptr_dtor_str(&value);
+
+	zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ(exception), ZEND_STRL("errors"), errors);
+
+	zend_throw_exception_object(&exception);
+}
+
+static void throw_invalid_url_exception_during_write(zval *errors)
+{
+	fill_errors(errors);
+	throw_invalid_url_exception(errors);
+}
+
 static lxb_status_t lexbor_serialize_callback(const lxb_char_t *data, size_t length, void *ctx)
 {
 	smart_str *uri_str = ctx;
@@ -255,7 +280,7 @@ static zend_result lexbor_write_scheme(struct uri_internal_t *internal_uri, zval
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_protocol_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		fill_errors(errors);
+		throw_invalid_url_exception_during_write(errors);
 
 		return FAILURE;
 	}
@@ -284,7 +309,7 @@ static zend_result lexbor_write_username(uri_internal_t *internal_uri, zval *val
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_username_set(lexbor_uri, str.data, str.length) != LXB_STATUS_OK) {
-		fill_errors(errors);
+		throw_invalid_url_exception_during_write(errors);
 
 		return FAILURE;
 	}
@@ -313,7 +338,7 @@ static zend_result lexbor_write_password(struct uri_internal_t *internal_uri, zv
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_password_set(lexbor_uri, str.data, str.length) != LXB_STATUS_OK) {
-		fill_errors(errors);
+		throw_invalid_url_exception_during_write(errors);
 
 		return FAILURE;
 	}
@@ -385,7 +410,7 @@ static zend_result lexbor_write_host(struct uri_internal_t *internal_uri, zval *
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_hostname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		fill_errors(errors);
+		throw_invalid_url_exception_during_write(errors);
 
 		return FAILURE;
 	}
@@ -414,7 +439,7 @@ static zend_result lexbor_write_port(struct uri_internal_t *internal_uri, zval *
 	zval_long_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_port_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		fill_errors(errors);
+		throw_invalid_url_exception_during_write(errors);
 
 		return FAILURE;
 	}
@@ -443,7 +468,7 @@ static zend_result lexbor_write_path(struct uri_internal_t *internal_uri, zval *
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_pathname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		fill_errors(errors);
+		throw_invalid_url_exception_during_write(errors);
 
 		return FAILURE;
 	}
@@ -472,7 +497,7 @@ static zend_result lexbor_write_query(struct uri_internal_t *internal_uri, zval 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_search_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		fill_errors(errors);
+		throw_invalid_url_exception_during_write(errors);
 
 		return FAILURE;
 	}
@@ -501,7 +526,7 @@ static zend_result lexbor_write_fragment(struct uri_internal_t *internal_uri, zv
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_hash_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		fill_errors(errors);
+		throw_invalid_url_exception_during_write(errors);
 
 		return FAILURE;
 	}
@@ -538,29 +563,23 @@ void lexbor_request_shutdown(void)
 	lexbor_urls = 0;
 }
 
-static void *lexbor_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors)
+lxb_url_t *lexbor_parse_uri_ex(const zend_string *uri_str, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
 {
 	lexbor_cleanup_parser();
 
-	const lxb_url_t *lexbor_base_url = base_url;
 	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) ZSTR_VAL(uri_str), ZSTR_LEN(uri_str));
 	fill_errors(errors);
+
+	if (url == NULL && !silent) {
+		throw_invalid_url_exception(errors);
+	}
 
 	return url;
 }
 
-static void lexbor_create_invalid_uri_exception(zval *exception_zv, zval *errors)
+static void *lexbor_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors, bool silent)
 {
-	ZEND_ASSERT(Z_TYPE_P(errors) == IS_ARRAY && "Lexbor always returns an array of errors when URI parsing fails");
-
-	object_init_ex(exception_zv, uri_whatwg_invalid_url_exception_ce);
-
-	zval value;
-	ZVAL_STRING(&value, "URL parsing failed");
-	zend_update_property_ex(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(exception_zv), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
-	zval_ptr_dtor_str(&value);
-
-	zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(exception_zv), ZEND_STRL("errors"), errors);
+	return lexbor_parse_uri_ex(uri_str, base_url, errors, silent);
 }
 
 static void *lexbor_clone_uri(void *uri)
@@ -603,7 +622,6 @@ static void lexbor_free_uri(void *uri)
 const uri_handler_t lexbor_uri_handler = {
 	.name = URI_PARSER_WHATWG,
 	.parse_uri = lexbor_parse_uri,
-	.create_invalid_uri_exception = lexbor_create_invalid_uri_exception,
 	.clone_uri = lexbor_clone_uri,
 	.uri_to_string = lexbor_uri_to_string,
 	.free_uri = lexbor_free_uri,

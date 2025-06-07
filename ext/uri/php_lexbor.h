@@ -22,8 +22,7 @@
 
 extern const uri_handler_t lexbor_uri_handler;
 
-void lexbor_module_init(void);
-void lexbor_module_shutdown(void);
+lxb_url_t *lexbor_parse_uri_ex(const zend_string *uri_str, const lxb_url_t *lexbor_base_url, zval *errors, bool silent);
 
 zend_result lexbor_request_init(void);
 void lexbor_request_shutdown(void);
