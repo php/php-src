@@ -928,3 +928,134 @@ void zend_async_coroutine_internal_context_init(zend_coroutine_t *coroutine)
 //////////////////////////////////////////////////////////////////////
 /* Internal Context API end */
 //////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+/* Callback Vector Implementation */
+//////////////////////////////////////////////////////////////////////
+
+/* Private helper functions for iterator management - static inline for performance */
+
+/* Register the single iterator - prevents concurrent iterations */
+static zend_always_inline bool
+zend_async_callbacks_register_iterator(zend_async_callbacks_vector_t *vector, uint32_t *iterator_index)
+{
+	if (vector->current_iterator != NULL) {
+		// Concurrent iteration detected - this is not allowed
+		return false;
+	}
+	
+	vector->current_iterator = iterator_index;
+	return true;
+}
+
+/* Unregister the iterator after iteration completes */
+static zend_always_inline void
+zend_async_callbacks_unregister_iterator(zend_async_callbacks_vector_t *vector)
+{
+	vector->current_iterator = NULL;
+}
+
+/* Adjust the active iterator when an element is removed */
+static zend_always_inline void
+zend_async_callbacks_adjust_iterator(zend_async_callbacks_vector_t *vector, uint32_t removed_index)
+{
+	if (vector->current_iterator != NULL && *vector->current_iterator > removed_index) {
+		(*vector->current_iterator)--;
+	}
+}
+
+/* Public API implementations */
+
+/* Remove a specific callback; order is NOT preserved, but iterator is safely adjusted */
+ZEND_API void
+zend_async_callbacks_remove(zend_async_event_t *event, const zend_async_event_callback_t *callback)
+{
+	zend_async_callbacks_vector_t *vector = &event->callbacks;
+
+	for (uint32_t i = 0; i < vector->length; ++i) {
+		if (vector->data[i] == callback) {
+			// Adjust the active iterator before performing the removal
+			zend_async_callbacks_adjust_iterator(vector, i);
+			
+			// O(1) removal: move last element to current position
+			vector->data[i] = vector->length > 0 ? vector->data[--vector->length] : NULL;
+			callback->dispose(callback, event);
+			return;
+		}
+	}
+}
+
+/* Call all callbacks with safe iterator tracking to handle concurrent modifications */
+ZEND_API void
+zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception)
+{
+	// If pre-notify returns false, we stop notifying callbacks
+	if (event->before_notify != NULL) {
+		if (false == event->before_notify(event, &result, &exception)) {
+			return;
+		}
+	}
+
+	if (event->callbacks.data == NULL || event->callbacks.length == 0) {
+		return;
+	}
+
+	zend_async_callbacks_vector_t *vector = &event->callbacks;
+	uint32_t current_index = 0;
+	
+	// Register iterator - prevents concurrent iterations
+	if (!zend_async_callbacks_register_iterator(vector, &current_index)) {
+		zend_error(E_CORE_WARNING,
+			"Concurrent callback iteration detected - nested notify() calls are not allowed"
+		);
+		return;
+	}
+
+	// Iterate through callbacks with safe index tracking
+	while (current_index < vector->length) {
+		// Store current callback (it might be moved during execution)
+		zend_async_event_callback_t *callback = vector->data[current_index];
+
+		// Move to next callback
+		// Note: current_index may have been adjusted by zend_async_callbacks_adjust_iterator
+		// if a callback was removed during this iteration
+		current_index++;
+
+		// Execute callback
+		callback->callback(event, callback, result, exception);
+		
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			break;
+		}
+	}
+
+	// Unregister iterator
+	zend_async_callbacks_unregister_iterator(vector);
+}
+
+/* Call all callbacks and close the event (Like future) */
+ZEND_API void
+zend_async_callbacks_notify_and_close(zend_async_event_t *event, void *result, zend_object *exception)
+{
+	ZEND_ASYNC_EVENT_SET_CLOSED(event);
+	zend_async_callbacks_notify(event, result, exception);
+}
+
+/* Free the vector's memory including iterator tracking */
+ZEND_API void
+zend_async_callbacks_free(zend_async_event_t *event)
+{
+	if (event->callbacks.data != NULL) {
+		for (uint32_t i = 0; i < event->callbacks.length; ++i) {
+			event->callbacks.data[i]->dispose(event->callbacks.data[i], event);
+		}
+
+		efree(event->callbacks.data);
+	}
+
+	// Reset all fields
+	event->callbacks.data            = NULL;
+	event->callbacks.length          = 0;
+	event->callbacks.capacity        = 0;
+	event->callbacks.current_iterator = NULL;
+}
