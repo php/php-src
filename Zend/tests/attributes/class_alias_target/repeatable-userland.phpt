@@ -15,14 +15,15 @@ $attributes[0]->newInstance();
 
 ?>
 --EXPECTF--
-array(1) {
+array(2) {
   [0]=>
   object(ReflectionAttribute)#%d (1) {
     ["name"]=>
-    string(10) "ClassAlias"
+    string(11) "MyAttribute"
+  }
+  [1]=>
+  object(ReflectionAttribute)#%d (1) {
+    ["name"]=>
+    string(11) "MyAttribute"
   }
 }
-php: /usr/src/php/Zend/zend_variables.c:143: zval_copy_ctor_func: Assertion `!(zval_gc_flags(((*(zvalue)).value.str)->gc.u.type_info) & (1<<6))' failed.
-Aborted (core dumped)
-
-Termsig=6

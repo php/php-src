@@ -20,6 +20,6 @@ array(1) {
   [0]=>
   object(ReflectionAttribute)#%d (1) {
     ["name"]=>
-    string(10) "ClassAlias"
+    string(11) "MyAttribute"
   }
 }

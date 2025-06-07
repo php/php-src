@@ -9,4 +9,4 @@ function demo(
 
 ?>
 --EXPECTF--
-Fatal error: Attribute "Deprecated" cannot target parameter (allowed targets: class, function, method, class constant, constant) in %s on line %d
+Fatal error: Attribute "Deprecated" cannot target parameter (allowed targets: class, function, method, class constant, constant, class alias) in %s on line %d
