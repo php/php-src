@@ -392,16 +392,20 @@ ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_event_new(
 static void waker_events_dtor(zval *item)
 {
 	zend_async_waker_trigger_t * trigger = Z_PTR_P(item);
+	zend_async_event_t *event = trigger->event;
+	trigger->event = NULL;
 
-	trigger->event->del_callback(trigger->event, trigger->callback);
+	printf("waker_events_dtor event %p\n", trigger);
 
-	//
-	// At this point, we explicitly stop the event because it is no longer being listened to by our handlers.
-	// However, this does not mean the object is destroyed—it may remain in memory if something still holds a reference to it.
-	//
-	trigger->event->stop(trigger->event);
-
-	ZEND_ASYNC_EVENT_RELEASE(trigger->event);
+	if (event != NULL) {
+		event->del_callback(event, trigger->callback);
+		//
+		// At this point, we explicitly stop the event because it is no longer being listened to by our handlers.
+		// However, this does not mean the object is destroyed—it may remain in memory if something still holds a reference to it.
+		//
+		event->stop(event);
+		ZEND_ASYNC_EVENT_RELEASE(event);
+	}
 
 	efree(trigger);
 }
