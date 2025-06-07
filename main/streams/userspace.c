@@ -566,6 +566,9 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 
 	ZVAL_STRINGL(&args[0], (char*)buf, count);
 
+	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_WRITE, false);
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 1, args);
 	zend_string_release_ex(func_name, false);
@@ -575,6 +578,10 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_WRITE " is not implemented!",
 				ZSTR_VAL(us->wrapper->ce->name));
 	}
+
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
+
 	/* Exception occurred */
 	if (Z_ISUNDEF(retval)) {
 		return -1;
@@ -609,28 +616,31 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 
 	assert(us != NULL);
 
+	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
 	ZVAL_LONG(&args[0], count);
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_READ, false);
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 1, args);
 	zend_string_release_ex(func_name, false);
 
 	if (UNEXPECTED(Z_ISUNDEF(retval))) {
-		return -1;
+		goto err;
 	}
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
 				ZSTR_VAL(us->wrapper->ce->name));
-		return -1;
+		goto err;
 	}
 
 	if (Z_TYPE(retval) == IS_FALSE) {
-		return -1;
+		goto err;
 	}
 
 	if (!try_convert_to_string(&retval)) {
 		zval_ptr_dtor(&retval);
-		return -1;
+		goto err;
 	}
 
 	didread = Z_STRLEN(retval);
@@ -657,11 +667,11 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 				"%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
 				ZSTR_VAL(us->wrapper->ce->name));
 		stream->eof = 1;
-		return -1;
+		goto err;
 	}
 	if (UNEXPECTED(Z_ISUNDEF(retval))) {
 		stream->eof = 1;
-		return -1;
+		goto err;
 	}
 
 	if (zval_is_true(&retval)) {
@@ -669,7 +679,15 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	}
 	zval_ptr_dtor(&retval);
 
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
+
 	return didread;
+
+err:
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
+	return -1;
 }
 
 static int php_userstreamop_close(php_stream *stream, int close_handle)
@@ -723,6 +741,9 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	ZVAL_LONG(&args[0], offset);
 	ZVAL_LONG(&args[1], whence);
 
+	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_SEEK, false);
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 2, args);
 	zend_string_release_ex(func_name, false);
@@ -737,7 +758,8 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 
 		zval_ptr_dtor(&retval);
 
-		return -1;
+		ret = -1;
+		goto out;
 	} else if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval)) {
 		ret = 0;
 	} else {
@@ -748,7 +770,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	ZVAL_UNDEF(&retval);
 
 	if (ret) {
-		return ret;
+		goto out;
 	}
 
 	/* now determine where we are */
@@ -767,6 +789,11 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	}
 
 	zval_ptr_dtor(&retval);
+
+out:
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
+
 	return ret;
 }
 
@@ -1394,6 +1421,9 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 		break;
 	}
 
+	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
 	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_CAST, false);
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 1, args);
 	zend_string_release_ex(func_name, false);
@@ -1403,7 +1433,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " is not implemented!",
 					ZSTR_VAL(us->wrapper->ce->name));
 		}
-		return FAILURE;
+		goto out;
 	}
 
 	do {
@@ -1431,6 +1461,10 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	} while (0);
 
 	zval_ptr_dtor(&retval);
+
+out:
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
 
 	return ret;
 }

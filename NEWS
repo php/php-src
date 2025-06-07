@@ -40,6 +40,10 @@ PHP                                                                        NEWS
   . Fix GH-19610 (Deprecation warnings in functions taking as argument).
     (Girgias)
 
+- Streams:
+  . Fixed bug GH-14506 (Closing a userspace stream inside a userspace handler
+    causes heap corruption). (nielsdos)
+
 - URI:
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
   . Fixed memory management of the internal "parse_url" URI parser.
