@@ -930,3 +930,18 @@ class ReflectionConstant implements Reflector
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class ReflectionClassAlias implements Reflector
+{
+    public string $name;
+
+    public function __construct(string $name) {}
+
+    public function __toString(): string {}
+
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
+}

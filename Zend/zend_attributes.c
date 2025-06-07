@@ -309,9 +309,12 @@ ZEND_METHOD(NoDiscard, __construct)
 ZEND_METHOD(ClassAlias, __construct)
 {
 	zend_string *alias = NULL;
+	HashTable *attributes = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(alias)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(attributes)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval value;
@@ -320,6 +323,17 @@ ZEND_METHOD(ClassAlias, __construct)
 
 	/* The assignment might fail due to 'readonly'. */
 	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+
+	if (attributes == NULL || zend_hash_num_elements(attributes) == 0) {
+		return;
+	}
+
+	if (!zend_array_is_list(attributes)) {
+		zend_throw_error(NULL,
+			"ClassAlias::__construct(): Argument #2 ($attributes) must be a list, not an associative array"
+		);
 		RETURN_THROWS();
 	}
 }
@@ -486,7 +500,8 @@ static const char *target_names[] = {
 	"property",
 	"class constant",
 	"parameter",
-	"constant"
+	"constant",
+	"class alias"
 };
 
 ZEND_API zend_string *zend_get_attribute_target_names(uint32_t flags)
