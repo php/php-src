@@ -18,14 +18,14 @@ PHP on the fourth Thursday of November each year. Following the GA release, we
 publish patch-level releases every four weeks, with at least one release
 candidate (RC) published two weeks before each patch-level release.
 
-Each major and minor version undergoes a 24-week pre-release cycle before GA
+Each major and minor version undergoes a 20-week pre-release cycle before GA
 release. The pre-release cycle begins on the second Thursday of June with the
 first alpha release of the new major/minor version. The pre-release cycle
 consists of at least:
 
 - 3 alpha releases
 - 3 beta releases
-- 6 release candidates
+- 4 release candidates
 
 Feature freeze for the next major/minor occurs with the first beta release.
 
