@@ -6,6 +6,7 @@
    :hidden:
 
    architecture
+   events
    api-reference
    implementation-guide
    patterns
