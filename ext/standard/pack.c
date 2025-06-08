@@ -885,12 +885,15 @@ PHP_FUNCTION(unpack)
 			if ((inputpos + size) <= inputlen) {
 
 				zend_string* real_name;
+				zend_long long_key = 0;
 				zval val;
 
 				if (repetitions == 1 && namelen > 0) {
 					/* Use a part of the formatarg argument directly as the name. */
 					real_name = zend_string_init_fast(name, namelen);
-
+				} else if (namelen == 0) {
+					real_name = NULL;
+					long_key = i + 1;
 				} else {
 					/* Need to add the 1-based element number to the name */
 					char buf[MAX_LENGTH_OF_LONG + 1];
@@ -912,7 +915,6 @@ PHP_FUNCTION(unpack)
 						size = len;
 
 						ZVAL_STRINGL(&val, &input[inputpos], len);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					case 'A': {
@@ -939,7 +941,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_STRINGL(&val, &input[inputpos], len + 1);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					/* New option added for Z to remain in-line with the Perl implementation */
@@ -964,7 +965,6 @@ PHP_FUNCTION(unpack)
 						len = s;
 
 						ZVAL_STRINGL(&val, &input[inputpos], len);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1016,7 +1016,6 @@ PHP_FUNCTION(unpack)
 						ZSTR_VAL(buf)[len] = '\0';
 
 						ZVAL_STR(&val, buf);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1026,7 +1025,6 @@ PHP_FUNCTION(unpack)
 						zend_long v = (type == 'c') ? (int8_t) x : x;
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1046,7 +1044,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1062,7 +1059,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1082,8 +1078,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
-
 						break;
 					}
 
@@ -1104,7 +1098,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 #endif
@@ -1124,7 +1117,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_DOUBLE(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1143,13 +1135,12 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_DOUBLE(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
 					case 'x':
 						/* Do nothing with input, just skip it */
-						break;
+						goto no_output;
 
 					case 'X':
 						if (inputpos < size) {
@@ -1160,7 +1151,7 @@ PHP_FUNCTION(unpack)
 								php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 							}
 						}
-						break;
+						goto no_output;
 
 					case '@':
 						if (repetitions <= inputlen) {
@@ -1170,10 +1161,19 @@ PHP_FUNCTION(unpack)
 						}
 
 						i = repetitions - 1;	/* Done, break out of for loop */
-						break;
+						goto no_output;
 				}
 
-				zend_string_release(real_name);
+				if (real_name) {
+					zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
+				} else {
+					zend_hash_index_update(Z_ARRVAL_P(return_value), long_key, &val);
+				}
+
+no_output:
+				if (real_name) {
+					zend_string_release_ex(real_name, false);
+				}
 
 				inputpos += size;
 				if (inputpos < 0) {
