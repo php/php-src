@@ -552,7 +552,7 @@ PHP 8.5 UPGRADE NOTES
   . Now avoids creating extra string copies when converting strings
     for use in the collator.
 
-MBString:
+- MBString:
   . The parts of the code that used SSE2 have been adapted to use SIMD
     with ARM NEON as well.
 
