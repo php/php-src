@@ -135,7 +135,7 @@ typedef void (*zend_async_event_callback_fn)
 typedef void (*zend_async_event_callback_dispose_fn)(zend_async_event_callback_t *callback, zend_async_event_t * event);
 typedef void (*zend_async_event_add_callback_t)(zend_async_event_t *event, zend_async_event_callback_t *callback);
 typedef void (*zend_async_event_del_callback_t)(zend_async_event_t *event, zend_async_event_callback_t *callback);
-typedef bool (*zend_async_event_callbacks_notify_t)(zend_async_event_t *event, void **result, zend_object **exception);
+typedef void (*zend_async_event_callbacks_notify_t)(zend_async_event_t *event, void *result, zend_object *exception);
 typedef void (*zend_async_event_start_t) (zend_async_event_t *event);
 typedef void (*zend_async_event_stop_t) (zend_async_event_t *event);
 typedef void (*zend_async_event_dispose_t) (zend_async_event_t *event);
@@ -302,7 +302,7 @@ struct _zend_async_event_s {
 	 * Handler that is invoked before all event listeners are notified.
 	 * May be NULL.
 	 */
-	zend_async_event_callbacks_notify_t before_notify;
+	zend_async_event_callbacks_notify_t notify_handler;
 	zend_async_event_start_t start;
 	zend_async_event_stop_t stop;
 	zend_async_event_dispose_t dispose;
@@ -433,10 +433,20 @@ typedef struct {
 } while (0)
 
 /* Public callback vector functions - implementations in zend_async_API.c */
-ZEND_API void zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception);
+ZEND_API void zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception, bool from_handler);
 ZEND_API void zend_async_callbacks_remove(zend_async_event_t *event, zend_async_event_callback_t *callback);
 ZEND_API void zend_async_callbacks_free(zend_async_event_t *event);
 ZEND_API void zend_async_callbacks_notify_and_close(zend_async_event_t *event, void *result, zend_object *exception);
+
+#define ZEND_ASYNC_CALLBACKS_NOTIFY(event, result, exception) \
+	zend_async_callbacks_notify((event), (result), (exception), false)
+
+#define ZEND_ASYNC_CALLBACKS_NOTIFY_AND_CLOSE(event, result, exception) \
+	zend_async_callbacks_notify_and_close((event), (result), (exception))
+
+#define ZEND_ASYNC_CALLBACKS_NOTIFY_FROM_HANDLER(event, result, exception) \
+	zend_async_callbacks_notify((event), (result), (exception), true)
+
 
 /* Append a callback; grows the buffer when needed */
 static zend_always_inline void

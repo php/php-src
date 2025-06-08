@@ -1006,13 +1006,12 @@ zend_async_callbacks_remove(zend_async_event_t *event, zend_async_event_callback
 
 /* Call all callbacks with safe iterator tracking to handle concurrent modifications */
 ZEND_API void
-zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception)
+zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception, bool from_handler)
 {
 	// If pre-notify returns false, we stop notifying callbacks
-	if (event->before_notify != NULL) {
-		if (false == event->before_notify(event, &result, &exception)) {
-			return;
-		}
+	if (false == from_handler && event->notify_handler != NULL) {
+		event->notify_handler(event, result, exception);
+		return;
 	}
 
 	if (event->callbacks.data == NULL || event->callbacks.length == 0) {
@@ -1057,7 +1056,7 @@ ZEND_API void
 zend_async_callbacks_notify_and_close(zend_async_event_t *event, void *result, zend_object *exception)
 {
 	ZEND_ASYNC_EVENT_SET_CLOSED(event);
-	zend_async_callbacks_notify(event, result, exception);
+	zend_async_callbacks_notify(event, result, exception, false);
 }
 
 /* Free the vector's memory including iterator tracking */
