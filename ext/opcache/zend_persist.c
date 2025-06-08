@@ -915,7 +915,6 @@ static void zend_persist_class_constant(zval *zv)
 
 zend_class_alias *zend_persist_class_alias_entry(zend_class_alias *orig_alias)
 {
-	Bucket *p;
 	zend_class_alias *alias = orig_alias;
 	
 	alias = zend_shared_memdup_put(alias, sizeof(zend_class_alias));
