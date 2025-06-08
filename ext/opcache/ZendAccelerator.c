@@ -4161,6 +4161,14 @@ static void preload_link(void)
 				continue;
 			}
 
+			// Not preloading class constants for deprecated aliases
+			if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
+				zend_class_alias *class_alias = Z_CLASS_ALIAS_P(zv);
+				if (class_alias->alias_flags & ZEND_ACC_DEPRECATED) {
+					continue;
+				}
+			}
+
 			if ((ce->ce_flags & ZEND_ACC_LINKED) && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 				if (!(ce->ce_flags & ZEND_ACC_TRAIT)) { /* don't update traits */
 					CG(in_compilation) = true; /* prevent autoloading */

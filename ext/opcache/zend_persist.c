@@ -29,6 +29,7 @@
 #include "zend_operators.h"
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
+#include "zend_class_alias.h"
 
 #ifdef HAVE_JIT
 # include "Optimizer/zend_func_info.h"
@@ -912,6 +913,21 @@ static void zend_persist_class_constant(zval *zv)
 	zend_persist_type(&c->type);
 }
 
+zend_class_alias *zend_persist_class_alias_entry(zend_class_alias *orig_alias)
+{
+	Bucket *p;
+	zend_class_alias *alias = orig_alias;
+	
+	alias = zend_shared_memdup_put(alias, sizeof(zend_class_alias));
+	alias->ce = zend_persist_class_entry(alias->ce);
+	// zend_accel_store_string(alias->name);
+	if (alias->attributes) {
+		alias->attributes = zend_persist_attributes(alias->attributes);
+	}
+
+	return alias;
+}
+
 zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 {
 	Bucket *p;
@@ -1333,7 +1349,12 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		zend_accel_store_interned_string(p->key);
-		Z_CE(p->val) = zend_persist_class_entry(Z_CE(p->val));
+		if (Z_TYPE(p->val) == IS_ALIAS_PTR) {
+			Z_CLASS_ALIAS(p->val) = zend_persist_class_alias_entry(Z_CLASS_ALIAS(p->val));
+		} else {
+			ZEND_ASSERT(Z_TYPE(p->val) == IS_PTR);
+			Z_CE(p->val) = zend_persist_class_entry(Z_CE(p->val));
+		}
 	} ZEND_HASH_FOREACH_END();
 	ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 		if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {

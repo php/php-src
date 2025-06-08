@@ -354,16 +354,20 @@ static void zend_accel_do_delayed_early_binding(
 	CG(compiled_filename) = persistent_script->script.filename;
 	CG(in_compilation) = 1;
 	for (uint32_t i = 0; i < persistent_script->num_early_bindings; i++) {
-		const zend_early_binding *early_binding = &persistent_script->early_bindings[i];
-		zend_class_entry *ce = zend_hash_find_ex_ptr(EG(class_table), early_binding->lcname, 1);
-		if (!ce) {
+		zend_early_binding *early_binding = &persistent_script->early_bindings[i];
+		zval *ce_or_alias = zend_hash_find_ex(EG(class_table), early_binding->lcname, 1);
+		if (!ce_or_alias) {
 			zval *zv = zend_hash_find_known_hash(EG(class_table), early_binding->rtd_key);
+			zend_class_entry *ce = NULL;
 			if (zv) {
-				zend_class_entry *orig_ce = Z_CE_P(zv);
-				zend_class_entry *parent_ce = !(orig_ce->ce_flags & ZEND_ACC_LINKED)
-					? zend_hash_find_ex_ptr(EG(class_table), early_binding->lc_parent_name, 1)
+				zend_class_entry *orig_ce;
+				Z_CE_FROM_ZVAL_P(orig_ce, zv);
+				zval *parent_ce_or_alias = !(orig_ce->ce_flags & ZEND_ACC_LINKED)
+					? zend_hash_find_ex(EG(class_table), early_binding->lc_parent_name, 1)
 					: NULL;
-				if (parent_ce || (orig_ce->ce_flags & ZEND_ACC_LINKED)) {
+				if (parent_ce_or_alias || (orig_ce->ce_flags & ZEND_ACC_LINKED)) {
+					zend_class_entry *parent_ce;
+					Z_CE_FROM_ZVAL_P(parent_ce, parent_ce_or_alias);
 					ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->lcname, zv);
 				}
 			}

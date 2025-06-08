@@ -787,6 +787,13 @@ static bool zend_optimizer_ignore_class(zval *ce_zv, const zend_string *filename
 			return false;
 		}
 	}
+	// Ignore deprecated aliases so that they are fetched at runtime
+	if (Z_TYPE_P(ce_zv) == IS_ALIAS_PTR) {
+		zend_class_alias *alias = Z_CLASS_ALIAS_P(ce_zv);
+		if (alias->alias_flags & ZEND_ACC_DEPRECATED) {
+			return true;
+		}
+	}
 	return ce->type == ZEND_USER_CLASS
 		&& (!ce->info.user.filename || ce->info.user.filename != filename);
 }
@@ -820,6 +827,12 @@ zend_class_entry *zend_optimizer_get_class_entry(
 			return Z_PTR_P(ce_or_alias);
 		}
 		ZEND_ASSERT(Z_TYPE_P(ce_or_alias) == IS_ALIAS_PTR);
+		zend_class_alias *alias = Z_CLASS_ALIAS_P(ce_or_alias);
+		if (alias->alias_flags & ZEND_ACC_DEPRECATED) {
+			// Pretend that the class cannot be found so that it gets looked
+			// up at runtime
+			return NULL;
+		}
 		return Z_CLASS_ALIAS_P(ce_or_alias)->ce;
 	}
 

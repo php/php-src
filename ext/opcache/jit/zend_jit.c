@@ -575,7 +575,9 @@ static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, con
 
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
 		class_name = Z_STR_P(zv);
-		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		// ZEND_FETCH_CLASS_SILENT - ignore alias deprecation
+		// TODO but we want to not cache the ce if i is a deprecated alias
+		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD | ZEND_FETCH_CLASS_SILENT);
 		if (ce && (ce->type == ZEND_INTERNAL_CLASS || ce->info.user.filename != op_array->filename)) {
 			ce = NULL;
 		}

@@ -3611,6 +3611,8 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		}
 		return SUCCESS;
 	}
+
+	zend_string_release(original_name);
 	return FAILURE;
 }
 /* }}} */
