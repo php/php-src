@@ -1,5 +1,5 @@
 --TEST--
-Composed callable using composition and auto-promotion
+Closures get auto promoted to a Composed Closure.
 --FILE--
 <?php
 
