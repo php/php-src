@@ -39,23 +39,28 @@ class StaticTest
     }
 }
 
-function times23(int $x): int
+function times19(int $x): int
 {
-   return $x * 23;
+   return $x * 19;
 }
 
-class Times27
+class Times23
 {
     function __invoke(int $x): int
     {
-        return $x * 27;
+        return $x * 23;
     }
 }
 
+$times29 = function(int $x): int {
+    return $x * 29;
+};
+
+function times31(int $x): int {
+    return $x * 31;
+};
 
 $test = new Test();
-
-$add3 = fn($x) => _add($x, 3);
 
 $res1 = 1
     |> times3(...)
@@ -64,11 +69,12 @@ $res1 = 1
     |> [$test, 'times11']
     |> StaticTest::times13(...)
     |> [StaticTest::class, 'times17']
-    |> fn($x) => times23($x)
-    |> new Times27()
+    |> new Times23()
+    |> $times29
+    |> fn($x) => times31($x)
 ;
 
 var_dump($res1);
 ?>
 --EXPECT--
-int(158513355)
+int(5277907635)

@@ -1,5 +1,5 @@
 --TEST--
-Pipe operator handles all callable styles
+Pipe operator handles namespaces
 --FILE--
 <?php
 
