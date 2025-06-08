@@ -6436,10 +6436,15 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	znode operand_result;
 	zend_compile_expr(&operand_result, operand_ast);
 
-	/* Wrap the value in a ZEND_QM_ASSIGN opcode to ensure references
-	 * always fail. Otherwise, they'd only fail in complex cases like arrays. */
+	/* Wrap simple values in a ZEND_QM__ASSIGN opcode to ensure references
+	 * always fail. They will already fail in complex cases like arrays,
+	 * so those don't need a wrapper. */
 	znode wrapped_operand_result;
-	zend_emit_op_tmp(&wrapped_operand_result, ZEND_QM_ASSIGN, &operand_result, NULL);
+	if (operand_result.op_type & (IS_CV|IS_VAR)) {
+		zend_emit_op_tmp(&wrapped_operand_result, ZEND_QM_ASSIGN, &operand_result, NULL);
+	} else {
+		wrapped_operand_result = operand_result;
+	}
 
 	/* Turn the operand into a function parameter list. */
 	zend_ast *arg_list_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&wrapped_operand_result));
