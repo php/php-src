@@ -30,6 +30,7 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include "convert.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include "private.h"
@@ -101,61 +102,132 @@ static inline void bc_fast_sqrt(bc_num *num, size_t scale, size_t num_calc_full_
 	*num = ret;
 }
 
-static inline void bc_standard_sqrt(bc_num *num, size_t scale, bcmath_compare_result num_cmp_one)
+static inline void bc_standard_sqrt(bc_num *num, size_t scale, size_t num_calc_full_len, size_t num_use_full_len, size_t leading_zeros)
 {
-	size_t cscale;
-	bc_num guess, guess1, point5, diff;
-	size_t rscale = MAX(scale, (*num)->n_scale);
+	/* allocate memory */
+	size_t n_arr_size = BC_ARR_SIZE_FROM_LEN(num_calc_full_len);
 
-	bc_init_num(&guess1);
-	bc_init_num(&diff);
-	point5 = bc_new_num (1, 1);
-	point5->n_value[1] = 5;
+	size_t guess_full_len = (num_calc_full_len + 1) / 2;
+	/* Since add the old guess and the new guess together during the calculation,
+	 * there is a chance of overflow, so allocate an extra size. */
+	size_t guess_arr_size = BC_ARR_SIZE_FROM_LEN(guess_full_len) + 1;
 
+	/* n_arr_size * 2 + guess_arr_size * 3 */
+	BC_VECTOR *buf = safe_emalloc(n_arr_size + guess_arr_size, sizeof(BC_VECTOR) * 2, guess_arr_size * sizeof(BC_VECTOR));
 
-	/* Calculate the initial guess. */
-	if (num_cmp_one == BCMATH_RIGHT_GREATER) {
-		/* The number is between 0 and 1.  Guess should start at 1. */
-		guess = bc_copy_num(BCG(_one_));
-		cscale = (*num)->n_scale;
-	} else {
-		/* The number is greater than 1.  Guess should start at 10^(exp/2). */
-		bc_init_num(&guess);
-		bc_int2num(&guess, 10);
+	BC_VECTOR *n_vector = buf;
+	/* In division by successive approximation, the numerator is modified during the computation,
+	 * so it must be copied each time. */
+	BC_VECTOR *n_vector_copy = n_vector + n_arr_size;
+	BC_VECTOR *guess_vector = n_vector_copy + n_arr_size;
+	BC_VECTOR *guess1_vector = guess_vector + guess_arr_size;
+	BC_VECTOR *tmp_div_ret_vector = guess1_vector + guess_arr_size;
 
-		bc_int2num(&guess1, (*num)->n_len);
-		bc_multiply_ex(guess1, point5, &guess1, 0);
-		guess1->n_scale = 0;
-		bc_raise_bc_exponent(guess, guess1, &guess, 0);
-		bc_free_num (&guess1);
-		cscale = 3;
+	/* convert num to n_vector */
+	const char *nend = (*num)->n_value + leading_zeros + num_use_full_len - 1;
+	bc_convert_to_vector_with_zero_pad(n_vector, nend, num_use_full_len, num_calc_full_len - num_use_full_len);
+
+	/* Prepare guess_vector (Temporary implementation) */
+	for (size_t i = 0; i < guess_arr_size - 2; i++) {
+		guess_vector[i] = BC_VECTOR_BOUNDARY_NUM - 1;
 	}
-
-	/* Find the square root using Newton's algorithm. */
-	bool done = false;
-	while (!done) {
-		bc_free_num (&guess1);
-		guess1 = bc_copy_num(guess);
-		bc_divide(*num, guess, &guess, cscale);
-		bc_add_ex(guess, guess1, &guess, 0);
-		bc_multiply_ex(guess, point5, &guess, cscale);
-		bc_sub_ex(guess, guess1, &diff, cscale + 1);
-		if (bc_is_near_zero(diff, cscale)) {
-			if (cscale < rscale + 1) {
-				cscale = MIN (cscale * 3, rscale + 1);
-			} else {
-				done = true;
-			}
+	if (guess_full_len % BC_VECTOR_SIZE == 0) {
+		guess_vector[guess_arr_size - 2] = BC_VECTOR_BOUNDARY_NUM - 1;
+	} else {
+		guess_vector[guess_arr_size - 2] = 0;
+		for (size_t i = 0; i < guess_full_len % BC_VECTOR_SIZE; i++) {
+			guess_vector[guess_arr_size - 2] *= BASE;
+			guess_vector[guess_arr_size - 2] += 9;
 		}
 	}
+	guess_vector[guess_arr_size - 1] = 0;
 
-	/* Assign the number and clean up. */
-	bc_free_num (num);
-	bc_divide(guess, BCG(_one_), num, rscale);
-	bc_free_num (&guess);
-	bc_free_num (&guess1);
-	bc_free_num (&point5);
-	bc_free_num (&diff);
+	size_t quot_size = n_arr_size - (guess_arr_size - 1) + 1;
+
+	BC_VECTOR two[1] = { 2 };
+
+	/**
+	 * Newton's algorithm. Iterative expression is `x_{n+1} = (x_n + a / x_n) / 2`
+	 * If break down the calculation into detailed steps, it looks like this:
+	 * 1. quot = a / x_n
+	 * 2. add = x_n + quot1
+	 * 3. x_{n+1} = add / 2
+	 * 4. repeat until the difference between the `x_n` and `x_{n+1}` is less than or equal to 1.
+	 */
+	bool done = false;
+	do {
+		/* Since the value changes during division by successive approximation, use a copied version of it. */
+		memcpy(n_vector_copy, n_vector, n_arr_size * sizeof(BC_VECTOR));
+
+		/* 1. quot = a / x_n */
+		bc_divide_vector(
+			n_vector_copy, n_arr_size,
+			guess_vector, guess_arr_size - 1, guess_full_len,
+			tmp_div_ret_vector, quot_size
+		);
+
+		BC_VECTOR *tmp_vptr = guess1_vector;
+		guess1_vector = guess_vector;
+		guess_vector = tmp_vptr;
+
+		/* 2. add = x_n + quot1 */
+		int carry = 0;
+		for (size_t i = 0; i < guess_arr_size - 1; i++) {
+			guess_vector[i] = guess1_vector[i] + tmp_div_ret_vector[i] + carry;
+			if (guess_vector[i] >= BC_VECTOR_BOUNDARY_NUM) {
+				guess_vector[i] -= BC_VECTOR_BOUNDARY_NUM;
+				carry = 1;
+			} else {
+				carry = 0;
+			}
+		}
+		guess_vector[guess_arr_size - 1] = tmp_div_ret_vector[guess_arr_size - 1] + carry;
+
+		/* 3. x_{n+1} = add / 2 */
+		bc_divide_vector(
+			guess_vector, guess_arr_size,
+			two, 1, 1,
+			tmp_div_ret_vector, guess_arr_size
+		);
+
+		memcpy(guess_vector, tmp_div_ret_vector, guess_arr_size * sizeof(BC_VECTOR));
+
+		/* 4. repeat until the difference between the `x_n` and `x_{n+1}` is less than or equal to 1. */
+		size_t diff = guess_vector[0] > guess1_vector[0] ? guess_vector[0] - guess1_vector[0] : guess1_vector[0] - guess_vector[0];
+		if (diff <= 1) {
+			bool is_same = true;
+			for (size_t i = 1; i < guess_arr_size - 1; i++) {
+				if (guess_vector[i] != guess1_vector[i]) {
+					is_same = false;
+					break;
+				}
+			}
+			done = is_same;
+		}
+	} while (!done);
+
+	size_t guess_len;
+	size_t guess_leading_zeros = 0;
+	if (leading_zeros > 0) {
+		guess_len = 1; /* for int zero */
+		guess_leading_zeros = (leading_zeros + 1) / 2;
+	} else {
+		guess_len = ((*num)->n_len + 1) / 2;
+	}
+	bc_num ret = bc_new_num_nonzeroed(guess_len, scale + 1);
+	char *rptr = ret->n_value;
+	char *rend = rptr + guess_len + scale + 1 - 1;
+
+	for (size_t i = 0; i < guess_leading_zeros; i++) {
+		*rptr++ = 0;
+	}
+	bc_convert_vector_to_char(guess_vector, rptr, rend, guess_arr_size - 1);
+	ret->n_scale = scale;
+
+	bc_free_num(num);
+	*num = ret;
+
+	efree(buf);
 }
 
 bool bc_sqrt(bc_num *num, size_t scale)
@@ -202,7 +274,7 @@ bool bc_sqrt(bc_num *num, size_t scale)
 	if (num_calc_full_len < MAX_LENGTH_OF_LONG) {
 		bc_fast_sqrt(num, scale, num_calc_full_len, num_use_full_len, leading_zeros);
 	} else {
-		bc_standard_sqrt(num, scale, num_cmp_one);
+		bc_standard_sqrt(num, scale, num_calc_full_len, num_use_full_len, leading_zeros);
 	}
 
 	return true;
