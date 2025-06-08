@@ -492,14 +492,10 @@ static int php_sqlite3_collation_callback(void *context, int string1_len, const 
 			zend_type_error("%s(): Return value of the collation callback must be of type int, %s returned",
 				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
 			zend_string_release(func_name);
-			ret = FAILURE;
+			zval_ptr_dtor(&retval);
+			return FAILURE;
 		}
-		if (Z_LVAL(retval) > 0) {
-			ret = 1;
-		} else if (Z_LVAL(retval) < 0) {
-			ret = -1;
-		}
-		zval_ptr_dtor(&retval);
+		ret = ZEND_NORMALIZE_BOOL(Z_LVAL(retval));
 	}
 
 	return ret;

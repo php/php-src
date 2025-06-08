@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f8cd6b3c6aa662d76dca3d0a28d61acfb5a611b5 */
+ * Stub hash: ae1e62d72c3c8290c9f39f21b583e980ea9b8eb2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -109,6 +109,12 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_string *const_ATTR_EXTENDED_RESULT_CODES_name = zend_string_init_interned("ATTR_EXTENDED_RESULT_CODES", sizeof("ATTR_EXTENDED_RESULT_CODES") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_EXTENDED_RESULT_CODES_name, &const_ATTR_EXTENDED_RESULT_CODES_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_EXTENDED_RESULT_CODES_name);
+
+	zval const_ATTR_BUSY_STATEMENT_value;
+	ZVAL_LONG(&const_ATTR_BUSY_STATEMENT_value, PDO_SQLITE_ATTR_BUSY_STATEMENT);
+	zend_string *const_ATTR_BUSY_STATEMENT_name = zend_string_init_interned("ATTR_BUSY_STATEMENT", sizeof("ATTR_BUSY_STATEMENT") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_BUSY_STATEMENT_name, &const_ATTR_BUSY_STATEMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_BUSY_STATEMENT_name);
 
 	zval const_OK_value;
 	ZVAL_LONG(&const_OK_value, SQLITE_OK);

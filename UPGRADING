@@ -194,6 +194,9 @@ PHP 8.5 UPGRADE NOTES
     IntlListFormatter::WIDTH_NARROW widths.
     It is supported from icu 67.
 
+- PDO_Sqlite:
+  . Added class constant Pdo_Sqlite::ATTR_BUSY_STATEMENT.
+
 - SOAP:
   . Enumeration cases are now dumped in __getTypes().
 
@@ -423,6 +426,9 @@ PHP 8.5 UPGRADE NOTES
 
 - PCRE:
   . Upgraded to pcre2lib from 10.44 to 10.45.
+
+- PDO_Sqlite:
+  . Increased minimum release version support from 3.7.7 to 3.7.17.
 
 - Readline:
   . The return types of readline_add_history(), readline_clear_history(), and
