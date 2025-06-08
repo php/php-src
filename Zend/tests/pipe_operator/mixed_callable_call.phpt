@@ -56,8 +56,8 @@ $times29 = function(int $x): int {
     return $x * 29;
 };
 
-function times31(int $x): int {
-    return $x * 31;
+function times2(int $x): int {
+    return $x * 2;
 };
 
 $test = new Test();
@@ -71,10 +71,10 @@ $res1 = 1
     |> [StaticTest::class, 'times17']
     |> new Times23()
     |> $times29
-    |> fn($x) => times31($x)
+    |> fn($x) => times2($x)
 ;
 
 var_dump($res1);
 ?>
 --EXPECT--
-int(5277907635)
+int(340510170)
