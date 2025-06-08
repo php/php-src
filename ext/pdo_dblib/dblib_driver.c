@@ -269,7 +269,7 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
 	dbcancel(H->link);
 
-	return zend_string_init(id, len, 0);
+	return zend_string_init((const char *) id, len, 0);
 }
 
 static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
