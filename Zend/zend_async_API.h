@@ -310,6 +310,31 @@ struct _zend_async_event_s {
 	zend_async_event_info_t info;
 };
 
+/**
+ * Event reference. A special data structure that allows representing an object with the Awaitable interface,
+ * but which does not store the event directly—instead, it holds only a reference to it.
+ * This is necessary for events that are destroyed asynchronously and therefore cannot be used as Zend objects.
+ *
+ * For example, events like Timer, Poll, and Signal cannot be Zend objects
+ * because their destruction cycle does not align.
+ *
+ * * flags should always be equal to ZEND_ASYNC_EVENT_REFERENCE_PREFIX.
+ * * zend_object_offset is the offset of the Zend object structure.
+ * * event is a pointer to the zend_async_event_t structure.
+ */
+#define ZEND_ASYNC_EVENT_REF_PROLOG         \
+	uint32_t flags;                         \
+	uint32_t zend_object_offset;
+
+#define ZEND_ASYNC_EVENT_REF_FIELDS         \
+	uint32_t flags;                         \
+	uint32_t zend_object_offset;            \
+	zend_async_event_t *event;
+
+typedef struct {
+	ZEND_ASYNC_EVENT_REF_FIELDS
+} zend_async_event_ref_t;
+
 #define ZEND_ASYNC_EVENT_F_CLOSED        (1u << 0)  /* event was closed */
 #define ZEND_ASYNC_EVENT_F_RESULT_USED   (1u << 1)  /* result will be used in exception handler */
 #define ZEND_ASYNC_EVENT_F_EXC_CAUGHT    (1u << 2)  /* error was caught in exception handler */
@@ -318,6 +343,20 @@ struct _zend_async_event_s {
 #define ZEND_ASYNC_EVENT_F_ZEND_OBJ 	 (1u << 4)  /* event is a zend object */
 #define ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY (1u << 5) /* event will not free memory in dispose handler */
 #define ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED (1u << 6) /* exception has been caught and processed */
+
+#define ZEND_ASYNC_EVENT_F_REFERENCE 	  (1u << 7)  /* event is a reference structure */
+
+// Flag indicating that the event has a zend_object reference by extra_offset.
+#define ZEND_ASYNC_EVENT_F_OBJ_REF 		  (1u << 8)  /* has zend_object ref */
+
+#define ZEND_ASYNC_EVENT_REFERENCE_PREFIX ((uint32_t)0x80) /* prefix for reference structures */
+
+// Create a reference to an event with the given offset and event pointer.
+#define ZEND_ASYNC_EVENT_REF_SET(ptr, offset, ev) do {  \
+	(ptr)->flags = ZEND_ASYNC_EVENT_REFERENCE_PREFIX;   \
+	(ptr)->zend_object_offset = (offset);               \
+	(ptr)->event = (ev);                                \
+	} while (0)
 
 #define ZEND_ASYNC_EVENT_IS_CLOSED(ev)         (((ev)->flags & ZEND_ASYNC_EVENT_F_CLOSED) != 0)
 #define ZEND_ASYNC_EVENT_WILL_RESULT_USED(ev)  (((ev)->flags & ZEND_ASYNC_EVENT_F_RESULT_USED) != 0)
@@ -347,9 +386,22 @@ struct _zend_async_event_s {
 #define ZEND_ASYNC_EVENT_SET_EXCEPTION_HANDLED(ev) ((ev)->flags |=  ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED)
 #define ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(ev) ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED)
 
+#define ZEND_ASYNC_EVENT_WITH_OBJECT_REF(ev) ((ev)->flags |=  ZEND_ASYNC_EVENT_F_OBJ_REF)
+
 // Convert awaitable Zend object to zend_async_event_t pointer
-#define ZEND_ASYNC_OBJECT_TO_EVENT(obj) ((zend_async_event_t *)((char *)(obj) - (obj)->handlers->offset))
-#define ZEND_ASYNC_EVENT_TO_OBJECT(event) ((zend_object *)((char *)(event) + (event)->zend_object_offset))
+#define ZEND_ASYNC_EVENT_IS_REFERENCE(ptr) (*((const uint32_t *)(ptr)) == ZEND_ASYNC_EVENT_REFERENCE_PREFIX)
+#define ZEND_ASYNC_OBJECT_TO_EVENT(obj)													 \
+	(																					 \
+		ZEND_ASYNC_EVENT_IS_REFERENCE((void *)((char *)(obj) - (obj)->handlers->offset)) \
+		? ((zend_async_event_ref_t *)((char *)(obj) - (obj)->handlers->offset))->event	 \
+		: (zend_async_event_t *)((char *)(obj) - (obj)->handlers->offset)				 \
+	)
+
+// Convert zend_async_event_t to zend_object pointer
+#define ZEND_ASYNC_EVENT_TO_OBJECT(ev)							\
+	(((ev)->flags & ZEND_ASYNC_EVENT_F_OBJ_REF)					\
+	? *(zend_object **)((char *)(ev) + (ev)->extra_offset)		\
+	: (zend_object *)((char *)(ev) + (ev)->zend_object_offset) )
 
 // Get refcount of the event object
 #define ZEND_ASYNC_EVENT_REF(ev) (ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev) ? \
