@@ -53,7 +53,6 @@ PHP                                                                        NEWS
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
   . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
-  . Properly handle __debugInfo() returning an array reference. (nielsdos)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -144,6 +143,8 @@ PHP                                                                        NEWS
   . Implement GH-17321: Add setAuthorizer to Pdo\Sqlite. (nielsdos)
   . PDO::sqliteCreateCollation now throws a TypeError if the callback
     has a wrong return type. (David Carlier)
+  . Added Pdo_Sqlite::ATTR_BUSY_STATEMENT constant to check
+    if a statement is currently executing. (David Carlier)
 
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing
