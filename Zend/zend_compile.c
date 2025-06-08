@@ -6449,7 +6449,7 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 
 	/* Turn $foo |> bar(...) into bar($foo). */
 	if (callable_ast->kind == ZEND_AST_CALL
-	    && callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
 		fcall_ast = zend_ast_create(ZEND_AST_CALL,
 				callable_ast->child[0], arg_list_ast);
 	/* Turn $foo |> bar::baz(...) into bar::baz($foo). */
@@ -8407,10 +8407,10 @@ static zend_op_array *zend_compile_func_decl_ex(
 			"nodiscard",
 			sizeof("nodiscard")-1
 		);
-	
+
 		if (nodiscard_attribute) {
 			op_array->fn_flags |= ZEND_ACC_NODISCARD;
-		}	
+		}
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
