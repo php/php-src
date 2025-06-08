@@ -26,6 +26,7 @@ struct _php_json_encoder {
 	int depth;
 	int max_depth;
 	php_json_error_code error_code;
+  size_t error_pos;
 };
 
 static inline void php_json_encode_init(php_json_encoder *encoder)

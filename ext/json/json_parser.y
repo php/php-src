@@ -300,12 +300,18 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 {
 	if (!parser->scanner.errcode) {
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+		parser->scanner.errpos = (size_t)(parser->scanner.cursor - parser->scanner.str_start);
 	}
 }
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser)
 {
 	return parser->scanner.errcode;
+}
+
+PHP_JSON_API size_t php_json_parser_error_pos(const php_json_parser *parser)
+{
+	return parser->scanner.errpos;
 }
 
 static const php_json_parser_methods default_parser_methods =

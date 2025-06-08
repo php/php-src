@@ -8,6 +8,7 @@ require_once("json_validate_requires.inc");
 json_validate_trycatchdump("");
 json_validate_trycatchdump("-");
 json_validate_trycatchdump("", -1);
+json_validate_trycatchdump('{"key1":"value1", "value2"}', 2);
 json_validate_trycatchdump('{"key1":"value1", "key2":"value2"}', 1);
 json_validate_trycatchdump('{"key1":"value1", "key2":"value2"}', 2);
 json_validate_trycatchdump("-", 0);

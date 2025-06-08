@@ -35,6 +35,7 @@ typedef struct _php_json_scanner {
 	int state;                      /* condition state */
 	int options;                    /* options */
 	php_json_error_code errcode;    /* error type if there is an error */
+	size_t errpos;
 	int utf8_invalid;               /* whether utf8 is invalid */
 	int utf8_invalid_count;         /* number of extra character for invalid utf8 */
 } php_json_scanner;
