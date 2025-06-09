@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed GH-18695 (zend_ast_export() - float number is not preserved).
     (Oleg Efimov)
   . Do not delete main chunk in zend_gc. (danog, Arnaud)
+  . Fix compile issues with zend_alloc and some non-default options. (nielsdos)
 
 - Curl:
   . Fix memory leak when setting a list via curl_setopt fails. (nielsdos)
