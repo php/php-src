@@ -32,7 +32,7 @@ if $FOREGROUND; then
   exec named -c "$NAMED_CONF" -p 53 -u "$(whoami)" -t "$SCRIPT_DIR" -g -d 1
 else
   echo "(running in background)"
-  named -c "$NAMED_CONF" -p 53 -u "$(whoami)" -t "$SCRIPT_DIR"  > "$LOG_FILE" 2>&1
+  named -c "$NAMED_CONF" -p 53 -u "$(whoami)" -t "$SCRIPT_DIR"
 
   # Wait for BIND to start with periodic checks
   MAX_WAIT=20  # Maximum wait time in attempts (20 * 0.5s = 10s)
