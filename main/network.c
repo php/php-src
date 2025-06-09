@@ -229,7 +229,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	for (n = 1; (sai = sai->ai_next) != NULL; n++)
 		;
 
-	*sal = safe_emalloc((n + 1), sizeof(*sal), 0);
+	*sal = safe_emalloc((n + 1), sizeof(**sal), 0);
 	sai = res;
 	sap = *sal;
 
@@ -264,7 +264,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 		in = *((struct in_addr *) host_info->h_addr);
 	}
 
-	*sal = safe_emalloc(2, sizeof(*sal), 0);
+	*sal = safe_emalloc(2, sizeof(**sal), 0);
 	sap = *sal;
 	*sap = emalloc(sizeof(struct sockaddr_in));
 	(*sap)->sa_family = AF_INET;
