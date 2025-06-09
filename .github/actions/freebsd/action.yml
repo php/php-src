@@ -101,4 +101,3 @@ runs:
             --show-diff \
             --show-slow 1000 \
             --set-timeout 120 \
-            -d zend_extension=opcache.so
