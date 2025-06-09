@@ -586,6 +586,8 @@ ZEND_METHOD(ClassAlias, __construct)
 	}
 
 	if (attributes == NULL || zend_hash_num_elements(attributes) == 0) {
+		ZVAL_EMPTY_ARRAY(&value);
+		zend_update_property(zend_ce_class_alias, Z_OBJ_P(ZEND_THIS), ZEND_STRL("attributes"), &value);
 		return;
 	}
 
@@ -595,6 +597,8 @@ ZEND_METHOD(ClassAlias, __construct)
 		);
 		RETURN_THROWS();
 	}
+	ZVAL_ARR(&value, attributes);
+	zend_update_property(zend_ce_class_alias, Z_OBJ_P(ZEND_THIS), ZEND_STRL("attributes"), &value);
 }
 
 static zend_attribute *get_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset)

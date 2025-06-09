@@ -20,7 +20,13 @@ object(ReflectionAttribute)#%d (1) {
   ["name"]=>
   string(10) "ClassAlias"
 }
-object(ClassAlias)#%d (1) {
+object(ClassAlias)#%d (2) {
   ["alias"]=>
   string(5) "Other"
+  ["attributes"]=>
+  array(1) {
+    [0]=>
+    object(NonAttribute)#%d (0) {
+    }
+  }
 }

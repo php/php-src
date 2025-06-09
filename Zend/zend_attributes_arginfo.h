@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b70c1fed22c60805e01f5ec7f34ad8133ac70b28 */
+ * Stub hash: 9f03d6d181126bf0d2116708ad1cdc2476ab46fd */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -321,6 +321,12 @@ static zend_class_entry *register_class_ClassAlias(void)
 	zend_string *property_alias_name = zend_string_init("alias", sizeof("alias") - 1, true);
 	zend_declare_typed_property(class_entry, property_alias_name, &property_alias_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_alias_name, true);
+
+	zval property_attributes_default_value;
+	ZVAL_UNDEF(&property_attributes_default_value);
+	zend_string *property_attributes_name = zend_string_init("attributes", sizeof("attributes") - 1, true);
+	zend_declare_typed_property(class_entry, property_attributes_name, &property_attributes_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
+	zend_string_release_ex(property_attributes_name, true);
 
 	zend_string *attribute_name_Attribute_class_ClassAlias_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, true);
 	zend_attribute *attribute_Attribute_class_ClassAlias_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ClassAlias_0, 1);
