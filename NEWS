@@ -53,6 +53,7 @@ PHP                                                                        NEWS
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
   . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
+  . Properly handle __debugInfo() returning an array reference. (nielsdos)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
