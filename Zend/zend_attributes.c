@@ -502,7 +502,7 @@ ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry 
 		if (zend_string_equals(attr->name, zend_ce_attribute->name)) {
 			internal_attr = pemalloc(sizeof(zend_internal_attribute), 1);
 			internal_attr->ce = ce;
-			if (Z_TYPE(attr->args[0].value) == IS_NULL) {
+			if (attr->argc == 0) {
 				// Apply default of Attribute::TARGET_ALL
 				internal_attr->flags = ZEND_ATTRIBUTE_TARGET_ALL;
 			} else {
