@@ -14,7 +14,6 @@ PHP                                                                        NEWS
   . Drop support for -z CLI/CGI flag. (nielsdos)
   . Fixed GH-17956 - development server 404 page does not adapt to mobiles.
     (pascalchevrel)
-  . Properly handle __debugInfo() returning an array reference. (nielsdos)
 
 - CURL:
   . Added CURLFOLLOW_ALL, CURLFOLLOW_OBEYCODE and CURLFOLLOW_FIRSTONLY
@@ -54,6 +53,7 @@ PHP                                                                        NEWS
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
   . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
+  . Properly handle __debugInfo() returning an array reference. (nielsdos)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
