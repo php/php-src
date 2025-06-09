@@ -2430,7 +2430,9 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 				/* Make sure the heap free below does not use tracked_free(). */
 				heap->custom_heap._free = __zend_free;
 			}
+#if ZEND_MM_STAT
 			heap->size = 0;
+#endif
 		}
 
 		void (*shutdown)(bool, bool) = heap->custom_heap._shutdown;
@@ -2969,6 +2971,7 @@ static zend_always_inline zval *tracked_get_size_zv(zend_mm_heap *heap, void *pt
 }
 
 static zend_always_inline void tracked_check_limit(zend_mm_heap *heap, size_t add_size) {
+#if ZEND_MM_STAT
 	if (add_size > heap->limit - heap->size && !heap->overflow) {
 #if ZEND_DEBUG
 		zend_mm_safe_error(heap,
@@ -2980,6 +2983,7 @@ static zend_always_inline void tracked_check_limit(zend_mm_heap *heap, size_t ad
 			heap->limit, add_size);
 #endif
 	}
+#endif
 }
 
 static void *tracked_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
@@ -2993,7 +2997,9 @@ static void *tracked_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC
 	}
 
 	tracked_add(heap, ptr, size);
+#if ZEND_MM_STAT
 	heap->size += size;
+#endif
 	return ptr;
 }
 
@@ -3004,7 +3010,9 @@ static void tracked_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
 
 	zend_mm_heap *heap = AG(mm_heap);
 	zval *size_zv = tracked_get_size_zv(heap, ptr);
+#if ZEND_MM_STAT
 	heap->size -= Z_LVAL_P(size_zv);
+#endif
 	zend_hash_del_bucket(heap->tracked_allocs, (Bucket *) size_zv);
 	free(ptr);
 }
@@ -3029,7 +3037,9 @@ static void *tracked_realloc(void *ptr, size_t new_size ZEND_FILE_LINE_DC ZEND_F
 
 	ptr = __zend_realloc(ptr, new_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	tracked_add(heap, ptr, new_size);
+#if ZEND_MM_STAT
 	heap->size += new_size - old_size;
+#endif
 	return ptr;
 }
 
