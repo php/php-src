@@ -7557,19 +7557,28 @@ static void zend_compile_attributes(
 	}
 
 	if (*attributes != NULL) {
+		/* Allow delaying target validation for forward compatibility. */
+		zend_attribute *delayed_target_validation = zend_get_attribute_str(
+			*attributes,
+			"delayedtargetvalidation",
+			strlen("delayedtargetvalidation")
+		);
+		uint32_t extra_flags = delayed_target_validation ? ZEND_ATTRIBUTE_NO_TARGET_VALIDATION : 0;
 		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
 		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
 			if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
 				continue;
 			}
 
-			if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
-				zend_string *location = zend_get_attribute_target_names(target);
-				zend_string *allowed = zend_get_attribute_target_names(config->flags);
+			if (delayed_target_validation == NULL) {
+				if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+					zend_string *location = zend_get_attribute_target_names(target);
+					zend_string *allowed = zend_get_attribute_target_names(config->flags);
 
-				zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
-					ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
-				);
+					zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+						ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
+					);
+				}
 			}
 
 			if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
@@ -7579,7 +7588,7 @@ static void zend_compile_attributes(
 			}
 
 			if (config->validator != NULL) {
-				config->validator(attr, target, CG(active_class_entry));
+				config->validator(attr, target | extra_flags, CG(active_class_entry));
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

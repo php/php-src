@@ -97,3 +97,9 @@ final class NoDiscard
 
     public function __construct(?string $message = null) {}
 }
+
+/**
+ * @strict-properties
+ */
+#[Attribute]
+final class DelayedTargetValidation {}
