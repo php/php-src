@@ -138,6 +138,17 @@ typedef void (*zend_async_event_del_callback_t)(zend_async_event_t *event, zend_
 typedef void (*zend_async_event_callbacks_notify_t)(zend_async_event_t *event, void *result, zend_object *exception);
 typedef void (*zend_async_event_start_t) (zend_async_event_t *event);
 typedef void (*zend_async_event_stop_t) (zend_async_event_t *event);
+
+/**
+ * The replay method can be called in several modes:
+ * If the callback parameter is not NULL, it will be invoked synchronously and immediately.
+ * If callback is NULL, then the `result` and `exception` parameters will be filled in.
+ *
+ * The method will return true if the result was applied.
+ */
+typedef bool (*zend_async_event_replay_t) (
+	zend_async_event_t *event, zend_async_event_callback_t *callback, zval *result, zend_object **exception
+);
 typedef void (*zend_async_event_dispose_t) (zend_async_event_t *event);
 typedef zend_string* (*zend_async_event_info_t) (zend_async_event_t *event);
 
@@ -298,16 +309,22 @@ struct _zend_async_event_s {
 	/* Methods */
 	zend_async_event_add_callback_t add_callback;
 	zend_async_event_del_callback_t del_callback;
+	zend_async_event_start_t start;
+	zend_async_event_stop_t stop;
+	/*
+	 * Replay method. Nullable.
+	 * This method is implemented only by those events that can provide a result again, even after they have completed.
+	 * For example, this method is relevant for coroutines and futures, which can provide the result again and again.
+	 */
+	zend_async_event_replay_t replay;
+	zend_async_event_dispose_t dispose;
+	/* Event info: can be NULL */
+	zend_async_event_info_t info;
 	/*
 	 * Handler that is invoked before all event listeners are notified.
 	 * May be NULL.
 	 */
 	zend_async_event_callbacks_notify_t notify_handler;
-	zend_async_event_start_t start;
-	zend_async_event_stop_t stop;
-	zend_async_event_dispose_t dispose;
-	/* Event info: can be NULL */
-	zend_async_event_info_t info;
 };
 
 /**
@@ -431,6 +448,10 @@ typedef struct {
 		} \
 	} \
 } while (0)
+
+#define ZEND_ASYNC_EVENT_REPLAY(ev, callback) (ev->replay != NULL ? ev->replay(ev, callback, NULL, NULL) : false)
+#define ZEND_ASYNC_EVENT_EXTRACT_RESULT(ev, result) (ev->replay != NULL ? ev->replay(ev, NULL, result, NULL) : false)
+#define ZEND_ASYNC_EVENT_EXTRACT_RESULT_OR_ERROR(ev, result, exception) (ev->replay != NULL ? ev->replay(ev, NULL, result, exception) : false)
 
 /* Public callback vector functions - implementations in zend_async_API.c */
 ZEND_API void zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception, bool from_handler);
@@ -719,6 +740,9 @@ struct _zend_coroutine_s {
 
 	/* Storage for return value. */
 	zval result;
+
+	/* Exception object, if any, nullable */
+	zend_object *exception;
 
 	/* Coroutine context object */
 	zend_async_context_t *context;
