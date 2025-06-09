@@ -979,7 +979,9 @@ PHP_FUNCTION(unpack)
 
 
 						if (size > INT_MAX / 2) {
-							zend_string_release(real_name);
+							if (real_name) {
+								zend_string_release_ex(real_name, false);
+							}
 							zend_argument_value_error(1, "repeater must be less than or equal to %d", INT_MAX / 2);
 							RETURN_THROWS();
 						}
