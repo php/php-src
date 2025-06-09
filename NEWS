@@ -39,6 +39,9 @@ PHP                                                                        NEWS
   . Add missing filter cleanups on phar failure. (nielsdos)
   . Fixed bug GH-18642 (Signed integer overflow in ext/phar fseek). (nielsdos)
 
+- PHPDBG:
+  . Fix 'phpdbg --help' segfault on shutdown with USE_ZEND_ALLOC=0. (nielsdos)
+
 - PDO ODBC:
   . Fix memory leak if WideCharToMultiByte() fails. (nielsdos)
 
