@@ -6436,7 +6436,7 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	znode operand_result;
 	zend_compile_expr(&operand_result, operand_ast);
 
-	/* Wrap simple values in a ZEND_QM__ASSIGN opcode to ensure references
+	/* Wrap simple values in a ZEND_QM_ASSIGN opcode to ensure references
 	 * always fail. They will already fail in complex cases like arrays,
 	 * so those don't need a wrapper. */
 	znode wrapped_operand_result;
