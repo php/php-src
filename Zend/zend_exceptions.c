@@ -969,6 +969,9 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 
 		zend_call_known_instance_method_with_0_params(ex->ce->__tostring, ex, &tmp);
 		if (!EG(exception)) {
+			if (UNEXPECTED(Z_ISREF(tmp))) {
+				zend_unwrap_reference(&tmp);
+			}
 			if (Z_TYPE(tmp) != IS_STRING) {
 				zend_error(E_WARNING, "%s::__toString() must return a string", ZSTR_VAL(ce_exception->name));
 			} else {

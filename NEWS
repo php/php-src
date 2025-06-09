@@ -54,6 +54,7 @@ PHP                                                                        NEWS
     released on bailout). (DanielEScherzer and ilutov)
   . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
   . Properly handle __debugInfo() returning an array reference. (nielsdos)
+  . Properly handle reference return value from __toString(). (nielsdos)
   . Added the pipe (|>) operator. (crell)
 
 - Curl:
