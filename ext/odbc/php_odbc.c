@@ -1463,6 +1463,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (rc == SQL_ERROR) {
 					odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
 					efree(buf);
+					zval_ptr_dtor(return_value);
 					RETURN_FALSE;
 				}
 
