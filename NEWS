@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
   . Fix memory leak in locale lookup on failure. (nielsdos)
 
+- Opcache:
+  . Fixed bug GH-18743 (Incompatibility in Inline TLS Assembly on Alpine 3.22).
+    (nielsdos, Arnaud)
+
 - ODBC:
   . Fix memory leak on php_odbc_fetch_hash() failure. (nielsdos)
 
