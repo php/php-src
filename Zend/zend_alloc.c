@@ -2400,7 +2400,6 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 static void *tracked_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 static void tracked_free_all(zend_mm_heap *heap);
 static void *poison_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-#endif
 
 static void zend_mm_check_freelists(zend_mm_heap *heap)
 {
@@ -2411,6 +2410,7 @@ static void zend_mm_check_freelists(zend_mm_heap *heap)
 		}
 	}
 }
+#endif
 
 ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 {
@@ -3041,7 +3041,6 @@ static void tracked_free_all(zend_mm_heap *heap) {
 		free(ptr);
 	} ZEND_HASH_FOREACH_END();
 }
-#endif
 
 static void* poison_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
@@ -3236,6 +3235,7 @@ static void poison_enable(zend_mm_heap *heap, char *parameters)
 	zend_mm_set_custom_handlers_ex(heap, poison_malloc, poison_free,
 			poison_realloc, poison_gc, poison_shutdown);
 }
+#endif
 
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 {
