@@ -34,6 +34,10 @@
 #define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<7)
 #define ZEND_ATTRIBUTE_FLAGS				((1<<8) - 1)
 
+/* Not a real flag, just passed to validators when target validation is *
+ * suppressed; must not conflict with any of the real flags above. */
+#define ZEND_ATTRIBUTE_NO_TARGET_VALIDATION (1<<8)
+
 /* Flags for zend_attribute.flags */
 #define ZEND_ATTRIBUTE_PERSISTENT   (1<<0)
 #define ZEND_ATTRIBUTE_STRICT_TYPES (1<<1)
@@ -50,6 +54,7 @@ extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 extern ZEND_API zend_class_entry *zend_ce_override;
 extern ZEND_API zend_class_entry *zend_ce_deprecated;
 extern ZEND_API zend_class_entry *zend_ce_nodiscard;
+extern ZEND_API zend_class_entry *zend_ce_delayed_target_validation;
 
 typedef struct {
 	zend_string *name;
