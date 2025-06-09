@@ -108,5 +108,7 @@ final class ClassAlias
 {
     public readonly string $alias;
 
+    public readonly array $attributes;
+
     public function __construct(string $alias, array $attributes = []) {}
 }
