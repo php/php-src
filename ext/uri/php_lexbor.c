@@ -25,7 +25,7 @@
 #endif
 
 ZEND_TLS lxb_url_parser_t lexbor_parser;
-ZEND_TLS int lexbor_urls;
+ZEND_TLS unsigned short int lexbor_urls;
 
 #define LEXBOR_MAX_URL_COUNT 500
 #define LEXBOR_MRAW_BYTE_SIZE 8192
@@ -59,6 +59,7 @@ static void lexbor_cleanup_parser(void)
 {
 	if (++lexbor_urls % LEXBOR_MAX_URL_COUNT == 0) {
 		lexbor_mraw_clean(lexbor_parser.mraw);
+		lexbor_urls = 0;
 	}
 
 	lxb_url_parser_clean(&lexbor_parser);
