@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 11b860c627ade31e1ed4185b6dccd303b7bfa508 */
+ * Stub hash: 416be19494555016195600e488d79f0dd35f2620 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -249,7 +249,7 @@ static void register_random_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_const_MT_RAND_PHP_0->args[0].value, &attribute_Deprecated_const_MT_RAND_PHP_0_arg0);
 	attribute_Deprecated_const_MT_RAND_PHP_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_const_MT_RAND_PHP_0_arg1;
-	zend_string *attribute_Deprecated_const_MT_RAND_PHP_0_arg1_str = zend_string_init("as it uses a problematic version of Mt19937", strlen("as it uses a problematic version of Mt19937"), 1);
+	zend_string *attribute_Deprecated_const_MT_RAND_PHP_0_arg1_str = zend_string_init("as it uses a biased non-standard variant of Mt19937", strlen("as it uses a biased non-standard variant of Mt19937"), 1);
 	ZVAL_STR(&attribute_Deprecated_const_MT_RAND_PHP_0_arg1, attribute_Deprecated_const_MT_RAND_PHP_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_const_MT_RAND_PHP_0->args[1].value, &attribute_Deprecated_const_MT_RAND_PHP_0_arg1);
 	attribute_Deprecated_const_MT_RAND_PHP_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);

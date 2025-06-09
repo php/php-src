@@ -12,7 +12,7 @@ namespace {
      * @var int
      * @cvalue MT_RAND_PHP
      */
-    #[\Deprecated(since: '8.3', message: 'as it uses a problematic version of Mt19937')]
+    #[\Deprecated(since: '8.3', message: 'as it uses a biased non-standard variant of Mt19937')]
     const MT_RAND_PHP = UNKNOWN;
 
     #[\Deprecated(since: '8.4', message: "use \\Random\\Randomizer::getFloat() instead")]
