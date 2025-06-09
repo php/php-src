@@ -32,6 +32,7 @@ ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 ZEND_API zend_class_entry *zend_ce_override;
 ZEND_API zend_class_entry *zend_ce_deprecated;
 ZEND_API zend_class_entry *zend_ce_nodiscard;
+ZEND_API zend_class_entry *zend_ce_delayed_target_validation;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -72,25 +73,21 @@ uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_ent
 static void validate_allow_dynamic_properties(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
+	const char *msg = NULL;
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
-		zend_error_noreturn(E_ERROR, "Cannot apply #[\\AllowDynamicProperties] to trait %s",
-			ZSTR_VAL(scope->name)
-		);
+		msg = "Cannot apply #[\\AllowDynamicProperties] to trait %s";
+	} else if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		msg = "Cannot apply #[\\AllowDynamicProperties] to interface %s";
+	} else if (scope->ce_flags & ZEND_ACC_READONLY_CLASS) {
+		msg = "Cannot apply #[\\AllowDynamicProperties] to readonly class %s";
+	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
+		msg = "Cannot apply #[\\AllowDynamicProperties] to enum %s";
 	}
-	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error_noreturn(E_ERROR, "Cannot apply #[\\AllowDynamicProperties] to interface %s",
-			ZSTR_VAL(scope->name)
-		);
-	}
-	if (scope->ce_flags & ZEND_ACC_READONLY_CLASS) {
-		zend_error_noreturn(E_ERROR, "Cannot apply #[\\AllowDynamicProperties] to readonly class %s",
-			ZSTR_VAL(scope->name)
-		);
-	}
-	if (scope->ce_flags & ZEND_ACC_ENUM) {
-		zend_error_noreturn(E_ERROR, "Cannot apply #[\\AllowDynamicProperties] to enum %s",
-			ZSTR_VAL(scope->name)
-		);
+	if (msg != NULL) {
+		if (target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION) {
+			return;
+		}
+		zend_error_noreturn(E_ERROR, msg, ZSTR_VAL(scope->name) );
 	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 }
@@ -505,7 +502,12 @@ ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry 
 		if (zend_string_equals(attr->name, zend_ce_attribute->name)) {
 			internal_attr = pemalloc(sizeof(zend_internal_attribute), 1);
 			internal_attr->ce = ce;
-			internal_attr->flags = Z_LVAL(attr->args[0].value);
+			if (Z_TYPE(attr->args[0].value) == IS_NULL) {
+				// Apply default of Attribute::TARGET_ALL
+				internal_attr->flags = ZEND_ATTRIBUTE_TARGET_ALL;
+			} else {
+				internal_attr->flags = Z_LVAL(attr->args[0].value);
+			}
 			internal_attr->validator = NULL;
 
 			zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
@@ -567,6 +569,9 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_nodiscard = register_class_NoDiscard();
 	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
+
+	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
+	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
 }
 
 void zend_attributes_shutdown(void)
