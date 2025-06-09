@@ -8497,8 +8497,9 @@ static void zend_compile_property_hooks(
 {
 	zend_class_entry *ce = CG(active_class_entry);
 
-	if (prop_info->flags & ZEND_ACC_READONLY) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Hooked properties cannot be readonly");
+	/* Allow hooks on backed readonly properties only. */
+	if ((prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL)) == (ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Hooked virtual properties cannot be readonly");
 	}
 
 	if (hooks->children == 0) {

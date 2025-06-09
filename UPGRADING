@@ -144,6 +144,8 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/attributes-on-constants
   . The #[\Deprecated] attribute can now be used on constants.
     RFC: https://wiki.php.net/rfc/attributes-on-constants
+  . Property hooks are now allowed on backed readonly properties.
+    RFC: https://wiki.php.net/rfc/readonly_hooks
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
