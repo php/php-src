@@ -2440,8 +2440,12 @@ ZEND_API zend_result zend_std_cast_object_tostring(zend_object *readobj, zval *w
 				zend_call_known_instance_method_with_0_params(ce->__tostring, readobj, &retval);
 				zend_object_release(readobj);
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
+is_string:
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;
+				} else if (Z_ISREF(retval)) {
+					zend_unwrap_reference(&retval);
+					goto is_string;
 				}
 				zval_ptr_dtor(&retval);
 				if (!EG(exception)) {
