@@ -389,14 +389,23 @@ static void validate_class_alias(
 		}
 		ZEND_ASSERT(nested_attribs != NULL);
 		if (UNEXPECTED(!Z_OPT_CONSTANT_P(nested_attribs))) {
-			zend_wrong_parameter_error(
-				ZPP_ERROR_WRONG_ARG,
-				2,
-				"attributes",
-				Z_EXPECTED_ARRAY,
-				nested_attribs
-			);
-			// Something with an invalid parameter
+			// If it is an array, then it must be an array that can be evaluated
+			// already
+			if (Z_TYPE_P(nested_attribs) == IS_ARRAY) {
+				zend_argument_type_error(
+					2,
+					"must be an array of objects"
+				);
+			} else {
+				zend_wrong_parameter_error(
+					ZPP_ERROR_WRONG_ARG,
+					2,
+					"attributes",
+					Z_EXPECTED_ARRAY,
+					nested_attribs
+				);
+				// Something with an invalid parameter
+			}
 		} else {
 			zend_ast *attributes_ast = Z_ASTVAL_P(nested_attribs);
 			compile_alias_attributes(&( alias_obj->attributes), attributes_ast);
