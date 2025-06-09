@@ -127,18 +127,47 @@ static inline void bc_standard_sqrt(bc_num *num, size_t scale, size_t num_calc_f
 	const char *nend = (*num)->n_value + leading_zeros + num_use_full_len - 1;
 	bc_convert_to_vector_with_zero_pad(n_vector, nend, num_use_full_len, num_calc_full_len - num_use_full_len);
 
-	/* Prepare guess_vector (Temporary implementation) */
-	for (size_t i = 0; i < guess_arr_size - 2; i++) {
-		guess_vector[i] = BC_VECTOR_BOUNDARY_NUM - 1;
+	/* Prepare guess_vector. Use `bc_fast_sqrt_vector()` to quickly obtain a highly accurate initial value. */
+
+	/* 18 on 64-bit, 10 on 32-bit */
+	size_t n_top_len_for_initial_guess = (MAX_LENGTH_OF_LONG - 1) & ~1;
+
+	/* Set the number of digits of num to be used as the initial value for Newton's method.
+	 * Just as the square roots of 1000 and 100 differ significantly, the number of digits
+	 * to "ignore" here must be even. */
+	if (num_calc_full_len & 1) {
+		n_top_len_for_initial_guess--;
 	}
-	if (guess_full_len % BC_VECTOR_SIZE == 0) {
-		guess_vector[guess_arr_size - 2] = BC_VECTOR_BOUNDARY_NUM - 1;
-	} else {
-		guess_vector[guess_arr_size - 2] = 0;
-		for (size_t i = 0; i < guess_full_len % BC_VECTOR_SIZE; i++) {
-			guess_vector[guess_arr_size - 2] *= BASE;
-			guess_vector[guess_arr_size - 2] += 9;
-		}
+
+	BC_VECTOR n_top = n_vector[n_arr_size - 1];
+	size_t n_top_index = n_arr_size - 2;
+	size_t n_top_vector_len = num_calc_full_len % BC_VECTOR_SIZE == 0 ? BC_VECTOR_SIZE : num_calc_full_len % BC_VECTOR_SIZE;
+	size_t count = n_top_len_for_initial_guess - n_top_vector_len;
+	while (count >= BC_VECTOR_SIZE) {
+		n_top *= BC_VECTOR_BOUNDARY_NUM;
+		n_top += n_vector[n_top_index--];
+		count -= BC_VECTOR_SIZE;
+	}
+	if (count > 0) {
+		n_top *= BC_POW_10_LUT[count];
+		n_top += n_vector[n_top_index] / BC_POW_10_LUT[BC_VECTOR_SIZE - count];
+	}
+
+	/* Calculate the initial guess. */
+	BC_VECTOR initial_guess = bc_fast_sqrt_vector(n_top);
+
+	/* Set the obtained initial guess to guess_vector. */
+	size_t initial_guess_len = (n_top_len_for_initial_guess + 1) / 2;
+	size_t guess_top_vector_len = guess_full_len % BC_VECTOR_SIZE == 0 ? BC_VECTOR_SIZE : guess_full_len % BC_VECTOR_SIZE;
+	size_t guess_len_diff = initial_guess_len - guess_top_vector_len;
+	guess_vector[guess_arr_size - 2] = initial_guess / BC_POW_10_LUT[guess_len_diff];
+	initial_guess %= BC_POW_10_LUT[guess_len_diff];
+	guess_vector[guess_arr_size - 3] = initial_guess * BC_POW_10_LUT[BC_VECTOR_SIZE - guess_len_diff];
+	guess_vector[guess_arr_size - 3] += BC_POW_10_LUT[BC_VECTOR_SIZE - guess_len_diff] - 1;
+
+	/* Initialize the uninitialized vector with zeros. */
+	for (size_t i = 0; i < guess_arr_size - 3; i++) {
+		guess_vector[i] = 0;
 	}
 	guess_vector[guess_arr_size - 1] = 0;
 
