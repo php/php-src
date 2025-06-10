@@ -274,7 +274,7 @@ PHP_FUNCTION(pack)
 		}
 
 		/* Handle special arg '*' for all codes and check argv overflows */
-		switch ((int) code) {
+		switch (code) {
 			/* Never uses any args */
 			case 'x':
 			case 'X':
@@ -380,10 +380,10 @@ too_few_args:
 
 	/* Calculate output length and upper bound while processing*/
 	for (i = 0; i < formatcount; i++) {
-	    int code = (int) formatcodes[i];
+	    char code = formatcodes[i];
 		int arg = formatargs[i];
 
-		switch ((int) code) {
+		switch (code) {
 			case 'h':
 			case 'H':
 				INC_OUTPUTPOS((arg + (arg % 2)) / 2,1)	/* 4 bit per arg */
@@ -463,10 +463,10 @@ too_few_args:
 
 	/* Do actual packing */
 	for (i = 0; i < formatcount; i++) {
-	    int code = (int) formatcodes[i];
+	    char code = formatcodes[i];
 		int arg = formatargs[i];
 
-		switch ((int) code) {
+		switch (code) {
 			case 'a':
 			case 'A':
 			case 'Z': {
@@ -632,7 +632,7 @@ too_few_args:
 
 			case 'd': {
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					memcpy(&ZSTR_VAL(output)[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -642,7 +642,7 @@ too_few_args:
 			case 'e': {
 				/* pack little endian double */
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					php_pack_copy_double(1, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
@@ -652,7 +652,7 @@ too_few_args:
 			case 'E': {
 				/* pack big endian double */
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					php_pack_copy_double(0, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
@@ -784,7 +784,7 @@ PHP_FUNCTION(unpack)
 		if (namelen > 200)
 			namelen = 200;
 
-		switch ((int) type) {
+		switch (type) {
 			/* Never use any input */
 			case 'X':
 				size = -1;
@@ -902,7 +902,7 @@ PHP_FUNCTION(unpack)
 					real_name = zend_string_concat2(name, namelen, res, digits);
 				}
 
-				switch ((int) type) {
+				switch (type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
 						zend_long len = inputlen - inputpos;	/* Remaining string */
