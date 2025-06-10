@@ -779,6 +779,9 @@ static bool zend_optimizer_ignore_class(zval *ce_zv, const zend_string *filename
 {
 	const zend_class_entry *ce;
 	Z_CE_FROM_ZVAL_P(ce, ce_zv);
+	if (Z_TYPE_P(ce_zv) == IS_ALIAS_PTR) {
+		return true;
+	}
 
 	if (ce->ce_flags & ZEND_ACC_PRELOADED) {
 		const Bucket *ce_bucket = (const Bucket*)((uintptr_t)ce_zv - XtOffsetOf(Bucket, val));
@@ -833,7 +836,8 @@ zend_class_entry *zend_optimizer_get_class_entry(
 			// up at runtime
 			return NULL;
 		}
-		return Z_CLASS_ALIAS_P(ce_or_alias)->ce;
+		return NULL;
+		// return Z_CLASS_ALIAS_P(ce_or_alias)->ce;
 	}
 
 	zval *ce_zv = zend_hash_find(CG(class_table), lcname);
@@ -842,7 +846,8 @@ zend_class_entry *zend_optimizer_get_class_entry(
 			return Z_PTR_P(ce_zv);
 		}
 		ZEND_ASSERT(Z_TYPE_P(ce_zv) == IS_ALIAS_PTR);
-		return Z_CLASS_ALIAS_P(ce_zv)->ce;
+		return NULL;
+		// return Z_CLASS_ALIAS_P(ce_zv)->ce;
 	}
 
 	if (op_array && op_array->scope && zend_string_equals_ci(op_array->scope->name, lcname)) {
@@ -885,7 +890,7 @@ const zend_class_constant *zend_fetch_class_const_info(
 			} else {
 				zval *ce_zv = zend_hash_find(EG(class_table), Z_STR_P(op1 + 1));
 				if (ce_zv && !zend_optimizer_ignore_class(ce_zv, op_array->filename)) {
-					ce = Z_PTR_P(ce_zv);
+					Z_CE_FROM_ZVAL_P(ce, ce_zv);
 				}
 			}
 		}

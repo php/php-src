@@ -3613,6 +3613,7 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 	}
 
 	zend_string_release(original_name);
+	free(alias);
 	return FAILURE;
 }
 /* }}} */

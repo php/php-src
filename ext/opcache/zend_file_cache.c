@@ -1664,6 +1664,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
                                               zend_persistent_script  *script,
                                               void                    *buf)
 {
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 	zend_class_entry *ce;
 
 	UNSERIALIZE_PTR(Z_PTR_P(zv));

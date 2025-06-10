@@ -924,6 +924,12 @@ zend_class_alias *zend_persist_class_alias_entry(zend_class_alias *orig_alias)
 		alias->attributes = zend_persist_attributes(alias->attributes);
 	}
 
+	if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+		alias->alias_flags |= ZEND_ACC_IMMUTABLE;
+	} else {
+		alias->alias_flags |= ZEND_ACC_FILE_CACHED;
+	}
+
 	return alias;
 }
 

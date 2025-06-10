@@ -337,6 +337,11 @@ static void validate_class_alias(
 		goto restore_execution_data;
 	}
 
+	// if (CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION) {
+	// 	// Opcache, don't register the alias
+	// 	goto restore_execution_data;
+	// }
+
 	zend_result result = zend_register_class_alias_ex(
 		ZSTR_VAL(alias),
 		ZSTR_LEN(alias),
@@ -660,10 +665,6 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, const zend_attribute *a
 	ZVAL_COPY_OR_DUP(ret, &attr->args[i].value);
 
 	if (Z_TYPE_P(ret) == IS_CONSTANT_AST) {
-		// Delayed validation for attributes in class aliases
-		if (CG(in_compilation) && i == 1 && zend_string_equals(attr->name, zend_ce_class_alias->name)) {
-			return SUCCESS;
-		}
 		if (SUCCESS != zval_update_constant_ex(ret, scope)) {
 			zval_ptr_dtor(ret);
 			return FAILURE;

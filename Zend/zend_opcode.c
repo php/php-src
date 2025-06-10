@@ -300,6 +300,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 	if (UNEXPECTED(Z_TYPE_INFO_P(zv) == IS_ALIAS_PTR)) {
 		zend_class_alias *class_alias = Z_CLASS_ALIAS_P(zv);
 
+		if (class_alias->alias_flags & ZEND_ACC_IMMUTABLE) {
+			return;
+		}
+
 		if (class_alias->attributes) {
 			zend_hash_release(class_alias->attributes);
 			// class_alias->attributes = NULL;
