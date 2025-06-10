@@ -917,7 +917,6 @@ PHP_FUNCTION(unpack)
 					}
 					case 'A': {
 						/* A will strip any trailing whitespace */
-						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
 						zend_long len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -929,11 +928,11 @@ PHP_FUNCTION(unpack)
 
 						/* Remove trailing white space and nulls chars from unpacked data */
 						while (--len >= 0) {
-							if (input[inputpos + len] != padn
-								&& input[inputpos + len] != pads
-								&& input[inputpos + len] != padt
-								&& input[inputpos + len] != padc
-								&& input[inputpos + len] != padl
+							if (input[inputpos + len] != '\0'
+								&& input[inputpos + len] != ' '
+								&& input[inputpos + len] != '\t'
+								&& input[inputpos + len] != '\r'
+								&& input[inputpos + len] != '\n'
 							)
 								break;
 						}
@@ -945,7 +944,6 @@ PHP_FUNCTION(unpack)
 					/* New option added for Z to remain in-line with the Perl implementation */
 					case 'Z': {
 						/* Z will strip everything after the first null character */
-						char pad = '\0';
 						zend_long s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
@@ -958,7 +956,7 @@ PHP_FUNCTION(unpack)
 
 						/* Remove everything after the first null */
 						for (s=0 ; s < len ; s++) {
-							if (input[inputpos + s] == pad)
+							if (input[inputpos + s] == '\0')
 								break;
 						}
 						len = s;
