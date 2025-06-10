@@ -5313,6 +5313,8 @@ function generateGlobalConstantAttributeInitialization(
         $constInfos,
         "",
         static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+            $code = "";
+
             if ($constInfo->attributes === []) {
                 return null;
             }
