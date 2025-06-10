@@ -26,6 +26,9 @@
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 
+#if defined(__APPLE__)
+#include <Availability.h>
+#endif
 
 static int pdo_sqlite_stmt_dtor(pdo_stmt_t *stmt)
 {
@@ -389,8 +392,17 @@ static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 			break;
         case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
 #if SQLITE_VERSION_NUMBER >= 3041000
-            ZVAL_LONG(val, (zend_long)sqlite3_stmt_isexplain(S->stmt));
-            return 1;
+#if defined(__APPLE__)
+            if (__builtin_available(macOS 14.2, *)) {
+#endif
+                ZVAL_LONG(val, (zend_long)sqlite3_stmt_isexplain(S->stmt));
+                return 1;
+#if defined(__APPLE__)
+            } else {
+                zend_value_error("explain statement unsupported");
+                return 0;
+            }
+#endif
 #else
             zend_value_error("explain statement unsupported");
             return 0;
@@ -409,19 +421,28 @@ static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 	switch (attr) {
         case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
 #if SQLITE_VERSION_NUMBER >= 3041000
-            if (Z_TYPE_P(zval) != IS_LONG) {
-                zend_type_error("explain mode must be of type int");
-                return 0;
-            }
-            if (Z_TYPE_P(zval) < 0 || Z_TYPE_P(zval) > 2) {
-                zend_value_error("explain mode must be one of the EXPLAIN_MODE_* constants");
-                return 0;
-            }
-            if (sqlite3_stmt_explain(S->stmt, (int)Z_LVAL_P(zval)) != SQLITE_OK) {
-                return 0;
-            }
+#if defined(__APPLE__)
+            if (__builtin_available(macOS 14.2, *)) {
+#endif
+                if (Z_TYPE_P(zval) != IS_LONG) {
+                    zend_type_error("explain mode must be of type int");
+                    return 0;
+                }
+                if (Z_TYPE_P(zval) < 0 || Z_TYPE_P(zval) > 2) {
+                    zend_value_error("explain mode must be one of the EXPLAIN_MODE_* constants");
+                    return 0;
+                }
+                if (sqlite3_stmt_explain(S->stmt, (int)Z_LVAL_P(zval)) != SQLITE_OK) {
+                    return 0;
+                }
 
-            return 1;
+                return 1;
+#if defined(__APPLE__)
+            } else {
+                zend_value_error("explain statement unsupported");
+                return 0;
+            }
+#endif
 #else
             zend_value_error("explain statement unsupported");
             return 0;
