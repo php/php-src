@@ -1989,9 +1989,8 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 				}
 	 		}
 			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT);
-			op1_string = zval_get_string_func(op1);
-			if (UNEXPECTED(EG(exception))) {
-				zend_string_release(op1_string);
+			op1_string = zval_try_get_string_func(op1);
+			if (UNEXPECTED(!op1_string)) {
 				if (orig_op1 != result) {
 					ZVAL_UNDEF(result);
 				}
@@ -2023,10 +2022,9 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 				free_op1_string = true;
 			}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_CONCAT);
-			op2_string = zval_get_string_func(op2);
-			if (UNEXPECTED(EG(exception))) {
+			op2_string = zval_try_get_string_func(op2);
+			if (UNEXPECTED(!op2_string)) {
 				zend_string_release(op1_string);
-				zend_string_release(op2_string);
 				if (orig_op1 != result) {
 					ZVAL_UNDEF(result);
 				}
