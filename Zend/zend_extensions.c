@@ -19,7 +19,6 @@
 
 #include "zend_extensions.h"
 #include "zend_system_id.h"
-#include "SAPI.h"
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;

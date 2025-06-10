@@ -93,7 +93,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <Zend/zend_portability.h>
-#include "main/SAPI.h"
 
 struct lsapi_MD5Context {
     uint32 buf[4];

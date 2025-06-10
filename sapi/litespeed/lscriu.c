@@ -85,7 +85,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "lscriu.h"
 
 #include <Zend/zend_portability.h>
-#include "main/SAPI.h"
 
 #define  LSCRIU_PATH    256
 
