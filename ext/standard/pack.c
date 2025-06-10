@@ -888,12 +888,12 @@ PHP_FUNCTION(unpack)
 				zend_long long_key = 0;
 				zval val;
 
-				if (repetitions == 1 && namelen > 0) {
-					/* Use a part of the formatarg argument directly as the name. */
-					real_name = zend_string_init_fast(name, namelen);
-				} else if (namelen == 0) {
+				if (namelen == 0) {
 					real_name = NULL;
 					long_key = i + 1;
+				} else if (repetitions == 1) {
+					/* Use a part of the formatarg argument directly as the name. */
+					real_name = zend_string_init_fast(name, namelen);
 				} else {
 					/* Need to add the 1-based element number to the name */
 					char buf[MAX_LENGTH_OF_LONG + 1];
