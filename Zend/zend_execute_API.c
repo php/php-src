@@ -328,9 +328,10 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 			}
 		} ZEND_HASH_FOREACH_END();
 		ZEND_HASH_MAP_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
-				continue;
-			}
+			// CHECK
+			// if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
+			// 	continue;
+			// }
 			zend_class_entry *ce;
 			Z_CE_FROM_ZVAL_P(ce, zv);
 

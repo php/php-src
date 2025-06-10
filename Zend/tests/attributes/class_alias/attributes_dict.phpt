@@ -6,6 +6,8 @@ Alias attributes must not be associative
 #[ClassAlias('Other', ['test' => new Deprecated()])]
 class Demo {}
 
+class_alias( 'Demo', 'Other2' );
+
 $attr = new ReflectionClass( Demo::class )->getAttributes()[0];
 $attr->newInstance();
 
