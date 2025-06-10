@@ -375,6 +375,11 @@ PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
+	char *msg = php_json_get_error_msg(JSON_G(error_code));
+    RETVAL_STRING(msg);
+	if (JSON_G(error_code) == PHP_JSON_ERROR_SYNTAX) {
+        efree(msg);
+    }
+	//original:RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
 }
 /* }}} */
