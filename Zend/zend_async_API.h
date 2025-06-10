@@ -1041,6 +1041,9 @@ ZEND_API zend_string* zend_coroutine_gen_info(zend_coroutine_t *coroutine, char 
 
 ZEND_API zend_async_event_callback_t * zend_async_event_callback_new(zend_async_event_callback_fn callback, size_t size);
 
+#define ZEND_ASYNC_EVENT_CALLBACK(callback) zend_async_event_callback_new(callback, 0)
+#define ZEND_ASYNC_EVENT_CALLBACK_EX(callback, size) zend_async_event_callback_new(callback, size)
+
 ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_callback_new(
 	zend_coroutine_t * coroutine, zend_async_event_callback_fn callback, size_t size
 );
