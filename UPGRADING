@@ -474,6 +474,9 @@ PHP 8.5 UPGRADE NOTES
   - SHUT_WR.
   - SHUT_RDWR.
 
+- Tokenizer:
+  . T_VOID_CAST.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
