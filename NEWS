@@ -53,6 +53,8 @@ PHP                                                                        NEWS
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
   . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
+  . Properly handle __debugInfo() returning an array reference. (nielsdos)
+  . Added the pipe (|>) operator. (crell)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -141,6 +143,10 @@ PHP                                                                        NEWS
 - PDO_SQLITE:
   . throw on null bytes / resolve GH-13952 (divinity76).
   . Implement GH-17321: Add setAuthorizer to Pdo\Sqlite. (nielsdos)
+  . PDO::sqliteCreateCollation now throws a TypeError if the callback
+    has a wrong return type. (David Carlier)
+  . Added Pdo_Sqlite::ATTR_BUSY_STATEMENT constant to check
+    if a statement is currently executing. (David Carlier)
 
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing
@@ -243,6 +249,10 @@ PHP                                                                        NEWS
 
 - Tests:
   . Allow to shuffle tests even in non-parallell mode. (dhuang00)
+
+- Tidy:
+  . tidy::__construct/parseFile/parseString methods throw an exception if
+    the configuration argument is invalid. (David Carlier)
 
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,

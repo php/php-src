@@ -2432,6 +2432,20 @@ PHPAPI void php_stream_context_set_option(php_stream_context *context,
 	SEPARATE_ARRAY(wrapperhash);
 	zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue);
 }
+
+void php_stream_context_unset_option(php_stream_context *context,
+	const char *wrappername, const char *optionname)
+{
+	zval *wrapperhash;
+
+	wrapperhash = zend_hash_str_find(Z_ARRVAL(context->options), wrappername, strlen(wrappername));
+	if (NULL == wrapperhash) {
+		return;
+	}
+	SEPARATE_ARRAY(&context->options);
+	SEPARATE_ARRAY(wrapperhash);
+	zend_hash_str_del(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname));
+}
 /* }}} */
 
 /* {{{ php_stream_dirent_alphasort */

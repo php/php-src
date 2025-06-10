@@ -144,6 +144,8 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/attributes-on-constants
   . The #[\Deprecated] attribute can now be used on constants.
     RFC: https://wiki.php.net/rfc/attributes-on-constants
+  . Added the pipe (|>) operator.
+    RFC: https://wiki.php.net/rfc/pipe-operator-v3
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
@@ -193,6 +195,9 @@ PHP 8.5 UPGRADE NOTES
     IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT and
     IntlListFormatter::WIDTH_NARROW widths.
     It is supported from icu 67.
+
+- PDO_Sqlite:
+  . Added class constant Pdo_Sqlite::ATTR_BUSY_STATEMENT.
 
 - SOAP:
   . Enumeration cases are now dumped in __getTypes().
@@ -268,6 +273,9 @@ PHP 8.5 UPGRADE NOTES
 - PDO_SQLITE:
   . SQLite PDO::quote() will now throw an exception or emit a warning,
     depending on the error mode, if the string contains a null byte.
+  . PDO::sqliteCreateCollation will now throw an exception
+    if the callback has the wrong return type, making it more
+    in line with Pdo_Sqlite::createCollation behavior.
 
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
@@ -315,6 +323,12 @@ PHP 8.5 UPGRADE NOTES
   . socket_create/socket_bind can create AF_PACKET family sockets.
   . socket_getsockname gets the interface index and its string
     representation with AF_PACKET socket.
+
+- Tidy:
+  . tidy::__construct/parseFile/parseString now throws a ValueError
+    if the configuration contains an invalid or set a read-only
+    internal entry, a TypeError contains, at least, one element
+    when the key is not a string.
 
 - Zlib:
   . The "use_include_path" argument for the
@@ -415,6 +429,9 @@ PHP 8.5 UPGRADE NOTES
 - PCRE:
   . Upgraded to pcre2lib from 10.44 to 10.45.
 
+- PDO_Sqlite:
+  . Increased minimum release version support from 3.7.7 to 3.7.17.
+
 - Readline:
   . The return types of readline_add_history(), readline_clear_history(), and
     readline_callback_handler_install() have been changed to true, rather
@@ -458,6 +475,10 @@ PHP 8.5 UPGRADE NOTES
   - SHUT_RD.
   - SHUT_WR.
   - SHUT_RDWR.
+
+- Tokenizer:
+  . T_VOID_CAST.
+  . T_PIPE.
 
 ========================================
 11. Changes to INI File Handling
@@ -546,7 +567,7 @@ PHP 8.5 UPGRADE NOTES
   . Now avoids creating extra string copies when converting strings
     for use in the collator.
 
-MBString:
+- MBString:
   . The parts of the code that used SSE2 have been adapted to use SIMD
     with ARM NEON as well.
 
