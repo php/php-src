@@ -198,6 +198,9 @@ PHP 8.5 UPGRADE NOTES
 
 - PDO_Sqlite:
   . Added class constant Pdo_Sqlite::ATTR_BUSY_STATEMENT.
+  . Added class constants Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT,
+    Pdo_Sqlite::EXPLAIN_MODE_PREPARED, Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN,
+    Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
 
 - SOAP:
   . Enumeration cases are now dumped in __getTypes().

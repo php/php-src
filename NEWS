@@ -148,6 +148,9 @@ PHP                                                                        NEWS
     has a wrong return type. (David Carlier)
   . Added Pdo_Sqlite::ATTR_BUSY_STATEMENT constant to check
     if a statement is currently executing. (David Carlier)
+  . Added Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT constant to set a statement
+    in either EXPLAIN_MODE_PREPARED, EXPLAIN_MODE_EXPLAIN,
+    EXPLAIN_MODE_EXPLAIN_QUERY_PLAN modes. (David Carlier)
 
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing
