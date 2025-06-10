@@ -165,15 +165,24 @@ static inline void bc_standard_sqrt(bc_num *num, size_t scale, size_t num_calc_f
 	guess_vector[guess_arr_size - 3] = initial_guess * BC_POW_10_LUT[BC_VECTOR_SIZE - guess_len_diff];
 	guess_vector[guess_arr_size - 3] += BC_POW_10_LUT[BC_VECTOR_SIZE - guess_len_diff] - 1;
 
-	/* Initialize the uninitialized vector with zeros. */
+	/* Initialize the uninitialized vector with `BC_VECTOR_BOUNDARY_NUM - 1`. */
 	for (size_t i = 0; i < guess_arr_size - 3; i++) {
-		guess_vector[i] = 0;
+		guess_vector[i] = BC_VECTOR_BOUNDARY_NUM - 1;
+		guess1_vector[i] = BC_VECTOR_BOUNDARY_NUM - 1;
 	}
 	guess_vector[guess_arr_size - 1] = 0;
 
-	size_t quot_size = n_arr_size - (guess_arr_size - 1) + 1;
-
 	BC_VECTOR two[1] = { 2 };
+
+	/* The precision (number of vectors) used for the calculation.
+	 * Since the initial value uses two vectors, the initial precision is set to 2. */
+	size_t guess_precision = 2;
+	size_t guess_offset = guess_arr_size - 1 - guess_precision;
+	size_t n_offset = guess_offset * 2;
+	size_t n_precision = n_arr_size - n_offset;
+	size_t quot_size = n_precision - (guess_precision) + 1;
+	size_t guess_use_len = guess_top_vector_len + BC_VECTOR_SIZE;
+	bool updated_precision = false;
 
 	/**
 	 * Newton's algorithm. Iterative expression is `x_{n+1} = (x_n + a / x_n) / 2`
@@ -185,14 +194,23 @@ static inline void bc_standard_sqrt(bc_num *num, size_t scale, size_t num_calc_f
 	 */
 	bool done = false;
 	do {
+		if (updated_precision) {
+			guess_offset = guess_arr_size - 1 - guess_precision;
+			n_offset = guess_offset * 2;
+			n_precision = n_arr_size - n_offset;
+			quot_size = n_precision - (guess_precision) + 1;
+			guess_use_len = guess_top_vector_len + (guess_precision - 1) * BC_VECTOR_SIZE;
+			updated_precision = false;
+		}
+
 		/* Since the value changes during division by successive approximation, use a copied version of it. */
-		memcpy(n_vector_copy, n_vector, n_arr_size * sizeof(BC_VECTOR));
+		memcpy(n_vector_copy + n_offset, n_vector + n_offset, n_precision * sizeof(BC_VECTOR));
 
 		/* 1. quot = a / x_n */
 		bc_divide_vector(
-			n_vector_copy, n_arr_size,
-			guess_vector, guess_arr_size - 1, guess_full_len,
-			tmp_div_ret_vector, quot_size
+			n_vector_copy + n_offset, n_precision,
+			guess_vector + guess_offset, guess_precision, guess_use_len,
+			tmp_div_ret_vector + guess_offset, quot_size
 		);
 
 		BC_VECTOR *tmp_vptr = guess1_vector;
@@ -201,7 +219,7 @@ static inline void bc_standard_sqrt(bc_num *num, size_t scale, size_t num_calc_f
 
 		/* 2. add = x_n + quot1 */
 		int carry = 0;
-		for (size_t i = 0; i < guess_arr_size - 1; i++) {
+		for (size_t i = guess_offset; i < guess_arr_size - 1; i++) {
 			guess_vector[i] = guess1_vector[i] + tmp_div_ret_vector[i] + carry;
 			if (guess_vector[i] >= BC_VECTOR_BOUNDARY_NUM) {
 				guess_vector[i] -= BC_VECTOR_BOUNDARY_NUM;
@@ -214,24 +232,30 @@ static inline void bc_standard_sqrt(bc_num *num, size_t scale, size_t num_calc_f
 
 		/* 3. x_{n+1} = add / 2 */
 		bc_divide_vector(
-			guess_vector, guess_arr_size,
+			guess_vector + guess_offset, guess_precision + 1,
 			two, 1, 1,
-			tmp_div_ret_vector, guess_arr_size
+			tmp_div_ret_vector + guess_offset, guess_precision + 1
 		);
 
-		memcpy(guess_vector, tmp_div_ret_vector, guess_arr_size * sizeof(BC_VECTOR));
+		memcpy(guess_vector + guess_offset, tmp_div_ret_vector + guess_offset, guess_precision * sizeof(BC_VECTOR));
 
 		/* 4. repeat until the difference between the `x_n` and `x_{n+1}` is less than or equal to 1. */
-		size_t diff = guess_vector[0] > guess1_vector[0] ? guess_vector[0] - guess1_vector[0] : guess1_vector[0] - guess_vector[0];
-		if (diff <= 1) {
-			bool is_same = true;
-			for (size_t i = 1; i < guess_arr_size - 1; i++) {
-				if (guess_vector[i] != guess1_vector[i]) {
-					is_same = false;
-					break;
+		if (guess_precision < guess_arr_size - 1) {
+			/* If the precision has not yet reached the maximum number of digits, it will be increased. */
+			guess_precision = MIN(guess_precision * 2, guess_arr_size - 1);
+			updated_precision = true;
+		} else {
+			size_t diff = guess_vector[0] > guess1_vector[0] ? guess_vector[0] - guess1_vector[0] : guess1_vector[0] - guess_vector[0];
+			if (diff <= 1) {
+				bool is_same = true;
+				for (size_t i = 1; i < guess_arr_size - 1; i++) {
+					if (guess_vector[i] != guess1_vector[i]) {
+						is_same = false;
+						break;
+					}
 				}
+				done = is_same;
 			}
-			done = is_same;
 		}
 	} while (!done);
 
