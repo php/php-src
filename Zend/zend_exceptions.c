@@ -265,11 +265,11 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 /* Same as writing to OBJ_PROP_NUM() when there are no hooks,
  * but checks the offset is correct when Zend is built in debug mode.
  * This is faster than going through the regular property write routine when the offset is known at compile time. */
-static void zend_update_property_num_checked(zend_object *object, uint32_t prop_num, zend_string *member, zval *value)
+static void zend_update_property_num_checked(zend_class_entry *scope, zend_object *object, uint32_t prop_num, zend_string *member, zval *value)
 {
 	if (UNEXPECTED(object->ce->num_hooked_props > 0)) {
 		/* Property may have been overridden with a hook. */
-		zend_update_property_ex(object->ce, object, member, value);
+		zend_update_property_ex(scope != NULL ? scope : object->ce, object, member, value);
 		zval_ptr_dtor(value);
 		return;
 	}
@@ -302,19 +302,19 @@ static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* 
 		ZVAL_EMPTY_ARRAY(&trace);
 	}
 
-	zend_update_property_num_checked(object, ZEND_EXCEPTION_TRACE_OFF, ZSTR_KNOWN(ZEND_STR_TRACE), &trace);
+	zend_update_property_num_checked(i_get_exception_base(object), object, ZEND_EXCEPTION_TRACE_OFF, ZSTR_KNOWN(ZEND_STR_TRACE), &trace);
 
 	if (EXPECTED((class_type != zend_ce_parse_error && class_type != zend_ce_compile_error)
 			|| !(filename = zend_get_compiled_filename()))) {
 		ZVAL_STRING(&tmp, zend_get_executed_filename());
-		zend_update_property_num_checked(object, ZEND_EXCEPTION_FILE_OFF, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+		zend_update_property_num_checked(NULL, object, ZEND_EXCEPTION_FILE_OFF, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		ZVAL_LONG(&tmp, zend_get_executed_lineno());
-		zend_update_property_num_checked(object, ZEND_EXCEPTION_LINE_OFF, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		zend_update_property_num_checked(NULL, object, ZEND_EXCEPTION_LINE_OFF, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 	} else {
 		ZVAL_STR_COPY(&tmp, filename);
-		zend_update_property_num_checked(object, ZEND_EXCEPTION_FILE_OFF, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+		zend_update_property_num_checked(NULL, object, ZEND_EXCEPTION_FILE_OFF, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		ZVAL_LONG(&tmp, zend_get_compiled_lineno());
-		zend_update_property_num_checked(object, ZEND_EXCEPTION_LINE_OFF, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		zend_update_property_num_checked(NULL, object, ZEND_EXCEPTION_LINE_OFF, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 	}
 
 	return object;
@@ -344,17 +344,26 @@ ZEND_METHOD(Exception, __construct)
 
 	if (message) {
 		ZVAL_STR_COPY(&tmp, message);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_MESSAGE_OFF, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_MESSAGE_OFF, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (code) {
 		ZVAL_LONG(&tmp, code);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_CODE_OFF, ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_CODE_OFF, ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (previous) {
 		Z_ADDREF_P(previous);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_PREVIOUS_OFF, ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		zend_update_property_num_checked(zend_ce_exception, Z_OBJ_P(object), ZEND_EXCEPTION_PREVIOUS_OFF, ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 }
 /* }}} */
@@ -394,33 +403,54 @@ ZEND_METHOD(ErrorException, __construct)
 
 	if (message) {
 		ZVAL_STR_COPY(&tmp, message);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_MESSAGE_OFF, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_MESSAGE_OFF, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (code) {
 		ZVAL_LONG(&tmp, code);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_CODE_OFF, ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_CODE_OFF, ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (previous) {
 		Z_ADDREF_P(previous);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_PREVIOUS_OFF, ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		zend_update_property_num_checked(zend_ce_exception, Z_OBJ_P(object), ZEND_EXCEPTION_PREVIOUS_OFF, ZSTR_KNOWN(ZEND_STR_PREVIOUS), previous);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	ZVAL_LONG(&tmp, severity);
-	zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_SEVERITY_OFF, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_SEVERITY_OFF, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
 
 	if (filename) {
 		ZVAL_STR_COPY(&tmp, filename);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_FILE_OFF, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+		zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_FILE_OFF, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (!lineno_is_null) {
 		ZVAL_LONG(&tmp, lineno);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_LINE_OFF, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_LINE_OFF, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	} else if (filename) {
 		ZVAL_LONG(&tmp, 0);
-		zend_update_property_num_checked(Z_OBJ_P(object), ZEND_EXCEPTION_LINE_OFF, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		zend_update_property_num_checked(NULL, Z_OBJ_P(object), ZEND_EXCEPTION_LINE_OFF, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 }
 /* }}} */

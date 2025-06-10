@@ -17,6 +17,12 @@ namespace {
     /** @var string */
     const ZEND_CONSTANT_A = "global";
 
+    /**
+     * @var int
+     */
+    #[\Deprecated(message: "use something else", since: "version 1.5")]
+    const ZEND_TEST_ATTRIBUTED_CONSTANT = 42;
+
     interface _ZendTestInterface
     {
         /** @var int */
@@ -328,6 +334,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_log_err_debug(string $str): void {}
 
     function zend_test_compile_to_ast(string $str): string {}
+
+    function zend_test_gh18756(): void {}
 }
 
 namespace ZendTestNS {

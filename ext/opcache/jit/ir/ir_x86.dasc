@@ -3236,7 +3236,7 @@ static void ir_emit_store_mem_int_const(ir_ctx *ctx, ir_type type, ir_mem mem, i
 			val = (int64_t)(intptr_t)ir_sym_val(ctx, val_insn);
 		}
 
-		if (sizeof(void*) == 4 || IR_IS_SIGNED_32BIT(val)) {
+		if (ir_type_size[val_insn->type] <= 4 || IR_IS_SIGNED_32BIT(val)) {
 			if (is_arg && ir_type_size[type] < 4) {
 				type = IR_U32;
 			}
@@ -3664,7 +3664,7 @@ static int32_t ir_fuse_imm(ir_ctx *ctx, ir_ref ref)
 		IR_ASSERT(IR_IS_SIGNED_32BIT((intptr_t)addr));
 		return (int32_t)(intptr_t)addr;
 	} else {
-		IR_ASSERT(IR_IS_SIGNED_32BIT(val_insn->val.i32));
+		IR_ASSERT(ir_type_size[val_insn->type] == 4 || IR_IS_SIGNED_32BIT(val_insn->val.i64));
 		return val_insn->val.i32;
 	}
 }

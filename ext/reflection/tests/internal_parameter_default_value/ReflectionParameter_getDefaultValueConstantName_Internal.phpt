@@ -47,7 +47,7 @@ NULL
 NULL
 ----------
 string(11) "PHP_INT_MIN"
-string(11) "PHP_INT_MAX"
+NULL
 ----------
 string(17) "DateTimeZone::ALL"
 NULL

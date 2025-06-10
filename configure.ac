@@ -1324,11 +1324,15 @@ AS_VAR_IF([program_prefix], [NONE], [program_prefix=])
 AS_VAR_IF([program_suffix], [NONE], [program_suffix=])
 
 orig_libdir=$libdir
+
+dnl First for unexpanded (default), second for expanded (from options)
 AS_CASE([$libdir],
-  ['${exec_prefix}/lib'], [libdir=$libdir/php])
+  ['${exec_prefix}/lib'], [libdir=$libdir/php],
+  [${exec_prefix}/${PHP_LIBDIR}], [libdir=$libdir/php])
 
 AS_CASE([$(eval echo $datadir)],
-  ['${prefix}/share'], [datadir=$datadir/php])
+  ['${prefix}/share'], [datadir=$datadir/php],
+  [${prefix}/share], [datadir=$datadir/php])
 
 phptempdir=$(pwd)/libs
 

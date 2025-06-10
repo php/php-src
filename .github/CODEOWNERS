@@ -27,6 +27,7 @@
 /ext/gmp @Girgias
 /ext/intl @devnexen
 /ext/json @bukka
+/ext/lexbor @kocsismate @nielsdos
 /ext/libxml @nielsdos
 /ext/mbstring @alexdowad @youkidearitai
 /ext/mysqli @bukka @kamil-tekiela
@@ -51,6 +52,7 @@
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/uri @kocsismate
 /ext/xml @nielsdos
 /ext/xmlreader @nielsdos
 /ext/xmlwriter @nielsdos

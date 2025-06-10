@@ -3422,7 +3422,7 @@ static void zend_jit_setup(bool reattached)
 
 		__asm__(
 			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
+			: "=D" (ti));
 		tsrm_tls_offset = ti[1];
 		tsrm_tls_index = ti[0] * 8;
 #elif defined(__FreeBSD__)
@@ -3430,7 +3430,7 @@ static void zend_jit_setup(bool reattached)
 
 		__asm__(
 			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
+			: "=D" (ti));
 		tsrm_tls_offset = ti[1];
 		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/bf56e8b9c8639ac4447d223b83cdc128107cc3cd/libexec/rtld-elf/rtld.c#L5260) */
 		tsrm_tls_index = (ti[0] + 1) * 8;
@@ -3439,7 +3439,7 @@ static void zend_jit_setup(bool reattached)
 
 		__asm__(
 			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
+			: "=D" (ti));
 		tsrm_tls_offset = ti[1];
 		tsrm_tls_index = ti[0] * 16;
 #endif

@@ -75,14 +75,17 @@ enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_RSA,
 	OPENSSL_KEYTYPE_DSA,
 	OPENSSL_KEYTYPE_DH,
+	OPENSSL_KEYTYPE_EC,
+	OPENSSL_KEYTYPE_X25519,
+	OPENSSL_KEYTYPE_ED25519,
+	OPENSSL_KEYTYPE_X448,
+	OPENSSL_KEYTYPE_ED448,
+
 	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-	OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1,
-	OPENSSL_KEYTYPE_X25519 = OPENSSL_KEYTYPE_DH +2,
-	OPENSSL_KEYTYPE_ED25519 = OPENSSL_KEYTYPE_DH +3,
-	OPENSSL_KEYTYPE_X448 = OPENSSL_KEYTYPE_DH +4,
-	OPENSSL_KEYTYPE_ED448 = OPENSSL_KEYTYPE_DH +5,
 };
 
+/* Cipher constants, do not forget to update php_openssl_cipher_names in
+ * openssl_backend_v3.c  if new constant added. */
 enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_RC2_40,
 	PHP_OPENSSL_CIPHER_RC2_128,
@@ -106,10 +109,10 @@ enum php_openssl_encoding {
 	ENCODING_PEM,
 };
 
-
 #define MIN_KEY_LENGTH		384
 
-/* constants used in ext/phar/util.c, keep in sync */
+/* Constants used in ext/phar/util.c, keep in sync and do not forget to update
+ * php_openssl_digest_names in openssl_backend_v3.c if new constant added. */
 #define OPENSSL_ALGO_SHA1 	1
 #define OPENSSL_ALGO_MD5	2
 #ifndef OPENSSL_NO_MD4
@@ -126,6 +129,7 @@ enum php_openssl_encoding {
 #ifndef OPENSSL_NO_RMD160
 #define OPENSSL_ALGO_RMD160 10
 #endif
+
 #define DEBUG_SMIME	0
 
 #if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
@@ -221,8 +225,12 @@ void php_openssl_dispose_config(struct php_x509_request * req);
 zend_result php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded);
 zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int seeded);
 
-EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo);
+const EVP_MD *php_openssl_get_evp_md_by_name(const char *name);
+const EVP_MD *php_openssl_get_evp_md_from_algo(zend_long algo);
+void php_openssl_release_evp_md(const EVP_MD *md);
+const EVP_CIPHER * php_openssl_get_evp_cipher_by_name(const char *name);
 const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo);
+void php_openssl_release_evp_cipher(const EVP_CIPHER *cipher);
 
 void php_openssl_backend_init(void);
 void php_openssl_backend_init_common(void);
