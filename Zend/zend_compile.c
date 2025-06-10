@@ -6427,6 +6427,57 @@ static bool can_match_use_jumptable(zend_ast_list *arms) {
 	return 1;
 }
 
+static void zend_compile_pipe(znode *result, zend_ast *ast)
+{
+	zend_ast *operand_ast = ast->child[0];
+	zend_ast *callable_ast = ast->child[1];
+
+	/* Compile the left hand side down to a value first. */
+	znode operand_result;
+	zend_compile_expr(&operand_result, operand_ast);
+
+	/* Wrap simple values in a ZEND_QM_ASSIGN opcode to ensure references
+	 * always fail. They will already fail in complex cases like arrays,
+	 * so those don't need a wrapper. */
+	znode wrapped_operand_result;
+	if (operand_result.op_type & (IS_CV|IS_VAR)) {
+		zend_emit_op_tmp(&wrapped_operand_result, ZEND_QM_ASSIGN, &operand_result, NULL);
+	} else {
+		wrapped_operand_result = operand_result;
+	}
+
+	/* Turn the operand into a function parameter list. */
+	zend_ast *arg_list_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&wrapped_operand_result));
+
+	zend_ast *fcall_ast;
+	znode callable_result;
+
+	/* Turn $foo |> bar(...) into bar($foo). */
+	if (callable_ast->kind == ZEND_AST_CALL
+		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		fcall_ast = zend_ast_create(ZEND_AST_CALL,
+				callable_ast->child[0], arg_list_ast);
+	/* Turn $foo |> bar::baz(...) into bar::baz($foo). */
+	} else if (callable_ast->kind == ZEND_AST_STATIC_CALL
+			&& callable_ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		fcall_ast = zend_ast_create(ZEND_AST_STATIC_CALL,
+			callable_ast->child[0], callable_ast->child[1], arg_list_ast);
+	/* Turn $foo |> $bar->baz(...) into $bar->baz($foo). */
+	} else if (callable_ast->kind == ZEND_AST_METHOD_CALL
+			&& callable_ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		fcall_ast = zend_ast_create(ZEND_AST_METHOD_CALL,
+			callable_ast->child[0], callable_ast->child[1], arg_list_ast);
+	/* Turn $foo |> $expr into ($expr)($foo) */
+	} else {
+		zend_compile_expr(&callable_result, callable_ast);
+		callable_ast = zend_ast_create_znode(&callable_result);
+		fcall_ast = zend_ast_create(ZEND_AST_CALL,
+			callable_ast, arg_list_ast);
+	}
+
+	zend_compile_expr(result, fcall_ast);
+}
+
 static void zend_compile_match(znode *result, zend_ast *ast)
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -11768,6 +11819,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
+			return;
+		case ZEND_AST_PIPE:
+			zend_compile_pipe(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
