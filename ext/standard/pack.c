@@ -737,7 +737,6 @@ PHP_FUNCTION(unpack)
 
 	while (formatlen-- > 0) {
 		char type = *(format++);
-		char c;
 		int repetitions = 1, argb;
 		char *name;
 		int namelen;
@@ -745,7 +744,7 @@ PHP_FUNCTION(unpack)
 
 		/* Handle format arguments if any */
 		if (formatlen > 0) {
-			c = *format;
+			char c = *format;
 
 			if (c >= '0' && c <= '9') {
 				errno = 0;
