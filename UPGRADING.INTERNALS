@@ -34,6 +34,9 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . Added ZEND_NONSTRING attribute macro for character arrays that do not
     represent strings. This allows to silence the GCC 15.x
     `-Wunterminated-string-initialization` warning.
+  . Added the zend_update_exception_properties() function for instantiating
+    Exception child classes. It updates the $message, $code, and $previous
+    properties.
 
 ========================
 2. Build system changes
