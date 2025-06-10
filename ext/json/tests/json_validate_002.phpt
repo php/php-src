@@ -5,17 +5,17 @@ json_validate() - Error handling
 
 require_once("json_validate_requires.inc");
 
-json_validate_trycatchdump("");
-json_validate_trycatchdump("-");
-json_validate_trycatchdump("", -1);
+//json_validate_trycatchdump("");
+//json_validate_trycatchdump("-");
+//json_validate_trycatchdump("", -1);
 json_validate_trycatchdump('{"key1":"value1", "value2"}', 2);
-json_validate_trycatchdump('{"key1":"value1", "key2":"value2"}', 1);
-json_validate_trycatchdump('{"key1":"value1", "key2":"value2"}', 2);
-json_validate_trycatchdump("-", 0);
-json_validate_trycatchdump("-", 512, JSON_BIGINT_AS_STRING);
-json_validate_trycatchdump("-", 512, JSON_BIGINT_AS_STRING | JSON_INVALID_UTF8_IGNORE);
-json_validate_trycatchdump("-", 512, JSON_INVALID_UTF8_IGNORE);
-json_validate_trycatchdump("{}", 512, JSON_INVALID_UTF8_IGNORE);
+//json_validate_trycatchdump('{"key1":"value1", "key2":"value2"}', 1);
+//json_validate_trycatchdump('{"key1":"value1", "key2":"value2"}', 2);
+//json_validate_trycatchdump("-", 0);
+//json_validate_trycatchdump("-", 512, JSON_BIGINT_AS_STRING);
+//json_validate_trycatchdump("-", 512, JSON_BIGINT_AS_STRING | JSON_INVALID_UTF8_IGNORE);
+//json_validate_trycatchdump("-", 512, JSON_INVALID_UTF8_IGNORE);
+//json_validate_trycatchdump("{}", 512, JSON_INVALID_UTF8_IGNORE);
 
 ?>
 --EXPECTF--

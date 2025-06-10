@@ -159,10 +159,8 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 			return "Control character error, possibly incorrectly encoded";
 		case PHP_JSON_ERROR_SYNTAX:
 			char *msg;
-			spprintf(&msg, 0, "Syntax error at character %zu", JSON_G(error_pos));
+			spprintf(&msg, 0, "Syntax error near character %zu", JSON_G(error_pos));
 			return msg;
-			//efree(msg);
-			//return "Syntax error";
 		case PHP_JSON_ERROR_UTF8:
 			return "Malformed UTF-8 characters, possibly incorrectly encoded";
 		case PHP_JSON_ERROR_RECURSION:

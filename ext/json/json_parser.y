@@ -35,6 +35,7 @@ int json_yydebug = 1;
 #define PHP_JSON_DEPTH_INC \
 	if (parser->max_depth && parser->depth >= parser->max_depth) { \
 		parser->scanner.errcode = PHP_JSON_ERROR_DEPTH; \
+		parser->scanner.errpos = (size_t)(parser->scanner.str_start - parser->scanner.input_start); \
 		YYERROR; \
 	} \
 	++parser->depth
@@ -108,6 +109,7 @@ object_end:
 	|	']'
 			{
 				parser->scanner.errcode = PHP_JSON_ERROR_STATE_MISMATCH;
+				parser->scanner.errpos = (size_t)(parser->scanner.str_start - parser->scanner.input_start); \
 				YYERROR;
 			}
 ;
@@ -164,6 +166,7 @@ array_end:
 	|	'}'
 			{
 				parser->scanner.errcode = PHP_JSON_ERROR_STATE_MISMATCH;
+				parser->scanner.errpos = (size_t)(parser->scanner.str_start - parser->scanner.input_start); \
 				YYERROR;
 			}
 ;
@@ -242,6 +245,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 	} else {
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
+			parser->scanner.errpos = (size_t)(parser->scanner.str_start - parser->scanner.input_start); \
 			zend_string_release_ex(key, 0);
 			zval_ptr_dtor_nogc(zvalue);
 			zval_ptr_dtor_nogc(object);
@@ -300,7 +304,9 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 {
 	if (!parser->scanner.errcode) {
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
-		parser->scanner.errpos = (size_t)(parser->scanner.cursor - parser->scanner.str_start);
+		parser->scanner.errpos = (size_t)(parser->scanner.str_start - parser->scanner.input_start);
+		fprintf(stderr, "End of input: errpos=%zu, cursor=%p, str_start=%p\n", parser->scanner.errpos, parser->scanner.cursor, parser->scanner.str_start);
+		//parser->scanner.errpos = (size_t)(parser->scanner.cursor - parser->scanner.str_start);
 	}
 }
 
@@ -346,12 +352,20 @@ PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 		int max_depth,
 		const php_json_parser_methods *parser_methods)
 {
+	
 	memset(parser, 0, sizeof(php_json_parser));
 	php_json_scanner_init(&parser->scanner, str, str_len, options);
 	parser->depth = 1;
 	parser->max_depth = max_depth;
 	parser->return_value = return_value;
 	memcpy(&parser->methods, parser_methods, sizeof(php_json_parser_methods));
+
+	if (!str || str_len == 0) {
+		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+		parser->scanner.errpos = 0;
+	}
+
+	fprintf(stderr, "Init: str_start=%p, cursor=%p, limit=%p, str_len=%zu\n", parser->scanner.str_start, parser->scanner.cursor, parser->scanner.limit, str_len);
 }
 
 PHP_JSON_API void php_json_parser_init(php_json_parser *parser,

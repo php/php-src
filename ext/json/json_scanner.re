@@ -93,9 +93,24 @@ static int php_json_ucs2_to_int(php_json_scanner *s, int size)
 
 void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len, int options)
 {
+	s->token = NULL;
+    s->marker = NULL;
+    s->ctxmarker = NULL;
+    s->pstr = NULL;
+    s->str_esc = 0;
+    s->state = 0;
+    s->errcode = PHP_JSON_ERROR_NONE;
+    s->errpos = 0; /* Initialize errpos */
+    s->utf8_invalid = 0;
+    s->utf8_invalid_count = 0;
+	s->str_start = (php_json_ctype *)str; /* Initialize str_start */
+	s->input_start = (php_json_ctype *)str; /* Initialize str_start */
+	
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;
 	s->options = options;
+	s->errpos = 0;
+	s->errcode = 0;
 	PHP_JSON_CONDITION_SET(JS);
 }
 
@@ -105,6 +120,29 @@ int php_json_scan(php_json_scanner *s)
 
 std:
 	s->token = s->cursor;
+
+	fprintf(stderr, "Scan: START=%p \n cursor=%p \n token=%p \n str_start=%p \n limit=%p \n value_START='%.*s' \n value_token='%.*s' \n value_cursor='%.*s' \n value_str_start='%.*s' \n", 
+            s->input_start,
+			s->cursor,
+			s->token,
+			s->str_start,
+			s->limit,
+			(int)(s->limit - s->input_start), 
+            s->input_start,
+			(int)(s->limit - s->token), 
+            s->token,
+			(int)(s->limit - s->cursor), 
+            s->cursor,
+			(int)(s->limit - s->str_start),
+			s->str_start
+		);
+
+	if (s->cursor >= s->limit) {
+        s->errcode = PHP_JSON_ERROR_SYNTAX;
+        s->errpos = (size_t)(s->str_start - s->input_start);
+        fprintf(stderr, "End of input: errpos=%zu, cursor=%p, str_start=%p\n", s->errpos, s->cursor, s->str_start);
+        return PHP_JSON_T_ERROR;
+    }
 
 /*!re2c
 	re2c:indent:top = 1;
@@ -201,6 +239,7 @@ std:
 			return PHP_JSON_T_EOI;
 		} else {
 			s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
+			s->errpos = (size_t)(s->str_start - s->input_start);
 			return PHP_JSON_T_ERROR;
 		}
 	}
@@ -213,19 +252,25 @@ std:
 	}
 	<JS>CTRL                 {
 		s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
+		s->errpos = (size_t)(s->str_start - s->input_start);
 		return PHP_JSON_T_ERROR;
 	}
 	<JS>UTF8                 {
 		s->errcode = PHP_JSON_ERROR_SYNTAX;
+		s->errpos = (size_t)(s->str_start - s->input_start);
+		fprintf(stderr, "Syntax error: errpos=%zu, cursor=%p, str_start=%p\n", 
+                s->errpos, s->cursor, s->str_start);
 		return PHP_JSON_T_ERROR;
 	}
 	<JS>ANY                  {
 		s->errcode = PHP_JSON_ERROR_UTF8;
+		s->errpos = (size_t)(s->str_start - s->input_start);
 		return PHP_JSON_T_ERROR;
 	}
 
 	<STR_P1>CTRL             {
 		s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
+		s->errpos = (size_t)(s->str_start - s->input_start);
 		return PHP_JSON_T_ERROR;
 	}
 	<STR_P1>UTF16_1          {
@@ -246,6 +291,7 @@ std:
 	}
 	<STR_P1>UCS2             {
 		s->errcode = PHP_JSON_ERROR_UTF16;
+		s->errpos = (size_t)(s->str_start - s->input_start);
 		return PHP_JSON_T_ERROR;
 	}
 	<STR_P1>ESC              {
@@ -254,6 +300,9 @@ std:
 	}
 	<STR_P1>ESCPREF           {
 		s->errcode = PHP_JSON_ERROR_SYNTAX;
+		s->errpos = (size_t)(s->str_start - s->input_start);
+		fprintf(stderr, "Syntax error: errpos=%zu, cursor=%p, str_start=%p\n", 
+                s->errpos, s->cursor, s->str_start);
 		return PHP_JSON_T_ERROR;
 	}
 	<STR_P1>["]              {
@@ -283,6 +332,7 @@ std:
 			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
 				if (s->utf8_invalid_count > INT_MAX - 2) {
 					s->errcode = PHP_JSON_ERROR_UTF8;
+					s->errpos = (size_t)(s->str_start - s->input_start);
 					return PHP_JSON_T_ERROR;
 				}
 				s->utf8_invalid_count += 2;
@@ -293,6 +343,7 @@ std:
 			PHP_JSON_CONDITION_GOTO(STR_P1);
 		}
 		s->errcode = PHP_JSON_ERROR_UTF8;
+		s->errpos = (size_t)(s->str_start - s->input_start);
 		return PHP_JSON_T_ERROR;
 	}
 
@@ -358,6 +409,9 @@ std:
 				break;
 			default:
 				s->errcode = PHP_JSON_ERROR_SYNTAX;
+				s->errpos = (size_t)(s->str_start - s->input_start);
+				fprintf(stderr, "Syntax error: errpos=%zu, cursor=%p, str_start=%p\n", 
+                s->errpos, s->cursor, s->str_start);
 				return PHP_JSON_T_ERROR;
 		}
 		*(s->pstr++) = esc;
@@ -386,6 +440,9 @@ std:
 
 	<*>ANY                   {
 		s->errcode = PHP_JSON_ERROR_SYNTAX;
+		s->errpos = (size_t)(s->str_start - s->input_start);
+		fprintf(stderr, "Syntax error: errpos=%zu, cursor=%p, str_start=%p\n", 
+                s->errpos, s->cursor, s->str_start);
 		return PHP_JSON_T_ERROR;
 	}
 */
