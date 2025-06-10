@@ -26,6 +26,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
+#include "zend_enum.h"
 #include "zend_exceptions.h"
 #include "pdo_sqlite_arginfo.h"
 

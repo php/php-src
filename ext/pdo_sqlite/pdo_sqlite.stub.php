@@ -36,6 +36,13 @@ class Sqlite extends \PDO
     /** @cvalue PDO_SQLITE_ATTR_BUSY_STATEMENT */
     public const int ATTR_BUSY_STATEMENT = UNKNOWN;
 
+    /** @cvalue PDO_SQLITE_ATTR_EXPLAIN_STATEMENT */
+    public const int ATTR_EXPLAIN_STATEMENT = UNKNOWN;
+
+    public const int EXPLAIN_MODE_PREPARED = 0;
+    public const int EXPLAIN_MODE_EXPLAIN = 1;
+    public const int EXPLAIN_MODE_EXPLAIN_QUERY_PLAN = 2;
+
     /** @cvalue SQLITE_OK */
     public const int OK = UNKNOWN;
 

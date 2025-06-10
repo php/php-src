@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ae1e62d72c3c8290c9f39f21b583e980ea9b8eb2 */
+ * Stub hash: 739fdb0ab932e6bcb4f6c0113f9e641d695b764e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -115,6 +115,30 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_string *const_ATTR_BUSY_STATEMENT_name = zend_string_init_interned("ATTR_BUSY_STATEMENT", sizeof("ATTR_BUSY_STATEMENT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_BUSY_STATEMENT_name, &const_ATTR_BUSY_STATEMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_BUSY_STATEMENT_name);
+
+	zval const_ATTR_EXPLAIN_STATEMENT_value;
+	ZVAL_LONG(&const_ATTR_EXPLAIN_STATEMENT_value, PDO_SQLITE_ATTR_EXPLAIN_STATEMENT);
+	zend_string *const_ATTR_EXPLAIN_STATEMENT_name = zend_string_init_interned("ATTR_EXPLAIN_STATEMENT", sizeof("ATTR_EXPLAIN_STATEMENT") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_EXPLAIN_STATEMENT_name, &const_ATTR_EXPLAIN_STATEMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_EXPLAIN_STATEMENT_name);
+
+	zval const_EXPLAIN_MODE_PREPARED_value;
+	ZVAL_LONG(&const_EXPLAIN_MODE_PREPARED_value, 0);
+	zend_string *const_EXPLAIN_MODE_PREPARED_name = zend_string_init_interned("EXPLAIN_MODE_PREPARED", sizeof("EXPLAIN_MODE_PREPARED") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_PREPARED_name, &const_EXPLAIN_MODE_PREPARED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_EXPLAIN_MODE_PREPARED_name);
+
+	zval const_EXPLAIN_MODE_EXPLAIN_value;
+	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_value, 1);
+	zend_string *const_EXPLAIN_MODE_EXPLAIN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN", sizeof("EXPLAIN_MODE_EXPLAIN") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_EXPLAIN_name, &const_EXPLAIN_MODE_EXPLAIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_EXPLAIN_MODE_EXPLAIN_name);
+
+	zval const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value;
+	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value, 2);
+	zend_string *const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN_QUERY_PLAN", sizeof("EXPLAIN_MODE_EXPLAIN_QUERY_PLAN") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name, &const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name);
 
 	zval const_OK_value;
 	ZVAL_LONG(&const_OK_value, SQLITE_OK);

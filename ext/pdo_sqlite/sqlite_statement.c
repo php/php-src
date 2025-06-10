@@ -387,11 +387,50 @@ static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 				ZVAL_TRUE(val);
 			}
 			break;
+        case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
+#if SQLITE_VERSION_NUMBER >= 3041000
+            ZVAL_LONG(val, (zend_long)sqlite3_stmt_isexplain(S->stmt));
+            return 1;
+#else
+            zend_value_error("explain statement unsupported");
+            return 0;
+#endif
 		default:
 			return 0;
 	}
 
 	return 1;
+}
+
+static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *zval)
+{
+	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+
+	switch (attr) {
+        case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
+#if SQLITE_VERSION_NUMBER >= 3041000
+            if (Z_TYPE_P(zval) != IS_LONG) {
+                zend_type_error("explain mode must be of type int");
+                return 0;
+            }
+            if (Z_TYPE_P(zval) < 0 || Z_TYPE_P(zval) > 2) {
+                zend_value_error("explain mode must be one of the EXPLAIN_MODE_* constants");
+                return 0;
+            }
+            if (sqlite3_stmt_explain(S->stmt, (int)Z_LVAL_P(zval)) != SQLITE_OK) {
+                return 0;
+            }
+
+            return 1;
+#else
+            zend_value_error("explain statement unsupported");
+            return 0;
+#endif
+		default:
+			return 0;
+    }
+
+    return 1;
 }
 
 const struct pdo_stmt_methods sqlite_stmt_methods = {
@@ -401,7 +440,7 @@ const struct pdo_stmt_methods sqlite_stmt_methods = {
 	pdo_sqlite_stmt_describe,
 	pdo_sqlite_stmt_get_col,
 	pdo_sqlite_stmt_param_hook,
-	NULL, /* set_attr */
+	pdo_sqlite_stmt_set_attribute, /* set_attr */
 	pdo_sqlite_stmt_get_attribute, /* get_attr */
 	pdo_sqlite_stmt_col_meta,
 	NULL, /* next_rowset */
