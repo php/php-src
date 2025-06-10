@@ -1839,14 +1839,32 @@ flf_clean:
 /* {{{ Checks if haystack starts with needle */
 PHP_FUNCTION(str_starts_with)
 {
-	zend_string *haystack, *needle;
-
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(haystack)
-		Z_PARAM_STR(needle)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_BOOL(zend_string_starts_with(haystack, needle));
+    zend_string *haystack;
+    zval *needles;
+    size_t num_needles;
+    
+    ZEND_PARSE_PARAMETERS_START(2, -1)
+        Z_PARAM_STR(haystack)
+        Z_PARAM_VARIADIC('+', needles, num_needles)
+    ZEND_PARSE_PARAMETERS_END();
+    
+    /* Check each needle */
+    for (size_t i = 0; i < num_needles; ++i) {
+        if (UNEXPECTED(Z_TYPE(needles[i]) != IS_STRING)) {
+			if (ZEND_ARG_USES_STRICT_TYPES()) {
+                zend_type_error("Argument %zu passed to str_starts_with() must be of type string, %s given",
+                    i + 2, zend_zval_type_name(&needles[i]));
+                return;
+            } else {
+                convert_to_string(&needles[i]);
+            }
+        }
+        if (zend_string_starts_with(haystack, Z_STR(needles[i]))) {
+            RETURN_TRUE;
+        }
+    }
+    
+    RETURN_FALSE;
 }
 /* }}} */
 
@@ -1868,20 +1886,42 @@ flf_clean:
 /* {{{ Checks if haystack ends with needle */
 PHP_FUNCTION(str_ends_with)
 {
-	zend_string *haystack, *needle;
-
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(haystack)
-		Z_PARAM_STR(needle)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(memcmp(
-		ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - ZSTR_LEN(needle),
-		ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
+    zend_string *haystack;
+    zval *needles;
+    size_t num_needles;
+    
+    ZEND_PARSE_PARAMETERS_START(2, -1)  /* 2 to unlimited args */
+        Z_PARAM_STR(haystack)
+        Z_PARAM_VARIADIC('+', needles, num_needles)
+    ZEND_PARSE_PARAMETERS_END();
+    
+    size_t haystack_len = ZSTR_LEN(haystack);
+    
+    for (size_t i = 0; i < num_needles; ++i) {
+        if (UNEXPECTED(Z_TYPE(needles[i]) != IS_STRING)) {
+			if (ZEND_ARG_USES_STRICT_TYPES()) {
+                zend_type_error("Argument %zu passed to str_ends_with() must be of type string, %s given",
+                    i + 2, zend_zval_type_name(&needles[i]));
+                return;
+            } else {
+                convert_to_string(&needles[i]);
+            }
+		}        
+        zend_string *needle = Z_STR(needles[i]);
+        size_t needle_len = ZSTR_LEN(needle);        
+        if (needle_len > haystack_len) {
+            continue;
+        }
+        /* Check if haystack ends with this needle */
+        if (memcmp(
+            ZSTR_VAL(haystack) + haystack_len - needle_len,
+            ZSTR_VAL(needle), 
+            needle_len) == 0) {
+            RETURN_TRUE;
+        }
+    }
+    
+    RETURN_FALSE;
 }
 /* }}} */
 
