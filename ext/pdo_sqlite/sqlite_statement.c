@@ -375,13 +375,18 @@ static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 		case PDO_SQLITE_ATTR_READONLY_STATEMENT:
 			ZVAL_FALSE(val);
 
-#if SQLITE_VERSION_NUMBER >= 3007004
-				if (sqlite3_stmt_readonly(S->stmt)) {
-					ZVAL_TRUE(val);
-				}
-#endif
+			if (sqlite3_stmt_readonly(S->stmt)) {
+				ZVAL_TRUE(val);
+			}
 			break;
 
+		case PDO_SQLITE_ATTR_BUSY_STATEMENT:
+			ZVAL_FALSE(val);
+
+			if (sqlite3_stmt_busy(S->stmt)) {
+				ZVAL_TRUE(val);
+			}
+			break;
 		default:
 			return 0;
 	}
