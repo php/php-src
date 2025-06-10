@@ -2031,28 +2031,24 @@ PHP_FUNCTION(socket_set_option)
 
 	set_errno(0);
 
-#define HANDLE_SUBCALL(res) \
-	do { \
-		if (res == 1) { goto default_case; } \
-		else if (res == SUCCESS) { RETURN_TRUE; } \
-		else { RETURN_FALSE; } \
-	} while (0)
-
-
-	if (level == IPPROTO_IP) {
-		int res = php_do_setsockopt_ip_mcast(php_sock, level, optname, arg4);
-		HANDLE_SUBCALL(res);
-	}
-
+	if (
+		level == IPPROTO_IP
 #ifdef HAVE_IPV6
-	else if (level == IPPROTO_IPV6) {
-		int res = php_do_setsockopt_ipv6_mcast(php_sock, level, optname, arg4);
-		if (res == 1) {
+		|| level == IPPROTO_IPV6
+#endif
+	) {
+		int res = php_do_setsockopt_ip_mcast(php_sock, level, optname, arg4);
+#ifdef HAVE_IPV6
+		/* If option is unknown for IPv6 */
+		if (level == IPPROTO_IPV6 && res == 1) {
 			res = php_do_setsockopt_ipv6_rfc3542(php_sock, level, optname, arg4);
 		}
-		HANDLE_SUBCALL(res);
-	}
 #endif
+		if (res == 1) {
+			goto default_case;
+		}
+		RETURN_BOOL(res == SUCCESS);
+	}
 
 	if (level == IPPROTO_TCP) {
 		switch (optname) {
