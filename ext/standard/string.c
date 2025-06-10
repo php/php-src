@@ -4933,6 +4933,15 @@ PHP_FUNCTION(setlocale)
 		Z_PARAM_VARIADIC('+', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (ZEND_ARG_USES_STRICT_TYPES()) {
+		for (uint32_t i = 0; i < num_args; i++) {
+			if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && Z_TYPE(args[i]) != IS_STRING)) {
+				zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING, &args[i]);
+				RETURN_THROWS();
+			}
+		}
+	}
+
 	for (uint32_t i = 0; i < num_args; i++) {
 		if (Z_TYPE(args[i]) == IS_ARRAY) {
 			zval *elem;
