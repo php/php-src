@@ -69,7 +69,7 @@ ZEND_API zend_object *zend_throw_error_exception(zend_class_entry *exception_ce,
 
 extern ZEND_API void (*zend_throw_exception_hook)(zend_object *ex);
 
-ZEND_API zend_result zend_update_exception_properties(INTERNAL_FUNCTION_PARAMETERS, zend_string *message, zend_long code, zval *previous);
+ZEND_API zend_result zend_update_exception_properties(zend_execute_data *execute_data, zval *return_value, zend_string *message, zend_long code, zval *previous);
 
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
 ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *exception, int severity);
