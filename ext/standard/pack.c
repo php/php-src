@@ -360,7 +360,7 @@ too_few_args:
 
 	/* Calculate output length and upper bound while processing*/
 	for (i = 0; i < formatcount; i++) {
-	    char code = formatcodes[i];
+		char code = formatcodes[i];
 		int arg = formatargs[i];
 
 		switch (code) {
@@ -443,7 +443,7 @@ too_few_args:
 
 	/* Do actual packing */
 	for (i = 0; i < formatcount; i++) {
-	    char code = formatcodes[i];
+		char code = formatcodes[i];
 		int arg = formatargs[i];
 
 		switch (code) {
