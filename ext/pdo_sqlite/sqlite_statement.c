@@ -27,6 +27,8 @@
 #include "php_pdo_sqlite_int.h"
 
 #if defined(__APPLE__)
+// If more than one usage, a Zend macro could be created
+// around this runtime check
 #include <Availability.h>
 #endif
 
@@ -428,7 +430,7 @@ static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
                     zend_type_error("explain mode must be of type int");
                     return 0;
                 }
-                if (Z_TYPE_P(zval) < 0 || Z_TYPE_P(zval) > 2) {
+                if (Z_LVAL_P(zval) < 0 || Z_LVAL_P(zval) > 2) {
                     zend_value_error("explain mode must be one of the EXPLAIN_MODE_* constants");
                     return 0;
                 }
