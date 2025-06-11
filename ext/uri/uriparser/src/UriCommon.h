@@ -70,7 +70,6 @@
 
 /* Used to point to from empty path segments.
  * X.first and X.afterLast must be the same non-NULL value then. */
-extern const URI_CHAR * const URI_FUNC(SafeToPointTo);
 extern const URI_CHAR * const URI_FUNC(ConstPwd);
 extern const URI_CHAR * const URI_FUNC(ConstParent);
 

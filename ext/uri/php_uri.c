@@ -25,12 +25,14 @@
 #include "Zend/zend_enum.h"
 #include "ext/standard/info.h"
 
-#include "php_uri.h"
 #include "php_uri_common.h"
 #include "php_lexbor.h"
+#include "php_uriparser.h"
 #include "php_uri_arginfo.h"
 #include "uriparser/src/UriConfig.h"
 
+zend_class_entry *uri_rfc3986_uri_ce;
+zend_object_handlers uri_rfc3986_uri_object_handlers;
 zend_class_entry *uri_whatwg_url_ce;
 zend_object_handlers uri_whatwg_uri_object_handlers;
 zend_class_entry *uri_comparison_mode_ce;
@@ -102,67 +104,6 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	}
 
 	return result;
-}
-
-PHP_METHOD(Uri_WhatWg_InvalidUrlException, __construct)
-{
-	zend_string *message = NULL;
-	zval *errors = NULL;
-	zend_long code = 0;
-	zval *previous = NULL;
-
-	ZEND_PARSE_PARAMETERS_START(0, 4)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(message)
-		Z_PARAM_ARRAY(errors)
-		Z_PARAM_LONG(code)
-		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(previous, zend_ce_throwable)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (zend_update_exception_properties(INTERNAL_FUNCTION_PARAM_PASSTHRU, message, code, previous) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (errors == NULL) {
-		zval tmp;
-		ZVAL_EMPTY_ARRAY(&tmp);
-		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), &tmp);
-	} else {
-		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), errors);
-	}
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-}
-
-PHP_METHOD(Uri_WhatWg_UrlValidationError, __construct)
-{
-	zend_string *context;
-	zval *type;
-	bool failure;
-
-	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_STR(context)
-		Z_PARAM_OBJECT_OF_CLASS(type, uri_whatwg_url_validation_error_type_ce)
-		Z_PARAM_BOOL(failure)
-	ZEND_PARSE_PARAMETERS_END();
-
-	zend_update_property_str(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("context"), context);
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-
-	zend_update_property_ex(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_TYPE), type);
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-
-	zval failure_zv;
-	ZVAL_BOOL(&failure_zv, failure);
-	zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("failure"), &failure_zv);
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
 }
 
 /**
@@ -242,6 +183,91 @@ PHPAPI void php_uri_instantiate_uri(
 	uri_object->internal.uri = uri;
 }
 
+static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
+{
+	zend_string *uri_str;
+	zend_object *base_url_object = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH_STR(uri_str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, uri_rfc3986_uri_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_handler, uri_str, base_url_object, is_constructor, is_constructor, NULL);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, parse)
+{
+	create_rfc3986_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, __construct)
+{
+	create_rfc3986_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(Uri_WhatWg_InvalidUrlException, __construct)
+{
+	zend_string *message = NULL;
+	zval *errors = NULL;
+	zend_long code = 0;
+	zval *previous = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 4)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(message)
+		Z_PARAM_ARRAY(errors)
+		Z_PARAM_LONG(code)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(previous, zend_ce_throwable)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_update_exception_properties(INTERNAL_FUNCTION_PARAM_PASSTHRU, message, code, previous) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (errors == NULL) {
+		zval tmp;
+		ZVAL_EMPTY_ARRAY(&tmp);
+		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), &tmp);
+	} else {
+		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), errors);
+	}
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+}
+
+PHP_METHOD(Uri_WhatWg_UrlValidationError, __construct)
+{
+	zend_string *context;
+	zval *type;
+	bool failure;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(context)
+		Z_PARAM_OBJECT_OF_CLASS(type, uri_whatwg_url_validation_error_type_ce)
+		Z_PARAM_BOOL(failure)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_update_property_str(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("context"), context);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	zend_update_property_ex(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_TYPE), type);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	zval failure_zv;
+	ZVAL_BOOL(&failure_zv, failure);
+	zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("failure"), &failure_zv);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+}
+
 static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
 	zend_string *uri_str;
@@ -266,6 +292,105 @@ PHP_METHOD(Uri_WhatWg_Url, parse)
 PHP_METHOD(Uri_WhatWg_Url, __construct)
 {
 	create_whatwg_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getScheme)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawScheme)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, URI_COMPONENT_READ_RAW);
+}
+
+static void read_uriparser_userinfo(INTERNAL_FUNCTION_PARAMETERS, uri_component_read_mode_t read_mode)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
+	URI_ASSERT_INITIALIZATION(internal_uri);
+
+	if (UNEXPECTED(uriparser_read_userinfo(internal_uri, read_mode, return_value) == FAILURE)) {
+		zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name),
+			ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_USERINFO)));
+		RETURN_THROWS();
+	}
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getUserInfo)
+{
+	read_uriparser_userinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawUserInfo)
+{
+	read_uriparser_userinfo(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_COMPONENT_READ_RAW);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getUsername)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_USERNAME, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawUsername)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_USERNAME, URI_COMPONENT_READ_RAW);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getPassword)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PASSWORD, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawPassword)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PASSWORD, URI_COMPONENT_READ_RAW);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getHost)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawHost)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, URI_COMPONENT_READ_RAW);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getPort)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PORT, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getPath)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PATH, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawPath)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PATH, URI_COMPONENT_READ_RAW);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getQuery)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_QUERY, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawQuery)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_QUERY, URI_COMPONENT_READ_RAW);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getFragment)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, URI_COMPONENT_READ_NORMALIZED_ASCII);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, getRawFragment)
+{
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, URI_COMPONENT_READ_RAW);
 }
 
 static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, zend_object *comparison_mode)
@@ -309,6 +434,99 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, z
 
 	zend_string_release(this_str);
 	zend_string_release(that_str);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, equals)
+{
+	zend_object *that_object;
+	zend_object *comparison_mode = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJ_OF_CLASS(that_object, uri_rfc3986_uri_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce);
+	ZEND_PARSE_PARAMETERS_END();
+
+	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, comparison_mode);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	URI_ASSERT_INITIALIZATION(internal_uri);
+
+	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
+	if (uri_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(uri_str);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, toString)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	URI_ASSERT_INITIALIZATION(internal_uri);
+
+	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, false);
+	if (uri_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(uri_str);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, resolve)
+{
+	zend_string *uri_str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1) \
+		Z_PARAM_PATH_STR(uri_str) \
+	ZEND_PARSE_PARAMETERS_END(); \
+
+	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	URI_ASSERT_INITIALIZATION(internal_uri);
+
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, this_object, true, false, NULL);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	URI_ASSERT_INITIALIZATION(internal_uri);
+
+	/* Serialize state: "uri" key in the first array */
+	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
+	if (uri_str == NULL) {
+		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		RETURN_THROWS();
+	}
+	zval tmp;
+	ZVAL_STR(&tmp, uri_str);
+
+	array_init(return_value);
+
+	zval arr;
+	array_init(&arr);
+	zend_hash_str_add_new(Z_ARRVAL(arr), URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1, &tmp);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
+
+	/* Serialize regular properties: second array */
+	ZVAL_ARR(&arr, this_object->handlers->get_properties(this_object));
+	Z_TRY_ADDREF(arr);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 }
 
 static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_name)
@@ -371,6 +589,20 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_na
 	}
 }
 
+PHP_METHOD(Uri_Rfc3986_Uri, __unserialize)
+{
+	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PARSER_RFC3986);
+}
+
+PHP_METHOD(Uri_Rfc3986_Uri, __debugInfo)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_object *object = Z_OBJ_P(ZEND_THIS);
+
+	RETURN_ARR(uri_get_debug_properties(object));
+}
+
 PHP_METHOD(Uri_WhatWg_Url, getScheme)
 {
 	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, URI_COMPONENT_READ_NORMALIZED_ASCII);
@@ -381,19 +613,9 @@ PHP_METHOD(Uri_WhatWg_Url, withScheme)
 	uri_write_component_str(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME);
 }
 
-PHP_METHOD(Uri_WhatWg_Url, getUsername)
-{
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_USERNAME, URI_COMPONENT_READ_NORMALIZED_ASCII);
-}
-
 PHP_METHOD(Uri_WhatWg_Url, withUsername)
 {
 	uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_USERNAME);
-}
-
-PHP_METHOD(Uri_WhatWg_Url, getPassword)
-{
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PASSWORD, URI_COMPONENT_READ_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, withPassword)
@@ -416,19 +638,9 @@ PHP_METHOD(Uri_WhatWg_Url, withHost)
 	uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST);
 }
 
-PHP_METHOD(Uri_WhatWg_Url, getPort)
-{
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PORT, URI_COMPONENT_READ_NORMALIZED_ASCII);
-}
-
 PHP_METHOD(Uri_WhatWg_Url, withPort)
 {
 	uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PORT);
-}
-
-PHP_METHOD(Uri_WhatWg_Url, getPath)
-{
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PATH, URI_COMPONENT_READ_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, withPath)
@@ -436,19 +648,9 @@ PHP_METHOD(Uri_WhatWg_Url, withPath)
 	uri_write_component_str(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PATH);
 }
 
-PHP_METHOD(Uri_WhatWg_Url, getQuery)
-{
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_QUERY, URI_COMPONENT_READ_NORMALIZED_ASCII);
-}
-
 PHP_METHOD(Uri_WhatWg_Url, withQuery)
 {
 	uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_QUERY);
-}
-
-PHP_METHOD(Uri_WhatWg_Url, getFragment)
-{
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, URI_COMPONENT_READ_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, withFragment)
@@ -629,6 +831,9 @@ zend_result uri_handler_register(const uri_handler_t *uri_handler)
 
 static PHP_MINIT_FUNCTION(uri)
 {
+	uri_rfc3986_uri_ce = register_class_Uri_Rfc3986_Uri();
+	php_uri_implementation_set_object_handlers(uri_rfc3986_uri_ce, &uri_rfc3986_uri_object_handlers);
+
 	uri_whatwg_url_ce = register_class_Uri_WhatWg_Url();
 	php_uri_implementation_set_object_handlers(uri_whatwg_url_ce, &uri_whatwg_uri_object_handlers);
 
@@ -640,6 +845,10 @@ static PHP_MINIT_FUNCTION(uri)
 	uri_whatwg_url_validation_error_type_ce = register_class_Uri_WhatWg_UrlValidationErrorType();
 
 	zend_hash_init(&uri_handlers, 4, NULL, NULL, true);
+
+	if (uri_handler_register(&uriparser_uri_handler) == FAILURE) {
+		return FAILURE;
+	}
 
 	if (uri_handler_register(&lexbor_uri_handler) == FAILURE) {
 		return FAILURE;
@@ -665,6 +874,10 @@ static PHP_MSHUTDOWN_FUNCTION(uri)
 
 PHP_RINIT_FUNCTION(uri)
 {
+	if (uriparser_request_init() == FAILURE) {
+		return FAILURE;
+	}
+
 	if (lexbor_request_init() == FAILURE) {
 		return FAILURE;
 	}
