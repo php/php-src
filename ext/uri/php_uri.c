@@ -488,9 +488,9 @@ PHP_METHOD(Uri_Rfc3986_Uri, resolve)
 {
 	zend_string *uri_str;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1) \
-		Z_PARAM_PATH_STR(uri_str) \
-	ZEND_PARSE_PARAMETERS_END(); \
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH_STR(uri_str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
@@ -850,6 +850,8 @@ static PHP_MINIT_FUNCTION(uri)
 		return FAILURE;
 	}
 
+	uriparser_module_init();
+
 	if (uri_handler_register(&lexbor_uri_handler) == FAILURE) {
 		return FAILURE;
 	}
@@ -874,10 +876,6 @@ static PHP_MSHUTDOWN_FUNCTION(uri)
 
 PHP_RINIT_FUNCTION(uri)
 {
-	if (uriparser_request_init() == FAILURE) {
-		return FAILURE;
-	}
-
 	if (lexbor_request_init() == FAILURE) {
 		return FAILURE;
 	}

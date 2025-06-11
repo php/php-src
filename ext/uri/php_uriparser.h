@@ -18,6 +18,7 @@
 #define PHP_URIPARSER_H
 
 #include <uriparser/Uri.h>
+#include "uriparser/src/UriMemory.h"
 #include <php_uri_common.h>
 
 extern const uri_handler_t uriparser_uri_handler;
@@ -29,7 +30,7 @@ typedef struct uriparser_uris_t {
 	zend_string *normalized_uri_str;
 } uriparser_uris_t;
 
-zend_result uriparser_request_init(void);
+void uriparser_module_init(void);
 
 zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
 
