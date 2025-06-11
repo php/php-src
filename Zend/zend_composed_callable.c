@@ -163,6 +163,11 @@ static zend_result zend_composed_callable_splice(HashTable *dst, HashTable *src,
 		}
 	} ZEND_HASH_FOREACH_END();
 
+	/* append splice */
+	if (insert && (zend_composed_callable_append(dst, insert) == FAILURE)) {
+		return FAILURE;
+	}
+
 	return SUCCESS;
 }
 
