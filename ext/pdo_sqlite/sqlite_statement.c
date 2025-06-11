@@ -427,7 +427,7 @@ static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
             if (__builtin_available(macOS 14.2, *)) {
 #endif
                 if (Z_TYPE_P(zval) != IS_LONG) {
-                    zend_type_error("explain mode must be of type int");
+                    zend_type_error("explain mode must be of type int, %s given", zend_zval_value_name(zval));
                     return 0;
                 }
                 if (Z_LVAL_P(zval) < 0 || Z_LVAL_P(zval) > 2) {
