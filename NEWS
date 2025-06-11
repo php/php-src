@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.3.23
 
 - Core:
+  . Fixed GH-18833 (use after free during destruction).
+    (Daniil Gentili)
   . Fixed GH-18695 (zend_ast_export() - float number is not preserved).
     (Oleg Efimov)
 
