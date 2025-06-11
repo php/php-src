@@ -87,6 +87,10 @@ extern "C" {
 
 
 
+extern const URI_CHAR * const URI_FUNC(SafeToPointTo);
+
+
+
 /**
  * Specifies a range of characters within a string.
  * The range includes all characters from <c>first</c>
@@ -199,6 +203,9 @@ typedef struct URI_TYPE(QueryListStruct) {
 
 	struct URI_TYPE(QueryListStruct) * next; /**< Pointer to the next key/value pair in the list, can be NULL if last already */
 } URI_TYPE(QueryList); /**< @copydoc UriQueryListStructA */
+
+
+URI_PUBLIC UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri);
 
 
 
