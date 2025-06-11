@@ -24,9 +24,6 @@ void *uriparser_parse_uri(const zend_string *uri_str, const void *base_url, zval
 static void uriparser_free_uri(void *uri);
 static void throw_invalid_uri_exception(void);
 
-HashTable uriparser_property_handlers;
-UriMemoryManager uriparser_memory_manager;
-
 static void uriparser_copy_text_range(UriTextRangeA *text_range, UriTextRangeA *new_text_range, bool use_safe)
 {
 	if (text_range->first == NULL || text_range->afterLast == NULL || (text_range->first > text_range->afterLast && !use_safe)) {
@@ -99,34 +96,43 @@ static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri) // TODO add to uripar
 
 static zend_result uriparser_normalize_uri(UriUriA *uriparser_uri)
 {
-	if (uriNormalizeSyntaxExMmA(uriparser_uri, (unsigned int)-1, &uriparser_memory_manager) != URI_SUCCESS) {
+	if (uriNormalizeSyntaxExA(uriparser_uri, (unsigned int)-1) != URI_SUCCESS) {
 		return FAILURE;
 	}
 
 	return SUCCESS;
 }
 
-#define URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode) do { \
-	if (read_mode == URI_COMPONENT_READ_RAW) { \
-		uriparser_uri = (UriUriA *) uriparser_uris->uri; \
-	} else if (read_mode == URI_COMPONENT_READ_NORMALIZED_UNICODE || read_mode == URI_COMPONENT_READ_NORMALIZED_ASCII) { \
-		if (uriparser_uris->normalized_uri == NULL) { \
-			uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri); \
-			if (uriparser_normalize_uri(uriparser_uris->normalized_uri) == FAILURE) { \
-				return FAILURE; \
-			} \
-		} \
-		uriparser_uri = uriparser_uris->normalized_uri; \
-	} else { \
-		ZEND_UNREACHABLE(); \
-	} \
-} while (0)
+static UriUriA *uriparser_read_uri(uriparser_uris_t *uriparser_uris, uri_component_read_mode_t read_mode)
+{
+	switch (read_mode) {
+		case URI_COMPONENT_READ_RAW:
+			return uriparser_uris->uri;
+		case URI_COMPONENT_READ_NORMALIZED_ASCII:
+			ZEND_FALLTHROUGH;
+		case URI_COMPONENT_READ_NORMALIZED_UNICODE:
+			if (uriparser_uris->normalized_uri == NULL) {
+				uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri);
+				if (uriparser_normalize_uri(uriparser_uris->normalized_uri) == FAILURE) {
+					uriFreeUriMembersA(uriparser_uris->normalized_uri);
+					efree(uriparser_uris->normalized_uri);
+					uriparser_uris->normalized_uri = NULL;
+
+					return NULL;
+				}
+			}
+
+			return uriparser_uris->normalized_uri;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
 
 static zend_result uriparser_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri;
-	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->scheme.first != NULL && uriparser_uri->scheme.afterLast != NULL) {
 		zend_string *str = zend_string_init(uriparser_uri->scheme.first, uriparser_uri->scheme.afterLast - uriparser_uri->scheme.first, false);
@@ -140,9 +146,10 @@ static zend_result uriparser_read_scheme(const uri_internal_t *internal_uri, uri
 
 zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri;
-	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
 		ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, uriparser_uri->userInfo.afterLast - uriparser_uri->userInfo.first);
@@ -155,14 +162,17 @@ zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_comp
 
 static zend_result uriparser_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri;
-	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
-		char *c = strchr(uriparser_uri->userInfo.first, ':');
-		if (c == NULL && uriparser_uri->userInfo.afterLast - uriparser_uri->userInfo.first > 0) {
-			ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, uriparser_uri->userInfo.afterLast - uriparser_uri->userInfo.first);
+		size_t length = uriparser_uri->userInfo.afterLast - uriparser_uri->userInfo.first;
+		char *c = memchr(uriparser_uri->userInfo.first, ':', length);
+
+		if (c == NULL && length > 0) {
+			ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, length);
 		} else if (c != NULL && c - uriparser_uri->userInfo.first > 0) {
 			ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, c - uriparser_uri->userInfo.first);
 		} else {
@@ -177,12 +187,14 @@ static zend_result uriparser_read_username(const uri_internal_t *internal_uri, u
 
 static zend_result uriparser_read_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri;
-	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
-		char *c = strchr(uriparser_uri->userInfo.first, ':');
+		const char *c = memchr(uriparser_uri->userInfo.first, ':', uriparser_uri->userInfo.afterLast - uriparser_uri->userInfo.first);
+
 		if (c != NULL && uriparser_uri->userInfo.afterLast - c - 1 > 0) {
 			ZVAL_STRINGL(retval, c + 1, uriparser_uri->userInfo.afterLast - c - 1);
 		} else {
@@ -197,9 +209,10 @@ static zend_result uriparser_read_password(const uri_internal_t *internal_uri, u
 
 static zend_result uriparser_read_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri;
-	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL && uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first > 0) {
 		if (uriparser_uri->hostData.ip6 != NULL) {
@@ -209,7 +222,7 @@ static zend_result uriparser_read_host(const uri_internal_t *internal_uri, uri_c
 			smart_str_appendl(&host_str, uriparser_uri->hostText.first, uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first);
 			smart_str_appendc(&host_str, ']');
 
-			ZVAL_STR(retval, smart_str_extract(&host_str));
+			ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 		} else {
 			ZVAL_STRINGL(retval, uriparser_uri->hostText.first, uriparser_uri->hostText.afterLast - uriparser_uri->hostText.first);
 		}
@@ -236,26 +249,27 @@ static zend_result uriparser_read_port(const uri_internal_t *internal_uri, uri_c
 
 static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri;
-	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->pathHead != NULL) {
 		const UriPathSegmentA *p;
 		smart_str str = {0};
 
 		if (uriparser_uri->absolutePath || uriIsHostSetA(uriparser_uri)) {
-			smart_str_appends(&str, "/");
+			smart_str_appendc(&str, '/');
 		}
 
-		smart_str_appendl(&str, uriparser_uri->pathHead->text.first, (int) ((uriparser_uri->pathHead->text).afterLast - (uriparser_uri->pathHead->text).first));
+		smart_str_appendl(&str, uriparser_uri->pathHead->text.first, (size_t) ((uriparser_uri->pathHead->text).afterLast - (uriparser_uri->pathHead->text).first));
 
 		for (p = uriparser_uri->pathHead->next; p != NULL; p = p->next) {
-			smart_str_appends(&str, "/");
+			smart_str_appendc(&str, '/');
 			smart_str_appendl(&str, p->text.first, (int) ((p->text).afterLast - (p->text).first));
 		}
 
-		ZVAL_STR(retval, smart_str_extract(&str));
+		ZVAL_NEW_STR(retval, smart_str_extract(&str));
 	} else if (uriparser_uri->absolutePath) {
 		ZVAL_CHAR(retval, '/');
 	} else {
@@ -267,9 +281,10 @@ static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_c
 
 static zend_result uriparser_read_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri;
-	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->query.first != NULL && uriparser_uri->query.afterLast != NULL) {
 		ZVAL_STRINGL(retval, uriparser_uri->query.first, uriparser_uri->query.afterLast - uriparser_uri->query.first);
@@ -282,9 +297,10 @@ static zend_result uriparser_read_query(const uri_internal_t *internal_uri, uri_
 
 static zend_result uriparser_read_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) internal_uri->uri;
-	UriUriA *uriparser_uri;
-	URIPARSER_READ_URI(uriparser_uri, uriparser_uris, read_mode);
+	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	if (UNEXPECTED(uriparser_uri == NULL)) {
+		return FAILURE;
+	}
 
 	if (uriparser_uri->fragment.first != NULL && uriparser_uri->fragment.afterLast != NULL) {
 		ZVAL_STRINGL(retval, uriparser_uri->fragment.first, uriparser_uri->fragment.afterLast - uriparser_uri->fragment.first);
@@ -307,20 +323,12 @@ static void *uriparser_calloc(UriMemoryManager *memory_manager, size_t nmemb, si
 
 static void *uriparser_realloc(UriMemoryManager *memory_manager, void *ptr, size_t size)
 {
-	return realloc(ptr, size);
+	return erealloc(ptr, size);
 }
 
 static void *uriparser_reallocarray(UriMemoryManager *memory_manager, void *ptr, size_t nmemb, size_t size)
 {
-	const size_t total_size = nmemb * size;
-
-	/* check for unsigned overflow */
-	if ((nmemb != 0) && (total_size / nmemb != size)) {
-		errno = ENOMEM;
-		return NULL;
-	}
-
-	return erealloc(ptr, total_size);
+	return safe_erealloc(ptr, nmemb, size, 0);
 }
 
 static void uriparser_free(UriMemoryManager *memory_manager, void *ptr)
@@ -328,17 +336,13 @@ static void uriparser_free(UriMemoryManager *memory_manager, void *ptr)
 	efree(ptr);
 }
 
-zend_result uriparser_request_init(void)
+void uriparser_module_init(void)
 {
-	uriparser_memory_manager.calloc = uriparser_calloc;
-	uriparser_memory_manager.malloc = uriparser_malloc;
-	uriparser_memory_manager.realloc = uriparser_realloc;
-	uriparser_memory_manager.reallocarray = uriparser_reallocarray;
-	uriparser_memory_manager.free = uriparser_free;
-
-	zend_hash_init(&uriparser_property_handlers, 8, NULL, NULL, true);
-
-	return SUCCESS;
+	defaultMemoryManager.malloc = uriparser_malloc;
+	defaultMemoryManager.calloc = uriparser_calloc;
+	defaultMemoryManager.realloc = uriparser_realloc;
+	defaultMemoryManager.reallocarray = uriparser_reallocarray;
+	defaultMemoryManager.free = uriparser_free;
 }
 
 static uriparser_uris_t *uriparser_create_uris(
@@ -357,16 +361,7 @@ static uriparser_uris_t *uriparser_create_uris(
 
 static void throw_invalid_uri_exception(void)
 {
-	zval exception;
-
-	object_init_ex(&exception, uri_invalid_uri_exception_ce);
-
-	zval value;
-	ZVAL_STRING(&value, "URI parsing failed");
-	zend_update_property_ex(uri_whatwg_invalid_url_exception_ce, Z_OBJ(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
-	zval_ptr_dtor_str(&value);
-
-	zend_throw_exception_object(&exception);
+	zend_throw_exception(uri_invalid_uri_exception_ce, "URI parsing failed", 0);
 }
 
 void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t *uriparser_base_urls, bool silent)
@@ -376,7 +371,7 @@ void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t 
 	/* uriparser keeps the originally passed in string, while lexbor may allocate a new one. */
 	zend_string *original_uri_str = zend_string_init(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), false);
 	if (ZSTR_LEN(original_uri_str) == 0 ||
-		uriParseSingleUriExMmA(uriparser_uri, ZSTR_VAL(original_uri_str), ZSTR_VAL(original_uri_str) + ZSTR_LEN(original_uri_str), NULL, &uriparser_memory_manager) != URI_SUCCESS
+		uriParseSingleUriExA(uriparser_uri, ZSTR_VAL(original_uri_str), ZSTR_VAL(original_uri_str) + ZSTR_LEN(original_uri_str), NULL) != URI_SUCCESS
 	) {
 		efree(uriparser_uri);
 		zend_string_release_ex(original_uri_str, false);
@@ -395,11 +390,11 @@ void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t 
 
 	UriUriA *absolute_uri = emalloc(sizeof(UriUriA));
 
-	if (uriAddBaseUriExMmA(absolute_uri, uriparser_uri, uriparser_base_url, URI_RESOLVE_STRICTLY, &uriparser_memory_manager) != URI_SUCCESS) {
+	if (uriAddBaseUriExA(absolute_uri, uriparser_uri, uriparser_base_url, URI_RESOLVE_STRICTLY) != URI_SUCCESS) {
 		zend_string_release_ex(original_uri_str, false);
-		uriFreeUriMembersMmA(uriparser_uri, &uriparser_memory_manager);
+		uriFreeUriMembersA(uriparser_uri);
 		efree(uriparser_uri);
-		uriFreeUriMembersMmA(uriparser_base_url, &uriparser_memory_manager);
+		uriFreeUriMembersA(uriparser_base_url);
 		efree(uriparser_base_url);
 		efree(absolute_uri);
 
@@ -412,9 +407,9 @@ void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t 
 
 	/* TODO fix freeing: if the following code runs, then we'll have use-after-free-s because uriparser doesn't
 	   copy the input. If we don't run the following code, then we'll have memory leaks...
-	uriFreeUriMembersMmA(uriparser_base_url, &uriparser_memory_manager);
+	uriFreeUriMembersA(uriparser_base_url);
 	efree(uriparser_base_url);
-	uriFreeUriMembersMmA(uriparser_uri, &uriparser_memory_manager);
+	uriFreeUriMembersA(uriparser_uri);
 	efree(uriparser_uri);
 	 */
 
@@ -462,12 +457,12 @@ static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t 
 
 	zend_string *uri_string = zend_string_alloc(charsRequired - 1, false);
 	if (uriToStringA(ZSTR_VAL(uri_string), uriparser_uri, charsRequired, NULL) != URI_SUCCESS) {
-		zend_string_release(uri_string);
+		zend_string_efree(uri_string);
 		return NULL;
 	}
 
 	if (exclude_fragment) {
-		char *pos = strrchr(ZSTR_VAL(uri_string), '#');
+		const char *pos = zend_memrchr(ZSTR_VAL(uri_string), '#', ZSTR_LEN(uri_string));
 		if (pos != NULL) {
 			uri_string = zend_string_truncate(uri_string, (pos - ZSTR_VAL(uri_string)), false);
 		}
@@ -486,7 +481,7 @@ static void uriparser_free_uri(void *uri)
 			uriparser_uris->uri_str = NULL;
 		}
 
-		uriFreeUriMembersMmA(uriparser_uris->uri, &uriparser_memory_manager);
+		uriFreeUriMembersA(uriparser_uris->uri);
 		efree(uriparser_uris->uri);
 		uriparser_uris->uri = NULL;
 	}
@@ -498,7 +493,7 @@ static void uriparser_free_uri(void *uri)
 			uriparser_uris->normalized_uri_str = NULL;
 		}
 
-		uriFreeUriMembersMmA(uriparser_uris->normalized_uri, &uriparser_memory_manager);
+		uriFreeUriMembersA(uriparser_uris->normalized_uri);
 		efree(uriparser_uris->normalized_uri);
 		uriparser_uris->normalized_uri = NULL;
 	}
