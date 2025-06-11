@@ -15,10 +15,12 @@ $db = new Pdo\Sqlite('sqlite::memory:');
 $db->query('CREATE TABLE test_explain (a string);');
 $stmt = $db->prepare('INSERT INTO test_explain VALUES ("first insert"), ("second_insert")');
 $stmt->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN);
+var_dump($stmt->getAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT) == Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN);
 $r = $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 $stmts = $db->prepare('SELECT * FROM test_explain');
 $stmts->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN);
+var_dump($stmt->getAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT) == Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN);
 $r = $stmts->execute();
 var_dump($stmts->fetchAll(PDO::FETCH_ASSOC));
 
@@ -54,8 +56,11 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage(), PHP_EOL;
 }
+
+var_dump($stmts->getAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT) == Pdo\Sqlite::EXPLAIN_MODE_PREPARED);
 ?>
 --EXPECT--
+bool(true)
 array(16) {
   [0]=>
   array(8) {
@@ -362,6 +367,7 @@ array(16) {
     NULL
   }
 }
+bool(false)
 array(1) {
   [0]=>
   array(4) {
@@ -391,3 +397,4 @@ explain mode must be of type int, string given
 explain mode must be of type int, Duh given
 explain mode must be one of the EXPLAIN_MODE_* constants
 explain mode must be one of the EXPLAIN_MODE_* constants
+bool(true)
