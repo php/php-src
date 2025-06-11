@@ -117,8 +117,6 @@ bool bc_is_zero(bc_num num);
 
 bool bc_is_zero_for_scale(bc_num num, size_t scale);
 
-bool bc_is_near_zero(bc_num num, size_t scale);
-
 bool bc_is_neg(bc_num num);
 
 void bc_rm_trailing_zeros(bc_num num);
