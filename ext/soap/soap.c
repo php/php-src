@@ -50,10 +50,12 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
 
 static void clear_soap_fault(zval *obj);
 static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *name, zend_string *lang);
+static void add_soap_fault_en(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
 static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, zend_string *lang);
+static void add_soap_fault_ex_en(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
 static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, zend_string *name, zend_string *lang);
-static ZEND_NORETURN void soap_server_fault_en(char* code, char* string, char *actor, zval* details, zend_string *name);
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr);
+static ZEND_NORETURN void soap_server_fault_en(char* code, char* string, char *actor, zval* details, zend_string *name);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, zend_ulong index, int);
 static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t function_name_length);
@@ -1253,10 +1255,10 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 		if (service->send_errors) {
 			zval rv;
 			zend_string *msg = zval_get_string(zend_read_property_ex(zend_ce_error, Z_OBJ(exception_object), ZSTR_KNOWN(ZEND_STR_MESSAGE), /* silent */ false, &rv));
-			add_soap_fault_ex(&exception_object, this_ptr, "Server", ZSTR_VAL(msg), NULL, NULL, SOAP_GLOBAL(lang_en));
+			add_soap_fault_ex_en(&exception_object, this_ptr, "Server", ZSTR_VAL(msg), NULL, NULL);
 			zend_string_release_ex(msg, 0);
 		} else {
-			add_soap_fault_ex(&exception_object, this_ptr, "Server", "Internal Error", NULL, NULL, SOAP_GLOBAL(lang_en));
+			add_soap_fault_ex_en(&exception_object, this_ptr, "Server", "Internal Error", NULL, NULL);
 		}
 		soap_server_fault_ex(function, &exception_object, NULL);
 	}
@@ -1875,7 +1877,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 				code = "Client";
 			}
 
-			add_soap_fault_ex(&fault, &SOAP_GLOBAL(error_object), code, ZSTR_VAL(message), NULL, NULL, SOAP_GLOBAL(lang_en));
+			add_soap_fault_ex_en(&fault, &SOAP_GLOBAL(error_object), code, ZSTR_VAL(message), NULL, NULL);
 			Z_ADDREF(fault);
 			zend_throw_exception_object(&fault);
 			zend_bailout();
@@ -2229,7 +2231,7 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 
 	xmlDocDumpMemory(request, (xmlChar**)&buf, &buf_size);
 	if (!buf) {
-		add_soap_fault(this_ptr, "HTTP", "Error build soap request", NULL, NULL, SOAP_GLOBAL(lang_en));
+		add_soap_fault_en(this_ptr, "HTTP", "Error build soap request", NULL, NULL);
 		return false;
 	}
 
@@ -2259,7 +2261,7 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_error)) {
 				/* Programmer error in __doRequest() implementation, let it bubble up. */
 			} else if (Z_TYPE_P(Z_CLIENT_SOAP_FAULT_P(this_ptr)) != IS_OBJECT) {
-				add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() returned non string value", NULL, NULL, SOAP_GLOBAL(lang_en));
+				add_soap_fault_en(this_ptr, "Client", "SoapClient::__doRequest() returned non string value", NULL, NULL);
 			}
 			ret = false;
 		} else if (Z_TYPE_P(trace) == IS_TRUE) {
@@ -2419,15 +2421,15 @@ static void do_soap_call(zend_execute_data *execute_data,
 				smart_str_append(&error,function);
 	 			smart_str_appends(&error,"\") is not a valid method for this service");
 	 			smart_str_0(&error);
-				add_soap_fault(this_ptr, "Client", ZSTR_VAL(error.s), NULL, NULL, SOAP_GLOBAL(lang_en));
+				add_soap_fault_en(this_ptr, "Client", ZSTR_VAL(error.s), NULL, NULL);
 				smart_str_free(&error);
 			}
 		} else {
 			zval *uri = Z_CLIENT_URI_P(this_ptr);
 			if (Z_TYPE_P(uri) != IS_STRING) {
-				add_soap_fault(this_ptr, "Client", "Error finding \"uri\" property", NULL, NULL, SOAP_GLOBAL(lang_en));
+				add_soap_fault_en(this_ptr, "Client", "Error finding \"uri\" property", NULL, NULL);
 			} else if (location == NULL) {
-				add_soap_fault(this_ptr, "Client", "Error could not find \"location\" property", NULL, NULL, SOAP_GLOBAL(lang_en));
+				add_soap_fault_en(this_ptr, "Client", "Error could not find \"location\" property", NULL, NULL);
 			} else {
 				if (call_uri == NULL) {
 					call_uri = Z_STR_P(uri);
@@ -2464,7 +2466,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 			if (Z_TYPE_P(fault) == IS_OBJECT) {
 				ZVAL_COPY(return_value, fault);
 			} else {
-				add_soap_fault_ex(return_value, this_ptr, "Client", "Unknown Error", NULL, NULL, SOAP_GLOBAL(lang_en));
+				add_soap_fault_ex_en(return_value, this_ptr, "Client", "Unknown Error", NULL, NULL);
 				Z_ADDREF_P(return_value);
 			}
 		} else {
@@ -2929,12 +2931,22 @@ static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fa
 }
 /* }}} */
 
+static void add_soap_fault_ex_en(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail)
+{
+	add_soap_fault_ex(fault, obj, fault_code, fault_string, fault_actor, fault_detail, SOAP_GLOBAL(lang_en));
+}
+
 void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, zend_string *lang) /* {{{ */
 {
 	zval fault;
 	add_soap_fault_ex(&fault, obj, fault_code, fault_string, fault_actor, fault_detail, lang);
 }
 /* }}} */
+
+static void add_soap_fault_en(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail)
+{
+	add_soap_fault(obj, fault_code, fault_string, fault_actor, fault_detail, SOAP_GLOBAL(lang_en));
+}
 
 static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *name, zend_string *lang) /* {{{ */
 {
