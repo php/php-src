@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed GH-18662 (fpm_get_status segfault). (txuna)
 
+- Hash:
+  . Fixed bug GH-14551 (PGO build fails with xxhash). (nielsdos)
+
 - Intl:
   . Fix memory leak in intl_datetime_decompose() on failure. (nielsdos)
   . Fix memory leak in locale lookup on failure. (nielsdos)
