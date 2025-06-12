@@ -657,7 +657,7 @@ static void soap_fault_dtor_properties(zval *obj)
 	ZVAL_NULL(Z_FAULT_DETAIL_P(obj));
 	ZVAL_NULL(Z_FAULT_NAME_P(obj));
 	ZVAL_NULL(Z_FAULT_HEADERFAULT_P(obj));
-	ZVAL_NULL(Z_FAULT_LANG_P(obj));
+	ZVAL_EMPTY_STRING(Z_FAULT_LANG_P(obj));
 }
 
 /* {{{ SoapFault constructor */
@@ -1724,11 +1724,11 @@ PHP_METHOD(SoapServer, fault)
 	size_t code_len, string_len, actor_len = 0;
 	zval* details = NULL;
 	zend_string *name = NULL;
-	zend_string *lang = NULL;
+	zend_string *lang = ZSTR_EMPTY_ALLOC();
 	soapServicePtr service;
 	xmlCharEncodingHandlerPtr old_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|szSS!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|szSS",
 	    &code, &code_len, &string, &string_len, &actor, &actor_len, &details,
 	    &name, &lang) == FAILURE) {
 		RETURN_THROWS();
@@ -3754,7 +3754,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 
 				/* xml:lang attribute is required for <Reason> in SOAP 1.2 */
 				tmp = Z_FAULT_LANG_P(ret);
-				zend_string *lang = Z_ISNULL_P(tmp) ? ZSTR_EMPTY_ALLOC() : Z_STR_P(tmp);
+				zend_string *lang = Z_STR_P(tmp);
 				xmlNodeSetLang(node, BAD_CAST ZSTR_VAL(lang));
 			}
 			detail_name = SOAP_1_2_ENV_NS_PREFIX":Detail";
