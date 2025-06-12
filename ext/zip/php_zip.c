@@ -3037,13 +3037,11 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 		/* Cancel if an exception has been thrown */
 		return -1;
 	}
-	bool failed = false;
-	zval *cb_retval_ptr = &cb_retval;
-	ZVAL_DEREF(cb_retval_ptr);
-	zend_long retval = zval_try_get_long(cb_retval_ptr, &failed);
+	bool failed;
+	zend_long retval = zval_try_get_long(&cb_retval, &failed);
 	if (failed) {
 		zend_type_error("Return value of callback provided to ZipArchive::registerCancelCallback()"
-			" must be of type int, %s returned", zend_zval_value_name(cb_retval_ptr));
+			" must be of type int, %s returned", zend_zval_value_name(&cb_retval));
 		zval_ptr_dtor(&cb_retval);
 		return -1;
 	}
