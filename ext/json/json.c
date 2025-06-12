@@ -158,9 +158,7 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 		case PHP_JSON_ERROR_CTRL_CHAR:
 			return "Control character error, possibly incorrectly encoded";
 		case PHP_JSON_ERROR_SYNTAX:
-			char *msg;
-			spprintf(&msg, 0, "Syntax error near character %zu", JSON_G(error_pos));
-			return msg;
+			return "Syntax error";
 		case PHP_JSON_ERROR_UTF8:
 			return "Malformed UTF-8 characters, possibly incorrectly encoded";
 		case PHP_JSON_ERROR_RECURSION:
@@ -375,11 +373,13 @@ PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	char *msg = php_json_get_error_msg(JSON_G(error_code));
-    RETVAL_STRING(msg);
 	if (JSON_G(error_code) == PHP_JSON_ERROR_SYNTAX) {
-        efree(msg);
-    }
-	//original:RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
+        char *msg;
+		spprintf(&msg, 0, "Syntax error near character %zu", JSON_G(error_pos));
+		RETVAL_STRING(msg);
+		efree(msg);
+    } else {
+		RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
+	}
 }
 /* }}} */
