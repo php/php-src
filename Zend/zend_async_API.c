@@ -1055,6 +1055,7 @@ zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object
 ZEND_API void
 zend_async_callbacks_notify_and_close(zend_async_event_t *event, void *result, zend_object *exception)
 {
+	event->stop(event);
 	ZEND_ASYNC_EVENT_SET_CLOSED(event);
 	zend_async_callbacks_notify(event, result, exception, false);
 }
