@@ -390,6 +390,10 @@ PHP 8.5 UPGRADE NOTES
   . ReflectionConstant::getAttributes() was introduced.
     RFC: https://wiki.php.net/rfc/attributes-on-constants
 
+- Sqlite:
+  . Sqlite3Stmt::busy to check if a statement had been fetched
+    but not completely.
+
 - Standard:
   . Added array_first() and array_last().
     RFC: https://wiki.php.net/rfc/array_first_last
