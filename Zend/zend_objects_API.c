@@ -97,33 +97,17 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 	end = objects->object_buckets + 1;
 	obj_ptr = objects->object_buckets + objects->top;
 
-	if (fast_shutdown) {
-		do {
-			obj_ptr--;
-			obj = *obj_ptr;
-			if (IS_OBJ_VALID(obj)) {
-				if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
-					GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
-					if (obj->handlers->free_obj != zend_object_std_dtor) {
-						GC_ADDREF(obj);
-						obj->handlers->free_obj(obj);
-					}
-				}
+	do {
+		obj_ptr--;
+		obj = *obj_ptr;
+		if (IS_OBJ_VALID(obj)) {
+			if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+				GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
+				GC_ADDREF(obj);
+				obj->handlers->free_obj(obj);
 			}
-		} while (obj_ptr != end);
-	} else {
-		do {
-			obj_ptr--;
-			obj = *obj_ptr;
-			if (IS_OBJ_VALID(obj)) {
-				if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
-					GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
-					GC_ADDREF(obj);
-					obj->handlers->free_obj(obj);
-				}
-			}
-		} while (obj_ptr != end);
-	}
+		}
+	} while (obj_ptr != end);
 }
 
 
