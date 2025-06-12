@@ -240,6 +240,10 @@ PHP                                                                        NEWS
   . Fix overall theorical overflows on zend_string buffer allocations.
     (David Carlier/nielsdos)
 
+- Sqlite:
+  . Added Sqlite3Stmt::busy to check if a statement is still being executed.
+    (David Carlier)
+
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).
