@@ -582,6 +582,8 @@ PHP 8.5 UPGRADE NOTES
   . Improved performance of array functions with callbacks
     (array_find, array_filter, array_map, usort, ...).
   . Improved performance of urlencode() and rawurlencode().
+  . Improved unpack() performance with nameless repetitions by avoiding
+    creating temporary strings and reparsing them.
 
 - XMLReader:
   . Improved property access performance.
