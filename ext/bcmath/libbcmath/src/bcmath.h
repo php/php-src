@@ -123,12 +123,6 @@ void bc_rm_trailing_zeros(bc_num num);
 
 bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min);
 
-#define bc_add_ex(n1, n2, result, scale_min) do {	\
-	bc_num add_ex = bc_add(n1, n2, scale_min);		\
-	bc_free_num (result);                           \
-	*(result) = add_ex;                             \
-} while (0)
-
 bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min);
 
 #define bc_sub_ex(n1, n2, result, scale_min) do {	\
@@ -175,8 +169,6 @@ typedef enum {
 raise_mod_status bc_raisemod(bc_num base, bc_num exponent, bc_num mod, bc_num *result, size_t scale);
 
 bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scale);
-
-void bc_raise_bc_exponent(bc_num base, bc_num exponent, bc_num *resul, size_t scale);
 
 bool bc_sqrt(bc_num *num, size_t scale);
 
