@@ -4927,18 +4927,19 @@ PHP_FUNCTION(setlocale)
 	zend_long cat;
 	zval *args = NULL;
 	uint32_t num_args;
+	ALLOCA_FLAG(use_heap);
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_LONG(cat)
 		Z_PARAM_VARIADIC('+', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_ARG_USES_STRICT_TYPES()) {
-		for (uint32_t i = 0; i < num_args; i++) {
-			if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && Z_TYPE(args[i]) != IS_STRING)) {
-				zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING, &args[i]);
-				RETURN_THROWS();
-			}
+	zend_string **strings = do_alloca(sizeof(zend_string *) * num_args, use_heap);
+
+	for (uint32_t i = 0; i < num_args; i++) {
+		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], false, i + 2))) {
+			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING, &args[i]);
+			goto out;
 		}
 	}
 
@@ -4948,24 +4949,29 @@ PHP_FUNCTION(setlocale)
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), elem) {
 				zend_string *result = try_setlocale_zval(cat, elem);
 				if (EG(exception)) {
-					RETURN_THROWS();
+					goto out;
 				}
 				if (result) {
-					RETURN_STR(result);
+					RETVAL_STR(result);
+					goto out;
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			zend_string *result = try_setlocale_zval(cat, &args[i]);
+			zend_string *result = try_setlocale_str(cat, strings[i]);
 			if (EG(exception)) {
-				RETURN_THROWS();
+				goto out;
 			}
 			if (result) {
-				RETURN_STR(result);
+				RETVAL_STR(result);
+				goto out;
 			}
 		}
 	}
 
-	RETURN_FALSE;
+	RETVAL_FALSE;
+
+out:
+	free_alloca(strings, use_heap);
 }
 /* }}} */
 

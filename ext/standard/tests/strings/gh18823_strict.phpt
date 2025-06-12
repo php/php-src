@@ -1,5 +1,5 @@
 --TEST--
-GH-18823 (setlocale's 2nd and 3rd argument ignores strict_types)
+GH-18823 (setlocale's 2nd and 3rd argument ignores strict_types) - strict mode
 --FILE--
 <?php
 declare(strict_types=1);
