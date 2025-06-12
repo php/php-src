@@ -19,7 +19,7 @@ var_dump($failures);
 
 ?>
 --EXPECTF--
-URL parsing failed
+The specified URI is malformed (PortInvalid)
 array(%d) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
