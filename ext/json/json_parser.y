@@ -305,8 +305,6 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 	if (!parser->scanner.errcode) {
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
 		parser->scanner.errpos = (size_t)(parser->scanner.str_start - parser->scanner.input_start);
-		fprintf(stderr, "End of input: errpos=%zu, cursor=%p, str_start=%p\n", parser->scanner.errpos, parser->scanner.cursor, parser->scanner.str_start);
-		//parser->scanner.errpos = (size_t)(parser->scanner.cursor - parser->scanner.str_start);
 	}
 }
 
@@ -359,13 +357,6 @@ PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 	parser->max_depth = max_depth;
 	parser->return_value = return_value;
 	memcpy(&parser->methods, parser_methods, sizeof(php_json_parser_methods));
-
-	if (!str || str_len == 0) {
-		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
-		parser->scanner.errpos = 0;
-	}
-
-	fprintf(stderr, "Init: str_start=%p, cursor=%p, limit=%p, str_len=%zu\n", parser->scanner.str_start, parser->scanner.cursor, parser->scanner.limit, str_len);
 }
 
 PHP_JSON_API void php_json_parser_init(php_json_parser *parser,

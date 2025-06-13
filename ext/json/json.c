@@ -179,6 +179,29 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 }
 /* }}} */
 
+
+char *php_json_get_error_msg_wrapper(php_json_error_code error_code) /* {{{ */
+{
+	char *final_message;
+	const char *error_message = php_json_get_error_msg(error_code);
+
+	switch(error_code) {
+		case PHP_JSON_ERROR_SYNTAX:
+		case PHP_JSON_ERROR_UTF8:
+		case PHP_JSON_ERROR_CTRL_CHAR:
+		case PHP_JSON_ERROR_UNSUPPORTED_TYPE:
+		case PHP_JSON_ERROR_INVALID_PROPERTY_NAME:
+		case PHP_JSON_ERROR_UTF16:			
+			spprintf(&final_message, 0, "%s near character %zu",error_message, JSON_G(error_pos));
+			break;
+		default:
+			spprintf(&final_message, 0, "%s", error_message);
+	}
+
+	return final_message;
+}
+/* }}} */
+
 PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
@@ -373,13 +396,8 @@ PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (JSON_G(error_code) == PHP_JSON_ERROR_SYNTAX) {
-        char *msg;
-		spprintf(&msg, 0, "Syntax error near character %zu", JSON_G(error_pos));
-		RETVAL_STRING(msg);
-		efree(msg);
-    } else {
-		RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
-	}
+	char *msg = php_json_get_error_msg_wrapper(JSON_G(error_code));
+	RETVAL_STRING(msg);
+	efree(msg);
 }
 /* }}} */

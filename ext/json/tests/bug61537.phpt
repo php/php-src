@@ -24,14 +24,14 @@ var_dump(json_last_error(), json_last_error_msg());
 --EXPECT--
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
 string(4) "null"
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
 
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
 string(4) "null"
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"

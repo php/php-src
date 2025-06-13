@@ -26,17 +26,17 @@ object(JsonException)#1 (7) {
   ["code":protected]=>
   int(5)
   ["file":protected]=>
-  string(%d) "%s"
+  string(67) "/home/usuario/dev/php-src/ext/json/tests/json_encode_exceptions.php"
   ["line":protected]=>
-  int(%d)
+  int(4)
   ["trace":"Exception":private]=>
   array(1) {
     [0]=>
     array(4) {
       ["file"]=>
-      string(%d) "%s"
+      string(67) "/home/usuario/dev/php-src/ext/json/tests/json_encode_exceptions.php"
       ["line"]=>
-      int(%d)
+      int(4)
       ["function"]=>
       string(11) "json_encode"
       ["args"]=>
@@ -53,4 +53,4 @@ object(JsonException)#1 (7) {
 }
 string(4) "null"
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
