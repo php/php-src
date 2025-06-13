@@ -1351,7 +1351,6 @@ static void php_session_remove_cookie(void) {
 
 static zend_result php_session_send_cookie(void)
 {
-	sapi_header_line header_line = {0};
 	smart_str ncookie = {0};
 	zend_string *date_fmt = NULL;
 	zend_string *e_id;
@@ -1417,9 +1416,9 @@ static zend_result php_session_send_cookie(void)
 	smart_str_0(&ncookie);
 
 	php_session_remove_cookie(); /* remove already sent session ID cookie */
-	header_line.line = ZSTR_VAL(ncookie.s);
-	header_line.line_len = ZSTR_LEN(ncookie.s);
-	sapi_header_op(SAPI_HEADER_ADD, &header_line);
+	/*	'replace' must be 0 here, else a previous Set-Cookie
+		header, probably sent with setcookie() will be replaced! */
+	sapi_add_header_ex(estrndup(ZSTR_VAL(ncookie.s), ZSTR_LEN(ncookie.s)), ZSTR_LEN(ncookie.s), 0, 0);
 	smart_str_free(&ncookie);
 
 	return SUCCESS;
