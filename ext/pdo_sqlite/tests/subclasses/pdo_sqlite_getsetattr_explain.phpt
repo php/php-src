@@ -395,6 +395,6 @@ array(2) {
 }
 explain mode must be of type int, string given
 explain mode must be of type int, Duh given
-explain mode must be one of the EXPLAIN_MODE_* constants
-explain mode must be one of the EXPLAIN_MODE_* constants
+explain mode must be one of the Pdo\Sqlite::EXPLAIN_MODE_* constants
+explain mode must be one of the Pdo\Sqlite::EXPLAIN_MODE_* constants
 bool(true)

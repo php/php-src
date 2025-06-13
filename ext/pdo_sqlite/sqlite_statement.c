@@ -431,7 +431,7 @@ static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
                     return 0;
                 }
                 if (Z_LVAL_P(zval) < 0 || Z_LVAL_P(zval) > 2) {
-                    zend_value_error("explain mode must be one of the EXPLAIN_MODE_* constants");
+                    zend_value_error("explain mode must be one of the Pdo\\Sqlite::EXPLAIN_MODE_* constants");
                     return 0;
                 }
                 if (sqlite3_stmt_explain(S->stmt, (int)Z_LVAL_P(zval)) != SQLITE_OK) {
