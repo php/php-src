@@ -668,7 +668,7 @@ PHP_METHOD(SoapFault, __construct)
 	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *fault_code_ns = NULL;
 	size_t fault_string_len, fault_actor_len = 0, fault_code_len = 0;
 	zend_string *name = NULL;
-	zend_string *lang = NULL;
+	zend_string *lang = ZSTR_EMPTY_ALLOC();
 	zval *details = NULL, *headerfault = NULL, *this_ptr;
 	zend_string *code_str;
 	HashTable *code_ht;
@@ -681,7 +681,7 @@ PHP_METHOD(SoapFault, __construct)
 		Z_PARAM_ZVAL_OR_NULL(details)
 		Z_PARAM_STR_OR_NULL(name)
 		Z_PARAM_ZVAL_OR_NULL(headerfault)
-		Z_PARAM_PATH_STR_OR_NULL(lang)
+		Z_PARAM_PATH_STR(lang)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (code_str) {
@@ -1730,7 +1730,7 @@ PHP_METHOD(SoapServer, fault)
 	soapServicePtr service;
 	xmlCharEncodingHandlerPtr old_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|szSS",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|szSP",
 	    &code, &code_len, &string, &string_len, &actor, &actor_len, &details,
 	    &name, &lang) == FAILURE) {
 		RETURN_THROWS();
@@ -2999,9 +2999,7 @@ static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fau
 	if (name != NULL) {
 		ZVAL_STR_COPY(Z_FAULT_NAME_P(obj), name);
 	}
-	if (lang != NULL) {
-		ZVAL_STR_COPY(Z_FAULT_LANG_P(obj), lang);
-	}
+	ZVAL_STR_COPY(Z_FAULT_LANG_P(obj), lang);
 }
 /* }}} */
 

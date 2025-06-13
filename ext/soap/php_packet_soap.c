@@ -177,7 +177,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 	fault = get_node_ex(body->children,"Fault",envelope_ns);
 	if (fault != NULL) {
 		char *faultcode = NULL;
-		zend_string *lang = NULL;
+		zend_string *lang = ZSTR_EMPTY_ALLOC();
 		zend_string *faultstring = NULL, *faultactor = NULL;
 		zval details;
 		xmlNodePtr tmp;
@@ -248,9 +248,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 		if (faultactor) {
 			zend_string_release_ex(faultactor, 0);
 		}
-		if (lang) {
-			zend_string_release_ex(lang, false);
-		}
+		zend_string_release_ex(lang, false);
 		if (Z_REFCOUNTED(details)) {
 			Z_DELREF(details);
 		}
