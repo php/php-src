@@ -42,6 +42,26 @@
 # endif
 #endif
 
+#if defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) && !defined(ZEND_VM_TAIL_CALL_DISPATCH)
+# define ZEND_VM_TAIL_CALL_DISPATCH 1
+# define ZEND_OPCODE_HANDLER_CCONV ZEND_PRESERVE_NONE
+#else
+# undef ZEND_VM_TAIL_CALL_DISPATCH
+# define ZEND_VM_TAIL_CALL_DISPATCH 0
+# define ZEND_OPCODE_HANDLER_CCONV ZEND_FASTCALL
+#endif
+
+#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
+typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_t)(void);
+typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(void);
+#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL
+typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_CCONV *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+#else
+typedef const void* zend_vm_opcode_handler_t;
+typedef const void* zend_vm_opcode_handler_func_t;
+#endif
+
 #define ZEND_VM_OP_SPEC          0x00000001
 #define ZEND_VM_OP_CONST         0x00000002
 #define ZEND_VM_OP_TMPVAR        0x00000004
