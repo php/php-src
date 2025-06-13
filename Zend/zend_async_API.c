@@ -1098,3 +1098,48 @@ zend_async_callbacks_free(zend_async_event_t *event)
 	vector->capacity        = 0;
 	vector->current_iterator = NULL;
 }
+
+///////////////////////////////////////////////////////////////
+/// Socket Listening API Registration
+///////////////////////////////////////////////////////////////
+/* Socket listening stubs */
+static zend_async_listen_event_t* socket_listen_stub(const char *host, int port, int backlog, size_t extra_size)
+{
+	ASYNC_THROW_ERROR("Socket listening API is not enabled");
+	return NULL;
+}
+
+/* Socket listening function pointers */
+ZEND_API zend_async_socket_listen_t zend_async_socket_listen_fn = socket_listen_stub;
+
+/* Registration lock for socket listening */
+static zend_atomic_bool socket_listening_lock = {0};
+static char *socket_listening_module_name = NULL;
+
+ZEND_API bool zend_async_socket_listening_register(
+	char *module,
+	bool allow_override,
+	zend_async_socket_listen_t socket_listen_fn
+)
+{
+	if (zend_atomic_bool_exchange(&socket_listening_lock, 1)) {
+		return false;
+	}
+
+	if (socket_listening_module_name == module) {
+		return true;
+	}
+
+	if (socket_listening_module_name != NULL && false == allow_override) {
+		zend_error(
+			E_CORE_ERROR, "The module %s is trying to override Socket Listening API, which was registered by the module %s.",
+			module, socket_listening_module_name
+		);
+		return false;
+	}
+
+	socket_listening_module_name = module;
+	zend_async_socket_listen_fn = socket_listen_fn;
+
+	return true;
+}

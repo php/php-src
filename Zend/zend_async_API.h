@@ -165,6 +165,8 @@ typedef struct _zend_async_dns_addrinfo_s zend_async_dns_addrinfo_t;
 
 typedef struct _zend_async_exec_event_s zend_async_exec_event_t;
 
+typedef struct _zend_async_listen_event_s zend_async_listen_event_t;
+
 typedef struct _zend_async_task_s zend_async_task_t;
 
 /* Internal context typedefs removed - using direct functions */
@@ -221,6 +223,16 @@ typedef zend_async_exec_event_t* (*zend_async_new_exec_event_t) (
 	const char *cwd,
 	const char *env,
 	size_t extra_size
+);
+
+typedef zend_async_listen_event_t* (*zend_async_socket_listen_t)(
+	const char *host, int port, int backlog, size_t extra_size
+);
+
+typedef int (*zend_async_listen_get_local_address_t)(
+	zend_async_listen_event_t *listen_event,
+	char *host, size_t host_len,
+	int *port
 );
 
 typedef int (* zend_async_exec_t) (
@@ -559,6 +571,15 @@ struct _zend_async_exec_event_s {
 	size_t output_len;
 	char * output_buffer;
 	zval * std_error;
+};
+
+struct _zend_async_listen_event_s {
+	zend_async_event_t base;
+	const char *host;
+	int port;
+	int backlog;
+	zend_socket_t socket_fd;
+	zend_async_listen_get_local_address_t get_local_address;
 };
 
 struct _zend_async_task_s {
@@ -980,6 +1001,10 @@ ZEND_API extern zend_async_new_process_event_t zend_async_new_process_event_fn;
 ZEND_API extern zend_async_new_thread_event_t zend_async_new_thread_event_fn;
 ZEND_API extern zend_async_new_filesystem_event_t zend_async_new_filesystem_event_fn;
 
+/* Socket Listening API */
+
+ZEND_API extern zend_async_socket_listen_t zend_async_socket_listen_fn;
+
 /* DNS API */
 
 ZEND_API extern zend_async_getnameinfo_t zend_async_getnameinfo_fn;
@@ -1035,6 +1060,12 @@ ZEND_API bool zend_async_reactor_register(
 
 ZEND_API void zend_async_thread_pool_register(
 	zend_string *module, bool allow_override, zend_async_queue_task_t queue_task_fn
+);
+
+ZEND_API bool zend_async_socket_listening_register(
+	char *module,
+	bool allow_override,
+	zend_async_socket_listen_t socket_listen_fn
 );
 
 ZEND_API zend_string* zend_coroutine_gen_info(zend_coroutine_t *coroutine, char *zend_coroutine_name);
@@ -1136,6 +1167,12 @@ END_EXTERN_C()
 	zend_async_exec_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, timeout)
 
 #define ZEND_ASYNC_QUEUE_TASK(task) zend_async_queue_task_fn(task)
+
+/* Socket Listening API Macros */
+#define ZEND_ASYNC_SOCKET_LISTEN(host, port, backlog) \
+	zend_async_socket_listen_fn(host, port, backlog, 0)
+#define ZEND_ASYNC_SOCKET_LISTEN_EX(host, port, backlog, extra_size) \
+	zend_async_socket_listen_fn(host, port, backlog, extra_size)
 
 /* Context API Macros */
 #define ZEND_ASYNC_NEW_CONTEXT(parent) zend_async_new_context_fn(parent)
