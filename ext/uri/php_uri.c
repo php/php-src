@@ -846,11 +846,9 @@ static PHP_MINIT_FUNCTION(uri)
 
 	zend_hash_init(&uri_handlers, 4, NULL, NULL, true);
 
-	if (uri_handler_register(&uriparser_uri_handler) == FAILURE) {
+	if (PHP_MINIT(uri_uriparser)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE) {
 		return FAILURE;
 	}
-
-	uriparser_module_init();
 
 	if (uri_handler_register(&lexbor_uri_handler) == FAILURE) {
 		return FAILURE;

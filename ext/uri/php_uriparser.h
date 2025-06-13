@@ -30,7 +30,7 @@ typedef struct uriparser_uris_t {
 	zend_string *normalized_uri_str;
 } uriparser_uris_t;
 
-void uriparser_module_init(void);
+PHP_MINIT_FUNCTION(uri_uriparser);
 
 zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
 
