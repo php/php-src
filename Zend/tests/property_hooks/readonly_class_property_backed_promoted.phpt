@@ -37,4 +37,3 @@ int(42)
 Cannot modify readonly property Test::$prop
 Cannot modify protected(set) readonly property Test::$prop from global scope
 int(42)
-
