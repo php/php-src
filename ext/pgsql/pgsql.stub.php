@@ -13,8 +13,8 @@ namespace {
     /**
      * @var string
      * @cvalue pgsql_libpq_version
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'as it is the same as PGSQL_LIBPQ_VERSION')]
     const PGSQL_LIBPQ_VERSION_STR = UNKNOWN;
 
     /* For connection option */

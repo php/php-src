@@ -15,8 +15,8 @@ $a = filter_var($var, FILTER_SANITIZE_STRING, array("flags" => FILTER_FLAG_STRIP
 echo $a . "\n";
 ?>
 --EXPECTF--
-Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 XYZalert(/ext/filter+bypass/);ABC
 
-Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 XYZalert(/ext/filter+bypass/);ABC
