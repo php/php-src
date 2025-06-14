@@ -905,7 +905,13 @@ try_again:
 			if (zobj->ce->__get && !((*guard) & IN_GET)) {
 				goto call_getter;
 			}
+
+			bool obj_is_freed = GC_REFCOUNT(zobj) == 1;
 			OBJ_RELEASE(zobj);
+			if (UNEXPECTED(obj_is_freed)) {
+				retval = &EG(uninitialized_zval);
+				goto exit;
+			}
 		} else if (zobj->ce->__get && !((*guard) & IN_GET)) {
 			goto call_getter_addref;
 		}
