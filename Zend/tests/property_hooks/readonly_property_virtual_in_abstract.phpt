@@ -1,5 +1,5 @@
 --TEST--
-Virtual readonly property in interface throws
+Hooked properties in abstract classes cannot be readonly
 --FILE--
 <?php
 
@@ -8,4 +8,4 @@ abstract class Test {
 }
 ?>
 --EXPECTF--
-Fatal error: Hooked virtual properties cannot be readonly in %s on line %d
+Fatal error: Hooked properties in abstract classes may not be declared readonly in %s on line %d

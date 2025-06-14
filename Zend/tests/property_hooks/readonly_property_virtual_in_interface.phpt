@@ -1,5 +1,5 @@
 --TEST--
-Virtual readonly property in interface throws
+Interface properties cannot be readonly
 --FILE--
 <?php
 
@@ -8,4 +8,4 @@ interface Test {
 }
 ?>
 --EXPECTF--
-Fatal error: Hooked virtual properties cannot be readonly in %s on line %d
+Fatal error: Interface properties may not be declared readonly in %s on line %d

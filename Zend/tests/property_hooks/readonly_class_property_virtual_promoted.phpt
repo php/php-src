@@ -13,4 +13,4 @@ readonly class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Hooked virtual properties cannot be readonly in %s on line %d
+Fatal error: Hooked virtual properties may not be declared readonly in %s on line %d
