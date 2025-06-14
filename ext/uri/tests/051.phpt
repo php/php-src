@@ -5,6 +5,14 @@ uri
 --FILE--
 <?php
 
+$uri = new Uri\Rfc3986\Uri("https://example.com");
+
+try {
+    $uri->resolve("á");
+} catch (Uri\InvalidUriException $e) {
+    echo $e->getMessage() . "\n";
+}
+
 $url = new Uri\WhatWg\Url("https://example.com");
 
 try {
@@ -20,6 +28,7 @@ var_dump($softErrors);
 
 ?>
 --EXPECTF--
+URI parsing failed
 URL parsing failed
 string(23) "https://example.com/foo"
 array(%d) {
