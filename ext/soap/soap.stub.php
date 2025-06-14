@@ -477,8 +477,9 @@ namespace {
         public mixed $detail = null;
         public ?string $_name = null;
         public mixed $headerfault = null;
+        public string $lang = "";
 
-        public function __construct(array|string|null $code, string $string, ?string $actor = null, mixed $details = null, ?string $name = null, mixed $headerFault = null) {}
+        public function __construct(array|string|null $code, string $string, ?string $actor = null, mixed $details = null, ?string $name = null, mixed $headerFault = null, string $lang = "") {}
 
         public function __toString(): string {}
     }
@@ -502,7 +503,7 @@ namespace {
         public function __construct(?string $wsdl, array $options = []) {}
 
         /** @tentative-return-type */
-        public function fault(string $code, string $string, string $actor = "", mixed $details = null, string $name = ""): void {}
+        public function fault(string $code, string $string, string $actor = "", mixed $details = null, string $name = "", string $lang = ""): void {}
 
         /** @tentative-return-type */
         public function addSoapHeader(SoapHeader $header): void {}
