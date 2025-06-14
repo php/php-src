@@ -192,6 +192,7 @@ typedef enum {					/* Parameter: 			*/
 	SAPI_HEADER_REPLACE,		/* sapi_header_line* 	*/
 	SAPI_HEADER_ADD,			/* sapi_header_line* 	*/
 	SAPI_HEADER_DELETE,			/* sapi_header_line* 	*/
+	SAPI_HEADER_DELETE_PREFIX,		/* sapi_header_line* 	*/
 	SAPI_HEADER_DELETE_ALL,		/* void					*/
 	SAPI_HEADER_SET_STATUS		/* int 					*/
 } sapi_header_op_enum;
@@ -199,7 +200,6 @@ typedef enum {					/* Parameter: 			*/
 BEGIN_EXTERN_C()
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg);
 
-/* Deprecated functions. Use sapi_header_op instead. */
 SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, bool duplicate, bool replace);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1)
 
