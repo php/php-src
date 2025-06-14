@@ -38,6 +38,7 @@
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
 #include "zend_property_hooks.h"
+#include "zend_class_alias.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -1207,7 +1208,7 @@ static zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /*
 }
 /* }}} */
 
-static zend_string *zend_resolve_class_name_ast(zend_ast *ast) /* {{{ */
+zend_string *zend_resolve_class_name_ast(zend_ast *ast) /* {{{ */
 {
 	zval *class_name = zend_ast_get_zval(ast);
 	if (Z_TYPE_P(class_name) != IS_STRING) {
@@ -1875,8 +1876,23 @@ static bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name, zend
 	if (class_name_refers_to_active_ce(class_name, fetch_type)) {
 		cc = zend_hash_find_ptr(&CG(active_class_entry)->constants_table, name);
 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
-		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), class_name);
-		if (ce) {
+		zend_string *lc_key = zend_string_tolower(class_name);
+		zval *ce_or_alias = zend_hash_find(CG(class_table), lc_key);
+		zend_string_release(lc_key);
+
+		if (ce_or_alias) {
+			zend_class_entry *ce;
+			if (Z_TYPE_P(ce_or_alias) == IS_ALIAS_PTR) {
+				zend_class_alias *alias = Z_CLASS_ALIAS_P(ce_or_alias);
+				if (alias->alias_flags & ZEND_ACC_DEPRECATED) {
+					// Cannot evaluate at compile time
+					return 0;
+				}
+				ce = alias->ce;
+			} else {
+				ZEND_ASSERT(Z_TYPE_P(ce_or_alias) == IS_PTR);
+				ce = Z_PTR_P(ce_or_alias);
+			}
 			cc = zend_hash_find_ptr(&ce->constants_table, name);
 		} else {
 			return 0;
@@ -5340,7 +5356,10 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		zend_class_entry *ce = NULL;
 		if (opline->op1_type == IS_CONST) {
 			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op1) + 1);
-			ce = zend_hash_find_ptr(CG(class_table), lcname);
+			zval *ce_or_alias = zend_hash_find(CG(class_table), lcname);
+			if (ce_or_alias) {
+				Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
+			}
 			if (ce) {
 				if (zend_compile_ignore_class(ce, CG(active_op_array)->filename)) {
 					ce = NULL;
@@ -7439,7 +7458,7 @@ static void zend_compile_attributes(
 	zend_internal_attribute *config;
 
 	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t g, i, j;
+	uint32_t g, i;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_ATTRIBUTE_LIST);
 
@@ -7482,68 +7501,13 @@ static void zend_compile_attributes(
 
 			/* Populate arguments */
 			if (args) {
-				ZEND_ASSERT(args->kind == ZEND_AST_ARG_LIST);
-
-				bool uses_named_args = 0;
-				for (j = 0; j < args->children; j++) {
-					zend_ast **arg_ast_ptr = &args->child[j];
-					zend_ast *arg_ast = *arg_ast_ptr;
-
-					if (arg_ast->kind == ZEND_AST_UNPACK) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"Cannot use unpacking in attribute argument list");
-					}
-
-					if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
-						attr->args[j].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
-						arg_ast_ptr = &arg_ast->child[1];
-						uses_named_args = 1;
-
-						for (uint32_t k = 0; k < j; k++) {
-							if (attr->args[k].name &&
-									zend_string_equals(attr->args[k].name, attr->args[j].name)) {
-								zend_error_noreturn(E_COMPILE_ERROR, "Duplicate named parameter $%s",
-									ZSTR_VAL(attr->args[j].name));
-							}
-						}
-					} else if (uses_named_args) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"Cannot use positional argument after named argument");
-					}
-
-					zend_const_expr_to_zval(
-						&attr->args[j].value, arg_ast_ptr, /* allow_dynamic */ true);
-				}
+				zend_attribute_populate_arguments(attr, args);
 			}
 		}
 	}
 
 	if (*attributes != NULL) {
-		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
-		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
-			if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
-				continue;
-			}
-
-			if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
-				zend_string *location = zend_get_attribute_target_names(target);
-				zend_string *allowed = zend_get_attribute_target_names(config->flags);
-
-				zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
-					ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
-				);
-			}
-
-			if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
-				if (zend_is_attribute_repeated(*attributes, attr)) {
-					zend_error_noreturn(E_ERROR, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->name));
-				}
-			}
-
-			if (config->validator != NULL) {
-				config->validator(attr, target, CG(active_class_entry));
-			}
-		} ZEND_HASH_FOREACH_END();
+		zend_apply_internal_attribute_validation(*attributes, offset, target);
 	}
 }
 /* }}} */
