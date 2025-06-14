@@ -8,4 +8,4 @@ abstract class Test {
 }
 ?>
 --EXPECTF--
-Fatal error: Hooked properties in abstract classes may not be declared readonly in %s on line %d
+Fatal error: Hooked properties in abstract classes cannot be declared readonly in %s on line %d

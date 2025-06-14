@@ -8,4 +8,4 @@ interface Test {
 }
 ?>
 --EXPECTF--
-Fatal error: Interface properties may not be declared readonly in %s on line %d
+Fatal error: Interface properties cannot be declared readonly in %s on line %d

@@ -8501,14 +8501,14 @@ static void zend_compile_property_hooks(
 	if ((prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL)) == (ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL)) {
 
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Interface properties may not be declared readonly");
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface properties cannot be declared readonly");
 		}
 
 		if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Hooked properties in abstract classes may not be declared readonly");
+			zend_error_noreturn(E_COMPILE_ERROR, "Hooked properties in abstract classes cannot be declared readonly");
 		}
 
-		zend_error_noreturn(E_COMPILE_ERROR, "Hooked virtual properties may not be declared readonly");
+		zend_error_noreturn(E_COMPILE_ERROR, "Hooked virtual properties cannot be declared readonly");
 	}
 
 	if (hooks->children == 0) {
