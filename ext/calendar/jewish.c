@@ -714,7 +714,7 @@ zend_long JewishToSdn(
 	int yearLength;
 	int lengthOfAdarIAndII;
 
-	if (year <= 0 || day <= 0 || day > 30) {
+	if (year <= 0 || year >= 6000 || day <= 0 || day > 30) {
 		return (0);
 	}
 	switch (month) {
