@@ -418,8 +418,6 @@ static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 
 static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *zval)
 {
-	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
-
 	switch (attr) {
         case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
 #if SQLITE_VERSION_NUMBER >= 3041000
@@ -434,6 +432,8 @@ static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
                     zend_value_error("explain mode must be one of the Pdo\\Sqlite::EXPLAIN_MODE_* constants");
                     return 0;
                 }
+
+                pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
                 if (sqlite3_stmt_explain(S->stmt, (int)Z_LVAL_P(zval)) != SQLITE_OK) {
                     return 0;
                 }
