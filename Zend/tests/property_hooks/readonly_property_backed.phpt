@@ -25,12 +25,12 @@ var_dump($t->prop);
 try {
     $t->set(43);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $t->prop = 43;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($t->prop);
 
@@ -79,8 +79,8 @@ final readonly class Foo3
 ?>
 --EXPECT--
 int(42)
-Cannot modify readonly property Test::$prop
-Cannot modify protected(set) readonly property Test::$prop from global scope
+Error: Cannot modify readonly property Test::$prop
+Error: Cannot modify protected(set) readonly property Test::$prop from global scope
 int(42)
 array(3) {
   [0]=>

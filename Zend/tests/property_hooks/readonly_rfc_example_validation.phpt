@@ -17,7 +17,7 @@ var_dump($one);
 try {
    $two = new PositivePoint(0,1);
 } catch (Error $e) {
-   echo $e->getMessage(), "\n";
+   echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 
@@ -29,4 +29,4 @@ object(PositivePoint)#1 (2) {
   ["y"]=>
   int(1)
 }
-Value must be greater 0
+Error: Value must be greater 0

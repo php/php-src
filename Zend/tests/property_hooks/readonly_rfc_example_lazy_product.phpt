@@ -77,7 +77,7 @@ var_dump($product);
 try {
     $categoryId->setValue($product, '420');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -102,4 +102,4 @@ object(LazyProduct)#2 (5) {
   ["categoryId":"LazyProduct":private]=>
   string(2) "42"
 }
-Cannot modify readonly property LazyProduct::$categoryId
+Error: Cannot modify readonly property LazyProduct::$categoryId

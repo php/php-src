@@ -50,13 +50,13 @@ $t->getParentValue();
 try {
     $t->setAgain(); // cannot write, readonly
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $t->prop = 43; // cannot write, visibility
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -93,5 +93,5 @@ In ChildClass::$prop::get():
     parent::$prop::get(): 911
     $this->prop: 911
     $this->prop * 2: 1822
-Cannot modify readonly property ChildClass::$prop
-Cannot modify protected(set) readonly property ChildClass::$prop from global scope
+Error: Cannot modify readonly property ChildClass::$prop
+Error: Cannot modify protected(set) readonly property ChildClass::$prop from global scope
