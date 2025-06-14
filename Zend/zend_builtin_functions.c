@@ -69,6 +69,63 @@ zend_result zend_startup_builtin_functions(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_FUNCTION(clone)
+{
+	zend_object *zobj;
+	HashTable *with = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJ(zobj)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(with)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_class_entry *scope = zend_get_executed_scope();
+
+	zend_class_entry *ce = zobj->ce;
+	zend_function *clone = ce->clone;
+
+	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
+		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
+
+	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		if (clone->common.scope != scope) {
+			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
+			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
+				zend_throw_error(NULL, "Call to %s %s::__clone() from %s%s",
+					zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
+					scope ? "scope " : "global scope",
+					scope ? ZSTR_VAL(scope->name) : ""
+				);
+				RETURN_THROWS();
+			}
+		}
+	}
+
+	zend_object *cloned;
+	if (zobj->handlers->clone_obj_with) {
+		cloned = zobj->handlers->clone_obj_with(zobj, scope, with);
+	} else {
+		if (UNEXPECTED(with != NULL && zend_hash_num_elements(with) > 0)) {
+			zend_throw_error(NULL, "Trying to clone an object with updated properties that is not compatible %s", ZSTR_VAL(ce->name));
+			RETURN_THROWS();
+		}
+		cloned = zobj->handlers->clone_obj(zobj);
+	}
+	
+	if (EG(exception)) {
+		if (cloned) {
+			OBJ_RELEASE(cloned);
+		}
+
+		RETURN_THROWS();
+	}
+
+	RETURN_OBJ(cloned);
+}
+
 ZEND_FUNCTION(exit)
 {
 	zend_string *str = NULL;
