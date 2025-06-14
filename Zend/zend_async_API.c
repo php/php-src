@@ -26,6 +26,9 @@ zend_async_globals_t zend_async_globals_api = {0};
 
 #define ASYNC_THROW_ERROR(error) zend_throw_error(NULL, error);
 
+/* Forward declarations */
+static void zend_async_main_handlers_shutdown(void);
+
 static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_provider)
 {
 	ASYNC_THROW_ERROR("Async API is not enabled");
@@ -174,6 +177,7 @@ void zend_async_shutdown(void)
 {
 	zend_async_globals_dtor();
 	zend_async_internal_context_api_shutdown();
+	zend_async_main_handlers_shutdown();
 }
 
 ZEND_API int zend_async_get_api_version_number(void)
@@ -1142,4 +1146,201 @@ ZEND_API bool zend_async_socket_listening_register(
 	zend_async_socket_listen_fn = socket_listen_fn;
 
 	return true;
+}
+
+///////////////////////////////////////////////////////////////
+/// Coroutine Switch Handlers Implementation
+///////////////////////////////////////////////////////////////
+
+ZEND_API void zend_coroutine_switch_handlers_init(zend_coroutine_t *coroutine)
+{
+	if (coroutine->switch_handlers) {
+		return; /* Already initialized */
+	}
+	
+	coroutine->switch_handlers = emalloc(sizeof(zend_coroutine_switch_handlers_vector_t));
+	coroutine->switch_handlers->length = 0;
+	coroutine->switch_handlers->capacity = 0;
+	coroutine->switch_handlers->data = NULL;
+	coroutine->switch_handlers->in_execution = false;
+}
+
+ZEND_API void zend_coroutine_switch_handlers_destroy(zend_coroutine_t *coroutine)
+{
+	if (!coroutine->switch_handlers) {
+		return;
+	}
+	
+	if (coroutine->switch_handlers->data) {
+		efree(coroutine->switch_handlers->data);
+	}
+	efree(coroutine->switch_handlers);
+	coroutine->switch_handlers = NULL;
+}
+
+ZEND_API uint32_t zend_coroutine_add_switch_handler(
+	zend_coroutine_t *coroutine,
+	zend_coroutine_switch_handler_fn handler,
+	void *user_data)
+{
+	if (!handler) {
+		zend_error(E_WARNING, "Cannot add NULL switch handler");
+		return 0;
+	}
+	
+	if (!coroutine->switch_handlers) {
+		zend_coroutine_switch_handlers_init(coroutine);
+	}
+	
+	zend_coroutine_switch_handlers_vector_t *vector = coroutine->switch_handlers;
+	
+	if (vector->in_execution) {
+		zend_error(E_WARNING, "Cannot add switch handler during handler execution");
+		return 0;
+	}
+	
+	/* Expand array if needed */
+	if (vector->length == vector->capacity) {
+		vector->capacity = vector->capacity ? vector->capacity * 2 : 4;
+		vector->data = safe_erealloc(vector->data, 
+		                           vector->capacity,
+		                           sizeof(zend_coroutine_switch_handler_t), 
+		                           0);
+	}
+	
+	/* Add handler */
+	uint32_t index = vector->length;
+	vector->data[index].handler = handler;
+	vector->data[index].user_data = user_data;
+	vector->length++;
+	
+	return index;
+}
+
+ZEND_API bool zend_coroutine_remove_switch_handler(
+	zend_coroutine_t *coroutine,
+	uint32_t handler_index)
+{
+	if (!coroutine->switch_handlers) {
+		return false;
+	}
+	
+	zend_coroutine_switch_handlers_vector_t *vector = coroutine->switch_handlers;
+	
+	if (vector->in_execution) {
+		zend_error(E_WARNING, "Cannot remove switch handler during handler execution");
+		return false;
+	}
+	
+	if (handler_index >= vector->length) {
+		return false;
+	}
+	
+	/* Shift elements to remove the handler */
+	for (uint32_t i = handler_index; i < vector->length - 1; i++) {
+		vector->data[i] = vector->data[i + 1];
+	}
+	
+	vector->length--;
+	return true;
+}
+
+ZEND_API void zend_coroutine_call_switch_handlers(
+	zend_coroutine_t *coroutine,
+	bool is_enter,
+	bool is_finishing)
+{
+	if (!coroutine->switch_handlers || coroutine->switch_handlers->length == 0) {
+		return;
+	}
+	
+	zend_coroutine_switch_handlers_vector_t *vector = coroutine->switch_handlers;
+	
+	/* Set execution protection flag */
+	vector->in_execution = true;
+	
+	/* Call all handlers */
+	for (uint32_t i = 0; i < vector->length; i++) {
+		vector->data[i].handler(coroutine, is_enter, is_finishing);
+	}
+	
+	/* Clear execution protection flag */
+	vector->in_execution = false;
+}
+
+///////////////////////////////////////////////////////////////
+/// Global Main Coroutine Switch Handlers Implementation
+///////////////////////////////////////////////////////////////
+
+static zend_coroutine_switch_handlers_vector_t global_main_coroutine_start_handlers = {0, 0, NULL, false};
+
+ZEND_API void zend_async_add_main_coroutine_start_handler(
+	zend_coroutine_switch_handler_fn handler,
+	void *user_data)
+{
+	zend_coroutine_switch_handlers_vector_t *vector = &global_main_coroutine_start_handlers;
+
+	/* Expand vector if needed */
+	if (vector->length >= vector->capacity) {
+		uint32_t new_capacity = vector->capacity ? vector->capacity * 2 : 4;
+		vector->data = safe_perealloc(vector->data, new_capacity, sizeof(zend_coroutine_switch_handler_t), 0, 1);
+		vector->capacity = new_capacity;
+	}
+
+	/* Add handler */
+	vector->data[vector->length].handler = handler;
+	vector->data[vector->length].user_data = user_data;
+	vector->length++;
+}
+
+ZEND_API void zend_async_call_main_coroutine_start_handlers(zend_coroutine_t *main_coroutine)
+{
+	zend_coroutine_switch_handlers_vector_t *vector = &global_main_coroutine_start_handlers;
+
+	if (vector->length == 0 || vector->in_execution) {
+		return;
+	}
+
+	/* Set execution protection flag */
+	vector->in_execution = true;
+
+	/* Call all handlers */
+	for (uint32_t i = 0; i < vector->length; i++) {
+		vector->data[i].handler(main_coroutine, true, false);
+	}
+
+	/* Clear execution protection flag */
+	vector->in_execution = false;
+
+	/* Copy handlers to main coroutine */
+	if (main_coroutine->switch_handlers == NULL) {
+		main_coroutine->switch_handlers = safe_emalloc(1, sizeof(zend_coroutine_switch_handlers_vector_t), 0);
+		main_coroutine->switch_handlers->length = 0;
+		main_coroutine->switch_handlers->capacity = 0;
+		main_coroutine->switch_handlers->data = NULL;
+		main_coroutine->switch_handlers->in_execution = false;
+	}
+
+	/* Copy all global handlers to main coroutine */
+	for (uint32_t i = 0; i < vector->length; i++) {
+		zend_coroutine_add_switch_handler(
+			main_coroutine,
+			vector->data[i].handler,
+			vector->data[i].user_data
+		);
+	}
+}
+
+/* Global cleanup function - called during PHP shutdown */
+static void zend_async_main_handlers_shutdown(void)
+{
+	zend_coroutine_switch_handlers_vector_t *vector = &global_main_coroutine_start_handlers;
+	
+	if (vector->data != NULL) {
+		pefree(vector->data, 1);
+		vector->data = NULL;
+		vector->length = 0;
+		vector->capacity = 0;
+		vector->in_execution = false;
+	}
 }
