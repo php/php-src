@@ -26,6 +26,9 @@
 #include "SAPI.h"
 
 #include <sqlite3.h>
+#ifdef __APPLE__
+#include <Availability.h>
+#endif
 
 #include "zend_exceptions.h"
 #include "sqlite3_arginfo.h"
@@ -1499,6 +1502,60 @@ PHP_METHOD(SQLite3Stmt, busy)
 	}
     RETURN_FALSE;
 }
+
+#if SQLITE_VERSION_NUMBER >= 3043000
+PHP_METHOD(SQLite3Stmt, explain)
+{
+#ifdef __APPLE__
+	if (__builtin_available(macOS 14.2, *)) {
+#endif
+		php_sqlite3_stmt *stmt_obj;
+		zval *object = ZEND_THIS;
+		stmt_obj = Z_SQLITE3_STMT_P(object);
+
+		ZEND_PARSE_PARAMETERS_NONE();
+
+		SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
+		SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
+
+		RETURN_LONG((zend_long)sqlite3_stmt_isexplain(stmt_obj->stmt));
+#ifdef __APPLE__
+	} else {
+		zend_throw_error(NULL, "explain statement unsupported");
+	}
+#endif
+}
+
+PHP_METHOD(SQLite3Stmt, setExplain)
+{
+#ifdef __APPLE__
+	if (__builtin_available(macOS 14.2, *)) {
+#endif
+		php_sqlite3_stmt *stmt_obj;
+		zend_long mode;
+		zval *object = ZEND_THIS;
+		stmt_obj = Z_SQLITE3_STMT_P(object);
+
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_LONG(mode)
+		ZEND_PARSE_PARAMETERS_END();
+
+		if (mode < 0 || mode > 2) {
+			zend_argument_value_error(1, "must be one of the SQLite3Stmt::EXPLAIN_MODE_* constants");
+			RETURN_THROWS();
+		}
+
+		SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
+		SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
+
+		RETURN_BOOL(sqlite3_stmt_explain(stmt_obj->stmt, (int)mode) == SQLITE_OK);
+#ifdef __APPLE__
+	} else {
+		zend_throw_error(NULL, "explain statement unsupported");
+	}
+#endif
+}
+#endif
 
 /* bind parameters to a statement before execution */
 static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */

@@ -247,6 +247,8 @@ PHP                                                                        NEWS
 - Sqlite:
   . Added Sqlite3Stmt::busy to check if a statement is still being executed.
     (David Carlier)
+  . Added Sqlite3Stmt::explain to produce a explain query plan from
+    the statement. (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
