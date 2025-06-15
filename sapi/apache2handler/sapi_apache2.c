@@ -415,7 +415,7 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_get_request_time,		/* Request Time */
 	NULL,						/* Child Terminate */
 
-	STANDARD_SAPI_MODULE_PROPERTIES
+	STANDARD_SAPI_MODULE_PROPERTIES_WITH_FLAGS(SAPI_MODULE_FLAG_ISOLATE_SYMBOLS)
 };
 
 static apr_status_t php_apache_server_shutdown(void *tmp)
