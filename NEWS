@@ -148,6 +148,9 @@ PHP                                                                        NEWS
     has a wrong return type. (David Carlier)
   . Added Pdo_Sqlite::ATTR_BUSY_STATEMENT constant to check
     if a statement is currently executing. (David Carlier)
+  . Added Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT constant to set a statement
+    in either EXPLAIN_MODE_PREPARED, EXPLAIN_MODE_EXPLAIN,
+    EXPLAIN_MODE_EXPLAIN_QUERY_PLAN modes. (David Carlier)
 
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing
@@ -237,12 +240,18 @@ PHP                                                                        NEWS
   . Fix overall theorical overflows on zend_string buffer allocations.
     (David Carlier/nielsdos)
 
+- Sqlite:
+  . Added Sqlite3Stmt::busy to check if a statement is still being executed.
+    (David Carlier)
+
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).
   . Fixed bug GH-18062 (is_callable(func(...), callable_name: $name) for first
     class callables returns wrong name). (timwolla)
   . Added array_first() and array_last(). (nielsdos)
+  . Fixed bug GH-18823 (setlocale's 2nd and 3rd argument ignores strict_types).
+    (nielsdos)
 
 - Streams:
   . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).

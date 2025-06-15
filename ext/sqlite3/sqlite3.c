@@ -1479,6 +1479,23 @@ PHP_METHOD(SQLite3Stmt, readOnly)
 }
 /* }}} */
 
+PHP_METHOD(SQLite3Stmt, busy)
+{
+	php_sqlite3_stmt *stmt_obj;
+	zval *object = ZEND_THIS;
+	stmt_obj = Z_SQLITE3_STMT_P(object);
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
+	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
+
+	if (sqlite3_stmt_busy(stmt_obj->stmt)) {
+		RETURN_TRUE;
+	}
+    RETURN_FALSE;
+}
+
 /* bind parameters to a statement before execution */
 static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 {

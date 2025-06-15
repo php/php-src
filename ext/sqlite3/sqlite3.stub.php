@@ -272,6 +272,8 @@ class SQLite3Stmt
 
     /** @tentative-return-type */
     public function reset(): bool {}
+
+    public function busy(): bool {}
 }
 
 /** @not-serializable */
