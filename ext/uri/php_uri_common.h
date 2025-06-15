@@ -17,6 +17,8 @@
 #ifndef PHP_URI_COMMON_H
 #define PHP_URI_COMMON_H
 
+extern zend_class_entry *uri_rfc3986_uri_ce;
+extern zend_object_handlers uri_rfc3986_uri_object_handlers;
 extern zend_class_entry *uri_whatwg_url_ce;
 extern zend_object_handlers uri_whatwg_uri_object_handlers;
 extern zend_class_entry *uri_comparison_mode_ce;
@@ -121,6 +123,7 @@ static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 #define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
 #define Z_URI_INTERNAL_P(zv) uri_internal_from_obj(Z_OBJ_P((zv)))
 
+#define URI_PARSER_RFC3986 "Uri\\Rfc3986\\Uri"
 #define URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 

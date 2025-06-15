@@ -76,8 +76,7 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t proper
 	ZEND_ASSERT(property_handler != NULL);
 
 	if (UNEXPECTED(property_handler->read_func(internal_uri, component_read_mode, return_value) == FAILURE)) {
-		zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name),
-			ZSTR_VAL(get_known_string_by_property_name(property_name)));
+		zend_throw_error(NULL, "The %s component cannot be retrieved", ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		RETURN_THROWS();
 	}
 }
