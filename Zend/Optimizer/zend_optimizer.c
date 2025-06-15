@@ -779,22 +779,12 @@ static bool zend_optimizer_ignore_class(zval *ce_zv, const zend_string *filename
 {
 	const zend_class_entry *ce;
 	Z_CE_FROM_ZVAL_P(ce, ce_zv);
-	if (Z_TYPE_P(ce_zv) == IS_ALIAS_PTR) {
-		return true;
-	}
 
 	if (ce->ce_flags & ZEND_ACC_PRELOADED) {
 		const Bucket *ce_bucket = (const Bucket*)((uintptr_t)ce_zv - XtOffsetOf(Bucket, val));
 		size_t offset = ce_bucket - EG(class_table)->arData;
 		if (offset < EG(persistent_classes_count)) {
 			return false;
-		}
-	}
-	// Ignore deprecated aliases so that they are fetched at runtime
-	if (Z_TYPE_P(ce_zv) == IS_ALIAS_PTR) {
-		zend_class_alias *alias = Z_CLASS_ALIAS_P(ce_zv);
-		if (alias->alias_flags & ZEND_ACC_DEPRECATED) {
-			return true;
 		}
 	}
 	return ce->type == ZEND_USER_CLASS
@@ -830,14 +820,7 @@ zend_class_entry *zend_optimizer_get_class_entry(
 			return Z_PTR_P(ce_or_alias);
 		}
 		ZEND_ASSERT(Z_TYPE_P(ce_or_alias) == IS_ALIAS_PTR);
-		zend_class_alias *alias = Z_CLASS_ALIAS_P(ce_or_alias);
-		if (alias->alias_flags & ZEND_ACC_DEPRECATED) {
-			// Pretend that the class cannot be found so that it gets looked
-			// up at runtime
-			return NULL;
-		}
-		return NULL;
-		// return Z_CLASS_ALIAS_P(ce_or_alias)->ce;
+		return Z_CLASS_ALIAS_P(ce_or_alias)->ce;
 	}
 
 	zval *ce_zv = zend_hash_find(CG(class_table), lcname);
@@ -846,8 +829,7 @@ zend_class_entry *zend_optimizer_get_class_entry(
 			return Z_PTR_P(ce_zv);
 		}
 		ZEND_ASSERT(Z_TYPE_P(ce_zv) == IS_ALIAS_PTR);
-		return NULL;
-		// return Z_CLASS_ALIAS_P(ce_zv)->ce;
+		return Z_CLASS_ALIAS_P(ce_zv)->ce;
 	}
 
 	if (op_array && op_array->scope && zend_string_equals_ci(op_array->scope->name, lcname)) {

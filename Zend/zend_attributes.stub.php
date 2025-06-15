@@ -19,8 +19,6 @@ final class Attribute
     const int TARGET_PARAMETER = UNKNOWN;
     /** @cvalue ZEND_ATTRIBUTE_TARGET_CONST */
     const int TARGET_CONSTANT = UNKNOWN;
-    /** @cvalue ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS */
-    const int TARGET_CLASS_ALIAS = UNKNOWN;
     /** @cvalue ZEND_ATTRIBUTE_TARGET_ALL */
     const int TARGET_ALL = UNKNOWN;
     /**  @cvalue ZEND_ATTRIBUTE_IS_REPEATABLE */
@@ -79,7 +77,7 @@ final class Override
 /**
  * @strict-properties
  */
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION|Attribute::TARGET_CLASS_CONSTANT|Attribute::TARGET_CONSTANT|Attribute::TARGET_CLASS|Attribute::TARGET_CLASS_ALIAS)]
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION|Attribute::TARGET_CLASS_CONSTANT|Attribute::TARGET_CONSTANT|Attribute::TARGET_CLASS)]
 final class Deprecated
 {
     public readonly ?string $message;
@@ -106,15 +104,3 @@ final class NoDiscard
 #[Attribute(Attribute::TARGET_ALL)]
 final class DelayedTargetValidation {}
 
-/**
- * @strict-properties
- */
-#[Attribute(Attribute::TARGET_CLASS|Attribute::IS_REPEATABLE)]
-final class ClassAlias
-{
-    public readonly string $alias;
-
-    public readonly array $attributes;
-
-    public function __construct(string $alias, array $attributes = []) {}
-}

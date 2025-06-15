@@ -919,10 +919,6 @@ zend_class_alias *zend_persist_class_alias_entry(zend_class_alias *orig_alias)
 	
 	alias = zend_shared_memdup_put(alias, sizeof(zend_class_alias));
 	alias->ce = zend_persist_class_entry(alias->ce);
-	// zend_accel_store_string(alias->name);
-	if (alias->attributes) {
-		alias->attributes = zend_persist_attributes(alias->attributes);
-	}
 
 	if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 		alias->alias_flags |= ZEND_ACC_IMMUTABLE;

@@ -600,11 +600,6 @@ static void zend_persist_class_alias_entry_calc(const zend_class_alias *alias)
 	// alias->ce is going to be a pointer to a class entry that will be
 	// persisted on its own, here we just need to add size for the alias
 	ADD_SIZE(sizeof(zend_class_alias));
-	// And the things that the alias holds directly
-	ADD_INTERNED_STRING(alias->name);
-	if (alias->attributes) {
-		zend_persist_attributes_calc(alias->attributes);
-	}
 	zend_persist_class_entry_calc(alias->ce);
 }
 

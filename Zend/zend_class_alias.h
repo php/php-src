@@ -24,8 +24,6 @@
 struct _zend_class_alias {
     zend_refcounted_h gc;
     zend_class_entry *ce;
-    zend_string *name;
-    HashTable *attributes;
     uint32_t alias_flags;
 };
 
@@ -52,6 +50,5 @@ typedef struct _zend_class_alias zend_class_alias;
 
 
 zend_class_alias * zend_class_alias_init(zend_class_entry *ce);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_alias(const zend_class_alias *alias);
 
 #endif

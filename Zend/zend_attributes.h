@@ -30,10 +30,9 @@
 #define ZEND_ATTRIBUTE_TARGET_CLASS_CONST	(1<<4)
 #define ZEND_ATTRIBUTE_TARGET_PARAMETER		(1<<5)
 #define ZEND_ATTRIBUTE_TARGET_CONST			(1<<6)
-#define ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS   (1<<7)
-#define ZEND_ATTRIBUTE_TARGET_ALL			((1<<8) - 1)
-#define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<8)
-#define ZEND_ATTRIBUTE_FLAGS				((1<<9) - 1)
+#define ZEND_ATTRIBUTE_TARGET_ALL			((1<<7) - 1)
+#define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<7)
+#define ZEND_ATTRIBUTE_FLAGS				((1<<8) - 1)
 
 /* Flags for zend_attribute.flags */
 #define ZEND_ATTRIBUTE_PERSISTENT   (1<<0)
@@ -99,9 +98,6 @@ ZEND_API zend_attribute *zend_add_attribute(
 		uint32_t flags, uint32_t offset, uint32_t lineno);
 
 uint32_t zend_attribute_attribute_get_flags(const zend_attribute *attr, zend_class_entry *scope);
-
-ZEND_API void zend_apply_internal_attribute_validation(HashTable *attributes, uint32_t offset, uint32_t target);
-ZEND_API void zend_attribute_populate_arguments(zend_attribute *attr, zend_ast_list *args);
 
 END_EXTERN_C()
 

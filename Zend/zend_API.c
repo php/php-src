@@ -3597,9 +3597,6 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 	 */
 	zend_class_alias *alias = zend_class_alias_init(ce);
 
-	zend_string *original_name = zend_string_init(name, name_len, persistent);
-	alias->name = original_name;
-
 	ZVAL_ALIAS_PTR(&zv, alias);
 
 	ret = zend_hash_add(CG(class_table), lcname, &zv);
@@ -3612,7 +3609,6 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		return SUCCESS;
 	}
 
-	zend_string_release(original_name);
 	free(alias);
 	return FAILURE;
 }

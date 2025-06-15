@@ -683,15 +683,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	/* class table hash keys, class names, properties, methods, constants, etc */
 	ZEND_HASH_MAP_FOREACH_BUCKET(CG(class_table), p) {
 		zend_class_entry *ce = NULL;
-
-		if (EXPECTED(Z_TYPE(p->val) == IS_PTR)) {
-			ce = Z_PTR(p->val);
-		} else {
-			ZEND_ASSERT(Z_TYPE(p->val) == IS_ALIAS_PTR);
-			zend_class_alias *alias = Z_PTR(p->val);
-			alias->name = new_interned_string(alias->name);
-			ce = alias->ce;
-		}
+		Z_CE_FROM_ZVAL(ce, p->val);
 
 		if (p->key) {
 			p->key = new_interned_string(p->key);
@@ -4164,14 +4156,6 @@ static void preload_link(void)
 					break; /* can stop already */
 				}
 				continue;
-			}
-
-			// Not preloading class constants for deprecated aliases
-			if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
-				zend_class_alias *class_alias = Z_CLASS_ALIAS_P(zv);
-				if (class_alias->alias_flags & ZEND_ACC_DEPRECATED) {
-					continue;
-				}
 			}
 
 			if ((ce->ce_flags & ZEND_ACC_LINKED) && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {

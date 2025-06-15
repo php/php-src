@@ -942,8 +942,4 @@ final class ReflectionClassAlias implements Reflector
     public function __construct(string $name) {}
 
     public function __toString(): string {}
-
-    public function isDeprecated(): bool {}
-
-    public function getAttributes(?string $name = null, int $flags = 0): array {}
 }

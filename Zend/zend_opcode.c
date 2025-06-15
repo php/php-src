@@ -304,14 +304,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 			return;
 		}
 
-		if (class_alias->attributes) {
-			zend_hash_release(class_alias->attributes);
-			// class_alias->attributes = NULL;
-		}
-		if (class_alias->name) {
-			zend_string_release(class_alias->name);
-			// class_alias->name = NULL;
-		}
 		free(class_alias);
 		return;
 	}

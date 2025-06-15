@@ -7958,18 +7958,6 @@ ZEND_METHOD(ReflectionClassAlias, __construct)
 	ZVAL_STR_COPY(name_zv, name);
 }
 
-ZEND_METHOD(ReflectionClassAlias, getAttributes)
-{
-	reflection_object *intern;
-	zend_class_alias *alias;
-
-	GET_REFLECTION_OBJECT_PTR(alias);
-
-	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		alias->attributes, 0, alias->ce, ZEND_ATTRIBUTE_TARGET_CLASS_ALIAS,
-		NULL);
-}
-
 ZEND_METHOD(ReflectionClassAlias, __toString)
 {
 	reflection_object *intern;
@@ -7982,23 +7970,11 @@ ZEND_METHOD(ReflectionClassAlias, __toString)
 
 	smart_str_append_printf(
 		&str,
-		"%s - %salias for %s",
+		"%s - alias for %s",
 		Z_STRVAL_P(reflection_prop_name(ZEND_THIS)),
-		(alias->alias_flags & ZEND_ACC_DEPRECATED) ? "deprecated " : "",
 		ZSTR_VAL(alias->ce->name)
 	);
 	RETURN_STR(smart_str_extract(&str));
-}
-
-ZEND_METHOD(ReflectionClassAlias, isDeprecated)
-{
-	reflection_object *intern;
-	zend_class_alias *alias;
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	GET_REFLECTION_OBJECT_PTR(alias);
-	RETURN_BOOL(alias->alias_flags & ZEND_ACC_DEPRECATED);
 }
 
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
