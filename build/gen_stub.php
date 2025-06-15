@@ -3055,7 +3055,6 @@ class PropertyInfo extends VariableLike
     private const PHP_85_KNOWN = [
         "self" => "ZEND_STR_SELF",
         "parent" => "ZEND_STR_PARENT",
-        "userinfo" => "ZEND_STR_USERINFO",
         "username" => "ZEND_STR_USERNAME",
         "password" => "ZEND_STR_PASSWORD",
     ];
