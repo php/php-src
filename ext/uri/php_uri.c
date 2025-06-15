@@ -312,8 +312,7 @@ static void read_uriparser_userinfo(INTERNAL_FUNCTION_PARAMETERS, uri_component_
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	if (UNEXPECTED(uriparser_read_userinfo(internal_uri, read_mode, return_value) == FAILURE)) {
-		zend_throw_error(NULL, "%s::$%s property cannot be retrieved", ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name),
-			ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_USERINFO)));
+		zend_throw_error(NULL, "The userinfo component cannot be retrieved");
 		RETURN_THROWS();
 	}
 }
@@ -393,6 +392,11 @@ PHP_METHOD(Uri_Rfc3986_Uri, getRawFragment)
 	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, URI_COMPONENT_READ_RAW);
 }
 
+static void throw_cannot_recompose_uri_to_string(zend_object *object)
+{
+	zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->ce->name));
+}
+
 static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, zend_object *comparison_mode)
 {
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
@@ -418,7 +422,7 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, z
 	zend_string *this_str = this_internal_uri->handler->uri_to_string(
 		this_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
 	if (this_str == NULL) {
-		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
 
@@ -426,7 +430,7 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, z
 		that_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
 	if (that_str == NULL) {
 		zend_string_release(this_str);
-		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(that_object->ce->name));
+		throw_cannot_recompose_uri_to_string(that_object);
 		RETURN_THROWS();
 	}
 
@@ -460,7 +464,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 
 	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
 	if (uri_str == NULL) {
-		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
 
@@ -477,7 +481,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 
 	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, false);
 	if (uri_str == NULL) {
-		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
 
@@ -510,7 +514,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 	/* Serialize state: "uri" key in the first array */
 	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
 	if (uri_str == NULL) {
-		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
 	zval tmp;
@@ -723,7 +727,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 	/* Serialize state: "uri" key in the first array */
 	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
 	if (uri_str == NULL) {
-		zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to string", ZSTR_VAL(this_object->ce->name));
+		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
 	zval tmp;
