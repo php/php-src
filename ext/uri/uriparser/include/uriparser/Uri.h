@@ -87,10 +87,6 @@ extern "C" {
 
 
 
-extern const URI_CHAR * const URI_FUNC(SafeToPointTo);
-
-
-
 /**
  * Specifies a range of characters within a string.
  * The range includes all characters from <c>first</c>
@@ -648,6 +644,33 @@ URI_PUBLIC int URI_FUNC(ToStringCharsRequired)(const URI_TYPE(Uri) * uri,
  */
 URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
 		int maxChars, int * charsWritten);
+
+
+/**
+ * Copies a %URI structure.
+ *
+ * @param destUri        <b>OUT</b>: Output destination
+ * @param sourceUri      <b>IN</b>: %URI to copy
+ * @param memory         <b>IN</b>: Memory manager to use, NULL for default libc
+ * @return               Error code or 0 on success
+ *
+ * @since 0.9.8
+ */
+URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
+		const URI_TYPE(Uri) * sourceUri, UriMemoryManager * memory);
+
+
+
+/**
+ * Copies a %URI structure.
+ *
+ * @param destUri        <b>OUT</b>: Output destination
+ * @param sourceUri      <b>IN</b>: %URI to copy
+ * @return               Error code or 0 on success
+ *
+ * @since 0.9.8
+ */
+URI_PUBLIC int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri, const URI_TYPE(Uri) * sourceUri);
 
 
 

@@ -109,82 +109,6 @@ static void URI_FUNC(LowercaseInplaceExceptPercentEncoding)(const URI_CHAR * fir
 static UriBool URI_FUNC(LowercaseMalloc)(const URI_CHAR ** first,
 		const URI_CHAR ** afterLast, UriMemoryManager * memory);
 
-static void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
-		unsigned int revertMask, UriMemoryManager * memory);
-
-
-
-static URI_INLINE void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
-		unsigned int revertMask, UriMemoryManager * memory) {
-	if (revertMask & URI_NORMALIZE_SCHEME) {
-		/* NOTE: A scheme cannot be the empty string
-		 *       so no need to compare .first with .afterLast, here. */
-		memory->free(memory, (URI_CHAR *)uri->scheme.first);
-		uri->scheme.first = NULL;
-		uri->scheme.afterLast = NULL;
-	}
-
-	if (revertMask & URI_NORMALIZE_USER_INFO) {
-		if (uri->userInfo.first != uri->userInfo.afterLast) {
-			memory->free(memory, (URI_CHAR *)uri->userInfo.first);
-		}
-		uri->userInfo.first = NULL;
-		uri->userInfo.afterLast = NULL;
-	}
-
-	if (revertMask & URI_NORMALIZE_HOST) {
-		if (uri->hostData.ipFuture.first != NULL) {
-			/* IPvFuture */
-			/* NOTE: An IPvFuture address cannot be the empty string
-			 *       so no need to compare .first with .afterLast, here. */
-			memory->free(memory, (URI_CHAR *)uri->hostData.ipFuture.first);
-			uri->hostData.ipFuture.first = NULL;
-			uri->hostData.ipFuture.afterLast = NULL;
-			uri->hostText.first = NULL;
-			uri->hostText.afterLast = NULL;
-		} else if (uri->hostText.first != NULL) {
-			/* Regname */
-			if (uri->hostText.first != uri->hostText.afterLast) {
-				memory->free(memory, (URI_CHAR *)uri->hostText.first);
-			}
-			uri->hostText.first = NULL;
-			uri->hostText.afterLast = NULL;
-		}
-	}
-
-	/* NOTE: Port cannot happen! */
-
-	if (revertMask & URI_NORMALIZE_PATH) {
-		URI_TYPE(PathSegment) * walker = uri->pathHead;
-		while (walker != NULL) {
-			URI_TYPE(PathSegment) * const next = walker->next;
-			if (walker->text.afterLast > walker->text.first) {
-				memory->free(memory, (URI_CHAR *)walker->text.first);
-			}
-			memory->free(memory, walker);
-			walker = next;
-		}
-		uri->pathHead = NULL;
-		uri->pathTail = NULL;
-	}
-
-	if (revertMask & URI_NORMALIZE_QUERY) {
-		if (uri->query.first != uri->query.afterLast) {
-			memory->free(memory, (URI_CHAR *)uri->query.first);
-		}
-		uri->query.first = NULL;
-		uri->query.afterLast = NULL;
-	}
-
-	if (revertMask & URI_NORMALIZE_FRAGMENT) {
-		if (uri->fragment.first != uri->fragment.afterLast) {
-			memory->free(memory, (URI_CHAR *)uri->fragment.first);
-		}
-		uri->fragment.first = NULL;
-		uri->fragment.afterLast = NULL;
-	}
-}
-
 
 
 static URI_INLINE UriBool URI_FUNC(ContainsUppercaseLetters)(const URI_CHAR * first,
@@ -407,15 +331,9 @@ static URI_INLINE UriBool URI_FUNC(MakeRangeOwner)(unsigned int * doneMask,
 			&& (range->first != NULL)
 			&& (range->afterLast != NULL)
 			&& (range->afterLast > range->first)) {
-		const int lenInChars = (int)(range->afterLast - range->first);
-		const int lenInBytes = lenInChars * sizeof(URI_CHAR);
-		URI_CHAR * dup = memory->malloc(memory, lenInBytes);
-		if (dup == NULL) {
-			return URI_FALSE; /* Raises malloc error */
+		if (URI_FUNC(CopyRangeEngine)(range, range, memory) == URI_FALSE) {
+			return URI_FALSE;
 		}
-		memcpy(dup, range->first, lenInBytes);
-		range->first = dup;
-		range->afterLast = dup + lenInChars;
 		*doneMask |= maskTest;
 	}
 	return URI_TRUE;

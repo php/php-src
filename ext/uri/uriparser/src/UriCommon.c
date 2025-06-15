@@ -64,6 +64,7 @@
 #ifndef URI_DOXYGEN
 # include <uriparser/Uri.h>
 # include "UriCommon.h"
+# include "UriMemory.h"
 #endif
 
 
@@ -115,6 +116,225 @@ int URI_FUNC(CompareRange)(
 	}
 
 	return diff;
+}
+
+
+
+UriBool URI_FUNC(CopyRangeEngine)(URI_TYPE(TextRange) * destRange,
+		const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory) {
+	const int lenInChars = (int)(sourceRange->afterLast - sourceRange->first);
+	const int lenInBytes = lenInChars * sizeof(URI_CHAR);
+	URI_CHAR * dup = memory->malloc(memory, lenInBytes);
+	if (dup == NULL) {
+		return URI_FALSE;
+	}
+	memcpy(dup, sourceRange->first, lenInBytes);
+	destRange->first = dup;
+	destRange->afterLast = dup + lenInChars;
+
+	return URI_TRUE;
+}
+
+
+
+UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
+		const URI_TYPE(TextRange) * sourceRange, UriBool useSafe, UriMemoryManager * memory) {
+	if (sourceRange->first == NULL || sourceRange->afterLast == NULL || (sourceRange->first > sourceRange->afterLast && !useSafe)) {
+		destRange->first = NULL;
+		destRange->afterLast = NULL;
+	} else if (sourceRange->first >= sourceRange->afterLast && useSafe) {
+		destRange->first = URI_FUNC(SafeToPointTo);
+		destRange->afterLast = URI_FUNC(SafeToPointTo);
+	} else {
+		return URI_FUNC(CopyRangeEngine)(destRange, sourceRange, memory);
+	}
+
+	return URI_TRUE;
+}
+
+
+
+URI_INLINE void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
+		unsigned int revertMask, UriMemoryManager * memory) {
+	if (revertMask & URI_NORMALIZE_SCHEME) {
+		/* NOTE: A scheme cannot be the empty string
+		 *       so no need to compare .first with .afterLast, here. */
+		memory->free(memory, (URI_CHAR *)uri->scheme.first);
+		uri->scheme.first = NULL;
+		uri->scheme.afterLast = NULL;
+	}
+
+	if (revertMask & URI_NORMALIZE_USER_INFO) {
+		if (uri->userInfo.first != uri->userInfo.afterLast) {
+			memory->free(memory, (URI_CHAR *)uri->userInfo.first);
+		}
+		uri->userInfo.first = NULL;
+		uri->userInfo.afterLast = NULL;
+	}
+
+	if (revertMask & URI_NORMALIZE_HOST) {
+		if (uri->hostData.ipFuture.first != NULL) {
+			/* IPvFuture */
+			/* NOTE: An IPvFuture address cannot be the empty string
+			 *       so no need to compare .first with .afterLast, here. */
+			memory->free(memory, (URI_CHAR *)uri->hostData.ipFuture.first);
+			uri->hostData.ipFuture.first = NULL;
+			uri->hostData.ipFuture.afterLast = NULL;
+			uri->hostText.first = NULL;
+			uri->hostText.afterLast = NULL;
+		} else if (uri->hostText.first != NULL) {
+			/* Regname */
+			if (uri->hostText.first != uri->hostText.afterLast) {
+				memory->free(memory, (URI_CHAR *)uri->hostText.first);
+			}
+			uri->hostText.first = NULL;
+			uri->hostText.afterLast = NULL;
+		}
+	}
+
+	/* NOTE: Port cannot happen! */
+
+	if (revertMask & URI_NORMALIZE_PATH) {
+		URI_TYPE(PathSegment) * walker = uri->pathHead;
+		while (walker != NULL) {
+			URI_TYPE(PathSegment) * const next = walker->next;
+			if (walker->text.afterLast > walker->text.first) {
+				memory->free(memory, (URI_CHAR *)walker->text.first);
+			}
+			memory->free(memory, walker);
+			walker = next;
+		}
+		uri->pathHead = NULL;
+		uri->pathTail = NULL;
+	}
+
+	if (revertMask & URI_NORMALIZE_QUERY) {
+		if (uri->query.first != uri->query.afterLast) {
+			memory->free(memory, (URI_CHAR *)uri->query.first);
+		}
+		uri->query.first = NULL;
+		uri->query.afterLast = NULL;
+	}
+
+	if (revertMask & URI_NORMALIZE_FRAGMENT) {
+		if (uri->fragment.first != uri->fragment.afterLast) {
+			memory->free(memory, (URI_CHAR *)uri->fragment.first);
+		}
+		uri->fragment.first = NULL;
+		uri->fragment.afterLast = NULL;
+	}
+}
+
+
+
+int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
+		 const URI_TYPE(Uri) * sourceUri, UriMemoryManager * memory) {
+	if (sourceUri == NULL) {
+		return URI_ERROR_NULL;
+	}
+
+	URI_CHECK_MEMORY_MANAGER(memory); /* may return */
+
+	if (URI_FUNC(CopyRange)(&destUri->scheme, &sourceUri->scheme, URI_FALSE, memory) == URI_FALSE) {
+		return URI_ERROR_MALLOC;
+	}
+
+	if (URI_FUNC(CopyRange)(&destUri->userInfo, &sourceUri->userInfo, URI_FALSE, memory) == URI_FALSE) {
+		URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_SCHEME, memory);
+		return URI_ERROR_MALLOC;
+	}
+
+	if (URI_FUNC(CopyRange)(&destUri->hostText, &sourceUri->hostText, URI_TRUE, memory) == URI_FALSE) {
+		URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_USER_INFO, memory);
+		return URI_ERROR_MALLOC;
+	}
+	if (sourceUri->hostData.ip4 == NULL) {
+		destUri->hostData.ip4 = NULL;
+	} else {
+		destUri->hostData.ip4 = memory->malloc(memory, sizeof(UriIp4));
+		if (destUri->hostData.ip4 == NULL) {
+			URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_HOST, memory);
+			return URI_ERROR_MALLOC;
+		}
+		*(destUri->hostData.ip4) = *(sourceUri->hostData.ip4);
+	}
+	if (sourceUri->hostData.ip6 == NULL) {
+		destUri->hostData.ip6 = NULL;
+	} else {
+		destUri->hostData.ip6 = memory->malloc(memory, sizeof(UriIp6));
+		if (destUri->hostData.ip6 == NULL) {
+			URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_HOST, memory);
+			return URI_ERROR_MALLOC;
+		}
+		*(destUri->hostData.ip6) = *(sourceUri->hostData.ip6);
+	}
+	if (URI_FUNC(CopyRange)(&destUri->hostData.ipFuture, &sourceUri->hostData.ipFuture, URI_FALSE, memory) == URI_FALSE) {
+		URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_HOST, memory);
+		return URI_ERROR_MALLOC;
+	}
+
+	if (URI_FUNC(CopyRange)(&destUri->portText, &sourceUri->portText, URI_FALSE, memory) == URI_FALSE) {
+		URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_HOST, memory);
+		return URI_ERROR_MALLOC;
+	}
+
+	if (sourceUri->pathHead != NULL && sourceUri->pathTail != NULL) {
+		destUri->pathHead = memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
+		if (destUri->pathHead == NULL) {
+			URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_PATH, memory);
+			return URI_ERROR_MALLOC;
+		}
+		if (URI_FUNC(CopyRange)(&destUri->pathHead->text, &sourceUri->pathHead->text, URI_TRUE, memory) == URI_FALSE) {
+			URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_PATH, memory);
+			return URI_ERROR_MALLOC;
+		}
+		destUri->pathHead->reserved = NULL;
+
+		URI_TYPE(PathSegment) *p = sourceUri->pathHead->next;
+		URI_TYPE(PathSegment) *newP = destUri->pathHead;
+		while (p != NULL && (p->text.first != p->text.afterLast || p->text.first == URI_FUNC(SafeToPointTo))) {
+			newP->next = memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
+			if (newP->next == NULL) {
+				URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_PATH, memory);
+				return URI_ERROR_MALLOC;
+			}
+			newP = newP->next;
+			if (URI_FUNC(CopyRange)(&newP->text, &p->text, URI_TRUE, memory) == URI_FALSE) {
+				URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_PATH, memory);
+				return URI_ERROR_MALLOC;
+			}
+			newP->reserved = NULL;
+			p = p->next;
+		}
+		newP->next = NULL;
+		destUri->pathTail = newP;
+	} else {
+		destUri->pathHead = NULL;
+		destUri->pathTail = NULL;
+	}
+
+	if (URI_FUNC(CopyRange)(&destUri->query, &sourceUri->query, URI_FALSE, memory) == URI_FALSE) {
+		URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_PATH, memory);
+		return URI_ERROR_MALLOC;
+	}
+
+	if (URI_FUNC(CopyRange)(&destUri->fragment, &sourceUri->fragment, URI_FALSE, memory) == URI_FALSE) {
+		URI_FUNC(PreventLeakage)(destUri, URI_NORMALIZE_QUERY, memory);
+		return URI_ERROR_MALLOC;
+	}
+
+	destUri->absolutePath = sourceUri->absolutePath;
+	destUri->owner = URI_TRUE;
+	destUri->reserved = NULL;
+
+	return URI_SUCCESS;
+}
+
+
+
+int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri,
+		const URI_TYPE(Uri) * sourceUri) {
+	return URI_FUNC(CopyUriMm)(destUri, sourceUri, NULL);
 }
 
 
