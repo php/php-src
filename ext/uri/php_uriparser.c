@@ -28,72 +28,14 @@ static inline size_t get_text_range_length(const UriTextRangeA *range)
 	return range->afterLast - range->first;
 }
 
-static void uriparser_copy_text_range(UriTextRangeA *text_range, UriTextRangeA *new_text_range, bool use_safe)
-{
-	if (text_range->first == NULL || text_range->afterLast == NULL || (text_range->first > text_range->afterLast && !use_safe)) {
-		new_text_range->first = NULL;
-		new_text_range->afterLast = NULL;
-	} else if (text_range->first >= text_range->afterLast && use_safe) {
-		new_text_range->first = uriSafeToPointToA;
-		new_text_range->afterLast = uriSafeToPointToA;
-	} else {
-		size_t length = get_text_range_length(text_range);
-		char *dup = emalloc(length);
-		memcpy(dup, text_range->first, length);
-
-		new_text_range->first = dup;
-		new_text_range->afterLast = dup + length;
-	}
-}
-
 static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri) // TODO add to uriparser
 {
 	UriUriA *new_uriparser_uri = emalloc(sizeof(UriUriA));
 
-	uriparser_copy_text_range(&uriparser_uri->scheme, &new_uriparser_uri->scheme, false);
-	uriparser_copy_text_range(&uriparser_uri->userInfo, &new_uriparser_uri->userInfo, false);
-	uriparser_copy_text_range(&uriparser_uri->hostText, &new_uriparser_uri->hostText, true);
-	if (uriparser_uri->hostData.ip4 == NULL) {
-		new_uriparser_uri->hostData.ip4 = NULL;
-	} else {
-		new_uriparser_uri->hostData.ip4 = emalloc(sizeof(UriIp4));
-		*(new_uriparser_uri->hostData.ip4) = *(uriparser_uri->hostData.ip4);
+	if (uriCopyUriA(new_uriparser_uri, uriparser_uri) != URI_SUCCESS) {
+		efree(new_uriparser_uri);
+		return NULL;  /* TODO check for null on call sites */
 	}
-	if (uriparser_uri->hostData.ip6 == NULL) {
-		new_uriparser_uri->hostData.ip6 = NULL;
-	} else {
-		new_uriparser_uri->hostData.ip6 = emalloc(sizeof(UriIp6));
-		*(new_uriparser_uri->hostData.ip6) = *(uriparser_uri->hostData.ip6);
-	}
-	uriparser_copy_text_range(&uriparser_uri->hostData.ipFuture, &new_uriparser_uri->hostData.ipFuture, false);
-	uriparser_copy_text_range(&uriparser_uri->portText, &new_uriparser_uri->portText, false);
-
-	if (uriparser_uri->pathHead != NULL && uriparser_uri->pathTail != NULL) {
-		new_uriparser_uri->pathHead = emalloc(sizeof(UriPathSegmentA));
-		uriparser_copy_text_range(&uriparser_uri->pathHead->text, &new_uriparser_uri->pathHead->text, true);
-		new_uriparser_uri->pathHead->reserved = NULL;
-
-		UriPathSegmentA *p = uriparser_uri->pathHead->next;
-		UriPathSegmentA *new_p = new_uriparser_uri->pathHead;
-		while (p != NULL && (p->text.first != p->text.afterLast || p->text.first == uriSafeToPointToA)) {
-			new_p->next = emalloc(sizeof(UriPathSegmentA));
-			new_p = new_p->next;
-			uriparser_copy_text_range(&p->text, &new_p->text, true);
-			new_p->reserved = NULL;
-			p = p->next;
-		}
-		new_p->next = NULL;
-		new_uriparser_uri->pathTail = new_p;
-	} else {
-		new_uriparser_uri->pathHead = NULL;
-		new_uriparser_uri->pathTail = NULL;
-	}
-
-	uriparser_copy_text_range(&uriparser_uri->query, &new_uriparser_uri->query, false);
-	uriparser_copy_text_range(&uriparser_uri->fragment, &new_uriparser_uri->fragment, false);
-	new_uriparser_uri->absolutePath = uriparser_uri->absolutePath;
-	new_uriparser_uri->owner = true;
-	new_uriparser_uri->reserved = NULL;
 
 	return new_uriparser_uri;
 }
@@ -407,7 +349,7 @@ void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t 
 
 	UriUriA *absolute_uri = emalloc(sizeof(UriUriA));
 
-	if (uriAddBaseUriExA(absolute_uri, uriparser_uri, uriparser_base_urls->uri, URI_RESOLVE_STRICTLY) != URI_SUCCESS) {
+	if (uriAddBaseUriA(absolute_uri, uriparser_uri, uriparser_base_urls->uri) != URI_SUCCESS) {
 		uriFreeUriMembersA(uriparser_uri);
 		efree(uriparser_uri);
 		efree(absolute_uri);
