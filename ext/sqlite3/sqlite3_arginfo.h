@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 28132e0e4df61f19dc4b23a7c9f79be6b3e40a8e */
+ * Stub hash: c3216eada9881743cbd3aa1510f1200b7ce0d942 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -147,6 +147,15 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3Stmt_busy, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+#if SQLITE_VERSION_NUMBER >= 3043000
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3Stmt_explain, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3Stmt_setExplain, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Result___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -206,6 +215,10 @@ ZEND_METHOD(SQLite3Stmt, paramCount);
 ZEND_METHOD(SQLite3Stmt, readOnly);
 ZEND_METHOD(SQLite3Stmt, reset);
 ZEND_METHOD(SQLite3Stmt, busy);
+#if SQLITE_VERSION_NUMBER >= 3043000
+ZEND_METHOD(SQLite3Stmt, explain);
+ZEND_METHOD(SQLite3Stmt, setExplain);
+#endif
 ZEND_METHOD(SQLite3Result, __construct);
 ZEND_METHOD(SQLite3Result, numColumns);
 ZEND_METHOD(SQLite3Result, columnName);
@@ -258,6 +271,10 @@ static const zend_function_entry class_SQLite3Stmt_methods[] = {
 	ZEND_ME(SQLite3Stmt, readOnly, arginfo_class_SQLite3Stmt_readOnly, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3Stmt, reset, arginfo_class_SQLite3Stmt_reset, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3Stmt, busy, arginfo_class_SQLite3Stmt_busy, ZEND_ACC_PUBLIC)
+#if SQLITE_VERSION_NUMBER >= 3043000
+	ZEND_ME(SQLite3Stmt, explain, arginfo_class_SQLite3Stmt_explain, ZEND_ACC_PUBLIC)
+	ZEND_ME(SQLite3Stmt, setExplain, arginfo_class_SQLite3Stmt_setExplain, ZEND_ACC_PUBLIC)
+#endif
 	ZEND_FE_END
 };
 
@@ -540,6 +557,30 @@ static zend_class_entry *register_class_SQLite3Stmt(void)
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Stmt", class_SQLite3Stmt_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
+#if SQLITE_VERSION_NUMBER >= 3043000
+
+	zval const_EXPLAIN_MODE_PREPARED_value;
+	ZVAL_LONG(&const_EXPLAIN_MODE_PREPARED_value, 0);
+	zend_string *const_EXPLAIN_MODE_PREPARED_name = zend_string_init_interned("EXPLAIN_MODE_PREPARED", sizeof("EXPLAIN_MODE_PREPARED") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_PREPARED_name, &const_EXPLAIN_MODE_PREPARED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_EXPLAIN_MODE_PREPARED_name);
+#endif
+#if SQLITE_VERSION_NUMBER >= 3043000
+
+	zval const_EXPLAIN_MODE_EXPLAIN_value;
+	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_value, 1);
+	zend_string *const_EXPLAIN_MODE_EXPLAIN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN", sizeof("EXPLAIN_MODE_EXPLAIN") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_EXPLAIN_name, &const_EXPLAIN_MODE_EXPLAIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_EXPLAIN_MODE_EXPLAIN_name);
+#endif
+#if SQLITE_VERSION_NUMBER >= 3043000
+
+	zval const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value;
+	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value, 2);
+	zend_string *const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN_QUERY_PLAN", sizeof("EXPLAIN_MODE_EXPLAIN_QUERY_PLAN") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name, &const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_name);
+#endif
 
 	return class_entry;
 }
