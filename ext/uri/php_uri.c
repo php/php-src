@@ -448,7 +448,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, equals)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS(that_object, uri_rfc3986_uri_ce)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce);
+		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, comparison_mode);
