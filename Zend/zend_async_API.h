@@ -476,7 +476,11 @@ typedef struct {
 /* Properly release the event object */
 #define ZEND_ASYNC_EVENT_RELEASE(ev) do { \
 	if (ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev)) { \
-		OBJ_RELEASE(ZEND_ASYNC_EVENT_TO_OBJECT(ev)); \
+		if(GC_REFCOUNT(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) == 1) { \
+			OBJ_RELEASE(ZEND_ASYNC_EVENT_TO_OBJECT(ev)); \
+		} else { \
+			GC_DELREF(ZEND_ASYNC_EVENT_TO_OBJECT(ev)); \
+		} \
 	} else { \
 		if ((ev)->ref_count == 1) { \
 			(ev)->ref_count = 0; \

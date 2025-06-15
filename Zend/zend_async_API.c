@@ -1012,13 +1012,18 @@ zend_async_callbacks_remove(zend_async_event_t *event, zend_async_event_callback
 ZEND_API void
 zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception, bool from_handler)
 {
+	// Protect from self-deletion by incrementing ref count before calling callbacks
+	ZEND_ASYNC_EVENT_ADD_REF(event);
+
 	// If pre-notify returns false, we stop notifying callbacks
 	if (false == from_handler && event->notify_handler != NULL) {
 		event->notify_handler(event, result, exception);
+		ZEND_ASYNC_EVENT_RELEASE(event);
 		return;
 	}
 
 	if (event->callbacks.data == NULL || event->callbacks.length == 0) {
+		ZEND_ASYNC_EVENT_RELEASE(event);
 		return;
 	}
 
@@ -1030,6 +1035,7 @@ zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object
 		zend_error(E_CORE_WARNING,
 			"Concurrent callback iteration detected - nested notify() calls are not allowed"
 		);
+		ZEND_ASYNC_EVENT_RELEASE(event);
 		return;
 	}
 
@@ -1053,6 +1059,9 @@ zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object
 
 	// Unregister iterator
 	zend_async_callbacks_unregister_iterator(vector);
+	
+	// Dispose the reference we added at the beginning - this may trigger disposal if ref count reaches 0
+	ZEND_ASYNC_EVENT_RELEASE(event);
 }
 
 /* Call all callbacks and close the event (Like future) */
