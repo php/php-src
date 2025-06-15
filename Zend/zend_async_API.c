@@ -1180,8 +1180,7 @@ ZEND_API void zend_coroutine_switch_handlers_destroy(zend_coroutine_t *coroutine
 
 ZEND_API uint32_t zend_coroutine_add_switch_handler(
 	zend_coroutine_t *coroutine,
-	zend_coroutine_switch_handler_fn handler,
-	void *user_data)
+	zend_coroutine_switch_handler_fn handler)
 {
 	if (!handler) {
 		zend_error(E_WARNING, "Cannot add NULL switch handler");
@@ -1211,7 +1210,6 @@ ZEND_API uint32_t zend_coroutine_add_switch_handler(
 	/* Add handler */
 	uint32_t index = vector->length;
 	vector->data[index].handler = handler;
-	vector->data[index].user_data = user_data;
 	vector->length++;
 	
 	return index;
@@ -1259,13 +1257,35 @@ ZEND_API void zend_coroutine_call_switch_handlers(
 	/* Set execution protection flag */
 	vector->in_execution = true;
 	
-	/* Call all handlers */
-	for (uint32_t i = 0; i < vector->length; i++) {
-		vector->data[i].handler(coroutine, is_enter, is_finishing);
+	/* Call all handlers and remove those that return false */
+	uint32_t write_index = 0;
+	for (uint32_t read_index = 0; read_index < vector->length; read_index++) {
+		bool keep_handler = vector->data[read_index].handler(coroutine, is_enter, is_finishing);
+		
+		if (keep_handler) {
+			/* Keep this handler - move it to write position if needed */
+			if (write_index != read_index) {
+				vector->data[write_index] = vector->data[read_index];
+			}
+			write_index++;
+		}
+		/* If keep_handler is false, we skip copying this handler (effectively removing it) */
 	}
+	
+	/* Update length to reflect removed handlers */
+	vector->length = write_index;
 	
 	/* Clear execution protection flag */
 	vector->in_execution = false;
+	
+	/* Free vector memory if no handlers remain */
+	if (vector->length == 0 && vector->data != NULL) {
+		coroutine->switch_handlers = NULL;
+		efree(vector->data);
+		vector->data = NULL;
+		vector->capacity = 0;
+		efree(vector);
+	}
 }
 
 ///////////////////////////////////////////////////////////////
@@ -1275,8 +1295,7 @@ ZEND_API void zend_coroutine_call_switch_handlers(
 static zend_coroutine_switch_handlers_vector_t global_main_coroutine_start_handlers = {0, 0, NULL, false};
 
 ZEND_API void zend_async_add_main_coroutine_start_handler(
-	zend_coroutine_switch_handler_fn handler,
-	void *user_data)
+	zend_coroutine_switch_handler_fn handler)
 {
 	zend_coroutine_switch_handlers_vector_t *vector = &global_main_coroutine_start_handlers;
 
@@ -1289,46 +1308,32 @@ ZEND_API void zend_async_add_main_coroutine_start_handler(
 
 	/* Add handler */
 	vector->data[vector->length].handler = handler;
-	vector->data[vector->length].user_data = user_data;
 	vector->length++;
 }
 
 ZEND_API void zend_async_call_main_coroutine_start_handlers(zend_coroutine_t *main_coroutine)
 {
-	zend_coroutine_switch_handlers_vector_t *vector = &global_main_coroutine_start_handlers;
+	zend_coroutine_switch_handlers_vector_t *global_vector = &global_main_coroutine_start_handlers;
 
-	if (vector->length == 0 || vector->in_execution) {
+	if (global_vector->length == 0) {
 		return;
 	}
 
-	/* Set execution protection flag */
-	vector->in_execution = true;
-
-	/* Call all handlers */
-	for (uint32_t i = 0; i < vector->length; i++) {
-		vector->data[i].handler(main_coroutine, true, false);
-	}
-
-	/* Clear execution protection flag */
-	vector->in_execution = false;
-
-	/* Copy handlers to main coroutine */
+	/* Initialize main coroutine switch handlers if needed */
 	if (main_coroutine->switch_handlers == NULL) {
-		main_coroutine->switch_handlers = safe_emalloc(1, sizeof(zend_coroutine_switch_handlers_vector_t), 0);
-		main_coroutine->switch_handlers->length = 0;
-		main_coroutine->switch_handlers->capacity = 0;
-		main_coroutine->switch_handlers->data = NULL;
-		main_coroutine->switch_handlers->in_execution = false;
+		zend_coroutine_switch_handlers_init(main_coroutine);
 	}
 
-	/* Copy all global handlers to main coroutine */
-	for (uint32_t i = 0; i < vector->length; i++) {
+	/* Copy all global handlers to main coroutine first */
+	for (uint32_t i = 0; i < global_vector->length; i++) {
 		zend_coroutine_add_switch_handler(
 			main_coroutine,
-			vector->data[i].handler,
-			vector->data[i].user_data
+			global_vector->data[i].handler
 		);
 	}
+
+	/* Now call the standard switch handlers function which will handle removal logic */
+	zend_coroutine_call_switch_handlers(main_coroutine, true, false);
 }
 
 /* Global cleanup function - called during PHP shutdown */

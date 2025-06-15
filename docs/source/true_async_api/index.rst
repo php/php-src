@@ -7,6 +7,7 @@
 
    architecture
    events
+   coroutines
    api-reference
    implementation-guide
    patterns
@@ -90,6 +91,9 @@ For implementation details, see the :doc:`implementation-guide` section.
 
 :doc:`architecture`
    Detailed explanation of the two-repository architecture and component separation.
+
+:doc:`coroutines`
+   Complete guide to coroutines, context switching, and internal context management.
 
 :doc:`api-reference`
    Complete API reference with function signatures, macros, and data structures.

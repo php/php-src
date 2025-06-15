@@ -125,10 +125,11 @@ typedef void (*zend_coroutine_entry_t)(void);
 typedef struct _zend_coroutine_switch_handler_s zend_coroutine_switch_handler_t;
 typedef struct _zend_coroutine_switch_handlers_vector_s zend_coroutine_switch_handlers_vector_t;
 
-typedef void (*zend_coroutine_switch_handler_fn)(
+typedef bool (*zend_coroutine_switch_handler_fn)(
 	zend_coroutine_t *coroutine,
 	bool is_enter,     /* true = entering coroutine, false = leaving */
 	bool is_finishing  /* true = coroutine is finishing */
+	/* returns: true = keep handler, false = remove handler after execution */
 );
 
 typedef struct _zend_async_event_s zend_async_event_t;
@@ -271,7 +272,6 @@ struct _zend_fcall_s {
 
 struct _zend_coroutine_switch_handler_s {
 	zend_coroutine_switch_handler_fn handler;  /* Handler function pointer */
-	void *user_data;                           /* User data (can be NULL) */
 };
 
 struct _zend_coroutine_switch_handlers_vector_s {
@@ -1139,8 +1139,7 @@ ZEND_API void zend_async_waker_callback_timeout(
 /* Coroutine Switch Handlers API */
 ZEND_API uint32_t zend_coroutine_add_switch_handler(
 	zend_coroutine_t *coroutine,
-	zend_coroutine_switch_handler_fn handler,
-	void *user_data
+	zend_coroutine_switch_handler_fn handler
 );
 
 ZEND_API bool zend_coroutine_remove_switch_handler(
@@ -1159,8 +1158,7 @@ ZEND_API void zend_coroutine_switch_handlers_destroy(zend_coroutine_t *coroutine
 
 /* Global Main Coroutine Switch Handlers API */
 ZEND_API void zend_async_add_main_coroutine_start_handler(
-	zend_coroutine_switch_handler_fn handler,
-	void *user_data
+	zend_coroutine_switch_handler_fn handler
 );
 
 ZEND_API void zend_async_call_main_coroutine_start_handlers(zend_coroutine_t *main_coroutine);
@@ -1250,21 +1248,13 @@ END_EXTERN_C()
 #define ZEND_ASYNC_INTERNAL_CONTEXT_UNSET(coro, key) zend_async_internal_context_unset(coro, key)
 
 /* Coroutine Switch Handlers API Macros */
-#define ZEND_COROUTINE_ADD_SWITCH_HANDLER(coroutine, handler) \
-	zend_coroutine_add_switch_handler(coroutine, handler, NULL)
-
-#define ZEND_COROUTINE_ADD_SWITCH_HANDLER_EX(coroutine, handler, user_data) \
-	zend_coroutine_add_switch_handler(coroutine, handler, user_data)
+#define ZEND_COROUTINE_ADD_SWITCH_HANDLER(coroutine, handler) zend_coroutine_add_switch_handler(coroutine, handler)
 
 #define ZEND_COROUTINE_ENTER(coroutine) zend_coroutine_call_switch_handlers(coroutine, true, false);
 #define ZEND_COROUTINE_LEAVE(coroutine) zend_coroutine_call_switch_handlers(coroutine, false, false)
 #define ZEND_COROUTINE_FINISH(coroutine) zend_coroutine_call_switch_handlers(coroutine, false, true)
 
 /* Global Main Coroutine Switch Handlers API Macros */
-#define ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER(handler) \
-	zend_async_add_main_coroutine_start_handler(handler, NULL)
-
-#define ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER_EX(handler, user_data) \
-	zend_async_add_main_coroutine_start_handler(handler, user_data)
+#define ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER(handler) zend_async_add_main_coroutine_start_handler(handler)
 
 #endif //ZEND_ASYNC_API_H
