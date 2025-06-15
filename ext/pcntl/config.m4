@@ -25,6 +25,8 @@ if test "$PHP_PCNTL" != "no"; then
     wait3
     wait4
     waitid
+    wait6
+    syscall
   ]))
 
   AC_CHECK_FUNCS([WIFCONTINUED],,
@@ -42,6 +44,9 @@ if test "$PHP_PCNTL" != "no"; then
       P_JAILID
     ]),,,
     [#include <sys/wait.h>])
+
+  AC_CHECK_DECLS([SYS_waitid],,,
+    [#include <sys/syscall.h>])
 
   dnl if unsupported, -1 means automatically ENOSYS in this context
   AC_CACHE_CHECK([if sched_getcpu is supported], [php_cv_func_sched_getcpu],
