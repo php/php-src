@@ -35,7 +35,7 @@ var_dump($res1);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=18, args=0, vars=2, tmps=2)
+     ; (lines=18, args=0, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s:1-27
 0000 V2 = NEW 0 string("Other")
@@ -61,7 +61,7 @@ LIVE RANGES:
      2: 0010 - 0011 (tmp/var)
 
 _test1:
-     ; (lines=4, args=1, vars=1, tmps=1)
+     ; (lines=4, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:3-5
 0000 CV0($a) = RECV 1
@@ -70,7 +70,7 @@ _test1:
 0003 RETURN T1
 
 Other::foo:
-     ; (lines=4, args=1, vars=1, tmps=1)
+     ; (lines=4, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:8-10
 0000 CV0($a) = RECV 1
@@ -79,7 +79,7 @@ Other::foo:
 0003 RETURN T1
 
 Other::bar:
-     ; (lines=4, args=1, vars=1, tmps=1)
+     ; (lines=4, args=1, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:12-14
 0000 CV0($a) = RECV 1

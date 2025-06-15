@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: edf910997672a2b8d8b5c25e8a7a4ff1c135e7b1 */
+ * Stub hash: 28132e0e4df61f19dc4b23a7c9f79be6b3e40a8e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -144,6 +144,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3Stmt_reset arginfo_class_SQLite3_close
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3Stmt_busy, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Result___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -202,6 +205,7 @@ ZEND_METHOD(SQLite3Stmt, getSQL);
 ZEND_METHOD(SQLite3Stmt, paramCount);
 ZEND_METHOD(SQLite3Stmt, readOnly);
 ZEND_METHOD(SQLite3Stmt, reset);
+ZEND_METHOD(SQLite3Stmt, busy);
 ZEND_METHOD(SQLite3Result, __construct);
 ZEND_METHOD(SQLite3Result, numColumns);
 ZEND_METHOD(SQLite3Result, columnName);
@@ -253,6 +257,7 @@ static const zend_function_entry class_SQLite3Stmt_methods[] = {
 	ZEND_ME(SQLite3Stmt, paramCount, arginfo_class_SQLite3Stmt_paramCount, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3Stmt, readOnly, arginfo_class_SQLite3Stmt_readOnly, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3Stmt, reset, arginfo_class_SQLite3Stmt_reset, ZEND_ACC_PUBLIC)
+	ZEND_ME(SQLite3Stmt, busy, arginfo_class_SQLite3Stmt_busy, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
