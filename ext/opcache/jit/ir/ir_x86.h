@@ -178,6 +178,27 @@ enum _ir_reg {
 	| IR_REGSET(IR_REG_RBP) \
 	| IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15))
 
+# if __has_attribute(preserve_none) && !defined(__SANITIZE_ADDRESS__)
+
+#  define IR_HAVE_PRESERVE_NONE 1
+
+/* https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1029 */
+#  define IR_REG_INT_PNARGS 12
+#  define IR_REG_INT_PNARG1  IR_REG_R12
+#  define IR_REG_INT_PNARG2  IR_REG_R13
+#  define IR_REG_INT_PNARG3  IR_REG_R14
+#  define IR_REG_INT_PNARG4  IR_REG_R15
+#  define IR_REG_INT_PNARG5  IR_REG_RDI
+#  define IR_REG_INT_PNARG6  IR_REG_RSI
+#  define IR_REG_INT_PNARG7  IR_REG_RDX
+#  define IR_REG_INT_PNARG8  IR_REG_RCX
+#  define IR_REG_INT_PNARG9  IR_REG_R8
+#  define IR_REG_INT_PNARG10 IR_REG_R9
+#  define IR_REG_INT_PNARG11 IR_REG_R11
+#  define IR_REG_INT_PNARG12 IR_REG_RAX
+
+# endif /* preserve_none */
+
 typedef struct _ir_va_list {
 	uint32_t  gp_offset;
 	uint32_t  fp_offset;
