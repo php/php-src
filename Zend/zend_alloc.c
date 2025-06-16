@@ -2860,6 +2860,7 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *ptr 
 				return Z_LVAL_P(size_zv);
 			}
 		} else if (heap->custom_heap._malloc != poison_malloc) {
+			ZEND_MM_POISON_HEAP(heap);
 			return 0;
 		}
 		ZEND_MM_POISON_HEAP(heap);
@@ -3148,7 +3149,7 @@ ZEND_API void* ZEND_FASTCALL _erealloc2(void *ptr, size_t size, size_t copy_size
 	ZEND_MM_UNPOISON_HEAP(AG(mm_heap));
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
 		ptr = AG(mm_heap)->custom_heap._realloc(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		ZEND_MM_UNPOISON_HEAP(AG(mm_heap));
+		ZEND_MM_POISON_HEAP(AG(mm_heap));
 		return ptr;
 	}
 #endif
