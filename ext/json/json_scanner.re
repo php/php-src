@@ -104,7 +104,7 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
     s->utf8_invalid = 0;
     s->utf8_invalid_count = 0;
 	s->str_start = (php_json_ctype *)str; /* Initialize str_start */
-	s->input_start = (php_json_ctype *)str; /* Initialize str_start */
+	s->input_start = (php_json_ctype *)str; /* Initialize input_start */
 	
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;
@@ -120,12 +120,6 @@ int php_json_scan(php_json_scanner *s)
 
 std:
 	s->token = s->cursor;
-
-	/*if (s->cursor >= s->limit) {
-        s->errcode = PHP_JSON_ERROR_SYNTAX;
-        s->errpos = (size_t)(s->str_start - s->input_start);
-        return PHP_JSON_T_ERROR;
-    }*/
 
 /*!re2c
 	re2c:indent:top = 1;
