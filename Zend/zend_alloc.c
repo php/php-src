@@ -1644,7 +1644,6 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 		dbg->orig_lineno = __zend_orig_lineno;
 		ZEND_MM_POISON_DEBUGINFO(dbg);
 #endif
-		ZEND_MM_UNPOISON(ptr, size);
 		return ptr;
 	} else if (EXPECTED(size <= ZEND_MM_MAX_LARGE_SIZE)) {
 		ptr = zend_mm_alloc_large(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1658,15 +1657,12 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 		dbg->orig_lineno = __zend_orig_lineno;
 		ZEND_MM_POISON_DEBUGINFO(dbg);
 #endif
-		ZEND_MM_UNPOISON(ptr, size);
 		return ptr;
 	} else {
 #if ZEND_DEBUG
 		size = real_size;
 #endif
-		ptr = zend_mm_alloc_huge(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		ZEND_MM_UNPOISON(ptr, size);
-		return ptr;
+		return zend_mm_alloc_huge(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 }
 
@@ -1739,6 +1735,7 @@ static zend_never_inline void *zend_mm_realloc_slow(zend_mm_heap *heap, void *pt
 		size_t orig_peak = heap->peak;
 #endif
 		ret = zend_mm_alloc_heap(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		ZEND_MM_UNPOISON(ret, size);
 		ZEND_MM_UNPOISON(ptr, copy_size);
 		memcpy(ret, ptr, copy_size);
 		zend_mm_free_heap(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2826,6 +2823,9 @@ ZEND_API void* ZEND_FASTCALL _zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND
 {
 	ZEND_MM_UNPOISON_HEAP(heap);
 	void *ptr = zend_mm_alloc_heap(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	if (EXPECTED(ptr)) {
+		ZEND_MM_UNPOISON(ret, size);
+	}
 	ZEND_MM_POISON_HEAP(heap);
 	return ptr;
 }
@@ -3106,6 +3106,9 @@ ZEND_API void* ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 	}
 #endif
 	void *ptr = zend_mm_alloc_heap(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	if (EXPECTED(ptr)) {
+		ZEND_MM_UNPOISON(ret, size);
+	}
 	ZEND_MM_POISON_HEAP(AG(mm_heap));
 	return ptr;
 }
@@ -3406,7 +3409,7 @@ static void tracked_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
 
 static void *tracked_realloc(void *ptr, size_t new_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
 	zend_mm_heap *heap = AG(mm_heap);
-	ZEND_MM_POISON_HEAP(heap);
+	ZEND_MM_UNPOISON_HEAP(heap);
 	zval *old_size_zv = NULL;
 	size_t old_size = 0;
 	if (ptr) {
@@ -3428,7 +3431,7 @@ static void *tracked_realloc(void *ptr, size_t new_size ZEND_FILE_LINE_DC ZEND_F
 #if ZEND_MM_STAT
 	heap->size += new_size - old_size;
 #endif
-	ZEND_MM_UNPOISON_HEAP(heap);
+	ZEND_MM_POISON_HEAP(heap);
 	return ptr;
 }
 
@@ -3448,16 +3451,19 @@ static void* poison_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	if (SIZE_MAX - heap->debug.padding * 2 < size) {
 		zend_mm_panic("Integer overflow in memory allocation");
 	}
-	size += heap->debug.padding * 2;
+	size_t sizePlusPadding = size + heap->debug.padding * 2;
 
-	void *ptr = zend_mm_alloc_heap(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	void *ptr = zend_mm_alloc_heap(heap, sizePlusPadding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 
 	if (EXPECTED(ptr)) {
 		if (heap->debug.poison_alloc) {
-			memset(ptr, heap->debug.poison_alloc_value, size);
+			ZEND_MM_UNPOISON(ptr, sizePlusPadding);
+			memset(ptr, heap->debug.poison_alloc_value, sizePlusPadding);
+			ZEND_MM_POISON(ptr, sizePlusPadding);
 		}
 
 		ptr = (char*)ptr + heap->debug.padding;
+		ZEND_MM_UNPOISON(ptr, size);
 	}
 
 	return ptr;
@@ -3479,7 +3485,9 @@ static void poison_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		size_t size = zend_mm_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 
 		if (heap->debug.poison_free) {
+			ZEND_MM_UNPOISON(ptr, heap->debug.poison_free_value);
 			memset(ptr, heap->debug.poison_free_value, size);
+			ZEND_MM_POISON(ptr, heap->debug.poison_free_value);
 		}
 	}
 
