@@ -492,6 +492,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	}  zend_end_try();
 	ZEND_MM_UNPOISON_HEAP(heap);
 	heap->overflow = 0;
+	ZEND_MM_POISON_HEAP(heap);
 	zend_bailout();
 	exit(1);
 }
