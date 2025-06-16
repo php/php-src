@@ -443,7 +443,7 @@ void shutdown_executor(void) /* {{{ */
 	bool fast_shutdown = (
 		is_zend_mm()
 		|| (forceFastShutdown && ZEND_ATOL(forceFastShutdown))
-	) && EG(full_tables_cleanup);
+	) && !EG(full_tables_cleanup);
 #else
 	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
 #endif
