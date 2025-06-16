@@ -1649,8 +1649,8 @@ static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t si
 	} else if (EXPECTED(size <= ZEND_MM_MAX_LARGE_SIZE)) {
 		ptr = zend_mm_alloc_large(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 #if ZEND_DEBUG
-		ZEND_MM_UNPOISON_DEBUGINFO(dbg);
 		dbg = zend_mm_get_debug_info(heap, ptr);
+		ZEND_MM_UNPOISON_DEBUGINFO(dbg);
 		dbg->size = real_size;
 		dbg->filename = __zend_filename;
 		dbg->orig_filename = __zend_orig_filename;
@@ -1922,8 +1922,8 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 				}
 
 #if ZEND_DEBUG
-				ZEND_MM_UNPOISON_DEBUGINFO(dbg);
 				dbg = zend_mm_get_debug_info(heap, ret);
+				ZEND_MM_UNPOISON_DEBUGINFO(dbg);
 				dbg->size = real_size;
 				dbg->filename = __zend_filename;
 				dbg->orig_filename = __zend_orig_filename;
