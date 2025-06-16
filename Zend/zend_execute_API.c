@@ -1283,7 +1283,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	zend_class_alias *alias = NULL;
 	if (ce_zval) {
 		if (Z_TYPE_P(ce_zval) == IS_ALIAS_PTR) {
-			ce_cache = 0;
 			alias = Z_CLASS_ALIAS_P(ce_zval);
 			ce = alias->ce;
 		} else {
