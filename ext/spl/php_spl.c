@@ -528,7 +528,7 @@ PHP_FUNCTION(spl_autoload_register)
 	if (ZEND_FCI_INITIALIZED(fci)) {
 		if (!fcc.function_handler) {
 			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
+			 * with it ourselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
 			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
 		}
@@ -591,7 +591,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (!fcc.function_handler) {
 		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-		 * with it outselves. It is important that it is not refetched on every call,
+		 * with it ourselves. It is important that it is not refetched on every call,
 		 * because calls may occur from different scopes. */
 		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
 	}

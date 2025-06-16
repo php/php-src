@@ -7,7 +7,9 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
 opcache.jit_buffer_size=32M
-opcache.jit=function
+opcache.jit=1254
+opcache.jit_hot_func=1
+opcache.jit_hot_side_exit=1
 --FILE--
 <?php
 $a = [2147483647,2147483647,2147483647,3,0,0,32,2147483584,127];

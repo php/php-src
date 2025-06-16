@@ -1068,7 +1068,6 @@ PHP_FUNCTION(odbc_execute)
 					RETURN_FALSE;
 				}
 				filename = estrndup(&ZSTR_VAL(tmpstr)[1], ZSTR_LEN(tmpstr) - 2);
-				filename[strlen(filename)] = '\0';
 
 				/* Check the basedir */
 				if (php_check_open_basedir(filename)) {
@@ -1462,6 +1461,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (rc == SQL_ERROR) {
 					odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
 					efree(buf);
+					zval_ptr_dtor(return_value);
 					RETURN_FALSE;
 				}
 

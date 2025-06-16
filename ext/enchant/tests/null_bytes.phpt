@@ -4,8 +4,7 @@ null bytes
 enchant
 --SKIPIF--
 <?php
-$broker = enchant_broker_init();
-if (!enchant_broker_list_dicts($broker)) die("skip No broker dicts installed");
+if (!enchant_broker_list_dicts(enchant_broker_init())) {die("skip no dictionary installed on this machine! \n");}
 ?>
 --FILE--
 <?php

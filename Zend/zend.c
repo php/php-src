@@ -1050,6 +1050,8 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_last) = 0;
 #endif /* ZTS */
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	EG(fatal_error_backtrace_on) = false;
+	ZVAL_UNDEF(&EG(last_fatal_error_backtrace));
 
 	zend_interned_strings_init();
 	zend_startup_builtin_functions();
@@ -2086,8 +2088,8 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 		return;
 	}
 
-	if (zend_string_equals_literal_ci(type_name, "self")
-			|| zend_string_equals_literal_ci(type_name, "parent")) {
+	if (zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_SELF))
+			|| zend_string_equals_ci(type_name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return;
 	}
 

@@ -1383,9 +1383,16 @@ static void ir_load_local_addr(ir_ctx *ctx, ir_reg reg, ir_ref src)
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	ir_reg base = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
-	int32_t offset = IR_SPILL_POS_TO_OFFSET(ctx->ir_base[src].op3);
+	ir_insn *var_insn;
+	int32_t offset;
 
 	IR_ASSERT(ir_rule(ctx, src) == IR_STATIC_ALLOCA);
+	var_insn = &ctx->ir_base[src];
+	if (var_insn->op == IR_VADDR) {
+		var_insn = &ctx->ir_base[var_insn->op1];
+	}
+	IR_ASSERT(var_insn->op == IR_VAR || var_insn->op == IR_ALLOCA);
+	offset = IR_SPILL_POS_TO_OFFSET(var_insn->op3);
 	if (aarch64_may_encode_imm12(offset)) {
 		|	add Rx(reg), Rx(base), #offset
 	} else {
@@ -5680,10 +5687,15 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 								ir_reg reg = ir_get_free_reg(constraints.tmp_regs[n].type, available);
 								ir_ref *ops = insn->ops;
 								IR_REGSET_EXCL(available, reg);
-								if (constraints.tmp_regs[n].num > 0
-								 && IR_IS_CONST_REF(ops[constraints.tmp_regs[n].num])) {
-									/* rematerialization */
-									reg |= IR_REG_SPILL_LOAD;
+								if (constraints.tmp_regs[n].num > 0) {
+									if (IR_IS_CONST_REF(ops[constraints.tmp_regs[n].num])) {
+										/* rematerialization */
+										reg |= IR_REG_SPILL_LOAD;
+									} else if (ctx->ir_base[ops[constraints.tmp_regs[n].num]].op == IR_ALLOCA ||
+											ctx->ir_base[ops[constraints.tmp_regs[n].num]].op == IR_VADDR) {
+										/* local address rematerialization */
+										reg |= IR_REG_SPILL_LOAD;
+									}
 								}
 								ctx->regs[i][constraints.tmp_regs[n].num] = reg;
 							} else if (constraints.tmp_regs[n].reg == IR_REG_SCRATCH) {

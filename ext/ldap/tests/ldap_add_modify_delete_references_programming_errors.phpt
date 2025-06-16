@@ -76,6 +76,6 @@ try {
 ?>
 --EXPECT--
 Error: Object of class stdClass could not be converted to string
-ValueError: ldap_add(): Argument #3 ($entry) list of attribute values must not be empty
+ValueError: ldap_add(): Argument #3 ($entry) attribute "attribute2" must be a non-empty list of attribute values
 TypeError: LDAP value must be of type string|int|bool, array given
 TypeError: LDAP value must be of type string|int|bool, stdClass given

@@ -257,8 +257,7 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 	spl_SplObjectStorage *intern;
 	zend_class_entry *parent = class_type;
 
-	intern = emalloc(sizeof(spl_SplObjectStorage) + zend_object_properties_size(parent));
-	memset(intern, 0, sizeof(spl_SplObjectStorage) - sizeof(zval));
+	intern = zend_object_alloc(sizeof(spl_SplObjectStorage), parent);
 	intern->pos = 0;
 
 	zend_object_std_init(&intern->std, class_type);
@@ -336,12 +335,10 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 
 	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
 		array_init(&tmp);
-		/* Incrementing the refcount of obj and inf would confuse the garbage collector.
-		 * Prefer to null the destructor */
-		Z_ARRVAL_P(&tmp)->pDestructor = NULL;
 		zval obj;
-		ZVAL_OBJ(&obj, element->obj);
+		ZVAL_OBJ_COPY(&obj, element->obj);
 		add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &obj);
+		Z_TRY_ADDREF(element->inf);
 		add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
 		zend_hash_next_index_insert(Z_ARRVAL(storage), &tmp);
 	} ZEND_HASH_FOREACH_END();

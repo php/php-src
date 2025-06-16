@@ -33,8 +33,6 @@
 #include "dom_properties.h"
 #include "token_list.h"
 #include "zend_interfaces.h"
-#include "lexbor/lexbor/core/types.h"
-#include "lexbor/lexbor/core/lexbor.h"
 
 #include "ext/standard/info.h"
 
@@ -101,6 +99,7 @@ static zend_object_handlers dom_modern_nodelist_object_handlers;
 static zend_object_handlers dom_html_collection_object_handlers;
 static zend_object_handlers dom_object_namespace_node_handlers;
 static zend_object_handlers dom_modern_domimplementation_object_handlers;
+static zend_object_handlers dom_modern_element_object_handlers;
 static zend_object_handlers dom_token_list_object_handlers;
 #ifdef LIBXML_XPATH_ENABLED
 zend_object_handlers dom_xpath_object_handlers;
@@ -357,6 +356,9 @@ static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, in
 		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
 
+	if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
 	return NULL;
 }
 
@@ -366,13 +368,14 @@ static zend_always_inline const dom_prop_handler *dom_get_prop_handler(const dom
 
 	if (obj->prop_handler != NULL) {
 		if (cache_slot && *cache_slot == obj->prop_handler) {
-			hnd = *(cache_slot + 1);
+			hnd = cache_slot[1];
 		}
 		if (!hnd) {
 			hnd = zend_hash_find_ptr(obj->prop_handler, name);
 			if (cache_slot) {
-				*cache_slot = obj->prop_handler;
-				*(cache_slot + 1) = (void *) hnd;
+				cache_slot[0] = obj->prop_handler;
+				cache_slot[1] = (void *) hnd;
+				cache_slot[2] = NULL;
 			}
 		}
 	}
@@ -660,6 +663,21 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 }
 /* }}} */
 
+static zend_object *dom_modern_element_clone_obj(zend_object *zobject)
+{
+	zend_object *clone = dom_objects_store_clone_obj(zobject);
+
+	/* The $classList property is unique per element, and cached due to its [[SameObject]] requirement.
+	 * Remove it from the clone so the clone will get a fresh instance upon demand. */
+	zval *class_list = dom_element_class_list_zval(php_dom_obj_from_obj(clone));
+	if (!Z_ISUNDEF_P(class_list)) {
+		zval_ptr_dtor(class_list);
+		ZVAL_UNDEF(class_list);
+	}
+
+	return clone;
+}
+
 static zend_object *dom_object_namespace_node_clone_obj(zend_object *zobject)
 {
 	dom_object_namespace_node *intern = php_dom_namespace_node_obj_from_obj(zobject);
@@ -694,6 +712,7 @@ static zend_object *dom_token_list_new(zend_class_entry *class_type)
 
 static const zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("lexbor")
 	ZEND_MOD_CONFLICTS("domxml")
 	ZEND_MOD_END
 };
@@ -734,22 +753,6 @@ void dom_xpath_objects_free_storage(zend_object *object);
 HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n);
 #endif
 
-static void *dom_malloc(size_t size) {
-	return emalloc(size);
-}
-
-static void *dom_realloc(void *dst, size_t size) {
-	return erealloc(dst, size);
-}
-
-static void *dom_calloc(size_t num, size_t size) {
-	return ecalloc(num, size);
-}
-
-static void dom_free(void *ptr) {
-	efree(ptr);
-}
-
 /* {{{ PHP_MINIT_FUNCTION(dom) */
 PHP_MINIT_FUNCTION(dom)
 {
@@ -768,6 +771,9 @@ PHP_MINIT_FUNCTION(dom)
 	/* The IDL has the [SameObject] constraint, which is incompatible with cloning because it imposes that there is only
 	 * one instance per parent object. */
 	dom_modern_domimplementation_object_handlers.clone_obj = NULL;
+
+	memcpy(&dom_modern_element_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
+	dom_modern_element_object_handlers.clone_obj = dom_modern_element_clone_obj;
 
 	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_nnodemap_object_handlers.free_obj = dom_nnodemap_objects_free_storage;
@@ -1099,7 +1105,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	dom_modern_element_class_entry = register_class_Dom_Element(dom_modern_node_class_entry, dom_modern_parentnode_class_entry, dom_modern_childnode_class_entry);
 	dom_modern_element_class_entry->create_object = dom_objects_new;
-	dom_modern_element_class_entry->default_object_handlers = &dom_object_handlers;
+	dom_modern_element_class_entry->default_object_handlers = &dom_modern_element_object_handlers;
 
 	zend_hash_init(&dom_modern_element_prop_handlers, 0, NULL, NULL, true);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "namespaceURI", dom_node_namespace_uri_read, NULL);
@@ -1124,7 +1130,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	dom_html_element_class_entry = register_class_Dom_HTMLElement(dom_modern_element_class_entry);
 	dom_html_element_class_entry->create_object = dom_objects_new;
-	dom_html_element_class_entry->default_object_handlers = &dom_object_handlers;
+	dom_html_element_class_entry->default_object_handlers = &dom_modern_element_object_handlers;
 	zend_hash_add_new_ptr(&classes, dom_html_element_class_entry->name, &dom_modern_element_prop_handlers);
 
 	dom_text_class_entry = register_class_DOMText(dom_characterdata_class_entry);
@@ -1319,8 +1325,6 @@ PHP_MINIT_FUNCTION(dom)
 
 	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
 	php_libxml_register_export(dom_modern_node_class_entry, php_dom_export_node);
-
-	lexbor_memory_setup(dom_malloc, dom_realloc, dom_calloc, dom_free);
 
 	return SUCCESS;
 }

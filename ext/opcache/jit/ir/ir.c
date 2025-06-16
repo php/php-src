@@ -918,7 +918,7 @@ static ir_ref _ir_fold_cse(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir
 #define IR_FOLD_EMIT           goto ir_fold_emit
 #define IR_FOLD_NEXT           break
 
-#include "ir_fold_hash.h"
+#include <ir_fold_hash.h>
 
 #define IR_FOLD_RULE(x) ((x) >> 21)
 #define IR_FOLD_KEY(x)  ((x) & 0x1fffff)
@@ -974,7 +974,7 @@ restart:
 	} while (1);
 
 ir_fold_restart:
-	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
+	if (!ctx->use_lists) {
 		op1_insn = ctx->ir_base + op1;
 		op2_insn = ctx->ir_base + op2;
 		op3_insn = ctx->ir_base + op3;
@@ -987,7 +987,7 @@ ir_fold_restart:
 		return IR_FOLD_DO_RESTART;
 	}
 ir_fold_cse:
-	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
+	if (!ctx->use_lists) {
 		/* Local CSE */
 		ref = _ir_fold_cse(ctx, opt, op1, op2, op3);
 		if (ref) {
@@ -1009,9 +1009,15 @@ ir_fold_cse:
 		ctx->prev_insn_chain[op] = ref;
 
 		return ref;
+	} else {
+		ctx->fold_insn.optx = opt;
+		ctx->fold_insn.op1 = op1;
+		ctx->fold_insn.op2 = op2;
+		ctx->fold_insn.op3 = op3;
+		return IR_FOLD_DO_CSE;
 	}
 ir_fold_emit:
-	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
+	if (!ctx->use_lists) {
 		return ir_emit(ctx, opt, op1, op2, op3);
 	} else {
 		ctx->fold_insn.optx = opt;
@@ -1021,17 +1027,17 @@ ir_fold_emit:
 		return IR_FOLD_DO_EMIT;
 	}
 ir_fold_copy:
-	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
+	if (!ctx->use_lists) {
 		return ref;
 	} else {
 		ctx->fold_insn.op1 = ref;
 		return IR_FOLD_DO_COPY;
 	}
 ir_fold_const:
-	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
+	if (!ctx->use_lists) {
 		return ir_const(ctx, val, IR_OPT_TYPE(opt));
 	} else {
-		ctx->fold_insn.type = IR_OPT_TYPE(opt);
+		ctx->fold_insn.opt = IR_OPT(IR_OPT_TYPE(opt), IR_OPT_TYPE(opt));
 		ctx->fold_insn.val.u64 = val.u64;
 		return IR_FOLD_DO_CONST;
 	}
@@ -1288,69 +1294,65 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 
 void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref ref)
 {
-	ir_ref j, n, *p, *q, use;
+	ir_ref n, *p, *q, use;
 	ir_use_list *use_list;
-	ir_ref skip = 0;
 
 	IR_ASSERT(from > 0);
 	use_list = &ctx->use_lists[from];
 	n = use_list->count;
-	for (j = 0, p = q = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
+	for (p = q = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 		use = *p;
-		if (use == ref) {
-			skip++;
-		} else {
+		if (use != ref) {
 			if (p != q) {
 				*q = use;
 			}
 			q++;
 		}
 	}
-	if (skip) {
-		use_list->count -= skip;
+	if (p != q) {
+		use_list->count -= (p - q);
 		do {
 			*q = IR_UNUSED;
 			q++;
-		} while (--skip);
+		} while (q != p);
 	}
 }
 
 void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref ref)
 {
-	ir_ref j, n, *p;
+	ir_ref n, *p;
 	ir_use_list *use_list;
 
 	IR_ASSERT(from > 0);
 	use_list = &ctx->use_lists[from];
 	n = use_list->count;
-	j = 0;
 	p = &ctx->use_edges[use_list->refs];
-	while (j < n) {
+	while (n > 0) {
 		if (*p == ref) {
 			use_list->count--;
-			j++;
-			while (j < n) {
+			n--;
+			while (n > 0) {
 				*p = *(p+1);
 				p++;
-				j++;
+				n--;
 			}
 			*p = IR_UNUSED;
 			break;
 		}
 		p++;
-		j++;
+		n--;
 	}
 }
 
 void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
 {
 	ir_use_list *use_list;
-	ir_ref i, n, *p;
+	ir_ref n, *p;
 
 	IR_ASSERT(ref > 0);
 	use_list = &ctx->use_lists[ref];
 	n = use_list->count;
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 		if (*p == use) {
 			*p = new_use;
 			break;
@@ -1361,12 +1363,12 @@ void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use
 void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
 {
 	ir_use_list *use_list;
-	ir_ref i, n, *p;
+	ir_ref n, *p;
 
 	IR_ASSERT(ref > 0);
 	use_list = &ctx->use_lists[ref];
 	n = use_list->count;
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 		if (*p == use) {
 			*p = new_use;
 		}
@@ -1436,7 +1438,7 @@ void ir_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref)
 	n = use_list->count;
 	p = ctx->use_edges + use_list->refs;
 
-	if (new_ref < 0) {
+	if (new_ref <= 0) {
 		/* constant or IR_UNUSED */
 		for (; n; p++, n--) {
 			use = *p;
@@ -1483,6 +1485,18 @@ void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val)
 void ir_array_grow(ir_array *a, uint32_t size)
 {
 	IR_ASSERT(size > a->size);
+	if (size >= 256) {
+		size = IR_ALIGNED_SIZE(size, 256);
+	} else {
+		/* Use big enough power of 2 */
+		size -= 1;
+		size |= (size >> 1);
+		size |= (size >> 2);
+		size |= (size >> 4);
+//		size |= (size >> 8);
+//		size |= (size >> 16);
+		size += 1;
+	}
 	a->refs = ir_mem_realloc(a->refs, size * sizeof(ir_ref));
 	a->size = size;
 }
@@ -1818,7 +1832,7 @@ int ir_mem_flush(void *ptr, size_t size)
 #else
 void *ir_mem_mmap(size_t size)
 {
-        int prot_flags = PROT_EXEC;
+	int prot_flags = PROT_EXEC;
 #if defined(__NetBSD__)
 	prot_flags |= PROT_MPROTECT(PROT_READ|PROT_WRITE);
 #endif
@@ -1915,7 +1929,7 @@ static ir_alias ir_check_aliasing(ir_ctx *ctx, ir_ref addr1, ir_ref addr2)
 }
 #endif
 
-static ir_alias ir_check_partial_aliasing(const ir_ctx *ctx, ir_ref addr1, ir_ref addr2, ir_type type1, ir_type type2)
+ir_alias ir_check_partial_aliasing(const ir_ctx *ctx, ir_ref addr1, ir_ref addr2, ir_type type1, ir_type type2)
 {
 	ir_insn *insn1, *insn2;
 	ir_ref base1, base2, off1, off2;
@@ -2009,9 +2023,8 @@ static ir_alias ir_check_partial_aliasing(const ir_ctx *ctx, ir_ref addr1, ir_re
 	return IR_MAY_ALIAS;
 }
 
-static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr)
+IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr, ir_ref limit)
 {
-	ir_ref limit = (addr > 0) ? addr : 1;
 	ir_insn *insn;
 	uint32_t modified_regset = 0;
 
@@ -2022,10 +2035,10 @@ static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_re
 				if (insn->type == type) {
 					return ref; /* load forwarding (L2L) */
 				} else if (ir_type_size[insn->type] == ir_type_size[type]) {
-					return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), ref); /* load forwarding with bitcast (L2L) */
+					return ref; /* load forwarding with bitcast (L2L) */
 				} else if (ir_type_size[insn->type] > ir_type_size[type]
 						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(insn->type)) {
-					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), ref); /* partial load forwarding (L2L) */
+					return ref; /* partial load forwarding (L2L) */
 				}
 			}
 		} else if (insn->op == IR_STORE) {
@@ -2039,10 +2052,10 @@ static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_re
 				} else if (type2 == type) {
 					return insn->op3; /* store forwarding (S2L) */
 				} else if (ir_type_size[type2] == ir_type_size[type]) {
-					return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), insn->op3); /* store forwarding with bitcast (S2L) */
+					return insn->op3; /* store forwarding with bitcast (S2L) */
 				} else if (ir_type_size[type2] > ir_type_size[type]
 						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(type2)) {
-					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), insn->op3); /* partial store forwarding (S2L) */
+					return insn->op3; /* partial store forwarding (S2L) */
 				} else {
 					return IR_UNUSED;
 				}
@@ -2056,7 +2069,233 @@ static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_re
 		}
 		ref = insn->op1;
 	}
+
 	return IR_UNUSED;
+}
+
+ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr)
+{
+	return ir_find_aliasing_load_i(ctx, ref, type, addr, (addr > 0 && addr < ref) ? addr : 1);
+}
+
+IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var)
+{
+	ir_insn *insn;
+
+	while (ref > var) {
+		insn = &ctx->ir_base[ref];
+		if (insn->op == IR_VLOAD) {
+			if (insn->op2 == var) {
+				if (insn->type == type) {
+					return ref; /* load forwarding (L2L) */
+				} else if (ir_type_size[insn->type] == ir_type_size[type]) {
+					return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), ref); /* load forwarding with bitcast (L2L) */
+				} else if (ir_type_size[insn->type] > ir_type_size[type]
+						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(insn->type)) {
+					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), ref); /* partial load forwarding (L2L) */
+				}
+			}
+		} else if (insn->op == IR_VSTORE) {
+			ir_type type2 = ctx->ir_base[insn->op3].type;
+
+			if (insn->op2 == var) {
+				if (type2 == type) {
+					return insn->op3; /* store forwarding (S2L) */
+				} else if (ir_type_size[type2] == ir_type_size[type]) {
+					return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), insn->op3); /* store forwarding with bitcast (S2L) */
+				} else if (ir_type_size[type2] > ir_type_size[type]
+						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(type2)) {
+					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), insn->op3); /* partial store forwarding (S2L) */
+				} else {
+					break;
+				}
+			}
+		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_CALL || insn->op == IR_STORE) {
+			break;
+		}
+		ref = insn->op1;
+	}
+
+	return IR_UNUSED;
+}
+
+ir_ref ir_find_aliasing_vload(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var)
+{
+	return ir_find_aliasing_vload_i(ctx, ref, type, var);
+}
+
+IR_ALWAYS_INLINE ir_ref ir_find_aliasing_store_i(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val, ir_ref limit)
+{
+	ir_ref next = IR_UNUSED;
+	ir_insn *insn;
+	ir_type type = ctx->ir_base[val].type;
+	ir_type type2;
+	bool guarded = 0;
+
+//	if (!IR_IS_CONST_REF(val)) {
+//		insn = &ctx->ir_base[val];
+//		if (insn->op == IR_BITCAST
+//		 && !IR_IS_CONST_REF(insn->op1)
+//		 && ir_type_size[insn->type] == ir_type_size[ctx->ir_base[insn->op1].type]) {
+//			/* skip BITCAST */
+//			val = insn->op1;
+//		}
+//	}
+
+	while (ref > limit) {
+		insn = &ctx->ir_base[ref];
+		if (insn->op == IR_STORE) {
+			if (insn->op2 == addr) {
+				if (ctx->ir_base[insn->op3].type == type) {
+					if (insn->op3 == val) {
+						/* dead STORE (store the same value once again) */
+						return ref;
+					} else {
+						if (!guarded) {
+							/* the previous STORE is dead (there are no LOADs) */
+							if (!ctx->use_lists) {
+								if (next) {
+									ctx->ir_base[next].op1 = insn->op1;
+								} else {
+									ctx->control = insn->op1;
+								}
+							} else {
+								ir_ref prev = insn->op1;
+
+								if (!next) {
+									IR_ASSERT(ctx->use_lists[ref].count == 1);
+									next = ctx->use_edges[ctx->use_lists[ref].refs];
+								}
+								ctx->ir_base[next].op1 = prev;
+								ir_use_list_remove_one(ctx, ref, next);
+								ir_use_list_replace_one(ctx, prev, ref, next);
+								if (!IR_IS_CONST_REF(insn->op2)) {
+									ir_use_list_remove_one(ctx, insn->op2, ref);
+								}
+								if (!IR_IS_CONST_REF(insn->op3)) {
+									ir_use_list_remove_one(ctx, insn->op3, ref);
+								}
+								insn->op1 = IR_UNUSED;
+							}
+							MAKE_NOP(insn);
+						}
+						break;
+					}
+				} else {
+					break;
+				}
+			} else {
+				type2 = ctx->ir_base[insn->op3].type;
+				goto check_aliasing;
+			}
+		} else if (insn->op == IR_LOAD) {
+			if (insn->op2 == addr) {
+				if (ref == val) {
+					/* dead STORE (store the value that was loaded before) */
+					return ref;
+				}
+				break;
+			}
+			type2 = insn->type;
+check_aliasing:
+			if (ir_check_partial_aliasing(ctx, addr, insn->op2, type, type2) != IR_NO_ALIAS) {
+				break;
+			}
+		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
+			guarded = 1;
+		} else if (insn->op >= IR_START || insn->op == IR_CALL) {
+			break;
+		}
+		next = ref;
+		ref = insn->op1;
+	}
+
+	return IR_UNUSED;
+}
+
+ir_ref ir_find_aliasing_store(ir_ctx *ctx, ir_ref ref, ir_ref addr, ir_ref val)
+{
+	return ir_find_aliasing_store_i(ctx, ref, addr, val, (addr > 0 && addr < ref) ? addr : 1);
+}
+
+IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vstore_i(ir_ctx *ctx, ir_ref ref, ir_ref var, ir_ref val)
+{
+	ir_ref limit = var;
+	ir_ref next = IR_UNUSED;
+	ir_insn *insn;
+	bool guarded = 0;
+
+//	if (!IR_IS_CONST_REF(val)) {
+//		insn = &ctx->ir_base[val];
+//		if (insn->op == IR_BITCAST
+//		 && !IR_IS_CONST_REF(insn->op1)
+//		 && ir_type_size[insn->type] == ir_type_size[ctx->ir_base[insn->op1].type]) {
+//			/* skip BITCAST */
+//			val = insn->op1;
+//		}
+//	}
+
+	while (ref > limit) {
+		insn = &ctx->ir_base[ref];
+		if (insn->op == IR_VSTORE) {
+			if (insn->op2 == var) {
+				if (insn->op3 == val) {
+					/* dead VSTORE */
+					return ref;
+				} else {
+					if (!guarded) {
+						/* the previous VSTORE is dead (there are no VLOADs) */
+						if (!ctx->use_lists) {
+							if (next) {
+								ctx->ir_base[next].op1 = insn->op1;
+							} else {
+								ctx->control = insn->op1;
+							}
+						} else {
+							ir_ref prev = insn->op1;
+
+							if (!next) {
+								IR_ASSERT(ctx->use_lists[ref].count == 1);
+								next = ctx->use_edges[ctx->use_lists[ref].refs];
+							}
+							ctx->ir_base[next].op1 = prev;
+							ir_use_list_remove_one(ctx, ref, next);
+							ir_use_list_replace_one(ctx, prev, ref, next);
+							if (!IR_IS_CONST_REF(insn->op2)) {
+								ir_use_list_remove_one(ctx, insn->op2, ref);
+							}
+							if (!IR_IS_CONST_REF(insn->op3)) {
+								ir_use_list_remove_one(ctx, insn->op3, ref);
+							}
+							insn->op1 = IR_UNUSED;
+						}
+						MAKE_NOP(insn);
+					}
+					break;
+				}
+			}
+		} else if (insn->op == IR_VLOAD) {
+			if (insn->op2 == var) {
+				if (ref == val) {
+					/* dead VSTORE */
+					return ref;
+				}
+				break;
+			}
+		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
+			guarded = 1;
+		} else if (insn->op >= IR_START || insn->op == IR_CALL || insn->op == IR_LOAD || insn->op == IR_STORE) {
+			break;
+		}
+		next = ref;
+		ref = insn->op1;
+	}
+	return IR_UNUSED;
+}
+
+ir_ref ir_find_aliasing_vstore(ir_ctx *ctx, ir_ref ref, ir_ref var, ir_ref val)
+{
+	return ir_find_aliasing_vstore_i(ctx, ref, var, val);
 }
 
 /* IR Construction API */
@@ -2176,7 +2415,7 @@ void _ir_BEGIN(ir_ctx *ctx, ir_ref src)
 	}
 }
 
-ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
+static ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 
@@ -2184,10 +2423,65 @@ ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
 		ir_insn *op2_insn = &ctx->ir_base[insn->op2];
 
 		if (IR_IS_TYPE_INT(op2_insn->type) && op2_insn->val.u64 == 0) {
-			return insn->op1;
+			ref = insn->op1;
+			insn = &ctx->ir_base[ref];
+			if (insn->op == IR_ALLOCA || insn->op == IR_VADDR) {
+				return IR_TRUE;
+			}
+		}
+	} else if (insn->op == IR_EQ && insn->op2 == IR_TRUE) {
+		ref = insn->op1;
+		insn = &ctx->ir_base[ref];
+	} else if (insn->op == IR_EQ && insn->op2 == IR_NULL) {
+		ir_insn *op1_insn = &ctx->ir_base[insn->op1];
+		if (op1_insn->op == IR_ALLOCA || op1_insn->op == IR_VADDR) {
+			return IR_FALSE;
 		}
 	}
+//	while (insn->op == IR_SEXT || insn->op == IR_ZEXT || insn->op == IR_BITCAST) {
+//		ref = insn->op1;
+//		insn = &ctx->ir_base[ref];
+//	}
 	return ref;
+}
+
+IR_ALWAYS_INLINE ir_ref ir_check_dominating_predicates_i(ir_ctx *ctx, ir_ref ref, ir_ref condition, ir_ref limit)
+{
+	ir_insn *prev = NULL;
+	ir_insn *insn;
+
+	while (ref > limit) {
+		insn = &ctx->ir_base[ref];
+		if (insn->op == IR_GUARD_NOT) {
+			if (insn->op2 == condition) {
+				return IR_FALSE;
+			}
+		} else if (insn->op == IR_GUARD) {
+			if (insn->op2 == condition) {
+				return IR_TRUE;
+			}
+		} else if (insn->op == IR_IF) {
+			if (insn->op2 == condition) {
+				if (prev->op == IR_IF_TRUE) {
+					return IR_TRUE;
+				} else if (prev->op == IR_IF_FALSE) {
+					return IR_FALSE;
+				}
+			}
+		} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
+			break;
+		}
+		prev = insn;
+		ref = insn->op1;
+	}
+
+	return condition;
+}
+
+ir_ref ir_check_dominating_predicates(ir_ctx *ctx, ir_ref ref, ir_ref condition)
+{
+	IR_ASSERT(!IR_IS_CONST_REF(condition));
+	return ir_check_dominating_predicates_i(ctx, ref, condition, (condition < ref) ? condition : 1);
 }
 
 ir_ref _ir_IF(ir_ctx *ctx, ir_ref condition)
@@ -2205,38 +2499,7 @@ ir_ref _ir_IF(ir_ctx *ctx, ir_ref condition)
 	if (IR_IS_CONST_REF(condition)) {
 		condition = ir_ref_is_true(ctx, condition) ? IR_TRUE : IR_FALSE;
 	} else {
-		ir_insn *prev = NULL;
-		ir_ref ref = ctx->control;
-		ir_insn *insn;
-
-		while (ref > condition) {
-			insn = &ctx->ir_base[ref];
-			if (insn->op == IR_GUARD_NOT) {
-				if (insn->op2 == condition) {
-					condition = IR_FALSE;
-					break;
-				}
-			} else if (insn->op == IR_GUARD) {
-				if (insn->op2 == condition) {
-					condition = IR_TRUE;
-					break;
-				}
-			} else if (insn->op == IR_IF) {
-				if (insn->op2 == condition) {
-					if (prev->op == IR_IF_TRUE) {
-						condition = IR_TRUE;
-						break;
-					} else if (prev->op == IR_IF_FALSE) {
-						condition = IR_FALSE;
-						break;
-					}
-				}
-			} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
-				break;
-			}
-			prev = insn;
-			ref = insn->op1;
-		}
+		condition = ir_check_dominating_predicates_i(ctx, ctx->control, condition, condition);
 	}
 	if_ref = ir_emit2(ctx, IR_IF, ctx->control, condition);
 	ctx->control = IR_UNUSED;
@@ -2755,35 +3018,9 @@ void _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 		}
 		condition = IR_FALSE;
 	} else if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
-		ir_insn *prev = NULL;
-		ir_ref ref = ctx->control;
-		ir_insn *insn;
-
-		while (ref > condition) {
-			insn = &ctx->ir_base[ref];
-			if (insn->op == IR_GUARD) {
-				if (insn->op2 == condition) {
-					return;
-				}
-			} else if (insn->op == IR_GUARD_NOT) {
-				if (insn->op2 == condition) {
-					condition = IR_FALSE;
-					break;
-				}
-			} else if (insn->op == IR_IF) {
-				if (insn->op2 == condition) {
-					if (prev->op == IR_IF_TRUE) {
-						return;
-					} else if (prev->op == IR_IF_FALSE) {
-						condition = IR_FALSE;
-						break;
-					}
-				}
-			} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
-				break;
-			}
-			prev = insn;
-			ref = insn->op1;
+		condition = ir_check_dominating_predicates_i(ctx, ctx->control, condition, condition);
+		if (condition == IR_TRUE) {
+			return;
 		}
 	}
 	if (ctx->snapshot_create) {
@@ -2801,35 +3038,9 @@ void _ir_GUARD_NOT(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 		}
 		condition = IR_TRUE;
 	} else if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
-		ir_insn *prev = NULL;
-		ir_ref ref = ctx->control;
-		ir_insn *insn;
-
-		while (ref > condition) {
-			insn = &ctx->ir_base[ref];
-			if (insn->op == IR_GUARD_NOT) {
-				if (insn->op2 == condition) {
-					return;
-				}
-			} else if (insn->op == IR_GUARD) {
-				if (insn->op2 == condition) {
-					condition = IR_TRUE;
-					break;
-				}
-			} else if (insn->op == IR_IF) {
-				if (insn->op2 == condition) {
-					if (prev->op == IR_IF_TRUE) {
-						condition = IR_TRUE;
-						break;
-					} else if (prev->op == IR_IF_FALSE) {
-						return;
-					}
-				}
-			} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
-				break;
-			}
-			prev = insn;
-			ref = insn->op1;
+		condition = ir_check_dominating_predicates_i(ctx, ctx->control, condition, condition);
+		if (condition == IR_FALSE) {
+			return;
 		}
 	}
 	if (ctx->snapshot_create) {
@@ -2881,109 +3092,33 @@ void _ir_AFREE(ir_ctx *ctx, ir_ref size)
 
 ir_ref _ir_VLOAD(ir_ctx *ctx, ir_type type, ir_ref var)
 {
-	ir_ref ref = ctx->control;
-	ir_insn *insn;
-
-	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
-		IR_ASSERT(ctx->control);
-		return ctx->control = ir_emit2(ctx, IR_OPT(IR_VLOAD, type), ctx->control, var);
-	}
-	while (ref > var) {
-		insn = &ctx->ir_base[ref];
-		if (insn->op == IR_VLOAD) {
-			if (insn->op2 == var) {
-				if (insn->type == type) {
-					return ref; /* load forwarding (L2L) */
-				} else if (ir_type_size[insn->type] == ir_type_size[type]) {
-					return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), ref); /* load forwarding with bitcast (L2L) */
-				} else if (ir_type_size[insn->type] > ir_type_size[type]
-						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(insn->type)) {
-					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), ref); /* partial load forwarding (L2L) */
-				}
-			}
-		} else if (insn->op == IR_VSTORE) {
-			ir_type type2 = ctx->ir_base[insn->op3].type;
-
-			if (insn->op2 == var) {
-				if (type2 == type) {
-					return insn->op3; /* store forwarding (S2L) */
-				} else if (ir_type_size[type2] == ir_type_size[type]) {
-					return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), insn->op3); /* store forwarding with bitcast (S2L) */
-				} else if (ir_type_size[type2] > ir_type_size[type]
-						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(type2)) {
-					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), insn->op3); /* partial store forwarding (S2L) */
-				} else {
-					break;
-				}
-			}
-		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_CALL || insn->op == IR_STORE) {
-			break;
-		}
-		ref = insn->op1;
-	}
+	ir_ref ref;
 
 	IR_ASSERT(ctx->control);
+	if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
+		ref = ir_find_aliasing_vload_i(ctx, ctx->control, type, var);
+		if (ref) {
+			ir_insn *insn = &ctx->ir_base[ref];
+			if (insn->type == type) {
+				return ref;
+			} else if (ir_type_size[insn->type] == ir_type_size[type]) {
+				return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), ref); /* load forwarding with bitcast (L2L) */
+			} else {
+				return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), ref); /* partial load forwarding (L2L) */
+			}
+		}
+	}
 	return ctx->control = ir_emit2(ctx, IR_OPT(IR_VLOAD, type), ctx->control, var);
 }
 
 void _ir_VSTORE(ir_ctx *ctx, ir_ref var, ir_ref val)
 {
-	ir_ref limit = var;
-	ir_ref ref = ctx->control;
-	ir_ref prev = IR_UNUSED;
-	ir_insn *insn;
-	bool guarded = 0;
-
-	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
-		IR_ASSERT(ctx->control);
-		ctx->control = ir_emit3(ctx, IR_VSTORE, ctx->control, var, val);
-		return;
-	}
-
-	if (!IR_IS_CONST_REF(val)) {
-		insn = &ctx->ir_base[val];
-		if (insn->op == IR_BITCAST
-		 && !IR_IS_CONST_REF(insn->op1)
-		 && ir_type_size[insn->type] == ir_type_size[ctx->ir_base[insn->op1].type]) {
-			/* skip BITCAST */
-			val = insn->op1;
-		}
-	}
-
 	IR_ASSERT(ctx->control);
-	while (ref > limit) {
-		insn = &ctx->ir_base[ref];
-		if (insn->op == IR_VSTORE) {
-			if (insn->op2 == var) {
-				if (insn->op3 == val) {
-					return;
-				} else {
-					if (!guarded) {
-						if (prev) {
-							ctx->ir_base[prev].op1 = insn->op1;
-						} else {
-							ctx->control = insn->op1;
-						}
-						MAKE_NOP(insn);
-					}
-					break;
-				}
-			}
-		} else if (insn->op == IR_VLOAD) {
-			if (insn->op2 == var) {
-				if (ref == val) {
-					/* dead STORE */
-					return;
-				}
-				break;
-			}
-		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
-			guarded = 1;
-		} else if (insn->op >= IR_START || insn->op == IR_CALL || insn->op == IR_LOAD || insn->op == IR_STORE) {
-			break;
+	if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
+		if (ir_find_aliasing_vstore_i(ctx, ctx->control, var, val)) {
+			/* dead STORE */
+			return;
 		}
-		prev = ref;
-		ref = insn->op1;
 	}
 	ctx->control = ir_emit3(ctx, IR_VSTORE, ctx->control, var, val);
 }
@@ -3008,89 +3143,40 @@ void _ir_RSTORE(ir_ctx *ctx, ir_ref reg, ir_ref val)
 
 ir_ref _ir_LOAD(ir_ctx *ctx, ir_type type, ir_ref addr)
 {
-	ir_ref ref = IR_UNUSED;
+	ir_ref ref;
 
 	IR_ASSERT(ctx->control);
 	if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
-		ref = ir_find_aliasing_load(ctx, ctx->control, type, addr);
+		if (ctx->ir_base[addr].op == IR_VADDR) {
+			return _ir_VLOAD(ctx, type, ctx->ir_base[addr].op1);
+		}
+		ref = ir_find_aliasing_load_i(ctx, ctx->control, type, addr, (addr > 0) ? addr : 1);
+		if (ref) {
+			ir_insn *insn = &ctx->ir_base[ref];
+			if (insn->type == type) {
+				return ref;
+			} else if (ir_type_size[insn->type] == ir_type_size[type]) {
+				return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), ref); /* load forwarding with bitcast (L2L) */
+			} else {
+				return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), ref); /* partial load forwarding (L2L) */
+			}
+		}
 	}
-	if (!ref) {
-		ctx->control = ref = ir_emit2(ctx, IR_OPT(IR_LOAD, type), ctx->control, addr);
-	}
-	return ref;
+	return ctx->control = ir_emit2(ctx, IR_OPT(IR_LOAD, type), ctx->control, addr);
 }
 
 void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 {
-	ir_ref limit = (addr > 0) ? addr : 1;
-	ir_ref ref = ctx->control;
-	ir_ref prev = IR_UNUSED;
-	ir_insn *insn;
-	ir_type type = ctx->ir_base[val].type;
-	ir_type type2;
-	bool guarded = 0;
-
 	IR_ASSERT(ctx->control);
-	if (UNEXPECTED(!(ctx->flags & IR_OPT_FOLDING))) {
-		ctx->control = ir_emit3(ctx, IR_STORE, ctx->control, addr, val);
-		return;
-	}
-
-	if (!IR_IS_CONST_REF(val)) {
-		insn = &ctx->ir_base[val];
-		if (insn->op == IR_BITCAST
-		 && !IR_IS_CONST_REF(insn->op1)
-		 && ir_type_size[insn->type] == ir_type_size[ctx->ir_base[insn->op1].type]) {
-			/* skip BITCAST */
-			val = insn->op1;
+	if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
+		if (ctx->ir_base[addr].op == IR_VADDR) {
+			_ir_VSTORE(ctx, ctx->ir_base[addr].op1, val);
+			return;
 		}
-	}
-
-	while (ref > limit) {
-		insn = &ctx->ir_base[ref];
-		if (insn->op == IR_STORE) {
-			if (insn->op2 == addr) {
-				if (ctx->ir_base[insn->op3].type == type) {
-					if (insn->op3 == val) {
-						return;
-					} else {
-						if (!guarded) {
-							if (prev) {
-								ctx->ir_base[prev].op1 = insn->op1;
-							} else {
-								ctx->control = insn->op1;
-							}
-							MAKE_NOP(insn);
-						}
-						break;
-					}
-				} else {
-					break;
-				}
-			} else {
-				type2 = ctx->ir_base[insn->op3].type;
-				goto check_aliasing;
-			}
-		} else if (insn->op == IR_LOAD) {
-			if (insn->op2 == addr) {
-				if (ref == val) {
-					/* dead STORE */
-					return;
-				}
-				break;
-			}
-			type2 = insn->type;
-check_aliasing:
-			if (ir_check_partial_aliasing(ctx, addr, insn->op2, type, type2) != IR_NO_ALIAS) {
-				break;
-			}
-		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
-			guarded = 1;
-		} else if (insn->op >= IR_START || insn->op == IR_CALL) {
-			break;
+		if (ir_find_aliasing_store_i(ctx, ctx->control, addr, val, (addr > 0) ? addr : 1)) {
+			/* dead STORE */
+			return;
 		}
-		prev = ref;
-		ref = insn->op1;
 	}
 	ctx->control = ir_emit3(ctx, IR_STORE, ctx->control, addr, val);
 }

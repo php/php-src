@@ -208,7 +208,7 @@ static void gmp_free_object_storage(zend_object *obj) /* {{{ */
 
 static inline zend_object *gmp_create_object_ex(zend_class_entry *ce, mpz_ptr *gmpnum_target) /* {{{ */
 {
-	gmp_object *intern = emalloc(sizeof(gmp_object) + zend_object_properties_size(ce));
+	gmp_object *intern = zend_object_alloc(sizeof(gmp_object), ce);
 
 	zend_object_std_init(&intern->std, ce);
 	object_properties_init(&intern->std, ce);
@@ -480,7 +480,8 @@ static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 		return ZEND_UNCOMPARABLE;
 	}
 
-	return ZEND_THREEWAY_COMPARE(mpz_cmp(gmp_op1, gmp_op2), 0);
+	int ret = mpz_cmp(gmp_op1, gmp_op2); /* avoid multiple evaluations */
+	return ZEND_THREEWAY_COMPARE(ret, 0);
 }
 /* }}} */
 
@@ -514,7 +515,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	mpz_ptr gmpnum;
 	const unsigned char *p, *max;
 	zval *zv;
-	int retval = FAILURE;
+	zend_result retval = FAILURE;
 	php_unserialize_data_t unserialize_data;
 	zend_object *zobj;
 
@@ -1422,7 +1423,8 @@ ZEND_FUNCTION(gmp_cmp)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_b)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG(ZEND_THREEWAY_COMPARE(mpz_cmp(gmpnum_a, gmpnum_b), 0));
+	int ret = mpz_cmp(gmpnum_a, gmpnum_b); /* avoid multiple evaluations */
+	RETURN_LONG(ZEND_THREEWAY_COMPARE(ret, 0));
 }
 /* }}} */
 

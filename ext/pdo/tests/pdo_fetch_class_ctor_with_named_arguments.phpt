@@ -44,12 +44,12 @@ $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_fetch_class_ctor_named");
 ?>
 --EXPECTF--
-Value of $a: My key is B
-Value of $b: My key is A
-Value of $a: My key is B
-Value of $b: My key is A
-Value of $a: My key is B
-Value of $b: My key is A
+Value of $a: My key is A
+Value of $b: My key is B
+Value of $a: My key is A
+Value of $b: My key is B
+Value of $a: My key is A
+Value of $b: My key is B
 array(3) {
   [0]=>
   object(TestBase)#%d (3) {

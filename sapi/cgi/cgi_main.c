@@ -158,7 +158,6 @@ static const opt_struct OPTIONS[] = {
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
-	{'z', 1, "zend-extension"},
 	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
@@ -1042,7 +1041,6 @@ static void php_cgi_usage(char *argv0)
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
 				"  -T <count>       Measure execution time of script repeated <count> times.\n",
 				prog, prog);
 }
@@ -2383,10 +2381,6 @@ parent_loop_end:
 							behavior = PHP_MODE_STRIP;
 							break;
 
-						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
-							break;
-
 						default:
 							break;
 					}
@@ -2426,7 +2420,7 @@ do_repeat:
 				 *  test.php v1=test "v2=hello world!"
 				*/
 				if (!SG(request_info).query_string && argc > php_optind) {
-					size_t slen = strlen(PG(arg_separator).input);
+					size_t slen = ZSTR_LEN(PG(arg_separator).input);
 					len = 0;
 					for (i = php_optind; i < argc; i++) {
 						if (i < (argc - 1)) {
@@ -2442,7 +2436,7 @@ do_repeat:
 					for (i = php_optind; i < argc; i++) {
 						strlcat(s, argv[i], len);
 						if (i < (argc - 1)) {
-							strlcat(s, PG(arg_separator).input, len);
+							strlcat(s, ZSTR_VAL(PG(arg_separator).input), len);
 						}
 					}
 					SG(request_info).query_string = s;

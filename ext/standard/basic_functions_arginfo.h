@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b0a0ccc94c6db2831f7f0b8e67562cd6a734fcdf */
+ * Stub hash: dfd7d2cfd31312f7f6c5074c10cab54e9d1fbccc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -234,6 +234,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_array_key_first, 0, 1, MAY_BE_LO
 ZEND_END_ARG_INFO()
 
 #define arginfo_array_key_last arginfo_array_key_first
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_first, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_array_last arginfo_array_first
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_values, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
@@ -1127,12 +1133,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_scandir, 0, 1, MAY_BE_ARRAY|MAY_
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_GLOB)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_glob, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_exec, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
@@ -2350,6 +2354,8 @@ ZEND_FUNCTION(array_replace_recursive);
 ZEND_FUNCTION(array_keys);
 ZEND_FUNCTION(array_key_first);
 ZEND_FUNCTION(array_key_last);
+ZEND_FUNCTION(array_first);
+ZEND_FUNCTION(array_last);
 ZEND_FUNCTION(array_values);
 ZEND_FUNCTION(array_count_values);
 ZEND_FUNCTION(array_column);
@@ -2592,9 +2598,7 @@ ZEND_FUNCTION(getcwd);
 ZEND_FUNCTION(rewinddir);
 ZEND_FUNCTION(readdir);
 ZEND_FUNCTION(scandir);
-#if defined(HAVE_GLOB)
 ZEND_FUNCTION(glob);
-#endif
 ZEND_FUNCTION(exec);
 ZEND_FUNCTION(system);
 ZEND_FUNCTION(passthru);
@@ -2943,6 +2947,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("array_keys", zif_array_keys, arginfo_array_keys, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_key_first", zif_array_key_first, arginfo_array_key_first, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_key_last", zif_array_key_last, arginfo_array_key_last, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("array_first", zif_array_first, arginfo_array_first, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("array_last", zif_array_last, arginfo_array_last, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_values", zif_array_values, arginfo_array_values, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_count_values", zif_array_count_values, arginfo_array_count_values, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("array_column", zif_array_column, arginfo_array_column, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
@@ -3193,9 +3199,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(rewinddir, arginfo_rewinddir)
 	ZEND_FE(readdir, arginfo_readdir)
 	ZEND_FE(scandir, arginfo_scandir)
-#if defined(HAVE_GLOB)
 	ZEND_FE(glob, arginfo_glob)
-#endif
 	ZEND_FE(exec, arginfo_exec)
 	ZEND_FE(system, arginfo_system)
 	ZEND_FE(passthru, arginfo_passthru)

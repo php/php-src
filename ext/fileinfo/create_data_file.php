@@ -19,6 +19,8 @@
     for ($i = ord(' '); $i < 0x7F; ++$i) {
         $map[chr($i)] = chr($i);
     }
+    // … Except trigraphs
+    $map["?"] = '\?';
     // … Except digits following a \0: \012 will be interpreted as octal 012, and not \0 followed by 12.
     // Then we have to express \0 in a full unambiguous 3-chars octal code.
     for ($i = ord('0'); $i <= ord('9'); ++$i) {
@@ -39,7 +41,7 @@
     $chunks = str_split($dta, CHUNK_SIZE);
     $chunks[count($chunks) - 1] = str_pad($chunks[count($chunks) - 1], CHUNK_SIZE, chr(0));
 
-    echo 'const unsigned char php_magic_database[' . count($chunks) . '][' . CHUNK_SIZE . "] = {\n";
+    echo 'const unsigned char php_magic_database[' . count($chunks) . '][' . CHUNK_SIZE . "] ZEND_NONSTRING = {\n";
     foreach ($chunks as $chunk) {
         echo '"' . strtr($chunk, $map) . '",' . "\n";
     }

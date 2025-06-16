@@ -115,7 +115,9 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create opcache lock file in %s: %s (%d)", lockfile_path, strerror(errno), errno);
 	}
 
-	fchmod(lock_file, 0666);
+	if (fchmod(lock_file, 0666) == -1) {
+		zend_accel_error(ACCEL_LOG_WARNING, "Unable to change opcache lock file permissions in %s: %s (%d)", lockfile_path, strerror(errno), errno);
+	}
 
 	val = fcntl(lock_file, F_GETFD, 0);
 	val |= FD_CLOEXEC;

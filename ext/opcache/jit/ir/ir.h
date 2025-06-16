@@ -154,19 +154,27 @@ typedef enum _ir_type {
 } ir_type;
 
 #ifdef IR_64
-# define IR_SIZE_T     IR_U64
-# define IR_SSIZE_T    IR_I64
-# define IR_UINTPTR_T  IR_U64
-# define IR_INTPTR_T   IR_I64
-# define IR_C_UINTPTR  IR_U64
-# define IR_C_INTPTR   IR_I64
+# define IR_SIZE_T          IR_U64
+# define IR_SSIZE_T         IR_I64
+# define IR_UINTPTR_T       IR_U64
+# define IR_INTPTR_T        IR_I64
+# define IR_C_UINTPTR       IR_U64
+# define IR_C_INTPTR        IR_I64
+# define ir_const_size_t    ir_const_u64
+# define ir_const_ssize_t   ir_const_i64
+# define ir_const_uintptr_t ir_const_u64
+# define ir_const_intptr_t  ir_const_i64
 #else
-# define IR_SIZE_T     IR_U32
-# define IR_SSIZE_T    IR_I32
-# define IR_UINTPTR_T  IR_U32
-# define IR_INTPTR_T   IR_I32
-# define IR_C_UINTPTR  IR_U32
-# define IR_C_INTPTR   IR_I32
+# define IR_SIZE_T          IR_U32
+# define IR_SSIZE_T         IR_I32
+# define IR_UINTPTR_T       IR_U32
+# define IR_INTPTR_T        IR_I32
+# define IR_C_UINTPTR       IR_U32
+# define IR_C_INTPTR        IR_I32
+# define ir_const_size_t    ir_const_u32
+# define ir_const_ssize_t   ir_const_i32
+# define ir_const_uintptr_t ir_const_u32
+# define ir_const_intptr_t  ir_const_i32
 #endif
 
 /* List of IR opcodes
@@ -297,10 +305,11 @@ typedef enum _ir_type {
 	_(COND,	        d3,   def, def, def) /* op1 ? op2 : op3             */ \
 	\
 	/* data-flow and miscellaneous ops                                  */ \
+	_(VADDR,        d1,   var, ___, ___) /* load address of local var   */ \
+	_(FRAME_ADDR,   d0,   ___, ___, ___) /* function frame address      */ \
 	_(PHI,          pN,   reg, def, def) /* SSA Phi function            */ \
 	_(COPY,         d1X1, def, opt, ___) /* COPY (last foldable op)     */ \
 	_(PI,           p2,   reg, def, ___) /* e-SSA Pi constraint ???     */ \
-	_(FRAME_ADDR,   d0,   ___, ___, ___) /* function frame address      */ \
 	/* (USE, RENAME)                                                    */ \
 	\
 	/* data ops                                                         */ \
@@ -320,7 +329,6 @@ typedef enum _ir_type {
 	_(AFREE,        a2,   src, def, ___) /* revert alloca(def)          */ \
 	_(BLOCK_BEGIN,  a1,   src, ___, ___) /* stacksave                   */ \
 	_(BLOCK_END,    a2,   src, def, ___) /* stackrestore                */ \
-	_(VADDR,        d1,   var, ___, ___) /* load address of local var   */ \
 	_(VLOAD,        l2,   src, var, ___) /* load value of local var     */ \
 	_(VSTORE,       s3,   src, var, def) /* store value to local var    */ \
 	_(RLOAD,        l1X2, src, num, opt) /* load value from register    */ \
@@ -401,8 +409,10 @@ typedef int32_t ir_ref;
 #define IR_CONSTS_LIMIT_MIN (-(IR_TRUE - 1))
 #define IR_INSNS_LIMIT_MIN (IR_UNUSED + 1)
 
+/* ADDR_MEMBER is neccessary to workaround MSVC C preprocessor bug */
 #ifndef IR_64
-# define ADDR_MEMBER            uintptr_t                  addr;
+# define ADDR_MEMBER            uintptr_t                  addr; \
+								void                      *ptr;
 #else
 # define ADDR_MEMBER
 #endif
@@ -412,6 +422,7 @@ typedef union _ir_val {
 	int64_t                            i64;
 #ifdef IR_64
 	uintptr_t                          addr;
+	void                              *ptr;
 #endif
 	IR_STRUCT_LOHI(
 		union {
@@ -466,6 +477,7 @@ typedef struct _ir_insn {
 		},
 		union {
 			ir_ref                     op1;
+			ir_ref                     ref;
 			ir_ref                     prev_const;
 		}
 	);
@@ -960,9 +972,7 @@ IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)
 			 || !ir_mem2ssa(ctx)) {
 				return NULL;
 			}
-			if (opt_level > 1) {
-				ir_reset_cfg(ctx);
-			}
+			ir_reset_cfg(ctx);
 		}
 
 		if (opt_level > 1) {

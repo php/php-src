@@ -161,7 +161,7 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 	}
 #endif
 
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
+	for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 		use = *p;
 		insn = &ctx->ir_base[use];
 		if (insn->op == IR_PARAM) {
@@ -415,9 +415,9 @@ static int ir_const_label(ir_ctx *ctx, ir_ref ref)
 }
 
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-# include "ir_emit_x86.h"
+# include <ir_emit_x86.h>
 #elif defined(IR_TARGET_AARCH64)
-# include "ir_emit_aarch64.h"
+# include <ir_emit_aarch64.h>
 #else
 # error "Unknown IR target"
 #endif
@@ -917,7 +917,7 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 
 	copies = alloca(use_list->count * sizeof(ir_dessa_copy));
 
-	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
+	for (i = use_list->count, p = &ctx->use_edges[use_list->refs]; i > 0; p++, i--) {
 		ir_ref ref = *p;
 		ir_insn *insn = &ctx->ir_base[ref];
 

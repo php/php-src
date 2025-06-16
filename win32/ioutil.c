@@ -281,7 +281,8 @@ PW32IO int php_win32_ioutil_close(int fd)
 
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
-	size_t path_len, dir_len = 0;
+	size_t path_len;
+	DWORD dir_len = 0;
 	const wchar_t *my_path;
 
 	if (!path) {
@@ -336,7 +337,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 			dst = _tmp + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 #ifndef ZTS
 			if (dir_len > 0) {
-				size_t len = GetCurrentDirectoryW(dir_len, dst);
+				DWORD len = GetCurrentDirectoryW(dir_len, dst);
 				if (len == 0 || len + 1 != dir_len) {
 					free(tmp);
 					free(_tmp);

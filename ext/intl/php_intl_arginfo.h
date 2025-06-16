@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 168eabfdcbf29189f2327448f104ea98752d1c5a */
+ * Stub hash: 0d5b028a1ab8f35e8ee1b51ce3141b6ef782af28 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -489,6 +489,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_str_split, 0, 1, MAY_BE
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_levenshtein, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, insertion_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, replacement_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deletion_cost, IS_LONG, 0, "1")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -565,6 +573,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_accept_from_http, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_is_right_to_left, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_add_likely_subtags, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_locale_minimize_subtags arginfo_locale_add_likely_subtags
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_msgfmt_create, 0, 2, MessageFormatter, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -780,11 +798,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_transliterator_transliterate, 0,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, end, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_transliterator_get_error_code, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_transliterator_get_error_code, 0, 1, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, transliterator, Transliterator, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_transliterator_get_error_message, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_transliterator_get_error_message, 0, 1, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, transliterator, Transliterator, 0)
 ZEND_END_ARG_INFO()
 
@@ -899,6 +917,7 @@ ZEND_FUNCTION(grapheme_substr);
 ZEND_FUNCTION(grapheme_strstr);
 ZEND_FUNCTION(grapheme_stristr);
 ZEND_FUNCTION(grapheme_str_split);
+ZEND_FUNCTION(grapheme_levenshtein);
 ZEND_FUNCTION(grapheme_extract);
 ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
@@ -920,6 +939,9 @@ ZEND_FUNCTION(locale_filter_matches);
 ZEND_FUNCTION(locale_canonicalize);
 ZEND_FUNCTION(locale_lookup);
 ZEND_FUNCTION(locale_accept_from_http);
+ZEND_FUNCTION(locale_is_right_to_left);
+ZEND_FUNCTION(locale_add_likely_subtags);
+ZEND_FUNCTION(locale_minimize_subtags);
 ZEND_FUNCTION(msgfmt_create);
 ZEND_FUNCTION(msgfmt_format);
 ZEND_FUNCTION(msgfmt_format_message);
@@ -1086,6 +1108,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(grapheme_strstr, arginfo_grapheme_strstr)
 	ZEND_FE(grapheme_stristr, arginfo_grapheme_stristr)
 	ZEND_FE(grapheme_str_split, arginfo_grapheme_str_split)
+	ZEND_FE(grapheme_levenshtein, arginfo_grapheme_levenshtein)
 	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
 	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
@@ -1107,6 +1130,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(locale_canonicalize, arginfo_locale_canonicalize)
 	ZEND_FE(locale_lookup, arginfo_locale_lookup)
 	ZEND_FE(locale_accept_from_http, arginfo_locale_accept_from_http)
+	ZEND_FE(locale_is_right_to_left, arginfo_locale_is_right_to_left)
+	ZEND_FE(locale_add_likely_subtags, arginfo_locale_add_likely_subtags)
+	ZEND_FE(locale_minimize_subtags, arginfo_locale_minimize_subtags)
 	ZEND_FE(msgfmt_create, arginfo_msgfmt_create)
 	ZEND_FE(msgfmt_format, arginfo_msgfmt_format)
 	ZEND_FE(msgfmt_format_message, arginfo_msgfmt_format_message)

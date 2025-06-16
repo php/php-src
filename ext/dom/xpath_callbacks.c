@@ -24,6 +24,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 
 #include "php_dom.h"
+#include "internal_helpers.h"
 #include <libxml/parserInternals.h>
 
 static void xpath_callbacks_entry_dtor(zval *zv)
@@ -205,13 +206,14 @@ static zend_result php_dom_xpath_callback_ns_update_method_handler(
 			ZVAL_PTR(&registered_value, fcc);
 
 			if (!key) {
-				zend_string *str = zval_try_get_string(entry);
+				zend_string *tmp_str;
+				zend_string *str = zval_try_get_tmp_string(entry, &tmp_str);
 				if (str && php_dom_xpath_is_callback_name_valid_and_throw(str, name_validation, true)) {
 					zend_hash_update(&ns->functions, str, &registered_value);
 					if (register_func) {
 						register_func(ctxt, namespace, str);
 					}
-					zend_string_release_ex(str, false);
+					zend_tmp_string_release(tmp_str);
 				} else {
 					zend_fcc_dtor(fcc);
 					efree(fcc);
@@ -425,7 +427,8 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 	}
 
 	if (Z_TYPE(callback_retval) != IS_UNDEF) {
-		if (Z_TYPE(callback_retval) == IS_OBJECT && instanceof_function(Z_OBJCE(callback_retval), dom_node_class_entry)) {
+		if (Z_TYPE(callback_retval) == IS_OBJECT
+		 && (instanceof_function(Z_OBJCE(callback_retval), dom_get_node_ce(php_dom_follow_spec_node((const xmlNode *) ctxt->context->doc))))) {
 			xmlNode *nodep;
 			dom_object *obj;
 			if (xpath_callbacks->node_list == NULL) {
@@ -439,13 +442,14 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 		} else if (Z_TYPE(callback_retval) == IS_FALSE || Z_TYPE(callback_retval) == IS_TRUE) {
 			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(callback_retval) == IS_TRUE));
 		} else if (Z_TYPE(callback_retval) == IS_OBJECT) {
-			zend_type_error("Only objects that are instances of DOMNode can be converted to an XPath expression");
+			zend_type_error("Only objects that are instances of DOM nodes can be converted to an XPath expression");
 			zval_ptr_dtor(&callback_retval);
 			return FAILURE;
 		} else {
-			zend_string *str = zval_get_string(&callback_retval);
+			zend_string *tmp_str;
+			zend_string *str = zval_get_tmp_string(&callback_retval, &tmp_str);
 			valuePush(ctxt, xmlXPathNewString(BAD_CAST ZSTR_VAL(str)));
-			zend_string_release_ex(str, 0);
+			zend_tmp_string_release(tmp_str);
 		}
 		zval_ptr_dtor(&callback_retval);
 	}

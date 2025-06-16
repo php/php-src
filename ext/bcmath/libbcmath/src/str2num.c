@@ -32,17 +32,15 @@
 #include "bcmath.h"
 #include "convert.h"
 #include "private.h"
+#include "xsse.h"
 #include <stdbool.h>
 #include <stddef.h>
-#ifdef __SSE2__
-# include <emmintrin.h>
-#endif
 
 /* Convert strings to bc numbers.  Base 10 only.*/
-static const char *bc_count_digits(const char *str, const char *end)
+static inline const char *bc_count_digits(const char *str, const char *end)
 {
 	/* Process in bulk */
-#ifdef __SSE2__
+#ifdef XSSE2
 	const __m128i offset = _mm_set1_epi8((signed char) (SCHAR_MIN - '0'));
 	/* we use the less than comparator, so add 1 */
 	const __m128i threshold = _mm_set1_epi8(SCHAR_MIN + ('9' + 1 - '0'));
@@ -79,7 +77,7 @@ static const char *bc_count_digits(const char *str, const char *end)
 static inline const char *bc_skip_zero_reverse(const char *scanner, const char *stop)
 {
 	/* Check in bulk */
-#ifdef __SSE2__
+#ifdef XSSE2
 	const __m128i c_zero_repeat = _mm_set1_epi8('0');
 	while (scanner - sizeof(__m128i) >= stop) {
 		scanner -= sizeof(__m128i);
@@ -180,7 +178,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 			 */
 			if (str_scale > 0) {
 				const char *fractional_new_end = bc_skip_zero_reverse(fractional_end, fractional_ptr);
-				str_scale -= fractional_new_end - fractional_end;
+				str_scale -= fractional_end - fractional_new_end; /* fractional_end >= fractional_new_end */
 			}
 		}
 	} else {

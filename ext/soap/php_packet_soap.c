@@ -192,6 +192,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 			if (tmp != NULL && tmp->children != NULL) {
 				zval zv;
 				master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+				convert_to_string(&zv)
 				faultstring = Z_STR(zv);
 			}
 
@@ -199,6 +200,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 			if (tmp != NULL && tmp->children != NULL) {
 				zval zv;
 				master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+				convert_to_string(&zv)
 				faultactor = Z_STR(zv);
 			}
 
@@ -222,6 +224,7 @@ bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctio
 				if (tmp != NULL && tmp->children != NULL) {
 					zval zv;
 					master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+					convert_to_string(&zv)
 					faultstring = Z_STR(zv);
 				}
 			}

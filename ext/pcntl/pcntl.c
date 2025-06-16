@@ -881,8 +881,7 @@ static bool php_pcntl_set_user_signal_infos(
 
 	zval *user_signal_no;
 	ZEND_HASH_FOREACH_VAL(user_signals, user_signal_no) {
-		bool failed = true;
-		ZVAL_DEREF(user_signal_no);
+		bool failed;
 		zend_long tmp = zval_try_get_long(user_signal_no, &failed);
 
 		if (failed) {
@@ -956,6 +955,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 			RETURN_THROWS();
 		}
 
+		zend_hash_real_init_packed(Z_ARRVAL_P(user_old_set));
 		for (unsigned int signal_no = 1; signal_no < PCNTL_G(num_signals); ++signal_no) {
 			if (sigismember(&old_set, signal_no) != 1) {
 				continue;
@@ -1355,7 +1355,6 @@ void pcntl_signal_dispatch(void)
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
-				ZVAL_NULL(&retval);
 				ZVAL_LONG(&params[0], queue->signo);
 #ifdef HAVE_STRUCT_SIGINFO_T
 				array_init(&params[1]);
@@ -1365,7 +1364,6 @@ void pcntl_signal_dispatch(void)
 #endif
 
 				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
-				/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
 				call_user_function(NULL, NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
 #ifdef HAVE_STRUCT_SIGINFO_T
@@ -1680,6 +1678,7 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 
 	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (zend_ulong i = 0; i < maxcpus; i ++) {
 		if (PCNTL_CPU_ISSET(i, mask)) {

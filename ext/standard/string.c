@@ -46,9 +46,10 @@
 #include "ext/random/php_random.h"
 
 #ifdef __SSE2__
-#include <emmintrin.h>
 #include "Zend/zend_bitset.h"
 #endif
+
+#include "zend_simd.h"
 
 /* this is read-only, so it's ok */
 ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
@@ -1273,10 +1274,10 @@ PHP_FUNCTION(str_increment)
 				ZSTR_VAL(tmp)[0] = ZSTR_VAL(incremented)[0];
 				break;
 		}
-		zend_string_release_ex(incremented, /* persistent */ false);
-		RETURN_STR(tmp);
+		zend_string_efree(incremented);
+		RETURN_NEW_STR(tmp);
 	}
-	RETURN_STR(incremented);
+	RETURN_NEW_STR(incremented);
 }
 
 
@@ -1323,17 +1324,17 @@ PHP_FUNCTION(str_decrement)
 
 	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
 		if (ZSTR_LEN(decremented) == 1) {
-			zend_string_release_ex(decremented, /* persistent */ false);
+			zend_string_efree(decremented);
 			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
 			RETURN_THROWS();
 		}
 		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
 		memcpy(ZSTR_VAL(tmp), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
 		ZSTR_VAL(tmp)[ZSTR_LEN(decremented) - 1] = '\0';
-		zend_string_release_ex(decremented, /* persistent */ false);
-		RETURN_STR(tmp);
+		zend_string_efree(decremented);
+		RETURN_NEW_STR(tmp);
 	}
-	RETURN_STR(decremented);
+	RETURN_NEW_STR(decremented);
 }
 
 #if defined(PHP_WIN32)
@@ -2817,7 +2818,7 @@ static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const c
 		char *input = ZSTR_VAL(str);
 		size_t len = ZSTR_LEN(str);
 
-#ifdef __SSE2__
+#ifdef XSSE2
 		if (ZSTR_LEN(str) >= sizeof(__m128i)) {
 			__m128i search = _mm_set1_epi8(ch_from);
 			__m128i delta = _mm_set1_epi8(ch_to - ch_from);
@@ -3037,7 +3038,7 @@ static zend_always_inline zend_long count_chars(const char *p, zend_long length,
 	zend_long count = 0;
 	const char *endp;
 
-#ifdef __SSE2__
+#ifdef XSSE2
 	if (length >= sizeof(__m128i)) {
 		__m128i search = _mm_set1_epi8(ch);
 
@@ -4925,12 +4926,22 @@ PHP_FUNCTION(setlocale)
 {
 	zend_long cat;
 	zval *args = NULL;
-	int num_args;
+	uint32_t num_args;
+	ALLOCA_FLAG(use_heap);
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_LONG(cat)
 		Z_PARAM_VARIADIC('+', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
+
+	zend_string **strings = do_alloca(sizeof(zend_string *) * num_args, use_heap);
+
+	for (uint32_t i = 0; i < num_args; i++) {
+		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], false, i + 2))) {
+			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING, &args[i]);
+			goto out;
+		}
+	}
 
 	for (uint32_t i = 0; i < num_args; i++) {
 		if (Z_TYPE(args[i]) == IS_ARRAY) {
@@ -4938,24 +4949,29 @@ PHP_FUNCTION(setlocale)
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), elem) {
 				zend_string *result = try_setlocale_zval(cat, elem);
 				if (EG(exception)) {
-					RETURN_THROWS();
+					goto out;
 				}
 				if (result) {
-					RETURN_STR(result);
+					RETVAL_STR(result);
+					goto out;
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			zend_string *result = try_setlocale_zval(cat, &args[i]);
+			zend_string *result = try_setlocale_str(cat, strings[i]);
 			if (EG(exception)) {
-				RETURN_THROWS();
+				goto out;
 			}
 			if (result) {
-				RETURN_STR(result);
+				RETVAL_STR(result);
+				goto out;
 			}
 		}
 	}
 
-	RETURN_FALSE;
+	RETVAL_FALSE;
+
+out:
+	free_alloca(strings, use_heap);
 }
 /* }}} */
 
@@ -5835,7 +5851,7 @@ static zend_string *php_str_rot13(zend_string *str)
 	e = p + ZSTR_LEN(str);
 	target = ZSTR_VAL(ret);
 
-#ifdef __SSE2__
+#ifdef XSSE2
 	if (e - p > 15) {
 		const __m128i a_minus_1 = _mm_set1_epi8('a' - 1);
 		const __m128i m_plus_1 = _mm_set1_epi8('m' + 1);

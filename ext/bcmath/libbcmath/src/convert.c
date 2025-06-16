@@ -17,16 +17,14 @@
 #include "bcmath.h"
 #include "convert.h"
 #include "private.h"
-#ifdef __SSE2__
-# include <emmintrin.h>
-#endif
+#include "xsse.h"
 
 char *bc_copy_and_toggle_bcd(char *restrict dest, const char *source, const char *source_end)
 {
 	const size_t bulk_shift = SWAR_REPEAT('0');
 
-#ifdef __SSE2__
-	/* SIMD SSE2 bulk shift + copy */
+#ifdef XSSE2
+	/* SIMD SSE2 or NEON bulk shift + copy */
 	__m128i shift_vector = _mm_set1_epi8('0');
 	while (source + sizeof(__m128i) <= source_end) {
 		__m128i bytes = _mm_loadu_si128((const __m128i *) source);

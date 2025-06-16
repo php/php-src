@@ -54,7 +54,7 @@ PHP_FUNCTION(curl_share_close)
 }
 /* }}} */
 
-static bool _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
+static bool _php_curl_share_setopt(php_curlsh *sh, zend_long option, const zval *zvalue) /* {{{ */
 {
 	CURLSHcode error = CURLSHE_OK;
 
@@ -91,11 +91,7 @@ PHP_FUNCTION(curl_share_setopt)
 
 	sh = Z_CURL_SHARE_P(z_sh);
 
-	if (_php_curl_share_setopt(sh, options, zvalue, return_value)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(_php_curl_share_setopt(sh, options, zvalue));
 }
 /* }}} */
 
@@ -164,9 +160,7 @@ PHP_FUNCTION(curl_share_init_persistent)
 	}
 
 	ZEND_HASH_FOREACH_VAL(share_opts, zval *entry) {
-		ZVAL_DEREF(entry);
-
-		bool failed = false;
+		bool failed;
 		zend_ulong option = zval_try_get_long(entry, &failed);
 
 		if (failed) {

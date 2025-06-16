@@ -2,6 +2,23 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha1
 
+- BCMath:
+  . Simplify `bc_divide()` code. (SakiTakamachi)
+  . If the result is 0, n_scale is set to 0. (SakiTakamachi)
+  . If size of BC_VECTOR array is within 64 bytes, stack area is now used.
+    (SakiTakamachi)
+
+- CLI:
+  . Add --ini=diff to print INI settings changed from the builtin default.
+    (timwolla)
+  . Drop support for -z CLI/CGI flag. (nielsdos)
+  . Fixed GH-17956 - development server 404 page does not adapt to mobiles.
+    (pascalchevrel)
+
+- CURL:
+  . Added CURLFOLLOW_ALL, CURLFOLLOW_OBEYCODE and CURLFOLLOW_FIRSTONLY
+    values for CURLOPT_FOLLOLOCATION curl_easy_setopt option. (David Carlier)
+
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
   . Fixed method calls for PHP objects wrapped in variant. (cmb)
@@ -10,17 +27,41 @@ PHP                                                                        NEWS
   . Fixed bug GH-16665 (\array and \callable should not be usable in
     class_alias). (nielsdos)
   . Added PHP_BUILD_DATE constant. (cmb)
-  . Added support for Closures in constant expressions. (timwolla,
-    Volker Dusch)
+  . Added support for Closures and first class callables in constant
+    expressions. (timwolla, Volker Dusch)
   . Use `clock_gettime_nsec_np()` for high resolution timer on macOS
     if available. (timwolla)
   . Implement GH-15680 (Enhance zend_dump_op_array to properly represent
     non-printable characters in string literals). (nielsdos, WangYihang)
   . Add support for backtraces for fatal errors. (enorris)
+  . Fixed bug GH-17442 (Engine UAF with reference assign and dtor). (nielsdos)
+  . Improved error message of UnhandledMatchError for
+    zend.exception_string_param_max_len=0. (timwolla)
+  . Fixed bug GH-17959 (Relax missing trait fatal error to error exception).
+    (ilutov)
+  . Fixed bug GH-18033 (NULL-ptr dereference when using register_tick_function
+    in destructor). (nielsdos)
+  . Fixed bug GH-18026 (Improve "expecting token" error for ampersand). (ilutov)
+  . Added the #[\NoDiscard] attribute to indicate that a function's return
+    value is important and should be consumed. (timwolla, Volker Dusch)
+  . Added the (void) cast to indicate that not using a value is intentional.
+    (timwolla, Volker Dusch)
+  . Added get_error_handler(), get_exception_handler() functions. (Arnaud)
+  . Fixed bug GH-15753 and GH-16198 (Bind traits before parent class). (ilutov)
+  . Added support for casts in constant expressions. (nielsdos)
+  . Fixed bugs GH-17711 and GH-18022 (Infinite recursion on deprecated attribute
+    evaluation) and GH-18464 (Recursion protection for deprecation constants not
+    released on bailout). (DanielEScherzer and ilutov)
+  . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
+  . Properly handle __debugInfo() returning an array reference. (nielsdos)
+  . Properly handle reference return value from __toString(). (nielsdos)
+  . Added the pipe (|>) operator. (crell)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
   . Added curl_share_init_persistent(). (enorris)
+  . Added CURLINFO_USED_PROXY, CURLINFO_HTTPAUTH_USED, and CURLINFO_PROXYAUTH_USED
+    support to curl_getinfo. (Ayesh Karunaratne)
 
 - Date:
   . Fix undefined behaviour problems regarding integer overflow in extreme edge
@@ -32,6 +73,19 @@ PHP                                                                        NEWS
 
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
+  . Added enchant_dict_remove(). (nielsdos)
+  . Fix missing empty string checks. (nielsdos)
+
+- EXIF:
+  . Add OffsetTime* Exif tags. (acc987)
+
+- Fileinfo:
+  . Upgrade to file 5.46. (nielsdos)
+  . Change return type of finfo_close() to true. (timwolla)
+
+- FPM:
+  . Fixed GH-17645 (FPM with httpd ProxyPass does not decode script path).
+    (Jakub Zelenka)
 
 - GD:
   . Fixed bug #68629 (Transparent artifacts when using imagerotate). (pierre,
@@ -42,17 +96,44 @@ PHP                                                                        NEWS
   . Bumped ICU requirement to ICU >= 57.1. (cmb)
   . IntlDateFormatter::setTimeZone()/datefmt_set_timezone() throws an exception
     with uninitialised classes or clone failure. (David Carlier)
+  . Added DECIMAL_COMPACT_SHORT/DECIMAL_COMPACT_LONG for NumberFormatter class.
+    (BogdanUngureanu)
+  . Added Locale::isRightToLeft to check if a locale is written right to left.
+    (David Carlier)
+  . Added null bytes presence in locale inputs for Locale class. (David Carlier)
+  . Added grapheme_levenshtein() function. (Yuya Hamada)
+  . Added Locale::addLikelySubtags/Locale::minimizeSubtags to handle
+    adding/removing likely subtags to a locale. (David Carlier)
+  . Added IntlListFormatter class to format a list of items with a locale
+    , operands types and units. (BogdanUngureanu)
+  . Fixed bug GH-18566 ([intl] Weird numeric sort in Collator). (nielsdos)
+
+- LDAP:
+  . Allow ldap_get_option to retrieve global option by allowing NULL for
+    connection instance ($ldap). (Remi)
+
+- MySQLi:
+  . Fixed bugs GH-17900 and GH-8084 (calling mysqli::__construct twice).
+    (nielsdos)
 
 - MySQLnd:
   . Added mysqlnd.collect_memory_statistics to ini quick reference.
     (hauk92)
 
-- OPcache:
+- Opcache:
   . Fixed ZTS OPcache build on Cygwin. (cmb)
   . Added opcache.file_cache_read_only. (Samuel Melrose)
+  . Updated default value of opcache.jit_hot_loop. (Arnaud)
+  . Log a warning when opcache lock file permissions could not be changed.
+    (Taavi Eomäe)
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
+
+- PCRE:
+  . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
+  . Remove PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK from pcre compile options.
+    (mvorisek)
 
 - PDO_PGSQL:
   . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
@@ -60,12 +141,25 @@ PHP                                                                        NEWS
     Pdo\Pgsql::prepare(…, [ PDO::ATTR_PREFETCH => 0 ]) make fetch() lazy
     instead of storing the whole result set in memory (Guillaume Outters)
 
+- PDO_SQLITE:
+  . throw on null bytes / resolve GH-13952 (divinity76).
+  . Implement GH-17321: Add setAuthorizer to Pdo\Sqlite. (nielsdos)
+  . PDO::sqliteCreateCollation now throws a TypeError if the callback
+    has a wrong return type. (David Carlier)
+  . Added Pdo_Sqlite::ATTR_BUSY_STATEMENT constant to check
+    if a statement is currently executing. (David Carlier)
+  . Added Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT constant to set a statement
+    in either EXPLAIN_MODE_PREPARED, EXPLAIN_MODE_EXPLAIN,
+    EXPLAIN_MODE_EXPLAIN_QUERY_PLAN modes. (David Carlier)
+
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing
     its name to be reused. (David Carlier)
   . Added Iterable support for pgsql_copy_from. (David Carlier)
   . pg_connect checks if connection_string contains any null byte,
     pg_close_stmt check if the statement contains any null byte.
+    (David Carlier)
+  . Added pg_service to get the connection current service identifier.
     (David Carlier)
 
 - POSIX:
@@ -81,11 +175,19 @@ PHP                                                                        NEWS
 - Reflection:
   . Added ReflectionConstant::getExtension() and ::getExtensionName().
     (DanielEScherzer)
+  . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
+    zval for uninitialized typed properties). (nielsdos)
+  . Fixed bug GH-15766 (ReflectionClass::toString() should have better output
+    for enums). (DanielEScherzer)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap
     or a TypeError if read_and_close value is not compatible with int.
     (David Carlier)
+
+- SimpleXML:
+  . Fixed bug GH-12231 (SimpleXML xpath should warn when returning other return
+    types than node lists). (nielsdos)
 
 - SNMP:
   . snmpget, snmpset, snmp_get2, snmp_set2, snmp_get3, snmp_set3 and
@@ -95,6 +197,11 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #49169 (SoapServer calls wrong function, although "SOAP action"
     header is correct). (nielsdos)
+  . Fix namespace handling of WSDL and XML schema in SOAP,
+    fixing at least GH-16320 and bug #68576. (nielsdos)
+  . Fixed bug #70951 (Segmentation fault on invalid WSDL cache). (nielsdos)
+  . Implement request #55503 (Extend __getTypes to support enumerations).
+    (nielsdos, datibbaw)
 
 - Sockets:
   . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
@@ -122,14 +229,29 @@ PHP                                                                        NEWS
     (David Carlier)
   . socket_getsockname/socket_create/socket_bind handled AF_PACKET family socket.
     (David Carlier)
+  . Added IP_BINDANY for a socket to bind to any address. (David Carlier)
+  . Added SO_BUSY_POOL to reduce packets poll latency. (David Carlier)
+  - Added UDP_SEGMENT support to optimise multiple large datagrams over UDP
+    if the kernel and hardware supports it. (David Carlier)
+  - Added SHUT_RD, SHUT_WR and SHUT_RDWR constants for socket_shutdown().
+    (David Carlier)
 
 - Sodium:
   . Fix overall theorical overflows on zend_string buffer allocations.
     (David Carlier/nielsdos)
 
+- Sqlite:
+  . Added Sqlite3Stmt::busy to check if a statement is still being executed.
+    (David Carlier)
+
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).
+  . Fixed bug GH-18062 (is_callable(func(...), callable_name: $name) for first
+    class callables returns wrong name). (timwolla)
+  . Added array_first() and array_last(). (nielsdos)
+  . Fixed bug GH-18823 (setlocale's 2nd and 3rd argument ignores strict_types).
+    (nielsdos)
 
 - Streams:
   . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
@@ -137,6 +259,10 @@ PHP                                                                        NEWS
 
 - Tests:
   . Allow to shuffle tests even in non-parallell mode. (dhuang00)
+
+- Tidy:
+  . tidy::__construct/parseFile/parseString methods throw an exception if
+    the configuration argument is invalid. (David Carlier)
 
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,
@@ -154,6 +280,7 @@ PHP                                                                        NEWS
     is now a boolean. (David Carlier)
   . Fixed bug GH-16883 (gzopen() does not use the default stream context when
     opening HTTP URLs). (nielsdos)
+  . Implemented GH-17668 (zlib streams should support locking). (nielsdos)
 
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

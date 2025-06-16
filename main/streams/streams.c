@@ -1390,6 +1390,10 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 				}
  				whence = SEEK_SET;
 				break;
+			case SEEK_SET:
+				if (offset < 0) {
+					return -1;
+				}
 		}
 		ret = stream->ops->seek(stream, offset, whence, &stream->position);
 
@@ -2428,6 +2432,20 @@ PHPAPI void php_stream_context_set_option(php_stream_context *context,
 	SEPARATE_ARRAY(wrapperhash);
 	zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue);
 }
+
+void php_stream_context_unset_option(php_stream_context *context,
+	const char *wrappername, const char *optionname)
+{
+	zval *wrapperhash;
+
+	wrapperhash = zend_hash_str_find(Z_ARRVAL(context->options), wrappername, strlen(wrappername));
+	if (NULL == wrapperhash) {
+		return;
+	}
+	SEPARATE_ARRAY(&context->options);
+	SEPARATE_ARRAY(wrapperhash);
+	zend_hash_str_del(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname));
+}
 /* }}} */
 
 /* {{{ php_stream_dirent_alphasort */
@@ -2469,25 +2487,19 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 				vector_size = 10;
 			} else {
 				if(vector_size*2 < vector_size) {
-					/* overflow */
-					php_stream_closedir(stream);
-					efree(vector);
-					return -1;
+					goto overflow;
 				}
 				vector_size *= 2;
 			}
-			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
+			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(zend_string *), 0);
 		}
 
 		vector[nfiles] = zend_string_init(sdp.d_name, strlen(sdp.d_name), 0);
 
-		nfiles++;
-		if(vector_size < 10 || nfiles == 0) {
-			/* overflow */
-			php_stream_closedir(stream);
-			efree(vector);
-			return -1;
+		if(vector_size < 10 || nfiles + 1 == 0) {
+			goto overflow;
 		}
+		nfiles++;
 	}
 	php_stream_closedir(stream);
 
@@ -2497,5 +2509,13 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 		qsort(*namelist, nfiles, sizeof(zend_string *), (int(*)(const void *, const void *))compare);
 	}
 	return nfiles;
+
+overflow:
+	php_stream_closedir(stream);
+	for (unsigned int i = 0; i < nfiles; i++) {
+		zend_string_efree(vector[i]);
+	}
+	efree(vector);
+	return -1;
 }
 /* }}} */

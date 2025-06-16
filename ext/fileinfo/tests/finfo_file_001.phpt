@@ -8,7 +8,7 @@ fileinfo
 $fp = finfo_open();
 try {
     var_dump(finfo_file($fp, "\0"));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {

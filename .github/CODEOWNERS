@@ -27,6 +27,7 @@
 /ext/gmp @Girgias
 /ext/intl @devnexen
 /ext/json @bukka
+/ext/lexbor @kocsismate @nielsdos
 /ext/libxml @nielsdos
 /ext/mbstring @alexdowad @youkidearitai
 /ext/mysqli @bukka @kamil-tekiela
@@ -44,12 +45,14 @@
 /ext/pdo_sqlite @SakiTakamachi
 /ext/pgsql @devnexen
 /ext/random @TimWolla @zeriyoshi
+/ext/reflection @DanielEScherzer
 /ext/session @Girgias
 /ext/simplexml @nielsdos
 /ext/soap @nielsdos
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/uri @kocsismate
 /ext/xml @nielsdos
 /ext/xmlreader @nielsdos
 /ext/xmlwriter @nielsdos

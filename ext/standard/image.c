@@ -165,7 +165,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	long bits;
 	unsigned char a[64];
 	unsigned long len=64, szlength;
-	int factor = 1,maxfactor = 16;
+	int factor = 1,maxfactor = 1 << 15;
 	int status = 0;
 	unsigned char *b, *buf = NULL;
 	zend_string *bufz;
@@ -197,15 +197,20 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 		/*
 		 * zlib::uncompress() wants to know the output data length
 		 * if none was given as a parameter
-		 * we try from input length * 2 up to input length * 2^8
+		 * we try from input length * 2 up to input length * 2^15
 		 * doubling it whenever it wasn't big enough
-		 * that should be eneugh for all real life cases
+		 * that should be enough for all real life cases
 		*/
 
 		do {
-			szlength = ZSTR_LEN(bufz) * (1<<factor++);
+			factor <<= 1;
+			if (ZSTR_LEN(bufz) > ULONG_MAX / factor) {
+				status = Z_MEM_ERROR;
+				break;
+			}
+			szlength = (unsigned long) (ZSTR_LEN(bufz) * factor);
 			buf = erealloc(buf, szlength);
-			status = uncompress(buf, &szlength, (unsigned char *) ZSTR_VAL(bufz), ZSTR_LEN(bufz));
+			status = uncompress(buf, &szlength, (unsigned char *) ZSTR_VAL(bufz), (unsigned long) ZSTR_LEN(bufz));
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 
 		if (bufz) {

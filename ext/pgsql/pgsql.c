@@ -907,6 +907,7 @@ PHP_FUNCTION(pg_close)
 #define PHP_PG_HOST 6
 #define PHP_PG_VERSION 7
 #define PHP_PG_JIT 8
+#define PHP_PG_SERVICE 9
 
 /* php_pgsql_get_link_info */
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
@@ -991,6 +992,12 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			PQclear(res);
 			return;
 		}
+#if defined(HAVE_PG_SERVICE)
+		case PHP_PG_SERVICE: {
+			result = PQservice(pgsql);
+			break;
+		}
+#endif
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	if (result) {
@@ -1046,6 +1053,13 @@ PHP_FUNCTION(pg_jit)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_JIT);
 }
+
+#if defined(HAVE_PG_SERVICE)
+PHP_FUNCTION(pg_service)
+{
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_SERVICE);
+}
+#endif
 
 /* Returns the value of a server parameter */
 PHP_FUNCTION(pg_parameter_status)
@@ -1670,8 +1684,7 @@ static zend_string *get_field_name(PGconn *pgsql, Oid oid)
 			continue;
 		}
 
-		char *end_ptr;
-		Oid tmp_oid = strtoul(tmp_oid_str, &end_ptr, 10);
+		Oid tmp_oid = strtoul(tmp_oid_str, NULL, 10);
 
 		zend_string *name = zend_string_init(tmp_name, strlen(tmp_name), 0);
 		zend_hash_index_update_ptr(&PGG(field_oids), tmp_oid, name);
@@ -2173,17 +2186,18 @@ PHP_FUNCTION(pg_fetch_all_columns)
 		RETURN_THROWS();
 	}
 
-	array_init(return_value);
-
 	if ((pg_numrows = PQntuples(pgsql_result)) <= 0) {
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
+
+	array_init_size(return_value, pg_numrows);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
 		if (PQgetisnull(pgsql_result, pg_row, (int)colno)) {
-			add_next_index_null(return_value);
+			add_index_null(return_value, pg_row);
 		} else {
-			add_next_index_string(return_value, PQgetvalue(pgsql_result, pg_row, (int)colno));
+			add_index_string(return_value, pg_row, PQgetvalue(pgsql_result, pg_row, (int)colno));
 		}
 	}
 }
@@ -3350,6 +3364,7 @@ PHP_FUNCTION(pg_copy_to)
 
 				PQclear(pgsql_result);
 				array_init(return_value);
+				zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 				while (!copydone)
 				{
 					int ret = PQgetCopyData(pgsql, &csv, 0);
@@ -3391,11 +3406,12 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 	if (UNEXPECTED(!tmp)) {
 		return FAILURE;
 	}
-	zend_string *zquery = zend_string_alloc(ZSTR_LEN(tmp) + 1, false);
+	zend_string *zquery = zend_string_alloc(ZSTR_LEN(tmp) + 2, false);
 	memcpy(ZSTR_VAL(zquery), ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 1);
 	ZSTR_LEN(zquery) = ZSTR_LEN(tmp);
-	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(zquery)[ZSTR_LEN(tmp)]  != '\n') {
+	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(zquery)[ZSTR_LEN(tmp) - 1]  != '\n') {
 		ZSTR_VAL(zquery)[ZSTR_LEN(tmp)] = '\n';
+		ZSTR_VAL(zquery)[ZSTR_LEN(tmp) + 1] = '\0';
 		ZSTR_LEN(zquery) ++;
 	}
 	if (PQputCopyData(pgsql, ZSTR_VAL(zquery), ZSTR_LEN(zquery)) != 1) {
@@ -3863,7 +3879,12 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	switch(entry_type) {
 		case PHP_PG_ASYNC_IS_BUSY:
 			PQconsumeInput(pgsql);
-			RETVAL_LONG(PQisBusy(pgsql));
+			/* PQisBusy
+			 * Returns 1 if a command is busy, that is, PQgetResult would block waiting for input.
+			 * A 0 return indicates that PQgetResult can be called with assurance of not blocking.
+			 * https://www.postgresql.org/docs/current/libpq-async.html#LIBPQ-PQISBUSY
+			 */
+			RETVAL_BOOL(PQisBusy(pgsql));
 			break;
 		case PHP_PG_ASYNC_REQUEST_CANCEL: {
 			PGcancel *c;
@@ -3871,8 +3892,15 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			int rc;
 
 			c = PQgetCancel(pgsql);
-			RETVAL_LONG((rc = PQcancel(c, err, sizeof(err))));
-			if (rc < 0) {
+			/* PQcancel
+			 * The return value of PQcancel is 1 if the cancel request was successfully dispatched and 0 if not.
+			 * If not, errbuf is filled with an explanatory error message.
+			 * errbuf must be a char array of size errbufsize (the recommended size is 256 bytes).
+			 * https://www.postgresql.org/docs/current/libpq-cancel.html#LIBPQ-PQCANCEL
+			 */
+			rc = PQcancel(c, err, sizeof(err));
+			RETVAL_BOOL(rc);
+			if (rc == 0) {
 				zend_error(E_WARNING, "cannot cancel the query: %s", err);
 			}
 			while ((pgsql_result = PQgetResult(pgsql))) {
@@ -3886,7 +3914,6 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	if (PQsetnonblocking(pgsql, 0)) {
 		php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
 	}
-	convert_to_boolean(return_value);
 }
 /* }}} */
 
@@ -4907,8 +4934,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 			break; /* break out for() */
 		}
 
-		convert_to_boolean(is_enum);
-		if (Z_TYPE_P(is_enum) == IS_TRUE) {
+		if (zval_is_true(is_enum)) {
 			/* enums need to be treated like strings */
 			data_type = PG_TEXT;
 		} else {
@@ -6244,7 +6270,7 @@ PHP_FUNCTION(pg_put_copy_end)
 {
 	zval *pgsql_link;
 	pgsql_link_handle *link;
-	zend_string *error;
+	zend_string *error = NULL;
 	char *err = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -6265,21 +6291,18 @@ PHP_FUNCTION(pg_put_copy_end)
 
 PHP_FUNCTION(pg_socket_poll)
 {
-	zval *z_socket;
 	php_stream *stream;
 	php_socket_t socket;
 	zend_long read, write;
 	zend_long ts = -1;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_RESOURCE(z_socket)
+		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_LONG(read)
 		Z_PARAM_LONG(write)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(ts)
 	ZEND_PARSE_PARAMETERS_END();
-
-	php_stream_from_zval(stream, z_socket);
 
 	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void **)&socket, 0)) {
 		zend_argument_type_error(1, "invalid resource socket");

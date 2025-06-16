@@ -1713,6 +1713,16 @@ function array_key_first(array $array): int|string|null {}
 function array_key_last(array $array): int|string|null {}
 
 /**
+ * @compile-time-eval
+ */
+function array_first(array $array): mixed {}
+
+/**
+ * @compile-time-eval
+ */
+function array_last(array $array): mixed {}
+
+/**
  * @return array<int, mixed|ref>
  * @compile-time-eval
  */
@@ -1977,7 +1987,7 @@ function get_cfg_var(string $option): string|array|false {}
 function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
 
 /**
- * @return array<string, int|string>|null
+ * @return array<string, int|string|array>|null
  * @refcount 1
  */
 function error_get_last(): ?array {}
@@ -2687,13 +2697,11 @@ function readdir($dir_handle = null): string|false {}
  */
 function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING, $context = null): array|false {}
 
-#ifdef HAVE_GLOB
 /**
  * @return array<int, string>|false
  * @refcount 1
  */
 function glob(string $pattern, int $flags = 0): array|false {}
-#endif
 
 /* exec.c */
 

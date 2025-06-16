@@ -28,6 +28,8 @@ Then you can interact with that variable:
 """
 
 import gdb
+import gdb.printing
+import gdb.types
 import re
 import traceback
 import os
@@ -110,28 +112,27 @@ class ZendTypePrettyPrinter(gdb.printing.PrettyPrinter):
         for bit in range(0, type_mask_size):
             if type_mask & (1 << bit):
                 type_name = ZendTypeBits.zendTypeName(bit)
-                match type_name:
-                    case None:
-                        parts.append('(1<<%d)' % bit)
-                    case 'list':
-                        list = t['ptr'].cast(gdb.lookup_type('zend_type_list').pointer())
-                        num_types = int(list['num_types'])
-                        types = list['types'].dereference().cast(gdb.lookup_type('zend_type').array(num_types))
-                        for i in range(0, num_types):
-                            str = self.format_type(types[i])
-                            if any((c in set('|&()')) for c in str):
-                                str = '(%s)' % str
-                            parts.append(str)
-                    case 'union' | 'arena':
-                        meta.append(type_name)
-                    case 'intersection':
-                        meta.append(type_name)
-                        separator = '&'
-                    case 'name':
-                        str = t['ptr'].cast(gdb.lookup_type('zend_string').pointer())
-                        parts.append(format_zstr(str))
-                    case _:
-                        parts.append(type_name)
+                if type_name is None:
+                    parts.append('(1<<%d)' % bit)
+                elif type_name == 'list':
+                    list_ptr = t['ptr'].cast(gdb.lookup_type('zend_type_list').pointer())
+                    num_types = int(list_ptr['num_types'])
+                    types = list_ptr['types'].dereference().cast(gdb.lookup_type('zend_type').array(num_types))
+                    for i in range(0, num_types):
+                        type_str = self.format_type(types[i])
+                        if any((c in set('|&()')) for c in type_str):
+                            type_str = '(%s)' % type_str
+                        parts.append(type_str)
+                elif type_name == 'union' or type_name == 'arena':
+                    meta.append(type_name)
+                elif type_name == 'intersection':
+                    meta.append(type_name)
+                    separator = '&'
+                elif type_name == 'name':
+                    name_str = t['ptr'].cast(gdb.lookup_type('zend_string').pointer())
+                    parts.append(format_zstr(name_str))
+                else:
+                    parts.append(type_name)
 
         str = separator.join(parts)
 
@@ -156,7 +157,11 @@ class ZendAstKindPrettyPrinter(gdb.printing.PrettyPrinter):
 pp_set.add_printer('zend_ast_kind', '^zend_ast_kind$', ZendAstKindPrettyPrinter)
 
 class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
-    "Print a zend_ast"
+    """
+        Print a zend_ast, or one of the specialized structures based on it:
+        zend_ast_decl, zend_ast_list, zend_ast_op_array, zend_ast_zval, or
+        zend_ast_znode
+    """
 
     def __init__(self, val):
         self.val = val
@@ -179,12 +184,10 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
                     if int(c) != 0:
                         c = c.dereference()
                     yield ('child[%d]' % i, c)
-            elif field.name == 'name':
-                yield (field.name, format_zstr(val[field.name]))
             elif field.name == 'val':
                 yield (field.name, ZvalPrettyPrinter(val[field.name]).to_string())
             else:
-                yield (field.name, format_nested(self.val[field.name]))
+                yield (field.name, format_nested(val[field.name]))
 
     def is_special(self):
         special_shift = 6 # ZEND_AST_SPECIAL_SHIFT
@@ -206,6 +209,8 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
             return self.val.cast(gdb.lookup_type('zend_ast_zval'))
         if kind == enum_value('ZEND_AST_OP_ARRAY'):
             return self.val.cast(gdb.lookup_type('zend_ast_op_array'))
+        if kind == enum_value('ZEND_AST_CALLABLE_CONVERT'):
+            return self.val.cast(gdb.lookup_type('zend_ast_fcc'))
         if kind == enum_value('ZEND_AST_ZNODE'):
             return self.val.cast(gdb.lookup_type('zend_ast_znode'))
         if self.is_decl():
@@ -231,6 +236,12 @@ class ZendAstPrettyPrinter(gdb.printing.PrettyPrinter):
 
 
 pp_set.add_printer('zend_ast', '^_zend_ast$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_decl', '^_zend_ast_decl$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_list', '^_zend_ast_list$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_op_array', '^_zend_ast_op_array$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_fcc', '^_zend_ast_fcc$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_zval', '^_zend_ast_zval$', ZendAstPrettyPrinter)
+pp_set.add_printer('zend_ast_znode', '^_zend_ast_znode$', ZendAstPrettyPrinter)
 
 class ZvalPrettyPrinter(gdb.printing.PrettyPrinter):
     "Print a zval"
@@ -391,15 +402,15 @@ class ZendFunctionPrettyPrinter(gdb.printing.PrettyPrinter):
         self.val = val
 
     def to_string(self):
-        match int(self.val['type']):
-            case ZendFnTypes.ZEND_INTERNAL_FUNCTION:
-                typestr = 'internal'
-            case ZendFnTypes.ZEND_USER_FUNCTION:
-                typestr = 'user'
-            case ZendFnTypes.ZEND_EVAL_CODE:
-                typestr = 'eval'
-            case _:
-                typestr = '???'
+        val_type = int(self.val['type'])
+        if val_type == ZendFnTypes.ZEND_INTERNAL_FUNCTION:
+            typestr = 'internal'
+        elif val_type == ZendFnTypes.ZEND_USER_FUNCTION:
+            typestr = 'user'
+        elif val_type == ZendFnTypes.ZEND_EVAL_CODE:
+            typestr = 'eval'
+        else:
+            typestr = '???'
 
         if self.val['common']['function_name']:
             namestr = format_zstr(self.val['common']['function_name'])
@@ -819,13 +830,12 @@ class ZendRefTypeInfo:
 
         bits = self._bits
         type_bits = None
-        match type_name:
-            case 'string':
-                type_bits = self._str_bits
-            case 'array':
-                type_bits = self._array_bits
-            case 'object':
-                type_bits = self._obj_bits
+        if type_name == 'string':
+            type_bits = self._str_bits
+        elif type_name == 'array':
+            type_bits = self._array_bits
+        elif type_name == 'object':
+            type_bits = self._obj_bits
 
         type_flags = flags & self._flags_mask
         for i in range(0, 31):
@@ -848,15 +858,14 @@ class ZendRefTypeInfo:
 
         if (flags & (1<<self.bit('GC_NOT_COLLECTABLE'))) == 0:
             gc_color = (flags >> self._info_shift) & self._gc_color
-            match gc_color:
-                case self._gc_black:
-                    names.append('GC_BLACK')
-                case self._gc_white:
-                    names.append('GC_WHITE')
-                case self._gc_grey:
-                    names.append('GC_GREY')
-                case self._gc_purple:
-                    names.append('GC_PURPLE')
+            if gc_color == self._gc_black:
+                names.append('GC_BLACK')
+            elif gc_color == self._gc_white:
+                names.append('GC_WHITE')
+            elif gc_color == self._gc_grey:
+                names.append('GC_GREY')
+            elif gc_color == self._gc_purple:
+                names.append('GC_PURPLE')
 
             gc_address = (flags >> self._info_shift) & self._gc_address
             if gc_address != 0:
@@ -895,17 +904,16 @@ class ZendRefTypeInfo:
             pattern = re.compile(r'#define (GC_[^\s]+)\s+((0x)?[0-9a-f]+)')
             matches = pattern.findall(content)
             for name, bit, _ in matches:
-                match name:
-                    case 'GC_TYPE_MASK':
-                        self._type_mask = int(bit, 0)
-                    case 'GC_FLAGS_MASK':
-                        self._flags_mask = int(bit, 0)
-                    case 'GC_INFO_MASK':
-                        self._info_mask = int(bit, 0)
-                    case 'GC_INFO_SHIFT':
-                        self._info_shift = int(bit, 0)
-                    case 'GC_FLAGS_SHIFT':
-                        self._flags_shift = int(bit, 0)
+                if name == 'GC_TYPE_MASK':
+                    self._type_mask = int(bit, 0)
+                elif name == 'GC_FLAGS_MASK':
+                    self._flags_mask = int(bit, 0)
+                elif name == 'GC_INFO_MASK':
+                    self._info_mask = int(bit, 0)
+                elif name == 'GC_INFO_SHIFT':
+                    self._info_shift = int(bit, 0)
+                elif name == 'GC_FLAGS_SHIFT':
+                    self._flags_shift = int(bit, 0)
 
             # IS_STR_INTERNED             GC_IMMUTABLE
             # IS_STR_PERMANENT            (1<<8)
@@ -916,13 +924,12 @@ class ZendRefTypeInfo:
                     bit = bits.get(val)
                     if bit == None:
                         continue
-                match type:
-                    case 'STR':
-                        target = str_bits
-                    case 'ARRAY':
-                        target = array_bits
-                    case 'OBJ':
-                        target = obj_bits
+                if type == 'STR':
+                    target = str_bits
+                elif type == 'ARRAY':
+                    target = array_bits
+                elif type == 'OBJ':
+                    target = obj_bits
                 target[name] = int(bit)
 
         # Hard coded because these are not exposed in header files

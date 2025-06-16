@@ -661,7 +661,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 					/* If column was bound as LOB, return a stream. */
 					int loid = lo_open(S->H->server, oid, INV_READ);
 					if (loid >= 0) {
-						php_stream *stream = pdo_pgsql_create_lob_stream(&stmt->database_object_handle, loid, oid);
+						php_stream *stream = pdo_pgsql_create_lob_stream(stmt->database_object_handle, loid, oid);
 						if (stream) {
 							php_stream_to_zval(stream, result);
 							return 1;

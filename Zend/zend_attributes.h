@@ -21,6 +21,7 @@
 #define ZEND_ATTRIBUTES_H
 
 #include "zend_compile.h"
+#include "zend_constants.h"
 
 #define ZEND_ATTRIBUTE_TARGET_CLASS			(1<<0)
 #define ZEND_ATTRIBUTE_TARGET_FUNCTION		(1<<1)
@@ -28,9 +29,10 @@
 #define ZEND_ATTRIBUTE_TARGET_PROPERTY		(1<<3)
 #define ZEND_ATTRIBUTE_TARGET_CLASS_CONST	(1<<4)
 #define ZEND_ATTRIBUTE_TARGET_PARAMETER		(1<<5)
-#define ZEND_ATTRIBUTE_TARGET_ALL			((1<<6) - 1)
-#define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<6)
-#define ZEND_ATTRIBUTE_FLAGS				((1<<7) - 1)
+#define ZEND_ATTRIBUTE_TARGET_CONST			(1<<6)
+#define ZEND_ATTRIBUTE_TARGET_ALL			((1<<7) - 1)
+#define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<7)
+#define ZEND_ATTRIBUTE_FLAGS				((1<<8) - 1)
 
 /* Flags for zend_attribute.flags */
 #define ZEND_ATTRIBUTE_PERSISTENT   (1<<0)
@@ -47,6 +49,7 @@ extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 extern ZEND_API zend_class_entry *zend_ce_override;
 extern ZEND_API zend_class_entry *zend_ce_deprecated;
+extern ZEND_API zend_class_entry *zend_ce_nodiscard;
 
 typedef struct {
 	zend_string *name;
@@ -121,6 +124,12 @@ static zend_always_inline zend_attribute *zend_add_property_attribute(zend_class
 static zend_always_inline zend_attribute *zend_add_class_constant_attribute(zend_class_entry *ce, zend_class_constant *c, zend_string *name, uint32_t argc)
 {
 	uint32_t flags = ce->type != ZEND_USER_CLASS ? ZEND_ATTRIBUTE_PERSISTENT : 0;
+	return zend_add_attribute(&c->attributes, name, argc, flags, 0, 0);
+}
+
+static zend_always_inline zend_attribute *zend_add_global_constant_attribute(zend_constant *c, zend_string *name, uint32_t argc)
+{
+	uint32_t flags = ZEND_CONSTANT_MODULE_NUMBER(c) == PHP_USER_CONSTANT ? 0 : ZEND_ATTRIBUTE_PERSISTENT;
 	return zend_add_attribute(&c->attributes, name, argc, flags, 0, 0);
 }
 

@@ -780,6 +780,14 @@ AC_DEFUN([PHP_BUILD_SHARED],[
 ])
 
 dnl
+dnl PHP_BUILD_SHARED_DYLIB
+dnl
+AC_DEFUN([PHP_BUILD_SHARED_DYLIB],[
+  PHP_BUILD_SHARED
+  OVERALL_TARGET=libphp.dylib
+])
+
+dnl
 dnl PHP_BUILD_STATIC
 dnl
 AC_DEFUN([PHP_BUILD_STATIC],[
@@ -894,6 +902,7 @@ AC_DEFUN([PHP_SELECT_SAPI],[
     case "$2" in
     static[)] PHP_BUILD_STATIC;;
     shared[)] PHP_BUILD_SHARED;;
+    shared-dylib[)] PHP_BUILD_SHARED_DYLIB;;
     bundle[)] PHP_BUILD_BUNDLE;;
     esac
     install_sapi="install-sapi"
@@ -1914,7 +1923,7 @@ dnl
 dnl Common setup macro for SQLite library.
 dnl
 AC_DEFUN([PHP_SETUP_SQLITE], [
-PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7], [
+PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.17], [
   PHP_EVAL_INCLINE([$SQLITE_CFLAGS])
   PHP_EVAL_LIBLINE([$SQLITE_LIBS], [$1])
 ])

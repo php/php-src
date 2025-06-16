@@ -33,6 +33,28 @@ class Sqlite extends \PDO
     /** @cvalue PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES */
     public const int ATTR_EXTENDED_RESULT_CODES = UNKNOWN;
 
+    /** @cvalue PDO_SQLITE_ATTR_BUSY_STATEMENT */
+    public const int ATTR_BUSY_STATEMENT = UNKNOWN;
+
+    /** @cvalue PDO_SQLITE_ATTR_EXPLAIN_STATEMENT */
+    public const int ATTR_EXPLAIN_STATEMENT = UNKNOWN;
+
+#if SQLITE_VERSION_NUMBER >= 3041000
+    public const int EXPLAIN_MODE_PREPARED = 0;
+    public const int EXPLAIN_MODE_EXPLAIN = 1;
+    public const int EXPLAIN_MODE_EXPLAIN_QUERY_PLAN = 2;
+#endif
+
+    /** @cvalue SQLITE_OK */
+    public const int OK = UNKNOWN;
+
+    /* Constants for authorizer return */
+
+    /** @cvalue SQLITE_DENY */
+    public const int DENY = UNKNOWN;
+    /** @cvalue SQLITE_IGNORE */
+    public const int IGNORE = UNKNOWN;
+
     // Registers an aggregating User Defined Function for use in SQL statements
     public function createAggregate(
         string $name,
@@ -63,4 +85,6 @@ class Sqlite extends \PDO
         ?string $dbname = "main",
         int $flags = \Pdo\Sqlite::OPEN_READONLY
     ) {}
+
+    public function setAuthorizer(?callable $callback): void {}
 }
