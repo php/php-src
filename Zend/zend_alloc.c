@@ -3031,7 +3031,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 		{ \
 			size_t page_offset = ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE); \
 			zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE); \
-			int page_num = page_offset / ZEND_MM_PAGE_SIZE; \chunk->
+			int page_num = page_offset / ZEND_MM_PAGE_SIZE; \
 			ZEND_MM_UNPOISON_CHUNK_HDR(chunk); \
 			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "zend_mm_heap corrupted"); \
 			ZEND_ASSERT(chunk->map[page_num] & ZEND_MM_IS_SRUN); \
