@@ -92,6 +92,38 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool us
 	const char *n1ptr = n1->n_value;
 	const char *n2ptr = n2->n_value;
 
+	while (count >= sizeof(BC_VECTOR)) {
+		BC_VECTOR n1bytes;
+		BC_VECTOR n2bytes;
+		memcpy(&n1bytes, n1ptr, sizeof(BC_VECTOR));
+		memcpy(&n2bytes, n2ptr, sizeof(BC_VECTOR));
+
+		if (n1bytes != n2bytes) {
+#if BC_LITTLE_ENDIAN
+			n1bytes = BC_BSWAP(n1bytes);
+			n2bytes = BC_BSWAP(n2bytes);
+#endif
+			if (n1bytes > n2bytes) {
+				/* Magnitude of n1 > n2. */
+				if (!use_sign || n1->n_sign == PLUS) {
+					return BCMATH_LEFT_GREATER;
+				} else {
+					return BCMATH_RIGHT_GREATER;
+				}
+			} else {
+				/* Magnitude of n1 < n2. */
+				if (!use_sign || n1->n_sign == PLUS) {
+					return BCMATH_RIGHT_GREATER;
+				} else {
+					return BCMATH_LEFT_GREATER;
+				}
+			}
+		}
+		count -= sizeof(BC_VECTOR);
+		n1ptr += sizeof(BC_VECTOR);
+		n2ptr += sizeof(BC_VECTOR);
+	}
+
 	while ((count > 0) && (*n1ptr == *n2ptr)) {
 		n1ptr++;
 		n2ptr++;
