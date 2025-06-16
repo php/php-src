@@ -2038,6 +2038,7 @@ static void zend_mm_add_huge_block(zend_mm_heap *heap, void *ptr, size_t size ZE
 #endif
 {
 	zend_mm_huge_list *list = (zend_mm_huge_list*)zend_mm_alloc_heap(heap, sizeof(zend_mm_huge_list) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	ZEND_MM_UNPOISON(list, sizeof(zend_mm_huge_list));
 	list->ptr = ptr;
 	list->size = size;
 	list->next = heap->huge_list;
@@ -2048,6 +2049,7 @@ static void zend_mm_add_huge_block(zend_mm_heap *heap, void *ptr, size_t size ZE
 	list->dbg.lineno = __zend_lineno;
 	list->dbg.orig_lineno = __zend_orig_lineno;
 #endif
+	ZEND_MM_POISON(list, sizeof(zend_mm_huge_list));
 	heap->huge_list = list;
 }
 
@@ -2056,11 +2058,14 @@ static size_t zend_mm_del_huge_block(zend_mm_heap *heap, void *ptr ZEND_FILE_LIN
 	zend_mm_huge_list *prev = NULL;
 	zend_mm_huge_list *list = heap->huge_list;
 	while (list != NULL) {
+		ZEND_MM_UNPOISON(list, sizeof(zend_mm_huge_list));
 		if (list->ptr == ptr) {
 			size_t size;
 
 			if (prev) {
+				ZEND_MM_UNPOISON(prev, sizeof(zend_mm_huge_list));
 				prev->next = list->next;
+				ZEND_MM_POISON(prev, sizeof(zend_mm_huge_list));
 			} else {
 				heap->huge_list = list->next;
 			}
@@ -2070,6 +2075,7 @@ static size_t zend_mm_del_huge_block(zend_mm_heap *heap, void *ptr ZEND_FILE_LIN
 		}
 		prev = list;
 		list = list->next;
+		ZEND_MM_POISON(prev, sizeof(zend_mm_huge_list));
 	}
 	ZEND_MM_CHECK(0, "zend_mm_heap corrupted");
 	return 0;
@@ -2079,10 +2085,14 @@ static size_t zend_mm_get_huge_block_size(zend_mm_heap *heap, void *ptr ZEND_FIL
 {
 	zend_mm_huge_list *list = heap->huge_list;
 	while (list != NULL) {
+		ZEND_MM_UNPOISON(list, sizeof(zend_mm_huge_list));
 		if (list->ptr == ptr) {
+			ZEND_MM_POISON(list, sizeof(zend_mm_huge_list));
 			return list->size;
 		}
-		list = list->next;
+		zend_mm_huge_list *next = list->next;
+		ZEND_MM_POISON(list, sizeof(zend_mm_huge_list));
+		list = next;
 	}
 	ZEND_MM_CHECK(0, "zend_mm_heap corrupted");
 	return 0;
@@ -2096,6 +2106,7 @@ static void zend_mm_change_huge_block_size(zend_mm_heap *heap, void *ptr, size_t
 {
 	zend_mm_huge_list *list = heap->huge_list;
 	while (list != NULL) {
+		ZEND_MM_UNPOISON(list, sizeof(zend_mm_huge_list));
 		if (list->ptr == ptr) {
 			list->size = size;
 #if ZEND_DEBUG
@@ -2105,9 +2116,12 @@ static void zend_mm_change_huge_block_size(zend_mm_heap *heap, void *ptr, size_t
 			list->dbg.lineno = __zend_lineno;
 			list->dbg.orig_lineno = __zend_orig_lineno;
 #endif
+			ZEND_MM_POISON(list, sizeof(zend_mm_huge_list));
 			return;
 		}
-		list = list->next;
+		zend_mm_huge_list *next = list->next;
+		ZEND_MM_POISON(list, sizeof(zend_mm_huge_list));
+		list = next;
 	}
 }
 
@@ -2529,6 +2543,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 	list = heap->huge_list;
 	while (list) {
 		zend_mm_huge_list *q = list;
+		ZEND_MM_UNPOISON(list, sizeof(zend_mm_huge_list));
 
 		leak.addr = list->ptr;
 		leak.size = list->dbg.size;
@@ -2707,6 +2722,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 	heap->huge_list = NULL;
 	while (list) {
 		zend_mm_huge_list *q = list;
+		ZEND_MM_UNPOISON(list, sizeof(zend_mm_huge_list));
 		list = list->next;
 		zend_mm_chunk_free(heap, q->ptr, q->size);
 	}
@@ -2923,12 +2939,16 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 
 	zend_mm_huge_list *block = AG(mm_heap)->huge_list;
 	while (block) {
+		ZEND_MM_UNPOISON(block, sizeof(zend_mm_huge_list));
 		if (ptr >= block->ptr
 				&& ptr < (void*)((char*)block->ptr + block->size)) {
+			ZEND_MM_POISON(block, sizeof(zend_mm_huge_list));
 			ZEND_MM_POISON_HEAP(AG(mm_heap));
 			return 1;
 		}
-		block = block->next;
+		zend_mm_huge_list *next = block->next;
+		ZEND_MM_POISON(block, sizeof(zend_mm_huge_list));
+		block = next;
 	}
 
 	ZEND_MM_POISON_HEAP(AG(mm_heap));
