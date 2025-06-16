@@ -2448,6 +2448,8 @@ static zend_long zend_mm_find_leaks_small(zend_mm_chunk *p, uint32_t i, uint32_t
 		dbg = (zend_mm_debug_info*)((char*)dbg + bin_data_size[bin_num]);
 		ZEND_MM_UNPOISON_DEBUGINFO(dbg);
 	}
+	ZEND_MM_POISON_DEBUGINFO(dbg);
+
 	if (empty) {
 		zend_mm_bitset_reset_range(p->free_map, i, bin_pages[bin_num]);
 	}
@@ -2482,9 +2484,14 @@ static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, uint32
 				i++;
 			}
 		}
-		p = p->next;
+		zend_mm_chunk *next = p->next;
+		ZEND_MM_POISON_CHUNK_HDR(p, heap);
+		p = next;
+		ZEND_MM_UNPOISON_CHUNK_HDR(p);
+
 		i = ZEND_MM_FIRST_PAGE;
 	} while (p != heap->main_chunk);
+	ZEND_MM_POISON_CHUNK_HDR(p, heap);
 	return count;
 }
 
@@ -2545,6 +2552,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 
 	/* for each chunk */
 	p = heap->main_chunk;
+	ZEND_MM_UNPOISON_CHUNK_HDR(p);
 	do {
 		i = ZEND_MM_FIRST_PAGE;
 		while (i < p->free_tail) {
@@ -2571,8 +2579,12 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 							dbg->filename = NULL;
 							dbg->lineno = 0;
 
-							repeated = zend_mm_find_leaks_small(p, i, j + 1, &leak) +
-							           zend_mm_find_leaks(heap, p, i + bin_pages[bin_num], &leak);
+							repeated = zend_mm_find_leaks_small(p, i, j + 1, &leak);
+							ZEND_MM_UNPOISON_CHUNK_HDR(p);
+
+							repeated += zend_mm_find_leaks(heap, p, i + bin_pages[bin_num], &leak);
+							ZEND_MM_UNPOISON_CHUNK_HDR(p);
+
 							total += 1 + repeated;
 							if (repeated) {
 								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
@@ -2604,6 +2616,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 					zend_mm_bitset_reset_range(p->free_map, i, pages_count);
 
 					repeated = zend_mm_find_leaks(heap, p, i + pages_count, &leak);
+					ZEND_MM_UNPOISON_CHUNK_HDR(p);
 					total += 1 + repeated;
 					if (repeated) {
 						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
@@ -2614,7 +2627,10 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 				i++;
 			}
 		}
-		p = p->next;
+		zend_mm_chunk *next = p->next;
+		ZEND_MM_POISON_CHUNK_HDR(p, heap);
+		p = next;
+		ZEND_MM_UNPOISON_CHUNK_HDR(p);
 	} while (p != heap->main_chunk);
 	if (total) {
 		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &total);
