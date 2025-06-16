@@ -3485,9 +3485,9 @@ static void poison_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		size_t size = zend_mm_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 
 		if (heap->debug.poison_free) {
-			ZEND_MM_UNPOISON(ptr, heap->debug.poison_free_value);
+			ZEND_MM_UNPOISON(ptr, size);
 			memset(ptr, heap->debug.poison_free_value, size);
-			ZEND_MM_POISON(ptr, heap->debug.poison_free_value);
+			ZEND_MM_POISON(ptr, size);
 		}
 	}
 
