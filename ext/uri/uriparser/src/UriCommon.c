@@ -154,7 +154,7 @@ UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
 
 
 
-URI_INLINE void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
+void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
 		unsigned int revertMask, UriMemoryManager * memory) {
 	if (revertMask & URI_NORMALIZE_SCHEME) {
 		/* NOTE: A scheme cannot be the empty string
