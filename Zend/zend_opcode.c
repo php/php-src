@@ -297,7 +297,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 	 * so we don't need to destroy the underlying ->ce here, but we do need
 	 * to free the attributes and the storage for the 
 	 * skip the destruction of aliases entirely. */
-	if (UNEXPECTED(Z_TYPE_INFO_P(zv) == IS_ALIAS_PTR)) {
+	if (UNEXPECTED(Z_TYPE_P(zv) == IS_ALIAS_PTR)) {
 		zend_class_alias *class_alias = Z_CLASS_ALIAS_P(zv);
 
 		if (class_alias->alias_flags & ZEND_ACC_IMMUTABLE) {
