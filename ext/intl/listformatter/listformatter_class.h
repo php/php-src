@@ -49,4 +49,7 @@ static inline ListFormatter_object *php_intl_listformatter_fetch_object(zend_obj
 void listformatter_register_class( void );
 extern zend_class_entry *ListFormatter_ce_ptr;
 
+#define INTL_LISTFORMATTER_FALLBACK_TYPE_AND 0
+#define INTL_LISTFORMATTER_FALLBACK_WIDTH_WIDE 0
+
 #endif // LISTFORMATTER_CLASS_H 
