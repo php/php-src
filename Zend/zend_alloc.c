@@ -2087,8 +2087,9 @@ static size_t zend_mm_get_huge_block_size(zend_mm_heap *heap, void *ptr ZEND_FIL
 	while (list != NULL) {
 		ZEND_MM_UNPOISON(list, sizeof(zend_mm_huge_list));
 		if (list->ptr == ptr) {
+			size_t size = list->size;
 			ZEND_MM_POISON(list, sizeof(zend_mm_huge_list));
-			return list->size;
+			return size;
 		}
 		zend_mm_huge_list *next = list->next;
 		ZEND_MM_POISON(list, sizeof(zend_mm_huge_list));
