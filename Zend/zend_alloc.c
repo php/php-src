@@ -3510,6 +3510,7 @@ static void tracked_free_all(zend_mm_heap *heap) {
 static void* poison_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_heap *heap = AG(mm_heap);
+	ZEND_MM_UNPOISON_HEAP(heap);
 
 	if (SIZE_MAX - heap->debug.padding * 2 < size) {
 		zend_mm_panic("Integer overflow in memory allocation");
@@ -3529,12 +3530,14 @@ static void* poison_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		ZEND_MM_UNPOISON(ptr, size);
 	}
 
+	ZEND_MM_POISON_HEAP(heap);
 	return ptr;
 }
 
 static void poison_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_heap *heap = AG(mm_heap);
+	ZEND_MM_UNPOISON_HEAP(heap);
 
 	if (EXPECTED(ptr)) {
 		/* zend_mm_shutdown() will try to free the heap when custom handlers
@@ -3555,6 +3558,7 @@ static void poison_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	}
 
 	zend_mm_free_heap(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	ZEND_MM_POISON_HEAP(heap);
 }
 
 static void* poison_realloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
@@ -3563,6 +3567,7 @@ static void* poison_realloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_L
 
 	void *new = poison_malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 
+	ZEND_MM_UNPOISON_HEAP(heap);
 	if (ptr) {
 	    /* Determine the size of the old allocation from the unpadded pointer. */
 		size_t oldsize = zend_mm_size(heap, (char*)ptr - heap->debug.padding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -3578,6 +3583,7 @@ static void* poison_realloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_L
 		memcpy(new, ptr, MIN(oldsize, size));
 		poison_free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
+	ZEND_MM_POISON_HEAP(heap);
 
 	return new;
 }
@@ -3585,6 +3591,7 @@ static void* poison_realloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_L
 static size_t poison_gc(void)
 {
 	zend_mm_heap *heap = AG(mm_heap);
+	ZEND_MM_UNPOISON_HEAP(heap);
 
 	void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 	void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
@@ -3598,7 +3605,8 @@ static size_t poison_gc(void)
 	size_t collected = _zend_mm_gc(heap);
 
 	_zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, _gc, _shutdown);
-
+	
+	ZEND_MM_POISON_HEAP(heap);
 	return collected;
 }
 
