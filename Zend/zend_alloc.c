@@ -514,6 +514,71 @@ static void stderr_last_error(char *msg)
 }
 #endif
 
+static void _zend_mm_set_custom_handlers_ex(zend_mm_heap *heap,
+                                          void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          size_t (*_gc)(void),
+                                          void   (*_shutdown)(bool, bool))
+{
+#if ZEND_MM_CUSTOM
+	zend_mm_heap *_heap = (zend_mm_heap*)heap;
+
+	if (!_malloc && !_free && !_realloc) {
+		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_NONE;
+	} else {
+		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
+		_heap->custom_heap._malloc = _malloc;
+		_heap->custom_heap._free = _free;
+		_heap->custom_heap._realloc = _realloc;
+		_heap->custom_heap._gc = _gc;
+		_heap->custom_heap._shutdown = _shutdown;
+	}
+#endif
+}
+
+
+static void _zend_mm_get_custom_handlers_ex(zend_mm_heap *heap,
+                                             void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             size_t (**_gc)(void),
+                                             void   (**_shutdown)(bool, bool))
+{
+#if ZEND_MM_CUSTOM
+	zend_mm_heap *_heap = (zend_mm_heap*)heap;
+
+	if (heap->use_custom_heap) {
+		*_malloc = _heap->custom_heap._malloc;
+		*_free = _heap->custom_heap._free;
+		*_realloc = _heap->custom_heap._realloc;
+		if (_gc != NULL) {
+			*_gc = _heap->custom_heap._gc;
+		}
+		if (_shutdown != NULL) {
+			*_shutdown = _heap->custom_heap._shutdown;
+		}
+	} else {
+		*_malloc = NULL;
+		*_free = NULL;
+		*_realloc = NULL;
+		if (_gc != NULL) {
+			*_gc = NULL;
+		}
+		if (_shutdown != NULL) {
+			*_shutdown = NULL;
+		}
+	}
+#else
+	*_malloc = NULL;
+	*_free = NULL;
+	*_realloc = NULL;
+	*_gc = NULL;
+	*_shutdown = NULL;
+#endif
+}
+
+
 /*****************/
 /* OS Allocation */
 /*****************/
@@ -3509,6 +3574,7 @@ static void* poison_realloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_L
 		oldsize -= sizeof(zend_mm_debug_info);
 #endif
 
+		ZEND_MM_UNPOISON(ptr, MIN(oldsize, size));
 		memcpy(new, ptr, MIN(oldsize, size));
 		poison_free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
@@ -3526,12 +3592,12 @@ static size_t poison_gc(void)
 	size_t (*_gc)(void);
 	void   (*_shutdown)(bool, bool);
 
-	zend_mm_get_custom_handlers_ex(heap, &_malloc, &_free, &_realloc, &_gc, &_shutdown);
-	zend_mm_set_custom_handlers_ex(heap, NULL, NULL, NULL, NULL, NULL);
+	_zend_mm_get_custom_handlers_ex(heap, &_malloc, &_free, &_realloc, &_gc, &_shutdown);
+	_zend_mm_set_custom_handlers_ex(heap, NULL, NULL, NULL, NULL, NULL);
 
 	size_t collected = _zend_mm_gc(heap);
 
-	zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, _gc, _shutdown);
+	_zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, _gc, _shutdown);
 
 	return collected;
 }
@@ -3546,17 +3612,18 @@ static void poison_shutdown(bool full, bool silent)
 	size_t (*_gc)(void);
 	void   (*_shutdown)(bool, bool);
 
-	zend_mm_get_custom_handlers_ex(heap, &_malloc, &_free, &_realloc, &_gc, &_shutdown);
-	zend_mm_set_custom_handlers_ex(heap, NULL, NULL, NULL, NULL, NULL);
+	_zend_mm_get_custom_handlers_ex(heap, &_malloc, &_free, &_realloc, &_gc, &_shutdown);
+	_zend_mm_set_custom_handlers_ex(heap, NULL, NULL, NULL, NULL, NULL);
 
 	if (heap->debug.check_freelists_on_shutdown) {
 		zend_mm_check_freelists(heap);
 	}
 
 	zend_mm_shutdown(heap, full, silent);
+	ZEND_MM_UNPOISON_HEAP(heap);
 
 	if (!full) {
-		zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, _gc, _shutdown);
+		_zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, _gc, _shutdown);
 	}
 }
 
@@ -3637,7 +3704,7 @@ static void poison_enable(zend_mm_heap *heap, char *parameters)
 		tmp++;
 	}
 
-	zend_mm_set_custom_handlers_ex(heap, poison_malloc, poison_free,
+	_zend_mm_set_custom_handlers_ex(heap, poison_malloc, poison_free,
 			poison_realloc, poison_gc, poison_shutdown);
 }
 #endif
@@ -3737,18 +3804,6 @@ ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap)
 #endif
 }
 
-ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
-                                          void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
-{
-#if ZEND_MM_CUSTOM
-	ZEND_MM_UNPOISON_HEAP(heap);
-	zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, NULL, NULL);
-	ZEND_MM_POISON_HEAP(heap);
-#endif
-}
-
 ZEND_API void zend_mm_set_custom_handlers_ex(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
                                           void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
@@ -3756,32 +3811,19 @@ ZEND_API void zend_mm_set_custom_handlers_ex(zend_mm_heap *heap,
                                           size_t (*_gc)(void),
                                           void   (*_shutdown)(bool, bool))
 {
-#if ZEND_MM_CUSTOM
 	ZEND_MM_UNPOISON_HEAP(heap);
-	zend_mm_heap *_heap = (zend_mm_heap*)heap;
-
-	if (!_malloc && !_free && !_realloc) {
-		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_NONE;
-	} else {
-		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-		_heap->custom_heap._malloc = _malloc;
-		_heap->custom_heap._free = _free;
-		_heap->custom_heap._realloc = _realloc;
-		_heap->custom_heap._gc = _gc;
-		_heap->custom_heap._shutdown = _shutdown;
-	}
-	ZEND_MM_POISON_HEAP(heap);
-#endif
+	_zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, _gc, _shutdown);
+	ZEND_MM_UNPOISON_HEAP(heap);
 }
 
-ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
-                                             void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                             void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                             void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
+                                          void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
 {
 #if ZEND_MM_CUSTOM
 	ZEND_MM_UNPOISON_HEAP(heap);
-	zend_mm_get_custom_handlers_ex(heap, _malloc, _free, _realloc, NULL, NULL);
+	_zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, NULL, NULL);
 	ZEND_MM_POISON_HEAP(heap);
 #endif
 }
@@ -3793,39 +3835,20 @@ ZEND_API void zend_mm_get_custom_handlers_ex(zend_mm_heap *heap,
                                              size_t (**_gc)(void),
                                              void   (**_shutdown)(bool, bool))
 {
+	ZEND_MM_UNPOISON_HEAP(heap);
+	_zend_mm_get_custom_handlers_ex(heap, _malloc, _free, _realloc, _gc, _shutdown);
+	ZEND_MM_POISON_HEAP(heap);
+}
+
+ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
+                                             void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+{
 #if ZEND_MM_CUSTOM
 	ZEND_MM_UNPOISON_HEAP(heap);
-
-	zend_mm_heap *_heap = (zend_mm_heap*)heap;
-
-	if (heap->use_custom_heap) {
-		*_malloc = _heap->custom_heap._malloc;
-		*_free = _heap->custom_heap._free;
-		*_realloc = _heap->custom_heap._realloc;
-		if (_gc != NULL) {
-			*_gc = _heap->custom_heap._gc;
-		}
-		if (_shutdown != NULL) {
-			*_shutdown = _heap->custom_heap._shutdown;
-		}
-	} else {
-		*_malloc = NULL;
-		*_free = NULL;
-		*_realloc = NULL;
-		if (_gc != NULL) {
-			*_gc = NULL;
-		}
-		if (_shutdown != NULL) {
-			*_shutdown = NULL;
-		}
-	}
+	_zend_mm_get_custom_handlers_ex(heap, _malloc, _free, _realloc, NULL, NULL);
 	ZEND_MM_POISON_HEAP(heap);
-#else
-	*_malloc = NULL;
-	*_free = NULL;
-	*_realloc = NULL;
-	*_gc = NULL;
-	*_shutdown = NULL;
 #endif
 }
 
