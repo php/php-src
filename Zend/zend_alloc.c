@@ -3077,7 +3077,6 @@ ZEND_API void ZEND_FASTCALL _efree_large(void *ptr, size_t size)
 		ZEND_ASSERT(ZEND_MM_LRUN_PAGES(chunk->map[page_num]) == pages_count);
 		ZEND_MM_POISON_CHUNK_HDR(chunk, AG(mm_heap));
 
-		ZEND_MM_UNPOISON_HEAP(AG(mm_heap));
 		zend_mm_free_large(AG(mm_heap), chunk, page_num, pages_count);
 		ZEND_MM_POISON_HEAP(AG(mm_heap));
 	}
@@ -3150,7 +3149,7 @@ ZEND_API void* ZEND_FASTCALL _erealloc2(void *ptr, size_t size, size_t copy_size
 	}
 #endif
 	ptr = zend_mm_realloc_heap(AG(mm_heap), ptr, size, 1, copy_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-	ZEND_MM_UNPOISON_HEAP(AG(mm_heap));
+	ZEND_MM_POISON_HEAP(AG(mm_heap));
 	return ptr;
 }
 
