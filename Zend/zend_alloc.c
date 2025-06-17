@@ -3052,7 +3052,6 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 			ZEND_MM_UNPOISON_CHUNK_HDR(chunk); \
 			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "zend_mm_heap corrupted"); \
 			ZEND_MM_POISON_CHUNK_HDR(chunk, AG(mm_heap)); \
-			ZEND_MM_UNPOISON_HEAP(AG(mm_heap)); \
 			zend_mm_free_small(AG(mm_heap), ptr, _num); \
 			ZEND_MM_POISON_HEAP(AG(mm_heap)); \
 		} \
