@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.23
+19 Jun 2025, PHP 8.3.23RC1
 
 - Core:
   . Fixed GH-18695 (zend_ast_export() - float number is not preserved).
