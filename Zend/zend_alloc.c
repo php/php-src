@@ -2363,7 +2363,9 @@ static size_t _zend_mm_gc(zend_mm_heap *heap)
 	if (heap->use_custom_heap) {
 		size_t (*gc)(void) = heap->custom_heap._gc;
 		if (gc) {
-			return gc();
+			size_t ret = gc();
+			ZEND_MM_UNPOISON_HEAP(heap);
+			return ret;
 		}
 		return 0;
 	}
