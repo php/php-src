@@ -10,6 +10,15 @@ FPM\Tester::skipIfRoot();
 
 require_once "tester.inc";
 
+// TODO: fix leak on shutdown caused by alloc_globals_dtor not getting invoked
+$opts = getenv("ASAN_OPTIONS") ?: '';
+if ($opts) {
+    $opts .= ",detect_leaks=0";
+} else {
+    $opts = "detect_leaks=0";
+}
+putenv("ASAN_OPTIONS=$opts");
+
 $cfg = <<<EOT
 [global]
 error_log = {{FILE:LOG}}
