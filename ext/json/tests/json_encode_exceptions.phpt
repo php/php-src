@@ -26,17 +26,17 @@ object(JsonException)#1 (7) {
   ["code":protected]=>
   int(5)
   ["file":protected]=>
-  string(67) "/home/usuario/dev/php-src/ext/json/tests/json_encode_exceptions.php"
+  string(%d) "%s"
   ["line":protected]=>
-  int(4)
+  int(%d)
   ["trace":"Exception":private]=>
   array(1) {
     [0]=>
     array(4) {
       ["file"]=>
-      string(67) "/home/usuario/dev/php-src/ext/json/tests/json_encode_exceptions.php"
+      string(%d) "%s"
       ["line"]=>
-      int(4)
+      int(%d)
       ["function"]=>
       string(11) "json_encode"
       ["args"]=>
