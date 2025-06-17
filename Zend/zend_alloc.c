@@ -2900,7 +2900,7 @@ ZEND_API bool is_zend_mm(void)
 
 ZEND_API bool is_zend_ptr(const void *ptr)
 {
-	ZEND_MM_POISON_HEAP(AG(mm_heap));
+	ZEND_MM_UNPOISON_HEAP(AG(mm_heap));
 #if ZEND_MM_CUSTOM
 	if (AG(mm_heap)->use_custom_heap) {
 		if (AG(mm_heap)->custom_heap._malloc == tracked_malloc) {
