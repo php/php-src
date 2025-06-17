@@ -3613,6 +3613,7 @@ static size_t poison_gc(void)
 static void poison_shutdown(bool full, bool silent)
 {
 	zend_mm_heap *heap = AG(mm_heap);
+	ZEND_MM_UNPOISON_HEAP(heap);
 
 	void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 	void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
@@ -3633,6 +3634,7 @@ static void poison_shutdown(bool full, bool silent)
 	if (!full) {
 		_zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, _gc, _shutdown);
 	}
+	ZEND_MM_POISON_HEAP(heap);
 }
 
 static void poison_enable(zend_mm_heap *heap, char *parameters)
