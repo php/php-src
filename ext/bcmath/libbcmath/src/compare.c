@@ -92,29 +92,24 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool us
 	const char *n1ptr = n1->n_value;
 	const char *n2ptr = n2->n_value;
 
-	while ((count > 0) && (*n1ptr == *n2ptr)) {
-		n1ptr++;
-		n2ptr++;
-		count--;
-	}
-
-	if (count != 0) {
-		if (*n1ptr > *n2ptr) {
-			/* Magnitude of n1 > n2. */
-			if (!use_sign || n1->n_sign == PLUS) {
-				return BCMATH_LEFT_GREATER;
-			} else {
-				return BCMATH_RIGHT_GREATER;
-			}
+	int cmp_ret = memcmp(n1ptr, n2ptr, count);
+	if (cmp_ret > 0) {
+		/* Magnitude of n1 > n2. */
+		if (!use_sign || n1->n_sign == PLUS) {
+			return BCMATH_LEFT_GREATER;
 		} else {
-			/* Magnitude of n1 < n2. */
-			if (!use_sign || n1->n_sign == PLUS) {
-				return BCMATH_RIGHT_GREATER;
-			} else {
-				return BCMATH_LEFT_GREATER;
-			}
+			return BCMATH_RIGHT_GREATER;
+		}
+	} else if (cmp_ret < 0) {
+		/* Magnitude of n1 < n2. */
+		if (!use_sign || n1->n_sign == PLUS) {
+			return BCMATH_RIGHT_GREATER;
+		} else {
+			return BCMATH_LEFT_GREATER;
 		}
 	}
+	n1ptr += count;
+	n2ptr += count;
 
 	/* They are equal up to the last part of the equal part of the fraction. */
 	if (n1_scale != n2_scale) {
