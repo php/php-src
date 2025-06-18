@@ -46,6 +46,9 @@
 #define IN_ISSET	ZEND_GUARD_PROPERTY_ISSET
 #define IN_HOOK		ZEND_GUARD_PROPERTY_HOOK
 
+static zend_arg_info zend_call_trampoline_arginfo[1] = {{0}};
+static zend_arg_info zend_property_hook_arginfo[1] = {{0}};
+
 static zend_always_inline bool zend_objects_check_stack_limit(void)
 {
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -1782,9 +1785,6 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	const zend_property_info *prop_info,
 	zend_property_hook_kind kind, zend_string *prop_name)
 {
-	static const zend_internal_arg_info arg_info[2] = {
-		{ .name = "value" }
-	};
 	zend_function *func;
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline);
@@ -1810,7 +1810,7 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	func->common.scope = prop_info->ce;
 	func->common.prototype = NULL;
 	func->common.prop_info = prop_info;
-	func->common.arg_info = (zend_arg_info *) arg_info;
+	func->common.arg_info = zend_property_hook_arginfo;
 	func->internal_function.handler = kind == ZEND_PROPERTY_HOOK_GET
 		? ZEND_FN(zend_parent_hook_get_trampoline)
 		: ZEND_FN(zend_parent_hook_set_trampoline);
@@ -2574,3 +2574,8 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare */
 	NULL,									/* get_properties_for */
 };
+
+void zend_object_handlers_startup(void) {
+	zend_call_trampoline_arginfo[0].name = ZSTR_KNOWN(ZEND_STR_ARGS);
+	zend_property_hook_arginfo[0].name = ZSTR_KNOWN(ZEND_STR_VALUE);
+}

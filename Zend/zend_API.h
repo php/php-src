@@ -922,8 +922,12 @@ ZEND_API bool zend_is_iterable(const zval *iterable);
 
 ZEND_API bool zend_is_countable(const zval *countable);
 
+ZEND_API void zend_convert_internal_arg_info(zend_arg_info *new_arg_info,
+		const zend_internal_arg_info *arg_info, bool is_return_info,
+		bool permanent);
+
 ZEND_API zend_result zend_get_default_from_internal_arg_info(
-		zval *default_value_zval, const zend_internal_arg_info *arg_info);
+		zval *default_value_zval, const zend_arg_info *arg_info);
 
 END_EXTERN_C()
 

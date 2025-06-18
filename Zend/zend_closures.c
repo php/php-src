@@ -510,7 +510,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 	 * ZEND_ACC_USER_ARG_INFO flag to prevent invalid usage by Reflection */
 	invoke->type = ZEND_INTERNAL_FUNCTION;
 	invoke->internal_function.fn_flags =
-		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & keep_flags);
+		ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | ZEND_ACC_NEVER_CACHE | (closure->func.common.fn_flags & keep_flags);
 	if (closure->func.type != ZEND_INTERNAL_FUNCTION || (closure->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 		invoke->internal_function.fn_flags |=
 			ZEND_ACC_USER_ARG_INFO;
@@ -618,7 +618,6 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 	zval val;
 	struct _zend_arg_info *arg_info = closure->func.common.arg_info;
 	HashTable *debug_info;
-	bool zstr_args = (closure->func.type == ZEND_USER_FUNCTION) || (closure->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO);
 
 	*is_temp = 1;
 
@@ -694,15 +693,9 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			zend_string *name;
 			zval info;
 			ZEND_ASSERT(arg_info->name && "Argument should have name");
-			if (zstr_args) {
-				name = zend_strpprintf(0, "%s$%s",
-						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-						ZSTR_VAL(arg_info->name));
-			} else {
-				name = zend_strpprintf(0, "%s$%s",
-						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-						((zend_internal_arg_info*)arg_info)->name);
-			}
+			name = zend_strpprintf(0, "%s$%s",
+					ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
+					ZSTR_VAL(arg_info->name));
 			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 			zend_hash_update(Z_ARRVAL(val), name, &info);
 			zend_string_release_ex(name, 0);
@@ -885,8 +878,7 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 }
 /* }}} */
 
-/* __call and __callStatic name the arguments "$arguments" in the docs. */
-static zend_internal_arg_info trampoline_arg_info[] = {ZEND_ARG_VARIADIC_TYPE_INFO(false, arguments, IS_MIXED, false)};
+static zend_arg_info trampoline_arg_info[1];
 
 void zend_closure_from_frame(zval *return_value, const zend_execute_data *call) { /* {{{ */
 	zval instance;
@@ -951,3 +943,11 @@ void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {
 	ZVAL_COPY_VALUE(var, val);
 }
 /* }}} */
+
+void zend_closure_startup(void)
+{
+	/* __call and __callStatic name the arguments "$arguments" in the docs. */
+	trampoline_arg_info[0].name = zend_string_init_interned("arguments", strlen("arguments"), true);
+	trampoline_arg_info[0].type = (zend_type)ZEND_TYPE_INIT_CODE(IS_MIXED, false, _ZEND_ARG_INFO_FLAGS(false, 1, 0));
+	trampoline_arg_info[0].default_value = NULL;
+}

@@ -763,11 +763,6 @@ static void format_default_value(smart_str *str, zval *value) {
 	}
 }
 
-static inline bool has_internal_arg_info(const zend_function *fptr) {
-	return fptr->type == ZEND_INTERNAL_FUNCTION
-		&& !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO);
-}
-
 /* {{{ _parameter_string */
 static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, bool required, char* indent)
 {
@@ -789,17 +784,15 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	if (ZEND_ARG_IS_VARIADIC(arg_info)) {
 		smart_str_appends(str, "...");
 	}
-	smart_str_append_printf(str, "$%s", has_internal_arg_info(fptr)
-		? ((zend_internal_arg_info*)arg_info)->name : ZSTR_VAL(arg_info->name));
+	smart_str_append_printf(str, "$%s", ZSTR_VAL(arg_info->name));
 
 	if (!required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
 		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
 			smart_str_appends(str, " = ");
 			/* TODO: We don't have a way to fetch the default value for an internal function
 			 * with userland arg info. */
-			if (has_internal_arg_info(fptr)
-					&& ((zend_internal_arg_info*)arg_info)->default_value) {
-				smart_str_appends(str, ((zend_internal_arg_info*)arg_info)->default_value);
+			if (arg_info->default_value) {
+				smart_str_append(str, arg_info->default_value);
 			} else {
 				smart_str_appends(str, "<default>");
 			}
@@ -1463,11 +1456,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	}
 
 	prop_name = reflection_prop_name(object);
-	if (has_internal_arg_info(fptr)) {
-		ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)->name);
-	} else {
-		ZVAL_STR_COPY(prop_name, arg_info->name);
-	}
+	ZVAL_STR_COPY(prop_name, arg_info->name);
 }
 /* }}} */
 
@@ -1653,8 +1642,7 @@ static zend_result get_parameter_default(zval *result, parameter_reference *para
 			/* We don't have a way to determine the default value for this case right now. */
 			return FAILURE;
 		}
-		return zend_get_default_from_internal_arg_info(
-			result, (zend_internal_arg_info *) param->arg_info);
+		return zend_get_default_from_internal_arg_info(result, param->arg_info);
 	} else {
 		zval *default_value = get_default_from_recv((zend_op_array *) param->fptr, param->offset);
 		if (!default_value) {
@@ -2590,22 +2578,11 @@ ZEND_METHOD(ReflectionParameter, __construct)
 		uint32_t i;
 		position = -1;
 
-		if (has_internal_arg_info(fptr)) {
-			for (i = 0; i < num_args; i++) {
-				if (arg_info[i].name) {
-					if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, ZSTR_VAL(arg_name)) == 0) {
-						position = i;
-						break;
-					}
-				}
-			}
-		} else {
-			for (i = 0; i < num_args; i++) {
-				if (arg_info[i].name) {
-					if (zend_string_equals(arg_name, arg_info[i].name)) {
-						position = i;
-						break;
-					}
+		for (i = 0; i < num_args; i++) {
+			if (arg_info[i].name) {
+				if (zend_string_equals(arg_name, arg_info[i].name)) {
+					position = i;
+					break;
 				}
 			}
 		}
@@ -2646,11 +2623,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 
 	prop_name = reflection_prop_name(object);
 	zval_ptr_dtor(prop_name);
-	if (has_internal_arg_info(fptr)) {
-		ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)[position].name);
-	} else {
-		ZVAL_STR_COPY(prop_name, arg_info[position].name);
-	}
+	ZVAL_STR_COPY(prop_name, arg_info[position].name);
 	return;
 
 failure:
@@ -2689,11 +2662,7 @@ ZEND_METHOD(ReflectionParameter, getName)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	GET_REFLECTION_OBJECT_PTR(param);
-	if (has_internal_arg_info(param->fptr)) {
-		RETURN_STRING(((zend_internal_arg_info *) param->arg_info)->name);
-	} else {
-		RETURN_STR_COPY(param->arg_info->name);
-	}
+	RETURN_STR_COPY(param->arg_info->name);
 }
 /* }}} */
 
@@ -2947,8 +2916,7 @@ ZEND_METHOD(ReflectionParameter, isDefaultValueAvailable)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
-		RETURN_BOOL(!(param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)
-			&& ((zend_internal_arg_info*) (param->arg_info))->default_value);
+		RETURN_BOOL(param->arg_info->default_value);
 	} else {
 		zval *default_value = get_default_from_recv((zend_op_array *)param->fptr, param->offset);
 		RETURN_BOOL(default_value != NULL);

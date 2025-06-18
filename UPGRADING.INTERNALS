@@ -49,6 +49,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     removed. Call zend_wrong_param_count(); followed by RETURN_THROWS();
     instead.
   . PHP_HAVE_STREAMS macro removed from <php.h>.
+  . zend_function.arg_info is now always a zend_arg_info*. Before, the arg_info
+    member was a zend_internal_arg_info on internal functions, unless the
+    ZEND_ACC_USER_ARG_INFO flag was set.
 
 ========================
 2. Build system changes

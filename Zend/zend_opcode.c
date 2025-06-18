@@ -124,21 +124,32 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	}
 }
 
-void zend_free_internal_arg_info(zend_internal_function *function) {
-	if ((function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
-		function->arg_info) {
+ZEND_API void zend_free_internal_arg_info(zend_internal_function *function,
+		bool persistent) {
+	if (function->arg_info) {
+		ZEND_ASSERT((persistent || (function->fn_flags & ZEND_ACC_NEVER_CACHE))
+				&& "Functions with non-persistent arg_info must be flagged ZEND_ACC_NEVER_CACHE");
 
 		uint32_t i;
 		uint32_t num_args = function->num_args + 1;
-		zend_internal_arg_info *arg_info = function->arg_info - 1;
+		zend_arg_info *arg_info = function->arg_info - 1;
 
 		if (function->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
 		for (i = 0 ; i < num_args; i++) {
-			zend_type_release(arg_info[i].type, /* persistent */ true);
+			bool is_return_info = i == 0;
+			if (!is_return_info) {
+				zend_string_release_ex(arg_info[i].name, persistent);
+				if (arg_info[i].default_value) {
+					zend_string_release_ex(arg_info[i].default_value,
+							persistent);
+				}
+			}
+			zend_type_release(arg_info[i].type, persistent);
 		}
-		free(arg_info);
+
+		pefree(arg_info, persistent);
 	}
 }
 
@@ -157,7 +168,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 		/* For methods this will be called explicitly. */
 		if (!function->common.scope) {
-			zend_free_internal_arg_info(&function->internal_function);
+			zend_free_internal_arg_info(&function->internal_function, true);
 
 			if (function->common.attributes) {
 				zend_hash_release(function->common.attributes);
@@ -474,12 +485,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release_ex(ce->name, 1);
 
-			/* TODO: eliminate this loop for classes without functions with arg_info / attributes */
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
 				if (fn->common.scope == ce) {
-					if (fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) {
-						zend_free_internal_arg_info(&fn->internal_function);
-					}
+					zend_free_internal_arg_info(&fn->internal_function, true);
 
 					if (fn->common.attributes) {
 						zend_hash_release(fn->common.attributes);
