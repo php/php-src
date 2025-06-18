@@ -27,7 +27,7 @@
 #include "php_pdo_odbc_int.h"
 
 /* Buffer size; bigger columns than this become a "long column" */
-#define LONG_COLUMN_BUFFER_SIZE 2048
+#define LONG_COLUMN_BUFFER_SIZE (ZEND_MM_PAGE_SIZE- ZSTR_MAX_OVERHEAD)
 
 enum pdo_odbc_conv_result {
 	PDO_ODBC_CONV_NOT_REQUIRED,
