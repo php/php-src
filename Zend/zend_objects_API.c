@@ -100,7 +100,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 			if (IS_OBJ_VALID(obj)) {
 				if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 					GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
-					if (obj->handlers->free_obj != zend_object_std_dtor) {
+					if (obj->handlers->free_obj != zend_object_std_dtor
+					 || (OBJ_FLAGS(obj) & IS_OBJ_WEAKLY_REFERENCED)
+					) {
 						GC_ADDREF(obj);
 						obj->handlers->free_obj(obj);
 					}
