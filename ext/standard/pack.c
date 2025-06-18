@@ -61,7 +61,13 @@ static void php_pack(const zval *val, size_t size, php_pack_endianness endiannes
 
 	if ((endianness == PHP_LITTLE_ENDIAN) != MACHINE_LITTLE_ENDIAN) {
 		zl = PHP_LONG_BSWAP(zl);
+#if MACHINE_LITTLE_ENDIAN
 		zl >>= (sizeof(zl) - size) * 8;
+#endif
+	} else {
+#if !MACHINE_LITTLE_ENDIAN
+		zl <<= (sizeof(zl) - size) * 8;
+#endif
 	}
 
 	memcpy(output, (const char *) &zl, size);
