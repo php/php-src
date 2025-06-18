@@ -81,8 +81,7 @@ namespace PHP {
 
 		CodePointBreakIterator &refreshInputText(UText *input, UErrorCode &status) override;
 
-		inline UChar32 getLastCodePoint()
-		{
+		inline UChar32 getLastCodePoint() const {
 			return this->lastCodePoint;
 		}
 
