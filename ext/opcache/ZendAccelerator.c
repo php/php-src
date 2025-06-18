@@ -663,8 +663,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		if (Z_FUNC(p->val)->common.function_name) {
 			Z_FUNC(p->val)->common.function_name = new_interned_string(Z_FUNC(p->val)->common.function_name);
 		}
-		if (Z_FUNC(p->val)->common.arg_info &&
-		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
+		if (Z_FUNC(p->val)->common.arg_info) {
 			uint32_t i;
 			uint32_t num_args = Z_FUNC(p->val)->common.num_args + 1;
 			zend_arg_info *arg_info = Z_FUNC(p->val)->common.arg_info - 1;
@@ -673,6 +672,12 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				num_args++;
 			}
 			for (i = 0 ; i < num_args; i++) {
+				if (i > 0) {
+					arg_info[i].name = new_interned_string(arg_info[i].name);
+					if (arg_info[i].default_value) {
+						arg_info[i].default_value = new_interned_string(arg_info[i].default_value);
+					}
+				}
 				accel_copy_permanent_list_types(new_interned_string, arg_info[i].type);
 			}
 		}
@@ -713,6 +718,24 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			}
 			if (Z_FUNC(q->val)->common.function_name) {
 				Z_FUNC(q->val)->common.function_name = new_interned_string(Z_FUNC(q->val)->common.function_name);
+			}
+			if (Z_FUNC(q->val)->common.scope == ce) {
+				uint32_t i;
+				uint32_t num_args = Z_FUNC(q->val)->common.num_args + 1;
+				zend_arg_info *arg_info = Z_FUNC(q->val)->common.arg_info - 1;
+
+				if (Z_FUNC(q->val)->common.fn_flags & ZEND_ACC_VARIADIC) {
+					num_args++;
+				}
+				for (i = 0 ; i < num_args; i++) {
+					if (i > 0) {
+						arg_info[i].name = new_interned_string(arg_info[i].name);
+						if (arg_info[i].default_value) {
+							arg_info[i].default_value = new_interned_string(arg_info[i].default_value);
+						}
+					}
+					accel_copy_permanent_list_types(new_interned_string, arg_info[i].type);
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 

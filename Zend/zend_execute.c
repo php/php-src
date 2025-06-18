@@ -136,8 +136,7 @@ static ZEND_FUNCTION(pass)
 {
 }
 
-ZEND_BEGIN_ARG_INFO_EX(zend_pass_function_arg_info, 0, 0, 0)
-ZEND_END_ARG_INFO()
+static zend_arg_info zend_pass_function_arg_info[1] = {0};
 
 ZEND_API const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
@@ -148,7 +147,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	NULL,                   /* prototype         */
 	0,                      /* num_args          */
 	0,                      /* required_num_args */
-	(zend_internal_arg_info *) zend_pass_function_arg_info + 1, /* arg_info */
+	zend_pass_function_arg_info + 1, /* arg_info */
 	NULL,                   /* attributes        */
 	NULL,                   /* run_time_cache    */
 	NULL,                   /* doc_comment       */
@@ -1480,7 +1479,7 @@ static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, con
 
 ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *ret)
 {
-	const zend_internal_arg_info *ret_info = zf->internal_function.arg_info - 1;
+	const zend_arg_info *ret_info = zf->internal_function.arg_info - 1;
 
 	if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_VOID) {
 		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
@@ -5474,28 +5473,17 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 
 	// TODO: Use a hash table?
 	uint32_t num_args = fbc->common.num_args;
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)
-			|| EXPECTED(fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-		for (uint32_t i = 0; i < num_args; i++) {
-			const zend_arg_info *arg_info = &fbc->common.arg_info[i];
-			if (zend_string_equals(arg_name, arg_info->name)) {
-				if (fbc->type == ZEND_USER_FUNCTION && (!fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE))) {
-					*cache_slot = unique_id;
-					*(uintptr_t *)(cache_slot + 1) = i;
-				}
-				return i;
-			}
-		}
-	} else {
-		ZEND_ASSERT(num_args == 0 || fbc->internal_function.arg_info);
-		for (uint32_t i = 0; i < num_args; i++) {
-			const zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
-			size_t len = strlen(arg_info->name);
-			if (zend_string_equals_cstr(arg_name, arg_info->name, len)) {
+	for (uint32_t i = 0; i < num_args; i++) {
+		const zend_arg_info *arg_info = &fbc->common.arg_info[i];
+		if (zend_string_equals(arg_name, arg_info->name)) {
+			if ((fbc->type == ZEND_USER_FUNCTION
+			  && (!fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE)))
+			 || (fbc->type == ZEND_INTERNAL_FUNCTION
+			  && !(fbc->common.fn_flags & ZEND_ACC_NEVER_CACHE))) {
 				*cache_slot = unique_id;
 				*(uintptr_t *)(cache_slot + 1) = i;
-				return i;
 			}
+			return i;
 		}
 	}
 
@@ -5503,7 +5491,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 		if ((fbc->type == ZEND_USER_FUNCTION
 		  && (!fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE)))
 		 || (fbc->type == ZEND_INTERNAL_FUNCTION
-		  && !(fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO))) {
+		  && !(fbc->common.fn_flags & ZEND_ACC_NEVER_CACHE))) {
 			*cache_slot = unique_id;
 			*(uintptr_t *)(cache_slot + 1) = fbc->common.num_args;
 		}
@@ -5661,7 +5649,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 				continue;
 			}
 
-			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
+			zend_arg_info *arg_info = &fbc->internal_function.arg_info[i];
 			if (i < fbc->common.required_num_args) {
 				zend_execute_data *old = start_fake_frame(call, NULL);
 				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");

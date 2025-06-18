@@ -592,7 +592,7 @@ typedef struct _zend_internal_function {
 	zend_function *prototype;
 	uint32_t num_args;
 	uint32_t required_num_args;
-	zend_internal_arg_info *arg_info;
+	zend_arg_info *arg_info;
 	HashTable *attributes;
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	zend_string *doc_comment;
@@ -976,7 +976,8 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void);
 		} \
 	} while (0)
 
-void zend_free_internal_arg_info(zend_internal_function *function);
+ZEND_API void zend_free_internal_arg_info(zend_internal_function *function,
+		bool permanent);
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void zend_function_dtor(zval *zv);
 ZEND_API void destroy_zend_class(zval *zv);

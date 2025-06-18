@@ -20,6 +20,7 @@
 */
 
 #include "zend.h"
+#include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_API.h"
 #include "zend_hash.h"
@@ -2927,6 +2928,80 @@ static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
 	} ZEND_TYPE_FOREACH_END();
 }
 
+static void zend_convert_internal_arg_info_type(zend_type *type, bool persistent)
+{
+	if (ZEND_TYPE_HAS_LITERAL_NAME(*type)) {
+		// gen_stubs.php does not support codegen for compound types. As a
+		// temporary workaround, we support union types by splitting
+		// the type name on `|` characters if necessary.
+		const char *class_name = ZEND_TYPE_LITERAL_NAME(*type);
+		type->type_mask &= ~_ZEND_TYPE_LITERAL_NAME_BIT;
+
+		size_t num_types = 1;
+		const char *p = class_name;
+		while ((p = strchr(p, '|'))) {
+			num_types++;
+			p++;
+		}
+
+		if (num_types == 1) {
+			/* Simple class type */
+			zend_string *str = zend_string_init_interned(class_name, strlen(class_name), persistent);
+			zend_alloc_ce_cache(str);
+			ZEND_TYPE_SET_PTR(*type, str);
+			type->type_mask |= _ZEND_TYPE_NAME_BIT;
+		} else {
+			/* Union type */
+			zend_type_list *list = pemalloc(ZEND_TYPE_LIST_SIZE(num_types), persistent);
+			list->num_types = num_types;
+			ZEND_TYPE_SET_LIST(*type, list);
+			ZEND_TYPE_FULL_MASK(*type) |= _ZEND_TYPE_UNION_BIT;
+
+			const char *start = class_name;
+			uint32_t j = 0;
+			while (true) {
+				const char *end = strchr(start, '|');
+				zend_string *str = zend_string_init_interned(start, end ? end - start : strlen(start), persistent);
+				zend_alloc_ce_cache(str);
+				list->types[j] = (zend_type) ZEND_TYPE_INIT_CLASS(str, 0, 0);
+				if (!end) {
+					break;
+				}
+				start = end + 1;
+				j++;
+			}
+		}
+	}
+	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(*type)) {
+		/* Warning generated an extension load warning which is emitted for every test
+		   zend_error(E_CORE_WARNING, "iterable type is now a compile time alias for array|Traversable,"
+		   " regenerate the argument info via the php-src gen_stub build script");
+		   */
+		zend_type legacy_iterable = ZEND_TYPE_INIT_CLASS_MASK(
+			ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
+			(type->type_mask | MAY_BE_ARRAY)
+		);
+		*type = legacy_iterable;
+	}
+}
+
+ZEND_API void zend_convert_internal_arg_info(zend_arg_info *new_arg_info, const zend_internal_arg_info *arg_info, bool is_return_info, bool persistent)
+{
+	if (!is_return_info) {
+		new_arg_info->name = zend_string_init_interned(arg_info->name, strlen(arg_info->name), persistent);
+		if (arg_info->default_value) {
+			new_arg_info->default_value = zend_string_init_interned(arg_info->default_value, strlen(arg_info->default_value), persistent);
+		} else {
+			new_arg_info->default_value = NULL;
+		}
+	} else {
+		new_arg_info->name = NULL;
+		new_arg_info->default_value = NULL;
+	}
+	new_arg_info->type = arg_info->type;
+	zend_convert_internal_arg_info_type(&new_arg_info->type, persistent);
+}
+
 /* registers all functions in *library_functions in the function hash */
 ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type) /* {{{ */
 {
@@ -2938,6 +3013,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 	int error_type;
 	zend_string *lowercase_name;
 	size_t fname_len;
+	const zend_internal_arg_info *internal_arg_info;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -2994,7 +3070,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 
 		if (ptr->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;
-			internal_function->arg_info = (zend_internal_arg_info*)ptr->arg_info+1;
+			internal_arg_info = ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
 			if (info->required_num_args == (uintptr_t)-1) {
@@ -3024,7 +3100,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			zend_error(E_CORE_WARNING, "Missing arginfo for %s%s%s()",
 				 scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
 
-			internal_function->arg_info = NULL;
+			internal_arg_info = NULL;
 			internal_function->num_args = 0;
 			internal_function->required_num_args = 0;
 		}
@@ -3035,13 +3111,11 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 				!(internal_function->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			zend_error(E_CORE_WARNING, "%s::__toString() implemented without string return type",
 				ZSTR_VAL(scope->name));
-			internal_function->arg_info = (zend_internal_arg_info *) arg_info_toString + 1;
+			internal_arg_info = (zend_internal_arg_info *) arg_info_toString + 1;
 			internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 			internal_function->num_args = internal_function->required_num_args = 0;
 		}
 
-
-		zend_set_function_arg_flags((zend_function*)internal_function);
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {
 				/* This is a class that must be abstract itself. Here we set the check info. */
@@ -3106,17 +3180,17 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		}
 
 		/* If types of arguments have to be checked */
-		if (reg_function->arg_info && num_args) {
+		if (internal_arg_info && num_args) {
 			uint32_t i;
 			for (i = 0; i < num_args; i++) {
-				zend_internal_arg_info *arg_info = &reg_function->arg_info[i];
+				const zend_internal_arg_info *arg_info = &internal_arg_info[i];
 				ZEND_ASSERT(arg_info->name && "Parameter must have a name");
 				if (ZEND_TYPE_IS_SET(arg_info->type)) {
 				    reg_function->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 				}
 #if ZEND_DEBUG
 				for (uint32_t j = 0; j < i; j++) {
-					if (!strcmp(arg_info->name, reg_function->arg_info[j].name)) {
+					if (!strcmp(arg_info->name, internal_arg_info[j].name)) {
 						zend_error_noreturn(E_CORE_ERROR,
 							"Duplicate parameter name $%s for function %s%s%s()", arg_info->name,
 							scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
@@ -3126,77 +3200,23 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			}
 		}
 
-		/* Rebuild arginfos if parameter/property types and/or a return type are used */
-		if (reg_function->arg_info &&
-		    (reg_function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
-			/* convert "const char*" class type names into "zend_string*" */
+		/* Convert zend_internal_arg_info to zend_arg_info */
+		if (internal_arg_info) {
 			uint32_t i;
-			zend_internal_arg_info *arg_info = reg_function->arg_info - 1;
-			zend_internal_arg_info *new_arg_info;
+			const zend_internal_arg_info *arg_info = internal_arg_info - 1;
+			zend_arg_info *new_arg_info;
 
 			/* Treat return type as an extra argument */
 			num_args++;
-			new_arg_info = malloc(sizeof(zend_internal_arg_info) * num_args);
-			memcpy(new_arg_info, arg_info, sizeof(zend_internal_arg_info) * num_args);
+			new_arg_info = malloc(sizeof(zend_arg_info) * num_args);
 			reg_function->arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
-				if (ZEND_TYPE_HAS_LITERAL_NAME(new_arg_info[i].type)) {
-					// gen_stubs.php does not support codegen for DNF types in arg infos.
-					// As a temporary workaround, we split the type name on `|` characters,
-					// converting it to an union type if necessary.
-					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
-					new_arg_info[i].type.type_mask &= ~_ZEND_TYPE_LITERAL_NAME_BIT;
-
-					size_t num_types = 1;
-					const char *p = class_name;
-					while ((p = strchr(p, '|'))) {
-						num_types++;
-						p++;
-					}
-
-					if (num_types == 1) {
-						/* Simple class type */
-						zend_string *str = zend_string_init_interned(class_name, strlen(class_name), 1);
-						zend_alloc_ce_cache(str);
-						ZEND_TYPE_SET_PTR(new_arg_info[i].type, str);
-						new_arg_info[i].type.type_mask |= _ZEND_TYPE_NAME_BIT;
-					} else {
-						/* Union type */
-						zend_type_list *list = malloc(ZEND_TYPE_LIST_SIZE(num_types));
-						list->num_types = num_types;
-						ZEND_TYPE_SET_LIST(new_arg_info[i].type, list);
-						ZEND_TYPE_FULL_MASK(new_arg_info[i].type) |= _ZEND_TYPE_UNION_BIT;
-
-						const char *start = class_name;
-						uint32_t j = 0;
-						while (true) {
-							const char *end = strchr(start, '|');
-							zend_string *str = zend_string_init_interned(start, end ? end - start : strlen(start), 1);
-							zend_alloc_ce_cache(str);
-							list->types[j] = (zend_type) ZEND_TYPE_INIT_CLASS(str, 0, 0);
-							if (!end) {
-								break;
-							}
-							start = end + 1;
-							j++;
-						}
-					}
-				}
-				if (ZEND_TYPE_IS_ITERABLE_FALLBACK(new_arg_info[i].type)) {
-					/* Warning generated an extension load warning which is emitted for every test
-					zend_error(E_CORE_WARNING, "iterable type is now a compile time alias for array|Traversable,"
-						" regenerate the argument info via the php-src gen_stub build script");
-					*/
-					zend_type legacy_iterable = ZEND_TYPE_INIT_CLASS_MASK(
-						ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
-						(new_arg_info[i].type.type_mask | MAY_BE_ARRAY)
-					);
-					new_arg_info[i].type = legacy_iterable;
-				}
-
-				zend_normalize_internal_type(&new_arg_info[i].type);
+				zend_convert_internal_arg_info(&new_arg_info[i], &arg_info[i],
+						i == 0, true);
 			}
 		}
+
+		zend_set_function_arg_flags((zend_function*)reg_function);
 
 		if (scope) {
 			zend_check_magic_method_implementation(
@@ -5242,48 +5262,43 @@ static zend_string *try_parse_string(const char *str, size_t len, char quote) {
 }
 
 ZEND_API zend_result zend_get_default_from_internal_arg_info(
-		zval *default_value_zval, const zend_internal_arg_info *arg_info)
+		zval *default_value_zval, const zend_arg_info *arg_info)
 {
-	const char *default_value = arg_info->default_value;
+	const zend_string *default_value = arg_info->default_value;
 	if (!default_value) {
 		return FAILURE;
 	}
 
 	/* Avoid going through the full AST machinery for some simple and common cases. */
-	size_t default_value_len = strlen(default_value);
 	zend_ulong lval;
-	if (default_value_len == sizeof("null")-1
-			&& !memcmp(default_value, "null", sizeof("null")-1)) {
+	if (zend_string_equals_literal(default_value, "null")) {
 		ZVAL_NULL(default_value_zval);
 		return SUCCESS;
-	} else if (default_value_len == sizeof("true")-1
-			&& !memcmp(default_value, "true", sizeof("true")-1)) {
+	} else if (zend_string_equals_literal(default_value, "true")) {
 		ZVAL_TRUE(default_value_zval);
 		return SUCCESS;
-	} else if (default_value_len == sizeof("false")-1
-			&& !memcmp(default_value, "false", sizeof("false")-1)) {
+	} else if (zend_string_equals_literal(default_value, "false")) {
 		ZVAL_FALSE(default_value_zval);
 		return SUCCESS;
-	} else if (default_value_len >= 2
-			&& (default_value[0] == '\'' || default_value[0] == '"')
-			&& default_value[default_value_len - 1] == default_value[0]) {
+	} else if (ZSTR_LEN(default_value) >= 2
+			&& (ZSTR_VAL(default_value)[0] == '\'' || ZSTR_VAL(default_value)[0] == '"')
+			&& ZSTR_VAL(default_value)[ZSTR_LEN(default_value) - 1] == ZSTR_VAL(default_value)[0]) {
 		zend_string *str = try_parse_string(
-			default_value + 1, default_value_len - 2, default_value[0]);
+			ZSTR_VAL(default_value) + 1, ZSTR_LEN(default_value) - 2, ZSTR_VAL(default_value)[0]);
 		if (str) {
 			ZVAL_STR(default_value_zval, str);
 			return SUCCESS;
 		}
-	} else if (default_value_len == sizeof("[]")-1
-			&& !memcmp(default_value, "[]", sizeof("[]")-1)) {
+	} else if (zend_string_equals_literal(default_value, "[]")) {
 		ZVAL_EMPTY_ARRAY(default_value_zval);
 		return SUCCESS;
-	} else if (ZEND_HANDLE_NUMERIC_STR(default_value, default_value_len, lval)) {
+	} else if (ZEND_HANDLE_NUMERIC(default_value, lval)) {
 		ZVAL_LONG(default_value_zval, lval);
 		return SUCCESS;
 	}
 
 #if 0
-	fprintf(stderr, "Evaluating %s via AST\n", default_value);
+	fprintf(stderr, "Evaluating %s via AST\n", ZSTR_VAL(default_value));
 #endif
-	return get_default_via_ast(default_value_zval, default_value);
+	return get_default_via_ast(default_value_zval, ZSTR_VAL(default_value));
 }
