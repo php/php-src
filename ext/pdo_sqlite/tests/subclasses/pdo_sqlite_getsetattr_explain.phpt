@@ -103,7 +103,7 @@ array(%d) {
   %A
   array(8) {
     ["addr"]=>
-    int(2)
+    int(%d)
     ["opcode"]=>
     string(7) "String8"
     ["p1"]=>
@@ -119,7 +119,7 @@ array(%d) {
     ["comment"]=>
     %a
   }
-  [%d]=>
+  %A
   array(8) {
     ["addr"]=>
     int(%d)
