@@ -90,14 +90,11 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_na
 	ZEND_ASSERT(property_handler != NULL);
 
 	zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS));
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		zend_object_release(new_object);
-		RETURN_THROWS();
-	}
+	ZEND_ASSERT(new_object != NULL);
 
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
 	URI_ASSERT_INITIALIZATION(new_internal_uri);
-	if (property_handler->write_func == NULL) {
+	if (UNEXPECTED(property_handler->write_func == NULL)) {
 		zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name),
 			ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		zend_object_release(new_object);
@@ -106,7 +103,7 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_na
 
 	zval errors;
 	ZVAL_UNDEF(&errors);
-	if (property_handler->write_func(new_internal_uri, property_zv, &errors) == FAILURE) {
+	if (UNEXPECTED(property_handler->write_func(new_internal_uri, property_zv, &errors) == FAILURE)) {
 		zval_ptr_dtor(&errors);
 		zend_object_release(new_object);
 		RETURN_THROWS();

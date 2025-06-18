@@ -5,5 +5,5 @@ AC_DEFINE("URI_NO_UNICODE", 1, "Define to 1 for disabling unicode support of uri
 ADD_FLAG("CFLAGS_URI", "/D URI_STATIC_BUILD");
 
 ADD_EXTENSION_DEP('uri', 'lexbor');
-ADD_SOURCES("ext/uri/uriparser/src", "UriCommon.c UriCompare.c UriEscape.c UriFile.c UriIp4.c UriIp4Base.c UriMemory.c UriNormalize.c UriNormalizeBase.c UriParse.c UriParseBase.c UriQuery.c UriRecompose.c UriResolve.c UriShorten.c", "uri");
+ADD_SOURCES("ext/uri/uriparser/src", "UriCommon.c UriCompare.c UriCopy.c UriEscape.c UriFile.c UriIp4.c UriIp4Base.c UriMemory.c UriNormalize.c UriNormalizeBase.c UriParse.c UriParseBase.c UriQuery.c UriRecompose.c UriResolve.c UriShorten.c", "uri");
 PHP_INSTALL_HEADERS("ext/uri", "php_lexbor.h php_uri.h php_uri_common.h php_uriparser.h uriparser/src uriparser/include");

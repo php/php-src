@@ -12,8 +12,8 @@ AC_DEFINE([URI_ENABLE_ANSI], [1], [Define to 1 for enabling ANSI support of urip
 AC_DEFINE([URI_NO_UNICODE], [1], [Define to 1 for disabling unicode support of uriparser.])
 
 URIPARSER_DIR="uriparser"
-URIPARSER_SOURCES="$URIPARSER_DIR/src/UriCommon.c $URIPARSER_DIR/src/UriCompare.c $URIPARSER_DIR/src/UriEscape.c \
-$URIPARSER_DIR/src/UriFile.c $URIPARSER_DIR/src/UriIp4.c $URIPARSER_DIR/src/UriIp4Base.c \
+URIPARSER_SOURCES="$URIPARSER_DIR/src/UriCommon.c $URIPARSER_DIR/src/UriCompare.c $URIPARSER_DIR/src/UriCopy.c \
+$URIPARSER_DIR/src/UriEscape.c $URIPARSER_DIR/src/UriFile.c $URIPARSER_DIR/src/UriIp4.c $URIPARSER_DIR/src/UriIp4Base.c \
 $URIPARSER_DIR/src/UriMemory.c $URIPARSER_DIR/src/UriNormalize.c $URIPARSER_DIR/src/UriNormalizeBase.c \
 $URIPARSER_DIR/src/UriParse.c $URIPARSER_DIR/src/UriParseBase.c $URIPARSER_DIR/src/UriQuery.c \
 $URIPARSER_DIR/src/UriRecompose.c $URIPARSER_DIR/src/UriResolve.c $URIPARSER_DIR/src/UriShorten.c"

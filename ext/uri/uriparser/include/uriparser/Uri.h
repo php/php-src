@@ -201,6 +201,7 @@ typedef struct URI_TYPE(QueryListStruct) {
 } URI_TYPE(QueryList); /**< @copydoc UriQueryListStructA */
 
 
+
 URI_PUBLIC UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri);
 
 
@@ -646,6 +647,7 @@ URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
 		int maxChars, int * charsWritten);
 
 
+
 /**
  * Copies a %URI structure.
  *
@@ -654,7 +656,8 @@ URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
  * @param memory         <b>IN</b>: Memory manager to use, NULL for default libc
  * @return               Error code or 0 on success
  *
- * @since 0.9.8
+ * @see uriCopyUriA
+ * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
 		const URI_TYPE(Uri) * sourceUri, UriMemoryManager * memory);
@@ -668,7 +671,8 @@ URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
  * @param sourceUri      <b>IN</b>: %URI to copy
  * @return               Error code or 0 on success
  *
- * @since 0.9.8
+ * @see uriCopyUriMmA
+ * @since 0.9.9
  */
 URI_PUBLIC int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri, const URI_TYPE(Uri) * sourceUri);
 

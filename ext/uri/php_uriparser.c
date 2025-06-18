@@ -28,25 +28,21 @@ static inline size_t get_text_range_length(const UriTextRangeA *range)
 	return range->afterLast - range->first;
 }
 
-static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri) // TODO add to uriparser
+static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri)
 {
+	ZEND_ASSERT(uriparser_uri != NULL);
+
 	UriUriA *new_uriparser_uri = emalloc(sizeof(UriUriA));
 
-	if (uriCopyUriA(new_uriparser_uri, uriparser_uri) != URI_SUCCESS) {
-		efree(new_uriparser_uri);
-		return NULL;  /* TODO check for null on call sites */
-	}
+	int result = uriCopyUriA(new_uriparser_uri, uriparser_uri);
+	ZEND_ASSERT(result == URI_SUCCESS && new_uriparser_uri != NULL);
 
 	return new_uriparser_uri;
 }
 
-static zend_result uriparser_normalize_uri(UriUriA *uriparser_uri)
+static void uriparser_normalize_uri(UriUriA *uriparser_uri)
 {
-	if (uriNormalizeSyntaxExA(uriparser_uri, (unsigned int)-1) != URI_SUCCESS) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	ZEND_ASSERT(uriNormalizeSyntaxExA(uriparser_uri, (unsigned int)-1) == URI_SUCCESS);
 }
 
 static UriUriA *uriparser_read_uri(uriparser_uris_t *uriparser_uris, uri_component_read_mode_t read_mode)
@@ -59,13 +55,7 @@ static UriUriA *uriparser_read_uri(uriparser_uris_t *uriparser_uris, uri_compone
 		case URI_COMPONENT_READ_NORMALIZED_UNICODE:
 			if (uriparser_uris->normalized_uri == NULL) {
 				uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri);
-				if (uriparser_normalize_uri(uriparser_uris->normalized_uri) == FAILURE) {
-					uriFreeUriMembersA(uriparser_uris->normalized_uri);
-					efree(uriparser_uris->normalized_uri);
-					uriparser_uris->normalized_uri = NULL;
-
-					return NULL;
-				}
+				uriparser_normalize_uri(uriparser_uris->normalized_uri);
 			}
 
 			return uriparser_uris->normalized_uri;
@@ -76,9 +66,7 @@ static UriUriA *uriparser_read_uri(uriparser_uris_t *uriparser_uris, uri_compone
 static zend_result uriparser_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->scheme.first != NULL && uriparser_uri->scheme.afterLast != NULL) {
 		zend_string *str = zend_string_init(uriparser_uri->scheme.first, get_text_range_length(&uriparser_uri->scheme), false);
@@ -93,9 +81,7 @@ static zend_result uriparser_read_scheme(const uri_internal_t *internal_uri, uri
 zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
 		ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, get_text_range_length(&uriparser_uri->userInfo));
@@ -109,9 +95,7 @@ zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_comp
 static zend_result uriparser_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
 		size_t length = get_text_range_length(&uriparser_uri->userInfo);
@@ -134,9 +118,7 @@ static zend_result uriparser_read_username(const uri_internal_t *internal_uri, u
 static zend_result uriparser_read_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
 		const char *c = memchr(uriparser_uri->userInfo.first, ':', get_text_range_length(&uriparser_uri->userInfo));
@@ -156,9 +138,7 @@ static zend_result uriparser_read_password(const uri_internal_t *internal_uri, u
 static zend_result uriparser_read_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL && get_text_range_length(&uriparser_uri->hostText) > 0) {
 		if (uriparser_uri->hostData.ip6 != NULL) {
@@ -193,9 +173,7 @@ static int str_to_int(const char *str, int len)
 static zend_result uriparser_read_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->portText.first != NULL && uriparser_uri->portText.afterLast != NULL) {
 		ZVAL_LONG(retval, str_to_int(uriparser_uri->portText.first, get_text_range_length(&uriparser_uri->portText)));
@@ -209,9 +187,7 @@ static zend_result uriparser_read_port(const uri_internal_t *internal_uri, uri_c
 static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->pathHead != NULL) {
 		const UriPathSegmentA *p;
@@ -241,9 +217,7 @@ static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_c
 static zend_result uriparser_read_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->query.first != NULL && uriparser_uri->query.afterLast != NULL) {
 		ZVAL_STRINGL(retval, uriparser_uri->query.first, get_text_range_length(&uriparser_uri->query));
@@ -257,9 +231,7 @@ static zend_result uriparser_read_query(const uri_internal_t *internal_uri, uri_
 static zend_result uriparser_read_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
-	if (UNEXPECTED(uriparser_uri == NULL)) {
-		return FAILURE;
-	}
+	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->fragment.first != NULL && uriparser_uri->fragment.afterLast != NULL) {
 		ZVAL_STRINGL(retval, uriparser_uri->fragment.first, get_text_range_length(&uriparser_uri->fragment));
@@ -373,6 +345,10 @@ void *uriparser_parse_uri(const zend_string *uri_str, const void *base_url, zval
 	return uriparser_parse_uri_ex(uri_str, base_url, silent);
 }
 
+/* TODO make the clone handler accept a flag to distingish between clone() calls and withers.
+ * When calling a wither successfully, the normalized URI is surely invalidated, therefore
+ * it doesn't make sense to copy it. In case of failure, an exeption is thrown, and the URI object
+ * is discarded altogether. */
 static void *uriparser_clone_uri(void *uri)
 {
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) uri;
@@ -386,30 +362,25 @@ static void *uriparser_clone_uri(void *uri)
 static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
 {
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) uri;
-	UriUriA *uriparser_uri = uriparser_uris->uri;
+	UriUriA *uriparser_uri;
 
-	if ((recomposition_mode == URI_RECOMPOSITION_NORMALIZED_UNICODE || recomposition_mode == URI_RECOMPOSITION_NORMALIZED_ASCII) &&
-		uriparser_uris->normalized_uri == NULL
-	) {
-		uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri);
-		if (uriparser_normalize_uri(uriparser_uris->normalized_uri) == FAILURE) {
-			return NULL;
+	if (recomposition_mode == URI_RECOMPOSITION_RAW_ASCII || recomposition_mode == URI_RECOMPOSITION_RAW_UNICODE) {
+		uriparser_uri = uriparser_uris->uri;
+	} else {
+		if (uriparser_uris->normalized_uri == NULL) {
+			uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri);
+			uriparser_normalize_uri(uriparser_uris->normalized_uri);
 		}
 		uriparser_uri = uriparser_uris->normalized_uri;
 	}
 
-	int charsRequired;
-	if (uriToStringCharsRequiredA(uriparser_uri, &charsRequired) != URI_SUCCESS) {
-		return NULL;
-	}
+	int charsRequired = 0;
+	ZEND_ASSERT(uriToStringCharsRequiredA(uriparser_uri, &charsRequired) == URI_SUCCESS);
 
 	charsRequired++;
 
 	zend_string *uri_string = zend_string_alloc(charsRequired - 1, false);
-	if (uriToStringA(ZSTR_VAL(uri_string), uriparser_uri, charsRequired, NULL) != URI_SUCCESS) {
-		zend_string_efree(uri_string);
-		return NULL;
-	}
+	ZEND_ASSERT(uriToStringA(ZSTR_VAL(uri_string), uriparser_uri, charsRequired, NULL) == URI_SUCCESS);
 
 	if (exclude_fragment) {
 		const char *pos = zend_memrchr(ZSTR_VAL(uri_string), '#', ZSTR_LEN(uri_string));
