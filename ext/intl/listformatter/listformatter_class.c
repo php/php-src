@@ -15,8 +15,8 @@
 #include "php.h"
 #include "php_intl.h"
 #include <unicode/ulistformatter.h>
-#include "listformatter_arginfo.h"
 #include "listformatter_class.h"
+#include "listformatter_arginfo.h"
 #include "intl_convert.h"
 
 static zend_object_handlers listformatter_handlers;
@@ -53,8 +53,13 @@ PHP_METHOD(IntlListFormatter, __construct)
     ListFormatter_object *obj = Z_INTL_LISTFORMATTER_P(ZEND_THIS);
     char* locale;
     size_t locale_len = 0;
-    zend_long type = ULISTFMT_TYPE_AND;
-    zend_long width = ULISTFMT_WIDTH_WIDE;
+    #if U_ICU_VERSION_MAJOR_NUM >= 67
+        zend_long type = ULISTFMT_TYPE_AND;
+        zend_long width = ULISTFMT_WIDTH_WIDE;
+    #else
+        zend_long type = INTL_LISTFORMATTER_FALLBACK_TYPE_AND;
+        zend_long width = INTL_LISTFORMATTER_FALLBACK_WIDTH_WIDE;
+    #endif
     ZEND_PARSE_PARAMETERS_START(1, 3)
         Z_PARAM_STRING(locale, locale_len)
         Z_PARAM_OPTIONAL
@@ -90,12 +95,12 @@ PHP_METHOD(IntlListFormatter, __construct)
 
         LISTFORMATTER_OBJECT(obj) = ulistfmt_openForType(locale, type, width, &status);
     #else
-        if (type != ULISTFMT_TYPE_AND) {
+        if (type != INTL_LISTFORMATTER_FALLBACK_TYPE_AND) {
             zend_argument_value_error(2, "contains an unsupported type. ICU 66 and below only support IntlListFormatter::TYPE_AND");
             RETURN_THROWS();
         }
 
-        if (width != ULISTFMT_WIDTH_WIDE) {
+        if (width != INTL_LISTFORMATTER_FALLBACK_WIDTH_WIDE) {
             zend_argument_value_error(3, "contains an unsupported width. ICU 66 and below only support IntlListFormatter::WIDTH_WIDE");
             RETURN_THROWS();
         }
