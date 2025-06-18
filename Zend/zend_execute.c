@@ -135,8 +135,7 @@ static ZEND_FUNCTION(pass)
 {
 }
 
-ZEND_BEGIN_ARG_INFO_EX(zend_pass_function_arg_info, 0, 0, 0)
-ZEND_END_ARG_INFO()
+static zend_arg_info zend_pass_function_arg_info[1] = {0};
 
 ZEND_API const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
@@ -147,7 +146,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	NULL,                   /* prototype         */
 	0,                      /* num_args          */
 	0,                      /* required_num_args */
-	(zend_internal_arg_info *) zend_pass_function_arg_info + 1, /* arg_info */
+	zend_pass_function_arg_info + 1, /* arg_info */
 	NULL,                   /* attributes        */
 	NULL,                   /* run_time_cache    */
 	NULL,                   /* doc_comment       */
@@ -1470,7 +1469,7 @@ static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, con
 
 ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *ret)
 {
-	const zend_internal_arg_info *ret_info = zf->internal_function.arg_info - 1;
+	const zend_arg_info *ret_info = zf->internal_function.arg_info - 1;
 
 	if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_VOID) {
 		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
@@ -5387,9 +5386,8 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 	} else {
 		ZEND_ASSERT(num_args == 0 || fbc->internal_function.arg_info);
 		for (uint32_t i = 0; i < num_args; i++) {
-			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
-			size_t len = strlen(arg_info->name);
-			if (zend_string_equals_cstr(arg_name, arg_info->name, len)) {
+			zend_arg_info *arg_info = &fbc->internal_function.arg_info[i];
+			if (zend_string_equals(arg_name, arg_info->name)) {
 				*cache_slot = fbc;
 				*(uintptr_t *)(cache_slot + 1) = i;
 				return i;
@@ -5554,7 +5552,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 				continue;
 			}
 
-			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
+			zend_arg_info *arg_info = &fbc->internal_function.arg_info[i];
 			if (i < fbc->common.required_num_args) {
 				zend_execute_data *old = start_fake_frame(call, NULL);
 				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");
@@ -5563,7 +5561,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 			}
 
 			zval default_value;
-			if (zend_get_default_from_internal_arg_info(&default_value, arg_info) == FAILURE) {
+			if (zend_get_default_from_arg_info(&default_value, arg_info) == FAILURE) {
 				zend_execute_data *old = start_fake_frame(call, NULL);
 				zend_argument_error(zend_ce_argument_count_error, i + 1,
 					"must be passed explicitly, because the default value is not known");
