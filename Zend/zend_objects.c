@@ -269,6 +269,14 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members_with(zend_object *new_obj
 		}
 
 		if (EXPECTED(!EG(exception)) && zend_hash_num_elements(properties) > 0) {
+			/* Unlock readonly properties once more. */
+			if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce) && old_object->ce->clone) {
+				for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
+					zval* prop = OBJ_PROP_NUM(new_object, i);
+					Z_PROP_FLAG_P(prop) |= IS_PROP_REINITABLE;
+				}
+			}
+
 			const zend_class_entry *old_scope = EG(fake_scope);
 
 			EG(fake_scope) = scope;
