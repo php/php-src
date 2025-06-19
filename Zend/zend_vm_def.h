@@ -6021,7 +6021,7 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 					HANDLE_EXCEPTION();
 				}
 			}
-			zend_throw_error(NULL, "__clone method called on non-object");
+			zend_type_error("clone(): Argument #1 ($object) must be of type object, %s given", zend_zval_value_name(obj));
 			FREE_OP1();
 			FREE_OP2();
 			HANDLE_EXCEPTION();
@@ -6059,7 +6059,7 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 		if (OP2_TYPE != IS_UNUSED) {
 			zval *properties = GET_OP2_ZVAL_PTR(BP_VAR_R);
 			if (Z_TYPE_P(properties) != IS_ARRAY) {
-				zend_type_error("Updated properties must be of type array, %s given", zend_zval_value_name(properties));
+				zend_type_error("clone(): Argument #2 ($withProperties) must be of type array, %s given", zend_zval_value_name(obj));
 				FREE_OP1();
 				FREE_OP2();
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
