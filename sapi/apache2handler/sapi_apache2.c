@@ -461,7 +461,7 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	return OK;
 }
 
-extern bool use_deepbind;
+ZEND_API bool use_deepbind;
 
 static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
