@@ -430,7 +430,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	if (error == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Cannot call the CURLMOPT_PUSHFUNCTION");
 	} else if (!Z_ISUNDEF(retval)) {
-		if (CURL_PUSH_DENY != zval_get_long(&retval)) {
+		if (CURL_PUSH_DENY != php_curl_get_long(&retval)) {
 		    rval = CURL_PUSH_OK;
 			zend_llist_add_element(&mh->easyh, &pz_ch);
 		} else {
