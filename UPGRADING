@@ -212,6 +212,11 @@ PHP 8.5 UPGRADE NOTES
     now have an optional $lang parameter.
     This support solves compatibility with .NET SOAP clients.
 
+- Sqlite:
+  . Added class constants Sqlite3Stmt::EXPLAIN_MODE_PREPARED,
+    Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN and
+    Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()

@@ -249,6 +249,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added Sqlite3Stmt::explain to produce a explain query plan from
     the statement. (David Carlier)
+  . Added Sqlite3Result::fetchAll to returns all results at once from a query.
+    (David Carlier)
 
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
