@@ -845,6 +845,8 @@ static bool module_initialized = false;
 static bool module_startup = true;
 static bool module_shutdown = false;
 
+bool use_deepbind = false;
+
 /* {{{ php_during_module_startup */
 PHPAPI bool php_during_module_startup(void)
 {
