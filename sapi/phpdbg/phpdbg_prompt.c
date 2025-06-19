@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "zend.h"
-#include "main/SAPI.h"
 #include "zend_compile.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
