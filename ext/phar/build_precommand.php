@@ -27,7 +27,7 @@ $classes = array(
     );
 
 foreach($classes as $name) {
-    echo "if (!class_exists('$name', 0))\n{\n";
+    echo "if (!class_exists('$name', false))\n{\n";
     $f = file(dirname(__FILE__) . '/phar/' . strtolower($name) . '.inc');
     unset($f[0]);
     $c = count($f);
