@@ -27,7 +27,6 @@
 #include "xml_serializer.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
-#include <libxml/SAX.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>

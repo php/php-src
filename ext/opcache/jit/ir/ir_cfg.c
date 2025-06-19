@@ -77,6 +77,51 @@ void ir_reset_cfg(ir_ctx *ctx)
 	}
 }
 
+static uint32_t IR_NEVER_INLINE ir_cfg_remove_dead_inputs(ir_ctx *ctx, uint32_t *_blocks, ir_block *blocks, uint32_t bb_count)
+{
+	uint32_t b, count = 0;
+	ir_block *bb = blocks + 1;
+	ir_insn *insn;
+	ir_ref i, j, n, *ops, input;
+
+	for (b = 1; b <= bb_count; b++, bb++) {
+		bb->successors = count;
+		count += ctx->use_lists[bb->end].count;
+		bb->successors_count = 0;
+		bb->predecessors = count;
+		insn = &ctx->ir_base[bb->start];
+		if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
+			n = insn->inputs_count;
+			ops = insn->ops;
+			for (i = 1, j = 1; i <= n; i++) {
+				input = ops[i];
+				if (_blocks[input]) {
+					if (i != j) {
+						ops[j] = ops[i];
+					}
+					j++;
+				} else if (input > 0) {
+					ir_use_list_remove_one(ctx, input, bb->start);
+				}
+			}
+			j--;
+			if (j != n) {
+				if (j == 1) {
+					insn->op = IR_BEGIN;
+				}
+				insn->inputs_count = j;
+				bb->predecessors_count = j;
+				j++;
+				for (;j <= n; j++) {
+					ops[j] = IR_UNUSED;
+				}
+			}
+		}
+		count += bb->predecessors_count;
+	}
+	return count;
+}
+
 int ir_build_cfg(ir_ctx *ctx)
 {
 	ir_ref n, *p, ref, start, end;
@@ -239,7 +284,10 @@ int ir_build_cfg(ir_ctx *ctx)
 		bb++;
 	} IR_BITSET_FOREACH_END();
 	bb_count = b - 1;
-	IR_ASSERT(count == edges_count * 2);
+	if (UNEXPECTED(count != edges_count * 2)) {
+		count = ir_cfg_remove_dead_inputs(ctx, _blocks, blocks, bb_count);
+		IR_ASSERT(count != edges_count * 2);
+	}
 	ir_mem_free(bb_starts);
 
 	/* Create an array of successor/predecessors control edges */

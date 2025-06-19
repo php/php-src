@@ -43,5 +43,5 @@ foreach (explode("\n", $output) as $line) {
 preloaded
 PHP %s
 Copyright (c) The PHP Group
-Zend Engine %s
+%AZend Engine %s
 %A    with Zend OPcache %a

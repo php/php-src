@@ -199,10 +199,8 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t
 		t->exit_info[exit_point].flags = flags;
 		t->exit_info[exit_point].stack_size = stack_size;
 		t->exit_info[exit_point].stack_offset = stack_offset;
-		t->exit_info[exit_point].poly_func_ref = 0;
-		t->exit_info[exit_point].poly_this_ref = 0;
-		t->exit_info[exit_point].poly_func_reg = ZREG_NONE;
-		t->exit_info[exit_point].poly_this_reg = ZREG_NONE;
+		t->exit_info[exit_point].poly_func = (zend_jit_ref_snapshot){.reg = ZREG_NONE};
+		t->exit_info[exit_point].poly_this = (zend_jit_ref_snapshot){.reg = ZREG_NONE};
 	}
 
 	return exit_point;
@@ -3514,17 +3512,18 @@ static int zend_jit_trace_exit_needs_deoptimization(uint32_t trace_num, uint32_t
 }
 
 static int zend_jit_trace_deoptimization(
-                                         zend_jit_ctx            *jit,
-                                         uint32_t                 flags,
-                                         const zend_op           *opline,
-                                         zend_jit_trace_stack    *parent_stack,
-                                         int                      parent_vars_count,
-                                         zend_ssa                *ssa,
-                                         zend_jit_trace_stack    *stack,
-                                         zend_jit_exit_const     *constants,
-                                         int8_t                   func_reg,
-                                         bool                     polymorphic_side_trace)
+                                         zend_jit_ctx                   *jit,
+                                         const zend_jit_trace_exit_info *exit_info,
+                                         zend_jit_trace_stack           *parent_stack,
+                                         int                             parent_vars_count,
+                                         zend_ssa                       *ssa,
+                                         zend_jit_trace_stack           *stack,
+                                         zend_jit_exit_const            *constants,
+                                         bool                            polymorphic_side_trace)
 {
+	uint32_t flags = exit_info->flags;
+	const zend_op *opline = exit_info->opline;
+
 	int i;
 	int check2 = -1;
 
@@ -3668,9 +3667,16 @@ static int zend_jit_trace_deoptimization(
 		zend_jit_check_exception(jit);
 	}
 
-	if ((flags & ZEND_JIT_EXIT_METHOD_CALL) && !polymorphic_side_trace) {
-		if (!zend_jit_free_trampoline(jit, func_reg)) {
-			return 0;
+	if (flags & ZEND_JIT_EXIT_METHOD_CALL) {
+		jit->poly_func_ref = zend_jit_deopt_rload_spilled(jit, IR_ADDR,
+				exit_info->poly_func.reg, exit_info->poly_func.offset);
+		jit->poly_this_ref = zend_jit_deopt_rload_spilled(jit, IR_ADDR,
+				exit_info->poly_this.reg, exit_info->poly_this.offset);
+
+		if (!polymorphic_side_trace) {
+			if (!zend_jit_free_trampoline(jit, jit->poly_func_ref)) {
+				return 0;
+			}
 		}
 	}
 
@@ -4265,11 +4271,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		if (parent_trace) {
 			/* Deoptimization */
 			if (!zend_jit_trace_deoptimization(&ctx,
-					zend_jit_traces[parent_trace].exit_info[exit_num].flags,
-					zend_jit_traces[parent_trace].exit_info[exit_num].opline,
+					&zend_jit_traces[parent_trace].exit_info[exit_num],
 					parent_stack, parent_vars_count, ssa, stack,
 					zend_jit_traces[parent_trace].constants,
-					zend_jit_traces[parent_trace].exit_info[exit_num].poly_func_reg,
 					polymorphic_side_trace)) {
 				goto jit_failure;
 			}
@@ -6381,8 +6385,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op_array, ssa, ssa_op, frame->call_level,
 								op1_info, op1_addr, ce, ce_is_instanceof, on_this, delayed_fetch_this, op1_ce,
 								p + 1, peek_checked_stack - checked_stack,
-								polymorphic_side_trace ? zend_jit_traces[parent_trace].exit_info[exit_num].poly_func_reg : -1,
-								polymorphic_side_trace ? zend_jit_traces[parent_trace].exit_info[exit_num].poly_this_reg : -1,
+								polymorphic_side_trace ? jit->poly_func_ref : -1,
+								polymorphic_side_trace ? jit->poly_this_ref : -1,
 								polymorphic_side_trace)) {
 							goto jit_failure;
 						}
@@ -7419,11 +7423,9 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 		NULL;
 
 	if (!zend_jit_trace_deoptimization(&ctx,
-			zend_jit_traces[trace_num].exit_info[exit_num].flags,
-			zend_jit_traces[trace_num].exit_info[exit_num].opline,
+			&zend_jit_traces[trace_num].exit_info[exit_num],
 			stack, stack_size, NULL, NULL,
 			zend_jit_traces[trace_num].constants,
-			zend_jit_traces[trace_num].exit_info[exit_num].poly_func_reg,
 			0)) {
 		goto jit_failure;
 	}
@@ -7973,6 +7975,17 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 	}
 }
 
+static void zend_jit_dump_ref_snapshot(zend_jit_ref_snapshot *rs)
+{
+	if (rs->reg == ZREG_NONE) {
+		fprintf(stderr, "?");
+	} else if (!IR_REG_SPILLED(rs->reg)) {
+		fprintf(stderr, "%s", zend_reg_name(rs->reg));
+	} else {
+		fprintf(stderr, "0x%x(%s)", rs->offset, zend_reg_name(IR_REG_NUM(rs->reg)));
+	}
+}
+
 static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 {
 	int i, j;
@@ -8003,9 +8016,11 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 		if (t->exit_info[i].flags & (ZEND_JIT_EXIT_POLYMORPHISM|ZEND_JIT_EXIT_METHOD_CALL|ZEND_JIT_EXIT_CLOSURE_CALL)) {
 			fprintf(stderr, "/POLY");
 			if (t->exit_info[i].flags & ZEND_JIT_EXIT_METHOD_CALL) {
-				fprintf(stderr, "(%s, %s)",
-					t->exit_info[i].poly_func_reg != ZREG_NONE ? zend_reg_name(t->exit_info[i].poly_func_reg) : "?",
-					t->exit_info[i].poly_this_reg != ZREG_NONE ? zend_reg_name(t->exit_info[i].poly_this_reg) : "?");
+				fprintf(stderr, "(");
+				zend_jit_dump_ref_snapshot(&t->exit_info[i].poly_func);
+				fprintf(stderr, ", ");
+				zend_jit_dump_ref_snapshot(&t->exit_info[i].poly_this);
+				fprintf(stderr, ")");
 			}
 		}
 		if (t->exit_info[i].flags & ZEND_JIT_EXIT_FREE_OP1) {
@@ -8737,9 +8752,15 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			}
 		}
 		if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_METHOD_CALL) {
-			ZEND_ASSERT(t->exit_info[exit_num].poly_func_reg >= 0);
-			zend_function *func = (zend_function*)regs->gpr[t->exit_info[exit_num].poly_func_reg];
+			zend_jit_ref_snapshot *func_snapshot = &t->exit_info[exit_num].poly_func;
+			ZEND_ASSERT(func_snapshot->reg >= 0);
 
+			zend_function *func;
+			if (IR_REG_SPILLED(func_snapshot->reg)) {
+				func = *(zend_function**)(regs->gpr[IR_REG_NUM(func_snapshot->reg)] + func_snapshot->offset);
+			} else {
+				func = (zend_function*)regs->gpr[func_snapshot->reg];
+			}
 			if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 				zend_string_release_ex(func->common.function_name, 0);
 				zend_free_trampoline(func);

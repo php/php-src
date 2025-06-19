@@ -19,14 +19,12 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif
-
 #include "php.h"
 
 #include "url.h"
 #include "file.h"
+#include "zend_simd.h"
+#include "Zend/zend_smart_str.h"
 
 /* {{{ free_url */
 PHPAPI void php_url_free(php_url *theurl)
@@ -449,18 +447,15 @@ static int php_htoi(const char *s)
 
 static const unsigned char hexchars[] = "0123456789ABCDEF";
 
-static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw) /* {{{ */ {
+static zend_always_inline size_t php_url_encode_impl(unsigned char *to, const char *s, size_t len, bool raw) /* {{{ */ {
 	unsigned char c;
-	unsigned char *to;
 	unsigned char const *from, *end;
-	zend_string *start;
+	const unsigned char *to_init = to;
 
 	from = (unsigned char *)s;
 	end = (unsigned char *)s + len;
-	start = zend_string_safe_alloc(3, len, 0, 0);
-	to = (unsigned char*)ZSTR_VAL(start);
 
-#ifdef __SSE2__
+#ifdef XSSE2
 	while (from + 16 < end) {
 		__m128i mask;
 		uint32_t bits;
@@ -537,19 +532,24 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 			*to++ = c;
 		}
 	}
-	*to = '\0';
 
-	ZEND_ASSERT(!ZSTR_IS_INTERNED(start) && GC_REFCOUNT(start) == 1);
-	start = zend_string_truncate(start, to - (unsigned char*)ZSTR_VAL(start), 0);
-
-	return start;
+	return to - to_init;
 }
 /* }}} */
+
+static zend_always_inline zend_string *php_url_encode_helper(char const *s, size_t len, bool raw)
+{
+	zend_string *result = zend_string_safe_alloc(3, len, 0, false);
+	size_t length = php_url_encode_impl((unsigned char *) ZSTR_VAL(result), s, len, raw);
+	ZSTR_VAL(result)[length] = '\0';
+	ZEND_ASSERT(!ZSTR_IS_INTERNED(result) && GC_REFCOUNT(result) == 1);
+	return zend_string_truncate(result, length, false);
+}
 
 /* {{{ php_url_encode */
 PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 {
-	return php_url_encode_impl(s, len, 0);
+	return php_url_encode_helper(s, len, false);
 }
 /* }}} */
 
@@ -616,9 +616,18 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
 /* {{{ php_raw_url_encode */
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
-	return php_url_encode_impl(s, len, 1);
+	return php_url_encode_helper(s, len, true);
 }
 /* }}} */
+
+PHPAPI void php_url_encode_to_smart_str(smart_str *buf, char const *s, size_t len, bool raw)
+{
+	size_t start_length = smart_str_get_len(buf);
+	size_t extend = zend_safe_address_guarded(3, len, 0);
+	char *dest = smart_str_extend(buf, extend);
+	size_t length = php_url_encode_impl((unsigned char *) dest, s, len, raw);
+	ZSTR_LEN(buf->s) = start_length + length;
+}
 
 /* {{{ URL-encodes string */
 PHP_FUNCTION(rawurlencode)

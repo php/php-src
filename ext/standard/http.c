@@ -37,14 +37,7 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 		smart_str_append(form_str, key_prefix);
 	}
 	if (index_string) {
-		zend_string *encoded_key;
-		if (encoding_type == PHP_QUERY_RFC3986) {
-			encoded_key = php_raw_url_encode(index_string, index_string_len);
-		} else {
-			encoded_key = php_url_encode(index_string, index_string_len);
-		}
-		smart_str_append(form_str, encoded_key);
-		zend_string_free(encoded_key);
+		php_url_encode_to_smart_str(form_str, index_string, index_string_len, encoding_type == PHP_QUERY_RFC3986);
 	} else {
 		/* Numeric key */
 		if (num_prefix) {
@@ -59,31 +52,16 @@ static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 
 try_again:
 	switch (Z_TYPE_P(scalar)) {
-		case IS_STRING: {
-			zend_string *encoded_data;
-			if (encoding_type == PHP_QUERY_RFC3986) {
-				encoded_data = php_raw_url_encode(Z_STRVAL_P(scalar), Z_STRLEN_P(scalar));
-			} else {
-				encoded_data = php_url_encode(Z_STRVAL_P(scalar), Z_STRLEN_P(scalar));
-			}
-			smart_str_append(form_str, encoded_data);
-			zend_string_free(encoded_data);
+		case IS_STRING:
+			php_url_encode_to_smart_str(form_str, Z_STRVAL_P(scalar), Z_STRLEN_P(scalar), encoding_type == PHP_QUERY_RFC3986);
 			break;
-		}
 		case IS_LONG:
 			smart_str_append_long(form_str, Z_LVAL_P(scalar));
 			break;
 		case IS_DOUBLE: {
-			zend_string *encoded_data;
 			zend_string *tmp = zend_double_to_str(Z_DVAL_P(scalar));
-			if (encoding_type == PHP_QUERY_RFC3986) {
-				encoded_data = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-			} else {
-				encoded_data = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-			}
-			smart_str_append(form_str, encoded_data);
+			php_url_encode_to_smart_str(form_str, ZSTR_VAL(tmp), ZSTR_LEN(tmp), encoding_type == PHP_QUERY_RFC3986);
 			zend_string_free(tmp);
-			zend_string_free(encoded_data);
 			break;
 		}
 		case IS_FALSE:
@@ -124,7 +102,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	if (!arg_sep) {
-		arg_sep = zend_ini_str("arg_separator.output", strlen("arg_separator.output"), false);
+		arg_sep = PG(arg_separator).output;
 		if (ZSTR_LEN(arg_sep) == 0) {
 			arg_sep = ZSTR_CHAR('&');
 		}
@@ -181,7 +159,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				} else {
 					new_prefix = zend_string_concat2(ZSTR_VAL(encoded_key), ZSTR_LEN(encoded_key), "%5B", strlen("%5B"));
 				}
-				zend_string_release_ex(encoded_key, false);
+				zend_string_efree(encoded_key);
 			} else { /* is integer index */
 				char *index_int_as_str;
 				size_t index_int_as_str_len;
@@ -210,7 +188,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			GC_TRY_PROTECT_RECURSION(ht);
 			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, new_prefix, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type);
 			GC_TRY_UNPROTECT_RECURSION(ht);
-			zend_string_release_ex(new_prefix, false);
+			zend_string_efree(new_prefix);
 		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
 			/* Skip these types */
 			continue;

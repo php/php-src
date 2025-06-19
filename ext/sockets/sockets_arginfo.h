@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 42d486d2666d23569e70860e2b1ef203161792b3 */
+ * Stub hash: 7b1baf47dce2fb08faa5616068238ea078d1609b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1107,6 +1107,18 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(ETH_P_ALL)
 	REGISTER_LONG_CONSTANT("ETH_P_ALL", ETH_P_ALL, CONST_PERSISTENT);
+#endif
+#if defined(UDP_SEGMENT)
+	REGISTER_LONG_CONSTANT("UDP_SEGMENT", UDP_SEGMENT, CONST_PERSISTENT);
+#endif
+#if defined(SHUT_RDWR)
+	REGISTER_LONG_CONSTANT("SHUT_RD", SHUT_RD, CONST_PERSISTENT);
+#endif
+#if defined(SHUT_RDWR)
+	REGISTER_LONG_CONSTANT("SHUT_WR", SHUT_WR, CONST_PERSISTENT);
+#endif
+#if defined(SHUT_RDWR)
+	REGISTER_LONG_CONSTANT("SHUT_RDWR", SHUT_RDWR, CONST_PERSISTENT);
 #endif
 }
 

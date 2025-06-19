@@ -918,7 +918,7 @@ static ir_ref _ir_fold_cse(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir
 #define IR_FOLD_EMIT           goto ir_fold_emit
 #define IR_FOLD_NEXT           break
 
-#include "ir_fold_hash.h"
+#include <ir_fold_hash.h>
 
 #define IR_FOLD_RULE(x) ((x) >> 21)
 #define IR_FOLD_KEY(x)  ((x) & 0x1fffff)
@@ -1485,6 +1485,18 @@ void ir_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val)
 void ir_array_grow(ir_array *a, uint32_t size)
 {
 	IR_ASSERT(size > a->size);
+	if (size >= 256) {
+		size = IR_ALIGNED_SIZE(size, 256);
+	} else {
+		/* Use big enough power of 2 */
+		size -= 1;
+		size |= (size >> 1);
+		size |= (size >> 2);
+		size |= (size >> 4);
+//		size |= (size >> 8);
+//		size |= (size >> 16);
+		size += 1;
+	}
 	a->refs = ir_mem_realloc(a->refs, size * sizeof(ir_ref));
 	a->size = size;
 }
@@ -1820,7 +1832,7 @@ int ir_mem_flush(void *ptr, size_t size)
 #else
 void *ir_mem_mmap(size_t size)
 {
-        int prot_flags = PROT_EXEC;
+	int prot_flags = PROT_EXEC;
 #if defined(__NetBSD__)
 	prot_flags |= PROT_MPROTECT(PROT_READ|PROT_WRITE);
 #endif

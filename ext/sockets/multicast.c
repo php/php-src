@@ -293,8 +293,7 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		goto dosockopt;
 
 	case IP_MULTICAST_LOOP:
-		convert_to_boolean(arg4);
-		ipv4_mcast_ttl_lback = (unsigned char) (Z_TYPE_P(arg4) == IS_TRUE);
+		ipv4_mcast_ttl_lback = (unsigned char) zval_is_true(arg4);
 		goto ipv4_loop_ttl;
 
 	case IP_MULTICAST_TTL:
@@ -358,8 +357,7 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 		goto dosockopt;
 
 	case IPV6_MULTICAST_LOOP:
-		convert_to_boolean(arg4);
-		ov = (int) Z_TYPE_P(arg4) == IS_TRUE;
+		ov = (int) zval_is_true(arg4);
 		goto ipv6_loop_hops;
 	case IPV6_MULTICAST_HOPS:
 		convert_to_long(arg4);

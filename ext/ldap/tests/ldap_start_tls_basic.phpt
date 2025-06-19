@@ -5,6 +5,8 @@ Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
 --EXTENSIONS--
 ldap
+--ENV--
+LDAPNOINIT=1
 --SKIPIF--
 <?php require_once __DIR__ .'/skipifbindfailure.inc'; ?>
 --FILE--

@@ -415,9 +415,9 @@ static int ir_const_label(ir_ctx *ctx, ir_ref ref)
 }
 
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-# include "ir_emit_x86.h"
+# include <ir_emit_x86.h>
 #elif defined(IR_TARGET_AARCH64)
-# include "ir_emit_aarch64.h"
+# include <ir_emit_aarch64.h>
 #else
 # error "Unknown IR target"
 #endif

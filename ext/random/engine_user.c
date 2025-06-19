@@ -27,6 +27,7 @@ static php_random_result generate(void *state)
 	uint64_t result = 0;
 	size_t size;
 	zval retval;
+	zend_string *zstr;
 
 	zend_call_known_instance_method_with_0_params(s->generate_method, s->object, &retval);
 
@@ -37,7 +38,14 @@ static php_random_result generate(void *state)
 		};
 	}
 
-	size = Z_STRLEN(retval);
+	if (UNEXPECTED(Z_ISREF(retval))) {
+		zstr = Z_STR_P(Z_REFVAL(retval));
+	} else {
+		zstr = Z_STR(retval);
+	}
+
+	/* Store generated size in a state */
+	size = ZSTR_LEN(zstr);
 
 	/* Guard for over 64-bit results */
 	if (size > sizeof(uint64_t)) {
@@ -47,10 +55,11 @@ static php_random_result generate(void *state)
 	if (size > 0) {
 		/* Endianness safe copy */
 		for (size_t i = 0; i < size; i++) {
-			result += ((uint64_t) (unsigned char) Z_STRVAL(retval)[i]) << (8 * i);
+			result += ((uint64_t) (unsigned char) ZSTR_VAL(zstr)[i]) << (8 * i);
 		}
 	} else {
 		zend_throw_error(random_ce_Random_BrokenRandomEngineError, "A random engine must return a non-empty string");
+		zval_ptr_dtor(&retval);
 		return (php_random_result){
 			.size = sizeof(uint64_t),
 			.result = 0,

@@ -185,12 +185,10 @@ PHP_METHOD(IntlDateFormatter, parseToCalendar)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	if (z_parse_pos) {
-		zval *z_parse_pos_tmp = z_parse_pos;
-		ZVAL_DEREF(z_parse_pos_tmp);
-		bool failed = false;
-		zend_long long_parse_pos = zval_try_get_long(z_parse_pos_tmp, &failed);
+		bool failed;
+		zend_long long_parse_pos = zval_try_get_long(z_parse_pos, &failed);
 		if (failed) {
-			zend_argument_type_error(2, "must be of type int, %s given", zend_zval_value_name(z_parse_pos_tmp));
+			zend_argument_type_error(2, "must be of type int, %s given", zend_zval_value_name(z_parse_pos));
 			RETURN_THROWS();
 		}
 		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {

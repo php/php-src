@@ -19,7 +19,7 @@
 #define MD5_H
 
 PHPAPI void make_digest(char *md5str, const unsigned char *digest);
-PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len);
+PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, size_t len);
 
 /*
  * This is an OpenSSL-compatible implementation of the RSA Data Security,

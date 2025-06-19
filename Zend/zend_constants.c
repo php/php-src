@@ -85,7 +85,8 @@ static void copy_zend_constant(zval *zv)
 		c->filename = zend_string_copy(c->filename);
 	}
 	if (c->attributes != NULL) {
-		c->attributes = zend_array_dup(c->attributes);
+		// Use the same attributes table
+		GC_ADDREF(c->attributes);
 	}
 	if (Z_TYPE(c->value) == IS_STRING) {
 		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
@@ -373,9 +374,14 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 
 			if (UNEXPECTED(ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0 && !CONST_IS_RECURSIVE(c)) {
-					CONST_PROTECT_RECURSION(c);
+					if (c->ce->type == ZEND_USER_CLASS) {
+						/* Recursion protection only applied to user constants, GH-18463 */
+						CONST_PROTECT_RECURSION(c);
+					}
 					zend_deprecated_class_constant(c, constant_name);
-					CONST_UNPROTECT_RECURSION(c);
+					if (c->ce->type == ZEND_USER_CLASS) {
+						CONST_UNPROTECT_RECURSION(c);
+					}
 					if (EG(exception)) {
 						goto failure;
 					}

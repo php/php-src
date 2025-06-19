@@ -2983,7 +2983,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 						hooks[j] = new_fn;
 					}
 				}
-				ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+				ce->num_hooked_props++;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

@@ -100,7 +100,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		case PARSE_POST:
 		case PARSE_GET:
 		case PARSE_STRING:
-			separator = (char *) estrdup(PG(arg_separator).input);
+			separator = estrndup(ZSTR_VAL(PG(arg_separator).input), ZSTR_LEN(PG(arg_separator).input));
 			break;
 		case PARSE_COOKIE:
 			separator = ";\0";

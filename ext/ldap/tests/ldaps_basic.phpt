@@ -2,8 +2,8 @@
 ldap_connect() - Basic ldaps test
 --EXTENSIONS--
 ldap
---XFAIL--
-Passes locally but fails on CI - need investigation (configuration ?)
+--ENV--
+LDAPNOINIT=1
 --SKIPIF--
 <?php require_once __DIR__ .'/skipifbindfailure.inc'; ?>
 --FILE--

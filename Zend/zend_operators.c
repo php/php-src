@@ -378,6 +378,7 @@ static zend_always_inline zend_result zendi_try_convert_scalar_to_number(zval *o
 static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(const zval *op, bool *failed) /* {{{ */
 {
 	*failed = 0;
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -448,6 +449,14 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(const zval *
 		case IS_ARRAY:
 			*failed = 1;
 			return 0;
+		case IS_REFERENCE:
+			op = Z_REFVAL_P(op);
+			if (Z_TYPE_P(op) == IS_LONG) {
+				return Z_LVAL_P(op);
+			} else {
+				goto try_again;
+			}
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -1980,9 +1989,8 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 				}
 	 		}
 			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT);
-			op1_string = zval_get_string_func(op1);
-			if (UNEXPECTED(EG(exception))) {
-				zend_string_release(op1_string);
+			op1_string = zval_try_get_string_func(op1);
+			if (UNEXPECTED(!op1_string)) {
 				if (orig_op1 != result) {
 					ZVAL_UNDEF(result);
 				}
@@ -2014,10 +2022,9 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 				free_op1_string = true;
 			}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_CONCAT);
-			op2_string = zval_get_string_func(op2);
-			if (UNEXPECTED(EG(exception))) {
-				zend_string_release(op1_string);
-				zend_string_release(op2_string);
+			op2_string = zval_try_get_string_func(op2);
+			if (UNEXPECTED(!op2_string)) {
+				zend_string_release_ex(op1_string, false);
 				if (orig_op1 != result) {
 					ZVAL_UNDEF(result);
 				}
@@ -2062,8 +2069,8 @@ has_op2_string:;
 		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_string, op2_string);
 
 		if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
-			if (free_op1_string) zend_string_release(op1_string);
-			if (free_op2_string) zend_string_release(op2_string);
+			if (free_op1_string) zend_string_release_ex(op1_string, false);
+			if (free_op2_string) zend_string_release_ex(op2_string, false);
 			zend_throw_error(NULL, "String size overflow");
 			if (orig_op1 != result) {
 				ZVAL_UNDEF(result);
@@ -2086,7 +2093,7 @@ has_op2_string:;
 			/* account for the case where result_str == op1_string == op2_string and the realloc is done */
 			if (op1_string == op2_string) {
 				if (free_op2_string) {
-					zend_string_release(op2_string);
+					zend_string_release_ex(op2_string, false);
 					free_op2_string = false;
 				}
 				op2_string = result_str;
@@ -2105,8 +2112,8 @@ has_op2_string:;
 		ZSTR_VAL(result_str)[result_len] = '\0';
 	}
 
-	if (free_op1_string) zend_string_release(op1_string);
-	if (free_op2_string) zend_string_release(op2_string);
+	if (free_op1_string) zend_string_release_ex(op1_string, false);
+	if (free_op2_string) zend_string_release_ex(op2_string, false);
 
 	return SUCCESS;
 }

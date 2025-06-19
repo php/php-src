@@ -95,7 +95,7 @@ static zend_string *dom_element_html_fragment_serialize(dom_object *obj, xmlNode
 				status |= xmlOutputBufferFlush(out);
 				status |= xmlOutputBufferClose(out);
 			}
-			(void) xmlSaveClose(ctxt);
+			status |= xmlSaveClose(ctxt);
 			xmlCharEncCloseFunc(handler);
 		}
 		if (UNEXPECTED(status < 0)) {

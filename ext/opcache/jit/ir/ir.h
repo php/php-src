@@ -154,19 +154,27 @@ typedef enum _ir_type {
 } ir_type;
 
 #ifdef IR_64
-# define IR_SIZE_T     IR_U64
-# define IR_SSIZE_T    IR_I64
-# define IR_UINTPTR_T  IR_U64
-# define IR_INTPTR_T   IR_I64
-# define IR_C_UINTPTR  IR_U64
-# define IR_C_INTPTR   IR_I64
+# define IR_SIZE_T          IR_U64
+# define IR_SSIZE_T         IR_I64
+# define IR_UINTPTR_T       IR_U64
+# define IR_INTPTR_T        IR_I64
+# define IR_C_UINTPTR       IR_U64
+# define IR_C_INTPTR        IR_I64
+# define ir_const_size_t    ir_const_u64
+# define ir_const_ssize_t   ir_const_i64
+# define ir_const_uintptr_t ir_const_u64
+# define ir_const_intptr_t  ir_const_i64
 #else
-# define IR_SIZE_T     IR_U32
-# define IR_SSIZE_T    IR_I32
-# define IR_UINTPTR_T  IR_U32
-# define IR_INTPTR_T   IR_I32
-# define IR_C_UINTPTR  IR_U32
-# define IR_C_INTPTR   IR_I32
+# define IR_SIZE_T          IR_U32
+# define IR_SSIZE_T         IR_I32
+# define IR_UINTPTR_T       IR_U32
+# define IR_INTPTR_T        IR_I32
+# define IR_C_UINTPTR       IR_U32
+# define IR_C_INTPTR        IR_I32
+# define ir_const_size_t    ir_const_u32
+# define ir_const_ssize_t   ir_const_i32
+# define ir_const_uintptr_t ir_const_u32
+# define ir_const_intptr_t  ir_const_i32
 #endif
 
 /* List of IR opcodes
@@ -401,8 +409,10 @@ typedef int32_t ir_ref;
 #define IR_CONSTS_LIMIT_MIN (-(IR_TRUE - 1))
 #define IR_INSNS_LIMIT_MIN (IR_UNUSED + 1)
 
+/* ADDR_MEMBER is neccessary to workaround MSVC C preprocessor bug */
 #ifndef IR_64
-# define ADDR_MEMBER            uintptr_t                  addr;
+# define ADDR_MEMBER            uintptr_t                  addr; \
+								void                      *ptr;
 #else
 # define ADDR_MEMBER
 #endif
@@ -412,6 +422,7 @@ typedef union _ir_val {
 	int64_t                            i64;
 #ifdef IR_64
 	uintptr_t                          addr;
+	void                              *ptr;
 #endif
 	IR_STRUCT_LOHI(
 		union {
@@ -466,6 +477,7 @@ typedef struct _ir_insn {
 		},
 		union {
 			ir_ref                     op1;
+			ir_ref                     ref;
 			ir_ref                     prev_const;
 		}
 	);

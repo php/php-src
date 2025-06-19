@@ -1923,7 +1923,7 @@ dnl
 dnl Common setup macro for SQLite library.
 dnl
 AC_DEFUN([PHP_SETUP_SQLITE], [
-PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7], [
+PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.17], [
   PHP_EVAL_INCLINE([$SQLITE_CFLAGS])
   PHP_EVAL_LIBLINE([$SQLITE_LIBS], [$1])
 ])

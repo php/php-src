@@ -180,12 +180,6 @@ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		phpdbg_notice("Script ended normally");
 	}
 
-	/* hack to restore mm_heap->use_custom_heap in order to receive memory leak info */
-	if (use_mm_wrappers) {
-		/* ASSUMING that mm_heap->use_custom_heap is the first element of the struct ... */
-		*(int *) zend_mm_get_heap() = 0;
-	}
-
 	if (PHPDBG_G(buffer)) {
 		free(PHPDBG_G(buffer));
 		PHPDBG_G(buffer) = NULL;

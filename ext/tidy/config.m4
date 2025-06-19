@@ -57,6 +57,12 @@ if test "$PHP_TIDY" != "no"; then
     [],
     [-L$TIDY_LIBDIR])
 
+  PHP_CHECK_LIBRARY([$TIDY_LIB_NAME], [tidyOptGetCategory],
+    [AC_DEFINE([HAVE_TIDYOPTGETCATEGORY], [1],
+      [Define to 1 if Tidy library has the 'tidyOptGetCategory' function.])],
+    [],
+    [-L$TIDY_LIBDIR])
+
   PHP_ADD_LIBRARY_WITH_PATH([$TIDY_LIB_NAME],
     [$TIDY_LIBDIR],
     [TIDY_SHARED_LIBADD])

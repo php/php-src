@@ -70,6 +70,9 @@
 # if defined(HAVE_LINUX_IF_ETHER_H)
 #  include <linux/if_ether.h>
 # endif
+# if defined(HAVE_LINUX_UDP_H)
+#  include <linux/udp.h>
+# endif
 #endif
 
 #include <stddef.h>
@@ -2301,6 +2304,22 @@ PHP_FUNCTION(socket_set_option)
 		}
 #endif
 
+#if defined(UDP_SEGMENT)
+		case UDP_SEGMENT: {
+			ov = zval_get_long(arg4);
+
+			// UDP segmentation offload maximum size or 0 to disable it
+			if (ov < 0 || ov > USHRT_MAX) {
+				zend_argument_value_error(4, "must be of between 0 and %u", USHRT_MAX);
+				RETURN_FALSE;
+			}
+
+			optlen = sizeof(ov);
+			opt_ptr = &ov;
+			break;
+		}
+#endif
+
 		default:
 default_case:
 			ov = zval_get_long(arg4);
@@ -2360,26 +2379,22 @@ PHP_FUNCTION(socket_create_pair)
 		RETURN_THROWS();
 	}
 
-	object_init_ex(&retval[0], socket_ce);
-	php_sock[0] = Z_SOCKET_P(&retval[0]);
-
-	object_init_ex(&retval[1], socket_ce);
-	php_sock[1] = Z_SOCKET_P(&retval[1]);
-
 	if (socketpair(domain, type, protocol, fds_array) != 0) {
 		SOCKETS_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Unable to create socket pair [%d]: %s", errno, sockets_strerror(errno));
-		zval_ptr_dtor(&retval[0]);
-		zval_ptr_dtor(&retval[1]);
 		RETURN_FALSE;
 	}
 
 	fds_array_zval = zend_try_array_init_size(fds_array_zval, 2);
 	if (!fds_array_zval) {
-		zval_ptr_dtor(&retval[0]);
-		zval_ptr_dtor(&retval[1]);
 		RETURN_THROWS();
 	}
+
+	object_init_ex(&retval[0], socket_ce);
+	php_sock[0] = Z_SOCKET_P(&retval[0]);
+
+	object_init_ex(&retval[1], socket_ce);
+	php_sock[1] = Z_SOCKET_P(&retval[1]);
 
 	php_sock[0]->bsd_socket = fds_array[0];
 	php_sock[1]->bsd_socket = fds_array[1];
@@ -2414,6 +2429,11 @@ PHP_FUNCTION(socket_shutdown)
 
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
+
+	if (how_shutdown < SHUT_RD || how_shutdown > SHUT_RDWR) {
+		zend_argument_value_error(2, "must be one of SHUT_RD, SHUT_WR or SHUT_RDWR");
+		RETURN_THROWS();
+	}
 
 	if (shutdown(php_sock->bsd_socket, how_shutdown) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to shutdown socket", errno);

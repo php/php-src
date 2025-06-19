@@ -6,10 +6,11 @@ TestFest PHP|Tek
 --FILE--
 <?php
 $rc = new ReflectionClass("stdClass");
-$rc2 = clone($rc);
+try {
+  $rc2 = clone($rc);
+} catch (Throwable $e) {
+  echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class ReflectionClass in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Trying to clone an uncloneable object of class ReflectionClass

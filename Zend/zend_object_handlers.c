@@ -46,6 +46,15 @@
 #define IN_ISSET	ZEND_GUARD_PROPERTY_ISSET
 #define IN_HOOK		ZEND_GUARD_PROPERTY_HOOK
 
+static zend_always_inline bool zend_objects_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 /*
   __X accessors explanation:
 
@@ -197,6 +206,9 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 	}
 
 	zend_call_known_instance_method_with_0_params(ce->__debugInfo, object, &retval);
+	if (UNEXPECTED(Z_ISREF(retval))) {
+		zend_unwrap_reference(&retval);
+	}
 	if (Z_TYPE(retval) == IS_ARRAY) {
 		if (!Z_REFCOUNTED(retval)) {
 			*is_temp = 1;
@@ -2122,6 +2134,11 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
 
+	if (zend_objects_check_stack_limit()) {
+		zend_throw_error(NULL, "Maximum call stack size reached during object comparison");
+		return ZEND_UNCOMPARABLE;
+	}
+
 	if (Z_TYPE_P(o1) != Z_TYPE_P(o2)) {
 		/* Object and non-object */
 		zval *object;
@@ -2423,8 +2440,12 @@ ZEND_API zend_result zend_std_cast_object_tostring(zend_object *readobj, zval *w
 				zend_call_known_instance_method_with_0_params(ce->__tostring, readobj, &retval);
 				zend_object_release(readobj);
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
+is_string:
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;
+				} else if (Z_ISREF(retval)) {
+					zend_unwrap_reference(&retval);
+					goto is_string;
 				}
 				zval_ptr_dtor(&retval);
 				if (!EG(exception)) {

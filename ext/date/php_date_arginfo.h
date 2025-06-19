@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 093743b4fe7a698d1262cc1a81b60a85064fdccb */
+ * Stub hash: 4e61617ca7c877aa3811d674d47850f23157074b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -175,7 +175,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timezone_transitions_get, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampBegin, IS_LONG, 0, "PHP_INT_MIN")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "PHP_INT_MAX")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "2147483647")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_timezone_location_get, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -436,7 +436,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DateTimeZone_getTransitions, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampBegin, IS_LONG, 0, "PHP_INT_MIN")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "PHP_INT_MAX")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timestampEnd, IS_LONG, 0, "2147483647")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeZone_getLocation arginfo_class_DateTime_getLastErrors

@@ -255,9 +255,7 @@ IR_ALWAYS_INLINE void ir_arena_free(ir_arena *arena)
 IR_ALWAYS_INLINE void* ir_arena_alloc(ir_arena **arena_ptr, size_t size)
 {
 	ir_arena *arena = *arena_ptr;
-	char *ptr = arena->ptr;
-
-	size = IR_ALIGNED_SIZE(size, 8);
+	char *ptr = (char*)IR_ALIGNED_SIZE((uintptr_t)arena->ptr, 8);
 
 	if (EXPECTED(size <= (size_t)(arena->end - ptr))) {
 		arena->ptr = ptr + size;
@@ -283,7 +281,7 @@ IR_ALWAYS_INLINE void* ir_arena_checkpoint(ir_arena *arena)
 	return arena->ptr;
 }
 
-IR_ALWAYS_INLINE void ir_release(ir_arena **arena_ptr, void *checkpoint)
+IR_ALWAYS_INLINE void ir_arena_release(ir_arena **arena_ptr, void *checkpoint)
 {
 	ir_arena *arena = *arena_ptr;
 

@@ -363,7 +363,7 @@ $op2_get_obj_zval_ptr_undef = array(
 );
 
 $op1_get_obj_zval_ptr_deref = array(
-    "ANY"      => "get_obj_zval_ptr(opline->op1_type, opline->op1, \\1)",
+    "ANY"      => "get_obj_zval_ptr_deref(opline->op1_type, opline->op1, \\1)",
     "TMP"      => "_get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC)",
     "VAR"      => "_get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC)",
     "CONST"    => "RT_CONSTANT(opline, opline->op1)",
@@ -374,7 +374,7 @@ $op1_get_obj_zval_ptr_deref = array(
 );
 
 $op2_get_obj_zval_ptr_deref = array(
-    "ANY"      => "get_obj_zval_ptr(opline->op2_type, opline->op2, \\1)",
+    "ANY"      => "get_obj_zval_ptr_deref(opline->op2_type, opline->op2, \\1)",
     "TMP"      => "_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC)",
     "VAR"      => "_get_zval_ptr_var_deref(opline->op2.var EXECUTE_DATA_CC)",
     "CONST"    => "RT_CONSTANT(opline, opline->op2)",

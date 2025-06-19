@@ -3,6 +3,7 @@ GH-16508: Missing lineno in inheritance errors of delayed early bound classes
 --EXTENSIONS--
 opcache
 --INI--
+opcache.enable=1
 opcache.enable_cli=1
 --FILE--
 <?php

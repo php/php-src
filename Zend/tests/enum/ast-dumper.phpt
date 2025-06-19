@@ -28,7 +28,7 @@ try {
 
 ?>
 --EXPECT--
-assert(function () {
+assert((function () {
     enum Foo {
         case Bar;
     }
@@ -45,4 +45,4 @@ assert(function () {
     }
 
     return false;
-}())
+})())

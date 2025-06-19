@@ -71,6 +71,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%left T_PIPE
 %left '.'
 %left T_SL T_SR
 %left '+' '-'
@@ -237,6 +238,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
+%token T_PIPE         "'|>'"
 /* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
  * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
  * or shift to continue parsing an intersection type. */
@@ -279,7 +281,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> isset_variable type return_type type_expr type_without_static
 %type <ast> identifier type_expr_without_static union_type_without_static_element union_type_without_static intersection_type_without_static
 %type <ast> inline_function union_type_element union_type intersection_type
-%type <ast> attributed_statement attributed_class_statement attributed_parameter
+%type <ast> attributed_statement attributed_top_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
@@ -391,13 +393,17 @@ attributed_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	enum_declaration_statement			{ $$ = $1; }
+;
+
+attributed_top_statement:
+		attributed_statement				{ $$ = $1; }
 	|	T_CONST const_list ';'				{ $$ = $2; }
 ;
 
 top_statement:
 		statement							{ $$ = $1; }
-	|	attributed_statement					{ $$ = $1; }
-	|	attributes attributed_statement		{ $$ = zend_ast_with_attributes($2, $1); }
+	|	attributed_top_statement			{ $$ = $1; }
+	|	attributes attributed_top_statement	{ $$ = zend_ast_with_attributes($2, $1); }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
 			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
@@ -1288,6 +1294,8 @@ expr:
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_EQUAL, $1, $3); }
 	|	expr T_IS_NOT_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
+	|	expr T_PIPE expr
+			{ $$ = zend_ast_create(ZEND_AST_PIPE, $1, $3); }
 	|	expr '<' expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, $3); }
 	|	expr T_IS_SMALLER_OR_EQUAL expr

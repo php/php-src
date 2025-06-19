@@ -19,10 +19,10 @@ assert((function () {
 
 ?>
 --EXPECTF--
-assert(): assert(function () {
+assert(): assert((function () {
     match ('foo') {
         'foo', 'bar' => false,
         'baz' => 'a',
         default => 'b',
     };
-}()) failed
+})()) failed

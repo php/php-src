@@ -7,11 +7,12 @@ dom
 
 $dom = DOM\XMLDocument::createFromString('<root class="a b c"><child/></root>');
 $element = $dom->documentElement;
-clone $element->classList;
+try {
+  clone $element->classList;
+} catch (Throwable $e) {
+  echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class Dom\TokenList in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Trying to clone an uncloneable object of class Dom\TokenList

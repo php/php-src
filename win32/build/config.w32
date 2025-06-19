@@ -293,7 +293,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 //AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
 
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
-	php_ini_builder.c \
+	php_ini_builder.c php_glob.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c output.c internal_functions.c \
@@ -314,7 +314,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 	ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/d2FuncCache1");
 }
 
-ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
+ADD_SOURCES("win32", "dllmain.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
 	getrusage.c ftok.c ioutil.c codepage.c nice.c \
 	fnmatch.c sockets.c console.c signal.c");

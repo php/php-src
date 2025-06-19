@@ -931,7 +931,7 @@ XXH_PUBLIC_API int XXH128_cmp(const void* h128_1, const void* h128_2);
 
 /*******   Canonical representation   *******/
 typedef struct { unsigned char digest[sizeof(XXH128_hash_t)]; } XXH128_canonical_t;
-XXH_PUBLIC_API void XXH128_canonicalFromHash(XXH128_canonical_t* dst, XXH128_hash_t hash);
+static zend_always_inline void XXH128_canonicalFromHash(XXH128_canonical_t* dst, XXH128_hash_t hash);
 XXH_PUBLIC_API XXH128_hash_t XXH128_hashFromCanonical(const XXH128_canonical_t* src);
 
 
@@ -5503,7 +5503,7 @@ XXH_PUBLIC_API int XXH128_cmp(const void* h128_1, const void* h128_2)
 
 /*======   Canonical representation   ======*/
 /*! @ingroup xxh3_family */
-XXH_PUBLIC_API void
+static zend_always_inline void
 XXH128_canonicalFromHash(XXH128_canonical_t* dst, XXH128_hash_t hash)
 {
     XXH_STATIC_ASSERT(sizeof(XXH128_canonical_t) == sizeof(XXH128_hash_t));

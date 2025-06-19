@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 65be08c1bdace83ad1fa1175fc824262e07eac2a */
+ * Stub hash: 5e224893a5fb72b3f93249235c2a1634233ce505 */
 
 static void register_zend_constants_symbols(int module_number)
 {
@@ -26,4 +26,18 @@ static void register_zend_constants_symbols(int module_number)
 	REGISTER_BOOL_CONSTANT("TRUE", true, CONST_PERSISTENT);
 	REGISTER_BOOL_CONSTANT("FALSE", false, CONST_PERSISTENT);
 	REGISTER_NULL_CONSTANT("NULL", CONST_PERSISTENT);
+
+	zend_constant *const_E_STRICT = zend_hash_str_find_ptr(EG(zend_constants), "E_STRICT", sizeof("E_STRICT") - 1);
+
+	zend_attribute *attribute_Deprecated_const_E_STRICT_0 = zend_add_global_constant_attribute(const_E_STRICT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_E_STRICT_0_arg0;
+	zend_string *attribute_Deprecated_const_E_STRICT_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0_arg0, attribute_Deprecated_const_E_STRICT_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_E_STRICT_0->args[0].value, &attribute_Deprecated_const_E_STRICT_0_arg0);
+	attribute_Deprecated_const_E_STRICT_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_E_STRICT_0_arg1;
+	zend_string *attribute_Deprecated_const_E_STRICT_0_arg1_str = zend_string_init("the error level was removed", strlen("the error level was removed"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0_arg1, attribute_Deprecated_const_E_STRICT_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_E_STRICT_0->args[1].value, &attribute_Deprecated_const_E_STRICT_0_arg1);
+	attribute_Deprecated_const_E_STRICT_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }

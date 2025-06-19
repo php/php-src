@@ -1994,10 +1994,16 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
 					if (use_insn->op1 == phi_ref) {
+						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
+							return 0;
+						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op2, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
 					} else if (use_insn->op2 == phi_ref) {
+						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op1].type)) {
+							return 0;
+						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op1, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
@@ -2027,10 +2033,16 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
 					if (use_insn->op1 == phi_ref) {
+						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
+							return 0;
+						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op2, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
 					} else if (use_insn->op2 == phi_ref) {
+						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op1].type)) {
+							return 0;
+						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op1, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
@@ -3570,11 +3582,12 @@ remove_aliased_load:
 				if (val_insn->type == insn->type) {
 					ir_iter_replace_insn(ctx, i, val, worklist);
 				} else {
-					IR_ASSERT(!IR_IS_CONST_REF(insn->op2));
-					ir_use_list_remove_one(ctx, insn->op2, i);
-					if (ir_is_dead(ctx, insn->op2)) {
-						/* schedule DCE */
-						ir_bitqueue_add(worklist, insn->op2);
+					if (!IR_IS_CONST_REF(insn->op2)) {
+						ir_use_list_remove_one(ctx, insn->op2, i);
+						if (ir_is_dead(ctx, insn->op2)) {
+							/* schedule DCE */
+							ir_bitqueue_add(worklist, insn->op2);
+						}
 					}
 					if (!IR_IS_CONST_REF(val)) {
 						ir_use_list_add(ctx, val, i);

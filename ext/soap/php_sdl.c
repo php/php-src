@@ -31,6 +31,12 @@
 # define O_BINARY 0
 #endif
 
+#ifdef WORDS_BIGENDIAN
+# define SOAP_BIG_ENDIAN 1
+#else
+# define SOAP_BIG_ENDIAN 0
+#endif
+
 static void delete_fault(zval *zv);
 static void delete_fault_persistent(zval *zv);
 static void delete_binding(zval *zv);
@@ -177,7 +183,7 @@ encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, size_t len)
 {
 	encodePtr enc;
 
-	if ((enc = zend_hash_str_find_ptr(&SOAP_GLOBAL(defEnc), nscat, len)) != NULL) {
+	if ((enc = zend_hash_str_find_ptr(&php_soap_defEnc, nscat, len)) != NULL) {
 		return enc;
 	} else if (sdl && sdl->encoders && (enc = zend_hash_str_find_ptr(sdl->encoders, nscat, len)) != NULL) {
 		return enc;
@@ -3188,9 +3194,13 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		char *user = php_get_current_user();
 		size_t user_len = user ? strlen(user) + 1 : 0;
 
+		/* System architecture identification (see bug #70951) */
+		static const char ids[] = {SIZEOF_ZEND_LONG, SOAP_BIG_ENDIAN};
+
 		md5str[0] = '\0';
 		PHP_MD5Init(&md5_context);
 		PHP_MD5Update(&md5_context, (unsigned char*)uri, uri_len);
+		PHP_MD5Update(&md5_context, ids, sizeof(ids));
 		PHP_MD5Final(digest, &md5_context);
 		make_digest(md5str, digest);
 		key = emalloc(len+sizeof("/wsdl-")-1+user_len+2+sizeof(md5str));

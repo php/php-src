@@ -498,12 +498,14 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (stream && use_proxy && use_ssl) {
 		smart_str header = {0};
+		bool reset_ssl_peer_name = false;
 
 		/* Set peer_name or name verification will try to use the proxy server name */
 		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
 			ZVAL_STR_COPY(&ssl_proxy_peer_name, resource->host);
 			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
 			zval_ptr_dtor(&ssl_proxy_peer_name);
+			reset_ssl_peer_name = true;
 		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
@@ -565,6 +567,10 @@ finish:
 				php_stream_close(stream);
 				stream = NULL;
 			}
+		}
+
+		if (reset_ssl_peer_name) {
+			php_stream_context_unset_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name");
 		}
 	}
 
