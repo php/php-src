@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fa489a46c586ae935036f76a992163aeb67246d3 */
+ * Stub hash: c1d4ef325ecb8c8cb312910e8091ca003dc2603a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -121,7 +121,7 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_string *const_ATTR_EXPLAIN_STATEMENT_name = zend_string_init_interned("ATTR_EXPLAIN_STATEMENT", sizeof("ATTR_EXPLAIN_STATEMENT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_EXPLAIN_STATEMENT_name, &const_ATTR_EXPLAIN_STATEMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_EXPLAIN_STATEMENT_name);
-#if SQLITE_VERSION_NUMBER >= 3041000
+#if SQLITE_VERSION_NUMBER >= 3043000
 
 	zval const_EXPLAIN_MODE_PREPARED_value;
 	ZVAL_LONG(&const_EXPLAIN_MODE_PREPARED_value, 0);
@@ -129,7 +129,7 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_PREPARED_name, &const_EXPLAIN_MODE_PREPARED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXPLAIN_MODE_PREPARED_name);
 #endif
-#if SQLITE_VERSION_NUMBER >= 3041000
+#if SQLITE_VERSION_NUMBER >= 3043000
 
 	zval const_EXPLAIN_MODE_EXPLAIN_value;
 	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_value, 1);
@@ -137,7 +137,7 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_EXPLAIN_name, &const_EXPLAIN_MODE_EXPLAIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXPLAIN_MODE_EXPLAIN_name);
 #endif
-#if SQLITE_VERSION_NUMBER >= 3041000
+#if SQLITE_VERSION_NUMBER >= 3043000
 
 	zval const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value;
 	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value, 2);

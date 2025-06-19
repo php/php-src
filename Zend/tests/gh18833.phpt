@@ -1,5 +1,5 @@
 --TEST--
-Bug #18833 (Use after free with weakmaps dependent on destruction order)
+GH-18833 (Use after free with weakmaps dependent on destruction order)
 --FILE--
 <?php
 
