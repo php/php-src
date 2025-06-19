@@ -2010,6 +2010,75 @@ static void sqlite3result_clear_column_names_cache(php_sqlite3_result *result) {
 	result->column_count = -1;
 }
 
+PHP_METHOD(SQLite3Result, fetchAll)
+{
+	int i;
+	bool done = false;
+	php_sqlite3_result *result_obj;
+	zval *object = ZEND_THIS;
+	zend_long mode = PHP_SQLITE3_BOTH;
+	result_obj = Z_SQLITE3_RESULT_P(object);
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
+
+	result_obj->column_count = sqlite3_column_count(result_obj->stmt_obj->stmt);
+	if (mode & PHP_SQLITE3_ASSOC) {
+		result_obj->column_names = emalloc(result_obj->column_count * sizeof(zend_string*));
+
+		for (i = 0; i < result_obj->column_count; i++) {
+			const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
+			result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
+		}
+	}
+	array_init(return_value);
+
+	while (!done) {
+		int step = sqlite3_step(result_obj->stmt_obj->stmt);
+
+		switch (step) {
+		case SQLITE_ROW: {
+			zval result;
+			array_init_size(&result, result_obj->column_count);
+
+			for (i = 0; i < result_obj->column_count; i ++) {
+				zval data;
+				sqlite_value_to_zval(result_obj->stmt_obj->stmt, i, &data);
+
+				if (mode & PHP_SQLITE3_NUM) {
+					add_index_zval(&result, i, &data);
+				}
+
+				if (mode & PHP_SQLITE3_ASSOC) {
+					if (mode & PHP_SQLITE3_NUM) {
+						if (Z_REFCOUNTED(data)) {
+							Z_ADDREF(data);
+						}
+					}
+					zend_symtable_update(Z_ARR_P(&result), result_obj->column_names[i], &data);
+				}
+			}
+
+			add_next_index_zval(return_value, &result);
+			break;
+		}
+		case SQLITE_DONE:
+			done = true;
+			break;
+		default:
+			if (!EG(exception)) {
+				php_sqlite3_error(result_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(result_obj->stmt_obj->stmt)), "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
+			}
+			zval_ptr_dtor(return_value);
+			RETURN_FALSE;
+		}
+	}
+}
+
 /* {{{ Resets the result set back to the first row. */
 PHP_METHOD(SQLite3Result, reset)
 {
