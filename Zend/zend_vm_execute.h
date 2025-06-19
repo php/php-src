@@ -5196,7 +5196,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_
 					HANDLE_EXCEPTION();
 				}
 			}
-			zend_throw_error(NULL, "__clone method called on non-object");
+			zend_type_error("clone(): Argument #1 ($object) must be of type object, %s given", zend_zval_value_name(obj));
 
 			HANDLE_EXCEPTION();
 		}
@@ -15444,7 +15444,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 					HANDLE_EXCEPTION();
 				}
 			}
-			zend_throw_error(NULL, "__clone method called on non-object");
+			zend_type_error("clone(): Argument #1 ($object) must be of type object, %s given", zend_zval_value_name(obj));
 			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 			HANDLE_EXCEPTION();
 		}
@@ -33539,7 +33539,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 					HANDLE_EXCEPTION();
 				}
 			}
-			zend_throw_error(NULL, "__clone method called on non-object");
+			zend_type_error("clone(): Argument #1 ($object) must be of type object, %s given", zend_zval_value_name(obj));
 
 			HANDLE_EXCEPTION();
 		}
@@ -41058,7 +41058,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 					HANDLE_EXCEPTION();
 				}
 			}
-			zend_throw_error(NULL, "__clone method called on non-object");
+			zend_type_error("clone(): Argument #1 ($object) must be of type object, %s given", zend_zval_value_name(obj));
 
 			HANDLE_EXCEPTION();
 		}

@@ -6022,7 +6022,7 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 					HANDLE_EXCEPTION();
 				}
 			}
-			zend_throw_error(NULL, "__clone method called on non-object");
+			zend_type_error("clone(): Argument #1 ($object) must be of type object, %s given", zend_zval_value_name(obj));
 			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}

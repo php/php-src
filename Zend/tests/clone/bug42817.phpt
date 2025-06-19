@@ -6,7 +6,7 @@ $a = clone(null);
 array_push($a->b, $c);
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: __clone method called on non-object in %sbug42817.php:2
+Fatal error: Uncaught TypeError: clone(): Argument #1 ($object) must be of type object, null given in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sbug42817.php on line 2
