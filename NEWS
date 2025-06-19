@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18833 (Use after free with weakmaps dependent on destruction
     order). (Daniil Gentili)
 
+- Curl:
+  . Fix memory leaks when returning refcounted value from curl callback.
+    (nielsdos)
+
 03 Jul 2025, PHP 8.3.23
 
 - Core:
