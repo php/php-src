@@ -415,7 +415,7 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_get_request_time,		/* Request Time */
 	NULL,						/* Child Terminate */
 
-	STANDARD_SAPI_MODULE_PROPERTIES_WITH_FLAGS(SAPI_MODULE_FLAG_ISOLATE_SYMBOLS)
+	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
 static apr_status_t php_apache_server_shutdown(void *tmp)
@@ -461,11 +461,14 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	return OK;
 }
 
+extern bool use_deepbind;
+
 static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
 	void *data = NULL;
 	const char *userdata_key = "apache2hook_post_config";
+	use_deepbind = true;
 
 	/* Apache will load, unload and then reload a DSO module. This
 	 * prevents us from starting PHP until the second load. */
