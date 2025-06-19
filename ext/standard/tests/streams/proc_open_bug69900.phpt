@@ -32,9 +32,9 @@ for($i = 0; $i < 10; $i++){
     fwrite($pipes[0], "hello$i\r\n");
     fflush($pipes[0]);
 
-    $t0 = microtime(1);
+    $t0 = microtime(true);
     $s = fgets($pipes[1]);
-    $t1 = microtime(1);
+    $t1 = microtime(true);
 
     echo $s;
 
