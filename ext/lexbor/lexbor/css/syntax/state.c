@@ -100,13 +100,6 @@ lxb_css_syntax_state_consume_numeric(lxb_css_syntax_tokenizer_t *tkz,
                                      const lxb_char_t *end);
 
 static const lxb_char_t *
-lxb_css_syntax_state_decimal(lxb_css_syntax_tokenizer_t *tkz,
-                             lxb_css_syntax_token_t *token,
-                             const lxb_char_t *data, const lxb_char_t *end,
-                             lxb_char_t *buf, lxb_char_t *buf_p,
-                             const lxb_char_t *buf_end);
-
-static const lxb_char_t *
 lxb_css_syntax_state_consume_numeric_name_start(lxb_css_syntax_tokenizer_t *tkz,
                                                 lxb_css_syntax_token_t *token,
                                                 const lxb_char_t *data,
@@ -706,8 +699,6 @@ lxb_css_syntax_state_plus(lxb_css_syntax_tokenizer_t *tkz,
                           lxb_css_syntax_token_t *token,
                           const lxb_char_t *data, const lxb_char_t *end)
 {
-    lxb_char_t buf[128];
-
     /* Skip U+002B PLUS SIGN (+). */
     data += 1;
 
@@ -732,8 +723,8 @@ lxb_css_syntax_state_plus(lxb_css_syntax_tokenizer_t *tkz,
         /* U+0030 DIGIT ZERO (0) and U+0039 DIGIT NINE (9) */
         if (*data >= 0x30 && *data <= 0x39) {
             lxb_css_syntax_token_number(token)->have_sign = true;
-            return lxb_css_syntax_state_decimal(tkz, token, data, end,
-                                                buf, buf, buf + sizeof(buf));
+            return lxb_css_syntax_state_consume_numeric(tkz, token,
+                                                        data - 1, end);
         }
 
         data -= 1;
@@ -804,6 +795,7 @@ lxb_css_syntax_state_full_stop(lxb_css_syntax_tokenizer_t *tkz,
                                const lxb_char_t *data, const lxb_char_t *end)
 {
     if (lxb_css_syntax_state_start_number(data, end)) {
+        lxb_css_syntax_token_number(token)->have_sign = false;
         return lxb_css_syntax_state_consume_numeric(tkz, token, data, end);
     }
 
@@ -935,37 +927,26 @@ lxb_css_syntax_state_rc_bracket(lxb_css_syntax_tokenizer_t *tkz, lxb_css_syntax_
  * Numeric
  */
 lxb_inline void
-lxb_css_syntax_consume_numeric_set_int(lxb_css_syntax_tokenizer_t *tkz,
-                                       lxb_css_syntax_token_t *token,
-                                       const lxb_char_t *start, const lxb_char_t *end)
-{
-    double num = lexbor_strtod_internal(start, (end - start), 0);
-
-    token->type = LXB_CSS_SYNTAX_TOKEN_NUMBER;
-
-    lxb_css_syntax_token_number(token)->is_float = false;
-    lxb_css_syntax_token_number(token)->num = num;
-}
-
-lxb_inline void
-lxb_css_syntax_consume_numeric_set_float(lxb_css_syntax_tokenizer_t *tkz,
-                                         lxb_css_syntax_token_t *token,
-                                         const lxb_char_t *start, const lxb_char_t *end,
-                                         bool e_is_negative, int exponent, int e_digit)
+lxb_css_syntax_consume_numeric_set(lxb_css_syntax_tokenizer_t *tkz,
+                                   lxb_css_syntax_token_t *token,
+                                   const lxb_char_t *start, const lxb_char_t *end,
+                                   bool is_float, bool e_is_negative,
+                                   int exponent, int e_digit)
 {
     if (e_is_negative) {
-        exponent -= e_digit;
+        exponent = e_digit - exponent;
+        exponent = -exponent;
     }
     else {
-        exponent += e_digit;
+        exponent = e_digit + exponent;
     }
 
     double num = lexbor_strtod_internal(start, (end - start), exponent);
 
     token->type = LXB_CSS_SYNTAX_TOKEN_NUMBER;
 
+    lxb_css_syntax_token_number(token)->is_float = is_float;
     lxb_css_syntax_token_number(token)->num = num;
-    lxb_css_syntax_token_number(token)->is_float = true;
 }
 
 const lxb_char_t *
@@ -985,72 +966,22 @@ lxb_css_syntax_state_consume_numeric(lxb_css_syntax_tokenizer_t *tkz,
                                      const lxb_char_t *data,
                                      const lxb_char_t *end)
 {
-    lxb_char_t *buf_p;
-    const lxb_char_t *buf_end;
+    bool e_is_negative, is_float;
+    int exponent, e_digit;
+    lxb_char_t ch, *buf_p;
+    const lxb_char_t *begin, *buf_end;
+    lxb_css_syntax_token_t *t_str;
+    lxb_css_syntax_token_string_t *str;
     lxb_char_t buf[128];
 
     buf_p = buf;
     buf_end = buf + sizeof(buf);
 
-    do {
-        /* U+0030 DIGIT ZERO (0) and U+0039 DIGIT NINE (9) */
-        if (*data < 0x30 || *data > 0x39) {
-            break;
-        }
-
-        if (buf_p != buf_end) {
-            *buf_p++ = *data;
-        }
-
-        data += 1;
-
-        if (data >= end) {
-            lxb_css_syntax_consume_numeric_set_int(tkz, token, buf, buf_p);
-            return data;
-        }
-    }
-    while (true);
-
-    /* U+002E FULL STOP (.) */
-    if (*data != 0x2E) {
-        lxb_css_syntax_consume_numeric_set_int(tkz, token, buf, buf_p);
-
-        return lxb_css_syntax_state_consume_numeric_name_start(tkz, token,
-                                                               data, end);
-    }
-
-    data += 1;
-
-    if (data >= end || *data < 0x30 || *data > 0x39) {
-        lxb_css_syntax_consume_numeric_set_int(tkz, token, buf, buf_p);
-        return data - 1;
-    }
-
-    return lxb_css_syntax_state_decimal(tkz, token, data, end,
-                                        buf, buf_p, buf_end);
-}
-
-static const lxb_char_t *
-lxb_css_syntax_state_decimal(lxb_css_syntax_tokenizer_t *tkz,
-                             lxb_css_syntax_token_t *token,
-                             const lxb_char_t *data, const lxb_char_t *end,
-                             lxb_char_t *buf, lxb_char_t *buf_p,
-                             const lxb_char_t *buf_end)
-{
-    bool e_is_negative;
-    int exponent, e_digit;
-    lxb_char_t ch;
-    const lxb_char_t *begin;
-    lxb_css_syntax_token_t *t_str;
-    lxb_css_syntax_token_string_t *str;
-
-    begin = data;
-
     str = lxb_css_syntax_token_dimension_string(token);
     t_str = (lxb_css_syntax_token_t *) (void *) str;
 
     /* U+0030 DIGIT ZERO (0) and U+0039 DIGIT NINE (9) */
-    do {
+    while (*data >= 0x30 && *data <= 0x39) {
         if (buf_p != buf_end) {
             *buf_p++ = *data;
         }
@@ -1058,22 +989,54 @@ lxb_css_syntax_state_decimal(lxb_css_syntax_tokenizer_t *tkz,
         data += 1;
 
         if (data >= end) {
-            exponent = 0 - (int) (data - begin);
-
-            lxb_css_syntax_consume_numeric_set_float(tkz, token, buf,
-                                                     buf_p, 0, exponent, 0);
+            lxb_css_syntax_consume_numeric_set(tkz, token, buf, buf_p,
+                                               false, false, 0, 0);
             return data;
         }
     }
-    while (*data >= 0x30 && *data <= 0x39);
+
+    exponent = 0;
+    is_float = false;
+
+    /* U+002E FULL STOP (.) */
+    if (*data == 0x2E) {
+        data += 1;
+
+        /* U+0030 DIGIT ZERO (0) and U+0039 DIGIT NINE (9) */
+        if (data >= end || *data < 0x30 || *data > 0x39) {
+            lxb_css_syntax_consume_numeric_set(tkz, token, buf, buf_p,
+                                               false, false, 0, 0);
+            return data - 1;
+        }
+
+        begin = buf_p;
+
+        /* U+0030 DIGIT ZERO (0) and U+0039 DIGIT NINE (9) */
+        do {
+            if (buf_p != buf_end) {
+                *buf_p++ = *data;
+            }
+
+            data += 1;
+        }
+        while (data < end && *data >= 0x30 && *data <= 0x39);
+
+        exponent = -(int) (buf_p - begin);
+        is_float = true;
+
+        if (data >= end) {
+            lxb_css_syntax_consume_numeric_set(tkz, token, buf, buf_p,
+                                               true, false, exponent, 0);
+            return data;
+        }
+    }
 
     ch = *data;
-    exponent = 0 - (int) (data - begin);
 
     /* U+0045 Latin Capital Letter (E) or U+0065 Latin Small Letter (e) */
     if (ch != 0x45 && ch != 0x65) {
-        lxb_css_syntax_consume_numeric_set_float(tkz, token, buf,
-                                                 buf_p, 0, exponent, 0);
+        lxb_css_syntax_consume_numeric_set(tkz, token, buf, buf_p,
+                                           is_float, false, exponent, 0);
 
         return lxb_css_syntax_state_consume_numeric_name_start(tkz, token,
                                                                data, end);
@@ -1087,11 +1050,10 @@ lxb_css_syntax_state_decimal(lxb_css_syntax_tokenizer_t *tkz,
         data -= 1;
 
         lxb_css_syntax_token_base(t_str)->length = 1;
-
         lxb_css_syntax_buffer_append_m(tkz, data, 1);
 
-        lxb_css_syntax_consume_numeric_set_float(tkz, token, buf,
-                                                 buf_p, 0, exponent, 0);
+        lxb_css_syntax_consume_numeric_set(tkz, token, buf, buf_p,
+                                           is_float, false, exponent, 0);
 
         token->type = LXB_CSS_SYNTAX_TOKEN_DIMENSION;
 
@@ -1122,8 +1084,8 @@ lxb_css_syntax_state_decimal(lxb_css_syntax_tokenizer_t *tkz,
             data -= 1;
         }
 
-        lxb_css_syntax_consume_numeric_set_float(tkz, token, buf,
-                                                 buf_p, 0, exponent, 0);
+        lxb_css_syntax_consume_numeric_set(tkz, token, buf, buf_p,
+                                           is_float, false, exponent, 0);
 
         token->type = LXB_CSS_SYNTAX_TOKEN_DIMENSION;
 
@@ -1135,7 +1097,6 @@ lxb_css_syntax_state_decimal(lxb_css_syntax_tokenizer_t *tkz,
         return begin;
     }
 
-    begin = data;
     e_digit = 0;
 
     /* U+0030 DIGIT ZERO (0) and U+0039 DIGIT NINE (9) */
@@ -1145,16 +1106,17 @@ lxb_css_syntax_state_decimal(lxb_css_syntax_tokenizer_t *tkz,
         data += 1;
 
         if (data >= end) {
-                lxb_css_syntax_consume_numeric_set_float(tkz, token, buf, buf_p,
-                                                         e_is_negative, exponent,
-                                                         e_digit);
-                return data;
+            lxb_css_syntax_consume_numeric_set(tkz, token, buf, buf_p,
+                                               true, e_is_negative,
+                                               exponent, e_digit);
+            return data;
         }
     }
     while(*data >= 0x30 && *data <= 0x39);
 
-    lxb_css_syntax_consume_numeric_set_float(tkz, token, buf, buf_p,
-                                             e_is_negative, exponent, e_digit);
+    lxb_css_syntax_consume_numeric_set(tkz, token, buf, buf_p,
+                                       true, e_is_negative,
+                                       exponent, e_digit);
 
     return lxb_css_syntax_state_consume_numeric_name_start(tkz, token,
                                                            data, end);
