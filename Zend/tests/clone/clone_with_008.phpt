@@ -32,4 +32,9 @@ object(Clazz)#%d (2) {
   ["b"]=>
   string(7) "__clone"
 }
-Error: Cannot modify readonly property Clazz::$b
+object(Clazz)#%d (2) {
+  ["a"]=>
+  string(7) "default"
+  ["b"]=>
+  string(4) "with"
+}
