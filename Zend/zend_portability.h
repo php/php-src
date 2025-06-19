@@ -162,11 +162,14 @@
 #  define PHP_RTLD_MODE  RTLD_LAZY
 # endif
 
+/* True global */
+static bool use_deepbind = false;
+
 # if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
 #  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
 # elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__) && !__has_feature(memory_sanitizer)
 #  if defined(LM_ID_NEWLM)
-#    define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | ((sapi_module.flags & SAPI_MODULE_FLAG_ISOLATE_SYMBOLS) != 0 ? RTLD_DEEPBIND : 0))
+#    define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | (use_deepbind ? RTLD_DEEPBIND : 0))
 #  else
 #    define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_DEEPBIND)
 #  endif
