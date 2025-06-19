@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 006be61b2c519e7d9ca997a7f12135eb3e0f3500 */
+ * Stub hash: e0faa5c9dda689ae7c22a73df8d720f75e721d50 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -150,6 +150,13 @@ static zend_class_entry *register_class_PDO(void)
 	zend_declare_typed_class_constant(class_entry, const_PARAM_STMT_name, &const_PARAM_STMT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_PARAM_STMT_name);
 	ZEND_ASSERT(LONG_CONST(PDO_PARAM_STMT) == 4);
+
+	zval const_PARAM_BINARY_value;
+	ZVAL_LONG(&const_PARAM_BINARY_value, LONG_CONST(PDO_PARAM_BINARY));
+	zend_string *const_PARAM_BINARY_name = zend_string_init_interned("PARAM_BINARY", sizeof("PARAM_BINARY") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_PARAM_BINARY_name, &const_PARAM_BINARY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_PARAM_BINARY_name);
+	ZEND_ASSERT(LONG_CONST(PDO_PARAM_BINARY) == 6);
 
 	zval const_PARAM_INPUT_OUTPUT_value;
 	ZVAL_LONG(&const_PARAM_INPUT_OUTPUT_value, LONG_CONST(PDO_PARAM_INPUT_OUTPUT));

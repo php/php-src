@@ -32,6 +32,18 @@ enum pdo_odbc_conv_result {
 	PDO_ODBC_CONV_FAIL
 };
 
+/*
+ * Used for determing if we should use SQL_C_BINARY on binary columns
+ * XXX: Callers use what ODBC returns, rather that what user told PDO,
+ * need to propagate
+ */
+static bool php_odbc_sqltype_is_binary(SWORD sqltype) {
+	if (sqltype == SQL_BINARY || sqltype == SQL_VARBINARY || sqltype == SQL_LONGVARBINARY) {
+		return true;
+	}
+	return false;
+}
+
 static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SQLSMALLINT sqltype)
 {
 	if (!S->assume_utf8) return 0;
@@ -332,6 +344,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 							sqltype = SQL_INTEGER;
 							break;
 						case PDO_PARAM_LOB:
+						case PDO_PARAM_BINARY:
 							sqltype = SQL_LONGVARBINARY;
 							break;
 						default:
@@ -641,8 +654,15 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 
 static int odbc_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
+	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
+	pdo_odbc_column *C = &S->cols[colno];
+
 	array_init(return_value);
-	add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+	if (php_odbc_sqltype_is_binary(C->coltype)) {
+		add_assoc_long(return_value, "pdo_type", PDO_PARAM_BINARY);
+	} else {
+		add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+	}
 	return 1;
 }
 
@@ -651,6 +671,10 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
 
+	SQLSMALLINT c_type = C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR;
+	if (type && (*type == PDO_PARAM_BINARY || *type == PDO_PARAM_LOB)) {
+		c_type = SQL_C_BINARY;
+	}
 	/* if it is a column containing "long" data, perform late binding now */
 	if (C->is_long) {
 		SQLLEN orig_fetched_len = SQL_NULL_DATA;
@@ -660,7 +684,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 		 * of 256 bytes; if there is more to be had, we then allocate
 		 * bigger buffer for the caller to free */
 
-		rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, C->data,
+		rc = SQLGetData(S->stmt, colno+1, c_type, C->data,
  			256, &C->fetched_len);
 		orig_fetched_len = C->fetched_len;
 
@@ -687,7 +711,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			do {
 				C->fetched_len = 0;
 				/* read block. 256 bytes => 255 bytes are actually read, the last 1 is NULL */
-				rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, buf2, 256, &C->fetched_len);
+				rc = SQLGetData(S->stmt, colno+1, c_type, buf2, 256, &C->fetched_len);
 
 				/* adjust `used` in case we have proper length info from the driver */
 				if (orig_fetched_len >= 0 && C->fetched_len >= 0) {
