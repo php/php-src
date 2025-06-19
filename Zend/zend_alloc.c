@@ -2256,6 +2256,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 				heap->custom_heap.std._free = free;
 			}
 			heap->size = 0;
+			heap->real_size = 0;
 		}
 
 		if (full) {
@@ -2799,6 +2800,7 @@ static void *tracked_malloc(size_t size)
 	void *ptr = __zend_malloc(size);
 	tracked_add(heap, ptr, size);
 	heap->size += size;
+	heap->real_size = heap->size;
 	return ptr;
 }
 
@@ -2810,6 +2812,7 @@ static void tracked_free(void *ptr) {
 	zend_mm_heap *heap = AG(mm_heap);
 	zval *size_zv = tracked_get_size_zv(heap, ptr);
 	heap->size -= Z_LVAL_P(size_zv);
+	heap->real_size = heap->size;
 	zend_hash_del_bucket(heap->tracked_allocs, (Bucket *) size_zv);
 	free(ptr);
 }
@@ -2835,6 +2838,7 @@ static void *tracked_realloc(void *ptr, size_t new_size) {
 	ptr = __zend_realloc(ptr, new_size);
 	tracked_add(heap, ptr, new_size);
 	heap->size += new_size - old_size;
+	heap->real_size = heap->size;
 	return ptr;
 }
 
