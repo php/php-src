@@ -28,7 +28,6 @@ var_dump(count(get_defined_functions()));
 var_dump(gettype(get_declared_interfaces()));
 var_dump(count(get_declared_interfaces()));
 
-var_dump(get_extension_funcs(true));
 var_dump(gettype(get_extension_funcs("standard")));
 var_dump(count(get_extension_funcs("standard")));
 var_dump(gettype(get_extension_funcs("zend")));
@@ -51,7 +50,6 @@ string(5) "array"
 int(%d)
 string(5) "array"
 int(%d)
-bool(false)
 string(5) "array"
 int(%d)
 string(5) "array"

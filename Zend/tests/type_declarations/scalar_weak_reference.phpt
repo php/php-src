@@ -21,9 +21,11 @@ var_dump($x);
 to_bool($x);
 var_dump($x);
 ?>
---EXPECT--
+--EXPECTF--
 float(1)
 int(1)
 float(1)
 string(1) "1"
+
+Deprecated: to_bool(): Passing string to parameter #1 ($x) of type bool is deprecated in %s on line %d
 bool(true)

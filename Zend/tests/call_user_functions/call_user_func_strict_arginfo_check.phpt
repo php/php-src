@@ -7,8 +7,8 @@ declare(strict_types=1);
 namespace Foo;
 
 // strlen() will be called with strict_types=0, so this is legal.
-var_dump(call_user_func('strlen', false));
+var_dump(call_user_func('strlen', 25));
 
 ?>
 --EXPECT--
-int(0)
+int(2)

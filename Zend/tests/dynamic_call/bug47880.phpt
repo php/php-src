@@ -4,7 +4,7 @@ Bug #47880 (crashes in call_user_func_array())
 <?php
 class bomb {
   static function go($n)	{
-   $backtrace = debug_backtrace(false);
+   $backtrace = debug_backtrace(0);
    $backtrace[1]['args'][1] = 'bomb';
   }
 }

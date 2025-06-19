@@ -12,14 +12,14 @@
 
 if (!extension_loaded('phar'))
 {
-    if (!class_exists('PHP_Archive', 0)) {
+    if (!class_exists('PHP_Archive', false)) {
         echo "Neither Extension Phar nor class PHP_Archive are available.\n";
         exit(1);
     }
     if (!in_array('phar', stream_get_wrappers())) {
         stream_wrapper_register('phar', 'PHP_Archive');
     }
-    if (!class_exists('Phar',0)) {
+    if (!class_exists('Phar', false)) {
         require 'phar://'.__FILE__.'/phar.inc';
     }
 }

@@ -3,7 +3,7 @@ Bug #79022 (class_exists returns True for classes that are not ready to be used)
 --FILE--
 <?php
 function my_autoloader($class) {
-    if (class_exists('Foo', 0)) {
+    if (class_exists('Foo', false)) {
         new Foo();
     }
     if ($class == 'Foo') {
@@ -19,7 +19,7 @@ function my_autoloader($class) {
     }
 
 
-    if (interface_exists('iFoo', 0)) {
+    if (interface_exists('iFoo', false)) {
         new Dummy();
     }
     if ($class == 'iFoo') {

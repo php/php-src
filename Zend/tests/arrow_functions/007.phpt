@@ -12,7 +12,7 @@ try {
 }
 
 try {
-    assert((fn&(int... $args): ?bool => $args[0])(false));
+    assert((fn&(int... $args): ?int => $args[0])(0));
 } catch (AssertionError $e) {
     echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
 }
@@ -20,4 +20,4 @@ try {
 ?>
 --EXPECT--
 assert(): assert((fn() => false)()) failed
-assert(): assert((fn&(int ...$args): ?bool => $args[0])(false)) failed
+assert(): assert((fn&(int ...$args): ?int => $args[0])(0)) failed

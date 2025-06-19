@@ -2,7 +2,7 @@
 
 $web = '000';
 
-if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', 0)) {
+if (in_array('phar', stream_get_wrappers()) && class_exists('Phar', false)) {
     Phar::interceptFileFuncs();
     set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
     Phar::webPhar(null, $web);

@@ -24,9 +24,11 @@ var_dump(isset($test->prop2));
 var_dump($test);
 
 ?>
---EXPECT--
+--EXPECTF--
 int(40)
 bool(true)
+
+Deprecated: Test::$prop2::get(): Returning type bool which is implicitly converted to type int is deprecated in %s on line %d
 bool(true)
 object(Test)#1 (1) {
   ["prop"]=>

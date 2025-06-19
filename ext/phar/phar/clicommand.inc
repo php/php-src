@@ -40,7 +40,7 @@ abstract class CLICommand
         if (isset($this->cmds[$command]['arg'])) {
             $this->args = call_user_func(array($this, $this->cmds[$command]['arg']));
             $i = 1;
-            $missing = false;
+            $missing = '';
             while (++$i < $argc) {
                 if ($argv[$i][0] == '-') {
                     if (strlen($argv[$i]) == 2 && isset($this->args[$argv[$i][1]])) {

@@ -3,7 +3,7 @@ Bug #36513 (comment will be output in last line)
 --FILE--
 <?php
 function test($s) {
-  echo "'".trim(str_replace("&nbsp;", " ", htmlspecialchars_decode(strip_tags(highlight_string($s,1)))))."'\n";
+  echo "'".trim(str_replace("&nbsp;", " ", htmlspecialchars_decode(strip_tags(highlight_string($s, true)))))."'\n";
 }
 
 eval('echo "1";//2');

@@ -523,7 +523,7 @@ class PharCommand extends CLICommand
                 $s .= "if (!in_array('phar', stream_get_wrappers())) {\n";
                 $s .= "\tstream_wrapper_register('phar', 'PHP_Archive');\n";
                 $s .= "}\n";
-                $s .= "if (!class_exists('Phar',0)) {\n";
+                $s .= "if (!class_exists('Phar', false)) {\n";
                 $s .= "\tinclude 'phar://'.__FILE__.'/phar.inc';\n";
                 $s .= "}\n";
                 $s .= '?>';

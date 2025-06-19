@@ -58,7 +58,11 @@ float(5.5)
 
 Deprecated: zend_number_or_string(): Passing null to parameter #1 ($param) of type string|int|float is deprecated in %s on line %d
 int(0)
+
+Deprecated: zend_number_or_string(): Passing bool to parameter #1 ($param) of type string|int|float is deprecated in %s on line %d
 int(0)
+
+Deprecated: zend_number_or_string(): Passing bool to parameter #1 ($param) of type string|int|float is deprecated in %s on line %d
 int(1)
 string(8) "ToString"
 zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
@@ -67,7 +71,11 @@ string(6) "string"
 int(1)
 float(5.5)
 NULL
+
+Deprecated: zend_number_or_string_or_null(): Passing bool to parameter #1 ($param) of type string|int|float|null is deprecated in %s on line %d
 int(0)
+
+Deprecated: zend_number_or_string_or_null(): Passing bool to parameter #1 ($param) of type string|int|float|null is deprecated in %s on line %d
 int(1)
 string(8) "ToString"
 zend_number_or_string_or_null(): Argument #1 ($param) must be of type string|int|float|null, array given
