@@ -40,7 +40,7 @@
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
 ZEND_API HashTable module_registry;
 
-bool use_deepbind = false;
+ZEND_API bool use_deepbind = false;
 
 static zend_module_entry **module_request_startup_handlers;
 static zend_module_entry **module_request_shutdown_handlers;
