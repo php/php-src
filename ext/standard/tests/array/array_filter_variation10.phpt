@@ -16,7 +16,7 @@ function dump($value, $key)
   echo "$key = $value\n";
 }
 
-var_dump( array_filter($input, 'dump', true) );
+var_dump( array_filter($input, 'dump', ARRAY_FILTER_USE_BOTH) );
 
 echo "*** Testing array_filter() : usage variations - 'callback' filters based on key value ***\n";
 
@@ -25,12 +25,12 @@ function dump2($value, $key)
   return $key > 4;
 }
 
-var_dump( array_filter($input, 'dump2', true) );
+var_dump( array_filter($input, 'dump2', ARRAY_FILTER_USE_BOTH) );
 
 echo "*** Testing array_filter() : usage variations - 'callback' expecting second argument ***\n";
 
 try {
-    var_dump( array_filter($small, 'dump', false) );
+    var_dump( array_filter($small, 'dump', 0) );
 } catch (Throwable $e) {
     echo "Exception: " . $e->getMessage() . "\n";
 }
