@@ -461,14 +461,12 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	return OK;
 }
 
-ZEND_API extern bool use_deepbind;
-
 static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
 	void *data = NULL;
 	const char *userdata_key = "apache2hook_post_config";
-	use_deepbind = true;
+	zend_set_dl_use_deepbind(true);
 
 	/* Apache will load, unload and then reload a DSO module. This
 	 * prevents us from starting PHP until the second load. */
