@@ -17,7 +17,7 @@ var_dump( gmdate(DATE_ISO8601, $timestamp) );
 
 echo "\n-- Testing gmdate() function with less than the range of timestamp --\n";
 $timestamp = mktime(20, 45, 50, 12, 13, 1901);
-var_dump( gmdate(DATE_ISO8601, $timestamp) );
+var_dump( gmdate(DATE_ISO8601, (int)$timestamp) );
 
 echo "\n-- Testing gmdate() function with maximum range of timestamp --\n";
 $timestamp = mktime(03, 14, 07, 1, 19, 2038);
@@ -25,7 +25,7 @@ var_dump( gmdate(DATE_ISO8601, $timestamp) );
 
 echo "\n-- Testing gmdate() function with greater than the range of timestamp --\n";
 $timestamp = mktime(03, 14, 10, 1, 19, 2038);
-var_dump( gmdate(DATE_ISO8601, $timestamp) );
+var_dump( gmdate(DATE_ISO8601, (int)$timestamp) );
 
 ?>
 --EXPECTF--
