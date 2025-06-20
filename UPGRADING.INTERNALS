@@ -17,6 +17,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 - Core
   . PG(arg_separator).input and PG(arg_separator).output are now `zend_string*`
     instead of `char*`.
+  . Added php_get_current_running_user() API to get the (effective) user
+    running the script.
 
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign

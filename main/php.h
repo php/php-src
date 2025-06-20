@@ -337,6 +337,7 @@ PHPAPI int php_register_internal_extensions(void);
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(void);
 PHPAPI char *php_get_current_user(void);
+PHPAPI char *php_get_current_running_user(size_t *len);
 
 PHPAPI const char *php_get_internal_encoding(void);
 PHPAPI const char *php_get_input_encoding(void);
