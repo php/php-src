@@ -192,7 +192,7 @@ char *php_json_get_error_msg_wrapper(php_json_error_code error_code) /* {{{ */
 		case PHP_JSON_ERROR_UNSUPPORTED_TYPE:
 		case PHP_JSON_ERROR_INVALID_PROPERTY_NAME:
 		case PHP_JSON_ERROR_UTF16:			
-			spprintf(&final_message, 0, "%s near character %zu",error_message, JSON_G(error_pos));
+			spprintf(&final_message, 0, "%s near character %zu", error_message, JSON_G(error_pos));
 			break;
 		default:
 			spprintf(&final_message, 0, "%s", error_message);
