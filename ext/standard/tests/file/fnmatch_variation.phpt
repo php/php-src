@@ -111,20 +111,6 @@ $str_arr = array(
 );
 match_($str_arr, $str_arr);
 
-echo "\n--- With booleans ---\n";
-$bool_arr = array(
-  TRUE,
-  true,
-  1,
-  10,
-  FALSE,
-  false,
-  0,
-  "",
-  "string"
-);
-match_($bool_arr, $bool_arr);
-
 echo "\n--- With NULL ---\n";
 $null_arr = array(
   "",
@@ -299,98 +285,6 @@ bool(true)
 fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(true)
 fnmatch(): Argument #2 ($filename) must not contain any null bytes
-bool(false)
-bool(true)
-
---- With booleans ---
--- Iteration 0 --
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
--- Iteration 1 --
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
--- Iteration 2 --
-bool(true)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
--- Iteration 3 --
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
--- Iteration 4 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
--- Iteration 5 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
--- Iteration 6 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(false)
-bool(false)
--- Iteration 7 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(true)
-bool(false)
--- Iteration 8 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
 bool(false)
 bool(true)
 

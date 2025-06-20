@@ -25,7 +25,7 @@ fclose($fp);
 $fp = fopen("$file_path/glob_variation/wonder;123456", "w");
 fclose($fp);
 
-$patterns = array (
+$patterns = [
   "$file_path/glob_variation/*der*",
   "$file_path/glob_variation/?onder*",
   "$file_path/glob_variation/w*der?*",
@@ -37,8 +37,7 @@ $patterns = array (
   '$file_path/glob_variation/wonder5',
   "$file_path/glob_variation/?wonder?",
   "$file_path/glob_variation/wonder?",
-  TRUE  // boolean true
-);
+];
 $counter = 1;
 /* loop through $patterns to match each $pattern with the files created
    using glob() */
@@ -284,11 +283,11 @@ array(3) {
 }
 array(3) {
   [0]=>
-  string(%d) "%s"
+  string(%d) "%s/glob_variation/wonder"
   [1]=>
-  string(%d) "%s"
+  string(%d) "%s/glob_variation/wonder12345"
   [2]=>
-  string(%d) "%s"
+  string(%d) "%s/glob_variation/wonder;123456"
 }
 array(3) {
   [0]=>
@@ -382,22 +381,6 @@ array(0) {
 array(0) {
 }
 
--- Iteration 12 --
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-array(1) {
-  [0]=>
-  string(%d) "1"
-}
-array(0) {
-}
-array(0) {
-}
-
 *** Testing glob() with pattern within braces ***
 array(1) {
   [0]=>
@@ -446,8 +429,5 @@ array(0) {
 array(1) {
   [0]=>
   string(%d) "%s/glob_variation/wonder1"
-}
--- Iteration 12 --
-array(0) {
 }
 Done

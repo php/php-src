@@ -13,11 +13,6 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-try {
-    var_dump( readfile(false) );  // boolean false as $filename
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
 
 echo "\n-- Testing readfile() with non-existent file --\n";
 $non_existent_file = __DIR__."/non_existent_file.tmp";
@@ -29,7 +24,6 @@ echo "Done\n";
 *** Test readfile(): error conditions ***
 
 -- Testing readfile() with invalid arguments --
-Path must not be empty
 Path must not be empty
 
 -- Testing readfile() with non-existent file --
