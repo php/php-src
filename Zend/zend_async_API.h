@@ -743,6 +743,11 @@ typedef enum {
 	ZEND_ASYNC_WAKER_RESULT
 } ZEND_ASYNC_WAKER_STATUS;
 
+/**
+ *  Condition that is TRUE if the coroutine is in the queue
+ */
+#define ZEND_ASYNC_WAKER_IN_QUEUE(waker) (waker != NULL && ((waker)->status == ZEND_ASYNC_WAKER_QUEUED || waker->status == ZEND_ASYNC_WAKER_IGNORED))
+
 struct _zend_async_waker_s {
 	/* The waker status. */
 	ZEND_ASYNC_WAKER_STATUS status;
