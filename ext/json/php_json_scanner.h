@@ -28,8 +28,8 @@ typedef struct _php_json_scanner {
 	php_json_ctype *limit;          /* the last read character + 1 position */
 	php_json_ctype *marker;         /* marker position for backtracking */
 	php_json_ctype *ctxmarker;      /* marker position for context backtracking */
-	php_json_ctype *str_start;      /* start position of the string */
-	php_json_ctype *input_start;    /* start position of the string */
+	php_json_ctype *str_start;      /* dynamic position of the string under analysis */
+	php_json_ctype *input_start;    /* fixed start position of the original string provided to the scanner */
 	php_json_ctype *pstr;           /* string pointer for escapes conversion */
 	zval value;                     /* value */
 	int str_esc;                    /* number of extra characters for escaping */

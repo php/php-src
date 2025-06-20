@@ -349,8 +349,7 @@ PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 		int options,
 		int max_depth,
 		const php_json_parser_methods *parser_methods)
-{
-	
+{	
 	memset(parser, 0, sizeof(php_json_parser));
 	php_json_scanner_init(&parser->scanner, str, str_len, options);
 	parser->depth = 1;
