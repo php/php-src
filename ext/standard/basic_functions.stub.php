@@ -124,33 +124,33 @@ const ARRAY_FILTER_USE_KEY = UNKNOWN;
 
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_ACTIVE
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_ACTIVE = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_CALLBACK
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_CALLBACK = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_BAIL
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_BAIL = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_WARNING
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_WARNING = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_EXCEPTION
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_EXCEPTION = UNKNOWN;
 
 /* basic_functions.h */

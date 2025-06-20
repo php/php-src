@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0fcee2fa666dc88faf084578dde157409a6f5594 */
+ * Stub hash: 1c8b81daeaf360b0ecab9ebbdf4f8865f521f43d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1870,6 +1870,20 @@ static void register_php_dom_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("Dom\\NAMESPACE_ERR", NAMESPACE_ERR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("Dom\\VALIDATION_ERR", VALIDATION_ERR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("Dom\\HTML_NO_DEFAULT_NS", DOM_HTML_NO_DEFAULT_NS, CONST_PERSISTENT);
+
+	zend_constant *const_DOM_PHP_ERR = zend_hash_str_find_ptr(EG(zend_constants), "DOM_PHP_ERR", sizeof("DOM_PHP_ERR") - 1);
+
+	zend_attribute *attribute_Deprecated_const_DOM_PHP_ERR_0 = zend_add_global_constant_attribute(const_DOM_PHP_ERR, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_DOM_PHP_ERR_0_arg0;
+	zend_string *attribute_Deprecated_const_DOM_PHP_ERR_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_DOM_PHP_ERR_0_arg0, attribute_Deprecated_const_DOM_PHP_ERR_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_DOM_PHP_ERR_0->args[0].value, &attribute_Deprecated_const_DOM_PHP_ERR_0_arg0);
+	attribute_Deprecated_const_DOM_PHP_ERR_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_DOM_PHP_ERR_0_arg1;
+	zend_string *attribute_Deprecated_const_DOM_PHP_ERR_0_arg1_str = zend_string_init("as it is no longer used", strlen("as it is no longer used"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_DOM_PHP_ERR_0_arg1, attribute_Deprecated_const_DOM_PHP_ERR_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_DOM_PHP_ERR_0->args[1].value, &attribute_Deprecated_const_DOM_PHP_ERR_0_arg1);
+	attribute_Deprecated_const_DOM_PHP_ERR_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_entry_DOMNode)

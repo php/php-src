@@ -30,7 +30,7 @@ foreach (get_declared_classes() as $class) {
 ?>
 ===DONE===
 --EXPECTF--
-Deprecated: Constant SUNFUNCS_RET_STRING is deprecated in %s on line %d
+Deprecated: Constant SUNFUNCS_RET_STRING is deprecated since 8.4, as date_sunrise() and date_sunset() were deprecated in 8.1 in %s on line %d
 
-Deprecated: Constant SUNFUNCS_RET_STRING is deprecated in %s on line %d
+Deprecated: Constant SUNFUNCS_RET_STRING is deprecated since 8.4, as date_sunrise() and date_sunset() were deprecated in 8.1 in %s on line %d
 ===DONE===

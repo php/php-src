@@ -121,14 +121,14 @@ const FILTER_UNSAFE_RAW = UNKNOWN;
 /**
  * @var int
  * @cvalue FILTER_SANITIZE_STRING
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use htmlspecialchars() instead')]
 const FILTER_SANITIZE_STRING = UNKNOWN;
 /**
  * @var int
  * @cvalue FILTER_SANITIZE_STRING
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use htmlspecialchars() instead')]
 const FILTER_SANITIZE_STRIPPED = UNKNOWN;
 /**
  * @var int

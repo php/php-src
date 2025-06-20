@@ -83,22 +83,22 @@ const DATE_W3C = DATE_RFC3339;
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_TIMESTAMP
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_TIMESTAMP = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_STRING
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_STRING = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_DOUBLE
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_DOUBLE = UNKNOWN;
 
 function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
