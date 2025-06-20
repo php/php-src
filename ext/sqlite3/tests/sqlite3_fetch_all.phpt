@@ -13,6 +13,7 @@ $stmt = $conn->query('insert into users (id, num) values (2, 2)');
 $stmt = $conn->query('SELECT * FROM users');
 $rowall = $stmt->fetchAll();
 var_dump($rowall);
+$stmt->reset();
 $rowfetch = [];
 while (($row = $stmt->fetchArray())) $rowfetch[] = $row;
 var_dump($rowfetch);
