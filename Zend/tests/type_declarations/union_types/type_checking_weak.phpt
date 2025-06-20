@@ -66,15 +66,15 @@ Type int|float:
 INF              => INF
 "42"             => 42
 "42.0"           => 42.0
-"42x"            => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float, string given
-"x"              => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float, string given
-""               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float, string given
-true             => 1 ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type int|float is deprecated)
-false            => 0 ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type int|float is deprecated)
-null             => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float, null given
-[]               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float, array given
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float, stdClass given
-new WithToString => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float, WithToString given
+"42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, string given
+"x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, string given
+""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, string given
+true             => 1 ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type int|float is deprecated)
+false            => 0 ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type int|float is deprecated)
+null             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, null given
+[]               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, array given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, stdClass given
+new WithToString => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float, WithToString given
 
 Type int|float|false:
 42               => 42
@@ -82,15 +82,15 @@ Type int|float|false:
 INF              => INF
 "42"             => 42
 "42.0"           => 42.0
-"42x"            => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|false, string given
-"x"              => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|false, string given
-""               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|false, string given
-true             => 1 ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type int|float|false is deprecated)
+"42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, string given
+"x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, string given
+""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, string given
+true             => 1 ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type int|float|false is deprecated)
 false            => false
-null             => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|false, null given
-[]               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|false, array given
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|false, stdClass given
-new WithToString => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|false, WithToString given
+null             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, null given
+[]               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, array given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, stdClass given
+new WithToString => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|false, WithToString given
 
 Type int|float|bool:
 42               => 42
@@ -98,31 +98,31 @@ Type int|float|bool:
 INF              => INF
 "42"             => 42
 "42.0"           => 42.0
-"42x"            => true ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type int|float|bool is deprecated)
-"x"              => true ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type int|float|bool is deprecated)
-""               => false ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type int|float|bool is deprecated)
+"42x"            => true ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type int|float|bool is deprecated)
+"x"              => true ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type int|float|bool is deprecated)
+""               => false ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type int|float|bool is deprecated)
 true             => true
 false            => false
-null             => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|bool, null given
-[]               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|bool, array given
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|bool, stdClass given
-new WithToString => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|float|bool, WithToString given
+null             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, null given
+[]               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, array given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, stdClass given
+new WithToString => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|float|bool, WithToString given
 
 Type int|bool:
 42               => 42
 42.0             => 42
-INF              => true ({%s(%d) : eval()'d code:1}(): Passing float to parameter #1 ($arg) of type int|bool is deprecated)
+INF              => true ({closure:%s:%d}(): Passing float to parameter #1 ($arg) of type int|bool is deprecated)
 "42"             => 42
 "42.0"           => 42
-"42x"            => true ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type int|bool is deprecated)
-"x"              => true ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type int|bool is deprecated)
-""               => false ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type int|bool is deprecated)
+"42x"            => true ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type int|bool is deprecated)
+"x"              => true ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type int|bool is deprecated)
+""               => false ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type int|bool is deprecated)
 true             => true
 false            => false
-null             => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|bool, null given
-[]               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|bool, array given
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|bool, stdClass given
-new WithToString => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type int|bool, WithToString given
+null             => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, null given
+[]               => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, array given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, stdClass given
+new WithToString => {closure:%s:%d}(): Argument #1 ($arg) must be of type int|bool, WithToString given
 
 Type int|string|null:
 42               => 42
@@ -133,11 +133,11 @@ INF              => "INF"
 "42x"            => "42x"
 "x"              => "x"
 ""               => ""
-true             => 1 ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type string|int|null is deprecated)
-false            => 0 ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type string|int|null is deprecated)
+true             => 1 ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type string|int|null is deprecated)
+false            => 0 ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type string|int|null is deprecated)
 null             => null
-[]               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type string|int|null, array given
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type string|int|null, stdClass given
+[]               => {closure:%s:%d}(): Argument #1 ($arg) must be of type string|int|null, array given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type string|int|null, stdClass given
 new WithToString => "__toString()"
 
 Type string|bool:
@@ -151,9 +151,9 @@ INF              => "INF"
 ""               => ""
 true             => true
 false            => false
-null             => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type string|bool, null given
-[]               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type string|bool, array given
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type string|bool, stdClass given
+null             => {closure:%s:%d}(): Argument #1 ($arg) must be of type string|bool, null given
+[]               => {closure:%s:%d}(): Argument #1 ($arg) must be of type string|bool, array given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type string|bool, stdClass given
 new WithToString => "__toString()"
 
 Type float|array:
@@ -162,15 +162,15 @@ Type float|array:
 INF              => INF
 "42"             => 42.0
 "42.0"           => 42.0
-"42x"            => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|float, string given
-"x"              => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|float, string given
-""               => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|float, string given
-true             => 1.0 ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type array|float is deprecated)
-false            => 0.0 ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type array|float is deprecated)
-null             => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|float, null given
+"42x"            => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, string given
+"x"              => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, string given
+""               => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, string given
+true             => 1.0 ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type array|float is deprecated)
+false            => 0.0 ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type array|float is deprecated)
+null             => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, null given
 []               => []
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|float, stdClass given
-new WithToString => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|float, WithToString given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, stdClass given
+new WithToString => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|float, WithToString given
 
 Type string|array:
 42               => "42"
@@ -181,25 +181,25 @@ INF              => "INF"
 "42x"            => "42x"
 "x"              => "x"
 ""               => ""
-true             => "1" ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type array|string is deprecated)
-false            => "" ({%s(%d) : eval()'d code:1}(): Passing bool to parameter #1 ($arg) of type array|string is deprecated)
-null             => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|string, null given
+true             => "1" ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type array|string is deprecated)
+false            => "" ({closure:%s:%d}(): Passing bool to parameter #1 ($arg) of type array|string is deprecated)
+null             => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|string, null given
 []               => []
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|string, stdClass given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|string, stdClass given
 new WithToString => "__toString()"
 
 Type bool|array:
-42               => true ({%s(%d) : eval()'d code:1}(): Passing int to parameter #1 ($arg) of type array|bool is deprecated)
-42.0             => true ({%s(%d) : eval()'d code:1}(): Passing float to parameter #1 ($arg) of type array|bool is deprecated)
-INF              => true ({%s(%d) : eval()'d code:1}(): Passing float to parameter #1 ($arg) of type array|bool is deprecated)
-"42"             => true ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
-"42.0"           => true ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
-"42x"            => true ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
-"x"              => true ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
-""               => false ({%s(%d) : eval()'d code:1}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
+42               => true ({closure:%s:%d}(): Passing int to parameter #1 ($arg) of type array|bool is deprecated)
+42.0             => true ({closure:%s:%d}(): Passing float to parameter #1 ($arg) of type array|bool is deprecated)
+INF              => true ({closure:%s:%d}(): Passing float to parameter #1 ($arg) of type array|bool is deprecated)
+"42"             => true ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
+"42.0"           => true ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
+"42x"            => true ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
+"x"              => true ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
+""               => false ({closure:%s:%d}(): Passing string to parameter #1 ($arg) of type array|bool is deprecated)
 true             => true
 false            => false
-null             => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|bool, null given
+null             => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, null given
 []               => []
-new stdClass     => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|bool, stdClass given
-new WithToString => {%s(%d) : eval()'d code:1}(): Argument #1 ($arg) must be of type array|bool, WithToString given
+new stdClass     => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, stdClass given
+new WithToString => {closure:%s:%d}(): Argument #1 ($arg) must be of type array|bool, WithToString given
