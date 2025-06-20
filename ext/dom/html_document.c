@@ -752,7 +752,7 @@ static bool dom_parse_decode_encode_finish(
 
 static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
-	const zend_long VALID_OPTIONS = XML_PARSE_NOERROR | XML_PARSE_COMPACT | HTML_PARSE_NOIMPLIED | DOM_HTML_NO_DEFAULT_NS;
+	const zend_long VALID_OPTIONS = HTML_PARSE_NOERROR | HTML_PARSE_COMPACT | HTML_PARSE_NOIMPLIED | DOM_HTML_NO_DEFAULT_NS;
 	if ((options & ~VALID_OPTIONS) != 0) {
 		zend_argument_value_error(arg_num, "contains invalid flags (allowed flags: "
 										   "LIBXML_NOERROR, "
