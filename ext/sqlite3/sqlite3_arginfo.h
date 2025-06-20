@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 28132e0e4df61f19dc4b23a7c9f79be6b3e40a8e */
+ * Stub hash: 194bbb3e8cdb8885ebcfae4ba55efa9ef4fa14ba */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -164,6 +164,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SQLite3Result_fe
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "SQLITE3_BOTH")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_SQLite3Result_fetchAll, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "SQLITE3_BOTH")
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_SQLite3Result_reset arginfo_class_SQLite3_close
 
 #define arginfo_class_SQLite3Result_finalize arginfo_class_SQLite3Stmt_close
@@ -211,6 +215,7 @@ ZEND_METHOD(SQLite3Result, numColumns);
 ZEND_METHOD(SQLite3Result, columnName);
 ZEND_METHOD(SQLite3Result, columnType);
 ZEND_METHOD(SQLite3Result, fetchArray);
+ZEND_METHOD(SQLite3Result, fetchAll);
 ZEND_METHOD(SQLite3Result, reset);
 ZEND_METHOD(SQLite3Result, finalize);
 
@@ -267,6 +272,7 @@ static const zend_function_entry class_SQLite3Result_methods[] = {
 	ZEND_ME(SQLite3Result, columnName, arginfo_class_SQLite3Result_columnName, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3Result, columnType, arginfo_class_SQLite3Result_columnType, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3Result, fetchArray, arginfo_class_SQLite3Result_fetchArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(SQLite3Result, fetchAll, arginfo_class_SQLite3Result_fetchAll, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3Result, reset, arginfo_class_SQLite3Result_reset, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3Result, finalize, arginfo_class_SQLite3Result_finalize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END

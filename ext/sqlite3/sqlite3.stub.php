@@ -293,6 +293,8 @@ class SQLite3Result
     /** @tentative-return-type */
     public function fetchArray(int $mode = SQLITE3_BOTH): array|false {}
 
+    public function fetchAll(int $mode = SQLITE3_BOTH): array|false {}
+
     /** @tentative-return-type */
     public function reset(): bool {}
 
