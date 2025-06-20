@@ -2012,7 +2012,7 @@ static void sqlite3result_clear_column_names_cache(php_sqlite3_result *result) {
 
 PHP_METHOD(SQLite3Result, fetchAll)
 {
-	int i;
+	int i, nb_cols;
 	bool done = false;
 	php_sqlite3_result *result_obj;
 	zval *object = ZEND_THIS;
@@ -2026,15 +2026,17 @@ PHP_METHOD(SQLite3Result, fetchAll)
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
-	result_obj->column_count = sqlite3_column_count(result_obj->stmt_obj->stmt);
+	nb_cols = sqlite3_column_count(result_obj->stmt_obj->stmt);
 	if (mode & PHP_SQLITE3_ASSOC) {
-		result_obj->column_names = emalloc(result_obj->column_count * sizeof(zend_string*));
+		sqlite3result_clear_column_names_cache(result_obj);
+		result_obj->column_names = emalloc(nb_cols * sizeof(zend_string*));
 
-		for (i = 0; i < result_obj->column_count; i++) {
+		for (i = 0; i < nb_cols; i++) {
 			const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
 			result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
 		}
 	}
+	result_obj->column_count = nb_cols;
 	array_init(return_value);
 
 	while (!done) {
