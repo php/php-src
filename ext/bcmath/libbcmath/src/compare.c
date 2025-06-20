@@ -39,6 +39,25 @@
    than N2 and +1 if N1 is greater than N2.  If USE_SIGN is false, just
    compare the magnitudes. */
 
+static inline bcmath_compare_result bc_compare_get_result_val(bool left_abs_greater, bool use_sign, sign left_sign)
+{
+	if (left_abs_greater) {
+		/* Magnitude of left > right. */
+		if (!use_sign || left_sign == PLUS) {
+			return BCMATH_LEFT_GREATER;
+		} else {
+			return BCMATH_RIGHT_GREATER;
+		}
+	} else {
+		/* Magnitude of left < right. */
+		if (!use_sign || left_sign == PLUS) {
+			return BCMATH_RIGHT_GREATER;
+		} else {
+			return BCMATH_LEFT_GREATER;
+		}
+	}
+}
+
 bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool use_sign)
 {
 	/* First, compare signs. */
@@ -66,21 +85,7 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool us
 
 	/* Now compare the magnitude. */
 	if (n1->n_len != n2->n_len) {
-		if (n1->n_len > n2->n_len) {
-			/* Magnitude of n1 > n2. */
-			if (!use_sign || n1->n_sign == PLUS) {
-				return BCMATH_LEFT_GREATER;
-			} else {
-				return BCMATH_RIGHT_GREATER;
-			}
-		} else {
-			/* Magnitude of n1 < n2. */
-			if (!use_sign || n1->n_sign == PLUS) {
-				return BCMATH_RIGHT_GREATER;
-			} else {
-				return BCMATH_LEFT_GREATER;
-			}
-		}
+		return bc_compare_get_result_val(n1->n_len > n2->n_len, use_sign, n1->n_sign);
 	}
 
 	size_t n1_scale = MIN(n1->n_scale, scale);
@@ -103,21 +108,7 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool us
 			n1bytes = BC_BSWAP(n1bytes);
 			n2bytes = BC_BSWAP(n2bytes);
 #endif
-			if (n1bytes > n2bytes) {
-				/* Magnitude of n1 > n2. */
-				if (!use_sign || n1->n_sign == PLUS) {
-					return BCMATH_LEFT_GREATER;
-				} else {
-					return BCMATH_RIGHT_GREATER;
-				}
-			} else {
-				/* Magnitude of n1 < n2. */
-				if (!use_sign || n1->n_sign == PLUS) {
-					return BCMATH_RIGHT_GREATER;
-				} else {
-					return BCMATH_LEFT_GREATER;
-				}
-			}
+			return bc_compare_get_result_val(n1bytes > n2bytes, use_sign, n1->n_sign);
 		}
 		count -= sizeof(BC_VECTOR);
 		n1ptr += sizeof(BC_VECTOR);
@@ -131,21 +122,7 @@ bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, size_t scale, bool us
 	}
 
 	if (count != 0) {
-		if (*n1ptr > *n2ptr) {
-			/* Magnitude of n1 > n2. */
-			if (!use_sign || n1->n_sign == PLUS) {
-				return BCMATH_LEFT_GREATER;
-			} else {
-				return BCMATH_RIGHT_GREATER;
-			}
-		} else {
-			/* Magnitude of n1 < n2. */
-			if (!use_sign || n1->n_sign == PLUS) {
-				return BCMATH_RIGHT_GREATER;
-			} else {
-				return BCMATH_LEFT_GREATER;
-			}
-		}
+		return bc_compare_get_result_val(*n1ptr > *n2ptr, use_sign, n1->n_sign);
 	}
 
 	/* They are equal up to the last part of the equal part of the fraction. */
