@@ -18,6 +18,10 @@ $rowfetch = [];
 while (($row = $stmt->fetchArray())) $rowfetch[] = $row;
 var_dump($rowfetch);
 var_dump($rowall == $rowfetch);
+$stmt->reset();
+var_dump($stmt->fetchAll(SQLITE3_NUM));
+$stmt->reset();
+var_dump($stmt->fetchAll(SQLITE3_ASSOC));
 
 ?>
 --EXPECT--
@@ -70,3 +74,35 @@ array(2) {
   }
 }
 bool(true)
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(1)
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(2)
+  }
+}
+array(2) {
+  [0]=>
+  array(2) {
+    ["id"]=>
+    int(1)
+    ["num"]=>
+    int(1)
+  }
+  [1]=>
+  array(2) {
+    ["id"]=>
+    int(2)
+    ["num"]=>
+    int(2)
+  }
+}
