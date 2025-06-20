@@ -711,19 +711,30 @@ ZEND_API zend_async_waker_t * zend_async_waker_new_with_timeout(
 	return waker;
 }
 
-ZEND_API bool zend_async_waker_apply_error(zend_async_waker_t *waker, zend_object *error, bool override, bool for_cancellation)
+ZEND_API bool zend_async_waker_apply_error(
+	zend_async_waker_t *waker, zend_object *error, bool tranfer_error, bool override, bool for_cancellation
+)
 {
 	if (UNEXPECTED(waker == NULL)) {
+		if (tranfer_error) {
+			OBJ_RELEASE(error);
+		}
 		return false;
 	}
 
 	if (EXPECTED(waker->error == NULL)) {
 		waker->error = error;
+		if (false == tranfer_error) {
+			GC_ADDREF(error);
+		}
 		return true;
 	}
 
 	if (for_cancellation && instanceof_function(waker->error->ce, zend_ce_cancellation_exception)) {
 		// If the waker already has a cancellation exception, we do not override it
+		if (tranfer_error) {
+			OBJ_RELEASE(error);
+		}
 		return false;
 	}
 
@@ -732,6 +743,10 @@ ZEND_API bool zend_async_waker_apply_error(zend_async_waker_t *waker, zend_objec
 		waker->error = error;
 	} else {
 		zend_exception_set_previous(waker->error, error);
+	}
+
+	if (false == tranfer_error) {
+		GC_ADDREF(error);
 	}
 
 	return true;
