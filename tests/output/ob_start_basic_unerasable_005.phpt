@@ -8,7 +8,7 @@ function callback($string) {
     return "[callback:$callback_invocations]$string\n";
 }
 
-ob_start('callback', 0, false);
+ob_start('callback', 0, 0);
 
 echo "Attempt to flush unerasable buffer - should fail...";
 var_dump(ob_flush());

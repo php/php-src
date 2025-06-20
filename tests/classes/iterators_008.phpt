@@ -10,7 +10,7 @@ class D extends C implements Iterator {
 
   public function valid(): bool {
     echo __METHOD__ . "($this->counter)\n";
-    return $this->counter;
+    return (bool)$this->counter;
   }
 
   public function next(): void {

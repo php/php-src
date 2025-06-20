@@ -8,7 +8,7 @@ function callback($string) {
     return "[callback:$callback_invocations]$string\n";
 }
 
-ob_start('callback', 0, false);
+ob_start('callback', 0, 0);
 
 echo "All of the following calls will fail to clean/remove the topmost buffer:\n";
 var_dump(ob_clean());
