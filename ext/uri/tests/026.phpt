@@ -43,7 +43,7 @@ string(8) "test.com"
 string(8) "test.com"
 string(8) "test.com"
 NULL
-URL parsing failed
+The specified host is malformed (DomainInvalidCodePoint)
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -62,6 +62,6 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-URL parsing failed
+The specified host is malformed (HostMissing)
 string(7) "foo.com"
 string(8) "test.com"

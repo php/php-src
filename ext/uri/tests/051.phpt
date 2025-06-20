@@ -20,7 +20,7 @@ var_dump($softErrors);
 
 ?>
 --EXPECTF--
-URL parsing failed
+The specified URI is malformed (Ipv4TooManyParts)
 string(23) "https://example.com/foo"
 array(%d) {
   [0]=>

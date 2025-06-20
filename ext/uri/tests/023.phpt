@@ -27,5 +27,5 @@ try {
 --EXPECT--
 string(5) "https"
 string(4) "http"
-URL parsing failed
-URL parsing failed
+The specified scheme is malformed
+The specified scheme is malformed
