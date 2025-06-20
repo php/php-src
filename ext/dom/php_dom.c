@@ -1603,26 +1603,10 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 
 zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type)
 {
-	dom_object *intern;
-	dom_nnodemap_object *objmap;
-
-	intern = dom_objects_set_class(class_type);
-	intern->ptr = emalloc(sizeof(dom_nnodemap_object));
-	objmap = (dom_nnodemap_object *)intern->ptr;
-	ZVAL_UNDEF(&objmap->baseobj_zv);
-	objmap->baseobj = NULL;
-	objmap->nodetype = 0;
-	objmap->ht = NULL;
-	objmap->local = NULL;
-	objmap->local_lower = NULL;
-	objmap->release_local = false;
-	objmap->ns = NULL;
-	objmap->release_ns = false;
-	objmap->cache_tag.modification_nr = 0;
+	dom_object *intern = dom_objects_set_class(class_type);
+	intern->ptr = ecalloc(1, sizeof(dom_nnodemap_object));
+	dom_nnodemap_object *objmap = intern->ptr;
 	objmap->cached_length = -1;
-	objmap->cached_obj = NULL;
-	objmap->cached_obj_index = 0;
-	objmap->dict = NULL;
 
 	return &intern->std;
 }
