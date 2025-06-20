@@ -4,7 +4,7 @@ Test function gzrewind() by calling it with its expected arguments when reading
 zlib
 --FILE--
 <?php
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f, 'r');
 echo "test rewind before doing anything\n";
 var_dump(gzrewind($h));
