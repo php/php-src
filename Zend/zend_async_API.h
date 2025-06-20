@@ -600,6 +600,8 @@ struct _zend_async_exec_event_s {
 	zval * result_buffer;
 	size_t output_len;
 	char * output_buffer;
+	zend_long exit_code;
+	int term_signal;
 	zval * std_error;
 };
 
