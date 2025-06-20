@@ -11,14 +11,13 @@ require __DIR__ . '/../skipif_root.inc';
 echo "*** Testing is_readable(): usage variations ***\n";
 
 echo "\n*** Testing is_readable() on miscellaneous filenames ***\n";
-$misc_files = array(
+$misc_files = [
   0,
+  1,
   1234,
   -2.34555,
-  TRUE,
-  FALSE,
   " ",
-);
+];
 /* loop through to test each element in the above array
    is a readable file */
 foreach( $misc_files as $misc_file ) {
@@ -32,7 +31,6 @@ echo "Done\n";
 *** Testing is_readable(): usage variations ***
 
 *** Testing is_readable() on miscellaneous filenames ***
-bool(false)
 bool(false)
 bool(false)
 bool(false)

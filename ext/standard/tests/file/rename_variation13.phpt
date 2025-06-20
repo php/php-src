@@ -18,23 +18,18 @@ $aFile = $file_path.'/afile.tmp';
 mkdir($file_path);
 
 /* An array of files */
-$names_arr = array(
+$names = [
   /* Invalid args */
   -1,
-  TRUE,
-  FALSE,
   "",
   " ",
-
   /* prefix with path separator of a non existing directory*/
   "/no/such/file/dir",
-  "php/php"
+  "php/php",
+];
 
-);
-
-for( $i=0; $i<count($names_arr); $i++ ) {
-  $name = $names_arr[$i];
-  echo @"-- testing '$name' --\n";
+foreach ($names as $name) {
+  echo "-- testing '$name' --\n";
   touch($aFile);
   var_dump(rename($aFile, $name));
   if (file_exists($name)) {
@@ -57,18 +52,6 @@ rmdir($file_path);
 bool(true)
 
 Warning: rename(-1,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
-bool(false)
--- testing '1' --
-bool(true)
-
-Warning: rename(1,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
-bool(false)
--- testing '' --
-
-Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
-bool(false)
-
-Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)
 -- testing '' --
 

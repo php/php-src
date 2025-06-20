@@ -7,17 +7,13 @@ obscure_filename
 /* Passing invalid arguments to is_dir() */
 
 echo "*** Testing is_dir() with Invalid arguments: expected bool(false) ***\n";
-$dirnames = array(
-  /* Invalid dirnames */
+$dirnames = [
   -2.34555,
-  TRUE,
-  FALSE,
   " ",
-
-  /* scalars */
   0,
-  1234
-);
+  1,
+  1234,
+];
 
 /* loop through to test each element the above array */
 foreach($dirnames as $dirname) {
@@ -26,7 +22,6 @@ foreach($dirnames as $dirname) {
 ?>
 --EXPECT--
 *** Testing is_dir() with Invalid arguments: expected bool(false) ***
-bool(false)
 bool(false)
 bool(false)
 bool(false)

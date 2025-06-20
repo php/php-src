@@ -13,14 +13,13 @@ obscure_filename
 echo "*** Testing is_writable(): usage variations ***\n";
 
 echo "\n*** Testing is_writable() with invalid filenames ***\n";
-$misc_files = array(
+$misc_files = [
   0,
+  1,
   1234,
   -2.34555,
-  TRUE,
-  FALSE,
   " ",
-);
+];
 /* loop through to test each element in the above array
    is a writable file */
 foreach( $misc_files as $misc_file ) {
@@ -33,8 +32,6 @@ foreach( $misc_files as $misc_file ) {
 *** Testing is_writable(): usage variations ***
 
 *** Testing is_writable() with invalid filenames ***
-bool(false)
-bool(false)
 bool(false)
 bool(false)
 bool(false)

@@ -15,12 +15,12 @@ $buffer_types = array("text", "numeric", "text_with_new_line", "alphanumeric");
 foreach( $buffer_types as $type) {
   fill_buffer($buffer, $type, 100);
   file_put_contents( $file_path."/file_put_contents_variation1.tmp", $buffer);
-  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 0) );
-  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 1) );
-  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 0, NULL, 5) );
-  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 1, NULL, 5) );
-  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 0, NULL, 5, 20) );
-  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", 1, NULL, 5, 20) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", false) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", true) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", false, NULL, 5) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", true, NULL, 5) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", false, NULL, 5, 20) );
+  var_dump( file_get_contents($file_path."/file_put_contents_variation1.tmp", true, NULL, 5, 20) );
 
 }
 

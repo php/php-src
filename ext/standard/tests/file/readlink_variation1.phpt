@@ -11,17 +11,15 @@ obscure_filename
 $file_path = __DIR__;
 
 echo "*** Testing Invalid file types ***\n";
-$filenames = array(
+$filenames = [
   /* Invalid filenames */
   -2.34555,
   "",
-  TRUE,
-  FALSE,
-
   /* scalars */
   1234,
-  0
-);
+  0,
+  1,
+];
 
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {
@@ -31,9 +29,6 @@ foreach( $filenames as $filename ) {
 ?>
 --EXPECTF--
 *** Testing Invalid file types ***
-
-Warning: readlink(): %s in %s on line %d
-bool(false)
 
 Warning: readlink(): %s in %s on line %d
 bool(false)

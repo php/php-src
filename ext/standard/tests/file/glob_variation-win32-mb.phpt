@@ -23,7 +23,7 @@ fclose($fp);
 $fp = fopen("$file_path/glob_variation私はガラスを食べられます/wonder;123456", "w");
 fclose($fp);
 
-$patterns = array (
+$patterns = [
   "$file_path/glob_variation私はガラスを食べられます/*der*",
   "$file_path/glob_variation私はガラスを食べられます/?onder*",
   "$file_path/glob_variation私はガラスを食べられます/w*der?*",
@@ -35,24 +35,21 @@ $patterns = array (
   '$file_path/glob_variation私はガラスを食べられます/wonder5',
   "$file_path/glob_variation私はガラスを食べられます/?wonder?",
   "$file_path/glob_variation私はガラスを食べられます/wonder?",
-  TRUE  // boolean true
-);
+];
 $counter = 1;
-/* loop through $patterns to match each $pattern with the files created
-   using glob() */
 foreach($patterns as $pattern) {
-  echo "\n-- Iteration $counter --\n";
-  try {
-    var_dump( glob($pattern) );  // default arguments
-    var_dump( glob($pattern, GLOB_MARK) );
-    var_dump( glob($pattern, GLOB_NOSORT) );
-    var_dump( glob($pattern, GLOB_NOCHECK) );
-    var_dump( glob($pattern, GLOB_NOESCAPE) );
-    var_dump( glob($pattern, GLOB_ERR) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
-  }
-  $counter++;
+    echo "\n-- Iteration $counter --\n";
+    try {
+        var_dump( glob($pattern) );  // default arguments
+        var_dump( glob($pattern, GLOB_MARK) );
+        var_dump( glob($pattern, GLOB_NOSORT) );
+        var_dump( glob($pattern, GLOB_NOCHECK) );
+        var_dump( glob($pattern, GLOB_NOESCAPE) );
+        var_dump( glob($pattern, GLOB_ERR) );
+    } catch (Error $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
+    }
+    $counter++;
 }
 
 echo "\n*** Testing glob() with pattern within braces ***\n";
@@ -72,13 +69,15 @@ $counter = 1;
 /* loop through $patterns to match each $pattern with the directories created
    using glob() */
 foreach($patterns as $pattern) {
-  echo "-- Iteration $counter --\n";
-  try {
-    var_dump( glob($pattern, GLOB_ONLYDIR) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
-  }
-  $counter++;
+    echo "-- Iteration $counter --\n";
+    try {
+        $files = glob($pattern, GLOB_ONLYDIR);
+        natsort($files);
+        var_dump($files);
+    } catch (Error $e) {
+      echo $e->getMessage(), "\n";
+    }
+    $counter++;
 }
 
 echo "Done\n";
@@ -86,9 +85,13 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-rmdir("$file_path/glob_variation私はガラスを食べられます/wonder1/wonder2");
-rmdir("$file_path/glob_variation私はガラスを食べられます/wonder1/");
-rmdir("$file_path/glob_variation私はガラスを食べられます/");
+@rmdir("$file_path/glob_variation私はガラスを食べられます/wonder1/wonder2");
+@rmdir("$file_path/glob_variation私はガラスを食べられます/wonder1/");
+@rmdir("$file_path/glob_variation私はガラスを食べられます/");
+@unlink("$file_path/glob_variation私はガラスを食べられます/wonder12345");
+@unlink("$file_path/glob_variation私はガラスを食べられます/wonder;123456");
+@rmdir("$file_path/glob_variation私はガラスを食べられます/wonder");
+@rmdir("$file_path/glob_variation私はガラスを食べられます");
 ?>
 --EXPECTF--
 *** Testing glob() : usage variations ***

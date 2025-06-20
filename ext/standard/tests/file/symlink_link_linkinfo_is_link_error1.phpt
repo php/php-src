@@ -20,15 +20,12 @@ echo "*** Testing symlink() for error conditions ***\n";
 
 //invalid arguments
 var_dump( symlink('', $linkname) );  // empty string as filename
-var_dump( symlink(false, $linkname) );  // boolean false as filename
 var_dump( symlink($filename, '') );  // '' as linkname
-var_dump( symlink($filename, false) );  // false as linkname
 
 echo "\n*** Testing linkinfo() for error conditions ***\n";
 
 //invalid arguments
 var_dump( linkinfo('') );  // empty string as linkname
-var_dump( linkinfo(false) );  // boolean false as linkname
 
 echo "Done\n";
 ?>
@@ -46,16 +43,7 @@ bool(false)
 Warning: symlink(): %s in %s on line %d
 bool(false)
 
-Warning: symlink(): %s in %s on line %d
-bool(false)
-
-Warning: symlink(): %s in %s on line %d
-bool(false)
-
 *** Testing linkinfo() for error conditions ***
-
-Warning: linkinfo(): %s in %s on line %d
-int(-1)
 
 Warning: linkinfo(): %s in %s on line %d
 int(-1)

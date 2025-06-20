@@ -43,10 +43,10 @@ var_dump(stream_wrapper_register('test2', 'test_wrapper_base'));
 $fd = fopen("test://foo","r");
 $fd2 = fopen("test2://foo","r");
 
-test("stream_set_blocking - 1", $fd, true, "stream_set_blocking", array($fd,0), STREAM_OPTION_BLOCKING, 0);
-test("stream_set_blocking - 2", $fd, false, "stream_set_blocking", array($fd,1), STREAM_OPTION_BLOCKING, 1);
-test("stream_set_blocking - 3", $fd, "foo", "stream_set_blocking", array($fd,0), STREAM_OPTION_BLOCKING, 0);
-test("stream_set_blocking - 4", $fd2, true, "stream_set_blocking", array($fd2,1), STREAM_OPTION_BLOCKING, 1);
+test("stream_set_blocking - 1", $fd, true, "stream_set_blocking", array($fd, false), STREAM_OPTION_BLOCKING, 0);
+test("stream_set_blocking - 2", $fd, false, "stream_set_blocking", array($fd, true), STREAM_OPTION_BLOCKING, 1);
+test("stream_set_blocking - 3", $fd, "foo", "stream_set_blocking", array($fd, false), STREAM_OPTION_BLOCKING, 0);
+test("stream_set_blocking - 4", $fd2, true, "stream_set_blocking", array($fd2, true), STREAM_OPTION_BLOCKING, 1);
 
 test("stream_set_write_buffer - 1", $fd, true, "stream_set_write_buffer", array($fd,0), STREAM_OPTION_WRITE_BUFFER, STREAM_BUFFER_NONE);
 test("stream_set_write_buffer - 2", $fd, true, "stream_set_write_buffer", array($fd,4096), STREAM_OPTION_WRITE_BUFFER, STREAM_BUFFER_FULL);

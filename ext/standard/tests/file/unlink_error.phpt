@@ -25,9 +25,6 @@ echo "\n-- Testing unlink() on invalid arguments --\n";
 var_dump( unlink('') );  // $filename as empty string
 var_dump( file_exists('') );  // confirm file doesn't exist
 
-var_dump( unlink(false) );  // $filename as boolean false
-var_dump( file_exists(false) );  // confirm file doesn't exist
-
 echo "\n-- Testing unlink() on non-existent file --\n";
 var_dump( unlink(__DIR__."/non_existent_file.tmp") );
 
@@ -50,10 +47,6 @@ rmdir(__DIR__."/unlink_error");
 *** Testing unlink() : error conditions ***
 
 -- Testing unlink() on invalid arguments --
-
-Warning: unlink(): %s in %s on line %d
-bool(false)
-bool(false)
 
 Warning: unlink(): %s in %s on line %d
 bool(false)
