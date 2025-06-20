@@ -711,6 +711,32 @@ ZEND_API zend_async_waker_t * zend_async_waker_new_with_timeout(
 	return waker;
 }
 
+ZEND_API bool zend_async_waker_apply_error(zend_async_waker_t *waker, zend_object *error, bool override, bool for_cancellation)
+{
+	if (UNEXPECTED(waker == NULL)) {
+		return false;
+	}
+
+	if (EXPECTED(waker->error == NULL)) {
+		waker->error = error;
+		return true;
+	}
+
+	if (for_cancellation && instanceof_function(waker->error->ce, zend_ce_cancellation_exception)) {
+		// If the waker already has a cancellation exception, we do not override it
+		return false;
+	}
+
+	if (override) {
+		zend_exception_set_previous(error, waker->error);
+		waker->error = error;
+	} else {
+		zend_exception_set_previous(waker->error, error);
+	}
+
+	return true;
+}
+
 //////////////////////////////////////////////////////////////////////
 /* Waker API end */
 //////////////////////////////////////////////////////////////////////

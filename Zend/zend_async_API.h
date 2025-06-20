@@ -1124,8 +1124,13 @@ ZEND_API zend_async_waker_t *zend_async_waker_new(zend_coroutine_t *coroutine);
 ZEND_API zend_async_waker_t * zend_async_waker_new_with_timeout(
 	zend_coroutine_t * coroutine, const zend_ulong timeout, zend_async_event_t *cancellation
 );
+ZEND_API bool zend_async_waker_apply_error(zend_async_waker_t *waker, zend_object *error, bool override, bool for_cancellation);
 ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine);
 ZEND_API void zend_async_waker_add_triggered_event(zend_coroutine_t *coroutine, zend_async_event_t *event);
+
+#define ZEND_ASYNC_WAKER_APPLY_ERROR(waker, error) zend_async_waker_apply_error((waker), (error), true, false)
+#define ZEND_ASYNC_WAKER_APPEND_ERROR(waker, error) zend_async_waker_apply_error((waker), (error), false, false)
+#define ZEND_ASYNC_WAKER_APPLY_CANCELLATION(waker, error) zend_async_waker_apply_error((waker), (error), true, true)
 
 ZEND_API void zend_async_resume_when(
 		zend_coroutine_t			*coroutine,
