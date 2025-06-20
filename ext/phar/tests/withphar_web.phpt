@@ -12,5 +12,6 @@ PATH_INFO=/web.php
 files/nophar.phar
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
---EXPECT--
+--EXPECTF--
+Deprecated: class_exists(): Passing int to parameter #2 ($autoload) of type bool is deprecated in %s on line %d
 web

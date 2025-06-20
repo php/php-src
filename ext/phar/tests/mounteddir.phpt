@@ -13,14 +13,14 @@ $pname = 'phar://' . $fname;
 
 $a = new Phar($fname);
 $a['index.php'] = '<?php
-Phar::mount("testit", dirname(Phar::running(0)) . "/testit");
-echo file_get_contents(Phar::running(1) . "/testit/extfile.php"), "\n";
-echo file_get_contents(Phar::running(1) . "/testit/directory"), "\n";
-echo file_get_contents(Phar::running(1) . "/testit/existing.txt"), "\n";
+Phar::mount("testit", dirname(Phar::running(false)) . "/testit");
+echo file_get_contents(Phar::running(true) . "/testit/extfile.php"), "\n";
+echo file_get_contents(Phar::running(true) . "/testit/directory"), "\n";
+echo file_get_contents(Phar::running(true) . "/testit/existing.txt"), "\n";
 include "testit/extfile.php";
 include "testit/extfile2.php";
 try {
-Phar::mount(".phar/stub.php", dirname(Phar::running(0)) . "/testit/extfile.php");
+Phar::mount(".phar/stub.php", dirname(Phar::running(false)) . "/testit/extfile.php");
 } catch (Exception $e) {
 echo $e->getMessage(),"\n";
 }

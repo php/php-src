@@ -9,11 +9,7 @@ phar.readonly=0
 <?php
 class myIterator implements Iterator
 {
-    var $a;
-    function __construct(array $a)
-    {
-        $this->a = $a;
-    }
+    function __construct(public array $a) {}
     function next(): void {
         echo "next\n";
         next($this->a);
@@ -28,7 +24,7 @@ class myIterator implements Iterator
     }
     function valid(): bool {
         echo "valid\n";
-        return current($this->a);
+        return (bool)current($this->a);
     }
     function rewind(): void {
         echo "rewind\n";
