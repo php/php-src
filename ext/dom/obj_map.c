@@ -198,18 +198,13 @@ static void dom_map_cache_obj(dom_nnodemap_object *map, xmlNodePtr itemnode, zen
 	map->cached_obj = cached_obj;
 }
 
-static xmlNodePtr dom_map_get_attr_start(xmlNodePtr node)
-{
-	ZEND_ASSERT(node->type == XML_ELEMENT_NODE);
-	return (xmlNodePtr) node->properties;
-}
-
 static void dom_map_get_attributes_item(dom_nnodemap_object *map, zend_long index, zval *return_value)
 {
 	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
 	xmlNodePtr itemnode = NULL;
 	if (nodep && index >= 0) {
-		itemnode = dom_map_get_attr_start(nodep);
+		ZEND_ASSERT(nodep->type == XML_ELEMENT_NODE);
+		itemnode = (xmlNodePtr) nodep->properties;
 		for (; index > 0 && itemnode; itemnode = itemnode->next, index--);
 	}
 	dom_ret_node_to_zobj(map, itemnode, return_value);
