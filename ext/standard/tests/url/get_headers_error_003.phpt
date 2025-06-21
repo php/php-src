@@ -13,11 +13,11 @@ $opts = array(
 );
 
 $context = stream_context_create($opts);
-$headers = get_headers("http://".PHP_CLI_SERVER_ADDRESS, 1, $context);
+$headers = get_headers("http://".PHP_CLI_SERVER_ADDRESS, true, $context);
 echo $headers["X-Request-Method"]."\n";
 
 stream_context_set_default($opts);
-$headers = get_headers("http://".PHP_CLI_SERVER_ADDRESS, 1);
+$headers = get_headers("http://".PHP_CLI_SERVER_ADDRESS, true);
 echo $headers["X-Request-Method"]."\n";
 
 echo "Done";
