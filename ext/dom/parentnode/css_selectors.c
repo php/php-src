@@ -249,7 +249,8 @@ void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zv
 		object_init_ex(return_value, dom_modern_nodelist_class_entry);
 		dom_object *ret_obj = Z_DOMOBJ_P(return_value);
 		dom_nnodemap_object *mapptr = (dom_nnodemap_object *) ret_obj->ptr;
-		ZVAL_ARR(&mapptr->baseobj_zv, list);
+		mapptr->array = list;
+		mapptr->release_array = true;
 		mapptr->handler = &php_dom_obj_map_nodeset;
 	}
 }

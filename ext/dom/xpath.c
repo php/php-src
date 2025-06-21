@@ -234,15 +234,6 @@ PHP_METHOD(DOMXPath, registerNamespace)
 }
 /* }}} */
 
-static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
-{
-	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
-
-	ZVAL_COPY_VALUE(&mapptr->baseobj_zv, baseobj);
-	mapptr->handler = &php_dom_obj_map_nodeset;
-}
-/* }}} */
-
 static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) /* {{{ */
 {
 	zval *context = NULL;
@@ -335,6 +326,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 		{
 			xmlNodeSetPtr nodesetp;
 			zval retval;
+			bool release_array = false;
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
 				array_init_size(&retval, nodesetp->nodeNr);
@@ -369,12 +361,18 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 					}
 					add_next_index_zval(&retval, &child);
 				}
+				release_array = true;
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
+
 			object_init_ex(return_value, dom_get_nodelist_ce(modern));
 			nodeobj = Z_DOMOBJ_P(return_value);
-			dom_xpath_iter(&retval, nodeobj);
+			dom_nnodemap_object *mapptr = nodeobj->ptr;
+
+			mapptr->array = Z_ARR(retval);
+			mapptr->release_array = release_array;
+			mapptr->handler = &php_dom_obj_map_nodeset;
 			break;
 		}
 

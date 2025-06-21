@@ -55,8 +55,7 @@ static zend_long dom_map_get_xmlht_length(dom_nnodemap_object *map)
 
 static zend_long dom_map_get_nodeset_length(dom_nnodemap_object *map)
 {
-	HashTable *nodeht = Z_ARRVAL(map->baseobj_zv);
-	return zend_hash_num_elements(nodeht);
+	return zend_hash_num_elements(map->array);
 }
 
 static zend_long dom_map_get_prop_length(dom_nnodemap_object *map)
@@ -132,8 +131,7 @@ static void dom_map_get_notation_item(dom_nnodemap_object *map, zend_long index,
 
 static void dom_map_get_nodeset_item(dom_nnodemap_object *map, zend_long index, zval *return_value)
 {
-	HashTable *nodeht = Z_ARRVAL(map->baseobj_zv);
-	zval *entry = zend_hash_index_find(nodeht, index);
+	zval *entry = zend_hash_index_find(map->array, index);
 	if (entry) {
 		RETURN_COPY(entry);
 	} else {
@@ -294,7 +292,7 @@ void php_dom_create_obj_map(dom_object *basenode, dom_object *intern, xmlHashTab
 
 	ZEND_ASSERT(basenode != NULL);
 
-	ZVAL_OBJ_COPY(&mapptr->baseobj_zv, &basenode->std);
+	GC_ADDREF(&basenode->std);
 
 	xmlDocPtr doc = basenode->document ? basenode->document->ptr : NULL;
 
