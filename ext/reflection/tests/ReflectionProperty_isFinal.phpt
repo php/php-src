@@ -13,7 +13,7 @@ class C {
     public private(set) mixed $p7;
     public private(set) final mixed $p8;
 
-    public function __construct( final $p9, public $p10 ) {}
+    public function __construct(final $p9, public $p10) {}
 }
 
 $rc = new ReflectionClass(C::class);

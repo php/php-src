@@ -20,7 +20,7 @@ class B extends A {
     }
 }
 
-$b = new B("test" );
+$b = new B("test");
 
 ?>
 --EXPECT--
