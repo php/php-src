@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-14082 (Segmentation fault on unknown address 0x600000000018
     in ext/opcache/jit/zend_jit.c). (nielsdos)
 
+- OpenSSL:
+  . Fixed bug #80770 (It is not possible to get client peer certificate with
+    stream_socket_server). (Jakub Zelenka)
+
 - PCNTL:
   . Fixed bug GH-18958 (Fatal error during shutdown after pcntl_rfork() or
     pcntl_forkx() with zend-max-execution-timers). (Arnaud)
