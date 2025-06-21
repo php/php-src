@@ -1,31 +1,14 @@
 --TEST--
 Test variations in usage of deg2rad()
 --INI--
-precision = 10
+precision=14
 --FILE--
 <?php
-/*
- * Function is implemented in ext/standard/math.c
-*/
 
+$values = include 'data/numbers.inc';
 
-//Test deg2rad with a different input values
-
-$values = array(23,
-        -23,
-        2.345e1,
-        -2.345e1,
-        0x17,
-        027,
-        "23",
-        "23.45",
-        "2.345e1",
-        "1000",
-        true,
-        false);
-
-for ($i = 0; $i < count($values); $i++) {
-    $res = deg2rad($values[$i]);
+foreach ($values as $value) {
+    $res = deg2rad($value);
     var_dump($res);
 }
 
@@ -34,12 +17,8 @@ for ($i = 0; $i < count($values); $i++) {
 float(0.40142572795869574)
 float(-0.40142572795869574)
 float(0.40927970959267024)
+float(0.40927970959267024)
 float(-0.40927970959267024)
-float(0.40142572795869574)
-float(0.40142572795869574)
-float(0.40142572795869574)
-float(0.40927970959267024)
-float(0.40927970959267024)
-float(17.453292519943293)
-float(0.017453292519943295)
-float(0)
+float(0.17453292519943295)
+float(0.17976891295541594)
+float(68.94923210003599)
