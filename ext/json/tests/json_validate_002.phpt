@@ -8,6 +8,9 @@ require_once("json_validate_requires.inc");
 json_validate_trycatchdump("");
 json_validate_trycatchdump("-");
 json_validate_trycatchdump("", -1);
+json_validate_trycatchdump('{"key1":"value1", "value2"}', 2);
+json_validate_trycatchdump('{"text":"Hello \u20AC World", "key1":"Hello \xE2\x28 World"}', 2);
+json_validate_trycatchdump('{"text":"Hello \u20AC World"}', 2);
 json_validate_trycatchdump('{"key1":"value1", "key2":"value2"}', 1);
 json_validate_trycatchdump('{"key1":"value1", "key2":"value2"}', 2);
 json_validate_trycatchdump("-", 0);
@@ -20,13 +23,22 @@ json_validate_trycatchdump("{}", 512, JSON_INVALID_UTF8_IGNORE);
 --EXPECTF--
 bool(false)
 int(4)
-string(12) "Syntax error"
+string(29) "Syntax error near character 0"
 bool(false)
 int(4)
-string(12) "Syntax error"
+string(29) "Syntax error near character 0"
 bool(false)
 int(4)
-string(12) "Syntax error"
+string(29) "Syntax error near character 0"
+bool(false)
+int(4)
+string(30) "Syntax error near character 19"
+bool(false)
+int(4)
+string(30) "Syntax error near character 38"
+bool(true)
+int(0)
+string(8) "No error"
 bool(false)
 int(1)
 string(28) "Maximum stack depth exceeded"
@@ -44,7 +56,7 @@ int(0)
 string(8) "No error"
 bool(false)
 int(4)
-string(12) "Syntax error"
+string(29) "Syntax error near character 0"
 bool(true)
 int(0)
 string(8) "No error"
