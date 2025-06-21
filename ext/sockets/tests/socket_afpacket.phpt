@@ -367,7 +367,7 @@ object(Socket\EthernetPacket)#%d (7) {
     ["srcAddr"]=>
     string(%d) "%s.%s.%s.%s"
     ["dstAddr"]=>
-    string(9) "%s.%s.%s.%s"
+    string(%d) "%s.%s.%s.%s"
     ["payload"]=>
     object(Socket\TcpPacket)#%d (4) {
       ["headerSize"]=>
