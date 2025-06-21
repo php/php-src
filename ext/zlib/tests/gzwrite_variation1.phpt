@@ -5,7 +5,7 @@ zlib
 --FILE--
 <?php
 
-$filename = __DIR__."/004.txt.gz";
+$filename = __DIR__."/data/test.txt.gz";
 $h = gzopen($filename, 'r');
 $str = "Here is the string to be written. ";
 $length = 10;

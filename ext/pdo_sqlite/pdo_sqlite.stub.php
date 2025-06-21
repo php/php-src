@@ -39,7 +39,7 @@ class Sqlite extends \PDO
     /** @cvalue PDO_SQLITE_ATTR_EXPLAIN_STATEMENT */
     public const int ATTR_EXPLAIN_STATEMENT = UNKNOWN;
 
-#if SQLITE_VERSION_NUMBER >= 3041000
+#if SQLITE_VERSION_NUMBER >= 3043000
     public const int EXPLAIN_MODE_PREPARED = 0;
     public const int EXPLAIN_MODE_EXPLAIN = 1;
     public const int EXPLAIN_MODE_EXPLAIN_QUERY_PLAN = 2;

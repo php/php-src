@@ -202,6 +202,8 @@ PHP                                                                        NEWS
   . Fixed bug #70951 (Segmentation fault on invalid WSDL cache). (nielsdos)
   . Implement request #55503 (Extend __getTypes to support enumerations).
     (nielsdos, datibbaw)
+  . Implement request #61105 (Support Soap 1.2 SoapFault Reason Text lang
+    attribute). (nielsdos)
 
 - Sockets:
   . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.

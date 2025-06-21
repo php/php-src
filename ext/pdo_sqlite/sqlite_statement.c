@@ -393,7 +393,7 @@ static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 			}
 			break;
 		case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
-#if SQLITE_VERSION_NUMBER >= 3041000
+#if SQLITE_VERSION_NUMBER >= 3043000
 #if defined(__APPLE__)
 			if (__builtin_available(macOS 14.2, *)) {
 #endif
@@ -420,7 +420,7 @@ static int pdo_sqlite_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval 
 {
 	switch (attr) {
 		case PDO_SQLITE_ATTR_EXPLAIN_STATEMENT:
-#if SQLITE_VERSION_NUMBER >= 3041000
+#if SQLITE_VERSION_NUMBER >= 3043000
 #if defined(__APPLE__)
 			if (__builtin_available(macOS 14.2, *)) {
 #endif

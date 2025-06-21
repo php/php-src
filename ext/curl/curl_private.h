@@ -150,6 +150,9 @@ void _php_curl_multi_cleanup_list(void *data);
 void _php_curl_verify_handlers(php_curl *ch, bool reporterror);
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
 
+/* Consumes `zv` */
+zend_long php_curl_get_long(zval *zv);
+
 static inline php_curl *curl_from_obj(zend_object *obj) {
 	return (php_curl *)((char *)(obj) - XtOffsetOf(php_curl, std));
 }

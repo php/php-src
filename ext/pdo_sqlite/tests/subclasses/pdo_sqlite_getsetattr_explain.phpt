@@ -59,9 +59,9 @@ try {
 
 var_dump($stmts->getAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT) == Pdo\Sqlite::EXPLAIN_MODE_PREPARED);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
-array(16) {
+array(%d) {
   [0]=>
   array(8) {
     ["addr"]=>
@@ -71,7 +71,7 @@ array(16) {
     ["p1"]=>
     int(0)
     ["p2"]=>
-    int(14)
+    int(%d)
     ["p3"]=>
     int(0)
     ["p4"]=>
@@ -79,7 +79,7 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
   [1]=>
   array(8) {
@@ -90,7 +90,7 @@ array(16) {
     ["p1"]=>
     int(3)
     ["p2"]=>
-    int(7)
+    int(%d)
     ["p3"]=>
     int(2)
     ["p4"]=>
@@ -98,12 +98,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [2]=>
+  %A
   array(8) {
     ["addr"]=>
-    int(2)
+    int(%d)
     ["opcode"]=>
     string(7) "String8"
     ["p1"]=>
@@ -117,12 +117,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [3]=>
+  %A
   array(8) {
     ["addr"]=>
-    int(3)
+    int(%d)
     ["opcode"]=>
     string(5) "Yield"
     ["p1"]=>
@@ -136,12 +136,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [4]=>
+  %A
   array(8) {
     ["addr"]=>
-    int(4)
+    int(%d)
     ["opcode"]=>
     string(7) "String8"
     ["p1"]=>
@@ -155,12 +155,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [5]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(5)
+    int(%d)
     ["opcode"]=>
     string(5) "Yield"
     ["p1"]=>
@@ -174,12 +174,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [6]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(6)
+    int(%d)
     ["opcode"]=>
     string(12) "EndCoroutine"
     ["p1"]=>
@@ -193,12 +193,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [7]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(7)
+    int(%d)
     ["opcode"]=>
     string(9) "OpenWrite"
     ["p1"]=>
@@ -212,18 +212,18 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [8]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(8)
+    int(%d)
     ["opcode"]=>
     string(5) "Yield"
     ["p1"]=>
     int(3)
     ["p2"]=>
-    int(13)
+    int(%d)
     ["p3"]=>
     int(0)
     ["p4"]=>
@@ -231,12 +231,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [9]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(9)
+    int(%d)
     ["opcode"]=>
     string(8) "NewRowid"
     ["p1"]=>
@@ -250,12 +250,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [10]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(10)
+    int(%d)
     ["opcode"]=>
     string(10) "MakeRecord"
     ["p1"]=>
@@ -269,12 +269,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [11]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(11)
+    int(%d)
     ["opcode"]=>
     string(6) "Insert"
     ["p1"]=>
@@ -288,18 +288,18 @@ array(16) {
     ["p5"]=>
     int(57)
     ["comment"]=>
-    NULL
+    %a
   }
-  [12]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(12)
+    int(%d)
     ["opcode"]=>
     string(4) "Goto"
     ["p1"]=>
     int(0)
     ["p2"]=>
-    int(8)
+    int(%d)
     ["p3"]=>
     int(0)
     ["p4"]=>
@@ -307,12 +307,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [13]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(13)
+    int(%d)
     ["opcode"]=>
     string(4) "Halt"
     ["p1"]=>
@@ -326,12 +326,12 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
-  [14]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(14)
+    int(%d)
     ["opcode"]=>
     string(11) "Transaction"
     ["p1"]=>
@@ -345,12 +345,12 @@ array(16) {
     ["p5"]=>
     int(1)
     ["comment"]=>
-    NULL
+    %a
   }
-  [15]=>
+  [%d]=>
   array(8) {
     ["addr"]=>
-    int(15)
+    int(%d)
     ["opcode"]=>
     string(4) "Goto"
     ["p1"]=>
@@ -364,7 +364,7 @@ array(16) {
     ["p5"]=>
     int(0)
     ["comment"]=>
-    NULL
+    %a
   }
 }
 bool(false)
@@ -376,7 +376,7 @@ array(1) {
     ["parent"]=>
     int(0)
     ["notused"]=>
-    int(0)
+    int(%d)
     ["detail"]=>
     string(17) "SCAN test_explain"
   }
