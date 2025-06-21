@@ -239,7 +239,7 @@ static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
 	ZVAL_COPY_VALUE(&mapptr->baseobj_zv, baseobj);
-	mapptr->nodetype = DOM_NODESET;
+	mapptr->handler = &php_dom_obj_map_nodeset;
 }
 /* }}} */
 

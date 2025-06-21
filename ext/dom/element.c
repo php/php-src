@@ -825,7 +825,7 @@ static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, z
 
 	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, NULL);
+	dom_namednode_iter(intern, namednode, NULL, name, NULL, &php_dom_obj_map_by_tag_name);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagName)
@@ -1257,7 +1257,7 @@ static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS
 
 	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, uri);
+	dom_namednode_iter(intern, namednode, NULL, name, uri, &php_dom_obj_map_by_tag_name);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagNameNS)
