@@ -288,7 +288,7 @@ zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 
 	object_init_ex(retval, dom_get_nodelist_ce(php_dom_follow_spec_intern(obj)));
 	dom_object *intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
+	dom_namednode_iter(obj, intern, NULL, NULL, NULL, &php_dom_obj_map_child_nodes);
 
 	return SUCCESS;
 }
@@ -422,7 +422,7 @@ zend_result dom_node_attributes_read(dom_object *obj, zval *retval)
 	if (nodep->type == XML_ELEMENT_NODE) {
 		object_init_ex(retval, dom_get_namednodemap_ce(php_dom_follow_spec_intern(obj)));
 		dom_object *intern = Z_DOMOBJ_P(retval);
-		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL);
+		dom_namednode_iter(obj, intern, NULL, NULL, NULL, &php_dom_obj_map_attributes);
 	} else {
 		ZVAL_NULL(retval);
 	}
