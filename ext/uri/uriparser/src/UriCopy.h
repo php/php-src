@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2007, Weijia Song <songweijia@gmail.com>
  * Copyright (C) 2007, Sebastian Pipping <sebastian@pipping.org>
+ * Copyright (C) 2025, Máté Kocsis <kocsismate@php.net>
  * All rights reserved.
  *
  * Redistribution and use in source  and binary forms, with or without
@@ -37,8 +38,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if (defined(URI_PASS_ANSI) && !defined(URI_COMMON_H_ANSI)) \
-	|| (defined(URI_PASS_UNICODE) && !defined(URI_COMMON_H_UNICODE)) \
+#if (defined(URI_PASS_ANSI) && !defined(URI_COPY_H_ANSI)) \
+	|| (defined(URI_PASS_UNICODE) && !defined(URI_COPY_H_UNICODE)) \
 	|| (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
 #include <uriparser/UriDefsConfig.h>
@@ -46,67 +47,34 @@
 /* Include SELF twice */
 # ifdef URI_ENABLE_ANSI
 #  define URI_PASS_ANSI 1
-#  include "UriCommon.h"
+#  include "UriCopy.h"
 #  undef URI_PASS_ANSI
 # endif
 # ifdef URI_ENABLE_UNICODE
 #  define URI_PASS_UNICODE 1
-#  include "UriCommon.h"
+#  include "UriCopy.h"
 #  undef URI_PASS_UNICODE
 # endif
 /* Only one pass for each encoding */
-#elif (defined(URI_PASS_ANSI) && !defined(URI_COMMON_H_ANSI) \
+#elif (defined(URI_PASS_ANSI) && !defined(URI_COPY_H_ANSI) \
 	&& defined(URI_ENABLE_ANSI)) || (defined(URI_PASS_UNICODE) \
-	&& !defined(URI_COMMON_H_UNICODE) && defined(URI_ENABLE_UNICODE))
+	&& !defined(URI_COPY_H_UNICODE) && defined(URI_ENABLE_UNICODE))
 # ifdef URI_PASS_ANSI
-#  define URI_COMMON_H_ANSI 1
+#  define URI_COPY_H_ANSI 1
 #  include <uriparser/UriDefsAnsi.h>
 # else
-#  define URI_COMMON_H_UNICODE 1
+#  define URI_COPY_H_UNICODE 1
 #  include <uriparser/UriDefsUnicode.h>
 # endif
 
 
 
-/* Used to point to from empty path segments.
- * X.first and X.afterLast must be the same non-NULL value then. */
-extern const URI_CHAR * const URI_FUNC(SafeToPointTo);
-extern const URI_CHAR * const URI_FUNC(ConstPwd);
-extern const URI_CHAR * const URI_FUNC(ConstParent);
-
-
-
-void URI_FUNC(ResetUri)(URI_TYPE(Uri) * uri);
-
-int URI_FUNC(CompareRange)(
-		const URI_TYPE(TextRange) * a,
-		const URI_TYPE(TextRange) * b);
-
-UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
-		const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory);
-UriBool URI_FUNC(CopyRangeAsNeeded)(URI_TYPE(TextRange) * destRange,
-		const URI_TYPE(TextRange) * sourceRange, UriBool useSafe, UriMemoryManager * memory);
-
-UriBool URI_FUNC(RemoveDotSegmentsAbsolute)(URI_TYPE(Uri) * uri,
-		UriMemoryManager * memory);
-UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri,
-		UriBool relative, UriBool pathOwned, UriMemoryManager * memory);
-
-unsigned char URI_FUNC(HexdigToInt)(URI_CHAR hexdig);
-URI_CHAR URI_FUNC(HexToLetter)(unsigned int value);
-URI_CHAR URI_FUNC(HexToLetterEx)(unsigned int value, UriBool uppercase);
-
-UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri);
-
-UriBool URI_FUNC(CopyPath)(URI_TYPE(Uri) * dest, const URI_TYPE(Uri) * source,
-		UriMemoryManager * memory);
-UriBool URI_FUNC(CopyAuthority)(URI_TYPE(Uri) * dest,
-		const URI_TYPE(Uri) * source, UriMemoryManager * memory);
-
-UriBool URI_FUNC(FixAmbiguity)(URI_TYPE(Uri) * uri, UriMemoryManager * memory);
-void URI_FUNC(FixEmptyTrailSegment)(URI_TYPE(Uri) * uri,
-		UriMemoryManager * memory);
-
+void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
+		unsigned int revertMask, UriMemoryManager * memory);
+int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
+		const URI_TYPE(Uri) * sourceUri, UriMemoryManager * memory);
+int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri,
+		const URI_TYPE(Uri) * sourceUri);
 
 #endif
 #endif

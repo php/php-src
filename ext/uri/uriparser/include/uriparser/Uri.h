@@ -202,6 +202,10 @@ typedef struct URI_TYPE(QueryListStruct) {
 
 
 
+URI_PUBLIC UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri);
+
+
+
 /**
  * Parses a RFC 3986 %URI.
  * Uses default libc-based memory manager.
@@ -641,6 +645,36 @@ URI_PUBLIC int URI_FUNC(ToStringCharsRequired)(const URI_TYPE(Uri) * uri,
  */
 URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
 		int maxChars, int * charsWritten);
+
+
+
+/**
+ * Copies a %URI structure.
+ *
+ * @param destUri        <b>OUT</b>: Output destination
+ * @param sourceUri      <b>IN</b>: %URI to copy
+ * @param memory         <b>IN</b>: Memory manager to use, NULL for default libc
+ * @return               Error code or 0 on success
+ *
+ * @see uriCopyUriA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
+		const URI_TYPE(Uri) * sourceUri, UriMemoryManager * memory);
+
+
+
+/**
+ * Copies a %URI structure.
+ *
+ * @param destUri        <b>OUT</b>: Output destination
+ * @param sourceUri      <b>IN</b>: %URI to copy
+ * @return               Error code or 0 on success
+ *
+ * @see uriCopyUriMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri, const URI_TYPE(Uri) * sourceUri);
 
 
 
