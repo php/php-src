@@ -32,10 +32,14 @@ typedef struct dom_nnodemap_object {
 	dom_object *baseobj;
 	zval baseobj_zv;
 	zend_long cached_length;
-	xmlHashTable *ht;
-	xmlChar *local;
-	zend_string *local_lower;
-	xmlChar *ns;
+	union {
+		xmlHashTable *ht;
+		struct {
+			xmlChar *local;
+			zend_string *local_lower;
+			xmlChar *ns;
+		};
+	};
 	php_libxml_cache_tag cache_tag;
 	dom_object *cached_obj;
 	zend_long cached_obj_index;
