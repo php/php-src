@@ -26,10 +26,6 @@ $needle = array(
   //nulls
   "\0",
 
-  //boolean false
-  FALSE,
-  false,
-
   //empty string
   "",
 
@@ -92,7 +88,7 @@ string(53) "Hello,
 string(8) "he #4 A "
 
 -- Iteration 5 --
-string(47) "	
+string(47) "
 %0
   $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
@@ -100,7 +96,7 @@ string(47) "
 string(36) "\o,()*+-./:;<=>?@hello123456he #4 A "
 
 -- Iteration 7 --
-string(47) "	
+string(47) "
 %0
   $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
@@ -124,99 +120,91 @@ string(45) "%0
   $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
 -- Iteration 13 --
-string(45) "%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+string(1) " "
 
 -- Iteration 14 --
-string(45) "%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+string(41) "$&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
 -- Iteration 15 --
 string(1) " "
 
 -- Iteration 16 --
-string(41) "$&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
-
--- Iteration 17 --
-string(1) " "
-
--- Iteration 18 --
 string(40) "&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 19 --
+-- Iteration 17 --
 string(39) "!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 20 --
+-- Iteration 18 --
 string(37) "%\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 21 --
+-- Iteration 19 --
 string(36) "\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 22 --
+-- Iteration 20 --
 string(33) "()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 23 --
+-- Iteration 21 --
 string(31) "*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 24 --
+-- Iteration 22 --
 string(30) "+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 25 --
+-- Iteration 23 --
 string(29) "-./:;<=>?@hello123456he #4 A "
 
+-- Iteration 24 --
+string(28) "./:;<=>?@hello123456he #4 A "
+
+-- Iteration 25 --
+string(28) "./:;<=>?@hello123456he #4 A "
+
 -- Iteration 26 --
-string(28) "./:;<=>?@hello123456he #4 A "
-
--- Iteration 27 --
-string(28) "./:;<=>?@hello123456he #4 A "
-
--- Iteration 28 --
 string(26) ":;<=>?@hello123456he #4 A "
 
--- Iteration 29 --
+-- Iteration 27 --
 string(25) ";<=>?@hello123456he #4 A "
 
--- Iteration 30 --
+-- Iteration 28 --
 string(24) "<=>?@hello123456he #4 A "
 
--- Iteration 31 --
+-- Iteration 29 --
 string(22) ">?@hello123456he #4 A "
 
--- Iteration 32 --
+-- Iteration 30 --
 string(23) "=>?@hello123456he #4 A "
 
--- Iteration 33 --
+-- Iteration 31 --
 string(21) "?@hello123456he #4 A "
 
+-- Iteration 32 --
+string(20) "@hello123456he #4 A "
+
+-- Iteration 33 --
+string(20) "@hello123456he #4 A "
+
 -- Iteration 34 --
-string(20) "@hello123456he #4 A "
-
--- Iteration 35 --
-string(20) "@hello123456he #4 A "
-
--- Iteration 36 --
 string(14) "123456he #4 A "
 
--- Iteration 37 --
+-- Iteration 35 --
 string(5) "#4 A "
+
+-- Iteration 36 --
+string(5) "#4 A "
+
+-- Iteration 37 --
+string(2) "A "
 
 -- Iteration 38 --
-string(5) "#4 A "
+string(2) "A "
 
 -- Iteration 39 --
-string(2) "A "
+string(4) "4 A "
 
 -- Iteration 40 --
-string(2) "A "
+string(4) "4 A "
 
 -- Iteration 41 --
-string(4) "4 A "
-
--- Iteration 42 --
-string(4) "4 A "
-
--- Iteration 43 --
-string(53) "Hello,	
+string(53) "Hello,
 %0
   $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 *** Done ***

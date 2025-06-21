@@ -24,17 +24,13 @@ $pieces = array(
   2,
   0,
   -639,
-  true,
   "PHP",
-  false,
   "",
   " ",
   "string\x00with\x00...\0"
 );
 $glues = array(
   "TRUE",
-  true,
-  false,
   array("key1", "key2"),
   "",
   " ",

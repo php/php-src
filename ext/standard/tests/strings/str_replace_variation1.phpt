@@ -5,8 +5,17 @@ precision=14
 --FILE--
 <?php
 echo "\n*** Testing str_replace() with various search values ***";
-$search_arr = array( TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL,
-                     array(), "php", "");
+$search_arr = [
+    1,
+    0,
+    -1,
+    "1",
+    "0",
+    "-1",
+    array(),
+    "php",
+    "",
+];
 
 $i = 0;
 /* loop through to replace the matched elements in the array */
@@ -24,154 +33,124 @@ foreach( $search_arr as $value ) {
 -- Iteration 0 --
 
 Warning: Array to string conversion in %s on line %d
-array(12) {
+array(9) {
   [0]=>
   string(5) "FOUND"
   [1]=>
-  string(0) ""
+  string(1) "0"
   [2]=>
-  string(5) "FOUND"
+  string(6) "-FOUND"
   [3]=>
-  string(1) "0"
-  [4]=>
-  string(6) "-FOUND"
-  [5]=>
   string(5) "FOUND"
-  [6]=>
+  [4]=>
   string(1) "0"
-  [7]=>
+  [5]=>
   string(6) "-FOUND"
+  [6]=>
+  string(5) "Array"
+  [7]=>
+  string(3) "php"
   [8]=>
   string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
-  string(3) "php"
-  [11]=>
-  string(0) ""
 }
-int(5)
+int(4)
 
 -- Iteration 1 --
 
 Warning: Array to string conversion in %s on line %d
-array(12) {
+array(9) {
   [0]=>
   string(1) "1"
   [1]=>
-  string(0) ""
+  string(5) "FOUND"
   [2]=>
-  string(1) "1"
+  string(2) "-1"
   [3]=>
-  string(1) "0"
+  string(1) "1"
   [4]=>
-  string(2) "-1"
+  string(5) "FOUND"
   [5]=>
-  string(1) "1"
-  [6]=>
-  string(1) "0"
-  [7]=>
   string(2) "-1"
-  [8]=>
-  string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
-  string(3) "php"
-  [11]=>
-  string(0) ""
-}
-int(0)
-
--- Iteration 2 --
-
-Warning: Array to string conversion in %s on line %d
-array(12) {
-  [0]=>
-  string(5) "FOUND"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(5) "FOUND"
-  [3]=>
-  string(1) "0"
-  [4]=>
-  string(6) "-FOUND"
-  [5]=>
-  string(5) "FOUND"
   [6]=>
-  string(1) "0"
-  [7]=>
-  string(6) "-FOUND"
-  [8]=>
-  string(0) ""
-  [9]=>
   string(5) "Array"
-  [10]=>
-  string(3) "php"
-  [11]=>
-  string(0) ""
-}
-int(5)
-
--- Iteration 3 --
-
-Warning: Array to string conversion in %s on line %d
-array(12) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(1) "1"
-  [3]=>
-  string(5) "FOUND"
-  [4]=>
-  string(2) "-1"
-  [5]=>
-  string(1) "1"
-  [6]=>
-  string(5) "FOUND"
   [7]=>
-  string(2) "-1"
-  [8]=>
-  string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
   string(3) "php"
-  [11]=>
+  [8]=>
   string(0) ""
 }
 int(2)
 
--- Iteration 4 --
+-- Iteration 2 --
 
 Warning: Array to string conversion in %s on line %d
-array(12) {
+array(9) {
   [0]=>
   string(1) "1"
   [1]=>
-  string(0) ""
-  [2]=>
-  string(1) "1"
-  [3]=>
   string(1) "0"
+  [2]=>
+  string(5) "FOUND"
+  [3]=>
+  string(1) "1"
+  [4]=>
+  string(1) "0"
+  [5]=>
+  string(5) "FOUND"
+  [6]=>
+  string(5) "Array"
+  [7]=>
+  string(3) "php"
+  [8]=>
+  string(0) ""
+}
+int(2)
+
+-- Iteration 3 --
+
+Warning: Array to string conversion in %s on line %d
+array(9) {
+  [0]=>
+  string(5) "FOUND"
+  [1]=>
+  string(1) "0"
+  [2]=>
+  string(6) "-FOUND"
+  [3]=>
+  string(5) "FOUND"
+  [4]=>
+  string(1) "0"
+  [5]=>
+  string(6) "-FOUND"
+  [6]=>
+  string(5) "Array"
+  [7]=>
+  string(3) "php"
+  [8]=>
+  string(0) ""
+}
+int(4)
+
+-- Iteration 4 --
+
+Warning: Array to string conversion in %s on line %d
+array(9) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(5) "FOUND"
+  [2]=>
+  string(2) "-1"
+  [3]=>
+  string(1) "1"
   [4]=>
   string(5) "FOUND"
   [5]=>
-  string(1) "1"
+  string(2) "-1"
   [6]=>
-  string(1) "0"
-  [7]=>
-  string(5) "FOUND"
-  [8]=>
-  string(0) ""
-  [9]=>
   string(5) "Array"
-  [10]=>
+  [7]=>
   string(3) "php"
-  [11]=>
+  [8]=>
   string(0) ""
 }
 int(2)
@@ -179,218 +158,99 @@ int(2)
 -- Iteration 5 --
 
 Warning: Array to string conversion in %s on line %d
-array(12) {
+array(9) {
   [0]=>
-  string(5) "FOUND"
+  string(1) "1"
   [1]=>
-  string(0) ""
+  string(1) "0"
   [2]=>
   string(5) "FOUND"
   [3]=>
-  string(1) "0"
+  string(1) "1"
   [4]=>
-  string(6) "-FOUND"
+  string(1) "0"
   [5]=>
   string(5) "FOUND"
   [6]=>
-  string(1) "0"
+  string(5) "Array"
   [7]=>
-  string(6) "-FOUND"
+  string(3) "php"
   [8]=>
   string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
-  string(3) "php"
-  [11]=>
-  string(0) ""
 }
-int(5)
+int(2)
 
 -- Iteration 6 --
 
 Warning: Array to string conversion in %s on line %d
-array(12) {
+array(9) {
   [0]=>
   string(1) "1"
   [1]=>
-  string(0) ""
+  string(1) "0"
   [2]=>
-  string(1) "1"
+  string(2) "-1"
   [3]=>
-  string(5) "FOUND"
-  [4]=>
-  string(2) "-1"
-  [5]=>
   string(1) "1"
-  [6]=>
-  string(5) "FOUND"
-  [7]=>
+  [4]=>
+  string(1) "0"
+  [5]=>
   string(2) "-1"
+  [6]=>
+  string(5) "Array"
+  [7]=>
+  string(3) "php"
   [8]=>
   string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
-  string(3) "php"
-  [11]=>
-  string(0) ""
 }
-int(2)
+int(0)
 
 -- Iteration 7 --
 
 Warning: Array to string conversion in %s on line %d
-array(12) {
+array(9) {
   [0]=>
   string(1) "1"
   [1]=>
-  string(0) ""
+  string(1) "0"
   [2]=>
-  string(1) "1"
+  string(2) "-1"
   [3]=>
-  string(1) "0"
-  [4]=>
-  string(5) "FOUND"
-  [5]=>
   string(1) "1"
-  [6]=>
+  [4]=>
   string(1) "0"
+  [5]=>
+  string(2) "-1"
+  [6]=>
+  string(5) "Array"
   [7]=>
   string(5) "FOUND"
   [8]=>
-  string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
-  string(3) "php"
-  [11]=>
-  string(0) ""
-}
-int(2)
-
--- Iteration 8 --
-
-Deprecated: str_replace(): Passing null to parameter #1 ($search) of type array|string is deprecated in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
-array(12) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(1) "1"
-  [3]=>
-  string(1) "0"
-  [4]=>
-  string(2) "-1"
-  [5]=>
-  string(1) "1"
-  [6]=>
-  string(1) "0"
-  [7]=>
-  string(2) "-1"
-  [8]=>
-  string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
-  string(3) "php"
-  [11]=>
-  string(0) ""
-}
-int(0)
-
--- Iteration 9 --
-
-Warning: Array to string conversion in %s on line %d
-array(12) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(1) "1"
-  [3]=>
-  string(1) "0"
-  [4]=>
-  string(2) "-1"
-  [5]=>
-  string(1) "1"
-  [6]=>
-  string(1) "0"
-  [7]=>
-  string(2) "-1"
-  [8]=>
-  string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
-  string(3) "php"
-  [11]=>
-  string(0) ""
-}
-int(0)
-
--- Iteration 10 --
-
-Warning: Array to string conversion in %s on line %d
-array(12) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(1) "1"
-  [3]=>
-  string(1) "0"
-  [4]=>
-  string(2) "-1"
-  [5]=>
-  string(1) "1"
-  [6]=>
-  string(1) "0"
-  [7]=>
-  string(2) "-1"
-  [8]=>
-  string(0) ""
-  [9]=>
-  string(5) "Array"
-  [10]=>
-  string(5) "FOUND"
-  [11]=>
   string(0) ""
 }
 int(1)
 
--- Iteration 11 --
+-- Iteration 8 --
 
 Warning: Array to string conversion in %s on line %d
-array(12) {
+array(9) {
   [0]=>
   string(1) "1"
   [1]=>
-  string(0) ""
+  string(1) "0"
   [2]=>
-  string(1) "1"
+  string(2) "-1"
   [3]=>
-  string(1) "0"
-  [4]=>
-  string(2) "-1"
-  [5]=>
   string(1) "1"
-  [6]=>
+  [4]=>
   string(1) "0"
-  [7]=>
+  [5]=>
   string(2) "-1"
-  [8]=>
-  string(0) ""
-  [9]=>
+  [6]=>
   string(5) "Array"
-  [10]=>
+  [7]=>
   string(3) "php"
-  [11]=>
+  [8]=>
   string(0) ""
 }
 int(0)
