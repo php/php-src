@@ -18,34 +18,28 @@ mkdir($dir);
 chdir($dir);
 
 /* An array of filenames */
-$names_arr = array(
-  -1,
-  TRUE,
-  FALSE,
+$names = [
+  /* Invalid args */
+  '-1',
   "",
   " ",
-  //this one also generates a java message rather than our own so we don't replicate php message
   "\0",
-  array(),
-
-  //the next 2 generate java messages so we don't replicate the php messages
+  /* prefix with path separator of a non existing directory*/
   "/no/such/file/dir",
-  "php/php"
+  "php/php",
+];
 
-);
-
-for( $i=0; $i<count($names_arr); $i++ ) {
-    echo "-- Iteration $i --\n";
+foreach ($names as $name) {
     try {
-        $res = file_put_contents($names_arr[$i], "Some data");
+        $res = file_put_contents($name, "Some data");
         if ($res !== false && $res != null) {
-            echo "$res bytes written to: '$names_arr[$i]'\n";
-            unlink($names_arr[$i]);
+            echo "$res bytes written to: '$name'\n";
+            unlink($name);
         } else {
-            echo "Failed to write data to: '$names_arr[$i]'\n";
+            echo "Failed to write data to: '$name'\n";
         }
-    } catch (\TypeError|\ValueError $e) {
-        echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -59,25 +53,13 @@ rmdir($dir);
 ?>
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
--- Iteration 0 --
 9 bytes written to: '-1'
--- Iteration 1 --
-9 bytes written to: '1'
--- Iteration 2 --
 ValueError: Path must not be empty
--- Iteration 3 --
-ValueError: Path must not be empty
--- Iteration 4 --
 9 bytes written to: ' '
--- Iteration 5 --
 ValueError: file_put_contents(): Argument #1 ($filename) must not contain any null bytes
--- Iteration 6 --
-TypeError: file_put_contents(): Argument #1 ($filename) must be of type string, array given
--- Iteration 7 --
 
 Warning: file_put_contents(%sdir): Failed to open stream: %s in %s on line %d
 Failed to write data to: '%sir'
--- Iteration 8 --
 
 Warning: file_put_contents(%sphp): Failed to open stream: %s in %s on line %d
 Failed to write data to: '%sphp'

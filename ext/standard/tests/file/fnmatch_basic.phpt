@@ -21,8 +21,6 @@ var_dump( fnmatch("*.phpt", $file) );
 echo "*** Testing fnmatch() with other than file ***\n";
 var_dump( fnmatch(100, 100) );
 var_dump( fnmatch("string", "string") );
-var_dump( fnmatch(TRUE, TRUE) );
-var_dump( fnmatch(FALSE, FALSE) );
 
 echo "\n*** Done ***\n";
 ?>
@@ -35,8 +33,6 @@ bool(true)
 bool(true)
 bool(false)
 *** Testing fnmatch() with other than file ***
-bool(true)
-bool(true)
 bool(true)
 bool(true)
 
