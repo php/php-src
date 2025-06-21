@@ -2795,6 +2795,9 @@ simple_list:
 				zend_ast_export_attributes(str, ast->child[3], indent, 0);
 			}
 			zend_ast_export_visibility(str, ast->attr, ZEND_MODIFIER_TARGET_CPP);
+			if (ast->attr & ZEND_ACC_FINAL) {
+				smart_str_appends(str, "final ");
+			}
 			if (ast->child[0]) {
 				zend_ast_export_type(str, ast->child[0], indent);
 				smart_str_appendc(str, ' ');
