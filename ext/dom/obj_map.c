@@ -204,29 +204,30 @@ static xmlNodePtr dom_map_get_attr_start(xmlNodePtr node)
 	return (xmlNodePtr) node->properties;
 }
 
-static void dom_map_get_chain_item(dom_nnodemap_object *map, zend_long index, zval *return_value, xmlNodePtr (*get_start)(xmlNodePtr))
+static void dom_map_get_attributes_item(dom_nnodemap_object *map, zend_long index, zval *return_value)
+{
+	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
+	xmlNodePtr itemnode = NULL;
+	if (nodep && index >= 0) {
+		itemnode = dom_map_get_attr_start(nodep);
+		for (; index > 0 && itemnode; itemnode = itemnode->next, index--);
+	}
+	dom_ret_node_to_zobj(map, itemnode, return_value);
+}
+
+static void dom_map_get_nodes_item(dom_nnodemap_object *map, zend_long index, zval *return_value)
 {
 	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
 	xmlNodePtr itemnode = NULL;
 	if (nodep && index >= 0) {
 		dom_node_idx_pair start_point = dom_obj_map_get_start_point(map, nodep, index);
-		itemnode = start_point.node ? start_point.node : get_start(nodep);
+		itemnode = start_point.node ? start_point.node : dom_nodelist_iter_start_first_child(nodep);
 		for (; start_point.index > 0 && itemnode; itemnode = itemnode->next, start_point.index--);
 	}
 	dom_ret_node_to_zobj(map, itemnode, return_value);
 	if (itemnode) {
 		dom_map_cache_obj(map, itemnode, index, return_value);
 	}
-}
-
-static void dom_map_get_attributes_item(dom_nnodemap_object *map, zend_long index, zval *return_value)
-{
-	dom_map_get_chain_item(map, index, return_value, dom_map_get_attr_start);
-}
-
-static void dom_map_get_nodes_item(dom_nnodemap_object *map, zend_long index, zval *return_value)
-{
-	dom_map_get_chain_item(map, index, return_value, dom_nodelist_iter_start_first_child);
 }
 
 static void dom_map_get_by_tag_name_item(dom_nnodemap_object *map, zend_long index, zval *return_value)
@@ -352,7 +353,7 @@ const php_dom_obj_map_handler php_dom_obj_map_attributes = {
 	.get_item = dom_map_get_attributes_item,
 	.get_named_item = dom_map_get_named_item_prop,
 	.has_named_item = dom_map_has_named_item_prop,
-	.use_cache = true,
+	.use_cache = false,
 	.nameless = false,
 };
 
