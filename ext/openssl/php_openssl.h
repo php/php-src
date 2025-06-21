@@ -70,14 +70,23 @@ struct php_openssl_errors {
 	int bottom;
 };
 
+struct php_openssl_libctx {
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	OSSL_LIB_CTX *libctx;
+	OSSL_LIB_CTX *default_libctx;
+	OSSL_LIB_CTX *custom_libctx;
+#endif
+	char *propq;
+};
+
 ZEND_BEGIN_MODULE_GLOBALS(openssl)
 	struct php_openssl_errors *errors;
 	struct php_openssl_errors *errors_mark;
-#if PHP_OPENSSL_API_VERSION >= 0x30000
-	OSSL_LIB_CTX *libctx;
-	char *propq;
-#endif
+	struct php_openssl_libctx ctx;
 ZEND_END_MODULE_GLOBALS(openssl)
+
+#define PHP_OPENSSL_LIBCTX OPENSSL_G(ctx).libctx
+#define PHP_OPENSSL_PROPQ OPENSSL_G(ctx).propq
 
 #define OPENSSL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(openssl, v)
 
