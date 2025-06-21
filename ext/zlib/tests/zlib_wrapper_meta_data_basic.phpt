@@ -5,13 +5,13 @@ zlib
 --FILE--
 <?php
 echo "no wrapper\n";
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f,'r');
 var_dump(stream_get_meta_data($h));
 gzclose($h);
 echo "\nwith wrapper\n";
-$f = "compress.zlib://".__DIR__."/004.txt.gz";
-$h = fopen($f,'r');
+$f2 = "compress.zlib://" . $f;
+$h = fopen($f2,'r');
 var_dump(stream_get_meta_data($h));
 gzclose($h);
 
@@ -55,5 +55,5 @@ array(9) {
   ["seekable"]=>
   bool(true)
   ["uri"]=>
-  string(%d) "compress.zlib://%s/004.txt.gz"
+  string(%d) "compress.zlib://%s/test.txt.gz"
 }

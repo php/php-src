@@ -5,16 +5,12 @@ zlib
 --FILE--
 <?php
 
-var_dump(gzfile("nonexistent_file_gzfile",1));
-
-var_dump(gzfile(__DIR__."/004私はガラスを食べられます.txt.gz"));
-var_dump(gzfile(__DIR__."/004私はガラスを食べられます.txt.gz", 1));
+var_dump(gzfile(__DIR__."/gzfile-mb私はガラスを食べられます.txt.gz"));
+var_dump(gzfile(__DIR__."/gzfile-mb私はガラスを食べられます.txt.gz", true));
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: gzfile(nonexistent_file_gzfile): Failed to open stream: No such file or directory in %s on line %d
-bool(false)
+--EXPECT--
 array(6) {
   [0]=>
   string(36) "When you're taught through feelings

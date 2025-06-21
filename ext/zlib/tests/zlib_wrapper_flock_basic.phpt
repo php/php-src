@@ -4,7 +4,7 @@ Test function flock on a zlib stream
 zlib
 --FILE--
 <?php
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f,'r');
 var_dump(flock($h, LOCK_EX));
 gzclose($h);

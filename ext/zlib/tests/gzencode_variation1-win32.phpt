@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) != "WIN") {
 --FILE--
 <?php
 
-include(__DIR__ . '/data.inc');
+include(__DIR__ . '/data/data.inc');
 
 echo "*** Testing gzencode() : variation ***\n";
 

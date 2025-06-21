@@ -4,7 +4,7 @@ Test gzinflate() function : error conditions
 zlib
 --FILE--
 <?php
-include(__DIR__ . '/data.inc');
+include(__DIR__ . '/data/data.inc');
 
 echo "*** Testing gzinflate() : error conditions ***\n";
 
