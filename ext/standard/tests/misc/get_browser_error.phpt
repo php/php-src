@@ -11,8 +11,8 @@ echo "*** Testing get_browser() : error functionality ***\n";
 /* Unknown browser uses defaults. */
 var_dump( get_browser( 'foobar', true ) );
 
-/* Some wrong parameters, no HTTP_USER_AGENT set */
-var_dump( get_browser( null, 'foobar' ) );
+/* no HTTP_USER_AGENT set */
+var_dump( get_browser( null, true ) );
 
 ?>
 --EXPECTF--
