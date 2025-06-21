@@ -1,45 +1,24 @@
 --TEST--
 Test variations in usage of asinh()
 --INI--
-serialize_precision = 10
+precision=14
 --FILE--
 <?php
-/*
- * Function is implemented in ext/standard/math.c
-*/
 
+$values = include 'data/numbers.inc';
 
-//Test asinh with a different input values
-
-$values = array(23,
-        -23,
-        2.345e1,
-        -2.345e1,
-        0x17,
-        027,
-        "23",
-        "23.45",
-        "2.345e1",
-        "1000",
-        true,
-        false);
-
-for ($i = 0; $i < count($values); $i++) {
-    $res = asinh($values[$i]);
+foreach ($values as $value) {
+    $res = asinh($value);
     var_dump($res);
 }
 
 ?>
 --EXPECT--
-float(3.829113652)
-float(-3.829113652)
-float(3.848471992)
-float(-3.848471992)
-float(3.829113652)
-float(3.829113652)
-float(3.829113652)
-float(3.848471992)
-float(3.848471992)
-float(7.60090271)
-float(0.881373587)
-float(0)
+float(3.8291136516208812)
+float(-3.8291136516208812)
+float(3.8484719917851553)
+float(3.8484719917851553)
+float(-3.8484719917851553)
+float(2.99822295029797)
+float(3.027639279353268)
+float(8.97474462874175)

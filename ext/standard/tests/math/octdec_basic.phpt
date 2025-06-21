@@ -1,59 +1,46 @@
 --TEST--
-Test octdec() - basic function test octdec()
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
+octdec(): basic
 --FILE--
 <?php
-$values = array(01234567,
-                0567,
-                017777777777,
-                020000000000,
-                0x1234ABC,
-                12345,
-                '01234567',
-                '0567',
-                '017777777777',
-                '020000000000',
-                '0x1234ABC',
-                '12345',
-                31101.3,
-                31.1013e5,
-                true,
-                false,
-                );
 
-for ($i = 0; $i < count($values); $i++) {
-    $res = octdec($values[$i]);
+$values = [
+    0o567 => '567',
+    0o17777777777 => '17777777777',
+];
+
+$values_leading = [
+    0o567 => '0567',
+    0o17777777777 => '017777777777',
+];
+
+$values_leading_explicit = [
+    0o567 => '0o567',
+    0o17777777777 => '0o17777777777',
+];
+
+foreach ($values as $nb => $value) {
+    echo "octdec('$value') should be $nb is ";
+    $res = octdec($value);
     var_dump($res);
 }
+
+foreach ($values_leading as $nb => $value) {
+    echo "octdec('$value') should be $nb is ";
+    $res = octdec($value);
+    var_dump($res);
+}
+
+foreach ($values_leading_explicit as $nb => $value) {
+    echo "octdec('$value') should be $nb is ";
+    $res = octdec($value);
+    var_dump($res);
+}
+
 ?>
---EXPECTF--
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(14489)
-int(253)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(36947879)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(4618484)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(4104)
-int(5349)
-int(342391)
-int(375)
-int(2147483647)
-float(2147483648)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(668)
-int(5349)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(102923)
-int(823384)
-int(1)
-int(0)
+--EXPECT--
+octdec('567') should be 375 is int(375)
+octdec('17777777777') should be 2147483647 is int(2147483647)
+octdec('0567') should be 375 is int(375)
+octdec('017777777777') should be 2147483647 is int(2147483647)
+octdec('0o567') should be 375 is int(375)
+octdec('0o17777777777') should be 2147483647 is int(2147483647)

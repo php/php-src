@@ -4,63 +4,22 @@ Test log1p() - basic function test log1p()
 precision=14
 --FILE--
 <?php
-echo "*** Testing log1p() : basic functionality ***\n";
 
-$values = array(23,
-                -23,
-                2.345e1,
-                -2.345e1,
-                0x17,
-                027,
-                "23",
-                "23.45",
-                "2.345e1",
-                true,
-                false);
+$values = include 'data/numbers.inc';
 
-echo "\n LOG1p tests\n";
-
-foreach($values as $value) {
-    echo "\n-- log1p $value --\n";
+foreach ($values as $value) {
+    echo "log1p($value): ";
     var_dump(log1p($value));
 };
 
 
 ?>
 --EXPECT--
-*** Testing log1p() : basic functionality ***
-
- LOG1p tests
-
--- log1p 23 --
-float(3.1780538303479458)
-
--- log1p -23 --
-float(NAN)
-
--- log1p 23.45 --
-float(3.196630215920881)
-
--- log1p -23.45 --
-float(NAN)
-
--- log1p 23 --
-float(3.1780538303479458)
-
--- log1p 23 --
-float(3.1780538303479458)
-
--- log1p 23 --
-float(3.1780538303479458)
-
--- log1p 23.45 --
-float(3.196630215920881)
-
--- log1p 2.345e1 --
-float(3.196630215920881)
-
--- log1p 1 --
-float(0.6931471805599453)
-
--- log1p  --
-float(0)
+log1p(23): float(3.1780538303479458)
+log1p(-23): float(NAN)
+log1p(23.45): float(3.196630215920881)
+log1p(23.45): float(3.196630215920881)
+log1p(-23.45): float(NAN)
+log1p(10): float(2.3978952727983707)
+log1p(10.3): float(2.424802725718295)
+log1p(3950.5): float(8.28185053264503)

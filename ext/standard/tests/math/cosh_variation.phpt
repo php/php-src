@@ -1,45 +1,24 @@
 --TEST--
 Test variations in usage of cosh()
 --INI--
-serialize_precision = 10
+precision=14
 --FILE--
 <?php
-/*
- * Function is implemented in ext/standard/math.c
-*/
 
+$values = include 'data/numbers.inc';
 
-//Test cosh with a different input values
-
-$values = array(23,
-        -23,
-        2.345e1,
-        -2.345e1,
-        0x17,
-        027,
-        "23",
-        "23.45",
-        "2.345e1",
-        "1000",
-        true,
-        false);
-
-for ($i = 0; $i < count($values); $i++) {
-    $res = cosh($values[$i]);
+foreach ($values as $value) {
+    $res = cosh($value);
     var_dump($res);
 }
 
 ?>
 --EXPECT--
-float(4872401723)
-float(4872401723)
-float(7641446995)
-float(7641446995)
-float(4872401723)
-float(4872401723)
-float(4872401723)
-float(7641446995)
-float(7641446995)
+float(4872401723.124452)
+float(4872401723.124452)
+float(7641446994.979367)
+float(7641446994.979367)
+float(7641446994.979367)
+float(11013.232920103324)
+float(14866.309443262266)
 float(INF)
-float(1.543080635)
-float(1)

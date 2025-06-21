@@ -1,46 +1,23 @@
 --TEST--
 Test abs() function : basic functionality
 --INI--
-precision = 14
+precision=14
 --FILE--
 <?php
-echo "*** Testing abs() : basic functionality ***\n";
 
-$values = array(23,
-                -23,
-                2.345e1,
-                -2.345e1,
-                0x17,
-                027,
-                "23",
-                "-23",
-                "23.45",
-                "2.345e1",
-                "-2.345e1",
-                null,
-                true,
-                false);
+$values = include 'data/numbers.inc';
 
-for ($i = 0; $i < count($values); $i++) {
-    $res = abs($values[$i]);
+foreach ($values as $value) {
+    $res = abs($value);
     var_dump($res);
 }
 ?>
---EXPECTF--
-*** Testing abs() : basic functionality ***
-int(23)
-int(23)
-float(23.45)
-float(23.45)
-int(23)
-int(23)
+--EXPECT--
 int(23)
 int(23)
 float(23.45)
 float(23.45)
 float(23.45)
-
-Deprecated: abs(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-int(0)
-int(1)
-int(0)
+int(10)
+float(10.3)
+float(3950.5)
