@@ -18,7 +18,7 @@ fclose($sockets[1]);
 $sockets = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 var_dump($sockets);
 
-stream_set_blocking($sockets[1], 0);
+stream_set_blocking($sockets[1], false);
 
 $eol = '<EOL>';
 

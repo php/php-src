@@ -45,7 +45,7 @@ $fp = stream_socket_client($srv_addr, $errno, $errstr, 2);
 if (!$fp) {
     echo "$errstr ($errno)\n";
 } else {
-    stream_set_blocking($fp, 0);
+    stream_set_blocking($fp, false);
     sleep(2);
     while (!feof($fp)) {
         ++$i;
