@@ -24,6 +24,7 @@
 
 #define FILTER_FORCE_ARRAY			0x4000000
 #define FILTER_NULL_ON_FAILURE			0x8000000
+#define FILTER_THROW_ON_FAILURE			0x10000000
 
 #define FILTER_FLAG_ALLOW_OCTAL             0x0001
 #define FILTER_FLAG_ALLOW_HEX               0x0002
@@ -50,7 +51,7 @@
 #define FILTER_FLAG_IPV6                    0x00200000
 #define FILTER_FLAG_NO_RES_RANGE            0x00400000
 #define FILTER_FLAG_NO_PRIV_RANGE           0x00800000
-#define FILTER_FLAG_GLOBAL_RANGE            0x10000000
+#define FILTER_FLAG_GLOBAL_RANGE            0x20000000
 
 #define FILTER_FLAG_HOSTNAME               0x100000
 
@@ -93,9 +94,16 @@
 || (id >= FILTER_VALIDATE_ALL && id <= FILTER_VALIDATE_LAST) \
 || id == FILTER_CALLBACK)
 
+
+/* When using FILTER_THROW_ON_FAILURE, we can't actually throw the error here
+ * because we don't have access to the name of the filter. Use ZVAL_ERROR()
+ * so that we can easily identify places where we want to throw. */
 #define RETURN_VALIDATION_FAILED \
 	if (EG(exception)) { \
 		return; \
+	} else if (flags & FILTER_THROW_ON_FAILURE) { \
+		zval_ptr_dtor(value); \
+		ZVAL_ERROR(value); \
 	} else if (flags & FILTER_NULL_ON_FAILURE) { \
 		zval_ptr_dtor(value); \
 		ZVAL_NULL(value); \
