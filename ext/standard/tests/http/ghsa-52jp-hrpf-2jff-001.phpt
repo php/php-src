@@ -35,7 +35,7 @@ $clientCode = <<<'CODE'
 
  $ctx = stream_context_create();
  stream_context_set_params($ctx, array("notification" => "stream_notification_callback"));
- var_dump(trim(file_get_contents("http://{{ ADDR }}", false, $ctx)));
+ var_dump(file_get_contents("http://{{ ADDR }}", false, $ctx));
  var_dump($http_response_header);
 CODE;
 
@@ -47,7 +47,7 @@ Found the mime-type: text/html;
 Redirected: string(8000) "%s"
 
 Warning: file_get_contents(http://127.0.0.1:%d): Failed to open stream: %s
-string(0) ""
+bool(false)
 array(3) {
   [0]=>
   string(15) "HTTP/1.0 301 Ok"

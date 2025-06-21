@@ -27,7 +27,7 @@ $responses = array(
 
 ['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
-$f = file_get_contents($uri, 0, $ctx);
+$f = file_get_contents($uri, false, $ctx);
 
 http_server_kill($pid);
 var_dump($f);
