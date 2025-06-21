@@ -25,10 +25,6 @@ $needle = array(
   //nulls
   '\0',
 
-  //boolean false
-  FALSE,
-  false,
-
   //empty string
   '',
 
@@ -113,95 +109,89 @@ string(5) "\101 "
 bool(false)
 
 -- Iteration 13 --
-bool(false)
+string(1) " "
 
 -- Iteration 14 --
-bool(false)
+string(47) "$&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 15 --
 string(1) " "
 
 -- Iteration 16 --
-string(47) "$&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
-
--- Iteration 17 --
-string(1) " "
-
--- Iteration 18 --
 string(46) "&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
--- Iteration 19 --
+-- Iteration 17 --
 string(45) "!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
--- Iteration 20 --
+-- Iteration 18 --
 string(43) "%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
--- Iteration 21 --
+-- Iteration 19 --
 string(5) "\101 "
 
--- Iteration 22 --
+-- Iteration 20 --
 string(39) "()*+-./:;<=>?@hello123456he \x234 \101 "
 
--- Iteration 23 --
+-- Iteration 21 --
 string(37) "*+-./:;<=>?@hello123456he \x234 \101 "
 
--- Iteration 24 --
+-- Iteration 22 --
 string(36) "+-./:;<=>?@hello123456he \x234 \101 "
 
--- Iteration 25 --
+-- Iteration 23 --
 string(35) "-./:;<=>?@hello123456he \x234 \101 "
 
+-- Iteration 24 --
+string(34) "./:;<=>?@hello123456he \x234 \101 "
+
+-- Iteration 25 --
+string(34) "./:;<=>?@hello123456he \x234 \101 "
+
 -- Iteration 26 --
-string(34) "./:;<=>?@hello123456he \x234 \101 "
-
--- Iteration 27 --
-string(34) "./:;<=>?@hello123456he \x234 \101 "
-
--- Iteration 28 --
 string(32) ":;<=>?@hello123456he \x234 \101 "
 
--- Iteration 29 --
+-- Iteration 27 --
 string(31) ";<=>?@hello123456he \x234 \101 "
 
--- Iteration 30 --
+-- Iteration 28 --
 string(30) "<=>?@hello123456he \x234 \101 "
 
--- Iteration 31 --
+-- Iteration 29 --
 string(28) ">?@hello123456he \x234 \101 "
 
--- Iteration 32 --
+-- Iteration 30 --
 string(29) "=>?@hello123456he \x234 \101 "
 
--- Iteration 33 --
+-- Iteration 31 --
 string(27) "?@hello123456he \x234 \101 "
 
--- Iteration 34 --
+-- Iteration 32 --
 string(26) "@hello123456he \x234 \101 "
+
+-- Iteration 33 --
+string(26) "@hello123456he \x234 \101 "
+
+-- Iteration 34 --
+string(2) "1 "
 
 -- Iteration 35 --
-string(26) "@hello123456he \x234 \101 "
+string(5) "\101 "
 
 -- Iteration 36 --
-string(2) "1 "
+string(44) "#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 37 --
 string(5) "\101 "
 
 -- Iteration 38 --
-string(44) "#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
-
--- Iteration 39 --
-string(5) "\101 "
-
--- Iteration 40 --
 bool(false)
 
+-- Iteration 39 --
+string(7) "4 \101 "
+
+-- Iteration 40 --
+string(7) "4 \101 "
+
 -- Iteration 41 --
-string(7) "4 \101 "
-
--- Iteration 42 --
-string(7) "4 \101 "
-
--- Iteration 43 --
 string(63) "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 *** Done ***

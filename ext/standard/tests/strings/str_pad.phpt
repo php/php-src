@@ -21,7 +21,6 @@ echo "\n#### variations with input string and pad-length ####\n";
 $input_strings = array(
     "variation", // normal string
     "", 	// empty string
-    true,  // boolean
     15,  // numeric
     15.55,  // numeric
     "2990"  // numeric string
@@ -50,7 +49,7 @@ foreach ($input_strings as $input_string ) {
 }
 
 echo "\n#### variation with pad string ####\n";
-$pad_strings = array ("=", 1, true, "string_pad", 1.5, "\t", '\t');
+$pad_strings = ["=", 1, "string_pad", 1.5, "\t", '\t'];
 $input_string="variation";
 $pad_length = 16;
 foreach ( $pad_strings as $pad_string ) {
@@ -148,36 +147,6 @@ string(16) "================"
 string(16) "================"
 string(16) "================"
 string(16) "================"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(1) "1"
-string(9) "1        "
-string(9) "1========"
-string(9) "========1"
-string(9) "1========"
-string(9) "====1===="
-string(10) "1         "
-string(10) "1========="
-string(10) "=========1"
-string(10) "1========="
-string(10) "====1====="
-string(16) "1               "
-string(16) "1==============="
-string(16) "===============1"
-string(16) "1==============="
-string(16) "=======1========"
 string(2) "15"
 string(2) "15"
 string(2) "15"
@@ -274,10 +243,6 @@ string(16) "variation======="
 string(16) "=======variation"
 string(16) "variation======="
 string(16) "===variation===="
-string(16) "variation1111111"
-string(16) "1111111variation"
-string(16) "variation1111111"
-string(16) "111variation1111"
 string(16) "variation1111111"
 string(16) "1111111variation"
 string(16) "variation1111111"

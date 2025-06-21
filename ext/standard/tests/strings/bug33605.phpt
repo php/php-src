@@ -3,7 +3,7 @@ Bug #33605 (substr_compare crashes)
 --FILE--
 <?php
 try {
-    substr_compare("aa", "a", -99999999, -1, 0);
+    substr_compare("aa", "a", -99999999, -1, false);
 } catch (\ValueError $e) {
     echo $e->getMessage();
 }

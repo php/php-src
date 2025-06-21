@@ -6,8 +6,8 @@ Test strrchr() function : usage variations - double quoted strings
 /* Test strrchr() function by passing various double quoted strings for 'haystack' & 'needle' */
 
 echo "*** Testing strrchr() function: with various double quoted strings ***";
-$haystack = "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ";
-$needle = array(
+$haystack = "Hello,$&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ";
+$needle = [
   //regular strings
   "l",
   "L",
@@ -20,15 +20,9 @@ $needle = array(
   "	",
   "\n",
   "\N",
-  "
-",  //new line
 
   //nulls
   "\0",
-
-  //boolean false
-  FALSE,
-  false,
 
   //empty string
   "",
@@ -63,8 +57,8 @@ $needle = array(
   "A",  //respective ASCII char of \101
   "456HEE",  //numerics + chars
   42, //needle as int(ASCII value of "*")
-  $haystack  //haystack as needle
-);
+  $haystack,  //haystack as needle
+];
 
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
@@ -75,7 +69,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with various double quoted strings ***
 -- Iteration 1 --
 string(16) "lo123456he #4 A "
@@ -84,139 +78,116 @@ string(16) "lo123456he #4 A "
 bool(false)
 
 -- Iteration 3 --
-string(53) "Hello,	
-%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+string(47) "Hello,$&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
 -- Iteration 4 --
 string(8) "he #4 A "
 
 -- Iteration 5 --
-string(47) "	
-%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+bool(false)
 
 -- Iteration 6 --
 string(36) "\o,()*+-./:;<=>?@hello123456he #4 A "
 
 -- Iteration 7 --
-string(47) "	
-%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+bool(false)
 
 -- Iteration 8 --
-string(44) "
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+bool(false)
 
 -- Iteration 9 --
 string(36) "\o,()*+-./:;<=>?@hello123456he #4 A "
 
 -- Iteration 10 --
-string(44) "
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+bool(false)
 
 -- Iteration 11 --
-string(45) "%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+bool(false)
 
 -- Iteration 12 --
-string(45) "%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+string(1) " "
 
 -- Iteration 13 --
-string(45) "%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
-
--- Iteration 14 --
-string(45) "%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
-
--- Iteration 15 --
-string(1) " "
-
--- Iteration 16 --
 string(41) "$&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 17 --
+-- Iteration 14 --
 string(1) " "
 
--- Iteration 18 --
+-- Iteration 15 --
 string(40) "&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 19 --
+-- Iteration 16 --
 string(39) "!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 20 --
+-- Iteration 17 --
 string(37) "%\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 21 --
+-- Iteration 18 --
 string(36) "\o,()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 22 --
+-- Iteration 19 --
 string(33) "()*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 23 --
+-- Iteration 20 --
 string(31) "*+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 24 --
+-- Iteration 21 --
 string(30) "+-./:;<=>?@hello123456he #4 A "
 
--- Iteration 25 --
+-- Iteration 22 --
 string(29) "-./:;<=>?@hello123456he #4 A "
 
--- Iteration 26 --
+-- Iteration 23 --
 string(28) "./:;<=>?@hello123456he #4 A "
 
--- Iteration 27 --
+-- Iteration 24 --
 string(28) "./:;<=>?@hello123456he #4 A "
 
--- Iteration 28 --
+-- Iteration 25 --
 string(26) ":;<=>?@hello123456he #4 A "
 
--- Iteration 29 --
+-- Iteration 26 --
 string(25) ";<=>?@hello123456he #4 A "
 
--- Iteration 30 --
+-- Iteration 27 --
 string(24) "<=>?@hello123456he #4 A "
 
--- Iteration 31 --
+-- Iteration 28 --
 string(22) ">?@hello123456he #4 A "
 
--- Iteration 32 --
+-- Iteration 29 --
 string(23) "=>?@hello123456he #4 A "
 
--- Iteration 33 --
+-- Iteration 30 --
 string(21) "?@hello123456he #4 A "
 
--- Iteration 34 --
+-- Iteration 31 --
 string(20) "@hello123456he #4 A "
 
--- Iteration 35 --
+-- Iteration 32 --
 string(20) "@hello123456he #4 A "
 
--- Iteration 36 --
+-- Iteration 33 --
 string(14) "123456he #4 A "
 
--- Iteration 37 --
+-- Iteration 34 --
 string(5) "#4 A "
+
+-- Iteration 35 --
+string(5) "#4 A "
+
+-- Iteration 36 --
+string(2) "A "
+
+-- Iteration 37 --
+string(2) "A "
 
 -- Iteration 38 --
-string(5) "#4 A "
+string(4) "4 A "
 
 -- Iteration 39 --
-string(2) "A "
+string(4) "4 A "
 
 -- Iteration 40 --
-string(2) "A "
-
--- Iteration 41 --
-string(4) "4 A "
-
--- Iteration 42 --
-string(4) "4 A "
-
--- Iteration 43 --
-string(53) "Hello,	
-%0
-  $&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
+string(47) "Hello,$&!#%\o,()*+-./:;<=>?@hello123456he #4 A "
 *** Done ***

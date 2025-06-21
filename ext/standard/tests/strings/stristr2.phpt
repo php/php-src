@@ -5,15 +5,15 @@ stristr() - New parameter: before_needle
 
 $email  = 'AbcCdEfGh';
 var_dump(stristr($email, 'c'));
-var_dump(stristr($email, 'c', 1));
+var_dump(stristr($email, 'c', true));
 
 $email  = 'AbCdeEfGh';
 var_dump(stristr($email, 'E'));
-var_dump(stristr($email, 'E', 1));
+var_dump(stristr($email, 'E', true));
 
 $email  = 'wazAbCdeEfGh';
 var_dump(stristr($email, 97));
-var_dump(stristr($email, 97, 1));
+var_dump(stristr($email, 97, true));
 
 ?>
 --EXPECT--

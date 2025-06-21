@@ -24,21 +24,15 @@ $pieces = array(
   2,
   0,
   -639,
-  true,
   "PHP",
-  false,
   "",
   " ",
-  "string\x00with\x00...\0"
 );
 $glues = array(
   "TRUE",
-  true,
-  false,
   array("key1", "key2"),
   "",
   " ",
-  "string\x00between",
   -0,
   '\0'
 );
@@ -179,23 +173,17 @@ array(1) {
 
 *** Testing implode() with variations of glue ***
 -- Iteration 1 --
-string(59) "2TRUE0TRUE-639TRUE1TRUEPHPTRUETRUETRUE TRUEstring%0with%0...%0"
+string(30) "2TRUE0TRUE-639TRUEPHPTRUETRUE "
 -- Iteration 2 --
-string(35) "2101-639111PHP111 1string%0with%0...%0"
--- Iteration 3 --
-string(27) "20-6391PHP string%0with%0...%0"
--- Iteration 4 --
 implode(): Argument #1 ($separator) must be of type string, array given
+-- Iteration 3 --
+string(10) "20-639PHP "
+-- Iteration 4 --
+string(15) "2 0 -639 PHP   "
 -- Iteration 5 --
-string(27) "20-6391PHP string%0with%0...%0"
+string(15) "2000-6390PHP00 "
 -- Iteration 6 --
-string(35) "2 0 -639 1 PHP     string%0with%0...%0"
--- Iteration 7 --
-string(139) "2string%0between0string%0between-639string%0between1string%0betweenPHPstring%0betweenstring%0betweenstring%0between string%0betweenstring%0with%0...%0"
--- Iteration 8 --
-string(35) "2000-639010PHP000 0string%0with%0...%0"
--- Iteration 9 --
-string(43) "2\00\0-639\01\0PHP\0\0\0 \0string%0with%0...%0"
+string(20) "2\00\0-639\0PHP\0\0 "
 
 *** Testing implode() on empty string ***
 implode(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
@@ -208,9 +196,9 @@ Warning: Array to string conversion in %s on line %d
 string(27) "ArrayTESTArrayTESTPHPTEST50"
 implode(): Argument #1 ($separator) must be of type string, array given
 
-Warning: Array to string conversion in %s
+Warning: Array to string conversion in %s on line %d
 
-Warning: Array to string conversion in %s
+Warning: Array to string conversion in %s on line %d
 string(18) "Array2Array2PHP250"
 
 *** Testing implode() on objects ***

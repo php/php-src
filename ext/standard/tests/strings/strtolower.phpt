@@ -21,9 +21,7 @@ $strings = array (
   "stRINg0234",
   "1.233.344StrinG12333",
   "$$$$$$!!!!@@@@@@@ ABCDEF !!!***",
-  "ABCD\0abcdABCD",
-  TRUE,
-  FALSE,
+  "ABCDabcdABCD",
 
   /* Check for off-by-one errors in the SSE implementation */
   "AAAAAAAAAAAAAAAAAAAA",
@@ -49,7 +47,7 @@ else
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtolower() with 256 chars ***
 00 => 00
 01 => 01
@@ -328,27 +326,21 @@ string(20) "1.233.344string12333"
 string(31) "$$$$$$!!!!@@@@@@@ abcdef !!!***"
 
 -- Iteration 5 --
-string(13) "abcd%0abcdabcd"
+string(12) "abcdabcdabcd"
 
 -- Iteration 6 --
-string(1) "1"
-
--- Iteration 7 --
-string(0) ""
-
--- Iteration 8 --
 string(20) "aaaaaaaaaaaaaaaaaaaa"
 
--- Iteration 9 --
+-- Iteration 7 --
 string(20) "zzzzzzzzzzzzzzzzzzzz"
 
--- Iteration 10 --
+-- Iteration 8 --
 string(20) "@@@@@@@@@@@@@@@@@@@@"
 
--- Iteration 11 --
+-- Iteration 9 --
 string(20) "[[[[[[[[[[[[[[[[[[[["
 
--- Iteration 12 --
+-- Iteration 10 --
 string(62) "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz"
 
 *** Testing strtolower() with two different case strings ***
