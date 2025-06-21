@@ -1584,13 +1584,14 @@ AC_SUBST([AR_FLAGS], [cr])
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
 dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
 dnl compiler.
+dnl TODO: Should this be removed?
 AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
   undefine([AC_PROG_CXX])
   AC_DEFUN([AC_PROG_CXX], [])
   undefine([AC_PROG_CXXCPP])
   AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
 ])
-AC_PROG_LIBTOOL
+LT_INIT
 
 PHP_SET_LIBTOOL_VARIABLE([--silent])
 
