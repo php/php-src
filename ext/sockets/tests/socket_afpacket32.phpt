@@ -58,6 +58,65 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32-bit only");
 
     socket_close($s_s);
     socket_close($s_c);
+
+    $s_c     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_IP);
+    $s_bind  = socket_bind($s_c, 'lo');
+
+    $s_s     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_IP);
+    $v_bind  = socket_bind($s_s, 'lo');
+
+    $ip = hex2bin(
+	    "4500" .
+	    str_repeat("0028", 16) .
+	    "0000" .
+	    "4000" .
+	    "4006" .
+	    "0000" .
+	    "7f000001" .
+	    "7f000001"
+    );
+    $p = str_repeat("A", 20);
+
+    $buf = pack("H12H12n", "ffffffffffff", "000000000000", ETH_P_IP);
+    $buf .= $ip . $p;
+
+    $min_frame_size = 60;
+    $buf .= str_repeat("\x00", max(0, $min_frame_size - strlen($buf)));
+
+    var_dump(socket_sendto($s_s, $buf, strlen($buf), 0, "lo", 1));
+
+    try {
+    	socket_recvfrom($s_c, $rsp, strlen($buf), 0, $addr);
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(), PHP_EOL;
+    }
+
+    $ip = hex2bin(
+	    "9999" .
+	    "0028" .
+	    "0000" .
+	    "4000" .
+	    "4006" .
+	    "0000" .
+	    "FFFFFeFF" .
+	    "7f000001"
+    );
+    $p = str_repeat("Bb", 80);
+
+    $buf = pack("H12H12n", "ffffffffffffh", "aaaaaAAAAAAA", ETH_P_IP);
+    $buf .= $ip . $p;
+
+    $min_frame_size = 60;
+    $buf .= str_repeat("\x00", max(0, $min_frame_size - strlen($buf)));
+
+    var_dump(socket_sendto($s_s, $buf, strlen($buf), 0, "lo", 1));
+    var_dump(socket_recvfrom($s_c, $rsp, strlen($buf), 0, $addr));
+
+    var_dump($addr);
+    var_dump($rsp);
+ 
+    socket_close($s_s);
+    socket_close($s_c);
 ?>
 --EXPECTF--
 bool(true)
