@@ -17,7 +17,7 @@ var_dump(ini_get_all("pcre"));
 var_dump(ini_get_all("pcre", false));
 var_dump(ini_get_all("reflection", false));
 
-var_dump(ini_get_all("", ""));
+var_dump(ini_get_all("", false));
 
 echo "Done\n";
 ?>

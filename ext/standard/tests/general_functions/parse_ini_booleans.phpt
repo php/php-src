@@ -5,7 +5,7 @@ parse_ini_file() boolean operators
 
 $ini_file = __DIR__."/parse_ini_booleans.data";
 
-var_dump(parse_ini_file($ini_file, 1));
+var_dump(parse_ini_file($ini_file, true));
 
 echo "Done.\n";
 

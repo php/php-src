@@ -13,18 +13,16 @@ echo "\n\n";
 echo "uniqid() with a prefix\n";
 
 // Use a fixed prefix so we can ensure length of o/p id is fixed
-$prefix = array (
-                99999,
-                "99999",
-                10.5e2,
-                true,
-                false
-                );
+$prefixes = [
+    99999,
+    "99999",
+    10.5e2,
+];
 
-for ($i = 0; $i < count($prefix); $i++) {
-    var_dump(uniqid($prefix[$i]));
-    var_dump(uniqid($prefix[$i], true));
-    var_dump(uniqid($prefix[$i], false));
+foreach ($prefixes as $prefix) {
+    var_dump(uniqid($prefix));
+    var_dump(uniqid($prefix, true));
+    var_dump(uniqid($prefix, false));
     echo "\n";
 }
 
@@ -50,11 +48,3 @@ string(18) "99999%s"
 string(17) "1050%s"
 string(27) "1050%s.%s"
 string(17) "1050%s"
-
-string(14) "1%s"
-string(24) "1%s.%s"
-string(14) "1%s"
-
-string(13) "%s"
-string(23) "%s.%s"
-string(13) "%s"
