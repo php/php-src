@@ -22,7 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-#include "dom_ce.h"
+#include "obj_map.h"
 
 typedef struct nodeIterator {
 	int cur;

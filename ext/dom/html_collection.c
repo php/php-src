@@ -21,6 +21,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "obj_map.h"
 #include "nodelist.h"
 #include "html_collection.h"
 #include "namespace_compat.h"
@@ -115,7 +116,7 @@ zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, int 
 		dom_html_collection_named_item_into_zval(rv, index.str, object);
 	} else {
 		ZEND_ASSERT(index.type == DOM_NODELIST_DIM_LONG);
-		php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
+		php_dom_obj_map_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
 	}
 
 	return rv;

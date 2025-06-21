@@ -56,7 +56,7 @@ extern zend_module_entry dom_module_entry;
 #include "xpath_callbacks.h"
 #include "zend_exceptions.h"
 #include "dom_ce.h"
-#include "obj_map.h"
+
 /* DOM API_VERSION, please bump it up, if you change anything in the API
     therefore it's easier for the script-programmers to check, what's working how
    Can be checked with phpversion("dom");
@@ -75,23 +75,6 @@ static inline dom_xpath_object *php_xpath_obj_from_obj(zend_object *obj) {
 }
 
 #define Z_XPATHOBJ_P(zv)  php_xpath_obj_from_obj(Z_OBJ_P((zv)))
-
-typedef struct dom_nnodemap_object {
-	dom_object *baseobj;
-	zval baseobj_zv;
-	int cached_length;
-	xmlHashTable *ht;
-	xmlChar *local;
-	zend_string *local_lower;
-	xmlChar *ns;
-	php_libxml_cache_tag cache_tag;
-	dom_object *cached_obj;
-	zend_long cached_obj_index;
-	xmlDictPtr dict;
-	const php_dom_obj_map_handler *handler;
-	bool release_local : 1;
-	bool release_ns : 1;
-} dom_nnodemap_object;
 
 typedef struct {
 	zend_object_iterator intern;
@@ -145,7 +128,6 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
 bool dom_node_is_read_only(const xmlNode *node);
 bool dom_node_children_valid(const xmlNode *node);
-void dom_namednode_iter(dom_object *basenode, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns, const php_dom_obj_map_handler *handler);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
@@ -210,8 +192,6 @@ void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_valu
 xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input);
 
 /* nodemap and nodelist APIs */
-void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, const char *ns, zval *return_value);
-xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index);
 zend_long php_dom_get_namednodemap_length(dom_object *obj);
 xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep);
 

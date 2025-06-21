@@ -20,13 +20,35 @@
 typedef struct dom_nnodemap_object dom_nnodemap_object;
 
 typedef struct php_dom_obj_map_handler {
-   zend_long (*length)(dom_nnodemap_object *);
-   void (*get_item)(dom_nnodemap_object *, zend_long, zval *);
-   xmlNodePtr (*get_named_item)(dom_nnodemap_object *, const zend_string *, const char *);
-   bool (*has_named_item)(dom_nnodemap_object *, const zend_string *, const char *);
-   bool use_cache;
-   bool nameless;
+	zend_long (*length)(dom_nnodemap_object *);
+	void (*get_item)(dom_nnodemap_object *, zend_long, zval *);
+	xmlNodePtr (*get_named_item)(dom_nnodemap_object *, const zend_string *, const char *);
+	bool (*has_named_item)(dom_nnodemap_object *, const zend_string *, const char *);
+	bool use_cache;
+	bool nameless;
 } php_dom_obj_map_handler;
+
+typedef struct dom_nnodemap_object {
+	dom_object *baseobj;
+	zval baseobj_zv;
+	int cached_length;
+	xmlHashTable *ht;
+	xmlChar *local;
+	zend_string *local_lower;
+	xmlChar *ns;
+	php_libxml_cache_tag cache_tag;
+	dom_object *cached_obj;
+	zend_long cached_obj_index;
+	xmlDictPtr dict;
+	const php_dom_obj_map_handler *handler;
+	bool release_local : 1;
+	bool release_ns : 1;
+} dom_nnodemap_object;
+
+void php_dom_create_obj_map(dom_object *basenode, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns, const php_dom_obj_map_handler *handler);
+void php_dom_obj_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, const char *ns, zval *return_value);
+void php_dom_obj_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
+zend_long php_dom_get_nodelist_length(dom_object *obj);
 
 extern const php_dom_obj_map_handler php_dom_obj_map_attributes;
 extern const php_dom_obj_map_handler php_dom_obj_map_by_tag_name;
