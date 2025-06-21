@@ -14,7 +14,7 @@ $ini_file = __DIR__."/parse_ini_basic.data";
 
 define('TEST_CONSTANT', 'this_is_test_constant');
 
-var_dump(parse_ini_file($ini_file, 1));
+var_dump(parse_ini_file($ini_file, true));
 
 echo "Done.\n";
 ?>
