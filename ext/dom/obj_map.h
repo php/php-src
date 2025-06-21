@@ -31,7 +31,7 @@ typedef struct php_dom_obj_map_handler {
 typedef struct dom_nnodemap_object {
 	dom_object *baseobj;
 	zval baseobj_zv;
-	int cached_length;
+	zend_long cached_length;
 	xmlHashTable *ht;
 	xmlChar *local;
 	zend_string *local_lower;
@@ -41,8 +41,8 @@ typedef struct dom_nnodemap_object {
 	zend_long cached_obj_index;
 	xmlDictPtr dict;
 	const php_dom_obj_map_handler *handler;
-	bool release_local : 1;
-	bool release_ns : 1;
+	bool release_local;
+	bool release_ns;
 } dom_nnodemap_object;
 
 void php_dom_create_obj_map(dom_object *basenode, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns, const php_dom_obj_map_handler *handler);
