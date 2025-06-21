@@ -289,6 +289,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 	if (flags & FILTER_THROW_ON_FAILURE) {
 		ZEND_ASSERT(copy_for_throwing != NULL);
 		if (Z_ISERROR_P(value)) {
+			ZVAL_NULL(value);
 			zend_throw_exception_ex(
 				php_filter_failed_exception_ce,
 				0,
