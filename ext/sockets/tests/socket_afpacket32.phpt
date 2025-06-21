@@ -127,3 +127,45 @@ int(%d)
 invalid transport header length
 int(60)
 unsupported ethernet protocol
+int(84)
+unsupported ip header protocol
+int(%d)
+int(%d)
+string(%d) "%s"
+object(Socket\EthernetPacket)#%d (7) {
+  ["headerSize"]=>
+  int(%d)
+  ["rawPacket"]=>
+  string(%d) "%r(.|\n)*?"%r
+  ["socket"]=>
+  object(Socket)#%d (0) {
+  }
+  ["ethProtocol"]=>
+  int(2048)
+  ["srcMac"]=>
+  string(%d) "%s"
+  ["dstMac"]=>
+  string(%d) "%s"
+  ["payload"]=>
+  object(Socket\Ipv4Packet)#%d (5) {
+    ["headerSize"]=>
+    int(%d)
+    ["rawPacket"]=>
+    string(%d) "%s"
+    ["srcAddr"]=>
+    string(%d) "%s.%s.%s.%s"
+    ["dstAddr"]=>
+    string(%d) "%s.%s.%s.%s"
+    ["payload"]=>
+    object(Socket\TcpPacket)#%d (4) {
+      ["headerSize"]=>
+      int(%d)
+      ["rawPacket"]=>
+      string(%d) "%r(.|\n)*?"%r
+      ["srcPort"]=>
+      int(%d)
+      ["dstPort"]=>
+      int(%d)
+    }
+  }
+}
