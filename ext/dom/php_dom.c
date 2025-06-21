@@ -24,6 +24,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "zend_enum.h"
 #include "php_dom.h"
+#include "obj_map.h"
 #include "nodelist.h"
 #include "html_collection.h"
 #include "namespace_compat.h"
@@ -1456,50 +1457,6 @@ void dom_objects_free_storage(zend_object *object)
 }
 /* }}} */
 
-/* TODO: move me to obj_map.c */
-void dom_namednode_iter(dom_object *basenode, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns, const php_dom_obj_map_handler *handler) /* {{{ */
-{
-	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
-
-	ZEND_ASSERT(basenode != NULL);
-
-	ZVAL_OBJ_COPY(&mapptr->baseobj_zv, &basenode->std);
-
-	xmlDocPtr doc = basenode->document ? basenode->document->ptr : NULL;
-
-	mapptr->handler = handler;
-	mapptr->baseobj = basenode;
-	mapptr->ht = ht;
-	if (EXPECTED(doc != NULL)) {
-		mapptr->dict = doc->dict;
-		xmlDictReference(doc->dict);
-	}
-
-	const xmlChar* tmp;
-
-	if (local) {
-		int len = (int) ZSTR_LEN(local);
-		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ZSTR_VAL(local), len)) != NULL) {
-			mapptr->local = BAD_CAST tmp;
-		} else {
-			mapptr->local = BAD_CAST ZSTR_VAL(zend_string_copy(local));
-			mapptr->release_local = true;
-		}
-		mapptr->local_lower = zend_string_tolower(local);
-	}
-
-	if (ns) {
-		int len = (int) ZSTR_LEN(ns);
-		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ZSTR_VAL(ns), len)) != NULL) {
-			mapptr->ns = BAD_CAST tmp;
-		} else {
-			mapptr->ns = BAD_CAST ZSTR_VAL(zend_string_copy(ns));
-			mapptr->release_ns = true;
-		}
-	}
-}
-/* }}} */
-
 static void dom_objects_set_class_ex(zend_class_entry *class_type, dom_object *intern)
 {
 	zend_class_entry *base_class = class_type;
@@ -2294,7 +2251,7 @@ static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int 
 		return rv;
 	}
 
-	php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, lval, rv);
+	php_dom_obj_map_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, lval, rv);
 	return rv;
 }
 
@@ -2382,7 +2339,7 @@ static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int t
 	zend_long lval;
 	if (dom_nodemap_or_nodelist_process_offset_as_named(offset, &lval)) {
 		/* exceptional case, switch to named lookup */
-		php_dom_named_node_map_get_named_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_STR_P(offset), NULL, rv);
+		php_dom_obj_map_get_named_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_STR_P(offset), NULL, rv);
 		return rv;
 	}
 
@@ -2429,7 +2386,7 @@ static zval *dom_modern_nodemap_read_dimension(zend_object *object, zval *offset
 		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
 			map->handler->get_item(map, (zend_long) lval, rv);
 		} else {
-			php_dom_named_node_map_get_named_item_into_zval(map, Z_STR_P(offset), NULL, rv);
+			php_dom_obj_map_get_named_item_into_zval(map, Z_STR_P(offset), NULL, rv);
 		}
 	} else if (Z_TYPE_P(offset) == IS_LONG) {
 		map->handler->get_item(map, Z_LVAL_P(offset), rv);
