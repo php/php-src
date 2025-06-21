@@ -26,8 +26,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32-bit only");
     var_dump($istr);
     var_dump($iindex);
 
-    socket_getpeername($s_c, $istr, $iindex2);
-
     $s_s     = socket_create(AF_PACKET, SOCK_RAW, ETH_P_LOOP);
     $v_bind  = socket_bind($s_s, 'lo');
 
