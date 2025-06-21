@@ -288,6 +288,67 @@ zend_long php_dom_get_nodelist_length(dom_object *obj)
 	return count;
 }
 
+void php_dom_create_obj_map(dom_object *basenode, dom_object *intern, xmlHashTablePtr ht, zend_string *local, zend_string *ns, const php_dom_obj_map_handler *handler)
+{
+	dom_nnodemap_object *mapptr = intern->ptr;
+
+	ZEND_ASSERT(basenode != NULL);
+
+	ZVAL_OBJ_COPY(&mapptr->baseobj_zv, &basenode->std);
+
+	xmlDocPtr doc = basenode->document ? basenode->document->ptr : NULL;
+
+	mapptr->handler = handler;
+	mapptr->baseobj = basenode;
+	mapptr->ht = ht;
+	if (EXPECTED(doc != NULL)) {
+		mapptr->dict = doc->dict;
+		xmlDictReference(doc->dict);
+	}
+
+	const xmlChar* tmp;
+
+	if (local) {
+		int len = (int) ZSTR_LEN(local);
+		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ZSTR_VAL(local), len)) != NULL) {
+			mapptr->local = BAD_CAST tmp;
+		} else {
+			mapptr->local = BAD_CAST ZSTR_VAL(zend_string_copy(local));
+			mapptr->release_local = true;
+		}
+		mapptr->local_lower = zend_string_tolower(local);
+	}
+
+	if (ns) {
+		int len = (int) ZSTR_LEN(ns);
+		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ZSTR_VAL(ns), len)) != NULL) {
+			mapptr->ns = BAD_CAST tmp;
+		} else {
+			mapptr->ns = BAD_CAST ZSTR_VAL(zend_string_copy(ns));
+			mapptr->release_ns = true;
+		}
+	}
+}
+
+void php_dom_obj_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
+{
+	if (EXPECTED(objmap)) {
+		objmap->handler->get_item(objmap, index, return_value);
+	} else {
+		RETURN_NULL();
+	}
+}
+
+void php_dom_obj_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, const char *ns, zval *return_value)
+{
+	xmlNodePtr itemnode = objmap->handler->get_named_item(objmap, named, ns);
+	if (itemnode) {
+		DOM_RET_OBJ(itemnode, objmap->baseobj);
+	} else {
+		RETURN_NULL();
+	}
+}
+
 /**********************
  * === Named item === *
  **********************/

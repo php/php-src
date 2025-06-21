@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "obj_map.h"
 #include "nodelist.h"
 #include "zend_interfaces.h"
 
@@ -63,15 +64,6 @@ PHP_METHOD(DOMNodeList, count)
 }
 /* }}} end dom_nodelist_count */
 
-void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
-{
-	if (EXPECTED(objmap)) {
-		objmap->handler->get_item(objmap, index, return_value);
-	} else {
-		RETURN_NULL();
-	}
-}
-
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since:
 */
@@ -85,7 +77,7 @@ PHP_METHOD(DOMNodeList, item)
 	zval *id = ZEND_THIS;
 	dom_object *intern = Z_DOMOBJ_P(id);
 	dom_nnodemap_object *objmap = intern->ptr;
-	php_dom_nodelist_get_item_into_zval(objmap, index, return_value);
+	php_dom_obj_map_get_item_into_zval(objmap, index, return_value);
 }
 /* }}} end dom_nodelist_item */
 
@@ -136,7 +128,7 @@ zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int 
 		return NULL;
 	}
 
-	php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
+	php_dom_obj_map_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
 	return rv;
 }
 

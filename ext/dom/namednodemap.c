@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "obj_map.h"
 #include "zend_interfaces.h"
 
 /*
@@ -54,16 +55,6 @@ zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, const char *ns, zval *return_value)
-{
-	xmlNodePtr itemnode = objmap->handler->get_named_item(objmap, named, ns);
-	if (itemnode) {
-		DOM_RET_OBJ(itemnode, objmap->baseobj);
-	} else {
-		RETURN_NULL();
-	}
-}
-
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since:
 */
@@ -76,7 +67,7 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItem)
 	}
 
 	dom_nnodemap_object *objmap = Z_DOMOBJ_P(ZEND_THIS)->ptr;
-	php_dom_named_node_map_get_named_item_into_zval(objmap, named, NULL, return_value);
+	php_dom_obj_map_get_named_item_into_zval(objmap, named, NULL, return_value);
 }
 /* }}} end dom_namednodemap_get_named_item */
 
@@ -121,7 +112,7 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 	objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap != NULL) {
-		php_dom_named_node_map_get_named_item_into_zval(objmap, named, uri, return_value);
+		php_dom_obj_map_get_named_item_into_zval(objmap, named, uri, return_value);
 	}
 }
 /* }}} end dom_namednodemap_get_named_item_ns */
