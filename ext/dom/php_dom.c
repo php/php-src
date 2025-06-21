@@ -1545,8 +1545,11 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 		if (objmap->local_lower) {
 			zend_string_release(objmap->local_lower);
 		}
-		if (!Z_ISUNDEF(objmap->baseobj_zv)) {
-			zval_ptr_dtor(&objmap->baseobj_zv);
+		if (objmap->release_array) {
+			zend_array_release(objmap->array);
+		}
+		if (objmap->baseobj) {
+			OBJ_RELEASE(&objmap->baseobj->std);
 		}
 		xmlDictFree(objmap->dict);
 		efree(objmap);
