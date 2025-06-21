@@ -2346,7 +2346,15 @@ simple_list:
 			smart_str_appendc(str, '`');
 			break;
 		case ZEND_AST_CLONE:
-			PREFIX_OP("clone ", 270, 271);
+			smart_str_appends(str, "clone");
+			smart_str_appendc(str, '(');
+			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			if (ast->child[1]) {
+				smart_str_appends(str, ", ");
+				zend_ast_export_ex(str, ast->child[1], 0, indent);
+			}
+			smart_str_appendc(str, ')');
+			break;
 		case ZEND_AST_PRINT:
 			PREFIX_OP("print ", 60, 61);
 		case ZEND_AST_INCLUDE_OR_EVAL:
