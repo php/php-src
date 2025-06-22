@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fix memory leaks when returning refcounted value from curl callback.
     (nielsdos)
 
+- LDAP:
+  . Fixed GH-18902 ldap_exop/ldap_exop_sync assert triggered on empty
+    request OID. (David Carlier)
+
 - Streams:
   . Fixed GH-13264 (fgets() and stream_get_line() do not return false on filter
     fatal error). (Jakub Zelenka)
