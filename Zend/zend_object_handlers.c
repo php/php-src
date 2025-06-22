@@ -719,7 +719,9 @@ static bool zend_call_get_hook(
 		return false;
 	}
 
+	GC_ADDREF(zobj);
 	zend_call_known_instance_method_with_0_params(get, zobj, rv);
+	OBJ_RELEASE(zobj);
 
 	return true;
 }
