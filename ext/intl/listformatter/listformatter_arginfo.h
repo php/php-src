@@ -65,8 +65,6 @@ static zend_class_entry *register_class_IntlListFormatter(void)
 	zend_string *const_TYPE_UNITS_name = zend_string_init_interned("TYPE_UNITS", sizeof("TYPE_UNITS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_TYPE_UNITS_name, &const_TYPE_UNITS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TYPE_UNITS_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 67
 
 	zval const_WIDTH_WIDE_value;
 	ZVAL_LONG(&const_WIDTH_WIDE_value, ULISTFMT_WIDTH_WIDE);
