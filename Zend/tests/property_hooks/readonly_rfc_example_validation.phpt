@@ -5,10 +5,10 @@ Readonly property hook validation
 
 readonly class PositivePoint
 {
- public function __construct(
-     public int $x { set => $value > 0 ? $value : throw new \Error('Value must be greater 0'); },
-     public int $y { set => $value > 0 ? $value : throw new \Error('Value must be greater 0'); },
- ) {}
+    public function __construct(
+        public int $x { set => $value > 0 ? $value : throw new \Error('Value must be greater 0'); },
+        public int $y { set => $value > 0 ? $value : throw new \Error('Value must be greater 0'); },
+    ) {}
 }
 
 $one = new PositivePoint(1,1);
