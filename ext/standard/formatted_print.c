@@ -534,7 +534,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 						goto fail;
 					}
 					if (Z_LVAL_P(tmp) < 0 || Z_LVAL_P(tmp) > INT_MAX) {
-						zend_value_error("Width must be greater than zero and less than %d", INT_MAX);
+						zend_value_error("Width must be between 0 and %d", INT_MAX);
 						goto fail;
 					}
 					width = Z_LVAL_P(tmp);
@@ -542,7 +542,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 				} else if (isdigit((int)*format)) {
 					PRINTF_DEBUG(("sprintf: getting width\n"));
 					if ((width = php_sprintf_getnumber(&format, &format_len)) < 0) {
-						zend_value_error("Width must be greater than zero and less than %d", INT_MAX);
+						zend_value_error("Width must be between 0 and %d", INT_MAX);
 						goto fail;
 					}
 					adjusting |= ADJ_WIDTH;
@@ -586,7 +586,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 						expprec = 1;
 					} else if (isdigit((int)*format)) {
 						if ((precision = php_sprintf_getnumber(&format, &format_len)) < 0) {
-							zend_value_error("Precision must be greater than zero and less than %d", INT_MAX);
+							zend_value_error("Precision must be between 0 and %d", INT_MAX);
 							goto fail;
 						}
 						adjusting |= ADJ_PRECISION;
