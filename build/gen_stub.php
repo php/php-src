@@ -3551,7 +3551,7 @@ class ClassInfo {
         $code .= generateCodeWithConditions(
             $this->constInfos,
             '',
-            static fn ( $const ) => $const->getDeclaration($allConstInfos)
+            static fn (ConstInfo $const): string => $const->getDeclaration($allConstInfos)
         );
 
         foreach ($this->enumCaseInfos as $enumCase) {
@@ -5189,7 +5189,7 @@ function generateArgInfoCode(
             $code .= generateCodeWithConditions(
                 $fileInfo->constInfos,
                 '',
-                static fn ( $constInfo ) => $constInfo->getDeclaration($allConstInfos)
+                static fn (ConstInfo $constInfo): string => $constInfo->getDeclaration($allConstInfos)
             );
 
             if ($attributeInitializationCode !== "" && $fileInfo->constInfos) {
