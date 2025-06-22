@@ -67,9 +67,7 @@
 
 #define TIDY_FETCH_ONLY_OBJECT	\
 	PHPTidyObj *obj;	\
-	if (zend_parse_parameters_none() != SUCCESS) {	\
-		RETURN_THROWS();	\
-	}	\
+	ZEND_PARSE_PARAMETERS_NONE(); \
 	obj = Z_TIDY_P(ZEND_THIS);	\
 
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
@@ -1140,9 +1138,7 @@ PHP_FUNCTION(tidy_diagnose)
 /* {{{ Get release date (version) for Tidy library */
 PHP_FUNCTION(tidy_get_release)
 {
-	if (zend_parse_parameters_none() != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #ifdef HAVE_TIDYRELEASEDATE
 	RETURN_STRING((const char *)tidyReleaseDate());
