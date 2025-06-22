@@ -34,7 +34,7 @@ ZEND_DECLARE_MODULE_GLOBALS(filter)
 typedef struct filter_list_entry {
 	const char *name;
 	int    id;
-	void (*function)(PHP_INPUT_FILTER_PARAM_DECL);
+	zend_result (*function)(PHP_INPUT_FILTER_PARAM_DECL);
 } filter_list_entry;
 
 /* {{{ filter_list */
@@ -284,12 +284,11 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 		copy_for_throwing = zend_string_copy(Z_STR_P(value));
 	}
 
-	filter_func.function(value, flags, options, charset);
+	zend_result result = filter_func.function(value, flags, options, charset);
 
 	if (flags & FILTER_THROW_ON_FAILURE) {
 		ZEND_ASSERT(copy_for_throwing != NULL);
-		if (Z_ISERROR_P(value)) {
-			ZVAL_NULL(value);
+		if (result == FAILURE) {
 			zend_throw_exception_ex(
 				php_filter_failed_exception_ce,
 				0,
