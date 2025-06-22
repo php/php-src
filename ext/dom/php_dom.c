@@ -96,6 +96,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_namespace_info_class_entry;
 static zend_object_handlers dom_object_handlers;
 static zend_object_handlers dom_nnodemap_object_handlers;
 static zend_object_handlers dom_nodelist_object_handlers;
+static zend_object_handlers dom_unset_children_property_object_handlers;
 static zend_object_handlers dom_modern_nnodemap_object_handlers;
 static zend_object_handlers dom_modern_nodelist_object_handlers;
 static zend_object_handlers dom_html_collection_object_handlers;
@@ -668,13 +669,34 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 static zend_object *dom_modern_element_clone_obj(zend_object *zobject)
 {
 	zend_object *clone = dom_objects_store_clone_obj(zobject);
+	dom_object *intern = php_dom_obj_from_obj(clone);
 
 	/* The $classList property is unique per element, and cached due to its [[SameObject]] requirement.
 	 * Remove it from the clone so the clone will get a fresh instance upon demand. */
-	zval *class_list = dom_element_class_list_zval(php_dom_obj_from_obj(clone));
+	zval *class_list = dom_element_class_list_zval(intern);
 	if (!Z_ISUNDEF_P(class_list)) {
 		zval_ptr_dtor(class_list);
 		ZVAL_UNDEF(class_list);
+	}
+	/* Likewise for $children */
+	zval *children = dom_parent_node_children(intern);
+	if (!Z_ISUNDEF_P(children)) {
+		zval_ptr_dtor(children);
+		ZVAL_UNDEF(children);
+	}
+
+	return clone;
+}
+
+static zend_object *dom_clone_obj_unset_children_property(zend_object *zobject)
+{
+	zend_object *clone = dom_objects_store_clone_obj(zobject);
+	dom_object *intern = php_dom_obj_from_obj(clone);
+
+	zval *children = dom_parent_node_children(intern);
+	if (!Z_ISUNDEF_P(children)) {
+		zval_ptr_dtor(children);
+		ZVAL_UNDEF(children);
 	}
 
 	return clone;
@@ -777,6 +799,9 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_modern_element_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_modern_element_object_handlers.clone_obj = dom_modern_element_clone_obj;
 
+	memcpy(&dom_unset_children_property_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
+	dom_unset_children_property_object_handlers.clone_obj = dom_clone_obj_unset_children_property;
+
 	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_nnodemap_object_handlers.free_obj = dom_nnodemap_objects_free_storage;
 	dom_nnodemap_object_handlers.read_dimension = dom_nodemap_read_dimension;
@@ -797,6 +822,8 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_html_collection_object_handlers, &dom_modern_nodelist_object_handlers, sizeof(zend_object_handlers));
 	dom_html_collection_object_handlers.read_dimension = dom_html_collection_read_dimension;
 	dom_html_collection_object_handlers.has_dimension = dom_html_collection_has_dimension;
+	dom_html_collection_object_handlers.get_gc = dom_html_collection_get_gc;
+	dom_html_collection_object_handlers.clone_obj = NULL;
 
 	memcpy(&dom_object_namespace_node_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_object_namespace_node_handlers.offset = XtOffsetOf(dom_object_namespace_node, dom.std);
@@ -911,9 +938,10 @@ PHP_MINIT_FUNCTION(dom)
 
 	dom_modern_documentfragment_class_entry = register_class_Dom_DocumentFragment(dom_modern_node_class_entry, dom_modern_parentnode_class_entry);
 	dom_modern_documentfragment_class_entry->create_object = dom_objects_new;
-	dom_modern_documentfragment_class_entry->default_object_handlers = &dom_object_handlers;
+	dom_modern_documentfragment_class_entry->default_object_handlers = &dom_unset_children_property_object_handlers;
 	zend_hash_init(&dom_modern_documentfragment_prop_handlers, 0, NULL, NULL, true);
 
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_documentfragment_prop_handlers, "children", dom_parent_node_children_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_documentfragment_prop_handlers, "firstElementChild", dom_parent_node_first_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_documentfragment_prop_handlers, "lastElementChild", dom_parent_node_last_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_documentfragment_prop_handlers, "childElementCount", dom_parent_node_child_element_count, NULL);
@@ -922,7 +950,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_new_ptr(&classes, dom_modern_documentfragment_class_entry->name, &dom_modern_documentfragment_prop_handlers);
 
 	dom_abstract_base_document_class_entry = register_class_Dom_Document(dom_modern_node_class_entry, dom_modern_parentnode_class_entry);
-	dom_abstract_base_document_class_entry->default_object_handlers = &dom_object_handlers;
+	dom_abstract_base_document_class_entry->default_object_handlers = &dom_unset_children_property_object_handlers;
 	zend_hash_init(&dom_abstract_base_document_prop_handlers, 0, NULL, NULL, true);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "implementation", dom_modern_document_implementation_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "URL", dom_document_document_uri_read, dom_document_document_uri_write);
@@ -932,6 +960,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "inputEncoding", dom_document_encoding_read, dom_html_document_encoding_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "doctype", dom_document_doctype_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "documentElement", dom_document_document_element_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "children", dom_parent_node_children_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "firstElementChild", dom_parent_node_first_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "lastElementChild", dom_parent_node_last_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "childElementCount", dom_parent_node_child_element_count, NULL);
@@ -1118,6 +1147,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "className", dom_element_class_name_read, dom_element_class_name_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "classList", dom_element_class_list_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "attributes", dom_node_attributes_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "children", dom_parent_node_children_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "firstElementChild", dom_parent_node_first_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "lastElementChild", dom_parent_node_last_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "childElementCount", dom_parent_node_child_element_count, NULL);
@@ -1534,8 +1564,8 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 	dom_nnodemap_object *objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap) {
-		if (objmap->cached_obj && GC_DELREF(&objmap->cached_obj->std) == 0) {
-			zend_objects_store_del(&objmap->cached_obj->std);
+		if (objmap->cached_obj) {
+			OBJ_RELEASE(&objmap->cached_obj->std);
 		}
 		if (objmap->release_local) {
 			dom_zend_string_release_from_char_pointer(objmap->local);

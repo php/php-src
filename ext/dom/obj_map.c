@@ -28,10 +28,7 @@
 static zend_always_inline void objmap_cache_release_cached_obj(dom_nnodemap_object *objmap)
 {
 	if (objmap->cached_obj) {
-		/* Since the DOM is a tree there can be no cycles. */
-		if (GC_DELREF(&objmap->cached_obj->std) == 0) {
-			zend_objects_store_del(&objmap->cached_obj->std);
-		}
+		OBJ_RELEASE(&objmap->cached_obj->std);
 		objmap->cached_obj = NULL;
 		objmap->cached_obj_index = 0;
 	}
@@ -77,6 +74,20 @@ static zend_long dom_map_get_nodes_length(dom_nnodemap_object *map)
 	if (nodep) {
 		for (xmlNodePtr curnode = dom_nodelist_iter_start_first_child(nodep); curnode; curnode = curnode->next) {
 			count++;
+		}
+	}
+	return count;
+}
+
+static zend_long dom_map_get_elements_length(dom_nnodemap_object *map)
+{
+	zend_long count = 0;
+	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
+	if (nodep) {
+		for (xmlNodePtr curnode = dom_nodelist_iter_start_first_child(nodep); curnode; curnode = curnode->next) {
+			if (curnode->type == XML_ELEMENT_NODE) {
+				count++;
+			}
 		}
 	}
 	return count;
@@ -216,6 +227,38 @@ static void dom_map_get_nodes_item(dom_nnodemap_object *map, zend_long index, zv
 		dom_node_idx_pair start_point = dom_obj_map_get_start_point(map, nodep, index);
 		itemnode = start_point.node ? start_point.node : dom_nodelist_iter_start_first_child(nodep);
 		for (; start_point.index > 0 && itemnode; itemnode = itemnode->next, start_point.index--);
+	}
+	dom_ret_node_to_zobj(map, itemnode, return_value);
+	if (itemnode) {
+		dom_map_cache_obj(map, itemnode, index, return_value);
+	}
+}
+
+static void dom_map_get_elements_item(dom_nnodemap_object *map, zend_long index, zval *return_value)
+{
+	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
+	xmlNodePtr itemnode = NULL;
+	if (nodep && index >= 0) {
+		dom_node_idx_pair start_point = dom_obj_map_get_start_point(map, nodep, index);
+		if (start_point.node) {
+			/* Guaranteed to be an element */
+			itemnode = start_point.node;
+		} else {
+			/* Fetch first element child */
+			itemnode = nodep->children;
+			while (itemnode && itemnode->type != XML_ELEMENT_NODE) {
+				itemnode = itemnode->next;
+			}
+		}
+
+		for (; start_point.index > 0 && itemnode; --start_point.index) {
+			do {
+				itemnode = itemnode->next;
+			} while (itemnode && itemnode->type != XML_ELEMENT_NODE);
+		}
+		if (itemnode && itemnode->type != XML_ELEMENT_NODE) {
+			itemnode = NULL;
+		}
 	}
 	dom_ret_node_to_zobj(map, itemnode, return_value);
 	if (itemnode) {
@@ -454,6 +497,15 @@ const php_dom_obj_map_handler php_dom_obj_map_notations = {
 	.has_named_item = dom_map_has_named_item_xmlht,
 	.use_cache = false,
 	.nameless = false,
+};
+
+const php_dom_obj_map_handler php_dom_obj_map_child_elements = {
+	.length = dom_map_get_elements_length,
+	.get_item = dom_map_get_elements_item,
+	.get_named_item = dom_map_get_named_item_null,
+	.has_named_item = dom_map_has_named_item_null,
+	.use_cache = true,
+	.nameless = true,
 };
 
 const php_dom_obj_map_handler php_dom_obj_map_noop = {

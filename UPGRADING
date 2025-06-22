@@ -185,6 +185,7 @@ PHP 8.5 UPGRADE NOTES
 
 - DOM:
   . Added Dom\Element::$outerHTML.
+  . Added $children property to Dom\ParentNode implementations.
 
 - EXIF:
   . Add OffsetTime* Exif tags.
