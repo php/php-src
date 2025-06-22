@@ -70,9 +70,6 @@ echo $category2->name . "\n";
 // same category instance returned
 var_dump($category1 === $category2);
 
-// can't be wrong, huh?
-var_dump($product);
-
 // cannot set twice
 try {
     $categoryId->setValue($product, '420');
@@ -86,20 +83,4 @@ hit database
 Category 42
 Category 42
 bool(true)
-object(LazyProduct)#2 (5) {
-  ["name"]=>
-  string(14) "Iced Chocolate"
-  ["price"]=>
-  float(1.99)
-  ["category"]=>
-  object(Category)#8 (1) {
-    ["name"]=>
-    string(11) "Category 42"
-  }
-  ["dbApi":"LazyProduct":private]=>
-  object(MockDbConnection)#6 (0) {
-  }
-  ["categoryId":"LazyProduct":private]=>
-  string(2) "42"
-}
 Error: Cannot modify readonly property LazyProduct::$categoryId
