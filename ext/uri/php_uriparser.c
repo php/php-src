@@ -42,7 +42,8 @@ static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri)
 
 static void uriparser_normalize_uri(UriUriA *uriparser_uri)
 {
-	ZEND_ASSERT(uriNormalizeSyntaxExA(uriparser_uri, (unsigned int)-1) == URI_SUCCESS);
+	int result = uriNormalizeSyntaxExA(uriparser_uri, (unsigned int)-1);
+	ZEND_ASSERT(result == URI_SUCCESS);
 }
 
 static UriUriA *uriparser_read_uri(uriparser_uris_t *uriparser_uris, uri_component_read_mode_t read_mode)
@@ -375,12 +376,14 @@ static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t 
 	}
 
 	int charsRequired = 0;
-	ZEND_ASSERT(uriToStringCharsRequiredA(uriparser_uri, &charsRequired) == URI_SUCCESS);
+	int result = uriToStringCharsRequiredA(uriparser_uri, &charsRequired);
+	ZEND_ASSERT(result == URI_SUCCESS);
 
 	charsRequired++;
 
 	zend_string *uri_string = zend_string_alloc(charsRequired - 1, false);
-	ZEND_ASSERT(uriToStringA(ZSTR_VAL(uri_string), uriparser_uri, charsRequired, NULL) == URI_SUCCESS);
+	result = uriToStringA(ZSTR_VAL(uri_string), uriparser_uri, charsRequired, NULL);
+	ZEND_ASSERT(result == URI_SUCCESS);
 
 	if (exclude_fragment) {
 		const char *pos = zend_memrchr(ZSTR_VAL(uri_string), '#', ZSTR_LEN(uri_string));
