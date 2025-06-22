@@ -279,28 +279,16 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 	/* Here be strings */
 	convert_to_string(value);
 
-	zend_string *copy_for_throwing = NULL;
-	if (flags & FILTER_THROW_ON_FAILURE) {
-		copy_for_throwing = zend_string_copy(Z_STR_P(value));
-	}
-
 	zend_result result = filter_func.function(value, flags, options, charset);
 
-	if (flags & FILTER_THROW_ON_FAILURE) {
-		ZEND_ASSERT(copy_for_throwing != NULL);
-		if (result == FAILURE) {
-			zend_throw_exception_ex(
-				php_filter_failed_exception_ce,
-				0,
-				"filter validation failed: filter %s not satisfied by %s",
-				filter_func.name,
-				ZSTR_VAL(copy_for_throwing)
-			);
-			zend_string_delref(copy_for_throwing);
-			return;
-		}
-		zend_string_delref(copy_for_throwing);
-		copy_for_throwing = NULL;
+	if ((flags & FILTER_THROW_ON_FAILURE) && result == FAILURE) {
+		zend_throw_exception_ex(
+			php_filter_failed_exception_ce,
+			0,
+			"filter validation failed: filter %s not satisfied",
+			filter_func.name
+		);
+		return;
 	}
 
 handle_default:
