@@ -4051,7 +4051,12 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 		}
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS|S!a!zz", &link, ldap_link_ce, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|S!a!zz", &link, ldap_link_ce, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(reqoid) == 0) {
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
