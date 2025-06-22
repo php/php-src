@@ -56,6 +56,8 @@ PHP                                                                        NEWS
   . Properly handle __debugInfo() returning an array reference. (nielsdos)
   . Properly handle reference return value from __toString(). (nielsdos)
   . Added the pipe (|>) operator. (crell)
+  . Added support for `final` with constructor property promotion.
+    (DanielEScherzer)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
