@@ -4,7 +4,6 @@ Phar: a non-executable zip with no stub named .phar.zip
 phar
 --INI--
 phar.readonly=1
-detect_unicode=0
 zend.multibyte=0
 --FILE--
 <?php
