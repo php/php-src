@@ -32,6 +32,7 @@
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_fibers.h"
+#include "main/php_main.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
 #include <sys/wait.h>
@@ -292,6 +293,7 @@ PHP_FUNCTION(pcntl_fork)
 
 		}
 	} else if (id == 0) {
+		php_child_init();
 		zend_max_execution_timer_init();
 	}
 
