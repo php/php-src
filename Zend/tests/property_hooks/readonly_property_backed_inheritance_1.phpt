@@ -18,4 +18,4 @@ class Test extends ParentClass {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare readonly property ParentClass::$prop as non-readonly Test::$prop %s on line %d
+Fatal error: Cannot redeclare readonly property ParentClass::$prop as non-readonly Test::$prop in %s on line %d
