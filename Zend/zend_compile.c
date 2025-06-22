@@ -903,13 +903,7 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 			}
 			break;
 		case T_FINAL:
-			if (target == ZEND_MODIFIER_TARGET_METHOD
-				|| target == ZEND_MODIFIER_TARGET_CONSTANT
-				|| target == ZEND_MODIFIER_TARGET_PROPERTY
-				|| target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
-				return ZEND_ACC_FINAL;
-			}
-			break;
+			return ZEND_ACC_FINAL;
 		case T_STATIC:
 			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_METHOD) {
 				return ZEND_ACC_STATIC;
@@ -7681,7 +7675,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
-		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY);
+		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY | ZEND_ACC_FINAL);
 		bool is_promoted = property_flags || hooks_ast;
 
 		znode var_node, default_node;
