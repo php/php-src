@@ -1549,7 +1549,7 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 		/* insufficient memory */
 		return NULL;
 	}
-	// bin is poisoned, do not unpoision inside this function
+	// bin is poisoned, do not unpoison inside this function
 	// zend_mm_set_next_free_slot automatically unpoisons and repoisons before return
 
 	chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(bin, ZEND_MM_CHUNK_SIZE);
