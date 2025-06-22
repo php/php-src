@@ -5,11 +5,6 @@ ldap
 --FILE--
 <?php
 $conn = ldap_connect();
-try {
-	ldap_exop($conn,null);
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
-}
 
 try {
 	ldap_exop($conn,"\0");
@@ -30,9 +25,6 @@ try {
 }
 ?>
 --EXPECTF--
-
-Deprecated: ldap_exop(): Passing null to parameter #2 ($request_oid) of type string is deprecated in %s on line %d
-ldap_exop(): Argument #2 ($request_oid) cannot be empty
 ldap_exop(): Argument #2 ($request_oid) must not contain any null bytes
-ldap_exop_sync(): Argument #2 ($request_oid) cannot be empty
+ldap_exop_sync(): Argument #2 ($request_oid) must not be empty
 ldap_exop_sync(): Argument #2 ($request_oid) must not contain any null bytes

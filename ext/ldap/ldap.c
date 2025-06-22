@@ -4041,7 +4041,7 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 	}
 
 	if (ZSTR_LEN(reqoid) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_value_error(2, "must not be empty");
 		RETURN_THROWS();
 	}
 
