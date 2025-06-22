@@ -3517,15 +3517,15 @@ static void* poison_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	if (SIZE_MAX - heap->debug.padding * 2 < size) {
 		zend_mm_panic("Integer overflow in memory allocation");
 	}
-	size_t sizePlusPadding = size + heap->debug.padding * 2;
+	size_t size_plus_padding = size + heap->debug.padding * 2;
 
-	void *ptr = zend_mm_alloc_heap(heap, sizePlusPadding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	void *ptr = zend_mm_alloc_heap(heap, size_plus_padding ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 
 	if (EXPECTED(ptr)) {
 		if (heap->debug.poison_alloc) {
-			ZEND_MM_UNPOISON(ptr, sizePlusPadding);
-			memset(ptr, heap->debug.poison_alloc_value, sizePlusPadding);
-			ZEND_MM_POISON(ptr, sizePlusPadding);
+			ZEND_MM_UNPOISON(ptr, size_plus_padding);
+			memset(ptr, heap->debug.poison_alloc_value, size_plus_padding);
+			ZEND_MM_POISON(ptr, size_plus_padding);
 		}
 
 		ptr = (char*)ptr + heap->debug.padding;
