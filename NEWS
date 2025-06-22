@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-18639 (Internal class aliases can break preloading + JIT).
     (nielsdos)
+  . Fixed bug GH-14082 (Segmentation fault on unknown address 0x600000000018
+    in ext/opcache/jit/zend_jit.c). (nielsdos)
 
 - Standard:
   . Fix misleading errors in printf(). (nielsdos)

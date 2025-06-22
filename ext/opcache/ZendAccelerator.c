@@ -52,6 +52,8 @@
 
 #ifdef HAVE_JIT
 # include "jit/zend_jit.h"
+# include "Optimizer/zend_func_info.h"
+# include "Optimizer/zend_call_graph.h"
 #endif
 
 #ifndef ZEND_WIN32
@@ -4363,6 +4365,39 @@ static void preload_load(void)
 	}
 }
 
+#if HAVE_JIT
+static void zend_accel_clear_call_graph_ptrs(zend_op_array *op_array)
+{
+	ZEND_ASSERT(ZEND_USER_CODE(op_array->type));
+	zend_func_info *info = ZEND_FUNC_INFO(op_array);
+	if (info) {
+		info->caller_info = NULL;
+		info->callee_info = NULL;
+	}
+}
+
+static void accel_reset_arena_info(zend_persistent_script *script)
+{
+	zend_op_array *op_array;
+	zend_class_entry *ce;
+
+	zend_accel_clear_call_graph_ptrs(&script->script.main_op_array);
+	ZEND_HASH_MAP_FOREACH_PTR(&script->script.function_table, op_array) {
+		zend_accel_clear_call_graph_ptrs(op_array);
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_MAP_FOREACH_PTR(&script->script.class_table, ce) {
+		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
+			if (op_array->scope == ce
+			 && op_array->type == ZEND_USER_FUNCTION
+			 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)
+			 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+				zend_accel_clear_call_graph_ptrs(op_array);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
+}
+#endif
+
 static zend_result accel_preload(const char *config, bool in_child)
 {
 	zend_file_handle file_handle;
@@ -4567,6 +4602,18 @@ static zend_result accel_preload(const char *config, bool in_child)
 			ZCSG(saved_scripts)[i++] = preload_script_in_shared_memory(script);
 		} ZEND_HASH_FOREACH_END();
 		ZCSG(saved_scripts)[i] = NULL;
+
+#if HAVE_JIT
+		/* During persisting, the JIT may trigger and fill in the call graph.
+		 * The call graph info is allocated on the arena which will be gone after preloading.
+		 * To prevent invalid accesses during normal requests, the arena data should be cleared.
+		 * This has to be done after all scripts have been persisted because shared op arrays between
+		 * scripts can change the call graph. */
+		accel_reset_arena_info(ZCSG(preload_script));
+		for (zend_persistent_script **scripts = ZCSG(saved_scripts); *scripts; scripts++) {
+			accel_reset_arena_info(*scripts);
+		}
+#endif
 
 		zend_shared_alloc_save_state();
 		accel_interned_strings_save_state();
