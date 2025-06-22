@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-18639 (Internal class aliases can break preloading + JIT).
     (nielsdos)
+  . Fixed bug GH-18899 (JIT function crash when emitting undefined variable
+    warning and opline is not set yet). (nielsdos)
 
 - Standard:
   . Fix misleading errors in printf(). (nielsdos)
