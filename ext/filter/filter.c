@@ -520,6 +520,8 @@ static void php_filter_call(
 
 	/* Cannot use both FILTER_NULL_ON_FAILURE and FILTER_THROW_ON_FAILURE */
 	if ((filter_flags & FILTER_NULL_ON_FAILURE) && (filter_flags & FILTER_THROW_ON_FAILURE)) {
+		zval_ptr_dtor(filtered);
+		ZVAL_NULL(filtered);
 		zend_argument_value_error(
 			options_arg_num,
 			"cannot use both FILTER_NULL_ON_FAILURE and FILTER_THROW_ON_FAILURE"
@@ -531,6 +533,7 @@ static void php_filter_call(
 		if (filter_flags & FILTER_REQUIRE_SCALAR) {
 			zval_ptr_dtor(filtered);
 			if (filter_flags & FILTER_THROW_ON_FAILURE) {
+				ZVAL_NULL(filtered);
 				zend_throw_exception(
 					php_filter_failed_exception_ce,
 					"filter validation failed: not a scalar value (got an array)",
@@ -550,6 +553,7 @@ static void php_filter_call(
 		const char *got_type = zend_zval_value_name(filtered);
 		zval_ptr_dtor(filtered);
 		if (filter_flags & FILTER_THROW_ON_FAILURE) {
+			ZVAL_NULL(filtered);
 			zend_throw_exception_ex(
 				php_filter_failed_exception_ce,
 				0,
