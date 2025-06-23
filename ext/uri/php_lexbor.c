@@ -234,6 +234,21 @@ static zend_string *fill_errors(zval *errors)
 	return result;
 }
 
+static void throw_invalid_url_exception_during_write(zval *errors, const char *component)
+{
+	zend_string *reason = fill_errors(errors);
+	zend_object *exception = zend_throw_exception_ex(
+		uri_whatwg_invalid_url_exception_ce,
+		0,
+		"The specified %s is malformed%s%s%s",
+		component,
+		reason ? " (" : "",
+		reason ? ZSTR_VAL(reason) : "",
+		reason ? ")" : ""
+	);
+	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+}
+
 static lxb_status_t lexbor_serialize_callback(const lxb_char_t *data, size_t length, void *ctx)
 {
 	smart_str *uri_str = ctx;
@@ -264,9 +279,7 @@ static zend_result lexbor_write_scheme(struct uri_internal_t *internal_uri, zval
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_protocol_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		zend_string *reason = fill_errors(errors);
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified scheme is malformed%s%s%s", reason ? " (" : "", reason ? ZSTR_VAL(reason) : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+		throw_invalid_url_exception_during_write(errors, "scheme");
 
 		return FAILURE;
 	}
@@ -295,9 +308,7 @@ static zend_result lexbor_write_username(uri_internal_t *internal_uri, zval *val
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_username_set(lexbor_uri, str.data, str.length) != LXB_STATUS_OK) {
-		zend_string *reason = fill_errors(errors);
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified username is malformed%s%s%s", reason ? " (" : "", reason ? ZSTR_VAL(reason) : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+		throw_invalid_url_exception_during_write(errors, "username");
 
 		return FAILURE;
 	}
@@ -326,9 +337,7 @@ static zend_result lexbor_write_password(struct uri_internal_t *internal_uri, zv
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_password_set(lexbor_uri, str.data, str.length) != LXB_STATUS_OK) {
-		zend_string *reason = fill_errors(errors);
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified password is malformed%s%s%s", reason ? " (" : "", reason ? ZSTR_VAL(reason) : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+		throw_invalid_url_exception_during_write(errors, "password");
 
 		return FAILURE;
 	}
@@ -400,9 +409,7 @@ static zend_result lexbor_write_host(struct uri_internal_t *internal_uri, zval *
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_hostname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		zend_string *reason = fill_errors(errors);
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified host is malformed%s%s%s", reason ? " (" : "", reason ? ZSTR_VAL(reason) : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+		throw_invalid_url_exception_during_write(errors, "host");
 
 		return FAILURE;
 	}
@@ -431,9 +438,7 @@ static zend_result lexbor_write_port(struct uri_internal_t *internal_uri, zval *
 	zval_long_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_port_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		zend_string *reason = fill_errors(errors);
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified port is malformed%s%s%s", reason ? " (" : "", reason ? ZSTR_VAL(reason) : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+		throw_invalid_url_exception_during_write(errors, "port");
 
 		return FAILURE;
 	}
@@ -462,9 +467,7 @@ static zend_result lexbor_write_path(struct uri_internal_t *internal_uri, zval *
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_pathname_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		zend_string *reason = fill_errors(errors);
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified path is malformed%s%s%s", reason ? " (" : "", reason ? ZSTR_VAL(reason) : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+		throw_invalid_url_exception_during_write(errors, "path");
 
 		return FAILURE;
 	}
@@ -493,9 +496,7 @@ static zend_result lexbor_write_query(struct uri_internal_t *internal_uri, zval 
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_search_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		zend_string *reason = fill_errors(errors);
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified query string is malformed%s%s%s", reason ? " (" : "", reason ? ZSTR_VAL(reason) : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+		throw_invalid_url_exception_during_write(errors, "query string");
 
 		return FAILURE;
 	}
@@ -524,9 +525,7 @@ static zend_result lexbor_write_fragment(struct uri_internal_t *internal_uri, zv
 	zval_string_or_null_to_lexbor_str(value, &str);
 
 	if (lxb_url_api_hash_set(lexbor_uri, &lexbor_parser, str.data, str.length) != LXB_STATUS_OK) {
-		zend_string *reason = fill_errors(errors);
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified fragment is malformed%s%s%s", reason ? " (" : "", reason ? ZSTR_VAL(reason) : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+		throw_invalid_url_exception_during_write(errors, "fragment");
 
 		return FAILURE;
 	}
