@@ -28,6 +28,8 @@ PHP                                                                        NEWS
     warning and opline is not set yet). (nielsdos)
   . Fixed bug GH-14082 (Segmentation fault on unknown address 0x600000000018
     in ext/opcache/jit/zend_jit.c). (nielsdos)
+  . Fixed bug GH-18898 (SEGV zend_jit_op_array_hot with property hooks
+    and preloading). (nielsdos)
 
 - PCNTL:
   . Fixed bug GH-18958 (Fatal error during shutdown after pcntl_rfork() or
