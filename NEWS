@@ -58,6 +58,7 @@ PHP                                                                        NEWS
   . Added the pipe (|>) operator. (crell)
   . Added support for `final` with constructor property promotion.
     (DanielEScherzer)
+  . Do not use RTLD_DEEPBIND if dlmopen is available. (Daniil Gentili)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
