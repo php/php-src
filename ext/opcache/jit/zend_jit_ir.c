@@ -5944,6 +5944,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			ir_IF_FALSE_cold(if_def);
 
 			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
+			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op1.var));
 
 			ref2 = jit_EG(uninitialized_zval);
@@ -5960,6 +5961,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			ir_IF_FALSE_cold(if_def);
 
 			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var)));
+			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op2.var));
 
 			ref2 = jit_EG(uninitialized_zval);
