@@ -5391,17 +5391,6 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_clone(znode *result, zend_ast *ast) /* {{{ */
-{
-	zend_ast *obj_ast = ast->child[0];
-
-	znode obj_node;
-	zend_compile_expr(&obj_node, obj_ast);
-
-	zend_emit_op_tmp(result, ZEND_CLONE, &obj_node, NULL);
-}
-/* }}} */
-
 static void zend_compile_global_var(zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -11716,9 +11705,6 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_NEW:
 			zend_compile_new(result, ast);
-			return;
-		case ZEND_AST_CLONE:
-			zend_compile_clone(result, ast);
 			return;
 		case ZEND_AST_ASSIGN_OP:
 			zend_compile_compound_assign(result, ast);
