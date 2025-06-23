@@ -100,13 +100,52 @@ else
     exit 1
 fi
 
+# Enhanced AppArmor handling
 if [[ -f /etc/apparmor.d/usr.sbin.named ]]; then
-  echo "Debug: AppArmor profile detected, setting to complain mode..."
-  aa-complain /usr/sbin/named || echo "Failed to set AppArmor to complain mode"
+  echo "Debug: AppArmor profile detected, attempting comprehensive bypass..."
+  
+  # Install apparmor-utils if not present
+  if ! command -v aa-complain >/dev/null 2>&1; then
+    echo "Debug: Installing apparmor-utils..."
+    apt-get update -qq
+    apt-get install -y apparmor-utils
+  fi
+  
+  # Check initial status
+  echo "Debug: Initial AppArmor status for named:"
+  aa-status 2>/dev/null | grep named || echo "No named profile in initial aa-status"
+  
+  # Try complain mode first
+  echo "Debug: Setting to complain mode..."
+  aa-complain /usr/sbin/named 2>/dev/null || echo "Failed to set AppArmor to complain mode"
+  
+  # Check what mode it's actually in
+  echo "Debug: AppArmor profile mode after complain:"
+  cat /sys/kernel/security/apparmor/profiles 2>/dev/null | grep named || echo "No named in profiles"
+  
+  # Try to completely disable it
+  echo "Debug: Attempting to disable AppArmor profile completely..."
+  aa-disable /usr/sbin/named 2>/dev/null || echo "Failed to disable AppArmor profile"
+  
+  # Alternative disable method
+  echo "Debug: Trying alternative disable method..."
+  ln -sf /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/ 2>/dev/null || echo "Symlink method failed"
+  
+  # Unload from kernel
+  if command -v apparmor_parser >/dev/null 2>&1; then
+    echo "Debug: Unloading profile from kernel..."
+    apparmor_parser -R /etc/apparmor.d/usr.sbin.named 2>/dev/null || echo "Failed to unload profile"
+  fi
+  
+  # Final status check
+  echo "Debug: Final AppArmor status:"
+  aa-status 2>/dev/null | grep named || echo "No named profile found (good!)"
+  
 elif [ -d /etc/apparmor.d/ ]; then
-  ls /etc/apparmor.d/
+  echo "Debug: AppArmor directory exists but no named profile found:"
+  ls /etc/apparmor.d/ | grep -i named || echo "No named-related profiles"
 else
-  echo "No apparmor.d"
+  echo "Debug: No AppArmor directory found"
 fi
 
 echo "Debug: Generated named.conf contents:"
@@ -147,6 +186,44 @@ else
     exit 1
   fi
 
+  # Set up permissions for bind user
+  echo "Debug: Setting up permissions for bind user..."
+  if id bind >/dev/null 2>&1; then
+    # The bind user needs execute permissions on all parent directories
+    echo "Debug: Setting directory permissions for bind user access..."
+    
+    # Make sure bind can traverse the entire path
+    chmod o+x /home 2>/dev/null || echo "Failed to chmod /home"
+    chmod o+x /home/runner 2>/dev/null || echo "Failed to chmod /home/runner" 
+    chmod o+x /home/runner/work 2>/dev/null || echo "Failed to chmod /home/runner/work"
+    chmod o+x /home/runner/work/php-src 2>/dev/null || echo "Failed to chmod /home/runner/work/php-src"
+    chmod o+x /home/runner/work/php-src/php-src 2>/dev/null || echo "Failed to chmod /home/runner/work/php-src/php-src"
+    chmod o+x "$SCRIPT_DIR" 2>/dev/null || echo "Failed to chmod $SCRIPT_DIR"
+    chmod o+x "$ZONES_DIR" 2>/dev/null || echo "Failed to chmod $ZONES_DIR"
+    
+    # Set file ownership and permissions
+    chown bind:bind "$NAMED_CONF" "$ZONES_DIR"/*.zone 2>/dev/null || echo "Failed to chown to bind user"
+    chmod 644 "$NAMED_CONF" "$ZONES_DIR"/*.zone
+    
+    echo "Debug: File permissions after setup:"
+    ls -la "$NAMED_CONF" "$ZONES_DIR"/*.zone
+    
+    echo "Debug: Directory permissions check:"
+    ls -ld "$SCRIPT_DIR" "$ZONES_DIR"
+    
+    # Test if bind user can actually read the config file
+    echo "Debug: Testing bind user access to config file:"
+    if sudo -u bind test -r "$NAMED_CONF"; then
+      echo "Debug: bind user CAN read config file"
+    else
+      echo "Debug: bind user CANNOT read config file - this is the problem!"
+      echo "Debug: Let's check what bind user sees:"
+      sudo -u bind ls -la "$NAMED_CONF" 2>&1 || echo "bind user cannot even stat the file"
+    fi
+  else
+    echo "Debug: bind user does not exist, keeping current permissions"
+  fi
+
   # Check IPv4/IPv6 configuration with fallbacks
   echo "Debug: Network configuration check:"
   echo "Debug: localhost resolution:"
@@ -183,9 +260,20 @@ else
   echo "Debug: systemd-resolved status:"
   systemctl is-active systemd-resolved 2>/dev/null || echo "systemd-resolved not active"
 
+  # Monitor AppArmor denials in background
+  echo "Debug: Starting AppArmor denial monitoring..."
+  (timeout 15 tail -f /var/log/syslog 2>/dev/null | grep "apparmor.*DENIED" | head -10 &) || echo "Could not start syslog monitoring"
+
+  # Try different user approaches
+  NAMED_USER="$(whoami)"
+  if id bind >/dev/null 2>&1; then
+    echo "Debug: Trying with bind user instead of root..."
+    NAMED_USER="bind"
+  fi
+
   # Run named and capture both stdout and stderr separately
-  echo "Debug: Starting named..."
-  if named -c "$NAMED_CONF" -p 53 -u "$(whoami)" > "$LOG_FILE" 2>&1; then
+  echo "Debug: Starting named as user: $NAMED_USER..."
+  if named -c "$NAMED_CONF" -p 53 -u "$NAMED_USER" > "$LOG_FILE" 2>&1; then
     echo "Debug: named command succeeded"
   else
     NAMED_EXIT_CODE=$?
@@ -193,11 +281,17 @@ else
     echo "Debug: Log file contents:"
     cat "$LOG_FILE" 2>/dev/null || echo "No log file found"
     
+    # Show any AppArmor denials
+    echo "Debug: Checking for AppArmor denials:"
+    grep "apparmor.*DENIED.*named" /var/log/syslog 2>/dev/null | tail -10 || echo "No AppArmor denials found in syslog"
+    
+    # Show general AppArmor messages
+    echo "Debug: Recent AppArmor messages for named:"
+    grep "apparmor.*named" /var/log/syslog 2>/dev/null | tail -10 || echo "No AppArmor messages found"
+    
     # Try to run named with more verbose output
     echo "Debug: Trying to run named in foreground for better error output:"
-    named -c "$NAMED_CONF" -p 53 -u "$(whoami)" -g -d 1 || true
-
-    cat /var/log/syslog | grep apparmor | grep named
+    timeout 5 named -c "$NAMED_CONF" -p 53 -u "$NAMED_USER" -g -d 1 || echo "Foreground attempt timed out or failed"
     
     exit $NAMED_EXIT_CODE
   fi
@@ -233,6 +327,10 @@ else
   else
     echo "No log file found at $LOG_FILE"
   fi
+
+  # Final AppArmor check
+  echo "Debug: Final AppArmor denial check:"
+  grep "apparmor.*DENIED.*named" /var/log/syslog 2>/dev/null | tail -5 || echo "No final AppArmor denials found"
 
   exit 1
 fi
