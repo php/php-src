@@ -17,11 +17,13 @@ var_dump($c->prop ?? 1);
 
 $r = new ReflectionClass(C::class);
 $c = $r->newLazyProxy(function () {
-    throw new Exception('Not reached');
+    $c = new C();
+    $c->prop = 2;
+    return $c;
 });
 var_dump($c->prop ?? 1);
 
 ?>
 --EXPECT--
 int(1)
-int(1)
+int(2)

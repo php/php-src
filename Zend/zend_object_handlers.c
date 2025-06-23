@@ -733,6 +733,8 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
 	uint32_t *guard = NULL;
+	bool obj_needs_deref = false;
+	zend_object *prev_zobj;
 
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Read object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
@@ -906,12 +908,8 @@ try_again:
 				goto call_getter;
 			}
 
-			bool obj_is_freed = GC_REFCOUNT(zobj) == 1;
-			OBJ_RELEASE(zobj);
-			if (UNEXPECTED(obj_is_freed)) {
-				retval = &EG(uninitialized_zval);
-				goto exit;
-			}
+			obj_needs_deref = true;
+			prev_zobj = zobj;
 		} else if (zobj->ce->__get && !((*guard) & IN_GET)) {
 			goto call_getter_addref;
 		}
@@ -960,7 +958,7 @@ uninit_error:
 			zobj = zend_lazy_object_init(zobj);
 			if (!zobj) {
 				retval = &EG(uninitialized_zval);
-				goto exit;
+				goto exit_slow;
 			}
 
 			if (UNEXPECTED(guard)) {
@@ -971,11 +969,12 @@ uninit_error:
 					(*guard) |= guard_type;
 					retval = zend_std_read_property(zobj, name, type, cache_slot, rv);
 					(*guard) &= ~guard_type;
-					return retval;
+					goto exit_slow;
 				}
 			}
 
-			return zend_std_read_property(zobj, name, type, cache_slot, rv);
+			retval = zend_std_read_property(zobj, name, type, cache_slot, rv);
+			goto exit_slow;
 		}
 	}
 	if (type != BP_VAR_IS) {
@@ -986,6 +985,16 @@ uninit_error:
 		}
 	}
 	retval = &EG(uninitialized_zval);
+
+exit_slow:
+	if (obj_needs_deref) {
+		/* Move value to rv in case zobj gets destroyed. */
+		if (retval != rv) {
+			ZVAL_COPY(rv, retval);
+			retval = rv;
+		}
+		OBJ_RELEASE(prev_zobj);
+	}
 
 exit:
 	return retval;
