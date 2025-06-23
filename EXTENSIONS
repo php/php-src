@@ -238,6 +238,7 @@ SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           bcmath
 PRIMARY MAINTAINER:  Andi Gutmans <andi@php.net> (2000 - 2004)
+                     Saki Takamachi <saki@php.net> (2024 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
