@@ -624,7 +624,6 @@ struct _zend_async_task_s {
 
 typedef void (*zend_async_before_coroutine_enqueue_t)(zend_coroutine_t *coroutine, zend_async_scope_t *scope, zval *result);
 typedef void (*zend_async_after_coroutine_enqueue_t)(zend_coroutine_t *coroutine, zend_async_scope_t *scope);
-typedef void (*zend_async_scope_dispose_t)(zend_async_scope_t *scope);
 
 /* Dynamic array of async event callbacks */
 typedef struct _zend_async_scopes_vector_s {
@@ -641,13 +640,12 @@ typedef struct _zend_async_scopes_vector_s {
  * it initiates the disposal process of the Scope.
  *
  * However, the internal Scope structure remains in memory until the last coroutine has completed.
- *
  */
 struct _zend_async_scope_s {
-	/* The scope ZEND_ASYNC_SCOPE_F flags */
-	uint32_t flags;
+	/* Event object for reacting to events. */
+	zend_async_event_t event;
 	/* The link to the zend_object structure */
-	zend_object * scope_object;
+	zend_object *scope_object;
 
 	zend_async_scopes_vector_t scopes;
 	zend_async_scope_t *parent_scope;
@@ -656,25 +654,29 @@ struct _zend_async_scope_s {
 
 	zend_async_before_coroutine_enqueue_t before_coroutine_enqueue;
 	zend_async_after_coroutine_enqueue_t after_coroutine_enqueue;
-	zend_async_scope_dispose_t dispose;
+	void (*cancel)(zend_async_scope_t *scope, zend_object *error, bool transfer_error, const bool is_safely);
 };
 
-#define ZEND_ASYNC_SCOPE_F_CLOSED				  (1u << 0)  /* scope was closed */
-#define ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY	      (1u << 1)  /* scope will not free memory in dispose handler */
-#define ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY 		  (1u << 2)  /* scope will be disposed safely */
+#define ZEND_ASYNC_SCOPE_F_CLOSED				  ZEND_ASYNC_EVENT_F_CLOSED  /* scope was closed */
+#define ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY	      ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY  /* scope will not free memory in dispose handler */
+#define ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY 		  (1u << 14)  /* scope will be disposed safely */
+#define ZEND_ASYNC_SCOPE_F_CANCELLED 			  (1u << 15)  /* scope was cancelled */
 
-#define ZEND_ASYNC_SCOPE_IS_CLOSED(scope)         (((scope)->flags & ZEND_ASYNC_SCOPE_F_CLOSED) != 0)
-#define ZEND_ASYNC_SCOPE_IS_NO_FREE_MEMORY(scope) (((scope)->flags & ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY) != 0)
-#define ZEND_ASYNC_SCOPE_IS_DISPOSE_SAFELY(scope) (((scope)->flags & ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY) != 0)
+#define ZEND_ASYNC_SCOPE_IS_CLOSED(scope)         (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CLOSED) != 0)
+#define ZEND_ASYNC_SCOPE_IS_NO_FREE_MEMORY(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY) != 0)
+#define ZEND_ASYNC_SCOPE_IS_DISPOSE_SAFELY(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY) != 0)
+#define ZEND_ASYNC_SCOPE_IS_CANCELLED(scope)      (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CANCELLED) != 0)
 
-#define ZEND_ASYNC_SCOPE_SET_CLOSED(scope)        ((scope)->flags |=  ZEND_ASYNC_SCOPE_F_CLOSED)
-#define ZEND_ASYNC_SCOPE_CLR_CLOSED(scope)        ((scope)->flags &= ~ZEND_ASYNC_SCOPE_F_CLOSED)
+#define ZEND_ASYNC_SCOPE_SET_CLOSED(scope)        ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_CLOSED)
+#define ZEND_ASYNC_SCOPE_CLR_CLOSED(scope)        ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_CLOSED)
 
-#define ZEND_ASYNC_SCOPE_SET_NO_FREE_MEMORY(scope) ((scope)->flags |=  ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY)
-#define ZEND_ASYNC_SCOPE_CLR_NO_FREE_MEMORY(scope) ((scope)->flags &= ~ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY)
+#define ZEND_ASYNC_SCOPE_SET_NO_FREE_MEMORY(scope) ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY)
+#define ZEND_ASYNC_SCOPE_CLR_NO_FREE_MEMORY(scope) ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY)
 
-#define ZEND_ASYNC_SCOPE_SET_DISPOSE(scope)        ((scope)->flags |=  ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
-#define ZEND_ASYNC_SCOPE_CLR_DISPOSE(scope)        ((scope)->flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
+#define ZEND_ASYNC_SCOPE_SET_DISPOSE_SAFELY(scope) ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
+#define ZEND_ASYNC_SCOPE_CLR_DISPOSE_SAFELY(scope) ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
+
+#define ZEND_ASYNC_SCOPE_SET_CANCELLED(scope)      ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_CANCELLED)
 
 static zend_always_inline void
 zend_async_scope_add_child(zend_async_scope_t *parent_scope, zend_async_scope_t *child_scope)
@@ -861,6 +863,28 @@ static zend_always_inline zend_string *zend_coroutine_callable_name(const zend_c
 
 	return zend_string_init("internal function", sizeof("internal function") - 1, 0);
 }
+
+/**
+ * Macro for constructing an FCALL structure from PHP function parameters.
+ * Z_PARAM_FUNC(fci, fcc);
+ * Z_PARAM_VARIADIC_WITH_NAMED(args, args_count, named_args);
+ */
+#define ZEND_ASYNC_FCALL_DEFINE(fcall, fci, fcc, args, args_count, named_args) \
+	zend_fcall_t * fcall = ecalloc(1, sizeof(zend_fcall_t));				 \
+	fcall->fci = fci;														 \
+	fcall->fci_cache = fcc;													 \
+	if (args_count) {														 \
+		fcall->fci.param_count = args_count;								 \
+		fcall->fci.params = safe_emalloc(args_count, sizeof(zval), 0);		 \
+		for (uint32_t i = 0; i < args_count; i++) {							 \
+			ZVAL_COPY(&fcall->fci.params[i], &args[i]);						 \
+		}																	 \
+	}																		 \
+	if (named_args) {														 \
+		fcall->fci.named_params = named_args;								 \
+		GC_ADDREF(named_args);												 \
+	}																		 \
+	Z_TRY_ADDREF(fcall->fci.function_name);
 
 ///////////////////////////////////////////////////////////////
 /// Async Context Structures
