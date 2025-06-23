@@ -4,11 +4,12 @@ Bug #36071 (Engine Crash related with 'clone')
 error_reporting=4095
 --FILE--
 <?php
-$a = clone 0;
-$a[0]->b = 0;
+try {
+    $a = clone 0;
+    $a[0]->b = 0;
+} catch (Error $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught TypeError: clone(): Argument #1 ($object) must be of type object, int given in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %sbug36071.php on line 2
+--EXPECT--
+TypeError: clone(): Argument #1 ($object) must be of type object, int given

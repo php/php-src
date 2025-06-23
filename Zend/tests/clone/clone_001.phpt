@@ -3,11 +3,12 @@ Using clone statement on non-object
 --FILE--
 <?php
 
-$a = clone array();
+try {
+    $a = clone array();
+} catch (Error $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Fatal error: Uncaught TypeError: clone(): Argument #1 ($object) must be of type object, array given in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+TypeError: clone(): Argument #1 ($object) must be of type object, array given
