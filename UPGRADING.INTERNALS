@@ -17,6 +17,12 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 - Core
   . PG(arg_separator).input and PG(arg_separator).output are now `zend_string*`
     instead of `char*`.
+  . DL_LOAD now doesn't use RTLD_DEEPBIND deepbind anymore on platforms
+    where dlmopen with LM_ID_NEWLM is available:
+    this means shared library symbol isolation (if needed) must be enabled on
+    the user side when requiring libphp.so, by using dlmopen with LM_ID_NEWLM
+    instead of dlopen.
+    RTLD_DEEPBIND is still enabled when the Apache SAPI is in use.
 
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
