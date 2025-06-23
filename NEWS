@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.10
 
+- Calendar:
+  . Fixed jewishtojd overflow on year argument. (David Carlier)
+
 - Core:
   . Fixed bug GH-18833 (Use after free with weakmaps dependent on destruction
     order). (Daniil Gentili)

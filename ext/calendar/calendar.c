@@ -490,6 +490,11 @@ PHP_FUNCTION(jewishtojd)
 		RETURN_THROWS();
 	}
 
+	if (ZEND_LONG_EXCEEDS_INT(year)) {
+		zend_argument_value_error(3, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
+
 	RETURN_LONG(JewishToSdn(year, month, day));
 }
 /* }}} */
