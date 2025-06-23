@@ -17,9 +17,14 @@ if (!file_exists('/proc/meminfo')) {
 }
 
 $free_ram = 0;
+$enough_free_ram = false;
 if ($f = fopen("/proc/meminfo","r")) {
     while (!feof($f)) {
-        if (preg_match('/MemFree[^\d]*(\d+)/i', fgets($f), $m)) {
+        $line = fgets($f);
+        if ($line === false) {
+            break;
+        }
+        if (preg_match('/MemFree[^\d]*(\d+)/i', $line, $m)) {
             $free_ram = max($free_ram, $m[1]/1024/1024);
             if ($free_ram > 3) {
                 $enough_free_ram = true;
@@ -28,7 +33,7 @@ if ($f = fopen("/proc/meminfo","r")) {
     }
 }
 
-if (empty($enough_free_ram)) {
+if (!$enough_free_ram) {
     die(sprintf("skip need +3G free RAM, but only %01.2f available", $free_ram));
 }
 
