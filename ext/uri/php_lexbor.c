@@ -75,10 +75,8 @@ static void lexbor_cleanup_parser(void)
  */
 static zend_string *fill_errors(zval *errors)
 {
-	zend_string *result = NULL;
-
 	if (errors == NULL) {
-		return result;
+		return NULL;
 	}
 
 	ZEND_ASSERT(Z_ISUNDEF_P(errors));
@@ -86,9 +84,10 @@ static zend_string *fill_errors(zval *errors)
 	array_init(errors);
 
 	if (lexbor_parser.log == NULL) {
-		return result;
+		return NULL;
 	}
 
+	zend_string *result = NULL;
 	lexbor_plog_entry_t *lxb_error;
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
 		zval error;
