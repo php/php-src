@@ -439,7 +439,7 @@ void shutdown_executor(void) /* {{{ */
 #if ZEND_DEBUG
 	bool fast_shutdown = 0;
 #elif defined(__SANITIZE_ADDRESS__)
-	char *force_fast_shutdown = getenv("ZEND_FORCE_FAST_SHUTDOWN");
+	char *force_fast_shutdown = getenv("ZEND_ASAN_FORCE_FAST_SHUTDOWN");
 	bool fast_shutdown = (
 		is_zend_mm()
 		|| (force_fast_shutdown && ZEND_ATOL(force_fast_shutdown))
