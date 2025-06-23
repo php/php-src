@@ -3216,6 +3216,17 @@ int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 	return FAILURE;
 }
 
+static void zend_jit_link_func_info(zend_op_array *op_array)
+{
+	if (!ZEND_FUNC_INFO(op_array)) {
+		void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+
+		if (jit_extension) {
+			ZEND_SET_FUNC_INFO(op_array, jit_extension);
+		}
+	}
+}
+
 int zend_jit_script(zend_script *script)
 {
 	void *checkpoint;
@@ -3303,6 +3314,7 @@ int zend_jit_script(zend_script *script)
 		zend_class_entry *ce;
 		zend_op_array *op_array;
 		zval *zv;
+		zend_property_info *prop;
 
 		ZEND_HASH_MAP_FOREACH_VAL(&script->class_table, zv) {
 			if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
@@ -3313,14 +3325,21 @@ int zend_jit_script(zend_script *script)
 			ZEND_ASSERT(ce->type == ZEND_USER_CLASS);
 
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
-				if (!ZEND_FUNC_INFO(op_array)) {
-					void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
-
-					if (jit_extension) {
-						ZEND_SET_FUNC_INFO(op_array, jit_extension);
-					}
-				}
+				zend_jit_link_func_info(op_array);
 			} ZEND_HASH_FOREACH_END();
+
+			if (ce->num_hooked_props > 0) {
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
+					if (prop->hooks) {
+						for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+							if (prop->hooks[i]) {
+								op_array = &prop->hooks[i]->op_array;
+								zend_jit_link_func_info(op_array);
+							}
+						}
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
