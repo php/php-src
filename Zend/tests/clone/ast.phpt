@@ -18,7 +18,14 @@ try {
 	echo $e->getMessage(), PHP_EOL;
 }
 
+try {
+	assert(false && $y = clone(...));
+} catch (Error $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
+
 ?>
 --EXPECT--
 assert(false && ($y = \clone($x)))
 assert(false && ($y = \clone($x)))
+assert(false && ($y = \clone(...)))

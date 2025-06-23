@@ -1228,6 +1228,11 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
+	|	T_CLONE '(' T_ELLIPSIS ')' {
+			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
+			name->attr = ZEND_NAME_FQ;
+			$$ = zend_ast_create(ZEND_AST_CALL, name, zend_ast_create_fcc());
+		}
 	|	T_CLONE expr {
 			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
 			name->attr = ZEND_NAME_FQ;

@@ -7,6 +7,7 @@ $x = new stdClass();
 
 \var_dump(\clone($x));
 \var_dump(\array_map('clone', [$x, $x, $x]));
+\var_dump(\array_map(clone(...), [$x, $x, $x]));
 
 class Foo {
     private function __clone() {
@@ -28,6 +29,17 @@ var_dump($f !== $clone);
 ?>
 --EXPECTF--
 object(stdClass)#%d (0) {
+}
+array(3) {
+  [0]=>
+  object(stdClass)#%d (0) {
+  }
+  [1]=>
+  object(stdClass)#%d (0) {
+  }
+  [2]=>
+  object(stdClass)#%d (0) {
+  }
 }
 array(3) {
   [0]=>
