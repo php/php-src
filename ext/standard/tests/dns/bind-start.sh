@@ -10,6 +10,12 @@ NAMED_CONF="$SCRIPT_DIR/named.conf"
 PID_FILE="$ZONES_DIR/named.pid"
 LOG_FILE="$SCRIPT_DIR/named.log"
 
+# Debug: show current user and permissions
+echo "Debug: Current user: $(whoami)"
+echo "Debug: Current UID: $(id -u)"
+echo "Debug: Script dir: $SCRIPT_DIR"
+echo "Debug: Zones dir: $ZONES_DIR"
+
 # Default mode: background
 FOREGROUND=false
 if [[ "${1:-}" == "-f" ]]; then
@@ -30,10 +36,81 @@ fi
 
 # Generate named.conf from template
 echo "Generating $NAMED_CONF from $NAMED_CONF_TEMPLATE"
+
+# Check if 127.0.0.1 is available and decide on listen address
+echo "Debug: Testing network connectivity for BIND address selection..."
+
+IPV4_OK=false
+IPV6_OK=false
+
+# Test IPv4 connectivity
+if ping -c 1 127.0.0.1 >/dev/null 2>&1; then
+  IPV4_OK=true
+  echo "Debug: IPv4 (127.0.0.1) is reachable"
+else
+  echo "Debug: IPv4 (127.0.0.1) is NOT reachable"
+fi
+
+# Test IPv6 connectivity
+if command -v ping6 >/dev/null 2>&1; then
+  if ping6 -c 1 ::1 >/dev/null 2>&1; then
+    IPV6_OK=true
+    echo "Debug: IPv6 (::1) is reachable"
+  fi
+else
+  if ping -6 -c 1 ::1 >/dev/null 2>&1; then
+    IPV6_OK=true
+    echo "Debug: IPv6 (::1) is reachable via ping -6"
+  fi
+fi
+
+if ! $IPV6_OK; then
+  echo "Debug: IPv6 (::1) is NOT reachable"
+fi
+
+# Choose the listen address
+if $IPV4_OK; then
+  LISTEN_ADDRESS="127.0.0.1"
+  echo "Debug: Using IPv4 (127.0.0.1) for BIND"
+elif $IPV6_OK; then
+  LISTEN_ADDRESS="::1"
+  echo "Debug: Using IPv6 (::1) for BIND"
+else
+  echo "Debug: Neither 127.0.0.1 nor ::1 is available!"
+  echo "Debug: Falling back to 127.0.0.1 anyway"
+  LISTEN_ADDRESS="127.0.0.1"
+fi
+
 sed -e "s|@ZONES_DIR@|$ZONES_DIR|g" \
     -e "s|@PID_FILE@|$PID_FILE|g" \
     -e "s|@SCRIPT_DIR@|$SCRIPT_DIR|g" \
+    -e "s|@LISTEN_ADDRESS@|$LISTEN_ADDRESS|g" \
     "$NAMED_CONF_TEMPLATE" > "$NAMED_CONF"
+
+# Ensure the generated config file is readable
+chmod 644 "$NAMED_CONF"
+
+# Debug: Check if the file is actually readable
+echo "Debug: Testing config file readability:"
+if [[ -r "$NAMED_CONF" ]]; then
+    echo "Debug: Config file is readable"
+else
+    echo "Debug: Config file is NOT readable"
+    ls -la "$NAMED_CONF"
+    exit 1
+fi
+
+if [[ -f /etc/apparmor.d/usr.sbin.named ]]; then
+  echo "Debug: AppArmor profile detected, setting to complain mode..."
+  aa-complain /usr/sbin/named || echo "Failed to set AppArmor to complain mode"
+elif [ -d /etc/apparmor.d/ ]; then
+  ls /etc/apparmor.d/
+else
+  echo "No apparmor.d"
+fi
+
+echo "Debug: Generated named.conf contents:"
+cat "$NAMED_CONF"
 
 # Clean up any leftover journal or PID files
 rm -f "$ZONES_DIR"/*.jnl "$PID_FILE"
@@ -43,10 +120,87 @@ echo "Starting BIND from $SCRIPT_DIR"
 
 if $FOREGROUND; then
   echo "(running in foreground)"
+  echo "Debug: About to exec: named -c $NAMED_CONF -p 53 -u $(whoami) -g -d 1"
   exec named -c "$NAMED_CONF" -p 53 -u "$(whoami)" -g -d 1
 else
   echo "(running in background)"
-  named -c "$NAMED_CONF" -p 53 -u "$(whoami)"
+  echo "Debug: About to run: named -c $NAMED_CONF -p 53 -u $(whoami)"
+  
+  # Test configuration first
+  echo "Debug: Testing BIND configuration..."
+  if named-checkconf "$NAMED_CONF"; then
+    echo "Debug: Configuration check passed"
+  else
+    echo "Debug: Configuration check failed"
+    exit 1
+  fi
+  
+  # Check if zone files exist
+  echo "Debug: Checking zone files..."
+  if [[ -f "$ZONES_DIR/basic.dnstest.php.net.zone" ]]; then
+    echo "Debug: Zone file exists"
+    echo "Debug: Zone file contents:"
+    cat "$ZONES_DIR/basic.dnstest.php.net.zone"
+  else
+    echo "Debug: Zone file missing: $ZONES_DIR/basic.dnstest.php.net.zone"
+    ls -la "$ZONES_DIR/"
+    exit 1
+  fi
+
+  # Check IPv4/IPv6 configuration with fallbacks
+  echo "Debug: Network configuration check:"
+  echo "Debug: localhost resolution:"
+  getent hosts localhost 2>/dev/null || echo "localhost not found in hosts"
+  
+  echo "Debug: 127.0.0.1 resolution:"
+  getent hosts 127.0.0.1 2>/dev/null || echo "127.0.0.1 not found"
+  
+  echo "Debug: Available IP addresses:"
+  if command -v ip >/dev/null 2>&1; then
+    ip addr show lo 2>/dev/null || echo "Failed to show loopback interface with ip"
+  else
+    ifconfig lo 2>/dev/null || echo "Failed to show loopback interface with ifconfig"
+  fi
+  
+  echo "Debug: Can we reach 127.0.0.1?"
+  ping -c 1 127.0.0.1 >/dev/null 2>&1 && echo "127.0.0.1 is reachable" || echo "127.0.0.1 is NOT reachable"
+  
+  echo "Debug: Can we reach ::1?"
+  if command -v ping6 >/dev/null 2>&1; then
+    ping6 -c 1 ::1 >/dev/null 2>&1 && echo "::1 is reachable" || echo "::1 is NOT reachable"
+  else
+    ping -6 -c 1 ::1 >/dev/null 2>&1 && echo "::1 is reachable (via ping -6)" || echo "::1 is NOT reachable"
+  fi
+  
+  # Check what's listening on port 53
+  echo "Debug: Processes listening on port 53:"
+  if command -v ss >/dev/null 2>&1; then
+    ss -tulpn 2>/dev/null | grep ':53' || echo "Debug: No processes found on port 53 (ss)"
+  else
+    netstat -tulpn 2>/dev/null | grep ':53' || echo "Debug: No processes found on port 53 (netstat)"
+  fi
+  
+  echo "Debug: systemd-resolved status:"
+  systemctl is-active systemd-resolved 2>/dev/null || echo "systemd-resolved not active"
+
+  # Run named and capture both stdout and stderr separately
+  echo "Debug: Starting named..."
+  if named -c "$NAMED_CONF" -p 53 -u "$(whoami)" > "$LOG_FILE" 2>&1; then
+    echo "Debug: named command succeeded"
+  else
+    NAMED_EXIT_CODE=$?
+    echo "Debug: named command failed with exit code: $NAMED_EXIT_CODE"
+    echo "Debug: Log file contents:"
+    cat "$LOG_FILE" 2>/dev/null || echo "No log file found"
+    
+    # Try to run named with more verbose output
+    echo "Debug: Trying to run named in foreground for better error output:"
+    named -c "$NAMED_CONF" -p 53 -u "$(whoami)" -g -d 1 || true
+
+    cat /var/log/syslog | grep apparmor | grep named
+    
+    exit $NAMED_EXIT_CODE
+  fi
 
   # Wait for BIND to start with periodic checks
   MAX_WAIT=20  # Maximum wait time in attempts (20 * 0.5s = 10s)
@@ -76,6 +230,8 @@ else
   if [[ -f "$LOG_FILE" ]]; then
     echo "Last few lines from log:"
     tail -5 "$LOG_FILE"
+  else
+    echo "No log file found at $LOG_FILE"
   fi
 
   exit 1
