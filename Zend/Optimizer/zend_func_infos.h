@@ -1,6 +1,7 @@
 /* This is a generated file, edit the .stub.php files instead. */
 
 static const func_info_t func_infos[] = {
+	F1("clone", MAY_BE_OBJECT),
 	F1("zend_version", MAY_BE_STRING),
 	FN("func_get_args", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY),
 	F1("get_class_vars", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
