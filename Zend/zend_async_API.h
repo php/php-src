@@ -656,6 +656,12 @@ struct _zend_async_scope_s {
 	zend_async_after_coroutine_enqueue_t after_coroutine_enqueue;
 
 	/**
+	 * The method determines the moment when the Scope can be destructed.
+	 * It checks the conditions and, if necessary, calls the dispose method.
+	 */
+	void (*try_to_dispose)(zend_async_scope_t *scope);
+
+	/**
 	 * The method handles an exception delivered to the Scope.
 	 * Its result may either be the cancellation of the Scope or the suppression of the exception.
 	 * If the coroutine parameter is specified, it indicates an attempt to handle an exception from a coroutine.
@@ -726,7 +732,7 @@ zend_async_scope_remove_child(zend_async_scope_t *parent_scope, zend_async_scope
 
 			// Try to dispose the parent scope if it is empty
 			if (parent_scope->scopes.length == 0) {
-				parent_scope->dispose(parent_scope);
+				parent_scope->try_to_dispose(parent_scope);
 			}
 
 			return;
