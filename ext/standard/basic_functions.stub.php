@@ -1678,11 +1678,13 @@ function array_merge_recursive(array ...$arrays): array {}
 
 /**
  * @compile-time-eval
+ * @return array<int|string, mixed|ref>
  */
 function array_replace(array $array, array ...$replacements): array {}
 
 /**
  * @compile-time-eval
+ * @return array<int|string, mixed|ref>
  */
 function array_replace_recursive(array $array, array ...$replacements): array {}
 
@@ -1755,16 +1757,19 @@ function array_intersect_key(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
+ * @return array<int|string, mixed|ref>
  */
 function array_intersect_ukey(array $array, ...$rest): array {}
 
 /**
  * @compile-time-eval
+ * @return array<int|string, mixed|ref>
  */
 function array_intersect(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
+ * @return array<int|string, mixed|ref>
  */
 function array_uintersect(array $array, ...$rest): array {}
 
@@ -1782,11 +1787,13 @@ function array_uintersect_assoc(array $array, ...$rest): array {}
 
 /**
  * @param array|callable $rest
+ * @return array<int|string, mixed|ref>
  */
 function array_intersect_uassoc(array $array, ...$rest): array {}
 
 /**
  * @param array|callable $rest
+ * @return array<int|string, mixed|ref>
  */
 function array_uintersect_uassoc(array $array, ...$rest): array {}
 

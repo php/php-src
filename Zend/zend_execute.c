@@ -1307,6 +1307,9 @@ ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
 # define ZEND_VERIFY_FUNC_INFO 0
 #endif
 
+#undef ZEND_VERIFY_FUNC_INFO
+#define ZEND_VERIFY_FUNC_INFO 1
+
 static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
 #if ZEND_VERIFY_FUNC_INFO
 	zend_string *name = fn->common.function_name;
