@@ -2443,10 +2443,10 @@ function str_contains(string $haystack, string $needle): bool {}
  * @compile-time-eval
  * @frameless-function {"arity": 2}
  */
-function str_starts_with(string $haystack, string $needle): bool {}
+function str_starts_with(string $haystack, string ...$needle): bool {}
 
 /** @compile-time-eval */
-function str_ends_with(string $haystack, string $needle): bool {}
+function str_ends_with(string $haystack, string ...$needle): bool {}
 
 /**
  * @compile-time-eval
@@ -3834,3 +3834,4 @@ function sapi_windows_set_ctrl_handler(?callable $handler, bool $add = true): bo
 
 function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 #endif
+//
