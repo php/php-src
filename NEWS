@@ -261,6 +261,8 @@ PHP                                                                        NEWS
   . Added array_first() and array_last(). (nielsdos)
   . Fixed bug GH-18823 (setlocale's 2nd and 3rd argument ignores strict_types).
     (nielsdos)
+  . Fixed exit code handling of sendmail cmd and added warnings.
+    (Jesse Hathaway)
 
 - Streams:
   . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).

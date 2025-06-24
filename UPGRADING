@@ -217,6 +217,12 @@ PHP 8.5 UPGRADE NOTES
     Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN and
     Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
 
+- Standard:
+  . mail() now returns the actual sendmail error and detects if the sendmail
+    process was terminated unexpectedly. In such cases, a warning is emitted
+    and the function returns false. Previously, these errors were silently
+    ignored. This change affects only the sendmail transport.
+
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
     XSLTProcessor::setParameter() and XSLTProcessor::removeParameter()
