@@ -183,7 +183,7 @@ typedef struct _zend_async_task_s zend_async_task_t;
 /* Internal context typedefs removed - using direct functions */
 
 typedef zend_coroutine_t * (*zend_async_new_coroutine_t)(zend_async_scope_t *scope);
-typedef zend_async_scope_t * (*zend_async_new_scope_t)(zend_async_scope_t * parent_scope);
+typedef zend_async_scope_t * (*zend_async_new_scope_t)(zend_async_scope_t * parent_scope, bool with_zend_object);
 typedef zend_coroutine_t * (*zend_async_spawn_t)(zend_async_scope_t *scope, zend_object *scope_provider);
 typedef void (*zend_async_suspend_t)(bool from_main);
 typedef void (*zend_async_enqueue_coroutine_t)(zend_coroutine_t *coroutine);
@@ -1235,7 +1235,8 @@ END_EXTERN_C()
 #define ZEND_ASYNC_SPAWN_WITH(scope) zend_async_spawn_fn(scope, NULL)
 #define ZEND_ASYNC_SPAWN_WITH_PROVIDER(scope_provider) zend_async_spawn_fn(NULL, scope_provider)
 #define ZEND_ASYNC_NEW_COROUTINE(scope) zend_async_new_coroutine_fn(scope)
-#define ZEND_ASYNC_NEW_SCOPE(parent) zend_async_new_scope_fn(parent)
+#define ZEND_ASYNC_NEW_SCOPE(parent) zend_async_new_scope_fn(parent, false)
+#define ZEND_ASYNC_NEW_SCOPE_WITH_OBJECT(parent) zend_async_new_scope_fn(parent, true)
 #define ZEND_ASYNC_SUSPEND() zend_async_suspend_fn(false)
 #define ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN() zend_async_suspend_fn(true)
 #define ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine) zend_async_enqueue_coroutine_fn(coroutine)
