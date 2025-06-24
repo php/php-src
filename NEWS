@@ -59,7 +59,7 @@ PHP                                                                        NEWS
   . Added support for `final` with constructor property promotion.
     (DanielEScherzer)
   . Do not use RTLD_DEEPBIND if dlmopen is available. (Daniil Gentili)
-  . Make `clone() a function. (timwolla, edorian)
+  . Make `clone()` a function. (timwolla, edorian)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
