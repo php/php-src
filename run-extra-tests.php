@@ -62,9 +62,88 @@ function main(int $argc, array $argv): void
     echo "DEBUG:    " . ($environment->debug ? 'Yes' : 'No') . "\n";
     echo "=====================================================================\n";
 
-    echo "No tests in this branch yet.\n";
+    try {
+        output_group_start($environment, 'Running Opcache TLS tests');
+        if (!run_opcache_tls_tests($environment)) {
+            echo "Failed\n";
+            exit(1);
+        }
+    } finally {
+        output_group_end($environment);
+    }
 
     echo "All OK\n";
+}
+
+function run_opcache_tls_tests(Environment $environment): bool
+{
+    if (!$environment->zts) {
+        echo "Skipping: NTS\n";
+        return true;
+    }
+
+    if (!$environment->debug) {
+        echo "Skipping: NDEBUG\n";
+        return true;
+    }
+
+    $tlsc = '';
+    $machine = '';
+    $static_support = 'yes';
+
+    switch ($environment->cpuArch) {
+        case 'x86':
+            $machine = '-m32';
+            break;
+        case 'x86_64':
+        case 'aarch64':
+            break;
+        default:
+            echo "Skipping: {$environment->cpuArch}\n";
+            return true;
+    }
+
+    switch ($environment->os) {
+        case 'Linux':
+        case 'FreeBSD':
+            $tlsc = __DIR__ . "/ext/opcache/jit/tls/zend_jit_tls_{$environment->cpuArch}.c";
+            break;
+        case 'Darwin':
+            if ($environment->cpuArch === 'aarch64') {
+                echo "Skipping: JIT+TLS not supported on MacOS Apple Silicon\n";
+                return true;
+            }
+            $tlsc = __DIR__ . "/ext/opcache/jit/tls/zend_jit_tls_darwin.c";
+            $static_support = 'no';
+            break;
+        default:
+            echo "Skipping: {$environment->os}\n";
+            return true;
+    }
+
+    echo "TLSC=$tlsc MACHINE=$machine STATIC_SUPPORT=$static_support ext/opcache/jit/tls/testing/test.sh\n";
+
+    $proc = proc_open(
+        __DIR__ . '/ext/opcache/jit/tls/testing/test.sh',
+        [
+            0 => ['pipe', 'r'],
+        ],
+        $pipes,
+        env_vars: array_merge(getenv(), [
+            'TLSC' => $tlsc,
+            'MACHINE' => $machine,
+            'STATIC_SUPPORT' => $static_support,
+        ]),
+    );
+
+    if (!$proc) {
+        echo "proc_open() failed\n";
+        return false;
+    }
+
+    fclose($pipes[0]);
+
+    return proc_close($proc) === 0;
 }
 
 function output_group_start(Environment $environment, string $name): void
