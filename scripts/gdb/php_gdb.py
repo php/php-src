@@ -49,6 +49,8 @@ class ZendStringPrettyPrinter(gdb.printing.PrettyPrinter):
         for field in self.val.type.fields():
             if field.name == 'val':
                 yield ('val', format_zstr(self.val))
+            elif field.name == 'h':
+                yield (field.name, "0x%x" % self.val[field.name])
             else:
                 yield (field.name, format_nested(self.val[field.name]))
 

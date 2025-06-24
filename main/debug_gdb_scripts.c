@@ -719,6 +719,8 @@ asm(
     ".ascii \"        for field in self.val.type.fields():\\n\"\n"
     ".ascii \"            if field.name == 'val':\\n\"\n"
     ".ascii \"                yield ('val', format_zstr(self.val))\\n\"\n"
+    ".ascii \"            elif field.name == 'h':\\n\"\n"
+    ".ascii \"                yield (field.name, \\\"0x%x\\\" % self.val[field.name])\\n\"\n"
     ".ascii \"            else:\\n\"\n"
     ".ascii \"                yield (field.name, format_nested(self.val[field.name]))\\n\"\n"
     ".ascii \"\\n\"\n"
