@@ -2479,9 +2479,7 @@ static zend_always_inline void php_sqlite3_fetch_one(int n_cols, php_sqlite3_res
 
 		if (mode & PHP_SQLITE3_ASSOC) {
 			if (mode & PHP_SQLITE3_NUM) {
-				if (Z_REFCOUNTED(data)) {
-					Z_ADDREF(data);
-				}
+				Z_TRY_ADDREF(data);
 			}
 			/* Note: we can't use the "add_new" variant here instead of "update" because
 			 * when the same column name is encountered, the last result should be taken. */
