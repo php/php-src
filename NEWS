@@ -31,6 +31,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix misleading errors in printf(). (nielsdos)
+  . Fix RCN violations in array functions. (nielsdos)
 
 - Streams:
   . Fixed GH-13264 (fgets() and stream_get_line() do not return false on filter
