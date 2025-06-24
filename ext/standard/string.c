@@ -1836,6 +1836,20 @@ flf_clean:
 	Z_FLF_PARAM_FREE_STR(2, needle_tmp);
 }
 
+/* {{{ Checks if a string contains another, case insensitive */
+PHP_FUNCTION(str_icontains)
+{
+	zend_string *haystack, *needle;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_STR(needle)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(php_memnistr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack)));
+}
+/* }}} */
+
 /* {{{ Checks if haystack starts with needle */
 PHP_FUNCTION(str_starts_with)
 {

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dfd7d2cfd31312f7f6c5074c10cab54e9d1fbccc */
+ * Stub hash: fa46a068353166de787b5c53dcb1077b2a8c20c3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -917,6 +917,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_contains, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_str_icontains arginfo_str_contains
 
 #define arginfo_str_starts_with arginfo_str_contains
 
@@ -2545,6 +2547,7 @@ ZEND_FUNCTION(strrpos);
 ZEND_FUNCTION(strripos);
 ZEND_FUNCTION(strrchr);
 ZEND_FUNCTION(str_contains);
+ZEND_FUNCTION(str_icontains);
 ZEND_FUNCTION(str_starts_with);
 ZEND_FUNCTION(str_ends_with);
 ZEND_FUNCTION(chunk_split);
@@ -3146,6 +3149,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("strripos", zif_strripos, arginfo_strripos, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("strrchr", zif_strrchr, arginfo_strrchr, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("str_contains", zif_str_contains, arginfo_str_contains, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_contains, NULL)
+	ZEND_RAW_FENTRY("str_icontains", zif_str_icontains, arginfo_str_icontains, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("str_starts_with", zif_str_starts_with, arginfo_str_starts_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_starts_with, NULL)
 	ZEND_RAW_FENTRY("str_ends_with", zif_str_ends_with, arginfo_str_ends_with, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("chunk_split", zif_chunk_split, arginfo_chunk_split, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
