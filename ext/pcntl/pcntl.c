@@ -125,16 +125,18 @@ typedef psetid_t cpu_set_t;
 #include <pthread/qos.h>
 #endif
 
-#if defined(__linux__) && defined(HAVE_DECL_SYS_WAITID) && HAVE_DECL_SYS_WAITID == 1 && defined(HAVE_SYSCALL)
-#define HAVE_LINUX_RAW_SYSCALL_WAITID 1
+#if defined(__linux__) && defined(HAVE_SYSCALL)
+#  include <sys/syscall.h>
+#  if defined(HAVE_DECL_SYS_WAITID) && HAVE_DECL_SYS_WAITID == 1
+#    define HAVE_LINUX_RAW_SYSCALL_WAITID 1
+#  endif
+#  if defined(HAVE_DECL_SYS_PIDFD_OPEN) && HAVE_DECL_SYS_PIDFD_OPEN == 1
+#    define HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN 1
+#  endif
 #endif
 
 #if defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
 #include <unistd.h>
-#endif
-
-#if defined(HAVE_PIDFD_OPEN) || defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
-#include <sys/syscall.h>
 #endif
 
 #ifdef HAVE_FORKX
@@ -1607,7 +1609,7 @@ PHP_FUNCTION(pcntl_forkx)
 #endif
 /* }}} */
 
-#ifdef HAVE_PIDFD_OPEN
+#ifdef HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN
 // The `pidfd_open` syscall is available since 5.3
 // and `setns` since 3.0.
 PHP_FUNCTION(pcntl_setns)
