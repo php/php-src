@@ -77,6 +77,8 @@ ZEND_FUNCTION(clone)
 		Z_PARAM_OBJ(zobj)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* clone() also exists as the ZEND_CLONE OPcode and both implementations must be kept in sync. */
+
 	zend_class_entry *scope = zend_get_executed_scope();
 
 	zend_class_entry *ce = zobj->ce;
