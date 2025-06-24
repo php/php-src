@@ -17,7 +17,8 @@ function do_single_test($header)
     global $mode;
 
     $result = iconv_mime_decode($header, $mode, "UTF-8");
-    printf("(%d) \"%s\"\n", iconv_strlen($result, "UTF-8"), $result);
+    $len = $result ? iconv_strlen($result, "UTF-8") : 0;
+    printf("(%d) \"%s\"\n", $len, $result);
 }
 
 function do_regression_test()
