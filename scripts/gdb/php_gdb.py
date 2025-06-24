@@ -83,12 +83,11 @@ class ZendArrayPrettyPrinter(gdb.printing.PrettyPrinter):
     def children(self):
         for field in self.val.type.fields():
             if field.name is None:
-                name = '<anonymous>'
-                val = self.val[field]
+                yield ('<anonymous>', format_nested(self.val[field]))
+            elif field.name == 'nTableMask':
+                yield (field.name, "0x%x" % self.val[field.name])
             else:
-                name = field.name
-                val = self.val[field.name]
-            yield (name, format_nested(val))
+                yield (field.name, format_nested(self.val[field.name]))
 
 pp_set.add_printer('zend_array', '^_zend_array$', ZendArrayPrettyPrinter)
 
