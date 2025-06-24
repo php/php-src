@@ -40,5 +40,6 @@ class MySessionHandler implements SessionHandlerInterface {
 session_set_save_handler(new MySessionHandler());
 session_start();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: ob_end_flush(): Returning a non-string result from user output handler output_html is deprecated in %s on line %d
 8

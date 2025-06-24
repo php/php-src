@@ -962,16 +962,16 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 
 			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
 				if (Z_TYPE(retval) != IS_STRING) {
-					// Make sure that we don't get lost in an output buffer
-					int old_flags = OG(flags);
-					OG(flags) = old_flags & (~PHP_OUTPUT_ACTIVATED);
+					// Make sure that we don't get lost in the current output buffer
+					// by disabling it
+					handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
 					php_error_docref(
 						NULL,
 						E_DEPRECATED,
 						"Returning a non-string result from user output handler %s is deprecated",
 						ZSTR_VAL(handler->name)
 					);
-					OG(flags) = old_flags;
+					handler->flags &= (~PHP_OUTPUT_HANDLER_DISABLED);
 				}
 				if (Z_TYPE(retval) == IS_FALSE) {
 					/* call failed, pass internal buffer along */
