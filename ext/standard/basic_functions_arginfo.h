@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dfd7d2cfd31312f7f6c5074c10cab54e9d1fbccc */
+ * Stub hash: 1eda5d340b462c9d6fbb43d3e27aef20e334e1ab */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2184,6 +2184,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_num_available_processors, 0, 0, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FRAMELESS_FUNCTION(min, 2);
 static const zend_frameless_function_info frameless_function_infos_min[] = {
@@ -2879,6 +2882,7 @@ ZEND_FUNCTION(sapi_windows_cp_is_utf8);
 ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
+ZEND_FUNCTION(num_available_processors);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(set_time_limit, arginfo_set_time_limit)
@@ -3491,6 +3495,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sapi_windows_set_ctrl_handler, arginfo_sapi_windows_set_ctrl_handler)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
+	ZEND_FE(num_available_processors, arginfo_num_available_processors)
 	ZEND_FE_END
 };
 
