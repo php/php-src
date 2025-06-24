@@ -8497,20 +8497,6 @@ static void zend_compile_property_hooks(
 {
 	zend_class_entry *ce = CG(active_class_entry);
 
-	/* Allow hooks on backed readonly properties only. */
-	if ((prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL)) == (ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL)) {
-
-		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Interface properties cannot be declared readonly");
-		}
-
-		if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Hooked properties in abstract classes cannot be declared readonly");
-		}
-
-		zend_error_noreturn(E_COMPILE_ERROR, "Hooked virtual properties cannot be declared readonly");
-	}
-
 	if (hooks->children == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Property hook list must not be empty");
 	}
@@ -8664,6 +8650,20 @@ static void zend_compile_property_hooks(
 		if (value_type_ast_ptr) {
 			*value_type_ast_ptr = NULL;
 		}
+	}
+
+	/* Allow hooks on backed readonly properties only. */
+	if ((prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL)) == (ZEND_ACC_READONLY|ZEND_ACC_VIRTUAL)) {
+
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface properties cannot be declared readonly");
+		}
+
+		if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Abstract hooked properties cannot be declared readonly");
+		}
+
+		zend_error_noreturn(E_COMPILE_ERROR, "Hooked virtual properties cannot be declared readonly");
 	}
 
 	ce->num_hooked_props++;

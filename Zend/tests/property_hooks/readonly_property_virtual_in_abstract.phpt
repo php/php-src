@@ -1,5 +1,5 @@
 --TEST--
-Hooked properties in abstract classes cannot be readonly
+Virtual readonly property in abstract class triggers non-abstract body error
 --FILE--
 <?php
 
@@ -8,4 +8,4 @@ abstract class Test {
 }
 ?>
 --EXPECTF--
-Fatal error: Hooked properties in abstract classes cannot be declared readonly in %s on line %d
+Fatal error: Non-abstract property hook must have a body in %s on line %d
