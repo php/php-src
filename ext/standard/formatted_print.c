@@ -591,6 +591,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 						expprec = 1;
 					} else {
 						precision = 0;
+						adjusting |= ADJ_PRECISION;
 					}
 				} else {
 					precision = 0;

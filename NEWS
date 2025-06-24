@@ -263,6 +263,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed exit code handling of sendmail cmd and added warnings.
     (Jesse Hathaway)
+  . Fixed bug GH-18897 (printf: empty precision is interpreted as precision 6,
+    not as precision 0). (nielsdos)
 
 - Streams:
   . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
