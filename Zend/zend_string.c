@@ -86,8 +86,6 @@ static zend_always_inline void zend_init_interned_strings_ht(HashTable *interned
 ZEND_API void zend_interned_strings_init(void)
 {
 	char s[2];
-	unsigned int i;
-	zend_string *str;
 
 	interned_string_request_handler = zend_new_interned_string_request;
 	interned_string_init_request_handler = zend_string_init_interned_request;
@@ -103,15 +101,13 @@ ZEND_API void zend_interned_strings_init(void)
 	zend_string_init_existing_interned = zend_string_init_existing_interned_permanent;
 
 	/* interned empty string */
-	str = zend_string_alloc(sizeof("")-1, 1);
-	ZSTR_VAL(str)[0] = '\000';
-	zend_empty_string = zend_new_interned_string_permanent(str);
+	zend_empty_string = zend_string_init_interned_permanent("", 0, true);
 	GC_ADD_FLAGS(zend_empty_string, IS_STR_VALID_UTF8);
 
 	s[1] = 0;
-	for (i = 0; i < 256; i++) {
+	for (size_t i = 0; i < 256; i++) {
 		s[0] = i;
-		zend_one_char_string[i] = zend_new_interned_string_permanent(zend_string_init(s, 1, 1));
+		zend_one_char_string[i] = zend_string_init_interned_permanent(s, 1, true);
 		if (i < 0x80) {
 			GC_ADD_FLAGS(zend_one_char_string[i], IS_STR_VALID_UTF8);
 		}
@@ -119,9 +115,8 @@ ZEND_API void zend_interned_strings_init(void)
 
 	/* known strings */
 	zend_known_strings = pemalloc(sizeof(zend_string*) * ((sizeof(known_strings) / sizeof(known_strings[0]) - 1)), 1);
-	for (i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
-		str = zend_string_init(known_strings[i], strlen(known_strings[i]), 1);
-		zend_known_strings[i] = zend_new_interned_string_permanent(str);
+	for (size_t i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
+		zend_known_strings[i] = zend_string_init_interned_permanent(known_strings[i], strlen(known_strings[i]), true);
 		GC_ADD_FLAGS(zend_known_strings[i], IS_STR_VALID_UTF8);
 	}
 }
