@@ -374,6 +374,8 @@ PHP 8.5 UPGRADE NOTES
   . get_exception_handler() allows retrieving the current user-defined exception
     handler function.
     RFC: https://wiki.php.net/rfc/get-error-exception-handler
+  . The clone language construct is now a function.
+    RFC: https://wiki.php.net/rfc/clone_with_v2
 
 - Curl:
   . curl_multi_get_handles() allows retrieving all CurlHandles current
