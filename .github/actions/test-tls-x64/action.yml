@@ -1,0 +1,11 @@
+name: Test TLS
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get install -y gcc clang lld
+        export TLSC=$(pwd)/ext/opcache/jit/tls/zend_jit_tls_x86_64.c
+        ./ext/opcache/jit/tls/testing/test.sh
