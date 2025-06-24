@@ -40,18 +40,19 @@ foreach ($callbacks as $callback) {
 
 
 --> Use callback 'return_false':
-My output.
-Deprecated: ob_end_flush(): Returning a non-string result from user output handler return_false is deprecated in %s on line %d
 
+Deprecated: ob_end_flush(): Returning a non-string result from user output handler return_false is deprecated in %s on line %d
+My output.
 
 --> Use callback 'return_null':
 
-
-
 Deprecated: ob_end_flush(): Returning a non-string result from user output handler return_null is deprecated in %s on line %d
+
+
 --> Use callback 'return_string':
 I stole your output.
 
 --> Use callback 'return_zero':
-0
+
 Deprecated: ob_end_flush(): Returning a non-string result from user output handler return_zero is deprecated in %s on line %d
+0

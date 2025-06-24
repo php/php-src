@@ -32,10 +32,20 @@ print "STDOUT:\n";
 fclose(STDOUT);
 var_dump(@fopen('php://stdout', 'a'));
 ?>
---EXPECT--
+--EXPECTF--
 STDIN:
+
+Deprecated: main(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
 bool(false)
+
+Deprecated: var_dump(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
 STDERR:
+
+Deprecated: main(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
 bool(false)
+
+Deprecated: var_dump(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
 STDOUT:
+
+Deprecated: main(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
 bool(false)
