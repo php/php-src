@@ -50,11 +50,11 @@ string(%d) "/**
 
 
 ---> Doc comment for A::$b:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for A::$c:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for A::$d:
@@ -64,7 +64,7 @@ string(%d) "/**
 
 
 ---> Doc comment for A::$e:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for A::$f:
@@ -74,7 +74,7 @@ string(%d) "/**
 
 
 ---> Doc comment for B::$a:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for B::$b:
@@ -82,7 +82,7 @@ string(%d) "/** A doc comment for $b */"
 
 
 ---> Doc comment for B::$c:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for B::$e:

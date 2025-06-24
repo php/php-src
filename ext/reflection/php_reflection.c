@@ -2035,7 +2035,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getDocComment)
 		RETURN_STR_COPY(((zend_internal_function *) fptr)->doc_comment);
 	}
 
-	RETURN_FALSE;
+	RETURN_EMPTY_STRING();
 }
 /* }}} */
 
@@ -4006,7 +4006,7 @@ ZEND_METHOD(ReflectionClassConstant, getDocComment)
 	if (ref->doc_comment) {
 		RETURN_STR_COPY(ref->doc_comment);
 	}
-	RETURN_FALSE;
+	RETURN_EMPTY_STRING();
 }
 /* }}} */
 
@@ -4411,7 +4411,7 @@ ZEND_METHOD(ReflectionClass, getDocComment)
 	if (ce->doc_comment) {
 		RETURN_STR_COPY(ce->doc_comment);
 	}
-	RETURN_FALSE;
+	RETURN_EMPTY_STRING();
 }
 /* }}} */
 
@@ -6335,7 +6335,7 @@ ZEND_METHOD(ReflectionProperty, getDocComment)
 	if (ref->prop && ref->prop->doc_comment) {
 		RETURN_STR_COPY(ref->prop->doc_comment);
 	}
-	RETURN_FALSE;
+	RETURN_EMPTY_STRING();
 }
 /* }}} */
 

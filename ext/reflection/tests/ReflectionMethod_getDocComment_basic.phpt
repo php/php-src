@@ -88,7 +88,7 @@ string(%d) "/**
 
 
 ---> Doc comment for B::f():
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for B::privf():

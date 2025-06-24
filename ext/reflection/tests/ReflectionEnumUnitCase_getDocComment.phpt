@@ -18,6 +18,6 @@ var_dump((new ReflectionClassConstant(Foo::class, 'Baz'))->getDocComment());
 ?>
 --EXPECT--
 string(26) "/** Example doc comment */"
-bool(false)
+string(0) ""
 string(26) "/** Example doc comment */"
-bool(false)
+string(0) ""

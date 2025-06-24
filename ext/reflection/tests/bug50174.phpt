@@ -27,5 +27,5 @@ var_dump($rp->getDocComment());
 
 ?>
 --EXPECT--
-bool(false)
-bool(false)
+string(0) ""
+string(0) ""

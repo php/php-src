@@ -49,6 +49,6 @@ foreach($r->getMethods() as $m)
 --EXPECT--
 string(19) "Comment for class A"
 string(15) "Method A::bla()"
-bool(false)
-bool(false)
+string(0) ""
+string(0) ""
 string(22) "* Comment for A::baz()"

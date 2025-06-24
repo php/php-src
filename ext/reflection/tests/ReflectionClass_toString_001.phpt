@@ -119,7 +119,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
 
       - Parameters [0] {
       }
-      - Tentative return [ string|false ]
+      - Tentative return [ string ]
     }
 
     Method [ <internal:Reflection> public method getConstructor ] {

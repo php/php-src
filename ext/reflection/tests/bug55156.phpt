@@ -27,6 +27,6 @@ namespace foo {
 
 ?>
 --EXPECT--
-bool(false)
+string(0) ""
 string(12) "/** test1 */"
 string(12) "/** test2 */"

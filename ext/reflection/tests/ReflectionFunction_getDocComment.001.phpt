@@ -38,5 +38,5 @@ dumpFuncInfo('extract');
 string(%d) "/**
  * my doc comment
  */"
-bool(false)
-bool(false)
+string(0) ""
+string(0) ""

@@ -29,5 +29,5 @@ var_dump(strip_doc_comment($rb->getDocComment()));
 
 ?>
 --EXPECT--
-bool(false)
-bool(false)
+string(0) ""
+string(0) ""
