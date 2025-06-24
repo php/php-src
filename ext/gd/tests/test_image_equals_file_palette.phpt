@@ -43,5 +43,6 @@ The images differ in 25 pixels.
 The images are equal.
 --CLEAN--
 <?php
-unlink(__DIR__ . DIRECTORY_SEPARATOR . 'test_image_equals_file_palette.png');
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'test_image_equals_file_palette.png';
+@unlink($filename);
 ?>
