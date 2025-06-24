@@ -1,5 +1,5 @@
 --TEST--
-json_validate() - compare against json_decode() for different types of inputs 
+json_validate() - compare against json_decode() for different types of inputs
 --FILE--
 <?php
 
