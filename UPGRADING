@@ -259,6 +259,12 @@ PHP 8.5 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Returning a non-string from a user output handler is deprecated. The
+    deprecation warning will bypass user output handlers to ensure it is
+    visible.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
 - Hash:
   . The MHASH_* constants have been deprecated.  These have been overlooked
     when the mhash*() function family has been deprecated per

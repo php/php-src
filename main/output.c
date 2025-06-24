@@ -948,6 +948,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
 			zval ob_args[2];
 			zval retval;
+			ZVAL_UNDEF(&retval);
 
 			/* ob_data */
 			ZVAL_STRINGL(&ob_args[0], handler->buffer.data, handler->buffer.used);
@@ -959,17 +960,33 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			handler->func.user->fci.params = ob_args;
 			handler->func.user->fci.retval = &retval;
 
-#define PHP_OUTPUT_USER_SUCCESS(retval) ((Z_TYPE(retval) != IS_UNDEF) && !(Z_TYPE(retval) == IS_FALSE))
-			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && PHP_OUTPUT_USER_SUCCESS(retval)) {
-				/* user handler may have returned TRUE */
-				status = PHP_OUTPUT_HANDLER_NO_DATA;
-				if (Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
-					convert_to_string(&retval);
-					if (Z_STRLEN(retval)) {
-						context->out.data = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
-						context->out.used = Z_STRLEN(retval);
-						context->out.free = 1;
-						status = PHP_OUTPUT_HANDLER_SUCCESS;
+			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
+				if (Z_TYPE(retval) != IS_STRING) {
+					// Make sure that we don't get lost in an output buffer
+					int old_flags = OG(flags);
+					OG(flags) = old_flags & (~PHP_OUTPUT_ACTIVATED);
+					php_error_docref(
+						NULL,
+						E_DEPRECATED,
+						"Returning a non-string result from user output handler %s is deprecated",
+						ZSTR_VAL(handler->name)
+					);
+					OG(flags) = old_flags;
+				}
+				if (Z_TYPE(retval) == IS_FALSE) {
+					/* call failed, pass internal buffer along */
+					status = PHP_OUTPUT_HANDLER_FAILURE;
+				} else {
+					/* user handler may have returned TRUE */
+					status = PHP_OUTPUT_HANDLER_NO_DATA;
+					if (Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
+						convert_to_string(&retval);
+						if (Z_STRLEN(retval)) {
+							context->out.data = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
+							context->out.used = Z_STRLEN(retval);
+							context->out.free = 1;
+							status = PHP_OUTPUT_HANDLER_SUCCESS;
+						}
 					}
 				}
 			} else {
