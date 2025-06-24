@@ -6,7 +6,6 @@ error_reporting=4095
 <?php
 try {
     $a = clone 0;
-    $a[0]->b = 0;
 } catch (Error $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
