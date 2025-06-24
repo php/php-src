@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed GH-8157 (post_max_size evaluates .user.ini too late in php-fpm).
     (Jakub Zelenka)
 
+- Iconv:
+  . Extends the ICONV_CONST preprocessor for illumos/solaris. (jMichaelA)
+
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
