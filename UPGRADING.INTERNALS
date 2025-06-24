@@ -43,6 +43,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . Added the zend_update_exception_properties() function for instantiating
     Exception child classes. It updates the $message, $code, and $previous
     properties.
+  . ZEND_IS_XDIGIT() macro was removed because it was unused and its name
+    did not match its actual behavior.
 
 ========================
 2. Build system changes
