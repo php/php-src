@@ -20,7 +20,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     require_once 'connect.inc';
     require_once 'table.inc';
 
-    function try_control_string($link, $control_string, $trace_file, $offset) {
+    function try_control_string($link, $control_string, $trace_file, $offset): string {
 
         @unlink($trace_file);
         if (true !== ($tmp = @mysqli_debug($control_string))) {
@@ -29,7 +29,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
                 $control_string,
                 gettype($tmp),
                 $tmp);
-            return false;
+            return '';
         }
 
         if (!$res = mysqli_query($link, 'SELECT * FROM test')) {
@@ -38,7 +38,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
                 $control_string,
                 mysqli_errno($link),
                 mysqli_error($link));
-            return false;
+            return '';
         }
         while (mysqli_fetch_assoc($res))
             ;
@@ -51,7 +51,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
                 $control_string,
                 gettype($tmp),
                 $tmp);
-            return false;
+            return '';
         }
 
         return trim(substr(file_get_contents($trace_file), 0, 100024));
