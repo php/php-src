@@ -105,16 +105,11 @@ ZEND_FUNCTION(clone)
 
 	zend_object *cloned;
 	cloned = zobj->handlers->clone_obj(zobj);
-	
-	if (EG(exception)) {
-		if (cloned) {
-			OBJ_RELEASE(cloned);
-		}
 
-		RETURN_THROWS();
+	ZEND_ASSERT(cloned || EG(exception));
+	if (EXPECTED(cloned)) {
+		RETURN_OBJ(cloned);
 	}
-
-	RETURN_OBJ(cloned);
 }
 
 ZEND_FUNCTION(exit)
