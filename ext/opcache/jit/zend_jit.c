@@ -3449,8 +3449,16 @@ int zend_jit_script(zend_script *script)
 	 || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 		zend_class_entry *ce;
 		zend_op_array *op_array;
+		zval *zv;
 
-		ZEND_HASH_MAP_FOREACH_PTR(&script->class_table, ce) {
+		ZEND_HASH_MAP_FOREACH_VAL(&script->class_table, zv) {
+			if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
+				continue;
+			}
+
+			ce = Z_PTR_P(zv);
+			ZEND_ASSERT(ce->type == ZEND_USER_CLASS);
+
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 				if (!ZEND_FUNC_INFO(op_array)) {
 					void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);

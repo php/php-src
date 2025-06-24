@@ -116,6 +116,11 @@ PHP 8.5 UPGRADE NOTES
   . SplFileObject::fwrite's parameter $length is now nullable. The default
     value changed from 0 to null.
 
+- Standard:
+  . Using a printf-family function with a formatter that did not specify the
+    precision previously incorrectly reset the precision instead of treating
+    it as a precision of 0. See GH-18897.
+
 ========================================
 2. New Features
 ========================================
@@ -216,6 +221,12 @@ PHP 8.5 UPGRADE NOTES
   . Added class constants Sqlite3Stmt::EXPLAIN_MODE_PREPARED,
     Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN and
     Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
+
+- Standard:
+  . mail() now returns the actual sendmail error and detects if the sendmail
+    process was terminated unexpectedly. In such cases, a warning is emitted
+    and the function returns false. Previously, these errors were silently
+    ignored. This change affects only the sendmail transport.
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),

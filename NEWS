@@ -58,6 +58,7 @@ PHP                                                                        NEWS
   . Added the pipe (|>) operator. (crell)
   . Added support for `final` with constructor property promotion.
     (DanielEScherzer)
+  . Do not use RTLD_DEEPBIND if dlmopen is available. (Daniil Gentili)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -260,6 +261,10 @@ PHP                                                                        NEWS
   . Added array_first() and array_last(). (nielsdos)
   . Fixed bug GH-18823 (setlocale's 2nd and 3rd argument ignores strict_types).
     (nielsdos)
+  . Fixed exit code handling of sendmail cmd and added warnings.
+    (Jesse Hathaway)
+  . Fixed bug GH-18897 (printf: empty precision is interpreted as precision 6,
+    not as precision 0). (nielsdos)
 
 - Streams:
   . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
