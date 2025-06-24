@@ -18,7 +18,6 @@ function mb_trim_regex( $string, $chars = "", $chars_array = array() )
     $encoded_char_list = implode( "|", array_merge( array( "\s","\t","\n","\r", "\0", "\x0B" ), $chars_array ) );
 
     $string = mb_ereg_replace( "^($encoded_char_list)*", "", $string );
-    $string = mb_ereg_replace( "($encoded_char_list)*$", "", $string );
     return $string;
 }
 
@@ -29,5 +28,5 @@ echo 'OK';
 ?>
 --EXPECTF--
 Warning: mb_ereg_replace(): mbregex search failure in php_mbereg_replace_exec(): match-stack limit over in %s on line %d
-string(0) ""
+bool(false)
 OK
