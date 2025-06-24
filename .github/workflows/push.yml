@@ -194,7 +194,7 @@ jobs:
   WINDOWS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
-    runs-on: windows-2019
+    runs-on: windows-2022
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
