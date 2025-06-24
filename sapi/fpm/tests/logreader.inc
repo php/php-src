@@ -285,7 +285,7 @@ class LogStreamSource extends LogSource
         $write  = null;
         $except = null;
         if (stream_select($read, $write, $except, $timeoutSeconds, $timeoutMicroseconds)) {
-            $line          = fgets($this->stream);
+            $line          = fgets($this->stream) ?: '';
             $this->lines[] = $line;
 
             return $line;
