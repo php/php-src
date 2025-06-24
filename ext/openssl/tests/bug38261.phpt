@@ -4,7 +4,6 @@ openssl key from zval leaks
 openssl
 --FILE--
 <?php
-$cert = false;
 class test {
     function __toString() {
         return "test object";
@@ -26,6 +25,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+$cert = '';
 var_dump(openssl_x509_parse($cert));
 
 try {
