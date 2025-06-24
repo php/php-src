@@ -43,7 +43,7 @@
 #undef iconv
 #endif
 
-#if defined(__NetBSD__)
+#if defined(__NetBSD__) || defined (__illumos__)
 // unfortunately, netbsd has still the old non posix conformant signature
 // libiconv tends to match the eventual system's iconv too.
 #define ICONV_CONST const
