@@ -3,39 +3,24 @@ Readonly classes can be constructed via reflection by ORM
 --FILE--
 <?php
 
-interface DbConnection {
-   public function loadCategory(string $id): Category;
-}
-
 class Category {
-   public function __construct(public string $name) {}
-}
-
-class MockDbConnection implements DbConnection {
-   public function loadCategory(string $id): Category {
-       echo "hit database\n";
-       return new Category("Category {$id}");
-   }
+   public function __construct(public string $id) {}
 }
 
 readonly class Product
 {
     public function __construct(
-        public string $name,
-        public float $price,
         public Category $category,
     ) {}
 }
 
 readonly class LazyProduct extends Product
 {
-   private DbConnection $dbApi;
-
    private string $categoryId;
 
    public Category $category {
        get {
-           return $this->category ??= $this->dbApi->loadCategory($this->categoryId);
+           return $this->category ??= new Category($this->categoryId);
        }
    }
 }
@@ -43,31 +28,16 @@ readonly class LazyProduct extends Product
 $reflect = new ReflectionClass(LazyProduct::class);
 $product = $reflect->newInstanceWithoutConstructor();
 
-$nameProperty = $reflect->getProperty('name');
-$nameProperty->setAccessible(true);
-$nameProperty->setValue($product, 'Iced Chocolate');
-
-$priceProperty = $reflect->getProperty('price');
-$priceProperty->setAccessible(true);
-$priceProperty->setValue($product, 1.99);
-
-$db = $reflect->getProperty('dbApi');
-$db->setAccessible(true);
-$db->setValue($product, new MockDbConnection());
-
 $categoryId = $reflect->getProperty('categoryId');
 $categoryId->setAccessible(true);
 $categoryId->setValue($product, '42');
 
-// lazy loading, hit db
 $category1 = $product->category;
-echo $category1->name . "\n";
-
-// cached category returned
 $category2 = $product->category;
-echo $category2->name . "\n";
 
-// same category instance returned
+echo $category1->id . "\n";
+echo $category2->id . "\n";
+
 var_dump($category1 === $category2);
 
 // cannot set twice
@@ -79,8 +49,7 @@ try {
 
 ?>
 --EXPECT--
-hit database
-Category 42
-Category 42
+42
+42
 bool(true)
 Error: Cannot modify readonly property LazyProduct::$categoryId
