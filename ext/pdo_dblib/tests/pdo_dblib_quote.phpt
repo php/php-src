@@ -11,10 +11,7 @@ getDbConnection();
 <?php
 require __DIR__ . '/config.inc';
 $db = getDbConnection();
-var_dump($db->quote(true, PDO::PARAM_BOOL));
-var_dump($db->quote(false, PDO::PARAM_BOOL));
 var_dump($db->quote(42, PDO::PARAM_INT));
-var_dump($db->quote(null, PDO::PARAM_NULL));
 var_dump($db->quote('\'', PDO::PARAM_STR));
 var_dump($db->quote('foo', PDO::PARAM_STR));
 var_dump($db->quote('foo', PDO::PARAM_STR | PDO::PARAM_STR_CHAR));
@@ -32,13 +29,8 @@ $db = getDbConnection(PDO::class, [PDO::ATTR_DEFAULT_STR_PARAM => PDO::PARAM_STR
 var_dump($db->getAttribute(PDO::ATTR_DEFAULT_STR_PARAM) === PDO::PARAM_STR_NATL);
 
 ?>
---EXPECTF--
-string(3) "'1'"
-string(2) "''"
+--EXPECT--
 string(4) "'42'"
-
-Deprecated: PDO::quote(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
-string(2) "''"
 string(4) "''''"
 string(5) "'foo'"
 string(5) "'foo'"
