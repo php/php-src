@@ -659,7 +659,7 @@ struct _zend_async_scope_s {
 	 * The method determines the moment when the Scope can be destructed.
 	 * It checks the conditions and, if necessary, calls the dispose method.
 	 */
-	void (*try_to_dispose)(zend_async_scope_t *scope);
+	bool (*try_to_dispose)(zend_async_scope_t *scope);
 
 	/**
 	 * The method handles an exception delivered to the Scope.
