@@ -4,6 +4,9 @@ Bug #70258 (Segfault if do_resize fails to allocated memory)
 memory_limit=2M
 --SKIPIF--
 <?php
+if (PHP_OS_FAMILY === 'Windows') {
+    die("xfail fails on Windows Server 2022 and newer.");
+}
 $zend_mm_enabled = getenv("USE_ZEND_ALLOC");
 if ($zend_mm_enabled === "0") {
     die("skip Zend MM disabled");
