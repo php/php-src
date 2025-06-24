@@ -14,8 +14,8 @@ if (!function_exists('snmp_set_enum_print')) die('skip This function is only ava
 require_once(__DIR__.'/snmp_include.inc');
 
 echo "Checking working\n";
-var_dump(snmp_set_enum_print(0));
-var_dump(snmp_set_enum_print(1));
+var_dump(snmp_set_enum_print(false));
+var_dump(snmp_set_enum_print(true));
 ?>
 --EXPECT--
 Checking working
