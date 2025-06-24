@@ -654,7 +654,24 @@ struct _zend_async_scope_s {
 
 	zend_async_before_coroutine_enqueue_t before_coroutine_enqueue;
 	zend_async_after_coroutine_enqueue_t after_coroutine_enqueue;
-	void (*cancel)(zend_async_scope_t *scope, zend_object *error, bool transfer_error, const bool is_safely);
+
+	/**
+	 * The method handles an exception delivered to the Scope.
+	 * Its result may either be the cancellation of the Scope or the suppression of the exception.
+	 * If the coroutine parameter is specified, it indicates an attempt to handle an exception from a coroutine.
+	 * Otherwise, it's an attempt by the user to stop the execution of the Scope.
+	 *
+	 * The method should return true if the exception was handled and the Scope can continue execution.
+	 *
+	 * This method is the central point of responsibility where the behavior in case of an error is determined.
+	 */
+	bool (*catch_or_cancel)(
+		zend_async_scope_t *scope,
+		zend_coroutine_t *coroutine,
+		zend_object *exception,
+		bool transfer_error,
+		const bool is_safely
+	);
 };
 
 #define ZEND_ASYNC_SCOPE_F_CLOSED				  ZEND_ASYNC_EVENT_F_CLOSED  /* scope was closed */

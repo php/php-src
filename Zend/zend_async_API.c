@@ -1055,6 +1055,8 @@ zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object
 {
 	// Protect from self-deletion by incrementing ref count before calling callbacks
 	ZEND_ASYNC_EVENT_ADD_REF(event);
+	// Automatically clear exception handled flag
+	ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(event);
 
 	// If pre-notify returns false, we stop notifying callbacks
 	if (false == from_handler && event->notify_handler != NULL) {
