@@ -2345,8 +2345,6 @@ simple_list:
 			}
 			smart_str_appendc(str, '`');
 			break;
-		case ZEND_AST_CLONE:
-			PREFIX_OP("clone ", 270, 271);
 		case ZEND_AST_PRINT:
 			PREFIX_OP("print ", 60, 61);
 		case ZEND_AST_INCLUDE_OR_EVAL:
