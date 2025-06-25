@@ -126644,7 +126644,7 @@ ZEND_API void ZEND_FASTCALL zend_deserialize_opcode_handler(zend_op *op)
 	op->handler = zend_opcode_handlers[(uintptr_t)op->handler];
 }
 
-ZEND_API zend_vm_opcode_handler_func_t ZEND_FASTCALL zend_get_opcode_handler_func(const zend_op *op)
+ZEND_API const void *ZEND_FASTCALL zend_get_opcode_handler_func(const zend_op *op)
 {
 #if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_TAIL_CALL_DISPATCH
 	zval *zv;
