@@ -117,7 +117,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	/* Check if the general dynamic code was relaxed by the linker */
 
 	// addl any,%ebx
-	if (code[0] != 0x81 || code[1] != 0xc3) {
+	if (memcmp(&code[0], "\x81\xc3", 2) != 0) {
 		uint64_t bytes;
 		memcpy(&bytes, &code[0], 8);
 		zend_accel_error(ACCEL_LOG_DEBUG, "addl insn does not match: 0x%16" PRIx64 "\n", bytes);
@@ -125,7 +125,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	}
 
 	// leal any(,%ebx,1),%eax
-	if (code[6] != 0x8d || code[7] != 0x04 || code[8] != 0x1d) {
+	if (memcmp(&code[6], "\x8d\x04\x1d", 3) != 0) {
 		uint64_t bytes;
 		memcpy(&bytes, &code[6], 8);
 		zend_accel_error(ACCEL_LOG_DEBUG, "leal insn does not match: 0x%16" PRIx64 "\n", bytes);
@@ -133,7 +133,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	}
 
 	// call any
-	if (code[13] != 0xe8) {
+	if (memcmp(&code[13], "\xe8", 1) != 0) {
 		uint64_t bytes;
 		memcpy(&bytes, &code[13], 8);
 		zend_accel_error(ACCEL_LOG_DEBUG, "call insn does not match: 0x%16" PRIx64 "\n", bytes);
@@ -189,7 +189,7 @@ code_changed:
 	}
 
 	// subl $any,%eax
-	if (code[12] != 0x81 || code[13] != 0xe8) {
+	if (memcmp(&code[12], "\x81\xe8", 2) != 0) {
 		uint64_t bytes;
 		memcpy(&bytes, &code[6], 8);
 		zend_accel_error(ACCEL_LOG_DEBUG, "subl insn does not match: 0x%16" PRIx64 "\n", bytes);
