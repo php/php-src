@@ -101,6 +101,9 @@ zend_async_freeaddrinfo_t zend_async_freeaddrinfo_fn = NULL;
 zend_async_new_exec_event_t zend_async_new_exec_event_fn = NULL;
 zend_async_exec_t zend_async_exec_fn = NULL;
 
+/* Trigger Event API */
+zend_async_new_trigger_event_t zend_async_new_trigger_event_fn = NULL;
+
 static zend_string * thread_pool_module_name = NULL;
 zend_async_queue_task_t zend_async_queue_task_fn = NULL;
 
@@ -259,7 +262,8 @@ ZEND_API bool zend_async_reactor_register(
     zend_async_getaddrinfo_t getaddrinfo_fn,
     zend_async_freeaddrinfo_t freeaddrinfo_fn,
     zend_async_new_exec_event_t new_exec_event_fn,
-    zend_async_exec_t exec_fn
+    zend_async_exec_t exec_fn,
+    zend_async_new_trigger_event_t new_trigger_event_fn
 )
 {
 	if (zend_atomic_bool_exchange(&reactor_lock, 1)) {
@@ -300,6 +304,8 @@ ZEND_API bool zend_async_reactor_register(
 
 	zend_async_new_exec_event_fn = new_exec_event_fn;
 	zend_async_exec_fn = exec_fn;
+
+	zend_async_new_trigger_event_fn = new_trigger_event_fn;
 
 	zend_atomic_bool_store(&reactor_lock, 0);
 

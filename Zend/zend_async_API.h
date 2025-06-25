@@ -170,6 +170,7 @@ typedef struct _zend_async_filesystem_event_s zend_async_filesystem_event_t;
 
 typedef struct _zend_async_process_event_s zend_async_process_event_t;
 typedef struct _zend_async_thread_event_s zend_async_thread_event_t;
+typedef struct _zend_async_trigger_event_s zend_async_trigger_event_t;
 
 typedef struct _zend_async_dns_nameinfo_s zend_async_dns_nameinfo_t;
 typedef struct _zend_async_dns_addrinfo_s zend_async_dns_addrinfo_t;
@@ -215,6 +216,8 @@ typedef void (*zend_async_thread_entry_t)(void *arg, size_t extra_size);
 typedef zend_async_thread_event_t* (*zend_async_new_thread_event_t)(
 	zend_async_thread_entry_t entry, void *arg, size_t extra_size
 );
+typedef void (*zend_async_trigger_event_trigger_fn)(zend_async_trigger_event_t *event);
+typedef zend_async_trigger_event_t* (*zend_async_new_trigger_event_t)(size_t extra_size);
 typedef zend_async_filesystem_event_t* (*zend_async_new_filesystem_event_t)(
 	zend_string * path, const unsigned int flags, size_t extra_size
 );
@@ -616,6 +619,11 @@ struct _zend_async_listen_event_s {
 
 struct _zend_async_task_s {
 	zend_async_event_t base;
+};
+
+struct _zend_async_trigger_event_s {
+	zend_async_event_t base;
+	zend_async_trigger_event_trigger_fn trigger;
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -1106,6 +1114,9 @@ ZEND_API extern zend_async_exec_t zend_async_exec_fn;
 ZEND_API bool zend_async_thread_pool_is_enabled(void);
 ZEND_API extern zend_async_queue_task_t zend_async_queue_task_fn;
 
+/* Trigger Event API */
+ZEND_API extern zend_async_new_trigger_event_t zend_async_new_trigger_event_fn;
+
 ZEND_API bool zend_async_scheduler_register(
 	char *module,
 	bool allow_override,
@@ -1142,7 +1153,8 @@ ZEND_API bool zend_async_reactor_register(
     zend_async_getaddrinfo_t getaddrinfo_fn,
     zend_async_freeaddrinfo_t freeaddrinfo_fn,
     zend_async_new_exec_event_t new_exec_event_fn,
-    zend_async_exec_t exec_fn
+    zend_async_exec_t exec_fn,
+    zend_async_new_trigger_event_t new_trigger_event_fn
 );
 
 ZEND_API void zend_async_thread_pool_register(
@@ -1291,6 +1303,10 @@ END_EXTERN_C()
 	zend_async_exec_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, timeout)
 
 #define ZEND_ASYNC_QUEUE_TASK(task) zend_async_queue_task_fn(task)
+
+/* Trigger Event API Macros */
+#define ZEND_ASYNC_NEW_TRIGGER_EVENT() zend_async_new_trigger_event_fn(0)
+#define ZEND_ASYNC_NEW_TRIGGER_EVENT_EX(extra_size) zend_async_new_trigger_event_fn(extra_size)
 
 /* Socket Listening API Macros */
 #define ZEND_ASYNC_SOCKET_LISTEN(host, port, backlog) \
