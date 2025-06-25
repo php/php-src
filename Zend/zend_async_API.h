@@ -184,7 +184,7 @@ typedef struct _zend_async_task_s zend_async_task_t;
 
 typedef zend_coroutine_t * (*zend_async_new_coroutine_t)(zend_async_scope_t *scope);
 typedef zend_async_scope_t * (*zend_async_new_scope_t)(zend_async_scope_t * parent_scope, bool with_zend_object);
-typedef zend_coroutine_t * (*zend_async_spawn_t)(zend_async_scope_t *scope, zend_object *scope_provider);
+typedef zend_coroutine_t * (*zend_async_spawn_t)(zend_async_scope_t *scope, zend_object *scope_provider, int32_t priority);
 typedef void (*zend_async_suspend_t)(bool from_main);
 typedef void (*zend_async_enqueue_coroutine_t)(zend_coroutine_t *coroutine);
 typedef void (*zend_async_resume_t)(zend_coroutine_t *coroutine, zend_object * error, const bool transfer_error);
@@ -1231,9 +1231,11 @@ ZEND_API void zend_async_call_main_coroutine_start_handlers(zend_coroutine_t *ma
 END_EXTERN_C()
 
 #define ZEND_ASYNC_IS_ENABLED() zend_async_is_enabled()
-#define ZEND_ASYNC_SPAWN() zend_async_spawn_fn(NULL, NULL)
-#define ZEND_ASYNC_SPAWN_WITH(scope) zend_async_spawn_fn(scope, NULL)
-#define ZEND_ASYNC_SPAWN_WITH_PROVIDER(scope_provider) zend_async_spawn_fn(NULL, scope_provider)
+#define ZEND_ASYNC_SPAWN() zend_async_spawn_fn(NULL, NULL, 0)
+#define ZEND_ASYNC_SPAWN_WITH(scope) zend_async_spawn_fn(scope, NULL, 0)
+#define ZEND_ASYNC_SPAWN_WITH_PROVIDER(scope_provider) zend_async_spawn_fn(NULL, scope_provider, 0)
+#define ZEND_ASYNC_SPAWN_WITH_PRIORITY(priority) zend_async_spawn_fn(NULL, NULL, priority)
+#define ZEND_ASYNC_SPAWN_WITH_SCOPE_EX(scope, priority) zend_async_spawn_fn(scope, NULL, priority)
 #define ZEND_ASYNC_NEW_COROUTINE(scope) zend_async_new_coroutine_fn(scope)
 #define ZEND_ASYNC_NEW_SCOPE(parent) zend_async_new_scope_fn(parent, false)
 #define ZEND_ASYNC_NEW_SCOPE_WITH_OBJECT(parent) zend_async_new_scope_fn(parent, true)

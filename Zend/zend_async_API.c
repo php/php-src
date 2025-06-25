@@ -29,7 +29,7 @@ zend_async_globals_t zend_async_globals_api = {0};
 /* Forward declarations */
 static void zend_async_main_handlers_shutdown(void);
 
-static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_provider)
+static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_provider, int32_t priority)
 {
 	ASYNC_THROW_ERROR("Async API is not enabled");
 	return NULL;
