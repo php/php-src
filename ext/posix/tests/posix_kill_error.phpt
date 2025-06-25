@@ -13,7 +13,7 @@ $sig = 999;
 var_dump( posix_kill($pid, 999) );
 
 echo "\n-- Testing posix_kill() function with negative pid --\n";
-$pid = -999;
+$pid = -1;
 $sig = 9;
 var_dump( posix_kill($pid, 999) );
 
