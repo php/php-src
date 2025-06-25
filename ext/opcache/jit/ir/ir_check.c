@@ -94,6 +94,7 @@ bool ir_check(const ir_ctx *ctx)
 	uint32_t flags;
 	bool ok = 1;
 
+	IR_CHECK_CALLING_CONV(ctx->flags);
 	if ((ctx->flags & (IR_VARARG_FUNC|IR_PRESERVE_NONE_FUNC)) == (IR_VARARG_FUNC|IR_PRESERVE_NONE_FUNC)) {
 		fprintf(stderr, "IR_VARARG_FUNC and IR_PRESERVE_NONE_FUNC flags are mutually exclusive (preserve_none does not support var args)\n");
 		ok = 0;

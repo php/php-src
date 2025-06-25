@@ -191,8 +191,6 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 	const int8_t *int_reg_params = _ir_int_reg_params;
 	const int8_t *fp_reg_params = _ir_fp_reg_params;
 
-	IR_CHECK_CALLING_CONV(ctx->flags);
-
 #ifdef IR_HAVE_FASTCALL
 	if (sizeof(void*) == 4 && (ctx->flags & IR_FASTCALL_FUNC)) {
 		int_reg_params_count = IR_REG_INT_FCARGS;
@@ -257,8 +255,6 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 	const int8_t *int_reg_params = _ir_int_reg_params;
 	const int8_t *fp_reg_params = _ir_fp_reg_params;
 
-	IR_CHECK_CALLING_CONV(ctx->flags);
-
 #ifdef IR_HAVE_FASTCALL
 	if (sizeof(void*) == 4 && ir_is_fastcall(ctx, insn)) {
 		int_reg_params_count = IR_REG_INT_FCARGS;
@@ -268,7 +264,7 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 	}
 #endif
 #ifdef IR_HAVE_PRESERVE_NONE
-	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+	if (ir_is_preserve_none(ctx, insn)) {
 		int_reg_params_count = IR_REG_INT_PNARGS;
 		int_reg_params = _ir_int_pn_reg_params;
 	}

@@ -10145,8 +10145,6 @@ static void ir_emit_load_params(ir_ctx *ctx)
 	const int8_t *fp_reg_params = _ir_fp_reg_params;
 	int32_t stack_offset = 0;
 
-	IR_CHECK_CALLING_CONV(ctx->flags);
-
 #ifdef IR_TARGET_X86
 	if (sizeof(void*) == 4 && (ctx->flags & IR_FASTCALL_FUNC)) {
 		int_reg_params_count = IR_REG_INT_FCARGS;
@@ -10278,8 +10276,6 @@ static void ir_fix_param_spills(ir_ctx *ctx)
 	const int8_t *fp_reg_params = _ir_fp_reg_params;
 	int32_t stack_start = 0;
 	int32_t stack_offset = 0;
-
-	IR_CHECK_CALLING_CONV(ctx->flags);
 
 #ifdef IR_TARGET_X86
 	if (sizeof(void*) == 4 && (ctx->flags & IR_FASTCALL_FUNC)) {
