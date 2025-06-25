@@ -156,7 +156,12 @@ bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn)
 	const ir_proto_t *proto = ir_call_proto(ctx, insn);
 
 	if (proto) {
-		return (proto->flags & IR_VARARG_FUNC) != 0;
+		if (proto->flags & IR_VARARG_FUNC) {
+#ifdef IR_HAVE_PRESERVE_NONE
+			IR_ASSERT(!(proto->flags & IR_PRESERVE_NONE_FUNC) && "preserve_none does not support var args");
+#endif
+			return 1;
+		}
 	}
 	return 0;
 }

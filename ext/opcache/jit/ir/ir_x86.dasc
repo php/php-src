@@ -2937,6 +2937,9 @@ store_int:
 			ir_match_fuse_load(ctx, insn->op1, ref);
 			return (ctx->mflags & IR_X86_BMI1) ? IR_BIT_COUNT : IR_CTPOP;
 		case IR_VA_START:
+#ifdef IR_HAVE_PRESERVE_NONE
+			IR_ASSERT(!(ctx->flags & IR_PRESERVE_NONE_FUNC) && "preserve_none does not support var args");
+#endif
 			ctx->flags2 |= IR_HAS_VA_START;
 			if ((ctx->ir_base[insn->op2].op == IR_ALLOCA) || (ctx->ir_base[insn->op2].op == IR_VADDR)) {
 				ir_use_list *use_list = &ctx->use_lists[insn->op2];
@@ -3789,19 +3792,8 @@ static void ir_emit_prologue(ir_ctx *ctx)
 		|	mov [Ra(fp)+offset+24], Ra(IR_REG_INT_ARG4)
 #elif defined(IR_TARGET_X64)
 |.if X64
-		int int_reg_params_count = IR_REG_INT_ARGS;
 		const int8_t *int_reg_params = _ir_int_reg_params;
 		const int8_t *fp_reg_params = _ir_fp_reg_params;
-
-		IR_CHECK_CALLING_CONV(ctx->flags);
-
-# ifdef IR_HAVE_PRESERVE_NONE
-		// TODO: test
-		if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
-			int_reg_params_count = IR_REG_INT_PNARGS;
-			int_reg_params = _ir_int_pn_reg_params;
-		}
-# endif
 
 		uint32_t i;
 		ir_reg fp;
@@ -3819,7 +3811,7 @@ static void ir_emit_prologue(ir_ctx *ctx)
 		if ((ctx->flags2 & (IR_HAS_VA_ARG_GP|IR_HAS_VA_COPY)) && ctx->gp_reg_params < IR_REG_INT_ARGS) {
 			/* skip named args */
 			offset += sizeof(void*) * ctx->gp_reg_params;
-			for (i = ctx->gp_reg_params; i < int_reg_params_count; i++) {
+			for (i = ctx->gp_reg_params; i < IR_REG_INT_ARGS; i++) {
 				|	mov qword [Ra(fp)+offset], Rq(int_reg_params[i])
 				offset += sizeof(void*);
 			}
@@ -8350,7 +8342,6 @@ static void ir_emit_va_start(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		overflow_arg_area_offset = ctx->stack_frame_size + ctx->call_stack_size + sizeof(void*) + ctx->param_stack_size;
 	}
 
-	// TODO: preserve none
 	if ((ctx->flags2 & (IR_HAS_VA_ARG_GP|IR_HAS_VA_COPY)) && ctx->gp_reg_params < IR_REG_INT_ARGS) {
 		|	lea Ra(tmp_reg), aword [Ra(fp)+reg_save_area_offset]
 		have_reg_save_area = 1;
@@ -8518,7 +8509,6 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		op2_reg = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
 		offset = IR_SPILL_POS_TO_OFFSET(ctx->ir_base[insn->op2].op3);
 	}
-	// TODO: preserve none
 	if (IR_IS_TYPE_INT(type)) {
 		|	mov Rd(tmp_reg), dword [Ra(op2_reg)+(offset+offsetof(ir_va_list, gp_offset))]
 		|	cmp Rd(tmp_reg), sizeof(void*)*IR_REG_INT_ARGS
@@ -10614,7 +10604,6 @@ void ir_fix_stack_frame(ir_ctx *ctx)
 		ctx->flags2 |= IR_16B_FRAME_ALIGNMENT;
 		ctx->stack_frame_size = IR_ALIGNED_SIZE(ctx->stack_frame_size, 16);
 		ctx->locals_area_size = ctx->stack_frame_size;
-		// TODO: preserve none
 		if ((ctx->flags2 & (IR_HAS_VA_ARG_GP|IR_HAS_VA_COPY)) && ctx->gp_reg_params < IR_REG_INT_ARGS) {
 			additional_size += sizeof(void*) * IR_REG_INT_ARGS;
 		}
