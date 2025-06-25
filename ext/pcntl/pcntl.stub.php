@@ -1091,7 +1091,7 @@ function pcntl_wifcontinued(int $status): bool {}
     function pcntl_forkx(int $flags): int{}
 #endif
 
-#ifdef HAVE_PIDFD_OPEN
+#ifdef HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN
     function pcntl_setns(?int $process_id = null, int $nstype = CLONE_NEWNET): bool {}
 #endif
 
