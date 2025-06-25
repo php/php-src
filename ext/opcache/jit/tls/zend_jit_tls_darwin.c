@@ -38,7 +38,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 
 #if defined(__x86_64__)
 	size_t *ti;
-	__asm__(
+	__asm__ __volatile__(
 		"leaq __tsrm_ls_cache(%%rip),%0"
 		: "=r" (ti));
 	*module_offset = ti[2];
@@ -58,13 +58,13 @@ void *zend_jit_tsrm_ls_cache_address(
 ) {
 
 	if (tcb_offset) {
-		char *base;
+		char *addr;
 		__asm__ __volatile__(
 			"movq   %%gs:(%1), %0\n"
-			: "=r" (base)
+			: "=r" (addr)
 			: "r" (tcb_offset)
 		);
-
+		return addr;
 	}
 	if (module_index != (size_t)-1 && module_offset != (size_t)-1) {
 		char *base;
