@@ -496,7 +496,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_HANDLER(ZEND_
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_add_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_add_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -521,7 +521,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_add_help
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_sub_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_sub_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -546,7 +546,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_sub_help
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_mul_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_mul_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -581,7 +581,7 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_C
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_mod_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_mod_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -606,7 +606,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_mod_help
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_shift_left_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_shift_left_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -631,7 +631,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_shift_le
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_shift_right_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_shift_right_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -656,7 +656,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_shift_ri
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_equal_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_is_equal_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -682,7 +682,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_equal
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_not_equal_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_is_not_equal_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -708,7 +708,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_not_e
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_smaller_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_is_smaller_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -734,7 +734,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_small
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_smaller_or_equal_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_is_smaller_or_equal_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -760,7 +760,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_small
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_or_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_bw_or_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -785,7 +785,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_or_he
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_and_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_bw_and_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -810,7 +810,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_and_h
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_xor_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_bw_xor_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -835,7 +835,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_xor_h
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_not_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_bw_not_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1)
 {
 	USE_OPLINE
 
@@ -2477,7 +2477,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GENERATOR_CREATE_S
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t _arg_num, zval *_arg)
+static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t _arg_num, zval *_arg)
 {
 	USE_OPLINE
 
@@ -2867,7 +2867,7 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_C
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_verify_recv_arg_type_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_verify_recv_arg_type_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1)
 {
 	USE_OPLINE
 
@@ -2895,7 +2895,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RECV_N
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_case_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_case_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -3379,7 +3379,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NOP_SP
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_dispatch_try_catch_finally_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t try_catch_offset, uint32_t op_num)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_dispatch_try_catch_finally_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t try_catch_offset, uint32_t op_num)
 {
 	/* May be NULL during generator closing (only finally blocks are executed) */
 	zend_object *ex = EG(exception);
@@ -10679,7 +10679,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CONST_T
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_fetch_var_address_helper_SPEC_CONST_UNUSED(ZEND_OPCODE_HANDLER_ARGS_EX int type)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_fetch_var_address_helper_SPEC_CONST_UNUSED(ZEND_OPCODE_HANDLER_ARGS_EX int type)
 {
 	USE_OPLINE
 	zval *varname;
@@ -18806,7 +18806,7 @@ try_instanceof:
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED(ZEND_OPCODE_HANDLER_ARGS_EX int type)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED(ZEND_OPCODE_HANDLER_ARGS_EX int type)
 {
 	USE_OPLINE
 	zval *varname;
@@ -49977,7 +49977,7 @@ assign_dim_op_ret_null:
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_fetch_var_address_helper_SPEC_CV_UNUSED(ZEND_OPCODE_HANDLER_ARGS_EX int type)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_fetch_var_address_helper_SPEC_CV_UNUSED(ZEND_OPCODE_HANDLER_ARGS_EX int type)
 {
 	USE_OPLINE
 	zval *varname;
@@ -55272,6 +55272,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_HANDLER(ZEND_
 # undef  ZEND_OPCODE_HANDLER_RET
 # undef  ZEND_OPCODE_HANDLER_RET_EX
 # undef  ZEND_OPCODE_HANDLER_CCONV
+# undef  ZEND_OPCODE_HANDLER_CCONV_EX
 # undef  ZEND_VM_DISPATCH_DEFAULT
 # undef  ZEND_VM_DISPATCH_NOTAIL
 # undef  ZEND_VM_DISPATCH_TO_HANDLER
@@ -55287,6 +55288,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_HANDLER(ZEND_
 # define ZEND_OPCODE_HANDLER_RET                    const zend_op *
 # define ZEND_OPCODE_HANDLER_RET_EX                 ZEND_OPCODE_HANDLER_RET
 # define ZEND_OPCODE_HANDLER_CCONV                  ZEND_FASTCALL
+# define ZEND_OPCODE_HANDLER_CCONV_EX               ZEND_OPCODE_HANDLER_CCONV
 # define ZEND_VM_DISPATCH_DEFAULT(handler)          return ((opcode_handler_func_t)(void*)(handler) == ZEND_HALT_EXTERNAL_HANDLER) ? NULL : opline
 # define ZEND_VM_DISPATCH_NOTAIL(handler)           ZEND_VM_DISPATCH_DEFAULT(handler)
 # define ZEND_VM_DISPATCH_TO_HANDLER(handler)       ZEND_VM_TAIL_CALL(((opcode_handler_func_t)(void*)(handler))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))
@@ -55304,7 +55306,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_OPCODE_HANDLER_CCONV *opcode_handler_func_
 # define ZEND_VM_RETURN()          return (const zend_op*)ZEND_VM_ENTER_BIT
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_add_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_add_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55329,7 +55331,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_add_help
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_sub_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_sub_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55354,7 +55356,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_sub_help
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_mul_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_mul_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55389,7 +55391,7 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_C
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_mod_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_mod_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55414,7 +55416,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_mod_help
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_shift_left_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_shift_left_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55439,7 +55441,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_shift_le
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_shift_right_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_shift_right_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55464,7 +55466,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_shift_ri
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_equal_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_is_equal_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -55490,7 +55492,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_equal
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_not_equal_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_is_not_equal_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -55516,7 +55518,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_not_e
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_smaller_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_is_smaller_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -55542,7 +55544,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_small
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_smaller_or_equal_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_is_smaller_or_equal_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -55568,7 +55570,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_is_small
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_or_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_bw_or_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55593,7 +55595,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_or_he
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_and_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_bw_and_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55618,7 +55620,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_and_h
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_xor_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_bw_xor_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	USE_OPLINE
 
@@ -55643,7 +55645,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_xor_h
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_bw_not_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_bw_not_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1)
 {
 	USE_OPLINE
 
@@ -57285,7 +57287,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_GENERATOR_CREATE_S
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_cannot_pass_by_ref_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t _arg_num, zval *_arg)
+static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_cannot_pass_by_ref_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t _arg_num, zval *_arg)
 {
 	USE_OPLINE
 
@@ -57675,7 +57677,7 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_C
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_verify_recv_arg_type_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_verify_recv_arg_type_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1)
 {
 	USE_OPLINE
 
@@ -57703,7 +57705,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RECV_N
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_case_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_case_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX zval *op_1, zval *op_2)
 {
 	int ret;
 	USE_OPLINE
@@ -58187,7 +58189,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NOP_SP
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_dispatch_try_catch_finally_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t try_catch_offset, uint32_t op_num)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_dispatch_try_catch_finally_helper_SPEC_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t try_catch_offset, uint32_t op_num)
 {
 	/* May be NULL during generator closing (only finally blocks are executed) */
 	zend_object *ex = EG(exception);
@@ -65485,7 +65487,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_SPEC_CONST_T
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_fetch_var_address_helper_SPEC_CONST_UNUSED_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX int type)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_fetch_var_address_helper_SPEC_CONST_UNUSED_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX int type)
 {
 	USE_OPLINE
 	zval *varname;
@@ -73610,7 +73612,7 @@ try_instanceof:
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX int type)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX int type)
 {
 	USE_OPLINE
 	zval *varname;
@@ -104777,7 +104779,7 @@ assign_dim_op_ret_null:
 
 #undef  ZEND_VM_DISPATCH
 #define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)
-static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_FASTCALL  zend_fetch_var_address_helper_SPEC_CV_UNUSED_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX int type)
+static zend_never_inline ZEND_OPCODE_HANDLER_RET_EX ZEND_OPCODE_HANDLER_CCONV_EX  zend_fetch_var_address_helper_SPEC_CV_UNUSED_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS_EX int type)
 {
 	USE_OPLINE
 	zval *varname;

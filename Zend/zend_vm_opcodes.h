@@ -42,13 +42,20 @@
 # endif
 #endif
 
-#if defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) && !defined(ZEND_VM_TAIL_CALL_DISPATCH)
+#if defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && defined(HAVE_SYSV_ABI) && (defined(_M_X64) || defined(__x86_64__) || defined(_M_ARM64) || defined(__aarch64__)) && (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) && !defined(ZEND_VM_TAIL_CALL_DISPATCH)
 # define ZEND_VM_TAIL_CALL_DISPATCH 1
 # define ZEND_OPCODE_HANDLER_CCONV ZEND_PRESERVE_NONE
+# ifdef _WIN32
+/* Use SysV ABI so that zend_vm_trampoline is returned in registers */
+#  define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_SYSV_ABI
+# else
+#  define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
+# endif
 #else
 # undef ZEND_VM_TAIL_CALL_DISPATCH
 # define ZEND_VM_TAIL_CALL_DISPATCH 0
-# define ZEND_OPCODE_HANDLER_CCONV ZEND_FASTCALL
+# define ZEND_OPCODE_HANDLER_CCONV    ZEND_FASTCALL
+# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
 #endif
 
 #if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
