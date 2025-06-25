@@ -26,13 +26,15 @@
 # define ZREG_IP              7 /* IR_REG_RDI */
 # define ZREG_FIRST_FPR       8
 # define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7)) /* all preserved registers */
+# if ZEND_VM_TAIL_CALL_DISPATCH
+#  error
+# endif
 #elif defined(IR_TARGET_X64)
 # define IR_REG_SP            4 /* IR_REG_RSP */
 # define IR_REG_FP            5 /* IR_REG_RBP */
 # if ZEND_VM_TAIL_CALL_DISPATCH
-/* Args 1 and 2 in preserve_none:
+/* Use preserve_none first two arg registers for FP/IP
  * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1029
- * TODO: other archs
  */
 #  define ZREG_FP             12 /* IR_REG_R12 */
 #  define ZREG_IP             13 /* IR_REG_R13 */
@@ -41,9 +43,7 @@
 #  define ZREG_IP             15 /* IR_REG_R15 */
 # endif
 # define ZREG_FIRST_FPR      16
-# if ZEND_VM_TAIL_CALL_DISPATCH
-#  define IR_REGSET_PRESERVED 0
-# elif defined(_WIN64)
+# if defined(_WIN64)
 #  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15))
 /*
 #  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15) | \
@@ -56,9 +56,18 @@
 # endif
 #elif defined(IR_TARGET_AARCH64)
 # define IR_REG_SP           31 /* IR_REG_RSP */
+# define IR_REG_LR           30 /* IR_REG_X30 */
 # define IR_REG_FP           29 /* IR_REG_X29 */
-# define ZREG_FP             27 /* IR_REG_X27 */
-# define ZREG_IP             28 /* IR_REG_X28 */
+# if ZEND_VM_TAIL_CALL_DISPATCH
+/* Use preserve_none first two arg registers for FP/IP
+ * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/AArch64/AArch64CallingConvention.td#L541
+ */
+#  define ZREG_FP             20 /* IR_REG_X20 */
+#  define ZREG_IP             21 /* IR_REG_X21 */
+# else
+#  define ZREG_FP             27 /* IR_REG_X27 */
+#  define ZREG_IP             28 /* IR_REG_X28 */
+# endif
 # define ZREG_FIRST_FPR      32
 # define IR_REGSET_PRESERVED ((1<<19) | (1<<20) | (1<<21) | (1<<22) | (1<<23) | \
                               (1<<24) | (1<<25) | (1<<26) | (1<<27) | (1<<28)) /* all preserved registers */
@@ -2738,11 +2747,22 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			if (GCC_GLOBAL_REGS) {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
 			} else if (ZEND_VM_TAIL_CALL_DISPATCH) {
-				/* The only preserved register is RBP:
+				/* The only preserved register on x86 is RBP:
 				 * https://github.com/llvm/llvm-project/blob/a414877a7a5f000d01370acb1162eb1dea87f48c/llvm/lib/Target/X86/X86RegisterInfo.cpp#L319
 				 * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1183
+				 * On AArch64 it's LR, FP:
+				 * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/AArch64/AArch64CallingConvention.td#L681
+				 *
+				 * Add them to the fixed_regset to prevent usage or these regs.
+				 * It's cheaper to not use them than to save them.
 				 */
-				jit->ctx.fixed_regset |= (1<<5);
+#if defined(IR_TARGET_X64)
+				jit->ctx.fixed_regset |= (1<<IR_REG_FP);
+#elif defined(IR_TARGET_AARCH64)
+				jit->ctx.fixed_regset |= (1<<IR_REG_FP) | (1<<IR_REG_LR);
+#else
+# error
+#endif
 			} else {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED;
 //#ifdef _WIN64

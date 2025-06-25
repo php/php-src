@@ -262,6 +262,34 @@ static const int8_t _ir_fp_reg_params[IR_REG_FP_ARGS] = {
 	IR_REG_FP_ARG8,
 };
 
+#ifdef IR_HAVE_PRESERVE_NONE
+static const int8_t _ir_int_pn_reg_params[IR_REG_INT_PNARGS] = {
+	IR_REG_INT_PNARG1,
+	IR_REG_INT_PNARG2,
+	IR_REG_INT_PNARG3,
+	IR_REG_INT_PNARG4,
+	IR_REG_INT_PNARG5,
+	IR_REG_INT_PNARG6,
+	IR_REG_INT_PNARG7,
+	IR_REG_INT_PNARG8,
+	IR_REG_INT_PNARG9,
+	IR_REG_INT_PNARG10,
+	IR_REG_INT_PNARG11,
+	IR_REG_INT_PNARG12,
+	IR_REG_INT_PNARG13,
+	IR_REG_INT_PNARG14,
+	IR_REG_INT_PNARG15,
+	IR_REG_INT_PNARG16,
+	IR_REG_INT_PNARG17,
+	IR_REG_INT_PNARG18,
+	IR_REG_INT_PNARG19,
+	IR_REG_INT_PNARG20,
+	IR_REG_INT_PNARG21,
+	IR_REG_INT_PNARG22,
+	IR_REG_INT_PNARG23,
+};
+#endif
+
 const char *ir_reg_name(int8_t reg, ir_type type)
 {
 	if (reg >= IR_REG_NUM) {
@@ -1054,6 +1082,9 @@ binop_fp:
 			}
 			return insn->op;
 		case IR_VA_START:
+#ifdef IR_HAVE_PRESERVE_NONE
+			IR_ASSERT(!(ctx->flags & IR_PRESERVE_NONE_FUNC) && "preserve_none does not support var args");
+#endif
 			ctx->flags2 |= IR_HAS_VA_START;
 			if ((ctx->ir_base[insn->op2].op == IR_ALLOCA) || (ctx->ir_base[insn->op2].op == IR_VADDR)) {
 				ir_use_list *use_list = &ctx->use_lists[insn->op2];
@@ -4637,6 +4668,12 @@ static int32_t ir_call_used_stack(ir_ctx *ctx, ir_insn *insn)
 	int last_named_input = (proto && (proto->flags & IR_VARARG_FUNC)) ? proto->params_count + 2 : insn->inputs_count;
 #endif
 
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ir_is_preserve_none(ctx, insn)) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+	}
+#endif
+
 	n = insn->inputs_count;
 	for (j = 3; j <= n; j++) {
 		type = ctx->ir_base[ir_insn_op(insn, j)].type;
@@ -4692,6 +4729,13 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 	if (tmp_reg == IR_REG_NONE) {
 		tmp_reg = IR_REG_IP0;
 	}
+
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ir_is_preserve_none(ctx, insn)) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
+	}
+#endif
 
 	if (insn->op == IR_CALL && (ctx->flags & IR_PREALLOCATED_STACK)) {
 		// TODO: support for preallocated stack
@@ -5397,6 +5441,13 @@ static void ir_emit_load_params(ir_ctx *ctx)
 	const int8_t *fp_reg_params = _ir_fp_reg_params;
 	int32_t stack_offset = 0;
 
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
+	}
+#endif
+
 	if (ctx->flags & IR_USE_FRAME_POINTER) {
 		stack_offset = sizeof(void*) * 2; /* skip old frame pointer and return address */
 	} else {
@@ -5505,6 +5556,13 @@ static void ir_fix_param_spills(ir_ctx *ctx)
 	const int8_t *fp_reg_params = _ir_fp_reg_params;
 	int32_t stack_offset = 0;
 	int32_t param_stack_size = 0;
+
+#ifdef HAVE_PRESERVE_NONE
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
+	}
+#endif
 
 	if (ctx->flags & IR_USE_FRAME_POINTER) {
 		/* skip old frame pointer and return address */

@@ -183,7 +183,7 @@ enum _ir_reg {
 #  define IR_HAVE_PRESERVE_NONE 1
 
 /* https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1029 */
-#  define IR_REG_INT_PNARGS 12
+#  define IR_REG_INT_PNARGS  12
 #  define IR_REG_INT_PNARG1  IR_REG_R12
 #  define IR_REG_INT_PNARG2  IR_REG_R13
 #  define IR_REG_INT_PNARG3  IR_REG_R14
