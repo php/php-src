@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Add $digest_algo parameter to openssl_public_encrypt() and
     openssl_private_decrypt() functions. (Jakub Zelenka)
 
+- POSIX:
+  . posix_kill and posix_setpgid throws a ValueError on invalid process_id.
+    (David Carlier)
+
 - Reflection:
   . Fixed bug GH-19187 (ReflectionNamedType::getName() prints nullable type when
     retrieved from ReflectionProperty::getSettableType()). (ilutov)

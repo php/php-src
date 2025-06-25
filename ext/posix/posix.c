@@ -45,6 +45,14 @@
 # include <sys/sysmacros.h>
 #endif
 
+#if (defined(__sun) && !defined(_LP64)) || defined(_AIX)
+#define POSIX_PID_MIN LONG_MIN
+#define POSIX_PID_MAX LONG_MAX
+#else
+#define POSIX_PID_MIN INT_MIN
+#define POSIX_PID_MAX INT_MAX
+#endif
+
 #include "posix_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
@@ -118,6 +126,12 @@ ZEND_GET_MODULE(posix)
 	}	\
 	RETURN_TRUE;
 
+#define PHP_POSIX_CHECK_PID(pid, lower, upper)										\
+	if (pid < lower || pid > upper) {										\
+		zend_argument_value_error(1, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, lower, upper);	\
+		RETURN_THROWS();											\
+	}
+
 /* {{{ Send a signal to a process (POSIX.1, 3.3.2) */
 
 PHP_FUNCTION(posix_kill)
@@ -128,6 +142,8 @@ PHP_FUNCTION(posix_kill)
 		Z_PARAM_LONG(pid)
 		Z_PARAM_LONG(sig)
 	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_POSIX_CHECK_PID(pid, POSIX_PID_MIN, POSIX_PID_MAX)
 
 	if (kill(pid, sig) < 0) {
 		POSIX_G(last_error) = errno;
@@ -290,6 +306,8 @@ PHP_FUNCTION(posix_setpgid)
 		Z_PARAM_LONG(pid)
 		Z_PARAM_LONG(pgid)
 	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_POSIX_CHECK_PID(pid, 0, POSIX_PID_MAX)
 
 	if (setpgid(pid, pgid) < 0) {
 		POSIX_G(last_error) = errno;
