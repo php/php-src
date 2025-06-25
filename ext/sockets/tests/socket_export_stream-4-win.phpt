@@ -16,7 +16,7 @@ function test($stream, $sock) {
     if ($stream !== null) {
         echo "stream_set_blocking ";
         try {
-            print_r(stream_set_blocking($stream, 0));
+            print_r(stream_set_blocking($stream, false));
         } catch (Error $e) {
             echo get_class($e), ": ", $e->getMessage(), "\n";
         }
