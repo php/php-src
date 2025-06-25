@@ -113,7 +113,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	/* Check if the general dynamic code was relaxed by the linker */
 
 	// data16 leaq any(%rip),%rdi
-	if (code[0] != 0x66 || code[1] != 0x48 || code[2] != 0x8d || code[3] != 0x3d) {
+	if (memcmp(&code[0], "\x66\x48\x8d\x3d", 4) != 0) {
 		uint64_t bytes;
 		memcpy(&bytes, &code[0], 8);
 		zend_accel_error(ACCEL_LOG_DEBUG, "leaq insn does not match: 0x%016" PRIx64 "\n", bytes);
@@ -121,7 +121,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	}
 
 	// data16 data16 rex.W call any
-	if (code[8] != 0x66 || code[9] != 0x66 || code[10] != 0x48 || code[11] != 0xe8) {
+	if (memcmp(&code[8], "\x66\x66\x48\xe8", 4) != 0) {
 		uint64_t bytes;
 		memcpy(&bytes, &code[8], 8);
 		zend_accel_error(ACCEL_LOG_DEBUG, "call insn does not match: 0x%016" PRIx64 "\n", bytes);
@@ -172,7 +172,7 @@ code_changed:
 	}
 
 	// leaq any(%rax),$rax
-	if (code[9] != 0x48 || code[10] != 0x8d || code[11] != 0x80) {
+	if (memcmp(&code[9], "\x48\x8d\x80", 3) != 0) {
 		uint64_t bytes;
 		memcpy(&bytes, &code[10], 8);
 		zend_accel_error(ACCEL_LOG_DEBUG, "leaq insn does not match: 0x%016" PRIx64 "\n", bytes);
