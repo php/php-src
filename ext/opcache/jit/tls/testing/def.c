@@ -28,6 +28,6 @@ void zend_accel_error(int type, const char *format, ...) {
 int test(void);
 
 int decl(void) {
-    return test();
+	return test();
 }
 
