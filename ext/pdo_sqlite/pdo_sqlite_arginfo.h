@@ -128,16 +128,12 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_string *const_EXPLAIN_MODE_PREPARED_name = zend_string_init_interned("EXPLAIN_MODE_PREPARED", sizeof("EXPLAIN_MODE_PREPARED") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_PREPARED_name, &const_EXPLAIN_MODE_PREPARED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXPLAIN_MODE_PREPARED_name);
-#endif
-#if SQLITE_VERSION_NUMBER >= 3043000
 
 	zval const_EXPLAIN_MODE_EXPLAIN_value;
 	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_value, 1);
 	zend_string *const_EXPLAIN_MODE_EXPLAIN_name = zend_string_init_interned("EXPLAIN_MODE_EXPLAIN", sizeof("EXPLAIN_MODE_EXPLAIN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_EXPLAIN_MODE_EXPLAIN_name, &const_EXPLAIN_MODE_EXPLAIN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXPLAIN_MODE_EXPLAIN_name);
-#endif
-#if SQLITE_VERSION_NUMBER >= 3043000
 
 	zval const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value;
 	ZVAL_LONG(&const_EXPLAIN_MODE_EXPLAIN_QUERY_PLAN_value, 2);

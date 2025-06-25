@@ -69,6 +69,49 @@ zend_result zend_startup_builtin_functions(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_FUNCTION(clone)
+{
+	zend_object *zobj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ(zobj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* clone() also exists as the ZEND_CLONE OPcode and both implementations must be kept in sync. */
+
+	zend_class_entry *scope = zend_get_executed_scope();
+
+	zend_class_entry *ce = zobj->ce;
+	zend_function *clone = ce->clone;
+
+	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
+		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
+
+	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		if (clone->common.scope != scope) {
+			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
+			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
+				zend_throw_error(NULL, "Call to %s %s::__clone() from %s%s",
+					zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
+					scope ? "scope " : "global scope",
+					scope ? ZSTR_VAL(scope->name) : ""
+				);
+				RETURN_THROWS();
+			}
+		}
+	}
+
+	zend_object *cloned;
+	cloned = zobj->handlers->clone_obj(zobj);
+
+	ZEND_ASSERT(cloned || EG(exception));
+	if (EXPECTED(cloned)) {
+		RETURN_OBJ(cloned);
+	}
+}
+
 ZEND_FUNCTION(exit)
 {
 	zend_string *str = NULL;

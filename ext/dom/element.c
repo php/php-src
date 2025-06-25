@@ -23,8 +23,8 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "zend_enum.h"
 #include "php_dom.h"
+#include "obj_map.h"
 #include "namespace_compat.h"
-#include "private_data.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
 #include "token_list.h"
@@ -825,7 +825,7 @@ static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, z
 
 	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, NULL);
+	php_dom_create_obj_map(intern, namednode, NULL, name, NULL, &php_dom_obj_map_by_tag_name);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagName)
@@ -1257,7 +1257,7 @@ static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS
 
 	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, uri);
+	php_dom_create_obj_map(intern, namednode, NULL, name, uri, &php_dom_obj_map_by_tag_name);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagNameNS)

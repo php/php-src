@@ -26,6 +26,9 @@
 #include "SAPI.h"
 
 #include <sqlite3.h>
+#ifdef __APPLE__
+#include <Availability.h>
+#endif
 
 #include "zend_exceptions.h"
 #include "sqlite3_arginfo.h"
@@ -36,6 +39,7 @@ static PHP_GINIT_FUNCTION(sqlite3);
 static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, const char *arg2, const char *arg3, const char *arg4);
 static void sqlite3_param_dtor(zval *data);
 static int php_sqlite3_compare_stmt_free(php_sqlite3_stmt **stmt_obj_ptr, sqlite3_stmt *statement);
+static zend_always_inline void php_sqlite3_fetch_one(int n_cols, php_sqlite3_result *result_obj, zend_long mode, zval *result);
 
 #define SQLITE3_CHECK_INITIALIZED(db_obj, member, class_name) \
 	if (!(db_obj) || !(member)) { \
@@ -1500,6 +1504,60 @@ PHP_METHOD(SQLite3Stmt, busy)
     RETURN_FALSE;
 }
 
+#if SQLITE_VERSION_NUMBER >= 3043000
+PHP_METHOD(SQLite3Stmt, explain)
+{
+#ifdef __APPLE__
+	if (__builtin_available(macOS 14.2, *)) {
+#endif
+		php_sqlite3_stmt *stmt_obj;
+		zval *object = ZEND_THIS;
+		stmt_obj = Z_SQLITE3_STMT_P(object);
+
+		ZEND_PARSE_PARAMETERS_NONE();
+
+		SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
+		SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
+
+		RETURN_LONG((zend_long)sqlite3_stmt_isexplain(stmt_obj->stmt));
+#ifdef __APPLE__
+	} else {
+		zend_throw_error(NULL, "explain statement unsupported");
+	}
+#endif
+}
+
+PHP_METHOD(SQLite3Stmt, setExplain)
+{
+#ifdef __APPLE__
+	if (__builtin_available(macOS 14.2, *)) {
+#endif
+		php_sqlite3_stmt *stmt_obj;
+		zend_long mode;
+		zval *object = ZEND_THIS;
+		stmt_obj = Z_SQLITE3_STMT_P(object);
+
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_LONG(mode)
+		ZEND_PARSE_PARAMETERS_END();
+
+		if (mode < 0 || mode > 2) {
+			zend_argument_value_error(1, "must be one of the SQLite3Stmt::EXPLAIN_MODE_* constants");
+			RETURN_THROWS();
+		}
+
+		SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
+		SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
+
+		RETURN_BOOL(sqlite3_stmt_explain(stmt_obj->stmt, (int)mode) == SQLITE_OK);
+#ifdef __APPLE__
+	} else {
+		zend_throw_error(NULL, "explain statement unsupported");
+	}
+#endif
+}
+#endif
+
 /* bind parameters to a statement before execution */
 static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 {
@@ -1929,12 +1987,22 @@ PHP_METHOD(SQLite3Result, columnType)
 }
 /* }}} */
 
+static void sqlite3result_fill_column_names_cache(php_sqlite3_result *result_obj, int nb_cols)
+{
+	result_obj->column_names = safe_emalloc(nb_cols, sizeof(zend_string*), 0);
+
+	for (int i = 0; i < nb_cols; i++) {
+		const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
+		result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
+	}
+}
+
 /* {{{ Fetch a result row as both an associative or numerically indexed array or both. */
 PHP_METHOD(SQLite3Result, fetchArray)
 {
 	php_sqlite3_result *result_obj;
 	zval *object = ZEND_THIS;
-	int i, ret;
+	int ret;
 	zend_long mode = PHP_SQLITE3_BOTH;
 	result_obj = Z_SQLITE3_RESULT_P(object);
 
@@ -1961,36 +2029,13 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 			/* Cache column names to speed up repeated fetchArray calls. */
 			if (mode & PHP_SQLITE3_ASSOC && !result_obj->column_names) {
-				result_obj->column_names = emalloc(n_cols * sizeof(zend_string*));
-
-				for (int i = 0; i < n_cols; i++) {
-					const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
-					result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
-				}
+				sqlite3result_fill_column_names_cache(result_obj, n_cols);
 			}
 
 			array_init(return_value);
 
-			for (i = 0; i < n_cols; i++) {
-				zval data;
+			php_sqlite3_fetch_one(n_cols, result_obj, mode, return_value);
 
-				sqlite_value_to_zval(result_obj->stmt_obj->stmt, i, &data);
-
-				if (mode & PHP_SQLITE3_NUM) {
-					add_index_zval(return_value, i, &data);
-				}
-
-				if (mode & PHP_SQLITE3_ASSOC) {
-					if (mode & PHP_SQLITE3_NUM) {
-						if (Z_REFCOUNTED(data)) {
-							Z_ADDREF(data);
-						}
-					}
-					/* Note: we can't use the "add_new" variant here instead of "update" because
-					 * when the same column name is encountered, the last result should be taken. */
-					zend_symtable_update(Z_ARR_P(return_value), result_obj->column_names[i], &data);
-				}
-			}
 			break;
 
 		case SQLITE_DONE:
@@ -2012,6 +2057,55 @@ static void sqlite3result_clear_column_names_cache(php_sqlite3_result *result) {
 	}
 	result->column_names = NULL;
 	result->column_count = -1;
+}
+
+PHP_METHOD(SQLite3Result, fetchAll)
+{
+	int nb_cols;
+	bool done = false;
+	php_sqlite3_result *result_obj;
+	zval *object = ZEND_THIS;
+	zend_long mode = PHP_SQLITE3_BOTH;
+	result_obj = Z_SQLITE3_RESULT_P(object);
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
+
+	nb_cols = sqlite3_column_count(result_obj->stmt_obj->stmt);
+	if (mode & PHP_SQLITE3_ASSOC && !result_obj->column_names) {
+		sqlite3result_fill_column_names_cache(result_obj, nb_cols);
+	}
+	result_obj->column_count = nb_cols;
+	array_init(return_value);
+
+	while (!done) {
+		int step = sqlite3_step(result_obj->stmt_obj->stmt);
+
+		switch (step) {
+		case SQLITE_ROW: {
+			zval result;
+			array_init_size(&result, result_obj->column_count);
+
+			php_sqlite3_fetch_one(result_obj->column_count, result_obj, mode, &result);
+
+			add_next_index_zval(return_value, &result);
+			break;
+		}
+		case SQLITE_DONE:
+			done = true;
+			break;
+		default:
+			if (!EG(exception)) {
+				php_sqlite3_error(result_obj->db_obj, sqlite3_errcode(sqlite3_db_handle(result_obj->stmt_obj->stmt)), "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
+			}
+			zval_ptr_dtor(return_value);
+			RETURN_FALSE;
+		}
+	}
 }
 
 /* {{{ Resets the result set back to the first row. */
@@ -2371,6 +2465,27 @@ static void sqlite3_param_dtor(zval *data) /* {{{ */
 	efree(param);
 }
 /* }}} */
+
+static zend_always_inline void php_sqlite3_fetch_one(int n_cols, php_sqlite3_result *result_obj, zend_long mode, zval *result)
+{
+	for (int i = 0; i < n_cols; i ++) {
+		zval data;
+		sqlite_value_to_zval(result_obj->stmt_obj->stmt, i, &data);
+
+		if (mode & PHP_SQLITE3_NUM) {
+			add_index_zval(result, i, &data);
+		}
+
+		if (mode & PHP_SQLITE3_ASSOC) {
+			if (mode & PHP_SQLITE3_NUM) {
+				Z_TRY_ADDREF(data);
+			}
+			/* Note: we can't use the "add_new" variant here instead of "update" because
+			 * when the same column name is encountered, the last result should be taken. */
+			zend_symtable_update(Z_ARR_P(result), result_obj->column_names[i], &data);
+		}
+	}
+}
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sqlite3)

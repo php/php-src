@@ -25,13 +25,13 @@ try {
 }
 
 try {
-    $r->__construct("baz", [], false);
+    $r->__construct("baz", [], 0);
 } catch (Error $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    $r->__construct("qax", [], false, null);
+    $r->__construct("qax", [], 0, null);
 } catch (Error $e) {
     echo $e->getMessage() . "\n";
 }

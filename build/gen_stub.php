@@ -1009,6 +1009,9 @@ class FunctionName implements FunctionOrMethodName {
     private /* readonly */ Name $name;
 
     public function __construct(Name $name) {
+        if ($name->name === '_clone') {
+            $name = new Name('clone', $name->getAttributes());
+        }
         $this->name = $name;
     }
 
@@ -2749,22 +2752,14 @@ class ConstInfo extends VariableLike
             throw new Exception("Constant " . $this->name->__toString() . " must have a @cvalue annotation");
         }
 
-        $code = "";
-
-        if ($this->cond) {
-            $code .= "#if {$this->cond}\n";
-        }
+        // Condition will be added by generateCodeWithConditions()
 
         if ($this->name->isClassConst()) {
-            $code .= $this->getClassConstDeclaration($value, $allConstInfos);
+            $code = $this->getClassConstDeclaration($value, $allConstInfos);
         } else {
-            $code .= $this->getGlobalConstDeclaration($value);
+            $code = $this->getGlobalConstDeclaration($value);
         }
         $code .= $this->getValueAssertion($value);
-
-        if ($this->cond) {
-            $code .= "#endif\n";
-        }
 
         return $code;
     }
@@ -3057,6 +3052,7 @@ class PropertyInfo extends VariableLike
         "parent" => "ZEND_STR_PARENT",
         "username" => "ZEND_STR_USERNAME",
         "password" => "ZEND_STR_PASSWORD",
+        "clone" => "ZEND_STR_CLONE",
     ];
 
     /**
@@ -3556,9 +3552,11 @@ class ClassInfo {
             $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "\\\\", $this->alias) . "\", class_entry);\n";
         }
 
-        foreach ($this->constInfos as $const) {
-            $code .= $const->getDeclaration($allConstInfos);
-        }
+        $code .= generateCodeWithConditions(
+            $this->constInfos,
+            '',
+            static fn (ConstInfo $const): string => $const->getDeclaration($allConstInfos)
+        );
 
         foreach ($this->enumCaseInfos as $enumCase) {
             $code .= $enumCase->getDeclaration($allConstInfos);
@@ -4535,7 +4533,7 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             // Allow for parsing extended types like callable(string):mixed in docblocks
-            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\])*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]<>]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\]|<(?&inparens)>)*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
             preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }
@@ -5192,9 +5190,11 @@ function generateArgInfoCode(
             $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number)\n";
             $code .= "{\n";
 
-            foreach ($fileInfo->constInfos as $constInfo) {
-                $code .= $constInfo->getDeclaration($allConstInfos);
-            }
+            $code .= generateCodeWithConditions(
+                $fileInfo->constInfos,
+                '',
+                static fn (ConstInfo $constInfo): string => $constInfo->getDeclaration($allConstInfos)
+            );
 
             if ($attributeInitializationCode !== "" && $fileInfo->constInfos) {
                 $code .= "\n";
