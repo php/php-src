@@ -118,6 +118,7 @@ typedef struct _zend_async_context_s zend_async_context_t;
 typedef struct _zend_async_waker_s zend_async_waker_t;
 typedef struct _zend_async_microtask_s zend_async_microtask_t;
 typedef struct _zend_async_scope_s zend_async_scope_t;
+typedef struct _zend_async_iterator_s zend_async_iterator_t;
 typedef struct _zend_fcall_s zend_fcall_t;
 typedef void (*zend_coroutine_entry_t)(void);
 
@@ -290,6 +291,28 @@ struct _zend_async_microtask_s {
 	bool is_cancelled;
 	uint32_t ref_count;
 };
+
+///////////////////////////////////////////////////////////////////
+/// Async iterator structures
+///////////////////////////////////////////////////////////////////
+
+struct _zend_async_iterator_s {
+	zend_async_microtask_t microtask;
+	void (*run)(zend_async_iterator_t *iterator);
+	void (*run_in_coroutine)(zend_async_iterator_t *iterator, int32_t priority);
+};
+
+typedef zend_result (*zend_async_iterator_handler_t)(zend_async_iterator_t *iterator, zval *current, zval *key);
+
+typedef zend_async_iterator_t* (*zend_async_new_iterator_t)(
+	zval *array,
+	zend_object_iterator *zend_iterator,
+	zend_fcall_t *fcall,
+	zend_async_iterator_handler_t handler,
+	unsigned int concurrency,
+	int32_t priority,
+	size_t iterator_size
+);
 
 ///////////////////////////////////////////////////////////////////
 /// Event Structures
@@ -1065,6 +1088,9 @@ ZEND_API extern zend_async_add_microtask_t zend_async_add_microtask_fn;
 ZEND_API extern zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn;
 ZEND_API extern zend_async_get_class_ce_t zend_async_get_class_ce_fn;
 
+/* Iterator API */
+ZEND_API extern zend_async_new_iterator_t zend_async_new_iterator_fn;
+
 /* Context API */
 ZEND_API extern zend_async_new_context_t zend_async_new_context_fn;
 
@@ -1132,7 +1158,8 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_class_ce_t get_class_ce_fn
+    zend_async_get_class_ce_t get_class_ce_fn,
+    zend_async_new_iterator_t new_iterator_fn
 );
 
 ZEND_API bool zend_async_reactor_register(
@@ -1313,6 +1340,12 @@ END_EXTERN_C()
 	zend_async_socket_listen_fn(host, port, backlog, 0)
 #define ZEND_ASYNC_SOCKET_LISTEN_EX(host, port, backlog, extra_size) \
 	zend_async_socket_listen_fn(host, port, backlog, extra_size)
+
+/* Iterator API Macros */
+#define ZEND_ASYNC_NEW_ITERATOR(array, zend_iterator, fcall, handler, concurrency, priority) \
+	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, concurrency, priority, 0)
+#define ZEND_ASYNC_NEW_ITERATOR_EX(array, zend_iterator, fcall, handler, concurrency, priority, size) \
+	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, concurrency, priority, size)
 
 /* Context API Macros */
 #define ZEND_ASYNC_NEW_CONTEXT(parent) zend_async_new_context_fn(parent)

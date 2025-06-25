@@ -107,6 +107,9 @@ zend_async_new_trigger_event_t zend_async_new_trigger_event_fn = NULL;
 static zend_string * thread_pool_module_name = NULL;
 zend_async_queue_task_t zend_async_queue_task_fn = NULL;
 
+/* Iterator API */
+zend_async_new_iterator_t zend_async_new_iterator_fn = NULL;
+
 /* Context API */
 zend_async_new_context_t zend_async_new_context_fn = new_context;
 
@@ -203,7 +206,8 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_class_ce_t get_class_ce_fn
+    zend_async_get_class_ce_t get_class_ce_fn,
+    zend_async_new_iterator_t new_iterator_fn
 )
 {
 	if (zend_atomic_bool_exchange(&scheduler_lock, 1)) {
@@ -238,6 +242,7 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_add_microtask_fn = add_microtask_fn;
 	zend_async_get_awaiting_info_fn = get_awaiting_info_fn;
 	zend_async_get_class_ce_fn = get_class_ce_fn;
+	zend_async_new_iterator_fn = new_iterator_fn;
 
 	zend_atomic_bool_store(&scheduler_lock, 0);
 
