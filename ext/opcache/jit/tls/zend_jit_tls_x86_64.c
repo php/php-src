@@ -149,7 +149,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	ZEND_ASSERT((void*)addr == &_tsrm_ls_cache);
 # endif
 
-	zend_accel_error(ACCEL_LOG_DEBUG, "dynamic tls module idx %zu offset %zu (infered from code)\n",
+	zend_accel_error(ACCEL_LOG_DEBUG, "dynamic tls module idx %zu offset %zu (inferred from code)\n",
 			(size_t)tlsdesc->index, (size_t)tlsdesc->offset);
 
 	return SUCCESS;
