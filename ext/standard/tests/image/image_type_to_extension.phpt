@@ -25,6 +25,7 @@ image_type_to_extension()
         "IMAGETYPE_XBM"      => IMAGETYPE_XBM,
         "IMAGETYPE_WEBP"     => IMAGETYPE_WEBP,
         "IMAGETYPE_AVIF"     => IMAGETYPE_AVIF,
+        "IMAGETYPE_HEIF"     => IMAGETYPE_HEIF,
     );
     foreach($constants as $name => $constant) {
         printf("Constant: %s\n\tWith dot: %s\n\tWithout dot: %s\n", $name, image_type_to_extension($constant), image_type_to_extension($constant, false));
@@ -89,6 +90,9 @@ Constant: IMAGETYPE_WEBP
 Constant: IMAGETYPE_AVIF
 	With dot: .avif
 	Without dot: avif
+Constant: IMAGETYPE_HEIF
+	With dot: .heif
+	Without dot: heif
 bool(false)
 bool(false)
 Done
