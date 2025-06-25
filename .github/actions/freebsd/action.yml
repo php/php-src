@@ -41,6 +41,7 @@ runs:
             gcc
 
           ./buildconf -f
+          CC=clang CXX=clang++ \
           ./configure \
             --prefix=/usr/local \
             --enable-debug \
