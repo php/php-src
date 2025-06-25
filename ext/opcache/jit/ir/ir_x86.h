@@ -162,7 +162,6 @@ enum _ir_reg {
 # define IR_REG_FP_ARG6  IR_REG_XMM5
 # define IR_REG_FP_ARG7  IR_REG_XMM6
 # define IR_REG_FP_ARG8  IR_REG_XMM7
-# define IR_MAX_REG_ARGS 14
 # define IR_SHADOW_ARGS  0
 
 # define IR_REG_VARARG_FP_REGS IR_REG_RAX /* hidden argument to specify the number of vector registers used */
@@ -197,7 +196,10 @@ enum _ir_reg {
 #  define IR_REG_INT_PNARG11 IR_REG_R11
 #  define IR_REG_INT_PNARG12 IR_REG_RAX
 
-# endif /* preserve_none */
+#  define IR_MAX_REG_ARGS 20 /* IR_REG_INT_PNARGS + IR_REG_FP_ARGS */
+# else /* !preserve_none */
+#  define IR_MAX_REG_ARGS 14 /* IR_REG_INT_ARGS + IR_REG_FP_ARGS */
+# endif
 
 typedef struct _ir_va_list {
 	uint32_t  gp_offset;
