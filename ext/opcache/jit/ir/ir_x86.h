@@ -178,7 +178,7 @@ enum _ir_reg {
 	| IR_REGSET(IR_REG_RBP) \
 	| IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15))
 
-# if __has_attribute(preserve_none) && !defined(__SANITIZE_ADDRESS__)
+# if __has_attribute(preserve_none)
 
 #  define IR_HAVE_PRESERVE_NONE 1
 

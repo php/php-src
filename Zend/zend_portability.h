@@ -318,7 +318,8 @@ char *alloca();
 # define ZEND_FASTCALL
 #endif
 
-#if __has_attribute(preserve_none) && !defined(__SANITIZE_ADDRESS__)
+/* Compilers may report to have preserve_none, but support it only on some architectures */
+#if __has_attribute(preserve_none) && (defined(_M_X64) || defined(__x86_64__) || defined(_M_ARM64) || defined(__aarch64__))
 # define HAVE_PRESERVE_NONE
 # define ZEND_PRESERVE_NONE __attribute__((preserve_none))
 #else
