@@ -309,6 +309,7 @@ typedef zend_async_iterator_t* (*zend_async_new_iterator_t)(
 	zend_object_iterator *zend_iterator,
 	zend_fcall_t *fcall,
 	zend_async_iterator_handler_t handler,
+	zend_async_scope_t *scope,
 	unsigned int concurrency,
 	int32_t priority,
 	size_t iterator_size
@@ -1342,10 +1343,12 @@ END_EXTERN_C()
 	zend_async_socket_listen_fn(host, port, backlog, extra_size)
 
 /* Iterator API Macros */
+#define ZEND_ASYNC_NEW_ITERATOR_SCOPE(array, zend_iterator, fcall, handler, scope, concurrency, priority) \
+	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, scope, concurrency, priority, 0)
 #define ZEND_ASYNC_NEW_ITERATOR(array, zend_iterator, fcall, handler, concurrency, priority) \
-	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, concurrency, priority, 0)
+	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, NULL, concurrency, priority, 0)
 #define ZEND_ASYNC_NEW_ITERATOR_EX(array, zend_iterator, fcall, handler, concurrency, priority, size) \
-	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, concurrency, priority, size)
+	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, NULL, concurrency, priority, size)
 
 /* Context API Macros */
 #define ZEND_ASYNC_NEW_CONTEXT(parent) zend_async_new_context_fn(parent)
