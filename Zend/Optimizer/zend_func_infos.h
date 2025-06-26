@@ -50,6 +50,10 @@ static const func_info_t func_infos[] = {
 	F1("curl_share_init_persistent", MAY_BE_OBJECT),
 	F1("curl_strerror", MAY_BE_STRING|MAY_BE_NULL),
 	F1("curl_version", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+	F1("curl_ws_meta", MAY_BE_OBJECT),
+	F1("curl_ws_recv", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
 	F1("date", MAY_BE_STRING),
 	F1("gmdate", MAY_BE_STRING),
 	F1("strftime", MAY_BE_STRING|MAY_BE_FALSE),

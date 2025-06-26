@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 792cdfa8a8ce190d73dffe679c51a41a2ee46cd7 */
+ * Stub hash: 41c4a6964ff4d00683d93df67212bfcccb7a4878 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -146,6 +146,26 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_version, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_curl_ws_meta, 0, 1, CurlWsFrame, 0)
+	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_ws_recv, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, meta, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_ws_send, 0, 2, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
+	ZEND_ARG_TYPE_INFO(0, buffer, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, type, CurlWsMessageType, 0, "CurlWsMessageType::Text")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, frag_size, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(curl_close);
 ZEND_FUNCTION(curl_copy_handle);
 ZEND_FUNCTION(curl_errno);
@@ -183,6 +203,11 @@ ZEND_FUNCTION(curl_share_strerror);
 ZEND_FUNCTION(curl_share_init_persistent);
 ZEND_FUNCTION(curl_strerror);
 ZEND_FUNCTION(curl_version);
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+ZEND_FUNCTION(curl_ws_meta);
+ZEND_FUNCTION(curl_ws_recv);
+ZEND_FUNCTION(curl_ws_send);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_close, arginfo_curl_close)
@@ -222,6 +247,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_share_init_persistent, arginfo_curl_share_init_persistent)
 	ZEND_FE(curl_strerror, arginfo_curl_strerror)
 	ZEND_FE(curl_version, arginfo_curl_version)
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+	ZEND_FE(curl_ws_meta, arginfo_curl_ws_meta)
+	ZEND_FE(curl_ws_recv, arginfo_curl_ws_recv)
+	ZEND_FE(curl_ws_send, arginfo_curl_ws_send)
+#endif
 	ZEND_FE_END
 };
 
@@ -965,6 +995,12 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURLOPT_WS_OPTIONS", CURLOPT_WS_OPTIONS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLWS_RAW_MODE", CURLWS_RAW_MODE, CONST_PERSISTENT);
 #endif
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+	REGISTER_LONG_CONSTANT("CURLWS_CONT", CURLWS_CONT, CONST_PERSISTENT);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+	REGISTER_LONG_CONSTANT("CURLWS_OFFSET", CURLWS_OFFSET, CONST_PERSISTENT);
+#endif
 #if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0 */
 	REGISTER_LONG_CONSTANT("CURLOPT_CA_CACHE_TIMEOUT", CURLOPT_CA_CACHE_TIMEOUT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_QUICK_EXIT", CURLOPT_QUICK_EXIT, CONST_PERSISTENT);
@@ -973,6 +1009,9 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURL_HTTP_VERSION_3ONLY", CURL_HTTP_VERSION_3ONLY, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("CURLOPT_SAFE_UPLOAD", CURLOPT_SAFE_UPLOAD, CONST_PERSISTENT);
+#if LIBCURL_VERSION_NUM >= 0x080e00 /* Available since 8.14.0 */
+	REGISTER_LONG_CONSTANT("CURLWS_NOAUTOPONG", CURLWS_NOAUTOPONG, CONST_PERSISTENT);
+#endif
 }
 
 static zend_class_entry *register_class_CurlHandle(void)
@@ -1017,6 +1056,62 @@ static zend_class_entry *register_class_CurlSharePersistentHandle(void)
 	zend_string *property_options_name = zend_string_init("options", sizeof("options") - 1, 1);
 	zend_declare_typed_property(class_entry, property_options_name, &property_options_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release(property_options_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CurlWsMessageType(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("CurlWsMessageType", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Binary", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Text", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Close", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Ping", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Pong", NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CurlWsFrame(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "CurlWsFrame", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE|ZEND_ACC_READONLY_CLASS);
+
+	zval property_type_default_value;
+	ZVAL_UNDEF(&property_type_default_value);
+	zend_string *property_type_class_CurlWsMessageType = zend_string_init("CurlWsMessageType", sizeof("CurlWsMessageType")-1, 1);
+	zend_declare_typed_property(class_entry, ZSTR_KNOWN(ZEND_STR_TYPE), &property_type_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_type_class_CurlWsMessageType, 0, 0));
+
+	zval property_continued_default_value;
+	ZVAL_UNDEF(&property_continued_default_value);
+	zend_string *property_continued_name = zend_string_init("continued", sizeof("continued") - 1, 1);
+	zend_declare_typed_property(class_entry, property_continued_name, &property_continued_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_continued_name);
+
+	zval property_offset_default_value;
+	ZVAL_UNDEF(&property_offset_default_value);
+	zend_string *property_offset_name = zend_string_init("offset", sizeof("offset") - 1, 1);
+	zend_declare_typed_property(class_entry, property_offset_name, &property_offset_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_offset_name);
+
+	zval property_bytesLeft_default_value;
+	ZVAL_UNDEF(&property_bytesLeft_default_value);
+	zend_string *property_bytesLeft_name = zend_string_init("bytesLeft", sizeof("bytesLeft") - 1, 1);
+	zend_declare_typed_property(class_entry, property_bytesLeft_name, &property_bytesLeft_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_bytesLeft_name);
+
+	zval property_length_default_value;
+	ZVAL_UNDEF(&property_length_default_value);
+	zend_string *property_length_name = zend_string_init("length", sizeof("length") - 1, 1);
+	zend_declare_typed_property(class_entry, property_length_name, &property_length_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_length_name);
 
 	return class_entry;
 }
