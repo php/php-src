@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.9
+03 Jul 2025, PHP 8.4.9
 
 - BcMath:
   . Fixed bug GH-18641 (Accessing a BcMath\Number property by ref crashes).
@@ -49,6 +49,10 @@ PHP                                                                        NEWS
   . Fixed bug #74796 (Requests through http proxy set peer name).
     (Jakub Zelenka)
 
+- PGSQL:
+  . Fixed GHSA-hrwm-9436-5mv3 (pgsql extension does not check for errors during
+    escaping). (CVE-2025-1735) (Jakub Zelenka)
+
 - PDO ODBC:
   . Fix memory leak if WideCharToMultiByte() fails. (nielsdos)
 
@@ -79,8 +83,14 @@ PHP                                                                        NEWS
   . Fixed bug GH-18597 (Heap-buffer-overflow in zend_alloc.c when assigning
     string with UTF-8 bytes). (nielsdos)
 
-- Soap:
+- SOAP:
   . Fix memory leaks in php_http.c when call_user_function() fails. (nielsdos)
+  . Fixed GHSA-453j-q27h-5p8x (NULL Pointer Dereference in PHP SOAP Extension
+    via Large XML Namespace Prefix). (CVE-2025-6491) (Lekssays, nielsdos)
+
+- Standard:
+  . Fixed GHSA-3cr5-j632-f35r (Null byte termination in hostnames).
+    (CVE-2025-1220) (Jakub Zelenka)
 
 - Tidy:
   . Fix memory leak in tidy output handler on error. (nielsdos)
