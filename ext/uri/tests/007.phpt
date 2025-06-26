@@ -25,7 +25,7 @@ var_dump($failures);
 
 ?>
 --EXPECTF--
-The specified URI is malformed (PortInvalid)
+The specified URI is malformed
 The specified URI is malformed (PortInvalid)
 array(%d) {
   [0]=>

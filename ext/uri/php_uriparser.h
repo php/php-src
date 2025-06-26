@@ -24,8 +24,9 @@
 extern const uri_handler_t uriparser_uri_handler;
 
 typedef struct uriparser_uris_t {
-	UriUriA *uri;
-	UriUriA *normalized_uri;
+	UriUriA uri;
+	UriUriA normalized_uri;
+	bool normalized_uri_initialized;
 } uriparser_uris_t;
 
 PHP_MINIT_FUNCTION(uri_uriparser);
