@@ -934,6 +934,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		return PHP_OUTPUT_HANDLER_FAILURE;
 	}
 
+	bool still_have_handler = true;
 	/* storable? */
 	if (php_output_handler_append(handler, &context->in) && !context->op) {
 		context->op = original_op;
@@ -971,7 +972,22 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 						"Returning a non-string result from user output handler %s is deprecated",
 						ZSTR_VAL(handler->name)
 					);
-					handler->flags &= (~PHP_OUTPUT_HANDLER_DISABLED);
+					// Check if the handler is still in the list of handlers to
+					// determine if the PHP_OUTPUT_HANDLER_DISABLED flag can
+					// be removed
+					still_have_handler = false;
+					int handler_count = php_output_get_level();
+					if (handler_count) {
+						php_output_handler **handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
+						for (int iii = 0; iii < handler_count; ++iii) {
+							php_output_handler *curr_handler = handlers[iii];
+							if (curr_handler == handler) {
+								handler->flags &= (~PHP_OUTPUT_HANDLER_DISABLED);
+								still_have_handler = true;
+								break;
+							}
+						}
+					}
 				}
 				if (Z_TYPE(retval) == IS_FALSE) {
 					/* call failed, pass internal buffer along */
@@ -1013,14 +1029,18 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 				status = PHP_OUTPUT_HANDLER_FAILURE;
 			}
 		}
-		handler->flags |= PHP_OUTPUT_HANDLER_STARTED;
+		if (still_have_handler) {
+			handler->flags |= PHP_OUTPUT_HANDLER_STARTED;
+		}
 		OG(running) = NULL;
 	}
 
 	switch (status) {
 		case PHP_OUTPUT_HANDLER_FAILURE:
-			/* disable this handler */
-			handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
+			if (still_have_handler) {
+				/* disable this handler */
+				handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
+			}
 			/* discard any output */
 			if (context->out.data && context->out.free) {
 				efree(context->out.data);
@@ -1029,18 +1049,22 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			context->out.data = handler->buffer.data;
 			context->out.used = handler->buffer.used;
 			context->out.free = 1;
-			handler->buffer.data = NULL;
-			handler->buffer.used = 0;
-			handler->buffer.size = 0;
+			if (still_have_handler) {
+				handler->buffer.data = NULL;
+				handler->buffer.used = 0;
+				handler->buffer.size = 0;
+			}
 			break;
 		case PHP_OUTPUT_HANDLER_NO_DATA:
 			/* handler ate all */
 			php_output_context_reset(context);
 			ZEND_FALLTHROUGH;
 		case PHP_OUTPUT_HANDLER_SUCCESS:
-			/* no more buffered data */
-			handler->buffer.used = 0;
-			handler->flags |= PHP_OUTPUT_HANDLER_PROCESSED;
+			if (still_have_handler) {
+				/* no more buffered data */
+				handler->buffer.used = 0;
+				handler->flags |= PHP_OUTPUT_HANDLER_PROCESSED;
+			}
 			break;
 	}
 
@@ -1242,6 +1266,19 @@ static int php_output_stack_pop(int flags)
 			}
 			php_output_handler_op(orphan, &context);
 		}
+		// If it isn't still in the stack, cannot free it
+		bool still_have_handler = false;
+		int handler_count = php_output_get_level();
+		if (handler_count) {
+			php_output_handler **handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
+			for (int iii = 0; iii < handler_count; ++iii) {
+				php_output_handler *curr_handler = handlers[iii];
+				if (curr_handler == orphan) {
+					still_have_handler = true;
+					break;
+				}
+			}
+		}
 
 		/* pop it off the stack */
 		zend_stack_del_top(&OG(handlers));
@@ -1257,7 +1294,9 @@ static int php_output_stack_pop(int flags)
 		}
 
 		/* destroy the handler (after write!) */
-		php_output_handler_free(&orphan);
+		if (still_have_handler) {
+			php_output_handler_free(&orphan);
+		}
 		php_output_context_dtor(&context);
 
 		return 1;
