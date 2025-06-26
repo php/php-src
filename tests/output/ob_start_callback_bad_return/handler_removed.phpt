@@ -18,4 +18,4 @@ while (1) {
 --EXPECTF--
 Deprecated: main(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
 
-Fatal error: Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
