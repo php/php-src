@@ -42,6 +42,12 @@ static void enqueue_coroutine(zend_coroutine_t *coroutine)
 	ASYNC_THROW_ERROR("Async API is not enabled");
 }
 
+static bool spawn_and_throw(zend_object *exception, zend_async_scope_t *scope, int32_t priority)
+{
+	ASYNC_THROW_ERROR("Async API is not enabled");
+	return false;
+}
+
 static zend_async_context_t * new_context(void)
 {
 	ASYNC_THROW_ERROR("Context API is not enabled");
@@ -74,6 +80,7 @@ zend_async_suspend_t zend_async_suspend_fn = suspend;
 zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn = enqueue_coroutine;
 zend_async_resume_t zend_async_resume_fn = NULL;
 zend_async_cancel_t zend_async_cancel_fn = NULL;
+zend_async_spawn_and_throw_t zend_async_spawn_and_throw_fn = spawn_and_throw;
 zend_async_shutdown_t zend_async_shutdown_fn = NULL;
 zend_async_get_coroutines_t zend_async_get_coroutines_fn = NULL;
 zend_async_add_microtask_t zend_async_add_microtask_fn = NULL;
@@ -202,6 +209,7 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
     zend_async_resume_t resume_fn,
     zend_async_cancel_t cancel_fn,
+    zend_async_spawn_and_throw_t spawn_and_throw_fn,
     zend_async_shutdown_t shutdown_fn,
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
@@ -237,6 +245,7 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_enqueue_coroutine_fn = enqueue_coroutine_fn;
     zend_async_resume_fn = resume_fn;
     zend_async_cancel_fn = cancel_fn;
+    zend_async_spawn_and_throw_fn = spawn_and_throw_fn;
     zend_async_shutdown_fn = shutdown_fn;
     zend_async_get_coroutines_fn = get_coroutines_fn;
     zend_async_add_microtask_fn = add_microtask_fn;

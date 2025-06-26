@@ -191,6 +191,7 @@ typedef void (*zend_async_suspend_t)(bool from_main);
 typedef void (*zend_async_enqueue_coroutine_t)(zend_coroutine_t *coroutine);
 typedef void (*zend_async_resume_t)(zend_coroutine_t *coroutine, zend_object * error, const bool transfer_error);
 typedef void (*zend_async_cancel_t)(zend_coroutine_t *coroutine, zend_object * error, bool transfer_error, const bool is_safely);
+typedef bool (*zend_async_spawn_and_throw_t)(zend_object *exception, zend_async_scope_t *scope, int32_t priority);
 typedef void (*zend_async_shutdown_t)(void);
 typedef zend_array* (*zend_async_get_coroutines_t)(void);
 typedef void (*zend_async_add_microtask_t)(zend_async_microtask_t *microtask);
@@ -296,10 +297,26 @@ struct _zend_async_microtask_s {
 /// Async iterator structures
 ///////////////////////////////////////////////////////////////////
 
+typedef void (*zend_async_iterator_method_t)(zend_async_iterator_t *iterator);
+
+#define ZEND_ASYNC_ITERATOR_FIELDS		\
+	zend_async_microtask_t microtask;	\
+	zend_async_scope_t *scope;			\
+	/* NULLABLE. Custom data for the iterator, can be used to store additional information. */ \
+	void *extended_data; \
+	/* NULLABLE. An additional destructor that will be called. */ \
+	zend_async_iterator_method_t extended_dtor; \
+	/* A method that starts the iterator in the current coroutine. */ \
+	zend_async_iterator_method_t run; \
+	/* A method that starts the iterator in a separate coroutine with the specified priority. */ \
+	void (*run_in_coroutine)(zend_async_iterator_t *iterator, int32_t priority); \
+	/* The maximum number of concurrent tasks that can be executed at the same time */ \
+	unsigned int concurrency; \
+	/* Priority for coroutines created by this iterator */ \
+	int32_t priority;
+
 struct _zend_async_iterator_s {
-	zend_async_microtask_t microtask;
-	void (*run)(zend_async_iterator_t *iterator);
-	void (*run_in_coroutine)(zend_async_iterator_t *iterator, int32_t priority);
+	ZEND_ASYNC_ITERATOR_FIELDS
 };
 
 typedef zend_result (*zend_async_iterator_handler_t)(zend_async_iterator_t *iterator, zval *current, zval *key);
@@ -1083,6 +1100,7 @@ ZEND_API extern zend_async_suspend_t zend_async_suspend_fn;
 ZEND_API extern zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn;
 ZEND_API extern zend_async_resume_t zend_async_resume_fn;
 ZEND_API extern zend_async_cancel_t zend_async_cancel_fn;
+ZEND_API extern zend_async_spawn_and_throw_t zend_async_spawn_and_throw_fn;
 ZEND_API extern zend_async_shutdown_t zend_async_shutdown_fn;
 ZEND_API extern zend_async_get_coroutines_t zend_async_get_coroutines_fn;
 ZEND_API extern zend_async_add_microtask_t zend_async_add_microtask_fn;
@@ -1155,6 +1173,7 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
     zend_async_resume_t resume_fn,
     zend_async_cancel_t cancel_fn,
+    zend_async_spawn_and_throw_t spawn_and_throw_fn,
     zend_async_shutdown_t shutdown_fn,
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
@@ -1286,6 +1305,19 @@ END_EXTERN_C()
 #define ZEND_ASYNC_RESUME_WITH_ERROR(coroutine, error, transfer_error) zend_async_resume_fn(coroutine, error, transfer_error)
 #define ZEND_ASYNC_CANCEL(coroutine, error, transfer_error) zend_async_cancel_fn(coroutine, error, transfer_error, false)
 #define ZEND_ASYNC_CANCEL_EX(coroutine, error, transfer_error, is_safely) zend_async_cancel_fn(coroutine, error, transfer_error, is_safely)
+
+/**
+ * Spawns a new coroutine and throws the specified exception within it.
+ * 
+ * This creates a dedicated coroutine for exception handling, ensuring proper
+ * scope-based error propagation when exceptions occur in microtasks or other
+ * contexts where direct throwing would bypass scope exception handling.
+ * 
+ * @param exception  The exception object to throw in the new coroutine
+ * @param scope      Target scope for the coroutine (NULL for current scope)
+ * @param priority   Priority level for the exception-throwing coroutine
+ */
+#define ZEND_ASYNC_SPAWN_AND_THROW(exception, scope, priority) zend_async_spawn_and_throw_fn(exception, scope, priority)
 #define ZEND_ASYNC_SHUTDOWN() zend_async_shutdown_fn()
 #define ZEND_ASYNC_GET_COROUTINES() zend_async_get_coroutines_fn()
 #define ZEND_ASYNC_ADD_MICROTASK(microtask) zend_async_add_microtask_fn(microtask)
