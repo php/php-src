@@ -201,7 +201,7 @@ int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
 			destPrev = destWalker;
 			sourceWalker = sourceWalker->next;
 
-			destUri->pathTail = destPrev;
+			destUri->pathTail = destWalker;
 		}
 	}
 

@@ -28,7 +28,7 @@ var_dump($softErrors);
 
 ?>
 --EXPECTF--
-The specified URI is malformed (Ipv4TooManyParts)
+The specified URI is malformed
 The specified URI is malformed (Ipv4TooManyParts)
 string(23) "https://example.com/foo"
 array(%d) {

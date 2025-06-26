@@ -29,7 +29,7 @@ var_dump(Uri\WhatWg\Url::parse("http://RuPaul's Drag Race All Stars 7 Winners Ca
 
 ?>
 --EXPECTF--
-The specified URI is malformed (MissingSchemeNonRelativeUrl)
+The specified URI is malformed
 NULL
 The specified URI is malformed (MissingSchemeNonRelativeUrl)
 NULL

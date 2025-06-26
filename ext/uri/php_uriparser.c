@@ -28,16 +28,12 @@ static inline size_t get_text_range_length(const UriTextRangeA *range)
 	return range->afterLast - range->first;
 }
 
-static UriUriA *uriparser_copy_uri(UriUriA *uriparser_uri)
+static void uriparser_copy_uri(UriUriA *new_uriparser_uri, UriUriA *uriparser_uri)
 {
-	ZEND_ASSERT(uriparser_uri != NULL);
-
-	UriUriA *new_uriparser_uri = emalloc(sizeof(UriUriA));
+	ZEND_ASSERT(new_uriparser_uri != NULL && uriparser_uri != NULL);
 
 	int result = uriCopyUriA(new_uriparser_uri, uriparser_uri);
 	ZEND_ASSERT(result == URI_SUCCESS && new_uriparser_uri != NULL);
-
-	return new_uriparser_uri;
 }
 
 static void uriparser_normalize_uri(UriUriA *uriparser_uri)
@@ -46,20 +42,26 @@ static void uriparser_normalize_uri(UriUriA *uriparser_uri)
 	ZEND_ASSERT(result == URI_SUCCESS);
 }
 
+static void normalize_uri_if_needed(uriparser_uris_t *uriparser_uris)
+{
+	if (uriparser_uris->normalized_uri_initialized == false) {
+		uriparser_copy_uri(&uriparser_uris->normalized_uri, &uriparser_uris->uri);
+		uriparser_normalize_uri(&uriparser_uris->normalized_uri);
+		uriparser_uris->normalized_uri_initialized = true;
+	}
+}
+
 static UriUriA *uriparser_read_uri(uriparser_uris_t *uriparser_uris, uri_component_read_mode_t read_mode)
 {
 	switch (read_mode) {
 		case URI_COMPONENT_READ_RAW:
-			return uriparser_uris->uri;
+			return &uriparser_uris->uri;
 		case URI_COMPONENT_READ_NORMALIZED_ASCII:
 			ZEND_FALLTHROUGH;
 		case URI_COMPONENT_READ_NORMALIZED_UNICODE:
-			if (uriparser_uris->normalized_uri == NULL) {
-				uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri);
-				uriparser_normalize_uri(uriparser_uris->normalized_uri);
-			}
+			normalize_uri_if_needed(uriparser_uris);
 
-			return uriparser_uris->normalized_uri;
+			return &uriparser_uris->normalized_uri;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
@@ -283,62 +285,58 @@ PHP_MINIT_FUNCTION(uri_uriparser)
 	return SUCCESS;
 }
 
-static uriparser_uris_t *uriparser_create_uris(
-	UriUriA *uri,
-	UriUriA *normalized_uri
-) {
-	uriparser_uris_t *uriparser_uris = emalloc(sizeof(uriparser_uris_t));
-
-	uriparser_uris->uri = uri;
-	uriparser_uris->normalized_uri = normalized_uri;
+static uriparser_uris_t *uriparser_create_uris(void)
+{
+	uriparser_uris_t *uriparser_uris = emalloc(sizeof(*uriparser_uris));
+	uriparser_uris->normalized_uri_initialized = false;
 
 	return uriparser_uris;
 }
 
 static void throw_invalid_uri_exception(void)
 {
-	zend_throw_exception(uri_invalid_uri_exception_ce, "URI parsing failed", 0);
+	zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
 }
+
+#define PARSE_URI(dest_uri, uri_str, uriparser_uris, silent) \
+	do { \
+		if (ZSTR_LEN(uri_str) == 0 || \
+			uriParseSingleUriExA(dest_uri, ZSTR_VAL(uri_str), ZSTR_VAL(uri_str) + ZSTR_LEN(uri_str), NULL) != URI_SUCCESS \
+		) { \
+			efree(uriparser_uris); \
+			if (!silent) { \
+				throw_invalid_uri_exception(); \
+			} \
+			return NULL; \
+		} \
+	} while (0)
 
 void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t *uriparser_base_urls, bool silent)
 {
-	UriUriA *uriparser_uri = emalloc(sizeof(UriUriA));
+	uriparser_uris_t *uriparser_uris = uriparser_create_uris();
 
-	if (ZSTR_LEN(uri_str) == 0 ||
-		uriParseSingleUriExA(uriparser_uri, ZSTR_VAL(uri_str), ZSTR_VAL(uri_str) + ZSTR_LEN(uri_str), NULL) != URI_SUCCESS
-	) {
-		efree(uriparser_uri);
-		if (!silent) {
-			throw_invalid_uri_exception();
-		}
-
-		return NULL;
-	}
-
-	uriMakeOwnerA(uriparser_uri);
 	if (uriparser_base_urls == NULL) {
-		return uriparser_create_uris(uriparser_uri, NULL);
-	}
+		PARSE_URI(&uriparser_uris->uri, uri_str, uriparser_uris, silent);
+		uriMakeOwnerA(&uriparser_uris->uri);
+	} else {
+		UriUriA uri;
 
-	UriUriA *absolute_uri = emalloc(sizeof(UriUriA));
+		PARSE_URI(&uri, uri_str, uriparser_uris, silent);
 
-	if (uriAddBaseUriA(absolute_uri, uriparser_uri, uriparser_base_urls->uri) != URI_SUCCESS) {
-		uriFreeUriMembersA(uriparser_uri);
-		efree(uriparser_uri);
-		efree(absolute_uri);
+		if (uriAddBaseUriA(&uriparser_uris->uri, &uri, &uriparser_base_urls->uri) != URI_SUCCESS) {
+			efree(uriparser_uris);
+			if (!silent) {
+				throw_invalid_uri_exception();
+			}
 
-		if (!silent) {
-			throw_invalid_uri_exception();
+			return NULL;
 		}
 
-		return NULL;
+		uriMakeOwnerA(&uriparser_uris->uri);
+		uriFreeUriMembersA(&uri);
 	}
 
-	uriMakeOwnerA(absolute_uri);
-	uriFreeUriMembersA(uriparser_uri);
-	efree(uriparser_uri);
-
-	return uriparser_create_uris(absolute_uri, NULL);
+	return uriparser_uris;
 }
 
 void *uriparser_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors, bool silent)
@@ -354,10 +352,14 @@ static void *uriparser_clone_uri(void *uri)
 {
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) uri;
 
-	return uriparser_create_uris(
-		uriparser_copy_uri(uriparser_uris->uri),
-		uriparser_uris->normalized_uri != NULL ? uriparser_copy_uri(uriparser_uris->normalized_uri) : NULL
-	);
+	uriparser_uris_t *new_uriparser_uris = uriparser_create_uris();
+	uriparser_copy_uri(&new_uriparser_uris->uri, &uriparser_uris->uri);
+	if (uriparser_uris->normalized_uri_initialized) {
+		uriparser_copy_uri(&new_uriparser_uris->normalized_uri, &uriparser_uris->normalized_uri);
+		new_uriparser_uris->normalized_uri_initialized = true;
+	}
+
+	return new_uriparser_uris;
 }
 
 static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
@@ -366,13 +368,11 @@ static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t 
 	UriUriA *uriparser_uri;
 
 	if (recomposition_mode == URI_RECOMPOSITION_RAW_ASCII || recomposition_mode == URI_RECOMPOSITION_RAW_UNICODE) {
-		uriparser_uri = uriparser_uris->uri;
+		uriparser_uri = &uriparser_uris->uri;
 	} else {
-		if (uriparser_uris->normalized_uri == NULL) {
-			uriparser_uris->normalized_uri = uriparser_copy_uri(uriparser_uris->uri);
-			uriparser_normalize_uri(uriparser_uris->normalized_uri);
-		}
-		uriparser_uri = uriparser_uris->normalized_uri;
+		normalize_uri_if_needed(uriparser_uris);
+
+		uriparser_uri = &uriparser_uris->normalized_uri;
 	}
 
 	int charsRequired = 0;
@@ -399,18 +399,12 @@ static void uriparser_free_uri(void *uri)
 {
 	uriparser_uris_t *uriparser_uris = (uriparser_uris_t *) uri;
 
-	if (uriparser_uris->uri != NULL) {
-		uriFreeUriMembersA(uriparser_uris->uri);
-		efree(uriparser_uris->uri);
-		uriparser_uris->uri = NULL;
-	}
+	uriFreeUriMembersA(&uriparser_uris->uri);
 
-	if (uriparser_uris->normalized_uri != NULL) {
-		ZEND_ASSERT(uriparser_uris->normalized_uri->owner);
+	if (uriparser_uris->normalized_uri_initialized) {
+		ZEND_ASSERT(uriparser_uris->normalized_uri.owner);
 
-		uriFreeUriMembersA(uriparser_uris->normalized_uri);
-		efree(uriparser_uris->normalized_uri);
-		uriparser_uris->normalized_uri = NULL;
+		uriFreeUriMembersA(&uriparser_uris->normalized_uri);
 	}
 
 	efree(uriparser_uris);
