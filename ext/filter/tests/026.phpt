@@ -20,30 +20,30 @@ var_dump(filter_var("", FILTER_SANITIZE_STRIPPED, FILTER_FLAG_STRIP_HIGH));
 echo "Done\n";
 ?>
 --EXPECTF--
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(40) "Let me see you Stripped down to the bone"
 
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(11) "!@#$%^&*()>"
 
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(0) ""
 
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(40) "Let me see you Stripped down to the bone"
 
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(11) "!@#$%^&*()>"
 
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(0) ""
 
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(40) "Let me see you Stripped down to the bone"
 
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(11) "!@#$%^&*()>"
 
-Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRIPPED is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(0) ""
 Done
