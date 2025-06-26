@@ -1035,12 +1035,15 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		OG(running) = NULL;
 	}
 
+	if (!still_have_handler) {
+		// Handler and context will have both already been freed
+		return status;
+	}
+
 	switch (status) {
 		case PHP_OUTPUT_HANDLER_FAILURE:
-			if (still_have_handler) {
-				/* disable this handler */
-				handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
-			}
+			/* disable this handler */
+			handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
 			/* discard any output */
 			if (context->out.data && context->out.free) {
 				efree(context->out.data);
@@ -1049,22 +1052,18 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			context->out.data = handler->buffer.data;
 			context->out.used = handler->buffer.used;
 			context->out.free = 1;
-			if (still_have_handler) {
-				handler->buffer.data = NULL;
-				handler->buffer.used = 0;
-				handler->buffer.size = 0;
-			}
+			handler->buffer.data = NULL;
+			handler->buffer.used = 0;
+			handler->buffer.size = 0;
 			break;
 		case PHP_OUTPUT_HANDLER_NO_DATA:
 			/* handler ate all */
 			php_output_context_reset(context);
 			ZEND_FALLTHROUGH;
 		case PHP_OUTPUT_HANDLER_SUCCESS:
-			if (still_have_handler) {
-				/* no more buffered data */
-				handler->buffer.used = 0;
-				handler->flags |= PHP_OUTPUT_HANDLER_PROCESSED;
-			}
+			/* no more buffered data */
+			handler->buffer.used = 0;
+			handler->flags |= PHP_OUTPUT_HANDLER_PROCESSED;
 			break;
 	}
 
