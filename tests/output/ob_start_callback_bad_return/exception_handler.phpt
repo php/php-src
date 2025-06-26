@@ -10,42 +10,42 @@ set_error_handler(function (int $errno, string $errstr, string $errfile, int $er
 });
 
 function return_null($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return null;
 }
 
 function return_false($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return false;
 }
 
 function return_true($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return true;
 }
 
 function return_zero($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return 0;
 }
 
 $cases = ['return_null', 'return_false', 'return_true', 'return_zero'];
 foreach ($cases as $case) {
-	$log = [];
-	echo "\n\nTesting: $case\n";
-	ob_start($case);
-	echo "Inside of $case\n";
-	try {
-		ob_end_flush();
-	} catch (\ErrorException $e) {
-		echo $e . "\n";
-	}
-	echo "\nEnd of $case, log was:\n";
-	echo implode("\n", $log);
+    $log = [];
+    echo "\n\nTesting: $case\n";
+    ob_start($case);
+    echo "Inside of $case\n";
+    try {
+        ob_end_flush();
+    } catch (\ErrorException $e) {
+        echo $e . "\n";
+    }
+    echo "\nEnd of $case, log was:\n";
+    echo implode("\n", $log);
 }
 
 ?>

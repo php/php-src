@@ -10,26 +10,26 @@ set_error_handler(function (int $errno, string $errstr, string $errfile, int $er
 });
 
 function return_null($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return null;
 }
 
 function return_false($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return false;
 }
 
 function return_true($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return true;
 }
 
 function return_zero($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return 0;
 }
 
@@ -40,30 +40,30 @@ ob_start('return_zero');
 
 echo "In all of them\n\n";
 try {
-	ob_end_flush();
+    ob_end_flush();
 } catch (\ErrorException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 echo "Ended return_zero handler\n\n";
 
 try {
-	ob_end_flush();
+    ob_end_flush();
 } catch (\ErrorException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 echo "Ended return_true handler\n\n";
 
 try {
-	ob_end_flush();
+    ob_end_flush();
 } catch (\ErrorException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 echo "Ended return_false handler\n\n";
 
 try {
-	ob_end_flush();
+    ob_end_flush();
 } catch (\ErrorException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 echo "Ended return_null handler\n\n";
 

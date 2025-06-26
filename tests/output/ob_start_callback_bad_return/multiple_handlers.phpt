@@ -6,44 +6,44 @@ ob_start(): Check behaviour with multiple nested handlers with had return values
 $log = [];
 
 function return_given_string($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
-	return $string;
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    return $string;
 }
 
 function return_empty_string($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return "";
 }
 
 function return_false($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return false;
 }
 
 function return_true($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return true;
 }
 
 function return_null($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return null;
 }
 
 function return_string($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return "I stole your output.";
 }
 
 function return_zero($string) {
-	global $log;
-	$log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
     return 0;
 }
 
