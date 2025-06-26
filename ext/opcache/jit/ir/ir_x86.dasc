@@ -1415,8 +1415,6 @@ op2_const:
 			}
 			constraints->tmp_regs[0] = IR_SCRATCH_REG(IR_REG_SCRATCH, IR_USE_SUB_REF, IR_DEF_SUB_REF);
 			n = 1;
-			IR_FALLTHROUGH;
-		case IR_TAILCALL:
 			insn = &ctx->ir_base[ref];
 			if (insn->inputs_count > 2) {
 				constraints->hints[2] = IR_REG_NONE;
@@ -1427,6 +1425,56 @@ op2_const:
 				}
 			}
 			flags = IR_USE_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG | IR_OP3_SHOULD_BE_IN_REG;
+			break;
+		case IR_TAILCALL:
+			insn = &ctx->ir_base[ref];
+
+			/* Epilogue may clobber these */
+			uint8_t preserved = IR_REG_PRESERVED;
+
+			/* For TAILCALL we don't need to reserve all scratch registers. */
+			uint8_t args = IR_REG_ARGS;
+			uint8_t tmp_reg = IR_REG_INT_RET1;
+
+#ifdef IR_HAVE_FASTCALL
+			if (ir_is_fastcall(ctx, insn)) {
+				args = IR_REG_FCARGS;
+			}
+#endif
+#ifdef IR_HAVE_PRESERVE_NONE
+			if (ir_is_preserve_none(ctx, insn)) {
+				args = IR_REG_PNARGS;
+				/* See ir_emit_tailcall() */
+				tmp_reg = IR_REG_R10;
+			}
+			if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+				preserved = IR_REG_PNPRESERVED;
+			}
+#endif
+
+			if (ctx->fixed_stack_frame_size != -1) {
+				preserved = IR_REG_FIXED_SAVED;
+			}
+
+			constraints->tmp_regs[n] = IR_SCRATCH_REG(args, IR_USE_SUB_REF, IR_DEF_SUB_REF);
+			n++;
+
+			/* Reserve tmp register used by ir_emit_arguments() */
+			constraints->tmp_regs[n] = IR_SCRATCH_REG(tmp_reg, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+			n++;
+
+			if (insn->inputs_count > 2) {
+				constraints->hints[2] = IR_REG_NONE;
+				constraints->hints_count = ir_get_args_regs(ctx, insn, constraints->hints);
+			}
+
+			if (!IR_IS_CONST_REF(insn->op2)) {
+				/* Make sure that one of these is not allocated to op2 */
+				constraints->tmp_regs[n] = IR_SCRATCH_REG(preserved, IR_USE_SUB_REF, IR_DEF_SUB_REF);
+				n++;
+			}
+
+			flags = IR_USE_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG | IR_OP3_SHOULD_BE_IN_REG | IR_DEF_CONFLICTS_WITH_INPUT_REGS;
 			break;
 		case IR_BINOP_SSE2:
 			flags = IR_DEF_REUSES_OP1_REG | IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG;
@@ -9245,64 +9293,22 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 {
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
-	int32_t used_stack = ir_emit_arguments(ctx, def, insn, ctx->regs[def][1]);
+
+	uint8_t tmp_reg = IR_REG_INT_RET1;
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ir_is_preserve_none(ctx, insn)) {
+		/* preserve_none uses IR_REG_INT_RET1 for argument passing, so we can
+		 * not use as tmp reg here. */
+		tmp_reg = IR_REG_R10;
+	}
+#endif
+
+	int32_t used_stack = ir_emit_arguments(ctx, def, insn, tmp_reg);
 
 	if (used_stack != 0) {
 		ir_emit_call_ex(ctx, def, insn, used_stack);
 		ir_emit_return_void(ctx);
 		return;
-	}
-
-	/* Move op2 to a scratch register before epilogue if it's in
-	 * used_preserved_regs, because it will be overridden. */
-
-	ir_reg op2_reg = IR_REG_NONE;
-	ir_mem mem = IR_MEM_B(IR_REG_NONE);
-	if (!IR_IS_CONST_REF(insn->op2)) {
-		op2_reg = ctx->regs[def][2];
-
-		if (op2_reg != IR_REG_NONE) {
-			if (IR_REG_SPILLED(op2_reg)) {
-				ZEND_ASSERT(0 && "TODO");
-				op2_reg = IR_REG_NUM(op2_reg);
-				ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
-			}
-			if (IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, op2_reg)) {
-				ir_reg tmp_reg;
-				if (ir_is_preserve_none(ctx, insn)) {
-					tmp_reg = IR_REG_R10;
-				} else {
-					tmp_reg = IR_REG_INT_RET1;
-				}
-
-				| mov Rq(tmp_reg), Rq(op2_reg)
-
-				op2_reg = tmp_reg;
-			}
-		} else {
-			if (ir_rule(ctx, insn->op2) & IR_FUSED) {
-				mem = ir_fuse_load(ctx, def, insn->op2);
-			} else {
-				mem = ir_ref_spill_slot(ctx, insn->op2);
-			}
-			ir_reg base = IR_MEM_BASE(mem);
-			ir_reg index = IR_MEM_INDEX(mem);
-			if ((base != IR_REG_NONE && IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, base)) ||
-					(index != IR_REG_NONE && IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, index))) {
-				ir_reg tmp_reg;
-				if (ir_is_preserve_none(ctx, insn)) {
-					tmp_reg = IR_REG_R10;
-				} else {
-					tmp_reg = IR_REG_INT_RET1;
-				}
-
-				ir_type type = ctx->ir_base[insn->op2].type;
-
-				| ASM_REG_MEM_OP, mov, type, tmp_reg, mem
-
-				op2_reg = tmp_reg;
-			}
-		}
 	}
 
 	ir_emit_epilogue(ctx);
@@ -9330,9 +9336,22 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.endif
 		}
     } else {
+		ir_reg op2_reg = ctx->regs[def][2];
+
 		if (op2_reg != IR_REG_NONE) {
+			if (IR_REG_SPILLED(op2_reg)) {
+				op2_reg = IR_REG_NUM(op2_reg);
+				ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+			}
 			|	jmp Ra(op2_reg)
 		} else {
+			ir_mem mem;
+
+			if (ir_rule(ctx, insn->op2) & IR_FUSED) {
+				mem = ir_fuse_load(ctx, def, insn->op2);
+			} else {
+				mem = ir_ref_spill_slot(ctx, insn->op2);
+			}
 			|	ASM_TMEM_OP jmp, aword, mem
 		}
     }

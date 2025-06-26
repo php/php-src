@@ -84,12 +84,20 @@ enum _ir_reg {
 	IR_REG_NUM,
 };
 
-#define IR_REG_GP_FIRST IR_REG_R0
-#define IR_REG_FP_FIRST IR_REG_XMM0
-#define IR_REG_GP_LAST  (IR_REG_FP_FIRST - 1)
-#define IR_REG_FP_LAST  (IR_REG_NUM - 1)
-#define IR_REG_SCRATCH  (IR_REG_NUM)        /* special name for regset */
-#define IR_REG_ALL      (IR_REG_NUM + 1)    /* special name for regset */
+#define IR_REG_GP_FIRST     IR_REG_R0
+#define IR_REG_FP_FIRST     IR_REG_XMM0
+#define IR_REG_GP_LAST      (IR_REG_FP_FIRST - 1)
+#define IR_REG_FP_LAST      (IR_REG_NUM - 1)
+#define IR_REG_SCRATCH      (IR_REG_NUM)        /* special name for regset */
+#define IR_REG_ALL          (IR_REG_NUM + 1)    /* special name for regset */
+#define IR_REG_PRESERVED    (IR_REG_NUM + 2)    /* special name for IR_REGSET_PRESERVED */
+#define IR_REG_PNPRESERVED  (IR_REG_NUM + 3)    /* special name for IR_REGSET_PNPRESERVED */
+#define IR_REG_FIXED_SAVED  (IR_REG_NUM + 4)    /* special name for fixed_save_regset */
+#define IR_REG_ARGS         (IR_REG_NUM + 5)    /* special name for IR_REGSET_ARGS */
+#define IR_REG_FCARGS       (IR_REG_NUM + 6)    /* special name for IR_REGSET_FCARGS */
+#define IR_REG_PNARGS       (IR_REG_NUM + 7)    /* special name for IR_REGSET_PNARGS */
+
+#define IR_REG_SPECIAL_NUM 8
 
 #define IR_REGSET_64BIT 0
 
@@ -177,6 +185,11 @@ enum _ir_reg {
 	| IR_REGSET(IR_REG_RBP) \
 	| IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15))
 
+# define IR_REGSET_ARGS \
+	(IR_REGSET(IR_REG_RDI) | IR_REGSET(IR_REG_RSI) | IR_REGSET(IR_REG_RDX) \
+	| IR_REGSET(IR_REG_RCX) | IR_REGSET(IR_REG_R8) | IR_REGSET(IR_REG_R9) \
+	| IR_REGSET_INTERVAL(IR_REG_XMM0, IR_REG_XMM7))
+
 # if __has_attribute(preserve_none)
 
 #  define IR_HAVE_PRESERVE_NONE 1
@@ -197,6 +210,13 @@ enum _ir_reg {
 #  define IR_REG_INT_PNARG12 IR_REG_RAX
 
 #  define IR_MAX_REG_ARGS 20 /* IR_REG_INT_PNARGS + IR_REG_FP_ARGS */
+
+#  define IR_REGSET_PNARGS \
+	(IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15) | IR_REGSET(IR_REG_RDI) \
+	| IR_REGSET(IR_REG_RSI) | IR_REGSET(IR_REG_RDX) | IR_REGSET(IR_REG_RCX) \
+	| IR_REGSET(IR_REG_R8) | IR_REGSET(IR_REG_R9) | IR_REGSET(IR_REG_R11) \
+	| IR_REGSET(IR_REG_RAX) | IR_REGSET_INTERVAL(IR_REG_XMM0, IR_REG_XMM7))
+
 # else /* !preserve_none */
 #  define IR_MAX_REG_ARGS 14 /* IR_REG_INT_ARGS + IR_REG_FP_ARGS */
 # endif
