@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.23
+03 Jul 2025, PHP 8.3.23
 
 - Core:
   . Fixed GH-18695 (zend_ast_export() - float number is not preserved).
@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #74796 (Requests through http proxy set peer name).
     (Jakub Zelenka)
 
+- PGSQL:
+  . Fixed GHSA-hrwm-9436-5mv3 (pgsql extension does not check for errors during
+    escaping). (CVE-2025-1735) (Jakub Zelenka)
+
 - Phar:
   . Add missing filter cleanups on phar failure. (nielsdos)
   . Fixed bug GH-18642 (Signed integer overflow in ext/phar fseek). (nielsdos)
@@ -60,8 +64,14 @@ PHP                                                                        NEWS
   . Fix memory leak when calloc() fails in php_readline_completion_cb().
     (nielsdos)
 
-- Soap:
+- SOAP:
   . Fix memory leaks in php_http.c when call_user_function() fails. (nielsdos)
+  . Fixed GHSA-453j-q27h-5p8x (NULL Pointer Dereference in PHP SOAP Extension
+    via Large XML Namespace Prefix). (CVE-2025-6491) (Lekssays, nielsdos)
+
+- Standard:
+  . Fixed GHSA-3cr5-j632-f35r (Null byte termination in hostnames).
+    (CVE-2025-1220) (Jakub Zelenka)
 
 - Tidy:
   . Fix memory leak in tidy output handler on error. (nielsdos)
