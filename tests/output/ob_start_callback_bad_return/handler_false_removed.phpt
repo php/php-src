@@ -1,5 +1,5 @@
 --TEST--
-ob_start(): Check behaviour with deprecation when OOM triggers handler removal
+ob_start(): Check behaviour with deprecation when OOM triggers handler removal (handler returns false)
 --FILE--
 <?php
 
