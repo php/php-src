@@ -65,15 +65,25 @@ int fpm_status_export_to_zval(zval *status)
 	struct fpm_scoreboard_proc_s procs[scoreboard.nprocs];
 
 	struct fpm_scoreboard_proc_s *proc_p;
+	int calculated_active = 0, calculated_idle = 0;
 	for(i=0; i<scoreboard.nprocs; i++) {
-		proc_p = fpm_scoreboard_proc_acquire(scoreboard_p, i, 1);
-		if (!proc_p){
-			procs[i].used=-1;
-			continue;
-		}
-		procs[i] = *proc_p;
-		fpm_scoreboard_proc_release(proc_p);
-	}
+            proc_p = fpm_scoreboard_proc_acquire(scoreboard_p, i, 1);
+            if (!proc_p){
+                procs[i].used=-1;
+                continue;
+            }
+            procs[i] = *proc_p;
+
+            if (proc_p->used) {
+                if (proc_p->request_stage == FPM_REQUEST_ACCEPTING) {
+                    calculated_idle++;
+                } else {
+                    calculated_active++;
+                }
+            }
+
+            fpm_scoreboard_proc_release(proc_p);
+        }
 	fpm_scoreboard_release(scoreboard_p);
 
 	now_epoch = time(NULL);
@@ -88,9 +98,9 @@ int fpm_status_export_to_zval(zval *status)
 	add_assoc_long(status, "listen-queue", scoreboard.lq);
 	add_assoc_long(status, "max-listen-queue", scoreboard.lq_max);
 	add_assoc_long(status, "listen-queue-len", scoreboard.lq_len);
-	add_assoc_long(status, "idle-processes", scoreboard.idle);
-	add_assoc_long(status, "active-processes", scoreboard.active);
-	add_assoc_long(status, "total-processes", scoreboard.idle + scoreboard.active);
+	add_assoc_long(status, "idle-processes", calculated_idle);
+	add_assoc_long(status, "active-processes", calculated_active);
+	add_assoc_long(status, "total-processes", calculated_idle + calculated_active);
 	add_assoc_long(status, "max-active-processes", scoreboard.active_max);
 	add_assoc_long(status, "max-children-reached", scoreboard.max_children_reached);
 	add_assoc_long(status, "slow-requests", scoreboard.slow_rq);
