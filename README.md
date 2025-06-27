@@ -96,7 +96,7 @@ PHP ships with an extensive test suite, the command `make test` is used after
 successful compilation of the sources to run this test suite.
 
 It is possible to run tests using multiple cores by setting `-jN` in
-`TEST_PHP_ARGS`:
+`TEST_PHP_ARGS` or `TESTS`:
 
 ```shell
 make TEST_PHP_ARGS=-j4 test
@@ -105,16 +105,10 @@ make TEST_PHP_ARGS=-j4 test
 Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum
 number of jobs should not exceed the number of cores available.
 
-Use `TESTS` variable to test only specific directories:
+Use `TEST_PHP_ARGS` or `TESTS` variable to test only specific directories:
 
 ```shell
 make TESTS=tests/lang/ test
-```
-
-Or combine the variables:
-
-```shell
-make TEST_PHP_ARGS=-j4 TESTS=tests/lang/ test   
 ```
 
 The [qa.php.net](https://qa.php.net) site provides more detailed info about
