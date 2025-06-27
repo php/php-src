@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - MbString:
   . Fixed bug GH-18901 (integer overflow mb_split). (nielsdos)
 
+- OCI8:
+  . Fixed bug GH-18873 (OCI_RETURN_LOBS flag causes oci8 to leak memory).
+    (Saki Takamachi)
+
 - Opcache:
   . Fixed bug GH-18639 (Internal class aliases can break preloading + JIT).
     (nielsdos)
