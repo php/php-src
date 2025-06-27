@@ -713,7 +713,7 @@ struct _zend_async_scope_s {
 	/**
 	 * The method handles an exception delivered to the Scope.
 	 * Its result may either be the cancellation of the Scope or the suppression of the exception.
-	 * If the coroutine parameter is specified, it indicates an attempt to handle an exception from a coroutine.
+	 * If the is_cancellation parameter is FALSE, it indicates an attempt to handle an exception from a coroutine.
 	 * Otherwise, it's an attempt by the user to stop the execution of the Scope.
 	 *
 	 * The method should return true if the exception was handled and the Scope can continue execution.
@@ -723,11 +723,22 @@ struct _zend_async_scope_s {
 	bool (*catch_or_cancel)(
 		zend_async_scope_t *scope,
 		zend_coroutine_t *coroutine,
+		zend_async_scope_t *from_scope,
 		zend_object *exception,
 		bool transfer_error,
-		const bool is_safely
+		const bool is_safely,
+		const bool is_cancellation
 	);
 };
+
+#define ZEND_ASYNC_SCOPE_CLOSE(scope, is_safely) \
+	((scope)->catch_or_cancel((scope), NULL, NULL, NULL, false, (is_safely), true))
+
+#define ZEND_ASYNC_SCOPE_CANCEL(scope, exception, transfer_error, is_safely) \
+	((scope)->catch_or_cancel((scope), NULL, NULL, (exception), (transfer_error), (is_safely), true))
+
+#define ZEND_ASYNC_SCOPE_CATCH(scope, coroutine, from_scope, exception, transfer_error, is_safely) \
+	((scope)->catch_or_cancel((scope), (coroutine), (from_scope), (exception), (transfer_error), (is_safely), false))
 
 #define ZEND_ASYNC_SCOPE_F_CLOSED				  ZEND_ASYNC_EVENT_F_CLOSED  /* scope was closed */
 #define ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY	      ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY  /* scope will not free memory in dispose handler */
