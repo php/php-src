@@ -4356,7 +4356,10 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		}
 		opline->result.num = zend_alloc_cache_slot();
 
-		if (args->children == 1) {
+		/* Skip adding a message on piped assert(...) calls, hence the ZEND_AST_ZNODE check.
+		 * We don't have access to the original AST anyway, so we would either need to duplicate
+		 * this logic in pipe compilation or store the AST. Neither seems worth the complexity. */
+		if (args->children == 1 && args->child[0]->kind != ZEND_AST_ZNODE) {
 			/* add "assert(condition) as assertion message */
 			zend_ast *arg = zend_ast_create_zval_from_str(
 				zend_ast_export("assert(", args->child[0], ")"));
