@@ -1513,6 +1513,8 @@ PHP_FUNCTION(pcntl_rfork)
 		default:
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
+	} else if (pid == 0) {
+		zend_max_execution_timer_init();
 	}
 
 	RETURN_LONG((zend_long) pid);
@@ -1556,6 +1558,8 @@ PHP_FUNCTION(pcntl_forkx)
 		default:
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
+	} else if (pid == 0) {
+		zend_max_execution_timer_init();
 	}
 
 	RETURN_LONG((zend_long) pid);
