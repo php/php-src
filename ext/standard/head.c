@@ -375,6 +375,11 @@ PHP_FUNCTION(http_response_code)
 			}
 			RETURN_FALSE;
 		}
+
+		if (SG(sapi_headers).http_status_line) {
+			php_error_docref(NULL, E_WARNING, "Calling http_response_code() after header('HTTP/...') has no effect. This will change in PHP 9.0");
+		}
+
 		zend_long old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;
