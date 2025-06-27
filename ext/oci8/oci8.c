@@ -573,12 +573,8 @@ void php_oci_column_hash_dtor(zval *data)
 		zend_list_close(column->stmtid);
 	}
 
-	if (column->descid) {
-		if (GC_REFCOUNT(column->descid) == 1)
-			zend_list_close(column->descid);
-		else {
-			GC_DELREF(column->descid);
-		}
+	if (column->descid && !GC_DELREF(column->descid)) {
+		zend_list_close(column->descid);
 	}
 
 	if (column->data) {
