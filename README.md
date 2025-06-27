@@ -119,7 +119,7 @@ make TESTS=tests/lang/ test
 Or combine the variables:
 
 ```shell
-make TEST_PHP_ARGS=-j8 TESTS=tests/lang/ test   
+make TEST_PHP_ARGS=-j4 TESTS=tests/lang/ test   
 ```
 
 The [qa.php.net](https://qa.php.net) site provides more detailed info about
