@@ -213,9 +213,9 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 	return object;
 }
 
-ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
+ZEND_API void ZEND_FASTCALL zend_objects_clone_members_ex(zend_object *new_object, zend_object *old_object, zend_class_entry *scope, const HashTable *properties)
 {
-	bool has_clone_method = old_object->ce->clone != NULL;
+	bool might_update_properties = old_object->ce->clone != NULL || zend_hash_num_elements(properties) > 0;
 
 	if (old_object->ce->default_properties_count) {
 		zval *src = old_object->properties_table;
@@ -226,7 +226,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			i_zval_ptr_dtor(dst);
 			ZVAL_COPY_VALUE_PROP(dst, src);
 			zval_add_ref(dst);
-			if (has_clone_method) {
+			if (might_update_properties) {
 				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
 				Z_PROP_FLAG_P(dst) |= IS_PROP_REINITABLE;
 			}
@@ -241,7 +241,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			src++;
 			dst++;
 		} while (src != end);
-	} else if (old_object->properties && !has_clone_method) {
+	} else if (old_object->properties && !might_update_properties) {
 		/* fast copy */
 		if (EXPECTED(old_object->handlers == &std_object_handlers)) {
 			if (EXPECTED(!(GC_FLAGS(old_object->properties) & IS_ARRAY_IMMUTABLE))) {
@@ -275,7 +275,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				ZVAL_COPY_VALUE(&new_prop, prop);
 				zval_add_ref(&new_prop);
 			}
-			if (has_clone_method) {
+			if (might_update_properties) {
 				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
 				Z_PROP_FLAG_P(&new_prop) |= IS_PROP_REINITABLE;
 			}
@@ -287,9 +287,45 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (has_clone_method) {
+	if (might_update_properties) {
 		GC_ADDREF(new_object);
-		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
+		if (old_object->ce->clone) {
+			zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
+		}
+
+		if (EXPECTED(!EG(exception)) && zend_hash_num_elements(properties) > 0) {
+			/* Unlock readonly properties once more. */
+			if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce) && old_object->ce->clone) {
+				for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
+					zval* prop = OBJ_PROP_NUM(new_object, i);
+					Z_PROP_FLAG_P(prop) |= IS_PROP_REINITABLE;
+				}
+			}
+
+			zend_class_entry *old_scope = EG(fake_scope);
+
+			EG(fake_scope) = scope;
+
+			zend_ulong num_key;
+			zend_string *key;
+			zval *val;
+			ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, val) {
+				if (UNEXPECTED(key == NULL)) {
+					key = zend_long_to_str(num_key);
+					new_object->handlers->write_property(new_object, key, val, NULL);
+					zend_string_release_ex(key, false);
+				} else {
+					new_object->handlers->write_property(new_object, key, val, NULL);
+				}
+	
+				if (UNEXPECTED(EG(exception))) {
+					break;
+				}
+			} ZEND_HASH_FOREACH_END();
+
+			EG(fake_scope) = old_scope;
+		}
+
 
 		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
 			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
@@ -303,12 +339,33 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	}
 }
 
-ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
+ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
+{
+	ZEND_ASSERT(old_object->ce == new_object->ce);
+
+	zend_objects_clone_members_ex(new_object, old_object, old_object->ce, &zend_empty_array);
+}
+
+ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, zend_class_entry *scope, const HashTable *properties)
 {
 	zend_object *new_object;
 
+	/* Compatibility with code that only overrides clone_obj. */
+	if (UNEXPECTED(old_object->handlers->clone_obj != zend_objects_clone_obj)) {
+		if (!old_object->handlers->clone_obj) {
+			zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(old_object->ce->name));
+			return NULL;
+		}
+		if (zend_hash_num_elements(properties) > 0) {
+			zend_throw_error(NULL, "Trying to clone an object with updated properties that is not compatible %s", ZSTR_VAL(old_object->ce->name));
+			return NULL;
+		} else {
+			return old_object->handlers->clone_obj(old_object);
+		}
+	}
+
 	if (UNEXPECTED(zend_object_is_lazy(old_object))) {
-		return zend_lazy_object_clone(old_object);
+		return zend_lazy_object_clone(old_object, scope, properties);
 	}
 
 	/* assume that create isn't overwritten, so when clone depends on the
@@ -325,7 +382,12 @@ ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 		} while (p != end);
 	}
 
-	zend_objects_clone_members(new_object, old_object);
+	zend_objects_clone_members_ex(new_object, old_object, scope, properties);
 
 	return new_object;
+}
+
+ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
+{
+	return zend_objects_clone_obj_with(old_object, old_object->ce, &zend_empty_array);
 }

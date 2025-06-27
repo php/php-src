@@ -514,6 +514,7 @@ zend_object_handlers php_com_object_handlers = {
 	php_com_object_free_storage,
 	zend_objects_destroy_object,
 	php_com_object_clone,
+	NULL, /* clone_with */
 	com_property_read,
 	com_property_write,
 	com_read_dimension,
