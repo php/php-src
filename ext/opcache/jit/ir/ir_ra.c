@@ -4100,17 +4100,24 @@ static void assign_regs(ir_ctx *ctx)
 		} while (ival);
 	}
 
+	ir_regset preserved;
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		preserved = IR_REGSET_PNPRESERVED;
+	} else {
+		preserved = IR_REGSET_PRESERVED;
+	}
+
 	if (ctx->fixed_stack_frame_size != -1) {
 		ctx->used_preserved_regs = (ir_regset)ctx->fixed_save_regset;
-		if (IR_REGSET_DIFFERENCE(IR_REGSET_INTERSECTION(used_regs, IR_REGSET_PRESERVED),
+		if (IR_REGSET_DIFFERENCE(IR_REGSET_INTERSECTION(used_regs, preserved),
 			ctx->used_preserved_regs)) {
 			// TODO: Preserved reg and fixed frame conflict ???
 			// IR_ASSERT(0 && "Preserved reg and fixed frame conflict");
 		}
 	} else {
 		ctx->used_preserved_regs = IR_REGSET_UNION((ir_regset)ctx->fixed_save_regset,
-			IR_REGSET_DIFFERENCE(IR_REGSET_INTERSECTION(used_regs, IR_REGSET_PRESERVED),
-				(ctx->flags & IR_FUNCTION) ? (ir_regset)ctx->fixed_regset : IR_REGSET_PRESERVED));
+			IR_REGSET_DIFFERENCE(IR_REGSET_INTERSECTION(used_regs, preserved),
+				(ctx->flags & IR_FUNCTION) ? (ir_regset)ctx->fixed_regset : preserved));
 	}
 
 	ir_fix_stack_frame(ctx);
