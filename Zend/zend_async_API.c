@@ -82,6 +82,7 @@ zend_async_resume_t zend_async_resume_fn = NULL;
 zend_async_cancel_t zend_async_cancel_fn = NULL;
 zend_async_spawn_and_throw_t zend_async_spawn_and_throw_fn = spawn_and_throw;
 zend_async_shutdown_t zend_async_shutdown_fn = NULL;
+zend_async_engine_shutdown_t zend_async_engine_shutdown_fn = NULL;
 zend_async_get_coroutines_t zend_async_get_coroutines_fn = NULL;
 zend_async_add_microtask_t zend_async_add_microtask_fn = NULL;
 zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = NULL;
@@ -215,7 +216,8 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
     zend_async_get_class_ce_t get_class_ce_fn,
-    zend_async_new_iterator_t new_iterator_fn
+    zend_async_new_iterator_t new_iterator_fn,
+    zend_async_engine_shutdown_t engine_shutdown_fn
 )
 {
 	if (zend_atomic_bool_exchange(&scheduler_lock, 1)) {
@@ -252,6 +254,7 @@ ZEND_API bool zend_async_scheduler_register(
 	zend_async_get_awaiting_info_fn = get_awaiting_info_fn;
 	zend_async_get_class_ce_fn = get_class_ce_fn;
 	zend_async_new_iterator_fn = new_iterator_fn;
+    zend_async_engine_shutdown_fn = engine_shutdown_fn;
 
 	zend_atomic_bool_store(&scheduler_lock, 0);
 

@@ -193,6 +193,7 @@ typedef void (*zend_async_resume_t)(zend_coroutine_t *coroutine, zend_object * e
 typedef void (*zend_async_cancel_t)(zend_coroutine_t *coroutine, zend_object * error, bool transfer_error, const bool is_safely);
 typedef bool (*zend_async_spawn_and_throw_t)(zend_object *exception, zend_async_scope_t *scope, int32_t priority);
 typedef void (*zend_async_shutdown_t)(void);
+typedef void (*zend_async_engine_shutdown_t)(void);
 typedef zend_array* (*zend_async_get_coroutines_t)(void);
 typedef void (*zend_async_add_microtask_t)(zend_async_microtask_t *microtask);
 typedef zend_array* (*zend_async_get_awaiting_info_t)(zend_coroutine_t * coroutine);
@@ -1113,6 +1114,7 @@ ZEND_API extern zend_async_resume_t zend_async_resume_fn;
 ZEND_API extern zend_async_cancel_t zend_async_cancel_fn;
 ZEND_API extern zend_async_spawn_and_throw_t zend_async_spawn_and_throw_fn;
 ZEND_API extern zend_async_shutdown_t zend_async_shutdown_fn;
+ZEND_API extern zend_async_engine_shutdown_t zend_async_engine_shutdown_fn;
 ZEND_API extern zend_async_get_coroutines_t zend_async_get_coroutines_fn;
 ZEND_API extern zend_async_add_microtask_t zend_async_add_microtask_fn;
 ZEND_API extern zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn;
@@ -1190,7 +1192,8 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
     zend_async_get_class_ce_t get_class_ce_fn,
-    zend_async_new_iterator_t new_iterator_fn
+    zend_async_new_iterator_t new_iterator_fn,
+    zend_async_engine_shutdown_t engine_shutdown_fn
 );
 
 ZEND_API bool zend_async_reactor_register(
@@ -1330,6 +1333,7 @@ END_EXTERN_C()
  */
 #define ZEND_ASYNC_SPAWN_AND_THROW(exception, scope, priority) zend_async_spawn_and_throw_fn(exception, scope, priority)
 #define ZEND_ASYNC_SHUTDOWN() zend_async_shutdown_fn()
+#define ZEND_ASYNC_ENGINE_SHUTDOWN() zend_async_engine_shutdown_fn()
 #define ZEND_ASYNC_GET_COROUTINES() zend_async_get_coroutines_fn()
 #define ZEND_ASYNC_ADD_MICROTASK(microtask) zend_async_add_microtask_fn(microtask)
 #define ZEND_ASYNC_GET_AWAITING_INFO(coroutine) zend_async_get_awaiting_info_fn(coroutine)
