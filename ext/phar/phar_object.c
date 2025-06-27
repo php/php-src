@@ -2306,6 +2306,13 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 			/* exception already thrown */
 			return NULL;
 		}
+
+		if (newentry.fp == NULL) {
+			/* entry->fp may be moved to cfp in phar_copy_file_contents
+			 * and be free'd later in phar_flush_ex
+			 * If so, zero fp to avoid double free in rshutdown. */
+			entry->fp = NULL;
+		}
 no_copy:
 		newentry.filename = zend_string_copy(newentry.filename);
 
