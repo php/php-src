@@ -1052,7 +1052,13 @@ jobs:
       - name: Test
         run: .github/scripts/windows/test.bat
   FREEBSD:
-    name: FREEBSD
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - zts: false
+          - zts: true
+    name: "FREEBSD_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     steps:
       - name: git checkout
@@ -1061,3 +1067,6 @@ jobs:
           ref: ${{ inputs.branch }}
       - name: FreeBSD
         uses: ./.github/actions/freebsd
+        with:
+          configurationParameters: >-
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
