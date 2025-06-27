@@ -160,7 +160,11 @@ bool php_dom_create_nullable_object(xmlNodePtr obj, zval *return_value, dom_obje
 xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
 void dom_set_document_ref_pointers(xmlNodePtr node, php_libxml_ref_obj *document);
 void dom_set_document_ref_pointers_attr(xmlAttrPtr attr, php_libxml_ref_obj *document);
+
+/* Prop getters by offset */
+zval *dom_get_prop_checked_offset(dom_object *obj, uint32_t offset, const char *name);
 zval *dom_element_class_list_zval(dom_object *obj);
+zval *dom_parent_node_children(dom_object *obj);
 
 typedef enum {
 	DOM_LOAD_STRING = 0,

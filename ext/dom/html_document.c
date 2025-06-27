@@ -84,16 +84,7 @@ typedef struct dom_decoding_encoding_ctx {
 /* https://dom.spec.whatwg.org/#dom-document-implementation */
 zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval)
 {
-	const uint32_t PROP_INDEX = 0;
-
-#if ZEND_DEBUG
-	zend_string *implementation_str = ZSTR_INIT_LITERAL("implementation", false);
-	const zend_property_info *prop_info = zend_get_property_info(dom_abstract_base_document_class_entry, implementation_str, 0);
-	zend_string_release_ex(implementation_str, false);
-	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
-#endif
-
-	zval *cached_implementation = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	zval *cached_implementation = dom_get_prop_checked_offset(obj, 1, "implementation");
 	if (Z_ISUNDEF_P(cached_implementation)) {
 		php_dom_create_implementation(cached_implementation, true);
 	}
