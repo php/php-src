@@ -1926,7 +1926,8 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{
 {
 	char *error;
 	zend_off_t offset;
-	phar_entry_info *link;
+
+	ZEND_ASSERT(!entry->link);
 
 	if (FAILURE == phar_open_entry_fp(entry, &error, 1)) {
 		if (error) {
@@ -1941,24 +1942,12 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{
 	}
 
 	/* copy old contents in entirety */
-	phar_seek_efp(entry, 0, SEEK_SET, 0, 1);
+	phar_seek_efp(entry, 0, SEEK_SET, 0, 0);
 	offset = php_stream_tell(fp);
-	link = phar_get_link_source(entry);
-
-	if (!link) {
-		link = entry;
-	}
-
-	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, 0), fp, link->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0), fp, entry->uncompressed_filesize, NULL)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, entry->filename);
 		return FAILURE;
-	}
-
-	if (entry->fp_type == PHAR_MOD) {
-		/* save for potential restore on error */
-		entry->cfp = entry->fp;
-		entry->fp = NULL;
 	}
 
 	/* set new location of file contents */
@@ -2299,6 +2288,10 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 			return NULL;
 		}
 no_copy:
+		/* Reset file pointers, they have to be reset here such that if a copy happens the original
+		 * source fp can be accessed. */
+		newentry.fp = NULL;
+		newentry.cfp = NULL;
 		newentry.filename = estrndup(newentry.filename, newentry.filename_len);
 
 		phar_metadata_tracker_clone(&newentry.metadata_tracker);
