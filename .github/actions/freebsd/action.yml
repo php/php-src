@@ -1,4 +1,8 @@
 name: FreeBSD
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
 runs:
   using: composite
   steps:
@@ -79,7 +83,9 @@ runs:
             --with-mhash \
             --with-sodium \
             --with-config-file-path=/etc \
-            --with-config-file-scan-dir=/etc/php.d
+            --with-config-file-scan-dir=/etc/php.d \
+            ${{ inputs.configurationParameters }}
+
           gmake -j2
           mkdir /etc/php.d
           gmake install > /dev/null
