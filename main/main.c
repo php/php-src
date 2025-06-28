@@ -2615,6 +2615,7 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 		}
 		#ifdef PHP_ASYNC_API
 			ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN();
+			ZEND_ASYNC_INITIALIZE;
 		#endif
 	} zend_catch {
 		result = false;
