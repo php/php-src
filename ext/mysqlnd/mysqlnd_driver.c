@@ -36,7 +36,7 @@ static struct st_mysqlnd_plugin_core mysqlnd_plugin_core =
 		"mysqlnd",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
 		{
 			NULL, /* will be filled later */
