@@ -55,6 +55,7 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-19248 (Use strerror_r instead of strerror in main).
     (Jakub Zelenka)
+  . Fixed bug GH-17345 (Bug #35916 was not completely fixed). (nielsdos)
 
 - XMLReader:
   . Fixed bug GH-20009 (XMLReader leak on RelaxNG schema failure). (nielsdos)
