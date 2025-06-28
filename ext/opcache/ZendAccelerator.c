@@ -5172,9 +5172,9 @@ static void accel_activate(void) {
 static zend_extension opcache_extension_entry = {
 	ACCELERATOR_PRODUCT_NAME,               /* name */
 	PHP_VERSION,							/* version */
-	"Zend Technologies",					/* author */
-	"http://www.zend.com/",					/* URL */
-	"Copyright (c)",						/* copyright */
+	"Zend by Perforce",					/* author */
+	"https://www.zend.com/",					/* URL */
+	"Copyright ©",						/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */
