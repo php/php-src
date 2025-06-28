@@ -201,7 +201,7 @@ void init_executor(void) /* {{{ */
 
 #ifdef PHP_ASYNC_API
 	EG(shutdown_context) = (zend_shutdown_context_t) {
-		.coroutine = NULL,
+		.is_started = NULL,
 		.idx = 0
 	};
 #endif
@@ -294,8 +294,15 @@ static bool shutdown_destructors_context_switch_handler(
 	bool is_enter, 
 	bool is_finishing
 ) {
-	zend_coroutine_t *shutdown_coroutine = ZEND_ASYNC_NEW_COROUTINE(ZEND_ASYNC_MAIN_SCOPE);
+	if (is_enter) {
+		return true;
+	}
 
+	if (is_finishing) {
+		return false;
+	}
+
+	zend_coroutine_t *shutdown_coroutine = ZEND_ASYNC_SPAWN_WITH_SCOPE_EX(ZEND_ASYNC_MAIN_SCOPE, 1);
 	shutdown_coroutine->internal_entry = shutdown_destructors_async;
 	shutdown_coroutine->extended_dispose = shutdown_destructors_coroutine_dtor;
 
@@ -317,7 +324,8 @@ void shutdown_destructors_async(void) /* {{{ */
 
 	HashTable *symbol_table = &EG(symbol_table);
 
-	if (shutdown_context->coroutine == NULL) {
+	if (false == shutdown_context->is_started) {
+		shutdown_context->is_started = true;
 		shutdown_context->coroutine = coroutine;
 		shutdown_context->num_elements = zend_hash_num_elements(symbol_table);
 		shutdown_context->idx = symbol_table->nNumUsed;
@@ -369,8 +377,9 @@ void shutdown_destructors_async(void) /* {{{ */
 		} while (shutdown_context->num_elements != zend_hash_num_elements(symbol_table));
 
 		if (should_continue) {
+			shutdown_context->is_started = false;
 			shutdown_context->coroutine = NULL;
-			zend_objects_store_call_destructors(&EG(objects_store));
+			zend_objects_store_call_destructors_async(&EG(objects_store));
 		}
 	} zend_catch {
 		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;

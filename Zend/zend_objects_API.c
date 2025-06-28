@@ -23,6 +23,8 @@
 #include "zend_variables.h"
 #include "zend_API.h"
 #include "zend_objects_API.h"
+
+#include "zend_async_API.h"
 #include "zend_fibers.h"
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
@@ -62,6 +64,93 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 		}
 	}
 }
+
+#ifdef PHP_ASYNC_API
+static void  store_call_destructors_coroutine_dtor(zend_coroutine_t *coroutine)
+{
+	zend_shutdown_context_t *shutdown_context = &EG(shutdown_context);
+
+	if (shutdown_context->coroutine == coroutine) {
+		shutdown_context->coroutine = NULL;
+		zend_error(E_CORE_ERROR, "Shutdown destructors coroutine was not finished property");
+		shutdown_destructors();
+	}
+}
+
+static void store_call_destructors_entry(void)
+{
+	zend_objects_store_call_destructors_async(&EG(objects_store));
+}
+
+static bool store_call_destructors_context_switch_handler(
+	zend_coroutine_t *coroutine,
+	bool is_enter,
+	bool is_finishing
+) {
+	if (is_enter) {
+		return true;
+	}
+
+	if (is_finishing) {
+		return false;
+	}
+
+	zend_coroutine_t *shutdown_coroutine = ZEND_ASYNC_SPAWN_WITH_SCOPE_EX(ZEND_ASYNC_MAIN_SCOPE, 1);
+	shutdown_coroutine->internal_entry = store_call_destructors_entry;
+	shutdown_coroutine->extended_dispose = store_call_destructors_coroutine_dtor;
+
+	return false;
+}
+
+ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors_async(zend_objects_store *objects)
+{
+	if (objects->top <= 1) {
+		return;
+	}
+
+	EG(flags) |= EG_FLAGS_OBJECT_STORE_NO_REUSE;
+
+	zend_class_entry *coroutine_ce = ZEND_ASYNC_GET_CE(ZEND_ASYNC_CLASS_COROUTINE);
+
+	zend_coroutine_t *coroutine = ZEND_ASYNC_CURRENT_COROUTINE;
+
+	zend_shutdown_context_t *shutdown_context = &EG(shutdown_context);
+
+	if (coroutine == NULL) {
+		ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER(store_call_destructors_context_switch_handler);
+	} else {
+		ZEND_COROUTINE_ADD_SWITCH_HANDLER(coroutine, store_call_destructors_context_switch_handler);
+	}
+
+	if (false == shutdown_context->is_started) {
+		shutdown_context->is_started = true;
+		shutdown_context->coroutine = coroutine;
+		shutdown_context->idx = 1;
+	}
+
+	for (uint32_t i = shutdown_context->idx; i < objects->top; i++) {
+		zend_object *obj = objects->object_buckets[i];
+		if (IS_OBJ_VALID(obj) && obj->ce != coroutine_ce) {
+			if (!(OBJ_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+				GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
+
+				if (obj->handlers->dtor_obj != zend_objects_destroy_object || obj->ce->destructor) {
+					shutdown_context->idx = i;
+					GC_ADDREF(obj);
+					obj->handlers->dtor_obj(obj);
+					GC_DELREF(obj);
+
+					if (coroutine != ZEND_ASYNC_CURRENT_COROUTINE) {
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	shutdown_context->is_started = false;
+}
+#endif
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_mark_destructed(zend_objects_store *objects)
 {

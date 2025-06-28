@@ -165,6 +165,7 @@ struct _zend_compiler_globals {
 
 #ifdef PHP_ASYNC_API
 typedef struct {
+	bool is_started;
 	void *coroutine;
 	uint32_t num_elements;
 	uint32_t idx;
