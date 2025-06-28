@@ -86,7 +86,7 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		case FORMAT_TYPE_CURRENCY:
-			if (getThis()) {
+			if (hasThis()) {
 				const char *space;
 				const char *class_name = get_active_class_name(&space);
 				zend_argument_value_error(2, "cannot be NumberFormatter::TYPE_CURRENCY constant, "
