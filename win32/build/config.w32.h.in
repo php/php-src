@@ -84,10 +84,8 @@
 #define ssize_t SSIZE_T
 #ifdef _WIN64
 # define SIZEOF_SIZE_T 8
-# define SIZEOF_PTRDIFF_T 8
 #else
 # define SIZEOF_SIZE_T 4
-# define SIZEOF_PTRDIFF_T 4
 #endif
 #define SIZEOF_OFF_T 4
 #define HAVE_FNMATCH
