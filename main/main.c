@@ -145,7 +145,7 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 		" GCOV"
 #endif
 	);
-	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
+	smart_string_appends(&version_info, "Copyright © The PHP Group and Contributors\n");
 
 	const char *build_provider = php_build_provider();
 	if (build_provider) {
