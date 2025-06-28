@@ -116,9 +116,7 @@ typedef enum {
 #if SIZEOF_INTMAX_T
 	LM_INTMAX_T,
 #endif
-#if SIZEOF_PTRDIFF_T
 	LM_PTRDIFF_T,
-#endif
 #if SIZEOF_LONG_LONG
 	LM_LONG_LONG,
 #endif
