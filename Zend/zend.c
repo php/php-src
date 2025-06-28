@@ -76,7 +76,7 @@ ZEND_API bool zend_dtrace_enabled;
 /* version information */
 static char *zend_version_info;
 static uint32_t zend_version_info_length;
-#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) Zend Technologies\n"
+#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright © Zend by Perforce\n"
 #define PRINT_ZVAL_INDENT 4
 
 /* true multithread-shared globals */
