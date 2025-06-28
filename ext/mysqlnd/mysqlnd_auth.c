@@ -590,7 +590,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 		"auth_plugin_mysql_native_password",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
@@ -644,7 +644,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin
 		"auth_plugin_mysql_clear_password",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
@@ -942,7 +942,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plu
 		"auth_plugin_sha256_password",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uwendel@mysql.com>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
@@ -1304,7 +1304,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin 
 		"auth_plugin_caching_sha2_password",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Johannes Schlüter <johannes.schlueter@php.net>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
