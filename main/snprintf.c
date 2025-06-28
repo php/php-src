@@ -613,11 +613,7 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 					break;
 				case 'j':
 					fmt++;
-#if SIZEOF_INTMAX_T
 					modifier = LM_INTMAX_T;
-#else
-					modifier = LM_SIZE_T;
-#endif
 					break;
 				case 't':
 					fmt++;
@@ -685,11 +681,9 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 							i_num = (int64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							i_num = (int64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
 						case LM_PTRDIFF_T:
 							i_num = (int64_t) va_arg(ap, ptrdiff_t);
 							break;
@@ -726,11 +720,9 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 								i_num = (int64_t) va_arg(ap, long long int);
 								break;
 #endif
-#if SIZEOF_INTMAX_T
 							case LM_INTMAX_T:
 								i_num = (int64_t) va_arg(ap, intmax_t);
 								break;
-#endif
 							case LM_PTRDIFF_T:
 								i_num = (int64_t) va_arg(ap, ptrdiff_t);
 								break;
@@ -770,11 +762,9 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
 						case LM_PTRDIFF_T:
 							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
@@ -807,11 +797,9 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
 						case LM_PTRDIFF_T:
 							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
