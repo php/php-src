@@ -45,7 +45,7 @@ static struct st_mysqlnd_typeii_plugin_example mysqlnd_example_plugin =
 		"example",
 		10001L,
 		"1.00.01",
-		"PHP License",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>",
 		{
 			NULL, /* will be filled later */
