@@ -1935,6 +1935,10 @@ void php_request_shutdown(void *dummy)
 		zend_call_destructors();
 	} zend_end_try();
 
+#ifdef PHP_ASYNC_API
+	ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN();
+#endif
+
 	/* 3. Flush all output buffers */
 	zend_try {
 		php_output_end_all();

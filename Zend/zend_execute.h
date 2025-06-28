@@ -40,6 +40,9 @@ ZEND_API extern zend_class_entry *(*zend_autoload)(zend_string *name, zend_strin
 void init_executor(void);
 void shutdown_executor(void);
 void shutdown_destructors(void);
+#ifdef PHP_ASYNC_API
+void shutdown_destructors_async(void);
+#endif
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown);
 
 ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value);

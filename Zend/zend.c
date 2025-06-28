@@ -1336,7 +1336,7 @@ void zend_call_destructors(void) /* {{{ */
 {
 	zend_try {
 #ifdef PHP_ASYNC_API
-		async_shutdown_destructors();
+		shutdown_destructors_async();
 #else
 		shutdown_destructors();
 #endif
