@@ -592,7 +592,7 @@ register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
-	if (zend_register_constant(&c) == SUCCESS) {
+	if (zend_register_constant(&c) != NULL) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

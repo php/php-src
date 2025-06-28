@@ -45,6 +45,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     properties.
   . ZEND_IS_XDIGIT() macro was removed because it was unused and its name
     did not match its actual behavior.
+  . zend_register_constant() now returns a pointer to the added constant
+    on success and NULL on failure instead of SUCCESS/FAILURE.
 
 ========================
 2. Build system changes
