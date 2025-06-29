@@ -15,28 +15,23 @@ echo "*** Testing readfile() : variation ***\n";
 
 
 /* An array of files */
-$names_arr = array(
+$names = [
   /* Invalid args */
   -1,
-  TRUE,
-  FALSE,
   "",
   " ",
   "\0",
-
   /* prefix with path separator of a non existing directory*/
   "/no/such/file/dir",
-  "php/php"
+  "php/php",
+];
 
-);
-
-for( $i=0; $i<count($names_arr); $i++ ) {
-    $name = $names_arr[$i];
+foreach ($names as $name) {;
     echo "-- testing '$name' --\n";
     try {
         readfile($name);
-    } catch (\TypeError|\ValueError $e) {
-        echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
@@ -45,11 +40,6 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 -- testing '-1' --
 
 Warning: readfile(-1): Failed to open stream: %s in %s on line %d
--- testing '1' --
-
-Warning: readfile(1): Failed to open stream: %s in %s on line %d
--- testing '' --
-ValueError: Path must not be empty
 -- testing '' --
 ValueError: Path must not be empty
 -- testing ' ' --

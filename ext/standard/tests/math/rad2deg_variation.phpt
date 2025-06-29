@@ -4,28 +4,11 @@ Test variations in usage of rad2deg()
 precision = 10
 --FILE--
 <?php
-/*
- * Function is implemented in ext/standard/math.c
-*/
 
+$values = include 'data/numbers.inc';
 
-//Test rad2deg with a different input values
-
-$values = array(23,
-        -23,
-        2.345e1,
-        -2.345e1,
-        0x17,
-        027,
-        "23",
-        "23.45",
-        "2.345e1",
-        "1000",
-        true,
-        false);
-
-for ($i = 0; $i < count($values); $i++) {
-    $res = rad2deg($values[$i]);
+foreach ($values as $value) {
+    $res = rad2deg($value);
     var_dump($res);
 }
 
@@ -34,12 +17,8 @@ for ($i = 0; $i < count($values); $i++) {
 float(1317.8029288008934)
 float(-1317.8029288008934)
 float(1343.5860295817804)
+float(1343.5860295817804)
 float(-1343.5860295817804)
-float(1317.8029288008934)
-float(1317.8029288008934)
-float(1317.8029288008934)
-float(1343.5860295817804)
-float(1343.5860295817804)
-float(57295.77951308232)
-float(57.29577951308232)
-float(0)
+float(572.9577951308232)
+float(590.146528984748)
+float(226346.97696643168)

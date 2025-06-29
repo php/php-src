@@ -69,17 +69,17 @@ var_dump($db->pgsqlGetNotify());
 
 
 // Test second parameter, should wait 2 seconds because no notify is queued
-$t = microtime(1);
+$t = microtime(true);
 $notify = $db->pgsqlGetNotify(PDO::FETCH_ASSOC, 1000);
-$diff = microtime(1) - $t;
+$diff = microtime(true) - $t;
 var_dump($diff >= 1 || 1 - abs($diff) < .05);
 var_dump($notify);
 
 // Test second parameter, should return immediately because a notify is queued
 $db->exec("NOTIFY channel_getnotify");
-$t = microtime(1);
+$t = microtime(true);
 $notify = $db->pgsqlGetNotify(PDO::FETCH_ASSOC, 5000);
-$diff = microtime(1) - $t;
+$diff = microtime(true) - $t;
 var_dump($diff < 1 || abs(1 - abs($diff)) < .05);
 var_dump(count($notify));
 

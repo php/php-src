@@ -84,8 +84,10 @@ int(2147483647)
 *** Trying float(NAN)
 *** Caught {closure:%s:%d}(): Return value must be of type int, float returned in %s on line %d
 *** Trying bool(true)
+E_DEPRECATED: {closure:%s:%d}(): Returning type bool which is implicitly converted to type int is deprecated on line %d
 int(1)
 *** Trying bool(false)
+E_DEPRECATED: {closure:%s:%d}(): Returning type bool which is implicitly converted to type int is deprecated on line %d
 int(0)
 *** Trying NULL
 *** Caught {closure:%s:%d}(): Return value must be of type int, null returned in %s on line %d
@@ -121,8 +123,10 @@ float(2147483647)
 *** Trying float(NAN)
 float(NAN)
 *** Trying bool(true)
+E_DEPRECATED: {closure:%s:%d}(): Returning type bool which is implicitly converted to type float is deprecated on line %d
 float(1)
 *** Trying bool(false)
+E_DEPRECATED: {closure:%s:%d}(): Returning type bool which is implicitly converted to type float is deprecated on line %d
 float(0)
 *** Trying NULL
 *** Caught {closure:%s:%d}(): Return value must be of type float, null returned in %s on line %d
@@ -158,8 +162,10 @@ string(10) "2147483647"
 *** Trying float(NAN)
 string(3) "NAN"
 *** Trying bool(true)
+E_DEPRECATED: {closure:%s:%d}(): Returning type bool which is implicitly converted to type string is deprecated on line %d
 string(1) "1"
 *** Trying bool(false)
+E_DEPRECATED: {closure:%s:%d}(): Returning type bool which is implicitly converted to type string is deprecated on line %d
 string(0) ""
 *** Trying NULL
 *** Caught {closure:%s:%d}(): Return value must be of type string, null returned in %s on line %d
@@ -177,22 +183,31 @@ string(6) "foobar"
 
 Testing 'bool' type:
 *** Trying int(1)
+E_DEPRECATED: {closure:%s:%d}(): Returning type int which is implicitly converted to type bool is deprecated on line %d
 bool(true)
 *** Trying string(1) "1"
+E_DEPRECATED: {closure:%s:%d}(): Returning type string which is implicitly converted to type bool is deprecated on line %d
 bool(true)
 *** Trying float(1)
+E_DEPRECATED: {closure:%s:%d}(): Returning type float which is implicitly converted to type bool is deprecated on line %d
 bool(true)
 *** Trying float(1.5)
+E_DEPRECATED: {closure:%s:%d}(): Returning type float which is implicitly converted to type bool is deprecated on line %d
 bool(true)
 *** Trying string(2) "1a"
+E_DEPRECATED: {closure:%s:%d}(): Returning type string which is implicitly converted to type bool is deprecated on line %d
 bool(true)
 *** Trying string(1) "a"
+E_DEPRECATED: {closure:%s:%d}(): Returning type string which is implicitly converted to type bool is deprecated on line %d
 bool(true)
 *** Trying string(0) ""
+E_DEPRECATED: {closure:%s:%d}(): Returning type string which is implicitly converted to type bool is deprecated on line %d
 bool(false)
 *** Trying int(2147483647)
+E_DEPRECATED: {closure:%s:%d}(): Returning type int which is implicitly converted to type bool is deprecated on line %d
 bool(true)
 *** Trying float(NAN)
+E_DEPRECATED: {closure:%s:%d}(): Returning type float which is implicitly converted to type bool is deprecated on line %d
 bool(true)
 *** Trying bool(true)
 bool(true)

@@ -1,31 +1,14 @@
 --TEST--
 Test variations in usage of atanh()
 --INI--
-precision = 10
+precision=14
 --FILE--
 <?php
-/*
- * Function is implemented in ext/standard/math.c
-*/
 
+$values = include 'data/numbers.inc';
 
-//Test atanh with a different input values
-
-$values = array(23,
-        -23,
-        2.345e1,
-        -2.345e1,
-        0x17,
-        027,
-        "23",
-        "23.45",
-        "2.345e1",
-        "1000",
-        true,
-        false);
-
-for ($i = 0; $i < count($values); $i++) {
-    $res = atanh($values[$i]);
+foreach ($values as $value) {
+    $res = atanh($value);
     var_dump($res);
 }
 
@@ -39,7 +22,3 @@ float(NAN)
 float(NAN)
 float(NAN)
 float(NAN)
-float(NAN)
-float(NAN)
-float(INF)
-float(0)

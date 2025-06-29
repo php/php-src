@@ -12,7 +12,8 @@ $ref =& $test->prop;
 print_R(intltz_get_canonical_id('Portugal', $ref));
 var_dump($test);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Assigning bool to typed property which is implicitly converted to type string is deprecated in %s on line %d
 Europe/Lisbonobject(Test)#1 (1) {
   ["prop"]=>
   &string(1) "1"

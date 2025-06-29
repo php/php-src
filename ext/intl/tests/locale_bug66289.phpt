@@ -7,15 +7,15 @@ intl
 
 ini_set("intl.default_locale", "en-US");
 $availableLocales = array('fr_FR', 'de', 'es_ES', 'es_419', 'en_US');
-var_dump(locale_lookup($availableLocales, false, true, 'fr_FR'));
-var_dump(locale_lookup($availableLocales, false, true, null));
+var_dump(locale_lookup($availableLocales, '', true, 'fr_FR'));
+var_dump(locale_lookup($availableLocales, '', true, null));
 
 $availableLocales = array('fr_FR', 'de', 'es_ES', 'es_419');
-var_dump(locale_lookup($availableLocales, false, true, 'fr_FR'));
+var_dump(locale_lookup($availableLocales, '', true, 'fr_FR'));
 
 ini_set("intl.default_locale", "de-DE");
 $availableLocales = array(Locale::getDefault());
-var_dump(locale_lookup($availableLocales, false, true));
+var_dump(locale_lookup($availableLocales, '', true));
 
 ?>
 --EXPECT--

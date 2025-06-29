@@ -1,45 +1,24 @@
 --TEST--
 Test variations in usage of sin()
 --INI--
-serialize_precision = 10
+precision=14
 --FILE--
 <?php
-/*
- * Function is implemented in ext/standard/math.c
-*/
 
+$values = include 'data/numbers.inc';
 
-//Test sin with a different input values
-
-$values = array(23,
-        -23,
-        2.345e1,
-        -2.345e1,
-        0x17,
-        027,
-        "23",
-        "23.45",
-        "2.345e1",
-        "1000",
-        true,
-        false);
-
-for ($i = 0; $i < count($values); $i++) {
-    $res = sin($values[$i]);
+foreach ($values as $value) {
+    $res = sin($value);
     var_dump($res);
 }
 
 ?>
 --EXPECT--
-float(-0.8462204042)
-float(0.8462204042)
-float(-0.9937407102)
-float(0.9937407102)
-float(-0.8462204042)
-float(-0.8462204042)
-float(-0.8462204042)
-float(-0.9937407102)
-float(-0.9937407102)
-float(0.8268795405)
-float(0.8414709848)
-float(0)
+float(-0.8462204041751706)
+float(0.8462204041751706)
+float(-0.9937407101726596)
+float(-0.9937407101726596)
+float(0.9937407101726596)
+float(-0.5440211108893698)
+float(-0.7676858097635825)
+float(-0.9986084143974419)
