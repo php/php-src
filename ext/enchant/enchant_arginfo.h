@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9dd3fce23840ced1c265f8ec1dd3929298fdfe37 */
+ * Stub hash: 31974eb901477da53ede7476953d461d32f772ba */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_enchant_broker_init, 0, 0, EnchantBroker, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -224,6 +224,32 @@ static void register_enchant_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_enchant_dict_is_in_session_0_arg1, attribute_Deprecated_func_enchant_dict_is_in_session_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_enchant_dict_is_in_session_0->args[1].value, &attribute_Deprecated_func_enchant_dict_is_in_session_0_arg1);
 	attribute_Deprecated_func_enchant_dict_is_in_session_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_ENCHANT_MYSPELL = zend_hash_str_find_ptr(EG(zend_constants), "ENCHANT_MYSPELL", sizeof("ENCHANT_MYSPELL") - 1);
+
+	zend_attribute *attribute_Deprecated_const_ENCHANT_MYSPELL_0 = zend_add_global_constant_attribute(const_ENCHANT_MYSPELL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg0;
+	zend_string *attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg0, attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ENCHANT_MYSPELL_0->args[0].value, &attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg0);
+	attribute_Deprecated_const_ENCHANT_MYSPELL_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg1;
+	zend_string *attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg1_str = zend_string_init("as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated", strlen("as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg1, attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ENCHANT_MYSPELL_0->args[1].value, &attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg1);
+	attribute_Deprecated_const_ENCHANT_MYSPELL_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_ENCHANT_ISPELL = zend_hash_str_find_ptr(EG(zend_constants), "ENCHANT_ISPELL", sizeof("ENCHANT_ISPELL") - 1);
+
+	zend_attribute *attribute_Deprecated_const_ENCHANT_ISPELL_0 = zend_add_global_constant_attribute(const_ENCHANT_ISPELL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_ENCHANT_ISPELL_0_arg0;
+	zend_string *attribute_Deprecated_const_ENCHANT_ISPELL_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ENCHANT_ISPELL_0_arg0, attribute_Deprecated_const_ENCHANT_ISPELL_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ENCHANT_ISPELL_0->args[0].value, &attribute_Deprecated_const_ENCHANT_ISPELL_0_arg0);
+	attribute_Deprecated_const_ENCHANT_ISPELL_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_ENCHANT_ISPELL_0_arg1;
+	zend_string *attribute_Deprecated_const_ENCHANT_ISPELL_0_arg1_str = zend_string_init("as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated", strlen("as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ENCHANT_ISPELL_0_arg1, attribute_Deprecated_const_ENCHANT_ISPELL_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ENCHANT_ISPELL_0->args[1].value, &attribute_Deprecated_const_ENCHANT_ISPELL_0_arg1);
+	attribute_Deprecated_const_ENCHANT_ISPELL_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_EnchantBroker(void)

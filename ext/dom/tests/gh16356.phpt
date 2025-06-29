@@ -13,7 +13,7 @@ var_dump($e1, $e2);
 
 ?>
 --EXPECT--
-object(Dom\Element)#3 (30) {
+object(Dom\Element)#3 (31) {
   ["namespaceURI"]=>
   string(12) "urn:example1"
   ["prefix"]=>
@@ -29,6 +29,8 @@ object(Dom\Element)#3 (30) {
   ["classList"]=>
   string(22) "(object value omitted)"
   ["attributes"]=>
+  string(22) "(object value omitted)"
+  ["children"]=>
   string(22) "(object value omitted)"
   ["firstElementChild"]=>
   NULL
@@ -75,7 +77,7 @@ object(Dom\Element)#3 (30) {
   ["textContent"]=>
   string(0) ""
 }
-object(Dom\Element)#4 (30) {
+object(Dom\Element)#4 (31) {
   ["namespaceURI"]=>
   string(12) "urn:example2"
   ["prefix"]=>
@@ -91,6 +93,8 @@ object(Dom\Element)#4 (30) {
   ["classList"]=>
   string(22) "(object value omitted)"
   ["attributes"]=>
+  string(22) "(object value omitted)"
+  ["children"]=>
   string(22) "(object value omitted)"
   ["firstElementChild"]=>
   NULL
