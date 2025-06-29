@@ -119,6 +119,40 @@ int URI_FUNC(CompareRange)(
 
 
 
+UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
+		const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory) {
+	const int lenInChars = (int)(sourceRange->afterLast - sourceRange->first);
+	const int lenInBytes = lenInChars * sizeof(URI_CHAR);
+	URI_CHAR * dup = memory->malloc(memory, lenInBytes);
+	if (dup == NULL) {
+		return URI_FALSE;
+	}
+	memcpy(dup, sourceRange->first, lenInBytes);
+	destRange->first = dup;
+	destRange->afterLast = dup + lenInChars;
+
+	return URI_TRUE;
+}
+
+
+
+UriBool URI_FUNC(CopyRangeAsNeeded)(URI_TYPE(TextRange) * destRange,
+		const URI_TYPE(TextRange) * sourceRange, UriBool useSafe, UriMemoryManager * memory) {
+	if (sourceRange->first == NULL) {
+		destRange->first = NULL;
+		destRange->afterLast = NULL;
+	} else if (sourceRange->first == sourceRange->afterLast && useSafe) {
+		destRange->first = URI_FUNC(SafeToPointTo);
+		destRange->afterLast = URI_FUNC(SafeToPointTo);
+	} else {
+		return URI_FUNC(CopyRange)(destRange, sourceRange, memory);
+	}
+
+	return URI_TRUE;
+}
+
+
+
 UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri,
 		UriBool relative, UriBool pathOwned, UriMemoryManager * memory) {
 	URI_TYPE(PathSegment) * walker;
