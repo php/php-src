@@ -52,6 +52,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 
 - Abstract
   . Preprocessor macro SIZEOF_PTRDIFF_T has been removed.
+  . Preprocessor macro SIZEOF_INTMAX_T has been removed.
 
 - Windows build system changes
   . SAPI() and ADD_SOURCES() now suport the optional `duplicate_sources`
@@ -73,6 +74,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . Autoconf macro PHP_OUTPUT has been removed (use AC_CONFIG_FILES).
   . Autoconf macro PHP_TEST_BUILD has been removed (use AC_* macros).
   . Preprocessor macro HAVE_PTRDIFF_T has been removed.
+  . Preprocessor macro HAVE_INTMAX_T has been removed.
 
 ========================
 3. Module changes
