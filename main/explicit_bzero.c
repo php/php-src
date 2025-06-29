@@ -28,8 +28,10 @@
 
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
-#ifdef HAVE_EXPLICIT_MEMSET
-    explicit_memset(dst, 0, siz);
+#ifdef HAVE_MEMSET_EXPLICIT /* C23 */
+	memset_explicit(dst, 0, siz);
+#elif defined(HAVE_EXPLICIT_MEMSET) /* NetBSD-specific */
+	explicit_memset(dst, 0, siz);
 #elif defined(PHP_WIN32)
 	RtlSecureZeroMemory(dst, siz);
 #elif defined(__GNUC__)
