@@ -201,7 +201,9 @@ void init_executor(void) /* {{{ */
 
 #ifdef PHP_ASYNC_API
 	EG(shutdown_context) = (zend_shutdown_context_t) {
-		.is_started = NULL,
+		.is_started = false,
+		.coroutine = NULL,
+		.num_elements = 0,
 		.idx = 0
 	};
 #endif
