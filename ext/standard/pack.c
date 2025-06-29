@@ -388,7 +388,7 @@ too_few_args:
 		switch ((int) code) {
 			case 'h':
 			case 'H':
-				INC_OUTPUTPOS((arg + (arg % 2)) / 2,1)	/* 4 bit per arg */
+				INC_OUTPUTPOS((arg / 2) + (arg % 2),1)	/* 4 bit per arg */
 				break;
 
 			case 'a':

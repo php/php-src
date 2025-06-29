@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fix misleading errors in printf(). (nielsdos)
   . Fix RCN violations in array functions. (nielsdos)
+  . Fixed GH-18976 pack() overflow with h/H format and INT_MAX repeater value.
+    (David Carlier)
 
 - Streams:
   . Fixed GH-13264 (fgets() and stream_get_line() do not return false on filter
