@@ -8261,7 +8261,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(Z_STR_P(name));
 
-	if (zend_register_constant(&c) == FAILURE) {
+	if (zend_register_constant(&c) == NULL) {
 	}
 
 	FREE_OP1();
@@ -8274,7 +8274,7 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	USE_OPLINE
 	zval *name;
 	zval *val;
-	zend_constant c;
+	zend_constant c, *registered;
 
 	SAVE_OPLINE();
 	name  = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -8293,7 +8293,8 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(Z_STR_P(name));
 
-	if (zend_register_constant(&c) == FAILURE) {
+	registered = zend_register_constant(&c);
+	if (registered == NULL) {
 		FREE_OP1();
 		FREE_OP2();
 		/* two opcodes used, second one is the data with attributes */
@@ -8301,9 +8302,7 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	}
 
 	HashTable *attributes = Z_PTR_P(GET_OP_DATA_ZVAL_PTR(BP_VAR_R));
-	zend_constant *registered = zend_get_constant_ptr(c.name);
 	ZEND_ASSERT(attributes != NULL);
-	ZEND_ASSERT(registered != NULL);
 	zend_constant_add_attributes(registered, attributes);
 
 	FREE_OP1();
