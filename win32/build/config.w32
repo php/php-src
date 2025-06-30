@@ -411,5 +411,6 @@ ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible v
 ARG_ENABLE("async-api", "Disable async API support", "yes");
 
 if (PHP_ASYNC_API == "yes") {
+    AC_DEFINE('PHP_ASYNC_API', 1);
     ADD_SOURCES("Zend", "zend_async_API.c");
 }
