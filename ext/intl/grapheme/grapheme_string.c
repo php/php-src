@@ -84,7 +84,6 @@ PHP_FUNCTION(grapheme_strpos)
 	char *haystack, *needle;
 	size_t haystack_len, needle_len;
 	const char *found;
-	char *locale = "";
 	zend_long loffset = 0;
 	int32_t offset = 0;
 	size_t noffset = 0;
@@ -122,7 +121,7 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 	/* do utf16 part of the strpos */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* fIgnoreCase */, 0, locale /* last */ );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* fIgnoreCase */, 0, "" /* last */ );
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -148,7 +147,7 @@ PHP_FUNCTION(grapheme_stripos)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
-		Z_PARAM_STRING_OR_NULL(locale, locale_len)
+		Z_PARAM_STRING(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -272,7 +271,7 @@ PHP_FUNCTION(grapheme_strripos)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
-		Z_PARAM_STRING_OR_NULL(locale, locale_len)
+		Z_PARAM_STRING(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -553,7 +552,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 			Z_PARAM_STRING(needle, needle_len)
 			Z_PARAM_OPTIONAL
 			Z_PARAM_BOOL(part)
-			Z_PARAM_STRING_OR_NULL(locale, locale_len)
+			Z_PARAM_STRING(locale, locale_len)
 		ZEND_PARSE_PARAMETERS_END();
 	} else {
 		ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -561,7 +560,6 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 			Z_PARAM_STRING(needle, needle_len)
 			Z_PARAM_OPTIONAL
 			Z_PARAM_BOOL(part)
-			Z_PARAM_STRING_OR_NULL(locale, locale_len)
 		ZEND_PARSE_PARAMETERS_END();
 	}
 
@@ -944,7 +942,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 		Z_PARAM_LONG(cost_ins)
 		Z_PARAM_LONG(cost_rep)
 		Z_PARAM_LONG(cost_del)
-		Z_PARAM_STRING_OR_NULL(locale, locale_len)
+		Z_PARAM_STRING(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (cost_ins <= 0 || cost_ins > UINT_MAX / 4) {
