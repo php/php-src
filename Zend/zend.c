@@ -1335,7 +1335,11 @@ ZEND_API void zend_activate(void) /* {{{ */
 void zend_call_destructors(void) /* {{{ */
 {
 	zend_try {
+#ifdef PHP_ASYNC_API
+		shutdown_destructors_async();
+#else
 		shutdown_destructors();
+#endif
 	} zend_end_try();
 }
 /* }}} */
@@ -1351,6 +1355,12 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 
 	/* shutdown_executor() takes care of its own bailout handling */
 	shutdown_executor();
+
+#ifdef PHP_ASYNC_API
+	// The execution of the True Async API should end here,
+	// after the GC has been run.
+	ZEND_ASYNC_ENGINE_SHUTDOWN();
+#endif
 
 	zend_try {
 		zend_ini_deactivate();

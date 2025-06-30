@@ -199,6 +199,15 @@ void init_executor(void) /* {{{ */
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 
+#ifdef PHP_ASYNC_API
+	EG(shutdown_context) = (zend_shutdown_context_t) {
+		.is_started = false,
+		.coroutine = NULL,
+		.num_elements = 0,
+		.idx = 0
+	};
+#endif
+
 	zend_max_execution_timer_init();
 	zend_fiber_init();
 	zend_weakrefs_init();
@@ -266,6 +275,122 @@ void shutdown_destructors(void) /* {{{ */
 	} zend_end_try();
 }
 /* }}} */
+
+#ifdef PHP_ASYNC_API
+#include "zend_async_API.h"
+
+static void  shutdown_destructors_coroutine_dtor(zend_coroutine_t *coroutine)
+{
+	zend_shutdown_context_t *shutdown_context = &EG(shutdown_context);
+
+	if (shutdown_context->coroutine == coroutine) {
+		shutdown_context->coroutine = NULL;
+		zend_error(E_CORE_ERROR, "Shutdown destructors coroutine was not finished property");
+		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
+		shutdown_destructors();
+	}
+}
+
+static bool shutdown_destructors_context_switch_handler(
+	zend_coroutine_t *coroutine, 
+	bool is_enter, 
+	bool is_finishing
+) {
+	if (is_enter) {
+		return true;
+	}
+
+	if (is_finishing) {
+		return false;
+	}
+
+	zend_coroutine_t *shutdown_coroutine = ZEND_ASYNC_SPAWN_WITH_SCOPE_EX(ZEND_ASYNC_MAIN_SCOPE, 1);
+	shutdown_coroutine->internal_entry = shutdown_destructors_async;
+	shutdown_coroutine->extended_dispose = shutdown_destructors_coroutine_dtor;
+
+	return false;
+}
+
+void shutdown_destructors_async(void) /* {{{ */
+{
+	zend_coroutine_t *coroutine = ZEND_ASYNC_CURRENT_COROUTINE;
+	bool should_continue = false;
+
+	zend_shutdown_context_t *shutdown_context = &EG(shutdown_context);
+
+	if (coroutine == NULL) {
+		ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER(shutdown_destructors_context_switch_handler);
+	} else {
+		ZEND_COROUTINE_ADD_SWITCH_HANDLER(coroutine, shutdown_destructors_context_switch_handler);
+	}
+
+	HashTable *symbol_table = &EG(symbol_table);
+
+	if (false == shutdown_context->is_started) {
+		shutdown_context->is_started = true;
+		shutdown_context->coroutine = coroutine;
+		shutdown_context->num_elements = zend_hash_num_elements(symbol_table);
+		shutdown_context->idx = symbol_table->nNumUsed;
+	}
+
+	if (CG(unclean_shutdown)) {
+		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
+	}
+
+	zend_try {
+		do {
+			if (should_continue) {
+				shutdown_context->num_elements = zend_hash_num_elements(symbol_table);
+				shutdown_context->idx = symbol_table->nNumUsed;
+			} else {
+				should_continue = true;
+			}
+
+			while (shutdown_context->idx > 0) {
+
+				shutdown_context->idx--;
+
+				Bucket *p = symbol_table->arData + shutdown_context->idx;
+
+				if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) {
+					continue;
+				}
+				
+				zval *zv = &p->val;
+				if (Z_TYPE_P(zv) == IS_INDIRECT) {
+					zv = Z_INDIRECT_P(zv);
+				}
+				
+				if (Z_TYPE_P(zv) == IS_OBJECT && Z_REFCOUNT_P(zv) == 1) {
+					zend_hash_del_bucket(symbol_table, p);
+				}
+				
+				// If the coroutine has changed
+				if (coroutine != ZEND_ASYNC_CURRENT_COROUTINE) {
+					should_continue = false;
+					break;
+				}
+			}
+
+			if (false == should_continue) {
+				break;
+			}
+
+		} while (shutdown_context->num_elements != zend_hash_num_elements(symbol_table));
+
+		if (should_continue) {
+			shutdown_context->is_started = false;
+			shutdown_context->coroutine = NULL;
+			zend_objects_store_call_destructors_async(&EG(objects_store));
+		}
+	} zend_catch {
+		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
+		shutdown_destructors();
+		zend_bailout();
+	} zend_end_try();
+}
+/* }}} */
+#endif
 
 /* Free values held by the executor. */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)

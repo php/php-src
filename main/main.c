@@ -1935,6 +1935,10 @@ void php_request_shutdown(void *dummy)
 		zend_call_destructors();
 	} zend_end_try();
 
+#ifdef PHP_ASYNC_API
+	ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN();
+#endif
+
 	/* 3. Flush all output buffers */
 	zend_try {
 		php_output_end_all();
@@ -2184,6 +2188,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	gc_globals_ctor();
 #ifdef PHP_ASYNC_API
 	zend_async_globals_ctor();
+	zend_async_init_internal_context_api();
 #endif
 
 	zend_observer_startup();
@@ -2610,6 +2615,7 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 		}
 		#ifdef PHP_ASYNC_API
 			ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN();
+			ZEND_ASYNC_INITIALIZE;
 		#endif
 	} zend_catch {
 		result = false;

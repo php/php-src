@@ -26,7 +26,10 @@ zend_async_globals_t zend_async_globals_api = {0};
 
 #define ASYNC_THROW_ERROR(error) zend_throw_error(NULL, error);
 
-static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_provider)
+/* Forward declarations */
+static void zend_async_main_handlers_shutdown(void);
+
+static zend_coroutine_t * spawn(zend_async_scope_t *scope, zend_object *scope_provider, int32_t priority)
 {
 	ASYNC_THROW_ERROR("Async API is not enabled");
 	return NULL;
@@ -39,11 +42,29 @@ static void enqueue_coroutine(zend_coroutine_t *coroutine)
 	ASYNC_THROW_ERROR("Async API is not enabled");
 }
 
+static void engine_shutdown_stub(void) {}
+
+static void shutdown_stub(void) {}
+
+static zend_array* get_coroutines_stub(void) { return NULL; }
+
+static void add_microtask_stub(zend_async_microtask_t *microtask) {}
+
+static zend_array* get_awaiting_info_stub(zend_coroutine_t *coroutine) { return NULL; }
+
+static bool spawn_and_throw(zend_object *exception, zend_async_scope_t *scope, int32_t priority)
+{
+	ASYNC_THROW_ERROR("Async API is not enabled");
+	return false;
+}
+
 static zend_async_context_t * new_context(void)
 {
 	ASYNC_THROW_ERROR("Context API is not enabled");
 	return NULL;
 }
+
+/* Internal context stubs removed - using direct implementation */
 
 static zend_class_entry * get_class_ce(zend_async_class type)
 {
@@ -69,10 +90,12 @@ zend_async_suspend_t zend_async_suspend_fn = suspend;
 zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn = enqueue_coroutine;
 zend_async_resume_t zend_async_resume_fn = NULL;
 zend_async_cancel_t zend_async_cancel_fn = NULL;
-zend_async_shutdown_t zend_async_shutdown_fn = NULL;
-zend_async_get_coroutines_t zend_async_get_coroutines_fn = NULL;
-zend_async_add_microtask_t zend_async_add_microtask_fn = NULL;
-zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = NULL;
+zend_async_spawn_and_throw_t zend_async_spawn_and_throw_fn = spawn_and_throw;
+zend_async_shutdown_t zend_async_shutdown_fn = shutdown_stub;
+zend_async_engine_shutdown_t zend_async_engine_shutdown_fn = engine_shutdown_stub;
+zend_async_get_coroutines_t zend_async_get_coroutines_fn = get_coroutines_stub;
+zend_async_add_microtask_t zend_async_add_microtask_fn = add_microtask_stub;
+zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = get_awaiting_info_stub;
 zend_async_get_class_ce_t zend_async_get_class_ce_fn = get_class_ce;
 
 static zend_atomic_bool reactor_lock = {0};
@@ -91,15 +114,24 @@ zend_async_new_filesystem_event_t zend_async_new_filesystem_event_fn = NULL;
 
 zend_async_getnameinfo_t zend_async_getnameinfo_fn = NULL;
 zend_async_getaddrinfo_t zend_async_getaddrinfo_fn = NULL;
+zend_async_freeaddrinfo_t zend_async_freeaddrinfo_fn = NULL;
 
 zend_async_new_exec_event_t zend_async_new_exec_event_fn = NULL;
 zend_async_exec_t zend_async_exec_fn = NULL;
 
+/* Trigger Event API */
+zend_async_new_trigger_event_t zend_async_new_trigger_event_fn = NULL;
+
 static zend_string * thread_pool_module_name = NULL;
 zend_async_queue_task_t zend_async_queue_task_fn = NULL;
 
+/* Iterator API */
+zend_async_new_iterator_t zend_async_new_iterator_fn = NULL;
+
 /* Context API */
 zend_async_new_context_t zend_async_new_context_fn = new_context;
+
+/* Internal Context API - now uses direct functions */
 
 ZEND_API bool zend_async_is_enabled(void)
 {
@@ -168,6 +200,8 @@ void zend_async_globals_dtor(void)
 void zend_async_shutdown(void)
 {
 	zend_async_globals_dtor();
+	zend_async_internal_context_api_shutdown();
+	zend_async_main_handlers_shutdown();
 }
 
 ZEND_API int zend_async_get_api_version_number(void)
@@ -186,11 +220,14 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
     zend_async_resume_t resume_fn,
     zend_async_cancel_t cancel_fn,
+    zend_async_spawn_and_throw_t spawn_and_throw_fn,
     zend_async_shutdown_t shutdown_fn,
     zend_async_get_coroutines_t get_coroutines_fn,
     zend_async_add_microtask_t add_microtask_fn,
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_class_ce_t get_class_ce_fn
+    zend_async_get_class_ce_t get_class_ce_fn,
+    zend_async_new_iterator_t new_iterator_fn,
+    zend_async_engine_shutdown_t engine_shutdown_fn
 )
 {
 	if (zend_atomic_bool_exchange(&scheduler_lock, 1)) {
@@ -220,11 +257,14 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_enqueue_coroutine_fn = enqueue_coroutine_fn;
     zend_async_resume_fn = resume_fn;
     zend_async_cancel_fn = cancel_fn;
+    zend_async_spawn_and_throw_fn = spawn_and_throw_fn;
     zend_async_shutdown_fn = shutdown_fn;
     zend_async_get_coroutines_fn = get_coroutines_fn;
     zend_async_add_microtask_fn = add_microtask_fn;
 	zend_async_get_awaiting_info_fn = get_awaiting_info_fn;
 	zend_async_get_class_ce_fn = get_class_ce_fn;
+	zend_async_new_iterator_fn = new_iterator_fn;
+    zend_async_engine_shutdown_fn = engine_shutdown_fn;
 
 	zend_atomic_bool_store(&scheduler_lock, 0);
 
@@ -247,8 +287,10 @@ ZEND_API bool zend_async_reactor_register(
     zend_async_new_filesystem_event_t new_filesystem_event_fn,
     zend_async_getnameinfo_t getnameinfo_fn,
     zend_async_getaddrinfo_t getaddrinfo_fn,
+    zend_async_freeaddrinfo_t freeaddrinfo_fn,
     zend_async_new_exec_event_t new_exec_event_fn,
-    zend_async_exec_t exec_fn
+    zend_async_exec_t exec_fn,
+    zend_async_new_trigger_event_t new_trigger_event_fn
 )
 {
 	if (zend_atomic_bool_exchange(&reactor_lock, 1)) {
@@ -285,9 +327,12 @@ ZEND_API bool zend_async_reactor_register(
 
 	zend_async_getnameinfo_fn = getnameinfo_fn;
 	zend_async_getaddrinfo_fn = getaddrinfo_fn;
+	zend_async_freeaddrinfo_fn = freeaddrinfo_fn;
 
 	zend_async_new_exec_event_fn = new_exec_event_fn;
 	zend_async_exec_fn = exec_fn;
+
+	zend_async_new_trigger_event_fn = new_trigger_event_fn;
 
 	zend_atomic_bool_store(&reactor_lock, 0);
 
@@ -336,6 +381,47 @@ ZEND_API zend_string* zend_coroutine_gen_info(zend_coroutine_t *coroutine, char 
 	}
 }
 
+static void event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
+{
+	if (callback->ref_count > 1) {
+		// If the callback is still referenced, we cannot dispose it yet
+		callback->ref_count--;
+		return;
+	}
+
+	callback->ref_count = 0;
+	efree(callback);
+}
+
+ZEND_API zend_async_event_callback_t * zend_async_event_callback_new(zend_async_event_callback_fn callback, size_t size)
+{
+	zend_async_event_callback_t * event_callback = ecalloc(1, size == 0 ? size : sizeof(zend_async_event_callback_t));
+
+	event_callback->ref_count = 1;
+	event_callback->callback = callback;
+	event_callback->dispose = event_callback_dispose;
+
+	return event_callback;
+}
+
+static void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event);
+
+ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_callback_new(
+	zend_coroutine_t * coroutine, zend_async_event_callback_fn callback, size_t size
+)
+{
+	zend_coroutine_event_callback_t * coroutine_callback = ecalloc(
+		1, size != 0 ? size : sizeof(zend_coroutine_event_callback_t)
+	);
+
+	coroutine_callback->base.ref_count = 1;
+	coroutine_callback->base.callback = callback;
+	coroutine_callback->coroutine = coroutine;
+	coroutine_callback->base.dispose = coroutine_event_callback_dispose;
+
+	return coroutine_callback;
+}
+
 //////////////////////////////////////////////////////////////////////
 /* Waker API */
 //////////////////////////////////////////////////////////////////////
@@ -343,10 +429,18 @@ ZEND_API zend_string* zend_coroutine_gen_info(zend_coroutine_t *coroutine, char 
 static void waker_events_dtor(zval *item)
 {
 	zend_async_waker_trigger_t * trigger = Z_PTR_P(item);
+	zend_async_event_t *event = trigger->event;
+	trigger->event = NULL;
 
-	trigger->event->del_callback(trigger->event, trigger->callback);
-
-	ZEND_ASYNC_EVENT_RELEASE(trigger->event);
+	if (event != NULL) {
+		event->del_callback(event, trigger->callback);
+		//
+		// At this point, we explicitly stop the event because it is no longer being listened to by our handlers.
+		// However, this does not mean the object is destroyed—it may remain in memory if something still holds a reference to it.
+		//
+		event->stop(event);
+		ZEND_ASYNC_EVENT_RELEASE(event);
+	}
 
 	efree(trigger);
 }
@@ -441,12 +535,17 @@ ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine)
 	efree(waker);
 }
 
-static void event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
+static void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
 {
 	if (callback->ref_count > 1) {
 		// If the callback is still referenced, we cannot dispose it yet
 		callback->ref_count--;
 		return;
+	} else if (UNEXPECTED(callback->ref_count == 0)) {
+		// Circular free from destructor
+		return;
+	} else {
+		ZEND_ASSERT(callback->ref_count > 0 && "Callback ref_count must be greater than 0. Memory corruption detected.");
 	}
 
 	callback->ref_count = 0;
@@ -508,13 +607,19 @@ ZEND_API void zend_async_resume_when(
 		event_callback = emalloc(sizeof(zend_coroutine_event_callback_t));
 		event_callback->base.ref_count = 1;
 		event_callback->base.callback = callback;
-		event_callback->base.dispose = event_callback_dispose;
+		event_callback->base.dispose = coroutine_event_callback_dispose;
 	}
 
 	// Set up the default dispose function if not set
 	if (event_callback->base.dispose == NULL) {
-		event_callback->base.dispose = event_callback_dispose;
+		event_callback->base.dispose = coroutine_event_callback_dispose;
 	}
+
+	if (event_callback->base.ref_count == 0) {
+		event_callback->base.ref_count = 1;
+	}
+
+	ZEND_ASSERT(event_callback->base.ref_count > 0 && "Callback ref_count must be greater than 0.");
 
 	event_callback->coroutine = coroutine;
 	event->add_callback(event, &event_callback->base);
@@ -639,6 +744,47 @@ ZEND_API zend_async_waker_t * zend_async_waker_new_with_timeout(
 	return waker;
 }
 
+ZEND_API bool zend_async_waker_apply_error(
+	zend_async_waker_t *waker, zend_object *error, bool tranfer_error, bool override, bool for_cancellation
+)
+{
+	if (UNEXPECTED(waker == NULL)) {
+		if (tranfer_error) {
+			OBJ_RELEASE(error);
+		}
+		return false;
+	}
+
+	if (EXPECTED(waker->error == NULL)) {
+		waker->error = error;
+		if (false == tranfer_error) {
+			GC_ADDREF(error);
+		}
+		return true;
+	}
+
+	if (for_cancellation && instanceof_function(waker->error->ce, zend_ce_cancellation_exception)) {
+		// If the waker already has a cancellation exception, we do not override it
+		if (tranfer_error) {
+			OBJ_RELEASE(error);
+		}
+		return false;
+	}
+
+	if (override) {
+		zend_exception_set_previous(error, waker->error);
+		waker->error = error;
+	} else {
+		zend_exception_set_previous(waker->error, error);
+	}
+
+	if (false == tranfer_error) {
+		GC_ADDREF(error);
+	}
+
+	return true;
+}
+
 //////////////////////////////////////////////////////////////////////
 /* Waker API end */
 //////////////////////////////////////////////////////////////////////
@@ -725,3 +871,566 @@ ZEND_API ZEND_COLD zend_object * zend_async_throw_timeout(const char *format, co
 //////////////////////////////////////////////////////////////////////
 /* Exception API end */
 //////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+/// ### Internal Coroutine Context
+///
+/// The internal coroutine context is intended for use in PHP-extensions.
+/// The flow is as follows:
+///
+/// 1. The extension registers a unique numeric index by `zend_async_internal_context_key_alloc`,
+/// described by a static C string.
+/// 2. The **TrueAsync API** verifies the uniqueness of the mapping between the index and the C string address.
+/// 3. The extension uses `zend_async_internal_context_*` functions to get, set, or unset keys.
+/// 4. Keys are automatically destroyed when the coroutine completes.
+//////////////////////////////////////////////////////////////////////
+
+// Global variables for internal context key management
+static HashTable *zend_async_context_key_names = NULL;
+
+#ifdef ZTS
+static MUTEX_T zend_async_context_mutex = NULL;
+#endif
+
+void zend_async_init_internal_context_api(void) 
+{
+#ifdef ZTS
+    zend_async_context_mutex = tsrm_mutex_alloc();
+#endif
+    // Initialize key names table - stores string pointers directly
+    zend_async_context_key_names = pemalloc(sizeof(HashTable), 1);
+    zend_hash_init(zend_async_context_key_names, 8, NULL, NULL, 1);  // No destructor - we don't own the strings
+}
+
+uint32_t zend_async_internal_context_key_alloc(const char *key_name) 
+{
+#ifdef ZTS
+    tsrm_mutex_lock(zend_async_context_mutex);
+#endif
+    
+    // Check if this string address already has a key
+    const char **existing_ptr;
+    ZEND_HASH_FOREACH_NUM_KEY_PTR(zend_async_context_key_names, zend_ulong existing_key, existing_ptr) {
+        if (*existing_ptr == key_name) {
+            // Found existing key for this string address
+#ifdef ZTS
+            tsrm_mutex_unlock(zend_async_context_mutex);
+#endif
+            return (uint32_t)existing_key;
+        }
+    } ZEND_HASH_FOREACH_END();
+    
+    // Use next available index as key
+    uint32_t key = zend_hash_num_elements(zend_async_context_key_names) + 1;
+    
+    // Store string pointer directly
+    zend_hash_index_add_ptr(zend_async_context_key_names, key, (void*)key_name);
+    
+#ifdef ZTS
+    tsrm_mutex_unlock(zend_async_context_mutex);
+#endif
+    
+    return key;
+}
+
+const char* zend_async_internal_context_key_name(uint32_t key) 
+{
+    if (zend_async_context_key_names == NULL) {
+        return NULL;
+    }
+    
+#ifdef ZTS
+    tsrm_mutex_lock(zend_async_context_mutex);
+#endif
+    
+    const char *name = zend_hash_index_find_ptr(zend_async_context_key_names, key);
+    
+#ifdef ZTS
+    tsrm_mutex_unlock(zend_async_context_mutex);
+#endif
+    
+    return name;
+}
+
+zval* zend_async_internal_context_find(zend_coroutine_t *coroutine, uint32_t key)
+{
+    if (coroutine == NULL || coroutine->internal_context == NULL) {
+        return NULL;
+    }
+    
+    return zend_hash_index_find(coroutine->internal_context, key);
+}
+
+void zend_async_internal_context_set(zend_coroutine_t *coroutine, uint32_t key, zval *value) 
+{
+    if (coroutine == NULL) {
+        return;
+    }
+    
+    // Initialize internal_context if needed
+    if (coroutine->internal_context == NULL) {
+        coroutine->internal_context = zend_new_array(0);
+    }
+    
+    // Set the value
+    zval copy;
+    ZVAL_COPY(&copy, value);
+    zend_hash_index_update(coroutine->internal_context, key, &copy);
+}
+
+bool zend_async_internal_context_unset(zend_coroutine_t *coroutine, uint32_t key) 
+{
+    if (coroutine == NULL || coroutine->internal_context == NULL) {
+        return false;
+    }
+    
+    return zend_hash_index_del(coroutine->internal_context, key) == SUCCESS;
+}
+
+void zend_async_coroutine_internal_context_dispose(zend_coroutine_t *coroutine)
+{
+    if (coroutine->internal_context != NULL) {
+    	zend_array_release(coroutine->internal_context);
+        coroutine->internal_context = NULL;
+    }
+}
+
+void zend_async_internal_context_api_shutdown(void)
+{
+#ifdef ZTS
+    if (zend_async_context_mutex != NULL) {
+        tsrm_mutex_lock(zend_async_context_mutex);
+    }
+#endif
+    
+    if (zend_async_context_key_names != NULL) {
+        zend_hash_destroy(zend_async_context_key_names);
+        pefree(zend_async_context_key_names, 1);
+        zend_async_context_key_names = NULL;
+    }
+    
+#ifdef ZTS
+    if (zend_async_context_mutex != NULL) {
+        tsrm_mutex_unlock(zend_async_context_mutex);
+        tsrm_mutex_free(zend_async_context_mutex);
+        zend_async_context_mutex = NULL;
+    }
+#endif
+}
+
+void zend_async_coroutine_internal_context_init(zend_coroutine_t *coroutine)
+{
+    coroutine->internal_context = NULL;
+}
+//////////////////////////////////////////////////////////////////////
+/* Internal Context API end */
+//////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+/* Callback Vector Implementation */
+//////////////////////////////////////////////////////////////////////
+
+/* Private helper functions for iterator management - static inline for performance */
+
+/* Register the single iterator - prevents concurrent iterations */
+static zend_always_inline bool
+zend_async_callbacks_register_iterator(zend_async_callbacks_vector_t *vector, uint32_t *iterator_index)
+{
+	if (vector->current_iterator != NULL) {
+		// Concurrent iteration detected - this is not allowed
+		return false;
+	}
+	
+	vector->current_iterator = iterator_index;
+	return true;
+}
+
+/* Unregister the iterator after iteration completes */
+static zend_always_inline void
+zend_async_callbacks_unregister_iterator(zend_async_callbacks_vector_t *vector)
+{
+	vector->current_iterator = NULL;
+}
+
+/* Adjust the active iterator when an element is removed */
+static zend_always_inline void
+zend_async_callbacks_adjust_iterator(zend_async_callbacks_vector_t *vector, uint32_t removed_index)
+{
+	if (vector->current_iterator != NULL && *vector->current_iterator > removed_index) {
+		(*vector->current_iterator)--;
+	}
+}
+
+/* Public API implementations */
+
+/* Remove a specific callback; order is NOT preserved, but iterator is safely adjusted */
+ZEND_API void
+zend_async_callbacks_remove(zend_async_event_t *event, zend_async_event_callback_t *callback)
+{
+	zend_async_callbacks_vector_t *vector = &event->callbacks;
+
+	for (uint32_t i = 0; i < vector->length; ++i) {
+		if (vector->data[i] == callback) {
+			// Adjust the active iterator before performing the removal
+			zend_async_callbacks_adjust_iterator(vector, i);
+			
+			// O(1) removal: move last element to current position
+			vector->data[i] = vector->length > 0 ? vector->data[--vector->length] : NULL;
+			callback->dispose(callback, event);
+			return;
+		}
+	}
+}
+
+/* Call all callbacks with safe iterator tracking to handle concurrent modifications */
+ZEND_API void
+zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception, bool from_handler)
+{
+	// Protect from self-deletion by incrementing ref count before calling callbacks
+	ZEND_ASYNC_EVENT_ADD_REF(event);
+	// Automatically clear exception handled flag
+	ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(event);
+
+	// If pre-notify returns false, we stop notifying callbacks
+	if (false == from_handler && event->notify_handler != NULL) {
+		event->notify_handler(event, result, exception);
+		ZEND_ASYNC_EVENT_RELEASE(event);
+		return;
+	}
+
+	if (event->callbacks.data == NULL || event->callbacks.length == 0) {
+		ZEND_ASYNC_EVENT_RELEASE(event);
+		return;
+	}
+
+	zend_async_callbacks_vector_t *vector = &event->callbacks;
+	uint32_t current_index = 0;
+	
+	// Register iterator - prevents concurrent iterations
+	if (!zend_async_callbacks_register_iterator(vector, &current_index)) {
+		zend_error(E_CORE_WARNING,
+			"Concurrent callback iteration detected - nested notify() calls are not allowed"
+		);
+		ZEND_ASYNC_EVENT_RELEASE(event);
+		return;
+	}
+
+	// Iterate through callbacks with safe index tracking
+	while (current_index < vector->length) {
+		// Store current callback (it might be moved during execution)
+		zend_async_event_callback_t *callback = vector->data[current_index];
+
+		// Move to next callback
+		// Note: current_index may have been adjusted by zend_async_callbacks_adjust_iterator
+		// if a callback was removed during this iteration
+		current_index++;
+
+		// Execute callback
+		callback->callback(event, callback, result, exception);
+		
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			break;
+		}
+	}
+
+	// Unregister iterator
+	zend_async_callbacks_unregister_iterator(vector);
+	
+	// Dispose the reference we added at the beginning - this may trigger disposal if ref count reaches 0
+	ZEND_ASYNC_EVENT_RELEASE(event);
+}
+
+/* Call all callbacks and close the event (Like future) */
+ZEND_API void
+zend_async_callbacks_notify_and_close(zend_async_event_t *event, void *result, zend_object *exception)
+{
+	event->stop(event);
+	ZEND_ASYNC_EVENT_SET_CLOSED(event);
+	zend_async_callbacks_notify(event, result, exception, false);
+}
+
+/* Free the vector's memory including iterator tracking */
+ZEND_API void
+zend_async_callbacks_free(zend_async_event_t *event)
+{
+	if (event->callbacks.data == NULL) {
+		return;
+	}
+
+	zend_async_callbacks_vector_t *vector = &event->callbacks;
+	uint32_t current_index = 0;
+	
+	// Register iterator - prevents concurrent iterations
+	if (!zend_async_callbacks_register_iterator(vector, &current_index)) {
+		zend_error(E_CORE_WARNING,
+			"Concurrent callback iteration detected - nested free() calls are not allowed"
+		);
+		return;
+	}
+
+	// Dispose all callbacks
+	while (current_index < vector->length) {
+		zend_async_event_callback_t *callback = vector->data[current_index];
+		current_index++;
+		callback->dispose(callback, event);
+	}
+
+	// Free memory
+	efree(vector->data);
+
+	// Unregister iterator
+	zend_async_callbacks_unregister_iterator(vector);
+
+	// Reset all fields
+	vector->data            = NULL;
+	vector->length          = 0;
+	vector->capacity        = 0;
+	vector->current_iterator = NULL;
+}
+
+///////////////////////////////////////////////////////////////
+/// Socket Listening API Registration
+///////////////////////////////////////////////////////////////
+/* Socket listening stubs */
+static zend_async_listen_event_t* socket_listen_stub(const char *host, int port, int backlog, size_t extra_size)
+{
+	ASYNC_THROW_ERROR("Socket listening API is not enabled");
+	return NULL;
+}
+
+/* Socket listening function pointers */
+ZEND_API zend_async_socket_listen_t zend_async_socket_listen_fn = socket_listen_stub;
+
+/* Registration lock for socket listening */
+static zend_atomic_bool socket_listening_lock = {0};
+static char *socket_listening_module_name = NULL;
+
+ZEND_API bool zend_async_socket_listening_register(
+	char *module,
+	bool allow_override,
+	zend_async_socket_listen_t socket_listen_fn
+)
+{
+	if (zend_atomic_bool_exchange(&socket_listening_lock, 1)) {
+		return false;
+	}
+
+	if (socket_listening_module_name == module) {
+		return true;
+	}
+
+	if (socket_listening_module_name != NULL && false == allow_override) {
+		zend_error(
+			E_CORE_ERROR, "The module %s is trying to override Socket Listening API, which was registered by the module %s.",
+			module, socket_listening_module_name
+		);
+		return false;
+	}
+
+	socket_listening_module_name = module;
+	zend_async_socket_listen_fn = socket_listen_fn;
+
+	return true;
+}
+
+///////////////////////////////////////////////////////////////
+/// Coroutine Switch Handlers Implementation
+///////////////////////////////////////////////////////////////
+
+ZEND_API void zend_coroutine_switch_handlers_init(zend_coroutine_t *coroutine)
+{
+	if (coroutine->switch_handlers) {
+		return; /* Already initialized */
+	}
+	
+	coroutine->switch_handlers = emalloc(sizeof(zend_coroutine_switch_handlers_vector_t));
+	coroutine->switch_handlers->length = 0;
+	coroutine->switch_handlers->capacity = 0;
+	coroutine->switch_handlers->data = NULL;
+	coroutine->switch_handlers->in_execution = false;
+}
+
+ZEND_API void zend_coroutine_switch_handlers_destroy(zend_coroutine_t *coroutine)
+{
+	if (!coroutine->switch_handlers) {
+		return;
+	}
+	
+	if (coroutine->switch_handlers->data) {
+		efree(coroutine->switch_handlers->data);
+	}
+	efree(coroutine->switch_handlers);
+	coroutine->switch_handlers = NULL;
+}
+
+ZEND_API uint32_t zend_coroutine_add_switch_handler(
+	zend_coroutine_t *coroutine,
+	zend_coroutine_switch_handler_fn handler)
+{
+	if (!handler) {
+		zend_error(E_WARNING, "Cannot add NULL switch handler");
+		return 0;
+	}
+	
+	if (!coroutine->switch_handlers) {
+		zend_coroutine_switch_handlers_init(coroutine);
+	}
+	
+	zend_coroutine_switch_handlers_vector_t *vector = coroutine->switch_handlers;
+	
+	if (vector->in_execution) {
+		zend_error(E_WARNING, "Cannot add switch handler during handler execution");
+		return 0;
+	}
+	
+	/* Expand array if needed */
+	if (vector->length == vector->capacity) {
+		vector->capacity = vector->capacity ? vector->capacity * 2 : 4;
+		vector->data = safe_erealloc(vector->data, 
+		                           vector->capacity,
+		                           sizeof(zend_coroutine_switch_handler_t), 
+		                           0);
+	}
+	
+	/* Add handler */
+	uint32_t index = vector->length;
+	vector->data[index].handler = handler;
+	vector->length++;
+	
+	return index;
+}
+
+ZEND_API bool zend_coroutine_remove_switch_handler(
+	zend_coroutine_t *coroutine,
+	uint32_t handler_index)
+{
+	if (!coroutine->switch_handlers) {
+		return false;
+	}
+	
+	zend_coroutine_switch_handlers_vector_t *vector = coroutine->switch_handlers;
+	
+	if (vector->in_execution) {
+		zend_error(E_WARNING, "Cannot remove switch handler during handler execution");
+		return false;
+	}
+	
+	if (handler_index >= vector->length) {
+		return false;
+	}
+	
+	/* Shift elements to remove the handler */
+	for (uint32_t i = handler_index; i < vector->length - 1; i++) {
+		vector->data[i] = vector->data[i + 1];
+	}
+	
+	vector->length--;
+	return true;
+}
+
+ZEND_API void zend_coroutine_call_switch_handlers(
+	zend_coroutine_t *coroutine,
+	bool is_enter,
+	bool is_finishing)
+{
+	if (!coroutine->switch_handlers || coroutine->switch_handlers->length == 0) {
+		return;
+	}
+	
+	zend_coroutine_switch_handlers_vector_t *vector = coroutine->switch_handlers;
+	
+	/* Set execution protection flag */
+	vector->in_execution = true;
+	
+	/* Call all handlers and remove those that return false */
+	uint32_t write_index = 0;
+	for (uint32_t read_index = 0; read_index < vector->length; read_index++) {
+		bool keep_handler = vector->data[read_index].handler(coroutine, is_enter, is_finishing);
+		
+		if (keep_handler) {
+			/* Keep this handler - move it to write position if needed */
+			if (write_index != read_index) {
+				vector->data[write_index] = vector->data[read_index];
+			}
+			write_index++;
+		}
+		/* If keep_handler is false, we skip copying this handler (effectively removing it) */
+	}
+	
+	/* Update length to reflect removed handlers */
+	vector->length = write_index;
+	
+	/* Clear execution protection flag */
+	vector->in_execution = false;
+	
+	/* Free vector memory if no handlers remain */
+	if (vector->length == 0 && vector->data != NULL) {
+		coroutine->switch_handlers = NULL;
+		efree(vector->data);
+		vector->data = NULL;
+		vector->capacity = 0;
+		efree(vector);
+	}
+}
+
+///////////////////////////////////////////////////////////////
+/// Global Main Coroutine Switch Handlers Implementation
+///////////////////////////////////////////////////////////////
+
+static zend_coroutine_switch_handlers_vector_t global_main_coroutine_start_handlers = {0, 0, NULL, false};
+
+ZEND_API void zend_async_add_main_coroutine_start_handler(
+	zend_coroutine_switch_handler_fn handler)
+{
+	zend_coroutine_switch_handlers_vector_t *vector = &global_main_coroutine_start_handlers;
+
+	/* Expand vector if needed */
+	if (vector->length >= vector->capacity) {
+		uint32_t new_capacity = vector->capacity ? vector->capacity * 2 : 4;
+		vector->data = safe_perealloc(vector->data, new_capacity, sizeof(zend_coroutine_switch_handler_t), 0, 1);
+		vector->capacity = new_capacity;
+	}
+
+	/* Add handler */
+	vector->data[vector->length].handler = handler;
+	vector->length++;
+}
+
+ZEND_API void zend_async_call_main_coroutine_start_handlers(zend_coroutine_t *main_coroutine)
+{
+	zend_coroutine_switch_handlers_vector_t *global_vector = &global_main_coroutine_start_handlers;
+
+	if (global_vector->length == 0) {
+		return;
+	}
+
+	/* Initialize main coroutine switch handlers if needed */
+	if (main_coroutine->switch_handlers == NULL) {
+		zend_coroutine_switch_handlers_init(main_coroutine);
+	}
+
+	/* Copy all global handlers to main coroutine first */
+	for (uint32_t i = 0; i < global_vector->length; i++) {
+		zend_coroutine_add_switch_handler(
+			main_coroutine,
+			global_vector->data[i].handler
+		);
+	}
+
+	/* Now call the standard switch handlers function which will handle removal logic */
+	zend_coroutine_call_switch_handlers(main_coroutine, true, false);
+}
+
+/* Global cleanup function - called during PHP shutdown */
+static void zend_async_main_handlers_shutdown(void)
+{
+	zend_coroutine_switch_handlers_vector_t *vector = &global_main_coroutine_start_handlers;
+	
+	if (vector->data != NULL) {
+		pefree(vector->data, 1);
+		vector->data = NULL;
+		vector->length = 0;
+		vector->capacity = 0;
+		vector->in_execution = false;
+	}
+}
