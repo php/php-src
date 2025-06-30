@@ -23,6 +23,9 @@ on:
       run_macos_arm64:
         required: true
         type: boolean
+      run_freebsd_zts:
+        required: true
+        type: boolean
       ubuntu_version:
         required: true
         type: string
@@ -1056,6 +1059,8 @@ jobs:
       fail-fast: false
       matrix:
         zts: [true, false]
+        exclude:
+          - zts: ${{ !inputs.run_freebsd_zts && true || '*never*' }}
     name: "FREEBSD_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     steps:
