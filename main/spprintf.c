@@ -313,11 +313,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					break;
 				case 'j':
 					fmt++;
-#if SIZEOF_INTMAX_T
 					modifier = LM_INTMAX_T;
-#else
-					modifier = LM_SIZE_T;
-#endif
 					break;
 				case 't':
 					fmt++;
@@ -394,11 +390,9 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							i_num = (int64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							i_num = (int64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
 						case LM_PTRDIFF_T:
 							i_num = (int64_t) va_arg(ap, ptrdiff_t);
 							break;
@@ -435,11 +429,9 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 								i_num = (int64_t) va_arg(ap, long long int);
 								break;
 #endif
-#if SIZEOF_INTMAX_T
 							case LM_INTMAX_T:
 								i_num = (int64_t) va_arg(ap, intmax_t);
 								break;
-#endif
 							case LM_PTRDIFF_T:
 								i_num = (int64_t) va_arg(ap, ptrdiff_t);
 								break;
@@ -478,11 +470,9 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
 						case LM_PTRDIFF_T:
 							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;
@@ -516,11 +506,9 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 							ui_num = (uint64_t) va_arg(ap, unsigned long long int);
 							break;
 #endif
-#if SIZEOF_INTMAX_T
 						case LM_INTMAX_T:
 							ui_num = (uint64_t) va_arg(ap, uintmax_t);
 							break;
-#endif
 						case LM_PTRDIFF_T:
 							ui_num = (uint64_t) va_arg(ap, ptrdiff_t);
 							break;

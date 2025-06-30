@@ -113,9 +113,7 @@ END_EXTERN_C()
 
 typedef enum {
 	LM_STD = 0,
-#if SIZEOF_INTMAX_T
 	LM_INTMAX_T,
-#endif
 	LM_PTRDIFF_T,
 #if SIZEOF_LONG_LONG
 	LM_LONG_LONG,

@@ -452,7 +452,6 @@ AC_CHECK_TYPES([socklen_t], [], [], [
 ])
 
 dnl These are defined elsewhere than stdio.h.
-PHP_CHECK_SIZEOF([intmax_t], [0])
 PHP_CHECK_SIZEOF([ssize_t], [8])
 
 dnl Check stdint types (must be after header check).
