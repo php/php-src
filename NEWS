@@ -74,6 +74,7 @@ PHP                                                                        NEWS
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
   . Added Dom\Element::insertAdjacentHTML(). (nielsdos)
+  . Added $children property to ParentNode implementations. (nielsdos)
 
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)

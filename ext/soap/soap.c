@@ -21,6 +21,7 @@
 #endif
 #include "php_soap.h"
 #include "ext/session/php_session.h"
+#include "zend_attributes.h"
 #include "soap_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"

@@ -24,10 +24,6 @@
 #include "collator_convert.h"
 #include "intl_convert.h"
 
-#if !defined(HAVE_PTRDIFF_T) && !defined(_PTRDIFF_T_DEFINED)
-typedef zend_long ptrdiff_t;
-#endif
-
 /**
  * Declare 'index' which will point to sort key in sort key
  * buffer.

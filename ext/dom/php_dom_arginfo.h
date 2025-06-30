@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0fcee2fa666dc88faf084578dde157409a6f5594 */
+ * Stub hash: 2119512797f6d51d9835660cd0eccd3ba83417a9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1870,6 +1870,20 @@ static void register_php_dom_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("Dom\\NAMESPACE_ERR", NAMESPACE_ERR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("Dom\\VALIDATION_ERR", VALIDATION_ERR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("Dom\\HTML_NO_DEFAULT_NS", DOM_HTML_NO_DEFAULT_NS, CONST_PERSISTENT);
+
+	zend_constant *const_DOM_PHP_ERR = zend_hash_str_find_ptr(EG(zend_constants), "DOM_PHP_ERR", sizeof("DOM_PHP_ERR") - 1);
+
+	zend_attribute *attribute_Deprecated_const_DOM_PHP_ERR_0 = zend_add_global_constant_attribute(const_DOM_PHP_ERR, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_DOM_PHP_ERR_0_arg0;
+	zend_string *attribute_Deprecated_const_DOM_PHP_ERR_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_DOM_PHP_ERR_0_arg0, attribute_Deprecated_const_DOM_PHP_ERR_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_DOM_PHP_ERR_0->args[0].value, &attribute_Deprecated_const_DOM_PHP_ERR_0_arg0);
+	attribute_Deprecated_const_DOM_PHP_ERR_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_DOM_PHP_ERR_0_arg1;
+	zend_string *attribute_Deprecated_const_DOM_PHP_ERR_0_arg1_str = zend_string_init("as it is no longer used", strlen("as it is no longer used"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_DOM_PHP_ERR_0_arg1, attribute_Deprecated_const_DOM_PHP_ERR_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_DOM_PHP_ERR_0->args[1].value, &attribute_Deprecated_const_DOM_PHP_ERR_0_arg1);
+	attribute_Deprecated_const_DOM_PHP_ERR_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_entry_DOMNode)
@@ -3011,31 +3025,12 @@ static zend_class_entry *register_class_Dom_Element(zend_class_entry *class_entr
 	zend_declare_typed_property(class_entry, property_tagName_name, &property_tagName_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_tagName_name);
 
-	zval property_id_default_value;
-	ZVAL_UNDEF(&property_id_default_value);
-	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
-	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_id_name);
-
-	zval property_className_default_value;
-	ZVAL_UNDEF(&property_className_default_value);
-	zend_string *property_className_name = zend_string_init("className", sizeof("className") - 1, 1);
-	zend_declare_typed_property(class_entry, property_className_name, &property_className_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_className_name);
-
-	zval property_classList_default_value;
-	ZVAL_UNDEF(&property_classList_default_value);
-	zend_string *property_classList_name = zend_string_init("classList", sizeof("classList") - 1, 1);
-	zend_string *property_classList_class_Dom_TokenList = zend_string_init("Dom\\TokenList", sizeof("Dom\\TokenList")-1, 1);
-	zend_declare_typed_property(class_entry, property_classList_name, &property_classList_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classList_class_Dom_TokenList, 0, 0));
-	zend_string_release(property_classList_name);
-
-	zval property_attributes_default_value;
-	ZVAL_UNDEF(&property_attributes_default_value);
-	zend_string *property_attributes_name = zend_string_init("attributes", sizeof("attributes") - 1, 1);
-	zend_string *property_attributes_class_Dom_NamedNodeMap = zend_string_init("Dom\\\116amedNodeMap", sizeof("Dom\\\116amedNodeMap")-1, 1);
-	zend_declare_typed_property(class_entry, property_attributes_name, &property_attributes_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_attributes_class_Dom_NamedNodeMap, 0, 0));
-	zend_string_release(property_attributes_name);
+	zval property_children_default_value;
+	ZVAL_UNDEF(&property_children_default_value);
+	zend_string *property_children_name = zend_string_init("children", sizeof("children") - 1, 1);
+	zend_string *property_children_class_Dom_HTMLCollection = zend_string_init("Dom\\HTMLCollection", sizeof("Dom\\HTMLCollection")-1, 1);
+	zend_declare_typed_property(class_entry, property_children_name, &property_children_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_children_class_Dom_HTMLCollection, 0, 0));
+	zend_string_release(property_children_name);
 
 	zval property_firstElementChild_default_value;
 	ZVAL_UNDEF(&property_firstElementChild_default_value);
@@ -3070,6 +3065,32 @@ static zend_class_entry *register_class_Dom_Element(zend_class_entry *class_entr
 	zend_string *property_nextElementSibling_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
 	zend_declare_typed_property(class_entry, property_nextElementSibling_name, &property_nextElementSibling_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_nextElementSibling_class_Dom_Element, 0, MAY_BE_NULL));
 	zend_string_release(property_nextElementSibling_name);
+
+	zval property_id_default_value;
+	ZVAL_UNDEF(&property_id_default_value);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
+	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_id_name);
+
+	zval property_className_default_value;
+	ZVAL_UNDEF(&property_className_default_value);
+	zend_string *property_className_name = zend_string_init("className", sizeof("className") - 1, 1);
+	zend_declare_typed_property(class_entry, property_className_name, &property_className_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_className_name);
+
+	zval property_classList_default_value;
+	ZVAL_UNDEF(&property_classList_default_value);
+	zend_string *property_classList_name = zend_string_init("classList", sizeof("classList") - 1, 1);
+	zend_string *property_classList_class_Dom_TokenList = zend_string_init("Dom\\TokenList", sizeof("Dom\\TokenList")-1, 1);
+	zend_declare_typed_property(class_entry, property_classList_name, &property_classList_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classList_class_Dom_TokenList, 0, 0));
+	zend_string_release(property_classList_name);
+
+	zval property_attributes_default_value;
+	ZVAL_UNDEF(&property_attributes_default_value);
+	zend_string *property_attributes_name = zend_string_init("attributes", sizeof("attributes") - 1, 1);
+	zend_string *property_attributes_class_Dom_NamedNodeMap = zend_string_init("Dom\\\116amedNodeMap", sizeof("Dom\\\116amedNodeMap")-1, 1);
+	zend_declare_typed_property(class_entry, property_attributes_name, &property_attributes_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_attributes_class_Dom_NamedNodeMap, 0, 0));
+	zend_string_release(property_attributes_name);
 
 	zval property_innerHTML_default_value;
 	ZVAL_UNDEF(&property_innerHTML_default_value);
@@ -3295,6 +3316,13 @@ static zend_class_entry *register_class_Dom_DocumentFragment(zend_class_entry *c
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_Node, 0);
 	zend_class_implements(class_entry, 1, class_entry_Dom_ParentNode);
 
+	zval property_children_default_value;
+	ZVAL_UNDEF(&property_children_default_value);
+	zend_string *property_children_name = zend_string_init("children", sizeof("children") - 1, 1);
+	zend_string *property_children_class_Dom_HTMLCollection = zend_string_init("Dom\\HTMLCollection", sizeof("Dom\\HTMLCollection")-1, 1);
+	zend_declare_typed_property(class_entry, property_children_name, &property_children_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_children_class_Dom_HTMLCollection, 0, 0));
+	zend_string_release(property_children_name);
+
 	zval property_firstElementChild_default_value;
 	ZVAL_UNDEF(&property_firstElementChild_default_value);
 	zend_string *property_firstElementChild_name = zend_string_init("firstElementChild", sizeof("firstElementChild") - 1, 1);
@@ -3386,6 +3414,33 @@ static zend_class_entry *register_class_Dom_Document(zend_class_entry *class_ent
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_Node, ZEND_ACC_ABSTRACT);
 	zend_class_implements(class_entry, 1, class_entry_Dom_ParentNode);
 
+	zval property_children_default_value;
+	ZVAL_UNDEF(&property_children_default_value);
+	zend_string *property_children_name = zend_string_init("children", sizeof("children") - 1, 1);
+	zend_string *property_children_class_Dom_HTMLCollection = zend_string_init("Dom\\HTMLCollection", sizeof("Dom\\HTMLCollection")-1, 1);
+	zend_declare_typed_property(class_entry, property_children_name, &property_children_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_children_class_Dom_HTMLCollection, 0, 0));
+	zend_string_release(property_children_name);
+
+	zval property_firstElementChild_default_value;
+	ZVAL_UNDEF(&property_firstElementChild_default_value);
+	zend_string *property_firstElementChild_name = zend_string_init("firstElementChild", sizeof("firstElementChild") - 1, 1);
+	zend_string *property_firstElementChild_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
+	zend_declare_typed_property(class_entry, property_firstElementChild_name, &property_firstElementChild_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_firstElementChild_class_Dom_Element, 0, MAY_BE_NULL));
+	zend_string_release(property_firstElementChild_name);
+
+	zval property_lastElementChild_default_value;
+	ZVAL_UNDEF(&property_lastElementChild_default_value);
+	zend_string *property_lastElementChild_name = zend_string_init("lastElementChild", sizeof("lastElementChild") - 1, 1);
+	zend_string *property_lastElementChild_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
+	zend_declare_typed_property(class_entry, property_lastElementChild_name, &property_lastElementChild_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_lastElementChild_class_Dom_Element, 0, MAY_BE_NULL));
+	zend_string_release(property_lastElementChild_name);
+
+	zval property_childElementCount_default_value;
+	ZVAL_UNDEF(&property_childElementCount_default_value);
+	zend_string *property_childElementCount_name = zend_string_init("childElementCount", sizeof("childElementCount") - 1, 1);
+	zend_declare_typed_property(class_entry, property_childElementCount_name, &property_childElementCount_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_childElementCount_name);
+
 	zval property_implementation_default_value;
 	ZVAL_UNDEF(&property_implementation_default_value);
 	zend_string *property_implementation_name = zend_string_init("implementation", sizeof("implementation") - 1, 1);
@@ -3436,26 +3491,6 @@ static zend_class_entry *register_class_Dom_Document(zend_class_entry *class_ent
 	zend_string *property_documentElement_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
 	zend_declare_typed_property(class_entry, property_documentElement_name, &property_documentElement_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_documentElement_class_Dom_Element, 0, MAY_BE_NULL));
 	zend_string_release(property_documentElement_name);
-
-	zval property_firstElementChild_default_value;
-	ZVAL_UNDEF(&property_firstElementChild_default_value);
-	zend_string *property_firstElementChild_name = zend_string_init("firstElementChild", sizeof("firstElementChild") - 1, 1);
-	zend_string *property_firstElementChild_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
-	zend_declare_typed_property(class_entry, property_firstElementChild_name, &property_firstElementChild_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_firstElementChild_class_Dom_Element, 0, MAY_BE_NULL));
-	zend_string_release(property_firstElementChild_name);
-
-	zval property_lastElementChild_default_value;
-	ZVAL_UNDEF(&property_lastElementChild_default_value);
-	zend_string *property_lastElementChild_name = zend_string_init("lastElementChild", sizeof("lastElementChild") - 1, 1);
-	zend_string *property_lastElementChild_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
-	zend_declare_typed_property(class_entry, property_lastElementChild_name, &property_lastElementChild_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_lastElementChild_class_Dom_Element, 0, MAY_BE_NULL));
-	zend_string_release(property_lastElementChild_name);
-
-	zval property_childElementCount_default_value;
-	ZVAL_UNDEF(&property_childElementCount_default_value);
-	zend_string *property_childElementCount_name = zend_string_init("childElementCount", sizeof("childElementCount") - 1, 1);
-	zend_declare_typed_property(class_entry, property_childElementCount_name, &property_childElementCount_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_VIRTUAL, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_childElementCount_name);
 
 	zval property_body_default_value;
 	ZVAL_UNDEF(&property_body_default_value);

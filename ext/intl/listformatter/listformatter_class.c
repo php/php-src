@@ -135,9 +135,9 @@ PHP_METHOD(IntlListFormatter, format)
     zval *val;
 
     ZEND_HASH_FOREACH_VAL(ht, val) {
-        zend_string *str_val;
+        zend_string *str_val, *tmp_str;
         
-        str_val = zval_get_string(val);
+        str_val = zval_get_tmp_string(val, &tmp_str);
         
         // Convert PHP string to UTF-16
         UChar *ustr = NULL;
@@ -145,7 +145,7 @@ PHP_METHOD(IntlListFormatter, format)
         UErrorCode status = U_ZERO_ERROR;
         
         intl_convert_utf8_to_utf16(&ustr, &ustr_len, ZSTR_VAL(str_val), ZSTR_LEN(str_val), &status);
-        zend_string_release(str_val);
+        zend_tmp_string_release(tmp_str);
 
         if (U_FAILURE(status)) {
             // We can't use goto cleanup because items and itemLengths are incompletely allocated

@@ -4533,7 +4533,7 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             // Allow for parsing extended types like callable(string):mixed in docblocks
-            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\])*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]<>]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\]|<(?&inparens)>)*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
             preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }

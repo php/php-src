@@ -79,7 +79,7 @@ array(%d) {
     ["addr"]=>
     int(1)
     ["opcode"]=>
-    string(13) "InitCoroutine"
+    string(%d) "%s"
     ["p1"]=>
     int(3)
     ["p2"]=>
@@ -87,7 +87,7 @@ array(%d) {
     ["p3"]=>
     int(2)
     ["p4"]=>
-    NULL
+    %s
     ["p5"]=>
     int(0)
     ["comment"]=>
@@ -368,7 +368,7 @@ array(1) {
     ["parent"]=>
     int(0)
     ["notused"]=>
-    int(0)
+    int(%d)
     ["detail"]=>
     string(17) "SCAN test_explain"
   }

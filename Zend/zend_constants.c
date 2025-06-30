@@ -505,11 +505,11 @@ static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_consta
 	return ret;
 }
 
-ZEND_API zend_result zend_register_constant(zend_constant *c)
+ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 {
 	zend_string *lowercase_name = NULL;
 	zend_string *name;
-	zend_result ret = SUCCESS;
+	zend_constant *ret = NULL;
 	bool persistent = (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) != 0;
 
 #if 0
@@ -539,7 +539,7 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 	/* Check if the user is trying to define any special constant */
 	if (zend_string_equals_literal(name, "__COMPILER_HALT_OFFSET__")
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
-		|| zend_hash_add_constant(EG(zend_constants), name, c) == NULL
+		|| (ret = zend_hash_add_constant(EG(zend_constants), name, c)) == NULL
 	) {
 		zend_error(E_WARNING, "Constant %s already defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
@@ -550,7 +550,6 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 		if (!persistent) {
 			zval_ptr_dtor_nogc(&c->value);
 		}
-		ret = FAILURE;
 	}
 	if (lowercase_name) {
 		zend_string_release(lowercase_name);

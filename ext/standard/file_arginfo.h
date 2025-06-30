@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e9a566d5ef96f781074027b1b3ff1824d0208b47 */
+ * Stub hash: dde0b40909dbadb565d898338834de7fa689c5e9 */
 
 static void register_file_symbols(int module_number)
 {
@@ -118,4 +118,31 @@ static void register_file_symbols(int module_number)
 #if defined(HAVE_FNMATCH) && defined(FNM_CASEFOLD)
 	REGISTER_LONG_CONSTANT("FNM_CASEFOLD", FNM_CASEFOLD, CONST_PERSISTENT);
 #endif
+
+	zend_constant *const_FILE_TEXT = zend_hash_str_find_ptr(EG(zend_constants), "FILE_TEXT", sizeof("FILE_TEXT") - 1);
+
+	zend_attribute *attribute_Deprecated_const_FILE_TEXT_0 = zend_add_global_constant_attribute(const_FILE_TEXT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_FILE_TEXT_0_arg0;
+	zend_string *attribute_Deprecated_const_FILE_TEXT_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_FILE_TEXT_0_arg0, attribute_Deprecated_const_FILE_TEXT_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILE_TEXT_0->args[0].value, &attribute_Deprecated_const_FILE_TEXT_0_arg0);
+	attribute_Deprecated_const_FILE_TEXT_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_FILE_TEXT_0_arg1;
+	zend_string *attribute_Deprecated_const_FILE_TEXT_0_arg1_str = zend_string_init("as the constant has no effect", strlen("as the constant has no effect"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_FILE_TEXT_0_arg1, attribute_Deprecated_const_FILE_TEXT_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILE_TEXT_0->args[1].value, &attribute_Deprecated_const_FILE_TEXT_0_arg1);
+	attribute_Deprecated_const_FILE_TEXT_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_FILE_BINARY = zend_hash_str_find_ptr(EG(zend_constants), "FILE_BINARY", sizeof("FILE_BINARY") - 1);
+
+	zend_attribute *attribute_Deprecated_const_FILE_BINARY_0 = zend_add_global_constant_attribute(const_FILE_BINARY, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_FILE_BINARY_0_arg0;
+	zend_string *attribute_Deprecated_const_FILE_BINARY_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_FILE_BINARY_0_arg0, attribute_Deprecated_const_FILE_BINARY_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILE_BINARY_0->args[0].value, &attribute_Deprecated_const_FILE_BINARY_0_arg0);
+	attribute_Deprecated_const_FILE_BINARY_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_FILE_BINARY_0_arg1;
+	zend_string *attribute_Deprecated_const_FILE_BINARY_0_arg1_str = zend_string_init("as the constant has no effect", strlen("as the constant has no effect"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_FILE_BINARY_0_arg1, attribute_Deprecated_const_FILE_BINARY_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILE_BINARY_0->args[1].value, &attribute_Deprecated_const_FILE_BINARY_0_arg1);
+	attribute_Deprecated_const_FILE_BINARY_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }

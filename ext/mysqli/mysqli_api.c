@@ -327,7 +327,7 @@ PHP_FUNCTION(mysqli_data_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-		if (getThis()) {
+		if (hasThis()) {
 			zend_throw_error(NULL, "mysqli_result::data_seek() cannot be used in MYSQLI_USE_RESULT mode");
 		} else {
 			zend_throw_error(NULL, "mysqli_data_seek() cannot be used in MYSQLI_USE_RESULT mode");
@@ -855,7 +855,7 @@ PHP_FUNCTION(mysqli_free_result)
 /* {{{ Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
 {
-	if (getThis()) {
+	if (hasThis()) {
 		if (zend_parse_parameters_none() == FAILURE) {
 			RETURN_THROWS();
 		}
