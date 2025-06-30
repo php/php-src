@@ -561,7 +561,7 @@ static zend_always_inline void
 zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t *callback)
 {
 	if (event->callbacks.data == NULL) {
-		event->callbacks.data = safe_emalloc(4, sizeof(zend_async_event_callback_t *), 0);
+		event->callbacks.data = (zend_async_event_callback_t **)safe_emalloc(4, sizeof(zend_async_event_callback_t *), 0);
 		event->callbacks.capacity = 4;
 	}
 
@@ -569,7 +569,7 @@ zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t
 
 	if (vector->length == vector->capacity) {
 		vector->capacity = vector->capacity ? vector->capacity * 2 : 4;
-		vector->data = safe_erealloc(vector->data,
+		vector->data = (zend_async_event_callback_t **)safe_erealloc(vector->data,
 									 vector->capacity,
 									 sizeof(zend_async_event_callback_t *),
 									 0);
@@ -770,13 +770,13 @@ zend_async_scope_add_child(zend_async_scope_t *parent_scope, zend_async_scope_t 
 	child_scope->parent_scope = parent_scope;
 
 	if (vector->data == NULL) {
-		vector->data = safe_emalloc(4, sizeof(zend_async_scope_t *), 0);
+		vector->data = (zend_async_scope_t **)safe_emalloc(4, sizeof(zend_async_scope_t *), 0);
 		vector->capacity = 4;
 	}
 
 	if (vector->length == vector->capacity) {
 		vector->capacity *= 2;
-		vector->data = safe_erealloc(vector->data, vector->capacity, sizeof(zend_async_scope_t *), 0);
+		vector->data = (zend_async_scope_t **)safe_erealloc(vector->data, vector->capacity, sizeof(zend_async_scope_t *), 0);
 	}
 
 	vector->data[vector->length++] = child_scope;
