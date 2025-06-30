@@ -251,6 +251,7 @@ PHP                                                                        NEWS
     zval for uninitialized typed properties). (nielsdos)
   . Fixed bug GH-15766 (ReflectionClass::toString() should have better output
     for enums). (DanielEScherzer)
+  . Added ReflectionProperty::getMangledName() method. (alexandre-daubois)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap
