@@ -574,7 +574,7 @@ void php_oci_column_hash_dtor(zval *data)
 	}
 
 	if (column->descid && !GC_DELREF(column->descid)) {
-		zend_list_close(column->descid);
+		zend_list_free(column->descid);
 	}
 
 	if (column->data) {
