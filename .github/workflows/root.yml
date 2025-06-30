@@ -60,6 +60,7 @@ jobs:
         (((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 5) || matrix.branch.version[0] >= 9) && '24.04')
         || '22.04' }}
       windows_version: '2022'
+      vs_crt_version: ${{ ((matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 4) && 'vs17') || 'vs16' }}
       skip_laravel: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
       skip_symfony: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
       skip_wordpress: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
