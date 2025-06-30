@@ -20,7 +20,9 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 $info = curl_getinfo($ch);
 var_dump(isset($info['conn_id']));
-var_dump($info['posttransfer_time_us'] === -1);
+var_dump($info['conn_id'] === 0);
+var_dump("1. debug");
+var_dump($info['conn_id']);
 
 $result = curl_exec($ch);
 
@@ -29,6 +31,19 @@ var_dump(isset($info['conn_id']));
 var_dump(is_int($info['conn_id']));
 var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === $info['conn_id']);
 var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === -1);
+var_dump("2. debug");
+var_dump($info['conn_id']);
+
+
+
+curl_setopt($ch, CURLOPT_URL, "{$host}/get.inc?test=file");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+$result = curl_exec($ch);
+
+$info = curl_getinfo($ch);
+var_dump("3. debug");
+var_dump($info['conn_id']);
+
 
 ?>
 --EXPECT--
