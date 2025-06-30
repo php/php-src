@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Curl:
   . Fix memory leaks when returning refcounted value from curl callback.
     (nielsdos)
+  . Remove incorrect string release. (nielsdos)
 
 - LDAP:
   . Fixed GH-18902 ldap_exop/ldap_exop_sync assert triggered on empty
