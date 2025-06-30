@@ -14,5 +14,8 @@ $x = $c . $x;
 ob_end_clean();
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: main(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
+
+Deprecated: ob_end_clean(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
 Done
