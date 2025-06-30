@@ -914,6 +914,15 @@ non_empty_argument_list:
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
+/* `clone_argument_list` is necessary to resolve a parser ambiguity (shift-reduce conflict)
+ * of `clone($expr)`, which could either be parsed as a function call with `$expr` as the first
+ * argument or as a use of the `clone` language construct with an expression with useless
+ * parenthesis. Both would be valid and result in the same AST / the same semantics.
+ * `clone_argument_list` is defined in a way that an `expr` in the first position needs to
+ * be followed by a `,` which is not valid syntax for a parenthesized `expr`, ensuring
+ * that calling `clone()` with a single unnamed parameter is handled by the language construct
+ * syntax.
+ */
 clone_argument_list:
 		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_clone_argument_list possible_comma ')' { $$ = $2; }
