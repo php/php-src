@@ -29,7 +29,7 @@
 #include "php_uri_common.h"
 #include "php_lexbor.h"
 #include "php_uri_arginfo.h"
-#include "uriparser/src/UriConfig.h"
+#include "uriparser/UriBase.h"
 
 zend_class_entry *uri_whatwg_url_ce;
 zend_object_handlers uri_whatwg_uri_object_handlers;
@@ -39,8 +39,6 @@ zend_class_entry *uri_invalid_uri_exception_ce;
 zend_class_entry *uri_whatwg_invalid_url_exception_ce;
 zend_class_entry *uri_whatwg_url_validation_error_type_ce;
 zend_class_entry *uri_whatwg_url_validation_error_ce;
-
-#define URIPARSER_VERSION PACKAGE_VERSION
 
 static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_REQUIRED("lexbor")
@@ -652,7 +650,11 @@ static PHP_MINFO_FUNCTION(uri)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "uri support", "active");
-	php_info_print_table_row(2, "uriparser library version", URIPARSER_VERSION);
+#ifdef URI_STATIC_BUILD
+	php_info_print_table_row(2, "uriparser bundled library version", URI_VER_ANSI);
+#else
+	php_info_print_table_row(2, "uriparser system library version", URI_VER_ANSI);
+#endif
 	php_info_print_table_end();
 }
 
