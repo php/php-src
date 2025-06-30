@@ -640,7 +640,11 @@ static int dom_xml_serialize_comment_node(xmlOutputBufferPtr out, xmlNodePtr com
 		const xmlChar *ptr = comment->content;
 		if (ptr != NULL) {
 			TRY(dom_xml_check_char_production(ptr));
-			if (strstr((const char *) ptr, "--") != NULL || ptr[strlen((const char *) ptr) - 1] == '-') {
+			if (strstr((const char *) ptr, "--") != NULL) {
+				return -1;
+			}
+			size_t len = strlen((const char *) ptr);
+			if (len > 0 && ptr[len - 1] == '-') {
 				return -1;
 			}
 		}
