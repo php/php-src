@@ -32,6 +32,9 @@ on:
       windows_version:
         required: true
         type: string
+      vs_crt_version:
+        required: true
+        type: string
       skip_laravel:
         required: true
         type: boolean
@@ -1034,7 +1037,7 @@ jobs:
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
-      PHP_BUILD_CRT: ${{ inputs.windows_version == '2022' && 'vs17' || 'vs16' }}
+      PHP_BUILD_CRT: ${{ inputs.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
