@@ -80,6 +80,10 @@ try {
 } catch (ValueError $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
+
+echo '--- Locale string ---' . \PHP_EOL;
+var_dump(grapheme_stripos("i", "\u{0130}", 0, "tr_TR"));
+var_dump(grapheme_stripos("i", "\u{0130}", 0, "en_US"));
 ?>
 --EXPECTF--
 --- Equal ---
@@ -126,3 +130,6 @@ int(0)
 grapheme_levenshtein(): Argument #3 ($insertion_cost) must be greater than 0 and less than or equal to %d
 grapheme_levenshtein(): Argument #4 ($replacement_cost) must be greater than 0 and less than or equal to %d
 grapheme_levenshtein(): Argument #5 ($deletion_cost) must be greater than 0 and less than or equal to %d
+--- Locale string ---
+int(0)
+bool(false)
