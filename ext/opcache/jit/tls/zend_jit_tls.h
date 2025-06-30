@@ -16,6 +16,9 @@
  *  +----------------------------------------------------------------------+
  */
 
+#ifndef ZEND_JIT_TLS_H
+#define ZEND_JIT_TLS_H
+
 #include "Zend/zend_types.h"
 
 #include <stdint.h>
@@ -33,3 +36,5 @@ void *zend_jit_tsrm_ls_cache_address(
 	size_t module_index,
 	size_t module_offset
 );
+
+#endif /* ZEND_JIT_TLS_H */
