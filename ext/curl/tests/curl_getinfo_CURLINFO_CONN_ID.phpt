@@ -20,18 +20,20 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 $info = curl_getinfo($ch);
 var_dump(isset($info['conn_id']));
+var_dump($info['posttransfer_time_us'] === -1);
 
 $result = curl_exec($ch);
 
 $info = curl_getinfo($ch);
 var_dump(isset($info['conn_id']));
 var_dump(is_int($info['conn_id']));
-var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === $info['CURLINFO_CONN_ID']);
-var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) > 0);
+var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === $info['conn_id']);
+var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === -1);
 
 ?>
 --EXPECT--
-bool(false)
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
