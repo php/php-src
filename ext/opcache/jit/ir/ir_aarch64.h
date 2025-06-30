@@ -146,7 +146,6 @@ enum _ir_reg {
 #define IR_REG_FP_ARG6  IR_REG_V5
 #define IR_REG_FP_ARG7  IR_REG_V6
 #define IR_REG_FP_ARG8  IR_REG_V7
-#define IR_MAX_REG_ARGS 16
 #define IR_SHADOW_ARGS  0
 
 # define IR_REGSET_SCRATCH \
@@ -157,6 +156,41 @@ enum _ir_reg {
 # define IR_REGSET_PRESERVED \
 	(IR_REGSET_INTERVAL(IR_REG_X19, IR_REG_X30) \
 	| IR_REGSET_INTERVAL(IR_REG_V8, IR_REG_V15))
+
+#if __has_attribute(preserve_none)
+
+# define IR_HAVE_PRESERVE_NONE 1
+
+/* https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/AArch64/AArch64CallingConvention.td#L541 */
+# define IR_REG_INT_PNARGS  23
+# define IR_REG_INT_PNARG1  IR_REG_X20
+# define IR_REG_INT_PNARG2  IR_REG_X21
+# define IR_REG_INT_PNARG3  IR_REG_X22
+# define IR_REG_INT_PNARG4  IR_REG_X23
+# define IR_REG_INT_PNARG5  IR_REG_X24
+# define IR_REG_INT_PNARG6  IR_REG_X25
+# define IR_REG_INT_PNARG7  IR_REG_X26
+# define IR_REG_INT_PNARG8  IR_REG_X27
+# define IR_REG_INT_PNARG9  IR_REG_X28
+# define IR_REG_INT_PNARG10 IR_REG_X0
+# define IR_REG_INT_PNARG11 IR_REG_X1
+# define IR_REG_INT_PNARG12 IR_REG_X2
+# define IR_REG_INT_PNARG13 IR_REG_X3
+# define IR_REG_INT_PNARG14 IR_REG_X4
+# define IR_REG_INT_PNARG15 IR_REG_X5
+# define IR_REG_INT_PNARG16 IR_REG_X6
+# define IR_REG_INT_PNARG17 IR_REG_X7
+# define IR_REG_INT_PNARG18 IR_REG_X10
+# define IR_REG_INT_PNARG19 IR_REG_X11
+# define IR_REG_INT_PNARG20 IR_REG_X12
+# define IR_REG_INT_PNARG21 IR_REG_X13
+# define IR_REG_INT_PNARG22 IR_REG_X14
+# define IR_REG_INT_PNARG23 IR_REG_X9
+
+# define IR_MAX_REG_ARGS 31 /* IR_REG_INT_PNARGS + IR_REG_FP_ARGS */
+#else /* !preserve_none */
+# define IR_MAX_REG_ARGS 16 /* IR_REG_INT_ARGS + IR_REG_FP_ARGS */
+#endif
 
 #ifndef __APPLE__
 typedef struct _ir_va_list {

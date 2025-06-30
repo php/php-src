@@ -84,12 +84,20 @@ enum _ir_reg {
 	IR_REG_NUM,
 };
 
-#define IR_REG_GP_FIRST IR_REG_R0
-#define IR_REG_FP_FIRST IR_REG_XMM0
-#define IR_REG_GP_LAST  (IR_REG_FP_FIRST - 1)
-#define IR_REG_FP_LAST  (IR_REG_NUM - 1)
-#define IR_REG_SCRATCH  (IR_REG_NUM)        /* special name for regset */
-#define IR_REG_ALL      (IR_REG_NUM + 1)    /* special name for regset */
+#define IR_REG_GP_FIRST     IR_REG_R0
+#define IR_REG_FP_FIRST     IR_REG_XMM0
+#define IR_REG_GP_LAST      (IR_REG_FP_FIRST - 1)
+#define IR_REG_FP_LAST      (IR_REG_NUM - 1)
+#define IR_REG_SCRATCH      (IR_REG_NUM)        /* special name for regset */
+#define IR_REG_ALL          (IR_REG_NUM + 1)    /* special name for regset */
+#define IR_REG_PRESERVED    (IR_REG_NUM + 2)    /* special name for IR_REGSET_PRESERVED */
+#define IR_REG_PNPRESERVED  (IR_REG_NUM + 3)    /* special name for IR_REGSET_PNPRESERVED */
+#define IR_REG_FIXED_SAVED  (IR_REG_NUM + 4)    /* special name for fixed_save_regset */
+#define IR_REG_ARGS         (IR_REG_NUM + 5)    /* special name for IR_REGSET_ARGS */
+#define IR_REG_FCARGS       (IR_REG_NUM + 6)    /* special name for IR_REGSET_FCARGS */
+#define IR_REG_PNARGS       (IR_REG_NUM + 7)    /* special name for IR_REGSET_PNARGS */
+
+#define IR_REG_SPECIAL_NUM 8
 
 #define IR_REGSET_64BIT 0
 
@@ -148,6 +156,7 @@ enum _ir_reg {
 # define IR_REG_FP_RET1  IR_REG_XMM0
 # define IR_REG_INT_ARGS 6
 # define IR_REG_FP_ARGS  8
+# define IR_MAX_REG_ARGS 20 /* IR_REG_INT_PNARGS + IR_REG_FP_ARGS */
 # define IR_REG_INT_ARG1 IR_REG_RDI
 # define IR_REG_INT_ARG2 IR_REG_RSI
 # define IR_REG_INT_ARG3 IR_REG_RDX
@@ -162,7 +171,6 @@ enum _ir_reg {
 # define IR_REG_FP_ARG6  IR_REG_XMM5
 # define IR_REG_FP_ARG7  IR_REG_XMM6
 # define IR_REG_FP_ARG8  IR_REG_XMM7
-# define IR_MAX_REG_ARGS 14
 # define IR_SHADOW_ARGS  0
 
 # define IR_REG_VARARG_FP_REGS IR_REG_RAX /* hidden argument to specify the number of vector registers used */
@@ -177,6 +185,41 @@ enum _ir_reg {
 	(IR_REGSET(IR_REG_RBX) \
 	| IR_REGSET(IR_REG_RBP) \
 	| IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15))
+
+# define IR_REGSET_ARGS \
+	(IR_REGSET(IR_REG_RDI) | IR_REGSET(IR_REG_RSI) | IR_REGSET(IR_REG_RDX) \
+	| IR_REGSET(IR_REG_RCX) | IR_REGSET(IR_REG_R8) | IR_REGSET(IR_REG_R9) \
+	| IR_REGSET_INTERVAL(IR_REG_XMM0, IR_REG_XMM7))
+
+# define IR_HAVE_PRESERVE_NONE 1
+
+/* https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1029 */
+# define IR_REG_INT_PNARGS  12
+# define IR_REG_INT_PNARG1  IR_REG_R12
+# define IR_REG_INT_PNARG2  IR_REG_R13
+# define IR_REG_INT_PNARG3  IR_REG_R14
+# define IR_REG_INT_PNARG4  IR_REG_R15
+# define IR_REG_INT_PNARG5  IR_REG_RDI
+# define IR_REG_INT_PNARG6  IR_REG_RSI
+# define IR_REG_INT_PNARG7  IR_REG_RDX
+# define IR_REG_INT_PNARG8  IR_REG_RCX
+# define IR_REG_INT_PNARG9  IR_REG_R8
+# define IR_REG_INT_PNARG10 IR_REG_R9
+# define IR_REG_INT_PNARG11 IR_REG_R11
+# define IR_REG_INT_PNARG12 IR_REG_RAX
+
+/* https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1183 */
+# define IR_REGSET_PNPRESERVED IR_REGSET(IR_REG_RBP)
+
+# define IR_REGSET_PNSCRATCH \
+	(IR_REGSET_DIFFERENCE(IR_REGSET_INTERVAL(IR_REG_GP_FIRST, IR_REG_GP_LAST), IR_REGSET_PNPRESERVED) \
+	| IR_REGSET_FP)
+
+# define IR_REGSET_PNARGS \
+	(IR_REGSET_INTERVAL(IR_REG_R12, IR_REG_R15) | IR_REGSET(IR_REG_RDI) \
+	| IR_REGSET(IR_REG_RSI) | IR_REGSET(IR_REG_RDX) | IR_REGSET(IR_REG_RCX) \
+	| IR_REGSET(IR_REG_R8) | IR_REGSET(IR_REG_R9) | IR_REGSET(IR_REG_R11) \
+	| IR_REGSET(IR_REG_RAX) | IR_REGSET_INTERVAL(IR_REG_XMM0, IR_REG_XMM7))
 
 typedef struct _ir_va_list {
 	uint32_t  gp_offset;

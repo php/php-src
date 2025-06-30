@@ -67,6 +67,9 @@ static const int8_t _ir_fp_reg_params[IR_REG_FP_ARGS];
 #else
 static const int8_t *_ir_fp_reg_params;
 #endif
+#ifdef IR_HAVE_PRESERVE_NONE
+static const int8_t _ir_int_pn_reg_params[IR_REG_INT_PNARGS];
+#endif
 
 static const ir_proto_t *ir_call_proto(const ir_ctx *ctx, ir_insn *insn)
 {
@@ -98,12 +101,14 @@ bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 				if (func->proto) {
 					const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
 
+					IR_CHECK_CALLING_CONV(proto->flags);
 					return (proto->flags & IR_FASTCALL_FUNC) != 0;
 				}
 			}
 		} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
 			const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
 
+			IR_CHECK_CALLING_CONV(proto->flags);
 			return (proto->flags & IR_FASTCALL_FUNC) != 0;
 		}
 		return 0;
@@ -117,12 +122,46 @@ bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 }
 #endif
 
+#ifdef IR_HAVE_PRESERVE_NONE
+bool ir_is_preserve_none(const ir_ctx *ctx, const ir_insn *insn)
+{
+	if (IR_IS_CONST_REF(insn->op2)) {
+		const ir_insn *func = &ctx->ir_base[insn->op2];
+
+		if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
+			if (func->proto) {
+				const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
+
+				IR_CHECK_CALLING_CONV(proto->flags);
+				return (proto->flags & IR_PRESERVE_NONE_FUNC) != 0;
+			}
+		}
+	} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
+		const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
+
+		IR_CHECK_CALLING_CONV(proto->flags);
+		return (proto->flags & IR_PRESERVE_NONE_FUNC) != 0;
+	}
+	return 0;
+}
+#else
+bool ir_is_preserve_none(const ir_ctx *ctx, const ir_insn *insn)
+{
+	return 0;
+}
+#endif
+
 bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn)
 {
 	const ir_proto_t *proto = ir_call_proto(ctx, insn);
 
 	if (proto) {
-		return (proto->flags & IR_VARARG_FUNC) != 0;
+		if (proto->flags & IR_VARARG_FUNC) {
+#ifdef IR_HAVE_PRESERVE_NONE
+			IR_ASSERT(!(proto->flags & IR_PRESERVE_NONE_FUNC) && "preserve_none does not support var args");
+#endif
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -158,6 +197,12 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 		fp_reg_params_count = IR_REG_FP_FCARGS;
 		int_reg_params = _ir_int_fc_reg_params;
 		fp_reg_params = _ir_fp_fc_reg_params;
+	}
+#endif
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
 	}
 #endif
 
@@ -216,6 +261,12 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 		fp_reg_params_count = IR_REG_FP_FCARGS;
 		int_reg_params = _ir_int_fc_reg_params;
 		fp_reg_params = _ir_fp_fc_reg_params;
+	}
+#endif
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ir_is_preserve_none(ctx, insn)) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
 	}
 #endif
 

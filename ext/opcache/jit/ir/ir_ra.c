@@ -610,8 +610,8 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 	len = ir_bitset_len(ctx->vregs_count + 1);
 	bb_live = ir_mem_malloc((ctx->cfg_blocks_count + 1) * len * sizeof(ir_bitset_base_t));
 
-	/* vregs + tmp + fixed + SRATCH + ALL */
-	ctx->live_intervals = ir_mem_calloc(ctx->vregs_count + 1 + IR_REG_NUM + 2, sizeof(ir_live_interval*));
+	/* vregs + tmp + fixed + special */
+	ctx->live_intervals = ir_mem_calloc(ctx->vregs_count + 1 + IR_REG_NUM + IR_REG_SPECIAL_NUM, sizeof(ir_live_interval*));
 
 #ifdef IR_DEBUG
 	visited = ir_bitset_malloc(ctx->cfg_blocks_count + 1);
@@ -1262,8 +1262,8 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 	/* Compute Live Ranges */
 	ctx->flags2 &= ~IR_LR_HAVE_DESSA_MOVES;
 
-	/* vregs + tmp + fixed + SRATCH + ALL */
-	ctx->live_intervals = ir_mem_calloc(ctx->vregs_count + 1 + IR_REG_NUM + 2, sizeof(ir_live_interval*));
+	/* vregs + tmp + fixed + special */
+	ctx->live_intervals = ir_mem_calloc(ctx->vregs_count + 1 + IR_REG_NUM + IR_REG_SPECIAL_NUM, sizeof(ir_live_interval*));
 
     if (!ctx->arena) {
 		ctx->arena = ir_arena_create(16 * 1024);
@@ -2036,8 +2036,8 @@ int ir_coalesce(ir_ctx *ctx)
 		n--;
 		if (n != ctx->vregs_count) {
 			j = ctx->vregs_count - n;
-			/* vregs + tmp + fixed + SRATCH + ALL */
-			for (i = n + 1; i <= n + IR_REG_NUM + 2; i++) {
+			/* vregs + tmp + fixed + special */
+			for (i = n + 1; i <= n + IR_REG_NUM + IR_REG_SPECIAL_NUM; i++) {
 				ctx->live_intervals[i] = ctx->live_intervals[i + j];
 				if (ctx->live_intervals[i]) {
 					ctx->live_intervals[i]->vreg = i;
@@ -2804,6 +2804,37 @@ static void ir_add_to_unhandled_spill(ir_live_interval **unhandled, ir_live_inte
 	}
 }
 
+static ir_regset ir_special_reg_regset(ir_ctx *ctx, uint8_t reg)
+{
+	IR_ASSERT(reg >= IR_REG_SCRATCH);
+
+	switch (reg) {
+		case IR_REG_SCRATCH:
+			return IR_REGSET_SCRATCH;
+		case IR_REG_PRESERVED:
+			return IR_REGSET_PRESERVED;
+		case IR_REG_PNPRESERVED:
+			return IR_REGSET_PNPRESERVED;
+		case IR_REG_FIXED_SAVED:
+			IR_ASSERT(ctx->fixed_stack_frame_size != -1);
+			return (ir_regset)ctx->fixed_save_regset;
+		case IR_REG_ARGS:
+			return IR_REGSET_ARGS;
+#ifdef IR_HAVE_FASTCALL
+		case IR_REG_FCARGS:
+			return IR_REGSET_FCARGS;
+#endif
+#ifdef IR_HAVE_PRESERVE_NONE
+		case IR_REG_PNARGS:
+			return IR_REGSET_PNARGS;
+#endif
+		case IR_REG_ALL:
+			return ~0;
+		default:
+			IR_ASSERT(0);
+	}
+}
+
 static ir_reg ir_try_allocate_free_reg(ir_ctx *ctx, ir_live_interval *ival, ir_live_interval **active, ir_live_interval *inactive, ir_live_interval **unhandled)
 {
 	ir_live_pos freeUntilPos[IR_REG_NUM];
@@ -2846,12 +2877,7 @@ static ir_reg ir_try_allocate_free_reg(ir_ctx *ctx, ir_live_interval *ival, ir_l
 		reg = other->reg;
 		IR_ASSERT(reg >= 0);
 		if (reg >= IR_REG_SCRATCH) {
-			if (reg == IR_REG_SCRATCH) {
-				available = IR_REGSET_DIFFERENCE(available, IR_REGSET_SCRATCH);
-			} else {
-				IR_ASSERT(reg == IR_REG_ALL);
-				available = IR_REGSET_EMPTY;
-			}
+			available = IR_REGSET_DIFFERENCE(available, ir_special_reg_regset(ctx, reg));
 		} else {
 			IR_REGSET_EXCL(available, reg);
 		}
@@ -2874,14 +2900,8 @@ static ir_reg ir_try_allocate_free_reg(ir_ctx *ctx, ir_live_interval *ival, ir_l
 				reg = other->reg;
 				IR_ASSERT(reg >= 0);
 				if (reg >= IR_REG_SCRATCH) {
-					ir_regset regset;
+					ir_regset regset = IR_REGSET_INTERSECTION(available, ir_special_reg_regset(ctx, reg));
 
-					if (reg == IR_REG_SCRATCH) {
-						regset = IR_REGSET_INTERSECTION(available, IR_REGSET_SCRATCH);
-					} else {
-						IR_ASSERT(reg == IR_REG_ALL);
-						regset = available;
-					}
 					overlapped = IR_REGSET_UNION(overlapped, regset);
 					IR_REGSET_FOREACH(regset, reg) {
 						if (next < freeUntilPos[reg]) {
@@ -3087,14 +3107,8 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 		reg = other->reg;
 		IR_ASSERT(reg >= 0);
 		if (reg >= IR_REG_SCRATCH) {
-			ir_regset regset;
+			ir_regset regset = IR_REGSET_INTERSECTION(available, ir_special_reg_regset(ctx, reg));
 
-			if (reg == IR_REG_SCRATCH) {
-				regset = IR_REGSET_INTERSECTION(available, IR_REGSET_SCRATCH);
-			} else {
-				IR_ASSERT(reg == IR_REG_ALL);
-				regset = available;
-			}
 			IR_REGSET_FOREACH(regset, reg) {
 				blockPos[reg] = nextUsePos[reg] = 0;
 			} IR_REGSET_FOREACH_END();
@@ -3122,14 +3136,8 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 			ir_live_pos overlap = ir_ivals_overlap(&ival->range, other->current_range);
 
 			if (overlap) {
-				ir_regset regset;
+				ir_regset regset = IR_REGSET_INTERSECTION(available, ir_special_reg_regset(ctx, reg));
 
-				if (reg == IR_REG_SCRATCH) {
-					regset = IR_REGSET_INTERSECTION(available, IR_REGSET_SCRATCH);
-				} else {
-					IR_ASSERT(reg == IR_REG_ALL);
-					regset = available;
-				}
 				IR_REGSET_FOREACH(regset, reg) {
 					if (overlap < nextUsePos[reg]) {
 						nextUsePos[reg] = overlap;
@@ -3562,8 +3570,8 @@ static int ir_linear_scan(ir_ctx *ctx)
 		ir_merge_to_unhandled(&unhandled, ival);
 	}
 
-	/* vregs + tmp + fixed + SRATCH + ALL */
-	for (j = ctx->vregs_count + 1; j <= ctx->vregs_count + IR_REG_NUM + 2; j++) {
+	/* vregs + tmp + fixed + special */
+	for (j = ctx->vregs_count + 1; j <= ctx->vregs_count + IR_REG_NUM + IR_REG_SPECIAL_NUM; j++) {
 		ival = ctx->live_intervals[j];
 		if (ival) {
 			ival->current_range = &ival->range;
@@ -4092,17 +4100,24 @@ static void assign_regs(ir_ctx *ctx)
 		} while (ival);
 	}
 
+	ir_regset preserved;
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		preserved = IR_REGSET_PNPRESERVED;
+	} else {
+		preserved = IR_REGSET_PRESERVED;
+	}
+
 	if (ctx->fixed_stack_frame_size != -1) {
 		ctx->used_preserved_regs = (ir_regset)ctx->fixed_save_regset;
-		if (IR_REGSET_DIFFERENCE(IR_REGSET_INTERSECTION(used_regs, IR_REGSET_PRESERVED),
+		if (IR_REGSET_DIFFERENCE(IR_REGSET_INTERSECTION(used_regs, preserved),
 			ctx->used_preserved_regs)) {
 			// TODO: Preserved reg and fixed frame conflict ???
 			// IR_ASSERT(0 && "Preserved reg and fixed frame conflict");
 		}
 	} else {
 		ctx->used_preserved_regs = IR_REGSET_UNION((ir_regset)ctx->fixed_save_regset,
-			IR_REGSET_DIFFERENCE(IR_REGSET_INTERSECTION(used_regs, IR_REGSET_PRESERVED),
-				(ctx->flags & IR_FUNCTION) ? (ir_regset)ctx->fixed_regset : IR_REGSET_PRESERVED));
+			IR_REGSET_DIFFERENCE(IR_REGSET_INTERSECTION(used_regs, preserved),
+				(ctx->flags & IR_FUNCTION) ? (ir_regset)ctx->fixed_regset : preserved));
 	}
 
 	ir_fix_stack_frame(ctx);

@@ -94,6 +94,12 @@ bool ir_check(const ir_ctx *ctx)
 	uint32_t flags;
 	bool ok = 1;
 
+	IR_CHECK_CALLING_CONV(ctx->flags);
+	if ((ctx->flags & (IR_VARARG_FUNC|IR_PRESERVE_NONE_FUNC)) == (IR_VARARG_FUNC|IR_PRESERVE_NONE_FUNC)) {
+		fprintf(stderr, "IR_VARARG_FUNC and IR_PRESERVE_NONE_FUNC flags are mutually exclusive (preserve_none does not support var args)\n");
+		ok = 0;
+	}
+
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base + i; i < ctx->insns_count;) {
 		if (insn->op >= IR_LAST_OP) {
 			fprintf(stderr, "ir_base[%d].op invalid opcode (%d)\n", i, insn->op);

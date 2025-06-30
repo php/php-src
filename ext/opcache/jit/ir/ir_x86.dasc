@@ -961,6 +961,23 @@ static const int8_t _ir_fp_reg_params[IR_REG_FP_ARGS] = {
 	IR_REG_FP_ARG8,
 };
 
+# ifdef IR_HAVE_PRESERVE_NONE
+static const int8_t _ir_int_pn_reg_params[IR_REG_INT_PNARGS] = {
+	IR_REG_INT_PNARG1,
+	IR_REG_INT_PNARG2,
+	IR_REG_INT_PNARG3,
+	IR_REG_INT_PNARG4,
+	IR_REG_INT_PNARG5,
+	IR_REG_INT_PNARG6,
+	IR_REG_INT_PNARG7,
+	IR_REG_INT_PNARG8,
+	IR_REG_INT_PNARG9,
+	IR_REG_INT_PNARG10,
+	IR_REG_INT_PNARG11,
+	IR_REG_INT_PNARG12,
+};
+# endif
+
 #else
 
 static const int8_t *_ir_int_reg_params = NULL;
@@ -1398,8 +1415,6 @@ op2_const:
 			}
 			constraints->tmp_regs[0] = IR_SCRATCH_REG(IR_REG_SCRATCH, IR_USE_SUB_REF, IR_DEF_SUB_REF);
 			n = 1;
-			IR_FALLTHROUGH;
-		case IR_TAILCALL:
 			insn = &ctx->ir_base[ref];
 			if (insn->inputs_count > 2) {
 				constraints->hints[2] = IR_REG_NONE;
@@ -1410,6 +1425,56 @@ op2_const:
 				}
 			}
 			flags = IR_USE_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG | IR_OP3_SHOULD_BE_IN_REG;
+			break;
+		case IR_TAILCALL:
+			insn = &ctx->ir_base[ref];
+
+			/* Epilogue may clobber these */
+			uint8_t preserved = IR_REG_PRESERVED;
+
+			/* For TAILCALL we don't need to reserve all scratch registers. */
+			uint8_t args = IR_REG_ARGS;
+			uint8_t tmp_reg = IR_REG_INT_RET1;
+
+#ifdef IR_HAVE_FASTCALL
+			if (ir_is_fastcall(ctx, insn)) {
+				args = IR_REG_FCARGS;
+			}
+#endif
+#ifdef IR_HAVE_PRESERVE_NONE
+			if (ir_is_preserve_none(ctx, insn)) {
+				args = IR_REG_PNARGS;
+				/* See ir_emit_tailcall() */
+				tmp_reg = IR_REG_R10;
+			}
+			if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+				preserved = IR_REG_PNPRESERVED;
+			}
+#endif
+
+			if (ctx->fixed_stack_frame_size != -1) {
+				preserved = IR_REG_FIXED_SAVED;
+			}
+
+			constraints->tmp_regs[n] = IR_SCRATCH_REG(args, IR_USE_SUB_REF, IR_DEF_SUB_REF);
+			n++;
+
+			/* Reserve tmp register used by ir_emit_arguments() */
+			constraints->tmp_regs[n] = IR_SCRATCH_REG(tmp_reg, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+			n++;
+
+			if (insn->inputs_count > 2) {
+				constraints->hints[2] = IR_REG_NONE;
+				constraints->hints_count = ir_get_args_regs(ctx, insn, constraints->hints);
+			}
+
+			if (!IR_IS_CONST_REF(insn->op2)) {
+				/* Make sure that one of these is not allocated to op2 */
+				constraints->tmp_regs[n] = IR_SCRATCH_REG(preserved, IR_USE_SUB_REF, IR_DEF_SUB_REF);
+				n++;
+			}
+
+			flags = IR_USE_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG | IR_OP3_SHOULD_BE_IN_REG | IR_DEF_CONFLICTS_WITH_INPUT_REGS;
 			break;
 		case IR_BINOP_SSE2:
 			flags = IR_DEF_REUSES_OP1_REG | IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG;
@@ -2920,6 +2985,9 @@ store_int:
 			ir_match_fuse_load(ctx, insn->op1, ref);
 			return (ctx->mflags & IR_X86_BMI1) ? IR_BIT_COUNT : IR_CTPOP;
 		case IR_VA_START:
+#ifdef IR_HAVE_PRESERVE_NONE
+			IR_ASSERT(!(ctx->flags & IR_PRESERVE_NONE_FUNC) && "preserve_none does not support var args");
+#endif
 			ctx->flags2 |= IR_HAS_VA_START;
 			if ((ctx->ir_base[insn->op2].op == IR_ALLOCA) || (ctx->ir_base[insn->op2].op == IR_VADDR)) {
 				ir_use_list *use_list = &ctx->use_lists[insn->op2];
@@ -3774,6 +3842,7 @@ static void ir_emit_prologue(ir_ctx *ctx)
 |.if X64
 		const int8_t *int_reg_params = _ir_int_reg_params;
 		const int8_t *fp_reg_params = _ir_fp_reg_params;
+
 		uint32_t i;
 		ir_reg fp;
 		int offset;
@@ -8771,6 +8840,11 @@ static int32_t ir_call_used_stack(ir_ctx *ctx, ir_insn *insn)
 		fp_reg_params_count = IR_REG_FP_FCARGS;
 	}
 #endif
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ir_is_preserve_none(ctx, insn)) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+	}
+#endif
 
 	n = insn->inputs_count;
 	for (j = 3; j <= n; j++) {
@@ -8840,6 +8914,12 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 		fp_reg_params_count = IR_REG_FP_FCARGS;
 		int_reg_params = _ir_int_fc_reg_params;
 		fp_reg_params = _ir_fp_fc_reg_params;
+	}
+#endif
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ir_is_preserve_none(ctx, insn)) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
 	}
 #endif
 
@@ -9213,7 +9293,17 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 {
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
-	int32_t used_stack = ir_emit_arguments(ctx, def, insn, ctx->regs[def][1]);
+
+	uint8_t tmp_reg = IR_REG_INT_RET1;
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ir_is_preserve_none(ctx, insn)) {
+		/* preserve_none uses IR_REG_INT_RET1 for argument passing, so we can
+		 * not use as tmp reg here. */
+		tmp_reg = IR_REG_R10;
+	}
+#endif
+
+	int32_t used_stack = ir_emit_arguments(ctx, def, insn, tmp_reg);
 
 	if (used_stack != 0) {
 		ir_emit_call_ex(ctx, def, insn, used_stack);
@@ -10082,6 +10172,12 @@ static void ir_emit_load_params(ir_ctx *ctx)
 		fp_reg_params = _ir_fp_fc_reg_params;
 	}
 #endif
+#ifdef IR_HAVE_PRESERVE_NONE
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
+	}
+#endif
 
 	if (ctx->flags & IR_USE_FRAME_POINTER) {
 		stack_offset = sizeof(void*) * 2; /* skip old frame pointer and return address */
@@ -10206,6 +10302,12 @@ static void ir_fix_param_spills(ir_ctx *ctx)
 		fp_reg_params_count = IR_REG_FP_FCARGS;
 		int_reg_params = _ir_int_fc_reg_params;
 		fp_reg_params = _ir_fp_fc_reg_params;
+	}
+#endif
+#ifdef HAVE_PRESERVE_NONE
+	if (ctx->flags & IR_PRESERVE_NONE_FUNC) {
+		int_reg_params_count = IR_REG_INT_PNARGS;
+		int_reg_params = _ir_int_pn_reg_params;
 	}
 #endif
 
