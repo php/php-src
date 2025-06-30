@@ -1055,9 +1055,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - zts: false
-          - zts: true
+        zts: [true, false]
     name: "FREEBSD_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     steps:
