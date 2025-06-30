@@ -207,7 +207,9 @@ for CC in clang gcc; do
       CFLAGS="$MACHINE $MUSL $opt -Werror -I$root/ext/opcache -I$root/Zend -I$root"
       LDFLAGS="$MACHINE -fuse-ld=$LD $RPATH"
 
-      exe_def_static_user
+      for pic in "-fPIC" "-fno-PIC -static"; do
+        CFLAGS="$CFLAGS $pic" exe_def_static_user
+      done
       shared_def_static_user
       shared_def_static_user_no_surplus
       dl_def_static_user
