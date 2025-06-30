@@ -45,6 +45,12 @@
 # include <sys/sysmacros.h>
 #endif
 
+#if (defined(__sun) && !defined(_LP64)) || defined(_AIX)
+#define POSIX_PID_MAX LONG_MAX
+#else
+#define POSIX_PID_MAX INT_MAX
+#endif
+
 #include "posix_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
@@ -128,6 +134,11 @@ PHP_FUNCTION(posix_kill)
 		Z_PARAM_LONG(pid)
 		Z_PARAM_LONG(sig)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (pid < -1 || pid > POSIX_PID_MAX) {
+		zend_argument_value_error(1, "must be between -1 and " ZEND_LONG_FMT, POSIX_PID_MAX);
+		RETURN_THROWS();
+	}
 
 	if (kill(pid, sig) < 0) {
 		POSIX_G(last_error) = errno;
