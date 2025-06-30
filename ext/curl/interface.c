@@ -2660,11 +2660,6 @@ PHP_FUNCTION(curl_getinfo)
 			CAAL("posttransfer_time_us", co);
 		}
 #endif
-#if LIBCURL_VERSION_NUM >= 0x080200 /* Available since 8.2.0 */
-		if (curl_easy_getinfo(ch->cp, CURLINFO_CONN_ID , &co) == CURLE_OK) {
-			CAAL("conn_id", co);
-		}
-#endif
 		if (curl_easy_getinfo(ch->cp, CURLINFO_TOTAL_TIME_T, &co) == CURLE_OK) {
 			CAAL("total_time_us", co);
 		}
@@ -2695,6 +2690,11 @@ PHP_FUNCTION(curl_getinfo)
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_PROXYAUTH_USED, &l_code) == CURLE_OK) {
 			CAAL("proxyauth_used", l_code);
+		}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080200 /* Available since 8.2.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_CONN_ID , &co) == CURLE_OK) {
+			CAAL("conn_id", co);
 		}
 #endif
 	} else {
