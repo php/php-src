@@ -162,7 +162,7 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 	dtv_pointer_t *dtv = *(dtv_pointer_t**)((uintptr_t)thread_pointer + DTV_OFFSET);
 	void *addr = (void*)(((dtv_pointer_t*)((char*)dtv + *module_index))->val + *module_offset);
 
-	ZEND_ASSERT((void*)addr == &_tsrm_ls_cache);
+	ZEND_ASSERT(addr == &_tsrm_ls_cache);
 # endif
 
 	zend_accel_error(ACCEL_LOG_DEBUG, "dynamic tls module idx %zu offset %zu (inferred from code)\n",
