@@ -24,7 +24,7 @@ LXB_API const lxb_css_data_t *
 lxb_css_unit_relative_by_name(const lxb_char_t *name, size_t length);
 
 LXB_API const lxb_css_data_t *
-lxb_css_unit_angel_by_name(const lxb_char_t *name, size_t length);
+lxb_css_unit_angle_by_name(const lxb_char_t *name, size_t length);
 
 LXB_API const lxb_css_data_t *
 lxb_css_unit_frequency_by_name(const lxb_char_t *name, size_t length);

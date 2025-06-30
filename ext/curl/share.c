@@ -160,9 +160,7 @@ PHP_FUNCTION(curl_share_init_persistent)
 	}
 
 	ZEND_HASH_FOREACH_VAL(share_opts, zval *entry) {
-		ZVAL_DEREF(entry);
-
-		bool failed = false;
+		bool failed;
 		zend_ulong option = zval_try_get_long(entry, &failed);
 
 		if (failed) {

@@ -452,9 +452,7 @@ AC_CHECK_TYPES([socklen_t], [], [], [
 ])
 
 dnl These are defined elsewhere than stdio.h.
-PHP_CHECK_SIZEOF([intmax_t], [0])
 PHP_CHECK_SIZEOF([ssize_t], [8])
-PHP_CHECK_SIZEOF([ptrdiff_t], [8])
 
 dnl Check stdint types (must be after header check).
 PHP_CHECK_STDINT_TYPES
@@ -565,6 +563,7 @@ AC_CHECK_FUNCS(m4_normalize([
   memmem
   mempcpy
   memrchr
+  memset_explicit
   mkstemp
   mmap
   nice
@@ -1333,11 +1332,15 @@ AS_VAR_IF([program_prefix], [NONE], [program_prefix=])
 AS_VAR_IF([program_suffix], [NONE], [program_suffix=])
 
 orig_libdir=$libdir
+
+dnl First for unexpanded (default), second for expanded (from options)
 AS_CASE([$libdir],
-  ['${exec_prefix}/lib'], [libdir=$libdir/php])
+  ['${exec_prefix}/lib'], [libdir=$libdir/php],
+  [${exec_prefix}/${PHP_LIBDIR}], [libdir=$libdir/php])
 
 AS_CASE([$(eval echo $datadir)],
-  ['${prefix}/share'], [datadir=$datadir/php])
+  ['${prefix}/share'], [datadir=$datadir/php],
+  [${prefix}/share], [datadir=$datadir/php])
 
 phptempdir=$(pwd)/libs
 

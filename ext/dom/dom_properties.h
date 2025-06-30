@@ -109,6 +109,7 @@ zend_result dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
 zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval);
 
 /* parent node properties */
+zend_result dom_parent_node_children_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval);

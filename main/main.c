@@ -1323,10 +1323,10 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 			case E_CORE_WARNING:
 			case E_COMPILE_WARNING:
 			case E_USER_WARNING:
-				/* throw an exception if we are in EH_THROW mode and the type is warning.
-				 * fatal errors are real errors and cannot be made exceptions.
-				 * exclude deprecated for the sake of BC to old damaged code.
-				 * notices are no errors and are not treated as such like E_WARNINGS.
+				/* Throw an exception if we are in EH_THROW mode and the type is warning.
+				 * Fatal errors are real errors and cannot be made exceptions.
+				 * Exclude deprecated for the sake of BC to old damaged code.
+				 * Notices are not errors and are not treated as such like E_WARNINGS.
 				 * DO NOT overwrite a pending exception.
 				 */
 				if (!EG(exception)) {

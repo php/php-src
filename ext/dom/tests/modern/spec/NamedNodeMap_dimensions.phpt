@@ -22,7 +22,7 @@ foreach ($test_values as $value) {
 ?>
 --EXPECTF--
 --- -1 ---
-string(1) "a"
+string(3) "N/A"
 bool(false)
 bool(true)
 --- 0 ---

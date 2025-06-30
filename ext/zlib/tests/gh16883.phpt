@@ -29,9 +29,9 @@ stream_context_set_default([
 $f = gzopen('http://'.PHP_CLI_SERVER_HOSTNAME.':'.PHP_CLI_SERVER_PORT, 'r');
 var_dump(stream_get_contents($f));
 
-var_dump(gzfile('http://'.PHP_CLI_SERVER_HOSTNAME.':'.PHP_CLI_SERVER_PORT, 'r'));
+var_dump(gzfile('http://'.PHP_CLI_SERVER_HOSTNAME.':'.PHP_CLI_SERVER_PORT));
 
-var_dump(readgzfile('http://'.PHP_CLI_SERVER_HOSTNAME.':'.PHP_CLI_SERVER_PORT, 'r'));
+var_dump(readgzfile('http://'.PHP_CLI_SERVER_HOSTNAME.':'.PHP_CLI_SERVER_PORT));
 
 ?>
 --EXPECT--

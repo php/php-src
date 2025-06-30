@@ -53,6 +53,13 @@ PHP                                                                        NEWS
     evaluation) and GH-18464 (Recursion protection for deprecation constants not
     released on bailout). (DanielEScherzer and ilutov)
   . Fixed AST printing for immediately invoked Closure. (Dmitrii Derepko)
+  . Properly handle __debugInfo() returning an array reference. (nielsdos)
+  . Properly handle reference return value from __toString(). (nielsdos)
+  . Added the pipe (|>) operator. (crell)
+  . Added support for `final` with constructor property promotion.
+    (DanielEScherzer)
+  . Do not use RTLD_DEEPBIND if dlmopen is available. (Daniil Gentili)
+  . Make `clone()` a function. (timwolla, edorian)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -67,10 +74,12 @@ PHP                                                                        NEWS
 - DOM:
   . Added Dom\Element::$outerHTML. (nielsdos)
   . Added Dom\Element::insertAdjacentHTML(). (nielsdos)
+  . Added $children property to ParentNode implementations. (nielsdos)
 
 - Enchant:
   . Added enchant_dict_remove_from_session(). (nielsdos)
   . Added enchant_dict_remove(). (nielsdos)
+  . Fix missing empty string checks. (nielsdos)
 
 - EXIF:
   . Add OffsetTime* Exif tags. (acc987)
@@ -120,9 +129,14 @@ PHP                                                                        NEWS
   . Fixed ZTS OPcache build on Cygwin. (cmb)
   . Added opcache.file_cache_read_only. (Samuel Melrose)
   . Updated default value of opcache.jit_hot_loop. (Arnaud)
+  . Log a warning when opcache lock file permissions could not be changed.
+    (Taavi Eomäe)
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
+
+- PCNTL:
+  . Extend pcntl_waitid with rusage parameter. (vrza)
 
 - PCRE:
   . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
@@ -138,6 +152,13 @@ PHP                                                                        NEWS
 - PDO_SQLITE:
   . throw on null bytes / resolve GH-13952 (divinity76).
   . Implement GH-17321: Add setAuthorizer to Pdo\Sqlite. (nielsdos)
+  . PDO::sqliteCreateCollation now throws a TypeError if the callback
+    has a wrong return type. (David Carlier)
+  . Added Pdo_Sqlite::ATTR_BUSY_STATEMENT constant to check
+    if a statement is currently executing. (David Carlier)
+  . Added Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT constant to set a statement
+    in either EXPLAIN_MODE_PREPARED, EXPLAIN_MODE_EXPLAIN,
+    EXPLAIN_MODE_EXPLAIN_QUERY_PLAN modes. (David Carlier)
 
 - PGSQL:
   . Added pg_close_stmt to close a prepared statement while allowing
@@ -187,6 +208,10 @@ PHP                                                                        NEWS
   . Fix namespace handling of WSDL and XML schema in SOAP,
     fixing at least GH-16320 and bug #68576. (nielsdos)
   . Fixed bug #70951 (Segmentation fault on invalid WSDL cache). (nielsdos)
+  . Implement request #55503 (Extend __getTypes to support enumerations).
+    (nielsdos, datibbaw)
+  . Implement request #61105 (Support Soap 1.2 SoapFault Reason Text lang
+    attribute). (nielsdos)
 
 - Sockets:
   . Added IPPROTO_ICMP/IPPROTO_ICMPV6 to create raw socket for ICMP usage.
@@ -225,12 +250,26 @@ PHP                                                                        NEWS
   . Fix overall theorical overflows on zend_string buffer allocations.
     (David Carlier/nielsdos)
 
+- Sqlite:
+  . Added Sqlite3Stmt::busy to check if a statement is still being executed.
+    (David Carlier)
+  . Added Sqlite3Stmt::explain to produce a explain query plan from
+    the statement. (David Carlier)
+  . Added Sqlite3Result::fetchAll to returns all results at once from a query.
+    (David Carlier)
+
 - Standard:
   . Fixed crypt() tests on musl when using --with-external-libcrypt
     (Michael Orlitzky).
   . Fixed bug GH-18062 (is_callable(func(...), callable_name: $name) for first
     class callables returns wrong name). (timwolla)
   . Added array_first() and array_last(). (nielsdos)
+  . Fixed bug GH-18823 (setlocale's 2nd and 3rd argument ignores strict_types).
+    (nielsdos)
+  . Fixed exit code handling of sendmail cmd and added warnings.
+    (Jesse Hathaway)
+  . Fixed bug GH-18897 (printf: empty precision is interpreted as precision 6,
+    not as precision 0). (nielsdos)
 
 - Streams:
   . Fixed bug GH-16889 (stream_select() timeout useless for pipes on Windows).
@@ -238,6 +277,10 @@ PHP                                                                        NEWS
 
 - Tests:
   . Allow to shuffle tests even in non-parallell mode. (dhuang00)
+
+- Tidy:
+  . tidy::__construct/parseFile/parseString methods throw an exception if
+    the configuration argument is invalid. (David Carlier)
 
 - Windows:
   . Fixed bug GH-10992 (Improper long path support for relative paths). (cmb,

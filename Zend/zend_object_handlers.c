@@ -206,6 +206,9 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 	}
 
 	zend_call_known_instance_method_with_0_params(ce->__debugInfo, object, &retval);
+	if (UNEXPECTED(Z_ISREF(retval))) {
+		zend_unwrap_reference(&retval);
+	}
 	if (Z_TYPE(retval) == IS_ARRAY) {
 		if (!Z_REFCOUNTED(retval)) {
 			*is_temp = 1;
@@ -719,7 +722,9 @@ static bool zend_call_get_hook(
 		return false;
 	}
 
+	GC_ADDREF(zobj);
 	zend_call_known_instance_method_with_0_params(get, zobj, rv);
+	OBJ_RELEASE(zobj);
 
 	return true;
 }
@@ -2437,8 +2442,12 @@ ZEND_API zend_result zend_std_cast_object_tostring(zend_object *readobj, zval *w
 				zend_call_known_instance_method_with_0_params(ce->__tostring, readobj, &retval);
 				zend_object_release(readobj);
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
+is_string:
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;
+				} else if (Z_ISREF(retval)) {
+					zend_unwrap_reference(&retval);
+					goto is_string;
 				}
 				zval_ptr_dtor(&retval);
 				if (!EG(exception)) {

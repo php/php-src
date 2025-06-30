@@ -71,6 +71,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%left T_PIPE
 %left '.'
 %left T_SL T_SR
 %left '+' '-'
@@ -237,6 +238,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "'??'"
 %token T_POW             "'**'"
 %token T_POW_EQUAL       "'**='"
+%token T_PIPE         "'|>'"
 /* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
  * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
  * or shift to continue parsing an intersection type. */
@@ -257,7 +259,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type_without_static argument global_var
+%type <ast> extends_from parameter optional_type_without_static argument argument_no_expr global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_dereferenceable new_non_dereferenceable anonymous_class class_name class_name_reference simple_variable
@@ -285,7 +287,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
-%type <ast> optional_parameter_list
+%type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -912,11 +914,40 @@ non_empty_argument_list:
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
-argument:
-		expr				{ $$ = $1; }
-	|	identifier ':' expr
+/* `clone_argument_list` is necessary to resolve a parser ambiguity (shift-reduce conflict)
+ * of `clone($expr)`, which could either be parsed as a function call with `$expr` as the first
+ * argument or as a use of the `clone` language construct with an expression with useless
+ * parenthesis. Both would be valid and result in the same AST / the same semantics.
+ * `clone_argument_list` is defined in a way that an `expr` in the first position needs to
+ * be followed by a `,` which is not valid syntax for a parenthesized `expr`, ensuring
+ * that calling `clone()` with a single unnamed parameter is handled by the language construct
+ * syntax.
+ */
+clone_argument_list:
+		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
+	|	'(' non_empty_clone_argument_list possible_comma ')' { $$ = $2; }
+	|	'(' expr ',' ')' { $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $2); }
+	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create_fcc(); }
+;
+
+non_empty_clone_argument_list:
+		expr ',' argument
+			{ $$ = zend_ast_create_list(2, ZEND_AST_ARG_LIST, $1, $3); }
+	|	argument_no_expr
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
+	|	non_empty_clone_argument_list ',' argument
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
+argument_no_expr:
+		identifier ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
 	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
+;
+
+argument:
+		expr { $$ = $1; }
+	|	argument_no_expr { $$ = $1; }
 ;
 
 global_var_list:
@@ -1226,7 +1257,16 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2); }
+	|	T_CLONE clone_argument_list {
+			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
+			name->attr = ZEND_NAME_FQ;
+			$$ = zend_ast_create(ZEND_AST_CALL, name, $2);
+		}
+	|	T_CLONE expr {
+			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
+			name->attr = ZEND_NAME_FQ;
+			$$ = zend_ast_create(ZEND_AST_CALL, name, zend_ast_create_list(1, ZEND_AST_ARG_LIST, $2));
+		}
 	|	variable T_PLUS_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ADD, $1, $3); }
 	|	variable T_MINUS_EQUAL expr
@@ -1292,6 +1332,8 @@ expr:
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_EQUAL, $1, $3); }
 	|	expr T_IS_NOT_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
+	|	expr T_PIPE expr
+			{ $$ = zend_ast_create(ZEND_AST_PIPE, $1, $3); }
 	|	expr '<' expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, $3); }
 	|	expr T_IS_SMALLER_OR_EQUAL expr

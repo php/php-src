@@ -455,7 +455,7 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
-		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL);
+		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL, SOAP_GLOBAL(lang_en));
 		smart_str_free(&soap_headers_z);
 		efree(http_msg);
 		return FALSE;
@@ -469,7 +469,7 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
-		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL);
+		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL, SOAP_GLOBAL(lang_en));
 		smart_str_free(&soap_headers_z);
 		efree(http_msg);
 		return FALSE;
@@ -482,7 +482,7 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
-		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL);
+		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL, SOAP_GLOBAL(lang_en));
 		PG(allow_url_fopen) = old_allow_url_fopen;
 		smart_str_free(&soap_headers_z);
 		efree(http_msg);
@@ -537,7 +537,7 @@ try_again:
 			if (request != buf) {
 				zend_string_release_ex(request, 0);
 			}
-			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL);
+			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL, SOAP_GLOBAL(lang_en));
 			PG(allow_url_fopen) = old_allow_url_fopen;
 			smart_str_free(&soap_headers_z);
 			efree(http_msg);
@@ -908,14 +908,14 @@ try_again:
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
 			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
-			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL);
+			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL, SOAP_GLOBAL(lang_en));
 			smart_str_free(&soap_headers_z);
 			efree(http_msg);
 			return FALSE;
 		}
 		smart_str_free(&soap_headers);
 	} else {
-		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL);
+		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL, SOAP_GLOBAL(lang_en));
 		smart_str_free(&soap_headers_z);
 		efree(http_msg);
 		return FALSE;
@@ -932,7 +932,7 @@ try_again:
 				php_stream_close(stream);
 				convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 				convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
-				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
+				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL, SOAP_GLOBAL(lang_en));
 				smart_str_free(&soap_headers_z);
 				efree(http_msg);
 				return FALSE;
@@ -1121,7 +1121,7 @@ try_again:
 		zend_string_release_ex(http_headers, 0);
 		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
-		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL);
+		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL, SOAP_GLOBAL(lang_en));
 		if (http_msg) {
 			efree(http_msg);
 		}
@@ -1180,7 +1180,7 @@ try_again:
 				phpurl = new_url;
 
 				if (--redirect_max < 1) {
-					add_soap_fault(this_ptr, "HTTP", "Redirection limit reached, aborting", NULL, NULL);
+					add_soap_fault(this_ptr, "HTTP", "Redirection limit reached, aborting", NULL, NULL, SOAP_GLOBAL(lang_en));
 					smart_str_free(&soap_headers_z);
 					efree(http_msg);
 					return FALSE;
@@ -1318,7 +1318,7 @@ try_again:
 			if (http_msg) {
 				efree(http_msg);
 			}
-			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL);
+			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL, SOAP_GLOBAL(lang_en));
 			return FALSE;
 		}
 		if (call_user_function(CG(function_table), (zval*)NULL, &func, &retval, 1, params) == SUCCESS &&
@@ -1334,7 +1334,7 @@ try_again:
 			efree(content_encoding);
 			zend_string_release_ex(http_headers, 0);
 			zend_string_release_ex(http_body, 0);
-			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL);
+			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL, SOAP_GLOBAL(lang_en));
 			if (http_msg) {
 				efree(http_msg);
 			}
@@ -1368,7 +1368,7 @@ try_again:
 		if (error) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
-			add_soap_fault(this_ptr, "HTTP", http_msg, NULL, NULL);
+			add_soap_fault(this_ptr, "HTTP", http_msg, NULL, NULL, SOAP_GLOBAL(lang_en));
 			efree(http_msg);
 			return FALSE;
 		}

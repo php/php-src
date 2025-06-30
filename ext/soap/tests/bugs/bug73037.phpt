@@ -109,12 +109,13 @@ HDRS;
                 $out .= fread($fp, 1024);
             }
 
-            $pos = strpos($out, "<env:Text>");
+            $marker = '<env:Text xml:lang="en">';
+            $pos = strpos($out, $marker);
             if (false === $pos) {
                 echo $out;
                 goto cleanup;
             }
-            $pos0 = $pos + strlen("<env:Text>");
+            $pos0 = $pos + strlen($marker);
             $pos = strpos($out, "</env:Text>");
             if (false === $pos) {
                 echo $out;

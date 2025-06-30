@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7712aba90b16090fbe7c124c1e3f26b2cc3e2ab2 */
+ * Stub hash: 4277993645a3f560c7a9971466fabf2d451bc92d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -29,6 +29,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapFault___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, details, IS_MIXED, 0, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, headerFault, IS_MIXED, 0, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lang, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SoapFault___toString, 0, 0, IS_STRING, 0)
@@ -54,6 +55,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SoapServer_fault
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, actor, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, details, IS_MIXED, 0, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lang, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SoapServer_addSoapHeader, 0, 1, IS_VOID, 0)
@@ -313,6 +315,20 @@ static void register_soap_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv2", SOAP_SSL_METHOD_SSLv2, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv3", SOAP_SSL_METHOD_SSLv3, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv23", SOAP_SSL_METHOD_SSLv23, CONST_PERSISTENT);
+
+	zend_constant *const_SOAP_FUNCTIONS_ALL = zend_hash_str_find_ptr(EG(zend_constants), "SOAP_FUNCTIONS_ALL", sizeof("SOAP_FUNCTIONS_ALL") - 1);
+
+	zend_attribute *attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0 = zend_add_global_constant_attribute(const_SOAP_FUNCTIONS_ALL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0;
+	zend_string *attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0, attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0->args[0].value, &attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0);
+	attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg1;
+	zend_string *attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg1_str = zend_string_init("as enabling all functions is a possible security concern", strlen("as enabling all functions is a possible security concern"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg1, attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0->args[1].value, &attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg1);
+	attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_Soap_Url(void)
@@ -443,6 +459,12 @@ static zend_class_entry *register_class_SoapFault(zend_class_entry *class_entry_
 	zend_string *property_headerfault_name = zend_string_init("headerfault", sizeof("headerfault") - 1, 1);
 	zend_declare_typed_property(class_entry, property_headerfault_name, &property_headerfault_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release(property_headerfault_name);
+
+	zval property_lang_default_value;
+	ZVAL_EMPTY_STRING(&property_lang_default_value);
+	zend_string *property_lang_name = zend_string_init("lang", sizeof("lang") - 1, 1);
+	zend_declare_typed_property(class_entry, property_lang_name, &property_lang_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_lang_name);
 
 	return class_entry;
 }

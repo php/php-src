@@ -25,7 +25,6 @@ extern "C" {
 # define LXB_NONSTRING
 #endif
 
-
 typedef struct {
     lxb_char_t key;
 

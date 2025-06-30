@@ -16,7 +16,7 @@ $pq->insert("b", 2);
 $pq->insert("c", 0);
 
 foreach ($pq as $k=>$v) {
-    echo "$k=>".print_r($v, 1)."\n";
+    echo "$k=>".print_r($v, true)."\n";
 }
 
 echo "EXTR_BOTH\n";
@@ -29,7 +29,7 @@ $pq1->insert("b", 2);
 $pq1->insert("c", 0);
 
 foreach ($pq1 as $k=>$v) {
-    echo "$k=>".print_r($v, 1)."\n";
+    echo "$k=>".print_r($v, true)."\n";
 }
 
 echo "EXTR_DATA\n";
@@ -42,7 +42,7 @@ $pq2->insert("b", 2);
 $pq2->insert("c", 0);
 
 foreach ($pq2 as $k=>$v) {
-    echo "$k=>".print_r($v, 1)."\n";
+    echo "$k=>".print_r($v, true)."\n";
 }
 
 echo "EXTR_PRIORITY\n";
@@ -55,7 +55,7 @@ $pq3->insert("b", 2);
 $pq3->insert("c", 0);
 
 foreach ($pq3 as $k=>$v) {
-    echo "$k=>".print_r($v, 1)."\n";
+    echo "$k=>".print_r($v, true)."\n";
 }
 
 ?>

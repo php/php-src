@@ -15,7 +15,7 @@ if (PHP_DOM == "yes") {
 			entity.c nodelist.c html_collection.c text.c comment.c \
 			entityreference.c \
 			token_list.c \
-			notation.c xpath.c dom_iterators.c \
+			notation.c obj_map.c xpath.c dom_iterators.c \
 			namednodemap.c xpath_callbacks.c", null, "/I ext/lexbor");
 
 		ADD_EXTENSION_DEP('dom', 'lexbor');

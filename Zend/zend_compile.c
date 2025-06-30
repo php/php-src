@@ -903,13 +903,7 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 			}
 			break;
 		case T_FINAL:
-			if (target == ZEND_MODIFIER_TARGET_METHOD
-				|| target == ZEND_MODIFIER_TARGET_CONSTANT
-				|| target == ZEND_MODIFIER_TARGET_PROPERTY
-				|| target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
-				return ZEND_ACC_FINAL;
-			}
-			break;
+			return ZEND_ACC_FINAL;
 		case T_STATIC:
 			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_METHOD) {
 				return ZEND_ACC_STATIC;
@@ -4936,6 +4930,20 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	return SUCCESS;
 }
 
+static zend_result zend_compile_func_clone(znode *result, zend_ast_list *args)
+{
+	znode arg_node;
+
+	if (args->children != 1) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args->child[0]);
+	zend_emit_op_tmp(result, ZEND_CLONE, &arg_node, NULL);
+
+	return SUCCESS;
+}
+
 static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
 {
 	if (zend_string_equals_literal(lcname, "strlen")) {
@@ -5004,6 +5012,8 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_array_key_exists(result, args);
 	} else if (zend_string_equals_literal(lcname, "sprintf")) {
 		return zend_compile_func_sprintf(result, args);
+	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_CLONE))) {
+		return zend_compile_func_clone(result, args);
 	} else {
 		return FAILURE;
 	}
@@ -5394,17 +5404,6 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_call_common(&ctor_result, args_ast, NULL, ast->lineno);
 	zend_do_free(&ctor_result);
-}
-/* }}} */
-
-static void zend_compile_clone(znode *result, zend_ast *ast) /* {{{ */
-{
-	zend_ast *obj_ast = ast->child[0];
-
-	znode obj_node;
-	zend_compile_expr(&obj_node, obj_ast);
-
-	zend_emit_op_tmp(result, ZEND_CLONE, &obj_node, NULL);
 }
 /* }}} */
 
@@ -6425,6 +6424,57 @@ static bool can_match_use_jumptable(zend_ast_list *arms) {
 	}
 
 	return 1;
+}
+
+static void zend_compile_pipe(znode *result, zend_ast *ast)
+{
+	zend_ast *operand_ast = ast->child[0];
+	zend_ast *callable_ast = ast->child[1];
+
+	/* Compile the left hand side down to a value first. */
+	znode operand_result;
+	zend_compile_expr(&operand_result, operand_ast);
+
+	/* Wrap simple values in a ZEND_QM_ASSIGN opcode to ensure references
+	 * always fail. They will already fail in complex cases like arrays,
+	 * so those don't need a wrapper. */
+	znode wrapped_operand_result;
+	if (operand_result.op_type & (IS_CV|IS_VAR)) {
+		zend_emit_op_tmp(&wrapped_operand_result, ZEND_QM_ASSIGN, &operand_result, NULL);
+	} else {
+		wrapped_operand_result = operand_result;
+	}
+
+	/* Turn the operand into a function parameter list. */
+	zend_ast *arg_list_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, zend_ast_create_znode(&wrapped_operand_result));
+
+	zend_ast *fcall_ast;
+	znode callable_result;
+
+	/* Turn $foo |> bar(...) into bar($foo). */
+	if (callable_ast->kind == ZEND_AST_CALL
+		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		fcall_ast = zend_ast_create(ZEND_AST_CALL,
+				callable_ast->child[0], arg_list_ast);
+	/* Turn $foo |> bar::baz(...) into bar::baz($foo). */
+	} else if (callable_ast->kind == ZEND_AST_STATIC_CALL
+			&& callable_ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		fcall_ast = zend_ast_create(ZEND_AST_STATIC_CALL,
+			callable_ast->child[0], callable_ast->child[1], arg_list_ast);
+	/* Turn $foo |> $bar->baz(...) into $bar->baz($foo). */
+	} else if (callable_ast->kind == ZEND_AST_METHOD_CALL
+			&& callable_ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		fcall_ast = zend_ast_create(ZEND_AST_METHOD_CALL,
+			callable_ast->child[0], callable_ast->child[1], arg_list_ast);
+	/* Turn $foo |> $expr into ($expr)($foo) */
+	} else {
+		zend_compile_expr(&callable_result, callable_ast);
+		callable_ast = zend_ast_create_znode(&callable_result);
+		fcall_ast = zend_ast_create(ZEND_AST_CALL,
+			callable_ast, arg_list_ast);
+	}
+
+	zend_compile_expr(result, fcall_ast);
 }
 
 static void zend_compile_match(znode *result, zend_ast *ast)
@@ -7630,7 +7680,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
-		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY);
+		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY | ZEND_ACC_FINAL);
 		bool is_promoted = property_flags || hooks_ast;
 
 		znode var_node, default_node;
@@ -8361,10 +8411,10 @@ static zend_op_array *zend_compile_func_decl_ex(
 			"nodiscard",
 			sizeof("nodiscard")-1
 		);
-	
+
 		if (nodiscard_attribute) {
 			op_array->fn_flags |= ZEND_ACC_NODISCARD;
-		}	
+		}
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
@@ -11672,9 +11722,6 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_NEW:
 			zend_compile_new(result, ast);
 			return;
-		case ZEND_AST_CLONE:
-			zend_compile_clone(result, ast);
-			return;
 		case ZEND_AST_ASSIGN_OP:
 			zend_compile_compound_assign(result, ast);
 			return;
@@ -11768,6 +11815,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
+			return;
+		case ZEND_AST_PIPE:
+			zend_compile_pipe(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

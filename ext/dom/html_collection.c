@@ -21,6 +21,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "obj_map.h"
 #include "nodelist.h"
 #include "html_collection.h"
 #include "namespace_compat.h"
@@ -49,11 +50,22 @@ static dom_named_item dom_html_collection_named_item(zend_string *key, zend_obje
 		zend_long cur = 0;
 		zend_long next = cur; /* not +1, otherwise we skip the first candidate */
 		xmlNodePtr candidate = basep->children;
+		bool iterate_tag_name = objmap->handler == &php_dom_obj_map_by_tag_name;
 		while (candidate != NULL) {
-			candidate = dom_get_elements_by_tag_name_ns_raw(basep, candidate, objmap->ns, objmap->local, objmap->local_lower, &cur, next);
-			if (candidate == NULL) {
-				break;
+			if (iterate_tag_name) {
+				candidate = dom_get_elements_by_tag_name_ns_raw(basep, candidate, objmap->ns, objmap->local, objmap->local_lower, &cur, next);
+				if (candidate == NULL) {
+					break;
+				}
+				next = cur + 1;
+			} else {
+				if (candidate->type != XML_ELEMENT_NODE) {
+					candidate = candidate->next;
+					continue;
+				}
 			}
+
+			ZEND_ASSERT(candidate->type == XML_ELEMENT_NODE);
 
 			xmlAttrPtr attr;
 
@@ -72,7 +84,9 @@ static dom_named_item dom_html_collection_named_item(zend_string *key, zend_obje
 				}
 			}
 
-			next = cur + 1;
+			if (!iterate_tag_name) {
+				candidate = candidate->next;
+			}
 		}
 	}
 
@@ -115,7 +129,7 @@ zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, int 
 		dom_html_collection_named_item_into_zval(rv, index.str, object);
 	} else {
 		ZEND_ASSERT(index.type == DOM_NODELIST_DIM_LONG);
-		php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
+		php_dom_obj_map_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
 	}
 
 	return rv;
@@ -137,6 +151,25 @@ int dom_html_collection_has_dimension(zend_object *object, zval *member, int che
 	} else {
 		ZEND_ASSERT(index.type == DOM_NODELIST_DIM_LONG);
 		return index.lval >= 0 && index.lval < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
+	}
+}
+
+HashTable *dom_html_collection_get_gc(zend_object *object, zval **table, int *n)
+{
+	dom_nnodemap_object *objmap = php_dom_obj_from_obj(object)->ptr;
+
+	if (objmap->baseobj) {
+		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+		zend_get_gc_buffer_add_obj(gc_buffer, &objmap->baseobj->std);
+		zend_get_gc_buffer_use(gc_buffer, table, n);
+
+		if (object->properties == NULL && object->ce->default_properties_count == 0) {
+			return NULL;
+		} else {
+			return zend_std_get_properties(object);
+		}
+	} else {
+		return zend_std_get_gc(object, table, n);
 	}
 }
 

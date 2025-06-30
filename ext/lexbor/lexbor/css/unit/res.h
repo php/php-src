@@ -246,7 +246,7 @@ static const lexbor_shs_entry_t lxb_css_unit_relative_shs[64] =
     {NULL, NULL, 0, 0}
 };
 
-static const lexbor_shs_entry_t lxb_css_unit_angel_shs[7] = 
+static const lexbor_shs_entry_t lxb_css_unit_angle_shs[7] = 
 {
     {NULL, NULL, 6, 0}, 
     {"turn", (void *) &lxb_css_unit_data[LXB_CSS_UNIT_TURN], 4, 0}, 

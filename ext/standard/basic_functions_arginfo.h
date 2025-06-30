@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dfd7d2cfd31312f7f6c5074c10cab54e9d1fbccc */
+ * Stub hash: f8c3745d39ed21f29f46b47f15b6fd1178e55dbb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3592,20 +3592,10 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CRYPT_SHA512", 1, CONST_PERSISTENT);
 #if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_A", PHP_DNS_A, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_NS", PHP_DNS_NS, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_CNAME", PHP_DNS_CNAME, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_SOA", PHP_DNS_SOA, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_PTR", PHP_DNS_PTR, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_HINFO", PHP_DNS_HINFO, CONST_PERSISTENT);
 #endif
 #if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS))) && (!defined(PHP_WIN32))
@@ -3613,26 +3603,12 @@ static void register_basic_functions_symbols(int module_number)
 #endif
 #if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_MX", PHP_DNS_MX, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_TXT", PHP_DNS_TXT, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_SRV", PHP_DNS_SRV, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_NAPTR", PHP_DNS_NAPTR, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_AAAA", PHP_DNS_AAAA, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_A6", PHP_DNS_A6, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_ANY", PHP_DNS_ANY, CONST_PERSISTENT);
-#endif
-#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 	REGISTER_LONG_CONSTANT("DNS_ALL", PHP_DNS_ALL, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("HTML_SPECIALCHARS", PHP_HTML_SPECIALCHARS, CONST_PERSISTENT);
@@ -3716,26 +3692,12 @@ static void register_basic_functions_symbols(int module_number)
 #endif
 #if !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL0", LOG_LOCAL0, CONST_PERSISTENT);
-#endif
-#if !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL1", LOG_LOCAL1, CONST_PERSISTENT);
-#endif
-#if !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL2", LOG_LOCAL2, CONST_PERSISTENT);
-#endif
-#if !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL3", LOG_LOCAL3, CONST_PERSISTENT);
-#endif
-#if !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL4", LOG_LOCAL4, CONST_PERSISTENT);
-#endif
-#if !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL5", LOG_LOCAL5, CONST_PERSISTENT);
-#endif
-#if !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL6", LOG_LOCAL6, CONST_PERSISTENT);
-#endif
-#if !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL7", LOG_LOCAL7, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("LOG_PID", LOG_PID, CONST_PERSISTENT);
@@ -3768,116 +3730,48 @@ static void register_basic_functions_symbols(int module_number)
 #endif
 #if defined(HAVE_NL_LANGINFO) && defined(ABDAY_1)
 	REGISTER_LONG_CONSTANT("ABDAY_1", ABDAY_1, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABDAY_1)
 	REGISTER_LONG_CONSTANT("ABDAY_2", ABDAY_2, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABDAY_1)
 	REGISTER_LONG_CONSTANT("ABDAY_3", ABDAY_3, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABDAY_1)
 	REGISTER_LONG_CONSTANT("ABDAY_4", ABDAY_4, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABDAY_1)
 	REGISTER_LONG_CONSTANT("ABDAY_5", ABDAY_5, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABDAY_1)
 	REGISTER_LONG_CONSTANT("ABDAY_6", ABDAY_6, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABDAY_1)
 	REGISTER_LONG_CONSTANT("ABDAY_7", ABDAY_7, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_NL_LANGINFO) && defined(DAY_1)
 	REGISTER_LONG_CONSTANT("DAY_1", DAY_1, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(DAY_1)
 	REGISTER_LONG_CONSTANT("DAY_2", DAY_2, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(DAY_1)
 	REGISTER_LONG_CONSTANT("DAY_3", DAY_3, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(DAY_1)
 	REGISTER_LONG_CONSTANT("DAY_4", DAY_4, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(DAY_1)
 	REGISTER_LONG_CONSTANT("DAY_5", DAY_5, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(DAY_1)
 	REGISTER_LONG_CONSTANT("DAY_6", DAY_6, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(DAY_1)
 	REGISTER_LONG_CONSTANT("DAY_7", DAY_7, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_1", ABMON_1, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_2", ABMON_2, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_3", ABMON_3, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_4", ABMON_4, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_5", ABMON_5, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_6", ABMON_6, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_7", ABMON_7, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_8", ABMON_8, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_9", ABMON_9, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_10", ABMON_10, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_11", ABMON_11, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(ABMON_1)
 	REGISTER_LONG_CONSTANT("ABMON_12", ABMON_12, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_1", MON_1, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_2", MON_2, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_3", MON_3, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_4", MON_4, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_5", MON_5, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_6", MON_6, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_7", MON_7, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_8", MON_8, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_9", MON_9, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_10", MON_10, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_11", MON_11, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_NL_LANGINFO) && defined(MON_1)
 	REGISTER_LONG_CONSTANT("MON_12", MON_12, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_NL_LANGINFO) && defined(AM_STR)
@@ -4046,6 +3940,71 @@ static void register_basic_functions_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_verify", sizeof("password_verify") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+	zend_constant *const_ASSERT_ACTIVE = zend_hash_str_find_ptr(EG(zend_constants), "ASSERT_ACTIVE", sizeof("ASSERT_ACTIVE") - 1);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_ACTIVE_0 = zend_add_global_constant_attribute(const_ASSERT_ACTIVE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0;
+	zend_string *attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].value, &attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0);
+	attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1;
+	zend_string *attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[1].value, &attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1);
+	attribute_Deprecated_const_ASSERT_ACTIVE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_ASSERT_CALLBACK = zend_hash_str_find_ptr(EG(zend_constants), "ASSERT_CALLBACK", sizeof("ASSERT_CALLBACK") - 1);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_CALLBACK_0 = zend_add_global_constant_attribute(const_ASSERT_CALLBACK, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0;
+	zend_string *attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0, attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_CALLBACK_0->args[0].value, &attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0);
+	attribute_Deprecated_const_ASSERT_CALLBACK_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_ASSERT_CALLBACK_0_arg1;
+	zend_string *attribute_Deprecated_const_ASSERT_CALLBACK_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_CALLBACK_0_arg1, attribute_Deprecated_const_ASSERT_CALLBACK_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_CALLBACK_0->args[1].value, &attribute_Deprecated_const_ASSERT_CALLBACK_0_arg1);
+	attribute_Deprecated_const_ASSERT_CALLBACK_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_ASSERT_BAIL = zend_hash_str_find_ptr(EG(zend_constants), "ASSERT_BAIL", sizeof("ASSERT_BAIL") - 1);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_BAIL_0 = zend_add_global_constant_attribute(const_ASSERT_BAIL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_ASSERT_BAIL_0_arg0;
+	zend_string *attribute_Deprecated_const_ASSERT_BAIL_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_BAIL_0_arg0, attribute_Deprecated_const_ASSERT_BAIL_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_BAIL_0->args[0].value, &attribute_Deprecated_const_ASSERT_BAIL_0_arg0);
+	attribute_Deprecated_const_ASSERT_BAIL_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_ASSERT_BAIL_0_arg1;
+	zend_string *attribute_Deprecated_const_ASSERT_BAIL_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_BAIL_0_arg1, attribute_Deprecated_const_ASSERT_BAIL_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_BAIL_0->args[1].value, &attribute_Deprecated_const_ASSERT_BAIL_0_arg1);
+	attribute_Deprecated_const_ASSERT_BAIL_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_ASSERT_WARNING = zend_hash_str_find_ptr(EG(zend_constants), "ASSERT_WARNING", sizeof("ASSERT_WARNING") - 1);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_WARNING_0 = zend_add_global_constant_attribute(const_ASSERT_WARNING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_ASSERT_WARNING_0_arg0;
+	zend_string *attribute_Deprecated_const_ASSERT_WARNING_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_WARNING_0_arg0, attribute_Deprecated_const_ASSERT_WARNING_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_WARNING_0->args[0].value, &attribute_Deprecated_const_ASSERT_WARNING_0_arg0);
+	attribute_Deprecated_const_ASSERT_WARNING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_ASSERT_WARNING_0_arg1;
+	zend_string *attribute_Deprecated_const_ASSERT_WARNING_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_WARNING_0_arg1, attribute_Deprecated_const_ASSERT_WARNING_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_WARNING_0->args[1].value, &attribute_Deprecated_const_ASSERT_WARNING_0_arg1);
+	attribute_Deprecated_const_ASSERT_WARNING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_constant *const_ASSERT_EXCEPTION = zend_hash_str_find_ptr(EG(zend_constants), "ASSERT_EXCEPTION", sizeof("ASSERT_EXCEPTION") - 1);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_EXCEPTION_0 = zend_add_global_constant_attribute(const_ASSERT_EXCEPTION, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0;
+	zend_string *attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0, attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].value, &attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0);
+	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg1;
+	zend_string *attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg1, attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].value, &attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg1);
+	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)

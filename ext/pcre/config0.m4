@@ -99,7 +99,14 @@ else
     [PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -Wno-implicit-fallthrough"],,
     [-Werror])
 
-  PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -DHAVE_CONFIG_H -I@ext_srcdir@/pcre2lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  PHP_PCRE_CFLAGS=m4_normalize(["
+    $PHP_PCRE_CFLAGS
+    -DHAVE_CONFIG_H
+    -DHAVE_MEMMOVE
+    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
+    -I@ext_srcdir@/pcre2lib
+  "])
+
   AC_DEFINE([HAVE_BUNDLED_PCRE], [1],
     [Define to 1 if PHP uses the bundled PCRE library.])
   AC_DEFINE([PCRE2_CODE_UNIT_WIDTH], [8])

@@ -124,33 +124,33 @@ const ARRAY_FILTER_USE_KEY = UNKNOWN;
 
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_ACTIVE
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_ACTIVE = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_CALLBACK
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_CALLBACK = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_BAIL
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_BAIL = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_WARNING
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_WARNING = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_EXCEPTION
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_EXCEPTION = UNKNOWN;
 
 /* basic_functions.h */
@@ -1686,13 +1686,11 @@ function array_merge_recursive(array ...$arrays): array {}
 
 /**
  * @compile-time-eval
- * @refcount 1
  */
 function array_replace(array $array, array ...$replacements): array {}
 
 /**
  * @compile-time-eval
- * @refcount 1
  */
 function array_replace_recursive(array $array, array ...$replacements): array {}
 
@@ -1775,19 +1773,16 @@ function array_intersect_key(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  */
 function array_intersect_ukey(array $array, ...$rest): array {}
 
 /**
  * @compile-time-eval
- * @refcount 1
  */
 function array_intersect(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  */
 function array_uintersect(array $array, ...$rest): array {}
 
@@ -1805,13 +1800,11 @@ function array_uintersect_assoc(array $array, ...$rest): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  */
 function array_intersect_uassoc(array $array, ...$rest): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  */
 function array_uintersect_uassoc(array $array, ...$rest): array {}
 

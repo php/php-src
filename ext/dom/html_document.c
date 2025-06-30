@@ -84,16 +84,7 @@ typedef struct dom_decoding_encoding_ctx {
 /* https://dom.spec.whatwg.org/#dom-document-implementation */
 zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval)
 {
-	const uint32_t PROP_INDEX = 0;
-
-#if ZEND_DEBUG
-	zend_string *implementation_str = ZSTR_INIT_LITERAL("implementation", false);
-	const zend_property_info *prop_info = zend_get_property_info(dom_abstract_base_document_class_entry, implementation_str, 0);
-	zend_string_release_ex(implementation_str, false);
-	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
-#endif
-
-	zval *cached_implementation = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	zval *cached_implementation = dom_get_prop_checked_offset(obj, 1, "implementation");
 	if (Z_ISUNDEF_P(cached_implementation)) {
 		php_dom_create_implementation(cached_implementation, true);
 	}
@@ -776,7 +767,7 @@ static bool dom_parse_decode_encode_finish(
 
 static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
-	const zend_long VALID_OPTIONS = XML_PARSE_NOERROR | XML_PARSE_COMPACT | HTML_PARSE_NOIMPLIED | DOM_HTML_NO_DEFAULT_NS;
+	const zend_long VALID_OPTIONS = HTML_PARSE_NOERROR | HTML_PARSE_COMPACT | HTML_PARSE_NOIMPLIED | DOM_HTML_NO_DEFAULT_NS;
 	if ((options & ~VALID_OPTIONS) != 0) {
 		zend_argument_value_error(arg_num, "contains invalid flags (allowed flags: "
 										   "LIBXML_NOERROR, "

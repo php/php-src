@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 $dom = new DOMDocument;
-$dom->formatOutput = 1;
+$dom->formatOutput = true;
 var_dump($dom->formatOutput);
 
 $dom2 = clone $dom;

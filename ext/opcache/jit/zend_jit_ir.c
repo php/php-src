@@ -3422,7 +3422,7 @@ static void zend_jit_setup(bool reattached)
 
 		__asm__(
 			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
+			: "=D" (ti));
 		tsrm_tls_offset = ti[1];
 		tsrm_tls_index = ti[0] * 8;
 #elif defined(__FreeBSD__)
@@ -3430,7 +3430,7 @@ static void zend_jit_setup(bool reattached)
 
 		__asm__(
 			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
+			: "=D" (ti));
 		tsrm_tls_offset = ti[1];
 		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/bf56e8b9c8639ac4447d223b83cdc128107cc3cd/libexec/rtld-elf/rtld.c#L5260) */
 		tsrm_tls_index = (ti[0] + 1) * 8;
@@ -3439,7 +3439,7 @@ static void zend_jit_setup(bool reattached)
 
 		__asm__(
 			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=a" (ti));
+			: "=D" (ti));
 		tsrm_tls_offset = ti[1];
 		tsrm_tls_index = ti[0] * 16;
 #endif
@@ -5944,6 +5944,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			ir_IF_FALSE_cold(if_def);
 
 			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
+			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op1.var));
 
 			ref2 = jit_EG(uninitialized_zval);
@@ -5960,6 +5961,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			ir_IF_FALSE_cold(if_def);
 
 			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var)));
+			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op2.var));
 
 			ref2 = jit_EG(uninitialized_zval);

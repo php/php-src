@@ -42,8 +42,8 @@ PHP 8.5 UPGRADE NOTES
     have run and the output handlers have been cleaned up.
     This is a consequence of fixing GH-18033.
   . Traits are now bound before the parent class. This is a subtle behavioral
-    change, but should closer match user expectations, demonstrated by GH-15753
-    and GH-16198.
+    change, but should more closely match user expectations, demonstrated by
+    GH-15753 and GH-16198.
 
 - FileInfo:
   . finfo_file() and finfo::file() now throws a ValueError instead of a
@@ -91,7 +91,7 @@ PHP 8.5 UPGRADE NOTES
     argument when fetching into an object, will now throw an Error.
   . The value of the constants PDO::FETCH_GROUP, PDO::FETCH_UNIQUE,
     PDO::FETCH_CLASSTYPE, PDO::FETCH_PROPS_LATE, and PDO::FETCH_SERIALIZE
-    has changed.
+    have changed.
   . A ValueError is now thrown if PDO::FETCH_PROPS_LATE is used with a fetch
     mode different than PDO::FETCH_CLASS, consistent with other fetch flags.
   . A ValueError is now thrown if PDO::FETCH_INTO is used as a fetch mode in
@@ -115,6 +115,11 @@ PHP 8.5 UPGRADE NOTES
     properties can break engine assumptions.
   . SplFileObject::fwrite's parameter $length is now nullable. The default
     value changed from 0 to null.
+
+- Standard:
+  . Using a printf-family function with a formatter that did not specify the
+    precision previously incorrectly reset the precision instead of treating
+    it as a precision of 0. See GH-18897.
 
 ========================================
 2. New Features
@@ -144,6 +149,10 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/attributes-on-constants
   . The #[\Deprecated] attribute can now be used on constants.
     RFC: https://wiki.php.net/rfc/attributes-on-constants
+  . Added the pipe (|>) operator.
+    RFC: https://wiki.php.net/rfc/pipe-operator-v3
+  . Constructor property promotion can now be used for final properties.
+    RFC: https://wiki.php.net/rfc/final_promotion
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
@@ -158,7 +167,7 @@ PHP 8.5 UPGRADE NOTES
     CURLINFO_USED_PROXY gets zero set if no proxy was used in the
     previous transfer or a non-zero value if a proxy was used.
     CURLINFO_HTTPAUTH_USED and CURLINFO_PROXYAUTH_USED get bitmasks
-    indicating the http and proxy authentication methods that were
+    indicating the HTTP and proxy authentication methods that were
     used in the previous request. See CURLAUTH_* constants for
     possible values.
   . Added CURLOPT_INFILESIZE_LARGE Curl option, which is a safe
@@ -168,14 +177,15 @@ PHP 8.5 UPGRADE NOTES
     accepts the largest integer value the system can handle.
   . Added CURLFOLLOW_OBEYCODE, CURLFOLLOW_FIRSTONLY and CURLFOLLOW_ALL values for
     CURLOPT_FOLLOWLOCATION curl_easy_setopt option.
-    CURLFOLLOW_OBEYCODE to follow more strictly in regard of redirect
+    CURLFOLLOW_OBEYCODE to follow more strictly in regard to redirect
     if they are allowed. CURLFOLLOW_FIRSTONLY to follow only the
-    first redirect thus if there any follow up redirect, it won't go
-    any further. CURLFOLLOW_ALL is equivalent to set CURLOPT_FOLLOWLOCATION
+    first redirect thus if there is any follow up redirect, it won't go
+    any further. CURLFOLLOW_ALL is equivalent to setting CURLOPT_FOLLOWLOCATION
     to true.
 
 - DOM:
   . Added Dom\Element::$outerHTML.
+  . Added $children property to Dom\ParentNode implementations.
 
 - EXIF:
   . Add OffsetTime* Exif tags.
@@ -187,12 +197,37 @@ PHP 8.5 UPGRADE NOTES
     number formats.
   . Added Locale::addLikelySubtags and Locale::minimizeSubtags to
     handle likely tags on a given locale.
-  . Added IntlListFormatter class to format, order, punctuates
+  . Added IntlListFormatter class to format, order, and punctuate
     a list of items with a given locale, IntlListFormatter::TYPE_AND,
     IntlListFormatter::TYPE_OR, IntlListFormatter::TYPE_UNITS operands and
     IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT and
     IntlListFormatter::WIDTH_NARROW widths.
     It is supported from icu 67.
+
+- PDO_Sqlite:
+  . Added class constant Pdo_Sqlite::ATTR_BUSY_STATEMENT.
+  . Added class constants Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT,
+    Pdo_Sqlite::EXPLAIN_MODE_PREPARED, Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN,
+    Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
+
+- SOAP:
+  . Enumeration cases are now dumped in __getTypes().
+  . Implemented request #61105:
+    support for Soap 1.2 Reason Text xml:lang attribute.
+    The signature of SoapFault::__construct() and SoapServer::fault() therefore
+    now have an optional $lang parameter.
+    This support solves compatibility with .NET SOAP clients.
+
+- Sqlite:
+  . Added class constants Sqlite3Stmt::EXPLAIN_MODE_PREPARED,
+    Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN and
+    Sqlite3Stmt::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
+
+- Standard:
+  . mail() now returns the actual sendmail error and detects if the sendmail
+    process was terminated unexpectedly. In such cases, a warning is emitted
+    and the function returns false. Previously, these errors were silently
+    ignored. This change affects only the sendmail transport.
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
@@ -247,7 +282,7 @@ PHP 8.5 UPGRADE NOTES
     was actually never possible.
 
 - LDAP:
-  . ldap_get_option() now accept a NULL connection, as ldap_set_option(),
+  . ldap_get_option() now accepts a NULL connection, as ldap_set_option(),
     to allow retrieval of global options.
 
 - libxml:
@@ -255,16 +290,21 @@ PHP 8.5 UPGRADE NOTES
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
+  . pcntl_waitid() takes an additional resource_usage argument to
+    gather various platform specific metrics about the child process.
 
 - PDO_PGSQL:
   . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
   . Pdo\Pgsql::setAttribute and Pdo\Pgsql::prepare supports
     PDO::ATTR_PREFETCH sets to 0 which set to lazy fetch mode.
-    In this mode, statements cannot be run parallely.
+    In this mode, statements cannot be run in parallel.
 
 - PDO_SQLITE:
   . SQLite PDO::quote() will now throw an exception or emit a warning,
     depending on the error mode, if the string contains a null byte.
+  . PDO::sqliteCreateCollation will now throw an exception
+    if the callback has the wrong return type, making it more
+    in line with Pdo_Sqlite::createCollation behavior.
 
 - PGSQL:
   . pg_copy_from also supports inputs as Iterable.
@@ -287,7 +327,7 @@ PHP 8.5 UPGRADE NOTES
     are enum cases rather than normal class constants.
 
 - Session:
-  . session_start is stricter in regard of the option argument.
+  . session_start is stricter in regard to the option argument.
     It throws a ValueError if the whole is not a hashmap or
     a TypeError if read_on_close value is not a valid type
     compatible with int.
@@ -304,7 +344,7 @@ PHP 8.5 UPGRADE NOTES
     ValueError if the port is lower than 0 or greater than 65535,
     also if any of the hints array entry is indexes numerically.
   . socket_addrinfo_lookup throws a TypeError if any of the hints
-    values cannot be cast to a int and can throw a ValueError if
+    values cannot be cast to int and can throw a ValueError if
     any of these values overflow.
   . socket_set_option with MCAST_LEAVE_GROUP/MCAST_LEAVE_SOURCE_GROUP
     options will throw an exception if the value isn't a valid object
@@ -312,6 +352,12 @@ PHP 8.5 UPGRADE NOTES
   . socket_create/socket_bind can create AF_PACKET family sockets.
   . socket_getsockname gets the interface index and its string
     representation with AF_PACKET socket.
+
+- Tidy:
+  . tidy::__construct/parseFile/parseString now throws a ValueError
+    if the configuration contains an invalid or set a read-only
+    internal entry, a TypeError contains, at least, one element
+    when the key is not a string.
 
 - Zlib:
   . The "use_include_path" argument for the
@@ -331,6 +377,8 @@ PHP 8.5 UPGRADE NOTES
   . get_exception_handler() allows retrieving the current user-defined exception
     handler function.
     RFC: https://wiki.php.net/rfc/get-error-exception-handler
+  . The clone language construct is now a function.
+    RFC: https://wiki.php.net/rfc/clone_with_v2
 
 - Curl:
   . curl_multi_get_handles() allows retrieving all CurlHandles current
@@ -373,6 +421,10 @@ PHP 8.5 UPGRADE NOTES
   . ReflectionConstant::getAttributes() was introduced.
     RFC: https://wiki.php.net/rfc/attributes-on-constants
 
+- Sqlite:
+  . Sqlite3Stmt::busy to check if a statement had been fetched
+    but not completely.
+
 - Standard:
   . Added array_first() and array_last().
     RFC: https://wiki.php.net/rfc/array_first_last
@@ -411,6 +463,9 @@ PHP 8.5 UPGRADE NOTES
 
 - PCRE:
   . Upgraded to pcre2lib from 10.44 to 10.45.
+
+- PDO_Sqlite:
+  . Increased minimum release version support from 3.7.7 to 3.7.17.
 
 - Readline:
   . The return types of readline_add_history(), readline_clear_history(), and
@@ -455,6 +510,10 @@ PHP 8.5 UPGRADE NOTES
   - SHUT_RD.
   - SHUT_WR.
   - SHUT_RDWR.
+
+- Tokenizer:
+  . T_VOID_CAST.
+  . T_PIPE.
 
 ========================================
 11. Changes to INI File Handling
@@ -543,7 +602,7 @@ PHP 8.5 UPGRADE NOTES
   . Now avoids creating extra string copies when converting strings
     for use in the collator.
 
-MBString:
+- MBString:
   . The parts of the code that used SSE2 have been adapted to use SIMD
     with ARM NEON as well.
 
@@ -558,6 +617,8 @@ MBString:
   . Improved performance of array functions with callbacks
     (array_find, array_filter, array_map, usort, ...).
   . Improved performance of urlencode() and rawurlencode().
+  . Improved unpack() performance with nameless repetitions by avoiding
+    creating temporary strings and reparsing them.
 
 - XMLReader:
   . Improved property access performance.

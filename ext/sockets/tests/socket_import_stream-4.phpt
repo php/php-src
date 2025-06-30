@@ -4,8 +4,7 @@ socket_import_stream: effects of closing
 sockets
 --SKIPIF--
 <?php
-
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+if (PHP_OS_FAMILY === 'Windows') {
   die("skip Not Valid for Windows");
 }
 ?>
@@ -16,7 +15,7 @@ function test($stream, $sock) {
     if ($stream !== null) {
         echo "stream_set_blocking ";
         try {
-            print_r(stream_set_blocking($stream, 0));
+            print_r(stream_set_blocking($stream, false));
         } catch (Error $e) {
             echo get_class($e), ": ", $e->getMessage(), "\n";
         }

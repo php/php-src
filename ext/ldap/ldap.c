@@ -4041,6 +4041,11 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 		RETURN_THROWS();
 	}
 
+	if (ZSTR_LEN(reqoid) == 0) {
+		zend_argument_must_not_be_empty_error(2);
+		RETURN_THROWS();
+	}
+
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
 

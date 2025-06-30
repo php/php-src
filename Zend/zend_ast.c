@@ -304,7 +304,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_va(
 	ast->attr = attr;
 	for (uint32_t i = 0; i < children; i++) {
 		ast->child[i] = va_arg(*va, zend_ast *);
-		if (lineno != (uint32_t)-1 && ast->child[i]) {
+		if (lineno == (uint32_t)-1 && ast->child[i]) {
 			lineno = zend_ast_get_lineno(ast->child[i]);
 		}
 	}
@@ -2345,8 +2345,6 @@ simple_list:
 			}
 			smart_str_appendc(str, '`');
 			break;
-		case ZEND_AST_CLONE:
-			PREFIX_OP("clone ", 270, 271);
 		case ZEND_AST_PRINT:
 			PREFIX_OP("print ", 60, 61);
 		case ZEND_AST_INCLUDE_OR_EVAL:
@@ -2518,6 +2516,7 @@ simple_list:
 		case ZEND_AST_GREATER_EQUAL:           BINARY_OP(" >= ",  180, 181, 181);
 		case ZEND_AST_AND:                     BINARY_OP(" && ",  130, 130, 131);
 		case ZEND_AST_OR:                      BINARY_OP(" || ",  120, 120, 121);
+		case ZEND_AST_PIPE:                    BINARY_OP(" |> ",  183, 183, 184);
 		case ZEND_AST_ARRAY_ELEM:
 			if (ast->child[1]) {
 				zend_ast_export_ex(str, ast->child[1], 80, indent);
@@ -2794,6 +2793,9 @@ simple_list:
 				zend_ast_export_attributes(str, ast->child[3], indent, 0);
 			}
 			zend_ast_export_visibility(str, ast->attr, ZEND_MODIFIER_TARGET_CPP);
+			if (ast->attr & ZEND_ACC_FINAL) {
+				smart_str_appends(str, "final ");
+			}
 			if (ast->child[0]) {
 				zend_ast_export_type(str, ast->child[0], indent);
 				smart_str_appendc(str, ' ');

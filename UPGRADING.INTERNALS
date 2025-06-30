@@ -17,6 +17,12 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 - Core
   . PG(arg_separator).input and PG(arg_separator).output are now `zend_string*`
     instead of `char*`.
+  . DL_LOAD now doesn't use RTLD_DEEPBIND deepbind anymore on platforms
+    where dlmopen with LM_ID_NEWLM is available:
+    this means shared library symbol isolation (if needed) must be enabled on
+    the user side when requiring libphp.so, by using dlmopen with LM_ID_NEWLM
+    instead of dlopen.
+    RTLD_DEEPBIND is still enabled when the Apache SAPI is in use.
 
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
@@ -34,10 +40,21 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . Added ZEND_NONSTRING attribute macro for character arrays that do not
     represent strings. This allows to silence the GCC 15.x
     `-Wunterminated-string-initialization` warning.
+  . Added the zend_update_exception_properties() function for instantiating
+    Exception child classes. It updates the $message, $code, and $previous
+    properties.
+  . ZEND_IS_XDIGIT() macro was removed because it was unused and its name
+    did not match its actual behavior.
+  . zend_register_constant() now returns a pointer to the added constant
+    on success and NULL on failure instead of SUCCESS/FAILURE.
 
 ========================
 2. Build system changes
 ========================
+
+- Abstract
+  . Preprocessor macro SIZEOF_PTRDIFF_T has been removed.
+  . Preprocessor macro SIZEOF_INTMAX_T has been removed.
 
 - Windows build system changes
   . SAPI() and ADD_SOURCES() now suport the optional `duplicate_sources`
@@ -45,6 +62,21 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     This allows to build additional variants of SAPIs (e.g. a DLL and EXE)
     without duplicate build rules.  It is up to the SAPI maintainers to ensure
     that appropriate build rules are created.
+
+- Unix build system changes
+  . libdir is properly set when --libdir (ex: /usr/lib64) and --with-libdir (ex lib64)
+    configure options are used to ${libdir}/php (ex: /usr/lib64/php)
+  . PHP_ODBC_CFLAGS, PHP_ODBC_LFLAGS, PHP_ODBC_LIBS, PHP_ODBC_TYPE preprocessor
+    macros defined by ext/odbc are now defined in php_config.h instead of the
+    build-defs.h header.
+  . Autoconf macro PHP_AP_EXTRACT_VERSION has been removed.
+  . Autoconf macro PHP_BUILD_THREAD_SAFE has been removed (set enable_zts
+    manually).
+  . Autoconf macro PHP_DEF_HAVE has been removed (use AC_DEFINE).
+  . Autoconf macro PHP_OUTPUT has been removed (use AC_CONFIG_FILES).
+  . Autoconf macro PHP_TEST_BUILD has been removed (use AC_* macros).
+  . Preprocessor macro HAVE_PTRDIFF_T has been removed.
+  . Preprocessor macro HAVE_INTMAX_T has been removed.
 
 ========================
 3. Module changes

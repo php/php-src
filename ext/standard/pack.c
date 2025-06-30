@@ -16,30 +16,10 @@
 
 #include "php.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#ifdef PHP_WIN32
-#define O_RDONLY _O_RDONLY
-#include "win32/param.h"
-#else
-#include <sys/param.h>
-#endif
 #include "pack.h"
-#ifdef HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
-#include <pwd.h>
-#endif
-#endif
-#include "fsock.h"
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 
 #define INC_OUTPUTPOS(a,b) \
 	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
@@ -274,7 +254,7 @@ PHP_FUNCTION(pack)
 		}
 
 		/* Handle special arg '*' for all codes and check argv overflows */
-		switch ((int) code) {
+		switch (code) {
 			/* Never uses any args */
 			case 'x':
 			case 'X':
@@ -380,13 +360,13 @@ too_few_args:
 
 	/* Calculate output length and upper bound while processing*/
 	for (i = 0; i < formatcount; i++) {
-	    int code = (int) formatcodes[i];
+		char code = formatcodes[i];
 		int arg = formatargs[i];
 
-		switch ((int) code) {
+		switch (code) {
 			case 'h':
 			case 'H':
-				INC_OUTPUTPOS((arg + (arg % 2)) / 2,1)	/* 4 bit per arg */
+				INC_OUTPUTPOS((arg / 2) + (arg % 2),1)	/* 4 bit per arg */
 				break;
 
 			case 'a':
@@ -463,10 +443,10 @@ too_few_args:
 
 	/* Do actual packing */
 	for (i = 0; i < formatcount; i++) {
-	    int code = (int) formatcodes[i];
+		char code = formatcodes[i];
 		int arg = formatargs[i];
 
-		switch ((int) code) {
+		switch (code) {
 			case 'a':
 			case 'A':
 			case 'Z': {
@@ -632,7 +612,7 @@ too_few_args:
 
 			case 'd': {
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					memcpy(&ZSTR_VAL(output)[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -642,7 +622,7 @@ too_few_args:
 			case 'e': {
 				/* pack little endian double */
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					php_pack_copy_double(1, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
@@ -652,7 +632,7 @@ too_few_args:
 			case 'E': {
 				/* pack big endian double */
 				while (arg-- > 0) {
-					double v = (double) zval_get_double(&argv[currentarg++]);
+					double v = zval_get_double(&argv[currentarg++]);
 					php_pack_copy_double(0, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
@@ -737,7 +717,6 @@ PHP_FUNCTION(unpack)
 
 	while (formatlen-- > 0) {
 		char type = *(format++);
-		char c;
 		int repetitions = 1, argb;
 		char *name;
 		int namelen;
@@ -745,7 +724,7 @@ PHP_FUNCTION(unpack)
 
 		/* Handle format arguments if any */
 		if (formatlen > 0) {
-			c = *format;
+			char c = *format;
 
 			if (c >= '0' && c <= '9') {
 				errno = 0;
@@ -784,7 +763,7 @@ PHP_FUNCTION(unpack)
 		if (namelen > 200)
 			namelen = 200;
 
-		switch ((int) type) {
+		switch (type) {
 			/* Never use any input */
 			case 'X':
 				size = -1;
@@ -885,12 +864,15 @@ PHP_FUNCTION(unpack)
 			if ((inputpos + size) <= inputlen) {
 
 				zend_string* real_name;
+				zend_long long_key = 0;
 				zval val;
 
-				if (repetitions == 1 && namelen > 0) {
+				if (namelen == 0) {
+					real_name = NULL;
+					long_key = i + 1;
+				} else if (repetitions == 1) {
 					/* Use a part of the formatarg argument directly as the name. */
 					real_name = zend_string_init_fast(name, namelen);
-
 				} else {
 					/* Need to add the 1-based element number to the name */
 					char buf[MAX_LENGTH_OF_LONG + 1];
@@ -899,7 +881,7 @@ PHP_FUNCTION(unpack)
 					real_name = zend_string_concat2(name, namelen, res, digits);
 				}
 
-				switch ((int) type) {
+				switch (type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
 						zend_long len = inputlen - inputpos;	/* Remaining string */
@@ -912,12 +894,10 @@ PHP_FUNCTION(unpack)
 						size = len;
 
 						ZVAL_STRINGL(&val, &input[inputpos], len);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					case 'A': {
 						/* A will strip any trailing whitespace */
-						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
 						zend_long len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -929,23 +909,21 @@ PHP_FUNCTION(unpack)
 
 						/* Remove trailing white space and nulls chars from unpacked data */
 						while (--len >= 0) {
-							if (input[inputpos + len] != padn
-								&& input[inputpos + len] != pads
-								&& input[inputpos + len] != padt
-								&& input[inputpos + len] != padc
-								&& input[inputpos + len] != padl
+							if (input[inputpos + len] != '\0'
+								&& input[inputpos + len] != ' '
+								&& input[inputpos + len] != '\t'
+								&& input[inputpos + len] != '\r'
+								&& input[inputpos + len] != '\n'
 							)
 								break;
 						}
 
 						ZVAL_STRINGL(&val, &input[inputpos], len + 1);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 					/* New option added for Z to remain in-line with the Perl implementation */
 					case 'Z': {
 						/* Z will strip everything after the first null character */
-						char pad = '\0';
 						zend_long s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
@@ -958,13 +936,12 @@ PHP_FUNCTION(unpack)
 
 						/* Remove everything after the first null */
 						for (s=0 ; s < len ; s++) {
-							if (input[inputpos + s] == pad)
+							if (input[inputpos + s] == '\0')
 								break;
 						}
 						len = s;
 
 						ZVAL_STRINGL(&val, &input[inputpos], len);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -979,7 +956,9 @@ PHP_FUNCTION(unpack)
 
 
 						if (size > INT_MAX / 2) {
-							zend_string_release(real_name);
+							if (real_name) {
+								zend_string_release_ex(real_name, false);
+							}
 							zend_argument_value_error(1, "repeater must be less than or equal to %d", INT_MAX / 2);
 							RETURN_THROWS();
 						}
@@ -1016,7 +995,6 @@ PHP_FUNCTION(unpack)
 						ZSTR_VAL(buf)[len] = '\0';
 
 						ZVAL_STR(&val, buf);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1026,7 +1004,6 @@ PHP_FUNCTION(unpack)
 						zend_long v = (type == 'c') ? (int8_t) x : x;
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1046,7 +1023,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1062,7 +1038,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1082,8 +1057,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
-
 						break;
 					}
 
@@ -1104,7 +1077,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 #endif
@@ -1124,7 +1096,6 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_DOUBLE(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
@@ -1143,13 +1114,12 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_DOUBLE(&val, v);
-						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
 						break;
 					}
 
 					case 'x':
 						/* Do nothing with input, just skip it */
-						break;
+						goto no_output;
 
 					case 'X':
 						if (inputpos < size) {
@@ -1160,7 +1130,7 @@ PHP_FUNCTION(unpack)
 								php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 							}
 						}
-						break;
+						goto no_output;
 
 					case '@':
 						if (repetitions <= inputlen) {
@@ -1170,10 +1140,19 @@ PHP_FUNCTION(unpack)
 						}
 
 						i = repetitions - 1;	/* Done, break out of for loop */
-						break;
+						goto no_output;
 				}
 
-				zend_string_release(real_name);
+				if (real_name) {
+					zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);
+				} else {
+					zend_hash_index_update(Z_ARRVAL_P(return_value), long_key, &val);
+				}
+
+no_output:
+				if (real_name) {
+					zend_string_release_ex(real_name, false);
+				}
 
 				inputpos += size;
 				if (inputpos < 0) {
