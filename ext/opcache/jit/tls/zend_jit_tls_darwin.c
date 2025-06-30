@@ -57,6 +57,7 @@ void *zend_jit_tsrm_ls_cache_address(
 	size_t module_offset
 ) {
 
+#if defined(__x86_64__)
 	if (tcb_offset) {
 		char *addr;
 		__asm__ __volatile__(
@@ -75,5 +76,7 @@ void *zend_jit_tsrm_ls_cache_address(
 		);
 		return base + module_offset;
 	}
+#endif
+
 	return NULL;
 }
