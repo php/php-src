@@ -73,19 +73,23 @@ if test "$PHP_OPCACHE" != "no"; then
         IR_TARGET=IR_TARGET_X64
         DASM_FLAGS="-D X64APPLE=1 -D X64=1"
         DASM_ARCH="x86"
+        TLS_TARGET="darwin"
       ],
       [*x86_64*|amd64-*-freebsd*], [
         IR_TARGET=IR_TARGET_X64
         DASM_FLAGS="-D X64=1"
         DASM_ARCH="x86"
+        TLS_TARGET="x86_64"
       ],
       [[i[34567]86*|x86*]], [
         IR_TARGET=IR_TARGET_X86
         DASM_ARCH="x86"
+        TLS_TARGET="x86"
       ],
       [aarch64*], [
         IR_TARGET=IR_TARGET_AARCH64
         DASM_ARCH="aarch64"
+        TLS_TARGET="aarch64"
       ])
 
     AS_VAR_IF([PHP_CAPSTONE], [yes],
@@ -102,6 +106,10 @@ if test "$PHP_OPCACHE" != "no"; then
 
     JIT_CFLAGS="-I@ext_builddir@/jit/ir -D$IR_TARGET -DIR_PHP"
     AS_VAR_IF([ZEND_DEBUG], [yes], [JIT_CFLAGS="$JIT_CFLAGS -DIR_DEBUG"])
+
+    AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
+      ZEND_JIT_SRC="$ZEND_JIT_SRC jit/tls/zend_jit_tls_$TLS_TARGET.c"
+    ])
   ])
 
   AC_CHECK_FUNCS([mprotect shm_create_largepage])

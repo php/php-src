@@ -128,6 +128,8 @@ jobs:
             --asan -x
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Test TLS resolution
+        uses: ./.github/actions/test-tls-alpine
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -260,6 +262,9 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Test TLS resolution
+        if: matrix.debug && matrix.zts && !matrix.asan
+        uses: ./.github/actions/test-tls-x64
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -349,6 +354,9 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Test TLS resolution
+        if: matrix.debug && matrix.zts
+        uses: ./.github/actions/test-tls-x32
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -408,6 +416,10 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Test TLS resolution
+        # JIT+ZTS not supported yet on ARM64
+        if: matrix.os != '14' && matrix.debug && matrix.zts
+        uses: ./.github/actions/test-tls-macos
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
