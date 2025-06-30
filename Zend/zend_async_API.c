@@ -42,6 +42,16 @@ static void enqueue_coroutine(zend_coroutine_t *coroutine)
 	ASYNC_THROW_ERROR("Async API is not enabled");
 }
 
+static void engine_shutdown_stub(void) {}
+
+static void shutdown_stub(void) {}
+
+static zend_array* get_coroutines_stub(void) { return NULL; }
+
+static void add_microtask_stub(zend_async_microtask_t *microtask) {}
+
+static zend_array* get_awaiting_info_stub(zend_coroutine_t *coroutine) { return NULL; }
+
 static bool spawn_and_throw(zend_object *exception, zend_async_scope_t *scope, int32_t priority)
 {
 	ASYNC_THROW_ERROR("Async API is not enabled");
@@ -81,11 +91,11 @@ zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn = enqueue_corouti
 zend_async_resume_t zend_async_resume_fn = NULL;
 zend_async_cancel_t zend_async_cancel_fn = NULL;
 zend_async_spawn_and_throw_t zend_async_spawn_and_throw_fn = spawn_and_throw;
-zend_async_shutdown_t zend_async_shutdown_fn = NULL;
-zend_async_engine_shutdown_t zend_async_engine_shutdown_fn = NULL;
-zend_async_get_coroutines_t zend_async_get_coroutines_fn = NULL;
-zend_async_add_microtask_t zend_async_add_microtask_fn = NULL;
-zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = NULL;
+zend_async_shutdown_t zend_async_shutdown_fn = shutdown_stub;
+zend_async_engine_shutdown_t zend_async_engine_shutdown_fn = engine_shutdown_stub;
+zend_async_get_coroutines_t zend_async_get_coroutines_fn = get_coroutines_stub;
+zend_async_add_microtask_t zend_async_add_microtask_fn = add_microtask_stub;
+zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = get_awaiting_info_stub;
 zend_async_get_class_ce_t zend_async_get_class_ce_fn = get_class_ce;
 
 static zend_atomic_bool reactor_lock = {0};
