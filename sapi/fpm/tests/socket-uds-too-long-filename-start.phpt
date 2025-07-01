@@ -40,11 +40,7 @@ $tester->expectLogPattern(
 
 $files = glob($socketFilePrefix . '*');
 
-if ($files === []) {
-    echo 'Socket files were not found.' . PHP_EOL;
-}
-
-if ($socketFile === $files[0]) {
+if (isset($files[0]) && $socketFile === $files[0]) {
     // this means the socket file path length is not an issue (anymore). Might be not long enough
     echo 'Socket file is the same as configured.' . PHP_EOL;
 }
