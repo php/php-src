@@ -144,7 +144,7 @@ static zend_result uriparser_read_host(const uri_internal_t *internal_uri, uri_c
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL && get_text_range_length(&uriparser_uri->hostText) > 0) {
-		if (uriparser_uri->hostData.ip6 != NULL) {
+		if (uriparser_uri->hostData.ip6 != NULL || uriparser_uri->hostData.ipFuture.first != NULL) {
 			smart_str host_str = {0};
 
 			smart_str_appendc(&host_str, '[');
@@ -196,7 +196,7 @@ static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_c
 		const UriPathSegmentA *p;
 		smart_str str = {0};
 
-		if (uriparser_uri->absolutePath || uriIsHostSetA(uriparser_uri)) {
+		if (uriparser_uri->absolutePath || uriHasHostA(uriparser_uri)) {
 			smart_str_appendc(&str, '/');
 		}
 
