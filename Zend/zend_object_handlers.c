@@ -1951,15 +1951,12 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		fbc = Z_FUNC_P(func);
 		if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_class_entry *scope = zend_get_executed_scope();
-			if (UNEXPECTED(fbc->common.scope != scope)) {
-				if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
-				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
-					zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
-					if (!fallback_fbc) {
-						zend_bad_method_call(fbc, function_name, scope);
-					}
-					fbc = fallback_fbc;
+			if (!zend_check_method_accessible(fbc, scope)) {
+				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
+				if (!fallback_fbc) {
+					zend_bad_method_call(fbc, function_name, scope);
 				}
+				fbc = fallback_fbc;
 			}
 		}
 	} else {
@@ -2117,13 +2114,10 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 	if (constructor) {
 		if (UNEXPECTED(!(constructor->op_array.fn_flags & ZEND_ACC_PUBLIC))) {
 			zend_class_entry *scope = get_fake_or_executed_scope();
-			if (UNEXPECTED(constructor->common.scope != scope)) {
-				if (UNEXPECTED(constructor->op_array.fn_flags & ZEND_ACC_PRIVATE)
-				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
-					zend_bad_constructor_call(constructor, scope);
-					zend_object_store_ctor_failed(zobj);
-					constructor = NULL;
-				}
+			if (!zend_check_method_accessible(constructor, scope)) {
+				zend_bad_constructor_call(constructor, scope);
+				zend_object_store_ctor_failed(zobj);
+				constructor = NULL;
 			}
 		}
 	}

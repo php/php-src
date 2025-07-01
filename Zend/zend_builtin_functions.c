@@ -89,14 +89,9 @@ ZEND_FUNCTION(clone)
 		RETURN_THROWS();
 	}
 
-	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
-		if (clone->common.scope != scope) {
-			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_bad_method_call(clone, clone->common.function_name, scope);
-				RETURN_THROWS();
-			}
-		}
+	if (clone && !zend_check_method_accessible(clone, scope)) {
+		zend_bad_method_call(clone, clone->common.function_name, scope);
+		RETURN_THROWS();
 	}
 
 	zend_object *cloned;
@@ -953,13 +948,7 @@ ZEND_FUNCTION(get_class_methods)
 	scope = zend_get_executed_scope();
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, mptr) {
-		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		 || (scope &&
-			 (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
-			   zend_check_protected(mptr->common.scope, scope))
-		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
-			   scope == mptr->common.scope)))
-		) {
+		if (zend_check_method_accessible(mptr, scope)) {
 			ZVAL_STR_COPY(&method_name, mptr->common.function_name);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}
