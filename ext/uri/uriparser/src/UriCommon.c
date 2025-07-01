@@ -119,6 +119,40 @@ int URI_FUNC(CompareRange)(
 
 
 
+UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
+		const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory) {
+	const int lenInChars = (int)(sourceRange->afterLast - sourceRange->first);
+	const int lenInBytes = lenInChars * sizeof(URI_CHAR);
+	URI_CHAR * dup = memory->malloc(memory, lenInBytes);
+	if (dup == NULL) {
+		return URI_FALSE;
+	}
+	memcpy(dup, sourceRange->first, lenInBytes);
+	destRange->first = dup;
+	destRange->afterLast = dup + lenInChars;
+
+	return URI_TRUE;
+}
+
+
+
+UriBool URI_FUNC(CopyRangeAsNeeded)(URI_TYPE(TextRange) * destRange,
+		const URI_TYPE(TextRange) * sourceRange, UriBool useSafe, UriMemoryManager * memory) {
+	if (sourceRange->first == NULL) {
+		destRange->first = NULL;
+		destRange->afterLast = NULL;
+	} else if (sourceRange->first == sourceRange->afterLast && useSafe) {
+		destRange->first = URI_FUNC(SafeToPointTo);
+		destRange->afterLast = URI_FUNC(SafeToPointTo);
+	} else {
+		return URI_FUNC(CopyRange)(destRange, sourceRange, memory);
+	}
+
+	return URI_TRUE;
+}
+
+
+
 UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri,
 		UriBool relative, UriBool pathOwned, UriMemoryManager * memory) {
 	URI_TYPE(PathSegment) * walker;
@@ -189,7 +223,7 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri,
 
 						if (prev == NULL) {
 							/* Last and first */
-							if (URI_FUNC(IsHostSet)(uri)) {
+							if (URI_FUNC(HasHost)(uri)) {
 								/* Replace "." with empty segment to represent trailing slash */
 								walker->text.first = URI_FUNC(SafeToPointTo);
 								walker->text.afterLast = URI_FUNC(SafeToPointTo);
@@ -463,7 +497,7 @@ URI_CHAR URI_FUNC(HexToLetterEx)(unsigned int value, UriBool uppercase) {
 
 
 /* Checks if a URI has the host component set. */
-UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri) {
+UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri) {
 	return (uri != NULL)
 			&& ((uri->hostText.first != NULL)
 				|| (uri->hostData.ip4 != NULL)
@@ -601,7 +635,7 @@ void URI_FUNC(FixEmptyTrailSegment)(URI_TYPE(Uri) * uri,
 		UriMemoryManager * memory) {
 	/* Fix path if only one empty segment */
 	if (!uri->absolutePath
-			&& !URI_FUNC(IsHostSet)(uri)
+			&& !URI_FUNC(HasHost)(uri)
 			&& (uri->pathHead != NULL)
 			&& (uri->pathHead->next == NULL)
 			&& (uri->pathHead->text.first == uri->pathHead->text.afterLast)) {

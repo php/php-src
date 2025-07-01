@@ -128,7 +128,7 @@ static int URI_FUNC(ResolveAbsolutePathFlag)(URI_TYPE(Uri) * absWork,
 		return URI_ERROR_NULL;
 	}
 
-	if (URI_FUNC(IsHostSet)(absWork) && absWork->absolutePath) {
+	if (URI_FUNC(HasHost)(absWork) && absWork->absolutePath) {
 		/* Empty segment needed, instead? */
 		if (absWork->pathHead == NULL) {
 			URI_TYPE(PathSegment) * const segment = memory->malloc(memory, sizeof(URI_TYPE(PathSegment)));
@@ -203,7 +203,7 @@ static int URI_FUNC(AddBaseUriImpl)(URI_TYPE(Uri) * absDest,
 	/* [06/32]	else */
 				} else {
 	/* [07/32]		if defined(R.authority) then */
-					if (URI_FUNC(IsHostSet)(relSource)) {
+					if (URI_FUNC(HasHost)(relSource)) {
 	/* [08/32]			T.authority = R.authority; */
 						if (!URI_FUNC(CopyAuthority)(absDest, relSource, memory)) {
 							return URI_ERROR_MALLOC;
