@@ -1014,7 +1014,9 @@ dnl _PHP_CHECK_SIZEOF(type, cross-value, extra-headers [, found-action [, not-fo
 dnl
 dnl Internal helper macro.
 dnl
-AC_DEFUN([_PHP_CHECK_SIZEOF], [
+AC_DEFUN([_PHP_CHECK_SIZEOF],
+[m4_warn([obsolete],
+  [The PHP_CHECK_SIZEOF macro is obsolete. Use AC_CHECK_SIZEOF.])
   php_cache_value=php_cv_sizeof_[]$1
   AC_CACHE_VAL(php_cv_sizeof_[]$1, [
     old_LIBS=$LIBS
@@ -1055,6 +1057,9 @@ ifelse([$5],[],,[else $5])
 
 dnl
 dnl PHP_CHECK_SIZEOF(type, cross-value, extra-headers)
+dnl
+dnl Checks the size of specified "type". This macro is obsolete as of PHP 8.5 in
+dnl favor of the AC_CHECK_SIZEOF.
 dnl
 AC_DEFUN([PHP_CHECK_SIZEOF], [
   AC_MSG_CHECKING([size of $1])
