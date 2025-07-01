@@ -4123,15 +4123,6 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 	}
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_clone_call(zend_function *clone, zend_class_entry *scope)
-{
-	zend_throw_error(NULL, "Call to %s %s::__clone() from %s%s",
-		zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
-		scope ? "scope " : "global scope",
-		scope ? ZSTR_VAL(scope->name) : ""
-	);
-}
-
 #if ZEND_INTENSIVE_DEBUGGING
 
 #define CHECK_SYMBOL_TABLES()													\
