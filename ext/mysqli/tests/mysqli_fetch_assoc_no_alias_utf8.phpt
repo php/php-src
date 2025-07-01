@@ -9,13 +9,13 @@ mysqli
     if (!$link = @mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
-    if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'UTF8'"))
+    if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE '%UTF8%'"))
         die("skip Cannot run SHOW CHARACTER SET to check charsets");
 
     if (!$tmp = mysqli_fetch_assoc($res))
         die("skip Looks like UTF8 is not available on the server");
 
-    if (strtolower($tmp['Charset']) !== 'utf8')
+    if (strtolower($tmp['Charset']) !== 'utf8' && strtolower($tmp['Charset']) !== 'utf8mb3')
         die("skip Not sure if UTF8 is available, canceling the test");
 
     mysqli_free_result($res);
