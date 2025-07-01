@@ -656,14 +656,14 @@ ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t a
 }
 /* }}} */
 
-ZEND_API const char *zend_get_executed_filename(void) /* {{{ */
+ZEND_ATTRIBUTE_PURE ZEND_API const char *zend_get_executed_filename(void) /* {{{ */
 {
 	zend_string *filename = zend_get_executed_filename_ex();
 	return filename != NULL ? ZSTR_VAL(filename) : "[no active file]";
 }
 /* }}} */
 
-ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
+ZEND_ATTRIBUTE_PURE ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 {
 	zend_string *filename_override = EG(filename_override);
 	if (filename_override != NULL) {
@@ -683,7 +683,7 @@ ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
+ZEND_ATTRIBUTE_PURE ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 {
 	zend_long lineno_override = EG(lineno_override);
 	if (lineno_override != -1) {
@@ -711,7 +711,7 @@ ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_get_executed_scope(void) /* {{{ */
+ZEND_ATTRIBUTE_PURE ZEND_API zend_class_entry *zend_get_executed_scope(void) /* {{{ */
 {
 	zend_execute_data *ex = EG(current_execute_data);
 
