@@ -1283,6 +1283,13 @@ ZEND_API uint32_t zend_coroutine_add_switch_handler(
 		return 0;
 	}
 	
+	/* Check for duplicate handler */
+	for (uint32_t i = 0; i < vector->length; i++) {
+		if (vector->data[i].handler == handler) {
+			return i;
+		}
+	}
+	
 	/* Expand array if needed */
 	if (vector->length == vector->capacity) {
 		vector->capacity = vector->capacity ? vector->capacity * 2 : 4;
@@ -1383,6 +1390,13 @@ ZEND_API void zend_async_add_main_coroutine_start_handler(
 	zend_coroutine_switch_handler_fn handler)
 {
 	zend_coroutine_switch_handlers_vector_t *vector = &global_main_coroutine_start_handlers;
+
+	/* Check for duplicate handler */
+	for (uint32_t i = 0; i < vector->length; i++) {
+		if (vector->data[i].handler == handler) {
+			return;
+		}
+	}
 
 	/* Expand vector if needed */
 	if (vector->length >= vector->capacity) {

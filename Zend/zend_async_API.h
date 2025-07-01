@@ -1423,5 +1423,11 @@ END_EXTERN_C()
 
 /* Global Main Coroutine Switch Handlers API Macros */
 #define ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER(handler) zend_async_add_main_coroutine_start_handler(handler)
+#define ZEND_ASYNC_ADD_SWITCH_HANDLER(handler) \
+	if (ZEND_ASYNC_CURRENT_COROUTINE) { \
+		zend_coroutine_add_switch_handler(ZEND_ASYNC_CURRENT_COROUTINE, handler); \
+	} else { \
+		zend_async_add_main_coroutine_start_handler(handler); \
+	}
 
 #endif //ZEND_ASYNC_API_H
