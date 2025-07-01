@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-18833 (Use after free with weakmaps dependent on destruction
     order). (Daniil Gentili)
   . Fixed bug GH-18907 (Leak when creating cycle in hook). (ilutov)
+  . Fix OSS-Fuzz #427814456. (nielsdos)
 
 - Curl:
   . Fix memory leaks when returning refcounted value from curl callback.
