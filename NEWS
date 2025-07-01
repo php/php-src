@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18958 (Fatal error during shutdown after pcntl_rfork() or
     pcntl_forkx() with zend-max-execution-timers). (Arnaud)
 
+- SOAP:
+  . Fixed bug GH-18990, bug #81029, bug #47314 (SOAP HTTP socket not closing
+    on object destruction). (nielsdos)
+
 - Standard:
   . Fix misleading errors in printf(). (nielsdos)
   . Fix RCN violations in array functions. (nielsdos)
