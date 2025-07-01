@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0alpha1
+03 Jul 2025, PHP 8.5.0alpha1
 
 - BCMath:
   . Simplify `bc_divide()` code. (SakiTakamachi)
