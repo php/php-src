@@ -1344,6 +1344,7 @@ static void php_session_remove_cookie(void) {
 
 	header_line.line = session_cookie;
 	header_line.line_len = strlen(session_cookie);
+	header_line.header_len = sizeof("Set-Cookie") - 1;
 	sapi_header_op(SAPI_HEADER_DELETE_PREFIX, &header_line);
 
 	efree(session_cookie);
