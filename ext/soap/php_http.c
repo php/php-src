@@ -506,9 +506,9 @@ try_again:
 		     zend_string_equals(orig->host, phpurl->host) &&
 		     orig->port == phpurl->port))) {
 		} else {
+			ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 			stream = NULL;
 			use_proxy = 0;
@@ -517,9 +517,9 @@ try_again:
 
 	/* Check if keep-alive connection is still opened */
 	if (stream != NULL && php_stream_eof(stream)) {
+		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
 		convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 		stream = NULL;
 		use_proxy = 0;
@@ -528,9 +528,7 @@ try_again:
 	if (!stream) {
 		stream = http_connect(this_ptr, phpurl, use_ssl, context, &use_proxy);
 		if (stream) {
-			php_stream_auto_cleanup(stream);
-			ZVAL_RES(Z_CLIENT_HTTPSOCKET_P(this_ptr), stream->res);
-			GC_ADDREF(stream->res);
+			php_stream_to_zval(stream, Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			ZVAL_LONG(Z_CLIENT_USE_PROXY_P(this_ptr), use_proxy);
 		} else {
 			php_url_free(phpurl);
@@ -686,9 +684,9 @@ try_again:
 
 				if (UNEXPECTED(php_random_bytes_throw(&nonce, sizeof(nonce)) != SUCCESS)) {
 					ZEND_ASSERT(EG(exception));
+					ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 					php_stream_close(stream);
 					convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-					convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 					convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 					smart_str_free(&soap_headers_z);
 					smart_str_free(&soap_headers);
@@ -904,9 +902,9 @@ try_again:
 			if (request != buf) {
 				zend_string_release_ex(request, 0);
 			}
+			ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL);
 			smart_str_free(&soap_headers_z);
@@ -929,8 +927,8 @@ try_again:
 				if (request != buf) {
 					zend_string_release_ex(request, 0);
 				}
+				ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 				php_stream_close(stream);
-				convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 				convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
 				smart_str_free(&soap_headers_z);
@@ -982,11 +980,11 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
+		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
 		if (http_headers) {
 			zend_string_release_ex(http_headers, 0);
 		}
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 		if (http_msg) {
 			efree(http_msg);
@@ -1117,9 +1115,9 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
+		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
 		zend_string_release_ex(http_headers, 0);
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL);
 		if (http_msg) {
@@ -1134,8 +1132,8 @@ try_again:
 	}
 
 	if (http_close) {
+		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 		stream = NULL;
 	}

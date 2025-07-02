@@ -1390,7 +1390,6 @@ static inline CURLcode add_simple_field(curl_mime *mime, zend_string *string_key
 	part = curl_mime_addpart(mime);
 	if (part == NULL) {
 		zend_tmp_string_release(tmp_postval);
-		zend_string_release_ex(string_key, 0);
 		return CURLE_OUT_OF_MEMORY;
 	}
 	if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK

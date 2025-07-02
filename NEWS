@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Curl:
   . Fix memory leaks when returning refcounted value from curl callback.
     (nielsdos)
+  . Remove incorrect string release. (nielsdos)
 
 - DOM:
   . Fixed bug GH-18979 (Dom\XMLDocument::createComment() triggers undefined
@@ -40,6 +41,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18958 (Fatal error during shutdown after pcntl_rfork() or
     pcntl_forkx() with zend-max-execution-timers). (Arnaud)
 
+- SOAP:
+  . Fixed bug GH-18990, bug #81029, bug #47314 (SOAP HTTP socket not closing
+    on object destruction). (nielsdos)
+
 - Standard:
   . Fix misleading errors in printf(). (nielsdos)
   . Fix RCN violations in array functions. (nielsdos)
@@ -49,6 +54,9 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed GH-13264 (fgets() and stream_get_line() do not return false on filter
     fatal error). (Jakub Zelenka)
+
+- Zip:
+  . Fix leak when path is too long in ZipArchive::extractTo(). (nielsdos)
 
 03 Jul 2025, PHP 8.4.10
 
