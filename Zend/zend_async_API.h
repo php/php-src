@@ -294,6 +294,26 @@ struct _zend_async_microtask_s {
 	uint32_t ref_count;
 };
 
+#define ZEND_ASYNC_MICROTASK_ADD_REF(microtask) \
+	do { \
+		if (microtask != NULL) { \
+			microtask->ref_count++; \
+		} \
+	} while (0)
+
+#define ZEND_ASYNC_MICROTASK_RELEASE(microtask) \
+	do { \
+		if (microtask != NULL && microtask->ref_count > 1) { \
+			microtask->ref_count--; \
+		} else { \
+			microtask->ref_count = 0; \
+			if (microtask->dtor) { \
+				microtask->dtor(microtask); \
+			} \
+			efree(microtask); \
+		} \
+	} while (0)
+
 ///////////////////////////////////////////////////////////////////
 /// Async iterator structures
 ///////////////////////////////////////////////////////////////////
