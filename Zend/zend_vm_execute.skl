@@ -126,7 +126,7 @@ ZEND_API void ZEND_FASTCALL zend_serialize_opcode_handler(zend_op *op)
 	}
 	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(uintptr_t)op->handler);
 	ZEND_ASSERT(zv != NULL);
-	op->handler = (const void *)(uintptr_t)Z_LVAL_P(zv);
+	op->handler = (zend_vm_opcode_handler_t)(uintptr_t)Z_LVAL_P(zv);
 }
 
 ZEND_API void ZEND_FASTCALL zend_deserialize_opcode_handler(zend_op *op)

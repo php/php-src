@@ -298,6 +298,7 @@ void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D)
 	ZVAL_NULL(result);
 }
 
+#if ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = (zend_op_array*)EX(func);
@@ -341,6 +342,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 		ZEND_OPCODE_TAIL_CALL(handler);
 	}
 }
+#endif
 
 static zend_always_inline zend_constant* _zend_quick_get_constant(
 		const zval *key, uint32_t flags, int check_defined_only)
@@ -402,6 +404,7 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key)
 	return _zend_quick_get_constant(key, 0, 1);
 }
 
+#if ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_counter_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t cost)
 {
 	zend_jit_op_array_trace_extension *jit_extension =
@@ -450,6 +453,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 	ZEND_OPCODE_TAIL_CALL_EX(zend_jit_trace_counter_helper,
 		((ZEND_JIT_COUNTER_INIT + JIT_G(hot_loop) - 1) / JIT_G(hot_loop)));
 }
+#endif
 
 #define TRACE_RECORD(_op, _info, _ptr) \
 	trace_buffer[idx].info = _op | (_info); \
@@ -657,7 +661,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 	zend_jit_trace_stop halt = 0;
 	int level = 0;
 	int ret_level = 0;
-	zend_vm_opcode_handler_t handler;
+	zend_vm_opcode_handler_func_t handler;
 	const zend_op_array *op_array;
 	zend_jit_op_array_trace_extension *jit_extension;
 	size_t offset;
@@ -983,7 +987,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			break;
 		}
 
-		handler = (zend_vm_opcode_handler_t)ZEND_OP_TRACE_INFO(opline, offset)->call_handler;
+		handler = ZEND_OP_TRACE_INFO(opline, offset)->call_handler;
 #ifdef HAVE_GCC_GLOBAL_REGS
 		handler();
 		if (UNEXPECTED(opline == zend_jit_halt_op)) {

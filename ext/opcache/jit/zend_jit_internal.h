@@ -26,6 +26,7 @@
 #include "Zend/zend_constants.h"
 #include "Zend/Optimizer/zend_func_info.h"
 #include "Zend/Optimizer/zend_call_graph.h"
+#include "zend_vm_opcodes.h"
 
 /* Address Encoding */
 typedef uintptr_t zend_jit_addr;
@@ -130,7 +131,7 @@ static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_
 typedef struct _zend_jit_op_array_extension {
 	zend_func_info func_info;
 	const zend_op_array *op_array;
-	const void *orig_handler;
+	zend_vm_opcode_handler_t orig_handler;
 } zend_jit_op_array_extension;
 
 /* Profiler */
@@ -169,7 +170,7 @@ typedef struct _zend_jit_op_array_hot_extension {
 	zend_func_info func_info;
 	const zend_op_array *op_array;
 	int16_t    *counter;
-	const void *orig_handlers[1];
+	zend_vm_opcode_handler_t orig_handlers[1];
 } zend_jit_op_array_hot_extension;
 
 #define zend_jit_op_array_hash(op_array) \
@@ -224,9 +225,6 @@ extern const zend_op *zend_jit_halt_op;
 	} while(0)
 # define ZEND_VM_ENTER_BIT 1ULL
 #endif
-
-/* VM handlers */
-typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *zend_vm_opcode_handler_t)(ZEND_OPCODE_HANDLER_ARGS);
 
 /* VM helpers */
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info);
@@ -339,8 +337,8 @@ typedef enum _zend_jit_trace_stop {
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
 	struct {
-		const void *orig_handler;
-		const void *call_handler;
+		zend_vm_opcode_handler_t      orig_handler;
+		zend_vm_opcode_handler_func_t call_handler;
 		int16_t    *counter;
 		uint8_t     trace_flags;
 	};
