@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #80770 (It is not possible to get client peer certificate with
     stream_socket_server). (Jakub Zelenka)
+  . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
+    return value check). (nielsdos, botovq)
 
 - PCNTL:
   . Fixed bug GH-18958 (Fatal error during shutdown after pcntl_rfork() or
