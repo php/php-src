@@ -5,14 +5,7 @@ oci8
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-
-ob_start();
-phpinfo(INFO_GENERAL);
-$info = ob_get_clean();
-
-if (strpos($info, 'Zend Memory Manager => enabled') === false) {
-    die('skip Zend MM is disabled');
-}
+if (getenv("USE_ZEND_ALLOC") === "0") die("skip requires ZendMM");
 ?>
 --FILE--
 <?php
