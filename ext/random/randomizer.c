@@ -43,16 +43,9 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 			.state = state,
 		};
 
-		zend_string *mname;
-		zend_function *generate_method;
-
-		mname = ZSTR_INIT_LITERAL("generate", 0);
-		generate_method = zend_hash_find_ptr(&engine_object->ce->function_table, mname);
-		zend_string_release(mname);
-
 		/* Create compatible state */
 		state->object = engine_object;
-		state->generate_method = generate_method;
+		state->generate_method = zend_hash_str_find_ptr(&engine_object->ce->function_table, "generate", strlen("generate"));
 
 		/* Mark self-allocated for memory management */
 		randomizer->is_userland_algo = true;
