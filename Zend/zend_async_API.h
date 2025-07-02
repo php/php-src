@@ -294,6 +294,26 @@ struct _zend_async_microtask_s {
 	uint32_t ref_count;
 };
 
+#define ZEND_ASYNC_MICROTASK_ADD_REF(microtask) \
+	do { \
+		if (microtask != NULL) { \
+			microtask->ref_count++; \
+		} \
+	} while (0)
+
+#define ZEND_ASYNC_MICROTASK_RELEASE(microtask) \
+	do { \
+		if (microtask != NULL && microtask->ref_count > 1) { \
+			microtask->ref_count--; \
+		} else { \
+			microtask->ref_count = 0; \
+			if (microtask->dtor) { \
+				microtask->dtor(microtask); \
+			} \
+			efree(microtask); \
+		} \
+	} while (0)
+
 ///////////////////////////////////////////////////////////////////
 /// Async iterator structures
 ///////////////////////////////////////////////////////////////////
@@ -561,7 +581,7 @@ static zend_always_inline void
 zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t *callback)
 {
 	if (event->callbacks.data == NULL) {
-		event->callbacks.data = safe_emalloc(4, sizeof(zend_async_event_callback_t *), 0);
+		event->callbacks.data = (zend_async_event_callback_t **)safe_emalloc(4, sizeof(zend_async_event_callback_t *), 0);
 		event->callbacks.capacity = 4;
 	}
 
@@ -569,7 +589,7 @@ zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t
 
 	if (vector->length == vector->capacity) {
 		vector->capacity = vector->capacity ? vector->capacity * 2 : 4;
-		vector->data = safe_erealloc(vector->data,
+		vector->data = (zend_async_event_callback_t **)safe_erealloc(vector->data,
 									 vector->capacity,
 									 sizeof(zend_async_event_callback_t *),
 									 0);
@@ -770,13 +790,13 @@ zend_async_scope_add_child(zend_async_scope_t *parent_scope, zend_async_scope_t 
 	child_scope->parent_scope = parent_scope;
 
 	if (vector->data == NULL) {
-		vector->data = safe_emalloc(4, sizeof(zend_async_scope_t *), 0);
+		vector->data = (zend_async_scope_t **)safe_emalloc(4, sizeof(zend_async_scope_t *), 0);
 		vector->capacity = 4;
 	}
 
 	if (vector->length == vector->capacity) {
 		vector->capacity *= 2;
-		vector->data = safe_erealloc(vector->data, vector->capacity, sizeof(zend_async_scope_t *), 0);
+		vector->data = (zend_async_scope_t **)safe_erealloc(vector->data, vector->capacity, sizeof(zend_async_scope_t *), 0);
 	}
 
 	vector->data[vector->length++] = child_scope;
@@ -1423,5 +1443,11 @@ END_EXTERN_C()
 
 /* Global Main Coroutine Switch Handlers API Macros */
 #define ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER(handler) zend_async_add_main_coroutine_start_handler(handler)
+#define ZEND_ASYNC_ADD_SWITCH_HANDLER(handler) \
+	if (ZEND_ASYNC_CURRENT_COROUTINE) { \
+		zend_coroutine_add_switch_handler(ZEND_ASYNC_CURRENT_COROUTINE, handler); \
+	} else { \
+		zend_async_add_main_coroutine_start_handler(handler); \
+	}
 
 #endif //ZEND_ASYNC_API_H

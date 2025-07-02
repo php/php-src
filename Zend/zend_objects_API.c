@@ -72,6 +72,7 @@ static void  store_call_destructors_coroutine_dtor(zend_coroutine_t *coroutine)
 
 	if (shutdown_context->coroutine == coroutine) {
 		shutdown_context->coroutine = NULL;
+		shutdown_context->is_started = false;
 		zend_error(E_CORE_ERROR, "Shutdown destructors coroutine was not finished property");
 		shutdown_destructors();
 	}
@@ -92,6 +93,12 @@ static bool store_call_destructors_context_switch_handler(
 	}
 
 	if (is_finishing) {
+		return false;
+	}
+
+	zend_shutdown_context_t *shutdown_context = &EG(shutdown_context);
+
+	if (false == shutdown_context->is_started) {
 		return false;
 	}
 

@@ -285,6 +285,7 @@ static void  shutdown_destructors_coroutine_dtor(zend_coroutine_t *coroutine)
 
 	if (shutdown_context->coroutine == coroutine) {
 		shutdown_context->coroutine = NULL;
+		shutdown_context->is_started = false;
 		zend_error(E_CORE_ERROR, "Shutdown destructors coroutine was not finished property");
 		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
 		shutdown_destructors();
@@ -301,6 +302,12 @@ static bool shutdown_destructors_context_switch_handler(
 	}
 
 	if (is_finishing) {
+		return false;
+	}
+
+	zend_shutdown_context_t *shutdown_context = &EG(shutdown_context);
+
+	if (false == shutdown_context->is_started) {
 		return false;
 	}
 
@@ -385,9 +392,12 @@ void shutdown_destructors_async(void) /* {{{ */
 		}
 	} zend_catch {
 		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
+		shutdown_context->is_started = false;
 		shutdown_destructors();
 		zend_bailout();
 	} zend_end_try();
+
+	shutdown_context->is_started = false;
 }
 /* }}} */
 #endif

@@ -1975,6 +1975,11 @@ static void zend_gc_collect_cycles_coroutine(void)
 
 	ZEND_ASYNC_ADD_MICROTASK(GC_G(microtask));
 	zend_gc_collect_cycles();
+
+	if (GC_G(microtask) != NULL) {
+		GC_G(microtask)->is_cancelled = true;
+		ZEND_ASYNC_MICROTASK_RELEASE(GC_G(microtask));
+	}
 }
 
 static zend_string* coroutine_info(zend_async_event_t *event)
