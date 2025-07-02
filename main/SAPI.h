@@ -185,7 +185,10 @@ END_EXTERN_C()
 typedef struct {
 	const char *line; /* If you allocated this, you need to free it yourself */
 	size_t line_len;
-	zend_long response_code; /* long due to zend_parse_parameters compatibility */
+	union {
+		zend_long response_code; /* long due to zend_parse_parameters compatibility */
+		size_t header_len; /* the "Key" in "Key: Value", for optimization */
+	};
 } sapi_header_line;
 
 typedef enum {					/* Parameter: 			*/
