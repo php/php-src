@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-03 Jul 2025, PHP 8.4.9
+03 Jul 2025, PHP 8.4.10
 
 - BcMath:
   . Fixed bug GH-18641 (Accessing a BcMath\Number property by ref crashes).
