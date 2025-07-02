@@ -236,75 +236,52 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 bool(true)
 bool(true)
 string(2) "lo"
-int(%i)
+int(1)
 
-Warning: socket_getpeername(): unable to retrieve peer name [95]: %sot supported in %s on line %d
+Warning: socket_getpeername(): unable to retrieve peer name [95]: Operation not supported in %s on line %d
 int(60)
 int(60)
 string(2) "lo"
-object(Socket\EthernetPacket)#3 (%d) {
+object(Socket\EthernetPacket)#3 (7) {
   ["headerSize"]=>
-  int(%d)
+  int(14)
   ["rawPacket"]=>
   string(%d) "%r(.|\n)*?"%r
   ["socket"]=>
   object(Socket)#1 (0) {
   }
   ["ethProtocol"]=>
-  int(%i)
+  int(96)
   ["srcMac"]=>
-  string(%d) "%s:%s:%s:%s:%s:%s"
+  string(11) "0:0:0:0:0:0"
   ["dstMac"]=>
-  string(%d) "%s:%s:%s:%s:%s:%s"
+  string(17) "ff:ff:ff:ff:ff:ff"
   ["payload"]=>
-  %a
+  object(Socket\EthernetPacket)#4 (7) {
+    ["headerSize"]=>
+    int(14)
+    ["rawPacket"]=>
+    string(%d) "%r(.|\n)*?"%r
+    ["socket"]=>
+    object(Socket)#1 (0) {
+    }
+    ["ethProtocol"]=>
+    int(0)
+    ["srcMac"]=>
+    string(17) "41:41:41:41:41:41"
+    ["dstMac"]=>
+    string(17) "41:41:41:41:41:41"
+    ["payload"]=>
+    NULL
+  }
 }
 int(60)
 unsupported ethernet protocol
 int(60)
-int(%d)
+int(72)
+int(72)
 string(2) "lo"
-object(Socket\EthernetPacket)#2 (7) {
-  ["headerSize"]=>
-  int(14)
-  ["rawPacket"]=>
-  string(%d) "%r(.|\n)*?"%r
-  ["socket"]=>
-  object(Socket)#%d (0) {
-  }
-  ["ethProtocol"]=>
-  int(%d)
-  ["srcMac"]=>
-  string(%d) "%s:%s:%s:%s:%s:%s"
-  ["dstMac"]=>
-  string(%d) "%s:%s:%s:%s:%s:%s"
-  ["payload"]=>
-  object(Socket\Ipv%sPacket)#%d (5) {
-    ["headerSize"]=>
-    int(%d)
-    ["rawPacket"]=>
-    string(%d) "%r(.|\n)*?"%r
-    ["srcAddr"]=>
-    string(%d) "%s"
-    ["dstAddr"]=>
-    string(%d) "%s"
-    ["payload"]=>
-    object(Socket\%sPacket)#%d (4) {
-      ["headerSize"]=>
-      int(%d)
-      ["rawPacket"]=>
-      string(%d) "%r(.|\n)*?"%r
-      ["srcPort"]=>
-      int(%d)
-      ["dstPort"]=>
-      int(%d)
-    }
-  }
-}
-int(%d)
-int(%d)
-string(2) "lo"
-object(Socket\EthernetPacket)#%d (7) {
+object(Socket\EthernetPacket)#8 (7) {
   ["headerSize"]=>
   int(14)
   ["rawPacket"]=>
@@ -313,75 +290,36 @@ object(Socket\EthernetPacket)#%d (7) {
   object(Socket)#3 (0) {
   }
   ["ethProtocol"]=>
-  int(%d)
+  int(34525)
   ["srcMac"]=>
-  string(%d) "%s:%s:%s:%s:%s:%s"
+  string(11) "0:0:0:0:0:0"
   ["dstMac"]=>
-  string(%d) "%s:%s:%s:%s:%s:%s"
+  string(17) "ff:ff:ff:ff:ff:ff"
   ["payload"]=>
-  object(Socket\Ipv6Packet)#%d (5) {
+  object(Socket\Ipv6Packet)#1 (5) {
     ["headerSize"]=>
-    int(%d)
+    int(5160)
     ["rawPacket"]=>
-    string(%d) "%A"
+    string(%d) "%r(.|\n)*?"%r
     ["srcAddr"]=>
-    string(%d) "%s"
+    string(3) "::1"
     ["dstAddr"]=>
-    string(%d) "%s"
+    string(3) "::1"
     ["payload"]=>
-    object(Socket\TcpPacket)#%d (4) {
+    object(Socket\TcpPacket)#11 (4) {
       ["headerSize"]=>
-      int(%d)
+      int(20)
       ["rawPacket"]=>
       string(%d) "%r(.|\n)*?"%r
       ["srcPort"]=>
-      int(%d)
+      int(0)
       ["dstPort"]=>
-      int(%d)
+      int(0)
     }
   }
 }
-int(%d)
+int(74)
 unsupported ipv6 header protocol
-int(%d)
-%A
-int(%d)
-%A
-string(%d) "%s"
-object(Socket\EthernetPacket)#%d (7) {
-  ["headerSize"]=>
-  int(%d)
-  ["rawPacket"]=>
-  string(%d) "%r(.|\n)*?"%r
-  ["socket"]=>
-  object(Socket)#%d (0) {
-  }
-  ["ethProtocol"]=>
-  int(2048)
-  ["srcMac"]=>
-  string(%d) "%s"
-  ["dstMac"]=>
-  string(%d) "%s"
-  ["payload"]=>
-  object(Socket\Ipv4Packet)#%d (5) {
-    ["headerSize"]=>
-    int(%d)
-    ["rawPacket"]=>
-    string(%d) "%s"
-    ["srcAddr"]=>
-    string(%d) "%s.%s.%s.%s"
-    ["dstAddr"]=>
-    string(%d) "%s.%s.%s.%s"
-    ["payload"]=>
-    object(Socket\TcpPacket)#%d (4) {
-      ["headerSize"]=>
-      int(%d)
-      ["rawPacket"]=>
-      string(%d) "%r(.|\n)*?"%r
-      ["srcPort"]=>
-      int(%d)
-      ["dstPort"]=>
-      int(%d)
-    }
-  }
-}
+int(84)
+unsupported ip header protocol
+int(194)
