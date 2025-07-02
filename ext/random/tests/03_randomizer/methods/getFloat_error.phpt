@@ -127,4 +127,4 @@ Random\Randomizer::getFloat(): Argument #2 ($max) must be finite
 Random\Randomizer::getFloat(): Argument #2 ($max) must be greater than argument #1 ($min)
 Random\Randomizer::getFloat(): Argument #2 ($max) must be greater than argument #1 ($min)
 Random\Randomizer::getFloat(): Argument #2 ($max) must be greater than argument #1 ($min)
-The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max).
+The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max)
