@@ -4356,10 +4356,7 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		}
 		opline->result.num = zend_alloc_cache_slot();
 
-		/* Skip adding a message on piped assert(...) calls, hence the ZEND_AST_ZNODE check.
-		 * We don't have access to the original AST anyway, so we would either need to duplicate
-		 * this logic in pipe compilation or store the AST. Neither seems worth the complexity. */
-		if (args->children == 1 && args->child[0]->kind != ZEND_AST_ZNODE) {
+		if (args->children == 1) {
 			/* add "assert(condition) as assertion message */
 			zend_ast *arg = zend_ast_create_zval_from_str(
 				zend_ast_export("assert(", args->child[0], ")"));
@@ -6429,6 +6426,20 @@ static bool can_match_use_jumptable(zend_ast_list *arms) {
 	return 1;
 }
 
+static bool zend_is_deopt_pipe_name(zend_ast *ast)
+{
+	if (ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(ast)) != IS_STRING) {
+		return false;
+	}
+
+	/* Assert compilation adds a message operand, but this is incompatible with the
+	 * pipe optimization that uses a temporary znode for the reference elimination.
+	 * Therefore, disable the optimization for assert.
+	 * Note that "assert" as a name is always treated as fully qualified. */
+	zend_string *str = zend_ast_get_str(ast);
+	return zend_string_equals_literal_ci(str, "assert");
+}
+
 static void zend_compile_pipe(znode *result, zend_ast *ast)
 {
 	zend_ast *operand_ast = ast->child[0];
@@ -6456,7 +6467,8 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 
 	/* Turn $foo |> bar(...) into bar($foo). */
 	if (callable_ast->kind == ZEND_AST_CALL
-		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT
+		&& !zend_is_deopt_pipe_name(callable_ast->child[0])) {
 		fcall_ast = zend_ast_create(ZEND_AST_CALL,
 				callable_ast->child[0], arg_list_ast);
 	/* Turn $foo |> bar::baz(...) into bar::baz($foo). */
