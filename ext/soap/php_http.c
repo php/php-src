@@ -1294,20 +1294,18 @@ try_again:
 	/* Decompress response */
 	content_encoding = get_http_header_value(ZSTR_VAL(http_headers), "Content-Encoding:");
 	if (content_encoding) {
-		zval func;
 		zval retval;
 		zval params[1];
+		zend_function *decompression_fn;
 
 		/* Warning: the zlib function names are chosen in an unfortunate manner.
 		 * Check zlib.c to see how a function corresponds with a particular format. */
 		if ((strcmp(content_encoding,"gzip") == 0 ||
 		     strcmp(content_encoding,"x-gzip") == 0) &&
-		     zend_hash_str_exists(EG(function_table), "gzdecode", sizeof("gzdecode")-1)) {
-			ZVAL_STRING(&func, "gzdecode");
+		     (decompression_fn = zend_hash_str_find_ptr(EG(function_table), "gzdecode", sizeof("gzdecode")-1))) {
 			ZVAL_STR_COPY(&params[0], http_body);
 		} else if (strcmp(content_encoding,"deflate") == 0 &&
-		           zend_hash_str_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1)) {
-			ZVAL_STRING(&func, "gzuncompress");
+		           (decompression_fn = zend_hash_str_find_ptr(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1))) {
 			ZVAL_STR_COPY(&params[0], http_body);
 		} else {
 			efree(content_encoding);
@@ -1319,15 +1317,13 @@ try_again:
 			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL, SOAP_GLOBAL(lang_en));
 			return FALSE;
 		}
-		if (call_user_function(CG(function_table), (zval*)NULL, &func, &retval, 1, params) == SUCCESS &&
-		    Z_TYPE(retval) == IS_STRING) {
+		zend_call_known_function(decompression_fn, NULL, NULL, &retval, 1, params, NULL);
+		if (Z_TYPE(retval) == IS_STRING) {
 			zval_ptr_dtor(&params[0]);
-			zval_ptr_dtor(&func);
 			zend_string_release_ex(http_body, 0);
 			ZVAL_COPY_VALUE(return_value, &retval);
 		} else {
 			zval_ptr_dtor(&params[0]);
-			zval_ptr_dtor(&func);
 			zval_ptr_dtor(&retval);
 			efree(content_encoding);
 			zend_string_release_ex(http_headers, 0);
