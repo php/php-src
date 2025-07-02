@@ -196,7 +196,7 @@ PHP_METHOD(Random_Randomizer, getFloat)
 		RETVAL_DOUBLE(php_random_gammasection_open_open(randomizer->engine, min, max));
 
 		if (UNEXPECTED(isnan(Z_DVAL_P(return_value)))) {
-			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max).");
+			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max)");
 			RETURN_THROWS();
 		}
 
