@@ -321,14 +321,14 @@ static uint8_t zend_user_opcodes[256] = {0,
 #define SPEC_RULE_OBSERVER     0x02000000
 
 static const uint32_t *zend_spec_handlers;
-static const void * const *zend_opcode_handlers;
+static zend_vm_opcode_handler_t const *zend_opcode_handlers;
 static int zend_handlers_count;
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
-static const void * const * zend_opcode_handler_funcs;
+static zend_vm_opcode_handler_func_t const * zend_opcode_handler_funcs;
 static zend_op hybrid_halt_op;
 #endif
 #if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC
-static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op);
+static zend_vm_opcode_handler_t zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op);
 #endif
 
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
@@ -58666,8 +58666,8 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_FE_FETCH_R_SIMPLE_SPEC_VAR_CV_RETVAL_USED_LABEL,
 			(void*)&&ZEND_NULL_LABEL
 		};
-		zend_opcode_handlers = (const void **) labels;
-		zend_handlers_count = sizeof(labels) / sizeof(void*);
+		zend_opcode_handlers = (zend_vm_opcode_handler_t*) labels;
+		zend_handlers_count = sizeof(labels) / sizeof(labels[0]);
 		memset(&hybrid_halt_op, 0, sizeof(hybrid_halt_op));
 		hybrid_halt_op.handler = (void*)&&HYBRID_HALT_LABEL;
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
@@ -64398,7 +64398,11 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 
 void zend_vm_init(void)
 {
-	static const void * const labels[] = {
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	static zend_vm_opcode_handler_func_t const labels[] = {
+#else
+	static zend_vm_opcode_handler_t const labels[] = {
+#endif
 		ZEND_NOP_SPEC_HANDLER,
 		ZEND_ADD_SPEC_CONST_CONST_HANDLER,
 		ZEND_ADD_SPEC_CONST_TMPVARCV_HANDLER,
@@ -68158,7 +68162,7 @@ void zend_vm_init(void)
 	execute_ex(NULL);
 #else
 	zend_opcode_handlers = labels;
-	zend_handlers_count = sizeof(labels) / sizeof(void*);
+	zend_handlers_count = sizeof(labels) / sizeof(labels[0]);
 	zend_spec_handlers = specs;
 #endif
 	VM_TRACE_START();
@@ -68200,7 +68204,7 @@ ZEND_API void ZEND_FASTCALL zend_serialize_opcode_handler(zend_op *op)
 	}
 	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(uintptr_t)op->handler);
 	ZEND_ASSERT(zv != NULL);
-	op->handler = (const void *)(uintptr_t)Z_LVAL_P(zv);
+	op->handler = (zend_vm_opcode_handler_t)(uintptr_t)Z_LVAL_P(zv);
 }
 
 ZEND_API void ZEND_FASTCALL zend_deserialize_opcode_handler(zend_op *op)
@@ -68286,7 +68290,7 @@ static uint32_t ZEND_FASTCALL zend_vm_get_opcode_handler_idx(uint32_t spec, cons
 }
 
 #if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC
-static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)
+static zend_vm_opcode_handler_t zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)
 {
 	return zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];
 }
