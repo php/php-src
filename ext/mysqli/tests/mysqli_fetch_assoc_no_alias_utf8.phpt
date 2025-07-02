@@ -9,7 +9,7 @@ mysqli
     if (!$link = @mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
-    if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE '%UTF8%'"))
+    if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'UTF8%'"))
         die("skip Cannot run SHOW CHARACTER SET to check charsets");
 
     if (!$tmp = mysqli_fetch_assoc($res))
