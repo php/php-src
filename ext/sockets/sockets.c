@@ -1696,7 +1696,7 @@ PHP_FUNCTION(socket_recvfrom)
 			int recv_flags = (int)arg4;
 			zval *addr = arg5;
 			zval *index = arg6;
-			if (recv_flags > 0 && !(recv_flags & (MSG_PEEK|MSG_DONTWAIT|MSG_ERRQUEUE))) {
+			if (recv_flags > 0 && (recv_flags & ~(MSG_PEEK|MSG_DONTWAIT|MSG_ERRQUEUE))) {
 				zend_argument_value_error(4, "must set one the flags MSG_PEEK, MSG_DONTWAIT, MSG_ERRQUEUE");
 				zend_string_efree(recv_buf);
 				RETURN_THROWS();
@@ -1760,7 +1760,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			switch (protocol) {
 				case ETH_P_IP: {
-					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, 0, sizeof(struct iphdr)) == FAILURE) {
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, ETH_HLEN, sizeof(struct iphdr)) == FAILURE) {
 						zval_ptr_dtor(&obj);
 						zend_string_efree(recv_buf);
 						zend_value_error("invalid ipv4 frame buffer length");
@@ -1821,10 +1821,10 @@ PHP_FUNCTION(socket_recvfrom)
 					break;
 				}
 				case ETH_P_IPV6: {
-					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, ETH_HLEN, sizeof(struct iphdr)) == FAILURE) {
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, ETH_HLEN, sizeof(struct ipv6hdr)) == FAILURE) {
 						zval_ptr_dtor(&obj);
 						zend_string_efree(recv_buf);
-						zend_value_error("invalid ipv4 frame buffer length");
+						zend_value_error("invalid ipv6 frame buffer length");
 						RETURN_THROWS();
 					}
 					struct ipv6hdr ip;
