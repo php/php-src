@@ -509,7 +509,7 @@ try_again:
 			ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+			ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 			stream = NULL;
 			use_proxy = 0;
 		}
@@ -520,7 +520,7 @@ try_again:
 		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
 		convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		stream = NULL;
 		use_proxy = 0;
 	}
@@ -687,7 +687,7 @@ try_again:
 					ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 					php_stream_close(stream);
 					convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-					convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+					ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 					smart_str_free(&soap_headers_z);
 					smart_str_free(&soap_headers);
 					efree(http_msg);
@@ -905,7 +905,7 @@ try_again:
 			ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+			ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL, SOAP_GLOBAL(lang_en));
 			smart_str_free(&soap_headers_z);
 			efree(http_msg);
@@ -929,7 +929,7 @@ try_again:
 				}
 				ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 				php_stream_close(stream);
-				convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+				ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL, SOAP_GLOBAL(lang_en));
 				smart_str_free(&soap_headers_z);
 				efree(http_msg);
@@ -985,7 +985,7 @@ try_again:
 		if (http_headers) {
 			zend_string_release_ex(http_headers, 0);
 		}
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		if (http_msg) {
 			efree(http_msg);
 		}
@@ -1118,7 +1118,7 @@ try_again:
 		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
 		zend_string_release_ex(http_headers, 0);
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL, SOAP_GLOBAL(lang_en));
 		if (http_msg) {
 			efree(http_msg);
@@ -1134,7 +1134,7 @@ try_again:
 	if (http_close) {
 		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		stream = NULL;
 	}
 
