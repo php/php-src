@@ -40,6 +40,9 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
     var_dump($addr);
     var_dump($rsp);
 
+    var_dump(bin2hex($rsp->rawPacket));
+    var_dump(bin2hex($rsp->payload->rawPacket));
+
     socket_close($s_c);
     // purposely unsupported ethernet protocol (ARP)
 
@@ -139,6 +142,9 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 
     var_dump($addr);
     var_dump($rsp);
+
+    var_dump(bin2hex($rsp->rawPacket));
+    var_dump(bin2hex($rsp->payload->rawPacket));
 
     $first_4_bytes = hex2bin("60000000");
 
@@ -275,6 +281,8 @@ object(Socket\EthernetPacket)#3 (7) {
     NULL
   }
 }
+string(120) "ffffffffffff000000000000006041414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141"
+string(28) "4141414141414141414141414141"
 int(60)
 unsupported ethernet protocol
 int(60)
@@ -318,6 +326,8 @@ object(Socket\EthernetPacket)#8 (7) {
     }
   }
 }
+string(144) "ffffffffffff00000000000086dd600000000014064000000000000000000000000000000001000000000000000000000000000000013039005000000000000000005002ffff0000"
+string(10320) "600000000014064000000000000000000000000000000001000000000000000000000000000000013039005000000000000000005002ffff000000000000000000000000000000000000000000000000000000000000000000006800000000000000812c%a"
 int(74)
 unsupported ipv6 header protocol
 int(84)
