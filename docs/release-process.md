@@ -96,6 +96,13 @@ releases.
     `user.signingKey` values to use with your local PHP repositories. See
     [Conditional Includes For Git Config][] for more information.
 
+11. Any time you see a placeholder like `php-X.Y.ZRCn`, the `RCn` is not always
+    a release candidate number. The placeholder could also represent any of:
+    * php-8.4.0alpha1 (initial alpha version)
+    * php-8.4.0beta2 (one of the beta versions)
+    * php-8.4.0 (initial GA)
+    * php-8.4.9 (periodic bugfix or security release)
+
 
 ## Packaging a non-stable release (alpha/beta/RC)
 
@@ -250,7 +257,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    ```shell
    git add -p
-   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.Z alpha2"
+   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.0 alpha2"
    ```
 
    The NEWS is updated at the *start* of the cycle for the next tag, e.g.
@@ -289,7 +296,8 @@ slightly different steps. We'll call attention where the steps differ.
     ```shell
     git push upstream php-X.Y.ZRCn # tag name
     git push upstream PHP-X.Y.Z    # patch-level version branch (post-GA only)
-    git push upstream PHP-X.Y      # version branch
+    git push upstream PHP-X.Y      # version branch (post-branch creation only)
+    git push upstream master       # version branch (pre-branch creation only)
     ```
 
     > 🚨 **Attention** \
