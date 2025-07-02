@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.10
+?? ??? ????, PHP 8.4.11
 
 - Calendar:
   . Fixed jewishtojd overflow on year argument. (David Carlier)
@@ -50,7 +50,7 @@ PHP                                                                        NEWS
   . Fixed GH-13264 (fgets() and stream_get_line() do not return false on filter
     fatal error). (Jakub Zelenka)
 
-03 Jul 2025, PHP 8.4.9
+03 Jul 2025, PHP 8.4.10
 
 - BcMath:
   . Fixed bug GH-18641 (Accessing a BcMath\Number property by ref crashes).
