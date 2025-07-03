@@ -11,7 +11,7 @@ var_dump($ao);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Invalid callback uksort, function "uksort" not found or invalid function name in %s:%d
+Fatal error: Uncaught Error: Cannot call method uksort when function uksort is disabled in %s:%d
 Stack trace:
 #0 %s(%d): ArrayObject->uksort(Object(Closure))
 #1 {main}

@@ -11,7 +11,7 @@ var_dump($ao);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Invalid callback asort, function "asort" not found or invalid function name in %s:%d
+Fatal error: Uncaught Error: Cannot call method asort when function asort is disabled in %s:%d
 Stack trace:
 #0 %s(%d): ArrayObject->asort()
 #1 {main}

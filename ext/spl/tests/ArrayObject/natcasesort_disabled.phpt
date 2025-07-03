@@ -11,7 +11,7 @@ var_dump($ao);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Invalid callback natcasesort, function "natcasesort" not found or invalid function name in %s:%d
+Fatal error: Uncaught Error: Cannot call method natcasesort when function natcasesort is disabled in %s:%d
 Stack trace:
 #0 %s(%d): ArrayObject->natcasesort()
 #1 {main}

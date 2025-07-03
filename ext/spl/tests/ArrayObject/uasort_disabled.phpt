@@ -11,7 +11,7 @@ var_dump($ao);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Invalid callback uasort, function "uasort" not found or invalid function name in %s:%d
+Fatal error: Uncaught Error: Cannot call method uasort when function uasort is disabled in %s:%d
 Stack trace:
 #0 %s(%d): ArrayObject->uasort(Object(Closure))
 #1 {main}
