@@ -856,10 +856,7 @@ PHP_FUNCTION(stream_select)
 static void user_space_stream_notifier(php_stream_context *context, int notifycode, int severity,
 		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr)
 {
-	zval *callback = &context->notifier->ptr;
-	zval retval;
 	zval zvs[6];
-	int i;
 
 	ZVAL_LONG(&zvs[0], notifycode);
 	ZVAL_LONG(&zvs[1], severity);
@@ -872,21 +869,20 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	ZVAL_LONG(&zvs[4], bytes_sofar);
 	ZVAL_LONG(&zvs[5], bytes_max);
 
-	if (FAILURE == call_user_function(NULL, NULL, callback, &retval, 6, zvs)) {
-		php_error_docref(NULL, E_WARNING, "Failed to call user notifier");
-	}
-	for (i = 0; i < 6; i++) {
+	zend_call_known_fcc(context->notifier->fcc, NULL, 6, zvs, NULL);
+	for (uint8_t i = 0; i < 6; i++) {
 		zval_ptr_dtor(&zvs[i]);
 	}
-	zval_ptr_dtor(&retval);
 }
 
 static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
 {
-	if (notifier && Z_TYPE(notifier->ptr) != IS_UNDEF) {
-		zval_ptr_dtor(&notifier->ptr);
-		ZVAL_UNDEF(&notifier->ptr);
-	}
+	ZEND_ASSERT(notifier);
+	ZEND_ASSERT(notifier->fcc);
+	ZEND_ASSERT(notifier->fcc->function_handler);
+	zend_fcc_dtor(notifier->fcc);
+	efree(notifier->fcc);
+	notifier->fcc = NULL;
 }
 
 static zend_result parse_context_options(php_stream_context *context, HashTable *options)
@@ -924,9 +920,19 @@ static zend_result parse_context_params(php_stream_context *context, HashTable *
 			context->notifier = NULL;
 		}
 
+		zend_fcall_info_cache *fcc = emalloc(sizeof(*fcc));
+		char *error;
+		if (!zend_is_callable_ex(tmp, NULL, 0, NULL, fcc, &error)) {
+			zend_argument_type_error(1, "must be an array with valid callbacks as values, %s", error);
+			efree(fcc);
+			efree(error);
+			return FAILURE;
+		}
+		zend_fcc_addref(fcc);
+
 		context->notifier = php_stream_notification_alloc();
 		context->notifier->func = user_space_stream_notifier;
-		ZVAL_COPY(&context->notifier->ptr, tmp);
+		context->notifier->fcc = fcc;
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
 	if (NULL != (tmp = zend_hash_str_find(params, "options", sizeof("options")-1))) {
@@ -1123,9 +1129,11 @@ PHP_FUNCTION(stream_context_get_params)
 	}
 
 	array_init(return_value);
-	if (context->notifier && Z_TYPE(context->notifier->ptr) != IS_UNDEF && context->notifier->func == user_space_stream_notifier) {
-		Z_TRY_ADDREF(context->notifier->ptr);
-		add_assoc_zval_ex(return_value, "notification", sizeof("notification")-1, &context->notifier->ptr);
+	if (context->notifier && context->notifier->fcc) {
+		ZEND_ASSERT(context->notifier->func == user_space_stream_notifier);
+		zval fn;
+		zend_get_callable_zval_from_fcc(context->notifier->fcc, &fn);
+		add_assoc_zval_ex(return_value, ZEND_STRL("notification"), &fn);
 	}
 	Z_TRY_ADDREF(context->options);
 	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &context->options);
