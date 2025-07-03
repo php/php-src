@@ -11,7 +11,7 @@ var_dump($ao);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Invalid callback ksort, function "ksort" not found or invalid function name in %s:%d
+Fatal error: Uncaught Error: Cannot call method ksort when function ksort is disabled in %s:%d
 Stack trace:
 #0 %s(%d): ArrayObject->ksort()
 #1 {main}
