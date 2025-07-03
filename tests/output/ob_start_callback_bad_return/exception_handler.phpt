@@ -3,6 +3,16 @@ ob_start(): Check behaviour with deprecation converted to exception
 --FILE--
 <?php
 
+class NotStringable {
+    public function __construct(public string $val) {}
+}
+class IsStringable {
+    public function __construct(public string $val) {}
+    public function __toString() {
+        return __CLASS__ . ": " . $this->val;
+    }
+}
+
 $log = [];
 
 set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) {
@@ -33,7 +43,26 @@ function return_zero($string) {
     return 0;
 }
 
-$cases = ['return_null', 'return_false', 'return_true', 'return_zero'];
+function return_non_stringable($string) {
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    return new NotStringable($string);
+}
+
+function return_stringable($string) {
+    global $log;
+    $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    return new IsStringable($string);
+}
+
+$cases = [
+    'return_null',
+    'return_false',
+    'return_true',
+    'return_zero',
+    'return_non_stringable',
+    'return_stringable',
+];
 foreach ($cases as $case) {
     $log = [];
     echo "\n\nTesting: $case\n";
@@ -93,4 +122,26 @@ Stack trace:
 
 End of return_zero, log was:
 return_zero: <<<Inside of return_zero
+>>>
+
+Testing: return_non_stringable
+ErrorException: ob_end_flush(): Returning a non-string result from user output handler return_non_stringable is deprecated in %s:%d
+Stack trace:
+#0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', '/usr/src/php/te...', 69)
+#1 %s(%d): ob_end_flush()
+#2 {main}
+
+End of return_non_stringable, log was:
+return_non_stringable: <<<Inside of return_non_stringable
+>>>
+
+Testing: return_stringable
+ErrorException: ob_end_flush(): Returning a non-string result from user output handler return_stringable is deprecated in %s:%d
+Stack trace:
+#0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', '/usr/src/php/te...', 69)
+#1 %s(%d): ob_end_flush()
+#2 {main}
+
+End of return_stringable, log was:
+return_stringable: <<<Inside of return_stringable
 >>>
