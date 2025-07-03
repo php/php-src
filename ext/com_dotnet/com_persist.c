@@ -392,9 +392,7 @@ CPH_METHOD(SaveToFile)
 			}
 		}
 
-		if (olefilename) {
-			efree(olefilename);
-		}
+		efree(olefilename);
 
 		if (FAILED(res)) {
 			php_com_throw_exception(res, NULL);

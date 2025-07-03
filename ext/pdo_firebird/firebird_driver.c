@@ -599,20 +599,12 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 		php_firebird_error(dbh);
 	}
 
-	if (H->date_format) {
-		pefree(H->date_format, dbh->is_persistent);
-	}
-	if (H->time_format) {
-		pefree(H->time_format, dbh->is_persistent);
-	}
-	if (H->timestamp_format) {
-		pefree(H->timestamp_format, dbh->is_persistent);
-	}
+	pefree(H->date_format, dbh->is_persistent);
+	pefree(H->time_format, dbh->is_persistent);
+	pefree(H->timestamp_format, dbh->is_persistent);
 
-	if (H->einfo.errmsg) {
-		pefree(H->einfo.errmsg, dbh->is_persistent);
-		H->einfo.errmsg = NULL;
-	}
+	pefree(H->einfo.errmsg, dbh->is_persistent);
+	H->einfo.errmsg = NULL;
 
 	pefree(H, dbh->is_persistent);
 }
@@ -1091,10 +1083,8 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 				if (UNEXPECTED(!str)) {
 					return false;
 				}
-				if (H->date_format) {
-					pefree(H->date_format, dbh->is_persistent);
-					H->date_format = NULL;
-				}
+				pefree(H->date_format, dbh->is_persistent);
+				H->date_format = NULL;
 				H->date_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}
@@ -1106,10 +1096,8 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 				if (UNEXPECTED(!str)) {
 					return false;
 				}
-				if (H->time_format) {
-					pefree(H->time_format, dbh->is_persistent);
-					H->time_format = NULL;
-				}
+				pefree(H->time_format, dbh->is_persistent);
+				H->time_format = NULL;
 				H->time_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}
@@ -1121,10 +1109,8 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 				if (UNEXPECTED(!str)) {
 					return false;
 				}
-				if (H->timestamp_format) {
-					pefree(H->timestamp_format, dbh->is_persistent);
-					H->timestamp_format = NULL;
-				}
+				pefree(H->timestamp_format, dbh->is_persistent);
+				H->timestamp_format = NULL;
 				H->timestamp_format = pestrndup(ZSTR_VAL(str), ZSTR_LEN(str),dbh->is_persistent);
 				zend_string_release_ex(str, 0);
 			}

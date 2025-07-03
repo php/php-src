@@ -5403,12 +5403,8 @@ finish:
 		*rp = '\0';
 	}
 	efree((void *)buf);
-	if (tbuf) {
-		efree(tbuf);
-	}
-	if (allow_free) {
-		efree(allow_free);
-	}
+	efree(tbuf);
+	efree(allow_free);
 
 	return (size_t)(rp - rbuf);
 }

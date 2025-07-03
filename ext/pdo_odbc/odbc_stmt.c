@@ -122,9 +122,7 @@ static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S)
 		int i;
 
 		for (i = 0; i < S->col_count; i++) {
-			if (S->cols[i].data) {
-				efree(S->cols[i].data);
-			}
+			efree(S->cols[i].data);
 		}
 		efree(S->cols);
 		S->cols = NULL;
@@ -145,9 +143,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 	}
 
 	free_cols(stmt, S);
-	if (S->convbuf) {
-		efree(S->convbuf);
-	}
+	efree(S->convbuf);
 	efree(S);
 
 	return 1;
@@ -207,9 +203,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt)
 					case PDO_ODBC_CONV_FAIL:
 						pdo_odbc_stmt_error("error converting input string");
 						SQLCloseCursor(S->stmt);
-						if (buf) {
-							efree(buf);
-						}
+						efree(buf);
 						return 0;
 				}
 				continue;
@@ -223,9 +217,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt)
 				/* shouldn't happen either */
 				pdo_odbc_stmt_error("input LOB is no longer a stream");
 				SQLCloseCursor(S->stmt);
-				if (buf) {
-					efree(buf);
-				}
+				efree(buf);
 				return 0;
 			}
 
@@ -247,9 +239,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt)
 		}
 	}
 
-	if (buf) {
-		efree(buf);
-	}
+	efree(buf);
 
 	switch (rc) {
 		case SQL_SUCCESS:
@@ -304,9 +294,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 
 			case PDO_PARAM_EVT_FREE:
 				P = param->driver_data;
-				if (P) {
-					efree(P);
-				}
+				efree(P);
 				break;
 
 			case PDO_PARAM_EVT_ALLOC:

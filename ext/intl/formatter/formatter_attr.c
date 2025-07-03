@@ -200,9 +200,7 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 
 	/* Actually set new attribute value. */
 	unum_setTextAttribute(FORMATTER_OBJECT(nfo), attribute, svalue, slength, &INTL_DATA_ERROR_CODE(nfo));
-	if (svalue) {
-		efree(svalue);
-	}
+	efree(svalue);
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting text attribute" );
 
 	RETURN_TRUE;
@@ -281,9 +279,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 
 	/* Actually set the symbol. */
 	unum_setSymbol(FORMATTER_OBJECT(nfo), symbol, svalue, slength, &INTL_DATA_ERROR_CODE(nfo));
-	if (svalue) {
-		efree(svalue);
-	}
+	efree(svalue);
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting symbol value" );
 
 	RETURN_TRUE;
@@ -349,9 +345,7 @@ PHP_FUNCTION( numfmt_set_pattern )
 	INTL_METHOD_CHECK_STATUS( nfo, "Error converting pattern to UTF-16" );
 
 	unum_applyPattern(FORMATTER_OBJECT(nfo), 0, svalue, slength, &spattern_error, &INTL_DATA_ERROR_CODE(nfo));
-	if (svalue) {
-		efree(svalue);
-	}
+	efree(svalue);
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
 		char *msg;
 		spprintf(&msg, 0, "Error setting pattern value at line %d, offset %d", spattern_error.line, spattern_error.offset);

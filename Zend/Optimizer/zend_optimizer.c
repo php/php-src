@@ -1208,9 +1208,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 		efree(op_array->literals);
 		op_array->literals = (zval*)(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16));
 	} else {
-		if (op_array->literals) {
-			efree(op_array->literals);
-		}
+		efree(op_array->literals);
 		op_array->literals = NULL;
 	}
 #endif
@@ -1318,9 +1316,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 		efree(op_array->literals);
 		op_array->literals = (zval*)(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16));
 	} else {
-		if (op_array->literals) {
-			efree(op_array->literals);
-		}
+		efree(op_array->literals);
 		op_array->literals = NULL;
 	}
 #endif

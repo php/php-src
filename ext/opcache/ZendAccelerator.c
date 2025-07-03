@@ -2980,9 +2980,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 static void accel_globals_dtor(zend_accel_globals *accel_globals)
 {
 	zend_string_free(accel_globals->key);
-	if (accel_globals->preloaded_internal_run_time_cache) {
-		pefree(accel_globals->preloaded_internal_run_time_cache, 1);
-	}
+	pefree(accel_globals->preloaded_internal_run_time_cache, 1);
 }
 
 #ifdef HAVE_HUGE_CODE_PAGES

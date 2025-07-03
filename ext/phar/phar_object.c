@@ -1520,9 +1520,7 @@ phar_spl_fileinfo:
 		temp = expand_filepath(base, NULL);
 		if (!temp) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
-			if (save) {
-				efree(save);
-			}
+			efree(save);
 			return ZEND_HASH_APPLY_STOP;
 		}
 
@@ -1586,13 +1584,8 @@ phar_spl_fileinfo:
 	if (php_check_open_basedir(fname)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned a path \"%s\" that open_basedir prevents opening", ZSTR_VAL(ce->name), fname);
 
-		if (save) {
-			efree(save);
-		}
-
-		if (temp) {
-			efree(temp);
-		}
+		efree(save);
+		efree(temp);
 
 		return ZEND_HASH_APPLY_STOP;
 	}
@@ -1603,26 +1596,16 @@ phar_spl_fileinfo:
 	if (!fp) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned a file that could not be opened \"%s\"", ZSTR_VAL(ce->name), fname);
 
-		if (save) {
-			efree(save);
-		}
-
-		if (temp) {
-			efree(temp);
-		}
+		efree(save);
+		efree(temp);
 
 		return ZEND_HASH_APPLY_STOP;
 	}
 after_open_fp:
 	if (str_key_len >= sizeof(".phar")-1 && !memcmp(str_key, ".phar", sizeof(".phar")-1)) {
 		/* silently skip any files that would be added to the magic .phar directory */
-		if (save) {
-			efree(save);
-		}
-
-		if (temp) {
-			efree(temp);
-		}
+		efree(save);
+		efree(temp);
 
 		if (opened) {
 			zend_string_release_ex(opened, 0);
@@ -1639,17 +1622,13 @@ after_open_fp:
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s cannot be created: %s", str_key, error);
 		efree(error);
 
-		if (save) {
-			efree(save);
-		}
+		efree(save);
 
 		if (opened) {
 			zend_string_release_ex(opened, 0);
 		}
 
-		if (temp) {
-			efree(temp);
-		}
+		efree(temp);
 
 		if (close_fp) {
 			php_stream_close(fp);
@@ -1658,9 +1637,7 @@ after_open_fp:
 		return ZEND_HASH_APPLY_STOP;
 
 	} else {
-		if (error) {
-			efree(error);
-		}
+		efree(error);
 		/* convert to PHAR_UFP */
 		if (data->internal_file->fp_type == PHAR_MOD) {
 			php_stream_close(data->internal_file->fp);
@@ -1691,13 +1668,8 @@ after_open_fp:
 
 	add_assoc_str(p_obj->ret, str_key, opened);
 
-	if (save) {
-		efree(save);
-	}
-
-	if (temp) {
-		efree(temp);
-	}
+	efree(save);
+	efree(temp);
 
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 	phar_entry_delref(data);
@@ -3654,9 +3626,7 @@ static void phar_add_file(phar_archive_data **pphar, zend_string *file_name, con
 		}
 		goto finish;
 	} else {
-		if (error) {
-			efree(error);
-		}
+		efree(error);
 
 		if (!data->internal_file->is_dir) {
 			size_t contents_len = 0;
@@ -3727,9 +3697,7 @@ static void phar_mkdir(phar_archive_data **pphar, zend_string *dir_name)
 
 		return;
 	} else {
-		if (error) {
-			efree(error);
-		}
+		efree(error);
 
 		/* check for copy on write */
 		if (data->phar != *pphar) {

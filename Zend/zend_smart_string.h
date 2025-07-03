@@ -66,10 +66,8 @@ static zend_always_inline size_t smart_string_alloc(smart_string *str, size_t le
 }
 
 static zend_always_inline void smart_string_free_ex(smart_string *str, bool persistent) {
-	if (str->c) {
-		pefree(str->c, persistent);
-		str->c = NULL;
-	}
+	pefree(str->c, persistent);
+	str->c = NULL;
 	str->a = str->len = 0;
 }
 

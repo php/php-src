@@ -123,9 +123,7 @@ void php_clear_stmt_bind(MY_STMT *stmt)
 	  mysqlnd keeps track of the binding and has freed its
 	  structures in stmt_close() above
 	*/
-	if (stmt->query) {
-		efree(stmt->query);
-	}
+	efree(stmt->query);
 	efree(stmt);
 }
 /* }}} */
@@ -149,9 +147,7 @@ static void mysqli_objects_free_storage(zend_object	*object)
 	mysqli_object 	*intern = php_mysqli_fetch_object(object);
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
-	if (my_res) {
-		efree(my_res);
-	}
+	efree(my_res);
 	zend_object_std_dtor(&intern->zo);
 }
 /* }}} */
@@ -571,9 +567,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-	if (MyG(error_msg)) {
-		efree(MyG(error_msg));
-	}
+	efree(MyG(error_msg));
 
 	return SUCCESS;
 }

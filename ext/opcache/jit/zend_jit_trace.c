@@ -9002,9 +9002,7 @@ static void zend_jit_trace_reset_caches(void)
 
 static void zend_jit_trace_free_caches(zend_jit_globals *jit_globals)
 {
-	if (jit_globals->exit_counters) {
-		free(jit_globals->exit_counters);
-	}
+	free(jit_globals->exit_counters);
 }
 
 static void zend_jit_trace_restart(void)

@@ -1036,9 +1036,7 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	intern->za = NULL;
 	zend_object_std_dtor(&intern->zo);
 
-	if (intern->filename) {
-		efree(intern->filename);
-	}
+	efree(intern->filename);
 }
 /* }}} */
 

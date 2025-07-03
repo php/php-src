@@ -4633,12 +4633,8 @@ static void delete_service(soapServicePtr service) /* {{{ */
 
 	delete_argv(&service->soap_class);
 
-	if (service->actor) {
-		efree(service->actor);
-	}
-	if (service->uri) {
-		efree(service->uri);
-	}
+	efree(service->actor);
+	efree(service->uri);
 	if (service->sdl) {
 		delete_sdl(service->sdl);
 	}

@@ -111,9 +111,7 @@ cleanup:
 	efree(oldlocale);
 #endif
 
-	if (sstr) {
-		efree(sstr);
-	}
+	efree(sstr);
 
 	INTL_METHOD_CHECK_STATUS( nfo, "Number parsing failed" );
 }
@@ -157,9 +155,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	if(zposition) {
 		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
 	}
-	if (sstr) {
-		efree(sstr);
-	}
+	efree(sstr);
 	INTL_METHOD_CHECK_STATUS( nfo, "Number parsing failed" );
 
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */

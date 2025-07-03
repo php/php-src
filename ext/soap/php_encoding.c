@@ -2533,7 +2533,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (nsptr != NULL) {
 			enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type);
 		}
-		if (ns) {efree(ns);}
+		efree(ns);
 
 	} else if ((attr = get_soap_enc_attribute(data->properties,"itemType")) &&
 	    attr->children &&
@@ -2547,7 +2547,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (nsptr != NULL) {
 			enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type);
 		}
-		if (ns) {efree(ns);}
+		efree(ns);
 
 		if ((attr = get_soap_enc_attribute(data->properties,"arraySize")) &&
 		    attr->children && attr->children->content) {
@@ -2901,7 +2901,7 @@ static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (nsptr) {
 			ZVAL_STRING(Z_VAR_ENC_NS_P(&soapvar), (char*)nsptr->href);
 		}
-		if (ns) {efree(ns);}
+		efree(ns);
 		ZVAL_COPY_VALUE(ret, &soapvar);
 	}
 	return ret;
@@ -3673,12 +3673,8 @@ static void delete_mapping(void *data)
 void delete_encoder(zval *zv)
 {
 	encodePtr t = Z_PTR_P(zv);
-	if (t->details.ns) {
-		efree(t->details.ns);
-	}
-	if (t->details.type_str) {
-		efree(t->details.type_str);
-	}
+	efree(t->details.ns);
+	efree(t->details.type_str);
 	if (t->details.map) {
 		delete_mapping(t->details.map);
 	}
@@ -3691,12 +3687,8 @@ void delete_encoder(zval *zv)
 void delete_encoder_persistent(zval *zv)
 {
 	encodePtr t = Z_PTR_P(zv);
-	if (t->details.ns) {
-		free(t->details.ns);
-	}
-	if (t->details.type_str) {
-		free(t->details.type_str);
-	}
+	free(t->details.ns);
+	free(t->details.type_str);
 	if (t->details.clark_notation) {
 		zend_string_release_ex(t->details.clark_notation, 1);
 	}

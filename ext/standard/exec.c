@@ -186,9 +186,7 @@ done:
 		signal(SIGCHLD, sig_handler);
 	}
 #endif
-	if (d) {
-		efree(d);
-	}
+	efree(d);
 	return pclose_return;
 err:
 	pclose_return = -1;

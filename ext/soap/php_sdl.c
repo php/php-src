@@ -67,7 +67,7 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const xmlChar *ty
 	} else {
 		enc = get_encoder_ex(sdl, (char*)type, xmlStrlen(type));
 	}
-	if (ns) {efree(ns);}
+	efree(ns);
 	return enc;
 }
 
@@ -1752,9 +1752,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 		}
 	}
 
-	if (functions) {
-		efree(functions);
-	}
+	efree(functions);
 	efree(bindings);
 	efree(encoders);
 	efree(types);
@@ -3107,12 +3105,8 @@ static void delete_psdl_int(sdl_cache_bucket *p)
 	sdlPtr tmp = p->sdl;
 
 	zend_hash_destroy(&tmp->functions);
-	if (tmp->source) {
-		free(tmp->source);
-	}
-	if (tmp->target_ns) {
-		free(tmp->target_ns);
-	}
+	free(tmp->source);
+	free(tmp->target_ns);
 	if (tmp->elements) {
 		zend_hash_destroy(tmp->elements);
 		free(tmp->elements);
@@ -3381,12 +3375,8 @@ void delete_sdl_impl(void *handle)
 	sdlPtr tmp = (sdlPtr)handle;
 
 	zend_hash_destroy(&tmp->functions);
-	if (tmp->source) {
-		efree(tmp->source);
-	}
-	if (tmp->target_ns) {
-		efree(tmp->target_ns);
-	}
+	efree(tmp->source);
+	efree(tmp->target_ns);
 	if (tmp->elements) {
 		zend_hash_destroy(tmp->elements);
 		efree(tmp->elements);
@@ -3425,18 +3415,12 @@ static void delete_binding_ex(zval *zv, bool persistent)
 {
 	sdlBindingPtr binding = Z_PTR_P(zv);
 
-	if (binding->location) {
-		pefree(binding->location, persistent);
-	}
-	if (binding->name) {
-		pefree(binding->name, persistent);
-	}
+	pefree(binding->location, persistent);
+	pefree(binding->name, persistent);
 
 	if (binding->bindingType == BINDING_SOAP) {
 		sdlSoapBindingPtr soapBind = binding->bindingAttributes;
-		if (soapBind) {
-			pefree(soapBind, persistent);
-		}
+		pefree(soapBind, persistent);
 	}
 	pefree(binding, persistent);
 }
@@ -3453,9 +3437,7 @@ static void delete_binding_persistent(zval *zv)
 
 static void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody body, bool persistent)
 {
-	if (body.ns) {
-		pefree(body.ns, persistent);
-	}
+	pefree(body.ns, persistent);
 	if (body.headers) {
 		zend_hash_destroy(body.headers);
 		pefree(body.headers, persistent);
@@ -3466,15 +3448,9 @@ static void delete_function_ex(zval *zv, bool persistent)
 {
 	sdlFunctionPtr function = Z_PTR_P(zv);
 
-	if (function->functionName) {
-		pefree(function->functionName, persistent);
-	}
-	if (function->requestName) {
-		pefree(function->requestName, persistent);
-	}
-	if (function->responseName) {
-		pefree(function->responseName, persistent);
-	}
+	pefree(function->functionName, persistent);
+	pefree(function->requestName, persistent);
+	pefree(function->responseName, persistent);
 	if (function->requestParameters) {
 		zend_hash_destroy(function->requestParameters);
 		pefree(function->requestParameters, persistent);
@@ -3491,9 +3467,7 @@ static void delete_function_ex(zval *zv, bool persistent)
 	if (function->bindingAttributes &&
 	    function->binding && function->binding->bindingType == BINDING_SOAP) {
 		sdlSoapBindingFunctionPtr soapFunction = function->bindingAttributes;
-		if (soapFunction->soapAction) {
-			pefree(soapFunction->soapAction, persistent);
-		}
+		pefree(soapFunction->soapAction, persistent);
 		delete_sdl_soap_binding_function_body(soapFunction->input, persistent);
 		delete_sdl_soap_binding_function_body(soapFunction->output, persistent);
 		pefree(soapFunction, persistent);
@@ -3514,9 +3488,7 @@ static void delete_function_persistent(zval *zv)
 static void delete_parameter_ex(zval *zv, bool persistent)
 {
 	sdlParamPtr param = Z_PTR_P(zv);
-	if (param->paramName) {
-		pefree(param->paramName, persistent);
-	}
+	pefree(param->paramName, persistent);
 	pefree(param, persistent);
 }
 
@@ -3532,12 +3504,8 @@ static void delete_parameter_persistent(zval *zv)
 
 static void delete_header_int_ex(sdlSoapBindingFunctionHeaderPtr hdr, bool persistent)
 {
-	if (hdr->name) {
-		pefree(hdr->name, persistent);
-	}
-	if (hdr->ns) {
-		pefree(hdr->ns, persistent);
-	}
+	pefree(hdr->name, persistent);
+	pefree(hdr->ns, persistent);
 	if (hdr->headerfaults) {
 		zend_hash_destroy(hdr->headerfaults);
 		pefree(hdr->headerfaults, persistent);
@@ -3565,9 +3533,7 @@ static void delete_header_persistent(zval *zv)
 static void delete_fault_ex(zval *zv, bool persistent)
 {
 	sdlFaultPtr fault = Z_PTR_P(zv);
-	if (fault->name) {
-		pefree(fault->name, persistent);
-	}
+	pefree(fault->name, persistent);
 	if (fault->details) {
 		zend_hash_destroy(fault->details);
 		pefree(fault->details, persistent);
@@ -3575,9 +3541,7 @@ static void delete_fault_ex(zval *zv, bool persistent)
 	if (fault->bindingAttributes) {
 		sdlSoapBindingFunctionFaultPtr binding = (sdlSoapBindingFunctionFaultPtr)fault->bindingAttributes;
 
-		if (binding->ns) {
-			pefree(binding->ns, persistent);
-		}
+		pefree(binding->ns, persistent);
 		pefree(fault->bindingAttributes, persistent);
 	}
 	pefree(fault, persistent);

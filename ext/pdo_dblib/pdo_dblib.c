@@ -95,12 +95,8 @@ int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	einfo->oserr = oserr;
 	einfo->dberr = dberr;
 
-	if (einfo->oserrstr) {
-		efree(einfo->oserrstr);
-	}
-	if (einfo->dberrstr) {
-		efree(einfo->dberrstr);
-	}
+	efree(einfo->oserrstr);
+	efree(einfo->dberrstr);
 	if (oserrstr) {
 		einfo->oserrstr = estrdup(oserrstr);
 	} else {
@@ -134,9 +130,7 @@ int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 			einfo = &DBLIB_G(err);
 		}
 
-		if (einfo->lastmsg) {
-			efree(einfo->lastmsg);
-		}
+		efree(einfo->lastmsg);
 
 		einfo->lastmsg = estrdup(msgtext);
 	}
@@ -150,18 +144,12 @@ void pdo_dblib_err_dtor(pdo_dblib_err *err)
 		return;
 	}
 
-	if (err->dberrstr) {
-		efree(err->dberrstr);
-		err->dberrstr = NULL;
-	}
-	if (err->lastmsg) {
-		efree(err->lastmsg);
-		err->lastmsg = NULL;
-	}
-	if (err->oserrstr) {
-		efree(err->oserrstr);
-		err->oserrstr = NULL;
-	}
+	efree(err->dberrstr);
+	err->dberrstr = NULL;
+	efree(err->lastmsg);
+	err->lastmsg = NULL;
+	efree(err->oserrstr);
+	err->oserrstr = NULL;
 }
 
 static PHP_GINIT_FUNCTION(dblib)
@@ -175,18 +163,12 @@ static PHP_GINIT_FUNCTION(dblib)
 
 PHP_RSHUTDOWN_FUNCTION(pdo_dblib)
 {
-	if (DBLIB_G(err).oserrstr) {
-		efree(DBLIB_G(err).oserrstr);
-		DBLIB_G(err).oserrstr = NULL;
-	}
-	if (DBLIB_G(err).dberrstr) {
-		efree(DBLIB_G(err).dberrstr);
-		DBLIB_G(err).dberrstr = NULL;
-	}
-	if (DBLIB_G(err).lastmsg) {
-		efree(DBLIB_G(err).lastmsg);
-		DBLIB_G(err).lastmsg = NULL;
-	}
+	efree(DBLIB_G(err).oserrstr);
+	DBLIB_G(err).oserrstr = NULL;
+	efree(DBLIB_G(err).dberrstr);
+	DBLIB_G(err).dberrstr = NULL;
+	efree(DBLIB_G(err).lastmsg);
+	DBLIB_G(err).lastmsg = NULL;
 	return SUCCESS;
 }
 

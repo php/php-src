@@ -379,9 +379,7 @@ static void xml_parser_free_obj(zend_object *object)
 		zend_fcc_dtor(&parser->endNamespaceDeclHandler);
 		parser->endNamespaceDeclHandler.function_handler = NULL;
 	}
-	if (parser->baseURI) {
-		efree(parser->baseURI);
-	}
+	efree(parser->baseURI);
 	if (parser->object) {
 		OBJ_RELEASE(parser->object);
 	}

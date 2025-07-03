@@ -242,9 +242,7 @@ static void odbc_result_free(odbc_result *res)
 
 	if (res->values) {
 		for (int i = 0; i < res->numcols; i++) {
-			if (res->values[i].value) {
-				efree(res->values[i].value);
-			}
+			efree(res->values[i].value);
 		}
 		efree(res->values);
 		res->values = NULL;
@@ -263,10 +261,8 @@ static void odbc_result_free(odbc_result *res)
 		 */
 		res->stmt = NULL;
 	}
-	if (res->param_info) {
-		efree(res->param_info);
-		res->param_info = NULL;
-	}
+	efree(res->param_info);
+	res->param_info = NULL;
 
 	HashTable *results = &res->conn_ptr->results;
 	res->conn_ptr = NULL;
@@ -1504,9 +1500,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 		}
 	}
-	if (buf) {
-		efree(buf);
-	}
+	efree(buf);
 }
 /* }}} */
 
@@ -2489,9 +2483,7 @@ PHP_FUNCTION(odbc_next_result)
 
 	if (result->values) {
 		for(i = 0; i < result->numcols; i++) {
-			if (result->values[i].value) {
-				efree(result->values[i].value);
-			}
+			efree(result->values[i].value);
 		}
 		efree(result->values);
 		result->values = NULL;

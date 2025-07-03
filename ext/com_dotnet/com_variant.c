@@ -270,9 +270,7 @@ PHP_COM_DOTNET_API zend_result php_com_zval_from_variant(zval *z, VARIANT *v, in
 			php_com_wrap_variant(z, v, codepage);
 	}
 
-	if (olestring) {
-		efree(olestring);
-	}
+	efree(olestring);
 
 	if (ret == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "variant->zval: conversion from 0x%x ret=%d", V_VT(v), ret);

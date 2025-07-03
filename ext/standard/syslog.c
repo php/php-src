@@ -42,10 +42,8 @@ PHP_MINIT_FUNCTION(syslog)
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
 	php_closelog();
-	if (BG(syslog_device)) {
-		free(BG(syslog_device));
-		BG(syslog_device) = NULL;
-	}
+	free(BG(syslog_device));
+	BG(syslog_device) = NULL;
 	return SUCCESS;
 }
 
@@ -83,10 +81,8 @@ PHP_FUNCTION(closelog)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_closelog();
-	if (BG(syslog_device)) {
-		free(BG(syslog_device));
-		BG(syslog_device)=NULL;
-	}
+	free(BG(syslog_device));
+	BG(syslog_device)=NULL;
 	RETURN_TRUE;
 }
 /* }}} */

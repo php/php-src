@@ -847,9 +847,7 @@ static void free_argv(char **argv, int argc)
 
 	if (argv) {
 		for (i = 0; i < argc; i++) {
-			if (argv[i]) {
-				efree(argv[i]);
-			}
+			efree(argv[i]);
 		}
 		efree(argv);
 	}

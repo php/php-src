@@ -221,9 +221,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 			 memcpy(b, buf, len);
 		}
 
-		if (buf) {
-			efree(buf);
-		}
+		efree(buf);
 	}
 
 	if (!status) {
@@ -1030,9 +1028,7 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 		efree(fline);
 		efree(iname);
 	}
-	if (fline) {
-		efree(fline);
-	}
+	efree(fline);
 
 	if (width && height) {
 		if (result) {

@@ -1128,9 +1128,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		onig_region_free(regs, 0);
 	}
 
-	if (description) {
-		efree(description);
-	}
+	efree(description);
 	if (regs != NULL) {
 		onig_region_free(regs, 1);
 	}

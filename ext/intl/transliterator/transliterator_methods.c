@@ -56,9 +56,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	/* Open ICU Transliterator. */
 	utrans = utrans_openU( ustr_id, ustr_id_len, (UTransDirection ) direction,
 		NULL, -1, &parse_error, TRANSLITERATOR_ERROR_CODE_P( to ) );
-	if (ustr_id) {
-		efree( ustr_id );
-	}
+	efree( ustr_id );
 
 	if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 	{

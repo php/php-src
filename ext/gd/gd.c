@@ -246,9 +246,7 @@ static void php_gd_font_object_free(zend_object *zobj)
 	php_gd_font_object *obj = php_gd_font_object_from_zend_object(zobj);
 
 	if (obj->font) {
-		if (obj->font->data) {
-			efree(obj->font->data);
-		}
+		efree(obj->font->data);
 		efree(obj->font);
 		obj->font = NULL;
 	}

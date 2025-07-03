@@ -202,9 +202,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 
 	zend_string_release_ex(message, false);
 
-	if (supp) {
-		efree(supp);
-	}
+	efree(supp);
 }
 /* }}} */
 
@@ -1310,9 +1308,7 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 	if (func->common.function_name) {
 		zend_string_release_ex(func->common.function_name, 0);
 	}
-	if (ZEND_MAP_PTR(func->common.run_time_cache)) {
-		efree(ZEND_MAP_PTR(func->common.run_time_cache));
-	}
+	efree(ZEND_MAP_PTR(func->common.run_time_cache));
 	efree(func);
 }
 /* }}} */
@@ -1322,9 +1318,7 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 	if (func->common.function_name) {
 		zend_string_release_ex(func->common.function_name, 1);
 	}
-	if (ZEND_MAP_PTR(func->common.run_time_cache)) {
-		pefree(ZEND_MAP_PTR(func->common.run_time_cache), 1);
-	}
+	pefree(ZEND_MAP_PTR(func->common.run_time_cache), 1);
 	pefree(func, 1);
 }
 /* }}} */
@@ -1485,12 +1479,8 @@ static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 	if (dbh->data_source) {
 		pefree((char *)dbh->data_source, dbh->is_persistent);
 	}
-	if (dbh->username) {
-		pefree(dbh->username, dbh->is_persistent);
-	}
-	if (dbh->password) {
-		pefree(dbh->password, dbh->is_persistent);
-	}
+	pefree(dbh->username, dbh->is_persistent);
+	pefree(dbh->password, dbh->is_persistent);
 
 	if (dbh->persistent_id) {
 		pefree((char *)dbh->persistent_id, dbh->is_persistent);

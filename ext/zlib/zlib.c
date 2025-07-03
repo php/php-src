@@ -73,9 +73,7 @@ static void inflate_context_free_obj(zend_object *object)
 {
 	php_zlib_context *intern = inflate_context_from_obj(object);
 
-	if (intern->inflateDict) {
-		efree(intern->inflateDict);
-	}
+	efree(intern->inflateDict);
 	inflateEnd(&intern->Z);
 
 	zend_object_std_dtor(&intern->std);
@@ -326,9 +324,7 @@ static void php_zlib_output_handler_context_dtor(void *opaq)
 	php_zlib_context *ctx = (php_zlib_context *) opaq;
 
 	if (ctx) {
-		if (ctx->buffer.data) {
-			efree(ctx->buffer.data);
-		}
+		efree(ctx->buffer.data);
 		efree(ctx);
 	}
 }
@@ -455,9 +451,7 @@ static inline int php_zlib_inflate_rounds(z_stream *Z, size_t max, char **buf, s
 		*buf = buffer.data;
 		*len = buffer.used;
 	} else {
-		if (buffer.data) {
-			efree(buffer.data);
-		}
+		efree(buffer.data);
 		/* HACK: See zlib/examples/zpipe.c inf() function for explanation. */
 		/* This works as long as this function is not used for streaming. Required to catch very short invalid data. */
 		status = (status == Z_OK) ? Z_DATA_ERROR : status;

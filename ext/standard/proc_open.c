@@ -225,13 +225,9 @@ static php_process_env _php_array_to_envp(zval *environment)
 static void _php_free_envp(php_process_env env)
 {
 #ifndef PHP_WIN32
-	if (env.envarray) {
-		efree(env.envarray);
-	}
+	efree(env.envarray);
 #endif
-	if (env.envp) {
-		efree(env.envp);
-	}
+	efree(env.envp);
 }
 /* }}} */
 

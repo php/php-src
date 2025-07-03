@@ -202,9 +202,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			php_url_free(resource);
 			return NULL;
 		}
-		if (error) {
-			efree(error);
-		}
+		efree(error);
 		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 		php_url_free(resource);
 		efree(internal_file);
@@ -584,14 +582,10 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	/* find the phar in our trusty global hash indexed by alias (host of phar://blah.phar/file.whatever) */
 	if (FAILURE == phar_get_archive(&phar, ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, &error)) {
 		php_url_free(resource);
-		if (error) {
-			efree(error);
-		}
+		efree(error);
 		return FAILURE;
 	}
-	if (error) {
-		efree(error);
-	}
+	efree(error);
 	if (*internal_file == '\0') {
 		/* root directory requested */
 		phar_dostat(phar, NULL, ssb, 1);
@@ -711,9 +705,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		php_url_free(resource);
 		return 0;
 	}
-	if (error) {
-		efree(error);
-	}
+	efree(error);
 	if (idata->internal_file->fp_refcount > 1) {
 		/* more than just our fp resource is open for this file */
 		php_stream_wrapper_log_error(wrapper, options, "phar error: \"%s\" in phar \"%s\", has open file pointers, cannot unlink", internal_file, ZSTR_VAL(resource->host));
@@ -750,9 +742,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	}
 	if (SUCCESS != phar_get_archive(&pfrom, ZSTR_VAL(resource_from->host), ZSTR_LEN(resource_from->host), NULL, 0, &error)) {
 		pfrom = NULL;
-		if (error) {
-			efree(error);
-		}
+		efree(error);
 	}
 	if (PHAR_G(readonly) && (!pfrom || !pfrom->is_data)) {
 		php_url_free(resource_from);
@@ -766,9 +756,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		return 0;
 	}
 	if (SUCCESS != phar_get_archive(&pto, ZSTR_VAL(resource_to->host), ZSTR_LEN(resource_to->host), NULL, 0, &error)) {
-		if (error) {
-			efree(error);
-		}
+		efree(error);
 		pto = NULL;
 	}
 	if (PHAR_G(readonly) && (!pto || !pto->is_data)) {

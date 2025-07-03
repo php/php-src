@@ -790,10 +790,8 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		compiler_globals->map_ptr_size = 0;
 	}
-	if (compiler_globals->internal_run_time_cache) {
-		pefree(compiler_globals->internal_run_time_cache, 1);
-		compiler_globals->internal_run_time_cache = NULL;
-	}
+	pefree(compiler_globals->internal_run_time_cache, 1);
+	compiler_globals->internal_run_time_cache = NULL;
 }
 /* }}} */
 
@@ -1124,14 +1122,10 @@ zend_result zend_post_startup(void) /* {{{ */
 	compiler_globals->function_table = NULL;
 	free(compiler_globals->class_table);
 	compiler_globals->class_table = NULL;
-	if (compiler_globals->map_ptr_real_base) {
-		free(compiler_globals->map_ptr_real_base);
-	}
+	free(compiler_globals->map_ptr_real_base);
 	compiler_globals->map_ptr_real_base = NULL;
 	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
-	if (compiler_globals->internal_run_time_cache) {
-		pefree(compiler_globals->internal_run_time_cache, 1);
-	}
+	pefree(compiler_globals->internal_run_time_cache, 1);
 	compiler_globals->internal_run_time_cache = NULL;
 	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
 		compiler_globals_ctor(compiler_globals);
@@ -1215,10 +1209,8 @@ void zend_shutdown(void) /* {{{ */
 		CG(script_encoding_list) = NULL;
 		CG(script_encoding_list_size) = 0;
 	}
-	if (CG(internal_run_time_cache)) {
-		pefree(CG(internal_run_time_cache), 1);
-		CG(internal_run_time_cache) = NULL;
-	}
+	pefree(CG(internal_run_time_cache), 1);
+	CG(internal_run_time_cache) = NULL;
 #endif
 	zend_map_ptr_static_last = 0;
 	zend_map_ptr_static_size = 0;

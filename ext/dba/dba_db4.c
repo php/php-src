@@ -258,12 +258,8 @@ DBA_NEXTKEY_FUNC(db4)
 			key = zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 		}
 		if (info->flags & DBA_PERSISTENT) {
-			if (gkey.data) {
-				free(gkey.data);
-			}
-			if (gval.data) {
-				free(gval.data);
-			}
+			free(gkey.data);
+			free(gval.data);
 		}
 	}
 

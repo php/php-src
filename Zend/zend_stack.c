@@ -77,10 +77,8 @@ ZEND_API bool zend_stack_is_empty(const zend_stack *stack)
 
 ZEND_API void zend_stack_destroy(zend_stack *stack)
 {
-	if (stack->elements) {
-		efree(stack->elements);
-		stack->elements = NULL;
-	}
+	efree(stack->elements);
+	stack->elements = NULL;
 }
 
 
@@ -151,10 +149,8 @@ ZEND_API void zend_stack_clean(zend_stack *stack, void (*func)(void *), bool fre
 		}
 	}
 	if (free_elements) {
-		if (stack->elements) {
-			efree(stack->elements);
-			stack->elements = NULL;
-		}
+		efree(stack->elements);
+		stack->elements = NULL;
 		stack->top = stack->max = 0;
 	}
 }

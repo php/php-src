@@ -1830,10 +1830,8 @@ zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char 
 
 	php_stream_rewind(fp);
 
-	if (phar->signature) {
-		efree(phar->signature);
-		phar->signature = NULL;
-	}
+	efree(phar->signature);
+	phar->signature = NULL;
 
 	switch(phar->sig_flags) {
 		case PHAR_SIG_SHA512: {

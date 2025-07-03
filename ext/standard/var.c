@@ -1204,9 +1204,7 @@ again:
 						}
 						smart_str_appendl(buf, "N;", 2);
 					}
-					if (serialized_data) {
-						efree(serialized_data);
-					}
+					efree(serialized_data);
 					return;
 				}
 

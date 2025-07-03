@@ -76,10 +76,8 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	einfo->file = file;
 	einfo->line = line;
 
-	if (einfo->errmsg) {
-		pefree(einfo->errmsg, dbh->is_persistent);
-		einfo->errmsg = NULL;
-	}
+	pefree(einfo->errmsg, dbh->is_persistent);
+	einfo->errmsg = NULL;
 
 	if (sqlstate == NULL || strlen(sqlstate) >= sizeof(pdo_error_type)) {
 		strcpy(*pdo_err, "HY000");
@@ -252,10 +250,8 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 			PQfinish(H->server);
 			H->server = NULL;
 		}
-		if (H->einfo.errmsg) {
-			pefree(H->einfo.errmsg, dbh->is_persistent);
-			H->einfo.errmsg = NULL;
-		}
+		pefree(H->einfo.errmsg, dbh->is_persistent);
+		H->einfo.errmsg = NULL;
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}
@@ -282,9 +278,7 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 		PDO_CURSOR_FWDONLY) == PDO_CURSOR_SCROLL;
 
 	if (scrollable) {
-		if (S->cursor_name) {
-			efree(S->cursor_name);
-		}
+		efree(S->cursor_name);
 		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
 		emulate = 1;
 	} else if (driver_options) {

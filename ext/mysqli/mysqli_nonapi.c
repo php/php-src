@@ -34,9 +34,7 @@
 static void php_mysqli_set_error(zend_long mysql_errno, char *mysql_err)
 {
 	MyG(error_no) = mysql_errno;
-	if (MyG(error_msg)) {
-		efree(MyG(error_msg));
-	}
+	efree(MyG(error_msg));
 	if(mysql_err && *mysql_err) {
 		MyG(error_msg) = estrdup(mysql_err);
 	} else {
@@ -240,25 +238,11 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 		/* if we're here, this means previous conn was ssl, repopulate settings */
 		mysql_ssl_set(mysql->mysql, ssl_key, ssl_cert, ssl_ca, ssl_capath, ssl_cipher);
 
-		if (ssl_key) {
-		    efree(ssl_key);
-		}
-
-		if (ssl_cert) {
-		    efree(ssl_cert);
-		}
-
-		if (ssl_ca) {
-		    efree(ssl_ca);
-		}
-
-		if (ssl_capath) {
-		    efree(ssl_capath);
-		}
-
-		if (ssl_cipher) {
-		    efree(ssl_cipher);
-		}
+		efree(ssl_key);
+		efree(ssl_cert);
+		efree(ssl_ca);
+		efree(ssl_capath);
+		efree(ssl_cipher);
 	}
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
 						port, socket, flags, MYSQLND_CLIENT_NO_FLAG) == NULL)
@@ -801,15 +785,9 @@ PHP_FUNCTION(mysqli_poll)
 		mysqlnd_zval_array_from_mysqlnd_array(new_e_array, e_array);
 	}
 
-	if (new_dont_poll_array) {
-		efree(new_dont_poll_array);
-	}
-	if (new_r_array) {
-		efree(new_r_array);
-	}
-	if (new_e_array) {
-		efree(new_e_array);
-	}
+	efree(new_dont_poll_array);
+	efree(new_r_array);
+	efree(new_e_array);
 	if (ret == PASS) {
 		RETURN_LONG(desc_num);
 	} else {

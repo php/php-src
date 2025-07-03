@@ -126,26 +126,16 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 
 	pgsql_stmt_finish(S, FIN_DISCARD|(server_obj_usable ? FIN_CLOSE|FIN_ABORT : 0));
 
-	if (S->stmt_name) {
-		efree(S->stmt_name);
-		S->stmt_name = NULL;
-	}
-	if (S->param_lengths) {
-		efree(S->param_lengths);
-		S->param_lengths = NULL;
-	}
-	if (S->param_values) {
-		efree(S->param_values);
-		S->param_values = NULL;
-	}
-	if (S->param_formats) {
-		efree(S->param_formats);
-		S->param_formats = NULL;
-	}
-	if (S->param_types) {
-		efree(S->param_types);
-		S->param_types = NULL;
-	}
+	efree(S->stmt_name);
+	S->stmt_name = NULL;
+	efree(S->param_lengths);
+	S->param_lengths = NULL;
+	efree(S->param_values);
+	S->param_values = NULL;
+	efree(S->param_formats);
+	S->param_formats = NULL;
+	efree(S->param_types);
+	S->param_types = NULL;
 	if (S->query) {
 		zend_string_release(S->query);
 		S->query = NULL;
@@ -166,10 +156,8 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 		S->cursor_name = NULL;
 	}
 
-	if(S->cols) {
-		efree(S->cols);
-		S->cols = NULL;
-	}
+	efree(S->cols);
+	S->cols = NULL;
 	efree(S);
 	stmt->driver_data = NULL;
 	return 1;
@@ -369,9 +357,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NAMED && param->is_param) {
 		switch (event_type) {
 			case PDO_PARAM_EVT_FREE:
-				if (param->driver_data) {
-					efree(param->driver_data);
-				}
+				efree(param->driver_data);
 				break;
 
 			case PDO_PARAM_EVT_NORMALIZE:

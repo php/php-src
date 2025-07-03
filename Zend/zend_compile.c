@@ -349,10 +349,8 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_arra
 
 void zend_oparray_context_end(zend_oparray_context *prev_context) /* {{{ */
 {
-	if (CG(context).brk_cont_array) {
-		efree(CG(context).brk_cont_array);
-		CG(context).brk_cont_array = NULL;
-	}
+	efree(CG(context).brk_cont_array);
+	CG(context).brk_cont_array = NULL;
 	if (CG(context).labels) {
 		zend_hash_destroy(CG(context).labels);
 		FREE_HASHTABLE(CG(context).labels);

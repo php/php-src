@@ -307,9 +307,7 @@ static void zend_accel_blacklist_loadone(zend_blacklist *blacklist, char *filena
 		blacklist->pos++;
 	}
 	fclose(fp);
-	if (blacklist_path) {
-		free(blacklist_path);
-	}
+	free(blacklist_path);
 }
 
 void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)

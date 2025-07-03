@@ -1142,9 +1142,7 @@ out:
 
 	smart_str_free(&req_buf);
 
-	if (http_header_line) {
-		efree(http_header_line);
-	}
+	efree(http_header_line);
 
 	if (header_info.location != NULL) {
 		efree(header_info.location);

@@ -184,14 +184,10 @@ void ftp_gc(ftpbuf_t *ftp)
 	if (ftp == NULL) {
 		return;
 	}
-	if (ftp->pwd) {
-		efree(ftp->pwd);
-		ftp->pwd = NULL;
-	}
-	if (ftp->syst) {
-		efree(ftp->syst);
-		ftp->syst = NULL;
-	}
+	efree(ftp->pwd);
+	ftp->pwd = NULL;
+	efree(ftp->syst);
+	ftp->syst = NULL;
 }
 
 bool ftp_quit(ftpbuf_t *ftp)
@@ -207,10 +203,8 @@ bool ftp_quit(ftpbuf_t *ftp)
 		return false;
 	}
 
-	if (ftp->pwd) {
-		efree(ftp->pwd);
-		ftp->pwd = NULL;
-	}
+	efree(ftp->pwd);
+	ftp->pwd = NULL;
 
 	return true;
 }
@@ -497,10 +491,8 @@ bool ftp_chdir(ftpbuf_t *ftp, const char *dir, const size_t dir_len)
 		return false;
 	}
 
-	if (ftp->pwd) {
-		efree(ftp->pwd);
-		ftp->pwd = NULL;
-	}
+	efree(ftp->pwd);
+	ftp->pwd = NULL;
 
 	if (!ftp_putcmd(ftp, "CWD", sizeof("CWD")-1, dir, dir_len)) {
 		return false;
@@ -517,10 +509,8 @@ bool ftp_cdup(ftpbuf_t *ftp)
 		return false;
 	}
 
-	if (ftp->pwd) {
-		efree(ftp->pwd);
-		ftp->pwd = NULL;
-	}
+	efree(ftp->pwd);
+	ftp->pwd = NULL;
 
 	if (!ftp_putcmd(ftp, "CDUP", sizeof("CDUP")-1, NULL, (size_t) 0)) {
 		return false;

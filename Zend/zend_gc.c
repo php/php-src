@@ -472,10 +472,8 @@ static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 
 static void root_buffer_dtor(zend_gc_globals *gc_globals)
 {
-	if (gc_globals->buf) {
-		free(gc_globals->buf);
-		gc_globals->buf = NULL;
-	}
+	free(gc_globals->buf);
+	gc_globals->buf = NULL;
 }
 
 static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)

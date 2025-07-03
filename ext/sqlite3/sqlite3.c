@@ -96,9 +96,7 @@ static void php_sqlite3_error(php_sqlite3_db_object *db_obj, int errcode, const 
 		php_error_docref(NULL, E_WARNING, "%s", message);
 	}
 
-	if (message) {
-		efree(message);
-	}
+	efree(message);
 }
 /* }}} */
 

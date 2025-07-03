@@ -48,10 +48,8 @@ void msgformat_data_free(msgformat_data* mf_data)
 	if (mf_data->umsgf)
 		umsg_close(mf_data->umsgf);
 
-	if (mf_data->orig_format) {
-		efree(mf_data->orig_format);
-		mf_data->orig_format = NULL;
-	}
+	efree(mf_data->orig_format);
+	mf_data->orig_format = NULL;
 
 	if (mf_data->arg_types) {
 		zend_hash_destroy(mf_data->arg_types);

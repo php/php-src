@@ -74,25 +74,17 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
 	pdo_mysql_free_result(S);
-	if (S->einfo.errmsg) {
-		pefree(S->einfo.errmsg, stmt->dbh->is_persistent);
-		S->einfo.errmsg = NULL;
-	}
+	pefree(S->einfo.errmsg, stmt->dbh->is_persistent);
+	S->einfo.errmsg = NULL;
 	if (S->stmt) {
 		mysql_stmt_close(S->stmt);
 		S->stmt = NULL;
 	}
 
 #ifndef PDO_USE_MYSQLND
-	if (S->params) {
-		efree(S->params);
-	}
-	if (S->in_null) {
-		efree(S->in_null);
-	}
-	if (S->in_length) {
-		efree(S->in_length);
-	}
+	efree(S->params);
+	efree(S->in_null);
+	efree(S->in_length);
 #endif
 
 	if (!S->done && php_pdo_stmt_valid_db_obj_handle(stmt)) {

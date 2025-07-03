@@ -1380,10 +1380,8 @@ static zend_object* php_hashcontext_create(zend_class_entry *ce) {
 static void php_hashcontext_dtor(zend_object *obj) {
 	php_hashcontext_object *hash = php_hashcontext_from_object(obj);
 
-	if (hash->context) {
-		efree(hash->context);
-		hash->context = NULL;
-	}
+	efree(hash->context);
+	hash->context = NULL;
 
 	if (hash->key) {
 		ZEND_SECURE_ZERO(hash->key, hash->ops->block_size);

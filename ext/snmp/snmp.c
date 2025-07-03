@@ -147,11 +147,9 @@ static PHP_GINIT_FUNCTION(snmp)
 /* }}} */
 
 #define PHP_SNMP_SESSION_FREE(a) { \
-	if ((*session)->a) { \
-		efree((*session)->a); \
+	efree((*session)->a); \
 		(*session)->a = NULL; \
-	} \
-}
+	}
 
 static void snmp_session_free(php_snmp_session **session) /* {{{ */
 {
@@ -362,10 +360,8 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 		ZVAL_COPY(snmpval, &val);
 	}
 	zval_ptr_dtor(&val);
-
-	if (dbuf){ /* malloc was used to store value */
-		efree(dbuf);
-	}
+/* malloc was used to store value */
+	efree(dbuf);
 }
 /* }}} */
 
@@ -1138,9 +1134,7 @@ static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string
 		return false;
 	}
 
-	if (s->contextEngineID) {
-		efree(s->contextEngineID);
-	}
+	efree(s->contextEngineID);
 
 	s->contextEngineID = ebuf;
 	s->contextEngineIDLen = eout_len;

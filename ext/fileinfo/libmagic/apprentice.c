@@ -601,9 +601,7 @@ apprentice_unmap(struct magic_map *map)
 		if (map->p == NULL) {
 			int j;
 			for (j = 0; j < MAGIC_SETS; j++) {
-				if (map->magic[j]) {
-					efree(map->magic[j]);
-				}
+				efree(map->magic[j]);
 			}
 		} else {
 			efree(map->p);
@@ -3328,9 +3326,7 @@ internal_loaded:
 		for (i = 0; i < MAGIC_SETS; i++)
 			byteswap(map->magic[i], map->nmagic[i]);
 
-	if (dbname) {
-		efree(dbname);
-	}
+	efree(dbname);
 	return map;
 
 error:
@@ -3338,9 +3334,7 @@ error:
 		php_stream_close(stream);
 	}
 	apprentice_unmap(map);
-	if (dbname) {
-		efree(dbname);
-	}
+	efree(dbname);
 	return NULL;
 }
 

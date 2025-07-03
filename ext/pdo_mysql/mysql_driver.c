@@ -66,10 +66,8 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 	einfo->file = file;
 	einfo->line = line;
 
-	if (einfo->errmsg) {
-		pefree(einfo->errmsg, dbh->is_persistent);
-		einfo->errmsg = NULL;
-	}
+	pefree(einfo->errmsg, dbh->is_persistent);
+	einfo->errmsg = NULL;
 
 	if (einfo->errcode) {
 		if (einfo->errcode == 2014) {
@@ -156,10 +154,8 @@ static void mysql_handle_closer(pdo_dbh_t *dbh)
 			mysql_close(H->server);
 			H->server = NULL;
 		}
-		if (H->einfo.errmsg) {
-			pefree(H->einfo.errmsg, dbh->is_persistent);
-			H->einfo.errmsg = NULL;
-		}
+		pefree(H->einfo.errmsg, dbh->is_persistent);
+		H->einfo.errmsg = NULL;
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}

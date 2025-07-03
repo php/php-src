@@ -235,10 +235,8 @@ static void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 		zend_string_release_ex(fh->opened_path, 0);
 		fh->opened_path = NULL;
 	}
-	if (fh->buf) {
-		efree(fh->buf);
-		fh->buf = NULL;
-	}
+	efree(fh->buf);
+	fh->buf = NULL;
 	if (fh->filename) {
 		zend_string_release(fh->filename);
 		fh->filename = NULL;

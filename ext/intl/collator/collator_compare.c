@@ -72,9 +72,7 @@ PHP_FUNCTION( collator_compare )
 		/* Set error messages. */
 		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
 			"Error converting first argument to UTF-16", 0 );
-		if (ustr1) {
-			efree( ustr1 );
-		}
+		efree( ustr1 );
 		RETURN_FALSE;
 	}
 
@@ -88,12 +86,8 @@ PHP_FUNCTION( collator_compare )
 		/* Set error messages. */
 		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
 			"Error converting second argument to UTF-16", 0 );
-		if (ustr1) {
-			efree( ustr1 );
-		}
-		if (ustr2) {
-			efree( ustr2 );
-		}
+		efree( ustr1 );
+		efree( ustr2 );
 		RETURN_FALSE;
 	}
 

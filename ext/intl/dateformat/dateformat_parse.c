@@ -45,16 +45,12 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 	if (UNEXPECTED(update_calendar)) {
 		UCalendar *parsed_calendar = (UCalendar *)udat_getCalendar(DATE_FORMAT_OBJECT(dfo));
 		udat_parseCalendar(DATE_FORMAT_OBJECT(dfo), parsed_calendar, text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
-		if (text_utf16) {
-			efree(text_utf16);
-		}
+		efree(text_utf16);
 		INTL_METHOD_CHECK_STATUS( dfo, "Calendar parsing failed" );
 		timestamp = ucal_getMillis( parsed_calendar, &INTL_DATA_ERROR_CODE(dfo));
 	} else {
 		timestamp = udat_parse(DATE_FORMAT_OBJECT(dfo), text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
-		if (text_utf16) {
-			efree(text_utf16);
-		}
+		efree(text_utf16);
 	}
 
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing failed" );
@@ -99,9 +95,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 	parsed_calendar = (UCalendar *)udat_getCalendar(DATE_FORMAT_OBJECT(dfo));
 	udat_parseCalendar( DATE_FORMAT_OBJECT(dfo), parsed_calendar, text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
 
-	if (text_utf16) {
-		efree(text_utf16);
-	}
+	efree(text_utf16);
 
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing failed" );
 

@@ -1678,10 +1678,8 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 		SSL_CTX_free(sslsock->ctx);
 		sslsock->ctx = NULL;
 #ifdef HAVE_TLS_ALPN
-		if (sslsock->alpn_ctx.data) {
-			pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
-			sslsock->alpn_ctx.data = NULL;
-		}
+		pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
+		sslsock->alpn_ctx.data = NULL;
 #endif
 		return FAILURE;
 	} else {
@@ -2139,9 +2137,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			sslsock->ctx = NULL;
 		}
 #ifdef HAVE_TLS_ALPN
-		if (sslsock->alpn_ctx.data) {
-			pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
-		}
+		pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
 #endif
 #ifdef PHP_WIN32
 		if (sslsock->s.socket == -1)
@@ -2178,13 +2174,8 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 		sslsock->sni_certs = NULL;
 	}
 
-	if (sslsock->url_name) {
-		pefree(sslsock->url_name, php_stream_is_persistent(stream));
-	}
-
-	if (sslsock->reneg) {
-		pefree(sslsock->reneg, php_stream_is_persistent(stream));
-	}
+	pefree(sslsock->url_name, php_stream_is_persistent(stream));
+	pefree(sslsock->reneg, php_stream_is_persistent(stream));
 
 	pefree(sslsock, php_stream_is_persistent(stream));
 

@@ -960,9 +960,7 @@ try_again:
 				tmp = strstr(tmp," ");
 				if (tmp != NULL) {
 					tmp++;
-					if (http_msg) {
-						efree(http_msg);
-					}
+					efree(http_msg);
 					http_msg = estrdup(tmp);
 				}
 				efree(http_version);
@@ -986,9 +984,7 @@ try_again:
 			zend_string_release_ex(http_headers, 0);
 		}
 		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
-		if (http_msg) {
-			efree(http_msg);
-		}
+		efree(http_msg);
 		smart_str_free(&soap_headers_z);
 		return true;
 	}
@@ -1120,9 +1116,7 @@ try_again:
 		zend_string_release_ex(http_headers, 0);
 		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL, SOAP_GLOBAL(lang_en));
-		if (http_msg) {
-			efree(http_msg);
-		}
+		efree(http_msg);
 		smart_str_free(&soap_headers_z);
 		return FALSE;
 	}
@@ -1311,9 +1305,7 @@ try_again:
 			efree(content_encoding);
 			zend_string_release_ex(http_headers, 0);
 			zend_string_release_ex(http_body, 0);
-			if (http_msg) {
-				efree(http_msg);
-			}
+			efree(http_msg);
 			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL, SOAP_GLOBAL(lang_en));
 			return FALSE;
 		}
@@ -1327,9 +1319,7 @@ try_again:
 			zend_string_release_ex(http_headers, 0);
 			zend_string_release_ex(http_body, 0);
 			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL, SOAP_GLOBAL(lang_en));
-			if (http_msg) {
-				efree(http_msg);
-			}
+			efree(http_msg);
 			return FALSE;
 		}
 		efree(content_encoding);
@@ -1366,9 +1356,7 @@ try_again:
 		}
 	}
 
-	if (http_msg) {
-		efree(http_msg);
-	}
+	efree(http_msg);
 
 	return TRUE;
 }

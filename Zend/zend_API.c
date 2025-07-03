@@ -1116,8 +1116,9 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 			} else {
 				zend_argument_type_error(arg_num, "must be of type %s, %s given", expected_type, zend_zval_value_name(arg));
 			}
-		} else if (error) {
+		} else {
 			efree(error);
+		
 		}
 
 		return FAILURE;
@@ -4090,9 +4091,7 @@ get_function_via_handler:
 					if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
 					 || (!zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope))) {
 						if (error) {
-							if (*error) {
-								efree(*error);
-							}
+							efree(*error);
 							zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 						}
 						retval = 0;

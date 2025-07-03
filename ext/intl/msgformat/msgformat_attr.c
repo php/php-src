@@ -77,9 +77,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 #endif
 
 	umsg_applyPattern(MSG_FORMAT_OBJECT(mfo), spattern, spattern_len, &spattern_error, &INTL_DATA_ERROR_CODE(mfo));
-	if (spattern) {
-		efree(spattern);
-	}
+	efree(spattern);
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 		char *msg;
 		spprintf(&msg, 0, "Error setting symbol value at line %d, offset %d", spattern_error.line, spattern_error.offset);
@@ -88,9 +86,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 		RETURN_FALSE;
 	}
 
-	if(mfo->mf_data.orig_format) {
-		efree(mfo->mf_data.orig_format);
-	}
+	efree(mfo->mf_data.orig_format);
 	mfo->mf_data.orig_format = estrndup(value, value_len);
 	mfo->mf_data.orig_format_len = value_len;
 	/* invalidate cached format types */

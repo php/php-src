@@ -145,9 +145,7 @@ static void php_firebird_free_sqlda(XSQLDA const *sqlda) /* {{{ */
 	for (i = 0; i < sqlda->sqld; ++i) {
 		XSQLVAR const *var = &sqlda->sqlvar[i];
 
-		if (var->sqlind) {
-			efree(var->sqlind);
-		}
+		efree(var->sqlind);
 	}
 }
 /* }}} */
@@ -679,9 +677,7 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 		case PDO_PARAM_EVT_ALLOC:
 			if (param->is_param) {
 				/* allocate the parameter */
-				if (var->sqlind) {
-					efree(var->sqlind);
-				}
+				efree(var->sqlind);
 				var->sqlind = (void*)emalloc(var->sqllen + 2*sizeof(short));
 				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 			}

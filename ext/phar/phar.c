@@ -199,15 +199,10 @@ void phar_destroy_phar_data(phar_archive_data *phar) /* {{{ */
 		phar->alias = NULL;
 	}
 
-	if (phar->fname) {
-		pefree(phar->fname, phar->is_persistent);
-		phar->fname = NULL;
-	}
-
-	if (phar->signature) {
-		pefree(phar->signature, phar->is_persistent);
-		phar->signature = NULL;
-	}
+	pefree(phar->fname, phar->is_persistent);
+	phar->fname = NULL;
+	pefree(phar->signature, phar->is_persistent);
+	phar->signature = NULL;
 
 	if (HT_IS_INITIALIZED(&phar->manifest)) {
 		zend_hash_destroy(&phar->manifest);
@@ -1058,9 +1053,7 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		{
 			php_stream_close(fp);
 
-			if (signature) {
-				efree(signature);
-			}
+			efree(signature);
 
 			if (error) {
 				spprintf(error, 0, "cannot load phar \"%s\" with implicit alias \"%.*s\" under different alias \"%s\"", fname, tmp_len, buffer, alias);
@@ -3098,10 +3091,8 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 
 		php_stream_rewind(newfile);
 
-		if (phar->signature) {
-			efree(phar->signature);
-			phar->signature = NULL;
-		}
+		efree(phar->signature);
+		phar->signature = NULL;
 
 		switch(phar->sig_flags) {
 			default: {
@@ -3114,9 +3105,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 						spprintf(error, 0, "phar error: unable to write signature: %s", save);
 						efree(save);
 					}
-					if (digest) {
-						efree(digest);
-					}
+					efree(digest);
 					if (must_close_old_file) {
 						php_stream_close(oldfile);
 					}
@@ -3521,9 +3510,7 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 
 		PHAR_G(request_init) = 0;
 
-		if (PHAR_G(cwd)) {
-			efree(PHAR_G(cwd));
-		}
+		efree(PHAR_G(cwd));
 
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;

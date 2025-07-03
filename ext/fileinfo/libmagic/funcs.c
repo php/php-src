@@ -527,10 +527,8 @@ file_reset(struct magic_set *ms, int checkloaded)
 		return -1;
 	}
 	file_clearbuf(ms);
-	if (ms->o.pbuf) {
-		efree(ms->o.pbuf);
-		ms->o.pbuf = NULL;
-	}
+	efree(ms->o.pbuf);
+	ms->o.pbuf = NULL;
 	ms->event_flags &= ~EVENT_HAD_ERR;
 	ms->error = -1;
 	return 0;

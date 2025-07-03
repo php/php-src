@@ -56,9 +56,7 @@ void mbfl_memory_device_realloc(mbfl_memory_device *device, size_t initsz, size_
 
 void mbfl_memory_device_clear(mbfl_memory_device *device)
 {
-	if (device->buffer) {
-		efree(device->buffer);
-	}
+	efree(device->buffer);
 	device->buffer = NULL;
 	device->length = device->pos = 0;
 }
@@ -149,9 +147,7 @@ void mbfl_wchar_device_init(mbfl_wchar_device *device)
 
 void mbfl_wchar_device_clear(mbfl_wchar_device *device)
 {
-	if (device->buffer) {
-		efree(device->buffer);
-	}
+	efree(device->buffer);
 	device->buffer = NULL;
 	device->length = device->pos = 0;
 }

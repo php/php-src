@@ -47,12 +47,8 @@ const char *inifile_version(void)
 /* {{{ inifile_free_key */
 void inifile_key_free(key_type *key)
 {
-	if (key->group) {
-		efree(key->group);
-	}
-	if (key->name) {
-		efree(key->name);
-	}
+	efree(key->group);
+	efree(key->name);
 	memset(key, 0, sizeof(key_type));
 }
 /* }}} */
@@ -60,9 +56,7 @@ void inifile_key_free(key_type *key)
 /* {{{ inifile_free_val */
 void inifile_val_free(val_type *val)
 {
-	if (val->value) {
-		efree(val->value);
-	}
+	efree(val->value);
 	memset(val, 0, sizeof(val_type));
 }
 /* }}} */
@@ -193,9 +187,7 @@ static int inifile_read(inifile *dba, line_type *ln) {
 					if (!ln->key.group) {
 						ln->key.group = estrdup("");
 					}
-					if (ln->key.name) {
-						efree(ln->key.name);
-					}
+					efree(ln->key.name);
 					ln->key.name = etrim(fline);
 					ln->val.value = etrim(pos+1);
 					ln->pos = php_stream_tell(dba->fp);

@@ -56,10 +56,8 @@ static void resourcebundle_iterator_invalidate( zend_object_iterator *iter )
 		zval_ptr_dtor( &iterator->current );
 		ZVAL_UNDEF(&iterator->current);
 	}
-	if (iterator->currentkey) {
-		efree( iterator->currentkey );
-		iterator->currentkey = NULL;
-	}
+	efree( iterator->currentkey );
+	iterator->currentkey = NULL;
 }
 /* }}} */
 

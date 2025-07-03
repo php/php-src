@@ -37,9 +37,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 	umsg_format_helper(mfo, Z_ARRVAL_P(args), &formatted, &formatted_len);
 
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
-		if (formatted) {
-			efree(formatted);
-		}
+		efree(formatted);
 		RETURN_FALSE;
 	} else {
 		INTL_METHOD_RETVAL_UTF8(mfo, formatted, formatted_len, 1);

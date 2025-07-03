@@ -71,9 +71,7 @@ ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...)
 
 ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack)
 {
-	if (stack->elements) {
-		pefree(stack->elements, stack->persistent);
-	}
+	pefree(stack->elements, stack->persistent);
 }
 
 

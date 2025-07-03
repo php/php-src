@@ -430,9 +430,7 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 			if( tag_value ){
 				zend_string_release_ex( tag_value, 0 );
 			}
-			if( mod_loc_name ){
-				efree( mod_loc_name);
-			}
+			efree( mod_loc_name);
 			return NULL;
 		}
 	} while( buflen > tag_value_len );
@@ -443,17 +441,13 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 		if( tag_value ){
 			zend_string_release_ex( tag_value, 0 );
 		}
-		if( mod_loc_name ){
-			efree( mod_loc_name);
-		}
+		efree( mod_loc_name);
 		return NULL;
 	} else {
 		*result = 1;
 	}
 
-	if( mod_loc_name ){
-		efree( mod_loc_name);
-	}
+	efree( mod_loc_name);
 
 	tag_value->len = strlen(tag_value->val);
 	return tag_value;
@@ -1078,9 +1072,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 			int cnt = 0;
 			/* Tokenize on the "_" or "-"  */
 			token = php_strtok_r( key_value->val , DELIMITER ,&last_ptr);
-			if( cur_key_name ){
-				efree( cur_key_name);
-			}
+			efree( cur_key_name);
 			/* Over-allocates a few bytes for the integer so we don't have to reallocate. */
 			size_t cur_key_name_size = (sizeof("-2147483648") - 1) + strlen(key_name) + 1;
 			cur_key_name = emalloc(cur_key_name_size);
@@ -1108,9 +1100,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 		}
 	}
 
-	if( cur_key_name ){
-		efree( cur_key_name);
-	}
+	efree( cur_key_name);
 	/*if( key_name != LOC_PRIVATE_TAG && key_value){*/
 	return cur_result;
 }
@@ -1398,9 +1388,7 @@ static void array_cleanup( char* arr[] , int arr_size)
 {
 	int i=0;
 	for( i=0; i< arr_size; i++ ){
-		if( arr[i*2] ){
-			efree( arr[i*2]);
-		}
+		efree( arr[i*2]);
 	}
 	efree(arr);
 }

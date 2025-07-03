@@ -35,9 +35,7 @@ void IntlDateFormatter_object_free( zend_object *object )
 
 	zend_object_std_dtor( &dfo->zo );
 
-	if (dfo->requested_locale) {
-		efree( dfo->requested_locale );
-	}
+	efree( dfo->requested_locale );
 
 	dateformat_data_free( &dfo->datef_data );
 }

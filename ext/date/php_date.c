@@ -410,9 +410,7 @@ static void _php_date_tzinfo_dtor(zval *zv) /* {{{ */
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(date)
 {
-	if (DATEG(timezone)) {
-		efree(DATEG(timezone));
-	}
+	efree(DATEG(timezone));
 	DATEG(timezone) = NULL;
 	DATEG(tzcache) = NULL;
 	DATEG(last_errors) = NULL;
@@ -424,9 +422,7 @@ PHP_RINIT_FUNCTION(date)
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(date)
 {
-	if (DATEG(timezone)) {
-		efree(DATEG(timezone));
-	}
+	efree(DATEG(timezone));
 	DATEG(timezone) = NULL;
 
 	return SUCCESS;

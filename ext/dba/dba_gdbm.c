@@ -140,9 +140,7 @@ DBA_FIRSTKEY_FUNC(gdbm)
 	datum gkey;
 	zend_string *key = NULL;
 
-	if (dba->nextkey.dptr) {
-		free(dba->nextkey.dptr);
-	}
+	free(dba->nextkey.dptr);
 
 	gkey = gdbm_firstkey(dba->dbf);
 	if (gkey.dptr) {

@@ -193,12 +193,8 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	}
 
 finish:
-	if (uhaystack) {
-		efree( uhaystack );
-	}
-	if (uneedle) {
-		efree( uneedle );
-	}
+	efree( uhaystack );
+	efree( uneedle );
 	if (bi) {
 		ubrk_close (bi);
 	}

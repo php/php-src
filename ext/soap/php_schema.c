@@ -70,12 +70,8 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *
 	smart_str_0(&nscat);
 	if ((enc_ptr = zend_hash_find_ptr(sdl->encoders, nscat.s)) != NULL) {
 		enc = enc_ptr;
-		if (enc->details.ns) {
-			efree(enc->details.ns);
-		}
-		if (enc->details.type_str) {
-			efree(enc->details.type_str);
-		}
+		efree(enc->details.ns);
+		efree(enc->details.type_str);
 		if (enc->details.clark_notation) {
 			zend_string_release_ex(enc->details.clark_notation, 0);
 		}
@@ -470,7 +466,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 			}
 			zend_hash_next_index_insert_ptr(cur_type->elements, newType);
 		}
-		if (ns) {efree(ns);}
+		efree(ns);
 	}
 
 	trav = listType->children;
@@ -566,7 +562,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				}
 				zend_hash_next_index_insert_ptr(cur_type->elements, newType);
 			}
-			if (ns) {efree(ns);}
+			efree(ns);
 
 			start = next;
 		}
@@ -683,7 +679,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (ns) {efree(ns);}
+		efree(ns);
 	} else if (!simpleType) {
 		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
 	}
@@ -788,7 +784,7 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (ns) {efree(ns);}
+		efree(ns);
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
 	}
@@ -913,7 +909,7 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (ns) {efree(ns);}
+		efree(ns);
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
 	}
@@ -968,7 +964,7 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (ns) {efree(ns);}
+		efree(ns);
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
 	}
@@ -1133,7 +1129,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			newModel->kind = XSD_CONTENT_GROUP_REF;
 			newModel->u.group_ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
 
-			if (ns) {efree(ns);}
+			efree(ns);
 		} else {
 			newModel = emalloc(sizeof(sdlContentModel));
 			newModel->kind = XSD_CONTENT_SEQUENCE; /* will be redefined */
@@ -1568,7 +1564,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			smart_str_appends(&nscat, type);
 			newType->name = estrdup(type);
 			smart_str_0(&nscat);
-			if (ns) {efree(ns);}
+			efree(ns);
 			newType->ref = estrndup(ZSTR_VAL(nscat.s), ZSTR_LEN(nscat.s));
 			smart_str_free(&nscat);
 		} else {
@@ -1703,7 +1699,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
-		if (str_ns) {efree(str_ns);}
+		efree(str_ns);
 	}
 
 	trav = element->children;
@@ -1800,7 +1796,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			smart_str_appends(&key, attr_name);
 			smart_str_0(&key);
 			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
-			if (ns) {efree(ns);}
+			efree(ns);
 		} else {
 			xmlAttrPtr ns;
 
@@ -1851,7 +1847,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		if (nsptr != NULL) {
 			newAttr->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
-		if (str_ns) {efree(str_ns);}
+		efree(str_ns);
 	}
 
 	attr = attrType->properties;
@@ -1906,7 +1902,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				} else {
 					ext->val = estrdup((char*)attr->children->content);
 				}
-				if (ns) {efree(ns);}
+				efree(ns);
 
 				if (!newAttr->extraAttributes) {
 					newAttr->extraAttributes = emalloc(sizeof(HashTable));
@@ -2040,7 +2036,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_appends(&key, group_name);
 			smart_str_0(&key);
 			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
-			if (ns) {efree(ns);}
+			efree(ns);
 			smart_str_free(&key);
 
 			zend_hash_next_index_insert_ptr(cur_type->attributes, newAttr);
@@ -2412,18 +2408,10 @@ void delete_type(zval *zv)
 {
 	sdlTypePtr type = Z_PTR_P(zv);
 
-	if (type->name) {
-		efree(type->name);
-	}
-	if (type->namens) {
-		efree(type->namens);
-	}
-	if (type->def) {
-		efree(type->def);
-	}
-	if (type->fixed) {
-		efree(type->fixed);
-	}
+	efree(type->name);
+	efree(type->namens);
+	efree(type->def);
+	efree(type->fixed);
 	if (type->elements) {
 		zend_hash_destroy(type->elements);
 		efree(type->elements);
@@ -2461,18 +2449,10 @@ void delete_type(zval *zv)
 void delete_type_persistent(zval *zv)
 {
 	sdlTypePtr type = Z_PTR_P(zv);
-	if (type->name) {
-		free(type->name);
-	}
-	if (type->namens) {
-		free(type->namens);
-	}
-	if (type->def) {
-		free(type->def);
-	}
-	if (type->fixed) {
-		free(type->fixed);
-	}
+	free(type->name);
+	free(type->namens);
+	free(type->def);
+	free(type->fixed);
 	if (type->elements) {
 		zend_hash_destroy(type->elements);
 		free(type->elements);
@@ -2509,12 +2489,8 @@ void delete_extra_attribute(zval *zv)
 {
 	sdlExtraAttributePtr attr = Z_PTR_P(zv);
 
-	if (attr->ns) {
-		efree(attr->ns);
-	}
-	if (attr->val) {
-		efree(attr->val);
-	}
+	efree(attr->ns);
+	efree(attr->val);
 	efree(attr);
 }
 
@@ -2522,12 +2498,8 @@ void delete_extra_attribute_persistent(zval *zv)
 {
 	sdlExtraAttributePtr attr = Z_PTR_P(zv);
 
-	if (attr->ns) {
-		free(attr->ns);
-	}
-	if (attr->val) {
-		free(attr->val);
-	}
+	free(attr->ns);
+	free(attr->val);
 	free(attr);
 }
 
@@ -2535,21 +2507,11 @@ void delete_attribute(zval *zv)
 {
 	sdlAttributePtr attr = Z_PTR_P(zv);
 
-	if (attr->def) {
-		efree(attr->def);
-	}
-	if (attr->fixed) {
-		efree(attr->fixed);
-	}
-	if (attr->name) {
-		efree(attr->name);
-	}
-	if (attr->namens) {
-		efree(attr->namens);
-	}
-	if (attr->ref) {
-		efree(attr->ref);
-	}
+	efree(attr->def);
+	efree(attr->fixed);
+	efree(attr->name);
+	efree(attr->namens);
+	efree(attr->ref);
 	if (attr->extraAttributes) {
 		zend_hash_destroy(attr->extraAttributes);
 		efree(attr->extraAttributes);
@@ -2561,21 +2523,11 @@ void delete_attribute_persistent(zval *zv)
 {
 	sdlAttributePtr attr = Z_PTR_P(zv);
 
-	if (attr->def) {
-		free(attr->def);
-	}
-	if (attr->fixed) {
-		free(attr->fixed);
-	}
-	if (attr->name) {
-		free(attr->name);
-	}
-	if (attr->namens) {
-		free(attr->namens);
-	}
-	if (attr->ref) {
-		free(attr->ref);
-	}
+	free(attr->def);
+	free(attr->fixed);
+	free(attr->name);
+	free(attr->namens);
+	free(attr->ref);
 	if (attr->extraAttributes) {
 		zend_hash_destroy(attr->extraAttributes);
 		free(attr->extraAttributes);
@@ -2585,24 +2537,18 @@ void delete_attribute_persistent(zval *zv)
 
 void delete_restriction_var_int(sdlRestrictionIntPtr ptr)
 {
-	if (ptr) {
-		efree(ptr);
-	}
+	efree(ptr);
 }
 
 void delete_restriction_var_int_persistent(sdlRestrictionIntPtr ptr)
 {
-	if (ptr) {
-		free(ptr);
-	}
+	free(ptr);
 }
 
 void delete_restriction_var_char_int(sdlRestrictionCharPtr ptr)
 {
 	if (ptr) {
-		if (ptr->value) {
-			efree(ptr->value);
-		}
+		efree(ptr->value);
 		efree(ptr);
 	}
 }
@@ -2615,9 +2561,7 @@ void delete_restriction_var_char(zval *zv)
 void delete_restriction_var_char_persistent_int(sdlRestrictionCharPtr ptr)
 {
 	if (ptr) {
-		if (ptr->value) {
-			free(ptr->value);
-		}
+		free(ptr->value);
 		free(ptr);
 	}
 }

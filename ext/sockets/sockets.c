@@ -401,9 +401,7 @@ char *sockets_strerror(int error) /* {{{ */
 		buf = hstrerror(error);
 #else
 		{
-			if (SOCKETS_G(strerror_buf)) {
-				efree(SOCKETS_G(strerror_buf));
-			}
+			efree(SOCKETS_G(strerror_buf));
 
 			spprintf(&(SOCKETS_G(strerror_buf)), 0, "Host lookup error %d", error);
 			buf = SOCKETS_G(strerror_buf);
@@ -418,9 +416,7 @@ char *sockets_strerror(int error) /* {{{ */
 		buf = NULL;
 
 		if (tmp[0]) {
-			if (SOCKETS_G(strerror_buf)) {
-				efree(SOCKETS_G(strerror_buf));
-			}
+			efree(SOCKETS_G(strerror_buf));
 
 			SOCKETS_G(strerror_buf) = estrdup(tmp);
 			free(tmp);

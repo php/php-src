@@ -198,9 +198,7 @@ PHP_FUNCTION(readline_info)
 #else
 				char *tmp = strdup(Z_STRVAL_P(value));
 				if (tmp) {
-					if (rl_line_buffer) {
-						free(rl_line_buffer);
-					}
+					free(rl_line_buffer);
 					rl_line_buffer = tmp;
 				}
 #endif

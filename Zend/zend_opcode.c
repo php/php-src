@@ -512,18 +512,12 @@ ZEND_API void destroy_zend_class(zval *zv)
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
 			}
-			if (ce->iterator_funcs_ptr) {
-				free(ce->iterator_funcs_ptr);
-			}
-			if (ce->arrayaccess_funcs_ptr) {
-				free(ce->arrayaccess_funcs_ptr);
-			}
+			free(ce->iterator_funcs_ptr);
+			free(ce->arrayaccess_funcs_ptr);
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}
-			if (ce->properties_info_table) {
-				free(ce->properties_info_table);
-			}
+			free(ce->properties_info_table);
 			if (ce->attributes) {
 				zend_hash_release(ce->attributes);
 			}
@@ -613,12 +607,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	if (op_array->attributes) {
 		zend_hash_release(op_array->attributes);
 	}
-	if (op_array->live_range) {
-		efree(op_array->live_range);
-	}
-	if (op_array->try_catch_array) {
-		efree(op_array->try_catch_array);
-	}
+	efree(op_array->live_range);
+	efree(op_array->try_catch_array);
 	if (zend_extension_flags & ZEND_EXTENSIONS_HAVE_OP_ARRAY_DTOR) {
 		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 			zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array);

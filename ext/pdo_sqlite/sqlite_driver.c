@@ -39,9 +39,7 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 	einfo->line = line;
 
 	if (einfo->errcode != SQLITE_OK) {
-		if (einfo->errmsg) {
-			pefree(einfo->errmsg, dbh->is_persistent);
-		}
+		pefree(einfo->errmsg, dbh->is_persistent);
 		einfo->errmsg = pestrdup((char*)sqlite3_errmsg(H->db), dbh->is_persistent);
 	} else { /* no error */
 		strncpy(*pdo_err, PDO_ERR_NONE, sizeof(*pdo_err));
@@ -166,10 +164,8 @@ static void sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 #endif
 			H->db = NULL;
 		}
-		if (einfo->errmsg) {
-			pefree(einfo->errmsg, dbh->is_persistent);
-			einfo->errmsg = NULL;
-		}
+		pefree(einfo->errmsg, dbh->is_persistent);
+		einfo->errmsg = NULL;
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}

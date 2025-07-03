@@ -173,9 +173,7 @@ PHP_FUNCTION( numfmt_format_currency )
 		INTL_METHOD_RETVAL_UTF8( nfo, formatted, formatted_len, ( formatted != format_buf ) );
 	}
 
-	if(scurrency) {
-		efree(scurrency);
-	}
+	efree(scurrency);
 }
 
 /* }}} */

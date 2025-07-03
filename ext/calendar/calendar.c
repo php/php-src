@@ -474,12 +474,8 @@ PHP_FUNCTION(jdtojewish)
 
 		RETVAL_NEW_STR(zend_strpprintf(0, "%s %s %s", heb_number_to_chars(day, fl, &dayp), JEWISH_HEB_MONTH_NAME(year)[month], heb_number_to_chars(year, fl, &yearp)));
 
-		if (dayp) {
-			efree(dayp);
-		}
-		if (yearp) {
-			efree(yearp);
-		}
+		efree(dayp);
+		efree(yearp);
 	}
 }
 /* }}} */

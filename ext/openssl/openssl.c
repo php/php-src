@@ -447,12 +447,8 @@ PHP_GINIT_FUNCTION(openssl)
 /* {{{ PHP_GSHUTDOWN_FUNCTION */
 PHP_GSHUTDOWN_FUNCTION(openssl)
 {
-	if (openssl_globals->errors) {
-		pefree(openssl_globals->errors, 1);
-	}
-	if (openssl_globals->errors_mark) {
-		pefree(openssl_globals->errors_mark, 1);
-	}
+	pefree(openssl_globals->errors, 1);
+	pefree(openssl_globals->errors_mark, 1);
 #if PHP_OPENSSL_API_VERSION >= 0x30000
 	php_openssl_backend_destroy_libctx(openssl_globals->libctx, openssl_globals->propq);
 #endif
@@ -4174,9 +4170,7 @@ clean_exit:
 		if (pkeys[i] != NULL) {
 			EVP_PKEY_free(pkeys[i]);
 		}
-		if (eks[i]) {
-			efree(eks[i]);
-		}
+		efree(eks[i]);
 	}
 	efree(eks);
 	efree(eksl);
