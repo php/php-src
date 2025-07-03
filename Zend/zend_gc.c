@@ -2238,7 +2238,10 @@ rerun_gc:
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
 		uint32_t idx, end;
-#ifndef PHP_ASYNC_API
+#ifdef PHP_ASYNC_API
+		stack->next = NULL;
+		stack->prev = NULL;
+#else
 		int count;
 		gc_stack stack;
 		stack.prev = NULL;
@@ -2351,7 +2354,7 @@ continue_calling_destructors:
 			}
 		}
 
-		GC_COLLECT_FREE_STACK;
+		gc_stack_free(GC_COLLECT_STACK);
 
 #ifdef PHP_ASYNC_API
 		end = GC_G(first_unused);
