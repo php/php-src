@@ -933,7 +933,7 @@ void zend_convert_internal_arg_info(zend_arg_info *new_arg_info,
 		const zend_internal_arg_info *arg_info, bool is_return_info);
 
 ZEND_API zend_result zend_get_default_from_arg_info(
-		zval *default_value_zval, zend_arg_info *arg_info);
+		zval *default_value_zval, const zend_arg_info *arg_info);
 
 END_EXTERN_C()
 
