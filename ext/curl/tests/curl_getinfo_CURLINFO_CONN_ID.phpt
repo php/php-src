@@ -94,8 +94,8 @@ $result = curl_exec($ch1);
 $info = curl_getinfo($ch1);
 var_dump(isset($info['conn_id']));
 var_dump(is_int($info['conn_id']));
-var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === $info['conn_id']);
-var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === 0);
+var_dump(curl_getinfo($ch1, CURLINFO_CONN_ID) === $info['conn_id']);
+var_dump(curl_getinfo($ch1, CURLINFO_CONN_ID) === 0);
 
 curl_setopt($ch2, CURLOPT_SHARE, $csh);
 
@@ -104,11 +104,15 @@ $result = curl_exec($ch2);
 $info = curl_getinfo($ch2);
 var_dump(isset($info['conn_id']));
 var_dump(is_int($info['conn_id']));
-var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === $info['conn_id']);
-var_dump(curl_getinfo($ch, CURLINFO_CONN_ID) === 0);
+var_dump(curl_getinfo($ch2, CURLINFO_CONN_ID) === $info['conn_id']);
+var_dump(curl_getinfo($ch2, CURLINFO_CONN_ID) === 0);
 
 ?>
 --EXPECT--
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
