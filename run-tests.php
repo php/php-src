@@ -806,13 +806,20 @@ function write_information(array $user_tests, $phpdbg): void
     // Get info from php
     $info_file = __DIR__ . '/run-test-info.php';
     @unlink($info_file);
-    $php_info = '<?php echo "
-PHP_SAPI    : " , PHP_SAPI , "
-PHP_VERSION : " , phpversion() , "
-ZEND_VERSION: " , zend_version() , "
-PHP_OS      : " , PHP_OS , " - " , php_uname() , "
-INI actual  : " , realpath(get_cfg_var("cfg_file_path")) , "
-More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
+    $php_info = '<?php
+$extra_inis = php_ini_scanned_files() ?: "";
+$more_ini = $extra_inis ? "More .INIs  : " . str_replace("\n", "", $extra_inis) : "";
+echo
+    "PHP_SAPI    : ",
+    PHP_SAPI,
+    "PHP_VERSION : ",
+    phpversion(),
+    "ZEND_VERSION: ",
+    zend_version(),
+    "PHP_OS      : ", PHP_OS , " - " , php_uname(),
+    "INI actual  : ", realpath(get_cfg_var("cfg_file_path")),
+    $more_ini
+; ?>';
     save_text($info_file, $php_info);
     $info_params = [];
     settings2array($ini_overwrites, $info_params);

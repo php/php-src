@@ -28,18 +28,18 @@ file_put_contents($pname . '/foo/hi', '<?php
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 try {
-    file_get_contents("./hi", 0, $context, 0, -1);
+    file_get_contents("./hi", false, $context, 0, -1);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 echo file_get_contents("fgc_edgecases.txt");
 set_include_path("' . addslashes(__DIR__) . '");
 echo file_get_contents("fgc_edgecases.txt", true);
-echo file_get_contents("./hi", 0, $context);
+echo file_get_contents("./hi", false, $context);
 echo file_get_contents("../oops");
-echo file_get_contents("./hi", 0, $context, 50000);
+echo file_get_contents("./hi", false, $context, 50000);
 echo file_get_contents("./hi");
-echo file_get_contents("./hi", 0, $context, 0, 0);
+echo file_get_contents("./hi", false, $context, 0, 0);
 ?>
 ');
 
@@ -56,18 +56,18 @@ blah
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 try {
-    file_get_contents("./hi", 0, $context, 0, -1);
+    file_get_contents("./hi", false, $context, 0, -1);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
 echo file_get_contents("fgc_edgecases.txt", true);
-echo file_get_contents("./hi", 0, $context);
+echo file_get_contents("./hi", false, $context);
 echo file_get_contents("../oops");
-echo file_get_contents("./hi", 0, $context, 50000);
+echo file_get_contents("./hi", false, $context, 50000);
 echo file_get_contents("./hi");
-echo file_get_contents("./hi", 0, $context, 0, 0);
+echo file_get_contents("./hi", false, $context, 0, 0);
 ?>
 file_get_contents(): Argument #5 ($length) must be greater than or equal to 0
 test
@@ -76,18 +76,18 @@ test
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 try {
-    file_get_contents("./hi", 0, $context, 0, -1);
+    file_get_contents("./hi", false, $context, 0, -1);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
 echo file_get_contents("fgc_edgecases.txt", true);
-echo file_get_contents("./hi", 0, $context);
+echo file_get_contents("./hi", false, $context);
 echo file_get_contents("../oops");
-echo file_get_contents("./hi", 0, $context, 50000);
+echo file_get_contents("./hi", false, $context, 50000);
 echo file_get_contents("./hi");
-echo file_get_contents("./hi", 0, $context, 0, 0);
+echo file_get_contents("./hi", false, $context, 0, 0);
 ?>
 
 Warning: file_get_contents(phar://%sfgc_edgecases.phar.php/oops): Failed to open stream: phar error: path "oops" is a directory in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
@@ -97,16 +97,16 @@ Warning: file_get_contents(): Failed to seek to position 50000 in the stream in 
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 try {
-    file_get_contents("./hi", 0, $context, 0, -1);
+    file_get_contents("./hi", false, $context, 0, -1);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
 echo file_get_contents("fgc_edgecases.txt", true);
-echo file_get_contents("./hi", 0, $context);
+echo file_get_contents("./hi", false, $context);
 echo file_get_contents("../oops");
-echo file_get_contents("./hi", 0, $context, 50000);
+echo file_get_contents("./hi", false, $context, 50000);
 echo file_get_contents("./hi");
-echo file_get_contents("./hi", 0, $context, 0, 0);
+echo file_get_contents("./hi", false, $context, 0, 0);
 ?>

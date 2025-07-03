@@ -24,11 +24,11 @@ function check_error(CurlHandle $ch) {
     }
 }
 
-function check_response($response, $clientCertSubject) {
-    if (strpos($response, $clientCertSubject) === false) {
-        echo "client cert subject not in response\n";
-    } else {
+function check_response(string|false $response, string $clientCertSubject) {
+    if ($response && str_contains($response, $clientCertSubject)) {
         echo "client cert subject in response\n";
+    } else {
+        echo "client cert subject not in response\n";
     }
 }
 
