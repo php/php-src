@@ -2034,8 +2034,10 @@ static void zend_gc_collect_cycles_coroutine(void)
 	}
 
 	if (GC_G(microtask) != NULL) {
-		GC_G(microtask)->is_cancelled = true;
-		ZEND_ASYNC_MICROTASK_RELEASE(GC_G(microtask));
+		zend_async_microtask_t *microtask = GC_G(microtask);
+		GC_G(microtask) = NULL;
+		microtask->is_cancelled = true;
+		ZEND_ASYNC_MICROTASK_RELEASE(microtask);
 	}
 }
 
@@ -2066,8 +2068,10 @@ static void coroutine_dispose(zend_coroutine_t *coroutine)
 		GC_G(dtor_scope) = NULL;
 
 		if (GC_G(microtask) != NULL) {
-			GC_G(microtask)->is_cancelled = true;
-			zend_gc_collect_cycles_microtask_dtor(GC_G(microtask));
+			zend_async_microtask_t *microtask = GC_G(microtask);
+			GC_G(microtask) = NULL;
+			microtask->is_cancelled = true;
+			ZEND_ASYNC_MICROTASK_RELEASE(microtask);
 		}
 
 		if (GC_G(gc_stack) != NULL) {
