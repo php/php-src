@@ -4021,6 +4021,7 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 		     ((fcc->object && fcc->calling_scope->__call) ||
 		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
 			scope = get_scope(frame);
+			ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
 			if (!zend_check_method_accessible(fcc->function_handler, scope)) {
 				retval = 0;
 				fcc->function_handler = NULL;
@@ -4083,6 +4084,7 @@ get_function_via_handler:
 			if (retval
 			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)) {
 				scope = get_scope(frame);
+				ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
 				if (!zend_check_method_accessible(fcc->function_handler, scope)) {
 					if (error) {
 						if (*error) {

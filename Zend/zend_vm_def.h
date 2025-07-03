@@ -6043,6 +6043,7 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 
 	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = EX(func)->op_array.scope;
+		ZEND_ASSERT(!(clone->common.fn_flags & ZEND_ACC_PUBLIC));
 		if (!zend_check_method_accessible(clone, scope)) {
 			zend_bad_method_call(clone, clone->common.function_name, scope);
 			FREE_OP1();
