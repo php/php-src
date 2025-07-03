@@ -4160,13 +4160,10 @@ try_again:
 			if (ce == zend_ce_closure) {
 				const zend_function *fn = zend_get_closure_method_def(Z_OBJ_P(callable));
 
-				if (fn->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
-					if (fn->common.scope) {
-						return zend_create_member_string(fn->common.scope->name, fn->common.function_name);
-					} else {
-						return zend_string_copy(fn->common.function_name);
-					}
+				if ((fn->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) && fn->common.scope) {
+					return zend_create_member_string(fn->common.scope->name, fn->common.function_name);
 				}
+				return zend_string_copy(fn->common.function_name);
 			}
 
 			return zend_string_concat2(
