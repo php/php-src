@@ -5392,7 +5392,7 @@ static zend_string *try_parse_string(const char *str, size_t len, char quote) {
 }
 
 ZEND_API zend_result zend_get_default_from_arg_info(
-		zval *default_value_zval, zend_arg_info *arg_info)
+		zval *default_value_zval, const zend_arg_info *arg_info)
 {
 	zend_string *default_value = arg_info->default_value;
 	if (!default_value) {
@@ -5401,13 +5401,13 @@ ZEND_API zend_result zend_get_default_from_arg_info(
 
 	/* Avoid going through the full AST machinery for some simple and common cases. */
 	zend_ulong lval;
-	if (zend_string_equals_cstr(default_value, "null", strlen("null"))) {
+	if (zend_string_equals_literal(default_value, "null")) {
 		ZVAL_NULL(default_value_zval);
 		return SUCCESS;
-	} else if (zend_string_equals_cstr(default_value, "true", strlen("true"))) {
+	} else if (zend_string_equals_literal(default_value, "true")) {
 		ZVAL_TRUE(default_value_zval);
 		return SUCCESS;
-	} else if (zend_string_equals_cstr(default_value, "false", strlen("false"))) {
+	} else if (zend_string_equals_literal(default_value, "false")) {
 		ZVAL_FALSE(default_value_zval);
 		return SUCCESS;
 	} else if (ZSTR_LEN(default_value) >= 2
@@ -5419,7 +5419,7 @@ ZEND_API zend_result zend_get_default_from_arg_info(
 			ZVAL_STR(default_value_zval, str);
 			return SUCCESS;
 		}
-	} else if (zend_string_equals_cstr(default_value, "[]", strlen("[]"))) {
+	} else if (zend_string_equals_literal(default_value, "[]")) {
 		ZVAL_EMPTY_ARRAY(default_value_zval);
 		return SUCCESS;
 	} else if (ZEND_HANDLE_NUMERIC(default_value, lval)) {
