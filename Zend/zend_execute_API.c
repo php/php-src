@@ -567,7 +567,7 @@ ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 }
 /* }}} */
 
-ZEND_API const char *get_active_function_name(void) /* {{{ */
+ZEND_ATTRIBUTE_PURE ZEND_API const char *get_active_function_name(void) /* {{{ */
 {
 	zend_function *func;
 
@@ -597,7 +597,7 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_function *zend_active_function_ex(zend_execute_data *execute_data)
+ZEND_ATTRIBUTE_PURE ZEND_API zend_function *zend_active_function_ex(const zend_execute_data *execute_data)
 {
 	zend_function *func = EX(func);
 
@@ -630,7 +630,7 @@ ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* 
 }
 /* }}} */
 
-ZEND_API const char *get_active_function_arg_name(uint32_t arg_num) /* {{{ */
+ZEND_ATTRIBUTE_PURE ZEND_API const char *get_active_function_arg_name(uint32_t arg_num) /* {{{ */
 {
 	if (!zend_is_executing()) {
 		return NULL;
@@ -642,7 +642,7 @@ ZEND_API const char *get_active_function_arg_name(uint32_t arg_num) /* {{{ */
 }
 /* }}} */
 
-ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num) /* {{{ */
+ZEND_ATTRIBUTE_PURE ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num) /* {{{ */
 {
 	if (!func || arg_num == 0 || func->common.num_args < arg_num) {
 		return NULL;
@@ -726,7 +726,7 @@ ZEND_ATTRIBUTE_PURE ZEND_API zend_class_entry *zend_get_executed_scope(void) /* 
 }
 /* }}} */
 
-ZEND_API bool zend_is_executing(void) /* {{{ */
+ZEND_ATTRIBUTE_PURE ZEND_API bool zend_is_executing(void) /* {{{ */
 {
 	return EG(current_execute_data) != 0;
 }
