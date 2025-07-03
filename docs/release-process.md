@@ -474,6 +474,15 @@ slightly different steps. We'll call attention where the steps differ.
 
    Here are a few examples of non-stable release announcement emails:
 
+   > 💬 **Hint** \
+   > If you are going to base your language on one of these old announcements,
+   > remember that
+   > * `qa.php.net` has been replaced with https://www.php.net/release-candidates.php
+   > * `bugs.php.net` has been replaced with GitHub issues, use
+   >    `https://github.com/php/php-src/issues/new?template=bug_report.yml`
+   >   to link directly to the form for creating a new bug report.
+   > * Since 8.4 there have only been 4 release candidates for PHP X.Y.0, rather than 6.
+
    * [PHP 8.1.0alpha1 is available for testing](https://news-web.php.net/php.qa/69043)
    * [PHP 8.1.0beta3 available for testing](https://news-web.php.net/php.qa/69079)
    * [PHP 8.1.0RC6 available for testing](https://news-web.php.net/php.qa/69117)
@@ -1008,8 +1017,13 @@ volunteers to begin the selection process for the next release managers.
 2. Request membership to the
    [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-3. Subscribe to the php-announce@lists.php.net mailing list by emailing
-   php-announce+subscribe@lists.php.net
+3. Make sure you are subscribed to all of the mailing lists that you will need to send
+   announcements to, since you cannot post to the lists otherwise:
+
+   * internals@lists.php.net (email internals+subscribe@lists.php.net)
+   * php-announce@lists.php.net (email php-announce+subscribe@lists.php.net)
+   * php-general@lists.php.net (email php-general+subscribe@lists.php.net)
+   * php-qa@lists.php.net (email php-qa+subscribe@lists.php.net)
 
 4. Email systems@php.net to get setup for access to downloads.php.net, to be
    added to the release-managers@php.net distribution list, and to be added to
