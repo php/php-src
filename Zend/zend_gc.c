@@ -2154,6 +2154,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 #endif
 
+	zend_hrtime_t dtor_start_time = 0;
+
 #ifdef PHP_ASYNC_API
 #define GC_COLLECT_TOTAL_COUNT (context->total_count)
 #define GC_COLLECT_COUNT (context->count)
@@ -2185,6 +2187,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		// so we continue the process from the next element.
 		GC_G(async_context).state = GC_ASYNC_STATE_RUNNING;
 		GC_G(dtor_idx)++;
+		dtor_start_time = zend_hrtime();
 		goto continue_calling_destructors;
 	} else {
 		context->state = GC_ASYNC_STATE_INIT;
@@ -2318,7 +2321,7 @@ rerun_gc:
 			}
 
 			/* Actually call destructors. */
-			zend_hrtime_t dtor_start_time = zend_hrtime();
+			dtor_start_time = zend_hrtime();
 			if (EXPECTED(!EG(active_fiber))) {
 #ifdef PHP_ASYNC_API
 continue_calling_destructors:
