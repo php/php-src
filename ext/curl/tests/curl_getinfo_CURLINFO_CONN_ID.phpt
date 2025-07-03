@@ -105,7 +105,7 @@ $info = curl_getinfo($ch2);
 var_dump(isset($info['conn_id']));
 var_dump(is_int($info['conn_id']));
 var_dump(curl_getinfo($ch2, CURLINFO_CONN_ID) === $info['conn_id']);
-var_dump(curl_getinfo($ch2, CURLINFO_CONN_ID) === 0);
+var_dump(curl_getinfo($ch2, CURLINFO_CONN_ID) === 1);
 
 ?>
 --EXPECT--
