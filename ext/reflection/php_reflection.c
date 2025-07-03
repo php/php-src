@@ -1444,7 +1444,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	}
 
 	prop_name = reflection_prop_name(object);
-	ZVAL_STR(prop_name, arg_info->name);
+	ZVAL_STR_COPY(prop_name, arg_info->name);
 }
 /* }}} */
 
