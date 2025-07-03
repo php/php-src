@@ -22,7 +22,7 @@ ob_end_clean();
 echo $x . "\n";
 ?>
 --EXPECTF--
-Deprecated: X::__toString(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
+Deprecated: X::__toString(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
 
-Deprecated: ob_end_clean(): Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
+Deprecated: ob_end_clean(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
 abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabc

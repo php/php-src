@@ -14,4 +14,4 @@ ob_start(function() {
 });
 ?>
 --EXPECTF--
-Deprecated: PHP Request Shutdown: Returning a non-string result from user output handler Closure::__invoke is deprecated in %s on line %d
+Deprecated: PHP Request Shutdown: Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
