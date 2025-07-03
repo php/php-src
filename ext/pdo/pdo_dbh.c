@@ -1377,7 +1377,7 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 				num_arg_info++;
 			}
 
-			zend_arg_info *arg_info = safe_pemalloc(num_arg_info, sizeof(zend_arg_info), 0, 1);
+			zend_arg_info *arg_info = safe_pemalloc(num_arg_info, sizeof(zend_arg_info), 0, true);
 			for (uint32_t i = 0; i < num_arg_info; i++) {
 				zend_convert_internal_arg_info(&arg_info[i], &funcs->arg_info[i], i == 0);
 			}

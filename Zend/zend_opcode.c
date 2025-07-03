@@ -135,12 +135,12 @@ void zend_free_internal_arg_info(zend_internal_function *function) {
 		for (i = 0 ; i < num_args; i++) {
 			bool is_return_info = i == 0;
 			if (!is_return_info) {
-				zend_string_release_ex(arg_info[i].name, 1);
+				zend_string_release_ex(arg_info[i].name, true);
 				if (arg_info[i].default_value) {
-					zend_string_release_ex(arg_info[i].default_value, 1);
+					zend_string_release_ex(arg_info[i].default_value, true);
 				}
 			}
-			zend_type_release(arg_info[i].type, /* persistent */ 1);
+			zend_type_release(arg_info[i].type, /* persistent */ true);
 		}
 
 		free(arg_info);

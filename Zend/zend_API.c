@@ -2952,7 +2952,7 @@ void zend_convert_internal_arg_info_type(zend_type *type)
 
 		if (num_types == 1) {
 			/* Simple class type */
-			zend_string *str = zend_string_init_interned(class_name, strlen(class_name), 1);
+			zend_string *str = zend_string_init_interned(class_name, strlen(class_name), true);
 			zend_alloc_ce_cache(str);
 			ZEND_TYPE_SET_PTR(*type, str);
 			type->type_mask |= _ZEND_TYPE_NAME_BIT;
@@ -2967,7 +2967,7 @@ void zend_convert_internal_arg_info_type(zend_type *type)
 			uint32_t j = 0;
 			while (true) {
 				const char *end = strchr(start, '|');
-				zend_string *str = zend_string_init_interned(start, end ? end - start : strlen(start), 1);
+				zend_string *str = zend_string_init_interned(start, end ? end - start : strlen(start), true);
 				zend_alloc_ce_cache(str);
 				list->types[j] = (zend_type) ZEND_TYPE_INIT_CLASS(str, 0, 0);
 				if (!end) {
@@ -2994,9 +2994,9 @@ void zend_convert_internal_arg_info_type(zend_type *type)
 void zend_convert_internal_arg_info(zend_arg_info *new_arg_info, const zend_internal_arg_info *arg_info, bool is_return_info)
 {
 	if (!is_return_info) {
-		new_arg_info->name = zend_string_init_interned(arg_info->name, strlen(arg_info->name), 1);
+		new_arg_info->name = zend_string_init_interned(arg_info->name, strlen(arg_info->name), true);
 		if (arg_info->default_value) {
-			new_arg_info->default_value = zend_string_init_interned(arg_info->default_value, strlen(arg_info->default_value), 1);
+			new_arg_info->default_value = zend_string_init_interned(arg_info->default_value, strlen(arg_info->default_value), true);
 		} else {
 			new_arg_info->default_value = NULL;
 		}

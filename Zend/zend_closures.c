@@ -915,7 +915,7 @@ void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {
 void zend_closure_startup(void)
 {
 	/* __call and __callStatic name the arguments "$arguments" in the docs. */
-	trampoline_arg_info[0].name = zend_string_init_interned("arguments", strlen("arguments"), 1);
+	trampoline_arg_info[0].name = zend_string_init_interned("arguments", strlen("arguments"), true);
 	trampoline_arg_info[0].type = (zend_type)ZEND_TYPE_INIT_CODE(IS_MIXED, false, _ZEND_ARG_INFO_FLAGS(false, 1, 0));
 	trampoline_arg_info[0].default_value = NULL;
 }
