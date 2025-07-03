@@ -979,8 +979,8 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 					int handler_count = php_output_get_level();
 					if (handler_count) {
 						php_output_handler **handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
-						for (int iii = 0; iii < handler_count; ++iii) {
-							php_output_handler *curr_handler = handlers[iii];
+						for (int handler_num = 0; handler_num < handler_count; ++handler_num) {
+							php_output_handler *curr_handler = handlers[handler_num];
 							if (curr_handler == handler) {
 								handler->flags &= (~PHP_OUTPUT_HANDLER_DISABLED);
 								still_have_handler = true;
