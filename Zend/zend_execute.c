@@ -5373,25 +5373,12 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 
 	// TODO: Use a hash table?
 	uint32_t num_args = fbc->common.num_args;
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)
-			|| EXPECTED(fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-		for (uint32_t i = 0; i < num_args; i++) {
-			zend_arg_info *arg_info = &fbc->op_array.arg_info[i];
-			if (zend_string_equals(arg_name, arg_info->name)) {
-				*cache_slot = fbc;
-				*(uintptr_t *)(cache_slot + 1) = i;
-				return i;
-			}
-		}
-	} else {
-		ZEND_ASSERT(num_args == 0 || fbc->internal_function.arg_info);
-		for (uint32_t i = 0; i < num_args; i++) {
-			zend_arg_info *arg_info = &fbc->internal_function.arg_info[i];
-			if (zend_string_equals(arg_name, arg_info->name)) {
-				*cache_slot = fbc;
-				*(uintptr_t *)(cache_slot + 1) = i;
-				return i;
-			}
+	for (uint32_t i = 0; i < num_args; i++) {
+		zend_arg_info *arg_info = &fbc->op_array.arg_info[i];
+		if (zend_string_equals(arg_name, arg_info->name)) {
+			*cache_slot = fbc;
+			*(uintptr_t *)(cache_slot + 1) = i;
+			return i;
 		}
 	}
 
