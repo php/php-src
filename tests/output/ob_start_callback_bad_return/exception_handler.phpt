@@ -127,7 +127,7 @@ return_zero: <<<Inside of return_zero
 Testing: return_non_stringable
 ErrorException: ob_end_flush(): Returning a non-string result from user output handler return_non_stringable is deprecated in %s:%d
 Stack trace:
-#0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', '/usr/src/php/te...', 69)
+#0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', %s, 69)
 #1 %s(%d): ob_end_flush()
 #2 {main}
 
@@ -138,7 +138,7 @@ return_non_stringable: <<<Inside of return_non_stringable
 Testing: return_stringable
 ErrorException: ob_end_flush(): Returning a non-string result from user output handler return_stringable is deprecated in %s:%d
 Stack trace:
-#0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', '/usr/src/php/te...', 69)
+#0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', %s, 69)
 #1 %s(%d): ob_end_flush()
 #2 {main}
 
