@@ -3215,7 +3215,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			/* Treat return type as an extra argument */
 			num_args++;
 			new_arg_info = malloc(sizeof(zend_arg_info) * num_args);
-			memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
 			reg_function->arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
 				zend_convert_internal_arg_info(&new_arg_info[i], &arg_info[i], i == 0);
