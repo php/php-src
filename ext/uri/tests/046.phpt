@@ -21,6 +21,16 @@ var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
+$uri = new Uri\Rfc3986\Uri("//");
+var_dump($uri->toRawString());
+var_dump($uri->getPath());
+var_dump($uri->getRawPath());
+
+$uri = new Uri\Rfc3986\Uri("///");
+var_dump($uri->toRawString());
+var_dump($uri->getPath());
+var_dump($uri->getRawPath());
+
 $uri = new Uri\Rfc3986\Uri("https://example.com");
 
 var_dump($uri->toRawString());
@@ -59,6 +69,12 @@ string(7) "foo/bar"
 string(8) "/foo/bar"
 string(8) "/foo/bar"
 string(8) "/foo/bar"
+string(2) "//"
+string(0) ""
+string(0) ""
+string(3) "///"
+string(1) "/"
+string(1) "/"
 string(19) "https://example.com"
 string(0) ""
 string(0) ""
