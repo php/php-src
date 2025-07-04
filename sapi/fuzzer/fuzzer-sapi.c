@@ -294,9 +294,11 @@ int fuzzer_do_request_from_buffer(
 void fuzzer_call_php_func_zval(const char *func_name, int nargs, zval *args) {
 	zval retval, func;
 
-	ZVAL_STRING(&func, func_name);
+	zend_function *fn = zend_hash_str_find_ptr(CG(function_table), func_name, strlen(func_name));
+	ZEND_ASSERT(fn != NULL);
+
 	ZVAL_UNDEF(&retval);
-	call_user_function(CG(function_table), NULL, &func, &retval, nargs, args);
+	zend_call_known_function(fn, NULL, NULL, &retval, nargs, args, NULL);
 
 	// TODO: check result?
 	/* to ensure retval is not broken */
