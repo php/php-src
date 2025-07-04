@@ -909,7 +909,6 @@ void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val) /* {
 	zval_ptr_dtor(var);
 	ZVAL_COPY_VALUE(var, val);
 }
-
 /* }}} */
 
 void zend_closure_startup(void)

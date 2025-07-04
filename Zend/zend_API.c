@@ -3117,7 +3117,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 				!(internal_function->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			zend_error(E_CORE_WARNING, "%s::__toString() implemented without string return type",
 				ZSTR_VAL(scope->name));
-			internal_arg_info = (zend_internal_arg_info*) arg_info_toString + 1;
+			internal_arg_info = (zend_internal_arg_info *) arg_info_toString + 1;
 			internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 			internal_function->num_args = internal_function->required_num_args = 0;
 		}
