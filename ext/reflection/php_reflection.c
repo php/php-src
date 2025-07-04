@@ -2844,7 +2844,7 @@ ZEND_METHOD(ReflectionParameter, isCallable)
 }
 /* }}} */
 
-/* {{{ Returns whether NULL is allowed as this parameters's value */
+/* {{{ Returns whether NULL is allowed as this parameter's value */
 ZEND_METHOD(ReflectionParameter, allowsNull)
 {
 	reflection_object *intern;
