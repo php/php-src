@@ -2785,7 +2785,7 @@ class ConstInfo extends VariableLike
         $code = "\t";
         if ($this->attributes !== []) {
             if ($this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_85_VERSION_ID) {
-                // Registration only returned the constant since PHP 8.5, its
+                // Registration only returns the constant since PHP 8.5, it's
                 // not worth the bloat to add two different registration blocks
                 // with conditions for the PHP version
                 $constVarName = 'const_' . $constName;
