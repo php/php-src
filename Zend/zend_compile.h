@@ -886,7 +886,6 @@ ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_ar
 
 #ifdef ZTS
 const char *zend_get_zendtext(void);
-int zend_get_zendleng(void);
 #endif
 
 typedef zend_result (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
