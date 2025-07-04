@@ -111,6 +111,8 @@ int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
 
 	URI_CHECK_MEMORY_MANAGER(memory); /* may return */
 
+	URI_FUNC(ResetUri)(destUri);
+
 	if (URI_FUNC(CopyRangeAsNeeded)(&destUri->scheme, &sourceUri->scheme, URI_FALSE, memory) == URI_FALSE) {
 		return URI_ERROR_MALLOC;
 	}
@@ -153,7 +155,10 @@ int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
 		*(destUri->hostData.ip6) = *(sourceUri->hostData.ip6);
 	}
 
-	if (URI_FUNC(CopyRangeAsNeeded)(&destUri->hostData.ipFuture, &sourceUri->hostData.ipFuture, URI_FALSE, memory) == URI_FALSE) {
+	if (sourceUri->hostData.ipFuture.first != NULL && sourceUri->hostText.first == sourceUri->hostData.ipFuture.first) {
+		destUri->hostData.ipFuture.first = destUri->hostText.first;
+		destUri->hostData.ipFuture.afterLast = destUri->hostText.afterLast;
+	} else if (URI_FUNC(CopyRangeAsNeeded)(&destUri->hostData.ipFuture, &sourceUri->hostData.ipFuture, URI_FALSE, memory) == URI_FALSE) {
 		URI_FUNC(PreventLeakageAfterCopy)(destUri, doneMask, memory);
 		return URI_ERROR_MALLOC;
 	}

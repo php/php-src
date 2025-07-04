@@ -334,6 +334,10 @@ URI_PUBLIC int URI_FUNC(ParseSingleUriExMm)(URI_TYPE(Uri) * uri,
  * itself is not freed, only its members.
  * Uses default libc-based memory manager.
  *
+ * @remarks
+ * Calling on an all-zeros structure (e.g. through <c>memset</c> or <c>calloc</c>) is safe.<br/>
+ * Calling on an uninitialized structure is <em>not</em> safe.
+ *
  * @param uri   <b>INOUT</b>: %URI structure whose members should be freed
  *
  * @see uriFreeUriMembersMmA
@@ -347,6 +351,10 @@ URI_PUBLIC void URI_FUNC(FreeUriMembers)(URI_TYPE(Uri) * uri);
  * Frees all memory associated with the members
  * of the %URI structure. Note that the structure
  * itself is not freed, only its members.
+ *
+ * @remarks
+ * Calling on an all-zeros structure (e.g. through <c>memset</c> or <c>calloc</c>) is safe.<br/>
+ * Calling on an uninitialized structure is <em>not</em> safe.
  *
  * @param uri     <b>INOUT</b>: %URI structure whose members should be freed
  * @param memory  <b>IN</b>: Memory manager to use, NULL for default libc
