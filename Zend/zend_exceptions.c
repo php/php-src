@@ -67,7 +67,7 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 {
 	/* zend_ce_exception and zend_ce_error may not be initialized yet when this is called (e.g when
 	 * implementing Throwable for Exception itself). Perform a manual inheritance check. */
-	zend_class_entry *root = class_type;
+	const zend_class_entry *root = class_type;
 	while (root->parent) {
 		root = root->parent;
 	}
@@ -89,13 +89,13 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 }
 /* }}} */
 
-static inline zend_class_entry *i_get_exception_base(zend_object *object) /* {{{ */
+static inline zend_class_entry *i_get_exception_base(const zend_object *object) /* {{{ */
 {
 	return instanceof_function(object->ce, zend_ce_exception) ? zend_ce_exception : zend_ce_error;
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_get_exception_base(zend_object *object) /* {{{ */
+ZEND_API zend_class_entry *zend_get_exception_base(const zend_object *object) /* {{{ */
 {
 	return i_get_exception_base(object);
 }
@@ -192,7 +192,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 #endif /* HAVE_DTRACE */
 
 	if (exception != NULL) {
-		zend_object *previous = EG(exception);
+		const zend_object *previous = EG(exception);
 		if (previous && zend_is_unwind_exit(previous)) {
 			/* Don't replace unwinding exception with different exception. */
 			OBJ_RELEASE(exception);
