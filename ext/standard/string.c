@@ -2404,7 +2404,7 @@ PHP_FUNCTION(substr_replace)
 			if (repl_idx < repl_ht->nNumUsed) {
 				repl_str = zval_get_tmp_string(tmp_repl, &tmp_repl_str);
 			} else {
-				repl_str = STR_EMPTY_ALLOC();
+				repl_str = ZSTR_EMPTY_ALLOC();
 			}
 		}
 
