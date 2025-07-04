@@ -329,7 +329,7 @@ PHP_NEW_EXTENSION([opcache], m4_normalize([
     ZendAccelerator.c
     $ZEND_JIT_SRC
   ]),
-  [$ext_shared],,
+  [no],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $JIT_CFLAGS],,
   [yes])
 
