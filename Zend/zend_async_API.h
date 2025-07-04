@@ -363,6 +363,30 @@ struct _zend_async_event_callback_s {
 	zend_async_event_callback_dispose_fn dispose;
 };
 
+#define ZEND_ASYNC_EVENT_CALLBACK_ADD_REF(callback) \
+	if (callback != NULL) { \
+		callback->ref_count++; \
+	}
+
+//
+// For a callback,
+// it’s crucial that the reference count is always greater than zero,
+// because a value of zero is a special case triggered from a destructor.
+// If you need to “retain” ownership of the object,
+// you **MUST** use either this macro or ZEND_ASYNC_EVENT_CALLBACK_RELEASE.
+//
+#define ZEND_ASYNC_EVENT_CALLBACK_DEC_REF(callback) \
+	if(callback != NULL && callback->ref_count > 1) { \
+		callback->ref_count--; \
+	}
+
+#define ZEND_ASYNC_EVENT_CALLBACK_RELEASE(callback) \
+	if (callback != NULL && callback->ref_count > 1) { \
+		callback->ref_count--; \
+	} else { \
+		coroutine_event_callback_dispose(callback, NULL); \
+	}
+
 struct _zend_coroutine_event_callback_s {
 	zend_async_event_callback_t base;
 	zend_coroutine_t *coroutine;
