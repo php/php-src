@@ -70,15 +70,6 @@ END_EXTERN_C()
 #define ZSTR_H(zstr)    (zstr)->h
 #define ZSTR_HASH(zstr) zend_string_hash_val(zstr)
 
-/* Compatibility macros */
-
-#define IS_INTERNED(s)	ZSTR_IS_INTERNED(s)
-#define STR_EMPTY_ALLOC()	ZSTR_EMPTY_ALLOC()
-#define _STR_HEADER_SIZE _ZSTR_HEADER_SIZE
-#define STR_ALLOCA_ALLOC(str, _len, use_heap) ZSTR_ALLOCA_ALLOC(str, _len, use_heap)
-#define STR_ALLOCA_INIT(str, s, len, use_heap) ZSTR_ALLOCA_INIT(str, s, len, use_heap)
-#define STR_ALLOCA_FREE(str, use_heap) ZSTR_ALLOCA_FREE(str, use_heap)
-
 /*---*/
 
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
