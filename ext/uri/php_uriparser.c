@@ -28,7 +28,7 @@ static inline size_t get_text_range_length(const UriTextRangeA *range)
 	return range->afterLast - range->first;
 }
 
-ZEND_ATTRIBUTE_NONNULL static void uriparser_copy_uri(UriUriA *new_uriparser_uri, UriUriA *uriparser_uri)
+ZEND_ATTRIBUTE_NONNULL static void uriparser_copy_uri(UriUriA *new_uriparser_uri, const UriUriA *uriparser_uri)
 {
 	int result = uriCopyUriA(new_uriparser_uri, uriparser_uri);
 	ZEND_ASSERT(result == URI_SUCCESS);
@@ -157,7 +157,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_host(const uri_internal
 
 ZEND_ATTRIBUTE_NONNULL static size_t str_to_int(const char *str, size_t len)
 {
-	int result = 0;
+	size_t result = 0;
 
 	for (size_t i = 0; i < len; ++i) {
 		result = result * 10 + (str[i] - '0');
