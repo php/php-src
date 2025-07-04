@@ -96,6 +96,8 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;
 	s->options = options;
+	s->character_count = 0;
+	s->character_max_count = 0;
 	PHP_JSON_CONDITION_SET(JS);
 }
 
@@ -105,6 +107,12 @@ int php_json_scan(php_json_scanner *s)
 
 std:
 	s->token = s->cursor;
+
+	if (s->character_max_count == 0) {
+		s->character_max_count = strlen((const char*) s->token);
+	} else {
+		s->character_count = s->character_max_count + (-1 * strlen((const char*) s->token));
+	}
 
 /*!re2c
 	re2c:indent:top = 1;
