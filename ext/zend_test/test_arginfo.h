@@ -583,7 +583,7 @@ static void register_test_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_STRING_CONSTANT("ZEND_CONSTANT_A", "global", CONST_PERSISTENT);
-	zend_constant *const_ZEND_TEST_ATTRIBUTED_CONSTANT = REGISTER_LONG_CONSTANT("ZEND_TEST_ATTRIBUTED_CONSTANT", 42, CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("ZEND_TEST_ATTRIBUTED_CONSTANT", 42, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZendSubNS\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT);
 
@@ -642,6 +642,7 @@ static void register_test_symbols(int module_number)
 	attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].name = zend_string_init_interned("arg", sizeof("arg") - 1, 1);
 
 #if (PHP_VERSION_ID >= 80500)
+	zend_constant *const_ZEND_TEST_ATTRIBUTED_CONSTANT = zend_hash_str_find_ptr(EG(zend_constants), "ZEND_TEST_ATTRIBUTED_CONSTANT", sizeof("ZEND_TEST_ATTRIBUTED_CONSTANT") - 1);
 
 	zend_attribute *attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0 = zend_add_global_constant_attribute(const_ZEND_TEST_ATTRIBUTED_CONSTANT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg0;

@@ -2784,8 +2784,13 @@ class ConstInfo extends VariableLike
 
         $code = "\t";
         if ($this->attributes !== []) {
-            $constVarName = 'const_' . $constName;
-            $code .= "zend_constant *$constVarName = ";
+            if ($this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_85_VERSION_ID) {
+                // Registration only returned the constant since PHP 8.5, its
+                // not worth the bloat to add two different registration blocks
+                // with conditions for the PHP version
+                $constVarName = 'const_' . $constName;
+                $code .= "zend_constant *$constVarName = ";
+            }
         }
 
         if ($value->type->isNull()) {
@@ -5314,12 +5319,11 @@ function generateGlobalConstantAttributeInitialization(
     $isConditional = false;
     if ($phpVersionIdMinimumCompatibility !== null && $phpVersionIdMinimumCompatibility < PHP_85_VERSION_ID) {
         $isConditional = true;
-        $phpVersionIdMinimumCompatibility = PHP_85_VERSION_ID;
     }
     $code = generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional) {
             $code = "";
 
             if ($constInfo->attributes === []) {
@@ -5328,12 +5332,18 @@ function generateGlobalConstantAttributeInitialization(
             $constName = str_replace('\\', '\\\\', $constInfo->name->__toString());
             $constVarName = 'const_' . $constName;
 
+            // The entire attribute block will be conditional if PHP < 8.5 is
+            // supported, but also if PHP < 8.5 is supported we need to search
+            // for the constant; see GH-19029
+            if ($isConditional) {
+                $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            }
             foreach ($constInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_global_constant_attribute($constVarName",
                     $constVarName . "_$key",
                     $allConstInfos,
-                    $phpVersionIdMinimumCompatibility
+                    PHP_85_VERSION_ID
                 );
             }
 
