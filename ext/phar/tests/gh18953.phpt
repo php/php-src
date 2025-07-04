@@ -1,45 +1,40 @@
 --TEST--
-Phar: Stream double free
+GH-18953 (Phar: Stream double free)
 --EXTENSIONS--
 phar
 --INI--
 phar.readonly=0
---ENV--
-USE_ZEND_ALLOC=0
 --FILE--
 <?php
 
-declare(strict_types=1);
-
-require __DIR__ . '/gh18953/autoload.inc';
-
-// cleaning
-@unlink("gh18953.phar");
-@unlink("gh18953.phar.gz");
-
-// create a phar
-$phar = new Phar("gh18953.phar");
-$phar->startBuffering();
-// add any dir
+$phar = new Phar(__DIR__ . "/gh18953.phar");
+$phar->addFromString("file", str_repeat("123", random_int(1, 1)));
 $phar->addEmptyDir("dir");
-$phar->stopBuffering();
-// compress
-$phar->compress(Phar::GZ);
+$phar2 = $phar->compress(Phar::GZ);
 
-// this increases the chance of reproducing the problem
-// even with this, it's not always reproducible
-$obj1 = new NS1\Class1();
-$obj2 = new NS1\Class1();
-$obj2 = new NS1\Class1();
-$obj2 = new NS1\Class1();
-$obj2 = new NS1\Class1();
+var_dump($phar["dir"]);
+var_dump($phar2["dir"]);
+var_dump($phar["file"]->openFile()->fread(100));
+var_dump($phar2["file"]->openFile()->fread(100));
 
-echo "Done" . PHP_EOL;
 ?>
 --CLEAN--
 <?php
-@unlink("gh18953.phar");
-@unlink("gh18953.phar.gz");
+@unlink(__DIR__ . "/gh18953.phar");
+@unlink(__DIR__ . "/gh18953.phar.gz");
 ?>
---EXPECT--
-Done
+--EXPECTF--
+object(PharFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%sphar%sdir"
+  ["fileName":"SplFileInfo":private]=>
+  string(3) "dir"
+}
+object(PharFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%sphar.gz%sdir"
+  ["fileName":"SplFileInfo":private]=>
+  string(3) "dir"
+}
+string(3) "123"
+string(3) "123"
