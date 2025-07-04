@@ -2984,9 +2984,9 @@ void zend_convert_internal_arg_info_type(zend_type *type)
 		   " regenerate the argument info via the php-src gen_stub build script");
 		   */
 		zend_type legacy_iterable = ZEND_TYPE_INIT_CLASS_MASK(
-				ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
-				(type->type_mask | MAY_BE_ARRAY)
-				);
+			ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
+			(type->type_mask | MAY_BE_ARRAY)
+		);
 		*type = legacy_iterable;
 	}
 }
