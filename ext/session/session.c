@@ -2603,7 +2603,7 @@ PHP_FUNCTION(session_start)
 						if (Z_TYPE_P(value) != IS_STRING) {
 							tmp = zval_get_long(value);
 						} else {
-							if (is_numeric_string(Z_STRVAL_P(value), Z_STRLEN_P(value), &tmp, NULL, false) != IS_LONG) {
+							if (is_numeric_str_function(Z_STR_P(value), &tmp, NULL) != IS_LONG) {
 								zend_type_error("%s(): Option \"%s\" value must be of type compatible with int, \"%s\" given",
 										get_active_function_name(), ZSTR_VAL(str_idx), Z_STRVAL_P(value)
 									       );
