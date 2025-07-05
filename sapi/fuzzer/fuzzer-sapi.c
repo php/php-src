@@ -292,7 +292,7 @@ int fuzzer_do_request_from_buffer(
 
 // Call named PHP function with N zval arguments
 void fuzzer_call_php_func_zval(const char *func_name, int nargs, zval *args) {
-	zval retval, func;
+	zval retval;
 
 	zend_function *fn = zend_hash_str_find_ptr(CG(function_table), func_name, strlen(func_name));
 	ZEND_ASSERT(fn != NULL);
@@ -306,7 +306,6 @@ void fuzzer_call_php_func_zval(const char *func_name, int nargs, zval *args) {
 
 	/* cleanup */
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func);
 }
 
 // Call named PHP function with N string arguments
