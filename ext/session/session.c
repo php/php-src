@@ -1485,7 +1485,7 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name)
 static void ppid2sid(zval *ppid) {
 	ZVAL_DEREF(ppid);
 	if (Z_TYPE_P(ppid) == IS_STRING) {
-		PS(id) = zend_string_init(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0);
+		PS(id) = zend_string_copy(Z_STR_P(ppid));
 		PS(send_cookie) = 0;
 	} else {
 		PS(id) = NULL;
@@ -3199,7 +3199,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 				progress->post_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->data), "bytes_processed", sizeof("bytes_processed") - 1);
 
 				php_rinit_session(0);
-				PS(id) = zend_string_init(Z_STRVAL(progress->sid), Z_STRLEN(progress->sid), 0);
+				PS(id) = zend_string_copy(Z_STR(progress->sid));
 				if (progress->apply_trans_sid) {
 					/* Enable trans sid by modifying flags */
 					PS(use_trans_sid) = 1;
