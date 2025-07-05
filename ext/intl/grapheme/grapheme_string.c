@@ -932,8 +932,6 @@ PHP_FUNCTION(grapheme_levenshtein)
 	zend_long cost_ins = 1;
 	zend_long cost_rep = 1;
 	zend_long cost_del = 1;
-	char *locale = "";
-	size_t locale_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STR(string1)
@@ -942,7 +940,6 @@ PHP_FUNCTION(grapheme_levenshtein)
 		Z_PARAM_LONG(cost_ins)
 		Z_PARAM_LONG(cost_rep)
 		Z_PARAM_LONG(cost_del)
-		Z_PARAM_STRING(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (cost_ins <= 0 || cost_ins > UINT_MAX / 4) {
@@ -1059,7 +1056,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 		RETVAL_FALSE;
 		goto out_bi2;
 	}
-	UCollator *collator = ucol_open(locale, &ustatus);
+	UCollator *collator = ucol_open("", &ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
