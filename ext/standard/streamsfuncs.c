@@ -870,9 +870,8 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	ZVAL_LONG(&zvs[5], bytes_max);
 
 	zend_call_known_fcc(context->notifier->fcc, NULL, 6, zvs, NULL);
-	for (uint8_t i = 0; i < 6; i++) {
-		zval_ptr_dtor(&zvs[i]);
-	}
+	/* Free refcounted string parameter */
+	zval_ptr_dtor_str(&zvs[2]);
 }
 
 static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
