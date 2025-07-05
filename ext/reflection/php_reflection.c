@@ -5753,6 +5753,21 @@ ZEND_METHOD(ReflectionProperty, getName)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, getMangledName)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop == NULL) {
+	    RETURN_STR_COPY(ref->unmangled_name);
+	}
+
+	RETURN_STR_COPY(ref->prop->name);
+}
+
 static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ */
 {
 	reflection_object *intern;
