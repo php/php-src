@@ -2774,8 +2774,11 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 						zend_argument_type_error(3, "\"ai_family\" key must be of type int, %s given", zend_zval_type_name(hint));
 						RETURN_THROWS();
 					}
-					if (val < 0 || val >= AF_MAX) {
-						zend_argument_value_error(3, "\"ai_family\" key must be between 0 and %d", AF_MAX - 1);
+					// Some platforms support also PF_LOCAL/AF_UNIX (e.g. FreeBSD) but the security concerns implied
+					// make it not worth handling it (e.g. unwarranted write permissions on the socket).
+					// Note existing socket_addrinfo* api already forbid such case.
+					if (val != AF_INET && val != AF_INET6) {
+						zend_argument_value_error(3, "\"ai_family\" key must be AF_INET or AF_INET6");
 						RETURN_THROWS();
 					}
 					hints.ai_family = (int)val;
@@ -2856,6 +2859,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	php_sock->blocking = 1;
 
 	switch(php_sock->type) {
+		// ZEND_ASSERT ? Addrinfo being opaque read-only, should not happen with previous change
 		case AF_UNIX:
 			{
 				// AF_UNIX sockets via getaddrino are not implemented due to security problems
