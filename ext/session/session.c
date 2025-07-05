@@ -1248,7 +1248,7 @@ static inline void last_modified(void)
 		}
 
 #define LAST_MODIFIED "Last-Modified: "
-		memcpy(buf, LAST_MODIFIED, sizeof(LAST_MODIFIED) - 1);
+		memcpy(buf, ZEND_STRL(LAST_MODIFIED));
 		strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &sb.st_mtime);
 		ADD_HEADER(buf);
 	}
@@ -1263,7 +1263,7 @@ CACHE_LIMITER_FUNC(public)
 
 	gettimeofday(&tv, NULL);
 	now = tv.tv_sec + PS(cache_expire) * 60;
-	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
+	memcpy(buf, ZEND_STRL(EXPIRES));
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_HEADER(buf);
 
@@ -1394,7 +1394,7 @@ static zend_result php_session_send_cookie(void)
 	/* URL encode id because it might be user supplied */
 	e_id = php_url_encode(ZSTR_VAL(PS(id)), ZSTR_LEN(PS(id)));
 
-	smart_str_appendl(&ncookie, "Set-Cookie: ", sizeof("Set-Cookie: ")-1);
+	smart_str_appends(&ncookie, "Set-Cookie: ");
 	smart_str_appendl(&ncookie, PS(session_name), strlen(PS(session_name)));
 	smart_str_appendc(&ncookie, '=');
 	smart_str_append(&ncookie, e_id);
@@ -1409,7 +1409,7 @@ static zend_result php_session_send_cookie(void)
 		t = tv.tv_sec + PS(cookie_lifetime);
 
 		if (t > 0) {
-			date_fmt = php_format_date("D, d M Y H:i:s \\G\\M\\T", sizeof("D, d M Y H:i:s \\G\\M\\T")-1, t, 0);
+			date_fmt = php_format_date(ZEND_STRL("D, d M Y H:i:s \\G\\M\\T"), t, false);
 			smart_str_appends(&ncookie, COOKIE_EXPIRES);
 			smart_str_append(&ncookie, date_fmt);
 			zend_string_release_ex(date_fmt, 0);
@@ -1515,8 +1515,8 @@ PHPAPI zend_result php_session_reset_id(void)
 
 	/* If the SID constant exists, destroy it. */
 	/* We must not delete any items in EG(zend_constants) */
-	/* zend_hash_str_del(EG(zend_constants), "sid", sizeof("sid") - 1); */
-	sid = zend_get_constant_str("SID", sizeof("SID") - 1);
+	/* zend_hash_str_del(EG(zend_constants), ZEND_STRL("sid")); */
+	sid = zend_get_constant_str(ZEND_STRL("SID"));
 
 	if (PS(define_sid)) {
 		smart_str var = {0};
@@ -1546,7 +1546,7 @@ PHPAPI zend_result php_session_reset_id(void)
 	if (APPLY_TRANS_SID) {
 		apply_trans_sid = 1;
 		if (PS(use_cookies) &&
-			(data = zend_hash_str_find(&EG(symbol_table), "_COOKIE", sizeof("_COOKIE") - 1))) {
+			(data = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_COOKIE")))) {
 			ZVAL_DEREF(data);
 			if (Z_TYPE_P(data) == IS_ARRAY &&
 				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), strlen(PS(session_name))))) {
@@ -1580,7 +1580,7 @@ PHPAPI zend_result php_session_start(void)
 			break;
 
 		case php_session_disabled:
-			value = zend_ini_string("session.save_handler", sizeof("session.save_handler") - 1, 0);
+			value = zend_ini_string(ZEND_STRL("session.save_handler"), false);
 			if (!PS(mod) && value) {
 				PS(mod) = _php_find_ps_module(value);
 				if (!PS(mod)) {
@@ -1588,7 +1588,7 @@ PHPAPI zend_result php_session_start(void)
 					return FAILURE;
 				}
 			}
-			value = zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
+			value = zend_ini_string(ZEND_STRL("session.serialize_handler"), false);
 			if (!PS(serializer) && value) {
 				PS(serializer) = _php_find_ps_serializer(value);
 				if (!PS(serializer)) {
@@ -1617,7 +1617,7 @@ PHPAPI zend_result php_session_start(void)
 	 */
 
 	if (!PS(id)) {
-		if (PS(use_cookies) && (data = zend_hash_str_find(&EG(symbol_table), "_COOKIE", sizeof("_COOKIE") - 1))) {
+		if (PS(use_cookies) && (data = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_COOKIE")))) {
 			ZVAL_DEREF(data);
 			if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
 				ppid2sid(ppid);
@@ -1627,13 +1627,13 @@ PHPAPI zend_result php_session_start(void)
 		}
 		/* Initialize session ID from non cookie values */
 		if (!PS(use_only_cookies)) {
-			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_GET", sizeof("_GET") - 1))) {
+			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_GET")))) {
 				ZVAL_DEREF(data);
 				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
 					ppid2sid(ppid);
 				}
 			}
-			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), "_POST", sizeof("_POST") - 1))) {
+			if (!PS(id) && (data = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_POST")))) {
 				ZVAL_DEREF(data);
 				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
 					ppid2sid(ppid);
@@ -1643,7 +1643,7 @@ PHPAPI zend_result php_session_start(void)
 			 * an external site which invalidates the previously found id. */
 			if (PS(id) && PS(extern_referer_chk)[0] != '\0' &&
 				!Z_ISUNDEF(PG(http_globals)[TRACK_VARS_SERVER]) &&
-				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
+				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZEND_STRL("HTTP_REFERER"))) &&
 				Z_TYPE_P(data) == IS_STRING &&
 				Z_STRLEN_P(data) != 0 &&
 				strstr(Z_STRVAL_P(data), PS(extern_referer_chk)) == NULL
@@ -2794,7 +2794,7 @@ static zend_result php_rinit_session(bool auto_start)
 	{
 		char *value;
 
-		value = zend_ini_string("session.save_handler", sizeof("session.save_handler") - 1, 0);
+		value = zend_ini_string(ZEND_STRL("session.save_handler"), false);
 		if (value) {
 			PS(mod) = _php_find_ps_module(value);
 		}
@@ -2803,7 +2803,7 @@ static zend_result php_rinit_session(bool auto_start)
 	if (PS(serializer) == NULL) {
 		char *value;
 
-		value = zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
+		value = zend_ini_string(ZEND_STRL("session.serialize_handler"), false);
 		if (value) {
 			PS(serializer) = _php_find_ps_serializer(value);
 		}
@@ -2907,7 +2907,7 @@ static PHP_GINIT_FUNCTION(ps)
 
 static PHP_MINIT_FUNCTION(session)
 {
-	zend_register_auto_global(zend_string_init_interned("_SESSION", sizeof("_SESSION") - 1, 1), 0, NULL);
+	zend_register_auto_global(zend_string_init_interned(ZEND_STRL("_SESSION"), true), false, NULL);
 
 	my_module_number = module_number;
 	PS(module_number) = module_number;
@@ -3058,7 +3058,7 @@ static bool php_check_cancel_upload(php_session_rfc1867_progress *progress)
 	if (Z_TYPE_P(progress_ary) != IS_ARRAY) {
 		return 0;
 	}
-	if ((cancel_upload = zend_hash_str_find(Z_ARRVAL_P(progress_ary), "cancel_upload", sizeof("cancel_upload") - 1)) == NULL) {
+	if ((cancel_upload = zend_hash_str_find(Z_ARRVAL_P(progress_ary), ZEND_STRL("cancel_upload"))) == NULL) {
 		return 0;
 	}
 	return Z_TYPE_P(cancel_upload) == IS_TRUE;
@@ -3189,13 +3189,13 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 				array_init(&progress->data);
 				array_init(&progress->files);
 
-				add_assoc_long_ex(&progress->data, "start_time", sizeof("start_time") - 1, (zend_long)sapi_get_request_time());
-				add_assoc_long_ex(&progress->data, "content_length",  sizeof("content_length") - 1, progress->content_length);
-				add_assoc_long_ex(&progress->data, "bytes_processed", sizeof("bytes_processed") - 1, data->post_bytes_processed);
-				add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 0);
-				add_assoc_zval_ex(&progress->data, "files", sizeof("files") - 1, &progress->files);
+				add_assoc_long_ex(&progress->data, ZEND_STRL("start_time"), (zend_long)sapi_get_request_time());
+				add_assoc_long_ex(&progress->data, ZEND_STRL("content_length"), progress->content_length);
+				add_assoc_long_ex(&progress->data, ZEND_STRL("bytes_processed"), data->post_bytes_processed);
+				add_assoc_bool_ex(&progress->data, ZEND_STRL("done"), false);
+				add_assoc_zval_ex(&progress->data, ZEND_STRL("files"), &progress->files);
 
-				progress->post_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->data), "bytes_processed", sizeof("bytes_processed") - 1);
+				progress->post_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->data), ZEND_STRL("bytes_processed"));
 
 				php_rinit_session(0);
 				PS(id) = zend_string_copy(Z_STR(progress->sid));
@@ -3210,18 +3210,18 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			array_init(&progress->current_file);
 
 			/* Each uploaded file has its own array. Trying to make it close to $_FILES entries. */
-			add_assoc_string_ex(&progress->current_file, "field_name", sizeof("field_name") - 1, data->name);
-			add_assoc_string_ex(&progress->current_file, "name", sizeof("name") - 1, *data->filename);
-			add_assoc_null_ex(&progress->current_file, "tmp_name", sizeof("tmp_name") - 1);
-			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, 0);
+			add_assoc_string_ex(&progress->current_file, ZEND_STRL("field_name"), data->name);
+			add_assoc_string_ex(&progress->current_file, ZEND_STRL("name"), *data->filename);
+			add_assoc_null_ex(&progress->current_file, ZEND_STRL("tmp_name"));
+			add_assoc_long_ex(&progress->current_file, ZEND_STRL("error"), 0);
 
-			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1, 0);
-			add_assoc_long_ex(&progress->current_file, "start_time", sizeof("start_time") - 1, (zend_long)time(NULL));
-			add_assoc_long_ex(&progress->current_file, "bytes_processed", sizeof("bytes_processed") - 1, 0);
+			add_assoc_bool_ex(&progress->current_file, ZEND_STRL("done"), 0);
+			add_assoc_long_ex(&progress->current_file, ZEND_STRL("start_time"), (zend_long)time(NULL));
+			add_assoc_long_ex(&progress->current_file, ZEND_STRL("bytes_processed"), 0);
 
 			add_next_index_zval(&progress->files, &progress->current_file);
 
-			progress->current_file_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->current_file), "bytes_processed", sizeof("bytes_processed") - 1);
+			progress->current_file_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->current_file), ZEND_STRL("bytes_processed"));
 
 			Z_LVAL_P(progress->current_file_bytes_processed) =  data->post_bytes_processed;
 			php_session_rfc1867_update(progress, 0);
@@ -3248,11 +3248,11 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			}
 
 			if (data->temp_filename) {
-				add_assoc_string_ex(&progress->current_file, "tmp_name",  sizeof("tmp_name") - 1, data->temp_filename);
+				add_assoc_string_ex(&progress->current_file, ZEND_STRL("tmp_name"), data->temp_filename);
 			}
 
-			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, data->cancel_upload);
-			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1,  1);
+			add_assoc_long_ex(&progress->current_file, ZEND_STRL("error"), data->cancel_upload);
+			add_assoc_bool_ex(&progress->current_file, ZEND_STRL("done"),  1);
 
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
@@ -3268,7 +3268,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 				} else {
 					if (!Z_ISUNDEF(progress->data)) {
 						SEPARATE_ARRAY(&progress->data);
-						add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 1);
+						add_assoc_bool_ex(&progress->data, ZEND_STRL("done"), 1);
 						Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 						php_session_rfc1867_update(progress, 1);
 					}
