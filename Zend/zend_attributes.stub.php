@@ -77,7 +77,7 @@ final class Override
 /**
  * @strict-properties
  */
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION|Attribute::TARGET_CLASS_CONSTANT|Attribute::TARGET_CONSTANT)]
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION|Attribute::TARGET_CLASS_CONSTANT|Attribute::TARGET_CONSTANT|Attribute::TARGET_CLASS)]
 final class Deprecated
 {
     public readonly ?string $message;

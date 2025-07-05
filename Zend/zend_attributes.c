@@ -110,6 +110,34 @@ static zend_string *validate_attribute(
 	return NULL;
 }
 
+static void validate_deprecated(
+	zend_attribute *attr,
+	uint32_t target,
+	zend_class_entry *scope
+) {
+	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
+		// Being used for a method or something, validation does not apply
+		return;
+	}
+	if (scope->ce_flags & ZEND_ACC_TRAIT) {
+		scope->ce_flags |= ZEND_ACC_DEPRECATED;
+		return;
+	}
+
+	const char *type = "class";
+	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		type = "interface";
+	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
+		type = "enum";
+	}
+	zend_error_noreturn(
+		E_ERROR,
+		"Cannot apply #[Deprecated] to %s %s",
+		type,
+		ZSTR_VAL(scope->name)
+	);
+}
+
 ZEND_METHOD(Attribute, __construct)
 {
 	zend_long flags = ZEND_ATTRIBUTE_TARGET_ALL;
@@ -579,6 +607,7 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_deprecated = register_class_Deprecated();
 	attr = zend_mark_internal_attribute(zend_ce_deprecated);
+	attr->validator = validate_deprecated;
 
 	zend_ce_nodiscard = register_class_NoDiscard();
 	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
