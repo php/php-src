@@ -29,4 +29,6 @@ while (1) {
 ?>
 --EXPECTF--
 Success
+Deprecated: main(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
+
 Fatal error: Allowed memory size of %s bytes exhausted%s(tried to allocate %s bytes) in %s on line %d

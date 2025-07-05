@@ -13,4 +13,5 @@ ob_start(function() {
     );
 });
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: PHP Request Shutdown: Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
