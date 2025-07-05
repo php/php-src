@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fix stream double free in phar. (nielsdos, dixyes)
+  . Fix phar crash and file corruption with SplFileObject. (nielsdos)
 
 - SOAP:
   . Fixed bug GH-18990, bug #81029, bug #47314 (SOAP HTTP socket not closing

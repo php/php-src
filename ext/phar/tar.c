@@ -832,7 +832,7 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 		php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
 	}
 
-	if (!entry->is_modified && entry->fp_refcount) {
+	if (entry->fp_refcount) {
 		/* open file pointers refer to this fp, do not free the stream */
 		switch (entry->fp_type) {
 			case PHAR_FP:

@@ -2737,7 +2737,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			/* remove this from the new phar */
 			continue;
 		}
-		if (!entry->is_modified && entry->fp_refcount) {
+		if (entry->fp_refcount) {
 			/* open file pointers refer to this fp, do not free the stream */
 			switch (entry->fp_type) {
 				case PHAR_FP:
