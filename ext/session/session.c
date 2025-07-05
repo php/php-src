@@ -513,7 +513,7 @@ static void php_session_save_current_state(int write)
 	if (write) {
 		IF_SESSION_VARS() {
 			zend_string *handler_class_name = PS(mod_user_class_name);
-			const char *handler_function_name;
+			const char *handler_function_name = "write";
 
 			if (PS(mod_data) || PS(mod_user_implemented)) {
 				zend_string *val;
@@ -529,12 +529,10 @@ static void php_session_save_current_state(int write)
 						handler_function_name = handler_class_name != NULL ? "updateTimestamp" : "update_timestamp";
 					} else {
 						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
-						handler_function_name = "write";
 					}
 					zend_string_release_ex(val, 0);
 				} else {
 					ret = PS(mod)->s_write(&PS(mod_data), PS(id), ZSTR_EMPTY_ALLOC(), PS(gc_maxlifetime));
-					handler_function_name = "write";
 				}
 			}
 
