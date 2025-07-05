@@ -1918,15 +1918,13 @@ static void zend_jit_vm_leave(zend_jit_ctx *jit, ir_ref to_opline)
 
 static int zend_jit_exception_handler_stub(zend_jit_ctx *jit)
 {
-	const void *handler;
-
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		handler = zend_get_opcode_handler_func(EG(exception_op));
+		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(EG(exception_op));
 
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
-		handler = EG(exception_op)->handler;
+		zend_vm_opcode_handler_t handler = EG(exception_op)->handler;
 
 		if (GCC_GLOBAL_REGS) {
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
@@ -4176,17 +4174,12 @@ static ir_ref zend_jit_continue_entry(zend_jit_ctx *jit, ir_ref src, unsigned in
 
 static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_throw)
 {
-	const void *handler;
-
 	zend_jit_set_ip(jit, opline);
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		handler = zend_get_opcode_handler_func(opline);
-	} else {
-		handler = opline->handler;
-	}
 	if (GCC_GLOBAL_REGS) {
+		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 	} else {
+		zend_vm_opcode_handler_t handler = opline->handler;
 		ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
 		jit_STORE_IP(jit, ip);
 	}
@@ -4216,7 +4209,6 @@ static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_th
 
 static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 {
-	const void *handler;
 	ir_ref ref;
 	zend_basic_block *bb;
 
@@ -4228,16 +4220,16 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 		    opline->opcode == ZEND_RETURN) {
 
 			/* Use inlined HYBRID VM handler */
-			handler = opline->handler;
+			zend_vm_opcode_handler_t handler = opline->handler;
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
 		} else {
-			handler = zend_get_opcode_handler_func(opline);
+			zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
 			ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 			ref = ir_LOAD_A(jit_IP(jit));
 			ir_TAILCALL(IR_VOID, ref);
 		}
 	} else {
-		handler = opline->handler;
+		zend_vm_opcode_handler_t handler = opline->handler;
 		if (GCC_GLOBAL_REGS) {
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
 		} else if ((jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY)
@@ -16741,7 +16733,7 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 	return 1;
 }
 
-static void *zend_jit_finish(zend_jit_ctx *jit)
+static zend_vm_opcode_handler_t zend_jit_finish(zend_jit_ctx *jit)
 {
 	void *entry;
 	size_t size;
@@ -16825,14 +16817,14 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 					opline++;
 				}
 			}
-			opline->handler = entry;
+			opline->handler = (zend_vm_opcode_handler_t)entry;
 
 			if (jit->ctx.entries_count) {
 				/* For all entries */
 				int i = jit->ctx.entries_count;
 				do {
 					ir_insn *insn = &jit->ctx.ir_base[jit->ctx.entries[--i]];
-					op_array->opcodes[insn->op2].handler = (char*)entry + insn->op3;
+					op_array->opcodes[insn->op2].handler = (zend_vm_opcode_handler_t)((char*)entry + insn->op3);
 				} while (i != 0);
 			}
 		} else {
@@ -16859,7 +16851,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 		zend_string_release(str);
 	}
 
-	return entry;
+	return (zend_vm_opcode_handler_t)entry;
 }
 
 static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
