@@ -80,6 +80,7 @@ try {
 } catch (ValueError $e) {
 	echo $e->getMessage() . PHP_EOL;
 }
+
 ?>
 --EXPECTF--
 --- Equal ---

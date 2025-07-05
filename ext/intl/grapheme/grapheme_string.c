@@ -121,7 +121,7 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 	/* do utf16 part of the strpos */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* fIgnoreCase */, 0 /* last */ );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* fIgnoreCase */, 0, "" /* last */ );
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -134,19 +134,20 @@ PHP_FUNCTION(grapheme_strpos)
 /* {{{ Find position of first occurrence of a string within another, ignoring case differences */
 PHP_FUNCTION(grapheme_stripos)
 {
-	char *haystack, *needle;
-	size_t haystack_len, needle_len;
+	char *haystack, *needle, *locale = "";
+	size_t haystack_len, needle_len, locale_len = 0;
 	const char *found;
 	zend_long loffset = 0;
 	int32_t offset = 0;
 	zend_long ret_pos;
 	int is_ascii;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(haystack, haystack_len)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
+		Z_PARAM_STRING(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -185,7 +186,7 @@ PHP_FUNCTION(grapheme_stripos)
 	}
 
 	/* do utf16 part of the strpos */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 1 /* fIgnoreCase */, 0 /*last */ );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 1 /* fIgnoreCase */, 0, locale /*last */ );
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -200,6 +201,7 @@ PHP_FUNCTION(grapheme_stripos)
 PHP_FUNCTION(grapheme_strrpos)
 {
 	char *haystack, *needle;
+	char *locale = "";
 	size_t haystack_len, needle_len;
 	zend_long loffset = 0;
 	int32_t offset = 0;
@@ -242,7 +244,7 @@ PHP_FUNCTION(grapheme_strrpos)
 		/* else we need to continue via utf16 */
 	}
 
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* f_ignore_case */, 1/* last */);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* f_ignore_case */, 1, locale /* last */);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -257,18 +259,19 @@ PHP_FUNCTION(grapheme_strrpos)
 /* {{{ Find position of last occurrence of a string within another, ignoring case */
 PHP_FUNCTION(grapheme_strripos)
 {
-	char *haystack, *needle;
-	size_t haystack_len, needle_len;
+	char *haystack, *needle, *locale = "";
+	size_t haystack_len, needle_len, locale_len = 0;
 	zend_long loffset = 0;
 	int32_t offset = 0;
 	zend_long ret_pos;
 	int is_ascii;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(haystack, haystack_len)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
+		Z_PARAM_STRING(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -309,7 +312,7 @@ PHP_FUNCTION(grapheme_strripos)
 		/* else we need to continue via utf16 */
 	}
 
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL,  1 /* f_ignore_case */, 1 /*last */);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL,  1 /* f_ignore_case */, 1, locale /*last */);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -537,18 +540,28 @@ PHP_FUNCTION(grapheme_substr)
 /* {{{	strstr_common_handler */
 static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_case)
 {
-	char *haystack, *needle;
+	char *haystack, *needle, *locale = "";
 	const char *found;
-	size_t haystack_len, needle_len;
+	size_t haystack_len, needle_len, locale_len = 0;
 	int32_t ret_pos, uchar_pos;
 	bool part = false;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(haystack, haystack_len)
-		Z_PARAM_STRING(needle, needle_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(part)
-	ZEND_PARSE_PARAMETERS_END();
+	if (f_ignore_case == 1) {
+		ZEND_PARSE_PARAMETERS_START(2, 4)
+			Z_PARAM_STRING(haystack, haystack_len)
+			Z_PARAM_STRING(needle, needle_len)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_BOOL(part)
+			Z_PARAM_STRING(locale, locale_len)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(2, 3)
+			Z_PARAM_STRING(haystack, haystack_len)
+			Z_PARAM_STRING(needle, needle_len)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_BOOL(part)
+		ZEND_PARSE_PARAMETERS_END();
+	}
 
 	if ( !f_ignore_case ) {
 
@@ -574,7 +587,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	}
 
 	/* need to work in utf16 */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, 0, &uchar_pos, f_ignore_case, 0 /*last */ );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, 0, &uchar_pos, f_ignore_case, 0, locale /*last */ );
 
 	if ( ret_pos < 0 ) {
 		RETURN_FALSE;
