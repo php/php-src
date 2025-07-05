@@ -191,8 +191,8 @@ typedef struct _php_ps_globals {
 	zend_long sid_bits_per_character;
 
 	php_session_rfc1867_progress *rfc1867_progress;
-	char *rfc1867_prefix;  /* session.upload_progress.prefix */
-	char *rfc1867_name;    /* session.upload_progress.name */
+	zend_string *rfc1867_prefix;  /* session.upload_progress.prefix */
+	zend_string *rfc1867_name;    /* session.upload_progress.name */
 	zend_long rfc1867_freq;         /* session.upload_progress.freq */
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 	bool rfc1867_enabled; /* session.upload_progress.enabled */
