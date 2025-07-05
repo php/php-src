@@ -110,7 +110,7 @@ socket_addrinfo_lookup(): Argument #3 ($hints) "ai_family" key must be of type i
 socket_addrinfo_lookup(): Argument #3 ($hints) "ai_socktype" key must be of type int, stdClass given
 socket_addrinfo_lookup(): Argument #3 ($hints) "ai_flags" key must be of type int, stdClass given
 socket_addrinfo_lookup(): Argument #3 ($hints) "ai_protocol" key must be of type int, stdClass given
-socket_addrinfo_lookup(): Argument #3 ($hints) "ai_family" key must be between 0 and %d
+socket_addrinfo_lookup(): Argument #3 ($hints) "ai_family" key must be AF_INET%A
 socket_addrinfo_lookup(): Argument #3 ($hints) "ai_socktype" key must be between 0 and %d
 socket_addrinfo_lookup(): Argument #3 ($hints) "ai_flags" key must be between 0 and %d
 socket_addrinfo_lookup(): Argument #3 ($hints) "ai_protocol" key must be between 0 and %d
