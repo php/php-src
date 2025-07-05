@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-18907 (Leak when creating cycle in hook). (ilutov)
   . Fix OSS-Fuzz #427814456. (nielsdos)
   . Fix OSS-Fuzz #428983568 and #428760800. (nielsdos)
+  . Fixed bug GH-19044 (Protected properties are not scoped according to their
+    prototype). (Bob)
 
 - Curl:
   . Fix memory leaks when returning refcounted value from curl callback.
