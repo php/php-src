@@ -808,9 +808,9 @@ static void register_php_date_symbols(int module_number)
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC3339_EXTENDED, "Y-m-d\\TH:i:s.vP") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RSS", DATE_FORMAT_RFC1123, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_W3C", DATE_FORMAT_RFC3339, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_TIMESTAMP = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_STRING = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_DOUBLE = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_PERSISTENT | CONST_DEPRECATED);
 
 
 	zend_attribute *attribute_Deprecated_func_strftime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strftime", sizeof("strftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
@@ -860,7 +860,6 @@ static void register_php_date_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_date_sunset_0_arg1, attribute_Deprecated_func_date_sunset_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunset_0->args[1].value, &attribute_Deprecated_func_date_sunset_0_arg1);
 	attribute_Deprecated_func_date_sunset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_SUNFUNCS_RET_TIMESTAMP = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_TIMESTAMP", sizeof("SUNFUNCS_RET_TIMESTAMP") - 1);
 
 	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_TIMESTAMP, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0;
@@ -873,7 +872,6 @@ static void register_php_date_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].value, &attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1);
 	attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_SUNFUNCS_RET_STRING = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_STRING", sizeof("SUNFUNCS_RET_STRING") - 1);
 
 	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_STRING_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_STRING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0;
@@ -886,7 +884,6 @@ static void register_php_date_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1, attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].value, &attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1);
 	attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_SUNFUNCS_RET_DOUBLE = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_DOUBLE", sizeof("SUNFUNCS_RET_DOUBLE") - 1);
 
 	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_DOUBLE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0;
