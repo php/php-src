@@ -124,19 +124,25 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 }
 
 void zend_free_internal_arg_info(zend_internal_function *function) {
-	if ((function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
-		function->arg_info) {
-
+	if (function->arg_info) {
 		uint32_t i;
 		uint32_t num_args = function->num_args + 1;
-		zend_internal_arg_info *arg_info = function->arg_info - 1;
+		zend_arg_info *arg_info = function->arg_info - 1;
 
 		if (function->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
 		for (i = 0 ; i < num_args; i++) {
-			zend_type_release(arg_info[i].type, /* persistent */ 1);
+			bool is_return_info = i == 0;
+			if (!is_return_info) {
+				zend_string_release_ex(arg_info[i].name, true);
+				if (arg_info[i].default_value) {
+					zend_string_release_ex(arg_info[i].default_value, true);
+				}
+			}
+			zend_type_release(arg_info[i].type, /* persistent */ true);
 		}
+
 		free(arg_info);
 	}
 }
@@ -473,12 +479,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release_ex(ce->name, 1);
 
-			/* TODO: eliminate this loop for classes without functions with arg_info / attributes */
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
 				if (fn->common.scope == ce) {
-					if (fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) {
-						zend_free_internal_arg_info(&fn->internal_function);
-					}
+					zend_free_internal_arg_info(&fn->internal_function);
 
 					if (fn->common.attributes) {
 						zend_hash_release(fn->common.attributes);
