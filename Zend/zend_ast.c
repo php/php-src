@@ -1098,21 +1098,14 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 						} else {
 							fptr = zend_hash_find_ptr_lc(&ce->function_table, method_name);
 							if (fptr) {
-								if (!(fptr->common.fn_flags & ZEND_ACC_PUBLIC)) {
-									if (UNEXPECTED(fptr->common.scope != scope)) {
-										if (
-											UNEXPECTED(fptr->op_array.fn_flags & ZEND_ACC_PRIVATE)
-											|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fptr), scope))
-										) {
-											if (ce->__callstatic) {
-												zend_throw_error(NULL, "Creating a callable for the magic __callStatic() method is not supported in constant expressions");
-											} else {
-												zend_bad_method_call(fptr, method_name, scope);
-											}
-
-											return FAILURE;
-										}
+								if (!zend_check_method_accessible(fptr, scope)) {
+									if (ce->__callstatic) {
+										zend_throw_error(NULL, "Creating a callable for the magic __callStatic() method is not supported in constant expressions");
+									} else {
+										zend_bad_method_call(fptr, method_name, scope);
 									}
+
+									return FAILURE;
 								}
 							} else {
 								if (ce->__callstatic) {
