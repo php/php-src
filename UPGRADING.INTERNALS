@@ -45,6 +45,13 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     properties.
   . ZEND_IS_XDIGIT() macro was removed because it was unused and its name
     did not match its actual behavior.
+  . The following zend_string-related legacy aliases were removed:
+    * IS_INTERNED() - use ZSTR_IS_INTERNED()
+    * STR_EMPTY_ALLOC() - use ZSTR_EMPTY_ALLOC()
+    * _STR_HEADER_SIZE - use _ZSTR_HEADER_SIZE
+    * STR_ALLOCA_ALLOC() - use ZSTR_ALLOCA_ALLOC()
+    * STR_ALLOCA_INIT() - use ZSTR_ALLOCA_INIT()
+    * STR_ALLOCA_FREE() - use ZSTR_ALLOCA_FREE()
   . zend_register_constant() now returns a pointer to the added constant
     on success and NULL on failure instead of SUCCESS/FAILURE.
 
