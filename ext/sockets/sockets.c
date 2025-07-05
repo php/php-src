@@ -2830,7 +2830,6 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 PHP_FUNCTION(socket_addrinfo_bind)
 {
 	zval			*arg1;
-	int				retval;
 	php_addrinfo	*ai;
 	php_socket		*php_sock;
 
@@ -2839,6 +2838,8 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ai = Z_ADDRESS_INFO_P(arg1);
+
+	ZEND_ASSERT(ai->addrinfo.ai_family == AF_INET || ai->addrinfo.ai_family == AF_INET6);
 
 	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
@@ -2858,32 +2859,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	php_sock->error = 0;
 	php_sock->blocking = 1;
 
-	switch(php_sock->type) {
-		// ZEND_ASSERT ? Addrinfo being opaque read-only, should not happen with previous change
-		case AF_UNIX:
-			{
-				// AF_UNIX sockets via getaddrino are not implemented due to security problems
-				close(php_sock->bsd_socket);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
-			}
-
-		case AF_INET:
-#ifdef HAVE_IPV6
-		case AF_INET6:
-#endif
-			{
-				retval = bind(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen);
-				break;
-			}
-		default:
-			close(php_sock->bsd_socket);
-			zval_ptr_dtor(return_value);
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
-			RETURN_THROWS();
-	}
-
-	if (retval != 0) {
+	if (bind(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to bind address", errno);
 		close(php_sock->bsd_socket);
 		zval_ptr_dtor(return_value);
@@ -2896,7 +2872,6 @@ PHP_FUNCTION(socket_addrinfo_bind)
 PHP_FUNCTION(socket_addrinfo_connect)
 {
 	zval			*arg1;
-	int				retval;
 	php_addrinfo	*ai;
 	php_socket		*php_sock;
 
@@ -2905,6 +2880,8 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ai = Z_ADDRESS_INFO_P(arg1);
+
+	ZEND_ASSERT(ai->addrinfo.ai_family == AF_INET || ai->addrinfo.ai_family == AF_INET6);
 
 	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
@@ -2924,31 +2901,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	php_sock->error = 0;
 	php_sock->blocking = 1;
 
-	switch(php_sock->type) {
-		case AF_UNIX:
-			{
-				// AF_UNIX sockets via getaddrino are not implemented due to security problems
-				close(php_sock->bsd_socket);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
-			}
-
-		case AF_INET:
-#ifdef HAVE_IPV6
-		case AF_INET6:
-#endif
-			{
-				retval = connect(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen);
-				break;
-			}
-		default:
-			zend_argument_value_error(1, "socket type must be one of AF_UNIX, AF_INET, or AF_INET6");
-			close(php_sock->bsd_socket);
-			zval_ptr_dtor(return_value);
-			RETURN_THROWS();
-	}
-
-	if (retval != 0) {
+	if (connect(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to connect address", errno);
 		close(php_sock->bsd_socket);
 		zval_ptr_dtor(return_value);
