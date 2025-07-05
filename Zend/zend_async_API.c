@@ -197,11 +197,13 @@ void zend_async_globals_dtor(void)
 #endif
 }
 
-void zend_async_shutdown(void)
+void zend_async_api_shutdown(void)
 {
-	zend_async_globals_dtor();
 	zend_async_internal_context_api_shutdown();
 	zend_async_main_handlers_shutdown();
+#ifndef ZTS
+	zend_async_globals_dtor();
+#endif
 }
 
 ZEND_API int zend_async_get_api_version_number(void)

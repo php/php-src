@@ -461,11 +461,14 @@ ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
 	zend_observer_fiber_destroy_notify(context);
 
+	// This code allows freeing the memory of the context independently of the stack memory.
+	zend_fiber_stack *stack = context->stack;
+
 	if (context->cleanup) {
 		context->cleanup(context);
 	}
 
-	zend_fiber_stack_free(context->stack);
+	zend_fiber_stack_free(stack);
 }
 
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)

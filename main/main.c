@@ -2515,12 +2515,13 @@ void php_module_shutdown(void)
 
 	module_initialized = false;
 
+#ifdef PHP_ASYNC_API
+	zend_async_api_shutdown();
+#endif
+
 #ifndef ZTS
 	core_globals_dtor(&core_globals);
 	gc_globals_dtor();
-	#ifdef PHP_ASYNC_API
-	zend_async_globals_dtor();
-	#endif
 #else
 	ts_free_id(core_globals_id);
 #endif

@@ -2034,8 +2034,10 @@ static void zend_gc_collect_cycles_coroutine(void)
 	}
 
 	if (GC_G(microtask) != NULL) {
-		GC_G(microtask)->is_cancelled = true;
-		ZEND_ASYNC_MICROTASK_RELEASE(GC_G(microtask));
+		zend_async_microtask_t *microtask = GC_G(microtask);
+		GC_G(microtask) = NULL;
+		microtask->is_cancelled = true;
+		ZEND_ASYNC_MICROTASK_RELEASE(microtask);
 	}
 }
 
@@ -2066,8 +2068,10 @@ static void coroutine_dispose(zend_coroutine_t *coroutine)
 		GC_G(dtor_scope) = NULL;
 
 		if (GC_G(microtask) != NULL) {
-			GC_G(microtask)->is_cancelled = true;
-			zend_gc_collect_cycles_microtask_dtor(GC_G(microtask));
+			zend_async_microtask_t *microtask = GC_G(microtask);
+			GC_G(microtask) = NULL;
+			microtask->is_cancelled = true;
+			ZEND_ASYNC_MICROTASK_RELEASE(microtask);
 		}
 
 		if (GC_G(gc_stack) != NULL) {
@@ -2150,6 +2154,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 #endif
 
+	zend_hrtime_t dtor_start_time = 0;
+
 #ifdef PHP_ASYNC_API
 #define GC_COLLECT_TOTAL_COUNT (context->total_count)
 #define GC_COLLECT_COUNT (context->count)
@@ -2181,6 +2187,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		// so we continue the process from the next element.
 		GC_G(async_context).state = GC_ASYNC_STATE_RUNNING;
 		GC_G(dtor_idx)++;
+		dtor_start_time = zend_hrtime();
 		goto continue_calling_destructors;
 	} else {
 		context->state = GC_ASYNC_STATE_INIT;
@@ -2231,7 +2238,10 @@ rerun_gc:
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
 		uint32_t idx, end;
-#ifndef PHP_ASYNC_API
+#ifdef PHP_ASYNC_API
+		stack->next = NULL;
+		stack->prev = NULL;
+#else
 		int count;
 		gc_stack stack;
 		stack.prev = NULL;
@@ -2314,7 +2324,7 @@ rerun_gc:
 			}
 
 			/* Actually call destructors. */
-			zend_hrtime_t dtor_start_time = zend_hrtime();
+			dtor_start_time = zend_hrtime();
 			if (EXPECTED(!EG(active_fiber))) {
 #ifdef PHP_ASYNC_API
 continue_calling_destructors:
@@ -2344,7 +2354,7 @@ continue_calling_destructors:
 			}
 		}
 
-		GC_COLLECT_FREE_STACK;
+		gc_stack_free(GC_COLLECT_STACK);
 
 #ifdef PHP_ASYNC_API
 		end = GC_G(first_unused);

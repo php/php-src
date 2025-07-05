@@ -363,6 +363,30 @@ struct _zend_async_event_callback_s {
 	zend_async_event_callback_dispose_fn dispose;
 };
 
+#define ZEND_ASYNC_EVENT_CALLBACK_ADD_REF(callback) \
+	if (callback != NULL) { \
+		callback->ref_count++; \
+	}
+
+//
+// For a callback,
+// it’s crucial that the reference count is always greater than zero,
+// because a value of zero is a special case triggered from a destructor.
+// If you need to “retain” ownership of the object,
+// you **MUST** use either this macro or ZEND_ASYNC_EVENT_CALLBACK_RELEASE.
+//
+#define ZEND_ASYNC_EVENT_CALLBACK_DEC_REF(callback) \
+	if(callback != NULL && callback->ref_count > 1) { \
+		callback->ref_count--; \
+	}
+
+#define ZEND_ASYNC_EVENT_CALLBACK_RELEASE(callback) \
+	if (callback != NULL && callback->ref_count > 1) { \
+		callback->ref_count--; \
+	} else { \
+		coroutine_event_callback_dispose(callback, NULL); \
+	}
+
 struct _zend_coroutine_event_callback_s {
 	zend_async_event_callback_t base;
 	zend_coroutine_t *coroutine;
@@ -1111,7 +1135,7 @@ ZEND_API bool zend_async_is_enabled(void);
 ZEND_API bool zend_scheduler_is_enabled(void);
 
 void zend_async_init(void);
-void zend_async_shutdown(void);
+void zend_async_api_shutdown(void);
 void zend_async_globals_ctor(void);
 void zend_async_globals_dtor(void);
 
@@ -1352,6 +1376,9 @@ END_EXTERN_C()
  * @param priority   Priority level for the exception-throwing coroutine
  */
 #define ZEND_ASYNC_SPAWN_AND_THROW(exception, scope, priority) zend_async_spawn_and_throw_fn(exception, scope, priority)
+/**
+ * The API method initiates graceful shutdown mode.
+ */
 #define ZEND_ASYNC_SHUTDOWN() zend_async_shutdown_fn()
 #define ZEND_ASYNC_ENGINE_SHUTDOWN() zend_async_engine_shutdown_fn()
 #define ZEND_ASYNC_GET_COROUTINES() zend_async_get_coroutines_fn()
