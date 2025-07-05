@@ -143,11 +143,11 @@ typedef struct _php_ps_globals {
 	zend_string *session_name;
 	zend_string *id;
 	char *extern_referer_chk;
-	char *cache_limiter;
+	zend_string *cache_limiter;
 	zend_long cookie_lifetime;
-	char *cookie_path;
-	char *cookie_domain;
-	char *cookie_samesite;
+	zend_string *cookie_path;
+	zend_string *cookie_domain;
+	zend_string *cookie_samesite;
 	bool  cookie_secure;
 	bool  cookie_httponly;
 	const ps_module *mod;
