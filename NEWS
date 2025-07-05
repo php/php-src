@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (psumbera)
   . Fixed bug GH-19053 (Duplicate property slot with hooks and interface
     property). (ilutov)
+  . Fixed bug GH-19044 (Protected properties are not scoped according to their
+    prototype). (Bob)
 
 - Hash:
   . Fix crash on clone failure. (nielsdos)
@@ -49,9 +51,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-18907 (Leak when creating cycle in hook). (ilutov)
   . Fix OSS-Fuzz #427814456. (nielsdos)
   . Fix OSS-Fuzz #428983568 and #428760800. (nielsdos)
-  . Fixed bug GH-17204 (-Wuseless-escape warnings emitted by re2c). (Peter Kokot)
-  . Fixed bug GH-19064 (Undefined symbol 'execute_ex' on Windows ARM64).
-    (Demon)
 
 - Curl:
   . Fix memory leaks when returning refcounted value from curl callback.

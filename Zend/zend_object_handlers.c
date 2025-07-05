@@ -282,7 +282,20 @@ static zend_always_inline bool is_derived_class(const zend_class_entry *child_cl
 static zend_never_inline int is_protected_compatible_scope(const zend_class_entry *ce, const zend_class_entry *scope) /* {{{ */
 {
 	return scope &&
-		(is_derived_class(ce, scope) || is_derived_class(scope, ce));
+		(ce == scope || is_derived_class(ce, scope) || is_derived_class(scope, ce));
+}
+/* }}} */
+
+static zend_never_inline int is_asymmetric_set_protected_property_compatible_scope(const zend_property_info *info, const zend_class_entry *scope) /* {{{ */
+{
+	zend_class_entry *ce;
+	if (!(info->prototype->flags & ZEND_ACC_PROTECTED_SET) && info->hooks && info->hooks[ZEND_PROPERTY_HOOK_SET]) {
+	       zend_function *hookfn = info->hooks[ZEND_PROPERTY_HOOK_SET];
+	       ce = hookfn->common.prototype ? hookfn->common.prototype->common.scope : hookfn->common.scope;
+	} else {
+	       ce = info->prototype->ce;
+	}
+	return is_protected_compatible_scope(ce, scope);
 }
 /* }}} */
 
@@ -419,7 +432,7 @@ wrong:
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
+				if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
 					goto wrong;
 				}
 			}
@@ -514,7 +527,7 @@ wrong:
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
+				if (UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
 					goto wrong;
 				}
 			}
@@ -585,7 +598,7 @@ ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_p
 		return true;
 	}
 	return EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
-		&& is_protected_compatible_scope(prop_info->ce, scope));
+		&& is_asymmetric_set_protected_property_compatible_scope(prop_info, scope));
 }
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
@@ -2030,7 +2043,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 		zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
+			 || UNEXPECTED(!is_protected_compatible_scope(property_info->prototype->ce, scope))) {
 				if (type != BP_VAR_IS) {
 					zend_bad_property_access(property_info, ce, property_name);
 				}
