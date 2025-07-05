@@ -2777,8 +2777,13 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 					// Some platforms support also PF_LOCAL/AF_UNIX (e.g. FreeBSD) but the security concerns implied
 					// make it not worth handling it (e.g. unwarranted write permissions on the socket).
 					// Note existing socket_addrinfo* api already forbid such case.
+#ifdef HAVE_IPV6
 					if (val != AF_INET && val != AF_INET6) {
 						zend_argument_value_error(3, "\"ai_family\" key must be AF_INET or AF_INET6");
+#else
+					if (val != AF_INET) {
+						zend_argument_value_error(3, "\"ai_family\" key must be AF_INET");
+#endif
 						RETURN_THROWS();
 					}
 					hints.ai_family = (int)val;
