@@ -425,12 +425,12 @@ static zend_result php_session_initialize(void)
 	}
 
 	/* Open session handler first */
-	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE
+	if (PS(mod)->s_open(&PS(mod_data), ZSTR_VAL(PS(save_path)), PS(session_name)) == FAILURE
 		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
 	) {
 		php_session_abort();
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 		}
 		return FAILURE;
 	}
@@ -444,7 +444,7 @@ static zend_result php_session_initialize(void)
 		if (!PS(id)) {
 			php_session_abort();
 			if (!EG(exception)) {
-				zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+				zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 			}
 			return FAILURE;
 		}
@@ -477,7 +477,7 @@ static zend_result php_session_initialize(void)
 		php_session_abort();
 		/* FYI: Some broken save handlers return FAILURE for non-existent session ID, this is incorrect */
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 		}
 		return FAILURE;
 	}
@@ -544,14 +544,14 @@ static void php_session_save_current_state(int write)
 									 "verify that the current setting of session.save_path "
 									 "is correct (%s)",
 									 PS(mod)->s_name,
-									 PS(save_path));
+									 ZSTR_VAL(PS(save_path)));
 				} else if (handler_class_name != NULL) {
 					php_error_docref(NULL, E_WARNING, "Failed to write session data using user "
-									 "defined save handler. (session.save_path: %s, handler: %s::%s)", PS(save_path),
+									 "defined save handler. (session.save_path: %s, handler: %s::%s)", ZSTR_VAL(PS(save_path)),
 									 ZSTR_VAL(handler_class_name), handler_function_name);
 				} else {
 					php_error_docref(NULL, E_WARNING, "Failed to write session data using user "
-									 "defined save handler. (session.save_path: %s, handler: %s)", PS(save_path),
+									 "defined save handler. (session.save_path: %s, handler: %s)", ZSTR_VAL(PS(save_path)),
 									 handler_function_name);
 				}
 			}
@@ -675,7 +675,7 @@ static PHP_INI_MH(OnUpdateSaveDir)
 		}
 	}
 
-	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	return OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
 
@@ -2218,7 +2218,6 @@ PHP_FUNCTION(session_set_save_handler)
 PHP_FUNCTION(session_save_path)
 {
 	zend_string *name = NULL;
-	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P!", &name) == FAILURE) {
 		RETURN_THROWS();
@@ -2234,12 +2233,12 @@ PHP_FUNCTION(session_save_path)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING(PS(save_path));
+	RETVAL_STRINGL(ZSTR_VAL(PS(save_path)), ZSTR_LEN(PS(save_path)));
 
 	if (name) {
-		ini_name = ZSTR_INIT_LITERAL("session.save_path", 0);
+		zend_string *ini_name = ZSTR_INIT_LITERAL("session.save_path", false);
 		zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-		zend_string_release_ex(ini_name, 0);
+		zend_string_release_ex(ini_name, false);
 	}
 }
 
@@ -2309,7 +2308,7 @@ PHP_FUNCTION(session_regenerate_id)
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
 			if (!EG(exception)) {
-				php_error_docref(NULL, E_WARNING, "Session object destruction failed. ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+				php_error_docref(NULL, E_WARNING, "Session object destruction failed. ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 			}
 			RETURN_FALSE;
 		}
@@ -2325,7 +2324,7 @@ PHP_FUNCTION(session_regenerate_id)
 		if (ret == FAILURE) {
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
-			php_error_docref(NULL, E_WARNING, "Session write failed. ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			php_error_docref(NULL, E_WARNING, "Session write failed. ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 			RETURN_FALSE;
 		}
 	}
@@ -2339,10 +2338,10 @@ PHP_FUNCTION(session_regenerate_id)
 	zend_string_release_ex(PS(id), 0);
 	PS(id) = NULL;
 
-	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
+	if (PS(mod)->s_open(&PS(mod_data), ZSTR_VAL(PS(save_path)), PS(session_name)) == FAILURE) {
 		PS(session_status) = php_session_none;
 		if (!EG(exception)) {
-			zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 		}
 		RETURN_THROWS();
 	}
@@ -2351,7 +2350,7 @@ PHP_FUNCTION(session_regenerate_id)
 	if (!PS(id)) {
 		PS(session_status) = php_session_none;
 		if (!EG(exception)) {
-			zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 		}
 		RETURN_THROWS();
 	}
@@ -2366,7 +2365,7 @@ PHP_FUNCTION(session_regenerate_id)
 					PS(mod)->s_close(&PS(mod_data));
 					PS(session_status) = php_session_none;
 					if (!EG(exception)) {
-						zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+						zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 					}
 					RETURN_THROWS();
 				}
@@ -2379,7 +2378,7 @@ PHP_FUNCTION(session_regenerate_id)
 		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
 		if (!EG(exception)) {
-			zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
 		}
 		RETURN_THROWS();
 	}
