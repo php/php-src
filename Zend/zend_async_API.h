@@ -1376,6 +1376,9 @@ END_EXTERN_C()
  * @param priority   Priority level for the exception-throwing coroutine
  */
 #define ZEND_ASYNC_SPAWN_AND_THROW(exception, scope, priority) zend_async_spawn_and_throw_fn(exception, scope, priority)
+/**
+ * The API method initiates graceful shutdown mode.
+ */
 #define ZEND_ASYNC_SHUTDOWN() zend_async_shutdown_fn()
 #define ZEND_ASYNC_ENGINE_SHUTDOWN() zend_async_engine_shutdown_fn()
 #define ZEND_ASYNC_GET_COROUTINES() zend_async_get_coroutines_fn()
