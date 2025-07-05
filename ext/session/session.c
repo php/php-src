@@ -1162,7 +1162,7 @@ static const ps_module *ps_modules[MAX_MODULES + 1] = {
 
 PHPAPI zend_result php_session_register_module(const ps_module *ptr)
 {
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 
 	for (int i = 0; i < MAX_MODULES; i++) {
 		if (!ps_modules[i]) {
@@ -1211,7 +1211,7 @@ static const char *week_days[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
 };
 
-static inline void strcpy_gmt(char *ubuf, time_t *when)
+static inline void strcpy_gmt(char *ubuf, const time_t *when)
 {
 	char buf[MAX_STR];
 	struct tm tm, *res;
@@ -3056,7 +3056,7 @@ static bool php_check_cancel_upload(php_session_rfc1867_progress *progress)
 	return Z_TYPE_P(cancel_upload) == IS_TRUE;
 }
 
-static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, int force_update)
+static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, bool force_update)
 {
 	if (!force_update) {
 		if (Z_LVAL_P(progress->post_bytes_processed) < progress->next_update) {
