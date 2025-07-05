@@ -33,6 +33,7 @@ if (PHP_OPCACHE != "no") {
 			DEFINE("IR_TARGET", ir_target);
 			DEFINE("DASM_FLAGS", dasm_flags);
 			DEFINE("DASM_ARCH", "x86");
+			DEFINE("TLS_TARGET", "win");
 
 			AC_DEFINE('HAVE_JIT', 1, 'Define to 1 to enable JIT.');
 
@@ -52,6 +53,11 @@ if (PHP_OPCACHE != "no") {
 			ADD_SOURCES(configure_module_dirname + "\\jit",
 				"zend_jit.c zend_jit_vm_helpers.c",
 				"opcache", "ext\\opcache\\jit");
+			if (PHP_ZTS == "yes") {
+				ADD_SOURCES(configure_module_dirname + "\\jit\\tls",
+					"zend_jit_tls_win.c",
+					"opcache", "ext\\opcache\\jit\\tls");
+			}
 			ADD_SOURCES(configure_module_dirname + "\\jit\\ir",
 				"ir.c", "opcache", "ext\\opcache\\jit\\ir");
 			ADD_SOURCES(configure_module_dirname + "\\jit\\ir",

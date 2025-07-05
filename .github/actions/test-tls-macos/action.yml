@@ -1,0 +1,9 @@
+name: Test TLS
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        export TLSC=$(pwd)/ext/opcache/jit/tls/zend_jit_tls_darwin.c
+        ./ext/opcache/jit/tls/testing/test.sh
