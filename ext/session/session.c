@@ -919,9 +919,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.upload_progress.cleanup",
 	                                                "1",     ZEND_INI_PERDIR, OnUpdateBool,        rfc1867_cleanup, php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.prefix",
-	                                     "upload_progress_", ZEND_INI_PERDIR, OnUpdateString,      rfc1867_prefix,  php_ps_globals, ps_globals)
+	                                     "upload_progress_", ZEND_INI_PERDIR, OnUpdateStr,      rfc1867_prefix,  php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.name",
-	                          "PHP_SESSION_UPLOAD_PROGRESS", ZEND_INI_PERDIR, OnUpdateString,      rfc1867_name,    php_ps_globals, ps_globals)
+	                          "PHP_SESSION_UPLOAD_PROGRESS", ZEND_INI_PERDIR, OnUpdateStr,      rfc1867_name,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.freq",  "1%", ZEND_INI_PERDIR, OnUpdateRfc1867Freq, rfc1867_freq,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.min_freq",
 	                                                   "1",  ZEND_INI_PERDIR, OnUpdateReal,        rfc1867_min_freq,php_ps_globals, ps_globals)
@@ -3155,9 +3155,9 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 				if (name_len == progress->sname_len && memcmp(data->name, PS(session_name), name_len) == 0) {
 					zval_ptr_dtor(&progress->sid);
 					ZVAL_STRINGL(&progress->sid, (*data->value), value_len);
-				} else if (name_len == strlen(PS(rfc1867_name)) && memcmp(data->name, PS(rfc1867_name), name_len + 1) == 0) {
+				} else if (zend_string_equals_cstr(PS(rfc1867_name), data->name, name_len)) {
 					smart_str_free(&progress->key);
-					smart_str_appends(&progress->key, PS(rfc1867_prefix));
+					smart_str_append(&progress->key, PS(rfc1867_prefix));
 					smart_str_appendl(&progress->key, *data->value, value_len);
 					smart_str_0(&progress->key);
 
