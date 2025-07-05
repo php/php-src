@@ -253,6 +253,9 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
+/* deprecation flag                                       |     |     |     */
+#define ZEND_ACC_DEPRECATED              (1 << 11) /*  X  |  X  |     |  X  */
+/*                                                        |     |     |     */
 /* Property Flags (unused: 13...)                         |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
@@ -267,7 +270,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30,31)                            |     |     |     */
+/* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -285,7 +288,7 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class has magic methods __get/__set/__unset/           |     |     |     */
 /* __isset that use guards                                |     |     |     */
-#define ZEND_ACC_USE_GUARDS              (1 << 11) /*  X  |     |     |     */
+#define ZEND_ACC_USE_GUARDS              (1 << 30) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 12) /*  X  |     |     |     */
@@ -335,9 +338,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */
-/*                                                        |     |     |     */
-/* deprecation flag                                       |     |     |     */
-#define ZEND_ACC_DEPRECATED              (1 << 11) /*     |  X  |     |  X  */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
 #define ZEND_ACC_RETURN_REFERENCE        (1 << 12) /*     |  X  |     |     */
