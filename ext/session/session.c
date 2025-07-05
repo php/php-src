@@ -992,7 +992,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 	PS_ENCODE_LOOP(
 			if (ZSTR_LEN(key) > PS_BIN_MAX) continue;
 			smart_str_appendc(&buf, (unsigned char)ZSTR_LEN(key));
-			smart_str_appendl(&buf, ZSTR_VAL(key), ZSTR_LEN(key));
+			smart_str_append(&buf, key);
 			php_var_serialize(&buf, struc, &var_hash);
 	);
 
@@ -1054,7 +1054,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	PS_ENCODE_LOOP(
-		smart_str_appendl(&buf, ZSTR_VAL(key), ZSTR_LEN(key));
+		smart_str_append(&buf, key);
 		if (memchr(ZSTR_VAL(key), PS_DELIMITER, ZSTR_LEN(key))) {
 			PHP_VAR_SERIALIZE_DESTROY(var_hash);
 			smart_str_free(&buf);
@@ -1397,7 +1397,7 @@ static zend_result php_session_send_cookie(void)
 	smart_str_appendl(&ncookie, "Set-Cookie: ", sizeof("Set-Cookie: ")-1);
 	smart_str_appendl(&ncookie, PS(session_name), strlen(PS(session_name)));
 	smart_str_appendc(&ncookie, '=');
-	smart_str_appendl(&ncookie, ZSTR_VAL(e_id), ZSTR_LEN(e_id));
+	smart_str_append(&ncookie, e_id);
 
 	zend_string_release_ex(e_id, 0);
 
@@ -1411,7 +1411,7 @@ static zend_result php_session_send_cookie(void)
 		if (t > 0) {
 			date_fmt = php_format_date("D, d M Y H:i:s \\G\\M\\T", sizeof("D, d M Y H:i:s \\G\\M\\T")-1, t, 0);
 			smart_str_appends(&ncookie, COOKIE_EXPIRES);
-			smart_str_appendl(&ncookie, ZSTR_VAL(date_fmt), ZSTR_LEN(date_fmt));
+			smart_str_append(&ncookie, date_fmt);
 			zend_string_release_ex(date_fmt, 0);
 
 			smart_str_appends(&ncookie, COOKIE_MAX_AGE);
@@ -1523,7 +1523,7 @@ PHPAPI zend_result php_session_reset_id(void)
 
 		smart_str_appends(&var, PS(session_name));
 		smart_str_appendc(&var, '=');
-		smart_str_appends(&var, ZSTR_VAL(PS(id)));
+		smart_str_append(&var, PS(id));
 		smart_str_0(&var);
 		if (sid) {
 			zval_ptr_dtor(sid);
