@@ -88,6 +88,11 @@ typedef enum {
 	ZEND_ASYNC_EXEC_MODE_SHELL_EXEC
 } zend_async_exec_mode;
 
+typedef enum {
+	ZEND_COROUTINE_NORMAL = 0,
+	ZEND_COROUTINE_HI_PRIORITY = 255
+} zend_coroutine_priority;
+
 typedef enum
 {
 	ZEND_ASYNC_CLASS_NO = 0,
