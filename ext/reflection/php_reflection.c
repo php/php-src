@@ -7321,6 +7321,12 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
+	zend_attribute *delayed_target_validation = zend_get_attribute_str(
+		attr->attributes,
+		"delayedtargetvalidation",
+		strlen("delayedtargetvalidation")
+	);
+
 	/* This code can be reached under one of three possible conditions:
 	 * - the attribute is an internal attribute, and it had the target and
 	 *   and repetition validated already
@@ -7329,17 +7335,15 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	 *   #[DelayedTargetValidation]
 	 * - the attribute is a user attribute, and neither target nor repetition
 	 *   have been validated.
-	 *
-	 * It is not worth checking for the presence of #[DelayedTargetValidation]
-	 * to determine if we should run target validation for internal attributes;
-	 * it is faster just to do the validation, which will always pass if the
-	 * attribute is absent.
 	 */
 	uint32_t flags = zend_attribute_attribute_get_flags(marker, ce);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
+	/* No harm in always running target validation, for internal attributes
+	 * with #[DelayedTargetValidation] it isn't necessary but will always
+	 * succeed. */
 	if (!(attr->target & flags)) {
 		zend_string *location = zend_get_attribute_target_names(attr->target);
 		zend_string *allowed = zend_get_attribute_target_names(flags);
@@ -7355,12 +7359,12 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	}
 
 	/* Run the delayed validator function for internal attributes */
-	if (ce->type == ZEND_INTERNAL_CLASS) {
+	if (delayed_target_validation && ce->type == ZEND_INTERNAL_CLASS) {
 		zend_internal_attribute *config = zend_internal_attribute_get(attr->data->lcname);
 		if (config != NULL && config->validator != NULL) {
 			config->validator(
 				attr->data,
-				attr->target | ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION,
+				flags | ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION,
 				attr->scope
 			);
 			if (EG(exception)) {
