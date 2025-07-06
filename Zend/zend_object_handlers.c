@@ -286,30 +286,6 @@ static zend_never_inline int is_protected_compatible_scope(const zend_class_entr
 }
 /* }}} */
 
-static int is_asymmetric_set_protected_property_compatible_scope(const zend_property_info *info, const zend_class_entry *scope) /* {{{ */
-{
-	zend_class_entry *ce;
-	/* we need to identify the common protected(set) ancestor: if the prototype has the protected(set), it's straightforward */
-	if (info->prototype->flags & ZEND_ACC_PROTECTED_SET) {
-		ce = info->prototype->ce;
-	} else if (info->hooks && info->hooks[ZEND_PROPERTY_HOOK_SET]) {
-		/* shortcut: the visibility of hooks cannot be overwritten */
-		zend_function *hook = info->hooks[ZEND_PROPERTY_HOOK_SET];
-		ce = zend_get_function_root_class(hook);
-	} else {
-		/* we do not have an easy way to find the ancestor which introduces the protected(set), let's iterate */
-		do {
-			ce = info->ce;
-			if (!ce->parent->properties_info_table) {
-				break;
-			}
-			info = ce->parent->properties_info_table[OBJ_PROP_TO_NUM(info->offset)];
-		} while (info->flags & ZEND_ACC_PROTECTED_SET);
-	}
-	return is_protected_compatible_scope(ce, scope);
-}
-/* }}} */
-
 static zend_never_inline zend_property_info *zend_get_parent_private_property(zend_class_entry *scope, const zend_class_entry *ce, zend_string *member) /* {{{ */
 {
 	zval *zv;
@@ -609,7 +585,7 @@ ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_p
 		return true;
 	}
 	return EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
-		&& is_asymmetric_set_protected_property_compatible_scope(prop_info, scope));
+		&& is_protected_compatible_scope(prop_info->prototype->ce, scope));
 }
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
