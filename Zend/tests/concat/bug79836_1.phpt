@@ -7,6 +7,7 @@ opcache.optimization_level = 0x7FFEBFFF & ~0x400
 $x = 'non-empty';
 ob_start(function () use (&$c) {
 	$c = 0;
+	return '';
 }, 1);
 $c = [];
 $x = $c . $x;
@@ -14,8 +15,5 @@ $x = $c . $x;
 ob_end_clean();
 echo "Done\n";
 ?>
---EXPECTF--
-Deprecated: main(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
-
-Deprecated: ob_end_clean(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
+--EXPECT--
 Done

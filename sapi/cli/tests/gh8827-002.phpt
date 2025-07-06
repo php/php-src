@@ -18,6 +18,7 @@ $stderr = fopen('php://stderr', 'r');
 
 ob_start(function ($buffer) use ($stdout) {
     fwrite($stdout, $buffer);
+	return '';
 }, 1);
 
 print "STDIN:\n";
@@ -32,20 +33,10 @@ print "STDOUT:\n";
 fclose(STDOUT);
 var_dump(@fopen('php://stdout', 'a'));
 ?>
---EXPECTF--
+--EXPECT--
 STDIN:
-
-Deprecated: main(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
 bool(false)
-
-Deprecated: var_dump(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
 STDERR:
-
-Deprecated: main(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
 bool(false)
-
-Deprecated: var_dump(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
 STDOUT:
-
-Deprecated: main(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
 bool(false)

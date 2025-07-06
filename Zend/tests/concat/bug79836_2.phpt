@@ -6,6 +6,7 @@ $c = str_repeat("abcd", 10);
 
 ob_start(function () use (&$c) {
 	$c = 0;
+	return '';
 }, 1);
 
 class X {
@@ -21,8 +22,5 @@ $x = $c . $xxx;
 ob_end_clean();
 echo $x . "\n";
 ?>
---EXPECTF--
-Deprecated: X::__toString(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
-
-Deprecated: ob_end_clean(): Returning a non-string result from user output handler {closure:%s:%d} is deprecated in %s on line %d
+--EXPECT--
 abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabc

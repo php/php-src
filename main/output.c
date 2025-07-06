@@ -1270,8 +1270,8 @@ static int php_output_stack_pop(int flags)
 		int handler_count = php_output_get_level();
 		if (handler_count) {
 			php_output_handler **handlers = (php_output_handler **) zend_stack_base(&OG(handlers));
-			for (int iii = 0; iii < handler_count; ++iii) {
-				php_output_handler *curr_handler = handlers[iii];
+			for (int handler_num = 0; handler_num < handler_count; ++handler_num) {
+				php_output_handler *curr_handler = handlers[handler_num];
 				if (curr_handler == orphan) {
 					still_have_handler = true;
 					break;
