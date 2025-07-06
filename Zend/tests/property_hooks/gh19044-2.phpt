@@ -22,9 +22,5 @@ class C2 extends C1 {
 var_dump(C2::foo(new GrandC1));
 
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Cannot modify protected(set) property GrandC1::$foo from scope C2 in %s:%d
-Stack trace:
-#0 %s(%d): C2::foo(Object(GrandC1))
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+int(3)
