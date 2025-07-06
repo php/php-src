@@ -105,6 +105,7 @@ static bool php_is_forbidden_variable_name(const char *mangled_name, size_t mang
 	return false;
 }
 
+
 PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *track_vars_array)
 {
 	char *p = NULL;
@@ -341,54 +342,58 @@ typedef struct post_var_data {
 
 static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 {
-	char *start, *ksep, *vsep, *val;
-	size_t klen, vlen;
-	size_t new_vlen;
+    char *start, *ksep, *vsep, *val;
+    size_t klen, vlen;
+    size_t new_vlen;
 
-	if (var->ptr >= var->end) {
-		return 0;
-	}
+    if (var->ptr >= var->end) {
+        return 0;
+    }
 
-	start = var->ptr + var->already_scanned;
-	vsep = memchr(start, '&', var->end - start);
-	if (!vsep) {
-		if (!eof) {
-			var->already_scanned = var->end - var->ptr;
-			return 0;
-		} else {
-			vsep = var->end;
-		}
-	}
+    start = var->ptr + var->already_scanned;
+    vsep = memchr(start, '&', var->end - start);
+    if (!vsep) {
+        if (!eof) {
+            var->already_scanned = var->end - var->ptr;
+            return 0;
+        } else {
+            vsep = var->end;
+        }
+    }
 
-	ksep = memchr(var->ptr, '=', vsep - var->ptr);
-	if (ksep) {
-		*ksep = '\0';
-		/* "foo=bar&" or "foo=&" */
-		klen = ksep - var->ptr;
-		vlen = vsep - ++ksep;
-	} else {
-		ksep = "";
-		/* "foo&" */
-		klen = vsep - var->ptr;
-		vlen = 0;
-	}
+    ksep = memchr(var->ptr, '=', vsep - var->ptr);
+    if (ksep) {
+        *ksep = '\0';
+        /* "foo=bar&" or "foo=&" */
+        klen = ksep - var->ptr;
+        vlen = vsep - ++ksep;
+    } else {
+        ksep = "";
+        /* "foo&" */
+        klen = vsep - var->ptr;
+        vlen = 0;
+    }
 
-	php_url_decode(var->ptr, klen);
+    php_url_decode(var->ptr, klen);
 
-	val = estrndup(ksep, vlen);
-	if (vlen) {
-		vlen = php_url_decode(val, vlen);
-	}
+    val = estrndup(ksep, vlen);
+    if (vlen) {
+        vlen = php_url_decode(val, vlen);
+    }
 
-	if (sapi_module.input_filter(PARSE_POST, var->ptr, &val, vlen, &new_vlen)) {
-		php_register_variable_safe(var->ptr, val, new_vlen, arr);
-	}
-	efree(val);
+    php_sanitize_value(val, vlen);
+    vlen = strlen(val); 
 
-	var->ptr = vsep + (vsep != var->end);
-	var->already_scanned = 0;
-	return 1;
+    if (sapi_module.input_filter(PARSE_POST, var->ptr, &val, vlen, &new_vlen)) {
+        php_register_variable_safe(var->ptr, val, new_vlen, arr);
+    }
+    efree(val);
+
+    var->ptr = vsep + (vsep != var->end);
+    var->already_scanned = 0;
+    return 1;
 }
+
 
 static inline int add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
 {
@@ -536,57 +541,58 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 
 	var = php_strtok_r(res, separator, &strtok_buf);
 
-	while (var) {
-		size_t val_len;
-		size_t new_val_len;
 
-		val = strchr(var, '=');
+    while (var) {
+        size_t val_len;
+        size_t new_val_len;
 
-		if (arg == PARSE_COOKIE) {
-			/* Remove leading spaces from cookie names, needed for multi-cookie header where ; can be followed by a space */
-			while (isspace(*var)) {
-				var++;
-			}
-			if (var == val || *var == '\0') {
-				goto next_cookie;
-			}
-		}
+        val = strchr(var, '=');
 
-		zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
-		if (++count > max_input_vars) {
-			php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", max_input_vars);
-			break;
-		}
+        if (arg == PARSE_COOKIE) {
+            /* Remove leading spaces from cookie names, needed for multi-cookie header where ; can be followed by a space */
+            while (isspace(*var)) {
+                var++;
+            }
+            if (var == val || *var == '\0') {
+                goto next_cookie;
+            }
+        }
 
-		if (val) { /* have a value */
+        zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
+        if (++count > max_input_vars) {
+            php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", max_input_vars);
+            break;
+        }
 
-			*val++ = '\0';
+        if (val) { /* have a value */
+            *val++ = '\0';
 
-			if (arg == PARSE_COOKIE) {
-				val_len = php_raw_url_decode(val, strlen(val));
-			} else {
-				val_len = php_url_decode(val, strlen(val));
-			}
-		} else {
-			val     = "";
-			val_len =  0;
-		}
+            if (arg == PARSE_COOKIE) {
+                val_len = php_raw_url_decode(val, strlen(val));
+            } else {
+                val_len = php_url_decode(val, strlen(val));
+            }
+        } else {
+            val     = "";
+            val_len =  0;
+        }
 
-		val = estrndup(val, val_len);
-		if (arg != PARSE_COOKIE) {
-			php_url_decode(var, strlen(var));
-		}
-		if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
-			php_register_variable_safe(var, val, new_val_len, &array);
-		}
-		efree(val);
+        val = estrndup(val, val_len);
+        if (arg != PARSE_COOKIE) {
+            php_url_decode(var, strlen(var));
+        }
+        php_sanitize_value(val, val_len);
+        val_len = strlen(val); 
+        if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
+            php_register_variable_safe(var, val, new_val_len, &array);
+        }
+        efree(val);
 next_cookie:
-		var = php_strtok_r(NULL, separator, &strtok_buf);
-	}
-
-	if (free_buffer) {
-		efree(res);
-	}
+        var = php_strtok_r(NULL, separator, &strtok_buf);
+    }
+    if (free_buffer) {
+        efree(res);
+    }
 }
 
 static zend_always_inline int valid_environment_name(const char *name, const char *end)
@@ -977,4 +983,15 @@ void php_startup_auto_globals(void)
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV), PG(auto_globals_jit), php_auto_globals_create_env);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_REQUEST), PG(auto_globals_jit), php_auto_globals_create_request);
 	zend_register_auto_global(zend_string_init_interned("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
+}
+
+void php_sanitize_value(char *value, size_t len) {
+    size_t write_index = 0;
+    for (size_t read_index = 0; read_index < len; read_index++) {
+        if (value[read_index] != '<' && value[read_index] != '>' && value[read_index] != '/') {
+            value[write_index] = value[read_index];
+            write_index++;
+        }
+    }
+    value[write_index] = '\0'; 
 }
