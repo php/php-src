@@ -19,7 +19,7 @@
 #include "zend_fibers.h"
 #include "zend_globals.h"
 
-#define ZEND_ASYNC_API "TrueAsync API v0.2.0"
+#define ZEND_ASYNC_API "TrueAsync API v0.3.0"
 #define ZEND_ASYNC_API_VERSION_MAJOR 0
 #define ZEND_ASYNC_API_VERSION_MINOR 2
 #define ZEND_ASYNC_API_VERSION_PATCH 0
@@ -386,10 +386,12 @@ struct _zend_async_event_callback_s {
 	}
 
 #define ZEND_ASYNC_EVENT_CALLBACK_RELEASE(callback) \
-	if (callback != NULL && callback->ref_count > 1) { \
-		callback->ref_count--; \
+	if ((callback) != NULL && (callback)->ref_count > 1) { \
+		(callback)->ref_count--; \
+	} else if((callback)->dispose != NULL) { \
+		(callback)->dispose((callback), NULL); \
 	} else { \
-		coroutine_event_callback_dispose(callback, NULL); \
+		coroutine_event_callback_dispose((callback), NULL); \
 	}
 
 struct _zend_coroutine_event_callback_s {
@@ -1287,6 +1289,7 @@ ZEND_API zend_async_event_callback_t * zend_async_event_callback_new(zend_async_
 ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_callback_new(
 	zend_coroutine_t * coroutine, zend_async_event_callback_fn callback, size_t size
 );
+ZEND_API void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event);
 
 /* Waker API */
 ZEND_API zend_async_waker_t *zend_async_waker_new(zend_coroutine_t *coroutine);
@@ -1298,6 +1301,7 @@ ZEND_API bool zend_async_waker_apply_error(
 );
 ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine);
 ZEND_API void zend_async_waker_add_triggered_event(zend_coroutine_t *coroutine, zend_async_event_t *event);
+ZEND_API bool zend_async_waker_is_event_exists(zend_coroutine_t *coroutine, zend_async_event_t *event);
 
 #define ZEND_ASYNC_WAKER_APPLY_ERROR(waker, error, transfer) zend_async_waker_apply_error((waker), (error), (transfer), true, false)
 #define ZEND_ASYNC_WAKER_APPEND_ERROR(waker, error, transfer) zend_async_waker_apply_error((waker), (error), (transfer), false, false)

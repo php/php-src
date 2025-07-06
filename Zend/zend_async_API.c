@@ -406,7 +406,7 @@ ZEND_API zend_async_event_callback_t * zend_async_event_callback_new(zend_async_
 	return event_callback;
 }
 
-static void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event);
+void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event);
 
 ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_callback_new(
 	zend_coroutine_t * coroutine, zend_async_event_callback_fn callback, size_t size
@@ -552,14 +552,18 @@ static void coroutine_event_callback_dispose(zend_async_event_callback_t *callba
 
 	callback->ref_count = 0;
 
-	zend_async_waker_t * waker = ((zend_coroutine_event_callback_t *) callback)->coroutine->waker;
+	const zend_coroutine_t * coroutine = ((zend_coroutine_event_callback_t *) callback)->coroutine;
 
-	if (event != NULL && waker != NULL) {
-		// remove the event from the waker
-		zend_hash_index_del(&waker->events, (zend_ulong)event);
+	if (EXPECTED(coroutine != NULL)) {
+		zend_async_waker_t * waker = coroutine->waker;
 
-		if (waker->triggered_events != NULL) {
-			zend_hash_index_del(waker->triggered_events, (zend_ulong)event);
+		if (event != NULL && waker != NULL) {
+			// remove the event from the waker
+			zend_hash_index_del(&waker->events, (zend_ulong)event);
+
+			if (waker->triggered_events != NULL) {
+				zend_hash_index_del(waker->triggered_events, (zend_ulong)event);
+			}
 		}
 	}
 
@@ -582,6 +586,15 @@ ZEND_API void zend_async_waker_add_triggered_event(zend_coroutine_t *coroutine, 
 	}
 }
 
+ZEND_API bool zend_async_waker_is_event_exists(zend_coroutine_t *coroutine, zend_async_event_t *event)
+{
+	if (UNEXPECTED(coroutine->waker == NULL)) {
+		return false;
+	}
+
+	return zend_hash_index_find(&coroutine->waker->events, (zend_ulong)event) != NULL;
+}
+
 ZEND_API void zend_async_resume_when(
 		zend_coroutine_t			*coroutine,
 		zend_async_event_t			*event,
@@ -590,6 +603,8 @@ ZEND_API void zend_async_resume_when(
 		zend_coroutine_event_callback_t *event_callback
 	)
 {
+	bool locally_allocated_callback = false;
+	
 	if (UNEXPECTED(ZEND_ASYNC_EVENT_IS_CLOSED(event))) {
 		zend_throw_error(NULL, "The event cannot be used after it has been terminated");
 		return;
@@ -610,6 +625,7 @@ ZEND_API void zend_async_resume_when(
 		event_callback->base.ref_count = 1;
 		event_callback->base.callback = callback;
 		event_callback->base.dispose = coroutine_event_callback_dispose;
+		locally_allocated_callback = true;
 	}
 
 	// Set up the default dispose function if not set
@@ -627,6 +643,10 @@ ZEND_API void zend_async_resume_when(
 	event->add_callback(event, &event_callback->base);
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (locally_allocated_callback) {
+			event_callback->base.dispose(&event_callback->base, event);
+		}
+		
 		if (trans_event) {
 			event->dispose(event);
 		}
@@ -640,7 +660,18 @@ ZEND_API void zend_async_resume_when(
 		trigger->callback = &event_callback->base;
 
 		if (UNEXPECTED(zend_hash_index_add_ptr(&coroutine->waker->events, (zend_ulong)event, trigger) == NULL)) {
-			zend_throw_error(NULL, "Failed to add event to the waker");
+			efree(trigger);
+
+			if (locally_allocated_callback) {
+				event_callback->base.dispose(&event_callback->base, event);
+			}
+
+			if (trans_event) {
+				event->dispose(event);
+			}
+
+			zend_throw_error(NULL, "Failed to add event to the waker: maybe event already exists");
+
 			return;
 		}
 	}
