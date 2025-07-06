@@ -1485,7 +1485,7 @@ PHP_METHOD(SoapServer, handle)
 		}
 #endif
 
-		/* If new session or something weird happned */
+		/* If new session or something weird happened */
 		if (soap_obj == NULL) {
 			object_init_ex(&tmp_soap, service->soap_class.ce);
 
@@ -1581,7 +1581,14 @@ soap_header_func_call:
 		if (soap_obj_ce && soap_obj_ce->__call) {
 			fn = zend_get_call_trampoline_func(soap_obj_ce, Z_STR(function_name), false);
 		} else {
-			php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
+			if (soap_obj_ce) {
+				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(soap_obj_ce->name),  Z_STRVAL(function_name));
+			} else {
+				zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL(function_name));
+			}
+			php_output_discard();
+			_soap_server_exception(service, function, ZEND_THIS);
+			if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
 			goto fail;
 		}
 	}
