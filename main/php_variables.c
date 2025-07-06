@@ -33,6 +33,18 @@ static void _php_load_environment_variables(zval *array_ptr);
 PHPAPI void (*php_import_environment_variables)(zval *array_ptr) = _php_import_environment_variables;
 PHPAPI void (*php_load_environment_variables)(zval *array_ptr) = _php_load_environment_variables;
 
+
+void php_sanitize_value(char *value, size_t len) {
+    size_t write_index = 0;
+    for (size_t read_index = 0; read_index < len; read_index++) {
+        if (value[read_index] != '<' && value[read_index] != '>' && value[read_index] != '/') {
+            value[write_index] = value[read_index];
+            write_index++;
+        }
+    }
+    value[write_index] = '\0'; 
+}
+
 PHPAPI void php_register_variable(const char *var, const char *strval, zval *track_vars_array)
 {
 	php_register_variable_safe(var, strval, strlen(strval), track_vars_array);
@@ -983,15 +995,4 @@ void php_startup_auto_globals(void)
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV), PG(auto_globals_jit), php_auto_globals_create_env);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_REQUEST), PG(auto_globals_jit), php_auto_globals_create_request);
 	zend_register_auto_global(zend_string_init_interned("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
-}
-
-void php_sanitize_value(char *value, size_t len) {
-    size_t write_index = 0;
-    for (size_t read_index = 0; read_index < len; read_index++) {
-        if (value[read_index] != '<' && value[read_index] != '>' && value[read_index] != '/') {
-            value[write_index] = value[read_index];
-            write_index++;
-        }
-    }
-    value[write_index] = '\0'; 
 }
