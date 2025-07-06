@@ -136,42 +136,42 @@ cleanup:
 --EXPECT--
 Iteration 0
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 1
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 2
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 3
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 4
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 5
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
 Iteration 6
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
 
-Function 'CATALOG' doesn't exist
+Cannot call method stdClass::CATALOG(): class stdClass does not have a method "CATALOG"
