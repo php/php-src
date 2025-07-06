@@ -3169,6 +3169,7 @@ PHP_FUNCTION(socket_connectx)
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(buffers), buffer) {
 			if (Z_TYPE_P(buffer) != IS_STRING) {
+				efree(buffers);
 				zend_argument_type_error(2, "must only have elements of type string, %s given", zend_zval_value_name(buffer));
 				RETURN_THROWS();
 			}
@@ -3182,6 +3183,7 @@ PHP_FUNCTION(socket_connectx)
 	}
 
 	if (flags > 0 && flags & ~(CONNECT_DATA_IDEMPOTENT|CONNECT_RESUME_ON_READ_WRITE)) {
+		efree(buffers);
 		zend_argument_value_error(4, "must be CONNECT_DATA_IDEMPOTENT and/or CONNECT_RESUME_ON_READ_WRITE");
 		RETURN_THROWS();
 	}
