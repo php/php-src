@@ -3135,3 +3135,91 @@ PHP_FUNCTION(socket_wsaprotocol_info_release)
 }
 /* }}} */
 #endif
+
+#ifdef HAVE_CONNECTX
+PHP_FUNCTION(socket_connectx)
+{
+	zval					*arg1, *buffers = NULL;
+	php_socket				*php_sock;
+	php_addrinfo	                        *ai;
+	zend_long                               flags = 0;
+	struct iovec                            *raw_buffers = NULL;
+	uint32_t                                raw_buffers_len = 0;
+	size_t                                  buffers_len = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(buffers)
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
+
+	if (buffers != NULL) {
+		raw_buffers_len = zend_hash_num_elements(Z_ARRVAL_P(buffers));
+		if (raw_buffers_len == 0) {
+			zend_argument_value_error(3, "must contain at least one entry");
+			RETURN_THROWS();
+		}
+		raw_buffers = emalloc(raw_buffers_len * sizeof(struct iovec));
+		zval *buffer;
+		raw_buffers_len = 0;
+
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(buffers), buffer) {
+			if (Z_TYPE_P(buffer) != IS_STRING) {
+				zend_argument_type_error(2, "must only have elements of type string, %s given", zend_zval_value_name(buffer));
+				RETURN_THROWS();
+			}
+			const struct iovec vec = {
+				.iov_base = (void *)Z_STRVAL_P(buffer),
+				.iov_len = Z_STRLEN_P(buffer)
+			};
+			raw_buffers[raw_buffers_len] = vec;
+			raw_buffers_len ++;
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (flags > 0 && flags & ~(CONNECT_DATA_IDEMPOTENT|CONNECT_RESUME_ON_READ_WRITE)) {
+		zend_argument_value_error(4, "must be CONNECT_DATA_IDEMPOTENT and/or CONNECT_RESUME_ON_READ_WRITE");
+		RETURN_THROWS();
+	}
+
+	ai = Z_ADDRESS_INFO_P(arg1);
+	// TODO: multiple interfaces support ?
+	struct sa_endpoints epoints = {0};
+	epoints.sae_dstaddr = ai->addrinfo.ai_addr;
+	epoints.sae_dstaddrlen = ai->addrinfo.ai_addrlen;
+
+	// TODO: using final length result ?
+	if (connectx(php_sock->bsd_socket, &epoints, SAE_ASSOCID_ANY, (unsigned int)flags, raw_buffers, raw_buffers_len, &buffers_len, NULL) < 0) {
+		efree(raw_buffers);
+		PHP_SOCKET_ERROR(php_sock, "Unable to connect", errno);
+		RETURN_FALSE;
+	}
+
+	efree(raw_buffers);
+	RETURN_TRUE;
+}
+
+PHP_FUNCTION(socket_disconnectx)
+{
+	zval					*arg1;
+	php_socket				*php_sock;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(arg1, socket_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
+
+	if (disconnectx(php_sock->bsd_socket, SAE_ASSOCID_ANY, SAE_CONNID_ANY) < 0) {
+		PHP_SOCKET_ERROR(php_sock, "Unable to disconnect", errno);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+#endif

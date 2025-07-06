@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7b1baf47dce2fb08faa5616068238ea078d1609b */
+ * Stub hash: 7a6612448ec7e208abe657a7408e00b8d80ccfd7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -211,6 +211,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_wsaprotocol_info_release,
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_CONNECTX)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_connectx, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, buffers, IS_ARRAY, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 1, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_disconnectx, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(socket_select);
 ZEND_FUNCTION(socket_create_listen);
 ZEND_FUNCTION(socket_accept);
@@ -256,6 +268,10 @@ ZEND_FUNCTION(socket_addrinfo_explain);
 ZEND_FUNCTION(socket_wsaprotocol_info_export);
 ZEND_FUNCTION(socket_wsaprotocol_info_import);
 ZEND_FUNCTION(socket_wsaprotocol_info_release);
+#endif
+#if defined(HAVE_CONNECTX)
+ZEND_FUNCTION(socket_connectx);
+ZEND_FUNCTION(socket_disconnectx);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -307,6 +323,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(socket_wsaprotocol_info_import, arginfo_socket_wsaprotocol_info_import)
 	ZEND_FE(socket_wsaprotocol_info_release, arginfo_socket_wsaprotocol_info_release)
 #endif
+#if defined(HAVE_CONNECTX)
+	ZEND_FE(socket_connectx, arginfo_socket_connectx)
+	ZEND_FE(socket_disconnectx, arginfo_socket_disconnectx)
+#endif
 	ZEND_FE_END
 };
 
@@ -322,6 +342,12 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(AF_PACKET)
 	REGISTER_LONG_CONSTANT("AF_PACKET", AF_PACKET, CONST_PERSISTENT);
+#endif
+#if defined(CONNECT_DATA_IDEMPOTENT)
+	REGISTER_LONG_CONSTANT("CONNECT_DATA_IDEMPOTENT", CONNECT_DATA_IDEMPOTENT, CONST_PERSISTENT);
+#endif
+#if defined(CONNECT_RESUME_ON_READ_WRITE)
+	REGISTER_LONG_CONSTANT("CONNECT_RESUME_ON_READ_WRITE", CONNECT_RESUME_ON_READ_WRITE, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SOCK_STREAM", SOCK_STREAM, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_DGRAM", SOCK_DGRAM, CONST_PERSISTENT);

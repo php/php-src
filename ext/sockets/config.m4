@@ -23,6 +23,8 @@ if test "$PHP_SOCKETS" != "no"; then
 
   AC_CHECK_TYPES([struct cmsgcred],,, [#include <sys/socket.h>])
 
+  AC_CHECK_FUNCS(m4_normalize([connectx]))
+
   PHP_SOCKETS_CFLAGS=-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
   AS_CASE([$host_alias],
     [*darwin*],
