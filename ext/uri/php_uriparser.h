@@ -18,7 +18,6 @@
 #define PHP_URIPARSER_H
 
 #include <uriparser/Uri.h>
-#include "uriparser/src/UriMemory.h"
 #include "php_uri_common.h"
 
 extern const uri_handler_t uriparser_uri_handler;

@@ -23,6 +23,45 @@
 static void uriparser_free_uri(void *uri);
 static void throw_invalid_uri_exception(void);
 
+static void *uriparser_malloc(UriMemoryManager *memory_manager, size_t size)
+{
+	return emalloc(size);
+}
+
+static void *uriparser_calloc(UriMemoryManager *memory_manager, size_t nmemb, size_t size)
+{
+	return ecalloc(nmemb, size);
+}
+
+static void *uriparser_realloc(UriMemoryManager *memory_manager, void *ptr, size_t size)
+{
+	return erealloc(ptr, size);
+}
+
+static void *uriparser_reallocarray(UriMemoryManager *memory_manager, void *ptr, size_t nmemb, size_t size)
+{
+	return safe_erealloc(ptr, nmemb, size, 0);
+}
+
+static void uriparser_free(UriMemoryManager *memory_manager, void *ptr)
+{
+	efree(ptr);
+}
+
+static const UriMemoryManager uriparser_mm = {
+	.malloc = uriparser_malloc,
+	.calloc = uriparser_calloc,
+	.realloc = uriparser_realloc,
+	.reallocarray = uriparser_reallocarray,
+	.free = uriparser_free,
+	.userData = NULL,
+};
+
+/* The library expects a pointer to a non-const UriMemoryManager, but does
+ * not actually modify it (and neither does our implementation). Use a
+ * const struct with a non-const pointer for convenience. */
+static UriMemoryManager* const mm = (UriMemoryManager*)&uriparser_mm;
+
 static inline size_t get_text_range_length(const UriTextRangeA *range)
 {
 	return range->afterLast - range->first;
@@ -30,14 +69,14 @@ static inline size_t get_text_range_length(const UriTextRangeA *range)
 
 ZEND_ATTRIBUTE_NONNULL static void uriparser_copy_uri(UriUriA *new_uriparser_uri, const UriUriA *uriparser_uri)
 {
-	int result = uriCopyUriA(new_uriparser_uri, uriparser_uri);
+	int result = uriCopyUriMmA(new_uriparser_uri, uriparser_uri, mm);
 	ZEND_ASSERT(result == URI_SUCCESS);
 }
 
 ZEND_ATTRIBUTE_NONNULL static UriUriA *get_normalized_uri(uriparser_uris_t *uriparser_uris) {
 	if (!uriparser_uris->normalized_uri_initialized) {
 		uriparser_copy_uri(&uriparser_uris->normalized_uri, &uriparser_uris->uri);
-		int result = uriNormalizeSyntaxExA(&uriparser_uris->normalized_uri, (unsigned int)-1);
+		int result = uriNormalizeSyntaxExMmA(&uriparser_uris->normalized_uri, (unsigned int)-1, mm);
 		ZEND_ASSERT(result == URI_SUCCESS);
 		uriparser_uris->normalized_uri_initialized = true;
 	}
@@ -237,42 +276,11 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_fragment(const uri_inte
 	return SUCCESS;
 }
 
-static void *uriparser_malloc(UriMemoryManager *memory_manager, size_t size)
-{
-	return emalloc(size);
-}
-
-static void *uriparser_calloc(UriMemoryManager *memory_manager, size_t nmemb, size_t size)
-{
-	return ecalloc(nmemb, size);
-}
-
-static void *uriparser_realloc(UriMemoryManager *memory_manager, void *ptr, size_t size)
-{
-	return erealloc(ptr, size);
-}
-
-static void *uriparser_reallocarray(UriMemoryManager *memory_manager, void *ptr, size_t nmemb, size_t size)
-{
-	return safe_erealloc(ptr, nmemb, size, 0);
-}
-
-static void uriparser_free(UriMemoryManager *memory_manager, void *ptr)
-{
-	efree(ptr);
-}
-
 PHP_MINIT_FUNCTION(uri_uriparser)
 {
 	if (uri_handler_register(&uriparser_uri_handler) == FAILURE) {
 		return FAILURE;
 	}
-
-	defaultMemoryManager.malloc = uriparser_malloc;
-	defaultMemoryManager.calloc = uriparser_calloc;
-	defaultMemoryManager.realloc = uriparser_realloc;
-	defaultMemoryManager.reallocarray = uriparser_reallocarray;
-	defaultMemoryManager.free = uriparser_free;
 
 	return SUCCESS;
 }
@@ -293,7 +301,7 @@ static void throw_invalid_uri_exception(void)
 #define PARSE_URI(dest_uri, uri_str, uriparser_uris, silent) \
 	do { \
 		if (ZSTR_LEN(uri_str) == 0 || \
-			uriParseSingleUriExA(dest_uri, ZSTR_VAL(uri_str), ZSTR_VAL(uri_str) + ZSTR_LEN(uri_str), NULL) != URI_SUCCESS \
+			uriParseSingleUriExMmA(dest_uri, ZSTR_VAL(uri_str), ZSTR_VAL(uri_str) + ZSTR_LEN(uri_str), NULL, mm) != URI_SUCCESS \
 		) { \
 			efree(uriparser_uris); \
 			if (!silent) { \
@@ -309,15 +317,15 @@ void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t 
 
 	if (uriparser_base_urls == NULL) {
 		PARSE_URI(&uriparser_uris->uri, uri_str, uriparser_uris, silent);
-		uriMakeOwnerA(&uriparser_uris->uri);
+		uriMakeOwnerMmA(&uriparser_uris->uri, mm);
 	} else {
 		UriUriA uri;
 
 		PARSE_URI(&uri, uri_str, uriparser_uris, silent);
 
-		if (uriAddBaseUriA(&uriparser_uris->uri, &uri, &uriparser_base_urls->uri) != URI_SUCCESS) {
+		if (uriAddBaseUriExMmA(&uriparser_uris->uri, &uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm) != URI_SUCCESS) {
 			efree(uriparser_uris);
-			uriFreeUriMembersA(&uri);
+			uriFreeUriMembersMmA(&uri, mm);
 			if (!silent) {
 				throw_invalid_uri_exception();
 			}
@@ -325,8 +333,8 @@ void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t 
 			return NULL;
 		}
 
-		uriMakeOwnerA(&uriparser_uris->uri);
-		uriFreeUriMembersA(&uri);
+		uriMakeOwnerMmA(&uriparser_uris->uri, mm);
+		uriFreeUriMembersMmA(&uri, mm);
 	}
 
 	return uriparser_uris;
@@ -390,8 +398,8 @@ ZEND_ATTRIBUTE_NONNULL static void uriparser_free_uri(void *uri)
 {
 	uriparser_uris_t *uriparser_uris = uri;
 
-	uriFreeUriMembersA(&uriparser_uris->uri);
-	uriFreeUriMembersA(&uriparser_uris->normalized_uri);
+	uriFreeUriMembersMmA(&uriparser_uris->uri, mm);
+	uriFreeUriMembersMmA(&uriparser_uris->normalized_uri, mm);
 
 	efree(uriparser_uris);
 }
