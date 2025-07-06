@@ -87,7 +87,19 @@ static void validate_allow_dynamic_properties(
 		if (target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION) {
 			return;
 		}
+		if (target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) {
+			// Should not have passed the first time
+			ZEND_ASSERT((scope->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES) == 0);
+			// Throw a catchable error at runtime
+			zend_throw_error(NULL, msg, ZSTR_VAL(scope->name));
+			return;
+		}
 		zend_error_noreturn(E_ERROR, msg, ZSTR_VAL(scope->name) );
+	}
+	if (target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) {
+		// Should have passed the first time
+		ZEND_ASSERT((scope->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES) != 0);
+		return;
 	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 }

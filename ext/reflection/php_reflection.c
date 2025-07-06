@@ -7354,6 +7354,21 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
+	/* Run the delayed validator function for internal attributes */
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		zend_internal_attribute *config = zend_internal_attribute_get(attr->data->lcname);
+		if (config != NULL && config->validator != NULL) {
+			config->validator(
+				attr->data,
+				attr->target | ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION,
+				attr->scope
+			);
+			if (EG(exception)) {
+				RETURN_THROWS();
+			}
+		}
+	}
+
 	/* Repetition validation is done even if #[DelayedTargetValidation] is used
 	 * and so can be skipped for internal attributes. */
 	if (ce->type == ZEND_USER_CLASS) {
