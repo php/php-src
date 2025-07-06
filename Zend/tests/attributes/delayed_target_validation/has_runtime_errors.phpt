@@ -1,5 +1,5 @@
 --TEST--
-#[\DelayedTargetValidation] prevents target errors at compile time
+#[\DelayedTargetValidation] has errors at runtime
 --FILE--
 <?php
 

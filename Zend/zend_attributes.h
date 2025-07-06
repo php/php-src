@@ -34,9 +34,13 @@
 #define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<7)
 #define ZEND_ATTRIBUTE_FLAGS				((1<<8) - 1)
 
-/* Not a real flag, just passed to validators when target validation is *
+/* Not a real flag, just passed to validators when target validation is
  * suppressed; must not conflict with any of the real flags above. */
 #define ZEND_ATTRIBUTE_NO_TARGET_VALIDATION (1<<8)
+
+/* Not a real flag, just passed to validators when target validation is
+ * being run at runtime; must not conflict with any of the real flags above. */
+#define ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION (1<<9)
 
 /* Flags for zend_attribute.flags */
 #define ZEND_ATTRIBUTE_PERSISTENT   (1<<0)
