@@ -3013,7 +3013,7 @@ static bool early_find_sid_in(zval *dest, int where, php_session_rfc1867_progres
 		return 0;
 	}
 
-	if ((ppid = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[where]), ZSTR_VAL(PS(session_name)), progress->sname_len))
+	if ((ppid = zend_hash_find(Z_ARRVAL(PG(http_globals)[where]), PS(session_name)))
 			&& Z_TYPE_P(ppid) == IS_STRING) {
 		zval_ptr_dtor(dest);
 		ZVAL_COPY_DEREF(dest, ppid);
@@ -3121,7 +3121,6 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			multipart_event_start *data = (multipart_event_start *) event_data;
 			progress = ecalloc(1, sizeof(php_session_rfc1867_progress));
 			progress->content_length = data->content_length;
-			progress->sname_len  = ZSTR_LEN(PS(session_name));
 			PS(rfc1867_progress) = progress;
 		}
 		break;

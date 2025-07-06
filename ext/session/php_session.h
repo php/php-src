@@ -120,7 +120,6 @@ typedef enum {
 } php_session_status;
 
 typedef struct _php_session_rfc1867_progress {
-	size_t    sname_len;
 	zval      sid;
 	smart_str key;
 
