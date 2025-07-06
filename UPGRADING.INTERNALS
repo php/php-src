@@ -47,7 +47,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     did not match its actual behavior.
   . zend_register_constant() now returns a pointer to the added constant
     on success and NULL on failure instead of SUCCESS/FAILURE.
-    The same is true for the specialized registration methods
+    The specialized registration methods that previously had void returns
+    also return pointers to the added constants:
     * zend_register_bool_constant()
     * zend_register_null_constant()
     * zend_register_long_constant()
