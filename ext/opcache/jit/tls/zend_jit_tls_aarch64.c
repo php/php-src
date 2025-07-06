@@ -216,8 +216,8 @@ code_changed:
 
 	uint64_t movz_imm = (insn[0] & AARCH64_MOVZ_IMM_MASK) >> 5;
 	uint64_t movz_shift = (((insn[0] & AARCH64_MOVZ_HW_MASK) >> 21) << 4);
-	uint64_t mozk_imm = (insn[1] & AARCH64_MOVK_IMM_MASK) >> 5;
-	uint64_t offset = (movz_imm << movz_shift) | mozk_imm;
+	uint64_t movk_imm = (insn[1] & AARCH64_MOVK_IMM_MASK) >> 5;
+	uint64_t offset = (movz_imm << movz_shift) | movk_imm;
 
 	if ((uintptr_t)&_tsrm_ls_cache - (uintptr_t)thread_pointer == offset) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "static tls at offset %" PRIxPTR " from thread pointer (inferred from code)\n", offset);
