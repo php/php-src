@@ -1008,7 +1008,7 @@ PHP_METHOD(SoapServer, __construct)
 
 	service->version = version;
 	service->type = SOAP_FUNCTIONS;
-	service->soap_functions.functions_all = FALSE;
+	service->soap_functions.functions_all = false;
 	service->soap_functions.ft = zend_new_array(0);
 
 	if (wsdl) {
@@ -1136,7 +1136,7 @@ PHP_METHOD(SoapServer, getFunctions)
 		ft = &(Z_OBJCE(service->soap_object)->function_table);
 	} else if (service->type == SOAP_CLASS) {
 		ft = &service->soap_class.ce->function_table;
-	} else if (service->soap_functions.functions_all == TRUE) {
+	} else if (service->soap_functions.functions_all) {
 		ft = EG(function_table);
 	} else if (service->soap_functions.ft != NULL) {
 		zval *name;
@@ -1177,7 +1177,7 @@ PHP_METHOD(SoapServer, addFunction)
 			zval *tmp_function;
 
 			if (service->soap_functions.ft == NULL) {
-				service->soap_functions.functions_all = FALSE;
+				service->soap_functions.functions_all = false;
 				service->soap_functions.ft = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(function_name)));
 			}
 
@@ -1216,7 +1216,7 @@ PHP_METHOD(SoapServer, addFunction)
 			RETURN_THROWS();
 		}
 		if (service->soap_functions.ft == NULL) {
-			service->soap_functions.functions_all = FALSE;
+			service->soap_functions.functions_all = false;
 			service->soap_functions.ft = zend_new_array(0);
 		}
 
@@ -1235,7 +1235,7 @@ PHP_METHOD(SoapServer, addFunction)
 				efree(service->soap_functions.ft);
 				service->soap_functions.ft = NULL;
 			}
-			service->soap_functions.functions_all = TRUE;
+			service->soap_functions.functions_all = true;
 		} else {
 			zend_argument_value_error(1, "must be SOAP_FUNCTIONS_ALL when an integer is passed");
 		}
@@ -1516,7 +1516,7 @@ PHP_METHOD(SoapServer, handle)
 		}
 		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
 	} else {
-		if (service->soap_functions.functions_all == TRUE) {
+		if (service->soap_functions.functions_all) {
 			function_table = EG(function_table);
 		} else {
 			function_table = service->soap_functions.ft;
