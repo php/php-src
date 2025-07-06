@@ -1009,7 +1009,9 @@ PHP_METHOD(SoapServer, __construct)
 	service->version = version;
 	service->type = SOAP_FUNCTIONS;
 	service->soap_functions.functions_all = false;
-	service->soap_functions.ft = zend_new_array(0);
+	ALLOC_HASHTABLE(service->soap_functions.ft);
+	/* This hashtable contains zend_function pointers so doesn't need a destructor */
+	zend_hash_init(service->soap_functions.ft, 0, NULL, NULL, false);
 
 	if (wsdl) {
 		service->sdl = get_sdl(ZEND_THIS, ZSTR_VAL(wsdl), cache_wsdl);
@@ -1123,7 +1125,7 @@ PHP_METHOD(SoapServer, setObject)
 PHP_METHOD(SoapServer, getFunctions)
 {
 	soapServicePtr  service;
-	HashTable      *ft = NULL;
+	const HashTable *ft = NULL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1139,11 +1141,7 @@ PHP_METHOD(SoapServer, getFunctions)
 	} else if (service->soap_functions.functions_all) {
 		ft = EG(function_table);
 	} else if (service->soap_functions.ft != NULL) {
-		zval *name;
-
-		ZEND_HASH_MAP_FOREACH_VAL(service->soap_functions.ft, name) {
-			add_next_index_str(return_value, zend_string_copy(Z_STR_P(name)));
-		} ZEND_HASH_FOREACH_END();
+		ft = service->soap_functions.ft;
 	}
 	if (ft != NULL) {
 		zend_function *f;
@@ -1162,7 +1160,7 @@ PHP_METHOD(SoapServer, getFunctions)
 PHP_METHOD(SoapServer, addFunction)
 {
 	soapServicePtr service;
-	zval *function_name, function_copy;
+	zval *function_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &function_name) == FAILURE) {
 		RETURN_THROWS();
@@ -1178,7 +1176,9 @@ PHP_METHOD(SoapServer, addFunction)
 
 			if (service->soap_functions.ft == NULL) {
 				service->soap_functions.functions_all = false;
-				service->soap_functions.ft = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(function_name)));
+				ALLOC_HASHTABLE(service->soap_functions.ft);
+				/* This hashtable contains zend_function pointers so doesn't need a destructor */
+				zend_hash_init(service->soap_functions.ft, zend_hash_num_elements(Z_ARRVAL_P(function_name)), NULL, NULL, false);
 			}
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(function_name), tmp_function) {
@@ -1191,15 +1191,15 @@ PHP_METHOD(SoapServer, addFunction)
 				}
 
 				key = zend_string_tolower(Z_STR_P(tmp_function));
+				f = zend_hash_find_ptr(EG(function_table), key);
 
-				if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
+				if (f == NULL) {
 					zend_string_release_ex(key, false);
 					zend_type_error("SoapServer::addFunction(): Function \"%s\" not found", Z_STRVAL_P(tmp_function));
 					RETURN_THROWS();
 				}
 
-				ZVAL_STR_COPY(&function_copy, f->common.function_name);
-				zend_hash_update(service->soap_functions.ft, key, &function_copy);
+				zend_hash_update_ptr(service->soap_functions.ft, key, f);
 
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END();
@@ -1209,19 +1209,20 @@ PHP_METHOD(SoapServer, addFunction)
 		zend_function *f;
 
 		key = zend_string_tolower(Z_STR_P(function_name));
-
-		if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
+		f = zend_hash_find_ptr(EG(function_table), key);
+		if (f == NULL) {
 			zend_string_release_ex(key, false);
 			zend_argument_type_error(1, "must be a valid function name, function \"%s\" not found", Z_STRVAL_P(function_name));
 			RETURN_THROWS();
 		}
 		if (service->soap_functions.ft == NULL) {
 			service->soap_functions.functions_all = false;
-			service->soap_functions.ft = zend_new_array(0);
+			ALLOC_HASHTABLE(service->soap_functions.ft);
+			/* This hashtable contains zend_function pointers so doesn't need a destructor */
+			zend_hash_init(service->soap_functions.ft, 0, NULL, NULL, false);
 		}
 
-		ZVAL_STR_COPY(&function_copy, f->common.function_name);
-		zend_hash_update(service->soap_functions.ft, key, &function_copy);
+		zend_hash_update_ptr(service->soap_functions.ft, key, f);
 		zend_string_release_ex(key, 0);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
 		if (Z_LVAL_P(function_name) == SOAP_FUNCTIONS_ALL) {
