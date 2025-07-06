@@ -28,6 +28,12 @@ TSRMLS_CACHE_EXTERN();
 
 /* https://developer.arm.com/documentation/ddi0602/2025-03/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page- */
 #define AARCH64_ADRP_IMM_MASK          0x60ffffe0 /* bits 30-29, 23-5 */
+#define AARCH64_ADRP_IMMHI_MASK        0x00ffffe0 /* bits 23-5 */
+#define AARCH64_ADRP_IMMLO_MASK        0x60000000 /* bits 30-29 */
+#define AARCH64_ADRP_IMMHI_START       5
+#define AARCH64_ADRP_IMMLO_START       29
+#define AARCH64_ADRP_IMMLO_WIDTH       2
+
 #define AARCH64_LDR_UNSIGNED_IMM_MASK  0x003ffc00 /* bits 21-10 */
 #define AARCH64_ADD_IMM_MASK           0x003ffc00 /* bits 21-10 */
 #define AARCH64_MOVZ_IMM_MASK          0x001fffe0 /* bits 20-5 */
@@ -146,7 +152,9 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 
 	/* Code is intact, we can extract immediate values */
 
-	uint64_t adrp_imm = (uint64_t)( ((insn[0] & 0x00ffffe0) >> 3) | ((insn[0] & 0x60000000) >> 29) ) << 12;
+	uint64_t adrp_immhi = (uint64_t)((insn[0] & AARCH64_ADRP_IMMHI_MASK) >> AARCH64_ADRP_IMMHI_START);
+	uint64_t adrp_immlo = (uint64_t)((insn[0] & AARCH64_ADRP_IMMLO_MASK) >> AARCH64_ADRP_IMMLO_START);
+	uint64_t adrp_imm = ((adrp_immhi << AARCH64_ADRP_IMMLO_WIDTH) | adrp_immlo) << 12;
 	uint64_t add_imm = (uint64_t)(insn[2] & AARCH64_ADD_IMM_MASK) >> 10;
 	uint64_t pc = (uint64_t)insn;
 	uintptr_t **where = (uintptr_t**)((pc & ~(4096-1)) + adrp_imm + add_imm);
