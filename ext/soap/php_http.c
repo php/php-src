@@ -695,7 +695,7 @@ try_again:
 			}
 		}
 		smart_str_append_const(&soap_headers,"Content-Length: ");
-		smart_str_append_long(&soap_headers, request->len);
+		smart_str_append_unsigned(&soap_headers, ZSTR_LEN(request));
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */
@@ -899,7 +899,7 @@ try_again:
 						   in_domain(uri->host, Z_STR_P(tmp))) &&
 						  (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
 							if (!first_cookie) {
-								smart_str_appends(&soap_headers, "; ");
+								smart_str_append_const(&soap_headers, "; ");
 							}
 							first_cookie = false;
 							soap_smart_str_append_header_value(&soap_headers, key, "Cookie");
