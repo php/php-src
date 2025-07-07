@@ -20,7 +20,7 @@
 #include "zend_sort.h"
 
 #define GEN_MAP(n, name) do { \
-		ZVAL_LONG(&tmp, (zend_long)(uintptr_t)zend_opcode_handlers[n]); \
+		ZVAL_LONG(&tmp, ZEND_PTR2ULONG(zend_opcode_handlers[n])); \
 		zend_hash_str_add(&vm_trace_ht, #name, sizeof(#name) - 1, &tmp); \
 	} while (0);
 

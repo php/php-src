@@ -23,7 +23,7 @@
 #include <stdint.h>
 
 /* This is the heart of the whole int64 enablement in zval. */
-#if defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
+#ifdef ZEND_INT64
 # define ZEND_ENABLE_ZVAL_LONG64 1
 #endif
 
@@ -38,6 +38,12 @@ typedef int64_t zend_off_t;
 # define Z_L(i) INT64_C(i)
 # define Z_UL(i) UINT64_C(i)
 # define SIZEOF_ZEND_LONG 8
+# define ZEND_PTR2ULONG(ptr) ((zend_ulong)(uintptr_t)(ptr))
+# define ZEND_ULONG2PTR(i) \
+    ( (UNEXPECTED((i) > (zend_ulong)UINTPTR_MAX)) \
+      ? (assert(!"zend_ulong out of pointer range"), NULL) \
+      : (void *)(uintptr_t)(i) \
+    )
 #else
 typedef int32_t zend_long;
 typedef uint32_t zend_ulong;
@@ -48,6 +54,8 @@ typedef int32_t zend_off_t;
 # define Z_L(i) INT32_C(i)
 # define Z_UL(i) UINT32_C(i)
 # define SIZEOF_ZEND_LONG 4
+# define ZEND_PTR2ULONG(ptr) ((zend_ulong)(uintptr_t)(ptr))
+# define ZEND_ULONG2PTR(i) ((void *)(uintptr_t)(i))
 #endif
 
 
