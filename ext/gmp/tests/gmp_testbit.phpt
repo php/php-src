@@ -48,12 +48,12 @@ var_dump(gmp_strval($n));
 echo "Done\n";
 ?>
 --EXPECTF--
-ValueError: gmp_testbit(): Argument #2 ($index) must be between 0 and %d * %d
+ValueError: gmp_testbit(): Argument #2 ($index) must be between 0 and %d
 bool(false)
 bool(false)
 bool(false)
 bool(true)
-ValueError: gmp_testbit(): Argument #2 ($index) must be between 0 and %d * %d
+ValueError: gmp_testbit(): Argument #2 ($index) must be between 0 and %d
 bool(false)
 bool(true)
 string(7) "1000002"
