@@ -11,9 +11,21 @@ try {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
+try {
+    stripos("Hello World", "o", PHP_INT_MAX);
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
+}
+
 echo "\n-- Offset before the start of the string --\n";
 try {
     stripos("Hello World", "o", -12);
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
+}
+
+try {
+    stripos("Hello World", "o", PHP_INT_MIN);
 } catch (Throwable $exception) {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
@@ -25,7 +37,9 @@ echo "*** Done ***";
 
 -- Offset beyond the end of the string --
 ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset before the start of the string --
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 *** Done ***
