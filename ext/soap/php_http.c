@@ -326,9 +326,9 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 {
 	if (ZSTR_VAL(domain)[0] == '.') {
 		if (ZSTR_LEN(host) > ZSTR_LEN(domain)) {
-			return strcmp(ZSTR_VAL(host)+ZSTR_LEN(host)-ZSTR_LEN(domain), ZSTR_VAL(domain)) == 0;
+			return zend_string_equals_cstr(domain, ZSTR_VAL(host)+ZSTR_LEN(host)-ZSTR_LEN(domain), ZSTR_LEN(domain));
 		} else {
-			return 0;
+			return false;
 		}
 	} else {
 		return zend_string_equals(host,domain);
