@@ -19,7 +19,7 @@
 #include "php_soap.h"
 #include "ext/hash/php_hash.h" /* For php_hash_bin2hex() */
 
-static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
+static const char *get_http_header_value_nodup(const char *headers, size_t headers_len, const char *type, size_t type_len, size_t *len);
 static char *get_http_header_value(zend_string *headers, char *type);
 static zend_string *get_http_body(php_stream *stream, bool close, zend_string *headers);
 static zend_string *get_http_headers(php_stream *stream);
@@ -353,8 +353,7 @@ bool make_http_soap_request(
 	int use_proxy = 0;
 	int use_ssl;
 	zend_string *http_body;
-	char *content_type, *http_version, *cookie_itt;
-	size_t cookie_len;
+	char *content_type, *http_version;
 	bool http_close;
 	zend_string *http_headers;
 	char *connection;
@@ -1013,34 +1012,36 @@ try_again:
 	   we shouldn't be changing urls so path doesn't
 	   matter too much
 	*/
-	cookie_itt = ZSTR_VAL(http_headers);
+	const char *cookie_itt = ZSTR_VAL(http_headers);
+	size_t cookie_len = ZSTR_LEN(http_headers);
+	size_t parsed_cookie_len;
 
-	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, "Set-Cookie:", &cookie_len))) {
+	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, cookie_len, ZEND_STRL("Set-Cookie:"), &parsed_cookie_len))) {
 		zval *cookies = Z_CLIENT_COOKIES_P(this_ptr);
 		SEPARATE_ARRAY(cookies);
 
-		char *cookie = estrndup(cookie_itt, cookie_len);
+		char *cookie = estrndup(cookie_itt, parsed_cookie_len);
 		char *eqpos = strstr(cookie, "=");
 		char *sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
 			smart_str name = {0};
-			int cookie_len;
+			size_t current_cookie_len;
 			zval zcookie;
 
 			if (sempos != NULL) {
-				cookie_len = sempos-(eqpos+1);
+				current_cookie_len = sempos-(eqpos+1);
 			} else {
-				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
+				current_cookie_len = parsed_cookie_len-(eqpos-cookie)-1;
 			}
 
 			smart_str_appendl(&name, cookie, eqpos - cookie);
 			smart_str_0(&name);
 
 			array_init(&zcookie);
-			add_index_stringl(&zcookie, 0, eqpos + 1, cookie_len);
+			add_index_stringl(&zcookie, 0, eqpos + 1, current_cookie_len);
 
 			if (sempos != NULL) {
-				char *options = cookie + cookie_len+1;
+				char *options = cookie + current_cookie_len+1;
 				while (*options) {
 					while (*options == ' ') {options++;}
 					sempos = strstr(options, ";");
@@ -1076,7 +1077,8 @@ try_again:
 			smart_str_free(&name);
 		}
 
-		cookie_itt = cookie_itt + cookie_len;
+		cookie_itt = cookie_itt + parsed_cookie_len;
+		cookie_len -= parsed_cookie_len;
 		efree(cookie);
 	}
 
@@ -1387,24 +1389,22 @@ try_again:
 	return true;
 }
 
-static char *get_http_header_value_nodup(char *headers, char *type, size_t *len)
+static const char *get_http_header_value_nodup(const char *headers, size_t headers_len, const char *type, size_t type_len, size_t *len)
 {
-	char *pos, *tmp = NULL;
-	int typelen, headerslen;
+	const char *pos;
+	const char *tmp = NULL;
 
-	typelen = strlen(type);
-	headerslen = strlen(headers);
 
 	/* header `titles' can be lower case, or any case combination, according
 	 * to the various RFC's. */
 	pos = headers;
 	do {
 		/* start of buffer or start of line */
-		if (strncasecmp(pos, type, typelen) == 0) {
-			char *eol;
+		if (strncasecmp(pos, type, type_len) == 0) {
+			const char *eol;
 
 			/* match */
-			tmp = pos + typelen;
+			tmp = pos + type_len;
 
 			/* strip leading whitespace */
 			while (*tmp == ' ' || *tmp == '\t') {
@@ -1413,7 +1413,7 @@ static char *get_http_header_value_nodup(char *headers, char *type, size_t *len)
 
 			eol = strchr(tmp, '\n');
 			if (eol == NULL) {
-				eol = headers + headerslen;
+				eol = headers + headers_len;
 			} else if (eol > tmp) {
 				if (*(eol-1) == '\r') {
 					eol--;
@@ -1443,9 +1443,7 @@ static char *get_http_header_value_nodup(char *headers, char *type, size_t *len)
 static char *get_http_header_value(zend_string *headers, char *type)
 {
 	size_t len;
-	char *value;
-
-	value = get_http_header_value_nodup(ZSTR_VAL(headers), type, &len);
+	const char *value = get_http_header_value_nodup(ZSTR_VAL(headers), ZSTR_LEN(headers), type, strlen(type), &len);
 
 	if (value) {
 		return estrndup(value, len);
