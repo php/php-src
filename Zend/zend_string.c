@@ -393,7 +393,7 @@ ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_va
 }
 #endif
 
-#if defined(__GNUC__) && defined(__i386__)
+#if SIZEOF_SIZE_T == SIZEOF_ZEND_LONG && defined(__GNUC__) && defined(__i386__)
 ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);
@@ -430,8 +430,7 @@ ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const 
 		: "cc");
 	return ret;
 }
-
-#elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
+#elif SIZEOF_SIZE_T == SIZEOF_ZEND_LONG && defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
 ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);

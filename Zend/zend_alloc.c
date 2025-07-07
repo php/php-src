@@ -589,7 +589,7 @@ ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_mm_bitset_nts(zend_mm_bi
 {
 #if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
 	return __builtin_ctzl(~bitset);
-#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && defined(PHP_HAVE_BUILTIN_CTZLL)
+#elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && SIZEOF_ZEND_LONG == SIZEOF_LONG_LONG && defined(PHP_HAVE_BUILTIN_CTZLL)
 	return __builtin_ctzll(~bitset);
 #elif defined(_WIN32)
 	unsigned long index;
@@ -2065,7 +2065,7 @@ static zend_mm_heap *zend_mm_init(void)
 #endif
 	zend_mm_init_key(heap);
 #if ZEND_MM_LIMIT
-	heap->limit = (size_t)Z_L(-1) >> 1;
+	heap->limit = (size_t)-1 >> 1;
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM
@@ -3262,7 +3262,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
 		memset(mm_heap, 0, sizeof(zend_mm_heap));
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-		mm_heap->limit = (size_t)Z_L(-1) >> 1;
+		mm_heap->limit = (size_t)-1 >> 1;
 		mm_heap->overflow = 0;
 
 		if (!tracked) {
@@ -3483,7 +3483,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 #endif
 	zend_mm_init_key(heap);
 #if ZEND_MM_LIMIT
-	heap->limit = (size_t)Z_L(-1) >> 1;
+	heap->limit = (size_t)-1 >> 1;
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM

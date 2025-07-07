@@ -286,11 +286,11 @@ typedef union {
 #ifndef float8get
 
 #ifdef WORDS_BIGENDIAN
-#define float8get(V,M)		memcpy((char*) &(V),(char*)  (M), sizeof(double))
-#define float8store(T,V)	memcpy((char*)  (T),(char*) &(V), sizeof(double))
+#define float8get(V,M)    memcpy((char*) &(V),(char*)  (M), sizeof(double))
+#define float8store(T,V)  memcpy((char*)  (T),(char*) &(V), sizeof(double))
 #else
-#define float8get(V,M)    memcpy((char*) &(V),(char*) (M),sizeof(double))
-#define float8store(T,V)  memcpy((char*) (T),(char*) &(V),sizeof(double))
+#define float8get(V,M)    memcpy((char*) &(V),(char*)  (M), sizeof(double))
+#define float8store(T,V)  memcpy((char*)  (T),(char*) &(V), sizeof(double))
 #endif /* WORDS_BIGENDIAN */
 
 #endif /* float8get */
