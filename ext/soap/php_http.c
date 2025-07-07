@@ -22,7 +22,7 @@
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
 static char *get_http_header_value(char *headers, char *type);
 static zend_string *get_http_body(php_stream *stream, bool close, zend_string *headers);
-static zend_string *get_http_headers(php_stream *socketd);
+static zend_string *get_http_headers(php_stream *stream);
 
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
@@ -1603,8 +1603,7 @@ static zend_string *get_http_headers(php_stream *stream)
 		if ((headerbuf[0] == '\r' && headerbuf[1] == '\n') ||
 		    (headerbuf[0] == '\n')) {
 			/* empty line marks end of headers */
-			smart_str_0(&tmp_response);
-			return tmp_response.s;
+			return smart_str_extract(&tmp_response);
 		}
 
 		/* add header to collection */
