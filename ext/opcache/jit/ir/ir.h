@@ -854,6 +854,9 @@ void ir_gdb_unregister_all(void);
 bool ir_gdb_present(void);
 
 /* IR load API (implementation in ir_load.c) */
+#define IR_RESOLVE_SYM_ADD_THUNK (1<<0)
+#define IR_RESOLVE_SYM_SILENT    (1<<1)
+
 struct _ir_loader {
 	uint32_t default_func_flags;
 	bool (*init_module)       (ir_loader *loader, const char *name, const char *filename, const char *target);
@@ -870,7 +873,7 @@ struct _ir_loader {
 	bool (*sym_data_end)      (ir_loader *loader, uint32_t flags);
 	bool (*func_init)         (ir_loader *loader, ir_ctx *ctx, const char *name);
 	bool (*func_process)      (ir_loader *loader, ir_ctx *ctx, const char *name);
-	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, bool add_thunk);
+	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, uint32_t flags);
 	bool (*has_sym)           (ir_loader *loader, const char *name);
 	bool (*add_sym)           (ir_loader *loader, const char *name, void *addr);
 };

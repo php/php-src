@@ -6868,7 +6868,24 @@ static void ir_emit_return_fp(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 
-	if (op2_reg == IR_REG_NONE || IR_REG_SPILLED(op2_reg)) {
+	if (IR_IS_CONST_REF(insn->op2)) {
+		ir_insn *value = &ctx->ir_base[insn->op2];
+
+		if ((type == IR_FLOAT && value->val.f == 0.0) || (type == IR_DOUBLE && value->val.d == 0.0)) {
+			|	fldz
+		} else if ((type == IR_FLOAT && value->val.f == 1.0) || (type == IR_DOUBLE && value->val.d == 1.0)) {
+			|	fld1
+		} else {
+			int label = ir_const_label(ctx, insn->op2);
+
+			if (type == IR_DOUBLE) {
+				|	fld qword [=>label]
+			} else {
+				IR_ASSERT(type == IR_FLOAT);
+				|	fld dword [=>label]
+			}
+		}
+	} else if (op2_reg == IR_REG_NONE || IR_REG_SPILLED(op2_reg)) {
 		ir_reg fp;
 		int32_t offset = ir_ref_spill_slot_offset(ctx, insn->op2, &fp);
 
@@ -8442,11 +8459,15 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	ir_type type = insn->type;
-	ir_reg def_reg = ctx->regs[def][0];
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 	ir_reg op2_reg = ctx->regs[def][2];
 	ir_reg tmp_reg = ctx->regs[def][3];
 	int32_t offset;
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead load */
+		return;
+	}
 	IR_ASSERT(def_reg != IR_REG_NONE && tmp_reg != IR_REG_NONE);
 	if (op2_reg != IR_REG_NONE) {
 		if (IR_REG_SPILLED(op2_reg)) {
@@ -8471,11 +8492,15 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	ir_type type = insn->type;
-	ir_reg def_reg = ctx->regs[def][0];
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 	ir_reg op2_reg = ctx->regs[def][2];
 	ir_reg tmp_reg = ctx->regs[def][3];
 	int32_t offset;
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead load */
+		return;
+	}
 	IR_ASSERT(def_reg != IR_REG_NONE&& tmp_reg != IR_REG_NONE);
 	if (op2_reg != IR_REG_NONE) {
 		if (IR_REG_SPILLED(op2_reg)) {
@@ -9221,6 +9246,58 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		return;
 	}
 
+	/* Move op2 to a tmp register before epilogue if it's in
+	 * used_preserved_regs, because it will be overridden. */
+
+	ir_reg op2_reg = IR_REG_NONE;
+	ir_mem mem = IR_MEM_B(IR_REG_NONE);
+	if (!IR_IS_CONST_REF(insn->op2)) {
+		op2_reg = ctx->regs[def][2];
+
+		ir_regset preserved_regs = (ir_regset)ctx->used_preserved_regs | IR_REGSET(IR_REG_STACK_POINTER);
+		if (ctx->flags & IR_USE_FRAME_POINTER) {
+			preserved_regs |= IR_REGSET(IR_REG_FRAME_POINTER);
+		}
+
+		bool is_spill_slot = op2_reg != IR_REG_NONE
+			&& IR_REG_SPILLED(op2_reg)
+			&& ctx->vregs[insn->op2];
+
+		if (op2_reg != IR_REG_NONE && !is_spill_slot) {
+			if (IR_REGSET_IN(preserved_regs, IR_REG_NUM(op2_reg))) {
+				ir_ref orig_op2_reg = op2_reg;
+				op2_reg = IR_REG_RAX;
+
+				if (IR_REG_SPILLED(orig_op2_reg)) {
+					ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+				} else {
+					ir_type type = ctx->ir_base[insn->op2].type;
+					| ASM_REG_REG_OP mov, type, op2_reg, IR_REG_NUM(orig_op2_reg)
+				}
+			} else {
+				op2_reg = IR_REG_NUM(op2_reg);
+			}
+		} else {
+			if (ir_rule(ctx, insn->op2) & IR_FUSED) {
+				IR_ASSERT(op2_reg == IR_REG_NONE);
+				mem = ir_fuse_load(ctx, def, insn->op2);
+			} else {
+				mem = ir_ref_spill_slot(ctx, insn->op2);
+			}
+			ir_reg base = IR_MEM_BASE(mem);
+			ir_reg index = IR_MEM_INDEX(mem);
+			if ((base != IR_REG_NONE && IR_REGSET_IN(preserved_regs, base)) ||
+					(index != IR_REG_NONE && IR_REGSET_IN(preserved_regs, index))) {
+				op2_reg = IR_REG_RAX;
+
+				ir_type type = ctx->ir_base[insn->op2].type;
+				ir_emit_load_mem_int(ctx, type, op2_reg, mem);
+			} else {
+				op2_reg = IR_REG_NONE;
+			}
+		}
+	}
+
 	ir_emit_epilogue(ctx);
 
 	if (IR_IS_CONST_REF(insn->op2)) {
@@ -9246,22 +9323,10 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.endif
 		}
     } else {
-		ir_reg op2_reg = ctx->regs[def][2];
-
 		if (op2_reg != IR_REG_NONE) {
-			if (IR_REG_SPILLED(op2_reg)) {
-				op2_reg = IR_REG_NUM(op2_reg);
-				ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
-			}
+			IR_ASSERT(!IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, op2_reg));
 			|	jmp Ra(op2_reg)
 		} else {
-			ir_mem mem;
-
-			if (ir_rule(ctx, insn->op2) & IR_FUSED) {
-				mem = ir_fuse_load(ctx, def, insn->op2);
-			} else {
-				mem = ir_ref_spill_slot(ctx, insn->op2);
-			}
 			|	ASM_TMEM_OP jmp, aword, mem
 		}
     }

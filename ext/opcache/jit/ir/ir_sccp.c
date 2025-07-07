@@ -1732,7 +1732,20 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use, 
 	ir_ref *p, n, input;
 
 	if (IR_IS_CONST_REF(ref)) {
-		return ir_const(ctx, insn->val, type);
+		ir_val val;
+
+		switch (type) {
+			case IR_I8:  val.i64 = insn->val.i8; break;
+			case IR_U8:  val.u64 = insn->val.u8; break;
+			case IR_I16: val.i64 = insn->val.i16; break;
+			case IR_U16: val.u64 = insn->val.u16; break;
+			case IR_I32: val.i64 = insn->val.i32; break;
+			case IR_U32: val.u64 = insn->val.u32; break;
+			case IR_CHAR:val.i64 = insn->val.i8; break;
+			case IR_BOOL:val.u64 = insn->val.u8 != 0; break;
+			default: IR_ASSERT(0); val.u64 = 0;
+		}
+		return ir_const(ctx, val, type);
 	} else {
 		ir_bitqueue_add(worklist, ref);
 		switch (insn->op) {

@@ -309,7 +309,7 @@ static void* ir_sym_addr(ir_ctx *ctx, const ir_insn *addr_insn)
 {
 	const char *name = ir_get_str(ctx, addr_insn->val.name);
 	void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-		ctx->loader->resolve_sym_name(ctx->loader, name, 0) :
+		ctx->loader->resolve_sym_name(ctx->loader, name, IR_RESOLVE_SYM_SILENT) :
 		ir_resolve_sym_name(name);
 
 	return addr;
@@ -320,7 +320,7 @@ static void* ir_sym_val(ir_ctx *ctx, const ir_insn *addr_insn)
 {
 	const char *name = ir_get_str(ctx, addr_insn->val.name);
 	void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-		ctx->loader->resolve_sym_name(ctx->loader, name, addr_insn->op == IR_FUNC) :
+		ctx->loader->resolve_sym_name(ctx->loader, name, addr_insn->op == IR_FUNC ? IR_RESOLVE_SYM_ADD_THUNK : 0) :
 		ir_resolve_sym_name(name);
 
 	IR_ASSERT(addr);
