@@ -21,7 +21,7 @@
 
 #define ZEND_ASYNC_API "TrueAsync API v0.3.0"
 #define ZEND_ASYNC_API_VERSION_MAJOR 0
-#define ZEND_ASYNC_API_VERSION_MINOR 2
+#define ZEND_ASYNC_API_VERSION_MINOR 3
 #define ZEND_ASYNC_API_VERSION_PATCH 0
 
 #define ZEND_ASYNC_API_VERSION_NUMBER \
@@ -339,7 +339,9 @@ typedef void (*zend_async_iterator_method_t)(zend_async_iterator_t *iterator);
 	/* The maximum number of concurrent tasks that can be executed at the same time */ \
 	unsigned int concurrency; \
 	/* Priority for coroutines created by this iterator */ \
-	int32_t priority;
+	int32_t priority; \
+	/* NULLABLE. Exception that stopped the iterator */ \
+	zend_object * exception;
 
 struct _zend_async_iterator_s {
 	ZEND_ASYNC_ITERATOR_FIELDS
