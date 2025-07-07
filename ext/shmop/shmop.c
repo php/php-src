@@ -182,6 +182,9 @@ PHP_FUNCTION(shmop_open)
 	if (shmop->shmflg & IPC_CREAT && shmop->size < 1) {
 		zend_argument_value_error(4, "must be greater than 0 for the \"c\" and \"n\" access modes");
 		goto err;
+	} else if (ZEND_LONG_SIZE_T_OVFL(shmop->size)) {
+		zend_argument_value_error(4, "must be less than or equal to %zu", SIZE_MAX);
+		goto err;
 	}
 
 	shmop->shmid = shmget(shmop->key, shmop->size, shmop->shmflg);
@@ -196,7 +199,7 @@ PHP_FUNCTION(shmop_open)
 		goto err;
 	}
 
-	if (shm.shm_segsz > ZEND_LONG_MAX) {
+	if (ZEND_SIZE_T_ZEND_LONG_OVFL(shm.shm_segsz)) {
 		zend_argument_value_error(4, "is too large");
 		goto err;
 	}
