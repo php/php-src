@@ -19,7 +19,7 @@
 
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
 static char *get_http_header_value(zend_string *headers, char *type);
-static zend_string *get_http_body(php_stream *socketd, bool close, zend_string *headers);
+static zend_string *get_http_body(php_stream *stream, bool close, zend_string *headers);
 static zend_string *get_http_headers(php_stream *socketd);
 
 #define smart_str_append_const(str, const) \
@@ -1472,7 +1472,8 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 {
 	zend_string *http_buf = NULL;
 	char *header;
-	bool header_close = close, header_chunked = false;
+	bool header_close = close;
+	bool header_chunked = false;
 	int header_length = 0;
 	size_t http_buf_size = 0;
 
@@ -1503,7 +1504,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 	}
 
 	if (header_chunked) {
-		char ch, headerbuf[8192];
+		char headerbuf[8192];
 		bool done = false;
 
 		while (!done) {
@@ -1539,7 +1540,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 					}
 
 					/* Eat up '\r' '\n' */
-					ch = php_stream_getc(stream);
+					char ch = php_stream_getc(stream);
 					if (ch == '\r') {
 						ch = php_stream_getc(stream);
 					}
