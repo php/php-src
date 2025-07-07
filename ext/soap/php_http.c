@@ -870,28 +870,37 @@ try_again:
 			bool first_cookie = true;
 			smart_str_append_const(&soap_headers, "Cookie: ");
 			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
-				if (key && Z_TYPE_P(data) == IS_ARRAY) {
-					zval *value;
+				if (key == NULL || Z_TYPE_P(data) != IS_ARRAY) {
+					continue;
+				}
 
-					if ((value = zend_hash_index_find(Z_ARRVAL_P(data), 0)) != NULL &&
-						Z_TYPE_P(value) == IS_STRING) {
-					  zval *tmp;
-					  if (((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 1)) == NULL ||
-						   Z_TYPE_P(tmp) != IS_STRING ||
-						   strncmp(phpurl->path?ZSTR_VAL(phpurl->path):"/",Z_STRVAL_P(tmp),Z_STRLEN_P(tmp)) == 0) &&
-						  ((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL ||
-						   Z_TYPE_P(tmp) != IS_STRING ||
-						   in_domain(phpurl->host, Z_STR_P(tmp))) &&
-						  (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
-							if (!first_cookie) {
-								smart_str_append_const(&soap_headers, "; ");
-							}
-							first_cookie = false;
-							smart_str_append(&soap_headers, key);
-							smart_str_appendc(&soap_headers, '=');
-							smart_str_append(&soap_headers, Z_STR_P(value));
-						}
+				zval *value = zend_hash_index_find(Z_ARRVAL_P(data), 0);
+				if (value == NULL || Z_TYPE_P(value) != IS_STRING) {
+					continue;
+				}
+
+				zval *tmp;
+				if (
+					(
+						(tmp = zend_hash_index_find(Z_ARRVAL_P(data), 1)) == NULL
+						|| Z_TYPE_P(tmp) != IS_STRING
+						|| strncmp(phpurl->path?ZSTR_VAL(phpurl->path):"/",Z_STRVAL_P(tmp),Z_STRLEN_P(tmp)) == 0
+					) && (
+						(tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL
+						|| Z_TYPE_P(tmp) != IS_STRING
+						|| in_domain(phpurl->host, Z_STR_P(tmp))
+					) && (
+						use_ssl
+						|| (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL
+					)
+				) {
+					if (!first_cookie) {
+						smart_str_append_const(&soap_headers, "; ");
 					}
+					first_cookie = false;
+					smart_str_append(&soap_headers, key);
+					smart_str_appendc(&soap_headers, '=');
+					smart_str_append(&soap_headers, Z_STR_P(value));
 				}
 			} ZEND_HASH_FOREACH_END();
 			smart_str_append_const(&soap_headers, "\r\n");
