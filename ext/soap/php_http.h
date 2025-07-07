@@ -26,7 +26,7 @@ int make_http_soap_request(zval        *this_ptr,
                            int          soap_version,
                            zval        *response);
 
-int proxy_authentication(zval* this_ptr, smart_str* soap_headers);
+bool proxy_authentication(const zval* this_ptr, smart_str* soap_headers);
 int basic_authentication(zval* this_ptr, smart_str* soap_headers);
 void http_context_headers(php_stream_context* context,
                           bool has_authorization,

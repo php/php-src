@@ -28,15 +28,15 @@ static zend_string *get_http_headers(php_stream *socketd);
 	smart_str_appendl(str,const,sizeof(const)-1)
 
 /* Proxy HTTP Authentication */
-int proxy_authentication(zval* this_ptr, smart_str* soap_headers)
+bool proxy_authentication(const zval* this_ptr, smart_str* soap_headers)
 {
-	zval *login = Z_CLIENT_PROXY_LOGIN_P(this_ptr);
+	const zval *login = Z_CLIENT_PROXY_LOGIN_P(this_ptr);
 	if (Z_TYPE_P(login) == IS_STRING) {
 		smart_str auth = {0};
 		smart_str_append(&auth, Z_STR_P(login));
 		smart_str_appendc(&auth, ':');
 
-		zval *password = Z_CLIENT_PROXY_PASSWORD_P(this_ptr);
+		const zval *password = Z_CLIENT_PROXY_PASSWORD_P(this_ptr);
 		if (Z_TYPE_P(password) == IS_STRING) {
 			smart_str_append(&auth, Z_STR_P(password));
 		}
@@ -47,9 +47,9 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 		smart_str_append_const(soap_headers, "\r\n");
 		zend_string_release_ex(buf, 0);
 		smart_str_free(&auth);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 /* HTTP Authentication */
