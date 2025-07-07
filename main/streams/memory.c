@@ -243,6 +243,8 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 						if (newsize < ms->fpos) {
 							ms->fpos = newsize;
 						}
+					} else if (UNEXPECTED(newsize > ZSTR_MAX_LEN)) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
 					} else {
 						size_t old_size = ZSTR_LEN(ms->data);
 						ms->data = zend_string_realloc(ms->data, newsize, 0);

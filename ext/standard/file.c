@@ -381,7 +381,8 @@ PHP_FUNCTION(file_get_contents)
 	bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = 0;
-	zend_long maxlen;
+	zend_long maxlen_zl;
+	size_t maxlen;
 	bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -394,14 +395,19 @@ PHP_FUNCTION(file_get_contents)
 		Z_PARAM_BOOL(use_include_path)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 		Z_PARAM_LONG(offset)
-		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
+		Z_PARAM_LONG_OR_NULL(maxlen_zl, maxlen_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (maxlen_is_null) {
-		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
-	} else if (maxlen < 0) {
+		maxlen = PHP_STREAM_COPY_ALL;
+	} else if (UNEXPECTED(maxlen_zl < 0)) {
 		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(maxlen_zl)) {
+		zend_argument_value_error(5, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
+	} else {
+		maxlen = (size_t) maxlen_zl;
 	}
 
 	php_stream_error_operation_begin();
@@ -505,10 +511,12 @@ PHP_FUNCTION(file_put_contents)
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
 				numbytes = -1;
 			} else {
+#if SIZEOF_SIZE_T >= SIZEOF_ZEND_LONG
 				if (len > ZEND_LONG_MAX) {
 					php_error_docref(NULL, E_WARNING, "content truncated from %zu to " ZEND_LONG_FMT " bytes", len, ZEND_LONG_MAX);
 					len = ZEND_LONG_MAX;
 				}
+#endif
 				numbytes = len;
 			}
 			break;
@@ -908,13 +916,16 @@ PHPAPI PHP_FUNCTION(fgets)
 		RETVAL_STRINGL(buf, line_len);
 		efree(buf);
 	} else {
-		if (len <= 0) {
+		if (UNEXPECTED(len <= 0)) {
 			zend_argument_value_error(2, "must be greater than 0");
+			RETURN_THROWS();
+		} else if (ZEND_LONG_SIZE_T_OVFL(len)) {
+			zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
 			RETURN_THROWS();
 		}
 
-		str = zend_string_alloc(len, 0);
-		buf = php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len);
+		str = zend_string_alloc((size_t) len, 0);
+		buf = php_stream_get_line(stream, ZSTR_VAL(str), (size_t) len, &line_len);
 		php_stream_error_operation_end_for_stream(stream);
 		if (buf == NULL) {
 			zend_string_efree(str);
@@ -1019,7 +1030,11 @@ PHPAPI PHP_FUNCTION(fwrite)
 	} else if (maxlen <= 0) {
 		num_bytes = 0;
 	} else {
+#if SIZEOF_SIZE_T >= SIZEOF_ZEND_LONG
 		num_bytes = MIN((size_t) maxlen, inputlen);
+#else
+		num_bytes = MIN(maxlen, (zend_long) inputlen);
+#endif
 	}
 
 	if (!num_bytes) {
@@ -1366,8 +1381,11 @@ PHP_FUNCTION(ftruncate)
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (size < 0) {
+	if (UNEXPECTED(size < 0)) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(size)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1614,8 +1632,11 @@ PHPAPI PHP_FUNCTION(fread)
 		Z_PARAM_LONG(len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (len <= 0) {
+	if (UNEXPECTED(len <= 0)) {
 		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(len)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1870,9 +1891,15 @@ PHP_FUNCTION(fgetcsv)
 
 	if (len_is_null || len == 0) {
 		len = -1;
-	} else if (len < 0 || len > (ZEND_LONG_MAX - 1)) {
+#if SIZEOF_SIZE_T >= SIZEOF_ZEND_LONG
+	} else if (UNEXPECTED(len < 0 || len > (ZEND_LONG_MAX - 1))) {
 		zend_argument_value_error(2, "must be between 0 and " ZEND_LONG_FMT, (ZEND_LONG_MAX - 1));
 		RETURN_THROWS();
+#else
+	} else if (UNEXPECTED(len < 0 || len > (SIZE_MAX - 1))) {
+		zend_argument_value_error(2, "must be between 0 and %zu", (SIZE_MAX - 1));
+		RETURN_THROWS();
+#endif
 	}
 
 	php_stream_error_operation_begin();

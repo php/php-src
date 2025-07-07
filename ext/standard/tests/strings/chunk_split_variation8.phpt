@@ -33,7 +33,7 @@ $values = array (
   PHP_INT_MAX,      // max positive integer number
   PHP_INT_MAX * 3,  // integer overflow
   -PHP_INT_MAX - 1, // min negative integer
-
+  (2 ** (PHP_SYS_SIZE * 8 - 2) - 1 << 1) + 1, // SSIZE_MAX
 );
 
 
@@ -80,3 +80,8 @@ chunk_split():::"
 chunk_split(): Argument #2 ($length) must be of type int, float given
 -- Iteration 8 --
 chunk_split(): Argument #2 ($length) must be greater than 0
+-- Iteration 9 --
+string(129) "This's heredoc string with 	 and 
+ white space char.
+It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
+chunk_split():::"

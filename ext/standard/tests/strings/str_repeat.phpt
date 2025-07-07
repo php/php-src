@@ -29,7 +29,14 @@ foreach($variations as $input) {
 
 echo "\n\n*** Testing error conditions ***\n";
 try {
-    str_repeat($input[0], -1); // Invalid arg for multiplier
+    str_repeat('', -1); // Invalid arg for multiplier
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    $sizetDiv2 = ((2 ** (PHP_SYS_SIZE * 8 - 2) - 1) << 1) + 1;
+    str_repeat('12', $sizetDiv2);
 } catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
@@ -100,4 +107,5 @@ try {
 
 
 *** Testing error conditions ***
-str_repeat(): Argument #2 ($times) must be greater than or equal to 0
+str_repeat(): Argument #2 ($times) must be greater than or equal to 0%S
+str_repeat(): Argument #2 ($times) must be greater than or equal to 0 and lower than or equal to %d
