@@ -62,7 +62,7 @@
 #define IR_MAX(a, b)          (((a) > (b)) ? (a) : (b))
 #define IR_MIN(a, b)          (((a) < (b)) ? (a) : (b))
 
-#define IR_IS_POWER_OF_TWO(x) (!((x) & ((x) - 1)))
+#define IR_IS_POWER_OF_TWO(x) ((x) && (!((x) & ((x) - 1))))
 
 #define IR_LOG2(x) ir_ntzl(x)
 

@@ -4366,11 +4366,15 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	ir_type type = insn->type;
-	ir_reg def_reg = ctx->regs[def][0];
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 	ir_reg op2_reg = ctx->regs[def][2];
 	ir_reg tmp_reg = ctx->regs[def][3];
 	int32_t offset;
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead load */
+		return;
+	}
 	IR_ASSERT(def_reg != IR_REG_NONE && tmp_reg != IR_REG_NONE);
 	if (op2_reg != IR_REG_NONE) {
 		if (IR_REG_SPILLED(op2_reg)) {
@@ -4394,11 +4398,15 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	ir_type type = insn->type;
-	ir_reg def_reg = ctx->regs[def][0];
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 	ir_reg op2_reg = ctx->regs[def][2];
 	ir_reg tmp_reg = ctx->regs[def][3];
 	int32_t offset;
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead load */
+		return;
+	}
 	IR_ASSERT(def_reg != IR_REG_NONE && tmp_reg != IR_REG_NONE);
 	if (op2_reg != IR_REG_NONE) {
 		if (IR_REG_SPILLED(op2_reg)) {
@@ -4935,6 +4943,28 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		return;
 	}
 
+	/* Move op2 to a tmp register before epilogue if it's in
+	 * used_preserved_regs, because it will be overridden. */
+
+	ir_reg op2_reg = IR_REG_NONE;
+	if (!IR_IS_CONST_REF(insn->op2)) {
+		op2_reg = ctx->regs[def][2];
+		IR_ASSERT(op2_reg != IR_REG_NONE);
+
+		if (IR_REG_SPILLED(op2_reg)) {
+			op2_reg = IR_REG_INT_TMP;
+			ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+		} else if (IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, IR_REG_NUM(op2_reg))) {
+			ir_reg orig_op2_reg = op2_reg;
+			op2_reg = IR_REG_INT_TMP;
+
+			ir_type type = ctx->ir_base[insn->op2].type;
+			| ASM_REG_REG_OP mov, type, op2_reg, IR_REG_NUM(orig_op2_reg)
+		} else {
+			op2_reg = IR_REG_NUM(op2_reg);
+		}
+	}
+
 	ir_emit_epilogue(ctx);
 
 	if (IR_IS_CONST_REF(insn->op2)) {
@@ -4947,13 +4977,8 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			|	br Rx(IR_REG_INT_TMP)
 		}
     } else {
-		ir_reg op2_reg = ctx->regs[def][2];
-
 		IR_ASSERT(op2_reg != IR_REG_NONE);
-		if (IR_REG_SPILLED(op2_reg)) {
-			op2_reg = IR_REG_NUM(op2_reg);
-			ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
-		}
+		IR_ASSERT(!IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, op2_reg));
 		|	br Rx(op2_reg)
     }
 }

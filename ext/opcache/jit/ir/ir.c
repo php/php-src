@@ -803,7 +803,9 @@ ir_ref ir_proto(ir_ctx *ctx, uint8_t flags, ir_type ret_type, uint32_t params_co
 	proto->flags = flags;
 	proto->ret_type = ret_type;
 	proto->params_count = params_count;
-	memcpy(proto->param_types, param_types, params_count);
+	if (params_count) {
+		memcpy(proto->param_types, param_types, params_count);
+	}
 	return ir_strl(ctx, (const char *)proto, offsetof(ir_proto_t, param_types) + params_count);
 }
 
