@@ -380,12 +380,15 @@ int make_http_soap_request(zval        *this_ptr,
 		int level = Z_LVAL_P(tmp) & 0x0f;
 		int kind  = Z_LVAL_P(tmp) & SOAP_COMPRESSION_DEFLATE;
 
-		if (level > 9) {level = 9;}
+		if (level > 9) {
+			level = 9;
+		}
 
-	  if ((Z_LVAL_P(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
+		if ((Z_LVAL_P(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
 			smart_str_append_const(&soap_headers_z,"Accept-Encoding: gzip, deflate\r\n");
-	  }
-	  if (level > 0) {
+		}
+
+		if (level > 0) {
 			zend_function *fn;
 			zval retval;
 			zval params[3];
@@ -416,7 +419,7 @@ int make_http_soap_request(zval        *this_ptr,
 				ZVAL_LONG(&params[2], 0x1f);
 			}
 
-	  		zend_call_known_function(fn, NULL, NULL, &retval, param_num, params, NULL);
+			zend_call_known_function(fn, NULL, NULL, &retval, param_num, params, NULL);
 			zval_ptr_dtor(&params[0]);
 			if (Z_TYPE(retval) == IS_STRING) {
 				request = Z_STR(retval);
@@ -428,7 +431,7 @@ int make_http_soap_request(zval        *this_ptr,
 				smart_str_free(&soap_headers_z);
 				return FALSE;
 			}
-	  }
+		}
 	}
 
 	tmp = Z_CLIENT_HTTPSOCKET_P(this_ptr);
@@ -461,7 +464,9 @@ int make_http_soap_request(zval        *this_ptr,
 
 try_again:
 	if (phpurl == NULL || phpurl->host == NULL) {
-	  if (phpurl != NULL) {php_url_free(phpurl);}
+		if (phpurl != NULL) {
+			php_url_free(phpurl);
+		}
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
@@ -1052,7 +1057,7 @@ try_again:
 					if (sempos != NULL) {
 						options = sempos+1;
 					} else {
-					  break;
+						break;
 					}
 				}
 			}
@@ -1509,7 +1514,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 						if (len_read <= 0) {
 							/* Error or EOF */
 							done = TRUE;
-						  break;
+							break;
 						}
 						len_size += len_read;
 	 					http_buf_size += len_read;
