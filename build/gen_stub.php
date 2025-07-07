@@ -2781,24 +2781,36 @@ class ConstInfo extends VariableLike
         if ($this->isDeprecated) {
             $flags .= " | CONST_DEPRECATED";
         }
+
+        $code = "\t";
+        if ($this->attributes !== []) {
+            if ($this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_85_VERSION_ID) {
+                // Registration only returns the constant since PHP 8.5, it's
+                // not worth the bloat to add two different registration blocks
+                // with conditions for the PHP version
+                $constVarName = 'const_' . $constName;
+                $code .= "zend_constant *$constVarName = ";
+            }
+        }
+
         if ($value->type->isNull()) {
-            return "\tREGISTER_NULL_CONSTANT(\"$constName\", $flags);\n";
+            return $code . "REGISTER_NULL_CONSTANT(\"$constName\", $flags);\n";
         }
 
         if ($value->type->isBool()) {
-            return "\tREGISTER_BOOL_CONSTANT(\"$constName\", " . ($cExpr ?: ($constValue ? "true" : "false")) . ", $flags);\n";
+            return $code . "REGISTER_BOOL_CONSTANT(\"$constName\", " . ($cExpr ?: ($constValue ? "true" : "false")) . ", $flags);\n";
         }
 
         if ($value->type->isInt()) {
-            return "\tREGISTER_LONG_CONSTANT(\"$constName\", " . ($cExpr ?: (int) $constValue) . ", $flags);\n";
+            return $code . "REGISTER_LONG_CONSTANT(\"$constName\", " . ($cExpr ?: (int) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isFloat()) {
-            return "\tREGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cExpr ?: (float) $constValue) . ", $flags);\n";
+            return $code . "REGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cExpr ?: (float) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isString()) {
-            return "\tREGISTER_STRING_CONSTANT(\"$constName\", " . ($cExpr ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
+            return $code . "REGISTER_STRING_CONSTANT(\"$constName\", " . ($cExpr ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
         }
 
         throw new Exception("Unimplemented constant type");
@@ -5307,12 +5319,11 @@ function generateGlobalConstantAttributeInitialization(
     $isConditional = false;
     if ($phpVersionIdMinimumCompatibility !== null && $phpVersionIdMinimumCompatibility < PHP_85_VERSION_ID) {
         $isConditional = true;
-        $phpVersionIdMinimumCompatibility = PHP_85_VERSION_ID;
     }
     $code = generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional) {
             $code = "";
 
             if ($constInfo->attributes === []) {
@@ -5321,13 +5332,18 @@ function generateGlobalConstantAttributeInitialization(
             $constName = str_replace('\\', '\\\\', $constInfo->name->__toString());
             $constVarName = 'const_' . $constName;
 
-            $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            // The entire attribute block will be conditional if PHP < 8.5 is
+            // supported, but also if PHP < 8.5 is supported we need to search
+            // for the constant; see GH-19029
+            if ($isConditional) {
+                $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            }
             foreach ($constInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_global_constant_attribute($constVarName",
                     $constVarName . "_$key",
                     $allConstInfos,
-                    $phpVersionIdMinimumCompatibility
+                    PHP_85_VERSION_ID
                 );
             }
 

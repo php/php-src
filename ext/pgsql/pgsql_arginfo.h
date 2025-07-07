@@ -757,7 +757,7 @@ static const zend_function_entry ext_functions[] = {
 static void register_pgsql_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION", pgsql_libpq_version, CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION_STR", pgsql_libpq_version, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_PGSQL_LIBPQ_VERSION_STR = REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION_STR", pgsql_libpq_version, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECT_FORCE_NEW", PGSQL_CONNECT_FORCE_NEW, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECT_ASYNC", PGSQL_CONNECT_ASYNC, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_PERSISTENT);
@@ -1153,7 +1153,6 @@ static void register_pgsql_symbols(int module_number)
 	attribute_Deprecated_func_pg_clientencoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_change_password", sizeof("pg_change_password") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
-	zend_constant *const_PGSQL_LIBPQ_VERSION_STR = zend_hash_str_find_ptr(EG(zend_constants), "PGSQL_LIBPQ_VERSION_STR", sizeof("PGSQL_LIBPQ_VERSION_STR") - 1);
 
 	zend_attribute *attribute_Deprecated_const_PGSQL_LIBPQ_VERSION_STR_0 = zend_add_global_constant_attribute(const_PGSQL_LIBPQ_VERSION_STR, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_PGSQL_LIBPQ_VERSION_STR_0_arg0;

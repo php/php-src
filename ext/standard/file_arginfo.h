@@ -108,8 +108,8 @@ static void register_file_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES", PHP_FILE_SKIP_EMPTY_LINES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_APPEND", PHP_FILE_APPEND, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT", PHP_FILE_NO_DEFAULT_CONTEXT, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_TEXT", 0, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("FILE_BINARY", 0, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_FILE_TEXT = REGISTER_LONG_CONSTANT("FILE_TEXT", 0, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_FILE_BINARY = REGISTER_LONG_CONSTANT("FILE_BINARY", 0, CONST_PERSISTENT | CONST_DEPRECATED);
 #if defined(HAVE_FNMATCH)
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FNM_PATHNAME", FNM_PATHNAME, CONST_PERSISTENT);
@@ -119,7 +119,6 @@ static void register_file_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("FNM_CASEFOLD", FNM_CASEFOLD, CONST_PERSISTENT);
 #endif
 
-	zend_constant *const_FILE_TEXT = zend_hash_str_find_ptr(EG(zend_constants), "FILE_TEXT", sizeof("FILE_TEXT") - 1);
 
 	zend_attribute *attribute_Deprecated_const_FILE_TEXT_0 = zend_add_global_constant_attribute(const_FILE_TEXT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_FILE_TEXT_0_arg0;
@@ -132,7 +131,6 @@ static void register_file_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_const_FILE_TEXT_0_arg1, attribute_Deprecated_const_FILE_TEXT_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILE_TEXT_0->args[1].value, &attribute_Deprecated_const_FILE_TEXT_0_arg1);
 	attribute_Deprecated_const_FILE_TEXT_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_FILE_BINARY = zend_hash_str_find_ptr(EG(zend_constants), "FILE_BINARY", sizeof("FILE_BINARY") - 1);
 
 	zend_attribute *attribute_Deprecated_const_FILE_BINARY_0 = zend_add_global_constant_attribute(const_FILE_BINARY, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_FILE_BINARY_0_arg0;
