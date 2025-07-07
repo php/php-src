@@ -2432,7 +2432,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 		repeated = zend_mm_find_leaks_huge(heap, list);
 		total += 1 + repeated;
 		if (repeated) {
-			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
+			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, ZEND_ULONG_TO_PTR(repeated));
 		}
 
 		heap->huge_list = list = list->next;
@@ -2471,7 +2471,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 							           zend_mm_find_leaks(heap, p, i + bin_pages[bin_num], &leak);
 							total += 1 + repeated;
 							if (repeated) {
-								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
+								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, ZEND_ULONG_TO_PTR(repeated));
 							}
 						}
 						dbg = (zend_mm_debug_info*)((char*)dbg + bin_data_size[bin_num]);
@@ -2497,7 +2497,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 					repeated = zend_mm_find_leaks(heap, p, i + pages_count, &leak);
 					total += 1 + repeated;
 					if (repeated) {
-						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
+						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, ZEND_ULONG_TO_PTR(repeated));
 					}
 					i += pages_count;
 				}
@@ -3085,14 +3085,14 @@ static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
 #if ZEND_MM_CUSTOM
 static zend_always_inline void tracked_add(zend_mm_heap *heap, void *ptr, size_t size) {
 	zval size_zv;
-	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
-	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
+	zend_ulong h = ZEND_PTR_TO_ZEND_ULONG(ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	ZEND_ASSERT(ZEND_ULONG_TO_PTR(h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
 	ZVAL_LONG(&size_zv, size);
 	zend_hash_index_add_new(heap->tracked_allocs, h, &size_zv);
 }
 
 static zend_always_inline zval *tracked_get_size_zv(zend_mm_heap *heap, void *ptr) {
-	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	zend_ulong h = ZEND_PTR_TO_ZEND_ULONG(ptr) >> ZEND_MM_ALIGNMENT_LOG2;
 	zval *size_zv = zend_hash_index_find(heap->tracked_allocs, h);
 	ZEND_ASSERT(size_zv && "Trying to free pointer not allocated through ZendMM");
 	return size_zv;
@@ -3178,7 +3178,7 @@ static void tracked_free_all(zend_mm_heap *heap) {
 	HashTable *tracked_allocs = heap->tracked_allocs;
 	zend_ulong h;
 	ZEND_HASH_FOREACH_NUM_KEY(tracked_allocs, h) {
-		void *ptr = (void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2);
+		void *ptr = ZEND_ULONG_TO_PTR(h << ZEND_MM_ALIGNMENT_LOG2);
 		free(ptr);
 	} ZEND_HASH_FOREACH_END();
 }

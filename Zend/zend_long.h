@@ -22,7 +22,7 @@
 #include <stdint.h>
 
 /* This is the heart of the whole int64 enablement in zval. */
-#if defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
+#ifdef ZEND_INT64
 # define ZEND_ENABLE_ZVAL_LONG64 1
 #endif
 
