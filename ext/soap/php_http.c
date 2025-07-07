@@ -386,31 +386,41 @@ int make_http_soap_request(zval        *this_ptr,
 			smart_str_append_const(&soap_headers_z,"Accept-Encoding: gzip, deflate\r\n");
 	  }
 	  if (level > 0) {
-			zval func;
+			zend_function *fn;
 			zval retval;
 			zval params[3];
-			int n;
+			uint32_t param_num;
 
 			ZVAL_STR_COPY(&params[0], buf);
 			ZVAL_LONG(&params[1], level);
 			if (kind == SOAP_COMPRESSION_DEFLATE) {
-				n = 2;
-				ZVAL_STRING(&func, "gzcompress");
+				param_num = 2;
+				fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("gzcompress"));
+				if (UNEXPECTED(fn == NULL)) {
+					zend_throw_error(NULL, "Function gzcompress() has been disabled");
+					smart_str_free(&soap_headers_z);
+					return FALSE;
+				}
+
 				smart_str_append_const(&soap_headers_z,"Content-Encoding: deflate\r\n");
 			} else {
-				n = 3;
-				ZVAL_STRING(&func, "gzencode");
+				param_num = 3;
+				fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("gzencode"));
+				if (UNEXPECTED(fn == NULL)) {
+					zend_throw_error(NULL, "Function gzencode() has been disabled");
+					smart_str_free(&soap_headers_z);
+					return FALSE;
+				}
+
 				smart_str_append_const(&soap_headers_z,"Content-Encoding: gzip\r\n");
 				ZVAL_LONG(&params[2], 0x1f);
 			}
-			if (call_user_function(CG(function_table), (zval*)NULL, &func, &retval, n, params) == SUCCESS &&
-			    Z_TYPE(retval) == IS_STRING) {
-				zval_ptr_dtor(&params[0]);
-				zval_ptr_dtor(&func);
+
+	  		zend_call_known_function(fn, NULL, NULL, &retval, param_num, params, NULL);
+			zval_ptr_dtor(&params[0]);
+			if (Z_TYPE(retval) == IS_STRING) {
 				request = Z_STR(retval);
 			} else {
-				zval_ptr_dtor(&params[0]);
-				zval_ptr_dtor(&func);
 				zval_ptr_dtor(&retval);
 				if (request != buf) {
 					zend_string_release_ex(request, 0);
