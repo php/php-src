@@ -21,7 +21,7 @@
 
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
 static char *get_http_header_value(char *headers, char *type);
-static zend_string *get_http_body(php_stream *socketd, int close, char *headers);
+static zend_string *get_http_body(php_stream *stream, bool close, zend_string *headers);
 static zend_string *get_http_headers(php_stream *socketd);
 
 #define smart_str_append_const(str, const) \
@@ -1124,7 +1124,7 @@ try_again:
 	}
 
 
-	http_body = get_http_body(stream, http_close, ZSTR_VAL(http_headers));
+	http_body = get_http_body(stream, http_close, http_headers);
 	if (!http_body) {
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
@@ -1454,25 +1454,32 @@ static char *get_http_header_value(char *headers, char *type)
 	return NULL;
 }
 
-static zend_string* get_http_body(php_stream *stream, int close, char *headers)
+static zend_string* get_http_body(php_stream *stream, bool close, zend_string *headers)
 {
 	zend_string *http_buf = NULL;
 	char *header;
-	int header_close = close, header_chunked = 0, header_length = 0, http_buf_size = 0;
+	bool header_close = close;
+	bool header_chunked = false;
+	int header_length = 0;
+	size_t http_buf_size = 0;
 
 	if (!close) {
-		header = get_http_header_value(headers, "Connection:");
+		header = get_http_header_value(ZSTR_VAL(headers), "Connection:");
 		if (header) {
-			if(!strncasecmp(header, "close", sizeof("close")-1)) header_close = 1;
+			if (!strncasecmp(header, "close", sizeof("close")-1)) {
+				header_close = true;
+			}
 			efree(header);
 		}
 	}
-	header = get_http_header_value(headers, "Transfer-Encoding:");
+	header = get_http_header_value(ZSTR_VAL(headers), "Transfer-Encoding:");
 	if (header) {
-		if(!strncasecmp(header, "chunked", sizeof("chunked")-1)) header_chunked = 1;
+		if (!strncasecmp(header, "chunked", sizeof("chunked")-1)) {
+			header_chunked = true;
+		}
 		efree(header);
 	}
-	header = get_http_header_value(headers, "Content-Length:");
+	header = get_http_header_value(ZSTR_VAL(headers), "Content-Length:");
 	if (header) {
 		header_length = atoi(header);
 		efree(header);
@@ -1483,9 +1490,8 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 	}
 
 	if (header_chunked) {
-		char ch, done, headerbuf[8192];
-
-		done = FALSE;
+		char headerbuf[8192];
+		bool done = false;
 
 		while (!done) {
 			int buf_size = 0;
@@ -1494,13 +1500,6 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 			if (sscanf(headerbuf, "%x", &buf_size) > 0 ) {
 				if (buf_size > 0) {
 					size_t len_size = 0;
-
-					if (http_buf_size + buf_size + 1 < 0) {
-						if (http_buf) {
-							zend_string_release_ex(http_buf, 0);
-						}
-						return NULL;
-					}
 
 					if (http_buf) {
 						http_buf = zend_string_realloc(http_buf, http_buf_size + buf_size, 0);
@@ -1512,7 +1511,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 						ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, buf_size - len_size);
 						if (len_read <= 0) {
 							/* Error or EOF */
-							done = TRUE;
+							done = true;
 							break;
 						}
 						len_size += len_read;
@@ -1520,7 +1519,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 					}
 
 					/* Eat up '\r' '\n' */
-					ch = php_stream_getc(stream);
+					char ch = php_stream_getc(stream);
 					if (ch == '\r') {
 						ch = php_stream_getc(stream);
 					}
@@ -1540,7 +1539,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 				return NULL;
 			}
 			if (buf_size == 0) {
-				done = TRUE;
+				done = true;
 			}
 		}
 
