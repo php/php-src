@@ -20,6 +20,21 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+/* offset very big */
+try {
+    substr_count($str, 'b', PHP_INT_MAX);
+    echo "unexpected success\n";
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    substr_count($str, 'b', PHP_INT_MIN);
+    echo "unexpected success\n";
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 /* Using offset and length to go beyond the size of the string:
    Exception is expected, as length+offset > length of string */
 try {
@@ -35,6 +50,21 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+/* length very big */
+try {
+    substr_count($str, 'b', 0, PHP_INT_MAX);
+    echo "unexpected success\n";
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    substr_count($str, 'b', 0, PHP_INT_MIN);
+    echo "unexpected success\n";
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 echo "Done\n";
 
 ?>
@@ -42,6 +72,10 @@ echo "Done\n";
 *** Testing error conditions ***
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)
+substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)
 substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)
 substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)
 Done

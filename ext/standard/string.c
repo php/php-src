@@ -188,7 +188,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, bool is_strspn)
 		if (start < 0) {
 			start = 0;
 		}
-	} else if ((size_t) start > remain_len) {
+	} else if (ZEND_LONG_GT_SIZE_T(start, remain_len)) {
 		start = remain_len;
 	}
 
@@ -199,7 +199,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, bool is_strspn)
 			if (len < 0) {
 				len = 0;
 			}
-		} else if ((size_t) len > remain_len) {
+		} else if (ZEND_LONG_GT_SIZE_T(len, remain_len)) {
 			len = remain_len;
 		}
 	} else {
@@ -1973,7 +1973,7 @@ static zend_always_inline void _zend_strpos(zval *return_value, zend_string *hay
 	if (offset < 0) {
 		offset += (zend_long)ZSTR_LEN(haystack);
 	}
-	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
+	if (offset < 0 || ZEND_LONG_GT_SIZE_T(offset, ZSTR_LEN(haystack))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -2054,7 +2054,7 @@ PHP_FUNCTION(stripos)
 	if (offset < 0) {
 		offset += (zend_long)ZSTR_LEN(haystack);
 	}
-	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
+	if (offset < 0 || ZEND_LONG_GT_SIZE_T(offset, ZSTR_LEN(haystack))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -2085,14 +2085,14 @@ PHP_FUNCTION(strrpos)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (offset >= 0) {
-		if ((size_t)offset > ZSTR_LEN(haystack)) {
+		if (ZEND_LONG_GT_SIZE_T(offset, ZSTR_LEN(haystack))) {
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
 		p = ZSTR_VAL(haystack) + (size_t)offset;
 		e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 	} else {
-		if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
+		if (offset < -ZEND_LONG_MAX || ZEND_LONG_GT_SIZE_T(-offset, ZSTR_LEN(haystack))) {
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
@@ -2135,7 +2135,7 @@ PHP_FUNCTION(strripos)
 		   Can also avoid tolower emallocs */
 		char lowered;
 		if (offset >= 0) {
-			if ((size_t)offset > ZSTR_LEN(haystack)) {
+			if (ZEND_LONG_GT_SIZE_T(offset, ZSTR_LEN(haystack))) {
 				zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 				RETURN_THROWS();
 			}
@@ -2143,7 +2143,7 @@ PHP_FUNCTION(strripos)
 			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - 1;
 		} else {
 			p = ZSTR_VAL(haystack);
-			if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
+			if (offset < -ZEND_LONG_MAX || ZEND_LONG_GT_SIZE_T(-offset, ZSTR_LEN(haystack))) {
 				zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 				RETURN_THROWS();
 			}
@@ -2161,7 +2161,7 @@ PHP_FUNCTION(strripos)
 
 	haystack_dup = zend_string_tolower(haystack);
 	if (offset >= 0) {
-		if ((size_t)offset > ZSTR_LEN(haystack)) {
+		if (ZEND_LONG_GT_SIZE_T(offset, ZSTR_LEN(haystack))) {
 			zend_string_release_ex(haystack_dup, 0);
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
@@ -2169,7 +2169,7 @@ PHP_FUNCTION(strripos)
 		p = ZSTR_VAL(haystack_dup) + offset;
 		e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
 	} else {
-		if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
+		if (offset < -ZEND_LONG_MAX || ZEND_LONG_GT_SIZE_T(-offset, ZSTR_LEN(haystack))) {
 			zend_string_release_ex(haystack_dup, 0);
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
@@ -2274,9 +2274,11 @@ PHP_FUNCTION(chunk_split)
 		Z_PARAM_STRING(end, endlen)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (chunklen <= 0) {
+	if (UNEXPECTED(chunklen <= 0)) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(chunklen)) {
+		chunklen = (zend_long) SIZE_MAX;
 	}
 
 	if ((size_t)chunklen > ZSTR_LEN(str)) {
@@ -2304,12 +2306,11 @@ static inline void _zend_substr(zval *return_value, zend_string *str, zend_long 
 		/* if "from" position is negative, count start position from the end
 		 * of the string
 		 */
-		if (-(size_t)f > ZSTR_LEN(str)) {
+		f = (zend_long)ZSTR_LEN(str) + f;
+		if (f < 0) {
 			f = 0;
-		} else {
-			f = (zend_long)ZSTR_LEN(str) + f;
 		}
-	} else if ((size_t)f > ZSTR_LEN(str)) {
+	} else if (ZEND_LONG_GT_SIZE_T(f, ZSTR_LEN(str))) {
 		RETURN_EMPTY_STRING();
 	}
 
@@ -2318,13 +2319,18 @@ static inline void _zend_substr(zval *return_value, zend_string *str, zend_long 
 			/* if "length" position is negative, set it to the length
 			 * needed to stop that many chars from the end of the string
 			 */
-			if (-(size_t)l > ZSTR_LEN(str) - (size_t)f) {
+			l = (zend_long)ZSTR_LEN(str) - f + l;
+			if (l < 0) {
 				l = 0;
-			} else {
-				l = (zend_long)ZSTR_LEN(str) - f + l;
 			}
-		} else if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
-			l = (zend_long)ZSTR_LEN(str) - f;
+		} else {
+			if (ZEND_LONG_SIZE_T_OVFL(l)) {
+				l = SIZE_MAX;
+			}
+
+			if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
+				l = (zend_long)ZSTR_LEN(str) - f;
+			}
 		}
 	} else {
 		l = (zend_long)ZSTR_LEN(str) - f;
@@ -2439,7 +2445,7 @@ PHP_FUNCTION(substr_replace)
 			if (f < 0) {
 				f = 0;
 			}
-		} else if ((size_t)f > ZSTR_LEN(str)) {
+		} else if (ZEND_LONG_GT_SIZE_T(f, ZSTR_LEN(str))) {
 			f = ZSTR_LEN(str);
 		}
 		/* if "length" position is negative, set it to the length
@@ -2452,7 +2458,7 @@ PHP_FUNCTION(substr_replace)
 			}
 		}
 
-		if ((size_t)l > ZSTR_LEN(str)) {
+		if (ZEND_LONG_GT_SIZE_T(l, ZSTR_LEN(str))) {
 			l = ZSTR_LEN(str);
 		}
 
@@ -2545,7 +2551,7 @@ PHP_FUNCTION(substr_replace)
 						if (f < 0) {
 							f = 0;
 						}
-					} else if (f > (zend_long)ZSTR_LEN(orig_str)) {
+					} else if (ZEND_LONG_GT_SIZE_T(f, ZSTR_LEN(orig_str))) {
 						f = ZSTR_LEN(orig_str);
 					}
 					from_idx++;
@@ -2559,7 +2565,7 @@ PHP_FUNCTION(substr_replace)
 					if (f < 0) {
 						f = 0;
 					}
-				} else if (f > (zend_long)ZSTR_LEN(orig_str)) {
+				} else if (ZEND_LONG_GT_SIZE_T(f, ZSTR_LEN(orig_str))) {
 					f = ZSTR_LEN(orig_str);
 				}
 			}
@@ -2603,7 +2609,7 @@ PHP_FUNCTION(substr_replace)
 
 			ZEND_ASSERT(0 <= f && f <= ZEND_LONG_MAX);
 			ZEND_ASSERT(0 <= l && l <= ZEND_LONG_MAX);
-			if (((size_t) f + l) > ZSTR_LEN(orig_str)) {
+			if (ZEND_ULONG_GT_SIZE_T((zend_ulong) f + (zend_ulong) l, ZSTR_LEN(orig_str))) {
 				l = ZSTR_LEN(orig_str) - f;
 			}
 
@@ -5627,6 +5633,9 @@ PHP_FUNCTION(str_repeat)
 	if (mult < 0) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(mult)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
 	}
 
 	/* Don't waste our time if it's empty */
@@ -5635,13 +5644,13 @@ PHP_FUNCTION(str_repeat)
 		RETURN_EMPTY_STRING();
 
 	/* Initialize the result string */
-	result = zend_string_safe_alloc(ZSTR_LEN(input_str), mult, 0, 0);
-	result_len = ZSTR_LEN(input_str) * mult;
+	result = zend_string_safe_alloc(ZSTR_LEN(input_str), (size_t) mult, 0, 0);
+	result_len = ZSTR_LEN(input_str) * (size_t) mult;
 	ZSTR_COPY_CONCAT_PROPERTIES(result, input_str);
 
 	/* Heavy optimization for situations where input string is 1 byte long */
 	if (ZSTR_LEN(input_str) == 1) {
-		memset(ZSTR_VAL(result), *ZSTR_VAL(input_str), mult);
+		memset(ZSTR_VAL(result), *ZSTR_VAL(input_str), (size_t) mult);
 	} else {
 		const char *s, *ee;
 		char *e;
@@ -5847,7 +5856,7 @@ PHP_FUNCTION(substr_count)
 		if (offset < 0) {
 			offset += (zend_long)haystack_len;
 		}
-		if ((offset < 0) || ((size_t)offset > haystack_len)) {
+		if ((offset < 0) || ZEND_LONG_GT_SIZE_T(offset, haystack_len)) {
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
@@ -5859,7 +5868,7 @@ PHP_FUNCTION(substr_count)
 		if (length < 0) {
 			length += haystack_len;
 		}
-		if (length < 0 || ((size_t)length > haystack_len)) {
+		if (length < 0 || ZEND_LONG_GT_SIZE_T(length, haystack_len)) {
 			zend_argument_value_error(4, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
@@ -5927,6 +5936,11 @@ PHP_FUNCTION(str_pad)
 		Z_PARAM_STRING(pad_str, pad_str_len)
 		Z_PARAM_LONG(pad_type_val)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_LONG_ZSTR_LEN_OVFL(pad_length)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", ZSTR_MAX_LEN);
+		RETURN_THROWS();
+	}
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
@@ -6277,7 +6291,7 @@ PHP_FUNCTION(str_split)
 		RETURN_THROWS();
 	}
 
-	if ((size_t)split_length >= ZSTR_LEN(str)) {
+	if (ZEND_LONG_GTE_SIZE_T(split_length, ZSTR_LEN(str))) {
 		if (0 == ZSTR_LEN(str)) {
 			RETURN_EMPTY_ARRAY();
 		}
@@ -6368,21 +6382,30 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if (offset < 0) {
-		offset = ZSTR_LEN(s1) + offset;
-		offset = (offset < 0) ? 0 : offset;
+		if (offset < -((zend_long) ZSTR_LEN(s1))) {
+			offset = 0;
+		} else {
+			offset = ZSTR_LEN(s1) + offset;
+		}
 	}
 
-	if ((size_t)offset > ZSTR_LEN(s1)) {
+	if (ZEND_LONG_GT_SIZE_T(offset, ZSTR_LEN(s1))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
 
-	cmp_len = len ? (size_t)len : MAX(ZSTR_LEN(s2), (ZSTR_LEN(s1) - offset));
+	if (!len) {
+		cmp_len = MAX(ZSTR_LEN(s2), (ZSTR_LEN(s1) - (size_t) offset));
+	} else if (ZEND_LONG_SIZE_T_OVFL(len)) {
+		cmp_len = SIZE_MAX;
+	} else {
+		cmp_len = (size_t) len;
+	}
 
 	if (!cs) {
-		RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
+		RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1) + (size_t) offset, ZSTR_LEN(s1) - (size_t) offset, ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 	} else {
-		RETURN_LONG(zend_binary_strncasecmp_l(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
+		RETURN_LONG(zend_binary_strncasecmp_l(ZSTR_VAL(s1) + (size_t) offset, ZSTR_LEN(s1) - (size_t) offset, ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 	}
 }
 /* }}} */
