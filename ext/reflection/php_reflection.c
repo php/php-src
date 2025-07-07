@@ -157,6 +157,7 @@ typedef struct _attribute_reference {
 	zend_class_entry *scope;
 	zend_string *filename;
 	uint32_t target;
+	zval target_reflector;
 } attribute_reference;
 
 typedef enum {
@@ -1236,7 +1237,7 @@ static void _extension_string(smart_str *str, const zend_module_entry *module, c
 
 /* {{{ reflection_attribute_factory */
 static void reflection_attribute_factory(zval *object, HashTable *attributes, zend_attribute *data,
-		zend_class_entry *scope, uint32_t target, zend_string *filename)
+		zend_class_entry *scope, uint32_t target, zend_string *filename, zval *target_reflector)
 {
 	reflection_object *intern;
 	attribute_reference *reference;
@@ -1249,6 +1250,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->scope = scope;
 	reference->filename = filename ? zend_string_copy(filename) : NULL;
 	reference->target = target;
+	ZVAL_COPY(&reference->target_reflector, target_reflector);
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
 	ZVAL_STR_COPY(reflection_prop_name(object), data->name);
@@ -1256,7 +1258,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 /* }}} */
 
 static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
-		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
+		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename, zval *target_reflector) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
 
@@ -1269,7 +1271,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
-				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename, target_reflector);
 				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1301,7 +1303,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 			}
 		}
 
-		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename, target_reflector);
 		add_next_index_zval(ret, &tmp);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1310,7 +1312,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 /* }}} */
 
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
-		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename) /* {{{ */
+		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename, zval *target_reflector) /* {{{ */
 {
 	zend_string *name = NULL;
 	zend_long flags = 0;
@@ -1343,7 +1345,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 
 	array_init(return_value);
 
-	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename)) {
+	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename, target_reflector)) {
 		RETURN_THROWS();
 	}
 }
@@ -2056,7 +2058,8 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		fptr->common.attributes, 0, fptr->common.scope, target,
-		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL);
+		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL,
+		ZEND_THIS);
 }
 /* }}} */
 
@@ -2898,7 +2901,8 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
-		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
+		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL,
+		ZEND_THIS);
 }
 
 /* {{{ Returns the index of the parameter, starting from 0 */
@@ -4020,7 +4024,8 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
-		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL);
+		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL,
+		ZEND_THIS);
 }
 /* }}} */
 
@@ -4425,7 +4430,8 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
-		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL);
+		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL,
+		ZEND_THIS);
 }
 /* }}} */
 
@@ -6353,7 +6359,8 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
-		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL);
+		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL,
+		ZEND_THIS);
 }
 /* }}} */
 
@@ -7211,6 +7218,19 @@ ZEND_METHOD(ReflectionAttribute, getTarget)
 }
 /* }}} */
 
+/* {{{ Returns the reflection object that attribute was obtained from of the attribute */
+ZEND_METHOD(ReflectionAttribute, getTargetReflector)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+	GET_REFLECTION_OBJECT_PTR(attr);
+
+	RETURN_COPY(&attr->target_reflector);
+}
+/* }}} */
+
 /* {{{ Returns true if the attribute is repeated */
 ZEND_METHOD(ReflectionAttribute, isRepeated)
 {
@@ -7822,7 +7842,8 @@ ZEND_METHOD(ReflectionConstant, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		const_->attributes, 0, NULL, ZEND_ATTRIBUTE_TARGET_CONST,
-		const_->filename);
+		const_->filename,
+		ZEND_THIS);
 }
 
 ZEND_METHOD(ReflectionConstant, __toString)

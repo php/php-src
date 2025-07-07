@@ -837,6 +837,7 @@ class ReflectionAttribute implements Reflector
 
     public function getName(): string {}
     public function getTarget(): int {}
+	public function getTargetReflector(): Reflector {}
     public function isRepeated(): bool {}
     public function getArguments(): array {}
     public function newInstance(): object {}
