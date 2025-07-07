@@ -537,7 +537,7 @@ ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine)
 	efree(waker);
 }
 
-static void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
+void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event)
 {
 	if (callback->ref_count > 1) {
 		// If the callback is still referenced, we cannot dispose it yet
