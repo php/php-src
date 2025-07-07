@@ -814,7 +814,6 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	zend_function *func;
 	uint32_t call_info;
 	void *object_or_called_scope;
-	zend_class_entry *orig_fake_scope;
 
 	ZVAL_UNDEF(fci->retval);
 
@@ -1003,7 +1002,7 @@ cleanup_args:
 		fci_cache->function_handler = NULL;
 	}
 
-	orig_fake_scope = EG(fake_scope);
+	const zend_class_entry *orig_fake_scope = EG(fake_scope);
 	EG(fake_scope) = NULL;
 	if (func->type == ZEND_USER_FUNCTION) {
 		uint32_t orig_jit_trace_num = EG(jit_trace_num);

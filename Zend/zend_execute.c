@@ -932,7 +932,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_pr
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
 	const zend_property_info *prop_info, const char *operation
 ) {
-	zend_class_entry *scope;
+	const zend_class_entry *scope;
 	if (EG(fake_scope)) {
 		scope = EG(fake_scope);
 	} else {
