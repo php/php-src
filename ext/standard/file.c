@@ -498,10 +498,12 @@ PHP_FUNCTION(file_put_contents)
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
 				numbytes = -1;
 			} else {
+#if SIZEOF_SIZE_T >= SIZEOF_ZEND_LONG
 				if (len > ZEND_LONG_MAX) {
 					php_error_docref(NULL, E_WARNING, "content truncated from %zu to " ZEND_LONG_FMT " bytes", len, ZEND_LONG_MAX);
 					len = ZEND_LONG_MAX;
 				}
+#endif
 				numbytes = len;
 			}
 			break;

@@ -2227,13 +2227,19 @@ static inline void _zend_substr(zval *return_value, zend_string *str, zend_long 
 		/* if "from" position is negative, count start position from the end
 		 * of the string
 		 */
-		if (-(size_t)f > ZSTR_LEN(str)) {
+		f = (zend_long)ZSTR_LEN(str) + f;
+		if (f < 0) {
 			f = 0;
-		} else {
-			f = (zend_long)ZSTR_LEN(str) + f;
 		}
-	} else if ((size_t)f > ZSTR_LEN(str)) {
-		RETURN_EMPTY_STRING();
+	} else {
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+			if (UNEXPECTED(f > SIZE_MAX)) {
+				f = SIZE_MAX;
+			}
+#endif
+		if ((size_t)f > ZSTR_LEN(str)) {
+			RETURN_EMPTY_STRING();
+		}
 	}
 
 	if (!len_is_null) {
@@ -2241,13 +2247,19 @@ static inline void _zend_substr(zval *return_value, zend_string *str, zend_long 
 			/* if "length" position is negative, set it to the length
 			 * needed to stop that many chars from the end of the string
 			 */
-			if (-(size_t)l > ZSTR_LEN(str) - (size_t)f) {
+			l = (zend_long)ZSTR_LEN(str) - f + l;
+			if (l < 0) {
 				l = 0;
-			} else {
-				l = (zend_long)ZSTR_LEN(str) - f + l;
 			}
-		} else if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
-			l = (zend_long)ZSTR_LEN(str) - f;
+		} else {
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+			if (UNEXPECTED(l > SIZE_MAX)) {
+				l = SIZE_MAX;
+			}
+#endif
+			if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
+				l = (zend_long)ZSTR_LEN(str) - f;
+			}
 		}
 	} else {
 		l = (zend_long)ZSTR_LEN(str) - f;
@@ -2362,8 +2374,15 @@ PHP_FUNCTION(substr_replace)
 			if (f < 0) {
 				f = 0;
 			}
-		} else if ((size_t)f > ZSTR_LEN(str)) {
-			f = ZSTR_LEN(str);
+		} else {
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+			if (UNEXPECTED(f > SIZE_MAX)) {
+				f = SIZE_MAX;
+			}
+#endif
+			if ((size_t)f > ZSTR_LEN(str)) {
+				f = ZSTR_LEN(str);
+			}
 		}
 		/* if "length" position is negative, set it to the length
 		 * needed to stop that many chars from the end of the string
@@ -2374,6 +2393,12 @@ PHP_FUNCTION(substr_replace)
 				l = 0;
 			}
 		}
+
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+		if (UNEXPECTED(l > SIZE_MAX)) {
+			l = SIZE_MAX;
+		}
+#endif
 
 		if ((size_t)l > ZSTR_LEN(str)) {
 			l = ZSTR_LEN(str);
@@ -2523,6 +2548,12 @@ PHP_FUNCTION(substr_replace)
 					l = 0;
 				}
 			}
+
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+			if (UNEXPECTED(l > SIZE_MAX)) {
+				l = SIZE_MAX;
+			}
+#endif
 
 			ZEND_ASSERT(0 <= f && f <= ZEND_LONG_MAX);
 			ZEND_ASSERT(0 <= l && l <= ZEND_LONG_MAX);
@@ -5797,6 +5828,13 @@ PHP_FUNCTION(str_pad)
 		Z_PARAM_STRING(pad_str, pad_str_len)
 		Z_PARAM_LONG(pad_type_val)
 	ZEND_PARSE_PARAMETERS_END();
+
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+	if (pad_length > SIZE_MAX/2) {
+		zend_argument_value_error(2, "must be lower or equal to %zd", SIZE_MAX/2);
+		RETURN_THROWS();
+	}
+#endif
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
