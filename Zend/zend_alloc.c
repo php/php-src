@@ -84,7 +84,6 @@ typedef int pid_t;
 #include <fcntl.h>
 #include <errno.h>
 
-
 #ifndef _WIN32
 # include <sys/mman.h>
 # ifndef MAP_ANON
@@ -174,27 +173,27 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #ifdef __SANITIZE_ADDRESS__
 # include <sanitizer/asan_interface.h>
 
-#if 0
+# if 0
 
-#define ZEND_MM_POISON_DEBUG(_type, _ptr, _size) do { \
+#  define ZEND_MM_POISON_DEBUG(_type, _ptr, _size) do { \
 	fprintf(stderr, "%s %p - %p in %d\n", (_type), (_ptr), (void*) (((size_t)_ptr)+((size_t)_size)), __LINE__); \
 	fflush(stderr); \
 } while (0);
 
-#else
+# else
 
-#define ZEND_MM_POISON_DEBUG(_type, _ptr, _size)
+#  define ZEND_MM_POISON_DEBUG(_type, _ptr, _size)
 
-#endif
+# endif
 
-#define ZEND_MM_POISON(_ptr, _size) do { \
+# define ZEND_MM_POISON(_ptr, _size) do { \
 	if (UNEXPECTED(((size_t) (_ptr)) & ((size_t)7))) { \
 		zend_mm_panic("Wrong alignment"); \
 	} \
 	ZEND_MM_POISON_DEBUG("Poisoning", (_ptr), (_size)); \
 	ASAN_POISON_MEMORY_REGION((_ptr), (_size));\
 } while (0);
-#define ZEND_MM_UNPOISON(_ptr, _size) do { \
+# define ZEND_MM_UNPOISON(_ptr, _size) do { \
 	if (UNEXPECTED(((size_t) (_ptr)) & ((size_t)7))) { \
 		zend_mm_panic("Wrong alignment"); \
 	} \
@@ -202,35 +201,35 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 	ASAN_UNPOISON_MEMORY_REGION((_ptr), (_size));\
 } while (0);
 
-#define ZEND_MM_POISON_HEAP(_ptr) ZEND_MM_POISON((_ptr), sizeof(zend_mm_heap));
-#define ZEND_MM_UNPOISON_HEAP(_ptr) ZEND_MM_UNPOISON((_ptr), sizeof(zend_mm_heap));
+# define ZEND_MM_POISON_HEAP(_ptr) ZEND_MM_POISON((_ptr), sizeof(zend_mm_heap));
+# define ZEND_MM_UNPOISON_HEAP(_ptr) ZEND_MM_UNPOISON((_ptr), sizeof(zend_mm_heap));
 
-#define ZEND_MM_POISON_DEBUGINFO(_ptr) ZEND_MM_POISON((_ptr), sizeof(zend_mm_debug_info));
-#define ZEND_MM_UNPOISON_DEBUGINFO(_ptr) ZEND_MM_UNPOISON((_ptr), sizeof(zend_mm_debug_info));
+# define ZEND_MM_POISON_DEBUGINFO(_ptr) ZEND_MM_POISON((_ptr), sizeof(zend_mm_debug_info));
+# define ZEND_MM_UNPOISON_DEBUGINFO(_ptr) ZEND_MM_UNPOISON((_ptr), sizeof(zend_mm_debug_info));
 
-#define ZEND_MM_POISON_CHUNK_HDR(_ptr, _heap) do { \
+# define ZEND_MM_POISON_CHUNK_HDR(_ptr, _heap) do { \
 	ZEND_MM_POISON((_ptr), sizeof(zend_mm_chunk)); \
 	ZEND_MM_UNPOISON_HEAP((_heap)); \
 } while (0);
 
-#define ZEND_MM_UNPOISON_CHUNK_HDR(_ptr) ZEND_MM_UNPOISON((_ptr), sizeof(zend_mm_chunk));
+# define ZEND_MM_UNPOISON_CHUNK_HDR(_ptr) ZEND_MM_UNPOISON((_ptr), sizeof(zend_mm_chunk));
 
-#define ZEND_MM_POISON_CHUNK(_ptr, _heap) do { \
+# define ZEND_MM_POISON_CHUNK(_ptr, _heap) do { \
 	ZEND_MM_POISON((_ptr), ZEND_MM_CHUNK_SIZE); \
 	ZEND_MM_UNPOISON_HEAP((_heap)); \
 } while (0);
 
 #else
 
-#define ZEND_MM_POISON(_ptr, _size)
-#define ZEND_MM_UNPOISON(_ptr, _size)
-#define ZEND_MM_POISON_HEAP(_ptr)
-#define ZEND_MM_UNPOISON_HEAP(_ptr)
-#define ZEND_MM_POISON_CHUNK_HDR(_ptr, _heap)
-#define ZEND_MM_UNPOISON_CHUNK_HDR(_ptr)
-#define ZEND_MM_POISON_CHUNK(_ptr, _heap)
-#define ZEND_MM_POISON_DEBUGINFO(_ptr)
-#define ZEND_MM_UNPOISON_DEBUGINFO(_ptr)
+# define ZEND_MM_POISON(_ptr, _size)
+# define ZEND_MM_UNPOISON(_ptr, _size)
+# define ZEND_MM_POISON_HEAP(_ptr)
+# define ZEND_MM_UNPOISON_HEAP(_ptr)
+# define ZEND_MM_POISON_CHUNK_HDR(_ptr, _heap)
+# define ZEND_MM_UNPOISON_CHUNK_HDR(_ptr)
+# define ZEND_MM_POISON_CHUNK(_ptr, _heap)
+# define ZEND_MM_POISON_DEBUGINFO(_ptr)
+# define ZEND_MM_UNPOISON_DEBUGINFO(_ptr)
 
 #endif
 typedef uint32_t   zend_mm_page_info; /* 4-byte integer */
