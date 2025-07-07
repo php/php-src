@@ -53,29 +53,29 @@ bool proxy_authentication(const zval* this_ptr, smart_str* soap_headers)
 }
 
 /* HTTP Authentication */
-int basic_authentication(zval* this_ptr, smart_str* soap_headers)
+bool basic_authentication(const zval* this_ptr, smart_str* soap_headers)
 {
-	zval *login = Z_CLIENT_LOGIN_P(this_ptr);
-	zval *use_digest = Z_CLIENT_USE_DIGEST_P(this_ptr);
+	const zval *login = Z_CLIENT_LOGIN_P(this_ptr);
+	const zval *use_digest = Z_CLIENT_USE_DIGEST_P(this_ptr);
 	if (Z_TYPE_P(login) == IS_STRING && Z_TYPE_P(use_digest) != IS_TRUE) {
 		smart_str auth = {0};
 		smart_str_append(&auth, Z_STR_P(login));
 		smart_str_appendc(&auth, ':');
 
-		zval *password = Z_CLIENT_PASSWORD_P(this_ptr);
+		const zval *password = Z_CLIENT_PASSWORD_P(this_ptr);
 		if (Z_TYPE_P(password) == IS_STRING) {
 			smart_str_append(&auth, Z_STR_P(password));
 		}
 		smart_str_0(&auth);
-		zend_string *buf = php_base64_encode((unsigned char*)ZSTR_VAL(auth.s), ZSTR_LEN(auth.s));
+		zend_string *buf = php_base64_encode_str(auth.s);
 		smart_str_append_const(soap_headers, "Authorization: Basic ");
 		smart_str_append(soap_headers, buf);
 		smart_str_append_const(soap_headers, "\r\n");
-		zend_string_release_ex(buf, 0);
+		zend_string_release_ex(buf, false);
 		smart_str_free(&auth);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 static void http_context_add_header(const char *s,
