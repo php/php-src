@@ -314,7 +314,7 @@ PHP_FUNCTION(socket_cmsg_space)
 		size_t size = entry->size + n * entry->var_el_size;
 		size_t total_size = CMSG_SPACE(size);
 		if (n > n_max /* zend_long overflow */
-			|| total_size > ZEND_LONG_MAX
+			|| ZEND_SIZE_T_ZEND_LONG_OVFL(total_size)
 			|| total_size < size /* align overflow */) {
 			zend_argument_value_error(3, "is too large");
 			RETURN_THROWS();
