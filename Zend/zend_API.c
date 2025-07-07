@@ -4021,13 +4021,11 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 		     ((fcc->object && fcc->calling_scope->__call) ||
 		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
 			scope = get_scope(frame);
-			if (fcc->function_handler->common.scope != scope) {
-				if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
-				 || !zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope)) {
-					retval = 0;
-					fcc->function_handler = NULL;
-					goto get_function_via_handler;
-				}
+			ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
+			if (!zend_check_method_accessible(fcc->function_handler, scope)) {
+				retval = 0;
+				fcc->function_handler = NULL;
+				goto get_function_via_handler;
 			}
 		}
 	} else {
@@ -4086,17 +4084,15 @@ get_function_via_handler:
 			if (retval
 			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)) {
 				scope = get_scope(frame);
-				if (fcc->function_handler->common.scope != scope) {
-					if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
-					 || (!zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope))) {
-						if (error) {
-							if (*error) {
-								efree(*error);
-							}
-							zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
+				ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
+				if (!zend_check_method_accessible(fcc->function_handler, scope)) {
+					if (error) {
+						if (*error) {
+							efree(*error);
 						}
-						retval = 0;
+						zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 					}
+					retval = 0;
 				}
 			}
 		}
