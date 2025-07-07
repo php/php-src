@@ -1547,11 +1547,11 @@ PHP_METHOD(SoapServer, handle)
 			}
 #endif
 			zend_function *header_fn = zend_hash_find_ptr_lc(function_table, Z_STR(h->function_name));
+			/* If object has a __call() magic method use it */
+			if (header_fn == NULL && soap_obj_ce && soap_obj_ce->__call) {
+				header_fn = zend_get_call_trampoline_func(soap_obj_ce, Z_STR(function_name), false);
+			}
 			if (UNEXPECTED(header_fn == NULL)) {
-				if (soap_obj_ce && soap_obj_ce->__call) {
-					header_fn = zend_get_call_trampoline_func(soap_obj_ce, Z_STR(function_name), false);
-					goto soap_header_func_call;
-				}
 				if (h->mustUnderstand) {
 					soap_server_fault_en("MustUnderstand","Header not understood", NULL, NULL, NULL);
 					goto fail;
@@ -1559,7 +1559,6 @@ PHP_METHOD(SoapServer, handle)
 				continue;
 			}
 
-soap_header_func_call:
 			zend_call_known_function(header_fn, soap_zobj, soap_obj_ce, &h->retval, h->num_params, h->parameters, NULL);
 			if (Z_TYPE(h->retval) == IS_OBJECT &&
 			    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry)) {
