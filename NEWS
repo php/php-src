@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-18907 (Leak when creating cycle in hook). (ilutov)
   . Fix OSS-Fuzz #427814456. (nielsdos)
   . Fix OSS-Fuzz #428983568 and #428760800. (nielsdos)
+  . Fixed bug GH-17204 -Wuseless-escape warnings emitted by re2c. (Peter Kokot)
 
 - Curl:
   . Fix memory leaks when returning refcounted value from curl callback.
