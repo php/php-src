@@ -156,8 +156,8 @@ static const zend_function_entry ext_functions[] = {
 
 static void register_enchant_symbols(int module_number)
 {
-	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_ENCHANT_MYSPELL = REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_ENCHANT_ISPELL = REGISTER_LONG_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_PERSISTENT | CONST_DEPRECATED);
 #if defined(HAVE_ENCHANT_GET_VERSION)
 	REGISTER_STRING_CONSTANT("LIBENCHANT_VERSION", PHP_ENCHANT_GET_VERSION, CONST_PERSISTENT);
 #endif
@@ -224,7 +224,6 @@ static void register_enchant_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_enchant_dict_is_in_session_0_arg1, attribute_Deprecated_func_enchant_dict_is_in_session_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_enchant_dict_is_in_session_0->args[1].value, &attribute_Deprecated_func_enchant_dict_is_in_session_0_arg1);
 	attribute_Deprecated_func_enchant_dict_is_in_session_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_ENCHANT_MYSPELL = zend_hash_str_find_ptr(EG(zend_constants), "ENCHANT_MYSPELL", sizeof("ENCHANT_MYSPELL") - 1);
 
 	zend_attribute *attribute_Deprecated_const_ENCHANT_MYSPELL_0 = zend_add_global_constant_attribute(const_ENCHANT_MYSPELL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg0;
@@ -237,7 +236,6 @@ static void register_enchant_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg1, attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ENCHANT_MYSPELL_0->args[1].value, &attribute_Deprecated_const_ENCHANT_MYSPELL_0_arg1);
 	attribute_Deprecated_const_ENCHANT_MYSPELL_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_ENCHANT_ISPELL = zend_hash_str_find_ptr(EG(zend_constants), "ENCHANT_ISPELL", sizeof("ENCHANT_ISPELL") - 1);
 
 	zend_attribute *attribute_Deprecated_const_ENCHANT_ISPELL_0 = zend_add_global_constant_attribute(const_ENCHANT_ISPELL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_const_ENCHANT_ISPELL_0_arg0;

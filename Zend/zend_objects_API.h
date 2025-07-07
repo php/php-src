@@ -137,5 +137,16 @@ static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_obj
 	return NULL;
 }
 
+static zend_always_inline bool zend_check_method_accessible(const zend_function *fn, const zend_class_entry *scope)
+{
+	if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC)
+		&& fn->common.scope != scope
+		&& (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_PRIVATE)
+			|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fn), scope)))) {
+		return false;
+	}
+
+	return true;
+}
 
 #endif /* ZEND_OBJECTS_H */

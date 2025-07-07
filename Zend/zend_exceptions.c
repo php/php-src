@@ -846,20 +846,6 @@ void zend_register_default_exception(void) /* {{{ */
 }
 /* }}} */
 
-/* {{{ Deprecated - Use zend_ce_exception directly instead */
-ZEND_API zend_class_entry *zend_exception_get_default(void)
-{
-	return zend_ce_exception;
-}
-/* }}} */
-
-/* {{{ Deprecated - Use zend_ce_error_exception directly instead */
-ZEND_API zend_class_entry *zend_get_error_exception(void)
-{
-	return zend_ce_error_exception;
-}
-/* }}} */
-
 static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, zend_string *message, zend_long code) /* {{{ */
 {
 	zval ex, tmp;

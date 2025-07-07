@@ -701,7 +701,7 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 				len = UINT_MAX;
 		}
 		*handled_output_len = len;
-	} else if (ZSTR_LEN(url_state->url_app.s) == 0) {
+	} else {
 		url_adapt_state_ex_t *ctx = url_state;
 		if (ctx->buf.s && ZSTR_LEN(ctx->buf.s)) {
 			smart_str_append(&ctx->result, ctx->buf.s);
@@ -715,8 +715,6 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 		} else {
 			*handled_output = estrndup(output, *handled_output_len = output_len);
 		}
-	} else {
-		*handled_output = NULL;
 	}
 }
 
