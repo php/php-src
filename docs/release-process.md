@@ -210,8 +210,8 @@ slightly different steps. We'll call attention where the steps differ.
    > Do *not* bump the API versions after RC1.
 
 5. Compile and run `make test`, with and without ZTS (Zend Thread Safety), using
-   the correct Bison and re2c versions, e.g., for PHP 7.4, Bison 3.0.0 and re2c
-   0.13.4 are required, as a minimum.
+   the correct Bison and re2c versions, e.g., for PHP 8.5, Bison 3.0.0 and re2c
+   1.0.3 are required, as a minimum.
 
    For example:
 
@@ -555,8 +555,8 @@ slightly different steps. We'll call attention where the steps differ.
    an example.
 
 6. Compile and run `make test`, with and without ZTS (Zend Thread Safety), using
-   the correct Bison and re2c versions, e.g., for PHP 7.4, Bison 3.0.0 and re2c
-   0.13.4 are required, as a minimum.
+   the correct Bison and re2c versions, e.g., for PHP 8.5, Bison 3.0.0 and re2c
+   1.0.3 are required, as a minimum.
 
    For example:
 
