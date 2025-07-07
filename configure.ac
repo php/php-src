@@ -540,7 +540,6 @@ AC_CHECK_FUNCS(m4_normalize([
   getgrnam_r
   gethostname
   getloadavg
-  getlogin
   getprotobyname
   getprotobynumber
   getpwnam_r
