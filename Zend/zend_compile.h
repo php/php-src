@@ -24,6 +24,7 @@
 #include "zend_types.h"
 #include "zend_map_ptr.h"
 #include "zend_alloc.h"
+#include "zend_vm_opcodes.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -135,7 +136,7 @@ void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr, bool allow_dynami
 typedef int (*user_opcode_handler_t) (zend_execute_data *execute_data);
 
 struct _zend_op {
-	const void *handler;
+	zend_vm_opcode_handler_t handler;
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
