@@ -3,7 +3,7 @@ gmp_setbit() with large index
 --EXTENSIONS--
 gmp
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
+<?php if (PHP_SYS_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 <?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow test"); ?>
 <?php
     /* This test requires about 8G RAM which likely not to be present on an arbitrary CI. */
@@ -24,8 +24,10 @@ gmp
 <?php
 
 $n = gmp_init("227200");
+
 for($a = 1<<30; $a > 0 && $a < 0x8000000000; $a <<= 2) {
     $i = $a - 1;
+    var_dump($i);
     printf("%X\n", $i);
     try {
         gmp_setbit($n, $i, 1);
