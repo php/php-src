@@ -17,7 +17,7 @@
 #include "php_soap.h"
 #include "ext/uri/php_uri.h"
 
-static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
+static const char *get_http_header_value_nodup(const char *headers, size_t headers_len, const char *type, size_t type_len, size_t *len);
 static char *get_http_header_value(zend_string *headers, char *type);
 static zend_string *get_http_body(php_stream *stream, bool close, zend_string *headers);
 static zend_string *get_http_headers(php_stream *stream);
@@ -365,8 +365,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4) bool make_http_soap_request(
 	zval *tmp;
 	int use_proxy = 0;
 	zend_string *http_body;
-	char *content_type, *http_version, *cookie_itt;
-	size_t cookie_len;
+	char *content_type, *http_version;
 	bool http_close;
 	zend_string *http_headers;
 	char *connection;
@@ -1026,13 +1025,15 @@ try_again:
 	   we shouldn't be changing urls so path doesn't
 	   matter too much
 	*/
-	cookie_itt = ZSTR_VAL(http_headers);
+	const char *cookie_itt = ZSTR_VAL(http_headers);
+	size_t cookie_len = ZSTR_LEN(http_headers);
+	size_t parsed_cookie_len;
 
-	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, "Set-Cookie:", &cookie_len))) {
+	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, cookie_len, ZEND_STRL("Set-Cookie:"), &parsed_cookie_len))) {
 		zval *cookies = Z_CLIENT_COOKIES_P(this_ptr);
 		SEPARATE_ARRAY(cookies);
 
-		char *cookie = estrndup(cookie_itt, cookie_len);
+		char *cookie = estrndup(cookie_itt, parsed_cookie_len);
 		char *eqpos = strstr(cookie, "=");
 		char *sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
@@ -1042,7 +1043,7 @@ try_again:
 			if (sempos != NULL) {
 				cookie_value_len = sempos-(eqpos+1);
 			} else {
-				cookie_value_len = strlen(cookie)-(eqpos-cookie)-1;
+				cookie_value_len = parsed_cookie_len-(eqpos-cookie)-1;
 			}
 
 			zend_string *name = zend_string_init(cookie, eqpos - cookie, false);
@@ -1087,7 +1088,8 @@ try_again:
 			zend_string_release_ex(name, false);
 		}
 
-		cookie_itt = cookie_itt + cookie_len;
+		cookie_itt = cookie_itt + parsed_cookie_len;
+		cookie_len -= parsed_cookie_len;
 		efree(cookie);
 	}
 
@@ -1401,24 +1403,22 @@ try_again:
 	return true;
 }
 
-static char *get_http_header_value_nodup(char *headers, char *type, size_t *len)
+static const char *get_http_header_value_nodup(const char *headers, size_t headers_len, const char *type, size_t type_len, size_t *len)
 {
-	char *pos, *tmp = NULL;
-	int typelen, headerslen;
+	const char *pos;
+	const char *tmp = NULL;
 
-	typelen = strlen(type);
-	headerslen = strlen(headers);
 
 	/* header `titles' can be lower case, or any case combination, according
 	 * to the various RFC's. */
 	pos = headers;
 	do {
 		/* start of buffer or start of line */
-		if (strncasecmp(pos, type, typelen) == 0) {
-			char *eol;
+		if (strncasecmp(pos, type, type_len) == 0) {
+			const char *eol;
 
 			/* match */
-			tmp = pos + typelen;
+			tmp = pos + type_len;
 
 			/* strip leading whitespace */
 			while (*tmp == ' ' || *tmp == '\t') {
@@ -1427,7 +1427,7 @@ static char *get_http_header_value_nodup(char *headers, char *type, size_t *len)
 
 			eol = strchr(tmp, '\n');
 			if (eol == NULL) {
-				eol = headers + headerslen;
+				eol = headers + headers_len;
 			} else if (eol > tmp) {
 				if (*(eol-1) == '\r') {
 					eol--;
@@ -1457,9 +1457,7 @@ static char *get_http_header_value_nodup(char *headers, char *type, size_t *len)
 static char *get_http_header_value(zend_string *headers, char *type)
 {
 	size_t len;
-	char *value;
-
-	value = get_http_header_value_nodup(ZSTR_VAL(headers), type, &len);
+	const char *value = get_http_header_value_nodup(ZSTR_VAL(headers), ZSTR_LEN(headers), type, strlen(type), &len);
 
 	if (value) {
 		return estrndup(value, len);
