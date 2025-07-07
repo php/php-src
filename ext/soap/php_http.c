@@ -388,12 +388,15 @@ bool make_http_soap_request(
 		int level = Z_LVAL_P(tmp) & 0x0f;
 		int kind  = Z_LVAL_P(tmp) & SOAP_COMPRESSION_DEFLATE;
 
-		if (level > 9) {level = 9;}
+		if (level > 9) {
+			level = 9;
+		}
 
-	  if ((Z_LVAL_P(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
+		if ((Z_LVAL_P(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
 			smart_str_append_const(&soap_headers_z,"Accept-Encoding: gzip, deflate\r\n");
-	  }
-	  if (level > 0) {
+		}
+
+		if (level > 0) {
 			zend_function *fn;
 			zval retval;
 			zval params[3];
@@ -436,7 +439,7 @@ bool make_http_soap_request(
 				smart_str_free(&soap_headers_z);
 				return false;
 			}
-	  }
+		}
 	}
 
 	tmp = Z_CLIENT_HTTPSOCKET_P(this_ptr);
@@ -1065,7 +1068,7 @@ try_again:
 					if (sempos != NULL) {
 						options = sempos+1;
 					} else {
-					  break;
+						break;
 					}
 				}
 			}
@@ -1530,7 +1533,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 						if (UNEXPECTED(len_read <= 0)) {
 							/* Error or EOF */
 							done = true;
-						  break;
+							break;
 						}
 						len_size += len_read;
 	 					http_buf_size += len_read;
