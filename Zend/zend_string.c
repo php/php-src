@@ -425,7 +425,7 @@ ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const 
 	const char *ptr = ZSTR_VAL(s1);
 	uintptr_t delta = (uintptr_t) s2 - (uintptr_t) s1;
 	size_t len = ZSTR_LEN(s1);
-	zend_ulong ret;
+	size_t ret;
 
 	__asm__ (
 		"0:\n\t"
@@ -456,14 +456,13 @@ ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const 
 		: "cc");
 	return ret;
 }
-
 #elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
 ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);
 	uintptr_t delta = (uintptr_t) s2 - (uintptr_t) s1;
 	size_t len = ZSTR_LEN(s1);
-	zend_ulong ret;
+	size_t ret;
 
 	__asm__ (
 		"0:\n\t"
