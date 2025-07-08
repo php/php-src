@@ -347,15 +347,12 @@ bool make_http_soap_request(
 	int use_proxy = 0;
 	int use_ssl;
 	zend_string *http_body;
-	char *content_type, *http_version;
 	bool http_close;
 	zend_string *http_headers;
-	char *connection;
 	bool http_1_1;
 	int http_status;
 	bool content_type_xml = false;
 	zend_long redirect_max = 20;
-	char *content_encoding;
 	char *http_msg = NULL;
 	bool old_allow_url_fopen;
 	php_stream_context *context = NULL;
@@ -957,7 +954,7 @@ try_again:
 			/* Check to see what HTTP status was sent */
 			http_1_1 = false;
 			http_status = 0;
-			http_version = get_http_header_value(http_headers, "HTTP/");
+			char *http_version = get_http_header_value(http_headers, "HTTP/");
 			if (http_version) {
 				char *tmp;
 
@@ -1086,16 +1083,16 @@ try_again:
 	if (http_1_1) {
 		http_close = false;
 		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(http_headers, "Proxy-Connection:");
-			if (connection) {
-				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
+			char *proxy_connection = get_http_header_value(http_headers, "Proxy-Connection:");
+			if (proxy_connection) {
+				if (strncasecmp(proxy_connection, "close", sizeof("close")-1) == 0) {
 					http_close = true;
 				}
-				efree(connection);
+				efree(proxy_connection);
 			}
 		}
 		if (!http_close) {
-			connection = get_http_header_value(http_headers, "Connection:");
+			char *connection = get_http_header_value(http_headers, "Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
 					http_close = true;
@@ -1106,16 +1103,16 @@ try_again:
 	} else {
 		http_close = true;
 		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(http_headers, "Proxy-Connection:");
-			if (connection) {
-				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
+			char *proxy_connection = get_http_header_value(http_headers, "Proxy-Connection:");
+			if (proxy_connection) {
+				if (strncasecmp(proxy_connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 					http_close = false;
 				}
-				efree(connection);
+				efree(proxy_connection);
 			}
 		}
 		if (http_close) {
-			connection = get_http_header_value(http_headers, "Connection:");
+			char *connection = get_http_header_value(http_headers, "Connection:");
 			if (connection) {
 				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 					http_close = false;
@@ -1278,7 +1275,7 @@ try_again:
 	smart_str_free(&soap_headers_z);
 
 	/* Check and see if the server even sent a xml document */
-	content_type = get_http_header_value(http_headers, "Content-Type:");
+	char *content_type = get_http_header_value(http_headers, "Content-Type:");
 	if (content_type) {
 		char *pos = NULL;
 		int cmplen;
@@ -1308,7 +1305,7 @@ try_again:
 	}
 
 	/* Decompress response */
-	content_encoding = get_http_header_value(http_headers, "Content-Encoding:");
+	char *content_encoding = get_http_header_value(http_headers, "Content-Encoding:");
 	if (content_encoding) {
 		zval retval;
 		zval params[1];
@@ -1455,32 +1452,31 @@ static char *get_http_header_value(zend_string *headers, char *type)
 static zend_string* get_http_body(php_stream *stream, bool close, zend_string *headers)
 {
 	zend_string *http_buf = NULL;
-	char *header;
 	bool header_close = close;
 	bool header_chunked = false;
 	int header_length = 0;
 	size_t http_buf_size = 0;
 
 	if (!close) {
-		header = get_http_header_value(headers, "Connection:");
-		if (header) {
-			if (!strncasecmp(header, "close", sizeof("close")-1)) {
+		char *connection = get_http_header_value(headers, "Connection:");
+		if (connection) {
+			if (!strncasecmp(connection, "close", sizeof("close")-1)) {
 				header_close = true;
 			}
-			efree(header);
+			efree(connection);
 		}
 	}
-	header = get_http_header_value(headers, "Transfer-Encoding:");
-	if (header) {
-		if (!strncasecmp(header, "chunked", sizeof("chunked")-1)) {
+	char *transfer_encoding = get_http_header_value(headers, "Transfer-Encoding:");
+	if (transfer_encoding) {
+		if (!strncasecmp(transfer_encoding, "chunked", sizeof("chunked")-1)) {
 			header_chunked = true;
 		}
-		efree(header);
+		efree(transfer_encoding);
 	}
-	header = get_http_header_value(headers, "Content-Length:");
-	if (header) {
-		header_length = atoi(header);
-		efree(header);
+	char *content_length = get_http_header_value(headers, "Content-Length:");
+	if (content_length) {
+		header_length = atoi(content_length);
+		efree(content_length);
 		if (!header_length && !header_chunked) {
 			/* Empty response */
 			return ZSTR_EMPTY_ALLOC();
