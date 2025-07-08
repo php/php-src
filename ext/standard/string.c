@@ -4937,17 +4937,18 @@ PHP_FUNCTION(setlocale)
 	zend_string **strings = do_alloca(sizeof(zend_string *) * num_args, use_heap);
 
 	for (uint32_t i = 0; i < num_args; i++) {
-		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], false, i + 2))) {
+		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], true, i + 2))) {
 			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING, &args[i]);
 			goto out;
 		}
 	}
 
 	for (uint32_t i = 0; i < num_args; i++) {
+		zend_string *result;
 		if (Z_TYPE(args[i]) == IS_ARRAY) {
 			zval *elem;
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), elem) {
-				zend_string *result = try_setlocale_zval(cat, elem);
+				result = try_setlocale_zval(cat, elem);
 				if (EG(exception)) {
 					goto out;
 				}
@@ -4956,15 +4957,18 @@ PHP_FUNCTION(setlocale)
 					goto out;
 				}
 			} ZEND_HASH_FOREACH_END();
+			continue;
+		} else if (Z_ISNULL(args[i])) {
+			result = try_setlocale_str(cat, ZSTR_EMPTY_ALLOC());
 		} else {
-			zend_string *result = try_setlocale_str(cat, strings[i]);
-			if (EG(exception)) {
-				goto out;
-			}
-			if (result) {
-				RETVAL_STR(result);
-				goto out;
-			}
+			result = try_setlocale_str(cat, strings[i]);
+		}
+		if (EG(exception)) {
+			goto out;
+		}
+		if (result) {
+			RETVAL_STR(result);
+			goto out;
 		}
 	}
 
