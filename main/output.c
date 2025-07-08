@@ -934,6 +934,13 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		return PHP_OUTPUT_HANDLER_FAILURE;
 	}
 
+	/* php_output_lock_error() doesn't fail for PHP_OUTPUT_HANDLER_WRITE but
+	 * anything that gets written will silently be discarded, remember that we
+	 * tried to write so a deprecation warning can be emitted at the end. */
+	if (context->op == PHP_OUTPUT_HANDLER_WRITE && OG(active) && OG(running)) {
+		handler->flags |= PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT;
+	}
+
 	bool still_have_handler = true;
 	/* storable? */
 	if (php_output_handler_append(handler, &context->in) && !context->op) {
@@ -962,14 +969,27 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			handler->func.user->fci.retval = &retval;
 
 			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
-				if (Z_TYPE(retval) != IS_STRING) {
+				// Use a single deprecation message for both types of deprecation
+				// * Returning a non-string
+				// * Trying to produce output
+				const char *error_msg = NULL;
+				if (Z_TYPE(retval) != IS_STRING && handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
+					error_msg = "Returning a non-string result or producing output from user output handler %s is deprecated";
+				} else if (Z_TYPE(retval) != IS_STRING) {
+					error_msg = "Returning a non-string result from user output handler %s is deprecated";
+				} else if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
+					error_msg = "Producing output from user output handler %s is deprecated";
+				}
+				// The handler might not always produce output
+				handler->flags &= ~PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT;
+				if (error_msg != NULL) {
 					// Make sure that we don't get lost in the current output buffer
 					// by disabling it
 					handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
 					php_error_docref(
 						NULL,
 						E_DEPRECATED,
-						"Returning a non-string result from user output handler %s is deprecated",
+						error_msg,
 						ZSTR_VAL(handler->name)
 					);
 					// Check if the handler is still in the list of handlers to
