@@ -166,6 +166,11 @@ const IDNA_ERROR_BIDI = UNKNOWN;
  * @cvalue UIDNA_ERROR_CONTEXTJ
  */
 const IDNA_ERROR_CONTEXTJ = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UCOL_DEFAULT_STRENGTH
+ */
+const UCOL_DEFAULT_STRENGTH = UNKNOWN;
 
 class IntlException extends Exception
 {
