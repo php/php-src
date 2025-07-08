@@ -424,6 +424,19 @@ static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 	mysqli_convert_zv_to_mysqlnd
 };
 
+static PHP_INI_MH(OnUpdateDefaultPort)
+{
+	zend_long value = ZEND_ATOL(ZSTR_VAL(new_value));
+
+	if (value < 0 || value > USHRT_MAX) {
+		return FAILURE;
+	}
+
+	MyG(default_port) = (unsigned short)value;
+
+	return SUCCESS;
+}
+
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
@@ -433,7 +446,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqli.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_pw",				NULL,	PHP_INI_ALL,		OnUpdateString,		default_pw,			zend_mysqli_globals,		mysqli_globals)
-	STD_PHP_INI_ENTRY("mysqli.default_port",			"3306",	PHP_INI_ALL,		OnUpdateLong,		default_port,		zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_ENTRY("mysqli.default_port",			"3306",	PHP_INI_ALL,		OnUpdateDefaultPort,		default_port,		zend_mysqli_globals,		mysqli_globals)
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 	STD_PHP_INI_ENTRY("mysqli.default_socket",			MYSQL_UNIX_ADDR,PHP_INI_ALL,OnUpdateStringUnempty,	default_socket,	zend_mysqli_globals,		mysqli_globals)
 #else
