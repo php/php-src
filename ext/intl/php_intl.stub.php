@@ -440,13 +440,13 @@ function grapheme_strpos(string $haystack, string $needle, int $offset = 0, stri
 
 function grapheme_stripos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): int|false {}
 
-function grapheme_strrpos(string $haystack, string $needle, int $offset = 0, int $strength = UCOL_DEFAULT_STRENGTH): int|false {}
+function grapheme_strrpos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): int|false {}
 
 function grapheme_strripos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): int|false {}
 
-function grapheme_substr(string $string, int $offset, ?int $length = null, int $strength = UCOL_DEFAULT_STRENGTH): string|false {}
+function grapheme_substr(string $string, int $offset, ?int $length = null, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): string|false {}
 
-function grapheme_strstr(string $haystack, string $needle, bool $beforeNeedle = false, int $strength = UCOL_DEFAULT_STRENGTH): string|false {}
+function grapheme_strstr(string $haystack, string $needle, bool $beforeNeedle = false, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): string|false {}
 
 function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle = false, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): string|false {}
 
