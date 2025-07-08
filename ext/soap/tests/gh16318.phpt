@@ -15,7 +15,7 @@ $test2["a"] = "a";
 $test2[] =& $test2;
 
 class TestSoapClient extends SoapClient {
-    public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false): ?string
+    public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false, ?string $uriParserClass = null): ?string
     {
         die($request);
     }
