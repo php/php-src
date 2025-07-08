@@ -27,6 +27,9 @@ static zend_string *get_http_headers(php_stream *stream);
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
 
+#define is_cstr_equals_literal_ci(str, len, literal) \
+	((len) == sizeof(literal)-1 && strncasecmp((str), "" literal, sizeof(literal)-1) == 0)
+
 /* Proxy HTTP Authentication */
 bool proxy_authentication(const zval* this_ptr, smart_str* soap_headers)
 {
@@ -112,25 +115,16 @@ static void http_context_add_header(const char *s,
 				p++;
 			}
 			/* skip some predefined headers */
-			if ((name_len != sizeof("host")-1 ||
-				 strncasecmp(s, "host", sizeof("host")-1) != 0) &&
-				(name_len != sizeof("connection")-1 ||
-				 strncasecmp(s, "connection", sizeof("connection")-1) != 0) &&
-				(name_len != sizeof("user-agent")-1 ||
-				 strncasecmp(s, "user-agent", sizeof("user-agent")-1) != 0) &&
-				(name_len != sizeof("content-length")-1 ||
-				 strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
-				(name_len != sizeof("content-type")-1 ||
-				 strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
-				(!has_cookies ||
-				 name_len != sizeof("cookie")-1 ||
-				 strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
-				(!has_authorization ||
-				 name_len != sizeof("authorization")-1 ||
-				 strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
-				(!has_proxy_authorization ||
-				 name_len != sizeof("proxy-authorization")-1 ||
-				 strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
+			if (
+				!is_cstr_equals_literal_ci(s, name_len, "host")
+				&& !is_cstr_equals_literal_ci(s, name_len, "connection")
+				&& !is_cstr_equals_literal_ci(s, name_len, "user-agent")
+				&& !is_cstr_equals_literal_ci(s, name_len, "content-length")
+				&& !is_cstr_equals_literal_ci(s, name_len, "content-type")
+				&& (!has_cookies || !is_cstr_equals_literal_ci(s, name_len, "cookie"))
+				&& (!has_authorization || !is_cstr_equals_literal_ci(s, name_len, "authorization"))
+				&& (!has_proxy_authorization || !is_cstr_equals_literal_ci(s, name_len, "proxy-authorization"))
+			) {
 				/* add header */
 				smart_str_appendl(soap_headers, s, p-s);
 				smart_str_append_const(soap_headers, "\r\n");
