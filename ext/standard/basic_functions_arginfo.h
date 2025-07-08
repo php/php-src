@@ -3894,10 +3894,7 @@ static void register_basic_functions_symbols(int module_number)
 #if defined(HAVE_STRPTIME)
 
 	zend_attribute *attribute_Deprecated_func_strptime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strptime", sizeof("strptime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_strptime_0_arg0;
-	zend_string *attribute_Deprecated_func_strptime_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_strptime_0_arg0, attribute_Deprecated_func_strptime_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strptime_0->args[0].value, &attribute_Deprecated_func_strptime_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_strptime_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
 	attribute_Deprecated_func_strptime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_func_strptime_0_arg1;
 	zend_string *attribute_Deprecated_func_strptime_0_arg1_str = zend_string_init("use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead", strlen("use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead"), 1);
@@ -3907,17 +3904,11 @@ static void register_basic_functions_symbols(int module_number)
 #endif
 
 	zend_attribute *attribute_Deprecated_func_assert_options_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "assert_options", sizeof("assert_options") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	zval attribute_Deprecated_func_assert_options_0_arg0;
-	zend_string *attribute_Deprecated_func_assert_options_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_assert_options_0_arg0, attribute_Deprecated_func_assert_options_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_assert_options_0->args[0].value, &attribute_Deprecated_func_assert_options_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_assert_options_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_func_assert_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_utf8_encode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_encode", sizeof("utf8_encode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_utf8_encode_0_arg0;
-	zend_string *attribute_Deprecated_func_utf8_encode_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0_arg0, attribute_Deprecated_func_utf8_encode_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_encode_0->args[0].value, &attribute_Deprecated_func_utf8_encode_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
 	attribute_Deprecated_func_utf8_encode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_func_utf8_encode_0_arg1;
 	zend_string *attribute_Deprecated_func_utf8_encode_0_arg1_str = zend_string_init("visit the php.net documentation for various alternatives", strlen("visit the php.net documentation for various alternatives"), 1);
@@ -3926,10 +3917,7 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_func_utf8_encode_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_utf8_decode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_decode", sizeof("utf8_decode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_utf8_decode_0_arg0;
-	zend_string *attribute_Deprecated_func_utf8_decode_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0_arg0, attribute_Deprecated_func_utf8_decode_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_decode_0->args[0].value, &attribute_Deprecated_func_utf8_decode_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
 	attribute_Deprecated_func_utf8_decode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_func_utf8_decode_0_arg1;
 	zend_string *attribute_Deprecated_func_utf8_decode_0_arg1_str = zend_string_init("visit the php.net documentation for various alternatives", strlen("visit the php.net documentation for various alternatives"), 1);
@@ -3942,10 +3930,7 @@ static void register_basic_functions_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_verify", sizeof("password_verify") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_attribute *attribute_Deprecated_const_ASSERT_ACTIVE_0 = zend_add_global_constant_attribute(const_ASSERT_ACTIVE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0;
-	zend_string *attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].value, &attribute_Deprecated_const_ASSERT_ACTIVE_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1;
 	zend_string *attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
@@ -3954,10 +3939,7 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_const_ASSERT_ACTIVE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_ASSERT_CALLBACK_0 = zend_add_global_constant_attribute(const_ASSERT_CALLBACK, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0;
-	zend_string *attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0, attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_CALLBACK_0->args[0].value, &attribute_Deprecated_const_ASSERT_CALLBACK_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_CALLBACK_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_const_ASSERT_CALLBACK_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_const_ASSERT_CALLBACK_0_arg1;
 	zend_string *attribute_Deprecated_const_ASSERT_CALLBACK_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
@@ -3966,10 +3948,7 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_const_ASSERT_CALLBACK_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_ASSERT_BAIL_0 = zend_add_global_constant_attribute(const_ASSERT_BAIL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_ASSERT_BAIL_0_arg0;
-	zend_string *attribute_Deprecated_const_ASSERT_BAIL_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_ASSERT_BAIL_0_arg0, attribute_Deprecated_const_ASSERT_BAIL_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_BAIL_0->args[0].value, &attribute_Deprecated_const_ASSERT_BAIL_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_BAIL_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_const_ASSERT_BAIL_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_const_ASSERT_BAIL_0_arg1;
 	zend_string *attribute_Deprecated_const_ASSERT_BAIL_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
@@ -3978,10 +3957,7 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_const_ASSERT_BAIL_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_ASSERT_WARNING_0 = zend_add_global_constant_attribute(const_ASSERT_WARNING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_ASSERT_WARNING_0_arg0;
-	zend_string *attribute_Deprecated_const_ASSERT_WARNING_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_ASSERT_WARNING_0_arg0, attribute_Deprecated_const_ASSERT_WARNING_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_WARNING_0->args[0].value, &attribute_Deprecated_const_ASSERT_WARNING_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_WARNING_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_const_ASSERT_WARNING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_const_ASSERT_WARNING_0_arg1;
 	zend_string *attribute_Deprecated_const_ASSERT_WARNING_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
@@ -3990,10 +3966,7 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_const_ASSERT_WARNING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_ASSERT_EXCEPTION_0 = zend_add_global_constant_attribute(const_ASSERT_EXCEPTION, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0;
-	zend_string *attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0, attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].value, &attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg1;
 	zend_string *attribute_Deprecated_const_ASSERT_EXCEPTION_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
