@@ -636,6 +636,12 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_SINCE,                  "since") \
 	_(ZEND_STR_GET,                    "get") \
 	_(ZEND_STR_SET,                    "set") \
+	_(ZEND_STR_8_DOT_0,                "8.0") \
+	_(ZEND_STR_8_DOT_1,                "8.1") \
+	_(ZEND_STR_8_DOT_2,                "8.2") \
+	_(ZEND_STR_8_DOT_3,                "8.3") \
+	_(ZEND_STR_8_DOT_4,                "8.4") \
+	_(ZEND_STR_8_DOT_5,                "8.5") \
 
 
 typedef enum _zend_known_string_id {

@@ -3058,6 +3058,12 @@ class StringBuilder {
         "username" => "ZEND_STR_USERNAME",
         "password" => "ZEND_STR_PASSWORD",
         "clone" => "ZEND_STR_CLONE",
+        '8.0' => 'ZEND_STR_8_DOT_0',
+        '8.1' => 'ZEND_STR_8_DOT_1',
+        '8.2' => 'ZEND_STR_8_DOT_2',
+        '8.3' => 'ZEND_STR_8_DOT_3',
+        '8.4' => 'ZEND_STR_8_DOT_4',
+        '8.5' => 'ZEND_STR_8_DOT_5',
     ];
 
     /**
@@ -3358,10 +3364,26 @@ class AttributeInfo {
         $code .= $stringRelease;
 
         foreach ($this->args as $i => $arg) {
-            $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
-            $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
-            $code .= $value->initializeZval($zvalName);
-            $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
+            $initValue = '';
+            if ($arg->value instanceof Node\Scalar\String_) {
+                $strVal = $arg->value->value;
+                [$strInit, $strUse, $strRelease] = StringBuilder::getString(
+                    'unused',
+                    $strVal,
+                    $phpVersionIdMinimumCompatibility
+                );
+                if ($strInit === '') {
+                    $initValue = "\tZVAL_STR(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
+                }
+            }
+            if ($initValue === '') {
+                $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
+                $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
+                $code .= $value->initializeZval($zvalName);
+                $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
+            } else {
+                $code .= $initValue;
+            }
             if ($arg->name) {
                 [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
                     "",
