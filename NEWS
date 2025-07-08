@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Optimized pack(). (nielsdos, divinity76)
+  . Fixed bug GH-19070 (setlocale($type, NULL) should not be deprecated).
+    (nielsdos)
 
 - URI:
   . Return the singleton UrlValidationErrorType instances from Uri\WhatWg\Url
