@@ -1522,7 +1522,7 @@ static zend_always_inline zend_mm_free_slot *zend_mm_get_next_free_slot(zend_mm_
 	ZEND_MM_POISON(slot, sizeof(zend_mm_free_slot*));
 	ZEND_MM_POISON(&ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, bin_num), sizeof(zend_mm_free_slot*));
 
-	return (zend_mm_free_slot*)next;
+	return next;
 }
 
 #else /* ZEND_MM_HEAP_PROTECTION */
@@ -1540,7 +1540,7 @@ static zend_always_inline zend_mm_free_slot *zend_mm_get_next_free_slot(zend_mm_
 
 	ZEND_MM_POISON(slot, sizeof(zend_mm_free_slot*));
 
-	return (zend_mm_free_slot*)next;
+	return next;
 }
 #endif /* ZEND_MM_HEAP_PROTECTION */
 
