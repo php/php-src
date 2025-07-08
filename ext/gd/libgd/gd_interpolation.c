@@ -62,7 +62,7 @@ TODO:
 #include "gdhelpers.h"
 #include "gd_intern.h"
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 # pragma optimize("t", on)
 # include <emmintrin.h>
 #endif
