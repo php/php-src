@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 716311270910321b33dfdc3aebe5f5c574e5b697 */
+ * Stub hash: 145ee08cacd0ee630fe4f7468c2dd58302a6f3d7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -462,29 +462,33 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_strpos, 0, 2, MAY_BE_LO
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, strength, IS_LONG, 0, "UCOL_DEFAULT_STRENGTH")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_stripos, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+#define arginfo_grapheme_stripos arginfo_grapheme_strpos
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_strrpos, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, strength, IS_LONG, 0, "UCOL_DEFAULT_STRENGTH")
 ZEND_END_ARG_INFO()
 
-#define arginfo_grapheme_strrpos arginfo_grapheme_strpos
-
-#define arginfo_grapheme_strripos arginfo_grapheme_stripos
+#define arginfo_grapheme_strripos arginfo_grapheme_strpos
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_substr, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, strength, IS_LONG, 0, "UCOL_DEFAULT_STRENGTH")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_strstr, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, beforeNeedle, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, strength, IS_LONG, 0, "UCOL_DEFAULT_STRENGTH")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_stristr, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
@@ -492,6 +496,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_stristr, 0, 2, MAY_BE_S
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, beforeNeedle, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, strength, IS_LONG, 0, "UCOL_DEFAULT_STRENGTH")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_str_split, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -505,6 +510,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_levenshtein, 0, 2, MAY_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, insertion_cost, IS_LONG, 0, "1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, replacement_cost, IS_LONG, 0, "1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deletion_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, strength, IS_LONG, 0, "UCOL_DEFAULT_STRENGTH")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
