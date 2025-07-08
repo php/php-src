@@ -493,11 +493,7 @@ PHP_FUNCTION(bzdecompress)
 	size_t source_len;
 	int error;
 	bool small = 0;
-#ifdef PHP_WIN32
-	unsigned __int64 size = 0;
-#else
 	unsigned long long size = 0;
-#endif
 	bz_stream bzs;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &source, &source_len, &small)) {
@@ -524,7 +520,7 @@ PHP_FUNCTION(bzdecompress)
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-#ifndef ZEND_ENABLE_ZVAL_LONG64
+#if SIZEOF_LONG_LONG > SIZEOF_SIZE_T
 		if (size > SIZE_MAX) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
@@ -536,9 +532,9 @@ PHP_FUNCTION(bzdecompress)
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-#ifndef ZEND_ENABLE_ZVAL_LONG64
+#if SIZEOF_LONG_LONG > SIZEOF_SIZE_T
 		if (UNEXPECTED(size > SIZE_MAX)) {
-			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
+			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zu", SIZE_MAX);
 			zend_string_efree(dest);
 			RETVAL_LONG(BZ_MEM_ERROR);
 		} else
