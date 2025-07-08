@@ -2955,14 +2955,7 @@ class ConstInfo extends VariableLike
     }
 }
 
-class PropertyInfo extends VariableLike
-{
-    private /* readonly */ int $classFlags;
-    public /* readonly */ PropertyName $name;
-    private /* readonly */ ?Expr $defaultValue;
-    private /* readonly */ ?string $defaultValueString;
-    private /* readonly */ bool $isDocReadonly;
-    private /* readonly */ bool $isVirtual;
+class StringBuilder {
 
     // Map possible variable names to the known string constant, see
     // ZEND_KNOWN_STRINGS
@@ -3068,6 +3061,75 @@ class PropertyInfo extends VariableLike
     ];
 
     /**
+     * Get an array of three strings:
+     *   - declaration of zend_string, if needed, or empty otherwise
+     *   - usage of that zend_string, or usage with ZSTR_KNOWN()
+     *   - freeing the zend_string, if needed
+     *
+     * @param string $varName
+     * @param string $strContent
+     * @param ?int $minPHPCompatibility
+     * @return string[]
+     */
+    public static function getString(
+        string $varName,
+        string $content,
+        ?int $minPHPCompatibility
+    ): array {
+        // Generally strings will not be known
+        $result = [
+            "\tzend_string *$varName = zend_string_init(\"$content\", sizeof(\"$content\") - 1, 1);\n",
+            $varName,
+            "\tzend_string_release($varName);\n"
+        ];
+        // If not set, use the current latest version
+        $allVersions = ALL_PHP_VERSION_IDS;
+        $minPhp = $minPHPCompatibility ?? end($allVersions);
+        if ($minPhp < PHP_80_VERSION_ID) {
+            // No known strings in 7.0
+            return $result;
+        }
+        $include = self::PHP_80_KNOWN;
+        switch ($minPhp) {
+            case PHP_85_VERSION_ID:
+                $include = array_merge($include, self::PHP_85_KNOWN);
+                // Intentional fall through
+
+            case PHP_84_VERSION_ID:
+                $include = array_merge($include, self::PHP_84_KNOWN);
+                // Intentional fall through
+
+            case PHP_83_VERSION_ID:
+            case PHP_82_VERSION_ID:
+                $include = array_merge($include, self::PHP_82_KNOWN);
+                // Intentional fall through
+
+            case PHP_81_VERSION_ID:
+                $include = array_merge($include, self::PHP_81_KNOWN);
+                break;
+        }
+        if (array_key_exists($content, $include)) {
+            $knownStr = $include[$content];
+            return [
+                '',
+                "ZSTR_KNOWN($knownStr)",
+                '',
+            ];
+        }
+        return $result;
+    }
+}
+
+class PropertyInfo extends VariableLike
+{
+    private /* readonly */ int $classFlags;
+    public /* readonly */ PropertyName $name;
+    private /* readonly */ ?Expr $defaultValue;
+    private /* readonly */ ?string $defaultValueString;
+    private /* readonly */ bool $isDocReadonly;
+    private /* readonly */ bool $isVirtual;
+
+    /**
      * @param AttributeInfo[] $attributes
      */
     public function __construct(
@@ -3147,7 +3209,11 @@ class PropertyInfo extends VariableLike
             $code .= $defaultValue->initializeZval($zvalName);
         }
 
-        [$stringInit, $nameCode, $stringRelease] = $this->getString($propertyName);
+        [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+            "property_{$propertyName}_name",
+            $propertyName,
+            $this->phpVersionIdMinimumCompatibility
+        );
         $code .= $stringInit;
 
         if ($this->exposedDocComment) {
@@ -3180,60 +3246,6 @@ class PropertyInfo extends VariableLike
         $code .= $stringRelease;
 
         return $code;
-    }
-
-    /**
-     * Get an array of three strings:
-     *   - declaration of zend_string, if needed, or empty otherwise
-     *   - usage of that zend_string, or usage with ZSTR_KNOWN()
-     *   - freeing the zend_string, if needed
-     *
-     * @param string $propName
-     * @return string[]
-     */
-    private function getString(string $propName): array {
-        // Generally strings will not be known
-        $nameCode = "property_{$propName}_name";
-        $result = [
-            "\tzend_string *$nameCode = zend_string_init(\"$propName\", sizeof(\"$propName\") - 1, 1);\n",
-            $nameCode,
-            "\tzend_string_release($nameCode);\n"
-        ];
-        // If not set, use the current latest version
-        $allVersions = ALL_PHP_VERSION_IDS;
-        $minPhp = $this->phpVersionIdMinimumCompatibility ?? end($allVersions);
-        if ($minPhp < PHP_80_VERSION_ID) {
-            // No known strings in 7.0
-            return $result;
-        }
-        $include = self::PHP_80_KNOWN;
-        switch ($minPhp) {
-            case PHP_85_VERSION_ID:
-                $include = array_merge($include, self::PHP_85_KNOWN);
-                // Intentional fall through
-
-            case PHP_84_VERSION_ID:
-                $include = array_merge($include, self::PHP_84_KNOWN);
-                // Intentional fall through
-
-            case PHP_83_VERSION_ID:
-            case PHP_82_VERSION_ID:
-                $include = array_merge($include, self::PHP_82_KNOWN);
-                // Intentional fall through
-
-            case PHP_81_VERSION_ID:
-                $include = array_merge($include, self::PHP_81_KNOWN);
-                break;
-        }
-        if (array_key_exists($propName, $include)) {
-            $knownStr = $include[$propName];
-            return [
-                '',
-                "ZSTR_KNOWN($knownStr)",
-                '',
-            ];
-        }
-        return $result;
     }
 
     /**
