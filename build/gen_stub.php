@@ -3069,19 +3069,26 @@ class StringBuilder {
      * @param string $varName
      * @param string $strContent
      * @param ?int $minPHPCompatibility
+     * @param bool $interned
      * @return string[]
      */
     public static function getString(
         string $varName,
         string $content,
-        ?int $minPHPCompatibility
+        ?int $minPHPCompatibility,
+        bool $interned = false
     ): array {
         // Generally strings will not be known
+        $initFn = $interned ? 'zend_string_init_interned' : 'zend_string_init';
         $result = [
-            "\tzend_string *$varName = zend_string_init(\"$content\", sizeof(\"$content\") - 1, 1);\n",
+            "\tzend_string *$varName = $initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n",
             $varName,
             "\tzend_string_release($varName);\n"
         ];
+        // For attribute values that are not freed
+        if ($varName === '') {
+            $result[0] = "$initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n";
+        }
         // If not set, use the current latest version
         $allVersions = ALL_PHP_VERSION_IDS;
         $minPhp = $minPHPCompatibility ?? end($allVersions);
@@ -3338,40 +3345,36 @@ class AttributeInfo {
 
     /** @param array<string, ConstInfo> $allConstInfos */
     public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility): string {
-        $php82MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_82_VERSION_ID;
-        $php84MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_84_VERSION_ID;
-        /* see ZEND_KNOWN_STRINGS in Zend/strings.h */
-        $knowns = [
-            "message" => "ZEND_STR_MESSAGE",
-        ];
-        if ($php82MinimumCompatibility) {
-            $knowns["SensitiveParameter"] = "ZEND_STR_SENSITIVEPARAMETER";
-        }
-        if ($php84MinimumCompatibility) {
-            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED_CAPITALIZED";
-            $knowns["since"] = "ZEND_STR_SINCE";
-        }
-
-        $code = "\n";
         $escapedAttributeName = strtr($this->class, '\\', '_');
-        if (isset($knowns[$escapedAttributeName])) {
-            $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, ZSTR_KNOWN({$knowns[$escapedAttributeName]}), " . count($this->args) . ");\n";
-        } else {
-            $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init_interned(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
-            $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
-            $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
-        }
+        [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+            "attribute_name_{$escapedAttributeName}_$nameSuffix",
+            addcslashes($this->class, "\\"),
+            $phpVersionIdMinimumCompatibility,
+            true
+        );
+        $code = "\n";
+        $code .= $stringInit;
+        $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, $nameCode, " . count($this->args) . ");\n";
+        $code .= $stringRelease;
+
         foreach ($this->args as $i => $arg) {
             $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
             $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
             $code .= $value->initializeZval($zvalName);
             $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
             if ($arg->name) {
-                if (isset($knowns[$arg->name->name])) {
-                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = ZSTR_KNOWN({$knowns[$arg->name->name]});\n";
+                [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+                    "",
+                    $arg->name->name,
+                    $phpVersionIdMinimumCompatibility,
+                    true
+                );
+                if ($stringInit === '') {
+                    $nameCode .= ";\n";
                 } else {
-                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init_interned(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+                    $nameCode = $stringInit;
                 }
+                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = $nameCode";
             }
         }
         return $code;
