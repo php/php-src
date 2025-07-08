@@ -207,18 +207,19 @@ PHP_FUNCTION(grapheme_strrpos)
 {
 	char *haystack, *needle;
 	char *locale = "";
-	size_t haystack_len, needle_len;
+	size_t haystack_len, needle_len, locale_len;
 	zend_long loffset = 0;
 	int32_t offset = 0;
 	zend_long strength = UCOL_DEFAULT_STRENGTH;
 	zend_long ret_pos;
 	int is_ascii;
 
-	ZEND_PARSE_PARAMETERS_START(2, 4)
+	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STRING(haystack, haystack_len)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
+		Z_PARAM_STRING(locale, locale_len)
 		Z_PARAM_LONG(strength)
 	ZEND_PARSE_PARAMETERS_END();
 
