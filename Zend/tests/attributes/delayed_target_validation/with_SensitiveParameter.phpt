@@ -28,7 +28,7 @@ class DemoClass {
   public function printVal(
     #[DelayedTargetValidation]
     #[SensitiveParameter]
-    $sensitive
+    $sensitive // Does something here
   ) {
     throw new Exception('Testing backtrace');
   }
