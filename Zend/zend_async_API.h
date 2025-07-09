@@ -798,13 +798,13 @@ struct _zend_async_scope_s {
 #define ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY	      ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY  /* scope will not free memory in dispose handler */
 #define ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY 		  (1u << 14)  /* scope will be disposed safely */
 #define ZEND_ASYNC_SCOPE_F_CANCELLED 			  (1u << 15)  /* scope was cancelled */
-#define ZEND_ASYNC_SCOPE_F_DISPOSED 			  (1u << 16)  /* scope was disposed */
+#define ZEND_ASYNC_SCOPE_F_DISPOSING 			  (1u << 16)  /* scope disposing */
 
 #define ZEND_ASYNC_SCOPE_IS_CLOSED(scope)         (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CLOSED) != 0)
 #define ZEND_ASYNC_SCOPE_IS_NO_FREE_MEMORY(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY) != 0)
 #define ZEND_ASYNC_SCOPE_IS_DISPOSE_SAFELY(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY) != 0)
 #define ZEND_ASYNC_SCOPE_IS_CANCELLED(scope)      (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CANCELLED) != 0)
-#define ZEND_ASYNC_SCOPE_IS_DISPOSED(scope)       (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSED) != 0)
+#define ZEND_ASYNC_SCOPE_IS_DISPOSING(scope)      (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSING) != 0)
 
 #define ZEND_ASYNC_SCOPE_SET_CLOSED(scope)        ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_CLOSED)
 #define ZEND_ASYNC_SCOPE_CLR_CLOSED(scope)        ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_CLOSED)
@@ -817,7 +817,8 @@ struct _zend_async_scope_s {
 
 #define ZEND_ASYNC_SCOPE_SET_CANCELLED(scope)      ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_CANCELLED)
 
-#define ZEND_ASYNC_SCOPE_SET_DISPOSED(scope)	  ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_DISPOSED)
+#define ZEND_ASYNC_SCOPE_SET_DISPOSING(scope)	  ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_DISPOSING)
+#define ZEND_ASYNC_SCOPE_CLR_DISPOSING(scope)	  ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSING)
 
 static zend_always_inline void
 zend_async_scope_add_child(zend_async_scope_t *parent_scope, zend_async_scope_t *child_scope)
