@@ -7558,11 +7558,23 @@ static void zend_compile_attributes(
 
 	if (*attributes != NULL) {
 		/* Allow delaying target validation for forward compatibility. */
-		zend_attribute *delayed_target_validation = zend_get_attribute_str(
-			*attributes,
-			"delayedtargetvalidation",
-			strlen("delayedtargetvalidation")
-		);
+		zend_attribute *delayed_target_validation = NULL;
+		if (target == ZEND_ATTRIBUTE_TARGET_PARAMETER) {
+			ZEND_ASSERT(offset >= 1);
+			// zend_get_parameter_attribute_str will add 1 too
+			delayed_target_validation = zend_get_parameter_attribute_str(
+				*attributes,
+				"delayedtargetvalidation",
+				strlen("delayedtargetvalidation"),
+				offset - 1
+			);
+		} else {
+			delayed_target_validation = zend_get_attribute_str(
+				*attributes,
+				"delayedtargetvalidation",
+				strlen("delayedtargetvalidation")
+			);
+		}
 		uint32_t extra_flags = delayed_target_validation ? ZEND_ATTRIBUTE_NO_TARGET_VALIDATION : 0;
 		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
 		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {

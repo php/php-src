@@ -73,6 +73,13 @@ uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_ent
 static void validate_allow_dynamic_properties(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
+	if (scope == NULL) {
+		// Only reachable when validator is run but the attribute isn't applied
+		// to a class; in the case of delayed target validation reflection will
+		// complain about the target before running the validator;
+		ZEND_ASSERT(target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION);
+		return;
+	}
 	const char *msg = NULL;
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
 		msg = "Cannot apply #[\\AllowDynamicProperties] to trait %s";
