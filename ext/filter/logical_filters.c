@@ -195,7 +195,7 @@ static bool php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret
 }
 /* }}} */
 
-void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval *option_val;
 	zend_long  min_range, max_range, option_flags;
@@ -266,12 +266,12 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	} else {
 		zval_ptr_dtor(value);
 		ZVAL_LONG(value, ctx_value);
-		return;
 	}
+	return SUCCESS;
 }
 /* }}} */
 
-void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	const char *str = Z_STRVAL_P(value);
 	size_t len = Z_STRLEN_P(value);
@@ -337,10 +337,11 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		zval_ptr_dtor(value);
 		ZVAL_BOOL(value, ret);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
-void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	size_t len;
 	const char *str, *end;
@@ -467,10 +468,11 @@ error:
 			RETURN_VALIDATION_FAILED
 	}
 	efree(num);
+	return SUCCESS;
 }
 /* }}} */
 
-void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval *option_val;
 	zend_string *regexp;
@@ -503,6 +505,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (rc < 0) {
 		RETURN_VALIDATION_FAILED
 	}
+	return SUCCESS;
 }
 
 static bool php_filter_validate_domain_ex(const zend_string *domain, zend_long flags) /* {{{ */
@@ -557,11 +560,12 @@ static bool php_filter_validate_domain_ex(const zend_string *domain, zend_long f
 }
 /* }}} */
 
-void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	if (!php_filter_validate_domain_ex(Z_STR_P(value), flags)) {
 		RETURN_VALIDATION_FAILED
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -589,7 +593,7 @@ static bool php_filter_is_valid_ipv6_hostname(const zend_string *s)
 	return *ZSTR_VAL(s) == '[' && *t == ']' && _php_filter_validate_ipv6(ZSTR_VAL(s) + 1, ZSTR_LEN(s) - 2, NULL);
 }
 
-void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	php_url *url;
 	size_t old_len = Z_STRLEN_P(value);
@@ -646,10 +650,11 @@ bad_url:
 	}
 
 	php_url_free(url);
+	return SUCCESS;
 }
 /* }}} */
 
-void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	/*
 	 * The regex below is based on a regex by Michael Rushton.
@@ -715,6 +720,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (rc < 0) {
 		RETURN_VALIDATION_FAILED
 	}
+	return SUCCESS;
 
 }
 /* }}} */
@@ -975,7 +981,7 @@ static bool ipv6_get_status_flags(const int ip[8], bool *global, bool *reserved,
  * to throw out reserved ranges; multicast ranges... etc. If both allow_ipv4
  * and allow_ipv6 flags flag are used, then the first dot or colon determine
  * the format */
-void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	int  ip[8];
 	int  mode;
@@ -1003,7 +1009,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 
 		if (!ipv4_get_status_flags(ip, &flag_global, &flag_reserved, &flag_private)) {
-			return; /* no special block */
+			return SUCCESS; /* no special block */
 		}
 	}
 	else if (mode == FORMAT_IPV6) {
@@ -1012,7 +1018,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 
 		if (!ipv6_get_status_flags(ip, &flag_global, &flag_reserved, &flag_private)) {
-			return; /* no special block */
+			return SUCCESS; /* no special block */
 		}
 	}
 
@@ -1027,10 +1033,11 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if ((flags & FILTER_FLAG_NO_RES_RANGE) && flag_reserved == true) {
 		RETURN_VALIDATION_FAILED
 	}
+	return SUCCESS;
 }
 /* }}} */
 
-void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+zend_result php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	const char *input = Z_STRVAL_P(value);
 	size_t input_len = Z_STRLEN_P(value);
@@ -1089,5 +1096,6 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			RETURN_VALIDATION_FAILED
 		}
 	}
+	return SUCCESS;
 }
 /* }}} */
