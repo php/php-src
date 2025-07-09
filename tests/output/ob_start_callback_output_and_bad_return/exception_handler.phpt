@@ -86,7 +86,7 @@ foreach ($cases as $case) {
 ?>
 --EXPECTF--
 Testing: return_null
-ErrorException: ob_end_flush(): Returning a non-string result or producing output from user output handler return_null is deprecated in %s:%d
+ErrorException: ob_end_flush(): Producing output from user output handler return_null is deprecated in %s:%d
 Stack trace:
 #0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', %s, %d)
 #1 %s(%d): ob_end_flush()
@@ -98,7 +98,7 @@ return_null: <<<Inside of return_null
 
 Testing: return_false
 Inside of return_false
-return_falseErrorException: ob_end_flush(): Returning a non-string result or producing output from user output handler return_false is deprecated in %s:%d
+return_falseErrorException: ob_end_flush(): Producing output from user output handler return_false is deprecated in %s:%d
 Stack trace:
 #0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', %s, %d)
 #1 %s(%d): ob_end_flush()
@@ -109,7 +109,7 @@ return_false: <<<Inside of return_false
 >>>
 
 Testing: return_true
-ErrorException: ob_end_flush(): Returning a non-string result or producing output from user output handler return_true is deprecated in %s:%d
+ErrorException: ob_end_flush(): Producing output from user output handler return_true is deprecated in %s:%d
 Stack trace:
 #0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', %s, %d)
 #1 %s(%d): ob_end_flush()
@@ -120,7 +120,7 @@ return_true: <<<Inside of return_true
 >>>
 
 Testing: return_zero
-0ErrorException: ob_end_flush(): Returning a non-string result or producing output from user output handler return_zero is deprecated in %s:%d
+0ErrorException: ob_end_flush(): Producing output from user output handler return_zero is deprecated in %s:%d
 Stack trace:
 #0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', %s, %d)
 #1 %s(%d): ob_end_flush()
@@ -131,7 +131,7 @@ return_zero: <<<Inside of return_zero
 >>>
 
 Testing: return_non_stringable
-ErrorException: ob_end_flush(): Returning a non-string result or producing output from user output handler return_non_stringable is deprecated in %s:%d
+ErrorException: ob_end_flush(): Producing output from user output handler return_non_stringable is deprecated in %s:%d
 Stack trace:
 #0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', %s, %d)
 #1 %s(%d): ob_end_flush()
@@ -142,7 +142,7 @@ return_non_stringable: <<<Inside of return_non_stringable
 >>>
 
 Testing: return_stringable
-ErrorException: ob_end_flush(): Returning a non-string result or producing output from user output handler return_stringable is deprecated in %s:%d
+ErrorException: ob_end_flush(): Producing output from user output handler return_stringable is deprecated in %s:%d
 Stack trace:
 #0 [internal function]: {closure:%s:%d}(8192, 'ob_end_flush():...', %s, %d)
 #1 %s(%d): ob_end_flush()

@@ -969,29 +969,37 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			handler->func.user->fci.retval = &retval;
 
 			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
-				// Use a single deprecation message for both types of deprecation
-				// * Returning a non-string
-				// * Trying to produce output
-				const char *error_msg = NULL;
-				if (Z_TYPE(retval) != IS_STRING && handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
-					error_msg = "Returning a non-string result or producing output from user output handler %s is deprecated";
-				} else if (Z_TYPE(retval) != IS_STRING) {
-					error_msg = "Returning a non-string result from user output handler %s is deprecated";
-				} else if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
-					error_msg = "Producing output from user output handler %s is deprecated";
-				}
-				// The handler might not always produce output
-				handler->flags &= ~PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT;
-				if (error_msg != NULL) {
+				if (Z_TYPE(retval) != IS_STRING || handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
 					// Make sure that we don't get lost in the current output buffer
 					// by disabling it
 					handler->flags |= PHP_OUTPUT_HANDLER_DISABLED;
-					php_error_docref(
-						NULL,
-						E_DEPRECATED,
-						error_msg,
-						ZSTR_VAL(handler->name)
-					);
+					// Make sure we keep a reference to the handler name in
+					// case
+					// * The handler produced output *and* returned a non-string
+					// * The first deprecation message causes the handler to
+					// be removed
+					zend_string *handler_name = handler->name;
+					zend_string_addref(handler_name);
+					if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
+						// The handler might not always produce output
+						handler->flags &= ~PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT;
+						php_error_docref(
+							NULL,
+							E_DEPRECATED,
+							"Producing output from user output handler %s is deprecated",
+							ZSTR_VAL(handler_name)
+						);
+					}
+					if (Z_TYPE(retval) != IS_STRING) {
+						php_error_docref(
+							NULL,
+							E_DEPRECATED,
+							"Returning a non-string result from user output handler %s is deprecated",
+							ZSTR_VAL(handler_name)
+						);
+					}
+					zend_string_release(handler_name);
+
 					// Check if the handler is still in the list of handlers to
 					// determine if the PHP_OUTPUT_HANDLER_DISABLED flag can
 					// be removed
