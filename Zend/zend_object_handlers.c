@@ -350,7 +350,7 @@ static ZEND_COLD zend_never_inline void zend_readonly_property_unset_error(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
-static zend_always_inline zend_class_entry *get_fake_or_executed_scope(void)
+static zend_always_inline const zend_class_entry *get_fake_or_executed_scope(void)
 {
 	if (UNEXPECTED(EG(fake_scope))) {
 		return EG(fake_scope);
@@ -391,7 +391,7 @@ dynamic:
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-		zend_class_entry *scope = get_fake_or_executed_scope();
+		const zend_class_entry *scope = get_fake_or_executed_scope();
 
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
@@ -491,7 +491,7 @@ dynamic:
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-		zend_class_entry *scope = get_fake_or_executed_scope();
+		const zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
 				zend_property_info *p = zend_get_parent_private_property(scope, ce, member);
@@ -583,7 +583,7 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info) {
 	ZEND_ASSERT(prop_info->flags & ZEND_ACC_PPP_SET_MASK);
 	ZEND_ASSERT(!(prop_info->flags & ZEND_ACC_PUBLIC_SET));
-	zend_class_entry *scope = get_fake_or_executed_scope();
+	const zend_class_entry *scope = get_fake_or_executed_scope();
 	if (prop_info->ce == scope) {
 		return true;
 	}
@@ -2030,7 +2030,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 	}
 
 	if (!(property_info->flags & ZEND_ACC_PUBLIC)) {
-		zend_class_entry *scope = get_fake_or_executed_scope();
+		const zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
@@ -2114,7 +2114,7 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 
 	if (constructor) {
 		if (UNEXPECTED(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC))) {
-			zend_class_entry *scope = get_fake_or_executed_scope();
+			const zend_class_entry *scope = get_fake_or_executed_scope();
 			ZEND_ASSERT(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC));
 			if (!zend_check_method_accessible(constructor, scope)) {
 				zend_bad_constructor_call(constructor, scope);

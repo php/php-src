@@ -274,7 +274,7 @@ static void zend_update_property_num_checked(zend_class_entry *scope, zend_objec
 		return;
 	}
 #if ZEND_DEBUG
-	zend_class_entry *old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = i_get_exception_base(object);
 	const zend_property_info *prop_info = zend_get_property_info(object->ce, member, true);
 	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == prop_num);
