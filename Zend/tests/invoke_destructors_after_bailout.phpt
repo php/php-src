@@ -19,7 +19,6 @@ final class StatCounter {
 
     public function __destruct() {
         echo "Sending stats: ".json_encode($this->stats)."\n";
-        exit(0);
     }
 
     public function inc(string $key, int $by = 1): void {
