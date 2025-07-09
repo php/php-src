@@ -142,7 +142,7 @@ PHP_FUNCTION(grapheme_stripos)
 	const char *found;
 	zend_long loffset = 0;
 	int32_t offset = 0;
-	zend_long strength = UCOL_DEFAULT_STRENGTH;
+	zend_long strength = UCOL_SECONDARY;
 	zend_long ret_pos;
 	int is_ascii;
 
@@ -271,7 +271,7 @@ PHP_FUNCTION(grapheme_strripos)
 	size_t haystack_len, needle_len, locale_len = 0;
 	zend_long loffset = 0;
 	int32_t offset = 0;
-	zend_long strength = UCOL_DEFAULT_STRENGTH;
+	zend_long strength = UCOL_SECONDARY;
 	zend_long ret_pos;
 	int is_ascii;
 
@@ -557,8 +557,14 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	const char *found;
 	size_t haystack_len, needle_len, locale_len = 0;
 	int32_t ret_pos, uchar_pos;
-	zend_long strength = UCOL_DEFAULT_STRENGTH;
+	zend_long strength;
 	bool part = false;
+
+	if (f_ignore_case) {
+		strength = UCOL_SECONDARY;
+	} else {
+		strength = UCOL_DEFAULT_STRENGTH;
+	}
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_STRING(haystack, haystack_len)
