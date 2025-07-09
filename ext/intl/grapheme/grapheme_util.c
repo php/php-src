@@ -139,14 +139,11 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	src = usearch_open(uneedle, uneedle_len, uhaystack, uhaystack_len, locale, bi, &status);
 	STRPOS_CHECK_STATUS(status, "Error creating search object");
 
-	if(f_ignore_case) {
-		UCollator *coll = usearch_getCollator(src);
-		ucol_setStrength(coll, strength);
-		status = U_ZERO_ERROR;
-		ucol_setAttribute(coll, UCOL_STRENGTH, UCOL_SECONDARY, &status);
-		STRPOS_CHECK_STATUS(status, "Error setting collation strength");
-		usearch_reset(src);
-	}
+	UCollator *coll = usearch_getCollator(src);
+	ucol_setAttribute(coll, UCOL_STRENGTH, strength, &status);
+	STRPOS_CHECK_STATUS(status, "Error setting collation strength");
+	status = U_ZERO_ERROR;
+	usearch_reset(src);
 
 	if(offset != 0) {
 		offset_pos = grapheme_get_haystack_offset(bi, offset);

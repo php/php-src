@@ -171,6 +171,11 @@ const IDNA_ERROR_CONTEXTJ = UNKNOWN;
  * @cvalue UCOL_DEFAULT_STRENGTH
  */
 const UCOL_DEFAULT_STRENGTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UCOL_SECONDARY
+ */
+const UCOL_SECONDARY = UNKNOWN;
 
 class IntlException extends Exception
 {
@@ -434,17 +439,17 @@ function grapheme_strlen(string $string): int|false|null {}
 
 function grapheme_strpos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): int|false {}
 
-function grapheme_stripos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): int|false {}
+function grapheme_stripos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_SECONDARY): int|false {}
 
 function grapheme_strrpos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): int|false {}
 
-function grapheme_strripos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): int|false {}
+function grapheme_strripos(string $haystack, string $needle, int $offset = 0, string $locale = "", int $strength = UCOL_SECONDARY): int|false {}
 
 function grapheme_substr(string $string, int $offset, ?int $length = null, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): string|false {}
 
 function grapheme_strstr(string $haystack, string $needle, bool $beforeNeedle = false, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): string|false {}
 
-function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle = false, string $locale = "", int $strength = UCOL_DEFAULT_STRENGTH): string|false {}
+function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle = false, string $locale = "", int $strength = UCOL_SECONDARY): string|false {}
 
 function grapheme_str_split(string $string, int $length = 1): array|false {}
 
