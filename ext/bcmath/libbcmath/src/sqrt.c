@@ -36,35 +36,6 @@
 /* Take the square root NUM and return it in NUM with SCALE digits
    after the decimal place. */
 
-static inline void bc_standard_sqrt(bc_num *num, size_t scale, bcmath_compare_result num_cmp_one);
-
-bool bc_sqrt(bc_num *num, size_t scale)
-{
-	/* Initial checks. */
-	if (bc_is_neg(*num)) {
-		/* Cannot take the square root of a negative number */
-		return false;
-	}
-	/* Square root of 0 is 0 */
-	if (bc_is_zero(*num)) {
-		bc_free_num (num);
-		*num = bc_copy_num(BCG(_zero_));
-		return true;
-	}
-
-	bcmath_compare_result num_cmp_one = bc_compare(*num, BCG(_one_), (*num)->n_scale);
-	/* Square root of 1 is 1 */
-	if (num_cmp_one == BCMATH_EQUAL) {
-		bc_free_num (num);
-		*num = bc_copy_num(BCG(_one_));
-		return true;
-	}
-
-	bc_standard_sqrt(num, scale, num_cmp_one);
-
-	return true;
-}
-
 static inline void bc_standard_sqrt(bc_num *num, size_t scale, bcmath_compare_result num_cmp_one)
 {
 	size_t cscale;
@@ -120,4 +91,31 @@ static inline void bc_standard_sqrt(bc_num *num, size_t scale, bcmath_compare_re
 	bc_free_num (&guess1);
 	bc_free_num (&point5);
 	bc_free_num (&diff);
+}
+
+bool bc_sqrt(bc_num *num, size_t scale)
+{
+	/* Initial checks. */
+	if (bc_is_neg(*num)) {
+		/* Cannot take the square root of a negative number */
+		return false;
+	}
+	/* Square root of 0 is 0 */
+	if (bc_is_zero(*num)) {
+		bc_free_num (num);
+		*num = bc_copy_num(BCG(_zero_));
+		return true;
+	}
+
+	bcmath_compare_result num_cmp_one = bc_compare(*num, BCG(_one_), (*num)->n_scale);
+	/* Square root of 1 is 1 */
+	if (num_cmp_one == BCMATH_EQUAL) {
+		bc_free_num (num);
+		*num = bc_copy_num(BCG(_one_));
+		return true;
+	}
+
+	bc_standard_sqrt(num, scale, num_cmp_one);
+
+	return true;
 }
