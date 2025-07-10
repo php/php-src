@@ -1,5 +1,5 @@
 --TEST--
-ob_start(): Check behaviour with nested deprecation converted to exception [bad return]
+ob_start(): Check behaviour with nested deprecation converted to exception [bad return + produce output]
 --FILE--
 <?php
 
@@ -22,36 +22,42 @@ set_error_handler(function (int $errno, string $errstr, string $errfile, int $er
 function return_null($string) {
     global $log;
     $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    echo __FUNCTION__;
     return null;
 }
 
 function return_false($string) {
     global $log;
     $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    echo __FUNCTION__;
     return false;
 }
 
 function return_true($string) {
     global $log;
     $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    echo __FUNCTION__;
     return true;
 }
 
 function return_zero($string) {
     global $log;
     $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    echo __FUNCTION__;
     return 0;
 }
 
 function return_non_stringable($string) {
     global $log;
     $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    echo __FUNCTION__;
     return new NotStringable($string);
 }
 
 function return_stringable($string) {
     global $log;
     $log[] = __FUNCTION__ . ": <<<" . $string . ">>>";
+    echo __FUNCTION__;
     return new IsStringable($string);
 }
 
@@ -110,7 +116,7 @@ echo implode("\n", $log);
 
 ?>
 --EXPECT--
-ob_end_flush(): Returning a non-string result from user output handler return_null is deprecated
+ob_end_flush(): Producing output from user output handler return_null is deprecated
 Ended return_null handler
 
 All handlers are over
@@ -118,26 +124,26 @@ All handlers are over
 return_stringable: <<<In all of them
 
 >>>
-return_non_stringable: <<<ob_end_flush(): Returning a non-string result from user output handler return_stringable is deprecated
+return_non_stringable: <<<ob_end_flush(): Producing output from user output handler return_stringable is deprecated
 Ended return_stringable handler
 
 >>>
-return_zero: <<<ob_end_flush(): Returning a non-string result from user output handler return_non_stringable is deprecated
+return_zero: <<<ob_end_flush(): Producing output from user output handler return_non_stringable is deprecated
 Ended return_non_stringable handler
 
 >>>
-return_true: <<<0ob_end_flush(): Returning a non-string result from user output handler return_zero is deprecated
+return_true: <<<0ob_end_flush(): Producing output from user output handler return_zero is deprecated
 Ended return_zero handler
 
 >>>
-return_false: <<<ob_end_flush(): Returning a non-string result from user output handler return_true is deprecated
+return_false: <<<ob_end_flush(): Producing output from user output handler return_true is deprecated
 Ended return_true handler
 
 >>>
-return_null: <<<ob_end_flush(): Returning a non-string result from user output handler return_true is deprecated
+return_null: <<<ob_end_flush(): Producing output from user output handler return_true is deprecated
 Ended return_true handler
 
-ob_end_flush(): Returning a non-string result from user output handler return_false is deprecated
+return_falseob_end_flush(): Producing output from user output handler return_false is deprecated
 Ended return_false handler
 
 >>>
