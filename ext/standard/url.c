@@ -25,6 +25,8 @@
 #include "file.h"
 #include "zend_simd.h"
 #include "Zend/zend_smart_str.h"
+#include "Zend/zend_exceptions.h"
+#include "ext/uri/php_uri.h"
 
 /* {{{ free_url */
 PHPAPI void php_url_free(php_url *theurl)
@@ -46,6 +48,13 @@ PHPAPI void php_url_free(php_url *theurl)
 	efree(theurl);
 }
 /* }}} */
+
+static void parse_url_free_uri(void *uri)
+{
+	php_url *parse_url_uri = (php_url *) uri;
+
+	php_url_free(parse_url_uri);
+}
 
 static void php_replace_controlchars(char *str, size_t len)
 {
@@ -311,7 +320,164 @@ parse_host:
 
 	return ret;
 }
-/* }}} */
+
+static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->scheme) {
+		ZVAL_STR_COPY(retval, parse_url_uri->scheme);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->user) {
+		ZVAL_STR_COPY(retval, parse_url_uri->user);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->pass) {
+		ZVAL_STR_COPY(retval, parse_url_uri->pass);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->host) {
+		ZVAL_STR_COPY(retval, parse_url_uri->host);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->port) {
+		ZVAL_LONG(retval, parse_url_uri->port);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->path) {
+		ZVAL_STR_COPY(retval, parse_url_uri->path);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->query) {
+		ZVAL_STR_COPY(retval, parse_url_uri->query);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->fragment) {
+		ZVAL_STR_COPY(retval, parse_url_uri->fragment);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static void *parse_url_clone_uri(void *uri)
+{
+	ZEND_UNREACHABLE();
+}
+
+static void throw_invalid_uri_exception(void)
+{
+	zval exception;
+
+	object_init_ex(&exception, uri_invalid_uri_exception_ce);
+
+	zval value;
+	ZVAL_STRING(&value, "URL parsing failed");
+	zend_update_property_ex(uri_whatwg_invalid_url_exception_ce, Z_OBJ(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
+	zval_ptr_dtor_str(&value);
+
+	zend_throw_exception_object(&exception);
+}
+
+static void *parse_url_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors, bool silent)
+{
+	bool has_port;
+
+	php_url *url = php_url_parse_ex2(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), &has_port);
+	if (url == NULL && !silent) {
+		throw_invalid_uri_exception();
+	}
+
+	return url;
+}
+
+static zend_string *parse_url_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
+{
+	ZEND_UNREACHABLE();
+}
+
+const uri_handler_t parse_url_uri_handler = {
+	.name = URI_PARSER_PHP,
+	.parse_uri = parse_url_parse_uri,
+	.clone_uri = parse_url_clone_uri,
+	.uri_to_string = parse_url_uri_to_string,
+	.free_uri = parse_url_free_uri,
+	{
+		.scheme = {.read_func = parse_url_read_scheme, .write_func = NULL},
+		.username = {.read_func = parse_url_read_username, .write_func = NULL},
+		.password = {.read_func = parse_url_read_password, .write_func = NULL},
+		.host = {.read_func = parse_url_read_host, .write_func = NULL},
+		.port = {.read_func = parse_url_read_port, .write_func = NULL},
+		.path = {.read_func = parse_url_read_path, .write_func = NULL},
+		.query = {.read_func = parse_url_read_query, .write_func = NULL},
+		.fragment = {.read_func = parse_url_read_fragment, .write_func = NULL},
+	}
+};
 
 /* {{{ Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
@@ -753,3 +919,8 @@ no_name_header:
 	php_stream_close(stream);
 }
 /* }}} */
+
+PHP_MINIT_FUNCTION(url)
+{
+	return uri_handler_register(&parse_url_uri_handler);
+}
