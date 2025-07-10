@@ -145,7 +145,7 @@ object(ReflectionClass)#3 (1) {
   string(9) "TestClass"
 }
 getDocComment():
-bool(false)
+string(0) ""
 hasType():
 bool(false)
 getType():
@@ -177,7 +177,7 @@ object(ReflectionClass)#3 (1) {
   string(9) "TestClass"
 }
 getDocComment():
-bool(false)
+string(0) ""
 hasType():
 bool(false)
 getType():
@@ -209,7 +209,7 @@ object(ReflectionClass)#3 (1) {
   string(9) "TestClass"
 }
 getDocComment():
-bool(false)
+string(0) ""
 hasType():
 bool(false)
 getType():
