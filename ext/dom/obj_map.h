@@ -19,11 +19,17 @@
 
 typedef struct dom_nnodemap_object dom_nnodemap_object;
 
+typedef struct php_dom_obj_map_collection_iter {
+	zend_long cur, next;
+	xmlNodePtr candidate, basep;
+} php_dom_obj_map_collection_iter;
+
 typedef struct php_dom_obj_map_handler {
 	zend_long (*length)(dom_nnodemap_object *);
 	void (*get_item)(dom_nnodemap_object *, zend_long, zval *);
 	xmlNodePtr (*get_ns_named_item)(dom_nnodemap_object *, const zend_string *, const char *);
 	bool (*has_ns_named_item)(dom_nnodemap_object *, const zend_string *, const char *);
+	void (*collection_named_item_iter)(dom_nnodemap_object *, php_dom_obj_map_collection_iter *);
 	bool use_cache;
 	bool nameless;
 } php_dom_obj_map_handler;
