@@ -19,6 +19,7 @@ opcache
 <?php
 // Prints "Debug Restarting!" message on next request.
 if (getenv('SKIP_REPEAT')) die("skip Not repeatable");
+if (PHP_ZTS) die("skip ZTS prints extra messages");
 ?>
 --FILE--
 <?php

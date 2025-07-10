@@ -1,0 +1,10 @@
+name: Test TLS
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        apk add clang gcc binutils-gold lld
+        export TLSC=$(pwd)/ext/opcache/jit/tls/zend_jit_tls_x86_64.c
+        ./ext/opcache/jit/tls/testing/test.sh
