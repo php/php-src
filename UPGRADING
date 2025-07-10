@@ -593,6 +593,13 @@ PHP 8.5 UPGRADE NOTES
   . The `-z` or `--zend-extension` option has been removed as it was
     non-functional. Use `-d zend_extension=<path>` instead.
 
+- PDO_ODBC
+  . The fetch behaviour for larger columns has been changed. Rather than
+    fetching 256 byte blocks, PDO_ODBC will try to fetch a larger block size;
+    currently, this is the page size minus string overhead. Drivers that
+    return SQL_NO_TOTAL in SQLGetData are also better handled as well.
+    This should improve compatibility and performance. See GH-10809, GH-10733.
+
 ========================================
 14. Performance Improvements
 ========================================
