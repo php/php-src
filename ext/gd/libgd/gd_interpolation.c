@@ -62,11 +62,6 @@ TODO:
 #include "gdhelpers.h"
 #include "gd_intern.h"
 
-#ifdef _MSC_VER
-# pragma optimize("t", on)
-# include <emmintrin.h>
-#endif
-
 #ifndef HAVE_FLOORF
 # define HAVE_FLOORF 0
 #endif
