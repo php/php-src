@@ -45,6 +45,12 @@ PHP 8.5 UPGRADE NOTES
     change, but should more closely match user expectations, demonstrated by
     GH-15753 and GH-16198.
 
+- DOM:
+  . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
+    Dom\HTMLCollection, and Dom\DtdNamedNodeMap now fails.
+    This never actually resulted in a working object,
+    so the impact should actually be zero.
+
 - FileInfo:
   . finfo_file() and finfo::file() now throws a ValueError instead of a
     TypeError when $filename contains nul bytes.
