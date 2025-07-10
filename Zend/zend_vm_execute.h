@@ -55123,7 +55123,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDL
 # pragma GCC optimize("no-gcse")
 # pragma GCC optimize("no-ivopts")
 #endif
-#ifdef _WIN64
+#if defined(_WIN64) && defined(_M_X64)
 /* See save_xmm_x86_64_ms_masm.asm */
 void execute_ex_real(zend_execute_data *ex)
 #else
