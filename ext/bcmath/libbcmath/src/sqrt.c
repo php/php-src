@@ -170,13 +170,13 @@ bool bc_sqrt(bc_num *num, size_t scale)
 	size_t num_use_scale = MIN((*num)->n_scale, num_calc_scale);
 
 	/* Square root of 0 is 0 */
-	if (bc_is_zero(*num)) {
+	if (bc_is_zero_for_scale(*num, num_use_scale)) {
 		bc_free_num (num);
 		*num = bc_copy_num(BCG(_zero_));
 		return true;
 	}
 
-	bcmath_compare_result num_cmp_one = bc_compare(*num, BCG(_one_), (*num)->n_scale);
+	bcmath_compare_result num_cmp_one = bc_compare(*num, BCG(_one_), num_use_scale);
 	/* Square root of 1 is 1 */
 	if (num_cmp_one == BCMATH_EQUAL) {
 		bc_free_num (num);
