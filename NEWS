@@ -52,6 +52,7 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-18990, bug #81029, bug #47314 (SOAP HTTP socket not closing
     on object destruction). (nielsdos)
+  . Fix memory leak when URL parsing fails in redirect. (Girgias)
 
 - Standard:
   . Fix misleading errors in printf(). (nielsdos)

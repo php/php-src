@@ -1144,11 +1144,11 @@ try_again:
 
 		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
 			php_url *new_url  = php_url_parse(loc);
+			efree(loc);
 
 			if (new_url != NULL) {
 				zend_string_release_ex(http_headers, 0);
 				zend_string_release_ex(http_body, 0);
-				efree(loc);
 				if (new_url->scheme == NULL && new_url->path != NULL) {
 					new_url->scheme = phpurl->scheme ? zend_string_copy(phpurl->scheme) : NULL;
 					new_url->host = phpurl->host ? zend_string_copy(phpurl->host) : NULL;
