@@ -36,6 +36,8 @@
 /* Take the square root NUM and return it in NUM with SCALE digits
    after the decimal place. */
 
+static inline void bc_standard_sqrt(bc_num *num, size_t scale, bcmath_compare_result num_cmp_one);
+
 bool bc_sqrt(bc_num *num, size_t scale)
 {
 	/* Initial checks. */
@@ -58,7 +60,13 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		return true;
 	}
 
-	/* Initialize the variables. */
+	bc_standard_sqrt(num, scale, num_cmp_one);
+
+	return true;
+}
+
+static inline void bc_standard_sqrt(bc_num *num, size_t scale, bcmath_compare_result num_cmp_one)
+{
 	size_t cscale;
 	bc_num guess, guess1, point5, diff;
 	size_t rscale = MAX(scale, (*num)->n_scale);
@@ -112,5 +120,4 @@ bool bc_sqrt(bc_num *num, size_t scale)
 	bc_free_num (&guess1);
 	bc_free_num (&point5);
 	bc_free_num (&diff);
-	return true;
 }
