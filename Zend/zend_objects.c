@@ -319,7 +319,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 {
 	ZEND_ASSERT(old_object->ce == new_object->ce);
 
-	zend_objects_clone_members_with(new_object, old_object, old_object->ce, &zend_empty_array);
+	zend_objects_clone_members_with(new_object, old_object, NULL, &zend_empty_array);
 }
 
 ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const zend_class_entry *scope, const HashTable *properties)
@@ -366,5 +366,5 @@ ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const
 
 ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 {
-	return zend_objects_clone_obj_with(old_object, old_object->ce, &zend_empty_array);
+	return zend_objects_clone_obj_with(old_object, NULL, &zend_empty_array);
 }
