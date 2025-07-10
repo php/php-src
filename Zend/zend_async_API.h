@@ -19,9 +19,9 @@
 #include "zend_fibers.h"
 #include "zend_globals.h"
 
-#define ZEND_ASYNC_API "TrueAsync API v0.2.0"
+#define ZEND_ASYNC_API "TrueAsync API v0.3.0"
 #define ZEND_ASYNC_API_VERSION_MAJOR 0
-#define ZEND_ASYNC_API_VERSION_MINOR 2
+#define ZEND_ASYNC_API_VERSION_MINOR 3
 #define ZEND_ASYNC_API_VERSION_PATCH 0
 
 #define ZEND_ASYNC_API_VERSION_NUMBER \
@@ -87,6 +87,11 @@ typedef enum {
 	ZEND_ASYNC_EXEC_MODE_PASSTHRU,
 	ZEND_ASYNC_EXEC_MODE_SHELL_EXEC
 } zend_async_exec_mode;
+
+typedef enum {
+	ZEND_COROUTINE_NORMAL = 0,
+	ZEND_COROUTINE_HI_PRIORITY = 255
+} zend_coroutine_priority;
 
 typedef enum
 {
@@ -334,7 +339,9 @@ typedef void (*zend_async_iterator_method_t)(zend_async_iterator_t *iterator);
 	/* The maximum number of concurrent tasks that can be executed at the same time */ \
 	unsigned int concurrency; \
 	/* Priority for coroutines created by this iterator */ \
-	int32_t priority;
+	int32_t priority; \
+	/* NULLABLE. Exception that stopped the iterator */ \
+	zend_object * exception;
 
 struct _zend_async_iterator_s {
 	ZEND_ASYNC_ITERATOR_FIELDS
@@ -381,10 +388,12 @@ struct _zend_async_event_callback_s {
 	}
 
 #define ZEND_ASYNC_EVENT_CALLBACK_RELEASE(callback) \
-	if (callback != NULL && callback->ref_count > 1) { \
-		callback->ref_count--; \
+	if ((callback) != NULL && (callback)->ref_count > 1) { \
+		(callback)->ref_count--; \
+	} else if((callback)->dispose != NULL) { \
+		(callback)->dispose((callback), NULL); \
 	} else { \
-		coroutine_event_callback_dispose(callback, NULL); \
+		coroutine_event_callback_dispose((callback), NULL); \
 	}
 
 struct _zend_coroutine_event_callback_s {
@@ -789,11 +798,13 @@ struct _zend_async_scope_s {
 #define ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY	      ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY  /* scope will not free memory in dispose handler */
 #define ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY 		  (1u << 14)  /* scope will be disposed safely */
 #define ZEND_ASYNC_SCOPE_F_CANCELLED 			  (1u << 15)  /* scope was cancelled */
+#define ZEND_ASYNC_SCOPE_F_DISPOSING 			  (1u << 16)  /* scope disposing */
 
 #define ZEND_ASYNC_SCOPE_IS_CLOSED(scope)         (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CLOSED) != 0)
 #define ZEND_ASYNC_SCOPE_IS_NO_FREE_MEMORY(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY) != 0)
 #define ZEND_ASYNC_SCOPE_IS_DISPOSE_SAFELY(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY) != 0)
 #define ZEND_ASYNC_SCOPE_IS_CANCELLED(scope)      (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CANCELLED) != 0)
+#define ZEND_ASYNC_SCOPE_IS_DISPOSING(scope)      (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSING) != 0)
 
 #define ZEND_ASYNC_SCOPE_SET_CLOSED(scope)        ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_CLOSED)
 #define ZEND_ASYNC_SCOPE_CLR_CLOSED(scope)        ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_CLOSED)
@@ -805,6 +816,9 @@ struct _zend_async_scope_s {
 #define ZEND_ASYNC_SCOPE_CLR_DISPOSE_SAFELY(scope) ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
 
 #define ZEND_ASYNC_SCOPE_SET_CANCELLED(scope)      ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_CANCELLED)
+
+#define ZEND_ASYNC_SCOPE_SET_DISPOSING(scope)	  ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_DISPOSING)
+#define ZEND_ASYNC_SCOPE_CLR_DISPOSING(scope)	  ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSING)
 
 static zend_always_inline void
 zend_async_scope_add_child(zend_async_scope_t *parent_scope, zend_async_scope_t *child_scope)
@@ -1282,6 +1296,7 @@ ZEND_API zend_async_event_callback_t * zend_async_event_callback_new(zend_async_
 ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_callback_new(
 	zend_coroutine_t * coroutine, zend_async_event_callback_fn callback, size_t size
 );
+ZEND_API void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event);
 
 /* Waker API */
 ZEND_API zend_async_waker_t *zend_async_waker_new(zend_coroutine_t *coroutine);
@@ -1293,6 +1308,7 @@ ZEND_API bool zend_async_waker_apply_error(
 );
 ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine);
 ZEND_API void zend_async_waker_add_triggered_event(zend_coroutine_t *coroutine, zend_async_event_t *event);
+ZEND_API bool zend_async_waker_is_event_exists(zend_coroutine_t *coroutine, zend_async_event_t *event);
 
 #define ZEND_ASYNC_WAKER_APPLY_ERROR(waker, error, transfer) zend_async_waker_apply_error((waker), (error), (transfer), true, false)
 #define ZEND_ASYNC_WAKER_APPEND_ERROR(waker, error, transfer) zend_async_waker_apply_error((waker), (error), (transfer), false, false)
