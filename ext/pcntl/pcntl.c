@@ -238,8 +238,8 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 
 	/* Reset all signals to their default disposition */
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
-		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
-			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
+		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)(intptr_t)SIG_DFL) {
+			php_signal(signo, (Sigfunc *)(intptr_t)SIG_DFL, 0);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -825,11 +825,11 @@ PHP_FUNCTION(pcntl_signal)
 
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
-		if (Z_LVAL_P(handle) != (zend_long) SIG_DFL && Z_LVAL_P(handle) != (zend_long) SIG_IGN) {
+		if (Z_LVAL_P(handle) != (zend_long)(intptr_t)SIG_DFL && Z_LVAL_P(handle) != (zend_long)(intptr_t)SIG_IGN) {
 			zend_argument_value_error(2, "must be either SIG_DFL or SIG_IGN when an integer value is given");
 			RETURN_THROWS();
 		}
-		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
+		if (php_signal(signo, (Sigfunc *)(intptr_t)Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
@@ -885,7 +885,7 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 	if ((prev_handle = zend_hash_index_find(&PCNTL_G(php_signal_table), signo)) != NULL) {
 		RETURN_COPY(prev_handle);
 	} else {
-		RETURN_LONG((zend_long)SIG_DFL);
+		RETURN_LONG((zend_long)(intptr_t)SIG_DFL);
 	}
 }
 
@@ -1151,11 +1151,11 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 			case SIGFPE:
 			case SIGSEGV:
 			case SIGBUS:
-				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
+				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)(intptr_t)siginfo->si_addr);
 				break;
 #if defined(SIGPOLL) && !defined(__CYGWIN__)
 			case SIGPOLL:
-				add_assoc_long_ex(user_siginfo, "band", sizeof("band")-1, siginfo->si_band);
+				add_assoc_long_ex(user_siginfo, "band", sizeof("band")-1, (zend_long)(intptr_t)siginfo->si_band);
 # ifdef si_fd
 				add_assoc_long_ex(user_siginfo, "fd",   sizeof("fd")-1,   siginfo->si_fd);
 # endif
