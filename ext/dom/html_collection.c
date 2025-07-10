@@ -46,46 +46,34 @@ static dom_named_item dom_html_collection_named_item(zend_string *key, zend_obje
 
 	/* 2. Return the first element in the collection for which at least one of the following is true: */
 	xmlNodePtr basep = dom_object_get_node(objmap->baseobj);
-	if (basep != NULL) {
-		zend_long cur = 0;
-		zend_long next = cur; /* not +1, otherwise we skip the first candidate */
-		xmlNodePtr candidate = basep->children;
-		bool iterate_tag_name = objmap->handler == &php_dom_obj_map_by_tag_name;
-		while (candidate != NULL) {
-			if (iterate_tag_name) {
-				candidate = dom_get_elements_by_tag_name_ns_raw(basep, candidate, objmap->ns, objmap->local, objmap->local_lower, &cur, next);
-				if (candidate == NULL) {
-					break;
-				}
-				next = cur + 1;
-			} else {
-				if (candidate->type != XML_ELEMENT_NODE) {
-					candidate = candidate->next;
-					continue;
-				}
+	if (basep != NULL && basep->children != NULL) {
+		php_dom_obj_map_collection_iter iter = {0};
+		iter.candidate = basep->children;
+		iter.basep = basep;
+
+		while (true) {
+			objmap->handler->collection_named_item_iter(objmap, &iter);
+			if (iter.candidate == NULL) {
+				break;
 			}
 
-			ZEND_ASSERT(candidate->type == XML_ELEMENT_NODE);
+			ZEND_ASSERT(iter.candidate->type == XML_ELEMENT_NODE);
 
 			xmlAttrPtr attr;
 
 			/* it has an ID which is key; */
-			if ((attr = xmlHasNsProp(candidate, BAD_CAST "id", NULL)) != NULL && dom_compare_value(attr, BAD_CAST ZSTR_VAL(key))) {
+			if ((attr = xmlHasNsProp(iter.candidate, BAD_CAST "id", NULL)) != NULL && dom_compare_value(attr, BAD_CAST ZSTR_VAL(key))) {
 				ret.context_intern = objmap->baseobj;
-				ret.node = candidate;
+				ret.node = iter.candidate;
 				return ret;
 			}
 			/* it is in the HTML namespace and has a name attribute whose value is key; */
-			else if (php_dom_ns_is_fast(candidate, php_dom_ns_is_html_magic_token)) {
-				if ((attr = xmlHasNsProp(candidate, BAD_CAST "name", NULL)) != NULL && dom_compare_value(attr, BAD_CAST ZSTR_VAL(key))) {
+			else if (php_dom_ns_is_fast(iter.candidate, php_dom_ns_is_html_magic_token)) {
+				if ((attr = xmlHasNsProp(iter.candidate, BAD_CAST "name", NULL)) != NULL && dom_compare_value(attr, BAD_CAST ZSTR_VAL(key))) {
 					ret.context_intern = objmap->baseobj;
-					ret.node = candidate;
+					ret.node = iter.candidate;
 					return ret;
 				}
-			}
-
-			if (!iterate_tag_name) {
-				candidate = candidate->next;
 			}
 		}
 	}
