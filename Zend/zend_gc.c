@@ -2176,11 +2176,21 @@ ZEND_API int zend_gc_collect_cycles(void)
 		return 0;
 	}
 
+	const bool in_fiber = EG(active_fiber) != NULL;
+
 	//
 	// We might enter this context from different coroutines, so we don’t initialize anything here.
 	//
-	gc_async_context_t *context = &GC_G(async_context);
-	gc_stack *stack = GC_G(gc_stack);
+	gc_async_context_t *context = NULL;
+	gc_stack *stack = NULL;
+
+	if (in_fiber) {
+		context = emalloc(sizeof(gc_async_context_t));
+		stack = emalloc(sizeof(gc_stack));
+	} else {
+		context = &GC_G(async_context);
+		stack = GC_G(gc_stack);
+	}
 
 	if (UNEXPECTED(context->state == GC_ASYNC_STATE_CONTINUE)) {
 		// If we reach this point, it means the destructor call was interrupted by a suspend() operation,
@@ -2197,14 +2207,21 @@ ZEND_API int zend_gc_collect_cycles(void)
 		context->should_rerun_gc = 0;
 		context->did_rerun_gc = 0;
 		context->gc_flags = 0;
+		// reset the destructor index
+		GC_G(dtor_idx) = GC_FIRST_ROOT;
 
-		if (GC_G(gc_stack) == NULL) {
-			stack = ecalloc(1, sizeof(gc_stack));
+		if (false == in_fiber) {
+			if (GC_G(gc_stack) == NULL) {
+				stack = emalloc(sizeof(gc_stack));
+				stack->prev = NULL;
+				stack->next = NULL;
+				GC_G(gc_stack) = stack;
+			} else {
+				stack = GC_G(gc_stack);
+			}
+		} else {
 			stack->prev = NULL;
 			stack->next = NULL;
-			GC_G(gc_stack) = stack;
-		} else {
-			stack = GC_G(gc_stack);
 		}
 	}
 
@@ -2357,7 +2374,9 @@ continue_calling_destructors:
 		gc_stack_free(GC_COLLECT_STACK);
 
 #ifdef PHP_ASYNC_API
-		end = GC_G(first_unused);
+		if (false == in_fiber) {
+			end = GC_G(first_unused);
+		}
 #endif
 
 		/* Destroy zvals. The root buffer may be reallocated. */
@@ -2442,9 +2461,15 @@ finish:
 
 	GC_G(collector_time) += zend_hrtime() - GC_COLLECT_START_TIME;
 #ifdef PHP_ASYNC_API
-	GC_G(async_context).state = GC_ASYNC_STATE_NONE;
-	if (GC_G(gc_stack) != NULL) {
-		GC_COLLECT_FREE_STACK;
+	if (in_fiber) {
+		efree(context);
+		gc_stack_free(stack);
+		efree(stack);
+	} else {
+		GC_G(async_context).state = GC_ASYNC_STATE_NONE;
+		if (GC_G(gc_stack) != NULL) {
+			GC_COLLECT_FREE_STACK;
+		}
 	}
 #endif
 	return GC_COLLECT_TOTAL_COUNT;
