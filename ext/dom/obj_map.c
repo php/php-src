@@ -294,9 +294,6 @@ static void dom_map_get_null_item(dom_nnodemap_object *map, zend_long index, zva
 zend_long php_dom_get_nodelist_length(dom_object *obj)
 {
 	dom_nnodemap_object *objmap = obj->ptr;
-	if (!objmap) {
-		return 0;
-	}
 
 	if (objmap->handler->use_cache) {
 		xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
