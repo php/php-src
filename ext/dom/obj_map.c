@@ -373,9 +373,9 @@ void php_dom_obj_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long i
 	}
 }
 
-void php_dom_obj_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, const char *ns, zval *return_value)
+void php_dom_obj_map_get_ns_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, const char *ns, zval *return_value)
 {
-	xmlNodePtr itemnode = objmap->handler->get_named_item(objmap, named, ns);
+	xmlNodePtr itemnode = objmap->handler->get_ns_named_item(objmap, named, ns);
 	if (itemnode) {
 		DOM_RET_OBJ(itemnode, objmap->baseobj);
 	} else {
@@ -387,17 +387,17 @@ void php_dom_obj_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const
  * === Named item === *
  **********************/
 
-static xmlNodePtr dom_map_get_named_item_entity(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static xmlNodePtr dom_map_get_ns_named_item_entity(dom_nnodemap_object *map, const zend_string *named, const char *ns)
 {
 	return xmlHashLookup(map->ht, BAD_CAST ZSTR_VAL(named));
 }
 
-static bool dom_map_has_named_item_xmlht(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static bool dom_map_has_ns_named_item_xmlht(dom_nnodemap_object *map, const zend_string *named, const char *ns)
 {
-	return dom_map_get_named_item_entity(map, named, ns) != NULL;
+	return dom_map_get_ns_named_item_entity(map, named, ns) != NULL;
 }
 
-static xmlNodePtr dom_map_get_named_item_notation(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static xmlNodePtr dom_map_get_ns_named_item_notation(dom_nnodemap_object *map, const zend_string *named, const char *ns)
 {
 	xmlNotationPtr notation = xmlHashLookup(map->ht, BAD_CAST ZSTR_VAL(named));
 	if (notation) {
@@ -406,7 +406,7 @@ static xmlNodePtr dom_map_get_named_item_notation(dom_nnodemap_object *map, cons
 	return NULL;
 }
 
-static xmlNodePtr dom_map_get_named_item_prop(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static xmlNodePtr dom_map_get_ns_named_item_prop(dom_nnodemap_object *map, const zend_string *named, const char *ns)
 {
 	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
 	if (nodep) {
@@ -423,17 +423,17 @@ static xmlNodePtr dom_map_get_named_item_prop(dom_nnodemap_object *map, const ze
 	return NULL;
 }
 
-static bool dom_map_has_named_item_prop(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static bool dom_map_has_ns_named_item_prop(dom_nnodemap_object *map, const zend_string *named, const char *ns)
 {
-	return dom_map_get_named_item_prop(map, named, ns) != NULL;
+	return dom_map_get_ns_named_item_prop(map, named, ns) != NULL;
 }
 
-static xmlNodePtr dom_map_get_named_item_null(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static xmlNodePtr dom_map_get_ns_named_item_null(dom_nnodemap_object *map, const zend_string *named, const char *ns)
 {
 	return NULL;
 }
 
-static bool dom_map_has_named_item_null(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static bool dom_map_has_ns_named_item_null(dom_nnodemap_object *map, const zend_string *named, const char *ns)
 {
 	return false;
 }
@@ -445,8 +445,8 @@ static bool dom_map_has_named_item_null(dom_nnodemap_object *map, const zend_str
 const php_dom_obj_map_handler php_dom_obj_map_attributes = {
 	.length = dom_map_get_prop_length,
 	.get_item = dom_map_get_attributes_item,
-	.get_named_item = dom_map_get_named_item_prop,
-	.has_named_item = dom_map_has_named_item_prop,
+	.get_ns_named_item = dom_map_get_ns_named_item_prop,
+	.has_ns_named_item = dom_map_has_ns_named_item_prop,
 	.use_cache = false,
 	.nameless = false,
 };
@@ -454,8 +454,8 @@ const php_dom_obj_map_handler php_dom_obj_map_attributes = {
 const php_dom_obj_map_handler php_dom_obj_map_by_tag_name = {
 	.length = dom_map_get_by_tag_name_length,
 	.get_item = dom_map_get_by_tag_name_item,
-	.get_named_item = dom_map_get_named_item_null,
-	.has_named_item = dom_map_has_named_item_null,
+	.get_ns_named_item = dom_map_get_ns_named_item_null,
+	.has_ns_named_item = dom_map_has_ns_named_item_null,
 	.use_cache = true,
 	.nameless = true,
 };
@@ -463,8 +463,8 @@ const php_dom_obj_map_handler php_dom_obj_map_by_tag_name = {
 const php_dom_obj_map_handler php_dom_obj_map_child_nodes = {
 	.length = dom_map_get_nodes_length,
 	.get_item = dom_map_get_nodes_item,
-	.get_named_item = dom_map_get_named_item_null,
-	.has_named_item = dom_map_has_named_item_null,
+	.get_ns_named_item = dom_map_get_ns_named_item_null,
+	.has_ns_named_item = dom_map_has_ns_named_item_null,
 	.use_cache = true,
 	.nameless = true,
 };
@@ -472,8 +472,8 @@ const php_dom_obj_map_handler php_dom_obj_map_child_nodes = {
 const php_dom_obj_map_handler php_dom_obj_map_nodeset = {
 	.length = dom_map_get_nodeset_length,
 	.get_item = dom_map_get_nodeset_item,
-	.get_named_item = dom_map_get_named_item_null,
-	.has_named_item = dom_map_has_named_item_null,
+	.get_ns_named_item = dom_map_get_ns_named_item_null,
+	.has_ns_named_item = dom_map_has_ns_named_item_null,
 	.use_cache = false,
 	.nameless = true,
 };
@@ -481,8 +481,8 @@ const php_dom_obj_map_handler php_dom_obj_map_nodeset = {
 const php_dom_obj_map_handler php_dom_obj_map_entities = {
 	.length = dom_map_get_xmlht_length,
 	.get_item = dom_map_get_entity_item,
-	.get_named_item = dom_map_get_named_item_entity,
-	.has_named_item = dom_map_has_named_item_xmlht,
+	.get_ns_named_item = dom_map_get_ns_named_item_entity,
+	.has_ns_named_item = dom_map_has_ns_named_item_xmlht,
 	.use_cache = false,
 	.nameless = false,
 };
@@ -490,8 +490,8 @@ const php_dom_obj_map_handler php_dom_obj_map_entities = {
 const php_dom_obj_map_handler php_dom_obj_map_notations = {
 	.length = dom_map_get_xmlht_length,
 	.get_item = dom_map_get_notation_item,
-	.get_named_item = dom_map_get_named_item_notation,
-	.has_named_item = dom_map_has_named_item_xmlht,
+	.get_ns_named_item = dom_map_get_ns_named_item_notation,
+	.has_ns_named_item = dom_map_has_ns_named_item_xmlht,
 	.use_cache = false,
 	.nameless = false,
 };
@@ -499,8 +499,8 @@ const php_dom_obj_map_handler php_dom_obj_map_notations = {
 const php_dom_obj_map_handler php_dom_obj_map_child_elements = {
 	.length = dom_map_get_elements_length,
 	.get_item = dom_map_get_elements_item,
-	.get_named_item = dom_map_get_named_item_null,
-	.has_named_item = dom_map_has_named_item_null,
+	.get_ns_named_item = dom_map_get_ns_named_item_null,
+	.has_ns_named_item = dom_map_has_ns_named_item_null,
 	.use_cache = true,
 	.nameless = true,
 };
@@ -508,8 +508,8 @@ const php_dom_obj_map_handler php_dom_obj_map_child_elements = {
 const php_dom_obj_map_handler php_dom_obj_map_noop = {
 	.length = dom_map_get_zero_length,
 	.get_item = dom_map_get_null_item,
-	.get_named_item = dom_map_get_named_item_null,
-	.has_named_item = dom_map_has_named_item_null,
+	.get_ns_named_item = dom_map_get_ns_named_item_null,
+	.has_ns_named_item = dom_map_has_ns_named_item_null,
 	.use_cache = false,
 	.nameless = true,
 };
