@@ -438,6 +438,7 @@ max_input_time = 60
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
 memory_limit = 128M
+max_memory_limit = -1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
