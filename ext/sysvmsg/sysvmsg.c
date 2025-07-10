@@ -34,12 +34,12 @@ PHP_MINFO_FUNCTION(sysvmsg);
 
 typedef struct {
 	key_t key;
-	zend_long id;
+	int id;
 	zend_object std;
 } sysvmsg_queue_t;
 
 struct php_msgbuf {
-	zend_long mtype;
+	size_t mtype;
 	char mtext[1];
 };
 
