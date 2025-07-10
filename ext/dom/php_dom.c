@@ -806,6 +806,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_nnodemap_object_handlers.free_obj = dom_nnodemap_objects_free_storage;
 	dom_nnodemap_object_handlers.read_dimension = dom_nodemap_read_dimension;
 	dom_nnodemap_object_handlers.has_dimension = dom_nodemap_has_dimension;
+	dom_nnodemap_object_handlers.clone_obj = NULL;
 
 	memcpy(&dom_nodelist_object_handlers, &dom_nnodemap_object_handlers, sizeof(zend_object_handlers));
 	dom_nodelist_object_handlers.read_dimension = dom_nodelist_read_dimension;
@@ -823,7 +824,6 @@ PHP_MINIT_FUNCTION(dom)
 	dom_html_collection_object_handlers.read_dimension = dom_html_collection_read_dimension;
 	dom_html_collection_object_handlers.has_dimension = dom_html_collection_has_dimension;
 	dom_html_collection_object_handlers.get_gc = dom_html_collection_get_gc;
-	dom_html_collection_object_handlers.clone_obj = NULL;
 
 	memcpy(&dom_object_namespace_node_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_object_namespace_node_handlers.offset = XtOffsetOf(dom_object_namespace_node, dom.std);
