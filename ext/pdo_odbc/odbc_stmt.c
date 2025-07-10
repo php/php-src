@@ -660,7 +660,8 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 		RETCODE rc;
 
 		/* fetch it into C->data, which is allocated with a length
-		 * of 2048 bytes; if there is more to be had, we then allocate
+		 * of the page size minus zend_string overhead (LONG_COLUMN_BUFFER_SIZE);
+		 * if there is more to be had, we then allocate
 		 * bigger buffer for the caller to free */
 
 		rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, C->data,
@@ -693,7 +694,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			 * may be passed.
 			 * The behavior in this case is the same as before,
 			 * dividing the data into blocks. However, it has been
-			 * changed from 256 byte to 2048 byte block.
+			 * changed from 256 byte to LONG_COLUMN_BUFFER_SIZE.
 			 */
 			ssize_t to_fetch_len;
 			if (orig_fetched_len == SQL_NO_TOTAL) {
