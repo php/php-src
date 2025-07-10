@@ -7547,7 +7547,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		return FAILURE;
 	}
 	if (mode->set_tag_length_always || (enc && mode->set_tag_length_when_encrypting)) {
-		if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, NULL)) {
+		if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, NULL) != 1) {
 			php_error_docref(NULL, E_WARNING, "Setting tag length for AEAD cipher failed");
 			return FAILURE;
 		}
@@ -7555,7 +7555,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	if (!enc && tag && tag_len > 0) {
 		if (!mode->is_aead) {
 			php_error_docref(NULL, E_WARNING, "The tag cannot be used because the cipher algorithm does not support AEAD");
-		} else if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag)) {
+		} else if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag) != 1) {
 			php_error_docref(NULL, E_WARNING, "Setting tag for AEAD cipher decryption failed");
 			return FAILURE;
 		}
