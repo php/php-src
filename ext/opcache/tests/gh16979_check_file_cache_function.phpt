@@ -17,6 +17,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.jit=disable
 opcache.file_cache="{PWD}/gh16979_cache"
+opcache.file_update_protection=0
 --EXTENSIONS--
 opcache
 --FILE--
@@ -35,9 +36,9 @@ var_dump(opcache_is_script_cached_in_file_cache(__FILE__));
 <?php
 require __DIR__ . '/cleanup_helper.inc';
 
-$baseCacheDir = __DIR__ . '/gh16979_cache';
+$cacheDir = __DIR__ . '/gh16979_cache';
 
-removeDirRecursive($baseCacheDir);
+removeDirRecursive($cacheDir);
 ?>
 --EXPECTF--
 bool(true)
