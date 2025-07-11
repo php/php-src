@@ -1095,7 +1095,7 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 		return SUCCESS;
 #endif
 	}
-	if (file == NULL || !RAND_load_file(file, -1)) {
+	if (file == NULL || RAND_load_file(file, -1) < 0) {
 		if (RAND_status() == 0) {
 			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "Unable to load random state; not enough random data!");
@@ -1122,7 +1122,7 @@ static int php_openssl_write_rand_file(const char * file, int egdsocket, int see
 		file = RAND_file_name(buffer, sizeof(buffer));
 	}
 	PHP_OPENSSL_RAND_ADD_TIME();
-	if (file == NULL || !RAND_write_file(file)) {
+	if (file == NULL || RAND_write_file(file) < 0) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to write random state");
 		return FAILURE;
