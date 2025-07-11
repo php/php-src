@@ -2185,7 +2185,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 	gc_stack *stack = NULL;
 
 	if (in_fiber) {
-		context = emalloc(sizeof(gc_async_context_t));
+		context = ecalloc(1, sizeof(gc_async_context_t));
 		stack = emalloc(sizeof(gc_stack));
 	} else {
 		context = &GC_G(async_context);
@@ -2462,13 +2462,15 @@ finish:
 	GC_G(collector_time) += zend_hrtime() - GC_COLLECT_START_TIME;
 #ifdef PHP_ASYNC_API
 	if (in_fiber) {
+		const int total_count = GC_COLLECT_TOTAL_COUNT;
 		efree(context);
-		gc_stack_free(stack);
 		efree(stack);
+		return total_count;
 	} else {
 		GC_G(async_context).state = GC_ASYNC_STATE_NONE;
 		if (GC_G(gc_stack) != NULL) {
-			GC_COLLECT_FREE_STACK;
+			GC_G(gc_stack) = NULL;
+			efree(stack);
 		}
 	}
 #endif
