@@ -1,60 +1,23 @@
 --TEST--
 Test exp() - basic function test for exp()
 --INI--
-serialize_precision=14
+precision=14
 --FILE--
 <?php
-$values = array(10,
-                10.3,
-                3.9505e3,
-                037,
-                0x5F,
-                "10",
-                "3950.5",
-                "3.9505e3",
-                "039",
-                true,
-                false,
-                );
+$values = include 'data/numbers.inc';
 
-$iterator = 1;
-foreach($values as $value) {
-    echo "\n-- Iteration $iterator --\n";
-    var_dump(exp($value));
-    $iterator++;
-};
+foreach ($values as $value) {
+    $res = exp($value);
+    var_dump($res);
+}
 
 ?>
 --EXPECT--
--- Iteration 1 --
-float(22026.465794807)
-
--- Iteration 2 --
-float(29732.618852891)
-
--- Iteration 3 --
+float(9744803446.248903)
+float(1.026187963170189E-10)
+float(15282893989.958735)
+float(15282893989.958735)
+float(6.543263341727205E-11)
+float(22026.465794806718)
+float(29732.618852891435)
 float(INF)
-
--- Iteration 4 --
-float(29048849665247)
-
--- Iteration 5 --
-float(1.811239082889E+41)
-
--- Iteration 6 --
-float(22026.465794807)
-
--- Iteration 7 --
-float(INF)
-
--- Iteration 8 --
-float(INF)
-
--- Iteration 9 --
-float(8.6593400423994E+16)
-
--- Iteration 10 --
-float(2.718281828459)
-
--- Iteration 11 --
-float(1)

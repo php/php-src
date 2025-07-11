@@ -25,10 +25,6 @@ $needle = array(
   //nulls
   '\0',
 
-  //boolean false
-  FALSE,
-  false,
-
   //empty string
   '',
 
@@ -105,69 +101,63 @@ int(10)
 int(54)
 int(54)
 -- Iteration 13 --
-int(54)
-int(54)
+int(53)
+int(53)
 -- Iteration 14 --
-int(54)
-int(54)
+int(16)
+int(16)
 -- Iteration 15 --
-int(53)
-int(53)
--- Iteration 16 --
-int(16)
-int(16)
--- Iteration 17 --
 int(15)
-bool(false)
+int(15)
+-- Iteration 16 --
+int(17)
+int(17)
+-- Iteration 17 --
+int(18)
+int(18)
 -- Iteration 18 --
-int(17)
-int(17)
+int(21)
+int(21)
 -- Iteration 19 --
-int(18)
-int(18)
+int(24)
+int(24)
 -- Iteration 20 --
-int(21)
-int(21)
+int(26)
+int(26)
 -- Iteration 21 --
-int(24)
-int(24)
+int(25)
+int(25)
 -- Iteration 22 --
-int(26)
-int(26)
+int(27)
+int(27)
 -- Iteration 23 --
-int(25)
-int(25)
+int(28)
+int(28)
 -- Iteration 24 --
-int(27)
-int(27)
+bool(false)
+bool(false)
 -- Iteration 25 --
-int(28)
-int(28)
+int(34)
+int(34)
 -- Iteration 26 --
-bool(false)
-bool(false)
+int(43)
+int(43)
 -- Iteration 27 --
-int(34)
-int(34)
--- Iteration 28 --
-int(43)
-int(43)
--- Iteration 29 --
 int(19)
 bool(false)
+-- Iteration 28 --
+int(49)
+int(49)
+-- Iteration 29 --
+bool(false)
+bool(false)
 -- Iteration 30 --
-int(49)
-int(49)
+bool(false)
+bool(false)
 -- Iteration 31 --
 bool(false)
 bool(false)
 -- Iteration 32 --
-bool(false)
-bool(false)
--- Iteration 33 --
-bool(false)
-bool(false)
--- Iteration 34 --
 int(0)
 bool(false)
 *** Done ***

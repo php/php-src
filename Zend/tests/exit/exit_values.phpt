@@ -1,5 +1,5 @@
 --TEST--
-exit(false);
+Exit with different values
 --FILE--
 <?php
 
@@ -84,11 +84,11 @@ Deprecated: exit(): Passing null to parameter #1 ($status) of type string|int is
 Using false as value:
 Exit status is: 0
 Output is:
-
+Deprecated: exit(): Passing bool to parameter #1 ($status) of type string|int is deprecated in %s on line %d
 Using true as value:
 Exit status is: 1
 Output is:
-
+Deprecated: exit(): Passing bool to parameter #1 ($status) of type string|int is deprecated in %s on line %d
 Using 0 as value:
 Exit status is: 0
 Output is:
@@ -136,11 +136,11 @@ Deprecated: exit(): Passing null to parameter #1 ($status) of type string|int is
 Using false as value:
 Exit status is: 0
 Output is:
-
+Deprecated: exit(): Passing bool to parameter #1 ($status) of type string|int is deprecated in %s on line %d
 Using true as value:
 Exit status is: 1
 Output is:
-
+Deprecated: exit(): Passing bool to parameter #1 ($status) of type string|int is deprecated in %s on line %d
 Using 0 as value:
 Exit status is: 0
 Output is:

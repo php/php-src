@@ -16,21 +16,16 @@ $file_path = __DIR__."/tempnamVar3";
 mkdir($file_path);
 
 /* An array of prefixes */
-$names_arr = array(
+$names_arr = [
   /* Invalid args */
   -1,
-  TRUE,
-  FALSE,
   "",
   " ",
   "\0",
-  array(),
-
   /* prefix with path separator of a non existing directory*/
   "/no/such/file/dir",
-  "php/php"
-
-);
+  "php/php",
+];
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
@@ -89,22 +84,12 @@ File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 3 --
-File name is => %s/%s
-File permissions are => 100600
-File created in => directory specified
--- Iteration 4 --
-File name is => %s/%s
-File permissions are => 100600
-File created in => directory specified
--- Iteration 5 --
 tempnam(): Argument #2 ($prefix) must not contain any null bytes
--- Iteration 6 --
-tempnam(): Argument #2 ($prefix) must be of type string, array given
--- Iteration 7 --
+-- Iteration 4 --
 File name is => %s/dir%s
 File permissions are => 100600
 File created in => directory specified
--- Iteration 8 --
+-- Iteration 5 --
 File name is => %s/php%s
 File permissions are => 100600
 File created in => directory specified

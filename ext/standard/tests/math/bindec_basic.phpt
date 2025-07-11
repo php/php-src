@@ -1,76 +1,47 @@
 --TEST--
-Test bindec() - basic function test bindec()
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
+bindec(): basic
 --INI--
 precision=14
 --FILE--
 <?php
-$values = array(111000111,
-                011100000,
-                1111111111111111111111111111111,
-                10000000000000000000000000000000,
-                100002001,
-                '111000111',
-                '011100000',
-                '1111111111111111111111111111111',
-                '10000000000000000000000000000000',
-                '100002001',
-                'abcdefg',
-                311015,
-                31101.3,
-                31.1013e5,
-                0x111ABC,
-                011237,
-                true,
-                false,
-                );
 
-for ($i = 0; $i < count($values); $i++) {
-    $res = bindec($values[$i]);
+$values = [
+    0b101010 => '101010',
+    0b111111 => '111111',
+];
+
+$values_leading = [
+    0b101010 => '0101010',
+    0b111111 => '0111111',
+];
+
+$values_leading_explicit = [
+    0b101010 => '0b101010',
+    0b111111 => '0b111111',
+];
+
+foreach ($values as $nb => $value) {
+    echo "bindec('$value') should be $nb is ";
+    $res = bindec($value);
+    var_dump($res);
+}
+
+foreach ($values_leading as $nb => $value) {
+    echo "bindec('$value') should be $nb is ";
+    $res = bindec($value);
+    var_dump($res);
+}
+
+foreach ($values_leading_explicit as $nb => $value) {
+    echo "bindec('$value') should be $nb is ";
+    $res = bindec($value);
     var_dump($res);
 }
 ?>
---EXPECTF--
-int(455)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(32766)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(5)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(129)
-int(455)
-int(224)
-int(2147483647)
-float(2147483648)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(129)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(13)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(13)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(26)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(6)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-int(1)
-int(0)
+--EXPECT--
+bindec('101010') should be 42 is int(42)
+bindec('111111') should be 63 is int(63)
+bindec('0101010') should be 42 is int(42)
+bindec('0111111') should be 63 is int(63)
+bindec('0b101010') should be 42 is int(42)
+bindec('0b111111') should be 63 is int(63)

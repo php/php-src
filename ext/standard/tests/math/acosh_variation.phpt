@@ -1,31 +1,14 @@
 --TEST--
 Test variations in usage of acosh()
 --INI--
-precision = 10
+precision=14
 --FILE--
 <?php
-/*
- * Function is implemented in ext/standard/math.c
-*/
 
+$values = include 'data/numbers.inc';
 
-//Test acosh with a different input values
-
-$values = array(23,
-        -23,
-        2.345e1,
-        -2.345e1,
-        0x17,
-        027,
-        "23",
-        "23.45",
-        "2.345e1",
-        "1000",
-        true,
-        false);
-
-for ($i = 0; $i < count($values); $i++) {
-    $res = acosh($values[$i]);
+foreach ($values as $value) {
+    $res = acosh($value);
     var_dump($res);
 }
 
@@ -34,12 +17,8 @@ for ($i = 0; $i < count($values); $i++) {
 float(3.8281684713331012)
 float(NAN)
 float(3.8475627390640357)
-float(NAN)
-float(3.8281684713331012)
-float(3.8281684713331012)
-float(3.8281684713331012)
 float(3.8475627390640357)
-float(3.8475627390640357)
-float(7.600902209541989)
-float(0)
 float(NAN)
+float(2.993222846126381)
+float(3.0229262125659933)
+float(8.974744596703715)

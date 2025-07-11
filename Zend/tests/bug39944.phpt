@@ -42,7 +42,7 @@ addToArray($b, "xx3");
 addToArray(getArray(), "xx4");
 $a = getArray();
 addToArray($a, "xx5");
-echo "arrTheArray = " . print_r($arrTheArray, 1);
+echo "arrTheArray = " . print_r($arrTheArray, true);
 
 /****/
 
@@ -69,7 +69,7 @@ $objRefTest->Add("xx1");
 $objRefTest->Add("xx2");
 $objRefTest->Add("xx3");
 
-echo "objRefTest->getArray() = " . print_r($objRefTest->getArray(), 1);
+echo "objRefTest->getArray() = " . print_r($objRefTest->getArray(), true);
 ?>
 --EXPECT--
 intTheValue = 10

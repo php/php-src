@@ -4,7 +4,7 @@ Bug #61124: Segmentation fault with openssl_decrypt
 openssl
 --FILE--
 <?php
-var_dump(openssl_decrypt('kzo w2RMExUTYQXW2Xzxmg==', 'aes-128-cbc', 'pass', false, 'pass'));
+var_dump(openssl_decrypt('kzo w2RMExUTYQXW2Xzxmg==', 'aes-128-cbc', 'pass', 0, 'pass'));
 ?>
 --EXPECTF--
 Warning: openssl_decrypt(): IV passed is only 4 bytes long, cipher expects an IV of precisely 16 bytes, padding with \0 in %s on line %d

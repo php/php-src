@@ -49,7 +49,7 @@ var_dump(file_get_contents($pname . '/d'));
 var_dump($phar['d']->isCompressed());
 var_dump($phar['d']->getMetaData());
 $context2 = stream_context_create(array('phar' => array('metadata' => array(4))));
-$fp = fopen($pname . '/b', 'r+', 0, $context2);
+$fp = fopen($pname . '/b', 'r+', false, $context2);
 fclose($fp);
 ?>
 ==AFTER==

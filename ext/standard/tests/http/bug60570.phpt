@@ -23,7 +23,7 @@ function do_test() {
     $i = 3;
     while ($i--) {
         $context = stream_context_create(array('http'=>array('timeout'=>1)));
-        file_get_contents($uri, 0, $context);
+        file_get_contents($uri, false, $context);
         unset($context);
 
         $b = $a;

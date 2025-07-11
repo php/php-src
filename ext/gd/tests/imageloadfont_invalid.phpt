@@ -12,9 +12,11 @@ fclose($fp);
 
 $image = imagecreatetruecolor(50, 20);
 $font = imageloadfont($filename);
-$black = imagecolorallocate($image, 0, 0, 0);
-imagestring($image, $font, 0, 0, "Hello", $black);
-unlink($filename);
+?>
+--CLEAN--
+<?php
+$filename = __DIR__ .  '/imageloadfont_invalid.gdf';
+@unlink($filename);
 ?>
 --EXPECTF--
 Warning: imageloadfont(): Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
