@@ -63,6 +63,7 @@ zend_long php_dom_get_nodelist_length(dom_object *obj);
 
 extern const php_dom_obj_map_handler php_dom_obj_map_attributes;
 extern const php_dom_obj_map_handler php_dom_obj_map_by_tag_name;
+extern const php_dom_obj_map_handler php_dom_obj_map_by_class_name;
 extern const php_dom_obj_map_handler php_dom_obj_map_child_elements;
 extern const php_dom_obj_map_handler php_dom_obj_map_child_nodes;
 extern const php_dom_obj_map_handler php_dom_obj_map_nodeset;
