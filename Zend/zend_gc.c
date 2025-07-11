@@ -2265,6 +2265,8 @@ rerun_gc:
 		stack.next = NULL;
 #endif
 
+		end = 0;
+
 		if (GC_G(gc_active)) {
 			GC_G(collector_time) += zend_hrtime() - GC_COLLECT_START_TIME;
 			GC_COLLECT_FINISH_0;
