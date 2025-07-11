@@ -35,10 +35,6 @@
 zend_long php_dom_get_namednodemap_length(dom_object *obj)
 {
 	dom_nnodemap_object *objmap = obj->ptr;
-	if (!objmap) {
-		return 0;
-	}
-
 	return objmap->handler->length(objmap);
 }
 
