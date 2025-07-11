@@ -622,6 +622,12 @@ report_memleaks = On
 ; Development value: 0
 ; Production value: 0
 
+; This directive controls whether PHP will output the backtrace of fatal errors.
+; Default Value: On
+; Development Value: On
+; Production Value: On
+;fatal_error_backtraces = On
+
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
