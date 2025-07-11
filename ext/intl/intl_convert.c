@@ -104,6 +104,54 @@ void intl_convert_utf8_to_utf16(
 }
 /* }}} */
 
+/* Convert given string from UTF-8 to UTF-16 to a zend_string*
+ *
+ * @param src         String to convert.
+ * @param src_len     Length of the source string.
+ * @param status      Conversion status.
+ *
+ * @return zend_string* on success and NULL on failure
+ */
+zend_string *intl_convert_utf8_to_utf16_zstr(
+	const char* src,    size_t  src_len,
+	UErrorCode* status )
+{
+	int32_t     dst_len = 0;
+
+	*status = U_ZERO_ERROR;
+
+	if(src_len > INT32_MAX) {
+		/* we cannot fit this string */
+		*status = U_BUFFER_OVERFLOW_ERROR;
+		return NULL;
+	}
+
+	/* Pre-flight */
+	u_strFromUTF8( NULL, 0, &dst_len, src, (int32_t)src_len, status );
+	if( *status != U_BUFFER_OVERFLOW_ERROR && *status != U_STRING_NOT_TERMINATED_WARNING )
+		return NULL;
+
+	/* Note: l=sizeof(UChar)-1 because we need sizeof(UChar) bytes for the NUL terminator instead of 1. */
+	zend_string *dst = zend_string_safe_alloc(sizeof(UChar), dst_len, sizeof(UChar) - 1, false);
+	UChar *dst_buf = (UChar *) ZSTR_VAL(dst);
+	ZEND_ASSERT((ZSTR_LEN(dst) - 1) / 2 == dst_len);
+	/* However, the length must not include the NUL terminator that we included previously. */
+	ZSTR_LEN(dst)--;
+
+	/* Convert source string from UTF-8 to UTF-16. */
+	*status = U_ZERO_ERROR;
+	u_strFromUTF8( dst_buf, dst_len + 1, NULL, src, src_len, status );
+	if( U_FAILURE( *status ) )
+	{
+		zend_string_efree( dst );
+		return NULL;
+	}
+
+	dst_buf[dst_len] = 0;
+
+	return dst;
+}
+
 /* {{{ intl_convert_utf16_to_utf8
  * Convert given string from UTF-16 to UTF-8.
  *

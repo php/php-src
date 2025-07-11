@@ -65,14 +65,7 @@
 
 #include "rare_cp_bitvec.h"
 
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif
-
-#ifdef __SSE3__
-#include <immintrin.h>
-#include <pmmintrin.h>
-#endif
+#include "zend_simd.h"
 
 /* }}} */
 
@@ -1537,7 +1530,7 @@ PHP_FUNCTION(mb_parse_str)
 	encstr = estrndup(encstr, encstr_len);
 
 	info.data_type              = PARSE_STRING;
-	info.separator              = PG(arg_separator).input;
+	info.separator              = ZSTR_VAL(PG(arg_separator).input);
 	info.report_errors          = true;
 	info.to_encoding            = MBSTRG(current_internal_encoding);
 	info.from_encodings         = MBSTRG(http_input_list);
@@ -1591,10 +1584,22 @@ PHP_FUNCTION(mb_output_handler)
 		if (SG(sapi_headers).send_default_content_type || free_mimetype) {
 			const char *charset = encoding->mime_name;
 			if (charset) {
-				char *p;
-				size_t len = spprintf(&p, 0, "Content-Type: %s; charset=%s",  mimetype, charset);
-				if (sapi_add_header(p, len, 0) != FAILURE) {
-					SG(sapi_headers).send_default_content_type = 0;
+				/* Don't try to add a header if we are in an output handler;
+				 * we aren't supposed to directly access the output globals
+				 * from outside of main/output.c, so just try to get the flags
+				 * for the currently running handler, will only succeed if
+				 * there is a handler running. */
+				int unused;
+				bool in_handler = php_output_handler_hook(
+					PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS,
+					&unused
+				) == SUCCESS;
+				if (!in_handler) {
+					char *p;
+					size_t len = spprintf(&p, 0, "Content-Type: %s; charset=%s",  mimetype, charset);
+					if (sapi_add_header(p, len, 0) != FAILURE) {
+						SG(sapi_headers).send_default_content_type = 0;
+					}
 				}
 			}
 
@@ -1749,7 +1754,7 @@ PHP_FUNCTION(mb_str_split)
 	}
 }
 
-#ifdef __SSE2__
+#ifdef XSSE2
 /* Thanks to StackOverflow user 'Paul R' (https://stackoverflow.com/users/253056/paul-r)
  * From: https://stackoverflow.com/questions/36998538/fastest-way-to-horizontally-sum-sse-unsigned-byte-vector
  * Takes a 128-bit XMM register, treats each byte as an 8-bit integer, and sums up all
@@ -1780,7 +1785,7 @@ static size_t mb_fast_strlen_utf8(unsigned char *p, size_t len)
 {
 	unsigned char *e = p + len;
 
-#ifdef __SSE2__
+#ifdef XSSE2
 	if (len >= sizeof(__m128i)) {
 		e -= sizeof(__m128i);
 
@@ -3931,7 +3936,7 @@ static uint32_t *make_conversion_map(HashTable *target_hash, size_t *conversion_
 	uint32_t *mapelm = convmap;
 
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-		bool failed = true;
+		bool failed;
 		zend_long tmp = zval_try_get_long(hash_entry, &failed);
 		if (failed) {
 			efree(convmap);
@@ -4919,7 +4924,7 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 static bool mb_fast_check_utf8_default(zend_string *str)
 {
 	unsigned char *p = (unsigned char*)ZSTR_VAL(str);
-# ifdef __SSE2__
+# ifdef XSSE2
 	/* `e` points 1 byte past the last full 16-byte block of string content
 	 * Note that we include the terminating null byte which is included in each zend_string
 	 * as part of the content to check; this ensures that multi-byte characters which are

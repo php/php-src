@@ -84,6 +84,9 @@ static const BC_VECTOR BC_POW_10_LUT[9] = {
 bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, size_t scale, bool use_sign);
 bc_num _bc_do_add (bc_num n1, bc_num n2);
 bc_num _bc_do_sub (bc_num n1, bc_num n2);
+void bc_multiply_vector(
+	const BC_VECTOR *n1_vector, size_t n1_arr_size, const BC_VECTOR *n2_vector, size_t n2_arr_size,
+	BC_VECTOR *prod_vector, size_t prod_arr_size);
 void _bc_rm_leading_zeros (bc_num num);
 
 #endif

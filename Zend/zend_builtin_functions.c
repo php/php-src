@@ -69,6 +69,40 @@ zend_result zend_startup_builtin_functions(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_FUNCTION(clone)
+{
+	zend_object *zobj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ(zobj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* clone() also exists as the ZEND_CLONE OPcode and both implementations must be kept in sync. */
+
+	zend_class_entry *scope = zend_get_executed_scope();
+
+	zend_class_entry *ce = zobj->ce;
+	zend_function *clone = ce->clone;
+
+	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
+		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
+
+	if (clone && !zend_check_method_accessible(clone, scope)) {
+		zend_bad_method_call(clone, clone->common.function_name, scope);
+		RETURN_THROWS();
+	}
+
+	zend_object *cloned;
+	cloned = zobj->handlers->clone_obj(zobj);
+
+	ZEND_ASSERT(cloned || EG(exception));
+	if (EXPECTED(cloned)) {
+		RETURN_OBJ(cloned);
+	}
+}
+
 ZEND_FUNCTION(exit)
 {
 	zend_string *str = NULL;
@@ -549,7 +583,7 @@ register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
-	if (zend_register_constant(&c) == SUCCESS) {
+	if (zend_register_constant(&c) != NULL) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -914,13 +948,7 @@ ZEND_FUNCTION(get_class_methods)
 	scope = zend_get_executed_scope();
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, mptr) {
-		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		 || (scope &&
-			 (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
-			   zend_check_protected(mptr->common.scope, scope))
-		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
-			   scope == mptr->common.scope)))
-		) {
+		if (zend_check_method_accessible(mptr, scope)) {
 			ZVAL_STR_COPY(&method_name, mptr->common.function_name);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}

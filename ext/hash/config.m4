@@ -31,7 +31,7 @@ AS_VAR_IF([ac_cv_c_bigendian_php], [yes], [
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-opt64.c"
   ])
   EXT_HASH_SHA3_SOURCES="$SHA3_OPT_SRC $SHA3_DIR/KeccakHash.c $SHA3_DIR/KeccakSponge.c"
-  PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded"
 ])
 
 PHP_NEW_EXTENSION([hash], m4_normalize([
@@ -58,7 +58,7 @@ PHP_NEW_EXTENSION([hash], m4_normalize([
     murmur/PMurHash128.c
   ]),
   [no],,
-  [$PHP_HASH_CFLAGS])
+  [$PHP_HASH_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 PHP_ADD_BUILD_DIR([$ext_builddir/murmur])
 AS_VAR_IF([SHA3_DIR],,, [PHP_ADD_BUILD_DIR([$ext_builddir/$SHA3_DIR])])
 PHP_INSTALL_HEADERS([ext/hash], m4_normalize([

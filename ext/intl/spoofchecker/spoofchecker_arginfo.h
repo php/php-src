@@ -112,48 +112,36 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	zend_string *const_ASCII_name = zend_string_init_interned("ASCII", sizeof("ASCII") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ASCII_name, &const_ASCII_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ASCII_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 
 	zval const_HIGHLY_RESTRICTIVE_value;
 	ZVAL_LONG(&const_HIGHLY_RESTRICTIVE_value, USPOOF_HIGHLY_RESTRICTIVE);
 	zend_string *const_HIGHLY_RESTRICTIVE_name = zend_string_init_interned("HIGHLY_RESTRICTIVE", sizeof("HIGHLY_RESTRICTIVE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_HIGHLY_RESTRICTIVE_name, &const_HIGHLY_RESTRICTIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_HIGHLY_RESTRICTIVE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 
 	zval const_MODERATELY_RESTRICTIVE_value;
 	ZVAL_LONG(&const_MODERATELY_RESTRICTIVE_value, USPOOF_MODERATELY_RESTRICTIVE);
 	zend_string *const_MODERATELY_RESTRICTIVE_name = zend_string_init_interned("MODERATELY_RESTRICTIVE", sizeof("MODERATELY_RESTRICTIVE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_MODERATELY_RESTRICTIVE_name, &const_MODERATELY_RESTRICTIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_MODERATELY_RESTRICTIVE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 
 	zval const_MINIMALLY_RESTRICTIVE_value;
 	ZVAL_LONG(&const_MINIMALLY_RESTRICTIVE_value, USPOOF_MINIMALLY_RESTRICTIVE);
 	zend_string *const_MINIMALLY_RESTRICTIVE_name = zend_string_init_interned("MINIMALLY_RESTRICTIVE", sizeof("MINIMALLY_RESTRICTIVE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_MINIMALLY_RESTRICTIVE_name, &const_MINIMALLY_RESTRICTIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_MINIMALLY_RESTRICTIVE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 
 	zval const_UNRESTRICTIVE_value;
 	ZVAL_LONG(&const_UNRESTRICTIVE_value, USPOOF_UNRESTRICTIVE);
 	zend_string *const_UNRESTRICTIVE_name = zend_string_init_interned("UNRESTRICTIVE", sizeof("UNRESTRICTIVE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_UNRESTRICTIVE_name, &const_UNRESTRICTIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_UNRESTRICTIVE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 
 	zval const_SINGLE_SCRIPT_RESTRICTIVE_value;
 	ZVAL_LONG(&const_SINGLE_SCRIPT_RESTRICTIVE_value, USPOOF_SINGLE_SCRIPT_RESTRICTIVE);
 	zend_string *const_SINGLE_SCRIPT_RESTRICTIVE_name = zend_string_init_interned("SINGLE_SCRIPT_RESTRICTIVE", sizeof("SINGLE_SCRIPT_RESTRICTIVE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_SINGLE_SCRIPT_RESTRICTIVE_name, &const_SINGLE_SCRIPT_RESTRICTIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SINGLE_SCRIPT_RESTRICTIVE_name);
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 58
 
 	zval const_MIXED_NUMBERS_value;
 	ZVAL_LONG(&const_MIXED_NUMBERS_value, USPOOF_MIXED_NUMBERS);

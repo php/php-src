@@ -180,12 +180,6 @@ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 		phpdbg_notice("Script ended normally");
 	}
 
-	/* hack to restore mm_heap->use_custom_heap in order to receive memory leak info */
-	if (use_mm_wrappers) {
-		/* ASSUMING that mm_heap->use_custom_heap is the first element of the struct ... */
-		*(int *) zend_mm_get_heap() = 0;
-	}
-
 	if (PHPDBG_G(buffer)) {
 		free(PHPDBG_G(buffer));
 		PHPDBG_G(buffer) = NULL;
@@ -429,7 +423,8 @@ PHP_FUNCTION(phpdbg_start_oplog)
 static zend_always_inline bool phpdbg_is_ignored_opcode(uint8_t opcode) {
 	return
 	    opcode == ZEND_NOP || opcode == ZEND_OP_DATA || opcode == ZEND_FE_FREE || opcode == ZEND_FREE || opcode == ZEND_ASSERT_CHECK || opcode == ZEND_VERIFY_RETURN_TYPE
-	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_FUNCTION
+	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_ATTRIBUTED_CONST
+	 || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_FUNCTION
 	 || opcode == ZEND_DECLARE_CLASS_DELAYED
 	 || opcode == ZEND_DECLARE_ANON_CLASS || opcode == ZEND_FAST_RET || opcode == ZEND_TICKS
 	 || opcode == ZEND_EXT_STMT || opcode == ZEND_EXT_FCALL_BEGIN || opcode == ZEND_EXT_FCALL_END

@@ -3356,7 +3356,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 
 		/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 		if (removed != NULL) {
-			for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
+			for ( ; pos - offset < length && idx < in_hash->nNumUsed; idx++, entry++) {
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos++;
 				Z_TRY_ADDREF_P(entry);
@@ -3369,9 +3369,9 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				}
 			}
 		} else { /* otherwise just skip those entries */
-			int pos2 = pos;
+			zend_long pos2 = pos;
 
-			for ( ; pos2 < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
+			for ( ; pos2 - offset < length && idx < in_hash->nNumUsed; idx++, entry++) {
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_packed_del_val(in_hash, entry);
@@ -3430,7 +3430,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 
 		/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 		if (removed != NULL) {
-			for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++, p++) {
+			for ( ; pos - offset < length && idx < in_hash->nNumUsed; idx++, p++) {
 				if (Z_TYPE(p->val) == IS_UNDEF) continue;
 				pos++;
 				entry = &p->val;
@@ -3443,9 +3443,9 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				zend_hash_del_bucket(in_hash, p);
 			}
 		} else { /* otherwise just skip those entries */
-			int pos2 = pos;
+			zend_long pos2 = pos;
 
-			for ( ; pos2 < offset + length && idx < in_hash->nNumUsed; idx++, p++) {
+			for ( ; pos2 - offset < length && idx < in_hash->nNumUsed; idx++, p++) {
 				if (Z_TYPE(p->val) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_del_bucket(in_hash, p);
@@ -4512,6 +4512,32 @@ PHP_FUNCTION(array_key_last)
 	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
 }
 /* }}} */
+
+PHP_FUNCTION(array_first)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_HASH_FOREACH_VAL(array, zval *zv) {
+		RETURN_COPY_DEREF(zv);
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_FUNCTION(array_last)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_HASH_REVERSE_FOREACH_VAL(array, zval *zv) {
+		RETURN_COPY_DEREF(zv);
+	} ZEND_HASH_FOREACH_END();
+}
 
 /* {{{ Return just the values from the input array */
 PHP_FUNCTION(array_values)

@@ -702,6 +702,10 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 		EG(exception) = NULL;
 		msg = ZSTR_EMPTY_ALLOC();
 	} else {
+		if (UNEXPECTED(Z_ISREF(tmp))) {
+			zend_unwrap_reference(&tmp);
+		}
+		ZEND_ASSERT(Z_TYPE(tmp) == IS_STRING);
 		zend_update_property_string(zend_get_exception_base(ex), ex, ZEND_STRL("string"), Z_STRVAL(tmp));
 		zval_ptr_dtor(&tmp);
 		msg = zval_get_string(zend_read_property_ex(zend_get_exception_base(ex), ex, ZSTR_KNOWN(ZEND_STR_STRING), /* silent */ true, &rv));

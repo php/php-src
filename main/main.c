@@ -771,8 +771,8 @@ PHP_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("arg_separator.output",	"&",		PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator.output,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("arg_separator.input",	"&",		PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateStringUnempty,	arg_separator.input,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("arg_separator.output",	"&",		PHP_INI_ALL,		OnUpdateStrNotEmpty,	arg_separator.output,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("arg_separator.input",	"&",		PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateStrNotEmpty,	arg_separator.input,	php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
@@ -1317,10 +1317,10 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 			case E_CORE_WARNING:
 			case E_COMPILE_WARNING:
 			case E_USER_WARNING:
-				/* throw an exception if we are in EH_THROW mode and the type is warning.
-				 * fatal errors are real errors and cannot be made exceptions.
-				 * exclude deprecated for the sake of BC to old damaged code.
-				 * notices are no errors and are not treated as such like E_WARNINGS.
+				/* Throw an exception if we are in EH_THROW mode and the type is warning.
+				 * Fatal errors are real errors and cannot be made exceptions.
+				 * Exclude deprecated for the sake of BC to old damaged code.
+				 * Notices are not errors and are not treated as such like E_WARNINGS.
 				 * DO NOT overwrite a pending exception.
 				 */
 				if (!EG(exception)) {

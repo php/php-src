@@ -140,6 +140,9 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 					fprintf(f, ", loop=BB%d(%d)", bb->loop_header, bb->loop_depth);
 				}
 			}
+			if (bb->flags & IR_BB_IRREDUCIBLE_LOOP) {
+				fprintf(f, ", IRREDUCIBLE");
+			}
 			if (bb->predecessors_count) {
 				uint32_t i;
 

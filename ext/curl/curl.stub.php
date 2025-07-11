@@ -13,9 +13,9 @@
 const CURLOPT_AUTOREFERER = UNKNOWN;
 /**
  * @var int
- * @deprecated has no effect since 5.1.2
  * @cvalue CURLOPT_BINARYTRANSFER
  */
+#[\Deprecated(since: '8.4', message: 'as it had no effect since 5.1.2')]
 const CURLOPT_BINARYTRANSFER = UNKNOWN;
 /**
  * @var int
@@ -496,6 +496,24 @@ const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
  * @cvalue CURLOPT_DEBUGFUNCTION
  */
 const CURLOPT_DEBUGFUNCTION = UNKNOWN;
+
+#if LIBCURL_VERSION_NUM >= 0x080d00 /* Available since 8.13.0 */
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_ALL
+ */
+const CURLFOLLOW_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_OBEYCODE
+ */
+const CURLFOLLOW_OBEYCODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_FIRSTONLY
+ */
+const CURLFOLLOW_FIRSTONLY = UNKNOWN;
+#endif
 
 /**
  * @var int

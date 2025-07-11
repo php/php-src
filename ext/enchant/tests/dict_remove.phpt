@@ -4,7 +4,7 @@ enchant_dict_remove() function
 enchant
 --SKIPIF--
 <?php
-if (!is_array(enchant_broker_list_dicts(enchant_broker_init()))) die("skip no dictionary installed on this machine");
+if (!enchant_broker_list_dicts(enchant_broker_init())) die("skip no dictionary installed on this machine");
 ?>
 --FILE--
 <?php

@@ -1074,8 +1074,8 @@ apprentice_sort(const void *a, const void *b)
 			    ma->mp->desc);
 			file_mdump(ma->mp);
 			file_mdump(mb->mp);
-			return 0;
 #endif
+			return 0;
 		}
 		return x > 0 ? -1 : 1;
 	}

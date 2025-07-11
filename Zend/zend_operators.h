@@ -156,7 +156,6 @@ static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 }
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
-#define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
 static zend_always_inline uint8_t is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
 	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data)

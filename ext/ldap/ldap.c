@@ -1011,8 +1011,6 @@ PHP_FUNCTION(ldap_connect)
 		RETURN_FALSE;
 	}
 
-	object_init_ex(return_value, ldap_link_ce);
-	ld = Z_LDAP_LINK_P(return_value);
 
 	{
 		int rc = LDAP_SUCCESS;
@@ -1035,13 +1033,17 @@ PHP_FUNCTION(ldap_connect)
 
 			/* ensure all pending TLS options are applied in a new context */
 			if (ldap_set_option(NULL, LDAP_OPT_X_TLS_NEWCTX, &val) != LDAP_OPT_SUCCESS) {
-				zval_ptr_dtor(return_value);
+				if (url != host) {
+					efree(url);
+				}
 				php_error_docref(NULL, E_WARNING, "Could not create new security context");
 				RETURN_FALSE;
 			}
 			LDAPG(tls_newctx) = false;
 		}
 #endif
+		object_init_ex(return_value, ldap_link_ce);
+		ld = Z_LDAP_LINK_P(return_value);
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
 		/* ldap_init() is deprecated, use ldap_initialize() instead.
@@ -1054,6 +1056,9 @@ PHP_FUNCTION(ldap_connect)
 		ldap = ldap_init(host, port);
 		if (ldap == NULL) {
 			zval_ptr_dtor(return_value);
+			if (url != host) {
+				efree(url);
+			}
 			php_error_docref(NULL, E_WARNING, "Could not create session handle");
 			RETURN_FALSE;
 		}
@@ -2984,16 +2989,22 @@ cleanup:
 /* {{{ Get the current value of various session-wide parameters */
 PHP_FUNCTION(ldap_get_option)
 {
-	zval *link, *retval;
+	zval *link = NULL, *retval;
 	ldap_linkdata *ld;
 	zend_long option;
+	LDAP *ldap;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olz", &link, ldap_link_ce, &option, &retval) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!lz", &link, ldap_link_ce, &option, &retval) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
-	ld = Z_LDAP_LINK_P(link);
-	VERIFY_LDAP_LINK_CONNECTED(ld);
+	if (!link) {
+		ldap = NULL;
+	} else {
+		ld = Z_LDAP_LINK_P(link);
+		VERIFY_LDAP_LINK_CONNECTED(ld);
+		ldap = ld->link;
+	}
 
 	switch (option) {
 	/* options with int value */
@@ -3029,7 +3040,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			int val;
 
-			if (ldap_get_option(ld->link, option, &val)) {
+			if (ldap_get_option(ldap, option, &val)) {
 				RETURN_FALSE;
 			}
 			ZEND_TRY_ASSIGN_REF_LONG(retval, val);
@@ -3039,7 +3050,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			struct timeval *timeout = NULL;
 
-			if (ldap_get_option(ld->link, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
+			if (ldap_get_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
 				if (timeout) {
 					ldap_memfree(timeout);
 				}
@@ -3056,7 +3067,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			int timeout;
 
-			if (ldap_get_option(ld->link, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
+			if (ldap_get_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
 				RETURN_FALSE;
 			}
 			ZEND_TRY_ASSIGN_REF_LONG(retval, (timeout / 1000));
@@ -3067,7 +3078,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			struct timeval *timeout = NULL;
 
-			if (ldap_get_option(ld->link, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
+			if (ldap_get_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
 				if (timeout) {
 					ldap_memfree(timeout);
 				}
@@ -3117,7 +3128,7 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			char *val = NULL;
 
-			if (ldap_get_option(ld->link, option, &val) || val == NULL || *val == '\0') {
+			if (ldap_get_option(ldap, option, &val) || val == NULL || *val == '\0') {
 				if (val) {
 					ldap_memfree(val);
 				}
@@ -3131,13 +3142,13 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			LDAPControl **ctrls = NULL;
 
-			if (ldap_get_option(ld->link, option, &ctrls) || ctrls == NULL) {
+			if (ldap_get_option(ldap, option, &ctrls) || ctrls == NULL) {
 				if (ctrls) {
 					ldap_memfree(ctrls);
 				}
 				RETURN_FALSE;
 			}
-			_php_ldap_controls_to_array(ld->link, ctrls, retval, 1);
+			_php_ldap_controls_to_array(ldap, ctrls, retval, 1);
 		} break;
 /* options not implemented
 	case LDAP_OPT_API_INFO:
@@ -3708,15 +3719,56 @@ PHP_FUNCTION(ldap_rename_ext)
 /* }}} */
 
 #ifdef HAVE_LDAP_START_TLS_S
+/*
+  Force new tls context creation with string options inherited from global
+  Workaround to https://bugs.openldap.org/show_bug.cgi?id=10337
+ */
+static int _php_ldap_tls_newctx(LDAP *ld)
+{
+	int val = 0, i, opts[] = {
+#if (LDAP_API_VERSION > 2000)
+		LDAP_OPT_X_TLS_CACERTDIR,
+		LDAP_OPT_X_TLS_CACERTFILE,
+		LDAP_OPT_X_TLS_CERTFILE,
+		LDAP_OPT_X_TLS_CIPHER_SUITE,
+		LDAP_OPT_X_TLS_KEYFILE,
+		LDAP_OPT_X_TLS_RANDOM_FILE,
+#endif
+#ifdef LDAP_OPT_X_TLS_CRLFILE
+		LDAP_OPT_X_TLS_CRLFILE,
+#endif
+#ifdef LDAP_OPT_X_TLS_DHFILE
+		LDAP_OPT_X_TLS_DHFILE,
+#endif
+#ifdef LDAP_OPT_X_TLS_ECNAME
+		LDAP_OPT_X_TLS_ECNAME,
+#endif
+	0};
+
+	for (i=0 ; opts[i] ; i++) {
+		char *path = NULL;
+
+		ldap_get_option(ld, opts[i], &path);
+		if (path) {			/* already set locally */
+			ldap_memfree(path);
+		} else {
+			ldap_get_option(NULL, opts[i], &path);
+			if (path) { 	/* set globally, inherit */
+				ldap_set_option(ld, opts[i], path);
+				ldap_memfree(path);
+			}
+		}
+	}
+
+	return ldap_set_option(ld, LDAP_OPT_X_TLS_NEWCTX, &val);
+}
+
 /* {{{ Start TLS */
 PHP_FUNCTION(ldap_start_tls)
 {
 	zval *link;
 	ldap_linkdata *ld;
 	int rc, protocol = LDAP_VERSION3;
-#ifdef LDAP_OPT_X_TLS_NEWCTX
-	int val = 0;
-#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &link, ldap_link_ce) != SUCCESS) {
 		RETURN_THROWS();
@@ -3727,7 +3779,7 @@ PHP_FUNCTION(ldap_start_tls)
 
 	if (((rc = ldap_set_option(ld->link, LDAP_OPT_PROTOCOL_VERSION, &protocol)) != LDAP_SUCCESS) ||
 #ifdef LDAP_OPT_X_TLS_NEWCTX
-		(LDAPG(tls_newctx) && (rc = ldap_set_option(ld->link, LDAP_OPT_X_TLS_NEWCTX, &val)) != LDAP_OPT_SUCCESS) ||
+		(LDAPG(tls_newctx) && (rc = _php_ldap_tls_newctx(ld->link)) != LDAP_OPT_SUCCESS) ||
 #endif
 		((rc = ldap_start_tls_s(ld->link, NULL, NULL)) != LDAP_SUCCESS)
 	) {
@@ -3986,6 +4038,11 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|S!h!zz", &link, ldap_link_ce, &reqoid, &reqdata, &server_controls_ht, &retdata, &retoid) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(reqoid) == 0) {
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

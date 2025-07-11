@@ -300,6 +300,9 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 				if (c->filename) {
 					zend_string_release_ex(c->filename, 0);
 				}
+				if (c->attributes) {
+					zend_hash_release(c->attributes);
+				}
 				efree(c);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
@@ -435,6 +438,12 @@ void shutdown_executor(void) /* {{{ */
 	zval *zv;
 #if ZEND_DEBUG
 	bool fast_shutdown = 0;
+#elif defined(__SANITIZE_ADDRESS__)
+	char *force_fast_shutdown = getenv("ZEND_ASAN_FORCE_FAST_SHUTDOWN");
+	bool fast_shutdown = (
+		is_zend_mm()
+		|| (force_fast_shutdown && ZEND_ATOL(force_fast_shutdown))
+	) && !EG(full_tables_cleanup);
 #else
 	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
 #endif
@@ -805,7 +814,6 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	zend_function *func;
 	uint32_t call_info;
 	void *object_or_called_scope;
-	zend_class_entry *orig_fake_scope;
 
 	ZVAL_UNDEF(fci->retval);
 
@@ -994,7 +1002,7 @@ cleanup_args:
 		fci_cache->function_handler = NULL;
 	}
 
-	orig_fake_scope = EG(fake_scope);
+	const zend_class_entry *orig_fake_scope = EG(fake_scope);
 	EG(fake_scope) = NULL;
 	if (func->type == ZEND_USER_FUNCTION) {
 		uint32_t orig_jit_trace_num = EG(jit_trace_num);

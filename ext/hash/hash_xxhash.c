@@ -158,7 +158,7 @@ const php_hash_ops php_hash_xxh3_64_ops = {
 typedef XXH_errorcode (*xxh3_reset_with_secret_func_t)(XXH3_state_t*, const void*, size_t);
 typedef XXH_errorcode (*xxh3_reset_with_seed_func_t)(XXH3_state_t*, XXH64_hash_t);
 
-zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *args,
+static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *args,
 		xxh3_reset_with_seed_func_t func_init_seed, xxh3_reset_with_secret_func_t func_init_secret, const char* algo_name)
 {
 	memset(&ctx->s, 0, sizeof ctx->s);

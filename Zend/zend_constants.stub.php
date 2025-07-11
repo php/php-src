@@ -71,9 +71,9 @@ const E_USER_NOTICE = UNKNOWN;
 /**
  * @var int
  * @cvalue E_STRICT
- * @deprecated
  * @todo Remove in PHP 9.0
  */
+#[\Deprecated(since: '8.4', message: 'the error level was removed')]
 const E_STRICT = UNKNOWN;
 
 /**

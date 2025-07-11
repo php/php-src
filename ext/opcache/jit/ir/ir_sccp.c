@@ -1732,7 +1732,20 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use, 
 	ir_ref *p, n, input;
 
 	if (IR_IS_CONST_REF(ref)) {
-		return ir_const(ctx, insn->val, type);
+		ir_val val;
+
+		switch (type) {
+			case IR_I8:  val.i64 = insn->val.i8; break;
+			case IR_U8:  val.u64 = insn->val.u8; break;
+			case IR_I16: val.i64 = insn->val.i16; break;
+			case IR_U16: val.u64 = insn->val.u16; break;
+			case IR_I32: val.i64 = insn->val.i32; break;
+			case IR_U32: val.u64 = insn->val.u32; break;
+			case IR_CHAR:val.i64 = insn->val.i8; break;
+			case IR_BOOL:val.u64 = insn->val.u8 != 0; break;
+			default: IR_ASSERT(0); val.u64 = 0;
+		}
+		return ir_const(ctx, val, type);
 	} else {
 		ir_bitqueue_add(worklist, ref);
 		switch (insn->op) {
@@ -1994,10 +2007,16 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
 					if (use_insn->op1 == phi_ref) {
+						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
+							return 0;
+						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op2, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
 					} else if (use_insn->op2 == phi_ref) {
+						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op1].type)) {
+							return 0;
+						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op1, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
@@ -2027,10 +2046,16 @@ static bool ir_try_promote_induction_var_ext(ir_ctx *ctx, ir_ref ext_ref, ir_ref
 
 				if (use_insn->op >= IR_EQ && use_insn->op <= IR_UGT) {
 					if (use_insn->op1 == phi_ref) {
+						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op2].type)) {
+							return 0;
+						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op2, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
 					} else if (use_insn->op2 == phi_ref) {
+						if (IR_IS_TYPE_SIGNED(type) != IR_IS_TYPE_SIGNED(ctx->ir_base[use_insn->op1].type)) {
+							return 0;
+						}
 						if (ir_is_cheaper_ext(ctx, use_insn->op1, ctx->ir_base[phi_ref].op1, ext_ref, op)) {
 							continue;
 					    }
@@ -3570,11 +3595,12 @@ remove_aliased_load:
 				if (val_insn->type == insn->type) {
 					ir_iter_replace_insn(ctx, i, val, worklist);
 				} else {
-					IR_ASSERT(!IR_IS_CONST_REF(insn->op2));
-					ir_use_list_remove_one(ctx, insn->op2, i);
-					if (ir_is_dead(ctx, insn->op2)) {
-						/* schedule DCE */
-						ir_bitqueue_add(worklist, insn->op2);
+					if (!IR_IS_CONST_REF(insn->op2)) {
+						ir_use_list_remove_one(ctx, insn->op2, i);
+						if (ir_is_dead(ctx, insn->op2)) {
+							/* schedule DCE */
+							ir_bitqueue_add(worklist, insn->op2);
+						}
 					}
 					if (!IR_IS_CONST_REF(val)) {
 						ir_use_list_add(ctx, val, i);

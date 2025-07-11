@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3c6be99bb36965139464925a618cb0bf03affa62 */
+ * Stub hash: 7a8d126a96f0115783bd20a9adfc6bdc5ee88fda */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -719,6 +719,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionConstant___toString arginfo_class_ReflectionFunction___toString
 
+#define arginfo_class_ReflectionConstant_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
+
 ZEND_METHOD(Reflection, getModifierNames);
 ZEND_METHOD(ReflectionClass, __clone);
 ZEND_METHOD(ReflectionFunctionAbstract, inNamespace);
@@ -987,6 +989,7 @@ ZEND_METHOD(ReflectionConstant, getFileName);
 ZEND_METHOD(ReflectionConstant, getExtension);
 ZEND_METHOD(ReflectionConstant, getExtensionName);
 ZEND_METHOD(ReflectionConstant, __toString);
+ZEND_METHOD(ReflectionConstant, getAttributes);
 
 static const zend_function_entry class_Reflection_methods[] = {
 	ZEND_ME(Reflection, getModifierNames, arginfo_class_Reflection_getModifierNames, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -1355,6 +1358,7 @@ static const zend_function_entry class_ReflectionConstant_methods[] = {
 	ZEND_ME(ReflectionConstant, getExtension, arginfo_class_ReflectionConstant_getExtension, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionConstant, getExtensionName, arginfo_class_ReflectionConstant_getExtensionName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionConstant, __toString, arginfo_class_ReflectionConstant___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionConstant, getAttributes, arginfo_class_ReflectionConstant_getAttributes, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

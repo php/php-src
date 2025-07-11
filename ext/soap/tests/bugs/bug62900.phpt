@@ -11,7 +11,7 @@ $wsdl_with_ns = <<<XML
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://test-uri">
 	<types>
 		<xs:schema targetNamespace="http://test-uri" elementFormDefault="qualified">
-			<import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="bug62900.xsd" />
+			<xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="bug62900.xsd" />
 		</xs:schema>
 	</types>
 </definitions>
@@ -21,7 +21,7 @@ $wsdl_without_ns = <<<XML
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://test-uri">
 	<types>
 		<xs:schema elementFormDefault="qualified">
-			<import schemaLocation="bug62900.xsd" />
+			<xs:import schemaLocation="bug62900.xsd" />
 		</xs:schema>
 	</types>
 </definitions>

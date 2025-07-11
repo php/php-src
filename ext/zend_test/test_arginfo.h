@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bedc3883fbfe2491c95375beb13140e7fcfd83a5 */
+ * Stub hash: 13a5559e87cb073c921006bb3be5354b90247306 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -175,6 +175,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_log_err_debug, 0, 1, I
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_zend_test_compile_to_ast arginfo_zend_create_unterminated_string
+
+#define arginfo_zend_test_gh18756 arginfo_zend_test_void_return
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -312,6 +316,8 @@ static ZEND_FUNCTION(zend_test_set_fmode);
 static ZEND_FUNCTION(zend_test_cast_fread);
 static ZEND_FUNCTION(zend_test_is_zend_ptr);
 static ZEND_FUNCTION(zend_test_log_err_debug);
+static ZEND_FUNCTION(zend_test_compile_to_ast);
+static ZEND_FUNCTION(zend_test_gh18756);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -365,14 +371,22 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("zend_test_deprecated_attr", zif_zend_test_deprecated_attr, arginfo_zend_test_deprecated_attr, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
+#if (PHP_VERSION_ID >= 80500)
 	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, 0, NULL, NULL)
+#endif
 #else
-	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, ZEND_ACC_NODISCARD)
+	ZEND_RAW_FENTRY("zend_test_nodiscard", zif_zend_test_nodiscard, arginfo_zend_test_nodiscard, 0)
 #endif
 #if (PHP_VERSION_ID >= 80400)
+#if (PHP_VERSION_ID >= 80500)
 	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD, NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED, NULL, NULL)
+#endif
 #else
-	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)
+	ZEND_RAW_FENTRY("zend_test_deprecated_nodiscard", zif_zend_test_deprecated_nodiscard, arginfo_zend_test_deprecated_nodiscard, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_aliased", zif_zend_test_void_return, arginfo_zend_test_aliased, 0, NULL, NULL)
@@ -428,6 +442,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_cast_fread, arginfo_zend_test_cast_fread)
 	ZEND_FE(zend_test_is_zend_ptr, arginfo_zend_test_is_zend_ptr)
 	ZEND_FE(zend_test_log_err_debug, arginfo_zend_test_log_err_debug)
+	ZEND_FE(zend_test_compile_to_ast, arginfo_zend_test_compile_to_ast)
+	ZEND_FE(zend_test_gh18756, arginfo_zend_test_gh18756)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
@@ -567,6 +583,7 @@ static void register_test_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_STRING_CONSTANT("ZEND_CONSTANT_A", "global", CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZEND_TEST_ATTRIBUTED_CONSTANT", 42, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZendSubNS\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT);
 
@@ -623,6 +640,22 @@ static void register_test_symbols(int module_number)
 	ZVAL_STR(&attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0, attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].value, &attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0);
 	attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].name = zend_string_init_interned("arg", sizeof("arg") - 1, 1);
+
+#if (PHP_VERSION_ID >= 80500)
+	zend_constant *const_ZEND_TEST_ATTRIBUTED_CONSTANT = zend_hash_str_find_ptr(EG(zend_constants), "ZEND_TEST_ATTRIBUTED_CONSTANT", sizeof("ZEND_TEST_ATTRIBUTED_CONSTANT") - 1);
+
+	zend_attribute *attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0 = zend_add_global_constant_attribute(const_ZEND_TEST_ATTRIBUTED_CONSTANT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zval attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg0;
+	zend_string *attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg0_str = zend_string_init("use something else", strlen("use something else"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg0, attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0->args[0].value, &attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg0);
+	attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zval attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg1;
+	zend_string *attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg1_str = zend_string_init("version 1.5", strlen("version 1.5"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg1, attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0->args[1].value, &attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0_arg1);
+	attribute_Deprecated_const_ZEND_TEST_ATTRIBUTED_CONSTANT_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+#endif
 }
 
 static zend_class_entry *register_class__ZendTestInterface(void)
@@ -826,6 +859,25 @@ static zend_class_entry *register_class__ZendTestChildClass(zend_class_entry *cl
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry__ZendTestClass, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, class_entry__ZendTestClass);
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestGenStubFlagCompatibilityTest(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestGenStubFlagCompatibilityTest", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#if (PHP_VERSION_ID >= 80100)
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+#elif (PHP_VERSION_ID >= 80000)
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
 #endif
 
 	return class_entry;

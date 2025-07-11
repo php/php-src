@@ -49,6 +49,7 @@ ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
+static zend_class_entry *zend_test_gen_stub_flag_compatibility_test;
 static zend_class_entry *zend_attribute_test_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
@@ -1293,6 +1294,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
 
+	zend_test_gen_stub_flag_compatibility_test = register_class_ZendTestGenStubFlagCompatibilityTest();
+
 	zend_attribute_test_class = register_class_ZendAttributeTest();
 
 	zend_test_trait = register_class__ZendTestTrait();
@@ -1590,4 +1593,33 @@ static PHP_FUNCTION(zend_test_create_throwing_resource)
 	ZEND_PARSE_PARAMETERS_NONE();
 	zend_resource *res = zend_register_resource(NULL, le_throwing_resource);
 	ZVAL_RES(return_value, res);
+}
+
+static PHP_FUNCTION(zend_test_compile_to_ast)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_arena *ast_arena;
+	zend_ast *ast = zend_compile_string_to_ast(str, &ast_arena, ZSTR_EMPTY_ALLOC());
+	
+	zend_string *result = zend_ast_export("", ast, "");
+
+	zend_ast_destroy(ast);
+	zend_arena_destroy(ast_arena);
+
+	RETVAL_STR(result);
+}
+
+static PHP_FUNCTION(zend_test_gh18756)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_mm_heap *heap = zend_mm_startup();
+	zend_mm_gc(heap);
+	zend_mm_gc(heap);
+	zend_mm_shutdown(heap, true, false);
 }

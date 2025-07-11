@@ -39,6 +39,7 @@ if test "$PHP_INTL" != "no"; then
       locale/locale_class.c
       locale/locale_methods.c
       locale/locale.c
+      listformatter/listformatter_class.c
       msgformat/msgformat_attr.c
       msgformat/msgformat_class.c
       msgformat/msgformat_data.c
@@ -119,6 +120,7 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/grapheme
     $ext_builddir/idn
     $ext_builddir/locale
+    $ext_builddir/listformatter
     $ext_builddir/msgformat
     $ext_builddir/normalizer
     $ext_builddir/resourcebundle

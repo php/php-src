@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:db="http://xmlns.oracle.com/apps/fnd/soaprovider/plsql/xxxoraws/w_orderws/" targetNamespace="http://xmlns.oracle.com/apps/fnd/soaprovider/plsql/xxxoraws/w_orderws/" elementFormDefault="qualified">
+    <types>
+        <schema
+                xmlns="http://www.w3.org/2001/XMLSchema"
+                targetNamespace="http://soapinterop.org/types">
+            <complexType name="APPS.XXXORAWS_T_ORDEX9143292X1X11">
+                <sequence>
+                    <element name="ITEM_NUMBER" minOccurs="0" nillable="true" db:type="VARCHAR2">
+                        <simpleType>
+                            <restriction base="string">
+                                <maxLength value="40"/>
+                            </restriction>
+                        </simpleType>
+                    </element>
+                </sequence>
+            </complexType>
+        </schema>
+    </types>
+</definitions>

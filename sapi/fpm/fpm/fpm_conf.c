@@ -10,9 +10,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <inttypes.h>
-#ifdef HAVE_GLOB
-# include <glob.h>
-#endif
 
 #include <stdio.h>
 #include <unistd.h>
@@ -22,6 +19,7 @@
 #include "zend_globals.h"
 #include "zend_stream.h"
 #include "php_syslog.h"
+#include "php_glob.h"
 
 #include "fpm.h"
 #include "fpm_conf.h"
@@ -1387,26 +1385,23 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 {
 	char *filename;
 	int *error = (int *)arg;
-#ifdef HAVE_GLOB
-	glob_t g;
-#endif
+	php_glob_t g;
 	size_t i;
 
 	if (!inc || !arg) return;
 	if (*error) return; /* We got already an error. Switch to the end. */
 	spprintf(&filename, 0, "%s", ini_filename);
 
-#ifdef HAVE_GLOB
 	{
 		g.gl_offs = 0;
-		if ((i = glob(inc, GLOB_ERR | GLOB_MARK, NULL, &g)) != 0) {
-#ifdef GLOB_NOMATCH
-			if (i == GLOB_NOMATCH) {
+		if ((i = php_glob(inc, PHP_GLOB_ERR | PHP_GLOB_MARK, NULL, &g)) != 0) {
+#ifdef PHP_GLOB_NOMATCH
+			if (i == PHP_GLOB_NOMATCH) {
 				zlog(ZLOG_WARNING, "Nothing matches the include pattern '%s' from %s at line %d.", inc, filename, ini_lineno);
 				efree(filename);
 				return;
 			}
-#endif /* GLOB_NOMATCH */
+#endif /* PHP_GLOB_NOMATCH */
 			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%zd) from %s at line %d.", inc, i, filename, ini_lineno);
 			*error = 1;
 			efree(filename);
@@ -1424,16 +1419,8 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 				return;
 			}
 		}
-		globfree(&g);
+		php_globfree(&g);
 	}
-#else /* HAVE_GLOB */
-	if (0 > fpm_conf_load_ini_file(inc)) {
-		zlog(ZLOG_ERROR, "Unable to include %s from %s at line %d", inc, filename, ini_lineno);
-		*error = 1;
-		efree(filename);
-		return;
-	}
-#endif /* HAVE_GLOB */
 
 	efree(filename);
 }

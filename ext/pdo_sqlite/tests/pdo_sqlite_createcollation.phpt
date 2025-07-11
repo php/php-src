@@ -24,6 +24,13 @@ foreach ($result as $row) {
   echo $row['name'] . "\n";
 }
 
+$db->sqliteCreateCollation('MYCOLLATEBAD', function($a, $b) { return $a; });
+
+try {
+	$db->query('SELECT name FROM test_pdo_sqlite_createcollation ORDER BY name COLLATE MYCOLLATEBAD');
+} catch (\TypeError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
 ?>
 --EXPECT--
 1
@@ -32,3 +39,4 @@ foreach ($result as $row) {
 1
 10
 2
+PDO::query(): Return value of the collation callback must be of type int, string returned

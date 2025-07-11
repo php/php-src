@@ -437,8 +437,6 @@ PHP_FUNCTION( transliterator_get_error_code )
 
 	/* Fetch the object (without resetting its last error code ). */
 	to = Z_INTL_TRANSLITERATOR_P( object );
-	if (to == NULL )
-		RETURN_FALSE;
 
 	RETURN_LONG( (zend_long) TRANSLITERATOR_ERROR_CODE( to ) );
 }
@@ -460,8 +458,6 @@ PHP_FUNCTION( transliterator_get_error_message )
 
 	/* Fetch the object (without resetting its last error code ). */
 	to = Z_INTL_TRANSLITERATOR_P( object );
-	if (to == NULL )
-		RETURN_FALSE;
 
 	/* Return last error message. */
 	message = intl_error_get_message( TRANSLITERATOR_ERROR_P( to ) );

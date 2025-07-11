@@ -2022,6 +2022,33 @@ const ETH_P_LOOP = UNKNOWN;
 const ETH_P_ALL = UNKNOWN;
 #endif
 
+#ifdef UDP_SEGMENT
+/**
+ * @var int
+ * @cvalue UDP_SEGMENT
+ */
+const UDP_SEGMENT = UNKNOWN;
+#endif
+
+#ifdef SHUT_RDWR
+/**
+ * @var int
+ * @cvalue SHUT_RD
+ */
+const SHUT_RD = UNKNOWN;
+/**
+/**
+ * @var int
+ * @cvalue SHUT_WR
+ */
+const SHUT_WR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SHUT_RDWR
+ */
+const SHUT_RDWR = UNKNOWN;
+#endif
+
 /**
  * @strict-properties
  * @not-serializable

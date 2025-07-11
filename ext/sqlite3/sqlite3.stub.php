@@ -272,6 +272,17 @@ class SQLite3Stmt
 
     /** @tentative-return-type */
     public function reset(): bool {}
+
+    public function busy(): bool {}
+
+#if SQLITE_VERSION_NUMBER >= 3043000
+    public const int EXPLAIN_MODE_PREPARED = 0;
+    public const int EXPLAIN_MODE_EXPLAIN = 1;
+    public const int EXPLAIN_MODE_EXPLAIN_QUERY_PLAN = 2;
+
+    public function explain(): int {}
+    public function setExplain(int $mode): bool {}
+#endif
 }
 
 /** @not-serializable */
@@ -290,6 +301,8 @@ class SQLite3Result
 
     /** @tentative-return-type */
     public function fetchArray(int $mode = SQLITE3_BOTH): array|false {}
+
+    public function fetchAll(int $mode = SQLITE3_BOTH): array|false {}
 
     /** @tentative-return-type */
     public function reset(): bool {}

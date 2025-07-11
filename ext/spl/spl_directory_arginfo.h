@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 06a7809f97dde10e800382fec03a9bb308918bb3 */
+ * Stub hash: 802429d736404c2d66601f640942c827b6e6e94b */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -151,15 +151,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveDirectoryIterator_getSubPathname arginfo_class_SplFileInfo_getPath
 
-#if defined(HAVE_GLOB)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_GlobIterator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_GlobIterator_count, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_class_GlobIterator_count arginfo_class_FilesystemIterator_getFlags
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -323,10 +320,8 @@ ZEND_METHOD(RecursiveDirectoryIterator, hasChildren);
 ZEND_METHOD(RecursiveDirectoryIterator, getChildren);
 ZEND_METHOD(RecursiveDirectoryIterator, getSubPath);
 ZEND_METHOD(RecursiveDirectoryIterator, getSubPathname);
-#if defined(HAVE_GLOB)
 ZEND_METHOD(GlobIterator, __construct);
 ZEND_METHOD(GlobIterator, count);
-#endif
 ZEND_METHOD(SplFileObject, __construct);
 ZEND_METHOD(SplFileObject, rewind);
 ZEND_METHOD(SplFileObject, eof);
@@ -430,13 +425,11 @@ static const zend_function_entry class_RecursiveDirectoryIterator_methods[] = {
 	ZEND_FE_END
 };
 
-#if defined(HAVE_GLOB)
 static const zend_function_entry class_GlobIterator_methods[] = {
 	ZEND_ME(GlobIterator, __construct, arginfo_class_GlobIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(GlobIterator, count, arginfo_class_GlobIterator_count, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-#endif
 
 static const zend_function_entry class_SplFileObject_methods[] = {
 	ZEND_ME(SplFileObject, __construct, arginfo_class_SplFileObject___construct, ZEND_ACC_PUBLIC)
@@ -602,7 +595,6 @@ static zend_class_entry *register_class_RecursiveDirectoryIterator(zend_class_en
 	return class_entry;
 }
 
-#if defined(HAVE_GLOB)
 static zend_class_entry *register_class_GlobIterator(zend_class_entry *class_entry_FilesystemIterator, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
@@ -613,7 +605,6 @@ static zend_class_entry *register_class_GlobIterator(zend_class_entry *class_ent
 
 	return class_entry;
 }
-#endif
 
 static zend_class_entry *register_class_SplFileObject(zend_class_entry *class_entry_SplFileInfo, zend_class_entry *class_entry_RecursiveIterator, zend_class_entry *class_entry_SeekableIterator)
 {

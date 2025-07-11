@@ -19,7 +19,6 @@
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zval retval;
-	zval args[1];
 	int status;
 
 	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL)) {
@@ -29,8 +28,7 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 		return;
 	}
 
-	ZVAL_COPY(&args[0], value);
-	status = call_user_function(NULL, NULL, option_array, &retval, 1, args);
+	status = call_user_function(NULL, NULL, option_array, &retval, 1, value);
 
 	if (status == SUCCESS && !Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(value);
@@ -39,6 +37,4 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 	}
-
-	zval_ptr_dtor(&args[0]);
 }

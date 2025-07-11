@@ -126,6 +126,7 @@ typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 #define get_zval_ptr_ptr(op_type, node, type) _get_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 #define get_zval_ptr_ptr_undef(op_type, node, type) _get_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 #define get_obj_zval_ptr(op_type, node, type) _get_obj_zval_ptr(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_obj_zval_ptr_deref(op_type, node, type) _get_obj_zval_ptr_deref(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_obj_zval_ptr_undef(op_type, node, type) _get_obj_zval_ptr_undef(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_obj_zval_ptr_ptr(op_type, node, type) _get_obj_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 
@@ -537,6 +538,14 @@ static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr(int op_type, znode_o
 	return get_zval_ptr(op_type, op, type);
 }
 
+static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_deref(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_UNUSED) {
+		return &EX(This);
+	}
+	return get_zval_ptr_deref(op_type, op, type);
+}
+
 static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_undef(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type == IS_UNUSED) {
@@ -923,7 +932,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_pr
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
 	const zend_property_info *prop_info, const char *operation
 ) {
-	zend_class_entry *scope;
+	const zend_class_entry *scope;
 	if (EG(fake_scope)) {
 		scope = EG(fake_scope);
 	} else {
@@ -1972,6 +1981,24 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_
 	zend_error_unchecked(code, "%s %s::%s is deprecated%S",
 		type,
 		ZSTR_VAL(c->ce->name),
+		ZSTR_VAL(constant_name),
+		message_suffix
+	);
+
+	zend_string_release(message_suffix);
+}
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_constant *c, const zend_string *constant_name)
+{
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (get_deprecation_suffix_from_attribute(c->attributes, NULL, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = ZEND_CONSTANT_MODULE_NUMBER(c) == PHP_USER_CONSTANT ? E_USER_DEPRECATED : E_DEPRECATED;
+
+	zend_error_unchecked(code, "Constant %s is deprecated%S",
 		ZSTR_VAL(constant_name),
 		message_suffix
 	);
@@ -4096,15 +4123,6 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 	}
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_clone_call(zend_function *clone, zend_class_entry *scope)
-{
-	zend_throw_error(NULL, "Call to %s %s::__clone() from %s%s",
-		zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
-		scope ? "scope " : "global scope",
-		scope ? ZSTR_VAL(scope->name) : ""
-	);
-}
-
 #if ZEND_INTENSIVE_DEBUGGING
 
 #define CHECK_SYMBOL_TABLES()													\
@@ -5322,7 +5340,11 @@ static zend_always_inline zend_result _zend_quick_get_constant(
 	if (!check_defined_only) {
 		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
 		if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
-			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(c->name));
+			if (!CONST_IS_RECURSIVE(c)) {
+				CONST_PROTECT_RECURSION(c);
+				zend_deprecated_constant(c, c->name);
+				CONST_UNPROTECT_RECURSION(c);
+			}
 			return SUCCESS;
 		}
 	}

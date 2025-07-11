@@ -19,5 +19,6 @@
 
 zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 int dom_html_collection_has_dimension(zend_object *object, zval *member, int check_empty);
+HashTable *dom_html_collection_get_gc(zend_object *object, zval **table, int *n);
 
 #endif

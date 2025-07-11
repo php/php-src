@@ -17,11 +17,11 @@ require_once 'skipifconnectfailure.inc';
     if (!($res = mysqli_query($link, "SELECT 'good' AS morning")))
         printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    $res_clone = clone $res;
-    print "done!";
+    try {
+        $res_clone = clone $res;
+    } catch (Throwable $e) {
+        echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    }
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class mysqli_result in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Trying to clone an uncloneable object of class mysqli_result

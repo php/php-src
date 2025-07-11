@@ -30,7 +30,6 @@
 #if defined(__AVX2__)
 # include <immintrin.h>
 #elif defined( __SSE2__)
-# include <mmintrin.h>
 # include <emmintrin.h>
 #endif
 

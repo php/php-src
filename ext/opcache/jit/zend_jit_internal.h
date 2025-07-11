@@ -321,17 +321,18 @@ typedef enum _zend_jit_trace_stop {
 
 #define ZEND_JIT_TRACE_SUPPORTED    0
 
-#define ZEND_JIT_EXIT_JITED         (1<<0)
-#define ZEND_JIT_EXIT_BLACKLISTED   (1<<1)
-#define ZEND_JIT_EXIT_TO_VM         (1<<2) /* exit to VM without attempt to create a side trace */
-#define ZEND_JIT_EXIT_RESTORE_CALL  (1<<3) /* deoptimizer should restore EX(call) chain */
-#define ZEND_JIT_EXIT_POLYMORPHISM  (1<<4) /* exit because of polymorphic call */
-#define ZEND_JIT_EXIT_FREE_OP1      (1<<5)
-#define ZEND_JIT_EXIT_FREE_OP2      (1<<6)
-#define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
-#define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
-#define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
-#define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
+#define ZEND_JIT_EXIT_JITED             (1<<0)
+#define ZEND_JIT_EXIT_BLACKLISTED       (1<<1)
+#define ZEND_JIT_EXIT_TO_VM             (1<<2) /* exit to VM without attempt to create a side trace */
+#define ZEND_JIT_EXIT_RESTORE_CALL      (1<<3) /* deoptimizer should restore EX(call) chain */
+#define ZEND_JIT_EXIT_POLYMORPHISM      (1<<4) /* exit because of polymorphic call */
+#define ZEND_JIT_EXIT_FREE_OP1          (1<<5)
+#define ZEND_JIT_EXIT_FREE_OP2          (1<<6)
+#define ZEND_JIT_EXIT_PACKED_GUARD      (1<<7)
+#define ZEND_JIT_EXIT_CLOSURE_CALL      (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
+#define ZEND_JIT_EXIT_METHOD_CALL       (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
+#define ZEND_JIT_EXIT_INVALIDATE        (1<<10) /* invalidate current trace */
+#define ZEND_JIT_EXIT_CHECK_EXCEPTION   (1<<11)
 
 #define ZEND_JIT_EXIT_FIXED         (1U<<31) /* the exit_info can't be changed by zend_jit_snapshot_handler() */
 
@@ -436,16 +437,22 @@ struct _zend_jit_trace_rec {
 
 #define ZEND_JIT_TRACE_START_REC_SIZE 2
 
+typedef struct _zend_jit_ref_snapshot {
+	union {
+		int32_t ref;        /* While generating code: The ir_ref to snapshot */
+		int32_t offset;     /* After compilation / during deopt: C stack offset if 'reg' is spilled */
+	};
+	int8_t reg;             /* Set after compilation by zend_jit_snapshot_handler() */
+} zend_jit_ref_snapshot;
+
 typedef struct _zend_jit_trace_exit_info {
-	const zend_op       *opline;     /* opline where VM should continue execution */
-	const zend_op_array *op_array;
-	uint32_t             flags;      /* set of ZEND_JIT_EXIT_... */
-	uint32_t             stack_size;
-	uint32_t             stack_offset;
-	int32_t              poly_func_ref;
-	int32_t              poly_this_ref;
-	int8_t               poly_func_reg;
-	int8_t               poly_this_reg;
+	const zend_op          *opline;     /* opline where VM should continue execution */
+	const zend_op_array    *op_array;
+	uint32_t                flags;      /* set of ZEND_JIT_EXIT_... */
+	uint32_t                stack_size;
+	uint32_t                stack_offset;
+	zend_jit_ref_snapshot   poly_func;
+	zend_jit_ref_snapshot   poly_this;
 } zend_jit_trace_exit_info;
 
 typedef struct _zend_jit_trace_stack {

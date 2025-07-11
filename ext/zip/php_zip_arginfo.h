@@ -1103,160 +1103,120 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_OPSYS_DOS_name = zend_string_init_interned("OPSYS_DOS", sizeof("OPSYS_DOS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_DOS_name, &const_OPSYS_DOS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_DOS_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_AMIGA_value;
 	ZVAL_LONG(&const_OPSYS_AMIGA_value, ZIP_OPSYS_AMIGA);
 	zend_string *const_OPSYS_AMIGA_name = zend_string_init_interned("OPSYS_AMIGA", sizeof("OPSYS_AMIGA") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_AMIGA_name, &const_OPSYS_AMIGA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_AMIGA_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_OPENVMS_value;
 	ZVAL_LONG(&const_OPSYS_OPENVMS_value, ZIP_OPSYS_OPENVMS);
 	zend_string *const_OPSYS_OPENVMS_name = zend_string_init_interned("OPSYS_OPENVMS", sizeof("OPSYS_OPENVMS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_OPENVMS_name, &const_OPSYS_OPENVMS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_OPENVMS_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_UNIX_value;
 	ZVAL_LONG(&const_OPSYS_UNIX_value, ZIP_OPSYS_UNIX);
 	zend_string *const_OPSYS_UNIX_name = zend_string_init_interned("OPSYS_UNIX", sizeof("OPSYS_UNIX") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_UNIX_name, &const_OPSYS_UNIX_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_UNIX_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_VM_CMS_value;
 	ZVAL_LONG(&const_OPSYS_VM_CMS_value, ZIP_OPSYS_VM_CMS);
 	zend_string *const_OPSYS_VM_CMS_name = zend_string_init_interned("OPSYS_VM_CMS", sizeof("OPSYS_VM_CMS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_VM_CMS_name, &const_OPSYS_VM_CMS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_VM_CMS_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_ATARI_ST_value;
 	ZVAL_LONG(&const_OPSYS_ATARI_ST_value, ZIP_OPSYS_ATARI_ST);
 	zend_string *const_OPSYS_ATARI_ST_name = zend_string_init_interned("OPSYS_ATARI_ST", sizeof("OPSYS_ATARI_ST") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_ATARI_ST_name, &const_OPSYS_ATARI_ST_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_ATARI_ST_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_OS_2_value;
 	ZVAL_LONG(&const_OPSYS_OS_2_value, ZIP_OPSYS_OS_2);
 	zend_string *const_OPSYS_OS_2_name = zend_string_init_interned("OPSYS_OS_2", sizeof("OPSYS_OS_2") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_OS_2_name, &const_OPSYS_OS_2_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_OS_2_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_MACINTOSH_value;
 	ZVAL_LONG(&const_OPSYS_MACINTOSH_value, ZIP_OPSYS_MACINTOSH);
 	zend_string *const_OPSYS_MACINTOSH_name = zend_string_init_interned("OPSYS_MACINTOSH", sizeof("OPSYS_MACINTOSH") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_MACINTOSH_name, &const_OPSYS_MACINTOSH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_MACINTOSH_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_Z_SYSTEM_value;
 	ZVAL_LONG(&const_OPSYS_Z_SYSTEM_value, ZIP_OPSYS_Z_SYSTEM);
 	zend_string *const_OPSYS_Z_SYSTEM_name = zend_string_init_interned("OPSYS_Z_SYSTEM", sizeof("OPSYS_Z_SYSTEM") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_Z_SYSTEM_name, &const_OPSYS_Z_SYSTEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_Z_SYSTEM_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_CPM_value;
 	ZVAL_LONG(&const_OPSYS_CPM_value, ZIP_OPSYS_CPM);
 	zend_string *const_OPSYS_CPM_name = zend_string_init_interned("OPSYS_CPM", sizeof("OPSYS_CPM") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_CPM_name, &const_OPSYS_CPM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_CPM_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_WINDOWS_NTFS_value;
 	ZVAL_LONG(&const_OPSYS_WINDOWS_NTFS_value, ZIP_OPSYS_WINDOWS_NTFS);
 	zend_string *const_OPSYS_WINDOWS_NTFS_name = zend_string_init_interned("OPSYS_WINDOWS_NTFS", sizeof("OPSYS_WINDOWS_NTFS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_WINDOWS_NTFS_name, &const_OPSYS_WINDOWS_NTFS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_WINDOWS_NTFS_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_MVS_value;
 	ZVAL_LONG(&const_OPSYS_MVS_value, ZIP_OPSYS_MVS);
 	zend_string *const_OPSYS_MVS_name = zend_string_init_interned("OPSYS_MVS", sizeof("OPSYS_MVS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_MVS_name, &const_OPSYS_MVS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_MVS_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_VSE_value;
 	ZVAL_LONG(&const_OPSYS_VSE_value, ZIP_OPSYS_VSE);
 	zend_string *const_OPSYS_VSE_name = zend_string_init_interned("OPSYS_VSE", sizeof("OPSYS_VSE") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_VSE_name, &const_OPSYS_VSE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_VSE_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_ACORN_RISC_value;
 	ZVAL_LONG(&const_OPSYS_ACORN_RISC_value, ZIP_OPSYS_ACORN_RISC);
 	zend_string *const_OPSYS_ACORN_RISC_name = zend_string_init_interned("OPSYS_ACORN_RISC", sizeof("OPSYS_ACORN_RISC") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_ACORN_RISC_name, &const_OPSYS_ACORN_RISC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_ACORN_RISC_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_VFAT_value;
 	ZVAL_LONG(&const_OPSYS_VFAT_value, ZIP_OPSYS_VFAT);
 	zend_string *const_OPSYS_VFAT_name = zend_string_init_interned("OPSYS_VFAT", sizeof("OPSYS_VFAT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_VFAT_name, &const_OPSYS_VFAT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_VFAT_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_ALTERNATE_MVS_value;
 	ZVAL_LONG(&const_OPSYS_ALTERNATE_MVS_value, ZIP_OPSYS_ALTERNATE_MVS);
 	zend_string *const_OPSYS_ALTERNATE_MVS_name = zend_string_init_interned("OPSYS_ALTERNATE_MVS", sizeof("OPSYS_ALTERNATE_MVS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_ALTERNATE_MVS_name, &const_OPSYS_ALTERNATE_MVS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_ALTERNATE_MVS_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_BEOS_value;
 	ZVAL_LONG(&const_OPSYS_BEOS_value, ZIP_OPSYS_BEOS);
 	zend_string *const_OPSYS_BEOS_name = zend_string_init_interned("OPSYS_BEOS", sizeof("OPSYS_BEOS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_BEOS_name, &const_OPSYS_BEOS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_BEOS_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_TANDEM_value;
 	ZVAL_LONG(&const_OPSYS_TANDEM_value, ZIP_OPSYS_TANDEM);
 	zend_string *const_OPSYS_TANDEM_name = zend_string_init_interned("OPSYS_TANDEM", sizeof("OPSYS_TANDEM") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_TANDEM_name, &const_OPSYS_TANDEM_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_TANDEM_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_OS_400_value;
 	ZVAL_LONG(&const_OPSYS_OS_400_value, ZIP_OPSYS_OS_400);
 	zend_string *const_OPSYS_OS_400_name = zend_string_init_interned("OPSYS_OS_400", sizeof("OPSYS_OS_400") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_OS_400_name, &const_OPSYS_OS_400_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_OS_400_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_OS_X_value;
 	ZVAL_LONG(&const_OPSYS_OS_X_value, ZIP_OPSYS_OS_X);
 	zend_string *const_OPSYS_OS_X_name = zend_string_init_interned("OPSYS_OS_X", sizeof("OPSYS_OS_X") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_OPSYS_OS_X_name, &const_OPSYS_OS_X_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_OPSYS_OS_X_name);
-#endif
-#if defined(ZIP_OPSYS_DEFAULT)
 
 	zval const_OPSYS_DEFAULT_value;
 	ZVAL_LONG(&const_OPSYS_DEFAULT_value, ZIP_OPSYS_DEFAULT);
@@ -1283,16 +1243,12 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_EM_AES_128_name = zend_string_init_interned("EM_AES_128", sizeof("EM_AES_128") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_EM_AES_128_name, &const_EM_AES_128_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EM_AES_128_name);
-#endif
-#if defined(HAVE_ENCRYPTION)
 
 	zval const_EM_AES_192_value;
 	ZVAL_LONG(&const_EM_AES_192_value, ZIP_EM_AES_192);
 	zend_string *const_EM_AES_192_name = zend_string_init_interned("EM_AES_192", sizeof("EM_AES_192") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_EM_AES_192_name, &const_EM_AES_192_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EM_AES_192_name);
-#endif
-#if defined(HAVE_ENCRYPTION)
 
 	zval const_EM_AES_256_value;
 	ZVAL_LONG(&const_EM_AES_256_value, ZIP_EM_AES_256);

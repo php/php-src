@@ -286,9 +286,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	RETVAL_NEW_STR(u8str);
 
 	if (is_systemid) { /* by-ref argument passed */
-		ZVAL_DEREF(is_systemid);
-		zval_ptr_dtor(is_systemid);
-		ZVAL_BOOL(is_systemid, isSystemID);
+		ZEND_TRY_ASSIGN_REF_BOOL(is_systemid, isSystemID);
 	}
 }
 
@@ -648,7 +646,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 	error = U_ZERO_ERROR;
 	winID = intl_convert_utf16_to_utf8(uWinID.getBuffer(), uWinID.length(), &error);
 	INTL_CHECK_STATUS(error, "could not convert time zone id to UTF-8");
-	RETURN_STR(winID);
+	RETURN_NEW_STR(winID);
 }
 /* }}} */
 
@@ -686,6 +684,6 @@ U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
 	error = U_ZERO_ERROR;
 	id = intl_convert_utf16_to_utf8(uID.getBuffer(), uID.length(), &error);
 	INTL_CHECK_STATUS(error, "could not convert time zone id to UTF-8");
-	RETURN_STR(id);
+	RETURN_NEW_STR(id);
 }
 /* }}} */

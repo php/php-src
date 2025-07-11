@@ -39,6 +39,9 @@ if (PHP_INTL != "no") {
 				formatter_main.c \
 				formatter_parse.c \
 				", "intl");
+		ADD_SOURCES(configure_module_dirname + "/listformatter", "\
+				listformatter_class.c \
+				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/locale", "\
 				locale.c \
 				locale_class.c \

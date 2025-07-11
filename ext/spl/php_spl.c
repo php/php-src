@@ -213,7 +213,7 @@ PHP_FUNCTION(class_uses)
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnexpectedValueException, z_list, sub, allow, ce_flags); \
 
-/* {{{ Return an array containing the names of all clsses and interfaces defined in SPL */
+/* {{{ Return an array containing the names of all classes and interfaces defined in SPL */
 PHP_FUNCTION(spl_classes)
 {
 	if (zend_parse_parameters_none() == FAILURE) {

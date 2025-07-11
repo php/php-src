@@ -124,33 +124,33 @@ const ARRAY_FILTER_USE_KEY = UNKNOWN;
 
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_ACTIVE
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_ACTIVE = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_CALLBACK
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_CALLBACK = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_BAIL
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_BAIL = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_WARNING
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_WARNING = UNKNOWN;
 /**
  * @var int
- * @deprecated
  * @cvalue PHP_ASSERT_EXCEPTION
  */
+#[\Deprecated(since: '8.3', message: 'as assert_options() is deprecated')]
 const ASSERT_EXCEPTION = UNKNOWN;
 
 /* basic_functions.h */
@@ -1686,13 +1686,11 @@ function array_merge_recursive(array ...$arrays): array {}
 
 /**
  * @compile-time-eval
- * @refcount 1
  */
 function array_replace(array $array, array ...$replacements): array {}
 
 /**
  * @compile-time-eval
- * @refcount 1
  */
 function array_replace_recursive(array $array, array ...$replacements): array {}
 
@@ -1711,6 +1709,16 @@ function array_key_first(array $array): int|string|null {}
  * @compile-time-eval
  */
 function array_key_last(array $array): int|string|null {}
+
+/**
+ * @compile-time-eval
+ */
+function array_first(array $array): mixed {}
+
+/**
+ * @compile-time-eval
+ */
+function array_last(array $array): mixed {}
 
 /**
  * @return array<int, mixed|ref>
@@ -1765,19 +1773,16 @@ function array_intersect_key(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  */
 function array_intersect_ukey(array $array, ...$rest): array {}
 
 /**
  * @compile-time-eval
- * @refcount 1
  */
 function array_intersect(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  */
 function array_uintersect(array $array, ...$rest): array {}
 
@@ -1795,13 +1800,11 @@ function array_uintersect_assoc(array $array, ...$rest): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  */
 function array_intersect_uassoc(array $array, ...$rest): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  */
 function array_uintersect_uassoc(array $array, ...$rest): array {}
 
@@ -2552,8 +2555,8 @@ function nl2br(string $string, bool $use_xhtml = true): string {}
 function strip_tags(string $string, array|string|null $allowed_tags = null): string {}
 
 /**
- * @param array|string $locales
- * @param string $rest
+ * @param array|string|null $locales
+ * @param string|null $rest
  */
 function setlocale(int $category, $locales, ...$rest): string|false {}
 
@@ -2687,13 +2690,11 @@ function readdir($dir_handle = null): string|false {}
  */
 function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING, $context = null): array|false {}
 
-#ifdef HAVE_GLOB
 /**
  * @return array<int, string>|false
  * @refcount 1
  */
 function glob(string $pattern, int $flags = 0): array|false {}
-#endif
 
 /* exec.c */
 

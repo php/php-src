@@ -529,6 +529,11 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 
 	PHP_ENCHANT_GET_BROKER;
 
+	if (taglen == 0) {
+		zend_argument_must_not_be_empty_error(2);
+		RETURN_THROWS();
+	}
+
 	RETURN_BOOL(enchant_broker_dict_exists(pbroker->pbroker, tag));
 }
 /* }}} */
@@ -553,6 +558,16 @@ PHP_FUNCTION(enchant_broker_set_ordering)
 	}
 
 	PHP_ENCHANT_GET_BROKER;
+
+	if (ptaglen == 0) {
+		zend_argument_must_not_be_empty_error(2);
+		RETURN_THROWS();
+	}
+
+	if (porderinglen == 0) {
+		zend_argument_must_not_be_empty_error(3);
+		RETURN_THROWS();
+	}
 
 	enchant_broker_set_ordering(pbroker->pbroker, ptag, pordering);
 	RETURN_TRUE;

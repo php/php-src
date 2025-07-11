@@ -13,5 +13,6 @@ $from = 'test@example.com';
 $headers = ['From' => &$from];
 var_dump(mail('test@example.com', 'Test', 'Test', $headers));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: mail(): Sendmail exited with non-zero exit code 127 in %sgh10990.php on line %d
 bool(false)

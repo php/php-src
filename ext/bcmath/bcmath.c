@@ -179,6 +179,26 @@ static zend_result php_str2num(bc_num *num, const zend_string *str)
 }
 /* }}} */
 
+static void bc_pow_err(bc_raise_status status, uint32_t arg_num)
+{
+	/* If arg_num is 0, it means it is an op */
+	switch (status) {
+		case BC_RAISE_STATUS_DIVIDE_BY_ZERO:
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+			break;
+		case BC_RAISE_STATUS_LEN_IS_OVERFLOW:
+		case BC_RAISE_STATUS_SCALE_IS_OVERFLOW:
+		case BC_RAISE_STATUS_FULLLEN_IS_OVERFLOW:
+			if (arg_num == 0) {
+				zend_value_error("exponent is too large, the number of digits overflowed");
+			} else {
+				zend_argument_value_error(arg_num, "exponent is too large, the number of digits overflowed");
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
 /* {{{ Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
 {
@@ -615,11 +635,11 @@ PHP_FUNCTION(bcpow)
 		goto cleanup;
 	}
 
-	if (!bc_raise(first, exponent, &result, scale)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+	bc_raise_status ret_status = bc_raise(first, exponent, &result, scale);
+	if (UNEXPECTED(ret_status != BC_RAISE_STATUS_OK)) {
+		bc_pow_err(ret_status, 2);
 		goto cleanup;
 	}
-
 	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
@@ -971,6 +991,12 @@ static zval *bcmath_number_read_property(zend_object *obj, zend_string *name, in
 	return zend_std_read_property(obj, name, type, cache_slot, rv);
 }
 
+static zval *bcmath_number_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
+{
+	/* Must always go through read property because all properties are virtual, and no dynamic properties are allowed. */
+	return NULL;
+}
+
 static int bcmath_number_has_property(zend_object *obj, zend_string *name, int check_empty, void **cache_slot)
 {
 	if (check_empty == ZEND_PROPERTY_NOT_EMPTY) {
@@ -1014,6 +1040,7 @@ static void bcmath_number_register_class(void)
 	bcmath_number_obj_handlers.unset_property = bcmath_number_unset_property;
 	bcmath_number_obj_handlers.has_property = bcmath_number_has_property;
 	bcmath_number_obj_handlers.read_property = bcmath_number_read_property;
+	bcmath_number_obj_handlers.get_property_ptr_ptr = bcmath_number_get_property_ptr_ptr;
 	bcmath_number_obj_handlers.get_properties_for = bcmath_number_get_properties_for;
 	bcmath_number_obj_handlers.cast_object = bcmath_number_cast_object;
 }
@@ -1144,8 +1171,9 @@ static zend_result bcmath_number_pow_internal(
 		}
 		return FAILURE;
 	}
-	if (!bc_raise(n1, exponent, ret, *scale)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Negative power of zero");
+	bc_raise_status ret_status = bc_raise(n1, exponent, ret, *scale);
+	if (UNEXPECTED(ret_status != BC_RAISE_STATUS_OK)) {
+		bc_pow_err(ret_status, is_op ? 0 : 1);
 		return FAILURE;
 	}
 	bc_rm_trailing_zeros(*ret);

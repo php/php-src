@@ -27,12 +27,14 @@
 #define FILE_NAME "/tmp/fuzzer.php"
 #define MAX_STEPS 1000
 #define MAX_SIZE (8 * 1024)
+#define ZEND_VM_ENTER_BIT 1ULL
+
 static uint32_t steps_left;
 static bool bailed_out = false;
 
 /* Because the fuzzer is always compiled with clang,
  * we can assume that we don't use global registers / hybrid VM. */
-typedef int (ZEND_FASTCALL *opcode_handler_t)(zend_execute_data *);
+typedef zend_op *(ZEND_FASTCALL *opcode_handler_t)(zend_execute_data *, const zend_op *);
 
 static zend_always_inline void fuzzer_bailout(void) {
 	bailed_out = true;
@@ -51,11 +53,13 @@ static zend_always_inline void fuzzer_step(void) {
 static void (*orig_execute_ex)(zend_execute_data *execute_data);
 
 static void fuzzer_execute_ex(zend_execute_data *execute_data) {
+	const zend_op *opline = EX(opline);
 	while (1) {
-		int ret;
 		fuzzer_step();
-		if ((ret = ((opcode_handler_t) EX(opline)->handler)(execute_data)) != 0) {
-			if (ret > 0) {
+		opline = ((opcode_handler_t) opline->handler)(execute_data, opline);
+		if ((uintptr_t) opline & ZEND_VM_ENTER_BIT) {
+			opline = (const zend_op *) ((uintptr_t) opline & ~ZEND_VM_ENTER_BIT);
+			if (opline) {
 				execute_data = EG(current_execute_data);
 			} else {
 				return;
@@ -123,15 +127,16 @@ ZEND_ATTRIBUTE_UNUSED static void create_file(void) {
 ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
 	steps_left = MAX_STEPS;
 	zend_exception_save();
-	zval retval, func, args[2];
-	ZVAL_STRING(&func, "opcache_invalidate");
+	zval retval, args[2];
+	zend_function *fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("opcache_invalidate"));
+	ZEND_ASSERT(fn != NULL);
+
 	ZVAL_STRING(&args[0], FILE_NAME);
 	ZVAL_TRUE(&args[1]);
-	call_user_function(CG(function_table), NULL, &func, &retval, 2, args);
+	zend_call_known_function(fn, NULL, NULL, &retval, 2, args, NULL);
 	ZEND_ASSERT(Z_TYPE(retval) == IS_TRUE);
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func);
 	zend_exception_restore();
 }
 

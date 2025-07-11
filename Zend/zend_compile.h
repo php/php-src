@@ -395,6 +395,11 @@ typedef struct _zend_oparray_context {
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* Has IS_PTR operands that needs special cleaning; same  |     |     |     */
+/* value as ZEND_ACC_OVERRIDE but override is for class   |     |     |     */
+/* methods and this is for the top level op array         |     |     |     */
+#define ZEND_ACC_PTR_OPS                 (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* has #[\NoDiscard] attribute                            |     |     |     */
 #define ZEND_ACC_NODISCARD               (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
@@ -881,7 +886,6 @@ ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_ar
 
 #ifdef ZTS
 const char *zend_get_zendtext(void);
-int zend_get_zendleng(void);
 #endif
 
 typedef zend_result (ZEND_FASTCALL *unary_op_type)(zval *, zval *);

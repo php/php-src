@@ -125,8 +125,18 @@ typedef psetid_t cpu_set_t;
 #include <pthread/qos.h>
 #endif
 
-#ifdef HAVE_PIDFD_OPEN
-#include <sys/syscall.h>
+#if defined(__linux__) && defined(HAVE_SYSCALL)
+#  include <sys/syscall.h>
+#  if defined(HAVE_DECL_SYS_WAITID) && HAVE_DECL_SYS_WAITID == 1
+#    define HAVE_LINUX_RAW_SYSCALL_WAITID 1
+#  endif
+#  if defined(HAVE_DECL_SYS_PIDFD_OPEN) && HAVE_DECL_SYS_PIDFD_OPEN == 1
+#    define HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN 1
+#  endif
+#endif
+
+#if defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
+#include <unistd.h>
 #endif
 
 #ifdef HAVE_FORKX
@@ -401,19 +411,49 @@ PHP_FUNCTION(pcntl_waitid)
 	bool id_is_null = 1;
 	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
+	zval *z_rusage = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(0, 4)
+	siginfo_t siginfo;
+	int status;
+
+	ZEND_PARSE_PARAMETERS_START(0, 5)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(idtype)
 		Z_PARAM_LONG_OR_NULL(id, id_is_null)
 		Z_PARAM_ZVAL(user_siginfo)
 		Z_PARAM_LONG(options)
+		Z_PARAM_ZVAL(z_rusage)
 	ZEND_PARSE_PARAMETERS_END();
 
 	errno = 0;
-	siginfo_t siginfo;
+	memset(&siginfo, 0, sizeof(siginfo_t));
 
-	int status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+#if defined(HAVE_WAIT6) || defined(HAVE_LINUX_RAW_SYSCALL_WAITID)
+	if (z_rusage) {
+		z_rusage = zend_try_array_init(z_rusage);
+		if (!z_rusage) {
+			RETURN_THROWS();
+		}
+		struct rusage rusage;
+# if defined(HAVE_WAIT6) /* FreeBSD */
+		struct __wrusage wrusage;
+		memset(&wrusage, 0, sizeof(struct __wrusage));
+		pid_t pid = wait6((idtype_t) idtype, (id_t) id, &status, (int) options, &wrusage, &siginfo);
+		status = pid > 0 ? 0 : pid;
+		memcpy(&rusage, &wrusage.wru_self, sizeof(struct rusage));
+# else /* Linux */
+		memset(&rusage, 0, sizeof(struct rusage));
+		status = syscall(SYS_waitid, (idtype_t) idtype, (id_t) id, &siginfo, (int) options, &rusage);
+# endif
+		if (status == 0) {
+			PHP_RUSAGE_TO_ARRAY(rusage, z_rusage);
+		}
+	} else { /* POSIX */
+		status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+	}
+#else /* POSIX */
+	status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+#endif
 
 	if (status == -1) {
 		PCNTL_G(last_error) = errno;
@@ -881,8 +921,7 @@ static bool php_pcntl_set_user_signal_infos(
 
 	zval *user_signal_no;
 	ZEND_HASH_FOREACH_VAL(user_signals, user_signal_no) {
-		bool failed = true;
-		ZVAL_DEREF(user_signal_no);
+		bool failed;
 		zend_long tmp = zval_try_get_long(user_signal_no, &failed);
 
 		if (failed) {
@@ -1316,7 +1355,7 @@ static void pcntl_signal_handler(int signo)
 		PCNTL_G(head) = psig;
 	}
 	PCNTL_G(tail) = psig;
-	PCNTL_G(pending_signals) = 1;
+	PCNTL_G(pending_signals) = true;
 	if (PCNTL_G(async_signals)) {
 		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 	}
@@ -1347,7 +1386,7 @@ void pcntl_signal_dispatch(void)
 	zend_fiber_switch_block();
 
 	/* Prevent reentrant handler calls */
-	PCNTL_G(processing_signal_queue) = 1;
+	PCNTL_G(processing_signal_queue) = true;
 
 	queue = PCNTL_G(head);
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
@@ -1356,7 +1395,6 @@ void pcntl_signal_dispatch(void)
 	while (queue) {
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
-				ZVAL_NULL(&retval);
 				ZVAL_LONG(&params[0], queue->signo);
 #ifdef HAVE_STRUCT_SIGINFO_T
 				array_init(&params[1]);
@@ -1366,7 +1404,6 @@ void pcntl_signal_dispatch(void)
 #endif
 
 				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
-				/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
 				call_user_function(NULL, NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
 #ifdef HAVE_STRUCT_SIGINFO_T
@@ -1381,10 +1418,10 @@ void pcntl_signal_dispatch(void)
 		queue = next;
 	}
 
-	PCNTL_G(pending_signals) = 0;
+	PCNTL_G(pending_signals) = false;
 
 	/* Re-enable queue */
-	PCNTL_G(processing_signal_queue) = 0;
+	PCNTL_G(processing_signal_queue) = false;
 
 	/* Re-enable fiber switching */
 	zend_fiber_switch_unblock();
@@ -1522,6 +1559,8 @@ PHP_FUNCTION(pcntl_rfork)
 		default:
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
+	} else if (pid == 0) {
+		zend_max_execution_timer_init();
 	}
 
 	RETURN_LONG((zend_long) pid);
@@ -1565,6 +1604,8 @@ PHP_FUNCTION(pcntl_forkx)
 		default:
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
+	} else if (pid == 0) {
+		zend_max_execution_timer_init();
 	}
 
 	RETURN_LONG((zend_long) pid);
@@ -1572,7 +1613,7 @@ PHP_FUNCTION(pcntl_forkx)
 #endif
 /* }}} */
 
-#ifdef HAVE_PIDFD_OPEN
+#ifdef HAVE_LINUX_RAW_SYSCALL_PIDFD_OPEN
 // The `pidfd_open` syscall is available since 5.3
 // and `setns` since 3.0.
 PHP_FUNCTION(pcntl_setns)

@@ -343,6 +343,8 @@ typedef struct _zend_fcall_info_cache {
 ZEND_API int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
+ZEND_API void zend_set_dl_use_deepbind(bool use_deepbind);
+
 ZEND_API zend_result zend_get_parameters_array_ex(uint32_t param_count, zval *argument_array);
 
 /* internal function to efficiently copy parameters when executing __call() */
@@ -694,8 +696,8 @@ ZEND_API zend_result _call_user_function_impl(zval *object, zval *function_name,
 # define empty_fcall_info (zend_fcall_info) {0}
 # define empty_fcall_info_cache (zend_fcall_info_cache) {0}
 #else
-# define empty_fcall_info zend_fcall_info {0}
-# define empty_fcall_info_cache zend_fcall_info_cache {0}
+# define empty_fcall_info zend_fcall_info {}
+# define empty_fcall_info_cache zend_fcall_info_cache {}
 #endif
 
 /** Build zend_call_info/cache from a zval*

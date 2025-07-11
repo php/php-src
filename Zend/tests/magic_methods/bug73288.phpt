@@ -23,6 +23,7 @@ function test_clone() {
     $b = clone $c->x;
 }
 
+// No catch, because we want to test Exception::__toString().
 test_clone();
 ?>
 --EXPECTF--

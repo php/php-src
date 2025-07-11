@@ -93,7 +93,7 @@ void zend_lazy_objects_destroy(zend_lazy_objects_store *store)
 	zend_hash_destroy(&store->infos);
 }
 
-static void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *info)
+static void zend_lazy_object_set_info(const zend_object *obj, zend_lazy_object_info *info)
 {
 	ZEND_ASSERT(zend_object_is_lazy(obj));
 
@@ -102,7 +102,7 @@ static void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *i
 	(void)zv;
 }
 
-static zend_lazy_object_info* zend_lazy_object_get_info(zend_object *obj)
+static zend_lazy_object_info* zend_lazy_object_get_info(const zend_object *obj)
 {
 	ZEND_ASSERT(zend_object_is_lazy(obj));
 
@@ -112,7 +112,7 @@ static zend_lazy_object_info* zend_lazy_object_get_info(zend_object *obj)
 	return info;
 }
 
-static bool zend_lazy_object_has_stale_info(zend_object *obj)
+static bool zend_lazy_object_has_stale_info(const zend_object *obj)
 {
 	return zend_hash_index_find_ptr(&EG(lazy_objects_store).infos, obj->handle);
 }
@@ -154,18 +154,18 @@ zend_object* zend_lazy_object_get_instance(zend_object *obj)
 	return obj;
 }
 
-zend_lazy_object_flags_t zend_lazy_object_get_flags(zend_object *obj)
+zend_lazy_object_flags_t zend_lazy_object_get_flags(const zend_object *obj)
 {
 	return zend_lazy_object_get_info(obj)->flags;
 }
 
-void zend_lazy_object_del_info(zend_object *obj)
+void zend_lazy_object_del_info(const zend_object *obj)
 {
 	zend_result res = zend_hash_index_del(&EG(lazy_objects_store).infos, obj->handle);
 	ZEND_ASSERT(res == SUCCESS);
 }
 
-bool zend_lazy_object_decr_lazy_props(zend_object *obj)
+bool zend_lazy_object_decr_lazy_props(const zend_object *obj)
 {
 	ZEND_ASSERT(zend_object_is_lazy(obj));
 	ZEND_ASSERT(!zend_lazy_object_initialized(obj));
@@ -183,7 +183,7 @@ bool zend_lazy_object_decr_lazy_props(zend_object *obj)
  * Making objects lazy
  */
 
-ZEND_API bool zend_class_can_be_lazy(zend_class_entry *ce)
+ZEND_API bool zend_class_can_be_lazy(const zend_class_entry *ce)
 {
 	/* Internal classes are not supported */
 	if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS && ce != zend_standard_class_def)) {
@@ -444,7 +444,7 @@ static void zend_lazy_object_revert_init(zend_object *obj, zval *properties_tabl
 	OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED;
 }
 
-static bool zend_lazy_object_compatible(zend_object *real_object, zend_object *lazy_object)
+static bool zend_lazy_object_compatible(const zend_object *real_object, const zend_object *lazy_object)
 {
 	if (EXPECTED(real_object->ce == lazy_object->ce)) {
 		return true;
