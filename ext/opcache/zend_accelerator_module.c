@@ -23,6 +23,7 @@
 
 #include "php.h"
 #include "ZendAccelerator.h"
+#include "zend_system_id.h"
 #include "zend_API.h"
 #include "zend_closures.h"
 #include "zend_shared_alloc.h"
@@ -651,6 +652,7 @@ ZEND_FUNCTION(opcache_get_status)
 
 	if (ZCG(accel_directives).file_cache) {
 		add_assoc_string(return_value, "file_cache", ZCG(accel_directives).file_cache);
+		add_assoc_stringl(return_value, "system_id", zend_system_id, 32);
 	}
 	if (file_cache_only) {
 		add_assoc_bool(return_value, "file_cache_only", 1);

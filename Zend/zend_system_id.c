@@ -18,6 +18,7 @@
 #include "php.h"
 #include "zend_system_id.h"
 #include "zend_extensions.h"
+#include "zend_abi_signature.h"
 #include "ext/standard/md5.h"
 #include "ext/hash/php_hash.h"
 
@@ -44,14 +45,6 @@ ZEND_API zend_result zend_add_system_entropy(const char *module_name, const char
 void zend_startup_system_id(void)
 {
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, PHP_VERSION, sizeof(PHP_VERSION)-1);
-	PHP_MD5Update(&context, ZEND_EXTENSION_BUILD_ID, sizeof(ZEND_EXTENSION_BUILD_ID)-1);
-	PHP_MD5Update(&context, ZEND_BIN_ID, sizeof(ZEND_BIN_ID)-1);
-	if (strstr(PHP_VERSION, "-dev") != 0) {
-		/* Development versions may be changed from build to build */
-		PHP_MD5Update(&context, __DATE__, sizeof(__DATE__)-1);
-		PHP_MD5Update(&context, __TIME__, sizeof(__TIME__)-1);
-	}
 	zend_system_id[0] = '\0';
 }
 
@@ -65,6 +58,27 @@ void zend_finalize_system_id(void)
 {
 	unsigned char digest[16];
 	uint8_t hooks = 0;
+
+	if (EG(portable_build)) {
+		/* Portable build mode: Use the ABI signature and major/minor version */
+		int major_version = PHP_MAJOR_VERSION;
+		int minor_version = PHP_MINOR_VERSION;
+
+		PHP_MD5Update(&context, (const unsigned char *)&major_version, sizeof(int));
+		PHP_MD5Update(&context, (const unsigned char *)&minor_version, sizeof(int));
+		PHP_MD5Update(&context, (const unsigned char *)zend_opcache_abi_signature, strlen(zend_opcache_abi_signature));
+	} else {
+		/* Default strict mode: Use the original full-fat build ID */
+		PHP_MD5Update(&context, PHP_VERSION, sizeof(PHP_VERSION)-1);
+		PHP_MD5Update(&context, ZEND_EXTENSION_BUILD_ID, sizeof(ZEND_EXTENSION_BUILD_ID)-1);
+		if (strstr(PHP_VERSION, "-dev") != 0) {
+			PHP_MD5Update(&context, __DATE__, sizeof(__DATE__)-1);
+			PHP_MD5Update(&context, __TIME__, sizeof(__TIME__)-1);
+		}
+	}
+
+	/* These are always critical for compatibility */
+	PHP_MD5Update(&context, ZEND_BIN_ID, sizeof(ZEND_BIN_ID)-1);
 
 	if (zend_ast_process) {
 		hooks |= ZEND_HOOK_AST_PROCESS;
