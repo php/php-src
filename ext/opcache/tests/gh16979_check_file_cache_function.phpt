@@ -33,7 +33,7 @@ var_dump(opcache_is_script_cached_in_file_cache(__FILE__));
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/cleanup_helper.inc.php'
+require __DIR__ . '/cleanup_helper.inc';
 
 $baseCacheDir = __DIR__ . '/gh16979_cache';
 
