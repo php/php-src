@@ -47,6 +47,10 @@ PHP                                                                        NEWS
     on object destruction). (nielsdos)
   . Fix memory leak when URL parsing fails in redirect. (Girgias)
 
+- SPL:
+  . Fixed bug GH-19094 (Attaching class with no Iterator implementation to
+    MultipleIterator causes crash). (nielsdos)
+
 - Standard:
   . Fix misleading errors in printf(). (nielsdos)
   . Fix RCN violations in array functions. (nielsdos)
