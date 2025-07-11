@@ -7683,6 +7683,8 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY | ZEND_ACC_FINAL);
 		bool is_promoted = property_flags || hooks_ast;
 
+		CG(zend_lineno) = param_ast->lineno;
+
 		znode var_node, default_node;
 		uint8_t opcode;
 		zend_op *opline;
