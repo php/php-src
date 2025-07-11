@@ -76,7 +76,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . Preprocessor macro SIZEOF_INTMAX_T has been removed.
 
 - Windows build system changes
-  . SAPI() and ADD_SOURCES() now suport the optional `duplicate_sources`
+  . SAPI() and ADD_SOURCES() now support the optional `duplicate_sources`
     parameter.  If truthy, no rules to build the object files are generated.
     This allows to build additional variants of SAPIs (e.g. a DLL and EXE)
     without duplicate build rules.  It is up to the SAPI maintainers to ensure
