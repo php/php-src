@@ -367,26 +367,20 @@ static int filename_is_in_cache(zend_string *filename)
 
 static int filename_is_in_file_cache(zend_string *filename)
 {
-	zend_string *realpath;
-
-	realpath = zend_resolve_path(filename);
-
+	zend_string *realpath = zend_resolve_path(filename);
 	if (!realpath) {
 		return 0;
 	}
 
 	zend_file_handle handle;
-
 	zend_stream_init_filename_ex(&handle, filename);
 	handle.opened_path = realpath;
 
 	zend_persistent_script *result = zend_file_cache_script_load_ex(&handle, true);
-
 	zend_destroy_file_handle(&handle);
 
 	return result != NULL;
 }
-
 
 static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 {
