@@ -99,7 +99,6 @@ PHP_FUNCTION(stream_socket_client)
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	double timeout;
 	bool timeout_is_null = 1;
-	php_timeout_ull conv;
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
@@ -138,7 +137,7 @@ PHP_FUNCTION(stream_socket_client)
 	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
 		tv_pointer = NULL;
 	} else {
-		conv = (php_timeout_ull) (timeout * 1000000.0);
+		php_timeout_ull conv = (php_timeout_ull) (timeout * 1000000.0);
 #ifdef PHP_WIN32
 		tv.tv_sec = (long)(conv / 1000000);
 		tv.tv_usec = (long)(conv % 1000000);
@@ -262,7 +261,6 @@ PHP_FUNCTION(stream_socket_accept)
 	bool timeout_is_null = 1;
 	zval *zpeername = NULL;
 	zend_string *peername = NULL;
-	php_timeout_ull conv;
 	struct timeval tv;
 	php_stream *stream = NULL, *clistream = NULL;
 	zend_string *errstr = NULL;
@@ -286,7 +284,7 @@ PHP_FUNCTION(stream_socket_accept)
 	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
 		tv_pointer = NULL;
 	} else {
-		conv = (php_timeout_ull) (timeout * 1000000.0);
+		php_timeout_ull conv = (php_timeout_ull) (timeout * 1000000.0);
 #ifdef PHP_WIN32
 		tv.tv_sec = (long)(conv / 1000000);
 		tv.tv_usec = (long)(conv % 1000000);
