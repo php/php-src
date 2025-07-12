@@ -209,38 +209,23 @@ static void register_hash_symbols(int module_number)
 #if defined(PHP_MHASH_BC)
 
 	zend_attribute *attribute_Deprecated_func_mhash_get_block_size_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_get_block_size", sizeof("mhash_get_block_size") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	zval attribute_Deprecated_func_mhash_get_block_size_0_arg0;
-	zend_string *attribute_Deprecated_func_mhash_get_block_size_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mhash_get_block_size_0_arg0, attribute_Deprecated_func_mhash_get_block_size_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_get_block_size_0->args[0].value, &attribute_Deprecated_func_mhash_get_block_size_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_get_block_size_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_mhash_get_block_size_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_mhash_get_hash_name_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_get_hash_name", sizeof("mhash_get_hash_name") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	zval attribute_Deprecated_func_mhash_get_hash_name_0_arg0;
-	zend_string *attribute_Deprecated_func_mhash_get_hash_name_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mhash_get_hash_name_0_arg0, attribute_Deprecated_func_mhash_get_hash_name_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_get_hash_name_0->args[0].value, &attribute_Deprecated_func_mhash_get_hash_name_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_get_hash_name_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_mhash_get_hash_name_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_mhash_keygen_s2k_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_keygen_s2k", sizeof("mhash_keygen_s2k") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	zval attribute_Deprecated_func_mhash_keygen_s2k_0_arg0;
-	zend_string *attribute_Deprecated_func_mhash_keygen_s2k_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mhash_keygen_s2k_0_arg0, attribute_Deprecated_func_mhash_keygen_s2k_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].value, &attribute_Deprecated_func_mhash_keygen_s2k_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_mhash_count_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_count", sizeof("mhash_count") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	zval attribute_Deprecated_func_mhash_count_0_arg0;
-	zend_string *attribute_Deprecated_func_mhash_count_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mhash_count_0_arg0, attribute_Deprecated_func_mhash_count_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_count_0->args[0].value, &attribute_Deprecated_func_mhash_count_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_count_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_mhash_count_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_mhash_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash", sizeof("mhash") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	zval attribute_Deprecated_func_mhash_0_arg0;
-	zend_string *attribute_Deprecated_func_mhash_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mhash_0_arg0, attribute_Deprecated_func_mhash_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_0->args[0].value, &attribute_Deprecated_func_mhash_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_mhash_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 #endif
 }
