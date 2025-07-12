@@ -1364,11 +1364,7 @@ PHP_FUNCTION(stream_set_blocking)
 		Z_PARAM_BOOL(block)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block, NULL) == -1) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(-1 != php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block, NULL));
 }
 
 /* }}} */
@@ -1409,11 +1405,7 @@ PHP_FUNCTION(stream_set_timeout)
 	}
 #endif
 
-	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t)) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t));
 }
 #endif /* HAVE_SYS_TIME_H || defined(PHP_WIN32) */
 /* }}} */
@@ -1589,11 +1581,7 @@ PHP_FUNCTION(stream_is_local)
 		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0);
 	}
 
-	if (!wrapper) {
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(wrapper->is_url==0);
+	RETURN_BOOL(wrapper && wrapper->is_url == 0);
 }
 /* }}} */
 
@@ -1606,11 +1594,7 @@ PHP_FUNCTION(stream_supports_lock)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!php_stream_supports_lock(stream)) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(php_stream_supports_lock(stream));
 }
 
 /* {{{ Check if a stream is a TTY. */
@@ -1637,15 +1621,13 @@ PHP_FUNCTION(stream_isatty)
 
 #ifdef PHP_WIN32
 	/* Check if the Windows standard handle is redirected to file */
-	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
+	RETURN_BOOL(php_win32_console_fileno_is_console(fileno));
 #elif defined(HAVE_UNISTD_H)
 	/* Check if the file descriptor identifier is a terminal */
-	RETVAL_BOOL(isatty(fileno));
+	RETURN_BOOL(isatty(fileno));
 #else
-	{
-		zend_stat_t stat = {0};
-		RETVAL_BOOL(zend_fstat(fileno, &stat) == 0 && (stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000);
-	}
+	zend_stat_t stat = {0};
+	RETURN_BOOL(zend_fstat(fileno, &stat) == 0 && (stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000);
 #endif
 }
 
@@ -1691,21 +1673,10 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 
 	if (enable_is_null) {
 		/* Check if the Windows standard handle has VT100 control codes enabled */
-		if (php_win32_console_fileno_has_vt100(fileno)) {
-			RETURN_TRUE;
-		}
-		else {
-			RETURN_FALSE;
-		}
-	}
-	else {
+		RETURN_BOOL(php_win32_console_fileno_has_vt100(fileno));
+	} else {
 		/* Enable/disable VT100 control codes support for the specified Windows standard handle */
-		if (php_win32_console_fileno_set_vt100(fileno, enable ? TRUE : FALSE)) {
-			RETURN_TRUE;
-		}
-		else {
-			RETURN_FALSE;
-		}
+		RETURN_BOOL(php_win32_console_fileno_set_vt100(fileno, enable ? TRUE : FALSE));
 	}
 }
 #endif
