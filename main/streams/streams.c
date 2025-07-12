@@ -1534,8 +1534,6 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool
 	ssize_t ret = 0;
 	char *ptr;
 	size_t len = 0, buflen;
-	int step = CHUNK_SIZE;
-	int min_room = CHUNK_SIZE / 4;
 	php_stream_statbuf ssbuf;
 	zend_string *result;
 
@@ -1578,20 +1576,21 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool
 	 * we can.  Note that the stream may be filtered, in which case the stat
 	 * result may be inaccurate, as the filter may inflate or deflate the
 	 * number of bytes that we can read.  In order to avoid an upsize followed
-	 * by a downsize of the buffer, overestimate by the step size (which is
+	 * by a downsize of the buffer, overestimate by the CHUNK_SIZE size (which is
 	 * 8K).  */
 	if (php_stream_stat(src, &ssbuf) == 0 && ssbuf.sb.st_size > 0) {
-		buflen = MAX(ssbuf.sb.st_size - src->position, 0) + step;
+		buflen = MAX(ssbuf.sb.st_size - src->position, 0) + CHUNK_SIZE;
 		if (maxlen > 0 && buflen > maxlen) {
 			buflen = maxlen;
 		}
 	} else {
-		buflen = step;
+		buflen = CHUNK_SIZE;
 	}
 
 	result = zend_string_alloc(buflen, persistent);
 	ptr = ZSTR_VAL(result);
 
+	const int min_room = CHUNK_SIZE / 4;
 	// TODO: Propagate error?
 	while ((ret = php_stream_read(src, ptr, buflen - len)) > 0) {
 		len += ret;
@@ -1599,10 +1598,10 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool
 			if (maxlen == len) {
 				break;
 			}
-			if (maxlen > 0 && buflen + step > maxlen) {
+			if (maxlen > 0 && buflen + CHUNK_SIZE > maxlen) {
 				buflen = maxlen;
 			} else {
-				buflen += step;
+				buflen += CHUNK_SIZE;
 			}
 			result = zend_string_extend(result, buflen, persistent);
 			ptr = ZSTR_VAL(result) + len;
