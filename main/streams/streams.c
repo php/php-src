@@ -1041,12 +1041,13 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 #define STREAM_BUFFERED_AMOUNT(stream) \
 	((size_t)(((stream)->writepos) - (stream)->readpos))
 
-static const char *_php_stream_search_delim(php_stream *stream,
-											size_t maxlen,
-											size_t skiplen,
-											const char *delim, /* non-empty! */
-											size_t delim_len)
-{
+static const char *_php_stream_search_delim(
+	const php_stream *stream,
+	size_t maxlen,
+	size_t skiplen,
+	const char *delim, /* non-empty! */
+	size_t delim_len
+) {
 	size_t	seek_len;
 
 	/* set the maximum number of bytes we're allowed to read from buffer */
@@ -1340,7 +1341,7 @@ PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
 	return count;
 }
 
-PHPAPI zend_off_t _php_stream_tell(php_stream *stream)
+PHPAPI zend_off_t _php_stream_tell(const php_stream *stream)
 {
 	return stream->position;
 }
@@ -1975,7 +1976,7 @@ PHPAPI zend_result php_unregister_url_stream_wrapper_volatile(zend_string *proto
 /* {{{ php_stream_locate_url_wrapper */
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options)
 {
-	HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
+	const HashTable *wrapper_hash = (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
 	php_stream_wrapper *wrapper = NULL;
 	const char *p, *protocol = NULL;
 	size_t n = 0;
@@ -2416,7 +2417,7 @@ PHPAPI void php_stream_notification_free(php_stream_notifier *notifier)
 	efree(notifier);
 }
 
-PHPAPI zval *php_stream_context_get_option(php_stream_context *context,
+PHPAPI zval *php_stream_context_get_option(const php_stream_context *context,
 		const char *wrappername, const char *optionname)
 {
 	zval *wrapperhash;

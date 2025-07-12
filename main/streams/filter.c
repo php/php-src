@@ -68,7 +68,7 @@ PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpatter
 
 /* Buckets */
 
-PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent)
+PHPAPI php_stream_bucket *php_stream_bucket_new(const php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent)
 {
 	int is_persistent = php_stream_is_persistent(stream);
 	php_stream_bucket *bucket;

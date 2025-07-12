@@ -568,13 +568,13 @@ PHP_FUNCTION(stream_get_meta_data)
 /* {{{ Retrieves list of registered socket transports */
 PHP_FUNCTION(stream_get_transports)
 {
-	HashTable *stream_xport_hash;
-	zend_string *stream_xport;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	stream_xport_hash = php_stream_xport_get_hash();
 	array_init(return_value);
+
+	const HashTable *stream_xport_hash = php_stream_xport_get_hash();
+	zend_string *stream_xport;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(stream_xport_hash, stream_xport) {
 		add_next_index_str(return_value, zend_string_copy(stream_xport));
 	} ZEND_HASH_FOREACH_END();
@@ -584,13 +584,12 @@ PHP_FUNCTION(stream_get_transports)
 /* {{{ Retrieves list of registered stream wrappers */
 PHP_FUNCTION(stream_get_wrappers)
 {
-	HashTable *url_stream_wrappers_hash;
-	zend_string *stream_protocol;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash();
 	array_init(return_value);
+
+	const HashTable *url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash();
+	zend_string *stream_protocol;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(url_stream_wrappers_hash, stream_protocol) {
 		if (stream_protocol) {
 			add_next_index_str(return_value, zend_string_copy(stream_protocol));
@@ -884,7 +883,7 @@ static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
 	notifier->fcc = NULL;
 }
 
-static zend_result parse_context_options(php_stream_context *context, HashTable *options)
+static zend_result parse_context_options(php_stream_context *context, const HashTable *options)
 {
 	zval *wval, *oval;
 	zend_string *wkey, *okey;
@@ -908,7 +907,7 @@ static zend_result parse_context_options(php_stream_context *context, HashTable 
 	return SUCCESS;
 }
 
-static zend_result parse_context_params(php_stream_context *context, HashTable *params)
+static zend_result parse_context_params(php_stream_context *context, const HashTable *params)
 {
 	zval *tmp;
 
