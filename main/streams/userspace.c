@@ -794,12 +794,12 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 
 /* parse the return value from one of the stat functions and store the
  * relevant fields into the statbuf provided */
-static void statbuf_from_array(zval *array, php_stream_statbuf *ssb)
+static void statbuf_from_array(const HashTable *array, php_stream_statbuf *ssb)
 {
 	zval *elem;
 
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
-	if (NULL != (elem = zend_hash_str_find(Z_ARRVAL_P(array), #name, sizeof(#name)-1))) {     \
+	if (NULL != (elem = zend_hash_str_find(array, #name, sizeof(#name)-1))) {     \
 		ssb->sb.st_##name2 = zval_get_long(elem);                                                      \
 	}
 
@@ -842,7 +842,7 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
 	zend_result call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) == IS_ARRAY) {
-		statbuf_from_array(&retval, ssb);
+		statbuf_from_array(Z_ARR(retval), ssb);
 		ret = 0;
 	} else {
 		if (call_result == FAILURE) {
@@ -1275,7 +1275,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) == IS_ARRAY) {
 		/* We got the info we needed */
-		statbuf_from_array(&zretval, ssb);
+		statbuf_from_array(Z_ARR(zretval), ssb);
 		ret = 0;
 	} else {
 		if (call_result == FAILURE) {
