@@ -375,6 +375,12 @@ PHP_FUNCTION(http_response_code)
 			}
 			RETURN_FALSE;
 		}
+
+		if (SG(sapi_headers).http_status_line) {
+			efree(SG(sapi_headers).http_status_line);
+			SG(sapi_headers).http_status_line = NULL;
+		}
+
 		zend_long old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;
