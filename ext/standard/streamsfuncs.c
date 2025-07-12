@@ -529,9 +529,9 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_zval(return_value, "wrapper_data", &stream->wrapperdata);
 	}
 	if (stream->wrapper) {
-		add_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label);
+		add_assoc_string(return_value, "wrapper_type", stream->wrapper->wops->label);
 	}
-	add_assoc_string(return_value, "stream_type", (char *)stream->ops->label);
+	add_assoc_string(return_value, "stream_type", stream->ops->label);
 
 	add_assoc_string(return_value, "mode", stream->mode);
 
@@ -543,7 +543,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		array_init(newval);
 
 		for (filter = stream->filterhead; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, (char *)filter->fops->label);
+			add_next_index_string(newval, filter->fops->label);
 		}
 
 		add_assoc_zval(return_value, "filters", newval);
