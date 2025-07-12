@@ -35,9 +35,9 @@
 /* {{{ resource and registration code */
 /* Global wrapper hash, copied to FG(stream_wrappers) on registration of volatile wrapper */
 static HashTable url_stream_wrappers_hash;
-static int le_stream = FAILURE; /* true global */
-static int le_pstream = FAILURE; /* true global */
-static int le_stream_filter = FAILURE; /* true global */
+static int le_stream = -1; /* true global */
+static int le_pstream = -1; /* true global */
+static int le_stream_filter = -1; /* true global */
 
 PHPAPI int php_file_le_stream(void)
 {
