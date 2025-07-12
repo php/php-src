@@ -1215,7 +1215,7 @@ PHP_FUNCTION(stream_context_create)
 /* }}} */
 
 /* {{{ streams filter functions */
-static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
+static void apply_filter_to_stream(bool append, INTERNAL_FUNCTION_PARAMETERS)
 {
 	php_stream *stream;
 	char *filtername;

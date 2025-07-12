@@ -531,7 +531,7 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 
 /* read all data from stream and put into a buffer. Caller must free buffer
  * when done. */
-PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int persistent STREAMS_DC);
+PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool persistent STREAMS_DC);
 #define php_stream_copy_to_mem(src, maxlen, persistent) _php_stream_copy_to_mem((src), (maxlen), (persistent) STREAMS_CC)
 
 /* output all data from a stream */

@@ -44,8 +44,8 @@ struct _php_stream_bucket {
 	char *buf;
 	size_t buflen;
 	/* if non-zero, buf should be pefreed when the bucket is destroyed */
-	uint8_t own_buf;
-	uint8_t is_persistent;
+	bool own_buf;
+	bool is_persistent;
 
 	/* destroy this struct when refcount falls to zero */
 	int refcount;
@@ -124,8 +124,8 @@ PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_strea
 PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
-PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish);
-PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor);
+PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, bool finish);
+PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC);
 END_EXTERN_C()
