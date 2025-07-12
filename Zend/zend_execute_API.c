@@ -1130,22 +1130,26 @@ ZEND_API zend_result zend_call_method_if_exists(
 		zend_object *object, zend_string *method_name, zval *retval,
 		uint32_t param_count, zval *params)
 {
-	zend_fcall_info fci;
-	fci.size = sizeof(zend_fcall_info);
-	fci.object = object;
-	ZVAL_STR(&fci.function_name, method_name);
-	fci.retval = retval;
-	fci.param_count = param_count;
-	fci.params = params;
-	fci.named_params = NULL;
+	zend_class_entry *ce = object->ce;
+	zend_function *fn = zend_hash_find_ptr_lc(&ce->function_table, method_name);
+	bool is_trampoline = false;
 
-	zend_fcall_info_cache fcc;
-	if (!zend_is_callable_ex(&fci.function_name, fci.object, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL)) {
-		ZVAL_UNDEF(retval);
-		return FAILURE;
+	if (UNEXPECTED(fn == NULL)) {
+		/* We don't have a trampoline */
+		if (!ce->__call) {
+			ZVAL_UNDEF(retval);
+			return FAILURE;
+		}
+		is_trampoline = true;
+		fn = zend_get_call_trampoline_func(ce, method_name, false);
 	}
 
-	return zend_call_function(&fci, &fcc);
+	zend_call_known_function(fn, object, ce, retval, param_count, params, NULL);
+
+	if (is_trampoline) {
+		zend_free_trampoline(fn);
+	}
+	return SUCCESS;
 }
 
 /* 0-9 a-z A-Z _ \ 0x80-0xff */
