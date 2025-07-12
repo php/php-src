@@ -361,7 +361,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence);
 #define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET)
 #define php_stream_seek(stream, offset, whence)	_php_stream_seek((stream), (offset), (whence))
 
-PHPAPI zend_off_t _php_stream_tell(php_stream *stream);
+PHPAPI zend_off_t _php_stream_tell(const php_stream *stream);
 #define php_stream_tell(stream)	_php_stream_tell((stream))
 
 PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t count);
