@@ -79,7 +79,7 @@ PHPAPI bool php_header(void)
 #define ILLEGAL_COOKIE_CHARACTER "\",\", \";\", \" \", \"\\t\", \"\\r\", \"\\n\", \"\\013\", or \"\\014\""
 PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
 	zend_string *path, zend_string *domain, bool secure, bool httponly,
-	zend_string *samesite, bool url_encode)
+	zend_string *samesite, bool partitioned, bool url_encode)
 {
 	zend_string *dt;
 	sapi_header_line ctr = {0};
@@ -182,6 +182,9 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		smart_str_appends(&buf, COOKIE_SAMESITE);
 		smart_str_append(&buf, samesite);
 	}
+	if (partitioned) {
+		smart_str_appends(&buf, COOKIE_PARTITIONED);
+	}
 
 	ctr.line = ZSTR_VAL(buf.s);
 	ctr.line_len = (uint32_t) ZSTR_LEN(buf.s);
@@ -192,7 +195,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 }
 
 static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_long *expires, zend_string **path,
-		zend_string **domain, bool *secure, bool *httponly, zend_string **samesite)
+		zend_string **domain, bool *secure, bool *httponly, zend_string **samesite, bool *partitioned)
 {
 	zend_string *key;
 	zval *value;
@@ -212,6 +215,8 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 			*secure = zval_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "httponly")) {
 			*httponly = zval_is_true(value);
+		} else if (zend_string_equals_literal_ci(key, "partitioned")) {
+			*partitioned = zval_is_true(value);
 		} else if (zend_string_equals_literal_ci(key, "samesite")) {
 			*samesite = zval_get_string(value);
 		} else {
@@ -227,9 +232,9 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 	HashTable *options = NULL;
 	zend_long expires = 0;
 	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
-	bool secure = 0, httponly = 0;
+	bool secure = 0, httponly = 0, partitioned = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 7)
+	ZEND_PARSE_PARAMETERS_START(1, 8)
 		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(value)
@@ -238,6 +243,7 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 		Z_PARAM_STR(domain)
 		Z_PARAM_BOOL(secure)
 		Z_PARAM_BOOL(httponly)
+		Z_PARAM_BOOL(partitioned)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (options) {
@@ -248,13 +254,13 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 		}
 
 		if (FAILURE == php_head_parse_cookie_options_array(options, &expires, &path,
-			&domain, &secure, &httponly, &samesite)
+			&domain, &secure, &httponly, &samesite, &partitioned)
 		) {
 			goto cleanup;
 		}
 	}
 
-	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, !is_raw) == SUCCESS) {
+	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, partitioned, !is_raw) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
