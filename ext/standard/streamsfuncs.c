@@ -595,17 +595,13 @@ PHP_FUNCTION(stream_get_wrappers)
 /* }}} */
 
 /* {{{ stream_select related functions */
-static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t *max_fd)
+static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, php_socket_t *max_fd)
 {
 	zval *elem;
 	php_stream *stream;
 	int cnt = 0;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
-		return 0;
-	}
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
+	ZEND_HASH_FOREACH_VAL(stream_array, elem) {
 		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
 			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
 			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
@@ -634,7 +630,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 	return cnt ? 1 : 0;
 }
 
-static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
+static int stream_array_from_fd_set(zval *stream_array, const fd_set *fds)
 {
 	zval *elem, *dest_elem;
 	HashTable *ht;
@@ -643,9 +639,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	zend_string *key;
 	zend_ulong num_ind;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
-		return 0;
-	}
+	ZEND_ASSERT(Z_TYPE_P(stream_array) == IS_ARRAY);
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
@@ -671,7 +665,6 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 
 				zval_add_ref(dest_elem);
 				ret++;
-				continue;
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -692,9 +685,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	zend_ulong num_ind;
 	zend_string *key;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
-		return 0;
-	}
+	ZEND_ASSERT(Z_TYPE_P(stream_array) == IS_ARRAY);
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
@@ -717,7 +708,6 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 			}
 			zval_add_ref(dest_elem);
 			ret++;
-			continue;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -760,21 +750,21 @@ PHP_FUNCTION(stream_select)
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
-		set_count = stream_array_to_fd_set(r_array, &rfds, &max_fd);
+		set_count = stream_array_to_fd_set(Z_ARR_P(r_array), &rfds, &max_fd);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
 		sets += set_count;
 	}
 
 	if (w_array != NULL) {
-		set_count = stream_array_to_fd_set(w_array, &wfds, &max_fd);
+		set_count = stream_array_to_fd_set(Z_ARR_P(w_array), &wfds, &max_fd);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
 		sets += set_count;
 	}
 
 	if (e_array != NULL) {
-		set_count = stream_array_to_fd_set(e_array, &efds, &max_fd);
+		set_count = stream_array_to_fd_set(Z_ARR_P(e_array), &efds, &max_fd);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
 		sets += set_count;
