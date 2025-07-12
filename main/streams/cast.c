@@ -370,7 +370,7 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 /* }}} */
 
 /* {{{ php_stream_make_seekable */
-PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC)
+PHPAPI php_stream_make_seekable_status _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC)
 {
 	if (newstream == NULL) {
 		return PHP_STREAM_FAILED;
