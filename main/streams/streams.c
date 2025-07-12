@@ -880,7 +880,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf)
 {
 	size_t avail;
-	const char *cr, *lf, *eol = NULL;
+	const char *eol = NULL;
 	const char *readptr;
 
 	if (!buf) {
@@ -893,8 +893,8 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf)
 
 	/* Look for EOL */
 	if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
-		cr = memchr(readptr, '\r', avail);
-		lf = memchr(readptr, '\n', avail);
+		const char *cr = memchr(readptr, '\r', avail);
+		const char *lf = memchr(readptr, '\n', avail);
 
 		if (cr && lf != cr + 1 && !(lf && lf < cr)) {
 			/* mac */
@@ -1218,16 +1218,15 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 	size_t consumed = 0;
 	php_stream_bucket *bucket;
 	php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
-	php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
+	php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out;
 	php_stream_filter_status_t status = PSFS_ERR_FATAL;
-	php_stream_filter *filter;
 
 	if (buf) {
 		bucket = php_stream_bucket_new(stream, (char *)buf, count, 0, 0);
 		php_stream_bucket_append(&brig_in, bucket);
 	}
 
-	for (filter = stream->writefilters.head; filter; filter = filter->next) {
+	for (php_stream_filter *filter = stream->writefilters.head; filter; filter = filter->next) {
 		/* for our return value, we are interested in the number of bytes consumed from
 		 * the first filter in the chain */
 		status = filter->fops->filter(stream, filter, brig_inp, brig_outp,
@@ -1239,7 +1238,7 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 		/* brig_out becomes brig_in.
 		 * brig_in will always be empty here, as the filter MUST attach any un-consumed buckets
 		 * to its own brigade */
-		brig_swap = brig_inp;
+		php_stream_bucket_brigade *brig_swap = brig_inp;
 		brig_inp = brig_outp;
 		brig_outp = brig_swap;
 		memset(brig_outp, 0, sizeof(*brig_outp));
