@@ -51,6 +51,7 @@ struct php_unserialize_data {
 	var_dtor_entries *first_dtor;
 	var_dtor_entries *last_dtor;
 	HashTable        *allowed_classes;
+	zval             *allowed_classes_callback;
 	HashTable        *ref_props;
 	zend_long         cur_depth;
 	zend_long         max_depth;
@@ -65,6 +66,7 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init(void) {
 		d->last = &d->entries;
 		d->first_dtor = d->last_dtor = NULL;
 		d->allowed_classes = NULL;
+		d->allowed_classes_callback = NULL;
 		d->ref_props = NULL;
 		d->cur_depth = 0;
 		d->max_depth = BG(unserialize_max_depth);
@@ -97,6 +99,13 @@ PHPAPI HashTable *php_var_unserialize_get_allowed_classes(php_unserialize_data_t
 }
 PHPAPI void php_var_unserialize_set_allowed_classes(php_unserialize_data_t d, HashTable *classes) {
 	d->allowed_classes = classes;
+}
+
+PHPAPI zval *php_var_unserialize_get_allowed_classes_callback(php_unserialize_data_t d) {
+	return d->allowed_classes_callback;
+}
+PHPAPI void php_var_unserialize_set_allowed_classes_callback(php_unserialize_data_t d, zval *callback) {
+	d->allowed_classes_callback = callback;
 }
 
 PHPAPI void php_var_unserialize_set_max_depth(php_unserialize_data_t d, zend_long max_depth) {
@@ -359,18 +368,43 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 }
 
 static inline int unserialize_allowed_class(
-		zend_string *lcname, php_unserialize_data_t *var_hashx)
+		zend_string *lcname, zend_string *class_name, php_unserialize_data_t *var_hashx)
 {
 	HashTable *classes = (*var_hashx)->allowed_classes;
+	zval args[1];
+	zval retval;
 
-	if(classes == NULL) {
+	if(classes == NULL && (*var_hashx)->allowed_classes_callback == NULL) {
 		return 1;
 	}
-	if(!zend_hash_num_elements(classes)) {
-		return 0;
+
+	if (classes != NULL && zend_hash_num_elements(classes) && zend_hash_exists(classes, lcname)) {
+		return 1;
 	}
 
-	return zend_hash_exists(classes, lcname);
+	/* Check for allowed classes callback */
+	if ((*var_hashx)->allowed_classes_callback) {
+		ZVAL_STR(&args[0], class_name);
+		BG(serialize_lock)++;
+		call_user_function(NULL, NULL, (*var_hashx)->allowed_classes_callback, &retval, 1, args);
+		BG(serialize_lock)--;
+
+		if (EG(exception)) {
+			return 0;
+		}
+
+		if (Z_TYPE(retval) == IS_TRUE) {
+			zval_ptr_dtor(&retval);
+			return 1;
+		}
+
+		if (Z_TYPE(retval) != IS_FALSE) {
+			zend_type_error("\"allowed_classes_callback\" must return bool, %s given", zend_zval_value_name(&retval));
+		}
+		zval_ptr_dtor(&retval);
+	}
+
+    return 0;
 }
 
 #define YYFILL(n) do { } while (0)
@@ -1187,7 +1221,7 @@ object ":" uiv ":" ["]	{
 	do {
 		zend_string *lc_name;
 
-		if (!(*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
+		if (!(*var_hash)->allowed_classes && !(*var_hash)->allowed_classes_callback && ZSTR_HAS_CE_CACHE(class_name)) {
 			ce = ZSTR_GET_CE_CACHE(class_name);
 			if (ce) {
 				break;
@@ -1195,7 +1229,7 @@ object ":" uiv ":" ["]	{
 		}
 
 		lc_name = zend_string_tolower(class_name);
-		if(!unserialize_allowed_class(lc_name, var_hash)) {
+		if(!unserialize_allowed_class(lc_name, class_name, var_hash)) {
 			zend_string_release_ex(lc_name, 0);
 			if (!zend_is_valid_class_name(class_name)) {
 				zend_string_release_ex(class_name, 0);
