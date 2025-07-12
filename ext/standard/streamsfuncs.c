@@ -482,7 +482,6 @@ PHP_FUNCTION(stream_copy_to_stream)
 	zend_long maxlen, pos = 0;
 	bool maxlen_is_null = 1;
 	size_t len;
-	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		PHP_Z_PARAM_STREAM(src)
@@ -501,9 +500,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 		RETURN_FALSE;
 	}
 
-	ret = php_stream_copy_to_stream_ex(src, dest, maxlen, &len);
-
-	if (ret != SUCCESS) {
+	if (php_stream_copy_to_stream_ex(src, dest, maxlen, &len) != SUCCESS) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(len);
