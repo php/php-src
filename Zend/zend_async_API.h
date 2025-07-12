@@ -137,9 +137,6 @@ typedef struct _zend_async_iterator_s zend_async_iterator_t;
 typedef struct _zend_fcall_s zend_fcall_t;
 typedef void (*zend_coroutine_entry_t)(void);
 
-/* Future resolve function type */
-typedef void (*zend_future_resolve_t)(zend_future_t *future, zval *value, zend_object *exception, bool transfer_error);
-
 /* Channel method function types */
 typedef bool (*zend_channel_send_t)(zend_async_channel_t *channel, zval *value);
 typedef bool (*zend_channel_receive_t)(zend_async_channel_t *channel, zval *result);
@@ -983,41 +980,6 @@ struct _zend_coroutine_s {
 };
 
 /**
- * zend_future_t structure represents a future result container.
- * It inherits from zend_async_event_t to participate in the event system.
- */
-struct _zend_future_s {
-	zend_async_event_t event;               /* Event inheritance (first member) */
-	zval result;                            /* Result value (UNDEF = pending) */
-	zend_object *exception;                 /* Exception object (NULL = no error) */
-	
-	/* Debug information */
-	zend_string *filename;                  /* Creation file */
-	uint32_t lineno;                        /* Creation line */
-	zend_string *resolved_filename;         /* Resolution file */
-	uint32_t resolved_lineno;               /* Resolution line */
-
-	/* Resolution method */
-	zend_future_resolve_t resolve;
-};
-
-/**
- * zend_async_channel_t structure represents a communication channel.
- * It inherits from zend_async_event_t to participate in the event system.
- */
-struct _zend_async_channel_s {
-	zend_async_event_t event;               /* Event inheritance (first member) */
-	
-	/* Debug information */
-	zend_string *filename;                  /* Creation file */
-	uint32_t lineno;                        /* Creation line */
-	
-	/* Channel-specific method pointers */
-	zend_channel_send_t send;               /* Send method */
-	zend_channel_receive_t receive;         /* Receive method */
-};
-
-/**
  * The macro evaluates to TRUE if the coroutine is in a waiting state —
  * either waiting for events or waiting in the execution queue.
  */
@@ -1102,6 +1064,42 @@ struct _zend_async_context_s {
 	zend_async_context_unset_t unset;
 	zend_async_context_dispose_t dispose;
 };
+
+///////////////////////////////////////////////////////////////
+/// Future
+///////////////////////////////////////////////////////////////
+
+/**
+ * zend_future_t structure represents a future result container.
+ * It inherits from zend_async_event_t to participate in the event system.
+ */
+struct _zend_future_s {
+	zend_async_event_t event;               /* Event inheritance (first member) */
+	zval result;							/* Result value */
+	zend_object *exception;					/* Exception object (NULL = no error) */
+};
+
+#define ZEND_FUTURE_F_THREAD_SAFE (1u << 10)
+#define ZEND_FUTURE_F_IGNORE (1u << 11)
+
+///////////////////////////////////////////////////////////////
+/// Channel
+///////////////////////////////////////////////////////////////
+
+/**
+ * zend_async_channel_t structure represents a communication channel.
+ * It inherits from zend_async_event_t to participate in the event system.
+ */
+struct _zend_async_channel_s {
+	zend_async_event_t event;               /* Event inheritance (first member) */
+
+	/* Channel-specific method pointers */
+	zend_channel_send_t send;               /* Send method */
+	zend_channel_receive_t receive;         /* Receive method */
+};
+
+#define ZEND_ASYNC_CHANNEL_F_THREAD_SAFE (1u << 10)
+
 
 ///////////////////////////////////////////////////////////////
 /// Global Macros
