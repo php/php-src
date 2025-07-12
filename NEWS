@@ -3,7 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.0alpha2
 
 - Core:
-  . Fix OSS-Fuzz #427814452 (pipe compilation fails with assert). (nielsdos)
+  . Fix OSS-Fuzz #427814452 (pipe compilation fails with assert).
+    (nielsdos, ilutov)
 
 - DOM:
   . Make cloning DOM node lists, maps, and collections fail. (nielsdos)
