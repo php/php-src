@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fix theoretical issues with hrtime() not being available. (nielsdos)
 
+- GD:
+  . Fix incorrect comparison with result of php_stream_can_cast(). (Girgias)
+
 - Hash:
   . Fix crash on clone failure. (nielsdos)
 
