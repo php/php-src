@@ -54,6 +54,12 @@ static zend_future_t* future_create_stub(bool thread_safe, size_t extra_size)
 	return NULL;
 }
 
+static zend_async_channel_t* channel_create_stub(size_t buffer_size, bool resizable, bool thread_safe, size_t extra_size) 
+{
+	ASYNC_THROW_ERROR("Async API is not enabled");
+	return NULL;
+}
+
 static void add_microtask_stub(zend_async_microtask_t *microtask) {}
 
 static zend_array* get_awaiting_info_stub(zend_coroutine_t *coroutine) { return NULL; }
@@ -104,6 +110,7 @@ zend_async_add_microtask_t zend_async_add_microtask_fn = add_microtask_stub;
 zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = get_awaiting_info_stub;
 zend_async_get_class_ce_t zend_async_get_class_ce_fn = get_class_ce;
 zend_async_future_create_t zend_async_future_create_fn = future_create_stub;
+zend_async_channel_create_t zend_async_channel_create_fn = channel_create_stub;
 
 static zend_atomic_bool reactor_lock = {0};
 static char * reactor_module_name = NULL;
