@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2119512797f6d51d9835660cd0eccd3ba83417a9 */
+ * Stub hash: 757889c0ca89cc8e9905ba465e0621fe89b6e716 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dom_import_simplexml, 0, 1, DOMAttr|DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -775,6 +775,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Element_getElementsByTa
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Element_getElementsByClassName, 0, 1, Dom\\HTMLCollection, 0)
+	ZEND_ARG_TYPE_INFO(0, classNames, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Element_insertAdjacentElement, 0, 2, Dom\\Element, 1)
 	ZEND_ARG_OBJ_INFO(0, where, Dom\\AdjacentPosition, 0)
 	ZEND_ARG_OBJ_INFO(0, element, Dom\\Element, 0)
@@ -905,6 +909,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Dom_Document_getElementsByTagName arginfo_class_Dom_Element_getElementsByTagName
 
 #define arginfo_class_Dom_Document_getElementsByTagNameNS arginfo_class_Dom_Element_getElementsByTagNameNS
+
+#define arginfo_class_Dom_Document_getElementsByClassName arginfo_class_Dom_Element_getElementsByClassName
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Document_createElement, 0, 1, Dom\\Element, 0)
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
@@ -1278,6 +1284,7 @@ ZEND_METHOD(Dom_Element, setAttributeNodeNS);
 ZEND_METHOD(Dom_Element, removeAttributeNode);
 ZEND_METHOD(Dom_Element, getElementsByTagName);
 ZEND_METHOD(Dom_Element, getElementsByTagNameNS);
+ZEND_METHOD(Dom_Element, getElementsByClassName);
 ZEND_METHOD(Dom_Element, insertAdjacentElement);
 ZEND_METHOD(Dom_Element, insertAdjacentText);
 ZEND_METHOD(Dom_Element, insertAdjacentHTML);
@@ -1653,6 +1660,7 @@ static const zend_function_entry class_Dom_Element_methods[] = {
 	ZEND_ME(Dom_Element, removeAttributeNode, arginfo_class_Dom_Element_removeAttributeNode, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, getElementsByTagName, arginfo_class_Dom_Element_getElementsByTagName, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, getElementsByTagNameNS, arginfo_class_Dom_Element_getElementsByTagNameNS, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_Element, getElementsByClassName, arginfo_class_Dom_Element_getElementsByClassName, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, insertAdjacentElement, arginfo_class_Dom_Element_insertAdjacentElement, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, insertAdjacentText, arginfo_class_Dom_Element_insertAdjacentText, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, insertAdjacentHTML, arginfo_class_Dom_Element_insertAdjacentHTML, ZEND_ACC_PUBLIC)
@@ -1721,6 +1729,7 @@ static const zend_function_entry class_Dom_DocumentFragment_methods[] = {
 static const zend_function_entry class_Dom_Document_methods[] = {
 	ZEND_RAW_FENTRY("getElementsByTagName", zim_Dom_Element_getElementsByTagName, arginfo_class_Dom_Document_getElementsByTagName, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getElementsByTagNameNS", zim_Dom_Element_getElementsByTagNameNS, arginfo_class_Dom_Document_getElementsByTagNameNS, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getElementsByClassName", zim_Dom_Element_getElementsByClassName, arginfo_class_Dom_Document_getElementsByClassName, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Dom_Document, createElement, arginfo_class_Dom_Document_createElement, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Document, createElementNS, arginfo_class_Dom_Document_createElementNS, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("createDocumentFragment", zim_DOMDocument_createDocumentFragment, arginfo_class_Dom_Document_createDocumentFragment, ZEND_ACC_PUBLIC, NULL, NULL)
