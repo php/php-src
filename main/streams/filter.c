@@ -403,7 +403,7 @@ PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool fini
 	php_stream_filter *current;
 	php_stream *stream;
 	size_t flushed_size = 0;
-	long flags = (finish ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC);
+	int flags = (finish ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC);
 
 	if (!filter->chain || !filter->chain->stream) {
 		/* Filter is not attached to a chain, or chain is somehow not part of a stream */
