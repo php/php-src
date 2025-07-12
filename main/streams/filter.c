@@ -282,7 +282,7 @@ PHPAPI void php_stream_filter_free(php_stream_filter *filter)
 	pefree(filter, filter->is_persistent);
 }
 
-PHPAPI zend_result php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI void php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	filter->next = chain->head;
 	filter->prev = NULL;
@@ -294,8 +294,6 @@ PHPAPI zend_result php_stream_filter_prepend_ex(php_stream_filter_chain *chain, 
 	}
 	chain->head = filter;
 	filter->chain = chain;
-
-	return SUCCESS;
 }
 
 PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter)
