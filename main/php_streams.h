@@ -561,7 +561,7 @@ END_EXTERN_C()
 #define PHP_STREAM_CAST_INTERNAL	0x20000000	/* stream cast for internal use */
 #define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE | PHP_STREAM_CAST_INTERNAL)
 BEGIN_EXTERN_C()
-PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
+PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
 END_EXTERN_C()
 /* use this to check if a stream can be cast into another form */
 #define php_stream_can_cast(stream, as)	_php_stream_cast((stream), (as), NULL, 0)
@@ -626,7 +626,7 @@ END_EXTERN_C()
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_ZEND_STREAM     0x00010000
 
-int php_init_stream_wrappers(int module_number);
+zend_result php_init_stream_wrappers(int module_number);
 void php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);
 PHP_RSHUTDOWN_FUNCTION(streams);

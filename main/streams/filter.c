@@ -40,22 +40,22 @@ PHPAPI HashTable *_php_get_stream_filters_hash(void)
 }
 
 /* API for registering GLOBAL filters */
-PHPAPI int php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory)
+PHPAPI zend_result php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory)
 {
-	int ret;
+	zend_result ret;
 	zend_string *str = zend_string_init_interned(filterpattern, strlen(filterpattern), true);
 	ret = zend_hash_add_ptr(&stream_filters_hash, str, (void*)factory) ? SUCCESS : FAILURE;
 	zend_string_release_ex(str, true);
 	return ret;
 }
 
-PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern)
+PHPAPI zend_result php_stream_filter_unregister_factory(const char *filterpattern)
 {
 	return zend_hash_str_del(&stream_filters_hash, filterpattern, strlen(filterpattern));
 }
 
 /* API for registering VOLATILE wrappers */
-PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory)
+PHPAPI zend_result php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory)
 {
 	if (!FG(stream_filters)) {
 		ALLOC_HASHTABLE(FG(stream_filters));
@@ -282,7 +282,7 @@ PHPAPI void php_stream_filter_free(php_stream_filter *filter)
 	pefree(filter, filter->is_persistent);
 }
 
-PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI zend_result php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	filter->next = chain->head;
 	filter->prev = NULL;
@@ -303,7 +303,7 @@ PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_strea
 	php_stream_filter_prepend_ex(chain, filter);
 }
 
-PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	php_stream *stream = chain->stream;
 
@@ -395,7 +395,7 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 	}
 }
 
-PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, bool finish)
+PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish)
 {
 	php_stream_bucket_brigade brig_a = { NULL, NULL }, brig_b = { NULL, NULL }, *inp = &brig_a, *outp = &brig_b, *brig_temp;
 	php_stream_bucket *bucket;

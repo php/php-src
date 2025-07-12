@@ -121,10 +121,10 @@ struct _php_stream_filter {
 /* stack filter onto a stream */
 BEGIN_EXTERN_C()
 PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter);
-PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
+PHPAPI zend_result php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter);
-PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
-PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, bool finish);
+PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
+PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC);
@@ -142,8 +142,8 @@ typedef struct _php_stream_filter_factory {
 } php_stream_filter_factory;
 
 BEGIN_EXTERN_C()
-PHPAPI int php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory);
-PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern);
-PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory);
+PHPAPI zend_result php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory);
+PHPAPI zend_result php_stream_filter_unregister_factory(const char *filterpattern);
+PHPAPI zend_result php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory);
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent);
 END_EXTERN_C()

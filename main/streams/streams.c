@@ -1869,7 +1869,7 @@ void php_shutdown_stream_hashes(void)
 	}
 }
 
-int php_init_stream_wrappers(int module_number)
+zend_result php_init_stream_wrappers(int module_number)
 {
 	le_stream = zend_register_list_destructors_ex(stream_resource_regular_dtor, NULL, "stream", module_number);
 	le_pstream = zend_register_list_destructors_ex(NULL, stream_resource_persistent_dtor, "persistent stream", module_number);
