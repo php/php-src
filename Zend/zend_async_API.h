@@ -1077,10 +1077,39 @@ struct _zend_future_s {
 	zend_async_event_t event;               /* Event inheritance (first member) */
 	zval result;							/* Result value */
 	zend_object *exception;					/* Exception object (NULL = no error) */
+	/* Created file and line number */
+	uint32_t lineno;
+	uint32_t completed_lineno;
+	/* Completed file and line number */
+	zend_string *filename;
+	zend_string *completed_filename;
 };
 
 #define ZEND_FUTURE_F_THREAD_SAFE (1u << 10)
-#define ZEND_FUTURE_F_IGNORE (1u << 11)
+#define ZEND_FUTURE_F_IGNORED (1u << 11)
+
+#define ZEND_FUTURE_IS_COMPLETED(future) (((future)->event.flags & ZEND_ASYNC_EVENT_F_CLOSED) != 0)
+
+#define ZEND_FUTURE_SET_THREAD_SAFE(future) ((future)->event.flags |= ZEND_FUTURE_F_THREAD_SAFE)
+#define ZEND_FUTURE_SET_IGNORED(future) ((future)->event.flags |= ZEND_FUTURE_F_IGNORED)
+
+
+#define ZEND_FUTURE_COMPLETE(future, result) do {			\
+		if(ZEND_ASYNC_EVENT_IS_CLOSED(&(future)->event)) {	\
+			break;											\
+		}													\
+		ZVAL_COPY(&(future)->result, (result));				\
+		(future)->event.stop(&(future)->event);				\
+	} while (0)
+
+#define ZEND_FUTURE_REJECT(future, error) do {			\
+		if(ZEND_ASYNC_EVENT_IS_CLOSED(&(future)->event)) {	\
+			break;											\
+		}													\
+		(future)->exception = error;			     		\
+		GC_ADDREF(error);							     	\
+		(future)->event.stop(&(future)->event);				\
+	} while (0)
 
 ///////////////////////////////////////////////////////////////
 /// Channel
@@ -1092,7 +1121,6 @@ struct _zend_future_s {
  */
 struct _zend_async_channel_s {
 	zend_async_event_t event;               /* Event inheritance (first member) */
-
 	/* Channel-specific method pointers */
 	zend_channel_send_t send;               /* Send method */
 	zend_channel_receive_t receive;         /* Receive method */
