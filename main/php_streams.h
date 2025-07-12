@@ -646,15 +646,18 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 /* pushes an error message onto the stack for a wrapper instance */
 PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 
-#define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
-#define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
-#define PHP_STREAM_FAILED		2 /* an error occurred while attempting conversion */
-#define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
+typedef enum {
+	PHP_STREAM_UNCHANGED = 0, /* orig stream was seekable anyway */
+	PHP_STREAM_RELEASED = 1, /* newstream should be used; origstream is no longer valid */
+	PHP_STREAM_FAILED = 2, /* an error occurred while attempting conversion */
+	PHP_STREAM_CRITICAL = 3, /* an error occurred; origstream is in an unknown state; you should close origstream */
+} php_stream_make_seekable_status;
+
 #define PHP_STREAM_NO_PREFERENCE	0
 #define PHP_STREAM_PREFER_STDIO		1
 #define PHP_STREAM_FORCE_CONVERSION	2
 /* DO NOT call this on streams that are referenced by resources! */
-PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC);
+PHPAPI php_stream_make_seekable_status _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC);
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC)
 
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
