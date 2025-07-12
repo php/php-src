@@ -15,10 +15,8 @@
  */
 
 #include "php.h"
-#include "php_globals.h"
 #include "php_network.h"
-#include "php_open_temporary_file.h"
-#include "ext/standard/file.h"
+#include "ext/standard/file.h"  /* For FG(stream_filters) */
 #include <stddef.h>
 #include <fcntl.h>
 
