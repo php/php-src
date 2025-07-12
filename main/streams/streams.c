@@ -1903,11 +1903,9 @@ void php_shutdown_stream_wrappers(int module_number)
 /* Validate protocol scheme names during registration
  * Must conform to /^[a-zA-Z0-9+.-]+$/
  */
-static inline zend_result php_stream_wrapper_scheme_validate(const char *protocol, unsigned int protocol_len)
+static inline zend_result php_stream_wrapper_scheme_validate(const char *protocol, size_t protocol_len)
 {
-	unsigned int i;
-
-	for(i = 0; i < protocol_len; i++) {
+	for (size_t i = 0; i < protocol_len; i++) {
 		if (!isalnum((int)protocol[i]) &&
 			protocol[i] != '+' &&
 			protocol[i] != '-' &&
