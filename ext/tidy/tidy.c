@@ -798,8 +798,6 @@ static zend_result _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht
 
 static zend_result php_tidy_parse_string(PHPTidyObj *obj, const char *string, uint32_t len, const char *enc)
 {
-	TidyBuffer buf;
-
 	if(enc) {
 		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
 			php_error_docref(NULL, E_WARNING, "Could not set encoding \"%s\"", enc);
@@ -809,9 +807,15 @@ static zend_result php_tidy_parse_string(PHPTidyObj *obj, const char *string, ui
 
 	obj->ptdoc->initialized = true;
 
+#ifdef HAVE_TIDYPARSESTRING
+	if (tidyParseString(obj->ptdoc->doc, string) < 0) {
+#else
+	TidyBuffer buf;
+
 	tidyBufInit(&buf);
 	tidyBufAttach(&buf, (byte *) string, len);
 	if (tidyParseBuffer(obj->ptdoc->doc, &buf) < 0) {
+#endif
 		php_error_docref(NULL, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
 		return FAILURE;
 	}
