@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 94822f6472750c646fc138f383278ca692b39d27 */
+ * Stub hash: 763dbec5f5a6eddce8fb3dae8d6c43def7e41f05 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -197,11 +197,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefrombmp, 0, 1, Gd
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_GD_TGA)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromtga, 0, 1, GdImage, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_imagecreatefromtga arginfo_imagecreatefromgif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagexbm, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
@@ -622,9 +618,7 @@ ZEND_FUNCTION(imagecreatefromgd2part);
 #if defined(HAVE_GD_BMP)
 ZEND_FUNCTION(imagecreatefrombmp);
 #endif
-#if defined(HAVE_GD_TGA)
 ZEND_FUNCTION(imagecreatefromtga);
-#endif
 ZEND_FUNCTION(imagexbm);
 #if defined(HAVE_GD_AVIF)
 ZEND_FUNCTION(imageavif);
@@ -758,9 +752,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_GD_BMP)
 	ZEND_FE(imagecreatefrombmp, arginfo_imagecreatefrombmp)
 #endif
-#if defined(HAVE_GD_TGA)
 	ZEND_FE(imagecreatefromtga, arginfo_imagecreatefromtga)
-#endif
 	ZEND_FE(imagexbm, arginfo_imagexbm)
 #if defined(HAVE_GD_AVIF)
 	ZEND_FE(imageavif, arginfo_imageavif)
