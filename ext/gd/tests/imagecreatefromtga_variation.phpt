@@ -4,7 +4,6 @@ imagecreatefromtga() - RLE file reading
 gd
 --SKIPIF--
 <?php
-if (!(imagetypes() & IMG_TGA)) die('skip TGA support required');
 if (!(imagetypes() & IMG_PNG)) {
     die("skip No PNG support");
 }

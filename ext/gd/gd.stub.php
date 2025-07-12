@@ -594,9 +594,7 @@ function imagecreatefromgd2part(string $filename, int $x, int $y, int $width, in
 function imagecreatefrombmp(string $filename): GdImage|false {}
 #endif
 
-#ifdef HAVE_GD_TGA
 function imagecreatefromtga(string $filename): GdImage|false {}
-#endif
 
 function imagexbm(GdImage $image, ?string $filename, ?int $foreground_color = null): bool {}
 
