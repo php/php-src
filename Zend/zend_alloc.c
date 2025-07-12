@@ -174,7 +174,7 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #endif
 
 typedef uint32_t   zend_mm_page_info; /* 4-byte integer */
-typedef zend_ulong zend_mm_bitset;    /* 4-byte or 8-byte integer */
+typedef size_t     zend_mm_bitset;    /* 4-byte or 8-byte integer */
 
 #define ZEND_MM_ALIGNED_OFFSET(size, alignment) \
 	(((size_t)(size)) & ((alignment) - 1))
@@ -587,7 +587,7 @@ static void *zend_mm_mmap(size_t size)
 /* number of trailing set (1) bits */
 ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
+#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_SIZE_T == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
 	return __builtin_ctzl(~bitset);
 #elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && defined(PHP_HAVE_BUILTIN_CTZLL)
 	return __builtin_ctzll(~bitset);
@@ -610,7 +610,7 @@ ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_mm_bitset_nts(zend_mm_bi
 	if (bitset == (zend_mm_bitset)-1) return ZEND_MM_BITSET_LEN;
 
 	n = 0;
-#if SIZEOF_ZEND_LONG == 8
+#if SIZEOF_SIZE_T == 8
 	if (sizeof(zend_mm_bitset) == 8) {
 		if ((bitset & 0xffffffff) == 0xffffffff) {n += 32; bitset = bitset >> Z_UL(32);}
 	}
@@ -2065,7 +2065,7 @@ static zend_mm_heap *zend_mm_init(void)
 #endif
 	zend_mm_init_key(heap);
 #if ZEND_MM_LIMIT
-	heap->limit = (size_t)Z_L(-1) >> 1;
+	heap->limit = (size_t)-1 >> 1;
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM
@@ -3262,7 +3262,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
 		memset(mm_heap, 0, sizeof(zend_mm_heap));
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-		mm_heap->limit = (size_t)Z_L(-1) >> 1;
+		mm_heap->limit = (size_t)-1 >> 1;
 		mm_heap->overflow = 0;
 
 		if (!tracked) {
@@ -3483,7 +3483,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 #endif
 	zend_mm_init_key(heap);
 #if ZEND_MM_LIMIT
-	heap->limit = (size_t)Z_L(-1) >> 1;
+	heap->limit = (size_t)-1 >> 1;
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM

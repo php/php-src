@@ -686,7 +686,7 @@ XML_GetCurrentColumnNumber(XML_Parser parser)
 	return parser->parser->input->col;
 }
 
-PHP_XML_API long
+PHP_XML_API zend_long
 XML_GetCurrentByteIndex(XML_Parser parser)
 {
 	return parser->parser->input->consumed +

@@ -20,6 +20,7 @@
 #include "php.h"
 #include "php_calendar.h"
 #include "sdncal.h"
+#include "../date/lib/timelib.h"
 #include <time.h>
 
 /**
@@ -30,7 +31,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 {
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
-	struct tm te;
+	timelib_time *t;
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
 	const zend_long max_year = (zend_long)(ZEND_LONG_MAX / 5) * 4;
@@ -59,7 +60,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 		RETURN_THROWS();
 	}
 
-	#ifdef ZEND_ENABLE_ZVAL_LONG64
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 	/* Compiling for 64bit, allow years between 1970 and 2.000.000.000 */
 	if (gm && year < 1970) {
 		/* timestamps only start after 1970 */
@@ -72,13 +73,13 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 		zend_argument_value_error(1, "must be a year before 2.000.000.000 (inclusive)");
 		RETURN_THROWS();
 	}
-	#else
+#else
 	/* Compiling for 32bit, allow years between 1970 and 2037 */
 	if (gm && (year < 1970 || year > 2037)) {
 		zend_argument_value_error(1, "must be between 1970 and 2037 (inclusive)");
 		RETURN_THROWS();
 	}
-	#endif
+#endif
 
 
 	golden = (year % 19) + 1;					/* the Golden number */
@@ -123,20 +124,26 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 	easter = pfm + tmp + 1;	    					/* Easter as the number of days after 21st March */
 
 	if (gm) {							/* return a timestamp */
-		te.tm_isdst = -1;
-		te.tm_year = year-1900;
-		te.tm_sec = 0;
-		te.tm_min = 0;
-		te.tm_hour = 0;
+		t = timelib_time_ctor();
+		t->us = 0;
+		t->s = 0;
+		t->i = 0;
+		t->h = 0;
+		t->y = year;
+		t->z = 0;
+		t->dst = -1;
 
 		if (easter < 11) {
-			te.tm_mon = 2;			/* March */
-			te.tm_mday = easter+21;
+			t->m = 3;
+			t->d = easter+21;
 		} else {
-			te.tm_mon = 3;			/* April */
-			te.tm_mday = easter-10;
+			t->m = 4;
+			t->d = easter-10;
 		}
-	    result = mktime(&te);
+
+		timelib_update_ts(t, NULL);
+		result = t->sse;
+		timelib_time_dtor(t);
 	} else {							/* return the days after March 21 */
 	    result = easter;
 	}
