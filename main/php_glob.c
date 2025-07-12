@@ -266,7 +266,7 @@ PHPAPI int php_glob(const char *pattern, int flags, int (*errfunc)(const char *,
 	pglob->gl_errfunc = errfunc;
 	pglob->gl_matchc = 0;
 
-	if (strnlen(pattern, PATH_MAX) == PATH_MAX)
+	if (zend_strnlen(pattern, PATH_MAX) == PATH_MAX)
 		return(PHP_GLOB_NOMATCH);
 
 	if (pglob->gl_offs >= SSIZE_MAX || pglob->gl_pathc >= SSIZE_MAX ||
