@@ -5175,12 +5175,12 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_
 	zend_object *zobj;
 	zend_class_entry *ce, *scope;
 	zend_function *clone;
-	zend_object_clone_obj_t clone_call;
 
 	SAVE_OPLINE();
 	obj = RT_CONSTANT(opline, opline->op1);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_CONST == IS_CONST ||
@@ -5207,8 +5207,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_
 	zobj = Z_OBJ_P(obj);
 	ce = zobj->ce;
 	clone = ce->clone;
-	clone_call = zobj->handlers->clone_obj;
-	if (UNEXPECTED(clone_call == NULL)) {
+	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
 		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
 
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -5226,7 +5225,20 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned;
+	if (zobj->handlers->clone_obj_with) {
+		scope = EX(func)->op_array.scope;
+		cloned = zobj->handlers->clone_obj_with(zobj, scope, &zend_empty_array);
+	} else {
+		cloned = zobj->handlers->clone_obj(zobj);
+	}
+
+	ZEND_ASSERT(cloned || EG(exception));
+	if (EXPECTED(cloned)) {
+		ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
+	} else {
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -15422,12 +15434,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 	zend_object *zobj;
 	zend_class_entry *ce, *scope;
 	zend_function *clone;
-	zend_object_clone_obj_t clone_call;
 
 	SAVE_OPLINE();
 	obj = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -15454,8 +15466,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 	zobj = Z_OBJ_P(obj);
 	ce = zobj->ce;
 	clone = ce->clone;
-	clone_call = zobj->handlers->clone_obj;
-	if (UNEXPECTED(clone_call == NULL)) {
+	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
 		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -15473,8 +15484,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned;
+	if (zobj->handlers->clone_obj_with) {
+		scope = EX(func)->op_array.scope;
+		cloned = zobj->handlers->clone_obj_with(zobj, scope, &zend_empty_array);
+	} else {
+		cloned = zobj->handlers->clone_obj(zobj);
+	}
 
+	ZEND_ASSERT(cloned || EG(exception));
+	if (EXPECTED(cloned)) {
+		ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
+	} else {
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -33517,12 +33540,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 	zend_object *zobj;
 	zend_class_entry *ce, *scope;
 	zend_function *clone;
-	zend_object_clone_obj_t clone_call;
 
 	SAVE_OPLINE();
 	obj = &EX(This);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_UNUSED == IS_CONST ||
@@ -33549,8 +33572,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 	zobj = Z_OBJ_P(obj);
 	ce = zobj->ce;
 	clone = ce->clone;
-	clone_call = zobj->handlers->clone_obj;
-	if (UNEXPECTED(clone_call == NULL)) {
+	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
 		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
 
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -33568,7 +33590,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned;
+	if (zobj->handlers->clone_obj_with) {
+		scope = EX(func)->op_array.scope;
+		cloned = zobj->handlers->clone_obj_with(zobj, scope, &zend_empty_array);
+	} else {
+		cloned = zobj->handlers->clone_obj(zobj);
+	}
+
+	ZEND_ASSERT(cloned || EG(exception));
+	if (EXPECTED(cloned)) {
+		ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
+	} else {
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -41036,12 +41071,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 	zend_object *zobj;
 	zend_class_entry *ce, *scope;
 	zend_function *clone;
-	zend_object_clone_obj_t clone_call;
 
 	SAVE_OPLINE();
 	obj = EX_VAR(opline->op1.var);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_CV == IS_CONST ||
@@ -41068,8 +41103,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 	zobj = Z_OBJ_P(obj);
 	ce = zobj->ce;
 	clone = ce->clone;
-	clone_call = zobj->handlers->clone_obj;
-	if (UNEXPECTED(clone_call == NULL)) {
+	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
 		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
 
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -41087,7 +41121,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 		}
 	}
 
-	ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(zobj));
+	zend_object *cloned;
+	if (zobj->handlers->clone_obj_with) {
+		scope = EX(func)->op_array.scope;
+		cloned = zobj->handlers->clone_obj_with(zobj, scope, &zend_empty_array);
+	} else {
+		cloned = zobj->handlers->clone_obj(zobj);
+	}
+
+	ZEND_ASSERT(cloned || EG(exception));
+	if (EXPECTED(cloned)) {
+		ZVAL_OBJ(EX_VAR(opline->result.var), cloned);
+	} else {
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
