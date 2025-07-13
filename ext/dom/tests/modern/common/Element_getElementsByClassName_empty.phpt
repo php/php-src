@@ -21,7 +21,7 @@ foreach ($collection as $node) {
 var_dump($dom->getElementsByClassName(" ")->count());
 var_dump($dom->getElementsByClassName("\t")->count());
 var_dump($dom->getElementsByClassName("\t\n\f\v")->count());
-var_dump($dom->getElementsByClassName("\t\n\f\v")->namedItem("cjild"));
+var_dump($dom->getElementsByClassName("\t\n\f\v")->namedItem("child"));
 
 ?>
 --EXPECT--
