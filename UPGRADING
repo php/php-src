@@ -371,6 +371,8 @@ PHP 8.5 UPGRADE NOTES
   . socket_create/socket_bind can create AF_PACKET family sockets.
   . socket_getsockname gets the interface index and its string
     representation with AF_PACKET socket.
+  . socket_set_option with multicast context throws a ValueError
+    when the created socket is not of AF_INET/AF_INET6 family.
 
 - Tidy:
   . tidy::__construct/parseFile/parseString now throws a ValueError

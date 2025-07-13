@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fetch larger block sizes and better handle SQL_NO_TOTAL when calling
     SQLGetData. (Calvin Buckley, Saki Takamachi)
 
+- Sockets:
+  . socket_set_option for multicast context throws a ValueError
+    when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
+
 - Standard:
   . Optimized pack(). (nielsdos, divinity76)
   . Fixed bug GH-19070 (setlocale($type, NULL) should not be deprecated).
