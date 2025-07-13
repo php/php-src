@@ -124,7 +124,7 @@ bool dom_ordered_set_all_contained(HashTable *token_set, const char *value, bool
 
 	/* Restore "seen" flag. */
 	zend_string *k;
-	ZEND_HASH_FOREACH_STR_KEY_VAL(token_set, k, zv) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(token_set, k, zv) {
 		if (!Z_STR_P(zv)) {
 			Z_STR_P(zv) = k;
 		}
