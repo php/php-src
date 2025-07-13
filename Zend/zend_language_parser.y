@@ -1737,7 +1737,7 @@ isset_variable:
 static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 {
 	const char *toktype = yystr;
-	size_t toktype_len = strlen(toktype);
+	YYSIZE_T toktype_len = strlen(toktype);
 
 	/* CG(parse_error) states:
 	 * 0 => yyres = NULL, yystr is the unexpected token
@@ -1753,7 +1753,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		/* The unexpected token */
 		char buffer[120];
 		const unsigned char *tokcontent, *tokcontent_end;
-		size_t tokcontent_len;
+		YYSIZE_T tokcontent_len;
 
 		CG(parse_error)++;
 
