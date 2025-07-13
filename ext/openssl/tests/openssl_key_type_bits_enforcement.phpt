@@ -41,7 +41,7 @@ foreach ([OPENSSL_KEYTYPE_RSA, OPENSSL_KEYTYPE_DSA, OPENSSL_KEYTYPE_DH] as $type
 }
 // Should succeed: RSA, DSA, DH with bits >= MIN_KEY_LENGTH
 foreach ([OPENSSL_KEYTYPE_RSA, OPENSSL_KEYTYPE_DSA, OPENSSL_KEYTYPE_DH] as $type) {
-    test_key($type, 2048); // valid
+    test_key($type, 1024); // valid, but small to keep test fast
 }
 // Should succeed: EC with curve only
  test_key(OPENSSL_KEYTYPE_EC);
