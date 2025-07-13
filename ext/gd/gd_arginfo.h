@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 763dbec5f5a6eddce8fb3dae8d6c43def7e41f05 */
+ * Stub hash: 3db75a07cd5dfda50f239bc8c3992cd6d1e7afcb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -191,11 +191,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgd2part, 0, 5
 	ZEND_ARG_TYPE_INFO(0, height, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_GD_BMP)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefrombmp, 0, 1, GdImage, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_imagecreatefrombmp arginfo_imagecreatefromgif
 
 #define arginfo_imagecreatefromtga arginfo_imagecreatefromgif
 
@@ -262,13 +258,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd2, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "IMG_GD2_RAW")
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_GD_BMP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagebmp, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, file, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compressed, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagedestroy, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
@@ -615,9 +609,7 @@ ZEND_FUNCTION(imagecreatefromwbmp);
 ZEND_FUNCTION(imagecreatefromgd);
 ZEND_FUNCTION(imagecreatefromgd2);
 ZEND_FUNCTION(imagecreatefromgd2part);
-#if defined(HAVE_GD_BMP)
 ZEND_FUNCTION(imagecreatefrombmp);
-#endif
 ZEND_FUNCTION(imagecreatefromtga);
 ZEND_FUNCTION(imagexbm);
 #if defined(HAVE_GD_AVIF)
@@ -636,9 +628,7 @@ ZEND_FUNCTION(imagejpeg);
 ZEND_FUNCTION(imagewbmp);
 ZEND_FUNCTION(imagegd);
 ZEND_FUNCTION(imagegd2);
-#if defined(HAVE_GD_BMP)
 ZEND_FUNCTION(imagebmp);
-#endif
 ZEND_FUNCTION(imagedestroy);
 ZEND_FUNCTION(imagecolorallocate);
 ZEND_FUNCTION(imagepalettecopy);
@@ -749,9 +739,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecreatefromgd, arginfo_imagecreatefromgd)
 	ZEND_FE(imagecreatefromgd2, arginfo_imagecreatefromgd2)
 	ZEND_FE(imagecreatefromgd2part, arginfo_imagecreatefromgd2part)
-#if defined(HAVE_GD_BMP)
 	ZEND_FE(imagecreatefrombmp, arginfo_imagecreatefrombmp)
-#endif
 	ZEND_FE(imagecreatefromtga, arginfo_imagecreatefromtga)
 	ZEND_FE(imagexbm, arginfo_imagexbm)
 #if defined(HAVE_GD_AVIF)
@@ -770,9 +758,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagewbmp, arginfo_imagewbmp)
 	ZEND_FE(imagegd, arginfo_imagegd)
 	ZEND_FE(imagegd2, arginfo_imagegd2)
-#if defined(HAVE_GD_BMP)
 	ZEND_FE(imagebmp, arginfo_imagebmp)
-#endif
 	ZEND_FE(imagedestroy, arginfo_imagedestroy)
 	ZEND_FE(imagecolorallocate, arginfo_imagecolorallocate)
 	ZEND_FE(imagepalettecopy, arginfo_imagepalettecopy)

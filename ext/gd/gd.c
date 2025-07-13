@@ -443,9 +443,7 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_WEBP
 	php_info_print_table_row(2, "WebP Support", "enabled");
 #endif
-#ifdef HAVE_GD_BMP
 	php_info_print_table_row(2, "BMP Support", "enabled");
-#endif
 #ifdef HAVE_GD_AVIF
 	php_info_print_table_row(2, "AVIF Support", "enabled");
 #endif
@@ -494,11 +492,7 @@ PHP_FUNCTION(gd_info)
 #else
 	add_assoc_bool(return_value, "WebP Support", 0);
 #endif
-#ifdef HAVE_GD_BMP
 	add_assoc_bool(return_value, "BMP Support", 1);
-#else
-	add_assoc_bool(return_value, "BMP Support", 0);
-#endif
 #ifdef HAVE_GD_AVIF
 	add_assoc_bool(return_value, "AVIF Support", 1);
 #else
@@ -1329,9 +1323,7 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_WEBP
 	ret |= PHP_IMG_WEBP;
 #endif
-#ifdef HAVE_GD_BMP
 	ret |= PHP_IMG_BMP;
-#endif
 	ret |= PHP_IMG_TGA;
 #ifdef HAVE_GD_AVIF
 	ret |= PHP_IMG_AVIF;
@@ -1716,14 +1708,12 @@ PHP_FUNCTION(imagecreatefromgd2part)
 }
 /* }}} */
 
-#ifdef HAVE_GD_BMP
 /* {{{ Create a new image from BMP file or URL */
 PHP_FUNCTION(imagecreatefrombmp)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_BMP, "BMP", gdImageCreateFromBmp, gdImageCreateFromBmpCtx);
 }
 /* }}} */
-#endif
 
 /* {{{ Create a new image from TGA file or URL */
 PHP_FUNCTION(imagecreatefromtga)
@@ -2117,7 +2107,6 @@ PHP_FUNCTION(imagegd2)
 }
 /* }}} */
 
-#ifdef HAVE_GD_BMP
 /* {{{ Output BMP image to browser or file */
 PHP_FUNCTION(imagebmp)
 {
@@ -2148,7 +2137,6 @@ PHP_FUNCTION(imagebmp)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ Destroy an image - No effect as of PHP 8.0 */
 PHP_FUNCTION(imagedestroy)
