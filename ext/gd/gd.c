@@ -449,9 +449,7 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_AVIF
 	php_info_print_table_row(2, "AVIF Support", "enabled");
 #endif
-#ifdef HAVE_GD_TGA
 	php_info_print_table_row(2, "TGA Read Support", "enabled");
-#endif
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -506,11 +504,7 @@ PHP_FUNCTION(gd_info)
 #else
 	add_assoc_bool(return_value, "AVIF Support", 0);
 #endif
-#ifdef HAVE_GD_TGA
 	add_assoc_bool(return_value, "TGA Read Support", 1);
-#else
-	add_assoc_bool(return_value, "TGA Read Support", 0);
-#endif
 #ifdef USE_GD_JISX0208
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 1);
 #else
@@ -1338,9 +1332,7 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_BMP
 	ret |= PHP_IMG_BMP;
 #endif
-#ifdef HAVE_GD_TGA
 	ret |= PHP_IMG_TGA;
-#endif
 #ifdef HAVE_GD_AVIF
 	ret |= PHP_IMG_AVIF;
 #endif
@@ -1733,14 +1725,12 @@ PHP_FUNCTION(imagecreatefrombmp)
 /* }}} */
 #endif
 
-#ifdef HAVE_GD_TGA
 /* {{{ Create a new image from TGA file or URL */
 PHP_FUNCTION(imagecreatefromtga)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_TGA, "TGA", gdImageCreateFromTga, gdImageCreateFromTgaCtx);
 }
 /* }}} */
-#endif
 
 /* {{{ _php_image_output */
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn)

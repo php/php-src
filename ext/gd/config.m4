@@ -192,7 +192,6 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_GD_CHECK_FORMAT([Jpeg], [AC_DEFINE([HAVE_GD_JPG], [1])])
   PHP_GD_CHECK_FORMAT([Xpm],  [AC_DEFINE([HAVE_GD_XPM], [1])])
   PHP_GD_CHECK_FORMAT([Bmp],  [AC_DEFINE([HAVE_GD_BMP], [1])])
-  PHP_GD_CHECK_FORMAT([Tga],  [AC_DEFINE([HAVE_GD_TGA], [1])])
   PHP_CHECK_LIBRARY([gd], [gdFontCacheShutdown],
     [AC_DEFINE([HAVE_GD_FREETYPE], [1])],
     [],
@@ -265,8 +264,6 @@ dnl These are always available with bundled library
       [Define to 1 if gd extension has PNG support.])
     AC_DEFINE([HAVE_GD_BMP], [1],
       [Define to 1 if gd extension has BMP support.])
-    AC_DEFINE([HAVE_GD_TGA], [1],
-      [Define to 1 if gd extension has TGA support.])
 
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
