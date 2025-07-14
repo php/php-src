@@ -30,10 +30,10 @@ try {
 ?>
 --EXPECT--
 missing value
-Filter\FilterFailedException: input value not found
+Filter\FilterFailedException: input value 'b' not found
 
 validation fails (array type check)
 Filter\FilterFailedException: filter validation failed: not an array (got string)
 
 validation fails (filter value)
-Filter\FilterFailedException: filter validation failed: filter validate_email not satisfied by 1
+Filter\FilterFailedException: filter validation failed: filter validate_email not satisfied by '1'
