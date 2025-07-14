@@ -687,4 +687,9 @@ void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 		return_value);
 }
 
+CONF *php_openssl_nconf_new(void)
+{
+	return NCONF_new(NULL);
+}
+
 #endif

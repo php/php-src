@@ -366,4 +366,6 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 
 const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method);
 
+CONF *php_openssl_nconf_new(void);
+
 #endif
