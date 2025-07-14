@@ -34,4 +34,4 @@ validation fails (object without __toString)
 Filter\FilterFailedException: filter validation failed: object of type stdClass has no __toString() method
 
 validation fails (filter value)
-Filter\FilterFailedException: filter validation failed: filter validate_email not satisfied by a
+Filter\FilterFailedException: filter validation failed: filter validate_email not satisfied by 'a'

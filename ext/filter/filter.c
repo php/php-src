@@ -294,7 +294,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 			zend_throw_exception_ex(
 				php_filter_failed_exception_ce,
 				0,
-				"filter validation failed: filter %s not satisfied by %s",
+				"filter validation failed: filter %s not satisfied by '%s'",
 				filter_func.name,
 				ZSTR_VAL(copy_for_throwing)
 			);
@@ -691,10 +691,11 @@ PHP_FUNCTION(filter_input)
 		}
 
 		if (filter_flags & FILTER_THROW_ON_FAILURE) {
-			zend_throw_exception(
+			zend_throw_exception_ex(
 				php_filter_failed_exception_ce,
-				"input value not found",
-				0
+				0,
+				"input value '%s' not found",
+				ZSTR_VAL(var)
 			);
 			RETURN_THROWS();
 		}
