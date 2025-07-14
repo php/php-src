@@ -2,15 +2,7 @@
 GH-16979: Test opcache_is_script_cached_in_file_cache function
 --SKIPIF--
 <?php
-// Ensure the cache directory exists BEFORE OPcache needs it
-$cacheDir = __DIR__ . '/gh16979_cache';
-if (!is_dir($cacheDir)) {
-    @mkdir($cacheDir, 0777, true);
-}
-// Check if mkdir failed potentially due to permissions
-if (!is_dir($cacheDir) || !is_writable($cacheDir)) {
-    die('skip Could not create or write to cache directory: ' . $cacheDir);
-}
+@mkdir(__DIR__ . '/gh16979_cache', 0777, true);
 ?>
 --INI--
 opcache.enable=1
@@ -23,23 +15,34 @@ opcache
 --FILE--
 <?php
 
-opcache_compile_file(__FILE__);
-
-var_dump(opcache_is_script_cached_in_file_cache(__FILE__));
-
-opcache_invalidate(__FILE__, true); // force=true
-
-var_dump(opcache_is_script_cached_in_file_cache(__FILE__));
+$file = __DIR__ . '/gh16979_check_file_cache_function.inc';
+var_dump(opcache_is_script_cached_in_file_cache($file));
+opcache_compile_file($file);
+var_dump(opcache_is_script_cached_in_file_cache($file));
+opcache_invalidate($file, force: true);
+var_dump(opcache_is_script_cached_in_file_cache($file));
 
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/cleanup_helper.inc';
-
-$cacheDir = __DIR__ . '/gh16979_cache';
-
-removeDirRecursive($cacheDir);
+function removeDirRecursive($dir) {
+    if (!is_dir($dir)) return;
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($iterator as $fileinfo) {
+        if ($fileinfo->isDir()) {
+            @rmdir($fileinfo->getRealPath());
+        } else {
+            @unlink($fileinfo->getRealPath());
+        }
+    }
+    @rmdir($dir);
+}
+removeDirRecursive(__DIR__ . '/gh16979_cache');
 ?>
---EXPECTF--
+--EXPECT--
+bool(false)
 bool(true)
 bool(false)
