@@ -444,7 +444,7 @@ ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_callback_new(
 
 static zend_always_inline zend_async_waker_trigger_t *waker_trigger_create(zend_async_event_t *event, uint32_t initial_capacity)
 {
-	size_t total_size = sizeof(zend_async_waker_trigger_t) + initial_capacity * sizeof(zend_async_event_callback_t *);
+	size_t total_size = sizeof(zend_async_waker_trigger_t) + (initial_capacity - 1) * sizeof(zend_async_event_callback_t *);
 	zend_async_waker_trigger_t *trigger = (zend_async_waker_trigger_t *)emalloc(total_size);
 
 	trigger->length = 0;
@@ -458,7 +458,7 @@ static zend_always_inline zend_async_waker_trigger_t *waker_trigger_add_callback
 {
 	if (trigger->length >= trigger->capacity) {
 		uint32_t new_capacity = trigger->capacity * 2;
-		size_t total_size = sizeof(zend_async_waker_trigger_t) + new_capacity * sizeof(zend_async_event_callback_t *);
+		size_t total_size = sizeof(zend_async_waker_trigger_t) + (new_capacity - 1) * sizeof(zend_async_event_callback_t *);
 
 		zend_async_waker_trigger_t *new_trigger = (zend_async_waker_trigger_t *)erealloc(trigger, total_size);
 		new_trigger->capacity = new_capacity;
