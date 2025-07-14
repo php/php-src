@@ -22,7 +22,6 @@
 #include <time.h>
 
 #include "php.h"
-#include "zend.h"
 #include "ZendAccelerator.h"
 #include "zend_API.h"
 #include "zend_closures.h"
