@@ -557,6 +557,11 @@ PHP 8.5 UPGRADE NOTES
     from being a multiple of loop iteration counts.
     It is recommended that this parameter is set to a prime number.
 
+- OpenSSL:
+  Added openssl.libctx to select the OpenSSL library context type. Either
+  custom libctx for each thread can be used or a single global (default)
+  libctx is used.
+
 ========================================
 12. Windows Support
 ========================================

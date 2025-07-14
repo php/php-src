@@ -157,6 +157,11 @@ PHP                                                                        NEWS
   . Log a warning when opcache lock file permissions could not be changed.
     (Taavi Eomäe)
 
+- OpenSSL:
+  . Added openssl.libctx INI that allows to select the OpenSSL library context
+    type and convert verious parts of the extension to use the custom  libctx.
+    (Jakub Zelenka)
+
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)
 
