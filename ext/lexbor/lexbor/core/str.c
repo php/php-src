@@ -133,6 +133,10 @@ lexbor_str_append(lexbor_str_t *str, lexbor_mraw_t *mraw,
 {
     lxb_char_t *data_begin;
 
+	if (length == 0) {
+		return str->data;
+	}
+
     lexbor_str_check_size_arg_m(str, lexbor_str_size(str),
                                 mraw, (length + 1), NULL);
 
