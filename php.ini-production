@@ -1865,6 +1865,14 @@ ldap.max_links = -1
 ; SSL stream context option.
 ;openssl.capath=
 
+; The libctx is an OpenSSL library context. OpenSSL defines a default library
+; context, but PHP OpenSSL also defines its own library context to avoid
+; interference with other libraries using OpenSSL and to provide an independent
+; context for each thread in ZTS. Possible values:
+;  "custom"  - use a custom library context (default)
+;  "default" - use the default OpenSSL library context
+;openssl.libctx=custom
+
 [ffi]
 ; FFI API restriction. Possible values:
 ; "preload" - enabled in CLI scripts and preloaded files (default)

@@ -44,6 +44,16 @@ void php_openssl_backend_shutdown(void)
 #endif
 }
 
+void php_openssl_backend_init_libctx(struct php_openssl_libctx *ctx)
+{
+	// Do nothing as there is no libctx
+}
+
+void php_openssl_backend_destroy_libctx(struct php_openssl_libctx *ctx)
+{
+	// Do nothing as there is no libctx
+}
+
 EVP_PKEY_CTX *php_openssl_pkey_new_from_name(const char *name, int id)
 {
 	return EVP_PKEY_CTX_new_id(id, NULL);
