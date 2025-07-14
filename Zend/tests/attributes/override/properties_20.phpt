@@ -12,5 +12,6 @@ class C {
 
 echo "Done";
 
+?>
 --EXPECTF--
 Fatal error: C::$c has #[\Override] attribute, but no matching parent property exists in %s on line %d

@@ -16,5 +16,6 @@ class C implements I {
 
 echo "Done";
 
+?>
 --EXPECT--
 Done
