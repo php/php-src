@@ -7,12 +7,12 @@ dom
 
 $dom = Dom\HTMLDocument::createFromString(<<<HTML
 <div class="  foo bar ">
-    <p class="bar">
-        <p class="bar" name="here">1</p>
-        <p name="here">2</p>
+    <main class="bar">
+        <p name="here">1</p>
+        <p class="bar" name="here">2</p>
         <p name="here">3</p>
         <p class="bAR" name="here">4</p>
-    </p>
+    </main>
     <b class="foo bars"></b>
 </div>
 HTML, LIBXML_NOERROR);
@@ -27,6 +27,8 @@ foreach ($collection as $key => $node) {
     var_dump($node->tagName, $node->textContent);
     var_dump($node === $collection->item($key));
 }
+
+echo "--- named item \"here\" ---\n";
 
 var_dump($collection->namedItem("here")->textContent);
 
@@ -47,16 +49,21 @@ string(56) "
 "
 bool(true)
 --- Key 1 ---
-string(1) "P"
-string(9) "
-        "
+string(4) "MAIN"
+string(45) "
+        1
+        2
+        3
+        4
+    "
 bool(true)
 --- Key 2 ---
 string(1) "P"
-string(1) "1"
+string(1) "2"
 bool(true)
 --- Key 3 ---
 string(1) "P"
 string(1) "4"
 bool(true)
-string(1) "1"
+--- named item "here" ---
+string(1) "2"
