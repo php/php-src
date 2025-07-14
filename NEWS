@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 
 - DOM:
   . Make cloning DOM node lists, maps, and collections fail. (nielsdos)
+  . Added Dom\Element::getElementsByClassName(). (nielsdos)
 
 - PDO_ODBC
   . Fetch larger block sizes and better handle SQL_NO_TOTAL when calling
