@@ -668,6 +668,12 @@ ZEND_API void zend_async_resume_when(
 		zend_coroutine_event_callback_t *event_callback
 	)
 {
+	ZEND_ASSERT(EG(exception) == NULL && "Cannot resume when there is an active exception in the engine.");
+
+	if (UNEXPECTED(EG(exception))) {
+		return;
+	}
+
 	bool locally_allocated_callback = false;
 	
 	if (UNEXPECTED(ZEND_ASYNC_EVENT_IS_CLOSED(event))) {
