@@ -408,6 +408,7 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
 
 - DOM:
+  . Added Dom\Element::getElementsByClassName().
   . Added Dom\Element::insertAdjacentHTML().
 
 - Enchant:
