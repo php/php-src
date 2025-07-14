@@ -442,6 +442,33 @@ ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_callback_new(
 /* Waker API */
 //////////////////////////////////////////////////////////////////////
 
+static zend_always_inline zend_async_waker_trigger_t *waker_trigger_create(zend_async_event_t *event, uint32_t initial_capacity)
+{
+	size_t total_size = sizeof(zend_async_waker_trigger_t) + initial_capacity * sizeof(zend_async_event_callback_t *);
+	zend_async_waker_trigger_t *trigger = (zend_async_waker_trigger_t *)emalloc(total_size);
+
+	trigger->length = 0;
+	trigger->capacity = initial_capacity;
+	trigger->event = event;
+
+	return trigger;
+}
+
+static zend_always_inline zend_async_waker_trigger_t *waker_trigger_add_callback(zend_async_waker_trigger_t *trigger, zend_async_event_callback_t *callback)
+{
+	if (trigger->length >= trigger->capacity) {
+		uint32_t new_capacity = trigger->capacity * 2;
+		size_t total_size = sizeof(zend_async_waker_trigger_t) + new_capacity * sizeof(zend_async_event_callback_t *);
+
+		zend_async_waker_trigger_t *new_trigger = (zend_async_waker_trigger_t *)erealloc(trigger, total_size);
+		new_trigger->capacity = new_capacity;
+		trigger = new_trigger;
+	}
+
+	trigger->data[trigger->length++] = callback;
+	return trigger;
+}
+
 static void waker_events_dtor(zval *item)
 {
 	zend_async_waker_trigger_t * trigger = Z_PTR_P(item);
@@ -449,7 +476,12 @@ static void waker_events_dtor(zval *item)
 	trigger->event = NULL;
 
 	if (event != NULL) {
-		event->del_callback(event, trigger->callback);
+		// Remove all callbacks from the event
+		for (uint32_t i = 0; i < trigger->length; i++) {
+			if (trigger->data[i] != NULL) {
+				event->del_callback(event, trigger->data[i]);
+			}
+		}
 		//
 		// At this point, we explicitly stop the event because it is no longer being listened to by our handlers.
 		// However, this does not mean the object is destroyed—it may remain in memory if something still holds a reference to it.
@@ -458,6 +490,7 @@ static void waker_events_dtor(zval *item)
 		ZEND_ASYNC_EVENT_RELEASE(event);
 	}
 
+	// Free the entire trigger (includes flexible array member)
 	efree(trigger);
 }
 
@@ -572,11 +605,29 @@ void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zen
 		zend_async_waker_t * waker = coroutine->waker;
 
 		if (event != NULL && waker != NULL) {
-			// remove the event from the waker
-			zend_hash_index_del(&waker->events, (zend_ulong)event);
+			// Find the trigger for this event
+			zval *trigger_zval = zend_hash_index_find(&waker->events, (zend_ulong)event);
 
-			if (waker->triggered_events != NULL) {
-				zend_hash_index_del(waker->triggered_events, (zend_ulong)event);
+			if (trigger_zval != NULL) {
+				zend_async_waker_trigger_t *trigger = Z_PTR_P(trigger_zval);
+
+				// Remove only this specific callback from the trigger
+				for (uint32_t i = 0; i < trigger->length; i++) {
+					if (trigger->data[i] == callback) {
+						// Move last element to current position (O(1) removal)
+						trigger->data[i] = trigger->data[--trigger->length];
+						break;
+					}
+				}
+
+				// If no more callbacks in trigger, remove the entire event
+				if (trigger->length == 0) {
+					zend_hash_index_del(&waker->events, (zend_ulong)event);
+
+					if (waker->triggered_events != NULL) {
+						zend_hash_index_del(waker->triggered_events, (zend_ulong)event);
+					}
+				}
 			}
 		}
 	}
@@ -669,32 +720,45 @@ ZEND_API void zend_async_resume_when(
 	}
 
 	if (EXPECTED(coroutine->waker != NULL)) {
-		zend_async_waker_trigger_t *trigger = emalloc(sizeof(zend_async_waker_trigger_t));
-		trigger->event = event;
-		trigger->callback = &event_callback->base;
+		zval *trigger_zval = zend_hash_index_find(&coroutine->waker->events, (zend_ulong)event);
+		zend_async_waker_trigger_t *trigger;
 
-		if (UNEXPECTED(zend_hash_index_add_ptr(&coroutine->waker->events, (zend_ulong)event, trigger) == NULL)) {
-			efree(trigger);
+		if (UNEXPECTED(trigger_zval != NULL)) {
+			// Event already exists, add callback to existing trigger
+			trigger = Z_PTR_P(trigger_zval);
+			trigger = waker_trigger_add_callback(trigger, &event_callback->base);
+			// Update the hash table entry with potentially new pointer after realloc
+			Z_PTR_P(trigger_zval) = trigger;
+		} else {
+			// New event, create new trigger
+			trigger = waker_trigger_create(event, 1);
+			trigger = waker_trigger_add_callback(trigger, &event_callback->base);
+
+			if (UNEXPECTED(zend_hash_index_add_ptr(&coroutine->waker->events, (zend_ulong)event, trigger) == NULL)) {
+				// This should not happen with new events, but handle gracefully
+				efree(trigger);
 
 			event_callback->coroutine = NULL;
 			event->del_callback(event, &event_callback->base);
 
-			if (locally_allocated_callback) {
-				event_callback->base.dispose(&event_callback->base, event);
+				event_callback->coroutine = NULL;
+				event->del_callback(event, &event_callback->base);
+
+				if (locally_allocated_callback) {
+					event_callback->base.dispose(&event_callback->base, event);
+				}
+
+				if (trans_event) {
+					event->dispose(event);
+				}
+
+				zend_throw_error(NULL, "Failed to add event to the waker");
+			} else {
+				if (false == trans_event) {
+					ZEND_ASYNC_EVENT_ADD_REF(event);
+				}
 			}
-
-			if (trans_event) {
-				event->dispose(event);
-			}
-
-			zend_throw_error(NULL, "Failed to add event to the waker: maybe event already exists");
-
-			return;
 		}
-	}
-
-	if (false == trans_event) {
-		ZEND_ASYNC_EVENT_ADD_REF(event);
 	}
 }
 

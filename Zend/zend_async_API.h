@@ -418,8 +418,10 @@ struct _zend_coroutine_event_callback_s {
 };
 
 struct _zend_async_waker_trigger_s {
-	zend_async_event_t *event;
-	zend_async_event_callback_t *callback;
+	uint32_t                      length;          /* current number of callbacks          */
+	uint32_t                      capacity;        /* allocated slots in the array         */
+	zend_async_event_t           *event;
+	zend_async_event_callback_t  *data[];         /* flexible array member                */
 };
 
 /* Dynamic array of async event callbacks with single iterator protection */
