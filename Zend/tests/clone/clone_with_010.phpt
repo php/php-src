@@ -18,4 +18,4 @@ try {
 ?>
 --EXPECT--
 Error: Trying to clone an uncloneable object of class Random\Engine\Secure
-Error: Cloning objects of class Random\Engine\Xoshiro256StarStar with updated properties is not supported
+Error: Cannot create dynamic property Random\Engine\Xoshiro256StarStar::$with

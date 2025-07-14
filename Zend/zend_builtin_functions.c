@@ -98,13 +98,14 @@ ZEND_FUNCTION(clone)
 	}
 
 	zend_object *cloned;
-	if (zobj->handlers->clone_obj_with) {
-		cloned = zobj->handlers->clone_obj_with(zobj, scope, with);
-	} else {
-		if (UNEXPECTED(zend_hash_num_elements(with) > 0)) {
+	if (zend_hash_num_elements(with) > 0) {
+		if (UNEXPECTED(!zobj->handlers->clone_obj_with)) {
 			zend_throw_error(NULL, "Cloning objects of class %s with updated properties is not supported", ZSTR_VAL(ce->name));
 			RETURN_THROWS();
 		}
+
+		cloned = zobj->handlers->clone_obj_with(zobj, scope, with);
+	} else {
 		cloned = zobj->handlers->clone_obj(zobj);
 	}
 
