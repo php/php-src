@@ -6426,6 +6426,20 @@ static bool can_match_use_jumptable(zend_ast_list *arms) {
 	return 1;
 }
 
+static bool zend_is_pipe_optimizable_callable_name(zend_ast *ast)
+{
+	if (ast->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(ast)) == IS_STRING) {
+		/* Assert compilation adds a message operand, but this is incompatible with the
+		 * pipe optimization that uses a temporary znode for the reference elimination.
+		 * Therefore, disable the optimization for assert.
+		 * Note that "assert" as a name is always treated as fully qualified. */
+		zend_string *str = zend_ast_get_str(ast);
+		return !zend_string_equals_literal_ci(str, "assert");
+	}
+
+	return true;
+}
+
 static void zend_compile_pipe(znode *result, zend_ast *ast)
 {
 	zend_ast *operand_ast = ast->child[0];
@@ -6453,7 +6467,8 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 
 	/* Turn $foo |> bar(...) into bar($foo). */
 	if (callable_ast->kind == ZEND_AST_CALL
-		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT
+		&& zend_is_pipe_optimizable_callable_name(callable_ast->child[0])) {
 		fcall_ast = zend_ast_create(ZEND_AST_CALL,
 				callable_ast->child[0], arg_list_ast);
 	/* Turn $foo |> bar::baz(...) into bar::baz($foo). */
@@ -7682,6 +7697,8 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
 		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY | ZEND_ACC_FINAL);
 		bool is_promoted = property_flags || hooks_ast;
+
+		CG(zend_lineno) = param_ast->lineno;
 
 		znode var_node, default_node;
 		uint8_t opcode;

@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha2
 
+- Core:
+  . Fix OSS-Fuzz #427814452 (pipe compilation fails with assert).
+    (nielsdos, ilutov)
+
 - DOM:
   . Make cloning DOM node lists, maps, and collections fail. (nielsdos)
 
@@ -79,6 +83,8 @@ PHP                                                                        NEWS
     (DanielEScherzer)
   . Do not use RTLD_DEEPBIND if dlmopen is available. (Daniil Gentili)
   . Make `clone()` a function. (timwolla, edorian)
+  . Fixed bug GH-19081 (Wrong lineno in property error with constructor property
+    promotion). (ilutov)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)

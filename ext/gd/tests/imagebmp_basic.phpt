@@ -2,10 +2,6 @@
 imagebmp() - basic functionality
 --EXTENSIONS--
 gd
---SKIPIF--
-<?php
-if (!(imagetypes() & IMG_BMP)) die('skip BMP support required');
-?>
 --FILE--
 <?php
 // create an image
