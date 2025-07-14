@@ -676,6 +676,9 @@ ZEND_API void zend_async_resume_when(
 		if (UNEXPECTED(zend_hash_index_add_ptr(&coroutine->waker->events, (zend_ulong)event, trigger) == NULL)) {
 			efree(trigger);
 
+			event_callback->coroutine = NULL;
+			event->del_callback(event, &event_callback->base);
+
 			if (locally_allocated_callback) {
 				event_callback->base.dispose(&event_callback->base, event);
 			}
