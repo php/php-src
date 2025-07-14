@@ -252,7 +252,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_ERROR
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
-%type <ast> class_declaration_statement trait_declaration_statement legacy_namespace_name
+%type <ast> class_declaration_statement class_body_statement trait_declaration_statement legacy_namespace_name
 %type <ast> interface_declaration_statement interface_extends_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
@@ -291,7 +291,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
-%type <num> class_modifiers class_modifier anonymous_class_modifiers anonymous_class_modifiers_optional use_type backup_fn_flags
+%type <num> class_modifiers class_modifiers_optional class_modifier anonymous_class_modifiers anonymous_class_modifiers_optional use_type backup_fn_flags
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
@@ -602,12 +602,18 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL, NULL); }
-	|	T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
+		class_modifiers_optional T_CLASS { $<num>$ = CG(zend_lineno); } T_STRING
+	 	extends_from implements_list backup_doc_comment class_body_statement
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $8, NULL, NULL); }
+;
+
+class_body_statement:
+		'{' class_statement_list '}' { $$ = $2; }
+	| 	';' { $$ = NULL; }
+
+class_modifiers_optional:
+		%empty			{ $$ = 0; }
+	|	class_modifiers	{ $$ = $1; }
 ;
 
 class_modifiers:
