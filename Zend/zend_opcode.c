@@ -710,8 +710,8 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 }
 
 static uint32_t zend_get_brk_cont_target(const zend_op *opline) {
-	uint32_t nest_levels = opline->op2.num;
-	uint32_t array_offset = opline->op1.num;
+	int nest_levels = opline->op2.num;
+	int array_offset = opline->op1.num;
 	zend_brk_cont_element *jmp_to;
 	do {
 		jmp_to = &CG(context).brk_cont_array[array_offset];
