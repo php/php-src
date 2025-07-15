@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed GH-19169 build issue with C++17 and ZEND_STATIC_ASSERT macro.
     (psumbera)
+  . Fixed bug GH-19053 (Duplicate property slot with hooks and interface
+    property). (ilutov)
 
 - Hash:
   . Fix crash on clone failure. (nielsdos)
