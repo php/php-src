@@ -17,6 +17,7 @@
 
 #include "php.h"
 #include <stdio.h>
+#include <stdint.h>
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -1520,7 +1521,16 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			break;
 	}
 
+#if SIZEOF_ZEND_LONG == 4
+	if (result &&
+		result->width <= INT32_MAX &&
+		result->height <= INT32_MAX &&
+		result->bits <= INT32_MAX &&
+		result->channels <= INT32_MAX)
+	{
+#else
 	if (result) {
+#endif
 		char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
 		array_init(return_value);
 		add_index_long(return_value, 0, result->width);
