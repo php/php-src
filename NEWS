@@ -17,6 +17,9 @@ PHP                                                                        NEWS
     (nielsdos)
   . Remove incorrect string release. (nielsdos)
 
+- Intl:
+  . Fix memleak on failure in collator_get_sort_key(). (nielsdos)
+
 - LDAP:
   . Fixed GH-18902 ldap_exop/ldap_exop_sync assert triggered on empty
     request OID. (David Carlier)
