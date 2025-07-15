@@ -2781,24 +2781,36 @@ class ConstInfo extends VariableLike
         if ($this->isDeprecated) {
             $flags .= " | CONST_DEPRECATED";
         }
+
+        $code = "\t";
+        if ($this->attributes !== []) {
+            if ($this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_85_VERSION_ID) {
+                // Registration only returns the constant since PHP 8.5, it's
+                // not worth the bloat to add two different registration blocks
+                // with conditions for the PHP version
+                $constVarName = 'const_' . $constName;
+                $code .= "zend_constant *$constVarName = ";
+            }
+        }
+
         if ($value->type->isNull()) {
-            return "\tREGISTER_NULL_CONSTANT(\"$constName\", $flags);\n";
+            return $code . "REGISTER_NULL_CONSTANT(\"$constName\", $flags);\n";
         }
 
         if ($value->type->isBool()) {
-            return "\tREGISTER_BOOL_CONSTANT(\"$constName\", " . ($cExpr ?: ($constValue ? "true" : "false")) . ", $flags);\n";
+            return $code . "REGISTER_BOOL_CONSTANT(\"$constName\", " . ($cExpr ?: ($constValue ? "true" : "false")) . ", $flags);\n";
         }
 
         if ($value->type->isInt()) {
-            return "\tREGISTER_LONG_CONSTANT(\"$constName\", " . ($cExpr ?: (int) $constValue) . ", $flags);\n";
+            return $code . "REGISTER_LONG_CONSTANT(\"$constName\", " . ($cExpr ?: (int) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isFloat()) {
-            return "\tREGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cExpr ?: (float) $constValue) . ", $flags);\n";
+            return $code . "REGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cExpr ?: (float) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isString()) {
-            return "\tREGISTER_STRING_CONSTANT(\"$constName\", " . ($cExpr ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
+            return $code . "REGISTER_STRING_CONSTANT(\"$constName\", " . ($cExpr ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
         }
 
         throw new Exception("Unimplemented constant type");
@@ -2943,14 +2955,7 @@ class ConstInfo extends VariableLike
     }
 }
 
-class PropertyInfo extends VariableLike
-{
-    private /* readonly */ int $classFlags;
-    public /* readonly */ PropertyName $name;
-    private /* readonly */ ?Expr $defaultValue;
-    private /* readonly */ ?string $defaultValueString;
-    private /* readonly */ bool $isDocReadonly;
-    private /* readonly */ bool $isVirtual;
+class StringBuilder {
 
     // Map possible variable names to the known string constant, see
     // ZEND_KNOWN_STRINGS
@@ -3053,7 +3058,89 @@ class PropertyInfo extends VariableLike
         "username" => "ZEND_STR_USERNAME",
         "password" => "ZEND_STR_PASSWORD",
         "clone" => "ZEND_STR_CLONE",
+        '8.0' => 'ZEND_STR_8_DOT_0',
+        '8.1' => 'ZEND_STR_8_DOT_1',
+        '8.2' => 'ZEND_STR_8_DOT_2',
+        '8.3' => 'ZEND_STR_8_DOT_3',
+        '8.4' => 'ZEND_STR_8_DOT_4',
+        '8.5' => 'ZEND_STR_8_DOT_5',
     ];
+
+    /**
+     * Get an array of three strings:
+     *   - declaration of zend_string, if needed, or empty otherwise
+     *   - usage of that zend_string, or usage with ZSTR_KNOWN()
+     *   - freeing the zend_string, if needed
+     *
+     * @param string $varName
+     * @param string $strContent
+     * @param ?int $minPHPCompatibility
+     * @param bool $interned
+     * @return string[]
+     */
+    public static function getString(
+        string $varName,
+        string $content,
+        ?int $minPHPCompatibility,
+        bool $interned = false
+    ): array {
+        // Generally strings will not be known
+        $initFn = $interned ? 'zend_string_init_interned' : 'zend_string_init';
+        $result = [
+            "\tzend_string *$varName = $initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n",
+            $varName,
+            "\tzend_string_release($varName);\n"
+        ];
+        // For attribute values that are not freed
+        if ($varName === '') {
+            $result[0] = "$initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n";
+        }
+        // If not set, use the current latest version
+        $allVersions = ALL_PHP_VERSION_IDS;
+        $minPhp = $minPHPCompatibility ?? end($allVersions);
+        if ($minPhp < PHP_80_VERSION_ID) {
+            // No known strings in 7.0
+            return $result;
+        }
+        $include = self::PHP_80_KNOWN;
+        switch ($minPhp) {
+            case PHP_85_VERSION_ID:
+                $include = array_merge($include, self::PHP_85_KNOWN);
+                // Intentional fall through
+
+            case PHP_84_VERSION_ID:
+                $include = array_merge($include, self::PHP_84_KNOWN);
+                // Intentional fall through
+
+            case PHP_83_VERSION_ID:
+            case PHP_82_VERSION_ID:
+                $include = array_merge($include, self::PHP_82_KNOWN);
+                // Intentional fall through
+
+            case PHP_81_VERSION_ID:
+                $include = array_merge($include, self::PHP_81_KNOWN);
+                break;
+        }
+        if (array_key_exists($content, $include)) {
+            $knownStr = $include[$content];
+            return [
+                '',
+                "ZSTR_KNOWN($knownStr)",
+                '',
+            ];
+        }
+        return $result;
+    }
+}
+
+class PropertyInfo extends VariableLike
+{
+    private /* readonly */ int $classFlags;
+    public /* readonly */ PropertyName $name;
+    private /* readonly */ ?Expr $defaultValue;
+    private /* readonly */ ?string $defaultValueString;
+    private /* readonly */ bool $isDocReadonly;
+    private /* readonly */ bool $isVirtual;
 
     /**
      * @param AttributeInfo[] $attributes
@@ -3135,7 +3222,11 @@ class PropertyInfo extends VariableLike
             $code .= $defaultValue->initializeZval($zvalName);
         }
 
-        [$stringInit, $nameCode, $stringRelease] = $this->getString($propertyName);
+        [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+            "property_{$propertyName}_name",
+            $propertyName,
+            $this->phpVersionIdMinimumCompatibility
+        );
         $code .= $stringInit;
 
         if ($this->exposedDocComment) {
@@ -3168,60 +3259,6 @@ class PropertyInfo extends VariableLike
         $code .= $stringRelease;
 
         return $code;
-    }
-
-    /**
-     * Get an array of three strings:
-     *   - declaration of zend_string, if needed, or empty otherwise
-     *   - usage of that zend_string, or usage with ZSTR_KNOWN()
-     *   - freeing the zend_string, if needed
-     *
-     * @param string $propName
-     * @return string[]
-     */
-    private function getString(string $propName): array {
-        // Generally strings will not be known
-        $nameCode = "property_{$propName}_name";
-        $result = [
-            "\tzend_string *$nameCode = zend_string_init(\"$propName\", sizeof(\"$propName\") - 1, 1);\n",
-            $nameCode,
-            "\tzend_string_release($nameCode);\n"
-        ];
-        // If not set, use the current latest version
-        $allVersions = ALL_PHP_VERSION_IDS;
-        $minPhp = $this->phpVersionIdMinimumCompatibility ?? end($allVersions);
-        if ($minPhp < PHP_80_VERSION_ID) {
-            // No known strings in 7.0
-            return $result;
-        }
-        $include = self::PHP_80_KNOWN;
-        switch ($minPhp) {
-            case PHP_85_VERSION_ID:
-                $include = array_merge($include, self::PHP_85_KNOWN);
-                // Intentional fall through
-
-            case PHP_84_VERSION_ID:
-                $include = array_merge($include, self::PHP_84_KNOWN);
-                // Intentional fall through
-
-            case PHP_83_VERSION_ID:
-            case PHP_82_VERSION_ID:
-                $include = array_merge($include, self::PHP_82_KNOWN);
-                // Intentional fall through
-
-            case PHP_81_VERSION_ID:
-                $include = array_merge($include, self::PHP_81_KNOWN);
-                break;
-        }
-        if (array_key_exists($propName, $include)) {
-            $knownStr = $include[$propName];
-            return [
-                '',
-                "ZSTR_KNOWN($knownStr)",
-                '',
-            ];
-        }
-        return $result;
     }
 
     /**
@@ -3314,40 +3351,52 @@ class AttributeInfo {
 
     /** @param array<string, ConstInfo> $allConstInfos */
     public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility): string {
-        $php82MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_82_VERSION_ID;
-        $php84MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_84_VERSION_ID;
-        /* see ZEND_KNOWN_STRINGS in Zend/strings.h */
-        $knowns = [
-            "message" => "ZEND_STR_MESSAGE",
-        ];
-        if ($php82MinimumCompatibility) {
-            $knowns["SensitiveParameter"] = "ZEND_STR_SENSITIVEPARAMETER";
-        }
-        if ($php84MinimumCompatibility) {
-            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED_CAPITALIZED";
-            $knowns["since"] = "ZEND_STR_SINCE";
-        }
-
-        $code = "\n";
         $escapedAttributeName = strtr($this->class, '\\', '_');
-        if (isset($knowns[$escapedAttributeName])) {
-            $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, ZSTR_KNOWN({$knowns[$escapedAttributeName]}), " . count($this->args) . ");\n";
-        } else {
-            $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init_interned(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
-            $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
-            $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
-        }
+        [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+            "attribute_name_{$escapedAttributeName}_$nameSuffix",
+            addcslashes($this->class, "\\"),
+            $phpVersionIdMinimumCompatibility,
+            true
+        );
+        $code = "\n";
+        $code .= $stringInit;
+        $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, $nameCode, " . count($this->args) . ");\n";
+        $code .= $stringRelease;
+
         foreach ($this->args as $i => $arg) {
-            $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
-            $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
-            $code .= $value->initializeZval($zvalName);
-            $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
-            if ($arg->name) {
-                if (isset($knowns[$arg->name->name])) {
-                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = ZSTR_KNOWN({$knowns[$arg->name->name]});\n";
-                } else {
-                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init_interned(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+            $initValue = '';
+            if ($arg->value instanceof Node\Scalar\String_) {
+                $strVal = $arg->value->value;
+                [$strInit, $strUse, $strRelease] = StringBuilder::getString(
+                    'unused',
+                    $strVal,
+                    $phpVersionIdMinimumCompatibility
+                );
+                if ($strInit === '') {
+                    $initValue = "\tZVAL_STR(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
                 }
+            }
+            if ($initValue === '') {
+                $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
+                $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
+                $code .= $value->initializeZval($zvalName);
+                $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
+            } else {
+                $code .= $initValue;
+            }
+            if ($arg->name) {
+                [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+                    "",
+                    $arg->name->name,
+                    $phpVersionIdMinimumCompatibility,
+                    true
+                );
+                if ($stringInit === '') {
+                    $nameCode .= ";\n";
+                } else {
+                    $nameCode = $stringInit;
+                }
+                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = $nameCode";
             }
         }
         return $code;
@@ -5307,12 +5356,11 @@ function generateGlobalConstantAttributeInitialization(
     $isConditional = false;
     if ($phpVersionIdMinimumCompatibility !== null && $phpVersionIdMinimumCompatibility < PHP_85_VERSION_ID) {
         $isConditional = true;
-        $phpVersionIdMinimumCompatibility = PHP_85_VERSION_ID;
     }
     $code = generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional) {
             $code = "";
 
             if ($constInfo->attributes === []) {
@@ -5321,13 +5369,18 @@ function generateGlobalConstantAttributeInitialization(
             $constName = str_replace('\\', '\\\\', $constInfo->name->__toString());
             $constVarName = 'const_' . $constName;
 
-            $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            // The entire attribute block will be conditional if PHP < 8.5 is
+            // supported, but also if PHP < 8.5 is supported we need to search
+            // for the constant; see GH-19029
+            if ($isConditional) {
+                $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            }
             foreach ($constInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_global_constant_attribute($constVarName",
                     $constVarName . "_$key",
                     $allConstInfos,
-                    $phpVersionIdMinimumCompatibility
+                    PHP_85_VERSION_ID
                 );
             }
 

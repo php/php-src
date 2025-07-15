@@ -1400,13 +1400,14 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 {
 	zend_object *zobj = Z_OBJ_P(obj);
 	zend_object_write_property_t write_property = zobj->handlers->write_property;
-	zend_class_entry *old_scope = EG(fake_scope);
 	zend_string *key;
 	zval *value;
 
 	if (HT_IS_PACKED(properties)) {
 		return;
 	}
+
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = Z_OBJCE_P(obj);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(properties, key, value) {
 		if (key) {
@@ -1746,7 +1747,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 				size_t prop_name_len;
 				if (zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len) == SUCCESS) {
 					zend_string *pname = zend_string_init(prop_name, prop_name_len, 0);
-					zend_class_entry *prev_scope = EG(fake_scope);
+					const zend_class_entry *prev_scope = EG(fake_scope);
 					if (class_name && class_name[0] != '*') {
 						zend_string *cname = zend_string_init(class_name, strlen(class_name), 0);
 						EG(fake_scope) = zend_lookup_class(cname);
@@ -4021,13 +4022,11 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 		     ((fcc->object && fcc->calling_scope->__call) ||
 		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
 			scope = get_scope(frame);
-			if (fcc->function_handler->common.scope != scope) {
-				if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
-				 || !zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope)) {
-					retval = 0;
-					fcc->function_handler = NULL;
-					goto get_function_via_handler;
-				}
+			ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
+			if (!zend_check_method_accessible(fcc->function_handler, scope)) {
+				retval = 0;
+				fcc->function_handler = NULL;
+				goto get_function_via_handler;
 			}
 		}
 	} else {
@@ -4086,17 +4085,15 @@ get_function_via_handler:
 			if (retval
 			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)) {
 				scope = get_scope(frame);
-				if (fcc->function_handler->common.scope != scope) {
-					if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
-					 || (!zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope))) {
-						if (error) {
-							if (*error) {
-								efree(*error);
-							}
-							zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
+				ZEND_ASSERT(!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC));
+				if (!zend_check_method_accessible(fcc->function_handler, scope)) {
+					if (error) {
+						if (*error) {
+							efree(*error);
 						}
-						retval = 0;
+						zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 					}
+					retval = 0;
 				}
 			}
 		}
@@ -5005,7 +5002,7 @@ ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const cha
 
 ZEND_API void zend_update_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zval *value) /* {{{ */
 {
-	zend_class_entry *old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
@@ -5018,7 +5015,7 @@ ZEND_API void zend_update_property_ex(zend_class_entry *scope, zend_object *obje
 ZEND_API void zend_update_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zval *value) /* {{{ */
 {
 	zend_string *property;
-	zend_class_entry *old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
@@ -5042,7 +5039,7 @@ ZEND_API void zend_update_property_null(zend_class_entry *scope, zend_object *ob
 ZEND_API void zend_unset_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length) /* {{{ */
 {
 	zend_string *property;
-	zend_class_entry *old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
@@ -5114,7 +5111,6 @@ ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zen
 {
 	zval *property, tmp;
 	zend_property_info *prop_info;
-	zend_class_entry *old_scope = EG(fake_scope);
 
 	if (UNEXPECTED(!(scope->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 		if (UNEXPECTED(zend_update_class_constants(scope) != SUCCESS)) {
@@ -5122,6 +5118,7 @@ ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zen
 		}
 	}
 
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = scope;
 	property = zend_std_get_static_property_with_info(scope, name, BP_VAR_W, &prop_info);
 	EG(fake_scope) = old_scope;
@@ -5214,7 +5211,7 @@ ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope
 ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv) /* {{{ */
 {
 	zval *value;
-	zend_class_entry *old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 
@@ -5240,7 +5237,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, 
 ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, bool silent) /* {{{ */
 {
 	zval *property;
-	zend_class_entry *old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 
 	EG(fake_scope) = scope;
 	property = zend_std_get_static_property(scope, name, silent ? BP_VAR_IS : BP_VAR_R);

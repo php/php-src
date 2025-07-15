@@ -297,12 +297,12 @@ int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args
 
 	SET_OPTIONAL_STRING_ARG("config", req->config_filename, default_ssl_conf_filename);
 	SET_OPTIONAL_STRING_ARG("config_section_name", req->section_name, "req");
-	req->global_config = NCONF_new(NULL);
+	req->global_config = php_openssl_nconf_new();
 	if (!NCONF_load(req->global_config, default_ssl_conf_filename, NULL)) {
 		php_openssl_store_errors();
 	}
 
-	req->req_config = NCONF_new(NULL);
+	req->req_config = php_openssl_nconf_new();
 	if (!NCONF_load(req->req_config, req->config_filename, NULL)) {
 		return FAILURE;
 	}

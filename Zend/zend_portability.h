@@ -109,7 +109,10 @@
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
 #endif
 
-#ifdef PHP_HAVE_BUILTIN_UNREACHABLE
+/* use C23 unreachable() from <stddef.h> if possible */
+#ifdef unreachable
+# define _ZEND_UNREACHABLE() unreachable()
+#elif defined(PHP_HAVE_BUILTIN_UNREACHABLE)
 # define _ZEND_UNREACHABLE() __builtin_unreachable()
 #else
 # define _ZEND_UNREACHABLE() ZEND_ASSUME(0)

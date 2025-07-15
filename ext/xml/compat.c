@@ -355,7 +355,9 @@ get_entity(void *user, const xmlChar *name)
 		if (ret == NULL)
 			ret = xmlGetDocEntity(parser->parser->myDoc, name);
 
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		if (ret == NULL || parser->parser->instate == XML_PARSER_CONTENT) {
+		ZEND_DIAGNOSTIC_IGNORED_END
 			if (ret == NULL || ret->etype == XML_INTERNAL_GENERAL_ENTITY || ret->etype == XML_INTERNAL_PARAMETER_ENTITY || ret->etype == XML_INTERNAL_PREDEFINED_ENTITY) {
 				/* Predefined entities will expand unless no cdata handler is present */
 				if (parser->h_default && ! (ret && ret->etype == XML_INTERNAL_PREDEFINED_ENTITY && parser->h_cdata)) {

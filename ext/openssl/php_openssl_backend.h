@@ -237,10 +237,8 @@ void php_openssl_backend_init_common(void);
 void php_openssl_backend_gshutdown(void);
 void php_openssl_backend_shutdown(void);
 
-#if PHP_OPENSSL_API_VERSION >= 0x30000
-void php_openssl_backend_init_libctx(OSSL_LIB_CTX **plibctx, char **ppropq);
-void php_openssl_backend_destroy_libctx(OSSL_LIB_CTX *libctx, char *propq);
-#endif
+void php_openssl_backend_init_libctx(struct php_openssl_libctx *ctx);
+void php_openssl_backend_destroy_libctx(struct php_openssl_libctx *ctx);
 
 const char *php_openssl_get_conf_filename(void);
 
@@ -367,5 +365,7 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		const char *aad, size_t aad_len, int enc);
 
 const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method);
+
+CONF *php_openssl_nconf_new(void);
 
 #endif

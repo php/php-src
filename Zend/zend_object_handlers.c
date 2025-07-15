@@ -350,7 +350,7 @@ static ZEND_COLD zend_never_inline void zend_readonly_property_unset_error(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
-static zend_always_inline zend_class_entry *get_fake_or_executed_scope(void)
+static zend_always_inline const zend_class_entry *get_fake_or_executed_scope(void)
 {
 	if (UNEXPECTED(EG(fake_scope))) {
 		return EG(fake_scope);
@@ -391,7 +391,7 @@ dynamic:
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-		zend_class_entry *scope = get_fake_or_executed_scope();
+		const zend_class_entry *scope = get_fake_or_executed_scope();
 
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
@@ -491,7 +491,7 @@ dynamic:
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-		zend_class_entry *scope = get_fake_or_executed_scope();
+		const zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
 				zend_property_info *p = zend_get_parent_private_property(scope, ce, member);
@@ -583,7 +583,7 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info) {
 	ZEND_ASSERT(prop_info->flags & ZEND_ACC_PPP_SET_MASK);
 	ZEND_ASSERT(!(prop_info->flags & ZEND_ACC_PUBLIC_SET));
-	zend_class_entry *scope = get_fake_or_executed_scope();
+	const zend_class_entry *scope = get_fake_or_executed_scope();
 	if (prop_info->ce == scope) {
 		return true;
 	}
@@ -1949,17 +1949,15 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	zval *func = zend_hash_find(&ce->function_table, lc_function_name);
 	if (EXPECTED(func)) {
 		fbc = Z_FUNC_P(func);
-		if (!(fbc->op_array.fn_flags & ZEND_ACC_PUBLIC)) {
+		if (!(fbc->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_class_entry *scope = zend_get_executed_scope();
-			if (UNEXPECTED(fbc->common.scope != scope)) {
-				if (UNEXPECTED(fbc->op_array.fn_flags & ZEND_ACC_PRIVATE)
-				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fbc), scope))) {
-					zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
-					if (!fallback_fbc) {
-						zend_bad_method_call(fbc, function_name, scope);
-					}
-					fbc = fallback_fbc;
+			ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_PUBLIC));
+			if (!zend_check_method_accessible(fbc, scope)) {
+				zend_function *fallback_fbc = get_static_method_fallback(ce, function_name);
+				if (!fallback_fbc) {
+					zend_bad_method_call(fbc, function_name, scope);
 				}
+				fbc = fallback_fbc;
 			}
 		}
 	} else {
@@ -2032,7 +2030,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 	}
 
 	if (!(property_info->flags & ZEND_ACC_PUBLIC)) {
-		zend_class_entry *scope = get_fake_or_executed_scope();
+		const zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
@@ -2115,15 +2113,13 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 	zend_function *constructor = zobj->ce->constructor;
 
 	if (constructor) {
-		if (UNEXPECTED(!(constructor->op_array.fn_flags & ZEND_ACC_PUBLIC))) {
-			zend_class_entry *scope = get_fake_or_executed_scope();
-			if (UNEXPECTED(constructor->common.scope != scope)) {
-				if (UNEXPECTED(constructor->op_array.fn_flags & ZEND_ACC_PRIVATE)
-				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
-					zend_bad_constructor_call(constructor, scope);
-					zend_object_store_ctor_failed(zobj);
-					constructor = NULL;
-				}
+		if (UNEXPECTED(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC))) {
+			const zend_class_entry *scope = get_fake_or_executed_scope();
+			ZEND_ASSERT(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC));
+			if (!zend_check_method_accessible(constructor, scope)) {
+				zend_bad_constructor_call(constructor, scope);
+				zend_object_store_ctor_failed(zobj);
+				constructor = NULL;
 			}
 		}
 	}

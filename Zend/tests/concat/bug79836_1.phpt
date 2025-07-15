@@ -7,6 +7,7 @@ opcache.optimization_level = 0x7FFEBFFF & ~0x400
 $x = 'non-empty';
 ob_start(function () use (&$c) {
 	$c = 0;
+	return '';
 }, 1);
 $c = [];
 $x = $c . $x;

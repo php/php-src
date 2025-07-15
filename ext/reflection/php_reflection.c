@@ -4190,7 +4190,7 @@ ZEND_METHOD(ReflectionClass, getStaticProperties)
 ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 {
 	reflection_object *intern;
-	zend_class_entry *ce, *old_scope;
+	zend_class_entry *ce;
 	zend_string *name;
 	zval *prop, *def_value = NULL;
 
@@ -4204,7 +4204,7 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 		RETURN_THROWS();
 	}
 
-	old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	prop = zend_std_get_static_property(ce, name, BP_VAR_IS);
 	EG(fake_scope) = old_scope;
@@ -4231,7 +4231,7 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 {
 	reflection_object *intern;
-	zend_class_entry *ce, *old_scope;
+	zend_class_entry *ce;
 	zend_property_info *prop_info;
 	zend_string *name;
 	zval *variable_ptr, *value;
@@ -4245,7 +4245,7 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		RETURN_THROWS();
 	}
-	old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	variable_ptr =  zend_std_get_static_property_with_info(ce, name, BP_VAR_W, &prop_info);
 	EG(fake_scope) = old_scope;
@@ -4998,7 +4998,7 @@ ZEND_METHOD(ReflectionClass, isInstance)
 ZEND_METHOD(ReflectionClass, newInstance)
 {
 	reflection_object *intern;
-	zend_class_entry *ce, *old_scope;
+	zend_class_entry *ce;
 	zend_function *constructor;
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -5007,7 +5007,7 @@ ZEND_METHOD(ReflectionClass, newInstance)
 		return;
 	}
 
-	old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
 	EG(fake_scope) = old_scope;
@@ -5065,7 +5065,7 @@ ZEND_METHOD(ReflectionClass, newInstanceWithoutConstructor)
 ZEND_METHOD(ReflectionClass, newInstanceArgs)
 {
 	reflection_object *intern;
-	zend_class_entry *ce, *old_scope;
+	zend_class_entry *ce;
 	int argc = 0;
 	HashTable *args = NULL;
 	zend_function *constructor;
@@ -5084,7 +5084,7 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 		return;
 	}
 
-	old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
 	EG(fake_scope) = old_scope;
@@ -5908,7 +5908,7 @@ ZEND_METHOD(ReflectionProperty, getValue)
 			}
 		}
 
-		zend_class_entry *old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		member_p = Z_OBJ_P(object)->handlers->read_property(Z_OBJ_P(object),
 				ref->unmangled_name, BP_VAR_R, ref->cache_slot, &rv);
@@ -5967,7 +5967,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			Z_PARAM_ZVAL(value)
 		ZEND_PARSE_PARAMETERS_END();
 
-		zend_class_entry *old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		object->handlers->write_property(object, ref->unmangled_name, value, ref->cache_slot);
 		EG(fake_scope) = old_scope;
@@ -6026,7 +6026,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 
 	if (!prop || !prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
 		zval rv;
-		zend_class_entry *old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		zval *member_p = Z_OBJ_P(object)->handlers->read_property(
 				Z_OBJ_P(object), ref->unmangled_name, BP_VAR_R,
@@ -6052,7 +6052,7 @@ static void reflection_property_set_raw_value(zend_property_info *prop,
 		zend_object *object, zval *value)
 {
 	if (!prop || !prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
-		zend_class_entry *old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		object->handlers->write_property(object, unmangled_name, value, cache_slot);
 		EG(fake_scope) = old_scope;
@@ -6275,7 +6275,6 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 		}
 		RETURN_FALSE;
 	} else {
-		zend_class_entry *old_scope;
 		int retval;
 
 		if (!object) {
@@ -6298,7 +6297,7 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 			}
 		}
 
-		old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		retval = Z_OBJ_HT_P(object)->has_property(Z_OBJ_P(object),
 				ref->unmangled_name, ZEND_PROPERTY_EXISTS, ref->cache_slot);

@@ -11,6 +11,7 @@ ob_start(function() {
     register_tick_function(
        function() { }
     );
+    return '';
 });
 ?>
 --EXPECT--
