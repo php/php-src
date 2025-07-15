@@ -553,6 +553,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, (uint8_t*)ZSTR_VAL(key_str), key_len);
 	efree( ustr );
 	if(!key_len) {
+		zend_string_efree(key_str);
 		RETURN_FALSE;
 	}
 	ZSTR_LEN(key_str) = key_len - 1;
