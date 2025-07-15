@@ -323,7 +323,7 @@ parse_host:
 
 static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+	php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->scheme) {
 		ZVAL_STR_COPY(retval, parse_url_uri->scheme);
@@ -336,7 +336,7 @@ static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, uri
 
 static zend_result parse_url_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+	php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->user) {
 		ZVAL_STR_COPY(retval, parse_url_uri->user);
@@ -349,7 +349,7 @@ static zend_result parse_url_read_username(const uri_internal_t *internal_uri, u
 
 static zend_result parse_url_read_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+	php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->pass) {
 		ZVAL_STR_COPY(retval, parse_url_uri->pass);
@@ -362,7 +362,7 @@ static zend_result parse_url_read_password(const uri_internal_t *internal_uri, u
 
 static zend_result parse_url_read_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+	php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->host) {
 		ZVAL_STR_COPY(retval, parse_url_uri->host);
@@ -375,7 +375,7 @@ static zend_result parse_url_read_host(const uri_internal_t *internal_uri, uri_c
 
 static zend_result parse_url_read_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+	php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->port) {
 		ZVAL_LONG(retval, parse_url_uri->port);
@@ -388,7 +388,7 @@ static zend_result parse_url_read_port(const uri_internal_t *internal_uri, uri_c
 
 static zend_result parse_url_read_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+	php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->path) {
 		ZVAL_STR_COPY(retval, parse_url_uri->path);
@@ -401,7 +401,7 @@ static zend_result parse_url_read_path(const uri_internal_t *internal_uri, uri_c
 
 static zend_result parse_url_read_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+	php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->query) {
 		ZVAL_STR_COPY(retval, parse_url_uri->query);
@@ -414,7 +414,7 @@ static zend_result parse_url_read_query(const uri_internal_t *internal_uri, uri_
 
 static zend_result parse_url_read_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+	php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->fragment) {
 		ZVAL_STR_COPY(retval, parse_url_uri->fragment);
@@ -432,16 +432,7 @@ static void *parse_url_clone_uri(void *uri)
 
 static void throw_invalid_uri_exception(void)
 {
-	zval exception;
-
-	object_init_ex(&exception, uri_invalid_uri_exception_ce);
-
-	zval value;
-	ZVAL_STRING(&value, "URL parsing failed");
-	zend_update_property_ex(uri_whatwg_invalid_url_exception_ce, Z_OBJ(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
-	zval_ptr_dtor_str(&value);
-
-	zend_throw_exception_object(&exception);
+	zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
 }
 
 static void *parse_url_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors, bool silent)

@@ -109,7 +109,7 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name)
 {
 	if (uri_handler_name == NULL) {
-		return uri_handler_by_name("parse_url", sizeof("parse_url") - 1);
+		return uri_handler_by_name(URI_PARSER_PHP, sizeof(URI_PARSER_PHP) - 1);
 	}
 
 	return uri_handler_by_name(ZSTR_VAL(uri_handler_name), ZSTR_LEN(uri_handler_name));
@@ -123,7 +123,7 @@ PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_stri
 		return NULL;
 	}
 
-	uri_internal_t *internal_uri = emalloc(sizeof(uri_internal_t));
+	uri_internal_t *internal_uri = emalloc(sizeof(*internal_uri));
 	internal_uri->handler = uri_handler;
 	internal_uri->uri = uri_handler->parse_uri(uri_str, NULL, NULL, silent);
 
@@ -200,7 +200,7 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 		return NULL;
 	}
 
-	php_uri *uri = ecalloc(1, sizeof(php_uri));
+	php_uri *uri = ecalloc(1, sizeof(*uri));
 	zval tmp;
 	ZVAL_UNDEF(&tmp);
 	zend_result result;
@@ -980,7 +980,7 @@ PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
 
 static zend_object *uri_create_object_handler(zend_class_entry *class_type)
 {
-	uri_object_t *uri_object = zend_object_alloc(sizeof(uri_object_t), class_type);
+	uri_object_t *uri_object = zend_object_alloc(sizeof(*uri_object), class_type);
 
 	zend_object_std_init(&uri_object->std, class_type);
 	object_properties_init(&uri_object->std, class_type);
