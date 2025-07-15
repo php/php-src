@@ -44,6 +44,16 @@ void php_openssl_backend_shutdown(void)
 #endif
 }
 
+void php_openssl_backend_init_libctx(struct php_openssl_libctx *ctx)
+{
+	// Do nothing as there is no libctx
+}
+
+void php_openssl_backend_destroy_libctx(struct php_openssl_libctx *ctx)
+{
+	// Do nothing as there is no libctx
+}
+
 EVP_PKEY_CTX *php_openssl_pkey_new_from_name(const char *name, int id)
 {
 	return EVP_PKEY_CTX_new_id(id, NULL);
@@ -675,6 +685,11 @@ void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 	OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
 		aliases ? php_openssl_add_method_or_alias : php_openssl_add_method,
 		return_value);
+}
+
+CONF *php_openssl_nconf_new(void)
+{
+	return NCONF_new(NULL);
 }
 
 #endif

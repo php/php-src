@@ -2708,7 +2708,7 @@ void phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_defa
 			/* remove this from the new phar */
 			continue;
 		}
-		if (!entry->is_modified && entry->fp_refcount) {
+		if (entry->fp_refcount) {
 			/* open file pointers refer to this fp, do not free the stream */
 			switch (entry->fp_type) {
 				case PHAR_FP:

@@ -696,8 +696,8 @@ ZEND_API zend_result _call_user_function_impl(zval *object, zval *function_name,
 # define empty_fcall_info (zend_fcall_info) {0}
 # define empty_fcall_info_cache (zend_fcall_info_cache) {0}
 #else
-# define empty_fcall_info zend_fcall_info {0}
-# define empty_fcall_info_cache zend_fcall_info_cache {0}
+# define empty_fcall_info zend_fcall_info {}
+# define empty_fcall_info_cache zend_fcall_info_cache {}
 #endif
 
 /** Build zend_call_info/cache from a zval*

@@ -709,7 +709,7 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 	}
 }
 
-static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const zend_op *opline) {
+static uint32_t zend_get_brk_cont_target(const zend_op *opline) {
 	int nest_levels = opline->op2.num;
 	int array_offset = opline->op1.num;
 	zend_brk_cont_element *jmp_to;
@@ -1120,7 +1120,7 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_BRK:
 			case ZEND_CONT:
 				{
-					uint32_t jmp_target = zend_get_brk_cont_target(op_array, opline);
+					uint32_t jmp_target = zend_get_brk_cont_target(opline);
 
 					if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 						zend_check_finally_breakout(op_array, opline - op_array->opcodes, jmp_target);

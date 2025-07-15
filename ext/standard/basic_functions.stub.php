@@ -2555,8 +2555,8 @@ function nl2br(string $string, bool $use_xhtml = true): string {}
 function strip_tags(string $string, array|string|null $allowed_tags = null): string {}
 
 /**
- * @param array|string $locales
- * @param string $rest
+ * @param array|string|null $locales
+ * @param string|null $rest
  */
 function setlocale(int $category, $locales, ...$rest): string|false {}
 

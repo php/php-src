@@ -351,12 +351,31 @@ int php_openssl_get_ssl_stream_data_index(void)
 	return ssl_stream_data_index;
 }
 
-/* {{{ INI Settings */
+static PHP_INI_MH(OnUpdateLibCtx)
+{
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+	if (zend_string_equals_literal(new_value, "default")) {
+		OPENSSL_G(ctx).libctx = OPENSSL_G(ctx).default_libctx;
+	} else if (zend_string_equals_literal(new_value, "custom")) {
+		OPENSSL_G(ctx).libctx = OPENSSL_G(ctx).custom_libctx;
+	} else {
+		/* Do not output error when restoring ini options. */
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			int err_type = stage == ZEND_INI_STAGE_RUNTIME ? E_WARNING : E_ERROR;
+			php_error_docref(NULL, err_type, "OpenSSL libctx \"%s\" cannot be found", ZSTR_VAL(new_value));
+		}
+		return FAILURE;
+	}
+#endif
+
+	return SUCCESS;
+}
+
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("openssl.cafile", NULL, PHP_INI_PERDIR, NULL)
 	PHP_INI_ENTRY("openssl.capath", NULL, PHP_INI_PERDIR, NULL)
+	PHP_INI_ENTRY("openssl.libctx", "custom", PHP_INI_PERDIR, OnUpdateLibCtx)
 PHP_INI_END()
-/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(openssl)
@@ -438,9 +457,7 @@ PHP_GINIT_FUNCTION(openssl)
 #endif
 	openssl_globals->errors = NULL;
 	openssl_globals->errors_mark = NULL;
-#if PHP_OPENSSL_API_VERSION >= 0x30000
-	php_openssl_backend_init_libctx(&openssl_globals->libctx, &openssl_globals->propq);
-#endif
+	php_openssl_backend_init_libctx(&openssl_globals->ctx);
 }
 /* }}} */
 
@@ -453,9 +470,7 @@ PHP_GSHUTDOWN_FUNCTION(openssl)
 	if (openssl_globals->errors_mark) {
 		pefree(openssl_globals->errors_mark, 1);
 	}
-#if PHP_OPENSSL_API_VERSION >= 0x30000
-	php_openssl_backend_destroy_libctx(openssl_globals->libctx, openssl_globals->propq);
-#endif
+	php_openssl_backend_destroy_libctx(&openssl_globals->ctx);
 }
 /* }}} */
 

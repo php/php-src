@@ -238,7 +238,7 @@ static void register_soap_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SOAP_1_2", SOAP_1_2, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_PERSISTENCE_SESSION", SOAP_PERSISTENCE_SESSION, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_PERSISTENCE_REQUEST", SOAP_PERSISTENCE_REQUEST, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SOAP_FUNCTIONS_ALL", SOAP_FUNCTIONS_ALL, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SOAP_FUNCTIONS_ALL = REGISTER_LONG_CONSTANT("SOAP_FUNCTIONS_ALL", SOAP_FUNCTIONS_ALL, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("SOAP_ENCODED", SOAP_ENCODED, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_LITERAL", SOAP_LITERAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_RPC", SOAP_RPC, CONST_PERSISTENT);
@@ -316,13 +316,9 @@ static void register_soap_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv3", SOAP_SSL_METHOD_SSLv3, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv23", SOAP_SSL_METHOD_SSLv23, CONST_PERSISTENT);
 
-	zend_constant *const_SOAP_FUNCTIONS_ALL = zend_hash_str_find_ptr(EG(zend_constants), "SOAP_FUNCTIONS_ALL", sizeof("SOAP_FUNCTIONS_ALL") - 1);
 
 	zend_attribute *attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0 = zend_add_global_constant_attribute(const_SOAP_FUNCTIONS_ALL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0;
-	zend_string *attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0, attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0->args[0].value, &attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg1;
 	zend_string *attribute_Deprecated_const_SOAP_FUNCTIONS_ALL_0_arg1_str = zend_string_init("as enabling all functions is a possible security concern", strlen("as enabling all functions is a possible security concern"), 1);

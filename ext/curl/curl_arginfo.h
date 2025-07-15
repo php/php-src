@@ -228,7 +228,7 @@ static const zend_function_entry ext_functions[] = {
 static void register_curl_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("CURLOPT_AUTOREFERER", CURLOPT_AUTOREFERER, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CURLOPT_BINARYTRANSFER", CURLOPT_BINARYTRANSFER, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_CURLOPT_BINARYTRANSFER = REGISTER_LONG_CONSTANT("CURLOPT_BINARYTRANSFER", CURLOPT_BINARYTRANSFER, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("CURLOPT_BUFFERSIZE", CURLOPT_BUFFERSIZE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_CAINFO", CURLOPT_CAINFO, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_CAPATH", CURLOPT_CAPATH, CONST_PERSISTENT);
@@ -974,13 +974,9 @@ static void register_curl_symbols(int module_number)
 #endif
 	REGISTER_LONG_CONSTANT("CURLOPT_SAFE_UPLOAD", CURLOPT_SAFE_UPLOAD, CONST_PERSISTENT);
 
-	zend_constant *const_CURLOPT_BINARYTRANSFER = zend_hash_str_find_ptr(EG(zend_constants), "CURLOPT_BINARYTRANSFER", sizeof("CURLOPT_BINARYTRANSFER") - 1);
 
 	zend_attribute *attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0 = zend_add_global_constant_attribute(const_CURLOPT_BINARYTRANSFER, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg0;
-	zend_string *attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg0, attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[0].value, &attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1;
 	zend_string *attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1_str = zend_string_init("as it had no effect since 5.1.2", strlen("as it had no effect since 5.1.2"), 1);

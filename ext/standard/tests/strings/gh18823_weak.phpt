@@ -27,6 +27,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-Deprecated: setlocale(): Passing null to parameter #2 ($locales) of type string is deprecated in %s on line %d
+--EXPECT--
 no

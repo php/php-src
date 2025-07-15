@@ -35,10 +35,6 @@
 zend_long php_dom_get_namednodemap_length(dom_object *obj)
 {
 	dom_nnodemap_object *objmap = obj->ptr;
-	if (!objmap) {
-		return 0;
-	}
-
 	return objmap->handler->length(objmap);
 }
 
@@ -67,7 +63,7 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItem)
 	}
 
 	dom_nnodemap_object *objmap = Z_DOMOBJ_P(ZEND_THIS)->ptr;
-	php_dom_obj_map_get_named_item_into_zval(objmap, named, NULL, return_value);
+	php_dom_obj_map_get_ns_named_item_into_zval(objmap, named, NULL, return_value);
 }
 /* }}} end dom_namednodemap_get_named_item */
 
@@ -112,7 +108,7 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 	objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap != NULL) {
-		php_dom_obj_map_get_named_item_into_zval(objmap, named, uri, return_value);
+		php_dom_obj_map_get_ns_named_item_into_zval(objmap, named, uri, return_value);
 	}
 }
 /* }}} end dom_namednodemap_get_named_item_ns */

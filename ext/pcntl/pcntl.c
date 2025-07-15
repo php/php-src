@@ -1355,7 +1355,7 @@ static void pcntl_signal_handler(int signo)
 		PCNTL_G(head) = psig;
 	}
 	PCNTL_G(tail) = psig;
-	PCNTL_G(pending_signals) = 1;
+	PCNTL_G(pending_signals) = true;
 	if (PCNTL_G(async_signals)) {
 		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 	}
@@ -1386,7 +1386,7 @@ void pcntl_signal_dispatch(void)
 	zend_fiber_switch_block();
 
 	/* Prevent reentrant handler calls */
-	PCNTL_G(processing_signal_queue) = 1;
+	PCNTL_G(processing_signal_queue) = true;
 
 	queue = PCNTL_G(head);
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
@@ -1418,10 +1418,10 @@ void pcntl_signal_dispatch(void)
 		queue = next;
 	}
 
-	PCNTL_G(pending_signals) = 0;
+	PCNTL_G(pending_signals) = false;
 
 	/* Re-enable queue */
-	PCNTL_G(processing_signal_queue) = 0;
+	PCNTL_G(processing_signal_queue) = false;
 
 	/* Re-enable fiber switching */
 	zend_fiber_switch_unblock();

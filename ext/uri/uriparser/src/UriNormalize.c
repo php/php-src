@@ -109,12 +109,9 @@ static void URI_FUNC(LowercaseInplaceExceptPercentEncoding)(const URI_CHAR * fir
 static UriBool URI_FUNC(LowercaseMalloc)(const URI_CHAR ** first,
 		const URI_CHAR ** afterLast, UriMemoryManager * memory);
 
-static void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
-		unsigned int revertMask, UriMemoryManager * memory);
 
 
-
-static URI_INLINE void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
+void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
 		unsigned int revertMask, UriMemoryManager * memory) {
 	if (revertMask & URI_NORMALIZE_SCHEME) {
 		/* NOTE: A scheme cannot be the empty string
@@ -407,15 +404,9 @@ static URI_INLINE UriBool URI_FUNC(MakeRangeOwner)(unsigned int * doneMask,
 			&& (range->first != NULL)
 			&& (range->afterLast != NULL)
 			&& (range->afterLast > range->first)) {
-		const int lenInChars = (int)(range->afterLast - range->first);
-		const int lenInBytes = lenInChars * sizeof(URI_CHAR);
-		URI_CHAR * dup = memory->malloc(memory, lenInBytes);
-		if (dup == NULL) {
-			return URI_FALSE; /* Raises malloc error */
+		if (URI_FUNC(CopyRange)(range, range, memory) == URI_FALSE) {
+			return URI_FALSE;
 		}
-		memcpy(dup, range->first, lenInBytes);
-		range->first = dup;
-		range->afterLast = dup + lenInChars;
 		*doneMask |= maskTest;
 	}
 	return URI_TRUE;
@@ -557,6 +548,75 @@ int URI_FUNC(NormalizeSyntax)(URI_TYPE(Uri) * uri) {
 }
 
 
+static const URI_CHAR * URI_FUNC(PastLeadingZeros)(const URI_CHAR * first, const URI_CHAR * afterLast) {
+	assert(first != NULL);
+	assert(afterLast != NULL);
+	assert(first != afterLast);
+
+	{	
+		/* Find the first non-zero character */
+		const URI_CHAR * remainderFirst = first;
+		while ((remainderFirst < afterLast) && (remainderFirst[0] == _UT('0'))) {
+			remainderFirst++;
+		}
+
+		/* Is the string /all/ zeros? */
+		if (remainderFirst == afterLast) {
+			/* Yes, and length is >=1 because we ruled out the empty string earlier;
+			 * pull back onto rightmost zero */
+			assert(remainderFirst > first);
+			remainderFirst--;
+			assert(remainderFirst[0] == _UT('0'));
+		}
+
+		return remainderFirst;
+	}
+}
+
+
+
+static void URI_FUNC(DropLeadingZerosInplace)(URI_CHAR * first, const URI_CHAR ** afterLast) {
+	assert(first != NULL);
+	assert(afterLast != NULL);
+	assert(*afterLast != NULL);
+
+	if (first == *afterLast) {
+		return;
+	}
+
+	{
+		const URI_CHAR * const remainderFirst = URI_FUNC(PastLeadingZeros)(first, *afterLast);
+
+		if (remainderFirst > first) {
+			const size_t remainderLen = *afterLast - remainderFirst;
+			memmove(first, remainderFirst, remainderLen * sizeof(URI_CHAR));
+			first[remainderLen] = _UT('\0');
+			*afterLast = first + remainderLen;
+		}
+	}
+}
+
+
+
+static void URI_FUNC(AdvancePastLeadingZeros)(
+		const URI_CHAR ** first, const URI_CHAR * afterLast) {
+	assert(first != NULL);
+	assert(*first != NULL);
+	assert(afterLast != NULL);
+
+	if (*first == afterLast) {
+		return;
+	}
+
+	{
+		const URI_CHAR * const remainderFirst = URI_FUNC(PastLeadingZeros)(*first, afterLast);
+
+		/* Cut off leading zeros */
+		*first = remainderFirst;
+	}
+}
+
+
 
 static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 		unsigned int inMask, unsigned int * outMask,
@@ -654,6 +714,27 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 
 				URI_FUNC(LowercaseInplaceExceptPercentEncoding)(uri->hostText.first,
 						uri->hostText.afterLast);
+			}
+		}
+	}
+
+	/* Port */
+	if (outMask != NULL) {
+		/* Is there a port even? */
+		if (uri->portText.first != NULL) {
+			/* Determine whether the port is already normalized, i.e. either "", "0" or no leading zeros */
+			const size_t portLen = uri->portText.afterLast - uri->portText.first;
+			if ((portLen > 1) && (uri->portText.first[0] == _UT('0'))) {
+				*outMask |= URI_NORMALIZE_PORT;
+			}
+		}
+	} else {
+		/* Normalize the port, i.e. drop leading zeros (except for string "0") */
+		if ((inMask & URI_NORMALIZE_PORT) && (uri->portText.first != NULL)) {
+			if (uri->owner) {
+				URI_FUNC(DropLeadingZerosInplace)((URI_CHAR *)uri->portText.first, &(uri->portText.afterLast));
+			} else {
+				URI_FUNC(AdvancePastLeadingZeros)(&(uri->portText.first), uri->portText.afterLast);
 			}
 		}
 	}

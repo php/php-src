@@ -6,6 +6,7 @@ $c = str_repeat("abcd", 10);
 
 ob_start(function () use (&$c) {
 	$c = 0;
+	return '';
 }, 1);
 
 class X {

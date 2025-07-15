@@ -921,9 +921,7 @@ static zend_result zend_scan_escape_string(zval *zendlval, char *str, int len, c
 			ZVAL_EMPTY_STRING(zendlval);
 		} else {
 			zend_uchar c = (zend_uchar)*str;
-			if (c == '\n' || c == '\r') {
-				CG(zend_lineno)++;
-			}
+			HANDLE_NEWLINE(c);
 			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
 		}
 		goto skip_escape_conversion;
@@ -1817,11 +1815,11 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_MUL_EQUAL);
 }
 
-<ST_IN_SCRIPTING>"*\*" {
+<ST_IN_SCRIPTING>"**" {
 	RETURN_TOKEN(T_POW);
 }
 
-<ST_IN_SCRIPTING>"*\*=" {
+<ST_IN_SCRIPTING>"**=" {
 	RETURN_TOKEN(T_POW_EQUAL);
 }
 
@@ -2512,9 +2510,7 @@ inline_char_handler:
 			ZVAL_EMPTY_STRING(zendlval);
 		} else {
 			zend_uchar c = (zend_uchar)*(yytext+bprefix+1);
-			if (c == '\n' || c == '\r') {
-				CG(zend_lineno)++;
-			}
+			HANDLE_NEWLINE(c);
 			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
 		}
 		goto skip_escape_conversion;

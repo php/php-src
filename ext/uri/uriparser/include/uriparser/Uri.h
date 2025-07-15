@@ -201,6 +201,17 @@ typedef struct URI_TYPE(QueryListStruct) {
 } URI_TYPE(QueryList); /**< @copydoc UriQueryListStructA */
 
 
+/**
+ * Checks if a URI has the host component set.
+ *
+ * @param uri <b>IN</b>: %URI to check
+ * @return <c>URI_TRUE</c> when host is set, <c>URI_FALSE</c> otherwise
+ *
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri);
+
+
 
 /**
  * Parses a RFC 3986 %URI.
@@ -323,6 +334,10 @@ URI_PUBLIC int URI_FUNC(ParseSingleUriExMm)(URI_TYPE(Uri) * uri,
  * itself is not freed, only its members.
  * Uses default libc-based memory manager.
  *
+ * @remarks
+ * Calling on an all-zeros structure (e.g. through <c>memset</c> or <c>calloc</c>) is safe.<br/>
+ * Calling on an uninitialized structure is <em>not</em> safe.
+ *
  * @param uri   <b>INOUT</b>: %URI structure whose members should be freed
  *
  * @see uriFreeUriMembersMmA
@@ -336,6 +351,10 @@ URI_PUBLIC void URI_FUNC(FreeUriMembers)(URI_TYPE(Uri) * uri);
  * Frees all memory associated with the members
  * of the %URI structure. Note that the structure
  * itself is not freed, only its members.
+ *
+ * @remarks
+ * Calling on an all-zeros structure (e.g. through <c>memset</c> or <c>calloc</c>) is safe.<br/>
+ * Calling on an uninitialized structure is <em>not</em> safe.
  *
  * @param uri     <b>INOUT</b>: %URI structure whose members should be freed
  * @param memory  <b>IN</b>: Memory manager to use, NULL for default libc
@@ -641,6 +660,36 @@ URI_PUBLIC int URI_FUNC(ToStringCharsRequired)(const URI_TYPE(Uri) * uri,
  */
 URI_PUBLIC int URI_FUNC(ToString)(URI_CHAR * dest, const URI_TYPE(Uri) * uri,
 		int maxChars, int * charsWritten);
+
+
+
+/**
+ * Copies a %URI structure.
+ *
+ * @param destUri        <b>OUT</b>: Output destination
+ * @param sourceUri      <b>IN</b>: %URI to copy
+ * @param memory         <b>IN</b>: Memory manager to use, NULL for default libc
+ * @return               Error code or 0 on success
+ *
+ * @see uriCopyUriA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(CopyUriMm)(URI_TYPE(Uri) * destUri,
+		const URI_TYPE(Uri) * sourceUri, UriMemoryManager * memory);
+
+
+
+/**
+ * Copies a %URI structure.
+ *
+ * @param destUri        <b>OUT</b>: Output destination
+ * @param sourceUri      <b>IN</b>: %URI to copy
+ * @return               Error code or 0 on success
+ *
+ * @see uriCopyUriMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(CopyUri)(URI_TYPE(Uri) * destUri, const URI_TYPE(Uri) * sourceUri);
 
 
 

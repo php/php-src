@@ -932,7 +932,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_pr
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
 	const zend_property_info *prop_info, const char *operation
 ) {
-	zend_class_entry *scope;
+	const zend_class_entry *scope;
 	if (EG(fake_scope)) {
 		scope = EG(fake_scope);
 	} else {
@@ -4121,15 +4121,6 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-}
-
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_clone_call(zend_function *clone, zend_class_entry *scope)
-{
-	zend_throw_error(NULL, "Call to %s %s::__clone() from %s%s",
-		zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
-		scope ? "scope " : "global scope",
-		scope ? ZSTR_VAL(scope->name) : ""
-	);
 }
 
 #if ZEND_INTENSIVE_DEBUGGING

@@ -56,7 +56,7 @@ var WINVER = "0x0602"; /* 8/2012 */
 var MINBISON = "3.0.0";
 
 // There's a minimum requirement for re2c..
-var MINRE2C = "0.13.4";
+var MINRE2C = "1.0.3";
 
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();

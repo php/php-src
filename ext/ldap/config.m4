@@ -60,15 +60,20 @@ if test "$PHP_LDAP" != "no"; then
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   AS_VAR_IF([PHP_LDAP], [yes], [
-    PKG_CHECK_MODULES([LDAP], [lber ldap])
-    PHP_LDAP_PKGCONFIG=true
-  ], [PHP_LDAP_CHECKS([$PHP_LDAP])])
+    PKG_CHECK_MODULES([LDAP], [lber ldap],
+      PHP_LDAP_PKGCONFIG=true, PHP_LDAP_PKGCONFIG=false)])
 
   AS_IF([test "$PHP_LDAP_PKGCONFIG" = true], [
     PHP_EVAL_INCLINE([$LDAP_CFLAGS])
     PHP_EVAL_LIBLINE([$LDAP_LIBS], [LDAP_SHARED_LIBADD])
   ], [
-    AS_VAR_IF([LDAP_DIR],, [AC_MSG_ERROR([Cannot find ldap.h])])
+    AS_VAR_IF([PHP_LDAP], [yes], [
+      for i in /usr/local /usr; do
+        PHP_LDAP_CHECKS([$i])
+      done
+    ], [PHP_LDAP_CHECKS([$PHP_LDAP])])
+    AC_MSG_CHECKING([for ldap.h])
+    AS_VAR_IF([LDAP_DIR],, [AC_MSG_ERROR([Cannot find ldap.h])], AC_MSG_RESULT([$LDAP_DIR]))
 
     dnl -pc removal is a hack for clang
     MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')

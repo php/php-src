@@ -5,6 +5,8 @@ uri
 --FILE--
 <?php
 
+var_dump(Uri\Rfc3986\Uri::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor"));
+
 $url = Uri\WhatWg\Url::parse("http://username:password@héééostname:9090/gah/../path?arg=vaéue#anchor");
 var_dump($url);
 var_dump($url->getAsciiHost());
@@ -14,6 +16,7 @@ var_dump($url->toUnicodeString());
 
 ?>
 --EXPECTF--
+NULL
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(4) "http"
