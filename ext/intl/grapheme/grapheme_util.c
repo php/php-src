@@ -94,7 +94,7 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 
 
 /* {{{ grapheme_strpos_utf16 - strrpos using utf16*/
-int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last, char* locale, int32_t strength)
+int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last, char* locale)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
 	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
@@ -139,11 +139,13 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	src = usearch_open(uneedle, uneedle_len, uhaystack, uhaystack_len, locale, bi, &status);
 	STRPOS_CHECK_STATUS(status, "Error creating search object");
 
-	UCollator *coll = usearch_getCollator(src);
-	ucol_setAttribute(coll, UCOL_STRENGTH, strength, &status);
-	STRPOS_CHECK_STATUS(status, "Error setting collation strength");
-	status = U_ZERO_ERROR;
-	usearch_reset(src);
+	if(f_ignore_case) {
+		UCollator *coll = usearch_getCollator(src);
+		status = U_ZERO_ERROR;
+		ucol_setAttribute(coll, UCOL_STRENGTH, UCOL_SECONDARY, &status);
+		STRPOS_CHECK_STATUS(status, "Error setting collation strength");
+		usearch_reset(src);
+	}
 
 	if(offset != 0) {
 		offset_pos = grapheme_get_haystack_offset(bi, offset);

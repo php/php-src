@@ -60,11 +60,11 @@ var_dump(grapheme_levenshtein($nabe, $nabe_E0100));
 
 // variable $nabe and $nabe_E0101 is different because that is IVS.
 // $nabe_E0101 is variable selector in U+908A U+E0101.
-// grapheme_levenshtein can catches different only match strength is Collator::IDENTICAL.
-// So result is maybe 1.
+// grapheme_levenshtein can catches different only match strength is u-ks-identic for locale.
+// So result is expect to 1.
 $nabe = '邊';
 $nabe_E0101 = "\u{908A}\u{E0101}";
-var_dump(grapheme_levenshtein($nabe, $nabe_E0101, strength: Collator::IDENTICAL));
+var_dump(grapheme_levenshtein($nabe, $nabe_E0101, locale: "ja_JP-u-ks-identic"));
 
 // combining character
 var_dump(grapheme_levenshtein("\u{0065}\u{0301}", "\u{00e9}"));
