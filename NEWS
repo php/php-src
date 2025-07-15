@@ -2,9 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.12
 
+- Intl:
+  . Fix memleak on failure in collator_get_sort_key(). (nielsdos)
+
 - OpenSSL:
   . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
     return value check). (nielsdos, botovq)
+  . Fix error return check of EVP_CIPHER_CTX_ctrl(). (nielsdos)
 
 31 Jul 2025, PHP 8.4.11
 
