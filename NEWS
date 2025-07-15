@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0alpha2
+17 Jul 2025, PHP 8.5.0alpha2
 
 - Core:
   . Fix OSS-Fuzz #427814452 (pipe compilation fails with assert).
