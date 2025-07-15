@@ -36,6 +36,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 #define YYMALLOC malloc
 #define YYFREE free
 #endif
+void* temp;
 }
 
 %code requires {
@@ -252,7 +253,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_ERROR
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
-%type <ast> class_declaration_statement class_body_statement class_short_ctor trait_declaration_statement legacy_namespace_name
+%type <ast> class_declaration_statement class_body_statement parent_ctr_call class_short_ctor trait_declaration_statement legacy_namespace_name
 %type <ast> interface_declaration_statement interface_extends_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
@@ -605,21 +606,37 @@ class_declaration_statement:
 		class_modifiers_optional T_CLASS { $<num>$ = CG(zend_lineno); } T_STRING
 		class_short_ctor
 	 	extends_from implements_list backup_doc_comment class_body_statement
-			{
-			zend_ast* stmts = zend_ast_create_list(0, ZEND_AST_STMT_LIST, $5, $9);
+		{
+			zend_ast_decl *ctor = $5;
+			if (ctor && ctor->child[2] && temp) {
+				ctor->child[2] = zend_ast_list_add(ctor->child[2], temp);
+			}
+			zend_ast* stmts = zend_ast_create_list(2, ZEND_AST_STMT_LIST, $5, $9);
 			$$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $8, zend_ast_get_str($4), $6, $7, stmts, NULL, NULL); }
 ;
 
 class_short_ctor:
 		'(' parameter_list ')'
 		{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, ZEND_ACC_PUBLIC, CG(zend_lineno), NULL,
-				  ZSTR_KNOWN(ZEND_STR_CTOR), $2, NULL, zend_ast_create_list(0, ZEND_AST_STMT_LIST), NULL, NULL);; }
+				  ZSTR_KNOWN(ZEND_STR_CTOR), $2, NULL, zend_ast_create_list(0, ZEND_AST_STMT_LIST), NULL, NULL); }
 	|	%empty	{ $$ = NULL; }
 ;
 
 class_body_statement:
 		'{' class_statement_list '}' { $$ = $2; }
 	| 	';' { $$ = NULL; }
+;
+
+parent_ctr_call:
+		argument_list
+		{
+		zval zv; ZVAL_INTERNED_STR(&zv, ZSTR_KNOWN(ZEND_STR_PARENT));
+		 $$ = zend_ast_create(ZEND_AST_STATIC_CALL,
+			zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ),
+			zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CTOR)),
+			$1); }
+	|	%empty			{ $$ = NULL; }
+;
 
 class_modifiers_optional:
 		%empty			{ $$ = 0; }
@@ -685,7 +702,7 @@ enum_case_expr:
 
 extends_from:
 		%empty				{ $$ = NULL; }
-	|	T_EXTENDS class_name	{ $$ = $2; }
+	|	T_EXTENDS class_name parent_ctr_call { $$ = $2; temp = $3; }
 ;
 
 interface_extends_list:
