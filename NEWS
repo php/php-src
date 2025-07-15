@@ -41,6 +41,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18898 (SEGV zend_jit_op_array_hot with property hooks
     and preloading). (nielsdos)
 
+- OpenSSL:
+  . Fixed bug #80770 (It is not possible to get client peer certificate with
+    stream_socket_server). (Jakub Zelenka)
+
 - PCNTL:
   . Fixed bug GH-18958 (Fatal error during shutdown after pcntl_rfork() or
     pcntl_forkx() with zend-max-execution-timers). (Arnaud)
