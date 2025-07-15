@@ -460,6 +460,13 @@ PHP 8.5 UPGRADE NOTES
     across multiple PHP requests.
     RFC: https://wiki.php.net/rfc/curl_share_persistence_improvement
 
+- URI:
+  . Uri\UriException, Uri\InvalidUriException, Uri\UriComparisonMode,
+    Uri\Rfc3986\Uri, Uri\WhatWg\InvalidUrlException,
+    Uri\WhatWg\UrlValidationErrorType, Uri\WhatWg\UrlValidationError,
+    and Uri\WhatWg\Url are added.
+    RFC: https://wiki.php.net/rfc/url_parsing_api
+
 ========================================
 8. Removed Extensions and SAPIs
 ========================================
@@ -482,6 +489,11 @@ PHP 8.5 UPGRADE NOTES
   . An always enabled lexbor extension is added. It contains the lexbor
     library that was separated from ext/dom for being reused among other
     extensions. The new extension is not directly exposed to userland.
+
+- URI:
+  . An always enabled uri extension is added that can be used for handling
+    URIs and URLs according to RFC 3986 and WHATWG URL.
+    RFC: https://wiki.php.net/rfc/url_parsing_api
 
 - PCRE:
   . Upgraded to pcre2lib from 10.44 to 10.45.
