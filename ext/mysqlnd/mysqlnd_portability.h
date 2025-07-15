@@ -108,7 +108,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 */
 
 /* Optimized store functions for Intel x86, non-valid for WIN64. __i386__ is GCC */
-#if defined(__i386__) && !defined(_WIN64)
+#if SIZEOF_ZEND_LONG == 4 && defined(__i386__) && !defined(_WIN64)
 #define sint2korr(A)    (*((int16_t *) (A)))
 #define sint3korr(A)    ((int32_t) ((((zend_uchar) (A)[2]) & 128) ? \
                    (((uint32_t) 255L << 24) | \
