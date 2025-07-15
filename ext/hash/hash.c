@@ -542,7 +542,7 @@ static void php_hash_do_hash_hmac(
 		if (n < 0) {
 			efree(context);
 			efree(K);
-			zend_string_release(digest);
+			zend_string_efree(digest);
 			RETURN_FALSE;
 		}
 
