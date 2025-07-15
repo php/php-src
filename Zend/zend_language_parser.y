@@ -607,7 +607,7 @@ class_declaration_statement:
 		class_short_ctor
 	 	extends_from implements_list backup_doc_comment class_body_statement
 		{
-			zend_ast_decl *ctor = $5;
+			zend_ast_decl *ctor = (zend_ast_decl *)$5;
 			if (ctor && ctor->child[2] && temp) {
 				ctor->child[2] = zend_ast_list_add(ctor->child[2], temp);
 			}
