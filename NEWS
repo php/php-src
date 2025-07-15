@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha3
 
+- Sockets:
+  . socket_set_option for multicast context throws a ValueError
+    when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
 
 17 Jul 2025, PHP 8.5.0alpha2
 
@@ -16,10 +19,6 @@ PHP                                                                        NEWS
 - PDO_ODBC
   . Fetch larger block sizes and better handle SQL_NO_TOTAL when calling
     SQLGetData. (Calvin Buckley, Saki Takamachi)
-
-- Sockets:
-  . socket_set_option for multicast context throws a ValueError
-    when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
 
 - Standard:
   . Optimized pack(). (nielsdos, divinity76)
