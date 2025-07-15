@@ -174,7 +174,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_host(const uri_internal
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
-	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL && get_text_range_length(&uriparser_uri->hostText) > 0) {
+	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL) {
 		if (uriparser_uri->hostData.ip6 != NULL || uriparser_uri->hostData.ipFuture.first != NULL) {
 			/* the textual representation of the host is always accessible in the .hostText field no matter what the host is */
 			smart_str host_str = {0};
