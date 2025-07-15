@@ -826,4 +826,9 @@ void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 	zend_hash_sort(Z_ARRVAL_P(return_value), php_openssl_compare_func, 1);
 }
 
+CONF *php_openssl_nconf_new(void)
+{
+	return NCONF_new_ex(PHP_OPENSSL_LIBCTX, NULL);
+}
+
 #endif
