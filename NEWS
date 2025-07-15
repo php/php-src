@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.12
 
-
+- OpenSSL:
+  . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
+    return value check). (nielsdos, botovq)
 
 31 Jul 2025, PHP 8.4.11
 
