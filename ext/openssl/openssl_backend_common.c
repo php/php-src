@@ -297,12 +297,12 @@ int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args
 
 	SET_OPTIONAL_STRING_ARG("config", req->config_filename, default_ssl_conf_filename);
 	SET_OPTIONAL_STRING_ARG("config_section_name", req->section_name, "req");
-	req->global_config = NCONF_new(NULL);
+	req->global_config = php_openssl_nconf_new();
 	if (!NCONF_load(req->global_config, default_ssl_conf_filename, NULL)) {
 		php_openssl_store_errors();
 	}
 
-	req->req_config = NCONF_new(NULL);
+	req->req_config = php_openssl_nconf_new();
 	if (!NCONF_load(req->req_config, req->config_filename, NULL)) {
 		return FAILURE;
 	}
@@ -440,7 +440,7 @@ zend_result php_openssl_load_rand_file(const char * file, int *egdsocket, int *s
 		return SUCCESS;
 #endif
 	}
-	if (file == NULL || !RAND_load_file(file, -1)) {
+	if (file == NULL || RAND_load_file(file, -1) < 0) {
 		if (RAND_status() == 0) {
 			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "Unable to load random state; not enough random data!");
@@ -465,7 +465,7 @@ zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int se
 	if (file == NULL) {
 		file = RAND_file_name(buffer, sizeof(buffer));
 	}
-	if (file == NULL || !RAND_write_file(file)) {
+	if (file == NULL || RAND_write_file(file) < 0) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Unable to write random state");
 		return FAILURE;
@@ -1671,7 +1671,7 @@ zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv
 	char *iv_new;
 
 	if (mode->is_aead) {
-		if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_ivlen_flag, *piv_len, NULL) != 1) {
+		if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_ivlen_flag, *piv_len, NULL) <= 0) {
 			php_error_docref(NULL, E_WARNING, "Setting of IV length for AEAD mode failed");
 			return FAILURE;
 		}
@@ -1742,7 +1742,7 @@ zend_result php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		return FAILURE;
 	}
 	if (mode->set_tag_length_always || (enc && mode->set_tag_length_when_encrypting)) {
-		if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, NULL)) {
+		if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, NULL) <= 0) {
 			php_error_docref(NULL, E_WARNING, "Setting tag length for AEAD cipher failed");
 			return FAILURE;
 		}
@@ -1750,7 +1750,7 @@ zend_result php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	if (!enc && tag && tag_len > 0) {
 		if (!mode->is_aead) {
 			php_error_docref(NULL, E_WARNING, "The tag cannot be used because the cipher algorithm does not support AEAD");
-		} else if (!EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag)) {
+		} else if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode->aead_set_tag_flag, tag_len, (unsigned char *) tag) <= 0) {
 			php_error_docref(NULL, E_WARNING, "Setting tag for AEAD cipher decryption failed");
 			return FAILURE;
 		}
@@ -1886,7 +1886,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 		if (mode.is_aead && tag) {
 			zend_string *tag_str = zend_string_alloc(tag_len, 0);
 
-			if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode.aead_get_tag_flag, tag_len, ZSTR_VAL(tag_str)) == 1) {
+			if (EVP_CIPHER_CTX_ctrl(cipher_ctx, mode.aead_get_tag_flag, tag_len, ZSTR_VAL(tag_str)) > 0) {
 				ZSTR_VAL(tag_str)[tag_len] = '\0';
 				ZSTR_LEN(tag_str) = tag_len;
 				ZEND_TRY_ASSIGN_REF_NEW_STR(tag, tag_str);

@@ -274,7 +274,7 @@ static void zend_update_property_num_checked(zend_class_entry *scope, zend_objec
 		return;
 	}
 #if ZEND_DEBUG
-	zend_class_entry *old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = i_get_exception_base(object);
 	const zend_property_info *prop_info = zend_get_property_info(object->ce, member, true);
 	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == prop_num);
@@ -843,20 +843,6 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
 
 	INIT_CLASS_ENTRY(zend_ce_graceful_exit, "GracefulExit", NULL);
-}
-/* }}} */
-
-/* {{{ Deprecated - Use zend_ce_exception directly instead */
-ZEND_API zend_class_entry *zend_exception_get_default(void)
-{
-	return zend_ce_exception;
-}
-/* }}} */
-
-/* {{{ Deprecated - Use zend_ce_error_exception directly instead */
-ZEND_API zend_class_entry *zend_get_error_exception(void)
-{
-	return zend_ce_error_exception;
 }
 /* }}} */
 

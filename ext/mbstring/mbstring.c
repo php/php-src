@@ -1584,10 +1584,22 @@ PHP_FUNCTION(mb_output_handler)
 		if (SG(sapi_headers).send_default_content_type || free_mimetype) {
 			const char *charset = encoding->mime_name;
 			if (charset) {
-				char *p;
-				size_t len = spprintf(&p, 0, "Content-Type: %s; charset=%s",  mimetype, charset);
-				if (sapi_add_header(p, len, 0) != FAILURE) {
-					SG(sapi_headers).send_default_content_type = 0;
+				/* Don't try to add a header if we are in an output handler;
+				 * we aren't supposed to directly access the output globals
+				 * from outside of main/output.c, so just try to get the flags
+				 * for the currently running handler, will only succeed if
+				 * there is a handler running. */
+				int unused;
+				bool in_handler = php_output_handler_hook(
+					PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS,
+					&unused
+				) == SUCCESS;
+				if (!in_handler) {
+					char *p;
+					size_t len = spprintf(&p, 0, "Content-Type: %s; charset=%s",  mimetype, charset);
+					if (sapi_add_header(p, len, 0) != FAILURE) {
+						SG(sapi_headers).send_default_content_type = 0;
+					}
 				}
 			}
 

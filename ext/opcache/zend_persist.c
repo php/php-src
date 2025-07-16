@@ -1283,6 +1283,7 @@ void zend_update_parent_ce(zend_class_entry *ce)
 	}
 }
 
+#ifdef HAVE_JIT
 static void zend_accel_persist_jit_op_array(zend_op_array *op_array, zend_class_entry *ce)
 {
 	if (op_array->type == ZEND_USER_FUNCTION) {
@@ -1315,6 +1316,7 @@ static void zend_accel_persist_link_func_info(zend_op_array *op_array, zend_clas
 		}
 	}
 }
+#endif
 
 static void zend_accel_persist_class_table(HashTable *class_table)
 {

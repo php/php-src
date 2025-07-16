@@ -418,11 +418,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 								i_num = (int64_t) va_arg(ap, long int);
 								break;
 							case LM_SIZE_T:
-#if SIZEOF_SSIZE_T
 								i_num = (int64_t) va_arg(ap, ssize_t);
-#else
-								i_num = (int64_t) va_arg(ap, size_t);
-#endif
 								break;
 #if SIZEOF_LONG_LONG
 							case LM_LONG_LONG:

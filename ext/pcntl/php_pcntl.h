@@ -43,12 +43,12 @@ struct php_pcntl_pending_signal {
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	HashTable php_signal_table;
-	int processing_signal_queue;
-	struct php_pcntl_pending_signal *head, *tail, *spares;
-	int last_error;
-	volatile char pending_signals;
+	bool processing_signal_queue;
+	volatile bool pending_signals;
 	bool async_signals;
-	unsigned num_signals;
+	uint8_t num_signals;
+	int last_error;
+	struct php_pcntl_pending_signal *head, *tail, *spares;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #if defined(ZTS) && defined(COMPILE_DL_PCNTL)

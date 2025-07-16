@@ -589,14 +589,10 @@ function imagecreatefromgd2(string $filename): GdImage|false {}
 /** @refcount 1 */
 function imagecreatefromgd2part(string $filename, int $x, int $y, int $width, int $height): GdImage|false {}
 
-#ifdef HAVE_GD_BMP
 /** @refcount 1 */
 function imagecreatefrombmp(string $filename): GdImage|false {}
-#endif
 
-#ifdef HAVE_GD_TGA
 function imagecreatefromtga(string $filename): GdImage|false {}
-#endif
 
 function imagexbm(GdImage $image, ?string $filename, ?int $foreground_color = null): bool {}
 
@@ -630,10 +626,8 @@ function imagegd(GdImage $image, ?string $file = null): bool {}
 
 function imagegd2(GdImage $image, ?string $file = null, int $chunk_size = 128, int $mode = IMG_GD2_RAW): bool {}
 
-#ifdef HAVE_GD_BMP
 /** @param resource|string|null $file */
 function imagebmp(GdImage $image, $file = null, bool $compressed = true): bool {}
-#endif
 
 function imagedestroy(GdImage $image): true {}
 

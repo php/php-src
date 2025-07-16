@@ -10,13 +10,28 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
+   | Authors: Máté Kocsis <kocsismate@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PACK_H
-#define PACK_H
+#ifndef PHP_URIPARSER_H
+#define PHP_URIPARSER_H
 
-PHP_MINIT_FUNCTION(pack);
+#include <uriparser/Uri.h>
+#include "php_uri_common.h"
 
-#endif /* PACK_H */
+extern const uri_handler_t uriparser_uri_handler;
+
+typedef struct uriparser_uris_t {
+	UriUriA uri;
+	UriUriA normalized_uri;
+	bool normalized_uri_initialized;
+} uriparser_uris_t;
+
+PHP_MINIT_FUNCTION(uri_uriparser);
+
+zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
+
+void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t *uriparser_base_url, bool silent);
+
+#endif

@@ -1659,6 +1659,7 @@ namespace Dom
 
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
+        public function getElementsByClassName(string $classNames): HTMLCollection {}
 
         public function insertAdjacentElement(AdjacentPosition $where, Element $element): ?Element {}
         public function insertAdjacentText(AdjacentPosition $where, string $data): void {}
@@ -1986,6 +1987,8 @@ namespace Dom
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
         /** @implementation-alias Dom\Element::getElementsByTagNameNS */
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
+        /** @implementation-alias Dom\Element::getElementsByClassName */
+        public function getElementsByClassName(string $classNames): HTMLCollection {}
 
         public function createElement(string $localName): Element {}
         public function createElementNS(?string $namespace, string $qualifiedName): Element {}

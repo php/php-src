@@ -152,7 +152,7 @@ static URI_INLINE int URI_FUNC(ToStringEngine)(URI_CHAR * dest,
 	/* [05/19]	endif; */
 				}
 	/* [06/19]	if defined(authority) then */
-				if (URI_FUNC(IsHostSet)(uri)) {
+				if (URI_FUNC(HasHost)(uri)) {
 	/* [07/19]		append "//" to result; */
 					if (dest != NULL) {
 						if (written + 2 <= maxChars) {
@@ -422,7 +422,7 @@ static URI_INLINE int URI_FUNC(ToStringEngine)(URI_CHAR * dest,
 	/* [10/19]	append path to result; */
 				/* Slash needed here? */
 				if (uri->absolutePath || ((uri->pathHead != NULL)
-						&& URI_FUNC(IsHostSet)(uri))) {
+						&& URI_FUNC(HasHost)(uri))) {
 					if (dest != NULL) {
 						if (written + 1 <= maxChars) {
 							memcpy(dest + written, _UT("/"),

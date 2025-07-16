@@ -1,6 +1,42 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0alpha1
+?? ??? ????, PHP 8.5.0alpha3
+
+- Sockets:
+  . socket_set_option for multicast context throws a ValueError
+    when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
+
+- URI:
+  . Empty host handling is fixed. (Máté Kocsis)
+  . Error handling of Uri\WhatWg\Url::withHost() is fixed when the input
+    contains a port. Now, it triggers an exception; previously, the error
+    was silently swallowed. (Máté Kocsis)
+
+17 Jul 2025, PHP 8.5.0alpha2
+
+- Core:
+  . Fix OSS-Fuzz #427814452 (pipe compilation fails with assert).
+    (nielsdos, ilutov)
+
+- DOM:
+  . Make cloning DOM node lists, maps, and collections fail. (nielsdos)
+  . Added Dom\Element::getElementsByClassName(). (nielsdos)
+
+- PDO_ODBC
+  . Fetch larger block sizes and better handle SQL_NO_TOTAL when calling
+    SQLGetData. (Calvin Buckley, Saki Takamachi)
+
+- Standard:
+  . Optimized pack(). (nielsdos, divinity76)
+  . Fixed bug GH-19070 (setlocale($type, NULL) should not be deprecated).
+    (nielsdos)
+
+- URI:
+  . Return the singleton UrlValidationErrorType instances from Uri\WhatWg\Url
+    instead of creating new objects that are different from the singleton.
+    (timwolla)
+
+03 Jul 2025, PHP 8.5.0alpha1
 
 - BCMath:
   . Simplify `bc_divide()` code. (SakiTakamachi)
@@ -60,6 +96,8 @@ PHP                                                                        NEWS
     (DanielEScherzer)
   . Do not use RTLD_DEEPBIND if dlmopen is available. (Daniil Gentili)
   . Make `clone()` a function. (timwolla, edorian)
+  . Fixed bug GH-19081 (Wrong lineno in property error with constructor property
+    promotion). (ilutov)
 
 - Curl:
   . Added curl_multi_get_handles(). (timwolla)
@@ -131,6 +169,11 @@ PHP                                                                        NEWS
   . Updated default value of opcache.jit_hot_loop. (Arnaud)
   . Log a warning when opcache lock file permissions could not be changed.
     (Taavi Eomäe)
+
+- OpenSSL:
+  . Added openssl.libctx INI that allows to select the OpenSSL library context
+    type and convert verious parts of the extension to use the custom  libctx.
+    (Jakub Zelenka)
 
 - Output:
   . Fixed calculation of aligned buffer size. (cmb)

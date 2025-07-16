@@ -127,15 +127,16 @@ ZEND_ATTRIBUTE_UNUSED static void create_file(void) {
 ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
 	steps_left = MAX_STEPS;
 	zend_exception_save();
-	zval retval, func, args[2];
-	ZVAL_STRING(&func, "opcache_invalidate");
+	zval retval, args[2];
+	zend_function *fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("opcache_invalidate"));
+	ZEND_ASSERT(fn != NULL);
+
 	ZVAL_STRING(&args[0], FILE_NAME);
 	ZVAL_TRUE(&args[1]);
-	call_user_function(CG(function_table), NULL, &func, &retval, 2, args);
+	zend_call_known_function(fn, NULL, NULL, &retval, 2, args, NULL);
 	ZEND_ASSERT(Z_TYPE(retval) == IS_TRUE);
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func);
 	zend_exception_restore();
 }
 

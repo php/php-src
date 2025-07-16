@@ -622,6 +622,12 @@ report_memleaks = On
 ; Development value: 0
 ; Production value: 0
 
+; This directive controls whether PHP will output the backtrace of fatal errors.
+; Default Value: On
+; Development Value: On
+; Production Value: On
+;fatal_error_backtraces = On
+
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
@@ -1858,6 +1864,14 @@ ldap.max_links = -1
 ; this value may still be overridden on a per-stream basis via the "capath"
 ; SSL stream context option.
 ;openssl.capath=
+
+; The libctx is an OpenSSL library context. OpenSSL defines a default library
+; context, but PHP OpenSSL also defines its own library context to avoid
+; interference with other libraries using OpenSSL and to provide an independent
+; context for each thread in ZTS. Possible values:
+;  "custom"  - use a custom library context (default)
+;  "default" - use the default OpenSSL library context
+;openssl.libctx=custom
 
 [ffi]
 ; FFI API restriction. Possible values:

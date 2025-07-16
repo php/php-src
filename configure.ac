@@ -451,9 +451,6 @@ AC_CHECK_TYPES([socklen_t], [], [], [
   #endif
 ])
 
-dnl These are defined elsewhere than stdio.h.
-PHP_CHECK_SIZEOF([ssize_t], [8])
-
 dnl Check stdint types (must be after header check).
 PHP_CHECK_STDINT_TYPES
 
@@ -543,7 +540,6 @@ AC_CHECK_FUNCS(m4_normalize([
   getgrnam_r
   gethostname
   getloadavg
-  getlogin
   getprotobyname
   getprotobynumber
   getpwnam_r
@@ -581,7 +577,6 @@ AC_CHECK_FUNCS(m4_normalize([
   statvfs
   std_syslog
   strcasecmp
-  strnlen
   strptime
   strtok_r
   symlink

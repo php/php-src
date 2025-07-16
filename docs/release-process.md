@@ -96,6 +96,13 @@ releases.
     `user.signingKey` values to use with your local PHP repositories. See
     [Conditional Includes For Git Config][] for more information.
 
+11. Any time you see a placeholder like `php-X.Y.ZRCn`, the `RCn` is not always
+    a release candidate number. The placeholder could also represent any of:
+    * php-8.4.0alpha1 (initial alpha version)
+    * php-8.4.0beta2 (one of the beta versions)
+    * php-8.4.0 (initial GA)
+    * php-8.4.9 (periodic bugfix or security release)
+
 
 ## Packaging a non-stable release (alpha/beta/RC)
 
@@ -162,7 +169,10 @@ slightly different steps. We'll call attention where the steps differ.
 4. Using your local-only release branch, bump the version numbers in
    `main/php_version.h`, `Zend/zend.h`, `configure.ac`, and possibly
    `NEWS`.
-
+  
+   The date for NEWS should be the date of the announcement (Thursday),
+   *not* the date of the tagging (Tuesday).
+  
    For examples, see [Update versions for PHP 8.1.0beta3][] (for a pre-GA
    example) or [Update versions for PHP 8.1.6RC1][] along with
    [Update NEWS for PHP 8.1.6RC1][] (for a post-GA example).
@@ -200,8 +210,8 @@ slightly different steps. We'll call attention where the steps differ.
    > Do *not* bump the API versions after RC1.
 
 5. Compile and run `make test`, with and without ZTS (Zend Thread Safety), using
-   the correct Bison and re2c versions, e.g., for PHP 7.4, Bison 3.0.0 and re2c
-   0.13.4 are required, as a minimum.
+   the correct Bison and re2c versions, e.g., for PHP 8.5, Bison 3.0.0 and re2c
+   1.0.3 are required, as a minimum.
 
    For example:
 
@@ -247,8 +257,11 @@ slightly different steps. We'll call attention where the steps differ.
 
    ```shell
    git add -p
-   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.Z alpha2"
+   git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.0 alpha2"
    ```
+
+   The NEWS is updated at the *start* of the cycle for the next tag, e.g.
+   [Update NEWS for PHP 8.2.0 alpha2][] was sent as part of tagging 8.2.0 alpha **1**.
 
    🔷 **For post-GA releases only,** switch back to the *version branch* for
    your release (e.g., `PHP-8.2`) and bump the version numbers in
@@ -283,7 +296,8 @@ slightly different steps. We'll call attention where the steps differ.
     ```shell
     git push upstream php-X.Y.ZRCn # tag name
     git push upstream PHP-X.Y.Z    # patch-level version branch (post-GA only)
-    git push upstream PHP-X.Y      # version branch
+    git push upstream PHP-X.Y      # version branch (post-branch creation only)
+    git push upstream master       # version branch (pre-branch creation only)
     ```
 
     > 🚨 **Attention** \
@@ -365,6 +379,10 @@ slightly different steps. We'll call attention where the steps differ.
 
    Follow the documentation in the file for editing the QA release information.
 
+   > 🚨 **Attention** \
+   > **For pre-GA releases only,** don't commit yet, because you need to add an
+   > announcement with the release. After updating `$QA_RELEASES`, skip to step 2 below.
+
    Add, commit, and push your changes, when finished.
 
    ```shell
@@ -408,6 +426,15 @@ slightly different steps. We'll call attention where the steps differ.
    text slightly to indicate progression through the pre-release cycle. For
    example, here are all the news posts for the pre-GA releases of PHP 8.1.0:
 
+   > 💬 **Hint** \
+   > If you are going to base your language on one of these old announcements,
+   > remember that
+   > * `qa.php.net` has been replaced with https://www.php.net/release-candidates.php
+   > * `bugs.php.net` has been replaced with GitHub issues, use
+   >    `https://github.com/php/php-src/issues/new?template=bug_report.yml`
+   >   to link directly to the form for creating a new bug report.
+   > * Since 8.4 there have only been 4 release candidates for PHP X.Y.0, rather than 6.
+
    * [Announce 8.1.0alpha1](https://github.com/php/web-php/commit/57b9675c8d8550493289fa1fba77427c93cdd472)
    * [Announce 8.1.0alpha2](https://github.com/php/web-php/commit/cec044fc0763f5cfa77d0e79479f8b6279023570)
    * [Announce 8.1.0alpha3](https://github.com/php/web-php/commit/5c480765f444a3fddfd575e01fe0be3fcfdde05b)
@@ -431,7 +458,7 @@ slightly different steps. We'll call attention where the steps differ.
    > When a version is in its post-GA phase, we do not post news entries for
    > non-stable releases.
 
-3. Wait for the web and qa sites to update with the new information before
+3. Wait for the php site to update with the new information before
    sending announcements. This could take up to an hour.
 
 4. Send *separate* announcement emails to:
@@ -446,6 +473,15 @@ slightly different steps. We'll call attention where the steps differ.
    build.
 
    Here are a few examples of non-stable release announcement emails:
+
+   > 💬 **Hint** \
+   > If you are going to base your language on one of these old announcements,
+   > remember that
+   > * `qa.php.net` has been replaced with https://www.php.net/release-candidates.php
+   > * `bugs.php.net` has been replaced with GitHub issues, use
+   >    `https://github.com/php/php-src/issues/new?template=bug_report.yml`
+   >   to link directly to the form for creating a new bug report.
+   > * Since 8.4 there have only been 4 release candidates for PHP X.Y.0, rather than 6.
 
    * [PHP 8.1.0alpha1 is available for testing](https://news-web.php.net/php.qa/69043)
    * [PHP 8.1.0beta3 available for testing](https://news-web.php.net/php.qa/69079)
@@ -519,8 +555,8 @@ slightly different steps. We'll call attention where the steps differ.
    an example.
 
 6. Compile and run `make test`, with and without ZTS (Zend Thread Safety), using
-   the correct Bison and re2c versions, e.g., for PHP 7.4, Bison 3.0.0 and re2c
-   0.13.4 are required, as a minimum.
+   the correct Bison and re2c versions, e.g., for PHP 8.5, Bison 3.0.0 and re2c
+   1.0.3 are required, as a minimum.
 
    For example:
 
@@ -720,10 +756,10 @@ slightly different steps. We'll call attention where the steps differ.
 
    The array probably contains information about the RC released two weeks ago
    in preparation for the current release. Since the current release is now GA,
-   it's time to remove the RC build from the QA website.
+   it's time to remove the RC build from the release candidates page.
 
    It is sufficient to set the `number` property for the release to `0` to
-   stop displaying the RC build on the QA website. You may also remove the
+   stop displaying the RC build on the release candidates page. You may also remove the
    sha256 hashes for the RC tarballs, but it's not necessary.
 
 9. Review all the changes in `web-php`, commit, and push them.
@@ -981,8 +1017,13 @@ volunteers to begin the selection process for the next release managers.
 2. Request membership to the
    [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-3. Subscribe to the php-announce@lists.php.net mailing list by emailing
-   php-announce+subscribe@lists.php.net
+3. Make sure you are subscribed to all of the mailing lists that you will need to send
+   announcements to, since you cannot post to the lists otherwise:
+
+   * internals@lists.php.net (email internals+subscribe@lists.php.net)
+   * php-announce@lists.php.net (email php-announce+subscribe@lists.php.net)
+   * php-general@lists.php.net (email php-general+subscribe@lists.php.net)
+   * php-qa@lists.php.net (email php-qa+subscribe@lists.php.net)
 
 4. Email systems@php.net to get setup for access to downloads.php.net, to be
    added to the release-managers@php.net distribution list, and to be added to

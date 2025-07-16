@@ -506,10 +506,10 @@ try_again:
 		     zend_string_equals(orig->host, phpurl->host) &&
 		     orig->port == phpurl->port))) {
 		} else {
+			ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+			ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 			stream = NULL;
 			use_proxy = 0;
 		}
@@ -517,10 +517,10 @@ try_again:
 
 	/* Check if keep-alive connection is still opened */
 	if (stream != NULL && php_stream_eof(stream)) {
+		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
 		convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		stream = NULL;
 		use_proxy = 0;
 	}
@@ -528,9 +528,7 @@ try_again:
 	if (!stream) {
 		stream = http_connect(this_ptr, phpurl, use_ssl, context, &use_proxy);
 		if (stream) {
-			php_stream_auto_cleanup(stream);
-			ZVAL_RES(Z_CLIENT_HTTPSOCKET_P(this_ptr), stream->res);
-			GC_ADDREF(stream->res);
+			php_stream_to_zval(stream, Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			ZVAL_LONG(Z_CLIENT_USE_PROXY_P(this_ptr), use_proxy);
 		} else {
 			php_url_free(phpurl);
@@ -686,10 +684,10 @@ try_again:
 
 				if (UNEXPECTED(php_random_bytes_throw(&nonce, sizeof(nonce)) != SUCCESS)) {
 					ZEND_ASSERT(EG(exception));
+					ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 					php_stream_close(stream);
 					convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-					convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-					convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+					ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 					smart_str_free(&soap_headers_z);
 					smart_str_free(&soap_headers);
 					efree(http_msg);
@@ -904,10 +902,10 @@ try_again:
 			if (request != buf) {
 				zend_string_release_ex(request, 0);
 			}
+			ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+			ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL, SOAP_GLOBAL(lang_en));
 			smart_str_free(&soap_headers_z);
 			efree(http_msg);
@@ -929,9 +927,9 @@ try_again:
 				if (request != buf) {
 					zend_string_release_ex(request, 0);
 				}
+				ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 				php_stream_close(stream);
-				convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-				convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+				ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL, SOAP_GLOBAL(lang_en));
 				smart_str_free(&soap_headers_z);
 				efree(http_msg);
@@ -982,12 +980,12 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
+		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
 		if (http_headers) {
 			zend_string_release_ex(http_headers, 0);
 		}
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		if (http_msg) {
 			efree(http_msg);
 		}
@@ -1117,10 +1115,10 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
+		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
 		zend_string_release_ex(http_headers, 0);
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL, SOAP_GLOBAL(lang_en));
 		if (http_msg) {
 			efree(http_msg);
@@ -1134,9 +1132,9 @@ try_again:
 	}
 
 	if (http_close) {
+		ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 		php_stream_close(stream);
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
 		stream = NULL;
 	}
 
@@ -1146,11 +1144,11 @@ try_again:
 
 		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
 			php_url *new_url  = php_url_parse(loc);
+			efree(loc);
 
 			if (new_url != NULL) {
 				zend_string_release_ex(http_headers, 0);
 				zend_string_release_ex(http_body, 0);
-				efree(loc);
 				if (new_url->scheme == NULL && new_url->path != NULL) {
 					new_url->scheme = phpurl->scheme ? zend_string_copy(phpurl->scheme) : NULL;
 					new_url->host = phpurl->host ? zend_string_copy(phpurl->host) : NULL;
@@ -1296,21 +1294,19 @@ try_again:
 	/* Decompress response */
 	content_encoding = get_http_header_value(ZSTR_VAL(http_headers), "Content-Encoding:");
 	if (content_encoding) {
-		zval func;
 		zval retval;
 		zval params[1];
+		zend_function *decompression_fn;
 
 		/* Warning: the zlib function names are chosen in an unfortunate manner.
 		 * Check zlib.c to see how a function corresponds with a particular format. */
 		if ((strcmp(content_encoding,"gzip") == 0 ||
 		     strcmp(content_encoding,"x-gzip") == 0) &&
-		     zend_hash_str_exists(EG(function_table), "gzdecode", sizeof("gzdecode")-1)) {
-			ZVAL_STRING(&func, "gzdecode");
-			ZVAL_STR_COPY(&params[0], http_body);
+		     (decompression_fn = zend_hash_str_find_ptr(EG(function_table), "gzdecode", sizeof("gzdecode")-1))) {
+			ZVAL_STR(&params[0], http_body);
 		} else if (strcmp(content_encoding,"deflate") == 0 &&
-		           zend_hash_str_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1)) {
-			ZVAL_STRING(&func, "gzuncompress");
-			ZVAL_STR_COPY(&params[0], http_body);
+		           (decompression_fn = zend_hash_str_find_ptr(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1))) {
+			ZVAL_STR(&params[0], http_body);
 		} else {
 			efree(content_encoding);
 			zend_string_release_ex(http_headers, 0);
@@ -1321,15 +1317,11 @@ try_again:
 			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL, SOAP_GLOBAL(lang_en));
 			return FALSE;
 		}
-		if (call_user_function(CG(function_table), (zval*)NULL, &func, &retval, 1, params) == SUCCESS &&
-		    Z_TYPE(retval) == IS_STRING) {
-			zval_ptr_dtor(&params[0]);
-			zval_ptr_dtor(&func);
+		zend_call_known_function(decompression_fn, NULL, NULL, &retval, 1, params, NULL);
+		if (Z_TYPE(retval) == IS_STRING) {
 			zend_string_release_ex(http_body, 0);
 			ZVAL_COPY_VALUE(return_value, &retval);
 		} else {
-			zval_ptr_dtor(&params[0]);
-			zval_ptr_dtor(&func);
 			zval_ptr_dtor(&retval);
 			efree(content_encoding);
 			zend_string_release_ex(http_headers, 0);
