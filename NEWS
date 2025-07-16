@@ -1,6 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.24
+?? ??? ????, PHP 8.3.25
+
+OpenSSL:
+  . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
+    return value check). (nielsdos, botovq)
+  . Fix error return check of EVP_CIPHER_CTX_ctrl(). (nielsdos)
+
+
+31 Jul 2025, PHP 8.3.24
 
 - Calendar:
   . Fixed jewishtojd overflow on year argument. (David Carlier)
@@ -40,9 +48,6 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #80770 (It is not possible to get client peer certificate with
     stream_socket_server). (Jakub Zelenka)
-  . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
-    return value check). (nielsdos, botovq)
-  . Fix error return check of EVP_CIPHER_CTX_ctrl(). (nielsdos)
 
 - PCNTL:
   . Fixed bug GH-18958 (Fatal error during shutdown after pcntl_rfork() or
