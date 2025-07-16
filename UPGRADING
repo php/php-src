@@ -430,6 +430,9 @@ PHP 8.5 UPGRADE NOTES
   . Added grapheme_levenshtein() function.
     RFC: https://wiki.php.net/rfc/grapheme_levenshtein
 
+- Opcache:
+  . Added opcache_is_script_cached_in_file_cache().
+
 - Pdo\Sqlite:
   . Added support for Pdo\Sqlite::setAuthorizer(), which is the equivalent of
     SQLite3::setAuthorizer(). The only interface difference is that the
