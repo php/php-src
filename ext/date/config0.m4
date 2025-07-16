@@ -5,16 +5,14 @@ dnl Check for strtoll, atoll
 AC_CHECK_FUNCS([strtoll atoll])
 
 AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
-  [PHP_DATE_CFLAGS="$PHP_DATE_CFLAGS -Wno-implicit-fallthrough"],,
-  [-Werror])
+  [PHP_DATE_CFLAGS="$PHP_DATE_CFLAGS -Wno-implicit-fallthrough"])
 
 PHP_DATE_CFLAGS="$PHP_DATE_CFLAGS -DHAVE_TIMELIB_CONFIG_H=1"
 PHP_TIMELIB_CFLAGS="$PHP_DATE_CFLAGS"
 PHP_DATE_CFLAGS="$PHP_DATE_CFLAGS -I@ext_builddir@/lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
 AX_CHECK_COMPILE_FLAG([-fwrapv],
-  [PHP_TIMELIB_CFLAGS="$PHP_TIMELIB_CFLAGS -fwrapv"],,
-  [-Werror])
+  [PHP_TIMELIB_CFLAGS="$PHP_TIMELIB_CFLAGS -fwrapv"])
 
 timelib_sources="lib/astro.c lib/dow.c lib/parse_date.c lib/parse_tz.c lib/parse_posix.c
                  lib/timelib.c lib/tm2unixtime.c lib/unixtime2tm.c lib/parse_iso_intervals.c lib/interval.c"
