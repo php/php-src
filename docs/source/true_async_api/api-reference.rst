@@ -2,11 +2,12 @@
  API Reference
 ###############
 
-This section provides comprehensive documentation for the TrueAsync API functions, macros, and data structures based on the actual implementation in ``Zend/zend_async_API.h``.
+This section provides comprehensive documentation for the TrueAsync API functions, macros, and data
+structures based on the actual implementation in ``Zend/zend_async_API.h``.
 
-******************
+*************
  API Version
-******************
+*************
 
 .. code:: c
 
@@ -15,9 +16,9 @@ This section provides comprehensive documentation for the TrueAsync API function
    #define ZEND_ASYNC_API_VERSION_MINOR 4
    #define ZEND_ASYNC_API_VERSION_PATCH 0
 
-********************
+*****************
  Core API Macros
-********************
+*****************
 
 Enablement Check
 ================
@@ -26,8 +27,8 @@ Enablement Check
 
    ZEND_ASYNC_IS_ENABLED()
 
-Returns ``true`` if async functionality is available, ``false`` otherwise.
-Always check this before using any async APIs.
+Returns ``true`` if async functionality is available, ``false`` otherwise. Always check this before
+using any async APIs.
 
 .. code:: c
 
@@ -35,9 +36,9 @@ Always check this before using any async APIs.
 
 Returns ``true`` if reactor (event loop) is available and functional.
 
-*********************
+**********************
  Coroutine Operations
-*********************
+**********************
 
 Coroutine Creation
 ==================
@@ -52,11 +53,11 @@ Coroutine Creation
 
 Creates and spawns new coroutines with various configuration options:
 
-* ``ZEND_ASYNC_SPAWN()`` - Create coroutine with default settings
-* ``ZEND_ASYNC_SPAWN_WITH(scope)`` - Create coroutine within specific scope
-* ``ZEND_ASYNC_SPAWN_WITH_PROVIDER(scope_provider)`` - Use scope provider object
-* ``ZEND_ASYNC_SPAWN_WITH_PRIORITY(priority)`` - Set coroutine priority
-* ``ZEND_ASYNC_SPAWN_WITH_SCOPE_EX(scope, priority)`` - Both scope and priority
+-  ``ZEND_ASYNC_SPAWN()`` - Create coroutine with default settings
+-  ``ZEND_ASYNC_SPAWN_WITH(scope)`` - Create coroutine within specific scope
+-  ``ZEND_ASYNC_SPAWN_WITH_PROVIDER(scope_provider)`` - Use scope provider object
+-  ``ZEND_ASYNC_SPAWN_WITH_PRIORITY(priority)`` - Set coroutine priority
+-  ``ZEND_ASYNC_SPAWN_WITH_SCOPE_EX(scope, priority)`` - Both scope and priority
 
 **Priority levels:**
 
@@ -89,8 +90,8 @@ Adds coroutine to execution queue for scheduling.
 
 Suspends current coroutine execution:
 
-* ``SUSPEND()`` - Normal suspension
-* ``RUN_SCHEDULER_AFTER_MAIN()`` - Suspend from main context
+-  ``SUSPEND()`` - Normal suspension
+-  ``RUN_SCHEDULER_AFTER_MAIN()`` - Suspend from main context
 
 Coroutine Control
 =================
@@ -102,8 +103,8 @@ Coroutine Control
 
 Resume coroutine execution:
 
-* ``RESUME(coroutine)`` - Normal resume
-* ``RESUME_WITH_ERROR(coroutine, error, transfer_error)`` - Resume with exception
+-  ``RESUME(coroutine)`` - Normal resume
+-  ``RESUME_WITH_ERROR(coroutine, error, transfer_error)`` - Resume with exception
 
 .. code:: c
 
@@ -112,12 +113,12 @@ Resume coroutine execution:
 
 Cancel coroutine execution:
 
-* ``CANCEL()`` - Cancel with default safety
-* ``CANCEL_EX()`` - Cancel with explicit safety flag
+-  ``CANCEL()`` - Cancel with default safety
+-  ``CANCEL_EX()`` - Cancel with explicit safety flag
 
-********************
+***********
  Scope API
-********************
+***********
 
 Scope Creation
 ==============
@@ -129,8 +130,8 @@ Scope Creation
 
 Create new async scopes for coroutine isolation:
 
-* ``NEW_SCOPE(parent)`` - Create scope with parent reference
-* ``NEW_SCOPE_WITH_OBJECT(parent)`` - Create scope backed by zend_object
+-  ``NEW_SCOPE(parent)`` - Create scope with parent reference
+-  ``NEW_SCOPE_WITH_OBJECT(parent)`` - Create scope backed by zend_object
 
 Scope Flags
 ===========
@@ -138,21 +139,21 @@ Scope Flags
 .. code:: c
 
    #define ZEND_ASYNC_SCOPE_IS_CLOSED(scope)
-   #define ZEND_ASYNC_SCOPE_IS_CANCELLED(scope) 
+   #define ZEND_ASYNC_SCOPE_IS_CANCELLED(scope)
    #define ZEND_ASYNC_SCOPE_IS_DISPOSING(scope)
 
 Check scope status:
 
-* ``IS_CLOSED`` - Scope has been closed
-* ``IS_CANCELLED`` - Scope was cancelled
-* ``IS_DISPOSING`` - Scope is being disposed
+-  ``IS_CLOSED`` - Scope has been closed
+-  ``IS_CANCELLED`` - Scope was cancelled
+-  ``IS_DISPOSING`` - Scope is being disposed
 
-********************
+***********
  Event API
-********************
+***********
 
 Event Lifecycle
-================
+===============
 
 All async events implement these core function pointers:
 
@@ -163,7 +164,7 @@ All async events implement these core function pointers:
    typedef void (*zend_async_event_dispose_t)(zend_async_event_t *event);
 
 Event State Checking
-=====================
+====================
 
 .. code:: c
 
@@ -172,7 +173,7 @@ Event State Checking
 Check if event has been closed.
 
 Event Reference Counting
-=========================
+========================
 
 .. code:: c
 
@@ -199,9 +200,9 @@ Event Flags
 
 Manipulate event flags.
 
-********************
+*************
  Reactor API
-********************
+*************
 
 Reactor Control
 ===============
@@ -219,16 +220,16 @@ Poll Events
 
    typedef enum {
        ASYNC_READABLE = 1,
-       ASYNC_WRITABLE = 2, 
+       ASYNC_WRITABLE = 2,
        ASYNC_DISCONNECT = 4,
        ASYNC_PRIORITIZED = 8
    } async_poll_event;
 
 Event flags for socket polling operations.
 
-********************
+******************
  Signal Constants
-********************
+******************
 
 .. code:: c
 
@@ -243,9 +244,9 @@ Event flags for socket polling operations.
 
 Cross-platform signal constants for async signal handling.
 
-********************
+*******************
  Process Execution
-********************
+*******************
 
 Execution Modes
 ===============
@@ -260,9 +261,9 @@ Execution Modes
        ZEND_ASYNC_EXEC_MODE_SHELL_EXEC   /* shell_exec() - buffer output */
    } zend_async_exec_mode;
 
-***********************
+************************
  Future and Channel API
-***********************
+************************
 
 Futures
 =======
@@ -284,9 +285,9 @@ Channels
 
 Create channels for coroutine communication.
 
-****************************
+*****************************
  API Context Switch Handlers
-****************************
+*****************************
 
 Registration
 ============
@@ -299,7 +300,7 @@ Registration
    );
 
    bool zend_coroutine_remove_switch_handler(
-       zend_coroutine_t *coroutine, 
+       zend_coroutine_t *coroutine,
        uint32_t handler_index
    );
 
@@ -329,9 +330,9 @@ Handler Function Type
 
 Returns ``true`` to keep handler, ``false`` to remove it after execution.
 
-********************
+*******************
  Utility Functions
-********************
+*******************
 
 System Management
 =================
@@ -368,12 +369,12 @@ Exception Handling
 
 Spawn coroutine specifically for throwing an exception within a scope.
 
-***********************
+**********************
  API Error Management
-***********************
+**********************
 
 API Exception Classes
-======================
+=====================
 
 .. code:: c
 
@@ -388,12 +389,12 @@ API Exception Classes
 
 Get class entries for async-related classes and exceptions.
 
-********************
+************
  Data Types
-********************
+************
 
 Platform Types
-===============
+==============
 
 .. code:: c
 
@@ -411,13 +412,13 @@ Platform Types
 
 Cross-platform type definitions for file descriptors, processes, and sockets.
 
-************************
+********************
  API Best Practices
-************************
+********************
 
-1. **Always check enablement** with ``ZEND_ASYNC_IS_ENABLED()`` before using APIs
-2. **Use appropriate scopes** for coroutine isolation
-3. **Handle reference counting** properly with event objects
-4. **Register cleanup handlers** using context switch handlers
-5. **Check reactor availability** before using event-based operations
-6. **Use priority levels** appropriately for coroutine scheduling
+#. **Always check enablement** with ``ZEND_ASYNC_IS_ENABLED()`` before using APIs
+#. **Use appropriate scopes** for coroutine isolation
+#. **Handle reference counting** properly with event objects
+#. **Register cleanup handlers** using context switch handlers
+#. **Check reactor availability** before using event-based operations
+#. **Use priority levels** appropriately for coroutine scheduling
