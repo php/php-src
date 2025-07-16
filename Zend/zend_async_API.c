@@ -48,13 +48,31 @@ static void shutdown_stub(void) {}
 
 static zend_array* get_coroutines_stub(void) { return NULL; }
 
-static zend_future_t* future_create_stub(bool thread_safe, size_t extra_size) 
+static zend_future_t* new_future_stub(bool thread_safe, size_t extra_size) 
 {
 	ASYNC_THROW_ERROR("Async API is not enabled");
 	return NULL;
 }
 
-static zend_async_channel_t* channel_create_stub(size_t buffer_size, bool resizable, bool thread_safe, size_t extra_size) 
+static zend_async_channel_t* new_channel_stub(size_t buffer_size, bool resizable, bool thread_safe, size_t extra_size) 
+{
+	ASYNC_THROW_ERROR("Async API is not enabled");
+	return NULL;
+}
+
+static zend_async_group_t* new_group_stub(size_t extra_size) 
+{
+	ASYNC_THROW_ERROR("Async API is not enabled");
+	return NULL;
+}
+
+static zend_object* new_future_obj_stub(zend_future_t *future) 
+{
+	ASYNC_THROW_ERROR("Async API is not enabled");
+	return NULL;
+}
+
+static zend_object* new_channel_obj_stub(zend_async_channel_t *channel) 
 {
 	ASYNC_THROW_ERROR("Async API is not enabled");
 	return NULL;
@@ -109,8 +127,13 @@ zend_async_get_coroutines_t zend_async_get_coroutines_fn = get_coroutines_stub;
 zend_async_add_microtask_t zend_async_add_microtask_fn = add_microtask_stub;
 zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = get_awaiting_info_stub;
 zend_async_get_class_ce_t zend_async_get_class_ce_fn = get_class_ce;
-zend_async_future_create_t zend_async_future_create_fn = future_create_stub;
-zend_async_channel_create_t zend_async_channel_create_fn = channel_create_stub;
+zend_async_new_future_t zend_async_new_future_fn = new_future_stub;
+zend_async_new_channel_t zend_async_new_channel_fn = new_channel_stub;
+zend_async_new_future_obj_t zend_async_new_future_obj_fn = new_future_obj_stub;
+zend_async_new_channel_obj_t zend_async_new_channel_obj_fn = new_channel_obj_stub;
+
+/* GROUP API */
+zend_async_new_group_t zend_async_new_group_fn = new_group_stub;
 
 static zend_atomic_bool reactor_lock = {0};
 static char * reactor_module_name = NULL;
@@ -243,6 +266,11 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
     zend_async_get_class_ce_t get_class_ce_fn,
     zend_async_new_iterator_t new_iterator_fn,
+    zend_async_new_future_t new_future_fn,
+    zend_async_new_channel_t new_channel_fn,
+    zend_async_new_future_obj_t new_future_obj_fn,
+    zend_async_new_channel_obj_t new_channel_obj_fn,
+    zend_async_new_group_t new_group_fn,
     zend_async_engine_shutdown_t engine_shutdown_fn
 )
 {
@@ -280,6 +308,11 @@ ZEND_API bool zend_async_scheduler_register(
 	zend_async_get_awaiting_info_fn = get_awaiting_info_fn;
 	zend_async_get_class_ce_fn = get_class_ce_fn;
 	zend_async_new_iterator_fn = new_iterator_fn;
+	zend_async_new_future_fn = new_future_fn;
+	zend_async_new_channel_fn = new_channel_fn;
+	zend_async_new_future_obj_fn = new_future_obj_fn;
+	zend_async_new_channel_obj_fn = new_channel_obj_fn;
+	zend_async_new_group_fn = new_group_fn;
     zend_async_engine_shutdown_fn = engine_shutdown_fn;
 
 	zend_atomic_bool_store(&scheduler_lock, 0);

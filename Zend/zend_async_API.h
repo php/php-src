@@ -19,9 +19,9 @@
 #include "zend_fibers.h"
 #include "zend_globals.h"
 
-#define ZEND_ASYNC_API "TrueAsync API v0.4.0"
+#define ZEND_ASYNC_API "TrueAsync API v0.5.0"
 #define ZEND_ASYNC_API_VERSION_MAJOR 0
-#define ZEND_ASYNC_API_VERSION_MINOR 4
+#define ZEND_ASYNC_API_VERSION_MINOR 5
 #define ZEND_ASYNC_API_VERSION_PATCH 0
 
 #define ZEND_ASYNC_API_VERSION_NUMBER \
@@ -106,6 +106,7 @@ typedef enum
 
 	ZEND_ASYNC_CLASS_CHANNEL = 10,
 	ZEND_ASYNC_CLASS_FUTURE = 11,
+	ZEND_ASYNC_CLASS_GROUP = 12,
 
 	ZEND_ASYNC_EXCEPTION_DEFAULT = 30,
 	ZEND_ASYNC_EXCEPTION_CANCELLATION = 31,
@@ -134,6 +135,7 @@ typedef struct _zend_async_waker_s zend_async_waker_t;
 typedef struct _zend_async_microtask_s zend_async_microtask_t;
 typedef struct _zend_async_scope_s zend_async_scope_t;
 typedef struct _zend_async_iterator_s zend_async_iterator_t;
+typedef struct _zend_async_group_s zend_async_group_t;
 typedef struct _zend_fcall_s zend_fcall_t;
 typedef void (*zend_coroutine_entry_t)(void);
 
@@ -217,8 +219,13 @@ typedef zend_array* (*zend_async_get_coroutines_t)(void);
 typedef void (*zend_async_add_microtask_t)(zend_async_microtask_t *microtask);
 typedef zend_array* (*zend_async_get_awaiting_info_t)(zend_coroutine_t * coroutine);
 typedef zend_class_entry* (*zend_async_get_class_ce_t)(zend_async_class type);
-typedef zend_future_t* (*zend_async_future_create_t)(bool thread_safe, size_t extra_size);
-typedef zend_async_channel_t* (*zend_async_channel_create_t)(size_t buffer_size, bool resizable, bool thread_safe, size_t extra_size);
+typedef zend_future_t* (*zend_async_new_future_t)(bool thread_safe, size_t extra_size);
+typedef zend_async_channel_t* (*zend_async_new_channel_t)(size_t buffer_size, bool resizable, bool thread_safe, size_t extra_size);
+
+typedef zend_async_group_t* (*zend_async_new_group_t)(size_t extra_size);
+
+typedef zend_object* (*zend_async_new_future_obj_t)(zend_future_t *future);
+typedef zend_object* (*zend_async_new_channel_obj_t)(zend_async_channel_t *channel);
 
 typedef void (*zend_async_reactor_startup_t)(void);
 typedef void (*zend_async_reactor_shutdown_t)(void);
@@ -285,6 +292,8 @@ typedef int (* zend_async_exec_t) (
 );
 
 typedef void (*zend_async_queue_task_t)(zend_async_task_t *task);
+
+typedef void (*zend_async_task_run_t)(zend_async_task_t *task);
 
 typedef void (*zend_async_microtask_handler_t)(zend_async_microtask_t *microtask);
 
@@ -732,6 +741,7 @@ struct _zend_async_listen_event_s {
 
 struct _zend_async_task_s {
 	zend_async_event_t base;
+	zend_async_task_run_t run;
 };
 
 struct _zend_async_trigger_event_s {
@@ -1259,8 +1269,13 @@ ZEND_API extern zend_async_get_coroutines_t zend_async_get_coroutines_fn;
 ZEND_API extern zend_async_add_microtask_t zend_async_add_microtask_fn;
 ZEND_API extern zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn;
 ZEND_API extern zend_async_get_class_ce_t zend_async_get_class_ce_fn;
-ZEND_API extern zend_async_future_create_t zend_async_future_create_fn;
-ZEND_API extern zend_async_channel_create_t zend_async_channel_create_fn;
+ZEND_API extern zend_async_new_future_t zend_async_new_future_fn;
+ZEND_API extern zend_async_new_channel_t zend_async_new_channel_fn;
+ZEND_API extern zend_async_new_future_obj_t zend_async_new_future_obj_fn;
+ZEND_API extern zend_async_new_channel_obj_t zend_async_new_channel_obj_fn;
+
+/* GROUP API */
+ZEND_API extern zend_async_new_group_t zend_async_new_group_fn;
 
 /* Iterator API */
 ZEND_API extern zend_async_new_iterator_t zend_async_new_iterator_fn;
@@ -1335,6 +1350,11 @@ ZEND_API bool zend_async_scheduler_register(
     zend_async_get_awaiting_info_t get_awaiting_info_fn,
     zend_async_get_class_ce_t get_class_ce_fn,
     zend_async_new_iterator_t new_iterator_fn,
+    zend_async_new_future_t new_future_fn,
+    zend_async_new_channel_t new_channel_fn,
+    zend_async_new_future_obj_t new_future_obj_fn,
+    zend_async_new_channel_obj_t new_channel_obj_fn,
+    zend_async_new_group_t new_group_fn,
     zend_async_engine_shutdown_t engine_shutdown_fn
 );
 
@@ -1446,12 +1466,18 @@ ZEND_API void zend_async_add_main_coroutine_start_handler(
 ZEND_API void zend_async_call_main_coroutine_start_handlers(zend_coroutine_t *main_coroutine);
 
 /* Future API Functions */
-#define ZEND_ASYNC_NEW_FUTURE(thread_safe) zend_async_future_create_fn(thread_safe, 0)
-#define ZEND_ASYNC_NEW_FUTURE_EX(thread_safe, extra_size) zend_async_future_create_fn(thread_safe, extra_size)
+#define ZEND_ASYNC_NEW_FUTURE(thread_safe) zend_async_new_future_fn(thread_safe, 0)
+#define ZEND_ASYNC_NEW_FUTURE_EX(thread_safe, extra_size) zend_async_new_future_fn(thread_safe, extra_size)
+#define ZEND_ASYNC_NEW_FUTURE_OBJ(future) zend_async_new_future_obj_fn(future)
 
 /* Channel API Functions */
-#define ZEND_ASYNC_NEW_CHANNEL(buffer_size, resizable, thread_safe) zend_async_channel_create_fn(buffer_size, resizable, thread_safe, 0)
-#define ZEND_ASYNC_NEW_CHANNEL_EX(buffer_size, resizable, thread_safe, extra_size) zend_async_channel_create_fn(buffer_size, resizable, thread_safe, extra_size)
+#define ZEND_ASYNC_NEW_CHANNEL(buffer_size, resizable, thread_safe) zend_async_new_channel_fn(buffer_size, resizable, thread_safe, 0)
+#define ZEND_ASYNC_NEW_CHANNEL_EX(buffer_size, resizable, thread_safe, extra_size) zend_async_new_channel_fn(buffer_size, resizable, thread_safe, extra_size)
+#define ZEND_ASYNC_NEW_CHANNEL_OBJ(channel) zend_async_new_channel_obj_fn(channel)
+
+/* GROUP API Functions */
+#define ZEND_ASYNC_NEW_GROUP() zend_async_new_group_fn(0)
+#define ZEND_ASYNC_NEW_GROUP_EX(extra_size) zend_async_new_group_fn(extra_size)
 
 END_EXTERN_C()
 
