@@ -2265,8 +2265,6 @@ rerun_gc:
 		stack.next = NULL;
 #endif
 
-		end = 0;
-
 		if (GC_G(gc_active)) {
 			GC_G(collector_time) += zend_hrtime() - GC_COLLECT_START_TIME;
 			GC_COLLECT_FINISH_0;
@@ -2347,6 +2345,7 @@ rerun_gc:
 			if (EXPECTED(!EG(active_fiber))) {
 #ifdef PHP_ASYNC_API
 continue_calling_destructors:
+				end = GC_G(first_unused);
 				if (UNEXPECTED(FAILURE == gc_call_destructors(GC_G(dtor_idx), GC_G(first_unused), NULL))) {
 					//
 					// gc_call_destructors returns FAILURE when a destructor interrupts execution,
