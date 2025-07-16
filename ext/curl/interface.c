@@ -2623,6 +2623,11 @@ PHP_FUNCTION(curl_getinfo)
 			CAAL("proxyauth_used", l_code);
 		}
 #endif
+#if LIBCURL_VERSION_NUM >= 0x080200 /* Available since 8.2.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_CONN_ID , &co) == CURLE_OK) {
+			CAAL("conn_id", co);
+		}
+#endif
 	} else {
 		switch (option) {
 			case CURLINFO_HEADER_OUT:
