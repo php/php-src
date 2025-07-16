@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed GH-19169 build issue with C++17 and ZEND_STATIC_ASSERT macro.
     (psumbera)
+  . Fixed bug GH-18581 (Coerce numeric string keys from iterators when argument
+    unpacking). (ilutov)
 
 - Hash:
   . Fix crash on clone failure. (nielsdos)
