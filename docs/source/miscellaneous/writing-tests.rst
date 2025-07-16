@@ -95,13 +95,13 @@ might use a variation tests to test boundary conditions.
 How big is a test case?
 =======================
 
-Small. Really — the smaller the better, a good guide is no more than 10 lines of output. The
-reason for this is that if we break something in PHP and it breaks your test case we need to be able
-to find out quite quickly what we broke, going through 1000s of line of test case output is not
-easy. Having said that it's sometimes just not practical to stay within the 10 line guideline, in
-this case you can help a lot by commenting the output. You may find plenty of much longer tests in
-PHP - the small tests message is something that we learnt over time, in fact we are slowly going
-through and splitting tests up when we need to.
+Small. Really — the smaller the better, a good guide is no more than 10 lines of output. The reason
+for this is that if we break something in PHP and it breaks your test case we need to be able to
+find out quite quickly what we broke, going through 1000s of line of test case output is not easy.
+Having said that it's sometimes just not practical to stay within the 10 line guideline, in this
+case you can help a lot by commenting the output. You may find plenty of much longer tests in PHP -
+the small tests message is something that we learnt over time, in fact we are slowly going through
+and splitting tests up when we need to.
 
 Comments
 ========
@@ -183,10 +183,10 @@ Testing your test cases
 
 Most people who write tests for PHP don't have access to a huge number of operating systems but the
 tests are run on every system that runs PHP. It's good to test your test on as many platforms as you
-can — Linux and Windows are the most important, it's increasingly important to make sure that
-tests run on 64 bit as well as 32 bit platforms. If you only have access to one operating system —
-don't worry, if you have karma, commit the test but watch php-qa@lists.php.net for reports of
-failures on other platforms. If you don't have karma to commit have a look at the next section.
+can — Linux and Windows are the most important, it's increasingly important to make sure that tests
+run on 64 bit as well as 32 bit platforms. If you only have access to one operating system — don't
+worry, if you have karma, commit the test but watch php-qa@lists.php.net for reports of failures on
+other platforms. If you don't have karma to commit have a look at the next section.
 
 When you are testing your test case it's really important to make sure that you clean up any
 temporary resources (eg files) that you used in the test. There is a special ``--CLEAN--`` section
