@@ -25,9 +25,8 @@
 #define ZEND_ASYNC_API_VERSION_PATCH 0
 
 #define ZEND_ASYNC_API_VERSION_NUMBER \
-	((ZEND_ASYNC_API_VERSION_MAJOR << 16) | \
-	(ZEND_ASYNC_API_VERSION_MINOR << 8)  | \
-	(ZEND_ASYNC_API_VERSION_PATCH))
+	((ZEND_ASYNC_API_VERSION_MAJOR << 16) | (ZEND_ASYNC_API_VERSION_MINOR << 8) \
+			| (ZEND_ASYNC_API_VERSION_PATCH))
 
 #ifndef PHP_WIN32
 #include <netdb.h>
@@ -42,18 +41,18 @@ typedef enum {
 } async_poll_event;
 
 /* Signal Constants */
-#define ZEND_ASYNC_SIGHUP    1
-#define ZEND_ASYNC_SIGINT    2
-#define ZEND_ASYNC_SIGQUIT   3
-#define ZEND_ASYNC_SIGILL    4
+#define ZEND_ASYNC_SIGHUP 1
+#define ZEND_ASYNC_SIGINT 2
+#define ZEND_ASYNC_SIGQUIT 3
+#define ZEND_ASYNC_SIGILL 4
 #define ZEND_ASYNC_SIGABRT_COMPAT 6
-#define ZEND_ASYNC_SIGFPE    8
-#define ZEND_ASYNC_SIGKILL   9
-#define ZEND_ASYNC_SIGSEGV   11
-#define ZEND_ASYNC_SIGTERM   15
-#define ZEND_ASYNC_SIGBREAK  21
-#define ZEND_ASYNC_SIGABRT   22
-#define ZEND_ASYNC_SIGWINCH  28
+#define ZEND_ASYNC_SIGFPE 8
+#define ZEND_ASYNC_SIGKILL 9
+#define ZEND_ASYNC_SIGSEGV 11
+#define ZEND_ASYNC_SIGTERM 15
+#define ZEND_ASYNC_SIGBREAK 21
+#define ZEND_ASYNC_SIGABRT 22
+#define ZEND_ASYNC_SIGWINCH 28
 
 //
 // Definitions compatibles with proc_open()
@@ -93,8 +92,7 @@ typedef enum {
 	ZEND_COROUTINE_HI_PRIORITY = 255
 } zend_coroutine_priority;
 
-typedef enum
-{
+typedef enum {
 	ZEND_ASYNC_CLASS_NO = 0,
 	ZEND_ASYNC_CLASS_AWAITABLE = 1,
 	ZEND_ASYNC_CLASS_COROUTINE = 2,
@@ -148,29 +146,27 @@ typedef struct _zend_coroutine_switch_handler_s zend_coroutine_switch_handler_t;
 typedef struct _zend_coroutine_switch_handlers_vector_s zend_coroutine_switch_handlers_vector_t;
 
 typedef bool (*zend_coroutine_switch_handler_fn)(
-	zend_coroutine_t *coroutine,
-	bool is_enter,     /* true = entering coroutine, false = leaving */
-	bool is_finishing  /* true = coroutine is finishing */
-	/* returns: true = keep handler, false = remove handler after execution */
+		zend_coroutine_t *coroutine, bool is_enter, /* true = entering coroutine, false = leaving */
+		bool is_finishing /* true = coroutine is finishing */
+		/* returns: true = keep handler, false = remove handler after execution */
 );
 
 typedef struct _zend_async_event_s zend_async_event_t;
 typedef struct _zend_async_event_callback_s zend_async_event_callback_t;
 typedef struct _zend_async_waker_trigger_s zend_async_waker_trigger_t;
 typedef struct _zend_coroutine_event_callback_s zend_coroutine_event_callback_t;
-typedef void (*zend_async_event_callback_fn)
-(
-	zend_async_event_t *event,
-	zend_async_event_callback_t *callback,
-	void * result,
-	zend_object *exception
-);
-typedef void (*zend_async_event_callback_dispose_fn)(zend_async_event_callback_t *callback, zend_async_event_t * event);
-typedef void (*zend_async_event_add_callback_t)(zend_async_event_t *event, zend_async_event_callback_t *callback);
-typedef void (*zend_async_event_del_callback_t)(zend_async_event_t *event, zend_async_event_callback_t *callback);
-typedef void (*zend_async_event_callbacks_notify_t)(zend_async_event_t *event, void *result, zend_object *exception);
-typedef void (*zend_async_event_start_t) (zend_async_event_t *event);
-typedef void (*zend_async_event_stop_t) (zend_async_event_t *event);
+typedef void (*zend_async_event_callback_fn)(zend_async_event_t *event,
+		zend_async_event_callback_t *callback, void *result, zend_object *exception);
+typedef void (*zend_async_event_callback_dispose_fn)(
+		zend_async_event_callback_t *callback, zend_async_event_t *event);
+typedef void (*zend_async_event_add_callback_t)(
+		zend_async_event_t *event, zend_async_event_callback_t *callback);
+typedef void (*zend_async_event_del_callback_t)(
+		zend_async_event_t *event, zend_async_event_callback_t *callback);
+typedef void (*zend_async_event_callbacks_notify_t)(
+		zend_async_event_t *event, void *result, zend_object *exception);
+typedef void (*zend_async_event_start_t)(zend_async_event_t *event);
+typedef void (*zend_async_event_stop_t)(zend_async_event_t *event);
 
 /**
  * The replay method can be called in several modes:
@@ -179,11 +175,10 @@ typedef void (*zend_async_event_stop_t) (zend_async_event_t *event);
  *
  * The method will return true if the result was applied.
  */
-typedef bool (*zend_async_event_replay_t) (
-	zend_async_event_t *event, zend_async_event_callback_t *callback, zval *result, zend_object **exception
-);
-typedef void (*zend_async_event_dispose_t) (zend_async_event_t *event);
-typedef zend_string* (*zend_async_event_info_t) (zend_async_event_t *event);
+typedef bool (*zend_async_event_replay_t)(zend_async_event_t *event,
+		zend_async_event_callback_t *callback, zval *result, zend_object **exception);
+typedef void (*zend_async_event_dispose_t)(zend_async_event_t *event);
+typedef zend_string *(*zend_async_event_info_t)(zend_async_event_t *event);
 
 typedef struct _zend_async_poll_event_s zend_async_poll_event_t;
 typedef struct _zend_async_timer_event_s zend_async_timer_event_t;
@@ -205,91 +200,75 @@ typedef struct _zend_async_task_s zend_async_task_t;
 
 /* Internal context typedefs removed - using direct functions */
 
-typedef zend_coroutine_t * (*zend_async_new_coroutine_t)(zend_async_scope_t *scope);
-typedef zend_async_scope_t * (*zend_async_new_scope_t)(zend_async_scope_t * parent_scope, bool with_zend_object);
-typedef zend_coroutine_t * (*zend_async_spawn_t)(zend_async_scope_t *scope, zend_object *scope_provider, int32_t priority);
+typedef zend_coroutine_t *(*zend_async_new_coroutine_t)(zend_async_scope_t *scope);
+typedef zend_async_scope_t *(*zend_async_new_scope_t)(
+		zend_async_scope_t *parent_scope, bool with_zend_object);
+typedef zend_coroutine_t *(*zend_async_spawn_t)(
+		zend_async_scope_t *scope, zend_object *scope_provider, int32_t priority);
 typedef void (*zend_async_suspend_t)(bool from_main);
 typedef void (*zend_async_enqueue_coroutine_t)(zend_coroutine_t *coroutine);
-typedef void (*zend_async_resume_t)(zend_coroutine_t *coroutine, zend_object * error, const bool transfer_error);
-typedef void (*zend_async_cancel_t)(zend_coroutine_t *coroutine, zend_object * error, bool transfer_error, const bool is_safely);
-typedef bool (*zend_async_spawn_and_throw_t)(zend_object *exception, zend_async_scope_t *scope, int32_t priority);
+typedef void (*zend_async_resume_t)(
+		zend_coroutine_t *coroutine, zend_object *error, const bool transfer_error);
+typedef void (*zend_async_cancel_t)(
+		zend_coroutine_t *coroutine, zend_object *error, bool transfer_error, const bool is_safely);
+typedef bool (*zend_async_spawn_and_throw_t)(
+		zend_object *exception, zend_async_scope_t *scope, int32_t priority);
 typedef void (*zend_async_shutdown_t)(void);
 typedef void (*zend_async_engine_shutdown_t)(void);
-typedef zend_array* (*zend_async_get_coroutines_t)(void);
+typedef zend_array *(*zend_async_get_coroutines_t)(void);
 typedef void (*zend_async_add_microtask_t)(zend_async_microtask_t *microtask);
-typedef zend_array* (*zend_async_get_awaiting_info_t)(zend_coroutine_t * coroutine);
-typedef zend_class_entry* (*zend_async_get_class_ce_t)(zend_async_class type);
-typedef zend_future_t* (*zend_async_new_future_t)(bool thread_safe, size_t extra_size);
-typedef zend_async_channel_t* (*zend_async_new_channel_t)(size_t buffer_size, bool resizable, bool thread_safe, size_t extra_size);
+typedef zend_array *(*zend_async_get_awaiting_info_t)(zend_coroutine_t *coroutine);
+typedef zend_class_entry *(*zend_async_get_class_ce_t)(zend_async_class type);
+typedef zend_future_t *(*zend_async_new_future_t)(bool thread_safe, size_t extra_size);
+typedef zend_async_channel_t *(*zend_async_new_channel_t)(
+		size_t buffer_size, bool resizable, bool thread_safe, size_t extra_size);
 
-typedef zend_async_group_t* (*zend_async_new_group_t)(size_t extra_size);
+typedef zend_async_group_t *(*zend_async_new_group_t)(size_t extra_size);
 
-typedef zend_object* (*zend_async_new_future_obj_t)(zend_future_t *future);
-typedef zend_object* (*zend_async_new_channel_obj_t)(zend_async_channel_t *channel);
+typedef zend_object *(*zend_async_new_future_obj_t)(zend_future_t *future);
+typedef zend_object *(*zend_async_new_channel_obj_t)(zend_async_channel_t *channel);
 
 typedef void (*zend_async_reactor_startup_t)(void);
 typedef void (*zend_async_reactor_shutdown_t)(void);
 typedef bool (*zend_async_reactor_execute_t)(bool no_wait);
 typedef bool (*zend_async_reactor_loop_alive_t)(void);
 
-typedef zend_async_poll_event_t* (*zend_async_new_socket_event_t)(
-	zend_socket_t socket, async_poll_event events, size_t extra_size
-);
-typedef zend_async_poll_event_t* (*zend_async_new_poll_event_t)(
-	zend_file_descriptor_t fh, zend_socket_t socket, async_poll_event events, size_t extra_size
-);
-typedef zend_async_timer_event_t* (*zend_async_new_timer_event_t)(
-	const zend_ulong timeout, const zend_ulong nanoseconds, const bool is_periodic, size_t extra_size
-);
-typedef zend_async_signal_event_t* (*zend_async_new_signal_event_t)(int signum, size_t extra_size);
-typedef zend_async_process_event_t* (*zend_async_new_process_event_t)(zend_process_t process_handle, size_t extra_size);
+typedef zend_async_poll_event_t *(*zend_async_new_socket_event_t)(
+		zend_socket_t socket, async_poll_event events, size_t extra_size);
+typedef zend_async_poll_event_t *(*zend_async_new_poll_event_t)(zend_file_descriptor_t fh,
+		zend_socket_t socket, async_poll_event events, size_t extra_size);
+typedef zend_async_timer_event_t *(*zend_async_new_timer_event_t)(const zend_ulong timeout,
+		const zend_ulong nanoseconds, const bool is_periodic, size_t extra_size);
+typedef zend_async_signal_event_t *(*zend_async_new_signal_event_t)(int signum, size_t extra_size);
+typedef zend_async_process_event_t *(*zend_async_new_process_event_t)(
+		zend_process_t process_handle, size_t extra_size);
 typedef void (*zend_async_thread_entry_t)(void *arg, size_t extra_size);
-typedef zend_async_thread_event_t* (*zend_async_new_thread_event_t)(
-	zend_async_thread_entry_t entry, void *arg, size_t extra_size
-);
+typedef zend_async_thread_event_t *(*zend_async_new_thread_event_t)(
+		zend_async_thread_entry_t entry, void *arg, size_t extra_size);
 typedef void (*zend_async_trigger_event_trigger_fn)(zend_async_trigger_event_t *event);
-typedef zend_async_trigger_event_t* (*zend_async_new_trigger_event_t)(size_t extra_size);
-typedef zend_async_filesystem_event_t* (*zend_async_new_filesystem_event_t)(
-	zend_string * path, const unsigned int flags, size_t extra_size
-);
+typedef zend_async_trigger_event_t *(*zend_async_new_trigger_event_t)(size_t extra_size);
+typedef zend_async_filesystem_event_t *(*zend_async_new_filesystem_event_t)(
+		zend_string *path, const unsigned int flags, size_t extra_size);
 
-typedef zend_async_dns_nameinfo_t* (*zend_async_getnameinfo_t)(const struct sockaddr* addr, int flags, size_t extra_size);
-typedef zend_async_dns_addrinfo_t* (*zend_async_getaddrinfo_t)(
-	const char *node, const char *service, const struct addrinfo *hints, size_t extra_size
-);
+typedef zend_async_dns_nameinfo_t *(*zend_async_getnameinfo_t)(
+		const struct sockaddr *addr, int flags, size_t extra_size);
+typedef zend_async_dns_addrinfo_t *(*zend_async_getaddrinfo_t)(
+		const char *node, const char *service, const struct addrinfo *hints, size_t extra_size);
 typedef void (*zend_async_freeaddrinfo_t)(struct addrinfo *ai);
 
-typedef zend_async_exec_event_t* (*zend_async_new_exec_event_t) (
-	zend_async_exec_mode exec_mode,
-	const char *cmd,
-	zval *return_buffer,
-	zval *return_value,
-	zval *std_error,
-	const char *cwd,
-	const char *env,
-	size_t extra_size
-);
+typedef zend_async_exec_event_t *(*zend_async_new_exec_event_t)(zend_async_exec_mode exec_mode,
+		const char *cmd, zval *return_buffer, zval *return_value, zval *std_error, const char *cwd,
+		const char *env, size_t extra_size);
 
-typedef zend_async_listen_event_t* (*zend_async_socket_listen_t)(
-	const char *host, int port, int backlog, size_t extra_size
-);
+typedef zend_async_listen_event_t *(*zend_async_socket_listen_t)(
+		const char *host, int port, int backlog, size_t extra_size);
 
 typedef int (*zend_async_listen_get_local_address_t)(
-	zend_async_listen_event_t *listen_event,
-	char *host, size_t host_len,
-	int *port
-);
+		zend_async_listen_event_t *listen_event, char *host, size_t host_len, int *port);
 
-typedef int (* zend_async_exec_t) (
-	zend_async_exec_mode exec_mode,
-	const char *cmd,
-	zval *return_buffer,
-	zval *return_value,
-	zval *std_error,
-	const char *cwd,
-	const char *env,
-	const zend_ulong timeout
-);
+typedef int (*zend_async_exec_t)(zend_async_exec_mode exec_mode, const char *cmd,
+		zval *return_buffer, zval *return_value, zval *std_error, const char *cwd, const char *env,
+		const zend_ulong timeout);
 
 typedef void (*zend_async_queue_task_t)(zend_async_task_t *task);
 
@@ -307,14 +286,14 @@ struct _zend_fcall_s {
 ///////////////////////////////////////////////////////////////////
 
 struct _zend_coroutine_switch_handler_s {
-	zend_coroutine_switch_handler_fn handler;  /* Handler function pointer */
+	zend_coroutine_switch_handler_fn handler; /* Handler function pointer */
 };
 
 struct _zend_coroutine_switch_handlers_vector_s {
-	uint32_t length;                           /* Number of handlers */
-	uint32_t capacity;                         /* Allocated capacity */
-	zend_coroutine_switch_handler_t *data;     /* Array of handlers */
-	bool in_execution;                         /* Protection flag during execution */
+	uint32_t length; /* Number of handlers */
+	uint32_t capacity; /* Allocated capacity */
+	zend_coroutine_switch_handler_t *data; /* Array of handlers */
+	bool in_execution; /* Protection flag during execution */
 };
 
 struct _zend_async_microtask_s {
@@ -350,9 +329,9 @@ struct _zend_async_microtask_s {
 
 typedef void (*zend_async_iterator_method_t)(zend_async_iterator_t *iterator);
 
-#define ZEND_ASYNC_ITERATOR_FIELDS		\
-	zend_async_microtask_t microtask;	\
-	zend_async_scope_t *scope;			\
+#define ZEND_ASYNC_ITERATOR_FIELDS \
+	zend_async_microtask_t microtask; \
+	zend_async_scope_t *scope; \
 	/* NULLABLE. Custom data for the iterator, can be used to store additional information. */ \
 	void *extended_data; \
 	/* NULLABLE. An additional destructor that will be called. */ \
@@ -360,30 +339,25 @@ typedef void (*zend_async_iterator_method_t)(zend_async_iterator_t *iterator);
 	/* A method that starts the iterator in the current coroutine. */ \
 	zend_async_iterator_method_t run; \
 	/* A method that starts the iterator in a separate coroutine with the specified priority. */ \
-	void (*run_in_coroutine)(zend_async_iterator_t *iterator, int32_t priority); \
+	void (*run_in_coroutine)(zend_async_iterator_t * iterator, int32_t priority); \
 	/* The maximum number of concurrent tasks that can be executed at the same time */ \
 	unsigned int concurrency; \
 	/* Priority for coroutines created by this iterator */ \
 	int32_t priority; \
 	/* NULLABLE. Exception that stopped the iterator */ \
-	zend_object * exception;
+	zend_object *exception;
 
 struct _zend_async_iterator_s {
 	ZEND_ASYNC_ITERATOR_FIELDS
 };
 
-typedef zend_result (*zend_async_iterator_handler_t)(zend_async_iterator_t *iterator, zval *current, zval *key);
+typedef zend_result (*zend_async_iterator_handler_t)(
+		zend_async_iterator_t *iterator, zval *current, zval *key);
 
-typedef zend_async_iterator_t* (*zend_async_new_iterator_t)(
-	zval *array,
-	zend_object_iterator *zend_iterator,
-	zend_fcall_t *fcall,
-	zend_async_iterator_handler_t handler,
-	zend_async_scope_t *scope,
-	unsigned int concurrency,
-	int32_t priority,
-	size_t iterator_size
-);
+typedef zend_async_iterator_t *(*zend_async_new_iterator_t)(zval *array,
+		zend_object_iterator *zend_iterator, zend_fcall_t *fcall,
+		zend_async_iterator_handler_t handler, zend_async_scope_t *scope, unsigned int concurrency,
+		int32_t priority, size_t iterator_size);
 
 ///////////////////////////////////////////////////////////////////
 /// Event Structures
@@ -408,14 +382,14 @@ struct _zend_async_event_callback_s {
 // you **MUST** use either this macro or ZEND_ASYNC_EVENT_CALLBACK_RELEASE.
 //
 #define ZEND_ASYNC_EVENT_CALLBACK_DEC_REF(callback) \
-	if(callback != NULL && callback->ref_count > 1) { \
+	if (callback != NULL && callback->ref_count > 1) { \
 		callback->ref_count--; \
 	}
 
 #define ZEND_ASYNC_EVENT_CALLBACK_RELEASE(callback) \
 	if ((callback) != NULL && (callback)->ref_count > 1) { \
 		(callback)->ref_count--; \
-	} else if((callback)->dispose != NULL) { \
+	} else if ((callback)->dispose != NULL) { \
 		(callback)->dispose((callback), NULL); \
 	} else { \
 		coroutine_event_callback_dispose((callback), NULL); \
@@ -427,27 +401,27 @@ struct _zend_coroutine_event_callback_s {
 };
 
 struct _zend_async_waker_trigger_s {
-	uint32_t                      length;          /* current number of callbacks          */
-	uint32_t                      capacity;        /* allocated slots in the array         */
-	zend_async_event_t           *event;
-	zend_async_event_callback_t  *data[1];        /* flexible array member                */
+	uint32_t length; /* current number of callbacks          */
+	uint32_t capacity; /* allocated slots in the array         */
+	zend_async_event_t *event;
+	zend_async_event_callback_t *data[1]; /* flexible array member                */
 };
 
 /* Dynamic array of async event callbacks with single iterator protection */
 typedef struct _zend_async_callbacks_vector_s {
-	uint32_t                      length;          /* current number of callbacks          */
-	uint32_t                      capacity;        /* allocated slots in the array         */
-	zend_async_event_callback_t  **data;           /* dynamically allocated callback array */
-	
+	uint32_t length; /* current number of callbacks          */
+	uint32_t capacity; /* allocated slots in the array         */
+	zend_async_event_callback_t **data; /* dynamically allocated callback array */
+
 	/* Single iterator tracking - NULL means no active iteration */
-	uint32_t                     *current_iterator; /* pointer to active iterator index     */
+	uint32_t *current_iterator; /* pointer to active iterator index     */
 } zend_async_callbacks_vector_t;
 
 /**
  * Basic structure for representing events.
- * An event can be either an internal C object or a Zend object implementing the Awaitable interface.
- * In that case, the ZEND_ASYNC_EVENT_F_ZEND_OBJ flag is set to TRUE,
- * and the zend_object_offset field points to the offset of the zend_object structure.
+ * An event can be either an internal C object or a Zend object implementing the Awaitable
+ * interface. In that case, the ZEND_ASYNC_EVENT_F_ZEND_OBJ flag is set to TRUE, and the
+ * zend_object_offset field points to the offset of the zend_object structure.
  *
  * To manage the reference counter, use the macros:
  * ZEND_ASYNC_EVENT_ADD_REF, ZEND_ASYNC_EVENT_DEL_REF, ZEND_ASYNC_EVENT_RELEASE.
@@ -458,8 +432,7 @@ struct _zend_async_event_s {
 	uint32_t flags;
 	/* Offset to the beginning of additional data associated with the event (used for extensions) */
 	uint32_t extra_offset;
-	union
-	{
+	union {
 		/* The refcount of the event. */
 		uint32_t ref_count;
 		/* The offset of Zend object structure. */
@@ -476,8 +449,9 @@ struct _zend_async_event_s {
 	zend_async_event_stop_t stop;
 	/*
 	 * Replay method. Nullable.
-	 * This method is implemented only by those events that can provide a result again, even after they have completed.
-	 * For example, this method is relevant for coroutines and futures, which can provide the result again and again.
+	 * This method is implemented only by those events that can provide a result again, even after
+	 * they have completed. For example, this method is relevant for coroutines and futures, which
+	 * can provide the result again and again.
 	 */
 	zend_async_event_replay_t replay;
 	zend_async_event_dispose_t dispose;
@@ -491,9 +465,10 @@ struct _zend_async_event_s {
 };
 
 /**
- * Event reference. A special data structure that allows representing an object with the Awaitable interface,
- * but which does not store the event directly—instead, it holds only a reference to it.
- * This is necessary for events that are destroyed asynchronously and therefore cannot be used as Zend objects.
+ * Event reference. A special data structure that allows representing an object with the Awaitable
+ * interface, but which does not store the event directly—instead, it holds only a reference to it.
+ * This is necessary for events that are destroyed asynchronously and therefore cannot be used as
+ * Zend objects.
  *
  * For example, events like Timer, Poll, and Signal cannot be Zend objects
  * because their destruction cycle does not align.
@@ -502,129 +477,144 @@ struct _zend_async_event_s {
  * * zend_object_offset is the offset of the Zend object structure.
  * * event is a pointer to the zend_async_event_t structure.
  */
-#define ZEND_ASYNC_EVENT_REF_PROLOG         \
-	uint32_t flags;                         \
+#define ZEND_ASYNC_EVENT_REF_PROLOG \
+	uint32_t flags; \
 	uint32_t zend_object_offset;
 
-#define ZEND_ASYNC_EVENT_REF_FIELDS         \
-	uint32_t flags;                         \
-	uint32_t zend_object_offset;            \
+#define ZEND_ASYNC_EVENT_REF_FIELDS \
+	uint32_t flags; \
+	uint32_t zend_object_offset; \
 	zend_async_event_t *event;
 
 typedef struct {
 	ZEND_ASYNC_EVENT_REF_FIELDS
 } zend_async_event_ref_t;
 
-#define ZEND_ASYNC_EVENT_F_CLOSED        (1u << 0)  /* event was closed */
-#define ZEND_ASYNC_EVENT_F_RESULT_USED   (1u << 1)  /* result will be used in exception handler */
-#define ZEND_ASYNC_EVENT_F_EXC_CAUGHT    (1u << 2)  /* error was caught in exception handler */
+#define ZEND_ASYNC_EVENT_F_CLOSED (1u << 0) /* event was closed */
+#define ZEND_ASYNC_EVENT_F_RESULT_USED (1u << 1) /* result will be used in exception handler */
+#define ZEND_ASYNC_EVENT_F_EXC_CAUGHT (1u << 2) /* error was caught in exception handler */
 /* Indicates that the event produces a ZVAL pointer during the callback. */
-#define ZEND_ASYNC_EVENT_F_ZVAL_RESULT   (1u << 3)
-#define ZEND_ASYNC_EVENT_F_ZEND_OBJ 	 (1u << 4)  /* event is a zend object */
-#define ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY (1u << 5) /* event will not free memory in dispose handler */
-#define ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED (1u << 6) /* exception has been caught and processed */
+#define ZEND_ASYNC_EVENT_F_ZVAL_RESULT (1u << 3)
+#define ZEND_ASYNC_EVENT_F_ZEND_OBJ (1u << 4) /* event is a zend object */
+#define ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY \
+	(1u << 5) /* event will not free memory in dispose handler */
+#define ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED (1u << 6) /* exception has been caught and processed \
+														*/
 
-#define ZEND_ASYNC_EVENT_F_REFERENCE 	  (1u << 7)  /* event is a reference structure */
+#define ZEND_ASYNC_EVENT_F_REFERENCE (1u << 7) /* event is a reference structure */
 
 // Flag indicating that the event has a zend_object reference by extra_offset.
-#define ZEND_ASYNC_EVENT_F_OBJ_REF 		  (1u << 8)  /* has zend_object ref */
+#define ZEND_ASYNC_EVENT_F_OBJ_REF (1u << 8) /* has zend_object ref */
 
-#define ZEND_ASYNC_EVENT_REFERENCE_PREFIX ((uint32_t)0x80) /* prefix for reference structures */
+#define ZEND_ASYNC_EVENT_REFERENCE_PREFIX ((uint32_t) 0x80) /* prefix for reference structures */
 
 // Create a reference to an event with the given offset and event pointer.
-#define ZEND_ASYNC_EVENT_REF_SET(ptr, offset, ev) do {  \
-	(ptr)->flags = ZEND_ASYNC_EVENT_REFERENCE_PREFIX;   \
-	(ptr)->zend_object_offset = (offset);               \
-	(ptr)->event = (ev);                                \
+#define ZEND_ASYNC_EVENT_REF_SET(ptr, offset, ev) \
+	do { \
+		(ptr)->flags = ZEND_ASYNC_EVENT_REFERENCE_PREFIX; \
+		(ptr)->zend_object_offset = (offset); \
+		(ptr)->event = (ev); \
 	} while (0)
 
-#define ZEND_ASYNC_EVENT_IS_CLOSED(ev)         (((ev)->flags & ZEND_ASYNC_EVENT_F_CLOSED) != 0)
-#define ZEND_ASYNC_EVENT_WILL_RESULT_USED(ev)  (((ev)->flags & ZEND_ASYNC_EVENT_F_RESULT_USED) != 0)
-#define ZEND_ASYNC_EVENT_WILL_EXC_CAUGHT(ev)   (((ev)->flags & ZEND_ASYNC_EVENT_F_EXC_CAUGHT) != 0)
-#define ZEND_ASYNC_EVENT_WILL_ZVAL_RESULT(ev)  (((ev)->flags & ZEND_ASYNC_EVENT_F_ZVAL_RESULT) != 0)
-#define ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev)      (((ev)->flags & ZEND_ASYNC_EVENT_F_ZEND_OBJ) != 0)
-#define ZEND_ASYNC_EVENT_IS_NO_FREE_MEMORY(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY) != 0)
-#define ZEND_ASYNC_EVENT_IS_EXCEPTION_HANDLED(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED) != 0)
+#define ZEND_ASYNC_EVENT_IS_CLOSED(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_CLOSED) != 0)
+#define ZEND_ASYNC_EVENT_WILL_RESULT_USED(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_RESULT_USED) != 0)
+#define ZEND_ASYNC_EVENT_WILL_EXC_CAUGHT(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_EXC_CAUGHT) != 0)
+#define ZEND_ASYNC_EVENT_WILL_ZVAL_RESULT(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_ZVAL_RESULT) != 0)
+#define ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev) (((ev)->flags & ZEND_ASYNC_EVENT_F_ZEND_OBJ) != 0)
+#define ZEND_ASYNC_EVENT_IS_NO_FREE_MEMORY(ev) \
+	(((ev)->flags & ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY) != 0)
+#define ZEND_ASYNC_EVENT_IS_EXCEPTION_HANDLED(ev) \
+	(((ev)->flags & ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED) != 0)
 
-#define ZEND_ASYNC_EVENT_SET_CLOSED(ev)        ((ev)->flags |=  ZEND_ASYNC_EVENT_F_CLOSED)
-#define ZEND_ASYNC_EVENT_CLR_CLOSED(ev)        ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_CLOSED)
+#define ZEND_ASYNC_EVENT_SET_CLOSED(ev) ((ev)->flags |= ZEND_ASYNC_EVENT_F_CLOSED)
+#define ZEND_ASYNC_EVENT_CLR_CLOSED(ev) ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_CLOSED)
 
-#define ZEND_ASYNC_EVENT_SET_RESULT_USED(ev)   ((ev)->flags |=  ZEND_ASYNC_EVENT_F_RESULT_USED)
-#define ZEND_ASYNC_EVENT_CLR_RESULT_USED(ev)   ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_RESULT_USED)
+#define ZEND_ASYNC_EVENT_SET_RESULT_USED(ev) ((ev)->flags |= ZEND_ASYNC_EVENT_F_RESULT_USED)
+#define ZEND_ASYNC_EVENT_CLR_RESULT_USED(ev) ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_RESULT_USED)
 
-#define ZEND_ASYNC_EVENT_SET_EXC_CAUGHT(ev)    ((ev)->flags |=  ZEND_ASYNC_EVENT_F_EXC_CAUGHT)
-#define ZEND_ASYNC_EVENT_CLR_EXC_CAUGHT(ev)    ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_EXC_CAUGHT)
+#define ZEND_ASYNC_EVENT_SET_EXC_CAUGHT(ev) ((ev)->flags |= ZEND_ASYNC_EVENT_F_EXC_CAUGHT)
+#define ZEND_ASYNC_EVENT_CLR_EXC_CAUGHT(ev) ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_EXC_CAUGHT)
 
-#define ZEND_ASYNC_EVENT_SET_ZVAL_RESULT(ev)   ((ev)->flags |=  ZEND_ASYNC_EVENT_F_ZVAL_RESULT)
-#define ZEND_ASYNC_EVENT_CLR_ZVAL_RESULT(ev)   ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_ZVAL_RESULT)
+#define ZEND_ASYNC_EVENT_SET_ZVAL_RESULT(ev) ((ev)->flags |= ZEND_ASYNC_EVENT_F_ZVAL_RESULT)
+#define ZEND_ASYNC_EVENT_CLR_ZVAL_RESULT(ev) ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_ZVAL_RESULT)
 
-#define ZEND_ASYNC_EVENT_SET_ZEND_OBJ(ev)      ((ev)->flags |=  ZEND_ASYNC_EVENT_F_ZEND_OBJ)
-#define ZEND_ASYNC_EVENT_SET_ZEND_OBJ_OFFSET(ev, offset) ((ev)->zend_object_offset = (unsigned int) (offset))
+#define ZEND_ASYNC_EVENT_SET_ZEND_OBJ(ev) ((ev)->flags |= ZEND_ASYNC_EVENT_F_ZEND_OBJ)
+#define ZEND_ASYNC_EVENT_SET_ZEND_OBJ_OFFSET(ev, offset) \
+	((ev)->zend_object_offset = (unsigned int) (offset))
 
-#define ZEND_ASYNC_EVENT_SET_NO_FREE_MEMORY(ev) ((ev)->flags |=  ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY)
+#define ZEND_ASYNC_EVENT_SET_NO_FREE_MEMORY(ev) ((ev)->flags |= ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY)
 
-#define ZEND_ASYNC_EVENT_SET_EXCEPTION_HANDLED(ev) ((ev)->flags |=  ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED)
-#define ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(ev) ((ev)->flags &= ~ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED)
+#define ZEND_ASYNC_EVENT_SET_EXCEPTION_HANDLED(ev) \
+	((ev)->flags |= ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED)
+#define ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(ev) \
+	((ev)->flags &= ~ZEND_ASYNC_EVENT_F_EXCEPTION_HANDLED)
 
-#define ZEND_ASYNC_EVENT_WITH_OBJECT_REF(ev) ((ev)->flags |=  ZEND_ASYNC_EVENT_F_OBJ_REF)
+#define ZEND_ASYNC_EVENT_WITH_OBJECT_REF(ev) ((ev)->flags |= ZEND_ASYNC_EVENT_F_OBJ_REF)
 
 // Convert awaitable Zend object to zend_async_event_t pointer
-#define ZEND_ASYNC_EVENT_IS_REFERENCE(ptr) (*((const uint32_t *)(ptr)) == ZEND_ASYNC_EVENT_REFERENCE_PREFIX)
-#define ZEND_ASYNC_OBJECT_TO_EVENT(obj)													 \
-	(																					 \
-		ZEND_ASYNC_EVENT_IS_REFERENCE((void *)((char *)(obj) - (obj)->handlers->offset)) \
-		? ((zend_async_event_ref_t *)((char *)(obj) - (obj)->handlers->offset))->event	 \
-		: (zend_async_event_t *)((char *)(obj) - (obj)->handlers->offset)				 \
-	)
+#define ZEND_ASYNC_EVENT_IS_REFERENCE(ptr) \
+	(*((const uint32_t *) (ptr)) == ZEND_ASYNC_EVENT_REFERENCE_PREFIX)
+#define ZEND_ASYNC_OBJECT_TO_EVENT(obj) \
+	(ZEND_ASYNC_EVENT_IS_REFERENCE((void *) ((char *) (obj) - (obj)->handlers->offset)) \
+					? ((zend_async_event_ref_t *) ((char *) (obj) - (obj)->handlers->offset)) \
+							  ->event \
+					: (zend_async_event_t *) ((char *) (obj) - (obj)->handlers->offset))
 
 // Convert zend_async_event_t to zend_object pointer
-#define ZEND_ASYNC_EVENT_TO_OBJECT(ev)							\
-	(((ev)->flags & ZEND_ASYNC_EVENT_F_OBJ_REF)					\
-	? *(zend_object **)((char *)(ev) + (ev)->extra_offset)		\
-	: (zend_object *)((char *)(ev) + (ev)->zend_object_offset) )
+#define ZEND_ASYNC_EVENT_TO_OBJECT(ev) \
+	(((ev)->flags & ZEND_ASYNC_EVENT_F_OBJ_REF) \
+					? *(zend_object **) ((char *) (ev) + (ev)->extra_offset) \
+					: (zend_object *) ((char *) (ev) + (ev)->zend_object_offset))
 
 // Get refcount of the event object
-#define ZEND_ASYNC_EVENT_REF(ev) (ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev) ? \
-		GC_REFCOUNT(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) : \
-		(ev)->ref_count)
+#define ZEND_ASYNC_EVENT_REF(ev) \
+	(ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev) ? GC_REFCOUNT(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) \
+									  : (ev)->ref_count)
 
 // Proper increment of the event object's reference count.
-#define ZEND_ASYNC_EVENT_ADD_REF(ev) (ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev) ? \
-		GC_ADDREF(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) : \
-		++(ev)->ref_count)
+#define ZEND_ASYNC_EVENT_ADD_REF(ev) \
+	(ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev) ? GC_ADDREF(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) \
+									  : ++(ev)->ref_count)
 
 // Proper decrement of the event object's reference count.
-#define ZEND_ASYNC_EVENT_DEL_REF(ev) (ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev) ? \
-		GC_DELREF(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) : \
-		--(ev)->ref_count)
+#define ZEND_ASYNC_EVENT_DEL_REF(ev) \
+	(ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev) ? GC_DELREF(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) \
+									  : --(ev)->ref_count)
 
 /* Properly release the event object */
-#define ZEND_ASYNC_EVENT_RELEASE(ev) do { \
-	if (ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev)) { \
-		if(GC_REFCOUNT(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) == 1) { \
-			OBJ_RELEASE(ZEND_ASYNC_EVENT_TO_OBJECT(ev)); \
+#define ZEND_ASYNC_EVENT_RELEASE(ev) \
+	do { \
+		if (ZEND_ASYNC_EVENT_IS_ZEND_OBJ(ev)) { \
+			if (GC_REFCOUNT(ZEND_ASYNC_EVENT_TO_OBJECT(ev)) == 1) { \
+				OBJ_RELEASE(ZEND_ASYNC_EVENT_TO_OBJECT(ev)); \
+			} else { \
+				GC_DELREF(ZEND_ASYNC_EVENT_TO_OBJECT(ev)); \
+			} \
 		} else { \
-			GC_DELREF(ZEND_ASYNC_EVENT_TO_OBJECT(ev)); \
+			if ((ev)->ref_count == 1) { \
+				(ev)->ref_count = 0; \
+				(ev)->dispose(ev); \
+			} else { \
+				(ev)->ref_count--; \
+			} \
 		} \
-	} else { \
-		if ((ev)->ref_count == 1) { \
-			(ev)->ref_count = 0; \
-			(ev)->dispose(ev); \
-		} else { \
-			(ev)->ref_count--; \
-		} \
-	} \
-} while (0)
+	} while (0)
 
-#define ZEND_ASYNC_EVENT_REPLAY(ev, callback) (ev->replay != NULL ? ev->replay(ev, callback, NULL, NULL) : false)
-#define ZEND_ASYNC_EVENT_EXTRACT_RESULT(ev, result) (ev->replay != NULL ? ev->replay(ev, NULL, result, NULL) : false)
-#define ZEND_ASYNC_EVENT_EXTRACT_RESULT_OR_ERROR(ev, result, exception) (ev->replay != NULL ? ev->replay(ev, NULL, result, exception) : false)
+#define ZEND_ASYNC_EVENT_REPLAY(ev, callback) \
+	(ev->replay != NULL ? ev->replay(ev, callback, NULL, NULL) : false)
+#define ZEND_ASYNC_EVENT_EXTRACT_RESULT(ev, result) \
+	(ev->replay != NULL ? ev->replay(ev, NULL, result, NULL) : false)
+#define ZEND_ASYNC_EVENT_EXTRACT_RESULT_OR_ERROR(ev, result, exception) \
+	(ev->replay != NULL ? ev->replay(ev, NULL, result, exception) : false)
 
 /* Public callback vector functions - implementations in zend_async_API.c */
-ZEND_API void zend_async_callbacks_notify(zend_async_event_t *event, void *result, zend_object *exception, bool from_handler);
-ZEND_API void zend_async_callbacks_remove(zend_async_event_t *event, zend_async_event_callback_t *callback);
+ZEND_API void zend_async_callbacks_notify(
+		zend_async_event_t *event, void *result, zend_object *exception, bool from_handler);
+ZEND_API void zend_async_callbacks_remove(
+		zend_async_event_t *event, zend_async_event_callback_t *callback);
 ZEND_API void zend_async_callbacks_free(zend_async_event_t *event);
-ZEND_API void zend_async_callbacks_notify_and_close(zend_async_event_t *event, void *result, zend_object *exception);
+ZEND_API void zend_async_callbacks_notify_and_close(
+		zend_async_event_t *event, void *result, zend_object *exception);
 
 #define ZEND_ASYNC_CALLBACKS_NOTIFY(event, result, exception) \
 	zend_async_callbacks_notify((event), (result), (exception), false)
@@ -635,13 +625,13 @@ ZEND_API void zend_async_callbacks_notify_and_close(zend_async_event_t *event, v
 #define ZEND_ASYNC_CALLBACKS_NOTIFY_FROM_HANDLER(event, result, exception) \
 	zend_async_callbacks_notify((event), (result), (exception), true)
 
-
 /* Append a callback; grows the buffer when needed */
-static zend_always_inline void
-zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t *callback)
+static zend_always_inline void zend_async_callbacks_push(
+		zend_async_event_t *event, zend_async_event_callback_t *callback)
 {
 	if (event->callbacks.data == NULL) {
-		event->callbacks.data = (zend_async_event_callback_t **)safe_emalloc(4, sizeof(zend_async_event_callback_t *), 0);
+		event->callbacks.data = (zend_async_event_callback_t **) safe_emalloc(
+				4, sizeof(zend_async_event_callback_t *), 0);
 		event->callbacks.capacity = 4;
 	}
 
@@ -649,10 +639,8 @@ zend_async_callbacks_push(zend_async_event_t *event, zend_async_event_callback_t
 
 	if (vector->length == vector->capacity) {
 		vector->capacity = vector->capacity ? vector->capacity * 2 : 4;
-		vector->data = (zend_async_event_callback_t **)safe_erealloc(vector->data,
-									 vector->capacity,
-									 sizeof(zend_async_event_callback_t *),
-									 0);
+		vector->data = (zend_async_event_callback_t **) safe_erealloc(
+				vector->data, vector->capacity, sizeof(zend_async_event_callback_t *), 0);
 	}
 
 	vector->data[vector->length++] = callback;
@@ -712,7 +700,8 @@ struct _zend_async_dns_addrinfo_s {
 	zend_async_event_t base;
 	const char *node;
 	const char *service;
-	/* The DNS resolution result must be explicitly and mandatorily freed using the ZEND_ASYNC_FREEADDRINFO method! */
+	/* The DNS resolution result must be explicitly and mandatorily freed using the
+	 * ZEND_ASYNC_FREEADDRINFO method! */
 	struct addrinfo *result;
 };
 
@@ -720,14 +709,14 @@ struct _zend_async_exec_event_s {
 	zend_async_event_t base;
 	zend_async_exec_mode exec_mode;
 	bool terminated;
-	char * cmd;
-	zval * return_value;
-	zval * result_buffer;
+	char *cmd;
+	zval *return_value;
+	zval *result_buffer;
 	size_t output_len;
-	char * output_buffer;
+	char *output_buffer;
 	zend_long exit_code;
 	int term_signal;
-	zval * std_error;
+	zval *std_error;
 };
 
 struct _zend_async_listen_event_s {
@@ -753,14 +742,16 @@ struct _zend_async_trigger_event_s {
 /// Scope Structures
 ///////////////////////////////////////////////////////////////////
 
-typedef void (*zend_async_before_coroutine_enqueue_t)(zend_coroutine_t *coroutine, zend_async_scope_t *scope, zval *result);
-typedef void (*zend_async_after_coroutine_enqueue_t)(zend_coroutine_t *coroutine, zend_async_scope_t *scope);
+typedef void (*zend_async_before_coroutine_enqueue_t)(
+		zend_coroutine_t *coroutine, zend_async_scope_t *scope, zval *result);
+typedef void (*zend_async_after_coroutine_enqueue_t)(
+		zend_coroutine_t *coroutine, zend_async_scope_t *scope);
 
 /* Dynamic array of async event callbacks */
 typedef struct _zend_async_scopes_vector_s {
-	uint32_t                      length;   /* current number of items              */
-	uint32_t                      capacity; /* allocated slots in the array         */
-	zend_async_scope_t			  **data;    /* dynamically allocated array			*/
+	uint32_t length; /* current number of items              */
+	uint32_t capacity; /* allocated slots in the array         */
+	zend_async_scope_t **data; /* dynamically allocated array			*/
 } zend_async_scopes_vector_t;
 
 /**
@@ -795,81 +786,90 @@ struct _zend_async_scope_s {
 	/**
 	 * The method handles an exception delivered to the Scope.
 	 * Its result may either be the cancellation of the Scope or the suppression of the exception.
-	 * If the is_cancellation parameter is FALSE, it indicates an attempt to handle an exception from a coroutine.
-	 * Otherwise, it's an attempt by the user to stop the execution of the Scope.
+	 * If the is_cancellation parameter is FALSE, it indicates an attempt to handle an exception
+	 * from a coroutine. Otherwise, it's an attempt by the user to stop the execution of the Scope.
 	 *
-	 * The method should return true if the exception was handled and the Scope can continue execution.
+	 * The method should return true if the exception was handled and the Scope can continue
+	 * execution.
 	 *
-	 * This method is the central point of responsibility where the behavior in case of an error is determined.
+	 * This method is the central point of responsibility where the behavior in case of an error is
+	 * determined.
 	 */
-	bool (*catch_or_cancel)(
-		zend_async_scope_t *scope,
-		zend_coroutine_t *coroutine,
-		zend_async_scope_t *from_scope,
-		zend_object *exception,
-		bool transfer_error,
-		const bool is_safely,
-		const bool is_cancellation
-	);
+	bool (*catch_or_cancel)(zend_async_scope_t *scope, zend_coroutine_t *coroutine,
+			zend_async_scope_t *from_scope, zend_object *exception, bool transfer_error,
+			const bool is_safely, const bool is_cancellation);
 };
 
 #define ZEND_ASYNC_SCOPE_CLOSE(scope, is_safely) \
 	((scope)->catch_or_cancel((scope), NULL, NULL, NULL, false, (is_safely), true))
 
 #define ZEND_ASYNC_SCOPE_CANCEL(scope, exception, transfer_error, is_safely) \
-	((scope)->catch_or_cancel((scope), NULL, NULL, (exception), (transfer_error), (is_safely), true))
+	((scope)->catch_or_cancel( \
+			(scope), NULL, NULL, (exception), (transfer_error), (is_safely), true))
 
 #define ZEND_ASYNC_SCOPE_CATCH(scope, coroutine, from_scope, exception, transfer_error, is_safely) \
-	((scope)->catch_or_cancel((scope), (coroutine), (from_scope), (exception), (transfer_error), (is_safely), false))
+	((scope)->catch_or_cancel((scope), (coroutine), (from_scope), (exception), (transfer_error), \
+			(is_safely), false))
 
-#define ZEND_ASYNC_SCOPE_F_CLOSED				  ZEND_ASYNC_EVENT_F_CLOSED  /* scope was closed */
-#define ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY	      ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY  /* scope will not free memory in dispose handler */
-#define ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY 		  (1u << 14)  /* scope will be disposed safely */
-#define ZEND_ASYNC_SCOPE_F_CANCELLED 			  (1u << 15)  /* scope was cancelled */
-#define ZEND_ASYNC_SCOPE_F_DISPOSING 			  (1u << 16)  /* scope disposing */
+#define ZEND_ASYNC_SCOPE_F_CLOSED ZEND_ASYNC_EVENT_F_CLOSED /* scope was closed */
+#define ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY \
+	ZEND_ASYNC_EVENT_F_NO_FREE_MEMORY /* scope will not free memory in dispose handler */
+#define ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY (1u << 14) /* scope will be disposed safely */
+#define ZEND_ASYNC_SCOPE_F_CANCELLED (1u << 15) /* scope was cancelled */
+#define ZEND_ASYNC_SCOPE_F_DISPOSING (1u << 16) /* scope disposing */
 
-#define ZEND_ASYNC_SCOPE_IS_CLOSED(scope)         (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CLOSED) != 0)
-#define ZEND_ASYNC_SCOPE_IS_NO_FREE_MEMORY(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY) != 0)
-#define ZEND_ASYNC_SCOPE_IS_DISPOSE_SAFELY(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY) != 0)
-#define ZEND_ASYNC_SCOPE_IS_CANCELLED(scope)      (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CANCELLED) != 0)
-#define ZEND_ASYNC_SCOPE_IS_DISPOSING(scope)      (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSING) != 0)
+#define ZEND_ASYNC_SCOPE_IS_CLOSED(scope) (((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CLOSED) != 0)
+#define ZEND_ASYNC_SCOPE_IS_NO_FREE_MEMORY(scope) \
+	(((scope)->event.flags & ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY) != 0)
+#define ZEND_ASYNC_SCOPE_IS_DISPOSE_SAFELY(scope) \
+	(((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY) != 0)
+#define ZEND_ASYNC_SCOPE_IS_CANCELLED(scope) \
+	(((scope)->event.flags & ZEND_ASYNC_SCOPE_F_CANCELLED) != 0)
+#define ZEND_ASYNC_SCOPE_IS_DISPOSING(scope) \
+	(((scope)->event.flags & ZEND_ASYNC_SCOPE_F_DISPOSING) != 0)
 
-#define ZEND_ASYNC_SCOPE_SET_CLOSED(scope)        ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_CLOSED)
-#define ZEND_ASYNC_SCOPE_CLR_CLOSED(scope)        ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_CLOSED)
+#define ZEND_ASYNC_SCOPE_SET_CLOSED(scope) ((scope)->event.flags |= ZEND_ASYNC_SCOPE_F_CLOSED)
+#define ZEND_ASYNC_SCOPE_CLR_CLOSED(scope) ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_CLOSED)
 
-#define ZEND_ASYNC_SCOPE_SET_NO_FREE_MEMORY(scope) ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY)
-#define ZEND_ASYNC_SCOPE_CLR_NO_FREE_MEMORY(scope) ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY)
+#define ZEND_ASYNC_SCOPE_SET_NO_FREE_MEMORY(scope) \
+	((scope)->event.flags |= ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY)
+#define ZEND_ASYNC_SCOPE_CLR_NO_FREE_MEMORY(scope) \
+	((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_NO_FREE_MEMORY)
 
-#define ZEND_ASYNC_SCOPE_SET_DISPOSE_SAFELY(scope) ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
-#define ZEND_ASYNC_SCOPE_CLR_DISPOSE_SAFELY(scope) ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
+#define ZEND_ASYNC_SCOPE_SET_DISPOSE_SAFELY(scope) \
+	((scope)->event.flags |= ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
+#define ZEND_ASYNC_SCOPE_CLR_DISPOSE_SAFELY(scope) \
+	((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSE_SAFELY)
 
-#define ZEND_ASYNC_SCOPE_SET_CANCELLED(scope)      ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_CANCELLED)
+#define ZEND_ASYNC_SCOPE_SET_CANCELLED(scope) ((scope)->event.flags |= ZEND_ASYNC_SCOPE_F_CANCELLED)
 
-#define ZEND_ASYNC_SCOPE_SET_DISPOSING(scope)	  ((scope)->event.flags |=  ZEND_ASYNC_SCOPE_F_DISPOSING)
-#define ZEND_ASYNC_SCOPE_CLR_DISPOSING(scope)	  ((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSING)
+#define ZEND_ASYNC_SCOPE_SET_DISPOSING(scope) ((scope)->event.flags |= ZEND_ASYNC_SCOPE_F_DISPOSING)
+#define ZEND_ASYNC_SCOPE_CLR_DISPOSING(scope) \
+	((scope)->event.flags &= ~ZEND_ASYNC_SCOPE_F_DISPOSING)
 
-static zend_always_inline void
-zend_async_scope_add_child(zend_async_scope_t *parent_scope, zend_async_scope_t *child_scope)
+static zend_always_inline void zend_async_scope_add_child(
+		zend_async_scope_t *parent_scope, zend_async_scope_t *child_scope)
 {
 	zend_async_scopes_vector_t *vector = &parent_scope->scopes;
 
 	child_scope->parent_scope = parent_scope;
 
 	if (vector->data == NULL) {
-		vector->data = (zend_async_scope_t **)safe_emalloc(4, sizeof(zend_async_scope_t *), 0);
+		vector->data = (zend_async_scope_t **) safe_emalloc(4, sizeof(zend_async_scope_t *), 0);
 		vector->capacity = 4;
 	}
 
 	if (vector->length == vector->capacity) {
 		vector->capacity *= 2;
-		vector->data = (zend_async_scope_t **)safe_erealloc(vector->data, vector->capacity, sizeof(zend_async_scope_t *), 0);
+		vector->data = (zend_async_scope_t **) safe_erealloc(
+				vector->data, vector->capacity, sizeof(zend_async_scope_t *), 0);
 	}
 
 	vector->data[vector->length++] = child_scope;
 }
 
-static zend_always_inline void
-zend_async_scope_remove_child(zend_async_scope_t *parent_scope, zend_async_scope_t *child_scope)
+static zend_always_inline void zend_async_scope_remove_child(
+		zend_async_scope_t *parent_scope, zend_async_scope_t *child_scope)
 {
 	zend_async_scopes_vector_t *vector = &parent_scope->scopes;
 	for (uint32_t i = 0; i < vector->length; ++i) {
@@ -887,8 +887,7 @@ zend_async_scope_remove_child(zend_async_scope_t *parent_scope, zend_async_scope
 	}
 }
 
-static zend_always_inline void
-zend_async_scope_free_children(zend_async_scope_t *parent_scope)
+static zend_always_inline void zend_async_scope_free_children(zend_async_scope_t *parent_scope)
 {
 	zend_async_scopes_vector_t *vector = &parent_scope->scopes;
 
@@ -918,14 +917,18 @@ typedef enum {
 /**
  *  Condition that is TRUE if the coroutine is in the queue
  */
-#define ZEND_ASYNC_WAKER_IN_QUEUE(waker) (waker != NULL && ((waker)->status == ZEND_ASYNC_WAKER_QUEUED || waker->status == ZEND_ASYNC_WAKER_IGNORED))
+#define ZEND_ASYNC_WAKER_IN_QUEUE(waker) \
+	(waker != NULL \
+			&& ((waker)->status == ZEND_ASYNC_WAKER_QUEUED \
+					|| waker->status == ZEND_ASYNC_WAKER_IGNORED))
 
 struct _zend_async_waker_s {
 	/* The waker status. */
 	ZEND_ASYNC_WAKER_STATUS status;
 	/* The array of zend_async_trigger_callback_t. */
 	HashTable events;
-	/* A list of events objects (zend_async_event_t) that occurred during the last iteration of the event loop. */
+	/* A list of events objects (zend_async_event_t) that occurred during the last iteration of the
+	 * event loop. */
 	HashTable *triggered_events;
 	/* Result of the waker. */
 	zval result;
@@ -995,7 +998,8 @@ struct _zend_coroutine_s {
  * The macro evaluates to TRUE if the coroutine is in a waiting state —
  * either waiting for events or waiting in the execution queue.
  */
-#define ZEND_COROUTINE_SUSPENDED(coroutine) ((coroutine)->waker != NULL && ZEND_ASYNC_WAKER_WAITING((coroutine)->waker))
+#define ZEND_COROUTINE_SUSPENDED(coroutine) \
+	((coroutine)->waker != NULL && ZEND_ASYNC_WAKER_WAITING((coroutine)->waker))
 
 /* Coroutine flags */
 #define ZEND_COROUTINE_F_STARTED (1u << 10) /* coroutine is started */
@@ -1004,24 +1008,37 @@ struct _zend_coroutine_s {
 #define ZEND_COROUTINE_F_PROTECTED (1u << 13) /* coroutine is protected */
 #define ZEND_COROUTINE_F_MAIN (1u << 14) /* coroutine is a main coroutine */
 
-#define ZEND_COROUTINE_IS_ZOMBIE(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_ZOMBIE) != 0)
+#define ZEND_COROUTINE_IS_ZOMBIE(coroutine) \
+	(((coroutine)->event.flags & ZEND_COROUTINE_F_ZOMBIE) != 0)
 #define ZEND_COROUTINE_SET_ZOMBIE(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_ZOMBIE)
-#define ZEND_COROUTINE_IS_STARTED(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_STARTED) != 0)
-#define ZEND_COROUTINE_IS_CANCELLED(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_CANCELLED) != 0)
-#define ZEND_COROUTINE_IS_FINISHED(coroutine) (((coroutine)->event.flags & ZEND_ASYNC_EVENT_F_CLOSED) != 0)
-#define ZEND_COROUTINE_IS_PROTECTED(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_PROTECTED) != 0)
-#define ZEND_COROUTINE_IS_EXCEPTION_HANDLED(coroutine) ZEND_ASYNC_EVENT_IS_EXCEPTION_HANDLED(&(coroutine)->event)
+#define ZEND_COROUTINE_IS_STARTED(coroutine) \
+	(((coroutine)->event.flags & ZEND_COROUTINE_F_STARTED) != 0)
+#define ZEND_COROUTINE_IS_CANCELLED(coroutine) \
+	(((coroutine)->event.flags & ZEND_COROUTINE_F_CANCELLED) != 0)
+#define ZEND_COROUTINE_IS_FINISHED(coroutine) \
+	(((coroutine)->event.flags & ZEND_ASYNC_EVENT_F_CLOSED) != 0)
+#define ZEND_COROUTINE_IS_PROTECTED(coroutine) \
+	(((coroutine)->event.flags & ZEND_COROUTINE_F_PROTECTED) != 0)
+#define ZEND_COROUTINE_IS_EXCEPTION_HANDLED(coroutine) \
+	ZEND_ASYNC_EVENT_IS_EXCEPTION_HANDLED(&(coroutine)->event)
 #define ZEND_COROUTINE_IS_MAIN(coroutine) (((coroutine)->event.flags & ZEND_COROUTINE_F_MAIN) != 0)
 #define ZEND_COROUTINE_SET_STARTED(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_STARTED)
-#define ZEND_COROUTINE_SET_CANCELLED(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_CANCELLED)
-#define ZEND_COROUTINE_SET_FINISHED(coroutine) ((coroutine)->event.flags |= ZEND_ASYNC_EVENT_F_CLOSED)
-#define ZEND_COROUTINE_SET_PROTECTED(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_PROTECTED)
+#define ZEND_COROUTINE_SET_CANCELLED(coroutine) \
+	((coroutine)->event.flags |= ZEND_COROUTINE_F_CANCELLED)
+#define ZEND_COROUTINE_SET_FINISHED(coroutine) \
+	((coroutine)->event.flags |= ZEND_ASYNC_EVENT_F_CLOSED)
+#define ZEND_COROUTINE_SET_PROTECTED(coroutine) \
+	((coroutine)->event.flags |= ZEND_COROUTINE_F_PROTECTED)
 #define ZEND_COROUTINE_SET_MAIN(coroutine) ((coroutine)->event.flags |= ZEND_COROUTINE_F_MAIN)
-#define ZEND_COROUTINE_CLR_PROTECTED(coroutine) ((coroutine)->event.flags &= ~ZEND_COROUTINE_F_PROTECTED)
-#define ZEND_COROUTINE_SET_EXCEPTION_HANDLED(coroutine) ZEND_ASYNC_EVENT_SET_EXCEPTION_HANDLED(&(coroutine)->event)
-#define ZEND_COROUTINE_CLR_EXCEPTION_HANDLED(coroutine) ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(&(coroutine)->event)
+#define ZEND_COROUTINE_CLR_PROTECTED(coroutine) \
+	((coroutine)->event.flags &= ~ZEND_COROUTINE_F_PROTECTED)
+#define ZEND_COROUTINE_SET_EXCEPTION_HANDLED(coroutine) \
+	ZEND_ASYNC_EVENT_SET_EXCEPTION_HANDLED(&(coroutine)->event)
+#define ZEND_COROUTINE_CLR_EXCEPTION_HANDLED(coroutine) \
+	ZEND_ASYNC_EVENT_CLR_EXCEPTION_HANDLED(&(coroutine)->event)
 
-static zend_always_inline zend_string *zend_coroutine_callable_name(const zend_coroutine_t *coroutine)
+static zend_always_inline zend_string *zend_coroutine_callable_name(
+		const zend_coroutine_t *coroutine)
 {
 	if (ZEND_COROUTINE_IS_MAIN(coroutine)) {
 		return zend_string_init("main", sizeof("main") - 1, 0);
@@ -1040,28 +1057,29 @@ static zend_always_inline zend_string *zend_coroutine_callable_name(const zend_c
  * Z_PARAM_VARIADIC_WITH_NAMED(args, args_count, named_args);
  */
 #define ZEND_ASYNC_FCALL_DEFINE(fcall, fci, fcc, args, args_count, named_args) \
-	zend_fcall_t * fcall = ecalloc(1, sizeof(zend_fcall_t));				 \
-	fcall->fci = fci;														 \
-	fcall->fci_cache = fcc;													 \
-	if (args_count) {														 \
-		fcall->fci.param_count = args_count;								 \
-		fcall->fci.params = safe_emalloc(args_count, sizeof(zval), 0);		 \
-		for (uint32_t i = 0; i < args_count; i++) {							 \
-			ZVAL_COPY(&fcall->fci.params[i], &args[i]);						 \
-		}																	 \
-	}																		 \
-	if (named_args) {														 \
-		fcall->fci.named_params = named_args;								 \
-		GC_ADDREF(named_args);												 \
-	}																		 \
+	zend_fcall_t *fcall = ecalloc(1, sizeof(zend_fcall_t)); \
+	fcall->fci = fci; \
+	fcall->fci_cache = fcc; \
+	if (args_count) { \
+		fcall->fci.param_count = args_count; \
+		fcall->fci.params = safe_emalloc(args_count, sizeof(zval), 0); \
+		for (uint32_t i = 0; i < args_count; i++) { \
+			ZVAL_COPY(&fcall->fci.params[i], &args[i]); \
+		} \
+	} \
+	if (named_args) { \
+		fcall->fci.named_params = named_args; \
+		GC_ADDREF(named_args); \
+	} \
 	Z_TRY_ADDREF(fcall->fci.function_name);
 
 ///////////////////////////////////////////////////////////////
 /// Async Context Structures
 ///////////////////////////////////////////////////////////////
 
-typedef zend_async_context_t * (*zend_async_new_context_t)(void);
-typedef bool (*zend_async_context_find_t)(zend_async_context_t *context, zval *key, zval *result, bool include_parent);
+typedef zend_async_context_t *(*zend_async_new_context_t)(void);
+typedef bool (*zend_async_context_find_t)(
+		zend_async_context_t *context, zval *key, zval *result, bool include_parent);
 typedef void (*zend_async_context_set_t)(zend_async_context_t *context, zval *key, zval *value);
 typedef bool (*zend_async_context_unset_t)(zend_async_context_t *context, zval *key);
 typedef void (*zend_async_context_dispose_t)(zend_async_context_t *context);
@@ -1086,9 +1104,9 @@ struct _zend_async_context_s {
  * It inherits from zend_async_event_t to participate in the event system.
  */
 struct _zend_future_s {
-	zend_async_event_t event;               /* Event inheritance (first member) */
-	zval result;							/* Result value */
-	zend_object *exception;					/* Exception object (NULL = no error) */
+	zend_async_event_t event; /* Event inheritance (first member) */
+	zval result; /* Result value */
+	zend_object *exception; /* Exception object (NULL = no error) */
 	/* Created file and line number */
 	uint32_t lineno;
 	uint32_t completed_lineno;
@@ -1105,22 +1123,23 @@ struct _zend_future_s {
 #define ZEND_FUTURE_SET_THREAD_SAFE(future) ((future)->event.flags |= ZEND_FUTURE_F_THREAD_SAFE)
 #define ZEND_FUTURE_SET_IGNORED(future) ((future)->event.flags |= ZEND_FUTURE_F_IGNORED)
 
-
-#define ZEND_FUTURE_COMPLETE(future, result) do {			\
-		if(ZEND_ASYNC_EVENT_IS_CLOSED(&(future)->event)) {	\
-			break;											\
-		}													\
-		ZVAL_COPY(&(future)->result, (result));				\
-		(future)->event.stop(&(future)->event);				\
+#define ZEND_FUTURE_COMPLETE(future, result) \
+	do { \
+		if (ZEND_ASYNC_EVENT_IS_CLOSED(&(future)->event)) { \
+			break; \
+		} \
+		ZVAL_COPY(&(future)->result, (result)); \
+		(future)->event.stop(&(future)->event); \
 	} while (0)
 
-#define ZEND_FUTURE_REJECT(future, error) do {			\
-		if(ZEND_ASYNC_EVENT_IS_CLOSED(&(future)->event)) {	\
-			break;											\
-		}													\
-		(future)->exception = error;			     		\
-		GC_ADDREF(error);							     	\
-		(future)->event.stop(&(future)->event);				\
+#define ZEND_FUTURE_REJECT(future, error) \
+	do { \
+		if (ZEND_ASYNC_EVENT_IS_CLOSED(&(future)->event)) { \
+			break; \
+		} \
+		(future)->exception = error; \
+		GC_ADDREF(error); \
+		(future)->event.stop(&(future)->event); \
 	} while (0)
 
 ///////////////////////////////////////////////////////////////
@@ -1132,14 +1151,13 @@ struct _zend_future_s {
  * It inherits from zend_async_event_t to participate in the event system.
  */
 struct _zend_async_channel_s {
-	zend_async_event_t event;               /* Event inheritance (first member) */
+	zend_async_event_t event; /* Event inheritance (first member) */
 	/* Channel-specific method pointers */
-	zend_channel_send_t send;               /* Send method */
-	zend_channel_receive_t receive;         /* Receive method */
+	zend_channel_send_t send; /* Send method */
+	zend_channel_receive_t receive; /* Receive method */
 };
 
 #define ZEND_ASYNC_CHANNEL_F_THREAD_SAFE (1u << 10)
-
 
 ///////////////////////////////////////////////////////////////
 /// Global Macros
@@ -1210,30 +1228,33 @@ END_EXTERN_C()
 #define ZEND_ASYNC_MAIN_SCOPE ZEND_ASYNC_G(main_scope)
 #define ZEND_ASYNC_SCHEDULER ZEND_ASYNC_G(scheduler)
 
-#define ZEND_ASYNC_INCREASE_EVENT_COUNT  if (ZEND_ASYNC_G(active_event_count) < UINT_MAX) { \
+#define ZEND_ASYNC_INCREASE_EVENT_COUNT \
+	if (ZEND_ASYNC_G(active_event_count) < UINT_MAX) { \
 		ZEND_ASYNC_G(active_event_count)++; \
 	} else { \
 		ZEND_ASSERT("The event count is already max."); \
 	}
 
-#define ZEND_ASYNC_DECREASE_EVENT_COUNT  if (ZEND_ASYNC_G(active_event_count) > 0) { \
+#define ZEND_ASYNC_DECREASE_EVENT_COUNT \
+	if (ZEND_ASYNC_G(active_event_count) > 0) { \
 		ZEND_ASYNC_G(active_event_count)--; \
 	} else { \
 		ZEND_ASSERT("The event count is already zero."); \
 	}
 
-#define ZEND_ASYNC_INCREASE_COROUTINE_COUNT  if (ZEND_ASYNC_G(active_coroutine_count) < UINT_MAX) { \
+#define ZEND_ASYNC_INCREASE_COROUTINE_COUNT \
+	if (ZEND_ASYNC_G(active_coroutine_count) < UINT_MAX) { \
 		ZEND_ASYNC_G(active_coroutine_count)++; \
 	} else { \
 		ZEND_ASSERT("The coroutine count is already max."); \
 	}
 
-#define ZEND_ASYNC_DECREASE_COROUTINE_COUNT  if (ZEND_ASYNC_G(active_coroutine_count) > 0) { \
+#define ZEND_ASYNC_DECREASE_COROUTINE_COUNT \
+	if (ZEND_ASYNC_G(active_coroutine_count) > 0) { \
 		ZEND_ASYNC_G(active_coroutine_count)--; \
 	} else { \
 		ZEND_ASSERT("The coroutine count is already zero."); \
 	}
-
 
 BEGIN_EXTERN_C()
 
@@ -1245,13 +1266,15 @@ void zend_async_api_shutdown(void);
 void zend_async_globals_ctor(void);
 void zend_async_globals_dtor(void);
 
-ZEND_API const char * zend_async_get_api_version(void);
+ZEND_API const char *zend_async_get_api_version(void);
 ZEND_API int zend_async_get_api_version_number(void);
 
-ZEND_API ZEND_COLD zend_object * zend_async_new_exception(zend_async_class type, const char *format, ...);
-ZEND_API ZEND_COLD zend_object * zend_async_throw(zend_async_class type, const char *format, ...);
-ZEND_API ZEND_COLD zend_object * zend_async_throw_cancellation(const char *format, ...);
-ZEND_API ZEND_COLD zend_object * zend_async_throw_timeout(const char *format, const zend_long timeout);
+ZEND_API ZEND_COLD zend_object *zend_async_new_exception(
+		zend_async_class type, const char *format, ...);
+ZEND_API ZEND_COLD zend_object *zend_async_throw(zend_async_class type, const char *format, ...);
+ZEND_API ZEND_COLD zend_object *zend_async_throw_cancellation(const char *format, ...);
+ZEND_API ZEND_COLD zend_object *zend_async_throw_timeout(
+		const char *format, const zend_long timeout);
 
 /* Scheduler API */
 
@@ -1285,9 +1308,10 @@ ZEND_API extern zend_async_new_context_t zend_async_new_context_fn;
 
 /* Internal Context API - Direct Functions */
 ZEND_API uint32_t zend_async_internal_context_key_alloc(const char *key_name);
-ZEND_API const char* zend_async_internal_context_key_name(uint32_t key);
-ZEND_API zval * zend_async_internal_context_find(zend_coroutine_t *coroutine, uint32_t key);
-ZEND_API void zend_async_internal_context_set(zend_coroutine_t *coroutine, uint32_t key, zval *value);
+ZEND_API const char *zend_async_internal_context_key_name(uint32_t key);
+ZEND_API zval *zend_async_internal_context_find(zend_coroutine_t *coroutine, uint32_t key);
+ZEND_API void zend_async_internal_context_set(
+		zend_coroutine_t *coroutine, uint32_t key, zval *value);
 ZEND_API bool zend_async_internal_context_unset(zend_coroutine_t *coroutine, uint32_t key);
 
 /* Internal Context initialization and cleanup */
@@ -1332,147 +1356,117 @@ ZEND_API extern zend_async_queue_task_t zend_async_queue_task_fn;
 /* Trigger Event API */
 ZEND_API extern zend_async_new_trigger_event_t zend_async_new_trigger_event_fn;
 
-ZEND_API bool zend_async_scheduler_register(
-	char *module,
-	bool allow_override,
-	zend_async_new_coroutine_t new_coroutine_fn,
-	zend_async_new_scope_t new_scope_fn,
-	zend_async_new_context_t new_context_fn,
-    zend_async_spawn_t spawn_fn,
-    zend_async_suspend_t suspend_fn,
-    zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
-    zend_async_resume_t resume_fn,
-    zend_async_cancel_t cancel_fn,
-    zend_async_spawn_and_throw_t spawn_and_throw_fn,
-    zend_async_shutdown_t shutdown_fn,
-    zend_async_get_coroutines_t get_coroutines_fn,
-    zend_async_add_microtask_t add_microtask_fn,
-    zend_async_get_awaiting_info_t get_awaiting_info_fn,
-    zend_async_get_class_ce_t get_class_ce_fn,
-    zend_async_new_iterator_t new_iterator_fn,
-    zend_async_new_future_t new_future_fn,
-    zend_async_new_channel_t new_channel_fn,
-    zend_async_new_future_obj_t new_future_obj_fn,
-    zend_async_new_channel_obj_t new_channel_obj_fn,
-    zend_async_new_group_t new_group_fn,
-    zend_async_engine_shutdown_t engine_shutdown_fn
-);
+ZEND_API bool zend_async_scheduler_register(char *module, bool allow_override,
+		zend_async_new_coroutine_t new_coroutine_fn, zend_async_new_scope_t new_scope_fn,
+		zend_async_new_context_t new_context_fn, zend_async_spawn_t spawn_fn,
+		zend_async_suspend_t suspend_fn, zend_async_enqueue_coroutine_t enqueue_coroutine_fn,
+		zend_async_resume_t resume_fn, zend_async_cancel_t cancel_fn,
+		zend_async_spawn_and_throw_t spawn_and_throw_fn, zend_async_shutdown_t shutdown_fn,
+		zend_async_get_coroutines_t get_coroutines_fn, zend_async_add_microtask_t add_microtask_fn,
+		zend_async_get_awaiting_info_t get_awaiting_info_fn,
+		zend_async_get_class_ce_t get_class_ce_fn, zend_async_new_iterator_t new_iterator_fn,
+		zend_async_new_future_t new_future_fn, zend_async_new_channel_t new_channel_fn,
+		zend_async_new_future_obj_t new_future_obj_fn,
+		zend_async_new_channel_obj_t new_channel_obj_fn, zend_async_new_group_t new_group_fn,
+		zend_async_engine_shutdown_t engine_shutdown_fn);
 
-ZEND_API bool zend_async_reactor_register(
-	char *module,
-	bool allow_override,
-	zend_async_reactor_startup_t reactor_startup_fn,
-	zend_async_reactor_shutdown_t reactor_shutdown_fn,
-	zend_async_reactor_execute_t reactor_execute_fn,
-	zend_async_reactor_loop_alive_t reactor_loop_alive_fn,
-    zend_async_new_socket_event_t new_socket_event_fn,
-    zend_async_new_poll_event_t new_poll_event_fn,
-    zend_async_new_timer_event_t new_timer_event_fn,
-    zend_async_new_signal_event_t new_signal_event_fn,
-    zend_async_new_process_event_t new_process_event_fn,
-    zend_async_new_thread_event_t new_thread_event_fn,
-    zend_async_new_filesystem_event_t new_filesystem_event_fn,
-    zend_async_getnameinfo_t getnameinfo_fn,
-    zend_async_getaddrinfo_t getaddrinfo_fn,
-    zend_async_freeaddrinfo_t freeaddrinfo_fn,
-    zend_async_new_exec_event_t new_exec_event_fn,
-    zend_async_exec_t exec_fn,
-    zend_async_new_trigger_event_t new_trigger_event_fn
-);
+ZEND_API bool zend_async_reactor_register(char *module, bool allow_override,
+		zend_async_reactor_startup_t reactor_startup_fn,
+		zend_async_reactor_shutdown_t reactor_shutdown_fn,
+		zend_async_reactor_execute_t reactor_execute_fn,
+		zend_async_reactor_loop_alive_t reactor_loop_alive_fn,
+		zend_async_new_socket_event_t new_socket_event_fn,
+		zend_async_new_poll_event_t new_poll_event_fn,
+		zend_async_new_timer_event_t new_timer_event_fn,
+		zend_async_new_signal_event_t new_signal_event_fn,
+		zend_async_new_process_event_t new_process_event_fn,
+		zend_async_new_thread_event_t new_thread_event_fn,
+		zend_async_new_filesystem_event_t new_filesystem_event_fn,
+		zend_async_getnameinfo_t getnameinfo_fn, zend_async_getaddrinfo_t getaddrinfo_fn,
+		zend_async_freeaddrinfo_t freeaddrinfo_fn, zend_async_new_exec_event_t new_exec_event_fn,
+		zend_async_exec_t exec_fn, zend_async_new_trigger_event_t new_trigger_event_fn);
 
 ZEND_API void zend_async_thread_pool_register(
-	zend_string *module, bool allow_override, zend_async_queue_task_t queue_task_fn
-);
+		zend_string *module, bool allow_override, zend_async_queue_task_t queue_task_fn);
 
 ZEND_API bool zend_async_socket_listening_register(
-	char *module,
-	bool allow_override,
-	zend_async_socket_listen_t socket_listen_fn
-);
+		char *module, bool allow_override, zend_async_socket_listen_t socket_listen_fn);
 
-ZEND_API zend_string* zend_coroutine_gen_info(zend_coroutine_t *coroutine, char *zend_coroutine_name);
+ZEND_API zend_string *zend_coroutine_gen_info(
+		zend_coroutine_t *coroutine, char *zend_coroutine_name);
 
-ZEND_API zend_async_event_callback_t * zend_async_event_callback_new(zend_async_event_callback_fn callback, size_t size);
+ZEND_API zend_async_event_callback_t *zend_async_event_callback_new(
+		zend_async_event_callback_fn callback, size_t size);
 
 #define ZEND_ASYNC_EVENT_CALLBACK(callback) zend_async_event_callback_new(callback, 0)
 #define ZEND_ASYNC_EVENT_CALLBACK_EX(callback, size) zend_async_event_callback_new(callback, size)
 
-ZEND_API zend_coroutine_event_callback_t * zend_async_coroutine_callback_new(
-	zend_coroutine_t * coroutine, zend_async_event_callback_fn callback, size_t size
-);
-ZEND_API void coroutine_event_callback_dispose(zend_async_event_callback_t *callback, zend_async_event_t * event);
+ZEND_API zend_coroutine_event_callback_t *zend_async_coroutine_callback_new(
+		zend_coroutine_t *coroutine, zend_async_event_callback_fn callback, size_t size);
+ZEND_API void coroutine_event_callback_dispose(
+		zend_async_event_callback_t *callback, zend_async_event_t *event);
 
 /* Waker API */
 ZEND_API zend_async_waker_t *zend_async_waker_new(zend_coroutine_t *coroutine);
-ZEND_API zend_async_waker_t * zend_async_waker_new_with_timeout(
-	zend_coroutine_t * coroutine, const zend_ulong timeout, zend_async_event_t *cancellation
-);
-ZEND_API bool zend_async_waker_apply_error(
-	zend_async_waker_t *waker, zend_object *error, bool transfer_error, bool override, bool for_cancellation
-);
+ZEND_API zend_async_waker_t *zend_async_waker_new_with_timeout(
+		zend_coroutine_t *coroutine, const zend_ulong timeout, zend_async_event_t *cancellation);
+ZEND_API bool zend_async_waker_apply_error(zend_async_waker_t *waker, zend_object *error,
+		bool transfer_error, bool override, bool for_cancellation);
 ZEND_API void zend_async_waker_destroy(zend_coroutine_t *coroutine);
-ZEND_API void zend_async_waker_add_triggered_event(zend_coroutine_t *coroutine, zend_async_event_t *event);
-ZEND_API bool zend_async_waker_is_event_exists(zend_coroutine_t *coroutine, zend_async_event_t *event);
+ZEND_API void zend_async_waker_add_triggered_event(
+		zend_coroutine_t *coroutine, zend_async_event_t *event);
+ZEND_API bool zend_async_waker_is_event_exists(
+		zend_coroutine_t *coroutine, zend_async_event_t *event);
 
-#define ZEND_ASYNC_WAKER_APPLY_ERROR(waker, error, transfer) zend_async_waker_apply_error((waker), (error), (transfer), true, false)
-#define ZEND_ASYNC_WAKER_APPEND_ERROR(waker, error, transfer) zend_async_waker_apply_error((waker), (error), (transfer), false, false)
-#define ZEND_ASYNC_WAKER_APPLY_CANCELLATION(waker, error, transfer) zend_async_waker_apply_error((waker), (error), (transfer), true, true)
+#define ZEND_ASYNC_WAKER_APPLY_ERROR(waker, error, transfer) \
+	zend_async_waker_apply_error((waker), (error), (transfer), true, false)
+#define ZEND_ASYNC_WAKER_APPEND_ERROR(waker, error, transfer) \
+	zend_async_waker_apply_error((waker), (error), (transfer), false, false)
+#define ZEND_ASYNC_WAKER_APPLY_CANCELLATION(waker, error, transfer) \
+	zend_async_waker_apply_error((waker), (error), (transfer), true, true)
 
-ZEND_API void zend_async_resume_when(
-		zend_coroutine_t			*coroutine,
-		zend_async_event_t			*event,
-		const bool					trans_event,
-		zend_async_event_callback_fn callback,
-		zend_coroutine_event_callback_t *event_callback
-	);
+ZEND_API void zend_async_resume_when(zend_coroutine_t *coroutine, zend_async_event_t *event,
+		const bool trans_event, zend_async_event_callback_fn callback,
+		zend_coroutine_event_callback_t *event_callback);
 
-ZEND_API void zend_async_waker_callback_resolve(
-	zend_async_event_t *event, zend_async_event_callback_t *callback, void * result, zend_object *exception
-);
+ZEND_API void zend_async_waker_callback_resolve(zend_async_event_t *event,
+		zend_async_event_callback_t *callback, void *result, zend_object *exception);
 
-ZEND_API void zend_async_waker_callback_cancel(
-	zend_async_event_t *event, zend_async_event_callback_t *callback, void * result, zend_object *exception
-);
+ZEND_API void zend_async_waker_callback_cancel(zend_async_event_t *event,
+		zend_async_event_callback_t *callback, void *result, zend_object *exception);
 
-ZEND_API void zend_async_waker_callback_timeout(
-	zend_async_event_t *event, zend_async_event_callback_t *callback, void * result, zend_object *exception
-);
+ZEND_API void zend_async_waker_callback_timeout(zend_async_event_t *event,
+		zend_async_event_callback_t *callback, void *result, zend_object *exception);
 
 /* Coroutine Switch Handlers API */
 ZEND_API uint32_t zend_coroutine_add_switch_handler(
-	zend_coroutine_t *coroutine,
-	zend_coroutine_switch_handler_fn handler
-);
+		zend_coroutine_t *coroutine, zend_coroutine_switch_handler_fn handler);
 
 ZEND_API bool zend_coroutine_remove_switch_handler(
-	zend_coroutine_t *coroutine,
-	uint32_t handler_index
-);
+		zend_coroutine_t *coroutine, uint32_t handler_index);
 
 ZEND_API void zend_coroutine_call_switch_handlers(
-	zend_coroutine_t *coroutine,
-	bool is_enter,
-	bool is_finishing
-);
+		zend_coroutine_t *coroutine, bool is_enter, bool is_finishing);
 
 ZEND_API void zend_coroutine_switch_handlers_init(zend_coroutine_t *coroutine);
 ZEND_API void zend_coroutine_switch_handlers_destroy(zend_coroutine_t *coroutine);
 
 /* Global Main Coroutine Switch Handlers API */
-ZEND_API void zend_async_add_main_coroutine_start_handler(
-	zend_coroutine_switch_handler_fn handler
-);
+ZEND_API void zend_async_add_main_coroutine_start_handler(zend_coroutine_switch_handler_fn handler);
 
 ZEND_API void zend_async_call_main_coroutine_start_handlers(zend_coroutine_t *main_coroutine);
 
 /* Future API Functions */
 #define ZEND_ASYNC_NEW_FUTURE(thread_safe) zend_async_new_future_fn(thread_safe, 0)
-#define ZEND_ASYNC_NEW_FUTURE_EX(thread_safe, extra_size) zend_async_new_future_fn(thread_safe, extra_size)
+#define ZEND_ASYNC_NEW_FUTURE_EX(thread_safe, extra_size) \
+	zend_async_new_future_fn(thread_safe, extra_size)
 #define ZEND_ASYNC_NEW_FUTURE_OBJ(future) zend_async_new_future_obj_fn(future)
 
 /* Channel API Functions */
-#define ZEND_ASYNC_NEW_CHANNEL(buffer_size, resizable, thread_safe) zend_async_new_channel_fn(buffer_size, resizable, thread_safe, 0)
-#define ZEND_ASYNC_NEW_CHANNEL_EX(buffer_size, resizable, thread_safe, extra_size) zend_async_new_channel_fn(buffer_size, resizable, thread_safe, extra_size)
+#define ZEND_ASYNC_NEW_CHANNEL(buffer_size, resizable, thread_safe) \
+	zend_async_new_channel_fn(buffer_size, resizable, thread_safe, 0)
+#define ZEND_ASYNC_NEW_CHANNEL_EX(buffer_size, resizable, thread_safe, extra_size) \
+	zend_async_new_channel_fn(buffer_size, resizable, thread_safe, extra_size)
 #define ZEND_ASYNC_NEW_CHANNEL_OBJ(channel) zend_async_new_channel_obj_fn(channel)
 
 /* GROUP API Functions */
@@ -1494,22 +1488,26 @@ END_EXTERN_C()
 #define ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN() zend_async_suspend_fn(true)
 #define ZEND_ASYNC_ENQUEUE_COROUTINE(coroutine) zend_async_enqueue_coroutine_fn(coroutine)
 #define ZEND_ASYNC_RESUME(coroutine) zend_async_resume_fn(coroutine, NULL, false)
-#define ZEND_ASYNC_RESUME_WITH_ERROR(coroutine, error, transfer_error) zend_async_resume_fn(coroutine, error, transfer_error)
-#define ZEND_ASYNC_CANCEL(coroutine, error, transfer_error) zend_async_cancel_fn(coroutine, error, transfer_error, false)
-#define ZEND_ASYNC_CANCEL_EX(coroutine, error, transfer_error, is_safely) zend_async_cancel_fn(coroutine, error, transfer_error, is_safely)
+#define ZEND_ASYNC_RESUME_WITH_ERROR(coroutine, error, transfer_error) \
+	zend_async_resume_fn(coroutine, error, transfer_error)
+#define ZEND_ASYNC_CANCEL(coroutine, error, transfer_error) \
+	zend_async_cancel_fn(coroutine, error, transfer_error, false)
+#define ZEND_ASYNC_CANCEL_EX(coroutine, error, transfer_error, is_safely) \
+	zend_async_cancel_fn(coroutine, error, transfer_error, is_safely)
 
 /**
  * Spawns a new coroutine and throws the specified exception within it.
- * 
+ *
  * This creates a dedicated coroutine for exception handling, ensuring proper
  * scope-based error propagation when exceptions occur in microtasks or other
  * contexts where direct throwing would bypass scope exception handling.
- * 
+ *
  * @param exception  The exception object to throw in the new coroutine
  * @param scope      Target scope for the coroutine (NULL for current scope)
  * @param priority   Priority level for the exception-throwing coroutine
  */
-#define ZEND_ASYNC_SPAWN_AND_THROW(exception, scope, priority) zend_async_spawn_and_throw_fn(exception, scope, priority)
+#define ZEND_ASYNC_SPAWN_AND_THROW(exception, scope, priority) \
+	zend_async_spawn_and_throw_fn(exception, scope, priority)
 /**
  * The API method initiates graceful shutdown mode.
  */
@@ -1528,33 +1526,53 @@ END_EXTERN_C()
 #define ZEND_ASYNC_REACTOR_EXECUTE(no_wait) zend_async_reactor_execute_fn(no_wait)
 #define ZEND_ASYNC_REACTOR_LOOP_ALIVE() zend_async_reactor_loop_alive_fn()
 
-#define ZEND_ASYNC_NEW_SOCKET_EVENT(socket, events) zend_async_new_socket_event_fn(socket, events, 0)
-#define ZEND_ASYNC_NEW_SOCKET_EVENT_EX(socket, events, extra_size) zend_async_new_socket_event_fn(socket, events, extra_size)
-#define ZEND_ASYNC_NEW_POLL_EVENT(fh, socket, events) zend_async_new_poll_event_fn(fh, socket, events, 0)
-#define ZEND_ASYNC_NEW_POLL_EVENT_EX(fh, socket, events, extra_size) zend_async_new_poll_event_fn(fh, socket, events, extra_size)
-#define ZEND_ASYNC_NEW_TIMER_EVENT(timeout, is_periodic) zend_async_new_timer_event_fn(timeout, 0, is_periodic, 0)
-#define ZEND_ASYNC_NEW_TIMER_EVENT_EX(timeout, is_periodic, extra_size) zend_async_new_timer_event_fn(timeout, 0, is_periodic, extra_size)
-#define ZEND_ASYNC_NEW_TIMER_EVENT_NS(timeout, nanoseconds, is_periodic) zend_async_new_timer_event_fn(timeout, nanoseconds, is_periodic, 0)
-#define ZEND_ASYNC_NEW_TIMER_EVENT_NS_EX(timeout, nanoseconds, is_periodic, extra_size) zend_async_new_timer_event_fn(timeout, nanoseconds, is_periodic, extra_size)
+#define ZEND_ASYNC_NEW_SOCKET_EVENT(socket, events) \
+	zend_async_new_socket_event_fn(socket, events, 0)
+#define ZEND_ASYNC_NEW_SOCKET_EVENT_EX(socket, events, extra_size) \
+	zend_async_new_socket_event_fn(socket, events, extra_size)
+#define ZEND_ASYNC_NEW_POLL_EVENT(fh, socket, events) \
+	zend_async_new_poll_event_fn(fh, socket, events, 0)
+#define ZEND_ASYNC_NEW_POLL_EVENT_EX(fh, socket, events, extra_size) \
+	zend_async_new_poll_event_fn(fh, socket, events, extra_size)
+#define ZEND_ASYNC_NEW_TIMER_EVENT(timeout, is_periodic) \
+	zend_async_new_timer_event_fn(timeout, 0, is_periodic, 0)
+#define ZEND_ASYNC_NEW_TIMER_EVENT_EX(timeout, is_periodic, extra_size) \
+	zend_async_new_timer_event_fn(timeout, 0, is_periodic, extra_size)
+#define ZEND_ASYNC_NEW_TIMER_EVENT_NS(timeout, nanoseconds, is_periodic) \
+	zend_async_new_timer_event_fn(timeout, nanoseconds, is_periodic, 0)
+#define ZEND_ASYNC_NEW_TIMER_EVENT_NS_EX(timeout, nanoseconds, is_periodic, extra_size) \
+	zend_async_new_timer_event_fn(timeout, nanoseconds, is_periodic, extra_size)
 #define ZEND_ASYNC_NEW_SIGNAL_EVENT(signum) zend_async_new_signal_event_fn(signum, 0)
-#define ZEND_ASYNC_NEW_SIGNAL_EVENT_EX(signum, extra_size) zend_async_new_signal_event_fn(signum, extra_size)
-#define ZEND_ASYNC_NEW_PROCESS_EVENT(process_handle) zend_async_new_process_event_fn(process_handle, 0)
-#define ZEND_ASYNC_NEW_PROCESS_EVENT_EX(process_handle, extra_size) zend_async_new_process_event_fn(process_handle, extra_size)
+#define ZEND_ASYNC_NEW_SIGNAL_EVENT_EX(signum, extra_size) \
+	zend_async_new_signal_event_fn(signum, extra_size)
+#define ZEND_ASYNC_NEW_PROCESS_EVENT(process_handle) \
+	zend_async_new_process_event_fn(process_handle, 0)
+#define ZEND_ASYNC_NEW_PROCESS_EVENT_EX(process_handle, extra_size) \
+	zend_async_new_process_event_fn(process_handle, extra_size)
 #define ZEND_ASYNC_NEW_THREAD_EVENT(entry, arg) zend_async_new_thread_event_fn(entry, arg, 0)
 #define ZEND_ASYNC_NEW_THREAD_EVENT_EX(entry, arg) zend_async_new_thread_event_fn(entry, arg, 0)
-#define ZEND_ASYNC_NEW_FILESYSTEM_EVENT(path, flags) zend_async_new_filesystem_event_fn(path, flags, 0)
-#define ZEND_ASYNC_NEW_FILESYSTEM_EVENT_EX(path, flags, extra_size) zend_async_new_filesystem_event_fn(path, flags, extra_size)
+#define ZEND_ASYNC_NEW_FILESYSTEM_EVENT(path, flags) \
+	zend_async_new_filesystem_event_fn(path, flags, 0)
+#define ZEND_ASYNC_NEW_FILESYSTEM_EVENT_EX(path, flags, extra_size) \
+	zend_async_new_filesystem_event_fn(path, flags, extra_size)
 
 #define ZEND_ASYNC_GETNAMEINFO(addr, flags) zend_async_getnameinfo_fn(addr, flags, 0)
-#define ZEND_ASYNC_GETNAMEINFO_EX(addr, flags, extra_size) zend_async_getnameinfo_fn(addr, flags, extra_size)
-#define ZEND_ASYNC_GETADDRINFO(node, service, hints) zend_async_getaddrinfo_fn(node, service, hints, 0)
-#define ZEND_ASYNC_GETADDRINFO_EX(node, service, hints, extra_size) zend_async_getaddrinfo_fn(node, service, hints, extra_size)
+#define ZEND_ASYNC_GETNAMEINFO_EX(addr, flags, extra_size) \
+	zend_async_getnameinfo_fn(addr, flags, extra_size)
+#define ZEND_ASYNC_GETADDRINFO(node, service, hints) \
+	zend_async_getaddrinfo_fn(node, service, hints, 0)
+#define ZEND_ASYNC_GETADDRINFO_EX(node, service, hints, extra_size) \
+	zend_async_getaddrinfo_fn(node, service, hints, extra_size)
 #define ZEND_ASYNC_FREEADDRINFO(ai) zend_async_freeaddrinfo_fn(ai)
 
-#define ZEND_ASYNC_NEW_EXEC_EVENT(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env) \
-	zend_async_new_exec_event_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, 0)
-#define ZEND_ASYNC_NEW_EXEC_EVENT_EX(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, extra_size) \
-	zend_async_new_exec_event_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, extra_size)
+#define ZEND_ASYNC_NEW_EXEC_EVENT( \
+		exec_mode, cmd, return_buffer, return_value, std_error, cwd, env) \
+	zend_async_new_exec_event_fn( \
+			exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, 0)
+#define ZEND_ASYNC_NEW_EXEC_EVENT_EX( \
+		exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, extra_size) \
+	zend_async_new_exec_event_fn( \
+			exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, extra_size)
 #define ZEND_ASYNC_EXEC(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, timeout) \
 	zend_async_exec_fn(exec_mode, cmd, return_buffer, return_value, std_error, cwd, env, timeout)
 
@@ -1571,39 +1589,48 @@ END_EXTERN_C()
 	zend_async_socket_listen_fn(host, port, backlog, extra_size)
 
 /* Iterator API Macros */
-#define ZEND_ASYNC_NEW_ITERATOR_SCOPE(array, zend_iterator, fcall, handler, scope, concurrency, priority) \
-	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, scope, concurrency, priority, 0)
+#define ZEND_ASYNC_NEW_ITERATOR_SCOPE( \
+		array, zend_iterator, fcall, handler, scope, concurrency, priority) \
+	zend_async_new_iterator_fn( \
+			array, zend_iterator, fcall, handler, scope, concurrency, priority, 0)
 #define ZEND_ASYNC_NEW_ITERATOR(array, zend_iterator, fcall, handler, concurrency, priority) \
 	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, NULL, concurrency, priority, 0)
-#define ZEND_ASYNC_NEW_ITERATOR_EX(array, zend_iterator, fcall, handler, concurrency, priority, size) \
-	zend_async_new_iterator_fn(array, zend_iterator, fcall, handler, NULL, concurrency, priority, size)
+#define ZEND_ASYNC_NEW_ITERATOR_EX( \
+		array, zend_iterator, fcall, handler, concurrency, priority, size) \
+	zend_async_new_iterator_fn( \
+			array, zend_iterator, fcall, handler, NULL, concurrency, priority, size)
 
 /* Context API Macros */
 #define ZEND_ASYNC_NEW_CONTEXT(parent) zend_async_new_context_fn(parent)
-#define ZEND_ASYNC_CURRENT_CONTEXT (ZEND_ASYNC_G(coroutine) != NULL ? ZEND_ASYNC_G(coroutine)->scope->context : NULL)
+#define ZEND_ASYNC_CURRENT_CONTEXT \
+	(ZEND_ASYNC_G(coroutine) != NULL ? ZEND_ASYNC_G(coroutine)->scope->context : NULL)
 #define ZEND_ASYNC_GET_COROUTINE_CONTEXT() \
-	((ZEND_ASYNC_G(coroutine)) ? \
-		(ZEND_ASYNC_G(coroutine)->context ? \
-			ZEND_ASYNC_G(coroutine)->context : \
-			(ZEND_ASYNC_G(coroutine)->context = ZEND_ASYNC_NEW_CONTEXT(NULL))) \
-		: NULL)
+	((ZEND_ASYNC_G(coroutine)) \
+					? (ZEND_ASYNC_G(coroutine)->context ? ZEND_ASYNC_G(coroutine)->context \
+														: (ZEND_ASYNC_G(coroutine)->context \
+																  = ZEND_ASYNC_NEW_CONTEXT(NULL))) \
+					: NULL)
 
 /* Internal Context API Macros */
-#define ZEND_ASYNC_INTERNAL_CONTEXT_KEY_ALLOC(key_name) zend_async_internal_context_key_alloc(key_name)
+#define ZEND_ASYNC_INTERNAL_CONTEXT_KEY_ALLOC(key_name) \
+	zend_async_internal_context_key_alloc(key_name)
 #define ZEND_ASYNC_INTERNAL_CONTEXT_KEY_NAME(key) zend_async_internal_context_key_name(key)
 #define ZEND_ASYNC_INTERNAL_CONTEXT_FIND(coro, key) zend_async_internal_context_find(coro, key)
-#define ZEND_ASYNC_INTERNAL_CONTEXT_SET(coro, key, value) zend_async_internal_context_set(coro, key, value)
+#define ZEND_ASYNC_INTERNAL_CONTEXT_SET(coro, key, value) \
+	zend_async_internal_context_set(coro, key, value)
 #define ZEND_ASYNC_INTERNAL_CONTEXT_UNSET(coro, key) zend_async_internal_context_unset(coro, key)
 
 /* Coroutine Switch Handlers API Macros */
-#define ZEND_COROUTINE_ADD_SWITCH_HANDLER(coroutine, handler) zend_coroutine_add_switch_handler(coroutine, handler)
+#define ZEND_COROUTINE_ADD_SWITCH_HANDLER(coroutine, handler) \
+	zend_coroutine_add_switch_handler(coroutine, handler)
 
 #define ZEND_COROUTINE_ENTER(coroutine) zend_coroutine_call_switch_handlers(coroutine, true, false);
 #define ZEND_COROUTINE_LEAVE(coroutine) zend_coroutine_call_switch_handlers(coroutine, false, false)
 #define ZEND_COROUTINE_FINISH(coroutine) zend_coroutine_call_switch_handlers(coroutine, false, true)
 
 /* Global Main Coroutine Switch Handlers API Macros */
-#define ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER(handler) zend_async_add_main_coroutine_start_handler(handler)
+#define ZEND_ASYNC_ADD_MAIN_COROUTINE_START_HANDLER(handler) \
+	zend_async_add_main_coroutine_start_handler(handler)
 #define ZEND_ASYNC_ADD_SWITCH_HANDLER(handler) \
 	if (ZEND_ASYNC_CURRENT_COROUTINE) { \
 		zend_coroutine_add_switch_handler(ZEND_ASYNC_CURRENT_COROUTINE, handler); \
@@ -1611,4 +1638,4 @@ END_EXTERN_C()
 		zend_async_add_main_coroutine_start_handler(handler); \
 	}
 
-#endif //ZEND_ASYNC_API_H
+#endif // ZEND_ASYNC_API_H
