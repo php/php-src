@@ -97,7 +97,7 @@ function php_cli_server_start(
     }
 
     register_shutdown_function(
-        function($handle) use($router, $doc_root, $output_file) {
+        function($handle, $router, $doc_root, $output_file) {
             proc_terminate($handle);
             $status = proc_get_status($handle);
             if ($status['exitcode'] !== -1 && $status['exitcode'] !== 0
@@ -108,7 +108,10 @@ function php_cli_server_start(
             @unlink(__DIR__ . "/{$router}");
             remove_directory($doc_root);
         },
-        $handle
+        $handle,
+        $router,
+        $doc_root,
+        $output_file
     );
 
     // Define the same "constants" we previously did.

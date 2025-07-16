@@ -16,10 +16,10 @@ $stdoutStream = fopen('php://stdout', 'r');
 
 $stdoutFile = tempnam(sys_get_temp_dir(), 'gh8827');
 $stderrFile = tempnam(sys_get_temp_dir(), 'gh8827');
-register_shutdown_function(function () use ($stdoutFile, $stderrFile) {
+register_shutdown_function(function ($stdoutFile, $stderrFile) {
     unlink($stdoutFile);
     unlink($stderrFile);
-});
+}, $stdoutFile, $stderrFile);
 
 fclose(STDOUT);
 fclose(STDERR);
