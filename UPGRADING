@@ -571,6 +571,9 @@ PHP 8.5 UPGRADE NOTES
   . The default value of opcache.jit_hot_loop is now 61 (a prime) to prevent it
     from being a multiple of loop iteration counts.
     It is recommended that this parameter is set to a prime number.
+  . Changing opcache.memory_consumption when OPcache SHM is already set up
+    will now correctly report a failure instead of silently doing nothing and
+    showing misleading values in PHPInfo.
 
 - OpenSSL:
   Added openssl.libctx to select the OpenSSL library context type. Either

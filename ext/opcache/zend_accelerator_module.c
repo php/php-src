@@ -76,6 +76,15 @@ static int validate_api_restriction(void)
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
 {
+	if (accel_startup_ok) {
+		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.memory_consumption cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.memory_consumption] in an individual pool's configuration?\n");
+		} else {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.memory_consumption cannot be changed when OPcache is already set up.\n");
+		}
+		return FAILURE;
+	}
+
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 	zend_long memsize = atoi(ZSTR_VAL(new_value));
 	/* sanity check we must use at least 8 MB */
