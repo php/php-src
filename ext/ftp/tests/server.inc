@@ -52,10 +52,10 @@ if ($pid) {
 
     if (!$s) die("Error accepting a new connection\n");
 
-    register_shutdown_function(function() use($pid, $s) {
+    register_shutdown_function(function($pid, $s) {
         fclose($s);
         pcntl_waitpid($pid, $status);
-    });
+    }, $pid, $s);
 
     fputs($s, "220----- PHP FTP server 0.3 -----\r\n220 Service ready\r\n");
     $buf = fread($s, 2048);
