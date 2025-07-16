@@ -264,7 +264,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	}
 
 	if (has_clone_method) {
-		GC_ADDREF(new_object);
 		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
 
 		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
@@ -274,8 +273,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
 			}
 		}
-
-		OBJ_RELEASE(new_object);
 	}
 }
 
