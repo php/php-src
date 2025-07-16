@@ -6,6 +6,12 @@ PHP                                                                        NEWS
   . socket_set_option for multicast context throws a ValueError
     when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
 
+- URI:
+  . Empty host handling is fixed. (Máté Kocsis)
+  . Error handling of Uri\WhatWg\Url::withHost() is fixed when the input
+    contains a port. Now, it triggers an exception; previously, the error
+    was silently swallowed. (Máté Kocsis)
+
 17 Jul 2025, PHP 8.5.0alpha2
 
 - Core:

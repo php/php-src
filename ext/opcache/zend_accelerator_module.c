@@ -27,6 +27,7 @@
 #include "zend_closures.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
+#include "zend_file_cache.h"
 #include "php_ini.h"
 #include "SAPI.h"
 #include "zend_virtual_cwd.h"
@@ -362,6 +363,23 @@ static int filename_is_in_cache(zend_string *filename)
 	}
 
 	return 0;
+}
+
+static int filename_is_in_file_cache(zend_string *filename)
+{
+	zend_string *realpath = zend_resolve_path(filename);
+	if (!realpath) {
+		return 0;
+	}
+
+	zend_file_handle handle;
+	zend_stream_init_filename_ex(&handle, filename);
+	handle.opened_path = realpath;
+
+	zend_persistent_script *result = zend_file_cache_script_load_ex(&handle, true);
+	zend_destroy_file_handle(&handle);
+
+	return result != NULL;
 }
 
 static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
@@ -998,4 +1016,28 @@ ZEND_FUNCTION(opcache_is_script_cached)
 	}
 
 	RETURN_BOOL(filename_is_in_cache(script_name));
+}
+
+/* {{{ Return true if the script is cached in OPCache file cache, false if it is not cached or if OPCache is not running. */
+ZEND_FUNCTION(opcache_is_script_cached_in_file_cache)
+{
+	zend_string *script_name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(script_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!validate_api_restriction()) {
+		RETURN_FALSE;
+	}
+
+	if (!(ZCG(accelerator_enabled) || ZCG(accel_directives).file_cache_only)) {
+		RETURN_FALSE;
+	}
+
+	if (!ZCG(accel_directives).file_cache) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(filename_is_in_file_cache(script_name));
 }
