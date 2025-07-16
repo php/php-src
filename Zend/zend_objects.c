@@ -294,6 +294,15 @@ ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const
 		EG(fake_scope) = scope;
 
 		ZEND_HASH_FOREACH_KEY_VAL(properties, zend_ulong num_key, zend_string *key, zval *val) {
+			if (UNEXPECTED(Z_ISREF_P(val))) {
+				if (Z_REFCOUNT_P(val) == 1) {
+					val = Z_REFVAL_P(val);
+				} else {
+					zend_throw_error(NULL, "Cannot assign by reference when cloning with updated properties");
+					break;
+				}
+			}
+
 			if (UNEXPECTED(key == NULL)) {
 				key = zend_long_to_str(num_key);
 				new_object->handlers->write_property(new_object, key, val, NULL);
