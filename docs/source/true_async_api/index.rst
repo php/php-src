@@ -85,9 +85,9 @@ For implementation details, see the :doc:`implementation-guide` section.
    // Later, in callback: clean up
    ZEND_ASYNC_FREEADDRINFO(result);
 
-******************
+***********************
  Documentation Sections
-******************
+***********************
 
 :doc:`architecture`
    Detailed explanation of the two-repository architecture and component separation.
@@ -105,4 +105,4 @@ For implementation details, see the :doc:`implementation-guide` section.
    Common patterns, best practices, and coding conventions for the API.
 
 :doc:`examples`
-   Practical examples showing how to use different API components.
+   Practical C code examples showing how to use different API components.

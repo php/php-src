@@ -83,9 +83,9 @@ All implementations must match the exact function pointer signatures defined in
        const bool is_periodic, size_t extra_size
    );
 
-***********************
+************************
  Implementation Patterns
-***********************
+************************
 
 Event Structure Pattern
 =======================
