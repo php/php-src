@@ -199,7 +199,7 @@ ZEND_API bool zend_async_reactor_is_enabled(void)
 	return reactor_module_name != NULL;
 }
 
-static void ts_globals_ctor(zend_async_globals_t *globals)
+static void internal_globals_ctor(zend_async_globals_t *globals)
 {
 	globals->state = ZEND_ASYNC_OFF;
 	zend_atomic_bool_store(&globals->heartbeat, false);
@@ -213,7 +213,7 @@ static void ts_globals_ctor(zend_async_globals_t *globals)
 	globals->exit_exception = NULL;
 }
 
-static void ts_globals_dtor(zend_async_globals_t *globals)
+static void internal_globals_dtor(zend_async_globals_t *globals)
 {
 }
 
@@ -221,13 +221,13 @@ void zend_async_globals_ctor(void)
 {
 #ifdef ZTS
 	ts_allocate_fast_id(&zend_async_globals_id, &zend_async_globals_offset,
-			sizeof(zend_async_globals_t), (ts_allocate_ctor) ts_globals_ctor,
-			(ts_allocate_dtor) ts_globals_dtor);
+			sizeof(zend_async_globals_t), (ts_allocate_ctor) internal_globals_ctor,
+			(ts_allocate_dtor) internal_globals_dtor);
 
 	ZEND_ASSERT(zend_async_globals_id != 0 && "zend_async_globals allocation failed");
 
 #else
-	ts_globals_ctor(&zend_async_globals_api);
+	internal_globals_ctor(&zend_async_globals_api);
 #endif
 }
 
@@ -239,7 +239,7 @@ void zend_async_globals_dtor(void)
 {
 #ifdef ZTS
 #else
-	ts_globals_dtor(&zend_async_globals_api);
+	internal_globals_dtor(&zend_async_globals_api);
 #endif
 }
 
