@@ -68,9 +68,7 @@
  */
 #include "zend.h"
 #include "zend_API.h"
-#ifdef PHP_ASYNC_API
 #include "zend_async_API.h"
-#endif
 #include "zend_compile.h"
 #include "zend_errors.h"
 #include "zend_fibers.h"

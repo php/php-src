@@ -49,6 +49,8 @@
 #include <sys/syscall.h>
 #endif
 
+#include "zend_async_API.h"
+
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
@@ -199,14 +201,12 @@ void init_executor(void) /* {{{ */
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 
-#ifdef PHP_ASYNC_API
 	EG(shutdown_context) = (zend_shutdown_context_t) {
 		.is_started = false,
 		.coroutine = NULL,
 		.num_elements = 0,
 		.idx = 0
 	};
-#endif
 
 	zend_max_execution_timer_init();
 	zend_fiber_init();
@@ -257,29 +257,7 @@ static ZEND_COLD void zend_throw_or_error(int fetch_type, zend_class_entry *exce
 }
 /* }}} */
 
-void shutdown_destructors(void) /* {{{ */
-{
-	if (CG(unclean_shutdown)) {
-		EG(symbol_table).pDestructor = zend_unclean_zval_ptr_dtor;
-	}
-	zend_try {
-		uint32_t symbols;
-		do {
-			symbols = zend_hash_num_elements(&EG(symbol_table));
-			zend_hash_reverse_apply(&EG(symbol_table), (apply_func_t) zval_call_destructor);
-		} while (symbols != zend_hash_num_elements(&EG(symbol_table)));
-		zend_objects_store_call_destructors(&EG(objects_store));
-	} zend_catch {
-		/* if we couldn't destruct cleanly, mark all objects as destructed anyway */
-		zend_objects_store_mark_destructed(&EG(objects_store));
-	} zend_end_try();
-}
-/* }}} */
-
-#ifdef PHP_ASYNC_API
-#include "zend_async_API.h"
-
-static void  shutdown_destructors_coroutine_dtor(zend_coroutine_t *coroutine)
+static void  shutdown_destructors_coroutine_dtor(zend_coroutine_t *coroutine) /* {{{ */
 {
 	zend_shutdown_context_t *shutdown_context = &EG(shutdown_context);
 
@@ -318,7 +296,7 @@ static bool shutdown_destructors_context_switch_handler(
 	return false;
 }
 
-void shutdown_destructors_async(void) /* {{{ */
+void shutdown_destructors(void) /* {{{ */
 {
 	zend_coroutine_t *coroutine = ZEND_ASYNC_CURRENT_COROUTINE;
 	bool should_continue = false;
@@ -400,7 +378,6 @@ void shutdown_destructors_async(void) /* {{{ */
 	shutdown_context->is_started = false;
 }
 /* }}} */
-#endif
 
 /* Free values held by the executor. */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)

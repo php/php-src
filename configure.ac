@@ -1046,16 +1046,6 @@ PHP_ARG_ENABLE([undefined-sanitizer],,
     [Enable undefined sanitizer])],
   [no],
   [no])
-PHP_ARG_ENABLE([async-api],,
-  [AS_HELP_STRING([--disable-async-api],
-    [Disable async API support])],
-  [yes],
-  [no])
-
-AS_VAR_IF([PHP_ASYNC_API], [yes], [
-  AC_DEFINE([PHP_ASYNC_API], [1], [Define to 1 if async API support is enabled.])
-])
-
 
 dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
@@ -1796,10 +1786,8 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
   ]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
 
-if test "$PHP_ASYNC_API" = "yes"; then
   PHP_ADD_SOURCES([Zend], m4_normalize([zend_async_API.c]),
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
-fi
 
 PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/scripts/Makefile.frag],
   [$abs_srcdir/scripts],

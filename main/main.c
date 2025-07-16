@@ -2614,10 +2614,9 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 		if (append_file_p && result) {
 			result = zend_execute_script(ZEND_REQUIRE, NULL, append_file_p) == SUCCESS;
 		}
-		#ifdef PHP_ASYNC_API
-			ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN();
-			ZEND_ASYNC_INITIALIZE;
-		#endif
+
+		ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN();
+		ZEND_ASYNC_INITIALIZE;
 	} zend_catch {
 		result = false;
 	} zend_end_try();
@@ -2789,10 +2788,8 @@ PHPAPI void php_reserve_tsrm_memory(void)
 		TSRM_ALIGNED_SIZE(zend_mm_globals_size()) +
 		TSRM_ALIGNED_SIZE(zend_gc_globals_size()) +
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
-		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct))
-#ifdef PHP_ASYNC_API
-		+ TSRM_ALIGNED_SIZE(sizeof(zend_async_globals_t))
-#endif
+		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_async_globals_t))
 	);
 }
 /* }}} */

@@ -1997,11 +1997,8 @@ function write_summary()
 	} else {
 		ar[k++] = ['Static analyzer', 'disabled'];
 	}
-    if (typeof PHP_ASYNC_API !== "undefined" && PHP_ASYNC_API == "yes") {
-        ar[k++] = ['True Async API', 'Yes'];
-    } else {
-        ar[k++] = ['True Async API', 'No'];
-    }
+
+    ar[k++] = ['True Async API', 'Yes'];
 
 	output_as_table(["",""], ar);
 	STDOUT.WriteBlankLines(2);

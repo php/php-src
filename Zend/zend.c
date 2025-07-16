@@ -41,9 +41,7 @@
 #include "Optimizer/zend_optimizer.h"
 #include "php.h"
 #include "php_globals.h"
-#ifdef PHP_ASYNC_API
 #include "zend_async_API.h"
-#endif
 
 // FIXME: Breaks the declaration of the function below
 #undef zenderror
@@ -1335,11 +1333,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 void zend_call_destructors(void) /* {{{ */
 {
 	zend_try {
-#ifdef PHP_ASYNC_API
-		shutdown_destructors_async();
-#else
 		shutdown_destructors();
-#endif
 	} zend_end_try();
 }
 /* }}} */
@@ -1356,11 +1350,9 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	/* shutdown_executor() takes care of its own bailout handling */
 	shutdown_executor();
 
-#ifdef PHP_ASYNC_API
 	// The execution of the True Async API should end here,
 	// after the GC has been run.
 	ZEND_ASYNC_ENGINE_SHUTDOWN();
-#endif
 
 	zend_try {
 		zend_ini_deactivate();
@@ -1959,18 +1951,13 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 				zend_user_exception_handler();
 			}
-#ifdef PHP_ASYNC_API
+
 			// If we are inside a coroutine,
 			// we do not call the final error handler,
 			// as the exception will be handled higher up in the method ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN
 			if (false == ZEND_ASYNC_CURRENT_COROUTINE && EG(exception)) {
 				ret = zend_exception_error(EG(exception), E_ERROR);
 			}
-#else
-			if (EG(exception)) {
-				ret = zend_exception_error(EG(exception), E_ERROR);
-			}
-#endif
 		}
 		zend_destroy_static_vars(op_array);
 		destroy_op_array(op_array);
