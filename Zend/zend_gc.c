@@ -259,8 +259,6 @@ struct _gc_stack {
 	zend_refcounted *data[GC_STACK_SEGMENT_SIZE];
 };
 
-#ifdef PHP_ASYNC_API
-
 typedef enum {
 	GC_ASYNC_STATE_NONE = 0,
 	GC_ASYNC_STATE_INIT,		// initial state
@@ -280,7 +278,6 @@ typedef struct {
 	zend_hrtime_t start_time;       // start of full GC pass
 	zend_hrtime_t dtor_start_time;  // start of dtor phase
 } gc_async_context_t;
-#endif
 
 typedef struct _zend_gc_globals {
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
@@ -308,13 +305,11 @@ typedef struct _zend_gc_globals {
 	uint32_t dtor_end;
 	zend_fiber *dtor_fiber;
 	bool dtor_fiber_running;
-#ifdef PHP_ASYNC_API
 	gc_async_context_t async_context; /* async context for gc */
 	gc_stack *gc_stack;			/* local mark/scan stack */
 	zend_coroutine_t *dtor_coroutine;
 	zend_async_scope_t *dtor_scope;
 	zend_async_microtask_t *microtask;
-#endif
 
 #if GC_BENCH
 	uint32_t root_buf_length;
@@ -534,13 +529,11 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->dtor_fiber = NULL;
 	gc_globals->dtor_fiber_running = false;
 
-#ifdef PHP_ASYNC_API
 	gc_globals->dtor_coroutine = NULL;
 	gc_globals->dtor_scope = NULL;
 	gc_globals->microtask = NULL;
 	gc_globals->async_context.state = GC_ASYNC_STATE_NONE;
 	gc_globals->gc_stack = NULL;
-#endif
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
@@ -567,11 +560,9 @@ void gc_globals_dtor(void)
 	root_buffer_dtor(&gc_globals);
 #endif
 
-#ifdef PHP_ASYNC_API
 	if (GC_G(dtor_scope)) {
 		GC_G(dtor_scope) = NULL;
 	}
-#endif
 }
 
 void gc_reset(void)
@@ -1857,15 +1848,7 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 	gc_root_buffer *current;
 	zend_refcounted *p;
 
-#ifdef PHP_ASYNC_API
 	const bool in_coroutine = GC_G(dtor_coroutine) != NULL;
-
-#define RESUMED_AFTER_SUSPENSION (fiber != NULL && GC_G(dtor_fiber) != fiber) \
-	|| (in_coroutine && GC_G(dtor_coroutine) != ZEND_ASYNC_CURRENT_COROUTINE)
-#else
-	const bool in_coroutine = false;
-#define RESUMED_AFTER_SUSPENSION fiber != NULL && GC_G(dtor_fiber) != fiber
-#endif
 
 	/* The root buffer might be reallocated during destructors calls,
 	 * make sure to reload pointers as necessary. */
@@ -1886,20 +1869,18 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 				GC_TRACE_REF(obj, "calling destructor");
 				GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
 				GC_ADDREF(obj);
-#ifdef PHP_ASYNC_API
 				if (in_coroutine) {
 					ZEND_ASYNC_CURRENT_COROUTINE->extended_data = obj;
 				}
-#endif
+
 				obj->handlers->dtor_obj(obj);
-#ifdef PHP_ASYNC_API
 				if (in_coroutine) {
 					ZEND_ASYNC_CURRENT_COROUTINE->extended_data = NULL;
 				}
-#endif
 				GC_TRACE_REF(obj, "returned from destructor");
 				GC_DELREF(obj);
-				if (UNEXPECTED(RESUMED_AFTER_SUSPENSION)) {
+				if (UNEXPECTED((fiber != NULL && GC_G(dtor_fiber) != fiber)
+					|| (in_coroutine && GC_G(dtor_coroutine) != ZEND_ASYNC_CURRENT_COROUTINE))) {
 					/* We resumed after suspension */
 					gc_check_possible_root((zend_refcounted*)&obj->gc);
 					return FAILURE;
@@ -1974,7 +1955,6 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 	}
 }
 
-#ifdef PHP_ASYNC_API
 static void zend_gc_collect_cycles_microtask(zend_async_microtask_t *task);
 
 static void zend_gc_collect_cycles_microtask_dtor(zend_async_microtask_t *task)
@@ -2134,12 +2114,9 @@ static zend_always_inline void start_gc_in_coroutine(void)
 		zend_error_noreturn(E_ERROR, "Unable to spawn destructor coroutine");
 	}
 }
-#endif
 
 ZEND_API int zend_gc_collect_cycles(void)
 {
-#ifdef PHP_ASYNC_API
-
 	if (UNEXPECTED(ZEND_ASYNC_IS_ACTIVE && ZEND_ASYNC_CURRENT_COROUTINE != GC_G(dtor_coroutine))) {
 
 		if (GC_G(dtor_coroutine)) {
@@ -2150,23 +2127,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		return 0;
 	}
 
-#endif
-
 	zend_hrtime_t dtor_start_time = 0;
-
-#ifdef PHP_ASYNC_API
-#define GC_COLLECT_TOTAL_COUNT (context->total_count)
-#define GC_COLLECT_COUNT (context->count)
-#define GC_COLLECT_START_TIME (context->start_time)
-#define GC_COLLECT_SHOULD_RERUN_GC (context->should_rerun_gc)
-#define GC_COLLECT_DID_RERUN_GC (context->did_rerun_gc)
-#define GC_COLLECT_GC_FLAGS (context->gc_flags)
-#define GC_COLLECT_STACK (stack)
-#define GC_COLLECT_FREE_STACK GC_G(gc_stack) = NULL;\
-	gc_stack_free(stack); \
-	efree(stack)
-#define GC_COLLECT_FINISH_0 GC_G(async_context).state = GC_ASYNC_STATE_NONE; \
-	return 0
 
 	// Someone is trying to invoke GC from within a destructor?
 	// We don’t know what that is, but we have nothing to do here.
@@ -2225,23 +2186,6 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 	context->state = GC_ASYNC_STATE_RUNNING;
 
-#else
-#define GC_COLLECT_COUNT count
-#define GC_COLLECT_TOTAL_COUNT total_count
-#define GC_COLLECT_START_TIME start_time
-#define GC_COLLECT_SHOULD_RERUN_GC should_rerun_gc
-#define GC_COLLECT_DID_RERUN_GC did_rerun_gc
-#define GC_COLLECT_GC_FLAGS gc_flags
-#define GC_COLLECT_STACK (&stack)
-#define GC_COLLECT_FREE_STACK gc_stack_free(&stack);
-#define GC_COLLECT_FINISH_0 return 0
-
-	int total_count = 0;
-	bool should_rerun_gc = 0;
-	bool did_rerun_gc = 0;
-
-	zend_hrtime_t start_time = zend_hrtime();
-#endif
 
 	if (GC_G(num_roots) && !GC_G(gc_active)) {
 		zend_gc_remove_root_tmpvars();
@@ -2252,20 +2196,15 @@ rerun_gc:
 		gc_root_buffer *current, *last;
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
-		uint32_t idx, end;
-#ifdef PHP_ASYNC_API
+		uint32_t idx, end = 0;
+
 		stack->next = NULL;
 		stack->prev = NULL;
-#else
-		int count;
-		gc_stack stack;
-		stack.prev = NULL;
-		stack.next = NULL;
-#endif
 
 		if (GC_G(gc_active)) {
-			GC_G(collector_time) += zend_hrtime() - GC_COLLECT_START_TIME;
-			GC_COLLECT_FINISH_0;
+			GC_G(collector_time) += zend_hrtime() - context->start_time;
+			GC_G(async_context).state = GC_ASYNC_STATE_NONE;
+			return 0;
 		}
 
 		GC_TRACE("Collecting cycles");
@@ -2273,17 +2212,19 @@ rerun_gc:
 		GC_G(gc_active) = 1;
 
 		GC_TRACE("Marking roots");
-		gc_mark_roots(GC_COLLECT_STACK);
+		gc_mark_roots(stack);
 		GC_TRACE("Scanning roots");
-		gc_scan_roots(GC_COLLECT_STACK);
+		gc_scan_roots(stack);
 
 		GC_TRACE("Collecting roots");
-		GC_COLLECT_COUNT = gc_collect_roots(&gc_flags, GC_COLLECT_STACK);
+		context->count = gc_collect_roots(&gc_flags, stack);
 
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
-			GC_COLLECT_FREE_STACK;
+			GC_G(gc_stack) = NULL;
+			gc_stack_free(stack);
+			efree(stack);
 			GC_G(gc_active) = 0;
 			goto finish;
 		}
@@ -2298,7 +2239,7 @@ rerun_gc:
 			 * modify any refcounts, so we have no real way to detect this situation
 			 * short of rerunning full GC tracing. What we do instead is to only run
 			 * destructors at this point and automatically re-run GC afterwards. */
-			GC_COLLECT_SHOULD_RERUN_GC = 1;
+			context->should_rerun_gc = 1;
 
 			/* Mark all roots for which a dtor will be invoked as DTOR_GARBAGE. Additionally
 			 * color them purple. This serves a double purpose: First, they should be
@@ -2332,7 +2273,7 @@ rerun_gc:
 			while (idx != end) {
 				if (GC_IS_DTOR_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
-					GC_COLLECT_COUNT -= gc_remove_nested_data_from_buffer(p, current, GC_COLLECT_STACK);
+					context->count -= gc_remove_nested_data_from_buffer(p, current, stack);
 				}
 				current++;
 				idx++;
@@ -2341,9 +2282,7 @@ rerun_gc:
 			/* Actually call destructors. */
 			dtor_start_time = zend_hrtime();
 			if (EXPECTED(!EG(active_fiber))) {
-#ifdef PHP_ASYNC_API
 continue_calling_destructors:
-				end = GC_G(first_unused);
 				if (UNEXPECTED(FAILURE == gc_call_destructors(GC_G(dtor_idx), GC_G(first_unused), NULL))) {
 					//
 					// gc_call_destructors returns FAILURE when a destructor interrupts execution,
@@ -2352,11 +2291,8 @@ continue_calling_destructors:
 					// because the process continues elsewhere.
 					//
 					GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
-					return GC_COLLECT_TOTAL_COUNT;
+					return context->total_count;
 				}
-#else
-				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
-#endif
 			} else {
 				gc_call_destructors_in_fiber(end);
 			}
@@ -2365,18 +2301,17 @@ continue_calling_destructors:
 			if (GC_G(gc_protected)) {
 				/* something went wrong */
 				zend_get_gc_buffer_release();
-				GC_G(collector_time) += zend_hrtime() - GC_COLLECT_START_TIME;
-				GC_COLLECT_FINISH_0;
+				GC_G(collector_time) += zend_hrtime() - context->start_time;
+				GC_G(async_context).state = GC_ASYNC_STATE_NONE;
+				return 0;
 			}
 		}
 
-		gc_stack_free(GC_COLLECT_STACK);
+		gc_stack_free(stack);
 
-#ifdef PHP_ASYNC_API
 		if (false == in_fiber) {
 			end = GC_G(first_unused);
 		}
-#endif
 
 		/* Destroy zvals. The root buffer may be reallocated. */
 		GC_TRACE("Destroying zvals");
@@ -2434,8 +2369,8 @@ continue_calling_destructors:
 		GC_G(free_time) += zend_hrtime() - free_start_time;
 
 		GC_TRACE("Collection finished");
-		GC_G(collected) += GC_COLLECT_COUNT;
-		GC_COLLECT_TOTAL_COUNT += GC_COLLECT_COUNT;
+		GC_G(collected) += context->count;
+		context->total_count += context->count;
 		GC_G(gc_active) = 0;
 	}
 
@@ -2444,8 +2379,8 @@ continue_calling_destructors:
 	/* Objects with destructors were removed from this GC run. Rerun GC right away to clean them
 	 * up. We do this only once: If we encounter more destructors on the second run, we'll not
 	 * run GC another time. */
-	if (GC_COLLECT_SHOULD_RERUN_GC && !GC_COLLECT_DID_RERUN_GC) {
-		GC_COLLECT_DID_RERUN_GC = 1;
+	if (context->should_rerun_gc && !context->did_rerun_gc) {
+		context->did_rerun_gc = 1;
 		goto rerun_gc;
 	}
 
@@ -2458,10 +2393,10 @@ finish:
 	zend_gc_check_root_tmpvars();
 	GC_G(gc_active) = 0;
 
-	GC_G(collector_time) += zend_hrtime() - GC_COLLECT_START_TIME;
-#ifdef PHP_ASYNC_API
+	GC_G(collector_time) += zend_hrtime() - context->start_time;
+
 	if (in_fiber) {
-		const int total_count = GC_COLLECT_TOTAL_COUNT;
+		const int total_count = context->total_count;
 		efree(context);
 		efree(stack);
 		return total_count;
@@ -2472,8 +2407,8 @@ finish:
 			efree(stack);
 		}
 	}
-#endif
-	return GC_COLLECT_TOTAL_COUNT;
+
+	return context->total_count;
 }
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status)
