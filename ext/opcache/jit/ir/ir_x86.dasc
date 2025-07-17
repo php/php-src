@@ -3774,6 +3774,7 @@ static void ir_emit_prologue(ir_ctx *ctx)
 |.if X64
 		const int8_t *int_reg_params = _ir_int_reg_params;
 		const int8_t *fp_reg_params = _ir_fp_reg_params;
+
 		uint32_t i;
 		ir_reg fp;
 		int offset;
@@ -9221,6 +9222,44 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		return;
 	}
 
+	/* Move op2 to a tmp register before epilogue if it's in
+	 * used_preserved_regs, because it will be overridden. */
+
+	ir_reg op2_reg = IR_REG_NONE;
+	ir_mem mem = IR_MEM_B(IR_REG_NONE);
+	if (!IR_IS_CONST_REF(insn->op2)) {
+		op2_reg = ctx->regs[def][2];
+
+		if (op2_reg != IR_REG_NONE) {
+			if (IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, IR_REG_NUM(op2_reg))) {
+				ir_reg orig_op2_reg = IR_REG_NUM(op2_reg);
+				op2_reg = IR_REG_RAX;
+
+				if (IR_REG_SPILLED(orig_op2_reg)) {
+					ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+				} else {
+					ir_type type = ctx->ir_base[insn->op2].type;
+					| ASM_REG_REG_OP mov, type, op2_reg, orig_op2_reg
+				}
+			}
+		} else {
+			if (ir_rule(ctx, insn->op2) & IR_FUSED) {
+				mem = ir_fuse_load(ctx, def, insn->op2);
+			} else {
+				mem = ir_ref_spill_slot(ctx, insn->op2);
+			}
+			ir_reg base = IR_MEM_BASE(mem);
+			ir_reg index = IR_MEM_INDEX(mem);
+			if ((base != IR_REG_NONE && IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, base)) ||
+					(index != IR_REG_NONE && IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, index))) {
+				op2_reg = IR_REG_RAX;
+
+				ir_type type = ctx->ir_base[insn->op2].type;
+				| ASM_REG_MEM_OP, mov, type, op2_reg, mem
+			}
+		}
+	}
+
 	ir_emit_epilogue(ctx);
 
 	if (IR_IS_CONST_REF(insn->op2)) {
@@ -9246,22 +9285,10 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.endif
 		}
     } else {
-		ir_reg op2_reg = ctx->regs[def][2];
-
 		if (op2_reg != IR_REG_NONE) {
-			if (IR_REG_SPILLED(op2_reg)) {
-				op2_reg = IR_REG_NUM(op2_reg);
-				ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
-			}
+			IR_ASSERT(!IR_REGSET_IN((ir_regset)ctx->used_preserved_regs, op2_reg));
 			|	jmp Ra(op2_reg)
 		} else {
-			ir_mem mem;
-
-			if (ir_rule(ctx, insn->op2) & IR_FUSED) {
-				mem = ir_fuse_load(ctx, def, insn->op2);
-			} else {
-				mem = ir_ref_spill_slot(ctx, insn->op2);
-			}
 			|	ASM_TMEM_OP jmp, aword, mem
 		}
     }
