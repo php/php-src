@@ -8,5 +8,5 @@ trait Demo {}
 
 echo "Done\n";
 ?>
---EXPECT--
-Done
+--EXPECTF--
+Fatal error: Cannot apply #[\Attribute] to trait Demo in %s on line %d

@@ -8,5 +8,5 @@ interface Demo {}
 
 echo "Done\n";
 ?>
---EXPECT--
-Done
+--EXPECTF--
+Fatal error: Cannot apply #[\Attribute] to interface Demo in %s on line %d

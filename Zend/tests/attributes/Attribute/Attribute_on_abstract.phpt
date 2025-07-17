@@ -8,5 +8,5 @@ abstract class Demo {}
 
 echo "Done\n";
 ?>
---EXPECT--
-Done
+--EXPECTF--
+Fatal error: Cannot apply #[\Attribute] to abstract class Demo in %s on line %d
