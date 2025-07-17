@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha3
 
+- Core:
+  . Fix support for non-userland stream notifiers. (timwolla)
+
 - Curl:
   . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
   . Add support for CURLINFO_QUEUE_TIME_T in curl_getinfo() (thecaliskan)
