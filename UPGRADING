@@ -193,11 +193,11 @@ PHP 8.5 UPGRADE NOTES
     used by a cURL transfer. It is primarily useful when connection reuse or
     connection pooling logic is needed in PHP-level applications. When
     curl_getinfo() returns an array, this value is available as the "conn_id" key.
-  . Added support for CURLINFO_QUEUE_TIME_T to the curl_getinfo()
+  . Added support for CURLINFO_QUEUE_TIME_T (libcurl >= 8.6.0) to the curl_getinfo()
     function. This constant allows retrieving the time (in microseconds) that the
     request spent in libcurl’s connection queue before it was sent.
     This value can also be retrieved by passing CURLINFO_QUEUE_TIME_T to the
-    curl_getinfo() $option parameter. This requires libcurl 8.6.0 or later.
+    curl_getinfo() $option parameter.
 
 - DOM:
   . Added Dom\Element::$outerHTML.
