@@ -2281,6 +2281,7 @@ rerun_gc:
 			dtor_start_time = zend_hrtime();
 			if (EXPECTED(!EG(active_fiber))) {
 continue_calling_destructors:
+				end = GC_G(first_unused);
 				if (UNEXPECTED(FAILURE == gc_call_destructors(GC_G(dtor_idx), GC_G(first_unused), NULL))) {
 					//
 					// gc_call_destructors returns FAILURE when a destructor interrupts execution,
