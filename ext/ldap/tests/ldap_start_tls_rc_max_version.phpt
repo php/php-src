@@ -6,6 +6,10 @@ ldap
 LDAPCONF={PWD}/ldap_start_tls_rc_max_version.conf
 --SKIPIF--
 <?php
+// Skip in CI for now as adding olcTLSProtocolMin does not seem to work (needs investigation)
+if (getenv('CI')) {
+    die("Skip in CI for now");
+}
 $require_vendor = [
     "name" => "OpenLDAP",
     "min_version" => 20600,
