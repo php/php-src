@@ -753,11 +753,34 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 		} \
 	} while (0)
 
-#define GC_TYPE_MASK				0x0000000f
-#define GC_FLAGS_MASK				0x000003f0
-#define GC_INFO_MASK				0xfffffc00
-#define GC_FLAGS_SHIFT				0
-#define GC_INFO_SHIFT				10
+/// GC is controlled through a data structure that is front-loaded onto zvals. This structure is 32-bits wide and follows
+/// the following layout (from MSB to LSB):
+/// - 4 bits for the type
+///   - these are IS_UNDEF, IS_NULL, IS_ARRAY, etc.
+/// - 6 bits for the flags
+///   - special flags for GC such as GC_IMMUTABLE, GC_PERSISTENT, etc.
+///   - other custom flags such as IS_STR_INTERNED, IS_ARRAY_IMMUTABLE, etc.
+///   - GC lifecycle flags such as IS_OBJ_DESTRUCTOR_CALLED and IS_OBJ_FREE_CALLED
+/// - 22 bits for the info
+///   - 20 bits for GC_ADDRESS: the address for GC ref-counting
+///   - 2 bits for GC_COLOR: the current color during GC cycles
+/// Updating the *_BITS flags below will automatically restructure this layout, sacrificing GC_ADDRESS bits. Please keep
+/// this in mind when adding a new flag.
+
+// Define the bit sizes for each field based on the original layout
+#define GC_TYPE_BITS    4       // Number of bits for the type field
+#define GC_FLAGS_BITS   6       // Number of bits for the flags field
+#define GC_INFO_BITS    22      // Number of bits for the info field
+
+// Calculate the dynamic shifts based on the bit sizes
+#define GC_TYPE_SHIFT   0       // Type starts at bit 0
+#define GC_FLAGS_SHIFT  0       // For legacy reasons, flags start at bit 0
+#define GC_INFO_SHIFT   (GC_TYPE_BITS + GC_FLAGS_BITS) // Info starts after the flags field (bit 10)
+
+// Define the masks (shifted into place), cast to unsigned and avoid negative shifts
+#define GC_TYPE_MASK    (((1U << GC_TYPE_BITS) - 1) << GC_TYPE_SHIFT)  // 0x0000000F
+#define GC_FLAGS_MASK   (((1U << GC_FLAGS_BITS) - 1) << (GC_FLAGS_SHIFT + GC_TYPE_BITS)) // 0x000003F0
+#define GC_INFO_MASK    ((~((1U << GC_INFO_SHIFT) - 1)) & 0xFFFFFFFF)  // 0xFFFFFC00
 
 static zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
