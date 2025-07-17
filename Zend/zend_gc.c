@@ -2222,9 +2222,7 @@ rerun_gc:
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
-			GC_G(gc_stack) = NULL;
 			gc_stack_free(stack);
-			efree(stack);
 			GC_G(gc_active) = 0;
 			goto finish;
 		}
