@@ -13,6 +13,13 @@ PHP                                                                        NEWS
     error handler instead of emitting a warning and continuing with an empty
     string. (Weilin Du)
 
+- Standard:
+  . The following functions now raise a ValueError when the $filename argument
+    contains NUL bytes: fileperms(), fileinode(), filesize(), fileowner(),
+    filegroup(), fileatime(), filemtime(), filectime(), filetype(),
+    is_writable(), is_readable(), is_executable(), is_file(), is_dir(),
+    is_link(), file_exists(), lstat(), stat(). (Girgias)
+
 30 Jul 2026, PHP 8.6.0alpha3
 
 - Core:

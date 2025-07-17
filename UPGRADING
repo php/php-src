@@ -228,6 +228,26 @@ PHP 8.6 UPGRADE NOTES
     bytes.
   . base_convert(), bindex(), hexdec() and octdec() now raise a notice when
     they cannot precisely convert the given number.
+  . The following functions now raise a ValueError when the $filename argument
+    contains NUL bytes:
+    - fileperms()
+    - fileinode()
+    - filesize()
+    - fileowner()
+    - filegroup()
+    - fileatime()
+    - filemtime()
+    - filectime()
+    - filetype()
+    - is_writable()
+    - is_readable()
+    - is_executable()
+    - is_file()
+    - is_dir()
+    - is_link()
+    - file_exists()
+    - lstat()
+    - stat()
 
 - Sysvshm:
   . shm_attach() now raises a ValueError when the $key argument is outside the
