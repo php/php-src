@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Added PHP_BUILD_PROVIDER constant. (timwolla)
 
+- Curl:
+  . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
+  . Add support for CURLINFO_QUEUE_TIME_T in curl_getinfo() (thecaliskan)
+
 - Sockets:
   . socket_set_option for multicast context throws a ValueError
     when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
