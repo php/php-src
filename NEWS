@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha3
 
+- Core:
+  . Added PHP_BUILD_PROVIDER constant. (timwolla)
+
 - Sockets:
   . socket_set_option for multicast context throws a ValueError
     when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
