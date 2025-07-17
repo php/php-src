@@ -849,8 +849,6 @@ PHP_FUNCTION(hash_copy)
 	RETVAL_OBJ(Z_OBJ_HANDLER_P(zhash, clone_obj)(Z_OBJ_P(zhash)));
 
 	if (php_hashcontext_from_object(Z_OBJ_P(return_value))->context == NULL) {
-		zval_ptr_dtor(return_value);
-
 		zend_throw_error(NULL, "Cannot copy hash");
 		RETURN_THROWS();
 	}

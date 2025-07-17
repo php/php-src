@@ -2589,7 +2589,6 @@ PHP_FUNCTION(socket_addrinfo_bind)
 			}
 		default:
 			close(php_sock->bsd_socket);
-			zval_ptr_dtor(return_value);
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
@@ -2653,7 +2652,6 @@ PHP_FUNCTION(socket_addrinfo_connect)
 		default:
 			zend_argument_value_error(1, "socket type must be one of AF_UNIX, AF_INET, or AF_INET6");
 			close(php_sock->bsd_socket);
-			zval_ptr_dtor(return_value);
 			RETURN_THROWS();
 	}
 
