@@ -34,6 +34,7 @@
 #include "zend_enum.h"
 #include "zend_object_handlers.h"
 #include "zend_observer.h"
+#include "zend_class_alias.h"
 
 #include <stdarg.h>
 
@@ -2551,7 +2552,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 
 	/* Collect internal classes with static members */
-	ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
+	zval *ce_or_alias;
+	ZEND_HASH_MAP_FOREACH_VAL(CG(class_table), ce_or_alias) {
+		Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 		if (ce->type == ZEND_INTERNAL_CLASS &&
 		    ce->default_static_members_count > 0) {
 		    class_count++;
@@ -2565,7 +2568,8 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	class_cleanup_handlers[class_count] = NULL;
 
 	if (class_count) {
-		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
+		ZEND_HASH_MAP_FOREACH_VAL(CG(class_table), ce_or_alias) {			
+			Z_CE_FROM_ZVAL_P(ce, ce_or_alias);
 			if (ce->type == ZEND_INTERNAL_CLASS &&
 			    ce->default_static_members_count > 0) {
 			    class_cleanup_handlers[--class_count] = ce;
@@ -3290,8 +3294,9 @@ static void clean_module_classes(int module_number) /* {{{ */
 {
 	/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
 	Bucket *bucket;
+	zend_class_entry *ce;
 	ZEND_HASH_REVERSE_FOREACH_BUCKET(EG(class_table), bucket) {
-		zend_class_entry *ce = Z_CE(bucket->val);
+		Z_CE_FROM_ZVAL(ce, bucket->val);
 		if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module->module_number == module_number) {
 			zend_hash_del_bucket(EG(class_table), bucket);
 		}
@@ -3604,7 +3609,9 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 	 * Instead of having to deal with differentiating between class types and lifetimes,
 	 * we simply don't increase the refcount of a class entry for aliases.
 	 */
-	ZVAL_ALIAS_PTR(&zv, ce);
+	zend_class_alias *alias = zend_class_alias_init(ce);
+
+	ZVAL_ALIAS_PTR(&zv, alias);
 
 	ret = zend_hash_add(CG(class_table), lcname, &zv);
 	zend_string_release_ex(lcname, 0);
@@ -3615,6 +3622,8 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		}
 		return SUCCESS;
 	}
+
+	free(alias);
 	return FAILURE;
 }
 /* }}} */
@@ -3732,11 +3741,12 @@ ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_nam
 
 	key = zend_string_alloc(class_name_length, 0);
 	zend_str_tolower_copy(ZSTR_VAL(key), class_name, class_name_length);
-	disabled_class = zend_hash_find_ptr(CG(class_table), key);
+	zval *disabled_class_or_alias = zend_hash_find(CG(class_table), key);
 	zend_string_release_ex(key, 0);
-	if (!disabled_class) {
+	if (!disabled_class_or_alias) {
 		return FAILURE;
 	}
+	Z_CE_FROM_ZVAL_P(disabled_class, disabled_class_or_alias);
 
 	/* Will be reset by INIT_CLASS_ENTRY. */
 	free(disabled_class->interfaces);
