@@ -70,10 +70,10 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	size_t				locale_len;
 	bool				pattern		= false;
 	UDate				date;
-	std::unique_ptr<TimeZone>	timeZone	= NULL;
+	std::unique_ptr<TimeZone>	timeZone;
 	UErrorCode			status		= U_ZERO_ERROR;
-	std::unique_ptr<DateFormat>	df		= NULL;
-	std::unique_ptr<Calendar>       cal             = NULL;
+	std::unique_ptr<DateFormat>	df;
+	std::unique_ptr<Calendar>       cal;
 	DateFormat::EStyle	dateStyle = DateFormat::kDefault,
 						timeStyle = DateFormat::kDefault;
 
