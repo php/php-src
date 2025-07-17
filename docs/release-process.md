@@ -509,7 +509,7 @@ slightly different steps. We'll call attention where the steps differ.
    * [Annonce 8.5.0alpha1](https://github.com/derickr/toot-together/pull/42)
    * [Annonce 8.5.0alpha2](https://github.com/derickr/toot-together/pull/47)
 
-   We post to ([@php@fosstodon.org](https://fosstodon.org/@php))
+   We post to [@php@fosstodon.org](https://fosstodon.org/@php).
 
 
 ## Packaging a stable release
