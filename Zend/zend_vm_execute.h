@@ -5180,7 +5180,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_
 	SAVE_OPLINE();
 	obj = RT_CONSTANT(opline, opline->op1);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_CONST == IS_CONST ||
@@ -15427,7 +15428,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 	SAVE_OPLINE();
 	obj = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -33522,7 +33524,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 	SAVE_OPLINE();
 	obj = &EX(This);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_UNUSED == IS_CONST ||
@@ -41041,7 +41044,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 	SAVE_OPLINE();
 	obj = EX_VAR(opline->op1.var);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_CV == IS_CONST ||

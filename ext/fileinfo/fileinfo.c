@@ -153,22 +153,10 @@ PHP_FUNCTION(finfo_open)
 	} else if (file && *file) { /* user specified file, perform open_basedir checks */
 
 		if (php_check_open_basedir(file)) {
-			if (object) {
-				zend_restore_error_handling(&zeh);
-				if (!EG(exception)) {
-					zend_throw_exception(NULL, "Constructor failed", 0);
-				}
-			}
-			RETURN_FALSE;
+			goto err;
 		}
 		if (!expand_filepath_with_mode(file, resolved_path, NULL, 0, CWD_EXPAND)) {
-			if (object) {
-				zend_restore_error_handling(&zeh);
-				if (!EG(exception)) {
-					zend_throw_exception(NULL, "Constructor failed", 0);
-				}
-			}
-			RETURN_FALSE;
+			goto err;
 		}
 		file = resolved_path;
 	}
@@ -177,37 +165,35 @@ PHP_FUNCTION(finfo_open)
 
 	if (magic == NULL) {
 		php_error_docref(NULL, E_WARNING, "Invalid mode '" ZEND_LONG_FMT "'.", options);
-		if (object) {
-			zend_restore_error_handling(&zeh);
-			if (!EG(exception)) {
-				zend_throw_exception(NULL, "Constructor failed", 0);
-			}
-		}
-		RETURN_FALSE;
+		goto err;
 	}
 
 	if (magic_load(magic, file) == -1) {
 		php_error_docref(NULL, E_WARNING, "Failed to load magic database at \"%s\"", file);
 		magic_close(magic);
-		if (object) {
-			zend_restore_error_handling(&zeh);
-			if (!EG(exception)) {
-				zend_throw_exception(NULL, "Constructor failed", 0);
-			}
-		}
-		RETURN_FALSE;
+		goto err;
 	}
 
 	if (object) {
 		zend_restore_error_handling(&zeh);
 		finfo_object *obj = Z_FINFO_P(object);
 		obj->magic = magic;
+		return;
 	} else {
 		zend_object *zobj = finfo_objects_new(finfo_class_entry);
 		finfo_object *obj = php_finfo_fetch_object(zobj);
 		obj->magic = magic;
 		RETURN_OBJ(zobj);
 	}
+
+err:
+	if (object) {
+		zend_restore_error_handling(&zeh);
+		if (!EG(exception)) {
+			zend_throw_exception(NULL, "Constructor failed", 0);
+		}
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 

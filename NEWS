@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.0alpha3
 
 - Core:
+  . Add clone-with support to the clone() function. (timwolla, edorian)
   . Fix support for non-userland stream notifiers. (timwolla)
 
 - Curl:
