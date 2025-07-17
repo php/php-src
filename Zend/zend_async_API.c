@@ -10,7 +10,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Edmond                                                       |
+  | Author: Edmond <edmondifthen@proton.me>                              |
   +----------------------------------------------------------------------+
 */
 #include "zend_async_API.h"
@@ -45,11 +45,7 @@ static void enqueue_coroutine(zend_coroutine_t *coroutine)
 	ASYNC_THROW_ERROR("Async API is not enabled");
 }
 
-static void engine_shutdown_stub(void)
-{
-}
-
-static void shutdown_stub(void)
+static void void_stub(void)
 {
 }
 
@@ -135,8 +131,8 @@ zend_async_enqueue_coroutine_t zend_async_enqueue_coroutine_fn = enqueue_corouti
 zend_async_resume_t zend_async_resume_fn = NULL;
 zend_async_cancel_t zend_async_cancel_fn = NULL;
 zend_async_spawn_and_throw_t zend_async_spawn_and_throw_fn = spawn_and_throw;
-zend_async_shutdown_t zend_async_shutdown_fn = shutdown_stub;
-zend_async_engine_shutdown_t zend_async_engine_shutdown_fn = engine_shutdown_stub;
+zend_async_shutdown_t zend_async_shutdown_fn = void_stub;
+zend_async_engine_shutdown_t zend_async_engine_shutdown_fn = void_stub;
 zend_async_get_coroutines_t zend_async_get_coroutines_fn = get_coroutines_stub;
 zend_async_add_microtask_t zend_async_add_microtask_fn = add_microtask_stub;
 zend_async_get_awaiting_info_t zend_async_get_awaiting_info_fn = get_awaiting_info_stub;
