@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0alpha3
 
+- Core:
+  . Fixed bug GH-19153 (#[\Attribute] validation should error on
+    trait/interface/enum/abstract class). (DanielEScherzer)
+
 - Sockets:
   . socket_set_option for multicast context throws a ValueError
     when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
