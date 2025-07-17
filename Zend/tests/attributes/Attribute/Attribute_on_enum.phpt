@@ -8,5 +8,5 @@ enum Demo {}
 
 echo "Done\n";
 ?>
---EXPECT--
-Done
+--EXPECTF--
+Fatal error: Cannot apply #[\Attribute] to enum Demo in %s on line %d
