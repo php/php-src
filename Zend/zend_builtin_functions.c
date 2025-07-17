@@ -72,9 +72,12 @@ zend_result zend_startup_builtin_functions(void) /* {{{ */
 ZEND_FUNCTION(clone)
 {
 	zend_object *zobj;
+	HashTable *with = (HashTable*)&zend_empty_array;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ(zobj)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(with)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* clone() also exists as the ZEND_CLONE OPcode and both implementations must be kept in sync. */
@@ -95,7 +98,16 @@ ZEND_FUNCTION(clone)
 	}
 
 	zend_object *cloned;
-	cloned = zobj->handlers->clone_obj(zobj);
+	if (zend_hash_num_elements(with) > 0) {
+		if (UNEXPECTED(!zobj->handlers->clone_obj_with)) {
+			zend_throw_error(NULL, "Cloning objects of class %s with updated properties is not supported", ZSTR_VAL(ce->name));
+			RETURN_THROWS();
+		}
+
+		cloned = zobj->handlers->clone_obj_with(zobj, scope, with);
+	} else {
+		cloned = zobj->handlers->clone_obj(zobj);
+	}
 
 	ZEND_ASSERT(cloned || EG(exception));
 	if (EXPECTED(cloned)) {
