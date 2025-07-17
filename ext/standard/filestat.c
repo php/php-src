@@ -1018,7 +1018,7 @@ ZEND_NAMED_FUNCTION(name) { \
 	zend_string *filename; \
 	\
 	ZEND_PARSE_PARAMETERS_START(1, 1) \
-		Z_PARAM_STR(filename) \
+		Z_PARAM_PATH_STR(filename) \
 	ZEND_PARSE_PARAMETERS_END(); \
 	\
 	php_stat(filename, funcnum, return_value); \
