@@ -231,10 +231,6 @@ void zend_async_globals_ctor(void)
 #endif
 }
 
-void zend_async_init(void)
-{
-}
-
 void zend_async_globals_dtor(void)
 {
 #ifdef ZTS

@@ -1261,7 +1261,6 @@ BEGIN_EXTERN_C()
 ZEND_API bool zend_async_is_enabled(void);
 ZEND_API bool zend_scheduler_is_enabled(void);
 
-void zend_async_init(void);
 void zend_async_api_shutdown(void);
 void zend_async_globals_ctor(void);
 void zend_async_globals_dtor(void);
