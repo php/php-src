@@ -895,7 +895,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_fetch_static_prop_helper_
 		&prop_info, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type,
 		type == BP_VAR_W ? opline->extended_value : 0 OPLINE_CC EXECUTE_DATA_CC);
 	if (UNEXPECTED(!prop)) {
-		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS));
+		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS) || (type == BP_VAR_UNSET));
 		prop = &EG(uninitialized_zval);
 	} else if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
 	 && (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
@@ -112163,7 +112163,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_fetch_static_prop_helper_
 		&prop_info, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type,
 		type == BP_VAR_W ? opline->extended_value : 0 OPLINE_CC EXECUTE_DATA_CC);
 	if (UNEXPECTED(!prop)) {
-		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS));
+		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS) || (type == BP_VAR_UNSET));
 		prop = &EG(uninitialized_zval);
 	} else if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)
 	 && (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
