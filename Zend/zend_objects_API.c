@@ -65,7 +65,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 	}
 }
 
-#ifdef PHP_ASYNC_API
 static void  store_call_destructors_coroutine_dtor(zend_coroutine_t *coroutine)
 {
 	zend_shutdown_context_t *shutdown_context = &EG(shutdown_context);
@@ -157,7 +156,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors_async(zend_objec
 
 	shutdown_context->is_started = false;
 }
-#endif
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_mark_destructed(zend_objects_store *objects)
 {

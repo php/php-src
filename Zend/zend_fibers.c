@@ -564,7 +564,6 @@ static void zend_fiber_cleanup(zend_fiber_context *context)
 	fiber->caller = NULL;
 }
 
-#ifdef PHP_ASYNC_API
 static zend_always_inline bool can_use_fiber(void)
 {
 	if (UNEXPECTED(ZEND_ASYNC_IS_ACTIVE)) {
@@ -575,7 +574,6 @@ static zend_always_inline bool can_use_fiber(void)
 	ZEND_ASYNC_DEACTIVATE;
 	return true;
 }
-#endif
 
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
@@ -726,11 +724,9 @@ ZEND_API zend_result zend_fiber_start(zend_fiber *fiber, zval *return_value)
 {
 	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_INIT);
 
-#ifdef PHP_ASYNC_API
 	if (UNEXPECTED(false == can_use_fiber())) {
 		return FAILURE;
 	}
-#endif
 
 	if (zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size)) == FAILURE) {
 		return FAILURE;
@@ -747,11 +743,9 @@ ZEND_API zend_result zend_fiber_start(zend_fiber *fiber, zval *return_value)
 
 ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_value)
 {
-#ifdef PHP_ASYNC_API
 	if (UNEXPECTED(false == can_use_fiber())) {
 		return;
 	}
-#endif
 
 	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
 
@@ -764,11 +758,9 @@ ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_val
 
 ZEND_API void zend_fiber_resume_exception(zend_fiber *fiber, zval *exception, zval *return_value)
 {
-#ifdef PHP_ASYNC_API
 	if (UNEXPECTED(false == can_use_fiber())) {
 		return;
 	}
-#endif
 
 	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
 
@@ -781,11 +773,9 @@ ZEND_API void zend_fiber_resume_exception(zend_fiber *fiber, zval *exception, zv
 
 ZEND_API void zend_fiber_suspend(zend_fiber *fiber, zval *value, zval *return_value)
 {
-#ifdef PHP_ASYNC_API
 	if (UNEXPECTED(false == can_use_fiber())) {
 		return;
 	}
-#endif
 
 	fiber->stack_bottom->prev_execute_data = NULL;
 
@@ -915,11 +905,9 @@ ZEND_METHOD(Fiber, __construct)
 		Z_PARAM_FUNC(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef PHP_ASYNC_API
 	if (UNEXPECTED(false == can_use_fiber())) {
 		RETURN_THROWS();
 	}
-#endif
 
 	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
 
@@ -943,11 +931,9 @@ ZEND_METHOD(Fiber, start)
 		Z_PARAM_VARIADIC_WITH_NAMED(fiber->fci.params, fiber->fci.param_count, fiber->fci.named_params);
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef PHP_ASYNC_API
 	if (UNEXPECTED(false == can_use_fiber())) {
 		RETURN_THROWS();
 	}
-#endif
 
 	if (UNEXPECTED(zend_fiber_switch_blocked())) {
 		zend_throw_error(zend_ce_fiber_error, "Cannot switch fibers in current execution context");

@@ -75,9 +75,7 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 	}
 	if (zend_string_equals_literal(root->name, "Exception")
 			|| zend_string_equals_literal(root->name, "Error")
-#ifdef PHP_ASYNC_API
 			|| zend_string_equals_literal(root->name, "CancellationException")
-#endif
 			) {
 		return SUCCESS;
 	}
@@ -835,10 +833,8 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_error = register_class_Error(zend_ce_throwable);
 	zend_init_exception_class_entry(zend_ce_error);
 
-#ifdef PHP_ASYNC_API
 	zend_ce_cancellation_exception = register_class_CancellationException(zend_ce_throwable);
 	zend_init_exception_class_entry(zend_ce_cancellation_exception);
-#endif
 
 	zend_ce_compile_error = register_class_CompileError(zend_ce_error);
 	zend_init_exception_class_entry(zend_ce_compile_error);
