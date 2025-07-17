@@ -748,14 +748,12 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 	const char *local = NULL;
 	php_stream_wrapper *wrapper = NULL;
 
+	ZEND_ASSERT(!zend_str_has_nul_byte(filename));
+	/* Quick check for empty file paths */
+	if (!ZSTR_LEN(filename)) {
+		RETURN_FALSE;
+	}
 	if (IS_ACCESS_CHECK(type)) {
-		if (!ZSTR_LEN(filename) || CHECK_NULL_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
-			if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
-				php_error_docref(NULL, E_WARNING, "Filename contains null byte");
-			}
-			RETURN_FALSE;
-		}
-
 		if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
 				&& php_check_open_basedir(local)) {
 			RETURN_FALSE;
@@ -821,13 +819,6 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		}
 
 		if (!wrapper) {
-			if (!ZSTR_LEN(filename) || CHECK_NULL_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
-				if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
-					php_error_docref(NULL, E_WARNING, "Filename contains null byte");
-				}
-				RETURN_FALSE;
-			}
-
 			if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
 			 && php_check_open_basedir(local)) {
 				RETURN_FALSE;
