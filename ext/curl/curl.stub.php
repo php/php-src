@@ -3054,6 +3054,13 @@ const CURL_LOCK_DATA_PSL = UNKNOWN;
  * @cvalue CURLAUTH_BEARER
  */
 const CURLAUTH_BEARER = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080600 /* Available since 8.6.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_QUEUE_TIME_T
+ */
+const CURLINFO_QUEUE_TIME_T = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLINFO_APPCONNECT_TIME_T

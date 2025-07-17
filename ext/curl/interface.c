@@ -2571,6 +2571,11 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_APPCONNECT_TIME_T, &co) == CURLE_OK) {
 			CAAL("appconnect_time_us", co);
 		}
+#if LIBCURL_VERSION_NUM >= 0x080600 /* Available since 8.6.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_QUEUE_TIME_T , &co) == CURLE_OK) {
+			CAAL("queue_time_us", co);
+		}
+#endif
 		if (curl_easy_getinfo(ch->cp, CURLINFO_CONNECT_TIME_T, &co) == CURLE_OK) {
 			CAAL("connect_time_us", co);
 		}
