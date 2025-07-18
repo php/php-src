@@ -21,16 +21,47 @@ echo "Using interface: $IFACE"
 echo "Current configuration:"
 resolvectl status "$IFACE" | grep -E 'Current DNS Server:|DNS Servers:'
 
-echo "Setting DNS to $LOCAL_DNS for $IFACE"
+# Store the original DNS server for fallback
+ORIGINAL_DNS=$(resolvectl status "$IFACE" | grep "DNS Servers:" | sed 's/.*DNS Servers: //' | awk '{print $1}')
+echo "Original DNS server: $ORIGINAL_DNS"
 
-# Reset interface configuration
+echo "Setting DNS to $LOCAL_DNS for $IFACE (with fallback to $ORIGINAL_DNS)"
+
+# Reset interface configuration first
 resolvectl revert "$IFACE"
 
-# Set DNS to local
-resolvectl dns "$IFACE" "$LOCAL_DNS"
+# Set DNS with local server FIRST (this makes it primary)
+resolvectl dns "$IFACE" "$LOCAL_DNS" "$ORIGINAL_DNS"
 
 # Confirm setup
 echo -e "\nUpdated configuration:"
 resolvectl status "$IFACE" | grep -E 'Current DNS Server:|DNS Servers:'
+
+echo -e "\nTesting DNS resolution..."
+
+# Test if our local DNS is working
+echo "Testing local BIND server directly:"
+if dig @127.0.0.1 www.basic.dnstest.php.net A +short; then
+    echo "✓ Local BIND server is responding"
+else
+    echo "✗ Local BIND server is not responding"
+    exit 1
+fi
+
+# Test system DNS resolution
+echo -e "\nTesting system DNS resolution:"
+if dig www.basic.dnstest.php.net A +short; then
+    echo "✓ System DNS resolution is working"
+else
+    echo "✗ System DNS resolution failed"
+fi
+
+# Test with nslookup as well
+echo -e "\nTesting with nslookup:"
+nslookup www.basic.dnstest.php.net || echo "nslookup failed"
+
+# Show which DNS server is actually being used
+echo -e "\nFinal verification:"
+resolvectl query www.basic.dnstest.php.net || echo "resolvectl query failed"
 
 echo -e "\nDNS configuration has been updated."
