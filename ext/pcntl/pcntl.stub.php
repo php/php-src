@@ -108,17 +108,17 @@ const P_JAILID = UNKNOWN;
 
 /**
  * @var int
- * @cvalue LONG_CONST(SIG_IGN)
+ * @cvalue LONG_CONST((intptr_t)SIG_IGN)
  */
 const SIG_IGN = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIG_DFL)
+ * @cvalue LONG_CONST((intptr_t)SIG_DFL)
  */
 const SIG_DFL = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIG_ERR)
+ * @cvalue LONG_CONST((intptr_t)SIG_ERR)
  */
 const SIG_ERR = UNKNOWN;
 /**

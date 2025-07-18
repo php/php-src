@@ -1208,7 +1208,7 @@ PHP_FUNCTION(tidy_get_config)
 				break;
 
 			case TidyInteger:
-				add_assoc_long(return_value, opt_name, (zend_long)opt_value);
+				add_assoc_long(return_value, opt_name, (zend_long)(uintptr_t)opt_value);
 				break;
 
 			case TidyBoolean:
@@ -1321,7 +1321,7 @@ PHP_FUNCTION(tidy_getopt)
 			RETURN_STR((zend_string*)optval);
 
 		case TidyInteger:
-			RETURN_LONG((zend_long)optval);
+			RETURN_LONG((zend_long)(uintptr_t)optval);
 			break;
 
 		case TidyBoolean:

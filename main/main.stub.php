@@ -165,6 +165,11 @@ const PHP_INT_MIN = UNKNOWN;
 const PHP_INT_SIZE = UNKNOWN;
 /**
  * @var int
+ * @cvalue SIZEOF_SIZE_T
+ */
+const PHP_SYS_SIZE = UNKNOWN;
+/**
+ * @var int
  * @cvalue FD_SETSIZE
  */
 const PHP_FD_SETSIZE = UNKNOWN;

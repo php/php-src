@@ -28,7 +28,7 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--
-gmp_scan1(): Argument #2 ($start) must be between 0 and %d * %d
+gmp_scan1(): Argument #2 ($start) must be between 0 and %d
 int(1)
 int(12)
 int(9)

@@ -4,7 +4,7 @@ Trying to parse a file that is too large (over 4GB)
 tidy
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (PHP_SYS_SIZE < 8) die("skip this test is for 64bit platform only");
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (getenv("SKIP_ASAN")) die("skip too big for asan");
 if (getenv("GITHUB_ACTIONS")) die("skip potentially crashes on GitHub actions");
