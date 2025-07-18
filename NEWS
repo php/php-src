@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . The $exclude_disabled parameter of the get_defined_functions() function has
     been deprecated, as it no longer has any effect since PHP 8.0. (Girgias)
 
+- DOM:
+  . Fixed bug GH-18877 (\Dom\HTMLDocument querySelectorAll selecting only the
+    first when using ~ and :has). (nielsdos, lexborisov)
+
 - FileInfo
   . The finfo_close() function has been deprecated. (timwolla)
   . The $context parameter of the finfo_buffer() function has been deprecated
