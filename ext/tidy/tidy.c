@@ -124,7 +124,6 @@ static void tidy_doc_update_properties(PHPTidyObj *);
 static void tidy_add_node_default_properties(PHPTidyObj *);
 static void *php_tidy_get_opt_val(const PHPTidyDoc *, TidyOption, TidyOptionType *);
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes);
-static zend_result _php_tidy_set_tidy_opt(TidyDoc, const char *, zval *, uint32_t arg);
 static zend_result _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht_options, uint32_t arg);
 static PHP_INI_MH(php_tidy_set_clean_output);
 static void php_tidy_clean_output_start(const char *name, size_t name_len);
@@ -214,42 +213,6 @@ static zend_result php_tidy_apply_config(TidyDoc doc, const zend_string *str_str
 		php_tidy_load_config(doc, ZSTR_VAL(str_string));
 	}
 	return SUCCESS;
-}
-
-static zend_result _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value, uint32_t arg)
-{
-	TidyOption opt = tidyGetOptionByName(doc, optname);
-	zend_long lval;
-
-	if (!opt) {
-		zend_argument_value_error(arg, "Unknown Tidy configuration option \"%s\"", optname);
-		return FAILURE;
-	}
-
-#if defined(HAVE_TIDYOPTGETCATEGORY)
-	if (tidyOptGetCategory(opt) == TidyInternalCategory) {
-#else
-	if (tidyOptIsReadOnly(opt)) {
-#endif
-		zend_argument_value_error(arg, "Attempting to set read-only option \"%s\"", optname);
-		return FAILURE;
-	}
-
-	TidyOptionType type = tidyOptGetType(opt);
-	if (type == TidyString) {
-		zend_string *tmp_str;
-		const zend_string *str = zval_get_tmp_string(value, &tmp_str);
-		const bool result = tidyOptSetValue(doc, tidyOptGetId(opt), ZSTR_VAL(str));
-		zend_tmp_string_release(tmp_str);
-		return result ? SUCCESS : FAILURE;
-	} else if (type == TidyInteger) {
-		lval = zval_get_long(value);
-		return tidyOptSetInt(doc, tidyOptGetId(opt), lval) ? SUCCESS : FAILURE;
-	} else {
-		ZEND_ASSERT(type == TidyBoolean);
-		lval = zval_get_long(value);
-		return tidyOptSetBool(doc, tidyOptGetId(opt), lval) ? SUCCESS : FAILURE;
-	}
 }
 
 static void tidy_create_node_object(zval *zv, PHPTidyDoc *ptdoc, TidyNode node)
@@ -751,20 +714,61 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 	tidy_create_node_object(return_value, obj->ptdoc, node);
 }
 
+
+static bool php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value, uint32_t arg)
+{
+	TidyOption opt = tidyGetOptionByName(doc, optname);
+	zend_long lval;
+
+	if (!opt) {
+		zend_argument_value_error(arg, "Unknown Tidy configuration option \"%s\"", optname);
+		return false;
+	}
+
+#if defined(HAVE_TIDYOPTGETCATEGORY)
+	if (tidyOptGetCategory(opt) == TidyInternalCategory) {
+#else
+	if (tidyOptIsReadOnly(opt)) {
+#endif
+		zend_argument_value_error(arg, "Attempting to set read-only option \"%s\"", optname);
+		return false;
+	}
+
+	TidyOptionType type = tidyOptGetType(opt);
+	if (type == TidyString) {
+		zend_string *tmp_str;
+		const zend_string *str = zval_get_tmp_string(value, &tmp_str);
+		const bool result = tidyOptSetValue(doc, tidyOptGetId(opt), ZSTR_VAL(str));
+		if (UNEXPECTED(!result)) {
+			zend_argument_type_error(arg, "option \"%s\" does not accept \"%s\" as a value", optname, ZSTR_VAL(str));
+		}
+		zend_tmp_string_release(tmp_str);
+		return result;
+	} else if (type == TidyInteger) {
+		lval = zval_get_long(value);
+		return tidyOptSetInt(doc, tidyOptGetId(opt), lval);
+	} else {
+		ZEND_ASSERT(type == TidyBoolean);
+		lval = zval_get_long(value);
+		return tidyOptSetBool(doc, tidyOptGetId(opt), lval);
+	}
+}
+
 static zend_result _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht_options, uint32_t arg)
 {
 	zval *opt_val;
 	zend_string *opt_name;
 
 	if (!HT_IS_PACKED(ht_options)) {
+		bool has_failures = false;
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht_options, opt_name, opt_val) {
 			if (opt_name == NULL) {
 				zend_argument_type_error(arg, "must be of type array with keys as string");
 				return FAILURE;
 			}
-			_php_tidy_set_tidy_opt(doc, ZSTR_VAL(opt_name), opt_val, arg);
+			has_failures = has_failures || !php_tidy_set_tidy_opt(doc, ZSTR_VAL(opt_name), opt_val, arg);
 		} ZEND_HASH_FOREACH_END();
-		return SUCCESS;
+		return has_failures ? FAILURE : SUCCESS;
 	} else {
 		zend_argument_type_error(arg, "must be of type array with keys as string");
 		return FAILURE;
