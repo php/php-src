@@ -114,7 +114,7 @@ static inline PHPTidyObj *php_tidy_fetch_object(zend_object *obj) {
 /* }}} */
 
 /* {{{ ext/tidy prototypes */
-static zend_string *php_tidy_file_to_mem(const char *, bool);
+static zend_string *php_tidy_file_to_mem(const zend_string *, bool);
 static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
@@ -246,7 +246,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 			Z_PARAM_BOOL(use_include_path)
 		ZEND_PARSE_PARAMETERS_END();
 
-		if (!(data = php_tidy_file_to_mem(ZSTR_VAL(arg1), use_include_path))) {
+		if (!(data = php_tidy_file_to_mem(arg1, use_include_path))) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -328,12 +328,12 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 	tidyRelease(doc);
 }
 
-static zend_string *php_tidy_file_to_mem(const char *filename, bool use_include_path)
+static zend_string *php_tidy_file_to_mem(const zend_string *filename, bool use_include_path)
 {
 	php_stream *stream;
 	zend_string *data = NULL;
 
-	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0), NULL))) {
+	if (!(stream = php_stream_open_wrapper(ZSTR_VAL(filename), "rb", (use_include_path ? USE_PATH : 0), NULL))) {
 		return NULL;
 	}
 	if ((data = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) == NULL) {
@@ -1050,7 +1050,7 @@ PHP_FUNCTION(tidy_parse_file)
 		Z_PARAM_BOOL(use_include_path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
+	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path))) {
 		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 		RETURN_FALSE;
 	}
@@ -1330,7 +1330,7 @@ PHP_METHOD(tidy, __construct)
 	obj = Z_TIDY_P(ZEND_THIS);
 
 	if (inputfile) {
-		if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
+		if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path))) {
 			zend_throw_error(zend_ce_exception, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 			RETURN_THROWS();
 		}
@@ -1375,7 +1375,7 @@ PHP_METHOD(tidy, parseFile)
 
 	obj = Z_TIDY_P(ZEND_THIS);
 
-	if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
+	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path))) {
 		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 		RETURN_FALSE;
 	}
