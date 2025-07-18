@@ -134,6 +134,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . The php_std_date() function has been removed. Use php_format_date() with
     the "D, d M Y H:i:s \\G\\M\\T" format instead.
   . Added php_url_encode_to_smart_str() to encode a URL to a smart_str buffer.
+  . The php_stat() function now asserts that the zend_string *filename
+    parameter does not contain any null bytes. To ensure such strings are not
+    provided the zend_str_has_nul_byte() API, the P ZPP specifier, or the fast
+    ZPP Z_PARAM_PATH_STR specifier can be used to check this ahead of time.
 
 ========================
 4. OpCode changes

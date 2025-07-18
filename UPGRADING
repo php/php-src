@@ -126,6 +126,25 @@ PHP 8.5 UPGRADE NOTES
   . Using a printf-family function with a formatter that did not specify the
     precision previously incorrectly reset the precision instead of treating
     it as a precision of 0. See GH-18897.
+  . Filenames with null bytes now always throw a ValueError for the following functions:
+    - fileperms()
+    - fileinode()
+    - filesize()
+    - fileowner()
+    - filegroup()
+    - fileatime()
+    - filemtime()
+    - filectime()
+    - filetype()
+    - is_writable()
+    - is_readable()
+    - is_executable()
+    - is_file()
+    - is_dir()
+    - is_link()
+    - file_exists()
+    - lstat()
+    - stat()
 
 ========================================
 2. New Features
