@@ -92,7 +92,7 @@ sysvshm_module php_sysvshm;
 
 static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
-static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
+static void php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvshm)
@@ -423,8 +423,7 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 }
 /* }}} */
 
-/* {{{ php_remove_shm_data */
-static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
+static void php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
 	zend_long memcpy_len;
@@ -440,8 +439,6 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 	if (memcpy_len > 0) {
 		memmove(chunk_ptr, next_chunk_ptr, memcpy_len);
 	}
-	return 0;
 }
-/* }}} */
 
 #endif /* HAVE_SYSVSHM */
