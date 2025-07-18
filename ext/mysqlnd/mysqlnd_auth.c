@@ -24,6 +24,12 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
+#ifdef MYSQLND_HAVE_LIBSODIUM
+#include <sodium.h>
+#include <sodium/crypto_hash_sha512.h>
+#include <sodium/crypto_scalarmult_ed25519.h>
+#include <sodium/crypto_core_ed25519.h>
+#endif
 
 static const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using the old insecure authentication. "
 "Please use an administration tool to reset your password with the command SET PASSWORD = PASSWORD('your_existing_password'). This will "
@@ -1324,6 +1330,109 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin 
 #endif
 
 
+#ifdef MYSQLND_HAVE_LIBSODIUM
+
+static zend_uchar *
+mysqlnd_ed25519_auth_data(struct st_mysqlnd_authentication_plugin * self,
+								  size_t * auth_data_len,
+								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
+								  const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
+								  const MYSQLND_SESSION_OPTIONS * const session_options,
+								  const MYSQLND_PFC_DATA * const pfc_data,
+								  const zend_ulong mysql_flags
+								 )
+{
+	zend_uchar *ret = NULL;
+	DBG_ENTER("mysqlnd_ed25519_auth_data");
+	DBG_INF_FMT("salt(%zu)=[%.*s]", auth_plugin_data_len, (int) auth_plugin_data_len, auth_plugin_data);
+
+	// Ensure the salt length is exactly 32 bytes
+	if (auth_plugin_data_len != 32) {
+		DBG_ERR_FMT("auth_plugin_data_len is %zu, expected 32", auth_plugin_data_len);
+		DBG_RETURN(NULL);
+	}
+
+	*auth_data_len = 0;
+
+	// Inline signature creation logic
+	unsigned char h[64], r[64], k[64];
+	unsigned char *sm = NULL;
+	unsigned char *s, *prefix;
+
+	sm = malloc(auth_plugin_data_len + 64);
+	if (!sm) {
+		DBG_RETURN(NULL);
+	}
+
+	// h = SHA512(password)
+    crypto_hash_sha512(h, (const unsigned char *)passwd, passwd_len);
+
+	// s = prune(h[0:31])
+	s = h;
+	s[0] &= 248;
+	s[31] &= 127;
+	s[31] |= 64;
+
+	// prefix = h[32:63]
+	prefix = h + 32;
+
+	// r = SHA512(prefix || M)
+	memcpy(sm + 32, prefix, 32);
+	memcpy(sm + 64, auth_plugin_data, auth_plugin_data_len);
+	crypto_hash_sha512(r, sm + 32, auth_plugin_data_len + 32);
+
+	// R = encoded point [r]B
+	crypto_core_ed25519_scalar_reduce(r, r);
+	crypto_scalarmult_ed25519_base_noclamp(sm, r);
+
+	// A = encoded point [s]B
+	crypto_scalarmult_ed25519_base_noclamp(sm + 32, s);
+
+	// k = SHA512(R || A || M)
+	crypto_hash_sha512(k, sm, auth_plugin_data_len + 64);
+
+	// S = (k * s + r) mod L
+	crypto_core_ed25519_scalar_reduce(k, k);
+	crypto_core_ed25519_scalar_mul(sm + 32, k, s);
+	crypto_core_ed25519_scalar_add(sm + 32, sm + 32, r);
+
+	ret = malloc(64);
+	if (ret) {
+		memcpy(ret, sm, 64);
+		*auth_data_len = 64;
+	}
+	free(sm);
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+
+static struct st_mysqlnd_authentication_plugin mysqlnd_ed25519_auth_plugin =
+{
+	{
+		MYSQLND_PLUGIN_API_VERSION,
+		"auth_plugin_client_ed25519",
+		MYSQLND_VERSION_ID,
+		PHP_MYSQLND_VERSION,
+		"PHP License 3.01",
+		"Diego Dupin <diego.dupin@mariadb.com>",
+		{
+			NULL, /* no statistics , will be filled later if there are some */
+			NULL, /* no statistics */
+		},
+		{
+			NULL /* plugin shutdown */
+		}
+	},
+	{/* methods */
+		mysqlnd_ed25519_auth_data,
+		NULL
+	}
+};
+#endif
+
 /* {{{ mysqlnd_register_builtin_authentication_plugins */
 void
 mysqlnd_register_builtin_authentication_plugins(void)
@@ -1333,6 +1442,9 @@ mysqlnd_register_builtin_authentication_plugins(void)
 #ifdef MYSQLND_HAVE_SSL
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_caching_sha2_auth_plugin);
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_sha256_authentication_plugin);
+#endif
+#ifdef MYSQLND_HAVE_LIBSODIUM
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_ed25519_auth_plugin);
 #endif
 }
 /* }}} */

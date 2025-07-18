@@ -70,6 +70,23 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
       PHP_ADD_EXTENSION_DEP(mysqlnd, hash)
     ])])
 
+  dnl -- Libsodium support --
+  PHP_ARG_WITH([mysqlnd-libsodium],
+    [whether to enable libsodium support in mysqlnd],
+    [AS_HELP_STRING([--with-mysqlnd-libsodium], [Enable libsodium support in mysqlnd])],
+    [no],
+    [no])
+
+  if test "$PHP_MYSQLND_LIBSODIUM" != "no"; then
+    PKG_CHECK_MODULES([LIBSODIUM], [libsodium >= 1.0.17], [
+      AC_DEFINE([MYSQLND_HAVE_LIBSODIUM], [1], [Define to 1 if mysqlnd has libsodium support.])
+      PHP_EVAL_LIBLINE([$LIBSODIUM_LIBS], [MYSQLND_SHARED_LIBADD])
+      PHP_EVAL_INCLINE([$LIBSODIUM_CFLAGS])
+    ], [
+      AC_MSG_ERROR([libsodium >= 1.0.17 library not found])
+    ])
+  fi
+
   PHP_INSTALL_HEADERS([ext/mysqlnd/])
   PHP_SUBST([MYSQLND_SHARED_LIBADD])
 fi
