@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9aee3d8f2ced376f5929048444eaa2529ff90311 */
+ * Stub hash: caf2252406298eef71052ced0b344a63b4f36fe7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -264,7 +264,7 @@ static zend_class_entry *register_class_Deprecated(void)
 	zend_attribute *attribute_Attribute_class_Deprecated_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Deprecated_0, 1);
 	zend_string_release(attribute_name_Attribute_class_Deprecated_0);
 	zval attribute_Attribute_class_Deprecated_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST | ZEND_ATTRIBUTE_TARGET_CONST);
+	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST | ZEND_ATTRIBUTE_TARGET_CONST | ZEND_ATTRIBUTE_TARGET_CLASS);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_Deprecated_0->args[0].value, &attribute_Attribute_class_Deprecated_0_arg0);
 
 	return class_entry;
