@@ -7,17 +7,19 @@ class test1 {
         register_shutdown_function(array($this, 'shutdown'));
     }
     public function shutdown() {
-        exit(__METHOD__);
+        exit(static::class . '::' . __FUNCTION__ . "\n");
     }
 }
 
 class test2 extends test1 {
     public function __destruct() {
-       exit (__METHOD__);
+        exit(static::class . '::' . __FUNCTION__ . "\n");
     }
 }
 new test1;
 new test2;
 ?>
 --EXPECT--
-test1::shutdowntest2::__destruct
+test1::shutdown
+test2::shutdown
+test2::__destruct
