@@ -29,8 +29,24 @@ var_dump(Uri\WhatWg\Url::parse("http://RuPaul's Drag Race All Stars 7 Winners Ca
 
 ?>
 --EXPECTF--
-The specified URI must not be empty
-NULL
+object(Uri\Rfc3986\Uri)#1 (8) {
+  ["scheme"]=>
+  NULL
+  ["username"]=>
+  NULL
+  ["password"]=>
+  NULL
+  ["host"]=>
+  NULL
+  ["port"]=>
+  NULL
+  ["path"]=>
+  string(0) ""
+  ["query"]=>
+  NULL
+  ["fragment"]=>
+  NULL
+}
 The specified URI is malformed (MissingSchemeNonRelativeUrl)
 NULL
 object(Uri\Rfc3986\Uri)#%d (%d) {

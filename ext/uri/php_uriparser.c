@@ -296,15 +296,6 @@ void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t 
 {
 	UriUriA uri = {0};
 
-	/* Empty URIs are always invalid. */
-	if (ZSTR_LEN(uri_str) == 0) {
-		if (!silent) {
-			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI must not be empty", 0);
-		}
-
-		goto fail;
-	}
-	
 	/* Parse the URI. */
 	if (uriParseSingleUriExMmA(&uri, ZSTR_VAL(uri_str), ZSTR_VAL(uri_str) + ZSTR_LEN(uri_str), NULL, mm) != URI_SUCCESS) {
 		if (!silent) {
