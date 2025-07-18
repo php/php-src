@@ -90,7 +90,7 @@ ZEND_GET_MODULE(sysvshm)
 /* TODO: Make this thread-safe. */
 sysvshm_module php_sysvshm;
 
-static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
+static bool php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const zend_string *data);
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
 static void php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 
@@ -235,7 +235,6 @@ PHP_FUNCTION(shm_remove)
 PHP_FUNCTION(shm_put_var)
 {
 	zval *shm_id, *arg_var;
-	int ret;
 	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	smart_str shm_var = {0};
@@ -262,13 +261,15 @@ PHP_FUNCTION(shm_put_var)
 		RETURN_THROWS();
 	}
 
+	ZEND_ASSERT(shm_var.s != NULL);
+
 	/* insert serialized variable into shared memory */
-	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s? ZSTR_VAL(shm_var.s) : NULL, shm_var.s? ZSTR_LEN(shm_var.s) : 0);
+	bool ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s);
 
 	/* free string */
 	smart_str_free(&shm_var);
 
-	if (ret == -1) {
+	if (!ret) {
 		php_error_docref(NULL, E_WARNING, "Not enough shared memory left");
 		RETURN_FALSE;
 	}
@@ -366,32 +367,31 @@ PHP_FUNCTION(shm_remove_var)
 }
 /* }}} */
 
-/* {{{ php_put_shm_data
+/* {{{
  * inserts an ascii-string into shared memory */
-static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len)
+static bool php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const zend_string *data)
 {
 	sysvshm_chunk *shm_var;
-	zend_long total_size;
 	zend_long shm_varpos;
 
-	total_size = ((zend_long) (len + sizeof(sysvshm_chunk) - 1) / sizeof(zend_long)) * sizeof(zend_long) + sizeof(zend_long); /* zend_long alligment */
+	size_t total_size = ((zend_long) (ZSTR_LEN(data) + sizeof(sysvshm_chunk) - 1) / sizeof(zend_long)) * sizeof(zend_long) + sizeof(zend_long); /* zend_long alligment */
 
 	if ((shm_varpos = php_check_shm_data(ptr, key)) > 0) {
 		php_remove_shm_data(ptr, shm_varpos);
 	}
 
 	if (ptr->free < total_size) {
-		return -1; /* not enough memory */
+		return false; /* not enough memory */
 	}
 
 	shm_var = (sysvshm_chunk *) ((char *) ptr + ptr->end);
 	shm_var->key = key;
-	shm_var->length = len;
+	shm_var->length = ZSTR_LEN(data);
 	shm_var->next = total_size;
-	memcpy(&(shm_var->mem), data, len);
+	memcpy(&(shm_var->mem), ZSTR_VAL(data), ZSTR_LEN(data));
 	ptr->end += total_size;
 	ptr->free -= total_size;
-	return 0;
+	return true;
 }
 /* }}} */
 
