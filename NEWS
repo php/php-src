@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.25
 
+- Core:
+  . Fixed GH-19169 build issue with C++17 and ZEND_STATIC_ASSERT macro.
+    (psumbera)
+
 - Hash:
   . Fix crash on clone failure. (nielsdos)
 
