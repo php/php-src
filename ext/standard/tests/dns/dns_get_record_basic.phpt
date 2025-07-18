@@ -10,6 +10,7 @@ $result = dns_get_record($domain, DNS_A);
 var_dump($result);
 ?>
 --EXPECTF--
+WRONG
 array(%d) {
   [0]=>
   array(%d) {
