@@ -219,7 +219,6 @@ static zend_result php_tidy_apply_config(TidyDoc doc, const zend_string *str_str
 static zend_result _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value, uint32_t arg)
 {
 	TidyOption opt = tidyGetOptionByName(doc, optname);
-	zend_string *str, *tmp_str;
 	zend_long lval;
 
 	if (!opt) {
@@ -236,36 +235,21 @@ static zend_result _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval
 		return FAILURE;
 	}
 
-	switch(tidyOptGetType(opt)) {
-		case TidyString:
-			str = zval_get_tmp_string(value, &tmp_str);
-			if (tidyOptSetValue(doc, tidyOptGetId(opt), ZSTR_VAL(str))) {
-				zend_tmp_string_release(tmp_str);
-				return SUCCESS;
-			}
-			zend_tmp_string_release(tmp_str);
-			break;
-
-		case TidyInteger:
-			lval = zval_get_long(value);
-			if (tidyOptSetInt(doc, tidyOptGetId(opt), lval)) {
-				return SUCCESS;
-			}
-			break;
-
-		case TidyBoolean:
-			lval = zval_get_long(value);
-			if (tidyOptSetBool(doc, tidyOptGetId(opt), lval)) {
-				return SUCCESS;
-			}
-			break;
-
-		default:
-			php_error_docref(NULL, E_WARNING, "Unable to determine type of configuration option");
-			break;
+	TidyOptionType type = tidyOptGetType(opt);
+	if (type == TidyString) {
+		zend_string *tmp_str;
+		const zend_string *str = zval_get_tmp_string(value, &tmp_str);
+		const bool result = tidyOptSetValue(doc, tidyOptGetId(opt), ZSTR_VAL(str));
+		zend_tmp_string_release(tmp_str);
+		return result ? SUCCESS : FAILURE;
+	} else if (type == TidyInteger) {
+		lval = zval_get_long(value);
+		return tidyOptSetInt(doc, tidyOptGetId(opt), lval) ? SUCCESS : FAILURE;
+	} else {
+		ZEND_ASSERT(type == TidyBoolean);
+		lval = zval_get_long(value);
+		return tidyOptSetBool(doc, tidyOptGetId(opt), lval) ? SUCCESS : FAILURE;
 	}
-
-	return FAILURE;
 }
 
 static void tidy_create_node_object(zval *zv, PHPTidyDoc *ptdoc, TidyNode node)
@@ -720,28 +704,19 @@ static void *php_tidy_get_opt_val(const PHPTidyDoc *ptdoc, TidyOption opt, TidyO
 {
 	*type = tidyOptGetType(opt);
 
-	switch (*type) {
-		case TidyString: {
-			const char *val = tidyOptGetValue(ptdoc->doc, tidyOptGetId(opt));
-			if (val) {
-				return (void *) zend_string_init(val, strlen(val), 0);
-			} else {
-				return (void *) ZSTR_EMPTY_ALLOC();
-			}
+	if (*type == TidyString) {
+		const char *val = tidyOptGetValue(ptdoc->doc, tidyOptGetId(opt));
+		if (val) {
+			return (void *) zend_string_init(val, strlen(val), 0);
+		} else {
+			return (void *) ZSTR_EMPTY_ALLOC();
 		}
-			break;
-
-		case TidyInteger:
-			return (void *) (uintptr_t) tidyOptGetInt(ptdoc->doc, tidyOptGetId(opt));
-			break;
-
-		case TidyBoolean:
-			return (void *) tidyOptGetBool(ptdoc->doc, tidyOptGetId(opt));
-			break;
+	} else if (*type == TidyInteger) {
+		return (void *) (uintptr_t) tidyOptGetInt(ptdoc->doc, tidyOptGetId(opt));
+	} else {
+		ZEND_ASSERT(*type == TidyBoolean);
+		return (void *) tidyOptGetBool(ptdoc->doc, tidyOptGetId(opt));
 	}
-
-	/* should not happen */
-	return NULL;
 }
 
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes node_type)
@@ -1322,18 +1297,10 @@ PHP_FUNCTION(tidy_getopt)
 
 		case TidyInteger:
 			RETURN_LONG((zend_long)optval);
-			break;
 
 		case TidyBoolean:
 			RETURN_BOOL(optval);
-			break;
-
-		default:
-			php_error_docref(NULL, E_WARNING, "Unable to determine type of configuration option");
-			break;
 	}
-
-	RETURN_FALSE;
 }
 /* }}} */
 
