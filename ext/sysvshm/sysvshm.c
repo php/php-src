@@ -91,8 +91,8 @@ ZEND_GET_MODULE(sysvshm)
 sysvshm_module php_sysvshm;
 
 static bool php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const zend_string *data);
-static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
-static void php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
+static ssize_t php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
+static void php_remove_shm_data(sysvshm_chunk_head *ptr, size_t shm_varpos);
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvshm)
@@ -284,7 +284,6 @@ PHP_FUNCTION(shm_get_var)
 	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	char *shm_data;
-	zend_long shm_varpos;
 	sysvshm_chunk *shm_var;
 	php_unserialize_data_t var_hash;
 
@@ -300,9 +299,9 @@ PHP_FUNCTION(shm_get_var)
 
 	/* setup string-variable and serialize */
 	/* get serialized variable from shared memory */
-	shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
+	ssize_t shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
 
-	if (shm_varpos < 0) {
+	if (shm_varpos == -1) {
 		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
@@ -343,7 +342,7 @@ PHP_FUNCTION(shm_has_var)
 PHP_FUNCTION(shm_remove_var)
 {
 	zval *shm_id;
-	zend_long shm_key, shm_varpos;
+	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &shm_id, sysvshm_ce, &shm_key)) {
@@ -356,9 +355,9 @@ PHP_FUNCTION(shm_remove_var)
 		RETURN_THROWS();
 	}
 
-	shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
+	ssize_t shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
 
-	if (shm_varpos < 0) {
+	if (shm_varpos == -1) {
 		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
@@ -372,7 +371,7 @@ PHP_FUNCTION(shm_remove_var)
 static bool php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const zend_string *data)
 {
 	sysvshm_chunk *shm_var;
-	zend_long shm_varpos;
+	ssize_t shm_varpos;
 
 	size_t total_size = ((zend_long) (ZSTR_LEN(data) + sizeof(sysvshm_chunk) - 1) / sizeof(zend_long)) * sizeof(zend_long) + sizeof(zend_long); /* zend_long alligment */
 
@@ -395,15 +394,13 @@ static bool php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const zend_
 }
 /* }}} */
 
-/* {{{ php_check_shm_data */
-static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
+static ssize_t php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 {
-	zend_long pos;
 	sysvshm_chunk *shm_var;
 
 	ZEND_ASSERT(ptr);
 
-	pos = ptr->start;
+	size_t pos = ptr->start;
 
 	for (;;) {
 		if (pos >= ptr->end) {
@@ -421,19 +418,17 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 	}
 	return -1;
 }
-/* }}} */
 
-static void php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
+static void php_remove_shm_data(sysvshm_chunk_head *ptr, size_t shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
-	zend_long memcpy_len;
 
 	ZEND_ASSERT(ptr);
 
 	chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos);
 	next_chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos + chunk_ptr->next);
 
-	memcpy_len = ptr->end-shm_varpos - chunk_ptr->next;
+	size_t memcpy_len = ptr->end-shm_varpos - chunk_ptr->next;
 	ptr->free += chunk_ptr->next;
 	ptr->end -= chunk_ptr->next;
 	if (memcpy_len > 0) {
