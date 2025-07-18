@@ -775,11 +775,13 @@ static zend_result _php_tidy_apply_config_array(TidyDoc doc, const HashTable *ht
 	}
 }
 
-static zend_result php_tidy_parse_string(PHPTidyObj *obj, const char *string, uint32_t len, const char *enc)
+static zend_result php_tidy_parse_string(PHPTidyObj *obj, const zend_string *string, const char *enc)
 {
 	TidyBuffer buf;
 
-	if(enc) {
+	ZEND_ASSERT(!ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(string)));
+
+	if (enc) {
 		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
 			php_error_docref(NULL, E_WARNING, "Could not set encoding \"%s\"", enc);
 			return FAILURE;
@@ -789,9 +791,9 @@ static zend_result php_tidy_parse_string(PHPTidyObj *obj, const char *string, ui
 	obj->ptdoc->initialized = true;
 
 	tidyBufInit(&buf);
-	tidyBufAttach(&buf, (byte *) string, len);
+	tidyBufAttach(&buf, (byte *) ZSTR_VAL(string), (unsigned int) ZSTR_LEN(string));
 	if (tidyParseBuffer(obj->ptdoc->doc, &buf) < 0) {
-		php_error_docref(NULL, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
+		php_error_docref(NULL, E_WARNING, "%s", (const char*) obj->ptdoc->errbuf->bp);
 		return FAILURE;
 	}
 	tidy_doc_update_properties(obj);
@@ -995,7 +997,7 @@ PHP_FUNCTION(tidy_parse_string)
 	obj = Z_TIDY_P(return_value);
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) != SUCCESS
-	 || php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) != SUCCESS) {
+	 || php_tidy_parse_string(obj, input, enc) != SUCCESS) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -1063,7 +1065,7 @@ PHP_FUNCTION(tidy_parse_file)
 	obj = Z_TIDY_P(return_value);
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) != SUCCESS
-	 || php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) != SUCCESS) {
+	 || php_tidy_parse_string(obj, contents, enc) != SUCCESS) {
 		zval_ptr_dtor(return_value);
 		RETVAL_FALSE;
 	}
@@ -1348,7 +1350,7 @@ PHP_METHOD(tidy, __construct)
 		}
 		zend_restore_error_handling(&error_handling);
 
-		php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc);
+		php_tidy_parse_string(obj, contents, enc);
 
 		zend_string_release_ex(contents, 0);
 	}
@@ -1385,7 +1387,7 @@ PHP_METHOD(tidy, parseFile)
 	}
 
 	RETVAL_BOOL(php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) == SUCCESS
-				&& php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) == SUCCESS);
+				&& php_tidy_parse_string(obj, contents, enc) == SUCCESS);
 
 	zend_string_release_ex(contents, 0);
 }
@@ -1413,7 +1415,7 @@ PHP_METHOD(tidy, parseString)
 	obj = Z_TIDY_P(ZEND_THIS);
 
 	RETURN_BOOL(php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht, 2) == SUCCESS
-				&& php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == SUCCESS);
+				&& php_tidy_parse_string(obj, input, enc) == SUCCESS);
 }
 
 
