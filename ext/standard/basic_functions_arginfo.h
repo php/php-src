@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 28d6bd0b7773e252ec2dfbd9e71ec60e4c54ac22 */
+ * Stub hash: dcc4e6865dac52b23534b6ef61c0d6be766af6b9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3297,8 +3297,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(http_get_last_response_headers, arginfo_http_get_last_response_headers)
 	ZEND_FE(http_clear_last_response_headers, arginfo_http_clear_last_response_headers)
 	ZEND_FE(request_parse_body, arginfo_request_parse_body)
-	ZEND_FE(image_type_to_mime_type, arginfo_image_type_to_mime_type)
-	ZEND_FE(image_type_to_extension, arginfo_image_type_to_extension)
+	ZEND_RAW_FENTRY("image_type_to_mime_type", zif_image_type_to_mime_type, arginfo_image_type_to_mime_type, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("image_type_to_extension", zif_image_type_to_extension, arginfo_image_type_to_extension, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(getimagesize, arginfo_getimagesize)
 	ZEND_FE(getimagesizefromstring, arginfo_getimagesizefromstring)
 	ZEND_FE(phpinfo, arginfo_phpinfo)

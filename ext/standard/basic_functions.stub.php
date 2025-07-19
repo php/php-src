@@ -3032,11 +3032,13 @@ function request_parse_body(?array $options = null): array {}
 /* image.c */
 
 /**
+ * @compile-time-eval
  * @refcount 1
  */
 function image_type_to_mime_type(int $image_type): string {}
 
 /**
+ * @compile-time-eval
  * @refcount 1
  */
 function image_type_to_extension(int $image_type, bool $include_dot = true): string|false {}
