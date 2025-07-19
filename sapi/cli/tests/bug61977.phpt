@@ -29,6 +29,9 @@ HEADER;
     if (fwrite($fp, $header)) {
         while (!feof($fp)) {
             $text = fgets($fp);
+            if ($text === false) {
+                break;
+            }
             if (strncasecmp("Content-type:", $text, 13) == 0) {
                 echo "foo.{$mimetype} => ", $text;
             }

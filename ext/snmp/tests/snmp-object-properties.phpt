@@ -32,15 +32,6 @@ $session->oid_increasing_check = FALSE;
 
 var_dump($session);
 
-$session->max_oids = "40";
-$session->enum_print = "1";
-$session->quick_print = "1";
-$session->valueretrieval = "1";
-$session->oid_output_format = "3";
-$session->oid_increasing_check = "45";
-
-var_dump($session);
-
 var_dump(property_exists($session, "enum_print"));
 var_dump(isset($session->enum_print));
 var_dump(empty($session->enum_print));
@@ -93,15 +84,15 @@ object(SNMP)#%d (%d) {
   ["max_oids"]=>
   NULL
   ["valueretrieval"]=>
-  int(1)
+  int(0)
   ["quick_print"]=>
   bool(false)
   ["enum_print"]=>
   bool(false)
   ["oid_output_format"]=>
-  int(3)
+  int(4)
   ["oid_increasing_check"]=>
-  bool(true)
+  bool(false)
   ["exceptions_enabled"]=>
   int(0)
 }
@@ -127,31 +118,6 @@ object(SNMP)#%d (%d) {
   int(4)
   ["oid_increasing_check"]=>
   bool(false)
-  ["exceptions_enabled"]=>
-  int(0)
-}
-object(SNMP)#%d (%d) {
-  ["info"]=>
-  array(3) {
-    ["hostname"]=>
-    string(%d) "%s"
-    ["timeout"]=>
-    int(%i)
-    ["retries"]=>
-    int(%d)
-  }
-  ["max_oids"]=>
-  int(40)
-  ["valueretrieval"]=>
-  int(1)
-  ["quick_print"]=>
-  bool(true)
-  ["enum_print"]=>
-  bool(true)
-  ["oid_output_format"]=>
-  int(3)
-  ["oid_increasing_check"]=>
-  bool(true)
   ["exceptions_enabled"]=>
   int(0)
 }

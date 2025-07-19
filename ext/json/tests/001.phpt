@@ -4,10 +4,10 @@ json_decode() tests
 <?php
 
 var_dump(json_decode(""));
-var_dump(json_decode("", 1));
-var_dump(json_decode("", 0));
-var_dump(json_decode(".", 1));
-var_dump(json_decode(".", 0));
+var_dump(json_decode("", true));
+var_dump(json_decode("", false));
+var_dump(json_decode(".", true));
+var_dump(json_decode(".", false));
 var_dump(json_decode("<?>"));
 var_dump(json_decode(";"));
 var_dump(json_decode("руссиш"));

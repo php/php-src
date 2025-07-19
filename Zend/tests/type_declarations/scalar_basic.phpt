@@ -72,7 +72,7 @@ int(1)
 int(1)
 
 *** Trying float(1.5)
-E_DEPRECATED: Implicit conversion from float 1.5 to int loses precision on line 14
+E_DEPRECATED: Implicit conversion from float 1.5 to int loses precision on line %d
 int(1)
 
 *** Trying string(2) "1a"
@@ -91,9 +91,11 @@ int(%d)
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying bool(true)
+E_DEPRECATED: {closure:%s:%d}(): Passing bool to parameter #1 ($i) of type int is deprecated on line %d
 int(1)
 
 *** Trying bool(false)
+E_DEPRECATED: {closure:%s:%d}(): Passing bool to parameter #1 ($i) of type int is deprecated on line %d
 int(0)
 
 *** Trying NULL
@@ -103,11 +105,11 @@ int(0)
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, array given, called in %s on line %d
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, stdClass given, called in %s on line %d
 
-*** Trying object(StringCapable)#%s (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, StringCapable given, called in %s on line %d
 
@@ -144,9 +146,11 @@ float(%s)
 float(NAN)
 
 *** Trying bool(true)
+E_DEPRECATED: {closure:%s:%d}(): Passing bool to parameter #1 ($f) of type float is deprecated on line %d
 float(1)
 
 *** Trying bool(false)
+E_DEPRECATED: {closure:%s:%d}(): Passing bool to parameter #1 ($f) of type float is deprecated on line %d
 float(0)
 
 *** Trying NULL
@@ -156,11 +160,11 @@ float(0)
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, array given, called in %s on line %d
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, stdClass given, called in %s on line %d
 
-*** Trying object(StringCapable)#%s (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, StringCapable given, called in %s on line %d
 
@@ -197,9 +201,11 @@ string(%d) "%d"
 string(3) "NAN"
 
 *** Trying bool(true)
+E_DEPRECATED: {closure:%s:%d}(): Passing bool to parameter #1 ($s) of type string is deprecated on line %d
 string(1) "1"
 
 *** Trying bool(false)
+E_DEPRECATED: {closure:%s:%d}(): Passing bool to parameter #1 ($s) of type string is deprecated on line %d
 string(0) ""
 
 *** Trying NULL
@@ -209,11 +215,11 @@ string(0) ""
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($s) must be of type string, array given, called in %s on line %d
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($s) must be of type string, stdClass given, called in %s on line %d
 
-*** Trying object(StringCapable)#%s (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 string(6) "foobar"
 
@@ -223,30 +229,39 @@ string(6) "foobar"
 Testing 'bool' type:
 
 *** Trying int(1)
+E_DEPRECATED: {closure:%s:%d}(): Passing int to parameter #1 ($b) of type bool is deprecated on line %d
 bool(true)
 
 *** Trying string(1) "1"
+E_DEPRECATED: {closure:%s:%d}(): Passing string to parameter #1 ($b) of type bool is deprecated on line %d
 bool(true)
 
 *** Trying float(1)
+E_DEPRECATED: {closure:%s:%d}(): Passing float to parameter #1 ($b) of type bool is deprecated on line %d
 bool(true)
 
 *** Trying float(1.5)
+E_DEPRECATED: {closure:%s:%d}(): Passing float to parameter #1 ($b) of type bool is deprecated on line %d
 bool(true)
 
 *** Trying string(2) "1a"
+E_DEPRECATED: {closure:%s:%d}(): Passing string to parameter #1 ($b) of type bool is deprecated on line %d
 bool(true)
 
 *** Trying string(1) "a"
+E_DEPRECATED: {closure:%s:%d}(): Passing string to parameter #1 ($b) of type bool is deprecated on line %d
 bool(true)
 
 *** Trying string(0) ""
+E_DEPRECATED: {closure:%s:%d}(): Passing string to parameter #1 ($b) of type bool is deprecated on line %d
 bool(false)
 
 *** Trying int(%d)
+E_DEPRECATED: {closure:%s:%d}(): Passing int to parameter #1 ($b) of type bool is deprecated on line %d
 bool(true)
 
 *** Trying float(NAN)
+E_DEPRECATED: {closure:%s:%d}(): Passing float to parameter #1 ($b) of type bool is deprecated on line %d
 bool(true)
 
 *** Trying bool(true)
@@ -262,11 +277,11 @@ bool(false)
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, array given, called in %s on line %d
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(stdClass)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, stdClass given, called in %s on line %d
 
-*** Trying object(StringCapable)#%s (0) {
+*** Trying object(StringCapable)#%d (0) {
 }
 *** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, StringCapable given, called in %s on line %d
 

@@ -18,11 +18,11 @@ $socket = stream_socket_accept($server);
 var_dump(stream_get_meta_data($client));
 
 echo "\n\nSet blocking to false:\n";
-var_dump(socket_set_blocking($client, 0));
+var_dump(socket_set_blocking($client, false));
 var_dump(stream_get_meta_data($client));
 
 echo "\n\nSet blocking to true:\n";
-var_dump(socket_set_blocking($client, 1));
+var_dump(socket_set_blocking($client, true));
 var_dump(stream_get_meta_data($client));
 
 fclose($client);
