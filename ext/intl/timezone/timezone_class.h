@@ -36,6 +36,8 @@ typedef struct {
 	intl_error		err;
 
 	// ICU TimeZone
+	// TODO?: a direct change isn't possible due to C inclusion (also it s a const)
+	// but see later it can be made possible through different ICU class usages
 	const TimeZone	*utimezone;
 
 	//whether to delete the timezone on object free
