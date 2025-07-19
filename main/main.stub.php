@@ -165,6 +165,11 @@ const PHP_INT_MIN = UNKNOWN;
 const PHP_INT_SIZE = UNKNOWN;
 /**
  * @var int
+ * @cvalue ZEND_LONG_SAFE_MAX
+ */
+const PHP_INT_MAX_SAFE = UNKNOWN;
+/**
+ * @var int
  * @cvalue FD_SETSIZE
  */
 const PHP_FD_SETSIZE = UNKNOWN;
