@@ -3533,6 +3533,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	} else if (UNEXPECTED(Z_ISERROR_P(ptr))) {
 		ZVAL_ERROR(result);
 		goto end;
+	} else if (type == BP_VAR_UNSET && UNEXPECTED(Z_TYPE_P(ptr) == IS_UNDEF)) {
+		ZVAL_NULL(result);
+		goto end;
 	}
 
 	ZVAL_INDIRECT(result, ptr);
@@ -3683,6 +3686,11 @@ static zend_never_inline zval* zend_fetch_static_property_address_ex(zend_proper
 	if (UNEXPECTED(result == NULL)) {
 		return NULL;
 	}
+
+	if (UNEXPECTED(Z_TYPE_P(result) == IS_UNDEF)
+	 && (fetch_type == BP_VAR_IS || fetch_type == BP_VAR_UNSET)) {
+		return NULL;
+	 }
 
 	*prop_info = property_info;
 
