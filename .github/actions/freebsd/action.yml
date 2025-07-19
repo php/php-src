@@ -41,9 +41,11 @@ runs:
             webp \
             libavif \
             `#sqlite3` \
-            curl
+            curl \
+            gcc
 
           ./buildconf -f
+          CC=clang CXX=clang++ \
           ./configure \
             --prefix=/usr/local \
             --enable-debug \
@@ -108,3 +110,8 @@ runs:
             --show-slow 1000 \
             --set-timeout 120 \
             -d zend_extension=opcache.so
+
+          export TLSC=$(pwd)/ext/opcache/jit/tls/zend_jit_tls_x86_64.c
+          if sapi/cli/php -r 'exit(!PHP_ZTS);'; then
+            ./ext/opcache/jit/tls/testing/test.sh
+          fi
