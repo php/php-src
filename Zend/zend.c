@@ -41,6 +41,7 @@
 #include "Optimizer/zend_optimizer.h"
 #include "php.h"
 #include "php_globals.h"
+#include "zend_async_API.h"
 
 // FIXME: Breaks the declaration of the function below
 #undef zenderror
@@ -1349,6 +1350,10 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	/* shutdown_executor() takes care of its own bailout handling */
 	shutdown_executor();
 
+	// The execution of the True Async API should end here,
+	// after the GC has been run.
+	ZEND_ASYNC_ENGINE_SHUTDOWN();
+
 	zend_try {
 		zend_ini_deactivate();
 	} zend_end_try();
@@ -1946,7 +1951,11 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 				zend_user_exception_handler();
 			}
-			if (EG(exception)) {
+
+			// If we are inside a coroutine,
+			// we do not call the final error handler,
+			// as the exception will be handled higher up in the method ZEND_ASYNC_RUN_SCHEDULER_AFTER_MAIN
+			if (false == ZEND_ASYNC_CURRENT_COROUTINE && EG(exception)) {
 				ret = zend_exception_error(EG(exception), E_ERROR);
 			}
 		}

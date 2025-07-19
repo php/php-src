@@ -68,6 +68,7 @@
  */
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_async_API.h"
 #include "zend_compile.h"
 #include "zend_errors.h"
 #include "zend_fibers.h"
@@ -248,6 +249,36 @@ typedef struct _gc_root_buffer {
 	zend_refcounted  *ref;
 } gc_root_buffer;
 
+typedef struct _gc_stack gc_stack;
+
+#define GC_STACK_SEGMENT_SIZE (((4096 - ZEND_MM_OVERHEAD) / sizeof(void*)) - 2)
+
+struct _gc_stack {
+	gc_stack        *prev;
+	gc_stack        *next;
+	zend_refcounted *data[GC_STACK_SEGMENT_SIZE];
+};
+
+typedef enum {
+	GC_ASYNC_STATE_NONE = 0,
+	GC_ASYNC_STATE_INIT,		// initial state
+	GC_ASYNC_STATE_RUNNING,		// GC is running
+	GC_ASYNC_STATE_CONTINUE		// GC is called from GC coroutine
+} gc_async_state_t;
+
+typedef struct {
+	gc_async_state_t state;			// state
+	int total_count;				// total freed objects in this GC run
+	int count;						// freed objects in this GC run
+
+	uint32_t gc_flags;				// GC_HAS_DESTRUCTORS, etc.
+	bool should_rerun_gc;			// run GC again after destructors
+	bool did_rerun_gc;				// guard against endless reruns
+
+	zend_hrtime_t start_time;       // start of full GC pass
+	zend_hrtime_t dtor_start_time;  // start of dtor phase
+} gc_async_context_t;
+
 typedef struct _zend_gc_globals {
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 
@@ -274,6 +305,11 @@ typedef struct _zend_gc_globals {
 	uint32_t dtor_end;
 	zend_fiber *dtor_fiber;
 	bool dtor_fiber_running;
+	gc_async_context_t async_context; /* async context for gc */
+	gc_stack *gc_stack;			/* local mark/scan stack */
+	zend_coroutine_t *dtor_coroutine;
+	zend_async_scope_t *dtor_scope;
+	zend_async_microtask_t *microtask;
 
 #if GC_BENCH
 	uint32_t root_buf_length;
@@ -307,17 +343,6 @@ static zend_gc_globals gc_globals;
 # define GC_BENCH_DEC(counter)
 # define GC_BENCH_PEAK(peak, counter)
 #endif
-
-
-#define GC_STACK_SEGMENT_SIZE (((4096 - ZEND_MM_OVERHEAD) / sizeof(void*)) - 2)
-
-typedef struct _gc_stack gc_stack;
-
-struct _gc_stack {
-	gc_stack        *prev;
-	gc_stack        *next;
-	zend_refcounted *data[GC_STACK_SEGMENT_SIZE];
-};
 
 #define GC_STACK_DCL(init) \
 	gc_stack *_stack = init; \
@@ -504,6 +529,12 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->dtor_fiber = NULL;
 	gc_globals->dtor_fiber_running = false;
 
+	gc_globals->dtor_coroutine = NULL;
+	gc_globals->dtor_scope = NULL;
+	gc_globals->microtask = NULL;
+	gc_globals->async_context.state = GC_ASYNC_STATE_NONE;
+	gc_globals->gc_stack = NULL;
+
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
 	gc_globals->root_buf_peak = 0;
@@ -528,6 +559,10 @@ void gc_globals_dtor(void)
 #ifndef ZTS
 	root_buffer_dtor(&gc_globals);
 #endif
+
+	if (GC_G(dtor_scope)) {
+		GC_G(dtor_scope) = NULL;
+	}
 }
 
 void gc_reset(void)
@@ -1813,6 +1848,8 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 	gc_root_buffer *current;
 	zend_refcounted *p;
 
+	const bool in_coroutine = GC_G(dtor_coroutine) != NULL;
+
 	/* The root buffer might be reallocated during destructors calls,
 	 * make sure to reload pointers as necessary. */
 	while (idx != end) {
@@ -1825,17 +1862,25 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 			 * could have already been invoked indirectly by some other
 			 * destructor. */
 			if (!(OBJ_FLAGS(p) & IS_OBJ_DESTRUCTOR_CALLED)) {
-				if (fiber != NULL) {
+				if (fiber != NULL || in_coroutine) {
 					GC_G(dtor_idx) = idx;
 				}
 				zend_object *obj = (zend_object*)p;
 				GC_TRACE_REF(obj, "calling destructor");
 				GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
 				GC_ADDREF(obj);
+				if (in_coroutine) {
+					ZEND_ASYNC_CURRENT_COROUTINE->extended_data = obj;
+				}
+
 				obj->handlers->dtor_obj(obj);
+				if (in_coroutine) {
+					ZEND_ASYNC_CURRENT_COROUTINE->extended_data = NULL;
+				}
 				GC_TRACE_REF(obj, "returned from destructor");
 				GC_DELREF(obj);
-				if (UNEXPECTED(fiber != NULL && GC_G(dtor_fiber) != fiber)) {
+				if (UNEXPECTED((fiber != NULL && GC_G(dtor_fiber) != fiber)
+					|| (in_coroutine && GC_G(dtor_coroutine) != ZEND_ASYNC_CURRENT_COROUTINE))) {
 					/* We resumed after suspension */
 					gc_check_possible_root((zend_refcounted*)&obj->gc);
 					return FAILURE;
@@ -1910,31 +1955,255 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 	}
 }
 
+static void zend_gc_collect_cycles_microtask(zend_async_microtask_t *task);
+
+static void zend_gc_collect_cycles_microtask_dtor(zend_async_microtask_t *task)
+{
+	if (task->ref_count > 1) {
+		task->ref_count--;
+		return;
+	}
+
+	if (GC_G(microtask) == task) {
+		GC_G(microtask) = NULL;
+	}
+
+	efree(task);
+}
+
+static void zend_gc_collect_cycles_coroutine(void)
+{
+	GC_TRACE("GC coroutine started");
+
+	if (GC_G(microtask) == NULL) {
+		zend_async_microtask_t *task = ecalloc(1, sizeof(zend_async_microtask_t));
+		task->handler = zend_gc_collect_cycles_microtask;
+		task->dtor = zend_gc_collect_cycles_microtask_dtor;
+		task->ref_count = 1;
+		GC_G(microtask) = task;
+	}
+
+	if (GC_ASYNC_STATE_NONE == GC_G(async_context).state) {
+		gc_async_context_t *context = &GC_G(async_context);
+		context->state = GC_ASYNC_STATE_INIT;
+		context->total_count = 0;
+		context->count = 0;
+		context->start_time = zend_hrtime();
+		context->should_rerun_gc = 0;
+		context->did_rerun_gc = 0;
+		context->gc_flags = 0;
+	} else if (GC_G(async_context).state == GC_ASYNC_STATE_RUNNING) {
+		GC_G(async_context).state = GC_ASYNC_STATE_CONTINUE;
+	}
+
+	if (GC_G(gc_stack) == NULL) {
+		gc_stack *stack = ecalloc(1, sizeof(gc_stack));
+		stack->prev = NULL;
+		stack->next = NULL;
+		GC_G(gc_stack) = stack;
+	}
+
+	ZEND_ASYNC_ADD_MICROTASK(GC_G(microtask));
+	zend_gc_collect_cycles();
+
+	// Coroutines were separated.
+	if (GC_G(dtor_coroutine) != ZEND_ASYNC_CURRENT_COROUTINE) {
+		return;
+	}
+
+	if (GC_G(microtask) != NULL) {
+		zend_async_microtask_t *microtask = GC_G(microtask);
+		GC_G(microtask) = NULL;
+		microtask->is_cancelled = true;
+		ZEND_ASYNC_MICROTASK_RELEASE(microtask);
+	}
+}
+
+static zend_string* coroutine_info(zend_async_event_t *event)
+{
+	zend_coroutine_t *coroutine = (zend_coroutine_t *) event;
+
+	if (coroutine->extended_data == NULL) {
+		return zend_coroutine_gen_info(coroutine, "zend_gc_collect_cycles");
+	}
+
+	zend_object *obj = coroutine->extended_data;
+	const char *class_name = ZSTR_VAL(obj->ce->name);
+	const char *method_name = "__destructor";
+
+	zend_string *tmp = zend_strpprintf(0, "%s::%s", class_name, method_name);
+	zend_string *result = zend_coroutine_gen_info(coroutine, ZSTR_VAL(tmp));
+	zend_string_release(tmp);
+
+	return result;
+}
+
+static void coroutine_dispose(zend_coroutine_t *coroutine)
+{
+	if (coroutine == GC_G(dtor_coroutine)) {
+		GC_TRACE("GC coroutine finished");
+		GC_G(dtor_coroutine) = NULL;
+		GC_G(dtor_scope) = NULL;
+
+		if (GC_G(microtask) != NULL) {
+			zend_async_microtask_t *microtask = GC_G(microtask);
+			GC_G(microtask) = NULL;
+			microtask->is_cancelled = true;
+			ZEND_ASYNC_MICROTASK_RELEASE(microtask);
+		}
+
+		if (GC_G(gc_stack) != NULL) {
+			gc_stack *stack = GC_G(gc_stack);
+			GC_G(gc_stack) = NULL;
+			gc_stack_free(stack);
+			efree(stack);
+		}
+
+		if (GC_G(async_context.state)) {
+			gc_async_context_t *context = &GC_G(async_context);
+			context->state = GC_ASYNC_STATE_NONE;
+			context->total_count = 0;
+			context->count = 0;
+			context->start_time = 0;
+			context->should_rerun_gc = 0;
+			context->did_rerun_gc = 0;
+			context->gc_flags = 0;
+		}
+	}
+}
+
+static zend_always_inline zend_coroutine_t* new_gc_coroutine(void)
+{
+	zend_coroutine_t * coroutine = ZEND_ASYNC_SPAWN_WITH(GC_G(dtor_scope));
+
+	if (UNEXPECTED(coroutine == NULL)) {
+		return NULL;
+	}
+
+	GC_G(dtor_coroutine) = coroutine;
+
+	coroutine->internal_entry = zend_gc_collect_cycles_coroutine;
+	coroutine->extended_data = NULL;
+	coroutine->extended_dispose = coroutine_dispose;
+	coroutine->event.info = coroutine_info;
+
+	return coroutine;
+}
+
+static void zend_gc_collect_cycles_microtask(zend_async_microtask_t *task)
+{
+	if (UNEXPECTED(new_gc_coroutine() == NULL)) {
+		task->is_cancelled = true;
+		return;
+	}
+}
+
+static zend_always_inline void start_gc_in_coroutine(void)
+{
+	GC_TRACE("Try to start GC in coroutine");
+
+	if (GC_G(dtor_scope) == NULL) {
+		GC_G(dtor_scope) = ZEND_ASYNC_NEW_SCOPE(NULL);
+
+		if (UNEXPECTED(GC_G(dtor_scope) == NULL)) {
+			zend_error_noreturn(E_ERROR, "Unable to create destructor scope");
+		}
+	}
+
+	if (UNEXPECTED(new_gc_coroutine() == NULL)) {
+		zend_error_noreturn(E_ERROR, "Unable to spawn destructor coroutine");
+	}
+}
+
 ZEND_API int zend_gc_collect_cycles(void)
 {
-	int total_count = 0;
-	bool should_rerun_gc = 0;
-	bool did_rerun_gc = 0;
+	if (UNEXPECTED(ZEND_ASYNC_IS_ACTIVE && ZEND_ASYNC_CURRENT_COROUTINE != GC_G(dtor_coroutine))) {
 
-	zend_hrtime_t start_time = zend_hrtime();
+		if (GC_G(dtor_coroutine)) {
+			return 0;
+		}
+
+		start_gc_in_coroutine();
+		return 0;
+	}
+
+	zend_hrtime_t dtor_start_time = 0;
+
+	// Someone is trying to invoke GC from within a destructor?
+	// We don’t know what that is, but we have nothing to do here.
+	if (UNEXPECTED(GC_G(async_context).state == GC_ASYNC_STATE_RUNNING)) {
+		return 0;
+	}
+
+	const bool in_fiber = EG(active_fiber) != NULL;
+
+	//
+	// We might enter this context from different coroutines, so we don’t initialize anything here.
+	//
+	gc_async_context_t *context = NULL;
+	gc_stack *stack = NULL;
+
+	if (in_fiber) {
+		context = ecalloc(1, sizeof(gc_async_context_t));
+		stack = emalloc(sizeof(gc_stack));
+	} else {
+		context = &GC_G(async_context);
+		stack = GC_G(gc_stack);
+	}
+
+	if (UNEXPECTED(context->state == GC_ASYNC_STATE_CONTINUE)) {
+		// If we reach this point, it means the destructor call was interrupted by a suspend() operation,
+		// so we continue the process from the next element.
+		GC_G(async_context).state = GC_ASYNC_STATE_RUNNING;
+		GC_G(dtor_idx)++;
+		dtor_start_time = zend_hrtime();
+		goto continue_calling_destructors;
+	} else {
+		context->state = GC_ASYNC_STATE_INIT;
+		context->total_count = 0;
+		context->count = 0;
+		context->start_time = zend_hrtime();
+		context->should_rerun_gc = 0;
+		context->did_rerun_gc = 0;
+		context->gc_flags = 0;
+		// reset the destructor index
+		GC_G(dtor_idx) = GC_FIRST_ROOT;
+
+		if (false == in_fiber) {
+			if (GC_G(gc_stack) == NULL) {
+				stack = emalloc(sizeof(gc_stack));
+				stack->prev = NULL;
+				stack->next = NULL;
+				GC_G(gc_stack) = stack;
+			} else {
+				stack = GC_G(gc_stack);
+			}
+		} else {
+			stack->prev = NULL;
+			stack->next = NULL;
+		}
+	}
+
+	context->state = GC_ASYNC_STATE_RUNNING;
+
+
 	if (GC_G(num_roots) && !GC_G(gc_active)) {
 		zend_gc_remove_root_tmpvars();
 	}
 
 rerun_gc:
 	if (GC_G(num_roots)) {
-		int count;
 		gc_root_buffer *current, *last;
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
-		uint32_t idx, end;
-		gc_stack stack;
+		uint32_t idx, end = 0;
 
-		stack.prev = NULL;
-		stack.next = NULL;
+		stack->next = NULL;
+		stack->prev = NULL;
 
 		if (GC_G(gc_active)) {
-			GC_G(collector_time) += zend_hrtime() - start_time;
+			GC_G(collector_time) += zend_hrtime() - context->start_time;
+			GC_G(async_context).state = GC_ASYNC_STATE_NONE;
 			return 0;
 		}
 
@@ -1943,17 +2212,17 @@ rerun_gc:
 		GC_G(gc_active) = 1;
 
 		GC_TRACE("Marking roots");
-		gc_mark_roots(&stack);
+		gc_mark_roots(stack);
 		GC_TRACE("Scanning roots");
-		gc_scan_roots(&stack);
+		gc_scan_roots(stack);
 
 		GC_TRACE("Collecting roots");
-		count = gc_collect_roots(&gc_flags, &stack);
+		context->count = gc_collect_roots(&gc_flags, stack);
 
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
-			gc_stack_free(&stack);
+			gc_stack_free(stack);
 			GC_G(gc_active) = 0;
 			goto finish;
 		}
@@ -1968,7 +2237,7 @@ rerun_gc:
 			 * modify any refcounts, so we have no real way to detect this situation
 			 * short of rerunning full GC tracing. What we do instead is to only run
 			 * destructors at this point and automatically re-run GC afterwards. */
-			should_rerun_gc = 1;
+			context->should_rerun_gc = 1;
 
 			/* Mark all roots for which a dtor will be invoked as DTOR_GARBAGE. Additionally
 			 * color them purple. This serves a double purpose: First, they should be
@@ -2002,16 +2271,27 @@ rerun_gc:
 			while (idx != end) {
 				if (GC_IS_DTOR_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
-					count -= gc_remove_nested_data_from_buffer(p, current, &stack);
+					context->count -= gc_remove_nested_data_from_buffer(p, current, stack);
 				}
 				current++;
 				idx++;
 			}
 
 			/* Actually call destructors. */
-			zend_hrtime_t dtor_start_time = zend_hrtime();
+			dtor_start_time = zend_hrtime();
 			if (EXPECTED(!EG(active_fiber))) {
-				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
+continue_calling_destructors:
+				end = GC_G(first_unused);
+				if (UNEXPECTED(FAILURE == gc_call_destructors(GC_G(dtor_idx), GC_G(first_unused), NULL))) {
+					//
+					// gc_call_destructors returns FAILURE when a destructor interrupts execution,
+					// i.e. calls suspend().
+					// At this point, we are inside a foreign coroutine from which we must immediately exit,
+					// because the process continues elsewhere.
+					//
+					GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
+					return context->total_count;
+				}
 			} else {
 				gc_call_destructors_in_fiber(end);
 			}
@@ -2020,12 +2300,17 @@ rerun_gc:
 			if (GC_G(gc_protected)) {
 				/* something went wrong */
 				zend_get_gc_buffer_release();
-				GC_G(collector_time) += zend_hrtime() - start_time;
+				GC_G(collector_time) += zend_hrtime() - context->start_time;
+				GC_G(async_context).state = GC_ASYNC_STATE_NONE;
 				return 0;
 			}
 		}
 
-		gc_stack_free(&stack);
+		gc_stack_free(stack);
+
+		if (false == in_fiber) {
+			end = GC_G(first_unused);
+		}
 
 		/* Destroy zvals. The root buffer may be reallocated. */
 		GC_TRACE("Destroying zvals");
@@ -2083,8 +2368,8 @@ rerun_gc:
 		GC_G(free_time) += zend_hrtime() - free_start_time;
 
 		GC_TRACE("Collection finished");
-		GC_G(collected) += count;
-		total_count += count;
+		GC_G(collected) += context->count;
+		context->total_count += context->count;
 		GC_G(gc_active) = 0;
 	}
 
@@ -2093,8 +2378,8 @@ rerun_gc:
 	/* Objects with destructors were removed from this GC run. Rerun GC right away to clean them
 	 * up. We do this only once: If we encounter more destructors on the second run, we'll not
 	 * run GC another time. */
-	if (should_rerun_gc && !did_rerun_gc) {
-		did_rerun_gc = 1;
+	if (context->should_rerun_gc && !context->did_rerun_gc) {
+		context->did_rerun_gc = 1;
 		goto rerun_gc;
 	}
 
@@ -2107,8 +2392,22 @@ finish:
 	zend_gc_check_root_tmpvars();
 	GC_G(gc_active) = 0;
 
-	GC_G(collector_time) += zend_hrtime() - start_time;
-	return total_count;
+	GC_G(collector_time) += zend_hrtime() - context->start_time;
+
+	if (in_fiber) {
+		const int total_count = context->total_count;
+		efree(context);
+		efree(stack);
+		return total_count;
+	} else {
+		GC_G(async_context).state = GC_ASYNC_STATE_NONE;
+		if (GC_G(gc_stack) != NULL) {
+			GC_G(gc_stack) = NULL;
+			efree(stack);
+		}
+	}
+
+	return context->total_count;
 }
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status)
