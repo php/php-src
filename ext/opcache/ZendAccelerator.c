@@ -25,6 +25,7 @@
 #include "zend_extensions.h"
 #include "zend_compile.h"
 #include "ZendAccelerator.h"
+#include "zend_modules.h"
 #include "zend_persist.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_module.h"
@@ -102,15 +103,12 @@ typedef int gid_t;
 
 #include "zend_simd.h"
 
-ZEND_EXTENSION();
+static zend_extension opcache_extension_entry;
 
 #ifndef ZTS
 zend_accel_globals accel_globals;
 #else
 int accel_globals_id;
-#if defined(COMPILE_DL_OPCACHE)
-ZEND_TSRMLS_CACHE_DEFINE()
-#endif
 #endif
 
 /* Points to the structure shared across all PHP processes */
@@ -2969,9 +2967,6 @@ static zend_result zend_accel_init_shm(void)
 
 static void accel_globals_ctor(zend_accel_globals *accel_globals)
 {
-#if defined(COMPILE_DL_OPCACHE) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 	accel_globals->key = zend_string_alloc(ZCG_KEY_LEN, true);
 	GC_MAKE_PERSISTENT_LOCAL(accel_globals->key);
@@ -3156,6 +3151,11 @@ static void accel_move_code_to_huge_pages(void)
 # endif /* defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE) */
 #endif /* HAVE_HUGE_CODE_PAGES */
 
+void start_accel_extension(void)
+{
+	zend_register_extension(&opcache_extension_entry, NULL);
+}
+
 static int accel_startup(zend_extension *extension)
 {
 #ifdef ZTS
@@ -3174,11 +3174,7 @@ static int accel_startup(zend_extension *extension)
 # endif
 #endif
 
-	if (start_accel_module() == FAILURE) {
-		accel_startup_ok = false;
-		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": module registration failed!");
-		return FAILURE;
-	}
+	zend_accel_register_ini_entries();
 
 #ifdef ZEND_WIN32
 	if (UNEXPECTED(accel_gen_uname_id() == FAILURE)) {
@@ -5084,7 +5080,7 @@ static void accel_activate(void) {
 	}
 }
 
-ZEND_EXT_API zend_extension zend_extension_entry = {
+static zend_extension opcache_extension_entry = {
 	ACCELERATOR_PRODUCT_NAME,               /* name */
 	PHP_VERSION,							/* version */
 	"Zend Technologies",					/* author */

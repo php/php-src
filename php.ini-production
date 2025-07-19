@@ -967,8 +967,6 @@ default_socket_timeout = 60
 ;extension=xsl
 ;extension=zip
 
-;zend_extension=opcache
-
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
 ;;;;;;;;;;;;;;;;;;;
