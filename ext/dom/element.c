@@ -62,7 +62,7 @@ PHP_METHOD(DOMElement, __construct)
 	if (uri_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {
-			nodep = xmlNewNode (NULL, BAD_CAST localname);
+			nodep = xmlNewDocNode(NULL, NULL, BAD_CAST localname, NULL);
 			if (nodep != NULL && uri != NULL) {
 				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
 				xmlSetNs(nodep, nsptr);
@@ -88,7 +88,7 @@ PHP_METHOD(DOMElement, __construct)
 	        php_dom_throw_error(NAMESPACE_ERR, true);
 	        RETURN_THROWS();
 	    }
-		nodep = xmlNewNode(NULL, BAD_CAST name);
+		nodep = xmlNewDocNode(NULL, NULL, BAD_CAST name, NULL);
 	}
 
 	if (!nodep) {
