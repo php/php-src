@@ -67,7 +67,7 @@ array(7) {
   [1]=>
   int(1)
   [2]=>
-  int(20)
+  int(%d)
   [3]=>
   string(20) "width="1" height="1""
   ["mime"]=>
@@ -83,7 +83,7 @@ array(6) {
   [1]=>
   int(1)
   [2]=>
-  int(20)
+  int(%d)
   ["mime"]=>
   string(13) "image/svg+xml"
   ["width_unit"]=>

@@ -265,7 +265,7 @@ array(18) {
     string(2) "px"
   }
   ["test4pix.heic"]=>
-  array(7) {
+  array(9) {
     [0]=>
     int(54)
     [1]=>
@@ -280,6 +280,10 @@ array(18) {
     int(3)
     ["mime"]=>
     string(10) "image/heif"
+    ["width_unit"]=>
+    string(2) "px"
+    ["height_unit"]=>
+    string(2) "px"
   }
   ["test4pix.iff"]=>
   array(8) {
