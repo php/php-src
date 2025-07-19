@@ -31,9 +31,7 @@ static void register_zend_constants_symbols(int module_number)
 	zend_attribute *attribute_Deprecated_const_E_STRICT_0 = zend_add_global_constant_attribute(const_E_STRICT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_E_STRICT_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_E_STRICT_0_arg1;
 	zend_string *attribute_Deprecated_const_E_STRICT_0_arg1_str = zend_string_init("the error level was removed", strlen("the error level was removed"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0_arg1, attribute_Deprecated_const_E_STRICT_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_E_STRICT_0->args[1].value, &attribute_Deprecated_const_E_STRICT_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0->args[1].value, attribute_Deprecated_const_E_STRICT_0_arg1_str);
 	attribute_Deprecated_const_E_STRICT_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }

@@ -156,9 +156,7 @@ static zend_class_entry *register_class_Attribute(void)
 	zend_string *attribute_name_Attribute_class_Attribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_Attribute_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Attribute_0, 1);
 	zend_string_release(attribute_name_Attribute_class_Attribute_0);
-	zval attribute_Attribute_class_Attribute_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_Attribute_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_Attribute_0->args[0].value, &attribute_Attribute_class_Attribute_0_arg0);
+	ZVAL_LONG(&attribute_Attribute_class_Attribute_0->args[0].value, ZEND_ATTRIBUTE_TARGET_CLASS);
 
 	return class_entry;
 }
@@ -173,9 +171,7 @@ static zend_class_entry *register_class_ReturnTypeWillChange(void)
 	zend_string *attribute_name_Attribute_class_ReturnTypeWillChange_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ReturnTypeWillChange_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ReturnTypeWillChange_0, 1);
 	zend_string_release(attribute_name_Attribute_class_ReturnTypeWillChange_0);
-	zval attribute_Attribute_class_ReturnTypeWillChange_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_ReturnTypeWillChange_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_ReturnTypeWillChange_0->args[0].value, &attribute_Attribute_class_ReturnTypeWillChange_0_arg0);
+	ZVAL_LONG(&attribute_Attribute_class_ReturnTypeWillChange_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD);
 
 	return class_entry;
 }
@@ -190,9 +186,7 @@ static zend_class_entry *register_class_AllowDynamicProperties(void)
 	zend_string *attribute_name_Attribute_class_AllowDynamicProperties_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_AllowDynamicProperties_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_AllowDynamicProperties_0, 1);
 	zend_string_release(attribute_name_Attribute_class_AllowDynamicProperties_0);
-	zval attribute_Attribute_class_AllowDynamicProperties_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_AllowDynamicProperties_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_AllowDynamicProperties_0->args[0].value, &attribute_Attribute_class_AllowDynamicProperties_0_arg0);
+	ZVAL_LONG(&attribute_Attribute_class_AllowDynamicProperties_0->args[0].value, ZEND_ATTRIBUTE_TARGET_CLASS);
 
 	return class_entry;
 }
@@ -207,9 +201,7 @@ static zend_class_entry *register_class_SensitiveParameter(void)
 	zend_string *attribute_name_Attribute_class_SensitiveParameter_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_SensitiveParameter_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_SensitiveParameter_0, 1);
 	zend_string_release(attribute_name_Attribute_class_SensitiveParameter_0);
-	zval attribute_Attribute_class_SensitiveParameter_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_SensitiveParameter_0_arg0, ZEND_ATTRIBUTE_TARGET_PARAMETER);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_SensitiveParameter_0->args[0].value, &attribute_Attribute_class_SensitiveParameter_0_arg0);
+	ZVAL_LONG(&attribute_Attribute_class_SensitiveParameter_0->args[0].value, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 
 	return class_entry;
 }
@@ -238,9 +230,7 @@ static zend_class_entry *register_class_Override(void)
 	zend_string *attribute_name_Attribute_class_Override_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_Override_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Override_0, 1);
 	zend_string_release(attribute_name_Attribute_class_Override_0);
-	zval attribute_Attribute_class_Override_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_Override_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_Override_0->args[0].value, &attribute_Attribute_class_Override_0_arg0);
+	ZVAL_LONG(&attribute_Attribute_class_Override_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD);
 
 	return class_entry;
 }
@@ -263,9 +253,7 @@ static zend_class_entry *register_class_Deprecated(void)
 	zend_string *attribute_name_Attribute_class_Deprecated_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_Deprecated_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Deprecated_0, 1);
 	zend_string_release(attribute_name_Attribute_class_Deprecated_0);
-	zval attribute_Attribute_class_Deprecated_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST | ZEND_ATTRIBUTE_TARGET_CONST);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_Deprecated_0->args[0].value, &attribute_Attribute_class_Deprecated_0_arg0);
+	ZVAL_LONG(&attribute_Attribute_class_Deprecated_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION | ZEND_ATTRIBUTE_TARGET_CLASS_CONST | ZEND_ATTRIBUTE_TARGET_CONST);
 
 	return class_entry;
 }
@@ -284,9 +272,7 @@ static zend_class_entry *register_class_NoDiscard(void)
 	zend_string *attribute_name_Attribute_class_NoDiscard_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_NoDiscard_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_NoDiscard_0, 1);
 	zend_string_release(attribute_name_Attribute_class_NoDiscard_0);
-	zval attribute_Attribute_class_NoDiscard_0_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_NoDiscard_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_NoDiscard_0->args[0].value, &attribute_Attribute_class_NoDiscard_0_arg0);
+	ZVAL_LONG(&attribute_Attribute_class_NoDiscard_0->args[0].value, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION);
 
 	return class_entry;
 }
