@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7a8d126a96f0115783bd20a9adfc6bdc5ee88fda */
+ * Stub hash: ef9e7f30a29819489e17a9c100f55696d5d164e0 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -380,6 +380,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionProperty___toString arginfo_class_ReflectionFunction___toString
 
 #define arginfo_class_ReflectionProperty_getName arginfo_class_ReflectionFunctionAbstract_getName
+
+#define arginfo_class_ReflectionProperty_getMangledName arginfo_class_ReflectionFunction___toString
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_getValue, 0, 0, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
@@ -853,6 +855,7 @@ ZEND_METHOD(ReflectionObject, __construct);
 ZEND_METHOD(ReflectionProperty, __construct);
 ZEND_METHOD(ReflectionProperty, __toString);
 ZEND_METHOD(ReflectionProperty, getName);
+ZEND_METHOD(ReflectionProperty, getMangledName);
 ZEND_METHOD(ReflectionProperty, getValue);
 ZEND_METHOD(ReflectionProperty, setValue);
 ZEND_METHOD(ReflectionProperty, getRawValue);
@@ -1155,6 +1158,7 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, __construct, arginfo_class_ReflectionProperty___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, __toString, arginfo_class_ReflectionProperty___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getName, arginfo_class_ReflectionProperty_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, getMangledName, arginfo_class_ReflectionProperty_getMangledName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getValue, arginfo_class_ReflectionProperty_getValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, setValue, arginfo_class_ReflectionProperty_setValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getRawValue, arginfo_class_ReflectionProperty_getRawValue, ZEND_ACC_PUBLIC)

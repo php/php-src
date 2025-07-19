@@ -482,6 +482,8 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getName(): string {}
 
+    public function getMangledName(): string {}
+
     /** @tentative-return-type */
     public function getValue(?object $object = null): mixed {}
 
