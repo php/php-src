@@ -331,13 +331,26 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 				if (curnode->type == XML_ELEMENT_NODE) {
 					/* This ensures that namespace references in this subtree are defined within this subtree,
 					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
-#if 0
-					xmlDOMWrapCtxt dummy_ctxt = {0};
-					xmlDOMWrapReconcileNamespaces(&dummy_ctxt, curnode, /* options */ 0);
-#else
-					/* See php_dom.c */
-					xmlReconciliateNs(curnode->doc, curnode);
-#endif
+					if (LIBXML_VERSION < 21300 && UNEXPECTED(curnode->doc == NULL)) {
+						/* xmlReconciliateNs() in these versions just uses the document for xmlNewReconciledNs(),
+						 * which can create an oldNs xml namespace declaration via xmlSearchNs() -> xmlTreeEnsureXMLDecl(). */
+						xmlDoc dummy;
+						memset(&dummy, 0, sizeof(dummy));
+						dummy.type = XML_DOCUMENT_NODE;
+						curnode->doc = &dummy;
+						xmlReconciliateNs(curnode->doc, curnode);
+						curnode->doc = NULL;
+
+						/* Append oldNs to current node's nsDef, which can be at most one node. */
+						if (dummy.oldNs) {
+							ZEND_ASSERT(dummy.oldNs->next == NULL);
+							xmlNsPtr old = curnode->nsDef;
+							curnode->nsDef = dummy.oldNs;
+							dummy.oldNs->next = old;
+						}
+					} else {
+						xmlReconciliateNs(curnode->doc, curnode);
+					}
 				}
 				/* Skip freeing */
 				curnode = next;
