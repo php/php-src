@@ -90,9 +90,9 @@ ZEND_GET_MODULE(sysvshm)
 /* TODO: Make this thread-safe. */
 sysvshm_module php_sysvshm;
 
-static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
-static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
-static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
+static bool php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const zend_string *data);
+static ssize_t php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
+static void php_remove_shm_data(sysvshm_chunk_head *ptr, size_t shm_varpos);
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvshm)
@@ -235,7 +235,6 @@ PHP_FUNCTION(shm_remove)
 PHP_FUNCTION(shm_put_var)
 {
 	zval *shm_id, *arg_var;
-	int ret;
 	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	smart_str shm_var = {0};
@@ -262,13 +261,15 @@ PHP_FUNCTION(shm_put_var)
 		RETURN_THROWS();
 	}
 
+	ZEND_ASSERT(shm_var.s != NULL);
+
 	/* insert serialized variable into shared memory */
-	ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s? ZSTR_VAL(shm_var.s) : NULL, shm_var.s? ZSTR_LEN(shm_var.s) : 0);
+	bool ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s);
 
 	/* free string */
 	smart_str_free(&shm_var);
 
-	if (ret == -1) {
+	if (!ret) {
 		php_error_docref(NULL, E_WARNING, "Not enough shared memory left");
 		RETURN_FALSE;
 	}
@@ -283,7 +284,6 @@ PHP_FUNCTION(shm_get_var)
 	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	char *shm_data;
-	zend_long shm_varpos;
 	sysvshm_chunk *shm_var;
 	php_unserialize_data_t var_hash;
 
@@ -299,9 +299,9 @@ PHP_FUNCTION(shm_get_var)
 
 	/* setup string-variable and serialize */
 	/* get serialized variable from shared memory */
-	shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
+	ssize_t shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
 
-	if (shm_varpos < 0) {
+	if (shm_varpos == -1) {
 		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
@@ -342,7 +342,7 @@ PHP_FUNCTION(shm_has_var)
 PHP_FUNCTION(shm_remove_var)
 {
 	zval *shm_id;
-	zend_long shm_key, shm_varpos;
+	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &shm_id, sysvshm_ce, &shm_key)) {
@@ -355,9 +355,9 @@ PHP_FUNCTION(shm_remove_var)
 		RETURN_THROWS();
 	}
 
-	shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
+	ssize_t shm_varpos = php_check_shm_data(shm_list_ptr->ptr, shm_key);
 
-	if (shm_varpos < 0) {
+	if (shm_varpos == -1) {
 		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
@@ -366,44 +366,41 @@ PHP_FUNCTION(shm_remove_var)
 }
 /* }}} */
 
-/* {{{ php_put_shm_data
+/* {{{
  * inserts an ascii-string into shared memory */
-static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len)
+static bool php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const zend_string *data)
 {
 	sysvshm_chunk *shm_var;
-	zend_long total_size;
-	zend_long shm_varpos;
+	ssize_t shm_varpos;
 
-	total_size = ((zend_long) (len + sizeof(sysvshm_chunk) - 1) / sizeof(zend_long)) * sizeof(zend_long) + sizeof(zend_long); /* zend_long alligment */
+	size_t total_size = ((zend_long) (ZSTR_LEN(data) + sizeof(sysvshm_chunk) - 1) / sizeof(zend_long)) * sizeof(zend_long) + sizeof(zend_long); /* zend_long alligment */
 
 	if ((shm_varpos = php_check_shm_data(ptr, key)) > 0) {
 		php_remove_shm_data(ptr, shm_varpos);
 	}
 
 	if (ptr->free < total_size) {
-		return -1; /* not enough memory */
+		return false; /* not enough memory */
 	}
 
 	shm_var = (sysvshm_chunk *) ((char *) ptr + ptr->end);
 	shm_var->key = key;
-	shm_var->length = len;
+	shm_var->length = ZSTR_LEN(data);
 	shm_var->next = total_size;
-	memcpy(&(shm_var->mem), data, len);
+	memcpy(&(shm_var->mem), ZSTR_VAL(data), ZSTR_LEN(data));
 	ptr->end += total_size;
 	ptr->free -= total_size;
-	return 0;
+	return true;
 }
 /* }}} */
 
-/* {{{ php_check_shm_data */
-static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
+static ssize_t php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 {
-	zend_long pos;
 	sysvshm_chunk *shm_var;
 
 	ZEND_ASSERT(ptr);
 
-	pos = ptr->start;
+	size_t pos = ptr->start;
 
 	for (;;) {
 		if (pos >= ptr->end) {
@@ -421,27 +418,22 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 	}
 	return -1;
 }
-/* }}} */
 
-/* {{{ php_remove_shm_data */
-static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
+static void php_remove_shm_data(sysvshm_chunk_head *ptr, size_t shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
-	zend_long memcpy_len;
 
 	ZEND_ASSERT(ptr);
 
 	chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos);
 	next_chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos + chunk_ptr->next);
 
-	memcpy_len = ptr->end-shm_varpos - chunk_ptr->next;
+	size_t memcpy_len = ptr->end-shm_varpos - chunk_ptr->next;
 	ptr->free += chunk_ptr->next;
 	ptr->end -= chunk_ptr->next;
 	if (memcpy_len > 0) {
 		memmove(chunk_ptr, next_chunk_ptr, memcpy_len);
 	}
-	return 0;
 }
-/* }}} */
 
 #endif /* HAVE_SYSVSHM */
