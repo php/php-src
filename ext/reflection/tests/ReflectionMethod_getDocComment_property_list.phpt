@@ -36,6 +36,6 @@ string(24) "/**
      * doc 1
      */"
 X::y
-bool(false)
+string(0) ""
 X::z
 string(12) "/** doc 2 */"

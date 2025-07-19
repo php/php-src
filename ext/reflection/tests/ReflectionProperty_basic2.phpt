@@ -60,7 +60,7 @@ object(ReflectionClass)#%d (1) {
   string(9) "TestClass"
 }
 getDocComment():
-bool(false)
+string(0) ""
 
 **********************************
 **********************************
@@ -78,7 +78,7 @@ object(ReflectionClass)#%d (1) {
   string(9) "TestClass"
 }
 getDocComment():
-bool(false)
+string(0) ""
 
 **********************************
 **********************************
@@ -116,7 +116,7 @@ object(ReflectionClass)#%d (1) {
   string(9) "TestClass"
 }
 getDocComment():
-bool(false)
+string(0) ""
 
 **********************************
 **********************************
@@ -134,6 +134,6 @@ object(ReflectionClass)#%d (1) {
   string(9) "TestClass"
 }
 getDocComment():
-bool(false)
+string(0) ""
 
 **********************************
