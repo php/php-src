@@ -45,7 +45,7 @@ static const char HARDCODED_INI[] =
 	"allow_url_include=0\n"
 	"allow_url_fopen=0\n"
 	"open_basedir=/tmp\n"
-	"disable_functions=dl,mail,mb_send_mail"
+	"disable_functions=dl,mail,mb_send_mail,set_error_handler"
 	",shell_exec,exec,system,proc_open,popen,passthru,pcntl_exec"
 	",chdir,chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
 	",move_uploaded_file,rename,rmdir,symlink,tempname,touch,unlink,fopen"

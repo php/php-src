@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Add clone-with support to the clone() function. (timwolla, edorian)
+  . Fix support for non-userland stream notifiers. (timwolla)
 
 - Curl:
   . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
@@ -18,6 +19,7 @@ PHP                                                                        NEWS
   . Error handling of Uri\WhatWg\Url::withHost() is fixed when the input
     contains a port. Now, it triggers an exception; previously, the error
     was silently swallowed. (Máté Kocsis)
+  . Support empty URIs with Uri\Rfc3986\Uri. (timwolla)
 
 17 Jul 2025, PHP 8.5.0alpha2
 
