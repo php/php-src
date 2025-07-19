@@ -35,7 +35,6 @@ runs:
           libssl-dev:i386 \
           libwebp-dev:i386 \
           libxml2-dev:i386 \
-          libxml2-dev:i386 \
           libxpm-dev:i386 \
           libxslt1-dev:i386 \
           firebird-dev:i386 \
