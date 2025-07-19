@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9aee3d8f2ced376f5929048444eaa2529ff90311 */
+ * Stub hash: ce91f65ef2a10f75c5d8f3ef309a4b09bda6b827 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -287,6 +287,20 @@ static zend_class_entry *register_class_NoDiscard(void)
 	zval attribute_Attribute_class_NoDiscard_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_NoDiscard_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD | ZEND_ATTRIBUTE_TARGET_FUNCTION);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_NoDiscard_0->args[0].value, &attribute_Attribute_class_NoDiscard_0_arg0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DelayedTargetValidation(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DelayedTargetValidation", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	zend_string *attribute_name_Attribute_class_DelayedTargetValidation_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_Attribute_class_DelayedTargetValidation_0, 0);
+	zend_string_release(attribute_name_Attribute_class_DelayedTargetValidation_0);
 
 	return class_entry;
 }
