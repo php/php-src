@@ -2054,6 +2054,7 @@ function generate_tmp_php_ini()
 
 				/* Fallback is implied, if filecache is enabled. */
 				INI.WriteLine("opcache.file_cache=" + dir);
+				INI.WriteLine("opcache.record_warnings=1");
 				INI.WriteLine("opcache.enable=1");
 				INI.WriteLine("opcache.enable_cli=1");
 			}
