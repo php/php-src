@@ -11,7 +11,7 @@ if (PHP_LIBXML == "yes") {
 		if (GREP_HEADER("libxml/xmlversion.h", "#define\\s+LIBXML_VERSION\\s+(\\d+)", PHP_PHP_BUILD + "\\include\\libxml2") &&
 				+RegExp.$1 >= 20904) {
 
-			EXTENSION("libxml", "libxml.c mime_sniff.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+			EXTENSION("libxml", "libxml.c mime_sniff.c image_svg.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 			AC_DEFINE("HAVE_LIBXML", 1, "Define to 1 if the PHP extension 'libxml' is available.");
 			ADD_FLAG("CFLAGS_LIBXML", "/D LIBXML_STATIC /D LIBXML_STATIC_FOR_DLL /D HAVE_WIN32_THREADS ");
 			if (!PHP_LIBXML_SHARED) {

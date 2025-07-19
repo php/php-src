@@ -43,6 +43,7 @@
 #endif
 
 #include "php_libxml.h"
+#include "image_svg.h"
 
 #define PHP_LIBXML_LOADED_VERSION ((char *)xmlParserVersion)
 
@@ -84,8 +85,14 @@ static zend_long php_libxml_default_dump_doc_to_file(const char *filename, xmlDo
 
 /* }}} */
 
+static const zend_module_dep libxml_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	ZEND_MOD_END
+};
+
 zend_module_entry libxml_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	libxml_deps,
 	"libxml",                /* extension name */
 	ext_functions,           /* extension function list */
 	PHP_MINIT(libxml),       /* extension-wide startup function */
@@ -969,6 +976,8 @@ static PHP_MINIT_FUNCTION(libxml)
 		xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
 	}
 
+	php_libxml_register_image_svg_handler();
+
 	return SUCCESS;
 }
 
@@ -1010,7 +1019,7 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 	}
 	php_libxml_shutdown();
 
-	return SUCCESS;
+	return php_libxml_unregister_image_svg_handler();
 }
 
 static zend_result php_libxml_post_deactivate(void)
