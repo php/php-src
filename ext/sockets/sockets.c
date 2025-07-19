@@ -1823,9 +1823,7 @@ PHP_FUNCTION(socket_recvfrom)
 					break;
 				}
 				case ETH_P_IPV6: {
-					struct php_socket_chunk ip_hdr_buf;
-					memcpy(&ip_hdr_buf, &ether_hdr_buf, sizeof(struct php_socket_chunk));
-					if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, ETH_HLEN, sizeof(struct ipv6hdr)) == FAILURE) {
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, ETH_HLEN, sizeof(struct ipv6hdr)) == FAILURE) {
 						zval_ptr_dtor(&obj);
 						zend_string_efree(recv_buf);
 						zend_value_error("invalid ipv6 frame buffer length");
@@ -1833,11 +1831,13 @@ PHP_FUNCTION(socket_recvfrom)
 					}
 					struct ipv6hdr ip;
 					memcpy(&ip, ether_hdr_buf.buf, sizeof(ip));
+					struct php_socket_chunk ip_hdr_buf;
+					memcpy(&ip_hdr_buf, &ether_hdr_buf, sizeof(struct php_socket_chunk));
 					size_t totalip = sizeof(ip) + ip.payload_len;
 					if (totalip > ether_hdr_buf.buf_len) {
 						zval_ptr_dtor(&obj);
 						zend_string_efree(recv_buf);
-						zend_value_error("invalid ipv6 payload length");
+						zend_value_error("invalid ipv6 payload length %ld %ld", totalip, ether_hdr_buf.buf_len);
 						RETURN_THROWS();
 					}
 					char s[INET6_ADDRSTRLEN], d[INET6_ADDRSTRLEN];
