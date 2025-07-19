@@ -78,7 +78,7 @@ string(10) "image/webp"
 string(10) "image/avif"
 
 -- Iteration 20 --
-string(10) "image\/heif"
+string(10) "image/heif"
 
 -- Iteration 999 --
 string(24) "application/octet-stream"
