@@ -2158,6 +2158,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 
 	module_shutdown = false;
 	module_startup = true;
+	zend_async_init_internal_context_api();
 	sapi_initialize_empty_request();
 	sapi_activate();
 
@@ -2180,7 +2181,6 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 #endif
 	gc_globals_ctor();
 	zend_async_globals_ctor();
-	zend_async_init_internal_context_api();
 
 	zend_observer_startup();
 #if ZEND_DEBUG
