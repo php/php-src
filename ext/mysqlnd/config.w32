@@ -38,6 +38,22 @@ if (PHP_MYSQLND != "no") {
 				ADD_EXTENSION_DEP('mysqlnd', 'hash');
 			}
 		}
+		// Libsodium support
+		ARG_WITH("mysqlnd-libsodium", "for libsodium support in mysqlnd", "no");
+		if (PHP_MYSQLND_LIBSODIUM != "no") {
+			if (CHECK_LIB("libsodium.lib", "mysqlnd") && CHECK_HEADER_ADD_INCLUDE("sodium.h", "CFLAGS")) {
+				// Check version of libsodium >= 1.0.17
+				var sodium_version_h = CHECK_HEADER_ADD_INCLUDE("sodium/version.h", "CFLAGS");
+				if (sodium_version_h) {
+					ADD_FLAG("CFLAGS", "/D PHP_MYSQLND_LIBSODIUM_MIN_VERSION=0x01001100");
+					AC_DEFINE("MYSQLND_HAVE_LIBSODIUM", 1, "Define to 1 if mysqlnd has libsodium support.");
+				} else {
+					WARNING("libsodium not enabled for mysqlnd; sodium/version.h not found");
+				}
+			} else {
+				WARNING("libsodium not enabled for mysqlnd; libraries and headers not found");
+			}
+		}
 		PHP_INSTALL_HEADERS("", "ext/mysqlnd");
 	}
 }
