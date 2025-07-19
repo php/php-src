@@ -19,6 +19,7 @@
 #include "php_filter.h"
 #include "filter_private.h"
 #include "ext/standard/url.h"
+#include "ext/standard/html.h"
 #include "ext/pcre/php_pcre.h"
 
 #include "zend_multiply.h"
@@ -1089,5 +1090,46 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			RETURN_VALIDATION_FAILED
 		}
 	}
+}
+/* }}} */
+
+/**
+ * Returns the number of Unicode codepoints (including U+FFFD for invalid sequences)
+ * in a UTF-8 encoded string.
+ */
+static size_t php_utf8_strlen(const unsigned char *str, size_t str_len)
+{
+    size_t len = 0, cursor = 0;
+    zend_result status;
+
+    while (cursor < str_len) {
+        php_next_utf8_char(str, str_len, &cursor, &status);
+        len++;
+    }
+
+    return len;
+}
+
+
+void php_filter_validate_str(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+{
+    int min_range_set, max_range_set;
+    zval *option_val;
+    zend_long min_range, max_range;
+    size_t len;
+    const char *str = Z_STRVAL_P(value);
+    size_t str_size = Z_STRLEN_P(value);
+
+    FETCH_LONG_OPTION(min_range, "min_range");
+    FETCH_LONG_OPTION(max_range, "max_range");
+
+    len = php_utf8_strlen((const unsigned char *)str, str_size);
+
+    if (min_range_set && len < min_range) {
+        RETURN_VALIDATION_FAILED;
+    }
+    if (max_range_set && max_range < len) {
+        RETURN_VALIDATION_FAILED;
+    }
 }
 /* }}} */

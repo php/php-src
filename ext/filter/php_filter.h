@@ -62,6 +62,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL);
+void php_filter_validate_str(PHP_INPUT_FILTER_PARAM_DECL);
 
 void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL);
