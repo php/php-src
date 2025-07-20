@@ -117,6 +117,18 @@ error:
 }
 /* }}} */
 
+static void timezone_throw_exception_with_call_location(const char *msg, const char *add_info)
+{
+	zend_string *fn = get_active_function_or_method_name();
+	zend_throw_error(IntlException_ce_ptr, "%s(): %s%s%s%s",
+		ZSTR_VAL(fn), msg,
+		add_info ? "\"" : "",
+		add_info ? add_info : "",
+		add_info ? "\"" : ""
+	);
+	zend_string_release_ex(fn, false);
+}
+
 /* {{{ timezone_process_timezone_argument
  * TimeZone argument processor. outside_error may be NULL (for static functions/constructors) */
 U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
@@ -138,14 +150,14 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		TimeZone_object *to = Z_INTL_TIMEZONE_P(zv_timezone);
 
 		if (to->utimezone == NULL) {
-			zend_throw_error(IntlException_ce_ptr, "passed IntlTimeZone is not "
-				"properly constructed");
+			timezone_throw_exception_with_call_location("passed IntlTimeZone is not "
+				"properly constructed", NULL);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
 		if (UNEXPECTED(timeZone == NULL)) {
-			zend_throw_error(IntlException_ce_ptr, "could not clone TimeZone");
+			timezone_throw_exception_with_call_location("could not clone TimeZone", NULL);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
@@ -165,22 +177,19 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		}
 		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRLEN_P(zv_timezone),
 				&status) == FAILURE) {
-			// TODO: Grab current executing function/method
-			zend_throw_error(IntlException_ce_ptr, "Time zone identifier given is not a "
-				"valid UTF-8 string");
+			timezone_throw_exception_with_call_location("Time zone identifier given is not a "
+				"valid UTF-8 string", NULL);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
 		if (UNEXPECTED(timeZone == NULL)) {
-			// TODO: Grab current executing function/method
-			zend_throw_error(IntlException_ce_ptr, "Could not create time zone");
+			timezone_throw_exception_with_call_location("Could not create time zone", NULL);
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		if (*timeZone == TimeZone::getUnknown()) {
-			// TODO: Grab current executing function/method
-			zend_throw_error(IntlException_ce_ptr, "No such time zone: '%s'", Z_STRVAL_P(zv_timezone));
+			timezone_throw_exception_with_call_location("No such time zone: ", Z_STRVAL_P(zv_timezone));
 			zval_ptr_dtor_str(&local_zv_tz);
 			delete timeZone;
 			return NULL;

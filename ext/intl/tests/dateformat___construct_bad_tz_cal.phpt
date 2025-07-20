@@ -29,6 +29,6 @@ try {
 }
 ?>
 --EXPECT--
-Exception: datefmt_create: No such time zone: 'bad timezone'
+Exception: IntlDateFormatter::__construct(): No such time zone: "bad timezone"
 Exception: IntlDateFormatter::__construct(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object
 Exception: IntlDateFormatter::__construct(): Argument #5 ($calendar) must be of type IntlCalendar|int|null, stdClass given
