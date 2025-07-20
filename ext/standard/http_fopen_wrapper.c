@@ -41,6 +41,7 @@
 #endif
 
 #include "php_standard.h"
+#include "ext/uri/php_uri.h"
 
 #include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
@@ -352,13 +353,31 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	return NULL;
 }
 
+static uri_handler_t *http_get_uri_handler(php_stream_context *context)
+{
+	if (context == NULL) {
+		return php_uri_get_handler(NULL);
+	}
+
+	zval *uri_handler_name = php_stream_context_get_option(context, "http", "uri_parser_class");
+	if (uri_handler_name == NULL) {
+		return php_uri_get_handler(NULL);
+	}
+
+	if (Z_TYPE_P(uri_handler_name) != IS_STRING) {
+		return NULL;
+	}
+
+	return php_uri_get_handler(Z_STR_P(uri_handler_name));
+}
+
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
 		php_stream_context *context, int redirect_max, int flags,
 		zval *response_header STREAMS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
-	php_url *resource = NULL;
+	php_uri *resource = NULL;
 	int use_ssl;
 	int use_proxy = 0;
 	zend_string *tmp = NULL;
@@ -391,7 +410,13 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	resource = php_url_parse(path);
+	uri_handler_t *uri_handler = http_get_uri_handler(context);
+	if (uri_handler == NULL) {
+		return NULL;
+	}
+	zend_string *tmp_uri = zend_string_init(path, strlen(path), false);
+	resource = php_uri_parse_to_struct(uri_handler, tmp_uri, URI_COMPONENT_READ_RAW, true);
+	zend_string_release_ex(tmp_uri, false);
 	if (resource == NULL) {
 		return NULL;
 	}
@@ -403,7 +428,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			(tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "proxy")) == NULL ||
 			Z_TYPE_P(tmpzval) != IS_STRING ||
 			Z_STRLEN_P(tmpzval) == 0) {
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return php_stream_open_wrapper_ex(path, mode, REPORT_ERRORS, NULL, context);
 		}
 		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
@@ -416,7 +441,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 		if (strpbrk(mode, "awx+")) {
 			php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper does not support writeable connections");
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return NULL;
 		}
 
@@ -445,7 +470,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (request_fulluri && (strchr(path, '\n') != NULL || strchr(path, '\r') != NULL)) {
 		php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper full URI path does not allow CR or LF characters");
-		php_url_free(resource);
+		php_uri_struct_free(resource);
 		zend_string_release(transport_string);
 		return NULL;
 	}
@@ -461,7 +486,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		if (d > timeoutmax) {
 			php_stream_wrapper_log_error(wrapper, options, "timeout must be lower than " ZEND_ULONG_FMT, (zend_ulong)timeoutmax);
 			zend_string_release(transport_string);
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return NULL;
 		}
 #ifndef PHP_WIN32
@@ -754,9 +779,9 @@ finish:
 		strcat(scratch, ":");
 
 		/* Note: password is optional! */
-		if (resource->pass) {
-			php_url_decode(ZSTR_VAL(resource->pass), ZSTR_LEN(resource->pass));
-			strcat(scratch, ZSTR_VAL(resource->pass));
+		if (resource->password) {
+			php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
+			strcat(scratch, ZSTR_VAL(resource->password));
 		}
 
 		stmp = php_base64_encode((unsigned char*)scratch, strlen(scratch));
@@ -1090,13 +1115,16 @@ finish:
 				header_info.location = NULL;
 			}
 
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			/* check for invalid redirection URLs */
-			if ((resource = php_url_parse(new_path)) == NULL) {
+			tmp_uri = zend_string_init(new_path, strlen(new_path), 1);
+			if ((resource = php_uri_parse_to_struct(uri_handler, tmp_uri, URI_COMPONENT_READ_RAW, true)) == NULL) {
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
 				efree(new_path);
+				zend_string_release_ex(tmp_uri, 1);
 				goto out;
 			}
+			zend_string_release_ex(tmp_uri, 1);
 
 #define CHECK_FOR_CNTRL_CHARS(val) { \
 	if (val) { \
@@ -1116,7 +1144,7 @@ finish:
 			/* check for control characters in login, password & path */
 			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
 				CHECK_FOR_CNTRL_CHARS(resource->user);
-				CHECK_FOR_CNTRL_CHARS(resource->pass);
+				CHECK_FOR_CNTRL_CHARS(resource->password);
 				CHECK_FOR_CNTRL_CHARS(resource->path);
 			}
 			int new_flags = HTTP_WRAPPER_REDIRECTED;
@@ -1147,7 +1175,7 @@ out:
 	}
 
 	if (resource) {
-		php_url_free(resource);
+		php_uri_struct_free(resource);
 	}
 
 	if (stream) {

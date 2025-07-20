@@ -2627,17 +2627,38 @@ static zend_long php_openssl_get_crypto_method(
 }
 /* }}} */
 
+static uri_handler_t *ssl_get_uri_handler(php_stream_context *context)
+{
+	if (context == NULL) {
+		return php_uri_get_handler(NULL);
+	}
+
+	zval *uri_handler_name = php_stream_context_get_option(context, "ssl", "uri_parser_class");
+	if (uri_handler_name == NULL) {
+		return php_uri_get_handler(NULL);
+	}
+
+	if (Z_TYPE_P(uri_handler_name) != IS_STRING) {
+		return NULL;
+	}
+
+	return php_uri_get_handler(Z_STR_P(uri_handler_name));
+}
+
 static char *php_openssl_get_url_name(const char *resourcename,
-		size_t resourcenamelen, int is_persistent)  /* {{{ */
+		size_t resourcenamelen, int is_persistent, php_stream_context *context)  /* {{{ */
 {
 	if (!resourcename) {
 		return NULL;
 	}
 
-	uri_handler_t *uri_handler = php_uri_get_handler(NULL);
+	uri_handler_t *uri_handler = ssl_get_uri_handler(context);
+	if (uri_handler == NULL) {
+		return NULL;
+	}
 
 	zend_string *resource = zend_string_init(resourcename, resourcenamelen, false);
-	uri_internal_t *internal_uri = php_uri_parse(uri_handler, resource, NULL);
+	uri_internal_t *internal_uri = php_uri_parse(uri_handler, resource, true);
 	if (internal_uri == NULL) {
 		zend_string_release(resource);
 		return NULL;
@@ -2766,7 +2787,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 #endif
 	}
 
-	sslsock->url_name = php_openssl_get_url_name(resourcename, resourcenamelen, !!persistent_id);
+	sslsock->url_name = php_openssl_get_url_name(resourcename, resourcenamelen, !!persistent_id, context);
 
 	return stream;
 }
