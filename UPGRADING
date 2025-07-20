@@ -244,6 +244,7 @@ PHP 8.5 UPGRADE NOTES
     process was terminated unexpectedly. In such cases, a warning is emitted
     and the function returns false. Previously, these errors were silently
     ignored. This change affects only the sendmail transport.
+  . getimagesize() now supports HEIF/HEIC images.
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
