@@ -7023,6 +7023,7 @@ PHP_FUNCTION(array_chunk)
 	}
 
 	array_init_size(return_value, (uint32_t)(((num_in - 1) / size) + 1));
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	ZVAL_UNDEF(&chunk);
 
