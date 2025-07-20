@@ -1949,6 +1949,11 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 				sdlAttributePtr attr;
 				zval *zattr, rv;
 
+				/* Attributes can't refer to other attributes as there's nothing to attach the href to. */
+				HashTable **ref_map = &SOAP_GLOBAL(ref_map);
+				HashTable *old_ref_map = *ref_map;
+				*ref_map = NULL;
+
 				ZEND_HASH_FOREACH_PTR(sdlType->attributes, attr) {
 					if (attr->name) {
 						zattr = get_zval_property(data, attr->name, &rv);
@@ -1978,6 +1983,8 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 						}
 					}
 				} ZEND_HASH_FOREACH_END();
+
+				*ref_map = old_ref_map;
 			}
 		}
 		if (style == SOAP_ENCODED) {
@@ -3060,6 +3067,12 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 	ret = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
+
+	/* Literals are unique and can't refer to other references via attributes. */
+	HashTable **ref_map = &SOAP_GLOBAL(ref_map);
+	HashTable *old_ref_map = *ref_map;
+	*ref_map = NULL;
+
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		zval *tmp;
 		smart_str list = {0};
@@ -3134,6 +3147,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			zval_ptr_dtor_str(&tmp);
 		}
 	}
+	*ref_map = old_ref_map;
 	return ret;
 }
 
