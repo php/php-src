@@ -442,6 +442,9 @@ void coroutine_event_callback_dispose(
 ZEND_API zend_coroutine_event_callback_t *zend_async_coroutine_callback_new(
 		zend_coroutine_t *coroutine, zend_async_event_callback_fn callback, size_t size)
 {
+	ZEND_ASSERT(size == 0 || size >= sizeof(zend_coroutine_event_callback_t) &&
+		"Size must be at least sizeof(zend_coroutine_event_callback_t)");
+
 	zend_coroutine_event_callback_t *coroutine_callback
 			= ecalloc(1, size != 0 ? size : sizeof(zend_coroutine_event_callback_t));
 
