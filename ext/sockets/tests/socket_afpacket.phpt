@@ -105,7 +105,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 
     $ipv6_first_4 = hex2bin("60000000");
 
-    $ipv6_payload_len = hex2bin("0014");
+    $ipv6_payload_len = hex2bin("2728");
 
     $ipv6_nexthdr = chr(6);
 
@@ -135,7 +135,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 	    . $dst_ip
 	    . $tcp_hdr;
 
-    $buf .= str_repeat("\x00", max(0, 60 - strlen($buf)));
+    $buf .= str_repeat("\x00", 20048);
 
     var_dump(socket_sendto($s_s, $buf, strlen($buf), 0, "lo", 1));
     var_dump(socket_recvfrom($s_c, $rsp, strlen($buf), 0, $addr));
@@ -282,20 +282,21 @@ object(Socket\EthernetPacket)#3 (7) {
   }
 }
 string(120) "ffffffffffff000000000000006041414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141"
-string(28) "4141414141414141414141414141"
+string(92) "41414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141"
 int(60)
 unsupported ethernet protocol
 int(60)
-int(72)
-int(72)
+invalid transport header length
+int(20120)
+int(20120)
 string(2) "lo"
 object(Socket\EthernetPacket)#8 (7) {
   ["headerSize"]=>
   int(14)
   ["rawPacket"]=>
-  string(%d) "%r(.|\n)*?"%r
+  string(20120) "%s"
   ["socket"]=>
-  object(Socket)#3 (0) {
+  object(Socket)#6 (0) {
   }
   ["ethProtocol"]=>
   int(34525)
@@ -304,17 +305,17 @@ object(Socket\EthernetPacket)#8 (7) {
   ["dstMac"]=>
   string(17) "ff:ff:ff:ff:ff:ff"
   ["payload"]=>
-  object(Socket\Ipv6Packet)#1 (5) {
+  object(Socket\Ipv6Packet)#9 (5) {
     ["headerSize"]=>
-    int(5160)
+    int(10319)
     ["rawPacket"]=>
-    string(%d) "%r(.|\n)*?"%r
+    string(10319) "%s"
     ["srcAddr"]=>
     string(3) "::1"
     ["dstAddr"]=>
     string(3) "::1"
     ["payload"]=>
-    object(Socket\TcpPacket)#11 (4) {
+    object(Socket\TcpPacket)#10 (4) {
       ["headerSize"]=>
       int(20)
       ["rawPacket"]=>
@@ -326,10 +327,10 @@ object(Socket\EthernetPacket)#8 (7) {
     }
   }
 }
-string(144) "ffffffffffff00000000000086dd600000000014064000000000000000000000000000000001000000000000000000000000000000013039005000000000000000005002ffff0000"
-string(10320) "600000000014064000000000000000000000000000000001000000000000000000000000000000013039005000000000000000005002ffff000000000000000000000000000000000000000000000000000000000000000000006800000000000000812c%a"
+string(40240) "ffffffffffff00000000000086dd600000002728064%s"
+string(20638) "3039005000000000000000005002ffff%s"
 int(74)
-unsupported ipv6 header protocol
+invalid ipv6 payload length
 int(84)
 unsupported ip header protocol
 int(194)

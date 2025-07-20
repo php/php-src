@@ -1760,7 +1760,8 @@ PHP_FUNCTION(socket_recvfrom)
 
 			switch (protocol) {
 				case ETH_P_IP: {
-					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, ETH_HLEN, sizeof(struct iphdr)) == FAILURE) {
+					size_t offset = ETH_HLEN;
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, sizeof(struct iphdr)) == FAILURE) {
 						zval_ptr_dtor(&obj);
 						zend_string_efree(recv_buf);
 						zend_value_error("invalid ipv4 frame buffer length");
@@ -1772,13 +1773,15 @@ PHP_FUNCTION(socket_recvfrom)
 					memcpy(&ip_hdr_buf, &ether_hdr_buf, sizeof(struct php_socket_chunk));
 					size_t tlayer = ip.ihl * 4;
 					size_t totalip = ntohs(ip.tot_len);
+					offset += tlayer;
 
-					if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, tlayer, totalip)) {
+					if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, offset, totalip)) {
 						zval_ptr_dtor(&obj);
 						zend_string_efree(recv_buf);
 						zend_value_error("invalid transport header length");
 						RETURN_THROWS();
 					}
+					offset += totalip;
 					struct in_addr s, d;
 					s.s_addr = ip.saddr;
 					d.s_addr = ip.daddr;
@@ -1791,7 +1794,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 					switch (ip.protocol) {
 						case IPPROTO_TCP: {
-							if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, tlayer, sizeof(struct tcphdr)) == FAILURE) {
+							if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, offset, sizeof(struct tcphdr)) == FAILURE) {
 								zval_ptr_dtor(&zpayload);
 								zval_ptr_dtor(&obj);
 								zend_string_efree(recv_buf);
@@ -1802,7 +1805,7 @@ PHP_FUNCTION(socket_recvfrom)
 							break;
 						}
 						case IPPROTO_UDP: {
-							if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, tlayer, sizeof(struct udphdr)) == FAILURE) {
+							if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, offset, sizeof(struct udphdr)) == FAILURE) {
 								zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
 								zend_update_property_stringl(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf), ZSTR_LEN(recv_buf));
 								Z_DELREF_P(&zpayload);
@@ -1823,7 +1826,8 @@ PHP_FUNCTION(socket_recvfrom)
 					break;
 				}
 				case ETH_P_IPV6: {
-					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, ETH_HLEN, sizeof(struct ipv6hdr)) == FAILURE) {
+					size_t offset = ETH_HLEN;
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, sizeof(struct ipv6hdr)) == FAILURE) {
 						zval_ptr_dtor(&obj);
 						zend_string_efree(recv_buf);
 						zend_value_error("invalid ipv6 frame buffer length");
@@ -1834,12 +1838,15 @@ PHP_FUNCTION(socket_recvfrom)
 					struct php_socket_chunk ip_hdr_buf;
 					memcpy(&ip_hdr_buf, &ether_hdr_buf, sizeof(struct php_socket_chunk));
 					size_t totalip = sizeof(ip) + ip.payload_len;
-					if (totalip > ether_hdr_buf.buf_len) {
+					offset += sizeof(struct ipv6hdr);
+
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, totalip) == FAILURE) {
 						zval_ptr_dtor(&obj);
 						zend_string_efree(recv_buf);
-						zend_value_error("invalid ipv6 payload length %ld %ld", totalip, ether_hdr_buf.buf_len);
+						zend_value_error("invalid ipv6 payload length");
 						RETURN_THROWS();
 					}
+					offset += totalip;
 					char s[INET6_ADDRSTRLEN], d[INET6_ADDRSTRLEN];
 					inet_ntop(AF_INET6, &ip.saddr, s, sizeof(s));
 					inet_ntop(AF_INET6, &ip.daddr, d, sizeof(d));
@@ -1853,25 +1860,25 @@ PHP_FUNCTION(socket_recvfrom)
 
 					switch (ipprotocol) {
 						case IPPROTO_TCP: {
-							if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, sizeof(ip), sizeof(struct tcphdr)) == FAILURE) {
+							if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, sizeof(struct tcphdr)) == FAILURE) {
 								zval_ptr_dtor(&zpayload);
 								zval_ptr_dtor(&obj);
 								zend_string_efree(recv_buf);
 								zend_value_error("invalid tcp frame buffer length");
 								RETURN_THROWS();
 							}
-							php_socket_afpacket_add_tcp(ip_hdr_buf.buf, sll, ifrname, &szpayload, &zpayload);
+							php_socket_afpacket_add_tcp(ether_hdr_buf.buf, sll, ifrname, &szpayload, &zpayload);
 							break;
 						}
 						case IPPROTO_UDP: {
-							if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, sizeof(ip), sizeof(struct udphdr)) == FAILURE) {
+							if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, sizeof(struct udphdr)) == FAILURE) {
 								zval_ptr_dtor(&zpayload);
 								zval_ptr_dtor(&obj);
 								zend_string_efree(recv_buf);
 								zend_value_error("invalid udp frame buffer length");
 								RETURN_THROWS();
 							}
-							php_socket_afpacket_add_udp(ip_hdr_buf.buf, sll, ifrname, &szpayload, &zpayload);
+							php_socket_afpacket_add_udp(ether_hdr_buf.buf, sll, ifrname, &szpayload, &zpayload);
 							break;
 						}
 						// TODO IPPROTO_ICMPV6 support
