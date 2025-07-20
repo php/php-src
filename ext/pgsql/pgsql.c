@@ -6253,7 +6253,6 @@ PHP_FUNCTION(pg_select)
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 
-	/* TODO Document result_type param on php.net (apparently it was added in PHP 7.1) */
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 		Z_PARAM_PATH_STR(table)
