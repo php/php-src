@@ -105,7 +105,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRules)
 	if (!u8str)
 	{
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
-				"rbbi_hash_code: Error converting result to UTF-8 string",
+				"Error converting result to UTF-8 string",
 				0);
 		RETURN_FALSE;
 	}
@@ -144,7 +144,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 			BREAKITER_ERROR_CODE(bio));
 	if (U_FAILURE(BREAKITER_ERROR_CODE(bio))) {
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
-				"rbbi_get_rule_status_vec: failed obtaining the status values",
+				"failed obtaining the status values",
 				0);
 		RETURN_FALSE;
 	}
@@ -169,7 +169,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules)
 
 	if (rules_len > INT_MAX - 1) {
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
-				"rbbi_get_binary_rules: the rules are too large",
+				"the rules are too large",
 				0);
 		RETURN_FALSE;
 	}

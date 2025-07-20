@@ -32,8 +32,8 @@ int(0)
 string(12) "U_ZERO_ERROR"
 string(12) "U_ZERO_ERROR"
 
-Warning: IntlCalendar::fieldDifference(): intlcal_field_difference: Call to ICU method has failed in %s on line %d
+Warning: IntlCalendar::fieldDifference(): Call to ICU method has failed in %s on line %d
 int(1)
 int(1)
-string(81) "intlcal_field_difference: Call to ICU method has failed: U_ILLEGAL_ARGUMENT_ERROR"
-string(81) "intlcal_field_difference: Call to ICU method has failed: U_ILLEGAL_ARGUMENT_ERROR"
+string(88) "IntlCalendar::fieldDifference(): Call to ICU method has failed: U_ILLEGAL_ARGUMENT_ERROR"
+string(88) "IntlCalendar::fieldDifference(): Call to ICU method has failed: U_ILLEGAL_ARGUMENT_ERROR"

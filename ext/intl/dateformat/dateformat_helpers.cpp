@@ -28,9 +28,9 @@ extern "C" {
 
 using icu::GregorianCalendar;
 
-int datefmt_process_calendar_arg(
+zend_result datefmt_process_calendar_arg(
 	zend_object *calendar_obj, zend_long calendar_long, bool calendar_is_null, Locale const& locale,
-	const char *func_name, intl_error *err, Calendar*& cal, zend_long& cal_int_type, bool& calendar_owned
+	intl_error *err, Calendar*& cal, zend_long& cal_int_type, bool& calendar_owned
 ) {
 	char *msg;
 	UErrorCode status = UErrorCode();
@@ -45,11 +45,11 @@ int datefmt_process_calendar_arg(
 	} else if (!calendar_obj) {
 		zend_long v = calendar_long;
 		if (v != (zend_long)UCAL_TRADITIONAL && v != (zend_long)UCAL_GREGORIAN) {
-			spprintf(&msg, 0, "%s: Invalid value for calendar type; it must be "
+			spprintf(&msg, 0, "Invalid value for calendar type; it must be "
 					"one of IntlDateFormatter::TRADITIONAL (locale's default "
 					"calendar) or IntlDateFormatter::GREGORIAN. "
-					"Alternatively, it can be an IntlCalendar object",
-					func_name);
+					"Alternatively, it can be an IntlCalendar object"
+					);
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
 			efree(msg);
 			return FAILURE;
@@ -65,8 +65,7 @@ int datefmt_process_calendar_arg(
 	} else if (calendar_obj) {
 		cal = calendar_fetch_native_calendar(calendar_obj);
 		if (cal == NULL) {
-			spprintf(&msg, 0, "%s: Found unconstructed IntlCalendar object",
-					func_name);
+			spprintf(&msg, 0, "Found unconstructed IntlCalendar object");
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
 			efree(msg);
 			return FAILURE;
@@ -76,8 +75,8 @@ int datefmt_process_calendar_arg(
 		cal_int_type = -1;
 
 	} else {
-		spprintf(&msg, 0, "%s: Invalid calendar argument; should be an integer "
-				"or an IntlCalendar instance", func_name);
+		spprintf(&msg, 0, "Invalid calendar argument; should be an integer "
+				"or an IntlCalendar instance");
 		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
 		efree(msg);
 		return FAILURE;
@@ -87,7 +86,7 @@ int datefmt_process_calendar_arg(
 		status = U_MEMORY_ALLOCATION_ERROR;
 	}
 	if (U_FAILURE(status)) {
-		spprintf(&msg, 0, "%s: Failure instantiating calendar", func_name);
+		spprintf(&msg, 0, "Failure instantiating calendar");
 		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
 		efree(msg);
 		return FAILURE;

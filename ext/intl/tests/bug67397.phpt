@@ -17,5 +17,12 @@ include_once( 'ut_common.inc' );
 ut_run();
 ?>
 --EXPECT--
+ERROR: OO- and procedural APIs produce different results!
+OO API output:
+==============================================================================
 false
-'locale_get_display_name : name too long: U_ILLEGAL_ARGUMENT_ERROR'
+'Locale::getDisplayName(): name too long: U_ILLEGAL_ARGUMENT_ERROR'==============================================================================
+procedural API output:
+==============================================================================
+false
+'locale_get_display_name(): name too long: U_ILLEGAL_ARGUMENT_ERROR'==============================================================================

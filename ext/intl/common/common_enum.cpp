@@ -268,7 +268,7 @@ PHP_METHOD(IntlIterator, rewind)
 		ii->iterator->funcs->rewind(ii->iterator);
 	} else {
 		intl_errors_set(INTLITERATOR_ERROR_P(ii), U_UNSUPPORTED_ERROR,
-			"IntlIterator::rewind: rewind not supported", 0);
+			"rewind not supported", 0);
 	}
 }
 

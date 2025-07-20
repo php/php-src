@@ -23,4 +23,4 @@ try {
 
 Exception: datefmt_create: Time zone identifier given is not a valid UTF-8 string in %s on line %d
 
-Exception: IntlDateFormatter::__construct(): datefmt_create: error converting pattern to UTF-16 in %s on line %d
+Exception: IntlDateFormatter::__construct(): error converting pattern to UTF-16 in %s on line %d

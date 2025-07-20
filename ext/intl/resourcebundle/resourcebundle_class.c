@@ -72,7 +72,7 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 /* }}} */
 
 /* {{{ ResourceBundle_ctor */
-static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
+static zend_result resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char           *bundlename;
 	size_t		bundlename_len = 0;
@@ -91,11 +91,6 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(fallback)
 	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
-
-	if (error_handling != NULL) {
-		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
-		*error_handling_replaced = 1;
-	}
 
 	if (rb->me) {
 		zend_throw_error(NULL, "ResourceBundle object is already constructed");
@@ -119,13 +114,13 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling
 		rb->me = ures_openDirect(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
 	}
 
-	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle");
+	INTL_CTOR_CHECK_STATUS(rb, "Cannot load libICU resource bundle");
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING ||
 			INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
 		char *pbuf;
 		intl_errors_set_code(NULL, INTL_DATA_ERROR_CODE(rb));
-		spprintf(&pbuf, 0, "resourcebundle_ctor: Cannot load libICU resource "
+		spprintf(&pbuf, 0, "Cannot load libICU resource "
 				"'%s' without fallback from %s to %s",
 				bundlename ? bundlename : "(default data)", locale,
 				ures_getLocaleByType(
@@ -142,18 +137,17 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling
 /* {{{ ResourceBundle object constructor */
 PHP_METHOD( ResourceBundle, __construct )
 {
-	zend_error_handling error_handling;
-	bool error_handling_replaced = 0;
+	bool old_use_exception = INTL_G(use_exceptions);
+	int old_error_level = INTL_G(error_level);
+	INTL_G(use_exceptions) = true;
+	INTL_G(error_level) = 0;
 
 	return_value = ZEND_THIS;
-	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, &error_handling, &error_handling_replaced) == FAILURE) {
-		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
-		}
+	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+		ZEND_ASSERT(EG(exception));
 	}
-	if (error_handling_replaced) {
-		zend_restore_error_handling(&error_handling);
-	}
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 /* }}} */
 
@@ -161,7 +155,7 @@ PHP_METHOD( ResourceBundle, __construct )
 PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
-	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, NULL) == FAILURE) {
+	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}

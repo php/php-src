@@ -343,7 +343,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		if (used_tz == NULL) {
 			zval nullzv;
 			ZVAL_NULL(&nullzv);
-			used_tz = timezone_process_timezone_argument(&nullzv, &err, "msgfmt_format");
+			used_tz = timezone_process_timezone_argument(&nullzv, &err);
 			if (used_tz == NULL) {
 				continue;
 			}
@@ -524,7 +524,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				}
 			case Formattable::kDate:
 				{
-					double dd = intl_zval_to_millis(elem, &err, "msgfmt_format");
+					double dd = intl_zval_to_millis(elem, &err);
 					if (U_FAILURE(err.code)) {
 						char *message;
 						zend_string *u8key;

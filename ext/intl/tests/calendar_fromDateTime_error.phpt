@@ -27,11 +27,11 @@ var_dump(IntlCalendar::fromDateTime($date));
 ?>
 --EXPECTF--
 threw exception, OK
-Warning: IntlCalendar::fromDateTime(): intlcal_from_date_time: DateTime object is unconstructed in %s on line %d
+Warning: IntlCalendar::fromDateTime(): DateTime object is unconstructed in %s on line %d
 NULL
 
-Warning: IntlCalendar::fromDateTime(): intlcal_from_date_time: object has an time zone offset that's too large in %s on line %d
+Warning: IntlCalendar::fromDateTime(): object has an time zone offset that's too large in %s on line %d
 NULL
 
-Warning: IntlCalendar::fromDateTime(): intlcal_from_date_time: time zone id 'WEST' extracted from ext/date DateTimeZone not recognized in %s on line %d
+Warning: IntlCalendar::fromDateTime(): time zone id 'WEST' extracted from ext/date DateTimeZone not recognized in %s on line %d
 NULL

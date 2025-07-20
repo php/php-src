@@ -53,7 +53,7 @@ static bool set_gregorian_calendar_time_zone(GregorianCalendar *gcal, UErrorCode
 {
 	if (U_FAILURE(status)) {
 		intl_error_set(NULL, status,
-			"IntlGregorianCalendar: Error creating ICU GregorianCalendar from date",
+			"`Error creating ICU GregorianCalendar from date",
 			0
 		);
 
@@ -64,7 +64,7 @@ static bool set_gregorian_calendar_time_zone(GregorianCalendar *gcal, UErrorCode
 	UnicodeString tzstr = UnicodeString::fromUTF8(StringPiece(tzinfo->name));
 	if (tzstr.isBogus()) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		   "IntlGregorianCalendar: Could not create UTF-8 string "
+		   "Could not create UTF-8 string "
 		   "from PHP's default timezone name (see date_default_timezone_get())",
 		   0
 		);
@@ -78,8 +78,7 @@ static bool set_gregorian_calendar_time_zone(GregorianCalendar *gcal, UErrorCode
 	return true;
 }
 
-static void _php_intlgregcal_constructor_body(
-    INTERNAL_FUNCTION_PARAMETERS, bool is_constructor, zend_error_handling *error_handling, bool *error_handling_replaced)
+static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
 	zval		*tz_object	= NULL;
 	zval		args_a[6],
@@ -127,11 +126,6 @@ static void _php_intlgregcal_constructor_body(
                RETURN_THROWS();
 	}
 
-	if (error_handling != NULL) {
-		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
-		*error_handling_replaced = 1;
-	}
-
 	// instantion of ICU object
 	Calendar_object *co = Z_INTL_CALENDAR_P(return_value);
 	std::unique_ptr<GregorianCalendar> gcal;
@@ -143,9 +137,9 @@ static void _php_intlgregcal_constructor_body(
 
 	if (variant <= 2) {
 		// From timezone and locale (0 to 2 arguments)
-		TimeZone *tz = timezone_process_timezone_argument(tz_object, NULL,
-			"intlgregcal_create_instance");
+		TimeZone *tz = timezone_process_timezone_argument(tz_object, NULL);
 		if (tz == NULL) {
+			// TODO: Exception should always occur already?
 			if (!EG(exception)) {
 				zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 			}
@@ -163,7 +157,7 @@ static void _php_intlgregcal_constructor_body(
 			status));
 			// Should this throw?
 		if (U_FAILURE(status)) {
-			intl_error_set(NULL, status, "intlgregcal_create_instance: error "
+			intl_error_set(NULL, status, "error "
 				"creating ICU GregorianCalendar from time zone and locale", 0);
 			delete tz;
 			if (!is_constructor) {
@@ -209,29 +203,27 @@ static void _php_intlgregcal_constructor_body(
 
 U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
 {
-	intl_error_reset(NULL);
-
 	object_init_ex(return_value, GregorianCalendar_ce_ptr);
-	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* is_constructor */ 0, NULL, NULL);
+	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* is_constructor */ false);
 }
 
 U_CFUNC PHP_METHOD(IntlGregorianCalendar, __construct)
 {
-	zend_error_handling error_handling;
-	bool error_handling_replaced = 0;
+	bool old_use_exception = INTL_G(use_exceptions);
+	int old_error_level = INTL_G(error_level);
+	INTL_G(use_exceptions) = true;
+	INTL_G(error_level) = 0;
 
 	return_value = ZEND_THIS;
-	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* is_constructor */ 1, &error_handling, &error_handling_replaced);
-	if (error_handling_replaced) {
-		zend_restore_error_handling(&error_handling);
-	}
+	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* is_constructor */ true);
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 
 U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDate)
 {
 	zend_long year, month, day;
 	UErrorCode status = U_ZERO_ERROR;
-	zend_error_handling error_handling;
 	Calendar_object *co;
 	std::unique_ptr<GregorianCalendar> gcal;
 
@@ -247,7 +239,8 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDate)
 	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
 	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
+	bool old_use_exception = INTL_G(use_exceptions);
+	int old_error_level = INTL_G(error_level);
 
 	gcal = std::unique_ptr<GregorianCalendar>(new GregorianCalendar((int32_t) year, (int32_t) month, (int32_t) day, status));
 	if (!set_gregorian_calendar_time_zone(gcal.get(), status)) {
@@ -259,7 +252,8 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDate)
 	co->ucal = gcal.release();
 
 cleanup:
-	zend_restore_error_handling(&error_handling);
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 
 U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
@@ -267,7 +261,6 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
 	zend_long year, month, day, hour, minute, second;
 	bool second_is_null = 1;
 	UErrorCode status = U_ZERO_ERROR;
-	zend_error_handling error_handling;
 	Calendar_object *co;
 	GregorianCalendar *tmp;
 
@@ -289,8 +282,6 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
 	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(hour, 4);
 	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(minute, 5);
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-
 	if (second_is_null) {
 		tmp = new GregorianCalendar((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute, status);
 	} else {
@@ -298,6 +289,8 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
 		tmp = new GregorianCalendar((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute, (int32_t) second, status);
 	}
 	auto gcal = std::unique_ptr<GregorianCalendar>(tmp);
+	bool old_use_exception = INTL_G(use_exceptions);
+	int old_error_level = INTL_G(error_level);
 	if (!set_gregorian_calendar_time_zone(gcal.get(), status)) {
 		goto cleanup;
 	}
@@ -308,7 +301,8 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
 	co->ucal = gcal.release();
 
 cleanup:
-	zend_restore_error_handling(&error_handling);
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 
 U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)
@@ -325,8 +319,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	fetch_greg(co)->setGregorianChange(date, CALENDAR_ERROR_CODE(co));
-	INTL_METHOD_CHECK_STATUS(co, "intlgregcal_set_gregorian_change: error "
-		"calling ICU method");
+	INTL_METHOD_CHECK_STATUS(co, "error calling ICU method");
 
 	RETURN_TRUE;
 }

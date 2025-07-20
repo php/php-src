@@ -61,18 +61,16 @@ U_CFUNC void timezone_object_construct(const TimeZone *zone, zval *object, int o
  *	   Convert from TimeZone to DateTimeZone object */
 U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 											   intl_error *outside_error,
-											   const char *func, zval *ret)
+											   zval *ret)
 {
 	UnicodeString		id;
-	char				*message = NULL;
 	php_timezone_obj	*tzobj;
 	zval				arg;
 
 	timeZone->getID(id);
 	if (id.isBogus()) {
-		spprintf(&message, 0, "%s: could not obtain TimeZone id", func);
 		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-			message, 1);
+			"could not obtain TimeZone id", false);
 		goto error;
 	}
 
@@ -91,19 +89,16 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		/* Call the constructor! */
 		u8str = intl_charFromString(id, &INTL_ERROR_CODE(*outside_error));
 		if (!u8str) {
-			spprintf(&message, 0, "%s: could not convert id to UTF-8", func);
 			intl_errors_set(outside_error, INTL_ERROR_CODE(*outside_error),
-				message, 1);
+				"could not convert id to UTF-8", false);
 			goto error;
 		}
 		ZVAL_STR(&arg, u8str);
 		zend_call_known_instance_method_with_1_params(
 			Z_OBJCE_P(ret)->constructor, Z_OBJ_P(ret), NULL, &arg);
 		if (EG(exception)) {
-			spprintf(&message, 0,
-				"%s: DateTimeZone constructor threw exception", func);
 			intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-				message, 1);
+				"DateTimeZone constructor threw exception", false);
 			zend_object_store_ctor_failed(Z_OBJ_P(ret));
 			zval_ptr_dtor(&arg);
 			goto error;
@@ -118,10 +113,6 @@ error:
 		}
 		ret = NULL;
 	}
-
-	if (message) {
-		efree(message);
-	}
 	return ret;
 }
 /* }}} */
@@ -129,8 +120,7 @@ error:
 /* {{{ timezone_process_timezone_argument
  * TimeZone argument processor. outside_error may be NULL (for static functions/constructors) */
 U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
-													 intl_error *outside_error,
-													 const char *func)
+													 intl_error *outside_error)
 {
 	zval		local_zv_tz;
 	TimeZone	*timeZone;
@@ -148,14 +138,14 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		TimeZone_object *to = Z_INTL_TIMEZONE_P(zv_timezone);
 
 		if (to->utimezone == NULL) {
-			zend_throw_error(IntlException_ce_ptr, "%s: passed IntlTimeZone is not "
-				"properly constructed", func);
+			zend_throw_error(IntlException_ce_ptr, "passed IntlTimeZone is not "
+				"properly constructed");
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
 		if (UNEXPECTED(timeZone == NULL)) {
-			zend_throw_error(IntlException_ce_ptr, "%s: could not clone TimeZone", func);
+			zend_throw_error(IntlException_ce_ptr, "could not clone TimeZone");
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
@@ -165,8 +155,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		php_timezone_obj *tzobj = Z_PHPTIMEZONE_P(zv_timezone);
 
 		zval_ptr_dtor_str(&local_zv_tz);
-		return timezone_convert_datetimezone(tzobj->type, tzobj, 0,
-			outside_error, func);
+		return timezone_convert_datetimezone(tzobj->type, tzobj, 0, outside_error);
 	} else {
 		UnicodeString	id;
 		UErrorCode		status = U_ZERO_ERROR; /* outside_error may be NULL */
@@ -176,20 +165,22 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		}
 		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRLEN_P(zv_timezone),
 				&status) == FAILURE) {
-			zend_throw_error(IntlException_ce_ptr, "%s: Time zone identifier given is not a "
-				"valid UTF-8 string", func);
+			// TODO: Grab current executing function/method
+			zend_throw_error(IntlException_ce_ptr, "Time zone identifier given is not a "
+				"valid UTF-8 string");
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
 		if (UNEXPECTED(timeZone == NULL)) {
-			zend_throw_error(IntlException_ce_ptr, "%s: Could not create time zone", func);
+			// TODO: Grab current executing function/method
+			zend_throw_error(IntlException_ce_ptr, "Could not create time zone");
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		if (*timeZone == TimeZone::getUnknown()) {
-			zend_throw_error(IntlException_ce_ptr, "%s: No such time zone: '%s'",
-				func, Z_STRVAL_P(zv_timezone));
+			// TODO: Grab current executing function/method
+			zend_throw_error(IntlException_ce_ptr, "No such time zone: '%s'", Z_STRVAL_P(zv_timezone));
 			zval_ptr_dtor_str(&local_zv_tz);
 			delete timeZone;
 			return NULL;

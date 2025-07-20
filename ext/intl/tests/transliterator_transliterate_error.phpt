@@ -24,7 +24,7 @@ transliterator_transliterate($tr, "\x80\x03");
 echo "Done.\n";
 ?>
 --EXPECTF--
-Warning: transliterator_transliterate(): transliterator_transliterate: Neither "start" nor the "end" arguments can exceed the number of UTF-16 code units (in this case, 3) in %s on line %d
+Warning: transliterator_transliterate(): Neither "start" nor the "end" arguments can exceed the number of UTF-16 code units (in this case, 3) in %s on line %d
 bool(false)
 transliterator_transliterate(): Argument #2 ($string) must be less than or equal to argument #3 ($end)
 
