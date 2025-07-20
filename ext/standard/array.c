@@ -7046,9 +7046,10 @@ PHP_FUNCTION(array_chunk)
 
 		/* If reached the chunk size, add it to the result array, and reset the
 		 * pointer. */
-		if (!(++current % size)) {
+		if (++current == size) {
 			add_next_index_zval(return_value, &chunk);
 			ZVAL_UNDEF(&chunk);
+			current = 0;
 		}
 	} ZEND_HASH_FOREACH_END();
 
