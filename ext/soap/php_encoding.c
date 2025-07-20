@@ -3042,7 +3042,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
-	/* Literals are uniqued and can't refer to other references via attributes. */
+	/* Literals are unique and can't refer to other references via attributes. */
 	HashTable **ref_map = &SOAP_GLOBAL(ref_map);
 	HashTable *old_ref_map = *ref_map;
 	*ref_map = NULL;
