@@ -28,7 +28,6 @@
 #include "zend_dtrace.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions_arginfo.h"
-#include "zend_cancellation_exception_arginfo.h"
 #include "zend_observer.h"
 
 #define ZEND_EXCEPTION_MESSAGE_OFF 0
@@ -43,7 +42,6 @@ ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
 ZEND_API zend_class_entry *zend_ce_error_exception;
 ZEND_API zend_class_entry *zend_ce_error;
-ZEND_API zend_class_entry *zend_ce_cancellation_exception;
 ZEND_API zend_class_entry *zend_ce_compile_error;
 ZEND_API zend_class_entry *zend_ce_parse_error;
 ZEND_API zend_class_entry *zend_ce_type_error;
@@ -74,9 +72,7 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 		root = root->parent;
 	}
 	if (zend_string_equals_literal(root->name, "Exception")
-			|| zend_string_equals_literal(root->name, "Error")
-			|| zend_string_equals_literal(root->name, "CancellationException")
-			) {
+			|| zend_string_equals_literal(root->name, "Error")) {
 		return SUCCESS;
 	}
 
@@ -95,23 +91,7 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 
 static inline zend_class_entry *i_get_exception_base(zend_object *object) /* {{{ */
 {
-	zend_class_entry *instance_ce = object->ce;
-
-	do
-	{
-		if (instance_ce == zend_ce_exception) {
-			return zend_ce_exception;
-		} else if (instance_ce == zend_ce_error) {
-			return zend_ce_error;
-		} else if (instance_ce == zend_ce_cancellation_exception) {
-			return zend_ce_cancellation_exception;
-		}
-
-		instance_ce = instance_ce->parent;
-
-	} while (instance_ce != NULL);
-
-	return NULL;
+	return instanceof_function(object->ce, zend_ce_exception) ? zend_ce_exception : zend_ce_error;
 }
 /* }}} */
 
@@ -832,9 +812,6 @@ void zend_register_default_exception(void) /* {{{ */
 
 	zend_ce_error = register_class_Error(zend_ce_throwable);
 	zend_init_exception_class_entry(zend_ce_error);
-
-	zend_ce_cancellation_exception = register_class_CancellationException(zend_ce_throwable);
-	zend_init_exception_class_entry(zend_ce_cancellation_exception);
 
 	zend_ce_compile_error = register_class_CompileError(zend_ce_error);
 	zend_init_exception_class_entry(zend_ce_compile_error);

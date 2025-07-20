@@ -115,7 +115,7 @@ static zend_class_entry *get_class_ce(zend_async_class type)
 			|| type == ZEND_ASYNC_EXCEPTION_INPUT_OUTPUT) {
 		return zend_ce_exception;
 	} else if (type == ZEND_ASYNC_EXCEPTION_CANCELLATION) {
-		return zend_ce_cancellation_exception;
+		return zend_ce_error;
 	}
 
 	return NULL;
@@ -908,7 +908,9 @@ ZEND_API bool zend_async_waker_apply_error(zend_async_waker_t *waker, zend_objec
 		return true;
 	}
 
-	if (for_cancellation && instanceof_function(waker->error->ce, zend_ce_cancellation_exception)) {
+	const zend_class_entry *ce_cancellation_exception = ZEND_ASYNC_GET_EXCEPTION_CE(ZEND_ASYNC_EXCEPTION_CANCELLATION);
+
+	if (for_cancellation && instanceof_function(waker->error->ce, ce_cancellation_exception)) {
 		// If the waker already has a cancellation exception, we do not override it
 		if (tranfer_error) {
 			OBJ_RELEASE(error);
