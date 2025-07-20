@@ -341,7 +341,26 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 					if (ptr->_private) {
 						php_libxml_node_object *obj = ptr->_private;
 						if (!obj->document || obj->document->class_type < PHP_LIBXML_CLASS_MODERN) {
-							xmlReconciliateNs(curnode->doc, curnode);
+							if (LIBXML_VERSION < 21300 && UNEXPECTED(curnode->doc == NULL)) {
+								/* xmlReconciliateNs() in these versions just uses the document for xmlNewReconciledNs(),
+								 * which can create an oldNs xml namespace declaration via xmlSearchNs() -> xmlTreeEnsureXMLDecl(). */
+								xmlDoc dummy;
+								memset(&dummy, 0, sizeof(dummy));
+								dummy.type = XML_DOCUMENT_NODE;
+								curnode->doc = &dummy;
+								xmlReconciliateNs(curnode->doc, curnode);
+								curnode->doc = NULL;
+
+								/* Append oldNs to current node's nsDef, which can be at most one node. */
+								if (dummy.oldNs) {
+									ZEND_ASSERT(dummy.oldNs->next == NULL);
+									xmlNsPtr old = curnode->nsDef;
+									curnode->nsDef = dummy.oldNs;
+									dummy.oldNs->next = old;
+								}
+							} else {
+								xmlReconciliateNs(curnode->doc, curnode);
+							}
 						}
 					}
 				}

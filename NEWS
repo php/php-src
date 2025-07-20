@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-18529 (additional inheriting of TLS int options).
     (Jakub Zelenka)
 
+- LibXML:
+  . Fixed bug GH-19098 (libxml<2.13 segmentation fault caused by
+    php_libxml_node_free). (nielsdos)
+
 - OpenSSL:
   . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
     return value check). (nielsdos, botovq)
