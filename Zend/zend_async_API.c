@@ -423,8 +423,11 @@ static void event_callback_dispose(zend_async_event_callback_t *callback, zend_a
 ZEND_API zend_async_event_callback_t *zend_async_event_callback_new(
 		zend_async_event_callback_fn callback, size_t size)
 {
+	ZEND_ASSERT(size == 0 || size >= sizeof(zend_async_event_callback_t) &&
+		"Size must be at least sizeof(zend_async_event_callback_t)");
+
 	zend_async_event_callback_t *event_callback
-			= ecalloc(1, size == 0 ? size : sizeof(zend_async_event_callback_t));
+			= ecalloc(1, size != 0 ? size : sizeof(zend_async_event_callback_t));
 
 	event_callback->ref_count = 1;
 	event_callback->callback = callback;
