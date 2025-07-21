@@ -2358,11 +2358,14 @@ class EvaluatedValue
         $this->isUnknownConstValue = $isUnknownConstValue;
     }
 
-    public function initializeZval(string $zvalName): string
+    public function initializeZval(string $zvalName, bool $alreadyExists = false, string $forStringDef = ''): string
     {
         $cExpr = $this->getCExpr();
 
-        $code = "\tzval $zvalName;\n";
+        $code = '';
+        if (!$alreadyExists) {
+            $code = "\tzval $zvalName;\n";
+        }
 
         if ($this->type->isNull()) {
             $code .= "\tZVAL_NULL(&$zvalName);\n";
@@ -2382,8 +2385,11 @@ class EvaluatedValue
             if ($cExpr === '""') {
                 $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
             } else {
-                $code .= "\tzend_string *{$zvalName}_str = zend_string_init($cExpr, strlen($cExpr), 1);\n";
-                $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
+                if ($forStringDef === '') {
+                    $forStringDef = "{$zvalName}_str";
+                }
+                $code .= "\tzend_string *$forStringDef = zend_string_init($cExpr, strlen($cExpr), 1);\n";
+                $code .= "\tZVAL_STR(&$zvalName, $forStringDef);\n";
             }
         } elseif ($this->type->isArray()) {
             if ($cExpr == '[]') {
@@ -2821,7 +2827,8 @@ class ConstInfo extends VariableLike
     {
         $constName = $this->name->getDeclarationName();
 
-        $zvalCode = $value->initializeZval("const_{$constName}_value", $allConstInfos);
+        // TODO $allConstInfos is unused
+        $zvalCode = $value->initializeZval("const_{$constName}_value");
 
         $code = "\n" . $zvalCode;
 
@@ -3378,9 +3385,11 @@ class AttributeInfo {
             }
             if ($initValue === '') {
                 $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
-                $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
-                $code .= $value->initializeZval($zvalName);
-                $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
+                $code .= $value->initializeZval(
+                    "attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value",
+                    true,
+                    "attribute_{$escapedAttributeName}_{$nameSuffix}_arg{$i}_str"
+                );
             } else {
                 $code .= $initValue;
             }
