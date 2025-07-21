@@ -115,14 +115,8 @@ PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name)
 	return uri_handler_by_name(ZSTR_VAL(uri_handler_name), ZSTR_LEN(uri_handler_name));
 }
 
-PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str, bool silent)
+ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str, bool silent)
 {
-	ZEND_ASSERT(uri_handler != NULL);
-
-	if (ZSTR_LEN(uri_str) == 0) {
-		return NULL;
-	}
-
 	uri_internal_t *internal_uri = emalloc(sizeof(*internal_uri));
 	internal_uri->handler = uri_handler;
 	internal_uri->uri = uri_handler->parse_uri(uri_str, NULL, NULL, silent);
@@ -135,7 +129,7 @@ PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_stri
 	return internal_uri;
 }
 
-static zend_result php_uri_get_property(const uri_internal_t *internal_uri, uri_property_name_t property_name, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_get_property(const uri_internal_t *internal_uri, uri_property_name_t property_name, uri_component_read_mode_t read_mode, zval *zv)
 {
 	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
 	if (property_handler == NULL) {
@@ -145,47 +139,47 @@ static zend_result php_uri_get_property(const uri_internal_t *internal_uri, uri_
 	return property_handler->read_func(internal_uri, read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
 	return php_uri_get_property(internal_uri, URI_PROPERTY_NAME_SCHEME, read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
 	return php_uri_get_property(internal_uri, URI_PROPERTY_NAME_USERNAME, read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
 	return php_uri_get_property(internal_uri, URI_PROPERTY_NAME_PASSWORD, read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
 	return php_uri_get_property(internal_uri, URI_PROPERTY_NAME_HOST, read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
 	return php_uri_get_property(internal_uri, URI_PROPERTY_NAME_PORT, read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
 	return php_uri_get_property(internal_uri, URI_PROPERTY_NAME_PATH, read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
 	return php_uri_get_property(internal_uri, URI_PROPERTY_NAME_QUERY, read_mode, zv);
 }
 
-PHPAPI zend_result php_uri_get_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
 {
 	return php_uri_get_property(internal_uri, URI_PROPERTY_NAME_FRAGMENT, read_mode, zv);
 }
 
-PHPAPI void php_uri_free(uri_internal_t *internal_uri)
+ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri)
 {
 	internal_uri->handler->free_uri(internal_uri->uri);
 	internal_uri->uri = NULL;
@@ -193,8 +187,9 @@ PHPAPI void php_uri_free(uri_internal_t *internal_uri)
 	efree(internal_uri);
 }
 
-PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_string *uri_str, uri_component_read_mode_t read_mode, bool silent)
-{
+ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
+	const uri_handler_t *uri_handler, zend_string *uri_str, uri_component_read_mode_t read_mode, bool silent
+) {
 	uri_internal_t *uri_internal = php_uri_parse(uri_handler, uri_str, silent);
 	if (uri_internal == NULL) {
 		return NULL;
@@ -207,97 +202,80 @@ PHPAPI php_uri *php_uri_parse_to_struct(const uri_handler_t *uri_handler, zend_s
 
 	result = php_uri_get_scheme(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
-		php_uri_free(uri_internal);
-		php_uri_struct_free(uri);
-		return NULL;
+		goto error;
 	}
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		uri->scheme = zend_string_copy(Z_STR(tmp));
-		zval_ptr_dtor(&tmp);
+	if (Z_TYPE(tmp) == IS_STRING) {
+		uri->scheme = Z_STR(tmp);
 	}
 
 	result = php_uri_get_username(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
-		php_uri_free(uri_internal);
-		php_uri_struct_free(uri);
-		return NULL;
+		goto error;
 	}
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		uri->user = zend_string_copy(Z_STR(tmp));
-		zval_ptr_dtor(&tmp);
+	if (Z_TYPE(tmp) == IS_STRING) {
+		uri->user = Z_STR(tmp);
 	}
 
 	result = php_uri_get_password(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
-		php_uri_free(uri_internal);
-		php_uri_struct_free(uri);
-		return NULL;
+		goto error;
 	}
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		uri->password = zend_string_copy(Z_STR(tmp));
-		zval_ptr_dtor(&tmp);
+	if (Z_TYPE(tmp) == IS_STRING) {
+		uri->password = Z_STR(tmp);
 	}
 
 	result = php_uri_get_host(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
-		php_uri_free(uri_internal);
-		php_uri_struct_free(uri);
-		return NULL;
+		goto error;
 	}
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		uri->host = zend_string_copy(Z_STR(tmp));
-		zval_ptr_dtor(&tmp);
+	if (Z_TYPE(tmp) == IS_STRING) {
+		uri->host = Z_STR(tmp);
 	}
 
 	result = php_uri_get_port(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
-		php_uri_free(uri_internal);
-		php_uri_struct_free(uri);
-		return NULL;
+		goto error;
 	}
-	if (Z_TYPE(tmp) == IS_LONG && Z_LVAL(tmp) >= 0) {
+	if (Z_TYPE(tmp) == IS_LONG) {
 		uri->port = Z_LVAL(tmp);
 	}
 
 	result = php_uri_get_path(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
-		php_uri_free(uri_internal);
-		php_uri_struct_free(uri);
-		return NULL;
+		goto error;
 	}
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		uri->path = zend_string_copy(Z_STR(tmp));
-		zval_ptr_dtor(&tmp);
+	if (Z_TYPE(tmp) == IS_STRING) {
+		uri->path = Z_STR(tmp);
 	}
 
 	result = php_uri_get_query(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
-		php_uri_free(uri_internal);
-		php_uri_struct_free(uri);
-		return NULL;
+		goto error;
 	}
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		uri->query = zend_string_copy(Z_STR(tmp));
-		zval_ptr_dtor(&tmp);
+	if (Z_TYPE(tmp) == IS_STRING) {
+		uri->query = Z_STR(tmp);
 	}
 
 	result = php_uri_get_fragment(uri_internal, read_mode, &tmp);
 	if (result == FAILURE) {
-		php_uri_free(uri_internal);
-		php_uri_struct_free(uri);
-		return NULL;
+		goto error;
 	}
-	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
-		uri->fragment = zend_string_copy(Z_STR(tmp));
-		zval_ptr_dtor(&tmp);
+	if (Z_TYPE(tmp) == IS_STRING) {
+		uri->fragment = Z_STR(tmp);
 	}
 
 	php_uri_free(uri_internal);
 
 	return uri;
+
+error:
+	php_uri_free(uri_internal);
+	php_uri_struct_free(uri);
+
+	return NULL;
 }
 
-PHPAPI void php_uri_struct_free(php_uri *uri)
+ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_struct_free(php_uri *uri)
 {
 	if (uri->scheme) {
 		zend_string_release(uri->scheme);
@@ -354,7 +332,7 @@ static zend_result pass_errors_by_ref_and_free(zval *errors_zv, zval *errors)
 	return SUCCESS;
 }
 
-PHPAPI void php_uri_instantiate_uri(
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_object *base_url_object,
 	bool should_throw, bool should_update_this_object, zval *errors_zv
 ) {
@@ -1024,7 +1002,7 @@ zend_object *uri_clone_obj_handler(zend_object *object)
 	return &new_uri_object->std;
 }
 
-PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers)
+ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers)
 {
 	ce->create_object = uri_create_object_handler;
 	ce->default_object_handlers = object_handlers;
