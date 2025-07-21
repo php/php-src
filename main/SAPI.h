@@ -195,7 +195,7 @@ typedef enum {					/* Parameter: 			*/
 	SAPI_HEADER_REPLACE,		/* sapi_header_line* 	*/
 	SAPI_HEADER_ADD,			/* sapi_header_line* 	*/
 	SAPI_HEADER_DELETE,			/* sapi_header_line* 	*/
-	SAPI_HEADER_DELETE_PREFIX,		/* sapi_header_line* 	*/
+	SAPI_HEADER_DELETE_PREFIX,	/* sapi_header_line* 	*/
 	SAPI_HEADER_DELETE_ALL,		/* void					*/
 	SAPI_HEADER_SET_STATUS		/* int 					*/
 } sapi_header_op_enum;
