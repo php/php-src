@@ -249,6 +249,9 @@ struct _zend_executor_globals {
 	/* timeout support */
 	zend_long timeout_seconds;
 
+	/* portable system_id */
+	bool portable_build;
+
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;
 	zend_ini_entry *error_reporting_ini_entry;
