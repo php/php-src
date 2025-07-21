@@ -1038,21 +1038,18 @@ static bool snmp_session_set_auth_protocol(struct snmp_session *s, zend_string *
 	}
 #endif
 
-	smart_string err = {0};
-
-	smart_string_appends(&err, "Authentication protocol must be \"SHA\"");
+	zend_value_error(
+		"Authentication protocol must be \"SHA\""
 #ifdef HAVE_SNMP_SHA256
-	smart_string_appends(&err, " or \"SHA256\"");
+		" or \"SHA256\""
 #endif
 #ifdef HAVE_SNMP_SHA512
-	smart_string_appends(&err, " or \"SHA512\"");
+		" or \"SHA512\""
 #endif
 #ifndef DISABLE_MD5
-	smart_string_appends(&err, " or \"MD5\"");
+		" or \"MD5\""
 #endif
-	smart_string_0(&err);
-	zend_value_error("%s", err.c);
-	smart_string_free(&err);
+	);
 	return false;
 }
 /* }}} */

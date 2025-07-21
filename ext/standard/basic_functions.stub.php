@@ -648,12 +648,17 @@ const IMAGETYPE_WEBP = UNKNOWN;
 const IMAGETYPE_AVIF = UNKNOWN;
 /**
  * @var int
+ * @cvalue IMAGE_FILETYPE_HEIF
+ */
+const IMAGETYPE_HEIF = UNKNOWN;
+/**
+ * @var int
  * @cvalue IMAGE_FILETYPE_UNKNOWN
  */
 const IMAGETYPE_UNKNOWN = UNKNOWN;
 /**
  * @var int
- * @cvalue IMAGE_FILETYPE_COUNT
+ * @cvalue IMAGE_FILETYPE_FIXED_COUNT
  */
 const IMAGETYPE_COUNT = UNKNOWN;
 

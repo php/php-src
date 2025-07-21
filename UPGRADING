@@ -244,6 +244,16 @@ PHP 8.5 UPGRADE NOTES
     process was terminated unexpectedly. In such cases, a warning is emitted
     and the function returns false. Previously, these errors were silently
     ignored. This change affects only the sendmail transport.
+  . getimagesize() now supports HEIF/HEIC images.
+
+- Standard:
+  . getimagesize() now supports SVG images when ext-libxml is also loaded.
+    Similarly, image_type_to_extension() and image_type_to_extension()
+    now also handle IMAGETYPE_SVG.
+  . The array returned by getimagesize() now has two additional entries:
+    "width_unit" and "height_unit" to indicate in which units the dimensions
+    are expressed. These units are px by default. They are not necessarily
+    the same (just to give one example: one may be cm and the other may be px).
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),
@@ -408,7 +418,8 @@ PHP 8.5 UPGRADE NOTES
   . get_exception_handler() allows retrieving the current user-defined exception
     handler function.
     RFC: https://wiki.php.net/rfc/get-error-exception-handler
-  . The clone language construct is now a function.
+  . The clone language construct is now a function and supports reassigning
+    (readonly) properties during cloning via the new $withProperties parameter.
     RFC: https://wiki.php.net/rfc/clone_with_v2
 
 - Curl:
@@ -564,6 +575,9 @@ PHP 8.5 UPGRADE NOTES
 - Tokenizer:
   . T_VOID_CAST.
   . T_PIPE.
+
+- Standard:
+  . IMAGETYPE_SVG when libxml is loaded.
 
 ========================================
 11. Changes to INI File Handling

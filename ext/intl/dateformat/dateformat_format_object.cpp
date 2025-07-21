@@ -70,10 +70,10 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	size_t				locale_len;
 	bool				pattern		= false;
 	UDate				date;
-	TimeZone			*timeZone	= NULL;
+	std::unique_ptr<TimeZone>	timeZone;
 	UErrorCode			status		= U_ZERO_ERROR;
-	DateFormat			*df			= NULL;
-	Calendar			*cal		= NULL;
+	std::unique_ptr<DateFormat>	df;
+	std::unique_ptr<Calendar>       cal;
 	DateFormat::EStyle	dateStyle = DateFormat::kDefault,
 						timeStyle = DateFormat::kDefault;
 
@@ -158,28 +158,28 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 					"not initialized properly", 0);
 			RETURN_FALSE;
 		}
-		timeZone = obj_cal->getTimeZone().clone();
+		timeZone = std::unique_ptr<TimeZone>(obj_cal->getTimeZone().clone());
 		date = obj_cal->getTime(status);
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: error obtaining instant from "
 					"IntlCalendar", 0);
-			RETVAL_FALSE;
-			goto cleanup;
+			RETURN_FALSE;
 		}
-		cal = obj_cal->clone();
+		cal = std::unique_ptr<Calendar>(obj_cal->clone());
 	} else if (instanceof_function(instance_ce, php_date_get_interface_ce())) {
-		if (intl_datetime_decompose(object, &date, &timeZone, NULL,
+		TimeZone *tz;
+		if (intl_datetime_decompose(object, &date, &tz, NULL,
 				"datefmt_format_object") == FAILURE) {
 			RETURN_FALSE;
 		}
-		cal = new GregorianCalendar(Locale::createFromName(locale_str), status);
+		timeZone = std::unique_ptr<TimeZone>(tz);
+		cal = std::unique_ptr<Calendar>(new GregorianCalendar(Locale::createFromName(locale_str), status));
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: could not create GregorianCalendar",
 					0);
-			RETVAL_FALSE;
-			goto cleanup;
+			RETURN_FALSE;
 		}
 	} else {
 		intl_error_set(NULL, status, "datefmt_format_object: the passed object "
@@ -190,36 +190,32 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 	if (pattern) {
 		StringPiece sp(Z_STRVAL_P(format));
-		df = new SimpleDateFormat(
+		df = std::unique_ptr<DateFormat>(new SimpleDateFormat(
 			UnicodeString::fromUTF8(sp),
 			Locale::createFromName(locale_str),
-			status);
+			status));
 
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: could not create SimpleDateFormat",
 					0);
-			RETVAL_FALSE;
-			goto cleanup;
+			RETURN_FALSE;
 		}
 	} else {
-		df = DateFormat::createDateTimeInstance(dateStyle, timeStyle,
-				Locale::createFromName(locale_str));
+		df = std::unique_ptr<DateFormat>(DateFormat::createDateTimeInstance(dateStyle, timeStyle,
+				Locale::createFromName(locale_str)));
 
 		if (df == NULL) { /* according to ICU sources, this should never happen */
 			intl_error_set(NULL, status,
 					"datefmt_format_object: could not create DateFormat",
 					0);
-			RETVAL_FALSE;
-			goto cleanup;
+			RETURN_FALSE;
 		}
 	}
 
 	//must be in this order (or have the cal adopt the tz)
-	df->adoptCalendar(cal);
-	cal = NULL;
-	df->adoptTimeZone(timeZone);
-	timeZone = NULL;
+	df->adoptCalendar(cal.release());
+	df->adoptTimeZone(timeZone.release());
 
 	{
 		zend_string *u8str;
@@ -231,15 +227,8 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 			intl_error_set(NULL, status,
 					"datefmt_format_object: error converting result to UTF-8",
 					0);
-			RETVAL_FALSE;
-			goto cleanup;
+			RETURN_FALSE;
 		}
 		RETVAL_STR(u8str);
 	}
-
-
-cleanup:
-	delete df;
-	delete timeZone;
-	delete cal;
 }

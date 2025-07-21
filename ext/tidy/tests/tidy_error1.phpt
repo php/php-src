@@ -32,7 +32,15 @@ try {
 	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
-$config = ['doctype' => 'php', 0 => 'value2'];
+$config = ['doctype' => 'php'];
+
+try {
+	var_dump($tidy->parseString($buffer, $config));
+} catch (\TypeError $e) {
+	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
+$config = ['doctype' => 'auto', 0 => 'value2'];
 
 try {
 	var_dump($tidy->parseString($buffer, $config));
@@ -45,4 +53,5 @@ try {
 ValueError: tidy::parseString(): Argument #2 ($config) Unknown Tidy configuration option "bogus"
 TypeError: tidy::parseString(): Argument #2 ($config) must be of type array with keys as string
 ValueError: tidy::parseString(): Argument #2 ($config) Attempting to set read-only option "doctype-mode"
+TypeError: tidy::parseString(): Argument #2 ($config) option "doctype" does not accept "php" as a value
 TypeError: tidy::parseString(): Argument #2 ($config) must be of type array with keys as string

@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.5.0alpha3
 
 - Core:
+  . Add clone-with support to the clone() function. (timwolla, edorian)
+  . Fix support for non-userland stream notifiers. (timwolla)
   . Added PHP_BUILD_PROVIDER constant. (timwolla)
 
 - Curl:
@@ -13,11 +15,17 @@ PHP                                                                        NEWS
   . socket_set_option for multicast context throws a ValueError
     when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
 
+- Standard:
+  . Add HEIF/HEIC support to getimagesize. (Benstone Zhang)
+  . Implement #71517 (Implement SVG support for getimagesize() and friends).
+    (nielsdos)
+
 - URI:
   . Empty host handling is fixed. (Máté Kocsis)
   . Error handling of Uri\WhatWg\Url::withHost() is fixed when the input
     contains a port. Now, it triggers an exception; previously, the error
     was silently swallowed. (Máté Kocsis)
+  . Support empty URIs with Uri\Rfc3986\Uri. (timwolla)
 
 17 Jul 2025, PHP 8.5.0alpha2
 
