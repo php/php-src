@@ -176,13 +176,15 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 		__asm__ ("mull %3\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (m_overflow)
 	     : "%0"(res),
-	       "rm"(size));
+	       "rm"(size)
+	     : "cc");
 	} else {
 		__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (m_overflow)
 	     : "%0"(res),
 	       "rm"(size),
-	       "rm"(offset));
+	       "rm"(offset)
+	     : "cc");
 	}
 
 	if (UNEXPECTED(m_overflow)) {
@@ -211,7 +213,8 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 			"adc $0,%1"
 			: "=&a"(res), "=&d" (m_overflow)
 			: "%0"(res),
-			  "rm"(size));
+			  "rm"(size)
+			: "cc");
 	} else {
 		__asm__ ("mul" LP_SUFF  " %3\n\t"
 			"add %4,%0\n\t"
@@ -219,7 +222,8 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 			: "=&a"(res), "=&d" (m_overflow)
 			: "%0"(res),
 			  "rm"(size),
-			  "rm"(offset));
+			  "rm"(offset)
+			: "cc");
 	}
 #undef LP_SUFF
 	if (UNEXPECTED(m_overflow)) {
