@@ -1337,13 +1337,14 @@ static int php_session_cache_limiter(void)
 
 static void php_session_remove_cookie(void) {
 	char *session_cookie;
+	size_t session_cookie_len;
 	sapi_header_line header_line = {0};
 
 	ZEND_ASSERT(strpbrk(ZSTR_VAL(PS(session_name)), SESSION_FORBIDDEN_CHARS) == NULL);
 	session_cookie_len = spprintf(&session_cookie, 0, "Set-Cookie: %s=", ZSTR_VAL(PS(session_name)));
 
 	header_line.line = session_cookie;
-	header_line.line_len = strlen(session_cookie);
+	header_line.line_len = session_cookie_len;
 	header_line.header_len = sizeof("Set-Cookie") - 1;
 	sapi_header_op(SAPI_HEADER_DELETE_PREFIX, &header_line);
 
