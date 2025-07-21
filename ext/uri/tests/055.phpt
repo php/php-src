@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-The specified URI is malformed
+The specified base URI must be absolute

@@ -264,7 +264,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	}
 
 	if (has_clone_method) {
-		GC_ADDREF(new_object);
 		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
 
 		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
@@ -274,9 +273,53 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
 			}
 		}
-
-		OBJ_RELEASE(new_object);
 	}
+}
+
+ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const zend_class_entry *scope, const HashTable *properties)
+{
+	zend_object *new_object = old_object->handlers->clone_obj(old_object);
+
+	if (EXPECTED(!EG(exception))) {
+		/* Unlock readonly properties once more. */
+		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
+			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
+				zval* prop = OBJ_PROP_NUM(new_object, i);
+				Z_PROP_FLAG_P(prop) |= IS_PROP_REINITABLE;
+			}
+		}
+
+		const zend_class_entry *old_scope = EG(fake_scope);
+
+		EG(fake_scope) = scope;
+
+		ZEND_HASH_FOREACH_KEY_VAL(properties, zend_ulong num_key, zend_string *key, zval *val) {
+			if (UNEXPECTED(Z_ISREF_P(val))) {
+				if (Z_REFCOUNT_P(val) == 1) {
+					val = Z_REFVAL_P(val);
+				} else {
+					zend_throw_error(NULL, "Cannot assign by reference when cloning with updated properties");
+					break;
+				}
+			}
+
+			if (UNEXPECTED(key == NULL)) {
+				key = zend_long_to_str(num_key);
+				new_object->handlers->write_property(new_object, key, val, NULL);
+				zend_string_release_ex(key, false);
+			} else {
+				new_object->handlers->write_property(new_object, key, val, NULL);
+			}
+
+			if (UNEXPECTED(EG(exception))) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		EG(fake_scope) = old_scope;
+	}
+
+	return new_object;
 }
 
 ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)

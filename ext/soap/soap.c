@@ -3716,7 +3716,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 		if (version == SOAP_1_1) {
 			tmp = Z_FAULT_CODE_P(ret);
 			if (Z_TYPE_P(tmp) == IS_STRING) {
-				xmlNodePtr node = xmlNewNode(NULL, BAD_CAST("faultcode"));
+				xmlNodePtr node = xmlNewDocNode(doc, NULL, BAD_CAST("faultcode"), NULL);
 				zend_string *str = php_escape_html_entities((unsigned char*)Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0, 0, NULL);
 				xmlAddChild(param, node);
 				if (fault_ns) {
@@ -3780,7 +3780,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 			if (Z_TYPE_P(tmp) > IS_NULL) {
 				detail = tmp;
 			}
-			node = xmlNewNode(NULL, BAD_CAST(detail_name));
+			node = xmlNewDocNode(doc, NULL, BAD_CAST(detail_name), NULL);
 			xmlAddChild(param, node);
 
 			zend_hash_internal_pointer_reset(fault->details);
@@ -4112,7 +4112,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 					h = master_to_xml(enc, data, hdr_use, head);
 					xmlNodeSetName(h, BAD_CAST(Z_STRVAL_P(name)));
 				} else {
-					h = xmlNewNode(NULL, BAD_CAST(Z_STRVAL_P(name)));
+					h = xmlNewDocNode(doc, NULL, BAD_CAST(Z_STRVAL_P(name)), NULL);
 					xmlAddChild(head, h);
 				}
 				nsptr = encode_add_ns(h, Z_STRVAL_P(ns));

@@ -3725,7 +3725,8 @@ PHP_FUNCTION(ldap_rename_ext)
  */
 static int _php_ldap_tls_newctx(LDAP *ld)
 {
-	int val = 0, i, opts[] = {
+	int val = 0, i;
+	int str_opts[] = {
 #if (LDAP_API_VERSION > 2000)
 		LDAP_OPT_X_TLS_CACERTDIR,
 		LDAP_OPT_X_TLS_CACERTFILE,
@@ -3745,20 +3746,41 @@ static int _php_ldap_tls_newctx(LDAP *ld)
 #endif
 	0};
 
-	for (i=0 ; opts[i] ; i++) {
+	for (i=0 ; str_opts[i] ; i++) {
 		char *path = NULL;
 
-		ldap_get_option(ld, opts[i], &path);
+		ldap_get_option(ld, str_opts[i], &path);
 		if (path) {			/* already set locally */
 			ldap_memfree(path);
 		} else {
-			ldap_get_option(NULL, opts[i], &path);
+			ldap_get_option(NULL, str_opts[i], &path);
 			if (path) { 	/* set globally, inherit */
-				ldap_set_option(ld, opts[i], path);
+				ldap_set_option(ld, str_opts[i], path);
 				ldap_memfree(path);
 			}
 		}
 	}
+
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MIN
+	int int_opts[] = {
+		LDAP_OPT_X_TLS_PROTOCOL_MIN,
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MAX
+		LDAP_OPT_X_TLS_PROTOCOL_MAX,
+#endif
+		0
+	};
+	for (i=0 ; int_opts[i] ; i++) {
+		int value = 0;
+
+		ldap_get_option(ld, int_opts[i], &value);
+		if (value <= 0) { 	/* if value is not set already */
+			ldap_get_option(NULL, int_opts[i], &value);
+			if (value > 0) { 	/* set globally, inherit */
+				ldap_set_option(ld, int_opts[i], &value);
+			}
+		}
+	}
+#endif
 
 	return ldap_set_option(ld, LDAP_OPT_X_TLS_NEWCTX, &val);
 }

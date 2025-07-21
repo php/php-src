@@ -39,20 +39,6 @@
 #define HttpPost curl_httppost
 #endif
 
-/* {{{ cruft for thread safe SSL crypto locks */
-#if defined(ZTS) && defined(HAVE_CURL_OLD_OPENSSL)
-# if defined(HAVE_OPENSSL_CRYPTO_H)
-#  define PHP_CURL_NEED_OPENSSL_TSL
-#  include <openssl/crypto.h>
-# else
-#  warning \
-	"libcurl was compiled with OpenSSL support, but configure could not find " \
-	"openssl/crypto.h; thus no SSL crypto locking callbacks will be set, which may " \
-	"cause random crashes on SSL requests"
-# endif
-#endif /* ZTS && HAVE_CURL_OLD_OPENSSL */
-/* }}} */
-
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -69,27 +55,6 @@
 #include "curl_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(curl)
-
-#ifdef PHP_CURL_NEED_OPENSSL_TSL /* {{{ */
-static MUTEX_T *php_curl_openssl_tsl = NULL;
-
-/* Locking callbacks are no longer used since OpenSSL 1.1. Mark the functions as unused to
- * avoid warnings due to this. */
-static ZEND_ATTRIBUTE_UNUSED void php_curl_ssl_lock(int mode, int n, const char * file, int line)
-{
-	if (mode & CRYPTO_LOCK) {
-		tsrm_mutex_lock(php_curl_openssl_tsl[n]);
-	} else {
-		tsrm_mutex_unlock(php_curl_openssl_tsl[n]);
-	}
-}
-
-static ZEND_ATTRIBUTE_UNUSED unsigned long php_curl_ssl_id(void)
-{
-	return (unsigned long) tsrm_thread_id();
-}
-#endif
-/* }}} */
 
 #define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s) - 1, (zend_long) v);
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s) - 1, (double) v);
@@ -389,24 +354,6 @@ PHP_MINIT_FUNCTION(curl)
 
 	register_curl_symbols(module_number);
 
-#ifdef PHP_CURL_NEED_OPENSSL_TSL
-	if (!CRYPTO_get_id_callback()) {
-		int i, c = CRYPTO_num_locks();
-
-		php_curl_openssl_tsl = malloc(c * sizeof(MUTEX_T));
-		if (!php_curl_openssl_tsl) {
-			return FAILURE;
-		}
-
-		for (i = 0; i < c; ++i) {
-			php_curl_openssl_tsl[i] = tsrm_mutex_alloc();
-		}
-
-		CRYPTO_set_id_callback(php_curl_ssl_id);
-		CRYPTO_set_locking_callback(php_curl_ssl_lock);
-	}
-#endif
-
 	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
 		return FAILURE;
 	}
@@ -568,21 +515,6 @@ zend_result curl_cast_object(zend_object *obj, zval *result, int type)
 PHP_MSHUTDOWN_FUNCTION(curl)
 {
 	curl_global_cleanup();
-#ifdef PHP_CURL_NEED_OPENSSL_TSL
-	if (php_curl_openssl_tsl) {
-		int i, c = CRYPTO_num_locks();
-
-		CRYPTO_set_id_callback(NULL);
-		CRYPTO_set_locking_callback(NULL);
-
-		for (i = 0; i < c; ++i) {
-			tsrm_mutex_free(php_curl_openssl_tsl[i]);
-		}
-
-		free(php_curl_openssl_tsl);
-		php_curl_openssl_tsl = NULL;
-	}
-#endif
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -2639,6 +2571,11 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_APPCONNECT_TIME_T, &co) == CURLE_OK) {
 			CAAL("appconnect_time_us", co);
 		}
+#if LIBCURL_VERSION_NUM >= 0x080600 /* Available since 8.6.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_QUEUE_TIME_T , &co) == CURLE_OK) {
+			CAAL("queue_time_us", co);
+		}
+#endif
 		if (curl_easy_getinfo(ch->cp, CURLINFO_CONNECT_TIME_T, &co) == CURLE_OK) {
 			CAAL("connect_time_us", co);
 		}
@@ -2689,6 +2626,11 @@ PHP_FUNCTION(curl_getinfo)
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_PROXYAUTH_USED, &l_code) == CURLE_OK) {
 			CAAL("proxyauth_used", l_code);
+		}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080200 /* Available since 8.2.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_CONN_ID , &co) == CURLE_OK) {
+			CAAL("conn_id", co);
 		}
 #endif
 	} else {

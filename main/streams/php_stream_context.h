@@ -44,7 +44,7 @@ typedef struct _php_stream_notifier php_stream_notifier;
 struct _php_stream_notifier {
 	php_stream_notification_func func;
 	void (*dtor)(php_stream_notifier *notifier);
-	zend_fcall_info_cache *fcc;
+	void *ptr;
 	int mask;
 	size_t progress, progress_max; /* position for progress notification */
 };

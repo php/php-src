@@ -23,6 +23,11 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     the user side when requiring libphp.so, by using dlmopen with LM_ID_NEWLM
     instead of dlopen.
     RTLD_DEEPBIND is still enabled when the Apache SAPI is in use.
+  . The ptr field of the php_stream_notifier struct is now a void* instead
+    of a zval. If the zval was used to store IS_PTR values only, the
+    extra layer of indirection can be removed. In other cases a zval can
+    be heap-allocated and stored in the pointer as a minimal change to keep
+    compatibility.
 
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
@@ -129,6 +134,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . The php_std_date() function has been removed. Use php_format_date() with
     the "D, d M Y H:i:s \\G\\M\\T" format instead.
   . Added php_url_encode_to_smart_str() to encode a URL to a smart_str buffer.
+  . The functionality of getimagesize(), image_type_to_mime_type(),
+    and image_type_to_extension() is now extensible using the internal APIs
+    php_image_register_handler() and php_image_unregister_handler() in
+    php_image.h.
 
 ========================
 4. OpCode changes

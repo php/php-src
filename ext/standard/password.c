@@ -86,18 +86,18 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	buffer = zend_string_alloc(length * 3 / 4 + 1, 0);
 	if (FAILURE == php_random_bytes_throw(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
 		zend_value_error("Unable to generate salt");
-		zend_string_release_ex(buffer, 0);
+		zend_string_efree(buffer);
 		return NULL;
 	}
 
 	ret = zend_string_alloc(length, 0);
 	if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), length, ZSTR_VAL(ret)) == FAILURE) {
 		zend_value_error("Generated salt too short");
-		zend_string_release_ex(buffer, 0);
-		zend_string_release_ex(ret, 0);
+		zend_string_efree(buffer);
+		zend_string_efree(ret);
 		return NULL;
 	}
-	zend_string_release_ex(buffer, 0);
+	zend_string_efree(buffer);
 	ZSTR_VAL(ret)[length] = 0;
 	return ret;
 }

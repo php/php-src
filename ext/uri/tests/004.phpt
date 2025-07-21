@@ -5,12 +5,7 @@ uri
 --FILE--
 <?php
 
-try {
-    new Uri\Rfc3986\Uri("");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
-}
-
+var_dump(new Uri\Rfc3986\Uri(""));
 var_dump(Uri\Rfc3986\Uri::parse(""));
 
 try {
@@ -29,8 +24,42 @@ var_dump(Uri\WhatWg\Url::parse("http://RuPaul's Drag Race All Stars 7 Winners Ca
 
 ?>
 --EXPECTF--
-The specified URI is malformed
-NULL
+object(Uri\Rfc3986\Uri)#%d (%d) {
+  ["scheme"]=>
+  NULL
+  ["username"]=>
+  NULL
+  ["password"]=>
+  NULL
+  ["host"]=>
+  NULL
+  ["port"]=>
+  NULL
+  ["path"]=>
+  string(0) ""
+  ["query"]=>
+  NULL
+  ["fragment"]=>
+  NULL
+}
+object(Uri\Rfc3986\Uri)#%d (%d) {
+  ["scheme"]=>
+  NULL
+  ["username"]=>
+  NULL
+  ["password"]=>
+  NULL
+  ["host"]=>
+  NULL
+  ["port"]=>
+  NULL
+  ["path"]=>
+  string(0) ""
+  ["query"]=>
+  NULL
+  ["fragment"]=>
+  NULL
+}
 The specified URI is malformed (MissingSchemeNonRelativeUrl)
 NULL
 object(Uri\Rfc3986\Uri)#%d (%d) {

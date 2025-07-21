@@ -769,7 +769,7 @@ extern "C++" {
 # define ZEND_INDIRECT_RETURN
 #endif
 
-#if __has_attribute(nonstring) && defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 15
+#if __has_attribute(nonstring) && defined(__GNUC__) && ((!defined(__clang__) && __GNUC__ >= 15) || (defined(__clang_major__) && __clang_major__ >= 20))
 # define ZEND_NONSTRING __attribute__((nonstring))
 #else
 # define ZEND_NONSTRING
@@ -799,7 +799,9 @@ extern "C++" {
 /** @deprecated */
 #define ZEND_CGG_DIAGNOSTIC_IGNORED_END ZEND_DIAGNOSTIC_IGNORED_END
 
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
+#if defined(__cplusplus)
+# define ZEND_STATIC_ASSERT(c, m) static_assert((c), m)
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
 # define ZEND_STATIC_ASSERT(c, m) _Static_assert((c), m)
 #else
 # define ZEND_STATIC_ASSERT(c, m)

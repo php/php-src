@@ -500,9 +500,16 @@ slightly different steps. We'll call attention where the steps differ.
    > report any potential bugs that should be fixed before the upcoming GA
    > release.
 
-5. 🔶 **For pre-GA *RCs* only,** coordinate with the social media team (i.e.,
-   Derick) to post a tweet with the RC release announcement and link to the news
-   entry on php.net. ([@official_php](https://twitter.com/official_php))
+5. 🔶 **For alphas, betas, and *pre-GA* RCs,** coordinate with the
+   social media team (i.e., Derick and Sergey) to post a toot containing the
+   release announcement and link to the news entry on php.net.
+   You can send a PR to [toot-together](https://github.com/derickr/toot-together/)
+   with highlights from the NEWS file yourself, if you want.
+
+   * [Annonce 8.5.0alpha1](https://github.com/derickr/toot-together/pull/42)
+   * [Annonce 8.5.0alpha2](https://github.com/derickr/toot-together/pull/47)
+
+   We post to [@php@fosstodon.org](https://fosstodon.org/@php).
 
 
 ## Packaging a stable release

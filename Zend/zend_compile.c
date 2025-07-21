@@ -7921,6 +7921,8 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			continue;
 		}
 
+		CG(zend_lineno) = param_ast->lineno;
+
 		/* Emit $this->prop = $prop for promoted properties. */
 		zend_string *name = zend_ast_get_str(param_ast->child[1]);
 		znode name_node, value_node;
