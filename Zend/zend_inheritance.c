@@ -1694,9 +1694,8 @@ void zend_build_properties_info_table(zend_class_entry *ce)
 			if (UNEXPECTED(root_prop->flags & ZEND_ACC_VIRTUAL)) {
 				/* Prototype is virtual, we need to manually hunt down the first backed property. */
 				root_prop = prop;
-				while (true) {
-					zend_class_entry *parent_ce = root_prop->ce->parent;
-					if (!parent_ce) { break; }
+				zend_class_entry *parent_ce;
+				while ((parent_ce = root_prop->ce->parent)) {
 					zend_property_info *parent_prop = zend_hash_find_ptr(&parent_ce->properties_info, key);
 					if (!parent_prop
 					 || parent_prop->prototype != prop->prototype
