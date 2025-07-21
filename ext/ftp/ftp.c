@@ -20,6 +20,7 @@
 #endif
 
 #include "php.h"
+#include "zend_time.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -29,7 +30,6 @@
 #endif
 #include <fcntl.h>
 #include <string.h>
-#include <time.h>
 #ifdef PHP_WIN32
 #include <winsock2.h>
 #else
@@ -42,10 +42,6 @@
 #include <netdb.h>
 #endif
 #include <errno.h>
-
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -1609,8 +1605,7 @@ static databuf_t* ftp_getdata(ftpbuf_t *ftp)
 		/* connect */
 		/* Win 95/98 seems not to like size > sizeof(sockaddr_in) */
 		size = php_sockaddr_size(&ftp->pasvaddr);
-		tv.tv_sec = ftp->timeout_sec;
-		tv.tv_usec = 0;
+		zend_time_sec2val(ftp->timeout_sec, tv);
 		if (php_connect_nonb(fd, (struct sockaddr*) &ftp->pasvaddr, size, &tv) == -1) {
 			php_error_docref(NULL, E_WARNING, "php_connect_nonb() failed: %s (%d)", strerror(errno), errno);
 			goto bail;
