@@ -986,7 +986,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 		return 0;
 	}
 
-	tmp_uri = zend_string_init(url_to, strlen(url_to), 1);
+	tmp_uri = zend_string_init(url_to, strlen(url_to), false);
 	resource_to = php_uri_parse_to_struct(uri_handler, tmp_uri, URI_COMPONENT_READ_RAW, true);
 	zend_string_release_ex(tmp_uri, 1);
 	if (!resource_to) {

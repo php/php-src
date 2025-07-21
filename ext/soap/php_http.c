@@ -336,13 +336,13 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 	}
 }
 
-int make_http_soap_request(zval              *this_ptr,
-                           zend_string       *buf,
-                           zend_string       *location,
-                           char              *soapaction,
-                           int               soap_version,
-                           const zend_string *uri_parser_class,
-                           zval              *return_value)
+int make_http_soap_request(zval        *this_ptr,
+						   zend_string *buf,
+						   zend_string *location,
+						   char        *soapaction,
+						   int          soap_version,
+						   const zend_string *uri_parser_class,
+						   zval        *return_value)
 {
 	zend_string *request;
 	smart_str soap_headers = {0};
@@ -1161,7 +1161,7 @@ try_again:
 
 			zend_string *loc_str = zend_string_init(loc, strlen(loc), false);
 			php_uri *new_uri = php_uri_parse_to_struct(uri_handler, loc_str, URI_COMPONENT_READ_NORMALIZED_ASCII, true);
-			zend_string_release(loc_str);
+			zend_string_release_ex(loc_str, false);
 			efree(loc);
 
 			if (new_uri != NULL) {
