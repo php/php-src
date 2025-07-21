@@ -3261,7 +3261,6 @@ function fpow(float $num, float $exponent): float {}
 
 /* microtime.c */
 
-#ifdef HAVE_GETTIMEOFDAY
 /** @refcount 1 */
 function microtime(bool $as_float = false): string|float {}
 
@@ -3270,7 +3269,6 @@ function microtime(bool $as_float = false): string|float {}
  * @refcount 1
  */
 function gettimeofday(bool $as_float = false): array|float {}
-#endif
 
 #ifdef HAVE_GETRUSAGE
 /**
@@ -3679,10 +3677,8 @@ function is_countable(mixed $value): bool {}
 
 /* uniqid.c */
 
-#ifdef HAVE_GETTIMEOFDAY
 /** @refcount 1 */
 function uniqid(string $prefix = "", bool $more_entropy = false): string {}
-#endif
 
 /* url.c */
 

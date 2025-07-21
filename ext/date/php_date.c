@@ -23,13 +23,9 @@
 #include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_time.h"
 #include "lib/timelib.h"
 #include "lib/timelib_private.h"
-#ifndef PHP_WIN32
-#include <time.h>
-#else
-#include "win32/time.h"
-#endif
 
 #ifdef PHP_WIN32
 static __inline __int64 php_date_llabs( __int64 i ) { return i >= 0? i: -i; }
@@ -55,18 +51,7 @@ static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; 
 
 PHPAPI time_t php_time(void)
 {
-#ifdef HAVE_GETTIMEOFDAY
-	struct timeval tm;
-
-	if (UNEXPECTED(gettimeofday(&tm, NULL) != SUCCESS)) {
-		/* fallback, can't reasonably happen */
-		return time(NULL);
-	}
-
-	return tm.tv_sec;
-#else
 	return time(NULL);
-#endif
 }
 
 /*
@@ -2355,16 +2340,9 @@ static void php_date_set_time_fraction(timelib_time *time, int microsecond)
 
 static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
 {
-#ifdef HAVE_GETTIMEOFDAY
-	struct timeval tp = {0}; /* For setting microsecond */
-
-	gettimeofday(&tp, NULL);
-	*sec = tp.tv_sec;
-	*usec = tp.tv_usec;
-#else
-	*sec = time(NULL);
-	*usec = 0;
-#endif
+	long nsec;
+	zend_realtime_get(sec, &nsec);
+	*usec = nsec / 1000;
 }
 
 PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags) /* {{{ */
