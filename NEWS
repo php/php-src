@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
   . Add support for CURLINFO_QUEUE_TIME_T in curl_getinfo() (thecaliskan)
 
+- Reflection:
+  . Fixed bug GH-19187 (ReflectionNamedType::getName() prints nullable type when
+    retrieved from ReflectionProperty::getSettableType()). (ilutov)
+
 - Session:
   . Fixed GH-19197: build broken with ZEND_STRL usage with memcpy
     when implemented as macro. (David Carlier)
