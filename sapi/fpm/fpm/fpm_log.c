@@ -2,17 +2,15 @@
 
 #include "php.h"
 #include "SAPI.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-#ifdef HAVE_TIMES
-#include <sys/times.h>
-#endif
+#include "zend_time.h"
 
 #include "fpm_config.h"
 #include "fpm_log.h"
-#include "fpm_clock.h"
 #include "fpm_process_ctl.h"
 #include "fpm_signals.h"
 #include "fpm_scoreboard.h"
@@ -131,7 +129,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 		test = 1;
 	}
 
-	now_epoch = time(NULL);
+	now_epoch = zend_realtime_get(NULL, NULL);
 
 	if (!test) {
 		scoreboard = fpm_scoreboard_get();
@@ -207,7 +205,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 					format[0] = '\0';
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.2f", tms_total / fpm_scoreboard_get_tick() / (proc.cpu_duration.tv_sec + proc.cpu_duration.tv_usec / 1000000.) * 100.);
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.2f", tms_total / fpm_scoreboard_get_tick() / (proc.cpu_duration_ns / (double)ZEND_NANO_IN_SEC) * 100.);
 					}
 					break;
 #endif
@@ -216,7 +214,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 					/* seconds */
 					if (format[0] == '\0' || !strcasecmp(format, "seconds")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.3f", proc.duration.tv_sec + proc.duration.tv_usec / 1000000.);
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.3f", proc.duration_ns / (double)ZEND_NANO_IN_SEC);
 						}
 
 					/* milliseconds */
@@ -225,13 +223,13 @@ int fpm_log_write(char *log_format) /* {{{ */
 						   !strcasecmp(format, "miliseconds") || !strcasecmp(format, "mili")
 					) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.3f", proc.duration.tv_sec * 1000. + proc.duration.tv_usec / 1000.);
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.3f", proc.duration_ns / 1000000.);
 						}
 
 					/* microseconds */
 					} else if (!strcasecmp(format, "microseconds") || !strcasecmp(format, "micro")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", (unsigned long)(proc.duration.tv_sec * 1000000UL + proc.duration.tv_usec));
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", (unsigned long)(proc.duration_ns / 1000));
 						}
 
 					} else {
