@@ -697,6 +697,7 @@ PHP 8.5 UPGRADE NOTES
   . Improved unpack() performance with nameless repetitions by avoiding
     creating temporary strings and reparsing them.
   . Improved pack() performance.
+  . Minor improvements in array_chunk() performance.
 
 - XMLReader:
   . Improved property access performance.
