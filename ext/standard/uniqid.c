@@ -15,6 +15,7 @@
  */
 
 #include "php.h"
+#include "zend_time.h"
 
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
@@ -25,17 +26,12 @@
 #include <errno.h>
 
 #include <stdio.h>
-#ifdef PHP_WIN32
-#include "win32/time.h"
-#else
-#include <sys/time.h>
-#endif
 
 #include "ext/random/php_random.h"
 #include "ext/random/php_random_csprng.h"
 
-#ifdef HAVE_GETTIMEOFDAY
-ZEND_TLS struct timeval prev_tv = { 0, 0 };
+ZEND_TLS time_t prev_tv_sec  = 0;
+ZEND_TLS long   prev_tv_usec = 0;
 
 /* {{{ Generates a unique ID */
 PHP_FUNCTION(uniqid)
@@ -43,9 +39,10 @@ PHP_FUNCTION(uniqid)
 	char *prefix = "";
 	bool more_entropy = 0;
 	zend_string *uniqid;
-	int sec, usec;
 	size_t prefix_len = 0;
-	struct timeval tv;
+	struct timespec ts;
+	long tv_usec;
+	int isec, iusec;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -59,14 +56,15 @@ PHP_FUNCTION(uniqid)
 	 * another process, causing a pause of around 10ms.
 	 */
 	do {
-		(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
-	} while (tv.tv_sec == prev_tv.tv_sec && tv.tv_usec == prev_tv.tv_usec);
+		zend_time_real_spec(&ts);
+		tv_usec = ts.tv_nsec / 1000;
+	} while (ts.tv_sec == prev_tv_sec && tv_usec == prev_tv_usec);
 
-	prev_tv.tv_sec = tv.tv_sec;
-	prev_tv.tv_usec = tv.tv_usec;
+	prev_tv_sec  = ts.tv_sec;
+	prev_tv_usec = tv_usec;
 
-	sec = (int) tv.tv_sec;
-	usec = (int) (tv.tv_usec % 0x100000);
+	isec  = (int) ts.tv_sec;
+	iusec = (int) (tv_usec % 0x100000);
 
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs.
@@ -78,12 +76,11 @@ PHP_FUNCTION(uniqid)
 			bytes = php_random_generate_fallback_seed();
 		}
 		seed = ((double) bytes / UINT32_MAX) * 10.0;
-		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, seed);
+		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, isec, iusec, seed);
 	} else {
-		uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);
+		uniqid = strpprintf(0, "%s%08x%05x", prefix, isec, iusec);
 	}
 
 	RETURN_STR(uniqid);
 }
-#endif
 /* }}} */

@@ -7,8 +7,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include "zend_time.h"
+
 #include "fpm.h"
-#include "fpm_clock.h"
 #include "fpm_children.h"
 #include "fpm_signals.h"
 #include "fpm_events.h"
@@ -294,7 +295,7 @@ int fpm_pctl_init_main(void)
 	return 0;
 }
 
-static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
+static void fpm_pctl_check_request_timeout(void) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -306,7 +307,7 @@ static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
 
 		if (terminate_timeout || slowlog_timeout) {
 			for (child = wp->children; child; child = child->next) {
-				fpm_request_check_timed_out(child, now, terminate_timeout, slowlog_timeout, track_finished);
+				fpm_request_check_timed_out(child, terminate_timeout, slowlog_timeout, track_finished);
 			}
 		}
 	}
@@ -324,7 +325,7 @@ static void fpm_pctl_kill_idle_child(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{ */
+static void fpm_pctl_perform_idle_server_maintenance(void) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -363,7 +364,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 				if (last_idle_child == NULL) {
 					last_idle_child = child;
 				} else {
-					if (timercmp(&child->started, &last_idle_child->started, <)) {
+					if (child->started_ns < last_idle_child->started_ns) {
 						last_idle_child = child;
 					}
 				}
@@ -377,17 +378,17 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 
 		/* this is specific to PM_STYLE_ONDEMAND */
 		if (wp->config->pm == PM_STYLE_ONDEMAND) {
-			struct timeval last, now;
+			uint64_t last_ns, now_ns;
 
 			zlog(ZLOG_DEBUG, "[pool %s] currently %d active children, %d spare children", wp->config->name, active, idle);
 
 			if (!last_idle_child) continue;
 
-			fpm_request_last_activity(last_idle_child, &last);
-			fpm_clock_get(&now);
-			if (last.tv_sec < now.tv_sec - wp->config->pm_process_idle_timeout) {
+			now_ns = zend_time_mono_fallback();
+			fpm_request_last_activity(last_idle_child, &last_ns);
+			if (last_ns < now_ns - wp->config->pm_process_idle_timeout * ZEND_NANO_IN_SEC) {
 				fpm_pctl_kill_idle_child(last_idle_child);
-			}
+			}			
 
 			continue;
 		}
@@ -459,15 +460,13 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 void fpm_pctl_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
 	static struct fpm_event_s heartbeat;
-	struct timeval now;
 
 	if (fpm_globals.parent_pid != getpid()) {
 		return; /* sanity check */
 	}
 
 	if (which == FPM_EV_TIMEOUT) {
-		fpm_clock_get(&now);
-		fpm_pctl_check_request_timeout(&now);
+		fpm_pctl_check_request_timeout();
 		return;
 	}
 
@@ -484,16 +483,14 @@ void fpm_pctl_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{{ *
 void fpm_pctl_perform_idle_server_maintenance_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
 	static struct fpm_event_s heartbeat;
-	struct timeval now;
 
 	if (fpm_globals.parent_pid != getpid()) {
 		return; /* sanity check */
 	}
 
 	if (which == FPM_EV_TIMEOUT) {
-		fpm_clock_get(&now);
 		if (fpm_pctl_can_spawn_children()) {
-			fpm_pctl_perform_idle_server_maintenance(&now);
+			fpm_pctl_perform_idle_server_maintenance();
 
 			/* if it's a child, stop here without creating the next event
 			 * this event is reserved to the master process

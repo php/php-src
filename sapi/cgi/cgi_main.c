@@ -30,14 +30,9 @@
 #include <stdio.h>
 
 #ifdef PHP_WIN32
-# include "win32/time.h"
 # include "win32/signal.h"
 # include "win32/winutil.h"
 # include <process.h>
-#endif
-
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -81,6 +76,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
+#include "zend_time.h"
 
 #include "php_getopt.h"
 
@@ -1738,11 +1734,7 @@ int main(int argc, char *argv[])
 	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
-#ifdef HAVE_GETTIMEOFDAY
-	struct timeval start, end;
-#else
-	time_t start, end;
-#endif
+	uint64_t start, elapsed;
 #ifndef PHP_WIN32
 	int status = 0;
 #endif
@@ -2251,11 +2243,7 @@ parent_loop_end:
 							repeats = atoi(php_optarg);
 						}
 					}
-#ifdef HAVE_GETTIMEOFDAY
-					gettimeofday(&start, NULL);
-#else
-					time(&start);
-#endif
+					start = zend_time_mono_fallback();
 					break;
 				case 'h':
 				case '?':
@@ -2586,11 +2574,7 @@ fastcgi_request_done:
 					if (warmup_repeats) {
 						warmup_repeats--;
 						if (!warmup_repeats) {
-#ifdef HAVE_GETTIMEOFDAY
-							gettimeofday(&start, NULL);
-#else
-							time(&start);
-#endif
+							start = zend_time_mono_fallback();
 						}
 						continue;
 					} else {
@@ -2640,24 +2624,8 @@ fastcgi_request_done:
 
 out:
 	if (benchmark) {
-		int sec;
-#ifdef HAVE_GETTIMEOFDAY
-		int usec;
-
-		gettimeofday(&end, NULL);
-		sec = (int)(end.tv_sec - start.tv_sec);
-		if (end.tv_usec >= start.tv_usec) {
-			usec = (int)(end.tv_usec - start.tv_usec);
-		} else {
-			sec -= 1;
-			usec = (int)(end.tv_usec + 1000000 - start.tv_usec);
-		}
-		fprintf(stderr, "\nElapsed time: %d.%06d sec\n", sec, usec);
-#else
-		time(&end);
-		sec = (int)(end - start);
-		fprintf(stderr, "\nElapsed time: %d sec\n", sec);
-#endif
+		elapsed = zend_time_mono_fallback() - start;
+		fprintf(stderr, "\nElapsed time: %lu.%09lu sec\n", (unsigned long)(elapsed / ZEND_NANO_IN_SEC), (unsigned long)(elapsed % ZEND_NANO_IN_SEC));
 	}
 
 parent_out:

@@ -39,7 +39,6 @@
 #include "fpm.h"
 #include "fpm_conf.h"
 #include "fpm_cleanup.h"
-#include "fpm_clock.h"
 #include "fpm_stdio.h"
 #include "fpm_unix.h"
 #include "fpm_signals.h"
@@ -520,10 +519,6 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 #endif
 
-	if (0 > fpm_clock_init()) {
-		return -1;
-	}
-
 #ifdef HAVE_APPARMOR
 	if (wp->config->apparmor_hat) {
 		char *con, *new_con;
@@ -677,9 +672,6 @@ int fpm_unix_init_main(void)
 
 	/* continue as a child */
 	setsid();
-	if (0 > fpm_clock_init()) {
-		return -1;
-	}
 
 	if (fpm_global_config.process_priority != 64) {
 		if (is_root) {

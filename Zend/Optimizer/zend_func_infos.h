@@ -559,10 +559,8 @@ static const func_info_t func_infos[] = {
 	F1("dechex", MAY_BE_STRING),
 	F1("base_convert", MAY_BE_STRING),
 	F1("number_format", MAY_BE_STRING),
-#if defined(HAVE_GETTIMEOFDAY)
 	F1("microtime", MAY_BE_STRING|MAY_BE_DOUBLE),
 	F1("gettimeofday", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_DOUBLE),
-#endif
 #if defined(HAVE_GETRUSAGE)
 	F1("getrusage", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
 #endif
@@ -597,9 +595,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_resolve_include_path", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("stream_get_wrappers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("stream_get_transports", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
-#if defined(HAVE_GETTIMEOFDAY)
 	F1("uniqid", MAY_BE_STRING),
-#endif
 	F1("parse_url", MAY_BE_LONG|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL|MAY_BE_FALSE),
 	F1("urlencode", MAY_BE_STRING),
 	F1("urldecode", MAY_BE_STRING),

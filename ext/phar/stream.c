@@ -21,6 +21,7 @@
 #include "phar_internal.h"
 #include "stream.h"
 #include "dirstream.h"
+#include "zend_time.h"
 
 static const php_stream_ops phar_ops = {
 	phar_stream_write, /* write */
@@ -191,7 +192,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	/* strip leading "/" */
 	internal_file = estrndup(ZSTR_VAL(resource->path) + 1, ZSTR_LEN(resource->path) - 1);
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
-		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, true, time(NULL)))) {
+		if (NULL == (idata = phar_get_or_create_entry_data(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), internal_file, strlen(internal_file), mode, 0, &error, true, zend_time_real_get()))) {
 			if (error) {
 				php_stream_wrapper_log_error(wrapper, options, "%s", error);
 				efree(error);
@@ -469,7 +470,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
 	if (data->internal_file->is_modified) {
-		data->internal_file->timestamp = time(0);
+		data->internal_file->timestamp = zend_time_real_get();
 		ret = phar_flush(data->phar, &error);
 		if (error) {
 			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS, "%s", error);

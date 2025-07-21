@@ -16,6 +16,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include "Zend/zend_time.h"
+
 #include "php_soap.h"
 #include "ext/hash/php_hash.h" /* For php_hash_bin2hex() */
 #include "ext/uri/php_uri.h"
@@ -189,8 +191,7 @@ static php_stream* http_connect(zval* this_ptr, php_uri *uri, int use_ssl, php_s
 
 	tmp = Z_CLIENT_CONNECTION_TIMEOUT_P(this_ptr);
 	if (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) > 0) {
-		tv.tv_sec = Z_LVAL_P(tmp);
-		tv.tv_usec = 0;
+		zend_time_sec2val(Z_LVAL_P(tmp), &tv);
 		timeout = &tv;
 	}
 

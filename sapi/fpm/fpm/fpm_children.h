@@ -21,13 +21,13 @@ struct fpm_child_s *fpm_child_find(pid_t pid);
 
 struct fpm_child_s {
 	struct fpm_child_s *prev, *next;
-	struct timeval started;
+	uint64_t started_ns;
 	struct fpm_worker_pool_s *wp;
 	struct fpm_event_s ev_stdout, ev_stderr, ev_free;
 	int shm_slot_i;
 	int fd_stdout, fd_stderr;
 	void (*tracer)(struct fpm_child_s *);
-	struct timeval slow_logged;
+	uint64_t slow_logged_ns;
 	bool idle_kill;
 	bool postponed_free;
 	pid_t pid;

@@ -20,12 +20,12 @@
 
 #include <unistd.h>
 #include <mm.h>
-#include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdint.h>
 
+#include "zend_time.h"
 #include "php_session.h"
 #include "mod_mm.h"
 #include "SAPI.h"
@@ -406,7 +406,7 @@ PS_WRITE_FUNC(mm)
 		if (sd) {
 			sd->datalen = val->len;
 			memcpy(sd->data, val->val, val->len);
-			time(&sd->ctime);
+			sd->ctime = zend_time_real_get();
 		}
 	}
 
@@ -442,9 +442,7 @@ PS_GC_FUNC(mm)
 	*nrdels = 0;
 	ps_mm_debug(("gc\n"));
 
-	time(&limit);
-
-	limit -= maxlifetime;
+	limit = zend_time_real_get() - maxlifetime;
 
 	mm_lock(data->mm, MM_LOCK_RW);
 
