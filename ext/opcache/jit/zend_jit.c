@@ -3836,6 +3836,24 @@ static void zend_jit_restart_preloaded_script(zend_persistent_script *script)
 				zend_jit_restart_preloaded_op_array(op_array);
 			}
 		} ZEND_HASH_FOREACH_END();
+
+		if (ce->num_hooked_props > 0) {
+			zend_property_info *prop;
+
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
+				if (prop->hooks) {
+					for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+						if (prop->hooks[i]) {
+							op_array = &prop->hooks[i]->op_array;
+							ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
+							if (!(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+								zend_jit_restart_preloaded_op_array(op_array);
+							}
+						}
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 

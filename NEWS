@@ -46,6 +46,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Reset global pointers to prevent use-after-free in zend_jit_status().
     (Florian Engelhardt)
+  . Fix issue with JIT restart and hooks. (nielsdos)
 
 - OpenSSL:
   . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
