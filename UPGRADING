@@ -381,7 +381,7 @@ PHP 8.5 UPGRADE NOTES
 - Sockets:
   . socket_create_listen, socket_bind and socket_sendto throw a
     ValueError if the port is lower than 0 or greater than 65535,
-    also if any of the hints array entry is indexes numerically.
+    and also if any of the hints array entries are indexed numerically.
   . socket_addrinfo_lookup throws a TypeError if any of the hints
     values cannot be cast to int and can throw a ValueError if
     any of these values overflow.
@@ -506,7 +506,7 @@ PHP 8.5 UPGRADE NOTES
     CURLFOLLOW_FIRSTONLY.
 
 - Fileinfo:
-  . Upgraded to file 5.46.
+  . Upgraded file from 5.45 to 5.46.
   . The return type of finfo_close() has been changed to true, rather
     than bool.
 
@@ -521,7 +521,7 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/url_parsing_api
 
 - PCRE:
-  . Upgraded to pcre2lib from 10.44 to 10.45.
+  . Upgraded pcre2lib from 10.44 to 10.45.
 
 - PDO_Sqlite:
   . Increased minimum release version support from 3.7.7 to 3.7.17.
