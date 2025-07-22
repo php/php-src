@@ -9,7 +9,7 @@ runs:
     - name: FreeBSD
       uses: vmactions/freebsd-vm@v1
       with:
-        release: '13.3'
+        release: '13.5'
         usesh: true
         copyback: false
         # Temporarily disable sqlite, as FreeBSD ships it with disabled double quotes. We'll need to fix our tests.
