@@ -562,11 +562,11 @@ void lexbor_request_shutdown(void)
 	lexbor_urls = 0;
 }
 
-lxb_url_t *lexbor_parse_uri_ex(const zend_string *uri_str, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
+lxb_url_t *lexbor_parse_uri_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
 {
 	lexbor_cleanup_parser();
 
-	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) ZSTR_VAL(uri_str), ZSTR_LEN(uri_str));
+	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) uri_str, uri_str_len);
 	const char *reason = fill_errors(errors);
 
 	if (url == NULL && !silent) {
@@ -577,9 +577,9 @@ lxb_url_t *lexbor_parse_uri_ex(const zend_string *uri_str, const lxb_url_t *lexb
 	return url;
 }
 
-static void *lexbor_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors, bool silent)
+static void *lexbor_parse_uri(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
 {
-	return lexbor_parse_uri_ex(uri_str, base_url, errors, silent);
+	return lexbor_parse_uri_ex(uri_str, uri_str_len, base_url, errors, silent);
 }
 
 static void *lexbor_clone_uri(void *uri)
