@@ -46,7 +46,7 @@ using icu::StringPiece;
 	}
 
 static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
-	return (GregorianCalendar*)co->ucal;
+	return static_cast<GregorianCalendar *>(co->ucal);
 }
 
 static bool set_gregorian_calendar_time_zone(GregorianCalendar *gcal, UErrorCode status)
