@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     property). (ilutov)
   . Fixed bug GH-19044 (Protected properties are not scoped according to their
     prototype). (Bob)
+  . Fixed bug GH-18581 (Coerce numeric string keys from iterators when argument
+    unpacking). (ilutov)
 
 - Hash:
   . Fix crash on clone failure. (nielsdos)
