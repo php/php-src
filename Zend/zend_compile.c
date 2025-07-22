@@ -6303,6 +6303,11 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 			continue;
 		}
 
+		if (case_ast->attr == ZEND_ALT_CASE_SYNTAX) {
+			CG(zend_lineno) = case_ast->lineno;
+			zend_error(E_DEPRECATED, "Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead");
+		}
+
 		zend_compile_expr(&cond_node, cond_ast);
 
 		if (expr_node.op_type == IS_CONST
