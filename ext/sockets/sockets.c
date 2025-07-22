@@ -41,6 +41,7 @@
 # include <netdb.h>
 # include <netinet/in.h>
 # include <netinet/tcp.h>
+# include <netinet/udp.h>
 # include <sys/un.h>
 # include <arpa/inet.h>
 # include <sys/time.h>
@@ -53,6 +54,11 @@
 # include "php_sockets.h"
 # ifdef HAVE_IF_NAMETOINDEX
 #  include <net/if.h>
+# endif
+# ifdef HAVE_NETINET_ETHER_H
+#  include <netinet/ether.h>
+#  include <netinet/ip.h>
+#  include <linux/ipv6.h>
 # endif
 # if defined(HAVE_LINUX_SOCK_DIAG_H)
 #  include <linux/sock_diag.h>
@@ -69,9 +75,6 @@
 # endif
 # if defined(HAVE_LINUX_IF_ETHER_H)
 #  include <linux/if_ether.h>
-# endif
-# if defined(HAVE_LINUX_UDP_H)
-#  include <linux/udp.h>
 # endif
 #endif
 
@@ -123,6 +126,14 @@ static PHP_RSHUTDOWN_FUNCTION(sockets);
 
 zend_class_entry *socket_ce;
 static zend_object_handlers socket_object_handlers;
+#ifdef AF_PACKET
+zend_class_entry *packet_ce;
+zend_class_entry *ethpacket_ce;
+zend_class_entry *tcppacket_ce;
+zend_class_entry *udppacket_ce;
+zend_class_entry *ipv4packet_ce;
+zend_class_entry *ipv6packet_ce;
+#endif
 
 static zend_object *socket_create_object(zend_class_entry *class_type) {
 	php_socket *intern = zend_object_alloc(sizeof(php_socket), class_type);
@@ -485,6 +496,14 @@ static PHP_MINIT_FUNCTION(sockets)
 	socket_object_handlers.get_gc = socket_get_gc;
 	socket_object_handlers.compare = zend_objects_not_comparable;
 
+#if defined(AF_PACKET)
+	packet_ce = register_class_Socket_Packet();
+	ethpacket_ce = register_class_Socket_EthernetPacket(packet_ce);
+	tcppacket_ce = register_class_Socket_TcpPacket(packet_ce);
+	udppacket_ce = register_class_Socket_UdpPacket(packet_ce);
+	ipv4packet_ce = register_class_Socket_Ipv4Packet(packet_ce);
+	ipv6packet_ce = register_class_Socket_Ipv6Packet(packet_ce);
+#endif
 	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
 	address_info_ce->default_object_handlers = &address_info_object_handlers;
@@ -1391,7 +1410,7 @@ PHP_FUNCTION(socket_bind)
 				struct sockaddr_ll *sa = (struct sockaddr_ll *) sock_type;
 				socklen_t sa_len = sizeof(sa);
 
-				if (getsockname(php_sock->bsd_socket, sock_type, &sa_len) < 0) {
+				if (getsockname(php_sock->bsd_socket, (struct sockaddr *)sa, &sa_len) < 0) {
 					zend_value_error("invalid AF_PACKET socket");
 					RETURN_THROWS();
 				}
@@ -1415,6 +1434,52 @@ PHP_FUNCTION(socket_bind)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#ifdef AF_PACKET
+
+struct php_socket_chunk {
+	const char *buf;
+	size_t buf_len;
+	size_t chunk_len;
+};
+
+static zend_result php_socket_get_chunk(struct php_socket_chunk *dst, const struct php_socket_chunk *src, size_t offset, size_t len) {
+	if (UNEXPECTED((offset > SIZE_MAX - len) || offset + len > src->buf_len)) {
+		return FAILURE;
+	}
+
+	dst->buf = src->buf + offset;
+	dst->chunk_len = len;
+	dst->buf_len = src->buf_len - offset;
+	return SUCCESS;
+}
+
+static void php_socket_afpacket_add_tcp(const char *ipdata, struct sockaddr_ll sll, char *ifrname,
+					zval *szpayload,  zval *zpayload) {
+	struct tcphdr tcp;
+	memcpy(&tcp, ipdata, sizeof(tcp));
+	object_init_ex(szpayload, tcppacket_ce);
+	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("srcPort"), ntohs(tcp.th_sport));
+	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("dstPort"), ntohs(tcp.th_dport));
+	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("headerSize"), sizeof(tcp));
+	zend_update_property_stringl(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("rawPacket"), ipdata, sizeof(tcp));
+	zend_update_property(Z_OBJCE_P(zpayload), Z_OBJ_P(zpayload), ZEND_STRL("payload"), szpayload);
+	Z_DELREF_P(szpayload);
+}
+
+static void php_socket_afpacket_add_udp(const char *ipdata, struct sockaddr_ll sll, char *ifrname,
+					zval *szpayload,  zval *zpayload) {
+	struct udphdr udp;
+	memcpy(&udp, ipdata, sizeof(udp));
+	object_init_ex(szpayload, udppacket_ce);
+	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("srcPort"), ntohs(udp.uh_sport));
+	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("dstPort"), ntohs(udp.uh_dport));
+	zend_update_property_long(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("headerSize"), sizeof(udp));
+	zend_update_property_stringl(Z_OBJCE_P(szpayload), Z_OBJ_P(szpayload), ZEND_STRL("rawPacket"), ipdata, sizeof(udp));
+	zend_update_property(Z_OBJCE_P(zpayload), Z_OBJ_P(zpayload), ZEND_STRL("payload"), szpayload);
+	Z_DELREF_P(szpayload);
+}
+#endif
 
 /* {{{ Receives data from a connected socket */
 PHP_FUNCTION(socket_recv)
@@ -1506,7 +1571,9 @@ PHP_FUNCTION(socket_recvfrom)
 	struct sockaddr_in6	sin6;
 #endif
 #ifdef AF_PACKET
-	//struct sockaddr_ll     sll;
+	struct sockaddr_ll     sll;
+	int protoid;
+	socklen_t protoidlen = sizeof(protoid);
 #endif
 	char				addrbuf[INET6_ADDRSTRLEN];
 	socklen_t			slen;
@@ -1535,7 +1602,16 @@ PHP_FUNCTION(socket_recvfrom)
 		RETURN_FALSE;
 	}
 
-	recv_buf = zend_string_alloc(arg3 + 1, 0);
+#ifdef AF_PACKET
+	// ethernet header + payload
+	// possibly follow-up PR SOCK_DGRAM
+	if (php_sock->type == AF_PACKET && arg3 < 60) {
+		zend_argument_value_error(3, "must be at least 60 for AF_PACKET");
+		RETURN_THROWS();
+	}
+#endif
+
+	recv_buf = zend_string_alloc(arg3 + 1, false);
 
 	switch (php_sock->type) {
 		case AF_UNIX:
@@ -1613,22 +1689,43 @@ PHP_FUNCTION(socket_recvfrom)
 			break;
 #endif
 #ifdef AF_PACKET
-			/*
-		case AF_PACKET:
-			// TODO expose and use proper ethernet frame type instead i.e. src mac, dst mac and payload to userland
-			// ditto for socket_sendto
+		case AF_PACKET: {
+			zval *socket = arg1;
+			zval *data = arg2;
+			size_t recv_len = (size_t)arg3;
+			int recv_flags = (int)arg4;
+			zval *addr = arg5;
+			zval *index = arg6;
+			if (recv_flags > 0 && (recv_flags & ~(MSG_PEEK|MSG_DONTWAIT|MSG_ERRQUEUE))) {
+				zend_argument_value_error(4, "must be 0 or more of MSG_PEEK, MSG_DONTWAIT, MSG_ERRQUEUE");
+				zend_string_efree(recv_buf);
+				RETURN_THROWS();
+			}
+
+			getsockopt(php_sock->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
+
+			// TODO: SOCK_DGRAM support
+			if (protoid != SOCK_RAW) {
+				zend_argument_value_error(1, "must be SOCK_RAW socket type");
+				zend_string_efree(recv_buf);
+				RETURN_THROWS();
+			}
 			slen = sizeof(sll);
 			memset(&sll, 0, sizeof(sll));
 			sll.sll_family = AF_PACKET;
 			char ifrname[IFNAMSIZ];
+			zval zpayload;
 
-			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), arg3, arg4, (struct sockaddr *)&sll, (socklen_t *)&slen);
+			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), recv_len, recv_flags, (struct sockaddr *)&sll, (socklen_t *)&slen);
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
+
+			ZEND_ASSERT(slen >= ETH_HLEN);
+
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
@@ -1638,11 +1735,216 @@ PHP_FUNCTION(socket_recvfrom)
 				RETURN_FALSE;
 			}
 
-			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
-			ZEND_TRY_ASSIGN_REF_STRING(arg5, ifrname);
-			ZEND_TRY_ASSIGN_REF_LONG(arg6, sll.sll_ifindex);
+			struct php_socket_chunk raw_buf = {
+				.buf = ZSTR_VAL(recv_buf),
+				.buf_len = ZSTR_LEN(recv_buf),
+				.chunk_len = 0
+			};
+			struct php_socket_chunk ether_hdr_buf;
+
+			if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, 0, ETH_HLEN) == FAILURE) {
+				zend_value_error("invalid ethernet frame buffer length");
+				zend_string_efree(recv_buf);
+				RETURN_THROWS();
+			}
+
+			struct ethhdr e;
+			memcpy(&e, ether_hdr_buf.buf, ETH_HLEN);
+			unsigned short protocol = ntohs(e.h_proto);
+
+			zval obj;
+			object_init_ex(&obj, ethpacket_ce);
+			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("socket"), socket);
+			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("headerSize"), ETH_HLEN);
+			zend_update_property_long(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("ethProtocol"), protocol);
+
+			switch (protocol) {
+				case ETH_P_IP: {
+					size_t offset = ETH_HLEN;
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, sizeof(struct iphdr)) == FAILURE) {
+						zval_ptr_dtor(&obj);
+						zend_string_efree(recv_buf);
+						zend_value_error("invalid ipv4 frame buffer length");
+						RETURN_THROWS();
+					}
+					struct iphdr ip;
+					memcpy(&ip, ether_hdr_buf.buf, sizeof(ip));
+					struct php_socket_chunk ip_hdr_buf;
+					memcpy(&ip_hdr_buf, &ether_hdr_buf, sizeof(struct php_socket_chunk));
+					size_t tlayer = ip.ihl * 4;
+					size_t totalip = ntohs(ip.tot_len);
+					offset += tlayer;
+
+					if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, offset, totalip)) {
+						zval_ptr_dtor(&obj);
+						zend_string_efree(recv_buf);
+						zend_value_error("invalid transport header length");
+						RETURN_THROWS();
+					}
+					offset += totalip;
+					struct in_addr s, d;
+					s.s_addr = ip.saddr;
+					d.s_addr = ip.daddr;
+					zval szpayload;
+					object_init_ex(&zpayload, ipv4packet_ce);
+					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("srcAddr"), inet_ntoa(s));
+					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("dstAddr"), inet_ntoa(d));
+					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headerSize"), totalip);
+					zend_update_property_stringl(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)ether_hdr_buf.buf, ether_hdr_buf.buf_len);
+
+					switch (ip.protocol) {
+						case IPPROTO_TCP: {
+							if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, offset, sizeof(struct tcphdr)) == FAILURE) {
+								zval_ptr_dtor(&zpayload);
+								zval_ptr_dtor(&obj);
+								zend_string_efree(recv_buf);
+								zend_value_error("invalid tcp frame buffer length");
+								RETURN_THROWS();
+							}
+							php_socket_afpacket_add_tcp(ip_hdr_buf.buf, sll, ifrname, &szpayload, &zpayload);
+							break;
+						}
+						case IPPROTO_UDP: {
+							if (php_socket_get_chunk(&ip_hdr_buf, &raw_buf, offset, sizeof(struct udphdr)) == FAILURE) {
+								zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
+								zend_update_property_stringl(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf), ZSTR_LEN(recv_buf));
+								Z_DELREF_P(&zpayload);
+								zend_string_efree(recv_buf);
+								zend_value_error("invalid udp frame buffer length");
+								RETURN_THROWS();
+							}
+							php_socket_afpacket_add_udp(ip_hdr_buf.buf, sll, ifrname, &szpayload, &zpayload);
+							break;
+						}
+						default:
+							zval_ptr_dtor(&zpayload);
+							zval_ptr_dtor(&obj);
+							zend_string_efree(recv_buf);
+							zend_value_error("unsupported ip header protocol");
+							RETURN_THROWS();
+					}
+					break;
+				}
+				case ETH_P_IPV6: {
+					size_t offset = ETH_HLEN;
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, sizeof(struct ipv6hdr)) == FAILURE) {
+						zval_ptr_dtor(&obj);
+						zend_string_efree(recv_buf);
+						zend_value_error("invalid ipv6 frame buffer length");
+						RETURN_THROWS();
+					}
+					struct ipv6hdr ip;
+					memcpy(&ip, ether_hdr_buf.buf, sizeof(ip));
+					struct php_socket_chunk ip_hdr_buf;
+					memcpy(&ip_hdr_buf, &ether_hdr_buf, sizeof(struct php_socket_chunk));
+					size_t totalip = sizeof(ip) + ip.payload_len;
+					offset += sizeof(struct ipv6hdr);
+
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, totalip) == FAILURE) {
+						zval_ptr_dtor(&obj);
+						zend_string_efree(recv_buf);
+						zend_value_error("invalid ipv6 payload length");
+						RETURN_THROWS();
+					}
+					offset += totalip;
+					char s[INET6_ADDRSTRLEN], d[INET6_ADDRSTRLEN];
+					inet_ntop(AF_INET6, &ip.saddr, s, sizeof(s));
+					inet_ntop(AF_INET6, &ip.daddr, d, sizeof(d));
+					zval szpayload;
+					object_init_ex(&zpayload, ipv6packet_ce);
+					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("srcAddr"), s);
+					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("dstAddr"), d);
+					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headerSize"), totalip);
+					zend_update_property_stringl(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)ether_hdr_buf.buf, totalip);
+					unsigned char ipprotocol = ip.nexthdr;
+
+					switch (ipprotocol) {
+						case IPPROTO_TCP: {
+							if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, sizeof(struct tcphdr)) == FAILURE) {
+								zval_ptr_dtor(&zpayload);
+								zval_ptr_dtor(&obj);
+								zend_string_efree(recv_buf);
+								zend_value_error("invalid tcp frame buffer length");
+								RETURN_THROWS();
+							}
+							php_socket_afpacket_add_tcp(ether_hdr_buf.buf, sll, ifrname, &szpayload, &zpayload);
+							break;
+						}
+						case IPPROTO_UDP: {
+							if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, offset, sizeof(struct udphdr)) == FAILURE) {
+								zval_ptr_dtor(&zpayload);
+								zval_ptr_dtor(&obj);
+								zend_string_efree(recv_buf);
+								zend_value_error("invalid udp frame buffer length");
+								RETURN_THROWS();
+							}
+							php_socket_afpacket_add_udp(ether_hdr_buf.buf, sll, ifrname, &szpayload, &zpayload);
+							break;
+						}
+						// TODO IPPROTO_ICMPV6 support
+						default:
+							zval_ptr_dtor(&zpayload);
+							zval_ptr_dtor(&obj);
+							zend_string_efree(recv_buf);
+							zend_value_error("unsupported ipv6 header protocol");
+							RETURN_THROWS();
+					}
+					break;
+				}
+				case ETH_P_LOOP: {
+					if (php_socket_get_chunk(&ether_hdr_buf, &raw_buf, ETH_HLEN, ETH_HLEN) == FAILURE) {
+						zval_ptr_dtor(&zpayload);
+						zval_ptr_dtor(&obj);
+						zend_string_efree(recv_buf);
+						zend_value_error("invalid ethernet frame buffer length");
+						RETURN_THROWS();
+					}
+					struct ethhdr innere;
+					struct php_socket_chunk eth_loop_hdr;
+					memcpy(&eth_loop_hdr, &ether_hdr_buf, sizeof(struct php_socket_chunk));
+					if ((char *)eth_loop_hdr.buf + sizeof(innere) < ZSTR_VAL(recv_buf) + slen) {
+						zval_ptr_dtor(&zpayload);
+						zval_ptr_dtor(&obj);
+						zend_string_efree(recv_buf);
+						zend_value_error("invalid ethernet loop header");
+						RETURN_THROWS();
+					}
+					memcpy(&innere, ether_hdr_buf.buf, sizeof(innere));
+					zval innerp;
+					ZVAL_NULL(&innerp);
+					object_init_ex(&zpayload, ethpacket_ce);
+					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("srcMac"), ether_ntoa((struct ether_addr *)innere.h_source));
+					zend_update_property_string(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("dstMac"), ether_ntoa((struct ether_addr *)innere.h_dest));
+					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("headerSize"), ETH_HLEN);
+					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("socket"), socket);
+					zend_update_property_stringl(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("rawPacket"), (char *)ether_hdr_buf.buf, ether_hdr_buf.buf_len);
+					zend_update_property(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("payload"), &innerp);
+					zend_update_property_long(Z_OBJCE(zpayload), Z_OBJ(zpayload), ZEND_STRL("ethProtocol"), 0);
+					break;
+				}
+				default:
+					zval_ptr_dtor(&zpayload);
+					zval_ptr_dtor(&obj);
+					zend_string_efree(recv_buf);
+					zend_value_error("unsupported ethernet protocol");
+					RETURN_THROWS();
+			}
+
+			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("srcMac"), ether_ntoa((struct ether_addr *)e.h_source));
+			zend_update_property_string(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("dstMac"), ether_ntoa((struct ether_addr *)e.h_dest));
+			zend_update_property(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("payload"), &zpayload);
+			zend_update_property_stringl(Z_OBJCE(obj), Z_OBJ(obj), ZEND_STRL("rawPacket"), ZSTR_VAL(recv_buf), ZSTR_LEN(recv_buf));
+			Z_DELREF(zpayload);
+			zend_string_efree(recv_buf);
+
+			ZEND_TRY_ASSIGN_REF_VALUE(data, &obj);
+			ZEND_TRY_ASSIGN_REF_STRING(addr, ifrname);
+
+			if (index) {
+				ZEND_TRY_ASSIGN_REF_LONG(index, sll.sll_ifindex);
+			}
 			break;
-			*/
+		}
 #endif
 		default:
 			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
@@ -1664,7 +1966,10 @@ PHP_FUNCTION(socket_sendto)
 	struct sockaddr_in6	sin6;
 #endif
 #ifdef AF_PACKET
-	//struct sockaddr_ll      sll;
+	struct sockaddr_ll      sll;
+	unsigned char           halen;
+	int protoid;
+	socklen_t protoidlen = sizeof(protoid);
 #endif
 	int					retval;
 	size_t              buf_len;
@@ -1696,6 +2001,15 @@ PHP_FUNCTION(socket_sendto)
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
+
+#ifdef AF_PACKET
+	// ether header + payload
+	// TODO dealing with SOCK_DGRAM
+	if (php_sock->type == AF_PACKET && len < 60) {
+		zend_argument_value_error(3, "must be at least 60 for AF_PACKET");
+		RETURN_THROWS();
+	}
+#endif
 
 	switch (php_sock->type) {
 		case AF_UNIX:
@@ -1741,23 +2055,33 @@ PHP_FUNCTION(socket_sendto)
 			break;
 #endif
 #ifdef AF_PACKET
-			/*
 		case AF_PACKET:
+			getsockopt(php_sock->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
+
+			// TODO: SOCK_DGRAM support
+			if (protoid != SOCK_RAW) {
+				zend_argument_value_error(1, "must be SOCK_RAW socket type");
+				RETURN_THROWS();
+			}
 			if (port_is_null) {
 				zend_argument_value_error(6, "cannot be null when the socket type is AF_PACKET");
 				RETURN_THROWS();
 			}
 
+			halen = ZSTR_LEN(addr) > ETH_ALEN ? ETH_ALEN : (unsigned char)ZSTR_LEN(addr);
+
 			memset(&sll, 0, sizeof(sll));			
+			memcpy(sll.sll_addr, addr, halen);
 			sll.sll_family = AF_PACKET;
 			sll.sll_ifindex = port;
+			sll.sll_halen = halen;
 
-			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			// TODO allows to use more user friendly type to replace raw buffer usage
+			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *) &sll, sizeof(sll));
 			break;
-		*/
 #endif
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, AF_PACKET or AF_INET6");
 			RETURN_THROWS();
 	}
 
