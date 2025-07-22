@@ -22,7 +22,7 @@
 extern zend_module_entry uri_module_entry;
 #define phpext_uri_ptr &uri_module_entry
 
-typedef struct {
+typedef struct php_uri {
 	zend_string *scheme;
 	zend_string *user;
 	zend_string *password;

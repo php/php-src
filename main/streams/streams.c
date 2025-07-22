@@ -28,6 +28,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
+#include "ext/uri/php_uri.h"
 #include <stddef.h>
 #include <fcntl.h>
 #include "php_streams_int.h"
@@ -2457,7 +2458,7 @@ void php_stream_context_unset_option(php_stream_context *context,
 }
 /* }}} */
 
-PHPAPI uri_handler_t *php_stream_context_get_uri_handler(const char *wrappername, php_stream_context *context)
+PHPAPI struct uri_handler_t *php_stream_context_get_uri_handler(const char *wrappername, php_stream_context *context)
 {
 	if (context == NULL) {
 		return php_uri_get_handler(NULL);

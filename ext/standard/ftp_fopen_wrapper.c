@@ -38,6 +38,7 @@
 #endif
 
 #include "php_standard.h"
+#include "ext/uri/php_uri.h"
 
 #include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
