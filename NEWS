@@ -35,7 +35,7 @@ PHP                                                                        NEWS
   . Fix some potential crashes on incorrect argument value. (nielsdos)
 
 - Standard:
-  . Fixed OSS Fuzz #417078295 (Leak in failed unserialize() with opcache).
+  . Fixed OSS Fuzz #433303828 (Leak in failed unserialize() with opcache).
     (ilutov)
 
 31 Jul 2025, PHP 8.4.11
