@@ -629,10 +629,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 
 		if (
-			/* @todo Find a better solution than hardcoding the uri handler name. Skipping these checks is needed because
-			 * both uriparser and lexbor performs comprehensive validations. Also, the [] pair is removed by these
-			 * libraries in case of ipv6 URIs, therefore php_filter_is_valid_ipv6_hostname() would case false positive
-			 * failures. */
+			/* Skipping these checks is possible because the new URI implementations perform comprehensive validations. */
 			strcmp(uri_handler->name, URI_PARSER_PHP) == 0 &&
 			/* An IPv6 enclosed by square brackets is a valid hostname.*/
 			!php_filter_is_valid_ipv6_hostname(uri->host) &&
@@ -654,7 +651,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (strcmp(uri_handler->name, "parse_url") == 0 &&
+	if (strcmp(uri_handler->name, URI_PARSER_PHP) == 0 &&
 		(
 			(uri->user != NULL && !is_userinfo_valid(uri->user)) ||
 			(uri->password != NULL && !is_userinfo_valid(uri->password))

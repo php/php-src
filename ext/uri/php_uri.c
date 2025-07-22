@@ -197,7 +197,6 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 
 	php_uri *uri = ecalloc(1, sizeof(*uri));
 	zval tmp;
-	ZVAL_UNDEF(&tmp);
 	zend_result result;
 
 	result = php_uri_get_scheme(uri_internal, read_mode, &tmp);

@@ -23,7 +23,7 @@
 
 #include "php.h"
 #include "ext/standard/file.h"
-#include "ext/standard/url.h"
+#include "ext/uri/php_uri.h"
 #include "streams/php_streams_int.h"
 #include "zend_smart_str.h"
 #include "php_openssl.h"
@@ -2643,11 +2643,11 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		return NULL;
 	}
 
+	char * url_name = NULL;
 	zval host_zv;
 	zend_result result = php_uri_get_host(internal_uri, URI_COMPONENT_READ_RAW, &host_zv);
 	if (result == SUCCESS && Z_TYPE(host_zv) == IS_STRING) {
 		const char * host = Z_STRVAL(host_zv);
-		char * url_name = NULL;
 		size_t len = Z_STRLEN(host_zv);
 
 		/* skip trailing dots */
@@ -2658,15 +2658,12 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		if (len) {
 			url_name = pestrndup(host, len, is_persistent);
 		}
-
-		php_uri_free(internal_uri);
-		zval_ptr_dtor(&host_zv);
-		return url_name;
 	}
 
 	php_uri_free(internal_uri);
 	zval_ptr_dtor(&host_zv);
-	return NULL;
+
+	return url_name;
 }
 /* }}} */
 

@@ -336,14 +336,10 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 	}
 }
 
-int make_http_soap_request(zval        *this_ptr,
-						   zend_string *buf,
-						   zend_string *location,
-						   char        *soapaction,
-						   int          soap_version,
-						   const zend_string *uri_parser_class,
-						   zval        *return_value)
-{
+int make_http_soap_request(
+	zval *this_ptr, zend_string *buf, zend_string *location, char *soapaction,
+	int soap_version, const zend_string *uri_parser_class, zval *return_value
+) {
 	zend_string *request;
 	smart_str soap_headers = {0};
 	smart_str soap_headers_z = {0};

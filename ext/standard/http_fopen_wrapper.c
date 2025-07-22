@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "ext/uri/php_uri.h"
 #include "php_streams.h"
 #include "php_network.h"
 #include "php_ini.h"
