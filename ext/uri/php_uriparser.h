@@ -32,6 +32,6 @@ PHP_MINIT_FUNCTION(uri_uriparser);
 
 zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
 
-void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t *uriparser_base_url, bool silent);
+void *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len, const uriparser_uris_t *uriparser_base_url, bool silent);
 
 #endif

@@ -41,7 +41,6 @@
 #endif
 
 #include "php_standard.h"
-#include "ext/uri/php_uri.h"
 
 #include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
@@ -353,24 +352,6 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	return NULL;
 }
 
-static uri_handler_t *http_get_uri_handler(php_stream_context *context)
-{
-	if (context == NULL) {
-		return php_uri_get_handler(NULL);
-	}
-
-	zval *uri_handler_name = php_stream_context_get_option(context, "http", "uri_parser_class");
-	if (uri_handler_name == NULL) {
-		return php_uri_get_handler(NULL);
-	}
-
-	if (Z_TYPE_P(uri_handler_name) != IS_STRING) {
-		return NULL;
-	}
-
-	return php_uri_get_handler(Z_STR_P(uri_handler_name));
-}
-
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
 		php_stream_context *context, int redirect_max, int flags,
@@ -410,13 +391,11 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	uri_handler_t *uri_handler = http_get_uri_handler(context);
+	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("http", context);
 	if (uri_handler == NULL) {
 		return NULL;
 	}
-	zend_string *tmp_uri = zend_string_init(path, strlen(path), false);
-	resource = php_uri_parse_to_struct(uri_handler, tmp_uri, URI_COMPONENT_READ_RAW, true);
-	zend_string_release_ex(tmp_uri, false);
+	resource = php_uri_parse_to_struct(uri_handler, path, strlen(path), URI_COMPONENT_READ_RAW, true);
 	if (resource == NULL) {
 		return NULL;
 	}
@@ -1117,14 +1096,11 @@ finish:
 
 			php_uri_struct_free(resource);
 			/* check for invalid redirection URLs */
-			tmp_uri = zend_string_init(new_path, strlen(new_path), 1);
-			if ((resource = php_uri_parse_to_struct(uri_handler, tmp_uri, URI_COMPONENT_READ_RAW, true)) == NULL) {
+			if ((resource = php_uri_parse_to_struct(uri_handler, new_path, strlen(new_path), URI_COMPONENT_READ_RAW, true)) == NULL) {
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
 				efree(new_path);
-				zend_string_release_ex(tmp_uri, 1);
 				goto out;
 			}
-			zend_string_release_ex(tmp_uri, 1);
 
 #define CHECK_FOR_CNTRL_CHARS(val) { \
 	if (val) { \

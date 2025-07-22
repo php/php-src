@@ -94,7 +94,7 @@ typedef struct uri_handler_t {
 	 * If the silent parameter is true, a Uri\InvalidUriException instance must be thrown.
 	 * If the parameter is false, the possible errors should be handled by the caller.
 	 */
-	void *(*parse_uri)(const zend_string *uri_str, const void *base_url, zval *errors, bool silent);
+	void *(*parse_uri)(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent);
 	void *(*clone_uri)(void *uri);
 	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
 	void (*free_uri)(void *uri);

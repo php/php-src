@@ -292,12 +292,12 @@ static uriparser_uris_t *uriparser_create_uris(void)
 	return uriparser_uris;
 }
 
-void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t *uriparser_base_urls, bool silent)
+void *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len, const uriparser_uris_t *uriparser_base_urls, bool silent)
 {
 	UriUriA uri = {0};
 
 	/* Parse the URI. */
-	if (uriParseSingleUriExMmA(&uri, ZSTR_VAL(uri_str), ZSTR_VAL(uri_str) + ZSTR_LEN(uri_str), NULL, mm) != URI_SUCCESS) {
+	if (uriParseSingleUriExMmA(&uri, uri_str, uri_str + uri_str_len, NULL, mm) != URI_SUCCESS) {
 		if (!silent) {
 			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
 		}
@@ -347,9 +347,9 @@ void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t 
 	return NULL;
 }
 
-void *uriparser_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors, bool silent)
+void *uriparser_parse_uri(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
 {
-	return uriparser_parse_uri_ex(uri_str, base_url, silent);
+	return uriparser_parse_uri_ex(uri_str, uri_str_len, base_url, silent);
 }
 
 /* TODO make the clone handler accept a flag to distinguish between clone() calls and withers.

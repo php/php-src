@@ -115,11 +115,11 @@ PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name)
 	return uri_handler_by_name(ZSTR_VAL(uri_handler_name), ZSTR_LEN(uri_handler_name));
 }
 
-ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, zend_string *uri_str, bool silent)
+ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, const char *uri_str, size_t uri_str_len, bool silent)
 {
 	uri_internal_t *internal_uri = emalloc(sizeof(*internal_uri));
 	internal_uri->handler = uri_handler;
-	internal_uri->uri = uri_handler->parse_uri(uri_str, NULL, NULL, silent);
+	internal_uri->uri = uri_handler->parse_uri(uri_str, uri_str_len, NULL, NULL, silent);
 
 	if (UNEXPECTED(internal_uri->uri == NULL)) {
 		efree(internal_uri);
@@ -188,9 +188,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri)
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
-	const uri_handler_t *uri_handler, zend_string *uri_str, uri_component_read_mode_t read_mode, bool silent
+	const uri_handler_t *uri_handler, const char *uri_str, size_t uri_str_len, uri_component_read_mode_t read_mode, bool silent
 ) {
-	uri_internal_t *uri_internal = php_uri_parse(uri_handler, uri_str, silent);
+	uri_internal_t *uri_internal = php_uri_parse(uri_handler, uri_str, uri_str_len, silent);
 	if (uri_internal == NULL) {
 		return NULL;
 	}
@@ -346,7 +346,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 		base_url = internal_base_url->uri;
 	}
 
-	void *uri = handler->parse_uri(uri_str, base_url, should_throw || errors_zv != NULL ? &errors : NULL, !should_throw);
+	void *uri = handler->parse_uri(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), base_url, should_throw || errors_zv != NULL ? &errors : NULL, !should_throw);
 	if (UNEXPECTED(uri == NULL)) {
 		if (should_throw) {
 			zval_ptr_dtor(&errors);
@@ -769,7 +769,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_na
 	if (internal_uri->uri != NULL) {
 		internal_uri->handler->free_uri(internal_uri->uri);
 	}
-	internal_uri->uri = internal_uri->handler->parse_uri(Z_STR_P(uri_zv), NULL, NULL, true);
+	internal_uri->uri = internal_uri->handler->parse_uri(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
 	if (internal_uri->uri == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
 		RETURN_THROWS();
