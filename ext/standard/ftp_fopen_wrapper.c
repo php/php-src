@@ -38,7 +38,6 @@
 #endif
 
 #include "php_standard.h"
-#include "ext/uri/php_uri.h"
 
 #include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
@@ -122,24 +121,6 @@ static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *
 }
 /* }}} */
 
-static uri_handler_t *ftp_get_uri_handler(php_stream_context *context)
-{
-	if (context == NULL) {
-		return php_uri_get_handler(NULL);
-	}
-
-	zval *uri_handler_name = php_stream_context_get_option(context, "ftp", "uri_parser_class");
-	if (uri_handler_name == NULL) {
-		return php_uri_get_handler(NULL);
-	}
-
-	if (Z_TYPE_P(uri_handler_name) != IS_STRING) {
-		return NULL;
-	}
-
-	return php_uri_get_handler(Z_STR_P(uri_handler_name));
-}
-
 /* {{{ php_ftp_fopen_connect */
 static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
 										 zend_string **opened_path, php_stream_context *context, php_stream **preuseid,
@@ -152,14 +133,12 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	char *transport;
 	int transport_len;
 
-	uri_handler_t *uri_handler = ftp_get_uri_handler(context);
+	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ftp", context);
 	if (uri_handler == NULL) {
 		return NULL;
 	}
 
-	zend_string *tmp_uri = zend_string_init(path, strlen(path), false);
-	resource = php_uri_parse_to_struct(uri_handler, tmp_uri, URI_COMPONENT_READ_RAW, true);
-	zend_string_release_ex(tmp_uri, false);
+	resource = php_uri_parse_to_struct(uri_handler, path, strlen(path), URI_COMPONENT_READ_RAW, true);
 	if (resource == NULL || resource->path == NULL) {
 		if (resource && presource) {
 			*presource = resource;
@@ -974,21 +953,17 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	int result;
 	char tmp_line[512];
 
-	uri_handler_t *uri_handler = ftp_get_uri_handler(context);
+	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ftp", context);
 	if (uri_handler == NULL) {
 		return 0;
 	}
 
-	zend_string *tmp_uri = zend_string_init(url_from, strlen(url_from), false);
-	resource_from = php_uri_parse_to_struct(uri_handler, tmp_uri, URI_COMPONENT_READ_RAW, true);
-	zend_string_release_ex(tmp_uri, false);
+	resource_from = php_uri_parse_to_struct(uri_handler, url_from, strlen(url_from), URI_COMPONENT_READ_RAW, true);
 	if (!resource_from) {
 		return 0;
 	}
 
-	tmp_uri = zend_string_init(url_to, strlen(url_to), false);
-	resource_to = php_uri_parse_to_struct(uri_handler, tmp_uri, URI_COMPONENT_READ_RAW, true);
-	zend_string_release_ex(tmp_uri, 1);
+	resource_to = php_uri_parse_to_struct(uri_handler, url_to, strlen(url_to), URI_COMPONENT_READ_RAW, true);
 	if (!resource_to) {
 		goto rename_errexit;
 	}

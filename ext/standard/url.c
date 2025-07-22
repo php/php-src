@@ -435,11 +435,11 @@ static void throw_invalid_uri_exception(void)
 	zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
 }
 
-static void *parse_url_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors, bool silent)
+static void *parse_url_parse_uri(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
 {
 	bool has_port;
 
-	php_url *url = php_url_parse_ex2(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), &has_port);
+	php_url *url = php_url_parse_ex2(uri_str, uri_str_len, &has_port);
 	if (url == NULL && !silent) {
 		throw_invalid_uri_exception();
 	}
