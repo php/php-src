@@ -60,7 +60,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     public function getClosureUsedVariables(): array {}
 
     /** @tentative-return-type */
-    public function getDocComment(): string|false {}
+    public function getDocComment(): string {}
 
     /** @tentative-return-type */
     public function getEndLine(): int|false {}
@@ -286,7 +286,7 @@ class ReflectionClass implements Reflector
     public function getEndLine(): int|false {}
 
     /** @tentative-return-type */
-    public function getDocComment(): string|false {}
+    public function getDocComment(): string {}
 
     /** @tentative-return-type */
     public function getConstructor(): ?ReflectionMethod {}
@@ -537,7 +537,7 @@ class ReflectionProperty implements Reflector
     public function getDeclaringClass(): ReflectionClass {}
 
     /** @tentative-return-type */
-    public function getDocComment(): string|false {}
+    public function getDocComment(): string {}
 
     /** @tentative-return-type */
     public function setAccessible(bool $accessible): void {}
@@ -615,7 +615,7 @@ class ReflectionClassConstant implements Reflector
     public function getDeclaringClass(): ReflectionClass {}
 
     /** @tentative-return-type */
-    public function getDocComment(): string|false {}
+    public function getDocComment(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 

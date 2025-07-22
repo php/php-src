@@ -73,19 +73,19 @@ string(26) "/** My DocComment for B */"
 
 
 ---> Doc comment for class C:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for class D:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for class E:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for class F:
-bool(false)
+string(0) ""
 
 
 ---> Doc comment for class G:
