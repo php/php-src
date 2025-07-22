@@ -467,6 +467,7 @@ PHP 8.5 UPGRADE NOTES
     ReflectionConstant::getExtensionName() were introduced.
   . ReflectionConstant::getAttributes() was introduced.
     RFC: https://wiki.php.net/rfc/attributes-on-constants
+  . ReflectionProperty::getMangledName() was introduced.
 
 - Sqlite:
   . Sqlite3Stmt::busy to check if a statement had been fetched
