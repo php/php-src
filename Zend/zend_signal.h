@@ -86,12 +86,12 @@ END_EXTERN_C()
 # endif /* not ZTS */
 
 ZEND_API void zend_signal_handler_unblock(void);
-void zend_signal_activate(void);
-void zend_signal_deactivate(void);
+ZEND_API void zend_signal_activate(void);
+ZEND_API void zend_signal_deactivate(void);
 BEGIN_EXTERN_C()
 ZEND_API void zend_signal_startup(void);
 END_EXTERN_C()
-void zend_signal_init(void);
+ZEND_API void zend_signal_init(void);
 
 ZEND_API void zend_signal(int signo, void (*handler)(int));
 ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact);
