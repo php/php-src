@@ -791,7 +791,7 @@ ZEND_EXT_API void zend_jit_status(zval *ret)
 	add_assoc_long(&stats, "kind", JIT_G(trigger));
 	add_assoc_long(&stats, "opt_level", JIT_G(opt_level));
 	add_assoc_long(&stats, "opt_flags", JIT_G(opt_flags));
-	if (dasm_buf) {
+	if (dasm_buf && dasm_end && dasm_ptr) {
 		add_assoc_long(&stats, "buffer_size", (char*)dasm_end - (char*)dasm_buf);
 		add_assoc_long(&stats, "buffer_free", (char*)dasm_end - (char*)*dasm_ptr);
 	} else {
@@ -5087,6 +5087,12 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 #else
 	zend_jit_trace_free_caches(&jit_globals);
 #endif
+
+	// Reset global pointers to prevent use-after-free in Apache reload
+	dasm_ptr = NULL;
+	dasm_buf = NULL;
+	dasm_end = NULL;
+	dasm_size = 0;
 }
 
 static void zend_jit_reset_counters(void)
