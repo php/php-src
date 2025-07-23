@@ -174,16 +174,12 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 # include <sanitizer/asan_interface.h>
 
 # if 0
-
 #  define ZEND_MM_POISON_DEBUG(_type, _ptr, _size) do { \
-	fprintf(stderr, "%s %p - %p in %d\n", (_type), (_ptr), (void*) (((size_t)_ptr)+((size_t)_size)), __LINE__); \
-	fflush(stderr); \
+		fprintf(stderr, "%s %p - %p in %d\n", (_type), (_ptr), (void*) (((size_t)_ptr)+((size_t)_size)), __LINE__); \
+		fflush(stderr); \
 } while (0);
-
 # else
-
 #  define ZEND_MM_POISON_DEBUG(_type, _ptr, _size)
-
 # endif
 
 # define ZEND_MM_POISON(_ptr, _size) do { \
@@ -514,11 +510,11 @@ static void stderr_last_error(char *msg)
 #endif
 
 static void _zend_mm_set_custom_handlers_ex(zend_mm_heap *heap,
-                                          void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          size_t (*_gc)(void),
-                                          void   (*_shutdown)(bool, bool))
+                                           void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                           void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                           void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                           size_t (*_gc)(void),
+                                           void   (*_shutdown)(bool, bool))
 {
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
@@ -536,13 +532,12 @@ static void _zend_mm_set_custom_handlers_ex(zend_mm_heap *heap,
 #endif
 }
 
-
 static void _zend_mm_get_custom_handlers_ex(zend_mm_heap *heap,
-                                             void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                             void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                             void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                             size_t (**_gc)(void),
-                                             void   (**_shutdown)(bool, bool))
+                                            void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                            void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                            void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                            size_t (**_gc)(void),
+                                            void   (**_shutdown)(bool, bool))
 {
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
