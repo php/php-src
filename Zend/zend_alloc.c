@@ -1241,12 +1241,12 @@ get_chunk:
 				heap->real_size += ZEND_MM_CHUNK_SIZE;
 
 #endif
+				ZEND_MM_UNPOISON_CHUNK_HDR(chunk);
 			}
 			heap->chunks_count++;
 			if (heap->chunks_count > heap->peak_chunks_count) {
 				heap->peak_chunks_count = heap->chunks_count;
 			}
-			ZEND_MM_UNPOISON_CHUNK_HDR(chunk);
 			zend_mm_chunk_init(heap, chunk);
 			ZEND_MM_UNPOISON_CHUNK_HDR(chunk);
 			page_num = ZEND_MM_FIRST_PAGE;
