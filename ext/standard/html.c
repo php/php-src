@@ -1320,6 +1320,10 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (str->len == 0) {
+		RETVAL_STR(str);
+		return;
+	}
 	replaced = php_escape_html_entities_ex(
 		(unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), all, (int) flags,
 		hint_charset ? ZSTR_VAL(hint_charset) : NULL, double_encode, /* quiet */ 0);
