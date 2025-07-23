@@ -34,11 +34,11 @@ struct fpm_scoreboard_proc_s {
 	struct timeval duration;
 	time_t accepted_epoch;
 	struct timeval tv;
-	char request_uri[128];
-	char query_string[512];
+	char request_uri[512];
+	char query_string[2048];
 	char request_method[16];
 	size_t content_length; /* used with POST only */
-	char script_filename[256];
+	char script_filename[512];
 	char auth_user[32];
 #ifdef HAVE_TIMES
 	struct tms cpu_accepted;
