@@ -1263,27 +1263,31 @@ get_chunk:
 
 found:
 	if (steps > 2 && pages_count < 8) {
-		ZEND_MM_UNPOISON_CHUNK_HDR(chunk->next);
-		ZEND_MM_UNPOISON_CHUNK_HDR(chunk->prev);
-		ZEND_MM_CHECK(chunk->next->prev == chunk, "zend_mm_heap corrupted");
-		ZEND_MM_CHECK(chunk->prev->next == chunk, "zend_mm_heap corrupted");
+		zend_mm_chunk *prev_chunk = chunk->prev;
+		zend_mm_chunk *next_chunk = chunk->next;
+		ZEND_MM_UNPOISON_CHUNK_HDR(next_chunk);
+		ZEND_MM_UNPOISON_CHUNK_HDR(prev_chunk);
+		ZEND_MM_CHECK(next_chunk->prev == chunk, "zend_mm_heap corrupted");
+		ZEND_MM_CHECK(prev_chunk->next == chunk, "zend_mm_heap corrupted");
 
 		/* move chunk into the head of the linked-list */
 		chunk->prev->next = chunk->next;
 		chunk->next->prev = chunk->prev;
 
-		ZEND_MM_UNPOISON_CHUNK_HDR(heap->main_chunk);
-		ZEND_MM_UNPOISON_CHUNK_HDR(heap->main_chunk->next);
+		zend_mm_chunk *main_chunk = heap->main_chunk;
+		zend_mm_chunk *main_next_chunk = heap->main_chunk->next;
+		ZEND_MM_UNPOISON_CHUNK_HDR(main_chunk);
+		ZEND_MM_UNPOISON_CHUNK_HDR(main_next_chunk);
 		chunk->next = heap->main_chunk->next;
 		chunk->prev = heap->main_chunk;
 		chunk->prev->next = chunk;
 		chunk->next->prev = chunk;
-		ZEND_MM_POISON_CHUNK_HDR(heap->main_chunk->next, heap);
-		ZEND_MM_POISON_CHUNK_HDR(heap->main_chunk, heap);
+		ZEND_MM_POISON_CHUNK_HDR(main_chunk, heap);
+		ZEND_MM_POISON_CHUNK_HDR(main_next_chunk, heap);
 
+		ZEND_MM_POISON_CHUNK_HDR(next_chunk, heap);
+		ZEND_MM_POISON_CHUNK_HDR(prev_chunk, heap);
 		ZEND_MM_UNPOISON_CHUNK_HDR(chunk);
-		ZEND_MM_POISON_CHUNK_HDR(chunk->next, heap);
-		ZEND_MM_POISON_CHUNK_HDR(chunk->prev, heap);
 	}
 	/* mark run as allocated */
 	chunk->free_pages -= pages_count;
