@@ -171,6 +171,22 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #endif
 
 #ifdef __SANITIZE_ADDRESS__
+
+/*
+	Poisoning uses the following rules:
+	* Always poison memory (re)allocated by private (non-ZEND_API) allocation functions before returning it
+	* Unpoison memory (re)allocated by public (ZEND_API) allocation functions before returning within the ZEND_API function
+	* Always poison freed memory
+	* Always poison unused memory during reallocation (where new_size < old_size)
+	* When accessing private heap structures and fields, always unpoison before accessing and repoison immediately after
+		* An exception to the above (for simplicity) is the main heap datastructure,
+		  which is poisoned only when entering a ZEND_API function and repoisoned before exiting.
+		* When working with custom handlers, remember that the tracked_malloc implementation
+		  removes the custom handlers, re-enters the current Zend allocator function, 
+		  then re-sets the custom handlers, so when invoking custom handlers always
+		  remember that the heap may be poisoned after invocation.
+*/
+
 # include <sanitizer/asan_interface.h>
 
 # if 0
