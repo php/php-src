@@ -46,7 +46,6 @@
 	delivered timestamp is monotonic and cannot be adjusted. */
 PHP_FUNCTION(hrtime)
 {
-#if ZEND_HRTIME_AVAILABLE
 	bool get_as_num = 0;
 	zend_hrtime_t t = zend_hrtime();
 
@@ -55,6 +54,7 @@ PHP_FUNCTION(hrtime)
 		Z_PARAM_BOOL(get_as_num)
 	ZEND_PARSE_PARAMETERS_END();
 
+#if ZEND_HRTIME_AVAILABLE
 	if (UNEXPECTED(get_as_num)) {
 		PHP_RETURN_HRTIME(t);
 	} else {
