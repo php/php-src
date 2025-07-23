@@ -1557,7 +1557,6 @@ static const php_stream_filter_ops strfilter_convert_ops = {
 static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	php_convert_filter *inst;
-	php_stream_filter *retval = NULL;
 
 	char *dot;
 	int conv_mode = 0;
@@ -1587,16 +1586,11 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 	if (php_convert_filter_ctor(inst, conv_mode,
 		(filterparams != NULL ? Z_ARRVAL_P(filterparams) : NULL),
 		filtername, persistent) != SUCCESS) {
-		goto out;
-	}
-
-	retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
-out:
-	if (retval == NULL) {
 		pefree(inst, persistent);
+		return NULL;
 	}
 
-	return retval;
+	return php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
 }
 
 static const php_stream_filter_factory strfilter_convert_factory = {
