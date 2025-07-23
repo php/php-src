@@ -575,13 +575,13 @@ function openssl_private_encrypt(#[\SensitiveParameter] string $data, &$encrypte
  * @param string $decrypted_data
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_private_decrypt(string $data, #[\SensitiveParameter] &$decrypted_data, #[\SensitiveParameter] $private_key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
+function openssl_private_decrypt(string $data, #[\SensitiveParameter] &$decrypted_data, #[\SensitiveParameter] $private_key, int $padding = OPENSSL_PKCS1_PADDING, ?string $digest_algo = null): bool {}
 
 /**
  * @param string $encrypted_data
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key
  */
-function openssl_public_encrypt(#[\SensitiveParameter] string $data, &$encrypted_data, $public_key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
+function openssl_public_encrypt(#[\SensitiveParameter] string $data, &$encrypted_data, $public_key, int $padding = OPENSSL_PKCS1_PADDING, ?string $digest_algo = null): bool {}
 
 /**
  * @param string $decrypted_data

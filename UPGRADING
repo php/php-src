@@ -327,6 +327,10 @@ PHP 8.5 UPGRADE NOTES
 - libxml:
   . libxml_set_external_entity_loader() now has a formal return type of true.
 
+- OpenSSL:
+  . openssl_public_encrypt() and openssl_private_decrypt() have new parameter
+    $digest_algo that allows specifying hash digest algorith for OEAP padding.
+
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
   . pcntl_waitid() takes an additional resource_usage argument to

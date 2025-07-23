@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
   . Add support for CURLINFO_QUEUE_TIME_T in curl_getinfo() (thecaliskan)
 
+- OpenSSL:
+  . Add $digest_algo parameter to openssl_public_encrypt() and
+    openssl_private_decrypt() functions. (Jakub Zelenka)
+
 - Reflection:
   . Fixed bug GH-19187 (ReflectionNamedType::getName() prints nullable type when
     retrieved from ReflectionProperty::getSettableType()). (ilutov)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a42bd7dec0a5e011983ce08b5e31cd8718247501 */
+ * Stub hash: 4186e01a05ec179f1f2196a2afd1860671f793d5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -258,6 +258,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_private_decrypt, 0, 3, _
 	ZEND_ARG_INFO(1, decrypted_data)
 	ZEND_ARG_INFO(0, private_key)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, padding, IS_LONG, 0, "OPENSSL_PKCS1_PADDING")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, digest_algo, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_public_encrypt, 0, 3, _IS_BOOL, 0)
@@ -265,6 +266,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_public_encrypt, 0, 3, _I
 	ZEND_ARG_INFO(1, encrypted_data)
 	ZEND_ARG_INFO(0, public_key)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, padding, IS_LONG, 0, "OPENSSL_PKCS1_PADDING")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, digest_algo, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_public_decrypt, 0, 3, _IS_BOOL, 0)
