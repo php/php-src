@@ -1999,6 +1999,7 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 					} else {
 						/* reallocation in-place */
 						ret = ptr;
+						ZEND_MM_POISON(ret, old_size)
 						ZEND_MM_UNPOISON(ret, size);
 					}
 				} else if (size <= ZEND_MM_MAX_SMALL_SIZE) {
