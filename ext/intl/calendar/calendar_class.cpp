@@ -247,13 +247,14 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
 void calendar_register_IntlCalendar_class(void)
 {
 	/* Create and register 'IntlCalendar' class. */
+	Calendar_object empty;
 	Calendar_ce_ptr = register_class_IntlCalendar();
 	Calendar_ce_ptr->default_object_handlers = &Calendar_handlers;
 	Calendar_ce_ptr->create_object = Calendar_object_create;
 
 	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
-	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
+	Calendar_handlers.offset = reinterpret_cast<char *>(&empty.zo) - reinterpret_cast<char *>(&empty);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
 	Calendar_handlers.get_debug_info = Calendar_get_debug_info;
 	Calendar_handlers.free_obj = Calendar_objects_free;
