@@ -1321,7 +1321,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (EXPECTED(ZSTR_LEN(str) == 0)) {
-		RETVAL_STR_COPY(str);
+		RETURN_EMPTY_STRING();
 		return;
 	}
 	replaced = php_escape_html_entities_ex(
