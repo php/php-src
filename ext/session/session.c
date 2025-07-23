@@ -1335,45 +1335,19 @@ static int php_session_cache_limiter(void)
    * Cookie Management *
    ********************* */
 
-/*
- * Remove already sent session ID cookie.
- * It must be directly removed from SG(sapi_header) because sapi_add_header_ex()
- * removes all of matching cookie. i.e. It deletes all of Set-Cookie headers.
- */
 static void php_session_remove_cookie(void) {
-	sapi_header_struct *header;
-	zend_llist *l = &SG(sapi_headers).headers;
-	zend_llist_element *next;
-	zend_llist_element *current;
 	char *session_cookie;
 	size_t session_cookie_len;
-	size_t len = sizeof("Set-Cookie")-1;
+	sapi_header_line header_line = {0};
 
 	ZEND_ASSERT(strpbrk(ZSTR_VAL(PS(session_name)), SESSION_FORBIDDEN_CHARS) == NULL);
 	session_cookie_len = spprintf(&session_cookie, 0, "Set-Cookie: %s=", ZSTR_VAL(PS(session_name)));
 
-	current = l->head;
-	while (current) {
-		header = (sapi_header_struct *)(current->data);
-		next = current->next;
-		if (header->header_len > len && header->header[len] == ':'
-			&& !strncmp(header->header, session_cookie, session_cookie_len)) {
-			if (current->prev) {
-				current->prev->next = next;
-			} else {
-				l->head = next;
-			}
-			if (next) {
-				next->prev = current->prev;
-			} else {
-				l->tail = current->prev;
-			}
-			sapi_free_header(header);
-			efree(current);
-			--l->count;
-		}
-		current = next;
-	}
+	header_line.line = session_cookie;
+	header_line.line_len = session_cookie_len;
+	header_line.header_len = sizeof("Set-Cookie") - 1;
+	sapi_header_op(SAPI_HEADER_DELETE_PREFIX, &header_line);
+
 	efree(session_cookie);
 }
 

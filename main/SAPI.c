@@ -597,7 +597,8 @@ static void sapi_update_response_code(int ncode)
  * since zend_llist_del_element only removes one matched item once,
  * we should remove them manually
  */
-static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
+static void sapi_remove_header(zend_llist *l, char *name, size_t len, size_t header_len)
+{
 	sapi_header_struct *header;
 	zend_llist_element *next;
 	zend_llist_element *current=l->head;
@@ -605,7 +606,8 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	while (current) {
 		header = (sapi_header_struct *)(current->data);
 		next = current->next;
-		if (header->header_len > len && header->header[len] == ':'
+		if (header->header_len > header_len
+				&& (header->header[header_len] == ':' || len > header_len)
 				&& !strncasecmp(header->header, name, len)) {
 			if (current->prev) {
 				current->prev->next = next;
@@ -653,7 +655,7 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 				char sav = *colon_offset;
 
 				*colon_offset = 0;
-		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header));
+				sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header), 0);
 				*colon_offset = sav;
 			}
 		}
@@ -668,7 +670,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	char *header_line;
-	size_t header_line_len;
+	size_t header_line_len, header_len;
 	int http_response_code;
 
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
@@ -691,6 +693,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 
 		case SAPI_HEADER_ADD:
 		case SAPI_HEADER_REPLACE:
+		case SAPI_HEADER_DELETE_PREFIX:
 		case SAPI_HEADER_DELETE: {
 				sapi_header_line *p = arg;
 
@@ -699,7 +702,13 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				}
 				header_line = estrndup(p->line, p->line_len);
 				header_line_len = p->line_len;
-				http_response_code = p->response_code;
+				if (op == SAPI_HEADER_DELETE_PREFIX) {
+					header_len = p->header_len;
+					http_response_code = 0;
+				} else {
+					header_len = 0;
+					http_response_code = p->response_code;
+				}
 				break;
 			}
 
@@ -722,8 +731,8 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		header_line[header_line_len]='\0';
 	}
 
-	if (op == SAPI_HEADER_DELETE) {
-		if (strchr(header_line, ':')) {
+	if (op == SAPI_HEADER_DELETE || op == SAPI_HEADER_DELETE_PREFIX) {
+		if (op == SAPI_HEADER_DELETE && strchr(header_line, ':')) {
 			efree(header_line);
 			sapi_module.sapi_error(E_WARNING, "Header to delete may not contain colon.");
 			return FAILURE;
@@ -733,7 +742,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 			sapi_header.header_len = header_line_len;
 			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers));
 		}
-		sapi_remove_header(&SG(sapi_headers).headers, header_line, header_line_len);
+		sapi_remove_header(&SG(sapi_headers).headers, header_line, header_line_len, header_len);
 		efree(header_line);
 		return SUCCESS;
 	} else {
