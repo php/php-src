@@ -33,7 +33,11 @@ typedef struct {
 	intl_error  err;
 
 	// ICU calendar
+#ifndef __cplusplus
 	Calendar*	ucal;
+#else
+	std::unique_ptr<Calendar> ucal;
+#endif
 
 	zend_object	zo;
 } Calendar_object;
