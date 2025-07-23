@@ -2356,6 +2356,7 @@ static zend_mm_heap *zend_mm_init(void)
 	return heap;
 }
 
+// heap must be unpoisoned when entering, must remain unpoisoned before leaving
 static size_t _zend_mm_gc(zend_mm_heap *heap)
 {
 	zend_mm_free_slot *p, *q;
@@ -2372,6 +2373,10 @@ static size_t _zend_mm_gc(zend_mm_heap *heap)
 		size_t (*gc)(void) = heap->custom_heap._gc;
 		if (gc) {
 			size_t ret = gc();
+			// Unpoison to handle re-entrant calls 
+			// i.e. via the tracked allocator, which 
+			// re-invokes the ZEND_API zend_mm_gc which
+			// poisons the heap before exiting.
 			ZEND_MM_UNPOISON_HEAP(heap);
 			return ret;
 		}
