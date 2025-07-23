@@ -1281,8 +1281,8 @@ found:
 
 #ifdef __SANITIZE_ADDRESS__
 		zend_mm_chunk *main_chunk = heap->main_chunk;
-		zend_mm_chunk *main_next_chunk = heap->main_chunk->next;
 		ZEND_MM_UNPOISON_CHUNK_HDR(main_chunk);
+		zend_mm_chunk *main_next_chunk = heap->main_chunk->next;
 		ZEND_MM_UNPOISON_CHUNK_HDR(main_next_chunk);
 #endif
 		chunk->next = heap->main_chunk->next;
