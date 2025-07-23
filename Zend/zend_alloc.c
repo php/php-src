@@ -1533,9 +1533,7 @@ static zend_always_inline zend_mm_free_slot *zend_mm_get_next_free_slot(zend_mm_
 static zend_always_inline zend_mm_free_slot *zend_mm_get_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot* slot)
 {
 	ZEND_MM_UNPOISON(slot, sizeof(zend_mm_free_slot*));
-
 	zend_mm_free_slot *next = slot->next_free_slot;
-
 	ZEND_MM_POISON(slot, sizeof(zend_mm_free_slot*));
 
 	return next;
