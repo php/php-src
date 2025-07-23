@@ -1263,30 +1263,41 @@ get_chunk:
 
 found:
 	if (steps > 2 && pages_count < 8) {
+#ifdef __SANITIZE_ADDRESS__
+		/* ifdef needed to avoid unused var warnings for the following vars */
 		zend_mm_chunk *prev_chunk = chunk->prev;
 		zend_mm_chunk *next_chunk = chunk->next;
 		ZEND_MM_UNPOISON_CHUNK_HDR(next_chunk);
 		ZEND_MM_UNPOISON_CHUNK_HDR(prev_chunk);
-		ZEND_MM_CHECK(next_chunk->prev == chunk, "zend_mm_heap corrupted");
-		ZEND_MM_CHECK(prev_chunk->next == chunk, "zend_mm_heap corrupted");
+#endif
+
+		ZEND_MM_CHECK(chunk->next->prev == chunk, "zend_mm_heap corrupted");
+		ZEND_MM_CHECK(chunk->prev->next == chunk, "zend_mm_heap corrupted");
 
 		/* move chunk into the head of the linked-list */
 		chunk->prev->next = chunk->next;
 		chunk->next->prev = chunk->prev;
 
+
+#ifdef __SANITIZE_ADDRESS__
 		zend_mm_chunk *main_chunk = heap->main_chunk;
 		zend_mm_chunk *main_next_chunk = heap->main_chunk->next;
 		ZEND_MM_UNPOISON_CHUNK_HDR(main_chunk);
 		ZEND_MM_UNPOISON_CHUNK_HDR(main_next_chunk);
+#endif
 		chunk->next = heap->main_chunk->next;
 		chunk->prev = heap->main_chunk;
 		chunk->prev->next = chunk;
 		chunk->next->prev = chunk;
+#ifdef __SANITIZE_ADDRESS__
 		ZEND_MM_POISON_CHUNK_HDR(main_chunk, heap);
 		ZEND_MM_POISON_CHUNK_HDR(main_next_chunk, heap);
+#endif
 
+#ifdef __SANITIZE_ADDRESS__
 		ZEND_MM_POISON_CHUNK_HDR(next_chunk, heap);
 		ZEND_MM_POISON_CHUNK_HDR(prev_chunk, heap);
+#endif
 		ZEND_MM_UNPOISON_CHUNK_HDR(chunk);
 	}
 	/* mark run as allocated */
