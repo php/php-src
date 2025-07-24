@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed GH-19197: build broken with ZEND_STRL usage with memcpy
     when implemented as macro. (David Carlier)
 
+- Soap:
+  . Fixed bug GH-19226 (Segfault when spawning new thread in soap extension).
+    (Florian Engelhardt)
+
 - Sockets:
   . socket_set_option for multicast context throws a ValueError
     when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
