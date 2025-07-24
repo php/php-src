@@ -31,7 +31,7 @@ typedef struct {
 } Locale_object;
 
 
-void locale_register_Locale_class( void );
+U_CFUNC void locale_register_Locale_class( void );
 
 extern zend_class_entry *Locale_ce_ptr;
 
