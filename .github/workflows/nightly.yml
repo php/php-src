@@ -132,7 +132,6 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             --asan -x
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Notify Slack
         if: failure()
@@ -246,14 +245,12 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
@@ -264,7 +261,6 @@ jobs:
           jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
@@ -338,14 +334,12 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
@@ -353,7 +347,6 @@ jobs:
           jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Notify Slack
         if: failure()
@@ -398,13 +391,11 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
         if: matrix.os != '14' || !matrix.zts
@@ -412,7 +403,6 @@ jobs:
         with:
           jitType: function
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
@@ -474,7 +464,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - uses: codecov/codecov-action@v4
         if: ${{ !cancelled() }}
@@ -528,7 +517,6 @@ jobs:
       - name: Enable Opcache
         run: |
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
-          echo zend_extension=opcache.so > /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
@@ -719,21 +707,18 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-prime
       - name: Test File Cache (prime shm, use shm)
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-use
       - name: Test File Cache (prime shm, use file)
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-use
             -d opcache.file_cache_only=1
@@ -741,7 +726,6 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-prime
             -d opcache.file_cache_only=1
@@ -749,7 +733,6 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-use
             -d opcache.file_cache_only=1
@@ -843,7 +826,6 @@ jobs:
         with:
           runTestsParameters: >-
             --msan
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
