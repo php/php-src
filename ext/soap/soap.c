@@ -453,7 +453,6 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	soap_globals->soap_version = SOAP_1_1;
 	soap_globals->mem_cache = NULL;
 	soap_globals->ref_map = NULL;
-	soap_globals->lang_en = zend_string_init_interned(ZEND_STRL("en"), true);
 }
 
 PHP_MSHUTDOWN_FUNCTION(soap)
@@ -552,6 +551,8 @@ PHP_MINIT_FUNCTION(soap)
 
 	old_error_handler = zend_error_cb;
 	zend_error_cb = soap_error_handler;
+
+	SOAP_GLOBAL(lang_en) = zend_string_init_interned(ZEND_STRL("en"), true);
 
 	return SUCCESS;
 }
@@ -4205,7 +4206,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, const char *param
 	}
 	xmlParam = master_to_xml(enc, val, style, parent);
 	zval_ptr_dtor(&defval);
-	if (xmlParam != NULL) { 
+	if (xmlParam != NULL) {
 		if (xmlParam->name == NULL || strcmp((char*)xmlParam->name, "BOGUS") == 0) {
 			xmlNodeSetName(xmlParam, BAD_CAST(paramName));
 		}
