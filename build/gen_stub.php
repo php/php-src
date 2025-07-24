@@ -1247,6 +1247,119 @@ class ReturnInfo {
     }
 }
 
+class VersionFlags {
+
+    /**
+     * Keys are the PHP versions, values are arrays of flags
+     */
+    private array $flagsByVersion;
+
+    public function __construct(array $baseFlags) {
+        $this->flagsByVersion = [];
+        foreach (ALL_PHP_VERSION_IDS as $version) {
+            $this->flagsByVersion[$version] = $baseFlags;
+        }
+    }
+
+    public function addForVersionsAbove(string $flag, int $minimumVersionId): void {
+        $write = false;
+
+        foreach (ALL_PHP_VERSION_IDS as $version) {
+            if ($version === $minimumVersionId || $write === true) {
+                $this->flagsByVersion[$version][] = $flag;
+                $write = true;
+            }
+        }
+    }
+
+    public function isEmpty(): bool {
+        foreach (ALL_PHP_VERSION_IDS as $version) {
+            if ($this->flagsByVersion[$version] !== []) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function generateVersionDependentFlagCode(
+        string $codeTemplate,
+        ?int $phpVersionIdMinimumCompatibility,
+        ?int $phpVersionIdMaxCompatibility = null
+    ): string {
+        $flagsByPhpVersions = $this->flagsByVersion;
+        $phpVersions = ALL_PHP_VERSION_IDS;
+        sort($phpVersions);
+        $currentPhpVersion = end($phpVersions);
+
+        // No version compatibility is needed
+        if ($phpVersionIdMinimumCompatibility === null) {
+            if (empty($flagsByPhpVersions[$currentPhpVersion])) {
+                return '';
+            }
+            return sprintf($codeTemplate, implode("|", $flagsByPhpVersions[$currentPhpVersion]));
+        }
+
+        ksort($flagsByPhpVersions);
+        // Remove flags which depend on a PHP version below the minimally supported one
+        $index = array_search($phpVersionIdMinimumCompatibility, array_keys($flagsByPhpVersions));
+        if ($index === false) {
+            throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMinimumCompatibility\"");
+        }
+        $flagsByPhpVersions = array_slice($flagsByPhpVersions, $index, null, true);
+        if ($phpVersionIdMaxCompatibility !== null) {
+            // Remove flags which depend on a PHP version above the maximally supported one
+            $index = array_search($phpVersionIdMaxCompatibility, array_keys($flagsByPhpVersions));
+            if ($index === false) {
+                throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMaxCompatibility\"");
+            }
+            $flagsByPhpVersions = array_slice($flagsByPhpVersions, 0, $index, true);
+        }
+
+        // Remove version-specific flags which don't differ from the previous one
+        // Also populate '0' values
+        $previousVersionId = null;
+        foreach ($flagsByPhpVersions as $versionId => $versionFlags) {
+            if ($versionFlags === []) {
+                $versionFlags = ['0'];
+                $flagsByPhpVersions[$versionId] = ['0'];
+            }
+            if ($previousVersionId !== null && $flagsByPhpVersions[$previousVersionId] === $versionFlags) {
+                unset($flagsByPhpVersions[$versionId]);
+            } else {
+                $previousVersionId = $versionId;
+            }
+        }
+
+        $flagCount = count($flagsByPhpVersions);
+
+        // Do not add a condition unnecessarily when the only version is the same as the minimally supported one
+        if ($flagCount === 1) {
+            reset($flagsByPhpVersions);
+            $firstVersion = key($flagsByPhpVersions);
+            if ($firstVersion === $phpVersionIdMinimumCompatibility) {
+                return sprintf($codeTemplate, implode("|", reset($flagsByPhpVersions)));
+            }
+        }
+
+        // Add the necessary conditions around the code using the version-specific flags
+        $code = '';
+        $i = 0;
+        foreach (array_reverse($flagsByPhpVersions, true) as $version => $versionFlags) {
+            $if = $i === 0 ? "#if" : "#elif";
+            $endif = $i === $flagCount - 1 ? "#endif\n" : "";
+
+            $code .= "$if (PHP_VERSION_ID >= $version)\n";
+
+            $code .= sprintf($codeTemplate, implode("|", $versionFlags));
+            $code .= $endif;
+
+            $i++;
+        }
+
+        return $code;
+    }
+}
+
 class FuncInfo {
     public /* readonly */ FunctionOrMethodName $name;
     private /* readonly */ int $classFlags;
@@ -1483,9 +1596,8 @@ class FuncInfo {
 
                     if ($isVanillaEntry) {
                         $template = "\tZEND_ME(" . $this->name->getDeclarationClassName() . ", " . $this->name->methodName . ", $argInfoName, %s)\n";
-                        $flagsCode = generateVersionDependentFlagCode(
+                        $flagsCode = $flagsByPhpVersions->generateVersionDependentFlagCode(
                             $template,
-                            $flagsByPhpVersions,
                             $this->minimumPhpVersionIdCompatibility
                         );
                         $functionEntryCode = rtrim($flagsCode);
@@ -1505,14 +1617,7 @@ class FuncInfo {
                 $name = "zif_$declarationName";
 
                 // Can only use ZEND_FE() if we have no flags for *all* versions
-                $hasFlags = false;
-                foreach ($flagsByPhpVersions as $flags) {
-                    if ($flags !== ['0']) {
-                        $hasFlags = true;
-                        break;
-                    }
-                }
-                if ($isVanillaEntry && !$hasFlags) {
+                if ($isVanillaEntry && $flagsByPhpVersions->isEmpty()) {
                     $functionEntryCode = "\tZEND_FE($declarationName, $argInfoName)";
                 }
             }
@@ -1530,18 +1635,16 @@ class FuncInfo {
             $docComment = $this->exposedDocComment ? '"' . $this->exposedDocComment->escape() . '"' : "NULL";
             $framelessFuncInfosName = !empty($this->framelessFunctionInfos) ? $this->getFramelessFunctionInfosName() : "NULL";
 
-            $code .= generateVersionDependentFlagCode(
+            $code .= $flagsByPhpVersions->generateVersionDependentFlagCode(
                 "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s, $framelessFuncInfosName, $docComment)\n",
-                $flagsByPhpVersions,
                 PHP_84_VERSION_ID
             );
 
             if (!$php84MinimumCompatibility) {
                 $code .= "#else\n";
 
-                $code .= generateVersionDependentFlagCode(
+                $code .= $flagsByPhpVersions->generateVersionDependentFlagCode(
                     "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n",
-                    $flagsByPhpVersions,
                     $this->minimumPhpVersionIdCompatibility,
                     PHP_83_VERSION_ID
                 );
@@ -1588,8 +1691,7 @@ class FuncInfo {
         $this->minimumPhpVersionIdCompatibility = $minimumPhpVersionIdCompatibility;
     }
 
-    /** @return array<int, string[]> */
-    private function getArginfoFlagsByPhpVersions(): array
+    private function getArginfoFlagsByPhpVersions(): VersionFlags
     {
         $flags = [];
 
@@ -1627,39 +1729,21 @@ class FuncInfo {
             }
         }
 
-        $php82AndAboveFlags = $flags;
+        $flags = new VersionFlags($flags);
+
         if ($this->isMethod() === false && $this->supportsCompileTimeEval) {
-            $php82AndAboveFlags[] = "ZEND_ACC_COMPILE_TIME_EVAL";
+            $flags->addForVersionsAbove("ZEND_ACC_COMPILE_TIME_EVAL", PHP_82_VERSION_ID);
         }
 
-        $php85AndAboveFlags = $php82AndAboveFlags;
         foreach ($this->attributes as $attr) {
             switch ($attr->class) {
                 case "NoDiscard":
-                    $php85AndAboveFlags[] = "ZEND_ACC_NODISCARD";
+                    $flags->addForVersionsAbove("ZEND_ACC_NODISCARD", PHP_85_VERSION_ID);
                     break;
             }
         }
 
-        if (empty($flags)) {
-            $flags[] = "0";
-        }
-        if (empty($php82AndAboveFlags)) {
-            $php82AndAboveFlags[] = "0";
-        }
-        if (empty($php85AndAboveFlags)) {
-            $php85AndAboveFlags[] = "0";
-        }
-
-        return [
-            PHP_70_VERSION_ID => $flags,
-            PHP_80_VERSION_ID => $flags,
-            PHP_81_VERSION_ID => $flags,
-            PHP_82_VERSION_ID => $php82AndAboveFlags,
-            PHP_83_VERSION_ID => $php82AndAboveFlags,
-            PHP_84_VERSION_ID => $php82AndAboveFlags,
-            PHP_85_VERSION_ID => $php85AndAboveFlags,
-        ];
+        return $flags;
     }
 
     private function generateRefSect1(DOMDocument $doc, string $role): DOMElement {
@@ -2459,10 +2543,7 @@ abstract class VariableLike
 
     abstract public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void;
 
-    /**
-     * @return array<int, string[]>
-     */
-    protected function getFlagsByPhpVersion(): array
+    protected function getFlagsByPhpVersion(): VersionFlags
     {
         $flags = "ZEND_ACC_PUBLIC";
         if ($this->flags & Modifiers::PROTECTED) {
@@ -2471,15 +2552,7 @@ abstract class VariableLike
             $flags = "ZEND_ACC_PRIVATE";
         }
 
-        return [
-            PHP_70_VERSION_ID => [$flags],
-            PHP_80_VERSION_ID => [$flags],
-            PHP_81_VERSION_ID => [$flags],
-            PHP_82_VERSION_ID => [$flags],
-            PHP_83_VERSION_ID => [$flags],
-            PHP_84_VERSION_ID => [$flags],
-            PHP_85_VERSION_ID => [$flags],
-        ];
+        return new VersionFlags([$flags]);
     }
 
     protected function getTypeCode(string $variableLikeName, string &$code): string
@@ -2580,23 +2653,6 @@ abstract class VariableLike
         }
     }
 
-    /**
-     * @param array<int, string[]> $flags
-     * @return array<int, string[]>
-     */
-    protected function addFlagForVersionsAbove(array $flags, string $flag, int $minimumVersionId): array
-    {
-        $write = false;
-
-        foreach ($flags as $version => $versionFlags) {
-            if ($version === $minimumVersionId || $write === true) {
-                $flags[$version][] = $flag;
-                $write = true;
-            }
-        }
-
-        return $flags;
-    }
 }
 
 class ConstInfo extends VariableLike
@@ -2858,9 +2914,8 @@ class ConstInfo extends VariableLike
             }
             $template .= "zend_declare_typed_class_constant(class_entry, $nameCode, &const_{$constName}_value, %s, $commentCode, $typeCode);\n";
 
-            $code .= generateVersionDependentFlagCode(
+            $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode(
                 $template,
-                $this->getFlagsByPhpVersion(),
                 $this->phpVersionIdMinimumCompatibility
             );
         }
@@ -2876,9 +2931,8 @@ class ConstInfo extends VariableLike
                 $template = "\t";
             }
             $template .= "zend_declare_class_constant_ex(class_entry, $nameCode, &const_{$constName}_value, %s, $commentCode);\n";
-            $code .= generateVersionDependentFlagCode(
+            $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode(
                 $template,
-                $this->getFlagsByPhpVersion(),
                 $this->phpVersionIdMinimumCompatibility
             );
         }
@@ -2928,20 +2982,17 @@ class ConstInfo extends VariableLike
         throw new Exception("Unimplemented constant type");
     }
 
-    /**
-     * @return array<int, string[]>
-     */
-    protected function getFlagsByPhpVersion(): array
+    protected function getFlagsByPhpVersion(): VersionFlags
     {
         $flags = parent::getFlagsByPhpVersion();
 
         // $this->isDeprecated also accounts for any #[\Deprecated] attributes
         if ($this->isDeprecated) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
         }
 
         if ($this->flags & Modifiers::FINAL) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_FINAL", PHP_81_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_FINAL", PHP_81_VERSION_ID);
         }
 
         return $flags;
@@ -3256,9 +3307,8 @@ class PropertyInfo extends VariableLike
             $template .= "zend_declare_property_ex(class_entry, $nameCode, &$zvalName, %s, $commentCode);\n";
         }
 
-        $code .= generateVersionDependentFlagCode(
+        $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode(
             $template,
-            $this->getFlagsByPhpVersion(),
             $this->phpVersionIdMinimumCompatibility
         );
 
@@ -3267,29 +3317,26 @@ class PropertyInfo extends VariableLike
         return $code;
     }
 
-    /**
-     * @return array<int, string[]>
-     */
-    protected function getFlagsByPhpVersion(): array
+    protected function getFlagsByPhpVersion(): VersionFlags
     {
         $flags = parent::getFlagsByPhpVersion();
 
         if ($this->flags & Modifiers::STATIC) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_STATIC", PHP_70_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_STATIC", PHP_70_VERSION_ID);
         }
 
         if ($this->flags & Modifiers::FINAL) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_FINAL", PHP_84_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_FINAL", PHP_84_VERSION_ID);
         }
 
         if ($this->flags & Modifiers::READONLY) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_81_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_READONLY", PHP_81_VERSION_ID);
         } elseif ($this->classFlags & Modifiers::READONLY) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_82_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_READONLY", PHP_82_VERSION_ID);
         }
 
         if ($this->isVirtual) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_VIRTUAL", PHP_84_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_VIRTUAL", PHP_84_VERSION_ID);
         }
 
         return $flags;
@@ -3537,13 +3584,17 @@ class ClassInfo {
 
         $code .= "{\n";
 
+        $flags = $this->getFlagsByPhpVersion();
+
         $classMethods = ($this->funcInfos === []) ? 'NULL' : "class_{$escapedName}_methods";
         if ($this->type === "enum") {
             $name = addslashes((string) $this->name);
             $backingType = $this->enumBackingType
                 ? $this->enumBackingType->toTypeCode() : "IS_UNDEF";
             $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, $classMethods);\n";
-            $code .= generateVersionDependentFlagCode("\tclass_entry->ce_flags = %s;\n", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
+            if (!$flags->isEmpty()) {
+                $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode("\tclass_entry->ce_flags = %s;\n", $this->phpVersionIdMinimumCompatibility);
+            }
         } else {
             $code .= "\tzend_class_entry ce, *class_entry;\n\n";
             if (count($this->name->getParts()) > 1) {
@@ -3561,7 +3612,7 @@ class ClassInfo {
                 }
 
                 $template = "\tclass_entry = zend_register_internal_class_with_flags(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ", %s);\n";
-                $entries = generateVersionDependentFlagCode($template, $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility ? max($this->phpVersionIdMinimumCompatibility, PHP_84_VERSION_ID) : null);
+                $entries = $flags->generateVersionDependentFlagCode($template, $this->phpVersionIdMinimumCompatibility ? max($this->phpVersionIdMinimumCompatibility, PHP_84_VERSION_ID) : null);
                 if ($entries !== '') {
                     $code .= $entries;
                 } else {
@@ -3572,12 +3623,16 @@ class ClassInfo {
                     $code .= "#else\n";
 
                     $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
-                    $code .= generateVersionDependentFlagCode("\tclass_entry->ce_flags |= %s;\n", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
+                    if (!$flags->isEmpty()) {
+                        $code .= $flags->generateVersionDependentFlagCode("\tclass_entry->ce_flags |= %s;\n", $this->phpVersionIdMinimumCompatibility);
+                    }
                     $code .= "#endif\n";
                 }
             } else {
                 $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
-                $code .= generateVersionDependentFlagCode("\tclass_entry->ce_flags |= %s;\n", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
+                if (!$flags->isEmpty()) {
+                    $code .= $flags->generateVersionDependentFlagCode("\tclass_entry->ce_flags |= %s;\n", $this->phpVersionIdMinimumCompatibility);
+                }
 
             }
         }
@@ -3693,10 +3748,7 @@ class ClassInfo {
         return $code;
     }
 
-    /**
-     * @return array<int, string[]>
-     */
-    private function getFlagsByPhpVersion(): array
+    private function getFlagsByPhpVersion(): VersionFlags
     {
         $php70Flags = [];
 
@@ -3716,44 +3768,28 @@ class ClassInfo {
             $php70Flags[] = "ZEND_ACC_DEPRECATED";
         }
 
-        $php80Flags = $php70Flags;
+        $flags = new VersionFlags($php70Flags);
 
         if ($this->isStrictProperties) {
-            $php80Flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
+            $flags->addForVersionsAbove("ZEND_ACC_NO_DYNAMIC_PROPERTIES", PHP_80_VERSION_ID);
         }
-
-        $php81Flags = $php80Flags;
 
         if ($this->isNotSerializable) {
-            $php81Flags[] = "ZEND_ACC_NOT_SERIALIZABLE";
+            $flags->addForVersionsAbove("ZEND_ACC_NOT_SERIALIZABLE", PHP_81_VERSION_ID);
         }
 
-        $php82Flags = $php81Flags;
-
         if ($this->flags & Modifiers::READONLY) {
-            $php82Flags[] = "ZEND_ACC_READONLY_CLASS";
+            $flags->addForVersionsAbove("ZEND_ACC_READONLY_CLASS", PHP_82_VERSION_ID);
         }
 
         foreach ($this->attributes as $attr) {
             if ($attr->class === "AllowDynamicProperties") {
-                $php82Flags[] = "ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES";
+                $flags->addForVersionsAbove("ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES", PHP_82_VERSION_ID);
                 break;
             }
         }
 
-        $php83Flags = $php82Flags;
-        $php84Flags = $php83Flags;
-        $php85Flags = $php84Flags;
-
-        return [
-            PHP_70_VERSION_ID => $php70Flags,
-            PHP_80_VERSION_ID => $php80Flags,
-            PHP_81_VERSION_ID => $php81Flags,
-            PHP_82_VERSION_ID => $php82Flags,
-            PHP_83_VERSION_ID => $php83Flags,
-            PHP_84_VERSION_ID => $php84Flags,
-            PHP_85_VERSION_ID => $php85Flags,
-        ];
+        return $flags;
     }
 
     public function discardInfoForOldPhpVersions(?int $phpVersionIdMinimumCompatibility): void {
@@ -5468,92 +5504,6 @@ function generateOptimizerInfo(array $funcMap): string {
     });
 
     $code .= "};\n";
-
-    return $code;
-}
-
-/**
- * @param array<int, string[]> $flagsByPhpVersions
- * @return string
- */
-function generateVersionDependentFlagCode(
-    string $codeTemplate,
-    array $flagsByPhpVersions,
-    ?int $phpVersionIdMinimumCompatibility,
-    ?int $phpVersionIdMaxCompatibility = null
-): string {
-    $phpVersions = ALL_PHP_VERSION_IDS;
-    sort($phpVersions);
-    $currentPhpVersion = end($phpVersions);
-
-    // No version compatibility is needed
-    if ($phpVersionIdMinimumCompatibility === null) {
-        if (empty($flagsByPhpVersions[$currentPhpVersion])) {
-            return '';
-        }
-
-        return sprintf($codeTemplate, implode("|", $flagsByPhpVersions[$currentPhpVersion]));
-    }
-
-    ksort($flagsByPhpVersions);
-    // Remove flags which depend on a PHP version below the minimally supported one
-    $index = array_search($phpVersionIdMinimumCompatibility, array_keys($flagsByPhpVersions));
-    if ($index === false) {
-        throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMinimumCompatibility\"");
-    }
-    $flagsByPhpVersions = array_slice($flagsByPhpVersions, $index, null, true);
-    if ($phpVersionIdMaxCompatibility !== null) {
-        // Remove flags which depend on a PHP version above the maximally supported one
-        $index = array_search($phpVersionIdMaxCompatibility, array_keys($flagsByPhpVersions));
-        if ($index === false) {
-            throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMaxCompatibility\"");
-        }
-        $flagsByPhpVersions = array_slice($flagsByPhpVersions, 0, $index, true);
-    }
-
-    // Remove empty version-specific flags
-    $flagsByPhpVersions = array_filter($flagsByPhpVersions);
-
-    // There are no version-specific flags
-    if (empty($flagsByPhpVersions)) {
-        return '';
-    }
-
-    // Remove version-specific flags which don't differ from the previous one
-    $previousVersionId = null;
-    foreach ($flagsByPhpVersions as $versionId => $versionFlags) {
-        if ($previousVersionId !== null && $flagsByPhpVersions[$previousVersionId] === $versionFlags) {
-            unset($flagsByPhpVersions[$versionId]);
-        } else {
-            $previousVersionId = $versionId;
-        }
-    }
-
-    $flagCount = count($flagsByPhpVersions);
-
-    // Do not add a condition unnecessarily when the only version is the same as the minimally supported one
-    if ($flagCount === 1) {
-        reset($flagsByPhpVersions);
-        $firstVersion = key($flagsByPhpVersions);
-        if ($firstVersion === $phpVersionIdMinimumCompatibility) {
-            return sprintf($codeTemplate, implode("|", reset($flagsByPhpVersions)));
-        }
-    }
-
-    // Add the necessary conditions around the code using the version-specific flags
-    $code = '';
-    $i = 0;
-    foreach (array_reverse($flagsByPhpVersions, true) as $version => $versionFlags) {
-        $if = $i === 0 ? "#if" : "#elif";
-        $endif = $i === $flagCount - 1 ? "#endif\n" : "";
-
-        $code .= "$if (PHP_VERSION_ID >= $version)\n";
-
-        $code .= sprintf($codeTemplate, implode("|", $versionFlags));
-        $code .= $endif;
-
-        $i++;
-    }
 
     return $code;
 }
