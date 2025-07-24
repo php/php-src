@@ -60,6 +60,7 @@ if test "$PHP_INTL" != "no"; then
     dateformat/datepatterngenerator_class.cpp \
     dateformat/datepatterngenerator_methods.cpp \
     msgformat/msgformat_helpers.cpp \
+    rangeformatter/rangeformatter_class.cpp \
     timezone/timezone_class.cpp \
     timezone/timezone_methods.cpp \
     calendar/calendar_class.cpp \
@@ -123,6 +124,7 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/listformatter
     $ext_builddir/msgformat
     $ext_builddir/normalizer
+    $ext_builddir/rangeformatter
     $ext_builddir/resourcebundle
     $ext_builddir/spoofchecker
     $ext_builddir/timezone

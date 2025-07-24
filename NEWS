@@ -2,4 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha1
 
+- Intl:
+  . Added IntlNumberRangeFormatter class to format an interval of two numbers
+    with a given skeleton, locale, collapse type and identity fallback.
+    (BogdanUngureanu)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
