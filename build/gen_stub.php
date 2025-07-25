@@ -3319,8 +3319,12 @@ class AttributeInfo {
         $this->args = $args;
     }
 
-    /** @param array<string, ConstInfo> $allConstInfos */
-    public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility): string {
+    /**
+     * @param array<string, ConstInfo> $allConstInfos
+     * @param array<string, string> &$declaredStrings Map of string content to
+     *   the name of a zend_string already created with that content
+     */
+    public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, array &$declaredStrings = []): string {
         $escapedAttributeName = strtr($this->class, '\\', '_');
         [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
             "attribute_name_{$escapedAttributeName}_$nameSuffix",
@@ -3344,6 +3348,9 @@ class AttributeInfo {
                 );
                 if ($strInit === '') {
                     $initValue = "\tZVAL_STR(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
+                } elseif (isset($declaredStrings[$strVal])) {
+                    $strUse = $declaredStrings[$strVal];
+                    $initValue = "\tZVAL_STR(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
                 }
             }
             if ($initValue === '') {
@@ -3353,6 +3360,9 @@ class AttributeInfo {
                     true,
                     "attribute_{$escapedAttributeName}_{$nameSuffix}_arg{$i}_str"
                 );
+                if ($arg->value instanceof Node\Scalar\String_) {
+                    $declaredStrings[$arg->value->value] = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg{$i}_str";
+                }
             } else {
                 $code .= $initValue;
             }
@@ -3603,6 +3613,8 @@ class ClassInfo {
             $php80CondEnd = "#endif\n";
         }
 
+        $declaredStrings = [];
+
         if (!empty($this->attributes)) {
             $code .= $php80CondStart;
 
@@ -3611,26 +3623,27 @@ class ClassInfo {
                     "zend_add_class_attribute(class_entry",
                     "class_{$escapedName}_$key",
                     $allConstInfos,
-                    $this->phpVersionIdMinimumCompatibility
+                    $this->phpVersionIdMinimumCompatibility,
+                    $declaredStrings
                 );
             }
 
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond)) {
+        if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility)) {
+        if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond)) {
+        if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
@@ -5185,8 +5198,9 @@ function generateArgInfoCode(
     $php80MinimumCompatibility = $fileInfo->getMinimumPhpVersionIdCompatibility() === null || $fileInfo->getMinimumPhpVersionIdCompatibility() >= PHP_80_VERSION_ID;
 
     if ($fileInfo->generateClassEntries) {
-        $attributeInitializationCode = generateFunctionAttributeInitialization($fileInfo->funcInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null);
-        $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($fileInfo->constInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null);
+        $declaredStrings = [];
+        $attributeInitializationCode = generateFunctionAttributeInitialization($fileInfo->funcInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
+        $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($fileInfo->constInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
         if ($attributeInitializationCode) {
             if (!$php80MinimumCompatibility) {
                 $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
@@ -5244,12 +5258,16 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
     return $code;
 }
 
-/** @param iterable<FuncInfo> $funcInfos */
-function generateFunctionAttributeInitialization(iterable $funcInfos, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, ?string $parentCond = null): string {
+/**
+ * @param iterable<FuncInfo> $funcInfos
+ * @param array<string, string> &$declaredStrings Map of string content to
+ *   the name of a zend_string already created with that content
+ */
+function generateFunctionAttributeInitialization(iterable $funcInfos, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, ?string $parentCond = null, array &$declaredStrings = []): string {
     return generateCodeWithConditions(
         $funcInfos,
         "",
-        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, &$declaredStrings) {
             $code = null;
 
             if ($funcInfo->name instanceof MethodName) {
@@ -5258,12 +5276,22 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
                 $functionTable = "CG(function_table)";
             }
 
+            // Make sure we don't try and use strings that might only be
+            // conditionally available; string reuse is only among declarations
+            // that are always there
+            if ($funcInfo->cond) {
+                $useDeclared = [];
+            } else {
+                $useDeclared = &$declaredStrings;
+            }
+
             foreach ($funcInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_function_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1)",
                     "func_" . $funcInfo->name->getNameForAttributes() . "_$key",
                     $allConstInfos,
-                    $phpVersionIdMinimumCompatibility
+                    $phpVersionIdMinimumCompatibility,
+                    $useDeclared
                 );
             }
 
@@ -5273,7 +5301,8 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
                         "zend_add_parameter_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1), $index",
                         "func_{$funcInfo->name->getNameForAttributes()}_arg{$index}_$key",
                         $allConstInfos,
-                        $phpVersionIdMinimumCompatibility
+                        $phpVersionIdMinimumCompatibility,
+                        $useDeclared
                     );
                 }
             }
@@ -5287,12 +5316,15 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
 /**
  * @param iterable<ConstInfo> $constInfos
  * @param array<string, ConstInfo> $allConstInfos
+ * @param array<string, string> &$declaredStrings Map of string content to
+ *   the name of a zend_string already created with that content
  */
 function generateGlobalConstantAttributeInitialization(
     iterable $constInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
-    ?string $parentCond = null
+    ?string $parentCond = null,
+    array &$declaredStrings = []
 ): string {
     $isConditional = false;
     if ($phpVersionIdMinimumCompatibility !== null && $phpVersionIdMinimumCompatibility < PHP_85_VERSION_ID) {
@@ -5301,11 +5333,19 @@ function generateGlobalConstantAttributeInitialization(
     $code = generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional, &$declaredStrings) {
             $code = "";
 
             if ($constInfo->attributes === []) {
                 return null;
+            }
+            // Make sure we don't try and use strings that might only be
+            // conditionally available; string reuse is only among declarations
+            // that are always there
+            if ($constInfo->cond) {
+                $useDeclared = [];
+            } else {
+                $useDeclared = &$declaredStrings;
             }
             $constName = str_replace('\\', '\\\\', $constInfo->name->__toString());
             $constVarName = 'const_' . $constName;
@@ -5321,7 +5361,8 @@ function generateGlobalConstantAttributeInitialization(
                     "zend_add_global_constant_attribute($constVarName",
                     $constVarName . "_$key",
                     $allConstInfos,
-                    PHP_85_VERSION_ID
+                    PHP_85_VERSION_ID,
+                    $useDeclared
                 );
             }
 
@@ -5338,25 +5379,37 @@ function generateGlobalConstantAttributeInitialization(
 /**
  * @param iterable<ConstInfo> $constInfos
  * @param array<string, ConstInfo> $allConstInfos
+ * @param array<string, string> &$declaredStrings Map of string content to
+ *    the name of a zend_string already created with that content
  */
 function generateConstantAttributeInitialization(
     iterable $constInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
-    ?string $parentCond = null
+    ?string $parentCond = null,
+    array &$declaredStrings = []
 ): string {
     return generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, &$declaredStrings) {
             $code = null;
 
+            // Make sure we don't try and use strings that might only be
+            // conditionally available; string reuse is only among declarations
+            // that are always there
+            if ($constInfo->cond) {
+                $useDeclared = [];
+            } else {
+                $useDeclared = &$declaredStrings;
+            }
             foreach ($constInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_class_constant_attribute(class_entry, const_" . $constInfo->name->getDeclarationName(),
                     "const_" . $constInfo->name->getDeclarationName() . "_$key",
                     $allConstInfos,
-                    $phpVersionIdMinimumCompatibility
+                    $phpVersionIdMinimumCompatibility,
+                    $useDeclared
                 );
             }
 
@@ -5369,11 +5422,14 @@ function generateConstantAttributeInitialization(
 /**
  * @param iterable<PropertyInfo> $propertyInfos
  * @param array<string, ConstInfo> $allConstInfos
+ * @param array<string, string> &$declaredStrings Map of string content to
+ *    the name of a zend_string already created with that content
  */
 function generatePropertyAttributeInitialization(
     iterable $propertyInfos,
     array $allConstInfos,
-    ?int $phpVersionIdMinimumCompatibility
+    ?int $phpVersionIdMinimumCompatibility,
+    array &$declaredStrings
 ): string {
     $code = "";
     foreach ($propertyInfos as $propertyInfo) {
@@ -5382,7 +5438,8 @@ function generatePropertyAttributeInitialization(
                 "zend_add_property_attribute(class_entry, property_" . $propertyInfo->name->getDeclarationName(),
                 "property_" . $propertyInfo->name->getDeclarationName() . "_" . $key,
                 $allConstInfos,
-                $phpVersionIdMinimumCompatibility
+                $phpVersionIdMinimumCompatibility,
+                $declaredStrings
             );
         }
     }
