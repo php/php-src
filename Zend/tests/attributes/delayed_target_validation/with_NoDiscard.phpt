@@ -12,10 +12,10 @@ class DemoClass {
 
 	public string $hooked {
 		#[DelayedTargetValidation]
-		// #[NoDiscard] // Does nothing here
+		#[NoDiscard] // Does nothing here
 		get => $this->hooked;
 		#[DelayedTargetValidation]
-		// #[NoDiscard] // Does nothing here
+		#[NoDiscard] // Does nothing here
 		set => $value;
 	}
 
