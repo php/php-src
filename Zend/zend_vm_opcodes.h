@@ -48,9 +48,12 @@ typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(void);
 #elif ZEND_VM_KIND == ZEND_VM_KIND_CALL
 typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
 typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
-#else
+#elif ZEND_VM_KIND == ZEND_VM_KIND_SWITCH
+typedef int zend_vm_opcode_handler_t;
+#elif ZEND_VM_KIND == ZEND_VM_KIND_GOTO
 typedef const void* zend_vm_opcode_handler_t;
-typedef const void* zend_vm_opcode_handler_func_t;
+#else
+# error
 #endif
 
 #define ZEND_VM_OP_SPEC          0x00000001
