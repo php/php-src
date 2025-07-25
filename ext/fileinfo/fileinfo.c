@@ -31,10 +31,11 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h" /* needed for context stuff */
+#include "Zend/zend_attributes.h"
+#include "Zend/zend_exceptions.h"
 #include "php_fileinfo.h"
 #include "fileinfo_arginfo.h"
 #include "fopen_wrappers.h" /* needed for is_url */
-#include "Zend/zend_exceptions.h"
 
 static zend_object_handlers finfo_object_handlers;
 zend_class_entry *finfo_class_entry;
