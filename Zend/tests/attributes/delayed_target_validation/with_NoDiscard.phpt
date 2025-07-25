@@ -6,36 +6,45 @@
 #[DelayedTargetValidation]
 #[NoDiscard] // Does nothing here
 class DemoClass {
-  #[DelayedTargetValidation]
-  #[NoDiscard] // Does nothing here
-  public $val;
+	#[DelayedTargetValidation]
+	#[NoDiscard] // Does nothing here
+	public $val;
 
-  #[DelayedTargetValidation]
-  #[NoDiscard] // Does nothing here
-  public const CLASS_CONST = 'FOO';
+	public string $hooked {
+		#[DelayedTargetValidation]
+		// #[NoDiscard] // Does nothing here
+		get => $this->hooked;
+		#[DelayedTargetValidation]
+		// #[NoDiscard] // Does nothing here
+		set => $value;
+	}
 
-  public function __construct(
-    #[DelayedTargetValidation]
-    #[NoDiscard] // Does nothing here
-    $str
-  ) {
-    echo "Got: $str\n";
-    $this->val = $str;
-  }
+	#[DelayedTargetValidation]
+	#[NoDiscard] // Does nothing here
+	public const CLASS_CONST = 'FOO';
 
-  #[DelayedTargetValidation]
-  #[NoDiscard] // Does something here
-  public function printVal() {
-    echo 'Value is: ' . $this->val . "\n";
-    return 123;
-  }
+	public function __construct(
+		#[DelayedTargetValidation]
+		#[NoDiscard] // Does nothing here
+		$str
+	) {
+		echo "Got: $str\n";
+		$this->val = $str;
+	}
+
+	#[DelayedTargetValidation]
+	#[NoDiscard] // Does something here
+	public function printVal() {
+		echo 'Value is: ' . $this->val . "\n";
+		return 123;
+	}
 }
 
 #[DelayedTargetValidation]
 #[NoDiscard] // Does something here
 function demoFn() {
-  echo __FUNCTION__ . "\n";
-  return 456;
+	echo __FUNCTION__ . "\n";
+	return 456;
 }
 
 #[DelayedTargetValidation]
@@ -46,6 +55,10 @@ $d = new DemoClass('example');
 $d->printVal();
 $v = $d->printVal();
 var_dump($d->val);
+$d->hooked = "foo";
+var_dump($d->hooked);
+// NODiscard does not support property hooks, this should not complain
+$d->hooked;
 var_dump(DemoClass::CLASS_CONST);
 demoFn();
 $v = demoFn();
@@ -58,6 +71,7 @@ Warning: The return value of method DemoClass::printVal() should either be used 
 Value is: example
 Value is: example
 string(7) "example"
+string(3) "foo"
 string(3) "FOO"
 
 Warning: The return value of function demoFn() should either be used or intentionally ignored by casting it as (void) in %s on line %d
