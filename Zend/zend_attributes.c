@@ -228,6 +228,31 @@ ZEND_METHOD(Deprecated, __construct)
 	}
 }
 
+static void validate_nodiscard(
+	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	/* There isn't an easy way to identify the *method* that the attribute is
+	 * applied to in a manner that works during both compilation (normal
+	 * validation) and runtime (delayed validation). So, handle them separately.
+	 */
+	if (CG(in_compilation)) {
+		ZEND_ASSERT((target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) == 0);
+		zend_op_array *op_array = CG(active_op_array);
+		const zend_string *prop_info_name = CG(context).active_property_info_name;
+		if (prop_info_name == NULL) {
+			op_array->fn_flags |= ZEND_ACC_NODISCARD;
+			return;
+		}
+		// Applied to a hook, either throw or ignore
+		if (target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION) {
+			return;
+		}
+		zend_error_noreturn(E_COMPILE_ERROR, "#[\\NoDiscard] is not supported for property hooks");
+	}
+	/* At runtime, no way to identify the target method; Reflection will handle
+	 * throwing the error if needed. */
+}
+
 ZEND_METHOD(NoDiscard, __construct)
 {
 	zend_string *message = NULL;
@@ -588,6 +613,7 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_nodiscard = register_class_NoDiscard();
 	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
+	attr->validator = validate_nodiscard;
 
 	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
 	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);

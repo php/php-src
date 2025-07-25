@@ -7582,8 +7582,9 @@ static void zend_compile_attributes(
 				continue;
 			}
 
-			if (delayed_target_validation == NULL) {
-				if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+			bool run_validator = true;
+			if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+				if (delayed_target_validation == NULL) {
 					zend_string *location = zend_get_attribute_target_names(target);
 					zend_string *allowed = zend_get_attribute_target_names(config->flags);
 
@@ -7591,6 +7592,7 @@ static void zend_compile_attributes(
 						ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
 					);
 				}
+				run_validator = false;
 			}
 
 			if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
@@ -7599,7 +7601,8 @@ static void zend_compile_attributes(
 				}
 			}
 
-			if (config->validator != NULL) {
+			// Validators are not run if the target is already invalid
+			if (run_validator && config->validator != NULL) {
 				config->validator(attr, target | extra_flags, CG(active_class_entry));
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -8446,6 +8449,10 @@ static zend_op_array *zend_compile_func_decl_ex(
 
 	CG(active_op_array) = op_array;
 
+	zend_oparray_context_begin(&orig_oparray_context, op_array);
+	CG(context).active_property_info_name = property_info_name;
+	CG(context).active_property_hook_kind = hook_kind;
+
 	if (decl->child[4]) {
 		int target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
 
@@ -8475,15 +8482,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 			op_array->fn_flags |= ZEND_ACC_DEPRECATED;
 		}
 
-		zend_attribute *nodiscard_attribute = zend_get_attribute_str(
-			op_array->attributes,
-			"nodiscard",
-			sizeof("nodiscard")-1
-		);
-
-		if (nodiscard_attribute) {
-			op_array->fn_flags |= ZEND_ACC_NODISCARD;
-		}
+		// ZEND_ACC_NODISCARD is added via an attribute validator
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
@@ -8496,10 +8495,6 @@ static zend_op_array *zend_compile_func_decl_ex(
 	if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		op_array->fn_flags |= ZEND_ACC_TOP_LEVEL;
 	}
-
-	zend_oparray_context_begin(&orig_oparray_context, op_array);
-	CG(context).active_property_info_name = property_info_name;
-	CG(context).active_property_hook_kind = hook_kind;
 
 	{
 		/* Push a separator to the loop variable stack */
@@ -8535,9 +8530,11 @@ static zend_op_array *zend_compile_func_decl_ex(
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_NODISCARD) {
-		if (is_hook) {
-			zend_error_noreturn(E_COMPILE_ERROR, "#[\\NoDiscard] is not supported for property hooks");
-		}
+		/* ZEND_ACC_NODISCARD gets added by the attribute validator, but only
+		 * if the method is not a hook; if it is a hook, then the validator
+		 * should have either thrown an error or done nothing due to delayed
+		 * target validation. */
+		ZEND_ASSERT(!is_hook);
 
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
