@@ -1322,7 +1322,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 
 	if (ZSTR_LEN(str) == 0) {
 		RETURN_EMPTY_STRING();
-		return;
 	}
 	replaced = php_escape_html_entities_ex(
 		(unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), all, (int) flags,
