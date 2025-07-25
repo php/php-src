@@ -1320,7 +1320,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (EXPECTED(ZSTR_LEN(str) == 0)) {
+	if (ZSTR_LEN(str) == 0) {
 		RETURN_EMPTY_STRING();
 		return;
 	}
