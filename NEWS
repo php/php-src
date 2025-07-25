@@ -15,6 +15,22 @@ PHP                                                                        NEWS
   . Disallow changing opcache.memory_consumption when SHM is already set up.
     (timwolla)
 
+- OpenSSL:
+  . Add $digest_algo parameter to openssl_public_encrypt() and
+    openssl_private_decrypt() functions. (Jakub Zelenka)
+
+- Reflection:
+  . Fixed bug GH-19187 (ReflectionNamedType::getName() prints nullable type when
+    retrieved from ReflectionProperty::getSettableType()). (ilutov)
+
+- Session:
+  . Fixed GH-19197: build broken with ZEND_STRL usage with memcpy
+    when implemented as macro. (David Carlier)
+
+- Soap:
+  . Fixed bug GH-19226 (Segfault when spawning new thread in soap extension).
+    (Florian Engelhardt)
+
 - Sockets:
   . socket_set_option for multicast context throws a ValueError
     when the socket family is not of AF_INET/AF_INET6 family. (David Carlier)
@@ -23,6 +39,8 @@ PHP                                                                        NEWS
   . Add HEIF/HEIC support to getimagesize. (Benstone Zhang)
   . Implement #71517 (Implement SVG support for getimagesize() and friends).
     (nielsdos)
+  . Optimized PHP html_entity_decode function. (Artem Ukrainskiy)
+  . Minor optimization to array_chunk(). (nielsdos)
 
 - URI:
   . Empty host handling is fixed. (Máté Kocsis)
@@ -249,6 +267,7 @@ PHP                                                                        NEWS
     zval for uninitialized typed properties). (nielsdos)
   . Fixed bug GH-15766 (ReflectionClass::toString() should have better output
     for enums). (DanielEScherzer)
+  . Added ReflectionProperty::getMangledName() method. (alexandre-daubois)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap

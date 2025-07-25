@@ -418,6 +418,23 @@ ZEND_METHOD(Closure, fromCallable)
 }
 /* }}} */
 
+ZEND_METHOD(Closure, getCurrent)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_execute_data *prev_ex = EX(prev_execute_data);
+
+	if (!prev_ex
+	 || !prev_ex->func
+	 || (prev_ex->func->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
+			zend_throw_error(NULL, "Current function is not a closure");
+			RETURN_THROWS();
+	}
+
+	zend_object *obj = ZEND_CLOSURE_OBJECT(prev_ex->func);
+	RETURN_OBJ_COPY(obj);
+}
+
 static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
 {
 	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");

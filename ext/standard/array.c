@@ -7023,6 +7023,7 @@ PHP_FUNCTION(array_chunk)
 	}
 
 	array_init_size(return_value, (uint32_t)(((num_in - 1) / size) + 1));
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	ZVAL_UNDEF(&chunk);
 
@@ -7046,9 +7047,10 @@ PHP_FUNCTION(array_chunk)
 
 		/* If reached the chunk size, add it to the result array, and reset the
 		 * pointer. */
-		if (!(++current % size)) {
+		if (++current == size) {
 			add_next_index_zval(return_value, &chunk);
 			ZVAL_UNDEF(&chunk);
+			current = 0;
 		}
 	} ZEND_HASH_FOREACH_END();
 

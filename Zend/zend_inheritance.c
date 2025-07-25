@@ -1713,10 +1713,25 @@ void zend_build_properties_info_table(zend_class_entry *ce)
 		}
 	}
 
-	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, zend_string *key, prop) {
 		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0
 		 && !(prop->flags & ZEND_ACC_VIRTUAL)) {
-			uint32_t prop_table_offset = OBJ_PROP_TO_NUM(!(prop->prototype->flags & ZEND_ACC_VIRTUAL) ? prop->prototype->offset : prop->offset);
+			const zend_property_info *root_prop = prop->prototype;
+			if (UNEXPECTED(root_prop->flags & ZEND_ACC_VIRTUAL)) {
+				/* Prototype is virtual, we need to manually hunt down the first backed property. */
+				root_prop = prop;
+				zend_class_entry *parent_ce;
+				while ((parent_ce = root_prop->ce->parent)) {
+					zend_property_info *parent_prop = zend_hash_find_ptr(&parent_ce->properties_info, key);
+					if (!parent_prop
+					 || parent_prop->prototype != prop->prototype
+					 || (parent_prop->flags & ZEND_ACC_VIRTUAL)) {
+						break;
+					}
+					root_prop = parent_prop;
+				}
+			}
+			uint32_t prop_table_offset = OBJ_PROP_TO_NUM(root_prop->offset);
 			table[prop_table_offset] = prop;
 		}
 	} ZEND_HASH_FOREACH_END();

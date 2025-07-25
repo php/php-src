@@ -608,8 +608,6 @@ static int accelerator_get_scripts(zval *return_value)
 	zval persistent_script_report;
 	zend_accel_hash_entry *cache_entry;
 	struct tm *ta;
-	struct timeval exec_time;
-	struct timeval fetch_time;
 
 	if (!ZCG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
 		return 0;
@@ -639,8 +637,6 @@ static int accelerator_get_scripts(zval *return_value)
 			if (ZCG(accel_directives).validate_timestamps) {
 				add_assoc_long(&persistent_script_report, "timestamp", (zend_long)script->timestamp);
 			}
-			timerclear(&exec_time);
-			timerclear(&fetch_time);
 
 			add_assoc_long(&persistent_script_report, "revalidate", (zend_long)script->dynamic_members.revalidate);
 

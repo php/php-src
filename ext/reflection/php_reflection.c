@@ -5753,6 +5753,21 @@ ZEND_METHOD(ReflectionProperty, getName)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, getMangledName)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop == NULL) {
+	    RETURN_STR_COPY(ref->unmangled_name);
+	}
+
+	RETURN_STR_COPY(ref->prop->name);
+}
+
 static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ */
 {
 	reflection_object *intern;
@@ -6403,7 +6418,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 	/* Get-only virtual property can never be written to. */
 	if (prop->hooks && (prop->flags & ZEND_ACC_VIRTUAL) && !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
 		zend_type never_type = ZEND_TYPE_INIT_CODE(IS_NEVER, 0, 0);
-		reflection_type_factory(never_type, return_value, 0);
+		reflection_type_factory(never_type, return_value, 1);
 		return;
 	}
 
@@ -6413,7 +6428,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 		if (!ZEND_TYPE_IS_SET(arg_info->type)) {
 			RETURN_NULL();
 		}
-		reflection_type_factory(arg_info->type, return_value, 0);
+		reflection_type_factory(arg_info->type, return_value, 1);
 		return;
 	}
 
@@ -6421,7 +6436,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 	if (!ZEND_TYPE_IS_SET(ref->prop->type)) {
 		RETURN_NULL();
 	}
-	reflection_type_factory(ref->prop->type, return_value, 0);
+	reflection_type_factory(ref->prop->type, return_value, 1);
 }
 
 /* {{{ Returns whether property has a type */

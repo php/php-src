@@ -1246,7 +1246,7 @@ static inline void last_modified(void)
 		}
 
 #define LAST_MODIFIED "Last-Modified: "
-		memcpy(buf, ZEND_STRL(LAST_MODIFIED));
+		memcpy(buf, LAST_MODIFIED, sizeof(LAST_MODIFIED) - 1);
 		strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &sb.st_mtime);
 		ADD_HEADER(buf);
 	}
@@ -1261,7 +1261,7 @@ CACHE_LIMITER_FUNC(public)
 
 	gettimeofday(&tv, NULL);
 	now = tv.tv_sec + PS(cache_expire) * 60;
-	memcpy(buf, ZEND_STRL(EXPIRES));
+	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_HEADER(buf);
 

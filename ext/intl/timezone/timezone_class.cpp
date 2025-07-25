@@ -133,7 +133,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 													 const char *func)
 {
 	zval		local_zv_tz;
-	TimeZone	*timeZone;
+	std::unique_ptr<TimeZone>	timeZone;
 
 	if (zv_timezone == NULL || Z_TYPE_P(zv_timezone) == IS_NULL) {
 		timelib_tzinfo *tzinfo = get_timezone_info();
@@ -153,7 +153,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
-		timeZone = to->utimezone->clone();
+		timeZone = std::unique_ptr<TimeZone>(to->utimezone->clone());
 		if (UNEXPECTED(timeZone == NULL)) {
 			zend_throw_error(IntlException_ce_ptr, "%s: could not clone TimeZone", func);
 			zval_ptr_dtor_str(&local_zv_tz);
@@ -181,7 +181,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
-		timeZone = TimeZone::createTimeZone(id);
+		timeZone = std::unique_ptr<TimeZone>(TimeZone::createTimeZone(id));
 		if (UNEXPECTED(timeZone == NULL)) {
 			zend_throw_error(IntlException_ce_ptr, "%s: Could not create time zone", func);
 			zval_ptr_dtor_str(&local_zv_tz);
@@ -191,14 +191,14 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			zend_throw_error(IntlException_ce_ptr, "%s: No such time zone: '%s'",
 				func, Z_STRVAL_P(zv_timezone));
 			zval_ptr_dtor_str(&local_zv_tz);
-			delete timeZone;
 			return NULL;
 		}
 	}
 
 	zval_ptr_dtor_str(&local_zv_tz);
 
-	return timeZone;
+	// well, this is included by the centralized C intl part so the "smart" part can't go further
+	return timeZone.release();
 }
 /* }}} */
 

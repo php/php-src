@@ -251,7 +251,7 @@ typedef struct _zend_oparray_context {
 /* Flag to differentiate cases from constants.            |     |     |     */
 /* Must not conflict with ZEND_ACC_ visibility flags      |     |     |     */
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
-#define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
+#define ZEND_CLASS_CONST_IS_CASE         (1 <<  6) /*     |     |     |  X  */
 /*                                                        |     |     |     */
 /* Property Flags (unused: 13...)                         |     |     |     */
 /* ===========                                            |     |     |     */
