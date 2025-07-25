@@ -6,40 +6,49 @@
 #[DelayedTargetValidation]
 #[SensitiveParameter] // Does nothing here
 class DemoClass {
-  #[DelayedTargetValidation]
-  #[SensitiveParameter] // Does nothing here
-  public $val;
+	#[DelayedTargetValidation]
+	#[SensitiveParameter] // Does nothing here
+	public $val;
 
-  #[DelayedTargetValidation]
-  #[SensitiveParameter] // Does nothing here
-  public const CLASS_CONST = 'FOO';
+	public string $hooked {
+		#[DelayedTargetValidation]
+		#[SensitiveParameter] // Does nothing here
+		get => $this->hooked;
+		#[DelayedTargetValidation]
+		#[SensitiveParameter] // Does nothing here
+		set => $value;
+	}
 
-  public function __construct(
-    #[DelayedTargetValidation]
-    #[SensitiveParameter] // Does something here
-    $str
-  ) {
-    echo "Got: $str\n";
-    $this->val = $str;
-  }
+	#[DelayedTargetValidation]
+	#[SensitiveParameter] // Does nothing here
+	public const CLASS_CONST = 'FOO';
 
-  #[DelayedTargetValidation]
-  #[SensitiveParameter] // Does nothing here
-  public function printVal(
-    #[DelayedTargetValidation]
-    #[SensitiveParameter]
-    $sensitive // Does something here
-  ) {
-    throw new Exception('Testing backtrace');
-  }
+	public function __construct(
+		#[DelayedTargetValidation]
+		#[SensitiveParameter] // Does something here
+		$str
+	) {
+		echo "Got: $str\n";
+		$this->val = $str;
+	}
+
+	#[DelayedTargetValidation]
+	#[SensitiveParameter] // Does nothing here
+	public function printVal(
+		#[DelayedTargetValidation]
+		#[SensitiveParameter]
+		$sensitive // Does something here
+	) {
+		throw new Exception('Testing backtrace');
+	}
 
 }
 
 #[DelayedTargetValidation]
 #[SensitiveParameter] // Does nothing here
 function demoFn() {
-  echo __FUNCTION__ . "\n";
-  return 456;
+	echo __FUNCTION__ . "\n";
+	return 456;
 }
 
 #[DelayedTargetValidation]
@@ -48,6 +57,8 @@ const GLOBAL_CONST = 'BAR';
 
 $d = new DemoClass('example');
 var_dump($d->val);
+$d->hooked = "foo";
+var_dump($d->hooked);
 var_dump(DemoClass::CLASS_CONST);
 demoFn();
 var_dump(GLOBAL_CONST);
@@ -59,6 +70,7 @@ $d->printVal('BAZ');
 --EXPECTF--
 Got: example
 string(7) "example"
+string(3) "foo"
 string(3) "FOO"
 demoFn
 string(3) "BAR"
