@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-18581 (Coerce numeric string keys from iterators when argument
     unpacking). (ilutov)
 
+- FTP:
+  . Fix theoretical issues with hrtime() not being available. (nielsdos)
+
 - Hash:
   . Fix crash on clone failure. (nielsdos)
 
@@ -34,6 +37,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed OSS Fuzz #433303828 (Leak in failed unserialize() with opcache).
     (ilutov)
+  . Fix theoretical issues with hrtime() not being available. (nielsdos)
 
 31 Jul 2025, PHP 8.3.24
 
