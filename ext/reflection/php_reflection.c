@@ -716,7 +716,7 @@ static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
 	return RT_CONSTANT(recv, recv->op2);
 }
 
-static int format_default_value(smart_str *str, zval *value) {
+static void format_default_value(smart_str *str, zval *value) {
 	if (smart_str_append_zval(str, value, SIZE_MAX) == SUCCESS) {
 		/* Nothing to do. */
 	} else if (Z_TYPE_P(value) == IS_ARRAY) {
@@ -761,7 +761,6 @@ static int format_default_value(smart_str *str, zval *value) {
 		smart_str_append(str, ast_str);
 		zend_string_release(ast_str);
 	}
-	return SUCCESS;
 }
 
 static inline bool has_internal_arg_info(const zend_function *fptr) {
@@ -808,9 +807,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 			zval *default_value = get_default_from_recv((zend_op_array*)fptr, offset);
 			if (default_value) {
 				smart_str_appends(str, " = ");
-				if (format_default_value(str, default_value) == FAILURE) {
-					return;
-				}
+				format_default_value(str, default_value);
 			}
 		}
 	}
@@ -1055,9 +1052,7 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		zval *default_value = property_get_default(prop);
 		if (default_value && !Z_ISUNDEF_P(default_value)) {
 			smart_str_appends(str, " = ");
-			if (format_default_value(str, default_value) == FAILURE) {
-				return;
-			}
+			format_default_value(str, default_value);
 		}
 	}
 
@@ -7181,10 +7176,7 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 				smart_str_appends(&str, " = ");
 			}
 
-			if (format_default_value(&str, &attr->data->args[i].value) == FAILURE) {
-				smart_str_free(&str);
-				RETURN_THROWS();
-			}
+			format_default_value(&str, &attr->data->args[i].value);
 
 			smart_str_appends(&str, " ]\n");
 		}
