@@ -1088,6 +1088,14 @@ mail.add_x_header = Off
 ; RFC 2822 non conformant MTA.
 mail.mixed_lf_and_crlf = Off
 
+; Control line ending mode for mail messages and headers.
+; Possible values: "crlf" (default), "lf", "mixed", "os"
+; - crlf: Use CRLF line endings
+; - lf: Use LF line endings only (converts CRLF in message to LF)
+; - mixed: Same as mail.mixed_lf_and_crlf = On
+; - os: Use CRLF on Windows, LF on other systems
+mail.cr_lf_mode = crlf
+
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
