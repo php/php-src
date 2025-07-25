@@ -3509,6 +3509,8 @@ void accel_shutdown(void)
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
 		ini_entry->on_modify = orig_include_path_on_modify;
 	}
+
+	accel_startup_ok = false;
 }
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason)
