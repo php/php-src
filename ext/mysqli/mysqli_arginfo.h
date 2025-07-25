@@ -1190,31 +1190,31 @@ static void register_mysqli_symbols(int module_number)
 	zend_attribute *attribute_Deprecated_const_MYSQLI_DATA_TRUNCATED_0 = zend_add_global_constant_attribute(const_MYSQLI_DATA_TRUNCATED, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_DATA_TRUNCATED_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_MYSQLI_DATA_TRUNCATED_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_DATA_TRUNCATED_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_DATA_TRUNCATED_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_DATA_TRUNCATED_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED_0 = zend_add_global_constant_attribute(const_MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_INDEX_USED_0 = zend_add_global_constant_attribute(const_MYSQLI_SERVER_QUERY_NO_INDEX_USED, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_INDEX_USED_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_INDEX_USED_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_INDEX_USED_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_INDEX_USED_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_SERVER_QUERY_NO_INDEX_USED_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_SERVER_QUERY_WAS_SLOW_0 = zend_add_global_constant_attribute(const_MYSQLI_SERVER_QUERY_WAS_SLOW, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_WAS_SLOW_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_MYSQLI_SERVER_QUERY_WAS_SLOW_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_WAS_SLOW_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_SERVER_QUERY_WAS_SLOW_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_SERVER_QUERY_WAS_SLOW_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_SERVER_PS_OUT_PARAMS_0 = zend_add_global_constant_attribute(const_MYSQLI_SERVER_PS_OUT_PARAMS, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_SERVER_PS_OUT_PARAMS_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_MYSQLI_SERVER_PS_OUT_PARAMS_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_SERVER_PS_OUT_PARAMS_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_SERVER_PS_OUT_PARAMS_0->args[1].value, attribute_Deprecated_const_MYSQLI_NO_DATA_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_SERVER_PS_OUT_PARAMS_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_GRANT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
@@ -1227,55 +1227,55 @@ static void register_mysqli_symbols(int module_number)
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_LOG_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_LOG, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_LOG_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_LOG_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_LOG_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_LOG_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_LOG_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_TABLES_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_TABLES, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_TABLES_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_TABLES_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_TABLES_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_TABLES_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_TABLES_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_HOSTS_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_HOSTS, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_HOSTS_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_HOSTS_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_HOSTS_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_HOSTS_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_HOSTS_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_STATUS_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_STATUS, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_STATUS_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_STATUS_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_STATUS_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_STATUS_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_STATUS_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_THREADS_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_THREADS, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_THREADS_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_THREADS_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_THREADS_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_THREADS_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_THREADS_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_REPLICA_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_REPLICA, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_REPLICA_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_REPLICA_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_REPLICA_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_REPLICA_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_REPLICA_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_SLAVE_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_SLAVE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_SLAVE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_SLAVE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_SLAVE_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_SLAVE_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_SLAVE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_MASTER_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_MASTER, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_MASTER_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_MASTER_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_MASTER_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_MASTER_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_MASTER_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_REFRESH_BACKUP_LOG_0 = zend_add_global_constant_attribute(const_MYSQLI_REFRESH_BACKUP_LOG, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_BACKUP_LOG_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_MYSQLI_REFRESH_BACKUP_LOG_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_MYSQLI_REFRESH_BACKUP_LOG_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_MYSQLI_REFRESH_BACKUP_LOG_0->args[1].value, attribute_Deprecated_const_MYSQLI_REFRESH_GRANT_0_arg1_str);
 	attribute_Deprecated_const_MYSQLI_REFRESH_BACKUP_LOG_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_MYSQLI_IS_MARIADB_0 = zend_add_global_constant_attribute(const_MYSQLI_IS_MARIADB, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);

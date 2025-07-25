@@ -3350,7 +3350,7 @@ class AttributeInfo {
                     $initValue = "\tZVAL_STR(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
                 } elseif (isset($declaredStrings[$strVal])) {
                     $strUse = $declaredStrings[$strVal];
-                    $initValue = "\tZVAL_STR(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
+                    $initValue = "\tZVAL_STR_COPY(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
                 }
             }
             if ($initValue === '') {

@@ -126,6 +126,6 @@ static void register_filter_symbols(int module_number)
 	zend_attribute *attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0 = zend_add_global_constant_attribute(const_FILTER_SANITIZE_STRIPPED, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].value, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].value, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str);
 	attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
