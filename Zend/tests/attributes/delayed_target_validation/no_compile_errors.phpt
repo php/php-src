@@ -13,16 +13,25 @@ class Demo {
 
 	#[DelayedTargetValidation]
 	#[Attribute]
-	public string $v;
+	public string $v1;
+
+	public string $v2 {
+		#[DelayedTargetValidation]
+		#[Attribute]
+		get => $this->v2;
+		#[DelayedTargetValidation]
+		#[Attribute]
+		set => $value;
+	}
 
 	#[DelayedTargetValidation]
 	#[Attribute]
 	public function __construct(
 		#[DelayedTargetValidation]
 		#[Attribute]
-		public string $v2
+		public string $v3
 	) {
-		$this->v = $v2;
+		$this->v1 = $v3;
 		echo __METHOD__ . "\n";
 	}
 }

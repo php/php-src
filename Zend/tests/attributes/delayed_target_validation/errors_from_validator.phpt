@@ -19,11 +19,28 @@ readonly class DemoReadonly {}
 #[AllowDynamicProperties]
 enum DemoEnum {}
 
+class DemoClass {
+	#[DelayedTargetValidation]
+	#[NoDiscard] // Does nothing here
+	public $val;
+
+	public string $hooked {
+		#[DelayedTargetValidation]
+		// #[NoDiscard] // Does nothing here
+		get => $this->hooked;
+		#[DelayedTargetValidation]
+		// #[NoDiscard] // Does nothing here
+		set => $value;
+	}
+}
+
 $cases = [
 	new ReflectionClass('DemoTrait'),
 	new ReflectionClass('DemoInterface'),
 	new ReflectionClass('DemoReadonly'),
 	new ReflectionClass('DemoEnum'),
+	// new ReflectionProperty('DemoClass', 'hooked')->getHook(PropertyHookType::Get),
+	// new ReflectionProperty('DemoClass', 'hooked')->getHook(PropertyHookType::Set),
 ];
 foreach ($cases as $r) {
 	echo str_repeat("*", 20) . "\n";

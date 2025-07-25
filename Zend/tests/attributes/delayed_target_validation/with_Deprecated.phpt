@@ -6,36 +6,45 @@
 #[DelayedTargetValidation]
 #[Deprecated] // Does nothing here
 class DemoClass {
-  #[DelayedTargetValidation]
-  #[Deprecated] // Does nothing here
-  public $val;
+	#[DelayedTargetValidation]
+	#[Deprecated] // Does nothing here
+	public $val;
 
-  #[DelayedTargetValidation]
-  #[Deprecated] // Does something here
-  public const CLASS_CONST = 'FOO';
+	public string $hooked {
+		#[DelayedTargetValidation]
+		#[Deprecated] // Does something here
+		get => $this->hooked;
+		#[DelayedTargetValidation]
+		#[Deprecated] // Does something here
+		set => $value;
+	}
 
-  public function __construct(
-    #[DelayedTargetValidation]
-    #[Deprecated] // Does nothing here
-    $str
-  ) {
-    echo "Got: $str\n";
-    $this->val = $str;
-  }
+	#[DelayedTargetValidation]
+	#[Deprecated] // Does something here
+	public const CLASS_CONST = 'FOO';
 
-  #[DelayedTargetValidation]
-  #[Deprecated] // Does something here
-  public function printVal() {
-    echo 'Value is: ' . $this->val . "\n";
-    return 123;
-  }
+	public function __construct(
+		#[DelayedTargetValidation]
+		#[Deprecated] // Does nothing here
+		$str
+	) {
+		echo "Got: $str\n";
+		$this->val = $str;
+	}
+
+	#[DelayedTargetValidation]
+	#[Deprecated] // Does something here
+	public function printVal() {
+		echo 'Value is: ' . $this->val . "\n";
+		return 123;
+	}
 }
 
 #[DelayedTargetValidation]
 #[Deprecated] // Does something here
 function demoFn() {
-  echo __FUNCTION__ . "\n";
-  return 456;
+	echo __FUNCTION__ . "\n";
+	return 456;
 }
 
 #[DelayedTargetValidation]
@@ -45,6 +54,8 @@ const GLOBAL_CONST = 'BAR';
 $d = new DemoClass('example');
 $d->printVal();
 var_dump($d->val);
+$d->hooked = "foo";
+var_dump($d->hooked);
 var_dump(DemoClass::CLASS_CONST);
 demoFn();
 var_dump(GLOBAL_CONST);
@@ -55,6 +66,11 @@ Got: example
 Deprecated: Method DemoClass::printVal() is deprecated in %s on line %d
 Value is: example
 string(7) "example"
+
+Deprecated: Method DemoClass::$hooked::set() is deprecated in %s on line %d
+
+Deprecated: Method DemoClass::$hooked::get() is deprecated in %s on line %d
+string(3) "foo"
 
 Deprecated: Constant DemoClass::CLASS_CONST is deprecated in %s on line %d
 string(3) "FOO"
