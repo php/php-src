@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7dcba884671fd90b891fab7e3f0d4cc9a4ac76a1 */
+ * Stub hash: ba3a517f23ba76d450e933b2fdd33b30e73f8707 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -12,6 +12,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_beginTransac
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_PDO_commit arginfo_class_PDO_beginTransaction
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDO_disconnect, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_errorCode, 0, 0, IS_STRING, 1)
 ZEND_END_ARG_INFO()
@@ -30,6 +33,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_PDO_getAvailableDrivers arginfo_class_PDO_errorInfo
 
 #define arginfo_class_PDO_inTransaction arginfo_class_PDO_beginTransaction
+
+#define arginfo_class_PDO_isConnected arginfo_class_PDO_disconnect
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_PDO_lastInsertId, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -62,12 +67,14 @@ ZEND_END_ARG_INFO()
 ZEND_METHOD(PDO, __construct);
 ZEND_METHOD(PDO, beginTransaction);
 ZEND_METHOD(PDO, commit);
+ZEND_METHOD(PDO, disconnect);
 ZEND_METHOD(PDO, errorCode);
 ZEND_METHOD(PDO, errorInfo);
 ZEND_METHOD(PDO, exec);
 ZEND_METHOD(PDO, getAttribute);
 ZEND_METHOD(PDO, getAvailableDrivers);
 ZEND_METHOD(PDO, inTransaction);
+ZEND_METHOD(PDO, isConnected);
 ZEND_METHOD(PDO, lastInsertId);
 ZEND_METHOD(PDO, prepare);
 ZEND_METHOD(PDO, query);
@@ -80,12 +87,14 @@ static const zend_function_entry class_PDO_methods[] = {
 	ZEND_ME(PDO, __construct, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, beginTransaction, arginfo_class_PDO_beginTransaction, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, commit, arginfo_class_PDO_commit, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, disconnect, arginfo_class_PDO_disconnect, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, errorCode, arginfo_class_PDO_errorCode, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, errorInfo, arginfo_class_PDO_errorInfo, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, exec, arginfo_class_PDO_exec, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, getAttribute, arginfo_class_PDO_getAttribute, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, getAvailableDrivers, arginfo_class_PDO_getAvailableDrivers, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(PDO, inTransaction, arginfo_class_PDO_inTransaction, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, isConnected, arginfo_class_PDO_isConnected, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, lastInsertId, arginfo_class_PDO_lastInsertId, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, prepare, arginfo_class_PDO_prepare, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, query, arginfo_class_PDO_query, ZEND_ACC_PUBLIC)
