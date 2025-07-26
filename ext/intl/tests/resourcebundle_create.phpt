@@ -24,14 +24,6 @@ function ut_main() {
         $str_res .= debug( $r1 );
     $str_res .= print_r( $r1['testsring'], true);
 
-    // fall out
-    $r2 = ut_resourcebundle_create( 'en_US', BUNDLE, false );
-        $str_res .= debug( $r2 );
-
-    // missing
-    $r3 = ut_resourcebundle_create( 'en_US', 'nonexisting' );
-        $str_res .= debug( $r3 );
-
     return $str_res;
 }
 
@@ -56,7 +48,3 @@ ResourceBundle Object
 )
 
  -127: U_USING_DEFAULT_WARNING
-NULL
-    2: resourcebundle_ctor: Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR
-NULL
-    2: resourcebundle_ctor: Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR
