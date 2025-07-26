@@ -62,6 +62,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		zend_class_entry *class_type, zval *initializer_zv,
 		zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags);
 ZEND_API zend_object *zend_lazy_object_init(zend_object *obj);
+ZEND_API zend_object *zend_lazy_object_init_ex(zend_object *obj, zend_string *prop_name);
 ZEND_API zend_object *zend_lazy_object_mark_as_initialized(zend_object *obj);
 
 void zend_lazy_objects_init(zend_lazy_objects_store *store);

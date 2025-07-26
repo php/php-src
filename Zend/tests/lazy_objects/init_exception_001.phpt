@@ -24,6 +24,6 @@ for ($i = 0; $i < 2; $i++) {
 --EXPECTF--
 Fatal error: Uncaught Exception in %s:%d
 Stack trace:
-#0 %s(%d): {closure:%s:%d}(Object(C))
+#0 %s(%d): {closure:%s:%d}(Object(C), 'c')
 #1 {main}
   thrown in %s on line %d

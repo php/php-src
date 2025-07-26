@@ -105,7 +105,7 @@ Error: Lazy object was released during initialization
 string(13) "C::__destruct"
 # Nested error (ghost):
 Error: Lazy object was released during initialization
-TypeError: Lazy object initializer must return NULL or no value
+TypeError: Lazy object initializer must return NULL, no value or true
 # Nested error (proxy):
 Error: Lazy object was released during initialization
 TypeError: The real instance class stdClass is not compatible with the proxy class C. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.

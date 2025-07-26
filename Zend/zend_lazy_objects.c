@@ -559,6 +559,11 @@ exit:
 /* Initialize a lazy object. */
 ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 {
+	return zend_lazy_object_init_ex(obj, NULL);
+}
+
+ZEND_API zend_object *zend_lazy_object_init_ex(zend_object *obj, zend_string *prop)
+{
 	ZEND_ASSERT(zend_object_is_lazy(obj));
 
 	/* If obj is an initialized lazy proxy, return the real instance. This
@@ -618,25 +623,50 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 
 	/* Call initializer */
 	zval retval;
-	int argc = 1;
-	zval zobj;
+	int argc = 2;
 	HashTable *named_params = NULL;
 	zend_object *instance = NULL;
 
-	ZVAL_OBJ(&zobj, obj);
+	zval args[2];
+	ZVAL_OBJ(&args[0], obj);
+	if (prop) {
+		ZVAL_STR(&args[1], prop);
+	} else {
+		ZVAL_NULL(&args[1]);
+	}
 
-	zend_call_known_fcc(initializer, &retval, argc, &zobj, named_params);
+	zend_call_known_fcc(initializer, &retval, argc, args, named_params);
 
 	if (EG(exception)) {
 		zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
 		goto exit;
 	}
 
-	if (Z_TYPE(retval) != IS_NULL) {
+	if (Z_TYPE(retval) != IS_NULL && Z_TYPE(retval) != IS_TRUE) {
 		zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
 		zval_ptr_dtor(&retval);
-		zend_type_error("Lazy object initializer must return NULL or no value");
+		zend_type_error("Lazy object initializer must return NULL, no value or true");
 		goto exit;
+	}
+
+	/* Restore IS_PROP_LAZY flags for flags that remain uninitialized. */
+	int lazy_properties_count = 0;
+	if (Z_TYPE(retval) == IS_TRUE && prop) {
+		if (ce->default_properties_count) {
+			for (int i = 0; i < ce->default_properties_count; i++) {
+				zval *prop = &obj->properties_table[i];
+				if (Z_TYPE_P(prop) == IS_UNDEF
+				 && (Z_PROP_FLAG_P(&properties_table_snapshot[i]) & IS_PROP_LAZY)) {
+					lazy_properties_count++;
+					Z_PROP_FLAG_P(prop) = IS_PROP_UNINIT | IS_PROP_LAZY;
+				}
+			}
+		}
+		if (lazy_properties_count != 0) {
+			OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED;
+			zend_lazy_object_info *info = zend_lazy_object_get_info(obj);
+			info->lazy_properties_count = lazy_properties_count;
+		}
 	}
 
 	if (properties_table_snapshot) {
@@ -654,9 +684,11 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 		zend_release_properties(properties_snapshot);
 	}
 
-	/* Must be very last in this function, for the
-	 * zend_lazy_object_has_stale_info() check */
-	zend_lazy_object_del_info(obj);
+	if (!(OBJ_EXTRA_FLAGS(obj) & IS_OBJ_LAZY_UNINITIALIZED)) {
+		/* Must be very last in this function, for the
+		 * zend_lazy_object_has_stale_info() check */
+		zend_lazy_object_del_info(obj);
+	}
 
 	instance = obj;
 
