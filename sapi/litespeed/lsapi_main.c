@@ -1395,6 +1395,8 @@ void start_children( int children )
             switch( pid ) {
             case 0: /* children process */
 
+                php_child_init();
+
                 /* don't catch our signals */
                 sigaction( SIGTERM, &old_term, 0 );
                 sigaction( SIGQUIT, &old_quit, 0 );
