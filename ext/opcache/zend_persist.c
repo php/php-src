@@ -1394,11 +1394,11 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 
 zend_error_info **zend_persist_warnings(uint32_t num_warnings, zend_error_info **warnings) {
 	if (warnings) {
-		warnings = zend_shared_memdup_free(warnings, num_warnings * sizeof(zend_error_info *));
+		warnings = zend_shared_memdup(warnings, num_warnings * sizeof(zend_error_info *));
 		for (uint32_t i = 0; i < num_warnings; i++) {
-			warnings[i] = zend_shared_memdup_free(warnings[i], sizeof(zend_error_info));
 			zend_accel_store_string(warnings[i]->filename);
 			zend_accel_store_string(warnings[i]->message);
+			warnings[i] = zend_shared_memdup(warnings[i], sizeof(zend_error_info));
 		}
 	}
 	return warnings;

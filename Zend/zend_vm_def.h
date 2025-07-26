@@ -7938,7 +7938,7 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
 		if (zv) {
 			SAVE_OPLINE();
 			ce = zend_bind_class_in_slot(zv, lcname, Z_STR_P(RT_CONSTANT(opline, opline->op2)));
-			if (!ce) {
+			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -7962,7 +7962,7 @@ ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY, CACHE_SLOT)
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			SAVE_OPLINE();
 			ce = zend_do_link_class(ce, (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL, rtd_key);
-			if (!ce) {
+			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
 		}

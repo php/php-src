@@ -1327,7 +1327,6 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 
 	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
 	if (ce) {
-		ZEND_ASSERT(!EG(exception));
 		zend_observer_class_linked_notify(ce, Z_STR_P(lcname));
 		return ce;
 	}
