@@ -40,7 +40,7 @@ static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
 	size_t i = strlen(message);
 	char *tmp;
-	if (i == 0) {
+	if (UNEXPECTED(i == 0)) {
 		tmp = pemalloc(1, persistent);
 		tmp[0] = '\0';
 		return tmp;
