@@ -1786,6 +1786,9 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
   ]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
 
+  PHP_ADD_SOURCES([Zend], m4_normalize([zend_async_API.c]),
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
+
 PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/scripts/Makefile.frag],
   [$abs_srcdir/scripts],
   [scripts])
