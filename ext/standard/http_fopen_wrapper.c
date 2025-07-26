@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "ext/uri/php_uri.h"
 #include "php_streams.h"
 #include "php_network.h"
 #include "php_ini.h"
@@ -358,7 +359,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		zval *response_header STREAMS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
-	php_url *resource = NULL;
+	php_uri *resource = NULL;
 	int use_ssl;
 	int use_proxy = 0;
 	zend_string *tmp = NULL;
@@ -391,7 +392,11 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	resource = php_url_parse(path);
+	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("http", context);
+	if (uri_handler == NULL) {
+		return NULL;
+	}
+	resource = php_uri_parse_to_struct(uri_handler, path, strlen(path), URI_COMPONENT_READ_RAW, true);
 	if (resource == NULL) {
 		return NULL;
 	}
@@ -403,7 +408,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			(tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "proxy")) == NULL ||
 			Z_TYPE_P(tmpzval) != IS_STRING ||
 			Z_STRLEN_P(tmpzval) == 0) {
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return php_stream_open_wrapper_ex(path, mode, REPORT_ERRORS, NULL, context);
 		}
 		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
@@ -416,7 +421,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 		if (strpbrk(mode, "awx+")) {
 			php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper does not support writeable connections");
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return NULL;
 		}
 
@@ -445,7 +450,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (request_fulluri && (strchr(path, '\n') != NULL || strchr(path, '\r') != NULL)) {
 		php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper full URI path does not allow CR or LF characters");
-		php_url_free(resource);
+		php_uri_struct_free(resource);
 		zend_string_release(transport_string);
 		return NULL;
 	}
@@ -461,7 +466,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		if (d > timeoutmax) {
 			php_stream_wrapper_log_error(wrapper, options, "timeout must be lower than " ZEND_ULONG_FMT, (zend_ulong)timeoutmax);
 			zend_string_release(transport_string);
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return NULL;
 		}
 #ifndef PHP_WIN32
@@ -758,9 +763,9 @@ finish:
 		strcat(scratch, ":");
 
 		/* Note: password is optional! */
-		if (resource->pass) {
-			php_url_decode(ZSTR_VAL(resource->pass), ZSTR_LEN(resource->pass));
-			strcat(scratch, ZSTR_VAL(resource->pass));
+		if (resource->password) {
+			php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
+			strcat(scratch, ZSTR_VAL(resource->password));
 		}
 
 		stmp = php_base64_encode((unsigned char*)scratch, strlen(scratch));
@@ -1094,9 +1099,9 @@ finish:
 				header_info.location = NULL;
 			}
 
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			/* check for invalid redirection URLs */
-			if ((resource = php_url_parse(new_path)) == NULL) {
+			if ((resource = php_uri_parse_to_struct(uri_handler, new_path, strlen(new_path), URI_COMPONENT_READ_RAW, true)) == NULL) {
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
 				efree(new_path);
 				goto out;
@@ -1120,7 +1125,7 @@ finish:
 			/* check for control characters in login, password & path */
 			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
 				CHECK_FOR_CNTRL_CHARS(resource->user);
-				CHECK_FOR_CNTRL_CHARS(resource->pass);
+				CHECK_FOR_CNTRL_CHARS(resource->password);
 				CHECK_FOR_CNTRL_CHARS(resource->path);
 			}
 			int new_flags = HTTP_WRAPPER_REDIRECTED;
@@ -1151,7 +1156,7 @@ out:
 	}
 
 	if (resource) {
-		php_url_free(resource);
+		php_uri_struct_free(resource);
 	}
 
 	if (stream) {
