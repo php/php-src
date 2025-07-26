@@ -1370,22 +1370,21 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 
 static int my_poll(php_socket_t fd, int events, int timeout) {
 	int n;
-	zend_hrtime_t timeout_hr = (zend_hrtime_t) timeout * 1000000;
+	uint64_t timeout_ns = (uint64_t) timeout * 1000000;
 
 	while (true) {
-		zend_hrtime_t start_ns = zend_hrtime();
-		n = php_pollfd_for_ms(fd, events, (int) (timeout_hr / 1000000));
+		uint64_t start_ns = zend_monotime_fallback();
+		n = php_pollfd_for_ms(fd, events, (int) (timeout_ns / 1000000));
 
 		if (n == -1 && php_socket_errno() == EINTR) {
-			zend_hrtime_t delta_ns = zend_hrtime() - start_ns;
-			/* delta_ns == 0 is only possible with a platform that does not support a high-res timer. */
-			if (delta_ns > timeout_hr || UNEXPECTED(delta_ns == 0)) {
+			uint64_t delta_ns = zend_monotime_fallback() - start_ns;
+			if (delta_ns > timeout_ns) {
 #ifndef PHP_WIN32
 				errno = ETIMEDOUT;
 #endif
 				break;
 			}
-			timeout_hr -= delta_ns;
+			timeout_ns -= delta_ns;
 		} else {
 			break;
 		}
