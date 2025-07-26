@@ -26,6 +26,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: P::foo(): Returning type int which is implicitly converted to type bool is deprecated in %s on line %d
 bool(false)
 C::foo(): Return value must be of type array|false, int returned

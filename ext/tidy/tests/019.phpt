@@ -13,17 +13,17 @@ tidy_repair_string($s, $s, $s);
 tidy_repair_string($l, $l, $l);
 
 try {
-    tidy_repair_file($s, $l, $l, $l);
+    tidy_repair_file($s, $l, $l);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    tidy_repair_file($s, $s, $s, $s);
+    tidy_repair_file($s, $s, $s);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-tidy_repair_file($l, $l, $l ,$l); // This doesn't emit any warning, TODO look into
+tidy_repair_file($l, $l, $l); // This doesn't emit any warning, TODO look into
 
 echo "Done\n";
 ?>

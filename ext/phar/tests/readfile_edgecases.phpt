@@ -22,7 +22,7 @@ $context = stream_context_create();
 readfile("readfile_edgecases.txt");
 set_include_path("' . addslashes(__DIR__) . '");
 readfile("readfile_edgecases.txt", true);
-readfile("./hi", 0, $context);
+readfile("./hi", false, $context);
 readfile("../oops");
 ?>
 ');
@@ -39,7 +39,7 @@ $context = stream_context_create();
 readfile("readfile_edgecases.txt");
 set_include_path("%stests");
 readfile("readfile_edgecases.txt", true);
-readfile("./hi", 0, $context);
+readfile("./hi", false, $context);
 readfile("../oops");
 ?>
 test
@@ -50,7 +50,7 @@ $context = stream_context_create();
 readfile("readfile_edgecases.txt");
 set_include_path("%stests");
 readfile("readfile_edgecases.txt", true);
-readfile("./hi", 0, $context);
+readfile("./hi", false, $context);
 readfile("../oops");
 ?>
 

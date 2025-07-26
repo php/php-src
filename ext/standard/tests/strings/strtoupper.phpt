@@ -20,9 +20,7 @@ $strings = array (
   "stRINg0234",
   "1.233.344StrinG12333",
   "$$$$$$!!!!@@@@@@@ ABCDEF !!!***",
-  "ABCD\0abcdABCD",
-  TRUE,
-  FALSE,
+  "ABCDabcdABCD",
   /* Check for off-by-one errors in the SSE implementation */
   "aaaaaaaaaaaaaaaaaaaa",
   "zzzzzzzzzzzzzzzzzzzz",
@@ -52,7 +50,7 @@ else
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtoupper() with 256 chars ***
 00 => 00
 01 => 01
@@ -332,39 +330,33 @@ string(20) "1.233.344STRING12333"
 string(31) "$$$$$$!!!!@@@@@@@ ABCDEF !!!***"
 
 -- Iteration 5 --
-string(13) "ABCD%0ABCDABCD"
+string(12) "ABCDABCDABCD"
 
 -- Iteration 6 --
-string(1) "1"
-
--- Iteration 7 --
-string(0) ""
-
--- Iteration 8 --
 string(20) "AAAAAAAAAAAAAAAAAAAA"
 
--- Iteration 9 --
+-- Iteration 7 --
 string(20) "ZZZZZZZZZZZZZZZZZZZZ"
 
--- Iteration 10 --
+-- Iteration 8 --
 string(20) "````````````````````"
 
--- Iteration 11 --
+-- Iteration 9 --
 string(20) "{{{{{{{{{{{{{{{{{{{{"
 
--- Iteration 12 --
+-- Iteration 10 --
 string(40) "{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{"
 
--- Iteration 13 --
+-- Iteration 11 --
 string(31) "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234"
 
--- Iteration 14 --
+-- Iteration 12 --
 string(32) "ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"
 
--- Iteration 15 --
+-- Iteration 13 --
 string(33) "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456"
 
--- Iteration 16 --
+-- Iteration 14 --
 string(62) "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 *** Testing strtoupper() with two different case strings ***

@@ -7,7 +7,7 @@ opcache.save_comments=1
 
 function strip_doc_comment($c)
 {
-    if (!strlen($c) || $c === false) return $c;
+    if ($c === false || !strlen($c)) return $c;
     return trim(substr($c, 3, -2));
 }
 

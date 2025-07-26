@@ -25,10 +25,12 @@ function check_read($file_handle, $read_size, $expect_size) {
   $data_from_file = fread($file_handle, $read_size);
 
   // check if data read is of expected size
-  if ( strlen($data_from_file) == $expect_size)
+  $len = $data_from_file ? strlen($data_from_file) : 0;
+  if ($len === $expect_size) {
     echo "OK\n";
-  else
-    echo "Error reading file, total number of bytes read = ".strlen($data_from_file)."\n";
+  } else {
+    echo "Error reading file, total number of bytes read = ".$len."\n";
+  }
 
   // file pointer position after read
   var_dump( ftell($file_handle) );
@@ -41,9 +43,17 @@ function check_read($file_handle, $read_size, $expect_size) {
 
 echo "*** Testing fread() : usage variations ***\n";
 
-$file_modes = array("a","ab","at",
-                    "w","wb","wt",
-                    "x","xb","xt" );
+$file_modes = [
+    "a",
+    "ab",
+    "at",
+    "w",
+    "wb",
+    "wt",
+    "x",
+    "xb",
+    "xt",
+];
 
 $file_content_types = array("numeric","text","text_with_new_line", "alphanumeric");
 
