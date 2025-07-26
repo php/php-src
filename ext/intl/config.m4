@@ -33,12 +33,8 @@ if test "$PHP_INTL" != "no"; then
       formatter/formatter_parse.c
       grapheme/grapheme_string.c
       grapheme/grapheme_util.c
-      idn/idn.c
       intl_convert.c
       intl_error.c
-      locale/locale_class.c
-      locale/locale_methods.c
-      locale/locale.c
       listformatter/listformatter_class.c
       msgformat/msgformat_attr.c
       msgformat/msgformat_class.c
@@ -57,7 +53,6 @@ if test "$PHP_INTL" != "no"; then
       spoofchecker/spoofchecker_main.c
       transliterator/transliterator_class.c
       transliterator/transliterator_methods.c
-      uchar/uchar.c
     ]),
     [$ext_shared],,
     [$INTL_COMMON_FLAGS],
@@ -83,7 +78,12 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/breakiterator_methods.cpp \
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
-    breakiterator/codepointiterator_methods.cpp"
+    breakiterator/codepointiterator_methods.cpp \
+    idn/idn.cpp \
+    locale/locale_class.cpp \
+    locale/locale_methods.cpp \
+    locale/locale.cpp \
+    uchar/uchar.cpp"
 
   PHP_REQUIRE_CXX()
 

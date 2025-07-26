@@ -1,3 +1,4 @@
+extern "C" {
 #include "uchar.h"
 #include "intl_data.h"
 #include "intl_convert.h"
@@ -6,6 +7,7 @@
 #include <unicode/utf8.h>
 
 #include "uchar_arginfo.h"
+}
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
@@ -314,7 +316,7 @@ IC_METHOD(enumCharNames) {
 		RETURN_FALSE;
 	}
 
-	u_enumCharNames(start, limit, (UEnumCharNamesFn*)enumCharNames_callback, &context, nameChoice, &error);
+	u_enumCharNames(start, limit, (UEnumCharNamesFn*)enumCharNames_callback, &context, static_cast<UCharNameChoice>(nameChoice), &error);
 	INTL_CHECK_STATUS(error, NULL);
 	RETURN_TRUE;
 }
@@ -515,7 +517,7 @@ IC_METHOD(getFC_NFKC_Closure) {
 	if (closure_len == 0) {
 		RETURN_EMPTY_STRING();
 	}
-	closure = safe_emalloc(sizeof(UChar), closure_len + 1, 0);
+	closure = reinterpret_cast<UChar *>(safe_emalloc(sizeof(UChar), closure_len + 1, 0));
 	error = U_ZERO_ERROR;
 	closure_len = u_getFC_NFKC_Closure(cp, closure, closure_len, &error);
 	if (U_FAILURE(error)) {
