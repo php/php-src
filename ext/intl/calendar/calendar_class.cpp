@@ -61,7 +61,7 @@ U_CFUNC Calendar *calendar_fetch_native_calendar(zend_object *object)
 {
 	Calendar_object *co = php_intl_calendar_fetch_object(object);
 
-	return co->ucal;
+	return co->ucal.get();
 }
 
 U_CFUNC void calendar_object_construct(zval *object,
@@ -71,7 +71,7 @@ U_CFUNC void calendar_object_construct(zval *object,
 
 	CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
 	assert(co->ucal == NULL);
-	co->ucal = calendar;
+	co->ucal.reset(calendar);
 }
 
 /* {{{ clone handler for Calendar */
@@ -90,7 +90,7 @@ static zend_object *Calendar_clone_obj(zend_object *object)
 		if (UNEXPECTED(!newCalendar)) {
 			zend_throw_error(NULL, "Failed to clone IntlCalendar");
 		} else {
-			co_new->ucal = newCalendar;
+			co_new->ucal.reset(newCalendar);
 		}
 	} else {
 		zend_throw_error(NULL, "Cannot clone uninitialized IntlCalendar");
@@ -143,7 +143,7 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 	debug_info = zend_new_array(8);
 
 	co  = php_intl_calendar_fetch_object(object);
-	cal = co->ucal;
+	cal = co->ucal.get();
 
 	if (cal == NULL) {
 		ZVAL_FALSE(&zv);
@@ -221,10 +221,7 @@ static void Calendar_objects_free(zend_object *object)
 {
 	Calendar_object* co = php_intl_calendar_fetch_object(object);
 
-	if (co->ucal) {
-		delete co->ucal;
-		co->ucal = NULL;
-	}
+	co->ucal.reset();
 	intl_error_reset(CALENDAR_ERROR_P(co));
 
 	zend_object_std_dtor(&co->zo);
@@ -237,7 +234,7 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
 	Calendar_object* intern = (Calendar_object*)zend_object_alloc(sizeof(Calendar_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
-    object_properties_init(&intern->zo, ce);
+	object_properties_init(&intern->zo, ce);
 	calendar_object_init(intern);
 
 	return &intern->zo;
@@ -250,13 +247,14 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
 void calendar_register_IntlCalendar_class(void)
 {
 	/* Create and register 'IntlCalendar' class. */
+	Calendar_object empty;
 	Calendar_ce_ptr = register_class_IntlCalendar();
 	Calendar_ce_ptr->default_object_handlers = &Calendar_handlers;
 	Calendar_ce_ptr->create_object = Calendar_object_create;
 
 	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
-	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
+	Calendar_handlers.offset = reinterpret_cast<char *>(&empty.zo) - reinterpret_cast<char *>(&empty);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
 	Calendar_handlers.get_debug_info = Calendar_get_debug_info;
 	Calendar_handlers.free_obj = Calendar_objects_free;
