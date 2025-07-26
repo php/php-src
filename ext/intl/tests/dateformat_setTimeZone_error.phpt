@@ -24,5 +24,5 @@ try {
 ?>
 --EXPECTF--
 Warning: Array to string conversion in %s on line %d
-datefmt_set_timezone: No such time zone: 'Array'
-datefmt_set_timezone: No such time zone: 'non existing timezone'
+IntlDateFormatter::setTimeZone(): No such time zone: "Array"
+IntlDateFormatter::setTimeZone(): No such time zone: "non existing timezone"

@@ -64,11 +64,11 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	{
 		char *buf = NULL;
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
-		spprintf( &buf, 0, "transliterator_create: unable to open ICU transliterator"
+		spprintf( &buf, 0, "unable to open ICU transliterator"
 			" with id \"%s\"", str_id );
 		if( buf == NULL ) {
 			intl_error_set_custom_msg( NULL,
-				"transliterator_create: unable to open ICU transliterator", 0 );
+				"unable to open ICU transliterator", 0 );
 		}
 		else
 		{
@@ -85,7 +85,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	{
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 		intl_error_set_custom_msg( NULL,
-			"transliterator_create: internal constructor call failed", 0 );
+			"internal constructor call failed", 0 );
 		zval_ptr_dtor( object );
 		return FAILURE;
 	}
@@ -169,7 +169,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		char *msg = NULL;
 		smart_str parse_error_str;
 		parse_error_str = intl_parse_error_to_string( &parse_error );
-		spprintf( &msg, 0, "transliterator_create_from_rules: unable to "
+		spprintf( &msg, 0, "unable to "
 			"create ICU transliterator from rules (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "" );
 		smart_str_free( &parse_error_str );
 		if( msg != NULL )
@@ -182,7 +182,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	}
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
-	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create_from_rules: internal constructor call failed" );
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "internal constructor call failed" );
 }
 /* }}} */
 
@@ -207,11 +207,11 @@ PHP_FUNCTION( transliterator_create_inverse )
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; /* change "to" into new object (from "object" ) */
 
 	utrans = utrans_openInverse( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
-	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create_inverse: could not create "
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "could not create "
 		"inverse ICU transliterator" );
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
-	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create: internal constructor call failed" );
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "internal constructor call failed" );
 }
 /* }}} */
 
@@ -229,7 +229,7 @@ PHP_FUNCTION( transliterator_list_ids )
 
 	en = utrans_openIDs( &status );
 	INTL_CHECK_STATUS( status,
-		"transliterator_list_ids: Failed to obtain registered transliterators" );
+		"Failed to obtain registered transliterators" );
 
 	array_init( return_value );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
@@ -252,7 +252,7 @@ PHP_FUNCTION( transliterator_list_ids )
 	{
 		zend_array_destroy( Z_ARR_P(return_value) );
 		RETVAL_FALSE;
-		intl_error_set_custom_msg( NULL, "transliterator_list_ids: "
+		intl_error_set_custom_msg( NULL,
 			"Failed to build array of registered transliterators", 0 );
 	}
 }
@@ -342,7 +342,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	{
 		char *msg;
 		spprintf( &msg, 0,
-			"transliterator_transliterate: Neither \"start\" nor the \"end\" "
+			"Neither \"start\" nor the \"end\" "
 			"arguments can exceed the number of UTF-16 code units "
 			"(in this case, %d)", (int) ustr_len );
 		if(msg != NULL )
@@ -385,7 +385,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		{
 			intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 			intl_errors_set_custom_msg( TRANSLITERATOR_ERROR_P( to ),
-				"transliterator_transliterate: transliteration failed", 0 );
+				"transliteration failed", 0 );
 			goto cleanup;
 		}
 		else

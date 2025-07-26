@@ -226,7 +226,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	}
 
 	if(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"numfmt_get_symbol: invalid symbol value", 0 );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value", 0 );
 		RETURN_FALSE;
 	}
 
@@ -268,7 +268,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 	}
 
 	if (symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"numfmt_set_symbol: invalid symbol value", 0 );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value", 0 );
 		RETURN_FALSE;
 	}
 

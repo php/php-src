@@ -137,12 +137,12 @@ TypeError: NumberFormatter::create(): Argument #1 ($locale) must be of type stri
 TypeError: numfmt_create(): Argument #1 ($locale) must be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
-IntlException: Constructor failed in %s on line %d
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
-'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
+IntlException: NumberFormatter::__construct(): number formatter creation failed in %s on line %d
+'NumberFormatter::__construct(): number formatter creation failed: U_UNSUPPORTED_ERROR'
+'NumberFormatter::create(): number formatter creation failed: U_UNSUPPORTED_ERROR'
+'numfmt_create(): number formatter creation failed: U_UNSUPPORTED_ERROR'
 
-IntlException: Constructor failed in %s on line %d
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
-'numfmt_create: number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
+IntlException: NumberFormatter::__construct(): number formatter creation failed in %s on line %d
+'NumberFormatter::__construct(): number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
+'NumberFormatter::create(): number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'
+'numfmt_create(): number formatter creation failed: U_MEMORY_ALLOCATION_ERROR'

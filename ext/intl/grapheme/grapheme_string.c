@@ -370,7 +370,7 @@ PHP_FUNCTION(grapheme_substr)
 		grapheme_substr_ascii(str, str_len, start, (int32_t)length, &sub_str, &asub_str_len);
 
 		if ( NULL == sub_str ) {
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: invalid parameters", 1 );
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "invalid parameters", 1 );
 			RETURN_FALSE;
 		}
 
@@ -747,7 +747,7 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: start not contained in string", 0 );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "start not contained in string", 0 );
 		RETURN_FALSE;
 	}
 

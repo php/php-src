@@ -190,7 +190,7 @@ PHP_FUNCTION( normalizer_normalize )
 	if( !u8str )
 	{
 		intl_error_set( NULL, status,
-				"normalizer_normalize: error converting normalized text UTF-8", 0 );
+				"error converting normalized text UTF-8", 0 );
 		RETURN_FALSE;
 	}
 

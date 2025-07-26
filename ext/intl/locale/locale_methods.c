@@ -510,7 +510,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 
 	/* Error encountered while fetching the value */
 	if( result ==0) {
-		spprintf(&msg , 0, "locale_get_%s : unable to get locale %s", tag_name , tag_name );
+		spprintf(&msg , 0, "unable to get locale %s", tag_name );
 		intl_error_set( NULL, status, msg , 1 );
 		efree(msg);
 		RETURN_NULL();
@@ -575,9 +575,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 
 	if(loc_name_len > ULOC_FULLNAME_CAPACITY) {
 		/* See bug 67397: overlong locale names cause trouble in uloc_getDisplayName */
-		spprintf(&msg , 0, "locale_get_display_%s : name too long", tag_name );
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  msg , 1 );
-		efree(msg);
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  "name too long" , 1 );
 		RETURN_FALSE;
 	}
 
@@ -634,7 +632,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 				continue;
 			}
 
-			spprintf(&msg, 0, "locale_get_display_%s : unable to get locale %s", tag_name , tag_name );
+			spprintf(&msg, 0, "unable to get locale %s", tag_name );
 			intl_error_set( NULL, status, msg , 1 );
 			efree(msg);
 			if( disp_name){
@@ -663,7 +661,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	efree( disp_name );
 	if( !u8str )
 	{
-		spprintf(&msg, 0, "locale_get_display_%s :error converting display name for %s to UTF-8", tag_name , tag_name );
+		spprintf(&msg, 0, "error converting display name for %s to UTF-8", tag_name );
 		intl_error_set( NULL, status, msg , 1 );
 		efree(msg);
 		RETURN_FALSE;
@@ -771,7 +769,7 @@ PHP_FUNCTION( locale_get_keywords )
 				kw_value_str = zend_string_truncate(kw_value_str, kw_value_len, 0);
 			}
 			if (U_FAILURE(status)) {
-				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "locale_get_keywords: Error encountered while getting the keyword  value for the  keyword", 0 );
+				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "Error encountered while getting the keyword value for the  keyword", 0 );
 				if( kw_value_str){
 					zend_string_efree( kw_value_str );
 				}
@@ -923,7 +921,7 @@ static int handleAppendResult( int result, smart_str* loc_name)
 	intl_error_reset( NULL );
 	if( result == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "locale_compose: parameter array element is not a string", 0 );
+			 "parameter array element is not a string", 0 );
 		smart_str_free(loc_name);
 		return 0;
 	}
@@ -1283,7 +1281,7 @@ PHP_FUNCTION(locale_filter_matches)
 		can_loc_range=get_icu_value_internal( loc_range , LOC_CANONICALIZE_TAG , &result , 0);
 		if( result <=0) {
 			intl_error_set( NULL, status,
-				"locale_filter_matches : unable to canonicalize loc_range" , 0 );
+				"unable to canonicalize loc_range" , 0 );
 			RETURN_FALSE;
 		}
 
@@ -1291,7 +1289,7 @@ PHP_FUNCTION(locale_filter_matches)
 		can_lang_tag = get_icu_value_internal( lang_tag , LOC_CANONICALIZE_TAG , &result ,  0);
 		if( result <=0) {
 			intl_error_set( NULL, status,
-				"locale_filter_matches : unable to canonicalize lang_tag" , 0 );
+				"unable to canonicalize lang_tag" , 0 );
 			RETURN_FALSE;
 		}
 
@@ -1441,7 +1439,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
 		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[cur_arr_len*2]);
 		if(result == 0) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag", 0);
+			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize lang_tag", 0);
 			LOOKUP_CLEAN_RETURN(NULL);
 		}
 		cur_arr[cur_arr_len*2+1] = Z_STRVAL_P(ele_value);
@@ -1456,14 +1454,14 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 				if(lang_tag) {
 					zend_string_release_ex(lang_tag, 0);
 				}
-				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
+				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize lang_tag" , 0);
 				LOOKUP_CLEAN_RETURN(NULL);
 			}
 			cur_arr[i*2] = erealloc(cur_arr[i*2], lang_tag->len+1);
 			result = strToMatch(lang_tag->val, cur_arr[i*2]);
 			zend_string_release_ex(lang_tag, 0);
 			if(result == 0) {
-				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
+				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize lang_tag" , 0);
 				LOOKUP_CLEAN_RETURN(NULL);
 			}
 		}
@@ -1475,7 +1473,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 		can_loc_range = get_icu_value_internal(loc_range, LOC_CANONICALIZE_TAG, &result , 0);
 		if( result != 1 || can_loc_range == NULL || !can_loc_range->val[0]) {
 			/* Error */
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize loc_range" , 0 );
+			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize loc_range" , 0 );
 			if(can_loc_range) {
 				zend_string_release_ex(can_loc_range, 0);
 			}
@@ -1493,7 +1491,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	}
 	if(result == 0) {
 		efree(cur_loc_range);
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "unable to canonicalize lang_tag" , 0);
 		LOOKUP_CLEAN_RETURN(NULL);
 	}
 
@@ -1603,7 +1601,7 @@ PHP_FUNCTION(locale_accept_from_http)
 			len = end ? end-start : http_accept_len-(start-http_accept);
 			if(len > ULOC_FULLNAME_CAPACITY) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"locale_accept_from_http: locale string too long", 0 );
+						"locale string too long", 0 );
 				RETURN_FALSE;
 			}
 			if(end) {
@@ -1613,11 +1611,11 @@ PHP_FUNCTION(locale_accept_from_http)
 	}
 
 	available = ures_openAvailableLocales(NULL, &status);
-	INTL_CHECK_STATUS(status, "locale_accept_from_http: failed to retrieve locale list");
+	INTL_CHECK_STATUS(status, "failed to retrieve locale list");
 	len = uloc_acceptLanguageFromHTTP(resultLocale, INTL_MAX_LOCALE_LEN,
 						&outResult, http_accept, available, &status);
 	uenum_close(available);
-	INTL_CHECK_STATUS(status, "locale_accept_from_http: failed to find acceptable locale");
+	INTL_CHECK_STATUS(status, "failed to find acceptable locale");
 	if (len < 0 || outResult == ULOC_ACCEPT_FAILED) {
 		RETURN_FALSE;
 	}
@@ -1656,7 +1654,7 @@ PHP_FUNCTION(locale_add_likely_subtags)
 	}
 
 	int32_t maximized_locale_len = uloc_addLikelySubtags(locale, maximized_locale, sizeof(maximized_locale), &status);
-	INTL_CHECK_STATUS(status, "locale_add_likely_subtags: invalid locale");
+	INTL_CHECK_STATUS(status, "invalid locale");
 	if (maximized_locale_len < 0) {
 		RETURN_FALSE;
 	}
@@ -1679,7 +1677,7 @@ PHP_FUNCTION(locale_minimize_subtags)
 	}
 
 	int32_t minimized_locale_len = uloc_minimizeSubtags(locale, minimized_locale, sizeof(minimized_locale), &status);
-	INTL_CHECK_STATUS(status, "locale_minimize_subtags: invalid locale");
+	INTL_CHECK_STATUS(status, "invalid locale");
 	if (minimized_locale_len < 0) {
 		RETURN_FALSE;
 	}

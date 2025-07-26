@@ -27,11 +27,11 @@ echo "Done.\n";
 ?>
 --EXPECTF--
 Warning: Transliterator::createFromRules(): String conversion of rules to UTF-16 failed in %s on line %d
-String conversion of rules to UTF-16 failed: U_INVALID_CHAR_FOUND
+Transliterator::createFromRules(): String conversion of rules to UTF-16 failed: U_INVALID_CHAR_FOUND
 
-Warning: Transliterator::createFromRules(): transliterator_create_from_rules: unable to create ICU transliterator from rules (parse error after "{'``'}a > “;", before or at "{'``'}a > b;") in %s on line %d
-transliterator_create_from_rules: unable to create ICU transliterator from rules (parse error after "{'``'}a > “;", before or at "{'``'}a > b;"): U_RULE_MASK_ERROR
+Warning: Transliterator::createFromRules(): unable to create ICU transliterator from rules (parse error after "{'``'}a > “;", before or at "{'``'}a > b;") in %s on line %d
+Transliterator::createFromRules(): unable to create ICU transliterator from rules (parse error after "{'``'}a > “;", before or at "{'``'}a > b;"): U_RULE_MASK_ERROR
 
-Warning: Transliterator::createFromRules(): transliterator_create_from_rules: unable to create ICU transliterator from rules (parse error at offset 0, before or at "ffff") in %s on line %d
-transliterator_create_from_rules: unable to create ICU transliterator from rules (parse error at offset 0, before or at "ffff"): U_MISSING_OPERATOR
+Warning: Transliterator::createFromRules(): unable to create ICU transliterator from rules (parse error at offset 0, before or at "ffff") in %s on line %d
+Transliterator::createFromRules(): unable to create ICU transliterator from rules (parse error at offset 0, before or at "ffff"): U_MISSING_OPERATOR
 Done.

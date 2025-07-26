@@ -41,7 +41,7 @@ string(49) "Sunday, January 1, 2012 at 5:12:00 AM GMT+05:12"
 string(49) "Sunday, January 1, 2012 at 5:12:00 AM GMT+05:12"
 string(46) "Sunday, 6 Tevet 5772 at 5:12:00 AM GMT+05:12"
 
-Fatal error: Uncaught IntlException: IntlDateFormatter::__construct(): datefmt_create: Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %s:%d
+Fatal error: Uncaught IntlException: IntlDateFormatter::__construct(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %s:%d
 Stack trace:
 #0 %s(%d): IntlDateFormatter->__construct('en_US@calendar=...', 0, 0, 'GMT+05:12', -1)
 #1 {main}

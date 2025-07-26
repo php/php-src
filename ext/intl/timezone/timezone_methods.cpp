@@ -88,8 +88,7 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 		RETURN_NULL();
 	}
 
-	tz = timezone_convert_datetimezone(tzobj->type, tzobj, false, NULL,
-		"intltz_from_date_time_zone");
+	tz = timezone_convert_datetimezone(tzobj->type, tzobj, false, NULL);
 	if (tz == NULL) {
 		RETURN_NULL();
 	}
@@ -567,7 +566,7 @@ U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
 	TIMEZONE_METHOD_FETCH_OBJECT;
 
 	zval *ret = timezone_convert_to_datetimezone(to->utimezone,
-		&TIMEZONE_ERROR(to), "intltz_to_date_time_zone", &tmp);
+		&TIMEZONE_ERROR(to), &tmp);
 
 	if (ret) {
 		ZVAL_COPY_VALUE(return_value, ret);
@@ -636,7 +635,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 
 	error = U_ZERO_ERROR;
 	TimeZone::getWindowsID(uID, uWinID, error);
-	INTL_CHECK_STATUS(error, "intltz_get_windows_id: Unable to get timezone from windows ID");
+	INTL_CHECK_STATUS(error, "Unable to get timezone from windows ID");
 	if (uWinID.length() == 0) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 		               "unknown system timezone", 0);

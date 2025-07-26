@@ -94,7 +94,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		HashTable *ht = Z_ARRVAL_P(format);
 		if (zend_hash_num_elements(ht) != 2) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-					"datefmt_format_object: bad format; if array, it must have "
+					"bad format; if array, it must have "
 					"two elements", 0);
 			RETURN_FALSE;
 		}
@@ -105,12 +105,12 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 			if (!valid_format(z)) {
 				if (idx == 0) {
 					intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"datefmt_format_object: bad format; the date format (first "
+						"bad format; the date format (first "
 						"element of the array) is not valid", 0);
 				} else {
 					ZEND_ASSERT(idx == 1 && "We checked that there are two elements above");
 					intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"datefmt_format_object: bad format; the time format (second "
+						"bad format; the time format (second "
 						"element of the array) is not valid", 0);
 				}
 				RETURN_FALSE;
@@ -127,7 +127,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	} else if (Z_TYPE_P(format) == IS_LONG) {
 		if (!valid_format(format)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-					"datefmt_format_object: the date/time format type is invalid",
+					"the date/time format type is invalid",
 					0);
 			RETURN_FALSE;
 		}
@@ -138,7 +138,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		}
 		if (Z_STRLEN_P(format) == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-					"datefmt_format_object: the format is empty", 0);
+					"the format is empty", 0);
 			RETURN_FALSE;
 		}
 		pattern = true;
@@ -154,7 +154,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		Calendar *obj_cal = calendar_fetch_native_calendar(object);
 		if (obj_cal == NULL) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-					"datefmt_format_object: bad IntlCalendar instance: "
+					"bad IntlCalendar instance: "
 					"not initialized properly", 0);
 			RETURN_FALSE;
 		}
@@ -162,27 +162,26 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		date = obj_cal->getTime(status);
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
-					"datefmt_format_object: error obtaining instant from "
+					"error obtaining instant from "
 					"IntlCalendar", 0);
 			RETURN_FALSE;
 		}
 		cal = std::unique_ptr<Calendar>(obj_cal->clone());
 	} else if (instanceof_function(instance_ce, php_date_get_interface_ce())) {
 		TimeZone *tz;
-		if (intl_datetime_decompose(object, &date, &tz, NULL,
-				"datefmt_format_object") == FAILURE) {
+		if (intl_datetime_decompose(object, &date, &tz, NULL) == FAILURE) {
 			RETURN_FALSE;
 		}
 		timeZone = std::unique_ptr<TimeZone>(tz);
 		cal = std::unique_ptr<Calendar>(new GregorianCalendar(Locale::createFromName(locale_str), status));
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
-					"datefmt_format_object: could not create GregorianCalendar",
+					"could not create GregorianCalendar",
 					0);
 			RETURN_FALSE;
 		}
 	} else {
-		intl_error_set(NULL, status, "datefmt_format_object: the passed object "
+		intl_error_set(NULL, status, "the passed object "
 				"must be an instance of either IntlCalendar or DateTimeInterface",
 				0);
 		RETURN_FALSE;
@@ -197,7 +196,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
-					"datefmt_format_object: could not create SimpleDateFormat",
+					"could not create SimpleDateFormat",
 					0);
 			RETURN_FALSE;
 		}
@@ -207,7 +206,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 		if (df == NULL) { /* according to ICU sources, this should never happen */
 			intl_error_set(NULL, status,
-					"datefmt_format_object: could not create DateFormat",
+					"could not create DateFormat",
 					0);
 			RETURN_FALSE;
 		}
@@ -225,7 +224,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		u8str = intl_charFromString(result, &status);
 		if (!u8str) {
 			intl_error_set(NULL, status,
-					"datefmt_format_object: error converting result to UTF-8",
+					"error converting result to UTF-8",
 					0);
 			RETURN_FALSE;
 		}

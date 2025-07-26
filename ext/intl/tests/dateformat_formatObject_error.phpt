@@ -29,27 +29,27 @@ var_dump(IntlDateFormatter::formatObject($cal, ""));
 
 ?>
 --EXPECTF--
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the passed object must be an instance of either IntlCalendar or DateTimeInterface in %s on line %d
+Warning: IntlDateFormatter::formatObject(): the passed object must be an instance of either IntlCalendar or DateTimeInterface in %s on line %d
 bool(false)
 
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: bad IntlCalendar instance: not initialized properly in %s on line %d
+Warning: IntlDateFormatter::formatObject(): bad IntlCalendar instance: not initialized properly in %s on line %d
 bool(false)
 Object of type B (inheriting DateTime) has not been correctly initialized by calling parent::__construct() in its constructor
 
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the date/time format type is invalid in %s on line %d
+Warning: IntlDateFormatter::formatObject(): the date/time format type is invalid in %s on line %d
 bool(false)
 
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: bad format; if array, it must have two elements in %s on line %d
+Warning: IntlDateFormatter::formatObject(): bad format; if array, it must have two elements in %s on line %d
 bool(false)
 
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: bad format; if array, it must have two elements in %s on line %d
+Warning: IntlDateFormatter::formatObject(): bad format; if array, it must have two elements in %s on line %d
 bool(false)
 
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: bad format; the date format (first element of the array) is not valid in %s on line %d
+Warning: IntlDateFormatter::formatObject(): bad format; the date format (first element of the array) is not valid in %s on line %d
 bool(false)
 
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: bad format; the time format (second element of the array) is not valid in %s on line %d
+Warning: IntlDateFormatter::formatObject(): bad format; the time format (second element of the array) is not valid in %s on line %d
 bool(false)
 
-Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the format is empty in %s on line %d
+Warning: IntlDateFormatter::formatObject(): the format is empty in %s on line %d
 bool(false)

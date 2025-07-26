@@ -9,7 +9,7 @@ ini_set("intl.default_locale", "pt_PT");
 ini_set("date.timezone", 'Atlantic/Azores');
 
 function print_exception($e) {
-    echo "\nException: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 try {
@@ -28,10 +28,7 @@ try {
     print_exception($e);
 }
 ?>
---EXPECTF--
-
-Exception: datefmt_create: No such time zone: 'bad timezone' in %s on line %d
-
-Exception: IntlDateFormatter::__construct(): datefmt_create: Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %s on line %d
-
-Exception: IntlDateFormatter::__construct(): Argument #5 ($calendar) must be of type IntlCalendar|int|null, stdClass given in %s on line %d
+--EXPECT--
+Exception: IntlDateFormatter::__construct(): No such time zone: "bad timezone"
+Exception: IntlDateFormatter::__construct(): Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object
+Exception: IntlDateFormatter::__construct(): Argument #5 ($calendar) must be of type IntlCalendar|int|null, stdClass given

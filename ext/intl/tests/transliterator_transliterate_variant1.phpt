@@ -28,11 +28,11 @@ Warning: transliterator_transliterate(): String conversion of id to UTF-16 faile
 
 Warning: transliterator_transliterate(): Could not create transliterator with ID %s
 
-String conversion of id to UTF-16 failed: U_INVALID_CHAR_FOUND
+transliterator_transliterate(): String conversion of id to UTF-16 failed: U_INVALID_CHAR_FOUND
 
-Warning: transliterator_transliterate(): transliterator_create: unable to open ICU transliterator with id "inexistent id" in %s on line %d
+Warning: transliterator_transliterate(): unable to open ICU transliterator with id "inexistent id" in %s on line %d
 
-Warning: transliterator_transliterate(): Could not create transliterator with ID "inexistent id" (transliterator_create: unable to open ICU transliterator with id "inexistent id": U_INVALID_ID) in %s on line %d
+Warning: transliterator_transliterate(): Could not create transliterator with ID "inexistent id" (transliterator_transliterate(): unable to open ICU transliterator with id "inexistent id": U_INVALID_ID) in %s on line %d
 
-transliterator_create: unable to open ICU transliterator with id "inexistent id": U_INVALID_ID
+transliterator_transliterate(): unable to open ICU transliterator with id "inexistent id": U_INVALID_ID
 Done.
