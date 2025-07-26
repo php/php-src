@@ -16,22 +16,21 @@ $initializer = function ($obj, $prop) {
     if ($prop === null || $prop === 'y') {
         $obj->y = 2;
     }
-    return true;
 };
 
-$obj = $rc->newLazyGhost($initializer);
+$obj = $rc->newLazyGhost($initializer, ReflectionClass::PARTIAL_INITIALIZATION);
 var_dump($obj);
 var_dump($obj->x);
 var_dump($obj);
 var_dump($obj->y);
 var_dump($obj);
 
-$obj = $rc->newLazyGhost($initializer);
+$obj = $rc->newLazyGhost($initializer, ReflectionClass::PARTIAL_INITIALIZATION);
 foreach ($obj as $prop) {}
 var_dump($obj);
 
 // Object is realized when no specific prop is requested.
-$obj = $rc->newLazyGhost(function () {});
+$obj = $rc->newLazyGhost(function () {}, ReflectionClass::PARTIAL_INITIALIZATION);
 foreach ($obj as $prop) {}
 var_dump($obj);
 

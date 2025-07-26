@@ -595,6 +595,9 @@ ZEND_API zend_object *zend_lazy_object_init_ex(zend_object *obj, zend_string *pr
 
 	zend_fcall_info_cache *initializer = zend_lazy_object_get_initializer_fcc(obj);
 
+	zend_lazy_object_info *info = zend_lazy_object_get_info(obj);
+	bool partial_initialization = info->flags & ZEND_LAZY_OBJECT_PARTIAL_INITIALIZATION;
+
 	/* Prevent reentrant initialization */
 	OBJ_EXTRA_FLAGS(obj) &= ~IS_OBJ_LAZY_UNINITIALIZED;
 
@@ -623,16 +626,18 @@ ZEND_API zend_object *zend_lazy_object_init_ex(zend_object *obj, zend_string *pr
 
 	/* Call initializer */
 	zval retval;
-	int argc = 2;
+	int argc = partial_initialization ? 2 : 1;
 	HashTable *named_params = NULL;
 	zend_object *instance = NULL;
 
 	zval args[2];
 	ZVAL_OBJ(&args[0], obj);
-	if (prop) {
-		ZVAL_STR(&args[1], prop);
-	} else {
-		ZVAL_NULL(&args[1]);
+	if (partial_initialization) {
+		if (prop) {
+			ZVAL_STR(&args[1], prop);
+		} else {
+			ZVAL_NULL(&args[1]);
+		}
 	}
 
 	zend_call_known_fcc(initializer, &retval, argc, args, named_params);
@@ -642,16 +647,16 @@ ZEND_API zend_object *zend_lazy_object_init_ex(zend_object *obj, zend_string *pr
 		goto exit;
 	}
 
-	if (Z_TYPE(retval) != IS_NULL && Z_TYPE(retval) != IS_TRUE) {
+	if (Z_TYPE(retval) != IS_NULL) {
 		zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
 		zval_ptr_dtor(&retval);
-		zend_type_error("Lazy object initializer must return NULL, no value or true");
+		zend_type_error("Lazy object initializer must return NULL or no value");
 		goto exit;
 	}
 
 	/* Restore IS_PROP_LAZY flags for flags that remain uninitialized. */
 	int lazy_properties_count = 0;
-	if (Z_TYPE(retval) == IS_TRUE && prop) {
+	if (partial_initialization && prop) {
 		if (ce->default_properties_count) {
 			for (int i = 0; i < ce->default_properties_count; i++) {
 				zval *prop = &obj->properties_table[i];
@@ -664,7 +669,6 @@ ZEND_API zend_object *zend_lazy_object_init_ex(zend_object *obj, zend_string *pr
 		}
 		if (lazy_properties_count != 0) {
 			OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED;
-			zend_lazy_object_info *info = zend_lazy_object_get_info(obj);
 			info->lazy_properties_count = lazy_properties_count;
 		}
 	}

@@ -36,9 +36,13 @@
 /* Do not call destructor when making existing object lazy */
 #define ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR                    (1<<4)
 
+/* Initialization may not initialize all properties, keeping the object lazy. */
+#define ZEND_LAZY_OBJECT_PARTIAL_INITIALIZATION             (1<<5)
+
 #define ZEND_LAZY_OBJECT_USER_MASK (                                        \
 	ZEND_LAZY_OBJECT_SKIP_INITIALIZATION_ON_SERIALIZE |                     \
-	ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR                                        \
+	ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR |                                      \
+	ZEND_LAZY_OBJECT_PARTIAL_INITIALIZATION                                 \
 )
 
 #define ZEND_LAZY_OBJECT_STRATEGY_MASK (                                    \

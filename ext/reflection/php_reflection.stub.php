@@ -250,6 +250,9 @@ class ReflectionClass implements Reflector
     /** @cvalue ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR */
     public const int SKIP_DESTRUCTOR = UNKNOWN;
 
+    /** @cvalue ZEND_LAZY_OBJECT_PARTIAL_INITIALIZATION */
+    public const int PARTIAL_INITIALIZATION = UNKNOWN;
+
     public string $name;
 
     private function __clone(): void {}

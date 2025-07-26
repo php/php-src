@@ -106,7 +106,7 @@ lazy ghost object(C)#%d (0) {
   uninitialized(int)
 }
 string(11) "initializer"
-TypeError: Lazy object initializer must return NULL, no value or true
+TypeError: Lazy object initializer must return NULL or no value
 lazy ghost object(C)#%d (0) {
   ["b"]=>
   uninitialized(int)
