@@ -85,6 +85,8 @@ jobs:
         with:
           runTestsParameters: >-
             --asan -x
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
   ALPINE:
     if: inputs.run_alpine
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
