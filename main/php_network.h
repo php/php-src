@@ -66,6 +66,11 @@
  * unless buf is not NULL.
  * Also works sensibly for win32 */
 BEGIN_EXTERN_C()
+#ifdef PHP_WIN32
+char *php_socket_strerror_s(long err, char *buf, size_t bufsize);
+#else
+#define php_socket_strerror_s php_socket_strerror
+#endif
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 PHPAPI zend_string *php_socket_error_str(long err);
 END_EXTERN_C()
