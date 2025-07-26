@@ -753,6 +753,30 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
  * version of the address will be emalloc'd and returned.
  * */
 
+ /* Helper functions for timeout calculation */
+static struct timeval php_network_subtract_timeval(struct timeval a, struct timeval b)
+{
+	struct timeval difference;
+	difference.tv_sec  = a.tv_sec  - b.tv_sec;
+	difference.tv_usec = a.tv_usec - b.tv_usec;
+	if (a.tv_usec < b.tv_usec) {
+		difference.tv_sec  -= 1L;
+		difference.tv_usec += 1000000L;
+	}
+	return difference;
+}
+
+static int php_network_compare_timeval(struct timeval a, struct timeval b)
+{
+	if (a.tv_sec > b.tv_sec || (a.tv_sec == b.tv_sec && a.tv_usec > b.tv_usec)) {
+		return 1;
+	} else if (a.tv_sec == b.tv_sec && a.tv_usec == b.tv_usec) {
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
 /* {{{ php_network_accept_incoming */
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		zend_string **textaddr,
@@ -768,31 +792,118 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 	int error = 0, n;
 	php_sockaddr_storage sa;
 	socklen_t sl;
+	int original_flags = 0;
+	int made_nonblocking = 0;
+	struct timeval start_time, *current_timeout = timeout;
+	struct timeval remaining_timeout;
+	int has_timeout = 0;
 
-	n = php_pollfd_for(srvsock, PHP_POLLREADABLE, timeout);
+	/* Initialize timeout tracking if we have a timeout */
+	if (timeout && (timeout->tv_sec > 0 || timeout->tv_usec > 0)) {
+		has_timeout = 1;
+		/* gettimeofday is not monotonic; using it here is not strictly correct */
+		gettimeofday(&start_time, NULL);
+		remaining_timeout = *timeout;
+		current_timeout = &remaining_timeout;
+	}
 
-	if (n == 0) {
-		error = PHP_TIMEOUT_ERROR_VALUE;
-	} else if (n == -1) {
-		error = php_socket_errno();
-	} else {
-		sl = sizeof(sa);
+	while (1) {
+		n = php_pollfd_for(srvsock, PHP_POLLREADABLE, current_timeout);
 
-		clisock = accept(srvsock, (struct sockaddr*)&sa, &sl);
-
-		if (clisock != SOCK_ERR) {
-			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
-					textaddr,
-					addr, addrlen
-					);
-			if (tcp_nodelay) {
-#ifdef TCP_NODELAY
-				setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
-#endif
-			}
-		} else {
+		if (n == 0) {
+			error = PHP_TIMEOUT_ERROR_VALUE;
+			break;
+		} else if (n == -1) {
 			error = php_socket_errno();
+			break;
+		} else {
+			sl = sizeof(sa);
+
+			/* Get original socket flags */
+			original_flags = fcntl(srvsock, F_GETFL, 0);
+			if (original_flags == -1) {
+				error = php_socket_errno();
+				break;
+			}
+
+			/* Make socket non-blocking if it wasn't already */
+			if (!(original_flags & O_NONBLOCK)) {
+				if (fcntl(srvsock, F_SETFL, original_flags | O_NONBLOCK) == -1) {
+					error = php_socket_errno();
+					break;
+				}
+				made_nonblocking = 1;
+			}
+
+			clisock = accept(srvsock, (struct sockaddr*)&sa, &sl);
+
+			/* Restore original blocking mode if we changed it */
+			if (made_nonblocking) {
+				fcntl(srvsock, F_SETFL, original_flags);
+				made_nonblocking = 0;
+			}
+
+			if (clisock != SOCK_ERR) {
+				/* Successfully accepted connection */
+				php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
+						textaddr,
+						addr, addrlen
+						);
+				if (tcp_nodelay) {
+#ifdef TCP_NODELAY
+					setsockopt(clisock, IPPROTO_TCP, TCP_NODELAY, (char*)&tcp_nodelay, sizeof(tcp_nodelay));
+#endif
+				}
+				break; /* Success - exit the loop */
+			} else {
+				error = php_socket_errno();
+
+				/* If we got EAGAIN/EWOULDBLOCK, the connection was accepted by another process
+				 * Go back to polling with remaining timeout */
+#if EAGAIN == EWOULDBLOCK
+				if (error == EAGAIN) {
+#else
+				if (error == EAGAIN || error == EWOULDBLOCK) {
+#endif
+					if (has_timeout) {
+						struct timeval cur_time, elapsed_time;
+
+						/* Calculate how much time has elapsed */
+						gettimeofday(&cur_time, NULL);
+						elapsed_time = php_network_subtract_timeval(cur_time, start_time);
+
+						/* Check if we've already exceeded the timeout */
+						if (php_network_compare_timeval(elapsed_time, *timeout) >= 0) {
+							error = PHP_TIMEOUT_ERROR_VALUE;
+							break;
+						}
+
+						/* Calculate remaining timeout */
+						remaining_timeout = php_network_subtract_timeval(*timeout, elapsed_time);
+
+						/* Ensure we don't have negative values */
+						if (remaining_timeout.tv_sec < 0 ||
+							(remaining_timeout.tv_sec == 0 && remaining_timeout.tv_usec <= 0)) {
+							error = PHP_TIMEOUT_ERROR_VALUE;
+							break;
+						}
+
+						current_timeout = &remaining_timeout;
+					}
+
+					error = 0; /* Reset error - this is expected behavior */
+					continue; /* Go back to poll with reduced timeout */
+				} else {
+					/* Real error occurred */
+					break;
+				}
+			}
 		}
+	}
+
+	/* Clean up if we still have non-blocking mode set (error case) */
+	if (made_nonblocking) {
+		fcntl(srvsock, F_SETFL, original_flags);
 	}
 
 	if (error_code) {
