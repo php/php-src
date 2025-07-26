@@ -10,6 +10,8 @@ runs:
       run: |
         set -x
 
+        OPCACHE_TLS_TESTS_DEPS="gcc clang lld"
+
         export DEBIAN_FRONTEND=noninteractive
 
         # Install sudo in Docker for consistent actions
@@ -74,4 +76,5 @@ runs:
           libqdbm-dev \
           libjpeg-dev \
           libpng-dev \
-          libfreetype6-dev
+          libfreetype6-dev \
+          $OPCACHE_TLS_TESTS_DEPS
