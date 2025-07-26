@@ -134,6 +134,8 @@ jobs:
             --asan -x
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -266,6 +268,8 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -355,6 +359,10 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
+        with:
+          debug: ${{ matrix.debug }}
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -414,6 +422,8 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -1076,3 +1086,4 @@ jobs:
         with:
           configurationParameters: >-
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
+          runExtraTests: true

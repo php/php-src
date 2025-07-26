@@ -6,6 +6,8 @@ runs:
       run: |
         set -x
 
+        OPCACHE_TLS_TESTS_DEPS="gcc clang lld"
+
         sudo apt-get update
         sudo apt-get install \
           bison \
@@ -58,4 +60,5 @@ runs:
           libqdbm-dev \
           libjpeg-dev \
           libpng-dev \
-          libfreetype6-dev
+          libfreetype6-dev \
+          $OPCACHE_TLS_TESTS_DEPS
