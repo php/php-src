@@ -361,8 +361,6 @@ jobs:
             -d opcache.enable_cli=1
       - name: Extra tests
         uses: ./.github/actions/extra-tests
-        with:
-          debug: ${{ matrix.debug }}
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
