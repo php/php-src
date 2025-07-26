@@ -398,6 +398,9 @@ PHP 8.5 UPGRADE NOTES
   . socket_set_option with multicast context throws a ValueError
     when the created socket is not of AF_INET/AF_INET6 family.
 
+- SysVSHM:
+  . shm_detach() now has a return type of true
+
 - Tidy:
   . tidy::__construct/parseFile/parseString now throws a ValueError
     if the configuration contains an invalid or set a read-only
