@@ -15,9 +15,9 @@ class ZException extends Exception {
 function dummy($query) {
     try {
         switch ($query) {
-            case 1;
+            case 1:
             break;
-            case 2;
+            case 2:
             break;
         default:
             throw new Exception('exception');

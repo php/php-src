@@ -1126,6 +1126,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_TENTATIVE_BIT) != 0)
 
 #define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce. Set in zend_compile.c for ZEND_AST_DIM nested within ZEND_AST_COALESCE. */
+#define ZEND_ALT_CASE_SYNTAX		(1 << 1) /* deprecated switch case terminated by semicolon */
 
 /* Attributes for ${} encaps var in strings (ZEND_AST_DIM or ZEND_AST_VAR node) */
 /* ZEND_AST_VAR nodes can have any of the ZEND_ENCAPS_VAR_* flags */
