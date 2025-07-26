@@ -598,15 +598,13 @@ static void register_test_symbols(int module_number)
 	zend_string *attribute_name_NoDiscard_func_zend_test_nodiscard_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_zend_test_nodiscard_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_nodiscard", sizeof("zend_test_nodiscard") - 1), attribute_name_NoDiscard_func_zend_test_nodiscard_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_zend_test_nodiscard_0);
-	zend_string *attribute_NoDiscard_func_zend_test_nodiscard_0_arg0_str = zend_string_init("custom message", strlen("custom message"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].value, attribute_NoDiscard_func_zend_test_nodiscard_0_arg0_str);
+	ZVAL_STR_COPY(&attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	attribute_NoDiscard_func_zend_test_nodiscard_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, 1);
 	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_nodiscard_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_nodiscard", sizeof("zend_test_deprecated_nodiscard") - 1), attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0, 1);
 	zend_string_release(attribute_name_Deprecated_func_zend_test_deprecated_nodiscard_0);
-	zend_string *attribute_Deprecated_func_zend_test_deprecated_nodiscard_0_arg0_str = zend_string_init("custom message", strlen("custom message"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_zend_test_deprecated_nodiscard_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_nodiscard_0_arg0_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_zend_test_deprecated_nodiscard_0->args[0].value, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
 	attribute_Deprecated_func_zend_test_deprecated_nodiscard_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_zend_test_deprecated_nodiscard_1 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
