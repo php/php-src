@@ -49,9 +49,6 @@ if test "$PHP_OPENSSL" != "no"; then
       the default provider.])])
 
   AS_VAR_IF([PHP_OPENSSL_ARGON2], [no],, [
-    AS_VAR_IF([PHP_THREAD_SAFETY], [yes],
-      [AC_MSG_ERROR([Not supported in ZTS mode for now])])
-
     PHP_CHECK_LIBRARY([crypto], [OSSL_set_max_threads],
       [AC_DEFINE([HAVE_OPENSSL_ARGON2], [1],
         [Define to 1 to enable OpenSSL argon2 password hashing.])],

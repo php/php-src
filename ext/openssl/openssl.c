@@ -355,7 +355,15 @@ static PHP_INI_MH(OnUpdateLibCtx)
 {
 #if PHP_OPENSSL_API_VERSION >= 0x30000
 	if (zend_string_equals_literal(new_value, "default")) {
+#if defined(ZTS) && defined(HAVE_OPENSSL_ARGON2)
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			int err_type = stage == ZEND_INI_STAGE_RUNTIME ? E_WARNING : E_ERROR;
+			php_error_docref(NULL, err_type, "OpenSSL libctx \"default\" cannot be used in this configuration");
+		}
+		return FAILURE;
+#else
 		OPENSSL_G(ctx).libctx = OPENSSL_G(ctx).default_libctx;
+#endif
 	} else if (zend_string_equals_literal(new_value, "custom")) {
 		OPENSSL_G(ctx).libctx = OPENSSL_G(ctx).custom_libctx;
 	} else {
