@@ -283,6 +283,19 @@ static bool php_open_listen_sock(php_socket *sock, unsigned short port, int back
 
 static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct sockaddr *la, socklen_t *la_len) /* {{{ */
 {
+#if defined(HAVE_ACCEPT4)
+	int flags = SOCK_CLOEXEC;
+	if (!in_sock->blocking) {
+		flags |= SOCK_NONBLOCK;
+	}
+
+	out_sock->bsd_socket = accept4(in_sock->bsd_socket, la, la_len, flags);
+
+	if (IS_INVALID_SOCKET(out_sock)) {
+		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
+		return 0;
+	}
+#else
 	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, la_len);
 
 	if (IS_INVALID_SOCKET(out_sock)) {
@@ -292,7 +305,7 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 
 #if !defined(PHP_WIN32)
 	/**
-	 * accept4 could had been used but not all platforms support it (e.g. Haiku, solaris < 11.4, ...)
+	 * for fewer and fewer platforms not supporting accept4 syscall we use fcntl instead,
 	 * win32, not having any concept of child process, has no need to address it.
 	 */
 	int mode;
@@ -310,6 +323,7 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 			return 0;
 		}
 	}
+#endif
 #endif
 
 	out_sock->error = 0;
