@@ -6,11 +6,9 @@ intl
 <?php
 
 $locale = 'en_US';
-$timezone = 'GMT-10:00';
-$type = IntlDateFormatter::FULL;
 $object = new stdClass();
 
-$f = new IntlDateFormatter($locale, $type, $type, $timezone, IntlDateFormatter::GREGORIAN);
+$f = new IntlDateFormatter($locale);
 
 $v = $f->format($object);
 var_dump($v);
