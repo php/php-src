@@ -11,7 +11,7 @@ $serverCode = '';
 include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
 php_cli_server_start($serverCode, null, []);
 
-$postData = proc_open("echo", [], $pipes);
+$postData = proc_open("echo Windows sucks", [], $pipes);
 
 $headers = [
     [],
