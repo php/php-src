@@ -9,8 +9,7 @@ girgias@php.net
 
 $locale = 'root';
 $fmt = '{0,whatever} would not work!';
-
-$str = 'failing';
+$str = '4,560 monkeys on 123 trees make 37.073 monkeys per tree';
 
 $m = MessageFormatter::parseMessage($locale, $fmt, $str);
 var_dump($m);

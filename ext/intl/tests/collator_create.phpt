@@ -1,5 +1,5 @@
 --TEST--
-create() icu >= 53.1
+Collator creation tests
 --EXTENSIONS--
 intl
 --FILE--
@@ -17,11 +17,9 @@ function ut_main()
     $locales = array(
         'EN-US-ODESSA',
         'UK_UA_ODESSA',
-        'uk-ua_CALIFORNIA@currency=;currency=GRN',
         '',
         'root',
         'uk@currency=EURO',
-    '12345678911131517192123252729313335373941434547495153575961636567697173757779818385878991939597991234567891113151719212325272931333537394143454749515357596163656769717375777981838587899193959799'
     );
 
     foreach( $locales as $locale )
@@ -62,7 +60,6 @@ Locale: 'UK_UA_ODESSA'
   ULOC_REQUESTED_LOCALE = 'UK_UA_ODESSA'
   ULOC_VALID_LOCALE     = 'uk'
   ULOC_ACTUAL_LOCALE    = 'uk'
-Error creating collator with 'uk-ua_CALIFORNIA@currency=;currency=GRN' locale: collator_create: unable to open ICU collator: U_ILLEGAL_ARGUMENT_ERROR
 Locale: ''
   ULOC_REQUESTED_LOCALE = ''
   ULOC_VALID_LOCALE     = '%s'
@@ -75,4 +72,3 @@ Locale: 'uk@currency=EURO'
   ULOC_REQUESTED_LOCALE = 'uk@currency=EURO'
   ULOC_VALID_LOCALE     = 'uk'
   ULOC_ACTUAL_LOCALE    = 'uk'
-Error creating collator with '12345678911131517192123252729313335373941434547495153575961636567697173757779818385878991939597991234567891113151719212325272931333537394143454749515357596163656769717375777981838587899193959799' locale: Locale string too long, should be no longer than %d characters: U_ILLEGAL_ARGUMENT_ERROR

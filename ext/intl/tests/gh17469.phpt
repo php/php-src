@@ -1,5 +1,7 @@
 --TEST--
 GH-17469: UConverter::transcode() raises always E_WARNING regardless of INI settings
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === "Windows") die("skip currently unsupported on Windows");

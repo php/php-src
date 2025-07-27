@@ -5,17 +5,17 @@ intl
 --FILE--
 <?php
 
-function ut_main()
-{
-    $ret = var_export(ut_loc_get_display_name(str_repeat('*', 256), 'en_us'), true);
-    $ret .= "\n";
-    $ret .= var_export(intl_get_error_message(), true);
-    return $ret;
-}
+$locale = str_repeat('*', 256);
+$dispLocale= 'en_us';
 
-include_once( 'ut_common.inc' );
-ut_run();
+var_dump(Locale::getDisplayName($locale, $dispLocale));
+var_dump(intl_get_error_message());
+var_dump(locale_get_display_name($locale, $dispLocale));
+var_dump(intl_get_error_message());
+
 ?>
 --EXPECT--
-false
-'locale_get_display_name : name too long: U_ILLEGAL_ARGUMENT_ERROR'
+bool(false)
+string(65) "locale_get_display_name : name too long: U_ILLEGAL_ARGUMENT_ERROR"
+bool(false)
+string(65) "locale_get_display_name : name too long: U_ILLEGAL_ARGUMENT_ERROR"

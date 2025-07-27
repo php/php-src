@@ -2,17 +2,21 @@
 MessageFormatter::format() inconsistent types in named argument
 --EXTENSIONS--
 intl
+--INI--
+intl.use_exceptions=On
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $fmt = <<<EOD
 {foo,number} {foo}
 EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
-var_dump($mf->format(array(7)));
+try {
+    var_dump($mf->format(array(7)));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: MessageFormatter::format(): Inconsistent types declared for an argument in %s on line %d
-bool(false)
+--EXPECT--
+IntlException: Inconsistent types declared for an argument

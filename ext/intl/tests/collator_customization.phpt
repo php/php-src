@@ -6,11 +6,10 @@ intl
 <?php
 
 /*
- * Check effects of changing misc collattion options.
+ * Check effects of changing misc collation options.
  */
 
-
-function cmp_array( &$coll, $a )
+function cmp_array(Collator $coll, $a)
 {
     $res = '';
     $prev = null;
@@ -32,7 +31,7 @@ function cmp_array( &$coll, $a )
     return $res;
 }
 
-function check_alternate_handling( &$coll )
+function check_alternate_handling(Collator $coll)
 {
     $res = '';
 
