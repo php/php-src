@@ -44,6 +44,12 @@ PHP 8.5 UPGRADE NOTES
   . Traits are now bound before the parent class. This is a subtle behavioral
     change, but should more closely match user expectations, demonstrated by
     GH-15753 and GH-16198.
+  . Errors emitted during compilation and class linking are now always delayed
+    and handled after compilation or class linking. Fatal errors emitted during
+    compilation or class linking cause any delayed errors to be handled
+    immediately, without calling user-defined error handlers.
+  . Exceptions thrown by user-defined error handlers when handling class linking
+    errors are not promoted to fatal errors anymore and do not prevent linking.
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,

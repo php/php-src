@@ -71,6 +71,8 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     * zend_register_string_constant()
     * zend_register_stringl_constant()
   . EG(fake_scope) now is a _const_ zend_class_entry*.
+  . zend_begin_record_errors() or EG(record_errors)=true cause errors to be
+    delayed. Before, errors would be recorded but not delayed.
 
 ========================
 2. Build system changes
