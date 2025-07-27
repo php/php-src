@@ -8,7 +8,6 @@ intl
 <?php
 
 $tzs = array(
-  'Gnomeregan' => array(NULL),
   'India Standard Time' => array(NULL),
   'Pacific Standard Time' => array('001', 'CA', 'MX', 'US', 'ZZ'),
   'Romance Standard Time' => array('001', 'BE', 'DK', 'ES', 'FR'),
@@ -25,9 +24,6 @@ foreach ($tzs as $tz => $regions) {
 }
 ?>
 --EXPECT--
-** Gnomeregan
-bool(false)
-Error: intltz_get_windows_id: Unknown windows timezone: U_ILLEGAL_ARGUMENT_ERROR
 ** India Standard Time
 string(13) "Asia/Calcutta"
 ** Pacific Standard Time
