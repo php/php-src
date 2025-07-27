@@ -11,7 +11,7 @@ $serverCode = '';
 include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
 php_cli_server_start($serverCode, null, []);
 
-$postData = proc_open("echo Windows sucks", [], $pipes);
+$postData = proc_open("echo", [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => ["pipe", "w"]], $pipes);
 
 $headers = [
     [],
@@ -36,7 +36,6 @@ foreach ($headers as $header) {
 
 proc_close($postData);
 ?>
---EXPECTF--
-%A
+--EXPECT--
 file_get_contents(): "content" resource is not a valid stream resource
 file_get_contents(): "content" resource is not a valid stream resource
