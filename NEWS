@@ -46,6 +46,9 @@ PHP                                                                        NEWS
     (ilutov)
   . Fix theoretical issues with hrtime() not being available. (nielsdos)
 
+- Windows:
+ . Free opened_path when opened_path_len >= MAXPATHLEN. (dixyes)
+
 31 Jul 2025, PHP 8.4.11
 
 - Calendar:
