@@ -127,10 +127,11 @@ PHP_FUNCTION( msgfmt_parse_message )
 	if(spattern && spattern_len) {
 		efree(spattern);
 	}
-	INTL_METHOD_CHECK_STATUS(mfo, "Creating message formatter failed");
+	INTL_METHOD_CHECK_STATUS_OR_GOTO(mfo, "Creating message formatter failed", clean);
 
 	msgfmt_do_parse(mfo, source, src_len, return_value);
 
+clean:
 	/* drop the temporary formatter */
 	msgformat_data_free(&mfo->mf_data);
 }

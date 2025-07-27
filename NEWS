@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fix crash on clone failure. (nielsdos)
 
+- Intl:
+  . Fixed GH-19261: msgfmt_parse_message leaks on message creation failure.
+    (David Carlier)
+
 - LDAP:
   . Fixed bug GH-18529 (additional inheriting of TLS int options).
     (Jakub Zelenka)
