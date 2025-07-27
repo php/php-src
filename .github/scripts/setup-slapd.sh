@@ -163,6 +163,88 @@ EOF
 
 sudo service slapd restart
 
+
+echo "=== TLS DEBUG: Testing TLS_PROTOCOL_MAX 3.2 ==="
+TEMP_LDAP_CONF=$(mktemp)
+echo 'TLS_PROTOCOL_MAX 3.2' > "$TEMP_LDAP_CONF"
+
+echo "Debug info:"
+echo "  Temp config file: $TEMP_LDAP_CONF"
+echo "  Contents:"
+cat "$TEMP_LDAP_CONF"
+echo ""
+
+echo "  Server TLS configuration check:"
+sudo ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcTLSProtocolMin=*)' dn olcTLSProtocolMin 2>/dev/null || echo "  No TLS protocol min configured"
+
+echo ""
+echo "Checking OpenLDAP config priority order (settings later in list override earlier ones):"
+
+echo "1. LDAPNOINIT: ${LDAPNOINIT:-not set}"
+
+echo "2. System file /etc/openldap/ldap.conf:"
+if [ -f /etc/openldap/ldap.conf ]; then
+  echo "   EXISTS - Contents:"
+  cat /etc/openldap/ldap.conf
+  sudo rm /etc/openldap/ldap.conf
+  echo "   REMOVED to test priority"
+else
+  echo "   Does not exist"
+fi
+
+echo "3. User files:"
+echo "   \$HOME/ldaprc: $([ -f "$HOME/ldaprc" ] && echo "EXISTS" || echo "does not exist")"
+if [ -f "$HOME/ldaprc" ]; then cat "$HOME/ldaprc"; fi
+echo "   \$HOME/.ldaprc: $([ -f "$HOME/.ldaprc" ] && echo "EXISTS" || echo "does not exist")"
+if [ -f "$HOME/.ldaprc" ]; then cat "$HOME/.ldaprc"; fi
+echo "   ./ldaprc: $([ -f "./ldaprc" ] && echo "EXISTS" || echo "does not exist")"
+if [ -f "./ldaprc" ]; then cat "./ldaprc"; fi
+
+echo "4. System file \$LDAPCONF: ${LDAPCONF:-not set}"
+if [ -n "$LDAPCONF" ] && [ -f "$LDAPCONF" ]; then
+  echo "   Contents:"
+  cat "$LDAPCONF"
+fi
+
+echo "5. User files \$LDAPRC related:"
+echo "   \$LDAPRC: ${LDAPRC:-not set}"
+if [ -n "$LDAPRC" ]; then
+  echo "   \$HOME/\$LDAPRC: $([ -f "$HOME/$LDAPRC" ] && echo "EXISTS" || echo "does not exist")"
+  echo "   \$HOME/.\$LDAPRC: $([ -f "$HOME/.$LDAPRC" ] && echo "EXISTS" || echo "does not exist")"
+  echo "   ./\$LDAPRC: $([ -f "./$LDAPRC" ] && echo "EXISTS" || echo "does not exist")"
+fi
+
+echo "6. Environment variables \$LDAP<OPTION>:"
+echo "   \$LDAPTLS_PROTOCOL_MAX: ${LDAPTLS_PROTOCOL_MAX:-not set}"
+echo "   \$LDAPBASE: ${LDAPBASE:-not set}"
+echo "   \$LDAPURI: ${LDAPURI:-not set}"
+
+echo ""
+echo "Testing with our LDAPCONF setting:"
+echo "  Command: LDAPCONF=\"$TEMP_LDAP_CONF\" ldapsearch -H ldap://localhost -D cn=Manager,dc=my-domain,dc=com -w secret -s base -b dc=my-domain,dc=com -ZZ 'objectclass=*'"
+LDAPCONF="$TEMP_LDAP_CONF" ldapsearch -H ldap://localhost -D cn=Manager,dc=my-domain,dc=com -w secret -s base -b dc=my-domain,dc=com -Z 'objectclass=*' >/dev/null 2>&1
+result1=$?
+echo "  Result: $([ $result1 -eq 0 ] && echo 'SUCCESS (unexpected)' || echo 'FAILED (expected)')"
+
+echo ""
+echo "Testing with environment variable (highest priority):"
+echo "  Command: LDAPTLS_PROTOCOL_MAX=3.2 ldapsearch -H ldap://localhost -D cn=Manager,dc=my-domain,dc=com -w secret -s base -b dc=my-domain,dc=com -ZZ 'objectclass=*'"
+LDAPTLS_PROTOCOL_MAX=3.2 ldapsearch -H ldap://localhost -D cn=Manager,dc=my-domain,dc=com -w secret -s base -b dc=my-domain,dc=com -Z 'objectclass=*' >/dev/null 2>&1
+result2=$?
+echo "  Result: $([ $result2 -eq 0 ] && echo 'SUCCESS (unexpected)' || echo 'FAILED (expected)')"
+
+echo ""
+echo "Testing what TLS version is actually being negotiated:"
+echo | openssl s_client -connect localhost:636 -servername localhost 2>&1 | grep -E "(Protocol|Cipher)" || echo "  LDAPS connection failed"
+
+rm -f "$TEMP_LDAP_CONF"
+echo ""
+echo "Summary:"
+echo "- If both LDAPCONF and LDAPTLS_PROTOCOL_MAX tests succeed, TLS version restrictions are not working"
+echo "- This would explain why the PHP test expecting failures gets successes instead"
+
+exit 1
+
 # Verify TLS connection
 tries=0
 while : ; do
@@ -182,3 +264,4 @@ while : ; do
 		fi
 	fi
 done
+
