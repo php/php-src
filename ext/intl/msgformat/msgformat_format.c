@@ -99,7 +99,7 @@ PHP_FUNCTION( msgfmt_format_message )
 		if( U_FAILURE(INTL_DATA_ERROR_CODE((mfo))) )
 		{
 			intl_error_set(/* intl_error* */ NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"msgfmt_format_message: error converting pattern to UTF-16", 0 );
+				"error converting pattern to UTF-16");
 			RETURN_FALSE;
 		}
 	} else {
@@ -114,7 +114,7 @@ PHP_FUNCTION( msgfmt_format_message )
 #ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		intl_error_set(/* intl_error* */ NULL, U_INVALID_FORMAT_ERROR,
-			"msgfmt_format_message: error converting pattern to quote-friendly format", 0 );
+			"msgfmt_format_message: error converting pattern to quote-friendly format");
 		RETURN_FALSE;
 	}
 #endif
@@ -136,11 +136,11 @@ PHP_FUNCTION( msgfmt_format_message )
 
 			/* Pass NULL to intl_error* parameter to store message in global Intl error msg stack */
 			intl_error_set_code(/* intl_error* */ NULL, INTL_DATA_ERROR_CODE( mfo ) );
-			intl_errors_set_custom_msg(/* intl_error* */ NULL, msg, 1 );
+			intl_errors_set_custom_msg(/* intl_error* */ NULL, msg);
 
 			efree( msg );
 		} else {
-			intl_errors_set_custom_msg(/* intl_error* */ NULL, "Creating message formatter failed", 0 );
+			intl_errors_set_custom_msg(/* intl_error* */ NULL, "Creating message formatter failed");
 		}
 		umsg_close(MSG_FORMAT_OBJECT(mfo));
 		RETURN_FALSE;

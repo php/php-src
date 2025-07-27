@@ -16,14 +16,14 @@ try {
     var_dump($mf->format(array("foo" => 7, "\x80" => "bar")));
 } catch (Throwable $e) {
     var_dump($e::class === 'IntlException');
-    var_dump("Invalid UTF-8 data in argument key: '\x80'" ===  $e->getMessage());
+    var_dump("MessageFormatter::format(): Invalid UTF-8 data in argument key: '\x80'" ===  $e->getMessage());
 }
 
 try {
     var_dump($mf->format(array("foo" => "\x80")));
 } catch (Throwable $e) {
     var_dump($e::class === 'IntlException');
-    var_dump("Invalid UTF-8 data in string argument: '\x80'" ===  $e->getMessage());
+    var_dump("MessageFormatter::format(): Invalid UTF-8 data in string argument: '\x80'" ===  $e->getMessage());
 }
 ?>
 --EXPECT--

@@ -47,12 +47,12 @@ try {
 ?>
 --EXPECT--
 bool(false)
-string(81) "locale_compose: parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR"
+string(90) "Locale::composeLocale(): parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(81) "locale_compose: parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR"
+string(83) "locale_compose(): parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(81) "locale_compose: parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR"
+string(90) "Locale::composeLocale(): parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(81) "locale_compose: parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR"
+string(83) "locale_compose(): parameter array element is not a string: U_ILLEGAL_ARGUMENT_ERROR"
 ValueError: Locale::composeLocale(): Argument #1 ($subtags) must contain a "language" key
 ValueError: locale_compose(): Argument #1 ($subtags) must contain a "language" key

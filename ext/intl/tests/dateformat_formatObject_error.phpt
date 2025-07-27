@@ -43,18 +43,18 @@ var_dump(intl_get_error_message());
 --EXPECT--
 DateObjectError: Object of type B (inheriting DateTime) has not been correctly initialized by calling parent::__construct() in its constructor
 bool(false)
-string(118) "datefmt_format_object: the passed object must be an instance of either IntlCalendar or DateTimeInterface: U_ZERO_ERROR"
+string(130) "IntlDateFormatter::formatObject(): the passed object must be an instance of either IntlCalendar or DateTimeInterface: U_ZERO_ERROR"
 bool(false)
-string(100) "datefmt_format_object: bad IntlCalendar instance: not initialized properly: U_ILLEGAL_ARGUMENT_ERROR"
+string(112) "IntlDateFormatter::formatObject(): bad IntlCalendar instance: not initialized properly: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(85) "datefmt_format_object: the date/time format type is invalid: U_ILLEGAL_ARGUMENT_ERROR"
+string(97) "IntlDateFormatter::formatObject(): the date/time format type is invalid: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(96) "datefmt_format_object: bad format; if array, it must have two elements: U_ILLEGAL_ARGUMENT_ERROR"
+string(108) "IntlDateFormatter::formatObject(): bad format; if array, it must have two elements: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(96) "datefmt_format_object: bad format; if array, it must have two elements: U_ILLEGAL_ARGUMENT_ERROR"
+string(108) "IntlDateFormatter::formatObject(): bad format; if array, it must have two elements: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(118) "datefmt_format_object: bad format; the date format (first element of the array) is not valid: U_ILLEGAL_ARGUMENT_ERROR"
+string(130) "IntlDateFormatter::formatObject(): bad format; the date format (first element of the array) is not valid: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(119) "datefmt_format_object: bad format; the time format (second element of the array) is not valid: U_ILLEGAL_ARGUMENT_ERROR"
+string(131) "IntlDateFormatter::formatObject(): bad format; the time format (second element of the array) is not valid: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(68) "datefmt_format_object: the format is empty: U_ILLEGAL_ARGUMENT_ERROR"
+string(80) "IntlDateFormatter::formatObject(): the format is empty: U_ILLEGAL_ARGUMENT_ERROR"

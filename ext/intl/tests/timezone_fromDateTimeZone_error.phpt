@@ -6,11 +6,12 @@ date.timezone=Atlantic/Azores
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $dt = new DateTime('2012-08-01 00:00:00 WEST');
 var_dump(IntlTimeZone::fromDateTimeZone($dt->getTimeZone()));
+var_dump(intl_get_error_message());
+
 ?>
---EXPECTF--
-Warning: IntlTimeZone::fromDateTimeZone(): intltz_from_date_time_zone: time zone id 'WEST' extracted from ext/date DateTimeZone not recognized in %s on line %d
+--EXPECT--
 NULL
+string(131) "IntlTimeZone::fromDateTimeZone(): time zone id 'WEST' extracted from ext/date DateTimeZone not recognized: U_ILLEGAL_ARGUMENT_ERROR"

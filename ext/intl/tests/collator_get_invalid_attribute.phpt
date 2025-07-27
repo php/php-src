@@ -18,6 +18,6 @@ var_dump(collator_get_error_message($coll));
 ?>
 --EXPECT--
 bool(false)
-string(55) "Error getting attribute value: U_ILLEGAL_ARGUMENT_ERROR"
+string(81) "Collator::getAttribute(): Error getting attribute value: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(55) "Error getting attribute value: U_ILLEGAL_ARGUMENT_ERROR"
+string(81) "collator_get_attribute(): Error getting attribute value: U_ILLEGAL_ARGUMENT_ERROR"

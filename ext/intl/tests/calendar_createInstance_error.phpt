@@ -17,4 +17,4 @@ try {
 }
 ?>
 --EXPECT--
-intlcal_create_instance: passed IntlTimeZone is not properly constructed
+intlcal_create_instance(): passed IntlTimeZone is not properly constructed

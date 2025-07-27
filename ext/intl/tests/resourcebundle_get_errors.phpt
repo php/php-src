@@ -19,7 +19,7 @@ var_dump($bundle->get('teststring'));
 ?>
 --EXPECT--
 NULL
-string(68) "Cannot load resource element 'nonexisting': U_MISSING_RESOURCE_ERROR"
+string(91) "ResourceBundle::get(): Cannot load resource element 'nonexisting': U_MISSING_RESOURCE_ERROR"
 NULL
-string(68) "Cannot load resource element 'nonexisting': U_MISSING_RESOURCE_ERROR"
+string(90) "resourcebundle_get(): Cannot load resource element 'nonexisting': U_MISSING_RESOURCE_ERROR"
 string(12) "Hello World!"

@@ -130,7 +130,7 @@ PHP_FUNCTION( normalizer_normalize )
 		intl_error_set_code( NULL, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16");
 		if (uinput) {
 			efree( uinput );
 		}
@@ -150,7 +150,7 @@ PHP_FUNCTION( normalizer_normalize )
 	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
 	 */
 	if( U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR && status != U_STRING_NOT_TERMINATED_WARNING ) {
-		intl_error_set_custom_msg( NULL, "Error normalizing string", 0 );
+		intl_error_set_custom_msg( NULL, "Error normalizing string");
 		efree( uret_buf );
 		efree( uinput );
 		RETURN_FALSE;
@@ -172,7 +172,7 @@ PHP_FUNCTION( normalizer_normalize )
 		/* Bail out if an unexpected error occurred. */
 		if( U_FAILURE(status)  ) {
 			/* Set error messages. */
-			intl_error_set_custom_msg( NULL,"Error normalizing string", 0 );
+			intl_error_set_custom_msg( NULL,"Error normalizing string");
 			efree( uret_buf );
 			efree( uinput );
 			RETURN_FALSE;
@@ -190,7 +190,7 @@ PHP_FUNCTION( normalizer_normalize )
 	if( !u8str )
 	{
 		intl_error_set( NULL, status,
-				"normalizer_normalize: error converting normalized text UTF-8", 0 );
+				"error converting normalized text UTF-8");
 		RETURN_FALSE;
 	}
 
@@ -248,7 +248,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 		intl_error_set_code( NULL, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting string to UTF-16.", 0 );
+		intl_error_set_custom_msg( NULL, "Error converting string to UTF-16.");
 		if (uinput) {
 			efree( uinput );
 		}
@@ -264,7 +264,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	/* Bail out if an unexpected error occurred. */
 	if( U_FAILURE(status)  ) {
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL,"Error testing if string is the given normalization form.", 0 );
+		intl_error_set_custom_msg( NULL,"Error testing if string is the given normalization form.");
 		RETURN_FALSE;
 	}
 
@@ -304,13 +304,13 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 	U8_NEXT(input, offset, input_length, codepoint);
 	if ((size_t)offset != input_length) {
 		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-		intl_error_set_custom_msg(NULL, "Input string must be exactly one UTF-8 encoded code point long.", 0);
+		intl_error_set_custom_msg(NULL, "Input string must be exactly one UTF-8 encoded code point long.");
 		return;
 	}
 
 	if ((codepoint < UCHAR_MIN_VALUE) || (codepoint > UCHAR_MAX_VALUE)) {
 		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-		intl_error_set_custom_msg(NULL, "Code point out of range", 0);
+		intl_error_set_custom_msg(NULL, "Code point out of range");
 		return;
 	}
 

@@ -150,7 +150,7 @@ PHP_FUNCTION(datefmt_parse)
 		zend_long long_parse_pos = zval_get_long(z_parse_pos_tmp);
 		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-			intl_error_set_custom_msg(NULL, "String index is out of valid range.", 0);
+			intl_error_set_custom_msg(NULL, "String index is out of valid range.");
 			RETURN_FALSE;
 		}
 		parse_pos = (int32_t)long_parse_pos;
@@ -193,7 +193,7 @@ PHP_METHOD(IntlDateFormatter, parseToCalendar)
 		}
 		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-			intl_error_set_custom_msg(NULL, "String index is out of valid range.", 0);
+			intl_error_set_custom_msg(NULL, "String index is out of valid range.");
 			RETURN_FALSE;
 		}
 		parse_pos = (int32_t)long_parse_pos;
@@ -232,7 +232,7 @@ PHP_FUNCTION(datefmt_localtime)
 		zend_long long_parse_pos = zval_get_long(z_parse_pos_tmp);
 		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-			intl_error_set_custom_msg(NULL, "String index is out of valid range.", 0);
+			intl_error_set_custom_msg(NULL, "String index is out of valid range.");
 			RETURN_FALSE;
 		}
 		parse_pos = (int32_t)long_parse_pos;

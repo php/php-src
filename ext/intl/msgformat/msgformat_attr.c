@@ -83,7 +83,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 		char *msg;
 		spprintf(&msg, 0, "Error setting symbol value at line %d, offset %d", spattern_error.line, spattern_error.offset);
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(mfo), msg, 1);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(mfo), msg);
 		efree(msg);
 		RETURN_FALSE;
 	}

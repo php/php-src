@@ -18,5 +18,5 @@ var_dump($mf->getErrorMessage());
 
 ?>
 --EXPECT--
-string(71) "Error setting symbol value at line 0, offset 26: U_PATTERN_SYNTAX_ERROR"
-string(71) "Error setting symbol value at line 0, offset 26: U_PATTERN_SYNTAX_ERROR"
+string(103) "MessageFormatter::setPattern(): Error setting symbol value at line 0, offset 26: U_PATTERN_SYNTAX_ERROR"
+string(93) "msgfmt_set_pattern(): Error setting symbol value at line 0, offset 26: U_PATTERN_SYNTAX_ERROR"

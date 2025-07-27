@@ -40,15 +40,15 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: IntlCalendar::toDateTime(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
+Warning: IntlCalendar::toDateTime(): DateTimeZone constructor threw exception in %s on line %d
 string(77) "exception: DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 
-Warning: intlcal_to_date_time(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
+Warning: intlcal_to_date_time(): DateTimeZone constructor threw exception in %s on line %d
 string(66) "DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 
-Warning: IntlCalendar::toDateTime(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
+Warning: IntlCalendar::toDateTime(): DateTimeZone constructor threw exception in %s on line %d
 string(66) "DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 
-Warning: intlcal_to_date_time(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
+Warning: intlcal_to_date_time(): DateTimeZone constructor threw exception in %s on line %d
 string(66) "DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 intlcal_to_date_time(): Argument #1 ($calendar) must be of type IntlCalendar, int given

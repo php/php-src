@@ -32,16 +32,16 @@ var_dump($nf->getErrorCode());
 ?>
 --EXPECT--
 NULL
-string(36) "Number parsing failed: U_PARSE_ERROR"
+string(70) "NumberFormatter::parseCurrency(): Number parsing failed: U_PARSE_ERROR"
 int(9)
 NULL
-string(36) "Number parsing failed: U_PARSE_ERROR"
-int(9)
-bool(false)
-NULL
-string(36) "Number parsing failed: U_PARSE_ERROR"
+string(70) "NumberFormatter::parseCurrency(): Number parsing failed: U_PARSE_ERROR"
 int(9)
 bool(false)
 NULL
-string(36) "Number parsing failed: U_PARSE_ERROR"
+string(61) "numfmt_parse_currency(): Number parsing failed: U_PARSE_ERROR"
+int(9)
+bool(false)
+NULL
+string(61) "numfmt_parse_currency(): Number parsing failed: U_PARSE_ERROR"
 int(9)

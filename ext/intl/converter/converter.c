@@ -42,8 +42,8 @@ static zend_class_entry     *php_converter_ce;
 static zend_object_handlers  php_converter_object_handlers;
 
 #define CONV_GET(pzv)  (Z_INTL_CONVERTER_P((pzv)))
-#define THROW_UFAILURE(obj, fname, error) php_converter_throw_failure(obj, error, \
-                                          fname "() returned error " ZEND_LONG_FMT ": %s", (zend_long)error, u_errorName(error))
+#define THROW_UFAILURE(obj, error) php_converter_throw_failure(obj, error, \
+                                          "returned error " ZEND_LONG_FMT ": %s", (zend_long)error, u_errorName(error))
 
 /* {{{ php_converter_throw_failure */
 static inline void php_converter_throw_failure(php_converter_object *objval, UErrorCode error, const char *format, ...) {
@@ -55,7 +55,7 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 	vsnprintf(message, sizeof(message), format, vargs);
 	va_end(vargs);
 
-	intl_errors_set(err, error, message, 1);
+	intl_errors_set(err, error, message);
 }
 /* }}} */
 
@@ -90,7 +90,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, zend_
 			 */
 			ucnv_getSubstChars(objval->src, chars, &chars_len, &uerror);
 			if (U_FAILURE(uerror)) {
-				THROW_UFAILURE(objval, "ucnv_getSubstChars", uerror);
+				THROW_UFAILURE(objval, uerror);
 				chars[0] = 0x1A;
 				chars[1] = 0;
 				chars_len = 1;
@@ -341,7 +341,7 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 	ucnv_setToUCallBack(cnv, (UConverterToUCallback)php_converter_to_u_callback, (const void*)objval,
 	                    NULL, NULL, &error);
 	if (U_FAILURE(error)) {
-		THROW_UFAILURE(objval, "ucnv_setToUCallBack", error);
+		THROW_UFAILURE(objval, error);
 		ret = 0;
 	}
 
@@ -349,7 +349,7 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 	ucnv_setFromUCallBack(cnv, (UConverterFromUCallback)php_converter_from_u_callback, (const void*)objval,
 	                      NULL, NULL, &error);
 	if (U_FAILURE(error)) {
-		THROW_UFAILURE(objval, "ucnv_setFromUCallBack", error);
+		THROW_UFAILURE(objval, error);
 		ret = 0;
 	}
 	return ret;
@@ -373,11 +373,11 @@ static bool php_converter_set_encoding(php_converter_object *objval,
 		php_error_docref(NULL, E_WARNING, "Ambiguous encoding specified, using %s", actual_encoding);
 	} else if (U_FAILURE(error)) {
 		if (objval) {
-			THROW_UFAILURE(objval, "ucnv_open", error);
+			THROW_UFAILURE(objval, error);
 		} else {
 			char *msg;
 			spprintf(&msg, 0, "Error setting encoding: %d - %s", (int)error, u_errorName(error));
-			intl_error_set(NULL, error, msg, 1);
+			intl_error_set(NULL, error, msg);
 			efree(msg);
 		}
 		return false;
@@ -439,7 +439,7 @@ static void php_converter_do_get_encoding(php_converter_object *objval, UConvert
 
 	name = ucnv_getName(cnv, &objval->error.code);
 	if (U_FAILURE(objval->error.code)) {
-		THROW_UFAILURE(objval, "ucnv_getName()", objval->error.code);
+		THROW_UFAILURE(objval, objval->error.code);
 		RETURN_FALSE;
 	}
 
@@ -474,7 +474,7 @@ static void php_converter_do_get_type(php_converter_object *objval, UConverter *
 
 	t = ucnv_getType(cnv);
 	if (U_FAILURE(objval->error.code)) {
-		THROW_UFAILURE(objval, "ucnv_getType", objval->error.code);
+		THROW_UFAILURE(objval, objval->error.code);
 		RETURN_FALSE;
 	}
 
@@ -554,7 +554,7 @@ PHP_METHOD(UConverter, setSubstChars) {
 		UErrorCode error = U_ZERO_ERROR;
 		ucnv_setSubstChars(objval->src, chars, chars_len, &error);
 		if (U_FAILURE(error)) {
-			THROW_UFAILURE(objval, "ucnv_setSubstChars", error);
+			THROW_UFAILURE(objval, error);
 			ret = 0;
 		}
 	} else {
@@ -566,7 +566,7 @@ PHP_METHOD(UConverter, setSubstChars) {
 		UErrorCode error = U_ZERO_ERROR;
 		ucnv_setSubstChars(objval->dest, chars, chars_len, &error);
 		if (U_FAILURE(error)) {
-			THROW_UFAILURE(objval, "ucnv_setSubstChars", error);
+			THROW_UFAILURE(objval, error);
 			ret = 0;
 		}
 	} else {
@@ -597,7 +597,7 @@ PHP_METHOD(UConverter, getSubstChars) {
 	 */
 	ucnv_getSubstChars(objval->src, chars, &chars_len, &error);
 	if (U_FAILURE(error)) {
-		THROW_UFAILURE(objval, "ucnv_getSubstChars", error);
+		THROW_UFAILURE(objval, error);
 		RETURN_FALSE;
 	}
 
@@ -624,7 +624,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	/* Get necessary buffer size first */
 	temp_len = 1 + ucnv_toUChars(src_cnv, NULL, 0, src, src_len, &error);
 	if (U_FAILURE(error) && error != U_BUFFER_OVERFLOW_ERROR) {
-		THROW_UFAILURE(objval, "ucnv_toUChars", error);
+		THROW_UFAILURE(objval, error);
 		return NULL;
 	}
 	temp = safe_emalloc(sizeof(UChar), temp_len, sizeof(UChar));
@@ -633,7 +633,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	error = U_ZERO_ERROR;
 	temp_len = ucnv_toUChars(src_cnv, temp, temp_len, src, src_len, &error);
 	if (U_FAILURE(error)) {
-		THROW_UFAILURE(objval, "ucnv_toUChars", error);
+		THROW_UFAILURE(objval, error);
 		efree(temp);
 		return NULL;
 	}
@@ -642,7 +642,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	/* Get necessary output buffer size */
 	ret_len = ucnv_fromUChars(dest_cnv, NULL, 0, temp, temp_len, &error);
 	if (U_FAILURE(error) && error != U_BUFFER_OVERFLOW_ERROR) {
-		THROW_UFAILURE(objval, "ucnv_fromUChars", error);
+		THROW_UFAILURE(objval, error);
 		efree(temp);
 		return NULL;
 	}
@@ -654,7 +654,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	ZSTR_LEN(ret) = ucnv_fromUChars(dest_cnv, ZSTR_VAL(ret), ret_len+1, temp, temp_len, &error);
 	efree(temp);
 	if (U_FAILURE(error)) {
-		THROW_UFAILURE(objval, "ucnv_fromUChars", error);
+		THROW_UFAILURE(objval, error);
 		zend_string_efree(ret);
 		return NULL;
 	}
@@ -758,7 +758,7 @@ PHP_METHOD(UConverter, transcode) {
 		}
 
 		if (U_FAILURE(error)) {
-			THROW_UFAILURE(NULL, "transcode", error);
+			THROW_UFAILURE(NULL, error);
 			RETVAL_FALSE;
 		}
 	} else {
@@ -831,7 +831,7 @@ PHP_METHOD(UConverter, getAliases) {
 
 	count = ucnv_countAliases(name, &error);
 	if (U_FAILURE(error)) {
-		THROW_UFAILURE(NULL, "ucnv_countAliases", error);
+		THROW_UFAILURE(NULL, error);
 		RETURN_FALSE;
 	}
 
@@ -843,7 +843,7 @@ PHP_METHOD(UConverter, getAliases) {
 		error = U_ZERO_ERROR;
 		alias = ucnv_getAlias(name, i, &error);
 		if (U_FAILURE(error)) {
-			THROW_UFAILURE(NULL, "ucnv_getAlias", error);
+			THROW_UFAILURE(NULL, error);
 			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_NULL();
 		}
@@ -866,7 +866,7 @@ PHP_METHOD(UConverter, getStandards) {
 		UErrorCode error = U_ZERO_ERROR;
 		const char *name = ucnv_getStandard(i, &error);
 		if (U_FAILURE(error)) {
-			THROW_UFAILURE(NULL, "ucnv_getStandard", error);
+			THROW_UFAILURE(NULL, error);
 			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_NULL();
 		}

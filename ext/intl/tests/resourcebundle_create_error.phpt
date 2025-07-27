@@ -33,9 +33,9 @@ var_dump(intl_get_error_message());
 
 ?>
 --EXPECT--
-IntlException: Constructor failed
+IntlException: ResourceBundle::__construct(): Cannot load libICU resource bundle
 NULL
-string(81) "resourcebundle_ctor: Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR"
-IntlException: Constructor failed
+string(85) "resourcebundle_create(): Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR"
+IntlException: ResourceBundle::__construct(): Cannot load libICU resource bundle
 NULL
-string(81) "resourcebundle_ctor: Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR"
+string(85) "resourcebundle_create(): Cannot load libICU resource bundle: U_MISSING_RESOURCE_ERROR"

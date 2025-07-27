@@ -16,6 +16,6 @@ var_dump(intl_get_error_message());
 ?>
 --EXPECT--
 bool(false)
-string(65) "locale_get_display_name : name too long: U_ILLEGAL_ARGUMENT_ERROR"
+string(65) "Locale::getDisplayName(): name too long: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(65) "locale_get_display_name : name too long: U_ILLEGAL_ARGUMENT_ERROR"
+string(66) "locale_get_display_name(): name too long: U_ILLEGAL_ARGUMENT_ERROR"
