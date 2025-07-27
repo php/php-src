@@ -360,8 +360,13 @@ static bool php_stream_unwrap_content(php_stream_context *context, zend_string *
 			*str_out = Z_STR_P(content);
 			return true;
 		} else if (Z_TYPE_P(content) == IS_RESOURCE) {
-			if ((php_stream_from_zval_no_verify(*stream_out, content))) {
+			*stream_out = php_stream_from_zval_no_verify_no_error(content);
+			if (*stream_out) {
 				return true;
+			} else {
+				const char *space;
+				const char *class_name = get_active_class_name(&space);
+				zend_type_error("%s%s%s(): \"content\" resource is not a valid stream resource", class_name, space, get_active_function_name());
 			}
 		}
 	}

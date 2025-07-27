@@ -37,5 +37,5 @@ foreach ($headers as $header) {
 proc_close($postData);
 ?>
 --EXPECT--
-file_get_contents(): supplied resource is not a valid stream resource
-file_get_contents(): supplied resource is not a valid stream resource
+file_get_contents(): "content" resource is not a valid stream resource
+file_get_contents(): "content" resource is not a valid stream resource
