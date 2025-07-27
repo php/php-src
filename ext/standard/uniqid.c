@@ -53,20 +53,32 @@ PHP_FUNCTION(uniqid)
 		Z_PARAM_BOOL(more_entropy)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* This implementation needs current microsecond to change,
-	 * hence we poll time until it does. This is much faster than
-	 * calling usleep(1) which may cause the kernel to schedule
-	 * another process, causing a pause of around 10ms.
+	/* This implementation needs current microsecond to change.
+	 * We will manually move the time forward if needed. This is
+	 * more stable as polling or sleeping as it will not be
+	 * effected by time changes (like ntp) and this is much faster
+	 * than calling usleep(1) which may cause the kernel to
+	 * schedule another process, causing a pause of around 10ms.
 	 */
-	do {
-		(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
-	} while (tv.tv_sec == prev_tv.tv_sec && tv.tv_usec == prev_tv.tv_usec);
+	(void)gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
+	if (UNEXPECTED((tv.tv_sec == prev_tv.tv_sec && tv.tv_usec <= prev_tv.tv_usec)
+		|| tv.tv_sec < prev_tv.tv_sec
+	)) {
+		prev_tv.tv_usec += 1;
+		if (UNEXPECTED(prev_tv.tv_usec > 999999)) {
+			prev_tv.tv_sec += prev_tv.tv_usec / 1000000;
+			prev_tv.tv_usec = prev_tv.tv_usec % 1000000;
+		}
 
-	prev_tv.tv_sec = tv.tv_sec;
-	prev_tv.tv_usec = tv.tv_usec;
+		sec  = (int) prev_tv.tv_sec;
+		usec = (int) prev_tv.tv_usec;
+	} else {
+		prev_tv.tv_sec  = tv.tv_sec;
+		prev_tv.tv_usec = tv.tv_usec;
 
-	sec = (int) tv.tv_sec;
-	usec = (int) (tv.tv_usec % 0x100000);
+		sec  = (int) tv.tv_sec;
+		usec = (int) (tv.tv_usec % 0x100000);
+	}
 
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs.
