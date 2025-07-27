@@ -8,13 +8,22 @@ server
 <?php
 class MyStream {
     public $context;
+    private $counter = 0;
 
     public function stream_open(string $path, string $mode, int $options, ?string &$opened_path): bool {
         return true;
     }
 
     public function stream_read(int $count): string|false {
-        return false;
+        $this->counter++;
+        if ($this->stream_eof()) {
+            return false;
+        }
+        return "test";
+    }
+
+    public function stream_eof(): bool {
+        return $this->counter == 2;
     }
 }
 
@@ -43,4 +52,6 @@ echo file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS . "/", false, stream_c
 --EXPECTF--
 Warning: file_get_contents(): Stream does not support seeking in %s on line %d
 
-Warning: file_get_contents(%s): Failed to open stream: Unable to determine length of "content" stream! in %s on line %d
+Warning: file_get_contents(): MyStream::stream_stat is not implemented! in %s on line %d
+string(1) "4"
+test

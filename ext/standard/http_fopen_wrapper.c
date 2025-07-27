@@ -362,6 +362,7 @@ static bool php_stream_unwrap_content(php_stream_context *context, zend_string *
 		} else if (Z_TYPE_P(content) == IS_RESOURCE) {
 			*stream_out = php_stream_from_zval_no_verify_no_error(content);
 			if (*stream_out) {
+				/* Note: at this point we don't know whether the stream is seekable, we can only know for sure by trying. */
 				return true;
 			} else {
 				const char *space;
@@ -374,21 +375,29 @@ static bool php_stream_unwrap_content(php_stream_context *context, zend_string *
 	return false;
 }
 
-static bool php_stream_append_content_length(smart_str *req_buf, zend_string *content_str, php_stream *content_stream)
+static bool php_stream_append_content_length(smart_str *req_buf, zend_string **content_str, php_stream **content_stream, bool *content_str_tmp)
 {
 	smart_str_appends(req_buf, "Content-Length: ");
-	if (content_str) {
-		smart_str_append_unsigned(req_buf, ZSTR_LEN(content_str));
+	if (*content_str) {
+		smart_str_append_unsigned(req_buf, ZSTR_LEN(*content_str));
 	} else {
-		zend_off_t current_position = php_stream_tell(content_stream);
-		if (php_stream_seek(content_stream, 0, SEEK_END) < 0) {
-			return false;
+		zend_off_t current_position = php_stream_tell(*content_stream);
+		if (php_stream_seek(*content_stream, 0, SEEK_END) < 0) {
+			*content_str = php_stream_copy_to_mem(*content_stream, PHP_STREAM_COPY_ALL, false);
+			*content_stream = NULL;
+			if (*content_str) {
+				*content_str_tmp = true;
+				smart_str_append_unsigned(req_buf, ZSTR_LEN(*content_str));
+			} else {
+				return false;
+			}
+		} else {
+			zend_off_t end_position = php_stream_tell(*content_stream);
+			if (php_stream_seek(*content_stream, current_position, SEEK_SET) < 0) {
+				return false;
+			}
+			smart_str_append_unsigned(req_buf, end_position - current_position);
 		}
-		zend_off_t end_position = php_stream_tell(content_stream);
-		if (php_stream_seek(content_stream, current_position, SEEK_SET) < 0) {
-			return false;
-		}
-		smart_str_append_unsigned(req_buf, end_position - current_position);
 	}
 	smart_str_appends(req_buf, "\r\n");
 	return true;
@@ -876,6 +885,7 @@ finish:
 
 	zend_string *content_str = NULL;
 	php_stream *content_stream = NULL;
+	bool content_str_tmp = false;
 
 	if (user_headers) {
 		/* A bit weird, but some servers require that Content-Length be sent prior to Content-Type for POST
@@ -887,7 +897,7 @@ finish:
 				!(have_header & HTTP_HEADER_CONTENT_LENGTH) &&
 				php_stream_unwrap_content(context, &content_str, &content_stream)
 		) {
-			if (!php_stream_append_content_length(&req_buf, content_str, content_stream)) {
+			if (!php_stream_append_content_length(&req_buf, &content_str, &content_stream, &content_str_tmp)) {
 				php_stream_close(stream);
 				stream = NULL;
 				efree(user_headers);
@@ -903,6 +913,9 @@ finish:
 
 		/* php_stream_unwrap_content() may throw a TypeError for non-stream resources */
 		if (UNEXPECTED(EG(exception))) {
+			if (content_str_tmp) {
+				zend_string_efree(content_str);
+			}
 			php_stream_close(stream);
 			stream = NULL;
 			goto out;
@@ -913,7 +926,7 @@ finish:
 	if ((header_init || redirect_keep_method) && context &&
 		(content_str || content_stream || php_stream_unwrap_content(context, &content_str, &content_stream))) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
-			if (!php_stream_append_content_length(&req_buf, content_str, content_stream)) {
+			if (!php_stream_append_content_length(&req_buf, &content_str, &content_stream, &content_str_tmp)) {
 				php_stream_close(stream);
 				stream = NULL;
 				php_stream_wrapper_log_error(wrapper, options, "Unable to determine length of \"content\" stream!");
@@ -928,6 +941,10 @@ finish:
 		if (content_str) {
 			smart_str_append(&req_buf, content_str);
 			php_stream_write(stream, ZSTR_VAL(req_buf.s), ZSTR_LEN(req_buf.s));
+
+			if (content_str_tmp) {
+				zend_string_efree(content_str);
+			}
 		} else {
 			php_stream_write(stream, ZSTR_VAL(req_buf.s), ZSTR_LEN(req_buf.s));
 
