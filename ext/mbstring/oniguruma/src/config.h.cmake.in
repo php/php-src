@@ -1,0 +1,68 @@
+/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
+   systems. This function is required for `alloca.c' support on those systems.
+   */
+#cmakedefine CRAY_STACKSEG_END
+
+/* Define to 1 if using `alloca.c'. */
+#cmakedefine C_ALLOCA
+
+/* Define to 1 if you have `alloca', as a function or macro. */
+#cmakedefine HAVE_ALLOCA  ${HAVE_ALLOCA}
+
+/* Define to 1 if you have `clock_gettime', as a function or macro. */
+#cmakedefine HAVE_CLOCK_GETTIME  ${HAVE_CLOCK_GETTIME}
+
+/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
+   */
+#cmakedefine HAVE_ALLOCA_H  ${HAVE_ALLOCA_H}
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#cmakedefine HAVE_STDINT_H  ${HAVE_STDINT_H}
+
+/* Define to 1 if you have the <sys/times.h> header file. */
+#cmakedefine HAVE_SYS_TIMES_H  ${HAVE_SYS_TIMES_H}
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#cmakedefine HAVE_SYS_TIME_H  ${HAVE_SYS_TIME_H}
+
+/* Define to 1 if you have the <time.h> header file. */
+#cmakedefine HAVE_TIME_H  ${HAVE_TIME_H}
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#cmakedefine HAVE_SYS_TYPES_H  ${HAVE_SYS_TYPES_H}
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#cmakedefine HAVE_UNISTD_H  ${HAVE_UNISTD_H}
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#cmakedefine HAVE_INTTYPES_H  ${HAVE_INTTYPES_H}
+
+/* Name of package */
+#cmakedefine PACKAGE  ${PACKAGE}
+
+/* Define to the version of this package. */
+#cmakedefine PACKAGE_VERSION  ${PACKAGE_VERSION}
+
+/* The size of `int', as computed by sizeof. */
+#cmakedefine SIZEOF_INT  ${SIZEOF_INT}
+
+/* The size of `intptr_t', as computed by sizeof. */
+#cmakedefine SIZEOF_INTPTR_T  ${SIZEOF_INTPTR_T}
+
+/* The size of `long', as computed by sizeof. */
+#cmakedefine SIZEOF_LONG  ${SIZEOF_LONG}
+
+/* The size of `long long', as computed by sizeof. */
+#cmakedefine SIZEOF_LONG_LONG  ${SIZEOF_LONG_LONG}
+
+/* The size of `void*', as computed by sizeof. */
+#cmakedefine SIZEOF_VOIDP  ${SIZEOF_VOIDP}
+
+/* The size of `time_t', as computed by sizeof. */
+#cmakedefine SIZEOF_TIME_T  ${SIZEOF_TIME_T}
+
+/* Define if enable CR+NL as line terminator */
+#cmakedefine USE_CRNL_AS_LINE_TERMINATOR  ${USE_CRNL_AS_LINE_TERMINATOR}
+
+/* Version number of package */
+#cmakedefine VERSION  ${VERSION}
