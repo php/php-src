@@ -17,6 +17,15 @@ fi
 
 echo "Using interface: $IFACE"
 
+# Check if NetworkManager is running
+systemctl is-active NetworkManager || echo "NetworkManager disabled"
+
+# Check if systemd-networkd is running  
+systemctl is-active systemd-networkd  || echo "systemd-networkd disabled"
+
+# Check what's managing your interface
+networkctl status eth0 
+
 # Get current DNS server
 echo "Current configuration:"
 resolvectl status "$IFACE" | grep -E 'Current DNS Server:|DNS Servers:'
@@ -31,11 +40,18 @@ echo "Setting DNS to $LOCAL_DNS for $IFACE (with fallback to $ORIGINAL_DNS)"
 resolvectl revert "$IFACE"
 
 # Set DNS with local server FIRST (this makes it primary)
-resolvectl dns "$IFACE" "$LOCAL_DNS" "$ORIGINAL_DNS"
+#resolvectl dns "$IFACE" "$LOCAL_DNS" "$ORIGINAL_DNS"
+resolvectl dns "$IFACE" "$LOCAL_DNS"
+
+# Flush DNS cache
+resolvectl flush-caches
 
 # Confirm setup
 echo -e "\nUpdated configuration:"
 resolvectl status
+
+# Check again what's managing your interface
+networkctl status eth0 
 
 echo -e "\nTesting DNS resolution..."
 
