@@ -308,6 +308,7 @@ PHP_FUNCTION(posix_setpgid)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_POSIX_CHECK_PID(pid, 0, POSIX_PID_MAX)
+	PHP_POSIX_CHECK_PID(pgid, 0, POSIX_PID_MAX)
 
 	if (setpgid(pid, pgid) < 0) {
 		POSIX_G(last_error) = errno;
@@ -346,6 +347,8 @@ PHP_FUNCTION(posix_getsid)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(val)
 	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_POSIX_CHECK_PID(val, 0, POSIX_PID_MAX)
 
 	if ((val = getsid(val)) < 0) {
 		POSIX_G(last_error) = errno;
@@ -1200,6 +1203,26 @@ PHP_FUNCTION(posix_setrlimit)
 		Z_PARAM_LONG(cur)
 		Z_PARAM_LONG(max)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (res < -1) {
+		zend_argument_value_error(1, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (cur < -1) {
+		zend_argument_value_error(2, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (max < -1) {
+		zend_argument_value_error(3, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (cur > max) {
+		zend_argument_value_error(2, "must be lower or equal to " ZEND_LONG_FMT, max);
+		RETURN_THROWS();
+	}
 
 	rl.rlim_cur = cur;
 	rl.rlim_max = max;
