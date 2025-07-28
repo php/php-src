@@ -145,6 +145,11 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 4. OpCode changes
 ========================
 
+* New ZEND_DECLARE_ATTRIBUTED_CONST is used when a global constant is declared
+  with `const` and has attributes; this opcode is used *instead* of the
+  ZEND_DECLARE_CONST, and in addition to the name of the constant and the
+  value to use, has a ZEND_OP_DATA with a pointer to the compiled attributes.
+
 ========================
 5. SAPI changes
 ========================
