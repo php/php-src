@@ -680,8 +680,7 @@ static void register_openssl_symbols(int module_number)
 	zend_attribute *attribute_Deprecated_func_openssl_free_key_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_free_key", sizeof("openssl_free_key") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_openssl_free_key_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_openssl_free_key_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_openssl_free_key_0_arg1_str = zend_string_init("as OpenSSLAsymmetricKey objects are freed automatically", strlen("as OpenSSLAsymmetricKey objects are freed automatically"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_openssl_free_key_0->args[1].value, attribute_Deprecated_func_openssl_free_key_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_openssl_free_key_0->args[1].value, attribute_Deprecated_func_openssl_pkey_free_0_arg1_str);
 	attribute_Deprecated_func_openssl_free_key_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_get_private", sizeof("openssl_pkey_get_private") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
