@@ -35,7 +35,7 @@ resolvectl dns "$IFACE" "$LOCAL_DNS" "$ORIGINAL_DNS"
 
 # Confirm setup
 echo -e "\nUpdated configuration:"
-resolvectl status "$IFACE" | grep -E 'Current DNS Server:|DNS Servers:'
+resolvectl status
 
 echo -e "\nTesting DNS resolution..."
 
