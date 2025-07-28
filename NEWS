@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed GH-19261: msgfmt_parse_message leaks on message creation failure.
     (David Carlier)
+  . Fix return value on failure for resourcebundle count handler. (Girgias)
 
 - LDAP:
   . Fixed bug GH-18529 (additional inheriting of TLS int options).
