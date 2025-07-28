@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fix memleak on failure in collator_get_sort_key(). (nielsdos)
+  . Fix return value on failure for resourcebundle count handler. (Girgias)
 
 - LDAP:
   . Fixed bug GH-18529 (additional inheriting of TLS int options).

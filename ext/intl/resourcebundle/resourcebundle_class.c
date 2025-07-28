@@ -308,7 +308,7 @@ static zend_result resourcebundle_array_count(zend_object *object, zend_long *co
 	if (rb->me == NULL) {
 		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,
 				"Found unconstructed ResourceBundle", 0);
-		return 0;
+		return FAILURE;
 	}
 
 	*count = ures_getSize( rb->me );
