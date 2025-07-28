@@ -77,12 +77,14 @@ jobs:
           sed -i 's/PHP_NAME="PHP - master"/PHP_NAME="PHP - baseline@'"$BASELINE_SHORT_SHA"'"/g' ./php-version-benchmarks/config/php/master_baseline.ini
           sed -i "s/PHP_ID=php_master/PHP_ID=php_master_baseline/g" ./php-version-benchmarks/config/php/master_baseline.ini
           sed -i "s/PHP_COMMIT=/PHP_COMMIT=$BASELINE_SHA/g" ./php-version-benchmarks/config/php/master_baseline.ini
+          sed -i "s/PHP_OPCACHE=1/PHP_OPCACHE=2/g" ./php-version-benchmarks/config/php/master_baseline.ini
 
           # Set config for the previous PHP version
           cp ./php-version-benchmarks/config/php/master.ini.dist ./php-version-benchmarks/config/php/master_last.ini
           sed -i 's/PHP_NAME="PHP - master"/PHP_NAME="PHP - previous master"/g' ./php-version-benchmarks/config/php/master_last.ini
           sed -i "s/PHP_ID=php_master/PHP_ID=php_master_previous/g" ./php-version-benchmarks/config/php/master_last.ini
           sed -i "s/PHP_COMMIT=/PHP_COMMIT=$LAST_RESULT_SHA/g" ./php-version-benchmarks/config/php/master_last.ini
+          sed -i "s/PHP_OPCACHE=1/PHP_OPCACHE=2/g" ./php-version-benchmarks/config/php/master_last.ini
 
           # Set config for the current PHP version
           cp ./php-version-benchmarks/config/php/master.ini.dist ./php-version-benchmarks/config/php/master_now.ini
