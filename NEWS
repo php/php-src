@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Add support for CURLINFO_QUEUE_TIME_T in curl_getinfo() (thecaliskan)
   . Add support for CURLOPT_SSL_SIGNATURE_ALGORITHMS. (Ayesh Karunaratne)
 
+- GD:
+  . Fix incorrect comparison with result of php_stream_can_cast(). (Girgias)
+
 - OPcache:
   . Disallow changing opcache.memory_consumption when SHM is already set up.
     (timwolla)
