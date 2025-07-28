@@ -5756,6 +5756,27 @@ PHP_FUNCTION(substr_count)
 }
 /* }}} */
 
+static void php_str_pad_fill(zend_string *result, size_t pad_chars, const char *pad_str, size_t pad_str_len) {
+	char *p = ZSTR_VAL(result) + ZSTR_LEN(result);
+	
+	if (pad_str_len == 1) {
+		memset(p, pad_str[0], pad_chars);
+		ZSTR_LEN(result) += pad_chars;
+		return;
+	}
+
+	const char *end = p + pad_chars;
+	while (p + pad_str_len <= end) {
+		p = zend_mempcpy(p, pad_str, pad_str_len);
+	}
+
+	if (p < end) {
+		memcpy(p, pad_str, end - p);
+	}
+	
+	ZSTR_LEN(result) += pad_chars;
+}
+
 /* {{{ Returns input string padded on the left or right to specified length with pad_string */
 PHP_FUNCTION(str_pad)
 {
@@ -5768,7 +5789,7 @@ PHP_FUNCTION(str_pad)
 	char *pad_str = " "; /* Pointer to padding string */
 	size_t pad_str_len = 1;
 	zend_long   pad_type_val = PHP_STR_PAD_RIGHT; /* The padding type value */
-	size_t	   i, left_pad=0, right_pad=0;
+	size_t left_pad=0, right_pad=0;
 	zend_string *result = NULL;	/* Resulting string */
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
@@ -5818,16 +5839,18 @@ PHP_FUNCTION(str_pad)
 	}
 
 	/* First we pad on the left. */
-	for (i = 0; i < left_pad; i++)
-		ZSTR_VAL(result)[ZSTR_LEN(result)++] = pad_str[i % pad_str_len];
+	if (left_pad > 0) {
+		php_str_pad_fill(result, left_pad, pad_str, pad_str_len);
+	}
 
 	/* Then we copy the input string. */
 	memcpy(ZSTR_VAL(result) + ZSTR_LEN(result), ZSTR_VAL(input), ZSTR_LEN(input));
 	ZSTR_LEN(result) += ZSTR_LEN(input);
 
 	/* Finally, we pad on the right. */
-	for (i = 0; i < right_pad; i++)
-		ZSTR_VAL(result)[ZSTR_LEN(result)++] = pad_str[i % pad_str_len];
+	if (right_pad > 0) {
+		php_str_pad_fill(result, right_pad, pad_str, pad_str_len);
+	}
 
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
