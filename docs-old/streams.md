@@ -90,7 +90,7 @@ PHPAPI php_stream *php_stream_sock_open_from_socket(int socket, int persistent);
     /* Convert a socket into a stream. */
 
 PHPAPI php_stream *php_stream_sock_open_host(const char *host, unsigned short port,
-        int socktype, int timeout, int persistent);
+        int socktype, struct timeval *timeout, const char *persistent_id);
     /* Open a connection to a host and return a stream. */
 
 PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int persistent,

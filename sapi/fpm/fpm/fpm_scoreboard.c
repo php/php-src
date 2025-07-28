@@ -11,7 +11,6 @@
 #include "fpm_shm.h"
 #include "fpm_sockets.h"
 #include "fpm_worker_pool.h"
-#include "fpm_clock.h"
 #include "zlog.h"
 
 static struct fpm_scoreboard_s *fpm_scoreboard = NULL;
