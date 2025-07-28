@@ -126,9 +126,9 @@ ZEND_GET_MODULE(posix)
 	}	\
 	RETURN_TRUE;
 
-#define PHP_POSIX_CHECK_PID(pid, lower, upper)										\
+#define PHP_POSIX_CHECK_PID(pid, arg, lower, upper)										\
 	if (pid < lower || pid > upper) {										\
-		zend_argument_value_error(1, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, lower, upper);	\
+		zend_argument_value_error(arg, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, lower, upper);	\
 		RETURN_THROWS();											\
 	}
 
@@ -143,7 +143,7 @@ PHP_FUNCTION(posix_kill)
 		Z_PARAM_LONG(sig)
 	ZEND_PARSE_PARAMETERS_END();
 
-	PHP_POSIX_CHECK_PID(pid, POSIX_PID_MIN, POSIX_PID_MAX)
+	PHP_POSIX_CHECK_PID(pid, 1, POSIX_PID_MIN, POSIX_PID_MAX)
 
 	if (kill(pid, sig) < 0) {
 		POSIX_G(last_error) = errno;
@@ -307,7 +307,8 @@ PHP_FUNCTION(posix_setpgid)
 		Z_PARAM_LONG(pgid)
 	ZEND_PARSE_PARAMETERS_END();
 
-	PHP_POSIX_CHECK_PID(pid, 0, POSIX_PID_MAX)
+	PHP_POSIX_CHECK_PID(pid, 1, 0, POSIX_PID_MAX)
+	PHP_POSIX_CHECK_PID(pgid, 2, 0, POSIX_PID_MAX)
 
 	if (setpgid(pid, pgid) < 0) {
 		POSIX_G(last_error) = errno;
@@ -346,6 +347,8 @@ PHP_FUNCTION(posix_getsid)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(val)
 	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_POSIX_CHECK_PID(val, 1, 0, POSIX_PID_MAX)
 
 	if ((val = getsid(val)) < 0) {
 		POSIX_G(last_error) = errno;
@@ -1200,6 +1203,21 @@ PHP_FUNCTION(posix_setrlimit)
 		Z_PARAM_LONG(cur)
 		Z_PARAM_LONG(max)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (cur < -1) {
+		zend_argument_value_error(2, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (max < -1) {
+		zend_argument_value_error(3, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (max > -1 && cur > max) {
+		zend_argument_value_error(2, "must be lower or equal to " ZEND_LONG_FMT, max);
+		RETURN_THROWS();
+	}
 
 	rl.rlim_cur = cur;
 	rl.rlim_max = max;

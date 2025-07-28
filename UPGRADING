@@ -384,8 +384,11 @@ PHP 8.5 UPGRADE NOTES
     last_error to EBADF and raises an E_WARNING message.
   . posix_kill throws a ValueError when the process_id argument is lower
     or greater than what supports the platform (signed integer or long
-    range), posix_setpgid throws a ValueError when the process_id is
-    lower than zero or greater than what supports the platform.
+    range), posix_setpgid throws a ValueError when the process_id or
+    the process_group_id is lower than zero or greater than
+    what supports the platform.
+  . posix_setrlimit throws a ValueError when the hard_limit of soft_limit
+    argument are lower than -1 or if soft_limit is greater than hard_limit.
 
 - Reflection:
   . The output of ReflectionClass::toString() for enums has changed to

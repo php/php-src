@@ -37,6 +37,9 @@ PHP                                                                        NEWS
 - POSIX:
   . posix_kill and posix_setpgid throws a ValueError on invalid process_id.
     (David Carlier)
+  . posix_setpgid throws a ValueError on invalid process_group_id,
+    posix_setrlimit throws a ValueError on invalid soft_limit and hard_limit
+    arguments. (David Carlier)
 
 - Reflection:
   . Fixed bug GH-19187 (ReflectionNamedType::getName() prints nullable type when
