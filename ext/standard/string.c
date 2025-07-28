@@ -1026,7 +1026,11 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 		}
 
 		cptr -= ZSTR_LEN(glue);
-		memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
+		if (ZSTR_LEN(glue) == 1) {
+			*cptr = ZSTR_VAL(glue)[0];
+		} else {
+			memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
+		}
 	}
 
 	free_alloca(strings, use_heap);
