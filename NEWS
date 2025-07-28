@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - GD:
   . Fix incorrect comparison with result of php_stream_can_cast(). (Girgias)
 
+- Intl:
+  . Fix return value on failure for resourcebundle count handler. (Girgias)
+
+
 - OPcache:
   . Disallow changing opcache.memory_consumption when SHM is already set up.
     (timwolla)
