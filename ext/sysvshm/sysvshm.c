@@ -261,7 +261,9 @@ PHP_FUNCTION(shm_put_var)
 		RETURN_THROWS();
 	}
 
-	ZEND_ASSERT(shm_var.s != NULL);
+	if (UNEXPECTED(shm_var.s == NULL)) {
+		RETURN_THROWS();
+	}
 
 	/* insert serialized variable into shared memory */
 	bool ret = php_put_shm_data(shm_list_ptr->ptr, shm_key, shm_var.s);
