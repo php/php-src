@@ -1964,6 +1964,9 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 		return zend_accel_load_script(persistent_script, from_memory);
 	}
 
+	zend_emit_recorded_errors();
+	zend_free_recorded_errors();
+
 	return op_array;
 }
 
