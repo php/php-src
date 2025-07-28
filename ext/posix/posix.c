@@ -1204,11 +1204,6 @@ PHP_FUNCTION(posix_setrlimit)
 		Z_PARAM_LONG(max)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (res < -1) {
-		zend_argument_value_error(1, "must be greater or equal to -1");
-		RETURN_THROWS();
-	}
-
 	if (cur < -1) {
 		zend_argument_value_error(2, "must be greater or equal to -1");
 		RETURN_THROWS();
