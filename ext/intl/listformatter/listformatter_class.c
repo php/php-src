@@ -72,7 +72,7 @@ PHP_METHOD(IntlListFormatter, __construct)
     }
 
     if (locale_len > INTL_MAX_LOCALE_LEN) {
-        zend_argument_value_error(1, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);
+        zend_argument_value_error(1, "must be less than or equal to %d characters", INTL_MAX_LOCALE_LEN);
         RETURN_THROWS();
     }
 
