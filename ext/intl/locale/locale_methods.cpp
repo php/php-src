@@ -21,6 +21,7 @@
 #include <unicode/putil.h>
 #include <unicode/ures.h>
 
+extern "C" {
 #include "php_intl.h"
 #include "locale.h"
 #include "locale_class.h"
@@ -32,6 +33,7 @@
 #include <php.h>
 #include "main/php_ini.h"
 #include "zend_smart_str.h"
+}
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
@@ -296,7 +298,7 @@ static zend_off_t getSingletonPos(const char* str)
 /* {{{ Get default locale */
 /* }}} */
 /* {{{ Get default locale */
-PHP_NAMED_FUNCTION(zif_locale_get_default)
+U_CFUNC PHP_NAMED_FUNCTION(zif_locale_get_default)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -308,7 +310,7 @@ PHP_NAMED_FUNCTION(zif_locale_get_default)
 /* {{{ Set default locale */
 /* }}} */
 /* {{{ Set default locale */
-PHP_NAMED_FUNCTION(zif_locale_set_default)
+U_CFUNC PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
 	zend_string* locale_name;
 	zend_string *ini_name;
@@ -520,21 +522,21 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 
 /* {{{ gets the script for the $locale */
-PHP_FUNCTION( locale_get_script )
+U_CFUNC PHP_FUNCTION( locale_get_script )
 {
 	get_icu_value_src_php( LOC_SCRIPT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the region for the $locale */
-PHP_FUNCTION( locale_get_region )
+U_CFUNC PHP_FUNCTION( locale_get_region )
 {
 	get_icu_value_src_php( LOC_REGION_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the primary language for the $locale */
-PHP_FUNCTION(locale_get_primary_language )
+U_CFUNC PHP_FUNCTION(locale_get_primary_language )
 {
 	get_icu_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
@@ -610,7 +612,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 
 	/* Get the disp_value for the given locale */
 	do{
-		disp_name = erealloc( disp_name , buflen * sizeof(UChar)  );
+		disp_name = reinterpret_cast<UChar *>(erealloc( disp_name , buflen * sizeof(UChar)  ));
 		disp_name_len = buflen;
 
 		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
@@ -674,28 +676,28 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 /* }}} */
 
 /* {{{ gets the name for the $locale in $in_locale or default_locale */
-PHP_FUNCTION(locale_get_display_name)
+U_CFUNC PHP_FUNCTION(locale_get_display_name)
 {
 	get_icu_disp_value_src_php( DISP_NAME , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the language for the $locale in $in_locale or default_locale */
-PHP_FUNCTION(locale_get_display_language)
+U_CFUNC PHP_FUNCTION(locale_get_display_language)
 {
 	get_icu_disp_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the script for the $locale in $in_locale or default_locale */
-PHP_FUNCTION(locale_get_display_script)
+U_CFUNC PHP_FUNCTION(locale_get_display_script)
 {
 	get_icu_disp_value_src_php( LOC_SCRIPT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the region for the $locale in $in_locale or default_locale */
-PHP_FUNCTION(locale_get_display_region)
+U_CFUNC PHP_FUNCTION(locale_get_display_region)
 {
 	get_icu_disp_value_src_php( LOC_REGION_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
@@ -709,7 +711,7 @@ PHP_FUNCTION(locale_get_display_region)
 * proto static string get_display_variant($locale, $in_locale = null)
 * gets the variant for the $locale in $in_locale or default_locale
 */
-PHP_FUNCTION(locale_get_display_variant)
+U_CFUNC PHP_FUNCTION(locale_get_display_variant)
 {
 	get_icu_disp_value_src_php( LOC_VARIANT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
@@ -721,7 +723,7 @@ PHP_FUNCTION(locale_get_display_variant)
  /* {{{ return an associative array containing keyword-value
  * pairs for this locale. The keys are keys to the array (doh!)
  */
-PHP_FUNCTION( locale_get_keywords )
+U_CFUNC PHP_FUNCTION( locale_get_keywords )
 {
 	UEnumeration*   e        = NULL;
 	UErrorCode      status   = U_ZERO_ERROR;
@@ -791,7 +793,7 @@ PHP_FUNCTION( locale_get_keywords )
  /* {{{ @return string the canonicalized locale
  * }}} */
  /* {{{ @param string $locale	The locale string to canonicalize */
-PHP_FUNCTION(locale_canonicalize)
+U_CFUNC PHP_FUNCTION(locale_canonicalize)
 {
 	get_icu_value_src_php( LOC_CANONICALIZE_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
@@ -936,7 +938,7 @@ static int handleAppendResult( int result, smart_str* loc_name)
 * }}} */
 /* {{{ Creates a locale by combining the parts of locale-ID passed
 * }}} */
-PHP_FUNCTION(locale_compose)
+U_CFUNC PHP_FUNCTION(locale_compose)
 {
 	smart_str      	loc_name_s = {0};
 	smart_str *loc_name = &loc_name_s;
@@ -1083,7 +1085,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 			}
 			/* Over-allocates a few bytes for the integer so we don't have to reallocate. */
 			size_t cur_key_name_size = (sizeof("-2147483648") - 1) + strlen(key_name) + 1;
-			cur_key_name = emalloc(cur_key_name_size);
+			cur_key_name = reinterpret_cast<char *>(emalloc(cur_key_name_size));
 			snprintf( cur_key_name, cur_key_name_size , "%s%d", key_name , cnt++);
 			add_assoc_string( hash_arr, cur_key_name , token);
 			/* tokenize on the "_" or "-" and stop  at singleton if any */
@@ -1117,7 +1119,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 /* }}} */
 
 /* {{{ parses a locale-id into an array the different parts of it */
-PHP_FUNCTION(locale_parse)
+U_CFUNC PHP_FUNCTION(locale_parse)
 {
 	char*          loc_name        = NULL;
 	size_t         loc_name_len    = 0;
@@ -1153,7 +1155,7 @@ PHP_FUNCTION(locale_parse)
 /* }}} */
 
 /* {{{ gets an array containing the list of variants, or null */
-PHP_FUNCTION(locale_get_all_variants)
+U_CFUNC PHP_FUNCTION(locale_get_all_variants)
 {
 	char*  	                loc_name        = NULL;
 	size_t    		loc_name_len    = 0;
@@ -1237,7 +1239,7 @@ static int strToMatch(const char* str ,char *retstr)
 /* {{{ Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm */
 /* }}} */
 /* {{{ Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm */
-PHP_FUNCTION(locale_filter_matches)
+U_CFUNC PHP_FUNCTION(locale_filter_matches)
 {
 	char*       	lang_tag        = NULL;
 	size_t         	lang_tag_len    = 0;
@@ -1296,7 +1298,7 @@ PHP_FUNCTION(locale_filter_matches)
 		}
 
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = ecalloc( 1, can_lang_tag->len + 1);
+		cur_lang_tag = reinterpret_cast<char *>(ecalloc( 1, can_lang_tag->len + 1));
 
 		/* Convert to lower case for case-insensitive comparison */
 		result = strToMatch( can_lang_tag->val , cur_lang_tag);
@@ -1306,7 +1308,7 @@ PHP_FUNCTION(locale_filter_matches)
 			RETURN_FALSE;
 		}
 
-		cur_loc_range = ecalloc( 1, can_loc_range->len + 1);
+		cur_loc_range = reinterpret_cast<char *>(ecalloc( 1, can_loc_range->len + 1));
 		result = strToMatch( can_loc_range->val , cur_loc_range );
 		if( result == 0) {
 			efree( cur_lang_tag );
@@ -1353,14 +1355,14 @@ PHP_FUNCTION(locale_filter_matches)
 	} /* end of if isCanonical */
 	else{
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = ecalloc( 1, strlen(lang_tag ) + 1);
+		cur_lang_tag = reinterpret_cast<char *>(ecalloc( 1, strlen(lang_tag ) + 1));
 
 		result = strToMatch( lang_tag , cur_lang_tag);
 		if( result == 0) {
 			efree( cur_lang_tag );
 			RETURN_FALSE;
 		}
-		cur_loc_range = ecalloc( 1, strlen(loc_range ) + 1);
+		cur_loc_range = reinterpret_cast<char *>(ecalloc( 1, strlen(loc_range ) + 1));
 		result = strToMatch( loc_range , cur_loc_range );
 		if( result == 0) {
 			efree( cur_lang_tag );
@@ -1425,7 +1427,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	zend_string* return_value = NULL;
 
-	char **cur_arr = ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *));
+	char **cur_arr = reinterpret_cast<char **>(ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *)));
 	ZEND_HASH_FOREACH_VAL(hash_arr, ele_value) {
 		ZVAL_DEREF(ele_value);
 	/* convert the array to lowercase , also replace hyphens with the underscore and store it in cur_arr */
@@ -1459,7 +1461,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag" , 0);
 				LOOKUP_CLEAN_RETURN(NULL);
 			}
-			cur_arr[i*2] = erealloc(cur_arr[i*2], lang_tag->len+1);
+			cur_arr[i*2] = reinterpret_cast<char *>(erealloc(cur_arr[i*2], lang_tag->len+1));
 			result = strToMatch(lang_tag->val, cur_arr[i*2]);
 			zend_string_release_ex(lang_tag, 0);
 			if(result == 0) {
@@ -1485,7 +1487,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 		}
 	}
 
-	cur_loc_range = ecalloc(1, strlen(loc_range)+1);
+	cur_loc_range = reinterpret_cast<char *>(ecalloc(1, strlen(loc_range)+1));
 	/* convert to lower and replace hyphens */
 	result = strToMatch(loc_range, cur_loc_range);
 	if(can_loc_range) {
@@ -1525,7 +1527,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 /* {{{ Searches the items in $langtag for the best match to the language
 * range
 */
-PHP_FUNCTION(locale_lookup)
+U_CFUNC PHP_FUNCTION(locale_lookup)
 {
 	zend_string*   	fallback_loc_str	= NULL;
 	char*    	loc_range      		= NULL;
@@ -1580,12 +1582,12 @@ PHP_FUNCTION(locale_lookup)
 /* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
 /* }}} */
 /* {{{ Tries to find out best available locale based on HTTP "Accept-Language" header */
-PHP_FUNCTION(locale_accept_from_http)
+U_CFUNC PHP_FUNCTION(locale_accept_from_http)
 {
 	UEnumeration *available;
 	char *http_accept = NULL;
 	size_t http_accept_len;
-	UErrorCode status = 0;
+	UErrorCode status = U_ZERO_ERROR;
 	int len;
 	char resultLocale[INTL_MAX_LOCALE_LEN+1];
 	UAcceptResult outResult;
@@ -1625,7 +1627,7 @@ PHP_FUNCTION(locale_accept_from_http)
 }
 /* }}} */
 
-PHP_FUNCTION(locale_is_right_to_left)
+U_CFUNC PHP_FUNCTION(locale_is_right_to_left)
 {
 	char *locale;
 	size_t locale_len;
@@ -1641,10 +1643,10 @@ PHP_FUNCTION(locale_is_right_to_left)
 	RETURN_BOOL(uloc_isRightToLeft(locale));
 }
 
-PHP_FUNCTION(locale_add_likely_subtags)
+U_CFUNC PHP_FUNCTION(locale_add_likely_subtags)
 {
 	char *locale, maximized_locale[ULOC_FULLNAME_CAPACITY];
-	UErrorCode status = 0;
+	UErrorCode status = U_ZERO_ERROR;
 	size_t locale_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1664,10 +1666,10 @@ PHP_FUNCTION(locale_add_likely_subtags)
 	RETURN_STRINGL(maximized_locale, maximized_locale_len);
 }
 
-PHP_FUNCTION(locale_minimize_subtags)
+U_CFUNC PHP_FUNCTION(locale_minimize_subtags)
 {
 	char *locale, minimized_locale[ULOC_FULLNAME_CAPACITY];
-	UErrorCode status = 0;
+	UErrorCode status = U_ZERO_ERROR;
 	size_t locale_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
