@@ -139,33 +139,3 @@ ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
 	zval_ptr_dtor(&retval);
 	zend_exception_restore();
 }
-
-ZEND_ATTRIBUTE_UNUSED char *get_opcache_path(void) {
-	/* Try relative to cwd. */
-	char *p = realpath("modules/opcache.so", NULL);
-	if (p) {
-		return p;
-	}
-
-	/* Try relative to binary location. */
-	char path[MAXPATHLEN];
-#if defined(__FreeBSD__)
-	size_t pathlen = sizeof(path);
-	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
-	if (sysctl(mib, 4, path, &pathlen, NULL, 0) < 0) {
-#else
-	if (readlink("/proc/self/exe", path, sizeof(path)) < 0) {
-#endif
-		ZEND_ASSERT(0 && "Failed to get binary path");
-		return NULL;
-	}
-
-	/* Get basename. */
-	char *last_sep = strrchr(path, '/');
-	if (last_sep) {
-		*last_sep = '\0';
-	}
-
-	strlcat(path, "/modules/opcache.so", sizeof(path));
-	return realpath(path, NULL);
-}
