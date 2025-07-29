@@ -2572,8 +2572,10 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		p->free_map[0] = (1L << ZEND_MM_FIRST_PAGE) - 1;
 		p->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
 
+#if ZEND_DEBUG
 		ZEND_ASSERT(getpid() == heap->pid
 				&& "heap was re-used without calling zend_mm_refresh_key_child() after a fork");
+#endif
 
 		zend_mm_refresh_key(heap);
 	}
