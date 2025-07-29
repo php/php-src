@@ -206,8 +206,8 @@ PHP                                                                        NEWS
   . Added grapheme_levenshtein() function. (Yuya Hamada)
   . Added Locale::addLikelySubtags/Locale::minimizeSubtags to handle
     adding/removing likely subtags to a locale. (David Carlier)
-  . Added IntlListFormatter class to format a list of items with a locale
-    , operands types and units. (BogdanUngureanu)
+  . Added IntlListFormatter class to format a list of items with a locale,
+    operands types and units. (BogdanUngureanu)
   . Fixed bug GH-18566 ([intl] Weird numeric sort in Collator). (nielsdos)
 
 - LDAP:
