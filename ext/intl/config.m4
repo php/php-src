@@ -36,14 +36,6 @@ if test "$PHP_INTL" != "no"; then
       intl_convert.c
       intl_error.c
       listformatter/listformatter_class.c
-      msgformat/msgformat_attr.c
-      msgformat/msgformat_class.c
-      msgformat/msgformat_data.c
-      msgformat/msgformat_format.c
-      msgformat/msgformat_parse.c
-      msgformat/msgformat.c
-      normalizer/normalizer_class.c
-      normalizer/normalizer_normalize.c
       php_intl.c
       resourcebundle/resourcebundle_class.c
       resourcebundle/resourcebundle_iterator.c
@@ -73,6 +65,14 @@ if test "$PHP_INTL" != "no"; then
     calendar/calendar_class.cpp \
     calendar/calendar_methods.cpp \
     calendar/gregoriancalendar_methods.cpp \
+    msgformat/msgformat_attr.cpp \
+    msgformat/msgformat_class.cpp \
+    msgformat/msgformat_data.cpp \
+    msgformat/msgformat_format.cpp \
+    msgformat/msgformat_parse.cpp \
+    msgformat/msgformat.cpp \
+    normalizer/normalizer_class.cpp \
+    normalizer/normalizer_normalize.cpp \
     breakiterator/breakiterator_class.cpp \
     breakiterator/breakiterator_iterators.cpp \
     breakiterator/breakiterator_methods.cpp \

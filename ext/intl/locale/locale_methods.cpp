@@ -936,7 +936,7 @@ static int handleAppendResult( int result, smart_str* loc_name)
 * }}} */
 U_CFUNC PHP_FUNCTION(locale_compose)
 {
-	smart_str      	loc_name_s = {0};
+	smart_str      	loc_name_s = {NULL, 0};
 	smart_str *loc_name = &loc_name_s;
 	zval*			arr	= NULL;
 	HashTable*		hash_arr = NULL;
