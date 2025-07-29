@@ -76,6 +76,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . zend_mm_refresh_key_child() must be called on any zend_mm_heap inherited
     from the parent process after a fork().
 
+- standard
+  . ext/standard/php_smart_string.h and ext/standard/php_smart_string_public.h
+    were removed. Use the corresponding headers in Zend/ instead.
+
 ========================
 2. Build system changes
 ========================
