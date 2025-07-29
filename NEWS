@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.11
+31 Jul 2025, PHP 8.4.11
 
 - Calendar:
   . Fixed jewishtojd overflow on year argument. (David Carlier)
