@@ -16,9 +16,9 @@
   +----------------------------------------------------------------------+
 */
 
+#include "zend_exceptions.h"
 #include "php_filter.h"
 #include "filter_private.h"
-#include "ext/standard/url.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/uri/php_uri.h"
 
@@ -610,7 +610,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	uri_handler_t *uri_handler = php_uri_get_handler(parser_name_set ? parser_name : NULL);
 	if (uri_handler == NULL) {
-		zend_throw_error(NULL, "Invalid URI parser used");
+		zend_value_error("%s(): \"uri_parser_class\" option has invalid value", get_active_function_name());
 		RETURN_VALIDATION_FAILED
 	}
 

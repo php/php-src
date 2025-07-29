@@ -26,6 +26,7 @@
 #include "ext/uri/php_uri.h"
 #include "streams/php_streams_int.h"
 #include "zend_smart_str.h"
+#include "zend_exceptions.h"
 #include "php_openssl.h"
 #include "php_openssl_backend.h"
 #include "php_network.h"
@@ -2635,6 +2636,7 @@ static char *php_openssl_get_url_name(const char *resourcename,
 
 	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ssl", context);
 	if (uri_handler == NULL) {
+		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
 	}
 
