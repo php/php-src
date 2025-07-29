@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0alpha3
+31 Jul 2025, PHP 8.5.0alpha3
 
 - Core:
   . Add clone-with support to the clone() function. (timwolla, edorian)
