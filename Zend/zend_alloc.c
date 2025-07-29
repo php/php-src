@@ -2034,7 +2034,7 @@ static void zend_mm_init_key(zend_mm_heap *heap)
 	zend_mm_refresh_key(heap);
 }
 
-static void zend_mm_refresh_key_child(zend_mm_heap *heap)
+ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
 {
 	uintptr_t old_key = heap->shadow_key;
 
