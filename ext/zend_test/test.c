@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include "ext/opcache/zend_accelerator_api.h"
+#include "zend_API.h"
 #include "zend_modules.h"
 #include "zend_types.h"
 #ifdef HAVE_CONFIG_H
@@ -1644,4 +1646,11 @@ static PHP_FUNCTION(zend_test_gh18756)
 	zend_mm_gc(heap);
 	zend_mm_gc(heap);
 	zend_mm_shutdown(heap, true, false);
+}
+
+static PHP_FUNCTION(zend_test_opcache_preloading)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_BOOL(opcache_preloading());
 }

@@ -325,6 +325,7 @@ PHP_NEW_EXTENSION([opcache], m4_normalize([
     shared_alloc_mmap.c
     shared_alloc_posix.c
     shared_alloc_shm.c
+    zend_accelerator_api.c
     zend_accelerator_blacklist.c
     zend_accelerator_debug.c
     zend_accelerator_hash.c
@@ -361,3 +362,5 @@ AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
   ])
   PHP_ADD_MAKEFILE_FRAGMENT([$ext_srcdir/jit/Makefile.frag])
 ])
+
+PHP_INSTALL_HEADERS([ext/opcache], [zend_accelerator_api.h])

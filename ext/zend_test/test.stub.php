@@ -338,6 +338,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_compile_to_ast(string $str): string {}
 
     function zend_test_gh18756(): void {}
+
+    function zend_test_opcache_preloading(): bool {}
 }
 
 namespace ZendTestNS {
