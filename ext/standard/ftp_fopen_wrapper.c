@@ -21,6 +21,7 @@
 #include "php_globals.h"
 #include "php_network.h"
 #include "php_ini.h"
+#include "zend_exceptions.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -136,6 +137,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 
 	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ftp", context);
 	if (uri_handler == NULL) {
+		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
 	}
 
@@ -956,6 +958,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 
 	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ftp", context);
 	if (uri_handler == NULL) {
+		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return 0;
 	}
 
@@ -1022,6 +1025,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	return 1;
 
 rename_errexit:
+	php_uri_struct_free(resource_from);
 	if (resource_to) {
 		php_uri_struct_free(resource_to);
 	}
