@@ -18,11 +18,13 @@
 
 #include <unicode/ustring.h>
 
+extern "C" {
 #include "php_intl.h"
 #include "msgformat_class.h"
 #include "msgformat_data.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
+}
 
 #ifndef Z_ADDREF_P
 #define Z_ADDREF_P(z) ((z)->refcount++)
@@ -48,7 +50,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 /* }}} */
 
 /* {{{ Format a message. */
-PHP_FUNCTION( msgfmt_format )
+U_CFUNC PHP_FUNCTION( msgfmt_format )
 {
 	zval *args;
 	MSG_FORMAT_METHOD_INIT_VARS;
@@ -69,7 +71,7 @@ PHP_FUNCTION( msgfmt_format )
 /* }}} */
 
 /* {{{ Format a message. */
-PHP_FUNCTION( msgfmt_format_message )
+U_CFUNC PHP_FUNCTION( msgfmt_format_message )
 {
 	zval       *args;
 	UChar      *spattern = NULL;

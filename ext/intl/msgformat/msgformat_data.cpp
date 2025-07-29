@@ -24,7 +24,7 @@
 /* {{{ void msgformat_data_init( msgformat_data* mf_data )
  * Initialize internals of msgformat_data.
  */
-void msgformat_data_init( msgformat_data* mf_data )
+U_CFUNC void msgformat_data_init( msgformat_data* mf_data )
 {
 	if( !mf_data )
 		return;
@@ -40,7 +40,7 @@ void msgformat_data_init( msgformat_data* mf_data )
 /* {{{ void msgformat_data_free( msgformat_data* mf_data )
  * Clean up memory allocated for msgformat_data
  */
-void msgformat_data_free(msgformat_data* mf_data)
+U_CFUNC void msgformat_data_free(msgformat_data* mf_data)
 {
 	if (!mf_data)
 		return;
@@ -69,7 +69,7 @@ void msgformat_data_free(msgformat_data* mf_data)
  */
 msgformat_data* msgformat_data_create( void )
 {
-	msgformat_data* mf_data = ecalloc( 1, sizeof(msgformat_data) );
+	msgformat_data* mf_data = reinterpret_cast<msgformat_data *>(ecalloc( 1, sizeof(msgformat_data) ));
 
 	msgformat_data_init( mf_data );
 

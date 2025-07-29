@@ -14,10 +14,12 @@
 
 #include <unicode/unum.h>
 
+extern "C" {
 #include "msgformat_class.h"
 #include "php_intl.h"
 #include "msgformat_data.h"
 #include "msgformat_arginfo.h"
+}
 
 #include <zend_exceptions.h>
 
@@ -29,7 +31,7 @@ static zend_object_handlers MessageFormatter_handlers;
  */
 
 /* {{{ MessageFormatter_objects_free */
-void MessageFormatter_object_free( zend_object *object )
+U_CFUNC void MessageFormatter_object_free( zend_object *object )
 {
 	MessageFormatter_object* mfo = php_intl_messageformatter_fetch_object(object);
 
@@ -40,11 +42,11 @@ void MessageFormatter_object_free( zend_object *object )
 /* }}} */
 
 /* {{{ MessageFormatter_object_create */
-zend_object *MessageFormatter_object_create(zend_class_entry *ce)
+U_CFUNC zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 {
 	MessageFormatter_object*     intern;
 
-	intern = zend_object_alloc(sizeof(MessageFormatter_object), ce);
+	intern = reinterpret_cast<MessageFormatter_object *>(zend_object_alloc(sizeof(MessageFormatter_object), ce));
 	msgformat_data_init( &intern->mf_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -54,7 +56,7 @@ zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ MessageFormatter_object_clone */
-zend_object *MessageFormatter_object_clone(zend_object *object)
+U_CFUNC zend_object *MessageFormatter_object_clone(zend_object *object)
 {
 	MessageFormatter_object     *mfo = php_intl_messageformatter_fetch_object(object);
 	zend_object             *new_obj = MessageFormatter_ce_ptr->create_object(object->ce);
@@ -66,7 +68,7 @@ zend_object *MessageFormatter_object_clone(zend_object *object)
 	/* clone formatter object */
 	if (MSG_FORMAT_OBJECT(mfo) != NULL) {
 		UErrorCode error = U_ZERO_ERROR;
-		MSG_FORMAT_OBJECT(new_mfo) = umsg_clone(MSG_FORMAT_OBJECT(mfo), &error);
+		MSG_FORMAT_OBJECT(new_mfo) = reinterpret_cast<UMessageFormat *>(umsg_clone(MSG_FORMAT_OBJECT(mfo), &error));
 
 		if (U_FAILURE(error)) {
 			zend_throw_error(NULL, "Failed to clone MessageFormatter");
