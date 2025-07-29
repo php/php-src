@@ -112,7 +112,7 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.BASELINE_COMMIT }}
 
-            PHP_OPCACHE=1
+            PHP_OPCACHE=2
             PHP_JIT=0
           EOF
       - name: Setup PHP config - baseline PHP version with JIT (manual only)
@@ -130,7 +130,7 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=${{ env.BASELINE_COMMIT }}
 
-            PHP_OPCACHE=1
+            PHP_OPCACHE=2
             PHP_JIT=${{ env.JIT }}
           EOF
 
