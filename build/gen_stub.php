@@ -959,9 +959,6 @@ class FunctionName implements FunctionOrMethodName {
     private /* readonly */ Name $name;
 
     public function __construct(Name $name) {
-        if ($name->name === '_clone') {
-            $name = new Name('clone', $name->getAttributes());
-        }
         $this->name = $name;
     }
 
@@ -6059,7 +6056,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "5.5.0";
+    $version = "5.6.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
