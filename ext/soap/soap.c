@@ -2785,16 +2785,16 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 PHP_METHOD(SoapClient, __doRequest)
 {
 	zend_string *buf;
-	char      *location, *action;
-	size_t     location_size, action_size;
+	zend_string *location;
+	zend_string *action;
 	zend_long  version;
 	bool  one_way = 0;
 	zval      *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSSl|b",
 	    &buf,
-	    &location, &location_size,
-	    &action, &action_size,
+	    &location,
+	    &action,
 	    &version, &one_way) == FAILURE) {
 		RETURN_THROWS();
 	}
