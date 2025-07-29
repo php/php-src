@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
+#include "zend_exceptions.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -394,6 +395,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("http", context);
 	if (uri_handler == NULL) {
+		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
 	}
 	resource = php_uri_parse_to_struct(uri_handler, path, strlen(path), URI_COMPONENT_READ_RAW, true);

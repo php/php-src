@@ -3,6 +3,17 @@ Test file_get_contents() function when a custom URI parser is configured
 --FILE--
 <?php
 
+try {
+    $context = stream_context_create([
+        "http" => [
+            "uri_parser_class" => "not-exists",
+        ],
+    ]);
+    var_dump(file_get_contents("https://example.com", context: $context));
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
 $context = stream_context_create([
     "http" => [
         "uri_parser_class" => null,
@@ -26,6 +37,8 @@ var_dump(file_get_contents("https://exa%23mple.org", context: $context)); // inv
 
 ?>
 --EXPECTF--
+file_get_contents(): Provided stream context has invalid value for the "uri_parser_class" option
+
 Warning: file_get_contents(https:///example.com): Failed to open stream: operation failed in %s on line %d
 bool(false)
 
