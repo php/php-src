@@ -46,7 +46,7 @@ using icu::StringPiece;
 	}
 
 static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
-	return static_cast<GregorianCalendar *>(co->ucal);
+	return static_cast<GregorianCalendar *>(co->ucal.get());
 }
 
 static bool set_gregorian_calendar_time_zone(GregorianCalendar *gcal, UErrorCode status)
@@ -204,7 +204,7 @@ static void _php_intlgregcal_constructor_body(
 		}
 	}
 
-	co->ucal = gcal.release();
+	co->ucal = std::move(gcal);
 }
 
 U_CFUNC PHP_FUNCTION(intlgregcal_create_instance)
@@ -256,7 +256,7 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDate)
 
 	object_init_ex(return_value, GregorianCalendar_ce_ptr);
 	co = Z_INTL_CALENDAR_P(return_value);
-	co->ucal = gcal.release();
+	co->ucal = std::move(gcal);
 
 cleanup:
 	zend_restore_error_handling(&error_handling);
@@ -304,8 +304,7 @@ U_CFUNC PHP_METHOD(IntlGregorianCalendar, createFromDateTime)
 
 	object_init_ex(return_value, GregorianCalendar_ce_ptr);
 	co = Z_INTL_CALENDAR_P(return_value);
-	// TODO: trying to get passed the ownership change step
-	co->ucal = gcal.release();
+	co->ucal = std::move(gcal);
 
 cleanup:
 	zend_restore_error_handling(&error_handling);

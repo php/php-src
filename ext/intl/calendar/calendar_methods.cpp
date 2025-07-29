@@ -227,7 +227,7 @@ static void _php_intlcal_field_uec_ret_in32t_method(
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	int32_t result = (co->ucal->*func)(
+	int32_t result = (co->ucal.get()->*func)(
 		(UCalendarDateFields)field, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
@@ -349,7 +349,7 @@ static void _php_intlcal_before_after(
 		RETURN_THROWS();
 	}
 
-	UBool res = (co->ucal->*func)(*when_co->ucal, CALENDAR_ERROR_CODE(co));
+	UBool res = (co->ucal.get()->*func)(*when_co->ucal, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "intlcal_before/after: Error calling ICU method");
 
 	RETURN_BOOL((int)res);
@@ -610,7 +610,7 @@ static void _php_intlcal_field_ret_in32t_method(
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	int32_t result = (co->ucal->*func)((UCalendarDateFields)field);
+	int32_t result = (co->ucal.get()->*func)((UCalendarDateFields)field);
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
 	RETURN_LONG((zend_long)result);

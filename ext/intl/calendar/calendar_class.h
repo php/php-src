@@ -33,13 +33,23 @@ typedef struct {
 	intl_error  err;
 
 	// ICU calendar
+#ifndef __cplusplus
 	Calendar*	ucal;
+#else
+	std::unique_ptr<Calendar> ucal;
+#endif
 
 	zend_object	zo;
 } Calendar_object;
 
 static inline Calendar_object *php_intl_calendar_fetch_object(zend_object *obj) {
+#ifndef __cplusplus
 	return (Calendar_object *)((char*)(obj) - XtOffsetOf(Calendar_object, zo));
+#else
+	Calendar_object empty;
+	size_t offset = reinterpret_cast<char *>(&empty.zo) - reinterpret_cast<char *>(&empty);
+	return reinterpret_cast<Calendar_object *>(reinterpret_cast<char *>(obj) - offset);
+#endif
 }
 #define Z_INTL_CALENDAR_P(zv) php_intl_calendar_fetch_object(Z_OBJ_P(zv))
 
