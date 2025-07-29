@@ -5006,6 +5006,7 @@ static zend_result accel_finish_startup_preload_subprocess(pid_t *pid)
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
 			exit(1);
 		}
+		php_child_init();
 	}
 
 	return SUCCESS;
