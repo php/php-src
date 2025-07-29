@@ -148,3 +148,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+- SAPIs must now call php_child_init() after a fork. If php-src code was
+  executed in other threads than the one initiating the fork,
+  refresh_memory_manager() must be called in every such thread.
