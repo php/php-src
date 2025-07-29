@@ -356,6 +356,9 @@ AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
     $ext_builddir/jit
     $ext_builddir/jit/ir
   ])
+  AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
+    PHP_ADD_BUILD_DIR([$ext_builddir/jit/tls])
+  ])
   PHP_ADD_MAKEFILE_FRAGMENT([$ext_srcdir/jit/Makefile.frag])
 ])
 PHP_SUBST([OPCACHE_SHARED_LIBADD])
