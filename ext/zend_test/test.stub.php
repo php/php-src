@@ -293,6 +293,8 @@ namespace {
 
     function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
 
+    function zend_call_method_if_exists(object $obj, string $method, mixed ...$args): mixed {}
+
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 
