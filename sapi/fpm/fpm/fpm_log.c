@@ -19,8 +19,6 @@
 #include "fastcgi.h"
 #include "zlog.h"
 
-#define FPM_LOG_BUFFER 1024
-
 static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
 static struct key_value_s *fpm_access_suppress_paths = NULL;
