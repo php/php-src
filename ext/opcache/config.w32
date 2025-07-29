@@ -68,3 +68,5 @@ if (PHP_OPCACHE_JIT == "yes") {
 }
 
 ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);
+
+PHP_INSTALL_HEADERS("ext/opcache", "zend_accelerator_api.h");
