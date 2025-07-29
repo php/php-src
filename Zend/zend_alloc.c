@@ -70,6 +70,8 @@
 # include <wincrypt.h>
 # include <process.h>
 # include "win32/winutil.h"
+# define getpid _getpid
+typedef int pid_t;
 #endif
 
 #include <stdio.h>
@@ -314,6 +316,9 @@ struct _zend_mm_heap {
 			bool    check_freelists_on_shutdown;
 		} debug;
 	};
+#endif
+#if ZEND_DEBUG
+	pid_t pid;
 #endif
 	zend_random_bytes_insecure_state rand_state;
 };
@@ -2051,6 +2056,10 @@ static void zend_mm_refresh_key_child(zend_mm_heap *heap)
 			slot = next;
 		}
 	}
+
+#if ZEND_DEBUG
+	heap->pid = getpid();
+#endif
 }
 
 static zend_mm_heap *zend_mm_init(void)
@@ -2101,6 +2110,9 @@ static zend_mm_heap *zend_mm_init(void)
 	heap->storage = NULL;
 #endif
 	heap->huge_list = NULL;
+#if ZEND_DEBUG
+	heap->pid = getpid();
+#endif
 	return heap;
 }
 
@@ -2559,6 +2571,9 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		memset(p->free_map, 0, sizeof(p->free_map) + sizeof(p->map));
 		p->free_map[0] = (1L << ZEND_MM_FIRST_PAGE) - 1;
 		p->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
+
+		ZEND_ASSERT(getpid() == heap->pid
+				&& "heap was re-used without calling zend_mm_refresh_key_child() after a fork");
 
 		zend_mm_refresh_key(heap);
 	}
@@ -3530,6 +3545,9 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 		memcpy(storage->data, data, data_size);
 	}
 	heap->storage = storage;
+#if ZEND_DEBUG
+	heap->pid = getpid();
+#endif
 	return heap;
 #else
 	return NULL;
