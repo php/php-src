@@ -354,7 +354,13 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (is_root) {
 		if (wp->config->user && *wp->config->user) {
 			if (fpm_unix_is_id(wp->config->user)) {
-				wp->set_uid = strtoul(wp->config->user, 0, 10);
+				unsigned long uid_val = strtoul(wp->config->user, 0, 10);
+				if (uid_val > INT_MAX) {
+					zlog(ZLOG_ERROR, "[pool %s] invalid user ID '%s': value too large",
+					     wp->config->name, wp->config->user);
+					return -1;
+				}
+				wp->set_uid = (int)uid_val;
 				pwd = getpwuid(wp->set_uid);
 				if (pwd) {
 					wp->set_gid = pwd->pw_gid;
@@ -378,7 +384,13 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 
 		if (wp->config->group && *wp->config->group) {
 			if (fpm_unix_is_id(wp->config->group)) {
-				wp->set_gid = strtoul(wp->config->group, 0, 10);
+				unsigned long gid_val = strtoul(wp->config->group, 0, 10);
+				if (gid_val > INT_MAX) {
+					zlog(ZLOG_ERROR, "[pool %s] invalid group ID '%s': value too large",
+					     wp->config->name, wp->config->group);
+					return -1;
+				}
+				wp->set_gid = (int)gid_val;
 			} else {
 				struct group *grp;
 
