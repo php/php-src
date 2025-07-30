@@ -266,6 +266,7 @@ static bool sqlite_handle_begin(pdo_dbh_t *dbh)
 			break;
 		case PDO_SQLITE_ATTR_TRANSACTION_MODE_EXCLUSIVE:
 			begin_statement = "BEGIN EXCLUSIVE TRANSACTION";
+			break;
 		default:
 			begin_statement = "BEGIN";
 	}
