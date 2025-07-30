@@ -3700,6 +3700,16 @@ function is_iterable(mixed $value): bool {}
  */
 function is_countable(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
+function is_representable_as_float(mixed $value): bool {}
+
+/**
+ * @compile-time-eval
+ */
+function is_representable_as_int(mixed $value): bool {}
+
 /* uniqid.c */
 
 #ifdef HAVE_GETTIMEOFDAY

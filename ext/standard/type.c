@@ -465,3 +465,118 @@ PHP_FUNCTION(is_countable)
 	RETURN_BOOL(zend_is_countable(var));
 }
 /* }}} */
+
+static bool can_int_be_exact_float(zend_long lval) {
+#if SIZEOF_ZEND_LONG == 4
+	return true;
+#else
+	return (zend_long) (double) lval == lval;
+#endif
+}
+
+static bool check_numeric_string_representable_as_float(zend_string *str) {
+	zend_long lval;
+	double dval;
+	int oflow_info;
+	
+	uint8_t type = _is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), 
+										&lval, &dval, false, &oflow_info, NULL);
+	
+	if (type == IS_LONG) {
+		return oflow_info != 0 || can_int_be_exact_float(lval);
+	}
+
+	return type == IS_DOUBLE && zend_finite(dval);
+}
+
+static bool check_numeric_string_representable_as_int(zend_string *str) {
+	zend_long lval;
+	double dval;
+	int oflow_info;
+
+	uint8_t type = _is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), 
+										&lval, &dval, false, &oflow_info, NULL);
+
+	if (type == IS_LONG) {
+		return oflow_info == 0;
+	}
+
+	return type == IS_DOUBLE && dval == floor(dval) && ZEND_DOUBLE_FITS_LONG(dval);
+}
+
+PHP_FUNCTION(is_representable_as_float)
+{
+	zval *arg;
+	
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+	
+	switch (Z_TYPE_P(arg)) {
+		case IS_LONG:
+			RETURN_BOOL(can_int_be_exact_float(Z_LVAL_P(arg)));
+
+		case IS_DOUBLE:
+			RETURN_TRUE;
+
+		case IS_STRING:
+			RETURN_BOOL(check_numeric_string_representable_as_float(Z_STR_P(arg)));
+
+		case IS_OBJECT: {
+			zval tmp;
+			if (!Z_OBJ_HT_P(arg)->cast_object ||
+				Z_OBJ_HT_P(arg)->cast_object(Z_OBJ_P(arg), &tmp, IS_STRING) != SUCCESS) {
+				RETURN_FALSE;
+			}
+
+			bool result = check_numeric_string_representable_as_float(Z_STR(tmp));
+			zval_ptr_dtor(&tmp);
+			RETURN_BOOL(result);
+		}
+
+		default:
+			RETURN_FALSE;
+	}
+}
+
+PHP_FUNCTION(is_representable_as_int)
+{
+	zval *arg;
+	
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+	
+	switch (Z_TYPE_P(arg)) {
+		case IS_LONG:
+			RETURN_TRUE;
+
+		case IS_DOUBLE: {
+			double dval = Z_DVAL_P(arg);
+
+			if (!zend_finite(dval) || zend_isnan(dval)) {
+				RETURN_FALSE;
+			}
+
+			RETURN_BOOL(dval == floor(dval) && ZEND_DOUBLE_FITS_LONG(dval));
+		}
+		
+		case IS_STRING:
+			RETURN_BOOL(check_numeric_string_representable_as_int(Z_STR_P(arg)));
+
+		case IS_OBJECT: {
+			zval tmp;
+			if (!Z_OBJ_HT_P(arg)->cast_object ||
+				Z_OBJ_HT_P(arg)->cast_object(Z_OBJ_P(arg), &tmp, IS_STRING) != SUCCESS) {
+				RETURN_FALSE;
+			}
+
+			bool result = check_numeric_string_representable_as_int(Z_STR(tmp));
+			zval_ptr_dtor(&tmp);
+			RETURN_BOOL(result);
+		}
+
+		default:
+			RETURN_FALSE;
+	}
+}
