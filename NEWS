@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     unpacking). (ilutov)
   . Fixed OSS-Fuzz #434346548 (Failed assertion with throwing __toString in
     binary const expr). (ilutov)
+  . Fixed bug GH-19305 (Operands may be being released during comparison).
+    (Arnaud)
 
 - FTP:
   . Fix theoretical issues with hrtime() not being available. (nielsdos)
