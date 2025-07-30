@@ -6162,6 +6162,9 @@ ZEND_VM_C_LABEL(add_unpack_again):
 		zval *val;
 
 		if (HT_IS_PACKED(ht) && (zend_hash_num_elements(result_ht) == 0 || HT_IS_PACKED(result_ht))) {
+			/* zend_hash_extend() skips initialization when the number of elements is 0,
+			 * but the code below expects that result_ht is initialized as packed.
+			 * We can just skip the work in that case. */
 			if (result_ht->nNumUsed + zend_hash_num_elements(ht) > 0) {
 				zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
 				ZEND_HASH_FILL_PACKED(result_ht) {
