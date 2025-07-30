@@ -15,6 +15,8 @@ PHP                                                                        NEWS
     binary const expr). (ilutov)
   . Fixed bug GH-19305 (Operands may be being released during comparison).
     (Arnaud)
+  . Fixed bug GH-19303 (Unpacking empty packed array into uninitialized array
+    causes assertion failure). (nielsdos)
 
 - FTP:
   . Fix theoretical issues with hrtime() not being available. (nielsdos)

@@ -2721,17 +2721,22 @@ add_unpack_again:
 		zval *val;
 
 		if (HT_IS_PACKED(ht) && (zend_hash_num_elements(result_ht) == 0 || HT_IS_PACKED(result_ht))) {
-			zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
-			ZEND_HASH_FILL_PACKED(result_ht) {
-				ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
-					if (UNEXPECTED(Z_ISREF_P(val)) &&
-						UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
-						val = Z_REFVAL_P(val);
-					}
-					Z_TRY_ADDREF_P(val);
-					ZEND_HASH_FILL_ADD(val);
-				} ZEND_HASH_FOREACH_END();
-			} ZEND_HASH_FILL_END();
+			/* zend_hash_extend() skips initialization when the number of elements is 0,
+			 * but the code below expects that result_ht is initialized as packed.
+			 * We can just skip the work in that case. */
+			if (result_ht->nNumUsed + zend_hash_num_elements(ht) > 0) {
+				zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
+				ZEND_HASH_FILL_PACKED(result_ht) {
+					ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
+						if (UNEXPECTED(Z_ISREF_P(val)) &&
+							UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
+							val = Z_REFVAL_P(val);
+						}
+						Z_TRY_ADDREF_P(val);
+						ZEND_HASH_FILL_ADD(val);
+					} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FILL_END();
+			}
 		} else {
 			zend_string *key;
 
