@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-19303 (Unpacking empty packed array into uninitialized array
     causes assertion failure). (nielsdos)
+  . Fixed bug GH-19306 (Generator can be resumed while fetching next value from
+    delegated Generator). (Arnaud)
 
 - FTP:
   . Fix theoretical issues with hrtime() not being available. (nielsdos)

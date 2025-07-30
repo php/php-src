@@ -787,6 +787,8 @@ try_again:
 		orig_generator->execute_fake.prev_execute_data = original_execute_data;
 	}
 
+	generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
+
 	/* Ensure this is run after executor_data swap to have a proper stack trace */
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
 		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {
@@ -795,7 +797,7 @@ try_again:
 			EG(jit_trace_num) = original_jit_trace_num;
 
 			orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
-			generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
+			generator->flags &= ~(ZEND_GENERATOR_CURRENTLY_RUNNING | ZEND_GENERATOR_IN_FIBER);
 			return;
 		}
 		if (UNEXPECTED(EG(exception))) {
@@ -817,7 +819,6 @@ try_again:
 	}
 
 	/* Resume execution */
-	generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
 	if (!ZEND_OBSERVER_ENABLED) {
 		zend_execute_ex(generator->execute_data);
 	} else {
