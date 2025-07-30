@@ -213,6 +213,8 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 	int last_was_longlink = 0;
 	size_t linkname_len;
 
+	zend_string *filename_pax_override = NULL;
+
 	if (error) {
 		*error = NULL;
 	}
@@ -275,12 +277,78 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 			phar_tar_oct_number(hdr->size, sizeof(hdr->size));
 
 		/* skip global/file headers (pax) */
-		if (!old && (hdr->typeflag == TAR_GLOBAL_HDR || hdr->typeflag == TAR_FILE_HDR)) {
+		if (!old && hdr->typeflag == TAR_GLOBAL_HDR) {
 			size = (size+511)&~511;
 			goto next;
 		}
 
-		if (((!old && hdr->prefix[0] == 0) || old) && zend_strnlen(hdr->name, 100) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+		/* Process file pax header */
+		if (!old && hdr->typeflag == TAR_FILE_HDR) {
+			size = (size + 511) & ~511;
+
+			char *pax_data = emalloc(size);
+
+			if (UNEXPECTED(php_stream_read(fp, pax_data, size) != size)) {
+				efree(pax_data);
+				goto truncated;
+			}
+
+			/* TODO: should this be usable multiple times? */
+			if (filename_pax_override) {
+				zend_string_release(filename_pax_override);
+				filename_pax_override = NULL;
+			}
+
+			char *ptr = pax_data;
+			const char *pax_data_end = pax_data + size;
+			while (ptr < pax_data_end) {
+				/* Format: "%d %s=%s\n" */
+
+				char *line_end = memchr(ptr, '\n', pax_data_end - ptr);
+				if (!line_end) {
+					break;
+				}
+
+				char *blank = memchr(ptr, ' ', line_end - ptr);
+				if (!blank) {
+					break;
+				}
+				*blank = '\0';
+				size_t kv_size = strtoull(ptr, NULL, 10);
+				if (kv_size != line_end - ptr + 1) {
+					break;
+				}
+
+				/* Check for known keys */
+				const char *key = blank + 1;
+				const char *equals = memchr(key, '=', line_end - key);
+				if (!equals) {
+					break;
+				}
+				size_t len = equals - key;
+				if (len == strlen("path") && memcmp(key, "path", strlen("path")) == 0) {
+					const char *filename_start = equals + 1;
+					size_t filename_pax_override_len = line_end - filename_start;
+					/* Ending '/' stripping */
+					if (filename_pax_override_len > 0 && filename_start[filename_pax_override_len - 1] == '/') {
+						filename_pax_override_len--;
+					}
+					filename_pax_override = zend_string_init(filename_start, filename_pax_override_len, myphar->is_persistent);
+					if (myphar->is_persistent) {
+						GC_MAKE_PERSISTENT_LOCAL(filename_pax_override);
+					}
+				}
+
+				ptr = line_end + 1;
+			}
+
+			efree(pax_data);
+
+			goto next_no_seek;
+		}
+
+		if ((filename_pax_override && zend_string_equals_literal(filename_pax_override, ".phar/signature.bin"))
+		 || (((!old && hdr->prefix[0] == 0) || old) && !strcmp(hdr->name, ".phar/signature.bin"))) {
 			zend_off_t curloc;
 			size_t sig_len;
 
@@ -289,6 +357,9 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has signature that is larger than 511 bytes, cannot process", fname);
 				}
 bail:
+				if (filename_pax_override) {
+					zend_string_release(filename_pax_override);
+				}
 				php_stream_close(fp);
 				phar_destroy_phar_data(myphar);
 				return FAILURE;
@@ -356,7 +427,10 @@ bail:
 			goto bail;
 		}
 
-		if (!last_was_longlink && hdr->typeflag == 'L') {
+		if (filename_pax_override) {
+			entry.filename = filename_pax_override;
+			filename_pax_override = NULL;
+		} else if (!last_was_longlink && hdr->typeflag == 'L') {
 			last_was_longlink = 1;
 			/* support the ././@LongLink system for storing long filenames */
 
@@ -564,6 +638,7 @@ bail:
 next:
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
+next_no_seek:
 			if ((uint32_t)php_stream_tell(fp) > totalsize) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
@@ -580,6 +655,7 @@ next:
 		read = php_stream_read(fp, buf, sizeof(buf));
 
 		if (read != sizeof(buf)) {
+truncated:
 			if (error) {
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 			}
@@ -673,6 +749,8 @@ next:
 	if (pphar) {
 		*pphar = myphar;
 	}
+
+	pefree(filename_pax_override, myphar->is_persistent);
 
 	return SUCCESS;
 }
