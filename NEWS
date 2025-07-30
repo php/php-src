@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.30
 
+- Opcache:
+  . Reset global pointers to prevent use-after-free in zend_jit_status().
+    (Florian Engelhardt)
 
 03 Jul 2025, PHP 8.2.29
 
