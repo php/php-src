@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19098 (libxml<2.13 segmentation fault caused by
     php_libxml_node_free). (nielsdos)
 
+- Opcache:
+  . Reset global pointers to prevent use-after-free in zend_jit_status().
+    (Florian Engelhardt)
+
 - OpenSSL:
   . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
     return value check). (nielsdos, botovq)
