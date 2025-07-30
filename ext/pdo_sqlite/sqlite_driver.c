@@ -255,7 +255,22 @@ static bool sqlite_handle_begin(pdo_dbh_t *dbh)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
-	if (sqlite3_exec(H->db, "BEGIN", NULL, NULL, NULL) != SQLITE_OK) {
+	char *begin_statement;
+	switch (H->transaction_mode) {
+		case 0:
+		case PDO_SQLITE_ATTR_TRANSACTION_MODE_DEFERRED:
+			begin_statement = "BEGIN DEFERRED TRANSACTION";
+			break;
+		case PDO_SQLITE_ATTR_TRANSACTION_MODE_IMMEDIATE:
+			begin_statement = "BEGIN IMMEDIATE TRANSACTION";
+			break;
+		case PDO_SQLITE_ATTR_TRANSACTION_MODE_EXCLUSIVE:
+			begin_statement = "BEGIN EXCLUSIVE TRANSACTION";
+		default:
+			begin_statement = "BEGIN";
+	}
+
+	if (sqlite3_exec(H->db, begin_statement, NULL, NULL, NULL) != SQLITE_OK) {
 		pdo_sqlite_error(dbh);
 		return false;
 	}
@@ -286,10 +301,21 @@ static bool sqlite_handle_rollback(pdo_dbh_t *dbh)
 
 static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
+	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
 		case PDO_ATTR_SERVER_VERSION:
 			ZVAL_STRING(return_value, (char *)sqlite3_libversion());
+			break;
+		case PDO_SQLITE_ATTR_TRANSACTION_MODE:
+			zend_long mode;
+			if (H->transaction_mode == 0) {
+				mode = PDO_SQLITE_ATTR_TRANSACTION_MODE_DEFERRED;
+			} else {
+				mode = H->transaction_mode;
+			}
+			ZVAL_LONG(return_value, mode);
 			break;
 
 		default:
@@ -326,6 +352,18 @@ static bool pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			sqlite3_extended_result_codes(H->db, lval);
 			return true;
+		case PDO_SQLITE_ATTR_TRANSACTION_MODE:
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			if (lval != PDO_SQLITE_ATTR_TRANSACTION_MODE_DEFERRED &&
+				lval != PDO_SQLITE_ATTR_TRANSACTION_MODE_IMMEDIATE &&
+				lval != PDO_SQLITE_ATTR_TRANSACTION_MODE_EXCLUSIVE) {
+				return false;
+			}
+			H->transaction_mode = lval;
+			return true;
+
 	}
 	return false;
 }
