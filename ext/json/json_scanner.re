@@ -109,8 +109,6 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;
 	s->options = options;
-	s->errpos = 0;
-	s->errcode = 0;
 	PHP_JSON_CONDITION_SET(JS);
 }
 

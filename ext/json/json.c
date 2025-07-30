@@ -195,7 +195,7 @@ char *php_json_get_error_msg_wrapper(php_json_error_code error_code) /* {{{ */
 			spprintf(&final_message, 0, "%s near character %zu", error_message, JSON_G(error_pos));
 			break;
 		default:
-			spprintf(&final_message, 0, "%s", error_message);
+			final_message = estrdup(error_message);
 	}
 
 	return final_message;
