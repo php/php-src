@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0beta1
 
+- Core:
+  . Fixed bug GH-19305 (Operands may be being released during comparison).
+    (Arnaud)
+
 - Opcache:
   . Fixed bug GH-19301 (opcache build failure). (Remi)
 
