@@ -647,7 +647,9 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 
 static zend_result zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
 {
-	zval *value;
+	zval *value, values;
+	ZVAL_UNDEF(&values);
+
 	if (Z_TYPE(generator->values) == IS_ARRAY) {
 		HashTable *ht = Z_ARR(generator->values);
 		HashPosition pos = Z_FE_POS(generator->values);
@@ -694,6 +696,13 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 		}
 		Z_FE_POS(generator->values) = pos;
 	} else {
+		/* GH-19306: Keep generator->values around until the end of the
+		 * procedure. If we're inside a fiber and move_forward() suspends it,
+		 * some other call to the generator may release generator->values. If we
+		 * free it immediately and the fiber is later resumed and the exception
+		 * is rethrown, we end up with dangling pointers to old stack frames. */
+		ZVAL_COPY(&values, &generator->values);
+
 		zend_object_iterator *iter = (zend_object_iterator *) Z_OBJ(generator->values);
 
 		if (iter->index++ > 0) {
@@ -726,11 +735,14 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 		} else {
 			ZVAL_LONG(&generator->key, iter->index);
 		}
+
+		zval_ptr_dtor(&values);
 	}
 
 	return SUCCESS;
 
 failure:
+	zval_ptr_dtor(&values);
 	zval_ptr_dtor(&generator->values);
 	ZVAL_UNDEF(&generator->values);
 
@@ -789,7 +801,7 @@ try_again:
 
 	/* Ensure this is run after executor_data swap to have a proper stack trace */
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
-		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {
+		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS) || UNEXPECTED(EG(exception))) {
 			/* Restore executor globals */
 			EG(current_execute_data) = original_execute_data;
 			EG(jit_trace_num) = original_jit_trace_num;
