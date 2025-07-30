@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-19305 (Operands may be being released during comparison).
     (Arnaud)
 
+- Intl:
+  . Fixed bug GH-19307 (PGO builds of shared ext-intl are broken). (cmb)
+
 - Opcache:
   . Fixed bug GH-19301 (opcache build failure). (Remi)
 
