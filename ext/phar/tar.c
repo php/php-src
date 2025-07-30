@@ -20,7 +20,7 @@
 #include "phar_internal.h"
 #include "ext/standard/php_string.h" /* For php_stristr() */
 
-static uint32_t phar_tar_number(const char *buf, size_t len) /* {{{ */
+static uint32_t phar_tar_oct_number(const char *buf, size_t len) /* {{{ */
 {
 	uint32_t num = 0;
 	size_t i = 0;
@@ -103,7 +103,7 @@ static uint32_t phar_tar_checksum(char *buf, size_t len) /* {{{ */
 bool phar_is_tar(char *buf, char *fname) /* {{{ */
 {
 	tar_header *header = (tar_header *) buf;
-	uint32_t checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
+	uint32_t checksum = phar_tar_oct_number(header->checksum, sizeof(header->checksum));
 	bool is_tar;
 	char save[sizeof(header->checksum)], *bname;
 
@@ -251,7 +251,7 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 
 		pos = php_stream_tell(fp);
 		hdr = (tar_header*) buf;
-		sum1 = phar_tar_number(hdr->checksum, sizeof(hdr->checksum));
+		sum1 = phar_tar_oct_number(hdr->checksum, sizeof(hdr->checksum));
 		if (sum1 == 0 && phar_tar_checksum(buf, sizeof(buf)) == 0) {
 			break;
 		}
@@ -268,7 +268,7 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 		}
 
 		size = entry.uncompressed_filesize = entry.compressed_filesize =
-			phar_tar_number(hdr->size, sizeof(hdr->size));
+			phar_tar_oct_number(hdr->size, sizeof(hdr->size));
 
 		/* skip global/file headers (pax) */
 		if (!old && (hdr->typeflag == TAR_GLOBAL_HDR || hdr->typeflag == TAR_FILE_HDR)) {
@@ -343,7 +343,7 @@ bail:
 			}
 
 			hdr = (tar_header*) buf;
-			sum1 = phar_tar_number(hdr->checksum, sizeof(hdr->checksum));
+			sum1 = phar_tar_oct_number(hdr->checksum, sizeof(hdr->checksum));
 
 			if (sum1 == 0 && phar_tar_checksum(buf, sizeof(buf)) == 0) {
 				break;
@@ -475,12 +475,12 @@ bail:
 			return FAILURE;
 		}
 
-		uint32_t entry_mode = phar_tar_number(hdr->mode, sizeof(hdr->mode));
+		uint32_t entry_mode = phar_tar_oct_number(hdr->mode, sizeof(hdr->mode));
 		entry.tar_type = ((old & (hdr->typeflag == '\0')) ? TAR_FILE : hdr->typeflag);
 		entry.offset = entry.offset_abs = pos; /* header_offset unused in tar */
 		entry.fp_type = PHAR_FP;
 		entry.flags = entry_mode & PHAR_ENT_PERM_MASK;
-		entry.timestamp = phar_tar_number(hdr->mtime, sizeof(hdr->mtime));
+		entry.timestamp = phar_tar_oct_number(hdr->mtime, sizeof(hdr->mtime));
 		entry.is_persistent = myphar->is_persistent;
 
 		if (old && entry.tar_type == TAR_FILE && S_ISDIR(entry_mode)) {
