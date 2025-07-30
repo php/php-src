@@ -329,9 +329,7 @@ bail:
 					if (error) {
 						spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 					}
-					php_stream_close(fp);
-					phar_destroy_phar_data(myphar);
-					return FAILURE;
+					goto bail;
 				}
 			}
 
@@ -341,9 +339,7 @@ bail:
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 
 			hdr = (tar_header*) buf;
@@ -369,9 +365,7 @@ bail:
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid entry size)", fname);
 				}
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 			entry.filename = zend_string_alloc(entry.uncompressed_filesize, myphar->is_persistent);
 			if (myphar->is_persistent) {
@@ -385,9 +379,7 @@ bail:
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 
 			/* skip blank stuff */
@@ -400,9 +392,7 @@ bail:
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 
 			read = php_stream_read(fp, buf, sizeof(buf));
@@ -412,9 +402,7 @@ bail:
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 			continue;
 		} else if (!last_was_longlink && !old && hdr->prefix[0] != 0) {
@@ -474,9 +462,7 @@ bail:
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (checksum mismatch of file \"%s\")", fname, ZSTR_VAL(entry.filename));
 			}
 			zend_string_release_ex(entry.filename, myphar->is_persistent);
-			php_stream_close(fp);
-			phar_destroy_phar_data(myphar);
-			return FAILURE;
+			goto bail;
 		}
 
 		uint32_t entry_mode = phar_tar_oct_number(hdr->mode, sizeof(hdr->mode));
@@ -507,9 +493,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file - hard link to non-existent file \"%.*s\"", fname, (int)linkname_len, hdr->linkname);
 				}
 				zend_string_release_ex(entry.filename, myphar->is_persistent);
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 			entry.link = estrndup(hdr->linkname, linkname_len);
 		} else if (entry.tar_type == TAR_SYMLINK) {
@@ -529,9 +513,7 @@ bail:
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has invalid metadata in magic file \"%s\"", fname, ZSTR_VAL(entry.filename));
 				}
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 		}
 
@@ -541,9 +523,7 @@ bail:
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has alias that is larger than 511 bytes, cannot process", fname);
 				}
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 
 			read = php_stream_read(fp, buf, size);
@@ -562,9 +542,7 @@ bail:
 						spprintf(error, 4096, "phar error: invalid alias \"%s\" in tar-based phar \"%s\"", buf, fname);
 					}
 
-					php_stream_close(fp);
-					phar_destroy_phar_data(myphar);
-					return FAILURE;
+					goto bail;
 				}
 
 				actual_alias = pestrndup(buf, size, myphar->is_persistent);
@@ -576,9 +554,7 @@ bail:
 					spprintf(error, 4096, "phar error: Unable to read alias from tar-based phar \"%s\"", fname);
 				}
 
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 		}
 
@@ -592,9 +568,7 @@ next:
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
-				php_stream_close(fp);
-				phar_destroy_phar_data(myphar);
-				return FAILURE;
+				goto bail;
 			}
 		}
 
@@ -609,9 +583,7 @@ next:
 			if (error) {
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 			}
-			php_stream_close(fp);
-			phar_destroy_phar_data(myphar);
-			return FAILURE;
+			goto bail;
 		}
 	}
 
@@ -623,12 +595,10 @@ next:
 
 	/* ensure signature set */
 	if (!myphar->is_data && PHAR_G(require_hash) && !myphar->signature) {
-		php_stream_close(fp);
-		phar_destroy_phar_data(myphar);
 		if (error) {
 			spprintf(error, 0, "tar-based phar \"%s\" does not have a signature", fname);
 		}
-		return FAILURE;
+		goto bail;
 	}
 
 	myphar->fname = pestrndup(fname, fname_len, myphar->is_persistent);
@@ -655,9 +625,7 @@ next:
 		if (error) {
 			spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\" to phar registry", fname);
 		}
-		php_stream_close(fp);
-		phar_destroy_phar_data(myphar);
-		return FAILURE;
+		goto bail;
 	}
 
 	myphar = actual;
