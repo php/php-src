@@ -198,6 +198,113 @@ static zend_result phar_tar_process_metadata(phar_entry_info *entry, php_stream 
 }
 /* }}} */
 
+/* Parses a PAX header and callbacks into `cb` for each valid key-value pair,
+ * passing along a `ctx` pointer to use for storing data when desired. */
+static const char *phar_parse_pax_header(char *ptr, uint32_t size, void *ctx, const char *(*cb)(const char *, uint32_t, const char *, void *))
+{
+	const char *pax_data_end = ptr + size;
+	while (ptr < pax_data_end) {
+		/* Format: "%d %s=%s\n" */
+		char *endptr;
+		char *blank = memchr(ptr, ' ', pax_data_end - ptr);
+		if (!blank) {
+			break;
+		}
+		*blank = '\0';
+		size_t kv_size = strtoull(ptr, &endptr, 10);
+		/* blank, non-empty keyword, equals, newline terminator */
+		if (endptr != blank || kv_size < 4 || kv_size > pax_data_end - ptr) {
+			break;
+		}
+
+		/* Check terminator */
+		char *record_end = ptr + kv_size;
+		if (record_end[-1] != '\n') {
+			break;
+		}
+
+		/* Validate keyword */
+		const char *key = blank + 1;
+		const char *equals = memchr(key, '=', record_end - key);
+		if (!equals || key == equals) {
+			break;
+		}
+
+		const char *err = cb(key, equals - key, record_end, ctx);
+		if (err) {
+			return err;
+		}
+
+		ptr = record_end;
+	}
+
+	return NULL;
+}
+
+struct phar_pax_local {
+	zend_string *filename_override;
+	bool is_persistent;
+};
+
+static const char *phar_pax_parse_path(const char *key, uint32_t key_len, const char *record_end, struct phar_pax_local *pax)
+{
+	const char *filename_start = key + key_len + 1;
+	size_t pax_local_filename_len = record_end - filename_start;
+	if (pax_local_filename_len <= 1) {
+		return "invalid path length";
+	}
+
+	/* strip '\n' */
+	pax_local_filename_len--;
+	/* Ending '/' stripping */
+	if (filename_start[pax_local_filename_len - 1] == '/') {
+		pax_local_filename_len--;
+	}
+
+	/* Last one takes precedence if multiple are provided */
+	if (pax->filename_override) {
+		pefree(pax->filename_override, pax->is_persistent);
+		pax->filename_override = NULL;
+	}
+
+	pax->filename_override = zend_string_init(filename_start, pax_local_filename_len, pax->is_persistent);
+	if (pax->is_persistent) {
+		GC_MAKE_PERSISTENT_LOCAL(pax_local_filename);
+	}
+
+	return NULL;
+}
+
+static const char *phar_pax_local_cb(const char *key, uint32_t key_len, const char *record_end, void *ctx)
+{
+	if (key_len == strlen("path") && memcmp(key, "path", strlen("path")) == 0) {
+		return phar_pax_parse_path(key, key_len, record_end, ctx);
+	}
+
+	return NULL;
+}
+
+static const char *phar_pax_global_cb(const char *key, uint32_t key_len, const char *record_end, void *ctx)
+{
+	if (key_len == strlen("hdrcharset") && memcmp(key, "hdrcharset", strlen("hdrcharset")) == 0) {
+		const char *value = key + key_len + 1;
+		size_t value_len = record_end - value;
+
+		// TODO: case sensitivity?
+		if ((value_len == strlen("BINARY") && strncmp(value, "BINARY", strlen("BINARY")) == 0)
+		 || (value_len == strlen("ISO-IR 10646 2000 UTF-8") && strncmp(value, "ISO-IR 10646 2000 UTF-8", strlen("ISO-IR 10646 2000 UTF-8")) == 0)) {
+			/* Pass as-is, this is our default modus operandi. */
+		} else {
+			return "invalid header character set";
+		}
+	} else if (key_len == strlen("path") && memcmp(key, "path", strlen("path")) == 0) {
+		/* Some application support this, others don't. This just adds needless complications. */
+		return "unsupported global path override";
+	}
+
+	return NULL;
+}
+
 zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
@@ -208,6 +315,7 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 	phar_archive_data *myphar, *actual;
 	bool last_was_longlink = false;
 	size_t linkname_len;
+	zend_string *pax_local_filename = NULL;
 
 	if (error) {
 		*error = NULL;
@@ -270,13 +378,58 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 		size = entry.uncompressed_filesize = entry.compressed_filesize =
 			phar_tar_oct_number(hdr->size, sizeof(hdr->size));
 
-		/* skip global/file headers (pax) */
-		if (!old && (hdr->typeflag == TAR_GLOBAL_HDR || hdr->typeflag == TAR_FILE_HDR)) {
-			size = (size+511)&~511;
-			goto next;
+		/* skip global pax headers */
+		if (!old && hdr->typeflag == TAR_GLOBAL_HDR) {
+			size = (size + 511) & ~511;
+			char *pax_data = emalloc(size);
+
+			if (UNEXPECTED(php_stream_read(fp, pax_data, size) != size)) {
+				efree(pax_data);
+				goto truncated;
+			}
+
+			const char *err = phar_parse_pax_header(pax_data, size, NULL, phar_pax_global_cb);
+			efree(pax_data);
+
+			if (err) {
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid global pax header: %s)", fname, err);
+				}
+				goto bail;
+			}
+
+			goto next_no_seek;
 		}
 
-		if (((!old && hdr->prefix[0] == 0) || old) && zend_strnlen(hdr->name, 100) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+		/* Process file pax header: https://pubs.opengroup.org/onlinepubs/9799919799/utilities/pax.html */
+		if (!old && hdr->typeflag == TAR_FILE_HDR) {
+			size = (size + 511) & ~511;
+			char *pax_data = emalloc(size);
+
+			if (UNEXPECTED(php_stream_read(fp, pax_data, size) != size)) {
+				efree(pax_data);
+				goto truncated;
+			}
+
+			struct phar_pax_local pax;
+			pax.filename_override = pax_local_filename;
+			pax.is_persistent = myphar->is_persistent;
+			const char *err = phar_parse_pax_header(pax_data, size, &pax, phar_pax_local_cb);
+			pax_local_filename = pax.filename_override;
+			efree(pax_data);
+
+			if (err) {
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid file pax header: %s)", fname, err);
+				}
+				goto bail;
+			}
+
+			goto next_no_seek;
+		}
+
+		if ((pax_local_filename && zend_string_equals_literal(pax_local_filename, ".phar/signature.bin"))
+		 || (((!old && hdr->prefix[0] == 0) || old) && !strcmp(hdr->name, ".phar/signature.bin"))) {
 			zend_off_t curloc;
 			size_t sig_len;
 
@@ -285,6 +438,7 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has signature that is larger than 511 bytes, cannot process", fname);
 				}
 bail:
+				pefree(pax_local_filename, myphar->is_persistent);
 				php_stream_close(fp);
 				phar_destroy_phar_data(myphar);
 				return FAILURE;
@@ -352,7 +506,10 @@ bail:
 			goto bail;
 		}
 
-		if (!last_was_longlink && hdr->typeflag == 'L') {
+		if (pax_local_filename) {
+			entry.filename = pax_local_filename;
+			pax_local_filename = NULL;
+		} else if (!last_was_longlink && hdr->typeflag == 'L') {
 			last_was_longlink = true;
 			/* support the ././@LongLink system for storing long filenames */
 
@@ -557,9 +714,9 @@ bail:
 		size = (size+511)&~511;
 
 		if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
-next:
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
+next_no_seek:
 			if ((uint32_t)php_stream_tell(fp) > totalsize) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
@@ -576,6 +733,7 @@ next:
 		read = php_stream_read(fp, buf, sizeof(buf));
 
 		if (read != sizeof(buf)) {
+truncated:
 			if (error) {
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 			}
@@ -625,6 +783,8 @@ next:
 	}
 
 	myphar = actual;
+
+	pefree(pax_local_filename, myphar->is_persistent);
 
 	if (actual_alias) {
 		phar_archive_data *fd_ptr;
