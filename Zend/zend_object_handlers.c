@@ -2202,6 +2202,10 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		}
 		Z_PROTECT_RECURSION_P(o1);
 
+		GC_ADDREF(zobj1);
+		GC_ADDREF(zobj2);
+		int ret;
+
 		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
 			zval *p1, *p2;
 
@@ -2216,31 +2220,45 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
-					int ret;
-
 					ret = zend_compare(p1, p2);
 					if (ret != 0) {
 						Z_UNPROTECT_RECURSION_P(o1);
-						return ret;
+						goto done;
 					}
 				} else {
 					Z_UNPROTECT_RECURSION_P(o1);
-					return 1;
+					ret = 1;
+					goto done;
 				}
 			} else {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					Z_UNPROTECT_RECURSION_P(o1);
-					return 1;
+					ret = 1;
+					goto done;
 				}
 			}
 		}
 
 		Z_UNPROTECT_RECURSION_P(o1);
-		return 0;
+		ret = 0;
+
+done:
+		OBJ_RELEASE(zobj1);
+		OBJ_RELEASE(zobj2);
+
+		return ret;
 	} else {
-		return zend_compare_symbol_tables(
+		GC_ADDREF(zobj1);
+		GC_ADDREF(zobj2);
+
+		int ret = zend_compare_symbol_tables(
 				zend_std_get_properties_ex(zobj1),
 				zend_std_get_properties_ex(zobj2));
+
+		OBJ_RELEASE(zobj1);
+		OBJ_RELEASE(zobj2);
+
+		return ret;
 	}
 }
 /* }}} */
