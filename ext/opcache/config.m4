@@ -85,7 +85,7 @@ AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
   AS_VAR_IF([PHP_CAPSTONE], [yes],
     [PKG_CHECK_MODULES([CAPSTONE], [capstone >= 3.0.0], [
       AC_DEFINE([HAVE_CAPSTONE], [1], [Define to 1 if Capstone is available.])
-      PHP_EVAL_LIBLINE([$CAPSTONE_LIBS], [OPCACHE_SHARED_LIBADD])
+      PHP_EVAL_LIBLINE([$CAPSTONE_LIBS])
       PHP_EVAL_INCLINE([$CAPSTONE_CFLAGS])
       ZEND_JIT_SRC="$ZEND_JIT_SRC jit/ir/ir_disasm.c"
     ])])
@@ -318,7 +318,7 @@ AS_VAR_IF([php_cv_shm_mmap_posix], [yes], [
   AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
     [Define to 1 if you have the POSIX mmap() SHM support.])
   AS_CASE([$ac_cv_search_shm_open], ["none required"|no], [],
-    [PHP_EVAL_LIBLINE([$ac_cv_search_shm_open], [OPCACHE_SHARED_LIBADD])])
+    [PHP_EVAL_LIBLINE([$ac_cv_search_shm_open])])
 ])
 
 PHP_NEW_EXTENSION([opcache], m4_normalize([
@@ -361,4 +361,3 @@ AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
   ])
   PHP_ADD_MAKEFILE_FRAGMENT([$ext_srcdir/jit/Makefile.frag])
 ])
-PHP_SUBST([OPCACHE_SHARED_LIBADD])
