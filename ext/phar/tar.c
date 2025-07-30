@@ -357,7 +357,9 @@ zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, ch
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has signature that is larger than 511 bytes, cannot process", fname);
 				}
 bail:
-				zend_string_release(filename_pax_override);
+				if (filename_pax_override) {
+					zend_string_release(filename_pax_override);
+				}
 				php_stream_close(fp);
 				phar_destroy_phar_data(myphar);
 				return FAILURE;
