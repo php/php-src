@@ -1,23 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0beta1
-
-- Core:
-  . Fixed bug GH-19305 (Operands may be being released during comparison).
-    (Arnaud)
-
-- Intl:
-  . Fixed bug GH-19307 (PGO builds of shared ext-intl are broken). (cmb)
-
-- Opcache:
-  . Fixed bug GH-19301 (opcache build failure). (Remi)
-
-31 Jul 2025, PHP 8.5.0alpha3
+31 Jul 2025, PHP 8.5.0alpha4
 
 - Core:
   . Add clone-with support to the clone() function. (timwolla, edorian)
   . Fix support for non-userland stream notifiers. (timwolla)
   . Added PHP_BUILD_PROVIDER constant. (timwolla)
+  . Fixed bug GH-19305 (Operands may be being released during comparison).
+    (Arnaud)
 
 - Curl:
   . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
@@ -32,6 +22,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fix return value on failure for resourcebundle count handler. (Girgias)
+  . Fixed bug GH-19307 (PGO builds of shared ext-intl are broken). (cmb)
 
 - OPcache:
   . Disallow changing opcache.memory_consumption when SHM is already set up.
@@ -41,6 +32,7 @@ PHP                                                                        NEWS
   . Make OPcache non-optional (Arnaud, timwolla)
   . Fixed bug GH-17422 (OPcache bypasses the user-defined error handler for
     deprecations). (Arnaud, timwolla)
+  . Fixed bug GH-19301 (opcache build failure). (Remi)
 
 - OpenSSL:
   . Add $digest_algo parameter to openssl_public_encrypt() and
