@@ -27,6 +27,12 @@ extern zend_module_entry pdo_sqlite_module_entry;
 #include "TSRM.h"
 #endif
 
+enum pdo_sqlite_transaction_mode {
+	PDO_SQLITE_TRANSACTION_MODE_DEFERRED = 0,
+	PDO_SQLITE_TRANSACTION_MODE_IMMEDIATE = 1,
+	PDO_SQLITE_TRANSACTION_MODE_EXCLUSIVE = 2
+};
+
 PHP_MINIT_FUNCTION(pdo_sqlite);
 PHP_MSHUTDOWN_FUNCTION(pdo_sqlite);
 PHP_RINIT_FUNCTION(pdo_sqlite);
