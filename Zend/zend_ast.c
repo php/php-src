@@ -585,9 +585,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 				ret = FAILURE;
 			} else {
 				binary_op_type op = get_binary_op(ast->attr);
-				ret = op(result, &op1, &op2);
+				op(result, &op1, &op2);
 				zval_ptr_dtor_nogc(&op1);
 				zval_ptr_dtor_nogc(&op2);
+				ret = EG(exception) ? FAILURE : SUCCESS;
 			}
 			break;
 		case ZEND_AST_GREATER:
