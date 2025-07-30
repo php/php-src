@@ -20,4 +20,4 @@ try {
 }
 ?>
 --EXPECT--
-IntlException: The argument for key 'foo' cannot be used as a date or time
+IntlException: MessageFormatter::format(): The argument for key 'foo' cannot be used as a date or time

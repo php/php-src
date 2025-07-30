@@ -19,4 +19,4 @@ try {
 }
 ?>
 --EXPECT--
-IntlException: No strategy to convert the value given for the argument with key '7' is available
+IntlException: MessageFormatter::format(): No strategy to convert the value given for the argument with key '7' is available

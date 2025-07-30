@@ -23,8 +23,8 @@ var_dump(intl_get_error_message());
 
 ?>
 --EXPECT--
-IntlException: msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR
+IntlException: MessageFormatter::__construct(): message formatter creation failed
 NULL
-string(74) "msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR"
+string(87) "MessageFormatter::create(): message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
-string(74) "msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR"
+string(76) "msgfmt_create(): message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR"

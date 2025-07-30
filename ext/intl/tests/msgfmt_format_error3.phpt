@@ -19,4 +19,4 @@ try {
 }
 ?>
 --EXPECT--
-IntlException: Found negative or too large array key
+IntlException: MessageFormatter::format(): Found negative or too large array key

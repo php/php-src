@@ -11,4 +11,4 @@ var_dump(intl_get_error_message());
 ?>
 --EXPECT--
 bool(false)
-string(50) "unknown windows timezone: U_ILLEGAL_ARGUMENT_ERROR"
+string(85) "IntlTimeZone::getIDForWindowsID(): unknown windows timezone: U_ILLEGAL_ARGUMENT_ERROR"

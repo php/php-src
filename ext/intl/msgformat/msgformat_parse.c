@@ -102,7 +102,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 		if( U_FAILURE(INTL_DATA_ERROR_CODE((mfo))) )
 		{
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"msgfmt_parse_message: error converting pattern to UTF-16", 0 );
+				"error converting pattern to UTF-16");
 			RETURN_FALSE;
 		}
 	} else {

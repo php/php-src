@@ -28,13 +28,13 @@ foreach ($locales as $locale) {
 
 ?>
 --EXPECT--
-IntlException: Constructor failed
+IntlException: Collator::__construct(): unable to open ICU collator
 NULL
-string(70) "collator_create: unable to open ICU collator: U_ILLEGAL_ARGUMENT_ERROR"
+string(73) "Collator::create(): unable to open ICU collator: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
-string(70) "collator_create: unable to open ICU collator: U_ILLEGAL_ARGUMENT_ERROR"
-IntlException: Constructor failed
+string(72) "collator_create(): unable to open ICU collator: U_ILLEGAL_ARGUMENT_ERROR"
+IntlException: Collator::__construct(): Locale string too long, should be no longer than 156 characters
 NULL
-string(89) "Locale string too long, should be no longer than 156 characters: U_ILLEGAL_ARGUMENT_ERROR"
+string(109) "Collator::create(): Locale string too long, should be no longer than 156 characters: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
-string(89) "Locale string too long, should be no longer than 156 characters: U_ILLEGAL_ARGUMENT_ERROR"
+string(108) "collator_create(): Locale string too long, should be no longer than 156 characters: U_ILLEGAL_ARGUMENT_ERROR"

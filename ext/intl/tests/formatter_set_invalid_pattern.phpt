@@ -16,6 +16,6 @@ var_dump(numfmt_get_error_message($fmt));
 ?>
 --EXPECT--
 bool(false)
-string(67) "Error setting pattern value at line 0, offset 0: U_UNQUOTED_SPECIAL"
+string(98) "NumberFormatter::setPattern(): Error setting pattern value at line 0, offset 0: U_UNQUOTED_SPECIAL"
 bool(false)
-string(67) "Error setting pattern value at line 0, offset 0: U_UNQUOTED_SPECIAL"
+string(89) "numfmt_set_pattern(): Error setting pattern value at line 0, offset 0: U_UNQUOTED_SPECIAL"

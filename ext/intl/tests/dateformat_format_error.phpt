@@ -21,6 +21,6 @@ var_dump(intl_get_error_message());
 ?>
 --EXPECT--
 bool(false)
-string(127) "datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR"
+string(140) "IntlDateFormatter::format(): invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(127) "datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR"
+string(129) "datefmt_format(): invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR"

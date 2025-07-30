@@ -18,21 +18,21 @@ static inline int convert_cp(UChar32* pcp, zend_string *string_codepoint, zend_l
 
 		if (ZEND_SIZE_T_INT_OVFL(string_codepoint_length)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-			intl_error_set_custom_msg(NULL, "Input string is too long.", 0);
+			intl_error_set_custom_msg(NULL, "Input string is too long.");
 			return FAILURE;
 		}
 
 		U8_NEXT(ZSTR_VAL(string_codepoint), i, string_codepoint_length, int_codepoint);
 		if ((size_t)i != string_codepoint_length) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.", 0);
+			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.");
 			return FAILURE;
 		}
 	}
 
 	if ((int_codepoint < UCHAR_MIN_VALUE) || (int_codepoint > UCHAR_MAX_VALUE)) {
 		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-		intl_error_set_custom_msg(NULL, "Codepoint out of range", 0);
+		intl_error_set_custom_msg(NULL, "Codepoint out of range");
 		return FAILURE;
 	}
 	*pcp = (UChar32)int_codepoint;
@@ -183,7 +183,7 @@ static UBool enumCharType_callback(enumCharType_data *context,
 
 	if (zend_call_function(&context->fci, &context->fci_cache) == FAILURE) {
 		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
-		intl_errors_set_custom_msg(NULL, "enumCharTypes callback failed", 0);
+		intl_errors_set_custom_msg(NULL, "enumCharTypes callback failed");
 		zval_ptr_dtor(&retval);
 		return 0;
 	}
@@ -286,7 +286,7 @@ static UBool enumCharNames_callback(enumCharNames_data *context,
 
 	if (zend_call_function(&context->fci, &context->fci_cache) == FAILURE) {
 		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
-		intl_error_set_custom_msg(NULL, "enumCharNames callback failed", 0);
+		intl_error_set_custom_msg(NULL, "enumCharNames callback failed");
 		zval_ptr_dtor(&retval);
 		zval_ptr_dtor_str(&args[2]);
 		return 0;
@@ -339,7 +339,7 @@ IC_METHOD(getPropertyName) {
 		RETURN_STRING(ret);
 	} else {
 		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-		intl_error_set_custom_msg(NULL, "Failed to get property name", 0);
+		intl_error_set_custom_msg(NULL, "Failed to get property name");
 		RETURN_FALSE;
 	}
 }
@@ -375,7 +375,7 @@ IC_METHOD(getPropertyValueName) {
 		RETURN_STRING(ret);
 	} else {
 		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-		intl_error_set_custom_msg(NULL, "Failed to get property name", 0);
+		intl_error_set_custom_msg(NULL, "Failed to get property name");
 		RETURN_FALSE;
 	}
 }
@@ -447,7 +447,7 @@ IC_METHOD(digit) {
 	ret = u_digit(cp, radix);
 	if (ret < 0) {
 		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-		intl_error_set_custom_msg(NULL, "Invalid digit", 0);
+		intl_error_set_custom_msg(NULL, "Invalid digit");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ret);

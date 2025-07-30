@@ -42,12 +42,7 @@ static zend_result php_intl_idn_check_status(UErrorCode err, const char *msg)
 {
 	intl_error_set_code(NULL, err);
 	if (U_FAILURE(err)) {
-		char *buff;
-		spprintf(&buff, 0, "%s: %s",
-			get_active_function_name(),
-			msg);
-		intl_error_set_custom_msg(NULL, buff, 1);
-		efree(buff);
+		intl_error_set_custom_msg(NULL, msg);
 		return FAILURE;
 	}
 

@@ -71,8 +71,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 	TimeZone *tz_clone = tz.clone();
 	if (UNEXPECTED(tz_clone == NULL)) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
-				"datefmt_get_timezone: Out of memory when cloning time zone",
-				0);
+				"Out of memory when cloning time zone");
 		RETURN_FALSE;
 	}
 
@@ -95,7 +94,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	timezone = timezone_process_timezone_argument(timezone_zv,
-			INTL_DATA_ERROR_P(dfo), "datefmt_set_timezone");
+			INTL_DATA_ERROR_P(dfo));
 	if (timezone == NULL) {
 		RETURN_FALSE;
 	}
@@ -146,8 +145,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 	Calendar *cal_clone = cal->clone();
 	if (UNEXPECTED(cal_clone == NULL)) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
-				"datefmt_get_calendar_object: Out of memory when cloning "
-				"calendar", 0);
+				"Out of memory when cloning calendar");
 		RETURN_FALSE;
 	}
 
@@ -187,7 +185,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	// must store the requested locale on object creation
 
 	if (datefmt_process_calendar_arg(calendar_obj, calendar_long, calendar_is_null, locale,
-			"datefmt_set_calendar",	INTL_DATA_ERROR_P(dfo), cal, cal_type, cal_owned) == FAILURE
+			INTL_DATA_ERROR_P(dfo), cal, cal_type, cal_owned) == FAILURE
 	) {
 		RETURN_FALSE;
 	}
@@ -197,8 +195,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 		TimeZone *old_timezone = fetch_datefmt(dfo)->getTimeZone().clone();
 		if (UNEXPECTED(old_timezone == NULL)) {
 			intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
-					"datefmt_set_calendar: Out of memory when cloning calendar",
-					0);
+					"Out of memory when cloning calendar");
 			delete cal;
 			RETURN_FALSE;
 		}
@@ -207,8 +204,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 		cal = cal->clone();
 		if (UNEXPECTED(cal == NULL)) {
 			intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
-					"datefmt_set_calendar: Out of memory when cloning calendar",
-					0);
+					"Out of memory when cloning calendar");
 			RETURN_FALSE;
 		}
 	}

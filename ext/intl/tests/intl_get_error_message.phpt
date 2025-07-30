@@ -15,4 +15,4 @@ else
 
 ?>
 --EXPECT--
-Error getting locale by type: U_ILLEGAL_ARGUMENT_ERROR
+collator_get_locale(): Error getting locale by type: U_ILLEGAL_ARGUMENT_ERROR

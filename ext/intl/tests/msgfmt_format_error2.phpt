@@ -19,4 +19,4 @@ try {
 }
 ?>
 --EXPECT--
-IntlException: Inconsistent types declared for an argument
+IntlException: MessageFormatter::format(): Inconsistent types declared for an argument

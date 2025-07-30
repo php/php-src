@@ -164,7 +164,7 @@ PHP_FUNCTION( numfmt_format_currency )
 
 	if( U_FAILURE( INTL_DATA_ERROR_CODE((nfo)) ) ) {
 		intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((nfo)) );
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(nfo), "Number formatting failed", 0 );
+		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(nfo), "Number formatting failed");
 		RETVAL_FALSE;
 		if (formatted != format_buf) {
 			efree(formatted);

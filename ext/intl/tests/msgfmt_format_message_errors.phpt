@@ -22,6 +22,6 @@ var_dump(intl_get_error_message());
 ?>
 --EXPECT--
 bool(false)
-string(47) "Creating message formatter failed: U_ZERO_ERROR"
+string(82) "MessageFormatter::formatMessage(): Creating message formatter failed: U_ZERO_ERROR"
 bool(false)
-string(47) "Creating message formatter failed: U_ZERO_ERROR"
+string(72) "msgfmt_format_message(): Creating message formatter failed: U_ZERO_ERROR"

@@ -19,8 +19,8 @@ echo "Done.\n";
 --EXPECTF--
 Warning: Transliterator::transliterate(): String conversion of string to UTF-16 failed in %s on line %d
 bool(false)
-String conversion of string to UTF-16 failed: U_INVALID_CHAR_FOUND
-String conversion of string to UTF-16 failed: U_INVALID_CHAR_FOUND
+Transliterator::transliterate(): String conversion of string to UTF-16 failed: U_INVALID_CHAR_FOUND
+Transliterator::transliterate(): String conversion of string to UTF-16 failed: U_INVALID_CHAR_FOUND
 string(0) ""
 U_ZERO_ERROR
 Done.

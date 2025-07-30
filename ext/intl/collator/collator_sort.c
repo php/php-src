@@ -359,8 +359,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 
 	if (!co || !co->ucoll) {
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Object not initialized", 0 );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Object not initialized");
 		zend_throw_error(NULL, "Object not initialized");
 
 		RETURN_THROWS();
@@ -393,7 +392,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 			if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 			{
 				intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
-				intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Sort with sort keys failed", 0 );
+				intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Sort with sort keys failed");
 
 				if( utf16_buf )
 					efree( utf16_buf );
@@ -516,8 +515,7 @@ PHP_FUNCTION( collator_get_sort_key )
 
 	if (!co || !co->ucoll) {
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Object not initialized", 0 );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Object not initialized");
 		zend_throw_error(NULL, "Object not initialized");
 
 		RETURN_THROWS();
@@ -536,8 +534,7 @@ PHP_FUNCTION( collator_get_sort_key )
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
 
 		/* Set error messages. */
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Error converting first argument to UTF-16", 0 );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Error converting first argument to UTF-16");
 		efree( ustr );
 		RETURN_FALSE;
 	}

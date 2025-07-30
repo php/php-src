@@ -25,10 +25,10 @@ var_dump(intl_get_error_message());
 ?>
 --EXPECT--
 bool(false)
-string(73) "locale_accept_from_http: locale string too long: U_ILLEGAL_ARGUMENT_ERROR"
+string(74) "Locale::acceptFromHttp(): locale string too long: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(73) "locale_accept_from_http: locale string too long: U_ILLEGAL_ARGUMENT_ERROR"
+string(75) "locale_accept_from_http(): locale string too long: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(73) "locale_accept_from_http: locale string too long: U_ILLEGAL_ARGUMENT_ERROR"
+string(74) "Locale::acceptFromHttp(): locale string too long: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(73) "locale_accept_from_http: locale string too long: U_ILLEGAL_ARGUMENT_ERROR"
+string(75) "locale_accept_from_http(): locale string too long: U_ILLEGAL_ARGUMENT_ERROR"

@@ -22,6 +22,6 @@ var_dump(intl_get_error_message());
 ?>
 --EXPECT--
 bool(false)
-string(59) "Creating message formatter failed: U_ILLEGAL_ARGUMENT_ERROR"
+string(93) "MessageFormatter::parseMessage(): Creating message formatter failed: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)
-string(59) "Creating message formatter failed: U_ILLEGAL_ARGUMENT_ERROR"
+string(83) "msgfmt_parse_message(): Creating message formatter failed: U_ILLEGAL_ARGUMENT_ERROR"
