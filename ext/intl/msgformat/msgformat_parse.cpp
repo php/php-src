@@ -18,11 +18,13 @@
 
 #include <unicode/ustring.h>
 
+extern "C" {
 #include "php_intl.h"
 #include "msgformat_class.h"
 #include "msgformat_data.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
+}
 
 /* {{{ */
 static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, size_t src_len, zval *return_value)
@@ -52,7 +54,7 @@ static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, size_t s
 /* }}} */
 
 /* {{{ Parse a message */
-PHP_FUNCTION( msgfmt_parse )
+U_CFUNC PHP_FUNCTION( msgfmt_parse )
 {
 	char *source;
 	size_t source_len;
@@ -74,7 +76,7 @@ PHP_FUNCTION( msgfmt_parse )
 /* }}} */
 
 /* {{{ Parse a message. */
-PHP_FUNCTION( msgfmt_parse_message )
+U_CFUNC PHP_FUNCTION( msgfmt_parse_message )
 {
 	UChar      *spattern = NULL;
 	int         spattern_len = 0;

@@ -12,36 +12,40 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef NORMALIZER_CLASS_H
-#define NORMALIZER_CLASS_H
+#ifdef __cplusplus
+#if __cplusplus >= 201703L
+#include <string_view>
+#endif
+#include <unicode/unistr.h>
+#endif
 
-#include <php.h>
-
-#include "intl_common.h"
-#include "intl_error.h"
-
-#include <unicode/unorm.h>
-
-typedef struct {
-	zend_object     zo;
-
-	// error value not used currently
-	intl_error  err;
-
-} Normalizer_object;
-
-#define NORMALIZER_ERROR(co) (co)->err
-#define NORMALIZER_ERROR_P(co) &(NORMALIZER_ERROR(co))
-
-#define NORMALIZER_ERROR_CODE(co)   INTL_ERROR_CODE(NORMALIZER_ERROR(co))
-#define NORMALIZER_ERROR_CODE_P(co) &(INTL_ERROR_CODE(NORMALIZER_ERROR(co)))
-
+#include "normalizer.h"
+#include "normalizer_class.h"
+#include "php_intl.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
-void normalizer_register_Normalizer_class( void );
+#include "normalizer_arginfo.h"
+#include "intl_error.h"
 #ifdef __cplusplus
 }
 #endif
-extern zend_class_entry *Normalizer_ce_ptr;
-#endif // #ifndef NORMALIZER_CLASS_H
+
+#include <unicode/unorm.h>
+
+zend_class_entry *Normalizer_ce_ptr = NULL;
+
+/*
+ * 'Normalizer' class registration structures & functions
+ */
+
+/* {{{ normalizer_register_Normalizer_class
+ * Initialize 'Normalizer' class
+ */
+U_CFUNC void normalizer_register_Normalizer_class( void )
+{
+	/* Create and register 'Normalizer' class. */
+	Normalizer_ce_ptr = register_class_Normalizer();
+	Normalizer_ce_ptr->create_object = NULL;
+}
+/* }}} */
