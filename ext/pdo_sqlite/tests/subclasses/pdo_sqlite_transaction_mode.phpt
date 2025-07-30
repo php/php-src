@@ -42,7 +42,7 @@ try {
     $pdo2->rollBack();
     printf("Database is not locked\n");
 } catch (PDOException $e) {
-    printf("Database is locked\n");
+    printf("Database is locked: %s\n", $e->getMessage());
 }
 $pdo->rollBack();
 
@@ -53,7 +53,7 @@ try {
     $pdo2->exec('begin immediate transaction');
     printf("Database is not locked\n");
 } catch (PDOException $e) {
-    printf("Database is locked\n");
+    printf("Database is locked: %s\n", $e->getMessage());
 }
 $pdo->rollBack();
 
@@ -64,7 +64,7 @@ try {
     $pdo2->exec('begin immediate transaction');
     printf("Database is not locked\n");
 } catch (PDOException $e) {
-    printf("Database is locked\n");
+    printf("Database is locked: %s\n", $e->getMessage());
 }
 ?>
 --EXPECT--
@@ -82,5 +82,5 @@ bool(false)
 bool(false)
 bool(false)
 Database is not locked
-Database is locked
-Database is locked
+Database is locked: SQLSTATE[HY000]: General error: 6 database table is locked
+Database is locked: SQLSTATE[HY000]: General error: 6 database schema is locked: main
