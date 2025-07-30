@@ -302,6 +302,7 @@ static bool sqlite_handle_rollback(pdo_dbh_t *dbh)
 static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+	zend_long transaction_mode;
 
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
@@ -309,13 +310,12 @@ static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 			ZVAL_STRING(return_value, (char *)sqlite3_libversion());
 			break;
 		case PDO_SQLITE_ATTR_TRANSACTION_MODE:
-			zend_long mode;
 			if (H->transaction_mode == 0) {
-				mode = PDO_SQLITE_ATTR_TRANSACTION_MODE_DEFERRED;
+				transaction_mode = PDO_SQLITE_ATTR_TRANSACTION_MODE_DEFERRED;
 			} else {
-				mode = H->transaction_mode;
+				transaction_mode = H->transaction_mode;
 			}
-			ZVAL_LONG(return_value, mode);
+			ZVAL_LONG(return_value, transaction_mode);
 			break;
 
 		default:
