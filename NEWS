@@ -21,6 +21,7 @@ PHP                                                                        NEWS
     delegated Generator). (Arnaud)
   . Fixed bug GH-19326 (Calling Generator::throw() on a running generator with
     a non-Generator delegate crashes). (Arnaud)
+  . Fixed bug GH-19280 (Stale array iterator position on rehashing). (ilutov)
 
 - FTP:
   . Fix theoretical issues with hrtime() not being available. (nielsdos)
