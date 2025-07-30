@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d5bc322159e4af87077c07ddaca0a77803b4743a */
+ * Stub hash: 311d1049e32af017b44e260a00f13830714b1e96 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_finfo_open, 0, 0, finfo, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FILEINFO_NONE")
@@ -63,7 +63,7 @@ ZEND_FUNCTION(mime_content_type);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(finfo_open, arginfo_finfo_open)
-	ZEND_FE(finfo_close, arginfo_finfo_close)
+	ZEND_RAW_FENTRY("finfo_close", zif_finfo_close, arginfo_finfo_close, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(finfo_set_flags, arginfo_finfo_set_flags)
 	ZEND_FE(finfo_file, arginfo_finfo_file)
 	ZEND_FE(finfo_buffer, arginfo_finfo_buffer)
@@ -96,6 +96,14 @@ static void register_fileinfo_symbols(int module_number)
 #endif
 	REGISTER_LONG_CONSTANT("FILEINFO_APPLE", MAGIC_APPLE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILEINFO_EXTENSION", MAGIC_EXTENSION, CONST_PERSISTENT);
+
+
+	zend_attribute *attribute_Deprecated_func_finfo_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "finfo_close", sizeof("finfo_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_finfo_close_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_finfo_close_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_finfo_close_0_arg1_str = zend_string_init("as finfo objects are freed automatically", strlen("as finfo objects are freed automatically"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_finfo_close_0->args[1].value, attribute_Deprecated_func_finfo_close_0_arg1_str);
+	attribute_Deprecated_func_finfo_close_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_finfo(void)
