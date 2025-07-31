@@ -498,8 +498,14 @@ ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_
 	return ptr;
 }
 
-static void zend_generator_throw_exception(zend_generator *generator, zval *exception)
+static zend_result zend_generator_throw_exception(zend_generator *generator, zval *exception)
 {
+	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
+		zval_ptr_dtor(exception);
+		zend_throw_error(NULL, "Cannot resume an already running generator");
+		return FAILURE;
+	}
+
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 
 	/* Throw the exception in the context of the generator. Decrementing the opline
@@ -520,6 +526,8 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 	}
 
 	EG(current_execute_data) = original_execute_data;
+
+	return SUCCESS;
 }
 
 static void zend_generator_add_child(zend_generator *generator, zend_generator *child)
@@ -1026,7 +1034,9 @@ ZEND_METHOD(Generator, throw)
 	if (generator->execute_data) {
 		zend_generator *root = zend_generator_get_current(generator);
 
-		zend_generator_throw_exception(root, exception);
+		if (zend_generator_throw_exception(root, exception) == FAILURE) {
+			return;
+		}
 
 		zend_generator_resume(generator);
 
