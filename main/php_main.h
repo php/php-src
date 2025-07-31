@@ -89,6 +89,26 @@ PHPAPI bool php_tsrm_startup(void);
 #define PHP_OS_STR PHP_OS
 #endif
 
+#ifndef PHP_BUILD_COMPILER
+# if defined(__clang__)
+/* __VERSION__ contains the compiler name */
+#  define PHP_BUILD_COMPILER __VERSION__
+# elif defined(__GNUC__)
+/* __VERSION__ does not contain the compiler name */
+#  define PHP_BUILD_COMPILER "GCC " __VERSION__
+# endif
+#endif
+
+#ifndef PHP_BUILD_ARCH
+# if defined(__x86_64__)
+#  define PHP_BUILD_ARCH "x86_64"
+# elif defined(__i386__)
+#  define PHP_BUILD_ARCH "x86"
+# elif defined(__aarch64__)
+#  define PHP_BUILD_ARCH "aarch64"
+# endif
+#endif
+
 END_EXTERN_C()
 
 #endif
