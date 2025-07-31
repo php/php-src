@@ -9689,6 +9689,87 @@ ZEND_VM_HANDLER(172, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(211, ZEND_FUNC_GET_NAMED_ARGS, UNUSED, UNUSED)
+{
+	USE_OPLINE
+	zval *arg_ptr, *arg_value, tmp;
+	uint32_t arg_count, first_extra_arg;
+	uint32_t i;
+	zend_function *func;
+	zend_arg_info *arg_info;
+
+	arg_count = EX_NUM_ARGS();
+	func = EX(func);
+	first_extra_arg = func->op_array.num_args;
+
+	SAVE_OPLINE();
+	array_init(EX_VAR(opline->result.var));
+
+	if (arg_count) {
+		i = 0;
+		arg_ptr = EX_VAR_NUM(0);
+
+		while (i < first_extra_arg && i < arg_count) {
+			if (EXPECTED(Z_TYPE_INFO_P(arg_ptr) != IS_UNDEF)) {
+				ZVAL_DEREF(arg_ptr);
+				if (Z_OPT_REFCOUNTED_P(arg_ptr)) {
+					Z_ADDREF_P(arg_ptr);
+				}
+				arg_value = arg_ptr;
+			} else {
+				ZVAL_NULL(&tmp);
+				arg_value = &tmp;
+			}
+
+			if (func->type == ZEND_USER_FUNCTION) {
+				arg_info = &func->op_array.arg_info[i];
+				add_assoc_zval(EX_VAR(opline->result.var), ZSTR_VAL(arg_info->name), arg_value);
+			} else {
+				arg_info = (zend_arg_info*)&((zend_internal_function*)func)->arg_info[i];
+				add_assoc_zval(EX_VAR(opline->result.var), ((zend_internal_arg_info*)arg_info)->name, arg_value);
+			}
+
+			arg_ptr++;
+			i++;
+		}
+
+		if (arg_count > first_extra_arg) {
+			arg_ptr = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
+		}
+
+		while (i < arg_count) {
+			if (EXPECTED(Z_TYPE_INFO_P(arg_ptr) != IS_UNDEF)) {
+				ZVAL_DEREF(arg_ptr);
+				if (Z_OPT_REFCOUNTED_P(arg_ptr)) {
+					Z_ADDREF_P(arg_ptr);
+				}
+				add_index_zval(EX_VAR(opline->result.var), i, arg_ptr);
+			} else {
+				add_index_null(EX_VAR(opline->result.var), i);
+			}
+			arg_ptr++;
+			i++;
+		}
+
+		if (EX_CALL_INFO() & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+			zend_string *name;
+			zval *named_param_zval;
+			
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EX(extra_named_params), name, named_param_zval) {
+				if (EXPECTED(Z_TYPE_INFO_P(named_param_zval) != IS_UNDEF)) {
+					ZVAL_DEREF(named_param_zval);
+					if (Z_OPT_REFCOUNTED_P(named_param_zval)) {
+						Z_ADDREF_P(named_param_zval);
+					}
+					add_assoc_zval(EX_VAR(opline->result.var), ZSTR_VAL(name), named_param_zval);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 /* Contrary to what its name indicates, ZEND_COPY_TMP may receive and define references. */
 ZEND_VM_HANDLER(167, ZEND_COPY_TMP, TMPVAR, UNUSED)
 {

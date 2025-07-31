@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fix GH-19610 (Deprecation warnings in functions taking as argument).
     (Girgias)
+  . Added func_get_named_args() function. (alexandre-daubois)
 
 - URI:
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)

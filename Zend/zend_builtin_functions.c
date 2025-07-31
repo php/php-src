@@ -300,6 +300,19 @@ ZEND_FUNCTION(func_get_arg)
 }
 /* }}} */
 
+static zval* process_arg_value(zval *arg_ptr) {
+	if (EXPECTED(Z_TYPE_INFO_P(arg_ptr) != IS_UNDEF)) {
+		ZVAL_DEREF(arg_ptr);
+		if (Z_OPT_REFCOUNTED_P(arg_ptr)) {
+			Z_ADDREF_P(arg_ptr);
+		}
+
+		return arg_ptr;
+	}
+
+	return &EG(uninitialized_zval);
+}
+
 /* {{{ Get an array of the arguments that were passed to the function */
 ZEND_FUNCTION(func_get_args)
 {
@@ -330,15 +343,11 @@ ZEND_FUNCTION(func_get_args)
 			p = ZEND_CALL_ARG(ex, 1);
 			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
-					q = p;
-					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
-						ZVAL_DEREF(q);
-						if (Z_OPT_REFCOUNTED_P(q)) {
-							Z_ADDREF_P(q);
-						}
-						ZEND_HASH_FILL_SET(q);
-					} else {
+					q = process_arg_value(p);
+					if (q == &EG(uninitialized_zval)) {
 						ZEND_HASH_FILL_SET_NULL();
+					} else {
+						ZEND_HASH_FILL_SET(q);
 					}
 					ZEND_HASH_FILL_NEXT();
 					p++;
@@ -347,15 +356,11 @@ ZEND_FUNCTION(func_get_args)
 				p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
 			}
 			while (i < arg_count) {
-				q = p;
-				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
-					ZVAL_DEREF(q);
-					if (Z_OPT_REFCOUNTED_P(q)) {
-						Z_ADDREF_P(q);
-					}
-					ZEND_HASH_FILL_SET(q);
-				} else {
+				q = process_arg_value(p);
+				if (q == &EG(uninitialized_zval)) {
 					ZEND_HASH_FILL_SET_NULL();
+				} else {
+					ZEND_HASH_FILL_SET(q);
 				}
 				ZEND_HASH_FILL_NEXT();
 				p++;
@@ -368,6 +373,82 @@ ZEND_FUNCTION(func_get_args)
 	}
 }
 /* }}} */
+
+ZEND_FUNCTION(func_get_named_args)
+{
+	zval *arg_ptr, *arg_value;
+	uint32_t arg_count, first_extra_arg;
+	uint32_t i;
+	zend_execute_data *ex = EX(prev_execute_data);
+	zend_function *func;
+	zend_arg_info *arg_info;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (ex && (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE)) {
+		zend_throw_error(NULL, "func_get_named_args() cannot be called from the global scope");
+		RETURN_THROWS();
+	}
+
+	if (zend_forbid_dynamic_call() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	func = ex->func;
+	arg_count = ZEND_CALL_NUM_ARGS(ex);
+
+	if (arg_count) {
+		array_init(return_value);
+		first_extra_arg = func->op_array.num_args;
+		i = 0;
+		arg_ptr = ZEND_CALL_ARG(ex, 1);
+
+		while (i < first_extra_arg && i < arg_count) {
+			arg_value = process_arg_value(arg_ptr);
+			if (arg_value == &EG(uninitialized_zval)) {
+				ZVAL_NULL(arg_value);
+			}
+
+			if (func->type == ZEND_USER_FUNCTION) {
+				arg_info = &func->op_array.arg_info[i];
+				add_assoc_zval(return_value, ZSTR_VAL(arg_info->name), arg_value);
+			} else {
+				arg_info = (zend_arg_info*)&((zend_internal_function*)func)->arg_info[i];
+				add_assoc_zval(return_value, ((zend_internal_arg_info*)arg_info)->name, arg_value);
+			}
+
+			arg_ptr++;
+			i++;
+		}
+
+		if (arg_count > first_extra_arg) {
+			arg_ptr = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
+		}
+
+		while (i < arg_count) {
+			arg_value = process_arg_value(arg_ptr);
+			if (arg_value == &EG(uninitialized_zval)) {
+				add_index_null(return_value, i);
+			} else {
+				add_index_zval(return_value, i, arg_value);
+			}
+			arg_ptr++;
+			i++;
+		}
+
+		if (ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+			zend_string *name;
+			zval *named_param_zval;
+			
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ex->extra_named_params, name, named_param_zval) {
+				named_param_zval = process_arg_value(named_param_zval);
+				add_assoc_zval(return_value, ZSTR_VAL(name), named_param_zval);
+			} ZEND_HASH_FOREACH_END();
+		}
+	} else {
+		RETURN_EMPTY_ARRAY();
+	}
+}
 
 /* {{{ Get string length
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
