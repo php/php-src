@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #442954659 (Crash in exif_scan_HEIF_header). (nielsdos)
   . Various hardening fixes to HEIF parsing. (nielsdos)
 
+- FPM:
+  . Fixed GH-8157 (post_max_size evaluates .user.ini too late in php-fpm).
+    (Jakub Zelenka)
+
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
