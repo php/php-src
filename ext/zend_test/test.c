@@ -87,6 +87,13 @@ static ZEND_FUNCTION(zend_test_func)
 	EX(func) = NULL;
 }
 
+static ZEND_FUNCTION(zend_trigger_bailout)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_error(E_ERROR, "Bailout");
+}
+
 static ZEND_FUNCTION(zend_test_array_return)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
