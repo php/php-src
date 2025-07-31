@@ -15,6 +15,8 @@ PHP                                                                        NEWS
     causes assertion failure). (nielsdos)
   . Fixed bug GH-19306 (Generator can be resumed while fetching next value from
     delegated Generator). (Arnaud)
+  . Fixed bug GH-19326 (Calling Generator::throw() on a running generator with
+    a non-Generator delegate crashes). (Arnaud)
 
 - FTP:
   . Fix theoretical issues with hrtime() not being available. (nielsdos)
