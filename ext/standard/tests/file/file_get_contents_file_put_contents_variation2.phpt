@@ -20,12 +20,12 @@ file_put_contents( $filename, $buffer );
 fill_buffer( $buffer, "numeric", 100);
 file_put_contents( $filename, $buffer, FILE_APPEND, NULL );
 file_put_contents( $filename, $data_array, FILE_APPEND, NULL );
-var_dump( file_get_contents($filename, 0) );
-var_dump( file_get_contents($filename, 1) );
-var_dump( file_get_contents($filename, 0, NULL, 5) );
-var_dump( file_get_contents($filename, 1, NULL, 5) );
-var_dump( file_get_contents($filename, 0, NULL, 5, 20) );
-var_dump( file_get_contents($filename, 1, NULL, 5, 20) );
+var_dump( file_get_contents($filename, false) );
+var_dump( file_get_contents($filename, true) );
+var_dump( file_get_contents($filename, false, NULL, 5) );
+var_dump( file_get_contents($filename, true, NULL, 5) );
+var_dump( file_get_contents($filename, false, NULL, 5, 20) );
+var_dump( file_get_contents($filename, true, NULL, 5, 20) );
 
 echo "--- Done ---";
 ?>

@@ -6,7 +6,7 @@ xmlreader
 <?php
 $reader = new XMLReader();
 try {
-    var_dump($reader->setParserProperty(XMLReader::LOADDTD, 1));
+    var_dump($reader->setParserProperty(XMLReader::LOADDTD, true));
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

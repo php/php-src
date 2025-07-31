@@ -38,8 +38,12 @@ foreach ($types as $description => $type) {
 null:
 Deprecated: posix_isatty(): Passing null to parameter #1 ($file_descriptor) of type int is deprecated in %s on line %d
 bool(false)
-false:bool(false)
-true:bool(false)
+false:
+Deprecated: posix_isatty(): Passing bool to parameter #1 ($file_descriptor) of type int is deprecated in %s on line %d
+bool(false)
+true:
+Deprecated: posix_isatty(): Passing bool to parameter #1 ($file_descriptor) of type int is deprecated in %s on line %d
+bool(false)
 int:bool(false)
 float no decimal:bool(false)
 float decimal:

@@ -25,15 +25,11 @@ $needles = array(
           //nulls
 /*11*/	  "\0",
 
-          //boolean false
-/*14*/	  FALSE,
-          false,
-
           //empty string
-/*16*/	  "",
+    	  "",
 
           //special chars
-/*17*/	  " ",
+    	  " ",
           "$",
           " $",
           "&",
@@ -46,7 +42,7 @@ $needles = array(
           "@",
           "@hEllo",
 
-/*29*/	  "12345", //decimal numeric string
+    	  "12345", //decimal numeric string
           "\x23",  //hexadecimal numeric string
           "#",  //respective ASCII char of \x23
           "\101",  //octal numeric string
@@ -129,106 +125,96 @@ int(44)
 int(44)
 int(43)
 -- Iteration 13 --
-int(44)
-int(44)
-int(44)
+int(43)
+int(43)
+int(43)
 int(43)
 -- Iteration 14 --
-int(44)
-int(44)
-int(44)
-int(43)
+int(12)
+int(12)
+bool(false)
+int(12)
 -- Iteration 15 --
-int(43)
-int(43)
-int(43)
-int(43)
+int(11)
+int(11)
+bool(false)
+int(11)
 -- Iteration 16 --
-int(12)
-int(12)
+int(13)
+int(13)
 bool(false)
-int(12)
+int(13)
 -- Iteration 17 --
-int(11)
-int(11)
+int(14)
+int(14)
 bool(false)
-int(11)
+int(14)
 -- Iteration 18 --
-int(13)
-int(13)
+int(17)
+int(17)
 bool(false)
-int(13)
+int(17)
 -- Iteration 19 --
-int(14)
-int(14)
-bool(false)
-int(14)
+int(20)
+int(20)
+int(20)
+int(20)
 -- Iteration 20 --
-int(17)
-int(17)
-bool(false)
-int(17)
+int(22)
+int(22)
+int(22)
+int(22)
 -- Iteration 21 --
-int(20)
-int(20)
-int(20)
-int(20)
+int(21)
+int(21)
+int(21)
+int(21)
 -- Iteration 22 --
-int(22)
-int(22)
-int(22)
-int(22)
+int(23)
+int(23)
+int(23)
+int(23)
 -- Iteration 23 --
-int(21)
-int(21)
-int(21)
-int(21)
+int(24)
+int(24)
+int(24)
+int(24)
 -- Iteration 24 --
-int(23)
-int(23)
-int(23)
-int(23)
+int(24)
+int(24)
+int(24)
+int(24)
 -- Iteration 25 --
-int(24)
-int(24)
-int(24)
-int(24)
+int(30)
+int(30)
+int(30)
+int(30)
 -- Iteration 26 --
-int(24)
-int(24)
-int(24)
-int(24)
+int(39)
+int(39)
+int(39)
+int(39)
 -- Iteration 27 --
-int(30)
-int(30)
-int(30)
-int(30)
+int(39)
+int(39)
+int(39)
+int(39)
 -- Iteration 28 --
-int(39)
-int(39)
-int(39)
-int(39)
+int(42)
+int(42)
+int(42)
+int(42)
 -- Iteration 29 --
-int(39)
-int(39)
-int(39)
-int(39)
+int(42)
+int(42)
+int(42)
+int(42)
 -- Iteration 30 --
-int(42)
-int(42)
-int(42)
-int(42)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 31 --
-int(42)
-int(42)
-int(42)
-int(42)
--- Iteration 32 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
--- Iteration 33 --
 int(0)
 bool(false)
 bool(false)

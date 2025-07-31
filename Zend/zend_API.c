@@ -530,10 +530,129 @@ static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32
 	return !EG(exception);
 }
 
+static ZEND_COLD bool zend_arg_from_bool_deprecated(const char *fallback_type, const uint32_t arg_num) {
+	/* Check arg_num is not (uint32_t)-1, as otherwise its called by
+	 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+	if (arg_num == (uint32_t)-1) {
+		return true;
+	}
+	/* Dealing with a class constant assignment should never happen */
+	if (arg_num == (uint32_t)-3) {
+		ZEND_UNREACHABLE();
+		return false;
+	}
+
+	/* Dealing with a property */
+	if (arg_num == (uint32_t)-2) {
+		/* Not enough info for a good error message */
+		zend_error(E_DEPRECATED,
+			"Assigning bool to typed property which is implicitly converted to type %s is deprecated",
+			fallback_type
+		);
+		return !EG(exception);
+	}
+
+	zend_function *func = zend_active_function();
+	zend_arg_info *arg_info = NULL;
+	zend_string *type_str = NULL;
+	if (arg_num != 0) {
+		uint32_t arg_offset = arg_num - 1;
+		if (arg_offset >= func->common.num_args) {
+			ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_VARIADIC);
+			arg_offset = func->common.num_args;
+		}
+		arg_info = &func->common.arg_info[arg_offset];
+		type_str = zend_type_to_string(arg_info->type);
+	}
+	zend_string *func_name = get_active_function_or_method_name();
+	const char *type_param = type_str ? ZSTR_VAL(type_str) : fallback_type;
+	if (arg_num == 0) {
+		zend_error(E_DEPRECATED,
+			"%s(): Returning type bool which is implicitly converted to type %s is deprecated",
+			ZSTR_VAL(func_name), type_param
+		);
+	} else {
+		const char *arg_name = get_active_function_arg_name(arg_num);
+		zend_error(E_DEPRECATED,
+			"%s(): Passing bool to parameter #%" PRIu32 "%s%s%s of type %s is deprecated",
+			ZSTR_VAL(func_name), arg_num,
+			arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "",
+			type_param
+		);
+	}
+	zend_string_release(func_name);
+	if (type_str) {
+		zend_string_release(type_str);
+	}
+	return !EG(exception);
+}
+
+static ZEND_COLD bool zend_arg_to_bool_deprecated(const zval *arg, uint32_t arg_num) {
+	/* Check arg_num is not (uint32_t)-1, as otherwise its called by
+	 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+	if (arg_num == (uint32_t)-1) {
+		return true;
+	}
+	/* Dealing with a class constant assignment should never happen */
+	if (arg_num == (uint32_t)-3) {
+		ZEND_UNREACHABLE();
+		return false;
+	}
+
+	const char *type_arg = zend_zval_type_name(arg);
+	/* Dealing with a property */
+	if (arg_num == (uint32_t)-2) {
+		/* Not enough info for a good error message */
+		zend_error(E_DEPRECATED,
+			"Assigning %s to type property which is implicitly converted to type bool is deprecated",
+			type_arg
+		);
+		return !EG(exception);
+	}
+
+	zend_function *func = zend_active_function();
+	zend_arg_info *arg_info = NULL;
+	zend_string *type_str = NULL;
+	if (arg_num != 0) {
+		uint32_t arg_offset = arg_num - 1;
+		if (arg_offset >= func->common.num_args) {
+			ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_VARIADIC);
+			arg_offset = func->common.num_args;
+		}
+		arg_info = &func->common.arg_info[arg_offset];
+		type_str = zend_type_to_string(arg_info->type);
+	}
+	zend_string *func_name = get_active_function_or_method_name();
+	const char *type_param = type_str ? ZSTR_VAL(type_str) : "bool";
+	if (arg_num == 0) {
+		zend_error(E_DEPRECATED,
+			"%s(): Returning type %s which is implicitly converted to type %s is deprecated",
+			ZSTR_VAL(func_name), type_arg, type_param
+		);
+	} else {
+		const char *arg_name = get_active_function_arg_name(arg_num);
+		zend_error(E_DEPRECATED,
+			"%s(): Passing %s to parameter #%" PRIu32 "%s%s%s of type %s is deprecated",
+			ZSTR_VAL(func_name), type_arg, arg_num,
+			arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "",
+			type_param
+		);
+	}
+	zend_string_release(func_name);
+	if (type_str) {
+		zend_string_release(type_str);
+	}
+	return !EG(exception);
+}
+
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(const zval *arg, bool *dest, uint32_t arg_num) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
-		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("bool", arg_num)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			if (UNEXPECTED(!zend_null_arg_deprecated("int", arg_num))) {
+				return 0;
+			}
+		} else if (UNEXPECTED(!zend_arg_to_bool_deprecated(arg, arg_num))) {
 			return 0;
 		}
 		*dest = zend_is_true(arg);
@@ -618,11 +737,21 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long 
 			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
-		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("int", arg_num)) {
-			return 0;
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			if (UNEXPECTED(!zend_null_arg_deprecated("int", arg_num))) {
+				return 0;
+			}
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(arg) == IS_FALSE);
+			if (UNEXPECTED(!zend_arg_from_bool_deprecated("int", arg_num))) {
+				return 0;
+			}
 		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
+		if (UNEXPECTED(!zend_arg_from_bool_deprecated("int", arg_num))) {
+			return 0;
+		}
 		*dest = 1;
 	} else {
 		return 0;
@@ -667,11 +796,21 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, double *
 			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
-		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("float", arg_num)) {
-			return 0;
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			if (UNEXPECTED(!zend_null_arg_deprecated("int", arg_num))) {
+				return 0;
+			}
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(arg) == IS_FALSE);
+			if (UNEXPECTED(!zend_arg_from_bool_deprecated("float", arg_num))) {
+				return 0;
+			}
 		}
 		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
+		if (UNEXPECTED(!zend_arg_from_bool_deprecated("float", arg_num))) {
+			return 0;
+		}
 		*dest = 1.0;
 	} else {
 		return 0;
@@ -711,11 +850,21 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, u
 		}
 		zend_string_release(str);
 	} else if (Z_TYPE_P(arg) < IS_TRUE) {
-		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("int|float", arg_num)) {
-			return 0;
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			if (UNEXPECTED(!zend_null_arg_deprecated("int", arg_num))) {
+				return 0;
+			}
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(arg) == IS_FALSE);
+			if (UNEXPECTED(!zend_arg_from_bool_deprecated("int|float", arg_num))) {
+				return 0;
+			}
 		}
 		ZVAL_LONG(arg, 0);
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
+		if (UNEXPECTED(!zend_arg_from_bool_deprecated("int|float", arg_num))) {
+			return 0;
+		}
 		ZVAL_LONG(arg, 1);
 	} else {
 		return 0;
@@ -732,11 +881,21 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **
 		return false;
 	}
 	if (Z_TYPE_P(arg) < IS_TRUE) {
-		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("string|int|float", arg_num)) {
-			return false;
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			if (UNEXPECTED(!zend_null_arg_deprecated("int", arg_num))) {
+				return 0;
+			}
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(arg) == IS_FALSE);
+			if (UNEXPECTED(!zend_arg_from_bool_deprecated("string|int|float", arg_num))) {
+				return 0;
+			}
 		}
 		ZVAL_LONG(arg, 0);
 	} else if (Z_TYPE_P(arg) == IS_TRUE) {
+		if (UNEXPECTED(!zend_arg_from_bool_deprecated("string|int|float", arg_num))) {
+			return 0;
+		}
 		ZVAL_LONG(arg, 1);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(arg);
@@ -759,6 +918,9 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **des
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("string", arg_num)) {
+			return 0;
+		} else if (UNEXPECTED((Z_TYPE_P(arg) == IS_TRUE || Z_TYPE_P(arg) == IS_FALSE)
+			&& !zend_arg_from_bool_deprecated("string", arg_num))) {
 			return 0;
 		}
 		convert_to_string(arg);

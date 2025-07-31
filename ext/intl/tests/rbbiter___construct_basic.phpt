@@ -23,7 +23,7 @@ $rbbi = new IntlRuleBasedBreakIterator($rules);
 var_dump(get_class($rbbi));
 
 try {
-    $obj = new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+', 'aoeu');
+    $obj = new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+', true);
 } catch (IntlException $e) {
     echo $e->getMessage(), "\n";
 }

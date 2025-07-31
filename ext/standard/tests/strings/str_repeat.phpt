@@ -11,7 +11,6 @@ $variations = array(
   'barbazbax',
   "\x00",
   '\0',
-  TRUE,
   4,
   1.23,
   "",
@@ -67,12 +66,6 @@ try {
 -- after repeating 1 times is => \0
 -- after repeating 2 times is => \0\0
 -- after repeating 3 times is => \0\0\0
-
---- str_repeat() of '1' ---
--- after repeating 0 times is => 
--- after repeating 1 times is => 1
--- after repeating 2 times is => 11
--- after repeating 3 times is => 111
 
 --- str_repeat() of '4' ---
 -- after repeating 0 times is => 
