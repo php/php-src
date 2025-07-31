@@ -1393,7 +1393,6 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 	 * null byte here, to avoid larger parts of the type being omitted by printing code later. */
 	size_t len = strlen(ZSTR_VAL(name));
 	if (len != ZSTR_LEN(name)) {
-		ZEND_ASSERT(scope && "This should only happen with resolved types");
 		return zend_string_init(ZSTR_VAL(name), len, 0);
 	}
 	return zend_string_copy(name);
