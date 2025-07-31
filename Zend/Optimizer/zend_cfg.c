@@ -421,6 +421,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 				}
 				break;
 			case ZEND_FUNC_GET_ARGS:
+			case ZEND_FUNC_GET_NAMED_ARGS:
 				flags |= ZEND_FUNC_VARARG;
 				break;
 			case ZEND_EXT_STMT:

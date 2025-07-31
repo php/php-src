@@ -3926,6 +3926,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_op->result_def);
 			break;
 		case ZEND_FUNC_GET_ARGS:
+		case ZEND_FUNC_GET_NAMED_ARGS:
 			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ARRAY|MAY_BE_ARRAY_EMPTY|MAY_BE_ARRAY_PACKED|MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
 			break;
 		case ZEND_GET_CLASS:
@@ -5025,6 +5026,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_ISSET_ISEMPTY_CV:
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
+		case ZEND_FUNC_GET_NAMED_ARGS:
 		case ZEND_COPY_TMP:
 		case ZEND_JMP_NULL:
 		case ZEND_JMP_FRAMELESS:
