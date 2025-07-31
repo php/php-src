@@ -80,13 +80,13 @@ retry:
 			if (sock->is_blocked) {
 				int retval;
 
-				sock->timeout_event = 0;
+				sock->timeout_event = false;
 
 				do {
 					retval = php_pollfd_for(sock->socket, POLLOUT, ptimeout);
 
 					if (retval == 0) {
-						sock->timeout_event = 1;
+						sock->timeout_event = true;
 						break;
 					}
 
@@ -129,7 +129,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 		return;
 	}
 
-	sock->timeout_event = 0;
+	sock->timeout_event = false;
 
 	if (has_buffered_data) {
 		/* If there is already buffered data, use no timeout. */
@@ -146,7 +146,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
 
 		if (retval == 0)
-			sock->timeout_event = 1;
+			sock->timeout_event = true;
 
 		if (retval >= 0)
 			break;
@@ -399,7 +399,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 		case PHP_STREAM_OPTION_READ_TIMEOUT:
 			sock->timeout = *(struct timeval*)ptrparam;
-			sock->timeout_event = 0;
+			sock->timeout_event = false;
 			return PHP_STREAM_OPTION_RETURN_OK;
 
 		case PHP_STREAM_OPTION_META_DATA_API:
@@ -885,7 +885,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		clisockdata->socket = clisock;
 #ifdef __linux__
 		/* O_NONBLOCK is not inherited on Linux */
-		clisockdata->is_blocked = 1;
+		clisockdata->is_blocked = true;
 #endif
 
 		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
@@ -963,7 +963,7 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	sock = pemalloc(sizeof(php_netstream_data_t), persistent_id ? 1 : 0);
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
-	sock->is_blocked = 1;
+	sock->is_blocked = true;
 	sock->timeout.tv_sec = FG(default_socket_timeout);
 	sock->timeout.tv_usec = 0;
 
