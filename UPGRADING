@@ -394,6 +394,11 @@ PHP 8.5 UPGRADE NOTES
   . The output of ReflectionClass::toString() for enums has changed to
     better indicate that the class is an enum, and that the enum cases
     are enum cases rather than normal class constants.
+  . The output of ReflectionProperty::__toString() for properties with
+    hooks has changed to indicate what hooks the property has, whether those
+    hooks are final, and whether the property is virtual. This also affects 
+    the output of ReflectionClass::__toString() when a class contains hooked
+    properties.
 
 - Session:
   . session_start is stricter in regard to the option argument.
