@@ -2326,7 +2326,7 @@ static zend_always_inline bool zend_parse_arg_string(zval *arg, char **dest, siz
 static zend_always_inline bool zend_parse_arg_path_str(zval *arg, zend_string **dest, bool check_null, uint32_t arg_num)
 {
 	if (!zend_parse_arg_str(arg, dest, check_null, arg_num) ||
-	    (*dest && UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(*dest), ZSTR_LEN(*dest))))) {
+	    (*dest && UNEXPECTED(zend_str_has_nul_byte(*dest)))) {
 		return 0;
 	}
 	return 1;

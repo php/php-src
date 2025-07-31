@@ -290,7 +290,7 @@ PHP_FUNCTION(mail)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (headers_str) {
-		if (strlen(ZSTR_VAL(headers_str)) != ZSTR_LEN(headers_str)) {
+		if (UNEXPECTED(zend_str_has_nul_byte(headers_str))) {
 			zend_argument_value_error(4, "must not contain any null bytes");
 			RETURN_THROWS();
 		}

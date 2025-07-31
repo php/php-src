@@ -609,7 +609,7 @@ PHP_METHOD(XSLTProcessor, setParameter)
 				RETURN_THROWS();
 			}
 
-			if (UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(string_key), ZSTR_LEN(string_key)))) {
+			if (UNEXPECTED(zend_str_has_nul_byte(string_key))) {
 				zend_argument_value_error(3, "must not contain keys with any null bytes");
 				RETURN_THROWS();
 			}
@@ -625,7 +625,7 @@ PHP_METHOD(XSLTProcessor, setParameter)
 				RETURN_THROWS();
 			}
 
-			if (UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(str), ZSTR_LEN(str)))) {
+			if (UNEXPECTED(zend_str_has_nul_byte(str))) {
 				zend_string_release(str);
 				zend_string_release_ex(ht_key, false);
 				zend_argument_value_error(3, "must not contain values with any null bytes");
@@ -643,7 +643,7 @@ PHP_METHOD(XSLTProcessor, setParameter)
 			RETURN_THROWS();
 		}
 
-		if (UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(name), ZSTR_LEN(name)))) {
+		if (UNEXPECTED(zend_str_has_nul_byte(name))) {
 			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}

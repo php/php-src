@@ -4506,7 +4506,7 @@ PHP_FUNCTION(mb_send_mail)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str_headers) {
-		if (strlen(ZSTR_VAL(str_headers)) != ZSTR_LEN(str_headers)) {
+		if (UNEXPECTED(zend_str_has_nul_byte(str_headers))) {
 			zend_argument_value_error(4, "must not contain any null bytes");
 			RETURN_THROWS();
 		}

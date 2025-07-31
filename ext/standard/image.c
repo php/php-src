@@ -1618,7 +1618,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 		Z_PARAM_ZVAL(info)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mode == FROM_PATH && CHECK_NULL_PATH(ZSTR_VAL(input), ZSTR_LEN(input))) {
+	if (mode == FROM_PATH && zend_str_has_nul_byte(input)) {
 		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}

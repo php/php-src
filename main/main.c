@@ -707,7 +707,7 @@ static PHP_INI_MH(OnUpdateMailLog)
 static PHP_INI_MH(OnChangeMailForceExtra)
 {
 	/* Check that INI setting does not have any nul bytes */
-	if (new_value && ZSTR_LEN(new_value) != strlen(ZSTR_VAL(new_value))) {
+	if (new_value && zend_str_has_nul_byte(new_value)) {
 		/* TODO Emit warning? */
 		return FAILURE;
 	}
