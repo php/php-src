@@ -1063,7 +1063,7 @@ PHP_FUNCTION(odbc_execute)
 				ZSTR_VAL(tmpstr)[0] == '\'' &&
 				ZSTR_VAL(tmpstr)[ZSTR_LEN(tmpstr) - 1] == '\'') {
 
-				if (ZSTR_LEN(tmpstr) != strlen(ZSTR_VAL(tmpstr))) {
+				if (UNEXPECTED(zend_str_has_nul_byte(tmpstr))) {
 					odbc_release_params(result, params);
 					RETURN_FALSE;
 				}
