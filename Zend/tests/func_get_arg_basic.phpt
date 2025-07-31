@@ -104,7 +104,7 @@ int(10)
 func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
 int(1)
 func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
-Exception: Too few arguments to function test2(), 0 passed in %s002.php on line %d and exactly 1 expected
+Exception: Too few arguments to function test2(), 0 passed in %s on line %d and exactly 1 expected
 int(1)
 int(2)
 func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
