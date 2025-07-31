@@ -334,7 +334,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	}
 
 	/* If max_memory_limit is not set to unlimited, verify change */
-	if (PG(max_memory_limit) != -1 && (value == -1 || value > PG(max_memory_limit))) {
+	if (value > PG(max_memory_limit)) {
 		if (value != -1) {
 			zend_error(E_WARNING,
 				"Failed to set memory_limit to %zd bytes. Setting to max_memory_limit instead (currently: " ZEND_LONG_FMT " bytes)",
