@@ -330,7 +330,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	if (new_value) {
 		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
 	} else {
-		value = Z_L(1) << 30; /* effectively, no limit */
+		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
 
 	/* If max_memory_limit is not set to unlimited, verify change */
