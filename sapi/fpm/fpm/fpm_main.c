@@ -702,7 +702,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 }
 /* }}} */
 
-static int sapi_cgi_activate(void) /* {{{ */
+static int sapi_cgi_pre_request_init(void)
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 	char *path, *doc_root, *server_name;
@@ -764,6 +764,11 @@ static int sapi_cgi_activate(void) /* {{{ */
 		efree(path);
 	}
 
+	return SUCCESS;
+}
+
+static int sapi_cgi_activate(void) /* {{{ */
+{
 	return SUCCESS;
 }
 /* }}} */
@@ -1600,6 +1605,7 @@ int main(int argc, char *argv[])
 	sapi_startup(&cgi_sapi_module);
 	cgi_sapi_module.php_ini_path_override = NULL;
 	cgi_sapi_module.php_ini_ignore_cwd = 1;
+	cgi_sapi_module.pre_request_init = sapi_cgi_pre_request_init;
 
 #ifndef HAVE_ATTRIBUTE_WEAK
 	fcgi_set_logger(fpm_fcgi_log);
