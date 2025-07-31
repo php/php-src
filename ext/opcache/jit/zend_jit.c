@@ -3928,8 +3928,10 @@ void zend_jit_deactivate(void)
 	zend_jit_profile_counter = 0;
 }
 
-static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array)
+static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array, void *context)
 {
+	ZEND_IGNORE_VALUE(context);
+
 	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 
 	if (!func_info) {
@@ -3959,49 +3961,11 @@ static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array)
 		}
 #endif
 	}
-	if (op_array->num_dynamic_func_defs) {
-		for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
-			zend_jit_restart_preloaded_op_array(op_array->dynamic_func_defs[i]);
-		}
-	}
 }
 
 static void zend_jit_restart_preloaded_script(zend_persistent_script *script)
 {
-	zend_class_entry *ce;
-	zend_op_array *op_array;
-
-	zend_jit_restart_preloaded_op_array(&script->script.main_op_array);
-
-	ZEND_HASH_MAP_FOREACH_PTR(&script->script.function_table, op_array) {
-		zend_jit_restart_preloaded_op_array(op_array);
-	} ZEND_HASH_FOREACH_END();
-
-	ZEND_HASH_MAP_FOREACH_PTR(&script->script.class_table, ce) {
-		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
-			if (op_array->type == ZEND_USER_FUNCTION) {
-				zend_jit_restart_preloaded_op_array(op_array);
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		if (ce->num_hooked_props > 0) {
-			zend_property_info *prop;
-
-			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
-				if (prop->hooks) {
-					for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
-						if (prop->hooks[i]) {
-							op_array = &prop->hooks[i]->op_array;
-							ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
-							if (!(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
-								zend_jit_restart_preloaded_op_array(op_array);
-							}
-						}
-					}
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
-	} ZEND_HASH_FOREACH_END();
+	zend_foreach_op_array(&script->script, zend_jit_restart_preloaded_op_array, NULL);
 }
 
 void zend_jit_restart(void)
