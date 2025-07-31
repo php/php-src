@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-19306 (Generator can be resumed while fetching next value from
     delegated Generator). (Arnaud)
+  . Fixed bug GH-19326 (Calling Generator::throw() on a running generator with
+    a non-Generator delegate crashes). (Arnaud)
 
 - Curl:
   . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
