@@ -321,25 +321,19 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		goto end;
 	}
 
-	/* call it's stream_open method - set up params first */
-	zend_result call_result;
-	zend_try {
-		ZVAL_STRING(&args[0], filename);
-		ZVAL_STRING(&args[1], mode);
-		ZVAL_LONG(&args[2], options);
-		ZVAL_NEW_REF(&args[3], &EG(uninitialized_zval));
+	/* call its stream_open method - set up params first */
+	ZVAL_STRING(&args[0], filename);
+	ZVAL_STRING(&args[1], mode);
+	ZVAL_LONG(&args[2], options);
+	ZVAL_NEW_REF(&args[3], &EG(uninitialized_zval));
 
-		zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_OPEN, false);
-		call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &zretval, 4, args);
-		zend_string_release_ex(func_name, false);
+	zend_string *func_name = ZSTR_INIT_LITERAL(USERSTREAM_OPEN, false);
+	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &zretval, 4, args);
+	zend_string_release_ex(func_name, false);
 
-		/* Keep arg3 alive if it has assigned the reference */
-		zval_ptr_dtor(&args[1]);
-		zval_ptr_dtor(&args[0]);
-	} zend_catch {
-		FG(user_stream_current_filename) = NULL;
-		zend_bailout();
-	} zend_end_try();
+	/* Keep arg3 alive if it has assigned the reference */
+	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor(&args[0]);
 
 	if (UNEXPECTED(call_result == FAILURE)) {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_OPEN "\" is not implemented",
