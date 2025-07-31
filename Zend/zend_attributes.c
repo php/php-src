@@ -95,6 +95,24 @@ static void validate_allow_dynamic_properties(
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 }
 
+static void validate_attribute(
+	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	const char *msg = NULL;
+	if (scope->ce_flags & ZEND_ACC_TRAIT) {
+		msg = "Cannot apply #[\\Attribute] to trait %s";
+	} else if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		msg = "Cannot apply #[\\Attribute] to interface %s";
+	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
+		msg = "Cannot apply #[\\Attribute] to enum %s";
+	} else if (scope->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
+		msg = "Cannot apply #[\\Attribute] to abstract class %s";
+	}
+	if (msg != NULL) {
+		zend_error_noreturn(E_ERROR, msg, ZSTR_VAL(scope->name));
+	}
+}
+
 ZEND_METHOD(Attribute, __construct)
 {
 	zend_long flags = ZEND_ATTRIBUTE_TARGET_ALL;
@@ -522,6 +540,7 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_attribute = register_class_Attribute();
 	attr = zend_mark_internal_attribute(zend_ce_attribute);
+	attr->validator = validate_attribute;
 
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
 	zend_mark_internal_attribute(zend_ce_return_type_will_change_attribute);
