@@ -30,7 +30,7 @@
 #include "zend_compile.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
-#include "zend_asan.h"
+#include "zend_sanitizers.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"

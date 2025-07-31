@@ -27,7 +27,7 @@
 #include "zend_types.h"
 #include "zend_variables.h"
 #include "zend_constants.h"
-#include "zend_asan.h"
+#include "zend_sanitizers.h"
 
 #include <stdint.h>
 

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_ASAN_H
-#define ZEND_ASAN_H
+#ifndef ZEND_SANITIZERS_H
+#define ZEND_SANITIZERS_H
 
 #include "zend_portability.h"
 
@@ -26,14 +26,27 @@
 # define ASAN_UNPOISON_MEMORY_REGION(_ptr, _size)
 #endif
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+# define MSAN_POISON_MEMORY_REGION(_ptr, _size)   __msan_allocated_memory(_ptr, _size)
+# define MSAN_UNPOISON_MEMORY_REGION(_ptr, _size) __msan_unpoison(_ptr, _size)
+#else
+# define MSAN_POISON_MEMORY_REGION(_ptr, _size)
+# define MSAN_UNPOISON_MEMORY_REGION(_ptr, _size)
+#endif
+
+/* Mark memory region as unaddressable (ASAN) and uninitialized (MSAN) */
 #define ZEND_POISON_MEMORY_REGION(_ptr, _size) do {     \
 	ZEND_ASSERT(!(((uintptr_t) (_ptr)) & 7));           \
 	ASAN_POISON_MEMORY_REGION((_ptr), (_size));         \
+	MSAN_POISON_MEMORY_REGION((_ptr), (_size));         \
 } while (0);
 
+/* Mark memory region as addressable (ASAN) without changing initialization state (MSAN) */
 #define ZEND_UNPOISON_MEMORY_REGION(_ptr, _size) do {   \
 	ZEND_ASSERT(!(((uintptr_t) (_ptr)) & 7));           \
 	ASAN_UNPOISON_MEMORY_REGION((_ptr), (_size));       \
+	/* No MSAN_UNPOISON_MEMORY_REGION */                \
 } while (0);
 
-#endif /* ZEND_ASAN_H */
+#endif /* ZEND_SANITIZERS_H */

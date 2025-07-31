@@ -17,7 +17,7 @@
 */
 
 #include "Zend/zend_API.h"
-#include "Zend/zend_asan.h"
+#include "Zend/zend_sanitizers.h"
 
 static ZEND_COLD void undef_result_after_exception(void) {
 	const zend_op *opline = EG(opline_before_exception);
