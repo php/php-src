@@ -208,6 +208,8 @@ namespace {
         case Baz = -1;
     }
 
+    function zend_trigger_bailout(): never {}
+
     function zend_test_array_return(): array {}
 
     /** @genstubs-expose-comment-block
