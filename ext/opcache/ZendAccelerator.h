@@ -300,8 +300,9 @@ extern zend_accel_shared_globals *accel_shared_globals;
 #define ZCSG(element)   (accel_shared_globals->element)
 
 #ifdef ZTS
-# define ZCG(v)	ZEND_TSRMG(accel_globals_id, zend_accel_globals *, v)
+# define ZCG(v)	ZEND_TSRMG_FAST(accel_globals_offset, zend_accel_globals *, v)
 extern int accel_globals_id;
+extern size_t accel_globals_offset;
 #else
 # define ZCG(v) (accel_globals.v)
 extern zend_accel_globals accel_globals;

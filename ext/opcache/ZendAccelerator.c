@@ -109,6 +109,7 @@ static zend_extension opcache_extension_entry;
 zend_accel_globals accel_globals;
 #else
 int accel_globals_id;
+size_t accel_globals_offset;
 #endif
 
 /* Points to the structure shared across all PHP processes */
@@ -3162,7 +3163,7 @@ void start_accel_extension(void)
 static int accel_startup(zend_extension *extension)
 {
 #ifdef ZTS
-	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
+	accel_globals_id = ts_allocate_fast_id(&accel_globals_id, &accel_globals_offset, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
 #else
 	accel_globals_ctor(&accel_globals);
 #endif

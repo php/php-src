@@ -51,6 +51,8 @@
 #include "ext/date/php_date.h"
 #include "ext/random/php_random_csprng.h"
 #include "ext/random/php_random_zend_utils.h"
+#include "ext/opcache/ZendAccelerator.h"
+#include "ext/opcache/jit/zend_jit.h"
 #include "php_variables.h"
 #include "ext/standard/credits.h"
 #ifdef PHP_WIN32
@@ -2773,7 +2775,9 @@ PHPAPI void php_reserve_tsrm_memory(void)
 		TSRM_ALIGNED_SIZE(zend_mm_globals_size()) +
 		TSRM_ALIGNED_SIZE(zend_gc_globals_size()) +
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
-		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct))
+		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_accel_globals)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_jit_globals))
 	);
 }
 /* }}} */
