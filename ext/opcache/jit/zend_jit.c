@@ -48,6 +48,7 @@
 
 #ifdef ZTS
 int jit_globals_id;
+size_t jit_globals_offset;
 #else
 zend_jit_globals jit_globals;
 #endif
@@ -3700,7 +3701,7 @@ int zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage)
 void zend_jit_init(void)
 {
 #ifdef ZTS
-	jit_globals_id = ts_allocate_id(&jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, (ts_allocate_dtor) zend_jit_globals_dtor);
+	jit_globals_id = ts_allocate_fast_id(&jit_globals_id, &jit_globals_offset, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, (ts_allocate_dtor) zend_jit_globals_dtor);
 #else
 	zend_jit_globals_ctor(&jit_globals);
 #endif
