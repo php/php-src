@@ -126,7 +126,7 @@ PHP                                                                        NEWS
 
 - CURL:
   . Added CURLFOLLOW_ALL, CURLFOLLOW_OBEYCODE and CURLFOLLOW_FIRSTONLY
-    values for CURLOPT_FOLLOLOCATION curl_easy_setopt option. (David Carlier)
+    values for CURLOPT_FOLLOWLOCATION curl_easy_setopt option. (David Carlier)
 
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
@@ -245,7 +245,7 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Added openssl.libctx INI that allows to select the OpenSSL library context
-    type and convert verious parts of the extension to use the custom  libctx.
+    type and convert various parts of the extension to use the custom  libctx.
     (Jakub Zelenka)
 
 - Output:
@@ -255,7 +255,7 @@ PHP                                                                        NEWS
   . Extend pcntl_waitid with rusage parameter. (vrza)
 
 - PCRE:
-  . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
+  . Upgraded to pcre2lib from 10.44 to 10.45. (nielsdos)
   . Remove PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK from pcre compile options.
     (mvorisek)
 
@@ -364,7 +364,7 @@ PHP                                                                        NEWS
     (David Carlier)
 
 - Sodium:
-  . Fix overall theorical overflows on zend_string buffer allocations.
+  . Fix overall theoretical overflows on zend_string buffer allocations.
     (David Carlier/nielsdos)
 
 - Sqlite:
@@ -393,7 +393,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - Tests:
-  . Allow to shuffle tests even in non-parallell mode. (dhuang00)
+  . Allow to shuffle tests even in non-parallel mode. (dhuang00)
 
 - Tidy:
   . tidy::__construct/parseFile/parseString methods throw an exception if
