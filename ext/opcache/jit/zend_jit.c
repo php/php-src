@@ -77,7 +77,6 @@ int zend_jit_profile_counter_rid = -1;
 int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 
 const zend_op *zend_jit_halt_op = NULL;
-static int zend_jit_vm_kind = 0;
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 static int zend_write_protect = 1;
 #endif
@@ -3707,18 +3706,13 @@ void zend_jit_init(void)
 #endif
 }
 
+#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
+# error JIT is compatible only with CALL and HYBRID VM
+#endif
+
 int zend_jit_check_support(void)
 {
 	int i;
-
-	zend_jit_vm_kind = zend_vm_kind();
-	if (zend_jit_vm_kind != ZEND_VM_KIND_CALL &&
-	    zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
-		zend_error(E_WARNING, "JIT is compatible only with CALL and HYBRID VM. JIT disabled.");
-		JIT_G(enabled) = 0;
-		JIT_G(on) = 0;
-		return FAILURE;
-	}
 
 	if (zend_execute_ex != execute_ex) {
 		if (zend_dtrace_enabled) {
