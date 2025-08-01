@@ -24176,7 +24176,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -24330,7 +24330,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -24484,7 +24484,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -24638,7 +24638,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -27182,7 +27182,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -27336,7 +27336,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -27490,7 +27490,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -27644,7 +27644,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -31536,7 +31536,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -31690,7 +31690,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -31844,7 +31844,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -31998,7 +31998,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -34285,7 +34285,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -34439,7 +34439,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -34593,7 +34593,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -34747,7 +34747,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -36468,7 +36468,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -36622,7 +36622,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -36776,7 +36776,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -36930,7 +36930,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -39115,7 +39115,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -39269,7 +39269,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -39423,7 +39423,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -39577,7 +39577,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -43474,7 +43474,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -43628,7 +43628,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -43782,7 +43782,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -43936,7 +43936,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -47427,7 +47427,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -47581,7 +47581,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -47735,7 +47735,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -47889,7 +47889,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -52927,7 +52927,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -53081,7 +53081,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -53235,7 +53235,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;
@@ -53389,7 +53389,7 @@ fast_assign_obj:
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						goto free_and_exit_assign_obj;

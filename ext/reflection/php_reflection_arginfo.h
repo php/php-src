@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ef9e7f30a29819489e17a9c100f55696d5d164e0 */
+ * Stub hash: 95e712e047d33ca2fce1dadc9f9b11a1ab4a06f0 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -1539,6 +1539,12 @@ static zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_
 	zend_string *const_SKIP_DESTRUCTOR_name = zend_string_init_interned("SKIP_DESTRUCTOR", sizeof("SKIP_DESTRUCTOR") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_SKIP_DESTRUCTOR_name, &const_SKIP_DESTRUCTOR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_SKIP_DESTRUCTOR_name);
+
+	zval const_PARTIAL_INITIALIZATION_value;
+	ZVAL_LONG(&const_PARTIAL_INITIALIZATION_value, ZEND_LAZY_OBJECT_PARTIAL_INITIALIZATION);
+	zend_string *const_PARTIAL_INITIALIZATION_name = zend_string_init_interned("PARTIAL_INITIALIZATION", sizeof("PARTIAL_INITIALIZATION") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_PARTIAL_INITIALIZATION_name, &const_PARTIAL_INITIALIZATION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_PARTIAL_INITIALIZATION_name);
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
