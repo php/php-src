@@ -391,7 +391,7 @@ PHP 8.5 UPGRADE NOTES
     argument are lower than -1 or if soft_limit is greater than hard_limit.
 
 - Reflection:
-  . The output of ReflectionClass::toString() for enums has changed to
+  . The output of ReflectionClass::__toString() for enums has changed to
     better indicate that the class is an enum, and that the enum cases
     are enum cases rather than normal class constants.
   . The output of ReflectionProperty::__toString() for properties with
