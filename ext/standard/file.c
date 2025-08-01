@@ -640,6 +640,16 @@ PHP_FUNCTION(file)
 			do {
 				p++;
 parse_eol:
+				if (skip_blank_lines) {
+					int windows_eol = 0;
+					if (p != ZSTR_VAL(target_buf) && eol_marker == '\n' && *(p - 1) == '\r') {
+						windows_eol++;
+					}
+					if (p-s-windows_eol == 1) {
+						s = p;
+						continue;
+					}
+				}
 				add_index_stringl(return_value, i++, s, p-s);
 				s = p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
