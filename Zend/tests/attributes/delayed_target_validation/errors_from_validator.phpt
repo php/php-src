@@ -20,10 +20,6 @@ readonly class DemoReadonly {}
 enum DemoEnum {}
 
 class DemoClass {
-	#[DelayedTargetValidation]
-	#[NoDiscard] // Does nothing here
-	public $val;
-
 	public string $hooked {
 		#[DelayedTargetValidation]
 		#[NoDiscard] // Does nothing here
@@ -88,7 +84,7 @@ array(2) {
     string(22) "AllowDynamicProperties"
   }
 }
-Error: Cannot apply #[AllowDynamicProperties] to trait DemoTrait
+Error: Cannot apply #[\AllowDynamicProperties] to trait DemoTrait
 ********************
 Interface [ <user> interface DemoInterface ] {
   @@ %s %d-%d
@@ -121,7 +117,7 @@ array(2) {
     string(22) "AllowDynamicProperties"
   }
 }
-Error: Cannot apply #[AllowDynamicProperties] to interface DemoInterface
+Error: Cannot apply #[\AllowDynamicProperties] to interface DemoInterface
 ********************
 Class [ <user> readonly class DemoReadonly ] {
   @@ %s %d-%d
@@ -154,7 +150,7 @@ array(2) {
     string(22) "AllowDynamicProperties"
   }
 }
-Error: Cannot apply #[AllowDynamicProperties] to readonly class DemoReadonly
+Error: Cannot apply #[\AllowDynamicProperties] to readonly class DemoReadonly
 ********************
 Enum [ <user> enum DemoEnum implements UnitEnum ] {
   @@ %s %d-%d
@@ -194,7 +190,7 @@ array(2) {
     string(22) "AllowDynamicProperties"
   }
 }
-Error: Cannot apply #[AllowDynamicProperties] to enum DemoEnum
+Error: Cannot apply #[\AllowDynamicProperties] to enum DemoEnum
 ********************
 Method [ <user> public method $hooked::get ] {
   @@ %s %d - %d

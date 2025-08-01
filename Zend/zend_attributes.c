@@ -74,9 +74,9 @@ static void validate_allow_dynamic_properties(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	if (scope == NULL) {
-		// Only reachable when validator is run but the attribute isn't applied
-		// to a class; in the case of delayed target validation reflection will
-		// complain about the target before running the validator;
+		/* Only reachable when validator is run but the attribute isn't applied
+		 * to a class; in the case of delayed target validation reflection will
+		 * complain about the target before running the validator. */
 		ZEND_ASSERT(target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION);
 		return;
 	}
@@ -233,8 +233,7 @@ static void validate_nodiscard(
 {
 	/* There isn't an easy way to identify the *method* that the attribute is
 	 * applied to in a manner that works during both compilation (normal
-	 * validation) and runtime (delayed validation). So, handle them separately.
-	 */
+	 * validation) and runtime (delayed validation). So, handle them separately. */
 	if (CG(in_compilation)) {
 		ZEND_ASSERT((target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) == 0);
 		zend_op_array *op_array = CG(active_op_array);

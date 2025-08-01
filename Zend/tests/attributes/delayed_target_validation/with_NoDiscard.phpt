@@ -57,7 +57,7 @@ $v = $d->printVal();
 var_dump($d->val);
 $d->hooked = "foo";
 var_dump($d->hooked);
-// NODiscard does not support property hooks, this should not complain
+// NoDiscard does not support property hooks, this should not complain
 $d->hooked;
 var_dump(DemoClass::CLASS_CONST);
 demoFn();

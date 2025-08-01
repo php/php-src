@@ -88,7 +88,7 @@ Class [ <user> <iterateable> class Demo ] {
 
   - Properties [3] {
     Property [ public string $v1 ]
-    Property [ public string $v2 ]
+    Property [ public string $v2 { get; set; } ]
     Property [ public string $v3 ]
   }
 
