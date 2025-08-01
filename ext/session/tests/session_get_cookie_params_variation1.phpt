@@ -9,6 +9,7 @@ session.cookie_lifetime=0
 session.cookie_path="/"
 session.cookie_domain=""
 session.cookie_secure=0
+session.cookie_partitioned=0
 session.cookie_httponly=0
 session.cookie_samesite=""
 --FILE--
@@ -31,13 +32,15 @@ ini_set("session.cookie_httponly", TRUE);
 var_dump(session_get_cookie_params());
 ini_set("session.cookie_samesite", "foo");
 var_dump(session_get_cookie_params());
+ini_set("session.cookie_partitioned", TRUE);
+var_dump(session_get_cookie_params());
 
 echo "Done";
 ob_end_flush();
 ?>
 --EXPECT--
 *** Testing session_get_cookie_params() : variation ***
-array(6) {
+array(7) {
   ["lifetime"]=>
   int(0)
   ["path"]=>
@@ -46,12 +49,14 @@ array(6) {
   string(0) ""
   ["secure"]=>
   bool(false)
+  ["partitioned"]=>
+  bool(false)
   ["httponly"]=>
   bool(false)
   ["samesite"]=>
   string(0) ""
 }
-array(6) {
+array(7) {
   ["lifetime"]=>
   int(3600)
   ["path"]=>
@@ -60,12 +65,14 @@ array(6) {
   string(0) ""
   ["secure"]=>
   bool(false)
+  ["partitioned"]=>
+  bool(false)
   ["httponly"]=>
   bool(false)
   ["samesite"]=>
   string(0) ""
 }
-array(6) {
+array(7) {
   ["lifetime"]=>
   int(3600)
   ["path"]=>
@@ -74,26 +81,14 @@ array(6) {
   string(0) ""
   ["secure"]=>
   bool(false)
-  ["httponly"]=>
-  bool(false)
-  ["samesite"]=>
-  string(0) ""
-}
-array(6) {
-  ["lifetime"]=>
-  int(3600)
-  ["path"]=>
-  string(5) "/path"
-  ["domain"]=>
-  string(3) "foo"
-  ["secure"]=>
+  ["partitioned"]=>
   bool(false)
   ["httponly"]=>
   bool(false)
   ["samesite"]=>
   string(0) ""
 }
-array(6) {
+array(7) {
   ["lifetime"]=>
   int(3600)
   ["path"]=>
@@ -101,13 +96,15 @@ array(6) {
   ["domain"]=>
   string(3) "foo"
   ["secure"]=>
-  bool(true)
+  bool(false)
+  ["partitioned"]=>
+  bool(false)
   ["httponly"]=>
   bool(false)
   ["samesite"]=>
   string(0) ""
 }
-array(6) {
+array(7) {
   ["lifetime"]=>
   int(3600)
   ["path"]=>
@@ -116,12 +113,14 @@ array(6) {
   string(3) "foo"
   ["secure"]=>
   bool(true)
+  ["partitioned"]=>
+  bool(false)
   ["httponly"]=>
-  bool(true)
+  bool(false)
   ["samesite"]=>
   string(0) ""
 }
-array(6) {
+array(7) {
   ["lifetime"]=>
   int(3600)
   ["path"]=>
@@ -129,6 +128,40 @@ array(6) {
   ["domain"]=>
   string(3) "foo"
   ["secure"]=>
+  bool(true)
+  ["partitioned"]=>
+  bool(false)
+  ["httponly"]=>
+  bool(true)
+  ["samesite"]=>
+  string(0) ""
+}
+array(7) {
+  ["lifetime"]=>
+  int(3600)
+  ["path"]=>
+  string(5) "/path"
+  ["domain"]=>
+  string(3) "foo"
+  ["secure"]=>
+  bool(true)
+  ["partitioned"]=>
+  bool(false)
+  ["httponly"]=>
+  bool(true)
+  ["samesite"]=>
+  string(3) "foo"
+}
+array(7) {
+  ["lifetime"]=>
+  int(3600)
+  ["path"]=>
+  string(5) "/path"
+  ["domain"]=>
+  string(3) "foo"
+  ["secure"]=>
+  bool(true)
+  ["partitioned"]=>
   bool(true)
   ["httponly"]=>
   bool(true)
