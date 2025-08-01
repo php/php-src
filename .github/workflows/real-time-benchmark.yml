@@ -11,6 +11,15 @@ on:
       jit:
         description: 'Whether JIT is benchmarked'
         required: false
+        default: "0"
+        type: choice
+        options:
+          - "0"
+          - "1"
+      instruction_count:
+        description: 'Whether Valgrind instruction count should be measured'
+        required: true
+        default: "0"
         type: choice
         options:
           - "0"
@@ -50,6 +59,7 @@ jobs:
       OPCACHE: ${{ inputs.opcache || '1' }}
       BASELINE_OPCACHE: ${{ inputs.baseline_opcache || '2' }}
       JIT: ${{ inputs.jit || '1' }}
+      INSTRUCTION_COUNT: ${{ inputs.instruction_count || '0' }}
       YEAR: ""
     steps:
       - name: Setup benchmark environment
@@ -130,6 +140,7 @@ jobs:
           cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           ESCAPED_DOCKER_REGISTRY=$(printf '%s\n' "${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}" | sed -e 's/[\/&]/\\&/g')
           sed -i "s/INFRA_DOCKER_REGISTRY=public.ecr.aws\/abcdefgh/INFRA_DOCKER_REGISTRY=$ESCAPED_DOCKER_REGISTRY/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s/INFRA_MEASURE_INSTRUCTION_COUNT=0/INFRA_MEASURE_INSTRUCTION_COUNT=${{ env.INSTRUCTION_COUNT }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           cp ./php-version-benchmarks/build/infrastructure/config/aws.tfvars.dist ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's/access_key = ""/access_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_ACCESS_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
           sed -i 's/secret_key = ""/secret_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_SECRET_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
