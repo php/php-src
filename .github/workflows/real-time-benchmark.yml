@@ -192,7 +192,7 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=$LAST_RESULT_SHA
 
-            PHP_OPCACHE=1
+            PHP_OPCACHE=2
             PHP_JIT=0
           EOF
       - name: Setup PHP config - benchmarked PHP version
@@ -270,7 +270,7 @@ jobs:
         run: |
           cd ./php-version-benchmarks/tmp/php_${{ env.ID }}
           NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)
-          gh pr comment ${{ inputs.pull_request }} --body-file "${NEWEST_RESULT_DIRECTORY}result.md" --repo ${{ env.REPOSITORY }}
+          gh pr comment ${{ inputs.pull_request }} --body-file "${NEWEST_RESULT_DIRECTORY}result.md" --repo ${{ github.repository }}
       - name: Cleanup
         if: always()
         run: |
