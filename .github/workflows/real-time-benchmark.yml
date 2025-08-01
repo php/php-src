@@ -45,6 +45,9 @@ on:
 permissions:
   contents: read
   pull-requests: write
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 jobs:
   REAL_TIME_BENCHMARK:
     name: REAL_TIME_BENCHMARK
