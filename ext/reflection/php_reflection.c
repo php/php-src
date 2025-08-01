@@ -1037,6 +1037,9 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		if (prop->flags & ZEND_ACC_READONLY) {
 			smart_str_appends(str, "readonly ");
 		}
+		if (prop->flags & ZEND_ACC_VIRTUAL) {
+			smart_str_appends(str, "virtual ");
+		}
 		if (ZEND_TYPE_IS_SET(prop->type)) {
 			zend_string *type_str = zend_type_to_string(prop->type);
 			smart_str_append(str, type_str);
@@ -1053,6 +1056,26 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		if (default_value && !Z_ISUNDEF_P(default_value)) {
 			smart_str_appends(str, " = ");
 			format_default_value(str, default_value);
+		}
+		if (prop->hooks != NULL) {
+			smart_str_appends(str, " {");
+			const zend_function *get_hooked = prop->hooks[ZEND_PROPERTY_HOOK_GET];
+			if (get_hooked != NULL) {
+				if (get_hooked->common.fn_flags & ZEND_ACC_FINAL) {
+					smart_str_appends(str, " final get;");
+				} else {
+					smart_str_appends(str, " get;");
+				}
+			}
+			const zend_function *set_hooked = prop->hooks[ZEND_PROPERTY_HOOK_SET];
+			if (set_hooked != NULL) {
+				if (set_hooked->common.fn_flags & ZEND_ACC_FINAL) {
+					smart_str_appends(str, " final set;");
+				} else {
+					smart_str_appends(str, " set;");
+				}
+			}
+			smart_str_appends(str, " }");
 		}
 	}
 
