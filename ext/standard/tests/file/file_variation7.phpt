@@ -62,20 +62,17 @@ array(5) {
 }
 
 file() with FILE_SKIP_EMPTY_LINES:
-array(5) {
+array(4) {
   [0]=>
   string(7) "Line 1
 "
   [1]=>
-  string(1) "
-"
-  [2]=>
   string(2) " 
 "
-  [3]=>
+  [2]=>
   string(3) "  
 "
-  [4]=>
+  [3]=>
   string(7) "\Line 3"
 }
 
