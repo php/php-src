@@ -72,6 +72,7 @@
 #define SUCCESSFULLY_REATTACHED 4
 #define ALLOC_FAIL_MAPPING      8
 #define ALLOC_FALLBACK          9
+#define NO_SHM_BACKEND          10
 
 typedef struct _zend_shared_segment {
     size_t  size;
