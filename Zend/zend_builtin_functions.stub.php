@@ -25,6 +25,9 @@ function func_get_arg(int $position): mixed {}
 /** @return array<int, mixed> */
 function func_get_args(): array {}
 
+/** @return array<string, mixed> */
+function func_get_named_args(): array {}
+
 function strlen(string $string): int {}
 
 /** @compile-time-eval */

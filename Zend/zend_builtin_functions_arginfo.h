@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9b49f527064695c812cd204d9efc63c13681d942 */
+ * Stub hash: 43f9081b5af96f86687b58c47e308c4828f8c644 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clone, 0, 1, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
@@ -24,6 +24,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_func_get_args, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_func_get_named_args arginfo_func_get_args
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strlen, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -254,6 +256,7 @@ ZEND_FUNCTION(zend_version);
 ZEND_FUNCTION(func_num_args);
 ZEND_FUNCTION(func_get_arg);
 ZEND_FUNCTION(func_get_args);
+ZEND_FUNCTION(func_get_named_args);
 ZEND_FUNCTION(strlen);
 ZEND_FUNCTION(strcmp);
 ZEND_FUNCTION(strncmp);
@@ -319,6 +322,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(func_num_args, arginfo_func_num_args)
 	ZEND_FE(func_get_arg, arginfo_func_get_arg)
 	ZEND_FE(func_get_args, arginfo_func_get_args)
+	ZEND_FE(func_get_named_args, arginfo_func_get_named_args)
 	ZEND_FE(strlen, arginfo_strlen)
 	ZEND_RAW_FENTRY("strcmp", zif_strcmp, arginfo_strcmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("strncmp", zif_strncmp, arginfo_strncmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
