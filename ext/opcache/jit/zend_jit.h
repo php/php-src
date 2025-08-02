@@ -145,8 +145,9 @@ typedef struct _zend_jit_globals {
 } zend_jit_globals;
 
 #ifdef ZTS
-# define JIT_G(v) ZEND_TSRMG(jit_globals_id, zend_jit_globals *, v)
+# define JIT_G(v) ZEND_TSRMG_FAST(jit_globals_offset, zend_jit_globals *, v)
 extern int jit_globals_id;
+extern size_t jit_globals_offset;
 #else
 # define JIT_G(v) (jit_globals.v)
 extern zend_jit_globals jit_globals;
