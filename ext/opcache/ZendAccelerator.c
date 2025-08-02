@@ -3241,6 +3241,12 @@ static zend_result accel_post_startup(void)
 				accel_startup_ok = false;
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
+			case NO_SHM_BACKEND:
+				zend_accel_error(ACCEL_LOG_INFO, "Opcode Caching is disabled: No available SHM backend. Set opcache.enable=0 to hide this message.");
+				zps_startup_failure("No available SHM backend", NULL, accelerator_remove_cb);
+				/* Do not abort PHP startup */
+				return SUCCESS;
+
 			case SUCCESSFULLY_REATTACHED:
 #ifdef HAVE_JIT
 				reattached = true;
