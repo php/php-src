@@ -7,7 +7,7 @@
  * @strict-properties
  */
 final class IntlNumberRangeFormatter {
-
+#if U_ICU_VERSION_MAJOR_NUM >= 63
     /** @cvalue UNUM_RANGE_COLLAPSE_AUTO */
     public const int COLLAPSE_AUTO = UNKNOWN;
 
@@ -31,10 +31,31 @@ final class IntlNumberRangeFormatter {
 
     /** @cvalue UNUM_IDENTITY_FALLBACK_RANGE */
     public const int IDENTITY_FALLBACK_RANGE = UNKNOWN;
+#else
+    public const int COLLAPSE_AUTO = 0;
+
+    public const int COLLAPSE_NONE = 1;
+
+    public const int COLLAPSE_UNIT = 2;
+
+    public const int COLLAPSE_ALL = 3;
+    
+    public const int IDENTITY_FALLBACK_SINGLE_VALUE = 0;
+
+    public const int IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE = 1;
+
+    public const int IDENTITY_FALLBACK_APPROXIMATELY = 2;
+
+    public const int IDENTITY_FALLBACK_RANGE = 3;
+#endif
 
     private function __construct() {}
 
     public static function createFromSkeleton(string $skeleton, string $locale, int $collapse, int $identityFallback): IntlNumberRangeFormatter {}
 
     public function format(float|int $start, float|int $end): string {}
+
+    public function getErrorCode(): int {}
+
+    public function getErrorMessage(): string {}
 }
