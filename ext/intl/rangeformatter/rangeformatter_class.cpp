@@ -120,7 +120,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     UnlocalizedNumberFormatter nf = NumberFormatter::forSkeleton(skeleton_ustr, status);
 
     if (U_FAILURE(status)) {
-        intl_error_set(NULL, status, "Failed to create the number skeleton", 0);
+        intl_error_set(NULL, status, "Failed to create the number skeleton");
         zend_throw_exception(IntlException_ce_ptr, "Failed to create the number skeleton", 0);
         RETURN_THROWS();
     }
@@ -161,7 +161,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     UnicodeString result = RANGEFORMATTER_OBJECT(obj)->formatFormattableRange(start_formattable, end_formattable, error).toString(error);
 
     if (U_FAILURE(error)) {
-        intl_error_set(NULL, error, "Failed to format number range", 0);
+        intl_error_set(NULL, error, "Failed to format number range");
         zend_throw_exception(IntlException_ce_ptr, "Failed to format number range", 0);
         RETURN_THROWS();
     }
@@ -169,7 +169,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
    zend_string *ret = intl_charFromString(result, &error);
 
    if (U_FAILURE(error)) {
-        intl_error_set(NULL, error, "Failed to convert result to UTF-8", 0);
+        intl_error_set(NULL, error, "Failed to convert result to UTF-8");
         zend_throw_exception(IntlException_ce_ptr, "Failed to convert result to UTF-8", 0);
         RETURN_THROWS();
    }
