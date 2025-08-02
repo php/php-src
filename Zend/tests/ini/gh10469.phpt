@@ -25,5 +25,5 @@ var_dump(get_open_basedir());
 @rmdir(__DIR__ . '/gh10469_tmp');
 ?>
 --EXPECTF--
-string(%d) "%stests%c.%e..%c.%e..%e%c.%ea%e%c.%ea"
-string(%d) "%stests%c%stests%c%stests%e%c%stests%egh10469_tmp%ea"
+string(%d) "%stests%cini%c.%e..%c.%e..%e%c.%ea%e%c.%ea"
+string(%d) "%stests%cini%c%stests%cini%c%stests%cini%e%c%stests%cini%egh10469_tmp%ea%e%c%stests%cini%egh10469_tmp%ea"
