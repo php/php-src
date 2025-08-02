@@ -121,26 +121,36 @@ ZEND_ATTRIBUTE_CONST PHPAPI const char *php_build_provider(void)
 
 PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
+	zend_string *os = php_get_uname('s');
+	zend_string *os_version = php_get_uname('r');
+
 	smart_string version_info = {0};
 	smart_string_append_printf(&version_info,
-		"PHP %s (%s) (built: %s) (%s)\n",
+		"PHP %s (%s) (built: %s) (%s) (%s %s%s)\n",
 		PHP_VERSION, sapi_module->name, php_build_date,
 #ifdef ZTS
 		"ZTS"
 #else
 		"NTS"
 #endif
-#ifdef PHP_BUILD_COMPILER
-		" " PHP_BUILD_COMPILER
-#endif
-#ifdef PHP_BUILD_ARCH
-		" " PHP_BUILD_ARCH
-#endif
 #if ZEND_DEBUG
 		" DEBUG"
 #endif
 #ifdef HAVE_GCOV
 		" GCOV"
+#endif
+#ifdef PHP_BUILD_ARCH
+		" " PHP_BUILD_ARCH
+#else
+		" Unknown arch"
+#endif
+		,
+		ZSTR_VAL(os),
+		ZSTR_VAL(os_version),
+#ifdef PHP_BUILD_COMPILER
+		" " PHP_BUILD_COMPILER
+#else
+		" Unknown compiler"
 #endif
 	);
 	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
@@ -149,6 +159,9 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 	}
 	smart_string_appends(&version_info, get_zend_version());
 	smart_string_0(&version_info);
+
+	zend_string_free(os);
+	zend_string_free(os_version);
 
 	return version_info.c;
 }
