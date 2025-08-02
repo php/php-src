@@ -19,7 +19,7 @@ class A {
 }
 
 $property = new MyReflectionProperty('A', 'protected');
-$property->setAccessible(true);
+$property->isStatic();
 
 ?>
 --EXPECTF--
@@ -28,7 +28,7 @@ $property->setAccessible(true);
   <!-- init ReflectionProperty::__construct() -->
   <ReflectionProperty::__construct>
   </ReflectionProperty::__construct:NULL>
-  <!-- init ReflectionProperty::setAccessible() -->
-  <ReflectionProperty::setAccessible>
-  </ReflectionProperty::setAccessible:NULL>
+  <!-- init ReflectionProperty::isStatic() -->
+  <ReflectionProperty::isStatic>
+  </ReflectionProperty::isStatic:false>
 </file '%s'>
