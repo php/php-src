@@ -107,8 +107,8 @@ retry:
 		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 			estr = php_socket_strerror(err, NULL, 0);
 			php_error_docref(NULL, E_NOTICE,
-				"Send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
-				(zend_long)count, err, estr);
+				"Send of %zu bytes failed with errno=%d %s",
+				count, err, estr);
 			efree(estr);
 		}
 	}
@@ -857,7 +857,6 @@ out:
 static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t *sock,
 		php_stream_xport_param *xparam STREAMS_DC)
 {
-	int clisock;
 	bool nodelay = 0;
 	zval *tmpzval = NULL;
 
@@ -869,7 +868,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		nodelay = 1;
 	}
 
-	clisock = php_network_accept_incoming(sock->socket,
+	php_socket_t clisock = php_network_accept_incoming(sock->socket,
 		xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 		xparam->want_addr ? &xparam->outputs.addr : NULL,
 		xparam->want_addr ? &xparam->outputs.addrlen : NULL,
