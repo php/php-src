@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2547f63fd024fd5f4fecc574bbcff1301d1d36e5 */
+ * Stub hash: ce02f0eeb9191e7c92cb8a5e5fcae20fceb0b47c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -837,7 +837,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_error, arginfo_mysqli_error)
 	ZEND_FE(mysqli_error_list, arginfo_mysqli_error_list)
 	ZEND_FE(mysqli_stmt_execute, arginfo_mysqli_stmt_execute)
-	ZEND_RAW_FENTRY("mysqli_execute", zif_mysqli_stmt_execute, arginfo_mysqli_execute, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("mysqli_execute", zif_mysqli_stmt_execute, arginfo_mysqli_execute, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mysqli_execute_query, arginfo_mysqli_execute_query)
 	ZEND_FE(mysqli_fetch_field, arginfo_mysqli_fetch_field)
 	ZEND_FE(mysqli_fetch_fields, arginfo_mysqli_fetch_fields)
@@ -1149,6 +1149,13 @@ static void register_mysqli_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_change_user", sizeof("mysqli_change_user") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_connect", sizeof("mysqli_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_mysqli_execute_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_execute", sizeof("mysqli_execute") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_execute_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_mysqli_execute_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_mysqli_execute_0_arg1_str = zend_string_init("use mysqli_stmt_execute() instead", strlen("use mysqli_stmt_execute() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_execute_0->args[1].value, attribute_Deprecated_func_mysqli_execute_0_arg1_str);
+	attribute_Deprecated_func_mysqli_execute_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mysqli_kill_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_kill", sizeof("mysqli_kill") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_kill_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
