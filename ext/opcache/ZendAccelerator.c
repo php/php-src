@@ -2841,39 +2841,10 @@ static void zps_startup_failure(const char *reason, const char *api_reason, int 
 	zend_llist_del_element(&zend_extensions, NULL, (int (*)(void *, void *))cb);
 }
 
-static inline zend_result accel_find_sapi(void)
+static inline bool accel_sapi_is_cli(void)
 {
-	static const char *supported_sapis[] = {
-		"apache",
-		"fastcgi",
-		"cli-server",
-		"cgi-fcgi",
-		"fpm-fcgi",
-		"fpmi-fcgi",
-		"apache2handler",
-		"litespeed",
-		"uwsgi",
-		"fuzzer",
-		"frankenphp",
-		"ngx-php",
-		NULL
-	};
-	const char **sapi_name;
-
-	if (sapi_module.name) {
-		for (sapi_name = supported_sapis; *sapi_name; sapi_name++) {
-			if (strcmp(sapi_module.name, *sapi_name) == 0) {
-				return SUCCESS;
-			}
-		}
-		if (ZCG(accel_directives).enable_cli && (
-		    strcmp(sapi_module.name, "cli") == 0
-		  || strcmp(sapi_module.name, "phpdbg") == 0)) {
-			return SUCCESS;
-		}
-	}
-
-	return FAILURE;
+	return strcmp(sapi_module.name, "cli") == 0
+		|| strcmp(sapi_module.name, "phpdbg") == 0;
 }
 
 static zend_result zend_accel_init_shm(void)
@@ -3196,15 +3167,9 @@ static int accel_startup(zend_extension *extension)
 	}
 #endif
 
-	/* no supported SAPI found - disable acceleration and stop initialization */
-	if (accel_find_sapi() == FAILURE) {
+	if (!ZCG(accel_directives).enable_cli && accel_sapi_is_cli()) {
 		accel_startup_ok = false;
-		if (!ZCG(accel_directives).enable_cli &&
-		    strcmp(sapi_module.name, "cli") == 0) {
-			zps_startup_failure("Opcode Caching is disabled for CLI", NULL, accelerator_remove_cb);
-		} else {
-			zps_startup_failure("Opcode Caching is only supported in Apache, FPM, FastCGI, FrankenPHP, LiteSpeed and uWSGI SAPIs", NULL, accelerator_remove_cb);
-		}
+		zps_startup_failure("Opcode Caching is disabled for CLI", NULL, accelerator_remove_cb);
 		return SUCCESS;
 	}
 
