@@ -266,7 +266,7 @@ PHP 8.5 UPGRADE NOTES
 
 - Standard:
   . getimagesize() now supports SVG images when ext-libxml is also loaded.
-    Similarly, image_type_to_extension() and image_type_to_extension()
+    Similarly, image_type_to_extension() and image_type_to_mime_type()
     now also handle IMAGETYPE_SVG.
   . The array returned by getimagesize() now has two additional entries:
     "width_unit" and "height_unit" to indicate in which units the dimensions
@@ -348,7 +348,7 @@ PHP 8.5 UPGRADE NOTES
 
 - OpenSSL:
   . openssl_public_encrypt() and openssl_private_decrypt() have new parameter
-    $digest_algo that allows specifying hash digest algorith for OEAP padding.
+    $digest_algo that allows specifying hash digest algorithm for OEAP padding.
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
@@ -396,14 +396,14 @@ PHP 8.5 UPGRADE NOTES
     are enum cases rather than normal class constants.
   . The output of ReflectionProperty::__toString() for properties with
     hooks has changed to indicate what hooks the property has, whether those
-    hooks are final, and whether the property is virtual. This also affects 
+    hooks are final, and whether the property is virtual. This also affects
     the output of ReflectionClass::__toString() when a class contains hooked
     properties.
 
 - Session:
   . session_start is stricter in regard to the option argument.
     It throws a ValueError if the whole is not a hashmap or
-    a TypeError if read_on_close value is not a valid type
+    a TypeError if read_and_close value is not a valid type
     compatible with int.
 
 - SNMP:

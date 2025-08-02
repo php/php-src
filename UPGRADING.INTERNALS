@@ -96,7 +96,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     that appropriate build rules are created.
 
 - Unix build system changes
-  . libdir is properly set when --libdir (ex: /usr/lib64) and --with-libdir (ex lib64)
+  . libdir is properly set when --libdir (ex: /usr/lib64) and --with-libdir (ex: lib64)
     configure options are used to ${libdir}/php (ex: /usr/lib64/php)
   . PHP_ODBC_CFLAGS, PHP_ODBC_LFLAGS, PHP_ODBC_LIBS, PHP_ODBC_TYPE preprocessor
     macros defined by ext/odbc are now defined in php_config.h instead of the
