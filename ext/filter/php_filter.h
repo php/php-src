@@ -53,27 +53,27 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define IF_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(filter, v)
 
 #define PHP_INPUT_FILTER_PARAM_DECL zval *value, zend_long flags, zval *option_array, char *charset
-void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_int(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_float(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL);
 
-void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL);
-void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_string(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_email(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_url(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL);
 
-void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL);
+zend_result php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL);
 
 #endif	/* FILTER_H */
