@@ -63,5 +63,8 @@ MySQLPDOTest::skip();
 
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs in %s on line %d
+
+Deprecated: Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs in %s on line %d
 done!
