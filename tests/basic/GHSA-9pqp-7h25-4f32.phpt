@@ -5,9 +5,6 @@ GHSA-9pqp-7h25-4f32
 if (!getenv('TEST_PHP_CGI_EXECUTABLE')) {
     die("skip php-cgi not available");
 }
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die("skip not for Windows in CI - probably resource issue");
-}
 ?>
 --FILE--
 <?php
@@ -21,7 +18,6 @@ function test($boundaryLen) {
         getenv('TEST_PHP_CGI_EXECUTABLE'),
         '-C',
         '-n',
-        __DIR__ . '/GHSA-9pqp-7h25-4f32.inc',
     ];
 
     $boundary = str_repeat('A', $boundaryLen);
@@ -42,7 +38,7 @@ function test($boundaryLen) {
     ]);
 
     $spec = [
-        0 => ['pipe', 'r'],
+        0 => [PHP_OS_FAMILY === "Windows" ? 'socket' : 'pipe', 'r'],
         1 => STDOUT,
         2 => STDOUT,
     ];
