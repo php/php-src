@@ -6,7 +6,7 @@ zlib
 --SKIPIF--
 <?php
 
-exec('lsof -p ' . getmypid(), $out, $status);
+exec('lsof -p ' . getmypid() . ' 2> /dev/null', $out, $status);
 if ($status !== 0) {
     die("skip lsof(8) not available");
 }
