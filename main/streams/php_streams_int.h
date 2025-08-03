@@ -14,7 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* internal header; not supposed to be installed; FIXME but unfortunately is */
+/* internal header; not supposed to be installed */
 
 #if ZEND_DEBUG
 
