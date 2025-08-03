@@ -17,6 +17,7 @@
 #endif
 
 #include "../intl_cppshims.h"
+#include <memory>
 
 #include <unicode/locid.h>
 #include <unicode/calendar.h>
