@@ -2234,9 +2234,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	   load zend extensions and register php function extensions
 	   to be loaded later */
 	zend_stream_init();
-	if (php_init_config() == FAILURE) {
-		return FAILURE;
-	}
+	php_init_config();
 	zend_stream_shutdown();
 
 	/* Register PHP core ini entries */
