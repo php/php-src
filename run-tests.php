@@ -275,6 +275,7 @@ function main(): void
         'fatal_error_backtraces=Off',
         'display_errors=1',
         'display_startup_errors=1',
+        'display_error_function_args=0',
         'log_errors=0',
         'html_errors=0',
         'track_errors=0',

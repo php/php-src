@@ -61,6 +61,7 @@ struct _php_core_globals {
 
 	uint8_t display_errors;
 	bool display_startup_errors;
+	bool display_error_function_args;
 	bool log_errors;
 	bool ignore_repeated_errors;
 	bool ignore_repeated_source;

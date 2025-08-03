@@ -572,6 +572,31 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 }
 /* }}} */
 
+static void _build_trace_args_list(zval *tmp, smart_str *str) /* {{{ */
+{
+	if (EXPECTED(Z_TYPE_P(tmp) == IS_ARRAY)) {
+		size_t last_len = ZSTR_LEN(str->s);
+		zend_string *name;
+		zval *arg;
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
+			if (name) {
+				smart_str_append(str, name);
+				smart_str_appends(str, ": ");
+			}
+			_build_trace_args(arg, str);
+		} ZEND_HASH_FOREACH_END();
+
+		if (last_len != ZSTR_LEN(str->s)) {
+			ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
+		}
+	} else {
+		/* only happens w/ reflection abuse (Zend/tests/bug63762.phpt) */
+		zend_error(E_WARNING, "args element is not an array");
+	}
+}
+/* }}} */
+
 static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t num) /* {{{ */
 {
 	zval *file, *tmp;
@@ -609,27 +634,48 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 	smart_str_appendc(str, '(');
 	tmp = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
 	if (tmp) {
-		if (EXPECTED(Z_TYPE_P(tmp) == IS_ARRAY)) {
-			size_t last_len = ZSTR_LEN(str->s);
-			zend_string *name;
-			zval *arg;
-
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
-				if (name) {
-					smart_str_append(str, name);
-					smart_str_appends(str, ": ");
-				}
-				_build_trace_args(arg, str);
-			} ZEND_HASH_FOREACH_END();
-
-			if (last_len != ZSTR_LEN(str->s)) {
-				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
-			}
-		} else {
-			zend_error(E_WARNING, "args element is not an array");
-		}
+		_build_trace_args_list(tmp, str);
 	}
 	smart_str_appends(str, ")\n");
+}
+/* }}} */
+
+/* {{{ Gets the function arguments printed as a string from a backtrace frame. */
+ZEND_API zend_string *zend_trace_function_args_to_string(const HashTable *frame) {
+	zval *tmp;
+	smart_str str = {0};
+	/* init because ASan will complain */
+	smart_str_appends(&str, "");
+
+	tmp = zend_hash_find_known_hash(frame, ZSTR_KNOWN(ZEND_STR_ARGS));
+	if (tmp) {
+		_build_trace_args_list(tmp, &str);
+	}
+
+	smart_str_0(&str);
+	return str.s ? str.s : ZSTR_EMPTY_ALLOC();
+}
+/* }}} */
+
+/* {{{ Gets the currently executing function's arguments as a string. Used by php_verror. */
+ZEND_API zend_string *zend_trace_current_function_args_string(void) {
+	zend_string *dynamic_params = NULL;
+	/* get a backtrace to snarf function args */
+	zval backtrace, *first_frame;
+	zend_fetch_debug_backtrace(&backtrace, /* skip_last */ 0, /* options */ 0, /* limit */ 1);
+	/* can fail esp if low memory condition */
+	if (Z_TYPE(backtrace) != IS_ARRAY) {
+		return NULL; /* don't need to free */
+	}
+	first_frame = zend_hash_index_find(Z_ARRVAL(backtrace), 0);
+	if (!first_frame) {
+		goto free_backtrace;
+	}
+	dynamic_params = zend_trace_function_args_to_string(Z_ARRVAL_P(first_frame));
+free_backtrace:
+	zval_ptr_dtor(&backtrace);
+	/* free the string after we use it */
+	return dynamic_params;
 }
 /* }}} */
 
