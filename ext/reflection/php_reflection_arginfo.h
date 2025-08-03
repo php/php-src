@@ -86,6 +86,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunctionAbstract_hasParameter, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionFunctionAbstract_getParameter, 0, 1, ReflectionParameter, 0)
+	ZEND_ARG_TYPE_MASK(0, param, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, function, Closure, MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
@@ -756,6 +764,8 @@ ZEND_METHOD(ReflectionFunctionAbstract, getReturnType);
 ZEND_METHOD(ReflectionFunctionAbstract, hasTentativeReturnType);
 ZEND_METHOD(ReflectionFunctionAbstract, getTentativeReturnType);
 ZEND_METHOD(ReflectionFunctionAbstract, getAttributes);
+ZEND_METHOD(ReflectionFunctionAbstract, hasParameter);
+ZEND_METHOD(ReflectionFunctionAbstract, getParameter);
 ZEND_METHOD(ReflectionFunction, __construct);
 ZEND_METHOD(ReflectionFunction, __toString);
 ZEND_METHOD(ReflectionFunction, isAnonymous);
@@ -1032,6 +1042,8 @@ static const zend_function_entry class_ReflectionFunctionAbstract_methods[] = {
 	ZEND_ME(ReflectionFunctionAbstract, hasTentativeReturnType, arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getTentativeReturnType, arginfo_class_ReflectionFunctionAbstract_getTentativeReturnType, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, getAttributes, arginfo_class_ReflectionFunctionAbstract_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, hasParameter, arginfo_class_ReflectionFunctionAbstract_hasParameter, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionFunctionAbstract, getParameter, arginfo_class_ReflectionFunctionAbstract_getParameter, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
