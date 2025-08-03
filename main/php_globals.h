@@ -154,6 +154,7 @@ struct _php_core_globals {
 	char *mail_log;
 	bool mail_x_header;
 	bool mail_mixed_lf_and_crlf;
+	char *mail_cr_lf_mode;
 
 	bool in_error_log;
 
