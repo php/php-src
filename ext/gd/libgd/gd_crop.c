@@ -92,7 +92,7 @@ gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode)
 
 	switch (mode) {
 		case GD_CROP_TRANSPARENT:
-			color = gdImageGetTransparent(im);
+			color = gdImageGetTransparent(im) & 0x7f000000;
 			break;
 
 		case GD_CROP_BLACK:
