@@ -1577,24 +1577,16 @@ try_again:
 PHP_FUNCTION(set_time_limit)
 {
 	zend_long new_timeout;
-	char *new_timeout_str;
-	size_t new_timeout_strlen;
-	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &new_timeout) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
-
-	key = ZSTR_INIT_LITERAL("max_execution_time", 0);
-	if (zend_alter_ini_entry_chars_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
-	zend_string_release_ex(key, 0);
-	efree(new_timeout_str);
+	zend_string *time = zend_long_to_str(new_timeout);
+	zend_string *key = ZSTR_INIT_LITERAL("max_execution_time", false);
+	RETVAL_BOOL(zend_alter_ini_entry_ex(key, time, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, false) == SUCCESS);
+	zend_string_release_ex(key, false);
+	zend_string_release_ex(time, false);
 }
 /* }}} */
 
