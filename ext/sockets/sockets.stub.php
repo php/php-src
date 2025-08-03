@@ -33,6 +33,20 @@ const AF_DIVERT = UNKNOWN;
  */
 const AF_PACKET = UNKNOWN;
 #endif
+#ifdef CONNECT_DATA_IDEMPOTENT
+/**
+ * @var int
+ * @cvalue CONNECT_DATA_IDEMPOTENT
+ */
+const CONNECT_DATA_IDEMPOTENT = UNKNOWN;
+#endif
+#ifdef CONNECT_RESUME_ON_READ_WRITE
+/**
+ * @var int
+ * @cvalue CONNECT_RESUME_ON_READ_WRITE
+ */
+const CONNECT_RESUME_ON_READ_WRITE = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SOCK_STREAM
@@ -2189,4 +2203,9 @@ function socket_wsaprotocol_info_export(Socket $socket, int $process_id): string
 function socket_wsaprotocol_info_import(string $info_id): Socket|false {}
 
 function socket_wsaprotocol_info_release(string $info_id): bool {}
+#endif
+
+#ifdef HAVE_CONNECTX
+function socket_connectx(Socket $socket, ?array $buffers = null, ?int $flags = 0): bool {} 
+function socket_disconnectx(Socket $socket): bool {}
 #endif
