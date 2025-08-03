@@ -163,6 +163,23 @@ EOF
 
 sudo service slapd restart
 
+# Debug: Test TLS_PROTOCOL_MAX setting like the failing PHP test
+echo "=== TLS DEBUG: Testing TLS_PROTOCOL_MAX 3.2 ==="
+TEMP_LDAP_CONF=$(mktemp)
+echo 'TLS_PROTOCOL_MAX 3.2' > "$TEMP_LDAP_CONF"
+
+echo "Testing START_TLS with TLS_PROTOCOL_MAX 3.2 (should fail since server min is 3.3):"
+LDAPCONF="$TEMP_LDAP_CONF" ldapsearch -H ldap://localhost -D cn=Manager,dc=my-domain,dc=com -w secret -s base -b dc=my-domain,dc=com -Z 'objectclass=*' >/dev/null 2>&1
+debug_rt=$?
+if [ $debug_rt -eq 0 ]; then
+	echo "TLS_PROTOCOL_MAX test: UNEXPECTED SUCCESS - TLS version restriction not working"
+  exit 1
+else
+	echo "TLS_PROTOCOL_MAX test: FAILED as expected (exit code $debug_rt)"
+fi
+rm -f "$TEMP_LDAP_CONF"
+echo ""
+
 # Verify TLS connection
 tries=0
 while : ; do
@@ -182,3 +199,4 @@ while : ; do
 		fi
 	fi
 done
+
