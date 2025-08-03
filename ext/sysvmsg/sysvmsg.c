@@ -383,10 +383,12 @@ PHP_FUNCTION(msg_send)
 				message_len = spprintf(&p, 0, ZEND_LONG_FMT, Z_LVAL_P(message));
 				break;
 			case IS_FALSE:
-				message_len = spprintf(&p, 0, "0");
+				p = "0";
+				message_len = 1;
 				break;
 			case IS_TRUE:
-				message_len = spprintf(&p, 0, "1");
+				p = "1";
+				message_len = 1;
 				break;
 			case IS_DOUBLE:
 				message_len = spprintf(&p, 0, "%F", Z_DVAL_P(message));
@@ -400,7 +402,7 @@ PHP_FUNCTION(msg_send)
 		messagebuffer = safe_emalloc(message_len, 1, sizeof(struct php_msgbuf));
 		memcpy(messagebuffer->mtext, p, message_len + 1);
 
-		if (Z_TYPE_P(message) != IS_STRING) {
+		if (Z_TYPE_P(message) == IS_LONG || Z_TYPE_P(message) == IS_DOUBLE) {
 			efree(p);
 		}
 	}

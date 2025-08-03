@@ -1049,7 +1049,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	const char *space = "";
 	const char *class_name = "";
 	const char *function;
-	int origin_len;
+	size_t origin_len;
 	char *origin;
 	zend_string *message;
 	int is_function = 0;
@@ -1116,9 +1116,10 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* if we still have memory then format the origin */
 	if (is_function) {
-		origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
 	} else {
-		origin_len = (int)spprintf(&origin, 0, "%s", function);
+		origin_len = strlen(function);
+		origin = estrndup(function, origin_len);
 	}
 
 	if (PG(html_errors)) {
@@ -1135,14 +1136,14 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* no docref given but function is known (the default) */
 	if (!docref && is_function) {
-		int doclen;
+		size_t doclen;
 		while (*function == '_') {
 			function++;
 		}
 		if (space[0] == '\0') {
-			doclen = (int)spprintf(&docref_buf, 0, "function.%s", function);
+			doclen = spprintf(&docref_buf, 0, "function.%s", function);
 		} else {
-			doclen = (int)spprintf(&docref_buf, 0, "%s.%s", class_name, function);
+			doclen = spprintf(&docref_buf, 0, "%s.%s", class_name, function);
 		}
 		while((p = strchr(docref_buf, '_')) != NULL) {
 			*p = '-';
