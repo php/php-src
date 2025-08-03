@@ -1106,17 +1106,29 @@ do_repeat:
 
 		case PHP_CLI_MODE_SHOW_INI_CONFIG:
 			{
-				zend_printf("Configuration File (php.ini) Path: \"%s\"\n", PHP_CONFIG_FILE_PATH);
-				if (php_ini_opened_path) {
-					zend_printf("Loaded Configuration File:         \"%s\"\n", php_ini_opened_path);
-				} else {
-					zend_printf("Loaded Configuration File:         (none)\n");
-				}
-				if (php_ini_scanned_path) {
-					zend_printf("Scan for additional .ini files in: \"%s\"\n", php_ini_scanned_path);
-				} else {
-					zend_printf("Scan for additional .ini files in: (none)\n");
-				}
+				int is_tty = 0;
+				#ifdef HAVE_UNISTD_H
+					is_tty = isatty(STDOUT_FILENO);
+				#elif defined(PHP_WIN32)
+					is_tty = php_win32_console_fileno_is_console(STDOUT_FILENO) && php_win32_console_fileno_has_vt100(STDOUT_FILENO);
+				#endif
+				char *quote = is_tty ? "\"" : "";
+
+				zend_printf("Configuration File (php.ini) Path: %s%s%s\n",
+					quote,
+					PHP_CONFIG_FILE_PATH,
+					quote
+				);
+				zend_printf("Loaded Configuration File:         %s%s%s\n",
+					php_ini_opened_path ? quote : "",
+					php_ini_opened_path ? php_ini_opened_path : "(none)",
+					php_ini_opened_path ? quote : ""
+				);
+				zend_printf("Scan for additional .ini files in: %s%s%s\n",
+					php_ini_scanned_path ? quote : "",
+					php_ini_scanned_path ? php_ini_scanned_path : "(none)",
+					php_ini_scanned_path ? quote : ""
+				);
 				zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
 				break;
 			}
