@@ -10,12 +10,14 @@ $ref = new \ReflectionFunction(#[A1] function () { });
 $attr = $ref->getAttributes()[0];
 var_dump($attr->getName(), $attr->getTarget() == Attribute::TARGET_FUNCTION, $attr->isRepeated());
 var_dump(get_class($attr->newInstance()));
+assert($attr->getTargetReflector() === $ref);
 
 echo "\n";
 
 $ref = new \ReflectionObject(new #[A1] class() { });
 $attr = $ref->getAttributes()[0];
 var_dump($attr->getName(), $attr->getTarget() == Attribute::TARGET_CLASS, $attr->isRepeated());
+assert($attr->getTargetReflector() === $ref);
 
 try {
     $attr->newInstance();
@@ -28,6 +30,7 @@ echo "\n";
 $ref = new \ReflectionFunction(#[A1] #[A1] function () { });
 $attr = $ref->getAttributes()[0];
 var_dump($attr->getName(), $attr->getTarget() == Attribute::TARGET_FUNCTION, $attr->isRepeated());
+assert($attr->getTargetReflector() === $ref);
 
 try {
     $attr->newInstance();
@@ -44,6 +47,7 @@ $ref = new \ReflectionObject(new #[A2] #[A2] class() { });
 $attr = $ref->getAttributes()[0];
 var_dump($attr->getName(), $attr->getTarget() == Attribute::TARGET_CLASS, $attr->isRepeated());
 var_dump(get_class($attr->newInstance()));
+assert($attr->getTargetReflector() === $ref);
 
 ?>
 --EXPECT--
