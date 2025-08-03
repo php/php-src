@@ -206,7 +206,7 @@ jobs:
             PHP_BRANCH=${{ env.BRANCH }}
             PHP_COMMIT=$LAST_RESULT_SHA
 
-            PHP_OPCACHE=2
+            PHP_OPCACHE=1
             PHP_JIT=0
           EOF
       - name: Setup PHP config - benchmarked PHP version
