@@ -166,6 +166,11 @@ contribute:
 - [Mailing list rules](/docs/mailinglist-rules.md)
 - [PHP release process](/docs/release-process.md)
 
+## Help and support
+
+If you're looking for help with using PHP the [Help page](https://www.php.net/support)
+is a good place to start.
+
 ## Credits
 
 For the list of people who've put work into PHP, please see the
