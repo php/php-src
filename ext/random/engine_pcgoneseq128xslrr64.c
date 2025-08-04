@@ -63,9 +63,9 @@ static zend_long range(void *state, zend_long min, zend_long max)
 	}, min, max);
 }
 
-static bool serialize(void *state, HashTable *data)
+static bool serialize(const void *state, HashTable *data)
 {
-	php_random_status_state_pcgoneseq128xslrr64 *s = state;
+	const php_random_status_state_pcgoneseq128xslrr64 *s = state;
 	uint64_t u;
 	zval z;
 
@@ -80,11 +80,10 @@ static bool serialize(void *state, HashTable *data)
 	return true;
 }
 
-static bool unserialize(void *state, HashTable *data)
+static bool unserialize(void *state, const HashTable *data)
 {
 	php_random_status_state_pcgoneseq128xslrr64 *s = state;
 	uint64_t u[2];
-	zval *t;
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
 	if (zend_hash_num_elements(data) != 2) {
@@ -92,7 +91,7 @@ static bool unserialize(void *state, HashTable *data)
 	}
 
 	for (uint32_t i = 0; i < 2; i++) {
-		t = zend_hash_index_find(data, i);
+		zval *t = zend_hash_index_find(data, i);
 		if (!t || Z_TYPE_P(t) != IS_STRING || Z_STRLEN_P(t) != (2 * sizeof(uint64_t))) {
 			return false;
 		}
