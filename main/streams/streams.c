@@ -2023,16 +2023,16 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		php_stream_wrapper *plain_files_wrapper = (php_stream_wrapper*)&php_plain_files_wrapper;
 
 		if (protocol) {
-			int localhost = 0;
+			bool localhost = false;
 
 			if (!strncasecmp(path, "file://localhost/", 17)) {
-				localhost = 1;
+				localhost = true;
 			}
 
 #ifdef PHP_WIN32
 			if (localhost == 0 && path[n+3] != '\0' && path[n+3] != '/' && path[n+4] != ':')	{
 #else
-			if (localhost == 0 && path[n+3] != '\0' && path[n+3] != '/') {
+			if (localhost == false && path[n+3] != '\0' && path[n+3] != '/') {
 #endif
 				if (options & REPORT_ERRORS) {
 					php_error_docref(NULL, E_WARNING, "Remote host file access not supported, %s", path);

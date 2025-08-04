@@ -1214,7 +1214,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			{
 				zval file_size, error_type;
-				int size_overflow = 0;
+				bool size_overflow = false;
 				char file_size_buf[65];
 
 				ZVAL_LONG(&error_type, cancel_upload);
@@ -1235,7 +1235,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 							file_size_buf[__len] = '\0';
 						}
 #endif
-						size_overflow = 1;
+						size_overflow = true;
 
 					} else {
 						ZVAL_LONG(&file_size, total_bytes);
