@@ -27,7 +27,7 @@ extern "C" {
     #include "../intl_data.h"
     #include "rangeformatter_arginfo.h"
     #include "rangeformatter_class.h"
-#include "intl_convert.h"
+    #include "intl_convert.h"
 }
 
 using icu::number::NumberRangeFormatter;
@@ -45,16 +45,16 @@ zend_object *IntlNumberRangeFormatter_object_create(zend_class_entry *ce)
 	IntlNumberRangeFormatter_object* intern;
 
     intern = reinterpret_cast<IntlNumberRangeFormatter_object*>(zend_object_alloc(sizeof(IntlNumberRangeFormatter_object), ce));
-	zend_object_std_init(&intern->zo, ce);
-	object_properties_init(&intern->zo, ce);
+    zend_object_std_init(&intern->zo, ce);
+    object_properties_init(&intern->zo, ce);
 
-	// Initialize rangeformatter_data structure
-	intl_error_init(&intern->nrf_data.error);
-	intern->nrf_data.unumrf = nullptr;
+    // Initialize rangeformatter_data structure
+    intl_error_init(&intern->nrf_data.error);
+    intern->nrf_data.unumrf = nullptr;
 
     intern->zo.handlers = &rangeformatter_handlers;
 
-	return &intern->zo;
+    return &intern->zo;
 }
 
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, __construct)
@@ -65,10 +65,10 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, __construct)
 
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
 {
-    #if U_ICU_VERSION_MAJOR_NUM < 63
-        zend_throw_error(NULL, "IntlNumberRangeFormatter is not available in ICU 62 and earlier");
-        RETURN_THROWS();
-    #endif
+#if U_ICU_VERSION_MAJOR_NUM < 63
+    zend_throw_error(NULL, "IntlNumberRangeFormatter is not available in ICU 62 and earlier");
+    RETURN_THROWS();
+#endif
 
     char* skeleton;
     char* locale;
@@ -88,7 +88,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
         zend_argument_must_not_be_empty_error(1);
         RETURN_THROWS();
     }
-    
+
     if (locale_len == 0) {
         locale = (char *)intl_locale_get_default();
     }
@@ -138,7 +138,6 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     RANGEFORMATTER_OBJECT(php_intl_numberrangeformatter_fetch_object(obj)) = nrf;
 
     RETURN_OBJ(obj);
-    
 }
 
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
@@ -166,15 +165,15 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
         RETURN_THROWS();
     }
 
-   zend_string *ret = intl_charFromString(result, &error);
+    zend_string *ret = intl_charFromString(result, &error);
 
-   if (U_FAILURE(error)) {
+    if (U_FAILURE(error)) {
         intl_error_set(NULL, error, "Failed to convert result to UTF-8");
         zend_throw_exception(IntlException_ce_ptr, "Failed to convert result to UTF-8", 0);
         RETURN_THROWS();
-   }
+    }
 
-   RETVAL_NEW_STR(ret);
+    RETVAL_NEW_STR(ret);
 }
 
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, getErrorCode)
@@ -197,7 +196,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, getErrorMessage)
 
 void IntlNumberRangeFormatter_object_free(zend_object *object)
 {
-	IntlNumberRangeFormatter_object* nfo = php_intl_numberrangeformatter_fetch_object(object);
+    IntlNumberRangeFormatter_object* nfo = php_intl_numberrangeformatter_fetch_object(object);
 
     if (nfo->nrf_data.unumrf) {
         delete nfo->nrf_data.unumrf;
@@ -206,14 +205,14 @@ void IntlNumberRangeFormatter_object_free(zend_object *object)
 
     intl_error_reset(&nfo->nrf_data.error);
 
-	zend_object_std_dtor(&nfo->zo);
+    zend_object_std_dtor(&nfo->zo);
 }
 
 void rangeformatter_register_class(void)
 {
     class_entry_IntlNumberRangeFormatter = register_class_IntlNumberRangeFormatter();
     class_entry_IntlNumberRangeFormatter->create_object = IntlNumberRangeFormatter_object_create;
-    
+
     memcpy(&rangeformatter_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     rangeformatter_handlers.offset = XtOffsetOf(IntlNumberRangeFormatter_object, zo);
     rangeformatter_handlers.free_obj = IntlNumberRangeFormatter_object_free;
