@@ -1,5 +1,5 @@
 --TEST--
-#[\Override]: Properties: Parent property is protected.
+#[\Override]: Properties: Parent property is protected, child property is public.
 --FILE--
 <?php
 

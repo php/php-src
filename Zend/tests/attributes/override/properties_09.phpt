@@ -1,5 +1,5 @@
 --TEST--
-#[\Override]: Properties: Parent property is private.
+#[\Override]: Properties: Parent property is private, child property is public.
 --FILE--
 <?php
 

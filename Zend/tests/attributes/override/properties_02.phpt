@@ -3,8 +3,7 @@
 --FILE--
 <?php
 
-class C
-{
+class C {
     #[\Override]
     public mixed $c;
 }

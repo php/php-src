@@ -1,5 +1,5 @@
 --TEST--
-#[\Override]: Properties: On used trait without parent method.
+#[\Override]: Properties: On used trait without parent property.
 --FILE--
 <?php
 

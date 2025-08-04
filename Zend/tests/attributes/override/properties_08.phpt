@@ -1,5 +1,5 @@
 --TEST--
-#[\Override]: Properties: On used trait with interface method.
+#[\Override]: Properties: On used trait with interface property.
 --FILE--
 <?php
 
