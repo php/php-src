@@ -359,6 +359,7 @@ typedef enum _ir_type {
 	_(IF_TRUE,      S1X1, src, prb, ___) /* IF TRUE proj.               */ \
 	_(IF_FALSE,     S1X1, src, prb, ___) /* IF FALSE proj.              */ \
 	_(CASE_VAL,     S2X1, src, def, prb) /* switch proj.                */ \
+	_(CASE_RANGE,   S3,   src, def, def) /* switch proj.                */ \
 	_(CASE_DEFAULT, S1X1, src, prb, ___) /* switch proj.                */ \
 	_(MERGE,        SN,   src, src, src) /* control merge               */ \
 	_(LOOP_BEGIN,   SN,   src, src, src) /* loop start                  */ \
@@ -854,6 +855,9 @@ void ir_gdb_unregister_all(void);
 bool ir_gdb_present(void);
 
 /* IR load API (implementation in ir_load.c) */
+#define IR_RESOLVE_SYM_ADD_THUNK (1<<0)
+#define IR_RESOLVE_SYM_SILENT    (1<<1)
+
 struct _ir_loader {
 	uint32_t default_func_flags;
 	bool (*init_module)       (ir_loader *loader, const char *name, const char *filename, const char *target);
@@ -870,7 +874,7 @@ struct _ir_loader {
 	bool (*sym_data_end)      (ir_loader *loader, uint32_t flags);
 	bool (*func_init)         (ir_loader *loader, ir_ctx *ctx, const char *name);
 	bool (*func_process)      (ir_loader *loader, ir_ctx *ctx, const char *name);
-	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, bool add_thunk);
+	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, uint32_t flags);
 	bool (*has_sym)           (ir_loader *loader, const char *name);
 	bool (*add_sym)           (ir_loader *loader, const char *name, void *addr);
 };
@@ -884,11 +888,12 @@ int ir_load_llvm_bitcode(ir_loader *loader, const char *filename);
 int ir_load_llvm_asm(ir_loader *loader, const char *filename);
 
 /* IR save API (implementation in ir_save.c) */
-#define IR_SAVE_CFG       (1<<0) /* add info about CFG */
-#define IR_SAVE_CFG_MAP   (1<<1) /* add info about CFG block assignment */
-#define IR_SAVE_USE_LISTS (1<<2) /* add info about def->use lists */
-#define IR_SAVE_RULES     (1<<3) /* add info about selected code-generation rules */
-#define IR_SAVE_REGS      (1<<4) /* add info about selected registers */
+#define IR_SAVE_CFG        (1<<0) /* add info about CFG */
+#define IR_SAVE_CFG_MAP    (1<<1) /* add info about CFG block assignment */
+#define IR_SAVE_USE_LISTS  (1<<2) /* add info about def->use lists */
+#define IR_SAVE_RULES      (1<<3) /* add info about selected code-generation rules */
+#define IR_SAVE_REGS       (1<<4) /* add info about selected registers */
+#define IR_SAVE_SAFE_NAMES (1<<5) /* add '@' prefix to symbol names */
 
 void ir_print_proto(const ir_ctx *ctx, ir_ref proto, FILE *f);
 void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f);
