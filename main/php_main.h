@@ -110,6 +110,24 @@ PHPAPI bool php_tsrm_startup(void);
 # endif
 #endif
 
+#ifndef PHP_BUILD_OS
+# if defined(PHP_WIN32)
+#  define PHP_BUILD_OS "WINNT"
+# elif defined(__APPLE__)
+#  define PHP_BUILD_OS "Darwin"
+# elif defined(__linux__)
+#  define PHP_BUILD_OS "Linux"
+# elif defined(__FreeBSD__)
+#  define PHP_BUILD_OS "FreeBSD"
+# elif defined(__NetBSD__)
+#  define PHP_BUILD_OS "NetBSD"
+# elif defined(__OpenBSD__)
+#  define PHP_BUILD_OS "OpenBSD"
+#elif defined(__sun__)
+#  define PHP_BUILD_OS "Solaris"
+# endif
+#endif
+
 END_EXTERN_C()
 
 #endif

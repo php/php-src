@@ -138,23 +138,18 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 #endif
 #ifdef PHP_BUILD_ARCH
 		" " PHP_BUILD_ARCH
-#else
-		" Unknown arch"
+#endif
+#ifdef PHP_BUILD_OS
+		" " PHP_BUILD_OS
+#endif
+#ifdef PHP_BUILD_COMPILER
+		" " PHP_BUILD_COMPILER
 #endif
 	);
 	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
-	smart_string_append_printf(&version_info, "Built %s\n",
-#ifdef PHP_BUILD_PROVIDER
-		"by " PHP_BUILD_PROVIDER
-#else
-		"on " PHP_UNAME_S " " PHP_UNAME_R
-#endif
-#ifdef PHP_BUILD_COMPILER
-		" (" PHP_BUILD_COMPILER ")"
-#else
-		""
-#endif
-	);
+	if (php_build_provider()) {
+		smart_string_append_printf(&version_info, "Built by %s\n", php_build_provider());
+	}
 	smart_string_appends(&version_info, get_zend_version());
 	smart_string_0(&version_info);
 
