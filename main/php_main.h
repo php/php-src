@@ -101,7 +101,7 @@ PHPAPI bool php_tsrm_startup(void);
 
 #ifndef PHP_BUILD_ARCH
 # if defined(__x86_64__)
-#  define PHP_BUILD_ARCH "x86_64"
+#  define PHP_BUILD_ARCH "x64"
 # elif defined(__i386__)
 #  define PHP_BUILD_ARCH "x86"
 # elif defined(__aarch64__)
