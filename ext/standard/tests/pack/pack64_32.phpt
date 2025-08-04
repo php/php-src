@@ -50,8 +50,34 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    var_dump(pack("p", 0));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(pack("j", 0));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    var_dump(unpack("p", ''));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(unpack("j", ''));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
+64-bit format codes are not available for 32-bit versions of PHP
+64-bit format codes are not available for 32-bit versions of PHP
+64-bit format codes are not available for 32-bit versions of PHP
+64-bit format codes are not available for 32-bit versions of PHP
 64-bit format codes are not available for 32-bit versions of PHP
 64-bit format codes are not available for 32-bit versions of PHP
 64-bit format codes are not available for 32-bit versions of PHP

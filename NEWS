@@ -197,6 +197,12 @@ PHP                                                                        NEWS
 - XML:
   . The xml_parser_free() function has been deprecated. (DanielEScherzer)
 
+- Standard:
+  . Added pack()/unpack() support for signed integers with specific endianness.
+    New format codes: m/y for signed 2-byte (little/big endian), M/Y for signed
+    4-byte (little/big endian), p/j for signed 8-byte (little/big endian).
+    Fixes GH-17068. (alexandre-daubois)
+
 31 Jul 2025, PHP 8.5.0alpha4
 
 - Core:

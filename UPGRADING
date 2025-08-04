@@ -299,6 +299,9 @@ PHP 8.5 UPGRADE NOTES
     the same (just to give one example: one may be cm and the other may be px).
   . setcookie() and setrawcookie() now support the "partitioned" key.
     RFC: https://wiki.php.net/rfc/CHIPS
+  . pack() and unpack() now support signed integers with specific endianness.
+    New format codes: m/y for signed 2-byte (little/big endian), M/Y for signed
+    4-byte (little/big endian), p/j for signed 8-byte (little/big endian).
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),

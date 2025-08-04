@@ -196,6 +196,7 @@ static double php_pack_parse_double(int is_little_endian, void * src)
 /* pack() idea stolen from Perl (implemented formats behave the same as there except J and P)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
+ * Added m, y for little/big endian signed 2-byte, M, Y for little/big endian signed 4-byte, p, j for little/big endian signed 8-byte.
  */
 /* {{{ Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
@@ -293,6 +294,8 @@ PHP_FUNCTION(pack)
 			case 'Q':
 			case 'J':
 			case 'P':
+			case 'j':
+			case 'p':
 #if SIZEOF_ZEND_LONG < 8
 					efree(formatcodes);
 					efree(formatargs);
@@ -317,6 +320,10 @@ PHP_FUNCTION(pack)
 			case 'd': /* double */
 			case 'e': /* little endian double */
 			case 'E': /* big endian double */
+			case 'm': /* little endian signed 2-byte */
+			case 'y': /* big endian signed 2-byte */
+			case 'M': /* little endian signed 4-byte */
+			case 'Y': /* big endian signed 4-byte */
 				if (arg < 0) {
 					arg = num_args - currentarg;
 				}
@@ -373,6 +380,8 @@ too_few_args:
 			case 'S':
 			case 'n':
 			case 'v':
+			case 'm': /* little endian signed 2-byte */
+			case 'y': /* big endian signed 2-byte */
 				INC_OUTPUTPOS(arg,2)		/* 16 bit per arg */
 				break;
 
@@ -385,6 +394,8 @@ too_few_args:
 			case 'L':
 			case 'N':
 			case 'V':
+			case 'M': /* little endian signed 4-byte */
+			case 'Y': /* big endian signed 4-byte */
 				INC_OUTPUTPOS(arg,4)		/* 32 bit per arg */
 				break;
 
@@ -393,7 +404,9 @@ too_few_args:
 			case 'Q':
 			case 'J':
 			case 'P':
-				INC_OUTPUTPOS(arg,8)		/* 32 bit per arg */
+			case 'j':
+			case 'p':
+				INC_OUTPUTPOS(arg,8)		/* 64 bit per arg */
 				break;
 #endif
 
@@ -508,12 +521,14 @@ too_few_args:
 			case 's':
 			case 'S':
 			case 'n':
-			case 'v': {
+			case 'v':
+			case 'm':
+			case 'y': {
 				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
 
-				if (code == 'n') {
+				if (code == 'n' || code == 'y') {
 					endianness = PHP_BIG_ENDIAN;
-				} else if (code == 'v') {
+				} else if (code == 'v' || code == 'm') {
 					endianness = PHP_LITTLE_ENDIAN;
 				}
 
@@ -535,12 +550,14 @@ too_few_args:
 			case 'l':
 			case 'L':
 			case 'N':
-			case 'V': {
+			case 'V':
+			case 'M':
+			case 'Y': {
 				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
 
-				if (code == 'N') {
+				if (code == 'N' || code == 'Y') {
 					endianness = PHP_BIG_ENDIAN;
-				} else if (code == 'V') {
+				} else if (code == 'V' || code == 'M') {
 					endianness = PHP_LITTLE_ENDIAN;
 				}
 
@@ -555,12 +572,14 @@ too_few_args:
 			case 'q':
 			case 'Q':
 			case 'J':
-			case 'P': {
+			case 'P':
+			case 'j':
+			case 'p': {
 				php_pack_endianness endianness = PHP_MACHINE_ENDIAN;
 
-				if (code == 'J') {
+				if (code == 'J' || code == 'j') {
 					endianness = PHP_BIG_ENDIAN;
-				} else if (code == 'P') {
+				} else if (code == 'P' || code == 'p') {
 					endianness = PHP_LITTLE_ENDIAN;
 				}
 
@@ -672,6 +691,7 @@ too_few_args:
  * f and d will return doubles.
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
+ * Added m, y for little/big endian signed 2-byte, M, Y for little/big endian signed 4-byte, p, j for little/big endian signed 8-byte.
  */
 /* {{{ Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
@@ -793,6 +813,8 @@ PHP_FUNCTION(unpack)
 			case 'S':
 			case 'n':
 			case 'v':
+			case 'm':
+			case 'y':
 				size = 2;
 				break;
 
@@ -807,6 +829,8 @@ PHP_FUNCTION(unpack)
 			case 'L':
 			case 'N':
 			case 'V':
+			case 'M':
+			case 'Y':
 				size = 4;
 				break;
 
@@ -815,6 +839,8 @@ PHP_FUNCTION(unpack)
 			case 'Q':
 			case 'J':
 			case 'P':
+			case 'p':
+			case 'j':
 #if SIZEOF_ZEND_LONG > 4
 				size = 8;
 				break;
@@ -1017,6 +1043,18 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
+					case 'm':   /* signed little endian 2-byte */
+					case 'y': { /* signed big endian 2-byte    */
+						uint16_t x = *((unaligned_uint16_t*) &input[inputpos]);
+
+						if ((type == 'y' && MACHINE_LITTLE_ENDIAN) || (type == 'm' && !MACHINE_LITTLE_ENDIAN)) {
+							x = php_pack_reverse_int16(x);
+						}
+
+						ZVAL_LONG(&val, (int16_t) x);
+						break;
+					}
+
 					case 'i':   /* signed integer, machine size, machine endian */
 					case 'I': { /* unsigned integer, machine size, machine endian */
 						zend_long v;
@@ -1051,6 +1089,18 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
+					case 'M':   /* signed little endian 4-byte */
+					case 'Y': { /* signed big endian 4-byte    */
+						uint32_t x = *((unaligned_uint32_t*) &input[inputpos]);
+
+						if ((type == 'Y' && MACHINE_LITTLE_ENDIAN) || (type == 'M' && !MACHINE_LITTLE_ENDIAN)) {
+							x = php_pack_reverse_int32(x);
+						}
+
+						ZVAL_LONG(&val, (int32_t) x);
+						break;
+					}
+
 #if SIZEOF_ZEND_LONG > 4
 					case 'q':   /* signed machine endian   */
 					case 'Q':   /* unsigned machine endian */
@@ -1068,6 +1118,18 @@ PHP_FUNCTION(unpack)
 						}
 
 						ZVAL_LONG(&val, v);
+						break;
+					}
+
+					case 'j':   /* signed big endian    */
+					case 'p': { /* signed little endian */
+						uint64_t x = *((unaligned_uint64_t*) &input[inputpos]);
+
+						if ((type == 'j' && MACHINE_LITTLE_ENDIAN) || (type == 'p' && !MACHINE_LITTLE_ENDIAN)) {
+							x = php_pack_reverse_int64(x);
+						}
+
+						ZVAL_LONG(&val, (int64_t) x);
 						break;
 					}
 #endif
