@@ -53,6 +53,28 @@ try {
     echo $exception->getMessage() . PHP_EOL;
 }
 
+try {
+    $nrf = IntlNumberRangeFormatter::createFromSkeleton(
+        'invalid skeleton here', 
+        'invalid-language', 
+        IntlNumberRangeFormatter::COLLAPSE_AUTO, 
+        IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE
+    );
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
+
+try {
+    $nrf = IntlNumberRangeFormatter::createFromSkeleton(
+        'invalid skeleton here', 
+        'ro_thisiswaytooooooooooooooooooooooooooooooooooooooooooooolongtobevaliditneedstobeatleast157characterstofailthevalidationinthelistformattercodeimplementation', 
+        IntlNumberRangeFormatter::COLLAPSE_AUTO, 
+        IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE
+    );
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
+
 ?>
 --EXPECT--
 Failed to create the number skeleton
@@ -61,3 +83,5 @@ IntlNumberRangeFormatter::createFromSkeleton(): Failed to create the number skel
 Call to private IntlNumberRangeFormatter::__construct() from global scope
 IntlNumberRangeFormatter::createFromSkeleton(): Argument #3 ($collapse) must be one of IntlNumberRangeFormatter::COLLAPSE_AUTO, IntlNumberRangeFormatter::COLLAPSE_NONE, IntlNumberRangeFormatter::COLLAPSE_UNIT, or IntlNumberRangeFormatter::COLLAPSE_ALL
 IntlNumberRangeFormatter::createFromSkeleton(): Argument #4 ($identityFallback) must be one of IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE, IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY, or IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE
+IntlNumberRangeFormatter::createFromSkeleton(): Argument #2 ($locale) "invalid-language" is invalid
+IntlNumberRangeFormatter::createFromSkeleton(): Argument #2 ($locale) must be no longer than 156 characters
