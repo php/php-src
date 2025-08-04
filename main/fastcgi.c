@@ -648,12 +648,8 @@ int fcgi_listen(const char *path, int backlog)
 	int       listen_socket;
 	sa_t      sa;
 	socklen_t sock_len;
-#ifdef SO_REUSEADDR
-# ifdef _WIN32
-	BOOL reuse = 1;
-# else
+#if !defined(_WIN32) && defined(SO_REUSEADDR)
 	int reuse = 1;
-# endif
 #endif
 
 	if ((s = strchr(path, ':'))) {
