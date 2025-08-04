@@ -133,6 +133,8 @@ extension_module_ptrs = "";
 	var oss = wmiservice.ExecQuery("Select * from Win32_OperatingSystem");
 	var os = oss.ItemIndex(0);
 	AC_DEFINE("PHP_BUILD_SYSTEM", os.Caption + " [" + os.Version + "]", "The system that PHP was built on.");
+	AC_DEFINE("PHP_UNAME_S", os.Caption, "The system name that PHP was built on.");
+	AC_DEFINE("PHP_UNAME_R", os.Version, "The system version that PHP was built on.");
 	var build_provider = WshShell.Environment("Process").Item("PHP_BUILD_PROVIDER");
 	if (build_provider) {
 		AC_DEFINE("PHP_BUILD_PROVIDER", build_provider, "The PHP build provider information.");

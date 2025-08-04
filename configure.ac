@@ -1412,6 +1412,16 @@ AC_ARG_VAR([PHP_UNAME],
 AS_VAR_IF([PHP_UNAME],, [PHP_UNAME=$(uname -a | xargs)])
 AC_DEFINE_UNQUOTED([PHP_UNAME], ["$PHP_UNAME"], [The 'uname -a' output.])
 
+AC_ARG_VAR([PHP_UNAME_S],
+  [Operating system name (defaults to the 'uname -s' output)])
+AS_VAR_IF([PHP_UNAME_S],, [PHP_UNAME_S=$(uname -s | xargs)])
+AC_DEFINE_UNQUOTED([PHP_UNAME_S], ["$PHP_UNAME_S"], [The 'uname -s' output.])
+
+AC_ARG_VAR([PHP_UNAME_R],
+  [Operating system version (defaults to the 'uname -r' output)])
+AS_VAR_IF([PHP_UNAME_R],, [PHP_UNAME_R=$(uname -r | xargs)])
+AC_DEFINE_UNQUOTED([PHP_UNAME_R], ["$PHP_UNAME_R"], [The 'uname -r' output.])
+
 PHP_OS=$(uname | xargs)
 AC_DEFINE_UNQUOTED([PHP_OS], ["$PHP_OS"], [The 'uname' output.])
 

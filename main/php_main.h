@@ -89,13 +89,14 @@ PHPAPI bool php_tsrm_startup(void);
 #define PHP_OS_STR PHP_OS
 #endif
 
+#define _PHP_STRINGIFY(s) #s
+#define PHP_STRINGIFY(s) _PHP_STRINGIFY(s)
+
 #ifndef PHP_BUILD_COMPILER
 # if defined(__clang__)
-/* __VERSION__ contains the compiler name */
-#  define PHP_BUILD_COMPILER __VERSION__
+#  define PHP_BUILD_COMPILER "Clang " PHP_STRINGIFY(__clang_major__)
 # elif defined(__GNUC__)
-/* __VERSION__ does not contain the compiler name */
-#  define PHP_BUILD_COMPILER "GCC " __VERSION__
+#  define PHP_BUILD_COMPILER "GCC " PHP_STRINGIFY(__GNUC__)
 # endif
 #endif
 
