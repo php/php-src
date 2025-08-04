@@ -541,14 +541,14 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 	ptr = path;
 	while (ptr && *ptr) {
 		/* Check for stream wrapper */
-		int is_stream_wrapper = 0;
+		bool is_stream_wrapper = false;
 
 		for (p = ptr; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
 		if ((*p == ':') && (p - ptr > 1) && (p[1] == '/') && (p[2] == '/')) {
 			/* .:// or ..:// is not a stream wrapper */
 			if (p[-1] != '.' || p[-2] != '.' || p - 2 != ptr) {
 				p += 3;
-				is_stream_wrapper = 1;
+				is_stream_wrapper = true;
 			}
 		}
 		end = strchr(p, DEFAULT_DIR_SEPARATOR);

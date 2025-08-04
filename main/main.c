@@ -1010,10 +1010,10 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	const char *space = "";
 	const char *class_name = "";
 	const char *function;
-	int origin_len;
+	size_t origin_len;
 	char *origin;
 	zend_string *message;
-	int is_function = 0;
+	bool is_function = false;
 
 	/* get error text into buffer and escape for html if necessary */
 	zend_string *buffer = vstrpprintf(0, format, args);
@@ -1045,23 +1045,23 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		switch (EG(current_execute_data)->opline->extended_value) {
 			case ZEND_EVAL:
 				function = "eval";
-				is_function = 1;
+				is_function = true;
 				break;
 			case ZEND_INCLUDE:
 				function = "include";
-				is_function = 1;
+				is_function = true;
 				break;
 			case ZEND_INCLUDE_ONCE:
 				function = "include_once";
-				is_function = 1;
+				is_function = true;
 				break;
 			case ZEND_REQUIRE:
 				function = "require";
-				is_function = 1;
+				is_function = true;
 				break;
 			case ZEND_REQUIRE_ONCE:
 				function = "require_once";
-				is_function = 1;
+				is_function = true;
 				break;
 			default:
 				function = "Unknown";
@@ -1077,9 +1077,9 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* if we still have memory then format the origin */
 	if (is_function) {
-		origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
 	} else {
-		origin_len = (int)spprintf(&origin, 0, "%s", function);
+		origin_len = spprintf(&origin, 0, "%s", function);
 	}
 
 	if (PG(html_errors)) {
@@ -2093,13 +2093,13 @@ void dummy_invalid_parameter_handler(
 		unsigned int   line,
 		uintptr_t      pReserved)
 {
-	static int called = 0;
+	static bool called = false;
 	char buf[1024];
 	int len;
 
 	if (!called) {
 			if(PG(windows_show_crt_warning)) {
-			called = 1;
+			called = true;
 			if (function) {
 				if (file) {
 					len = _snprintf(buf, sizeof(buf)-1, "Invalid parameter detected in CRT function '%ws' (%ws:%u)", function, file, line);
@@ -2110,7 +2110,7 @@ void dummy_invalid_parameter_handler(
 				len = _snprintf(buf, sizeof(buf)-1, "Invalid CRT parameter detected (function not known)");
 			}
 			zend_error(E_WARNING, "%s", buf);
-			called = 0;
+			called = false;
 		}
 	}
 }

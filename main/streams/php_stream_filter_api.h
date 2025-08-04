@@ -45,7 +45,7 @@ struct _php_stream_bucket {
 	size_t buflen;
 	/* if non-zero, buf should be pefreed when the bucket is destroyed */
 	uint8_t own_buf;
-	uint8_t is_persistent;
+	bool is_persistent;
 
 	/* destroy this struct when refcount falls to zero */
 	int refcount;

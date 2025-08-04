@@ -619,7 +619,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	size_t mlen, dlen, plen, vlen, ilen;
 	zend_off_t newoffs;
 	zval meta;
-	int base64 = 0;
+	bool base64 = false;
 	zend_string *base64_comma = NULL;
 
 	ZEND_ASSERT(mode);
