@@ -159,7 +159,7 @@ jobs:
             -d opcache.enable_cli=1
   MACOS_DEBUG_NTS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -177,7 +177,7 @@ jobs:
           configurationParameters: --enable-debug --disable-zts
       - name: make
         run: |-
-          export PATH="/usr/local/opt/bison/bin:$PATH"
+          export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
           make -j$(sysctl -n hw.logicalcpu) >/dev/null
       - name: make install
         run: sudo make install
