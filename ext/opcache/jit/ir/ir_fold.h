@@ -1909,7 +1909,9 @@ IR_FOLD(SUB(_, SUB))
 IR_FOLD(SUB(ADD, ADD))
 {
 	if (IR_IS_TYPE_INT(IR_OPT_TYPE(opt))) {
-		if (op1_insn->op1 == op2_insn->op1) {
+		if (op1 == op2) {
+			IR_FOLD_CONST_U(0);
+		} else if (op1_insn->op1 == op2_insn->op1) {
 			/* (a + b) - (a + c) => b - c */
 			op1 = op1_insn->op2;
 			op2 = op2_insn->op2;

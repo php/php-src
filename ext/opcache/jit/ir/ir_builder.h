@@ -603,6 +603,7 @@ extern "C" {
 #define ir_LOOP_END()                     _ir_LOOP_END(_ir_CTX)
 #define ir_SWITCH(_val)                   _ir_SWITCH(_ir_CTX, (_val))
 #define ir_CASE_VAL(_switch, _val)        _ir_CASE_VAL(_ir_CTX, (_switch), (_val))
+#define ir_CASE_RANGE(_switch, _v1, _v2)  _ir_CASE_RANGE(_ir_CTX, (_switch), (_v1), (_v2))
 #define ir_CASE_DEFAULT(_switch)          _ir_CASE_DEFAULT(_ir_CTX, (_switch))
 #define ir_RETURN(_val)                   _ir_RETURN(_ir_CTX, (_val))
 #define ir_IJMP(_addr)                    _ir_IJMP(_ir_CTX, (_addr))
@@ -682,6 +683,7 @@ ir_ref _ir_TLS(ir_ctx *ctx, ir_ref index, ir_ref offset);
 void   _ir_UNREACHABLE(ir_ctx *ctx);
 ir_ref _ir_SWITCH(ir_ctx *ctx, ir_ref val);
 void   _ir_CASE_VAL(ir_ctx *ctx, ir_ref switch_ref, ir_ref val);
+void   _ir_CASE_RANGE(ir_ctx *ctx, ir_ref switch_ref, ir_ref v1, ir_ref v2);
 void   _ir_CASE_DEFAULT(ir_ctx *ctx, ir_ref switch_ref);
 void   _ir_RETURN(ir_ctx *ctx, ir_ref val);
 void   _ir_IJMP(ir_ctx *ctx, ir_ref addr);
