@@ -9,7 +9,8 @@ max_memory_limit=128M
 <?php
 echo ini_get('max_memory_limit') . PHP_EOL;
 echo ini_get('memory_limit') . PHP_EOL;
---EXPECTF--
-Warning: Failed to set memory_limit to %d bytes. memory_limit (currently: %d bytes) cannot exceed max_memory_limit (%d bytes) in %s
+?>
+--EXPECT--
+Warning: Failed to set memory_limit to 268435456 bytes. Setting to max_memory_limit instead (currently: 134217728 bytes) in Unknown on line 0
 128M
 128M
