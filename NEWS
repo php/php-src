@@ -21,6 +21,9 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed zend call stack size for macOs/arm64. (David Carlier)
 
+- Calendar:
+  . Fixed bug GH-19371 (integer overflow in calendar.c). (nielsdos)
+
 - FTP:
   . Fix theoretical issues with hrtime() not being available. (nielsdos)
 
