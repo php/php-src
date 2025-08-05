@@ -353,6 +353,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
 ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_dup(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
