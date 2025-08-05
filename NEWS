@@ -148,6 +148,8 @@ PHP                                                                        NEWS
   . Add enum SortDirection. (timwolla)
   . pathinfo() raises a ValueError with an invalid $flags argument.
     (David Carlier)
+  . Passing 1 or negative base to log() now throws a ValueError.
+    (alexandre-daubois)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream

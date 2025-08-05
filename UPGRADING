@@ -132,6 +132,8 @@ PHP 8.6 UPGRADE NOTES
     constants).
 
 - Standard:
+  . log() now raises a ValueError when the base argument is 1 or less
+    than or equal to 0. Previously, base 1 silently returned NAN.
   . pathinfo() now raises a ValueError when an invalid $flag argument
     value is passed.
 
