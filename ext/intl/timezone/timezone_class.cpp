@@ -18,6 +18,7 @@
 #endif
 
 #include "../intl_cppshims.h"
+#include <memory>
 
 #include <unicode/timezone.h>
 #include <unicode/calendar.h>

@@ -13,6 +13,7 @@
 */
 
 #include "../intl_cppshims.h"
+#include <memory>
 
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
