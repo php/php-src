@@ -3005,38 +3005,24 @@ static void accel_globals_dtor(zend_accel_globals *accel_globals)
 # if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
 static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
 {
-	void *ret = MAP_FAILED;
-	void *mem;
-
-	mem = mmap(NULL, size,
-		PROT_READ | PROT_WRITE,
-		MAP_PRIVATE | MAP_ANONYMOUS,
-		-1, 0);
-	if (mem == MAP_FAILED) {
-		zend_error(E_WARNING,
-			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap failed: %s (%d)",
-			strerror(errno), errno);
-		return FAILURE;
-	}
-	memcpy(mem, start, real_size);
+	void *ret;
+	void *mem = MAP_FAILED;
 
 #  ifdef MAP_HUGETLB
-	ret = mmap(start, size,
+	mem = mmap(NULL, size,
 		PROT_READ | PROT_WRITE | PROT_EXEC,
-		MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_HUGETLB,
+		MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB,
 		-1, 0);
 #  endif
-	if (ret == MAP_FAILED) {
-		ret = mmap(start, size,
+	if (mem == MAP_FAILED) {
+		mem = mmap(NULL, size,
 			PROT_READ | PROT_WRITE | PROT_EXEC,
-			MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
+			MAP_PRIVATE | MAP_ANONYMOUS,
 			-1, 0);
 		/* this should never happen? */
-		ZEND_ASSERT(ret != MAP_FAILED);
+		ZEND_ASSERT(mem != MAP_FAILED);
 #  ifdef MADV_HUGEPAGE
-		if (-1 == madvise(start, size, MADV_HUGEPAGE)) {
-			memcpy(start, mem, real_size);
-			mprotect(start, size, PROT_READ | PROT_EXEC);
+		if (-1 == madvise(mem, size, MADV_HUGEPAGE)) {
 			munmap(mem, size);
 			zend_error(E_WARNING,
 				ACCELERATOR_PRODUCT_NAME " huge_code_pages: madvise(HUGEPAGE) failed: %s (%d)",
@@ -3044,8 +3030,6 @@ static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_
 			return FAILURE;
 		}
 #  else
-		memcpy(start, mem, real_size);
-		mprotect(start, size, PROT_READ | PROT_EXEC);
 		munmap(mem, size);
 		zend_error(E_WARNING,
 			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
@@ -3054,13 +3038,16 @@ static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_
 #  endif
 	}
 
-	// Given the MAP_FIXED flag the address can never diverge
-	ZEND_ASSERT(ret == start);
+	memcpy(mem, start, real_size);
+	mprotect(mem, size, PROT_READ | PROT_EXEC);
+	ret = mremap(mem, size, size, MREMAP_MAYMOVE | MREMAP_FIXED, start);
+	if (ret == MAP_FAILED) {
+		munmap(mem, size);
+		zend_error(E_WARNING,
+			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mremap() failed: %s (%d)",
+			strerror(errno), errno);
+	}
 	zend_mmap_set_name(start, size, "zend_huge_code_pages");
-	memcpy(start, mem, real_size);
-	mprotect(start, size, PROT_READ | PROT_EXEC);
-
-	munmap(mem, size);
 
 	return SUCCESS;
 }
