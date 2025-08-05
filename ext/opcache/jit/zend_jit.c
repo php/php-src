@@ -303,6 +303,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
 					case ZEND_CALLABLE_CONVERT:
+					case ZEND_CALLABLE_CONVERT_PARTIAL:
 						return 0;
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAR:
@@ -388,6 +389,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				case ZEND_DO_FCALL_BY_NAME:
 				case ZEND_DO_FCALL:
 				case ZEND_CALLABLE_CONVERT:
+				case ZEND_CALLABLE_CONVERT_PARTIAL:
 					end = opline;
 					if (end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
 						/* INIT_FCALL and DO_FCALL in different BasicBlocks */
@@ -867,6 +869,7 @@ static bool zend_jit_dec_call_level(uint8_t opcode)
 		case ZEND_DO_UCALL:
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_CALLABLE_CONVERT:
+		case ZEND_CALLABLE_CONVERT_PARTIAL:
 			return true;
 		default:
 			return false;

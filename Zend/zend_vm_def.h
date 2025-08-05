@@ -5712,6 +5712,30 @@ ZEND_VM_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(213, ZEND_SEND_PLACEHOLDER, UNUSED, CONST|UNUSED)
+{
+	zval *arg;
+
+	if (OP2_TYPE == IS_CONST) {
+		/* Named placeholder */
+		USE_OPLINE
+		SAVE_OPLINE();
+		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		uint32_t arg_num;
+		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
+		if (UNEXPECTED(!arg)) {
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		/* Positional placeholder */
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	}
+
+	Z_TYPE_INFO_P(arg) = _IS_PLACEHOLDER;
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED)
 {
 	USE_OPLINE
@@ -9819,6 +9843,45 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED, NUM|CACHE_SLOT)
 	zend_vm_stack_free_call_frame(call);
 
 	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CACHE_SLOT, CONST|UNUSED, NUM)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_execute_data *call = EX(call);
+	void **cache_slot = CACHE_ADDR(opline->op1.num);
+	zval *named_positions = GET_OP2_ZVAL_PTR();
+
+	zend_partial_create(EX_VAR(opline->result.var),
+		&call->This, call->func,
+		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
+		ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS ?
+			call->extra_named_params : NULL,
+		OP2_TYPE == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
+		&EX(func)->op_array, opline, cache_slot,
+		opline->extended_value & ZEND_FCALL_USES_VARIADIC_PLACEHOLDER);
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_array_release(call->extra_named_params);
+	}
+
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_free_trampoline(call->func);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
+	}
+
+	EX(call) = call->prev_execute_data;
+
+	zend_vm_stack_free_call_frame(call);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(208, ZEND_JMP_FRAMELESS, CONST, JMP_ADDR, NUM|CACHE_SLOT)

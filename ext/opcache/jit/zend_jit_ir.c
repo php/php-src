@@ -10078,7 +10078,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	}
 
 	bool may_have_extra_named_params =
-		opline->extended_value == ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS &&
+		(opline->extended_value & ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS) &&
 		(!func || func->common.fn_flags & ZEND_ACC_VARIADIC);
 
 	if (!jit->reuse_ip) {
