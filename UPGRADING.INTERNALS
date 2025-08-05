@@ -75,6 +75,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     delayed. Before, errors would be recorded but not delayed.
   . zend_mm_refresh_key_child() must be called on any zend_mm_heap inherited
     from the parent process after a fork().
+  . HASH_KEY_IS_* constants have been moved in the zend_hash_key_type enum.
 
 - standard
   . ext/standard/php_smart_string.h and ext/standard/php_smart_string_public.h
