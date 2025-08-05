@@ -110,6 +110,9 @@ ZEND_API ZEND_COLD void zend_verify_never_error(
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API bool zend_check_user_type_slow(
 		const zend_type *type, zval *arg, const zend_reference *ref, bool is_return_type);
+ZEND_API bool zend_check_type_ex(
+		const zend_type *type, zval *arg, zend_class_entry *scope,
+		bool is_return_type, bool is_internal);
 
 #if ZEND_DEBUG
 ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_execute_data *call);

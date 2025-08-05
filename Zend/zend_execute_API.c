@@ -39,6 +39,7 @@
 #include "zend_observer.h"
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
+#include "zend_partial.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -203,6 +204,7 @@ void init_executor(void) /* {{{ */
 	zend_weakrefs_init();
 
 	zend_hash_init(&EG(callable_convert_cache), 8, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&EG(partial_function_application_cache), 8, NULL, zend_partial_op_array_dtor, 0);
 
 	EG(active) = 1;
 }
@@ -420,6 +422,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 		zend_hash_clean(&EG(callable_convert_cache));
+		zend_hash_clean(&EG(partial_function_application_cache));
 
 #if ZEND_DEBUG
 		if (!CG(unclean_shutdown)) {
@@ -516,6 +519,7 @@ void shutdown_executor(void) /* {{{ */
 		}
 
 		zend_hash_destroy(&EG(callable_convert_cache));
+		zend_hash_destroy(&EG(partial_function_application_cache));
 	}
 
 #if ZEND_DEBUG
