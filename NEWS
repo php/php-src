@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha3
 
+- Core:
+  . Implemented partial function application RFC. (Arnaud)
+
 - GMP:
   . Fixed GMP power and shift operators to reject GMP right operands outside
     the unsigned long range instead of silently truncating them. (Weilin Du)
