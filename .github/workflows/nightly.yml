@@ -565,14 +565,16 @@ jobs:
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
           for repository in $repositories; do
-            printf "Testing amp/%s\n" "$repository"
+            echo "::group::$repository"
             git clone "https://github.com/amphp/$repository.git" "amphp-$repository" --depth 1
             cd "amphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-req=php+
             vendor/bin/phpunit || EXIT_CODE=$?
+            echo "::endgroup::"
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
+              echo "Failed"
             fi
             cd ..
           done
@@ -596,14 +598,16 @@ jobs:
           repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
           X=0
           for repository in $repositories; do
-            printf "Testing reactphp/%s\n" "$repository"
+            echo "::group::$repository"
             git clone "https://github.com/reactphp/$repository.git" "reactphp-$repository" --depth 1
             cd "reactphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-req=php+
             vendor/bin/phpunit || EXIT_CODE=$?
+            echo "::endgroup::"
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
+              echo "Failed"
             fi
             cd ..
           done
@@ -634,9 +638,12 @@ jobs:
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
+            echo "::group::$component"
             php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
+            echo "::endgroup::"
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
+              echo "Failed"
             fi
           done
           exit $X
