@@ -1,5 +1,7 @@
 --TEST--
 GH-19371 (integer overflow in calendar.c)
+--SKIPIF--
+<?php if (PHP_INT_SIZE !== 8) die("skip only for 64-bit"); ?>
 --EXTENSIONS--
 calendar
 --FILE--
