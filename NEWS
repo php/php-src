@@ -148,6 +148,8 @@ PHP                                                                        NEWS
   . Add enum SortDirection. (timwolla)
   . pathinfo() raises a ValueError with an invalid $flags argument.
     (David Carlier)
+  . Passing an invalid flag value to the second argument of scandir() will now
+    throw a ValueError. (alexandre-daubois)
 
 - Streams:
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
