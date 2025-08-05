@@ -2,6 +2,7 @@
 posix_kill() with large pid
 --EXTENSIONS--
 posix
+pcntl
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
