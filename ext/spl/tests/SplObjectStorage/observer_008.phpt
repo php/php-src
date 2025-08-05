@@ -9,24 +9,24 @@ $o2 = new StdClass;
 $o3 = new StdClass;
 
 $a = new A;
-$a->attach($o1);
-$a->attach($o2);
+$a->offsetSet($o1);
+$a->offsetSet($o2);
 
 $b = new SplObjectStorage();
-$b->attach($o2);
-$b->attach($o3);
+$b->offsetSet($o2);
+$b->offsetSet($o3);
 
-$a->addAll($b);
+$a->offsetUnset($b);
 
 var_dump($a->count());
 
-$a->detach($o3);
+$a->offsetUnset($o3);
 var_dump($a->count());
 
 $a->removeAll($b);
 var_dump($a->count());
 ?>
 --EXPECT--
-int(3)
+int(2)
 int(2)
 int(1)

@@ -17,7 +17,7 @@ $storage = new SplObjectStorage();
 
 foreach(array(1,"2","foo",true) as $value)
 {
-     $storage->attach(new TestClass($value));
+     $storage->offsetSet(new TestClass($value));
 }
 
 var_dump(count($storage));

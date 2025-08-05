@@ -25,6 +25,7 @@
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
 
 #include "php_spl.h" /* For php_spl_object_hash() */
 #include "spl_observer.h"

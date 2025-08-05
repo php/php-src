@@ -27,7 +27,7 @@ $storage = new MyStorage();
 
 foreach(array(1,2) as $value)
 {
-     $storage->attach(new TestClass($value));
+     $storage->offsetSet(new TestClass($value));
 }
 
 var_dump(count($storage));
