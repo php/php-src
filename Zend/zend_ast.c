@@ -2310,7 +2310,7 @@ simple_list:
 				case IS_NULL:      PREFIX_OP("(unset)",  240, 241);
 				case _IS_BOOL:     PREFIX_OP("(bool)",   240, 241);
 				case IS_LONG:      PREFIX_OP("(int)",    240, 241);
-				case IS_DOUBLE:    PREFIX_OP("(double)", 240, 241);
+				case IS_DOUBLE:    PREFIX_OP("(float)", 240, 241);
 				case IS_STRING:    PREFIX_OP("(string)", 240, 241);
 				case IS_ARRAY:     PREFIX_OP("(array)",  240, 241);
 				case IS_OBJECT:    PREFIX_OP("(object)", 240, 241);
