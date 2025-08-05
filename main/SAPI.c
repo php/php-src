@@ -65,11 +65,31 @@ static void sapi_globals_dtor(sapi_globals_struct *sapi_globals)
 SAPI_API sapi_module_struct sapi_module;
 
 
+#ifdef PHP_WIN32
+static void add_sapi_module_folder_to_dll_search_path(sapi_module_struct *sf)
+{
+	const DWORD flags = GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT;
+	HMODULE module;
+	wchar_t filename[MAX_PATH];
+	if (GetModuleHandleEx(flags, (LPCTSTR) sf, &module)) {
+		DWORD len = GetModuleFileNameW(module, filename, MAX_PATH);
+		if (len > 0 && len < MAX_PATH) {
+			wchar_t *slash = wcsrchr(filename, L'\\');
+			slash[0] = L'\0';
+			SetDllDirectoryW(filename);
+		}
+	}
+}
+#endif
+
 SAPI_API void sapi_startup(sapi_module_struct *sf)
 {
 	sf->ini_entries = NULL;
 	sapi_module = *sf;
 
+#ifdef PHP_WIN32
+	add_sapi_module_folder_to_dll_search_path(sf);
+#endif
 #ifdef ZTS
 	ts_allocate_fast_id(&sapi_globals_id, &sapi_globals_offset, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
 # ifdef PHP_WIN32
