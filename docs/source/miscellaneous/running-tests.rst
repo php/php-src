@@ -11,16 +11,16 @@ work). Therefore you can execute the script as follows:
 
 .. code:: shell
 
-   TEST_PHP_EXECUTABLE=sapi/cli/php \
    sapi/cli/php [-c /path/to/php.ini] run-tests.php [ext/foo/tests/GLOB]
 
 ******************************************
  Which php executable does make test use?
 ******************************************
 
-If you are running the ``run-tests.php`` script from the command line (as above) you must set the
+If you are running the ``run-tests.php`` script from the command line (as above) you can set the
 ``TEST_PHP_EXECUTABLE`` environment variable to explicitly select the PHP executable that is to be
-tested, that is, used to run the test scripts.
+tested, that is, used to run the test scripts, otherwise it will use the PHP CLI binary that you
+have compiled (``sapi/cli/php``).
 
 If you run the tests using make test, the PHP CLI and CGI executables are automatically set for you.
 ``make test`` executes ``run-tests.php`` script with the CLI binary. Some test scripts such as
