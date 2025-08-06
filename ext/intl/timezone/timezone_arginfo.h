@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6ffeea8491aa48c49879fa77bdb644d10d5c71bd */
+ * Stub hash: 22e652c6a05ade0a6fd3119e4742cd260ba27146 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -12,7 +12,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlTimeZone_crea
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlTimeZone_createEnumeration, 0, 0, IntlIterator, MAY_BE_FALSE)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, countryOrRawOffset, "null")
+	ZEND_ARG_TYPE_MASK(0, countryOrRawOffset, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlTimeZone_createTimeZone, 0, 1, IntlTimeZone, 1)
