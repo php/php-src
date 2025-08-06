@@ -89,6 +89,9 @@
 #ifndef __has_feature
 # define __has_feature(x) 0
 #endif
+#ifndef __has_include
+# define __has_include(x) 0
+#endif
 
 #if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
@@ -748,6 +751,10 @@ extern "C++" {
 # define ZEND_SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
 #else
 # define ZEND_SET_ALIGNED(alignment, decl) decl
+#endif
+
+#if __has_attribute(section)
+# define HAVE_ATTRIBUTE_SECTION
 #endif
 
 #define ZEND_SLIDE_TO_ALIGNED(alignment, ptr) (((uintptr_t)(ptr) + ((alignment)-1)) & ~((alignment)-1))
