@@ -2,11 +2,12 @@
 IntlCalendar::fromDateTime(): errors
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=nl
+date.timezone=Europe/Lisbon
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-date_default_timezone_set('Europe/Lisbon');
 
 try {
     IntlCalendar::fromDateTime("foobar");

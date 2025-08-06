@@ -2,11 +2,12 @@
 IntlCalendar::setTimeZone(): valid time zones for DateTime but not ICU
 --EXTENSIONS--
 intl
+--INI--
+date.timezone=Europe/Amsterdam
+intl.default_locale=nl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-date_default_timezone_set('Europe/Amsterdam');
 
 $intlcal = new IntlGregorianCalendar();
 

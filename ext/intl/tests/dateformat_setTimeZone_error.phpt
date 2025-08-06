@@ -2,11 +2,11 @@
 IntlDateFormatter::setTimeZone() bad args
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=pt_PT
+date.timezone=Atlantic/Azores
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
-ini_set("date.timezone", 'Atlantic/Azores');
 
 $df = new IntlDateFormatter(NULL, 0, 0);
 
