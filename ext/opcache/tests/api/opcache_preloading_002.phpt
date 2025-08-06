@@ -1,7 +1,5 @@
 --TEST--
 opcache_preloading() api 002
---EXTENSIONS--
-zend_test
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -9,6 +7,7 @@ opcache.preload={PWD}/opcache_preloading.inc
 opcache.preload_user={ENV:TEST_NON_ROOT_USER}
 --EXTENSIONS--
 posix
+zend_test
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
