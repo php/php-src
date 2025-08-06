@@ -1,5 +1,5 @@
 --TEST--
-Basic UConverter::convert() w/ Subsitution
+Basic UConverter::convert() w/ Substitution
 --EXTENSIONS--
 intl
 --INI--

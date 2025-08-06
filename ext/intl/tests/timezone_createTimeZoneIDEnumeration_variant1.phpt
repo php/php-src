@@ -4,7 +4,6 @@ IntlTimeZone::createTimeZoneIDEnumeration(): variant without offset
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $enum = IntlTimeZone::createTimeZoneIDEnumeration(
     IntlTimeZone::TYPE_ANY,
     'PT');
