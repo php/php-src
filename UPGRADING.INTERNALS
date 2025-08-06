@@ -29,6 +29,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     be heap-allocated and stored in the pointer as a minimal change to keep
     compatibility.
 
+- Hash
+  . Hash functions now use proper hash_spec_result enum for return values
+    instead of using SUCCESS and FAILURE.
+
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
     a value to a non-reference zval.

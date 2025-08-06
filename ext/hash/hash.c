@@ -229,20 +229,20 @@ static void one_to_buffer(size_t sz, unsigned char *buf, uint64_t val) {
    significant bits first. This allows 32-bit and 64-bit architectures to
    interchange serialized HashContexts. */
 
-PHP_HASH_API zend_result php_hash_serialize_spec(const php_hashcontext_object *hash, zval *zv, const char *spec) /* {{{ */
+PHP_HASH_API hash_spec_result php_hash_serialize_spec(const php_hashcontext_object *hash, zval *zv, const char *spec) /* {{{ */
 {
 	size_t pos = 0, max_alignment = 1;
 	unsigned char *buf = (unsigned char *) hash->context;
 	zval tmp;
 	if (buf == NULL) {
-		return FAILURE;
+		return HASH_SPEC_FAILURE;
 	}
 	array_init(zv);
 	while (*spec != '\0' && *spec != '.') {
 		char spec_ch = *spec;
 		size_t sz, count = parse_serialize_spec(&spec, &pos, &sz, &max_alignment);
 		if (pos + count * sz > hash->ops->context_size) {
-			return FAILURE;
+			return HASH_SPEC_FAILURE;
 		}
 		if (isupper((unsigned char) spec_ch)) {
 			pos += count * sz;
@@ -265,38 +265,33 @@ PHP_HASH_API zend_result php_hash_serialize_spec(const php_hashcontext_object *h
 		}
 	}
 	if (*spec == '.' && align_to(pos, max_alignment) != hash->ops->context_size) {
-		return FAILURE;
+		return HASH_SPEC_FAILURE;
 	}
-	return SUCCESS;
+	return HASH_SPEC_SUCCESS;
 }
 /* }}} */
 
-/* Unserialize a hash context serialized by `php_hash_serialize_spec` with `spec`.
-   Returns SUCCESS on success and a negative error code on failure.
-   Codes: FAILURE (-1) == generic failure
-   -999 == spec wrong size for context
-   -1000 - POS == problem at byte offset POS */
-
-PHP_HASH_API int php_hash_unserialize_spec(php_hashcontext_object *hash, const zval *zv, const char *spec) /* {{{ */
+/* Unserialize a hash context serialized by `php_hash_serialize_spec` with `spec`. */
+PHP_HASH_API hash_spec_result php_hash_unserialize_spec(php_hashcontext_object *hash, const zval *zv, const char *spec) /* {{{ */
 {
 	size_t pos = 0, max_alignment = 1, j = 0;
 	unsigned char *buf = (unsigned char *) hash->context;
 	zval *elt;
 	if (Z_TYPE_P(zv) != IS_ARRAY) {
-		return FAILURE;
+		return HASH_SPEC_FAILURE;
 	}
 	while (*spec != '\0' && *spec != '.') {
 		char spec_ch = *spec;
 		size_t sz, count = parse_serialize_spec(&spec, &pos, &sz, &max_alignment);
 		if (pos + count * sz > hash->ops->context_size) {
-			return -999;
+			return WRONG_CONTEXT_SIZE;
 		}
 		if (isupper((unsigned char) spec_ch)) {
 			pos += count * sz;
 		} else if (sz == 1 && count > 1) {
 			elt = zend_hash_index_find(Z_ARRVAL_P(zv), j);
 			if (!elt || Z_TYPE_P(elt) != IS_STRING || Z_STRLEN_P(elt) != count) {
-				return -1000 - pos;
+				return BYTE_OFFSET_POS_ERROR - pos;
 			}
 			++j;
 			memcpy(buf + pos, Z_STRVAL_P(elt), count);
@@ -306,14 +301,14 @@ PHP_HASH_API int php_hash_unserialize_spec(php_hashcontext_object *hash, const z
 				uint64_t val;
 				elt = zend_hash_index_find(Z_ARRVAL_P(zv), j);
 				if (!elt || Z_TYPE_P(elt) != IS_LONG) {
-					return -1000 - pos;
+					return BYTE_OFFSET_POS_ERROR - pos;
 				}
 				++j;
 				val = (uint32_t) Z_LVAL_P(elt);
 				if (sz == 8) {
 					elt = zend_hash_index_find(Z_ARRVAL_P(zv), j);
 					if (!elt || Z_TYPE_P(elt) != IS_LONG) {
-						return -1000 - pos;
+						return BYTE_OFFSET_POS_ERROR - pos;
 					}
 					++j;
 					val += ((uint64_t) Z_LVAL_P(elt)) << 32;
@@ -325,31 +320,32 @@ PHP_HASH_API int php_hash_unserialize_spec(php_hashcontext_object *hash, const z
 		}
 	}
 	if (*spec == '.' && align_to(pos, max_alignment) != hash->ops->context_size) {
-		return -999;
+		return WRONG_CONTEXT_SIZE;
 	}
-	return SUCCESS;
+
+	return HASH_SPEC_SUCCESS;
 }
 /* }}} */
 
-PHP_HASH_API zend_result php_hash_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv) /* {{{ */
+PHP_HASH_API hash_spec_result php_hash_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv) /* {{{ */
 {
-	if (hash->ops->serialize_spec) {
-		*magic = PHP_HASH_SERIALIZE_MAGIC_SPEC;
-		return php_hash_serialize_spec(hash, zv, hash->ops->serialize_spec);
-	} else {
-		return FAILURE;
-	}
+	if (!hash->ops->serialize_spec) {
+        return HASH_SPEC_FAILURE;
+    }
+
+    *magic = PHP_HASH_SERIALIZE_MAGIC_SPEC;
+    return php_hash_serialize_spec(hash, zv, hash->ops->serialize_spec);
 }
 /* }}} */
 
-PHP_HASH_API int php_hash_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv) /* {{{ */
+PHP_HASH_API hash_spec_result php_hash_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv) /* {{{ */
 {
 	if (hash->ops->serialize_spec
 		&& magic == PHP_HASH_SERIALIZE_MAGIC_SPEC) {
 		return php_hash_unserialize_spec(hash, zv, hash->ops->serialize_spec);
-	} else {
-		return FAILURE;
 	}
+
+    return HASH_SPEC_FAILURE;
 }
 /* }}} */
 
@@ -1475,7 +1471,7 @@ PHP_METHOD(HashContext, __serialize)
 	ZVAL_LONG(&tmp, hash->options);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
-	if (hash->ops->hash_serialize(hash, &magic, &tmp) != SUCCESS) {
+	if (hash->ops->hash_serialize(hash, &magic, &tmp) != HASH_SPEC_SUCCESS) {
 		goto serialize_failure;
 	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
@@ -1504,7 +1500,7 @@ PHP_METHOD(HashContext, __unserialize)
 	HashTable *data;
 	zval *algo_zv, *magic_zv, *options_zv, *hash_zv, *members_zv;
 	zend_long magic, options;
-	int unserialize_result;
+	hash_spec_result unserialize_result;
 	const php_hash_ops *ops;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
@@ -1553,7 +1549,7 @@ PHP_METHOD(HashContext, __unserialize)
 	ops->hash_init(hash->context, NULL);
 
 	unserialize_result = ops->hash_unserialize(hash, magic, hash_zv);
-	if (unserialize_result != SUCCESS) {
+	if (unserialize_result != HASH_SPEC_SUCCESS) {
 		zend_throw_exception_ex(NULL, 0, "Incomplete or ill-formed serialization data (\"%s\" code %d)", ops->algo, unserialize_result);
 		/* free context */
 		php_hashcontext_dtor(Z_OBJ_P(object));
