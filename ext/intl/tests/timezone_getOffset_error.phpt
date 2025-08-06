@@ -11,12 +11,12 @@ if ($arch != 'x86_64' && $arch != 'i386')
 ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getOffset(INF, true, $a, $a));
+echo intl_get_error_message(), PHP_EOL;
 
 ?>
---EXPECTF--
-Warning: IntlTimeZone::getOffset(): error obtaining offset in %s on line %d
+--EXPECT--
 bool(false)
+IntlTimeZone::getOffset(): error obtaining offset: U_ILLEGAL_ARGUMENT_ERROR
