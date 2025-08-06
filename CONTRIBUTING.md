@@ -420,14 +420,13 @@ An Example from the git project (commit 2b34e486bc):
     'arg' variable no longer is available.
 
 If you fix some bugs, you should note the bug ID numbers in your commit message.
-Bug ID should be prefixed by `#`.
 
 Example:
 
-    Fixed bug #14016 (pgsql notice handler double free crash bug).
+    Fixed GH-14009: Fix prototype for trait method.
 
-When you change the NEWS file for a bug fix, then please keep the bugs sorted in
-decreasing order under the fixed version.
+When you change the NEWS file for a bug fix, then please keep the bugs sorted
+under the fixed version.
 
 ## Copyright and license headers
 
