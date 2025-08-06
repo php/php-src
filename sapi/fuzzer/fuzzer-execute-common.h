@@ -53,7 +53,18 @@ static zend_always_inline void fuzzer_step(void) {
 static void (*orig_execute_ex)(zend_execute_data *execute_data);
 
 static void fuzzer_execute_ex(zend_execute_data *execute_data) {
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		/* No opline was executed before exception */
+		EG(opline_before_exception) = NULL;
+		/* Fall through to handle exception below. */
+	}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 	const zend_op *opline = EX(opline);
+
 	while (1) {
 		fuzzer_step();
 		opline = ((opcode_handler_t) opline->handler)(execute_data, opline);
