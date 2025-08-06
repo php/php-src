@@ -1635,7 +1635,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("integer"){TABS_AND_SPACES}")" {
 	if (PARSER_MODE()) {
-		zend_error(E_DEPRECATED, "Non canonical cast (integer) is deprecated, use the (int) cast instead");
+		zend_error(E_DEPRECATED, "Non-canonical cast (integer) is deprecated, use the (int) cast instead");
 	}
 	RETURN_TOKEN(T_INT_CAST);
 }
@@ -1646,7 +1646,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("double"){TABS_AND_SPACES}")" {
 	if (PARSER_MODE()) {
-		zend_error(E_DEPRECATED, "Non canonical cast (double) is deprecated, use the (float) cast instead");
+		zend_error(E_DEPRECATED, "Non-canonical cast (double) is deprecated, use the (float) cast instead");
 	}
 	RETURN_TOKEN(T_INT_CAST);
 }
@@ -1665,7 +1665,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("binary"){TABS_AND_SPACES}")" {
 	if (PARSER_MODE()) {
-		zend_error(E_DEPRECATED, "Non canonical cast (binary) is deprecated, use the (string) cast instead");
+		zend_error(E_DEPRECATED, "Non-canonical cast (binary) is deprecated, use the (string) cast instead");
 	}
 	RETURN_TOKEN(T_INT_CAST);
 }
@@ -1684,7 +1684,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("boolean"){TABS_AND_SPACES}")" {
 	if (PARSER_MODE()) {
-		zend_error(E_DEPRECATED, "Non canonical cast (boolean) is deprecated, use the (bool) cast instead");
+		zend_error(E_DEPRECATED, "Non-canonical cast (boolean) is deprecated, use the (bool) cast instead");
 	}
 	RETURN_TOKEN(T_INT_CAST);
 }

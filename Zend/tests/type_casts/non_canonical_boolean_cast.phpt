@@ -7,5 +7,5 @@ var_dump((boolean) 42);
 
 ?>
 --EXPECTF--
-Deprecated: Non canonical cast (boolean) is deprecated, use the (bool) cast instead in %s on line %d
+Deprecated: Non-canonical cast (boolean) is deprecated, use the (bool) cast instead in %s on line %d
 int(42)
