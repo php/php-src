@@ -136,7 +136,11 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_get_property(const uri_interna
 		return FAILURE;
 	}
 
-	return property_handler->read_func(internal_uri, read_mode, zv);
+	zend_result result = property_handler->read_func(internal_uri, read_mode, zv);
+
+	ZEND_ASSERT(result == FAILURE || (Z_TYPE_P(zv) == IS_STRING && GC_REFCOUNT(Z_STR_P(zv)) == 2) || Z_TYPE_P(zv) == IS_NULL || Z_TYPE_P(zv) == IS_LONG);
+
+	return result;
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
@@ -1011,14 +1015,14 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_implementation_set_object_handlers(ze
 	object_handlers->clone_obj = uri_clone_obj_handler;
 }
 
-zend_result uri_handler_register(const uri_handler_t *uri_handler)
+PHPAPI zend_result uri_handler_register(const uri_handler_t *uri_handler)
 {
-	zend_string *key = zend_string_init_interned(uri_handler->name, strlen(uri_handler->name), 1);
+	zend_string *key = zend_string_init_interned(uri_handler->name, strlen(uri_handler->name), true);
 
-	ZEND_ASSERT(uri_handler->name != NULL);
+	ZEND_ASSERT(uri_handler->name != NULL && (strlen(uri_handler->name) > 0 || strcmp(uri_handler->name, URI_PARSER_PHP) == 0));
 	ZEND_ASSERT(uri_handler->parse_uri != NULL);
-	ZEND_ASSERT(uri_handler->clone_uri != NULL);
-	ZEND_ASSERT(uri_handler->uri_to_string != NULL);
+	ZEND_ASSERT(uri_handler->clone_uri != NULL || strcmp(uri_handler->name, URI_PARSER_PHP) == 0);
+	ZEND_ASSERT(uri_handler->uri_to_string != NULL || strcmp(uri_handler->name, URI_PARSER_PHP) == 0);
 	ZEND_ASSERT(uri_handler->free_uri != NULL);
 
 	zend_result result = zend_hash_add_ptr(&uri_handlers, key, (void *) uri_handler) != NULL ? SUCCESS : FAILURE;
@@ -1045,7 +1049,7 @@ static PHP_MINIT_FUNCTION(uri)
 
 	zend_hash_init(&uri_handlers, 4, NULL, NULL, true);
 
-	if (PHP_MINIT(uri_uriparser)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE) {
+	if (uri_handler_register(&uriparser_uri_handler) == FAILURE) {
 		return FAILURE;
 	}
 

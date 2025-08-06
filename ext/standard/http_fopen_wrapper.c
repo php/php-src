@@ -749,33 +749,32 @@ finish:
 
 	/* auth header if it was specified */
 	if (((have_header & HTTP_HEADER_AUTH) == 0) && resource->user) {
-		/* make scratch large enough to hold the whole URL (over-estimate) */
-		size_t scratch_len = strlen(path) + 1;
-		char *scratch = emalloc(scratch_len);
+		smart_str scratch = {0};
 		zend_string *stmp;
 
 		/* decode the strings first */
 		php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
 
-		strcpy(scratch, ZSTR_VAL(resource->user));
-		strcat(scratch, ":");
+		smart_str_appendl(&scratch, ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
+		smart_str_appendc(&scratch, ':');
 
 		/* Note: password is optional! */
 		if (resource->password) {
 			php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
-			strcat(scratch, ZSTR_VAL(resource->password));
+			smart_str_appendl(&scratch, ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
 		}
 
-		stmp = php_base64_encode((unsigned char*)scratch, strlen(scratch));
+		zend_string *scratch_str = smart_str_extract(&scratch);
+		stmp = php_base64_encode((unsigned char*)ZSTR_VAL(scratch_str), ZSTR_LEN(scratch_str));
 
 		smart_str_appends(&req_buf, "Authorization: Basic ");
-		smart_str_appends(&req_buf, ZSTR_VAL(stmp));
+		smart_str_appendl(&req_buf, ZSTR_VAL(stmp), ZSTR_LEN(stmp));
 		smart_str_appends(&req_buf, "\r\n");
 
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 
 		zend_string_free(stmp);
-		efree(scratch);
+		smart_str_free(&scratch);
 	}
 
 	/* if the user has configured who they are, send a From: line */

@@ -76,10 +76,13 @@ typedef struct uri_property_handlers_t {
 } uri_property_handlers_t;
 
 typedef struct uri_handler_t {
+	/**
+	 * Name (the FQCN) of the URI handler. The "" name is reserved for the handler of the legacy parse_url().
+	 */
 	const char *name;
 
 	/**
-	 * Parse a URI string into a URI.
+	 * Parses a URI string into a URI.
 	 *
 	 * If the URI string is valid, a URI is returned. In case of failure, NULL is
 	 * returned.
@@ -93,10 +96,46 @@ typedef struct uri_handler_t {
 	 *
 	 * If the silent parameter is true, a Uri\InvalidUriException instance must be thrown.
 	 * If the parameter is false, the possible errors should be handled by the caller.
+	 *
+	 * @param uri_str The input string that is going to be parsed
+	 * @param uri_str_len Length of the input string
+	 * @param base_url The base URI if reference resolution should be performed, otherwise NULL
+	 * @param errors An out parameter that stores additional error information
+	 * @param silent Whether to throw a Uri\InvalidUriException in case of failure
 	 */
 	void *(*parse_uri)(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent);
+
+	/**
+	 * Clones a URI to a new URI.
+	 *
+	 * A deep-clone must be performed that copies all pointer members to a new memory address.
+	 * @param uri The input URI
+	 * @return The cloned URI
+	 */
 	void *(*clone_uri)(void *uri);
+
+	/**
+	 * Recomposes a URI as a string according to the recomposition_mode and exclude_fragment parameters.
+	 * The returned zend_string must not be persistent.
+	 *
+	 * Recomposition_mode can be one of the following:
+	 * - URI_RECOMPOSITION_RAW_ASCII: Recomposes the raw, non-normalized variant of the URI as a string that must only contain ASCII characters
+	 * - URI_RECOMPOSITION_RAW_UNICODE: Recomposes the raw, non-normalized variant of the URI as a string that may contain Unicode codepoints
+	 * - URI_RECOMPOSITION_NORMALIZED_ASCII: Recomposes the normalized variant of the URI as a string that must only contain ASCII characters
+	 * - URI_RECOMPOSITION_NORMALIZED_UNICODE: Recomposes the normalized variant of the URI as a string that may contain Unicode codepoints
+	 *
+	 * @param uri The input URI
+	 * @param recomposition_mode The type of recomposition
+	 * @param exclude_fragment Whether the fragment component should be part of the recomposed URI
+	 * @return The recomposed URI as a non-persistent zend_string
+	 */
 	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
+
+	/**
+	 * Frees the provided URI.
+	 *
+	 * @param uri The input URI
+	 */
 	void (*free_uri)(void *uri);
 
 	const uri_property_handlers_t property_handlers;
@@ -125,10 +164,9 @@ static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 
 #define URI_PARSER_RFC3986 "Uri\\Rfc3986\\Uri"
 #define URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
-#define URI_PARSER_PHP "parse_url"
+#define URI_PARSER_PHP ""
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 
-zend_result uri_handler_register(const uri_handler_t *uri_handler);
 const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, uri_property_name_t property_name);
 void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, uri_component_read_mode_t component_read_mode);
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
