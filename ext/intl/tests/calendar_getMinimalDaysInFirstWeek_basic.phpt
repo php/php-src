@@ -2,6 +2,8 @@
 IntlCalendar::getMinimalDaysInFirstWeek() basic test
 --EXTENSIONS--
 intl
+--INI--
+intl.default_locale=nl
 --FILE--
 <?php
 
