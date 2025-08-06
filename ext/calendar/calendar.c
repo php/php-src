@@ -195,7 +195,7 @@ PHP_FUNCTION(cal_days_in_month)
 	}
 
 	if (UNEXPECTED(month <= 0 || month > INT32_MAX - 1)) {
-		zend_argument_value_error(2, "must be between 0 and %d", INT32_MAX - 1);
+		zend_argument_value_error(2, "must be between 1 and %d", INT32_MAX - 1);
 		RETURN_THROWS();
 	}
 
@@ -250,7 +250,7 @@ PHP_FUNCTION(cal_to_jd)
 	}
 
 	if (UNEXPECTED(month <= 0 || month > INT32_MAX - 1)) {
-		zend_argument_value_error(2, "must be between 0 and %d", INT32_MAX - 1);
+		zend_argument_value_error(2, "must be between 1 and %d", INT32_MAX - 1);
 		RETURN_THROWS();
 	}
 

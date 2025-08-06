@@ -52,10 +52,10 @@ try {
 ?>
 --EXPECT--
 cal_days_in_month(): Argument #3 ($year) must be less than 2147483646
-cal_days_in_month(): Argument #2 ($month) must be between 0 and 2147483646
-cal_days_in_month(): Argument #2 ($month) must be between 0 and 2147483646
-cal_to_jd(): Argument #2 ($month) must be between 0 and 2147483646
-cal_to_jd(): Argument #2 ($month) must be between 0 and 2147483646
+cal_days_in_month(): Argument #2 ($month) must be between 1 and 2147483646
+cal_days_in_month(): Argument #2 ($month) must be between 1 and 2147483646
+cal_to_jd(): Argument #2 ($month) must be between 1 and 2147483646
+cal_to_jd(): Argument #2 ($month) must be between 1 and 2147483646
 cal_to_jd(): Argument #3 ($day) must be between -2147483648 and 2147483647
 cal_to_jd(): Argument #3 ($day) must be between -2147483648 and 2147483647
 cal_to_jd(): Argument #4 ($year) must be less than 2147483646
