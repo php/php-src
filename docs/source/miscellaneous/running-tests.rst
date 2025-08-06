@@ -58,6 +58,31 @@ Tester can easily execute tests selectively with as follows:
    ./sapi/cli/php run-tests.php ext/mbstring/*
    ./sapi/cli/php run-tests.php ext/mbstring/020.phpt
 
+*********************
+ Test Runner Options
+*********************
+
+The ``run-tests.php`` test runner has many options. You can see these options by using the ``-h``
+option with ``run-tests.php``.
+
+You can set options by specifying them on the command line when you run ``php run-tests.php`` or if
+you use ``make test`` through the ``TEST_PHP_ARGS`` environment variable:
+
+.. code:: shell
+
+   php run-tests.php -j24
+   # or
+   TEST_PHP_ARGS="-j24" make test
+
+Running Tests in Parallel
+=========================
+
+The test runner can run tests in parallel, by using the ``-j`` option:
+
+.. code:: shell
+
+   php run-tests.php -j24 ext/date/*.phpt
+
 **************
  Test results
 **************
