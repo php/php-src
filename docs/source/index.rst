@@ -16,6 +16,12 @@
    core/data-structures/index
 
 .. toctree::
+   :caption: TrueAsync API
+   :hidden:
+
+   true_async_api/index
+
+.. toctree::
    :caption: Miscellaneous
    :hidden:
 

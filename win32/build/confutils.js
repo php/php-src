@@ -1998,6 +1998,8 @@ function write_summary()
 		ar[k++] = ['Static analyzer', 'disabled'];
 	}
 
+    ar[k++] = ['True Async API', 'Yes'];
+
 	output_as_table(["",""], ar);
 	STDOUT.WriteBlankLines(2);
 }

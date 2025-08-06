@@ -407,3 +407,7 @@ toolset_setup_intrinsic_cflags();
 ARG_ENABLE('snapshot-build', 'Build a snapshot: turns on everything it can and ignores build errors', 'no');
 
 ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');
+
+ARG_ENABLE("async-api", "Disable async API support", "yes");
+
+ADD_SOURCES("Zend", "zend_async_API.c");
