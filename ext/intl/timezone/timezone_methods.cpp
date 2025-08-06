@@ -229,17 +229,17 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	if (zoneType != UCAL_ZONE_TYPE_ANY && zoneType != UCAL_ZONE_TYPE_CANONICAL
 			&& zoneType != UCAL_ZONE_TYPE_CANONICAL_LOCATION) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "bad zone type");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be one of IntlTimeZone::TYPE_ANY,"
+			" IntlTimeZone::TYPE_CANONICAL, or IntlTimeZone::TYPE_CANONICAL_LOCATION");
+		RETURN_THROWS();
 	}
 
 	if (!arg3isnull) {
-		if (UNEXPECTED(offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX)) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"offset out of bounds");
-			RETURN_FALSE;
+		if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(offset_arg))) {
+			zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
 		}
-		offset = (int32_t)offset_arg;
+		offset = static_cast<int32_t>(offset_arg);
 		offsetp = &offset;
 	} //else leave offsetp NULL
 
