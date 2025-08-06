@@ -275,15 +275,6 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_fragment(const uri_inte
 	return SUCCESS;
 }
 
-PHP_MINIT_FUNCTION(uri_uriparser)
-{
-	if (uri_handler_register(&uriparser_uri_handler) == FAILURE) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-
 static uriparser_uris_t *uriparser_create_uris(void)
 {
 	uriparser_uris_t *uriparser_uris = ecalloc(1, sizeof(*uriparser_uris));
@@ -352,8 +343,7 @@ void *uriparser_parse_uri(const char *uri_str, size_t uri_str_len, const void *b
 	return uriparser_parse_uri_ex(uri_str, uri_str_len, base_url, silent);
 }
 
-/* TODO make the clone handler accept a flag to distinguish between clone() calls and withers.
- * When calling a wither successfully, the normalized URI is surely invalidated, therefore
+/* When calling a wither successfully, the normalized URI is surely invalidated, therefore
  * it doesn't make sense to copy it. In case of failure, an exception is thrown, and the URI object
  * is discarded altogether. */
 ZEND_ATTRIBUTE_NONNULL static void *uriparser_clone_uri(void *uri)
