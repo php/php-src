@@ -24,6 +24,7 @@
 #include "../intl_error.h"
 #include "../intl_common.h"
 #include "converter_arginfo.h"
+#include "php_intl.h"
 
 typedef struct _php_converter_object {
 	UConverter *src, *dest;
@@ -370,7 +371,10 @@ static bool php_converter_set_encoding(php_converter_object *objval,
 			/* Should never happen */
 			actual_encoding = "(unknown)";
 		}
-		php_error_docref(NULL, E_WARNING, "Ambiguous encoding specified, using %s", actual_encoding);
+		char *msg;
+		spprintf(&msg, 0, "Ambiguous encoding specified, using %s", actual_encoding);
+		intl_error_set(NULL, error, msg);
+		efree(msg);
 	} else if (U_FAILURE(error)) {
 		if (objval) {
 			THROW_UFAILURE(objval, error);
@@ -530,10 +534,23 @@ PHP_METHOD(UConverter, __construct) {
 		Z_PARAM_STRING_OR_NULL(src, src_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_converter_set_encoding(objval, &(objval->src),  src,  src_len );
-	php_converter_set_encoding(objval, &(objval->dest), dest, dest_len);
+	const bool old_use_exception = INTL_G(use_exceptions);
+	const zend_long old_error_level = INTL_G(error_level);
+	INTL_G(use_exceptions) = true;
+	INTL_G(error_level) = 0;
+	if (UNEXPECTED(!php_converter_set_encoding(objval, &(objval->src), src, src_len))) {
+		ZEND_ASSERT(EG(exception));
+		goto cleanup;
+	}
+	if (UNEXPECTED(!php_converter_set_encoding(objval, &(objval->dest), dest, dest_len))) {
+		ZEND_ASSERT(EG(exception));
+		goto cleanup;
+	}
 	php_converter_resolve_callback(&objval->to_cache, Z_OBJ_P(ZEND_THIS), ZEND_STRL("toUCallback"));
 	php_converter_resolve_callback(&objval->from_cache, Z_OBJ_P(ZEND_THIS), ZEND_STRL("fromUCallback"));
+cleanup:
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 /* }}} */
 
