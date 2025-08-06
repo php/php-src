@@ -1,5 +1,7 @@
 --TEST--
 opcache_preloading() api 002
+--EXTENSIONS--
+zend_test
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
