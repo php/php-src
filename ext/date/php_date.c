@@ -3970,40 +3970,36 @@ PHP_FUNCTION(date_diff)
 
 static bool timezone_initialize(php_timezone_obj *tzobj, const zend_string *tz_zstr, char **warning_message) /* {{{ */
 {
-	timelib_time *dummy_t = ecalloc(1, sizeof(timelib_time));
+	timelib_time  dummy_t = {0};
 	int           dst, not_found;
 	const char *tz = ZSTR_VAL(tz_zstr);
 
 	ZEND_ASSERT(!zend_str_has_nul_byte(tz_zstr) && "timezone should have been checked to not have null bytes");
 
-	dummy_t->z = timelib_parse_zone(&tz, &dst, dummy_t, &not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
-	if ((dummy_t->z >= (100 * 60 * 60)) || (dummy_t->z <= (-100 * 60 * 60))) {
+	dummy_t.z = timelib_parse_zone(&tz, &dst, &dummy_t, &not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+	if ((dummy_t.z >= (100 * 60 * 60)) || (dummy_t.z <= (-100 * 60 * 60))) {
 		if (warning_message) {
 			spprintf(warning_message, 0, "Timezone offset is out of range (%s)", ZSTR_VAL(tz_zstr));
 		}
-		timelib_free(dummy_t->tz_abbr);
-		efree(dummy_t);
+		timelib_free(dummy_t.tz_abbr);
 		return false;
 	}
-	dummy_t->dst = dst;
+	dummy_t.dst = dst;
 	if (!not_found && (*tz != '\0')) {
 		if (warning_message) {
 			spprintf(warning_message, 0, "Unknown or bad timezone (%s)", ZSTR_VAL(tz_zstr));
 		}
-		timelib_free(dummy_t->tz_abbr);
-		efree(dummy_t);
+		timelib_free(dummy_t.tz_abbr);
 		return false;
 	}
 	if (not_found) {
 		if (warning_message) {
 			spprintf(warning_message, 0, "Unknown or bad timezone (%s)", ZSTR_VAL(tz_zstr));
 		}
-		efree(dummy_t);
 		return false;
 	} else {
-		set_timezone_from_timelib_time(tzobj, dummy_t);
-		timelib_free(dummy_t->tz_abbr);
-		efree(dummy_t);
+		set_timezone_from_timelib_time(tzobj, &dummy_t);
+		timelib_free(dummy_t.tz_abbr);
 		return true;
 	}
 } /* }}} */
