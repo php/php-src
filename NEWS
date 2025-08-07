@@ -73,6 +73,7 @@ PHP                                                                        NEWS
   . Fix theoretical issues with hrtime() not being available. (nielsdos)
   . Fixed bug GH-19300 (Nested array_multisort invocation with error breaks).
     (nielsdos)
+  . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
 
 - Windows:
   . Free opened_path when opened_path_len >= MAXPATHLEN. (dixyes)
