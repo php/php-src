@@ -125,62 +125,35 @@ U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 
 U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 {
-	zval				*arg = NULL;
-	StringEnumeration	*se	  = NULL;
-	intl_error_reset(NULL);
+	zend_string *timezone = nullptr;
+	zend_long timezone_shift = 0;
+	bool is_null = true;
+	StringEnumeration	*se	  = nullptr;
+	intl_error_reset(nullptr);
 
 	/* double indirection to have the zend engine destroy the new zval that
 	 * results from separation */
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(arg)
+		Z_PARAM_STR_OR_LONG_OR_NULL(timezone, timezone_shift, is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (arg == NULL || Z_TYPE_P(arg) == IS_NULL) {
+	if (is_null) {
 		se = TimeZone::createEnumeration();
-	} else if (Z_TYPE_P(arg) == IS_LONG) {
-int_offset:
-		if (UNEXPECTED(Z_LVAL_P(arg) < (zend_long)INT32_MIN ||
-				Z_LVAL_P(arg) > (zend_long)INT32_MAX)) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"value is out of range");
-			RETURN_FALSE;
-		} else {
-			se = TimeZone::createEnumeration((int32_t) Z_LVAL_P(arg));
-		}
-	} else if (Z_TYPE_P(arg) == IS_DOUBLE) {
-double_offset:
-		convert_to_long(arg);
-		goto int_offset;
-	} else if (Z_TYPE_P(arg) == IS_OBJECT || Z_TYPE_P(arg) == IS_STRING) {
-		zend_long lval;
-		double dval;
-		if (!try_convert_to_string(arg)) {
+	} else if (timezone != nullptr) {
+		se = TimeZone::createEnumeration(ZSTR_VAL(timezone));
+	} else {
+		if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(timezone_shift))) {
+			zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
 			RETURN_THROWS();
 		}
-		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, 0)) {
-		case IS_DOUBLE:
-			zval_ptr_dtor(arg);
-			ZVAL_DOUBLE(arg, dval);
-			goto double_offset;
-		case IS_LONG:
-			zval_ptr_dtor(arg);
-			ZVAL_LONG(arg, lval);
-			goto int_offset;
-		}
-		/* else call string version */
-		se = TimeZone::createEnumeration(Z_STRVAL_P(arg));
-	} else {
-		// TODO Should be a TypeError
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"invalid argument type");
-		RETURN_FALSE;
+		se = TimeZone::createEnumeration(static_cast<int32_t>(timezone_shift));
 	}
 
 	if (se) {
 		IntlIterator_from_StringEnumeration(se, return_value);
 	} else {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+		intl_error_set(nullptr, U_ILLEGAL_ARGUMENT_ERROR,
 			"error obtaining enumeration");
 		RETVAL_FALSE;
 	}
