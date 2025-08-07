@@ -5132,6 +5132,62 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 }
 /* }}} */
 
+/* {{{ Returns an instance of this class whose properties are filled with the given data before the constructor is called */
+ZEND_METHOD(ReflectionClass, newInstanceFromData)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	int argc = 0;
+	HashTable *data, *args = NULL;
+	zend_function *constructor;
+	zend_string *key;
+	zval *val;
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_HT(data)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (args) {
+		argc = zend_hash_num_elements(args);
+	}
+
+	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
+		return;
+	}
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(data, key, val) {
+		zend_update_property_ex(ce, Z_OBJ_P(return_value), key, val);
+	} ZEND_HASH_FOREACH_END();
+
+	const zend_class_entry *old_scope = EG(fake_scope);
+	EG(fake_scope) = ce;
+	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
+	EG(fake_scope) = old_scope;
+
+	/* Run the constructor if there is one */
+	if (constructor) {
+		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
+			zval_ptr_dtor(return_value);
+			RETURN_NULL();
+		}
+
+		zend_call_known_function(
+			constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL, 0, NULL, args);
+
+		if (EG(exception)) {
+			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
+		}
+	} else if (argc) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ZSTR_VAL(ce->name));
+	}
+}
+/* }}} */
+
 void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		int strategy, bool is_reset)
 {
