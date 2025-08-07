@@ -570,8 +570,8 @@ jobs:
             cd "amphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-req=php+
-            vendor/bin/phpunit
-            EXIT_CODE=$?
+            EXIT_CODE=0
+            vendor/bin/phpunit || EXIT_CODE=$?
             echo -e "\n::endgroup::"
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -604,8 +604,8 @@ jobs:
             cd "reactphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-req=php+
-            vendor/bin/phpunit
-            EXIT_CODE=$?
+            EXIT_CODE=0
+            vendor/bin/phpunit || EXIT_CODE=$?
             echo -e "\n::endgroup::"
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -641,8 +641,8 @@ jobs:
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
             echo "::group::$component"
-            php ./phpunit $component --exclude-group tty --exclude-group benchmark --exclude-group intl-data --exclude-group transient --exclude-group skip
-            EXIT_CODE=$?
+            EXIT_CODE=0
+            php ./phpunit $component --exclude-group tty --exclude-group benchmark --exclude-group intl-data --exclude-group transient --exclude-group skip || EXIT_CODE=$?
             echo -e "\n::endgroup::"
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
