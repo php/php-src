@@ -4,17 +4,18 @@ IntlTimeZone::toDateTimeZone(): errors
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $tz = IntlTimeZone::createTimeZone('Etc/Unknown');
 
 try {
     var_dump($tz->toDateTimeZone());
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    $previous = $e->getPrevious();
+    echo '    ', $previous::class, ': ', $previous->getMessage(), PHP_EOL;
 }
 
 ?>
---EXPECTF--
-Warning: IntlTimeZone::toDateTimeZone(): DateTimeZone constructor threw exception in %s on line %d
-string(66) "DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
+--EXPECT--
+IntlException: DateTimeZone constructor threw exception
+    DateInvalidTimeZoneException: DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)

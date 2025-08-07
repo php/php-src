@@ -64,56 +64,44 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 											   intl_error *outside_error,
 											   zval *ret)
 {
-	UnicodeString		id;
-	php_timezone_obj	*tzobj;
-	zval				arg;
+	UnicodeString id;
 
 	timeZone->getID(id);
 	if (id.isBogus()) {
 		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
 			"could not obtain TimeZone id");
-		goto error;
+		return nullptr;
 	}
-
-	object_init_ex(ret, php_date_get_timezone_ce());
-	tzobj = Z_PHPTIMEZONE_P(ret);
 
 	if (id.compare(0, 3, UnicodeString("GMT", sizeof("GMT")-1, US_INV)) == 0) {
 		/* The DateTimeZone constructor doesn't support offset time zones,
-		 * so we must mess with DateTimeZone structure ourselves */
-		tzobj->initialized	  = 1;
+		* so we must mess with DateTimeZone structure ourselves */
+		object_init_ex(ret, php_date_get_timezone_ce());
+		php_timezone_obj *tzobj = Z_PHPTIMEZONE_P(ret);
+
+		tzobj->initialized	  = true;
 		tzobj->type			  = TIMELIB_ZONETYPE_OFFSET;
 		//convert offset from milliseconds to seconds
 		tzobj->tzi.utc_offset = timeZone->getRawOffset() / 1000;
 	} else {
-		zend_string *u8str;
-		/* Call the constructor! */
-		u8str = intl_charFromString(id, &INTL_ERROR_CODE(*outside_error));
+		zend_string *u8str = intl_charFromString(id, &INTL_ERROR_CODE(*outside_error));
 		if (!u8str) {
 			intl_errors_set(outside_error, INTL_ERROR_CODE(*outside_error),
 				"could not convert id to UTF-8");
-			goto error;
+			return nullptr;
 		}
+
+		zval arg;
 		ZVAL_STR(&arg, u8str);
-		zend_call_known_instance_method_with_1_params(
-			Z_OBJCE_P(ret)->constructor, Z_OBJ_P(ret), NULL, &arg);
-		if (EG(exception)) {
-			intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-				"DateTimeZone constructor threw exception");
-			zend_object_store_ctor_failed(Z_OBJ_P(ret));
-			zval_ptr_dtor(&arg);
-			goto error;
-		}
+		/* Instantiate the object and call the constructor */
+		zend_result status = object_init_with_constructor(ret, php_date_get_timezone_ce(), 1, &arg, nullptr);
 		zval_ptr_dtor(&arg);
+		if (UNEXPECTED(status == FAILURE)) {
+			zend_throw_exception(IntlException_ce_ptr, "DateTimeZone constructor threw exception", 0);
+			return nullptr;
+		}
 	}
 
-	if (0) {
-error:
-		if (ret) {
-			zval_ptr_dtor(ret);
-		}
-		ret = NULL;
-	}
 	return ret;
 }
 /* }}} */
