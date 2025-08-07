@@ -50,5 +50,4 @@ static inline IntlNumberRangeFormatter_object *php_intl_numberrangeformatter_fet
 
 void rangeformatter_register_class(void);
 
-
 #endif
