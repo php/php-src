@@ -755,20 +755,20 @@ finish:
 		/* decode the strings first */
 		php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
 
-		smart_str_appendl(&scratch, ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
+		smart_str_append(&scratch, resource->user);
 		smart_str_appendc(&scratch, ':');
 
 		/* Note: password is optional! */
 		if (resource->password) {
 			php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
-			smart_str_appendl(&scratch, ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
+			smart_str_append(&scratch, resource->password);
 		}
 
 		zend_string *scratch_str = smart_str_extract(&scratch);
 		stmp = php_base64_encode((unsigned char*)ZSTR_VAL(scratch_str), ZSTR_LEN(scratch_str));
 
 		smart_str_appends(&req_buf, "Authorization: Basic ");
-		smart_str_appendl(&req_buf, ZSTR_VAL(stmp), ZSTR_LEN(stmp));
+		smart_str_append(&req_buf, stmp);
 		smart_str_appends(&req_buf, "\r\n");
 
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
