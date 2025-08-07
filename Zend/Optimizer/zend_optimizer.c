@@ -1024,6 +1024,8 @@ uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args) 
 		return ZEND_FUNC_VARARG;
 	} else if (zend_string_equals_literal(name, "func_get_args")) {
 		return ZEND_FUNC_VARARG;
+	} else if (zend_string_equals_literal(name, "func_get_named_args")) {
+		return ZEND_FUNC_VARARG;
 	} else {
 		return 0;
 	}
