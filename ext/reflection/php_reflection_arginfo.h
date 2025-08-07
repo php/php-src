@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ef9e7f30a29819489e17a9c100f55696d5d164e0 */
+ * Stub hash: 29f2d4faf0b4d82525b00d3957712596577514ca */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -286,6 +286,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionClass_
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionClass_newInstanceArgs, 0, 0, IS_OBJECT, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionClass_newInstanceFromData, 0, 1, IS_OBJECT, 1)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
@@ -829,6 +834,7 @@ ZEND_METHOD(ReflectionClass, isInstance);
 ZEND_METHOD(ReflectionClass, newInstance);
 ZEND_METHOD(ReflectionClass, newInstanceWithoutConstructor);
 ZEND_METHOD(ReflectionClass, newInstanceArgs);
+ZEND_METHOD(ReflectionClass, newInstanceFromData);
 ZEND_METHOD(ReflectionClass, newLazyGhost);
 ZEND_METHOD(ReflectionClass, newLazyProxy);
 ZEND_METHOD(ReflectionClass, resetAsLazyGhost);
@@ -1122,6 +1128,7 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, newInstance, arginfo_class_ReflectionClass_newInstance, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, newInstanceWithoutConstructor, arginfo_class_ReflectionClass_newInstanceWithoutConstructor, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, newInstanceArgs, arginfo_class_ReflectionClass_newInstanceArgs, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, newInstanceFromData, arginfo_class_ReflectionClass_newInstanceFromData, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, newLazyGhost, arginfo_class_ReflectionClass_newLazyGhost, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, newLazyProxy, arginfo_class_ReflectionClass_newLazyProxy, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, resetAsLazyGhost, arginfo_class_ReflectionClass_resetAsLazyGhost, ZEND_ACC_PUBLIC)
