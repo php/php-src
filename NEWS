@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-18736 (Circumvented type check with return by ref + finally).
     (ilutov)
 
+- Calendar:
+  . Fixed bug GH-19371 (integer overflow in calendar.c). (nielsdos)
+
 - FTP:
   . Fix theoretical issues with hrtime() not being available. (nielsdos)
 
