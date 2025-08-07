@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19098 (libxml<2.13 segmentation fault caused by
     php_libxml_node_free). (nielsdos)
 
+- MbString:
+  . Fixed bug GH-19397 (mb_list_encodings() can cause crashes on shutdown).
+    (nielsdos)
+
 - Opcache:
   . Reset global pointers to prevent use-after-free in zend_jit_status().
     (Florian Engelhardt)
