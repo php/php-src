@@ -1165,8 +1165,10 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 	MBSTRG(outconv_state) = 0;
 
 	if (MBSTRG(all_encodings_list)) {
-		GC_DELREF(MBSTRG(all_encodings_list));
-		zend_array_destroy(MBSTRG(all_encodings_list));
+		if (GC_DELREF(MBSTRG(all_encodings_list)) == 0) {
+			/* must be *array* destroy to remove from GC root buffer and free the hashtable itself */
+			zend_array_destroy(MBSTRG(all_encodings_list));
+		}
 		MBSTRG(all_encodings_list) = NULL;
 	}
 
