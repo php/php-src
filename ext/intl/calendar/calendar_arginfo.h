@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c014b88c9b6aa145ea20cc1f3fd719fe9f3d6966 */
+ * Stub hash: 2fc12d1fde65efbec4305f4934a3f4b25282a552 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlCalendar_createInstance, 0, 0, IntlCalendar, 1)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -165,7 +165,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_set
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_setTimeZone, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, timezone)
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlCalendar_toDateTime, 0, 0, DateTime, MAY_BE_FALSE)
@@ -249,7 +249,7 @@ ZEND_FUNCTION(intlcal_set_lenient);
 ZEND_FUNCTION(intlcal_set_repeated_wall_time_option);
 ZEND_FUNCTION(intlcal_set_skipped_wall_time_option);
 ZEND_FUNCTION(intlcal_set_time);
-ZEND_FUNCTION(intlcal_set_time_zone);
+ZEND_METHOD(IntlCalendar, setTimeZone);
 ZEND_FUNCTION(intlcal_to_date_time);
 ZEND_METHOD(IntlGregorianCalendar, createFromDate);
 ZEND_METHOD(IntlGregorianCalendar, createFromDateTime);
@@ -305,7 +305,7 @@ static const zend_function_entry class_IntlCalendar_methods[] = {
 	ZEND_RAW_FENTRY("setRepeatedWallTimeOption", zif_intlcal_set_repeated_wall_time_option, arginfo_class_IntlCalendar_setRepeatedWallTimeOption, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("setSkippedWallTimeOption", zif_intlcal_set_skipped_wall_time_option, arginfo_class_IntlCalendar_setSkippedWallTimeOption, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("setTime", zif_intlcal_set_time, arginfo_class_IntlCalendar_setTime, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("setTimeZone", zif_intlcal_set_time_zone, arginfo_class_IntlCalendar_setTimeZone, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(IntlCalendar, setTimeZone, arginfo_class_IntlCalendar_setTimeZone, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("toDateTime", zif_intlcal_to_date_time, arginfo_class_IntlCalendar_toDateTime, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };

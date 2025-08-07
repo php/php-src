@@ -72,21 +72,21 @@ U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 
 U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 {
-	zval		*zv_timezone	= NULL;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
 	char	        *locale_str	= NULL;
 	size_t		locale_len      = 0;
-	TimeZone	*timeZone;
 	UErrorCode	status			= U_ZERO_ERROR;
 	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(zv_timezone)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
 		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	timeZone = timezone_process_timezone_argument(zv_timezone, NULL);
-	if (timeZone == NULL) {
+	TimeZone *timeZone = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr);
+	if (timeZone == nullptr) {
 		RETURN_NULL();
 	}
 
@@ -296,26 +296,28 @@ U_CFUNC PHP_FUNCTION(intlcal_add)
 	RETURN_TRUE;
 }
 
+/* {{{ Set formatter's timezone. */
 U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 {
-	zval			*zv_timezone;
-	TimeZone		*timeZone;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
+
 	CALENDAR_METHOD_INIT_VARS;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"Oz!", &object, Calendar_ce_ptr, &zv_timezone) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(object, Calendar_ce_ptr)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+	ZEND_PARSE_PARAMETERS_END();
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	if (zv_timezone == NULL) {
+	if (timezone_object == nullptr && timezone_string == nullptr) {
 		RETURN_TRUE; /* the method does nothing if passed null */
 	}
 
-	timeZone = timezone_process_timezone_argument(zv_timezone,
-			CALENDAR_ERROR_P(co));
-	if (timeZone == NULL) {
+	TimeZone *timeZone = timezone_process_timezone_argument(
+		timezone_object, timezone_string, CALENDAR_ERROR_P(co));
+	if (timeZone == nullptr) {
 		RETURN_FALSE;
 	}
 
@@ -324,6 +326,34 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 	RETURN_TRUE;
 }
 
+U_CFUNC PHP_METHOD(IntlCalendar, setTimeZone)
+{
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
+
+	CALENDAR_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	object = ZEND_THIS;
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	if (timezone_object == nullptr && timezone_string == nullptr) {
+		RETURN_TRUE; /* the method does nothing if passed null */
+	}
+
+	TimeZone *timeZone = timezone_process_timezone_argument(
+		timezone_object, timezone_string, CALENDAR_ERROR_P(co));
+	if (timeZone == nullptr) {
+		RETURN_FALSE;
+	}
+
+	co->ucal->adoptTimeZone(timeZone);
+
+	RETURN_TRUE;
+}
 
 static void _php_intlcal_before_after(
 		UBool (Calendar::*func)(const Calendar&, UErrorCode&) const,

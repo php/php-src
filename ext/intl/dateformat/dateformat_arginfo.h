@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 56b66b1b51220ddbff698ec4c9a6ae60f3e0bfb0 */
+ * Stub hash: 160d05ec65c45b66b13eaecbef20b3c59bfb33d1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dateType, IS_LONG, 0, "IntlDateFormatter::FULL")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeType, IS_LONG, 0, "IntlDateFormatter::FULL")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, calendar, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -14,7 +14,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlDateFormatter
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dateType, IS_LONG, 0, "IntlDateFormatter::FULL")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeType, IS_LONG, 0, "IntlDateFormatter::FULL")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_LONG|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -40,7 +40,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlDateForm
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlDateFormatter_setTimeZone, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, timezone)
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlDateFormatter_setPattern, 0, 1, _IS_BOOL, 0)
@@ -100,7 +100,7 @@ ZEND_FUNCTION(datefmt_set_calendar);
 ZEND_FUNCTION(datefmt_get_timezone_id);
 ZEND_FUNCTION(datefmt_get_calendar_object);
 ZEND_FUNCTION(datefmt_get_timezone);
-ZEND_FUNCTION(datefmt_set_timezone);
+ZEND_METHOD(IntlDateFormatter, setTimeZone);
 ZEND_FUNCTION(datefmt_set_pattern);
 ZEND_FUNCTION(datefmt_get_pattern);
 ZEND_FUNCTION(datefmt_get_locale);
@@ -124,7 +124,7 @@ static const zend_function_entry class_IntlDateFormatter_methods[] = {
 	ZEND_RAW_FENTRY("getTimeZoneId", zif_datefmt_get_timezone_id, arginfo_class_IntlDateFormatter_getTimeZoneId, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getCalendarObject", zif_datefmt_get_calendar_object, arginfo_class_IntlDateFormatter_getCalendarObject, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getTimeZone", zif_datefmt_get_timezone, arginfo_class_IntlDateFormatter_getTimeZone, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("setTimeZone", zif_datefmt_set_timezone, arginfo_class_IntlDateFormatter_setTimeZone, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(IntlDateFormatter, setTimeZone, arginfo_class_IntlDateFormatter_setTimeZone, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("setPattern", zif_datefmt_set_pattern, arginfo_class_IntlDateFormatter_setPattern, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getPattern", zif_datefmt_get_pattern, arginfo_class_IntlDateFormatter_getPattern, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getLocale", zif_datefmt_get_locale, arginfo_class_IntlDateFormatter_getLocale, ZEND_ACC_PUBLIC, NULL, NULL)
