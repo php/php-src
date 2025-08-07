@@ -1019,7 +1019,7 @@ PHPAPI zend_result uri_handler_register(const uri_handler_t *uri_handler)
 {
 	zend_string *key = zend_string_init_interned(uri_handler->name, strlen(uri_handler->name), true);
 
-	ZEND_ASSERT(uri_handler->name != NULL && (strlen(uri_handler->name) > 0 || strcmp(uri_handler->name, URI_PARSER_PHP) == 0));
+	ZEND_ASSERT(uri_handler->name != NULL);
 	ZEND_ASSERT(uri_handler->parse_uri != NULL);
 	ZEND_ASSERT(uri_handler->clone_uri != NULL || strcmp(uri_handler->name, URI_PARSER_PHP) == 0);
 	ZEND_ASSERT(uri_handler->uri_to_string != NULL || strcmp(uri_handler->name, URI_PARSER_PHP) == 0);
