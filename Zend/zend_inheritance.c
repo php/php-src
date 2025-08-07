@@ -2683,6 +2683,69 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 }
 /* }}} */
 
+static void zend_traits_check_for_mutual_exclusions(zend_class_entry *ce, zend_class_entry **traits, HashTable **exclude_tables) /* {{{ */
+{
+	uint32_t i;
+	zend_string *key;
+	zend_function *fn;
+	HashTable *all_method_sources;
+	zend_class_entry *trait;
+	(void) trait; /* Silence unused variable warning */
+
+	ALLOC_HASHTABLE(all_method_sources);
+	zend_hash_init(all_method_sources, 0, NULL, NULL, 0);
+
+	for (i = 0; i < ce->num_traits; i++) {
+		if (!traits[i]) {
+			continue;
+		}
+
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->function_table, key, fn) {
+			HashTable *sources;
+
+			if ((sources = zend_hash_find_ptr(all_method_sources, key)) == NULL) {
+				ALLOC_HASHTABLE(sources);
+				zend_hash_init(sources, 0, NULL, NULL, 0);
+				zend_hash_add_ptr(all_method_sources, key, sources);
+			}
+
+			zend_hash_index_add_ptr(sources, i, traits[i]);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	/* Are all method implementations excluded? */
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(all_method_sources, key, fn) {
+		HashTable *sources = (HashTable*)fn;
+		bool has_available_impl = false;
+		uint32_t trait_index;
+
+		ZEND_HASH_FOREACH_NUM_KEY_PTR(sources, trait_index, trait) {
+			/* Trait's implementation is excluded? */
+			if (!exclude_tables[trait_index] || 
+				zend_hash_find(exclude_tables[trait_index], key) == NULL) {
+				has_available_impl = true;
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		if (!has_available_impl && zend_hash_num_elements(sources) > 1) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Invalid trait method precedence for %s() - all implementations have been excluded by insteadof rules",
+				ZSTR_VAL(key));
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_MAP_FOREACH_PTR(all_method_sources, fn) {
+		HashTable *sources = (HashTable*)fn;
+		zend_hash_destroy(sources);
+		FREE_HASHTABLE(sources);
+	} ZEND_HASH_FOREACH_END();
+	
+	zend_hash_destroy(all_method_sources);
+	FREE_HASHTABLE(all_method_sources);
+}
+/* }}} */
+
 static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry **traits, HashTable **exclude_tables, zend_class_entry **aliases) /* {{{ */
 {
 	uint32_t i;
@@ -3008,6 +3071,10 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 
 	/* complete initialization of trait structures in ce */
 	zend_traits_init_trait_structures(ce, traits, &exclude_tables, &aliases);
+
+	if (exclude_tables) {
+		zend_traits_check_for_mutual_exclusions(ce, traits, exclude_tables);
+	}
 
 	/* first care about all methods to be flattened into the class */
 	zend_do_traits_method_binding(ce, traits, exclude_tables, aliases);

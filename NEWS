@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.20
 
+- Core:
+  . Fixed bug GH-18223 (Meaningful error on wrong trait method exclusion).
+    (alexandre-daubois)
 
 12 Mar 2026, PHP 8.4.19
 
