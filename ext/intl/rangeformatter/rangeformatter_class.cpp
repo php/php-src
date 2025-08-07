@@ -42,7 +42,7 @@ zend_class_entry *class_entry_IntlNumberRangeFormatter;
 
 zend_object *IntlNumberRangeFormatter_object_create(zend_class_entry *ce)
 {
-	IntlNumberRangeFormatter_object* intern;
+    IntlNumberRangeFormatter_object* intern;
 
     intern = reinterpret_cast<IntlNumberRangeFormatter_object*>(zend_object_alloc(sizeof(IntlNumberRangeFormatter_object), ce));
     zend_object_std_init(&intern->zo, ce);
@@ -83,11 +83,6 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
         Z_PARAM_LONG(collapse)
         Z_PARAM_LONG(identityFallback)
     ZEND_PARSE_PARAMETERS_END();
-
-    if (skeleton_len == 0) {
-        zend_argument_must_not_be_empty_error(1);
-        RETURN_THROWS();
-    }
 
     if (locale_len == 0) {
         locale = (char *)intl_locale_get_default();
