@@ -25,7 +25,7 @@ void dateformat_data_init( dateformat_data* datef_data )
 	if( !datef_data )
 		return;
 
-	datef_data->udatf = NULL;
+	datef_data->udatf = nullptr;
 	intl_error_reset( &datef_data->error );
 }
 /* }}} */
@@ -41,7 +41,7 @@ void dateformat_data_free( dateformat_data* datef_data )
 	if( datef_data->udatf )
 		udat_close( datef_data->udatf );
 
-	datef_data->udatf = NULL;
+	datef_data->udatf = nullptr;
 	intl_error_reset( &datef_data->error );
 }
 /* }}} */
@@ -51,7 +51,7 @@ void dateformat_data_free( dateformat_data* datef_data )
  */
 dateformat_data* dateformat_data_create( void )
 {
-	dateformat_data* datef_data = ecalloc( 1, sizeof(dateformat_data) );
+	dateformat_data* datef_data = reinterpret_cast<dateformat_data *>(ecalloc( 1, sizeof(dateformat_data) ));
 
 	dateformat_data_init( datef_data );
 

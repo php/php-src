@@ -19,7 +19,13 @@
 
 #include <unicode/unum.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "intl_error.h"
+#ifdef __cplusplus
+}
+#endif
 
 typedef struct {
 	// error hangling
@@ -29,8 +35,14 @@ typedef struct {
 	UNumberFormat*  unum;
 } formatter_data;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 formatter_data* formatter_data_create( void );
 void formatter_data_init( formatter_data* nf_data );
 void formatter_data_free( formatter_data* nf_data );
+#ifdef __cplusplus
+}
+#endif
 
 #endif // FORMATTER_DATA_H
