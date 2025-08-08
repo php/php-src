@@ -316,11 +316,40 @@ PHP 8.5 UPGRADE NOTES
     one will still be used. If a user output handler returns a non-string and
     produces output, the warning about producing an output is emitted first.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+  . Non-canonical cast names (boolean), (integer), (double), and (binary) have
+    been deprecated, use (bool), (int), (float), and (string) respectively.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_non-standard_cast_names
+
+- FileInfo:
+  . The finfo_close() function has been deprecated.
+    As finfo objects are freed automatically.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_finfo_close
 
 - Hash:
   . The MHASH_* constants have been deprecated.  These have been overlooked
     when the mhash*() function family has been deprecated per
     https://wiki.php.net/rfc/deprecations_php_8_1#mhash_function_family
+
+- MySQLi:
+  . The mysqli_execute() alias function has been deprecated.
+    Use mysqli_stmt_execute() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#formally_deprecate_mysqli_execute
+
+- PDO:
+  . The "uri:" DSN scheme has been deprecated due to security concerns with
+    DSNs coming from remote URIs.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_pdo_s_urischeme
+
+
+- Reflection:
+  . The setAccessible() methods of various Reflection objects have been
+    deprecated, as those no longer have an effect.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_reflectionsetaccessible
+
+- Standard:
+  . The socket_set_timeout() alias function has been deprecated.
+    Use stream_set_timeout() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#formally_deprecate_socket_set_timeout
 
 ========================================
 5. Changed Functions
