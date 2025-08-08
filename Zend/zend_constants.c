@@ -239,7 +239,20 @@ ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry 
 		return (c->ce == scope);
 	} else {
 		ZEND_ASSERT(ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PROTECTED);
-		return zend_check_protected(c->ce, scope);
+		
+		if (zend_check_protected(c->ce, scope)) {
+			return 1;
+		}
+
+		const zend_class_entry *current_ce = c->ce;
+		while (current_ce->parent) {
+			if (zend_check_protected(current_ce->parent, scope)) {
+				return 1;
+			}
+			current_ce = current_ce->parent;
+		}
+		
+		return 0;
 	}
 }
 /* }}} */
