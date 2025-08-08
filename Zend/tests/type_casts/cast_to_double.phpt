@@ -1,5 +1,5 @@
 --TEST--
-casting different variables to double
+casting different variables to float
 --INI--
 precision=14
 --FILE--
@@ -32,7 +32,7 @@ $vars = array(
 );
 
 foreach ($vars as $var) {
-    $tmp = (double)$var;
+    $tmp = (float)$var;
     var_dump($tmp);
 }
 
