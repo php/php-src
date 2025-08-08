@@ -811,6 +811,10 @@ const TIDY_TAG_TRACK = UNKNOWN;
 const TIDY_TAG_VIDEO = UNKNOWN;
 # endif
 
+class TidyException extends Exception
+{
+}
+
 function tidy_parse_string(string $string, array|string|null $config = null, ?string $encoding = null): tidy|false {}
 
 function tidy_get_error_buffer(tidy $tidy): string|false {}

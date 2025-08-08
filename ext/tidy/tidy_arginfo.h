@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0e6561410a63658f76011c1ddcecdd1e68757f0a */
+ * Stub hash: 447cc8da5a34139184478956bb5e1a3eb01a866d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -465,6 +465,16 @@ static void register_tidy_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("TIDY_TAG_TRACK", TidyTag_TRACK, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("TIDY_TAG_VIDEO", TidyTag_VIDEO, CONST_PERSISTENT);
 #endif
+}
+
+static zend_class_entry *register_class_TidyException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "TidyException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_tidy(void)
