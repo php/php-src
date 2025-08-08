@@ -260,19 +260,16 @@ static zend_result spl_filesystem_object_get_file_name(spl_filesystem_object *in
 	return SUCCESS;
 } /* }}} */
 
-/* TODO Make void or have callers check return value */
-static bool spl_filesystem_dir_read(spl_filesystem_object *intern) /* {{{ */
+static void spl_filesystem_dir_read(spl_filesystem_object *intern) /* {{{ */
 {
 	if (intern->file_name) {
 		/* invalidate */
 		zend_string_release(intern->file_name);
 		intern->file_name = NULL;
 	}
+
 	if (!intern->u.dir.dirp || !php_stream_readdir(intern->u.dir.dirp, &intern->u.dir.entry)) {
 		intern->u.dir.entry.d_name[0] = '\0';
-		return 0;
-	} else {
-		return 1;
 	}
 }
 /* }}} */
