@@ -51,6 +51,7 @@ typedef struct {
 	struct pdo_sqlite_func *funcs;
 	struct pdo_sqlite_collation *collations;
 	zend_fcall_info_cache authorizer_fcc;
+	zend_long transaction_mode;
 } pdo_sqlite_db_handle;
 
 typedef struct {
@@ -75,7 +76,11 @@ enum {
 	PDO_SQLITE_ATTR_READONLY_STATEMENT,
 	PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES,
 	PDO_SQLITE_ATTR_BUSY_STATEMENT,
-	PDO_SQLITE_ATTR_EXPLAIN_STATEMENT
+	PDO_SQLITE_ATTR_EXPLAIN_STATEMENT,
+	PDO_SQLITE_ATTR_TRANSACTION_MODE,
+	PDO_SQLITE_ATTR_TRANSACTION_MODE_DEFERRED,
+	PDO_SQLITE_ATTR_TRANSACTION_MODE_IMMEDIATE,
+	PDO_SQLITE_ATTR_TRANSACTION_MODE_EXCLUSIVE
 };
 
 typedef int pdo_sqlite_create_collation_callback(void*, int, const void*, int, const void*);

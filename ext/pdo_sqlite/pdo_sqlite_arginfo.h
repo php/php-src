@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c1d4ef325ecb8c8cb312910e8091ca003dc2603a */
+ * Stub hash: d8d8c80e426e8af86474f45fb8fe76ef4b17ffa2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -121,6 +121,30 @@ static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry
 	zend_string *const_ATTR_EXPLAIN_STATEMENT_name = zend_string_init_interned("ATTR_EXPLAIN_STATEMENT", sizeof("ATTR_EXPLAIN_STATEMENT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_EXPLAIN_STATEMENT_name, &const_ATTR_EXPLAIN_STATEMENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_EXPLAIN_STATEMENT_name);
+
+	zval const_ATTR_TRANSACTION_MODE_value;
+	ZVAL_LONG(&const_ATTR_TRANSACTION_MODE_value, PDO_SQLITE_ATTR_TRANSACTION_MODE);
+	zend_string *const_ATTR_TRANSACTION_MODE_name = zend_string_init_interned("ATTR_TRANSACTION_MODE", sizeof("ATTR_TRANSACTION_MODE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_TRANSACTION_MODE_name, &const_ATTR_TRANSACTION_MODE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_TRANSACTION_MODE_name);
+
+	zval const_ATTR_TRANSACTION_MODE_DEFERRED_value;
+	ZVAL_LONG(&const_ATTR_TRANSACTION_MODE_DEFERRED_value, PDO_SQLITE_ATTR_TRANSACTION_MODE_DEFERRED);
+	zend_string *const_ATTR_TRANSACTION_MODE_DEFERRED_name = zend_string_init_interned("ATTR_TRANSACTION_MODE_DEFERRED", sizeof("ATTR_TRANSACTION_MODE_DEFERRED") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_TRANSACTION_MODE_DEFERRED_name, &const_ATTR_TRANSACTION_MODE_DEFERRED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_TRANSACTION_MODE_DEFERRED_name);
+
+	zval const_ATTR_TRANSACTION_MODE_IMMEDIATE_value;
+	ZVAL_LONG(&const_ATTR_TRANSACTION_MODE_IMMEDIATE_value, PDO_SQLITE_ATTR_TRANSACTION_MODE_IMMEDIATE);
+	zend_string *const_ATTR_TRANSACTION_MODE_IMMEDIATE_name = zend_string_init_interned("ATTR_TRANSACTION_MODE_IMMEDIATE", sizeof("ATTR_TRANSACTION_MODE_IMMEDIATE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_TRANSACTION_MODE_IMMEDIATE_name, &const_ATTR_TRANSACTION_MODE_IMMEDIATE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_TRANSACTION_MODE_IMMEDIATE_name);
+
+	zval const_ATTR_TRANSACTION_MODE_EXCLUSIVE_value;
+	ZVAL_LONG(&const_ATTR_TRANSACTION_MODE_EXCLUSIVE_value, PDO_SQLITE_ATTR_TRANSACTION_MODE_EXCLUSIVE);
+	zend_string *const_ATTR_TRANSACTION_MODE_EXCLUSIVE_name = zend_string_init_interned("ATTR_TRANSACTION_MODE_EXCLUSIVE", sizeof("ATTR_TRANSACTION_MODE_EXCLUSIVE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_TRANSACTION_MODE_EXCLUSIVE_name, &const_ATTR_TRANSACTION_MODE_EXCLUSIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_TRANSACTION_MODE_EXCLUSIVE_name);
 #if SQLITE_VERSION_NUMBER >= 3043000
 
 	zval const_EXPLAIN_MODE_PREPARED_value;
