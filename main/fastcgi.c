@@ -648,12 +648,8 @@ int fcgi_listen(const char *path, int backlog)
 	int       listen_socket;
 	sa_t      sa;
 	socklen_t sock_len;
-#ifdef SO_REUSEADDR
-# ifdef _WIN32
-	BOOL reuse = 1;
-# else
+#if !defined(_WIN32) && defined(SO_REUSEADDR)
 	int reuse = 1;
-# endif
 #endif
 
 	if ((s = strchr(path, ':'))) {
@@ -747,7 +743,13 @@ int fcgi_listen(const char *path, int backlog)
 
 	/* Create, bind socket and start listen on it */
 	if ((listen_socket = socket(sa.sa.sa_family, SOCK_STREAM, 0)) < 0 ||
-#ifdef SO_REUSEADDR
+#if !defined(_WIN32) && defined(SO_REUSEADDR)
+       /* SO_REUSEADDR on windows has a different behavior compared to unixes.
+        * It potentially allow a same address/port combination, even from an active connection (aka port hijacking).
+        * We trade the "fast port reuse on failure" ability though but performance ought to take a backseat on this matter.
+        * It might be tempting to use SO_EXCLUSIVEADDRINUSE, but it can significantly increase the amount of binding failures
+        * without real benefits .. but it is open for discussions.
+        */
 	    setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse)) < 0 ||
 #endif
 	    bind(listen_socket, (struct sockaddr *) &sa, sock_len) < 0 ||
