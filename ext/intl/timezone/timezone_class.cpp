@@ -131,7 +131,7 @@ static void timezone_throw_exception_with_call_location(const char *msg, const c
 }
 
 /* {{{ timezone_process_timezone_argument
- * TimeZone argument processor. outside_error may be NULL (for static functions/constructors) */
+ * TimeZone argument processor. outside_error may be nullptr (for static functions/constructors) */
 U_CFUNC TimeZone *timezone_process_timezone_argument(
 	zend_object *timezone_object, zend_string *timezone_string, intl_error *outside_error)
 {
@@ -154,7 +154,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(
 				return nullptr;
 			}
 			timeZone = std::unique_ptr<TimeZone>(to->utimezone->clone());
-			if (UNEXPECTED(timeZone == NULL)) {
+			if (UNEXPECTED(timeZone == nullptr)) {
 				timezone_throw_exception_with_call_location("could not clone TimeZone", nullptr);
 				return nullptr;
 			}
@@ -182,7 +182,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(
 
 	ZEND_ASSERT(timezone_string != nullptr);
 	UnicodeString id;
-	UErrorCode status = U_ZERO_ERROR; /* outside_error may be NULL */
+	UErrorCode status = U_ZERO_ERROR; /* outside_error may be nullptr */
 
 	if (UNEXPECTED(intl_stringFromChar(id, ZSTR_VAL(timezone_string), ZSTR_LEN(timezone_string), &status) == FAILURE)) {
 		timezone_throw_exception_with_call_location("Time zone identifier given is not a valid UTF-8 string", nullptr);
@@ -193,7 +193,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(
 	}
 
 	timeZone = std::unique_ptr<TimeZone>(TimeZone::createTimeZone(id));
-	if (UNEXPECTED(timeZone == NULL)) {
+	if (UNEXPECTED(timeZone == nullptr)) {
 		timezone_throw_exception_with_call_location("Could not create time zone",nullptr);
 		if (free_string) {
 			zend_string_release_ex(timezone_string, false);
