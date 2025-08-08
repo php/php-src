@@ -77,7 +77,8 @@ static bool set_gregorian_calendar_time_zone(GregorianCalendar *gcal, UErrorCode
 
 static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
-	zval		*tz_object	= NULL;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
 	zval		args_a[6],
 				*args		= &args_a[0];
 	char		*locale		= NULL;
@@ -112,15 +113,23 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 
 	// argument parsing
 	if (variant <= 2) {
-		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2),
-                               "|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
-                       RETURN_THROWS();
-               }
-       }
-       if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS(),
-                       "lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
-                       &largs[5]) == FAILURE) {
-               RETURN_THROWS();
+		/* These dummy variables are needed because the 2 param constructor allows trailing nulls... */
+		zval *dummy1, *dummy2, *dummy3, *dummy4;
+		ZEND_PARSE_PARAMETERS_START(0, 6)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+			Z_PARAM_STRING_OR_NULL(locale, locale_len)
+			Z_PARAM_ZVAL(dummy1)
+			Z_PARAM_ZVAL(dummy2)
+			Z_PARAM_ZVAL(dummy3)
+			Z_PARAM_ZVAL(dummy4)
+		ZEND_PARSE_PARAMETERS_END();
+	}
+	if (variant > 2
+		&& zend_parse_parameters(ZEND_NUM_ARGS(), "lll|lll",
+			&largs[0], &largs[1], &largs[2], &largs[3], &largs[4], &largs[5]) == FAILURE
+	) {
+		RETURN_THROWS();
 	}
 
 	// instantion of ICU object
@@ -134,8 +143,8 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 
 	if (variant <= 2) {
 		// From timezone and locale (0 to 2 arguments)
-		TimeZone *tz = timezone_process_timezone_argument(tz_object, NULL);
-		if (tz == NULL) {
+		TimeZone *tz = timezone_process_timezone_argument(timezone_object, timezone_string, nullptr);
+		if (tz == nullptr) {
 			// TODO: Exception should always occur already?
 			if (!EG(exception)) {
 				zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);

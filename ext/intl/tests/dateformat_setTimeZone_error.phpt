@@ -12,17 +12,16 @@ $df = new IntlDateFormatter(NULL, 0, 0);
 
 try {
 	$df->setTimeZone(array());
-} catch (IntlException $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	$df->setTimeZone('non existing timezone');
-} catch (IntlException $e) {
-	echo $e->getMessage();
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
---EXPECTF--
-Warning: Array to string conversion in %s on line %d
-IntlDateFormatter::setTimeZone(): No such time zone: "Array"
-IntlDateFormatter::setTimeZone(): No such time zone: "non existing timezone"
+--EXPECT--
+TypeError: IntlDateFormatter::setTimeZone(): Argument #1 ($timezone) must be of type object|string|null, array given
+IntlException: IntlDateFormatter::setTimeZone(): No such time zone: "non existing timezone"

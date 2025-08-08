@@ -67,7 +67,7 @@ static inline TimeZone_object *php_intl_timezone_fetch_object(zend_object *obj) 
 	}
 
 zval *timezone_convert_to_datetimezone(const TimeZone *timeZone, intl_error *outside_error, zval *ret);
-TimeZone *timezone_process_timezone_argument(zval *zv_timezone, intl_error *error);
+TimeZone *timezone_process_timezone_argument(zend_object *timezone_object, zend_string *timezone_string, intl_error *error);
 
 void timezone_object_construct(const TimeZone *zone, zval *object, int owned);
 

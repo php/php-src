@@ -59,7 +59,8 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	Calendar *cal = NULL;
 	zend_long	calendar_type;
 	bool		calendar_owned;
-	zval		*timezone_zv	= NULL;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
 	TimeZone	*timezone	= NULL;
 	bool		explicit_tz;
 	char*       pattern_str		= NULL;
@@ -76,7 +77,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(date_type)
 		Z_PARAM_LONG(time_type)
-		Z_PARAM_ZVAL(timezone_zv)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
 		Z_PARAM_STRING_OR_NULL(pattern_str, pattern_str_len)
 	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
@@ -120,13 +121,12 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	/* process timezone */
-	explicit_tz = timezone_zv != NULL && Z_TYPE_P(timezone_zv) != IS_NULL;
+	explicit_tz = timezone_object != nullptr || timezone_string != nullptr;
 
 	if (explicit_tz || calendar_owned ) {
 		//we have an explicit time zone or a non-object calendar
-		timezone = timezone_process_timezone_argument(timezone_zv,
-				INTL_DATA_ERROR_P(dfo));
-		if (timezone == NULL) {
+		timezone = timezone_process_timezone_argument(timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+		if (timezone == nullptr) {
 			goto error;
 		}
 	}

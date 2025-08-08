@@ -81,21 +81,46 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 /* {{{ Set formatter's timezone. */
 U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 {
-	zval		*timezone_zv;
-	TimeZone	*timezone;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	if ( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"Oz", &object, IntlDateFormatter_ce_ptr, &timezone_zv) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(object, IntlDateFormatter_ce_ptr)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-	timezone = timezone_process_timezone_argument(timezone_zv,
-			INTL_DATA_ERROR_P(dfo));
-	if (timezone == NULL) {
+	TimeZone *timezone = timezone_process_timezone_argument(
+		timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+	if (timezone == nullptr) {
+		RETURN_FALSE;
+	}
+
+	fetch_datefmt(dfo)->adoptTimeZone(timezone);
+
+	RETURN_TRUE;
+}
+
+U_CFUNC PHP_METHOD(IntlDateFormatter, setTimeZone)
+{
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
+
+	DATE_FORMAT_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	object = ZEND_THIS;
+	DATE_FORMAT_METHOD_FETCH_OBJECT;
+
+	TimeZone *timezone = timezone_process_timezone_argument(
+		timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+	if (timezone == nullptr) {
 		RETURN_FALSE;
 	}
 
