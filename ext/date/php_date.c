@@ -3213,7 +3213,12 @@ PHP_FUNCTION(date_format)
 }
 /* }}} */
 
-static bool php_date_modify(zval *object, char *modify, size_t modify_len, const bool should_throw) /* {{{ */
+typedef enum {
+	PHP_DATE_MODIFY_WARNING,
+	PHP_DATE_MODIFY_THROW
+} php_date_modify_error_mode;
+
+static bool php_date_modify(zval *object, char *modify, size_t modify_len, const php_date_modify_error_mode error_mode) /* {{{ */
 {
 	php_date_obj *dateobj;
 	timelib_time *tmp_time;
@@ -3233,7 +3238,7 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len, const
 
 	if (err && err->error_count) {
 		/* spit out the first library error message, at least */
-		if (should_throw) {
+		if (error_mode == PHP_DATE_MODIFY_THROW) {
 			zend_string *func_name = get_active_function_or_method_name();
 			zend_throw_exception_ex(date_ce_date_malformed_string_exception, 0,
 				"%s(): Failed to parse time string (%s) at position %d (%c): %s",
@@ -3317,7 +3322,7 @@ PHP_FUNCTION(date_modify)
 		RETURN_THROWS();
 	}
 
-	if (!php_date_modify(object, modify, modify_len, false)) {
+	if (!php_date_modify(object, modify, modify_len, PHP_DATE_MODIFY_WARNING)) {
 		RETURN_FALSE;
 	}
 
@@ -3337,7 +3342,7 @@ PHP_METHOD(DateTime, modify)
 		Z_PARAM_STRING(modify, modify_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!php_date_modify(object, modify, modify_len, true)) {
+	if (!php_date_modify(object, modify, modify_len, PHP_DATE_MODIFY_THROW)) {
 		RETURN_THROWS();
 	}
 
@@ -3359,7 +3364,7 @@ PHP_METHOD(DateTimeImmutable, modify)
 
 	date_clone_immutable(object, &new_object);
 
-	if (!php_date_modify(&new_object, modify, modify_len, true)) {
+	if (!php_date_modify(&new_object, modify, modify_len, PHP_DATE_MODIFY_THROW)) {
 		zval_ptr_dtor(&new_object);
 		RETURN_THROWS();
 	}
