@@ -11,13 +11,14 @@ echo $rc;
 --EXPECT--
 Class [ <internal:Reflection> class ReflectionClass implements Stringable, Reflector ] {
 
-  - Constants [6] {
+  - Constants [7] {
     Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
     Constant [ public int IS_EXPLICIT_ABSTRACT ] { 64 }
     Constant [ public int IS_FINAL ] { 32 }
     Constant [ public int IS_READONLY ] { 65536 }
     Constant [ public int SKIP_INITIALIZATION_ON_SERIALIZE ] { 8 }
     Constant [ public int SKIP_DESTRUCTOR ] { 16 }
+    Constant [ public int PARTIAL_INITIALIZATION ] { 32 }
   }
 
   - Static properties [0] {

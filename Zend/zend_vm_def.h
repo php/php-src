@@ -2513,7 +2513,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						value = &EG(uninitialized_zval);
 						ZEND_VM_C_GOTO(free_and_exit_assign_obj);
@@ -6162,7 +6162,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			}
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
-			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {			
+			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
 				if (c->ce->type == ZEND_USER_CLASS) {
 					/* Recursion protection only applied to user constants, GH-18463 */
 					CONST_PROTECT_RECURSION(c);

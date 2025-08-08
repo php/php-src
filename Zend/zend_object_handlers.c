@@ -953,7 +953,7 @@ call_getter:
 uninit_error:
 	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
 		if (!prop_info || (Z_PROP_FLAG_P(retval) & IS_PROP_LAZY)) {
-			zobj = zend_lazy_object_init(zobj);
+			zobj = zend_lazy_object_init_ex(zobj, name);
 			if (!zobj) {
 				retval = &EG(uninitialized_zval);
 				goto exit;
@@ -1004,7 +1004,7 @@ static zval *forward_write_to_lazy_object(zend_object *zobj,
 	zval backup;
 	ZVAL_COPY(&backup, value);
 
-	zend_object *instance = zend_lazy_object_init(zobj);
+	zend_object *instance = zend_lazy_object_init_ex(zobj, name);
 	if (UNEXPECTED(!instance)) {
 		zval_ptr_dtor(&backup);
 		return &EG(error_zval);
@@ -1395,7 +1395,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET) ||
 			    UNEXPECTED(prop_info && (Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT))) {
 				if (UNEXPECTED(zend_lazy_object_must_init(zobj) && (Z_PROP_FLAG_P(retval) & IS_PROP_LAZY))) {
-					zobj = zend_lazy_object_init(zobj);
+					zobj = zend_lazy_object_init_ex(zobj, name);
 					if (!zobj) {
 						return &EG(error_zval);
 					}
@@ -1453,7 +1453,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				}
 			}
 			if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-				zobj = zend_lazy_object_init(zobj);
+				zobj = zend_lazy_object_init_ex(zobj, name);
 				if (!zobj) {
 					return &EG(error_zval);
 				}
@@ -1527,7 +1527,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(slot) & IS_PROP_UNINIT)) {
 			if (UNEXPECTED(zend_lazy_object_must_init(zobj) && (Z_PROP_FLAG_P(slot) & IS_PROP_LAZY))) {
-				zobj = zend_lazy_object_init(zobj);
+				zobj = zend_lazy_object_init_ex(zobj, name);
 				if (!zobj) {
 					return;
 				}
@@ -1580,7 +1580,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 	}
 
 	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
-		zobj = zend_lazy_object_init(zobj);
+		zobj = zend_lazy_object_init_ex(zobj, name);
 		if (!zobj) {
 			return;
 		}
@@ -2414,7 +2414,7 @@ exit:
 lazy_init:
 	if (UNEXPECTED(zend_lazy_object_must_init(zobj))) {
 		if (!value || (Z_PROP_FLAG_P(value) & IS_PROP_LAZY)) {
-			zobj = zend_lazy_object_init(zobj);
+			zobj = zend_lazy_object_init_ex(zobj, name);
 			if (!zobj) {
 				result = 0;
 				goto exit;

@@ -5171,6 +5171,11 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		RETURN_THROWS();
 	}
 
+	if (strategy != ZEND_LAZY_OBJECT_STRATEGY_GHOST && (options & ZEND_LAZY_OBJECT_PARTIAL_INITIALIZATION)) {
+		zend_argument_error(reflection_exception_ptr, 2,
+				"does not accept ReflectionClass::PARTIAL_INITIALIZATION");
+	}
+
 	if (is_reset) {
 		if (zend_object_is_lazy(obj) && !zend_lazy_object_initialized(obj)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Object is already lazy");

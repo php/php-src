@@ -36,9 +36,13 @@
 /* Do not call destructor when making existing object lazy */
 #define ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR                    (1<<4)
 
+/* Initialization may not initialize all properties, keeping the object lazy. */
+#define ZEND_LAZY_OBJECT_PARTIAL_INITIALIZATION             (1<<5)
+
 #define ZEND_LAZY_OBJECT_USER_MASK (                                        \
 	ZEND_LAZY_OBJECT_SKIP_INITIALIZATION_ON_SERIALIZE |                     \
-	ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR                                        \
+	ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR |                                      \
+	ZEND_LAZY_OBJECT_PARTIAL_INITIALIZATION                                 \
 )
 
 #define ZEND_LAZY_OBJECT_STRATEGY_MASK (                                    \
@@ -62,6 +66,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		zend_class_entry *class_type, zval *initializer_zv,
 		zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags);
 ZEND_API zend_object *zend_lazy_object_init(zend_object *obj);
+ZEND_API zend_object *zend_lazy_object_init_ex(zend_object *obj, zend_string *prop_name);
 ZEND_API zend_object *zend_lazy_object_mark_as_initialized(zend_object *obj);
 
 void zend_lazy_objects_init(zend_lazy_objects_store *store);
