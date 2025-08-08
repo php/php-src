@@ -5145,6 +5145,11 @@ ZEND_METHOD(ReflectionClass, newInstanceFromData)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class that cannot be instantiated from data", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
+
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_HT(data)
 		Z_PARAM_OPTIONAL
