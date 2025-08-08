@@ -346,7 +346,7 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 	size_t new_vlen;
 
 	if (var->ptr >= var->end) {
-		return 0;
+		return false;
 	}
 
 	start = var->ptr + var->already_scanned;
@@ -354,7 +354,7 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 	if (!vsep) {
 		if (!eof) {
 			var->already_scanned = var->end - var->ptr;
-			return 0;
+			return false;
 		} else {
 			vsep = var->end;
 		}
@@ -387,10 +387,10 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 
 	var->ptr = vsep + (vsep != var->end);
 	var->already_scanned = 0;
-	return 1;
+	return true;
 }
 
-static inline int add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
+static inline zend_result add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
 {
 	uint64_t max_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
 
@@ -782,7 +782,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 /* }}} */
 
 /* {{{ php_hash_environment */
-PHPAPI int php_hash_environment(void)
+PHPAPI zend_result php_hash_environment(void)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));
 	zend_activate_auto_globals();
@@ -805,7 +805,7 @@ static bool php_auto_globals_create_get(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_GET]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_GET]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_post(zend_string *name)
@@ -824,7 +824,7 @@ static bool php_auto_globals_create_post(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_POST]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_POST]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_cookie(zend_string *name)
@@ -839,7 +839,7 @@ static bool php_auto_globals_create_cookie(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_COOKIE]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_COOKIE]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_files(zend_string *name)
@@ -851,7 +851,7 @@ static bool php_auto_globals_create_files(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_FILES]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_FILES]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 /* Ugly hack to fix HTTP_PROXY issue, see bug #72573 */
@@ -905,7 +905,7 @@ static bool php_auto_globals_create_server(zend_string *name)
 	 * ignore this issue, as it would probably require larger changes. */
 	HT_ALLOW_COW_VIOLATION(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_env(zend_string *name)
@@ -921,7 +921,7 @@ static bool php_auto_globals_create_env(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_ENV]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_ENV]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_request(zend_string *name)
@@ -965,7 +965,7 @@ static bool php_auto_globals_create_request(zend_string *name)
 	}
 
 	zend_hash_update(&EG(symbol_table), name, &form_variables);
-	return 0;
+	return false;
 }
 
 void php_startup_auto_globals(void)
