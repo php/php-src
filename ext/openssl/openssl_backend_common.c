@@ -1344,7 +1344,7 @@ EVP_PKEY *php_openssl_pkey_from_zval(
 	return key;
 }
 
-static zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t requested_key_size) {
+zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t requested_key_size) {
 	size_t key_size = requested_key_size;
 	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(key, NULL);
 	if (!ctx) {
