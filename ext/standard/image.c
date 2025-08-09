@@ -1198,20 +1198,20 @@ static struct php_gfxinfo *php_handle_avif(php_stream * stream) {
 }
 /* }}} */
 
-/* {{{ php_is_image_avif
+/*
  * Detect whether an image is of type AVIF
  *
  * Only the first "ftyp" box is read.
  * For a valid file, 12 bytes are usually read, but more might be necessary.
  */
-bool php_is_image_avif(php_stream* stream) {
+bool php_is_image_avif(php_stream* stream) { /* {{{ php_is_image_avif */
 	struct php_avif_stream avif_stream;
 	avif_stream.stream = stream;
 
 	if (AvifInfoIdentifyStream(&avif_stream, php_avif_stream_read, php_avif_stream_skip) == kAvifInfoOk) {
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 
