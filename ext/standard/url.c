@@ -328,8 +328,10 @@ static void parse_url_decode_component(zval *zv, uri_component_read_mode_t read_
 	}
 
 	if (read_mode == URI_COMPONENT_READ_RAW) {
-		php_url_decode(Z_STRVAL_P(zv), Z_STRLEN_P(zv));
+		return;
 	}
+
+	php_raw_url_decode(Z_STRVAL_P(zv), Z_STRLEN_P(zv));
 }
 
 static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
