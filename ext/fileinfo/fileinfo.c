@@ -343,6 +343,13 @@ PHP_FUNCTION(finfo_buffer)
 		RETURN_THROWS();
 	}
 
+	if (ZEND_NUM_ARGS() == 4 || (hasThis() && ZEND_NUM_ARGS() == 3)) {
+		php_error_docref(NULL, E_DEPRECATED, "The $context parameter has no effect for finfo_buffer()");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	if (!Z_FINFO_P(self)->magic) {
 		zend_throw_error(NULL, "Invalid finfo object");
 		RETURN_THROWS();
