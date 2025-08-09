@@ -713,6 +713,12 @@ zend_string *php_openssl_dh_compute_key(EVP_PKEY *pkey, char *pub_str, size_t pu
 
 const EVP_MD *php_openssl_get_evp_md_by_name(const char *name)
 {
+	const EVP_MD *dp = (const EVP_MD *) OBJ_NAME_get(name, OBJ_NAME_TYPE_MD_METH);
+
+	if (dp != NULL) {
+		return dp;
+	}
+
 	return EVP_MD_fetch(PHP_OPENSSL_LIBCTX, name, PHP_OPENSSL_PROPQ);
 }
 

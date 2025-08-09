@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - MySQLi:
   . The mysqli_execute() alias function has been deprecated. (timwolla)
 
+- OpenSSL:
+  . Fixed bug GH-19369 (8.5 | Regression in openssl_sign() - support for alias
+    algorithms appears to be broken). (Jakub Zelenka)
+
 - PDO:
   . The "uri:" DSN scheme has been deprecated due to security concerns with
     DSNs coming from remote URIs. (timwolla)
