@@ -4142,17 +4142,19 @@ static zend_result zend_compile_func_defined(znode *result, zend_ast_list *args)
 }
 /* }}} */
 
-static zend_result zend_compile_func_chr(znode *result, zend_ast_list *args) /* {{{ */
+static zend_result zend_compile_func_chr(znode *result, const zend_ast_list *args) /* {{{ */
 {
-
-	if (args->children == 1 &&
-	    args->child[0]->kind == ZEND_AST_ZVAL &&
-	    Z_TYPE_P(zend_ast_get_zval(args->child[0])) == IS_LONG) {
-
-		zend_long c = Z_LVAL_P(zend_ast_get_zval(args->child[0])) & 0xff;
-
+	zval *zint;
+	if (
+		args->children == 1
+		&& args->child[0]->kind == ZEND_AST_ZVAL
+		&& (zint = zend_ast_get_zval(args->child[0]))
+		&& Z_TYPE_P(zint) == IS_LONG
+		&& Z_LVAL_P(zint) >= 0
+		&& Z_LVAL_P(zint) <= 255
+	) {
 		result->op_type = IS_CONST;
-		ZVAL_CHAR(&result->u.constant, c);
+		ZVAL_CHAR(&result->u.constant, Z_LVAL_P(zint));
 		return SUCCESS;
 	} else {
 		return FAILURE;
