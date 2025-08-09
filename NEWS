@@ -5,9 +5,17 @@ PHP                                                                        NEWS
 - Core:
   . Non-canonical cast names (boolean), (integer), (double), and (binary) have
     been deprecated. (Girgias)
+  . The $exclude_disabled parameter of the get_defined_functions() function has
+    been deprecated, as it no longer has any effect since PHP 8.0. (Girgias)
 
 - FileInfo
   . The finfo_close() function has been deprecated. (timwolla)
+
+- Intl:
+  . Intl's internal error mechanism has been modernized so that it
+    indicates more accurately which call site caused what error.
+    Moreover, some ext/date exceptions have been wrapped inside a
+    IntlException now. (Girgias)
 
 - MySQLi:
   . The mysqli_execute() alias function has been deprecated. (timwolla)
@@ -21,6 +29,17 @@ PHP                                                                        NEWS
     `_property_string()`). (DanielEScherzer)
   . The setAccessible() methods of various Reflection objects have been
     deprecated, as those no longer have an effect. (timwolla)
+
+- SPL:
+  . Unregistering all autoloaders by passing the spl_autoload_call() function
+    as a callback argument to spl_autoload_unregister() has been deprecated.
+    Instead if this is needed, one should iterate over the return value of
+    spl_autoload_functions() and call spl_autoload_unregister() on each
+    value. (Girgias)
+  . The SplObjectStorage::contains(), SplObjectStorage::attach(), and
+    SplObjectStorage::detach() methods have been deprecated in favour of
+    SplObjectStorage::offsetExists(), SplObjectStorage::offsetSet(), and
+    SplObjectStorage::offsetUnset() respectively. (Girgias)
 
 - Standard:
   . The socket_set_timeout() alias function has been deprecated. (timwolla)
