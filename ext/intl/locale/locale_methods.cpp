@@ -1243,8 +1243,8 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 	zend_string*   	can_lang_tag    = nullptr;
 	zend_string*   	can_loc_range   = nullptr;
 
-	char*       	cur_lang_tag    = nullptr;
-	char*       	cur_loc_range   = nullptr;
+	std::unique_ptr<char, char_deleter> cur_lang_tag;
+	std::unique_ptr<char, char_deleter> cur_loc_range;
 
 	bool 	boolCanonical 	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
@@ -1286,98 +1286,72 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 		}
 
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = reinterpret_cast<char *>(ecalloc( 1, can_lang_tag->len + 1));
+		cur_lang_tag = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc( 1, can_lang_tag->len + 1)));
+		char *p_cur_lang_tag = cur_lang_tag.get();
 
 		/* Convert to lower case for case-insensitive comparison */
-		result = strToMatch( can_lang_tag->val , cur_lang_tag);
+		result = strToMatch( can_lang_tag->val , p_cur_lang_tag);
 		if( result == 0) {
-			efree( cur_lang_tag );
-			zend_string_release_ex( can_lang_tag, 0 );
+			zend_string_release_ex( can_lang_tag, false );
 			RETURN_FALSE;
 		}
 
-		cur_loc_range = reinterpret_cast<char *>(ecalloc( 1, can_loc_range->len + 1));
-		result = strToMatch( can_loc_range->val , cur_loc_range );
+		cur_loc_range = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc( 1, can_loc_range->len + 1)));
+		char *p_cur_loc_range = cur_loc_range.get();
+		result = strToMatch( can_loc_range->val , p_cur_loc_range );
 		if( result == 0) {
-			efree( cur_lang_tag );
-			zend_string_release_ex( can_lang_tag, 0 );
-			efree( cur_loc_range );
-			zend_string_release_ex( can_loc_range, 0 );
+			zend_string_release_ex( can_lang_tag, false );
+			zend_string_release_ex( can_loc_range, false );
 			RETURN_FALSE;
 		}
 
 		/* check if prefix */
-		token 	= strstr( cur_lang_tag , cur_loc_range );
+		token 	= strstr( p_cur_lang_tag , p_cur_loc_range );
 
-		if( token && (token==cur_lang_tag) ){
+		if( token && (token==p_cur_lang_tag) ){
 			/* check if the char. after match is SEPARATOR */
-			chrcheck = token + (strlen(cur_loc_range));
+			chrcheck = token + (strlen(p_cur_loc_range));
 			if( isIDSeparator(*chrcheck) || isKeywordSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
-				efree( cur_lang_tag );
-				efree( cur_loc_range );
-				if( can_lang_tag){
-					zend_string_release_ex( can_lang_tag, 0 );
-				}
-				if( can_loc_range){
-					zend_string_release_ex( can_loc_range, 0 );
-				}
+				zend_string_release_ex( can_lang_tag, false );
+				zend_string_release_ex( can_loc_range, false );
 				RETURN_TRUE;
 			}
 		}
 
 		/* No prefix as loc_range */
-		if( cur_lang_tag){
-			efree( cur_lang_tag );
-		}
-		if( cur_loc_range){
-			efree( cur_loc_range );
-		}
-		if( can_lang_tag){
-			zend_string_release_ex( can_lang_tag, 0 );
-		}
-		if( can_loc_range){
-			zend_string_release_ex( can_loc_range, 0 );
-		}
+		zend_string_release_ex( can_lang_tag, false );
+		zend_string_release_ex( can_loc_range, false );
 		RETURN_FALSE;
 
 	} /* end of if isCanonical */
 	else{
 		/* Convert to lower case for case-insensitive comparison */
-		cur_lang_tag = reinterpret_cast<char *>(ecalloc( 1, strlen(lang_tag ) + 1));
+		cur_lang_tag = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc( 1, strlen(lang_tag ) + 1)));
+		char *p_cur_lang_tag = cur_lang_tag.get();
 
-		result = strToMatch( lang_tag , cur_lang_tag);
+		result = strToMatch( lang_tag , p_cur_lang_tag);
 		if( result == 0) {
-			efree( cur_lang_tag );
 			RETURN_FALSE;
 		}
-		cur_loc_range = reinterpret_cast<char *>(ecalloc( 1, strlen(loc_range ) + 1));
-		result = strToMatch( loc_range , cur_loc_range );
+		cur_loc_range = std::unique_ptr<char, char_deleter>(reinterpret_cast<char *>(ecalloc( 1, strlen(loc_range ) + 1)));
+		char *p_cur_loc_range = cur_loc_range.get();
+		result = strToMatch( loc_range , p_cur_loc_range );
 		if( result == 0) {
-			efree( cur_lang_tag );
-			efree( cur_loc_range );
 			RETURN_FALSE;
 		}
 
 		/* check if prefix */
-		token 	= strstr( cur_lang_tag , cur_loc_range );
+		token 	= strstr( p_cur_lang_tag , p_cur_loc_range );
 
-		if( token && (token==cur_lang_tag) ){
+		if( token && (token==p_cur_lang_tag) ){
 			/* check if the char. after match is SEPARATOR */
-			chrcheck = token + (strlen(cur_loc_range));
+			chrcheck = token + (strlen(p_cur_loc_range));
 			if( isIDSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
-				efree( cur_lang_tag );
-				efree( cur_loc_range );
 				RETURN_TRUE;
 			}
 		}
 
 		/* No prefix as loc_range */
-		if( cur_lang_tag){
-			efree( cur_lang_tag );
-		}
-		if( cur_loc_range){
-			efree( cur_loc_range );
-		}
 		RETURN_FALSE;
 
 	}
