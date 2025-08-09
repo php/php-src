@@ -28,9 +28,10 @@ try {
 }
 ?>
 --EXPECTF--
+Deprecated: ini_set(): Using a value different than 0 for intl.error_level is deprecated, as the intl.error_level INI setting is deprecated. Instead the intl.use_exceptions INI setting should be enabled to throw exceptions on errors or intl_get_error_code()/intl_get_error_message() should be used to manually deal with errors in %s on line %d
 
 Warning: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR in %s on line %d
 
-Warning: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR in %s on line 5
+Warning: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR in %s on line %d
 UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR
 UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR
