@@ -82,9 +82,8 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 
 	tzobj = Z_PHPTIMEZONE_P(zv_timezone);
 	if (!tzobj->initialized) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"DateTimeZone object is unconstructed");
-		RETURN_NULL();
+		zend_throw_error(NULL, "DateTimeZone object is unconstructed");
+		RETURN_THROWS();
 	}
 
 	tz = timezone_convert_datetimezone(tzobj->type, tzobj, false, NULL);
@@ -209,7 +208,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	if (!arg3isnull) {
 		if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(offset_arg))) {
-			zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
 			RETURN_THROWS();
 		}
 		offset = static_cast<int32_t>(offset_arg);
@@ -311,8 +310,9 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 		Z_PARAM_LONG(index)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX)) {
-		RETURN_FALSE;
+	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(index))) {
+		zend_argument_value_error(2, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
 	}
 
 	UErrorCode status = UErrorCode();

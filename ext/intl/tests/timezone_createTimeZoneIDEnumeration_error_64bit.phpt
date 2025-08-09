@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-ValueError: IntlTimeZone::createTimeZoneIDEnumeration(): Argument #1 ($type) must be between -2147483648 and 2147483647
+ValueError: IntlTimeZone::createTimeZoneIDEnumeration(): Argument #3 ($rawOffset) must be between -2147483648 and 2147483647
