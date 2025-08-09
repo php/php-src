@@ -179,6 +179,12 @@ static const char * const LOC_PREFERRED_GRANDFATHERED[] = {
 	nullptr
 };
 
+struct char_deleter {
+	void operator()(void *p) const {
+		efree(p);
+	}
+};
+
 /* returns true if a is an ID separator, false otherwise */
 #define isIDSeparator(a) (a == '_' || a == '-')
 #define isKeywordSeparator(a) (a == '@' )
@@ -553,12 +559,6 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	size_t      disp_loc_name_len   = 0;
 	int         free_loc_name       = 0;
 
-	struct char_deleter {
-		void operator()(void *p) const {
-			efree(p);
-		}
-	};
-
 	std::unique_ptr<UChar, char_deleter> disp_name;
 	int32_t     disp_name_len  	= 0;
 
@@ -615,7 +615,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	/* Get the disp_value for the given locale */
 	do{
 		auto tmp = reinterpret_cast<UChar *>(erealloc( disp_name.release() , buflen * sizeof(UChar)  ));
-		disp_name = std::unique_ptr<UChar, char_deleter>(tmp);
+		disp_name.reset(tmp);
 		disp_name_len = buflen;
 
 		auto p_mod_loc_name = mod_loc_name.get();
@@ -1056,7 +1056,7 @@ static zend_string* get_private_subtags(const char* loc_name)
 static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 {
 	zend_string*   key_value 	= nullptr;
-	char*   cur_key_name	= nullptr;
+	std::unique_ptr<char, char_deleter>   cur_key_name;
 	char*   token        	= nullptr;
 	char*   last_ptr  	= nullptr;
 
@@ -1076,18 +1076,16 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 			int cnt = 0;
 			/* Tokenize on the "_" or "-"  */
 			token = php_strtok_r( key_value->val , DELIMITER ,&last_ptr);
-			if( cur_key_name ){
-				efree( cur_key_name);
-			}
 			/* Over-allocates a few bytes for the integer so we don't have to reallocate. */
 			size_t cur_key_name_size = (sizeof("-2147483648") - 1) + strlen(key_name) + 1;
-			cur_key_name = reinterpret_cast<char *>(emalloc(cur_key_name_size));
-			snprintf( cur_key_name, cur_key_name_size , "%s%d", key_name , cnt++);
-			add_assoc_string( hash_arr, cur_key_name , token);
+			cur_key_name.reset(reinterpret_cast<char *>(emalloc(cur_key_name_size)));
+			char *p_cur_key_name = cur_key_name.get();
+			snprintf( p_cur_key_name, cur_key_name_size , "%s%d", key_name , cnt++);
+			add_assoc_string( hash_arr, p_cur_key_name , token);
 			/* tokenize on the "_" or "-" and stop  at singleton if any */
 			while( (token = php_strtok_r(nullptr , DELIMITER , &last_ptr)) && (strlen(token)>1) ){
-				snprintf( cur_key_name , cur_key_name_size, "%s%d", key_name , cnt++);
-				add_assoc_string( hash_arr, cur_key_name , token);
+				snprintf( p_cur_key_name , cur_key_name_size, "%s%d", key_name , cnt++);
+				add_assoc_string( hash_arr, p_cur_key_name , token);
 			}
 /*
 			if( strcmp(key_name, LOC_PRIVATE_TAG) == 0 ){
@@ -1104,10 +1102,6 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 		} else if (key_value) {
 			zend_string_release_ex(key_value, 0);
 		}
-	}
-
-	if( cur_key_name ){
-		efree( cur_key_name);
 	}
 	/*if( key_name != LOC_PRIVATE_TAG && key_value){*/
 	return cur_result;
