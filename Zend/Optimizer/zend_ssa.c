@@ -910,9 +910,6 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 		if (n > 0) {
 			n--;
 
-			/* Push backtrack state */
-			zend_worklist_stack_push(&work, -(n + 1));
-
 			// FIXME: Can we optimize this copying out in some cases?
 			int *new_var;
 			if (ssa->cfg.blocks[n].next_child >= 0) {
@@ -927,29 +924,37 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 
 			zend_ssa_rename_in_block(op_array, build_flags, ssa, new_var, n);
 
-			/* Push children in enter state */
-			unsigned int child_count = 0;
-			int len_prior = work.len;
 			int j = ssa->cfg.blocks[n].children;
-			while (j >= 0) {
-				zend_worklist_stack_push(&work, j + 1);
-				j = ssa->cfg.blocks[j].next_child;
-				child_count++;
-			}
+			if (j >= 0) {
+				/* Push backtrack state */
+				zend_worklist_stack_push(&work, -(n + 1));
 
-			/* Reverse block order to maintain SSA variable number order given in previous PHP versions,
-			 * but the data structure doesn't allow reverse dominator tree traversal. */
-			for (unsigned int i = 0; i < child_count / 2; i++) {
-				int tmp = work.buf[len_prior + i];
-				work.buf[len_prior + i] = work.buf[work.len - 1 - i];
-				work.buf[work.len - 1 - i] = tmp;
+				/* Push children in enter state */
+				unsigned int child_count = 0;
+				int len_prior = work.len;
+				do {
+					zend_worklist_stack_push(&work, j + 1);
+					j = ssa->cfg.blocks[j].next_child;
+					child_count++;
+				} while (j >= 0);
+
+				/* Reverse block order to maintain SSA variable number order given in previous PHP versions,
+				 * but the data structure doesn't allow reverse dominator tree traversal. */
+				for (unsigned int i = 0; i < child_count / 2; i++) {
+					int tmp = work.buf[len_prior + i];
+					work.buf[len_prior + i] = work.buf[work.len - 1 - i];
+					work.buf[work.len - 1 - i] = tmp;
+				}
+			} else {
+				/* Leafs jump directly to backtracking */
+				goto backtrack;
 			}
 		}
 		/* Leave state: backtrack */
 		else {
 			n = -n;
 			n--;
-
+backtrack:;
 			for (unsigned int i = save_vars_top, p = save_positions[n]; i > p; i--) {
 				efree(save_vars[i]);
 			}
