@@ -895,11 +895,9 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 	ZEND_WORKLIST_STACK_ALLOCA(&work, ssa->cfg.blocks_count, work_use_heap);
 	zend_worklist_stack_push(&work, n + 1);
 
-	/* This is used together with `save_vars` to backtrack the right version of the renamed variables to use. */
-	ALLOCA_FLAG(save_positions_use_heap);
+	/* This is used to backtrack the right version of the renamed variables to use. */
 	ALLOCA_FLAG(save_vars_use_heap);
 	unsigned int save_vars_top = 0;
-	unsigned int *save_positions = do_alloca(sizeof(unsigned int) * ssa->cfg.blocks_count, save_positions_use_heap);
 	int **save_vars = do_alloca(sizeof(int *) * (ssa->cfg.blocks_count + 1), save_vars_use_heap);
 	save_vars[0] = var;
 
@@ -915,11 +913,9 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 			if (ssa->cfg.blocks[n].next_child >= 0) {
 				new_var = emalloc(sizeof(int) * (op_array->last_var + op_array->T));
 				memcpy(new_var, save_vars[save_vars_top], sizeof(int) * (op_array->last_var + op_array->T));
-				save_positions[n] = save_vars_top++;
-				save_vars[save_vars_top] = new_var;
+				save_vars[++save_vars_top] = new_var;
 			} else {
 				new_var = save_vars[save_vars_top];
-				save_positions[n] = save_vars_top;
 			}
 
 			zend_ssa_rename_in_block(op_array, build_flags, ssa, new_var, n);
@@ -955,16 +951,14 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 			n = -n;
 			n--;
 backtrack:;
-			for (unsigned int i = save_vars_top, p = save_positions[n]; i > p; i--) {
-				efree(save_vars[i]);
+			if (ssa->cfg.blocks[n].next_child >= 0) {
+				efree(save_vars[save_vars_top]);
+				save_vars_top--;
 			}
-
-			save_vars_top = save_positions[n];
 		}
 	}
 
 	free_alloca(save_vars, save_vars_use_heap);
-	free_alloca(save_positions, save_positions_use_heap);
 	ZEND_WORKLIST_STACK_FREE_ALLOCA(&work, work_use_heap);
 
 	return SUCCESS;
