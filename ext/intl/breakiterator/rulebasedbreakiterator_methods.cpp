@@ -139,7 +139,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 	ZEND_ASSERT(BREAKITER_ERROR_CODE(bio) == U_BUFFER_OVERFLOW_ERROR);
 	BREAKITER_ERROR_CODE(bio) = U_ZERO_ERROR;
 
-	int32_t *r = static_cast<int32_t *>(emalloc(num_rules * sizeof(int32_t)));
+	int32_t *r = zend_mm_safe_alloc<int32_t *>(static_cast<size_t>(num_rules), sizeof(int32_t));
 
 	std::unique_ptr<int32_t[], decltype(&zend_mm_destructor<int32_t>)> rules(r, zend_mm_destructor);
 
