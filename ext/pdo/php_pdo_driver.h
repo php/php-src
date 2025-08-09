@@ -577,7 +577,10 @@ struct _pdo_stmt_t {
 	 * bindParam() for its prepared statements, if false, PDO should
 	 * emulate prepare and bind on its behalf */
 	uint16_t supports_placeholders:2;
-	uint16_t reserved: 12;
+
+	/* defaults for fetches */
+	uint16_t default_fetch_type:9;
+	uint16_t reserved:3;
 
 	/* keep track of bound input parameters.  Some drivers support
 	 * input/output parameters, but you can't rely on that working */
@@ -594,9 +597,6 @@ struct _pdo_stmt_t {
 	 * not be valid until fetch (at the driver level) has been called at least once.
 	 * */
 	int32_t column_count;
-
-	/* defaults for fetches */
-	enum pdo_fetch_type default_fetch_type;
 
 	union {
 		int column;
@@ -703,6 +703,8 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 /* Normalization for fetching long param for driver attributes */
 PDO_API bool pdo_get_long_param(zend_long *lval, const zval *value);
 PDO_API bool pdo_get_bool_param(bool *bval, const zval *value);
+
+PDO_API bool pdo_verify_fetch_mode(uint32_t default_mode_and_flags, zend_long mode_and_flags, uint32_t mode_arg_num, bool fetch_all);
 
 PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
 
