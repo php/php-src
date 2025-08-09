@@ -412,6 +412,8 @@ PHP 8.5 UPGRADE NOTES
 - OpenSSL:
   . openssl_public_encrypt() and openssl_private_decrypt() have new parameter
     $digest_algo that allows specifying hash digest algorithm for OEAP padding.
+  . openssl_sign() and openssl_verify() have new parameter $padding to allow
+    using more secure RSA PSS padding.
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
@@ -663,6 +665,9 @@ PHP 8.5 UPGRADE NOTES
 - Intl:
   . DECIMAL_COMPACT_SHORT.
   . DECIMAL_COMPACT_LONG.
+
+- OpenSSL:
+  . OPENSSL_PKCS1_PSS_PADDING
 
 - POSIX:
   . POSIX_SC_OPEN_MAX.
