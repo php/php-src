@@ -22,7 +22,8 @@ try {
 
 var_dump($obj);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 Cannot acquire reference to readonly property A::$foo
 object(A)#1 (1) {
   ["foo"]=>

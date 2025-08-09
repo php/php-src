@@ -1,15 +1,16 @@
 --TEST--
 SPL: RecursiveTreeIterator and Exception from getEntry()
---INI--
-error_reporting=E_ALL&~E_NOTICE
 --FILE--
 <?php
 
-$ary = array(new stdClass);
+$ary = [
+    ['string'],
+    [new stdClass],
+];
 
 class RecursiveArrayIteratorAggregated implements IteratorAggregate {
-    public $it;
-    function __construct($it) {
+    public RecursiveArrayIterator $it;
+    function __construct(array $it) {
         $this->it = new RecursiveArrayIterator($it);
     }
     function getIterator(): Traversable {
@@ -27,5 +28,10 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+[0] => |-Array
+[0] => | \-string
+[1] => \-Array
+
+Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 Object of class stdClass could not be converted to string

@@ -25,6 +25,7 @@ var_dump(get_object_vars($obj));
 
 ?>
 --EXPECTF--
+Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
 array(3) {
   ["%0A%0b"]=>
   int(42)
@@ -33,6 +34,8 @@ array(3) {
   [12]=>
   int(6)
 }
+
+Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
 array(4) {
   ["prop"]=>
   NULL

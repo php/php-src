@@ -20,5 +20,6 @@ $action->filter();
 $action->filter();
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 DONE

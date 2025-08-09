@@ -1,11 +1,12 @@
 --TEST--
-Typed property type coercion through ArrayIterator
+GH-11178 (Segmentation fault in spl_array_it_get_current_data (PHP 8.1.18))
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class A implements IteratorAggregate {
-    function __construct(
-        public string $foo = 'bar'
-    ) {}
+    function __construct() {
+        $this->{'x'} = 1;
+    }
 
     function getIterator(): Traversable {
         return new ArrayIterator($this);
@@ -13,8 +14,9 @@ class A implements IteratorAggregate {
 }
 
 $obj = new A;
+
 foreach ($obj as $k => &$v) {
-	$v = 42;
+    $v = 3;
 }
 
 var_dump($obj);
@@ -22,6 +24,6 @@ var_dump($obj);
 --EXPECTF--
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
 object(A)#1 (1) {
-  ["foo"]=>
-  &string(2) "42"
+  ["x"]=>
+  &int(3)
 }
