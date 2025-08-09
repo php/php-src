@@ -31,18 +31,18 @@
 
 #include <type_traits>
 
-template<typename T>
-void zend_mm_destructor_handler(T *ptr, bool is_class) {
-	if (ptr) {
-		if (is_class) {
-			ptr->~T();
-		}
-		efree(ptr);
+template<typename T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
+void zend_mm_destructor(T *inst) {
+	if (inst) {
+		inst->~T();
+		efree(inst);
 	}
 }
 
-template<typename T>
-void zend_mm_destructor(T *inst) {
-	zend_mm_destructor_handler(inst, std::is_class_v<T>);	
+template<typename T, typename std::enable_if<!std::is_class<T>::value, int>::type = 0>
+void zend_mm_destructor(T *ptr) {
+	if (ptr) {
+		efree(ptr);
+	}
 }
 #endif
