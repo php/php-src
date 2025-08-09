@@ -101,6 +101,7 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . PHP_ODBC_CFLAGS, PHP_ODBC_LFLAGS, PHP_ODBC_LIBS, PHP_ODBC_TYPE preprocessor
     macros defined by ext/odbc are now defined in php_config.h instead of the
     build-defs.h header.
+  . Autoconf macro AX_CHECK_COMPILE_FLAG updated to serial 11.
   . Autoconf macro PHP_AP_EXTRACT_VERSION has been removed.
   . Autoconf macro PHP_BUILD_THREAD_SAFE has been removed (set enable_zts
     manually).
