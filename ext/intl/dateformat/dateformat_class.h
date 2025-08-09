@@ -35,8 +35,14 @@ static inline IntlDateFormatter_object *php_intl_dateformatter_fetch_object(zend
 }
 #define Z_INTL_DATEFORMATTER_P(zv) php_intl_dateformatter_fetch_object(Z_OBJ_P(zv))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void dateformat_register_IntlDateFormatter_class( void );
 extern zend_class_entry *IntlDateFormatter_ce_ptr;
+#ifdef __cplusplus
+}
+#endif
 
 /* Auxiliary macros */
 
