@@ -8,4 +8,4 @@ var_dump((double) 42);
 ?>
 --EXPECTF--
 Deprecated: Non-canonical cast (double) is deprecated, use the (float) cast instead in %s on line %d
-int(42)
+float(42)

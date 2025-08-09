@@ -1648,7 +1648,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	if (PARSER_MODE()) {
 		zend_error(E_DEPRECATED, "Non-canonical cast (double) is deprecated, use the (float) cast instead");
 	}
-	RETURN_TOKEN(T_INT_CAST);
+	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"real"{TABS_AND_SPACES}")" {
@@ -1667,7 +1667,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	if (PARSER_MODE()) {
 		zend_error(E_DEPRECATED, "Non-canonical cast (binary) is deprecated, use the (string) cast instead");
 	}
-	RETURN_TOKEN(T_INT_CAST);
+	RETURN_TOKEN(T_STRING_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
@@ -1686,7 +1686,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	if (PARSER_MODE()) {
 		zend_error(E_DEPRECATED, "Non-canonical cast (boolean) is deprecated, use the (bool) cast instead");
 	}
-	RETURN_TOKEN(T_INT_CAST);
+	RETURN_TOKEN(T_BOOL_CAST);
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
