@@ -389,6 +389,59 @@ PHP_FUNCTION(round)
 }
 /* }}} */
 
+/* {{{ Return the given value if in range of min and max */
+PHP_FUNCTION(clamp)
+{
+	zval *zvalue, *zmin, *zmax;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_ZVAL(zvalue)
+		Z_PARAM_ZVAL(zmin)
+		Z_PARAM_ZVAL(zmax)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_compare(zmin, zmax) > 0) {
+		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(zmax, zvalue) == -1) {
+		RETURN_COPY(zmax);
+	}
+
+	if (zend_compare(zvalue, zmin) == -1) {
+		RETURN_COPY(zmin);
+	}
+
+	RETURN_COPY(zvalue);
+}
+/* }}} */
+
+/* {{{ Return the given value if in range of min and max */
+ZEND_FRAMELESS_FUNCTION(clamp, 3)
+{
+	zval *zvalue, *zmin, *zmax;
+	Z_FLF_PARAM_ZVAL(1, zvalue);
+	Z_FLF_PARAM_ZVAL(2, zmin);
+	Z_FLF_PARAM_ZVAL(3, zmax);
+
+	if (zend_compare(zmin, zmax) > 0) {
+		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(zmax, zvalue) == -1) {
+		RETURN_COPY_VALUE(zmax);
+	}
+
+	if (zend_compare(zvalue, zmin) == -1) {
+		RETURN_COPY_VALUE(zmin);
+	}
+
+	RETURN_COPY_VALUE(zvalue);
+}
+/* }}} */
+
 /* {{{ Returns the sine of the number in radians */
 PHP_FUNCTION(sin)
 {
