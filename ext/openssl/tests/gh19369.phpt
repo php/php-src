@@ -10,10 +10,6 @@ if (!in_array('sha256WithRSAEncryption', openssl_get_md_methods(true))) {
 ?>
 --FILE--
 <?php
-$digests             = openssl_get_md_methods();
-$digests_and_aliases = openssl_get_md_methods(true);
-$digest_aliases      = array_diff($digests_and_aliases, $digests);
-
 $data = "Testing openssl_sign() with alias algorithm";
 $privkey = "file://" . __DIR__ . "/private_rsa_1024.key";
 
