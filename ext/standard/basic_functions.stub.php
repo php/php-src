@@ -1629,6 +1629,12 @@ function min(mixed $value, mixed ...$values): mixed {}
  */
 function max(mixed $value, mixed ...$values): mixed {}
 
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 3}
+ */
+function clamp(mixed $value, mixed $min, mixed $max): mixed {}
+
 function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
 
 function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
