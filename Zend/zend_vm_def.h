@@ -2976,8 +2976,7 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
-		EG(vm_stack_top) = (zval*)execute_data;
-		execute_data = EX(prev_execute_data);
+		execute_data = zend_vm_stack_pop_call_frame(execute_data);
 
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_rethrow_exception(execute_data);
@@ -4145,7 +4144,7 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 		}
 		zend_vm_stack_free_call_frame_ex(call_info, call);
 	} else {
-		EG(vm_stack_top) = (zval*)call;
+		zend_vm_stack_pop_call_frame(call);
 	}
 
 	if (!RETURN_VALUE_USED(opline)) {
@@ -4281,7 +4280,7 @@ ZEND_VM_C_LABEL(fcall_by_name_end):
 			}
 			zend_vm_stack_free_call_frame_ex(call_info, call);
 		} else {
-			EG(vm_stack_top) = (zval*)call;
+			zend_vm_stack_pop_call_frame(call);
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
@@ -4701,8 +4700,7 @@ ZEND_VM_HANDLER(139, ZEND_GENERATOR_CREATE, ANY, ANY)
 		call_info = EX_CALL_INFO();
 		EG(current_execute_data) = EX(prev_execute_data);
 		if (EXPECTED(!(call_info & (ZEND_CALL_TOP|ZEND_CALL_ALLOCATED)))) {
-			EG(vm_stack_top) = (zval*)execute_data;
-			execute_data = EX(prev_execute_data);
+			execute_data = zend_vm_stack_pop_call_frame(execute_data);
 			LOAD_NEXT_OPLINE();
 			ZEND_VM_LEAVE();
 		} else if (EXPECTED(!(call_info & ZEND_CALL_TOP))) {
@@ -6162,7 +6160,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			}
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
-			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {			
+			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
 				if (c->ce->type == ZEND_USER_CLASS) {
 					/* Recursion protection only applied to user constants, GH-18463 */
 					CONST_PROTECT_RECURSION(c);
