@@ -29,4 +29,15 @@
 #define _MSC_STDINT_H_ 1
 #endif
 
+#include <type_traits>
+
+template<typename T>
+void zend_mm_destructor(T *inst) {
+	if (inst) {
+		if constexpr (std::is_class_v<T>) {
+			inst->~T();
+		}
+		efree(inst);
+	}
+}
 #endif
