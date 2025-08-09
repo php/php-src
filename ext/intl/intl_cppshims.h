@@ -32,12 +32,17 @@
 #include <type_traits>
 
 template<typename T>
-void zend_mm_destructor(T *inst) {
-	if (inst) {
-		if constexpr (std::is_class_v<T>) {
-			inst->~T();
+void zend_mm_destructor_handler(T *ptr, bool is_class) {
+	if (ptr) {
+		if (is_class) {
+			ptr->~T();
 		}
-		efree(inst);
+		efree(ptr);
 	}
+}
+
+template<typename T>
+void zend_mm_destructor(T *inst) {
+	zend_mm_destructor_handler(inst, std::is_class_v<T>);	
 }
 #endif
