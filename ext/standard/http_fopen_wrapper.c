@@ -750,7 +750,6 @@ finish:
 	/* auth header if it was specified */
 	if (((have_header & HTTP_HEADER_AUTH) == 0) && resource->user) {
 		smart_str scratch = {0};
-		zend_string *stmp;
 
 		/* decode the strings first */
 		php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
@@ -765,7 +764,7 @@ finish:
 		}
 
 		zend_string *scratch_str = smart_str_extract(&scratch);
-		stmp = php_base64_encode((unsigned char*)ZSTR_VAL(scratch_str), ZSTR_LEN(scratch_str));
+		zend_string *stmp = php_base64_encode((unsigned char*)ZSTR_VAL(scratch_str), ZSTR_LEN(scratch_str));
 
 		smart_str_appends(&req_buf, "Authorization: Basic ");
 		smart_str_append(&req_buf, stmp);
@@ -773,8 +772,8 @@ finish:
 
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 
+		zend_string_efree(scratch_str);
 		zend_string_free(stmp);
-		smart_str_free(&scratch);
 	}
 
 	/* if the user has configured who they are, send a From: line */
