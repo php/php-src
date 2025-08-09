@@ -4,7 +4,6 @@ IntlTimeZone::createTimeZoneIDEnumeration(): variant without region
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $enum = IntlTimeZone::createTimeZoneIDEnumeration(
     IntlTimeZone::TYPE_ANY);
 $countAny = count(iterator_to_array($enum));

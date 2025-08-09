@@ -1023,8 +1023,12 @@ cli_server.color = On
 ; This directive allows you to produce PHP errors when some error
 ; happens within intl functions. The value is the level of the error produced.
 ; Default is 0, which does not produce any errors.
+; This directive is deprecated.
 ;intl.error_level = E_WARNING
-;intl.use_exceptions = 0
+; If enabled this directive indicates that when an error occurs within an
+; intl function a IntlException should be thrown.
+; Default is Off, which means errors need to be handled manually.
+;intl.use_exceptions = On
 
 [sqlite3]
 ; Directory pointing to SQLite3 extensions
