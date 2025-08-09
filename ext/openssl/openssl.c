@@ -2356,6 +2356,14 @@ PHP_FUNCTION(openssl_pkey_derive)
 		RETURN_THROWS();
 	}
 
+	if (ZEND_NUM_ARGS() == 3) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"the $key_length parameter is deprecated as it is either ignored or truncates the key");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	if (key_len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
