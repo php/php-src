@@ -4186,14 +4186,18 @@ static zend_result zend_compile_func_chr(znode *result, const zend_ast_list *arg
 }
 /* }}} */
 
-static zend_result zend_compile_func_ord(znode *result, zend_ast_list *args) /* {{{ */
+static zend_result zend_compile_func_ord(znode *result, const zend_ast_list *args) /* {{{ */
 {
-	if (args->children == 1 &&
-	    args->child[0]->kind == ZEND_AST_ZVAL &&
-	    Z_TYPE_P(zend_ast_get_zval(args->child[0])) == IS_STRING) {
-
+	zval *str;
+	if (
+		args->children == 1
+		&& args->child[0]->kind == ZEND_AST_ZVAL
+		&& (str = zend_ast_get_zval(args->child[0]))
+		&& Z_TYPE_P(str) == IS_STRING
+		&& Z_STRLEN_P(str) == 1
+	) {
 		result->op_type = IS_CONST;
-		ZVAL_LONG(&result->u.constant, (unsigned char)Z_STRVAL_P(zend_ast_get_zval(args->child[0]))[0]);
+		ZVAL_LONG(&result->u.constant, (unsigned char)Z_STRVAL_P(str)[0]);
 		return SUCCESS;
 	} else {
 		return FAILURE;
