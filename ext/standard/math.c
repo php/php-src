@@ -667,13 +667,9 @@ PHP_FUNCTION(log)
 		RETURN_DOUBLE(log10(num));
 	}
 
-	if (base == 1.0) {
-		RETURN_DOUBLE(ZEND_NAN);
-	}
-
-	if (base <= 0.0) {
-		zend_argument_value_error(2, "must be greater than 0");
-		RETURN_THROWS();
+	if (base <= 0.0 || base == 1.0) {
+        zend_argument_value_error(2, "must not be 1 or less than or equal to 0");
+        RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE(log(num) / log(base));
