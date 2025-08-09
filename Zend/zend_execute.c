@@ -3005,7 +3005,7 @@ static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_UNSET(z
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET EXECUTE_DATA_CC);
 }
 
-static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, bool is_list, int slow EXECUTE_DATA_DC)
+static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, bool is_list, bool slow EXECUTE_DATA_DC)
 {
 	zval *retval;
 
@@ -3142,6 +3142,9 @@ try_string_offset:
 		}
 		if (ZEND_CONST_COND(dim_type == IS_CV, 1) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP2();
+		}
+		if (is_list && Z_TYPE_P(container) > IS_NULL) {
+			zend_error(E_WARNING, "Cannot use %s as array", zend_zval_type_name(container));
 		}
 		if (!is_list && type != BP_VAR_IS) {
 			zend_error(E_WARNING, "Trying to access array offset on %s",
