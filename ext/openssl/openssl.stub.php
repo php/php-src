@@ -236,6 +236,11 @@ const OPENSSL_NO_PADDING = UNKNOWN;
  * @cvalue RSA_PKCS1_OAEP_PADDING
  */
 const OPENSSL_PKCS1_OAEP_PADDING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue RSA_PKCS1_PSS_PADDING
+ */
+const OPENSSL_PKCS1_PSS_PADDING = UNKNOWN;
 
 /* Informational stream wrapper constants */
 
@@ -595,10 +600,10 @@ function openssl_error_string(): string|false {}
  * @param string $signature
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1): bool {}
+function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key */
-function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1): int|false {}
+function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): int|false {}
 
 /**
  * @param string $sealed_data
