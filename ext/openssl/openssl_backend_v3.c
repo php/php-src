@@ -769,6 +769,12 @@ static const char *php_openssl_cipher_names[] = {
 
 const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *name)
 {
+	const EVP_CIPHER *cp = (const EVP_CIPHER *) OBJ_NAME_get(name, OBJ_NAME_TYPE_CIPHER_METH);
+
+	if (cp != NULL) {
+		return cp;
+	}
+
 	return EVP_CIPHER_fetch(PHP_OPENSSL_LIBCTX, name, PHP_OPENSSL_PROPQ);
 }
 
