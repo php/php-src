@@ -63,6 +63,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-18986 (OpenSSL backend: incorrect RAND_{load,write}_file()
     return value check). (nielsdos, botovq)
   . Fix error return check of EVP_CIPHER_CTX_ctrl(). (nielsdos)
+  . Fixed bug GH-19428 (openssl_pkey_derive segfaults for DH derive with low
+    key_length param). (Jakub Zelenka)
 
 - PDO Pgsql:
   . Fixed dangling pointer access on _pdo_pgsql_trim_message helper.
