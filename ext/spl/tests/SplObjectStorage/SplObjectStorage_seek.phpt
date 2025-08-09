@@ -64,8 +64,8 @@ var_dump($storage->current());
 
 echo "--- With holes cases ---\n";
 
-$storage->detach($b);
-$storage->detach($d);
+$storage->offsetUnset($b);
+$storage->offsetUnset($d);
 
 foreach (range(0, 2) as $index) {
     $storage->seek($index);

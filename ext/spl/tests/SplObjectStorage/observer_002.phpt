@@ -70,13 +70,13 @@ class SubjectImpl implements SplSubject
     function attach(SplObserver $observer): void
     {
         echo $this->name . '->' . __METHOD__ . '(' . $observer->getName() . ");\n";
-        $this->observers->attach($observer);
+        $this->observers->offsetSet($observer);
     }
 
     function detach(SplObserver $observer): void
     {
         echo $this->name . '->' . __METHOD__ . '(' . $observer->getName() . ");\n";
-        $this->observers->detach($observer);
+        $this->observers->offsetUnset($observer);
     }
 
     function count(): int
@@ -100,7 +100,7 @@ class SubjectImpl implements SplSubject
 
     function contains($obj)
     {
-        return $this->observers->contains($obj);
+        return $this->observers->offsetExists($obj);
     }
 }
 

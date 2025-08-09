@@ -7,8 +7,8 @@ $o2 = new stdClass;
 
 $s = new SplObjectStorage();
 
-$s->attach($o1, array('prev' => 2, 'next' => $o2));
-$s->attach($o2, array('prev' => $o1));
+$s->offsetSet($o1, array('prev' => 2, 'next' => $o2));
+$s->offsetSet($o2, array('prev' => $o1));
 
 $ss = serialize($s);
 unset($s,$o1,$o2);

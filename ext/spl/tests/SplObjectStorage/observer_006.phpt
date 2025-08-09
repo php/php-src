@@ -27,7 +27,7 @@ $storage = new MyStorage();
 
 foreach(array(1=>"foo",2=>42) as $key => $value)
 {
-     $storage->attach(new TestClass($key), $value);
+     $storage->offsetSet(new TestClass($key), $value);
 }
 
 var_dump(count($storage));
@@ -52,8 +52,8 @@ foreach($storage2 as $object)
 }
 
 var_dump($storage2);
-$storage->attach(new TestClass(3), new stdClass);
-$storage->attach(new TestClass(4), new TestClass(5));
+$storage->offsetSet(new TestClass(3), new stdClass);
+$storage->offsetSet(new TestClass(4), new TestClass(5));
 echo "===UNSERIALIZE2===\n";
 var_dump(unserialize(serialize($storage)));
 $storage->rewind();
@@ -70,7 +70,7 @@ $storage->next();
 $storage->next();
 var_dump($storage->key());
 var_dump($storage->current());
-$storage->attach($storage->current(), "replaced");
+$storage->offsetSet($storage->current(), "replaced");
 echo "===UNSERIALIZE4===\n";
 var_dump(unserialize(serialize($storage)));
 
