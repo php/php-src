@@ -10,12 +10,15 @@ PHP                                                                        NEWS
 
 - FileInfo
   . The finfo_close() function has been deprecated. (timwolla)
+  . The $context parameter of the finfo_buffer() function has been deprecated
+    as it is ignored. (Girgias)
 
 - Intl:
   . Intl's internal error mechanism has been modernized so that it
     indicates more accurately which call site caused what error.
     Moreover, some ext/date exceptions have been wrapped inside a
     IntlException now. (Girgias)
+  . The intl.error_level INI setting has been deprecated. (Girgias)
 
 - MySQLi:
   . The mysqli_execute() alias function has been deprecated. (timwolla)
@@ -23,6 +26,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug GH-19369 (8.5 | Regression in openssl_sign() - support for alias
     algorithms appears to be broken). (Jakub Zelenka)
+  . The $key_length parameter for openssl_pkey_derive() has been deprecated.
+    (Girgias)
 
 - PDO:
   . The "uri:" DSN scheme has been deprecated due to security concerns with
@@ -47,6 +52,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . The socket_set_timeout() alias function has been deprecated. (timwolla)
+  . Passing null to to readdir(), rewinddir(), and closedir() to use the last
+    opened directory has been deprecated. (Girgias)
 
 31 Jul 2025, PHP 8.5.0alpha4
 

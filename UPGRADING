@@ -327,16 +327,31 @@ PHP 8.5 UPGRADE NOTES
   . The finfo_close() function has been deprecated.
     As finfo objects are freed automatically.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_finfo_close
+  . The $context parameter of the finfo_buffer() function has been deprecated
+    as it is ignored.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_context_parameter_for_finfo_buffer
 
 - Hash:
   . The MHASH_* constants have been deprecated.  These have been overlooked
     when the mhash*() function family has been deprecated per
     https://wiki.php.net/rfc/deprecations_php_8_1#mhash_function_family
 
+- Intl:
+  . The intl.error_level INI setting has been deprecated.
+    Errors should either be checked manually or exceptions should be enabled
+    by using the intl.use_exceptions INI setting.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_intlerror_level_ini_setting
+
 - MySQLi:
   . The mysqli_execute() alias function has been deprecated.
     Use mysqli_stmt_execute() instead.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#formally_deprecate_mysqli_execute
+
+- OpenSSL:
+  . The $key_length parameter for openssl_pkey_derive() has been deprecated.
+    This is because it is either ignored, or truncates the key, which can be
+    a vulnerability.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_key_length_parameter_of_openssl_pkey_derive
 
 - PDO:
   . The "uri:" DSN scheme has been deprecated due to security concerns with
@@ -365,6 +380,10 @@ PHP 8.5 UPGRADE NOTES
   . The socket_set_timeout() alias function has been deprecated.
     Use stream_set_timeout() instead.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#formally_deprecate_socket_set_timeout
+  . Passing null to to readdir(), rewinddir(), and closedir() to use the last
+    opened directory has been deprecated. Provide the last opened directory
+    explicitly instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_null_to_readdir_rewinddir_and_closedir
 
 ========================================
 5. Changed Functions
