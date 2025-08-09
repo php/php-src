@@ -1483,15 +1483,15 @@ ZEND_FUNCTION(get_defined_functions)
 	zval internal, user;
 	zend_string *key;
 	zend_function *func;
-	bool exclude_disabled = 1;
+	bool exclude_disabled = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (exclude_disabled == 0) {
+	if (ZEND_NUM_ARGS() == 1) {
 		zend_error(E_DEPRECATED,
-			"get_defined_functions(): Setting $exclude_disabled to false has no effect");
+			"get_defined_functions(): The $exclude_disabled parameter has no effect since PHP 8.0");
 	}
 
 	array_init(&internal);
