@@ -320,5 +320,7 @@ caught Exception 27
 caught Exception 28
 caught Exception 29
 caught Exception 30
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 caught Exception 31
 caught Exception 32

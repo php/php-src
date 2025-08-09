@@ -85,23 +85,23 @@ Decrement on type null has no effect, this will change in the next major version
 NULL
 Empty string
 POST INC
-Increment on non-alphanumeric string is deprecated
+Increment on non-numeric string is deprecated, use str_increment() instead
 string(0) ""
 POST DEC
 Decrement on empty string is deprecated as non-numeric
 string(0) ""
 PRE INC
-Increment on non-alphanumeric string is deprecated
+Increment on non-numeric string is deprecated, use str_increment() instead
 string(1) "1"
 PRE DEC
 Decrement on empty string is deprecated as non-numeric
 int(-1)
 Non fill ASCII (only ++)
 POST INC
-Increment on non-alphanumeric string is deprecated
+Increment on non-numeric string is deprecated, use str_increment() instead
 string(4) " ad "
 PRE INC
-Increment on non-alphanumeric string is deprecated
+Increment on non-numeric string is deprecated, use str_increment() instead
 string(4) " ad "
 Bool
 POST INC
