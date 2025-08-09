@@ -13,5 +13,6 @@ function test() {
 }
 test();
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Cannot use string as array in %s on line %d
 NULL
