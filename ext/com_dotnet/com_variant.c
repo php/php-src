@@ -32,7 +32,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	SAFEARRAY *sa = NULL;
 	SAFEARRAYBOUND bound;
 	HashPosition pos;
-	int keytype;
+	zend_hash_key_type keytype;
 	zend_string *strindex;
 	zend_ulong intindex = 0;
 	VARIANT *va;

@@ -2842,7 +2842,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(const HashTable *
 
 
 /* This function should be made binary safe  */
-ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos)
+ZEND_API zend_hash_key_type ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos)
 {
 	uint32_t idx;
 	Bucket *p;
@@ -2889,7 +2889,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *h
 	}
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_type_ex(const HashTable *ht, const HashPosition *pos)
+ZEND_API zend_hash_key_type ZEND_FASTCALL zend_hash_get_current_key_type_ex(const HashTable *ht, const HashPosition *pos)
 {
 	uint32_t idx;
 	Bucket *p;
