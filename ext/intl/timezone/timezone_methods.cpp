@@ -208,7 +208,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	if (!arg3isnull) {
 		if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(offset_arg))) {
-			zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
 			RETURN_THROWS();
 		}
 		offset = static_cast<int32_t>(offset_arg);
