@@ -18,6 +18,7 @@ class TestSoapClient extends SoapClient {
         $action,
         $version,
         $one_way = false,
+        ?string $uriParserClass = null,
     ): ?string {
         die($request);
     }
