@@ -96,7 +96,7 @@ static int fpm_event_kqueue_init(int max) /* {{{ */
 /*
  * release kqueue stuff
  */
-static int fpm_event_kqueue_clean() /* {{{ */
+static int fpm_event_kqueue_clean(void) /* {{{ */
 {
 	if (kevents) {
 		free(kevents);
