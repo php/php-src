@@ -420,10 +420,8 @@ static struct IDispatchExVtbl php_dispatch_vtbl = {
  * dispatch ids */
 static void generate_dispids(php_dispatchex *disp)
 {
-	HashPosition pos;
 	zend_string *name = NULL;
-	zval *tmp, tmp2;
-	int keytype;
+	zval tmp;
 	zend_long pid;
 
 	if (disp->dispid_to_name == NULL) {
@@ -435,71 +433,42 @@ static void generate_dispids(php_dispatchex *disp)
 
 	/* properties */
 	if (Z_OBJPROP(disp->object)) {
-		zend_hash_internal_pointer_reset_ex(Z_OBJPROP(disp->object), &pos);
-		while (HASH_KEY_NON_EXISTENT != (keytype =
-				zend_hash_get_current_key_ex(Z_OBJPROP(disp->object), &name,
-				&pid, &pos))) {
-			char namebuf[32];
-			if (keytype == HASH_KEY_IS_LONG) {
-				snprintf(namebuf, sizeof(namebuf), ZEND_ULONG_FMT, pid);
-				name = zend_string_init(namebuf, strlen(namebuf), 0);
-			} else {
-				zend_string_addref(name);
-			}
+		ZEND_HASH_FOREACH_STR_KEY(Z_OBJPROP(disp->object), name) {
+			ZEND_ASSERT(name);
 
-			zend_hash_move_forward_ex(Z_OBJPROP(disp->object), &pos);
-
-			/* Find the existing id */
-			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				zend_string_release_ex(name, 0);
+			/* Check ID exists */
+			if (!zend_hash_exists(disp->name_to_dispid, name)) {
 				continue;
 			}
 
 			/* add the mappings */
-			ZVAL_STR_COPY(&tmp2, name);
-			zend_hash_next_index_insert(disp->dispid_to_name, &tmp2);
-			pid = zend_hash_next_free_element(disp->dispid_to_name) - 1;
+			ZVAL_STR_COPY(&tmp, name);
+			pid = zend_hash_next_free_element(disp->dispid_to_name);
+			zend_hash_index_update(disp->dispid_to_name, pid, &tmp);
 
-			ZVAL_LONG(&tmp2, pid);
-			zend_hash_update(disp->name_to_dispid, name, &tmp2);
-
-			zend_string_release_ex(name, 0);
-		}
+			ZVAL_LONG(&tmp, pid);
+			zend_hash_update(disp->name_to_dispid, name, &tmp);
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	/* functions */
 	if (Z_OBJCE(disp->object)) {
-		zend_hash_internal_pointer_reset_ex(&Z_OBJCE(disp->object)->function_table, &pos);
-		while (HASH_KEY_NON_EXISTENT != (keytype =
-				zend_hash_get_current_key_ex(&Z_OBJCE(disp->object)->function_table,
-			 	&name, &pid, &pos))) {
+		ZEND_HASH_FOREACH_STR_KEY(&Z_OBJCE(disp->object)->function_table, name) {
+			ZEND_ASSERT(name);
 
-			char namebuf[32];
-			if (keytype == HASH_KEY_IS_LONG) {
-				snprintf(namebuf, sizeof(namebuf), ZEND_ULONG_FMT, pid);
-				name = zend_string_init(namebuf, strlen(namebuf), 0);
-			} else {
-				zend_string_addref(name);
-			}
-
-			zend_hash_move_forward_ex(&Z_OBJCE(disp->object)->function_table, &pos);
-
-			/* Find the existing id */
-			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				zend_string_release_ex(name, 0);
+			/* Check ID exists */
+			if (!zend_hash_exists(disp->name_to_dispid, name)) {
 				continue;
 			}
 
 			/* add the mappings */
-			ZVAL_STR_COPY(&tmp2, name);
-			zend_hash_next_index_insert(disp->dispid_to_name, &tmp2);
-			pid = zend_hash_next_free_element(disp->dispid_to_name) - 1;
+			ZVAL_STR_COPY(&tmp, name);
+			pid = zend_hash_next_free_element(disp->dispid_to_name);
+			zend_hash_index_update(disp->dispid_to_name, pid, &tmp);
 
-			ZVAL_LONG(&tmp2, pid);
-			zend_hash_update(disp->name_to_dispid, name, &tmp2);
-
-			zend_string_release_ex(name, 0);
-		}
+			ZVAL_LONG(&tmp, pid);
+			zend_hash_update(disp->name_to_dispid, name, &tmp);
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 
@@ -540,15 +509,9 @@ static void disp_destructor(php_dispatchex *disp)
 	CoTaskMemFree(disp);
 }
 
-PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid,
-	   HashTable *id_to_name)
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name)
 {
 	php_dispatchex *disp = disp_constructor(val);
-	HashPosition pos;
-	zend_string *name = NULL;
-	zval tmp, *ntmp;
-	int keytype;
-	zend_ulong pid;
 
 	disp->dispid_to_name = id_to_name;
 
@@ -558,20 +521,16 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 	ALLOC_HASHTABLE(disp->name_to_dispid);
 	zend_hash_init(disp->name_to_dispid, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-	zend_hash_internal_pointer_reset_ex(id_to_name, &pos);
-	while (HASH_KEY_NON_EXISTENT != (keytype =
-				zend_hash_get_current_key_ex(id_to_name, &name, &pid, &pos))) {
+	ZEND_ASSERT(zend_array_is_list(id_to_name));
+	zend_ulong pid;
+	zval *value;
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(id_to_name, pid, value) {
+		ZEND_ASSERT(Z_TYPE_P(value) == IS_STRING);
 
-		if (keytype == HASH_KEY_IS_LONG) {
-
-			ntmp = zend_hash_get_current_data_ex(id_to_name, &pos);
-
-			ZVAL_LONG(&tmp, pid);
-			zend_hash_update(disp->name_to_dispid, Z_STR_P(ntmp), &tmp);
-		}
-
-		zend_hash_move_forward_ex(id_to_name, &pos);
-	}
+		zval tmp;
+		ZVAL_LONG(&tmp, pid);
+		zend_hash_update(disp->name_to_dispid, Z_STR_P(value), &tmp);
+	} ZEND_HASH_FOREACH_END();
 
 	return (IDispatch*)disp;
 }
