@@ -451,14 +451,14 @@ ZEND_FRAMELESS_FUNCTION(clamp, 3)
 	}
 
 	if (zend_compare(zmax, zvalue) == -1) {
-		RETURN_COPY_VALUE(zmax);
+		RETURN_COPY(zmax);
 	}
 
 	if (zend_compare(zvalue, zmin) == -1) {
-		RETURN_COPY_VALUE(zmin);
+		RETURN_COPY(zmin);
 	}
 
-	RETURN_COPY_VALUE(zvalue);
+	RETURN_COPY(zvalue);
 }
 /* }}} */
 

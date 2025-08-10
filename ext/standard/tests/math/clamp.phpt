@@ -49,13 +49,13 @@ float(2.5)
 float(2.5)
 float(1.3)
 float(3.141592653589793)
-double(NAN)
+float(NAN)
 string(1) "c"
 string(1) "d"
 2025-08-15
 2025-08-20
 2025-08-15
 2025-08-20
-Argument #2 ($min) cannot be NAN
-Argument #3 ($max) cannot be NAN
-Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+clamp(): Argument #2 ($min) cannot be NAN
+clamp(): Argument #3 ($max) cannot be NAN
+clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
