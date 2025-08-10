@@ -1,0 +1,196 @@
+# Oniguruma Makefile for Windows
+
+product_name = oniguruma
+
+TEST_DIR   = $(ONIG_DIR)/../test
+SAMPLE_DIR = $(ONIG_DIR)/../sample
+WIN_DIR    = $(ONIG_DIR)/../windows
+
+CPPFLAGS =
+CFLAGS = -O2 -nologo /W3
+LDFLAGS =
+LOADLIBES =
+ARLIB = lib
+ARLIB_FLAGS = -nologo
+ARDLL = cl
+ARDLL_FLAGS = -nologo -LD $(LINKFLAGS) -dll
+LINKFLAGS = -link -incremental:no -pdb:none
+
+SAMPLE_CFLAGS = $(CFLAGS) /I$(ONIG_DIR)
+
+INSTALL = install -c
+CP      = copy
+CC = cl
+DEFS = -DHAVE_CONFIG_H -DUSE_POSIX_API -DUSE_BINARY_COMPATIBLE_POSIX_API
+
+subdirs =
+
+libbase   = onig
+libname   = $(libbase)_s.lib
+dllname   = $(libbase).dll
+dlllib    = $(libbase).lib
+
+!IF defined(ENABLE_POSIX_API) && "$(ENABLE_POSIX_API)" == "NO"
+posixobjs =
+!ELSE
+posixobjs = $(BUILD_DIR)/regposix.obj $(BUILD_DIR)/regposerr.obj
+!ENDIF
+
+onigheaders  = $(ONIG_DIR)/oniguruma.h $(ONIG_DIR)/regint.h $(ONIG_DIR)/regparse.h $(ONIG_DIR)/regenc.h $(ONIG_DIR)/st.h
+posixheaders = $(ONIG_DIR)/onigposix.h
+headers      = $(posixheaders) $(onigheaders)
+
+onigobjs     = $(BUILD_DIR)/reggnu.obj $(BUILD_DIR)/regerror.obj $(BUILD_DIR)/regparse.obj $(BUILD_DIR)/regext.obj $(BUILD_DIR)/regcomp.obj \
+	       $(BUILD_DIR)/regexec.obj $(BUILD_DIR)/regenc.obj $(BUILD_DIR)/regsyntax.obj $(BUILD_DIR)/regtrav.obj \
+	       $(BUILD_DIR)/regversion.obj $(BUILD_DIR)/st.obj $(BUILD_DIR)/onig_init.obj
+libobjs      = $(onigobjs) $(posixobjs)
+
+jp_objs      =  $(BUILD_DIR)/euc_jp.obj $(BUILD_DIR)/sjis.obj
+iso8859_objs =  $(BUILD_DIR)/iso8859_1.obj  $(BUILD_DIR)/iso8859_2.obj \
+		$(BUILD_DIR)/iso8859_3.obj  $(BUILD_DIR)/iso8859_4.obj \
+		$(BUILD_DIR)/iso8859_5.obj  $(BUILD_DIR)/iso8859_6.obj \
+		$(BUILD_DIR)/iso8859_7.obj  $(BUILD_DIR)/iso8859_8.obj \
+		$(BUILD_DIR)/iso8859_9.obj  $(BUILD_DIR)/iso8859_10.obj \
+		$(BUILD_DIR)/iso8859_11.obj $(BUILD_DIR)/iso8859_13.obj \
+		$(BUILD_DIR)/iso8859_14.obj $(BUILD_DIR)/iso8859_15.obj \
+		$(BUILD_DIR)/iso8859_16.obj
+
+encobjs = $(BUILD_DIR)/ascii.obj $(BUILD_DIR)/utf8.obj \
+		$(BUILD_DIR)/unicode.obj \
+		$(BUILD_DIR)/utf16_be.obj $(BUILD_DIR)/utf16_le.obj \
+		$(BUILD_DIR)/utf32_be.obj $(BUILD_DIR)/utf32_le.obj \
+		$(jp_objs) $(iso8859_objs) \
+		$(BUILD_DIR)/euc_tw.obj $(BUILD_DIR)/euc_kr.obj $(BUILD_DIR)/big5.obj \
+		$(BUILD_DIR)/gb18030.obj \
+		$(BUILD_DIR)/koi8_r.obj  \
+		$(BUILD_DIR)/cp1251.obj \
+		$(BUILD_DIR)/euc_jp_prop.obj $(BUILD_DIR)/sjis_prop.obj \
+		$(BUILD_DIR)/unicode_unfold_key.obj $(BUILD_DIR)/unicode_fold1_key.obj \
+		$(BUILD_DIR)/unicode_fold2_key.obj $(BUILD_DIR)/unicode_fold3_key.obj	# $(BUILD_DIR)/koi8.obj
+
+onigsources  = $(ONIG_DIR)/regerror.c $(ONIG_DIR)/regparse.c $(ONIG_DIR)/regext.c $(ONIG_DIR)/regcomp.c $(ONIG_DIR)/regexec.c $(ONIG_DIR)/regenc.c \
+	       $(ONIG_DIR)/regsyntax.c $(ONIG_DIR)/regtrav.c $(ONIG_DIR)/regversion.c $(ONIG_DIR)/reggnu.c $(ONIG_DIR)/st.c
+posixsources = $(ONIG_DIR)/regposix.c $(ONIG_DIR)/regposerr.c
+libsources   = $(posixsources) $(onigsources)
+
+patchfiles   = re.c.168.patch re.c.181.patch
+distfiles    = README COPYING HISTORY \
+		Makefile.in configure.in config.h.in configure \
+		$(headers) $(libsources) $(patchfiles) \
+		test.rb testconv.rb
+testc        = testc
+testp        = testp
+
+makeargs = $(MFLAGS) CPPFLAGS='$(CPPFLAGS)' CFLAGS='$(CFLAGS)' CC='$(CC)'
+
+.SUFFIXES:
+.SUFFIXES: .obj .c .h .ps .dvi .info .texinfo
+
+{$(ONIG_DIR)}.c{$(BUILD_DIR)}.obj:
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(DEFS) /I. /I.. /Fo$@ /c $<
+
+# targets
+default: all
+
+all: $(libname) $(dllname)
+
+$(libname): $(libobjs) $(encobjs)
+	$(ARLIB) $(ARLIB_FLAGS) -out:$@ $(libobjs) $(encobjs)
+
+$(dllname): $(libobjs) $(encobjs)
+	$(ARDLL) $(libobjs) $(encobjs) -Fe$@ $(ARDLL_FLAGS)
+
+$(BUILD_DIR)/regparse.obj:  $(ONIG_DIR)/regparse.c $(onigheaders) $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regext.obj:    $(ONIG_DIR)/regext.c   $(onigheaders) $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regtrav.obj:   $(ONIG_DIR)/regtrav.c  $(onigheaders) $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regcomp.obj:   $(ONIG_DIR)/regcomp.c  $(onigheaders) $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regexec.obj:   $(ONIG_DIR)/regexec.c  $(ONIG_DIR)/regint.h $(ONIG_DIR)/regenc.h $(ONIG_DIR)/oniguruma.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/reggnu.obj:    $(ONIG_DIR)/reggnu.c   $(ONIG_DIR)/regint.h $(ONIG_DIR)/regenc.h $(ONIG_DIR)/oniguruma.h $(BUILD_DIR)/config.h $(ONIG_DIR)/oniggnu.h
+$(BUILD_DIR)/regerror.obj:  $(ONIG_DIR)/regerror.c $(ONIG_DIR)/regint.h $(ONIG_DIR)/regenc.h $(ONIG_DIR)/oniguruma.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regenc.obj:    $(ONIG_DIR)/regenc.c   $(ONIG_DIR)/regenc.h $(ONIG_DIR)/oniguruma.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regsyntax.obj: $(ONIG_DIR)/regsyntax.c $(ONIG_DIR)/regint.h $(ONIG_DIR)/regenc.h $(ONIG_DIR)/oniguruma.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regversion.obj: $(ONIG_DIR)/regversion.c $(ONIG_DIR)/oniguruma.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regposix.obj:  $(ONIG_DIR)/regposix.c $(posixheaders) $(ONIG_DIR)/oniguruma.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/regposerr.obj: $(ONIG_DIR)/regposerr.c $(posixheaders) $(BUILD_DIR)/config.h
+$(BUILD_DIR)/st.obj:        $(ONIG_DIR)/st.c $(ONIG_DIR)/regint.h $(ONIG_DIR)/oniguruma.h $(BUILD_DIR)/config.h $(ONIG_DIR)/st.h
+$(BUILD_DIR)/onig_init.obj: $(ONIG_DIR)/onig_init.c $(ONIG_DIR)/oniguruma.h
+
+$(BUILD_DIR)/ascii.obj:      $(ONIG_DIR)/ascii.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/unicode.obj:    $(ONIG_DIR)/unicode.c $(ONIG_DIR)/unicode_fold_data.c $(ONIG_DIR)/unicode_property_data.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/utf8.obj:       $(ONIG_DIR)/utf8.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/utf16_be.obj:   $(ONIG_DIR)/utf16_be.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/utf16_le.obj:   $(ONIG_DIR)/utf16_le.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/utf32_be.obj:   $(ONIG_DIR)/utf32_be.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/utf32_le.obj:   $(ONIG_DIR)/utf32_le.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/euc_jp.obj:     $(ONIG_DIR)/euc_jp.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/euc_tw.obj:     $(ONIG_DIR)/euc_tw.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/euc_kr.obj:     $(ONIG_DIR)/euc_kr.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/sjis.obj:       $(ONIG_DIR)/sjis.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_1.obj:  $(ONIG_DIR)/iso8859_1.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_2.obj:  $(ONIG_DIR)/iso8859_2.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_3.obj:  $(ONIG_DIR)/iso8859_3.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_4.obj:  $(ONIG_DIR)/iso8859_4.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_5.obj:  $(ONIG_DIR)/iso8859_5.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_6.obj:  $(ONIG_DIR)/iso8859_6.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_7.obj:  $(ONIG_DIR)/iso8859_7.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_8.obj:  $(ONIG_DIR)/iso8859_8.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_9.obj:  $(ONIG_DIR)/iso8859_9.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_10.obj: $(ONIG_DIR)/iso8859_10.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_11.obj: $(ONIG_DIR)/iso8859_11.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_13.obj: $(ONIG_DIR)/iso8859_13.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_14.obj: $(ONIG_DIR)/iso8859_14.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_15.obj: $(ONIG_DIR)/iso8859_15.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/iso8859_16.obj: $(ONIG_DIR)/iso8859_16.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/koi8.obj:       $(ONIG_DIR)/koi8.c   $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/koi8_r.obj:     $(ONIG_DIR)/koi8_r.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/cp1251.obj:     $(ONIG_DIR)/cp1251.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/big5.obj:       $(ONIG_DIR)/big5.c   $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/gb18030.obj:    $(ONIG_DIR)/gb18030.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/euc_jp_prop.obj:  $(ONIG_DIR)/euc_jp_prop.c $(ONIG_DIR)/regenc.h
+$(BUILD_DIR)/sjis_prop.obj:    $(ONIG_DIR)/sjis_prop.c $(ONIG_DIR)/regenc.h
+$(BUILD_DIR)/unicode_unfold_key.obj: $(ONIG_DIR)/unicode_unfold_key.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/unicode_fold1_key.obj: $(ONIG_DIR)/unicode_fold1_key.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/unicode_fold2_key.obj: $(ONIG_DIR)/unicode_fold2_key.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+$(BUILD_DIR)/unicode_fold3_key.obj: $(ONIG_DIR)/unicode_fold3_key.c $(ONIG_DIR)/regenc.h $(BUILD_DIR)/config.h
+
+all-test: test_syntax test_regset test_utf8 test_options test_back testc testp testu
+
+test_syntax: $(TEST_DIR)/test_syntax.c $(libname)
+	$(CC) -nologo /Fe:$@ /I. /I$(ONIG_DIR) /DONIG_EXTERN=extern /utf-8 $(TEST_DIR)/test_syntax.c $(libname)
+
+test_regset: $(TEST_DIR)/test_regset.c $(libname)
+	$(CC) -nologo /Fe:$@ /I. /I$(ONIG_DIR) /DONIG_EXTERN=extern /utf-8 $(TEST_DIR)/test_regset.c $(libname)
+
+test_utf8: $(TEST_DIR)/test_utf8.c $(libname)
+	$(CC) -nologo /Fe:$@ /I. /I$(ONIG_DIR) /DONIG_EXTERN=extern /utf-8 $(TEST_DIR)/test_utf8.c $(libname)
+
+test_options: $(TEST_DIR)/test_options.c $(libname)
+	$(CC) -nologo /Fe:$@ /I. /I$(ONIG_DIR) /DONIG_EXTERN=extern /utf-8 $(TEST_DIR)/test_options.c $(libname)
+
+test_back: $(TEST_DIR)/test_back.c $(libname)
+	$(CC) -nologo /Fe:$@ /I. /I$(ONIG_DIR) /DONIG_EXTERN=extern /utf-8 $(TEST_DIR)/test_back.c $(libname)
+
+testc: $(WIN_DIR)/testc.c $(libname)
+	$(CC) -nologo /Fe:$@ /I. /I$(ONIG_DIR) /DONIG_EXTERN=extern $(WIN_DIR)/testc.c $(libname)
+
+testp: $(WIN_DIR)/testc.c $(libname)
+	$(CC) -nologo /Fe:$@ /I. /I$(ONIG_DIR) /DONIG_EXTERN=extern /DPOSIX_TEST $(WIN_DIR)/testc.c $(libname)
+
+testu: $(TEST_DIR)/testu.c $(libname)
+	$(CC) -nologo /Fe:$@ /I. /I$(ONIG_DIR) /DONIG_EXTERN=extern $(TEST_DIR)/testu.c $(libname)
+
+clean:
+	del $(BUILD_DIR)\*.obj $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.exp $(BUILD_DIR)\*.dll $(BUILD_DIR)\test_regset.exe $(BUILD_DIR)\test_syntax.exe $(BUILD_DIR)\test_utf8.exe $(BUILD_DIR)\test_options.exe $(BUILD_DIR)\test_back.exe $(BUILD_DIR)\testp.exe $(BUILD_DIR)\testc.exe $(BUILD_DIR)\testu.exe
+
+
+samples: all
+	$(CC) $(SAMPLE_CFLAGS) /Fe:simple  $(SAMPLE_DIR)\simple.c  $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:posix   $(SAMPLE_DIR)\posix.c   $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:names   $(SAMPLE_DIR)\names.c   $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:listcap $(SAMPLE_DIR)\listcap.c $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:sql     $(SAMPLE_DIR)\sql.c     $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:encode  $(SAMPLE_DIR)\encode.c  $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:syntax  $(SAMPLE_DIR)\syntax.c  $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:count   $(SAMPLE_DIR)\count.c   $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:regset  $(SAMPLE_DIR)\regset.c  $(dlllib)
+	$(CC) $(SAMPLE_CFLAGS) /Fe:callback_each_match $(SAMPLE_DIR)\callback_each_match.c  $(dlllib)
