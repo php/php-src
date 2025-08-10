@@ -22,9 +22,9 @@ var_dump(
 
 ?>
 --EXPECTF--
-Deprecated: Constant DATE_RFC7231 is deprecated in %s on line %d
+Deprecated: Constant DATE_RFC7231 is deprecated since 8.5, as this format ignores the associated timezone and always uses GMT in %s on line %d
 
-Deprecated: Constant DateTimeInterface::RFC7231 is deprecated in %s on line %d
+Deprecated: Constant DateTimeInterface::RFC7231 is deprecated since 8.5, as this format ignores the associated timezone and always uses GMT in %s on line %d
 bool(true)
 bool(true)
 bool(true)

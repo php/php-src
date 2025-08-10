@@ -45,7 +45,7 @@ Date constants
     );
 ?>
 --EXPECTF--
-Deprecated: Constant DATE_RFC7231 is deprecated in %s on line %d
+Deprecated: Constant DATE_RFC7231 is deprecated since 8.5, as this format ignores the associated timezone and always uses GMT in %s on line %d
 string(25) "2006-07-01T14:27:30+02:00"
 string(25) "2006-05-30T14:32:13+02:00"
 string(35) "Saturday, 01-Jul-2006 14:27:30 CEST"
@@ -76,9 +76,9 @@ string(25) "2006-07-01T14:27:30+02:00"
 string(25) "2006-05-30T14:32:13+02:00"
 
 
-Deprecated: Constant DATE_RFC7231 is deprecated in %s on line %d
+Deprecated: Constant DATE_RFC7231 is deprecated since 8.5, as this format ignores the associated timezone and always uses GMT in %s on line %d
 
-Deprecated: Constant DateTimeInterface::RFC7231 is deprecated in %s on line %d
+Deprecated: Constant DateTimeInterface::RFC7231 is deprecated since 8.5, as this format ignores the associated timezone and always uses GMT in %s on line %d
 bool(true)
 bool(true)
 bool(true)
