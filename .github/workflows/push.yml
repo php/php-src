@@ -130,7 +130,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
@@ -190,7 +189,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
   MACOS_DEBUG_NTS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
@@ -198,7 +196,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 14
+          - os: 15
             arch: ARM64
     name: MACOS_${{ matrix.arch }}_DEBUG_NTS
     runs-on: macos-${{ matrix.os }}
@@ -229,7 +227,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
@@ -299,7 +296,6 @@ jobs:
           ./configure \
             --disable-debug \
             --enable-mbstring \
-            --enable-opcache \
             --enable-option-checking=fatal \
             --enable-sockets \
             --enable-werror \
@@ -319,7 +315,6 @@ jobs:
           sudo mkdir -p /etc/php.d
           sudo chmod 777 /etc/php.d
           echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
-          echo zend_extension=opcache.so >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
       - name: Setup

@@ -11,16 +11,16 @@ work). Therefore you can execute the script as follows:
 
 .. code:: shell
 
-   TEST_PHP_EXECUTABLE=sapi/cli/php \
    sapi/cli/php [-c /path/to/php.ini] run-tests.php [ext/foo/tests/GLOB]
 
 ******************************************
  Which php executable does make test use?
 ******************************************
 
-If you are running the ``run-tests.php`` script from the command line (as above) you must set the
+If you are running the ``run-tests.php`` script from the command line (as above) you can set the
 ``TEST_PHP_EXECUTABLE`` environment variable to explicitly select the PHP executable that is to be
-tested, that is, used to run the test scripts.
+tested, that is, used to run the test scripts, otherwise it will use the PHP CLI binary that you
+have compiled (``sapi/cli/php``).
 
 If you run the tests using make test, the PHP CLI and CGI executables are automatically set for you.
 ``make test`` executes ``run-tests.php`` script with the CLI binary. Some test scripts such as
@@ -57,6 +57,31 @@ Tester can easily execute tests selectively with as follows:
 
    ./sapi/cli/php run-tests.php ext/mbstring/*
    ./sapi/cli/php run-tests.php ext/mbstring/020.phpt
+
+*********************
+ Test Runner Options
+*********************
+
+The ``run-tests.php`` test runner has many options. You can see these options by using the ``-h``
+option with ``run-tests.php``.
+
+You can set options by specifying them on the command line when you run ``php run-tests.php`` or if
+you use ``make test`` through the ``TEST_PHP_ARGS`` environment variable:
+
+.. code:: shell
+
+   php run-tests.php -j24
+   # or
+   TEST_PHP_ARGS="-j24" make test
+
+Running Tests in Parallel
+=========================
+
+The test runner can run tests in parallel, by using the ``-j`` option:
+
+.. code:: shell
+
+   php run-tests.php -j24 ext/date/*.phpt
 
 **************
  Test results

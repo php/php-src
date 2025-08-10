@@ -1452,6 +1452,29 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		return;
 	}
 
+	/* Emit any delayed error before handling fatal error */
+	if ((type & E_FATAL_ERRORS) && !(type & E_DONT_BAIL) && EG(num_errors)) {
+		uint32_t num_errors = EG(num_errors);
+		zend_error_info **errors = EG(errors);
+		EG(num_errors) = 0;
+		EG(errors) = NULL;
+
+		bool orig_record_errors = EG(record_errors);
+		EG(record_errors) = false;
+
+		/* Disable user error handler before emitting delayed errors, as
+		 * it's unsafe to execute user code after a fatal error. */
+		int orig_user_error_handler_error_reporting = EG(user_error_handler_error_reporting);
+		EG(user_error_handler_error_reporting) = 0;
+
+		zend_emit_recorded_errors_ex(num_errors, errors);
+
+		EG(user_error_handler_error_reporting) = orig_user_error_handler_error_reporting;
+		EG(record_errors) = orig_record_errors;
+		EG(num_errors) = num_errors;
+		EG(errors) = errors;
+	}
+
 	if (EG(record_errors)) {
 		zend_error_info *info = emalloc(sizeof(zend_error_info));
 		info->type = type;
@@ -1464,6 +1487,11 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		EG(num_errors)++;
 		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info*) * EG(num_errors));
 		EG(errors)[EG(num_errors)-1] = info;
+
+		/* Do not process non-fatal recorded error */
+		if (!(type & E_FATAL_ERRORS) || (type & E_DONT_BAIL)) {
+			return;
+		}
 	}
 
 	// Always clear the last backtrace.
@@ -1752,13 +1780,18 @@ ZEND_API void zend_begin_record_errors(void)
 	EG(errors) = NULL;
 }
 
+ZEND_API void zend_emit_recorded_errors_ex(uint32_t num_errors, zend_error_info **errors)
+{
+	for (uint32_t i = 0; i < num_errors; i++) {
+		zend_error_info *error = errors[i];
+		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
+	}
+}
+
 ZEND_API void zend_emit_recorded_errors(void)
 {
 	EG(record_errors) = false;
-	for (uint32_t i = 0; i < EG(num_errors); i++) {
-		zend_error_info *error = EG(errors)[i];
-		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
-	}
+	zend_emit_recorded_errors_ex(EG(num_errors), EG(errors));
 }
 
 ZEND_API void zend_free_recorded_errors(void)

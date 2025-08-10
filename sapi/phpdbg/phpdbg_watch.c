@@ -1481,7 +1481,7 @@ void phpdbg_setup_watchpoints(void) {
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	int flags = O_CLOEXEC;
 #ifdef UFFD_USER_MODE_ONLY
-	// unpriviliged userfaultfd are disabled by default,
+	// unprivileged userfaultfd are disabled by default,
 	// with this flag it allows ranges from the user space
 	// being reported.
 	flags |= UFFD_USER_MODE_ONLY;

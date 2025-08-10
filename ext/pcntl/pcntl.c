@@ -32,6 +32,7 @@
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_fibers.h"
+#include "main/php_main.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
 #include <sys/wait.h>
@@ -297,7 +298,7 @@ PHP_FUNCTION(pcntl_fork)
 
 		}
 	} else if (id == 0) {
-		zend_max_execution_timer_init();
+		php_child_init();
 	}
 
 	RETURN_LONG((zend_long) id);
@@ -1560,7 +1561,7 @@ PHP_FUNCTION(pcntl_rfork)
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 	} else if (pid == 0) {
-		zend_max_execution_timer_init();
+		php_child_init();
 	}
 
 	RETURN_LONG((zend_long) pid);
@@ -1605,7 +1606,7 @@ PHP_FUNCTION(pcntl_forkx)
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 	} else if (pid == 0) {
-		zend_max_execution_timer_init();
+		php_child_init();
 	}
 
 	RETURN_LONG((zend_long) pid);

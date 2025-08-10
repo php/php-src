@@ -44,6 +44,12 @@ PHP 8.5 UPGRADE NOTES
   . Traits are now bound before the parent class. This is a subtle behavioral
     change, but should more closely match user expectations, demonstrated by
     GH-15753 and GH-16198.
+  . Errors emitted during compilation and class linking are now always delayed
+    and handled after compilation or class linking. Fatal errors emitted during
+    compilation or class linking cause any delayed errors to be handled
+    immediately, without calling user-defined error handlers.
+  . Exceptions thrown by user-defined error handlers when handling class linking
+    errors are not promoted to fatal errors anymore and do not prevent linking.
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
@@ -70,6 +76,16 @@ PHP 8.5 UPGRADE NOTES
 - MySQLi:
   . Calling the mysqli constructor on an already-constructed object
     is now no longer possible and throws an Error.
+
+- Opcache:
+  . The Opcache extension is now always built into the PHP binary and is always
+    loaded. The INI directives opcache.enable and opcache.enable_cli are still
+    honored.
+    The --enable-opcache/--disable-opcache configure flags have been removed,
+    and the build does not produce opcache.so or php_opcache.dll objects
+    anymore.
+    Using zend_extension=opcache.so or zend_extension=php_opcache.dll INI
+    directives will emit a warning.
 
 - PCNTL:
   . pcntl_exec() now throws ValueErrors when entries of the $args parameter
@@ -198,6 +214,8 @@ PHP 8.5 UPGRADE NOTES
     request spent in libcurl’s connection queue before it was sent.
     This value can also be retrieved by passing CURLINFO_QUEUE_TIME_T to the
     curl_getinfo() $option parameter.
+  . Added support for CURLOPT_SSL_SIGNATURE_ALGORITHMS to specify the signature
+    algorithms to use for TLS.
 
 - DOM:
   . Added Dom\Element::$outerHTML.
@@ -248,7 +266,7 @@ PHP 8.5 UPGRADE NOTES
 
 - Standard:
   . getimagesize() now supports SVG images when ext-libxml is also loaded.
-    Similarly, image_type_to_extension() and image_type_to_extension()
+    Similarly, image_type_to_extension() and image_type_to_mime_type()
     now also handle IMAGETYPE_SVG.
   . The array returned by getimagesize() now has two additional entries:
     "width_unit" and "height_unit" to indicate in which units the dimensions
@@ -280,6 +298,7 @@ PHP 8.5 UPGRADE NOTES
 - FPM:
   . FPM with httpd ProxyPass decodes the full script path. Added
     fastcgi.script_path_encoded INI setting to prevent this new behavior.
+  . FPM access log limit now respects log_limit value.
 
 ========================================
 4. Deprecated Functionality
@@ -297,11 +316,74 @@ PHP 8.5 UPGRADE NOTES
     one will still be used. If a user output handler returns a non-string and
     produces output, the warning about producing an output is emitted first.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+  . Non-canonical cast names (boolean), (integer), (double), and (binary) have
+    been deprecated, use (bool), (int), (float), and (string) respectively.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_non-standard_cast_names
+  . The $exclude_disabled parameter of the get_defined_functions() function has
+    been deprecated, as it no longer has any effect since PHP 8.0.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_exclude_disabled_parameter_of_get_defined_functions
+
+- FileInfo:
+  . The finfo_close() function has been deprecated.
+    As finfo objects are freed automatically.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_finfo_close
+  . The $context parameter of the finfo_buffer() function has been deprecated
+    as it is ignored.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_context_parameter_for_finfo_buffer
 
 - Hash:
   . The MHASH_* constants have been deprecated.  These have been overlooked
     when the mhash*() function family has been deprecated per
     https://wiki.php.net/rfc/deprecations_php_8_1#mhash_function_family
+
+- Intl:
+  . The intl.error_level INI setting has been deprecated.
+    Errors should either be checked manually or exceptions should be enabled
+    by using the intl.use_exceptions INI setting.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_intlerror_level_ini_setting
+
+- MySQLi:
+  . The mysqli_execute() alias function has been deprecated.
+    Use mysqli_stmt_execute() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#formally_deprecate_mysqli_execute
+
+- OpenSSL:
+  . The $key_length parameter for openssl_pkey_derive() has been deprecated.
+    This is because it is either ignored, or truncates the key, which can be
+    a vulnerability.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_key_length_parameter_of_openssl_pkey_derive
+
+- PDO:
+  . The "uri:" DSN scheme has been deprecated due to security concerns with
+    DSNs coming from remote URIs.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_pdo_s_urischeme
+
+
+- Reflection:
+  . The setAccessible() methods of various Reflection objects have been
+    deprecated, as those no longer have an effect.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_reflectionsetaccessible
+
+- SPL:
+  . Unregistering all autoloaders by passing the spl_autoload_call() function
+    as a callback argument to spl_autoload_unregister() has been deprecated.
+    Instead if this is needed, one should iterate over the return value of
+    spl_autoload_functions() and call spl_autoload_unregister() on each value.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_spl_autoload_call_to_spl_autoload_unregister
+  . The SplObjectStorage::contains(), SplObjectStorage::attach(), and
+    SplObjectStorage::detach() methods have been deprecated in favour of
+    SplObjectStorage::offsetExists(), SplObjectStorage::offsetSet(), and
+    SplObjectStorage::offsetUnset() respectively.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_splobjectstoragecontains_splobjectstorageattach_and_splobjectstoragedetach
+
+- Standard:
+  . The socket_set_timeout() alias function has been deprecated.
+    Use stream_set_timeout() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#formally_deprecate_socket_set_timeout
+  . Passing null to to readdir(), rewinddir(), and closedir() to use the last
+    opened directory has been deprecated. Provide the last opened directory
+    explicitly instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_null_to_readdir_rewinddir_and_closedir
 
 ========================================
 5. Changed Functions
@@ -326,6 +408,10 @@ PHP 8.5 UPGRADE NOTES
 
 - libxml:
   . libxml_set_external_entity_loader() now has a formal return type of true.
+
+- OpenSSL:
+  . openssl_public_encrypt() and openssl_private_decrypt() have new parameter
+    $digest_algo that allows specifying hash digest algorithm for OEAP padding.
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
@@ -359,16 +445,28 @@ PHP 8.5 UPGRADE NOTES
     an invalid file descriptor.
   . posix_fpathconf checks invalid file descriptors and sets
     last_error to EBADF and raises an E_WARNING message.
+  . posix_kill throws a ValueError when the process_id argument is lower
+    or greater than what supports the platform (signed integer or long
+    range), posix_setpgid throws a ValueError when the process_id or
+    the process_group_id is lower than zero or greater than
+    what supports the platform.
+  . posix_setrlimit throws a ValueError when the hard_limit of soft_limit
+    argument are lower than -1 or if soft_limit is greater than hard_limit.
 
 - Reflection:
-  . The output of ReflectionClass::toString() for enums has changed to
+  . The output of ReflectionClass::__toString() for enums has changed to
     better indicate that the class is an enum, and that the enum cases
     are enum cases rather than normal class constants.
+  . The output of ReflectionProperty::__toString() for properties with
+    hooks has changed to indicate what hooks the property has, whether those
+    hooks are final, and whether the property is virtual. This also affects
+    the output of ReflectionClass::__toString() when a class contains hooked
+    properties.
 
 - Session:
   . session_start is stricter in regard to the option argument.
     It throws a ValueError if the whole is not a hashmap or
-    a TypeError if read_on_close value is not a valid type
+    a TypeError if read_and_close value is not a valid type
     compatible with int.
 
 - SNMP:
@@ -381,7 +479,7 @@ PHP 8.5 UPGRADE NOTES
 - Sockets:
   . socket_create_listen, socket_bind and socket_sendto throw a
     ValueError if the port is lower than 0 or greater than 65535,
-    also if any of the hints array entry is indexes numerically.
+    and also if any of the hints array entries are indexed numerically.
   . socket_addrinfo_lookup throws a TypeError if any of the hints
     values cannot be cast to int and can throw a ValueError if
     any of these values overflow.
@@ -467,6 +565,7 @@ PHP 8.5 UPGRADE NOTES
     ReflectionConstant::getExtensionName() were introduced.
   . ReflectionConstant::getAttributes() was introduced.
     RFC: https://wiki.php.net/rfc/attributes-on-constants
+  . ReflectionProperty::getMangledName() was introduced.
 
 - Sqlite:
   . Sqlite3Stmt::busy to check if a statement had been fetched
@@ -506,14 +605,25 @@ PHP 8.5 UPGRADE NOTES
     CURLFOLLOW_FIRSTONLY.
 
 - Fileinfo:
-  . Upgraded to file 5.46.
+  . Upgraded file from 5.45 to 5.46.
   . The return type of finfo_close() has been changed to true, rather
     than bool.
+
+- Intl:
+  . Intl's internal error mechanism has been modernized so that it
+    indicates more accurately which call site caused what error.
+    Moreover, some ext/date exceptions have been wrapped inside a
+    IntlException now.
 
 - Lexbor:
   . An always enabled lexbor extension is added. It contains the lexbor
     library that was separated from ext/dom for being reused among other
     extensions. The new extension is not directly exposed to userland.
+
+- Opcache:
+  . The Opcache extension is now always built into the PHP binary and is always
+    loaded. The INI directives opcache.enable and opcache.enable_cli are still
+    honored.
 
 - URI:
   . An always enabled uri extension is added that can be used for handling
@@ -521,7 +631,7 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/url_parsing_api
 
 - PCRE:
-  . Upgraded to pcre2lib from 10.44 to 10.45.
+  . Upgraded pcre2lib from 10.44 to 10.45.
 
 - PDO_Sqlite:
   . Increased minimum release version support from 3.7.7 to 3.7.17.
@@ -588,6 +698,11 @@ PHP 8.5 UPGRADE NOTES
   . Added fatal_error_backtraces to control whether fatal errors should include
     a backtrace.
     RFC: https://wiki.php.net/rfc/error_backtraces_v2
+  . Added startup-only max_memory_limit INI setting to control the maximum
+    memory_limit that may be configured at startup or runtime. Exceeding this
+    value emits a warning, unless set to -1, and sets memory_limit to the
+    current max_memory_limit instead.
+    ML discussion: https://externals.io/message/127108
 
 - Opcache:
   . Added opcache.file_cache_read_only to support a read-only
@@ -602,6 +717,9 @@ PHP 8.5 UPGRADE NOTES
   . The default value of opcache.jit_hot_loop is now 61 (a prime) to prevent it
     from being a multiple of loop iteration counts.
     It is recommended that this parameter is set to a prime number.
+  . Changing opcache.memory_consumption when OPcache SHM is already set up
+    will now correctly report a failure instead of silently doing nothing and
+    showing misleading values in PHPInfo.
 
 - OpenSSL:
   Added openssl.libctx to select the OpenSSL library context type. Either
@@ -682,6 +800,10 @@ PHP 8.5 UPGRADE NOTES
 - MBString:
   . The parts of the code that used SSE2 have been adapted to use SIMD
     with ARM NEON as well.
+
+- Opcache:
+  . Improved performance of fetching TLS variables in JIT'ed code in non-Glibc
+    builds.
 
 - ReflectionProperty:
   . Improved performance of the following methods: getValue(), getRawValue(),

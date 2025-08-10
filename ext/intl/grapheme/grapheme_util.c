@@ -87,7 +87,7 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 #define STRPOS_CHECK_STATUS(status, error) \
 	if ( U_FAILURE( (status) ) ) { \
 		intl_error_set_code( NULL, (status) ); \
-		intl_error_set_custom_msg( NULL, (error), 0 ); \
+		intl_error_set_custom_msg( NULL, (error)); \
 		ret_pos = -1; \
 		goto finish; \
 	}

@@ -66,17 +66,17 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 
 	if ((ele_value = zend_hash_str_find_deref(hash_arr, key_name, strlen(key_name))) != NULL) {
 		if(Z_TYPE_P(ele_value) != IS_LONG) {
-			spprintf(&message, 0, "datefmt_format: parameter array contains "
+			spprintf(&message, 0, "parameter array contains "
 					"a non-integer element for key '%s'", key_name);
-			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
+			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message);
 			efree(message);
 		} else {
 			if (Z_LVAL_P(ele_value) > INT32_MAX ||
 					Z_LVAL_P(ele_value) < INT32_MIN) {
-				spprintf(&message, 0, "datefmt_format: value " ZEND_LONG_FMT " is out of "
+				spprintf(&message, 0, "value " ZEND_LONG_FMT " is out of "
 						"bounds for a 32-bit integer in key '%s'",
 						Z_LVAL_P(ele_value), key_name);
-				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
+				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message);
 				efree(message);
 			} else {
 				result = Z_LVAL_P(ele_value);
@@ -121,8 +121,7 @@ static UDate internal_get_timestamp(IntlDateFormatter_object *dfo,
 			&INTL_DATA_ERROR_CODE(dfo));
 
 	if (INTL_DATA_ERROR_CODE(dfo) != U_ZERO_ERROR) {
-		intl_errors_set(err, INTL_DATA_ERROR_CODE(dfo), "datefmt_format: "
-				"error cloning calendar", 0);
+		intl_errors_set(err, INTL_DATA_ERROR_CODE(dfo), "error cloning calendar");
 		return 0;
 	}
 
@@ -149,8 +148,6 @@ PHP_FUNCTION(datefmt_format)
 	/* Parse parameters. */
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz",
 			&object, IntlDateFormatter_ce_ptr, &zarg) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: unable "
-				"to parse input params", 0 );
 		RETURN_THROWS();
 	}
 
@@ -163,10 +160,9 @@ PHP_FUNCTION(datefmt_format)
 		}
 
 		timestamp = internal_get_timestamp(dfo, hash_arr);
-		INTL_METHOD_CHECK_STATUS(dfo, "datefmt_format: date formatting failed")
+		INTL_METHOD_CHECK_STATUS(dfo, "date formatting failed")
 	} else {
-		timestamp = intl_zval_to_millis(zarg, INTL_DATA_ERROR_P(dfo),
-				"datefmt_format");
+		timestamp = intl_zval_to_millis(zarg, INTL_DATA_ERROR_P(dfo));
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
 			RETURN_FALSE;
 		}

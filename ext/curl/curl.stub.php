@@ -3339,6 +3339,13 @@ const CURLINFO_PROXY_ERROR = UNKNOWN;
  * @cvalue CURLOPT_SSL_EC_CURVES
  */
 const CURLOPT_SSL_EC_CURVES = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080e00 /* Available since 8.14.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_SSL_SIGNATURE_ALGORITHMS
+ */
+const CURLOPT_SSL_SIGNATURE_ALGORITHMS = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLPX_BAD_ADDRESS_TYPE

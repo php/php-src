@@ -6,6 +6,8 @@ runs:
       run: |
         set -x
 
+        OPCACHE_TLS_TESTS_DEPS="gcc clang lld"
+
         export DEBIAN_FRONTEND=noninteractive
         dpkg --add-architecture i386
         apt-get update -y | true
@@ -44,4 +46,5 @@ runs:
           re2c \
           unzip \
           wget \
-          zlib1g-dev:i386
+          zlib1g-dev:i386 \
+          $OPCACHE_TLS_TESTS_DEPS

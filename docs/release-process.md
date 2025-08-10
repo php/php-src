@@ -219,7 +219,7 @@ slightly different steps. We'll call attention where the steps differ.
    # With ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -227,7 +227,7 @@ slightly different steps. We'll call attention where the steps differ.
    # Without ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -571,7 +571,7 @@ slightly different steps. We'll call attention where the steps differ.
    # With ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -579,7 +579,7 @@ slightly different steps. We'll call attention where the steps differ.
    # Without ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -878,25 +878,37 @@ If you choose to create a patch-level release, follow these steps:
    mailinglist.
 
 
-## Feature freeze
+## Soft feature freeze
 
-A major/minor version [feature freeze][] occurs with the first beta release.
-Specifically, it occurs when the first beta release is packaged, which means the
-feature freeze occurs two days before the first beta release.
+A major/minor version soft feature freeze occurs with the first beta release.
+This is a soft feature freeze because features can still be merged with RM
+approval.
 
-The feature freeze for `php-src` means that we will not accept any new features
-after the date of the feature freeze. For any RFCs to be included in the new
-version, they should be discussed and have the voting polls closed no later than
-the feature freeze date. However, this does not mean the new feature must have a
-complete implementation by this date.
-
-Following the feature freeze, the focus of work for the new version will be on
-fixing bugs, writing tests, and completing/polishing all accepted features.
+For any RFCs to be included in the new release, they should be discussed and
+have their voting polls closed no later than when the first beta is released.
+However, this does not mean the new feature must have a complete implementation
+by this date. Such implementation can be merged only with RM approval and must
+be done before the hard feature freeze.
 
 As a courtesy to the community, the release managers should remind others about
-the upcoming feature freeze by posting reminders to internals@lists.php.net at
-4-weeks, 3-weeks, 2-weeks, and 1-week prior to the feature freeze. This is a
-recommendation and the intervals may vary based on work load.
+the upcoming soft feature freeze by posting reminders to
+internals@lists.php.net at 5 weeks, 4 weeks, 3 weeks, 2 weeks, and 1 week prior
+to this feature freeze. This is a recommendation and the intervals may vary
+based on workload. The reminder should also contain a note with dates for
+the last allowed RFC to start voting.
+
+## Hard feature freeze
+
+A major/minor version hard [feature freeze][] occurs with the first RC release.
+Specifically, it occurs when the first RC release is packaged, which means the
+hard feature freeze occurs two days before the first RC release.
+
+The hard feature freeze for php-src means that we will not accept any new
+features after the date of the hard feature freeze.
+
+Following the hard feature freeze, the focus of work for the new version will
+be on fixing bugs, writing tests, and preparing documentation for all accepted
+features.
 
 
 ## Forking a new version branch

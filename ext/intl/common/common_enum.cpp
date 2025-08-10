@@ -74,8 +74,7 @@ static void string_enum_current_move_forward(zend_object_iterator *iter)
 
 	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii));
 	if (U_FAILURE(INTLITERATOR_ERROR_CODE(ii))) {
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii),
-			"Error fetching next iteration element", 0);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii), "Error fetching next iteration element");
 	} else if (result) {
 		ZVAL_STRINGL(&zoi_iter->current, result, result_length);
 	} //else we've reached the end of the enum, nothing more is required
@@ -105,8 +104,7 @@ static void string_enum_rewind(zend_object_iterator *iter)
 
 	intl_error_set_code(NULL, INTLITERATOR_ERROR_CODE(ii));
 	if (U_FAILURE(INTLITERATOR_ERROR_CODE(ii))) {
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii),
-			"Error resetting enumeration", 0);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(ii), "Error resetting enumeration");
 	} else {
 		iter->funcs->move_forward(iter);
 	}
@@ -268,7 +266,7 @@ PHP_METHOD(IntlIterator, rewind)
 		ii->iterator->funcs->rewind(ii->iterator);
 	} else {
 		intl_errors_set(INTLITERATOR_ERROR_P(ii), U_UNSUPPORTED_ERROR,
-			"IntlIterator::rewind: rewind not supported", 0);
+			"rewind not supported");
 	}
 }
 

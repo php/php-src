@@ -16,7 +16,7 @@
 
 /.github @TimWolla
 /build/gen_stub.php @kocsismate
-/ext/bcmath @Girgias @nielsdos @SakiTakamachi
+/ext/bcmath @nielsdos @SakiTakamachi
 /ext/curl @adoy
 /ext/date @derickr
 /ext/dba @Girgias

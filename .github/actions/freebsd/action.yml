@@ -3,6 +3,9 @@ inputs:
   configurationParameters:
     default: ''
     required: false
+  runExtraTests:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
@@ -16,6 +19,8 @@ runs:
         # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269889
         prepare: |
           cd $GITHUB_WORKSPACE
+
+          OPCACHE_TLS_TESTS_DEPS="gcc"
 
           kldload accf_http
           pkg install -y \
@@ -41,9 +46,11 @@ runs:
             webp \
             libavif \
             `#sqlite3` \
-            curl
+            curl \
+            $OPCACHE_TLS_TESTS_DEPS
 
           ./buildconf -f
+          CC=clang CXX=clang++ \
           ./configure \
             --prefix=/usr/local \
             --enable-debug \
@@ -106,5 +113,8 @@ runs:
             --offline \
             --show-diff \
             --show-slow 1000 \
-            --set-timeout 120 \
-            -d zend_extension=opcache.so
+            --set-timeout 120
+
+          if test "${{ inputs.runExtraTests }}" = "true"; then
+            sapi/cli/php run-extra-tests.php
+          fi

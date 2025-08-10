@@ -99,7 +99,6 @@ PHP_FUNCTION(stream_socket_client)
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	double timeout;
 	bool timeout_is_null = 1;
-	php_timeout_ull conv;
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
@@ -138,7 +137,7 @@ PHP_FUNCTION(stream_socket_client)
 	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
 		tv_pointer = NULL;
 	} else {
-		conv = (php_timeout_ull) (timeout * 1000000.0);
+		php_timeout_ull conv = (php_timeout_ull) (timeout * 1000000.0);
 #ifdef PHP_WIN32
 		tv.tv_sec = (long)(conv / 1000000);
 		tv.tv_usec = (long)(conv % 1000000);
@@ -262,7 +261,6 @@ PHP_FUNCTION(stream_socket_accept)
 	bool timeout_is_null = 1;
 	zval *zpeername = NULL;
 	zend_string *peername = NULL;
-	php_timeout_ull conv;
 	struct timeval tv;
 	php_stream *stream = NULL, *clistream = NULL;
 	zend_string *errstr = NULL;
@@ -286,7 +284,7 @@ PHP_FUNCTION(stream_socket_accept)
 	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
 		tv_pointer = NULL;
 	} else {
-		conv = (php_timeout_ull) (timeout * 1000000.0);
+		php_timeout_ull conv = (php_timeout_ull) (timeout * 1000000.0);
 #ifdef PHP_WIN32
 		tv.tv_sec = (long)(conv / 1000000);
 		tv.tv_usec = (long)(conv % 1000000);
@@ -484,7 +482,6 @@ PHP_FUNCTION(stream_copy_to_stream)
 	zend_long maxlen, pos = 0;
 	bool maxlen_is_null = 1;
 	size_t len;
-	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		PHP_Z_PARAM_STREAM(src)
@@ -503,9 +500,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 		RETURN_FALSE;
 	}
 
-	ret = php_stream_copy_to_stream_ex(src, dest, maxlen, &len);
-
-	if (ret != SUCCESS) {
+	if (php_stream_copy_to_stream_ex(src, dest, maxlen, &len) != SUCCESS) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(len);
@@ -534,9 +529,9 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_zval(return_value, "wrapper_data", &stream->wrapperdata);
 	}
 	if (stream->wrapper) {
-		add_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label);
+		add_assoc_string(return_value, "wrapper_type", stream->wrapper->wops->label);
 	}
-	add_assoc_string(return_value, "stream_type", (char *)stream->ops->label);
+	add_assoc_string(return_value, "stream_type", stream->ops->label);
 
 	add_assoc_string(return_value, "mode", stream->mode);
 
@@ -548,7 +543,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		array_init(newval);
 
 		for (filter = stream->filterhead; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, (char *)filter->fops->label);
+			add_next_index_string(newval, filter->fops->label);
 		}
 
 		add_assoc_zval(return_value, "filters", newval);
@@ -568,13 +563,13 @@ PHP_FUNCTION(stream_get_meta_data)
 /* {{{ Retrieves list of registered socket transports */
 PHP_FUNCTION(stream_get_transports)
 {
-	HashTable *stream_xport_hash;
-	zend_string *stream_xport;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	stream_xport_hash = php_stream_xport_get_hash();
 	array_init(return_value);
+
+	const HashTable *stream_xport_hash = php_stream_xport_get_hash();
+	zend_string *stream_xport;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(stream_xport_hash, stream_xport) {
 		add_next_index_str(return_value, zend_string_copy(stream_xport));
 	} ZEND_HASH_FOREACH_END();
@@ -584,13 +579,12 @@ PHP_FUNCTION(stream_get_transports)
 /* {{{ Retrieves list of registered stream wrappers */
 PHP_FUNCTION(stream_get_wrappers)
 {
-	HashTable *url_stream_wrappers_hash;
-	zend_string *stream_protocol;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash();
 	array_init(return_value);
+
+	const HashTable *url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash();
+	zend_string *stream_protocol;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(url_stream_wrappers_hash, stream_protocol) {
 		if (stream_protocol) {
 			add_next_index_str(return_value, zend_string_copy(stream_protocol));
@@ -601,17 +595,13 @@ PHP_FUNCTION(stream_get_wrappers)
 /* }}} */
 
 /* {{{ stream_select related functions */
-static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t *max_fd)
+static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, php_socket_t *max_fd)
 {
 	zval *elem;
 	php_stream *stream;
 	int cnt = 0;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
-		return 0;
-	}
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
+	ZEND_HASH_FOREACH_VAL(stream_array, elem) {
 		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
 			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
 			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
@@ -640,7 +630,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 	return cnt ? 1 : 0;
 }
 
-static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
+static int stream_array_from_fd_set(zval *stream_array, const fd_set *fds)
 {
 	zval *elem, *dest_elem;
 	HashTable *ht;
@@ -649,9 +639,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	zend_string *key;
 	zend_ulong num_ind;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
-		return 0;
-	}
+	ZEND_ASSERT(Z_TYPE_P(stream_array) == IS_ARRAY);
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
@@ -677,7 +665,6 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 
 				zval_add_ref(dest_elem);
 				ret++;
-				continue;
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -698,9 +685,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	zend_ulong num_ind;
 	zend_string *key;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
-		return 0;
-	}
+	ZEND_ASSERT(Z_TYPE_P(stream_array) == IS_ARRAY);
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
@@ -723,7 +708,6 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 			}
 			zval_add_ref(dest_elem);
 			ret++;
-			continue;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -766,21 +750,21 @@ PHP_FUNCTION(stream_select)
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
-		set_count = stream_array_to_fd_set(r_array, &rfds, &max_fd);
+		set_count = stream_array_to_fd_set(Z_ARR_P(r_array), &rfds, &max_fd);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
 		sets += set_count;
 	}
 
 	if (w_array != NULL) {
-		set_count = stream_array_to_fd_set(w_array, &wfds, &max_fd);
+		set_count = stream_array_to_fd_set(Z_ARR_P(w_array), &wfds, &max_fd);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
 		sets += set_count;
 	}
 
 	if (e_array != NULL) {
-		set_count = stream_array_to_fd_set(e_array, &efds, &max_fd);
+		set_count = stream_array_to_fd_set(Z_ARR_P(e_array), &efds, &max_fd);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
 		sets += set_count;
@@ -882,7 +866,7 @@ static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
 	notifier->ptr = NULL;
 }
 
-static zend_result parse_context_options(php_stream_context *context, HashTable *options)
+static zend_result parse_context_options(php_stream_context *context, const HashTable *options)
 {
 	zval *wval, *oval;
 	zend_string *wkey, *okey;
@@ -906,7 +890,7 @@ static zend_result parse_context_options(php_stream_context *context, HashTable 
 	return SUCCESS;
 }
 
-static zend_result parse_context_params(php_stream_context *context, HashTable *params)
+static zend_result parse_context_params(php_stream_context *context, const HashTable *params)
 {
 	zval *tmp;
 
@@ -1218,7 +1202,7 @@ PHP_FUNCTION(stream_context_create)
 /* }}} */
 
 /* {{{ streams filter functions */
-static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
+static void apply_filter_to_stream(bool append, INTERNAL_FUNCTION_PARAMETERS)
 {
 	php_stream *stream;
 	char *filtername;
@@ -1226,7 +1210,6 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	zend_long read_write = 0;
 	zval *filterparams = NULL;
 	php_stream_filter *filter = NULL;
-	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		PHP_Z_PARAM_STREAM(stream)
@@ -1257,13 +1240,13 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		}
 
 		if (append) {
-			ret = php_stream_filter_append_ex(&stream->readfilters, filter);
+			zend_result ret = php_stream_filter_append_ex(&stream->readfilters, filter);
+			if (ret != SUCCESS) {
+				php_stream_filter_remove(filter, 1);
+				RETURN_FALSE;
+			}
 		} else {
-			ret = php_stream_filter_prepend_ex(&stream->readfilters, filter);
-		}
-		if (ret != SUCCESS) {
-			php_stream_filter_remove(filter, 1);
-			RETURN_FALSE;
+			php_stream_filter_prepend_ex(&stream->readfilters, filter);
 		}
 	}
 
@@ -1274,13 +1257,13 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		}
 
 		if (append) {
-			ret = php_stream_filter_append_ex(&stream->writefilters, filter);
+			zend_result ret = php_stream_filter_append_ex(&stream->writefilters, filter);
+			if (ret != SUCCESS) {
+				php_stream_filter_remove(filter, 1);
+				RETURN_FALSE;
+			}
 		} else {
-			ret = php_stream_filter_prepend_ex(&stream->writefilters, filter);
-		}
-		if (ret != SUCCESS) {
-			php_stream_filter_remove(filter, 1);
-			RETURN_FALSE;
+			php_stream_filter_prepend_ex(&stream->writefilters, filter);
 		}
 	}
 
@@ -1378,11 +1361,7 @@ PHP_FUNCTION(stream_set_blocking)
 		Z_PARAM_BOOL(block)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block, NULL) == -1) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(-1 != php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block, NULL));
 }
 
 /* }}} */
@@ -1423,11 +1402,7 @@ PHP_FUNCTION(stream_set_timeout)
 	}
 #endif
 
-	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t)) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t));
 }
 #endif /* HAVE_SYS_TIME_H || defined(PHP_WIN32) */
 /* }}} */
@@ -1603,11 +1578,7 @@ PHP_FUNCTION(stream_is_local)
 		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0);
 	}
 
-	if (!wrapper) {
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(wrapper->is_url==0);
+	RETURN_BOOL(wrapper && wrapper->is_url == 0);
 }
 /* }}} */
 
@@ -1620,11 +1591,7 @@ PHP_FUNCTION(stream_supports_lock)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!php_stream_supports_lock(stream)) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(php_stream_supports_lock(stream));
 }
 
 /* {{{ Check if a stream is a TTY. */
@@ -1651,15 +1618,13 @@ PHP_FUNCTION(stream_isatty)
 
 #ifdef PHP_WIN32
 	/* Check if the Windows standard handle is redirected to file */
-	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
+	RETURN_BOOL(php_win32_console_fileno_is_console(fileno));
 #elif defined(HAVE_UNISTD_H)
 	/* Check if the file descriptor identifier is a terminal */
-	RETVAL_BOOL(isatty(fileno));
+	RETURN_BOOL(isatty(fileno));
 #else
-	{
-		zend_stat_t stat = {0};
-		RETVAL_BOOL(zend_fstat(fileno, &stat) == 0 && (stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000);
-	}
+	zend_stat_t stat = {0};
+	RETURN_BOOL(zend_fstat(fileno, &stat) == 0 && (stat.st_mode & /*S_IFMT*/0170000) == /*S_IFCHR*/0020000);
 #endif
 }
 
@@ -1705,21 +1670,10 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 
 	if (enable_is_null) {
 		/* Check if the Windows standard handle has VT100 control codes enabled */
-		if (php_win32_console_fileno_has_vt100(fileno)) {
-			RETURN_TRUE;
-		}
-		else {
-			RETURN_FALSE;
-		}
-	}
-	else {
+		RETURN_BOOL(php_win32_console_fileno_has_vt100(fileno));
+	} else {
 		/* Enable/disable VT100 control codes support for the specified Windows standard handle */
-		if (php_win32_console_fileno_set_vt100(fileno, enable ? TRUE : FALSE)) {
-			RETURN_TRUE;
-		}
-		else {
-			RETURN_FALSE;
-		}
+		RETURN_BOOL(php_win32_console_fileno_set_vt100(fileno, enable ? TRUE : FALSE));
 	}
 }
 #endif

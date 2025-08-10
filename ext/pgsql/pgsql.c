@@ -6388,7 +6388,7 @@ PHP_FUNCTION(pg_socket_poll)
 		Z_PARAM_LONG(ts)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void **)&socket, 0)) {
+	if (UNEXPECTED(php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void **)&socket, 0) == FAILURE)) {
 		zend_argument_type_error(1, "invalid resource socket");
 		RETURN_THROWS();
 	}

@@ -1,15 +1,112 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0alpha3
+?? ??? ????, PHP 8.5.0beta1
+
+- Core:
+  . Non-canonical cast names (boolean), (integer), (double), and (binary) have
+    been deprecated. (Girgias)
+  . The $exclude_disabled parameter of the get_defined_functions() function has
+    been deprecated, as it no longer has any effect since PHP 8.0. (Girgias)
+
+- DOM:
+  . Fixed bug GH-18877 (\Dom\HTMLDocument querySelectorAll selecting only the
+    first when using ~ and :has). (nielsdos, lexborisov)
+
+- FileInfo
+  . The finfo_close() function has been deprecated. (timwolla)
+  . The $context parameter of the finfo_buffer() function has been deprecated
+    as it is ignored. (Girgias)
+
+- Intl:
+  . Intl's internal error mechanism has been modernized so that it
+    indicates more accurately which call site caused what error.
+    Moreover, some ext/date exceptions have been wrapped inside a
+    IntlException now. (Girgias)
+  . The intl.error_level INI setting has been deprecated. (Girgias)
+
+- MySQLi:
+  . The mysqli_execute() alias function has been deprecated. (timwolla)
+
+- OpenSSL:
+  . Fixed bug GH-19369 (8.5 | Regression in openssl_sign() - support for alias
+    algorithms appears to be broken). (Jakub Zelenka)
+  . The $key_length parameter for openssl_pkey_derive() has been deprecated.
+    (Girgias)
+
+- PDO:
+  . The "uri:" DSN scheme has been deprecated due to security concerns with
+    DSNs coming from remote URIs. (timwolla)
+
+- Reflection:
+  . Fixed bug GH-17927 (Reflection: have some indication of property hooks in
+    `_property_string()`). (DanielEScherzer)
+  . The setAccessible() methods of various Reflection objects have been
+    deprecated, as those no longer have an effect. (timwolla)
+
+- SPL:
+  . Unregistering all autoloaders by passing the spl_autoload_call() function
+    as a callback argument to spl_autoload_unregister() has been deprecated.
+    Instead if this is needed, one should iterate over the return value of
+    spl_autoload_functions() and call spl_autoload_unregister() on each
+    value. (Girgias)
+  . The SplObjectStorage::contains(), SplObjectStorage::attach(), and
+    SplObjectStorage::detach() methods have been deprecated in favour of
+    SplObjectStorage::offsetExists(), SplObjectStorage::offsetSet(), and
+    SplObjectStorage::offsetUnset() respectively. (Girgias)
+
+- Standard:
+  . The socket_set_timeout() alias function has been deprecated. (timwolla)
+  . Passing null to to readdir(), rewinddir(), and closedir() to use the last
+    opened directory has been deprecated. (Girgias)
+
+31 Jul 2025, PHP 8.5.0alpha4
 
 - Core:
   . Add clone-with support to the clone() function. (timwolla, edorian)
   . Fix support for non-userland stream notifiers. (timwolla)
   . Added PHP_BUILD_PROVIDER constant. (timwolla)
+  . Fixed bug GH-19305 (Operands may be being released during comparison).
+    (Arnaud)
+  . Fixed bug GH-19306 (Generator can be resumed while fetching next value from
+    delegated Generator). (Arnaud)
+  . Fixed bug GH-19326 (Calling Generator::throw() on a running generator with
+    a non-Generator delegate crashes). (Arnaud)
 
 - Curl:
   . Add support for CURLINFO_CONN_ID in curl_getinfo() (thecaliskan)
   . Add support for CURLINFO_QUEUE_TIME_T in curl_getinfo() (thecaliskan)
+  . Add support for CURLOPT_SSL_SIGNATURE_ALGORITHMS. (Ayesh Karunaratne)
+
+- FPM:
+  . Make FPM access log limit configurable using log_limit. (Jakub Zelenka)
+
+- GD:
+  . Fix incorrect comparison with result of php_stream_can_cast(). (Girgias)
+
+- Intl:
+  . Fix return value on failure for resourcebundle count handler. (Girgias)
+  . Fixed bug GH-19307 (PGO builds of shared ext-intl are broken). (cmb)
+
+- OPcache:
+  . Disallow changing opcache.memory_consumption when SHM is already set up.
+    (timwolla)
+  . Fixed bug GH-15074 (Compiling opcache statically into ZTS PHP fails).
+    (Arnaud)
+  . Make OPcache non-optional (Arnaud, timwolla)
+  . Fixed bug GH-17422 (OPcache bypasses the user-defined error handler for
+    deprecations). (Arnaud, timwolla)
+  . Fixed bug GH-19301 (opcache build failure). (Remi)
+
+- OpenSSL:
+  . Add $digest_algo parameter to openssl_public_encrypt() and
+    openssl_private_decrypt() functions. (Jakub Zelenka)
+
+- POSIX:
+  . posix_kill and posix_setpgid throws a ValueError on invalid process_id.
+    (David Carlier)
+  . posix_setpgid throws a ValueError on invalid process_group_id,
+    posix_setrlimit throws a ValueError on invalid soft_limit and hard_limit
+    arguments. (David Carlier)
 
 - Reflection:
   . Fixed bug GH-19187 (ReflectionNamedType::getName() prints nullable type when
@@ -18,6 +115,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed GH-19197: build broken with ZEND_STRL usage with memcpy
     when implemented as macro. (David Carlier)
+
+- Soap:
+  . Fixed bug GH-19226 (Segfault when spawning new thread in soap extension).
+    (Florian Engelhardt)
 
 - Sockets:
   . socket_set_option for multicast context throws a ValueError
@@ -78,7 +179,7 @@ PHP                                                                        NEWS
 
 - CURL:
   . Added CURLFOLLOW_ALL, CURLFOLLOW_OBEYCODE and CURLFOLLOW_FIRSTONLY
-    values for CURLOPT_FOLLOLOCATION curl_easy_setopt option. (David Carlier)
+    values for CURLOPT_FOLLOWLOCATION curl_easy_setopt option. (David Carlier)
 
 - COM:
   . Fixed property access of PHP objects wrapped in variant. (cmb)
@@ -172,8 +273,8 @@ PHP                                                                        NEWS
   . Added grapheme_levenshtein() function. (Yuya Hamada)
   . Added Locale::addLikelySubtags/Locale::minimizeSubtags to handle
     adding/removing likely subtags to a locale. (David Carlier)
-  . Added IntlListFormatter class to format a list of items with a locale
-    , operands types and units. (BogdanUngureanu)
+  . Added IntlListFormatter class to format a list of items with a locale,
+    operands types and units. (BogdanUngureanu)
   . Fixed bug GH-18566 ([intl] Weird numeric sort in Collator). (nielsdos)
 
 - LDAP:
@@ -197,7 +298,7 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Added openssl.libctx INI that allows to select the OpenSSL library context
-    type and convert verious parts of the extension to use the custom  libctx.
+    type and convert various parts of the extension to use the custom  libctx.
     (Jakub Zelenka)
 
 - Output:
@@ -207,7 +308,7 @@ PHP                                                                        NEWS
   . Extend pcntl_waitid with rusage parameter. (vrza)
 
 - PCRE:
-  . Upgraded to pre2lib from 10.44 to 10.45. (nielsdos)
+  . Upgraded to pcre2lib from 10.44 to 10.45. (nielsdos)
   . Remove PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK from pcre compile options.
     (mvorisek)
 
@@ -253,8 +354,9 @@ PHP                                                                        NEWS
     (DanielEScherzer)
   . Fixed bug GH-12856 (ReflectionClass::getStaticPropertyValue() returns UNDEF
     zval for uninitialized typed properties). (nielsdos)
-  . Fixed bug GH-15766 (ReflectionClass::toString() should have better output
+  . Fixed bug GH-15766 (ReflectionClass::__toString() should have better output
     for enums). (DanielEScherzer)
+  . Added ReflectionProperty::getMangledName() method. (alexandre-daubois)
 
 - Session:
   . session_start() throws a ValueError on option argument if not a hashmap
@@ -315,7 +417,7 @@ PHP                                                                        NEWS
     (David Carlier)
 
 - Sodium:
-  . Fix overall theorical overflows on zend_string buffer allocations.
+  . Fix overall theoretical overflows on zend_string buffer allocations.
     (David Carlier/nielsdos)
 
 - Sqlite:
@@ -344,7 +446,7 @@ PHP                                                                        NEWS
     (cmb)
 
 - Tests:
-  . Allow to shuffle tests even in non-parallell mode. (dhuang00)
+  . Allow to shuffle tests even in non-parallel mode. (dhuang00)
 
 - Tidy:
   . tidy::__construct/parseFile/parseString methods throw an exception if

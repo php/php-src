@@ -1344,12 +1344,19 @@ EVP_PKEY *php_openssl_pkey_from_zval(
 	return key;
 }
 
-zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t key_size)
-{
-	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_pkey(key);
+zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t requested_key_size) {
+	size_t key_size = requested_key_size;
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(key, NULL);
 	if (!ctx) {
 		return NULL;
 	}
+
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+	/* OpenSSL 1.1 does not respect key_size for DH, so force size discovery so it can be compared later. */
+	if (EVP_PKEY_base_id(key) == EVP_PKEY_DH && key_size != 0) {
+		key_size = 0;
+	}
+#endif
 
 	if (EVP_PKEY_derive_init(ctx) <= 0 ||
 			EVP_PKEY_derive_set_peer(ctx, peer_key) <= 0 ||
@@ -1358,6 +1365,14 @@ zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t k
 		EVP_PKEY_CTX_free(ctx);
 		return NULL;
 	}
+
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+	/* Now compare the computed size for DH to mirror OpenSSL 3.0+ behavior. */
+	if (EVP_PKEY_base_id(key) == EVP_PKEY_DH && requested_key_size > 0 && requested_key_size < key_size) {
+		EVP_PKEY_CTX_free(ctx);
+		return NULL;
+	}
+#endif
 
 	zend_string *result = zend_string_alloc(key_size, 0);
 	if (EVP_PKEY_derive(ctx, (unsigned char *)ZSTR_VAL(result), &key_size) <= 0) {

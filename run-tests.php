@@ -688,6 +688,10 @@ function main(): void
     // Run selected tests.
     $test_cnt = count($test_files);
 
+    if ($test_cnt === 1) {
+        $cfg['show']['diff'] = true;
+    }
+
     verify_config($php);
     write_information($user_tests, $phpdbg);
 

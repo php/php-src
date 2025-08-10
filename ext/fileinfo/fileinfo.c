@@ -31,10 +31,11 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h" /* needed for context stuff */
+#include "Zend/zend_attributes.h"
+#include "Zend/zend_exceptions.h"
 #include "php_fileinfo.h"
 #include "fileinfo_arginfo.h"
 #include "fopen_wrappers.h" /* needed for is_url */
-#include "Zend/zend_exceptions.h"
 
 static zend_object_handlers finfo_object_handlers;
 zend_class_entry *finfo_class_entry;
@@ -340,6 +341,13 @@ PHP_FUNCTION(finfo_buffer)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OS|lr!", &self, finfo_class_entry, &buffer, &options, &dummy_context) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (ZEND_NUM_ARGS() == 4 || (hasThis() && ZEND_NUM_ARGS() == 3)) {
+		php_error_docref(NULL, E_DEPRECATED, "The $context parameter has no effect for finfo_buffer()");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (!Z_FINFO_P(self)->magic) {

@@ -650,7 +650,17 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 			}
 		}
 	} else {
+		bool orig_record_errors = EG(record_errors);
+		if (!orig_record_errors) {
+			zend_begin_record_errors();
+		}
+
 		op_array = zend_compile(ZEND_USER_FUNCTION);
+
+		if (!orig_record_errors) {
+			zend_emit_recorded_errors();
+			zend_free_recorded_errors();
+		}
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
@@ -1619,11 +1629,25 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_VAR);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"){TABS_AND_SPACES}")" {
 	RETURN_TOKEN(T_INT_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("double"|"float"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("integer"){TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "Non-canonical cast (integer) is deprecated, use the (int) cast instead");
+	}
+	RETURN_TOKEN(T_INT_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("float"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_DOUBLE_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("double"){TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "Non-canonical cast (double) is deprecated, use the (float) cast instead");
+	}
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
@@ -1635,7 +1659,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_STRING_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("binary"){TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "Non-canonical cast (binary) is deprecated, use the (string) cast instead");
+	}
 	RETURN_TOKEN(T_STRING_CAST);
 }
 
@@ -1647,7 +1678,14 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN(T_OBJECT_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_BOOL_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("boolean"){TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "Non-canonical cast (boolean) is deprecated, use the (bool) cast instead");
+	}
 	RETURN_TOKEN(T_BOOL_CAST);
 }
 

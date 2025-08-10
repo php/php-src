@@ -23,8 +23,7 @@ AS_VAR_IF([ac_cv_c_bigendian_php], [yes], [
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-inplace32BI.c"
     dnl Add -Wno-implicit-fallthrough flag as it happens on 32 bit builds
     AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
-      [PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -Wno-implicit-fallthrough"],,
-      [-Werror])
+      [PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -Wno-implicit-fallthrough"])
   ],[
     AC_MSG_RESULT([yes])
     SHA3_DIR="sha3/generic64lc"

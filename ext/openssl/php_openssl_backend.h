@@ -190,7 +190,7 @@ X509_STORE * php_openssl_setup_verify(zval * calist, uint32_t arg_num);
 STACK_OF(X509) * php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
 EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req);
-zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t key_size);
+zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t requested_key_size);
 
 #define PHP_SSL_REQ_INIT(req)		memset(req, 0, sizeof(*req))
 #define PHP_SSL_REQ_DISPOSE(req)	php_openssl_dispose_config(req)

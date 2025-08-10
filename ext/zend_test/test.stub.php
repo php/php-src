@@ -293,6 +293,8 @@ namespace {
 
     function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
 
+    function zend_call_method_if_exists(object $obj, string $method, mixed ...$args): mixed {}
+
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 
@@ -336,6 +338,8 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_compile_to_ast(string $str): string {}
 
     function zend_test_gh18756(): void {}
+
+    function zend_test_opcache_preloading(): bool {}
 }
 
 namespace ZendTestNS {

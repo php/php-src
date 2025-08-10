@@ -1383,14 +1383,14 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 
 static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 {
-	char *filename;
 	int *error = (int *)arg;
 	php_glob_t g;
 	size_t i;
 
 	if (!inc || !arg) return;
 	if (*error) return; /* We got already an error. Switch to the end. */
-	spprintf(&filename, 0, "%s", ini_filename);
+
+	const char *filename = ini_filename;
 
 	{
 		g.gl_offs = 0;
@@ -1398,31 +1398,26 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 #ifdef PHP_GLOB_NOMATCH
 			if (i == PHP_GLOB_NOMATCH) {
 				zlog(ZLOG_WARNING, "Nothing matches the include pattern '%s' from %s at line %d.", inc, filename, ini_lineno);
-				efree(filename);
 				return;
 			}
 #endif /* PHP_GLOB_NOMATCH */
 			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%zd) from %s at line %d.", inc, i, filename, ini_lineno);
 			*error = 1;
-			efree(filename);
 			return;
 		}
 
 		for (i = 0; i < g.gl_pathc; i++) {
-			int len = strlen(g.gl_pathv[i]);
+			size_t len = strlen(g.gl_pathv[i]);
 			if (len < 1) continue;
 			if (g.gl_pathv[i][len - 1] == '/') continue; /* don't parse directories */
 			if (0 > fpm_conf_load_ini_file(g.gl_pathv[i])) {
 				zlog(ZLOG_ERROR, "Unable to include %s from %s at line %d", g.gl_pathv[i], filename, ini_lineno);
 				*error = 1;
-				efree(filename);
 				return;
 			}
 		}
 		php_globfree(&g);
 	}
-
-	efree(filename);
 }
 /* }}} */
 

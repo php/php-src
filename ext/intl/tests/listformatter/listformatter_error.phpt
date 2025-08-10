@@ -33,6 +33,6 @@ try {
 ?>
 --EXPECT--
 IntlListFormatter::__construct(): Argument #1 ($locale) "f" is invalid
-IntlListFormatter::__construct(): Argument #1 ($locale) Locale string too long, should be no longer than 156 characters
+IntlListFormatter::__construct(): Argument #1 ($locale) must be less than or equal to 156 characters
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string

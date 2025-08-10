@@ -29,6 +29,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     be heap-allocated and stored in the pointer as a minimal change to keep
     compatibility.
 
+- Hash
+  . Hash functions now use proper hash_spec_result enum for return values
+    instead of using SUCCESS and FAILURE.
+
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
     a value to a non-reference zval.
@@ -71,6 +75,14 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     * zend_register_string_constant()
     * zend_register_stringl_constant()
   . EG(fake_scope) now is a _const_ zend_class_entry*.
+  . zend_begin_record_errors() or EG(record_errors)=true cause errors to be
+    delayed. Before, errors would be recorded but not delayed.
+  . zend_mm_refresh_key_child() must be called on any zend_mm_heap inherited
+    from the parent process after a fork().
+
+- standard
+  . ext/standard/php_smart_string.h and ext/standard/php_smart_string_public.h
+    were removed. Use the corresponding headers in Zend/ instead.
 
 ========================
 2. Build system changes
@@ -88,11 +100,12 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     that appropriate build rules are created.
 
 - Unix build system changes
-  . libdir is properly set when --libdir (ex: /usr/lib64) and --with-libdir (ex lib64)
+  . libdir is properly set when --libdir (ex: /usr/lib64) and --with-libdir (ex: lib64)
     configure options are used to ${libdir}/php (ex: /usr/lib64/php)
   . PHP_ODBC_CFLAGS, PHP_ODBC_LFLAGS, PHP_ODBC_LIBS, PHP_ODBC_TYPE preprocessor
     macros defined by ext/odbc are now defined in php_config.h instead of the
     build-defs.h header.
+  . Autoconf macro AX_CHECK_COMPILE_FLAG updated to serial 11.
   . Autoconf macro PHP_AP_EXTRACT_VERSION has been removed.
   . Autoconf macro PHP_BUILD_THREAD_SAFE has been removed (set enable_zts
     manually).
@@ -143,6 +156,15 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 4. OpCode changes
 ========================
 
+* New ZEND_DECLARE_ATTRIBUTED_CONST is used when a global constant is declared
+  with `const` and has attributes; this opcode is used *instead* of the
+  ZEND_DECLARE_CONST, and in addition to the name of the constant and the
+  value to use, has a ZEND_OP_DATA with a pointer to the compiled attributes.
+
 ========================
 5. SAPI changes
 ========================
+
+- SAPIs must now call php_child_init() after a fork. If php-src code was
+  executed in other threads than the one initiating the fork,
+  refresh_memory_manager() must be called in every such thread.

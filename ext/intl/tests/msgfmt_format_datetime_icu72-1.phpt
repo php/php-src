@@ -1,15 +1,11 @@
 --TEST--
 MessageFormatter::format(): DateTime accepted to format dates and times
---INI--
-date.timezone=Atlantic/Azores
 --EXTENSIONS--
 intl
 --SKIPIF--
 <?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip for ICU >= 72.1'); ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-//ini_set("intl.default_locale", "nl");
 
 $fmt = <<<EOD
 {0,date} {0,time}

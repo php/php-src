@@ -73,7 +73,7 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
 #define SPOOFCHECKER_CHECK_STATUS(co, msg)                                        \
     intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));           \
     if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {                                  \
-        intl_errors_set_custom_msg(SPOOFCHECKER_ERROR_P(co), msg, 0); \
+        intl_errors_set_custom_msg(SPOOFCHECKER_ERROR_P(co), msg); \
         RETURN_FALSE;                                                           \
     }                                                                           \
 

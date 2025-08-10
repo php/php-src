@@ -503,29 +503,25 @@ static void register_php_zip_symbols(int module_number)
 	zend_attribute *attribute_Deprecated_func_zip_entry_name_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_name", sizeof("zip_entry_name") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_name_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_zip_entry_name_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_zip_entry_name_0_arg1_str = zend_string_init("use ZipArchive::statIndex() instead", strlen("use ZipArchive::statIndex() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_zip_entry_name_0->args[1].value, attribute_Deprecated_func_zip_entry_name_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_zip_entry_name_0->args[1].value, attribute_Deprecated_func_zip_read_0_arg1_str);
 	attribute_Deprecated_func_zip_entry_name_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_zip_entry_compressedsize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_compressedsize", sizeof("zip_entry_compressedsize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_compressedsize_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_zip_entry_compressedsize_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_zip_entry_compressedsize_0_arg1_str = zend_string_init("use ZipArchive::statIndex() instead", strlen("use ZipArchive::statIndex() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_zip_entry_compressedsize_0->args[1].value, attribute_Deprecated_func_zip_entry_compressedsize_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_zip_entry_compressedsize_0->args[1].value, attribute_Deprecated_func_zip_read_0_arg1_str);
 	attribute_Deprecated_func_zip_entry_compressedsize_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_zip_entry_filesize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_filesize", sizeof("zip_entry_filesize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_filesize_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_zip_entry_filesize_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_zip_entry_filesize_0_arg1_str = zend_string_init("use ZipArchive::statIndex() instead", strlen("use ZipArchive::statIndex() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_zip_entry_filesize_0->args[1].value, attribute_Deprecated_func_zip_entry_filesize_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_zip_entry_filesize_0->args[1].value, attribute_Deprecated_func_zip_read_0_arg1_str);
 	attribute_Deprecated_func_zip_entry_filesize_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_zip_entry_compressionmethod_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_compressionmethod", sizeof("zip_entry_compressionmethod") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_compressionmethod_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_zip_entry_compressionmethod_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zend_string *attribute_Deprecated_func_zip_entry_compressionmethod_0_arg1_str = zend_string_init("use ZipArchive::statIndex() instead", strlen("use ZipArchive::statIndex() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_zip_entry_compressionmethod_0->args[1].value, attribute_Deprecated_func_zip_entry_compressionmethod_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_zip_entry_compressionmethod_0->args[1].value, attribute_Deprecated_func_zip_read_0_arg1_str);
 	attribute_Deprecated_func_zip_entry_compressionmethod_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 

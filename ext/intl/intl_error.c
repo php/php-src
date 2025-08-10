@@ -42,12 +42,10 @@ static void intl_free_custom_error_msg( intl_error* err )
 	if( !err && !( err = intl_g_error_get(  ) ) )
 		return;
 
-	if(err->free_custom_error_message ) {
-		efree( err->custom_error_message );
+	if (err->custom_error_message) {
+		zend_string_release_ex(err->custom_error_message, false);
+		err->custom_error_message = NULL;
 	}
-
-	err->custom_error_message      = NULL;
-	err->free_custom_error_message = 0;
 }
 /* }}} */
 
@@ -70,7 +68,6 @@ void intl_error_init( intl_error* err )
 
 	err->code                      = U_ZERO_ERROR;
 	err->custom_error_message      = NULL;
-	err->free_custom_error_message = 0;
 }
 /* }}} */
 
@@ -87,28 +84,41 @@ void intl_error_reset( intl_error* err )
 /* }}} */
 
 /* {{{ Set last error message to msg copying it if needed. */
-void intl_error_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
+void intl_error_set_custom_msg( intl_error* err, const char* msg)
 {
-	if( !msg )
+	/* See ext/intl/tests/bug70451.phpt and uchar.c:zif_IntlChar_charFromName */
+	if (UNEXPECTED(msg == NULL)) {
 		return;
+	}
+
+	zend_string *method_or_func = get_active_function_or_method_name();
+	zend_string *prefixed_message = zend_string_concat3(
+		ZSTR_VAL(method_or_func), ZSTR_LEN(method_or_func),
+		ZEND_STRL("(): "),
+		msg, strlen(msg)
+	);
+	zend_string_release_ex(method_or_func, false);
 
 	if( !err ) {
-		if( INTL_G( error_level ) )
+		if (INTL_G(error_level)) {
+			/* Docref will prefix the function/method for us, so use original message */
 			php_error_docref( NULL, INTL_G( error_level ), "%s", msg );
-		if( INTL_G( use_exceptions ) )
-			zend_throw_exception_ex( IntlException_ce_ptr, 0, "%s", msg );
+		}
+		if (INTL_G(use_exceptions)) {
+			/* Use this variant as we have a zend_string already */
+			zend_throw_error_exception(IntlException_ce_ptr, prefixed_message, 0, 0);
+		}
 	}
-	if( !err && !( err = intl_g_error_get(  ) ) )
+	if (!err && !(err = intl_g_error_get() )) {
+		zend_string_release_ex(prefixed_message, false);
 		return;
+	}
 
 	/* Free previous message if any */
 	intl_free_custom_error_msg( err );
 
-	/* Mark message copied if any */
-	err->free_custom_error_message = copyMsg;
-
 	/* Set user's error text message */
-	err->custom_error_message = copyMsg ? estrdup( msg ) : (char *) msg;
+	err->custom_error_message = prefixed_message;
 }
 /* }}} */
 
@@ -116,21 +126,22 @@ void intl_error_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
 zend_string * intl_error_get_message( intl_error* err )
 {
 	const char *uErrorName = NULL;
-	zend_string *errMessage = 0;
+	zend_string *errMessage = NULL;
 
 	if( !err && !( err = intl_g_error_get(  ) ) )
 		return ZSTR_EMPTY_ALLOC();
 
 	uErrorName = u_errorName( err->code );
+	size_t uErrorLen = strlen(uErrorName);
 
 	/* Format output string */
-	if( err->custom_error_message )
-	{
-		errMessage = strpprintf(0, "%s: %s", err->custom_error_message, uErrorName );
-	}
-	else
-	{
-		errMessage = strpprintf(0, "%s", uErrorName );
+	if (err->custom_error_message) {
+		errMessage = zend_string_concat3(
+			ZSTR_VAL(err->custom_error_message), ZSTR_LEN(err->custom_error_message),
+			ZEND_STRL(": "),
+			uErrorName, uErrorLen);
+	} else {
+		errMessage = zend_string_init(uErrorName, strlen(uErrorName), false);
 	}
 
 	return errMessage;
@@ -158,18 +169,18 @@ UErrorCode intl_error_get_code( intl_error* err )
 /* }}} */
 
 /* {{{ Set error code and message. */
-void intl_error_set( intl_error* err, UErrorCode code, const char* msg, int copyMsg )
+void intl_error_set( intl_error* err, UErrorCode code, const char* msg)
 {
 	intl_error_set_code( err, code );
-	intl_error_set_custom_msg( err, msg, copyMsg );
+	intl_error_set_custom_msg( err, msg);
 }
 /* }}} */
 
 /* {{{ Set error code and message. */
-void intl_errors_set( intl_error* err, UErrorCode code, const char* msg, int copyMsg )
+void intl_errors_set( intl_error* err, UErrorCode code, const char* msg)
 {
 	intl_errors_set_code( err, code );
-	intl_errors_set_custom_msg( err, msg, copyMsg );
+	intl_errors_set_custom_msg( err, msg);
 }
 /* }}} */
 
@@ -184,12 +195,12 @@ void intl_errors_reset( intl_error* err )
 /* }}} */
 
 /* {{{ */
-void intl_errors_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
+void intl_errors_set_custom_msg(intl_error* err, const char* msg)
 {
 	if(err) {
-		intl_error_set_custom_msg( err, msg, copyMsg );
+		intl_error_set_custom_msg( err, msg);
 	}
-	intl_error_set_custom_msg( NULL, msg, copyMsg );
+	intl_error_set_custom_msg( NULL, msg);
 }
 /* }}} */
 

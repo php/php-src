@@ -226,6 +226,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function hasPrototype(): bool {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "as it has no effect")]
     public function setAccessible(bool $accessible): void {}
 }
 
@@ -482,6 +483,8 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getName(): string {}
 
+    public function getMangledName(): string {}
+
     /** @tentative-return-type */
     public function getValue(?object $object = null): mixed {}
 
@@ -540,6 +543,7 @@ class ReflectionProperty implements Reflector
     public function getDocComment(): string|false {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "as it has no effect")]
     public function setAccessible(bool $accessible): void {}
 
     /** @tentative-return-type */

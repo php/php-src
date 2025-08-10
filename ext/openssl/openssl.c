@@ -355,7 +355,15 @@ static PHP_INI_MH(OnUpdateLibCtx)
 {
 #if PHP_OPENSSL_API_VERSION >= 0x30000
 	if (zend_string_equals_literal(new_value, "default")) {
+#if defined(ZTS) && defined(HAVE_OPENSSL_ARGON2)
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			int err_type = stage == ZEND_INI_STAGE_RUNTIME ? E_WARNING : E_ERROR;
+			php_error_docref(NULL, err_type, "OpenSSL libctx \"default\" cannot be used in this configuration");
+		}
+		return FAILURE;
+#else
 		OPENSSL_G(ctx).libctx = OPENSSL_G(ctx).default_libctx;
+#endif
 	} else if (zend_string_equals_literal(new_value, "custom")) {
 		OPENSSL_G(ctx).libctx = OPENSSL_G(ctx).custom_libctx;
 	} else {
@@ -2348,6 +2356,14 @@ PHP_FUNCTION(openssl_pkey_derive)
 		RETURN_THROWS();
 	}
 
+	if (ZEND_NUM_ARGS() == 3) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"the $key_length parameter is deprecated as it is either ignored or truncates the key");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	if (key_len < 0) {
 		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
@@ -3725,6 +3741,29 @@ clean_exit:
 
 /* }}} */
 
+/* Helper to set RSA padding and digest for OAEP */
+static int php_openssl_set_rsa_padding_and_digest(EVP_PKEY_CTX *ctx, zend_long padding, const char *digest_algo, const EVP_MD **pmd)
+{
+	if (EVP_PKEY_CTX_set_rsa_padding(ctx, padding) <= 0) {
+		return 0;
+	}
+
+	if (digest_algo != NULL) {
+		const EVP_MD *md = php_openssl_get_evp_md_by_name(digest_algo);
+		if (md == NULL) {
+			php_error_docref(NULL, E_WARNING, "Unknown digest algorithm: %s", digest_algo);
+			return 0;
+		}
+		*pmd = md;
+		if (padding == RSA_PKCS1_OAEP_PADDING) {
+			if (EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0) {
+				return 0;
+			}
+		}
+	}
+
+	return 1;
+}
 
 /* {{{ Encrypts data with private key */
 PHP_FUNCTION(openssl_private_encrypt)
@@ -3780,10 +3819,12 @@ PHP_FUNCTION(openssl_private_decrypt)
 {
 	zval *key, *crypted;
 	zend_long padding = RSA_PKCS1_PADDING;
-	char * data;
-	size_t data_len;
+	char *data;
+	char *digest_algo = NULL;
+	size_t data_len, digest_algo_len = 0;
+	const EVP_MD *md = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|lp!", &data, &data_len, &crypted, &key, &padding, &digest_algo, &digest_algo_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3798,7 +3839,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 	size_t out_len = 0;
 	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(pkey, NULL);
 	if (!ctx || EVP_PKEY_decrypt_init(ctx) <= 0 ||
-			EVP_PKEY_CTX_set_rsa_padding(ctx, padding) <= 0 ||
+			!php_openssl_set_rsa_padding_and_digest(ctx, padding, digest_algo, &md) ||
 			EVP_PKEY_decrypt(ctx, NULL, &out_len, (unsigned char *) data, data_len) <= 0) {
 		php_openssl_store_errors();
 		RETVAL_FALSE;
@@ -3820,6 +3861,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 	RETVAL_TRUE;
 
 cleanup:
+	php_openssl_release_evp_md(md);
 	EVP_PKEY_CTX_free(ctx);
 	EVP_PKEY_free(pkey);
 }
@@ -3831,9 +3873,11 @@ PHP_FUNCTION(openssl_public_encrypt)
 	zval *key, *crypted;
 	zend_long padding = RSA_PKCS1_PADDING;
 	char * data;
-	size_t data_len;
+	char *digest_algo = NULL;
+	size_t data_len, digest_algo_len = 0;
+	const EVP_MD *md = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|lp!", &data, &data_len, &crypted, &key, &padding, &digest_algo, &digest_algo_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3848,7 +3892,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 	size_t out_len = 0;
 	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(pkey, NULL);
 	if (!ctx || EVP_PKEY_encrypt_init(ctx) <= 0 ||
-			EVP_PKEY_CTX_set_rsa_padding(ctx, padding) <= 0 ||
+			!php_openssl_set_rsa_padding_and_digest(ctx, padding, digest_algo, &md) ||
 			EVP_PKEY_encrypt(ctx, NULL, &out_len, (unsigned char *) data, data_len) <= 0) {
 		php_openssl_store_errors();
 		RETVAL_FALSE;
@@ -3869,6 +3913,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 	RETVAL_TRUE;
 
 cleanup:
+	php_openssl_release_evp_md(md);
 	EVP_PKEY_CTX_free(ctx);
 	EVP_PKEY_free(pkey);
 }
@@ -3879,7 +3924,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 {
 	zval *key, *crypted;
 	zend_long padding = RSA_PKCS1_PADDING;
-	char * data;
+	char *data;
 	size_t data_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {

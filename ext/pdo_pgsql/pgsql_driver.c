@@ -39,8 +39,14 @@ static bool pgsql_handle_in_transaction(pdo_dbh_t *dbh);
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
-	size_t i = strlen(message)-1;
+	size_t i = strlen(message);
 	char *tmp;
+	if (UNEXPECTED(i == 0)) {
+		tmp = pemalloc(1, persistent);
+		tmp[0] = '\0';
+		return tmp;
+	}
+	--i;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
 		--i;

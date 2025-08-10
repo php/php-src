@@ -212,7 +212,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_INC "'++'"
 %token T_DEC "'--'"
 %token T_INT_CAST    "'(int)'"
-%token T_DOUBLE_CAST "'(double)'"
+%token T_DOUBLE_CAST "'(float)'"
 %token T_STRING_CAST "'(string)'"
 %token T_ARRAY_CAST  "'(array)'"
 %token T_OBJECT_CAST "'(object)'"

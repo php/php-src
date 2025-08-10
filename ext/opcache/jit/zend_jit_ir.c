@@ -18,6 +18,7 @@
 
 #include "jit/ir/ir.h"
 #include "jit/ir/ir_builder.h"
+#include "jit/tls/zend_jit_tls.h"
 
 #if defined(IR_TARGET_X86)
 # define IR_REG_SP            4 /* IR_REG_RSP */
@@ -171,15 +172,9 @@ static uint32_t default_mflags = 0;
 static bool delayed_call_chain = 0; // TODO: remove this var (use jit->delayed_call_level) ???
 
 #ifdef ZTS
-# ifdef _WIN32
-extern uint32_t _tls_index;
-extern char *_tls_start;
-extern char *_tls_end;
-# endif
-
 static size_t tsrm_ls_cache_tcb_offset = 0;
-static size_t tsrm_tls_index = 0;
-static size_t tsrm_tls_offset = 0;
+static size_t tsrm_tls_index = -1;
+static size_t tsrm_tls_offset = -1;
 
 # define EG_TLS_OFFSET(field) \
 	(executor_globals_offset + offsetof(zend_executor_globals, field))
@@ -334,6 +329,8 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
                                        zend_jit_addr   ref_addr,
                                        bool       check_exception);
 
+static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags);
+
 typedef struct _zend_jit_stub {
 	const char *name;
 	int (*stub)(zend_jit_ctx *jit);
@@ -463,6 +460,11 @@ static const char* zend_reg_name(int8_t reg)
 /* IR helpers */
 
 #ifdef ZTS
+static void * ZEND_FASTCALL zend_jit_get_tsrm_ls_cache(void)
+{
+	return _tsrm_ls_cache;
+}
+
 static ir_ref jit_TLS(zend_jit_ctx *jit)
 {
 	ZEND_ASSERT(jit->ctx.control);
@@ -482,9 +484,15 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 			ref = insn->op1;
 		}
 	}
-	jit->tls = ir_TLS(
-		tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
-		tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
+
+	if (tsrm_ls_cache_tcb_offset == 0 && tsrm_tls_index == -1) {
+		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
+	} else {
+		jit->tls = ir_TLS(
+				tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
+				tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
+	}
+
 	return jit->tls;
 }
 #endif
@@ -1918,15 +1926,13 @@ static void zend_jit_vm_leave(zend_jit_ctx *jit, ir_ref to_opline)
 
 static int zend_jit_exception_handler_stub(zend_jit_ctx *jit)
 {
-	const void *handler;
-
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		handler = zend_get_opcode_handler_func(EG(exception_op));
+	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
+		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(EG(exception_op));
 
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
-		handler = EG(exception_op)->handler;
+		zend_vm_opcode_handler_t handler = EG(exception_op)->handler;
 
 		if (GCC_GLOBAL_REGS) {
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
@@ -2045,7 +2051,7 @@ static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 
 	ir_IF_FALSE(if_top);
 
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_leave_nested_func_helper), call_info);
 		jit_STORE_IP(jit,
 			ir_LOAD_A(jit_EX(opline)));
@@ -2058,7 +2064,7 @@ static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 
 	ir_IF_TRUE(if_top);
 
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_leave_top_func_helper), call_info);
 		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else if (GCC_GLOBAL_REGS) {
@@ -2242,7 +2248,7 @@ static int zend_jit_leave_throw_stub(zend_jit_ctx *jit)
 
 static int zend_jit_hybrid_runtime_jit_stub(zend_jit_ctx *jit)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+	if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) {
 		return 0;
 	}
 
@@ -2255,7 +2261,7 @@ static int zend_jit_hybrid_profile_jit_stub(zend_jit_ctx *jit)
 {
 	ir_ref addr, func, run_time_cache, jit_extension;
 
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
+	if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) {
 		return 0;
 	}
 
@@ -2311,7 +2317,7 @@ static int _zend_jit_hybrid_hot_counter_stub(zend_jit_ctx *jit, uint32_t cost)
 
 static int zend_jit_hybrid_func_hot_counter_stub(zend_jit_ctx *jit)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_func)) {
+	if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID || !JIT_G(hot_func)) {
 		return 0;
 	}
 
@@ -2321,7 +2327,7 @@ static int zend_jit_hybrid_func_hot_counter_stub(zend_jit_ctx *jit)
 
 static int zend_jit_hybrid_loop_hot_counter_stub(zend_jit_ctx *jit)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_loop)) {
+	if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID || !JIT_G(hot_loop)) {
 		return 0;
 	}
 
@@ -2383,7 +2389,7 @@ static int _zend_jit_hybrid_trace_counter_stub(zend_jit_ctx *jit, uint32_t cost)
 
 static int zend_jit_hybrid_func_trace_counter_stub(zend_jit_ctx *jit)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_func)) {
+	if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID || !JIT_G(hot_func)) {
 		return 0;
 	}
 
@@ -2393,7 +2399,7 @@ static int zend_jit_hybrid_func_trace_counter_stub(zend_jit_ctx *jit)
 
 static int zend_jit_hybrid_ret_trace_counter_stub(zend_jit_ctx *jit)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_return)) {
+	if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID || !JIT_G(hot_return)) {
 		return 0;
 	}
 
@@ -2403,7 +2409,7 @@ static int zend_jit_hybrid_ret_trace_counter_stub(zend_jit_ctx *jit)
 
 static int zend_jit_hybrid_loop_trace_counter_stub(zend_jit_ctx *jit)
 {
-	if (zend_jit_vm_kind != ZEND_VM_KIND_HYBRID || !JIT_G(hot_loop)) {
+	if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID || !JIT_G(hot_loop)) {
 		return 0;
 	}
 
@@ -2413,7 +2419,7 @@ static int zend_jit_hybrid_loop_trace_counter_stub(zend_jit_ctx *jit)
 
 static int zend_jit_trace_halt_stub(zend_jit_ctx *jit)
 {
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 		ir_TAILCALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_halt_op->handler));
 	} else if (GCC_GLOBAL_REGS) {
 		jit_STORE_IP(jit, IR_NULL);
@@ -2670,7 +2676,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->ctx.fixed_regset = (1<<ZREG_FP) | (1<<ZREG_IP);
 	if (!(flags & IR_FUNCTION)) {
 		jit->ctx.flags |= IR_NO_STACK_COMBINE;
-		if (zend_jit_vm_kind == ZEND_VM_KIND_CALL) {
+		if (ZEND_VM_KIND == ZEND_VM_KIND_CALL) {
 			jit->ctx.flags |= IR_FUNCTION;
 			/* Stack must be 16 byte aligned */
 			/* TODO: select stack size ??? */
@@ -3127,6 +3133,8 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_DATA(EG(symbol_table));
 
 	REGISTER_DATA(CG(map_ptr_base));
+#else /* ZTS */
+	REGISTER_HELPER(zend_jit_get_tsrm_ls_cache);
 #endif
 #endif
 }
@@ -3138,7 +3146,7 @@ static void zend_jit_calc_trace_prologue_size(void)
 	void *entry;
 	size_t size;
 
-	zend_jit_init_ctx(jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
+	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
 
 	if (!GCC_GLOBAL_REGS) {
 		ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
@@ -3293,7 +3301,6 @@ static void zend_jit_setup_unwinder(void)
 }
 #endif
 
-
 static void zend_jit_setup(bool reattached)
 {
 #if defined(IR_TARGET_X86)
@@ -3312,170 +3319,21 @@ static void zend_jit_setup(bool reattached)
 	}
 # endif
 #endif
+
 #ifdef ZTS
-#if defined(IR_TARGET_AARCH64)
-	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
-
-# ifdef __FreeBSD__
-	if (tsrm_ls_cache_tcb_offset == 0) {
-		TLSDescriptor **where;
-
-		__asm__(
-			"adrp %0, :tlsdesc:_tsrm_ls_cache\n"
-			"add %0, %0, :tlsdesc_lo12:_tsrm_ls_cache\n"
-			: "=r" (where));
-		/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst
-		 * section "Relocations for thread-local storage".
-		 * The first entry holds a pointer to the variable's TLS descriptor resolver function and the second entry holds
-		 * a platform-specific offset or pointer. */
-		TLSDescriptor *tlsdesc = where[1];
-
-		tsrm_tls_offset = tlsdesc->offset;
-		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/22ca6db50f4e6bd75a141f57cf953d8de6531a06/lib/libc/gen/tls.c#L88) */
-		tsrm_tls_index = (tlsdesc->index + 1) * 8;
+	zend_result result = zend_jit_resolve_tsrm_ls_cache_offsets(
+		&tsrm_ls_cache_tcb_offset,
+		&tsrm_tls_index,
+		&tsrm_tls_offset
+	);
+	if (result == FAILURE) {
+		zend_accel_error(ACCEL_LOG_INFO,
+				"Could not get _tsrm_ls_cache offsets, will fallback to runtime resolution");
 	}
-# elif defined(__MUSL__)
-	if (tsrm_ls_cache_tcb_offset == 0) {
-		size_t **where;
-
-		__asm__(
-			"adrp %0, :tlsdesc:_tsrm_ls_cache\n"
-			"add %0, %0, :tlsdesc_lo12:_tsrm_ls_cache\n"
-			: "=r" (where));
-		/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst */
-		size_t *tlsdesc = where[1];
-
-		tsrm_tls_offset = tlsdesc[1];
-		tsrm_tls_index = tlsdesc[0] * 8;
-	}
-# else
-	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
-# endif
-# elif defined(_WIN64)
-	tsrm_tls_index  = _tls_index * sizeof(void*);
-
-	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
-	/* Probably, it might be better solution */
-	do {
-		void ***tls_mem = ((void****)__readgsqword(0x58))[_tls_index];
-		void *val = _tsrm_ls_cache;
-		size_t offset = 0;
-		size_t size = (char*)&_tls_end - (char*)&_tls_start;
-
-		while (offset < size) {
-			if (*tls_mem == val) {
-				tsrm_tls_offset = offset;
-				break;
-			}
-			tls_mem++;
-			offset += sizeof(void*);
-		}
-		if (offset >= size) {
-			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: offset >= size");
-		}
-	} while(0);
-# elif defined(ZEND_WIN32)
-	tsrm_tls_index  = _tls_index * sizeof(void*);
-
-	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
-	/* Probably, it might be better solution */
-	do {
-		void ***tls_mem = ((void****)__readfsdword(0x2c))[_tls_index];
-		void *val = _tsrm_ls_cache;
-		size_t offset = 0;
-		size_t size = (char*)&_tls_end - (char*)&_tls_start;
-
-		while (offset < size) {
-			if (*tls_mem == val) {
-				tsrm_tls_offset = offset;
-				break;
-			}
-			tls_mem++;
-			offset += sizeof(void*);
-		}
-		if (offset >= size) {
-			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: offset >= size");
-		}
-	} while(0);
-# elif defined(__APPLE__) && defined(__x86_64__)
-	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
-	if (tsrm_ls_cache_tcb_offset == 0) {
-		size_t *ti;
-		__asm__(
-			"leaq __tsrm_ls_cache(%%rip),%0"
-			: "=r" (ti));
-		tsrm_tls_offset = ti[2];
-		tsrm_tls_index = ti[1] * 8;
-	}
-# elif defined(__GNUC__) && defined(__x86_64__)
-	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
-	if (tsrm_ls_cache_tcb_offset == 0) {
-#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && \
-	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
-		size_t ret;
-
-		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
-			: "=r" (ret));
-		tsrm_ls_cache_tcb_offset = ret;
-#elif defined(__MUSL__)
-		size_t *ti;
-
-		__asm__(
-			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=D" (ti));
-		tsrm_tls_offset = ti[1];
-		tsrm_tls_index = ti[0] * 8;
-#elif defined(__FreeBSD__)
-		size_t *ti;
-
-		__asm__(
-			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=D" (ti));
-		tsrm_tls_offset = ti[1];
-		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/bf56e8b9c8639ac4447d223b83cdc128107cc3cd/libexec/rtld-elf/rtld.c#L5260) */
-		tsrm_tls_index = (ti[0] + 1) * 8;
-#else
-		size_t *ti;
-
-		__asm__(
-			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
-			: "=D" (ti));
-		tsrm_tls_offset = ti[1];
-		tsrm_tls_index = ti[0] * 16;
-#endif
-	}
-# elif defined(__GNUC__) && defined(__i386__)
-	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
-	if (tsrm_ls_cache_tcb_offset == 0) {
-#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
-		size_t ret;
-
-		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
-			: "=a" (ret));
-		tsrm_ls_cache_tcb_offset = ret;
-#else
-		size_t *ti, _ebx, _ecx, _edx;
-
-		__asm__(
-			"call 1f\n"
-			".subsection 1\n"
-			"1:\tmovl (%%esp), %%ebx\n\t"
-			"ret\n"
-			".previous\n\t"
-			"addl $_GLOBAL_OFFSET_TABLE_, %%ebx\n\t"
-			"leal _tsrm_ls_cache@tlsldm(%%ebx), %0\n\t"
-			"call ___tls_get_addr@plt\n\t"
-			"leal _tsrm_ls_cache@tlsldm(%%ebx), %0\n"
-			: "=a" (ti), "=&b" (_ebx), "=&c" (_ecx), "=&d" (_edx));
-		tsrm_tls_offset = ti[1];
-		tsrm_tls_index = ti[0] * 8;
-#endif
-	}
-# endif
 #endif
 
 #if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 		zend_jit_set_sp_adj_vm(); // set zend_jit_hybrid_vm_sp_adj
 	}
 #endif
@@ -4176,17 +4034,12 @@ static ir_ref zend_jit_continue_entry(zend_jit_ctx *jit, ir_ref src, unsigned in
 
 static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_throw)
 {
-	const void *handler;
-
 	zend_jit_set_ip(jit, opline);
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		handler = zend_get_opcode_handler_func(opline);
-	} else {
-		handler = opline->handler;
-	}
 	if (GCC_GLOBAL_REGS) {
+		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 	} else {
+		zend_vm_opcode_handler_t handler = opline->handler;
 		ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
 		jit_STORE_IP(jit, ip);
 	}
@@ -4216,28 +4069,27 @@ static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_th
 
 static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 {
-	const void *handler;
 	ir_ref ref;
 	zend_basic_block *bb;
 
 	zend_jit_set_ip(jit, opline);
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 		if (opline->opcode == ZEND_DO_UCALL ||
 		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
 		    opline->opcode == ZEND_DO_FCALL ||
 		    opline->opcode == ZEND_RETURN) {
 
 			/* Use inlined HYBRID VM handler */
-			handler = opline->handler;
+			zend_vm_opcode_handler_t handler = opline->handler;
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
 		} else {
-			handler = zend_get_opcode_handler_func(opline);
+			zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
 			ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 			ref = ir_LOAD_A(jit_IP(jit));
 			ir_TAILCALL(IR_VOID, ref);
 		}
 	} else {
-		handler = opline->handler;
+		zend_vm_opcode_handler_t handler = opline->handler;
 		if (GCC_GLOBAL_REGS) {
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
 		} else if ((jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY)
@@ -11132,7 +10984,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 
 			if (may_be_top_frame) {
 				// TODO: try to avoid this check ???
-				if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+				if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 #if 0
 					/* this check should be handled by the following OPLINE guard */
 					|	cmp IP, zend_jit_halt_op
@@ -16714,7 +16566,7 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 	int i, count;
 	zend_basic_block *bb;
 
-	zend_jit_init_ctx(jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? 0 : (IR_START_BR_TARGET|IR_ENTRY_BR_TARGET));
+	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : (IR_START_BR_TARGET|IR_ENTRY_BR_TARGET));
 
 	jit->ctx.spill_base = ZREG_FP;
 
@@ -16741,7 +16593,7 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 	return 1;
 }
 
-static void *zend_jit_finish(zend_jit_ctx *jit)
+static zend_vm_opcode_handler_t zend_jit_finish(zend_jit_ctx *jit)
 {
 	void *entry;
 	size_t size;
@@ -16792,7 +16644,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 
 //					ir_mem_unprotect(entry, size);
 					if (!(jit->ctx.flags & IR_FUNCTION)
-					 && zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+					 && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 #if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
 						sp_offset = zend_jit_hybrid_vm_sp_adj;
 #else
@@ -16825,14 +16677,14 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 					opline++;
 				}
 			}
-			opline->handler = entry;
+			opline->handler = (zend_vm_opcode_handler_t)entry;
 
 			if (jit->ctx.entries_count) {
 				/* For all entries */
 				int i = jit->ctx.entries_count;
 				do {
 					ir_insn *insn = &jit->ctx.ir_base[jit->ctx.entries[--i]];
-					op_array->opcodes[insn->op2].handler = (char*)entry + insn->op3;
+					op_array->opcodes[insn->op2].handler = (zend_vm_opcode_handler_t)((char*)entry + insn->op3);
 				} while (i != 0);
 			}
 		} else {
@@ -16859,7 +16711,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 		zend_string_release(str);
 	}
 
-	return entry;
+	return (zend_vm_opcode_handler_t)entry;
 }
 
 static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
@@ -17160,7 +17012,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 		    opline->opcode == ZEND_RETURN_BY_REF ||
 		    opline->opcode == ZEND_GENERATOR_CREATE) {
 
-			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+			if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 				if (trace->op != ZEND_JIT_TRACE_END ||
 				    (trace->stop != ZEND_JIT_TRACE_STOP_RETURN &&
 				     trace->stop < ZEND_JIT_TRACE_STOP_INTERPRETER)) {
@@ -17274,7 +17126,7 @@ static int zend_jit_deoptimizer_start(zend_jit_ctx        *jit,
                                       uint32_t             trace_num,
                                       uint32_t             exit_num)
 {
-	zend_jit_init_ctx(jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
+	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
 
 	jit->ctx.spill_base = ZREG_FP;
 
@@ -17295,7 +17147,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
                                 zend_jit_trace_info *parent,
                                 uint32_t             exit_num)
 {
-	zend_jit_init_ctx(jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
+	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
 
 	jit->ctx.spill_base = ZREG_FP;
 

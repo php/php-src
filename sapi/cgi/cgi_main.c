@@ -2041,6 +2041,8 @@ consult the installation file that came with this distribution, or visit \n\
 						 */
 						parent = 0;
 
+						php_child_init();
+
 						/* don't catch our signals */
 						sigaction(SIGTERM, &old_term, 0);
 						sigaction(SIGQUIT, &old_quit, 0);

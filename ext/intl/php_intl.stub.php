@@ -173,8 +173,7 @@ class IntlException extends Exception
 
 /* calendar */
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function intlcal_create_instance($timezone = null, ?string $locale = null): ?IntlCalendar {}
+function intlcal_create_instance(IntlTimeZone|DateTimeZone|string|null $timezone = null, ?string $locale = null): ?IntlCalendar {}
 
 function intlcal_get_keyword_values_for_locale(string $keyword, string $locale, bool $onlyCommon): IntlIterator|false {}
 
@@ -194,8 +193,7 @@ function intlcal_set_time(IntlCalendar $calendar, float $timestamp): bool {}
 
 function intlcal_add(IntlCalendar $calendar, int $field, int $value): bool {}
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function intlcal_set_time_zone(IntlCalendar $calendar, $timezone): bool {}
+function intlcal_set_time_zone(IntlCalendar $calendar, IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
 function intlcal_after(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
@@ -328,12 +326,11 @@ function intl_error_name(int $errorCode): string {}
 
 /* dateformat */
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
 function datefmt_create(
     ?string $locale,
     int $dateType = IntlDateFormatter::FULL,
     int $timeType = IntlDateFormatter::FULL,
-    $timezone = null,
+    IntlTimeZone|DateTimeZone|string|null $timezone = null,
     IntlCalendar|int|null $calendar = null,
     ?string $pattern = null
 ): ?IntlDateFormatter {}
@@ -352,8 +349,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $formatter): IntlCalendar
 
 function datefmt_get_timezone(IntlDateFormatter $formatter): IntlTimeZone|false {}
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): bool {}
+function datefmt_set_timezone(IntlDateFormatter $formatter, IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
 function datefmt_set_pattern(IntlDateFormatter $formatter, string $pattern): bool {}
 
@@ -571,8 +567,7 @@ function intltz_count_equivalent_ids(string $timezoneId): int|false {}
 
 function intltz_create_default(): IntlTimeZone {}
 
-/** @param IntlTimeZone|string|int|float|null $countryOrRawOffset */
-function intltz_create_enumeration($countryOrRawOffset = null): IntlIterator|false {}
+function intltz_create_enumeration(string|int|null $countryOrRawOffset = null): IntlIterator|false {}
 
 function intltz_create_time_zone(string $timezoneId): ?IntlTimeZone {}
 

@@ -2,12 +2,11 @@
 IntlCalendar::fieldDifference() basic test
 --INI--
 date.timezone=Atlantic/Azores
+intl.default_locale=nl
 --EXTENSIONS--
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('UTC');
 $intlcal->setTime(strtotime('2012-02-29 05:06:07 +0000') * 1000);
@@ -28,4 +27,4 @@ var_dump(
 --EXPECT--
 int(3601)
 int(6)
-int(61)
+int(61)
