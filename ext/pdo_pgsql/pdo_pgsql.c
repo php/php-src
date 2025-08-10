@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "zend_attributes.h"
 #include "ext/standard/info.h"
 #include "ext/pdo/php_pdo.h"
 #include "ext/pdo/php_pdo_error.h"
