@@ -389,6 +389,35 @@ PHP_FUNCTION(round)
 }
 /* }}} */
 
+/* Return the given value if in range of min and max */
+static void php_math_clamp(zval *return_value, zval *value, zval *min, zval *max)
+{
+	if (Z_TYPE_P(min) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(min)))) {
+		zend_argument_value_error(2, "cannot be NAN");
+		RETURN_THROWS();
+	}
+
+	if (Z_TYPE_P(max) == IS_DOUBLE && UNEXPECTED(zend_isnan(Z_DVAL_P(max)))) {
+		zend_argument_value_error(3, "cannot be NAN");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(max, min) == -1) {
+		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
+		RETURN_THROWS();
+	}
+
+	if (zend_compare(max, value) == -1) {
+		RETURN_COPY(max);
+	}
+
+	if (zend_compare(value, min) == -1) {
+		RETURN_COPY(min);
+	}
+
+	RETURN_COPY(value);
+}
+
 /* {{{ Return the given value if in range of min and max */
 PHP_FUNCTION(clamp)
 {
@@ -400,20 +429,7 @@ PHP_FUNCTION(clamp)
 		Z_PARAM_ZVAL(zmax)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_compare(zmin, zmax) > 0) {
-		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
-		RETURN_THROWS();
-	}
-
-	if (zend_compare(zmax, zvalue) == -1) {
-		RETURN_COPY(zmax);
-	}
-
-	if (zend_compare(zvalue, zmin) == -1) {
-		RETURN_COPY(zmin);
-	}
-
-	RETURN_COPY(zvalue);
+	php_math_clamp(return_value, zvalue, zmin, zmax);
 }
 /* }}} */
 
@@ -425,20 +441,7 @@ ZEND_FRAMELESS_FUNCTION(clamp, 3)
 	Z_FLF_PARAM_ZVAL(2, zmin);
 	Z_FLF_PARAM_ZVAL(3, zmax);
 
-	if (zend_compare(zmin, zmax) > 0) {
-		zend_argument_value_error(2, "must be smaller than or equal to argument #3 ($max)");
-		RETURN_THROWS();
-	}
-
-	if (zend_compare(zmax, zvalue) == -1) {
-		RETURN_COPY_VALUE(zmax);
-	}
-
-	if (zend_compare(zvalue, zmin) == -1) {
-		RETURN_COPY_VALUE(zmin);
-	}
-
-	RETURN_COPY_VALUE(zvalue);
+	php_math_clamp(return_value, zvalue, zmin, zmax);
 }
 /* }}} */
 
