@@ -2652,8 +2652,13 @@ PHP_FUNCTION(ord)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(ZSTR_LEN(str) != 1)) {
-		php_error_docref(NULL, E_DEPRECATED,
-			"Providing a string which is not one byte long is deprecated, use ord($str[0]) instead");
+		if (ZSTR_LEN(str) == 0) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Providing an empty string is deprecated");
+		} else {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Providing a string which is not one byte long is deprecated, use ord($str[0]) instead");
+		}
 	}
 	RETURN_LONG((unsigned char) ZSTR_VAL(str)[0]);
 }
