@@ -55,7 +55,7 @@ ob_end_flush();
 ?>');
 
 $extra_arguments = getenv('TEST_PHP_EXTRA_ARGS');
-var_dump(`$php $extra_arguments -d session.name=PHPSESSID $file`);
+var_dump(shell_exec("$php $extra_arguments -d session.name=PHPSESSID $file"));
 
 unlink($file);
 

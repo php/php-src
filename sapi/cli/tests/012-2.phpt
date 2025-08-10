@@ -15,17 +15,39 @@ $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 // -s : behavior = HIGHLIGHT
 // -w : behavior = STRIP
 
-var_dump(`$php -n -r "echo 1;" -F some.php`);
-var_dump(`$php -n -r "echo 2;" -f some.php`);
-var_dump(`$php -n -r "echo 3;" -l`); // ignores linting
-var_dump(`$php -n -r "echo 4;" -R some.php`);
-var_dump(`$php -n -r "echo 5;" -B ""`);
-var_dump(`$php -n -a -B ""`);
-var_dump(`$php -n -r "echo 6;" -E ""`);
-var_dump(`$php -n -a -E ""`);
-var_dump(`$php -n -r "echo 7;" -s`);
-var_dump(`$php -n -r "echo 8;" -w`);
-var_dump(`$php -n -l -r "echo 9;"`);
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo 1;" -F some.php
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo 2;" -f some.php
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo 3;" -l
+SHELL)); // ignores linting
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo 4;" -R some.php
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo 5;" -B ""
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -a -B ""
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo 6;" -E ""
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -a -E ""
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo 7;" -s
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -r "echo 8;" -w
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -l -r "echo 9;"
+SHELL));
 
 echo "Done\n";
 ?>

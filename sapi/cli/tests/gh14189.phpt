@@ -27,7 +27,9 @@ exit
 EOT;
 
 $code = escapeshellarg($code);
-echo `echo $code | "$php" -a`, "\n";
+echo shell_exec(<<<SHELL
+echo $code | "$php" -a
+SHELL), "\n";
 ?>
 --EXPECT--
 Interactive shell
