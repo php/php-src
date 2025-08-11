@@ -23,19 +23,31 @@ foreach($classes as $class) {
     var_dump($rc->getConstant('doesNotexist'));
 }
 ?>
---EXPECT--
+--EXPECTF--
 Reflecting on instance of class C: 
 string(12) "hello from C"
+
+Deprecated: ReflectionClass::getConstant() for a non-existent constant is deprecated, use ReflectionClass::hasConstant() to check if the constant exists in %s on line %d
 bool(false)
 Reflecting on instance of class D: 
 string(12) "hello from C"
+
+Deprecated: ReflectionClass::getConstant() for a non-existent constant is deprecated, use ReflectionClass::hasConstant() to check if the constant exists in %s on line %d
 bool(false)
 Reflecting on instance of class E: 
 string(12) "hello from C"
+
+Deprecated: ReflectionClass::getConstant() for a non-existent constant is deprecated, use ReflectionClass::hasConstant() to check if the constant exists in %s on line %d
 bool(false)
 Reflecting on instance of class F: 
 string(12) "hello from F"
+
+Deprecated: ReflectionClass::getConstant() for a non-existent constant is deprecated, use ReflectionClass::hasConstant() to check if the constant exists in %s on line %d
 bool(false)
 Reflecting on instance of class X: 
+
+Deprecated: ReflectionClass::getConstant() for a non-existent constant is deprecated, use ReflectionClass::hasConstant() to check if the constant exists in %s on line %d
 bool(false)
+
+Deprecated: ReflectionClass::getConstant() for a non-existent constant is deprecated, use ReflectionClass::hasConstant() to check if the constant exists in %s on line %d
 bool(false)
