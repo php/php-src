@@ -50,6 +50,9 @@ PHP 8.5 UPGRADE NOTES
     immediately, without calling user-defined error handlers.
   . Exceptions thrown by user-defined error handlers when handling class linking
     errors are not promoted to fatal errors anymore and do not prevent linking.
+  . Applying #[\Attribute] to an abstract class, enum, interface, or trait triggers
+    an error during compilation. Previously, the attribute could be added, but when
+    ReflectionAttribute::newInstance() was called an error would be thrown.
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
