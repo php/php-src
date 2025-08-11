@@ -27,6 +27,7 @@
 #include "streams/php_streams_int.h"
 #include "zend_smart_str.h"
 #include "php_openssl.h"
+#include "php_openssl_backend.h"
 #include "php_network.h"
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
@@ -850,7 +851,7 @@ static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *c
 	add_cert: {
 		BIO_puts(buffer, line);
 		efree(line);
-		cert = PEM_read_bio_X509(buffer, NULL, 0, NULL);
+		cert = php_openssl_pem_read_bio_x509(buffer);
 		BIO_free(buffer);
 		buffer_active = 0;
 		if (cert && X509_STORE_add_cert(cert_store, cert)) {
