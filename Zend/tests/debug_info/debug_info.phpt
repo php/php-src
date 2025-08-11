@@ -36,5 +36,7 @@ object(Foo)#%d (3) {
   ["c":"Foo":private]=>
   int(3)
 }
+
+Deprecated: Returning null from Bar::__debugInfo() is deprecated in %s on line %d
 object(Bar)#%d (0) {
 }
