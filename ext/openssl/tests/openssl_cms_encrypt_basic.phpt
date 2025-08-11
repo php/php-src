@@ -5,13 +5,9 @@ openssl
 --FILE--
 <?php
 $infile = __DIR__ . "/plain.txt";
-$outfile = tempnam(sys_get_temp_dir(), "cms_enc_basic");
-if ($outfile === false)
-    die("failed to get a temporary filename!");
-$outfile2 = $outfile . ".out";
-$outfile3 = tempnam(sys_get_temp_dir(), "cms_enc_basic");
-if ($outfile3 === false)
-    die("failed to get a temporary filename!");
+$outfile = __DIR__ . "/openssl_cms_encrypt_basic.out1";
+$outfile2 = __DIR__ . "/openssl_cms_encrypt_basic.out2";
+$outfile3 = __DIR__ . "/openssl_cms_encrypt_basic.out3";
 $single_cert = "file://" . __DIR__ . "/cert.crt";
 $privkey = "file://" . __DIR__ . "/private_rsa_1024.key";
 $wrongkey = "file://" . __DIR__ . "/private_rsa_2048.key";
@@ -27,7 +23,7 @@ var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $headers, cipher_a
 var_dump(openssl_cms_encrypt($infile, $outfile, openssl_x509_read($single_cert), $headers, cipher_algo: $cipher));
 var_dump(openssl_cms_decrypt($outfile, $outfile2, $single_cert, $privkey));
 readfile($outfile2);
-var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $assoc_headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $assoc_headers, cipher_algo: "AES-128-CBC"));
 var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $empty_headers, cipher_algo: $cipher));
 var_dump(openssl_cms_encrypt($wrong, $outfile, $single_cert, $headers, cipher_algo: $cipher));
 var_dump(openssl_cms_encrypt($empty, $outfile, $single_cert, $headers, cipher_algo: $cipher));
@@ -40,11 +36,9 @@ var_dump(openssl_cms_encrypt($infile, $outfile3, $single_cert, $headers, flags: 
 
 if (file_exists($outfile)) {
     echo "true\n";
-    unlink($outfile);
 }
 if (file_exists($outfile2)) {
     echo "true\n";
-    unlink($outfile2);
 }
 
 if (file_exists($outfile3)) {
@@ -53,8 +47,13 @@ if (file_exists($outfile3)) {
         echo "true\n";
     }
     unset($content); 
-    unlink($outfile3);
 }
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . "/openssl_cms_encrypt_basic.out1");
+@unlink(__DIR__ . "/openssl_cms_encrypt_basic.out2");
+@unlink(__DIR__ . "/openssl_cms_encrypt_basic.out3");
 ?>
 --EXPECT--
 bool(true)

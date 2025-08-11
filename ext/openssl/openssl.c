@@ -3201,6 +3201,7 @@ PHP_FUNCTION(openssl_cms_encrypt)
 	X509 * cert;
 	const EVP_CIPHER *cipher = NULL;
 	zend_long cipherid = PHP_OPENSSL_CIPHER_DEFAULT;
+	zend_string *cipher_str = NULL;
 	zend_string * strindex;
 	char * infilename = NULL;
 	size_t infilename_len;
@@ -3210,11 +3211,16 @@ PHP_FUNCTION(openssl_cms_encrypt)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppza!|lll", &infilename, &infilename_len,
-				  &outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags, &encoding, &cipherid) == FAILURE) {
-		RETURN_THROWS();
-	}
-
+	ZEND_PARSE_PARAMETERS_START(4, 7)
+		Z_PARAM_PATH(infilename, infilename_len)
+		Z_PARAM_PATH(outfilename, outfilename_len)
+		Z_PARAM_ZVAL(zrecipcerts)
+		Z_PARAM_ARRAY_OR_NULL(zheaders)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+		Z_PARAM_LONG(encoding)
+		Z_PARAM_STR_OR_LONG(cipher_str, cipherid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	infile = php_openssl_bio_new_file(
 			infilename, infilename_len, 1, PHP_OPENSSL_BIO_MODE_R(flags));
@@ -3273,7 +3279,11 @@ PHP_FUNCTION(openssl_cms_encrypt)
 	}
 
 	/* sanity check the cipher */
-	cipher = php_openssl_get_evp_cipher_from_algo(cipherid);
+	if (cipher_str) {
+		cipher = php_openssl_get_evp_cipher_by_name(ZSTR_VAL(cipher_str));
+	} else {
+		cipher = php_openssl_get_evp_cipher_from_algo(cipherid);
+	}
 	if (cipher == NULL) {
 		/* shouldn't happen */
 		php_error_docref(NULL, E_WARNING, "Failed to get cipher");

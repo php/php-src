@@ -53,6 +53,8 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
   . Implement #47728 (openssl_pkcs7_sign ignores new openssl flags).
     (Jakub Zelenka)
+  . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
+    (Jakub Zelenka)
 
 - PDO:
   . The "uri:" DSN scheme has been deprecated due to security concerns with

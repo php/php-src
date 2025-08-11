@@ -456,6 +456,9 @@ PHP 8.5 UPGRADE NOTES
     $digest_algo that allows specifying hash digest algorithm for OEAP padding.
   . openssl_sign() and openssl_verify() have new parameter $padding to allow
     using more secure RSA PSS padding.
+  . openssl_cms_encrypt() $cipher_algo parameter can be a string with the
+    cipher name. That allows to use more algorithms including AES GCM cipher
+    algorithms for auth enveloped data.
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
