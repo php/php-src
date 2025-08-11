@@ -2343,18 +2343,17 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 				ZSTR_VAL(ce->name), zend_get_unmangled_property_name(prop->name));
 		}
 
-		if (!prop->hooks) {
-			continue;
-		}
-		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
-			f = prop->hooks[i];
-			if (f && f->common.fn_flags & ZEND_ACC_OVERRIDE) {
-				ZEND_ASSERT(f->type != ZEND_INTERNAL_FUNCTION);
+		if (prop->hooks) {
+			for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+				f = prop->hooks[i];
+				if (f && f->common.fn_flags & ZEND_ACC_OVERRIDE) {
+					ZEND_ASSERT(f->type != ZEND_INTERNAL_FUNCTION);
 
-				zend_error_at_noreturn(
-					E_COMPILE_ERROR, f->op_array.filename, f->op_array.line_start,
-					"%s::%s() has #[\\Override] attribute, but no matching parent method exists",
-					ZEND_FN_SCOPE_NAME(f), ZSTR_VAL(f->common.function_name));
+					zend_error_at_noreturn(
+						E_COMPILE_ERROR, f->op_array.filename, f->op_array.line_start,
+						"%s::%s() has #[\\Override] attribute, but no matching parent method exists",
+						ZEND_FN_SCOPE_NAME(f), ZSTR_VAL(f->common.function_name));
+				}
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
