@@ -24,7 +24,7 @@ var_dump($f);
 --EXPECTF--
 in handler
 
-Deprecated: Returning null from Foo::__debugInfo() is deprecated in %s on line %d
+Deprecated: Returning null from Foo::__debugInfo() is deprecated, return an empty array instead in %s on line %d
 object(Foo)#3 (0) {
 }
 object(Foo)#2 (0) {
