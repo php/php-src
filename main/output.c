@@ -538,6 +538,9 @@ PHPAPI int php_output_handler_start(php_output_handler *handler)
 	if (php_output_lock_error(PHP_OUTPUT_HANDLER_START) || !handler) {
 		return FAILURE;
 	}
+	if (!(OG(flags) & PHP_OUTPUT_ACTIVATED)) {
+		return FAILURE;
+	}
 	if (NULL != (conflict = zend_hash_find_ptr(&php_output_handler_conflicts, handler->name))) {
 		if (SUCCESS != conflict(ZSTR_VAL(handler->name), ZSTR_LEN(handler->name))) {
 			return FAILURE;
