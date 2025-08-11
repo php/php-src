@@ -26,8 +26,6 @@ var_dump(xml_parser_get_option($parser, XML_OPTION_TARGET_ENCODING));
 var_dump(xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, "US-ASCII"));
 var_dump(xml_parser_get_option($parser, XML_OPTION_TARGET_ENCODING));
 
-xml_parser_free( $parser );
-
 echo "Done\n";
 ?>
 --EXPECT--
