@@ -7355,7 +7355,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	}
 
 	/* No harm in always running target validation, for internal attributes
-	 * with #[DelayedTargetValidation] it isn't necessary but will always
+	 * without #[DelayedTargetValidation] it isn't necessary but will always
 	 * succeed. */
 	if (!(attr->target & flags)) {
 		zend_string *location = zend_get_attribute_target_names(attr->target);
