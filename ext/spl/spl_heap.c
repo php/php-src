@@ -1075,6 +1075,206 @@ PHP_METHOD(SplPriorityQueue, __debugInfo)
 	RETURN_ARR(spl_heap_object_get_debug_info(spl_ce_SplPriorityQueue, Z_OBJ_P(ZEND_THIS)));
 } /* }}} */
 
+static void spl_heap_serialize_properties(zval *return_value, spl_heap_object *intern)
+{
+	HashTable *props = zend_std_get_properties(&intern->std);
+
+	ZVAL_ARR(return_value, props ? zend_array_dup(props) : zend_new_array(0));
+}
+
+static void spl_heap_serialize_internal_state(zval *return_value, spl_heap_object *intern, bool is_pqueue)
+{
+    zval heap_elements;
+    int heap_count = intern->heap->count;
+
+	array_init(return_value);
+	add_assoc_long(return_value, "flags", intern->flags);
+	
+	if (heap_count == 0) {
+		return;
+	}
+
+	array_init_size(&heap_elements, heap_count);
+
+	for (int heap_idx = 0; heap_idx < heap_count; ++heap_idx) {
+		if (is_pqueue) {
+			spl_pqueue_elem *elem = spl_heap_elem(intern->heap, heap_idx);
+			zval entry;
+			array_init(&entry);
+			add_assoc_zval_ex(&entry, "data", sizeof("data") - 1, &elem->data);
+			Z_TRY_ADDREF(elem->data);
+			add_assoc_zval_ex(&entry, "priority", sizeof("priority") - 1, &elem->priority);
+			Z_TRY_ADDREF(elem->priority);
+			zend_hash_next_index_insert(Z_ARRVAL(heap_elements), &entry);
+		} else {
+			zval *elem = spl_heap_elem(intern->heap, heap_idx);
+			zend_hash_next_index_insert(Z_ARRVAL(heap_elements), elem);
+			Z_TRY_ADDREF_P(elem);
+		}
+	}
+
+	add_assoc_zval(return_value, "heap_elements", &heap_elements);
+}
+
+static void spl_heap_unserialize_properties(HashTable *props_ht, spl_heap_object *intern)
+{
+	object_properties_load(&intern->std, props_ht);
+	if (!EG(exception)) {
+		return;
+	}
+
+    zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
+}
+
+static void spl_heap_unserialize_internal_state(HashTable *state_ht, spl_heap_object *intern, zval *this_ptr, bool is_pqueue)
+{
+	zval *flags_val = zend_hash_str_find(state_ht, "flags", sizeof("flags") - 1);
+	if (!flags_val || Z_TYPE_P(flags_val) != IS_LONG) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object: missing or invalid flags", ZSTR_VAL(intern->std.ce->name));
+		return;
+	}
+
+	intern->flags = (int) Z_LVAL_P(flags_val);
+	
+	zval *heap_elements = zend_hash_str_find(state_ht, "heap_elements", sizeof("heap_elements") - 1);
+	if (!heap_elements) {
+		return;
+	}
+	
+	if (Z_TYPE_P(heap_elements) != IS_ARRAY) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object: heap_elements must be an array", ZSTR_VAL(intern->std.ce->name));
+		return;
+	}
+	
+	zval *val;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(heap_elements), val) {
+		if (is_pqueue) {
+			if (Z_TYPE_P(val) != IS_ARRAY) {
+				zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object: priority queue elements must be arrays", ZSTR_VAL(intern->std.ce->name));
+				return;
+			}
+			
+			zval *data_val = zend_hash_str_find(Z_ARRVAL_P(val), "data", sizeof("data") - 1);
+			zval *priority_val = zend_hash_str_find(Z_ARRVAL_P(val), "priority", sizeof("priority") - 1);
+			
+			if (!data_val || !priority_val) {
+				zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object: priority queue elements must have data and priority", ZSTR_VAL(intern->std.ce->name));
+				return;
+			}
+			
+			spl_pqueue_elem elem;
+			ZVAL_COPY(&elem.data, data_val);
+			ZVAL_COPY(&elem.priority, priority_val);
+			spl_ptr_heap_insert(intern->heap, &elem, this_ptr);
+		} else {
+			Z_TRY_ADDREF_P(val);
+			spl_ptr_heap_insert(intern->heap, val, this_ptr);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_METHOD(SplPriorityQueue, __serialize)
+{
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
+	zval props, state;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	array_init(return_value);
+
+	spl_heap_serialize_properties(&props, intern);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &props);
+
+	spl_heap_serialize_internal_state(&state, intern, true);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &state);
+}
+
+PHP_METHOD(SplPriorityQueue, __unserialize)
+{
+	HashTable *data;
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
+	zval *props, *state;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_hash_num_elements(data) != 2) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
+		RETURN_THROWS();
+	}
+
+	props = zend_hash_index_find(data, 0);
+	if (!props || Z_TYPE_P(props) != IS_ARRAY) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
+		RETURN_THROWS();
+	}
+
+	spl_heap_unserialize_properties(Z_ARRVAL_P(props), intern);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	state = zend_hash_index_find(data, 1);
+	if (!state || Z_TYPE_P(state) != IS_ARRAY) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
+		RETURN_THROWS();
+	}
+
+	spl_heap_unserialize_internal_state(Z_ARRVAL_P(state), intern, ZEND_THIS, true);
+}
+
+PHP_METHOD(SplHeap, __serialize)
+{
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
+	zval props, state;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	array_init(return_value);
+
+	spl_heap_serialize_properties(&props, intern);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &props);
+
+	spl_heap_serialize_internal_state(&state, intern, false);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &state);
+}
+
+PHP_METHOD(SplHeap, __unserialize)
+{
+	HashTable *data;
+	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
+	zval *props, *state;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_hash_num_elements(data) != 2) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
+		RETURN_THROWS();
+	}
+
+	props = zend_hash_index_find(data, 0);
+	if (!props || Z_TYPE_P(props) != IS_ARRAY) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
+		RETURN_THROWS();
+	}
+
+	spl_heap_unserialize_properties(Z_ARRVAL_P(props), intern);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	state = zend_hash_index_find(data, 1);
+	if (!state || Z_TYPE_P(state) != IS_ARRAY) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(intern->std.ce->name));
+		RETURN_THROWS();
+	}
+
+	spl_heap_unserialize_internal_state(Z_ARRVAL_P(state), intern, ZEND_THIS, false);
+}
+
 /* iterator handler table */
 static const zend_object_iterator_funcs spl_heap_it_funcs = {
 	spl_heap_it_dtor,
