@@ -252,6 +252,15 @@
 
 ZEND_API int (*gc_collect_cycles)(void);
 
+/*
+ * The type of a root buffer entry.
+ *
+ * The lower two bits are used for flags and need to be masked out to
+ * reconstruct a pointer.
+ *
+ * When a node in the root buffer is removed, the non-flag bits of the
+ * unused entry are used to store the index of the next entry in the unused
+ * list. */
 typedef struct _gc_root_buffer {
 	zend_refcounted  *ref;
 } gc_root_buffer;
@@ -260,14 +269,7 @@ typedef struct _zend_gc_globals {
 	/*
 	 * The root buffer, which stores possible roots of reference cycles. It is
 	 * also used to store garbage to be collected at the end of a run.
-	 * A single array which is reallocated as necessary.
-	 *
-	 * The lower two bits in each entry are used for flags and need to be masked
-	 * out to reconstruct a pointer.
-	 *
-	 * When an object in the root buffer is removed, the non-flag bits of the
-	 * unused entry are used to store the index of the next entry in the unused
-	 * list. */
+	 * A single array which is reallocated as necessary. */
 	gc_root_buffer   *buf;
 
 	bool         gc_enabled;
@@ -282,12 +284,12 @@ typedef struct _zend_gc_globals {
 	uint32_t          num_roots;		/* number of roots in GC buffer     */
 
 	uint32_t gc_runs;					/* number of GC runs since reset */
-	uint32_t collected;					/* number of collected objects since reset */
+	uint32_t collected;					/* number of collected nodes since reset */
 
 	zend_hrtime_t activated_at;			/* the timestamp of the last reset */
 	zend_hrtime_t collector_time;		/* time spent running GC (ns) */
 	zend_hrtime_t dtor_time;			/* time spent calling destructors (ns) */
-	zend_hrtime_t free_time;			/* time spent destroying objects and freeing memory (ns) */
+	zend_hrtime_t free_time;			/* time spent destroying nodes and freeing memory (ns) */
 
 	uint32_t dtor_idx;			/* root buffer index */
 	uint32_t dtor_end;
@@ -400,8 +402,8 @@ static void gc_stack_free(gc_stack *stack)
  * Map a full index to a compressed index.
  *
  * The root buffer can have up to 2^30 entries, but we only have 20 bits to
- * store the index. So we use the 1<<19 as a compression flag and use the other
- * 19 bits to store the index modulo 2^19. */
+ * store the index. So we use the 1<<19 bit as a compression flag and use the
+ * other 19 bits to store the index modulo 2^19. */
 static zend_always_inline uint32_t gc_compress(uint32_t idx)
 {
 	if (EXPECTED(idx < GC_MAX_UNCOMPRESSED)) {
@@ -506,7 +508,6 @@ static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 	GC_BENCH_DEC(root_buf_length);
 }
 
-/* Destroy the root buffer */
 static void root_buffer_dtor(zend_gc_globals *gc_globals)
 {
 	if (gc_globals->buf) {
@@ -636,7 +637,6 @@ ZEND_API bool gc_protected(void)
 	return GC_G(gc_protected);
 }
 
-/* Reallocate the GC root buffer */
 static void gc_grow_root_buffer(void)
 {
 	size_t new_size;
@@ -662,7 +662,7 @@ static void gc_grow_root_buffer(void)
 	GC_G(buf_size) = new_size;
 }
 
-/* Adjust the GC activation threshold given the number of objects collected by the last run */
+/* Adjust the GC activation threshold given the number of nodes collected by the last run */
 static void gc_adjust_threshold(int count)
 {
 	uint32_t new_threshold;
@@ -693,7 +693,7 @@ static void gc_adjust_threshold(int count)
 	}
 }
 
-/* Add an object as a possible root, and perform a GC run unless one is active already. */
+/* Perform a GC run and then add a node as a possible root. */
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
 	uint32_t idx;
@@ -738,7 +738,7 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
-/* Add a possible root object to the buffer.
+/* Add a possible root node to the buffer.
  * Maybe perform a GC run. */
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
@@ -810,14 +810,13 @@ static void ZEND_FASTCALL gc_extra_root(zend_refcounted *ref)
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
-/* Remove an object from the root buffer given its compressed index */
+/* Remove a node from the root buffer given its compressed index */
 static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t idx)
 {
 	gc_root_buffer *root = gc_decompress(ref, idx);
 	gc_remove_from_roots(root);
 }
 
-/* Remove an object from the root buffer */
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 {
 	gc_root_buffer *root;
@@ -841,10 +840,10 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	gc_remove_from_roots(root);
 }
 
-/* Traverse the graph of objects referred to by ref. Change grey objects back
- * to black, and restore their reference counts. See ScanBlack() in Bacon & Rajan.
- * To implement a depth-first search, discovered objects are added to a stack which
- * is processed iteratively. */
+/* Mark all nodes reachable from ref as black (live). Restore the reference
+ * counts decremented by gc_mark_grey(). See ScanBlack() in Bacon & Rajan.
+ * To implement a depth-first search, discovered nodes are added to a stack
+ * which is processed iteratively. */
 static void gc_scan_black(zend_refcounted *ref, gc_stack *stack)
 {
 	HashTable *ht;
@@ -1044,8 +1043,8 @@ next:
 	}
 }
 
-/* Traverse the graph of objects referred to by ref. Decrement the reference
- * counts and mark visited objects grey. See MarkGray() in Bacon & Rajan. */
+/* Traverse the graph of nodes referred to by ref. Decrement the reference
+ * counts and mark visited nodes grey. See MarkGray() in Bacon & Rajan. */
 static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 {
 	HashTable *ht;
@@ -1258,8 +1257,9 @@ static void gc_compact(void)
 	}
 }
 
-/* For all roots marked purple, traverse the graph, marking referred objects grey.
- * See MarkRoots() in Bacon & Rajan. */
+/* For all roots marked purple, traverse the graph, decrementing the reference
+ * count of visited nodes. Mark visited nodes grey so that their reference
+ * counts will only be decremented once. See MarkRoots() in Bacon & Rajan. */
 static void gc_mark_roots(gc_stack *stack)
 {
 	gc_root_buffer *current, *last;
@@ -1470,7 +1470,7 @@ static void gc_scan_roots(gc_stack *stack)
 	}
 }
 
-/* Add an object to the buffer with the garbage flag, so that it will be
+/* Add a node to the buffer with the garbage flag, so that it will be
  * destroyed and freed when the scan is complete. */
 static void gc_add_garbage(zend_refcounted *ref)
 {
@@ -1497,7 +1497,7 @@ static void gc_add_garbage(zend_refcounted *ref)
 	GC_G(num_roots)++;
 }
 
-/* Traverse the reference graph from ref, marking any white objects as garbage. */
+/* Traverse the reference graph from ref, marking any white nodes as garbage. */
 static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *stack)
 {
 	int count = 0;
