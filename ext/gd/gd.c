@@ -34,6 +34,7 @@
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
 #include "php_memory_streams.h"
+#include "zend_attributes.h"
 #include "zend_object_handlers.h"
 
 #ifdef HAVE_SYS_WAIT_H

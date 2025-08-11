@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3db75a07cd5dfda50f239bc8c3992cd6d1e7afcb */
+ * Stub hash: bbf4c8d4a3ee5712120bd89f4a2ecc516ea65ff1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -759,7 +759,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagegd, arginfo_imagegd)
 	ZEND_FE(imagegd2, arginfo_imagegd2)
 	ZEND_FE(imagebmp, arginfo_imagebmp)
-	ZEND_FE(imagedestroy, arginfo_imagedestroy)
+	ZEND_RAW_FENTRY("imagedestroy", zif_imagedestroy, arginfo_imagedestroy, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(imagecolorallocate, arginfo_imagecolorallocate)
 	ZEND_FE(imagepalettecopy, arginfo_imagepalettecopy)
 	ZEND_FE(imagecolorat, arginfo_imagecolorat)
@@ -923,6 +923,14 @@ static void register_gd_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PNG_FILTER_PAETH", 0x80, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS", 0x8 | 0x10 | 0x20 | 0x40 | 0x80, CONST_PERSISTENT);
 #endif
+
+
+	zend_attribute *attribute_Deprecated_func_imagedestroy_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "imagedestroy", sizeof("imagedestroy") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_imagedestroy_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_imagedestroy_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_imagedestroy_0_arg1_str = zend_string_init("as it has no effect since PHP 8.0", strlen("as it has no effect since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_imagedestroy_0->args[1].value, attribute_Deprecated_func_imagedestroy_0_arg1_str);
+	attribute_Deprecated_func_imagedestroy_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_GdImage(void)
