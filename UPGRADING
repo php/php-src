@@ -322,6 +322,9 @@ PHP 8.5 UPGRADE NOTES
   . The $exclude_disabled parameter of the get_defined_functions() function has
     been deprecated, as it no longer has any effect since PHP 8.0.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_exclude_disabled_parameter_of_get_defined_functions
+  . Terminating case statements with a semicolon instead of a colon has
+    been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_semicolon_after_case_in_switch_statement
 
 - FileInfo:
   . The finfo_close() function has been deprecated.
