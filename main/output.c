@@ -257,7 +257,7 @@ PHPAPI int php_output_flush(void)
 	if (OG(active) && (OG(active)->flags & PHP_OUTPUT_HANDLER_FLUSHABLE)) {
 		php_output_context_init(&context, PHP_OUTPUT_HANDLER_FLUSH);
 		php_output_handler_op(OG(active), &context);
-		if (context.out.data && context.out.used) {
+		if (context.out.data && context.out.used && OG(flags) & PHP_OUTPUT_ACTIVATED) {
 			zend_stack_del_top(&OG(handlers));
 			php_output_write(context.out.data, context.out.used);
 			zend_stack_push(&OG(handlers), &OG(active));
@@ -536,6 +536,9 @@ PHPAPI int php_output_handler_start(php_output_handler *handler)
 	php_output_handler_conflict_check_t conflict;
 
 	if (php_output_lock_error(PHP_OUTPUT_HANDLER_START) || !handler) {
+		return FAILURE;
+	}
+	if (!(OG(flags) & PHP_OUTPUT_ACTIVATED)) {
 		return FAILURE;
 	}
 	if (NULL != (conflict = zend_hash_find_ptr(&php_output_handler_conflicts, handler->name))) {
