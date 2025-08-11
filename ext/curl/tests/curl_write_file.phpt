@@ -23,7 +23,6 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_FILE, $testfile_fp);
 curl_setopt($ch, CURLOPT_URL, 'file://' . $log_file);
 curl_exec($ch);
-curl_close($ch);
 
 fclose($testfile_fp);
 
