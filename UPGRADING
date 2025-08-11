@@ -593,6 +593,7 @@ PHP 8.5 UPGRADE NOTES
 - Standard:
   . Added array_first() and array_last().
     RFC: https://wiki.php.net/rfc/array_first_last
+  . Added exit_status().
 
 ========================================
 7. New Classes and Interfaces

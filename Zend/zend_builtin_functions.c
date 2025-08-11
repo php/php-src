@@ -501,6 +501,13 @@ ZEND_FUNCTION(error_reporting)
 }
 /* }}} */
 
+ZEND_FUNCTION(exit_status)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(EG(exit_status));
+}
+
 static bool validate_constant_array_argument(HashTable *ht, int argument_number) /* {{{ */
 {
 	bool ret = 1;
