@@ -266,6 +266,9 @@ PHP 8.5 UPGRADE NOTES
     and the function returns false. Previously, these errors were silently
     ignored. This change affects only the sendmail transport.
   . getimagesize() now supports HEIF/HEIC images.
+  . pack() and unpack() now support signed integers with specific endianness.
+    New format codes: m/y for signed 2-byte (little/big endian), M/Y for signed
+    4-byte (little/big endian), p/j for signed 8-byte (little/big endian).
 
 - Standard:
   . getimagesize() now supports SVG images when ext-libxml is also loaded.
