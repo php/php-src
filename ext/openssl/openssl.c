@@ -2749,7 +2749,7 @@ PHP_FUNCTION(openssl_pkcs7_read)
 		goto clean_exit;
 	}
 
-	p7 = PEM_read_bio_PKCS7(bio_in, NULL, NULL, NULL);
+	p7 = php_openssl_pem_read_bio_pkcs7(bio_in);
 	if (p7 == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
@@ -3071,19 +3071,19 @@ PHP_FUNCTION(openssl_cms_verify)
 
 	switch (encoding) {
 		case ENCODING_PEM:
-			cms = PEM_read_bio_CMS(sigbio, NULL, 0, NULL);
-				datain = in;
-				break;
-			case ENCODING_DER:
-				cms = d2i_CMS_bio(sigbio, NULL);
-				datain = in;
-				break;
-			case ENCODING_SMIME:
-				cms = SMIME_read_CMS(sigbio, &datain);
-				break;
-			default:
-				php_error_docref(NULL, E_WARNING, "Unknown encoding");
-				goto clean_exit;
+			cms = php_openssl_pem_read_bio_cms(sigbio);
+			datain = in;
+			break;
+		case ENCODING_DER:
+			cms = php_openssl_d2i_bio_cms(sigbio);
+			datain = in;
+			break;
+		case ENCODING_SMIME:
+			cms = php_openssl_smime_read_cms(sigbio, &datain);
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING, "Unknown encoding");
+			goto clean_exit;
 	}
 	if (cms == NULL) {
 		php_openssl_store_errors();
@@ -3398,7 +3398,7 @@ PHP_FUNCTION(openssl_cms_read)
 		goto clean_exit;
 	}
 
-	cms = PEM_read_bio_CMS(bio_in, NULL, NULL, NULL);
+	cms = php_openssl_pem_read_bio_cms(bio_in);
 	if (cms == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
@@ -3703,13 +3703,13 @@ PHP_FUNCTION(openssl_cms_decrypt)
 
 	switch (encoding) {
 		case ENCODING_DER:
-			cms = d2i_CMS_bio(in, NULL);
+			cms = php_openssl_d2i_bio_cms(in);
 			break;
 		case ENCODING_PEM:
-                        cms = PEM_read_bio_CMS(in, NULL, 0, NULL);
+			cms = php_openssl_pem_read_bio_cms(in);
 			break;
 		case ENCODING_SMIME:
-			cms = SMIME_read_CMS(in, &datain);
+			cms = php_openssl_smime_read_cms(in, &datain);
 			break;
 		default:
 			zend_argument_value_error(5, "must be an OPENSSL_ENCODING_* constant");
