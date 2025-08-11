@@ -53,6 +53,8 @@ PHP 8.5 UPGRADE NOTES
   . Applying #[\Attribute] to an abstract class, enum, interface, or trait triggers
     an error during compilation. Previously, the attribute could be added, but when
     ReflectionAttribute::newInstance() was called an error would be thrown.
+    The error can be delayed from compilation to runtime using the new
+    #[\DelayedTargetValidation] attribute.
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
@@ -184,6 +186,11 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/final_promotion
   . #[\Override] can now be applied to properties.
     RFC: https://wiki.php.net/rfc/override_properties
+  . The #[\DelayedTargetValidation] attribute can be used to suppress
+    compile-time errors from core (or extension) attributes that are used on
+    invalid targets. These errors are instead reported at runtime if and when
+    ReflectionAttribute::newInstance() is called.
+    RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute
 
 - Curl:
   . Added support for share handles that are persisted across multiple PHP
@@ -528,6 +535,11 @@ PHP 8.5 UPGRADE NOTES
     hooks are final, and whether the property is virtual. This also affects
     the output of ReflectionClass::__toString() when a class contains hooked
     properties.
+  . ReflectionAttribute::newInstance() can now throw errors for internal
+    attributes if the attribute was applied on an invalid target and the
+    error was delayed from compile-time to runtime via the
+    #[\DelayedTargetValidation] attribute.
+    RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute
 
 - Session:
   . session_start is stricter in regard to the option argument.
@@ -648,6 +660,10 @@ PHP 8.5 UPGRADE NOTES
 - Core:
   . NoDiscard attribute was added.
     RFC: https://wiki.php.net/rfc/marking_return_value_as_important
+  . DelayedTargetValidation is an attribute that, when added, delays any errors
+    from *other* internal attributes about being applied to invalid targets from
+    compile-time to runtime.
+    RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute
 
 - Curl:
   . CurlSharePersistentHandle representing a share handle that is persisted
