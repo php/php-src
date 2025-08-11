@@ -15,6 +15,7 @@
 #ifndef RANGEFORMATTER_CLASS_H
 #define RANGEFORMATTER_CLASS_H
 
+#if U_ICU_VERSION_MAJOR_NUM >= 63
 #include <unicode/numberrangeformatter.h>
 
 #ifdef __cplusplus
@@ -22,13 +23,18 @@ using icu::number::LocalizedNumberRangeFormatter;
 #else
 typedef void LocalizedNumberRangeFormatter;
 #endif
+#endif // U_ICU_VERSION_MAJOR_NUM >= 63
 
 typedef struct {
     // error handling
     intl_error      error;
 
     // formatter handling
+#if U_ICU_VERSION_MAJOR_NUM >= 63
     LocalizedNumberRangeFormatter*  unumrf;
+#else
+    void*  unumrf;
+#endif
 } rangeformatter_data;
 
 typedef struct {

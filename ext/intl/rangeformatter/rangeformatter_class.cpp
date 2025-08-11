@@ -12,16 +12,21 @@
    +----------------------------------------------------------------------+
 */
 
+extern "C" {
+    #include "php.h"
+    #include "zend_API.h"
+    #include "../intl_common.h"
+}
+
+#if U_ICU_VERSION_MAJOR_NUM >= 63
 #include <unicode/numberrangeformatter.h>
 #include <unicode/unumberrangeformatter.h>
 #include <unicode/numberformatter.h>
 #include <unicode/unistr.h>
 #include "../intl_convertcpp.h"
+#endif
 
 extern "C" {
-    #include "php.h"
-    #include "zend_API.h"
-    #include "../intl_common.h"
     #include "../intl_error.h"
     #include "../php_intl.h"
     #include "../intl_data.h"
@@ -30,12 +35,14 @@ extern "C" {
     #include "intl_convert.h"
 }
 
+#if U_ICU_VERSION_MAJOR_NUM >= 63
 using icu::number::NumberRangeFormatter;
 using icu::number::NumberFormatter;
 using icu::number::UnlocalizedNumberFormatter;
 using icu::number::LocalizedNumberRangeFormatter;
 using icu::UnicodeString;
 using icu::MeasureUnit;
+#endif
 
 static zend_object_handlers rangeformatter_handlers;
 zend_class_entry *class_entry_IntlNumberRangeFormatter;
@@ -68,8 +75,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
 #if U_ICU_VERSION_MAJOR_NUM < 63
     zend_throw_error(NULL, "IntlNumberRangeFormatter is not available in ICU 62 and earlier");
     RETURN_THROWS();
-#endif
-
+#else
     char* skeleton;
     char* locale;
     size_t locale_len;
@@ -133,10 +139,15 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     RANGEFORMATTER_OBJECT(php_intl_numberrangeformatter_fetch_object(obj)) = nrf;
 
     RETURN_OBJ(obj);
+#endif
 }
 
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
 {
+#if U_ICU_VERSION_MAJOR_NUM < 63
+    zend_throw_error(NULL, "IntlNumberRangeFormatter is not available in ICU 62 and earlier");
+    RETURN_THROWS();
+#else
     zval *start;
     zval *end;
 
@@ -169,6 +180,7 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     }
 
     RETVAL_NEW_STR(ret);
+#endif
 }
 
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, getErrorCode)
