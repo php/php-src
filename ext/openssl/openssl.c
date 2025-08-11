@@ -3997,6 +3997,30 @@ PHP_FUNCTION(openssl_error_string)
 }
 /* }}} */
 
+static zend_result php_openssl_setup_rsa_padding(EVP_PKEY_CTX *pctx, EVP_PKEY *pkey, zend_long padding)
+{
+	int key_type = EVP_PKEY_type(EVP_PKEY_id(pkey));
+
+	if (padding != 0) { // 0 = default/unspecified
+		if (key_type != EVP_PKEY_RSA) {
+			php_error_docref(NULL, E_WARNING, "Padding parameter is only supported for RSA keys");
+			return FAILURE;
+		}
+
+		if (padding == RSA_PKCS1_PSS_PADDING) {
+			if (EVP_PKEY_CTX_set_rsa_padding(pctx, RSA_PKCS1_PSS_PADDING) <= 0) {
+				php_openssl_store_errors();
+				return FAILURE;
+			}
+		} else if (padding != RSA_PKCS1_PADDING) {
+			php_error_docref(NULL, E_WARNING, "Unknown padding type");
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
 /* {{{ Signs data */
 PHP_FUNCTION(openssl_sign)
 {
@@ -4009,14 +4033,17 @@ PHP_FUNCTION(openssl_sign)
 	zend_string *method_str = NULL;
 	zend_long method_long = OPENSSL_ALGO_SHA1;
 	const EVP_MD *mdtype;
+	zend_long padding = 0;
+	EVP_PKEY_CTX *pctx;
 	bool can_default_digest = ZEND_THREEWAY_COMPARE(PHP_OPENSSL_API_VERSION, 0x30000) >= 0;
 
-	ZEND_PARSE_PARAMETERS_START(3, 4)
+	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_ZVAL(signature)
 		Z_PARAM_ZVAL(key)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG(method_str, method_long)
+		Z_PARAM_LONG(padding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	pkey = php_openssl_pkey_from_zval(key, 0, "", 0, 3);
@@ -4041,7 +4068,8 @@ PHP_FUNCTION(openssl_sign)
 	md_ctx = EVP_MD_CTX_create();
 	size_t siglen;
 	if (md_ctx != NULL &&
-			EVP_DigestSignInit(md_ctx, NULL, mdtype, NULL, pkey) &&
+			EVP_DigestSignInit(md_ctx, &pctx, mdtype, NULL, pkey) &&
+			php_openssl_setup_rsa_padding(pctx, pkey, padding) == SUCCESS &&
 			EVP_DigestSign(md_ctx, NULL, &siglen, (unsigned char*)data, data_len) &&
 			(sigbuf = zend_string_alloc(siglen, 0)) != NULL &&
 			EVP_DigestSign(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, (unsigned char*)data, data_len)) {
@@ -4074,14 +4102,17 @@ PHP_FUNCTION(openssl_verify)
 	size_t signature_len;
 	zend_string *method_str = NULL;
 	zend_long method_long = OPENSSL_ALGO_SHA1;
+	zend_long padding = 0;
+	EVP_PKEY_CTX *pctx;
 	bool can_default_digest = ZEND_THREEWAY_COMPARE(PHP_OPENSSL_API_VERSION, 0x30000) >= 0;
 
-	ZEND_PARSE_PARAMETERS_START(3, 4)
+	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_STRING(signature, signature_len)
 		Z_PARAM_ZVAL(key)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG(method_str, method_long)
+		Z_PARAM_LONG(padding)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(signature_len, signature, 2);
@@ -4106,11 +4137,25 @@ PHP_FUNCTION(openssl_verify)
 	}
 
 	md_ctx = EVP_MD_CTX_create();
-	if (md_ctx == NULL ||
-			!EVP_DigestVerifyInit(md_ctx, NULL, mdtype, NULL, pkey) ||
-			(err = EVP_DigestVerify(md_ctx, (unsigned char *)signature, signature_len, (unsigned char*)data, data_len)) < 0) {
+	if (md_ctx == NULL) {
+		php_openssl_store_errors();
+		err = -1;
+		goto cleanup;
+	}
+
+	if (!EVP_DigestVerifyInit(md_ctx, &pctx, mdtype, NULL, pkey) ||
+			php_openssl_setup_rsa_padding(pctx, pkey, padding) == FAILURE) {
+		php_openssl_store_errors();
+		err = -1;
+		goto cleanup;
+	}
+
+	err = EVP_DigestVerify(md_ctx, (unsigned char *)signature, signature_len, (unsigned char*)data, data_len);
+	if (err < 0) {
 		php_openssl_store_errors();
 	}
+
+cleanup:
 	EVP_MD_CTX_destroy(md_ctx);
 	php_openssl_release_evp_md(mdtype);
 	EVP_PKEY_free(pkey);

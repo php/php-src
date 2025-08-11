@@ -32,6 +32,8 @@ PHP                                                                        NEWS
     algorithms appears to be broken). (Jakub Zelenka)
   . The $key_length parameter for openssl_pkey_derive() has been deprecated.
     (Girgias)
+  . Implement #80495 (Enable to set padding in openssl_(sign|verify).
+    (Jakub Zelenka)
 
 - PDO:
   . The "uri:" DSN scheme has been deprecated due to security concerns with
