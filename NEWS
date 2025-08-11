@@ -36,6 +36,8 @@ PHP                                                                        NEWS
     (Girgias)
   . Implement #80495 (Enable to set padding in openssl_(sign|verify).
     (Jakub Zelenka)
+  . Implement #47728 (openssl_pkcs7_sign ignores new openssl flags).
+    (Jakub Zelenka)
 
 - PDO:
   . The "uri:" DSN scheme has been deprecated due to security concerns with
