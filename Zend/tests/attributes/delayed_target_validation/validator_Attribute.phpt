@@ -1,42 +1,29 @@
 --TEST--
-#[\DelayedTargetValidation] affects errors from validators
+#[\DelayedTargetValidation] with #[\Attribute]: validator errors delayed
 --FILE--
 <?php
 
 #[DelayedTargetValidation]
-#[AllowDynamicProperties]
+#[Attribute]
 trait DemoTrait {}
 
 #[DelayedTargetValidation]
-#[AllowDynamicProperties]
+#[Attribute]
 interface DemoInterface {}
 
 #[DelayedTargetValidation]
-#[AllowDynamicProperties]
-readonly class DemoReadonly {}
+#[Attribute]
+abstract class DemoAbstract {}
 
 #[DelayedTargetValidation]
-#[AllowDynamicProperties]
+#[Attribute]
 enum DemoEnum {}
-
-class DemoClass {
-	public string $hooked {
-		#[DelayedTargetValidation]
-		#[NoDiscard] // Does nothing here
-		get => $this->hooked;
-		#[DelayedTargetValidation]
-		#[NoDiscard] // Does nothing here
-		set => $value;
-	}
-}
 
 $cases = [
 	new ReflectionClass('DemoTrait'),
 	new ReflectionClass('DemoInterface'),
-	new ReflectionClass('DemoReadonly'),
+	new ReflectionClass('DemoAbstract'),
 	new ReflectionClass('DemoEnum'),
-	new ReflectionProperty('DemoClass', 'hooked')->getHook(PropertyHookType::Get),
-	new ReflectionProperty('DemoClass', 'hooked')->getHook(PropertyHookType::Set),
 ];
 foreach ($cases as $r) {
 	echo str_repeat("*", 20) . "\n";
@@ -81,10 +68,10 @@ array(2) {
   [1]=>
   object(ReflectionAttribute)#%d (1) {
     ["name"]=>
-    string(22) "AllowDynamicProperties"
+    string(9) "Attribute"
   }
 }
-Error: Cannot apply #[\AllowDynamicProperties] to trait DemoTrait
+Error: Cannot apply #[\Attribute] to trait DemoTrait
 ********************
 Interface [ <user> interface DemoInterface ] {
   @@ %s %d-%d
@@ -114,12 +101,12 @@ array(2) {
   [1]=>
   object(ReflectionAttribute)#%d (1) {
     ["name"]=>
-    string(22) "AllowDynamicProperties"
+    string(9) "Attribute"
   }
 }
-Error: Cannot apply #[\AllowDynamicProperties] to interface DemoInterface
+Error: Cannot apply #[\Attribute] to interface DemoInterface
 ********************
-Class [ <user> readonly class DemoReadonly ] {
+Class [ <user> abstract class DemoAbstract ] {
   @@ %s %d-%d
 
   - Constants [0] {
@@ -147,10 +134,10 @@ array(2) {
   [1]=>
   object(ReflectionAttribute)#%d (1) {
     ["name"]=>
-    string(22) "AllowDynamicProperties"
+    string(9) "Attribute"
   }
 }
-Error: Cannot apply #[\AllowDynamicProperties] to readonly class DemoReadonly
+Error: Cannot apply #[\Attribute] to abstract class DemoAbstract
 ********************
 Enum [ <user> enum DemoEnum implements UnitEnum ] {
   @@ %s %d-%d
@@ -187,52 +174,7 @@ array(2) {
   [1]=>
   object(ReflectionAttribute)#%d (1) {
     ["name"]=>
-    string(22) "AllowDynamicProperties"
+    string(9) "Attribute"
   }
 }
-Error: Cannot apply #[\AllowDynamicProperties] to enum DemoEnum
-********************
-Method [ <user> public method $hooked::get ] {
-  @@ %s %d - %d
-
-  - Parameters [0] {
-  }
-  - Return [ string ]
-}
-
-array(2) {
-  [0]=>
-  object(ReflectionAttribute)#%d (1) {
-    ["name"]=>
-    string(23) "DelayedTargetValidation"
-  }
-  [1]=>
-  object(ReflectionAttribute)#%d (1) {
-    ["name"]=>
-    string(9) "NoDiscard"
-  }
-}
-Error: #[\NoDiscard] is not supported for property hooks
-********************
-Method [ <user> public method $hooked::set ] {
-  @@ %s %d - %d
-
-  - Parameters [1] {
-    Parameter #0 [ <required> string $value ]
-  }
-  - Return [ void ]
-}
-
-array(2) {
-  [0]=>
-  object(ReflectionAttribute)#%d (1) {
-    ["name"]=>
-    string(23) "DelayedTargetValidation"
-  }
-  [1]=>
-  object(ReflectionAttribute)#%d (1) {
-    ["name"]=>
-    string(9) "NoDiscard"
-  }
-}
-Error: #[\NoDiscard] is not supported for property hooks
+Error: Cannot apply #[\Attribute] to enum DemoEnum
