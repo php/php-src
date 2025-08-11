@@ -579,10 +579,6 @@ PHP_MINFO_FUNCTION(odbc)
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ODBCG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "ODBC library", PHP_ODBC_TYPE);
-#ifdef ODBCVER
-	snprintf(buf, sizeof(buf), "0x%.4x", ODBCVER);
-	php_info_print_table_row(2, "ODBCVER", buf);
-#endif
 #ifndef PHP_WIN32
 	php_info_print_table_row(2, "ODBC_CFLAGS", PHP_ODBC_CFLAGS);
 	php_info_print_table_row(2, "ODBC_LFLAGS", PHP_ODBC_LFLAGS);
@@ -695,9 +691,7 @@ void odbc_bindcols(odbc_result *result)
 			case SQL_VARBINARY:
 			case SQL_LONGVARBINARY:
 			case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
-#endif
 				result->values[i].value = NULL;
 				break;
 
@@ -710,13 +704,9 @@ void odbc_bindcols(odbc_result *result)
 #endif /* HAVE_ADABAS */
 			case SQL_CHAR:
 			case SQL_VARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WCHAR:
 			case SQL_WVARCHAR:
 				colfieldid = SQL_DESC_OCTET_LENGTH;
-#else
-				char_extra_alloc = true;
-#endif
 				/* TODO: Check this is the intended behaviour */
 				ZEND_FALLTHROUGH;
 			default:
@@ -725,7 +715,6 @@ void odbc_bindcols(odbc_result *result)
 				if (rc != SQL_SUCCESS) {
 					displaysize = 0;
 				}
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO && colfieldid == SQL_DESC_OCTET_LENGTH) {
 					SQLINTEGER err;
 					SQLCHAR errtxt[128];
@@ -755,7 +744,6 @@ void odbc_bindcols(odbc_result *result)
 					result->values[i].value = NULL;
 					break;
 				}
-#endif
 				/* Workaround for drivers that report VARCHAR(MAX) columns as SQL_VARCHAR (bug #73725) */
 				if (SQL_VARCHAR == result->values[i].coltype && displaysize == 0) {
 					result->values[i].coltype = SQL_LONGVARCHAR;
@@ -1444,9 +1432,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				}
 				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
-#endif
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					ZVAL_EMPTY_STRING(&tmp);
 					break;
@@ -1614,9 +1600,7 @@ PHP_FUNCTION(odbc_fetch_into)
 				/* TODO: Check this is the intended behaviour */
 				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
-#endif
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					ZVAL_EMPTY_STRING(&tmp);
 					break;
@@ -1838,9 +1822,7 @@ PHP_FUNCTION(odbc_result)
 			ZEND_FALLTHROUGH;
 
 		case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 		case SQL_WLONGVARCHAR:
-#endif
 			if (IS_SQL_LONG(result->values[field_ind].coltype)) {
 				if (result->longreadlen <= 0) {
 				   break;
@@ -1884,10 +1866,7 @@ PHP_FUNCTION(odbc_result)
 			/* Reduce fieldlen by 1 if we have char data. One day we might
 			   have binary strings... */
 			if ((result->values[field_ind].coltype == SQL_LONGVARCHAR)
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
-			    || (result->values[field_ind].coltype == SQL_WLONGVARCHAR)
-#endif
-			) {
+			    || (result->values[field_ind].coltype == SQL_WLONGVARCHAR)) {
 				fieldsize -= 1;
 			}
 			/* Don't duplicate result, saves one emalloc.
@@ -2023,9 +2002,7 @@ PHP_FUNCTION(odbc_result_all)
 					/* TODO: Check this is the intended behaviour */
 					ZEND_FALLTHROUGH;
 				case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 				case SQL_WLONGVARCHAR:
-#endif
 					if (IS_SQL_LONG(result->values[i].coltype) &&
 						result->longreadlen <= 0) {
 						php_printf("<td>Not printable</td>");

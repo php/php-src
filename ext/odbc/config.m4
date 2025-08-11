@@ -106,13 +106,6 @@ dnl
 dnl configure options
 dnl
 
-PHP_ARG_WITH([odbcver],,
-  [AS_HELP_STRING([[--with-odbcver[=HEX]]],
-    [Force support for the passed ODBC version. A hex number is expected,
-    default 0x0350. Use the special value of 0 to prevent an explicit ODBCVER to
-    be defined.])],
-  [0x0350])
-
 AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([adabas],
   [for Adabas support],
@@ -409,12 +402,6 @@ PHP_ARG_WITH([dbmaker],
     ])
   ])
 ])
-
-AH_TEMPLATE([ODBCVER], [The highest supported ODBC version.])
-AS_VAR_IF([PHP_ODBCVER], [no],
-  [AC_DEFINE([ODBCVER], [0x0350])],
-  [AS_VAR_IF([PHP_ODBCVER], [0],,
-    [AC_DEFINE_UNQUOTED([ODBCVER], [$PHP_ODBCVER])])])
 
 dnl Extension setup
 if test -n "$ODBC_TYPE"; then
