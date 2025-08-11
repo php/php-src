@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 03e511abb97901a4a8268276b809b3cf7afbfa29 */
+ * Stub hash: 0e6a5f1a5f23602bafd5b7fdb10525c19a9476fc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -219,7 +219,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_encrypt, 0, 4, _IS_B
 	ZEND_ARG_TYPE_INFO(0, headers, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_LONG, 0, "OPENSSL_ENCODING_SMIME")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cipher_algo, IS_LONG, 0, "OPENSSL_CIPHER_AES_128_CBC")
+	ZEND_ARG_TYPE_MASK(0, cipher_algo, MAY_BE_STRING|MAY_BE_LONG, "OPENSSL_CIPHER_AES_128_CBC")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_sign, 0, 5, _IS_BOOL, 0)
