@@ -6509,11 +6509,22 @@ ZEND_METHOD(ReflectionProperty, getDefaultValue)
 	prop_info = ref->prop;
 
 	if (prop_info == NULL) {
-		return; // throw exception?
+		// Dynamic property
+		zend_error(
+			E_DEPRECATED,
+			"ReflectionProperty::getDefaultValue() for a property without a default value is deprecated, "
+				"use ReflectionProperty::hasDefaultValue() to check if the default value exists"
+		);
+		return;
 	}
 
 	prop = property_get_default(prop_info);
 	if (!prop || Z_ISUNDEF_P(prop)) {
+		zend_error(
+			E_DEPRECATED,
+			"ReflectionProperty::getDefaultValue() for a property without a default value is deprecated, "
+				"use ReflectionProperty::hasDefaultValue() to check if the default value exists"
+		);
 		return;
 	}
 
