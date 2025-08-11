@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19280 (Stale array iterator position on rehashing). (ilutov)
   . Fixed bug GH-18736 (Circumvented type check with return by ref + finally).
     (ilutov)
+  . Fixed bug GH-19065 (Long match statement can segfault compiler during
+    recursive SSA renaming). (nielsdos, Arnaud)
 
 - Calendar:
   . Fixed bug GH-19371 (integer overflow in calendar.c). (nielsdos)
