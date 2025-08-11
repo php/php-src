@@ -727,9 +727,9 @@ PHP 8.5 UPGRADE NOTES
     showing misleading values in PHPInfo.
 
 - OpenSSL:
-  Added openssl.libctx to select the OpenSSL library context type. Either
-  custom libctx for each thread can be used or a single global (default)
-  libctx is used.
+  . Added openssl.libctx to select the OpenSSL library context type. Either
+    custom libctx for each thread can be used or a single global (default)
+    libctx is used.
 
 ========================================
 12. Windows Support
