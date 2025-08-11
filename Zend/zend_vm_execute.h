@@ -321,14 +321,14 @@ static uint8_t zend_user_opcodes[256] = {0,
 #define SPEC_RULE_OBSERVER     0x02000000
 
 static const uint32_t *zend_spec_handlers;
-static const void * const *zend_opcode_handlers;
+static zend_vm_opcode_handler_t const *zend_opcode_handlers;
 static int zend_handlers_count;
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
-static const void * const * zend_opcode_handler_funcs;
+static zend_vm_opcode_handler_func_t const * zend_opcode_handler_funcs;
 static zend_op hybrid_halt_op;
 #endif
 #if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC
-static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op);
+static zend_vm_opcode_handler_t zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op);
 #endif
 
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
@@ -2518,6 +2518,11 @@ send_again:
 						}
 
 						name = Z_STR_P(&key);
+
+						zend_ulong tmp;
+						if (ZEND_HANDLE_NUMERIC(name, tmp)) {
+							name = NULL;
+						}
 					}
 				}
 
@@ -2814,17 +2819,22 @@ add_unpack_again:
 		zval *val;
 
 		if (HT_IS_PACKED(ht) && (zend_hash_num_elements(result_ht) == 0 || HT_IS_PACKED(result_ht))) {
-			zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
-			ZEND_HASH_FILL_PACKED(result_ht) {
-				ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
-					if (UNEXPECTED(Z_ISREF_P(val)) &&
-						UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
-						val = Z_REFVAL_P(val);
-					}
-					Z_TRY_ADDREF_P(val);
-					ZEND_HASH_FILL_ADD(val);
-				} ZEND_HASH_FOREACH_END();
-			} ZEND_HASH_FILL_END();
+			/* zend_hash_extend() skips initialization when the number of elements is 0,
+			 * but the code below expects that result_ht is initialized as packed.
+			 * We can just skip the work in that case. */
+			if (result_ht->nNumUsed + zend_hash_num_elements(ht) > 0) {
+				zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
+				ZEND_HASH_FILL_PACKED(result_ht) {
+					ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
+						if (UNEXPECTED(Z_ISREF_P(val)) &&
+							UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
+							val = Z_REFVAL_P(val);
+						}
+						Z_TRY_ADDREF_P(val);
+						ZEND_HASH_FILL_ADD(val);
+					} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FILL_END();
+			}
 		} else {
 			zend_string *key;
 
@@ -3207,7 +3217,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_CLASS_SPEC_HANDLE
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			SAVE_OPLINE();
 			ce = zend_do_link_class(ce, (opline->op2_type == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL, rtd_key);
-			if (!ce) {
+			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -5180,7 +5190,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_
 	SAVE_OPLINE();
 	obj = RT_CONSTANT(opline, opline->op1);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_CONST == IS_CONST ||
@@ -5217,14 +5228,12 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_
 
 	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = EX(func)->op_array.scope;
-		if (clone->common.scope != scope) {
-			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_bad_method_call(clone, clone->common.function_name, scope);
+		ZEND_ASSERT(!(clone->common.fn_flags & ZEND_ACC_PUBLIC));
+		if (!zend_check_method_accessible(clone, scope)) {
+			zend_bad_method_call(clone, clone->common.function_name, scope);
 
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -8010,7 +8019,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_DELAYED_SPEC_CON
 		if (zv) {
 			SAVE_OPLINE();
 			ce = zend_bind_class_in_slot(zv, lcname, Z_STR_P(RT_CONSTANT(opline, opline->op2)));
-			if (!ce) {
+			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -15429,7 +15438,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 	SAVE_OPLINE();
 	obj = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
@@ -15466,14 +15476,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 
 	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = EX(func)->op_array.scope;
-		if (clone->common.scope != scope) {
-			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_bad_method_call(clone, clone->common.function_name, scope);
-				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
+		ZEND_ASSERT(!(clone->common.fn_flags & ZEND_ACC_PUBLIC));
+		if (!zend_check_method_accessible(clone, scope)) {
+			zend_bad_method_call(clone, clone->common.function_name, scope);
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -33526,7 +33534,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 	SAVE_OPLINE();
 	obj = &EX(This);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_UNUSED == IS_CONST ||
@@ -33563,14 +33572,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 
 	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = EX(func)->op_array.scope;
-		if (clone->common.scope != scope) {
-			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_bad_method_call(clone, clone->common.function_name, scope);
+		ZEND_ASSERT(!(clone->common.fn_flags & ZEND_ACC_PUBLIC));
+		if (!zend_check_method_accessible(clone, scope)) {
+			zend_bad_method_call(clone, clone->common.function_name, scope);
 
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -41047,7 +41054,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 	SAVE_OPLINE();
 	obj = EX_VAR(opline->op1.var);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (IS_CV == IS_CONST ||
@@ -41084,14 +41092,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 
 	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = EX(func)->op_array.scope;
-		if (clone->common.scope != scope) {
-			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_bad_method_call(clone, clone->common.function_name, scope);
+		ZEND_ASSERT(!(clone->common.fn_flags & ZEND_ACC_PUBLIC));
+		if (!zend_check_method_accessible(clone, scope)) {
+			zend_bad_method_call(clone, clone->common.function_name, scope);
 
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -55131,7 +55137,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDL
 # pragma GCC optimize("no-gcse")
 # pragma GCC optimize("no-ivopts")
 #endif
-#ifdef _WIN64
+#if defined(_WIN64) && defined(_M_X64)
 /* See save_xmm_x86_64_ms_masm.asm */
 void execute_ex_real(zend_execute_data *ex)
 #else
@@ -58665,8 +58671,8 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_FE_FETCH_R_SIMPLE_SPEC_VAR_CV_RETVAL_USED_LABEL,
 			(void*)&&ZEND_NULL_LABEL
 		};
-		zend_opcode_handlers = (const void **) labels;
-		zend_handlers_count = sizeof(labels) / sizeof(void*);
+		zend_opcode_handlers = (zend_vm_opcode_handler_t*) labels;
+		zend_handlers_count = sizeof(labels) / sizeof(labels[0]);
 		memset(&hybrid_halt_op, 0, sizeof(hybrid_halt_op));
 		hybrid_halt_op.handler = (void*)&&HYBRID_HALT_LABEL;
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
@@ -64397,7 +64403,11 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 
 void zend_vm_init(void)
 {
-	static const void * const labels[] = {
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	static zend_vm_opcode_handler_func_t const labels[] = {
+#else
+	static zend_vm_opcode_handler_t const labels[] = {
+#endif
 		ZEND_NOP_SPEC_HANDLER,
 		ZEND_ADD_SPEC_CONST_CONST_HANDLER,
 		ZEND_ADD_SPEC_CONST_TMPVARCV_HANDLER,
@@ -68157,7 +68167,7 @@ void zend_vm_init(void)
 	execute_ex(NULL);
 #else
 	zend_opcode_handlers = labels;
-	zend_handlers_count = sizeof(labels) / sizeof(void*);
+	zend_handlers_count = sizeof(labels) / sizeof(labels[0]);
 	zend_spec_handlers = specs;
 #endif
 	VM_TRACE_START();
@@ -68199,7 +68209,7 @@ ZEND_API void ZEND_FASTCALL zend_serialize_opcode_handler(zend_op *op)
 	}
 	zv = zend_hash_index_find(zend_handlers_table, (zend_long)(uintptr_t)op->handler);
 	ZEND_ASSERT(zv != NULL);
-	op->handler = (const void *)(uintptr_t)Z_LVAL_P(zv);
+	op->handler = (zend_vm_opcode_handler_t)(uintptr_t)Z_LVAL_P(zv);
 }
 
 ZEND_API void ZEND_FASTCALL zend_deserialize_opcode_handler(zend_op *op)
@@ -68285,7 +68295,7 @@ static uint32_t ZEND_FASTCALL zend_vm_get_opcode_handler_idx(uint32_t spec, cons
 }
 
 #if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC
-static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)
+static zend_vm_opcode_handler_t zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)
 {
 	return zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];
 }

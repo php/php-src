@@ -57,7 +57,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["password"]=>
   NULL
   ["host"]=>
-  NULL
+  string(0) ""
   ["port"]=>
   NULL
   ["path"]=>
@@ -75,7 +75,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["password"]=>
   NULL
   ["host"]=>
-  NULL
+  string(0) ""
   ["port"]=>
   NULL
   ["path"]=>

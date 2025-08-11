@@ -190,7 +190,7 @@ X509_STORE * php_openssl_setup_verify(zval * calist, uint32_t arg_num);
 STACK_OF(X509) * php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
 EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req);
-zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t key_size);
+zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t requested_key_size);
 
 #define PHP_SSL_REQ_INIT(req)		memset(req, 0, sizeof(*req))
 #define PHP_SSL_REQ_DISPOSE(req)	php_openssl_dispose_config(req)
@@ -237,10 +237,8 @@ void php_openssl_backend_init_common(void);
 void php_openssl_backend_gshutdown(void);
 void php_openssl_backend_shutdown(void);
 
-#if PHP_OPENSSL_API_VERSION >= 0x30000
-void php_openssl_backend_init_libctx(OSSL_LIB_CTX **plibctx, char **ppropq);
-void php_openssl_backend_destroy_libctx(OSSL_LIB_CTX *libctx, char *propq);
-#endif
+void php_openssl_backend_init_libctx(struct php_openssl_libctx *ctx);
+void php_openssl_backend_destroy_libctx(struct php_openssl_libctx *ctx);
 
 const char *php_openssl_get_conf_filename(void);
 
@@ -367,5 +365,7 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		const char *aad, size_t aad_len, int enc);
 
 const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method);
+
+CONF *php_openssl_nconf_new(void);
 
 #endif

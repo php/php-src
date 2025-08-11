@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 93677b78d9aaa4d6dbb5d1dcf3e79a8418add5c0 */
+ * Stub hash: 792c695a705678a3779d62cef8a5136069f98dee */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shm_attach, 0, 1, SysvSharedMemory, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -7,7 +7,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shm_attach, 0, 1, SysvShared
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, permissions, IS_LONG, 0, "0666")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_detach, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_detach, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, shm, SysvSharedMemory, 0)
 ZEND_END_ARG_INFO()
 
@@ -16,7 +16,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_has_var, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_shm_remove arginfo_shm_detach
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_remove, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, shm, SysvSharedMemory, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_put_var, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, shm, SysvSharedMemory, 0)

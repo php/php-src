@@ -21,7 +21,6 @@
 #include "Zend/zend_exceptions.h"
 
 static void uriparser_free_uri(void *uri);
-static void throw_invalid_uri_exception(void);
 
 static void *uriparser_malloc(UriMemoryManager *memory_manager, size_t size)
 {
@@ -174,7 +173,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_host(const uri_internal
 	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
-	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL && get_text_range_length(&uriparser_uri->hostText) > 0) {
+	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL) {
 		if (uriparser_uri->hostData.ip6 != NULL || uriparser_uri->hostData.ipFuture.first != NULL) {
 			/* the textual representation of the host is always accessible in the .hostText field no matter what the host is */
 			smart_str host_str = {0};
@@ -293,51 +292,59 @@ static uriparser_uris_t *uriparser_create_uris(void)
 	return uriparser_uris;
 }
 
-static void throw_invalid_uri_exception(void)
-{
-	zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
-}
-
-#define PARSE_URI(dest_uri, uri_str, uriparser_uris, silent) \
-	do { \
-		if (ZSTR_LEN(uri_str) == 0 || \
-			uriParseSingleUriExMmA(dest_uri, ZSTR_VAL(uri_str), ZSTR_VAL(uri_str) + ZSTR_LEN(uri_str), NULL, mm) != URI_SUCCESS \
-		) { \
-			efree(uriparser_uris); \
-			if (!silent) { \
-				throw_invalid_uri_exception(); \
-			} \
-			return NULL; \
-		} \
-	} while (0)
-
 void *uriparser_parse_uri_ex(const zend_string *uri_str, const uriparser_uris_t *uriparser_base_urls, bool silent)
 {
-	uriparser_uris_t *uriparser_uris = uriparser_create_uris();
+	UriUriA uri = {0};
 
-	if (uriparser_base_urls == NULL) {
-		PARSE_URI(&uriparser_uris->uri, uri_str, uriparser_uris, silent);
-		uriMakeOwnerMmA(&uriparser_uris->uri, mm);
-	} else {
-		UriUriA uri;
-
-		PARSE_URI(&uri, uri_str, uriparser_uris, silent);
-
-		if (uriAddBaseUriExMmA(&uriparser_uris->uri, &uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm) != URI_SUCCESS) {
-			efree(uriparser_uris);
-			uriFreeUriMembersMmA(&uri, mm);
-			if (!silent) {
-				throw_invalid_uri_exception();
-			}
-
-			return NULL;
+	/* Parse the URI. */
+	if (uriParseSingleUriExMmA(&uri, ZSTR_VAL(uri_str), ZSTR_VAL(uri_str) + ZSTR_LEN(uri_str), NULL, mm) != URI_SUCCESS) {
+		if (!silent) {
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
 		}
 
-		uriMakeOwnerMmA(&uriparser_uris->uri, mm);
-		uriFreeUriMembersMmA(&uri, mm);
+		goto fail;
 	}
 
+	if (uriparser_base_urls != NULL) {
+		UriUriA tmp = {0};
+
+		/* Combine the parsed URI with the base URI and store the result in 'tmp',
+		 * since the target and source URLs must be distinct. */
+		int result = uriAddBaseUriExMmA(&tmp, &uri, &uriparser_base_urls->uri, URI_RESOLVE_STRICTLY, mm);
+		if (result != URI_SUCCESS) {
+			if (!silent) {
+				switch (result) {
+					case URI_ERROR_ADDBASE_REL_BASE:
+						zend_throw_exception(uri_invalid_uri_exception_ce, "The specified base URI must be absolute", 0);
+						break;
+					default:
+						/* This should be unreachable in practice. */
+						zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to resolve the specified URI against the base URI", 0);
+						break;
+				}
+			}
+
+			goto fail;
+		}
+
+		/* Store the combined URI back into 'uri'. */
+		uriFreeUriMembersMmA(&uri, mm);
+		uri = tmp;
+	}
+
+	/* Make the resulting URI independent of the 'uri_str'. */
+	uriMakeOwnerMmA(&uri, mm);
+
+	uriparser_uris_t *uriparser_uris = uriparser_create_uris();
+	uriparser_uris->uri = uri;
+
 	return uriparser_uris;
+
+ fail:
+
+	uriFreeUriMembersMmA(&uri, mm);
+
+	return NULL;
 }
 
 void *uriparser_parse_uri(const zend_string *uri_str, const void *base_url, zval *errors, bool silent)

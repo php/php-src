@@ -436,6 +436,7 @@ max_input_time = 60
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
 memory_limit = 128M
+max_memory_limit = -1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
@@ -619,6 +620,12 @@ report_memleaks = On
 ; Default value: 0
 ; Development value: 0
 ; Production value: 0
+
+; This directive controls whether PHP will output the backtrace of fatal errors.
+; Default Value: On
+; Development Value: On
+; Production Value: On
+;fatal_error_backtraces = On
 
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
@@ -959,8 +966,6 @@ default_socket_timeout = 60
 ;extension=xsl
 ;extension=zip
 
-;zend_extension=opcache
-
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
 ;;;;;;;;;;;;;;;;;;;
@@ -1016,8 +1021,12 @@ cli_server.color = On
 ; This directive allows you to produce PHP errors when some error
 ; happens within intl functions. The value is the level of the error produced.
 ; Default is 0, which does not produce any errors.
+; This directive is deprecated.
 ;intl.error_level = E_WARNING
-;intl.use_exceptions = 0
+; If enabled this directive indicates that when an error occurs within an
+; intl function a IntlException should be thrown.
+; Default is Off, which means errors need to be handled manually.
+;intl.use_exceptions = On
 
 [sqlite3]
 ; Directory pointing to SQLite3 extensions
@@ -1856,6 +1865,14 @@ ldap.max_links = -1
 ; this value may still be overridden on a per-stream basis via the "capath"
 ; SSL stream context option.
 ;openssl.capath=
+
+; The libctx is an OpenSSL library context. OpenSSL defines a default library
+; context, but PHP OpenSSL also defines its own library context to avoid
+; interference with other libraries using OpenSSL and to provide an independent
+; context for each thread in ZTS. Possible values:
+;  "custom"  - use a custom library context (default)
+;  "default" - use the default OpenSSL library context
+;openssl.libctx=custom
 
 [ffi]
 ; FFI API restriction. Possible values:

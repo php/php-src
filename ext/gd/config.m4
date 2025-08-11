@@ -65,6 +65,7 @@ AC_DEFUN([PHP_GD_PNG],[
   PHP_EVAL_LIBLINE([$PNG_LIBS], [GD_SHARED_LIBADD])
   PHP_EVAL_INCLINE([$PNG_CFLAGS])
   AC_DEFINE([HAVE_LIBPNG], [1], [Define to 1 if you have the libpng library.])
+  AC_DEFINE([HAVE_GD_PNG], [1], [Define to 1 if gd extension has PNG support.])
 ])
 
 AC_DEFUN([PHP_GD_AVIF], [
@@ -162,17 +163,22 @@ AC_CACHE_CHECK([for working gdImageCreateFrom$1 in libgd], [php_var],
 
 /* A custom gdErrorMethod */
 void exit1(int priority, const char *format, va_list args) {
+  (void)priority;
+  (void)format;
+  (void)args;
   _exit(1);
 }
 
 /* Override the default gd_error_method with one that
    actually causes the program to return an error. */
-int main(int argc, char** argv) {
+int main(void)
+{
   m4_if([$1],[Xpm],
   [char* f = "test.xpm"],
   [FILE* f = NULL]);
   gdSetErrorMethod(exit1);
   gdImagePtr p = gdImageCreateFrom$1(f);
+  (void)p;
   return 0;
 }])],
   [AS_VAR_SET([php_var], [yes])],
@@ -191,8 +197,6 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_GD_CHECK_FORMAT([Webp], [AC_DEFINE([HAVE_GD_WEBP], [1])])
   PHP_GD_CHECK_FORMAT([Jpeg], [AC_DEFINE([HAVE_GD_JPG], [1])])
   PHP_GD_CHECK_FORMAT([Xpm],  [AC_DEFINE([HAVE_GD_XPM], [1])])
-  PHP_GD_CHECK_FORMAT([Bmp],  [AC_DEFINE([HAVE_GD_BMP], [1])])
-  PHP_GD_CHECK_FORMAT([Tga],  [AC_DEFINE([HAVE_GD_TGA], [1])])
   PHP_CHECK_LIBRARY([gd], [gdFontCacheShutdown],
     [AC_DEFINE([HAVE_GD_FREETYPE], [1])],
     [],
@@ -258,15 +262,8 @@ if test "$PHP_GD" != "no"; then
       libgd/wbmp.c
     "])
 
-dnl These are always available with bundled library
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
       [Define to 1 if gd extension uses GD library bundled in PHP.])
-    AC_DEFINE([HAVE_GD_PNG], [1],
-      [Define to 1 if gd extension has PNG support.])
-    AC_DEFINE([HAVE_GD_BMP], [1],
-      [Define to 1 if gd extension has BMP support.])
-    AC_DEFINE([HAVE_GD_TGA], [1],
-      [Define to 1 if gd extension has TGA support.])
 
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])

@@ -648,12 +648,17 @@ const IMAGETYPE_WEBP = UNKNOWN;
 const IMAGETYPE_AVIF = UNKNOWN;
 /**
  * @var int
+ * @cvalue IMAGE_FILETYPE_HEIF
+ */
+const IMAGETYPE_HEIF = UNKNOWN;
+/**
+ * @var int
  * @cvalue IMAGE_FILETYPE_UNKNOWN
  */
 const IMAGETYPE_UNKNOWN = UNKNOWN;
 /**
  * @var int
- * @cvalue IMAGE_FILETYPE_COUNT
+ * @cvalue IMAGE_FILETYPE_FIXED_COUNT
  */
 const IMAGETYPE_COUNT = UNKNOWN;
 
@@ -2555,8 +2560,8 @@ function nl2br(string $string, bool $use_xhtml = true): string {}
 function strip_tags(string $string, array|string|null $allowed_tags = null): string {}
 
 /**
- * @param array|string $locales
- * @param string $rest
+ * @param array|string|null $locales
+ * @param string|null $rest
  */
 function setlocale(int $category, $locales, ...$rest): string|false {}
 
@@ -3582,6 +3587,7 @@ function stream_set_timeout($stream, int $seconds, int $microseconds = 0): bool 
  * @param resource $stream
  * @alias stream_set_timeout
  */
+#[\Deprecated(since: '8.5', message: "use stream_set_timeout() instead")]
 function socket_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
 #endif
 

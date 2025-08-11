@@ -6253,7 +6253,6 @@ PHP_FUNCTION(pg_select)
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 
-	/* TODO Document result_type param on php.net (apparently it was added in PHP 7.1) */
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 		Z_PARAM_PATH_STR(table)
@@ -6389,7 +6388,7 @@ PHP_FUNCTION(pg_socket_poll)
 		Z_PARAM_LONG(ts)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void **)&socket, 0)) {
+	if (UNEXPECTED(php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void **)&socket, 0) == FAILURE)) {
 		zend_argument_type_error(1, "invalid resource socket");
 		RETURN_THROWS();
 	}

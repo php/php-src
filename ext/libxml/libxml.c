@@ -43,6 +43,7 @@
 #endif
 
 #include "php_libxml.h"
+#include "image_svg.h"
 
 #define PHP_LIBXML_LOADED_VERSION ((char *)xmlParserVersion)
 
@@ -84,8 +85,14 @@ static zend_long php_libxml_default_dump_doc_to_file(const char *filename, xmlDo
 
 /* }}} */
 
+static const zend_module_dep libxml_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	ZEND_MOD_END
+};
+
 zend_module_entry libxml_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	libxml_deps,
 	"libxml",                /* extension name */
 	ext_functions,           /* extension function list */
 	PHP_MINIT(libxml),       /* extension-wide startup function */
@@ -335,7 +342,26 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 					if (ptr->_private) {
 						const php_libxml_node_object *obj = ptr->_private;
 						if (!obj->document || obj->document->class_type < PHP_LIBXML_CLASS_MODERN) {
-							xmlReconciliateNs(curnode->doc, curnode);
+							if (LIBXML_VERSION < 21300 && UNEXPECTED(curnode->doc == NULL)) {
+								/* xmlReconciliateNs() in these versions just uses the document for xmlNewReconciledNs(),
+								 * which can create an oldNs xml namespace declaration via xmlSearchNs() -> xmlTreeEnsureXMLDecl(). */
+								xmlDoc dummy;
+								memset(&dummy, 0, sizeof(dummy));
+								dummy.type = XML_DOCUMENT_NODE;
+								curnode->doc = &dummy;
+								xmlReconciliateNs(curnode->doc, curnode);
+								curnode->doc = NULL;
+
+								/* Append oldNs to current node's nsDef, which can be at most one node. */
+								if (dummy.oldNs) {
+									ZEND_ASSERT(dummy.oldNs->next == NULL);
+									xmlNsPtr old = curnode->nsDef;
+									curnode->nsDef = dummy.oldNs;
+									dummy.oldNs->next = old;
+								}
+							} else {
+								xmlReconciliateNs(curnode->doc, curnode);
+							}
 						}
 					}
 				}
@@ -969,6 +995,8 @@ static PHP_MINIT_FUNCTION(libxml)
 		xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
 	}
 
+	php_libxml_register_image_svg_handler();
+
 	return SUCCESS;
 }
 
@@ -1010,7 +1038,7 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 	}
 	php_libxml_shutdown();
 
-	return SUCCESS;
+	return php_libxml_unregister_image_svg_handler();
 }
 
 static zend_result php_libxml_post_deactivate(void)

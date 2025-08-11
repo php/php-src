@@ -65,7 +65,7 @@ lexbor_in_node_make(lexbor_in_t *incoming, lexbor_in_node_t *last_node,
 
     node->opt = LEXBOR_IN_OPT_UNDEF;
     node->begin = buf;
-    node->end = buf + buf_size;
+    node->end = buf ? (buf + buf_size) : NULL;
     node->use = buf;
 
     if (last_node != NULL) {

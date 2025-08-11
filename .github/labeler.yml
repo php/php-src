@@ -469,7 +469,6 @@
       - 'ext/pdo/php_pdo.h'
       - 'ext/pdo/php_pdo_driver.h'
       - 'ext/pdo/php_pdo_error.h'
-      - 'ext/phar/php_phar.h'
       - 'ext/random/php_random.h'
       - 'ext/random/php_random_csprng.h'
       - 'ext/random/php_random_uint128.h'

@@ -18,7 +18,7 @@ $socket = stream_socket_accept($server);
 var_dump(stream_get_meta_data($client));
 
 echo "\n\nSet a timeout on the client and attempt a read:\n";
-socket_set_timeout($client, 0, 1000);
+stream_set_timeout($client, 0, 1000);
 fread($client, 1);
 var_dump(stream_get_meta_data($client));
 

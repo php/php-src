@@ -1327,7 +1327,6 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 
 	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
 	if (ce) {
-		ZEND_ASSERT(!EG(exception));
 		zend_observer_class_linked_notify(ce, Z_STR_P(lcname));
 		return ce;
 	}
@@ -1394,7 +1393,6 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 	 * null byte here, to avoid larger parts of the type being omitted by printing code later. */
 	size_t len = strlen(ZSTR_VAL(name));
 	if (len != ZSTR_LEN(name)) {
-		ZEND_ASSERT(scope && "This should only happen with resolved types");
 		return zend_string_init(ZSTR_VAL(name), len, 0);
 	}
 	return zend_string_copy(name);
@@ -5701,7 +5699,19 @@ static void zend_compile_return(zend_ast *ast) /* {{{ */
 			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
 	}
 
+	uint32_t opnum_before_finally = get_next_op_number();
+
 	zend_handle_loops_and_finally((expr_node.op_type & (IS_TMP_VAR | IS_VAR)) ? &expr_node : NULL);
+
+	/* Content of reference might have changed in finally, repeat type check. */
+	if (by_ref
+	 /* Check if any opcodes were emitted since the last return type check. */
+	 && opnum_before_finally != get_next_op_number()
+	 && !is_generator
+	 && (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+		zend_emit_return_type_check(
+			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
+	}
 
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
@@ -6303,6 +6313,11 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 			continue;
 		}
 
+		if (case_ast->attr == ZEND_ALT_CASE_SYNTAX) {
+			CG(zend_lineno) = case_ast->lineno;
+			zend_error(E_DEPRECATED, "Case statements followed by a semicolon (;) are deprecated, use a colon (:) instead");
+		}
+
 		zend_compile_expr(&cond_node, cond_ast);
 
 		if (expr_node.op_type == IS_CONST
@@ -6426,6 +6441,20 @@ static bool can_match_use_jumptable(zend_ast_list *arms) {
 	return 1;
 }
 
+static bool zend_is_pipe_optimizable_callable_name(zend_ast *ast)
+{
+	if (ast->kind == ZEND_AST_ZVAL && Z_TYPE_P(zend_ast_get_zval(ast)) == IS_STRING) {
+		/* Assert compilation adds a message operand, but this is incompatible with the
+		 * pipe optimization that uses a temporary znode for the reference elimination.
+		 * Therefore, disable the optimization for assert.
+		 * Note that "assert" as a name is always treated as fully qualified. */
+		zend_string *str = zend_ast_get_str(ast);
+		return !zend_string_equals_literal_ci(str, "assert");
+	}
+
+	return true;
+}
+
 static void zend_compile_pipe(znode *result, zend_ast *ast)
 {
 	zend_ast *operand_ast = ast->child[0];
@@ -6453,7 +6482,8 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 
 	/* Turn $foo |> bar(...) into bar($foo). */
 	if (callable_ast->kind == ZEND_AST_CALL
-		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT) {
+		&& callable_ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT
+		&& zend_is_pipe_optimizable_callable_name(callable_ast->child[0])) {
 		fcall_ast = zend_ast_create(ZEND_AST_CALL,
 				callable_ast->child[0], arg_list_ast);
 	/* Turn $foo |> bar::baz(...) into bar::baz($foo). */
@@ -7683,6 +7713,8 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY | ZEND_ACC_FINAL);
 		bool is_promoted = property_flags || hooks_ast;
 
+		CG(zend_lineno) = param_ast->lineno;
+
 		znode var_node, default_node;
 		uint8_t opcode;
 		zend_op *opline;
@@ -7908,6 +7940,8 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		if (!is_promoted) {
 			continue;
 		}
+
+		CG(zend_lineno) = param_ast->lineno;
 
 		/* Emit $this->prop = $prop for promoted properties. */
 		zend_string *name = zend_ast_get_str(param_ast->child[1]);

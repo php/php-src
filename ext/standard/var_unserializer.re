@@ -1312,10 +1312,12 @@ object ":" uiv ":" ["]	{
 	YYCURSOR = *p;
 
 	if (*(YYCURSOR) != ':') {
+		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
 	if (*(YYCURSOR+1) != '{') {
 		*p = YYCURSOR+1;
+		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
 

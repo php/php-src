@@ -57,7 +57,7 @@ PHP_FUNCTION(grapheme_strlen)
 		intl_error_set_code( NULL, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16");
 		if (ustring) {
 			efree( ustring );
 		}
@@ -370,7 +370,7 @@ PHP_FUNCTION(grapheme_substr)
 		grapheme_substr_ascii(str, str_len, start, (int32_t)length, &sub_str, &asub_str_len);
 
 		if ( NULL == sub_str ) {
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: invalid parameters", 1 );
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "invalid parameters");
 			RETURN_FALSE;
 		}
 
@@ -387,7 +387,7 @@ PHP_FUNCTION(grapheme_substr)
 		intl_error_set_code( NULL, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16");
 		if (ustr) {
 			efree( ustr );
 		}
@@ -455,7 +455,7 @@ PHP_FUNCTION(grapheme_substr)
 			intl_error_set_code( NULL, status );
 
 			/* Set error messages. */
-			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 );
+			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8");
 
 			RETURN_FALSE;
 		}
@@ -524,7 +524,7 @@ PHP_FUNCTION(grapheme_substr)
 		intl_error_set_code( NULL, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 );
+		intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8");
 
 		RETURN_FALSE;
 	}
@@ -747,7 +747,7 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: start not contained in string", 0 );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "start not contained in string");
 		RETURN_FALSE;
 	}
 
@@ -779,7 +779,7 @@ PHP_FUNCTION(grapheme_extract)
 			start++;
 			if ( pstr >= str_end ) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-								"grapheme_extract: invalid input string", 0 );
+					"grapheme_extract: invalid input string");
 
 				RETURN_FALSE;
 			}
@@ -808,7 +808,7 @@ PHP_FUNCTION(grapheme_extract)
 		intl_error_set_code( NULL, status );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text", 0 );
+		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text");
 
 		RETURN_FALSE;
 	}
@@ -870,7 +870,7 @@ PHP_FUNCTION(grapheme_str_split)
 		intl_error_set_code( NULL, ustatus );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text", 0 );
+		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text");
 
 		RETURN_FALSE;
 	}
@@ -974,7 +974,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
-		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16", 0);
+		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16");
 		RETVAL_FALSE;
 		goto out_ustring1;
 	}
@@ -984,7 +984,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
-		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16", 0);
+		intl_error_set_custom_msg(NULL, "Error converting input string to UTF-16");
 		RETVAL_FALSE;
 		goto out_ustring2;
 	}
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	bi1 = grapheme_get_break_iterator(u_break_iterator_buffer1, &ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
-		intl_error_set_custom_msg(NULL, "Error on grapheme_get_break_iterator for argument #1 ($string1)", 0);
+		intl_error_set_custom_msg(NULL, "Error on grapheme_get_break_iterator for argument #1 ($string1)");
 		RETVAL_FALSE;
 		goto out_bi1;
 	}
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	bi2 = grapheme_get_break_iterator(u_break_iterator_buffer2, &ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
-		intl_error_set_custom_msg(NULL, "Error on grapheme_get_break_iterator for argument #2 ($string2)", 0);
+		intl_error_set_custom_msg(NULL, "Error on grapheme_get_break_iterator for argument #2 ($string2)");
 		RETVAL_FALSE;
 		goto out_bi2;
 	}
@@ -1030,7 +1030,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
-		intl_error_set_custom_msg(NULL, "Error on ubrk_setText for argument #1 ($string1)", 0);
+		intl_error_set_custom_msg(NULL, "Error on ubrk_setText for argument #1 ($string1)");
 		RETVAL_FALSE;
 		goto out_bi2;
 	}
@@ -1039,7 +1039,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
-		intl_error_set_custom_msg(NULL, "Error on ubrk_setText for argument #2 ($string2)", 0);
+		intl_error_set_custom_msg(NULL, "Error on ubrk_setText for argument #2 ($string2)");
 		RETVAL_FALSE;
 		goto out_bi2;
 	}
@@ -1047,7 +1047,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 
-		intl_error_set_custom_msg(NULL, "Error on ucol_open", 0);
+		intl_error_set_custom_msg(NULL, "Error on ucol_open");
 		RETVAL_FALSE;
 		goto out_collator;
 	}

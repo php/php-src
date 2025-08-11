@@ -6,6 +6,8 @@ runs:
       run: |
         set -x
 
+        OPCACHE_TLS_TESTS_DEPS="clang gcc binutils-gold lld"
+
         apk update -q
         apk add \
             util-linux \
@@ -53,4 +55,5 @@ runs:
             postgresql14-dev \
             tzdata \
             musl-locales \
-            musl-locales-lang
+            musl-locales-lang \
+            $OPCACHE_TLS_TESTS_DEPS

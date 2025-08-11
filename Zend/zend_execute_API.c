@@ -814,7 +814,6 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	zend_function *func;
 	uint32_t call_info;
 	void *object_or_called_scope;
-	zend_class_entry *orig_fake_scope;
 
 	ZVAL_UNDEF(fci->retval);
 
@@ -1003,7 +1002,7 @@ cleanup_args:
 		fci_cache->function_handler = NULL;
 	}
 
-	orig_fake_scope = EG(fake_scope);
+	const zend_class_entry *orig_fake_scope = EG(fake_scope);
 	EG(fake_scope) = NULL;
 	if (func->type == ZEND_USER_FUNCTION) {
 		uint32_t orig_jit_trace_num = EG(jit_trace_num);
@@ -1131,22 +1130,20 @@ ZEND_API zend_result zend_call_method_if_exists(
 		zend_object *object, zend_string *method_name, zval *retval,
 		uint32_t param_count, zval *params)
 {
-	zend_fcall_info fci;
-	fci.size = sizeof(zend_fcall_info);
-	fci.object = object;
-	ZVAL_STR(&fci.function_name, method_name);
-	fci.retval = retval;
-	fci.param_count = param_count;
-	fci.params = params;
-	fci.named_params = NULL;
-
+	zval zval_method;
 	zend_fcall_info_cache fcc;
-	if (!zend_is_callable_ex(&fci.function_name, fci.object, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL)) {
+
+	ZVAL_STR(&zval_method, method_name);
+
+	if (UNEXPECTED(!zend_is_callable_ex(&zval_method, object, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL))) {
 		ZVAL_UNDEF(retval);
 		return FAILURE;
 	}
 
-	return zend_call_function(&fci, &fcc);
+	zend_call_known_fcc(&fcc, retval, param_count, params, NULL);
+	/* Need to free potential trampoline (__call/__callStatic) copied function handler before releasing the closure */
+	zend_release_fcall_info_cache(&fcc);
+	return SUCCESS;
 }
 
 /* 0-9 a-z A-Z _ \ 0x80-0xff */

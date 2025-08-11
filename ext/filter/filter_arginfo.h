@@ -81,8 +81,8 @@ static void register_filter_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_MAC", FILTER_VALIDATE_MAC, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_DEFAULT", FILTER_DEFAULT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_UNSAFE_RAW", FILTER_UNSAFE_RAW, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRING", FILTER_SANITIZE_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRIPPED", FILTER_SANITIZE_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_FILTER_SANITIZE_STRING = REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRING", FILTER_SANITIZE_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_FILTER_SANITIZE_STRIPPED = REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRIPPED", FILTER_SANITIZE_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_ENCODED", FILTER_SANITIZE_ENCODED, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_SPECIAL_CHARS", FILTER_SANITIZE_SPECIAL_CHARS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_FULL_SPECIAL_CHARS", FILTER_SANITIZE_FULL_SPECIAL_CHARS, CONST_PERSISTENT);
@@ -115,30 +115,17 @@ static void register_filter_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_HOSTNAME", FILTER_FLAG_HOSTNAME, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_EMAIL_UNICODE", FILTER_FLAG_EMAIL_UNICODE, CONST_PERSISTENT);
 
-	zend_constant *const_FILTER_SANITIZE_STRING = zend_hash_str_find_ptr(EG(zend_constants), "FILTER_SANITIZE_STRING", sizeof("FILTER_SANITIZE_STRING") - 1);
 
 	zend_attribute *attribute_Deprecated_const_FILTER_SANITIZE_STRING_0 = zend_add_global_constant_attribute(const_FILTER_SANITIZE_STRING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg0;
-	zend_string *attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg0, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[0].value, &attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1;
 	zend_string *attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str = zend_string_init("use htmlspecialchars() instead", strlen("use htmlspecialchars() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[1].value, &attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[1].value, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str);
 	attribute_Deprecated_const_FILTER_SANITIZE_STRING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_FILTER_SANITIZE_STRIPPED = zend_hash_str_find_ptr(EG(zend_constants), "FILTER_SANITIZE_STRIPPED", sizeof("FILTER_SANITIZE_STRIPPED") - 1);
 
 	zend_attribute *attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0 = zend_add_global_constant_attribute(const_FILTER_SANITIZE_STRIPPED, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg0;
-	zend_string *attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg0, attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[0].value, &attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1;
-	zend_string *attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1_str = zend_string_init("use htmlspecialchars() instead", strlen("use htmlspecialchars() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1, attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].value, &attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].value, attribute_Deprecated_const_FILTER_SANITIZE_STRING_0_arg1_str);
 	attribute_Deprecated_const_FILTER_SANITIZE_STRIPPED_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }

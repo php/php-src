@@ -1378,7 +1378,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 							q->key = p->key;
 							Z_NEXT(q->val) = HT_HASH(ht, nIndex);
 							HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(j);
-							if (UNEXPECTED(ht->nInternalPointer == i)) {
+							if (UNEXPECTED(ht->nInternalPointer > j && ht->nInternalPointer <= i)) {
 								ht->nInternalPointer = j;
 							}
 							q++;
@@ -1397,7 +1397,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 							q->key = p->key;
 							Z_NEXT(q->val) = HT_HASH(ht, nIndex);
 							HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(j);
-							if (UNEXPECTED(ht->nInternalPointer == i)) {
+							if (UNEXPECTED(ht->nInternalPointer > j && ht->nInternalPointer <= i)) {
 								ht->nInternalPointer = j;
 							}
 							if (UNEXPECTED(i >= iter_pos)) {

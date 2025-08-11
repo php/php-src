@@ -197,6 +197,16 @@ PHP_FUNCTION(cal_days_in_month)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(month <= 0 || month > INT32_MAX - 1)) {
+		zend_argument_value_error(2, "must be between 1 and %d", INT32_MAX - 1);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(year > INT32_MAX - 1)) {
+		zend_argument_value_error(3, "must be less than %d", INT32_MAX - 1);
+		RETURN_THROWS();
+	}
+
 	calendar = &cal_conversion_table[cal];
 
 	sdn_start = calendar->to_jd(year, month, 1);
@@ -239,6 +249,21 @@ PHP_FUNCTION(cal_to_jd)
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
 		zend_argument_value_error(1, "must be a valid calendar ID");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(month <= 0 || month > INT32_MAX - 1)) {
+		zend_argument_value_error(2, "must be between 1 and %d", INT32_MAX - 1);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(day))) {
+		zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(year > INT32_MAX - 1)) {
+		zend_argument_value_error(4, "must be less than %d", INT32_MAX - 1);
 		RETURN_THROWS();
 	}
 

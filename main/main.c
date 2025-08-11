@@ -51,6 +51,10 @@
 #include "ext/date/php_date.h"
 #include "ext/random/php_random_csprng.h"
 #include "ext/random/php_random_zend_utils.h"
+#include "ext/opcache/ZendAccelerator.h"
+#ifdef HAVE_JIT
+# include "ext/opcache/jit/zend_jit.h"
+#endif
 #include "php_variables.h"
 #include "ext/standard/credits.h"
 #ifdef PHP_WIN32
@@ -332,6 +336,22 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	} else {
 		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
+
+	/* If memory_limit exceeds max_memory_limit, warn and set to max_memory_limit instead. */
+	if (value > PG(max_memory_limit)) {
+		if (value != -1) {
+			zend_error(E_WARNING,
+				"Failed to set memory_limit to %zd bytes. Setting to max_memory_limit instead (currently: " ZEND_LONG_FMT " bytes)",
+				value, PG(max_memory_limit));
+		}
+
+		zend_ini_entry *max_mem_limit_ini = zend_hash_str_find_ptr(EG(ini_directives), ZEND_STRL("max_memory_limit"));
+		entry->value = zend_string_copy(max_mem_limit_ini->value);
+		PG(memory_limit) = PG(max_memory_limit);
+
+		return SUCCESS;
+	}
+
 	if (zend_set_memory_limit(value) == FAILURE) {
 		/* When the memory limit is reset to the original level during deactivation, we may be
 		 * using more memory than the original limit while shutdown is still in progress.
@@ -346,6 +366,26 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	return SUCCESS;
 }
 /* }}} */
+
+static PHP_INI_MH(OnChangeMaxMemoryLimit)
+{
+	size_t value;
+	if (new_value) {
+		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
+	} else {
+		value = Z_L(1) << 30; /* effectively, no limit */
+	}
+
+	if (zend_set_memory_limit(value) == FAILURE) {
+		zend_error(E_ERROR, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
+		return FAILURE;
+	}
+
+	PG(memory_limit) = value;
+	PG(max_memory_limit) = value;
+
+	return SUCCESS;
+}
 
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetLogFilter)
@@ -707,7 +747,7 @@ static PHP_INI_MH(OnUpdateMailLog)
 static PHP_INI_MH(OnChangeMailForceExtra)
 {
 	/* Check that INI setting does not have any nul bytes */
-	if (new_value && ZSTR_LEN(new_value) != strlen(ZSTR_VAL(new_value))) {
+	if (new_value && zend_str_has_nul_byte(new_value)) {
 		/* TODO Emit warning? */
 		return FAILURE;
 	}
@@ -810,7 +850,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mail.mixed_lf_and_crlf",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_mixed_lf_and_crlf,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
-	PHP_INI_ENTRY("memory_limit",				"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
+
+	PHP_INI_ENTRY("max_memory_limit",		"-1",		PHP_INI_SYSTEM,		OnChangeMaxMemoryLimit)
+	PHP_INI_ENTRY("memory_limit",			"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
+
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
@@ -1010,7 +1053,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	const char *space = "";
 	const char *class_name = "";
 	const char *function;
-	int origin_len;
+	size_t origin_len;
 	char *origin;
 	zend_string *message;
 	int is_function = 0;
@@ -1077,9 +1120,10 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* if we still have memory then format the origin */
 	if (is_function) {
-		origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
 	} else {
-		origin_len = (int)spprintf(&origin, 0, "%s", function);
+		origin_len = strlen(function);
+		origin = estrndup(function, origin_len);
 	}
 
 	if (PG(html_errors)) {
@@ -1096,14 +1140,14 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* no docref given but function is known (the default) */
 	if (!docref && is_function) {
-		int doclen;
+		size_t doclen;
 		while (*function == '_') {
 			function++;
 		}
 		if (space[0] == '\0') {
-			doclen = (int)spprintf(&docref_buf, 0, "function.%s", function);
+			doclen = spprintf(&docref_buf, 0, "function.%s", function);
 		} else {
-			doclen = (int)spprintf(&docref_buf, 0, "%s.%s", class_name, function);
+			doclen = spprintf(&docref_buf, 0, "%s.%s", class_name, function);
 		}
 		while((p = strchr(docref_buf, '_')) != NULL) {
 			*p = '-';
@@ -1577,24 +1621,16 @@ try_again:
 PHP_FUNCTION(set_time_limit)
 {
 	zend_long new_timeout;
-	char *new_timeout_str;
-	size_t new_timeout_strlen;
-	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &new_timeout) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
-
-	key = ZSTR_INIT_LITERAL("max_execution_time", 0);
-	if (zend_alter_ini_entry_chars_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
-	zend_string_release_ex(key, 0);
-	efree(new_timeout_str);
+	zend_string *time = zend_long_to_str(new_timeout);
+	zend_string *key = ZSTR_INIT_LITERAL("max_execution_time", false);
+	RETVAL_BOOL(zend_alter_ini_entry_ex(key, time, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, false) == SUCCESS);
+	zend_string_release_ex(key, false);
+	zend_string_release_ex(time, false);
 }
 /* }}} */
 
@@ -1815,6 +1851,12 @@ static void sigchld_handler(int apar)
 }
 /* }}} */
 #endif
+
+PHPAPI void php_child_init(void)
+{
+	refresh_memory_manager();
+	zend_max_execution_timer_init();
+}
 
 /* {{{ php_request_startup */
 zend_result php_request_startup(void)
@@ -2236,9 +2278,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	   load zend extensions and register php function extensions
 	   to be loaded later */
 	zend_stream_init();
-	if (php_init_config() == FAILURE) {
-		return FAILURE;
-	}
+	php_init_config();
 	zend_stream_shutdown();
 
 	/* Register PHP core ini entries */
@@ -2767,7 +2807,12 @@ PHPAPI void php_reserve_tsrm_memory(void)
 		TSRM_ALIGNED_SIZE(zend_mm_globals_size()) +
 		TSRM_ALIGNED_SIZE(zend_gc_globals_size()) +
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
-		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct))
+		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_accel_globals)) +
+#ifdef HAVE_JIT
+		TSRM_ALIGNED_SIZE(sizeof(zend_jit_globals)) +
+#endif
+		0
 	);
 }
 /* }}} */

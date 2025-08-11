@@ -61,8 +61,6 @@ if (PHP_GD != "no") {
 			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
 		AC_DEFINE('HAVE_GD_BUNDLED', 1, "Define to 1 if gd extension uses GD library bundled in PHP.");
 		AC_DEFINE('HAVE_GD_PNG', 1, "Define to 1 if gd extension has PNG support.");
-		AC_DEFINE('HAVE_GD_BMP', 1, "Define to 1 if gd extension has BMP support.");
-		AC_DEFINE('HAVE_GD_TGA', 1, "Define to 1 if gd extension has TGA support.");
 		AC_DEFINE('HAVE_LIBPNG', 1, "Define to 1 if you have the libpng library.");
 		AC_DEFINE('HAVE_LIBJPEG', 1, "Define to 1 if you have the libjpeg library.");
 		AC_DEFINE('HAVE_GD_JPG', 1, "Define to 1 if gd extension has JPEG support.");

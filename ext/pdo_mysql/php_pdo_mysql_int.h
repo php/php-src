@@ -78,7 +78,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pdo_mysql)
 	/* dummy member so we get at least one member in the struct
 	 * and avoids build errors.
 	 */
-	void *dummymemmber;
+	void *dummymember;
 #endif
 ZEND_END_MODULE_GLOBALS(pdo_mysql)
 

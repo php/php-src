@@ -5392,6 +5392,11 @@ ZEND_VM_C_LABEL(send_again):
 						}
 
 						name = Z_STR_P(&key);
+
+						zend_ulong tmp;
+						if (ZEND_HANDLE_NUMERIC(name, tmp)) {
+							name = NULL;
+						}
 					}
 				}
 
@@ -6006,7 +6011,8 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 	SAVE_OPLINE();
 	obj = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (OP1_TYPE == IS_CONST ||
@@ -6043,14 +6049,12 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 
 	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = EX(func)->op_array.scope;
-		if (clone->common.scope != scope) {
-			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_bad_method_call(clone, clone->common.function_name, scope);
-				FREE_OP1();
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
+		ZEND_ASSERT(!(clone->common.fn_flags & ZEND_ACC_PUBLIC));
+		if (!zend_check_method_accessible(clone, scope)) {
+			zend_bad_method_call(clone, clone->common.function_name, scope);
+			FREE_OP1();
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -6321,17 +6325,22 @@ ZEND_VM_C_LABEL(add_unpack_again):
 		zval *val;
 
 		if (HT_IS_PACKED(ht) && (zend_hash_num_elements(result_ht) == 0 || HT_IS_PACKED(result_ht))) {
-			zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
-			ZEND_HASH_FILL_PACKED(result_ht) {
-				ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
-					if (UNEXPECTED(Z_ISREF_P(val)) &&
-						UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
-						val = Z_REFVAL_P(val);
-					}
-					Z_TRY_ADDREF_P(val);
-					ZEND_HASH_FILL_ADD(val);
-				} ZEND_HASH_FOREACH_END();
-			} ZEND_HASH_FILL_END();
+			/* zend_hash_extend() skips initialization when the number of elements is 0,
+			 * but the code below expects that result_ht is initialized as packed.
+			 * We can just skip the work in that case. */
+			if (result_ht->nNumUsed + zend_hash_num_elements(ht) > 0) {
+				zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
+				ZEND_HASH_FILL_PACKED(result_ht) {
+					ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
+						if (UNEXPECTED(Z_ISREF_P(val)) &&
+							UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
+							val = Z_REFVAL_P(val);
+						}
+						Z_TRY_ADDREF_P(val);
+						ZEND_HASH_FILL_ADD(val);
+					} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FILL_END();
+			}
 		} else {
 			zend_string *key;
 
@@ -7934,7 +7943,7 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
 		if (zv) {
 			SAVE_OPLINE();
 			ce = zend_bind_class_in_slot(zv, lcname, Z_STR_P(RT_CONSTANT(opline, opline->op2)));
-			if (!ce) {
+			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -7958,7 +7967,7 @@ ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY, CACHE_SLOT)
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			SAVE_OPLINE();
 			ce = zend_do_link_class(ce, (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL, rtd_key);
-			if (!ce) {
+			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
 		}

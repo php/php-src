@@ -24,6 +24,7 @@
 #include "zend_types.h"
 #include "zend_map_ptr.h"
 #include "zend_alloc.h"
+#include "zend_vm_opcodes.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -96,7 +97,7 @@ typedef struct _zend_ast_znode {
 	znode node;
 } zend_ast_znode;
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(const znode *node);
 
 static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
@@ -135,7 +136,7 @@ void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr, bool allow_dynami
 typedef int (*user_opcode_handler_t) (zend_execute_data *execute_data);
 
 struct _zend_op {
-	const void *handler;
+	zend_vm_opcode_handler_t handler;
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
@@ -251,7 +252,7 @@ typedef struct _zend_oparray_context {
 /* Flag to differentiate cases from constants.            |     |     |     */
 /* Must not conflict with ZEND_ACC_ visibility flags      |     |     |     */
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
-#define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
+#define ZEND_CLASS_CONST_IS_CASE         (1 <<  6) /*     |     |     |  X  */
 /*                                                        |     |     |     */
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |  X  |     */
@@ -1126,6 +1127,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_TENTATIVE_BIT) != 0)
 
 #define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce. Set in zend_compile.c for ZEND_AST_DIM nested within ZEND_AST_COALESCE. */
+#define ZEND_ALT_CASE_SYNTAX		(1 << 1) /* deprecated switch case terminated by semicolon */
 
 /* Attributes for ${} encaps var in strings (ZEND_AST_DIM or ZEND_AST_VAR node) */
 /* ZEND_AST_VAR nodes can have any of the ZEND_ENCAPS_VAR_* flags */

@@ -4,12 +4,11 @@ IntlTimeZone::getEquivalentID(): basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-print_R(IntlTimeZone::getEquivalentID('Europe/Lisbon', "1"));
-echo "\n";
-print_R(intltz_get_equivalent_id('Europe/Lisbon', 1));
-echo "\n";
+
+var_dump(IntlTimeZone::getEquivalentID('Europe/Lisbon', "1"));
+var_dump(intltz_get_equivalent_id('Europe/Lisbon', 1));
+
 ?>
 --EXPECT--
-Portugal
-Portugal
+string(8) "Portugal"
+string(8) "Portugal"

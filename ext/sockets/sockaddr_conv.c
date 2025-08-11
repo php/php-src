@@ -137,8 +137,7 @@ int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, zend_string
 	}
 #endif
 	else {
-		php_error_docref(NULL, E_WARNING,
-			"IP address used in the context of an unexpected type of socket");
+		zend_value_error("IP address used in the context of an unexpected type of socket");
 	}
 	return 0;
 }

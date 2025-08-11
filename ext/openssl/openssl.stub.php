@@ -236,6 +236,11 @@ const OPENSSL_NO_PADDING = UNKNOWN;
  * @cvalue RSA_PKCS1_OAEP_PADDING
  */
 const OPENSSL_PKCS1_OAEP_PADDING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue RSA_PKCS1_PSS_PADDING
+ */
+const OPENSSL_PKCS1_PSS_PADDING = UNKNOWN;
 
 /* Informational stream wrapper constants */
 
@@ -575,13 +580,13 @@ function openssl_private_encrypt(#[\SensitiveParameter] string $data, &$encrypte
  * @param string $decrypted_data
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_private_decrypt(string $data, #[\SensitiveParameter] &$decrypted_data, #[\SensitiveParameter] $private_key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
+function openssl_private_decrypt(string $data, #[\SensitiveParameter] &$decrypted_data, #[\SensitiveParameter] $private_key, int $padding = OPENSSL_PKCS1_PADDING, ?string $digest_algo = null): bool {}
 
 /**
  * @param string $encrypted_data
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key
  */
-function openssl_public_encrypt(#[\SensitiveParameter] string $data, &$encrypted_data, $public_key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
+function openssl_public_encrypt(#[\SensitiveParameter] string $data, &$encrypted_data, $public_key, int $padding = OPENSSL_PKCS1_PADDING, ?string $digest_algo = null): bool {}
 
 /**
  * @param string $decrypted_data
@@ -595,10 +600,10 @@ function openssl_error_string(): string|false {}
  * @param string $signature
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1): bool {}
+function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key */
-function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1): int|false {}
+function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): int|false {}
 
 /**
  * @param string $sealed_data

@@ -237,7 +237,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 	char esbuf[512];
 	smart_str ebuf = {0};
 	unsigned long ecode;
-	int retry = 1;
+	bool retry = true;
 
 	switch(err) {
 		case SSL_ERROR_ZERO_RETURN:
@@ -249,7 +249,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 			/* re-negotiation, or perhaps the SSL layer needs more
 			 * packets: retry in next iteration */
 			errno = EAGAIN;
-			retry = is_init ? 1 : sslsock->s.is_blocked;
+			retry = is_init ? true : sslsock->s.is_blocked;
 			break;
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
@@ -1324,7 +1324,8 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_pat
 }
 /* }}} */
 
-static zend_result php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock)  /* {{{ */
+static zend_result php_openssl_enable_server_sni(
+		php_stream *stream, php_openssl_netstream_data_t *sslsock, bool verify_peer)
 {
 	zval *val;
 	zval *current;
@@ -1445,6 +1446,12 @@ static zend_result php_openssl_enable_server_sni(php_stream *stream, php_openssl
 			return FAILURE;
 		}
 
+		if (!verify_peer) {
+			php_openssl_disable_peer_verification(ctx, stream);
+		} else if (FAILURE == php_openssl_enable_peer_verification(ctx, stream)) {
+			return FAILURE;
+		}
+
 		sslsock->sni_certs[i].name = pestrdup(ZSTR_VAL(key), php_stream_is_persistent(stream));
 		sslsock->sni_certs[i].ctx = ctx;
 		++i;
@@ -1455,7 +1462,6 @@ static zend_result php_openssl_enable_server_sni(php_stream *stream, php_openssl
 
 	return SUCCESS;
 }
-/* }}} */
 
 static void php_openssl_enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
 {
@@ -1547,6 +1553,7 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 	char *cipherlist = NULL;
 	char *alpn_protocols = NULL;
 	zval *val;
+	bool verify_peer = false;
 
 	if (sslsock->ssl_handle) {
 		if (sslsock->s.is_blocked) {
@@ -1594,8 +1601,11 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 
 	if (GET_VER_OPT("verify_peer") && !zend_is_true(val)) {
 		php_openssl_disable_peer_verification(sslsock->ctx, stream);
-	} else if (FAILURE == php_openssl_enable_peer_verification(sslsock->ctx, stream)) {
-		return FAILURE;
+	} else {
+		verify_peer = true;
+		if (FAILURE == php_openssl_enable_peer_verification(sslsock->ctx, stream)) {
+			return FAILURE;
+		}
 	}
 
 	/* callback for the passphrase (for localcert) */
@@ -1694,7 +1704,7 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 
 #ifdef HAVE_TLS_SNI
 	/* Enable server-side SNI */
-	if (!sslsock->is_client && php_openssl_enable_server_sni(stream, sslsock) == FAILURE) {
+	if (!sslsock->is_client && php_openssl_enable_server_sni(stream, sslsock, verify_peer) == FAILURE) {
 		return FAILURE;
 	}
 #endif
@@ -1796,7 +1806,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
 		struct timeval start_time, *timeout;
-		int	blocked = sslsock->s.is_blocked, has_timeout = 0;
+		bool blocked = sslsock->s.is_blocked, has_timeout = false;
 
 #ifdef HAVE_TLS_SNI
 		if (sslsock->is_client) {
@@ -1936,8 +1946,8 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		int retry = 1;
 		struct timeval start_time;
 		struct timeval *timeout = NULL;
-		int began_blocked = sslsock->s.is_blocked;
-		int has_timeout = 0;
+		bool began_blocked = sslsock->s.is_blocked;
+		bool has_timeout = false;
 		int nr_bytes = 0;
 
 		/* prevent overflow in openssl */
@@ -1955,7 +1965,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		}
 
 		if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
-			has_timeout = 1;
+			has_timeout = true;
 			/* gettimeofday is not monotonic; using it here is not strictly correct */
 			gettimeofday(&start_time, NULL);
 		}
@@ -1977,7 +1987,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 					if (began_blocked) {
 						php_openssl_set_blocking(sslsock, 1);
 					}
-					sslsock->s.timeout_event = 1;
+					sslsock->s.timeout_event = true;
 					return -1;
 				}
 			}
@@ -2238,7 +2248,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		clisockdata->s.socket = clisock;
 #ifdef __linux__
 		/* O_NONBLOCK is not inherited on Linux */
-		clisockdata->s.is_blocked = 1;
+		clisockdata->s.is_blocked = true;
 #endif
 
 		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
@@ -2369,8 +2379,8 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 						int retry = 1;
 						struct timeval start_time;
 						struct timeval *timeout = NULL;
-						int began_blocked = sslsock->s.is_blocked;
-						int has_timeout = 0;
+						bool began_blocked = sslsock->s.is_blocked;
+						bool has_timeout = false;
 
 						/* never use a timeout with non-blocking sockets */
 						if (began_blocked) {
@@ -2382,7 +2392,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 						}
 
 						if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
-							has_timeout = 1;
+							has_timeout = true;
 							/* gettimeofday is not monotonic; using it here is not strictly correct */
 							gettimeofday(&start_time, NULL);
 						}
@@ -2404,7 +2414,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 									if (began_blocked) {
 										php_openssl_set_blocking(sslsock, 1);
 									}
-									sslsock->s.timeout_event = 1;
+									sslsock->s.timeout_event = true;
 									return PHP_STREAM_OPTION_RETURN_ERR;
 								}
 							}
@@ -2428,7 +2438,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 								}
 
 								/* Don't loop indefinitely in non-blocking mode if no data is available */
-								if (began_blocked == 0 || !has_timeout) {
+								if (!began_blocked || !has_timeout) {
 									alive = retry;
 									break;
 								}
@@ -2658,7 +2668,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 	sslsock = pemalloc(sizeof(php_openssl_netstream_data_t), persistent_id ? 1 : 0);
 	memset(sslsock, 0, sizeof(*sslsock));
 
-	sslsock->s.is_blocked = 1;
+	sslsock->s.is_blocked = true;
 	/* this timeout is used by standard stream funcs, therefore it should use the default value */
 #ifdef _WIN32
 	sslsock->s.timeout.tv_sec = (long)FG(default_socket_timeout);

@@ -2,6 +2,7 @@
 GH-18953 (Phar: Stream double free)
 --EXTENSIONS--
 phar
+zlib
 --INI--
 phar.readonly=0
 --FILE--

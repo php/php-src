@@ -808,96 +808,54 @@ static void register_php_date_symbols(int module_number)
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC3339_EXTENDED, "Y-m-d\\TH:i:s.vP") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RSS", DATE_FORMAT_RFC1123, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_W3C", DATE_FORMAT_RFC3339, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_TIMESTAMP = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_STRING = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_SUNFUNCS_RET_DOUBLE = REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_PERSISTENT | CONST_DEPRECATED);
 
 
 	zend_attribute *attribute_Deprecated_func_strftime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strftime", sizeof("strftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_strftime_0_arg0;
-	zend_string *attribute_Deprecated_func_strftime_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_strftime_0_arg0, attribute_Deprecated_func_strftime_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strftime_0->args[0].value, &attribute_Deprecated_func_strftime_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_strftime_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_strftime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_strftime_0_arg1;
 	zend_string *attribute_Deprecated_func_strftime_0_arg1_str = zend_string_init("use IntlDateFormatter::format() instead", strlen("use IntlDateFormatter::format() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_strftime_0_arg1, attribute_Deprecated_func_strftime_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strftime_0->args[1].value, &attribute_Deprecated_func_strftime_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_strftime_0->args[1].value, attribute_Deprecated_func_strftime_0_arg1_str);
 	attribute_Deprecated_func_strftime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_gmstrftime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "gmstrftime", sizeof("gmstrftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_gmstrftime_0_arg0;
-	zend_string *attribute_Deprecated_func_gmstrftime_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_gmstrftime_0_arg0, attribute_Deprecated_func_gmstrftime_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_gmstrftime_0->args[0].value, &attribute_Deprecated_func_gmstrftime_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_gmstrftime_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_gmstrftime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_gmstrftime_0_arg1;
-	zend_string *attribute_Deprecated_func_gmstrftime_0_arg1_str = zend_string_init("use IntlDateFormatter::format() instead", strlen("use IntlDateFormatter::format() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_gmstrftime_0_arg1, attribute_Deprecated_func_gmstrftime_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_gmstrftime_0->args[1].value, &attribute_Deprecated_func_gmstrftime_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_gmstrftime_0->args[1].value, attribute_Deprecated_func_strftime_0_arg1_str);
 	attribute_Deprecated_func_gmstrftime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_date_sunrise_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "date_sunrise", sizeof("date_sunrise") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_date_sunrise_0_arg0;
-	zend_string *attribute_Deprecated_func_date_sunrise_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_date_sunrise_0_arg0, attribute_Deprecated_func_date_sunrise_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunrise_0->args[0].value, &attribute_Deprecated_func_date_sunrise_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_date_sunrise_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_date_sunrise_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_date_sunrise_0_arg1;
 	zend_string *attribute_Deprecated_func_date_sunrise_0_arg1_str = zend_string_init("use date_sun_info() instead", strlen("use date_sun_info() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_date_sunrise_0_arg1, attribute_Deprecated_func_date_sunrise_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunrise_0->args[1].value, &attribute_Deprecated_func_date_sunrise_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_date_sunrise_0->args[1].value, attribute_Deprecated_func_date_sunrise_0_arg1_str);
 	attribute_Deprecated_func_date_sunrise_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_date_sunset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "date_sunset", sizeof("date_sunset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_date_sunset_0_arg0;
-	zend_string *attribute_Deprecated_func_date_sunset_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_date_sunset_0_arg0, attribute_Deprecated_func_date_sunset_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunset_0->args[0].value, &attribute_Deprecated_func_date_sunset_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_date_sunset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
 	attribute_Deprecated_func_date_sunset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_date_sunset_0_arg1;
-	zend_string *attribute_Deprecated_func_date_sunset_0_arg1_str = zend_string_init("use date_sun_info() instead", strlen("use date_sun_info() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_date_sunset_0_arg1, attribute_Deprecated_func_date_sunset_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_date_sunset_0->args[1].value, &attribute_Deprecated_func_date_sunset_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_date_sunset_0->args[1].value, attribute_Deprecated_func_date_sunrise_0_arg1_str);
 	attribute_Deprecated_func_date_sunset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_SUNFUNCS_RET_TIMESTAMP = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_TIMESTAMP", sizeof("SUNFUNCS_RET_TIMESTAMP") - 1);
 
 	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_TIMESTAMP, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0;
-	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[0].value, &attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1;
 	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str = zend_string_init("as date_sunrise() and date_sunset() were deprecated in 8.1", strlen("as date_sunrise() and date_sunset() were deprecated in 8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].value, &attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].value, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
 	attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_SUNFUNCS_RET_STRING = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_STRING", sizeof("SUNFUNCS_RET_STRING") - 1);
 
 	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_STRING_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_STRING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0;
-	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0, attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[0].value, &attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1;
-	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1_str = zend_string_init("as date_sunrise() and date_sunset() were deprecated in 8.1", strlen("as date_sunrise() and date_sunset() were deprecated in 8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1, attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].value, &attribute_Deprecated_const_SUNFUNCS_RET_STRING_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].value, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
 	attribute_Deprecated_const_SUNFUNCS_RET_STRING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_constant *const_SUNFUNCS_RET_DOUBLE = zend_hash_str_find_ptr(EG(zend_constants), "SUNFUNCS_RET_DOUBLE", sizeof("SUNFUNCS_RET_DOUBLE") - 1);
 
 	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_DOUBLE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0;
-	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0, attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[0].value, &attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1;
-	zend_string *attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1_str = zend_string_init("as date_sunrise() and date_sunset() were deprecated in 8.1", strlen("as date_sunrise() and date_sunset() were deprecated in 8.1"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1, attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[1].value, &attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[1].value, attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0_arg1_str);
 	attribute_Deprecated_const_SUNFUNCS_RET_DOUBLE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
@@ -1032,82 +990,64 @@ static zend_class_entry *register_class_DateTimeImmutable(zend_class_entry *clas
 	zend_string *attribute_name_NoDiscard_func_modify_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_modify_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "modify", sizeof("modify") - 1), attribute_name_NoDiscard_func_modify_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_modify_0);
-	zval attribute_NoDiscard_func_modify_0_arg0;
 	zend_string *attribute_NoDiscard_func_modify_0_arg0_str = zend_string_init("as DateTimeImmutable::modify() does not modify the object itself", strlen("as DateTimeImmutable::modify() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_modify_0_arg0, attribute_NoDiscard_func_modify_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_modify_0->args[0].value, &attribute_NoDiscard_func_modify_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_modify_0->args[0].value, attribute_NoDiscard_func_modify_0_arg0_str);
 	attribute_NoDiscard_func_modify_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_add_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_add_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "add", sizeof("add") - 1), attribute_name_NoDiscard_func_add_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_add_0);
-	zval attribute_NoDiscard_func_add_0_arg0;
 	zend_string *attribute_NoDiscard_func_add_0_arg0_str = zend_string_init("as DateTimeImmutable::add() does not modify the object itself", strlen("as DateTimeImmutable::add() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_add_0_arg0, attribute_NoDiscard_func_add_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_add_0->args[0].value, &attribute_NoDiscard_func_add_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_add_0->args[0].value, attribute_NoDiscard_func_add_0_arg0_str);
 	attribute_NoDiscard_func_add_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_sub_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_sub_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "sub", sizeof("sub") - 1), attribute_name_NoDiscard_func_sub_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_sub_0);
-	zval attribute_NoDiscard_func_sub_0_arg0;
 	zend_string *attribute_NoDiscard_func_sub_0_arg0_str = zend_string_init("as DateTimeImmutable::sub() does not modify the object itself", strlen("as DateTimeImmutable::sub() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_sub_0_arg0, attribute_NoDiscard_func_sub_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_sub_0->args[0].value, &attribute_NoDiscard_func_sub_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_sub_0->args[0].value, attribute_NoDiscard_func_sub_0_arg0_str);
 	attribute_NoDiscard_func_sub_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_settimezone_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_settimezone_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settimezone", sizeof("settimezone") - 1), attribute_name_NoDiscard_func_settimezone_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_settimezone_0);
-	zval attribute_NoDiscard_func_settimezone_0_arg0;
 	zend_string *attribute_NoDiscard_func_settimezone_0_arg0_str = zend_string_init("as DateTimeImmutable::setTimezone() does not modify the object itself", strlen("as DateTimeImmutable::setTimezone() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_settimezone_0_arg0, attribute_NoDiscard_func_settimezone_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_settimezone_0->args[0].value, &attribute_NoDiscard_func_settimezone_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_settimezone_0->args[0].value, attribute_NoDiscard_func_settimezone_0_arg0_str);
 	attribute_NoDiscard_func_settimezone_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_settime_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_settime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settime", sizeof("settime") - 1), attribute_name_NoDiscard_func_settime_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_settime_0);
-	zval attribute_NoDiscard_func_settime_0_arg0;
 	zend_string *attribute_NoDiscard_func_settime_0_arg0_str = zend_string_init("as DateTimeImmutable::setTime() does not modify the object itself", strlen("as DateTimeImmutable::setTime() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_settime_0_arg0, attribute_NoDiscard_func_settime_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_settime_0->args[0].value, &attribute_NoDiscard_func_settime_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_settime_0->args[0].value, attribute_NoDiscard_func_settime_0_arg0_str);
 	attribute_NoDiscard_func_settime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_setdate_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_setdate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setdate", sizeof("setdate") - 1), attribute_name_NoDiscard_func_setdate_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_setdate_0);
-	zval attribute_NoDiscard_func_setdate_0_arg0;
 	zend_string *attribute_NoDiscard_func_setdate_0_arg0_str = zend_string_init("as DateTimeImmutable::setDate() does not modify the object itself", strlen("as DateTimeImmutable::setDate() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_setdate_0_arg0, attribute_NoDiscard_func_setdate_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_setdate_0->args[0].value, &attribute_NoDiscard_func_setdate_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_setdate_0->args[0].value, attribute_NoDiscard_func_setdate_0_arg0_str);
 	attribute_NoDiscard_func_setdate_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_setisodate_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_setisodate_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setisodate", sizeof("setisodate") - 1), attribute_name_NoDiscard_func_setisodate_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_setisodate_0);
-	zval attribute_NoDiscard_func_setisodate_0_arg0;
 	zend_string *attribute_NoDiscard_func_setisodate_0_arg0_str = zend_string_init("as DateTimeImmutable::setISODate() does not modify the object itself", strlen("as DateTimeImmutable::setISODate() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_setisodate_0_arg0, attribute_NoDiscard_func_setisodate_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_setisodate_0->args[0].value, &attribute_NoDiscard_func_setisodate_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_setisodate_0->args[0].value, attribute_NoDiscard_func_setisodate_0_arg0_str);
 	attribute_NoDiscard_func_setisodate_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_settimestamp_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_settimestamp_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "settimestamp", sizeof("settimestamp") - 1), attribute_name_NoDiscard_func_settimestamp_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_settimestamp_0);
-	zval attribute_NoDiscard_func_settimestamp_0_arg0;
 	zend_string *attribute_NoDiscard_func_settimestamp_0_arg0_str = zend_string_init("as DateTimeImmutable::setTimestamp() does not modify the object itself", strlen("as DateTimeImmutable::setTimestamp() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_settimestamp_0_arg0, attribute_NoDiscard_func_settimestamp_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_settimestamp_0->args[0].value, &attribute_NoDiscard_func_settimestamp_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_settimestamp_0->args[0].value, attribute_NoDiscard_func_settimestamp_0_arg0_str);
 	attribute_NoDiscard_func_settimestamp_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_string *attribute_name_NoDiscard_func_setmicrosecond_0 = zend_string_init_interned("NoDiscard", sizeof("NoDiscard") - 1, 1);
 	zend_attribute *attribute_NoDiscard_func_setmicrosecond_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setmicrosecond", sizeof("setmicrosecond") - 1), attribute_name_NoDiscard_func_setmicrosecond_0, 1);
 	zend_string_release(attribute_name_NoDiscard_func_setmicrosecond_0);
-	zval attribute_NoDiscard_func_setmicrosecond_0_arg0;
 	zend_string *attribute_NoDiscard_func_setmicrosecond_0_arg0_str = zend_string_init("as DateTimeImmutable::setMicrosecond() does not modify the object itself", strlen("as DateTimeImmutable::setMicrosecond() does not modify the object itself"), 1);
-	ZVAL_STR(&attribute_NoDiscard_func_setmicrosecond_0_arg0, attribute_NoDiscard_func_setmicrosecond_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_NoDiscard_func_setmicrosecond_0->args[0].value, &attribute_NoDiscard_func_setmicrosecond_0_arg0);
+	ZVAL_STR(&attribute_NoDiscard_func_setmicrosecond_0->args[0].value, attribute_NoDiscard_func_setmicrosecond_0_arg0_str);
 	attribute_NoDiscard_func_setmicrosecond_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;

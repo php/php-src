@@ -1186,7 +1186,7 @@ function gen_null_label($f, $kind, $prolog) {
             out($f,$prolog."ZEND_NULL_HANDLER,\n");
             break;
         case ZEND_VM_KIND_SWITCH:
-            out($f,$prolog."(void*)(uintptr_t)-1,\n");
+            out($f,$prolog."-1,\n");
             break;
         case ZEND_VM_KIND_GOTO:
             out($f,$prolog."(void*)&&ZEND_NULL_LABEL,\n");
@@ -1388,7 +1388,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                             out($f,"$prolog{$spec_name}_HANDLER,\n");
                             break;
                         case ZEND_VM_KIND_SWITCH:
-                            out($f,$prolog."(void*)(uintptr_t)$switch_labels[$spec_name],\n");
+                            out($f,$prolog."$switch_labels[$spec_name],\n");
                             break;
                         case ZEND_VM_KIND_GOTO:
                             out($f,$prolog."(void*)&&{$spec_name}_LABEL,\n");
@@ -1436,7 +1436,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                         out($f,$prolog."ZEND_NULL_HANDLER,\n");
                         break;
                     case ZEND_VM_KIND_SWITCH:
-                        out($f,$prolog."(void*)(uintptr_t)-1,\n");
+                        out($f,$prolog."-1,\n");
                         break;
                     case ZEND_VM_KIND_GOTO:
                         out($f,$prolog."(void*)&&ZEND_NULL_LABEL,\n");
@@ -1467,7 +1467,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                     out($f,$prolog.$dsc["op"]."_HANDLER,\n");
                     break;
                 case ZEND_VM_KIND_SWITCH:
-                    out($f,$prolog."(void*)(uintptr_t)".((string)$num).",\n");
+                    out($f,$prolog.((string)$num).",\n");
                     break;
                 case ZEND_VM_KIND_GOTO:
                     out($f,$prolog."(void*)&&".$dsc["op"]."_LABEL,\n");
@@ -1480,7 +1480,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                         out($f,$prolog."ZEND_NULL_HANDLER,\n");
                         break;
                     case ZEND_VM_KIND_SWITCH:
-                        out($f,$prolog."(void*)(uintptr_t)-1,\n");
+                        out($f,$prolog."-1,\n");
                         break;
                     case ZEND_VM_KIND_GOTO:
                         out($f,$prolog."(void*)&&ZEND_NULL_LABEL,\n");
@@ -1497,7 +1497,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
             out($f,$prolog."ZEND_NULL_HANDLER\n");
             break;
         case ZEND_VM_KIND_SWITCH:
-            out($f,$prolog."(void*)(uintptr_t)-1\n");
+            out($f,$prolog."-1\n");
             break;
         case ZEND_VM_KIND_GOTO:
             out($f,$prolog."(void*)&&ZEND_NULL_LABEL\n");
@@ -1813,16 +1813,16 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     out($f,"#define SPEC_RULE_OBSERVER     0x02000000\n");
                     out($f,"\n");
                     out($f,"static const uint32_t *zend_spec_handlers;\n");
-                    out($f,"static const void * const *zend_opcode_handlers;\n");
+                    out($f,"static zend_vm_opcode_handler_t const *zend_opcode_handlers;\n");
                     out($f,"static int zend_handlers_count;\n");
                     if ($kind == ZEND_VM_KIND_HYBRID) {
                         out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-                        out($f,"static const void * const * zend_opcode_handler_funcs;\n");
+                        out($f,"static zend_vm_opcode_handler_func_t const * zend_opcode_handler_funcs;\n");
                         out($f,"static zend_op hybrid_halt_op;\n");
                         out($f,"#endif\n");
                     }
                     out($f,"#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC\n");
-                    out($f,"static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op);\n");
+                    out($f,"static zend_vm_opcode_handler_t zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op);\n");
                     out($f,"#endif\n\n");
                     if ($kind == ZEND_VM_KIND_HYBRID) {
                         out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
@@ -2040,7 +2040,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     break;
                 case "HELPER_VARS":
                     if ($kind == ZEND_VM_KIND_SWITCH) {
-                        out($f,$m[1]."const void *dispatch_handler;\n");
+                        out($f,$m[1]."zend_vm_opcode_handler_t dispatch_handler;\n");
                     }
                     if ($kind != ZEND_VM_KIND_CALL && count($params)) {
                         if ($kind == ZEND_VM_KIND_HYBRID) {
@@ -2097,8 +2097,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,$prolog."\tstatic const void * const labels[] = {\n");
                         gen_labels($f, $spec, ($kind == ZEND_VM_KIND_HYBRID) ? ZEND_VM_KIND_GOTO : $kind, $prolog."\t\t", $specs);
                         out($f,$prolog."\t};\n");
-                        out($f,$prolog."\tzend_opcode_handlers = (const void **) labels;\n");
-                        out($f,$prolog."\tzend_handlers_count = sizeof(labels) / sizeof(void*);\n");
+                        out($f,$prolog."\tzend_opcode_handlers = (zend_vm_opcode_handler_t*) labels;\n");
+                        out($f,$prolog."\tzend_handlers_count = sizeof(labels) / sizeof(labels[0]);\n");
                         if ($kind == ZEND_VM_KIND_HYBRID) {
                             out($f,$prolog."\tmemset(&hybrid_halt_op, 0, sizeof(hybrid_halt_op));\n");
                             out($f,$prolog."\thybrid_halt_op.handler = (void*)&&HYBRID_HALT_LABEL;\n");
@@ -2212,7 +2212,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,$prolog."zend_spec_handlers = specs;\n");
                         out($f,$prolog.$executor_name."_ex(NULL);\n");
                     } else {
-                        out($f,$prolog."static const void * const labels[] = {\n");
+                        out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
+                        out($f,$prolog."static zend_vm_opcode_handler_func_t const labels[] = {\n");
+                        out($f,"#else\n");
+                        out($f,$prolog."static zend_vm_opcode_handler_t const labels[] = {\n");
+                        out($f,"#endif\n");
                         gen_labels($f, $spec, ($kind == ZEND_VM_KIND_HYBRID) ? ZEND_VM_KIND_CALL : $kind, $prolog."\t", $specs, $switch_labels);
                         out($f,$prolog."};\n");
                         out($f,$prolog."static const uint32_t specs[] = {\n");
@@ -2226,7 +2230,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#else\n");
                         }
                         out($f,$prolog."zend_opcode_handlers = labels;\n");
-                        out($f,$prolog."zend_handlers_count = sizeof(labels) / sizeof(void*);\n");
+                        out($f,$prolog."zend_handlers_count = sizeof(labels) / sizeof(labels[0]);\n");
                         out($f,$prolog."zend_spec_handlers = specs;\n");
                         if ($kind == ZEND_VM_KIND_HYBRID) {
                             out($f,"#endif\n");
@@ -2357,6 +2361,20 @@ function gen_vm_opcodes_header(
     $str .= "# if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))\n";
     $str .= "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 48\n";
     $str .= "# endif\n";
+    $str .= "#endif\n";
+    $str .= "\n";
+    $str .= "#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID\n";
+    $str .= "typedef const void* zend_vm_opcode_handler_t;\n";
+    $str .= "typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(void);\n";
+    $str .= "#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL\n";
+    $str .= "typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);\n";
+    $str .= "typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);\n";
+    $str .= "#elif ZEND_VM_KIND == ZEND_VM_KIND_SWITCH\n";
+    $str .= "typedef int zend_vm_opcode_handler_t;\n";
+    $str .= "#elif ZEND_VM_KIND == ZEND_VM_KIND_GOTO\n";
+    $str .= "typedef const void* zend_vm_opcode_handler_t;\n";
+    $str .= "#else\n";
+    $str .= "# error\n";
     $str .= "#endif\n";
     $str .= "\n";
     foreach ($vm_op_flags as $name => $val) {
@@ -2840,7 +2858,7 @@ function gen_vm($def, $skel) {
     }
     out($f, "}\n\n");
     out($f, "#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC\n");
-    out($f, "static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)\n");
+    out($f, "static zend_vm_opcode_handler_t zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)\n");
     out($f, "{\n");
     if (!ZEND_VM_SPEC) {
         out($f, "\treturn zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");

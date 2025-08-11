@@ -372,7 +372,9 @@ static zend_result lexbor_read_host(const struct uri_internal_t *internal_uri, u
 		smart_str_appendc(&host_str, ']');
 
 		ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
-	} else if (lexbor_uri->host.type != LXB_URL_HOST_TYPE_EMPTY && lexbor_uri->host.type != LXB_URL_HOST_TYPE__UNDEF) {
+	} else if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_EMPTY) {
+		ZVAL_EMPTY_STRING(retval);
+	} else if (lexbor_uri->host.type != LXB_URL_HOST_TYPE__UNDEF) {
 		switch (read_mode) {
 			case URI_COMPONENT_READ_NORMALIZED_UNICODE: {
 				smart_str host_str = {0};

@@ -95,6 +95,14 @@ string(1) "e"
 string(1) "f"
 string(1) "g"
 string(1) "h"
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
 string(1) "e"
 string(1) "f"
 string(1) "g"
@@ -111,6 +119,12 @@ string(1) "c"
 string(1) "e"
 string(1) "f"
 string(1) "g"
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
 string(1) "e"
 string(1) "f"
 string(1) "g"

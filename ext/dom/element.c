@@ -62,7 +62,7 @@ PHP_METHOD(DOMElement, __construct)
 	if (uri_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {
-			nodep = xmlNewNode (NULL, BAD_CAST localname);
+			nodep = xmlNewDocNode(NULL, NULL, BAD_CAST localname, NULL);
 			if (nodep != NULL && uri != NULL) {
 				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
 				xmlSetNs(nodep, nsptr);
@@ -88,7 +88,7 @@ PHP_METHOD(DOMElement, __construct)
 	        php_dom_throw_error(NAMESPACE_ERR, true);
 	        RETURN_THROWS();
 	    }
-		nodep = xmlNewNode(NULL, BAD_CAST name);
+		nodep = xmlNewDocNode(NULL, NULL, BAD_CAST name, NULL);
 	}
 
 	if (!nodep) {
@@ -841,6 +841,44 @@ PHP_METHOD(Dom_Element, getElementsByTagName)
 	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_html_collection_class_entry);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
+
+PHP_METHOD(Dom_Element, getElementsByClassName)
+{
+	dom_object *intern, *namednode;
+	zend_string *class_names;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &class_names) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(class_names) > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_INTERN(intern);
+
+	object_init_ex(return_value, dom_html_collection_class_entry);
+	namednode = Z_DOMOBJ_P(return_value);
+
+	HashTable *token_set;
+	ALLOC_HASHTABLE(token_set);
+	zend_hash_init(token_set, 0, NULL, NULL, false);
+	dom_ordered_set_parser(token_set, ZSTR_VAL(class_names), intern->document->quirks_mode == PHP_LIBXML_QUIRKS);
+
+	if (zend_hash_num_elements(token_set) == 0) {
+		php_dom_create_obj_map(intern, namednode, NULL, NULL, NULL, &php_dom_obj_map_noop);
+
+		zend_hash_destroy(token_set);
+		FREE_HASHTABLE(token_set);
+	} else {
+		php_dom_create_obj_map(intern, namednode, NULL, NULL, NULL, &php_dom_obj_map_by_class_name);
+
+		dom_nnodemap_object *map = namednode->ptr;
+		map->array = token_set;
+		map->release_array = true;
+	}
+}
 
 /* should_free_result must be initialized to false */
 static const xmlChar *dom_get_attribute_ns(dom_object *intern, xmlNodePtr elemp, const char *uri, size_t uri_len, const char *name, bool *should_free_result)

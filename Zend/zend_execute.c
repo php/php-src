@@ -932,7 +932,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_pr
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
 	const zend_property_info *prop_info, const char *operation
 ) {
-	zend_class_entry *scope;
+	const zend_class_entry *scope;
 	if (EG(fake_scope)) {
 		scope = EG(fake_scope);
 	} else {
@@ -5211,7 +5211,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 					}
 				} else if (UNEXPECTED(EG(exception))) {
 					break;
-				} else if (UNEXPECTED(strlen(ZSTR_VAL(inc_filename)) != ZSTR_LEN(inc_filename))) {
+				} else if (UNEXPECTED(zend_str_has_nul_byte(inc_filename))) {
 					zend_message_dispatcher(
 						(type == ZEND_INCLUDE_ONCE) ?
 							ZMSG_FAILED_INCLUDE_FOPEN : ZMSG_FAILED_REQUIRE_FOPEN,
@@ -5245,7 +5245,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 			break;
 		case ZEND_INCLUDE:
 		case ZEND_REQUIRE:
-			if (UNEXPECTED(strlen(ZSTR_VAL(inc_filename)) != ZSTR_LEN(inc_filename))) {
+			if (UNEXPECTED(zend_str_has_nul_byte(inc_filename))) {
 				zend_message_dispatcher(
 					(type == ZEND_INCLUDE) ?
 						ZMSG_FAILED_INCLUDE_FOPEN : ZMSG_FAILED_REQUIRE_FOPEN,

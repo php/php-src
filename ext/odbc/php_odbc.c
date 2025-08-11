@@ -346,21 +346,21 @@ static void _close_odbc_pconn(zend_resource *rsrc)
 /* {{{ PHP_INI_DISP(display_link_nums) */
 static PHP_INI_DISP(display_link_nums)
 {
-	char *value;
+	const zend_string *value;
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ZSTR_VAL(ini_entry->orig_value);
+		value = ini_entry->orig_value;
 	} else if (ini_entry->value) {
-		value = ZSTR_VAL(ini_entry->value);
+		value = ini_entry->value;
 	} else {
 		value = NULL;
 	}
 
 	if (value) {
-		if (atoi(value) == -1) {
+		if (atoi(ZSTR_VAL(value)) == -1) {
 			PUTS("Unlimited");
 		} else {
-			php_printf("%s", value);
+			php_output_write(ZSTR_VAL(value), ZSTR_LEN(value));
 		}
 	}
 }
@@ -670,7 +670,6 @@ void odbc_bindcols(odbc_result *result)
 	SQLSMALLINT 	colnamelen; /* Not used */
 	SQLLEN      	displaysize;
 	SQLUSMALLINT	colfieldid;
-	int		charextraalloc;
 
 	result->values = (odbc_result_value *) safe_emalloc(sizeof(odbc_result_value), result->numcols, 0);
 
@@ -678,7 +677,7 @@ void odbc_bindcols(odbc_result *result)
 	result->binmode = ODBCG(defaultbinmode);
 
 	for(i = 0; i < result->numcols; i++) {
-		charextraalloc = 0;
+		bool char_extra_alloc = false;
 		colfieldid = SQL_COLUMN_DISPLAY_SIZE;
 
 		rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), PHP_ODBC_SQL_DESC_NAME,
@@ -716,7 +715,7 @@ void odbc_bindcols(odbc_result *result)
 			case SQL_WVARCHAR:
 				colfieldid = SQL_DESC_OCTET_LENGTH;
 #else
-				charextraalloc = 1;
+				char_extra_alloc = true;
 #endif
 				/* TODO: Check this is the intended behaviour */
 				ZEND_FALLTHROUGH;
@@ -742,7 +741,7 @@ void odbc_bindcols(odbc_result *result)
 					}
 					 /* This is  a quirk for ODBC 2.0 compatibility for broken driver implementations.
 					  */
-					charextraalloc = 1;
+					char_extra_alloc = true;
 					rc = SQLColAttributes(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_DISPLAY_SIZE,
 								NULL, 0, NULL, &displaysize);
 					if (rc != SQL_SUCCESS) {
@@ -769,7 +768,7 @@ void odbc_bindcols(odbc_result *result)
 					displaysize += 3;
 				}
 
-				if (charextraalloc) {
+				if (char_extra_alloc) {
 					/* Since we don't know the exact # of bytes, allocate extra */
 					displaysize *= 4;
 				}
@@ -1015,10 +1014,9 @@ PHP_FUNCTION(odbc_execute)
 	zval *pv_res, *tmp;
 	HashTable *pv_param_ht = (HashTable *) &zend_empty_array;
 	odbc_params_t *params = NULL;
-	char *filename;
 	SQLSMALLINT ctype;
 	odbc_result *result;
-	int i, ne;
+	int i;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|h", &pv_res, odbc_result_ce, &pv_param_ht) == FAILURE) {
@@ -1029,8 +1027,9 @@ PHP_FUNCTION(odbc_execute)
 	CHECK_ODBC_RESULT(result);
 
 	if (result->numparams > 0) {
-		if ((ne = zend_hash_num_elements(pv_param_ht)) < result->numparams) {
-			php_error_docref(NULL, E_WARNING, "Not enough parameters (%d should be %d) given", ne, result->numparams);
+		uint32_t ne = zend_hash_num_elements(pv_param_ht);
+		if (ne < result->numparams) {
+			php_error_docref(NULL, E_WARNING, "Not enough parameters (%" PRIu32 " should be %d) given", ne, result->numparams);
 			RETURN_FALSE;
 		}
 
@@ -1063,11 +1062,11 @@ PHP_FUNCTION(odbc_execute)
 				ZSTR_VAL(tmpstr)[0] == '\'' &&
 				ZSTR_VAL(tmpstr)[ZSTR_LEN(tmpstr) - 1] == '\'') {
 
-				if (ZSTR_LEN(tmpstr) != strlen(ZSTR_VAL(tmpstr))) {
+				if (UNEXPECTED(zend_str_has_nul_byte(tmpstr))) {
 					odbc_release_params(result, params);
 					RETURN_FALSE;
 				}
-				filename = estrndup(&ZSTR_VAL(tmpstr)[1], ZSTR_LEN(tmpstr) - 2);
+				char *filename = estrndup(&ZSTR_VAL(tmpstr)[1], ZSTR_LEN(tmpstr) - 2);
 
 				/* Check the basedir */
 				if (php_check_open_basedir(filename)) {
@@ -2185,8 +2184,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 		int     direct = 0;
 		SQLCHAR dsnbuf[1024];
 		short   dsnbuflen;
-		char    *ldb = 0;
-		int		ldb_len = 0;
+		char    *ldb = NULL;
 
 		/* a connection string may have = but not ; - i.e. "DSN=PHP" */
 		if (strstr((char*)db, "=")) {
@@ -2248,7 +2246,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 					efree(pwd_quoted);
 				}
 			} else {
-				ldb_len = strlen(db)+1;
+				size_t ldb_len = strlen(db)+1;
 				ldb = (char*) emalloc(ldb_len);
 				memcpy(ldb, db, ldb_len);
 			}

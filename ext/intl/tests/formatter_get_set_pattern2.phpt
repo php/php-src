@@ -37,10 +37,6 @@ function ut_main()
     ut_nfmt_set_pattern($fmt, str_repeat('@', 200));
     $res_str .= "New pattern: '" . ut_nfmt_get_pattern( $fmt ) . "'\n";
     $res_str .= "Formatted number: " . ut_nfmt_format( $fmt, $test_value ) . "\n";
-    $res = ut_nfmt_set_pattern( $fmt, "0.0     .#.#.#");
-    if ($res !== false)
-         die("ut_nfmt_set_pattern should have failed");
-    $res_str .= ut_nfmt_get_error_message( $fmt ) . " (" . ut_nfmt_get_error_code( $fmt ) . ")\n";
 
     return $res_str;
 }
@@ -56,4 +52,3 @@ New pattern: '0.0'
 Formatted number: 12345.1
 New pattern: '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
 Formatted number: 12345.123456000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-Error setting pattern value at line 0, offset 0: U_UNQUOTED_SPECIAL (65555)

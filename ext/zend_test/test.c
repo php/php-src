@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include "ext/opcache/zend_accelerator_api.h"
+#include "zend_API.h"
 #include "zend_modules.h"
 #include "zend_types.h"
 #ifdef HAVE_CONFIG_H
@@ -512,6 +514,28 @@ static ZEND_FUNCTION(zend_object_init_with_constructor)
 	}
 	ZEND_ASSERT(!EG(exception));
 	ZVAL_COPY_VALUE(return_value, &obj);
+}
+
+static ZEND_FUNCTION(zend_call_method_if_exists)
+{
+	zend_object *obj = NULL;
+	zend_string *method_name;
+	uint32_t num_args = 0;
+	zval *args = NULL;
+	ZEND_PARSE_PARAMETERS_START(2, -1)
+		Z_PARAM_OBJ(obj)
+		Z_PARAM_STR(method_name)
+		Z_PARAM_VARIADIC('*', args, num_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_result status = zend_call_method_if_exists(obj, method_name, return_value, num_args, args);
+	if (status == FAILURE) {
+		ZEND_ASSERT(Z_ISUNDEF_P(return_value));
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+		RETURN_NULL();
+	}
 }
 
 static ZEND_FUNCTION(zend_get_unit_enum)
@@ -1622,4 +1646,11 @@ static PHP_FUNCTION(zend_test_gh18756)
 	zend_mm_gc(heap);
 	zend_mm_gc(heap);
 	zend_mm_shutdown(heap, true, false);
+}
+
+static PHP_FUNCTION(zend_test_opcache_preloading)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_BOOL(opcache_preloading());
 }
