@@ -125,6 +125,13 @@ static void validate_attribute(
 		msg = "Cannot apply #[\\Attribute] to abstract class %s";
 	}
 	if (msg != NULL) {
+		if (target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION) {
+			return;
+		}
+		if (target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) {
+			zend_throw_error(NULL, msg, ZSTR_VAL(scope->name));
+			return;
+		}
 		zend_error_noreturn(E_ERROR, msg, ZSTR_VAL(scope->name));
 	}
 }
