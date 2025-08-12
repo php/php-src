@@ -352,6 +352,57 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	return NULL;
 }
 
+static bool php_stream_unwrap_content(php_stream_context *context, zend_string **str_out, php_stream **stream_out)
+{
+	zval *content = php_stream_context_get_option(context, "http", "content");
+	if (content) {
+		if (Z_TYPE_P(content) == IS_STRING && Z_STRLEN_P(content) > 0) {
+			*str_out = Z_STR_P(content);
+			return true;
+		} else if (Z_TYPE_P(content) == IS_RESOURCE) {
+			*stream_out = php_stream_from_zval_no_verify_no_error(content);
+			if (*stream_out) {
+				/* Note: at this point we don't know whether the stream is seekable, we can only know for sure by trying. */
+				return true;
+			} else {
+				const char *space;
+				const char *class_name = get_active_class_name(&space);
+				zend_type_error("%s%s%s(): \"content\" resource is not a valid stream resource", class_name, space, get_active_function_name());
+			}
+		}
+	}
+
+	return false;
+}
+
+static bool php_stream_append_content_length(smart_str *req_buf, zend_string **content_str, php_stream **content_stream, bool *content_str_tmp)
+{
+	smart_str_appends(req_buf, "Content-Length: ");
+	if (*content_str) {
+		smart_str_append_unsigned(req_buf, ZSTR_LEN(*content_str));
+	} else {
+		zend_off_t current_position = php_stream_tell(*content_stream);
+		if (php_stream_seek(*content_stream, 0, SEEK_END) < 0) {
+			*content_str = php_stream_copy_to_mem(*content_stream, PHP_STREAM_COPY_ALL, false);
+			*content_stream = NULL;
+			if (*content_str) {
+				*content_str_tmp = true;
+				smart_str_append_unsigned(req_buf, ZSTR_LEN(*content_str));
+			} else {
+				return false;
+			}
+		} else {
+			zend_off_t end_position = php_stream_tell(*content_stream);
+			if (php_stream_seek(*content_stream, current_position, SEEK_SET) < 0) {
+				return false;
+			}
+			smart_str_append_unsigned(req_buf, end_position - current_position);
+		}
+	}
+	smart_str_appends(req_buf, "\r\n");
+	return true;
+}
+
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		const char *path, const char *mode, int options, zend_string **opened_path,
 		php_stream_context *context, int redirect_max, int flags,
@@ -828,6 +879,10 @@ finish:
 		}
 	}
 
+	zend_string *content_str = NULL;
+	php_stream *content_stream = NULL;
+	bool content_str_tmp = false;
+
 	if (user_headers) {
 		/* A bit weird, but some servers require that Content-Length be sent prior to Content-Type for POST
 		 * see bug #44603 for details. Since Content-Type maybe part of user's headers we need to do this check first.
@@ -836,41 +891,77 @@ finish:
 				(header_init || redirect_keep_method) &&
 				context &&
 				!(have_header & HTTP_HEADER_CONTENT_LENGTH) &&
-				(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
-				Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0
+				php_stream_unwrap_content(context, &content_str, &content_stream)
 		) {
-			smart_str_appends(&req_buf, "Content-Length: ");
-			smart_str_append_unsigned(&req_buf, Z_STRLEN_P(tmpzval));
-			smart_str_appends(&req_buf, "\r\n");
+			if (!php_stream_append_content_length(&req_buf, &content_str, &content_stream, &content_str_tmp)) {
+				php_stream_close(stream);
+				stream = NULL;
+				efree(user_headers);
+				php_stream_wrapper_log_error(wrapper, options, "Unable to determine length of \"content\" stream!");
+				goto out;
+			}
 			have_header |= HTTP_HEADER_CONTENT_LENGTH;
 		}
 
 		smart_str_appends(&req_buf, user_headers);
 		smart_str_appends(&req_buf, "\r\n");
 		efree(user_headers);
+
+		/* php_stream_unwrap_content() may throw a TypeError for non-stream resources */
+		if (UNEXPECTED(EG(exception))) {
+			if (content_str_tmp) {
+				zend_string_efree(content_str);
+			}
+			php_stream_close(stream);
+			stream = NULL;
+			goto out;
+		}
 	}
 
 	/* Request content, such as for POST requests */
 	if ((header_init || redirect_keep_method) && context &&
-		(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
-		Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
+		(content_str || content_stream || php_stream_unwrap_content(context, &content_str, &content_stream))) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
-			smart_str_appends(&req_buf, "Content-Length: ");
-			smart_str_append_unsigned(&req_buf, Z_STRLEN_P(tmpzval));
-			smart_str_appends(&req_buf, "\r\n");
+			if (!php_stream_append_content_length(&req_buf, &content_str, &content_stream, &content_str_tmp)) {
+				php_stream_close(stream);
+				stream = NULL;
+				php_stream_wrapper_log_error(wrapper, options, "Unable to determine length of \"content\" stream!");
+				goto out;
+			}
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
 			smart_str_appends(&req_buf, "Content-Type: application/x-www-form-urlencoded\r\n");
 			php_error_docref(NULL, E_NOTICE, "Content-type not specified assuming application/x-www-form-urlencoded");
 		}
 		smart_str_appends(&req_buf, "\r\n");
-		smart_str_appendl(&req_buf, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
-	} else {
-		smart_str_appends(&req_buf, "\r\n");
-	}
+		if (content_str) {
+			smart_str_append(&req_buf, content_str);
+			php_stream_write(stream, ZSTR_VAL(req_buf.s), ZSTR_LEN(req_buf.s));
 
-	/* send it */
-	php_stream_write(stream, ZSTR_VAL(req_buf.s), ZSTR_LEN(req_buf.s));
+			if (content_str_tmp) {
+				zend_string_efree(content_str);
+			}
+		} else {
+			php_stream_write(stream, ZSTR_VAL(req_buf.s), ZSTR_LEN(req_buf.s));
+
+			if (SUCCESS != php_stream_copy_to_stream_ex(content_stream, stream, PHP_STREAM_COPY_ALL, NULL)) {
+				php_stream_close(stream);
+				stream = NULL;
+				php_stream_wrapper_log_error(wrapper, options, "Unable to copy \"content\" stream!");
+				goto out;
+			}
+		}
+	} else {
+		/* php_stream_unwrap_content() may throw a TypeError for non-stream resources */
+		if (UNEXPECTED(EG(exception))) {
+			php_stream_close(stream);
+			stream = NULL;
+			goto out;
+		}
+
+		smart_str_appends(&req_buf, "\r\n");
+		php_stream_write(stream, ZSTR_VAL(req_buf.s), ZSTR_LEN(req_buf.s));
+	}
 
 	if (Z_ISUNDEF_P(response_header)) {
 		array_init(response_header);
