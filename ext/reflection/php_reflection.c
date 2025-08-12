@@ -4855,6 +4855,11 @@ ZEND_METHOD(ReflectionClass, getConstant)
 		}
 	} ZEND_HASH_FOREACH_END();
 	if ((c = zend_hash_find_ptr(constants_table, name)) == NULL) {
+		zend_error(
+			E_DEPRECATED,
+			"ReflectionClass::getConstant() for a non-existent constant is deprecated, "
+				"use ReflectionClass::hasConstant() to check if the constant exists"
+		);
 		RETURN_FALSE;
 	}
 	ZVAL_COPY_OR_DUP(return_value, &c->value);
