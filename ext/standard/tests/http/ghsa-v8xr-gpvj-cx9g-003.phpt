@@ -32,7 +32,7 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create();
     stream_context_set_params($ctx, array("notification" => "stream_notification_callback"));
     var_dump(trim(file_get_contents("http://{{ ADDR }}", false, $ctx)));
-    var_dump($http_response_header);
+    var_dump(http_get_last_response_headers());
 CODE;
 
 include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
