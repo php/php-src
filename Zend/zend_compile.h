@@ -254,7 +254,10 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 <<  6) /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Property Flags (unused: 13...)                         |     |     |     */
+/* has #[\Override] attribute                             |     |     |     */
+#define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |  X  |     */
+/*                                                        |     |     |     */
+/* Property Flags (unused: 13-27,29...)                   |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Promoted property / parameter                          |     |     |     */
@@ -392,9 +395,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* supports opcache compile-time evaluation (funcs)       |     |     |     */
 #define ZEND_ACC_COMPILE_TIME_EVAL       (1 << 27) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* has #[\Override] attribute                             |     |     |     */
-#define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Has IS_PTR operands that needs special cleaning; same  |     |     |     */
 /* value as ZEND_ACC_OVERRIDE but override is for class   |     |     |     */

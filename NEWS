@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . The backtick operator as an alias for shell_exec() has been deprecated.
     (timwolla)
   . Returning null from __debugInfo() has been deprecated. (DanielEScherzer)
+  . Support #[\Override] on properties. (Jiří Pudil)
 
 - Curl:
   . The curl_close() function has been deprecated. (DanielEScherzer)
