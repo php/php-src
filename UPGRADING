@@ -50,6 +50,9 @@ PHP 8.5 UPGRADE NOTES
     immediately, without calling user-defined error handlers.
   . Exceptions thrown by user-defined error handlers when handling class linking
     errors are not promoted to fatal errors anymore and do not prevent linking.
+  . Applying #[\Attribute] to an abstract class, enum, interface, or trait triggers
+    an error during compilation. Previously, the attribute could be added, but when
+    ReflectionAttribute::newInstance() was called an error would be thrown.
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
@@ -322,6 +325,9 @@ PHP 8.5 UPGRADE NOTES
   . The $exclude_disabled parameter of the get_defined_functions() function has
     been deprecated, as it no longer has any effect since PHP 8.0.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_exclude_disabled_parameter_of_get_defined_functions
+  . Terminating case statements with a semicolon instead of a colon has
+    been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_semicolon_after_case_in_switch_statement
 
 - FileInfo:
   . The finfo_close() function has been deprecated.
@@ -412,6 +418,8 @@ PHP 8.5 UPGRADE NOTES
 - OpenSSL:
   . openssl_public_encrypt() and openssl_private_decrypt() have new parameter
     $digest_algo that allows specifying hash digest algorithm for OEAP padding.
+  . openssl_sign() and openssl_verify() have new parameter $padding to allow
+    using more secure RSA PSS padding.
 
 - PCNTL:
   . pcntl_exec() now has a formal return type of false.
@@ -664,6 +672,13 @@ PHP 8.5 UPGRADE NOTES
   . DECIMAL_COMPACT_SHORT.
   . DECIMAL_COMPACT_LONG.
 
+- OpenSSL:
+  . OPENSSL_PKCS1_PSS_PADDING
+  . PKCS7_NOSMIMECAP
+  . PKCS7_CRLFEOL
+  . PKCS7_NOCRL
+  . PKCS7_NO_DUAL_CONTENT
+
 - POSIX:
   . POSIX_SC_OPEN_MAX.
 
@@ -722,9 +737,9 @@ PHP 8.5 UPGRADE NOTES
     showing misleading values in PHPInfo.
 
 - OpenSSL:
-  Added openssl.libctx to select the OpenSSL library context type. Either
-  custom libctx for each thread can be used or a single global (default)
-  libctx is used.
+  . Added openssl.libctx to select the OpenSSL library context type. Either
+    custom libctx for each thread can be used or a single global (default)
+    libctx is used.
 
 ========================================
 12. Windows Support

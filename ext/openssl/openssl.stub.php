@@ -166,6 +166,26 @@ const PKCS7_NOSIGS = UNKNOWN;
  * @cvalue PKCS7_NOOLDMIMETYPE
  */
 const PKCS7_NOOLDMIMETYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOSMIMECAP
+ */
+const PKCS7_NOSMIMECAP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_CRLFEOL
+ */
+const PKCS7_CRLFEOL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOCRL
+ */
+const PKCS7_NOCRL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NO_DUAL_CONTENT
+ */
+const PKCS7_NO_DUAL_CONTENT = UNKNOWN;
 
 /**
  * @var int
@@ -236,6 +256,11 @@ const OPENSSL_NO_PADDING = UNKNOWN;
  * @cvalue RSA_PKCS1_OAEP_PADDING
  */
 const OPENSSL_PKCS1_OAEP_PADDING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue RSA_PKCS1_PSS_PADDING
+ */
+const OPENSSL_PKCS1_PSS_PADDING = UNKNOWN;
 
 /* Informational stream wrapper constants */
 
@@ -595,10 +620,10 @@ function openssl_error_string(): string|false {}
  * @param string $signature
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1): bool {}
+function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key */
-function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1): int|false {}
+function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0): int|false {}
 
 /**
  * @param string $sealed_data
