@@ -629,6 +629,7 @@ function imagegd2(GdImage $image, ?string $file = null, int $chunk_size = 128, i
 /** @param resource|string|null $file */
 function imagebmp(GdImage $image, $file = null, bool $compressed = true): bool {}
 
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function imagedestroy(GdImage $image): true {}
 
 function imagecolorallocate(GdImage $image, int $red, int $green, int $blue): int|false {}
