@@ -2274,6 +2274,12 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 				php_stream_close(xparam->outputs.client);
 				xparam->outputs.client = NULL;
 				xparam->outputs.returncode = -1;
+				if (xparam->want_errortext) {
+					if (xparam->outputs.error_text) {
+						zend_string_free(xparam->outputs.error_text);
+					}
+					xparam->outputs.error_text = ZSTR_INIT_LITERAL("Cannot enable crypto", 0);
+				}
 			}
 		}
 	}
