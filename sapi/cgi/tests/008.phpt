@@ -30,8 +30,12 @@ $o = new test;
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -s "$filename"`);
-var_dump(`"$php" -n -s "unknown"`);
+var_dump(shell_exec(<<<SHELL
+"$php" -n -s "$filename"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+"$php" -n -s "unknown"
+SHELL));
 
 @unlink($filename);
 

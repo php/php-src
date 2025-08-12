@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     been deprecated, as it no longer has any effect since PHP 8.0. (Girgias)
   . Terminating case statements with a semicolon instead of a colon has
     been deprecated. (theodorejb)
+  . The backtick operator as an alias for shell_exec() has been deprecated.
+    (timwolla)
 
 - DOM:
   . Fixed bug GH-18877 (\Dom\HTMLDocument querySelectorAll selecting only the

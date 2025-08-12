@@ -10847,6 +10847,8 @@ static void zend_compile_shell_exec(znode *result, zend_ast *ast) /* {{{ */
 	zval fn_name;
 	zend_ast *name_ast, *args_ast, *call_ast;
 
+	zend_error(E_DEPRECATED, "The backtick (`) operator is deprecated, use shell_exec() instead");
+
 	ZVAL_STRING(&fn_name, "shell_exec");
 	name_ast = zend_ast_create_zval(&fn_name);
 	args_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast);

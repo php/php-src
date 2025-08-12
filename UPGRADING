@@ -328,6 +328,8 @@ PHP 8.5 UPGRADE NOTES
   . Terminating case statements with a semicolon instead of a colon has
     been deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_semicolon_after_case_in_switch_statement
+  . The backtick operator as an alias for shell_exec() has been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_backticks_as_an_alias_for_shell_exec
 
 - FileInfo:
   . The finfo_close() function has been deprecated.
