@@ -223,6 +223,8 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 			return Z_ARRVAL(retval);
 		}
 	} else if (Z_TYPE(retval) == IS_NULL) {
+		zend_error(E_DEPRECATED, "Returning null from %s::__debugInfo() is deprecated, return an empty array instead",
+			ZSTR_VAL(ce->name));
 		*is_temp = 1;
 		ht = zend_new_array(0);
 		return ht;
