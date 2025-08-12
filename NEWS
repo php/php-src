@@ -11,6 +11,11 @@ PHP                                                                        NEWS
     been deprecated. (theodorejb)
   . The backtick operator as an alias for shell_exec() has been deprecated.
     (timwolla)
+  . Returning null from __debugInfo() has been deprecated. (DanielEScherzer)
+
+- Date:
+  . The DATE_RFC7231 and DateTimeInterface::RFC7231 constants have been
+    deprecated. (jorgsowa)
 
 - DOM:
   . Fixed bug GH-18877 (\Dom\HTMLDocument querySelectorAll selecting only the

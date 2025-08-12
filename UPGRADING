@@ -330,6 +330,15 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_semicolon_after_case_in_switch_statement
   . The backtick operator as an alias for shell_exec() has been deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_backticks_as_an_alias_for_shell_exec
+  . Returning null from __debugInfo() has been deprecated.
+    Return an empty array instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_debuginfo_returning_null
+
+- Date:
+  . The DATE_RFC7231 and DateTimeInterface::RFC7231 constants have been
+    deprecated. This is because the associated timezone is ignored and always
+    uses GMT.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_date_rfc7231_and_datetimeinterfacerfc7231
 
 - FileInfo:
   . The finfo_close() function has been deprecated.
