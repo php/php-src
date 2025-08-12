@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.13
 
+- OpenSSL:
+  . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
+    (Jakub Zelenka)
 
 28 Aug 2025, PHP 8.4.12
 
