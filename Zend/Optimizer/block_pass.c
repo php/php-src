@@ -420,6 +420,14 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
+			case ZEND_EXT_STMT:
+				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+					/* Variable will be deleted later by FREE, so we can't optimize it */
+					Tsource[VAR_NUM(opline->op1.var)] = NULL;
+					break;
+				}
+				break;
+
 			case ZEND_CASE:
 			case ZEND_CASE_STRICT:
 			case ZEND_COPY_TMP:

@@ -903,7 +903,8 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_MATCH_ERROR
 	 || opline->opcode == ZEND_FETCH_LIST_R
 	 || opline->opcode == ZEND_FETCH_LIST_W
-	 || opline->opcode == ZEND_COPY_TMP) {
+	 || opline->opcode == ZEND_COPY_TMP
+	 || opline->opcode == ZEND_EXT_STMT) {
 		return 1;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R
