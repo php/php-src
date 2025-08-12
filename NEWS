@@ -13,6 +13,10 @@ PHP                                                                        NEWS
     (timwolla)
   . Returning null from __debugInfo() has been deprecated. (DanielEScherzer)
 
+- Curl:
+  . The curl_close() function has been deprecated. (DanielEScherzer)
+  . The curl_share_close() function has been deprecated. (DanielEScherzer)
+
 - Date:
   . The DATE_RFC7231 and DateTimeInterface::RFC7231 constants have been
     deprecated. (jorgsowa)
@@ -25,6 +29,9 @@ PHP                                                                        NEWS
   . The finfo_close() function has been deprecated. (timwolla)
   . The $context parameter of the finfo_buffer() function has been deprecated
     as it is ignored. (Girgias)
+
+- GD:
+  . The imagedestroy() function has been deprecated. (DanielEScherzer)
 
 - Intl:
   . Intl's internal error mechanism has been modernized so that it
@@ -55,6 +62,10 @@ PHP                                                                        NEWS
     `_property_string()`). (DanielEScherzer)
   . The setAccessible() methods of various Reflection objects have been
     deprecated, as those no longer have an effect. (timwolla)
+  . ReflectionClass::getConstant() for constants that do not exist has been
+    deprecated. (DanielEScherzer)
+  . ReflectionProperty::getDefaultValue() for properties without default values
+    has been deprecated. (DanielEScherzer)
 
 - SPL:
   . Unregistering all autoloaders by passing the spl_autoload_call() function
@@ -73,6 +84,9 @@ PHP                                                                        NEWS
     opened directory has been deprecated. (Girgias)
   . Fixed bug GH-19153 (#[\Attribute] validation should error on
     trait/interface/enum/abstract class). (DanielEScherzer)
+
+- XML:
+  . The xml_parser_free() function has been deprecated. (DanielEScherzer)
 
 31 Jul 2025, PHP 8.5.0alpha4
 
