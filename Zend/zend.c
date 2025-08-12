@@ -278,6 +278,7 @@ ZEND_INI_BEGIN()
 	/* Subtracted from the max allowed stack size, as a buffer, when checking for overflow. 0: auto detect. */
 	STD_ZEND_INI_ENTRY("zend.reserved_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateReservedStackSize,	reserved_stack_size,		zend_executor_globals,	executor_globals)
 #endif
+	STD_ZEND_INI_BOOLEAN("zend.portable_build",		"0",	ZEND_INI_SYSTEM,	OnUpdateBool, portable_build, zend_executor_globals, executor_globals)
 
 ZEND_INI_END()
 
