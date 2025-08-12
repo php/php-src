@@ -7,7 +7,7 @@ version string
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n -v`);
+var_dump(shell_exec("$php -n -v"));
 
 echo "Done\n";
 ?>

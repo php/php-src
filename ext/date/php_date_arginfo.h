@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c9dba59a68085579d18948963a979d63eecff204 */
+ * Stub hash: db70e6a06d177d2cb6e4a47379c0b761b248f380 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -798,7 +798,7 @@ static void register_php_date_symbols(int module_number)
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC1036, "D, d M y H:i:s O") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RFC1123", DATE_FORMAT_RFC1123, CONST_PERSISTENT);
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC1123, "D, d M Y H:i:s O") == 0);
-	REGISTER_STRING_CONSTANT("DATE_RFC7231", DATE_FORMAT_RFC7231, CONST_PERSISTENT);
+	zend_constant *const_DATE_RFC7231 = REGISTER_STRING_CONSTANT("DATE_RFC7231", DATE_FORMAT_RFC7231, CONST_PERSISTENT | CONST_DEPRECATED);
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC7231, "D, d M Y H:i:s \\G\\M\\T") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_PERSISTENT);
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC2822, "D, d M Y H:i:s O") == 0);
@@ -838,6 +838,13 @@ static void register_php_date_symbols(int module_number)
 	attribute_Deprecated_func_date_sunset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	ZVAL_STR_COPY(&attribute_Deprecated_func_date_sunset_0->args[1].value, attribute_Deprecated_func_date_sunrise_0_arg1_str);
 	attribute_Deprecated_func_date_sunset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_DATE_RFC7231_0 = zend_add_global_constant_attribute(const_DATE_RFC7231, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_DATE_RFC7231_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_DATE_RFC7231_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_DATE_RFC7231_0_arg1_str = zend_string_init("as this format ignores the associated timezone and always uses GMT", strlen("as this format ignores the associated timezone and always uses GMT"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_DATE_RFC7231_0->args[1].value, attribute_Deprecated_const_DATE_RFC7231_0_arg1_str);
+	attribute_Deprecated_const_DATE_RFC7231_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0 = zend_add_global_constant_attribute(const_SUNFUNCS_RET_TIMESTAMP, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_SUNFUNCS_RET_TIMESTAMP_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
@@ -926,7 +933,7 @@ static zend_class_entry *register_class_DateTimeInterface(void)
 	zend_string *const_RFC7231_value_str = zend_string_init(DATE_FORMAT_RFC7231, strlen(DATE_FORMAT_RFC7231), 1);
 	ZVAL_STR(&const_RFC7231_value, const_RFC7231_value_str);
 	zend_string *const_RFC7231_name = zend_string_init_interned("RFC7231", sizeof("RFC7231") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_RFC7231_name, &const_RFC7231_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_class_constant *const_RFC7231 = zend_declare_typed_class_constant(class_entry, const_RFC7231_name, &const_RFC7231_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(const_RFC7231_name);
 
 	zval const_RFC2822_value;
@@ -963,6 +970,14 @@ static zend_class_entry *register_class_DateTimeInterface(void)
 	zend_string *const_W3C_name = zend_string_init_interned("W3C", sizeof("W3C") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_W3C_name, &const_W3C_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(const_W3C_name);
+
+
+	zend_attribute *attribute_Deprecated_const_RFC7231_0 = zend_add_class_constant_attribute(class_entry, const_RFC7231, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_RFC7231_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_RFC7231_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_RFC7231_0_arg1_str = zend_string_init("as this format ignores the associated timezone and always uses GMT", strlen("as this format ignores the associated timezone and always uses GMT"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_RFC7231_0->args[1].value, attribute_Deprecated_const_RFC7231_0_arg1_str);
+	attribute_Deprecated_const_RFC7231_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }

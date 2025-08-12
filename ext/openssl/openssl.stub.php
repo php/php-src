@@ -166,6 +166,26 @@ const PKCS7_NOSIGS = UNKNOWN;
  * @cvalue PKCS7_NOOLDMIMETYPE
  */
 const PKCS7_NOOLDMIMETYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOSMIMECAP
+ */
+const PKCS7_NOSMIMECAP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_CRLFEOL
+ */
+const PKCS7_CRLFEOL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOCRL
+ */
+const PKCS7_NOCRL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NO_DUAL_CONTENT
+ */
+const PKCS7_NO_DUAL_CONTENT = UNKNOWN;
 
 /**
  * @var int

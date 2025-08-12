@@ -821,7 +821,8 @@ static void zend_do_free(znode *op1) /* {{{ */
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
 				if ((opline->opcode == ZEND_FETCH_LIST_R ||
-				     opline->opcode == ZEND_FETCH_LIST_W) &&
+				     opline->opcode == ZEND_FETCH_LIST_W ||
+				     opline->opcode == ZEND_EXT_STMT) &&
 				    opline->op1_type == IS_VAR &&
 				    opline->op1.var == op1->u.op.var) {
 					zend_emit_op(NULL, ZEND_FREE, op1, NULL);
@@ -1920,7 +1921,7 @@ static void zend_add_to_list(void *result, void *item) /* {{{ */
 }
 /* }}} */
 
-static void zend_do_extended_stmt(void) /* {{{ */
+static void zend_do_extended_stmt(znode* result) /* {{{ */
 {
 	zend_op *opline;
 
@@ -1931,6 +1932,9 @@ static void zend_do_extended_stmt(void) /* {{{ */
 	opline = get_next_op();
 
 	opline->opcode = ZEND_EXT_STMT;
+	if (result) {
+		SET_NODE(opline->op1, result);
+	}
 }
 /* }}} */
 
@@ -6050,7 +6054,7 @@ static void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	zend_update_jump_target_to_next(opnum_jmp);
 	zend_compile_for_expr_list(&result, cond_ast);
-	zend_do_extended_stmt();
+	zend_do_extended_stmt(NULL);
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &result, opnum_start);
 
@@ -6171,7 +6175,7 @@ static void zend_compile_if(zend_ast *ast) /* {{{ */
 
 			if (i > 0) {
 				CG(zend_lineno) = cond_ast->lineno;
-				zend_do_extended_stmt();
+				zend_do_extended_stmt(NULL);
 			}
 
 			zend_compile_expr(&cond_node, cond_ast);
@@ -6505,6 +6509,8 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 	}
 
 	zend_compile_expr(result, fcall_ast);
+	CG(zend_lineno) = fcall_ast->lineno;
+	zend_do_extended_stmt(result);
 }
 
 static void zend_compile_match(znode *result, zend_ast *ast)
@@ -8542,7 +8548,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 	/* put the implicit return on the really last line */
 	CG(zend_lineno) = decl->end_lineno;
 
-	zend_do_extended_stmt();
+	zend_do_extended_stmt(NULL);
 	zend_emit_final_return(0);
 
 	pass_two(CG(active_op_array));
@@ -10851,6 +10857,8 @@ static void zend_compile_shell_exec(znode *result, zend_ast *ast) /* {{{ */
 	zval fn_name;
 	zend_ast *name_ast, *args_ast, *call_ast;
 
+	zend_error(E_DEPRECATED, "The backtick (`) operator is deprecated, use shell_exec() instead");
+
 	ZVAL_STRING(&fn_name, "shell_exec");
 	name_ast = zend_ast_create_zval(&fn_name);
 	args_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast);
@@ -11617,7 +11625,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 	CG(zend_lineno) = ast->lineno;
 
 	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) && !zend_is_unticked_stmt(ast)) {
-		zend_do_extended_stmt();
+		zend_do_extended_stmt(NULL);
 	}
 
 	switch (ast->kind) {

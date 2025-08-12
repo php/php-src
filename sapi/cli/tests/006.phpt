@@ -17,9 +17,11 @@ date.timezone=UTC
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n --re unknown`);
-var_dump(`$php -n --re ""`);
-var_dump(`$php -n --re pcre`);
+var_dump(shell_exec("$php -n --re unknown"));
+var_dump(shell_exec(<<<SHELL
+$php -n --re ""
+SHELL));
+var_dump(shell_exec("$php -n --re pcre"));
 
 echo "Done\n";
 ?>

@@ -9,7 +9,7 @@ require_once "tester.inc";
 
 $php = \FPM\Tester::findExecutable();
 
-var_dump(`$php -n -v`);
+var_dump(shell_exec("$php -n -v"));
 
 echo "Done\n";
 ?>

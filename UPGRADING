@@ -50,6 +50,9 @@ PHP 8.5 UPGRADE NOTES
     immediately, without calling user-defined error handlers.
   . Exceptions thrown by user-defined error handlers when handling class linking
     errors are not promoted to fatal errors anymore and do not prevent linking.
+  . Applying #[\Attribute] to an abstract class, enum, interface, or trait triggers
+    an error during compilation. Previously, the attribute could be added, but when
+    ReflectionAttribute::newInstance() was called an error would be thrown.
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
@@ -325,6 +328,17 @@ PHP 8.5 UPGRADE NOTES
   . Terminating case statements with a semicolon instead of a colon has
     been deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_semicolon_after_case_in_switch_statement
+  . The backtick operator as an alias for shell_exec() has been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_backticks_as_an_alias_for_shell_exec
+  . Returning null from __debugInfo() has been deprecated.
+    Return an empty array instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_debuginfo_returning_null
+
+- Date:
+  . The DATE_RFC7231 and DateTimeInterface::RFC7231 constants have been
+    deprecated. This is because the associated timezone is ignored and always
+    uses GMT.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_date_rfc7231_and_datetimeinterfacerfc7231
 
 - FileInfo:
   . The finfo_close() function has been deprecated.
@@ -671,6 +685,10 @@ PHP 8.5 UPGRADE NOTES
 
 - OpenSSL:
   . OPENSSL_PKCS1_PSS_PADDING
+  . PKCS7_NOSMIMECAP
+  . PKCS7_CRLFEOL
+  . PKCS7_NOCRL
+  . PKCS7_NO_DUAL_CONTENT
 
 - POSIX:
   . POSIX_SC_OPEN_MAX.

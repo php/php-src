@@ -14658,6 +14658,13 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	ir_ref slow_inputs = IR_UNUSED;
 	uint32_t res_info = RES_INFO();
 
+	if (Z_MODE(val_addr) == IS_REG
+	 && Z_LOAD(val_addr)
+	 && jit->ra[Z_SSA_VAR(val_addr)].ref == IR_NULL) {
+		/* Force load */
+		zend_jit_use_reg(jit, val_addr);
+	}
+
 	if (val_addr != val_def_addr && val_def_addr) {
 		if (!zend_jit_update_regs(jit, (opline+1)->op1.var, val_addr, val_def_addr, val_info)) {
 			return 0;
