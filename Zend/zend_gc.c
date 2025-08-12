@@ -1258,8 +1258,8 @@ static void gc_compact(void)
 }
 
 /* For all roots marked purple, traverse the graph, decrementing the reference
- * count of visited nodes. Mark visited nodes grey so that their reference
- * counts will only be decremented once. See MarkRoots() in Bacon & Rajan. */
+ * count of their child nodes. Mark visited nodes grey so that they are not
+ * visited again. See MarkRoots() in Bacon & Rajan. */
 static void gc_mark_roots(gc_stack *stack)
 {
 	gc_root_buffer *current, *last;
