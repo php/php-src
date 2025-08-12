@@ -2317,14 +2317,11 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 
 void zend_inheritance_check_override(const zend_class_entry *ce)
 {
-	zend_function *f;
-	zend_property_info *prop;
-
 	if (ce->ce_flags & ZEND_ACC_TRAIT) {
 		return;
 	}
 
-	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, f) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zend_function *f) {
 		if (f->common.fn_flags & ZEND_ACC_OVERRIDE) {
 			ZEND_ASSERT(f->type != ZEND_INTERNAL_FUNCTION);
 
@@ -2335,7 +2332,7 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, zend_property_info *prop) {
 		if (prop->flags & ZEND_ACC_OVERRIDE) {
 			zend_error_noreturn(
 				E_COMPILE_ERROR,
@@ -2345,7 +2342,7 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 
 		if (prop->hooks) {
 			for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
-				f = prop->hooks[i];
+				zend_function *f = prop->hooks[i];
 				if (f && f->common.fn_flags & ZEND_ACC_OVERRIDE) {
 					ZEND_ASSERT(f->type != ZEND_INTERNAL_FUNCTION);
 
