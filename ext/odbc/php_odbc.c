@@ -579,10 +579,6 @@ PHP_MINFO_FUNCTION(odbc)
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ODBCG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "ODBC library", PHP_ODBC_TYPE);
-#ifdef ODBCVER
-	snprintf(buf, sizeof(buf), "0x%.4x", ODBCVER);
-	php_info_print_table_row(2, "ODBCVER", buf);
-#endif
 #ifndef PHP_WIN32
 	php_info_print_table_row(2, "ODBC_CFLAGS", PHP_ODBC_CFLAGS);
 	php_info_print_table_row(2, "ODBC_LFLAGS", PHP_ODBC_LFLAGS);
@@ -680,10 +676,10 @@ void odbc_bindcols(odbc_result *result)
 		bool char_extra_alloc = false;
 		colfieldid = SQL_COLUMN_DISPLAY_SIZE;
 
-		rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), PHP_ODBC_SQL_DESC_NAME,
+		rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)(i+1), SQL_DESC_NAME,
 				result->values[i].name, sizeof(result->values[i].name), &colnamelen, 0);
 		result->values[i].coltype = 0;
-		rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_TYPE,
+		rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)(i+1), SQL_COLUMN_TYPE,
 				NULL, 0, NULL, &result->values[i].coltype);
 
 		/* Don't bind LONG / BINARY columns, so that fetch behaviour can
@@ -695,9 +691,7 @@ void odbc_bindcols(odbc_result *result)
 			case SQL_VARBINARY:
 			case SQL_LONGVARBINARY:
 			case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
-#endif
 				result->values[i].value = NULL;
 				break;
 
@@ -710,22 +704,17 @@ void odbc_bindcols(odbc_result *result)
 #endif /* HAVE_ADABAS */
 			case SQL_CHAR:
 			case SQL_VARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WCHAR:
 			case SQL_WVARCHAR:
 				colfieldid = SQL_DESC_OCTET_LENGTH;
-#else
-				char_extra_alloc = true;
-#endif
 				/* TODO: Check this is the intended behaviour */
 				ZEND_FALLTHROUGH;
 			default:
-				rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
+				rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
 								NULL, 0, NULL, &displaysize);
 				if (rc != SQL_SUCCESS) {
 					displaysize = 0;
 				}
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO && colfieldid == SQL_DESC_OCTET_LENGTH) {
 					SQLINTEGER err;
 					SQLCHAR errtxt[128];
@@ -755,7 +744,6 @@ void odbc_bindcols(odbc_result *result)
 					result->values[i].value = NULL;
 					break;
 				}
-#endif
 				/* Workaround for drivers that report VARCHAR(MAX) columns as SQL_VARCHAR (bug #73725) */
 				if (SQL_VARCHAR == result->values[i].coltype && displaysize == 0) {
 					result->values[i].coltype = SQL_LONGVARCHAR;
@@ -844,7 +832,7 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
-	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT) (type?SQL_COLUMN_SCALE:SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+	SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT) (type?SQL_COLUMN_SCALE:SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
 
 	RETURN_LONG(len);
 }
@@ -915,7 +903,7 @@ PHP_FUNCTION(odbc_prepare)
 	result->numparams = 0;
 	result->param_info = NULL;
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -937,7 +925,7 @@ PHP_FUNCTION(odbc_prepare)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			*/
-			SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, ODBCG(default_cursortype));
+			SQLSetStmtAttr(result->stmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER) ODBCG(default_cursortype), 0);
 		}
 	} else {
 		result->fetch_abs = 0;
@@ -1302,7 +1290,7 @@ PHP_FUNCTION(odbc_exec)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -1324,7 +1312,7 @@ PHP_FUNCTION(odbc_exec)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			 */
-			SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, ODBCG(default_cursortype));
+			SQLSetStmtAttr(result->stmt, SQL_ATTR_CURSOR_TYPE, (SQLPOINTER) ODBCG(default_cursortype), 0);
 		}
 	} else {
 		result->fetch_abs = 0;
@@ -1444,9 +1432,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				}
 				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
-#endif
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					ZVAL_EMPTY_STRING(&tmp);
 					break;
@@ -1614,9 +1600,7 @@ PHP_FUNCTION(odbc_fetch_into)
 				/* TODO: Check this is the intended behaviour */
 				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
-#endif
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					ZVAL_EMPTY_STRING(&tmp);
 					break;
@@ -1838,9 +1822,7 @@ PHP_FUNCTION(odbc_result)
 			ZEND_FALLTHROUGH;
 
 		case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 		case SQL_WLONGVARCHAR:
-#endif
 			if (IS_SQL_LONG(result->values[field_ind].coltype)) {
 				if (result->longreadlen <= 0) {
 				   break;
@@ -1848,7 +1830,7 @@ PHP_FUNCTION(odbc_result)
 				   fieldsize = result->longreadlen;
 				}
 			} else {
-			   PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(field_ind + 1),
+			   SQLColAttribute(result->stmt, (SQLUSMALLINT)(field_ind + 1),
 					   			(SQLUSMALLINT)((sql_c_type == SQL_C_BINARY) ? SQL_COLUMN_LENGTH :
 					   			SQL_COLUMN_DISPLAY_SIZE),
 					   			NULL, 0, NULL, &fieldsize);
@@ -1884,10 +1866,7 @@ PHP_FUNCTION(odbc_result)
 			/* Reduce fieldlen by 1 if we have char data. One day we might
 			   have binary strings... */
 			if ((result->values[field_ind].coltype == SQL_LONGVARCHAR)
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
-			    || (result->values[field_ind].coltype == SQL_WLONGVARCHAR)
-#endif
-			) {
+			    || (result->values[field_ind].coltype == SQL_WLONGVARCHAR)) {
 				fieldsize -= 1;
 			}
 			/* Don't duplicate result, saves one emalloc.
@@ -2023,9 +2002,7 @@ PHP_FUNCTION(odbc_result_all)
 					/* TODO: Check this is the intended behaviour */
 					ZEND_FALLTHROUGH;
 				case SQL_LONGVARCHAR:
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 				case SQL_WLONGVARCHAR:
-#endif
 					if (IS_SQL_LONG(result->values[i].coltype) &&
 						result->longreadlen <= 0) {
 						php_printf("<td>Not printable</td>");
@@ -2169,7 +2146,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	}
 #else
 	if (cur_opt != SQL_CUR_DEFAULT) {
-		rc = SQLSetConnectOption(link->connection->hdbc, SQL_ODBC_CURSORS, cur_opt);
+		rc = SQLSetConnectAttr(link->connection->hdbc, SQL_ATTR_ODBC_CURSORS, (SQLPOINTER) (intptr_t) cur_opt, 0);
 		if (rc != SQL_SUCCESS) {  /* && rc != SQL_SUCCESS_WITH_INFO ? */
 			odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SQLSetConnectOption");
 			return false;
@@ -2600,7 +2577,7 @@ PHP_FUNCTION(odbc_field_type)
 		RETURN_FALSE;
 	}
 
-	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
+	SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
 	RETURN_STRING(tmp);
 }
 /* }}} */
@@ -2670,7 +2647,7 @@ PHP_FUNCTION(odbc_autocommit)
 	CHECK_ODBC_CONNECTION(conn);
 
 	if (!pv_onoff_is_null) {
-		rc = SQLSetConnectOption(conn->hdbc, SQL_AUTOCOMMIT, pv_onoff ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF);
+		rc = SQLSetConnectAttr(conn->hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) (intptr_t) (pv_onoff ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), 0);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			odbc_sql_error(conn, SQL_NULL_HSTMT, "Set autocommit");
 			RETURN_FALSE;
@@ -2679,7 +2656,7 @@ PHP_FUNCTION(odbc_autocommit)
 	} else {
 		SQLINTEGER status;
 
-		rc = SQLGetConnectOption(conn->hdbc, SQL_AUTOCOMMIT, (PTR)&status);
+		rc = SQLGetConnectAttr(conn->hdbc, SQL_ATTR_AUTOCOMMIT, &status, SQL_IS_INTEGER, NULL);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			odbc_sql_error(conn, SQL_NULL_HSTMT, "Get commit status");
 			RETURN_FALSE;
@@ -2781,7 +2758,7 @@ PHP_FUNCTION(odbc_setoption)
 				php_error_docref(NULL, E_WARNING, "Unable to set option for persistent connection");
 				RETURN_FALSE;
 			}
-			rc = SQLSetConnectOption(link->connection->hdbc, (unsigned short) pv_opt, pv_val);
+			rc = SQLSetConnectAttr(link->connection->hdbc, pv_opt, (SQLPOINTER) pv_val, 0);
 			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 				odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SetConnectOption");
 				RETURN_FALSE;
@@ -2795,7 +2772,7 @@ PHP_FUNCTION(odbc_setoption)
 			result = Z_ODBC_RESULT_P(pv_handle);
 			CHECK_ODBC_RESULT(result);
 
-			rc = SQLSetStmtOption(result->stmt, (unsigned short) pv_opt, pv_val);
+			rc = SQLSetStmtAttr(result->stmt, pv_opt, (SQLPOINTER) pv_val, 0);
 
 			if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 				odbc_sql_error(result->conn_ptr, result->stmt, "SetStmtOption");
@@ -2835,7 +2812,7 @@ PHP_FUNCTION(odbc_tables)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -2900,7 +2877,7 @@ PHP_FUNCTION(odbc_columns)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -2968,7 +2945,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3042,7 +3019,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3106,7 +3083,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3161,7 +3138,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3221,7 +3198,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3282,7 +3259,7 @@ PHP_FUNCTION(odbc_procedures)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3348,7 +3325,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3414,7 +3391,7 @@ PHP_FUNCTION(odbc_statistics)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3475,7 +3452,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);

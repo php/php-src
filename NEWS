@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0beta2
 
+- ODBC:
+  . Remove ODBCVER and assume ODBC 3.5. (Calvin Buckley)
+
 - OpenSSL:
   . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
     (Jakub Zelenka)

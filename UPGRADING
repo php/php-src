@@ -80,6 +80,10 @@ PHP 8.5 UPGRADE NOTES
   . Calling the mysqli constructor on an already-constructed object
     is now no longer possible and throws an Error.
 
+- ODBC:
+  . ODBC now assumes that at least ODBC 3.5 functionality is available. The
+    ODBCVER definition and build system flags to control it have been removed.
+
 - Opcache:
   . The Opcache extension is now always built into the PHP binary and is always
     loaded. The INI directives opcache.enable and opcache.enable_cli are still

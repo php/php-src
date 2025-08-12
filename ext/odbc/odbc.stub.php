@@ -233,8 +233,6 @@ namespace {
      * @cvalue SQL_TIMESTAMP
      */
     const SQL_TIMESTAMP = UNKNOWN;
-
-#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
     /**
      * @var int
      * @cvalue SQL_TYPE_DATE
@@ -326,8 +324,6 @@ namespace {
      * @cvalue SQL_QUICK
      */
     const SQL_QUICK = UNKNOWN;
-
-#endif
 
     function odbc_close_all(): void {}
 

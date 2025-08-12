@@ -102,7 +102,6 @@
 #endif
 
 #define ODBC_TYPE "unixODBC"
-#undef ODBCVER
 #include <sql.h>
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
@@ -132,8 +131,6 @@
 #elif defined(HAVE_DBMAKER) /* DBMaker */
 
 #define ODBC_TYPE "DBMaker"
-#undef ODBCVER
-#define ODBCVER 0x0300
 #define HAVE_SQL_EXTENDED_FETCH 1
 #include <odbc.h>
 
@@ -265,21 +262,8 @@ void odbc_bindcols(odbc_result *result);
 
 void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
 #define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR || x == SQL_WLONGVARCHAR)
 
-#define PHP_ODBC_SQLCOLATTRIBUTE SQLColAttribute
-#define PHP_ODBC_SQLALLOCSTMT(hdbc, phstmt) SQLAllocHandle(SQL_HANDLE_STMT, hdbc, phstmt)
-
-#define PHP_ODBC_SQL_DESC_NAME SQL_DESC_NAME
-#else
-#define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR)
-
-#define PHP_ODBC_SQLCOLATTRIBUTE SQLColAttributes
-#define PHP_ODBC_SQLALLOCSTMT SQLAllocStmt
-
-#define PHP_ODBC_SQL_DESC_NAME SQL_COLUMN_NAME
-#endif
 #define IS_SQL_BINARY(x) (x == SQL_BINARY || x == SQL_VARBINARY || x == SQL_LONGVARBINARY)
 
 PHP_ODBC_API ZEND_EXTERN_MODULE_GLOBALS(odbc)
