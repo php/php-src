@@ -3740,6 +3740,7 @@ final class CurlSharePersistentHandle
     public readonly array $options;
 }
 
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function curl_close(CurlHandle $handle): void {}
 
 /** @refcount 1 */

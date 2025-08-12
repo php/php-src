@@ -25,10 +25,6 @@ do {
 while ($info = curl_multi_info_read($mh)) {
     var_dump($info);
 }
-
-foreach ($urls as $i => $url) {
-    curl_close($conn[$i]);
-}
 ?>
 --EXPECTF--
 array(3) {
