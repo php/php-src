@@ -4177,6 +4177,11 @@ static int zend_jit_spill_store_inv(zend_jit_ctx *jit, zend_jit_addr src, zend_j
 	ZEND_ASSERT(Z_MODE(src) == IS_REG);
 	ZEND_ASSERT(Z_MODE(dst) == IS_MEM_ZVAL);
 
+	if (Z_LOAD(src) || Z_STORE(src)) {
+		/* it's not necessary to store register if it was previously loaded or already stored */
+		return 1;
+	}
+
 	if ((info & MAY_BE_ANY) == MAY_BE_LONG) {
 		jit_set_Z_LVAL(jit, dst, zend_jit_use_reg(jit, src));
 		if (Z_REG(dst) != ZREG_FP || !JIT_G(current_frame)) {
