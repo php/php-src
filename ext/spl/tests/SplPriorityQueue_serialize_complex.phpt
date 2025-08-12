@@ -1,74 +1,113 @@
 --TEST--
-SplPriorityQueue serialization with complex data types
+SplPriorityQueue serialization with mixed data types and extract flags
 --FILE--
 <?php
 $queue = new SplPriorityQueue();
+$queue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
 
-$array1 = ['name' => 'John', 'age' => 30, 'hobbies' => ['reading', 'gaming']];
-$array2 = [1, 2, [3, 4, ['nested' => true]]];
+$array1 = ['name' => 'John', 'hobbies' => ['reading', 'gaming']];
 $queue->insert($array1, 10);
-$queue->insert($array2, 5);
 
 class TestClass {
     public $prop = 'test';
-    private $private = 'hidden';
-    
-    public function __construct($value = null) {
-        if ($value) $this->prop = $value;
-    }
 }
-
-$obj1 = new TestClass('object1');
-$obj2 = new stdClass();
-$obj2->data = 'standard object';
-$obj2->number = 42;
-
+$obj1 = new TestClass();
 $queue->insert($obj1, 15);
-$queue->insert($obj2, 8);
 
 $queue->insert(3.14159, 12);
 $queue->insert(true, 20);
-$queue->insert(false, 1);
 $queue->insert(null, 3);
 
-echo "Original queue count: " . count($queue) . "\n";
-
 $serialized = serialize($queue);
+echo $serialized . "\n";
+
 $unserialized = unserialize($serialized);
+var_dump($unserialized);
 
-echo "Unserialized queue count: " . count($unserialized) . "\n";
+$queue2 = new SplPriorityQueue();
+$queue2->setExtractFlags(SplPriorityQueue::EXTR_PRIORITY);
+$queue2->insert("data", 42);
 
-while (!$unserialized->isEmpty()) {
-    $item = $unserialized->extract();
-    
-    if (is_array($item)) {
-        echo "Array: " . json_encode($item) . "\n";
-    } elseif (is_object($item)) {
-        if ($item instanceof TestClass) {
-            echo "TestClass object: prop=" . $item->prop . "\n";
-        } elseif ($item instanceof stdClass) {
-            echo "stdClass object: data=" . $item->data . ", number=" . $item->number . "\n";
-        }
-    } elseif (is_bool($item)) {
-        echo "Boolean: " . ($item ? "true" : "false") . "\n";
-    } elseif (is_null($item)) {
-        echo "NULL value\n";
-    } elseif (is_float($item)) {
-        echo "Float: " . $item . "\n";
-    } else {
-        echo "Other: " . var_export($item, true) . "\n";
-    }
-}
+$serialized2 = serialize($queue2);
+echo $serialized2 . "\n";
+
+$unserialized2 = unserialize($serialized2);
+var_dump($unserialized2);
 
 ?>
 --EXPECT--
-Original queue count: 8
-Unserialized queue count: 8
-Boolean: true
-TestClass object: prop=object1
-Float: 3.14159
-Array: {"name":"John","age":30,"hobbies":["reading","gaming"]}
-stdClass object: data=standard object, number=42
-Array: [1,2,[3,4,{"nested":true}]]
-NULL value
-Boolean: false
+O:16:"SplPriorityQueue":2:{i:0;a:0:{}i:1;a:2:{s:5:"flags";i:3;s:13:"heap_elements";a:5:{i:0;a:2:{s:4:"data";b:1;s:8:"priority";i:20;}i:1;a:2:{s:4:"data";O:9:"TestClass":1:{s:4:"prop";s:4:"test";}s:8:"priority";i:15;}i:2;a:2:{s:4:"data";d:3.14159;s:8:"priority";i:12;}i:3;a:2:{s:4:"data";a:2:{s:4:"name";s:4:"John";s:7:"hobbies";a:2:{i:0;s:7:"reading";i:1;s:6:"gaming";}}s:8:"priority";i:10;}i:4;a:2:{s:4:"data";N;s:8:"priority";i:3;}}}}
+object(SplPriorityQueue)#3 (3) {
+  ["flags":"SplPriorityQueue":private]=>
+  int(3)
+  ["isCorrupted":"SplPriorityQueue":private]=>
+  bool(false)
+  ["heap":"SplPriorityQueue":private]=>
+  array(5) {
+    [0]=>
+    array(2) {
+      ["data"]=>
+      bool(true)
+      ["priority"]=>
+      int(20)
+    }
+    [1]=>
+    array(2) {
+      ["data"]=>
+      object(TestClass)#4 (1) {
+        ["prop"]=>
+        string(4) "test"
+      }
+      ["priority"]=>
+      int(15)
+    }
+    [2]=>
+    array(2) {
+      ["data"]=>
+      float(3.14159)
+      ["priority"]=>
+      int(12)
+    }
+    [3]=>
+    array(2) {
+      ["data"]=>
+      array(2) {
+        ["name"]=>
+        string(4) "John"
+        ["hobbies"]=>
+        array(2) {
+          [0]=>
+          string(7) "reading"
+          [1]=>
+          string(6) "gaming"
+        }
+      }
+      ["priority"]=>
+      int(10)
+    }
+    [4]=>
+    array(2) {
+      ["data"]=>
+      NULL
+      ["priority"]=>
+      int(3)
+    }
+  }
+}
+O:16:"SplPriorityQueue":2:{i:0;a:0:{}i:1;a:2:{s:5:"flags";i:2;s:13:"heap_elements";a:1:{i:0;a:2:{s:4:"data";s:4:"data";s:8:"priority";i:42;}}}}
+object(SplPriorityQueue)#6 (3) {
+  ["flags":"SplPriorityQueue":private]=>
+  int(2)
+  ["isCorrupted":"SplPriorityQueue":private]=>
+  bool(false)
+  ["heap":"SplPriorityQueue":private]=>
+  array(1) {
+    [0]=>
+    array(2) {
+      ["data"]=>
+      string(4) "data"
+      ["priority"]=>
+      int(42)
+    }
+  }
+}

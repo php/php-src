@@ -1091,10 +1091,6 @@ static void spl_heap_serialize_internal_state(zval *return_value, spl_heap_objec
 	array_init(return_value);
 	add_assoc_long(return_value, "flags", intern->flags);
 	
-	if (heap_count == 0) {
-		return;
-	}
-
 	array_init_size(&heap_elements, heap_count);
 
 	for (int heap_idx = 0; heap_idx < heap_count; ++heap_idx) {
@@ -1191,6 +1187,10 @@ PHP_METHOD(SplPriorityQueue, __serialize)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, false) != SUCCESS)) {
+		RETURN_THROWS();
+	}
+
 	array_init(return_value);
 
 	spl_heap_serialize_properties(&props, intern);
@@ -1243,6 +1243,10 @@ PHP_METHOD(SplHeap, __serialize)
 	zval props, state;
 
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (UNEXPECTED(spl_heap_consistency_validations(intern, false) != SUCCESS)) {
+		RETURN_THROWS();
+	}
 
 	array_init(return_value);
 
