@@ -15,7 +15,7 @@ $responses = array(
 ['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
 var_dump(file_get_contents($uri));
-var_dump($http_response_header);
+var_dump(http_get_last_response_headers());
 
 http_server_kill($pid);
 
