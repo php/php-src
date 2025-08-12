@@ -6,6 +6,7 @@ repository available according to the release schedule.
 The release schedule for each version is published on the
 [PHP wiki](https://wiki.php.net):
 
+- [PHP 8.5](https://wiki.php.net/todo/php85)
 - [PHP 8.4](https://wiki.php.net/todo/php84)
 - [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
@@ -219,7 +220,7 @@ slightly different steps. We'll call attention where the steps differ.
    # With ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --enable-option-checking=fatal --enable-zts --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
@@ -227,7 +228,7 @@ slightly different steps. We'll call attention where the steps differ.
    # Without ZTS
    make distclean || \
    ./buildconf --force \
-       && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+       && ./configure --enable-option-checking=fatal --disable-all --enable-debug --enable-opcache-jit \
        && make -j$(nproc) \
        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
        || ./sapi/cli/php -v
