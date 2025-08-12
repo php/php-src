@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 94b232499672dfd61c2c585a5d1d8a27d1a4a7ce */
+ * Stub hash: c7838fb209d601be280dfdebfd135906afa36e8c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create, 0, 0, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
@@ -125,7 +125,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xml_get_current_line_number, arginfo_xml_get_current_line_number)
 	ZEND_FE(xml_get_current_column_number, arginfo_xml_get_current_column_number)
 	ZEND_FE(xml_get_current_byte_index, arginfo_xml_get_current_byte_index)
-	ZEND_FE(xml_parser_free, arginfo_xml_parser_free)
+	ZEND_RAW_FENTRY("xml_parser_free", zif_xml_parser_free, arginfo_xml_parser_free, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(xml_parser_set_option, arginfo_xml_parser_set_option)
 	ZEND_FE(xml_parser_get_option, arginfo_xml_parser_get_option)
 	ZEND_FE_END
@@ -169,6 +169,13 @@ static void register_xml_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_xml_set_object_0_arg1_str = zend_string_init("provide a proper method callable to xml_set_*_handler() functions", strlen("provide a proper method callable to xml_set_*_handler() functions"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_xml_set_object_0->args[1].value, attribute_Deprecated_func_xml_set_object_0_arg1_str);
 	attribute_Deprecated_func_xml_set_object_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_xml_parser_free_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "xml_parser_free", sizeof("xml_parser_free") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_xml_parser_free_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_xml_parser_free_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_xml_parser_free_0_arg1_str = zend_string_init("as it has no effect since PHP 8.0", strlen("as it has no effect since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_xml_parser_free_0->args[1].value, attribute_Deprecated_func_xml_parser_free_0_arg1_str);
+	attribute_Deprecated_func_xml_parser_free_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_XMLParser(void)
