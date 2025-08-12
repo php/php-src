@@ -268,8 +268,6 @@ PHP 8.5 UPGRADE NOTES
     and the function returns false. Previously, these errors were silently
     ignored. This change affects only the sendmail transport.
   . getimagesize() now supports HEIF/HEIC images.
-
-- Standard:
   . getimagesize() now supports SVG images when ext-libxml is also loaded.
     Similarly, image_type_to_extension() and image_type_to_mime_type()
     now also handle IMAGETYPE_SVG.
