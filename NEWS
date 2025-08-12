@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.12
+?? ??? ????, PHP 8.4.13
+
+
+28 Aug 2025, PHP 8.4.12
 
 - Core:
   . Fixed GH-19169 build issue with C++17 and ZEND_STATIC_ASSERT macro.
