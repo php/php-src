@@ -69,7 +69,7 @@ try {
 
 try {
     $pq = new SplPriorityQueue();
-    $pq->__unserialize([[], ['flags' => 0, 'heap_elements' => ['not_array']]]);
+    $pq->__unserialize([[], ['flags' => 1, 'heap_elements' => ['not_array']]]);
     echo "FAIL: Should have thrown exception\n";
 } catch (Exception $e) {
     echo "PQ invalid element structure - " . $e->getMessage() . "\n";
@@ -77,7 +77,7 @@ try {
 
 try {
     $pq = new SplPriorityQueue();
-    $pq->__unserialize([[], ['flags' => 0, 'heap_elements' => [['data' => 'test']]]]);
+    $pq->__unserialize([[], ['flags' => 1, 'heap_elements' => [['data' => 'test']]]]);
     echo "FAIL: Should have thrown exception\n";
 } catch (Exception $e) {
     echo "PQ missing priority - " . $e->getMessage() . "\n";
@@ -85,7 +85,7 @@ try {
 
 try {
     $pq = new SplPriorityQueue();
-    $pq->__unserialize([[], ['flags' => 0, 'heap_elements' => [['priority' => 1]]]]);
+    $pq->__unserialize([[], ['flags' => 1, 'heap_elements' => [['priority' => 1]]]]);
     echo "FAIL: Should have thrown exception\n";
 } catch (Exception $e) {
     echo "PQ missing data - " . $e->getMessage() . "\n";
@@ -96,11 +96,11 @@ try {
 Wrong element count - Invalid serialization data for SplMaxHeap object
 Invalid properties type - Invalid serialization data for SplMinHeap object
 Invalid state type - Invalid serialization data for SplMaxHeap object
-Missing flags - Invalid serialization data for SplMaxHeap object: missing or invalid flags
-Invalid heap elements - Invalid serialization data for SplMaxHeap object: heap_elements must be an array
+Missing flags - Invalid serialization data for SplMaxHeap object
+Invalid heap elements - Invalid serialization data for SplMaxHeap object
 PQ wrong element count - Invalid serialization data for SplPriorityQueue object
 PQ invalid properties - Invalid serialization data for SplPriorityQueue object
-PQ missing flags - Invalid serialization data for SplPriorityQueue object: missing or invalid flags
-PQ invalid element structure - Invalid serialization data for SplPriorityQueue object: priority queue elements must be arrays
-PQ missing priority - Invalid serialization data for SplPriorityQueue object: priority queue elements must have data and priority
-PQ missing data - Invalid serialization data for SplPriorityQueue object: priority queue elements must have data and priority
+PQ missing flags - Invalid serialization data for SplPriorityQueue object
+PQ invalid element structure - Invalid serialization data for SplPriorityQueue object
+PQ missing priority - Invalid serialization data for SplPriorityQueue object
+PQ missing data - Invalid serialization data for SplPriorityQueue object
