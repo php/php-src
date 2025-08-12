@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0beta1
 
+- apache2handler:
+  . Added the apache_connection_stream() function for CGI WebSockets. (Richard Tyler Miles)
+
 - Core:
   . Non-canonical cast names (boolean), (integer), (double), and (binary) have
     been deprecated. (Girgias)
