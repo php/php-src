@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . The backtick operator as an alias for shell_exec() has been deprecated.
     (timwolla)
   . Returning null from __debugInfo() has been deprecated. (DanielEScherzer)
+  . Support #[\Override] on properties. (Jiří Pudil)
 
 - Date:
   . The DATE_RFC7231 and DateTimeInterface::RFC7231 constants have been
