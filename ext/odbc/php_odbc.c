@@ -903,7 +903,7 @@ PHP_FUNCTION(odbc_prepare)
 	result->numparams = 0;
 	result->param_info = NULL;
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -1290,7 +1290,7 @@ PHP_FUNCTION(odbc_exec)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -2812,7 +2812,7 @@ PHP_FUNCTION(odbc_tables)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -2877,7 +2877,7 @@ PHP_FUNCTION(odbc_columns)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -2945,7 +2945,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3019,7 +3019,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3083,7 +3083,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3138,7 +3138,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3198,7 +3198,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3259,7 +3259,7 @@ PHP_FUNCTION(odbc_procedures)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3325,7 +3325,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3391,7 +3391,7 @@ PHP_FUNCTION(odbc_statistics)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
@@ -3452,7 +3452,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	object_init_ex(return_value, odbc_result_ce);
 	result = Z_ODBC_RESULT_P(return_value);
 
-	rc = PHP_ODBC_SQLALLOCSTMT(conn->hdbc, &(result->stmt));
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		php_error_docref(NULL, E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		zval_ptr_dtor(return_value);
