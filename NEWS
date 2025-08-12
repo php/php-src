@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19544 (GC treats ZEND_WEAKREF_TAG_MAP references as WeakMap
     references). (Arnaud, timwolla)
 
+- CLI:
+  . Fixed bug GH-19461 (Improve error message on listening error with IPv6
+    address). (alexandre-daubois)
+
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
