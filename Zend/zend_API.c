@@ -3770,7 +3770,7 @@ static zend_always_inline zend_class_entry *get_scope(zend_execute_data *frame)
 
 static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *scope, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool *strict_class, char **error, bool suppress_deprecation) /* {{{ */
 {
-	bool ret = 0;
+	bool ret = false;
 	zend_class_entry *ce;
 	size_t name_len = ZSTR_LEN(name);
 	zend_string *lcname;
@@ -3795,7 +3795,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			if (!fcc->object) {
 				fcc->object = zend_get_this_object(frame);
 			}
-			ret = 1;
+			ret = true;
 		}
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		if (!scope) {
@@ -3815,7 +3815,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 				fcc->object = zend_get_this_object(frame);
 			}
 			*strict_class = 1;
-			ret = 1;
+			ret = true;
 		}
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 		zend_class_entry *called_scope = zend_get_called_scope(frame);
@@ -3832,7 +3832,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 				fcc->object = zend_get_this_object(frame);
 			}
 			*strict_class = 1;
-			ret = 1;
+			ret = true;
 		}
 	} else if ((ce = zend_lookup_class(name)) != NULL) {
 		zend_class_entry *scope = get_scope(frame);
@@ -3852,7 +3852,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			fcc->called_scope = fcc->object ? fcc->object->ce : ce;
 		}
 		*strict_class = 1;
-		ret = 1;
+		ret = true;
 	} else {
 		if (error) zend_spprintf(error, 0, "class \"%.*s\" not found", (int)name_len, ZSTR_VAL(name));
 	}
