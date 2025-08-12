@@ -5,6 +5,8 @@
 
 class Base {
 
+	public $val;
+
 	public string $hooked {
 		get => $this->hooked;
 		set => $value;
@@ -19,7 +21,7 @@ class Base {
 #[Override] // Does nothing here
 class DemoClass extends Base {
 	#[DelayedTargetValidation]
-	#[Override] // Does nothing here
+	#[Override] // Does something here
 	public $val;
 
 	public string $hooked {
