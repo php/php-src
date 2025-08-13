@@ -24,6 +24,7 @@ PHP                                                                        NEWS
   . Enacted the follow-up phase of the "Path to Saner Increment/Decrement
     operators" RFC, meaning that incrementing non-numeric strings is now
     deprecated. (Girgias).
+  . Various closure binding issues are now deprecated. (alexandre-daubois)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
