@@ -188,7 +188,6 @@ extern const zend_op *zend_jit_halt_op;
 # define OPLINE_DC
 # define OPLINE_CC
 # define ZEND_OPCODE_HANDLER_RET              void
-# define ZEND_OPCODE_HANDLER_RET_EX           void
 # define ZEND_OPCODE_HANDLER_ARGS             EXECUTE_DATA_D
 # define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU
 # define ZEND_OPCODE_HANDLER_ARGS_EX
@@ -196,10 +195,6 @@ extern const zend_op *zend_jit_halt_op;
 # define ZEND_OPCODE_RETURN()                 return
 # define ZEND_OPCODE_TAIL_CALL(handler)       do { \
 		handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
-		return; \
-	} while(0)
-# define ZEND_OPCODE_TAIL_CALL_EX(handler, arg) do { \
-		handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX arg); \
 		return; \
 	} while(0)
 # define ZEND_VM_ENTER_BIT 0
@@ -214,23 +209,13 @@ extern const zend_op *zend_jit_halt_op;
 # define OPLINE_CC                            , OPLINE_C
 # define ZEND_OPCODE_HANDLER_RET              const zend_op *
 # if ZEND_VM_TAIL_CALL_DISPATCH
-#  define ZEND_OPCODE_HANDLER_RET_EX           zend_vm_trampoline
 #  define ZEND_OPCODE_TAIL_CALL(handler)       do { \
 		ZEND_MUSTTAIL return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 	} while(0)
-#  define ZEND_OPCODE_TAIL_CALL_EX(_handler, ...) do { \
-		zend_vm_trampoline t = (_handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__); \
-		opline = t.opline; \
-		return t.handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
-	} while(0)
 # define ZEND_OPCODE_RETURN()                  ZEND_OPCODE_TAIL_CALL((zend_vm_opcode_handler_t)opline->handler)
 # else
-#  define ZEND_OPCODE_HANDLER_RET_EX           const zend_op *
 #  define ZEND_OPCODE_TAIL_CALL(handler)       do { \
 		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
-	} while(0)
-#  define ZEND_OPCODE_TAIL_CALL_EX(handler, ...) do { \
-		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__); \
 	} while(0)
 # define ZEND_OPCODE_RETURN()                 return opline
 # endif
