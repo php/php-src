@@ -327,15 +327,15 @@ static int zend_handlers_count;
 static zend_vm_opcode_handler_func_t const * zend_opcode_handler_funcs;
 static zend_op hybrid_halt_op;
 #endif
-#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) || ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 
 static zend_vm_opcode_handler_func_t const * zend_opcode_handler_funcs;
 #endif
-#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID && !ZEND_VM_TAIL_CALL_DISPATCH) || !ZEND_VM_SPEC
+#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL) || !ZEND_VM_SPEC
 static zend_vm_opcode_handler_t zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op);
 #endif
 
-#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) || ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op* op);
 #else
 # define zend_vm_get_opcode_handler_func zend_vm_get_opcode_handler
@@ -400,7 +400,7 @@ static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opc
 # define ZEND_VM_DISPATCH(handler)         ZEND_VM_DISPATCH_DEFAULT(handler)
 # define ZEND_VM_DISPATCH_EX(handler, ...) \
       return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__)
-#elif ZEND_VM_TAIL_CALL_DISPATCH
+#elif ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 # define ZEND_OPCODE_HANDLER_RET               const zend_op *
 # define ZEND_VM_TAIL_CALL(call)               ZEND_MUSTTAIL return call
 # define ZEND_VM_CONTINUE()                    ZEND_VM_DISPATCH(opline->handler)
@@ -473,7 +473,7 @@ static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opc
 # define ZEND_VM_ENTER_EX()        return  1
 # define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()
 # define ZEND_VM_LEAVE()           return  2
-#elif ZEND_VM_TAIL_CALL_DISPATCH
+#elif ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 # define ZEND_VM_ENTER_BIT         1ULL
 # define ZEND_VM_ENTER_EX()        ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()
 # define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()
@@ -490,7 +490,7 @@ static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opc
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);
-#if ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_HANDLER(ZEND_OPCODE_HANDLER_ARGS);
 static zend_never_inline const zend_op *ZEND_OPCODE_HANDLER_CCONV zend_leave_helper_SPEC(zend_execute_data *ex, const zend_op *opline);
 static const zend_op call_halt_op = {
@@ -55261,7 +55261,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NULL_HANDLER(ZEND_
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
-#if ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return (zend_op*) ZEND_VM_ENTER_BIT;
@@ -55280,7 +55280,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_HANDLER(ZEND_
 #endif
 
 
-#if ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 # undef  ZEND_OPCODE_HANDLER_RET
 # undef  ZEND_OPCODE_HANDLER_CCONV
 # undef  ZEND_OPCODE_HANDLER_CCONV_EX
@@ -110069,14 +110069,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NULL_EXTERNAL_HAND
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
-#if ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_EXTERNAL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return (zend_op*) ZEND_VM_ENTER_BIT;
 }
 
 #endif
-#endif /* ZEND_VM_TAIL_CALL_DISPATCH */
+#endif /* ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL */
 #if (ZEND_VM_KIND != ZEND_VM_KIND_CALL) && (ZEND_GCC_VERSION >= 4000) && !defined(__clang__)
 # pragma GCC push_options
 # pragma GCC optimize("no-gcse")
@@ -122848,7 +122848,7 @@ void zend_vm_init(void)
 		ZEND_FE_FETCH_R_SIMPLE_SPEC_VAR_CV_RETVAL_USED_HANDLER,
 		ZEND_NULL_HANDLER
 	};
-#if ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	static zend_vm_opcode_handler_func_t const external_labels[] = {
 		ZEND_NOP_SPEC_EXTERNAL_HANDLER,
 		ZEND_ADD_SPEC_CONST_CONST_EXTERNAL_HANDLER,
@@ -126609,7 +126609,7 @@ void zend_vm_init(void)
 	zend_opcode_handler_funcs = labels;
 	zend_spec_handlers = specs;
 	execute_ex(NULL);
-#elif ZEND_VM_TAIL_CALL_DISPATCH
+#elif ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	zend_opcode_handler_funcs = external_labels;
 	zend_opcode_handlers = labels;
 	zend_spec_handlers = specs;
@@ -126668,7 +126668,7 @@ ZEND_API void ZEND_FASTCALL zend_deserialize_opcode_handler(zend_op *op)
 
 ZEND_API const void* ZEND_FASTCALL zend_get_opcode_handler_func(const zend_op *op)
 {
-#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	zval *zv;
 
 	if (!zend_handlers_table) {
@@ -126743,14 +126743,14 @@ static uint32_t ZEND_FASTCALL zend_vm_get_opcode_handler_idx(uint32_t spec, cons
 	return (spec & SPEC_START_MASK) + offset;
 }
 
-#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID && !ZEND_VM_TAIL_CALL_DISPATCH) || !ZEND_VM_SPEC
+#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL) || !ZEND_VM_SPEC
 static zend_vm_opcode_handler_t zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)
 {
 	return zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];
 }
 #endif
 
-#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op* op)
 {
 	uint32_t spec = zend_spec_handlers[opcode];
@@ -127053,7 +127053,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 
 ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data* ex)
 {
-#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_TAIL_CALL_DISPATCH)
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL)
 	zend_vm_opcode_handler_func_t handler;
 #endif
 	DCL_OPLINE;
@@ -127084,7 +127084,7 @@ ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data* ex)
 		ret = -1;
 	}
 #else
-# if ZEND_VM_TAIL_CALL_DISPATCH
+# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	handler = zend_vm_get_opcode_handler_func(zend_user_opcodes[opline->opcode], opline);
 	opline = handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 # else

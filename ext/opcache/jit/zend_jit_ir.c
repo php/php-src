@@ -27,13 +27,13 @@
 # define ZREG_IP              7 /* IR_REG_RDI */
 # define ZREG_FIRST_FPR       8
 # define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7)) /* all preserved registers */
-# if ZEND_VM_TAIL_CALL_DISPATCH
+# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 #  error
 # endif
 #elif defined(IR_TARGET_X64)
 # define IR_REG_SP            4 /* IR_REG_RSP */
 # define IR_REG_FP            5 /* IR_REG_RBP */
-# if ZEND_VM_TAIL_CALL_DISPATCH
+# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 /* Use the first two arg registers of the preserve_none calling convention for FP/IP
  * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1029 */
 #  define ZREG_FP             12 /* IR_REG_R12 */
@@ -58,7 +58,7 @@
 # define IR_REG_SP           31 /* IR_REG_RSP */
 # define IR_REG_LR           30 /* IR_REG_X30 */
 # define IR_REG_FP           29 /* IR_REG_X29 */
-# if ZEND_VM_TAIL_CALL_DISPATCH
+# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 /* Use the first two arg registers of the preserve_none calling convention for FP/IP
  * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/AArch64/AArch64CallingConvention.td#L541 */
 #  define ZREG_FP             20 /* IR_REG_X20 */
@@ -82,7 +82,7 @@
 #undef  _ir_CTX
 #define _ir_CTX                 (&jit->ctx)
 
-#if ZEND_VM_TAIL_CALL_DISPATCH
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 # define IR_OPCODE_HANDLER_RET IR_ADDR
 #elif GCC_GLOBAL_REGS
 # define IR_OPCODE_HANDLER_RET IR_VOID
@@ -574,7 +574,7 @@ static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
 #if defined(IR_TARGET_X86)
 	/* TODO: dummy prototype (only flags matter) ??? */
 	ir_ref proto = flags ? ir_proto_0(&jit->ctx, flags, IR_I32) : 0;
-#elif ZEND_VM_TAIL_CALL_DISPATCH
+#elif ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	ir_ref proto = flags ? ir_proto_0(&jit->ctx, flags, IR_ADDR) : 0;
 #else
 	ir_ref proto = 0;
@@ -1968,7 +1968,7 @@ static void zend_jit_tailcall_handler(zend_jit_ctx *jit, ir_ref handler)
 		handler = ir_CAST_OPCODE_HANDLER_FUNC(handler);
 	}
 #endif
-	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		ir_TAILCALL(IR_OPCODE_HANDLER_RET, handler);
 	} else {
 		ir_TAILCALL_2(IR_ADDR, handler, jit_FP(jit), jit_IP(jit));
@@ -1987,7 +1987,7 @@ static int zend_jit_exception_handler_stub(zend_jit_ctx *jit)
 	} else {
 		zend_vm_opcode_handler_t handler = EG(exception_op)->handler;
 
-		if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+		if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 			zend_jit_tailcall_handler(jit, ir_CONST_OPCODE_HANDLER_FUNC(handler));
 		} else {
 			ir_ref ref = ir_CALL_2(IR_ADDR, ir_CONST_OPCODE_HANDLER_FUNC(handler), jit_FP(jit), jit_IP(jit));
@@ -2089,7 +2089,7 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 		jit_STORE_IP(jit, ir_LOAD_A(jit_EX(opline)));
 	}
 
-	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		zend_jit_vm_enter(jit, jit_IP(jit));
@@ -2099,7 +2099,7 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 
 static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 {
-	if (ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		ir_TAILCALL(IR_OPCODE_HANDLER_RET, ir_CONST_OPCODE_HANDLER_FUNC(zend_jit_leave_func_helper_tailcall));
 		return 1;
 	}
@@ -2292,7 +2292,7 @@ static int zend_jit_leave_throw_stub(zend_jit_ctx *jit)
 	// JIT: opline = EG(exception_op);
 	jit_STORE_IP(jit, jit_EG(exception_op));
 
-	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		ir_STORE(jit_EX(opline), jit_IP(jit));
 
 		// JIT: HANDLE_EXCEPTION()
@@ -2490,7 +2490,7 @@ static int zend_jit_trace_halt_stub(zend_jit_ctx *jit)
 
 static int zend_jit_trace_escape_stub(zend_jit_ctx *jit)
 {
-	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		zend_jit_vm_enter(jit, jit_IP(jit));
@@ -2517,7 +2517,7 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 	ref = ir_LOAD_A(jit_EX(opline));
 	jit_STORE_IP(jit, ref);
 
-	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		zend_jit_vm_enter(jit, ref);
@@ -2537,7 +2537,7 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 	zend_jit_check_timeout(jit, NULL, NULL);
 
 	addr = zend_jit_orig_opline_handler(jit);
-	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_jit_tailcall_handler(jit, addr);
 	} else {
 #if defined(IR_TARGET_X86)
@@ -2734,7 +2734,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->ctx.fixed_regset = (1<<ZREG_FP) | (1<<ZREG_IP);
 	if (!(flags & IR_FUNCTION)) {
 		jit->ctx.flags |= IR_NO_STACK_COMBINE;
-		if (ZEND_VM_KIND == ZEND_VM_KIND_CALL) {
+		if (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 			jit->ctx.flags |= IR_FUNCTION;
 			/* Stack must be 16 byte aligned */
 			/* TODO: select stack size ??? */
@@ -2754,7 +2754,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			 */
 			if (GCC_GLOBAL_REGS) {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
-			} else if (ZEND_VM_TAIL_CALL_DISPATCH) {
+			} else if (ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 				/* The only preserved register on x86 is RBP:
 				 * https://github.com/llvm/llvm-project/blob/a414877a7a5f000d01370acb1162eb1dea87f48c/llvm/lib/Target/X86/X86RegisterInfo.cpp#L319
 				 * https://github.com/llvm/llvm-project/blob/68bfe91b5a34f80dbcc4f0a7fa5d7aa1cdf959c2/llvm/lib/Target/X86/X86CallingConv.td#L1183
@@ -3221,10 +3221,10 @@ static void zend_jit_calc_trace_prologue_size(void)
 	void *entry;
 	size_t size;
 
-	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
+	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) ? 0 : IR_START_BR_TARGET);
 
 	if (!GCC_GLOBAL_REGS) {
-		if (!ZEND_VM_TAIL_CALL_DISPATCH) {
+		if (ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL) {
 			ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
 			ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
 			jit_STORE_FP(jit, execute_data_ref);
@@ -4060,7 +4060,7 @@ static void zend_jit_recv_entry(zend_jit_ctx *jit, int b)
 
 	/* Insert a MERGE block with additional ENTRY input between predecessor and this one */
 	ir_ENTRY(ref, bb->start);
-	if (!GCC_GLOBAL_REGS && !ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (!GCC_GLOBAL_REGS && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL) {
 		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
@@ -4081,7 +4081,7 @@ static void zend_jit_osr_entry(zend_jit_ctx *jit, int b)
 
 	/* Insert a MERGE block with additional ENTRY input between predecessor and this one */
 	ir_ENTRY(ref, bb->start);
-	if (!GCC_GLOBAL_REGS && !ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (!GCC_GLOBAL_REGS && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL) {
 		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
@@ -4097,7 +4097,7 @@ static void zend_jit_osr_entry(zend_jit_ctx *jit, int b)
 static ir_ref zend_jit_continue_entry(zend_jit_ctx *jit, ir_ref src, unsigned int label)
 {
 	ir_ENTRY(src, label);
-	if (!GCC_GLOBAL_REGS && !ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (!GCC_GLOBAL_REGS && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL) {
 		/* 2 and 3 are hardcoded reference to IR_PARAMs */
 		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
 		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
@@ -4115,7 +4115,7 @@ static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_th
 	if (GCC_GLOBAL_REGS) {
 		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
-	} else if (ZEND_VM_TAIL_CALL_DISPATCH) {
+	} else if (ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_vm_opcode_handler_func_t handler = (zend_vm_opcode_handler_func_t)zend_get_opcode_handler_func(opline);
 		ir_ref ip = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(handler), jit_FP(jit), jit_IP(jit));
 		jit_STORE_IP(jit, ip);
@@ -4171,7 +4171,7 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 		}
 	} else {
 		zend_vm_opcode_handler_t handler = opline->handler;
-		if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+		if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 			zend_jit_tailcall_handler(jit, ir_CONST_OPCODE_HANDLER_FUNC(handler));
 		} else if ((jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY)
 		 && (opline->opcode == ZEND_CATCH
@@ -10286,7 +10286,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				}
 				if (GCC_GLOBAL_REGS) {
 					ir_CALL(IR_VOID, helper);
-				} else if (ZEND_VM_TAIL_CALL_DISPATCH) {
+				} else if (ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 					ir_CALL_2(IR_ADDR, helper, jit_FP(jit), jit_IP(jit));
 				} else {
 					ir_ref ref = ir_CALL_2(IR_ADDR, helper, jit_FP(jit), jit_IP(jit));
@@ -10462,7 +10462,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					}
 				}
 				/* fallback to indirect JMP or RETURN */
-				if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+				if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 					zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 				} else {
 					zend_jit_vm_enter(jit, jit_IP(jit));
@@ -11230,7 +11230,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		jit_STORE_IP(jit, ir_ADD_OFFSET(jit_IP(jit), sizeof(zend_op)));
 	}
 
-	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		zend_jit_vm_leave(jit, jit_IP(jit));
@@ -16661,7 +16661,7 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 	int i, count;
 	zend_basic_block *bb;
 
-	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : (IR_START_BR_TARGET|IR_ENTRY_BR_TARGET));
+	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) ? 0 : (IR_START_BR_TARGET|IR_ENTRY_BR_TARGET));
 
 	jit->ctx.spill_base = ZREG_FP;
 
@@ -16678,7 +16678,7 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 	jit->bb_edges = zend_arena_calloc(&CG(arena), count, sizeof(ir_ref));
 
 	if (!GCC_GLOBAL_REGS) {
-		if (!ZEND_VM_TAIL_CALL_DISPATCH) {
+		if (ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL) {
 			ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
 			ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
 			jit_STORE_FP(jit, execute_data_ref);
@@ -17092,7 +17092,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 
 	if ((!GCC_GLOBAL_REGS
 	 && (trace->op != ZEND_JIT_TRACE_END || trace->stop != ZEND_JIT_TRACE_STOP_RETURN))
-	 || ZEND_VM_TAIL_CALL_DISPATCH) {
+	 || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		if (opline->opcode == ZEND_RETURN ||
 		    opline->opcode == ZEND_RETURN_BY_REF ||
 		    opline->opcode == ZEND_DO_UCALL ||
@@ -17226,7 +17226,7 @@ static int zend_jit_deoptimizer_start(zend_jit_ctx        *jit,
                                       uint32_t             trace_num,
                                       uint32_t             exit_num)
 {
-	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
+	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) ? 0 : IR_START_BR_TARGET);
 
 	jit->ctx.spill_base = ZREG_FP;
 
@@ -17247,7 +17247,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
                                 zend_jit_trace_info *parent,
                                 uint32_t             exit_num)
 {
-	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
+	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) ? 0 : IR_START_BR_TARGET);
 
 	jit->ctx.spill_base = ZREG_FP;
 
@@ -17258,7 +17258,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 
 	if (!GCC_GLOBAL_REGS) {
 		if (!parent) {
-			if (!ZEND_VM_TAIL_CALL_DISPATCH) {
+			if (ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL) {
 				ir_ref execute_data_ref = ir_PARAM(IR_ADDR, "execute_data", 1);
 				ir_ref opline_ref = ir_PARAM(IR_ADDR, "opline", 2);
 				jit_STORE_FP(jit, execute_data_ref);
@@ -17366,7 +17366,7 @@ static int zend_jit_trace_end_loop(zend_jit_ctx *jit, int loop_ref, const void *
 
 static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const zend_op *opline)
 {
-	if (GCC_GLOBAL_REGS || ZEND_VM_TAIL_CALL_DISPATCH) {
+	if (GCC_GLOBAL_REGS || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
 		if (!original_handler) {
 			zend_jit_tailcall_handler(jit, ir_LOAD_A(jit_IP(jit)));
 		} else {

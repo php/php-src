@@ -140,7 +140,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPC
 		EX(opline)++;
 #ifdef HAVE_GCC_GLOBAL_REGS
 		opline = EX(opline);
-#elif ZEND_VM_TAIL_CALL_DISPATCH
+#elif ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 		return EX(opline);
 #else
 		return (const zend_op*)((uintptr_t)EX(opline) | ZEND_VM_ENTER_BIT);
@@ -486,7 +486,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend
 		opline = execute_data ? EX(opline) : NULL;
 #ifdef HAVE_GCC_GLOBAL_REGS
 		return;
-#elif ZEND_VM_TAIL_CALL_DISPATCH
+#elif ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 		if (EXPECTED(opline)) {
 			ZEND_OPCODE_TAIL_CALL((zend_vm_opcode_handler_t)opline->handler);
 		} else {

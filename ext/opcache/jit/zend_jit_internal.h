@@ -208,7 +208,7 @@ extern const zend_op *zend_jit_halt_op;
 # define OPLINE_DC                            , OPLINE_D
 # define OPLINE_CC                            , OPLINE_C
 # define ZEND_OPCODE_HANDLER_RET              const zend_op *
-# if ZEND_VM_TAIL_CALL_DISPATCH
+# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 #  define ZEND_OPCODE_TAIL_CALL(handler)       do { \
 		ZEND_MUSTTAIL return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 	} while(0)
