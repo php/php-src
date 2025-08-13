@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-${{ !matrix.asan && '22' || '24' }}.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: System info
@@ -154,7 +154,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: ccache
@@ -184,7 +184,7 @@ jobs:
     runs-on: macos-14
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: brew
         uses: ./.github/actions/brew
       - name: ccache
@@ -232,7 +232,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
@@ -245,7 +245,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: apt
@@ -305,7 +305,7 @@ jobs:
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
       - name: git checkout benchmarking-data
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: php/benchmarking-data
           ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
@@ -343,6 +343,6 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: FreeBSD
         uses: ./.github/actions/freebsd
