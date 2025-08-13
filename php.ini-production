@@ -539,6 +539,7 @@ ignore_repeated_errors = Off
 ; https://php.net/ignore-repeated-source
 ignore_repeated_source = Off
 
+; DEPRECATED: This INI setting is deprecated and will be removed in PHP 9.0.
 ; If this parameter is set to Off, then memory leaks will not be shown (on
 ; stdout or in the log). This is only effective in a debug compile, and if
 ; error reporting includes E_WARNING in the allowed list
@@ -672,6 +673,8 @@ variables_order = "GPCS"
 ; https://php.net/request-order
 request_order = "GP"
 
+; DEPRECATED: This INI setting is deprecated and will be hardcoded to Off in
+; no-CLI SAPI and On in CLI SAPI on PHP 9.0.
 ; This directive determines whether PHP registers $argv & $argc each time it
 ; runs. $argv contains an array of all the arguments passed to PHP when a script
 ; is invoked. $argc contains an integer representing the number of arguments

@@ -2397,6 +2397,8 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 				"Directive '%s' is deprecated",
 				{
 					"allow_url_include",
+					"report_memleaks",
+					"register_argc_argv",
 					NULL
 				}
 			},

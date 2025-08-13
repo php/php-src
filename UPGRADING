@@ -337,6 +337,7 @@ PHP 8.5 UPGRADE NOTES
   . Returning null from __debugInfo() has been deprecated.
     Return an empty array instead.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_debuginfo_returning_null
+  . The report_memleaks and register_argc_argv INI directives have been deprecated.
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are
