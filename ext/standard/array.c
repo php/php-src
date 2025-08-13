@@ -3326,6 +3326,9 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	zval		*entry;				/* Hash entry */
 	uint32_t    iter_pos = zend_hash_iterators_lower_pos(in_hash, 0);
 
+	GC_ADDREF(in_hash);
+	HT_ALLOW_COW_VIOLATION(in_hash); /* Will be reset when setting the flags for in_hash */
+
 	/* Get number of entries in the input hash */
 	num_in = zend_hash_num_elements(in_hash);
 
@@ -3493,6 +3496,15 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	HT_SET_ITERATORS_COUNT(&out_hash, HT_ITERATORS_COUNT(in_hash));
 	HT_SET_ITERATORS_COUNT(in_hash, 0);
 	in_hash->pDestructor = NULL;
+
+	if (UNEXPECTED(GC_DELREF(in_hash) == 0)) {
+		/* Array was completely deallocated during the operation */
+		zend_array_destroy(in_hash);
+		zend_hash_destroy(&out_hash);
+		zend_throw_error(NULL, "Array was modified during array_splice operation");
+		return;
+	}
+
 	zend_hash_destroy(in_hash);
 
 	HT_FLAGS(in_hash)          = HT_FLAGS(&out_hash);
