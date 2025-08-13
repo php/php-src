@@ -572,8 +572,6 @@ static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
 #if defined(IR_TARGET_X86)
 	/* TODO: dummy prototype (only flags matter) ??? */
 	ir_ref proto = flags ? ir_proto_0(&jit->ctx, flags, IR_I32) : 0;
-#elif ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
-	ir_ref proto = flags ? ir_proto_0(&jit->ctx, flags, IR_ADDR) : 0;
 #else
 	ir_ref proto = 0;
 #endif
