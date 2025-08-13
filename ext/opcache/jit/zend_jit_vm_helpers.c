@@ -1071,6 +1071,10 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 		if (UNEXPECTED(opline == zend_jit_halt_op)) {
 #else
 		opline = handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		if (opline->opcode == ZEND_VM_LAST_OPCODE + 1) {
+			/* Fake opline (call_halt_op, call_leave_op) */
+			opline = (opline->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
 		if (UNEXPECTED(((uintptr_t)opline & ~ZEND_VM_ENTER_BIT) == 0)) {
 #endif
 			stop = ZEND_JIT_TRACE_STOP_RETURN;
