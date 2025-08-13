@@ -99,7 +99,7 @@
 # define ir_CONST_OPCODE_HANDLER_FUNC(_addr) \
 	jit_CONST_OPCODE_HANDLER_FUNC(jit, _addr)
 # define ir_CAST_OPCODE_HANDLER_FUNC(_addr)  ir_fold2(_ir_CTX, IR_OPT(IR_PROTO, IR_ADDR), (_addr), \
-	ir_proto_0(_ir_CTX, IR_FASTCALL_FUNC, IR_I32))
+	ir_proto_0(_ir_CTX, IR_FASTCALL_FUNC, IR_OPCODE_HANDLER_RET))
 
 #define ir_CONST_FUNC_PROTO(_addr, _proto) \
 	jit_CONST_FUNC_PROTO(jit, (uintptr_t)(_addr), (_proto))
