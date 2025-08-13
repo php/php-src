@@ -1082,17 +1082,18 @@ function gen_handler($f, $spec, $kind, $name, $variant, $op1, $op2, $use, $code,
             return;
         case ZEND_VM_KIND_CALL:
         case ZEND_VM_KIND_TAILCALL:
+            $cconv = $variant == '_EXTERNAL' ? 'ZEND_OPCODE_HANDLER_FUNC_CCONV' : 'ZEND_OPCODE_HANDLER_CCONV';
             if ($opcode["hot"] && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
                 if (isset($opcode["use"])) {
-                    out($f,"static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV {$spec_name}_INLINE_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+                    out($f,"static zend_always_inline ZEND_OPCODE_HANDLER_RET {$cconv} {$spec_name}_INLINE_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
                     $additional_func = true;
                 } else {
-                    out($f,"static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+                    out($f,"static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET {$cconv} {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
                 }
             } else if ($opcode["hot"] && is_cold_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
-                out($f,"static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+                out($f,"static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET {$cconv} {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
             } else {
-                out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+                out($f,"static ZEND_OPCODE_HANDLER_RET {$cconv} {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
             }
             break;
         case ZEND_VM_KIND_SWITCH:
@@ -1119,7 +1120,8 @@ function gen_handler($f, $spec, $kind, $name, $variant, $op1, $op2, $use, $code,
     gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec, $variant);
 
     if ($additional_func) {
-        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+        $cconv = $variant == '_EXTERNAL' ? 'ZEND_OPCODE_HANDLER_FUNC_CCONV' : 'ZEND_OPCODE_HANDLER_CCONV';
+        out($f,"static ZEND_OPCODE_HANDLER_RET {$cconv} {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
         out($f,"{\n");
         out($f,"\tZEND_VM_TAIL_CALL({$spec_name}_INLINE_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
         out($f,"}\n");
@@ -1164,8 +1166,13 @@ function gen_helper($f, $spec, $kind, $name, $variant, $op1, $op2, $param, $code
                 } else {
                     $zend_attributes = " zend_never_inline";
                 }
-                $zend_cconv = " ZEND_OPCODE_HANDLER_CCONV ";
-                $zend_cconv_ex = " ZEND_OPCODE_HANDLER_CCONV_EX ";
+                if ($variant == '_EXTERNAL') {
+                    $zend_cconv = " ZEND_OPCODE_HANDLER_FUNC_CCONV ";
+                    $zend_cconv_ex = " ZEND_OPCODE_HANDLER_FUNC_CCONV_EX ";
+                } else {
+                    $zend_cconv = " ZEND_OPCODE_HANDLER_CCONV ";
+                    $zend_cconv_ex = " ZEND_OPCODE_HANDLER_CCONV_EX ";
+                }
                 $zend_fastcall = " ZEND_FASTCALL ";
             }
             if ($param == null) {
@@ -1565,7 +1572,8 @@ function gen_null_handler($f, $variant = '') {
     // for undefined opcodes, do we emit code for it only once
     if (!in_array($variant, $done, true)) {
         $done[] = $variant;
-        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NULL{$variant}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+        $cconv = $variant == '_EXTERNAL' ? 'ZEND_OPCODE_HANDLER_FUNC_CCONV' : 'ZEND_OPCODE_HANDLER_CCONV';
+        out($f,"static ZEND_OPCODE_HANDLER_RET {$cconv} ZEND_NULL{$variant}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
         out($f,"{\n");
         out($f,"\tUSE_OPLINE\n");
         out($f,"\n");
@@ -1581,8 +1589,9 @@ function gen_halt_handler($f, $variant = '') {
 
     if (!in_array($variant, $done, true)) {
         $done[] = $variant;
+        $cconv = $variant == '_EXTERNAL' ? 'ZEND_OPCODE_HANDLER_FUNC_CCONV' : 'ZEND_OPCODE_HANDLER_CCONV';
         out($f,"#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
-        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT{$variant}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+        out($f,"static ZEND_OPCODE_HANDLER_RET {$cconv} ZEND_HALT{$variant}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
         out($f,"{\n");
         out($f,"\treturn (zend_op*) ZEND_VM_ENTER_BIT;\n");
         out($f,"}\n\n");
@@ -2140,8 +2149,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
 
                         out($f,"# undef  ZEND_OPCODE_HANDLER_RET\n");
-                        out($f,"# undef  ZEND_OPCODE_HANDLER_CCONV\n");
-                        out($f,"# undef  ZEND_OPCODE_HANDLER_CCONV_EX\n");
                         out($f,"# undef  ZEND_VM_DISPATCH_DEFAULT\n");
                         out($f,"# undef  ZEND_VM_DISPATCH_NOTAIL\n");
                         out($f,"# undef  ZEND_VM_DISPATCH_TO_HANDLER\n");
@@ -2156,8 +2163,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# undef  ZEND_VM_RETURN\n");
 
                         out($f,"# define ZEND_OPCODE_HANDLER_RET                    const zend_op *\n");
-                        out($f,"# define ZEND_OPCODE_HANDLER_CCONV                  ZEND_FASTCALL\n");
-                        out($f,"# define ZEND_OPCODE_HANDLER_CCONV_EX               ZEND_OPCODE_HANDLER_CCONV\n");
                         out($f,"# define ZEND_VM_DISPATCH_DEFAULT(handler)          return ((opcode_handler_func_t)(void*)(handler) == ZEND_HALT_EXTERNAL_HANDLER) ? NULL : opline\n");
                         out($f,"# define ZEND_VM_DISPATCH_NOTAIL(handler)           ZEND_VM_DISPATCH_DEFAULT(handler)\n");
                         out($f,"# define ZEND_VM_DISPATCH_TO_HANDLER(handler)       ZEND_VM_TAIL_CALL(((opcode_handler_func_t)(void*)(handler))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))\n");
@@ -2165,10 +2170,10 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# define ZEND_VM_DISPATCH_TO_HELPER_EX(helper, ...) return (helper)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__)\n");
                         out($f,"# define ZEND_VM_DISPATCH_OPCODE(opcode,opline)     ZEND_VM_TAIL_CALL(((opcode_handler_func_t)(zend_vm_get_opcode_handler_func(opcode, opline)))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))\n");
                         out($f,"#define ZEND_VM_INTERRUPT()        ZEND_VM_DISPATCH(zend_interrupt_helper".($spec?"_SPEC":"")."_EXTERNAL)\n");
-                        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS);\n");
-                        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NULL_EXTERNAL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
-                        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_EXTERNAL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
-                        out($f,"typedef ZEND_OPCODE_HANDLER_RET (ZEND_OPCODE_HANDLER_CCONV *opcode_handler_func_t) (ZEND_OPCODE_HANDLER_ARGS);\n");
+                        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."_EXTERNAL(ZEND_OPCODE_HANDLER_ARGS);\n");
+                        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NULL_EXTERNAL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
+                        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_HALT_EXTERNAL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
+                        out($f,"typedef ZEND_OPCODE_HANDLER_RET (ZEND_OPCODE_HANDLER_FUNC_CCONV *opcode_handler_func_t) (ZEND_OPCODE_HANDLER_ARGS);\n");
                         out($f,"# define ZEND_VM_ENTER_EX()        return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
                         out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
                         out($f,"# define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
@@ -2528,19 +2533,21 @@ function gen_vm_opcodes_header(
     $str .= "#endif\n";
     $str .= "\n";
     $str .= "#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n";
-    $str .= "# define ZEND_OPCODE_HANDLER_CCONV ZEND_PRESERVE_NONE\n";
+    $str .= "# define ZEND_OPCODE_HANDLER_CCONV    ZEND_PRESERVE_NONE\n";
     $str .= "# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL\n";
-    $str .= "#else\n";
+    $str .= "#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL\n";
     $str .= "# define ZEND_OPCODE_HANDLER_CCONV    ZEND_FASTCALL\n";
     $str .= "# define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL\n";
     $str .= "#endif\n";
+    $str .= "#define ZEND_OPCODE_HANDLER_FUNC_CCONV    ZEND_FASTCALL\n";
+    $str .= "#define ZEND_OPCODE_HANDLER_FUNC_CCONV_EX ZEND_FASTCALL\n";
     $str .= "\n";
     $str .= "#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID\n";
     $str .= "typedef const void* zend_vm_opcode_handler_t;\n";
     $str .= "typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(void);\n";
     $str .= "#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n";
     $str .= "typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_CCONV *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);\n";
-    $str .= "typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);\n";
+    $str .= "typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_FUNC_CCONV *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);\n";
     $str .= "#elif ZEND_VM_KIND == ZEND_VM_KIND_SWITCH\n";
     $str .= "typedef int zend_vm_opcode_handler_t;\n";
     $str .= "#elif ZEND_VM_KIND == ZEND_VM_KIND_GOTO\n";

@@ -46,6 +46,7 @@ register const zend_op* volatile opline __asm__("x28");
 # pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif
 
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_leave_func_helper_tailcall(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_execute_data *old_execute_data;
@@ -80,9 +81,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_leave_func_helper_tai
 		} else {
 			opline = ++EX(opline);
 		}
-#ifndef HAVE_GCC_GLOBAL_REGS
 		ZEND_OPCODE_TAIL_CALL(opline->handler);
-#endif
 	} else {
 		if (UNEXPECTED(call_info & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS))) {
 			if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
@@ -96,14 +95,10 @@ ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_leave_func_helper_tai
 		if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
-#ifdef HAVE_GCC_GLOBAL_REGS
-		execute_data = EG(current_execute_data);
-		opline = zend_jit_halt_op;
-#else
 		return (zend_op*)ZEND_VM_ENTER_BIT;
-#endif
 	}
 }
+#endif
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info)
 {
@@ -359,7 +354,7 @@ void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D)
 	ZVAL_NULL(result);
 }
 
-#if ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = (zend_op_array*)EX(func);
@@ -465,7 +460,7 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key)
 	return _zend_quick_get_constant(key, 0, 1);
 }
 
-#if ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_trace_counter_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_jit_op_array_trace_extension *jit_extension =

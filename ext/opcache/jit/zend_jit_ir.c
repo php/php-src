@@ -2099,10 +2099,10 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 
 static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 {
-	if (ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) {
-		ir_TAILCALL(IR_OPCODE_HANDLER_RET, ir_CONST_OPCODE_HANDLER_FUNC(zend_jit_leave_func_helper_tailcall));
-		return 1;
-	}
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+	ir_TAILCALL(IR_OPCODE_HANDLER_RET, ir_CONST_OPCODE_HANDLER_FUNC(zend_jit_leave_func_helper_tailcall));
+	return 1;
+#endif
 
 	ir_ref call_info = ir_LOAD_U32(jit_EX(This.u1.type_info));
 	ir_ref if_top = ir_IF(ir_AND_U32(call_info, ir_CONST_U32(ZEND_CALL_TOP)));

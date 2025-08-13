@@ -47,19 +47,21 @@
 #endif
 
 #if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
-# define ZEND_OPCODE_HANDLER_CCONV ZEND_PRESERVE_NONE
+# define ZEND_OPCODE_HANDLER_CCONV    ZEND_PRESERVE_NONE
 # define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
-#else
+#elif ZEND_VM_KIND == ZEND_VM_KIND_CALL
 # define ZEND_OPCODE_HANDLER_CCONV    ZEND_FASTCALL
 # define ZEND_OPCODE_HANDLER_CCONV_EX ZEND_FASTCALL
 #endif
+#define ZEND_OPCODE_HANDLER_FUNC_CCONV    ZEND_FASTCALL
+#define ZEND_OPCODE_HANDLER_FUNC_CCONV_EX ZEND_FASTCALL
 
 #if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
 typedef const void* zend_vm_opcode_handler_t;
 typedef void (ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(void);
 #elif ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_CCONV *zend_vm_opcode_handler_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
-typedef const struct _zend_op *(ZEND_FASTCALL *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
+typedef const struct _zend_op *(ZEND_OPCODE_HANDLER_FUNC_CCONV *zend_vm_opcode_handler_func_t)(struct _zend_execute_data *execute_data, const struct _zend_op *opline);
 #elif ZEND_VM_KIND == ZEND_VM_KIND_SWITCH
 typedef int zend_vm_opcode_handler_t;
 #elif ZEND_VM_KIND == ZEND_VM_KIND_GOTO

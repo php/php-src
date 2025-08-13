@@ -98,7 +98,11 @@ static zend_vm_opcode_handler_t zend_jit_func_trace_counter_handler = NULL;
 static zend_vm_opcode_handler_t zend_jit_ret_trace_counter_handler = NULL;
 static zend_vm_opcode_handler_t zend_jit_loop_trace_counter_handler = NULL;
 
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS);
+#else
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS);
+#endif
 
 static int zend_jit_trace_op_len(const zend_op *opline);
 static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
@@ -3074,7 +3078,11 @@ jit_failure:
 }
 
 /* Run-time JIT handler */
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS)
+#else
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS)
+#endif
 {
 #if GCC_GLOBAL_REGS
 	zend_execute_data *execute_data;
