@@ -17,6 +17,8 @@ foreach($array as list(, $a)) {
 --EXPECT--
 int(1)
 int(3)
-string(1) "b"
+string(1)
+
+Warning: Cannot use string as array in %s on line %d
 NULL
 NULL
