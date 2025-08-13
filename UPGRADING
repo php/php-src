@@ -346,6 +346,9 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_debuginfo_returning_null
   . The report_memleaks INI directive has been deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_report_memleaks_ini_directive
+  . Constant redeclaration is deprecated and that behavior will trigger an
+    error in PHP 9.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_constant_redeclaration
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are

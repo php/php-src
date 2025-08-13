@@ -20,4 +20,4 @@ define("TEST",3);
 
 ?>
 --EXPECT--
-error :Constant TEST already defined
+error :Constant TEST already defined, this will be an error in PHP 9
