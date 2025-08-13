@@ -90,8 +90,6 @@
 # define IR_OPCODE_HANDLER_RET IR_ADDR
 #endif
 
-#define IR_OPCODE_HANDLER_FUNC IR_FASTCALL_FUNC
-
 #undef  ir_CONST_ADDR
 #define ir_CONST_ADDR(_addr)    jit_CONST_ADDR(jit, (uintptr_t)(_addr))
 #define ir_CONST_FUNC(_addr)    jit_CONST_FUNC(jit, (uintptr_t)(_addr), 0)
@@ -101,7 +99,7 @@
 # define ir_CONST_OPCODE_HANDLER_FUNC(_addr) \
 	jit_CONST_OPCODE_HANDLER_FUNC(jit, _addr)
 # define ir_CAST_OPCODE_HANDLER_FUNC(_addr)  ir_fold2(_ir_CTX, IR_OPT(IR_PROTO, IR_ADDR), (_addr), \
-	ir_proto_0(_ir_CTX, IR_OPCODE_HANDLER_FUNC, IR_I32))
+	ir_proto_0(_ir_CTX, IR_FASTCALL_FUNC, IR_I32))
 
 #define ir_CONST_FUNC_PROTO(_addr, _proto) \
 	jit_CONST_FUNC_PROTO(jit, (uintptr_t)(_addr), (_proto))
@@ -585,7 +583,7 @@ static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
 
 static ir_ref jit_CONST_OPCODE_HANDLER_FUNC(zend_jit_ctx *jit, zend_vm_opcode_handler_t handler)
 {
-	return jit_CONST_FUNC(jit, (uintptr_t)handler, IR_OPCODE_HANDLER_FUNC);
+	return jit_CONST_FUNC(jit, (uintptr_t)handler, IR_FASTCALL_FUNC);
 }
 
 static ir_ref jit_ADD_OFFSET(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset)
@@ -3230,7 +3228,7 @@ static void zend_jit_calc_trace_prologue_size(void)
 			jit_STORE_FP(jit, execute_data_ref);
 			jit_STORE_IP(jit, opline_ref);
 		}
-		jit->ctx.flags |= IR_OPCODE_HANDLER_FUNC;
+		jit->ctx.flags |= IR_FASTCALL_FUNC;
 	}
 
 	ir_UNREACHABLE();
@@ -16684,7 +16682,7 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 			jit_STORE_FP(jit, execute_data_ref);
 			jit_STORE_IP(jit, opline_ref);
 		}
-		jit->ctx.flags |= IR_OPCODE_HANDLER_FUNC;
+		jit->ctx.flags |= IR_FASTCALL_FUNC;
 	}
 
 	return 1;
@@ -17264,7 +17262,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 				jit_STORE_FP(jit, execute_data_ref);
 				jit_STORE_IP(jit, opline_ref);
 			}
-			jit->ctx.flags |= IR_OPCODE_HANDLER_FUNC;
+			jit->ctx.flags |= IR_FASTCALL_FUNC;
 		}
 	}
 
