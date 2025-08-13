@@ -82,7 +82,7 @@ PHP_FUNCTION(grapheme_strlen)
 PHP_FUNCTION(grapheme_strpos)
 {
 	char *haystack, *needle, *locale = "";
-	size_t haystack_len, needle_len, locale_len;
+	size_t haystack_len, needle_len, locale_len = 0;
 	const char *found;
 	zend_long loffset = 0;
 	int32_t offset = 0;
@@ -203,7 +203,7 @@ PHP_FUNCTION(grapheme_strrpos)
 {
 	char *haystack, *needle;
 	char *locale = "";
-	size_t haystack_len, needle_len, locale_len;
+	size_t haystack_len, needle_len, locale_len = 0;
 	zend_long loffset = 0;
 	int32_t offset = 0;
 	zend_long ret_pos;
@@ -332,7 +332,7 @@ PHP_FUNCTION(grapheme_substr)
 	char *str, *locale = "";
 	zend_string *u8_sub_str;
 	UChar *ustr;
-	size_t str_len, locale_len;
+	size_t str_len, locale_len = 0;
 	int32_t ustr_len;
 	zend_long lstart = 0, length = 0;
 	int32_t start = 0;
