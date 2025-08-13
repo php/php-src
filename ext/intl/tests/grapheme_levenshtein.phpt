@@ -89,6 +89,11 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 
+echo "--- Invalid locales ---\n";
+var_dump(grapheme_levenshtein("abc", "ａｂｃ", locale: "defaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
+var_dump(intl_get_error_code());
+var_dump(intl_get_error_message());
+
 ?>
 --EXPECTF--
 --- Equal ---
@@ -136,3 +141,7 @@ int(0)
 grapheme_levenshtein(): Argument #3 ($insertion_cost) must be greater than 0 and less than or equal to %d
 grapheme_levenshtein(): Argument #4 ($replacement_cost) must be greater than 0 and less than or equal to %d
 grapheme_levenshtein(): Argument #5 ($deletion_cost) must be greater than 0 and less than or equal to %d
+--- Invalid locales ---
+bool(false)
+int(%d)
+string(68) "grapheme_levenshtein(): Error on ucol_open: U_ILLEGAL_ARGUMENT_ERROR"
