@@ -704,7 +704,6 @@ static int php_userstreamop_flush(php_stream *stream)
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 0, NULL);
 	zend_string_release_ex(func_name, false);
 
-	// TODO: Warn on unimplemented method?
 	int ret = call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval) ? 0 : -1;
 
 	zval_ptr_dtor(&retval);
@@ -851,14 +850,12 @@ static int user_stream_set_check_liveliness(const php_userstream_data_t *us)
 		php_error_docref(NULL, E_WARNING,
 				"%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
 				ZSTR_VAL(us->wrapper->ce->name));
-		// TODO: Returning PHP_STREAM_OPTION_RETURN_NOTIMPL means the stream_set_option() returns true...
 		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
 	if (UNEXPECTED(Z_ISUNDEF(retval))) {
 		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
 	if (EXPECTED(Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
-		// TODO This seems wrong?
 		return Z_TYPE(retval) == IS_TRUE ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 	} else {
 		php_error_docref(NULL, E_WARNING,
@@ -907,7 +904,6 @@ static int user_stream_set_locking(const php_userstream_data_t *us, int value)
 		php_error_docref(NULL, E_WARNING,
 				"%s::" USERSTREAM_LOCK " is not implemented!",
 				ZSTR_VAL(us->wrapper->ce->name));
-		// TODO: Returning PHP_STREAM_OPTION_RETURN_NOTIMPL means the stream_set_option() returns true...
 		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
 	if (UNEXPECTED(Z_ISUNDEF(retval))) {
@@ -916,15 +912,14 @@ static int user_stream_set_locking(const php_userstream_data_t *us, int value)
 	if (EXPECTED(Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 		// This is somewhat confusing and relies on magic numbers.
 		return Z_TYPE(retval) == IS_FALSE;
-	} else {
-		// TODO: ext/standard/tests/file/userstreams_004.phpt returns null implicitly for function
-		// Should this warn or not?
-		//php_error_docref(NULL, E_WARNING,
-		//	"%s::" USERSTREAM_LOCK " value must be of type bool, %s given",
-		//		ZSTR_VAL(us->wrapper->ce->name), zend_zval_value_name(&retval));
-		zval_ptr_dtor(&retval);
-		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
+	// TODO: ext/standard/tests/file/userstreams_004.phpt returns null implicitly for function
+	// Should this warn or not? And should this be considered an error?
+	//php_error_docref(NULL, E_WARNING,
+	//	"%s::" USERSTREAM_LOCK " value must be of type bool, %s given",
+	//		ZSTR_VAL(us->wrapper->ce->name), zend_zval_value_name(&retval));
+	zval_ptr_dtor(&retval);
+	return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 }
 
 static int user_stream_set_truncation(const php_userstream_data_t *us, int value, void *ptrparam) {
@@ -958,7 +953,6 @@ static int user_stream_set_truncation(const php_userstream_data_t *us, int value
 		php_error_docref(NULL, E_WARNING,
 				"%s::" USERSTREAM_TRUNCATE " is not implemented!",
 				ZSTR_VAL(us->wrapper->ce->name));
-		// TODO: Returning PHP_STREAM_OPTION_RETURN_NOTIMPL means the stream_set_option() returns true...
 		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
 	if (UNEXPECTED(Z_ISUNDEF(retval))) {
@@ -1003,7 +997,6 @@ static int user_stream_set_option(const php_userstream_data_t *us, int option, i
 		php_error_docref(NULL, E_WARNING,
 				"%s::" USERSTREAM_SET_OPTION " is not implemented!",
 				ZSTR_VAL(us->wrapper->ce->name));
-		// TODO: Returning PHP_STREAM_OPTION_RETURN_NOTIMPL means the stream_set_option() returns true...
 		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
 	if (UNEXPECTED(Z_ISUNDEF(retval))) {
