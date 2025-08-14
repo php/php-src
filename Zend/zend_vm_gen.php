@@ -988,7 +988,7 @@ function is_inline_hybrid_handler($name, $hot, $op1, $op2, $extra_spec) {
 
 // Generates opcode handler
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $opcode, $extra_spec = null, &$switch_labels = array()) {
-    global $definition_file, $prefix, $opnames, $gen_order, $previous_helper_redefined_dispatch;
+    global $definition_file, $prefix, $opnames, $gen_order;
 
     static $used_observer_handlers = array();
 
@@ -1047,12 +1047,6 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 
     if (ZEND_VM_LINES) {
         out($f, "#line $lineno \"$definition_file\"\n");
-    }
-
-    if ($previous_helper_redefined_dispatch) {
-        out($f, "#undef  ZEND_VM_DISPATCH\n");
-        out($f, "#define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)\n");
-        $previous_helper_redefined_dispatch = false;
     }
 
     // Generate opcode handler's entry point according to selected threading model
@@ -1139,8 +1133,8 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 }
 
 // Generates helper
-function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno, $inline, $cold = false, $hot = false, $extra_spec = null) {
-    global $definition_file, $prefix, $previous_helper_redefined_dispatch;
+function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno, $inline, $cold = false, $hot = false, $extra_spec = null, $signature_only = false) {
+    global $definition_file, $prefix;
 
     if ($kind == ZEND_VM_KIND_HYBRID && !$hot) {
         return;
@@ -1156,14 +1150,11 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 
     $variant = $kind === ZEND_VM_KIND_TAILCALL ? '_TAILCALL' : '';
     $spec_name = $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2].($spec?extra_spec_name($extra_spec):"").$variant;
-    $dispatch_no_tail = false;
-
-    $decl = fopen("php://memory", "r+");
 
     // Generate helper's entry point according to selected threading model
     switch ($kind) {
         case ZEND_VM_KIND_HYBRID:
-            out($decl, $spec_name . "_LABEL:\n");
+            out($f, $spec_name . "_LABEL:\n");
             break;
         case ZEND_VM_KIND_CALL:
         case ZEND_VM_KIND_TAILCALL:
@@ -1187,48 +1178,28 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
                 }
                 $zend_fastcall = " ZEND_FASTCALL ";
             }
+            $semi = $signature_only ? ';' : '';
             if ($param == null) {
               // Helper without parameters
-                out($decl, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_cconv $spec_name(ZEND_OPCODE_HANDLER_ARGS)\n");
+                out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_cconv $spec_name(ZEND_OPCODE_HANDLER_ARGS)$semi\n");
             } else {
                 // Helper with parameter.
-                if ($kind === ZEND_VM_KIND_TAILCALL) {
-                    // Must use trampoline dispatch due to
-                    // incompatible signature for tailcall.
-                    $dispatch_no_tail = true;
-                }
-                out($decl, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_cconv_ex $spec_name(ZEND_OPCODE_HANDLER_ARGS_EX $param)\n");
+                out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_cconv_ex $spec_name(ZEND_OPCODE_HANDLER_ARGS_EX $param)$semi\n");
             }
             break;
         case ZEND_VM_KIND_SWITCH:
-            out($decl, "$spec_name:\n");
+            out($f, "$spec_name:\n");
             break;
         case ZEND_VM_KIND_GOTO:
-            out($decl, "$spec_name:\n");
+            out($f, "$spec_name:\n");
             break;
     }
 
-    fseek($decl, 0);
-    $decl = stream_get_contents($decl);
-
-    if ($dispatch_no_tail && !$previous_helper_redefined_dispatch) {
-        out($f, "#undef  ZEND_VM_DISPATCH\n");
-        out($f, "#define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)\n");
-        $previous_helper_redefined_dispatch = true;
-    } else if (!$dispatch_no_tail && $previous_helper_redefined_dispatch) {
-        out($f, "#undef  ZEND_VM_DISPATCH\n");
-        out($f, "#define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)\n");
-        $previous_helper_redefined_dispatch = false;
+    if (!$signature_only) {
+        // Generate helper's code
+        gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec);
     }
-
-    out($f, $decl);
-
-    // Generate helper's code
-    gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec);
-
-    out($f, "\n");
 }
-
 
 function gen_null_label($f, $kind, $prolog) {
     switch ($kind) {
@@ -1748,6 +1719,8 @@ function read_order_file($fn) {
 function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array()) {
     global $list, $opcodes, $helpers, $op_types_ex, $gen_order;
 
+    $delayed_helpers = fopen("php://memory", "w+");
+
     if ($spec) {
         // Produce specialized executor
         $op1t = $op_types_ex;
@@ -1775,7 +1748,13 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
                             if (isset($helpers[$num]["op1"][$op1]) &&
                                 isset($helpers[$num]["op2"][$op2])) {
                               // Generate helper code
-                                gen_helper($f, 1, $kind, $num, $op1, $op2, $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $helpers[$num]["hot"], $extra_spec);
+                                if ($kind === ZEND_VM_KIND_TAILCALL && $helpers[$num]["param"] !== null) {
+                                    $out = $delayed_helpers;
+                                    gen_helper($f, 1, $kind, $num, $op1, $op2, $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $helpers[$num]["hot"], $extra_spec, signature_only: true);
+                                } else {
+                                    $out = $f;
+                                }
+                                gen_helper($out, 1, $kind, $num, $op1, $op2, $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $helpers[$num]["hot"], $extra_spec);
                             }
                         }
                     } else {
@@ -1799,7 +1778,13 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
             } else if (isset($dsc["helper"])) {
                 $num = $dsc["helper"];
                 // Generate helper code
-                gen_helper($f, 0, $kind, $num, "ANY", "ANY", $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $helpers[$num]["hot"]);
+                if ($kind === ZEND_VM_KIND_TAILCALL && $helpers[$num]["param"] !== null) {
+                    $out = $delayed_helpers;
+                    gen_helper($out, 0, $kind, $num, "ANY", "ANY", $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $helpers[$num]["hot"], signature_only: true);
+                } else {
+                    $out = $f;
+                }
+                gen_helper($out, 0, $kind, $num, "ANY", "ANY", $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $helpers[$num]["hot"]);
             } else {
                 var_dump($dsc);
                 die("??? $kind:$num\n");
@@ -1854,6 +1839,17 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
             out($f,"\t\t\t\tVM_TRACE_OP_END(ZEND_NULL)\n");
             out($f,"\t\t\t\tHYBRID_BREAK(); /* Never reached */\n");
             break;
+    }
+
+    rewind($delayed_helpers);
+    $delayed_helpers = stream_get_contents($delayed_helpers);
+    if ($delayed_helpers !== '') {
+        out($f, "/* The following helpers can not tailcall due to signature mismatch */\n");
+        out($f, "#undef  ZEND_VM_DISPATCH\n");
+        out($f, "#define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)\n");
+        out($f, $delayed_helpers);
+        out($f, "#undef  ZEND_VM_DISPATCH\n");
+        out($f, "#define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)\n");
     }
 }
 
