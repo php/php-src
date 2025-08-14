@@ -178,6 +178,7 @@ PHP                                                                        NEWS
     (nielsdos)
   . Optimized PHP html_entity_decode function. (Artem Ukrainskiy)
   . Minor optimization to array_chunk(). (nielsdos)
+  . Added func_get_named_args() function. (alexandre-daubois)
 
 - URI:
   . Empty host handling is fixed. (Máté Kocsis)
