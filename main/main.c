@@ -698,6 +698,19 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 }
 /* }}} */
 
+static PHP_INI_MH(OnUpdateReportMemleaks)
+{
+	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool new_bool_value = zend_ini_parse_bool(new_value);
+
+	if (!new_bool_value) {
+		php_error_docref(NULL, E_DEPRECATED, "Directive 'report_memleaks' is deprecated");
+	}
+
+	*p = new_bool_value;
+	return SUCCESS;
+}
+
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
@@ -801,7 +814,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_source",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_source,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_ALL,		OnUpdateBool,			report_memleaks,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_ALL,		OnUpdateReportMemleaks,	report_memleaks,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("report_zend_debug",	"0",		PHP_INI_ALL,		OnUpdateBool,			report_zend_debug,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateLong,	output_buffering,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
