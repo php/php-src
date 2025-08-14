@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
     triggers "Constant already defined" warning). (ilutov)
+  . Fixed bug GH-19476 (pipe operator fails to correctly handle returning
+    by reference). (alexandre-daubois)
 
 - ODBC:
   . Remove ODBCVER and assume ODBC 3.5. (Calvin Buckley)
