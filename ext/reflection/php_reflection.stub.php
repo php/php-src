@@ -371,7 +371,7 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function newInstanceArgs(array $args = []): ?object {}
 
-    public function newInstanceFromData(array $data, array $args = []): ?object {}
+    public function newInstanceFromData(array $data, array $args = []): object {}
 
     public function newLazyGhost(callable $initializer, int $options = 0): object {}
 

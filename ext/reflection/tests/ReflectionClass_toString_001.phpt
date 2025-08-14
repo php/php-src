@@ -338,7 +338,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
         Parameter #0 [ <required> array $data ]
         Parameter #1 [ <optional> array $args = [] ]
       }
-      - Return [ ?object ]
+      - Return [ object ]
     }
 
     Method [ <internal:Reflection> public method newLazyGhost ] {
