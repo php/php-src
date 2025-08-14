@@ -2184,7 +2184,7 @@ its_ok:
 		goto err_oldpath;
 	}
 
-	phar_flush_ex(phar, NULL, 1, &error);
+	phar_flush_ex(phar, NULL, true, &error);
 
 	if (error) {
 		zend_hash_str_del(&(PHAR_G(phar_fname_map)), newpath, phar->fname_len);
@@ -4133,7 +4133,7 @@ PHP_METHOD(Phar, delMetadata)
 }
 /* }}} */
 
-static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, char *dest, size_t dest_len, char **error) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, const zend_string *dest, char **error) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	size_t len;
@@ -4161,7 +4161,7 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 	if (virtual_file_ex(&new_state, ZSTR_VAL(entry->filename), NULL, CWD_EXPAND) != 0 ||
 			new_state.cwd_length <= 1) {
 		if (EINVAL == errno && ZSTR_LEN(entry->filename) > 50) {
-			spprintf(error, 4096, "Cannot extract \"%.50s...\" to \"%s...\", extracted filename is too long for filesystem", ZSTR_VAL(entry->filename), dest);
+			spprintf(error, 4096, "Cannot extract \"%.50s...\" to \"%s...\", extracted filename is too long for filesystem", ZSTR_VAL(entry->filename), ZSTR_VAL(dest));
 		} else {
 			spprintf(error, 4096, "Cannot extract \"%s\", internal error", ZSTR_VAL(entry->filename));
 		}
@@ -4183,7 +4183,7 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 	}
 #endif
 
-	len = spprintf(&fullpath, 0, "%s/%s", dest, filename);
+	len = spprintf(&fullpath, 0, "%s/%s", ZSTR_VAL(dest), filename);
 
 	if (len >= MAXPATHLEN) {
 		/* truncate for error message */
@@ -4224,9 +4224,9 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 	slash = zend_memrchr(filename, '/', filename_len);
 
 	if (slash) {
-		fullpath[dest_len + (slash - filename) + 1] = '\0';
+		fullpath[ZSTR_LEN(dest) + (slash - filename) + 1] = '\0';
 	} else {
-		fullpath[dest_len] = '\0';
+		fullpath[ZSTR_LEN(dest)] = '\0';
 	}
 
 	if (FAILURE == php_stream_stat_path(fullpath, &ssb)) {
@@ -4248,9 +4248,9 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 	}
 
 	if (slash) {
-		fullpath[dest_len + (slash - filename) + 1] = '/';
+		fullpath[ZSTR_LEN(dest) + (slash - filename) + 1] = '/';
 	} else {
-		fullpath[dest_len] = '/';
+		fullpath[ZSTR_LEN(dest)] = '/';
 	}
 
 	filename = NULL;
@@ -4270,9 +4270,10 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 	}
 
 	if ((phar_get_fp_type(entry) == PHAR_FP && (entry->flags & PHAR_ENT_COMPRESSION_MASK)) || !phar_get_efp(entry, 0)) {
-		if (FAILURE == phar_open_entry_fp(entry, error, 1)) {
-			if (error) {
-				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer: %s", ZSTR_VAL(entry->filename), fullpath, *error);
+		char *open_entry_error = NULL;
+		if (FAILURE == phar_open_entry_fp(entry, &open_entry_error, 1)) {
+			if (open_entry_error) {
+				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer: %s", ZSTR_VAL(entry->filename), fullpath, open_entry_error);
 			} else {
 				spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to open internal file pointer", ZSTR_VAL(entry->filename), fullpath);
 			}
@@ -4310,28 +4311,28 @@ static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, cha
 }
 /* }}} */
 
-static int extract_helper(phar_archive_data *archive, zend_string *search, char *pathto, size_t pathto_len, bool overwrite, char **error) { /* {{{ */
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 3, 5) static int extract_helper(const phar_archive_data *archive, zend_string *search, const zend_string *pathto, bool overwrite, char **error) { /* {{{ */
 	int extracted = 0;
 	phar_entry_info *entry;
 
 	if (!search) {
 		/* nothing to match -- extract all files */
 		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
-			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
+			if (FAILURE == phar_extract_file(overwrite, entry, pathto, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
 	} else if (ZSTR_LEN(search) > 0 && '/' == ZSTR_VAL(search)[ZSTR_LEN(search) - 1]) {
 		/* ends in "/" -- extract all entries having that prefix */
 		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (!zend_string_starts_with(entry->filename, search)) continue;
-			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
+			if (FAILURE == phar_extract_file(overwrite, entry, pathto, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* otherwise, looking for an exact match */
 		entry = zend_hash_find_ptr(&archive->manifest, search);
 		if (NULL == entry) return 0;
-		if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
+		if (FAILURE == phar_extract_file(overwrite, entry, pathto, error)) return -1;
 		return 1;
 	}
 
@@ -4344,9 +4345,8 @@ PHP_METHOD(Phar, extractTo)
 {
 	php_stream *fp;
 	php_stream_statbuf ssb;
-	char *pathto;
+	zend_string *path_to;
 	zend_string *filename = NULL;
-	size_t pathto_len;
 	int ret;
 	zval *zval_file;
 	HashTable *files_ht = NULL;
@@ -4354,7 +4354,7 @@ PHP_METHOD(Phar, extractTo)
 	char *error = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_PATH(pathto, pathto_len)
+		Z_PARAM_PATH_STR(path_to)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(files_ht, filename)
 		Z_PARAM_BOOL(overwrite)
@@ -4372,30 +4372,30 @@ PHP_METHOD(Phar, extractTo)
 
 	php_stream_close(fp);
 
-	if (pathto_len < 1) {
+	if (ZSTR_LEN(path_to) < 1) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
 			"Invalid argument, extraction path must be non-zero length");
 		RETURN_THROWS();
 	}
 
-	if (pathto_len >= MAXPATHLEN) {
-		char *tmp = estrndup(pathto, 50);
+	if (ZSTR_LEN(path_to) >= MAXPATHLEN) {
+		char *tmp = estrndup(ZSTR_VAL(path_to), 50);
 		/* truncate for error message */
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Cannot extract to \"%s...\", destination directory is too long for filesystem", tmp);
 		efree(tmp);
 		RETURN_THROWS();
 	}
 
-	if (php_stream_stat_path(pathto, &ssb) < 0) {
-		ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
+	if (php_stream_stat_path(ZSTR_VAL(path_to), &ssb) < 0) {
+		ret = php_stream_mkdir(ZSTR_VAL(path_to), 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
 		if (!ret) {
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0,
-				"Unable to create path \"%s\" for extraction", pathto);
+				"Unable to create path \"%s\" for extraction", ZSTR_VAL(path_to));
 			RETURN_THROWS();
 		}
 	} else if (!(ssb.sb.st_mode & S_IFDIR)) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
-			"Unable to use path \"%s\" for extraction, it is a file, must be a directory", pathto);
+			"Unable to use path \"%s\" for extraction, it is a file, must be a directory", ZSTR_VAL(path_to));
 		RETURN_THROWS();
 	}
 
@@ -4411,7 +4411,7 @@ PHP_METHOD(Phar, extractTo)
 					"Invalid argument, array of filenames to extract contains non-string value");
 				RETURN_THROWS();
 			}
-			switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), pathto, pathto_len, overwrite, &error)) {
+			switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), path_to, overwrite, &error)) {
 				case -1:
 					zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
 						phar_obj->archive->fname, error);
@@ -4427,7 +4427,7 @@ PHP_METHOD(Phar, extractTo)
 		RETURN_TRUE;
 	}
 
-	ret = extract_helper(phar_obj->archive, filename, pathto, pathto_len, overwrite, &error);
+	ret = extract_helper(phar_obj->archive, filename, path_to, overwrite, &error);
 	if (-1 == ret) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
 			phar_obj->archive->fname, error);
