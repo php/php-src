@@ -24,6 +24,14 @@
 #include <stdbool.h>
 
 #ifdef TSRM_WIN32
+# ifndef TSRM_INCLUDE_FULL_WINDOWS_HEADERS
+#  define WIN32_LEAN_AND_MEAN
+# endif
+#else
+# include <pthread.h>
+#endif
+
+#ifdef TSRM_WIN32
 #	ifdef TSRM_EXPORTS
 #		define TSRM_API __declspec(dllexport)
 #	else
@@ -38,16 +46,41 @@
 typedef intptr_t tsrm_intptr_t;
 typedef uintptr_t tsrm_uintptr_t;
 
+/* Define THREAD_T and MUTEX_T */
+#ifdef TSRM_WIN32
+# define THREAD_T DWORD
+# define MUTEX_T CRITICAL_SECTION *
+# define COND_T PCONDITION_VARIABLE
+#else
+# define THREAD_T pthread_t
+# define MUTEX_T pthread_mutex_t *
+# define COND_T pthread_cond_t *
+#endif
+
+#include <signal.h>
+
+/* Debug support */
+#define TSRM_ERROR_LEVEL_ERROR	1
+#define TSRM_ERROR_LEVEL_CORE	2
+#define TSRM_ERROR_LEVEL_INFO	3
+
+/* utility functions */
+TSRM_API THREAD_T tsrm_thread_id(void);
+TSRM_API MUTEX_T tsrm_mutex_alloc(void);
+TSRM_API COND_T tsrm_cond_alloc(void);
+TSRM_API void tsrm_mutex_free(MUTEX_T mutexp);
+TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp);
+TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
+TSRM_API int tsrm_cond_wait(COND_T condp, MUTEX_T mutexp);
+TSRM_API int tsrm_cond_broadcast(COND_T condp);
+TSRM_API void tsrm_cond_free(COND_T condp);
+
+#ifdef HAVE_SIGPROCMASK
+TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
+#endif
+
 /* Only compile multi-threading functions if we're in ZTS mode */
 #ifdef ZTS
-
-#ifdef TSRM_WIN32
-# ifndef TSRM_INCLUDE_FULL_WINDOWS_HEADERS
-#  define WIN32_LEAN_AND_MEAN
-# endif
-#else
-# include <pthread.h>
-#endif
 
 #if SIZEOF_SIZE_T == 4
 # define TSRM_ALIGNED_SIZE(size) \
@@ -59,16 +92,7 @@ typedef uintptr_t tsrm_uintptr_t;
 
 typedef int ts_rsrc_id;
 
-/* Define THREAD_T and MUTEX_T */
-#ifdef TSRM_WIN32
-# define THREAD_T DWORD
-# define MUTEX_T CRITICAL_SECTION *
-#else
-# define THREAD_T pthread_t
-# define MUTEX_T pthread_mutex_t *
-#endif
 
-#include <signal.h>
 
 typedef void (*ts_allocate_ctor)(void *);
 typedef void (*ts_allocate_dtor)(void *);
@@ -108,11 +132,6 @@ TSRM_API void ts_free_id(ts_rsrc_id id);
  * The caller is responsible for ensuring the underlying resources don't data-race. */
 TSRM_API void ts_apply_for_id(ts_rsrc_id id, void (*cb)(void *));
 
-/* Debug support */
-#define TSRM_ERROR_LEVEL_ERROR	1
-#define TSRM_ERROR_LEVEL_CORE	2
-#define TSRM_ERROR_LEVEL_INFO	3
-
 typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id);
 typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id);
 typedef void (*tsrm_shutdown_func_t)(void);
@@ -120,16 +139,6 @@ typedef void (*tsrm_shutdown_func_t)(void);
 
 TSRM_API int tsrm_error(int level, const char *format, ...);
 TSRM_API void tsrm_error_set(int level, const char *debug_filename);
-
-/* utility functions */
-TSRM_API THREAD_T tsrm_thread_id(void);
-TSRM_API MUTEX_T tsrm_mutex_alloc(void);
-TSRM_API void tsrm_mutex_free(MUTEX_T mutexp);
-TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp);
-TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
-#ifdef HAVE_SIGPROCMASK
-TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
-#endif
 
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
