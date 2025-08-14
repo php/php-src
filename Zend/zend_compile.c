@@ -588,7 +588,7 @@ static inline void zend_insert_literal(zend_op_array *op_array, zval *zv, int li
 static int zend_add_literal(zval *zv) /* {{{ */
 {
 	zend_op_array *op_array = CG(active_op_array);
-	int i = op_array->last_literal;
+	uint32_t i = op_array->last_literal;
 	op_array->last_literal++;
 	if (i >= CG(context).literals_size) {
 		while (i >= CG(context).literals_size) {
