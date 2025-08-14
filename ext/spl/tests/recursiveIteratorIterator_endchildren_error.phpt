@@ -3,10 +3,10 @@ SPL: RecursiveIteratorIterator - Exception thrown in endchildren which should be
 --FILE--
 <?php
 
-$arr = array(array(1,2));
-$arrOb = new ArrayObject($arr);
-
-$recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
+$recArrIt = new RecursiveArrayIterator([
+    [1, 2],
+    ['a', 'b'],
+]);
 
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
 
@@ -30,6 +30,8 @@ foreach ($recItIt2 as $val) echo "$val\n";
 --EXPECTF--
 1
 2
+a
+b
 ===NEXT LOOP===
 1
 2

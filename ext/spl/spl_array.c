@@ -984,6 +984,12 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		}
 	} else {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Using an object as a backing array for %s is deprecated, as it allows violating class constraints and invariants",
+			instanceof_function(Z_OBJCE_P(object), spl_ce_ArrayIterator) ? "ArrayIterator" : "ArrayObject");
+		if (UNEXPECTED(EG(exception))) {
+			return;
+		}
 		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject) {
 			ZVAL_COPY_VALUE(&garbage, &intern->array);
 			if (just_array)	{
