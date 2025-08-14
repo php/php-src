@@ -5161,7 +5161,7 @@ ZEND_METHOD(ReflectionClass, newInstanceFromData)
 	}
 
 	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(data, key, val) {
@@ -5186,9 +5186,11 @@ ZEND_METHOD(ReflectionClass, newInstanceFromData)
 
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
+			RETURN_THROWS();
 		}
 	} else if (argc) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
 	}
 }
 /* }}} */
