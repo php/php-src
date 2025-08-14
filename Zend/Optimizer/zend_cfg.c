@@ -274,7 +274,6 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 {
 	uint32_t flags = 0;
 	uint32_t i;
-	int j;
 	uint32_t *block_map;
 	zend_function *fn;
 	int blocks_count = 0;
@@ -449,7 +448,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 	}
 
 	if (op_array->last_try_catch) {
-		for (j = 0; j < op_array->last_try_catch; j++) {
+		for (uint32_t j = 0; j < op_array->last_try_catch; j++) {
 			BB_START(op_array->try_catch_array[j].try_op);
 			if (op_array->try_catch_array[j].catch_op) {
 				BB_START(op_array->try_catch_array[j].catch_op);
@@ -494,7 +493,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 	blocks_count++;
 
 	/* Build CFG, Step 3: Calculate successors */
-	for (j = 0; j < blocks_count; j++) {
+	for (int j = 0; j < blocks_count; j++) {
 		zend_basic_block *block = &blocks[j];
 		zend_op *opline;
 		if (block->len == 0) {

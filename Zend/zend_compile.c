@@ -5886,7 +5886,7 @@ static void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 {
 	zend_label *dest;
-	int current, remove_oplines = opline->op1.num;
+	int remove_oplines = opline->op1.num;
 	zval *label;
 	uint32_t opnum = opline - op_array->opcodes;
 
@@ -5903,7 +5903,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline) /* {{{ */
 	zval_ptr_dtor_str(label);
 	ZVAL_NULL(label);
 
-	current = opline->extended_value;
+	uint32_t current = opline->extended_value;
 	for (; current != dest->brk_cont; current = CG(context).brk_cont_array[current].parent) {
 		if (current == -1) {
 			CG(in_compilation) = 1;
