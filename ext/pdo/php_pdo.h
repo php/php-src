@@ -53,6 +53,15 @@ PHP_MINFO_FUNCTION(pdo);
 #define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
 	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (zend_long)value);
 
+#define REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED(const_name, value) 													\
+    do {																												\
+		zend_string *key = zend_string_init_interned(const_name, sizeof(const_name)-1, true);									\
+		zval constant;																									\
+		ZVAL_LONG(&constant, value);																					\
+		zend_declare_class_constant_ex(php_pdo_get_dbh_ce(), key, &constant, ZEND_ACC_PUBLIC | CONST_DEPRECATED, NULL); \
+		zend_string_release(key);																						\
+	} while (0)
+
 #define LONG_CONST(c) (zend_long) c
 
 #define PDO_CONSTRUCT_CHECK_COND dbh->driver
