@@ -423,6 +423,9 @@ PHP 8.5 UPGRADE NOTES
     opened directory has been deprecated. Provide the last opened directory
     explicitly instead.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_null_to_readdir_rewinddir_and_closedir
+  . Passing integers outside the interval [0, 255] to chr() is now deprecated.
+    This is because a byte can only hold a value within this interval.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_integers_outside_the_interval_0_255_to_chr
 
 - XML:
   . The xml_parser_free() function has been deprecated, as XMLParser objects
