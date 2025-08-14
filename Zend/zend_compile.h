@@ -197,7 +197,7 @@ typedef struct _zend_oparray_context {
 	struct _zend_oparray_context *prev;
 	zend_op_array *op_array;
 	uint32_t   opcodes_size;
-	int        vars_size;
+	uint32_t   vars_size;
 	int        literals_size;
 	uint32_t   fast_call_var;
 	uint32_t   try_catch_offset;
