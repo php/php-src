@@ -55,7 +55,7 @@ sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-de
 On MacOS, you can install these using `brew`:
 
 ```shell
-brew install autoconf bison re2c iconv libxml2 sqlite
+brew install autoconf bison re2c libiconv libxml2 sqlite
 ```
 
 or with `MacPorts`:
