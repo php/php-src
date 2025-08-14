@@ -1796,7 +1796,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
 
   dnl Check external libs for iconv funcs.
   AS_VAR_IF([found_iconv], [no], [
-    for i in $PHP_ICONV /usr/local /usr; do
+    for i in $PHP_ICONV /usr/local /opt/homebrew/opt/libiconv /usr; do
       if test -r $i/include/gnu-libiconv/iconv.h; then
         ICONV_DIR=$i
         ICONV_INCLUDE_DIR=$i/include/gnu-libiconv
