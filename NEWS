@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.13
 
+- Core:
+  . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
+    triggers "Constant already defined" warning). (ilutov)
+
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
