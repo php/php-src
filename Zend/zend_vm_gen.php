@@ -856,13 +856,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
                         if (isset($matches[2])) {
                             // extra args
                             $args = substr(preg_replace("/,\s*[A-Za-z0-9_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
-                            /* Helpers with extra args are not generated in the
-                             * TAILCALL VM. Use the CALL helpers instead. */
-                            $dispatch_kind = $kind === ZEND_VM_KIND_TAILCALL ? ZEND_VM_KIND_CALL : $kind;
-                            return "ZEND_VM_DISPATCH_TO_HELPER_EX(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec, $dispatch_kind) . ", " . $args . ")";
-                        }
-                        if ($matches[1] === 'zend_leave_helper' && $kind == ZEND_VM_KIND_CALL) {
-                            return "ZEND_VM_DISPATCH_TO_LEAVE_HELPER(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec, $kind) . ")";
+                            return "ZEND_VM_DISPATCH_TO_HELPER_EX(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec, $kind) . ", " . $args . ")";
                         }
                         return "ZEND_VM_DISPATCH_TO_HELPER(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec, $kind) . ")";
                     }
@@ -1146,22 +1140,8 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
         return;
     }
 
-    if ($kind == ZEND_VM_KIND_TAILCALL && $param !== null) {
-        /* Helpers with extra params can not tailcall due to mismatched
-         * signatures. Don't generate them. The CALL helper will be used
-         * instead. */
-        return;
-    }
-
     if ($spec && skip_extra_spec_function($op1, $op2, $extra_spec)) {
         return;
-    }
-
-    $emit_endif = false;
-    if ($kind == ZEND_VM_KIND_CALL && $name == 'zend_leave_helper') {
-        /* This helper is unused by the TAILCALL VM */
-        out($f, "#if ZEND_VM_KIND == ZEND_VM_KIND_CALL\n");
-        $emit_endif = true;
     }
 
     if (ZEND_VM_LINES) {
@@ -1170,6 +1150,7 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 
     $variant = $kind === ZEND_VM_KIND_TAILCALL ? '_TAILCALL' : '';
     $spec_name = $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2].($spec?extra_spec_name($extra_spec):"").$variant;
+    $redefine_dispatch = false;
 
     // Generate helper's entry point according to selected threading model
     switch ($kind) {
@@ -1202,7 +1183,11 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
               // Helper without parameters
                 out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_cconv $spec_name(ZEND_OPCODE_HANDLER_ARGS)\n");
             } else {
-                // Helper with parameter.
+                // Helper with parameter. Must use trampoline dispatch due to
+                // incompatible signature for tailcall.
+                out($f, "#undef  ZEND_VM_DISPATCH\n");
+                out($f, "#define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_NOTAIL(handler)\n");
+                $redefine_dispatch = true;
                 out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_cconv_ex $spec_name(ZEND_OPCODE_HANDLER_ARGS_EX $param)\n");
             }
             break;
@@ -1217,8 +1202,9 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
     // Generate helper's code
     gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec);
 
-    if ($emit_endif) {
-        out($f, "#endif /* ZEND_VM_KIND == ZEND_VM_KIND_CALL */\n");
+    if ($redefine_dispatch) {
+        out($f, "#undef  ZEND_VM_DISPATCH\n");
+        out($f, "#define ZEND_VM_DISPATCH(handler) ZEND_VM_DISPATCH_DEFAULT(handler)\n");
     }
 }
 
@@ -1614,9 +1600,7 @@ function gen_halt_handler($f, $kind) {
 
     if (!in_array($kind, $done, true)) {
         $done[] = $kind;
-        $cconv = $kind === ZEND_VM_KIND_TAILCALL ? 'ZEND_OPCODE_HANDLER_CCONV' : 'ZEND_OPCODE_HANDLER_FUNC_CCONV';
-        $variant = $kind === ZEND_VM_KIND_TAILCALL ? '_TAILCALL' : '';
-        out($f,"static ZEND_OPCODE_HANDLER_RET {$cconv} ZEND_HALT{$variant}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
         out($f,"{\n");
         out($f,"\treturn (zend_op*) ZEND_VM_ENTER_BIT;\n");
         out($f,"}\n\n");
@@ -1978,22 +1962,19 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 out($f,"# define ZEND_VM_RETURN()        opline = NULL; return\n");
                                 out($f,"# define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE\n");
                             }
-                            out($f,"# define ZEND_VM_DISPATCH(handler) (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); return\n");
+                            out($f,"# define ZEND_VM_DISPATCH_NOTAIL(handler)  ZEND_VM_DISPATCH_DEFAULT(handler)\n");
+                            out($f,"# define ZEND_VM_DISPATCH_DEFAULT(handler) (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); return\n");
+                            out($f,"# define ZEND_VM_DISPATCH(handler)         ZEND_VM_DISPATCH_DEFAULT(handler)\n");
                             out($f,"# define ZEND_VM_DISPATCH_EX(handler, ...) \\\n");
                             out($f,"      return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__)\n");
                             out($f,"#else\n");
                             out($f,"# define ZEND_OPCODE_HANDLER_RET    const zend_op *\n");
                             out($f,"# define ZEND_VM_TAIL_CALL(call) return call\n");
                             out($f,"# define ZEND_VM_CONTINUE()      return opline\n");
-                            out($f,"# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
-                            out($f,"static const zend_op call_halt_op;\n");
-                            out($f,"#  define ZEND_VM_RETURN()        return &call_halt_op;\n");
-                            out($f,"#  define ZEND_VM_DISPATCH_TO_LEAVE_HELPER(helper) return &call_leave_op;\n");
-                            out($f,"# else\n");
-                            out($f,"#  define ZEND_VM_RETURN()        return (const zend_op*)ZEND_VM_ENTER_BIT\n");
-                            out($f,"#  define ZEND_VM_DISPATCH_TO_LEAVE_HELPER(helper) ZEND_VM_DISPATCH_TO_HELPER(helper);\n");
-                            out($f,"# endif\n");
-                            out($f,"# define ZEND_VM_DISPATCH(handler) return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)\n");
+                            out($f,"# define ZEND_VM_RETURN()        return (const zend_op*)ZEND_VM_ENTER_BIT\n");
+                            out($f,"# define ZEND_VM_DISPATCH_DEFAULT(handler)    return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)\n");
+                            out($f,"# define ZEND_VM_DISPATCH_NOTAIL(handler)     ZEND_VM_DISPATCH_DEFAULT(handler)\n");
+                            out($f,"# define ZEND_VM_DISPATCH(handler)            ZEND_VM_DISPATCH_DEFAULT(handler)\n");
                             out($f,"# define ZEND_VM_DISPATCH_EX(handler, ...) \\\n");
                             out($f,"      return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__)\n");
                             out($f,"# define ZEND_VM_INTERRUPT()        ZEND_VM_DISPATCH(zend_interrupt_helper".($spec?"_SPEC":"").")\n");
@@ -2040,8 +2021,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define ZEND_VM_ENTER_EX()        return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
                             out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
                             out($f,"# define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
+                            out($f,"# define ZEND_VM_INTERRUPT()        ZEND_VM_DISPATCH(zend_interrupt_helper".($spec?"_SPEC":"").")\n");
                             out($f,"#endif\n");
-                            out($f,"#define ZEND_VM_INTERRUPT()        ZEND_VM_DISPATCH(zend_interrupt_helper".($spec?"_SPEC":"").")\n");
                             out($f,"#define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {
                                 out($f,"#define ZEND_VM_DISPATCH_OPCODE(opcode, opline) return zend_vm_get_opcode_handler_func(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
@@ -2051,19 +2032,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"\n");
                             out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS);\n");
                             out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
-                            out($f,"#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
-                            out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
-                            out($f,"static zend_never_inline const zend_op *ZEND_OPCODE_HANDLER_CCONV zend_leave_helper_SPEC_TAILCALL(zend_execute_data *ex, const zend_op *opline);\n");
-                            out($f,"\n");
-                            out($f,"static const zend_op call_halt_op = {\n");
-                            out($f,"    .opcode = ZEND_VM_LAST_OPCODE + 1,\n");
-                            out($f,"    .handler = ZEND_HALT_TAILCALL_HANDLER,\n");
-                            out($f,"};\n");
-                            out($f,"static const zend_op call_leave_op = {\n");
-                            out($f,"    .opcode = ZEND_VM_LAST_OPCODE + 1,\n");
-                            out($f,"    .handler = zend_leave_helper_SPEC_TAILCALL,\n");
-                            out($f,"};\n");
-                            out($f,"#endif\n");
                             out($f,"\n");
                             break;
                         case ZEND_VM_KIND_SWITCH:
@@ -2148,20 +2116,30 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# undef ZEND_VM_TAIL_CALL\n");
                         out($f,"# undef ZEND_VM_CONTINUE\n");
                         out($f,"# undef ZEND_VM_RETURN\n");
-                        out($f,"# undef ZEND_VM_ENTER_EX\n");
-                        out($f,"# undef ZEND_VM_ENTER\n");
-                        out($f,"# undef ZEND_VM_LEAVE\n");
+                        out($f,"# undef ZEND_VM_DISPATCH_TAIL_CALL\n");
+                        out($f,"# undef ZEND_VM_DISPATCH_NOTAIL\n");
+                        out($f,"# undef ZEND_VM_DISPATCH_DEFAULT\n");
                         out($f,"# undef ZEND_VM_DISPATCH\n");
                         out($f,"# undef ZEND_VM_DISPATCH_EX\n");
                         out($f,"# undef ZEND_VM_INTERRUPT\n");
                         out($f,"\n");
-                        out($f,"# define ZEND_VM_TAIL_CALL(call)    ZEND_MUSTTAIL return call\n");
-                        out($f,"# define ZEND_VM_CONTINUE()         ZEND_VM_DISPATCH(opline->handler)\n");
-                        out($f,"# define ZEND_VM_RETURN()           ZEND_VM_DISPATCH(ZEND_HALT_TAILCALL_HANDLER)\n");
-                        out($f,"# define ZEND_VM_ENTER_EX()         ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
-                        out($f,"# define ZEND_VM_ENTER()            execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
-                        out($f,"# define ZEND_VM_LEAVE()            ZEND_VM_CONTINUE()\n");
-                        out($f,"# define ZEND_VM_DISPATCH(handler)  ZEND_MUSTTAIL return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)\n");
+                        out($f,"# define ZEND_VM_TAIL_CALL(call)               ZEND_MUSTTAIL return call\n");
+                        out($f,"# define ZEND_VM_CONTINUE()                    ZEND_VM_DISPATCH(opline->handler)\n");
+                        out($f,"# define ZEND_VM_RETURN()                      ZEND_VM_DISPATCH(ZEND_HALT_TAILCALL_HANDLER)\n");
+                        out($f,"# define ZEND_VM_DISPATCH_TAIL_CALL(handler)   ZEND_MUSTTAIL return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)\n");
+                        out($f,"# define ZEND_VM_DISPATCH_NOTAIL(handler) do { \\\n");
+                        out($f,"    /* Enter the branch only if handler is const, or if we don't have __builtin_constant_p */ \\\n");
+                        out($f,"    if (ZEND_CONST_COND(handler == ZEND_HALT_TAILCALL_HANDLER, 0) || ZEND_CONST_COND(handler == zend_leave_helper_SPEC_TAILCALL, 0) || ZEND_CONST_COND(0, 1)) { \\\n");
+                        out($f,"        if (handler == ZEND_HALT_TAILCALL_HANDLER) { \\\n");
+                        out($f,"            opline = &call_halt_op; \\\n");
+                        out($f,"        } else if (handler == zend_leave_helper_SPEC_TAILCALL) { \\\n");
+                        out($f,"            opline = &call_leave_op; \\\n");
+                        out($f,"        } \\\n");
+                        out($f,"    } \\\n");
+                        out($f,"    return opline; \\\n");
+                        out($f,"} while (0)\n");
+                        out($f,"# define ZEND_VM_DISPATCH_DEFAULT(handler)     ZEND_VM_DISPATCH_TAIL_CALL(handler)\n");
+                        out($f,"# define ZEND_VM_DISPATCH(handler)             ZEND_VM_DISPATCH_DEFAULT(handler)\n");
                         out($f,"# define ZEND_VM_DISPATCH_EX(_handler, ...) \\\n");
                         out($f,"      do { \\\n");
                         out($f, "         opline = (_handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__); \\\n");
@@ -2171,6 +2149,15 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."_TAILCALL(ZEND_OPCODE_HANDLER_ARGS);\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_NULL_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
+                        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
+                        out($f,"static zend_never_inline const zend_op *ZEND_OPCODE_HANDLER_CCONV zend_leave_helper_SPEC_TAILCALL(zend_execute_data *ex, const zend_op *opline);\n");
+                        out($f,"\n");
+                        out($f,"static const zend_op call_halt_op = {\n");
+                        out($f,"    .handler = ZEND_HALT_TAILCALL_HANDLER,\n");
+                        out($f,"};\n");
+                        out($f,"static const zend_op call_leave_op = {\n");
+                        out($f,"    .handler = zend_leave_helper_SPEC_TAILCALL,\n");
+                        out($f,"};\n");
                         out($f,"\n");
 
                         gen_executor_code($f, $spec, ZEND_VM_KIND_TAILCALL, $m[1]);
