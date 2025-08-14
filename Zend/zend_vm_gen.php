@@ -850,15 +850,15 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
                             is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec) &&
                             is_hot_handler($opcodes[$opnames[$name]]["hot"], $op1, $op2, $extra_spec) ?
                             "_INLINE" : "";
-                        return "ZEND_VM_DISPATCH_TO_HANDLER(" . opcode_name($handler, $spec, $op1, $op2, $extra_spec, $kind) . $inline . "_HANDLER)";
+                        return "ZEND_VM_DISPATCH(" . opcode_name($handler, $spec, $op1, $op2, $extra_spec, $kind) . $inline . "_HANDLER)";
                     } else {
                         // ZEND_VM_DISPATCH_TO_HELPER
                         if (isset($matches[2])) {
                             // extra args
                             $args = substr(preg_replace("/,\s*[A-Za-z0-9_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
-                            return "ZEND_VM_DISPATCH_TO_HELPER_EX(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec, $kind) . ", " . $args . ")";
+                            return "ZEND_VM_DISPATCH_EX(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec, $kind) . ", " . $args . ")";
                         }
-                        return "ZEND_VM_DISPATCH_TO_HELPER(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec, $kind) . ")";
+                        return "ZEND_VM_DISPATCH(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec, $kind) . ")";
                     }
                 },
                 $code);
@@ -1996,9 +1996,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             }
                             out($f,"# define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE\n");
                             out($f,"#endif\n");
-                            out($f,"#define ZEND_VM_DISPATCH_TO_HANDLER(handler)       ZEND_VM_DISPATCH(handler)\n");
-                            out($f,"#define ZEND_VM_DISPATCH_TO_HELPER(helper)         ZEND_VM_DISPATCH(helper)\n");
-                            out($f,"#define ZEND_VM_DISPATCH_TO_HELPER_EX(helper, ...) ZEND_VM_DISPATCH_EX(helper, __VA_ARGS__)\n");
                             out($f,"\n");
                             out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
                             out($f,"# define DCL_OPLINE\n");
