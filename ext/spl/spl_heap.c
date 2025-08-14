@@ -267,8 +267,6 @@ static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_c
 /* }}} */
 
 static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
-	size_t i;
-
 	if (heap->count+1 > heap->max_size) {
 		size_t alloc_size = heap->max_size * heap->elem_size;
 		/* we need to allocate more memory */
@@ -280,8 +278,9 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userda
 	heap->flags |= SPL_HEAP_WRITE_LOCKED;
 
 	/* sifting up */
-	for (i = heap->count; i > 0 && heap->cmp(spl_heap_elem(heap, (i-1)/2), elem, cmp_userdata) < 0; i = (i-1)/2) {
-		spl_heap_elem_copy(heap, spl_heap_elem(heap, i), spl_heap_elem(heap, (i-1)/2));
+	size_t pos;
+	for (pos = heap->count; pos > 0 && heap->cmp(spl_heap_elem(heap, (pos-1)/2), elem, cmp_userdata) < 0; pos = (pos-1)/2) {
+		spl_heap_elem_copy(heap, spl_heap_elem(heap, pos), spl_heap_elem(heap, (pos-1)/2));
 	}
 	heap->count++;
 
@@ -292,7 +291,7 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userda
 		heap->flags |= SPL_HEAP_CORRUPTED;
 	}
 
-	spl_heap_elem_copy(heap, spl_heap_elem(heap, i), elem);
+	spl_heap_elem_copy(heap, spl_heap_elem(heap, pos), elem);
 }
 /* }}} */
 
@@ -306,7 +305,6 @@ static void *spl_ptr_heap_top(spl_ptr_heap *heap) { /* {{{ */
 /* }}} */
 
 static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
-	size_t i, j;
 	const size_t limit = (heap->count-1)/2;
 	void *bottom;
 
@@ -324,16 +322,17 @@ static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void 
 
 	bottom = spl_heap_elem(heap, --heap->count);
 
-	for (i = 0; i < limit; i = j) {
+	size_t parent_idx, child_idx;
+	for (parent_idx = 0; parent_idx < limit; parent_idx = child_idx) {
 		/* Find smaller child */
-		j = i * 2 + 1;
-		if (j != heap->count && heap->cmp(spl_heap_elem(heap, j+1), spl_heap_elem(heap, j), cmp_userdata) > 0) {
-			j++; /* next child is bigger */
+		child_idx = parent_idx * 2 + 1;
+		if (child_idx != heap->count && heap->cmp(spl_heap_elem(heap, child_idx+1), spl_heap_elem(heap, child_idx), cmp_userdata) > 0) {
+			child_idx++; /* next child is bigger */
 		}
 
 		/* swap elements between two levels */
-		if(heap->cmp(bottom, spl_heap_elem(heap, j), cmp_userdata) < 0) {
-			spl_heap_elem_copy(heap, spl_heap_elem(heap, i), spl_heap_elem(heap, j));
+		if(heap->cmp(bottom, spl_heap_elem(heap, child_idx), cmp_userdata) < 0) {
+			spl_heap_elem_copy(heap, spl_heap_elem(heap, parent_idx), spl_heap_elem(heap, child_idx));
 		} else {
 			break;
 		}
@@ -346,7 +345,7 @@ static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void 
 		heap->flags |= SPL_HEAP_CORRUPTED;
 	}
 
-	void *to = spl_heap_elem(heap, i);
+	void *to = spl_heap_elem(heap, parent_idx);
 	if (to != bottom) {
 		spl_heap_elem_copy(heap, to, bottom);
 	}
