@@ -2362,8 +2362,10 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,$prolog."static zend_vm_opcode_handler_t const handlers[] = {\n");
                         gen_labels($f, $spec, $kind === ZEND_VM_KIND_HYBRID || $kind === ZEND_VM_KIND_CALL ? ZEND_VM_KIND_TAILCALL : $kind, $prolog."\t", $specs, $switch_labels);
                         out($f,$prolog."};\n");
-                        out($f, "#else\n");
-                        out($f,$prolog."static zend_vm_opcode_handler_t const handlers = funcs;\n");
+                        out($f,$prolog."zend_handlers_count = sizeof(handlers) / sizeof(handlers[0]);\n");
+                        out($f, "#elif ZEND_VM_KIND != ZEND_VM_KIND_HYBRID\n");
+                        out($f,$prolog."static zend_vm_opcode_handler_t const *handlers = funcs;\n");
+                        out($f,$prolog."zend_handlers_count = sizeof(funcs) / sizeof(funcs[0]);\n");
                         out($f, "#endif\n");
                         out($f,$prolog."static const uint32_t specs[] = {\n");
                         gen_specs($f, $prolog."\t", $specs);
@@ -2380,11 +2382,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,$prolog."zend_opcode_handler_funcs = funcs;\n");
                             out($f,$prolog."zend_opcode_handlers = handlers;\n");
                             out($f,$prolog."zend_spec_handlers = specs;\n");
-                            out($f,$prolog."zend_handlers_count = sizeof(handlers) / sizeof(handlers[0]);\n");
                         }
                         out($f,"#else\n");
                         out($f,$prolog."zend_opcode_handlers = handlers;\n");
-                        out($f,$prolog."zend_handlers_count = sizeof(handlers) / sizeof(handlers[0]);\n");
                         out($f,$prolog."zend_spec_handlers = specs;\n");
                         out($f,"#endif\n");
                     }
