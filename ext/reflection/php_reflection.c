@@ -7375,12 +7375,14 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	if (delayed_target_validation && ce->type == ZEND_INTERNAL_CLASS) {
 		zend_internal_attribute *config = zend_internal_attribute_get(attr->data->lcname);
 		if (config != NULL && config->validator != NULL) {
-			config->validator(
+			zend_string *error = config->validator(
 				attr->data,
 				attr->target | ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION,
 				attr->scope
 			);
-			if (EG(exception)) {
+			if (error != NULL) {
+				zend_throw_exception(zend_ce_error, ZSTR_VAL(error), 0);
+				zend_string_efree(error);
 				RETURN_THROWS();
 			}
 		}
@@ -7389,7 +7391,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		 * attribute is applied to, attr->scope is just the overall class entry
 		 * that the method is a part of. */
 		if (ce == zend_ce_nodiscard && attr->on_property_hook) {
-			zend_throw_error(NULL, "#[\\NoDiscard] is not supported for property hooks");;
+			zend_throw_error(NULL, "#[\\NoDiscard] is not supported for property hooks");
 			RETURN_THROWS();
 		}
 	}

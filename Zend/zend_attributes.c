@@ -70,16 +70,10 @@ uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_ent
 	return ZEND_ATTRIBUTE_TARGET_ALL;
 }
 
-static void validate_allow_dynamic_properties(
+static zend_string *validate_allow_dynamic_properties(
 		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
-	if (scope == NULL) {
-		/* Only reachable when validator is run but the attribute isn't applied
-		 * to a class; in the case of delayed target validation reflection will
-		 * complain about the target before running the validator. */
-		ZEND_ASSERT(target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION);
-		return;
-	}
+	ZEND_ASSERT(scope != NULL);
 	const char *msg = NULL;
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
 		msg = "Cannot apply #[\\AllowDynamicProperties] to trait %s";
@@ -91,27 +85,20 @@ static void validate_allow_dynamic_properties(
 		msg = "Cannot apply #[\\AllowDynamicProperties] to enum %s";
 	}
 	if (msg != NULL) {
-		if (target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION) {
-			return;
-		}
-		if (target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) {
-			// Should not have passed the first time
-			ZEND_ASSERT((scope->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES) == 0);
-			// Throw a catchable error at runtime
-			zend_throw_error(NULL, msg, ZSTR_VAL(scope->name));
-			return;
-		}
-		zend_error_noreturn(E_ERROR, msg, ZSTR_VAL(scope->name) );
+		smart_str str = {0};
+		smart_str_append_printf(&str, msg, ZSTR_VAL(scope->name));
+		return smart_str_extract(&str);
 	}
 	if (target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) {
 		// Should have passed the first time
 		ZEND_ASSERT((scope->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES) != 0);
-		return;
+		return NULL;
 	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+	return NULL;
 }
 
-static void validate_attribute(
+static zend_string *validate_attribute(
 	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	const char *msg = NULL;
@@ -125,15 +112,11 @@ static void validate_attribute(
 		msg = "Cannot apply #[\\Attribute] to abstract class %s";
 	}
 	if (msg != NULL) {
-		if (target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION) {
-			return;
-		}
-		if (target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) {
-			zend_throw_error(NULL, msg, ZSTR_VAL(scope->name));
-			return;
-		}
-		zend_error_noreturn(E_ERROR, msg, ZSTR_VAL(scope->name));
+		smart_str str = {0};
+		smart_str_append_printf(&str, msg, ZSTR_VAL(scope->name));
+		return smart_str_extract(&str);
 	}
+	return NULL;
 }
 
 ZEND_METHOD(Attribute, __construct)
@@ -235,7 +218,7 @@ ZEND_METHOD(Deprecated, __construct)
 	}
 }
 
-static void validate_nodiscard(
+static zend_string *validate_nodiscard(
 	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	/* There isn't an easy way to identify the *method* that the attribute is
@@ -247,16 +230,14 @@ static void validate_nodiscard(
 		const zend_string *prop_info_name = CG(context).active_property_info_name;
 		if (prop_info_name == NULL) {
 			op_array->fn_flags |= ZEND_ACC_NODISCARD;
-			return;
+			return NULL;
 		}
 		// Applied to a hook, either throw or ignore
-		if (target & ZEND_ATTRIBUTE_NO_TARGET_VALIDATION) {
-			return;
-		}
-		zend_error_noreturn(E_COMPILE_ERROR, "#[\\NoDiscard] is not supported for property hooks");
+		return ZSTR_INIT_LITERAL("#[\\NoDiscard] is not supported for property hooks", 0);
 	}
 	/* At runtime, no way to identify the target method; Reflection will handle
 	 * throwing the error if needed. */
+	 return NULL;
 }
 
 ZEND_METHOD(NoDiscard, __construct)

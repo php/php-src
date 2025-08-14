@@ -35,12 +35,8 @@
 #define ZEND_ATTRIBUTE_FLAGS				((1<<8) - 1)
 
 /* Not a real flag, just passed to validators when target validation is
- * suppressed; must not conflict with any of the real flags above. */
-#define ZEND_ATTRIBUTE_NO_TARGET_VALIDATION (1<<8)
-
-/* Not a real flag, just passed to validators when target validation is
  * being run at runtime; must not conflict with any of the real flags above. */
-#define ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION (1<<9)
+#define ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION (1<<8)
 
 /* Flags for zend_attribute.flags */
 #define ZEND_ATTRIBUTE_PERSISTENT   (1<<0)
@@ -79,7 +75,7 @@ typedef struct _zend_attribute {
 typedef struct _zend_internal_attribute {
 	zend_class_entry *ce;
 	uint32_t flags;
-	void (*validator)(zend_attribute *attr, uint32_t target, zend_class_entry *scope);
+	zend_string* (*validator)(zend_attribute *attr, uint32_t target, zend_class_entry *scope);
 } zend_internal_attribute;
 
 ZEND_API zend_attribute *zend_get_attribute(HashTable *attributes, zend_string *lcname);

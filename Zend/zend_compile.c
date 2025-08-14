@@ -7575,7 +7575,6 @@ static void zend_compile_attributes(
 				strlen("delayedtargetvalidation")
 			);
 		}
-		uint32_t extra_flags = delayed_target_validation ? ZEND_ATTRIBUTE_NO_TARGET_VALIDATION : 0;
 		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
 		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
 			if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
@@ -7603,7 +7602,13 @@ static void zend_compile_attributes(
 
 			// Validators are not run if the target is already invalid
 			if (run_validator && config->validator != NULL) {
-				config->validator(attr, target | extra_flags, CG(active_class_entry));
+				zend_string *error = config->validator(attr, target, CG(active_class_entry));
+				if (error != NULL) {
+					if (delayed_target_validation == false) {
+						zend_error_noreturn(E_COMPILE_ERROR, ZSTR_VAL(error));
+					}
+					zend_string_efree(error);
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
