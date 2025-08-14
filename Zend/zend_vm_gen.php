@@ -1572,35 +1572,23 @@ function gen_specs($f, $prolog, $specs) {
 
 // Generates handler for undefined opcodes (CALL threading model)
 function gen_null_handler($f, $kind) {
-    static $done = [];
-
-    // New and all executors with CALL threading model can use the same handler
-    // for undefined opcodes, do we emit code for it only once
-    if (!in_array($kind, $done, true)) {
-        $done[] = $kind;
-        $cconv = $kind === ZEND_VM_KIND_TAILCALL ? 'ZEND_OPCODE_HANDLER_CCONV' : 'ZEND_OPCODE_HANDLER_FUNC_CCONV';
-        $variant = $kind === ZEND_VM_KIND_TAILCALL ? '_TAILCALL' : '';
-        out($f,"static ZEND_OPCODE_HANDLER_RET {$cconv} ZEND_NULL{$variant}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
-        out($f,"{\n");
-        out($f,"\tUSE_OPLINE\n");
-        out($f,"\n");
-        out($f,"\tSAVE_OPLINE();\n");
-        out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
-        out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
-        out($f,"}\n\n");
-    }
+    $cconv = $kind === ZEND_VM_KIND_TAILCALL ? 'ZEND_OPCODE_HANDLER_CCONV' : 'ZEND_OPCODE_HANDLER_FUNC_CCONV';
+    $variant = $kind === ZEND_VM_KIND_TAILCALL ? '_TAILCALL' : '';
+    out($f,"static ZEND_OPCODE_HANDLER_RET {$cconv} ZEND_NULL{$variant}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+    out($f,"{\n");
+    out($f,"\tUSE_OPLINE\n");
+    out($f,"\n");
+    out($f,"\tSAVE_OPLINE();\n");
+    out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
+    out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
+    out($f,"}\n\n");
 }
 
 function gen_halt_handler($f, $kind) {
-    static $done = [];
-
-    if (!in_array($kind, $done, true)) {
-        $done[] = $kind;
-        out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
-        out($f,"{\n");
-        out($f,"\treturn (zend_op*) ZEND_VM_ENTER_BIT;\n");
-        out($f,"}\n\n");
-    }
+    out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_HALT_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+    out($f,"{\n");
+    out($f,"\treturn (zend_op*) ZEND_VM_ENTER_BIT;\n");
+    out($f,"}\n\n");
 }
 
 function extra_spec_name($extra_spec) {
