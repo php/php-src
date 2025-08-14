@@ -1954,7 +1954,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#endif\n");
                             out($f,"\n");
                             out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
-                            out($f,"# define ZEND_OPCODE_HANDLER_RET    void\n");
+                            out($f,"# define ZEND_OPCODE_HANDLER_RET void\n");
                             out($f,"# define ZEND_VM_TAIL_CALL(call) call; return\n");
                             out($f,"# define ZEND_VM_CONTINUE()      return\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {
@@ -1971,18 +1971,19 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 out($f,"# define ZEND_VM_RETURN()        opline = NULL; return\n");
                                 out($f,"# define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE\n");
                             }
-                            out($f,"# define ZEND_VM_DISPATCH(handler) (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); return\n");
+                            out($f,"# define ZEND_VM_DISPATCH(handler) \\\n");
+                            out($f, "     (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); return\n");
                             out($f,"# define ZEND_VM_DISPATCH_EX(handler, ...) \\\n");
-                            out($f,"      return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__)\n");
+                            out($f, "     (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__); return\n");
                             out($f,"#else\n");
-                            out($f,"# define ZEND_OPCODE_HANDLER_RET    const zend_op *\n");
-                            out($f,"# define ZEND_VM_TAIL_CALL(call)    return call\n");
-                            out($f,"# define ZEND_VM_CONTINUE()         return opline\n");
-                            out($f,"# define ZEND_VM_RETURN()           return (const zend_op*)ZEND_VM_ENTER_BIT\n");
-                            out($f,"# define ZEND_VM_DISPATCH(handler)  return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)\n");
+                            out($f,"# define ZEND_OPCODE_HANDLER_RET const zend_op *\n");
+                            out($f,"# define ZEND_VM_TAIL_CALL(call) return call\n");
+                            out($f,"# define ZEND_VM_CONTINUE()      return opline\n");
+                            out($f,"# define ZEND_VM_RETURN()        return (const zend_op*)ZEND_VM_ENTER_BIT\n");
+                            out($f,"# define ZEND_VM_DISPATCH(handler) \\\n");
+                            out($f,"      return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)\n");
                             out($f,"# define ZEND_VM_DISPATCH_EX(handler, ...) \\\n");
                             out($f,"      return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__)\n");
-                            out($f,"# define ZEND_VM_INTERRUPT()        ZEND_VM_DISPATCH(zend_interrupt_helper".($spec?"_SPEC":"").")\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {
                                 out($f,"# define ZEND_VM_HOT\n");
                             }
@@ -2023,8 +2024,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"# define ZEND_VM_ENTER_EX()        return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
                             out($f,"# define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
                             out($f,"# define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)\n");
-                            out($f,"# define ZEND_VM_INTERRUPT()        ZEND_VM_DISPATCH(zend_interrupt_helper".($spec?"_SPEC":"").")\n");
                             out($f,"#endif\n");
+                            out($f,"#define ZEND_VM_INTERRUPT()      ZEND_VM_DISPATCH(zend_interrupt_helper".($spec?"_SPEC":"").")\n");
                             out($f,"#define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {
                                 out($f,"#define ZEND_VM_DISPATCH_OPCODE(opcode, opline) return zend_vm_get_opcode_handler_func(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
@@ -2129,10 +2130,10 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# define ZEND_VM_DISPATCH_NOTAIL(handler)      return opline\n");
                         out($f,"# define ZEND_VM_DISPATCH(handler)             ZEND_VM_DISPATCH_DEFAULT(handler)\n");
                         out($f,"# define ZEND_VM_DISPATCH_EX(_handler, ...) \\\n");
-                        out($f,"      do { \\\n");
-                        out($f, "         opline = (_handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__); \\\n");
-                        out($f, "         ZEND_VM_DISPATCH(opline->handler); \\\n");
-                        out($f, "     } while (0)\n");
+                        out($f,"    do { \\\n");
+                        out($f,"        opline = (_handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX __VA_ARGS__); \\\n");
+                        out($f,"        ZEND_VM_DISPATCH(opline->handler); \\\n");
+                        out($f,"    } while (0)\n");
                         out($f,"# define ZEND_VM_DISPATCH_LEAVE_HELPER(helper) opline = &call_leave_op; SAVE_OPLINE(); ZEND_VM_DISPATCH(helper)\n");
                         out($f,"# define ZEND_VM_INTERRUPT()        ZEND_VM_DISPATCH(zend_interrupt_helper".($spec?"_SPEC":"")."_TAILCALL)\n");
                         out($f,"\n");
