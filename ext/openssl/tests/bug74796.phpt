@@ -34,6 +34,21 @@ $serverCode = <<<'CODE'
     phpt_wait();
 CODE;
 
+$serverCode2 = <<<'CODE'
+    $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
+
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $serverFlags, null);
+    phpt_notify_server_start($server);
+
+    for ($i=0; $i < 3; $i++) {
+        $conn = stream_socket_accept($server, 3);
+        fwrite($conn, "HTTP/1.0 200 OK\r\n\r\nHello from server $i");
+        fclose($conn);
+    }
+
+    phpt_wait();
+CODE;
+
 $proxyCode = <<<'CODE'
     function parse_sni_from_client_hello($data) {
         $sni = null;
@@ -156,9 +171,35 @@ $clientCode = <<<'CODE'
     phpt_notify('server');
 CODE;
 
+$clientCode2 = <<<'CODE'
+    $clientCtx = stream_context_create([
+        'ssl' => [
+            'cafile' => __DIR__ . '/sni_server_ca.pem',
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+        ],
+        "http" => [
+            "proxy" => "tcp://{{ ADDR }}"
+        ],
+    ]);
+
+    // servers
+    var_dump(file_get_contents("https://test.php.net/", false, $clientCtx));
+    var_dump(stream_context_get_options($clientCtx)['ssl']['peer_name'] ?? null);
+    phpt_notify('proxy');
+
+    echo file_get_contents(__DIR__ . "/bug74796_proxy_sni.log");
+
+    phpt_notify('server');
+CODE;
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, [
     'server' => $serverCode,
+    'proxy' => $proxyCode,
+]);
+ServerClientTestCase::getInstance()->run($clientCode2, [
+    'server' => $serverCode2,
     'proxy' => $proxyCode,
 ]);
 ?>
@@ -166,7 +207,7 @@ ServerClientTestCase::getInstance()->run($clientCode, [
 <?php
 @unlink(__DIR__ . "/bug74796_proxy_sni.log");
 ?>
---EXPECT--
+--EXPECTF--
 string(19) "Hello from server 0"
 NULL
 string(19) "Hello from server 1"
@@ -176,3 +217,14 @@ NULL
 cs.php.net
 uk.php.net
 us.php.net
+
+Warning: file_get_contents(): SSL operation failed with code 1. OpenSSL Error messages:
+error:%s:SSL routines::ssl/tls alert handshake failure in %sServerClientTestCase.inc(%d) : eval()'d code on line %d
+
+Warning: file_get_contents(https://test.php.net/): Failed to open stream: Cannot connect to HTTPS server through proxy in %sServerClientTestCase.inc(%d) : eval()'d code on line %d
+bool(false)
+string(12) "test.php.net"
+cs.php.net
+uk.php.net
+us.php.net
+test.php.net

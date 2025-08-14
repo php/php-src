@@ -575,7 +575,7 @@ finish:
 			}
 		}
 
-		if (reset_ssl_peer_name) {
+		if (stream && reset_ssl_peer_name) {
 			php_stream_context_unset_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name");
 		}
 	}
