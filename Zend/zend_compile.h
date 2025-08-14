@@ -1207,6 +1207,9 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 /* Used to distinguish (parent::$prop)::get() from parent hook call. */
 #define ZEND_PARENTHESIZED_STATIC_PROP 1
 
+/* Used to disallow pipes with arrow functions that lead to confusing parse trees. */
+#define ZEND_PARENTHESIZED_ARROW_FUNC 1
+
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)
 #define ZEND_SYMBOL_FUNCTION (1<<1)

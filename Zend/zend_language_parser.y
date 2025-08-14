@@ -1348,6 +1348,7 @@ expr:
 	|	'(' expr ')' {
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
+			if ($$->kind == ZEND_AST_ARROW_FUNC) $$->attr = ZEND_PARENTHESIZED_ARROW_FUNC;
 		}
 	|	new_dereferenceable { $$ = $1; }
 	|	new_non_dereferenceable { $$ = $1; }

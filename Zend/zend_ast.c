@@ -2070,6 +2070,9 @@ tail_call:
 		case ZEND_AST_ARROW_FUNC:
 		case ZEND_AST_METHOD:
 			decl = (const zend_ast_decl *) ast;
+			if (decl->kind == ZEND_AST_ARROW_FUNC && (decl->attr & ZEND_PARENTHESIZED_ARROW_FUNC)) {
+				smart_str_appendc(str, '(');
+			}
 			if (decl->child[4]) {
 				bool newlines = !(ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
 				zend_ast_export_attributes(str, decl->child[4], indent, newlines);
@@ -2113,6 +2116,9 @@ tail_call:
 					}
 					smart_str_appends(str, " => ");
 					zend_ast_export_ex(str, body, 0, indent);
+					if (decl->attr & ZEND_PARENTHESIZED_ARROW_FUNC) {
+						smart_str_appendc(str, ')');
+					}
 					break;
 				}
 

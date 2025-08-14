@@ -220,7 +220,7 @@ typedef struct _zend_ast_op_array {
 /* Separate structure for function and class declaration, as they need extra information. */
 typedef struct _zend_ast_decl {
 	zend_ast_kind kind;
-	zend_ast_attr attr; /* Unused - for structure compatibility */
+	zend_ast_attr attr;
 	uint32_t start_lineno;
 	uint32_t end_lineno;
 	uint32_t flags;
