@@ -1268,13 +1268,12 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 					 && ssa->vars[i].definition >= 0
 					 && ssa->ops[op_num].result_def == i) {
 						const zend_live_range *range = op_array->live_range;
-						int j;
 
 						op_num++;
 						if (op_array->opcodes[op_num].opcode == ZEND_OP_DATA) {
 							op_num++;
 						}
-						for (j = 0; j < op_array->last_live_range; range++, j++) {
+						for (uint32_t j = 0; j < op_array->last_live_range; range++, j++) {
 							if (range->start > op_num) {
 								/* further blocks will not be relevant... */
 								break;

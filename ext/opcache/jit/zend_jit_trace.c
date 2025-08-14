@@ -6583,10 +6583,9 @@ done:
 								uint32_t var_num = opline->result.var;
 								uint32_t op_num = opline - op_array->opcodes;
 								const zend_live_range *range = op_array->live_range;
-								int j;
 
 								op_num += zend_jit_trace_op_len(opline);
-								for (j = 0; j < op_array->last_live_range; range++, j++) {
+								for (uint32_t j = 0; j < op_array->last_live_range; range++, j++) {
 									if (range->start > op_num) {
 										/* further blocks will not be relevant... */
 										break;
