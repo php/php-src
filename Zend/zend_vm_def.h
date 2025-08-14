@@ -2962,7 +2962,10 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 {
 	zend_execute_data *old_execute_data;
 	uint32_t call_info = EX_CALL_INFO();
+#if ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL
+	/* zend_leave_helper may be called with opline=call_leave_op in TAILCALL VM */
 	SAVE_OPLINE();
+#endif
 
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
