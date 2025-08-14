@@ -2726,7 +2726,8 @@ static inline bool zend_is_call(zend_ast *ast) /* {{{ */
 	return ast->kind == ZEND_AST_CALL
 		|| ast->kind == ZEND_AST_METHOD_CALL
 		|| ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL
-		|| ast->kind == ZEND_AST_STATIC_CALL;
+		|| ast->kind == ZEND_AST_STATIC_CALL
+		|| ast->kind == ZEND_AST_PIPE;
 }
 /* }}} */
 
