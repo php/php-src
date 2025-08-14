@@ -198,7 +198,7 @@ typedef struct _zend_oparray_context {
 	zend_op_array *op_array;
 	uint32_t   opcodes_size;
 	uint32_t   vars_size;
-	int        literals_size;
+	uint32_t   literals_size;
 	uint32_t   fast_call_var;
 	uint32_t   try_catch_offset;
 	int        current_brk_cont;
@@ -550,7 +550,7 @@ struct _zend_op_array {
 	uint32_t line_start;
 	uint32_t line_end;
 
-	int last_literal;
+	uint32_t last_literal;
 	uint32_t num_dynamic_func_defs;
 	zval *literals;
 

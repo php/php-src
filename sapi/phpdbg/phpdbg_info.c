@@ -307,7 +307,7 @@ PHPDBG_INFO(literal) /* {{{ */
 	bool in_executor = PHPDBG_G(in_execution) && EG(current_execute_data) && EG(current_execute_data)->func;
 	if (in_executor || PHPDBG_G(ops)) {
 		zend_op_array *ops = in_executor ? &EG(current_execute_data)->func->op_array : PHPDBG_G(ops);
-		int literal = 0, count = ops->last_literal - 1;
+		uint32_t literal = 0, count = ops->last_literal - 1;
 
 		if (ops->function_name) {
 			if (ops->scope) {
