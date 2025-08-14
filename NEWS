@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   . Various closure binding issues are now deprecated. (alexandre-daubois)
   . Fixed bug GH-18373 (Don't substitute self/parent with anonymous class).
     (ilutov)
+  . Prohibit pipe & arrow function combination that leads to confusing parse
+    trees. (ilutov)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
