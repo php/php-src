@@ -2113,7 +2113,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 
                     if ($kind == ZEND_VM_KIND_HYBRID || $kind == ZEND_VM_KIND_CALL) {
 
-                        /* Generate tailcalling handlers */
+                        /* Generate both CALL and TAILCALL handlers.
+                         * TAILCALL handlers are used as zend_vm_opcode_handler_t
+                         * when supported.
+                         * CALL handlers are used as zend_vm_opcode_handler_func_t.
+                         */
                         out($f,"#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
                         out($f,"\n");
                         out($f,"# undef ZEND_VM_TAIL_CALL\n");
