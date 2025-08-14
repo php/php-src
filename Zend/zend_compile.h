@@ -542,7 +542,7 @@ struct _zend_op_array {
 	uint32_t *refcount;
 
 	uint32_t last_live_range;
-	int last_try_catch;
+	uint32_t last_try_catch;
 	zend_live_range *live_range;
 	zend_try_catch_element *try_catch_array;
 

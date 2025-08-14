@@ -244,7 +244,6 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	zend_generator *current_generator = zend_generator_get_current(generator);
 	zend_execute_data *ex = generator->execute_data;
 	uint32_t op_num, try_catch_offset;
-	int i;
 
 	/* If current_generator is running in a fiber, there are 2 cases to consider:
 	 *  - If generator is also marked with ZEND_GENERATOR_IN_FIBER, then the
@@ -289,7 +288,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	try_catch_offset = -1;
 
 	/* Find the innermost try/catch that we are inside of. */
-	for (i = 0; i < ex->func->op_array.last_try_catch; i++) {
+	for (uint32_t i = 0; i < ex->func->op_array.last_try_catch; i++) {
 		zend_try_catch_element *try_catch = &ex->func->op_array.try_catch_array[i];
 		if (op_num < try_catch->try_op) {
 			break;
