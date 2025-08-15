@@ -89,11 +89,6 @@ static zend_string *validate_allow_dynamic_properties(
 		smart_str_append_printf(&str, msg, ZSTR_VAL(scope->name));
 		return smart_str_extract(&str);
 	}
-	if (target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) {
-		// Should have passed the first time
-		ZEND_ASSERT((scope->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES) != 0);
-		return NULL;
-	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 	return NULL;
 }
@@ -221,23 +216,15 @@ ZEND_METHOD(Deprecated, __construct)
 static zend_string *validate_nodiscard(
 	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
-	/* There isn't an easy way to identify the *method* that the attribute is
-	 * applied to in a manner that works during both compilation (normal
-	 * validation) and runtime (delayed validation). So, handle them separately. */
-	if (CG(in_compilation)) {
-		ZEND_ASSERT((target & ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION) == 0);
-		zend_op_array *op_array = CG(active_op_array);
-		const zend_string *prop_info_name = CG(context).active_property_info_name;
-		if (prop_info_name == NULL) {
-			op_array->fn_flags |= ZEND_ACC_NODISCARD;
-			return NULL;
-		}
-		// Applied to a hook, either throw or ignore
-		return ZSTR_INIT_LITERAL("#[\\NoDiscard] is not supported for property hooks", 0);
+	ZEND_ASSERT(CG(in_compilation));
+	zend_op_array *op_array = CG(active_op_array);
+	const zend_string *prop_info_name = CG(context).active_property_info_name;
+	if (prop_info_name == NULL) {
+		op_array->fn_flags |= ZEND_ACC_NODISCARD;
+		return NULL;
 	}
-	/* At runtime, no way to identify the target method; Reflection will handle
-	 * throwing the error if needed. */
-	 return NULL;
+	// Applied to a hook
+	return ZSTR_INIT_LITERAL("#[\\NoDiscard] is not supported for property hooks", 0);
 }
 
 ZEND_METHOD(NoDiscard, __construct)
@@ -467,6 +454,9 @@ static void attr_free(zval *v)
 
 	zend_string_release(attr->name);
 	zend_string_release(attr->lcname);
+	if (attr->validation_error != NULL) {
+		zend_string_release(attr->validation_error);
+	}
 
 	for (uint32_t i = 0; i < attr->argc; i++) {
 		if (attr->args[i].name) {
@@ -499,6 +489,7 @@ ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_string 
 	}
 
 	attr->lcname = zend_string_tolower_ex(attr->name, persistent);
+	attr->validation_error = NULL;
 	attr->flags = flags;
 	attr->lineno = lineno;
 	attr->offset = offset;
