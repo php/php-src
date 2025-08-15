@@ -638,6 +638,10 @@ PHP 8.5 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- Core:
+  . NoDiscard attribute was added.
+    RFC: https://wiki.php.net/rfc/marking_return_value_as_important
+
 - Curl:
   . CurlSharePersistentHandle representing a share handle that is persisted
     across multiple PHP requests.
