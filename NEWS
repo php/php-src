@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20766 (Use-after-free in FE_FREE with GC interaction). (Bob)
   . Fix OSS-Fuzz #471486164 (Broken by-ref assignment to uninitialized hooked
     backing value). (ilutov)
+  . Fix OSS-Fuzz #438780145 (Nested finally with repeated return type check may
+    uaf). (ilutov)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
