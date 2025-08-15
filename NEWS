@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
 
+- PGSQL:
+  . Fixed bug GH-19485 (potential use after free when using persistent pgsql
+    connections). (Mark Karpeles)
+
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
 
