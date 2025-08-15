@@ -4,7 +4,8 @@ Request #70438: Add IV parameter for openssl_seal and openssl_open
 openssl
 --SKIPIF--
 <?php
-if (!in_array('AES-128-CBC', openssl_get_cipher_methods(true))) {
+if (!in_array('AES-128-CBC', openssl_get_cipher_methods(true)) &&
+    !in_array('aes-128-cbc', openssl_get_cipher_methods(true))) {
     print "skip";
 }
 ?>
