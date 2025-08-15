@@ -7606,8 +7606,10 @@ static void zend_compile_attributes(
 				if (error != NULL) {
 					if (delayed_target_validation == false) {
 						zend_error_noreturn(E_COMPILE_ERROR, "%s", ZSTR_VAL(error));
+						zend_string_efree(error);
+					} else {
+						attr->validation_error = error;
 					}
-					zend_string_efree(error);
 				}
 			}
 		} ZEND_HASH_FOREACH_END();

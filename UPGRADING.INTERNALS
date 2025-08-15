@@ -28,16 +28,11 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     extra layer of indirection can be removed. In other cases a zval can
     be heap-allocated and stored in the pointer as a minimal change to keep
     compatibility.
-  * The validator callbacks for internal attribute now return `zend_string *`
+  . The validator callbacks for internal attribute now return `zend_string *`
     rather than `void`; instead of emitting an error when an attribute is
     applied incorrectly, the error message should be returned as a zend_string
-    pointer.
-  . The `target` parameter for validator callbacks for internal attributes
-    can now include in the bitmask the new flag
-    ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION. The flag indicates that
-    validation is being performed at runtime and that other than returning an
-    error message, the validator should not do anything, most notably including
-    modification of any class properties.
+    pointer. If the error will be delayed until runtime, it is stored in the
+    new `validation_error` field of the `zend_attribute` struct.
     RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute
 
 - Hash

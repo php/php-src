@@ -181,6 +181,9 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 			ADD_SIZE(ZEND_ATTRIBUTE_SIZE(attr->argc));
 			ADD_INTERNED_STRING(attr->name);
 			ADD_INTERNED_STRING(attr->lcname);
+			if (attr->validation_error != NULL) {
+				ADD_INTERNED_STRING(attr->validation_error);
+			}
 
 			for (i = 0; i < attr->argc; i++) {
 				if (attr->args[i].name) {

@@ -7373,27 +7373,13 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 
 	/* Run the delayed validator function for internal attributes */
 	if (delayed_target_validation && ce->type == ZEND_INTERNAL_CLASS) {
-		zend_internal_attribute *config = zend_internal_attribute_get(attr->data->lcname);
-		if (config != NULL && config->validator != NULL) {
-			zend_string *error = config->validator(
-				attr->data,
-				attr->target | ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION,
-				attr->scope
-			);
-			if (error != NULL) {
-				zend_throw_exception(zend_ce_error, ZSTR_VAL(error), 0);
-				zend_string_efree(error);
-				RETURN_THROWS();
-			}
-		}
-		/* For #[NoDiscard], the attribute does not work on property hooks, but
-		 * at runtime the validator has no way to access the method that an
-		 * attribute is applied to, attr->scope is just the overall class entry
-		 * that the method is a part of. */
-		if (ce == zend_ce_nodiscard && attr->on_property_hook) {
-			zend_throw_error(NULL, "#[\\NoDiscard] is not supported for property hooks");
+		zend_string *error = attr->data->validation_error;
+		if (error != NULL) {
+			zend_throw_exception(zend_ce_error, ZSTR_VAL(error), 0);
 			RETURN_THROWS();
 		}
+	} else {
+		ZEND_ASSERT(attr->data->validation_error == NULL);
 	}
 
 	/* Repetition validation is done even if #[DelayedTargetValidation] is used

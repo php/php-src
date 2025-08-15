@@ -461,6 +461,7 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
 
 	SERIALIZE_STR(attr->name);
 	SERIALIZE_STR(attr->lcname);
+	SERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
 		SERIALIZE_STR(attr->args[i].name);
@@ -1352,6 +1353,7 @@ static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_scri
 
 	UNSERIALIZE_STR(attr->name);
 	UNSERIALIZE_STR(attr->lcname);
+	UNSERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
 		UNSERIALIZE_STR(attr->args[i].name);

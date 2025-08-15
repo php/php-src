@@ -34,10 +34,6 @@
 #define ZEND_ATTRIBUTE_IS_REPEATABLE		(1<<7)
 #define ZEND_ATTRIBUTE_FLAGS				((1<<8) - 1)
 
-/* Not a real flag, just passed to validators when target validation is
- * being run at runtime; must not conflict with any of the real flags above. */
-#define ZEND_ATTRIBUTE_DELAYED_TARGET_VALIDATION (1<<8)
-
 /* Flags for zend_attribute.flags */
 #define ZEND_ATTRIBUTE_PERSISTENT   (1<<0)
 #define ZEND_ATTRIBUTE_STRICT_TYPES (1<<1)
@@ -64,6 +60,9 @@ typedef struct {
 typedef struct _zend_attribute {
 	zend_string *name;
 	zend_string *lcname;
+	/* Only non-null for internal attributes with validation errors that are
+	 * delayed until runtime via #[\DelayedTargetValidation] */
+	zend_string *validation_error;
 	uint32_t flags;
 	uint32_t lineno;
 	/* Parameter offsets start at 1, everything else uses 0. */
