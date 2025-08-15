@@ -2351,7 +2351,10 @@ function wordwrap(string $string, int $width = 75, string $break = "\n", bool $c
  */
 function explode(string $separator, string $string, int $limit = PHP_INT_MAX): array {}
 
-/** @alias explode */
+/**
+ * @return array<int, string>
+ * @alias explode
+ */
 function split(string $separator, string $string, int $limit = PHP_INT_MAX): array {}
 
 /**
