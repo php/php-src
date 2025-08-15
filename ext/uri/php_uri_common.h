@@ -164,7 +164,7 @@ static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 
 #define URI_PARSER_RFC3986 "Uri\\Rfc3986\\Uri"
 #define URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
-#define URI_PARSER_PHP ""
+#define URI_PARSER_PHP "parse_url"
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 
 const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, uri_property_name_t property_name);
