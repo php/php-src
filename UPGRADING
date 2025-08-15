@@ -660,9 +660,7 @@ PHP 8.5 UPGRADE NOTES
 - Core:
   . NoDiscard attribute was added.
     RFC: https://wiki.php.net/rfc/marking_return_value_as_important
-  . DelayedTargetValidation is an attribute that, when added, delays any errors
-    from *other* internal attributes about being applied to invalid targets from
-    compile-time to runtime.
+  . DelayedTargetValidation attribute was added.
     RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute
 
 - Curl:

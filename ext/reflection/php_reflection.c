@@ -7331,8 +7331,10 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	 * - the attribute is an internal attribute, and it had the target and
 	 *   and repetition validated already
 	 * - the attribute is an internal attribute and repetition was validated
-	 *   already, but the target was not validated due to the presence of
-	 *   #[DelayedTargetValidation]
+	 *   already, the internal validator might have been run if the target was
+	 *   correct, but any error would have been stored in
+	 *   `zend_attribute.validation_error` instead of being thrown due to the
+	 *   presence of #[DelayedTargetValidation]
 	 * - the attribute is a user attribute, and neither target nor repetition
 	 *   have been validated.
 	 */
@@ -7358,7 +7360,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
-	/* Run the delayed validator function for internal attributes */
+	/* Report the delayed validator error for internal attributes */
 	if (delayed_target_validation && ce->type == ZEND_INTERNAL_CLASS) {
 		zend_string *error = attr->data->validation_error;
 		if (error != NULL) {

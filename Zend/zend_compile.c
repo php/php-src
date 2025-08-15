@@ -8539,8 +8539,9 @@ static zend_op_array *zend_compile_func_decl_ex(
 	if (op_array->fn_flags & ZEND_ACC_NODISCARD) {
 		/* ZEND_ACC_NODISCARD gets added by the attribute validator, but only
 		 * if the method is not a hook; if it is a hook, then the validator
-		 * should have either thrown an error or done nothing due to delayed
-		 * target validation. */
+		 * will have returned an error message, even if the error message was
+		 * delayed with #[\DelayedTargetValidation] that ZEND_ACC_NODISCARD
+		 * flag should not have been added. */
 		ZEND_ASSERT(!is_hook);
 
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
