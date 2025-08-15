@@ -42,6 +42,10 @@
 #include "php.h"
 #include "php_globals.h"
 
+#if defined(__APPLE__)
+#include <mach/machine/vm_param.h>
+#endif
+
 // FIXME: Breaks the declaration of the function below
 #undef zenderror
 
@@ -1275,6 +1279,10 @@ ZEND_API size_t zend_get_page_size(void)
 	SYSTEM_INFO system_info;
 	GetSystemInfo(&system_info);
 	return system_info.dwPageSize;
+#elif defined(__APPLE__)
+	/* Is in fact the global vm_page_size which is a kernel global
+	 * we save a syscall as they fetch the same cached value */
+	return (size_t)PAGE_SIZE;
 #elif defined(__FreeBSD__)
 	/* This returns the value obtained from
 	 * the auxv vector, avoiding a syscall. */
