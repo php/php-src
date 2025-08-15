@@ -22,7 +22,22 @@ function test2() {
 var_dump(test2());
 ?>
 --EXPECTF--
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(4) "test"
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
 string(9) "Arraytest"

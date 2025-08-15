@@ -63,11 +63,11 @@ Initial value:float(0)
 Result value:float(1)
 Initial value:string(0) ""
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(1) "1"
 Initial value:string(1) " "
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(1) " "
 Initial value:string(1) "0"
 Result value:int(1)

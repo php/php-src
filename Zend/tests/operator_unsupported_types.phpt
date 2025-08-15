@@ -2104,6 +2104,7 @@ Cannot increment stdClass
 Cannot decrement stdClass
 Cannot increment resource
 Cannot decrement resource
+Warning: Increment on non-numeric string is deprecated, use str_increment() instead
 No error for fop++
 Warning: Decrement on non-numeric string has no effect and is deprecated
 No error for foo--

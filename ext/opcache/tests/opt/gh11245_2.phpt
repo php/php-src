@@ -34,3 +34,5 @@ $_main:
 0006 RETURN int(1)
 LIVE RANGES:
      1: 0001 - 0005 (tmp/var)
+
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
