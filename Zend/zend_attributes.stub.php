@@ -101,5 +101,5 @@ final class NoDiscard
 /**
  * @strict-properties
  */
-#[Attribute]
+#[Attribute(Attribute::TARGET_ALL)]
 final class DelayedTargetValidation {}

@@ -217,9 +217,9 @@ static zend_string *validate_nodiscard(
 	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	ZEND_ASSERT(CG(in_compilation));
-	zend_op_array *op_array = CG(active_op_array);
 	const zend_string *prop_info_name = CG(context).active_property_info_name;
 	if (prop_info_name == NULL) {
+		zend_op_array *op_array = CG(active_op_array);
 		op_array->fn_flags |= ZEND_ACC_NODISCARD;
 		return NULL;
 	}
@@ -524,12 +524,7 @@ ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry 
 		if (zend_string_equals(attr->name, zend_ce_attribute->name)) {
 			internal_attr = pemalloc(sizeof(zend_internal_attribute), 1);
 			internal_attr->ce = ce;
-			if (attr->argc == 0) {
-				// Apply default of Attribute::TARGET_ALL
-				internal_attr->flags = ZEND_ATTRIBUTE_TARGET_ALL;
-			} else {
-				internal_attr->flags = Z_LVAL(attr->args[0].value);
-			}
+			internal_attr->flags = Z_LVAL(attr->args[0].value);
 			internal_attr->validator = NULL;
 
 			zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
