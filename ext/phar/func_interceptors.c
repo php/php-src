@@ -109,7 +109,7 @@ static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool
 	/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 	/* retrieving a file defaults to within the current directory, so use this if possible */
 	phar_archive_data *phar;
-	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
+	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, NULL)) {
 		efree(arch);
 		return NULL;
 	}
@@ -515,7 +515,7 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 			entry = estrndup(filename, filename_length);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_length;
-			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
+			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, NULL)) {
 				efree(arch);
 				efree(entry);
 				goto skip_phar;
@@ -759,7 +759,7 @@ PHP_FUNCTION(phar_is_file) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			/* retrieving a file within the current directory, so use this if possible */
-			if (SUCCESS == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
+			if (SUCCESS == phar_get_archive(&phar, arch, arch_len, NULL, NULL)) {
 				phar_entry_info *etemp;
 
 				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
@@ -825,7 +825,7 @@ PHP_FUNCTION(phar_is_link) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			/* retrieving a file within the current directory, so use this if possible */
-			if (SUCCESS == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
+			if (SUCCESS == phar_get_archive(&phar, arch, arch_len, NULL, NULL)) {
 				phar_entry_info *etemp;
 
 				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
