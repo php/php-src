@@ -364,8 +364,10 @@ static int _rollback_transactions(zval *el)
 
 	link = (PGconn *) rsrc->ptr;
 
-	/* unset notice processor */
-	PQsetNoticeProcessor(link, _php_pgsql_notice_handler, NULL);
+	/* unset notice processor if we initially did set it */
+	if (PQsetNoticeProcessor(link, NULL, NULL) == _php_pgsql_notice_handler) {
+		PQsetNoticeProcessor(link, _php_pgsql_notice_handler, NULL);
+	}
 
 	if (PQsetnonblocking(link, 0)) {
 		php_error_docref("ref.pgsql", E_NOTICE, "Cannot set connection to blocking mode");
