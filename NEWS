@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 
 28 Aug 2025, PHP 8.3.25
 
+- CLI:
+  . Fixed bug GH-19461 (Improve error message on listening error with IPv6
+    address). (alexandre-daubois)
+
 - Core:
   . Fixed GH-19169 build issue with C++17 and ZEND_STATIC_ASSERT macro.
     (psumbera)
