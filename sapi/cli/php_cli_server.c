@@ -237,7 +237,8 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 ZEND_DECLARE_MODULE_GLOBALS(cli_server)
 
 /* {{{ static char php_cli_server_css[]
- * copied from ext/standard/info.c
+ * Perhaps duplicate changes in ext/standard/css.c
+ *                            , sapi/cli/php_cli_server.c
  */
 static const char php_cli_server_css[] = "<style>" \
 										":root{" \
