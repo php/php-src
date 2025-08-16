@@ -561,17 +561,10 @@ void zend_constant_add_attributes(zend_constant *c, HashTable *attributes) {
 	GC_TRY_ADDREF(attributes);
 	c->attributes = attributes;
 
-	zend_attribute *deprecated_attribute = zend_get_attribute_str(
-		c->attributes,
-		"deprecated",
-		strlen("deprecated")
-	);
-
-	if (deprecated_attribute) {
-		ZEND_CONSTANT_SET_FLAGS(
-			c,
-			ZEND_CONSTANT_FLAGS(c) | CONST_DEPRECATED,
-			ZEND_CONSTANT_MODULE_NUMBER(c)
-		);
-	}
+	ZEND_HASH_PACKED_FOREACH_PTR(attributes, zend_attribute *attr) {
+		zend_internal_attribute *config = zend_internal_attribute_get(attr->lcname);
+		if (config && config->validator != NULL) {
+			config->validator(attr, ZEND_ATTRIBUTE_TARGET_CONST, CG(active_class_entry), c, 0);
+		}
+	} ZEND_HASH_FOREACH_END();
 }

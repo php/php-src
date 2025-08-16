@@ -70,7 +70,8 @@ typedef struct _zend_attribute {
 typedef struct _zend_internal_attribute {
 	zend_class_entry *ce;
 	uint32_t flags;
-	void (*validator)(zend_attribute *attr, uint32_t target, zend_class_entry *scope);
+	/* Parameter offsets start at 1, everything else uses 0. */
+	void (*validator)(zend_attribute *attr, uint32_t target_type, zend_class_entry *scope, void *target, uint32_t offset);
 } zend_internal_attribute;
 
 ZEND_API zend_attribute *zend_get_attribute(HashTable *attributes, zend_string *lcname);

@@ -7471,7 +7471,7 @@ static bool zend_is_valid_default_value(zend_type type, zval *value)
 }
 
 static void zend_compile_attributes(
-	HashTable **attributes, zend_ast *ast, uint32_t offset, uint32_t target, uint32_t promoted
+	HashTable **attributes, zend_ast *ast, uint32_t offset, uint32_t target_type, uint32_t promoted, void *target
 ) /* {{{ */ {
 	zend_attribute *attr;
 	zend_internal_attribute *config;
@@ -7505,7 +7505,7 @@ static void zend_compile_attributes(
 			zend_string_release(lcname);
 
 			/* Exclude internal attributes that do not match on promoted properties. */
-			if (config && !(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+			if (config && !(target_type & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
 				if (promoted & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL)) {
 					zend_string_release(name);
 					continue;
@@ -7563,8 +7563,8 @@ static void zend_compile_attributes(
 				continue;
 			}
 
-			if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
-				zend_string *location = zend_get_attribute_target_names(target);
+			if (!(target_type & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+				zend_string *location = zend_get_attribute_target_names(target_type);
 				zend_string *allowed = zend_get_attribute_target_names(config->flags);
 
 				zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
@@ -7578,8 +7578,9 @@ static void zend_compile_attributes(
 				}
 			}
 
-			if (config->validator != NULL) {
-				config->validator(attr, target, CG(active_class_entry));
+			/* target is NULL for global constants at compile-time. Validator will be called at runtime. */
+			if (config->validator != NULL && target) {
+				config->validator(attr, target_type, CG(active_class_entry), target, offset);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -7776,13 +7777,6 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		arg_info->name = zend_string_copy(name);
 		arg_info->type = (zend_type) ZEND_TYPE_INIT_NONE(0);
 
-		if (attributes_ast) {
-			zend_compile_attributes(
-				&op_array->attributes, attributes_ast, i + 1, ZEND_ATTRIBUTE_TARGET_PARAMETER,
-				is_promoted ? ZEND_ATTRIBUTE_TARGET_PROPERTY : 0
-			);
-		}
-
 		bool forced_allow_nullable = false;
 		if (type_ast) {
 			uint32_t default_type = *default_ast_ptr ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
@@ -7836,6 +7830,13 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			opcode = ZEND_RECV;
 			default_node.op_type = IS_UNUSED;
 			zval_ptr_dtor(&default_node.u.constant);
+		}
+
+		if (attributes_ast) {
+			zend_compile_attributes(
+				&op_array->attributes, attributes_ast, i + 1, ZEND_ATTRIBUTE_TARGET_PARAMETER,
+				is_promoted ? ZEND_ATTRIBUTE_TARGET_PROPERTY : 0, op_array
+			);
 		}
 
 		opline = zend_emit_op(NULL, opcode, NULL, &default_node);
@@ -7920,12 +7921,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			}
 			if (attributes_ast) {
 				zend_compile_attributes(
-					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, ZEND_ATTRIBUTE_TARGET_PARAMETER);
-
-				zend_attribute *override_attribute = zend_get_attribute_str(prop->attributes, "override", sizeof("override")-1);
-				if (override_attribute) {
-					prop->flags |= ZEND_ACC_OVERRIDE;
-				}
+					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, ZEND_ATTRIBUTE_TARGET_PARAMETER, prop);
 			}
 		}
 	}
@@ -8432,37 +8428,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 			target = ZEND_ATTRIBUTE_TARGET_METHOD;
 		}
 
-		zend_compile_attributes(&op_array->attributes, decl->child[4], 0, target, 0);
-
-		zend_attribute *override_attribute = zend_get_attribute_str(
-			op_array->attributes,
-			"override",
-			sizeof("override")-1
-		);
-
-		if (override_attribute) {
-			op_array->fn_flags |= ZEND_ACC_OVERRIDE;
-		}
-
-		zend_attribute *deprecated_attribute = zend_get_attribute_str(
-			op_array->attributes,
-			"deprecated",
-			sizeof("deprecated")-1
-		);
-
-		if (deprecated_attribute) {
-			op_array->fn_flags |= ZEND_ACC_DEPRECATED;
-		}
-
-		zend_attribute *nodiscard_attribute = zend_get_attribute_str(
-			op_array->attributes,
-			"nodiscard",
-			sizeof("nodiscard")-1
-		);
-
-		if (nodiscard_attribute) {
-			op_array->fn_flags |= ZEND_ACC_NODISCARD;
-		}
+		zend_compile_attributes(&op_array->attributes, decl->child[4], 0, target, 0, op_array);
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
@@ -8904,12 +8870,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		}
 
 		if (attr_ast) {
-			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
-
-			zend_attribute *override_attribute = zend_get_attribute_str(info->attributes, "override", sizeof("override")-1);
-			if (override_attribute) {
-				info->flags |= ZEND_ACC_OVERRIDE;
-			}
+			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0, info);
 		}
 
 		CG(context).active_property_info_name = old_active_property_info_name;
@@ -8986,17 +8947,7 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		c = zend_declare_typed_class_constant(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (attr_ast) {
-			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
-
-			zend_attribute *deprecated = zend_get_attribute_str(c->attributes, "deprecated", sizeof("deprecated")-1);
-
-			if (deprecated) {
-				ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
-				/* For deprecated constants, we need to flag the zval for recursion
-				 * detection. Make sure the zval is separated out of shm. */
-				ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
-				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-			}
+			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0, c);
 		}
 	}
 }
@@ -9266,7 +9217,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	CG(active_class_entry) = ce;
 
 	if (decl->child[3]) {
-		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
+		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0, ce);
 	}
 
 	if (implements_ast) {
@@ -9443,13 +9394,7 @@ static void zend_compile_enum_case(zend_ast *ast)
 
 	zend_ast *attr_ast = ast->child[3];
 	if (attr_ast) {
-		zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
-
-		zend_attribute *deprecated = zend_get_attribute_str(c->attributes, "deprecated", sizeof("deprecated")-1);
-
-		if (deprecated) {
-			ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
-		}
+		zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0, c);
 	}
 }
 
@@ -9663,7 +9608,7 @@ static void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 	}
 
 	HashTable *attributes = NULL;
-	zend_compile_attributes(&attributes, list->child[1], 0, ZEND_ATTRIBUTE_TARGET_CONST, 0);
+	zend_compile_attributes(&attributes, list->child[1], 0, ZEND_ATTRIBUTE_TARGET_CONST, 0, NULL);
 
 	ZEND_ASSERT(last_op != NULL);
 	last_op->opcode = ZEND_DECLARE_ATTRIBUTED_CONST;
