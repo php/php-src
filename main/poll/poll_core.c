@@ -38,7 +38,7 @@ extern const php_poll_backend_ops php_poll_backend_iocp_ops;
 extern const php_poll_backend_ops php_poll_backend_select_ops;
 
 /* Register all available backends */
-void php_poll_register_backends(void)
+PHPAPI void php_poll_register_backends(void)
 {
 	num_registered_backends = 0;
 
@@ -174,7 +174,7 @@ static int php_poll_simulate_et(php_poll_ctx *ctx, php_poll_event *events, int n
 }
 
 /* Create new poll context */
-php_poll_ctx *php_poll_create(
+PHPAPI php_poll_ctx *php_poll_create(
 		int max_events, php_poll_backend_type preferred_backend, bool persistent)
 {
 	if (max_events <= 0) {
@@ -210,7 +210,7 @@ php_poll_ctx *php_poll_create(
 }
 
 /* Initialize poll context */
-zend_result php_poll_init(php_poll_ctx *ctx)
+PHPAPI zend_result php_poll_init(php_poll_ctx *ctx)
 {
 	if (UNEXPECTED(ctx->initialized)) {
 		return SUCCESS;
@@ -227,7 +227,7 @@ zend_result php_poll_init(php_poll_ctx *ctx)
 }
 
 /* Destroy poll context */
-void php_poll_destroy(php_poll_ctx *ctx)
+PHPAPI void php_poll_destroy(php_poll_ctx *ctx)
 {
 	if (!ctx) {
 		return;
@@ -242,7 +242,7 @@ void php_poll_destroy(php_poll_ctx *ctx)
 }
 
 /* Add file descriptor */
-zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+PHPAPI zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
@@ -282,7 +282,7 @@ zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 }
 
 /* Modify file descriptor */
-zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+PHPAPI zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
@@ -313,7 +313,7 @@ zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *da
 }
 
 /* Remove file descriptor */
-zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
+PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
 {
 	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
@@ -336,7 +336,7 @@ zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
 }
 
 /* Wait for events */
-int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
+PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	if (UNEXPECTED(!ctx || !ctx->initialized || !events || max_events <= 0)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
@@ -357,25 +357,25 @@ int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int
 }
 
 /* Get backend name */
-const char *php_poll_backend_name(php_poll_ctx *ctx)
+PHPAPI const char *php_poll_backend_name(php_poll_ctx *ctx)
 {
 	return ctx && ctx->backend_ops ? ctx->backend_ops->name : "unknown";
 }
 
 /* Get backend type */
-php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx)
+PHPAPI php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx)
 {
 	return ctx ? ctx->backend_type : PHP_POLL_BACKEND_AUTO;
 }
 
 /* Check edge-triggering support */
-bool php_poll_supports_et(php_poll_ctx *ctx)
+PHPAPI bool php_poll_supports_et(php_poll_ctx *ctx)
 {
 	return ctx && (ctx->backend_ops->supports_et || ctx->simulate_et);
 }
 
 /* Error retrieval */
-php_poll_error php_poll_get_error(php_poll_ctx *ctx)
+PHPAPI php_poll_error php_poll_get_error(php_poll_ctx *ctx)
 {
 	return ctx ? ctx->last_error : PHP_POLL_ERR_INVALID;
 }
