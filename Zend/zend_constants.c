@@ -541,7 +541,7 @@ ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
 		|| (ret = zend_hash_add_constant(EG(zend_constants), name, c)) == NULL
 	) {
-		zend_error(E_WARNING, "Constant %s already defined", ZSTR_VAL(name));
+		zend_error(E_WARNING, "Constant %s already defined, this will be an error in PHP 9", ZSTR_VAL(name));
 		zend_string_release(c->name);
 		if (c->filename) {
 			zend_string_release(c->filename);
