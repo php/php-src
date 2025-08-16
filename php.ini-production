@@ -539,13 +539,6 @@ ignore_repeated_errors = Off
 ; https://php.net/ignore-repeated-source
 ignore_repeated_source = Off
 
-; Use of this INI entry is deprecated, it will be removed in PHP 9.0.
-; If this parameter is set to Off, then memory leaks will not be shown (on
-; stdout or in the log). This is only effective in a debug compile, and if
-; error reporting includes E_WARNING in the allowed list
-; https://php.net/report-memleaks
-;report_memleaks = On
-
 ; This setting is off by default.
 ;report_zend_debug = 0
 
