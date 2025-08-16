@@ -26,20 +26,20 @@ typedef struct {
 
 static zend_result select_backend_init(php_poll_ctx *ctx, int max_events)
 {
-	select_backend_data_t *data = calloc(1, sizeof(select_backend_data_t));
+	select_backend_data_t *data = pecalloc(1, sizeof(select_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
 
 	data->max_sockets = max_events;
-	data->socket_list = calloc(max_events, sizeof(php_socket_t));
-	data->data_list = calloc(max_events, sizeof(void *));
+	data->socket_list = pecalloc(max_events, sizeof(php_socket_t), ctx->persistent);
+	data->data_list = pecalloc(max_events, sizeof(void *), ctx->persistent);
 
 	if (!data->socket_list || !data->data_list) {
-		free(data->socket_list);
-		free(data->data_list);
-		free(data);
+		pefree(data->socket_list, ctx->persistent);
+		pefree(data->data_list, ctx->persistent);
+		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
@@ -57,9 +57,9 @@ static void select_backend_cleanup(php_poll_ctx *ctx)
 {
 	select_backend_data_t *data = (select_backend_data_t *) ctx->backend_data;
 	if (data) {
-		free(data->socket_list);
-		free(data->data_list);
-		free(data);
+		pefree(data->socket_list, ctx->persistent);
+		pefree(data->data_list, ctx->persistent);
+		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
 }
