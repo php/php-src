@@ -19,8 +19,10 @@
 #include <unicode/ustring.h>
 #include <math.h>
 
+extern "C" {
 #include "php_intl.h"
 #include "intl_convert.h"
+}
 #include "dateformat.h"
 #include "dateformat_class.h"
 #include "dateformat_data.h"
@@ -70,7 +72,7 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 
 static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_value, const UCalendar *parsed_calendar, zend_long calendar_field, char* key_name)
 {
-	zend_long calendar_field_val = ucal_get( parsed_calendar, calendar_field, &INTL_DATA_ERROR_CODE(dfo));
+	zend_long calendar_field_val = ucal_get( parsed_calendar, static_cast<UCalendarDateFields>(calendar_field), &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing - localtime failed : could not get a field from calendar" );
 
 	if( strcmp(key_name, CALENDAR_YEAR )==0 ){
@@ -126,7 +128,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 
 
 /* {{{ Parse the string $value starting at parse_pos to a Unix timestamp -int */
-PHP_FUNCTION(datefmt_parse)
+U_CFUNC PHP_FUNCTION(datefmt_parse)
 {
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
@@ -165,7 +167,7 @@ PHP_FUNCTION(datefmt_parse)
 }
 /* }}} */
 
-PHP_METHOD(IntlDateFormatter, parseToCalendar)
+U_CFUNC PHP_METHOD(IntlDateFormatter, parseToCalendar)
 {
 	zend_string *text_to_parse = NULL;
 	zval* z_parse_pos = NULL;
@@ -208,7 +210,7 @@ PHP_METHOD(IntlDateFormatter, parseToCalendar)
 }
 
 /* {{{ Parse the string $value to a localtime array */
-PHP_FUNCTION(datefmt_localtime)
+U_CFUNC PHP_FUNCTION(datefmt_localtime)
 {
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
