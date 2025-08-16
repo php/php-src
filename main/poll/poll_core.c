@@ -190,7 +190,7 @@ php_poll_ctx *php_poll_create(
 	/* Get backend operations */
 	ctx->backend_ops = php_poll_get_backend_ops(preferred_backend);
 	if (!ctx->backend_ops) {
-		free(ctx);
+		pefree(ctx, persistent);
 		return NULL;
 	}
 
@@ -202,7 +202,7 @@ php_poll_ctx *php_poll_create(
 	ctx->fd_entries = pecalloc(max_events, sizeof(php_poll_fd_entry), persistent);
 	ctx->fd_entries_size = max_events;
 	if (!ctx->fd_entries) {
-		free(ctx);
+		pefree(ctx, persistent);
 		return NULL;
 	}
 
@@ -237,8 +237,8 @@ void php_poll_destroy(php_poll_ctx *ctx)
 		ctx->backend_ops->cleanup(ctx);
 	}
 
-	free(ctx->fd_entries);
-	free(ctx);
+	pefree(ctx->fd_entries, ctx->persistent);
+	pefree(ctx, ctx->persistent);
 }
 
 /* Add file descriptor */
