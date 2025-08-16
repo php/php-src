@@ -41,7 +41,7 @@
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
 
-#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
+#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 #error "phpdbg can only be built with CALL zend vm kind"
 #endif
 

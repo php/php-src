@@ -98,7 +98,11 @@ static zend_vm_opcode_handler_t zend_jit_func_trace_counter_handler = NULL;
 static zend_vm_opcode_handler_t zend_jit_ret_trace_counter_handler = NULL;
 static zend_vm_opcode_handler_t zend_jit_loop_trace_counter_handler = NULL;
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS);
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS);
+#else
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS);
+#endif
 
 static int zend_jit_trace_op_len(const zend_op *opline);
 static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
@@ -3074,7 +3078,11 @@ jit_failure:
 }
 
 /* Run-time JIT handler */
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS)
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS)
+#else
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_runtime_jit(ZEND_OPCODE_HANDLER_ARGS)
+#endif
 {
 #if GCC_GLOBAL_REGS
 	zend_execute_data *execute_data;
@@ -3126,7 +3134,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_runtime_jit(ZEND_OPCODE_HANDLE
 #if GCC_GLOBAL_REGS
 	return; // ZEND_VM_CONTINUE
 #else
-	return orig_opline; // ZEND_VM_CONTINUE
+	opline = orig_opline;
+	ZEND_OPCODE_RETURN();
 #endif
 }
 
@@ -3314,7 +3323,7 @@ int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 		jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_FIRST_EXEC;
 		jit_extension->op_array = op_array;
-		jit_extension->orig_handler = (void*)opline->handler;
+		jit_extension->orig_handler = opline->handler;
 		ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 		opline->handler = zend_jit_runtime_jit_handler;
 		zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
@@ -3344,7 +3353,7 @@ int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 			memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 			jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_PROF_REQUEST;
 			jit_extension->op_array = op_array;
-			jit_extension->orig_handler = (void*)opline->handler;
+			jit_extension->orig_handler = opline->handler;
 			ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 			opline->handler = zend_jit_profile_jit_handler;
 			zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
@@ -3707,7 +3716,7 @@ void zend_jit_init(void)
 #endif
 }
 
-#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
+#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 # error JIT is compatible only with CALL and HYBRID VM
 #endif
 
