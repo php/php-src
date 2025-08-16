@@ -19,20 +19,23 @@ static const php_poll_backend_ops *registered_backends[16];
 static int num_registered_backends = 0;
 
 /* Forward declarations for backend ops */
+
+#ifdef HAVE_POLL
 extern const php_poll_backend_ops php_poll_backend_poll_ops;
+#endif
 #ifdef HAVE_EPOLL
 extern const php_poll_backend_ops php_poll_backend_epoll_ops;
 #endif
 #ifdef HAVE_KQUEUE
 extern const php_poll_backend_ops php_poll_backend_kqueue_ops;
 #endif
-#ifdef HAVE_PORT_H
+#ifdef HAVE_EVENT_PORTS
 extern const php_poll_backend_ops php_poll_backend_eventport_ops;
 #endif
 #ifdef _WIN32
 extern const php_poll_backend_ops php_poll_backend_iocp_ops;
-extern const php_poll_backend_ops php_poll_backend_select_ops;
 #endif
+extern const php_poll_backend_ops php_poll_backend_select_ops;
 
 /* Register all available backends */
 void php_poll_register_backends(void)
@@ -46,36 +49,34 @@ void php_poll_register_backends(void)
 	}
 #endif
 
-#ifdef HAVE_PORT_H
+#ifdef HAVE_EVENT_PORTS
 	/* Event Ports are preferred on Solaris */
 	if (php_poll_backend_eventport_ops.is_available()) {
 		registered_backends[num_registered_backends++] = &php_poll_backend_eventport_ops;
 	}
 #endif
 
-#ifdef HAVE_SYS_EPOLL_H
-	if (php_poll_backend_epoll_ops.is_available()) {
-		registered_backends[num_registered_backends++] = &php_poll_backend_epoll_ops;
-	}
-#endif
-
-#ifdef HAVE_SYS_EVENT_H
+#ifdef HAVE_KQUEUE
 	if (php_poll_backend_kqueue_ops.is_available()) {
 		registered_backends[num_registered_backends++] = &php_poll_backend_kqueue_ops;
 	}
 #endif
 
-#ifdef _WIN32
-	/* Windows select() as fallback before poll() */
-	if (php_poll_backend_select_ops.is_available()) {
-		registered_backends[num_registered_backends++] = &php_poll_backend_select_ops;
+#ifdef HAVE_EPOLL
+	if (php_poll_backend_epoll_ops.is_available()) {
+		registered_backends[num_registered_backends++] = &php_poll_backend_epoll_ops;
 	}
 #endif
 
-#ifndef _WIN32
+#ifdef HAVE_POLL
 	/* Poll is available on Unix-like systems */
 	registered_backends[num_registered_backends++] = &php_poll_backend_poll_ops;
 #endif
+
+	/* select() as a fallback */
+	if (php_poll_backend_select_ops.is_available()) {
+		registered_backends[num_registered_backends++] = &php_poll_backend_select_ops;
+	}
 }
 
 /* Get backend operations */

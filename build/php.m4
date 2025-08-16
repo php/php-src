@@ -1407,13 +1407,11 @@ AC_DEFUN([PHP_POLL_MECHANISMS],
     int port = port_create();
     return port;
   ])], [
-    AC_DEFINE([HAVE_PORT_H], [1], [Define if event ports are available])
+    AC_DEFINE([HAVE_EVENT_PORTS], [1], [Define if event ports are available])
     poll_mechanisms="$poll_mechanisms eventport"
   ])
 
-  dnl These are always available on POSIX
-  AC_DEFINE([HAVE_POLL_H], [1], [Define if poll is available])
-  AC_DEFINE([HAVE_SELECT], [1], [Define if select is available])
+  dnl Set poll mechanisms including poll and select that are always available
   poll_mechanisms="$poll_mechanisms poll select"
 
   AC_MSG_RESULT([$poll_mechanisms])
