@@ -196,6 +196,7 @@ php_poll_ctx *php_poll_create(
 
 	ctx->max_events = max_events;
 	ctx->backend_type = preferred_backend;
+	ctx->simulate_et = !ctx->backend_ops->supports_et;
 
 	/* Allocate FD entries for edge-trigger simulation */
 	ctx->fd_entries = pecalloc(max_events, sizeof(php_poll_fd_entry), persistent);
@@ -205,17 +206,24 @@ php_poll_ctx *php_poll_create(
 		return NULL;
 	}
 
-	/* Initialize backend */
-	if (ctx->backend_ops->init(ctx, max_events) != SUCCESS) {
-		free(ctx->fd_entries);
-		free(ctx);
-		return NULL;
+	return ctx;
+}
+
+/* Initialize poll context */
+zend_result php_poll_init(php_poll_ctx *ctx)
+{
+	if (UNEXPECTED(ctx->initialized)) {
+		return SUCCESS;
 	}
 
-	ctx->initialized = true;
-	ctx->simulate_et = !ctx->backend_ops->supports_et;
+	/* Initialize backend */
+	if (EXPECTED(ctx->backend_ops->init(ctx, ctx->max_events) == SUCCESS)) {
+		ctx->initialized = true;
+		return SUCCESS;
+	}
 
-	return ctx;
+	php_poll_set_system_error_if_not_set(ctx);
+	return FAILURE;
 }
 
 /* Destroy poll context */
