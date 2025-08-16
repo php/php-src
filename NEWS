@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     triggers "Constant already defined" warning). (ilutov)
   . Fixed bug GH-19476 (pipe operator fails to correctly handle returning
     by reference). (alexandre-daubois)
+  . The report_memleaks INI directive has been deprecated. (alexandre-daubois)
 
 - ODBC:
   . Remove ODBCVER and assume ODBC 3.5. (Calvin Buckley)
