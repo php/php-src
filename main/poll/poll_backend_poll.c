@@ -66,13 +66,13 @@ static int poll_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	poll_backend_data_t *data = calloc(1, sizeof(poll_backend_data_t));
 	if (!data) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	data->fds = calloc(max_events, sizeof(struct pollfd));
 	if (!data->fds) {
 		free(data);
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	data->allocated = max_events;
@@ -84,7 +84,7 @@ static int poll_backend_init(php_poll_ctx *ctx, int max_events)
 	}
 
 	ctx->backend_data = data;
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static void poll_backend_cleanup(php_poll_ctx *ctx)
@@ -108,11 +108,11 @@ static int poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *da
 			backend_data->fds[i].events = poll_events_to_native(events);
 			backend_data->fds[i].revents = 0;
 			backend_data->used++;
-			return PHP_POLL_OK;
+			return PHP_POLL_ERR_NONE;
 		}
 	}
 
-	return PHP_POLL_NOMEM;
+	return PHP_POLL_ERR_NOMEM;
 }
 
 static int poll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
@@ -122,11 +122,11 @@ static int poll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void 
 	for (int i = 0; i < backend_data->allocated; i++) {
 		if (backend_data->fds[i].fd == fd) {
 			backend_data->fds[i].events = poll_events_to_native(events);
-			return PHP_POLL_OK;
+			return PHP_POLL_ERR_NONE;
 		}
 	}
 
-	return PHP_POLL_NOTFOUND;
+	return PHP_POLL_ERR_NOTFOUND;
 }
 
 static int poll_backend_remove(php_poll_ctx *ctx, int fd)
@@ -139,11 +139,11 @@ static int poll_backend_remove(php_poll_ctx *ctx, int fd)
 			backend_data->fds[i].events = 0;
 			backend_data->fds[i].revents = 0;
 			backend_data->used--;
-			return PHP_POLL_OK;
+			return PHP_POLL_ERR_NONE;
 		}
 	}
 
-	return PHP_POLL_NOTFOUND;
+	return PHP_POLL_ERR_NOTFOUND;
 }
 
 static int poll_backend_wait(
