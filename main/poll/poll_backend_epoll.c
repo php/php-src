@@ -75,7 +75,7 @@ static int epoll_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	epoll_backend_data_t *data = calloc(1, sizeof(epoll_backend_data_t));
 	if (!data) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	data->epoll_fd = epoll_create1(EPOLL_CLOEXEC);
@@ -88,11 +88,11 @@ static int epoll_backend_init(php_poll_ctx *ctx, int max_events)
 	if (!data->events) {
 		close(data->epoll_fd);
 		free(data);
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	ctx->backend_data = data;
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static void epoll_backend_cleanup(php_poll_ctx *ctx)
@@ -117,10 +117,10 @@ static int epoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *d
 	ev.data.ptr = data;
 
 	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
-		return (errno == EEXIST) ? PHP_POLL_EXISTS : PHP_POLL_ERROR;
+		return (errno == EEXIST) ? PHP_POLL_ERR_EXISTS : PHP_POLL_ERROR;
 	}
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int epoll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
@@ -132,10 +132,10 @@ static int epoll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void
 	ev.data.ptr = data;
 
 	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_MOD, fd, &ev) == -1) {
-		return (errno == ENOENT) ? PHP_POLL_NOTFOUND : PHP_POLL_ERROR;
+		return (errno == ENOENT) ? PHP_POLL_ERR_NOTFOUND : PHP_POLL_ERROR;
 	}
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int epoll_backend_remove(php_poll_ctx *ctx, int fd)
@@ -143,10 +143,10 @@ static int epoll_backend_remove(php_poll_ctx *ctx, int fd)
 	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
 
 	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1) {
-		return (errno == ENOENT) ? PHP_POLL_NOTFOUND : PHP_POLL_ERROR;
+		return (errno == ENOENT) ? PHP_POLL_ERR_NOTFOUND : PHP_POLL_ERROR;
 	}
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int epoll_backend_wait(
