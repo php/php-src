@@ -41,8 +41,10 @@ if test "$PHP_TIDY" != "no"; then
   TIDY_LIBDIR=$TIDY_DIR/$PHP_LIBDIR
   if test "$TIDY_LIB_NAME" == 'tidyp'; then
     AC_DEFINE(HAVE_TIDYP_H,1,[defined if tidyp.h exists])
+    TIDY_HEADER='<tidyp.h>'
   else
     AC_DEFINE(HAVE_TIDY_H,1,[defined if tidy.h exists])
+    TIDY_HEADER='<tidy.h>'
   fi
 
 
@@ -62,15 +64,35 @@ if test "$PHP_TIDY" != "no"; then
     AC_DEFINE(HAVE_TIDYRELEASEDATE,1,[ ])
   ], [], [])
 
-  dnl The tidyOptGetCategory function (added in libtidy 5.4.0) if only useable
-  dnl if TidyInternalCategory (added in libtidy 5.6.0) is also present.
-  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,TidyInternalCategory,
-  [
-    AC_DEFINE(HAVE_TIDYOPTGETCATEGORY,1,[ ])
-  ], [], [])
-
   PHP_ADD_LIBRARY_WITH_PATH($TIDY_LIB_NAME, $TIDY_LIBDIR, TIDY_SHARED_LIBADD)
   PHP_ADD_INCLUDE($TIDY_INCDIR)
+
+  old_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS=-I$TIDY_INCDIR
+
+  dnl The tidyOptGetCategory function (added in libtidy 5.4.0) if only useable
+  dnl if TidyInternalCategory (added in libtidy 5.6.0) is also present.
+  AC_CACHE_CHECK([for tidyOptGetCategory], php_ac_cv_have_tidyoptgetcategory, [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      #include $TIDY_HEADER
+    ]],[[
+     TidyDoc doc = tidyCreate();
+     TidyOption badopt = tidyGetOptionByName(doc, "<bad>");
+     Bool v = (tidyOptGetCategory(badopt) == TidyInternalCategory);
+     (void)v;
+     tidyRelease(doc);
+     return 0;
+    ]])],[
+      php_ac_cv_have_tidyoptgetcategory=yes
+    ],[
+      php_ac_cv_have_tidyoptgetcategory=no
+    ])
+  ])
+  if test "$php_ac_cv_have_tidyoptgetcategory" = yes; then
+    AC_DEFINE(HAVE_TIDYOPTGETCATEGORY, 1, [Whether tidyOptGetCatgegory is available])
+  fi
+
+  CPPFLAGS=$old_CPPFLAGS
 
   dnl Add -Wno-ignored-qualifiers as this is an issue upstream
   TIDY_COMPILER_FLAGS="$TIDY_CFLAGS -Wno-ignored-qualifiers -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
