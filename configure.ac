@@ -437,6 +437,7 @@ AC_CHECK_HEADERS(m4_normalize([
 ])
 
 PHP_FOPENCOOKIE
+PHP_POLL_MECHANISMS
 PHP_BROKEN_GETCWD
 AS_VAR_IF([GCC], [yes], [PHP_BROKEN_GCC_STRLEN_OPT])
 
@@ -1687,6 +1688,16 @@ PHP_ADD_SOURCES_X([main],
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
   [PHP_FASTCGI_OBJS],
   [no])
+
+PHP_ADD_SOURCES([main/poll], m4_normalize([
+    poll_backend_epoll.c
+    poll_backend_kqueue.c
+    poll_backend_poll.c
+    poll_backend_port.c
+    poll_backend_select.c
+    poll_core.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_SOURCES([main/streams], m4_normalize([
     cast.c

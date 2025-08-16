@@ -42,7 +42,7 @@ static int iocp_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	iocp_backend_data_t *data = calloc(1, sizeof(iocp_backend_data_t));
 	if (!data) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	/* Create I/O Completion Port */
@@ -58,7 +58,7 @@ static int iocp_backend_init(php_poll_ctx *ctx, int max_events)
 	if (!data->operations) {
 		CloseHandle(data->iocp_handle);
 		free(data);
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	/* Load Winsock extension functions */
@@ -85,7 +85,7 @@ static int iocp_backend_init(php_poll_ctx *ctx, int max_events)
 
 	data->operation_count = 0;
 	ctx->backend_data = data;
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static void iocp_backend_cleanup(php_poll_ctx *ctx)
@@ -107,7 +107,7 @@ static int iocp_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *da
 	SOCKET sock = (SOCKET) fd;
 
 	if (backend_data->operation_count >= backend_data->max_operations) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	/* Associate socket with completion port */
@@ -138,7 +138,7 @@ static int iocp_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *da
 		}
 	}
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int iocp_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
@@ -168,7 +168,7 @@ static int iocp_backend_remove(php_poll_ctx *ctx, int fd)
 		}
 	}
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int iocp_backend_wait(

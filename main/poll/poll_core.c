@@ -108,7 +108,7 @@ const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backe
 }
 
 /* Find FD entry */
-static php_poll_fd_entry *php_poll_find_fd_entry(php_poll_ctx *ctx, int fd)
+php_poll_fd_entry *php_poll_find_fd_entry(php_poll_ctx *ctx, int fd)
 {
 	for (int i = 0; i < ctx->fd_entries_size; i++) {
 		if (ctx->fd_entries[i].active && ctx->fd_entries[i].fd == fd) {
@@ -211,7 +211,7 @@ php_poll_ctx *php_poll_create(int max_events, php_poll_backend_type preferred_ba
 	}
 
 	/* Initialize backend */
-	if (ctx->backend_ops->init(ctx, max_events) != PHP_POLL_OK) {
+	if (ctx->backend_ops->init(ctx, max_events) != PHP_POLL_ERR_NONE) {
 		free(ctx->fd_entries);
 		free(ctx);
 		return NULL;
@@ -241,17 +241,17 @@ void php_poll_destroy(php_poll_ctx *ctx)
 int php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	if (!ctx || !ctx->initialized || fd < 0) {
-		return PHP_POLL_INVALID;
+		return PHP_POLL_ERR_INVALID;
 	}
 
 	if (ctx->num_fds >= ctx->max_events) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	/* Get FD entry for tracking */
 	php_poll_fd_entry *entry = php_poll_get_fd_entry(ctx, fd);
 	if (!entry) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	entry->events = events;
@@ -264,7 +264,7 @@ int php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 	}
 
 	int result = ctx->backend_ops->add(ctx, fd, backend_events, data);
-	if (result == PHP_POLL_OK) {
+	if (result == PHP_POLL_ERR_NONE) {
 		ctx->num_fds++;
 	} else {
 		entry->active = false; /* Rollback */
@@ -277,12 +277,12 @@ int php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 int php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	if (!ctx || !ctx->initialized || fd < 0) {
-		return PHP_POLL_INVALID;
+		return PHP_POLL_ERR_INVALID;
 	}
 
 	php_poll_fd_entry *entry = php_poll_find_fd_entry(ctx, fd);
 	if (!entry) {
-		return PHP_POLL_NOTFOUND;
+		return PHP_POLL_ERR_NOTFOUND;
 	}
 
 	entry->events = events;
@@ -301,16 +301,16 @@ int php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 int php_poll_remove(php_poll_ctx *ctx, int fd)
 {
 	if (!ctx || !ctx->initialized || fd < 0) {
-		return PHP_POLL_INVALID;
+		return PHP_POLL_ERR_INVALID;
 	}
 
 	php_poll_fd_entry *entry = php_poll_find_fd_entry(ctx, fd);
 	if (!entry) {
-		return PHP_POLL_NOTFOUND;
+		return PHP_POLL_ERR_NOTFOUND;
 	}
 
 	int result = ctx->backend_ops->remove(ctx, fd);
-	if (result == PHP_POLL_OK) {
+	if (result == PHP_POLL_ERR_NONE) {
 		entry->active = false;
 		ctx->num_fds--;
 	}
@@ -322,7 +322,7 @@ int php_poll_remove(php_poll_ctx *ctx, int fd)
 int php_poll_wait(php_poll_ctx *ctx, php_poll_event_t *events, int max_events, int timeout)
 {
 	if (!ctx || !ctx->initialized || !events || max_events <= 0) {
-		return PHP_POLL_INVALID;
+		return PHP_POLL_ERR_INVALID;
 	}
 
 	int nfds = ctx->backend_ops->wait(ctx, events, max_events, timeout);

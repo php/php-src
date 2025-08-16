@@ -28,7 +28,7 @@ static int kqueue_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	kqueue_backend_data_t *data = calloc(1, sizeof(kqueue_backend_data_t));
 	if (!data) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	data->kqueue_fd = kqueue();
@@ -47,11 +47,11 @@ static int kqueue_backend_init(php_poll_ctx *ctx, int max_events)
 		free(data->events);
 		free(data->change_list);
 		free(data);
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	ctx->backend_data = data;
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static void kqueue_backend_cleanup(php_poll_ctx *ctx)
@@ -72,12 +72,12 @@ static int kqueue_add_change(
 		kqueue_backend_data_t *data, int fd, int16_t filter, uint16_t flags, void *udata)
 {
 	if (data->change_count >= data->change_capacity) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	struct kevent *kev = &data->change_list[data->change_count++];
 	EV_SET(kev, fd, filter, flags, 0, 0, udata);
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
@@ -92,23 +92,23 @@ static int kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *
 		flags |= EV_CLEAR; /* kqueue edge-triggering */
 	}
 
-	int result = PHP_POLL_OK;
+	int result = PHP_POLL_ERR_NONE;
 
 	if (events & PHP_POLL_READ) {
 		result = kqueue_add_change(backend_data, fd, EVFILT_READ, flags, data);
-		if (result != PHP_POLL_OK) {
+		if (result != PHP_POLL_ERR_NONE) {
 			return result;
 		}
 	}
 
 	if (events & PHP_POLL_WRITE) {
 		result = kqueue_add_change(backend_data, fd, EVFILT_WRITE, flags, data);
-		if (result != PHP_POLL_OK) {
+		if (result != PHP_POLL_ERR_NONE) {
 			return result;
 		}
 	}
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
@@ -126,7 +126,7 @@ static int kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 	kqueue_add_change(backend_data, fd, EVFILT_READ, EV_DELETE, NULL);
 	kqueue_add_change(backend_data, fd, EVFILT_WRITE, EV_DELETE, NULL);
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int kqueue_backend_wait(
