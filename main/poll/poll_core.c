@@ -174,16 +174,18 @@ static int php_poll_simulate_et(php_poll_ctx *ctx, php_poll_event *events, int n
 }
 
 /* Create new poll context */
-php_poll_ctx *php_poll_create(int max_events, php_poll_backend_type preferred_backend)
+php_poll_ctx *php_poll_create(
+		int max_events, php_poll_backend_type preferred_backend, bool persistent)
 {
 	if (max_events <= 0) {
 		return NULL;
 	}
 
-	php_poll_ctx *ctx = calloc(1, sizeof(php_poll_ctx));
+	php_poll_ctx *ctx = pecalloc(1, sizeof(php_poll_ctx), persistent);
 	if (!ctx) {
 		return NULL;
 	}
+	ctx->persistent = persistent;
 
 	/* Get backend operations */
 	ctx->backend_ops = php_poll_get_backend_ops(preferred_backend);
@@ -196,7 +198,7 @@ php_poll_ctx *php_poll_create(int max_events, php_poll_backend_type preferred_ba
 	ctx->backend_type = preferred_backend;
 
 	/* Allocate FD entries for edge-trigger simulation */
-	ctx->fd_entries = calloc(max_events, sizeof(php_poll_fd_entry));
+	ctx->fd_entries = pecalloc(max_events, sizeof(php_poll_fd_entry), persistent);
 	ctx->fd_entries_size = max_events;
 	if (!ctx->fd_entries) {
 		free(ctx);

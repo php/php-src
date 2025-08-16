@@ -40,7 +40,7 @@ typedef struct {
 
 static zend_result iocp_backend_init(php_poll_ctx *ctx, int max_events)
 {
-	iocp_backend_data_t *data = calloc(1, sizeof(iocp_backend_data_t));
+	iocp_backend_data_t *data = pecalloc(1, sizeof(iocp_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -49,17 +49,17 @@ static zend_result iocp_backend_init(php_poll_ctx *ctx, int max_events)
 	/* Create I/O Completion Port */
 	data->iocp_handle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (data->iocp_handle == NULL) {
-		free(data);
+		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
 		return FAILURE;
 	}
 
 	data->max_operations = max_events;
-	data->operations = calloc(max_events, sizeof(iocp_operation_t));
+	data->operations = pecalloc(max_events, sizeof(iocp_operation_t), ctx->persistent);
 
 	if (!data->operations) {
 		CloseHandle(data->iocp_handle);
-		free(data);
+		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
@@ -98,8 +98,8 @@ static void iocp_backend_cleanup(php_poll_ctx *ctx)
 		if (data->iocp_handle != NULL) {
 			CloseHandle(data->iocp_handle);
 		}
-		free(data->operations);
-		free(data);
+		pefree(data->operations, ctx->persistent);
+		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
 }

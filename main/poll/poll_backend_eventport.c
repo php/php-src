@@ -77,7 +77,7 @@ static uint32_t eventport_events_from_native(int native)
 /* Initialize event port backend */
 static zend_result eventport_backend_init(php_poll_ctx_t *ctx, int max_events)
 {
-	eventport_backend_data_t *data = calloc(1, sizeof(eventport_backend_data_t));
+	eventport_backend_data_t *data = pecalloc(1, sizeof(eventport_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -86,7 +86,7 @@ static zend_result eventport_backend_init(php_poll_ctx_t *ctx, int max_events)
 	/* Create event port */
 	data->port_fd = port_create();
 	if (data->port_fd == -1) {
-		free(data);
+		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
@@ -95,10 +95,10 @@ static zend_result eventport_backend_init(php_poll_ctx_t *ctx, int max_events)
 	data->active_associations = 0;
 
 	/* Allocate event array for port_getn() */
-	data->events = calloc(max_events, sizeof(port_event_t));
+	data->events = pecalloc(max_events, sizeof(port_event_t), ctx->persistent);
 	if (!data->events) {
 		close(data->port_fd);
-		free(data);
+		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
@@ -115,8 +115,8 @@ static void eventport_backend_cleanup(php_poll_ctx_t *ctx)
 		if (data->port_fd >= 0) {
 			close(data->port_fd);
 		}
-		free(data->events);
-		free(data);
+		pefree(data->events, ctx->persistent);
+		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
 }
