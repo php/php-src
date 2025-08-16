@@ -1375,6 +1375,50 @@ int main(void) {
 ])
 ])
 
+AC_DEFUN([PHP_POLL_MECHANISMS],
+[
+  AC_MSG_CHECKING([for polling mechanisms])
+  poll_mechanisms=""
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+    #include <sys/epoll.h>
+  ], [
+    int fd = epoll_create(1);
+    return fd;
+  ])], [
+    AC_DEFINE([HAVE_EPOLL], [1], [Define if epoll is available])
+    poll_mechanisms="$poll_mechanisms epoll"
+  ])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+    #include <sys/event.h>
+    #include <sys/time.h>
+  ], [
+    int kq = kqueue();
+    return kq;
+  ])], [
+    AC_DEFINE([HAVE_KQUEUE], [1], [Define if kqueue is available])
+    poll_mechanisms="$poll_mechanisms kqueue"
+  ])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+    #include <port.h>
+  ], [
+    int port = port_create();
+    return port;
+  ])], [
+    AC_DEFINE([HAVE_PORT_H], [1], [Define if event ports are available])
+    poll_mechanisms="$poll_mechanisms eventport"
+  ])
+
+  dnl These are always available on POSIX
+  AC_DEFINE([HAVE_POLL_H], [1], [Define if poll is available])
+  AC_DEFINE([HAVE_SELECT], [1], [Define if select is available])
+  poll_mechanisms="$poll_mechanisms poll select"
+
+  AC_MSG_RESULT([$poll_mechanisms])
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Library/function existence and build sanity checks.
 dnl ----------------------------------------------------------------------------
