@@ -237,14 +237,54 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 ZEND_DECLARE_MODULE_GLOBALS(cli_server)
 
 /* {{{ static char php_cli_server_css[]
- * copied from ext/standard/info.c
+ * Perhaps duplicate changes in ext/standard/css.c
+ *                            , sapi/cli/php_cli_server.c
  */
-static const char php_cli_server_css[] = "<style>\n" \
-										"body { background-color: #fcfcfc; color: #333333; margin: 0; padding:0; }\n" \
-										"h1 { font-size: 1.5em; font-weight: normal; background-color: #9999cc; min-height:2em; line-height:2em; border-bottom: 1px inset black; margin: 0; }\n" \
-										"h1, p { padding-left: 10px; }\n" \
-										"code.url { background-color: #eeeeee; font-family:monospace; padding:0 2px;}\n" \
-										"</style>\n";
+static const char php_cli_server_css[] = "<style>" \
+										":root{" \
+										"--c-black:#000000;" \
+										"--c-dark-grey:#333333;" \
+										"--c-lavender-misty:#E2E4EF;" \
+										"--c-blue-bell:#9999CC;" \
+										"--c-white:#FCFCFC;" \
+										"--php-background:light-dark(" \
+										"var(--c-white),var(--c-dark-grey)" \
+										");" \
+										"--php-code-background:var(--c-lavender-misty);" \
+										"--php-code-foreground:var(--c-black);" \
+										"--php-foreground:light-dark(" \
+										"var(--c-dark-grey),var(--c-lavender-misty)" \
+										");" \
+										"--php-heading-background:var(--c-blue-bell);" \
+										"--php-heading-foreground:var(--c-black);" \
+										"color-scheme:light dark;" \
+										"}" \
+										"body{" \
+										"background-color:var(--php-background);" \
+										"color:var(--php-foreground);" \
+										"margin:0;" \
+										"padding:0;" \
+										"}" \
+										"h1{" \
+										"font-size:1.5em;" \
+										"font-weight:normal;" \
+										"background-color:var(--php-heading-background);" \
+										"color:var(--php-heading-foreground);" \
+										"min-height:2em;" \
+										"line-height:2em;" \
+										"border-bottom:1px inset var(--php-black);" \
+										"margin:0;" \
+										"}" \
+										"h1,p{" \
+										"padding-left:10px;" \
+										"}" \
+										"code.url{" \
+										"background-color:var(--php-code-background);" \
+										"color:var(--php-code-foreground);" \
+										"font-family:monospace;" \
+										"padding:0 2px;" \
+										"}" \
+										"</style>";
 /* }}} */
 
 #ifdef PHP_WIN32
