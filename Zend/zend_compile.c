@@ -3365,7 +3365,7 @@ static void zend_compile_list_assign(
 
 static void zend_ensure_writable_variable(const zend_ast *ast) /* {{{ */
 {
-	if (ast->kind == ZEND_AST_CALL) {
+	if (ast->kind == ZEND_AST_CALL || ast->kind == ZEND_AST_PIPE) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Can't use function return value in write context");
 	}
 	if (

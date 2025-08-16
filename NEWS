@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . The report_memleaks INI directive has been deprecated. (alexandre-daubois)
   . Constant redeclaration is deprecated and this behavior will trigger an
     error in PHP 9. (alexandre-daubois)
+  . Fixed OSS-Fuzz #439125710 (Pipe cannot be used in write context).
+    (nielsdos)
 
 - ODBC:
   . Remove ODBCVER and assume ODBC 3.5. (Calvin Buckley)
