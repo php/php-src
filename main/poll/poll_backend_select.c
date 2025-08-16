@@ -13,16 +13,12 @@
 */
 
 #include "php_poll.h"
-
-#ifdef _WIN32
-
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#include "php_network.h"
 
 typedef struct {
 	fd_set read_fds, write_fds, error_fds;
 	fd_set master_read_fds, master_write_fds, master_error_fds;
-	SOCKET *socket_list;
+	php_socket_t *socket_list;
 	void **data_list;
 	int socket_count;
 	int max_sockets;
@@ -36,7 +32,7 @@ static int select_backend_init(php_poll_ctx *ctx, int max_events)
 	}
 
 	data->max_sockets = max_events;
-	data->socket_list = calloc(max_events, sizeof(SOCKET));
+	data->socket_list = calloc(max_events, sizeof(php_socket_t));
 	data->data_list = calloc(max_events, sizeof(void *));
 
 	if (!data->socket_list || !data->data_list) {
@@ -66,7 +62,7 @@ static void select_backend_cleanup(php_poll_ctx *ctx)
 	}
 }
 
-static int select_find_socket_index(select_backend_data_t *data, SOCKET sock)
+static int select_find_socket_index(select_backend_data_t *data, php_socket_t sock)
 {
 	for (int i = 0; i < data->socket_count; i++) {
 		if (data->socket_list[i] == sock) {
@@ -79,7 +75,7 @@ static int select_find_socket_index(select_backend_data_t *data, SOCKET sock)
 static int select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
-	SOCKET sock = (SOCKET) fd;
+	php_socket_t sock = (php_socket_t) fd;
 
 	if (backend_data->socket_count >= backend_data->max_sockets) {
 		return PHP_POLL_ERR_NOMEM;
@@ -87,7 +83,7 @@ static int select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *
 
 	/* Check if socket already exists */
 	if (select_find_socket_index(backend_data, sock) >= 0) {
-		return PHP_POLL_EXISTS;
+		return PHP_POLL_ERR_EXISTS;
 	}
 
 	/* Add socket to our tracking */
@@ -111,11 +107,11 @@ static int select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *
 static int select_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
-	SOCKET sock = (SOCKET) fd;
+	php_socket_t sock = (php_socket_t) fd;
 
 	int index = select_find_socket_index(backend_data, sock);
 	if (index < 0) {
-		return PHP_POLL_NOTFOUND;
+		return PHP_POLL_ERR_NOTFOUND;
 	}
 
 	/* Update user data */
@@ -141,11 +137,11 @@ static int select_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, voi
 static int select_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
-	SOCKET sock = (SOCKET) fd;
+	php_socket_t sock = (php_socket_t) fd;
 
 	int index = select_find_socket_index(backend_data, sock);
 	if (index < 0) {
-		return PHP_POLL_NOTFOUND;
+		return PHP_POLL_ERR_NOTFOUND;
 	}
 
 	/* Remove from fd_sets */
@@ -171,7 +167,7 @@ static int select_backend_wait(
 	if (backend_data->socket_count == 0) {
 		/* No sockets to wait for */
 		if (timeout > 0) {
-			Sleep(timeout);
+			php_sleep(timeout);
 		}
 		return 0;
 	}
@@ -200,7 +196,7 @@ static int select_backend_wait(
 	/* Process results */
 	int event_count = 0;
 	for (int i = 0; i < backend_data->socket_count && event_count < max_events; i++) {
-		SOCKET sock = backend_data->socket_list[i];
+		php_socket_t sock = backend_data->socket_list[i];
 		uint32_t revents = 0;
 
 		if (FD_ISSET(sock, &backend_data->read_fds)) {
@@ -241,5 +237,3 @@ const php_poll_backend_ops php_poll_backend_select_ops = {
 	.is_available = select_backend_is_available,
 	.supports_et = false /* select() doesn't support edge triggering */
 };
-
-#endif /* _WIN32 */

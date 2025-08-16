@@ -14,7 +14,7 @@
 
 #include "php_poll.h"
 
-#ifdef HAVE_PORT_CREATE
+#ifdef HAVE_EVENT_PORTS
 
 #include <port.h>
 #include <unistd.h>
@@ -79,14 +79,14 @@ static int eventport_backend_init(php_poll_ctx_t *ctx, int max_events)
 {
 	eventport_backend_data_t *data = calloc(1, sizeof(eventport_backend_data_t));
 	if (!data) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	/* Create event port */
 	data->port_fd = port_create();
 	if (data->port_fd == -1) {
 		free(data);
-		return PHP_POLL_ERROR;
+		return PHP_POLL_ERR_FAIL;
 	}
 
 	data->max_events = max_events;
@@ -97,7 +97,7 @@ static int eventport_backend_init(php_poll_ctx_t *ctx, int max_events)
 	if (!data->events) {
 		close(data->port_fd);
 		free(data);
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	ctx->backend_data = data;
@@ -129,14 +129,14 @@ static int eventport_backend_add(php_poll_ctx_t *ctx, int fd, uint32_t events, v
 	if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events, user_data) == -1) {
 		switch (errno) {
 			case EEXIST:
-				return PHP_POLL_EXISTS;
+				return PHP_POLL_ERR_EXISTS;
 			case ENOMEM:
-				return PHP_POLL_NOMEM;
+				return PHP_POLL_ERR_NOMEM;
 			case EBADF:
 			case EINVAL:
 				return PHP_POLL_ERR_INVALID;
 			default:
-				return PHP_POLL_ERROR;
+				return PHP_POLL_ERR_FAIL;
 		}
 	}
 
@@ -157,12 +157,12 @@ static int eventport_backend_modify(php_poll_ctx_t *ctx, int fd, uint32_t events
 	if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events, user_data) == -1) {
 		switch (errno) {
 			case ENOMEM:
-				return PHP_POLL_NOMEM;
+				return PHP_POLL_ERR_NOMEM;
 			case EBADF:
 			case EINVAL:
 				return PHP_POLL_ERR_INVALID;
 			default:
-				return PHP_POLL_ERROR;
+				return PHP_POLL_ERR_FAIL;
 		}
 	}
 
@@ -182,7 +182,7 @@ static int eventport_backend_remove(php_poll_ctx_t *ctx, int fd)
 			case EINVAL:
 				return PHP_POLL_ERR_INVALID;
 			default:
-				return PHP_POLL_ERROR;
+				return PHP_POLL_ERR_FAIL;
 		}
 	}
 
@@ -229,7 +229,7 @@ static int eventport_backend_wait(
 			return 0;
 		} else {
 			/* Real error */
-			return PHP_POLL_ERROR;
+			return PHP_POLL_ERR_FAIL;
 		}
 	}
 
@@ -300,4 +300,4 @@ const php_poll_backend_ops_t php_poll_backend_eventport_ops = {
 	.supports_et = true /* Event ports provide edge-triggered semantics by default */
 };
 
-#endif /* HAVE_PORT_CREATE */
+#endif /* HAVE_EVENT_PORTS */
