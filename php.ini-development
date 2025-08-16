@@ -327,11 +327,6 @@ serialize_precision = -1
 ; https://php.net/disable-functions
 disable_functions =
 
-; This directive allows you to disable certain classes.
-; It receives a comma-delimited list of class names.
-; https://php.net/disable-classes
-disable_classes =
-
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in
 ; <span style="color: ???????"> would work.
 ; https://php.net/syntax-highlighting
