@@ -70,6 +70,7 @@ struct php_poll_ctx {
 	int max_events;
 	int num_fds;
 	bool initialized;
+	bool persistent;
 	/* Whether to simulate edge triggering */
 	bool simulate_et;
 

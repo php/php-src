@@ -59,7 +59,8 @@ typedef struct php_poll_backend_ops php_poll_backend_ops;
 typedef struct php_poll_event php_poll_event;
 
 /* Public API */
-php_poll_ctx *php_poll_create(int max_events, php_poll_backend_type preferred_backend);
+php_poll_ctx *php_poll_create(
+		int max_events, php_poll_backend_type preferred_backend, bool persistent);
 void php_poll_destroy(php_poll_ctx *ctx);
 
 zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data);

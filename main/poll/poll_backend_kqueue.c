@@ -26,28 +26,28 @@ typedef struct {
 
 static zend_result kqueue_backend_init(php_poll_ctx *ctx, int max_events)
 {
-	kqueue_backend_data_t *data = calloc(1, sizeof(kqueue_backend_data_t));
+	kqueue_backend_data_t *data = pecalloc(1, sizeof(kqueue_backend_data_t), ctx->persistent);
 	if (!data) {
 		return PHP_POLL_ERR_NOMEM;
 	}
 
 	data->kqueue_fd = kqueue();
 	if (data->kqueue_fd == -1) {
-		free(data);
+		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
 		return FAILURE;
 	}
 
-	data->events = calloc(max_events, sizeof(struct kevent));
-	data->change_list = calloc(max_events * 2, sizeof(struct kevent)); /* Read + Write */
+	data->events = pecalloc(max_events, sizeof(struct kevent), ctx->persistent);
+	data->change_list = pecalloc(max_events * 2, sizeof(struct kevent)); /* Read + Write */
 	data->change_capacity = max_events * 2;
 	data->change_count = 0;
 
 	if (!data->events || !data->change_list) {
 		close(data->kqueue_fd);
-		free(data->events);
-		free(data->change_list);
-		free(data);
+		pefree(data->events, ctx->persistent);
+		pefree(data->change_list, ctx->persistent);
+		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
@@ -63,9 +63,9 @@ static void kqueue_backend_cleanup(php_poll_ctx *ctx)
 		if (data->kqueue_fd >= 0) {
 			close(data->kqueue_fd);
 		}
-		free(data->events);
-		free(data->change_list);
-		free(data);
+		pefree(data->events, ctx->persistent);
+		pefree(data->change_list), ctx->persistent;
+		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
 }

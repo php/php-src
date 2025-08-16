@@ -64,15 +64,15 @@ static uint32_t poll_events_from_native(uint32_t native)
 
 static zend_result poll_backend_init(php_poll_ctx *ctx, int max_events)
 {
-	poll_backend_data_t *data = calloc(1, sizeof(poll_backend_data_t));
+	poll_backend_data_t *data = pecalloc(1, sizeof(poll_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
 
-	data->fds = calloc(max_events, sizeof(struct pollfd));
+	data->fds = pecalloc(max_events, sizeof(struct pollfd), ctx->persistent);
 	if (!data->fds) {
-		free(data);
+		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
@@ -93,8 +93,8 @@ static void poll_backend_cleanup(php_poll_ctx *ctx)
 {
 	poll_backend_data_t *data = (poll_backend_data_t *) ctx->backend_data;
 	if (data) {
-		free(data->fds);
-		free(data);
+		pefree(data->fds, ctx->persistent);
+		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
 }
