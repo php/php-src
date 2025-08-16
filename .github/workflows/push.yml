@@ -112,6 +112,7 @@ jobs:
         with:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            ${{ matrix.debug && 'CXXFLAGS="-D_GLIBCXX_ASSERTIONS"' || '' }}
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
             ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++' || '' }}
           skipSlow: ${{ matrix.asan }}
