@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php_poll.h"
+#include "php_poll_internal.h"
 
 #ifdef _WIN32
 
@@ -38,18 +38,20 @@ typedef struct {
 	LPFN_GETACCEPTEXSOCKADDRS GetAcceptExSockaddrs;
 } iocp_backend_data_t;
 
-static int iocp_backend_init(php_poll_ctx *ctx, int max_events)
+static zend_result iocp_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	iocp_backend_data_t *data = calloc(1, sizeof(iocp_backend_data_t));
 	if (!data) {
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	/* Create I/O Completion Port */
 	data->iocp_handle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (data->iocp_handle == NULL) {
 		free(data);
-		return PHP_POLL_ERROR;
+		php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+		return FAILURE;
 	}
 
 	data->max_operations = max_events;
@@ -58,7 +60,8 @@ static int iocp_backend_init(php_poll_ctx *ctx, int max_events)
 	if (!data->operations) {
 		CloseHandle(data->iocp_handle);
 		free(data);
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	/* Load Winsock extension functions */
@@ -85,7 +88,7 @@ static int iocp_backend_init(php_poll_ctx *ctx, int max_events)
 
 	data->operation_count = 0;
 	ctx->backend_data = data;
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
 static void iocp_backend_cleanup(php_poll_ctx *ctx)
@@ -101,20 +104,22 @@ static void iocp_backend_cleanup(php_poll_ctx *ctx)
 	}
 }
 
-static int iocp_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result iocp_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	iocp_backend_data_t *backend_data = (iocp_backend_data_t *) ctx->backend_data;
 	SOCKET sock = (SOCKET) fd;
 
 	if (backend_data->operation_count >= backend_data->max_operations) {
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	/* Associate socket with completion port */
 	HANDLE result
 			= CreateIoCompletionPort((HANDLE) sock, backend_data->iocp_handle, (ULONG_PTR) sock, 0);
 	if (result == NULL) {
-		return PHP_POLL_ERROR;
+		php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+		return FAILURE;
 	}
 
 	/* Set up operation structure */
@@ -134,21 +139,22 @@ static int iocp_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *da
 
 		if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING) {
 			backend_data->operation_count--;
-			return PHP_POLL_ERROR;
+			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+			return FAILURE;
 		}
 	}
 
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
-static int iocp_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result iocp_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	/* For IOCP, we need to cancel existing operations and re-add */
 	iocp_backend_remove(ctx, fd);
 	return iocp_backend_add(ctx, fd, events, data);
 }
 
-static int iocp_backend_remove(php_poll_ctx *ctx, int fd)
+static zend_result iocp_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	iocp_backend_data_t *backend_data = (iocp_backend_data_t *) ctx->backend_data;
 	SOCKET sock = (SOCKET) fd;
@@ -168,11 +174,10 @@ static int iocp_backend_remove(php_poll_ctx *ctx, int fd)
 		}
 	}
 
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
-static int iocp_backend_wait(
-		php_poll_ctx *ctx, php_poll_event_t *events, int max_events, int timeout)
+static int iocp_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	iocp_backend_data_t *backend_data = (iocp_backend_data_t *) ctx->backend_data;
 
@@ -185,7 +190,7 @@ static int iocp_backend_wait(
 
 	if (!result && overlapped == NULL) {
 		/* Timeout or error */
-		return (GetLastError() == WAIT_TIMEOUT) ? 0 : PHP_POLL_ERROR;
+		return (GetLastError() == WAIT_TIMEOUT) ? 0 : -1;
 	}
 
 	if (overlapped != NULL) {
@@ -228,6 +233,7 @@ static bool iocp_backend_is_available(void)
 }
 
 const php_poll_backend_ops php_poll_backend_iocp_ops = {
+	.type = PHP_POLL_BACKEND_IOCP,
 	.name = "iocp",
 	.init = iocp_backend_init,
 	.cleanup = iocp_backend_cleanup,
@@ -236,8 +242,7 @@ const php_poll_backend_ops php_poll_backend_iocp_ops = {
 	.remove = iocp_backend_remove,
 	.wait = iocp_backend_wait,
 	.is_available = iocp_backend_is_available,
-	.supports_et
-	= true /* IOCP provides completion-based model which is inherently edge-triggered */
+	.supports_et = true /* IOCP provides completion-based model which is edge-triggered */
 };
 
 #endif /* _WIN32 */
