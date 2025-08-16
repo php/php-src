@@ -53,6 +53,8 @@ Deprecated: chr(): Passing null to parameter #1 ($codepoint) of type int is depr
 string(1) "%s"
 
 Deprecated: ord(): Passing null to parameter #1 ($character) of type string is deprecated in %s on line %d
+
+Deprecated: ord(): Providing an empty string is deprecated in %s on line %d
 int(0)
 string(98) "call_user_func_array(): Argument #1 ($callback) must be a valid callback, no array or string given"
 string(77) "call_user_func_array(): Argument #2 ($args) must be of type array, null given"
