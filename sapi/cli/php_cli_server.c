@@ -239,12 +239,31 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_server)
 /* {{{ static char php_cli_server_css[]
  * copied from ext/standard/info.c
  */
-static const char php_cli_server_css[] = "<style>\n" \
-										"body { background-color: #fcfcfc; color: #333333; margin: 0; padding:0; }\n" \
-										"h1 { font-size: 1.5em; font-weight: normal; background-color: #9999cc; min-height:2em; line-height:2em; border-bottom: 1px inset black; margin: 0; }\n" \
-										"h1, p { padding-left: 10px; }\n" \
-										"code.url { background-color: #eeeeee; font-family:monospace; padding:0 2px;}\n" \
-										"</style>\n";
+static const char php_cli_server_css[] = "<style>" \
+										"body{" \
+										"background-color:#fcfcfc;" \
+										"color:#333333;" \
+										"margin:0;" \
+										"padding:0;" \
+										"}" \
+										"h1{" \
+										"font-size:1.5em;" \
+										"font-weight:normal;" \
+										"background-color:#9999cc;" \
+										"min-height:2em;" \
+										"line-height:2em;" \
+										"border-bottom:1px inset black;" \
+										"margin:0;" \
+										"}" \
+										"h1,p{" \
+										"padding-left:10px;" \
+										"}" \
+										"code.url{" \
+										"background-color:#eeeeee;" \
+										"font-family:monospace;" \
+										"padding:0 2px;" \
+										"}" \
+										"</style>";
 /* }}} */
 
 #ifdef PHP_WIN32
