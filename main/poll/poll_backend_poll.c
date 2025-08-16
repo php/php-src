@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php_poll.h"
+#include "php_poll_internal.h"
 
 #ifdef HAVE_POLL
 
@@ -62,17 +62,19 @@ static uint32_t poll_events_from_native(uint32_t native)
 	return events;
 }
 
-static int poll_backend_init(php_poll_ctx *ctx, int max_events)
+static zend_result poll_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	poll_backend_data_t *data = calloc(1, sizeof(poll_backend_data_t));
 	if (!data) {
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	data->fds = calloc(max_events, sizeof(struct pollfd));
 	if (!data->fds) {
 		free(data);
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	data->allocated = max_events;
@@ -84,7 +86,7 @@ static int poll_backend_init(php_poll_ctx *ctx, int max_events)
 	}
 
 	ctx->backend_data = data;
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
 static void poll_backend_cleanup(php_poll_ctx *ctx)
@@ -97,7 +99,7 @@ static void poll_backend_cleanup(php_poll_ctx *ctx)
 	}
 }
 
-static int poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
@@ -108,28 +110,30 @@ static int poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *da
 			backend_data->fds[i].events = poll_events_to_native(events);
 			backend_data->fds[i].revents = 0;
 			backend_data->used++;
-			return PHP_POLL_ERR_NONE;
+			return SUCCESS;
 		}
 	}
 
-	return PHP_POLL_ERR_NOMEM;
+	php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+	return FAILURE;
 }
 
-static int poll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result poll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
 	for (int i = 0; i < backend_data->allocated; i++) {
 		if (backend_data->fds[i].fd == fd) {
 			backend_data->fds[i].events = poll_events_to_native(events);
-			return PHP_POLL_ERR_NONE;
+			return SUCCESS;
 		}
 	}
 
-	return PHP_POLL_ERR_NOTFOUND;
+	php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+	return FAILURE;
 }
 
-static int poll_backend_remove(php_poll_ctx *ctx, int fd)
+static zend_result poll_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
@@ -139,15 +143,15 @@ static int poll_backend_remove(php_poll_ctx *ctx, int fd)
 			backend_data->fds[i].events = 0;
 			backend_data->fds[i].revents = 0;
 			backend_data->used--;
-			return PHP_POLL_ERR_NONE;
+			return SUCCESS;
 		}
 	}
 
-	return PHP_POLL_ERR_NOTFOUND;
+	php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+	return FAILURE;
 }
 
-static int poll_backend_wait(
-		php_poll_ctx *ctx, php_poll_event_t *events, int max_events, int timeout)
+static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
@@ -183,7 +187,9 @@ static bool poll_backend_is_available(void)
 	return true; /* poll() is always available */
 }
 
-const php_poll_backend_ops php_poll_backend_poll_ops = { .name = "poll",
+const php_poll_backend_ops php_poll_backend_poll_ops = {
+	.type = PHP_POLL_BACKEND_POLL,
+	.name = "poll",
 	.init = poll_backend_init,
 	.cleanup = poll_backend_cleanup,
 	.add = poll_backend_add,
@@ -191,6 +197,7 @@ const php_poll_backend_ops php_poll_backend_poll_ops = { .name = "poll",
 	.remove = poll_backend_remove,
 	.wait = poll_backend_wait,
 	.is_available = poll_backend_is_available,
-	.supports_et = false };
+	.supports_et = false,
+};
 
 #endif /* HAVE_POLL */

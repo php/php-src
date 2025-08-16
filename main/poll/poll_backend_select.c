@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php_poll.h"
+#include "php_poll_internal.h"
 #include "php_network.h"
 
 typedef struct {
@@ -24,11 +24,12 @@ typedef struct {
 	int max_sockets;
 } select_backend_data_t;
 
-static int select_backend_init(php_poll_ctx *ctx, int max_events)
+static zend_result select_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	select_backend_data_t *data = calloc(1, sizeof(select_backend_data_t));
 	if (!data) {
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	data->max_sockets = max_events;
@@ -39,7 +40,8 @@ static int select_backend_init(php_poll_ctx *ctx, int max_events)
 		free(data->socket_list);
 		free(data->data_list);
 		free(data);
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	FD_ZERO(&data->master_read_fds);
@@ -48,7 +50,7 @@ static int select_backend_init(php_poll_ctx *ctx, int max_events)
 	data->socket_count = 0;
 
 	ctx->backend_data = data;
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
 static void select_backend_cleanup(php_poll_ctx *ctx)
@@ -72,18 +74,20 @@ static int select_find_socket_index(select_backend_data_t *data, php_socket_t so
 	return -1;
 }
 
-static int select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
 	php_socket_t sock = (php_socket_t) fd;
 
 	if (backend_data->socket_count >= backend_data->max_sockets) {
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	/* Check if socket already exists */
 	if (select_find_socket_index(backend_data, sock) >= 0) {
-		return PHP_POLL_ERR_EXISTS;
+		php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
+		return FAILURE;
 	}
 
 	/* Add socket to our tracking */
@@ -101,17 +105,18 @@ static int select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *
 	/* Always monitor for errors */
 	FD_SET(sock, &backend_data->master_error_fds);
 
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
-static int select_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result select_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
 	php_socket_t sock = (php_socket_t) fd;
 
 	int index = select_find_socket_index(backend_data, sock);
 	if (index < 0) {
-		return PHP_POLL_ERR_NOTFOUND;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+		return FAILURE;
 	}
 
 	/* Update user data */
@@ -131,17 +136,18 @@ static int select_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, voi
 	}
 	FD_SET(sock, &backend_data->master_error_fds);
 
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
-static int select_backend_remove(php_poll_ctx *ctx, int fd)
+static zend_result select_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
 	php_socket_t sock = (php_socket_t) fd;
 
 	int index = select_find_socket_index(backend_data, sock);
 	if (index < 0) {
-		return PHP_POLL_ERR_NOTFOUND;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+		return FAILURE;
 	}
 
 	/* Remove from fd_sets */
@@ -156,11 +162,11 @@ static int select_backend_remove(php_poll_ctx *ctx, int fd)
 	}
 	backend_data->socket_count--;
 
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
 static int select_backend_wait(
-		php_poll_ctx *ctx, php_poll_event_t *events, int max_events, int timeout)
+		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
 
@@ -190,7 +196,7 @@ static int select_backend_wait(
 			0, &backend_data->read_fds, &backend_data->write_fds, &backend_data->error_fds, ptv);
 
 	if (result <= 0) {
-		return (result == 0) ? 0 : PHP_POLL_ERROR;
+		return (result == 0) ? 0 : -1;
 	}
 
 	/* Process results */
@@ -227,6 +233,7 @@ static bool select_backend_is_available(void)
 }
 
 const php_poll_backend_ops php_poll_backend_select_ops = {
+	.type = PHP_POLL_BACKEND_SELECT,
 	.name = "select",
 	.init = select_backend_init,
 	.cleanup = select_backend_cleanup,

@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php_poll.h"
+#include "php_poll_internal.h"
 
 #ifdef HAVE_KQUEUE
 
@@ -24,7 +24,7 @@ typedef struct {
 	int change_capacity;
 } kqueue_backend_data_t;
 
-static int kqueue_backend_init(php_poll_ctx *ctx, int max_events)
+static zend_result kqueue_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	kqueue_backend_data_t *data = calloc(1, sizeof(kqueue_backend_data_t));
 	if (!data) {
@@ -34,7 +34,8 @@ static int kqueue_backend_init(php_poll_ctx *ctx, int max_events)
 	data->kqueue_fd = kqueue();
 	if (data->kqueue_fd == -1) {
 		free(data);
-		return PHP_POLL_ERROR;
+		php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+		return FAILURE;
 	}
 
 	data->events = calloc(max_events, sizeof(struct kevent));
@@ -47,11 +48,12 @@ static int kqueue_backend_init(php_poll_ctx *ctx, int max_events)
 		free(data->events);
 		free(data->change_list);
 		free(data);
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	ctx->backend_data = data;
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
 static void kqueue_backend_cleanup(php_poll_ctx *ctx)
@@ -68,19 +70,20 @@ static void kqueue_backend_cleanup(php_poll_ctx *ctx)
 	}
 }
 
-static int kqueue_add_change(
+static zend_result kqueue_add_change(
 		kqueue_backend_data_t *data, int fd, int16_t filter, uint16_t flags, void *udata)
 {
 	if (data->change_count >= data->change_capacity) {
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	struct kevent *kev = &data->change_list[data->change_count++];
 	EV_SET(kev, fd, filter, flags, 0, 0, udata);
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
-static int kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
 
@@ -92,33 +95,33 @@ static int kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *
 		flags |= EV_CLEAR; /* kqueue edge-triggering */
 	}
 
-	int result = PHP_POLL_ERR_NONE;
+	int result = SUCCESS;
 
 	if (events & PHP_POLL_READ) {
 		result = kqueue_add_change(backend_data, fd, EVFILT_READ, flags, data);
-		if (result != PHP_POLL_ERR_NONE) {
+		if (result != SUCCESS) {
 			return result;
 		}
 	}
 
 	if (events & PHP_POLL_WRITE) {
 		result = kqueue_add_change(backend_data, fd, EVFILT_WRITE, flags, data);
-		if (result != PHP_POLL_ERR_NONE) {
+		if (result != SUCCESS) {
 			return result;
 		}
 	}
 
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
-static int kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	/* For kqueue, we delete and re-add */
 	kqueue_backend_remove(ctx, fd);
 	return kqueue_backend_add(ctx, fd, events, data);
 }
 
-static int kqueue_backend_remove(php_poll_ctx *ctx, int fd)
+static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
 
@@ -126,11 +129,11 @@ static int kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 	kqueue_add_change(backend_data, fd, EVFILT_READ, EV_DELETE, NULL);
 	kqueue_add_change(backend_data, fd, EVFILT_WRITE, EV_DELETE, NULL);
 
-	return PHP_POLL_ERR_NONE;
+	return SUCCESS;
 }
 
 static int kqueue_backend_wait(
-		php_poll_ctx *ctx, php_poll_event_t *events, int max_events, int timeout)
+		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
 
@@ -183,6 +186,7 @@ static bool kqueue_backend_is_available(void)
 }
 
 const php_poll_backend_ops php_poll_backend_kqueue_ops = {
+	.type = PHP_POLL_BACKEND_KQUEUE,
 	.name = "kqueue",
 	.init = kqueue_backend_init,
 	.cleanup = kqueue_backend_cleanup,

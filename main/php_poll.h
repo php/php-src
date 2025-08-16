@@ -17,14 +17,16 @@
 
 #include "php.h"
 
+/* clang-format off */
+
 /* Event types */
-#define PHP_POLL_READ     0x01
-#define PHP_POLL_WRITE    0x02
-#define PHP_POLL_ERROR    0x04
-#define PHP_POLL_HUP      0x08
-#define PHP_POLL_RDHUP    0x10
-#define PHP_POLL_ONESHOT  0x20
-#define PHP_POLL_ET       0x40  /* Edge-triggered */
+#define PHP_POLL_READ    0x01
+#define PHP_POLL_WRITE   0x02
+#define PHP_POLL_ERROR   0x04
+#define PHP_POLL_HUP     0x08
+#define PHP_POLL_RDHUP   0x10
+#define PHP_POLL_ONESHOT 0x20
+#define PHP_POLL_ET      0x40 /* Edge-triggered */
 
 /* Poll backend types */
 typedef enum {
@@ -37,102 +39,43 @@ typedef enum {
 	PHP_POLL_BACKEND_IOCP
 } php_poll_backend_type;
 
-/* Error codes */
-#define PHP_POLL_ERR_NONE      0
-#define PHP_POLL_ERR_FAIL     -1
-#define PHP_POLL_ERR_NOMEM    -2
-#define PHP_POLL_ERR_INVALID  -3
-#define PHP_POLL_ERR_EXISTS   -4
-#define PHP_POLL_ERR_NOTFOUND -5
-#define PHP_POLL_ERR_TIMEOUT  -6
+/* Result codes */
+typedef enum {
+    PHP_POLL_ERR_NONE,
+    PHP_POLL_ERR_SYSTEM,
+    PHP_POLL_ERR_NOMEM,
+    PHP_POLL_ERR_INVALID,
+    PHP_POLL_ERR_EXISTS,
+    PHP_POLL_ERR_NOTFOUND,
+    PHP_POLL_ERR_TIMEOUT,
+} php_poll_error;
+
+/* clang-format on */
 
 /* Forward declarations */
 typedef struct php_poll_ctx php_poll_ctx;
 typedef struct php_poll_fd_entry php_poll_fd_entry;
-
-/* Poll event structure */
-typedef struct {
-	int fd;           /* File descriptor */
-	uint32_t events;  /* Requested events */
-	uint32_t revents; /* Returned events */
-	void *data;       /* User data pointer */
-} php_poll_event_t;
-
-/* FD entry for tracking state */
-struct php_poll_fd_entry {
-	int fd;
-	uint32_t events;
-	uint32_t last_revents; /* For edge-trigger simulation */
-	void *data;
-	bool active;
-	bool et_armed; /* Edge-trigger state */
-};
-
-/* Backend interface */
-typedef struct php_poll_backend_ops {
-	const char *name;
-	
-	/* Initialize backend */
-	int (*init)(php_poll_ctx *ctx, int max_events);
-	
-	/* Cleanup backend */
-	void (*cleanup)(php_poll_ctx *ctx);
-	
-	/* Add file descriptor */
-	int (*add)(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
-	
-	/* Modify file descriptor */
-	int (*modify)(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
-	
-	/* Remove file descriptor */
-	int (*remove)(php_poll_ctx *ctx, int fd);
-	
-	/* Wait for events */
-	int (*wait)(php_poll_ctx *ctx, php_poll_event_t *events, int max_events, int timeout);
-	
-	/* Check if backend is available */
-	bool (*is_available)(void);
-	
-	/* Backend supports edge triggering natively */
-	bool supports_et;
-} php_poll_backend_ops;
-
-/* Main poll context */
-struct php_poll_ctx {
-	const php_poll_backend_ops *backend_ops;
-	php_poll_backend_type backend_type;
-	
-	int max_events;
-	int num_fds;
-	bool initialized;
-	bool simulate_et; /* Whether to simulate edge triggering */
-	
-	/* FD tracking for edge-trigger simulation */
-	php_poll_fd_entry *fd_entries;
-	int fd_entries_size;
-	
-	/* Backend-specific data */
-	void *backend_data;
-};
+typedef struct php_poll_backend_ops php_poll_backend_ops;
+typedef struct php_poll_event php_poll_event;
 
 /* Public API */
-php_poll_ctx* php_poll_create(int max_events, php_poll_backend_type preferred_backend);
+php_poll_ctx *php_poll_create(int max_events, php_poll_backend_type preferred_backend);
 void php_poll_destroy(php_poll_ctx *ctx);
 
-int php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
-int php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
-int php_poll_remove(php_poll_ctx *ctx, int fd);
+zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
+zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
+zend_result php_poll_remove(php_poll_ctx *ctx, int fd);
 
-int php_poll_wait(php_poll_ctx *ctx, php_poll_event_t *events,  int max_events, int timeout);
+int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout);
 
-const char* php_poll_backend_name(php_poll_ctx *ctx);
+const char *php_poll_backend_name(php_poll_ctx *ctx);
 php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx);
 bool php_poll_supports_et(php_poll_ctx *ctx);
 
-php_poll_fd_entry *php_poll_find_fd_entry(php_poll_ctx *ctx, int fd);
-
 /* Backend registration */
 void php_poll_register_backends(void);
-const php_poll_backend_ops* php_poll_get_backend_ops(php_poll_backend_type backend);
+const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backend);
+
+php_poll_error php_poll_get_error(php_poll_ctx *ctx);
 
 #endif /* PHP_POLL_H */
