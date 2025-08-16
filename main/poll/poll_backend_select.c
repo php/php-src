@@ -32,7 +32,7 @@ static int select_backend_init(php_poll_ctx *ctx, int max_events)
 {
 	select_backend_data_t *data = calloc(1, sizeof(select_backend_data_t));
 	if (!data) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	data->max_sockets = max_events;
@@ -43,7 +43,7 @@ static int select_backend_init(php_poll_ctx *ctx, int max_events)
 		free(data->socket_list);
 		free(data->data_list);
 		free(data);
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	FD_ZERO(&data->master_read_fds);
@@ -52,7 +52,7 @@ static int select_backend_init(php_poll_ctx *ctx, int max_events)
 	data->socket_count = 0;
 
 	ctx->backend_data = data;
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static void select_backend_cleanup(php_poll_ctx *ctx)
@@ -82,7 +82,7 @@ static int select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *
 	SOCKET sock = (SOCKET) fd;
 
 	if (backend_data->socket_count >= backend_data->max_sockets) {
-		return PHP_POLL_NOMEM;
+		return PHP_POLL_ERR_NOMEM;
 	}
 
 	/* Check if socket already exists */
@@ -105,7 +105,7 @@ static int select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *
 	/* Always monitor for errors */
 	FD_SET(sock, &backend_data->master_error_fds);
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int select_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
@@ -135,7 +135,7 @@ static int select_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, voi
 	}
 	FD_SET(sock, &backend_data->master_error_fds);
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int select_backend_remove(php_poll_ctx *ctx, int fd)
@@ -160,7 +160,7 @@ static int select_backend_remove(php_poll_ctx *ctx, int fd)
 	}
 	backend_data->socket_count--;
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 static int select_backend_wait(
@@ -242,4 +242,4 @@ const php_poll_backend_ops php_poll_backend_select_ops = {
 	.supports_et = false /* select() doesn't support edge triggering */
 };
 
-#endif _WIN32
+#endif /* _WIN32 */
