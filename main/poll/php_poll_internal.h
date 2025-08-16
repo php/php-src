@@ -85,6 +85,9 @@ struct php_poll_ctx {
 	void *backend_data;
 };
 
+
+const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backend);
+
 php_poll_fd_entry *php_poll_find_fd_entry(php_poll_ctx *ctx, int fd);
 
 static inline void php_poll_set_error(php_poll_ctx *ctx, php_poll_error error)

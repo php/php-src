@@ -59,26 +59,24 @@ typedef struct php_poll_backend_ops php_poll_backend_ops;
 typedef struct php_poll_event php_poll_event;
 
 /* Public API */
-php_poll_ctx *php_poll_create(
+PHPAPI php_poll_ctx *php_poll_create(
 		int max_events, php_poll_backend_type preferred_backend, bool persistent);
 
-zend_result php_poll_init(php_poll_ctx *ctx);
-void php_poll_destroy(php_poll_ctx *ctx);
+PHPAPI zend_result php_poll_init(php_poll_ctx *ctx);
+PHPAPI void php_poll_destroy(php_poll_ctx *ctx);
 
-zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
-zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
-zend_result php_poll_remove(php_poll_ctx *ctx, int fd);
+PHPAPI zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
+PHPAPI zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data);
+PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd);
 
-int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout);
+PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout);
 
-const char *php_poll_backend_name(php_poll_ctx *ctx);
-php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx);
-bool php_poll_supports_et(php_poll_ctx *ctx);
+PHPAPI const char *php_poll_backend_name(php_poll_ctx *ctx);
+PHPAPI php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx);
+PHPAPI bool php_poll_supports_et(php_poll_ctx *ctx);
+PHPAPI php_poll_error php_poll_get_error(php_poll_ctx *ctx);
 
 /* Backend registration */
-void php_poll_register_backends(void);
-const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backend);
-
-php_poll_error php_poll_get_error(php_poll_ctx *ctx);
+PHPAPI void php_poll_register_backends(void);
 
 #endif /* PHP_POLL_H */
