@@ -17,6 +17,11 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
 
+- Tidy:
+  . Fixed GH-19021 build issue with libtidy in regard of tidyOptIsReadonly
+    deprecation and TidyInternalCategory being available later than
+    tidyOptGetCategory. (arjendekorte)
+
 28 Aug 2025, PHP 8.3.25
 
 - Core:

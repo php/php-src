@@ -62,7 +62,9 @@ if test "$PHP_TIDY" != "no"; then
     AC_DEFINE(HAVE_TIDYRELEASEDATE,1,[ ])
   ], [], [])
 
-  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyOptGetCategory,
+  dnl The tidyOptGetCategory function (added in libtidy 5.4.0) if only useable
+  dnl if TidyInternalCategory (added in libtidy 5.6.0) is also present.
+  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,TidyInternalCategory,
   [
     AC_DEFINE(HAVE_TIDYOPTGETCATEGORY,1,[ ])
   ], [], [])
