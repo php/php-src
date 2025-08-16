@@ -3356,7 +3356,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 	}
 
 	uint32_t throw_op_num = throw_op - EX(func)->op_array.opcodes;
-	int i, current_try_catch_offset = -1;
+	uint32_t current_try_catch_offset = -1;
 
 	if ((throw_op->opcode == ZEND_FREE || throw_op->opcode == ZEND_FE_FREE)
 		&& throw_op->extended_value & ZEND_FREE_ON_RETURN) {
@@ -3367,7 +3367,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 		const zend_live_range *range = find_live_range(
 			&EX(func)->op_array, throw_op_num, throw_op->op1.var);
 		/* free op1 of the corresponding RETURN */
-		for (i = throw_op_num; i < range->end; i++) {
+		for (uint32_t i = throw_op_num; i < range->end; i++) {
 			if (EX(func)->op_array.opcodes[i].opcode == ZEND_FREE
 			 || EX(func)->op_array.opcodes[i].opcode == ZEND_FE_FREE) {
 				/* pass */
@@ -3383,7 +3383,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 	}
 
 	/* Find the innermost try/catch/finally the exception was thrown in */
-	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
+	for (uint32_t i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		zend_try_catch_element *try_catch = &EX(func)->op_array.try_catch_array[i];
 		if (try_catch->try_op > throw_op_num) {
 			/* further blocks will not be relevant... */
