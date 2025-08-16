@@ -423,6 +423,8 @@ PHP 8.5 UPGRADE NOTES
     SplObjectStorage::offsetExists(), SplObjectStorage::offsetSet(), and
     SplObjectStorage::offsetUnset() respectively.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_splobjectstoragecontains_splobjectstorageattach_and_splobjectstoragedetach
+  . Using ArrayObject and ArrayIterator with objects has been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_arrayobject_and_arrayiterator_with_objects
 
 - Standard:
   . The socket_set_timeout() alias function has been deprecated.

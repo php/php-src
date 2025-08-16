@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - Session:
   . Added support for partitioned cookies. (nielsdos)
 
+- SPL:
+  . Deprecate ArrayObject and ArrayIterator with objects. (Girgias)
+
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
   . Passing integers outside the interval [0, 255] to chr() is now deprecated.
