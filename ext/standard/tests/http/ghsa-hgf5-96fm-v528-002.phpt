@@ -33,7 +33,7 @@ $clientCode = <<<'CODE'
     ];
     $ctx = stream_context_create($opts);
     var_dump(explode("\r\n", base64_decode(file_get_contents("http://user:pwd@{{ ADDR }}", false, $ctx))));
-    var_dump($http_response_header);
+    var_dump(http_get_last_response_headers());
 CODE;
 
 include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);

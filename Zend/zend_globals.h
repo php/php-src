@@ -106,6 +106,8 @@ struct _zend_compiler_globals {
 
 	bool ini_parser_unbuffered_errors;
 
+	bool has_assigned_to_http_response_header;
+
 	zend_llist open_files;
 
 	struct _zend_ini_parser_param *ini_parser_param;
