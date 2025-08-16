@@ -218,13 +218,13 @@ static zend_string *validate_nodiscard(
 {
 	ZEND_ASSERT(CG(in_compilation));
 	const zend_string *prop_info_name = CG(context).active_property_info_name;
-	if (prop_info_name == NULL) {
-		zend_op_array *op_array = CG(active_op_array);
-		op_array->fn_flags |= ZEND_ACC_NODISCARD;
-		return NULL;
+	if (prop_info_name != NULL) {
+		// Applied to a hook
+		return ZSTR_INIT_LITERAL("#[\\NoDiscard] is not supported for property hooks", 0);
 	}
-	// Applied to a hook
-	return ZSTR_INIT_LITERAL("#[\\NoDiscard] is not supported for property hooks", 0);
+	zend_op_array *op_array = CG(active_op_array);
+	op_array->fn_flags |= ZEND_ACC_NODISCARD;
+	return NULL;
 }
 
 ZEND_METHOD(NoDiscard, __construct)
