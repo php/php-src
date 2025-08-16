@@ -101,7 +101,7 @@ static int eventport_backend_init(php_poll_ctx_t *ctx, int max_events)
 	}
 
 	ctx->backend_data = data;
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 /* Cleanup event port backend */
@@ -134,14 +134,14 @@ static int eventport_backend_add(php_poll_ctx_t *ctx, int fd, uint32_t events, v
 				return PHP_POLL_NOMEM;
 			case EBADF:
 			case EINVAL:
-				return PHP_POLL_INVALID;
+				return PHP_POLL_ERR_INVALID;
 			default:
 				return PHP_POLL_ERROR;
 		}
 	}
 
 	backend_data->active_associations++;
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 /* Modify file descriptor in event port */
@@ -160,13 +160,13 @@ static int eventport_backend_modify(php_poll_ctx_t *ctx, int fd, uint32_t events
 				return PHP_POLL_NOMEM;
 			case EBADF:
 			case EINVAL:
-				return PHP_POLL_INVALID;
+				return PHP_POLL_ERR_INVALID;
 			default:
 				return PHP_POLL_ERROR;
 		}
 	}
 
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 /* Remove file descriptor from event port */
@@ -177,17 +177,17 @@ static int eventport_backend_remove(php_poll_ctx_t *ctx, int fd)
 	if (port_dissociate(backend_data->port_fd, PORT_SOURCE_FD, fd) == -1) {
 		switch (errno) {
 			case ENOENT:
-				return PHP_POLL_NOTFOUND;
+				return PHP_POLL_ERR_NOTFOUND;
 			case EBADF:
 			case EINVAL:
-				return PHP_POLL_INVALID;
+				return PHP_POLL_ERR_INVALID;
 			default:
 				return PHP_POLL_ERROR;
 		}
 	}
 
 	backend_data->active_associations--;
-	return PHP_POLL_OK;
+	return PHP_POLL_ERR_NONE;
 }
 
 /* Wait for events using event port */

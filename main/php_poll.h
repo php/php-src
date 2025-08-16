@@ -38,13 +38,13 @@ typedef enum {
 } php_poll_backend_type;
 
 /* Error codes */
-#define PHP_POLL_OK          0
-#define PHP_POLL_ERROR      -1
-#define PHP_POLL_NOMEM      -2
-#define PHP_POLL_INVALID    -3
-#define PHP_POLL_EXISTS     -4
-#define PHP_POLL_NOTFOUND   -5
-#define PHP_POLL_TIMEOUT    -6
+#define PHP_POLL_ERR_NONE      0
+#define PHP_POLL_ERR_FAIL     -1
+#define PHP_POLL_ERR_NOMEM    -2
+#define PHP_POLL_ERR_INVALID  -3
+#define PHP_POLL_ERR_EXISTS   -4
+#define PHP_POLL_ERR_NOTFOUND -5
+#define PHP_POLL_ERR_TIMEOUT  -6
 
 /* Forward declarations */
 typedef struct php_poll_ctx php_poll_ctx;
@@ -128,6 +128,8 @@ int php_poll_wait(php_poll_ctx *ctx, php_poll_event_t *events,  int max_events, 
 const char* php_poll_backend_name(php_poll_ctx *ctx);
 php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx);
 bool php_poll_supports_et(php_poll_ctx *ctx);
+
+php_poll_fd_entry *php_poll_find_fd_entry(php_poll_ctx *ctx, int fd);
 
 /* Backend registration */
 void php_poll_register_backends(void);
