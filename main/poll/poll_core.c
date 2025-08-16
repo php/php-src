@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php_poll.h"
+#include "php_poll_internal.h"
 
 /* Backend registry */
 static const php_poll_backend_ops *registered_backends[16];
@@ -88,19 +88,7 @@ const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backe
 	}
 
 	for (int i = 0; i < num_registered_backends; i++) {
-		if (registered_backends[i]
-				&& ((backend == PHP_POLL_BACKEND_EPOLL
-							&& strcmp(registered_backends[i]->name, "epoll") == 0)
-						|| (backend == PHP_POLL_BACKEND_KQUEUE
-								&& strcmp(registered_backends[i]->name, "kqueue") == 0)
-						|| (backend == PHP_POLL_BACKEND_EVENTPORT
-								&& strcmp(registered_backends[i]->name, "eventport") == 0)
-						|| (backend == PHP_POLL_BACKEND_IOCP
-								&& strcmp(registered_backends[i]->name, "iocp") == 0)
-						|| (backend == PHP_POLL_BACKEND_SELECT
-								&& strcmp(registered_backends[i]->name, "select") == 0)
-						|| (backend == PHP_POLL_BACKEND_POLL
-								&& strcmp(registered_backends[i]->name, "poll") == 0))) {
+		if (registered_backends[i] && registered_backends[i]->type == backend) {
 			return registered_backends[i];
 		}
 	}
@@ -123,8 +111,9 @@ php_poll_fd_entry *php_poll_find_fd_entry(php_poll_ctx *ctx, int fd)
 static php_poll_fd_entry *php_poll_get_fd_entry(php_poll_ctx *ctx, int fd)
 {
 	php_poll_fd_entry *entry = php_poll_find_fd_entry(ctx, fd);
-	if (entry)
+	if (entry) {
 		return entry;
+	}
 
 	/* Find empty slot */
 	for (int i = 0; i < ctx->fd_entries_size; i++) {
@@ -141,7 +130,7 @@ static php_poll_fd_entry *php_poll_get_fd_entry(php_poll_ctx *ctx, int fd)
 }
 
 /* Edge-trigger simulation */
-static int php_poll_simulate_et(php_poll_ctx *ctx, php_poll_event_t *events, int nfds)
+static int php_poll_simulate_et(php_poll_ctx *ctx, php_poll_event *events, int nfds)
 {
 	if (!ctx->simulate_et) {
 		return nfds; /* No simulation needed */
@@ -151,8 +140,9 @@ static int php_poll_simulate_et(php_poll_ctx *ctx, php_poll_event_t *events, int
 
 	for (int i = 0; i < nfds; i++) {
 		php_poll_fd_entry *entry = php_poll_find_fd_entry(ctx, events[i].fd);
-		if (!entry)
+		if (!entry) {
 			continue;
+		}
 
 		uint32_t new_events = events[i].revents;
 		uint32_t edge_events = 0;
@@ -186,12 +176,14 @@ static int php_poll_simulate_et(php_poll_ctx *ctx, php_poll_event_t *events, int
 /* Create new poll context */
 php_poll_ctx *php_poll_create(int max_events, php_poll_backend_type preferred_backend)
 {
-	if (max_events <= 0)
+	if (max_events <= 0) {
 		return NULL;
+	}
 
 	php_poll_ctx *ctx = calloc(1, sizeof(php_poll_ctx));
-	if (!ctx)
+	if (!ctx) {
 		return NULL;
+	}
 
 	/* Get backend operations */
 	ctx->backend_ops = php_poll_get_backend_ops(preferred_backend);
@@ -212,7 +204,7 @@ php_poll_ctx *php_poll_create(int max_events, php_poll_backend_type preferred_ba
 	}
 
 	/* Initialize backend */
-	if (ctx->backend_ops->init(ctx, max_events) != PHP_POLL_ERR_NONE) {
+	if (ctx->backend_ops->init(ctx, max_events) != SUCCESS) {
 		free(ctx->fd_entries);
 		free(ctx);
 		return NULL;
@@ -227,8 +219,9 @@ php_poll_ctx *php_poll_create(int max_events, php_poll_backend_type preferred_ba
 /* Destroy poll context */
 void php_poll_destroy(php_poll_ctx *ctx)
 {
-	if (!ctx)
+	if (!ctx) {
 		return;
+	}
 
 	if (ctx->backend_ops && ctx->backend_ops->cleanup) {
 		ctx->backend_ops->cleanup(ctx);
@@ -239,20 +232,23 @@ void php_poll_destroy(php_poll_ctx *ctx)
 }
 
 /* Add file descriptor */
-int php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
-	if (!ctx || !ctx->initialized || fd < 0) {
-		return PHP_POLL_ERR_INVALID;
+	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+		return FAILURE;
 	}
 
-	if (ctx->num_fds >= ctx->max_events) {
-		return PHP_POLL_ERR_NOMEM;
+	if (UNEXPECTED(ctx->num_fds >= ctx->max_events)) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	/* Get FD entry for tracking */
 	php_poll_fd_entry *entry = php_poll_get_fd_entry(ctx, fd);
 	if (!entry) {
-		return PHP_POLL_ERR_NOMEM;
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
 
 	entry->events = events;
@@ -264,26 +260,29 @@ int php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 		backend_events &= ~PHP_POLL_ET; /* Remove ET flag for backend */
 	}
 
-	int result = ctx->backend_ops->add(ctx, fd, backend_events, data);
-	if (result == PHP_POLL_ERR_NONE) {
+	if (EXPECTED(ctx->backend_ops->add(ctx, fd, backend_events, data) == SUCCESS)) {
 		ctx->num_fds++;
-	} else {
-		entry->active = false; /* Rollback */
+		return SUCCESS;
 	}
 
-	return result;
+	entry->active = false; /* Rollback */
+	php_poll_set_system_error_if_not_set(ctx);
+
+	return FAILURE;
 }
 
 /* Modify file descriptor */
-int php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
-	if (!ctx || !ctx->initialized || fd < 0) {
-		return PHP_POLL_ERR_INVALID;
+	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+		return FAILURE;
 	}
 
 	php_poll_fd_entry *entry = php_poll_find_fd_entry(ctx, fd);
-	if (!entry) {
-		return PHP_POLL_ERR_NOTFOUND;
+	if (UNEXPECTED(!entry)) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+		return FAILURE;
 	}
 
 	entry->events = events;
@@ -295,41 +294,53 @@ int php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 		backend_events &= ~PHP_POLL_ET;
 	}
 
-	return ctx->backend_ops->modify(ctx, fd, backend_events, data);
+	if (EXPECTED(ctx->backend_ops->modify(ctx, fd, backend_events, data) == SUCCESS)) {
+		return SUCCESS;
+	}
+
+	php_poll_set_system_error_if_not_set(ctx);
+	return FAILURE;
 }
 
 /* Remove file descriptor */
-int php_poll_remove(php_poll_ctx *ctx, int fd)
+zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
 {
-	if (!ctx || !ctx->initialized || fd < 0) {
-		return PHP_POLL_ERR_INVALID;
+	if (UNEXPECTED(!ctx || !ctx->initialized || fd < 0)) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+		return FAILURE;
 	}
 
 	php_poll_fd_entry *entry = php_poll_find_fd_entry(ctx, fd);
-	if (!entry) {
-		return PHP_POLL_ERR_NOTFOUND;
+	if (UNEXPECTED(!entry)) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+		return FAILURE;
 	}
 
-	int result = ctx->backend_ops->remove(ctx, fd);
-	if (result == PHP_POLL_ERR_NONE) {
+	if (EXPECTED(ctx->backend_ops->remove(ctx, fd) == SUCCESS)) {
 		entry->active = false;
 		ctx->num_fds--;
 	}
 
-	return result;
+	php_poll_set_system_error_if_not_set(ctx);
+	return FAILURE;
 }
 
 /* Wait for events */
-int php_poll_wait(php_poll_ctx *ctx, php_poll_event_t *events, int max_events, int timeout)
+int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
-	if (!ctx || !ctx->initialized || !events || max_events <= 0) {
-		return PHP_POLL_ERR_INVALID;
+	if (UNEXPECTED(!ctx || !ctx->initialized || !events || max_events <= 0)) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+		return -1;
 	}
 
 	int nfds = ctx->backend_ops->wait(ctx, events, max_events, timeout);
 
 	if (nfds > 0 && ctx->simulate_et) {
 		nfds = php_poll_simulate_et(ctx, events, nfds);
+	}
+
+	if (UNEXPECTED(nfds < 0)) {
+		php_poll_set_system_error_if_not_set(ctx);
 	}
 
 	return nfds;
@@ -351,4 +362,10 @@ php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx)
 bool php_poll_supports_et(php_poll_ctx *ctx)
 {
 	return ctx && (ctx->backend_ops->supports_et || ctx->simulate_et);
+}
+
+/* Error retrieval */
+php_poll_error php_poll_get_error(php_poll_ctx *ctx)
+{
+	return ctx ? ctx->last_error : PHP_POLL_ERR_INVALID;
 }
