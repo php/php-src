@@ -77,7 +77,7 @@ try {
 
 ?>
 --EXPECT--
-Failed to create the number skeleton
+IntlNumberRangeFormatter::createFromSkeleton(): Failed to create the number skeleton
 65811
 IntlNumberRangeFormatter::createFromSkeleton(): Failed to create the number skeleton: U_NUMBER_SKELETON_SYNTAX_ERROR
 Call to private IntlNumberRangeFormatter::__construct() from global scope

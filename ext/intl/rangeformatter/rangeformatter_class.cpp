@@ -121,9 +121,16 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     UnlocalizedNumberFormatter nf = NumberFormatter::forSkeleton(skeleton_ustr, status);
 
     if (U_FAILURE(status)) {
+        // override error level and use exceptions
+        const bool old_use_exception = INTL_G(use_exceptions);
+        const zend_long old_error_level = INTL_G(error_level);
+        INTL_G(use_exceptions) = true;
+        INTL_G(error_level) = 0;
+
         intl_error_set(NULL, status, "Failed to create the number skeleton");
-        zend_throw_exception(IntlException_ce_ptr, "Failed to create the number skeleton", 0);
-        RETURN_THROWS();
+
+        INTL_G(use_exceptions) = old_use_exception;
+        INTL_G(error_level) = old_error_level;
     }
 
     LocalizedNumberRangeFormatter* nrf = new LocalizedNumberRangeFormatter(
@@ -165,19 +172,24 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
 
     UnicodeString result = RANGEFORMATTER_OBJECT(obj)->formatFormattableRange(start_formattable, end_formattable, error).toString(error);
 
+    // override error level and use exceptions
+    const bool old_use_exception = INTL_G(use_exceptions);
+    const zend_long old_error_level = INTL_G(error_level);
+    INTL_G(use_exceptions) = true;
+    INTL_G(error_level) = 0;
+
     if (U_FAILURE(error)) {
         intl_error_set(NULL, error, "Failed to format number range");
-        zend_throw_exception(IntlException_ce_ptr, "Failed to format number range", 0);
-        RETURN_THROWS();
     }
 
     zend_string *ret = intl_charFromString(result, &error);
 
     if (U_FAILURE(error)) {
         intl_error_set(NULL, error, "Failed to convert result to UTF-8");
-        zend_throw_exception(IntlException_ce_ptr, "Failed to convert result to UTF-8", 0);
-        RETURN_THROWS();
     }
+
+    INTL_G(use_exceptions) = old_use_exception;
+    INTL_G(error_level) = old_error_level;
 
     RETVAL_NEW_STR(ret);
 #endif
