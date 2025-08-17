@@ -49,8 +49,7 @@ PHPAPI void php_url_free(php_url *theurl)
 
 static void php_str_to_utf8(const char *str, size_t len)
 {
-    zend_string *utf8;
-    utf8 = zend_string_alloc(len * 4, 0);
+    zend_string *utf8 = zend_string_safe_alloc(len, 4, 0, 0);
     const unsigned char *s = (const unsigned char *)str;
     const unsigned char *e = s + len;
     unsigned char *d = (unsigned char *)ZSTR_VAL(utf8);
