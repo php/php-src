@@ -7358,9 +7358,9 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		/* Delayed validation errors should only be set for internal attributes. */
 		ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
 		/* Delayed validation errors should only be set when
-		* #[\DelayedTargetValidation] is used. Searching for the attribute is
-		* more expensive than just an assertion and so we don't worry about it
-		* for non-debug builds. See discussion on GH-18817. */
+		 * #[\DelayedTargetValidation] is used. Searching for the attribute is
+		 * more expensive than just an assertion and so we don't worry about it
+		 * for non-debug builds. See discussion on GH-18817. */
 #if ZEND_DEBUG
 		zend_attribute *delayed_target_validation = zend_get_attribute_str(
 			attr->attributes,

@@ -7561,7 +7561,7 @@ static void zend_compile_attributes(
 		zend_attribute *delayed_target_validation = NULL;
 		if (target == ZEND_ATTRIBUTE_TARGET_PARAMETER) {
 			ZEND_ASSERT(offset >= 1);
-			// zend_get_parameter_attribute_str will add 1 too
+			/* zend_get_parameter_attribute_str will add 1 too */
 			delayed_target_validation = zend_get_parameter_attribute_str(
 				*attributes,
 				"delayedtargetvalidation",
@@ -7600,7 +7600,7 @@ static void zend_compile_attributes(
 				}
 			}
 
-			// Validators are not run if the target is already invalid
+			/* Validators are not run if the target is already invalid */
 			if (run_validator && config->validator != NULL) {
 				zend_string *error = config->validator(attr, target, CG(active_class_entry));
 				if (error != NULL) {
