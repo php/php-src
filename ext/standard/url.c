@@ -47,25 +47,16 @@ PHPAPI void php_url_free(php_url *theurl)
 }
 /* }}} */
 
-static void php_str_to_utf8(const char *str, size_t len)
+static void php_str_to_utf8(zend_string *str)
 {
-    zend_string *utf8 = zend_string_safe_alloc(len, 4, 0, 0);
-    const unsigned char *s = (const unsigned char *)str;
-    const unsigned char *e = s + len;
-    unsigned char *d = (unsigned char *)ZSTR_VAL(utf8);
-
+	const unsigned char *s = (const unsigned char *)ZSTR_VAL(str);
+    const unsigned char *e = s + ZSTR_LEN(str);
     while (s < e) {
-        if (*s < 0x80) { // ASCII
-            *d++ = *s++;
-        } else {
-            /* Convert non-ASCII bytes to UTF-8 */
-			*d++ = 0xEF;
-            *d++ = 0xBF;
-            *d++ = 0xBD;
-            s++;  
+        if (*s & 0x80) {
+            return;
         }
+        s++;
     }
-	zend_string_release(utf8);
 }
 
 PHPAPI php_url *php_url_parse(char const *str)
@@ -125,7 +116,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 
 		if (e + 1 == ue) { /* only scheme is available */
 			ret->scheme = zend_string_init(s, (e - s), 0);
-			php_str_to_utf8(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
+			php_str_to_utf8(ret->scheme);
 			return ret;
 		}
 
@@ -147,13 +138,13 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			}
 
 			ret->scheme = zend_string_init(s, (e-s), 0);
-			php_str_to_utf8(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
+			php_str_to_utf8(ret->scheme);
 
 			s = e + 1;
 			goto just_path;
 		} else {
 			ret->scheme = zend_string_init(s, (e-s), 0);
-			php_str_to_utf8(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
+			php_str_to_utf8(ret->scheme);
 
 			if (e + 2 < ue && *(e + 2) == '/') {
 				s = e + 3;
@@ -219,14 +210,14 @@ parse_host:
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
 		if ((pp = memchr(s, ':', (p-s)))) {
 			ret->user = zend_string_init(s, (pp-s), 0);
-			php_str_to_utf8(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
+			php_str_to_utf8(ret->user);
 
 			pp++;
 			ret->pass = zend_string_init(pp, (p-pp), 0);
-			php_str_to_utf8(ZSTR_VAL(ret->pass), ZSTR_LEN(ret->pass));
+			php_str_to_utf8(ret->pass);
 		} else {
 			ret->user = zend_string_init(s, (p-s), 0);
-			php_str_to_utf8(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
+			php_str_to_utf8(ret->user);
 		}
 
 		s = p + 1;
@@ -275,7 +266,7 @@ parse_host:
 	}
 
 	ret->host = zend_string_init(s, (p-s), 0);
-	php_str_to_utf8(ZSTR_VAL(ret->host), ZSTR_LEN(ret->host));
+	php_str_to_utf8(ret->host);
 
 	if (e == ue) {
 		return ret;
@@ -291,7 +282,7 @@ parse_host:
 		p++;
 		if (p < e) {
 			ret->fragment = zend_string_init(p, (e - p), 0);
-			php_str_to_utf8(ZSTR_VAL(ret->fragment), ZSTR_LEN(ret->fragment));
+			php_str_to_utf8(ret->fragment);
 		} else {
 			ret->fragment = ZSTR_EMPTY_ALLOC();
 		}
@@ -303,7 +294,7 @@ parse_host:
 		p++;
 		if (p < e) {
 			ret->query = zend_string_init(p, (e - p), 0);
-			php_str_to_utf8(ZSTR_VAL(ret->query), ZSTR_LEN(ret->query));
+			php_str_to_utf8(ret->query);
 		} else {
 			ret->query = ZSTR_EMPTY_ALLOC();
 		}
@@ -312,7 +303,7 @@ parse_host:
 
 	if (s < e || s == ue) {
 		ret->path = zend_string_init(s, (e - s), 0);
-		php_str_to_utf8(ZSTR_VAL(ret->path), ZSTR_LEN(ret->path));
+		php_str_to_utf8(ret->path);
 	}
 
 	return ret;
