@@ -55,11 +55,11 @@ static void php_replace_controlchars(char *str, size_t len)
 	ZEND_ASSERT(str != NULL);
 
 	while (s < e) {
-        if (*s <= 0x1F || *s == 0x7F) {   
+		if (*s <= 0x1F || *s == 0x7F) {   
 			*s = '_'; 
 		}
-        s++;
-    }
+		s++;
+	}
 }
 
 PHPAPI php_url *php_url_parse(char const *str)
