@@ -60,8 +60,10 @@ static void php_str_to_utf8(const char *str, size_t len)
             *d++ = *s++;
         } else {
             /* Convert non-ASCII bytes to UTF-8 */
-			unsigned int codepoint = *s++;
-            *d++ = 0xEF; *d++ = 0xBF; *d++ = 0xBD;  
+			*d++ = 0xEF;
+            *d++ = 0xBF;
+            *d++ = 0xBD;
+            s++;  
         }
     }
 	zend_string_release(utf8);
