@@ -7604,7 +7604,7 @@ static void zend_compile_attributes(
 			if (run_validator && config->validator != NULL) {
 				zend_string *error = config->validator(attr, target, CG(active_class_entry));
 				if (error != NULL) {
-					if (delayed_target_validation == false) {
+					if (delayed_target_validation == NULL) {
 						zend_error_noreturn(E_COMPILE_ERROR, "%s", ZSTR_VAL(error));
 						zend_string_efree(error);
 					} else {

@@ -85,9 +85,7 @@ static zend_string *validate_allow_dynamic_properties(
 		msg = "Cannot apply #[\\AllowDynamicProperties] to enum %s";
 	}
 	if (msg != NULL) {
-		smart_str str = {0};
-		smart_str_append_printf(&str, msg, ZSTR_VAL(scope->name));
-		return smart_str_extract(&str);
+		return zend_strpprintf(0, msg, ZSTR_VAL(scope->name));
 	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 	return NULL;
@@ -107,9 +105,7 @@ static zend_string *validate_attribute(
 		msg = "Cannot apply #[\\Attribute] to abstract class %s";
 	}
 	if (msg != NULL) {
-		smart_str str = {0};
-		smart_str_append_printf(&str, msg, ZSTR_VAL(scope->name));
-		return smart_str_extract(&str);
+		return zend_strpprintf(0, msg, ZSTR_VAL(scope->name));
 	}
 	return NULL;
 }
