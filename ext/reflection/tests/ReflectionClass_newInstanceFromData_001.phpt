@@ -129,6 +129,16 @@ var_dump($rcE->newInstanceFromData(['a' => 123, 'b' => 'good'], [456, 'foo'])); 
 // class with readonly promoted property
 var_dump($rcF->newInstanceFromData(['a' => 123], ['b' => 'good']));
 
+try
+{
+    var_dump($rcF->newInstanceFromData(['a' => 123, 'b' => 'first'], ['b' => 'second']));
+    echo "you should not see this\n";
+}
+catch(Throwable $e)
+{
+    echo "Exception: " . $e->getMessage() . "\n";
+}
+
 // readonly property set in the constructor
 try
 {
@@ -199,6 +209,7 @@ object(F)#%d (2) {
   ["b"]=>
   string(4) "good"
 }
+Exception: Cannot modify readonly property F::$b
 Exception: Cannot modify readonly property G::$b
 object(H)#%d (1) {
   ["a"]=>
