@@ -34,13 +34,15 @@
 
 #define MYSQLND_ASSEMBLED_PACKET_MAX_SIZE 3UL*1024UL*1024UL*1024UL
 
-#define MYSQLND_DEFAULT_AUTH_PROTOCOL "mysql_native_password"
+#define MYSQLND_DEFAULT_AUTH_PROTOCOL			"mysql_native_password"
+#define MYSQLND_CLEAR_PASSWORD_AUTH_PROTOCOL	"mysql_clear_password"
 
 #define MYSQLND_ERRMSG_SIZE			512
 #define MYSQLND_SQLSTATE_LENGTH		5
 #define MYSQLND_SQLSTATE_NULL		"00000"
 
 #define MYSQLND_MAX_ALLOWED_USER_LEN	252		/* 63 char * 4byte . MySQL supports now only 32 char, but let it be forward compatible */
+#define MYSQLND_MAX_ALLOWED_AUTH_LEN	4096	/* This would be a very large token! */
 #define MYSQLND_MAX_ALLOWED_DB_LEN		1024	/* 256 char * 4byte. MySQL supports now only 64 char in the tables, but on the FS could be different. Forward compatible. */
 
 #define MYSQLND_NET_CMD_BUFFER_MIN_SIZE			4096
@@ -102,6 +104,10 @@
 #define CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS		(1UL << 22) /* Don't close the connection for a connection with expired password. */
 #define CLIENT_SESSION_TRACK					(1UL << 23) /* Extended OK */
 /*
+  This is a mysqlnd extension. CLIENT_IGNORE_SIGPIPE is not used anyway. We will reuse it for our case and translate it to forcing the mysql_clear_password protocol
+*/
+#define CLIENT_SEND_CLEAR_PASSWORD		CLIENT_IGNORE_SIGPIPE /* Force plaintext password */
+/*
   This is a mysqlnd extension. CLIENT_ODBC is not used anyway. We will reuse it for our case and translate it to not using SSL peer verification
 */
 #define CLIENT_SSL_DONT_VERIFY_SERVER_CERT	CLIENT_ODBC
@@ -110,7 +116,8 @@
 
 #define MYSQLND_CAPABILITIES (CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS | \
 				CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION | \
-				CLIENT_MULTI_RESULTS  | CLIENT_LOCAL_FILES | CLIENT_PLUGIN_AUTH)
+				CLIENT_MULTI_RESULTS  | CLIENT_LOCAL_FILES | CLIENT_PLUGIN_AUTH | \
+				CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA)
 
 #define MYSQLND_PROTOCOL_FLAG_USE_COMPRESSION 1
 
