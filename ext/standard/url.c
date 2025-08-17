@@ -47,17 +47,6 @@ PHPAPI void php_url_free(php_url *theurl)
 }
 /* }}} */
 
-static void php_str_to_utf8(zend_string *str)
-{
-	const unsigned char *s = (const unsigned char *)ZSTR_VAL(str);
-    const unsigned char *e = s + ZSTR_LEN(str);
-    while (s < e) {
-        if (*s & 0x80) {
-            return;
-        }
-        s++;
-    }
-}
 
 PHPAPI php_url *php_url_parse(char const *str)
 {
@@ -116,7 +105,6 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 
 		if (e + 1 == ue) { /* only scheme is available */
 			ret->scheme = zend_string_init(s, (e - s), 0);
-			php_str_to_utf8(ret->scheme);
 			return ret;
 		}
 
@@ -138,13 +126,11 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			}
 
 			ret->scheme = zend_string_init(s, (e-s), 0);
-			php_str_to_utf8(ret->scheme);
 
 			s = e + 1;
 			goto just_path;
 		} else {
 			ret->scheme = zend_string_init(s, (e-s), 0);
-			php_str_to_utf8(ret->scheme);
 
 			if (e + 2 < ue && *(e + 2) == '/') {
 				s = e + 3;
@@ -210,14 +196,11 @@ parse_host:
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
 		if ((pp = memchr(s, ':', (p-s)))) {
 			ret->user = zend_string_init(s, (pp-s), 0);
-			php_str_to_utf8(ret->user);
 
 			pp++;
 			ret->pass = zend_string_init(pp, (p-pp), 0);
-			php_str_to_utf8(ret->pass);
 		} else {
 			ret->user = zend_string_init(s, (p-s), 0);
-			php_str_to_utf8(ret->user);
 		}
 
 		s = p + 1;
@@ -266,7 +249,6 @@ parse_host:
 	}
 
 	ret->host = zend_string_init(s, (p-s), 0);
-	php_str_to_utf8(ret->host);
 
 	if (e == ue) {
 		return ret;
@@ -282,7 +264,6 @@ parse_host:
 		p++;
 		if (p < e) {
 			ret->fragment = zend_string_init(p, (e - p), 0);
-			php_str_to_utf8(ret->fragment);
 		} else {
 			ret->fragment = ZSTR_EMPTY_ALLOC();
 		}
@@ -294,7 +275,6 @@ parse_host:
 		p++;
 		if (p < e) {
 			ret->query = zend_string_init(p, (e - p), 0);
-			php_str_to_utf8(ret->query);
 		} else {
 			ret->query = ZSTR_EMPTY_ALLOC();
 		}
@@ -303,7 +283,6 @@ parse_host:
 
 	if (s < e || s == ue) {
 		ret->path = zend_string_init(s, (e - s), 0);
-		php_str_to_utf8(ret->path);
 	}
 
 	return ret;
