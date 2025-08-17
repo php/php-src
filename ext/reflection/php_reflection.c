@@ -7321,12 +7321,6 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
-	zend_attribute *delayed_target_validation = zend_get_attribute_str(
-		attr->attributes,
-		"delayedtargetvalidation",
-		strlen("delayedtargetvalidation")
-	);
-
 	/* This code can be reached under one of three possible conditions:
 	 * - the attribute is an internal attribute, and it had the target and
 	 *   and repetition validated already
@@ -7360,15 +7354,23 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
-	/* Report the delayed validator error for internal attributes */
-	if (delayed_target_validation && ce->type == ZEND_INTERNAL_CLASS) {
-		zend_string *error = attr->data->validation_error;
-		if (error != NULL) {
-			zend_throw_exception(zend_ce_error, ZSTR_VAL(error), 0);
-			RETURN_THROWS();
-		}
-	} else {
-		ZEND_ASSERT(attr->data->validation_error == NULL);
+	if (attr->data->validation_error != NULL) {
+		/* Delayed validation errors should only be set for internal attributes. */
+		ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
+		/* Delayed validation errors should only be set when
+		* #[\DelayedTargetValidation] is used. Searching for the attribute is
+		* more expensive than just an assertion and so we don't worry about it
+		* for non-debug builds. See discussion on GH-18817. */
+#if ZEND_DEBUG
+		zend_attribute *delayed_target_validation = zend_get_attribute_str(
+			attr->attributes,
+			"delayedtargetvalidation",
+			strlen("delayedtargetvalidation")
+		);
+		ZEND_ASSERT(delayed_target_validation != NULL);
+#endif
+		zend_throw_exception(zend_ce_error, ZSTR_VAL(attr->data->validation_error), 0);
+		RETURN_THROWS();
 	}
 
 	/* Repetition validation is done even if #[DelayedTargetValidation] is used
