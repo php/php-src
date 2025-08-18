@@ -690,14 +690,6 @@ void odbc_bindcols(odbc_result *result)
 			case SQL_WLONGVARCHAR:
 				result->values[i].value = NULL;
 				break;
-
-#ifdef HAVE_ADABAS
-			case SQL_TIMESTAMP:
-				result->values[i].value = (char *)emalloc(27);
-				SQLBindCol(result->stmt, (SQLUSMALLINT)(i+1), SQL_C_CHAR, result->values[i].value,
-							27, &result->values[i].vallen);
-				break;
-#endif /* HAVE_ADABAS */
 			case SQL_CHAR:
 			case SQL_VARCHAR:
 			case SQL_WCHAR:
