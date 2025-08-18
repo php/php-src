@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
     triggers "Constant already defined" warning). (ilutov)
 
+- Opcache:
+  . Fixed bug GH-19493 (JIT variable not stored before YIELD). (Arnaud)
+
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
