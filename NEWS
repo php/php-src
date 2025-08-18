@@ -58,8 +58,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-19476 (pipe operator fails to correctly handle returning
     by reference). (alexandre-daubois)
   . The report_memleaks INI directive has been deprecated. (alexandre-daubois)
-  . Constant redeclaration is deprecated and this behavior will trigger an
-    error in PHP 9. (alexandre-daubois)
+  . Constant redeclaration has been deprecated. (alexandre-daubois)
   . Fixed OSS-Fuzz #439125710 (Pipe cannot be used in write context).
     (nielsdos)
   . Added support for configuring the URI parser for the FTP/FTPS as well as
