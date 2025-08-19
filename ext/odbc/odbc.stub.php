@@ -344,11 +344,9 @@ namespace {
     /** @alias odbc_exec */
     function odbc_do(Odbc\Connection $odbc, string $query): Odbc\Result|false {}
 
-#ifdef PHP_ODBC_HAVE_FETCH_HASH
     function odbc_fetch_object(Odbc\Result $statement, ?int $row = null): stdClass|false {}
 
     function odbc_fetch_array(Odbc\Result $statement, ?int $row = null): array|false {}
-#endif
 
     /**
      * @param array $array
