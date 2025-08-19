@@ -1,5 +1,9 @@
 --TEST--
-Deprecated INI directive report_memleaks warning
+Deprecated INI directive report_memleaks warning (debug build only)
+--SKIPIF--
+<?php
+if (!ZEND_DEBUG_BUILD) die("skip requires debug build");
+?>
 --INI--
 report_memleaks=0
 --FILE--

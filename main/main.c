@@ -703,9 +703,11 @@ static PHP_INI_MH(OnUpdateReportMemleaks)
 	bool *p = (bool *) ZEND_INI_GET_ADDR();
 	bool new_bool_value = zend_ini_parse_bool(new_value);
 
+#if ZEND_DEBUG
 	if (!new_bool_value) {
 		php_error_docref(NULL, E_DEPRECATED, "Directive 'report_memleaks' is deprecated");
 	}
+#endif
 
 	*p = new_bool_value;
 	return SUCCESS;
