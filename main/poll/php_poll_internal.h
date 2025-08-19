@@ -14,14 +14,6 @@
 
 #include "php_poll.h"
 
-/* Poll event structure */
-struct php_poll_event {
-	int fd; /* File descriptor */
-	uint32_t events; /* Requested events */
-	uint32_t revents; /* Returned events */
-	void *data; /* User data pointer */
-};
-
 /* FD entry for tracking state */
 struct php_poll_fd_entry {
 	int fd;
