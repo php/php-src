@@ -29,10 +29,10 @@ var_dump(json_last_error(), json_last_error_msg());
 ?>
 --EXPECT--
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(73) "Malformed UTF-8 characters, possibly incorrectly encoded near character 0"
