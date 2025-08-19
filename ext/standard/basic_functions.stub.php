@@ -3376,6 +3376,21 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
+function stream_poll_create(?int $max_events = null, int $backend = STREAM_POLL_BACKEND_AUTO): StreamPollContext {}
+
+/** @param resource $stream */
+function stream_poll_add(StreamPollContext $poll_ctx, $stream, int $events, mixed $data = null): void {}
+
+/** @param resource $stream */
+function stream_poll_modify(StreamPollContext $poll_ctx, $stream, int $events, mixed $data = null): void {}
+
+/** @param resource $stream */
+function stream_poll_remove(StreamPollContext $poll_ctx, $stream): void {}
+
+function stream_poll_wait(StreamPollContext $poll_ctx, int $timeout = -1): array {}
+
+function stream_poll_backend_name(StreamPollContext $poll_ctx): string {}
+
 function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
 
 /**

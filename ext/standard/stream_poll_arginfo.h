@@ -1,54 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: acb9c32baff24c8f6ad08dd2290ce0170fb9b956 */
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_poll_create, 0, 0, StreamPollContext, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, max_events, IS_LONG, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, backend, IS_LONG, 0, "STREAM_POLL_BACKEND_AUTO")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_add, 0, 3, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO(0, poll_ctx, StreamPollContext, 0)
-	ZEND_ARG_INFO(0, stream)
-	ZEND_ARG_TYPE_INFO(0, events, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_MIXED, 0, "null")
-ZEND_END_ARG_INFO()
-
-#define arginfo_stream_poll_modify arginfo_stream_poll_add
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_remove, 0, 2, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO(0, poll_ctx, StreamPollContext, 0)
-	ZEND_ARG_INFO(0, stream)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_wait, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO(0, poll_ctx, StreamPollContext, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_LONG, 0, "-1")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_backend_name, 0, 1, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO(0, poll_ctx, StreamPollContext, 0)
-ZEND_END_ARG_INFO()
+ * Stub hash: adcf3f025228764c97ec58f18c44b14ead8d2467 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_StreamPollContext___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_FUNCTION(stream_poll_create);
-ZEND_FUNCTION(stream_poll_add);
-ZEND_FUNCTION(stream_poll_modify);
-ZEND_FUNCTION(stream_poll_remove);
-ZEND_FUNCTION(stream_poll_wait);
-ZEND_FUNCTION(stream_poll_backend_name);
 ZEND_METHOD(StreamPollContext, __construct);
-
-static const zend_function_entry ext_functions[] = {
-	ZEND_FE(stream_poll_create, arginfo_stream_poll_create)
-	ZEND_FE(stream_poll_add, arginfo_stream_poll_add)
-	ZEND_FE(stream_poll_modify, arginfo_stream_poll_modify)
-	ZEND_FE(stream_poll_remove, arginfo_stream_poll_remove)
-	ZEND_FE(stream_poll_wait, arginfo_stream_poll_wait)
-	ZEND_FE(stream_poll_backend_name, arginfo_stream_poll_backend_name)
-	ZEND_FE_END
-};
 
 static const zend_function_entry class_StreamPollContext_methods[] = {
 	ZEND_ME(StreamPollContext, __construct, arginfo_class_StreamPollContext___construct, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
