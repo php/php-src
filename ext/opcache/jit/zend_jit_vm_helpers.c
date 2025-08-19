@@ -944,7 +944,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 #ifdef HAVE_GCC_GLOBAL_REGS
 		handler();
 		if (UNEXPECTED(opline == zend_jit_halt_op)) {
-			if (prev_opline->opcode == ZEND_YIELD) {
+			if (prev_opline->opcode == ZEND_YIELD || prev_opline->opcode == ZEND_YIELD_FROM) {
 				stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 			} else {
 				stop = ZEND_JIT_TRACE_STOP_RETURN;
@@ -958,7 +958,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 		rc = handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		if (rc != 0) {
 			if (rc < 0) {
-				if (opline->opcode == ZEND_YIELD) {
+				if (opline->opcode == ZEND_YIELD || opline->opcode == ZEND_YIELD_FROM) {
 					stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 				} else {
 					stop = ZEND_JIT_TRACE_STOP_RETURN;

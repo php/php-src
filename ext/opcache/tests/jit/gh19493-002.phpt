@@ -1,17 +1,17 @@
 --TEST--
-GH-19493: Var not stored before YIELD
+GH-19493 002: Var not stored before YIELD_FROM
 --FILE--
 <?php
 
 function f() {
     $offset = 0;
-    yield true;
+    yield from [true];
     for ($i = 0; $i < 100; $i++) {
         $offset++;
         if ($offset === 99) {
             break;
         }
-        yield true;
+        yield from [true];
     }
     return $offset;
 }
