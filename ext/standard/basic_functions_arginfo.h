@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1a1667a5c59111f096a758d5bb4aa7cf3ec09cfe */
+ * Stub hash: d3ece9dd919739915d607815d70dbbf9c96dd709 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1816,6 +1816,34 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_soundex arginfo_base64_encode
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_poll_create, 0, 0, StreamPollContext, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, max_events, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, backend, IS_LONG, 0, "STREAM_POLL_BACKEND_AUTO")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_add, 0, 3, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, poll_ctx, StreamPollContext, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, events, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_MIXED, 0, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_stream_poll_modify arginfo_stream_poll_add
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_remove, 0, 2, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, poll_ctx, StreamPollContext, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_wait, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, poll_ctx, StreamPollContext, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_backend_name, 0, 1, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, poll_ctx, StreamPollContext, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
@@ -2793,6 +2821,12 @@ ZEND_FUNCTION(proc_get_status);
 ZEND_FUNCTION(quoted_printable_decode);
 ZEND_FUNCTION(quoted_printable_encode);
 ZEND_FUNCTION(soundex);
+ZEND_FUNCTION(stream_poll_create);
+ZEND_FUNCTION(stream_poll_add);
+ZEND_FUNCTION(stream_poll_modify);
+ZEND_FUNCTION(stream_poll_remove);
+ZEND_FUNCTION(stream_poll_wait);
+ZEND_FUNCTION(stream_poll_backend_name);
 ZEND_FUNCTION(stream_select);
 ZEND_FUNCTION(stream_context_create);
 ZEND_FUNCTION(stream_context_set_params);
@@ -3398,6 +3432,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("quoted_printable_decode", zif_quoted_printable_decode, arginfo_quoted_printable_decode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("quoted_printable_encode", zif_quoted_printable_encode, arginfo_quoted_printable_encode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(soundex, arginfo_soundex)
+	ZEND_FE(stream_poll_create, arginfo_stream_poll_create)
+	ZEND_FE(stream_poll_add, arginfo_stream_poll_add)
+	ZEND_FE(stream_poll_modify, arginfo_stream_poll_modify)
+	ZEND_FE(stream_poll_remove, arginfo_stream_poll_remove)
+	ZEND_FE(stream_poll_wait, arginfo_stream_poll_wait)
+	ZEND_FE(stream_poll_backend_name, arginfo_stream_poll_backend_name)
 	ZEND_FE(stream_select, arginfo_stream_select)
 	ZEND_FE(stream_context_create, arginfo_stream_context_create)
 	ZEND_FE(stream_context_set_params, arginfo_stream_context_set_params)
