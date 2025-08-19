@@ -52,6 +52,14 @@ typedef enum {
 
 /* clang-format on */
 
+/* Poll event structure */
+struct php_poll_event {
+	int fd; /* File descriptor */
+	uint32_t events; /* Requested events */
+	uint32_t revents; /* Returned events */
+	void *data; /* User data pointer */
+};
+
 /* Forward declarations */
 typedef struct php_poll_ctx php_poll_ctx;
 typedef struct php_poll_fd_entry php_poll_fd_entry;
