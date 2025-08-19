@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1ac486a9c572384af6b7134cd4116989b596cada */
+ * Stub hash: f9ba28767b256dbcea087a65aa4bb5f5b509d6f3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -37,7 +37,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_odbc_do arginfo_odbc_prepare
 
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row, IS_LONG, 1, "null")
@@ -47,7 +46,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_fetch_array, 0, 1, MAY_BE_A
 	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, row, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_fetch_into, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, statement, Odbc\\Result, 0)
@@ -242,10 +240,8 @@ ZEND_FUNCTION(odbc_execute);
 ZEND_FUNCTION(odbc_cursor);
 ZEND_FUNCTION(odbc_data_source);
 ZEND_FUNCTION(odbc_exec);
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 ZEND_FUNCTION(odbc_fetch_object);
 ZEND_FUNCTION(odbc_fetch_array);
-#endif
 ZEND_FUNCTION(odbc_fetch_into);
 ZEND_FUNCTION(odbc_fetch_row);
 ZEND_FUNCTION(odbc_result);
@@ -293,10 +289,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_data_source, arginfo_odbc_data_source)
 	ZEND_FE(odbc_exec, arginfo_odbc_exec)
 	ZEND_RAW_FENTRY("odbc_do", zif_odbc_exec, arginfo_odbc_do, 0, NULL, NULL)
-#if defined(PHP_ODBC_HAVE_FETCH_HASH)
 	ZEND_FE(odbc_fetch_object, arginfo_odbc_fetch_object)
 	ZEND_FE(odbc_fetch_array, arginfo_odbc_fetch_array)
-#endif
 	ZEND_FE(odbc_fetch_into, arginfo_odbc_fetch_into)
 	ZEND_FE(odbc_fetch_row, arginfo_odbc_fetch_row)
 	ZEND_FE(odbc_result, arginfo_odbc_result)
