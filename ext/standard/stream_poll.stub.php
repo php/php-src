@@ -76,6 +76,7 @@ const STREAM_POLL_BACKEND_IOCP = UNKNOWN;
 
 final class StreamPollContext
 {
+    private final function __construct() {}
 }
 
 final class StreamPollEvent
