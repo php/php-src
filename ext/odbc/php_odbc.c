@@ -1306,7 +1306,6 @@ PHP_FUNCTION(odbc_exec)
 }
 /* }}} */
 
-#ifdef PHP_ODBC_HAVE_FETCH_HASH
 #define ODBC_NUM  1
 #define ODBC_OBJECT  2
 
@@ -1458,7 +1457,6 @@ PHP_FUNCTION(odbc_fetch_array)
 	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
 }
 /* }}} */
-#endif
 
 /* {{{ Fetch one result row into an array */
 PHP_FUNCTION(odbc_fetch_into)
