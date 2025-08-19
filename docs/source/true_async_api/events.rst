@@ -162,7 +162,7 @@ extends ``zend_async_timer_event_t`` as follows:
 
 Every extended event defines its own ``start``, ``stop`` and ``dispose`` functions. The dispose
 handler must release all resources associated with the event and is called when the reference count
-reaches ``1``. It is common to stop the event first and then close the underlying libuv handle so
+is ``1``. It is common to stop the event first and then close the underlying libuv handle so
 that memory gets freed in the ``uv_close`` callback.
 
 .. code:: c
