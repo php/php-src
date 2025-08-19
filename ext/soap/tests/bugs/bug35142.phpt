@@ -25,7 +25,7 @@ class TestSoapClient extends SoapClient {
     $this->server->addFunction('PostEvents');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): string {
+  function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): string {
     echo "$request\n";
     ob_start();
     $this->server->handle($request);
