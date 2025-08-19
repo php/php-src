@@ -39,7 +39,7 @@ typedef struct php_uri {
  * @param uri_handler The URI handler
  * @return SUCCESS in case of success, FAILURE otherwise
  */
-PHPAPI zend_result uri_handler_register(const uri_handler_t *uri_handler);
+PHPAPI zend_result php_uri_handler_register(const uri_handler_t *uri_handler);
 
 /**
  * Returns the registered URI handler based on uri_handler_name.

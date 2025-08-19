@@ -1015,7 +1015,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_implementation_set_object_handlers(ze
 	object_handlers->clone_obj = uri_clone_obj_handler;
 }
 
-PHPAPI zend_result uri_handler_register(const uri_handler_t *uri_handler)
+PHPAPI zend_result php_uri_handler_register(const uri_handler_t *uri_handler)
 {
 	zend_string *key = zend_string_init_interned(uri_handler->name, strlen(uri_handler->name), true);
 
@@ -1049,11 +1049,11 @@ static PHP_MINIT_FUNCTION(uri)
 
 	zend_hash_init(&uri_handlers, 4, NULL, NULL, true);
 
-	if (uri_handler_register(&uriparser_uri_handler) == FAILURE) {
+	if (php_uri_handler_register(&uriparser_uri_handler) == FAILURE) {
 		return FAILURE;
 	}
 
-	if (uri_handler_register(&lexbor_uri_handler) == FAILURE) {
+	if (php_uri_handler_register(&lexbor_uri_handler) == FAILURE) {
 		return FAILURE;
 	}
 

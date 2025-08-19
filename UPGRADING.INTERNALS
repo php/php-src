@@ -85,6 +85,9 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . ext/standard/php_smart_string.h and ext/standard/php_smart_string_public.h
     were removed. Use the corresponding headers in Zend/ instead.
 
+- URI
+  . Internal API for URI handling was added via the php_uri_*() functions.
+
 ========================
 2. Build system changes
 ========================

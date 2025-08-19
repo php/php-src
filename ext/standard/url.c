@@ -924,5 +924,5 @@ no_name_header:
 
 PHP_MINIT_FUNCTION(url)
 {
-	return uri_handler_register(&parse_url_uri_handler);
+	return php_uri_handler_register(&parse_url_uri_handler);
 }

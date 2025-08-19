@@ -12,6 +12,14 @@ PHP                                                                        NEWS
     error in PHP 9. (alexandre-daubois)
   . Fixed OSS-Fuzz #439125710 (Pipe cannot be used in write context).
     (nielsdos)
+  . Added support for configuring the URI parser for the FTP/FTPS as well as
+    the SSL/TLS stream wrappers as described in
+    https://wiki.php.net/rfc/url_parsing_api#plugability. (kocsismate)
+
+- Filter:
+  . Added support for configuring the URI parser for FILTER_VALIDATE_URL
+    as described in https://wiki.php.net/rfc/url_parsing_api#plugability.
+    (kocsismate)
 
 - ODBC:
   . Remove ODBCVER and assume ODBC 3.5. (Calvin Buckley)
@@ -22,6 +30,11 @@ PHP                                                                        NEWS
 
 - Session:
   . Added support for partitioned cookies. (nielsdos)
+
+- SOAP:
+  . Added support for configuring the URI parser for SoapClient::_doRequest()
+    as described in https://wiki.php.net/rfc/url_parsing_api#plugability.
+    (kocsismate)
 
 - SPL:
   . Deprecate ArrayObject and ArrayIterator with objects. (Girgias)
