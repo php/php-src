@@ -476,8 +476,8 @@ period and a space).
 Entries MUST start with a capital and end with a period (`.`). The period goes
 outside of the `{issue-description}`.
 
-Each entry SHOULD be followed by the name of the contributor, or their GitHub
-handle if they so choose.
+Each entry SHOULD be followed by the name of the contributor, their php.net
+account name, or their GitHub handle if they so choose.
 
 Entries MUST be wrapped at 80 characters.
 
@@ -489,6 +489,11 @@ Bug fix entries SHOULD be clustered together, and ordered according to their
 issue number. The `{issue-description}` SHOULD represent what the actual bug
 fix is about, and not necessarily what the user reported. Edit the description
 in the GitHub ticket to match.
+
+On the rare occasion where a bug from our deprecated bug system is fixed, the
+entry MUST be formatted as:
+
+	Fixed bug #{number} ({issue-description}). ({contributor})
 
 An example:
 
@@ -515,16 +520,19 @@ An example:
 Depending on what sort of fix it is, or where in the release cycle we are,
 different NEWS files must be updated.
 
-*Security fixes*: In the lowest security-supported branch, and in each newer
-branch, except for master.
+*Security fixes*: In the lowest security-supported branch which received the
+security fix, and in each newer branch, except for master unless alpha releases
+have been tagged, and a release branch has not been created.
 
 *Bug fixes*: In the lowest supported branch, and in each newer branch, except
-for master.
+for master unless alpha releases have been tagged, and a release branch has not
+been created.
 
 *Feature additions*: In master only.
 
-If for some reason a feature is introduced in a branch lower than master (this
-isn't strictly allowed), then the entry must also be in master.
+If for some reason a feature is introduced in a branch lower than master,
+although this is strictly prohibited by other policies, then the entry must
+also be in master.
 
 ## Thanks
 
