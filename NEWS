@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - ODBC:
   . Remove ODBCVER and assume ODBC 3.5. (Calvin Buckley)
 
+- Opcache:
+  . Fixed bug GH-19493 (JIT variable not stored before YIELD). (Arnaud)
+
 - OpenSSL:
   . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
     (Jakub Zelenka)
