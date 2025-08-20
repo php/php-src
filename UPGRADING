@@ -476,6 +476,21 @@ PHP 8.5 UPGRADE NOTES
         PDO::SQLITE_OPEN_READWRITE => Pdo\Sqlite::OPEN_READWRITE
         PDO::SQLITE_OPEN_CREATE => Pdo\Sqlite::OPEN_CREATE
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_driver_specific_pdo_constants_and_methods
+  . Driver specific methods in the PDO class have been deprecated.
+    List of affected methods and their replacement:
+        PDO::pgsqlCopyFromArray() => Pdo\Pgsql::copyFromArray()
+        PDO::pgsqlCopyFromFile() => Pdo\Pgsql::copyFromFile()
+        PDO::pgsqlCopyToArray() => Pdo\Pgsql::copyToArray()
+        PDO::pgsqlCopyToFile() => Pdo\Pgsql::copyToFile()
+        PDO::pgsqlGetNotify() => Pdo\Pgsql::getNotify()
+        PDO::pgsqlGetPid() => Pdo\Pgsql::getPid()
+        PDO::pgsqlLOBCreate() => Pdo\Pgsql::lobCreate()
+        PDO::pgsqlLOBOpen() => Pdo\Pgsql::lobOpen()
+        PDO::pgsqlLOBUnlink() => Pdo\Pgsql::lobUnlink()
+        PDO::sqliteCreateAggregate() => Pdo\Sqlite::createAggregate()
+        PDO::sqliteCreateCollation() => Pdo\Sqlite::createCollation()
+        PDO::sqliteCreateFunction() => Pdo\Sqlite::createFunction()
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_driver_specific_pdo_constants_and_methods
 
 - Reflection:
   . The setAccessible() methods of various Reflection objects have been

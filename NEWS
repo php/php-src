@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Upgraded to pcre2lib from 10.45 to 10.46. (nielsdos)
 
+- PDO:
+  . Driver specific methods in the PDO class are now deprecated. (Arnaud)
+
 - Session:
   . Fix RC violation of session SID constant deprecation attribute. (ilutov)
 

@@ -20,7 +20,8 @@ foreach ($db->query('SELECT testing(name) FROM test_pdo_sqlite_createfunction') 
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
 array(2) {
   ["testing(name)"]=>
   string(3) "php"
