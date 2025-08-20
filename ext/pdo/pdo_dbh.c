@@ -1318,6 +1318,9 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 	if (ZEND_MAP_PTR(func->common.run_time_cache)) {
 		efree(ZEND_MAP_PTR(func->common.run_time_cache));
 	}
+	if (func->common.attributes) {
+		zend_hash_release(func->common.attributes);
+	}
 	efree(func);
 }
 /* }}} */
@@ -1330,9 +1333,38 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 	if (ZEND_MAP_PTR(func->common.run_time_cache)) {
 		pefree(ZEND_MAP_PTR(func->common.run_time_cache), 1);
 	}
+	if (func->common.attributes) {
+		zend_hash_release(func->common.attributes);
+	}
 	pefree(func, 1);
 }
 /* }}} */
+
+/* We can not add #[Deprecated] attributes in @generate-function-entries stubs,
+ * and PDO drivers have no way to add them either, so we hard-code deprecation
+ * info here and add the attribute manually in pdo_hash_methods() */
+struct driver_specific_method_deprecation {
+	const char *old_name;
+	const char *new_name;
+};
+
+/* Methods deprecated in https://wiki.php.net/rfc/deprecations_php_8_5
+ * "Deprecate driver specific PDO constants and methods" */
+static const struct driver_specific_method_deprecation driver_specific_method_deprecations[] = {
+	{"pgsqlCopyFromArray",      "Pdo\\Pgsql::copyFromArray"},
+	{"pgsqlCopyFromFile",       "Pdo\\Pgsql::copyFromFile"},
+	{"pgsqlCopyToArray",        "Pdo\\Pgsql::copyToArray"},
+	{"pgsqlCopyToFile",         "Pdo\\Pgsql::copyToFile"},
+	{"pgsqlGetNotify",          "Pdo\\Pgsql::getNotify"},
+	{"pgsqlGetPid",             "Pdo\\Pgsql::getPid"},
+	{"pgsqlLOBCreate",          "Pdo\\Pgsql::lobCreate"},
+	{"pgsqlLOBOpen",            "Pdo\\Pgsql::lobOpen"},
+	{"pgsqlLOBUnlink",          "Pdo\\Pgsql::lobUnlink"},
+	{"sqliteCreateAggregate",   "Pdo\\Sqlite::createAggregate"},
+	{"sqliteCreateCollation",   "Pdo\\Sqlite::createCollation"},
+	{"sqliteCreateFunction",    "Pdo\\Sqlite::createFunction"},
+	{NULL,                      NULL},
+};
 
 /* {{{ overloaded object handlers for PDO class */
 bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
@@ -1371,6 +1403,7 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		} else {
 			func.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_NEVER_CACHE;
 		}
+		func.fn_flags |= ZEND_ACC_DEPRECATED;
 		func.doc_comment = NULL;
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
@@ -1399,8 +1432,33 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		namelen = strlen(funcs->fname);
 		lc_name = emalloc(namelen+1);
 		zend_str_tolower_copy(lc_name, funcs->fname, namelen);
-		zend_hash_str_add_mem(dbh->cls_methods[kind], lc_name, namelen, &func, sizeof(func));
+		zend_function *func_p = zend_hash_str_add_mem(dbh->cls_methods[kind], lc_name, namelen, &func, sizeof(func));
 		efree(lc_name);
+
+		const char *new_name = NULL;
+		for (const struct driver_specific_method_deprecation *d = driver_specific_method_deprecations;
+				d->old_name; d++) {
+			if (strcmp(d->old_name, funcs->fname) == 0) {
+				new_name = d->new_name;
+				break;
+			}
+		}
+		if (new_name) {
+			zend_attribute *attr = zend_add_function_attribute(func_p,
+					ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+
+			attr->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+			ZVAL_STR(&attr->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+
+			char *message;
+			size_t len = zend_spprintf(&message, 0, "use %s() instead", new_name);
+			zend_string *message_str = zend_string_init_interned(message, len, true);
+			efree(message);
+
+			attr->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+			ZVAL_STR(&attr->args[1].value, message_str);
+		}
+
 		funcs++;
 	}
 

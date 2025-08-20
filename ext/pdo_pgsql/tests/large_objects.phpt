@@ -83,7 +83,10 @@ require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->exec('DROP TABLE test_large_objects');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::pgsqlLOBCreate() is deprecated since 8.5, use Pdo\Pgsql::lobCreate() instead in %s on line %d
+
+Deprecated: Method PDO::pgsqlLOBOpen() is deprecated since 8.5, use Pdo\Pgsql::lobOpen() instead in %s on line %d
 Fetching:
 int(1)
 string(11) "Hello dude
@@ -97,3 +100,5 @@ Fetching NO bind:
 int(1)
 bool(true)
 Fetched!
+
+Deprecated: Method PDO::pgsqlLOBUnlink() is deprecated since 8.5, use Pdo\Pgsql::lobUnlink() instead in %s on line %d
