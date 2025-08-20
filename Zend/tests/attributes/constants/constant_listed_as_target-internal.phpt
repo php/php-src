@@ -3,7 +3,6 @@ Constants listed in valid targets when used wrong (internal attribute)
 --FILE--
 <?php
 
-#[Deprecated]
 function demo(
 	#[Deprecated] $v
 ) {}
