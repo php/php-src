@@ -70,7 +70,7 @@ uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_ent
 }
 
 static void validate_allow_dynamic_properties(
-		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+		zend_attribute *attr, uint32_t target_type, zend_class_entry *scope, void *target, uint32_t offset)
 {
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
 		zend_error_noreturn(E_ERROR, "Cannot apply #[\\AllowDynamicProperties] to trait %s",
@@ -96,7 +96,7 @@ static void validate_allow_dynamic_properties(
 }
 
 static void validate_attribute(
-	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+	zend_attribute *attr, uint32_t target_type, zend_class_entry *scope, void *target, uint32_t offset)
 {
 	const char *msg = NULL;
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
@@ -111,6 +111,51 @@ static void validate_attribute(
 	if (msg != NULL) {
 		zend_error_noreturn(E_ERROR, msg, ZSTR_VAL(scope->name));
 	}
+}
+
+static void validate_override(
+	zend_attribute *attr, uint32_t target_type, zend_class_entry *scope, void *target, uint32_t offset)
+{
+	if (target_type & ZEND_ATTRIBUTE_TARGET_METHOD) {
+		zend_op_array *op_array = target;
+		op_array->fn_flags |= ZEND_ACC_OVERRIDE;
+	} else {
+		ZEND_ASSERT(target_type & ZEND_ATTRIBUTE_TARGET_PROPERTY);
+		zend_property_info *prop_info = target;
+		prop_info->flags |= ZEND_ACC_OVERRIDE;
+	}
+}
+
+static void validate_deprecated(
+	zend_attribute *attr, uint32_t target_type, zend_class_entry *scope, void *target, uint32_t offset)
+{
+	if (target_type & (ZEND_ATTRIBUTE_TARGET_FUNCTION|ZEND_ATTRIBUTE_TARGET_METHOD)) {
+		zend_op_array *op_array = target;
+		op_array->fn_flags |= ZEND_ACC_DEPRECATED;
+	} else if (target_type & (ZEND_ATTRIBUTE_TARGET_CLASS_CONST)) {
+		zend_class_constant *c = target;
+		ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
+		/* For deprecated constants, we need to flag the zval for recursion
+		 * detection. Make sure the zval is separated out of shm. */
+		scope->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+		scope->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+	} else {
+		ZEND_ASSERT(target_type & ZEND_ATTRIBUTE_TARGET_CONST);
+		zend_constant *c = target;
+		ZEND_CONSTANT_SET_FLAGS(
+			c,
+			ZEND_CONSTANT_FLAGS(c) | CONST_DEPRECATED,
+			ZEND_CONSTANT_MODULE_NUMBER(c)
+		);
+	}
+}
+
+static void validate_no_discard(
+	zend_attribute *attr, uint32_t target_type, zend_class_entry *scope, void *target, uint32_t offset)
+{
+	ZEND_ASSERT(target_type & (ZEND_ATTRIBUTE_TARGET_FUNCTION|ZEND_ATTRIBUTE_TARGET_METHOD));
+	zend_op_array *op_array = target;
+	op_array->fn_flags |= ZEND_ACC_NODISCARD;
 }
 
 ZEND_METHOD(Attribute, __construct)
@@ -560,13 +605,16 @@ void zend_register_attribute_ce(void)
 	zend_ce_sensitive_parameter_value->default_object_handlers = &attributes_object_handlers_sensitive_parameter_value;
 
 	zend_ce_override = register_class_Override();
-	zend_mark_internal_attribute(zend_ce_override);
+	attr = zend_mark_internal_attribute(zend_ce_override);
+	attr->validator = validate_override;
 
 	zend_ce_deprecated = register_class_Deprecated();
 	attr = zend_mark_internal_attribute(zend_ce_deprecated);
+	attr->validator = validate_deprecated;
 
 	zend_ce_nodiscard = register_class_NoDiscard();
 	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
+	attr->validator = validate_no_discard;
 }
 
 void zend_attributes_shutdown(void)
