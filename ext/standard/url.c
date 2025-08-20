@@ -19,6 +19,7 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <wchar.h>
+#include <wctype.h>
 
 #include "php.h"
 
