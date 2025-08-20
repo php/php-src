@@ -18,6 +18,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
+#include <wchar.h>
 
 #include "php.h"
 
@@ -46,20 +47,22 @@ PHPAPI void php_url_free(php_url *theurl)
 	efree(theurl);
 }
 /* }}} */
-
+ 
 static void php_replace_controlchars(char *str, size_t len)
 {
-	unsigned char *s = (unsigned char *)str;
-	unsigned char *e = (unsigned char *)str + len;
+	assert(str != NULL);
 
-	ZEND_ASSERT(str != NULL);
+	wchar_t wbuf[len];
+	memset(wbuf, 0, sizeof(wbuf));
+    size_t wlen = mbstowcs(wbuf, str, len);
 
-	while (s < e) {
-		if (*s <= 0x1F || *s == 0x7F) {   
-			*s = '_'; 
-		}
-		s++;
-	}
+    for (size_t i = 0; i < wlen; i++) {
+        if (iswcntrl(wbuf[i])) {
+            wbuf[i] = L'_';
+        }
+    }
+
+    wcstombs(str, wbuf, len);
 }
 
 PHPAPI php_url *php_url_parse(char const *str)
