@@ -508,7 +508,7 @@ An example:
     a non-Generator delegate crashes). (Arnaud)
 
 - OPcache:
-  . Make OPcache non-optional (Arnaud, timwolla)
+  . Make OPcache non-optional. (Arnaud, timwolla)
 
 - OpenSSL:
   . Add $digest_algo parameter to openssl_public_encrypt() and
