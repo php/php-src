@@ -23,9 +23,10 @@
 
 #include "php.h"
 #include "ext/standard/file.h"
-#include "ext/standard/url.h"
+#include "ext/uri/php_uri.h"
 #include "streams/php_streams_int.h"
 #include "zend_smart_str.h"
+#include "zend_exceptions.h"
 #include "php_openssl.h"
 #include "php_openssl_backend.h"
 #include "php_network.h"
@@ -2627,23 +2628,29 @@ static zend_long php_openssl_get_crypto_method(
 /* }}} */
 
 static char *php_openssl_get_url_name(const char *resourcename,
-		size_t resourcenamelen, int is_persistent)  /* {{{ */
+		size_t resourcenamelen, int is_persistent, php_stream_context *context)  /* {{{ */
 {
-	php_url *url;
-
 	if (!resourcename) {
 		return NULL;
 	}
 
-	url = php_url_parse_ex(resourcename, resourcenamelen);
-	if (!url) {
+	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ssl", context);
+	if (uri_handler == NULL) {
+		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
 	}
 
-	if (url->host) {
-		const char * host = ZSTR_VAL(url->host);
-		char * url_name = NULL;
-		size_t len = ZSTR_LEN(url->host);
+	uri_internal_t *internal_uri = php_uri_parse(uri_handler, resourcename, resourcenamelen, true);
+	if (internal_uri == NULL) {
+		return NULL;
+	}
+
+	char * url_name = NULL;
+	zval host_zv;
+	zend_result result = php_uri_get_host(internal_uri, URI_COMPONENT_READ_RAW, &host_zv);
+	if (result == SUCCESS && Z_TYPE(host_zv) == IS_STRING) {
+		const char * host = Z_STRVAL(host_zv);
+		size_t len = Z_STRLEN(host_zv);
 
 		/* skip trailing dots */
 		while (len && host[len-1] == '.') {
@@ -2653,13 +2660,12 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		if (len) {
 			url_name = pestrndup(host, len, is_persistent);
 		}
-
-		php_url_free(url);
-		return url_name;
 	}
 
-	php_url_free(url);
-	return NULL;
+	php_uri_free(internal_uri);
+	zval_ptr_dtor(&host_zv);
+
+	return url_name;
 }
 /* }}} */
 
@@ -2757,7 +2763,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 #endif
 	}
 
-	sslsock->url_name = php_openssl_get_url_name(resourcename, resourcenamelen, !!persistent_id);
+	sslsock->url_name = php_openssl_get_url_name(resourcename, resourcenamelen, !!persistent_id, context);
 
 	return stream;
 }

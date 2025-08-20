@@ -42,6 +42,14 @@ on:
           - "0"
           - "1"
           - "2"
+      run_micro_bench:
+        description: 'Whether to run the micro_bench.php test'
+        required: true
+        default: "0"
+        type: choice
+        options:
+          - "0"
+          - "1"
 permissions:
   contents: read
   pull-requests: write
@@ -59,10 +67,11 @@ jobs:
       COMMIT: ${{ github.sha }}
       BASELINE_COMMIT: "d5f6e56610c729710073350af318c4ea1b292cfe"
       ID: "master"
-      OPCACHE: ${{ inputs.opcache || '1' }}
-      BASELINE_OPCACHE: ${{ inputs.baseline_opcache || '2' }}
-      JIT: ${{ inputs.jit || '1' }}
-      INSTRUCTION_COUNT: ${{ inputs.instruction_count || '0' }}
+      OPCACHE: "1"
+      BASELINE_OPCACHE: "2"
+      JIT: "1"
+      INSTRUCTION_COUNT: "1"
+      RUN_MICRO_BENCH: "0"
       YEAR: ""
     steps:
       - name: Setup benchmark environment
@@ -88,6 +97,12 @@ jobs:
             echo "BASELINE_COMMIT=$BASELINE_COMMIT" >> $GITHUB_ENV
 
             echo "ID=benchmarked" >> $GITHUB_ENV
+
+            echo "OPCACHE=${{ inputs.opcache }}" >> $GITHUB_ENV
+            echo "BASELINE_OPCACHE=${{ inputs.baseline_opcache }}" >> $GITHUB_ENV
+            echo "JIT=${{ inputs.jit }}" >> $GITHUB_ENV
+            echo "INSTRUCTION_COUNT=${{ inputs.instruction_count }}" >> $GITHUB_ENV
+            echo "RUN_MICRO_BENCH=${{ inputs.run_micro_bench }}" >> $GITHUB_ENV
           fi
 
       - name: Install dependencies
@@ -250,7 +265,10 @@ jobs:
           cp ./php-version-benchmarks/config/test/2_symfony_main.ini.dist ./php-version-benchmarks/config/test/2_symfony_main.ini
           cp ./php-version-benchmarks/config/test/4_wordpress.ini.dist ./php-version-benchmarks/config/test/4_wordpress.ini
           cp ./php-version-benchmarks/config/test/5_bench.php.ini.dist ./php-version-benchmarks/config/test/5_bench.php.ini
-          cp ./php-version-benchmarks/config/test/6_micro_bench.php.ini.dist ./php-version-benchmarks/config/test/6_micro_bench.php.ini
+
+          if [ "${{ env.RUN_MICRO_BENCH }}" -eq "1" ]; then
+            cp ./php-version-benchmarks/config/test/6_micro_bench.php.ini.dist ./php-version-benchmarks/config/test/6_micro_bench.php.ini
+          fi
       - name: Run benchmark
         run: ./php-version-benchmarks/benchmark.sh run aws
       - name: Store results

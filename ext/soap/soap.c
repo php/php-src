@@ -233,9 +233,9 @@ static void soap_url_object_free(zend_object *obj)
 {
 	soap_url_object *url_obj = soap_url_object_fetch(obj);
 
-	if (url_obj->url) {
-		php_url_free(url_obj->url);
-		url_obj->url = NULL;
+	if (url_obj->uri) {
+		php_uri_struct_free(url_obj->uri);
+		url_obj->uri = NULL;
 	}
 
 	zend_object_std_dtor(&url_obj->std);
@@ -2784,28 +2784,28 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 /* {{{ SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
-	zend_string *buf;
-	char      *location, *action;
-	size_t     location_size, action_size;
+	zend_string *buf, *location, *uri_parser_class = NULL;
+	char       *action;
+	size_t     action_size;
 	zend_long  version;
 	bool  one_way = 0;
 	zval      *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSsl|bS!",
 	    &buf,
-	    &location, &location_size,
+	    &location,
 	    &action, &action_size,
-	    &version, &one_way) == FAILURE) {
+	    &version, &one_way, &uri_parser_class) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (SOAP_GLOBAL(features) & SOAP_WAIT_ONE_WAY_CALLS) {
 		one_way = 0;
 	}
 	if (one_way) {
-		if (make_http_soap_request(this_ptr, buf, location, action, version, NULL)) {
+		if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_class, NULL)) {
 			RETURN_EMPTY_STRING();
 		}
-	} else if (make_http_soap_request(this_ptr, buf, location, action, version,
+	} else if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_class,
 	    return_value)) {
 		return;
 	}

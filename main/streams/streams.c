@@ -28,6 +28,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
+#include "ext/uri/php_uri.h"
 #include <stddef.h>
 #include <fcntl.h>
 #include "php_streams_int.h"
@@ -2456,6 +2457,24 @@ void php_stream_context_unset_option(php_stream_context *context,
 	zend_hash_str_del(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname));
 }
 /* }}} */
+
+PHPAPI struct uri_handler_t *php_stream_context_get_uri_handler(const char *wrappername, php_stream_context *context)
+{
+	if (context == NULL) {
+		return php_uri_get_handler(NULL);
+	}
+
+	zval *uri_handler_name = php_stream_context_get_option(context, wrappername, "uri_parser_class");
+	if (uri_handler_name == NULL || Z_TYPE_P(uri_handler_name) == IS_NULL) {
+		return php_uri_get_handler(NULL);
+	}
+
+	if (Z_TYPE_P(uri_handler_name) != IS_STRING) {
+		return NULL;
+	}
+
+	return php_uri_get_handler(Z_STR_P(uri_handler_name));
+}
 
 /* {{{ php_stream_dirent_alphasort */
 PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b)
