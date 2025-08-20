@@ -1,932 +1,858 @@
 /*
-   +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Author: Jim Winstead <jimw@php.net>                                  |
-   +----------------------------------------------------------------------+
+ * Copyright (c) Christos Zoulas 2003.
+ * All Rights Reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice immediately at the beginning of the file, without modification,
+ *    this list of conditions, and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  */
+#include "file.h"
 
+#ifndef	lint
+FILE_RCSID("@(#)$File: funcs.c,v 1.142 2023/07/30 14:41:14 christos Exp $")
+#endif	/* lint */
+
+#include "magic.h"
+#include <assert.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <sys/types.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>	/* for pipe2() */
+#endif
+#if defined(HAVE_WCHAR_H)
 #include <wchar.h>
+#endif
+#if defined(HAVE_WCTYPE_H)
 #include <wctype.h>
+#endif
+#include <limits.h>
 
-#include "php.h"
+#ifndef SIZE_MAX
+#define SIZE_MAX	((size_t)~0)
+#endif
 
-#include "url.h"
-#include "file.h"
-#include "zend_simd.h"
-#include "Zend/zend_smart_str.h"
-#include "Zend/zend_exceptions.h"
-#include "ext/uri/php_uri.h"
-
-/* {{{ free_url */
-PHPAPI void php_url_free(php_url *theurl)
+file_protected char *
+file_copystr(char *buf, size_t blen, size_t width, const char *str)
 {
-	if (theurl->scheme)
-		zend_string_release_ex(theurl->scheme, 0);
-	if (theurl->user)
-		zend_string_release_ex(theurl->user, 0);
-	if (theurl->pass)
-		zend_string_release_ex(theurl->pass, 0);
-	if (theurl->host)
-		zend_string_release_ex(theurl->host, 0);
-	if (theurl->path)
-		zend_string_release_ex(theurl->path, 0);
-	if (theurl->query)
-		zend_string_release_ex(theurl->query, 0);
-	if (theurl->fragment)
-		zend_string_release_ex(theurl->fragment, 0);
-	efree(theurl);
-}
-/* }}} */
-
-static void parse_url_free_uri(void *uri)
-{
-	php_url *parse_url_uri = (php_url *) uri;
-
-	php_url_free(parse_url_uri);
+	if (blen == 0)
+		return buf;
+	if (width >= blen)
+		width = blen - 1;
+	memcpy(buf, str, width);
+	buf[width] = '\0';
+	return buf;
 }
 
-static void php_replace_controlchars(char *str, size_t len)
+file_private void
+file_clearbuf(struct magic_set *ms)
 {
-	ZEND_ASSERT(str != NULL);
-
-	wchar_t wbuf[len];
-	memset(wbuf, 0, sizeof(wbuf));
-    size_t wlen = mbstowcs(wbuf, str, len);
-
-    for (size_t i = 0; i < wlen; i++) {
-        if (iswcntrl(wbuf[i])) {
-            wbuf[i] = L'_';
-        }
-    }
-
-    wcstombs(str, wbuf, len);
+	efree(ms->o.buf);
+	ms->o.buf = NULL;
+	ms->o.blen = 0;
 }
 
-PHPAPI php_url *php_url_parse(char const *str)
+file_private int
+file_checkfield(char *msg, size_t mlen, const char *what, const char **pp)
 {
-	return php_url_parse_ex(str, strlen(str));
+	const char *p = *pp;
+	int fw = 0;
+
+	while (*p && isdigit((unsigned char)*p))
+		fw = fw * 10 + (*p++ - '0');
+
+	*pp = p;
+
+	if (fw < 1024)
+		return 1;
+	if (msg)
+		snprintf(msg, mlen, "field %s too large: %d", what, fw);
+
+	return 0;
 }
 
-static const char *binary_strcspn(const char *s, const char *e, const char *chars) {
-	while (*chars) {
-		const char *p = memchr(s, *chars, e - s);
-		if (p) {
-			e = p;
+file_protected int
+file_checkfmt(char *msg, size_t mlen, const char *fmt)
+{
+	const char *p;
+	for (p = fmt; *p; p++) {
+		if (*p != '%')
+			continue;
+		if (*++p == '%')
+			continue;
+		// Skip uninteresting.
+		while (strchr("#0.'+- ", *p) != NULL)
+			p++;
+		if (*p == '*') {
+			if (msg)
+				snprintf(msg, mlen, "* not allowed in format");
+			return -1;
 		}
-		chars++;
+
+		if (!file_checkfield(msg, mlen, "width", &p))
+			return -1;
+
+		if (*p == '.') {
+			p++;
+			if (!file_checkfield(msg, mlen, "precision", &p))
+				return -1;
+		}
+
+		if (!isalpha((unsigned char)*p)) {
+			if (msg)
+				snprintf(msg, mlen, "bad format char: %c", *p);
+			return -1;
+		}
 	}
-	return e;
+	return 0;
 }
 
-/* {{{ php_url_parse */
-PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
-{
-	bool has_port;
-	return php_url_parse_ex2(str, length, &has_port);
-}
-
-/* {{{ php_url_parse_ex2
+/*
+ * Like printf, only we append to a buffer.
  */
-PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port)
+file_protected int
+file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 {
-	char port_buf[6];
-	php_url *ret = ecalloc(1, sizeof(php_url));
-	char const *s, *e, *p, *pp, *ue;
+	size_t len;
+	char *buf, *newstr;
+	char tbuf[1024];
 
-	*has_port = 0;
-	s = str;
-	ue = s + length;
+	if (ms->event_flags & EVENT_HAD_ERR)
+		return 0;
 
-	/* parse scheme */
-	if ((e = memchr(s, ':', length)) && e != s) {
-		/* validate scheme */
-		p = s;
-		while (p < e) {
-			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
-			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
-				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
-					goto parse_port;
-				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
-					s += 2;
-					e = 0;
-					goto parse_host;
-				} else {
-					goto just_path;
-				}
-			}
-			p++;
+	if (file_checkfmt(tbuf, sizeof(tbuf), fmt)) {
+		file_clearbuf(ms);
+		file_error(ms, 0, "Bad magic format `%s' (%s)", fmt, tbuf);
+		return -1;
+	}
+
+	len = vspprintf(&buf, 0, fmt, ap);
+	if (len > 1024 || len + ms->o.blen > 1024 * 1024) {
+		size_t blen = ms->o.blen;
+		if (buf) efree(buf);
+		file_clearbuf(ms);
+		file_error(ms, 0, "Output buffer space exceeded %" SIZE_T_FORMAT "u+%"
+		    SIZE_T_FORMAT "u", len, blen);
+		return -1;
+	}
+
+	if (ms->o.buf != NULL) {
+		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, buf);
+		efree(buf);
+		efree(ms->o.buf);
+		buf = newstr;
+	}
+	ms->o.buf = buf;
+	ms->o.blen = len;
+	return 0;
+}
+
+file_protected int
+file_printf(struct magic_set *ms, const char *fmt, ...)
+{
+	int rv;
+	va_list ap;
+
+	va_start(ap, fmt);
+	rv = file_vprintf(ms, fmt, ap);
+	va_end(ap);
+	return rv;
+}
+
+/*
+ * error - print best error message possible
+ */
+/*VARARGS*/
+__attribute__((__format__(__printf__, 3, 0)))
+file_private void
+file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
+    size_t lineno)
+{
+	/* Only the first error is ok */
+	if (ms->event_flags & EVENT_HAD_ERR)
+		return;
+	if (lineno != 0) {
+		file_clearbuf(ms);
+		(void)file_printf(ms, "line %" SIZE_T_FORMAT "u:", lineno);
+	}
+	if (ms->o.buf && *ms->o.buf)
+		(void)file_printf(ms, " ");
+	(void)file_vprintf(ms, f, va);
+	if (error > 0)
+		(void)file_printf(ms, " (%s)", strerror(error));
+	ms->event_flags |= EVENT_HAD_ERR;
+	ms->error = error;
+}
+
+/*VARARGS*/
+file_protected void
+file_error(struct magic_set *ms, int error, const char *f, ...)
+{
+	va_list va;
+	va_start(va, f);
+	file_error_core(ms, error, f, va, 0);
+	va_end(va);
+}
+
+/*
+ * Print an error with magic line number.
+ */
+/*VARARGS*/
+file_protected void
+file_magerror(struct magic_set *ms, const char *f, ...)
+{
+	va_list va;
+	va_start(va, f);
+	file_error_core(ms, 0, f, va, ms->line);
+	va_end(va);
+}
+
+file_protected void
+file_oomem(struct magic_set *ms, size_t len)
+{
+	file_error(ms, errno, "cannot allocate %" SIZE_T_FORMAT "u bytes",
+	    len);
+}
+
+file_protected void
+file_badseek(struct magic_set *ms)
+{
+	file_error(ms, errno, "error seeking");
+}
+
+file_protected void
+file_badread(struct magic_set *ms)
+{
+	file_error(ms, errno, "error reading");
+}
+
+#ifndef COMPILE_ONLY
+#define FILE_SEPARATOR "\n- "
+
+file_protected int
+file_separator(struct magic_set *ms)
+{
+	return file_printf(ms, FILE_SEPARATOR);
+}
+
+static void
+trim_separator(struct magic_set *ms)
+{
+	size_t l;
+
+	if (ms->o.buf == NULL)
+		return;
+
+	l = strlen(ms->o.buf);
+	if (l < sizeof(FILE_SEPARATOR))
+		return;
+
+	l -= sizeof(FILE_SEPARATOR) - 1;
+	if (strcmp(ms->o.buf + l, FILE_SEPARATOR) != 0)
+		return;
+
+	ms->o.buf[l] = '\0';
+}
+
+static int
+checkdone(struct magic_set *ms, int *rv)
+{
+	if ((ms->flags & MAGIC_CONTINUE) == 0)
+		return 1;
+	if (file_separator(ms) == -1)
+		*rv = -1;
+	return 0;
+}
+
+file_protected int
+file_default(struct magic_set *ms, size_t nb)
+{
+	if (ms->flags & MAGIC_MIME) {
+		if ((ms->flags & MAGIC_MIME_TYPE) &&
+		    file_printf(ms, "application/%s",
+			nb ? "octet-stream" : "x-empty") == -1)
+			return -1;
+		return 1;
+	}
+	if (ms->flags & MAGIC_APPLE) {
+		if (file_printf(ms, "UNKNUNKN") == -1)
+			return -1;
+		return 1;
+	}
+	if (ms->flags & MAGIC_EXTENSION) {
+		if (file_printf(ms, "???") == -1)
+			return -1;
+		return 1;
+	}
+	return 0;
+}
+
+/*
+ * The magic detection functions return:
+ *	 1: found
+ *	 0: not found
+ *	-1: error
+ */
+/*ARGSUSED*/
+file_protected int
+file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
+    const char *inname __attribute__ ((__unused__)),
+    const void *buf, size_t nb)
+{
+	int m = 0, rv = 0, looks_text = 0;
+	const char *code = NULL;
+	const char *code_mime = "binary";
+	const char *def = "data";
+	const char *ftype = NULL;
+	char *rbuf = NULL;
+	struct buffer b;
+	int fd = -1;
+
+	if (stream) {
+#ifdef _WIN64
+		php_socket_t _fd = fd;
+#else
+		int _fd;
+#endif
+		int _ret = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&_fd, 0);
+		if (SUCCESS == _ret) {
+			fd = (int)_fd;
 		}
+	}
 
-		if (e + 1 == ue) { /* only scheme is available */
-			ret->scheme = zend_string_init(s, (e - s), 0);
-			php_replace_controlchars(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
-			return ret;
+	buffer_init(&b, fd, st, buf, nb);
+	ms->mode = b.st.st_mode;
+
+	if (nb == 0) {
+		def = "empty";
+		goto simple;
+	} else if (nb == 1) {
+		def = "very short file (no magic)";
+		goto simple;
+	}
+
+	if ((ms->flags & MAGIC_NO_CHECK_ENCODING) == 0) {
+		looks_text = file_encoding(ms, &b, NULL, 0,
+		    &code, &code_mime, &ftype);
+	}
+
+#ifdef __EMX__
+	if ((ms->flags & MAGIC_NO_CHECK_APPTYPE) == 0 && inname) {
+		m = file_os2_apptype(ms, inname, &b);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try os2_apptype %d]\n", m);
+		switch (m) {
+		case -1:
+			return -1;
+		case 0:
+			break;
+		default:
+			return 1;
 		}
+	}
+#endif
 
+#ifdef PHP_FILEINFO_UNCOMPRESS
+	/* try compression stuff */
+	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
+		m = file_zmagic(ms, &b, inname);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try zmagic %d]\n", m);
+		if (m) {
+			goto done_encoding;
+		}
+	}
+#endif
+	/* Check if we have a tar file */
+	if ((ms->flags & MAGIC_NO_CHECK_TAR) == 0) {
+		m = file_is_tar(ms, &b);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try tar %d]\n", m);
+		if (m) {
+			if (checkdone(ms, &rv))
+				goto done;
+		}
+	}
+
+	/* Check if we have a JSON file */
+	if ((ms->flags & MAGIC_NO_CHECK_JSON) == 0) {
+		m = file_is_json(ms, &b);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try json %d]\n", m);
+		if (m) {
+			if (checkdone(ms, &rv))
+				goto done;
+		}
+	}
+
+	/* Check if we have a CSV file */
+	if ((ms->flags & MAGIC_NO_CHECK_CSV) == 0) {
+		m = file_is_csv(ms, &b, looks_text, code);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try csv %d]\n", m);
+		if (m) {
+			if (checkdone(ms, &rv))
+				goto done;
+		}
+	}
+
+	/* Check if we have a SIMH tape file */
+	if ((ms->flags & MAGIC_NO_CHECK_SIMH) == 0) {
+		m = file_is_simh(ms, &b);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try simh %d]\n", m);
+		if (m) {
+			if (checkdone(ms, &rv))
+				goto done;
+		}
+	}
+
+	/* Check if we have a CDF file */
+	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
+		m = file_trycdf(ms, &b);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try cdf %d]\n", m);
+		if (m) {
+			if (checkdone(ms, &rv))
+				goto done;
+		}
+	}
+#ifdef BUILTIN_ELF
+	if ((ms->flags & MAGIC_NO_CHECK_ELF) == 0 && nb > 5 && fd != -1) {
+		file_pushbuf_t *pb;
 		/*
-		 * certain schemas like mailto: and zlib: may not have any / after them
-		 * this check ensures we support those.
+		 * We matched something in the file, so this
+		 * *might* be an ELF file, and the file is at
+		 * least 5 bytes long, so if it's an ELF file
+		 * it has at least one byte past the ELF magic
+		 * number - try extracting information from the
+		 * ELF headers that cannot easily be  extracted
+		 * with rules in the magic file. We we don't
+		 * print the information yet.
 		 */
-		if (*(e+1) != '/') {
-			/* check if the data we get is a port this allows us to
-			 * correctly parse things like a.com:80
-			 */
-			p = e + 1;
-			while (p < ue && isdigit(*p)) {
-				p++;
+		if ((pb = file_push_buffer(ms)) == NULL)
+			return -1;
+
+		rv = file_tryelf(ms, &b);
+		rbuf = file_pop_buffer(ms, pb);
+		if (rv == -1) {
+			efree(rbuf);
+			rbuf = NULL;
+		}
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try elf %d]\n", m);
+	}
+#endif
+
+	/* try soft magic tests */
+	if ((ms->flags & MAGIC_NO_CHECK_SOFT) == 0) {
+		m = file_softmagic(ms, &b, NULL, NULL, BINTEST, looks_text);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try softmagic %d]\n", m);
+		if (m == 1 && rbuf) {
+			if (file_printf(ms, "%s", rbuf) == -1)
+				goto done;
+		}
+		if (m) {
+			if (checkdone(ms, &rv))
+				goto done;
+		}
+	}
+
+	/* try text properties */
+	if ((ms->flags & MAGIC_NO_CHECK_TEXT) == 0) {
+
+		m = file_ascmagic(ms, &b, looks_text);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try ascmagic %d]\n", m);
+		if (m) {
+			goto done;
+		}
+	}
+
+simple:
+	/* give up */
+	if (m == 0) {
+		m = 1;
+		rv = file_default(ms, nb);
+		if (rv == 0)
+			if (file_printf(ms, "%s", def) == -1)
+				rv = -1;
+	}
+ done:
+	trim_separator(ms);
+	if ((ms->flags & MAGIC_MIME_ENCODING) != 0) {
+		if (ms->flags & MAGIC_MIME_TYPE)
+			if (file_printf(ms, "; charset=") == -1)
+				rv = -1;
+		if (file_printf(ms, "%s", code_mime) == -1)
+			rv = -1;
+	}
+#ifdef PHP_FILEINFO_UNCOMPRESS
+ done_encoding:
+#endif
+	efree(rbuf);
+	buffer_fini(&b);
+	if (rv)
+		return rv;
+
+	return m;
+}
+#endif
+
+file_protected int
+file_reset(struct magic_set *ms, int checkloaded)
+{
+	if (checkloaded && ms->mlist[0] == NULL) {
+		file_error(ms, 0, "no magic files loaded");
+		return -1;
+	}
+	file_clearbuf(ms);
+	if (ms->o.pbuf) {
+		efree(ms->o.pbuf);
+		ms->o.pbuf = NULL;
+	}
+	ms->event_flags &= ~EVENT_HAD_ERR;
+	ms->error = -1;
+	return 0;
+}
+
+#define OCTALIFY(n, o)	\
+	/*LINTED*/ \
+	(void)(*(n)++ = '\\', \
+	*(n)++ = ((CAST(uint32_t, *(o)) >> 6) & 3) + '0', \
+	*(n)++ = ((CAST(uint32_t, *(o)) >> 3) & 7) + '0', \
+	*(n)++ = ((CAST(uint32_t, *(o)) >> 0) & 7) + '0', \
+	(o)++)
+
+file_protected const char *
+file_getbuffer(struct magic_set *ms)
+{
+	char *pbuf, *op, *np;
+	size_t psize, len;
+
+	if (ms->event_flags & EVENT_HAD_ERR)
+		return NULL;
+
+	if (ms->flags & MAGIC_RAW)
+		return ms->o.buf;
+
+	if (ms->o.buf == NULL)
+		return NULL;
+
+	/* * 4 is for octal representation, + 1 is for NUL */
+	len = strlen(ms->o.buf);
+	if (len > (SIZE_MAX - 1) / 4) {
+		file_oomem(ms, len);
+		return NULL;
+	}
+	psize = len * 4 + 1;
+	if ((pbuf = CAST(char *, erealloc(ms->o.pbuf, psize))) == NULL) {
+		file_oomem(ms, psize);
+		return NULL;
+	}
+	ms->o.pbuf = pbuf;
+
+#if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
+	{
+		mbstate_t state;
+		wchar_t nextchar;
+		int mb_conv = 1;
+		size_t bytesconsumed;
+		char *eop;
+		(void)memset(&state, 0, sizeof(mbstate_t));
+
+		np = ms->o.pbuf;
+		op = ms->o.buf;
+		eop = op + len;
+
+		while (op < eop) {
+			bytesconsumed = mbrtowc(&nextchar, op,
+			    CAST(size_t, eop - op), &state);
+			if (bytesconsumed == CAST(size_t, -1) ||
+			    bytesconsumed == CAST(size_t, -2)) {
+				mb_conv = 0;
+				break;
 			}
 
-			if ((p == ue || *p == '/') && (p - e) < 7) {
-				goto parse_port;
-			}
-
-			ret->scheme = zend_string_init(s, (e-s), 0);
-			php_replace_controlchars(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
-
-			s = e + 1;
-			goto just_path;
-		} else {
-			ret->scheme = zend_string_init(s, (e-s), 0);
-			php_replace_controlchars(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
-
-			if (e + 2 < ue && *(e + 2) == '/') {
-				s = e + 3;
-				if (zend_string_equals_literal_ci(ret->scheme, "file")) {
-					if (e + 3 < ue && *(e + 3) == '/') {
-						/* support windows drive letters as in:
-						   file:///c:/somedir/file.txt
-						*/
-						if (e + 5 < ue && *(e + 5) == ':') {
-							s = e + 4;
-						}
-						goto just_path;
-					}
-				}
+			if (iswprint(nextchar)) {
+				(void)memcpy(np, op, bytesconsumed);
+				op += bytesconsumed;
+				np += bytesconsumed;
 			} else {
-				s = e + 1;
-				goto just_path;
+				while (bytesconsumed-- > 0)
+					OCTALIFY(np, op);
 			}
 		}
-	} else if (e) { /* no scheme; starts with colon: look for port */
-		parse_port:
-		p = e + 1;
-		pp = p;
+		*np = '\0';
 
-		while (pp < ue && pp - p < 6 && isdigit(*pp)) {
-			pp++;
-		}
+		/* Parsing succeeded as a multi-byte sequence */
+		if (mb_conv != 0)
+			return ms->o.pbuf;
+	}
+#endif
 
-		if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/')) {
-			zend_long port;
-			char *end;
-			memcpy(port_buf, p, (pp - p));
-			port_buf[pp - p] = '\0';
-			port = ZEND_STRTOL(port_buf, &end, 10);
-			if (port >= 0 && port <= 65535 && end != port_buf) {
-				*has_port = 1;
-				ret->port = (unsigned short) port;
-				if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
-				    s += 2;
-				}
-			} else {
-				php_url_free(ret);
-				return NULL;
-			}
-		} else if (p == pp && pp == ue) {
-			php_url_free(ret);
-			return NULL;
-		} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
-			s += 2;
+	for (np = ms->o.pbuf, op = ms->o.buf; *op;) {
+		if (isprint(CAST(unsigned char, *op))) {
+			*np++ = *op++;
 		} else {
-			goto just_path;
+			OCTALIFY(np, op);
 		}
-	} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
-		s += 2;
-	} else {
-		goto just_path;
 	}
+	*np = '\0';
+	return ms->o.pbuf;
+}
 
-parse_host:
-	e = binary_strcspn(s, ue, "/?#");
+file_protected int
+file_check_mem(struct magic_set *ms, unsigned int level)
+{
+	size_t len;
 
-	/* check for login and password */
-	if ((p = zend_memrchr(s, '@', (e-s)))) {
-		if ((pp = memchr(s, ':', (p-s)))) {
-			ret->user = zend_string_init(s, (pp-s), 0);
-			php_replace_controlchars(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
-
-			pp++;
-			ret->pass = zend_string_init(pp, (p-pp), 0);
-			php_replace_controlchars(ZSTR_VAL(ret->pass), ZSTR_LEN(ret->pass));
-		} else {
-			ret->user = zend_string_init(s, (p-s), 0);
-			php_replace_controlchars(ZSTR_VAL(ret->user), ZSTR_LEN(ret->user));
+	if (level >= ms->c.len) {
+		len = (ms->c.len = 20 + level) * sizeof(*ms->c.li);
+		ms->c.li = CAST(struct level_info *, (ms->c.li == NULL) ?
+		    emalloc(len) :
+		    erealloc(ms->c.li, len));
+		if (ms->c.li == NULL) {
+			file_oomem(ms, len);
+			return -1;
 		}
+	}
+	ms->c.li[level].got_match = 0;
+#ifdef ENABLE_CONDITIONALS
+	ms->c.li[level].last_match = 0;
+	ms->c.li[level].last_cond = COND_NONE;
+#endif /* ENABLE_CONDITIONALS */
+	return 0;
+}
 
-		s = p + 1;
+file_protected size_t
+file_printedlen(const struct magic_set *ms)
+{
+	return ms->o.blen;
+}
+
+file_protected int
+file_replace(struct magic_set *ms, const char *pat, const char *rep)
+{
+	zend_string *pattern;
+	uint32_t opts = 0;
+	pcre_cache_entry *pce;
+	zend_string *res;
+	zend_string *repl;
+	size_t rep_cnt = 0;
+
+	opts |= PCRE2_MULTILINE;
+	pattern = convert_libmagic_pattern(pat, strlen(pat), opts);
+	pce = pcre_get_compiled_regex_cache_ex(pattern, 0);
+	zend_string_release_ex(pattern, 0);
+	if (pce == NULL) {
+		rep_cnt = -1;
+		goto out;
 	}
 
-	/* check for port */
-	if (s < ue && *s == '[' && *(e-1) == ']') {
-		/* Short circuit portscan,
-		   we're dealing with an
-		   IPv6 embedded address */
-		p = NULL;
-	} else {
-		p = zend_memrchr(s, ':', (e-s));
+	repl = zend_string_init(rep, strlen(rep), 0);
+	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt);
+
+	zend_string_release_ex(repl, 0);
+	if (NULL == res) {
+		rep_cnt = -1;
+		goto out;
 	}
 
-	if (p) {
-		if (!ret->port) {
-			p++;
-			if (e-p > 5) { /* port cannot be longer then 5 characters */
-				php_url_free(ret);
-				return NULL;
-			} else if (e - p > 0) {
-				zend_long port;
-				char *end;
-				memcpy(port_buf, p, (e - p));
-				port_buf[e - p] = '\0';
-				port = ZEND_STRTOL(port_buf, &end, 10);
-				if (port >= 0 && port <= 65535 && end != port_buf) {
-					*has_port = 1;
-					ret->port = (unsigned short)port;
-				} else {
-					php_url_free(ret);
-					return NULL;
-				}
-			}
-			p--;
-		}
-	} else {
-		p = e;
-	}
+	memcpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
+	ms->o.buf[ZSTR_LEN(res)] = '\0';
 
-	/* check if we have a valid host, if we don't reject the string as url */
-	if ((p-s) < 1) {
-		php_url_free(ret);
+	zend_string_release_ex(res, 0);
+
+out:
+	return rep_cnt;
+}
+
+file_protected file_pushbuf_t *
+file_push_buffer(struct magic_set *ms)
+{
+	file_pushbuf_t *pb;
+
+	if (ms->event_flags & EVENT_HAD_ERR)
+		return NULL;
+
+	if ((pb = (CAST(file_pushbuf_t *, emalloc(sizeof(*pb))))) == NULL)
+		return NULL;
+
+	pb->buf = ms->o.buf;
+	pb->blen = ms->o.blen;
+	pb->offset = ms->offset;
+
+	ms->o.buf = NULL;
+	ms->o.blen = 0;
+	ms->offset = 0;
+
+	return pb;
+}
+
+file_protected char *
+file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
+{
+	char *rbuf;
+
+	if (ms->event_flags & EVENT_HAD_ERR) {
+		efree(pb->buf);
+		efree(pb);
 		return NULL;
 	}
 
-	ret->host = zend_string_init(s, (p-s), 0);
-	php_replace_controlchars(ZSTR_VAL(ret->host), ZSTR_LEN(ret->host));
+	rbuf = ms->o.buf;
 
-	if (e == ue) {
-		return ret;
-	}
+	ms->o.buf = pb->buf;
+	ms->o.blen = pb->blen;
+	ms->offset = pb->offset;
 
-	s = e;
-
-	just_path:
-
-	e = ue;
-	p = memchr(s, '#', (e - s));
-	if (p) {
-		p++;
-		if (p < e) {
-			ret->fragment = zend_string_init(p, (e - p), 0);
-			php_replace_controlchars(ZSTR_VAL(ret->fragment), ZSTR_LEN(ret->fragment));
-		} else {
-			ret->fragment = ZSTR_EMPTY_ALLOC();
-		}
-		e = p-1;
-	}
-
-	p = memchr(s, '?', (e - s));
-	if (p) {
-		p++;
-		if (p < e) {
-			ret->query = zend_string_init(p, (e - p), 0);
-			php_replace_controlchars(ZSTR_VAL(ret->query), ZSTR_LEN(ret->query));
-		} else {
-			ret->query = ZSTR_EMPTY_ALLOC();
-		}
-		e = p-1;
-	}
-
-	if (s < e || s == ue) {
-		ret->path = zend_string_init(s, (e - s), 0);
-		php_replace_controlchars(ZSTR_VAL(ret->path), ZSTR_LEN(ret->path));
-	}
-
-	return ret;
+	efree(pb);
+	return rbuf;
 }
 
-static void parse_url_decode_component(zval *zv, uri_component_read_mode_t read_mode)
-{
-	if (Z_TYPE_P(zv) != IS_STRING) {
-		return;
-	}
-
-	if (read_mode == URI_COMPONENT_READ_RAW) {
-		return;
-	}
-
-	php_raw_url_decode(Z_STRVAL_P(zv), Z_STRLEN_P(zv));
-}
-
-static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
-{
-	php_url *parse_url_uri = internal_uri->uri;
-
-	if (parse_url_uri->scheme) {
-		ZVAL_STR_COPY(retval, parse_url_uri->scheme);
-		parse_url_decode_component(retval, read_mode);
-	} else {
-		ZVAL_NULL(retval);
-	}
-
-	return SUCCESS;
-}
-
-static zend_result parse_url_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
-{
-	php_url *parse_url_uri = internal_uri->uri;
-
-	if (parse_url_uri->user) {
-		ZVAL_STR_COPY(retval, parse_url_uri->user);
-		parse_url_decode_component(retval, read_mode);
-	} else {
-		ZVAL_NULL(retval);
-	}
-
-	return SUCCESS;
-}
-
-static zend_result parse_url_read_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
-{
-	php_url *parse_url_uri = internal_uri->uri;
-
-	if (parse_url_uri->pass) {
-		ZVAL_STR_COPY(retval, parse_url_uri->pass);
-		parse_url_decode_component(retval, read_mode);
-	} else {
-		ZVAL_NULL(retval);
-	}
-
-	return SUCCESS;
-}
-
-static zend_result parse_url_read_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
-{
-	php_url *parse_url_uri = internal_uri->uri;
-
-	if (parse_url_uri->host) {
-		ZVAL_STR_COPY(retval, parse_url_uri->host);
-		parse_url_decode_component(retval, read_mode);
-	} else {
-		ZVAL_NULL(retval);
-	}
-
-	return SUCCESS;
-}
-
-static zend_result parse_url_read_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
-{
-	php_url *parse_url_uri = internal_uri->uri;
-
-	if (parse_url_uri->port) {
-		ZVAL_LONG(retval, parse_url_uri->port);
-		parse_url_decode_component(retval, read_mode);
-	} else {
-		ZVAL_NULL(retval);
-	}
-
-	return SUCCESS;
-}
-
-static zend_result parse_url_read_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
-{
-	php_url *parse_url_uri = internal_uri->uri;
-
-	if (parse_url_uri->path) {
-		ZVAL_STR_COPY(retval, parse_url_uri->path);
-		parse_url_decode_component(retval, read_mode);
-	} else {
-		ZVAL_NULL(retval);
-	}
-
-	return SUCCESS;
-}
-
-static zend_result parse_url_read_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
-{
-	php_url *parse_url_uri = internal_uri->uri;
-
-	if (parse_url_uri->query) {
-		ZVAL_STR_COPY(retval, parse_url_uri->query);
-		parse_url_decode_component(retval, read_mode);
-	} else {
-		ZVAL_NULL(retval);
-	}
-
-	return SUCCESS;
-}
-
-static zend_result parse_url_read_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
-{
-	php_url *parse_url_uri = internal_uri->uri;
-
-	if (parse_url_uri->fragment) {
-		ZVAL_STR_COPY(retval, parse_url_uri->fragment);
-		parse_url_decode_component(retval, read_mode);
-	} else {
-		ZVAL_NULL(retval);
-	}
-
-	return SUCCESS;
-}
-
-static void throw_invalid_uri_exception(void)
-{
-	zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
-}
-
-static void *parse_url_parse_uri(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
-{
-	bool has_port;
-
-	php_url *url = php_url_parse_ex2(uri_str, uri_str_len, &has_port);
-	if (url == NULL && !silent) {
-		throw_invalid_uri_exception();
-	}
-
-	return url;
-}
-
-const uri_handler_t parse_url_uri_handler = {
-	.name = URI_PARSER_PHP,
-	.parse_uri = parse_url_parse_uri,
-	.clone_uri = NULL,
-	.uri_to_string = NULL,
-	.free_uri = parse_url_free_uri,
-	{
-		.scheme = {.read_func = parse_url_read_scheme, .write_func = NULL},
-		.username = {.read_func = parse_url_read_username, .write_func = NULL},
-		.password = {.read_func = parse_url_read_password, .write_func = NULL},
-		.host = {.read_func = parse_url_read_host, .write_func = NULL},
-		.port = {.read_func = parse_url_read_port, .write_func = NULL},
-		.path = {.read_func = parse_url_read_path, .write_func = NULL},
-		.query = {.read_func = parse_url_read_query, .write_func = NULL},
-		.fragment = {.read_func = parse_url_read_fragment, .write_func = NULL},
-	}
-};
-
-/* {{{ Parse a URL and return its components */
-PHP_FUNCTION(parse_url)
-{
-	char *str;
-	size_t str_len;
-	php_url *resource;
-	zend_long key = -1;
-	zval tmp;
-	bool has_port;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(key)
-	ZEND_PARSE_PARAMETERS_END();
-
-	resource = php_url_parse_ex2(str, str_len, &has_port);
-	if (resource == NULL) {
-		/* @todo Find a method to determine why php_url_parse_ex() failed */
-		RETURN_FALSE;
-	}
-
-	if (key > -1) {
-		switch (key) {
-			case PHP_URL_SCHEME:
-				if (resource->scheme != NULL) RETVAL_STR_COPY(resource->scheme);
-				break;
-			case PHP_URL_HOST:
-				if (resource->host != NULL) RETVAL_STR_COPY(resource->host);
-				break;
-			case PHP_URL_PORT:
-				if (has_port) RETVAL_LONG(resource->port);
-				break;
-			case PHP_URL_USER:
-				if (resource->user != NULL) RETVAL_STR_COPY(resource->user);
-				break;
-			case PHP_URL_PASS:
-				if (resource->pass != NULL) RETVAL_STR_COPY(resource->pass);
-				break;
-			case PHP_URL_PATH:
-				if (resource->path != NULL) RETVAL_STR_COPY(resource->path);
-				break;
-			case PHP_URL_QUERY:
-				if (resource->query != NULL) RETVAL_STR_COPY(resource->query);
-				break;
-			case PHP_URL_FRAGMENT:
-				if (resource->fragment != NULL) RETVAL_STR_COPY(resource->fragment);
-				break;
-			default:
-				zend_argument_value_error(2, "must be a valid URL component identifier, " ZEND_LONG_FMT " given", key);
-				break;
-		}
-		goto done;
-	}
-
-	/* allocate an array for return */
-	array_init(return_value);
-
-    /* add the various elements to the array */
-	if (resource->scheme != NULL) {
-		ZVAL_STR_COPY(&tmp, resource->scheme);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_SCHEME), &tmp);
-	}
-	if (resource->host != NULL) {
-		ZVAL_STR_COPY(&tmp, resource->host);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
-	}
-	if (has_port) {
-		ZVAL_LONG(&tmp, resource->port);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
-	}
-	if (resource->user != NULL) {
-		ZVAL_STR_COPY(&tmp, resource->user);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_USER), &tmp);
-	}
-	if (resource->pass != NULL) {
-		ZVAL_STR_COPY(&tmp, resource->pass);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_PASS), &tmp);
-	}
-	if (resource->path != NULL) {
-		ZVAL_STR_COPY(&tmp, resource->path);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_PATH), &tmp);
-	}
-	if (resource->query != NULL) {
-		ZVAL_STR_COPY(&tmp, resource->query);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_QUERY), &tmp);
-	}
-	if (resource->fragment != NULL) {
-		ZVAL_STR_COPY(&tmp, resource->fragment);
-		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &tmp);
-	}
-done:
-	php_url_free(resource);
-}
-/* }}} */
-
-/* https://stackoverflow.com/questions/34365746/whats-the-fastest-way-to-convert-hex-to-integer-in-c */
-static unsigned int php_htoi_single(unsigned char x)
-{
-	ZEND_ASSERT((x >= 'a' && x <= 'f') || (x >= 'A' && x <= 'F') || (x >= '0' && x <= '9'));
-	return 9 * (x >> 6) + (x & 0xf);
-}
-
-/* {{{ php_htoi */
-static int php_htoi(const char *s)
-{
-	int value;
-	unsigned char c;
-
-	c = ((unsigned char *)s)[0];
-	value = php_htoi_single(c) * 16;
-
-	c = ((unsigned char *)s)[1];
-	value += php_htoi_single(c);
-
-	return (value);
-}
-/* }}} */
-
-/* rfc1738:
-
-   ...The characters ";",
-   "/", "?", ":", "@", "=" and "&" are the characters which may be
-   reserved for special meaning within a scheme...
-
-   ...Thus, only alphanumerics, the special characters "$-_.+!*'(),", and
-   reserved characters used for their reserved purposes may be used
-   unencoded within a URL...
-
-   For added safety, we only leave -_. unencoded.
+/*
+ * convert string to ascii printable format.
  */
-
-static const unsigned char hexchars[] = "0123456789ABCDEF";
-
-static zend_always_inline size_t php_url_encode_impl(unsigned char *to, const char *s, size_t len, bool raw) /* {{{ */ {
-	unsigned char c;
-	unsigned char const *from, *end;
-	const unsigned char *to_init = to;
-
-	from = (unsigned char *)s;
-	end = (unsigned char *)s + len;
-
-#ifdef XSSE2
-	while (from + 16 < end) {
-		__m128i mask;
-		uint32_t bits;
-		const __m128i _A = _mm_set1_epi8('A' - 1);
-		const __m128i Z_ = _mm_set1_epi8('Z' + 1);
-		const __m128i _a = _mm_set1_epi8('a' - 1);
-		const __m128i z_ = _mm_set1_epi8('z' + 1);
-		const __m128i _zero = _mm_set1_epi8('0' - 1);
-		const __m128i nine_ = _mm_set1_epi8('9' + 1);
-		const __m128i dot = _mm_set1_epi8('.');
-		const __m128i minus = _mm_set1_epi8('-');
-		const __m128i under = _mm_set1_epi8('_');
-
-		__m128i in = _mm_loadu_si128((__m128i *)from);
-
-		__m128i gt = _mm_cmpgt_epi8(in, _A);
-		__m128i lt = _mm_cmplt_epi8(in, Z_);
-		mask = _mm_and_si128(lt, gt); /* upper */
-		gt = _mm_cmpgt_epi8(in, _a);
-		lt = _mm_cmplt_epi8(in, z_);
-		mask = _mm_or_si128(mask, _mm_and_si128(lt, gt)); /* lower */
-		gt = _mm_cmpgt_epi8(in, _zero);
-		lt = _mm_cmplt_epi8(in, nine_);
-		mask = _mm_or_si128(mask, _mm_and_si128(lt, gt)); /* number */
-		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, dot));
-		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, minus));
-		mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, under));
-
-		if (!raw) {
-			const __m128i blank = _mm_set1_epi8(' ');
-			__m128i eq = _mm_cmpeq_epi8(in, blank);
-			if (_mm_movemask_epi8(eq)) {
-				in = _mm_add_epi8(in, _mm_and_si128(eq, _mm_set1_epi8('+' - ' ')));
-				mask = _mm_or_si128(mask, eq);
-			}
-		}
-		if (raw) {
-			const __m128i wavy = _mm_set1_epi8('~');
-			mask = _mm_or_si128(mask, _mm_cmpeq_epi8(in, wavy));
-		}
-		if (((bits = _mm_movemask_epi8(mask)) & 0xffff) == 0xffff) {
-			_mm_storeu_si128((__m128i*)to, in);
-			to += 16;
-		} else {
-			unsigned char xmm[16];
-			_mm_storeu_si128((__m128i*)xmm, in);
-			for (size_t i = 0; i < sizeof(xmm); i++) {
-				if ((bits & (0x1 << i))) {
-					*to++ = xmm[i];
-				} else {
-					*to++ = '%';
-					*to++ = hexchars[xmm[i] >> 4];
-					*to++ = hexchars[xmm[i] & 0xf];
-				}
-			}
-		}
-		from += 16;
-	}
-#endif
-	while (from < end) {
-		c = *from++;
-
-		if (!raw && c == ' ') {
-			*to++ = '+';
-		} else if ((c < '0' && c != '-' && c != '.') ||
-				(c < 'A' && c > '9') ||
-				(c > 'Z' && c < 'a' && c != '_') ||
-				(c > 'z' && (!raw || c != '~'))) {
-			to[0] = '%';
-			to[1] = hexchars[c >> 4];
-			to[2] = hexchars[c & 15];
-			to += 3;
-		} else {
-			*to++ = c;
-		}
-	}
-
-	return to - to_init;
-}
-/* }}} */
-
-static zend_always_inline zend_string *php_url_encode_helper(char const *s, size_t len, bool raw)
+file_protected char *
+file_printable(struct magic_set *ms, char *buf, size_t bufsiz,
+    const char *str, size_t slen)
 {
-	zend_string *result = zend_string_safe_alloc(3, len, 0, false);
-	size_t length = php_url_encode_impl((unsigned char *) ZSTR_VAL(result), s, len, raw);
-	ZSTR_VAL(result)[length] = '\0';
-	ZEND_ASSERT(!ZSTR_IS_INTERNED(result) && GC_REFCOUNT(result) == 1);
-	return zend_string_truncate(result, length, false);
-}
+	char *ptr, *eptr = buf + bufsiz - 1;
+	const unsigned char *s = RCAST(const unsigned char *, str);
+	const unsigned char *es = s + slen;
 
-/* {{{ php_url_encode */
-PHPAPI zend_string *php_url_encode(char const *s, size_t len)
-{
-	return php_url_encode_helper(s, len, false);
-}
-/* }}} */
-
-/* {{{ URL-encodes string */
-PHP_FUNCTION(urlencode)
-{
-	zend_string *in_str;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(in_str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_NEW_STR(php_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
-}
-/* }}} */
-
-/* {{{ Decodes URL-encoded string */
-PHP_FUNCTION(urldecode)
-{
-	zend_string *in_str, *out_str;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(in_str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	out_str = zend_string_alloc(ZSTR_LEN(in_str), false);
-	ZSTR_LEN(out_str) = php_url_decode_ex(ZSTR_VAL(out_str), ZSTR_VAL(in_str), ZSTR_LEN(in_str));
-
-	RETURN_NEW_STR(out_str);
-}
-/* }}} */
-
-PHPAPI size_t php_url_decode_ex(char *dest, const char *src, size_t src_len)
-{
-	char *dest_start = dest;
-	const char *data = src;
-
-	while (src_len--) {
-		if (*data == '+') {
-			*dest = ' ';
-		}
-		else if (*data == '%' && src_len >= 2 && isxdigit((int) *(data + 1))
-				 && isxdigit((int) *(data + 2))) {
-			*dest = (char) php_htoi(data + 1);
-			data += 2;
-			src_len -= 2;
-		} else {
-			*dest = *data;
-		}
-		data++;
-		dest++;
-	}
-	*dest = '\0';
-	return dest - dest_start;
-}
-
-/* {{{ php_url_decode */
-PHPAPI size_t php_url_decode(char *str, size_t len)
-{
-	return php_url_decode_ex(str, str, len);
-}
-/* }}} */
-
-/* {{{ php_raw_url_encode */
-PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
-{
-	return php_url_encode_helper(s, len, true);
-}
-/* }}} */
-
-PHPAPI void php_url_encode_to_smart_str(smart_str *buf, char const *s, size_t len, bool raw)
-{
-	size_t start_length = smart_str_get_len(buf);
-	size_t extend = zend_safe_address_guarded(3, len, 0);
-	char *dest = smart_str_extend(buf, extend);
-	size_t length = php_url_encode_impl((unsigned char *) dest, s, len, raw);
-	ZSTR_LEN(buf->s) = start_length + length;
-}
-
-/* {{{ URL-encodes string */
-PHP_FUNCTION(rawurlencode)
-{
-	zend_string *in_str;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(in_str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_NEW_STR(php_raw_url_encode(ZSTR_VAL(in_str), ZSTR_LEN(in_str)));
-}
-/* }}} */
-
-/* {{{ Decodes URL-encodes string */
-PHP_FUNCTION(rawurldecode)
-{
-	zend_string *in_str, *out_str;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(in_str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	out_str = zend_string_alloc(ZSTR_LEN(in_str), false);
-	ZSTR_LEN(out_str) = php_raw_url_decode_ex(ZSTR_VAL(out_str), ZSTR_VAL(in_str), ZSTR_LEN(in_str));
-
-	RETURN_NEW_STR(out_str);
-}
-/* }}} */
-
-PHPAPI size_t php_raw_url_decode_ex(char *dest, const char *src, size_t src_len)
-{
-	char *dest_start = dest;
-	const char *data = src;
-
-	while (src_len--) {
-		if (*data == '%' && src_len >= 2 && isxdigit((int) *(data + 1))
-			&& isxdigit((int) *(data + 2))) {
-			*dest = (char) php_htoi(data + 1);
-			data += 2;
-			src_len -= 2;
-		} else {
-			*dest = *data;
-		}
-		data++;
-		dest++;
-	}
-	*dest = '\0';
-	return dest - dest_start;
-}
-
-/* {{{ php_raw_url_decode */
-PHPAPI size_t php_raw_url_decode(char *str, size_t len)
-{
-	return php_raw_url_decode_ex(str, str, len);
-}
-/* }}} */
-
-/* {{{ fetches all the headers sent by the server in response to a HTTP request */
-PHP_FUNCTION(get_headers)
-{
-	char *url;
-	size_t url_len;
-	php_stream *stream;
-	zval *prev_val, *hdr = NULL;
-	bool format = 0;
-	zval *zcontext = NULL;
-	php_stream_context *context;
-
-	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_PATH(url, url_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(format)
-		Z_PARAM_RESOURCE_OR_NULL(zcontext)
-	ZEND_PARSE_PARAMETERS_END();
-
-	context = php_stream_context_from_zval(zcontext, 0);
-
-	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
-		RETURN_FALSE;
-	}
-
-	if (Z_TYPE(stream->wrapperdata) != IS_ARRAY) {
-		php_stream_close(stream);
-		RETURN_FALSE;
-	}
-
-	array_init(return_value);
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&stream->wrapperdata), hdr) {
-		if (Z_TYPE_P(hdr) != IS_STRING) {
+	for (ptr = buf;  ptr < eptr && s < es && *s; s++) {
+		if ((ms->flags & MAGIC_RAW) != 0 || isprint(*s)) {
+			*ptr++ = *s;
 			continue;
 		}
-		if (!format) {
-no_name_header:
-			add_next_index_str(return_value, zend_string_copy(Z_STR_P(hdr)));
-		} else {
-			char c;
-			char *s, *p;
-
-			if ((p = strchr(Z_STRVAL_P(hdr), ':'))) {
-				c = *p;
-				*p = '\0';
-				s = p + 1;
-				while (isspace((int)*(unsigned char *)s)) {
-					s++;
-				}
-
-				if ((prev_val = zend_hash_str_find(Z_ARRVAL_P(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
-				} else { /* some headers may occur more than once, therefore we need to remake the string into an array */
-					convert_to_array(prev_val);
-					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
-				}
-
-				*p = c;
-			} else {
-				goto no_name_header;
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	php_stream_close(stream);
+		if (ptr >= eptr - 3)
+			break;
+		*ptr++ = '\\';
+		*ptr++ = ((CAST(unsigned int, *s) >> 6) & 7) + '0';
+		*ptr++ = ((CAST(unsigned int, *s) >> 3) & 7) + '0';
+		*ptr++ = ((CAST(unsigned int, *s) >> 0) & 7) + '0';
+	}
+	*ptr = '\0';
+	return buf;
 }
-/* }}} */
 
-PHP_MINIT_FUNCTION(url)
+struct guid {
+	uint32_t data1;
+	uint16_t data2;
+	uint16_t data3;
+	uint8_t data4[8];
+};
+
+file_protected int
+file_parse_guid(const char *s, uint64_t *guid)
 {
-	return php_uri_handler_register(&parse_url_uri_handler);
+	struct guid *g = CAST(struct guid *, CAST(void *, guid));
+#ifndef WIN32
+	return sscanf(s,
+	    "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
+	    &g->data1, &g->data2, &g->data3, &g->data4[0], &g->data4[1],
+	    &g->data4[2], &g->data4[3], &g->data4[4], &g->data4[5],
+	    &g->data4[6], &g->data4[7]) == 11 ? 0 : -1;
+#else
+	/* MS-Windows runtime doesn't support %hhx, except under
+	   non-default __USE_MINGW_ANSI_STDIO.  */
+	uint16_t data16[8];
+	int rv = sscanf(s, "%8x-%4hx-%4hx-%2hx%2hx-%2hx%2hx%2hx%2hx%2hx%2hx",
+	    &g->data1, &g->data2, &g->data3, &data16[0], &data16[1],
+	    &data16[2], &data16[3], &data16[4], &data16[5],
+	    &data16[6], &data16[7]) == 11 ? 0 : -1;
+	int i;
+	for (i = 0; i < 8; i++)
+	    g->data4[i] = data16[i];
+	return rv;
+#endif
+}
+
+file_protected int
+file_print_guid(char *str, size_t len, const uint64_t *guid)
+{
+	const struct guid *g = CAST(const struct guid *,
+	    CAST(const void *, guid));
+
+#ifndef WIN32
+	return snprintf(str, len, "%.8X-%.4hX-%.4hX-%.2hhX%.2hhX-"
+	    "%.2hhX%.2hhX%.2hhX%.2hhX%.2hhX%.2hhX",
+	    g->data1, g->data2, g->data3, g->data4[0], g->data4[1],
+	    g->data4[2], g->data4[3], g->data4[4], g->data4[5],
+	    g->data4[6], g->data4[7]);
+#else
+	return snprintf(str, len, "%.8X-%.4hX-%.4hX-%.2hX%.2hX-"
+	    "%.2hX%.2hX%.2hX%.2hX%.2hX%.2hX",
+	    g->data1, g->data2, g->data3, g->data4[0], g->data4[1],
+	    g->data4[2], g->data4[3], g->data4[4], g->data4[5],
+	    g->data4[6], g->data4[7]);
+#endif
+}
+
+#if 0
+file_protected int
+file_pipe_closexec(int *fds)
+{
+#ifdef __MINGW32__
+	return 0;
+#elif defined(HAVE_PIPE2)
+	return pipe2(fds, O_CLOEXEC);
+#else
+	if (pipe(fds) == -1)
+		return -1;
+# ifdef F_SETFD
+	(void)fcntl(fds[0], F_SETFD, FD_CLOEXEC);
+	(void)fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+# endif
+	return 0;
+#endif
+}
+#endif
+
+file_protected int
+file_clear_closexec(int fd) {
+#ifdef F_SETFD
+	return fcntl(fd, F_SETFD, 0);
+#else
+	return 0;
+#endif
+}
+
+file_protected char *
+file_strtrim(char *str)
+{
+	char *last;
+
+	while (isspace(CAST(unsigned char, *str)))
+		str++;
+	last = str;
+	while (*last)
+		last++;
+	--last;
+	while (isspace(CAST(unsigned char, *last)))
+		last--;
+	*++last = '\0';
+	return str;
 }
