@@ -18,10 +18,10 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
-#if defined(HAVE_WCHAR_H)
+#if defined(__APPLE__)
 #include <wchar.h>
 #endif
-#if defined(HAVE_WCTYPE_H)
+#if defined(__APPLE__)
 #include <wctype.h>
 #endif
 
@@ -64,6 +64,23 @@ static void parse_url_free_uri(void *uri)
 
 static void php_replace_controlchars(char *str, size_t len)
 {
+	#if defined(__APPLE__) 
+	{
+		ZEND_ASSERT(str != NULL);
+		wchar_t wbuf[len];
+		memset(wbuf, 0, sizeof(wbuf));
+		size_t wlen = mbstowcs(wbuf, str, len);
+
+		for (size_t i = 0; i < wlen; i++) {
+			if (iswcntrl(wbuf[i])) {
+				wbuf[i] = L'_';
+			}
+		}
+
+		wcstombs(str, wbuf, len);
+		return;
+	}
+	#endif
 	unsigned char *s = (unsigned char *)str;
 	unsigned char *e = (unsigned char *)str + len;
 
@@ -83,28 +100,6 @@ PHPAPI php_url *php_url_parse(char const *str)
 }
 
 static const char *binary_strcspn(const char *s, const char *e, const char *chars) {
-	#if defined(HAVE_WCHAR_H) && defined(HAVE_WCTYPE_H)
-	{
-		ZEND_ASSERT(str != NULL);
-		wchar_t wbuf[len];
-		memset(wbuf, 0, sizeof(wbuf));
-		size_t wlen = mbstowcs(wbuf, str, len);
-
-		while (s < e) {
-			if (*s <= 0x1F || *s == 0x7F) {   
-				*s = '_'; 
-			}
-			s++;
-		}
-		for (size_t i = 0; i < wlen; i++) {
-			if (iswcntrl(wbuf[i])) {
-				wbuf[i] = L'_';
-			}
-		}
-		wcstombs(str, wbuf, len);
-		return;
-	}
-	#endif
 	while (*chars) {
 		const char *p = memchr(s, *chars, e - s);
 		if (p) {
