@@ -101,7 +101,6 @@ static const char *binary_strcspn(const char *s, const char *e, const char *char
 				wbuf[i] = L'_';
 			}
 		}
-		php_printf("---arshid---");
 		wcstombs(str, wbuf, len);
 		return;
 	}
