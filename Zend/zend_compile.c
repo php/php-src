@@ -7557,19 +7557,41 @@ static void zend_compile_attributes(
 	}
 
 	if (*attributes != NULL) {
+		/* Allow delaying target validation for forward compatibility. */
+		zend_attribute *delayed_target_validation = NULL;
+		if (target == ZEND_ATTRIBUTE_TARGET_PARAMETER) {
+			ZEND_ASSERT(offset >= 1);
+			/* zend_get_parameter_attribute_str will add 1 too */
+			delayed_target_validation = zend_get_parameter_attribute_str(
+				*attributes,
+				"delayedtargetvalidation",
+				strlen("delayedtargetvalidation"),
+				offset - 1
+			);
+		} else {
+			delayed_target_validation = zend_get_attribute_str(
+				*attributes,
+				"delayedtargetvalidation",
+				strlen("delayedtargetvalidation")
+			);
+		}
 		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
 		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
 			if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
 				continue;
 			}
 
+			bool run_validator = true;
 			if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
-				zend_string *location = zend_get_attribute_target_names(target);
-				zend_string *allowed = zend_get_attribute_target_names(config->flags);
+				if (delayed_target_validation == NULL) {
+					zend_string *location = zend_get_attribute_target_names(target);
+					zend_string *allowed = zend_get_attribute_target_names(config->flags);
 
-				zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
-					ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
-				);
+					zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+						ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
+					);
+				}
+				run_validator = false;
 			}
 
 			if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
@@ -7578,8 +7600,17 @@ static void zend_compile_attributes(
 				}
 			}
 
-			if (config->validator != NULL) {
-				config->validator(attr, target, CG(active_class_entry));
+			/* Validators are not run if the target is already invalid */
+			if (run_validator && config->validator != NULL) {
+				zend_string *error = config->validator(attr, target, CG(active_class_entry));
+				if (error != NULL) {
+					if (delayed_target_validation == NULL) {
+						zend_error_noreturn(E_COMPILE_ERROR, "%s", ZSTR_VAL(error));
+						zend_string_efree(error);
+					} else {
+						attr->validation_error = error;
+					}
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -8425,6 +8456,10 @@ static zend_op_array *zend_compile_func_decl_ex(
 
 	CG(active_op_array) = op_array;
 
+	zend_oparray_context_begin(&orig_oparray_context, op_array);
+	CG(context).active_property_info_name = property_info_name;
+	CG(context).active_property_hook_kind = hook_kind;
+
 	if (decl->child[4]) {
 		int target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
 
@@ -8454,15 +8489,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 			op_array->fn_flags |= ZEND_ACC_DEPRECATED;
 		}
 
-		zend_attribute *nodiscard_attribute = zend_get_attribute_str(
-			op_array->attributes,
-			"nodiscard",
-			sizeof("nodiscard")-1
-		);
-
-		if (nodiscard_attribute) {
-			op_array->fn_flags |= ZEND_ACC_NODISCARD;
-		}
+		// ZEND_ACC_NODISCARD is added via an attribute validator
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
@@ -8475,10 +8502,6 @@ static zend_op_array *zend_compile_func_decl_ex(
 	if (level == FUNC_DECL_LEVEL_TOPLEVEL) {
 		op_array->fn_flags |= ZEND_ACC_TOP_LEVEL;
 	}
-
-	zend_oparray_context_begin(&orig_oparray_context, op_array);
-	CG(context).active_property_info_name = property_info_name;
-	CG(context).active_property_hook_kind = hook_kind;
 
 	{
 		/* Push a separator to the loop variable stack */
@@ -8514,9 +8537,12 @@ static zend_op_array *zend_compile_func_decl_ex(
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_NODISCARD) {
-		if (is_hook) {
-			zend_error_noreturn(E_COMPILE_ERROR, "#[\\NoDiscard] is not supported for property hooks");
-		}
+		/* ZEND_ACC_NODISCARD gets added by the attribute validator, but only
+		 * if the method is not a hook; if it is a hook, then the validator
+		 * will have returned an error message, even if the error message was
+		 * delayed with #[\DelayedTargetValidation] that ZEND_ACC_NODISCARD
+		 * flag should not have been added. */
+		ZEND_ASSERT(!is_hook);
 
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
