@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot assign int to property class@anonymous::$v of type class@anonymous
+Cannot assign int to property class@anonymous::$v of type self

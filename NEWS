@@ -25,6 +25,8 @@ PHP                                                                        NEWS
     operators" RFC, meaning that incrementing non-numeric strings is now
     deprecated. (Girgias).
   . Various closure binding issues are now deprecated. (alexandre-daubois)
+  . Fixed bug GH-18373 (Don't substitute self/parent with anonymous class).
+    (ilutov)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
