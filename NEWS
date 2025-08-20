@@ -48,6 +48,9 @@ PHP                                                                        NEWS
   . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
     (Jakub Zelenka)
 
+- PDO:
+  . Driver specific constants in the PDO class are now deprecated. (Arnaud)
+
 - Phar:
   . Fixed memory leaks when verifying OpenSSL signature. (Girgias)
 

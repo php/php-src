@@ -75,8 +75,8 @@ MySQLPDOTest::skip();
 
         }
 
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn off emulated prepared statements\n");
 
         $db->exec(sprintf('CREATE TABLE test_stmt_fetch_serialize(id INT, myobj BLOB) ENGINE=%s',

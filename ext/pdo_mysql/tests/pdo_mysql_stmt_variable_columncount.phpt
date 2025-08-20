@@ -57,7 +57,7 @@ MySQLPDOTest::skip();
             // Libmysql cannot handle such a stored procedure. You will see leaks with libmysql
             $db = MySQLPDOTest::factory();
             $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
-            $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+            $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 1);
             $stmt = $db->prepare("CALL {$procedure}(?)");
             $stmt->bindParam(1, $columns);
             for ($i = 5; $i < 10; $i++) {
@@ -88,7 +88,7 @@ MySQLPDOTest::skip();
             // Libmysql cannot handle such a stored procedure. You will see leaks with libmysql
             $db = MySQLPDOTest::factory();
             $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
-            $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+            $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 1);
             $db->exec('SET @numcols = 1');
             $stmt = $db->prepare("CALL {$procedure}()");
             $stmt->execute();

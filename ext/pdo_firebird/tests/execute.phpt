@@ -12,7 +12,7 @@ $dbh = getDbConnection();
 var_dump($dbh->getAttribute(PDO::ATTR_CONNECTION_STATUS));
 
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$dbh->setAttribute(PDO::FB_ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
+$dbh->setAttribute(Pdo\Firebird::ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
 
 $dbh->exec("CREATE TABLE test_execute (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
     datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
