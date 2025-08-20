@@ -1,5 +1,8 @@
 --TEST--
 GH-19486: incorrect opline after deoptimization
+--INI--
+opcache.jit_blacklist_root_trace=1
+opcache.jit_blacklist_side_trace=1
 --FILE--
 <?php
 
@@ -16,7 +19,7 @@ class GameMap
 
     public function floodFill(int $x, int $y, int $id): void
     {
-        if (($x < 0) or ($x >= 900) or ($y < 0) or ($y >= 400)) {
+        if (($x < 0) or ($x >= 50) or ($y < 0) or ($y >= 50)) {
             return;
         }
         if (isset($this->lakeID[$y][$x]) and ($this->lakeID[$y][$x] == $id)) {
