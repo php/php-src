@@ -203,8 +203,11 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 		parse_port:
 		p = e + 1;
 		pp = p;
+		
+		const char *first_slash = memchr(s, '/', ue - s);
 
 		while (pp < ue && pp - p < 6 && isdigit(*pp)) {
+			if (first_slash && pp >= first_slash) break;
 			pp++;
 		}
 
