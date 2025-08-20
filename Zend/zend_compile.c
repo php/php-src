@@ -7089,18 +7089,21 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				zend_assert_valid_class_name(class_name, "a type name");
 			} else {
 				ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_SELF || fetch_type == ZEND_FETCH_CLASS_PARENT);
+				bool substitute_self_parent = zend_is_scope_known()
+					&& CG(active_class_entry)
+					&& !(CG(active_class_entry)->ce_flags & ZEND_ACC_ANON_CLASS);
 
 				zend_ensure_valid_class_fetch_type(fetch_type);
 				if (fetch_type == ZEND_FETCH_CLASS_SELF) {
 					/* Scope might be unknown for unbound closures and traits */
-					if (zend_is_scope_known()) {
+					if (substitute_self_parent) {
 						class_name = CG(active_class_entry)->name;
 						ZEND_ASSERT(class_name && "must know class name when resolving self type at compile time");
 					}
 				} else {
 					ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_PARENT);
 					/* Scope might be unknown for unbound closures and traits */
-					if (zend_is_scope_known()) {
+					if (substitute_self_parent) {
 						class_name = CG(active_class_entry)->parent_name;
 						ZEND_ASSERT(class_name && "must know class name when resolving parent type at compile time");
 					}
