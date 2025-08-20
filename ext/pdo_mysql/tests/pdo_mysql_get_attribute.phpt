@@ -50,27 +50,27 @@ MySQLPDOTest::skipNotTransactionalEngine();
     $obj = new stdClass();
     set_and_get(4, $db, PDO::ATTR_AUTOCOMMIT, $obj);
 
-    set_and_get(5, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, 1);
-    set_and_get(6, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, 0);
-    set_and_get(7, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, -1);
+    set_and_get(5, $db, Pdo\Mysql::ATTR_LOCAL_INFILE, 1);
+    set_and_get(6, $db, Pdo\Mysql::ATTR_LOCAL_INFILE, 0);
+    set_and_get(7, $db, Pdo\Mysql::ATTR_LOCAL_INFILE, -1);
     $tmp = array();
-    set_and_get(8, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, $tmp);
+    set_and_get(8, $db, Pdo\Mysql::ATTR_LOCAL_INFILE, $tmp);
 
-    set_and_get(9, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, '');
-    set_and_get(10, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, 'SOME SQL');
-    set_and_get(11, $db, PPDO::MYSQL_ATTR_INIT_COMMAND, -1);
+    set_and_get(9, $db, PPdo\Mysql::ATTR_INIT_COMMAND, '');
+    set_and_get(10, $db, PPdo\Mysql::ATTR_INIT_COMMAND, 'SOME SQL');
+    set_and_get(11, $db, PPdo\Mysql::ATTR_INIT_COMMAND, -1);
     */
     /*
-    PDO::MYSQL_ATTR_READ_DEFAULT_FILE (integer)
+    Pdo\Mysql::ATTR_READ_DEFAULT_FILE (integer)
 
     Read options from the named option file instead of from my.cnf.
-    PDO::MYSQL_ATTR_READ_DEFAULT_GROUP (integer)
+    Pdo\Mysql::ATTR_READ_DEFAULT_GROUP (integer)
 
     Read options from the named group from my.cnf or the file specified with MYSQL_READ_DEFAULT_FILE.
-    PDO::MYSQL_ATTR_MAX_BUFFER_SIZE (integer)
+    Pdo\Mysql::ATTR_MAX_BUFFER_SIZE (integer)
 
     Maximum buffer size. Defaults to 1 MiB.
-    PDO::MYSQL_ATTR_DIRECT_QUERY (integer)
+    Pdo\Mysql::ATTR_DIRECT_QUERY (integer)
 
     Perform direct queries, don't use prepared statements.
     */

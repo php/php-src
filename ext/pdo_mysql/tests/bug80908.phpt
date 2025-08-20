@@ -23,7 +23,7 @@ $db->exec('CREATE TABLE test_80908 (`id` BIGINT(20) UNSIGNED AUTO_INCREMENT, `na
 
 function testLastInsertId(PDO $db) {
     echo "Running test lastInsertId\n";
-    $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+    $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
     try {
         $db->exec("INSERT INTO test_80908 (`name`) VALUES ('bar')");
         $id = $db->lastInsertId();

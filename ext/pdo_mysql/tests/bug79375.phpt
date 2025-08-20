@@ -52,7 +52,7 @@ function testPrepareExecute(PDO $db, string $name) {
 }
 
 function testUnbuffered(PDO $db, string $name) {
-    $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+    $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
     $db->exec("SET innodb_lock_wait_timeout = 1");
     $db->exec("START TRANSACTION");
     $query = "SELECT first FROM test_79375 WHERE first = 1 FOR UPDATE";

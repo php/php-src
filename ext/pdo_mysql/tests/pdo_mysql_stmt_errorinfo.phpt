@@ -17,8 +17,8 @@ MySQLPDOTest::skip();
 
     printf("Testing emulated PS...\n");
     try {
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn on emulated prepared statements\n");
 
         $stmt = $db->prepare('SELECT id FROM pdo_mysql_stmt_errorinfo_ihopeitdoesnotexist ORDER BY id ASC');
@@ -40,8 +40,8 @@ MySQLPDOTest::skip();
 
     printf("Testing native PS...\n");
     try {
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[004] Unable to turn off emulated prepared statements\n");
 
         $stmt = $db->prepare('SELECT id FROM pdo_mysql_stmt_errorinfo_ihopeitdoesnotexist ORDER BY id ASC');

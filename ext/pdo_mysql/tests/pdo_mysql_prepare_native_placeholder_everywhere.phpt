@@ -14,8 +14,8 @@ MySQLPDOTest::skip();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     try {
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to switch on emulated prepared statements, test will fail\n");
 
         $db->exec(sprintf('CREATE TABLE test_prepare_native_named_placeholder_everywhere(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
@@ -31,8 +31,8 @@ MySQLPDOTest::skip();
 
         // now the same with native PS
         printf("now the same with native PS\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[004] Unable to switch off emulated prepared statements, test_prepare_native_named_placeholder_everywhere will fail\n");
 
         $stmt = $db->prepare('SELECT ?, id, label FROM test_prepare_native_named_placeholder_everywhere WHERE ? = ? ORDER BY id ASC');

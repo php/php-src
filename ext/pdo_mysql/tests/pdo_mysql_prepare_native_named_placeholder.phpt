@@ -16,8 +16,8 @@ MySQLPDOTest::skip();
 
         $db->exec(sprintf('CREATE TABLE test_prepare_native_named_placeholder(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
 
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn off emulated prepared statements\n");
 
         // INSERT a single row
@@ -39,8 +39,8 @@ MySQLPDOTest::skip();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
         // Now the same with emulated PS.
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[004] Unable to turn on emulated prepared statements\n");
 
         // Note that the "named placeholder" is enclosed by double quotes.

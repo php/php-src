@@ -15,7 +15,7 @@ require __DIR__ . '/config.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_PERSISTENT, false);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$db->setAttribute(PDO::PGSQL_ATTR_DISABLE_PREPARES, true);
+$db->setAttribute(Pdo\Pgsql::ATTR_DISABLE_PREPARES, true);
 
 try {
     $db->lastInsertId('nonexistent_seq');
