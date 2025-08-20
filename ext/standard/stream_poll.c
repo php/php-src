@@ -331,7 +331,6 @@ PHP_FUNCTION(stream_poll_wait)
         php_stream_to_zval(entry->stream, &stream_zval);
         zend_update_property(stream_poll_event_class_entry, Z_OBJ(event_obj), 
                            ZEND_STRL("stream"), &stream_zval);
-        zval_ptr_dtor(&stream_zval);
         
         /* Set events property */
         zend_update_property_long(stream_poll_event_class_entry, Z_OBJ(event_obj), 
