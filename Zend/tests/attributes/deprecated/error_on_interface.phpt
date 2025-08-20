@@ -8,4 +8,4 @@ interface Demo {}
 
 ?>
 --EXPECTF--
-Fatal error: Cannot apply #[Deprecated] to interface Demo in %s on line %d
+Fatal error: Cannot apply #[\Deprecated] to interface Demo in %s on line %d

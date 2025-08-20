@@ -66,7 +66,7 @@ array(2) {
     string(10) "Deprecated"
   }
 }
-Error: Cannot apply #[Deprecated] to interface DemoInterface
+Error: Cannot apply #[\Deprecated] to interface DemoInterface
 ********************
 Class [ <user> class DemoClass ] {
   @@ %s %d-%d
@@ -99,7 +99,7 @@ array(2) {
     string(10) "Deprecated"
   }
 }
-Error: Cannot apply #[Deprecated] to class DemoClass
+Error: Cannot apply #[\Deprecated] to class DemoClass
 ********************
 Enum [ <user> enum DemoEnum implements UnitEnum ] {
   @@ %s %d-%d
@@ -139,4 +139,4 @@ array(2) {
     string(10) "Deprecated"
   }
 }
-Error: Cannot apply #[Deprecated] to enum DemoEnum
+Error: Cannot apply #[\Deprecated] to enum DemoEnum

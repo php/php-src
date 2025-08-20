@@ -121,7 +121,7 @@ static zend_string *validate_deprecated(
 	}
 	if (!(scope->ce_flags & ZEND_ACC_TRAIT)) {
 		const char *type = zend_get_object_type_case(scope, false);
-		return zend_strpprintf(0, "Cannot apply #[Deprecated] to %s %s", type, ZSTR_VAL(scope->name));
+		return zend_strpprintf(0, "Cannot apply #[\\Deprecated] to %s %s", type, ZSTR_VAL(scope->name));
 	}
 
 	scope->ce_flags |= ZEND_ACC_DEPRECATED;

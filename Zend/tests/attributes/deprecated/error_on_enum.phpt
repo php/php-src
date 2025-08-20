@@ -8,4 +8,4 @@ enum Demo {}
 
 ?>
 --EXPECTF--
-Fatal error: Cannot apply #[Deprecated] to enum Demo in %s on line %d
+Fatal error: Cannot apply #[\Deprecated] to enum Demo in %s on line %d
