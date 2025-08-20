@@ -619,7 +619,7 @@ static void lexbor_free_uri(void *uri)
 {
 }
 
-const uri_handler_t lexbor_uri_handler = {
+const uri_parser_t lexbor_uri_parser = {
 	.name = URI_PARSER_WHATWG,
 	.parse_uri = lexbor_parse_uri,
 	.clone_uri = lexbor_clone_uri,

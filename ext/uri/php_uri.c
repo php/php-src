@@ -49,11 +49,11 @@ static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_END
 };
 
-static zend_array uri_handlers;
+static zend_array uri_parsers;
 
-static uri_handler_t *uri_handler_by_name(const char *handler_name, size_t handler_name_len)
+static uri_parser_t *uri_parser_by_name(const char *uri_parser_name, size_t uri_parser_name_len)
 {
-	return zend_hash_str_find_ptr(&uri_handlers, handler_name, handler_name_len);
+	return zend_hash_str_find_ptr(&uri_parsers, uri_parser_name, uri_parser_name_len);
 }
 
 static HashTable *uri_get_debug_properties(zend_object *object)
@@ -68,7 +68,7 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 		return result;
 	}
 
-	const uri_property_handlers_t property_handlers = internal_uri->handler->property_handlers;
+	const uri_property_handlers_t property_handlers = internal_uri->parser->property_handlers;
 
 	zval tmp;
 	if (property_handlers.scheme.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
@@ -106,20 +106,20 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	return result;
 }
 
-PHPAPI uri_handler_t *php_uri_get_handler(const zend_string *uri_handler_name)
+PHPAPI uri_parser_t *php_uri_get_parser(const zend_string *uri_parser_name)
 {
-	if (uri_handler_name == NULL) {
-		return uri_handler_by_name(URI_PARSER_PHP, sizeof(URI_PARSER_PHP) - 1);
+	if (uri_parser_name == NULL) {
+		return uri_parser_by_name(URI_PARSER_PHP, sizeof(URI_PARSER_PHP) - 1);
 	}
 
-	return uri_handler_by_name(ZSTR_VAL(uri_handler_name), ZSTR_LEN(uri_handler_name));
+	return uri_parser_by_name(ZSTR_VAL(uri_parser_name), ZSTR_LEN(uri_parser_name));
 }
 
-ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_handler_t *uri_handler, const char *uri_str, size_t uri_str_len, bool silent)
+ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, bool silent)
 {
 	uri_internal_t *internal_uri = emalloc(sizeof(*internal_uri));
-	internal_uri->handler = uri_handler;
-	internal_uri->uri = uri_handler->parse_uri(uri_str, uri_str_len, NULL, NULL, silent);
+	internal_uri->parser = uri_parser;
+	internal_uri->uri = uri_parser->parse_uri(uri_str, uri_str_len, NULL, NULL, silent);
 
 	if (UNEXPECTED(internal_uri->uri == NULL)) {
 		efree(internal_uri);
@@ -185,16 +185,16 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_fragment(const uri_interna
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri)
 {
-	internal_uri->handler->free_uri(internal_uri->uri);
+	internal_uri->parser->free_uri(internal_uri->uri);
 	internal_uri->uri = NULL;
-	internal_uri->handler = NULL;
+	internal_uri->parser = NULL;
 	efree(internal_uri);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
-	const uri_handler_t *uri_handler, const char *uri_str, size_t uri_str_len, uri_component_read_mode_t read_mode, bool silent
+	const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, uri_component_read_mode_t read_mode, bool silent
 ) {
-	uri_internal_t *uri_internal = php_uri_parse(uri_handler, uri_str, uri_str_len, silent);
+	uri_internal_t *uri_internal = php_uri_parse(uri_parser, uri_str, uri_str_len, silent);
 	if (uri_internal == NULL) {
 		return NULL;
 	}
@@ -336,8 +336,8 @@ static zend_result pass_errors_by_ref_and_free(zval *errors_zv, zval *errors)
 }
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
-	INTERNAL_FUNCTION_PARAMETERS, const uri_handler_t *handler, const zend_string *uri_str, const zend_object *base_url_object,
-	bool should_throw, bool should_update_this_object, zval *errors_zv
+		INTERNAL_FUNCTION_PARAMETERS, const uri_parser_t *uri_parser, const zend_string *uri_str, const zend_object *base_url_object,
+		bool should_throw, bool should_update_this_object, zval *errors_zv
 ) {
 	zval errors;
 	ZVAL_UNDEF(&errors);
@@ -349,7 +349,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 		base_url = internal_base_url->uri;
 	}
 
-	void *uri = handler->parse_uri(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), base_url, should_throw || errors_zv != NULL ? &errors : NULL, !should_throw);
+	void *uri = uri_parser->parse_uri(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), base_url, should_throw || errors_zv != NULL ? &errors : NULL, !should_throw);
 	if (UNEXPECTED(uri == NULL)) {
 		if (should_throw) {
 			zval_ptr_dtor(&errors);
@@ -378,7 +378,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 		uri_object = Z_URI_OBJECT_P(return_value);
 	}
 
-	uri_object->internal.handler = handler;
+	uri_object->internal.parser = uri_parser;
 	uri_object->internal.uri = uri;
 }
 
@@ -393,7 +393,7 @@ static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor
 		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, uri_rfc3986_uri_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_handler, uri_str, base_url_object, is_constructor, is_constructor, NULL);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_parser, uri_str, base_url_object, is_constructor, is_constructor, NULL);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, parse)
@@ -480,7 +480,7 @@ static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 		Z_PARAM_ZVAL(errors)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_handler, uri_str, base_url_object, is_constructor, is_constructor, errors);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_parser, uri_str, base_url_object, is_constructor, is_constructor, errors);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, parse)
@@ -618,14 +618,14 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, z
 		exclude_fragment = zend_string_equals_literal(Z_STR_P(case_name), "ExcludeFragment");
 	}
 
-	zend_string *this_str = this_internal_uri->handler->uri_to_string(
+	zend_string *this_str = this_internal_uri->parser->uri_to_string(
 		this_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
 	if (this_str == NULL) {
 		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
 
-	zend_string *that_str = that_internal_uri->handler->uri_to_string(
+	zend_string *that_str = that_internal_uri->parser->uri_to_string(
 		that_internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, exclude_fragment);
 	if (that_str == NULL) {
 		zend_string_release(this_str);
@@ -661,7 +661,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
+	zend_string *uri_str = internal_uri->parser->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
 	if (uri_str == NULL) {
 		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
@@ -678,7 +678,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, false);
+	zend_string *uri_str = internal_uri->parser->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_NORMALIZED_ASCII, false);
 	if (uri_str == NULL) {
 		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
@@ -699,7 +699,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, resolve)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, this_object, true, false, NULL);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->parser, uri_str, this_object, true, false, NULL);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
@@ -711,7 +711,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	/* Serialize state: "uri" key in the first array */
-	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
+	zend_string *uri_str = internal_uri->parser->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
 	if (uri_str == NULL) {
 		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
@@ -732,7 +732,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 }
 
-static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_name)
+static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *uri_parser_name)
 {
 	HashTable *data;
 
@@ -768,11 +768,11 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *handler_na
 	}
 
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
-	internal_uri->handler = uri_handler_by_name(handler_name, strlen(handler_name));
+	internal_uri->parser = uri_parser_by_name(uri_parser_name, strlen(uri_parser_name));
 	if (internal_uri->uri != NULL) {
-		internal_uri->handler->free_uri(internal_uri->uri);
+		internal_uri->parser->free_uri(internal_uri->uri);
 	}
-	internal_uri->uri = internal_uri->handler->parse_uri(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
+	internal_uri->uri = internal_uri->parser->parse_uri(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
 	if (internal_uri->uri == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
 		RETURN_THROWS();
@@ -883,7 +883,7 @@ PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_UNICODE, false));
+	RETURN_STR(internal_uri->parser->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_UNICODE, false));
 }
 
 PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
@@ -894,7 +894,7 @@ PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	RETURN_STR(internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false));
+	RETURN_STR(internal_uri->parser->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false));
 }
 
 PHP_METHOD(Uri_WhatWg_Url, resolve)
@@ -912,7 +912,7 @@ PHP_METHOD(Uri_WhatWg_Url, resolve)
 	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->handler, uri_str, this_object, true, false, errors);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, internal_uri->parser, uri_str, this_object, true, false, errors);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, __serialize)
@@ -924,7 +924,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	/* Serialize state: "uri" key in the first array */
-	zend_string *uri_str = internal_uri->handler->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
+	zend_string *uri_str = internal_uri->parser->uri_to_string(internal_uri->uri, URI_RECOMPOSITION_RAW_ASCII, false);
 	if (uri_str == NULL) {
 		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
@@ -974,8 +974,8 @@ static void uri_free_obj_handler(zend_object *object)
 	uri_object_t *uri_object = uri_object_from_obj(object);
 
 	if (UNEXPECTED(uri_object->internal.uri != NULL)) {
-		uri_object->internal.handler->free_uri(uri_object->internal.uri);
-		uri_object->internal.handler = NULL;
+		uri_object->internal.parser->free_uri(uri_object->internal.uri);
+		uri_object->internal.parser = NULL;
 		uri_object->internal.uri = NULL;
 	}
 
@@ -993,9 +993,9 @@ zend_object *uri_clone_obj_handler(zend_object *object)
 	ZEND_ASSERT(new_object != NULL);
 	uri_object_t *new_uri_object = uri_object_from_obj(new_object);
 
-	new_uri_object->internal.handler = internal_uri->handler;
+	new_uri_object->internal.parser = internal_uri->parser;
 
-	void *uri = internal_uri->handler->clone_uri(internal_uri->uri);
+	void *uri = internal_uri->parser->clone_uri(internal_uri->uri);
 	ZEND_ASSERT(uri != NULL);
 
 	new_uri_object->internal.uri = uri;
@@ -1015,17 +1015,17 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_implementation_set_object_handlers(ze
 	object_handlers->clone_obj = uri_clone_obj_handler;
 }
 
-PHPAPI zend_result php_uri_handler_register(const uri_handler_t *uri_handler)
+PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser)
 {
-	zend_string *key = zend_string_init_interned(uri_handler->name, strlen(uri_handler->name), true);
+	zend_string *key = zend_string_init_interned(uri_parser->name, strlen(uri_parser->name), true);
 
-	ZEND_ASSERT(uri_handler->name != NULL);
-	ZEND_ASSERT(uri_handler->parse_uri != NULL);
-	ZEND_ASSERT(uri_handler->clone_uri != NULL || strcmp(uri_handler->name, URI_PARSER_PHP) == 0);
-	ZEND_ASSERT(uri_handler->uri_to_string != NULL || strcmp(uri_handler->name, URI_PARSER_PHP) == 0);
-	ZEND_ASSERT(uri_handler->free_uri != NULL);
+	ZEND_ASSERT(uri_parser->name != NULL);
+	ZEND_ASSERT(uri_parser->parse_uri != NULL);
+	ZEND_ASSERT(uri_parser->clone_uri != NULL || strcmp(uri_parser->name, URI_PARSER_PHP) == 0);
+	ZEND_ASSERT(uri_parser->uri_to_string != NULL || strcmp(uri_parser->name, URI_PARSER_PHP) == 0);
+	ZEND_ASSERT(uri_parser->free_uri != NULL);
 
-	zend_result result = zend_hash_add_ptr(&uri_handlers, key, (void *) uri_handler) != NULL ? SUCCESS : FAILURE;
+	zend_result result = zend_hash_add_ptr(&uri_parsers, key, (void *) uri_parser) != NULL ? SUCCESS : FAILURE;
 
 	zend_string_release_ex(key, true);
 
@@ -1047,13 +1047,13 @@ static PHP_MINIT_FUNCTION(uri)
 	uri_whatwg_url_validation_error_ce = register_class_Uri_WhatWg_UrlValidationError();
 	uri_whatwg_url_validation_error_type_ce = register_class_Uri_WhatWg_UrlValidationErrorType();
 
-	zend_hash_init(&uri_handlers, 4, NULL, NULL, true);
+	zend_hash_init(&uri_parsers, 4, NULL, NULL, true);
 
-	if (php_uri_handler_register(&uriparser_uri_handler) == FAILURE) {
+	if (php_uri_parser_register(&uriparser_uri_parser) == FAILURE) {
 		return FAILURE;
 	}
 
-	if (php_uri_handler_register(&lexbor_uri_handler) == FAILURE) {
+	if (php_uri_parser_register(&lexbor_uri_parser) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -1070,7 +1070,7 @@ static PHP_MINFO_FUNCTION(uri)
 
 static PHP_MSHUTDOWN_FUNCTION(uri)
 {
-	zend_hash_destroy(&uri_handlers);
+	zend_hash_destroy(&uri_parsers);
 
 	return SUCCESS;
 }

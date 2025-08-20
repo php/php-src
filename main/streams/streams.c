@@ -2458,22 +2458,22 @@ void php_stream_context_unset_option(php_stream_context *context,
 }
 /* }}} */
 
-PHPAPI struct uri_handler_t *php_stream_context_get_uri_handler(const char *wrappername, php_stream_context *context)
+PHPAPI struct uri_parser_t *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context)
 {
 	if (context == NULL) {
-		return php_uri_get_handler(NULL);
+		return php_uri_get_parser(NULL);
 	}
 
-	zval *uri_handler_name = php_stream_context_get_option(context, wrappername, "uri_parser_class");
-	if (uri_handler_name == NULL || Z_TYPE_P(uri_handler_name) == IS_NULL) {
-		return php_uri_get_handler(NULL);
+	zval *uri_parser_name = php_stream_context_get_option(context, wrappername, "uri_parser_class");
+	if (uri_parser_name == NULL || Z_TYPE_P(uri_parser_name) == IS_NULL) {
+		return php_uri_get_parser(NULL);
 	}
 
-	if (Z_TYPE_P(uri_handler_name) != IS_STRING) {
+	if (Z_TYPE_P(uri_parser_name) != IS_STRING) {
 		return NULL;
 	}
 
-	return php_uri_get_handler(Z_STR_P(uri_handler_name));
+	return php_uri_get_parser(Z_STR_P(uri_parser_name));
 }
 
 /* {{{ php_stream_dirent_alphasort */

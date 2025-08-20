@@ -66,9 +66,9 @@ PHPAPI void php_stream_context_set_option(php_stream_context *context,
 void php_stream_context_unset_option(php_stream_context *context,
 	const char *wrappername, const char *optionname);
 
-struct uri_handler_t;
+struct uri_parser_t;
 
-PHPAPI struct uri_handler_t *php_stream_context_get_uri_handler(const char *wrappername, php_stream_context *context);
+PHPAPI struct uri_parser_t *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context);
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);
 END_EXTERN_C()

@@ -20,7 +20,7 @@
 #include "php_uri_common.h"
 #include "lexbor/url/url.h"
 
-extern const uri_handler_t lexbor_uri_handler;
+extern const uri_parser_t lexbor_uri_parser;
 
 lxb_url_t *lexbor_parse_uri_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent);
 

@@ -75,9 +75,9 @@ typedef struct uri_property_handlers_t {
 	uri_property_handler_t fragment;
 } uri_property_handlers_t;
 
-typedef struct uri_handler_t {
+typedef struct uri_parser_t {
 	/**
-	 * Name (the FQCN) of the URI handler. The "" name is reserved for the handler of the legacy parse_url().
+	 * Name (the FQCN) of the URI parser. The "" name is reserved for the handler of the legacy parse_url().
 	 */
 	const char *name;
 
@@ -139,10 +139,10 @@ typedef struct uri_handler_t {
 	void (*free_uri)(void *uri);
 
 	const uri_property_handlers_t property_handlers;
-} uri_handler_t;
+} uri_parser_t;
 
 typedef struct uri_internal_t {
-	const uri_handler_t *handler;
+	const uri_parser_t *parser;
 	void *uri;
 } uri_internal_t;
 

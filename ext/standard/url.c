@@ -463,7 +463,7 @@ static void *parse_url_parse_uri(const char *uri_str, size_t uri_str_len, const 
 	return url;
 }
 
-const uri_handler_t parse_url_uri_handler = {
+const uri_parser_t parse_url_uri_parser = {
 	.name = URI_PARSER_PHP,
 	.parse_uri = parse_url_parse_uri,
 	.clone_uri = NULL,
@@ -924,5 +924,5 @@ no_name_header:
 
 PHP_MINIT_FUNCTION(url)
 {
-	return php_uri_handler_register(&parse_url_uri_handler);
+	return php_uri_parser_register(&parse_url_uri_parser);
 }
