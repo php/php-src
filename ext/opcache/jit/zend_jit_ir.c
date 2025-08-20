@@ -17377,16 +17377,8 @@ static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const
 			addr = ir_CAST_FC_FUNC(addr);
 #endif
 			ref = ir_CALL_2(IR_ADDR, addr, jit_FP(jit), jit_IP(jit));
-			if (opline &&
-			    (opline->opcode == ZEND_RETURN
-			  || opline->opcode == ZEND_RETURN_BY_REF
-			  || opline->opcode == ZEND_GENERATOR_RETURN
-			  || opline->opcode == ZEND_GENERATOR_CREATE
-			  || opline->opcode == ZEND_YIELD
-			  || opline->opcode == ZEND_YIELD_FROM)) {
-				zend_jit_vm_enter(jit, ref);
-				return 1;
-			}
+			zend_jit_vm_enter(jit, ref);
+			return 1;
 		}
 		zend_jit_vm_enter(jit, jit_IP(jit));
 	}
