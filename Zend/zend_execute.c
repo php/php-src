@@ -2006,7 +2006,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_consta
 	zend_string_release(message_suffix);
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_trait(
+ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
 	zend_class_entry *trait,
 	const zend_string *used_by
 ) {
