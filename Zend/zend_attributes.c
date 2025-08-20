@@ -116,21 +116,17 @@ static zend_string *validate_deprecated(
 	zend_class_entry *scope
 ) {
 	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
-		// Being used for a method or something, validation does not apply
+		/* Being used for a method or something, validation does not apply */
 		return NULL;
 	}
-	if (scope->ce_flags & ZEND_ACC_TRAIT) {
-		scope->ce_flags |= ZEND_ACC_DEPRECATED;
-		return NULL;
+	if (!(scope->ce_flags & ZEND_ACC_TRAIT)) {
+		const char *type = zend_get_object_type_case(scope, false);
+		return zend_strpprintf(0, "Cannot apply #[Deprecated] to %s %s", type, ZSTR_VAL(scope->name));
 	}
 
-	const char *type = "class";
-	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
-		type = "interface";
-	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
-		type = "enum";
-	}
-	return zend_strpprintf(0, "Cannot apply #[Deprecated] to %s %s", type, ZSTR_VAL(scope->name));
+	scope->ce_flags |= ZEND_ACC_DEPRECATED;
+	return NULL;
+
 }
 
 ZEND_METHOD(Attribute, __construct)
