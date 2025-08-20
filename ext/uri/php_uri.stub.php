@@ -30,6 +30,8 @@ namespace Uri\Rfc3986 {
 
         public function getScheme(): ?string {}
 
+        public function withScheme(string $scheme): static {}
+
         public function getRawScheme(): ?string {}
 
         public function getUserInfo(): ?string {}

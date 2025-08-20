@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e2c448000b1e00485bc988f073ea61dfc984e953 */
+ * Stub hash: 49c2068b8460f4e06c2266dea121704d073d5d3d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -12,6 +12,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Uri_Rfc3986_Uri___construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_getScheme, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_withScheme, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_Rfc3986_Uri_getRawScheme arginfo_class_Uri_Rfc3986_Uri_getScheme
@@ -97,9 +101,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url_getScheme arginfo_class_Uri_Rfc3986_Uri_getPath
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_withScheme, 0, 1, IS_STATIC, 0)
-	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Uri_WhatWg_Url_withScheme arginfo_class_Uri_Rfc3986_Uri_withScheme
 
 #define arginfo_class_Uri_WhatWg_Url_getUsername arginfo_class_Uri_Rfc3986_Uri_getScheme
 
@@ -168,6 +170,7 @@ ZEND_END_ARG_INFO()
 ZEND_METHOD(Uri_Rfc3986_Uri, parse);
 ZEND_METHOD(Uri_Rfc3986_Uri, __construct);
 ZEND_METHOD(Uri_Rfc3986_Uri, getScheme);
+ZEND_METHOD(Uri_Rfc3986_Uri, withScheme);
 ZEND_METHOD(Uri_Rfc3986_Uri, getRawScheme);
 ZEND_METHOD(Uri_Rfc3986_Uri, getUserInfo);
 ZEND_METHOD(Uri_Rfc3986_Uri, getRawUserInfo);
@@ -218,6 +221,7 @@ static const zend_function_entry class_Uri_Rfc3986_Uri_methods[] = {
 	ZEND_ME(Uri_Rfc3986_Uri, parse, arginfo_class_Uri_Rfc3986_Uri_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Uri_Rfc3986_Uri, __construct, arginfo_class_Uri_Rfc3986_Uri___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getScheme, arginfo_class_Uri_Rfc3986_Uri_getScheme, ZEND_ACC_PUBLIC)
+	ZEND_ME(Uri_Rfc3986_Uri, withScheme, arginfo_class_Uri_Rfc3986_Uri_withScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawScheme, arginfo_class_Uri_Rfc3986_Uri_getRawScheme, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getUserInfo, arginfo_class_Uri_Rfc3986_Uri_getUserInfo, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_Rfc3986_Uri, getRawUserInfo, arginfo_class_Uri_Rfc3986_Uri_getRawUserInfo, ZEND_ACC_PUBLIC)
