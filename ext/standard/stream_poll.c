@@ -334,7 +334,7 @@ PHP_FUNCTION(stream_poll_wait)
         
         /* Set events property */
         zend_update_property_long(stream_poll_event_class_entry, Z_OBJ(event_obj), 
-                                ZEND_STRL("events"), events[i].events);
+                                ZEND_STRL("events"), events[i].revents);
         
         /* Set data property */
         zend_update_property(stream_poll_event_class_entry, Z_OBJ(event_obj), 
