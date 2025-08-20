@@ -19,13 +19,13 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
-
 typedef struct {
 	int kqueue_fd;
 	struct kevent *events;
 	struct kevent *change_list;
 	int change_count;
 	int change_capacity;
+	int events_capacity;
 } kqueue_backend_data_t;
 
 static zend_result kqueue_backend_init(php_poll_ctx *ctx, int max_events)
@@ -43,9 +43,13 @@ static zend_result kqueue_backend_init(php_poll_ctx *ctx, int max_events)
 		return FAILURE;
 	}
 
-	data->events = pecalloc(max_events, sizeof(struct kevent), ctx->persistent);
-	data->change_list = pecalloc(max_events * 2, sizeof(struct kevent), ctx->persistent); /* Read + Write */
-	data->change_capacity = max_events * 2;
+	int initial_events = (max_events > 0) ? max_events : 64;
+	int initial_changes = max_events * 2;
+
+	data->events = pecalloc(initial_events, sizeof(struct kevent), ctx->persistent);
+	data->change_list = pecalloc(initial_changes, sizeof(struct kevent), ctx->persistent);
+	data->events_capacity = initial_events;
+	data->change_capacity = initial_changes;
 	data->change_count = 0;
 
 	if (!data->events || !data->change_list) {
@@ -75,15 +79,53 @@ static void kqueue_backend_cleanup(php_poll_ctx *ctx)
 	}
 }
 
-static zend_result kqueue_add_change(
-		php_poll_ctx *ctx, kqueue_backend_data_t *data, int fd, int16_t filter, uint16_t flags,
-		void *udata)
+/* Helper function to find existing change for same (ident, filter) */
+static int find_existing_change(kqueue_backend_data_t *data, int fd, int16_t filter)
 {
-	if (data->change_count >= data->change_capacity) {
+	for (int i = 0; i < data->change_count; i++) {
+		if (data->change_list[i].ident == (uintptr_t) fd && data->change_list[i].filter == filter) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+/* Helper function to grow change list capacity */
+static zend_result grow_change_list(php_poll_ctx *ctx, kqueue_backend_data_t *data)
+{
+	int new_capacity = data->change_capacity * 2;
+	struct kevent *new_list
+			= perealloc(data->change_list, new_capacity * sizeof(struct kevent), ctx->persistent);
+	if (!new_list) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
 
+	data->change_list = new_list;
+	data->change_capacity = new_capacity;
+	return SUCCESS;
+}
+
+static zend_result kqueue_add_change(php_poll_ctx *ctx, kqueue_backend_data_t *data, int fd,
+		int16_t filter, uint16_t flags, void *udata)
+{
+	int existing_idx = find_existing_change(data, fd, filter);
+
+	if (existing_idx >= 0) {
+		/* Update existing change */
+		struct kevent *existing = &data->change_list[existing_idx];
+		EV_SET(existing, fd, filter, flags, 0, 0, udata);
+		return SUCCESS;
+	}
+
+	if (data->change_count >= data->change_capacity) {
+		zend_result result = grow_change_list(ctx, data);
+		if (result != SUCCESS) {
+			return result;
+		}
+	}
+
+	/* Set new change */
 	struct kevent *kev = &data->change_list[data->change_count++];
 	EV_SET(kev, fd, filter, flags, 0, 0, udata);
 	return SUCCESS;
@@ -98,10 +140,10 @@ static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events
 		flags |= EV_ONESHOT;
 	}
 	if (events & PHP_POLL_ET) {
-		flags |= EV_CLEAR; /* kqueue edge-triggering */
+		flags |= EV_CLEAR;
 	}
 
-	int result = SUCCESS;
+	zend_result result = SUCCESS;
 
 	if (events & PHP_POLL_READ) {
 		result = kqueue_add_change(ctx, backend_data, fd, EVFILT_READ, flags, data);
@@ -124,17 +166,35 @@ static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
 
-	/* Add delete operations for both read and write filters */
-	kqueue_add_change(ctx, backend_data, fd, EVFILT_READ, EV_DELETE, NULL);
-	kqueue_add_change(ctx, backend_data, fd, EVFILT_WRITE, EV_DELETE, NULL);
+	/* Delete both read and write filters */
+	zend_result result = kqueue_add_change(ctx, backend_data, fd, EVFILT_READ, EV_DELETE, NULL);
+	if (result != SUCCESS) {
+		return result;
+	}
+	result = kqueue_add_change(ctx, backend_data, fd, EVFILT_WRITE, EV_DELETE, NULL);
+	if (result != SUCCESS) {
+		return result;
+	}
 
 	return SUCCESS;
 }
 
 static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
-	/* For kqueue, we delete and re-add */
-	kqueue_backend_remove(ctx, fd);
+	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
+
+	/* For epoll-consistent behavior: completely replace the event mask */
+	zend_result result = kqueue_add_change(ctx, backend_data, fd, EVFILT_READ, EV_DELETE, NULL);
+	if (result != SUCCESS) {
+		return result;
+	}
+
+	result = kqueue_add_change(ctx, backend_data, fd, EVFILT_WRITE, EV_DELETE, NULL);
+	if (result != SUCCESS) {
+		return result;
+	}
+
+	/* Add back the requested events (coalescing will handle DELETE -> ADD optimization) */
 	return kqueue_backend_add(ctx, fd, events, data);
 }
 
@@ -142,6 +202,18 @@ static int kqueue_backend_wait(
 		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
+
+	if (max_events > backend_data->events_capacity) {
+		int new_capacity = max_events;
+		struct kevent *new_events = perealloc(
+				backend_data->events, new_capacity * sizeof(struct kevent), ctx->persistent);
+		if (!new_events) {
+			max_events = backend_data->events_capacity;
+		} else {
+			backend_data->events = new_events;
+			backend_data->events_capacity = new_capacity;
+		}
+	}
 
 	struct timespec ts = { 0 }, *tsp = NULL;
 	if (timeout >= 0) {
