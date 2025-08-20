@@ -475,7 +475,7 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             -d opcache.enable_cli=1
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         if: ${{ !cancelled() }}
         with:
           fail_ci_if_error: true
