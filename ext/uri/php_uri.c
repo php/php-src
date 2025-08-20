@@ -26,8 +26,8 @@
 #include "ext/standard/info.h"
 
 #include "php_uri.h"
-#include "php_lexbor.h"
-#include "php_uriparser.h"
+#include "uri_parser_whatwg.h"
+#include "uri_parser_rfc3986.h"
 #include "php_uri_arginfo.h"
 #include "uriparser/src/UriConfig.h"
 

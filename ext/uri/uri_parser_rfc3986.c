@@ -15,7 +15,7 @@
 */
 
 #include "php.h"
-#include "php_uriparser.h"
+#include "uri_parser_rfc3986.h"
 #include "php_uri_common.h"
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"

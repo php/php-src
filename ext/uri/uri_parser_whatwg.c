@@ -15,7 +15,7 @@
 */
 
 #include "php.h"
-#include "php_lexbor.h"
+#include "uri_parser_whatwg.h"
 #include "php_uri_common.h"
 #include "Zend/zend_enum.h"
 #include "Zend/zend_smart_str.h"
