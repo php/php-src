@@ -59,7 +59,7 @@ static void parse_url_free_uri(void *uri)
 
 static void php_replace_controlchars(char *str, size_t len)
 {
-	assert(str != NULL);
+	ZEND_ASSERT(str != NULL);
 
 	wchar_t wbuf[len];
 	memset(wbuf, 0, sizeof(wbuf));
