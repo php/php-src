@@ -533,7 +533,7 @@ static zend_result lexbor_write_fragment(struct uri_internal_t *internal_uri, zv
 	return SUCCESS;
 }
 
-zend_result lexbor_request_init(void)
+PHP_RINIT_FUNCTION(uri_parser_whatwg)
 {
 	lexbor_mraw_t *mraw = lexbor_mraw_create();
 	lxb_status_t status = lexbor_mraw_init(mraw, LEXBOR_MRAW_BYTE_SIZE);
@@ -554,12 +554,14 @@ zend_result lexbor_request_init(void)
 	return SUCCESS;
 }
 
-void lexbor_request_shutdown(void)
+PHP_RSHUTDOWN_FUNCTION(uri_parser_whatwg)
 {
 	lxb_url_parser_memory_destroy(&lexbor_parser);
 	lxb_url_parser_destroy(&lexbor_parser, false);
 
 	lexbor_urls = 0;
+
+	return SUCCESS;
 }
 
 lxb_url_t *lexbor_parse_uri_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
