@@ -2,8 +2,6 @@
 FILTER_THROW_ON_FAILURE: filter_var_array() failure
 --EXTENSIONS--
 filter
---GET--
-a=1
 --FILE--
 <?php
 

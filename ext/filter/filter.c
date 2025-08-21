@@ -585,7 +585,7 @@ static void php_filter_call(
 	}
 
 	php_zval_filter(filtered, filter, filter_flags, options, charset);
-	// Don't wrap in an array if we are throwing an exception
+	/* Don't wrap in an array if we are throwing an exception */
 	if (EG(exception)) {
 		return;
 	}
