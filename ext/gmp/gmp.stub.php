@@ -83,7 +83,7 @@ function gmp_sub(GMP|int|string $num1, GMP|int|string $num2): GMP {}
 function gmp_mul(GMP|int|string $num1, GMP|int|string $num2): GMP {}
 
 /**
- * @return array<int, GMP>
+ * @return array{GMP, GMP}
  * @refcount 1
  */
 function gmp_div_qr(GMP|int|string $num1, GMP|int|string $num2, int $rounding_mode = GMP_ROUND_ZERO): array {}
