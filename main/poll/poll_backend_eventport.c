@@ -23,22 +23,11 @@
 #include <errno.h>
 
 typedef struct {
-	int fd;
-	uint32_t events;
-	void *data;
-	bool active;
-} eventport_fd_entry;
-
-typedef struct {
 	int port_fd;
 	port_event_t *events;
 	int events_capacity;
 	int active_associations;
-
-	/* FD tracking for re-association */
-	eventport_fd_entry *fd_entries;
-	int fd_entries_capacity;
-	int fd_count;
+	php_poll_fd_table *fd_table;
 } eventport_backend_data_t;
 
 /* Convert our event flags to event port flags */
@@ -85,68 +74,6 @@ static uint32_t eventport_events_from_native(int native)
 	return events;
 }
 
-/* Find FD entry */
-static eventport_fd_entry *eventport_find_fd_entry(eventport_backend_data_t *data, int fd)
-{
-	for (int i = 0; i < data->fd_entries_capacity; i++) {
-		if (data->fd_entries[i].active && data->fd_entries[i].fd == fd) {
-			return &data->fd_entries[i];
-		}
-	}
-	return NULL;
-}
-
-/* Get or create FD entry */
-static eventport_fd_entry *eventport_get_fd_entry(
-		eventport_backend_data_t *data, int fd, bool persistent)
-{
-	eventport_fd_entry *entry = eventport_find_fd_entry(data, fd);
-	if (entry) {
-		return entry;
-	}
-
-	/* Find empty slot */
-	for (int i = 0; i < data->fd_entries_capacity; i++) {
-		if (!data->fd_entries[i].active) {
-			data->fd_entries[i].fd = fd;
-			data->fd_entries[i].active = true;
-			data->fd_count++;
-			return &data->fd_entries[i];
-		}
-	}
-
-	int new_capacity = data->fd_entries_capacity ? data->fd_entries_capacity * 2 : 64;
-	eventport_fd_entry *new_entries
-			= perealloc(data->fd_entries, new_capacity * sizeof(eventport_fd_entry), persistent);
-	if (!new_entries) {
-		return NULL;
-	}
-
-	memset(new_entries + data->fd_entries_capacity, 0,
-			(new_capacity - data->fd_entries_capacity) * sizeof(eventport_fd_entry));
-
-	data->fd_entries = new_entries;
-
-	/* Use first new slot */
-	eventport_fd_entry *new_entry = &data->fd_entries[data->fd_entries_capacity];
-	new_entry->fd = fd;
-	new_entry->active = true;
-	data->fd_count++;
-
-	data->fd_entries_capacity = new_capacity;
-	return new_entry;
-}
-
-/* Remove FD entry */
-static void eventport_remove_fd_entry(eventport_backend_data_t *data, int fd)
-{
-	eventport_fd_entry *entry = eventport_find_fd_entry(data, fd);
-	if (entry) {
-		entry->active = false;
-		data->fd_count--;
-	}
-}
-
 /* Initialize event port backend */
 static zend_result eventport_backend_init(php_poll_ctx *ctx)
 {
@@ -165,7 +92,6 @@ static zend_result eventport_backend_init(php_poll_ctx *ctx)
 	}
 
 	data->active_associations = 0;
-	data->fd_count = 0;
 
 	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
 	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
@@ -178,16 +104,15 @@ static zend_result eventport_backend_init(php_poll_ctx *ctx)
 	}
 	data->events_capacity = initial_capacity;
 
-	/* Initialize FD tracking array */
-	data->fd_entries = pecalloc(initial_capacity, sizeof(eventport_fd_entry), ctx->persistent);
-	if (!data->fd_entries) {
+	/* Initialize FD tracking using helper */
+	data->fd_table = php_poll_fd_table_init(initial_capacity, ctx->persistent);
+	if (!data->fd_table) {
 		close(data->port_fd);
 		pefree(data->events, ctx->persistent);
 		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
-	data->fd_entries_capacity = initial_capacity;
 
 	ctx->backend_data = data;
 	return SUCCESS;
@@ -202,7 +127,7 @@ static void eventport_backend_cleanup(php_poll_ctx *ctx)
 			close(data->port_fd);
 		}
 		pefree(data->events, ctx->persistent);
-		pefree(data->fd_entries, ctx->persistent);
+		php_poll_fd_table_cleanup(data->fd_table);
 		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
@@ -214,14 +139,12 @@ static zend_result eventport_backend_add(
 {
 	eventport_backend_data_t *backend_data = (eventport_backend_data_t *) ctx->backend_data;
 
-	/* Check if FD already exists */
-	if (eventport_find_fd_entry(backend_data, fd)) {
+	if (php_poll_fd_table_find(backend_data->fd_table, fd)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
 		return FAILURE;
 	}
 
-	/* Get FD entry for tracking */
-	eventport_fd_entry *entry = eventport_get_fd_entry(backend_data, fd, ctx->persistent);
+	php_poll_fd_entry *entry = php_poll_fd_table_get(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -234,7 +157,7 @@ static zend_result eventport_backend_add(
 
 	/* Associate file descriptor with event port */
 	if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events, user_data) == -1) {
-		eventport_remove_fd_entry(backend_data, fd);
+		php_poll_fd_table_remove(backend_data->fd_table, fd);
 		switch (errno) {
 			case EEXIST:
 				php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
@@ -263,8 +186,7 @@ static zend_result eventport_backend_modify(
 {
 	eventport_backend_data_t *backend_data = (eventport_backend_data_t *) ctx->backend_data;
 
-	/* Find existing entry */
-	eventport_fd_entry *entry = eventport_find_fd_entry(backend_data, fd);
+	php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
 		return FAILURE;
@@ -303,9 +225,8 @@ static zend_result eventport_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	eventport_backend_data_t *backend_data = (eventport_backend_data_t *) ctx->backend_data;
 
-	/* Find existing entry */
-	eventport_fd_entry *entry = eventport_find_fd_entry(backend_data, fd);
-	if (!entry) {
+	/* Check if exists using helper */
+	if (!php_poll_fd_table_find(backend_data->fd_table, fd)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
 		return FAILURE;
 	}
@@ -326,9 +247,49 @@ static zend_result eventport_backend_remove(php_poll_ctx *ctx, int fd)
 		}
 	}
 
-	eventport_remove_fd_entry(backend_data, fd);
+	php_poll_fd_table_remove(backend_data->fd_table, fd);
 	backend_data->active_associations--;
 	return SUCCESS;
+}
+
+/* Handle re-association after event */
+static void eventport_handle_reassociation(
+		eventport_backend_data_t *backend_data, int fd, uint32_t fired_events)
+{
+	php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
+	if (!entry) {
+		return;
+	}
+
+	if (entry->events & PHP_POLL_ONESHOT) {
+		/* Oneshot: remove from tracking */
+		php_poll_fd_table_remove(backend_data->fd_table, fd);
+		backend_data->active_associations--;
+		return;
+	}
+
+	/* Determine which events to re-associate with */
+	uint32_t reassoc_events = entry->events;
+	if (entry->events & PHP_POLL_ET) {
+		/* Edge-triggered: don't re-associate with events that just fired */
+		reassoc_events &= ~fired_events;
+		reassoc_events &= ~PHP_POLL_ET; /* Remove ET flag for port_associate */
+	}
+
+	if (reassoc_events != 0) {
+		/* Re-associate for continued monitoring */
+		int native_events = eventport_events_to_native(reassoc_events);
+		if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events, entry->data)
+				!= 0) {
+			/* Re-association failed - might be due to fd being closed */
+			php_poll_fd_table_remove(backend_data->fd_table, fd);
+			backend_data->active_associations--;
+		}
+	} else {
+		/* No events to re-associate with */
+		php_poll_fd_table_remove(backend_data->fd_table, fd);
+		backend_data->active_associations--;
+	}
 }
 
 /* Wait for events using event port */
@@ -387,7 +348,7 @@ static int eventport_backend_wait(
 
 	int nfds = (int) nget;
 
-	/* Process the raw events first */
+	/* Process the events and handle re-association */
 	for (int i = 0; i < nfds; i++) {
 		port_event_t *port_event = &backend_data->events[i];
 
@@ -399,40 +360,8 @@ static int eventport_backend_wait(
 			events[i].revents = eventport_events_from_native(port_event->portev_events);
 			events[i].data = port_event->portev_user;
 
-			/* Event ports are naturally level-triggered but auto-dissociate after firing.
-			 * Re-associate unless it's oneshot */
-			eventport_fd_entry *entry = eventport_find_fd_entry(backend_data, fd);
-			if (entry && !(entry->events & PHP_POLL_ONESHOT)) {
-				/* For level-triggered: re-associate with all events
-				 * For edge-triggered: re-associate with events that didn't fire */
-				uint32_t reassoc_events = entry->events;
-				if (entry->events & PHP_POLL_ET) {
-					/* Edge-triggered: don't re-associate with events that just fired */
-					reassoc_events &= ~events[i].revents;
-					reassoc_events &= ~PHP_POLL_ET; /* Remove ET flag for port_associate */
-				}
-
-				if (reassoc_events != 0) {
-					int native_events = eventport_events_to_native(reassoc_events);
-					if (port_associate(backend_data->port_fd, PORT_SOURCE_FD, fd, native_events,
-								entry->data)
-							!= 0) {
-						/* Re-association failed  might be due to fd being closed */
-						eventport_remove_fd_entry(backend_data, fd);
-						backend_data->active_associations--;
-					}
-				} else {
-					/* No events to re-associate with */
-					eventport_remove_fd_entry(backend_data, fd);
-					backend_data->active_associations--;
-				}
-			} else {
-				/* Oneshot or entry not found - remove from tracking */
-				if (entry) {
-					eventport_remove_fd_entry(backend_data, fd);
-				}
-				backend_data->active_associations--;
-			}
+			/* Handle re-association based on event type */
+			eventport_handle_reassociation(backend_data, fd, events[i].revents);
 		} else {
 			/* Handle other event sources if needed (timers, user events, etc.) */
 			events[i].fd = -1;
