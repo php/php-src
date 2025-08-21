@@ -298,6 +298,10 @@ AC_DEFINE('HAVE_STRNLEN', 1);
 
 AC_DEFINE('ZEND_CHECK_STACK_LIMIT', 1)
 
+ADD_SOURCES("main/poll", "poll_backend_iocp.c poll_backend_select.c poll_core.c \
+	poll_fd_table.c");
+ADD_FLAG("CFLAGS_BD_MAIN_POLL", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");
 ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
@@ -309,7 +313,7 @@ ADD_SOURCES("win32", "dllmain.c readdir.c \
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
-PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/streams/ win32/");
+PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/poll/ main/streams/ win32/");
 PHP_INSTALL_HEADERS("Zend/Optimizer", "zend_call_graph.h zend_cfg.h zend_dfg.h zend_dump.h zend_func_info.h zend_inference.h zend_optimizer.h zend_ssa.h zend_worklist.h");
 
 STDOUT.WriteBlankLines(1);
