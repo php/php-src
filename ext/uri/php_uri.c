@@ -480,7 +480,7 @@ static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 		Z_PARAM_ZVAL(errors)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_parser, uri_str, base_url_object, is_constructor, is_constructor, errors);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &php_uri_parser_whatwg, uri_str, base_url_object, is_constructor, is_constructor, errors);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, parse)
@@ -947,7 +947,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 
 PHP_METHOD(Uri_WhatWg_Url, __unserialize)
 {
-	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PARSER_WHATWG);
+	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PARSER_WHATWG);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
@@ -1053,7 +1053,7 @@ static PHP_MINIT_FUNCTION(uri)
 		return FAILURE;
 	}
 
-	if (php_uri_parser_register(&lexbor_uri_parser) == FAILURE) {
+	if (php_uri_parser_register(&php_uri_parser_whatwg) == FAILURE) {
 		return FAILURE;
 	}
 
