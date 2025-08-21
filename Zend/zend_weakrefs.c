@@ -524,6 +524,10 @@ HashTable *zend_weakmap_get_object_key_entry_gc(zend_object *object, zval **tabl
 				ZEND_ASSERT(zv);
 				zend_get_gc_buffer_add_ptr(gc_buffer, zv);
 				zend_get_gc_buffer_add_obj(gc_buffer, &wm->std);
+			} else if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_BARE_HT) {
+				/* Bare HashTables are intentionally ignored, since they are
+				 * intended for internal usage by extensions and might not be
+				 * collectable. */
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else if (tag == ZEND_WEAKREF_TAG_MAP) {
@@ -532,6 +536,8 @@ HashTable *zend_weakmap_get_object_key_entry_gc(zend_object *object, zval **tabl
 		ZEND_ASSERT(zv);
 		zend_get_gc_buffer_add_ptr(gc_buffer, zv);
 		zend_get_gc_buffer_add_obj(gc_buffer, &wm->std);
+	} else if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_BARE_HT) {
+		/* Bare HashTables are intentionally ignored (see above) */
 	}
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
@@ -558,6 +564,9 @@ HashTable *zend_weakmap_get_object_entry_gc(zend_object *object, zval **table, i
 				zval *zv = zend_hash_index_find(&wm->ht, obj_key);
 				ZEND_ASSERT(zv);
 				zend_get_gc_buffer_add_ptr(gc_buffer, zv);
+			} else if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_BARE_HT) {
+				/* Bare HashTables are intentionally ignored
+				 * (see zend_weakmap_get_object_key_entry_gc) */
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else if (tag == ZEND_WEAKREF_TAG_MAP) {
@@ -565,6 +574,9 @@ HashTable *zend_weakmap_get_object_entry_gc(zend_object *object, zval **table, i
 		zval *zv = zend_hash_index_find(&wm->ht, obj_key);
 		ZEND_ASSERT(zv);
 		zend_get_gc_buffer_add_ptr(gc_buffer, zv);
+	} else if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_BARE_HT) {
+		/* Bare HashTables are intentionally ignored
+		 * (see zend_weakmap_get_object_key_entry_gc) */
 	}
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
