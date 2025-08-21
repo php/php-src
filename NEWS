@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
     triggers "Constant already defined" warning). (ilutov)
+  . Partially fixed bug GH-19542 (Scanning of string literals >=2GB will fail
+    due to signed int overflow). (ilutov)
 
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
