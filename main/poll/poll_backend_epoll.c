@@ -74,7 +74,7 @@ static uint32_t epoll_events_from_native(uint32_t native)
 
 static zend_result epoll_backend_init(php_poll_ctx *ctx)
 {
-	epoll_backend_data_t *data = pecalloc(1, sizeof(epoll_backend_data_t), ctx->persistent);
+	epoll_backend_data_t *data = php_poll_calloc(1, sizeof(epoll_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -89,7 +89,7 @@ static zend_result epoll_backend_init(php_poll_ctx *ctx)
 
 	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
 	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
-	data->events = pecalloc(initial_capacity, sizeof(struct epoll_event), ctx->persistent);
+	data->events = php_poll_calloc(initial_capacity, sizeof(struct epoll_event), ctx->persistent);
 	if (!data->events) {
 		close(data->epoll_fd);
 		pefree(data, ctx->persistent);
@@ -166,7 +166,7 @@ static int epoll_backend_wait(
 
 	/* Ensure we have enough space for the requested events */
 	if (max_events > backend_data->events_capacity) {
-		struct epoll_event *new_events = perealloc(
+		struct epoll_event *new_events = php_poll_realloc(
 				backend_data->events, max_events * sizeof(struct epoll_event), ctx->persistent);
 		if (!new_events) {
 			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
