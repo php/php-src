@@ -21,6 +21,7 @@
 typedef struct {
 	int epoll_fd;
 	struct epoll_event *events;
+	int events_capacity;
 } epoll_backend_data_t;
 
 static uint32_t epoll_events_to_native(uint32_t events)
@@ -71,7 +72,7 @@ static uint32_t epoll_events_from_native(uint32_t native)
 	return events;
 }
 
-static zend_result epoll_backend_init(php_poll_ctx *ctx, int max_events)
+static zend_result epoll_backend_init(php_poll_ctx *ctx)
 {
 	epoll_backend_data_t *data = pecalloc(1, sizeof(epoll_backend_data_t), ctx->persistent);
 	if (!data) {
@@ -82,17 +83,20 @@ static zend_result epoll_backend_init(php_poll_ctx *ctx, int max_events)
 	data->epoll_fd = epoll_create1(EPOLL_CLOEXEC);
 	if (data->epoll_fd == -1) {
 		pefree(data, ctx->persistent);
-		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
 		return FAILURE;
 	}
 
-	data->events = pecalloc(max_events, sizeof(struct epoll_event), ctx->persistent);
+	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
+	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
+	data->events = pecalloc(initial_capacity, sizeof(struct epoll_event), ctx->persistent);
 	if (!data->events) {
 		close(data->epoll_fd);
 		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
+	data->events_capacity = initial_capacity;
 
 	ctx->backend_data = data;
 	return SUCCESS;
@@ -111,7 +115,7 @@ static void epoll_backend_cleanup(php_poll_ctx *ctx)
 	}
 }
 
-static int epoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result epoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
 
@@ -127,7 +131,7 @@ static int epoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, void *d
 	return SUCCESS;
 }
 
-static int epoll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
+static zend_result epoll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
 	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
 
@@ -143,7 +147,7 @@ static int epoll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void
 	return SUCCESS;
 }
 
-static int epoll_backend_remove(php_poll_ctx *ctx, int fd)
+static zend_result epoll_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
 
@@ -159,6 +163,18 @@ static int epoll_backend_wait(
 		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
+
+	/* Ensure we have enough space for the requested events */
+	if (max_events > backend_data->events_capacity) {
+		struct epoll_event *new_events = perealloc(
+				backend_data->events, max_events * sizeof(struct epoll_event), ctx->persistent);
+		if (!new_events) {
+			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+			return -1;
+		}
+		backend_data->events = new_events;
+		backend_data->events_capacity = max_events;
+	}
 
 	int nfds = epoll_wait(backend_data->epoll_fd, backend_data->events, max_events, timeout);
 
