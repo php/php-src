@@ -65,7 +65,7 @@
 		dest_ht = NULL; \
 		ZVAL_COPY(&str_tmp, arg ## arg_num); \
 		arg ## arg_num = &str_tmp; \
-		if (!zend_flf_parse_arg_str_slow(arg ## arg_num, &dest_str, arg_num)) { \
+		if (!(dest_str = zend_flf_parse_arg_str_slow(arg ## arg_num, arg_num))) { \
 			zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_ARRAY_OR_STRING, arg ## arg_num); \
 			goto flf_clean; \
 		} \
