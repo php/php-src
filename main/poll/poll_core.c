@@ -80,7 +80,7 @@ PHPAPI void php_poll_register_backends(void)
 }
 
 /* Get backend operations */
-const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backend)
+static const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backend)
 {
 	if (backend == PHP_POLL_BACKEND_AUTO) {
 		/* Return the first (best) available backend */
@@ -89,6 +89,22 @@ const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backe
 
 	for (int i = 0; i < num_registered_backends; i++) {
 		if (registered_backends[i] && registered_backends[i]->type == backend) {
+			return registered_backends[i];
+		}
+	}
+
+	return NULL;
+}
+
+/* Get backend operations by backend name */
+static const php_poll_backend_ops *php_poll_get_backend_ops_by_name(const char *backend_name)
+{
+	if (!backend_name) {
+		return NULL;
+	}
+
+	for (int i = 0; i < num_registered_backends; i++) {
+		if (registered_backends[i] && strcmp(registered_backends[i]->name, backend_name) == 0) {
 			return registered_backends[i];
 		}
 	}
@@ -111,9 +127,27 @@ PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, bo
 		pefree(ctx, persistent);
 		return NULL;
 	}
-
 	ctx->backend_type = preferred_backend;
-	ctx->max_events_hint = 0; /* No hint by default */
+
+	return ctx;
+}
+
+/* Create new poll context */
+PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, bool persistent)
+{
+	php_poll_ctx *ctx = php_poll_calloc(1, sizeof(php_poll_ctx), persistent);
+	if (!ctx) {
+		return NULL;
+	}
+	ctx->persistent = persistent;
+
+	/* Get backend operations */
+	ctx->backend_ops = php_poll_get_backend_ops_by_name(preferred_backend);
+	if (!ctx->backend_ops) {
+		pefree(ctx, persistent);
+		return NULL;
+	}
+	ctx->backend_type = ctx->backend_ops->type;
 
 	return ctx;
 }

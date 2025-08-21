@@ -97,9 +97,6 @@ php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd);
 void php_poll_fd_table_remove(php_poll_fd_table *table, int fd);
 int php_poll_simulate_edge_trigger(php_poll_fd_table *table, php_poll_event *events, int nfds);
 
-/* Internal functions */
-const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backend);
-
 static inline void php_poll_set_error(php_poll_ctx *ctx, php_poll_error error)
 {
 	ctx->last_error = error;
