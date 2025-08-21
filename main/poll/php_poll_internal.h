@@ -12,17 +12,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php_poll.h"
+#ifndef PHP_POLL_INTERNAL_H
+#define PHP_POLL_INTERNAL_H
 
-/* FD entry for tracking state */
-struct php_poll_fd_entry {
-	int fd;
-	uint32_t events;
-	uint32_t last_revents; /* For edge-trigger simulation */
-	void *data;
-	bool active;
-	bool et_armed; /* Edge-trigger state */
-};
+#include "php_poll.h"
 
 /* Backend interface */
 typedef struct php_poll_backend_ops {
@@ -30,7 +23,7 @@ typedef struct php_poll_backend_ops {
 	const char *name;
 
 	/* Initialize backend */
-	zend_result (*init)(php_poll_ctx *ctx, int max_events);
+	zend_result (*init)(php_poll_ctx *ctx);
 
 	/* Cleanup backend */
 	void (*cleanup)(php_poll_ctx *ctx);
@@ -59,16 +52,11 @@ struct php_poll_ctx {
 	const php_poll_backend_ops *backend_ops;
 	php_poll_backend_type backend_type;
 
-	int max_events;
-	int num_fds;
 	bool initialized;
 	bool persistent;
-	/* Whether to simulate edge triggering */
-	bool simulate_et;
 
-	/* FD tracking for edge-trigger simulation */
-	php_poll_fd_entry *fd_entries;
-	int fd_entries_size;
+	/* Optional capacity hint for backends */
+	int max_events_hint;
 
 	/* Last error */
 	php_poll_error last_error;
@@ -77,10 +65,8 @@ struct php_poll_ctx {
 	void *backend_data;
 };
 
-
+/* Internal functions */
 const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backend);
-
-php_poll_fd_entry *php_poll_find_fd_entry(php_poll_ctx *ctx, int fd);
 
 static inline void php_poll_set_error(php_poll_ctx *ctx, php_poll_error error)
 {
@@ -93,3 +79,5 @@ static inline void php_poll_set_system_error_if_not_set(php_poll_ctx *ctx)
 		ctx->last_error = PHP_POLL_ERR_SYSTEM;
 	}
 }
+
+#endif /* PHP_POLL_INTERNAL_H */
