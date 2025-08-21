@@ -65,6 +65,30 @@ struct php_poll_ctx {
 	void *backend_data;
 };
 
+/* Generic FD entry structure */
+typedef struct php_poll_fd_entry {
+	int fd;
+	uint32_t events;
+	void *data;
+	bool active;
+	uint32_t last_revents; /* For edge-trigger simulation */
+} php_poll_fd_entry;
+
+/* FD tracking table */
+typedef struct php_poll_fd_table {
+	php_poll_fd_entry *entries;
+	int capacity;
+	int count;
+	bool persistent;
+} php_poll_fd_table;
+
+php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent);
+void php_poll_fd_table_cleanup(php_poll_fd_table *table);
+php_poll_fd_entry *php_poll_fd_table_find(php_poll_fd_table *table, int fd);
+php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd);
+void php_poll_fd_table_remove(php_poll_fd_table *table, int fd);
+int php_poll_simulate_edge_trigger(php_poll_fd_table *table, php_poll_event *events, int nfds);
+
 /* Internal functions */
 const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backend);
 

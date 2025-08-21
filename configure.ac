@@ -1696,6 +1696,7 @@ PHP_ADD_SOURCES([main/poll], m4_normalize([
     poll_backend_poll.c
     poll_backend_select.c
     poll_core.c
+    poll_fd_table.c
   ]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
