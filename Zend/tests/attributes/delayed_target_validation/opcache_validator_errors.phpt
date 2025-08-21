@@ -4,6 +4,7 @@
 opcache.enable=1
 opcache.enable_cli=1
 opcache.preload={PWD}/opcache_validator_errors.inc
+opcache.file_cache_only=0
 --EXTENSIONS--
 opcache
 --SKIPIF--
