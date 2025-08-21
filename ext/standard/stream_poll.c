@@ -98,22 +98,24 @@ static zend_object *php_stream_poll_context_create_object(zend_class_entry *ce)
 PHP_FUNCTION(stream_poll_create)
 {
 	zend_long backend_long = PHP_POLL_BACKEND_AUTO;
+	zend_string *backend_str = NULL;
 	php_poll_ctx *poll_ctx;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 	Z_PARAM_OPTIONAL
-	Z_PARAM_LONG(backend_long)
+	Z_PARAM_STR_OR_LONG(backend_str, backend_long)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_poll_backend_type backend = (php_poll_backend_type) backend_long;
-
-	poll_ctx = php_poll_create(backend, false);
+	if (backend_str == NULL) {
+		poll_ctx = php_poll_create((php_poll_backend_type) backend_long, false);
+	} else {
+		poll_ctx = php_poll_create_by_name(ZSTR_VAL(backend_str), false);
+	}
 	if (!poll_ctx) {
 		zend_throw_exception(
 				stream_poll_exception_class_entry, "Failed to create polling context", 0);
 		RETURN_THROWS();
 	}
-
 	if (php_poll_init(poll_ctx) != SUCCESS) {
 		php_poll_destroy(poll_ctx);
 		zend_throw_exception(
