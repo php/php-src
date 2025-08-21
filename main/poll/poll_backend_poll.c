@@ -89,7 +89,7 @@ static struct pollfd *poll_get_empty_pollfd_slot(poll_backend_data_t *data)
 
 static zend_result poll_backend_init(php_poll_ctx *ctx)
 {
-	poll_backend_data_t *data = pecalloc(1, sizeof(poll_backend_data_t), ctx->persistent);
+	poll_backend_data_t *data = php_poll_calloc(1, sizeof(poll_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -98,7 +98,7 @@ static zend_result poll_backend_init(php_poll_ctx *ctx)
 	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
 	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
 
-	data->fds = pecalloc(initial_capacity, sizeof(struct pollfd), ctx->persistent);
+	data->fds = php_poll_calloc(initial_capacity, sizeof(struct pollfd), ctx->persistent);
 	if (!data->fds) {
 		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
@@ -161,7 +161,7 @@ static zend_result poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, 
 	if (!pfd) {
 		/* Need to grow the pollfd array */
 		int new_capacity = backend_data->fds_capacity * 2;
-		struct pollfd *new_fds = perealloc(
+		struct pollfd *new_fds = php_poll_realloc(
 				backend_data->fds, new_capacity * sizeof(struct pollfd), ctx->persistent);
 		if (!new_fds) {
 			php_poll_fd_table_remove(backend_data->fd_table, fd);

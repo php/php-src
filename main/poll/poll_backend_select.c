@@ -43,7 +43,8 @@ static void select_update_max_fd(select_backend_data_t *data)
 
 static zend_result select_backend_init(php_poll_ctx *ctx)
 {
-	select_backend_data_t *data = pecalloc(1, sizeof(select_backend_data_t), ctx->persistent);
+	select_backend_data_t *data
+			= php_poll_calloc(1, sizeof(select_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;

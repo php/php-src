@@ -17,6 +17,13 @@
 
 #include "php_poll.h"
 
+/* Allocation macros */
+#define php_poll_calloc(nmemb, size, persistent) \
+	((persistent) ? calloc((nmemb), (size)) : ecalloc((nmemb), (size)))
+#define php_poll_malloc(size, persistent) ((persistent) ? malloc((size)) : emalloc((size)))
+#define php_poll_realloc(ptr, size, persistent) \
+	((persistent) ? realloc((ptr), (size)) : erealloc((ptr), (size)))
+
 /* Backend interface */
 typedef struct php_poll_backend_ops {
 	php_poll_backend_type type;
@@ -82,6 +89,7 @@ typedef struct php_poll_fd_table {
 	bool persistent;
 } php_poll_fd_table;
 
+/* Poll FD helpers */
 php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent);
 void php_poll_fd_table_cleanup(php_poll_fd_table *table);
 php_poll_fd_entry *php_poll_fd_table_find(php_poll_fd_table *table, int fd);
