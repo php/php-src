@@ -77,7 +77,8 @@ static uint32_t eventport_events_from_native(int native)
 /* Initialize event port backend */
 static zend_result eventport_backend_init(php_poll_ctx *ctx)
 {
-	eventport_backend_data_t *data = pecalloc(1, sizeof(eventport_backend_data_t), ctx->persistent);
+	eventport_backend_data_t *data
+			= php_poll_calloc(1, sizeof(eventport_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -95,7 +96,7 @@ static zend_result eventport_backend_init(php_poll_ctx *ctx)
 
 	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
 	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
-	data->events = pecalloc(initial_capacity, sizeof(port_event_t), ctx->persistent);
+	data->events = php_poll_calloc(initial_capacity, sizeof(port_event_t), ctx->persistent);
 	if (!data->events) {
 		close(data->port_fd);
 		pefree(data, ctx->persistent);
@@ -311,7 +312,7 @@ static int eventport_backend_wait(
 
 	/* Ensure we have enough space for the requested events */
 	if (max_events > backend_data->events_capacity) {
-		port_event_t *new_events = perealloc(
+		port_event_t *new_events = php_poll_realloc(
 				backend_data->events, max_events * sizeof(port_event_t), ctx->persistent);
 		if (!new_events) {
 			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
