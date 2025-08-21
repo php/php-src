@@ -20,8 +20,6 @@
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"
 
-static void uriparser_free_uri(void *uri);
-
 static void *uriparser_malloc(UriMemoryManager *memory_manager, size_t size)
 {
 	return emalloc(size);
