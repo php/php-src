@@ -27,8 +27,8 @@
 ZEND_TLS lxb_url_parser_t lexbor_parser;
 ZEND_TLS unsigned short int lexbor_urls;
 
-#define LEXBOR_MAX_URL_COUNT 500
-#define LEXBOR_MRAW_BYTE_SIZE 8192
+static const unsigned short int LEXBOR_MAX_URL_COUNT = 500;
+static const size_t LEXBOR_MRAW_BYTE_SIZE = 8192;
 
 static zend_always_inline void zval_string_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
 {
