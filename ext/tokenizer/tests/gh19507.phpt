@@ -15,12 +15,10 @@ $tokens = PhpToken::tokenize('<?php (double) $x;', TOKEN_PARSE);
 foreach ($tokens as $token) {
     echo $token->getTokenName(), "\n";
 }
-
+?>
 --EXPECT--
 error handler called: Non-canonical cast (double) is deprecated, use the (float) cast instead
 T_OPEN_TAG
-T_LNUMBER
-;
 T_DOUBLE_CAST
 T_WHITESPACE
 T_VARIABLE
