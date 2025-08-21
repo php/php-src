@@ -54,6 +54,10 @@ PHP                                                                        NEWS
     (Girgias)
   . Added support for partitioned cookies. (nielsdos)
 
+- Tokenizer:
+  . Fixed bug GH-19507 (Corrupted result after recursive tokenization during
+    token_get_all()). (kubawerlos, nielsdos, Arnaud)
+
 14 Aug 2025, PHP 8.5.0beta1
 
 - Core:
