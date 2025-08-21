@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_LEXBOR_H
-#define PHP_LEXBOR_H
+#ifndef PHP_URI_PARSER_WHATWG_H
+#define PHP_URI_PARSER_WHATWG_H
 
 #include "php_uri_common.h"
 #include "lexbor/url/url.h"
