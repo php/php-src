@@ -236,21 +236,21 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
+	unsigned short      		default_port;
+	bool				allow_persistent;
+	bool				allow_local_infile;
+	char				*default_host;
+	char				*default_user;
+	char				*default_pw;
+	char				*default_socket;
+	char				*local_infile_directory;
+	char				*error_msg;
 	zend_long			num_links;
 	zend_long			max_links;
 	zend_long 			num_active_persistent;
 	zend_long 			num_inactive_persistent;
 	zend_long			max_persistent;
-	bool				allow_persistent;
-	zend_ulong			default_port;
-	char				*default_host;
-	char				*default_user;
-	char				*default_pw;
-	char				*default_socket;
-	bool				allow_local_infile;
-	char				*local_infile_directory;
 	zend_long			error_no;
-	char				*error_msg;
 	zend_long			report_mode;
 	bool 				rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
