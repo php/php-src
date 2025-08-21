@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_URIPARSER_H
-#define PHP_URIPARSER_H
+#ifndef PHP_URI_PARSER_RFC3986_H
+#define PHP_URI_PARSER_RFC3986_H
 
 #include <uriparser/Uri.h>
 #include "php_uri_common.h"
