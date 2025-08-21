@@ -62,14 +62,13 @@ struct php_poll_event {
 
 /* Forward declarations */
 typedef struct php_poll_ctx php_poll_ctx;
-typedef struct php_poll_fd_entry php_poll_fd_entry;
 typedef struct php_poll_backend_ops php_poll_backend_ops;
 typedef struct php_poll_event php_poll_event;
 
 /* Public API */
-PHPAPI php_poll_ctx *php_poll_create(
-		int max_events, php_poll_backend_type preferred_backend, bool persistent);
+PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, bool persistent);
 
+PHPAPI zend_result php_poll_set_max_events_hint(php_poll_ctx *ctx, int max_events);
 PHPAPI zend_result php_poll_init(php_poll_ctx *ctx);
 PHPAPI void php_poll_destroy(php_poll_ctx *ctx);
 

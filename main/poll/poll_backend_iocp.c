@@ -25,20 +25,101 @@ typedef struct iocp_operation {
 	int fd;
 	uint32_t events;
 	void *user_data;
+	bool active;
 	char buffer[1]; /* Minimal buffer for accept/recv operations */
 } iocp_operation_t;
 
 typedef struct {
+	int fd;
+	uint32_t events;
+	void *data;
+	bool active;
+	bool associated; /* Whether socket is associated with IOCP */
+} iocp_fd_entry;
+
+typedef struct {
 	HANDLE iocp_handle;
 	iocp_operation_t *operations;
-	int max_operations;
+	int operations_capacity;
 	int operation_count;
+
+	/* FD tracking */
+	iocp_fd_entry *fd_entries;
+	int fd_entries_capacity;
+	int fd_count;
+
 	LPFN_ACCEPTEX AcceptEx;
 	LPFN_CONNECTEX ConnectEx;
 	LPFN_GETACCEPTEXSOCKADDRS GetAcceptExSockaddrs;
 } iocp_backend_data_t;
 
-static zend_result iocp_backend_init(php_poll_ctx *ctx, int max_events)
+/* Find FD entry */
+static iocp_fd_entry *iocp_find_fd_entry(iocp_backend_data_t *data, int fd)
+{
+	for (int i = 0; i < data->fd_entries_capacity; i++) {
+		if (data->fd_entries[i].active && data->fd_entries[i].fd == fd) {
+			return &data->fd_entries[i];
+		}
+	}
+	return NULL;
+}
+
+/* Get or create FD entry */
+static iocp_fd_entry *iocp_get_fd_entry(iocp_backend_data_t *data, int fd, bool persistent)
+{
+	iocp_fd_entry *entry = iocp_find_fd_entry(data, fd);
+	if (entry) {
+		return entry;
+	}
+
+	/* Find empty slot */
+	for (int i = 0; i < data->fd_entries_capacity; i++) {
+		if (!data->fd_entries[i].active) {
+			data->fd_entries[i].fd = fd;
+			data->fd_entries[i].active = true;
+			data->fd_entries[i].associated = false;
+			data->fd_count++;
+			return &data->fd_entries[i];
+		}
+	}
+
+	/* Need to grow the array */
+	int new_capacity = data->fd_entries_capacity ? data->fd_entries_capacity * 2 : 64;
+	iocp_fd_entry *new_entries
+			= perealloc(data->fd_entries, new_capacity * sizeof(iocp_fd_entry), persistent);
+	if (!new_entries) {
+		return NULL;
+	}
+
+	/* Initialize new entries */
+	memset(new_entries + data->fd_entries_capacity, 0,
+			(new_capacity - data->fd_entries_capacity) * sizeof(iocp_fd_entry));
+
+	data->fd_entries = new_entries;
+
+	/* Use first new slot */
+	iocp_fd_entry *new_entry = &data->fd_entries[data->fd_entries_capacity];
+	new_entry->fd = fd;
+	new_entry->active = true;
+	new_entry->associated = false;
+	data->fd_count++;
+
+	data->fd_entries_capacity = new_capacity;
+	return new_entry;
+}
+
+/* Remove FD entry */
+static void iocp_remove_fd_entry(iocp_backend_data_t *data, int fd)
+{
+	iocp_fd_entry *entry = iocp_find_fd_entry(data, fd);
+	if (entry) {
+		entry->active = false;
+		entry->associated = false;
+		data->fd_count--;
+	}
+}
+
+static zend_result iocp_backend_init(php_poll_ctx *ctx)
 {
 	iocp_backend_data_t *data = pecalloc(1, sizeof(iocp_backend_data_t), ctx->persistent);
 	if (!data) {
@@ -54,15 +135,30 @@ static zend_result iocp_backend_init(php_poll_ctx *ctx, int max_events)
 		return FAILURE;
 	}
 
-	data->max_operations = max_events;
-	data->operations = pecalloc(max_events, sizeof(iocp_operation_t), ctx->persistent);
+	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
+	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
 
+	data->operations = pecalloc(initial_capacity, sizeof(iocp_operation_t), ctx->persistent);
 	if (!data->operations) {
 		CloseHandle(data->iocp_handle);
 		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
+	data->operations_capacity = initial_capacity;
+	data->operation_count = 0;
+
+	/* Initialize FD tracking array */
+	data->fd_entries = pecalloc(initial_capacity, sizeof(iocp_fd_entry), ctx->persistent);
+	if (!data->fd_entries) {
+		CloseHandle(data->iocp_handle);
+		pefree(data->operations, ctx->persistent);
+		pefree(data, ctx->persistent);
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
+	}
+	data->fd_entries_capacity = initial_capacity;
+	data->fd_count = 0;
 
 	/* Load Winsock extension functions */
 	SOCKET dummy_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -86,7 +182,6 @@ static zend_result iocp_backend_init(php_poll_ctx *ctx, int max_events)
 		closesocket(dummy_socket);
 	}
 
-	data->operation_count = 0;
 	ctx->backend_data = data;
 	return SUCCESS;
 }
@@ -99,6 +194,7 @@ static void iocp_backend_cleanup(php_poll_ctx *ctx)
 			CloseHandle(data->iocp_handle);
 		}
 		pefree(data->operations, ctx->persistent);
+		pefree(data->fd_entries, ctx->persistent);
 		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
@@ -109,49 +205,60 @@ static zend_result iocp_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, 
 	iocp_backend_data_t *backend_data = (iocp_backend_data_t *) ctx->backend_data;
 	SOCKET sock = (SOCKET) fd;
 
-	if (backend_data->operation_count >= backend_data->max_operations) {
+	/* Check if FD already exists */
+	if (iocp_find_fd_entry(backend_data, fd)) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
+		return FAILURE;
+	}
+
+	/* Get FD entry for tracking */
+	iocp_fd_entry *entry = iocp_get_fd_entry(backend_data, fd, ctx->persistent);
+	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
 
-	/* Associate socket with completion port */
-	HANDLE result
-			= CreateIoCompletionPort((HANDLE) sock, backend_data->iocp_handle, (ULONG_PTR) sock, 0);
-	if (result == NULL) {
-		php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
-		return FAILURE;
-	}
+	entry->events = events;
+	entry->data = data;
 
-	/* Set up operation structure */
-	iocp_operation_t *op = &backend_data->operations[backend_data->operation_count++];
-	memset(op, 0, sizeof(iocp_operation_t));
-	op->fd = fd;
-	op->events = events;
-	op->user_data = data;
-
-	/* For read events, post a recv operation */
-	if (events & PHP_POLL_READ) {
-		WSABUF wsabuf = { 1, op->buffer };
-		DWORD flags = 0;
-		DWORD bytes_received;
-
-		int result = WSARecv(sock, &wsabuf, 1, &bytes_received, &flags, &op->overlapped, NULL);
-
-		if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING) {
-			backend_data->operation_count--;
+	/* Associate socket with completion port if not already done */
+	if (!entry->associated) {
+		HANDLE result = CreateIoCompletionPort(
+				(HANDLE) sock, backend_data->iocp_handle, (ULONG_PTR) sock, 0);
+		if (result == NULL) {
+			iocp_remove_fd_entry(backend_data, fd);
 			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
 			return FAILURE;
 		}
+		entry->associated = true;
 	}
+
+	/* Note: IOCP operations are typically initiated on-demand rather than pre-posted.
+	 * For a polling API, we would need to simulate readiness using techniques like:
+	 * - Zero-byte reads to check readability
+	 * - Connect() to localhost to check writability
+	 * This is complex and IOCP is better suited for async I/O rather than polling.
+	 * For now, we just track the association. */
 
 	return SUCCESS;
 }
 
 static zend_result iocp_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *data)
 {
-	/* For IOCP, we need to cancel existing operations and re-add */
-	iocp_backend_remove(ctx, fd);
-	return iocp_backend_add(ctx, fd, events, data);
+	iocp_backend_data_t *backend_data = (iocp_backend_data_t *) ctx->backend_data;
+
+	/* Find existing entry */
+	iocp_fd_entry *entry = iocp_find_fd_entry(backend_data, fd);
+	if (!entry) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+		return FAILURE;
+	}
+
+	/* Update entry */
+	entry->events = events;
+	entry->data = data;
+
+	return SUCCESS;
 }
 
 static zend_result iocp_backend_remove(php_poll_ctx *ctx, int fd)
@@ -159,20 +266,18 @@ static zend_result iocp_backend_remove(php_poll_ctx *ctx, int fd)
 	iocp_backend_data_t *backend_data = (iocp_backend_data_t *) ctx->backend_data;
 	SOCKET sock = (SOCKET) fd;
 
+	/* Find existing entry */
+	iocp_fd_entry *entry = iocp_find_fd_entry(backend_data, fd);
+	if (!entry) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+		return FAILURE;
+	}
+
 	/* Cancel all I/O operations on this socket */
 	CancelIo((HANDLE) sock);
 
-	/* Remove from our operation list */
-	for (int i = 0; i < backend_data->operation_count; i++) {
-		if (backend_data->operations[i].fd == fd) {
-			/* Shift remaining operations */
-			for (int j = i; j < backend_data->operation_count - 1; j++) {
-				backend_data->operations[j] = backend_data->operations[j + 1];
-			}
-			backend_data->operation_count--;
-			break;
-		}
-	}
+	/* Remove from tracking */
+	iocp_remove_fd_entry(backend_data, fd);
 
 	return SUCCESS;
 }
@@ -180,6 +285,24 @@ static zend_result iocp_backend_remove(php_poll_ctx *ctx, int fd)
 static int iocp_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	iocp_backend_data_t *backend_data = (iocp_backend_data_t *) ctx->backend_data;
+
+	/* IOCP is fundamentally different from other polling mechanisms.
+	 * It's completion-based rather than readiness-based.
+	 * A proper implementation would need to:
+	 * 1. Post overlapped I/O operations for all registered FDs
+	 * 2. Wait for completions
+	 * 3. Return the completed operations as events
+	 *
+	 * This is complex and doesn't map well to a traditional polling API.
+	 * For now, we provide a minimal implementation that can detect some completions. */
+
+	if (backend_data->fd_count == 0) {
+		/* No FDs to monitor, but respect timeout */
+		if (timeout > 0) {
+			Sleep(timeout);
+		}
+		return 0;
+	}
 
 	DWORD bytes_transferred;
 	ULONG_PTR completion_key;
@@ -190,30 +313,38 @@ static int iocp_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 
 	if (!result && overlapped == NULL) {
 		/* Timeout or error */
-		return (GetLastError() == WAIT_TIMEOUT) ? 0 : -1;
+		DWORD error = GetLastError();
+		if (error == WAIT_TIMEOUT) {
+			return 0;
+		} else {
+			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+			return -1;
+		}
 	}
 
 	if (overlapped != NULL) {
-		/* Find the operation that completed */
-		iocp_operation_t *op = CONTAINING_RECORD(overlapped, iocp_operation_t, overlapped);
+		/* We got a completion, but since we're not posting operations in add(),
+		 * this would only happen if the application is doing its own overlapped I/O.
+		 * Try to match it to one of our tracked FDs. */
 
-		events[0].fd = op->fd;
-		events[0].events = op->events;
-		events[0].data = op->user_data;
+		SOCKET completed_socket = (SOCKET) completion_key;
+		iocp_fd_entry *entry = iocp_find_fd_entry(backend_data, (int) completed_socket);
 
-		if (result) {
-			/* Successful completion */
-			if (op->events & PHP_POLL_READ) {
-				events[0].revents = PHP_POLL_READ;
-			} else if (op->events & PHP_POLL_WRITE) {
-				events[0].revents = PHP_POLL_WRITE;
+		if (entry && max_events > 0) {
+			events[0].fd = entry->fd;
+			events[0].events = entry->events;
+			events[0].data = entry->data;
+
+			if (result) {
+				/* Successful completion - determine event type */
+				events[0].revents = entry->events & (PHP_POLL_READ | PHP_POLL_WRITE);
+			} else {
+				/* Error completion */
+				events[0].revents = PHP_POLL_ERROR;
 			}
-		} else {
-			/* Error completion */
-			events[0].revents = PHP_POLL_ERROR;
-		}
 
-		return 1;
+			return 1;
+		}
 	}
 
 	return 0;
@@ -221,15 +352,8 @@ static int iocp_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 
 static bool iocp_backend_is_available(void)
 {
-	/* IOCP is available on Windows NT and later */
-	OSVERSIONINFO osvi = { 0 };
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-
-	if (GetVersionEx(&osvi)) {
-		return (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT);
-	}
-
-	return false;
+	/* IOCP is available on Windows NT and later (basically all modern Windows) */
+	return true;
 }
 
 const php_poll_backend_ops php_poll_backend_iocp_ops = {
@@ -242,7 +366,7 @@ const php_poll_backend_ops php_poll_backend_iocp_ops = {
 	.remove = iocp_backend_remove,
 	.wait = iocp_backend_wait,
 	.is_available = iocp_backend_is_available,
-	.supports_et = true /* IOCP provides completion-based model which is edge-triggered */
+	.supports_et = true /* IOCP provides completion-based model which is naturally edge-triggered */
 };
 
 #endif /* _WIN32 */

@@ -19,13 +19,14 @@
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
+
 typedef struct {
 	int kqueue_fd;
 	struct kevent *events;
 	int events_capacity;
 } kqueue_backend_data_t;
 
-static zend_result kqueue_backend_init(php_poll_ctx *ctx, int max_events)
+static zend_result kqueue_backend_init(php_poll_ctx *ctx)
 {
 	kqueue_backend_data_t *data = pecalloc(1, sizeof(kqueue_backend_data_t), ctx->persistent);
 	if (!data) {
@@ -40,18 +41,16 @@ static zend_result kqueue_backend_init(php_poll_ctx *ctx, int max_events)
 		return FAILURE;
 	}
 
-	/* Use reasonable default if max_events is 0 */
-	int initial_events = (max_events > 0) ? max_events : 64;
-
-	data->events = pecalloc(initial_events, sizeof(struct kevent), ctx->persistent);
-	data->events_capacity = initial_events;
-
+	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
+	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
+	data->events = pecalloc(initial_capacity, sizeof(struct kevent), ctx->persistent);
 	if (!data->events) {
 		close(data->kqueue_fd);
 		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
+	data->events_capacity = initial_capacity;
 
 	ctx->backend_data = data;
 	return SUCCESS;
@@ -98,23 +97,24 @@ static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events
 	if (change_count > 0) {
 		int result = kevent(backend_data->kqueue_fd, changes, change_count, NULL, 0, NULL);
 		if (result == -1) {
-			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+			switch (errno) {
+				case EEXIST:
+					php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
+					break;
+				case ENOMEM:
+					php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+					break;
+				case EBADF:
+				case EINVAL:
+					php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+					break;
+				default:
+					php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+					break;
+			}
 			return FAILURE;
 		}
 	}
-
-	return SUCCESS;
-}
-
-static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
-{
-	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
-
-	struct kevent changes[2];
-	EV_SET(&changes[0], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-	EV_SET(&changes[1], fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-
-	kevent(backend_data->kqueue_fd, changes, 2, NULL, 0, NULL);
 
 	return SUCCESS;
 }
@@ -136,7 +136,7 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		add_flags |= EV_CLEAR;
 	}
 
-	/* It needs to reset read and write so it works in the same way as epoll */
+	/* Delete existing filters that are not in the new events */
 	if (!(events & PHP_POLL_READ)) {
 		EV_SET(&deletes[delete_count], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 		delete_count++;
@@ -146,7 +146,7 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		delete_count++;
 	}
 
-	/* Prepare add operations */
+	/* Prepare add operations for requested events */
 	if (events & PHP_POLL_READ) {
 		EV_SET(&adds[add_count], fd, EVFILT_READ, add_flags, 0, 0, data);
 		add_count++;
@@ -156,21 +156,61 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		add_count++;
 	}
 
+	/* Delete existing filters (ignore ENOENT errors) */
 	if (delete_count > 0) {
 		int result = kevent(backend_data->kqueue_fd, deletes, delete_count, NULL, 0, NULL);
-		/* ENOENT is not an issue here because we try to delete only if it is there */
 		if (result == -1 && errno != ENOENT) {
 			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
 			return FAILURE;
 		}
 	}
 
+	/* Add new filters */
 	if (add_count > 0) {
 		int result = kevent(backend_data->kqueue_fd, adds, add_count, NULL, 0, NULL);
 		if (result == -1) {
-			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+			switch (errno) {
+				case ENOENT:
+					php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+					break;
+				case ENOMEM:
+					php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+					break;
+				case EBADF:
+				case EINVAL:
+					php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+					break;
+				default:
+					php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+					break;
+			}
 			return FAILURE;
 		}
+	}
+
+	return SUCCESS;
+}
+
+static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
+{
+	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
+
+	struct kevent changes[2];
+	EV_SET(&changes[0], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+	EV_SET(&changes[1], fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+
+	int result = kevent(backend_data->kqueue_fd, changes, 2, NULL, 0, NULL);
+	if (result == -1 && errno != ENOENT) {
+		switch (errno) {
+			case EBADF:
+			case EINVAL:
+				php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+				break;
+			default:
+				php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+				break;
+		}
+		return FAILURE;
 	}
 
 	return SUCCESS;
@@ -181,17 +221,16 @@ static int kqueue_backend_wait(
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
 
-	/* Grow events array if needed */
+	/* Ensure we have enough space for the requested events */
 	if (max_events > backend_data->events_capacity) {
-		int new_capacity = max_events;
 		struct kevent *new_events = perealloc(
-				backend_data->events, new_capacity * sizeof(struct kevent), ctx->persistent);
+				backend_data->events, max_events * sizeof(struct kevent), ctx->persistent);
 		if (!new_events) {
-			max_events = backend_data->events_capacity;
-		} else {
-			backend_data->events = new_events;
-			backend_data->events_capacity = new_capacity;
+			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+			return -1;
 		}
+		backend_data->events = new_events;
+		backend_data->events_capacity = max_events;
 	}
 
 	struct timespec ts = { 0 }, *tsp = NULL;
@@ -206,7 +245,7 @@ static int kqueue_backend_wait(
 	if (nfds > 0) {
 		for (int i = 0; i < nfds; i++) {
 			events[i].fd = (int) backend_data->events[i].ident;
-			events[i].events = 0;
+			events[i].events = 0; /* Not used in results */
 			events[i].data = backend_data->events[i].udata;
 			events[i].revents = 0;
 
