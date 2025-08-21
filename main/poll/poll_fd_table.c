@@ -17,7 +17,7 @@
 /* Initialize FD table */
 php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent)
 {
-	php_poll_fd_table *table = pecalloc(1, sizeof(php_poll_fd_table), persistent);
+	php_poll_fd_table *table = php_poll_calloc(1, sizeof(php_poll_fd_table), persistent);
 	if (!table) {
 		return NULL;
 	}
@@ -26,7 +26,7 @@ php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent)
 		initial_capacity = 64;
 	}
 
-	table->entries = pecalloc(initial_capacity, sizeof(php_poll_fd_entry), persistent);
+	table->entries = php_poll_calloc(initial_capacity, sizeof(php_poll_fd_entry), persistent);
 	if (!table->entries) {
 		pefree(table, persistent);
 		return NULL;
@@ -79,7 +79,7 @@ php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd)
 
 	/* Need to grow the array */
 	int new_capacity = table->capacity * 2;
-	php_poll_fd_entry *new_entries = perealloc(
+	php_poll_fd_entry *new_entries = php_poll_realloc(
 			table->entries, new_capacity * sizeof(php_poll_fd_entry), table->persistent);
 	if (!new_entries) {
 		return NULL;
