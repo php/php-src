@@ -1,11 +1,5 @@
 --TEST--
 Stream polling basic functionality - only add
---SKIPIF--
-<?php
-if (!function_exists('stream_poll_create')) {
-    die("skip stream polling not available");
-}
-?>
 --FILE--
 <?php
 
