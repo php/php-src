@@ -99,7 +99,7 @@ const php_poll_backend_ops *php_poll_get_backend_ops(php_poll_backend_type backe
 /* Create new poll context */
 PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, bool persistent)
 {
-	php_poll_ctx *ctx = pecalloc(1, sizeof(php_poll_ctx), persistent);
+	php_poll_ctx *ctx = php_poll_calloc(1, sizeof(php_poll_ctx), persistent);
 	if (!ctx) {
 		return NULL;
 	}

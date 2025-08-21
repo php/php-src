@@ -86,7 +86,7 @@ static iocp_fd_entry *iocp_get_fd_entry(iocp_backend_data_t *data, int fd, bool 
 	/* Need to grow the array */
 	int new_capacity = data->fd_entries_capacity ? data->fd_entries_capacity * 2 : 64;
 	iocp_fd_entry *new_entries
-			= perealloc(data->fd_entries, new_capacity * sizeof(iocp_fd_entry), persistent);
+			= php_poll_realloc(data->fd_entries, new_capacity * sizeof(iocp_fd_entry), persistent);
 	if (!new_entries) {
 		return NULL;
 	}
@@ -121,7 +121,7 @@ static void iocp_remove_fd_entry(iocp_backend_data_t *data, int fd)
 
 static zend_result iocp_backend_init(php_poll_ctx *ctx)
 {
-	iocp_backend_data_t *data = pecalloc(1, sizeof(iocp_backend_data_t), ctx->persistent);
+	iocp_backend_data_t *data = php_poll_calloc(1, sizeof(iocp_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -138,7 +138,7 @@ static zend_result iocp_backend_init(php_poll_ctx *ctx)
 	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
 	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
 
-	data->operations = pecalloc(initial_capacity, sizeof(iocp_operation_t), ctx->persistent);
+	data->operations = php_poll_calloc(initial_capacity, sizeof(iocp_operation_t), ctx->persistent);
 	if (!data->operations) {
 		CloseHandle(data->iocp_handle);
 		pefree(data, ctx->persistent);
@@ -149,7 +149,7 @@ static zend_result iocp_backend_init(php_poll_ctx *ctx)
 	data->operation_count = 0;
 
 	/* Initialize FD tracking array */
-	data->fd_entries = pecalloc(initial_capacity, sizeof(iocp_fd_entry), ctx->persistent);
+	data->fd_entries = php_poll_calloc(initial_capacity, sizeof(iocp_fd_entry), ctx->persistent);
 	if (!data->fd_entries) {
 		CloseHandle(data->iocp_handle);
 		pefree(data->operations, ctx->persistent);
