@@ -67,6 +67,7 @@ typedef struct php_poll_event php_poll_event;
 
 /* Public API */
 PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, bool persistent);
+PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, bool persistent);
 
 PHPAPI zend_result php_poll_set_max_events_hint(php_poll_ctx *ctx, int max_events);
 PHPAPI zend_result php_poll_init(php_poll_ctx *ctx);

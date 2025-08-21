@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 768f5d4bf8786ebe66a3d17c129b3f508b745e35 */
+ * Stub hash: a683c6581814e2e73db2aa2863aefc7c477aef82 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1817,7 +1817,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_soundex arginfo_base64_encode
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_poll_create, 0, 0, StreamPollContext, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, backend, IS_LONG, 0, "STREAM_POLL_BACKEND_AUTO")
+	ZEND_ARG_TYPE_MASK(0, backend, MAY_BE_LONG|MAY_BE_STRING, "STREAM_POLL_BACKEND_AUTO")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_poll_add, 0, 3, IS_VOID, 0)
