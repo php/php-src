@@ -283,7 +283,7 @@ static uriparser_uris_t *uriparser_create_uris(void)
 	return uriparser_uris;
 }
 
-void *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len, const uriparser_uris_t *uriparser_base_urls, bool silent)
+uriparser_uris_t *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len, const uriparser_uris_t *uriparser_base_urls, bool silent)
 {
 	UriUriA uri = {0};
 
