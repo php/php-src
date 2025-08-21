@@ -431,12 +431,12 @@ int make_http_soap_request(
 	}
 
 	if (location != NULL && ZSTR_VAL(location)[0] != '\000') {
-		uri_handler_t *uri_handler = php_uri_get_handler(uri_parser_class);
-		if (uri_handler == NULL) {
+		uri_parser_t *uri_parser = php_uri_get_parser(uri_parser_class);
+		if (uri_parser == NULL) {
 			zend_argument_value_error(6, "must be a valid URI parser name");
 			return FALSE;
 		}
-		uri = php_uri_parse_to_struct(uri_handler, ZSTR_VAL(location), ZSTR_LEN(location), URI_COMPONENT_READ_RAW, true);
+		uri = php_uri_parse_to_struct(uri_parser, ZSTR_VAL(location), ZSTR_LEN(location), URI_COMPONENT_READ_RAW, true);
 	}
 
 	tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
@@ -1148,14 +1148,14 @@ try_again:
 		char *loc;
 
 		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
-			uri_handler_t *uri_handler = php_uri_get_handler(uri_parser_class);
-			if (uri_handler == NULL) {
+			uri_parser_t *uri_parser = php_uri_get_parser(uri_parser_class);
+			if (uri_parser == NULL) {
 				efree(loc);
 				zend_argument_value_error(6, "must be a valid URI parser name");
 				return FALSE;
 			}
 
-			php_uri *new_uri = php_uri_parse_to_struct(uri_handler, loc, strlen(loc), URI_COMPONENT_READ_RAW, true);
+			php_uri *new_uri = php_uri_parse_to_struct(uri_parser, loc, strlen(loc), URI_COMPONENT_READ_RAW, true);
 			efree(loc);
 
 			if (new_uri != NULL) {

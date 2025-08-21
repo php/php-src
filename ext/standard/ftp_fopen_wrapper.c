@@ -135,13 +135,13 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	char *transport;
 	int transport_len;
 
-	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ftp", context);
-	if (uri_handler == NULL) {
+	uri_parser_t *uri_parser = php_stream_context_get_uri_parser("ftp", context);
+	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
 	}
 
-	resource = php_uri_parse_to_struct(uri_handler, path, strlen(path), URI_COMPONENT_READ_RAW, true);
+	resource = php_uri_parse_to_struct(uri_parser, path, strlen(path), URI_COMPONENT_READ_RAW, true);
 	if (resource == NULL || resource->path == NULL) {
 		if (resource && presource) {
 			*presource = resource;
@@ -956,18 +956,18 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	int result;
 	char tmp_line[512];
 
-	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ftp", context);
-	if (uri_handler == NULL) {
+	uri_parser_t *uri_parser = php_stream_context_get_uri_parser("ftp", context);
+	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return 0;
 	}
 
-	resource_from = php_uri_parse_to_struct(uri_handler, url_from, strlen(url_from), URI_COMPONENT_READ_RAW, true);
+	resource_from = php_uri_parse_to_struct(uri_parser, url_from, strlen(url_from), URI_COMPONENT_READ_RAW, true);
 	if (!resource_from) {
 		return 0;
 	}
 
-	resource_to = php_uri_parse_to_struct(uri_handler, url_to, strlen(url_to), URI_COMPONENT_READ_RAW, true);
+	resource_to = php_uri_parse_to_struct(uri_parser, url_to, strlen(url_to), URI_COMPONENT_READ_RAW, true);
 	if (!resource_to) {
 		goto rename_errexit;
 	}

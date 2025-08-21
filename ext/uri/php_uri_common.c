@@ -23,21 +23,21 @@ const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_i
 {
 	switch (property_name) {
 		case URI_PROPERTY_NAME_SCHEME:
-			return &internal_uri->handler->property_handlers.scheme;
+			return &internal_uri->parser->property_handlers.scheme;
 		case URI_PROPERTY_NAME_USERNAME:
-			return &internal_uri->handler->property_handlers.username;
+			return &internal_uri->parser->property_handlers.username;
 		case URI_PROPERTY_NAME_PASSWORD:
-			return &internal_uri->handler->property_handlers.password;
+			return &internal_uri->parser->property_handlers.password;
 		case URI_PROPERTY_NAME_HOST:
-			return &internal_uri->handler->property_handlers.host;
+			return &internal_uri->parser->property_handlers.host;
 		case URI_PROPERTY_NAME_PORT:
-			return &internal_uri->handler->property_handlers.port;
+			return &internal_uri->parser->property_handlers.port;
 		case URI_PROPERTY_NAME_PATH:
-			return &internal_uri->handler->property_handlers.path;
+			return &internal_uri->parser->property_handlers.path;
 		case URI_PROPERTY_NAME_QUERY:
-			return &internal_uri->handler->property_handlers.query;
+			return &internal_uri->parser->property_handlers.query;
 		case URI_PROPERTY_NAME_FRAGMENT:
-			return &internal_uri->handler->property_handlers.fragment;
+			return &internal_uri->parser->property_handlers.fragment;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }

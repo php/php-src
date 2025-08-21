@@ -15,7 +15,7 @@
 */
 
 #include "php.h"
-#include "php_uriparser.h"
+#include "uri_parser_rfc3986.h"
 #include "php_uri_common.h"
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"
@@ -401,7 +401,7 @@ ZEND_ATTRIBUTE_NONNULL static void uriparser_free_uri(void *uri)
 	efree(uriparser_uris);
 }
 
-const uri_handler_t uriparser_uri_handler = {
+const uri_parser_t uriparser_uri_parser = {
 	.name = URI_PARSER_RFC3986,
 	.parse_uri = uriparser_parse_uri,
 	.clone_uri = uriparser_clone_uri,

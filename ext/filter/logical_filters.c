@@ -608,14 +608,14 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int parser_name_set;
 	FETCH_STR_OPTION(parser_name, URL_OPTION_URI_PARSER_CLASS);
 
-	uri_handler_t *uri_handler = php_uri_get_handler(parser_name_set ? parser_name : NULL);
-	if (uri_handler == NULL) {
+	uri_parser_t *uri_parser = php_uri_get_parser(parser_name_set ? parser_name : NULL);
+	if (uri_parser == NULL) {
 		zend_value_error("%s(): \"uri_parser_class\" option has invalid value", get_active_function_name());
 		RETURN_VALIDATION_FAILED
 	}
 
 	/* Parse the URI - if it fails, we return NULL */
-	php_uri *uri = php_uri_parse_to_struct(uri_handler, Z_STRVAL_P(value), Z_STRLEN_P(value), URI_COMPONENT_READ_RAW, true);
+	php_uri *uri = php_uri_parse_to_struct(uri_parser, Z_STRVAL_P(value), Z_STRLEN_P(value), URI_COMPONENT_READ_RAW, true);
 	if (uri == NULL) {
 		RETURN_VALIDATION_FAILED
 	}
@@ -630,7 +630,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 		if (
 			/* Skipping these checks is possible because the new URI implementations perform comprehensive validations. */
-			strcmp(uri_handler->name, URI_PARSER_PHP) == 0 &&
+			strcmp(uri_parser->name, URI_PARSER_PHP) == 0 &&
 			/* An IPv6 enclosed by square brackets is a valid hostname.*/
 			!php_filter_is_valid_ipv6_hostname(uri->host) &&
 			/* Validate domain.
@@ -651,7 +651,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (strcmp(uri_handler->name, URI_PARSER_PHP) == 0 &&
+	if (strcmp(uri_parser->name, URI_PARSER_PHP) == 0 &&
 		(
 			(uri->user != NULL && !is_userinfo_valid(uri->user)) ||
 			(uri->password != NULL && !is_userinfo_valid(uri->password))

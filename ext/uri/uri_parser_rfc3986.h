@@ -14,17 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_LEXBOR_H
-#define PHP_LEXBOR_H
+#ifndef PHP_URIPARSER_H
+#define PHP_URIPARSER_H
 
+#include <uriparser/Uri.h>
 #include "php_uri_common.h"
-#include "lexbor/url/url.h"
 
-extern const uri_handler_t lexbor_uri_handler;
+extern const uri_parser_t uriparser_uri_parser;
 
-lxb_url_t *lexbor_parse_uri_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent);
+typedef struct uriparser_uris_t {
+	UriUriA uri;
+	UriUriA normalized_uri;
+	bool normalized_uri_initialized;
+} uriparser_uris_t;
 
-zend_result lexbor_request_init(void);
-void lexbor_request_shutdown(void);
+zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
+
+void *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len, const uriparser_uris_t *uriparser_base_url, bool silent);
 
 #endif

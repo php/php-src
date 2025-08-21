@@ -2634,13 +2634,13 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		return NULL;
 	}
 
-	uri_handler_t *uri_handler = php_stream_context_get_uri_handler("ssl", context);
-	if (uri_handler == NULL) {
+	uri_parser_t *uri_parser = php_stream_context_get_uri_parser("ssl", context);
+	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
 	}
 
-	uri_internal_t *internal_uri = php_uri_parse(uri_handler, resourcename, resourcenamelen, true);
+	uri_internal_t *internal_uri = php_uri_parse(uri_parser, resourcename, resourcenamelen, true);
 	if (internal_uri == NULL) {
 		return NULL;
 	}
