@@ -1311,7 +1311,7 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 
 PHP_RINIT_FUNCTION(zend_test)
 {
-	ZT_G(global_weakmap) = emalloc(sizeof(HashTable));
+	ALLOC_HASHTABLE(ZT_G(global_weakmap));
 	zend_hash_init(ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	ZT_G(observer_nesting_depth) = 0;
 	return SUCCESS;
@@ -1324,7 +1324,7 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 		zend_weakrefs_hash_del(ZT_G(global_weakmap), zend_weakref_key_to_object(obj_key));
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(ZT_G(global_weakmap));
-	efree(ZT_G(global_weakmap));
+	FREE_HASHTABLE(ZT_G(global_weakmap));
 
 	if (ZT_G(zend_test_heap))  {
 		free(ZT_G(zend_test_heap));

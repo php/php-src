@@ -1,5 +1,5 @@
 --TEST--
-GH-19543 001: GC treats ZEND_WEAKREF_TAG_MAP references as WeakMap references
+GH-19543 002: GC treats ZEND_WEAKREF_TAG_MAP references as WeakMap references
 --FILE--
 <?php
 
