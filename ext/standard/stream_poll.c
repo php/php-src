@@ -323,8 +323,12 @@ PHP_FUNCTION(stream_poll_wait)
 	}
 
 	if (max_events <= 0) {
-		// TODO: get some recommended value from polling api basend on number of added events
-		max_events = 1024;
+		/* Get suitable value from the polling backend */
+		max_events = php_poll_get_suitable_max_events(context->ctx);
+		if (max_events <= 0) {
+			/* This should not happen but use fallback just in case */
+			max_events = 64;
+		}
 	}
 	events = emalloc(sizeof(php_poll_event) * max_events);
 

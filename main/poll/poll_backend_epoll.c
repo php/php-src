@@ -22,6 +22,7 @@ typedef struct {
 	int epoll_fd;
 	struct epoll_event *events;
 	int events_capacity;
+	int fd_count;
 } epoll_backend_data_t;
 
 static uint32_t epoll_events_to_native(uint32_t events)
@@ -127,6 +128,7 @@ static zend_result epoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events,
 		php_poll_set_error(ctx, (errno == EEXIST) ? PHP_POLL_ERR_EXISTS : PHP_POLL_ERR_SYSTEM);
 		return FAILURE;
 	}
+	backend_data->fd_count++;
 
 	return SUCCESS;
 }
@@ -155,6 +157,7 @@ static zend_result epoll_backend_remove(php_poll_ctx *ctx, int fd)
 		php_poll_set_error(ctx, (errno == ENOENT) ? PHP_POLL_ERR_NOTFOUND : PHP_POLL_ERR_SYSTEM);
 		return FAILURE;
 	}
+	backend_data->fd_count--;
 
 	return SUCCESS;
 }
@@ -190,6 +193,26 @@ static int epoll_backend_wait(
 	return nfds;
 }
 
+static int epoll_backend_get_suitable_max_events(php_poll_ctx *ctx)
+{
+	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
+
+	if (!backend_data) {
+		return -1;
+	}
+
+	/* For epoll, we now track exactly how many FDs are registered */
+	int active_fds = backend_data->fd_count;
+
+	if (active_fds == 0) {
+		return 1;
+	}
+
+	/* Epoll can return exactly one event per registered FD,
+	 * so the suitable max_events is exactly the number of registered FDs */
+	return active_fds;
+}
+
 static bool epoll_backend_is_available(void)
 {
 	int fd = epoll_create1(EPOLL_CLOEXEC);
@@ -210,6 +233,7 @@ const php_poll_backend_ops php_poll_backend_epoll_ops = {
 	.remove = epoll_backend_remove,
 	.wait = epoll_backend_wait,
 	.is_available = epoll_backend_is_available,
+	.get_suitable_max_events = epoll_backend_get_suitable_max_events,
 	.supports_et = true,
 };
 
