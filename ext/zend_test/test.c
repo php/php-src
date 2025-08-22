@@ -350,7 +350,7 @@ static ZEND_FUNCTION(zend_weakmap_attach)
 			Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_weakrefs_hash_add(&ZT_G(global_weakmap), obj, value)) {
+	if (zend_weakrefs_hash_add(ZT_G(global_weakmap), obj, value)) {
 		Z_TRY_ADDREF_P(value);
 		RETURN_TRUE;
 	}
@@ -365,13 +365,13 @@ static ZEND_FUNCTION(zend_weakmap_remove)
 			Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(zend_weakrefs_hash_del(&ZT_G(global_weakmap), obj) == SUCCESS);
+	RETURN_BOOL(zend_weakrefs_hash_del(ZT_G(global_weakmap), obj) == SUCCESS);
 }
 
 static ZEND_FUNCTION(zend_weakmap_dump)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_ARR(zend_array_dup(&ZT_G(global_weakmap)));
+	RETURN_ARR(zend_array_dup(ZT_G(global_weakmap)));
 }
 
 static ZEND_FUNCTION(zend_get_current_func_name)
@@ -1370,7 +1370,8 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 
 PHP_RINIT_FUNCTION(zend_test)
 {
-	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
+	ALLOC_HASHTABLE(ZT_G(global_weakmap));
+	zend_hash_init(ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	ZT_G(observer_nesting_depth) = 0;
 	zend_test_mm_custom_handlers_rinit();
 	return SUCCESS;
@@ -1379,10 +1380,11 @@ PHP_RINIT_FUNCTION(zend_test)
 PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
 	zend_ulong obj_key;
-	ZEND_HASH_FOREACH_NUM_KEY(&ZT_G(global_weakmap), obj_key) {
-		zend_weakrefs_hash_del(&ZT_G(global_weakmap), zend_weakref_key_to_object(obj_key));
+	ZEND_HASH_FOREACH_NUM_KEY(ZT_G(global_weakmap), obj_key) {
+		zend_weakrefs_hash_del(ZT_G(global_weakmap), zend_weakref_key_to_object(obj_key));
 	} ZEND_HASH_FOREACH_END();
-	zend_hash_destroy(&ZT_G(global_weakmap));
+	zend_hash_destroy(ZT_G(global_weakmap));
+	FREE_HASHTABLE(ZT_G(global_weakmap));
 
 	if (ZT_G(zend_test_heap))  {
 		free(ZT_G(zend_test_heap));
