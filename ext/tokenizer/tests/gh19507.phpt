@@ -1,5 +1,5 @@
 --TEST--
-Bug #19507: Recursive tokenization during `token_get_all` result on error
+GH-19507: Corrupted result after recursive tokenization during token_get_all()
 --EXTENSIONS--
 tokenizer
 --FILE--
