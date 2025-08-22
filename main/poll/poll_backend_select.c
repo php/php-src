@@ -298,6 +298,25 @@ static bool select_backend_is_available(void)
 	return true; /* select() is always available */
 }
 
+static int select_backend_get_suitable_max_events(php_poll_ctx *ctx)
+{
+	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
+
+	if (UNEXPECTED(!backend_data || !backend_data->fd_table)) {
+		return -1;
+	}
+
+	/* For select(), we know exactly how many FDs are registered */
+	int active_fds = backend_data->fd_table->count;
+
+	if (active_fds == 0) {
+		/* No active FDs, return 1 just to not pass empty events */
+		return 1;
+	}
+
+	return active_fds;
+}
+
 const php_poll_backend_ops php_poll_backend_select_ops = {
 	.type = PHP_POLL_BACKEND_SELECT,
 	.name = "select",
@@ -308,5 +327,6 @@ const php_poll_backend_ops php_poll_backend_select_ops = {
 	.remove = select_backend_remove,
 	.wait = select_backend_wait,
 	.is_available = select_backend_is_available,
+	.get_suitable_max_events = select_backend_get_suitable_max_events,
 	.supports_et = false /* select() doesn't support ET natively, but we simulate it */
 };

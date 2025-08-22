@@ -84,6 +84,9 @@ PHPAPI php_poll_backend_type php_poll_get_backend_type(php_poll_ctx *ctx);
 PHPAPI bool php_poll_supports_et(php_poll_ctx *ctx);
 PHPAPI php_poll_error php_poll_get_error(php_poll_ctx *ctx);
 
+/* Get suitable max_events for backend */
+PHPAPI int php_poll_get_suitable_max_events(php_poll_ctx *ctx);
+
 /* Backend registration */
 PHPAPI void php_poll_register_backends(void);
 

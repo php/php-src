@@ -308,6 +308,24 @@ static bool poll_backend_is_available(void)
 	return true; /* poll() is always available */
 }
 
+static int poll_backend_get_suitable_max_events(php_poll_ctx *ctx)
+{
+	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
+
+	if (UNEXPECTED(!backend_data || !backend_data->fd_table)) {
+		return -1;
+	}
+
+	/* For poll(), we know exactly how many FDs are registered */
+	int active_fds = backend_data->fds_used;
+
+	if (active_fds == 0) {
+		return 1;
+	}
+
+	return active_fds;
+}
+
 const php_poll_backend_ops php_poll_backend_poll_ops = {
 	.type = PHP_POLL_BACKEND_POLL,
 	.name = "poll",
@@ -318,6 +336,7 @@ const php_poll_backend_ops php_poll_backend_poll_ops = {
 	.remove = poll_backend_remove,
 	.wait = poll_backend_wait,
 	.is_available = poll_backend_is_available,
+	.get_suitable_max_events = poll_backend_get_suitable_max_events,
 	.supports_et = false, /* poll() doesn't support ET natively, but we simulate it */
 };
 

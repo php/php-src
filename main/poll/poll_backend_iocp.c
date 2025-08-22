@@ -356,6 +356,27 @@ static bool iocp_backend_is_available(void)
 	return true;
 }
 
+static int iocp_backend_get_suitable_max_events(php_poll_ctx *ctx)
+{
+	iocp_backend_data_t *backend_data = (iocp_backend_data_t *) ctx->backend_data;
+
+	if (!backend_data) {
+		return -1;
+	}
+
+	/* For IOCP, we track exactly how many FDs are registered */
+	int active_fds = backend_data->fd_count;
+
+	if (active_fds == 0) {
+		return 1;
+	}
+
+	/* IOCP can potentially return multiple completions per socket,
+	 * but typically it's one completion per operation.
+	 * Since we're simulating polling behavior, use the FD count directly. */
+	return active_fds;
+}
+
 const php_poll_backend_ops php_poll_backend_iocp_ops = {
 	.type = PHP_POLL_BACKEND_IOCP,
 	.name = "iocp",
@@ -366,6 +387,7 @@ const php_poll_backend_ops php_poll_backend_iocp_ops = {
 	.remove = iocp_backend_remove,
 	.wait = iocp_backend_wait,
 	.is_available = iocp_backend_is_available,
+	.get_suitable_max_events = iocp_backend_get_suitable_max_events,
 	.supports_et = true /* IOCP provides completion-based model which is naturally edge-triggered */
 };
 
