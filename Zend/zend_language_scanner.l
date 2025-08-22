@@ -2758,7 +2758,7 @@ skip_escape_conversion:
 		SCNG(heredoc_scan_ahead) = 1;
 		SCNG(heredoc_indentation) = 0;
 		SCNG(heredoc_indentation_uses_spaces) = 0;
-		SCNG(on_event_context);
+		SCNG(on_event_context) = NULL;
 		LANG_SCNG(on_event) = NULL;
 		CG(doc_comment) = NULL;
 
