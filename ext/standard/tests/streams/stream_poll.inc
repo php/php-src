@@ -1,11 +1,38 @@
 <?php
 // stream Poll Testing helper
 function pt_new_socket_pair(): array {
-    $sockets = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+    $domain = (strtoupper(substr(PHP_OS, 0, 3) == 'WIN') ? STREAM_PF_INET : STREAM_PF_UNIX);
+    $sockets = stream_socket_pair($domain, STREAM_SOCK_STREAM, 0);
     if ($sockets === false) {
         die("Cannot create socket pair\n");
     }
     return $sockets;
+}
+
+function pt_new_tcp_socket_pair(): array {
+    $server = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr);
+    if (!$server) {
+        die("Cannot create TCP server: $errstr\n");
+    }
+    $address = stream_socket_get_name($server, false);
+
+    $client = stream_socket_client("tcp://$address", $errno, $errstr);
+    if (!$client) {
+        fclose($server);
+        die("Cannot connect to TCP server: $errstr\n");
+    }
+
+    $server_conn = stream_socket_accept($server);
+    if (!$server_conn) {
+        fclose($server);
+        fclose($client);
+        die("Cannot accept connection\n");
+    }
+
+    // Close the listening socket (no longer needed)
+    fclose($server);
+
+    return [$client, $server_conn];
 }
 
 function pt_new_stream_poll(): StreamPollContext {
