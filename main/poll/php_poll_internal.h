@@ -50,6 +50,9 @@ typedef struct php_poll_backend_ops {
 	/* Check if backend is available */
 	bool (*is_available)(void);
 
+	/* Get suitable max_events for this backend */
+	int (*get_suitable_max_events)(php_poll_ctx *ctx);
+
 	/* Backend supports edge triggering natively */
 	bool supports_et;
 } php_poll_backend_ops;
