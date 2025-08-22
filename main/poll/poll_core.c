@@ -296,3 +296,13 @@ PHPAPI php_poll_error php_poll_get_error(php_poll_ctx *ctx)
 {
 	return ctx ? ctx->last_error : PHP_POLL_ERR_INVALID;
 }
+
+/* Get suitable max_events for backend */
+PHPAPI int php_poll_get_suitable_max_events(php_poll_ctx *ctx)
+{
+	if (UNEXPECTED(!ctx || !ctx->backend_ops)) {
+		return -1;
+	}
+
+	return ctx->backend_ops->get_suitable_max_events(ctx);
+}
