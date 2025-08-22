@@ -24,7 +24,7 @@ extern const uri_parser_t lexbor_uri_parser;
 
 lxb_url_t *lexbor_parse_uri_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent);
 
-zend_result lexbor_request_init(void);
-void lexbor_request_shutdown(void);
+PHP_RINIT_FUNCTION(uri_parser_whatwg);
+PHP_RSHUTDOWN_FUNCTION(uri_parser_whatwg);
 
 #endif

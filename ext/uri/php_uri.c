@@ -1077,7 +1077,7 @@ static PHP_MSHUTDOWN_FUNCTION(uri)
 
 PHP_RINIT_FUNCTION(uri)
 {
-	if (lexbor_request_init() == FAILURE) {
+	if (PHP_RINIT(uri_parser_whatwg)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -1086,7 +1086,9 @@ PHP_RINIT_FUNCTION(uri)
 
 PHP_RSHUTDOWN_FUNCTION(uri)
 {
-	lexbor_request_shutdown();
+	if (PHP_RSHUTDOWN(uri_parser_whatwg)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE) {
+		return FAILURE;
+	}
 
 	return SUCCESS;
 }

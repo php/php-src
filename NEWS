@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Added support for configuring the URI parser for the FTP/FTPS as well as
     the SSL/TLS stream wrappers as described in
     https://wiki.php.net/rfc/url_parsing_api#plugability. (kocsismate)
+  . Fixed bug GH-19548 (Shared memory violation on property inheritance).
+    (alexandre-daubois)
+  . Fixed bug GH-19544 (GC treats ZEND_WEAKREF_TAG_MAP references as WeakMap
+    references). (Arnaud, timwolla)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
