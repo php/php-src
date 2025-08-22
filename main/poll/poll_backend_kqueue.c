@@ -195,26 +195,39 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
+	struct kevent change;
 
-	struct kevent changes[2];
-	EV_SET(&changes[0], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-	EV_SET(&changes[1], fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-
-	int result = kevent(backend_data->kqueue_fd, changes, 2, NULL, 0, NULL);
-	if (result == -1 && errno != ENOENT) {
-		switch (errno) {
-			case EBADF:
-			case EINVAL:
-				php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
-				break;
-			default:
-				php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
-				break;
+	/* Remove read first */
+	EV_SET(&change, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+	int result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
+	/* Check if read failed because the (fd, event) combination did not exist */
+	bool read_noent = (result == -1 && errno == ENOENT);
+	if (result == 0 || read_noent) {
+		/* Remove write if there was no error other than noent */
+		EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+		result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
+		/* If both read and write failed because not found, then fail */
+		if (result == -1 && errno == ENOENT && read_noent) {
+			php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+			return FAILURE;
 		}
-		return FAILURE;
 	}
 
-	return SUCCESS;
+	if (result == 0) {
+		return SUCCESS;
+	}
+
+	switch (errno) {
+		case EBADF:
+		case EINVAL:
+			php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+			break;
+		default:
+			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+			break;
+	}
+
+	return FAILURE;
 }
 
 static int kqueue_backend_wait(
