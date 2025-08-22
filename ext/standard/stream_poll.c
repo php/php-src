@@ -283,6 +283,11 @@ PHP_FUNCTION(stream_poll_remove)
 		RETURN_THROWS();
 	}
 
+	if (!zend_hash_index_exists(context->stream_map, (zend_ulong) fd)) {
+		zend_throw_exception(stream_poll_exception_class_entry, "Stream not found", 0);
+		RETURN_THROWS();
+	}
+
 	/* Remove from poll context */
 	if (php_poll_remove(context->ctx, (int) fd) != SUCCESS) {
 		zend_throw_exception(
