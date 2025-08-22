@@ -24,7 +24,7 @@ typedef struct {
 	int kqueue_fd;
 	struct kevent *events;
 	int events_capacity;
-	int filter_count;
+	int fd_count; /* Track number of unique FDs (not individual filters) */
 } kqueue_backend_data_t;
 
 static zend_result kqueue_backend_init(php_poll_ctx *ctx)
@@ -116,7 +116,8 @@ static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events
 			}
 			return FAILURE;
 		}
-		backend_data->filter_count += change_count;
+
+		backend_data->fd_count++;
 	}
 
 	return SUCCESS;
@@ -160,7 +161,7 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		add_count++;
 	}
 
-	//* Delete existing filters individually to count successes */
+	/* Delete existing filters individually to count successes */
 	for (int i = 0; i < delete_count; i++) {
 		int result = kevent(backend_data->kqueue_fd, &deletes[i], 1, NULL, 0, NULL);
 		if (result == 0) {
@@ -196,10 +197,14 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		}
 	}
 
-	backend_data->filter_count = backend_data->filter_count - successful_deletes + add_count;
+	/* If we're adding filters to a previously empty FD, increment */
+	else if (successful_deletes == 0 && add_count > 0) {
+		backend_data->fd_count++;
+	}
 
 	return SUCCESS;
 }
+
 static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
@@ -248,7 +253,7 @@ static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 		return FAILURE;
 	}
 
-	backend_data->filter_count -= successful_deletes;
+	backend_data->fd_count--;
 
 	return SUCCESS;
 }
@@ -258,16 +263,19 @@ static int kqueue_backend_wait(
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
 
-	/* Ensure we have enough space for the requested events */
-	if (max_events > backend_data->events_capacity) {
+	/* Ensure we have enough space for the requested events.
+	 * Since kqueue can return up to 2 raw events per FD (read + write),
+	 * we need capacity for potentially 2x max_events. */
+	int required_capacity = max_events * 2;
+	if (required_capacity > backend_data->events_capacity) {
 		struct kevent *new_events = php_poll_realloc(
-				backend_data->events, max_events * sizeof(struct kevent), ctx->persistent);
+				backend_data->events, required_capacity * sizeof(struct kevent), ctx->persistent);
 		if (!new_events) {
 			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 			return -1;
 		}
 		backend_data->events = new_events;
-		backend_data->events_capacity = max_events;
+		backend_data->events_capacity = required_capacity;
 	}
 
 	struct timespec ts = { 0 }, *tsp = NULL;
@@ -277,28 +285,77 @@ static int kqueue_backend_wait(
 		tsp = &ts;
 	}
 
-	int nfds = kevent(backend_data->kqueue_fd, NULL, 0, backend_data->events, max_events, tsp);
+	int nfds = kevent(
+			backend_data->kqueue_fd, NULL, 0, backend_data->events, required_capacity, tsp);
 
 	if (nfds > 0) {
+		/* Group events by FD and combine read/write events */
+		int unique_events = 0;
+		int oneshot_fds = 0; /* Count FDs that are completely oneshot */
+
 		for (int i = 0; i < nfds; i++) {
-			events[i].fd = (int) backend_data->events[i].ident;
-			events[i].events = 0; /* Not used in results */
-			events[i].data = backend_data->events[i].udata;
-			events[i].revents = 0;
+			int fd = (int) backend_data->events[i].ident;
+			uint32_t revents = 0;
+			void *data = backend_data->events[i].udata;
+			bool is_oneshot = (backend_data->events[i].flags & EV_ONESHOT) != 0;
 
 			if (backend_data->events[i].filter == EVFILT_READ) {
-				events[i].revents |= PHP_POLL_READ;
+				revents |= PHP_POLL_READ;
 			} else if (backend_data->events[i].filter == EVFILT_WRITE) {
-				events[i].revents |= PHP_POLL_WRITE;
+				revents |= PHP_POLL_WRITE;
 			}
 
 			if (backend_data->events[i].flags & EV_EOF) {
-				events[i].revents |= PHP_POLL_HUP;
+				revents |= PHP_POLL_HUP;
 			}
 			if (backend_data->events[i].flags & EV_ERROR) {
-				events[i].revents |= PHP_POLL_ERROR;
+				revents |= PHP_POLL_ERROR;
+			}
+
+			/* Look for existing event for this FD */
+			bool found = false;
+			for (int j = 0; j < unique_events; j++) {
+				if (events[j].fd == fd) {
+					/* Combine with existing event */
+					events[j].revents |= revents;
+
+					/* Handle oneshot logic: if existing event was oneshot but current isn't,
+					 * or vice versa, then the combined event is not oneshot */
+					if (events[j].events & PHP_POLL_ONESHOT) {
+						if (!is_oneshot) {
+							/* Previously oneshot, now not oneshot - remove oneshot flag and
+							 * decrement counter */
+							events[j].events &= ~PHP_POLL_ONESHOT;
+							oneshot_fds--;
+						}
+					}
+					/* If existing wasn't oneshot and current is oneshot, keep it not oneshot */
+
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				/* New FD, create new event */
+				ZEND_ASSERT(unique_events < max_events);
+				events[unique_events].fd = fd;
+				events[unique_events].events = is_oneshot ? PHP_POLL_ONESHOT : 0;
+				events[unique_events].revents = revents;
+				events[unique_events].data = data;
+
+				if (is_oneshot) {
+					oneshot_fds++;
+				}
+
+				unique_events++;
 			}
 		}
+
+		/* Adjust fd_count by subtracting FDs that were completely oneshot */
+		backend_data->fd_count -= oneshot_fds;
+
+		return unique_events;
 	}
 
 	return nfds;
@@ -322,16 +379,14 @@ static int kqueue_backend_get_suitable_max_events(php_poll_ctx *ctx)
 		return -1;
 	}
 
-	/* For kqueue, we now track exactly how many filters are registered */
-	int active_filters = backend_data->filter_count;
-
-	if (active_filters == 0) {
+	int active_fds = backend_data->fd_count;
+	if (active_fds == 0) {
 		return 1;
 	}
 
-	/* Kqueue can return exactly one event per registered filter,
-	 * so the suitable max_events is exactly the number of registered filters */
-	return active_filters;
+	/* Kqueue will return one combined event per FD (like epoll),
+	 * so the suitable max_events is exactly the number of registered FDs */
+	return active_fds;
 }
 
 const php_poll_backend_ops php_poll_backend_kqueue_ops = {
