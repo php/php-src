@@ -1564,7 +1564,9 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 						ZSTR_VAL(parent_info->ce->name));
 			}
 
-			child_info->flags &= ~ZEND_ACC_OVERRIDE;
+			if (child_info->ce == ce) {
+				child_info->flags &= ~ZEND_ACC_OVERRIDE;
+			}
 		}
 	} else {
 		zend_function **hooks = parent_info->hooks;
