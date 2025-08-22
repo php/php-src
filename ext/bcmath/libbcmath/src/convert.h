@@ -111,4 +111,30 @@ static inline void bc_convert_vector_to_char(const BC_VECTOR *vector, char *nptr
 	}
 }
 
+static inline void bc_convert_vector_to_char_with_skip(const BC_VECTOR *vector, char *nptr, char *nend, size_t arr_size, size_t skip)
+{
+	/* bulk skip */
+	size_t array_skip = skip / BC_VECTOR_SIZE;
+	arr_size -= array_skip;
+	vector += array_skip;
+
+	/* skip */
+	skip %= BC_VECTOR_SIZE;
+	if (skip > 0) {
+		BC_VECTOR current_vector = *vector;
+		current_vector /= BC_POW_10_LUT[skip];
+		size_t write_size = MIN(nend - nptr + 1, BC_VECTOR_SIZE - skip);
+		for (size_t i = 0; i < write_size; i++) {
+			*nend-- = current_vector % BASE;
+			current_vector /= BASE;
+		}
+		vector++;
+		arr_size--;
+	}
+
+	if (arr_size > 0) {
+		bc_convert_vector_to_char(vector, nptr, nend, arr_size);
+	}
+}
+
 #endif
