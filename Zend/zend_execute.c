@@ -2631,9 +2631,7 @@ static zend_never_inline uint8_t slow_index_convert(HashTable *ht, const zval *d
 		case IS_NULL:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-				GC_ADDREF(ht);
-			}
+			GC_TRY_ADDREF(ht);
 
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 
@@ -2718,9 +2716,7 @@ static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval 
 		case IS_NULL:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-				GC_ADDREF(ht);
-			}
+			GC_TRY_ADDREF(ht);
 
 			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 
@@ -3226,9 +3222,7 @@ num_idx:
 null_undef_idx:
 		/* The array may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-			GC_ADDREF(ht);
-		}
+		GC_TRY_ADDREF(ht);
 
 		zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 
