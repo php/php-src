@@ -24,6 +24,7 @@ typedef struct {
 	int kqueue_fd;
 	struct kevent *events;
 	int events_capacity;
+	int filter_count;
 } kqueue_backend_data_t;
 
 static zend_result kqueue_backend_init(php_poll_ctx *ctx)
@@ -115,6 +116,7 @@ static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events
 			}
 			return FAILURE;
 		}
+		backend_data->filter_count += change_count;
 	}
 
 	return SUCCESS;
@@ -128,6 +130,7 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 	struct kevent adds[2];
 	int delete_count = 0;
 	int add_count = 0;
+	int successful_deletes = 0;
 
 	uint16_t add_flags = EV_ADD | EV_ENABLE;
 	if (events & PHP_POLL_ONESHOT) {
@@ -157,13 +160,17 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		add_count++;
 	}
 
-	/* Delete existing filters (ignore ENOENT errors) */
-	if (delete_count > 0) {
-		int result = kevent(backend_data->kqueue_fd, deletes, delete_count, NULL, 0, NULL);
-		if (result == -1 && errno != ENOENT) {
+	//* Delete existing filters individually to count successes */
+	for (int i = 0; i < delete_count; i++) {
+		int result = kevent(backend_data->kqueue_fd, &deletes[i], 1, NULL, 0, NULL);
+		if (result == 0) {
+			successful_deletes++;
+		} else if (errno != ENOENT) {
+			/* Real error (not just "doesn't exist") */
 			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
 			return FAILURE;
 		}
+		/* ENOENT is ignored - filter didn't exist */
 	}
 
 	/* Add new filters */
@@ -189,45 +196,61 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		}
 	}
 
+	backend_data->filter_count = backend_data->filter_count - successful_deletes + add_count;
+
 	return SUCCESS;
 }
-
 static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
 	struct kevent change;
+	int successful_deletes = 0;
 
-	/* Remove read first */
+	/* Try to remove read filter */
 	EV_SET(&change, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
 	int result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
-	/* Check if read failed because the (fd, event) combination did not exist */
-	bool read_noent = (result == -1 && errno == ENOENT);
-	if (result == 0 || read_noent) {
-		/* Remove write if there was no error other than noent */
-		EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-		result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
-		/* If both read and write failed because not found, then fail */
-		if (result == -1 && errno == ENOENT && read_noent) {
-			php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
-			return FAILURE;
-		}
-	}
-
 	if (result == 0) {
-		return SUCCESS;
+		successful_deletes++;
+	} else if (errno != ENOENT) {
+		switch (errno) {
+			case EBADF:
+			case EINVAL:
+				php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+				break;
+			default:
+				php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+				break;
+		}
+		return FAILURE;
 	}
 
-	switch (errno) {
-		case EBADF:
-		case EINVAL:
-			php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
-			break;
-		default:
-			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
-			break;
+	/* Try to remove write filter */
+	EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+	result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
+	if (result == 0) {
+		successful_deletes++;
+	} else if (errno != ENOENT) {
+		switch (errno) {
+			case EBADF:
+			case EINVAL:
+				php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
+				break;
+			default:
+				php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+				break;
+		}
+		return FAILURE;
 	}
 
-	return FAILURE;
+	/* If no filters were successfully deleted, that's an error */
+	if (successful_deletes == 0) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
+		return FAILURE;
+	}
+
+	backend_data->filter_count -= successful_deletes;
+
+	return SUCCESS;
 }
 
 static int kqueue_backend_wait(
@@ -291,6 +314,26 @@ static bool kqueue_backend_is_available(void)
 	return false;
 }
 
+static int kqueue_backend_get_suitable_max_events(php_poll_ctx *ctx)
+{
+	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
+
+	if (!backend_data) {
+		return -1;
+	}
+
+	/* For kqueue, we now track exactly how many filters are registered */
+	int active_filters = backend_data->filter_count;
+
+	if (active_filters == 0) {
+		return 1;
+	}
+
+	/* Kqueue can return exactly one event per registered filter,
+	 * so the suitable max_events is exactly the number of registered filters */
+	return active_filters;
+}
+
 const php_poll_backend_ops php_poll_backend_kqueue_ops = {
 	.type = PHP_POLL_BACKEND_KQUEUE,
 	.name = "kqueue",
@@ -301,6 +344,7 @@ const php_poll_backend_ops php_poll_backend_kqueue_ops = {
 	.remove = kqueue_backend_remove,
 	.wait = kqueue_backend_wait,
 	.is_available = kqueue_backend_is_available,
+	.get_suitable_max_events = kqueue_backend_get_suitable_max_events,
 	.supports_et = true /* kqueue supports EV_CLEAR for edge triggering */
 };
 
