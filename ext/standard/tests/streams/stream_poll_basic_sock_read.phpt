@@ -10,8 +10,7 @@ $poll_ctx = pt_new_stream_poll();
 stream_poll_add($poll_ctx, $socket1r, STREAM_POLL_READ, "socket_data");
 
 fwrite($socket1w, "test data");
-$events = stream_poll_wait($poll_ctx, 100);
-pt_print_events($events, true);
+pt_print_events(stream_poll_wait($poll_ctx, 100), true);
 
 ?>
 --EXPECT--
