@@ -386,6 +386,26 @@ static bool eventport_backend_is_available(void)
 	return false;
 }
 
+static int eventport_backend_get_suitable_max_events(php_poll_ctx *ctx)
+{
+	eventport_backend_data_t *backend_data = (eventport_backend_data_t *) ctx->backend_data;
+
+	if (!backend_data || !backend_data->fd_table) {
+		return -1;
+	}
+
+	/* For event ports, we track exactly how many FD associations are active */
+	int active_associations = backend_data->active_associations;
+
+	if (active_associations == 0) {
+		return 1;
+	}
+
+	/* Event ports can return exactly one event per association,
+	 * so the suitable max_events is exactly the number of active associations */
+	return active_associations;
+}
+
 /* Event port backend operations structure */
 const php_poll_backend_ops php_poll_backend_eventport_ops = {
 	.type = PHP_POLL_BACKEND_EVENTPORT,
@@ -397,6 +417,7 @@ const php_poll_backend_ops php_poll_backend_eventport_ops = {
 	.remove = eventport_backend_remove,
 	.wait = eventport_backend_wait,
 	.is_available = eventport_backend_is_available,
+	.get_suitable_max_events = eventport_backend_get_suitable_max_events,
 	.supports_et = true /* Supports both level and edge triggering */
 };
 
