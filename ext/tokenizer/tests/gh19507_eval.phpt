@@ -1,5 +1,5 @@
 --TEST--
-GH-19507: Corrupted result after recursive tokenization during token_get_all()
+GH-19507: Corrupted result after recursive tokenization during token_get_all() (error handler with eval)
 --EXTENSIONS--
 tokenizer
 --FILE--
