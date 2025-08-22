@@ -40,6 +40,12 @@ function pt_new_stream_poll(): StreamPollContext {
     return stream_poll_create($backend === false ? STREAM_POLL_BACKEND_AUTO : $backend);
 }
 
+function pt_write_sleep($stream, $data, $delay = 10000): int|false {
+    $result = fwrite($stream, $data, $delay);
+    usleep($delay);
+    return $result;
+}
+
 function pt_print_events($events, $read_data = false): void {
     if (!is_array($events)) {
         die("Events must be an array\n");

@@ -25,6 +25,7 @@ typedef struct {
 	struct kevent *events;
 	int events_capacity;
 	int fd_count; /* Track number of unique FDs (not individual filters) */
+	HashTable *complete_oneshot_fds; /* Track FDs with both read+write oneshot */
 } kqueue_backend_data_t;
 
 static zend_result kqueue_backend_init(php_poll_ctx *ctx)
@@ -53,6 +54,11 @@ static zend_result kqueue_backend_init(php_poll_ctx *ctx)
 		return FAILURE;
 	}
 	data->events_capacity = initial_capacity;
+	data->fd_count = 0; /* Initialize FD counter */
+
+	/* Initialize complete oneshot tracking */
+	data->complete_oneshot_fds = emalloc(sizeof(HashTable));
+	zend_hash_init(data->complete_oneshot_fds, 8, NULL, NULL, ctx->persistent);
 
 	ctx->backend_data = data;
 	return SUCCESS;
@@ -66,6 +72,10 @@ static void kqueue_backend_cleanup(php_poll_ctx *ctx)
 			close(data->kqueue_fd);
 		}
 		pefree(data->events, ctx->persistent);
+		if (data->complete_oneshot_fds) {
+			zend_hash_destroy(data->complete_oneshot_fds);
+			efree(data->complete_oneshot_fds);
+		}
 		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
@@ -117,7 +127,14 @@ static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events
 			return FAILURE;
 		}
 
+		/* Increment FD count only once per unique FD */
 		backend_data->fd_count++;
+
+		/* Track if this FD has both read+write oneshot */
+		if ((events & (PHP_POLL_READ | PHP_POLL_WRITE | PHP_POLL_ONESHOT))
+				== (PHP_POLL_READ | PHP_POLL_WRITE | PHP_POLL_ONESHOT)) {
+			zend_hash_index_add_empty_element(backend_data->complete_oneshot_fds, fd);
+		}
 	}
 
 	return SUCCESS;
@@ -197,9 +214,21 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		}
 	}
 
-	/* If we're adding filters to a previously empty FD, increment */
-	else if (successful_deletes == 0 && add_count > 0) {
+	/* Update FD count and oneshot tracking */
+	if (successful_deletes > 0 && add_count == 0) {
+		/* Removed all filters - FD is gone */
+		backend_data->fd_count--;
+		zend_hash_index_del(backend_data->complete_oneshot_fds, fd);
+	} else if (successful_deletes == 0 && add_count > 0) {
+		/* Added filters to previously empty FD */
 		backend_data->fd_count++;
+		if ((events & (PHP_POLL_READ | PHP_POLL_WRITE | PHP_POLL_ONESHOT))
+				== (PHP_POLL_READ | PHP_POLL_WRITE | PHP_POLL_ONESHOT)) {
+			zend_hash_index_add_empty_element(backend_data->complete_oneshot_fds, fd);
+		}
+	} else if (successful_deletes > 0 || add_count > 0) {
+		/* Modified existing filters - remove from oneshot tracking */
+		zend_hash_index_del(backend_data->complete_oneshot_fds, fd);
 	}
 
 	return SUCCESS;
@@ -208,15 +237,16 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
-	struct kevent change;
+	struct kevent changes[2];
 	int successful_deletes = 0;
 
 	/* Try to remove read filter */
-	EV_SET(&change, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-	int result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
+	EV_SET(&changes[0], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+	int result = kevent(backend_data->kqueue_fd, &changes[0], 1, NULL, 0, NULL);
 	if (result == 0) {
 		successful_deletes++;
 	} else if (errno != ENOENT) {
+		/* Real error */
 		switch (errno) {
 			case EBADF:
 			case EINVAL:
@@ -230,11 +260,12 @@ static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 	}
 
 	/* Try to remove write filter */
-	EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-	result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
+	EV_SET(&changes[1], fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+	result = kevent(backend_data->kqueue_fd, &changes[1], 1, NULL, 0, NULL);
 	if (result == 0) {
 		successful_deletes++;
 	} else if (errno != ENOENT) {
+		/* Real error */
 		switch (errno) {
 			case EBADF:
 			case EINVAL:
@@ -253,7 +284,11 @@ static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 		return FAILURE;
 	}
 
+	/* Update FD count - we removed all filters for this FD */
 	backend_data->fd_count--;
+
+	/* Remove from complete oneshot tracking */
+	zend_hash_index_del(backend_data->complete_oneshot_fds, fd);
 
 	return SUCCESS;
 }
@@ -291,7 +326,8 @@ static int kqueue_backend_wait(
 	if (nfds > 0) {
 		/* Group events by FD and combine read/write events */
 		int unique_events = 0;
-		int oneshot_fds = 0; /* Count FDs that are completely oneshot */
+		HashTable processed_complete_oneshot; /* Track which complete oneshot FDs we've processed */
+		zend_hash_init(&processed_complete_oneshot, 8, NULL, NULL, 0);
 
 		for (int i = 0; i < nfds; i++) {
 			int fd = (int) backend_data->events[i].ident;
@@ -299,6 +335,7 @@ static int kqueue_backend_wait(
 			void *data = backend_data->events[i].udata;
 			bool is_oneshot = (backend_data->events[i].flags & EV_ONESHOT) != 0;
 
+			/* Convert this event */
 			if (backend_data->events[i].filter == EVFILT_READ) {
 				revents |= PHP_POLL_READ;
 			} else if (backend_data->events[i].filter == EVFILT_WRITE) {
@@ -318,19 +355,6 @@ static int kqueue_backend_wait(
 				if (events[j].fd == fd) {
 					/* Combine with existing event */
 					events[j].revents |= revents;
-
-					/* Handle oneshot logic: if existing event was oneshot but current isn't,
-					 * or vice versa, then the combined event is not oneshot */
-					if (events[j].events & PHP_POLL_ONESHOT) {
-						if (!is_oneshot) {
-							/* Previously oneshot, now not oneshot - remove oneshot flag and
-							 * decrement counter */
-							events[j].events &= ~PHP_POLL_ONESHOT;
-							oneshot_fds--;
-						}
-					}
-					/* If existing wasn't oneshot and current is oneshot, keep it not oneshot */
-
 					found = true;
 					break;
 				}
@@ -340,21 +364,50 @@ static int kqueue_backend_wait(
 				/* New FD, create new event */
 				ZEND_ASSERT(unique_events < max_events);
 				events[unique_events].fd = fd;
-				events[unique_events].events = is_oneshot ? PHP_POLL_ONESHOT : 0;
+				events[unique_events].events
+						= 0; /* Will be set below based on complete oneshot logic */
 				events[unique_events].revents = revents;
 				events[unique_events].data = data;
-
-				if (is_oneshot) {
-					oneshot_fds++;
-				}
-
 				unique_events++;
+			}
+
+			/* Handle complete oneshot logic */
+			if (is_oneshot && zend_hash_index_exists(backend_data->complete_oneshot_fds, fd)) {
+				/* This FD was registered with both read+write oneshot */
+				if (!zend_hash_index_exists(&processed_complete_oneshot, fd)) {
+					/* Mark as processed so we only handle once */
+					zend_hash_index_add_empty_element(&processed_complete_oneshot, fd);
+
+					/* Since this FD had both read+write oneshot, and at least one fired,
+					 * we need to remove ALL remaining filters to simulate epoll behavior */
+					struct kevent cleanup_changes[2];
+
+					/* Try to remove both read and write filters */
+					EV_SET(&cleanup_changes[0], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+					EV_SET(&cleanup_changes[1], fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+
+					/* Execute cleanup (ignore ENOENT - some filters already auto-removed) */
+					for (int c = 0; c < 2; c++) {
+						kevent(backend_data->kqueue_fd, &cleanup_changes[c], 1, NULL, 0, NULL);
+						/* Ignore errors - filters might already be gone */
+					}
+
+					/* This FD is now completely removed */
+					backend_data->fd_count--;
+					zend_hash_index_del(backend_data->complete_oneshot_fds, fd);
+
+					/* Mark the combined event as oneshot */
+					for (int j = 0; j < unique_events; j++) {
+						if (events[j].fd == fd) {
+							events[j].events = PHP_POLL_ONESHOT;
+							break;
+						}
+					}
+				}
 			}
 		}
 
-		/* Adjust fd_count by subtracting FDs that were completely oneshot */
-		backend_data->fd_count -= oneshot_fds;
-
+		zend_hash_destroy(&processed_complete_oneshot);
 		return unique_events;
 	}
 
@@ -379,7 +432,9 @@ static int kqueue_backend_get_suitable_max_events(php_poll_ctx *ctx)
 		return -1;
 	}
 
+	/* For kqueue, we now track exactly how many unique FDs are registered */
 	int active_fds = backend_data->fd_count;
+
 	if (active_fds == 0) {
 		return 1;
 	}
