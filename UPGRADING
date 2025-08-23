@@ -356,6 +356,10 @@ PHP 8.5 UPGRADE NOTES
   . Constant redeclaration is deprecated and that behavior will trigger an
     error in PHP 9.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_constant_redeclaration
+  . Enacted the follow-up phase of the "Path to Saner Increment/Decrement
+    operators" RFC, meaning that incrementing non-numeric strings is now
+    deprecated. Instead the str_increment() function should be used.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#enact_follow-up_phase_of_the_path_to_saner_incrementdecrement_operators_rfc
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are

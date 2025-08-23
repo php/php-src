@@ -21,6 +21,9 @@ PHP                                                                        NEWS
     references). (Arnaud, timwolla)
   . Introduced the TAILCALL VM, enabled by default when compiling with Clang>=19
     on x86_64 or aarch64. (Arnaud)
+  . Enacted the follow-up phase of the "Path to Saner Increment/Decrement
+    operators" RFC, meaning that incrementing non-numeric strings is now
+    deprecated. (Girgias).
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
