@@ -11,11 +11,16 @@ $poll_ctx = pt_new_stream_poll();
 stream_poll_add($poll_ctx, $socket1w, STREAM_POLL_WRITE, "socket_data_1");
 stream_poll_add($poll_ctx, $socket2w, STREAM_POLL_WRITE, "socket_data_2");
 
-pt_print_events(stream_poll_wait($poll_ctx, 0));
+pt_expect_events(stream_poll_wait($poll_ctx, 0), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket_data_1'],
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket_data_2']
+]);
 
 stream_poll_remove($poll_ctx, $socket1w);
 
-pt_print_events(stream_poll_wait($poll_ctx, 0));
+pt_expect_events(stream_poll_wait($poll_ctx, 0), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket_data_2']
+]);
 
 // check that both streams are still usable
 var_dump(fwrite($socket1w, "test 1"));
@@ -25,13 +30,9 @@ var_dump(fread($socket2r, 100));
 
 ?>
 --EXPECT--
-Events count: 2
-Event[0]: 2, user data: socket_data_1
-Event[1]: 2, user data: socket_data_2
-Events count: 1
-Event[0]: 2, user data: socket_data_2
+Events matched - count: 2
+Events matched - count: 1
 int(6)
 int(6)
 string(6) "test 1"
 string(6) "test 2"
-

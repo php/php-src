@@ -10,38 +10,52 @@ $poll_ctx = pt_new_stream_poll();
 stream_poll_add($poll_ctx, $socket1r, STREAM_POLL_READ, "socket1_data");
 stream_poll_add($poll_ctx, $socket1w, STREAM_POLL_WRITE, "socket2_data");
 
-pt_print_events(stream_poll_wait($poll_ctx, 0));
-pt_print_events(stream_poll_wait($poll_ctx, 0));
+pt_expect_events(stream_poll_wait($poll_ctx, 0), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket2_data']
+]);
+
+pt_expect_events(stream_poll_wait($poll_ctx, 0), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket2_data']
+]);
+
 fwrite($socket1w, "test data");
-pt_print_events(stream_poll_wait($poll_ctx, 100), true);
+pt_expect_events(stream_poll_wait($poll_ctx, 100), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket2_data'],
+    ['events' => STREAM_POLL_READ, 'data' => 'socket1_data', 'read' => 'test data']
+]);
+
 fwrite($socket1w, "more data");
-pt_print_events(stream_poll_wait($poll_ctx, 100));
-pt_print_events(stream_poll_wait($poll_ctx, 100));
+pt_expect_events(stream_poll_wait($poll_ctx, 100), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket2_data'],
+    ['events' => STREAM_POLL_READ, 'data' => 'socket1_data']
+]);
+
+pt_expect_events(stream_poll_wait($poll_ctx, 100), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket2_data'],
+    ['events' => STREAM_POLL_READ, 'data' => 'socket1_data']
+]);
+
 fwrite($socket1w, " and even more data");
-pt_print_events(stream_poll_wait($poll_ctx, 100), true);
+pt_expect_events(stream_poll_wait($poll_ctx, 100), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'socket2_data'],
+    ['events' => STREAM_POLL_READ, 'data' => 'socket1_data', 'read' => 'more data and even more data']
+]);
+
 fclose($socket1r);
-pt_print_events(stream_poll_wait($poll_ctx, 100));
+pt_expect_events(stream_poll_wait($poll_ctx, 100), [
+    ['events' => STREAM_POLL_WRITE|STREAM_POLL_HUP, 'data' => 'socket2_data']
+]);
+
 fclose($socket1w);
-pt_print_events(stream_poll_wait($poll_ctx, 100));
+pt_expect_events(stream_poll_wait($poll_ctx, 100), []);
 
 ?>
 --EXPECT--
-Events count: 1
-Event[0]: 2, user data: socket2_data
-Events count: 1
-Event[0]: 2, user data: socket2_data
-Events count: 2
-Event[0]: 2, user data: socket2_data
-Event[1]: 1, user data: socket1_data, read data: 'test data'
-Events count: 2
-Event[0]: 2, user data: socket2_data
-Event[1]: 1, user data: socket1_data
-Events count: 2
-Event[0]: 2, user data: socket2_data
-Event[1]: 1, user data: socket1_data
-Events count: 2
-Event[0]: 2, user data: socket2_data
-Event[1]: 1, user data: socket1_data, read data: 'more data and even more data'
-Events count: 1
-Event[0]: 10, user data: socket2_data
-Events count: 0
+Events matched - count: 1
+Events matched - count: 1
+Events matched - count: 2
+Events matched - count: 2
+Events matched - count: 2
+Events matched - count: 2
+Events matched - count: 1
+Events matched - count: 0
