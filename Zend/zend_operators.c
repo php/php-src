@@ -2565,6 +2565,7 @@ static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 		zend_string_release(zstr);
 		return false;
 	}
+	/* A userland error handler can change the type from string to something else */
 	zval_ptr_dtor(str);
 	ZVAL_STR(str, zstr);
 
