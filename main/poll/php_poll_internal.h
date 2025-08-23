@@ -100,16 +100,27 @@ php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd);
 void php_poll_fd_table_remove(php_poll_fd_table *table, int fd);
 int php_poll_simulate_edge_trigger(php_poll_fd_table *table, php_poll_event *events, int nfds);
 
+/* Error helper functions */
+php_poll_error php_poll_errno_to_error(int err);
+
+static inline void php_poll_set_errno_error(php_poll_ctx *ctx, int err)
+{
+	ctx->last_error = php_poll_errno_to_error(err);
+}
+
+static inline void php_poll_set_current_errno_error(php_poll_ctx *ctx)
+{
+	php_poll_set_errno_error(ctx, errno);
+}
+
+static inline bool php_poll_is_not_found_error(void)
+{
+	return errno == ENOENT;
+}
+
 static inline void php_poll_set_error(php_poll_ctx *ctx, php_poll_error error)
 {
 	ctx->last_error = error;
-}
-
-static inline void php_poll_set_system_error_if_not_set(php_poll_ctx *ctx)
-{
-	if (ctx->last_error == PHP_POLL_ERR_NONE) {
-		ctx->last_error = PHP_POLL_ERR_SYSTEM;
-	}
 }
 
 #endif /* PHP_POLL_INTERNAL_H */
