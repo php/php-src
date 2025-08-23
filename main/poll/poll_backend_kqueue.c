@@ -112,21 +112,7 @@ static zend_result kqueue_backend_add(php_poll_ctx *ctx, int fd, uint32_t events
 	if (change_count > 0) {
 		int result = kevent(backend_data->kqueue_fd, changes, change_count, NULL, 0, NULL);
 		if (result == -1) {
-			switch (errno) {
-				case EEXIST:
-					php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
-					break;
-				case ENOMEM:
-					php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
-					break;
-				case EBADF:
-				case EINVAL:
-					php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
-					break;
-				default:
-					php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
-					break;
-			}
+			php_poll_set_current_errno_error(ctx);
 			return FAILURE;
 		}
 
@@ -186,9 +172,8 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 		int result = kevent(backend_data->kqueue_fd, &deletes[i], 1, NULL, 0, NULL);
 		if (result == 0) {
 			successful_deletes++;
-		} else if (errno != ENOENT) {
-			/* Real error (not just "doesn't exist") */
-			php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
+		} else if (!php_poll_is_not_found_error()) {
+			php_poll_set_current_errno_error(ctx);
 			return FAILURE;
 		}
 		/* ENOENT is ignored - filter didn't exist */
@@ -198,21 +183,7 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 	if (add_count > 0) {
 		int result = kevent(backend_data->kqueue_fd, adds, add_count, NULL, 0, NULL);
 		if (result == -1) {
-			switch (errno) {
-				case ENOENT:
-					php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
-					break;
-				case ENOMEM:
-					php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
-					break;
-				case EBADF:
-				case EINVAL:
-					php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
-					break;
-				default:
-					php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
-					break;
-			}
+			php_poll_set_current_errno_error(ctx);
 			return FAILURE;
 		}
 	}
@@ -240,44 +211,26 @@ static zend_result kqueue_backend_modify(php_poll_ctx *ctx, int fd, uint32_t eve
 static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	kqueue_backend_data_t *backend_data = (kqueue_backend_data_t *) ctx->backend_data;
-	struct kevent changes[2];
+	struct kevent change;
 	int successful_deletes = 0;
 
 	/* Try to remove read filter */
-	EV_SET(&changes[0], fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
-	int result = kevent(backend_data->kqueue_fd, &changes[0], 1, NULL, 0, NULL);
+	EV_SET(&change, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
+	int result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
 	if (result == 0) {
 		successful_deletes++;
-	} else if (errno != ENOENT) {
-		/* Real error */
-		switch (errno) {
-			case EBADF:
-			case EINVAL:
-				php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
-				break;
-			default:
-				php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
-				break;
-		}
+	} else if (!php_poll_is_not_found_error()) {
+		php_poll_set_current_errno_error(ctx);
 		return FAILURE;
 	}
 
 	/* Try to remove write filter */
-	EV_SET(&changes[1], fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
-	result = kevent(backend_data->kqueue_fd, &changes[1], 1, NULL, 0, NULL);
+	EV_SET(&change, fd, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
+	result = kevent(backend_data->kqueue_fd, &change, 1, NULL, 0, NULL);
 	if (result == 0) {
 		successful_deletes++;
-	} else if (errno != ENOENT) {
-		/* Real error */
-		switch (errno) {
-			case EBADF:
-			case EINVAL:
-				php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
-				break;
-			default:
-				php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
-				break;
-		}
+	} else if (!php_poll_is_not_found_error()) {
+		php_poll_set_current_errno_error(ctx);
 		return FAILURE;
 	}
 
@@ -385,11 +338,13 @@ static int kqueue_backend_wait(
 		/* Clean up all the same FD filters for other read or write side */
 		zval *item;
 		struct kevent cleanup_change;
-		ZEND_HASH_FOREACH_NUM_KEY_VAL(backend_data->garbage_oneshot_fds, fd, item) {
+		ZEND_HASH_FOREACH_NUM_KEY_VAL(backend_data->garbage_oneshot_fds, fd, item)
+		{
 			int filter = Z_TYPE_P(item) == IS_TRUE ? EVFILT_WRITE : EVFILT_READ;
 			EV_SET(&cleanup_change, fd, filter, EV_DELETE, 0, 0, NULL);
 			kevent(backend_data->kqueue_fd, &cleanup_change, 1, NULL, 0, NULL);
-		} ZEND_HASH_FOREACH_END();
+		}
+		ZEND_HASH_FOREACH_END();
 
 		return unique_events;
 	}
