@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-19485 (potential use after free when using persistent pgsql
     connections). (Mark Karpeles)
 
+- Phar:
+  . Fixed memory leaks when verifying OpenSSL signature. (Girgias)
+
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
 
