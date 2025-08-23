@@ -35,6 +35,36 @@ function pt_new_tcp_socket_pair(): array {
     return [$client, $server_conn];
 }
 
+function pt_new_tcp_socket_connections(int $num_conns): array {
+    $server = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr);
+    if (!$server) {
+        die("Cannot create TCP server: $errstr\n");
+    }
+    $address = stream_socket_get_name($server, false);
+
+    $clients = [];
+    $server_conns = [];
+    for ($i = 0; $i < $num_conns; ++$i) {
+        $clients[$i] = stream_socket_client("tcp://$address", $errno, $errstr);
+        if (!$clients[$i]) {
+            fclose($server);
+            die("Cannot connect to TCP server: $errstr\n");
+        }
+
+        $server_conns[$i] = stream_socket_accept($server);
+        if (!$server_conns[$i]) {
+            fclose($server);
+            die("Cannot accept connection\n");
+        }
+    }
+
+
+    // Close the listening socket (no longer needed)
+    fclose($server);
+
+    return [$clients, $server_conns];
+}
+
 function pt_new_stream_poll(): StreamPollContext {
     $backend = getenv('STREAM_POLL_TEST_BACKEND');
     return stream_poll_create($backend === false ? STREAM_POLL_BACKEND_AUTO : $backend);
