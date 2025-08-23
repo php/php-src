@@ -186,7 +186,7 @@ PHPAPI zend_result php_poll_init(php_poll_ctx *ctx)
 		return SUCCESS;
 	}
 
-	php_poll_set_system_error_if_not_set(ctx);
+	php_poll_set_current_errno_error(ctx);
 	return FAILURE;
 }
 
@@ -217,7 +217,7 @@ PHPAPI zend_result php_poll_add(php_poll_ctx *ctx, int fd, uint32_t events, void
 		return SUCCESS;
 	}
 
-	php_poll_set_system_error_if_not_set(ctx);
+	php_poll_set_current_errno_error(ctx);
 	return FAILURE;
 }
 
@@ -234,7 +234,7 @@ PHPAPI zend_result php_poll_modify(php_poll_ctx *ctx, int fd, uint32_t events, v
 		return SUCCESS;
 	}
 
-	php_poll_set_system_error_if_not_set(ctx);
+	php_poll_set_current_errno_error(ctx);
 	return FAILURE;
 }
 
@@ -251,7 +251,7 @@ PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd)
 		return SUCCESS;
 	}
 
-	php_poll_set_system_error_if_not_set(ctx);
+	php_poll_set_current_errno_error(ctx);
 	return FAILURE;
 }
 
@@ -267,7 +267,7 @@ PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_even
 	int nfds = ctx->backend_ops->wait(ctx, events, max_events, timeout);
 
 	if (UNEXPECTED(nfds < 0)) {
-		php_poll_set_system_error_if_not_set(ctx);
+		php_poll_set_current_errno_error(ctx);
 	}
 
 	return nfds;
@@ -291,12 +291,6 @@ PHPAPI bool php_poll_supports_et(php_poll_ctx *ctx)
 	return ctx && ctx->backend_ops && ctx->backend_ops->supports_et;
 }
 
-/* Error retrieval */
-PHPAPI php_poll_error php_poll_get_error(php_poll_ctx *ctx)
-{
-	return ctx ? ctx->last_error : PHP_POLL_ERR_INVALID;
-}
-
 /* Get suitable max_events for backend */
 PHPAPI int php_poll_get_suitable_max_events(php_poll_ctx *ctx)
 {
@@ -305,4 +299,110 @@ PHPAPI int php_poll_get_suitable_max_events(php_poll_ctx *ctx)
 	}
 
 	return ctx->backend_ops->get_suitable_max_events(ctx);
+}
+
+/* Error retrieval */
+PHPAPI php_poll_error php_poll_get_error(php_poll_ctx *ctx)
+{
+	return ctx ? ctx->last_error : PHP_POLL_ERR_INVALID;
+}
+
+/* Errno to php_poll_error mapping helper */
+php_poll_error php_poll_errno_to_error(int err)
+{
+	switch (err) {
+		case 0:
+			return PHP_POLL_ERR_NONE;
+
+		case ENOMEM:
+			return PHP_POLL_ERR_NOMEM;
+
+		case EINVAL:
+		case EBADF:
+			return PHP_POLL_ERR_INVALID;
+
+		case EEXIST:
+			return PHP_POLL_ERR_EXISTS;
+
+		case ENOENT:
+			return PHP_POLL_ERR_NOTFOUND;
+
+#ifdef ETIME
+		case ETIME:
+#endif
+#ifdef ETIMEDOUT
+		case ETIMEDOUT:
+#endif
+			return PHP_POLL_ERR_TIMEOUT;
+
+		case EINTR:
+			return PHP_POLL_ERR_INTERRUPTED;
+
+		case EACCES:
+#ifdef EPERM
+		case EPERM:
+#endif
+			return PHP_POLL_ERR_PERMISSION;
+
+#ifdef EMFILE
+		case EMFILE:
+#endif
+#ifdef ENFILE
+		case ENFILE:
+#endif
+			return PHP_POLL_ERR_TOOBIG;
+
+		case EAGAIN:
+#if defined(EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
+		case EWOULDBLOCK:
+#endif
+			return PHP_POLL_ERR_AGAIN;
+
+#ifdef ENOSYS
+		case ENOSYS:
+#endif
+#ifdef EOPNOTSUPP
+		case EOPNOTSUPP:
+#endif
+#ifdef ENOTSUP
+		case ENOTSUP:
+#endif
+			return PHP_POLL_ERR_NOSUPPORT;
+
+		default:
+			return PHP_POLL_ERR_SYSTEM;
+	}
+}
+
+/* Get human-readable error description */
+PHPAPI const char *php_poll_error_string(php_poll_error error)
+{
+	switch (error) {
+		case PHP_POLL_ERR_NONE:
+			return "No error";
+		case PHP_POLL_ERR_SYSTEM:
+			return "System error";
+		case PHP_POLL_ERR_NOMEM:
+			return "Out of memory";
+		case PHP_POLL_ERR_INVALID:
+			return "Invalid argument";
+		case PHP_POLL_ERR_EXISTS:
+			return "File descriptor already exists";
+		case PHP_POLL_ERR_NOTFOUND:
+			return "File descriptor not found";
+		case PHP_POLL_ERR_TIMEOUT:
+			return "Operation timed out";
+		case PHP_POLL_ERR_INTERRUPTED:
+			return "Operation interrupted";
+		case PHP_POLL_ERR_PERMISSION:
+			return "Permission denied";
+		case PHP_POLL_ERR_TOOBIG:
+			return "Too many open files";
+		case PHP_POLL_ERR_AGAIN:
+			return "Resource temporarily unavailable";
+		case PHP_POLL_ERR_NOSUPPORT:
+			return "Operation not supported";
+		default:
+			return "Unknown error";
+	}
 }

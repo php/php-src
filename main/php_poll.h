@@ -39,15 +39,20 @@ typedef enum {
 	PHP_POLL_BACKEND_IOCP
 } php_poll_backend_type;
 
-/* Result codes */
+/* Error codes */
 typedef enum {
-    PHP_POLL_ERR_NONE,
-    PHP_POLL_ERR_SYSTEM,
-    PHP_POLL_ERR_NOMEM,
-    PHP_POLL_ERR_INVALID,
-    PHP_POLL_ERR_EXISTS,
-    PHP_POLL_ERR_NOTFOUND,
-    PHP_POLL_ERR_TIMEOUT,
+	PHP_POLL_ERR_NONE,          /* No error */
+	PHP_POLL_ERR_SYSTEM,        /* Generic system error */
+	PHP_POLL_ERR_NOMEM,         /* Out of memory (ENOMEM) */
+	PHP_POLL_ERR_INVALID,       /* Invalid argument (EINVAL, EBADF) */
+	PHP_POLL_ERR_EXISTS,        /* Already exists (EEXIST) */
+	PHP_POLL_ERR_NOTFOUND,      /* Not found (ENOENT) */
+	PHP_POLL_ERR_TIMEOUT,       /* Operation timed out (ETIME, ETIMEDOUT) */
+	PHP_POLL_ERR_INTERRUPTED,   /* Interrupted by signal (EINTR) */
+	PHP_POLL_ERR_PERMISSION,    /* Permission denied (EACCES, EPERM) */
+	PHP_POLL_ERR_TOOBIG,        /* Too many resources (EMFILE, ENFILE) */
+	PHP_POLL_ERR_AGAIN,         /* Try again (EAGAIN, EWOULDBLOCK) */
+	PHP_POLL_ERR_NOSUPPORT,     /* Not supported (ENOSYS, EOPNOTSUPP) */
 } php_poll_error;
 
 /* clang-format on */
@@ -89,5 +94,8 @@ PHPAPI int php_poll_get_suitable_max_events(php_poll_ctx *ctx);
 
 /* Backend registration */
 PHPAPI void php_poll_register_backends(void);
+
+/* Error string for the error */
+PHPAPI const char *php_poll_error_string(php_poll_error error);
 
 #endif /* PHP_POLL_H */
