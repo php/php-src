@@ -93,8 +93,7 @@ function pt_print_events($events, $read_data = false): void {
         echo "\n";
     }
 }
-
-function pt_expect_events($events, $expected): void {
+function pt_expect_events($events, $expected, $poll_ctx = null): void {
     if (!is_array($events)) {
         die("Events must be an array\n");
     }
@@ -112,6 +111,9 @@ function pt_expect_events($events, $expected): void {
         return;
     }
 
+    // Get current backend name for backend-specific expectations
+    $backend_name = $poll_ctx ? stream_poll_backend_name($poll_ctx) : 'unknown';
+
     // Convert events to comparable format for matching
     $actual_events = [];
     foreach ($events as $event) {
@@ -127,11 +129,23 @@ function pt_expect_events($events, $expected): void {
         $actual_events[] = $event_data;
     }
 
+    // Resolve backend-specific expectations
+    $resolved_expected = [];
+    foreach ($expected as $exp_event) {
+        $resolved_event = $exp_event;
+
+        if (isset($exp_event['events']) && is_array($exp_event['events'])) {
+            $resolved_event['events'] = pt_resolve_backend_specific_value($exp_event['events'], $backend_name);
+        }
+
+        $resolved_expected[] = $resolved_event;
+    }
+
     // Try to match each expected event with an actual event
     $matched = [];
     $unmatched_expected = [];
 
-    foreach ($expected as $exp_idx => $exp_event) {
+    foreach ($resolved_expected as $exp_idx => $exp_event) {
         $found_match = false;
 
         foreach ($actual_events as $act_idx => $act_event) {
@@ -167,8 +181,33 @@ function pt_expect_events($events, $expected): void {
         echo "Events matched - count: $event_count\n";
     } else {
         echo "Events did not match:\n";
-        pt_print_mismatched_events($events, $expected, $matched);
+        pt_print_mismatched_events($events, $resolved_expected, $matched);
     }
+}
+
+function pt_resolve_backend_specific_value($backend_map, $current_backend) {
+    // Direct backend match
+    if (isset($backend_map[$current_backend])) {
+        return $backend_map[$current_backend];
+    }
+
+    // Check for multi-backend keys (e.g., "poll|epoll")
+    foreach ($backend_map as $key => $value) {
+        if (strpos($key, '|') !== false) {
+            $backends = array_map('trim', explode('|', $key));
+            if (in_array($current_backend, $backends)) {
+                return $value;
+            }
+        }
+    }
+
+    // Fall back to default
+    if (isset($backend_map['default'])) {
+        return $backend_map['default'];
+    }
+
+    // If no match found, this is an error
+    die("No backend-specific value found for '$current_backend' and no default specified\n");
 }
 
 function pt_event_flags_to_string($flags): string {
