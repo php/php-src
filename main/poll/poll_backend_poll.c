@@ -24,8 +24,6 @@ typedef struct {
 	struct pollfd *fds;
 	int fds_capacity;
 	int fds_used;
-
-	/* Use common FD tracking helper */
 	php_poll_fd_table *fd_table;
 } poll_backend_data_t;
 
@@ -107,7 +105,6 @@ static zend_result poll_backend_init(php_poll_ctx *ctx)
 	data->fds_capacity = initial_capacity;
 	data->fds_used = 0;
 
-	/* Initialize FD tracking using helper */
 	data->fd_table = php_poll_fd_table_init(initial_capacity, ctx->persistent);
 	if (!data->fd_table) {
 		pefree(data->fds, ctx->persistent);
@@ -140,13 +137,11 @@ static zend_result poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, 
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
-	/* Check if FD already exists using helper */
 	if (php_poll_fd_table_find(backend_data->fd_table, fd)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
 		return FAILURE;
 	}
 
-	/* Get FD entry using helper */
 	php_poll_fd_entry *entry = php_poll_fd_table_get(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
@@ -192,7 +187,7 @@ static zend_result poll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t event
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
-	/* Find existing entry using helper */
+	/* Find existing entry using helper - O(1) instead of O(n) */
 	php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
@@ -217,7 +212,6 @@ static zend_result poll_backend_remove(php_poll_ctx *ctx, int fd)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
-	/* Check if exists using helper */
 	if (!php_poll_fd_table_find(backend_data->fd_table, fd)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
 		return FAILURE;
@@ -232,7 +226,6 @@ static zend_result poll_backend_remove(php_poll_ctx *ctx, int fd)
 		backend_data->fds_used--;
 	}
 
-	/* Remove from tracking using helper */
 	php_poll_fd_table_remove(backend_data->fd_table, fd);
 
 	return SUCCESS;
@@ -316,8 +309,7 @@ static int poll_backend_get_suitable_max_events(php_poll_ctx *ctx)
 		return -1;
 	}
 
-	/* For poll(), we know exactly how many FDs are registered */
-	int active_fds = backend_data->fds_used;
+	int active_fds = php_poll_fd_table_count(backend_data->fd_table);
 
 	if (active_fds == 0) {
 		return 1;
