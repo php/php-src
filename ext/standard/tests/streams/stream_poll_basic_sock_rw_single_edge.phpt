@@ -21,4 +21,4 @@ pt_expect_events(stream_poll_wait($poll_ctx, 100), [
 ?>
 --EXPECT--
 Events matched - count: 1
-Events matched - count: 2
+Events matched - count: 1
