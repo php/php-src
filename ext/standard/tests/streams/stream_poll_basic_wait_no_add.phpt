@@ -1,5 +1,5 @@
 --TEST--
-Stream polling basic functionality - only wait
+Stream polling - only wait
 --FILE--
 <?php
 require_once __DIR__ . '/stream_poll.inc';
