@@ -1,5 +1,5 @@
 --TEST--
-Stream polling basic functionality - backend name
+Stream polling - backend name
 --FILE--
 <?php
 require_once __DIR__ . '/stream_poll.inc';
