@@ -10,8 +10,9 @@ $poll_ctx = pt_new_stream_poll();
 stream_poll_add($poll_ctx, $socket2, STREAM_POLL_WRITE, "socket_data");
 stream_poll_modify($poll_ctx, $socket2, STREAM_POLL_WRITE, "modified_data");
 
-pt_print_events(stream_poll_wait($poll_ctx, 0));
+pt_expect_events(stream_poll_wait($poll_ctx, 0), [
+    ['events' => STREAM_POLL_WRITE, 'data' => 'modified_data']
+]);
 ?>
 --EXPECT--
-Events count: 1
-Event[0]: 2, user data: modified_data
+Events matched - count: 1

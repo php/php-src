@@ -10,9 +10,10 @@ $poll_ctx = pt_new_stream_poll();
 stream_poll_add($poll_ctx, $socket1r, STREAM_POLL_READ, "socket_data");
 
 fwrite($socket1w, "test data");
-pt_print_events(stream_poll_wait($poll_ctx, 100), true);
+pt_expect_events(stream_poll_wait($poll_ctx, 100), [
+    ['events' => STREAM_POLL_READ, 'data' => 'socket_data', 'read' => 'test data']
+]);
 
 ?>
 --EXPECT--
-Events count: 1
-Event[0]: 1, user data: socket_data, read data: 'test data'
+Events matched - count: 1
