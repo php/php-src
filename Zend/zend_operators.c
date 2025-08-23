@@ -2558,27 +2558,21 @@ static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 	int last=0; /* Shut up the compiler warning */
 	int ch;
 
+	zend_string *zstr = Z_STR_P(str);
+	zend_string_addref(zstr);
+	zend_error(E_DEPRECATED, "Increment on non-numeric string is deprecated, use str_increment() instead");
+	if (EG(exception)) {
+		zend_string_release(zstr);
+		return false;
+	}
+	/* A userland error handler can change the type from string to something else */
+	zval_ptr_dtor(str);
+	ZVAL_STR(str, zstr);
+
 	if (UNEXPECTED(Z_STRLEN_P(str) == 0)) {
-		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
-		if (EG(exception)) {
-			return false;
-		}
-		/* A userland error handler can change the type from string to something else */
 		zval_ptr_dtor(str);
 		ZVAL_CHAR(str, '1');
 		return true;
-	}
-
-	if (UNEXPECTED(!zend_string_only_has_ascii_alphanumeric(Z_STR_P(str)))) {
-		zend_string *zstr = Z_STR_P(str);
-		zend_string_addref(zstr);
-		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
-		if (EG(exception)) {
-			zend_string_release(zstr);
-			return false;
-		}
-		zval_ptr_dtor(str);
-		ZVAL_STR(str, zstr);
 	}
 
 	if (!Z_REFCOUNTED_P(str)) {
