@@ -1903,6 +1903,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 
 			if (!EVP_SignInit(md_ctx, mdtype)) {
 				EVP_PKEY_free(key);
+				EVP_MD_CTX_free(md_ctx);
 				efree(sigbuf);
 				if (error) {
 					spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
@@ -1913,6 +1914,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
 				if (!EVP_SignUpdate(md_ctx, buf, sig_len)) {
 					EVP_PKEY_free(key);
+					EVP_MD_CTX_free(md_ctx);
 					efree(sigbuf);
 					if (error) {
 						spprintf(error, 0, "unable to update the openssl signature for phar \"%s\"", phar->fname);
@@ -1923,6 +1925,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 
 			if (!EVP_SignFinal (md_ctx, sigbuf, &siglen, key)) {
 				EVP_PKEY_free(key);
+				EVP_MD_CTX_free(md_ctx);
 				efree(sigbuf);
 				if (error) {
 					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
@@ -1932,7 +1935,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 
 			sigbuf[siglen] = '\0';
 			EVP_PKEY_free(key);
-			EVP_MD_CTX_destroy(md_ctx);
+			EVP_MD_CTX_free(md_ctx);
 #else
 			size_t siglen;
 			sigbuf = NULL;
