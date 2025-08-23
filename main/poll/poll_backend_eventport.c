@@ -234,16 +234,8 @@ static zend_result eventport_backend_remove(php_poll_ctx *ctx, int fd)
 
 	if (port_dissociate(backend_data->port_fd, PORT_SOURCE_FD, fd) == -1) {
 		/* Only fail if it's not ENOENT (might already be dissociated) */
-		if (errno != ENOENT) {
-			switch (errno) {
-				case EBADF:
-				case EINVAL:
-					php_poll_set_error(ctx, PHP_POLL_ERR_INVALID);
-					break;
-				default:
-					php_poll_set_error(ctx, PHP_POLL_ERR_SYSTEM);
-					break;
-			}
+		if (!php_poll_is_not_found_error()) {
+			php_poll_set_current_errno_error(ctx);
 			return FAILURE;
 		}
 	}
@@ -335,16 +327,7 @@ static int eventport_backend_wait(
 	int result = port_getn(backend_data->port_fd, backend_data->events, max_events, &nget, tsp);
 
 	if (result == -1) {
-		if (errno == ETIME) {
-			/* Timeout - this is normal */
-			return 0;
-		} else if (errno == EINTR) {
-			/* Interrupted by signal */
-			return 0;
-		} else {
-			/* Real error */
-			return -1;
-		}
+		php_poll_set_current_errno_error(ctx);
 	}
 
 	int nfds = (int) nget;
