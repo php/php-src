@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
     (Jakub Zelenka)
 
+- Phar:
+  . Fixed memory leaks when verifying OpenSSL signature. (Girgias)
+
 - Session:
   . Added support for partitioned cookies. (nielsdos)
 
