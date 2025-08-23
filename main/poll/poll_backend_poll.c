@@ -21,10 +21,10 @@
 #include <string.h>
 
 typedef struct {
-	struct pollfd *fds;
-	int fds_capacity;
-	int fds_used;
 	php_poll_fd_table *fd_table;
+	/* Temporary arrays allocated during poll_backend_wait() */
+	struct pollfd *temp_fds;
+	int temp_fds_capacity;
 } poll_backend_data_t;
 
 static uint32_t poll_events_to_native(uint32_t events)
@@ -63,28 +63,6 @@ static uint32_t poll_events_from_native(uint32_t native)
 	return events;
 }
 
-/* Find pollfd slot */
-static struct pollfd *poll_find_pollfd_slot(poll_backend_data_t *data, int fd)
-{
-	for (int i = 0; i < data->fds_capacity; i++) {
-		if (data->fds[i].fd == fd) {
-			return &data->fds[i];
-		}
-	}
-	return NULL;
-}
-
-/* Get empty pollfd slot */
-static struct pollfd *poll_get_empty_pollfd_slot(poll_backend_data_t *data)
-{
-	for (int i = 0; i < data->fds_capacity; i++) {
-		if (data->fds[i].fd == -1) {
-			return &data->fds[i];
-		}
-	}
-	return NULL;
-}
-
 static zend_result poll_backend_init(php_poll_ctx *ctx)
 {
 	poll_backend_data_t *data = php_poll_calloc(1, sizeof(poll_backend_data_t), ctx->persistent);
@@ -93,30 +71,24 @@ static zend_result poll_backend_init(php_poll_ctx *ctx)
 		return FAILURE;
 	}
 
-	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
 	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
-
-	data->fds = php_poll_calloc(initial_capacity, sizeof(struct pollfd), ctx->persistent);
-	if (!data->fds) {
-		pefree(data, ctx->persistent);
-		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
-		return FAILURE;
-	}
-	data->fds_capacity = initial_capacity;
-	data->fds_used = 0;
 
 	data->fd_table = php_poll_fd_table_init(initial_capacity, ctx->persistent);
 	if (!data->fd_table) {
-		pefree(data->fds, ctx->persistent);
 		pefree(data, ctx->persistent);
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
 	}
 
-	/* Initialize all fds to -1 */
-	for (int i = 0; i < initial_capacity; i++) {
-		data->fds[i].fd = -1;
+	/* Pre-allocate temporary pollfd array */
+	data->temp_fds = php_poll_calloc(initial_capacity, sizeof(struct pollfd), ctx->persistent);
+	if (!data->temp_fds) {
+		php_poll_fd_table_cleanup(data->fd_table);
+		pefree(data, ctx->persistent);
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+		return FAILURE;
 	}
+	data->temp_fds_capacity = initial_capacity;
 
 	ctx->backend_data = data;
 	return SUCCESS;
@@ -126,8 +98,8 @@ static void poll_backend_cleanup(php_poll_ctx *ctx)
 {
 	poll_backend_data_t *data = (poll_backend_data_t *) ctx->backend_data;
 	if (data) {
-		pefree(data->fds, ctx->persistent);
 		php_poll_fd_table_cleanup(data->fd_table);
+		pefree(data->temp_fds, ctx->persistent);
 		pefree(data, ctx->persistent);
 		ctx->backend_data = NULL;
 	}
@@ -151,35 +123,6 @@ static zend_result poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, 
 	entry->events = events;
 	entry->data = user_data;
 
-	/* Find empty pollfd slot */
-	struct pollfd *pfd = poll_get_empty_pollfd_slot(backend_data);
-	if (!pfd) {
-		/* Need to grow the pollfd array */
-		int new_capacity = backend_data->fds_capacity * 2;
-		struct pollfd *new_fds = php_poll_realloc(
-				backend_data->fds, new_capacity * sizeof(struct pollfd), ctx->persistent);
-		if (!new_fds) {
-			php_poll_fd_table_remove(backend_data->fd_table, fd);
-			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
-			return FAILURE;
-		}
-
-		/* Initialize new slots */
-		for (int i = backend_data->fds_capacity; i < new_capacity; i++) {
-			new_fds[i].fd = -1;
-		}
-
-		backend_data->fds = new_fds;
-		pfd = &backend_data->fds[backend_data->fds_capacity];
-		backend_data->fds_capacity = new_capacity;
-	}
-
-	/* Set up pollfd */
-	pfd->fd = fd;
-	pfd->events = poll_events_to_native(events & ~(PHP_POLL_ET | PHP_POLL_ONESHOT));
-	pfd->revents = 0;
-	backend_data->fds_used++;
-
 	return SUCCESS;
 }
 
@@ -187,23 +130,15 @@ static zend_result poll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t event
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
-	/* Find existing entry using helper - O(1) instead of O(n) */
 	php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
 		return FAILURE;
 	}
 
-	/* Update entry */
 	entry->events = events;
 	entry->data = user_data;
-	entry->last_revents = 0; /* Reset on modify */
-
-	/* Find pollfd and update */
-	struct pollfd *pfd = poll_find_pollfd_slot(backend_data, fd);
-	if (pfd) {
-		pfd->events = poll_events_to_native(events & ~(PHP_POLL_ET | PHP_POLL_ONESHOT));
-	}
+	entry->last_revents = 0;
 
 	return SUCCESS;
 }
@@ -217,40 +152,70 @@ static zend_result poll_backend_remove(php_poll_ctx *ctx, int fd)
 		return FAILURE;
 	}
 
-	/* Find and clear pollfd */
-	struct pollfd *pfd = poll_find_pollfd_slot(backend_data, fd);
-	if (pfd) {
-		pfd->fd = -1;
-		pfd->events = 0;
-		pfd->revents = 0;
-		backend_data->fds_used--;
-	}
-
 	php_poll_fd_table_remove(backend_data->fd_table, fd);
-
 	return SUCCESS;
 }
 
-/* Handle oneshot removal after event */
-static void poll_handle_oneshot_removal(poll_backend_data_t *backend_data, int fd)
+/* Context for building pollfd array */
+typedef struct {
+	struct pollfd *fds;
+	int index;
+} poll_build_context;
+
+/* Callback to build pollfd array from fd_table */
+static bool poll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *user_data)
 {
-	/* Mark pollfd as disabled */
-	struct pollfd *pfd = poll_find_pollfd_slot(backend_data, fd);
-	if (pfd) {
-		pfd->fd = -1;
-		pfd->events = 0;
-		pfd->revents = 0;
-		backend_data->fds_used--;
+	poll_build_context *ctx = (poll_build_context *) user_data;
+
+	ctx->fds[ctx->index].fd = fd;
+	ctx->fds[ctx->index].events
+			= poll_events_to_native(entry->events & ~(PHP_POLL_ET | PHP_POLL_ONESHOT));
+	ctx->fds[ctx->index].revents = 0;
+	ctx->index++;
+
+	return true;
+}
+
+/* Context for processing poll results */
+typedef struct {
+	poll_backend_data_t *backend_data;
+	struct pollfd *pollfds;
+	php_poll_event *events;
+	int max_events;
+	int event_count;
+} poll_result_context;
+
+/* Callback to process poll results */
+static bool poll_process_results_callback(int fd, php_poll_fd_entry *entry, void *user_data)
+{
+	poll_result_context *ctx = (poll_result_context *) user_data;
+
+	if (ctx->event_count >= ctx->max_events) {
+		return false; /* Stop if events array is full */
 	}
-	php_poll_fd_table_remove(backend_data->fd_table, fd);
+
+	/* Find the corresponding pollfd entry */
+	for (int i = 0; i < php_poll_fd_table_count(ctx->backend_data->fd_table); i++) {
+		if (ctx->pollfds[i].fd == fd && ctx->pollfds[i].revents != 0) {
+			ctx->events[ctx->event_count].fd = fd;
+			ctx->events[ctx->event_count].events = entry->events;
+			ctx->events[ctx->event_count].revents
+					= poll_events_from_native(ctx->pollfds[i].revents);
+			ctx->events[ctx->event_count].data = entry->data;
+			ctx->event_count++;
+			break;
+		}
+	}
+
+	return true;
 }
 
 static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
-	if (backend_data->fds_used == 0) {
-		/* No FDs to monitor, but respect timeout */
+	int fd_count = php_poll_fd_table_count(backend_data->fd_table);
+	if (fd_count == 0) {
 		if (timeout > 0) {
 			struct timespec ts;
 			ts.tv_sec = timeout / 1000;
@@ -260,35 +225,45 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 		return 0;
 	}
 
-	int nfds = poll(backend_data->fds, backend_data->fds_capacity, timeout);
+	/* Ensure temp_fds array is large enough */
+	if (fd_count > backend_data->temp_fds_capacity) {
+		struct pollfd *new_fds = php_poll_realloc(
+				backend_data->temp_fds, fd_count * sizeof(struct pollfd), ctx->persistent);
+		if (!new_fds) {
+			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
+			return -1;
+		}
+		backend_data->temp_fds = new_fds;
+		backend_data->temp_fds_capacity = fd_count;
+	}
+
+	/* Build pollfd array from fd_table */
+	poll_build_context build_ctx = { .fds = backend_data->temp_fds, .index = 0 };
+	php_poll_fd_table_foreach(backend_data->fd_table, poll_build_fds_callback, &build_ctx);
+
+	/* Call poll() */
+	int nfds = poll(backend_data->temp_fds, fd_count, timeout);
 
 	if (nfds > 0) {
-		int event_count = 0;
-		for (int i = 0; i < backend_data->fds_capacity && event_count < max_events; i++) {
-			if (backend_data->fds[i].fd != -1 && backend_data->fds[i].revents != 0) {
-				php_poll_fd_entry *entry
-						= php_poll_fd_table_find(backend_data->fd_table, backend_data->fds[i].fd);
-				if (entry) {
-					events[event_count].fd = backend_data->fds[i].fd;
-					events[event_count].events = entry->events;
-					events[event_count].revents
-							= poll_events_from_native(backend_data->fds[i].revents);
-					events[event_count].data = entry->data;
-					event_count++;
-				}
+		/* Process results */
+		poll_result_context result_ctx = { .backend_data = backend_data,
+			.pollfds = backend_data->temp_fds,
+			.events = events,
+			.max_events = max_events,
+			.event_count = 0 };
 
-				backend_data->fds[i].revents = 0; /* Clear for next poll */
-			}
-		}
+		php_poll_fd_table_foreach(
+				backend_data->fd_table, poll_process_results_callback, &result_ctx);
+		int event_count = result_ctx.event_count;
 
-		/* Apply edge-trigger simulation using helper */
+		/* Apply edge-trigger simulation */
 		nfds = php_poll_simulate_edge_trigger(backend_data->fd_table, events, event_count);
 
-		/* Handle oneshot removals after simulation */
+		/* Handle oneshot removals */
 		for (int i = 0; i < nfds; i++) {
 			php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, events[i].fd);
 			if (entry && (entry->events & PHP_POLL_ONESHOT) && events[i].revents != 0) {
-				poll_handle_oneshot_removal(backend_data, events[i].fd);
+				php_poll_fd_table_remove(backend_data->fd_table, events[i].fd);
 			}
 		}
 	}
@@ -298,7 +273,7 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 
 static bool poll_backend_is_available(void)
 {
-	return true; /* poll() is always available */
+	return true;
 }
 
 static int poll_backend_get_suitable_max_events(php_poll_ctx *ctx)
@@ -310,12 +285,7 @@ static int poll_backend_get_suitable_max_events(php_poll_ctx *ctx)
 	}
 
 	int active_fds = php_poll_fd_table_count(backend_data->fd_table);
-
-	if (active_fds == 0) {
-		return 1;
-	}
-
-	return active_fds;
+	return active_fds == 0 ? 1 : active_fds;
 }
 
 const php_poll_backend_ops php_poll_backend_poll_ops = {
@@ -329,7 +299,7 @@ const php_poll_backend_ops php_poll_backend_poll_ops = {
 	.wait = poll_backend_wait,
 	.is_available = poll_backend_is_available,
 	.get_suitable_max_events = poll_backend_get_suitable_max_events,
-	.supports_et = false, /* poll() doesn't support ET natively, but we simulate it */
+	.supports_et = false,
 };
 
 #endif /* HAVE_POLL */
