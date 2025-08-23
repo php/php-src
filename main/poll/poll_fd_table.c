@@ -14,7 +14,6 @@
 
 #include "php_poll_internal.h"
 
-/* Initialize FD table */
 php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent)
 {
 	php_poll_fd_table *table = php_poll_calloc(1, sizeof(php_poll_fd_table), persistent);
@@ -26,39 +25,36 @@ php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent)
 		initial_capacity = 64;
 	}
 
-	table->entries = php_poll_calloc(initial_capacity, sizeof(php_poll_fd_entry), persistent);
-	if (!table->entries) {
-		pefree(table, persistent);
-		return NULL;
-	}
-
-	table->capacity = initial_capacity;
-	table->count = 0;
+	_zend_hash_init(&table->entries_ht, initial_capacity, NULL, persistent);
 	table->persistent = persistent;
+
 	return table;
 }
 
-/* Cleanup FD table */
 void php_poll_fd_table_cleanup(php_poll_fd_table *table)
 {
 	if (table) {
-		pefree(table->entries, table->persistent);
+		zend_ulong fd;
+		zval *zv;
+
+		ZEND_HASH_FOREACH_NUM_KEY_VAL(&table->entries_ht, fd, zv)
+		{
+			php_poll_fd_entry *entry = Z_PTR_P(zv);
+			pefree(entry, table->persistent);
+		}
+		ZEND_HASH_FOREACH_END();
+
+		zend_hash_destroy(&table->entries_ht);
 		pefree(table, table->persistent);
 	}
 }
 
-/* Find FD entry */
 php_poll_fd_entry *php_poll_fd_table_find(php_poll_fd_table *table, int fd)
 {
-	for (int i = 0; i < table->capacity; i++) {
-		if (table->entries[i].active && table->entries[i].fd == fd) {
-			return &table->entries[i];
-		}
-	}
-	return NULL;
+	zval *zv = zend_hash_index_find(&table->entries_ht, (zend_ulong) fd);
+	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-/* Get or create FD entry */
 php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd)
 {
 	php_poll_fd_entry *entry = php_poll_fd_table_find(table, fd);
@@ -66,92 +62,53 @@ php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd)
 		return entry;
 	}
 
-	/* Find empty slot */
-	for (int i = 0; i < table->capacity; i++) {
-		if (!table->entries[i].active) {
-			table->entries[i].fd = fd;
-			table->entries[i].active = true;
-			table->entries[i].last_revents = 0;
-			table->count++;
-			return &table->entries[i];
-		}
-	}
-
-	/* Need to grow the array */
-	int new_capacity = table->capacity * 2;
-	php_poll_fd_entry *new_entries = php_poll_realloc(
-			table->entries, new_capacity * sizeof(php_poll_fd_entry), table->persistent);
-	if (!new_entries) {
+	entry = php_poll_calloc(1, sizeof(php_poll_fd_entry), table->persistent);
+	if (!entry) {
 		return NULL;
 	}
 
-	/* Initialize new entries */
-	memset(new_entries + table->capacity, 0,
-			(new_capacity - table->capacity) * sizeof(php_poll_fd_entry));
+	entry->fd = fd;
+	entry->active = true;
+	entry->events = 0;
+	entry->data = NULL;
+	entry->last_revents = 0;
 
-	table->entries = new_entries;
+	zval zv;
+	ZVAL_PTR(&zv, entry);
+	if (!zend_hash_index_add(&table->entries_ht, (zend_ulong) fd, &zv)) {
+		pefree(entry, table->persistent);
+		return NULL;
+	}
 
-	/* Use first new slot */
-	php_poll_fd_entry *new_entry = &table->entries[table->capacity];
-	new_entry->fd = fd;
-	new_entry->active = true;
-	new_entry->last_revents = 0;
-	table->count++;
-
-	table->capacity = new_capacity;
-	return new_entry;
+	return entry;
 }
 
-/* Remove FD entry */
 void php_poll_fd_table_remove(php_poll_fd_table *table, int fd)
 {
-	php_poll_fd_entry *entry = php_poll_fd_table_find(table, fd);
-	if (entry) {
-		entry->active = false;
-		table->count--;
+	zval *zv = zend_hash_index_find(&table->entries_ht, (zend_ulong) fd);
+	if (zv) {
+		php_poll_fd_entry *entry = Z_PTR_P(zv);
+		pefree(entry, table->persistent);
+		zend_hash_index_del(&table->entries_ht, (zend_ulong) fd);
 	}
 }
 
-/* Edge-trigger simulation helper */
-int php_poll_simulate_edge_trigger(php_poll_fd_table *table, php_poll_event *events, int nfds)
+/* Helper function for backends that need to iterate over all entries */
+typedef bool (*php_poll_fd_iterator_func_t)(int fd, php_poll_fd_entry *entry, void *user_data);
+
+/* Iterate over all active FD entries */
+void php_poll_fd_table_foreach(
+		php_poll_fd_table *table, php_poll_fd_iterator_func_t callback, void *user_data)
 {
-	int filtered_count = 0;
+	zend_ulong fd;
+	zval *zv;
 
-	for (int i = 0; i < nfds; i++) {
-		php_poll_fd_entry *entry = php_poll_fd_table_find(table, events[i].fd);
-		if (!entry) {
-			continue;
-		}
-
-		uint32_t new_events = events[i].revents;
-		uint32_t reported_events = 0;
-
-		if (entry->events & PHP_POLL_ET) {
-			/* Edge-triggered: report edges only */
-			if ((new_events & PHP_POLL_READ) && !(entry->last_revents & PHP_POLL_READ)) {
-				reported_events |= PHP_POLL_READ;
-			}
-			if ((new_events & PHP_POLL_WRITE) && !(entry->last_revents & PHP_POLL_WRITE)) {
-				reported_events |= PHP_POLL_WRITE;
-			}
-			/* Always report error and hangup events */
-			reported_events |= (new_events & (PHP_POLL_ERROR | PHP_POLL_HUP | PHP_POLL_RDHUP));
-		} else {
-			/* Level-triggered: report all active events */
-			reported_events = new_events;
-		}
-
-		entry->last_revents = new_events;
-
-		/* Only include this event if we have something to report */
-		if (reported_events != 0) {
-			if (filtered_count != i) {
-				events[filtered_count] = events[i];
-			}
-			events[filtered_count].revents = reported_events;
-			filtered_count++;
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(&table->entries_ht, fd, zv)
+	{
+		php_poll_fd_entry *entry = Z_PTR_P(zv);
+		if (entry->active && !callback((int) fd, entry, user_data)) {
+			break; /* Callback returned false, stop iteration */
 		}
 	}
-
-	return filtered_count;
+	ZEND_HASH_FOREACH_END();
 }

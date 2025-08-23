@@ -15,30 +15,39 @@
 #include "php_poll_internal.h"
 #include "php_network.h"
 
+#include "php_poll_internal.h"
+#include "php_network.h"
+
 typedef struct {
 	fd_set read_fds, write_fds, error_fds;
 	fd_set master_read_fds, master_write_fds, master_error_fds;
-
-	/* Use common FD tracking helper */
 	php_poll_fd_table *fd_table;
-
-	php_socket_t max_fd; /* Highest fd for select() */
+	php_socket_t max_fd;
 } select_backend_data_t;
 
-/* Update max_fd for select() by scanning all active FDs */
+/* Select-specific helper functions */
+static bool find_max_fd_callback(int fd, php_poll_fd_entry *entry, void *user_data)
+{
+	php_socket_t *max_fd = (php_socket_t *) user_data;
+	php_socket_t sock = (php_socket_t) fd;
+
+	if (sock > *max_fd) {
+		*max_fd = sock;
+	}
+	return true;
+}
+
+static php_socket_t select_get_max_fd(php_poll_fd_table *table)
+{
+	php_socket_t max_fd = 0;
+	php_poll_fd_table_foreach(table, find_max_fd_callback, &max_fd);
+	return max_fd;
+}
+
+/* Update max_fd for select() */
 static void select_update_max_fd(select_backend_data_t *data)
 {
-	data->max_fd = 0;
-	php_poll_fd_table *table = data->fd_table;
-
-	for (int i = 0; i < table->capacity; i++) {
-		if (table->entries[i].active) {
-			php_socket_t sock = (php_socket_t) table->entries[i].fd;
-			if (sock > data->max_fd) {
-				data->max_fd = sock;
-			}
-		}
-	}
+	data->max_fd = select_get_max_fd(data->fd_table);
 }
 
 static zend_result select_backend_init(php_poll_ctx *ctx)
@@ -53,7 +62,7 @@ static zend_result select_backend_init(php_poll_ctx *ctx)
 	/* Use hint for initial allocation if provided, otherwise start with reasonable default */
 	int initial_capacity = ctx->max_events_hint > 0 ? ctx->max_events_hint : 64;
 
-	/* Initialize FD tracking using helper */
+	/* Initialize FD tracking using helper - now uses HashTable internally */
 	data->fd_table = php_poll_fd_table_init(initial_capacity, ctx->persistent);
 	if (!data->fd_table) {
 		pefree(data, ctx->persistent);
@@ -92,13 +101,11 @@ static zend_result select_backend_add(php_poll_ctx *ctx, int fd, uint32_t events
 	}
 #endif
 
-	/* Check if FD already exists using helper */
 	if (php_poll_fd_table_find(backend_data->fd_table, fd)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
 		return FAILURE;
 	}
 
-	/* Get FD entry using helper */
 	php_poll_fd_entry *entry = php_poll_fd_table_get(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
@@ -132,17 +139,15 @@ static zend_result select_backend_modify(
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
 	php_socket_t sock = (php_socket_t) fd;
 
-	/* Find existing entry using helper */
 	php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
 	if (!entry) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
 		return FAILURE;
 	}
 
-	/* Update entry */
 	entry->events = events;
 	entry->data = user_data;
-	entry->last_revents = 0; /* Reset on modify */
+	entry->last_revents = 0;
 
 	/* Remove from all sets first */
 	FD_CLR(sock, &backend_data->master_read_fds);
@@ -166,21 +171,17 @@ static zend_result select_backend_remove(php_poll_ctx *ctx, int fd)
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
 	php_socket_t sock = (php_socket_t) fd;
 
-	/* Check if exists using helper */
 	if (!php_poll_fd_table_find(backend_data->fd_table, fd)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
 		return FAILURE;
 	}
 
-	/* Remove from fd_sets */
 	FD_CLR(sock, &backend_data->master_read_fds);
 	FD_CLR(sock, &backend_data->master_write_fds);
 	FD_CLR(sock, &backend_data->master_error_fds);
 
-	/* Remove from tracking using helper */
 	php_poll_fd_table_remove(backend_data->fd_table, fd);
 
-	/* Update max_fd if this was the highest */
 	if (sock == backend_data->max_fd) {
 		select_update_max_fd(backend_data);
 	}
@@ -188,23 +189,59 @@ static zend_result select_backend_remove(php_poll_ctx *ctx, int fd)
 	return SUCCESS;
 }
 
-/* Handle oneshot removal after event */
 static void select_handle_oneshot_removal(select_backend_data_t *backend_data, int fd)
 {
 	php_socket_t sock = (php_socket_t) fd;
 
-	/* Remove from fd_sets */
 	FD_CLR(sock, &backend_data->master_read_fds);
 	FD_CLR(sock, &backend_data->master_write_fds);
 	FD_CLR(sock, &backend_data->master_error_fds);
 
-	/* Remove from tracking */
 	php_poll_fd_table_remove(backend_data->fd_table, fd);
 
-	/* Update max_fd if needed */
 	if (sock == backend_data->max_fd) {
 		select_update_max_fd(backend_data);
 	}
+}
+
+/* Callback function for processing select() results */
+typedef struct {
+	select_backend_data_t *backend_data;
+	php_poll_event *events;
+	int max_events;
+	int event_count;
+} select_result_context;
+
+static bool process_select_result_callback(int fd, php_poll_fd_entry *entry, void *user_data)
+{
+	select_result_context *ctx = (select_result_context *) user_data;
+
+	if (ctx->event_count >= ctx->max_events) {
+		return false; /* Stop iteration, events array is full */
+	}
+
+	php_socket_t sock = (php_socket_t) fd;
+	uint32_t revents = 0;
+
+	if (FD_ISSET(sock, &ctx->backend_data->read_fds)) {
+		revents |= PHP_POLL_READ;
+	}
+	if (FD_ISSET(sock, &ctx->backend_data->write_fds)) {
+		revents |= PHP_POLL_WRITE;
+	}
+	if (FD_ISSET(sock, &ctx->backend_data->error_fds)) {
+		revents |= PHP_POLL_ERROR;
+	}
+
+	if (revents != 0) {
+		ctx->events[ctx->event_count].fd = fd;
+		ctx->events[ctx->event_count].events = entry->events;
+		ctx->events[ctx->event_count].revents = revents;
+		ctx->events[ctx->event_count].data = entry->data;
+		ctx->event_count++;
+	}
+
+	return true; /* Continue iteration */
 }
 
 static int select_backend_wait(
@@ -212,7 +249,7 @@ static int select_backend_wait(
 {
 	select_backend_data_t *backend_data = (select_backend_data_t *) ctx->backend_data;
 
-	if (backend_data->fd_table->count == 0) {
+	if (php_poll_fd_table_is_empty(backend_data->fd_table)) {
 		/* No sockets to wait for, but respect timeout */
 		if (timeout > 0) {
 #ifdef _WIN32
@@ -248,41 +285,18 @@ static int select_backend_wait(
 		return (result == 0) ? 0 : -1;
 	}
 
-	/* Process results */
-	int event_count = 0;
-	php_poll_fd_table *table = backend_data->fd_table;
+	/* Process results using iteration over active FDs only */
+	select_result_context result_ctx = {
+		.backend_data = backend_data, .events = events, .max_events = max_events, .event_count = 0
+	};
 
-	for (int i = 0; i < table->capacity && event_count < max_events; i++) {
-		if (!table->entries[i].active) {
-			continue;
-		}
+	php_poll_fd_table_foreach(backend_data->fd_table, process_select_result_callback, &result_ctx);
+	int event_count = result_ctx.event_count;
 
-		php_socket_t sock = (php_socket_t) table->entries[i].fd;
-		uint32_t revents = 0;
-
-		if (FD_ISSET(sock, &backend_data->read_fds)) {
-			revents |= PHP_POLL_READ;
-		}
-		if (FD_ISSET(sock, &backend_data->write_fds)) {
-			revents |= PHP_POLL_WRITE;
-		}
-		if (FD_ISSET(sock, &backend_data->error_fds)) {
-			revents |= PHP_POLL_ERROR;
-		}
-
-		if (revents != 0) {
-			events[event_count].fd = table->entries[i].fd;
-			events[event_count].events = table->entries[i].events;
-			events[event_count].revents = revents;
-			events[event_count].data = table->entries[i].data;
-			event_count++;
-		}
-	}
-
-	/* Apply edge-trigger simulation using helper */
+	/* Apply edge-trigger simulation */
 	int nfds = php_poll_simulate_edge_trigger(backend_data->fd_table, events, event_count);
 
-	/* Handle oneshot removals after simulation */
+	/* Handle oneshot removals */
 	for (int i = 0; i < nfds; i++) {
 		php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, events[i].fd);
 		if (entry && (entry->events & PHP_POLL_ONESHOT) && events[i].revents != 0) {
@@ -306,11 +320,9 @@ static int select_backend_get_suitable_max_events(php_poll_ctx *ctx)
 		return -1;
 	}
 
-	/* For select(), we know exactly how many FDs are registered */
-	int active_fds = backend_data->fd_table->count;
+	int active_fds = php_poll_fd_table_count(backend_data->fd_table);
 
 	if (active_fds == 0) {
-		/* No active FDs, return 1 just to not pass empty events */
 		return 1;
 	}
 

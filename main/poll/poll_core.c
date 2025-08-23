@@ -406,3 +406,47 @@ PHPAPI const char *php_poll_error_string(php_poll_error error)
 			return "Unknown error";
 	}
 }
+
+/* Edge-trigger simulation helper */
+int php_poll_simulate_edge_trigger(php_poll_fd_table *table, php_poll_event *events, int nfds)
+{
+	int filtered_count = 0;
+
+	for (int i = 0; i < nfds; i++) {
+		php_poll_fd_entry *entry = php_poll_fd_table_find(table, events[i].fd);
+		if (!entry) {
+			continue;
+		}
+
+		uint32_t new_events = events[i].revents;
+		uint32_t reported_events = 0;
+
+		if (entry->events & PHP_POLL_ET) {
+			/* Edge-triggered: report edges only */
+			if ((new_events & PHP_POLL_READ) && !(entry->last_revents & PHP_POLL_READ)) {
+				reported_events |= PHP_POLL_READ;
+			}
+			if ((new_events & PHP_POLL_WRITE) && !(entry->last_revents & PHP_POLL_WRITE)) {
+				reported_events |= PHP_POLL_WRITE;
+			}
+			/* Always report error and hangup events */
+			reported_events |= (new_events & (PHP_POLL_ERROR | PHP_POLL_HUP | PHP_POLL_RDHUP));
+		} else {
+			/* Level-triggered: report all active events */
+			reported_events = new_events;
+		}
+
+		entry->last_revents = new_events;
+
+		/* Only include this event if we have something to report */
+		if (reported_events != 0) {
+			if (filtered_count != i) {
+				events[filtered_count] = events[i];
+			}
+			events[filtered_count].revents = reported_events;
+			filtered_count++;
+		}
+	}
+
+	return filtered_count;
+}

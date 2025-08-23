@@ -16,6 +16,7 @@
 #define PHP_POLL_INTERNAL_H
 
 #include "php_poll.h"
+#include "php_network.h"
 
 /* Allocation macros */
 #define php_poll_calloc(nmemb, size, persistent) \
@@ -81,23 +82,44 @@ typedef struct php_poll_fd_entry {
 	uint32_t events;
 	void *data;
 	bool active;
-	uint32_t last_revents; /* For edge-trigger simulation */
+	uint32_t last_revents;
 } php_poll_fd_entry;
 
 /* FD tracking table */
 typedef struct php_poll_fd_table {
-	php_poll_fd_entry *entries;
-	int capacity;
-	int count;
+	HashTable entries_ht;
 	bool persistent;
 } php_poll_fd_table;
 
-/* Poll FD helpers */
+/* Iterator callback function type */
+typedef bool (*php_poll_fd_iterator_func_t)(int fd, php_poll_fd_entry *entry, void *user_data);
+
+/* Poll FD helpers - clean API with accessor functions */
 php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent);
 void php_poll_fd_table_cleanup(php_poll_fd_table *table);
 php_poll_fd_entry *php_poll_fd_table_find(php_poll_fd_table *table, int fd);
 php_poll_fd_entry *php_poll_fd_table_get(php_poll_fd_table *table, int fd);
 void php_poll_fd_table_remove(php_poll_fd_table *table, int fd);
+
+/* Accessor functions for table properties */
+static inline int php_poll_fd_table_count(php_poll_fd_table *table)
+{
+	return zend_hash_num_elements(&table->entries_ht);
+}
+
+static inline bool php_poll_fd_table_is_empty(php_poll_fd_table *table)
+{
+	return zend_hash_num_elements(&table->entries_ht) == 0;
+}
+
+/* New helper functions for improved backend integration */
+void php_poll_fd_table_foreach(
+		php_poll_fd_table *table, php_poll_fd_iterator_func_t callback, void *user_data);
+php_socket_t php_poll_fd_table_get_max_fd(php_poll_fd_table *table);
+int php_poll_fd_table_collect_events(
+		php_poll_fd_table *table, php_poll_event *events, int max_events);
+
+/* Edge triggering simulation helper */
 int php_poll_simulate_edge_trigger(php_poll_fd_table *table, php_poll_event *events, int nfds);
 
 /* Error helper functions */
