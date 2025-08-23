@@ -1,5 +1,5 @@
 --TEST--
-Stream polling basic functionality - socket write / read
+Stream polling - socket write / read few time only
 --FILE--
 <?php
 require_once __DIR__ . '/stream_poll.inc';
