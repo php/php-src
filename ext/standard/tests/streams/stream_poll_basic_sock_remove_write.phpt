@@ -1,5 +1,5 @@
 --TEST--
-Stream polling basic functionality - socket delete write
+Stream polling - socket remove write
 --FILE--
 <?php
 require_once __DIR__ . '/stream_poll.inc';
