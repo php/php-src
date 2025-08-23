@@ -93,3 +93,111 @@ function pt_print_events($events, $read_data = false): void {
         echo "\n";
     }
 }
+
+function pt_expect_events($events, $expected): void {
+    if (!is_array($events)) {
+        die("Events must be an array\n");
+    }
+
+    if (!is_array($expected)) {
+        die("Expected events must be an array\n");
+    }
+
+    $event_count = count($events);
+    $expected_count = count($expected);
+
+    if ($event_count !== $expected_count) {
+        echo "Event count mismatch: got $event_count, expected $expected_count\n";
+        pt_print_mismatched_events($events, $expected);
+        return;
+    }
+
+    // Convert events to comparable format for matching
+    $actual_events = [];
+    foreach ($events as $event) {
+        if (!$event instanceof StreamPollEvent) {
+            die('Invalid event type');
+        }
+
+        $event_data = [
+            'events' => $event->events,
+            'data' => $event->data
+        ];
+
+        $actual_events[] = $event_data;
+    }
+
+    // Try to match each expected event with an actual event
+    $matched = [];
+    $unmatched_expected = [];
+
+    foreach ($expected as $exp_idx => $exp_event) {
+        $found_match = false;
+
+        foreach ($actual_events as $act_idx => $act_event) {
+            if (isset($matched[$act_idx])) {
+                continue; // Already matched
+            }
+
+            // Check if events and data match
+            if ($act_event['events'] === $exp_event['events'] &&
+                $act_event['data'] === $exp_event['data']) {
+
+                // If read data is expected, check it
+                if (isset($exp_event['read'])) {
+                    $read_data = fread($events[$act_idx]->stream, 1024);
+                    if ($read_data !== $exp_event['read']) {
+                        continue; // Read data doesn't match
+                    }
+                }
+
+                $matched[$act_idx] = $exp_idx;
+                $found_match = true;
+                break;
+            }
+        }
+
+        if (!$found_match) {
+            $unmatched_expected[] = $exp_event;
+        }
+    }
+
+    // Check if all events matched
+    if (count($matched) === $event_count && empty($unmatched_expected)) {
+        echo "Events matched - count: $event_count\n";
+    } else {
+        echo "Events did not match:\n";
+        pt_print_mismatched_events($events, $expected, $matched);
+    }
+}
+
+function pt_event_flags_to_string($flags): string {
+    $names = [];
+    if ($flags & STREAM_POLL_READ) $names[] = 'READ';
+    if ($flags & STREAM_POLL_WRITE) $names[] = 'WRITE';
+    if ($flags & STREAM_POLL_ERROR) $names[] = 'ERROR';
+    if ($flags & STREAM_POLL_HUP) $names[] = 'HUP';
+
+    return empty($names) ? 'NONE' : implode('|', $names);
+}
+
+function pt_print_mismatched_events($actual_events, $expected_events, $matched = []): void {
+    echo "Actual events:\n";
+    foreach ($actual_events as $i => $event) {
+        $match_status = isset($matched[$i]) ? " [MATCHED]" : " [UNMATCHED]";
+        $event_names = pt_event_flags_to_string($event->events);
+        echo "  Event[$i]: $event_names, user data: " . $event->data . $match_status . "\n";
+    }
+
+    echo "Expected events:\n";
+    foreach ($expected_events as $i => $exp_event) {
+        $was_matched = in_array($i, $matched);
+        $match_status = $was_matched ? " [MATCHED]" : " [UNMATCHED]";
+        $event_names = pt_event_flags_to_string($exp_event['events']);
+        echo "  Event[$i]: $event_names, user data: " . $exp_event['data'];
+        if (isset($exp_event['read'])) {
+            echo ", read data: '" . $exp_event['read'] . "'";
+        }
+        echo $match_status . "\n";
+    }
+}
