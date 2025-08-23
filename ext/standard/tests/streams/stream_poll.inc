@@ -1,5 +1,19 @@
 <?php
 // stream Poll Testing helper
+
+function pt_new_stream_poll(): StreamPollContext {
+    $backend = getenv('STREAM_POLL_TEST_BACKEND');
+    return stream_poll_create($backend === false ? STREAM_POLL_BACKEND_AUTO : $backend);
+}
+
+function pt_skip_for_backend($backend, $msg): void {
+    $backends_to_skip = is_array($backend) ? $backend : array($backend);
+    $current_backend = stream_poll_backend_name(pt_new_stream_poll());
+    if (in_array($current_backend, $backends_to_skip)) {
+        die("skip backend $current_backend $msg\n");
+    }
+}
+
 function pt_new_socket_pair(): array {
     $domain = (strtoupper(substr(PHP_OS, 0, 3) == 'WIN') ? STREAM_PF_INET : STREAM_PF_UNIX);
     $sockets = stream_socket_pair($domain, STREAM_SOCK_STREAM, 0);
@@ -63,11 +77,6 @@ function pt_new_tcp_socket_connections(int $num_conns): array {
     fclose($server);
 
     return [$clients, $server_conns];
-}
-
-function pt_new_stream_poll(): StreamPollContext {
-    $backend = getenv('STREAM_POLL_TEST_BACKEND');
-    return stream_poll_create($backend === false ? STREAM_POLL_BACKEND_AUTO : $backend);
 }
 
 function pt_write_sleep($stream, $data, $delay = 10000): int|false {

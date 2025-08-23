@@ -119,9 +119,6 @@ php_socket_t php_poll_fd_table_get_max_fd(php_poll_fd_table *table);
 int php_poll_fd_table_collect_events(
 		php_poll_fd_table *table, php_poll_event *events, int max_events);
 
-/* Edge triggering simulation helper */
-int php_poll_simulate_edge_trigger(php_poll_fd_table *table, php_poll_event *events, int nfds);
-
 /* Error helper functions */
 php_poll_error php_poll_errno_to_error(int err);
 
