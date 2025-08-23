@@ -109,6 +109,11 @@ static zend_result poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, 
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
 
+	if (events & PHP_POLL_ET) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOSUPPORT);
+		return FAILURE;
+	}
+
 	if (php_poll_fd_table_find(backend_data->fd_table, fd)) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_EXISTS);
 		return FAILURE;
@@ -129,6 +134,11 @@ static zend_result poll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events, 
 static zend_result poll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *user_data)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
+
+	if (events & PHP_POLL_ET) {
+		php_poll_set_error(ctx, PHP_POLL_ERR_NOSUPPORT);
+		return FAILURE;
+	}
 
 	php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, fd);
 	if (!entry) {
@@ -255,9 +265,6 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 		php_poll_fd_table_foreach(
 				backend_data->fd_table, poll_process_results_callback, &result_ctx);
 		int event_count = result_ctx.event_count;
-
-		/* Apply edge-trigger simulation */
-		nfds = php_poll_simulate_edge_trigger(backend_data->fd_table, events, event_count);
 
 		/* Handle oneshot removals */
 		for (int i = 0; i < nfds; i++) {
