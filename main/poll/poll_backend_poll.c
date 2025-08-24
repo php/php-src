@@ -16,7 +16,7 @@
 
 typedef struct {
 	php_poll_fd_table *fd_table;
-	struct pollfd *temp_fds;
+	php_pollfd *temp_fds;
 	int temp_fds_capacity;
 } poll_backend_data_t;
 
@@ -76,7 +76,7 @@ static zend_result poll_backend_init(php_poll_ctx *ctx)
 		return FAILURE;
 	}
 
-	data->temp_fds = php_poll_calloc(initial_capacity, sizeof(struct pollfd), ctx->persistent);
+	data->temp_fds = php_poll_calloc(initial_capacity, sizeof(php_pollfd), ctx->persistent);
 	if (!data->temp_fds) {
 		php_poll_fd_table_cleanup(data->fd_table);
 		pefree(data, ctx->persistent);
@@ -160,13 +160,13 @@ static zend_result poll_backend_remove(php_poll_ctx *ctx, int fd)
 	return SUCCESS;
 }
 
-/* Context for building pollfd array */
+/* Context for building php_pollfd array */
 typedef struct {
-	struct pollfd *fds;
+	php_pollfd *fds;
 	int index;
 } poll_build_context;
 
-/* Callback to build pollfd array from fd_table */
+/* Callback to build php_pollfd array from fd_table */
 static bool poll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *user_data)
 {
 	poll_build_context *ctx = (poll_build_context *) user_data;
@@ -197,8 +197,8 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 
 	/* Ensure temp_fds array is large enough */
 	if (fd_count > backend_data->temp_fds_capacity) {
-		struct pollfd *new_fds = php_poll_realloc(
-				backend_data->temp_fds, fd_count * sizeof(struct pollfd), ctx->persistent);
+		php_pollfd *new_fds = php_poll_realloc(
+				backend_data->temp_fds, fd_count * sizeof(php_pollfd), ctx->persistent);
 		if (!new_fds) {
 			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 			return -1;
@@ -207,7 +207,7 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 		backend_data->temp_fds_capacity = fd_count;
 	}
 
-	/* Build pollfd array from fd_table */
+	/* Build php_pollfd array from fd_table */
 	poll_build_context build_ctx = { .fds = backend_data->temp_fds, .index = 0 };
 	php_poll_fd_table_foreach(backend_data->fd_table, poll_build_fds_callback, &build_ctx);
 
@@ -218,10 +218,10 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 		return nfds; /* Return 0 for timeout, -1 for error */
 	}
 
-	/* Process results - iterate through pollfd array directly */
+	/* Process results - iterate through php_pollfd array directly */
 	int event_count = 0;
 	for (int i = 0; i < fd_count && event_count < max_events; i++) {
-		struct pollfd *pfd = &backend_data->temp_fds[i];
+		php_pollfd *pfd = &backend_data->temp_fds[i];
 
 		if (pfd->revents != 0) {
 			php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, pfd->fd);
