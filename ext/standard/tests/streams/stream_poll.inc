@@ -227,7 +227,7 @@ function pt_event_flags_to_string($flags): string {
     if ($flags & STREAM_POLL_ERROR) $names[] = 'ERROR';
     if ($flags & STREAM_POLL_HUP) $names[] = 'HUP';
 
-    return empty($names) ? 'NONE' : implode('|', $names);
+    return empty($names) ? 'NONE:' . $flags : implode('|', $names);
 }
 
 function pt_print_mismatched_events($actual_events, $expected_events, $matched = [], $backend_name = null): void {
