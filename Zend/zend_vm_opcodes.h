@@ -30,6 +30,14 @@
 #define ZEND_VM_KIND_GOTO	3
 #define ZEND_VM_KIND_HYBRID	4
 #define ZEND_VM_KIND_TAILCALL	5
+static const char *const zend_vm_kind_name[] = {
+    NULL,
+    "ZEND_VM_KIND_CALL",
+    "ZEND_VM_KIND_SWITCH",
+    "ZEND_VM_KIND_GOTO",
+    "ZEND_VM_KIND_HYBRID",
+    "ZEND_VM_KIND_TAILCALL",
+};
 #if 0
 /* HYBRID requires support for computed GOTO and global register variables*/
 #elif (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))
