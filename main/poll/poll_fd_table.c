@@ -34,10 +34,9 @@ php_poll_fd_table *php_poll_fd_table_init(int initial_capacity, bool persistent)
 void php_poll_fd_table_cleanup(php_poll_fd_table *table)
 {
 	if (table) {
-		zend_ulong fd;
 		zval *zv;
 
-		ZEND_HASH_FOREACH_NUM_KEY_VAL(&table->entries_ht, fd, zv)
+		ZEND_HASH_FOREACH_VAL(&table->entries_ht, zv)
 		{
 			php_poll_fd_entry *entry = Z_PTR_P(zv);
 			pefree(entry, table->persistent);
