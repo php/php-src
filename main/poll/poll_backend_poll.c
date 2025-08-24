@@ -180,6 +180,22 @@ static bool poll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *user
 	return true;
 }
 
+static void php_poll_msleep(int timeout_ms)
+{
+	if (timeout_ms <= 0) {
+		return;
+	}
+
+#ifdef PHP_WIN32
+	Sleep(timeout_ms);
+#else
+	struct timespec ts;
+	ts.tv_sec = timeout_ms / 1000;
+	ts.tv_nsec = (timeout_ms % 1000) * 1000000;
+	nanosleep(&ts, NULL);
+#endif
+}
+
 static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	poll_backend_data_t *backend_data = (poll_backend_data_t *) ctx->backend_data;
@@ -187,10 +203,7 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 	int fd_count = php_poll_fd_table_count(backend_data->fd_table);
 	if (fd_count == 0) {
 		if (timeout > 0) {
-			struct timespec ts;
-			ts.tv_sec = timeout / 1000;
-			ts.tv_nsec = (timeout % 1000) * 1000000;
-			nanosleep(&ts, NULL);
+			php_poll_msleep(timeout);
 		}
 		return 0;
 	}
