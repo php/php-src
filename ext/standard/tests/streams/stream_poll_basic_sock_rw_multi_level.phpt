@@ -44,7 +44,7 @@ pt_expect_events(stream_poll_wait($poll_ctx, 100), [
 fclose($socket1r);
 pt_expect_events(stream_poll_wait($poll_ctx, 100), [
     [
-        'events' => ['kqueue' => STREAM_POLL_WRITE|STREAM_POLL_HUP, 'default' => STREAM_POLL_HUP],
+        'events' => ['default' => STREAM_POLL_WRITE|STREAM_POLL_HUP, 'poll' => STREAM_POLL_HUP],
         'data' => 'socket2_data'
     ]
 ], $poll_ctx);
