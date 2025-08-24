@@ -15,7 +15,7 @@ lxb_html_tree_insertion_mode_text(lxb_html_tree_t *tree,
                                   lxb_html_token_t *token)
 {
     lxb_dom_node_t *node;
-    lxb_html_style_element_t *style;
+    const lxb_html_document_parse_cb_t *pcb;
 
     switch (token->tag_id) {
         case LXB_TAG__TEXT: {
@@ -48,9 +48,19 @@ lxb_html_tree_insertion_mode_text(lxb_html_tree_t *tree,
 
         /* TODO: need to implement */
         case LXB_TAG_SCRIPT:
-            lxb_html_tree_open_elements_pop(tree);
+            node = lxb_html_tree_open_elements_pop(tree);
 
             tree->mode = tree->original_mode;
+            pcb = tree->document->parse_cb;
+
+            if (pcb == NULL || pcb->script == NULL) {
+                break;
+            }
+
+            tree->status = pcb->script(tree, node);
+            if (tree->status != LXB_STATUS_OK) {
+                return lxb_html_tree_process_abort(tree);
+            }
 
             break;
 
@@ -58,20 +68,13 @@ lxb_html_tree_insertion_mode_text(lxb_html_tree_t *tree,
             node = lxb_html_tree_open_elements_pop(tree);
 
             tree->mode = tree->original_mode;
+            pcb = tree->document->parse_cb;
 
-            if (!tree->document->css_init) {
+            if (pcb == NULL || pcb->style == NULL) {
                 break;
             }
 
-            style = lxb_html_interface_style(node);
-
-            tree->status = lxb_html_style_element_parse(style);
-            if (tree->status != LXB_STATUS_OK) {
-                return lxb_html_tree_process_abort(tree);
-            }
-
-            tree->status = lxb_html_document_stylesheet_add(tree->document,
-                                                            style->stylesheet);
+            tree->status = pcb->style(tree, node);
             if (tree->status != LXB_STATUS_OK) {
                 return lxb_html_tree_process_abort(tree);
             }

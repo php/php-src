@@ -12,18 +12,18 @@ extern "C" {
 #endif
 
 #include "lexbor/core/mraw.h"
-#include "lexbor/core/avl.h"
-
 #include "lexbor/tag/tag.h"
 #include "lexbor/ns/ns.h"
 #include "lexbor/html/interface.h"
 #include "lexbor/dom/interfaces/attr.h"
 #include "lexbor/dom/interfaces/document.h"
-#include "lexbor/css/css.h"
 
 
 typedef lxb_status_t
 (*lxb_html_document_done_cb_f)(lxb_html_document_t *document);
+
+typedef lxb_status_t
+(*lxb_html_document_parse_cb_f)(lxb_html_tree_t *tree, lxb_dom_node_t *node);
 
 typedef unsigned int lxb_html_document_opt_t;
 
@@ -41,34 +41,25 @@ enum lxb_html_document_opt {
 };
 
 typedef struct {
-    lxb_css_memory_t    *memory;
-    lxb_css_selectors_t *css_selectors;
-    lxb_css_parser_t    *parser;
-
-    lexbor_avl_t        *styles;
-    lexbor_array_t      *stylesheets;
-    lexbor_dobject_t    *weak;
-
-    lexbor_hash_t       *customs;
-    uintptr_t           customs_id;
+    lxb_html_document_parse_cb_f script;
+    lxb_html_document_parse_cb_f style;
 }
-lxb_html_document_css_t;
+lxb_html_document_parse_cb_t;
 
 struct lxb_html_document {
-    lxb_dom_document_t              dom_document;
+    lxb_dom_document_t                 dom_document;
 
-    void                            *iframe_srcdoc;
+    void                               *iframe_srcdoc;
 
-    lxb_html_head_element_t         *head;
-    lxb_html_body_element_t         *body;
+    lxb_html_head_element_t            *head;
+    lxb_html_body_element_t            *body;
 
-    lxb_html_document_css_t         css;
-    bool                            css_init;
+    const lxb_html_document_parse_cb_t *parse_cb;
 
-    lxb_html_document_done_cb_f     done;
-    lxb_html_document_ready_state_t ready_state;
+    lxb_html_document_done_cb_f        done;
+    lxb_html_document_ready_state_t    ready_state;
 
-    lxb_html_document_opt_t         opt;
+    lxb_html_document_opt_t            opt;
 };
 
 
@@ -87,73 +78,6 @@ lxb_html_document_clean(lxb_html_document_t *document);
 
 LXB_API lxb_html_document_t *
 lxb_html_document_destroy(lxb_html_document_t *document);
-
-LXB_API lxb_status_t
-lxb_html_document_css_init(lxb_html_document_t *document);
-
-LXB_API void
-lxb_html_document_css_destroy(lxb_html_document_t *document);
-
-LXB_API void
-lxb_html_document_css_clean(lxb_html_document_t *document);
-
-LXB_API void
-lxb_html_document_css_parser_attach(lxb_html_document_t *document,
-                                    lxb_css_parser_t *parser);
-
-LXB_API void
-lxb_html_document_css_memory_attach(lxb_html_document_t *document,
-                                    lxb_css_memory_t *memory);
-
-LXB_API uintptr_t
-lxb_html_document_css_customs_find_id(lxb_html_document_t *document,
-                                      const lxb_char_t *key, size_t length);
-
-LXB_API uintptr_t
-lxb_html_document_css_customs_id(lxb_html_document_t *document,
-                                 const lxb_char_t *key, size_t length);
-
-LXB_API lxb_status_t
-lxb_html_document_stylesheet_attach(lxb_html_document_t *document,
-                                    lxb_css_stylesheet_t *sst);
-
-LXB_API lxb_status_t
-lxb_html_document_stylesheet_apply(lxb_html_document_t *document,
-                                   lxb_css_stylesheet_t *sst);
-
-LXB_API lxb_status_t
-lxb_html_document_stylesheet_add(lxb_html_document_t *document,
-                                 lxb_css_stylesheet_t *sst);
-
-LXB_API lxb_status_t
-lxb_html_document_stylesheet_remove(lxb_html_document_t *document,
-                                    lxb_css_stylesheet_t *sst);
-
-LXB_API lxb_status_t
-lxb_html_document_element_styles_attach(lxb_html_element_t *element);
-
-LXB_API void
-lxb_html_document_stylesheet_destroy_all(lxb_html_document_t *document,
-                                         bool destroy_memory);
-
-LXB_API lxb_status_t
-lxb_html_document_style_attach(lxb_html_document_t *document,
-                               lxb_css_rule_style_t *style);
-
-LXB_API lxb_status_t
-lxb_html_document_style_remove(lxb_html_document_t *document,
-                               lxb_css_rule_style_t *style);
-
-LXB_API lxb_status_t
-lxb_html_document_style_attach_by_element(lxb_html_document_t *document,
-                                          lxb_html_element_t *element,
-                                          lxb_css_rule_style_t *style);
-
-LXB_API lxb_status_t
-lxb_html_document_css_customs_init(lxb_html_document_t *document);
-
-LXB_API void
-lxb_html_document_css_customs_destroy(lxb_html_document_t *document);
 
 LXB_API lxb_status_t
 lxb_html_document_parse(lxb_html_document_t *document,
@@ -292,6 +216,32 @@ lxb_inline lxb_dom_element_t *
 lxb_html_document_destroy_element(lxb_dom_element_t *element)
 {
     return lxb_dom_document_destroy_element(element);
+}
+
+lxb_inline const lxb_html_document_parse_cb_t *
+lxb_html_document_parse_cb(lxb_html_document_t *document)
+{
+    return document->parse_cb;
+}
+
+lxb_inline void
+lxb_html_document_parse_cb_set(lxb_html_document_t *document,
+                               const lxb_html_document_parse_cb_t *parse_cb)
+{
+    document->parse_cb = parse_cb;
+}
+
+lxb_inline lxb_html_document_done_cb_f
+lxb_html_document_done(lxb_html_document_t *document)
+{
+    return document->done;
+}
+
+lxb_inline void
+lxb_html_document_done_set(lxb_html_document_t *document,
+                           lxb_html_document_done_cb_f done_cb)
+{
+    document->done = done_cb;
 }
 
 /*

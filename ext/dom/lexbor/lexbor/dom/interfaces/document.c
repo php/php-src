@@ -14,6 +14,12 @@
 #include "lexbor/dom/interfaces/processing_instruction.h"
 
 
+static const lxb_dom_document_node_cb_t lxb_dom_document_node_cbs =
+{
+    .insert = NULL, .remove = NULL, .destroy = NULL, .set_value = NULL
+};
+
+
 lxb_dom_document_t *
 lxb_dom_document_interface_create(lxb_dom_document_t *document)
 {
@@ -87,9 +93,7 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
     document->clone_interface = clone_interface;
     document->destroy_interface = destroy_interface;
 
-    document->ev_insert = NULL;
-    document->ev_remove = NULL;
-    document->ev_destroy = NULL;
+    document->node_cb = &lxb_dom_document_node_cbs;
 
     node = lxb_dom_interface_node(document);
 
@@ -108,6 +112,7 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
         document->user = owner->user;
         document->scripting = owner->scripting;
         document->compat_mode = owner->compat_mode;
+        document->css = owner->css;
 
         document->tags_inherited = true;
         document->ns_inherited = true;
@@ -116,6 +121,8 @@ lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
 
         return LXB_STATUS_OK;
     }
+
+    document->css = NULL;
 
     /* For nodes */
     document->mraw = lexbor_mraw_create();
@@ -474,6 +481,12 @@ lxb_dom_document_import_node(lxb_dom_document_t *doc, lxb_dom_node_t *node,
     }
 
     return new;
+}
+
+void
+lxb_dom_document_set_default_node_cb(lxb_dom_document_t *document)
+{
+    document->node_cb = &lxb_dom_document_node_cbs;
 }
 
 

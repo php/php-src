@@ -156,9 +156,6 @@ struct lxb_css_parser {
     lxb_css_syntax_token_type_t      *types_end;
     lxb_css_syntax_token_type_t      *types_pos;
 
-    lxb_css_syntax_tokenizer_chunk_f chunk_cb;
-    void                             *chunk_ctx;
-
     const lxb_char_t                 *pos;
     uintptr_t                        offset;
 

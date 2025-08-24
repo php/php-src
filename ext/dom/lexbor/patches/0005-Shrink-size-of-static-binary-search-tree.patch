@@ -1,4 +1,4 @@
-From 16daa8e860e393ff39613b908550b0982a2210f2 Mon Sep 17 00:00:00 2001
+From 065923a993a004b8891ad3992c99e7e63e77bad3 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Wed, 29 Nov 2023 21:29:31 +0100
 Subject: [PATCH 5/6] Shrink size of static binary search tree
@@ -8,7 +8,7 @@ This also makes it more efficient on the data cache.
  source/lexbor/core/sbst.h                   | 19 ++++++++++++++-----
  source/lexbor/html/tokenizer/state.c        |  2 +-
  utils/lexbor/html/tmp/tokenizer_res.h       |  2 +-
- utils/lexbor/html/tokenizer_entities_bst.py |  8 ++++----
+ utils/lexbor/html/tokenizer_entities_bst.py | 10 +++++-----
  utils/lexbor/lexbor/LXB.py                  |  2 +-
  5 files changed, 21 insertions(+), 12 deletions(-)
 
@@ -103,6 +103,15 @@ index 4fa0999..8bd83b2 100755
          else:
              value = '"{}"'.format(toHex(index[ split[0] ]['values'][0]['characters']))
  
+@@ -146,7 +146,7 @@ def toHex(s):
+     lst = []
+ 
+     for ch in bytes(s, 'utf-8'):
+-        hv = hex(ch).replace('0x', '\\\\x')
++        hv = hex(ch).replace('0x', '\\x')
+         lst.append(hv)
+ 
+     return ''.join(lst)
 @@ -210,5 +210,5 @@ def entities_bst_print(bst):
  
  if __name__ == "__main__":

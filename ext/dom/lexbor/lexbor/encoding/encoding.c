@@ -55,6 +55,51 @@ lxb_encoding_data_by_pre_name(const lxb_char_t *name, size_t length)
     return entry->value;
 }
 
+void
+lxb_encoding_utf_8_skip_bom(const lxb_char_t **begin, size_t *length)
+{
+    const lxb_char_t *p;
+
+    if (*length >= 3) {
+        p = *begin;
+
+        if (p[0] == 0xEF && p[1] == 0xBB && p[2] == 0xBF) {
+            *begin = p + 3;
+            *length -= 3;
+        }
+    }
+}
+
+void
+lxb_encoding_utf_16be_skip_bom(const lxb_char_t **begin, size_t *length)
+{
+    const lxb_char_t *p;
+
+    if (*length >= 2) {
+        p = *begin;
+
+        if (p[0] == 0xFE && p[1] == 0xFF) {
+            *begin = p + 2;
+            *length -= 2;
+        }
+    }
+}
+
+void
+lxb_encoding_utf_16le_skip_bom(const lxb_char_t **begin, size_t *length)
+{
+    const lxb_char_t *p;
+
+    if (*length >= 2) {
+        p = *begin;
+
+        if (p[0] == 0xFF && p[1] == 0xFE) {
+            *begin = p + 2;
+            *length -= 2;
+        }
+    }
+}
+
 /*
  * No inline functions for ABI.
  */

@@ -58,14 +58,14 @@ typedef enum {
 lxb_css_unit_relative_t;
 
 typedef enum {
-    LXB_CSS_UNIT_ANGEL__BEGIN      = 0x0016,
+    LXB_CSS_UNIT_ANGLE__BEGIN      = 0x0016,
     LXB_CSS_UNIT_DEG               = 0x0016,
     LXB_CSS_UNIT_GRAD              = 0x0017,
     LXB_CSS_UNIT_RAD               = 0x0018,
     LXB_CSS_UNIT_TURN              = 0x0019,
-    LXB_CSS_UNIT_ANGEL__LAST_ENTRY = 0x001a
+    LXB_CSS_UNIT_ANGLE__LAST_ENTRY = 0x001a
 }
-lxb_css_unit_angel_t;
+lxb_css_unit_angle_t;
 
 typedef enum {
     LXB_CSS_UNIT_FREQUENCY__BEGIN      = 0x001a,

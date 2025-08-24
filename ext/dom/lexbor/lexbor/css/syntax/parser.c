@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Alexander Borisov
+ * Copyright (C) 2020-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -173,47 +173,6 @@ lxb_css_syntax_parser_consume(lxb_css_parser_t *parser)
     if (!parser->rules->skip_consume) {
         lxb_css_syntax_token_consume(parser->tkz);
     }
-}
-
-lxb_status_t
-lxb_css_syntax_parser_tkz_cb(lxb_css_syntax_tokenizer_t *tkz,
-                             const lxb_char_t **data, const lxb_char_t **end,
-                             void *ctx)
-{
-    size_t length, size;
-    lxb_char_t *new_data;
-    lxb_status_t status;
-    lxb_css_parser_t *parser = ctx;
-
-    if (parser->pos == NULL) {
-        return parser->chunk_cb(tkz, data, end, parser->chunk_ctx);
-    }
-
-    length = (size_t) (*end - parser->pos);
-
-    if (SIZE_MAX - parser->str.length < length) {
-        return LXB_STATUS_ERROR_OVERFLOW;
-    }
-
-    if (parser->str.length + length >= parser->str_size) {
-        size = parser->str.length + length + 1;
-
-        new_data = lexbor_realloc(parser->str.data, size);
-        if (new_data == NULL) {
-            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
-        }
-
-        parser->str.data = new_data;
-        parser->str_size = size;
-    }
-
-    memcpy(parser->str.data + parser->str.length, parser->pos, length);
-
-    status = parser->chunk_cb(tkz, data, end, parser->chunk_ctx);
-    parser->str.length += length;
-    parser->pos = *data;
-
-    return status;
 }
 
 lxb_css_syntax_rule_t *

@@ -279,7 +279,7 @@ lxb_html_tokenizer_state_data(lxb_html_tokenizer_t *tkz,
                 if (tkz->is_eof) {
                     /* Emit TEXT node if not empty */
                     if (tkz->token->begin != NULL) {
-                        lxb_html_tokenizer_state_token_set_end_oef(tkz);
+                        lxb_html_tokenizer_state_token_set_end_eof(tkz);
                     }
 
                     if (tkz->token->begin != tkz->token->end) {
@@ -377,7 +377,7 @@ lxb_html_tokenizer_state_plaintext(lxb_html_tokenizer_t *tkz,
 
                 if (tkz->is_eof) {
                     if (tkz->token->begin != NULL) {
-                        lxb_html_tokenizer_state_token_set_end_oef(tkz);
+                        lxb_html_tokenizer_state_token_set_end_eof(tkz);
                     }
 
                     lxb_html_tokenizer_state_set_text(tkz);
@@ -453,7 +453,7 @@ lxb_html_tokenizer_state_tag_open(lxb_html_tokenizer_t *tkz,
         if (tkz->is_eof) {
             lxb_html_tokenizer_state_append_m(tkz, "<", 1);
 
-            lxb_html_tokenizer_state_token_set_end_oef(tkz);
+            lxb_html_tokenizer_state_token_set_end_eof(tkz);
             lxb_html_tokenizer_state_token_emit_text_not_empty_m(tkz, end);
 
             lxb_html_tokenizer_error_add(tkz->parse_errors, tkz->token->end,
@@ -508,7 +508,7 @@ lxb_html_tokenizer_state_end_tag_open(lxb_html_tokenizer_t *tkz,
         if (tkz->is_eof) {
             lxb_html_tokenizer_state_append_m(tkz, "</", 2);
 
-            lxb_html_tokenizer_state_token_set_end_oef(tkz);
+            lxb_html_tokenizer_state_token_set_end_eof(tkz);
             lxb_html_tokenizer_state_token_emit_text_not_empty_m(tkz, end);
 
             lxb_html_tokenizer_error_add(tkz->parse_errors, tkz->token->end,
@@ -582,7 +582,7 @@ lxb_html_tokenizer_state_tag_name(lxb_html_tokenizer_t *tkz,
             /* U+0000 NULL */
             case 0x00:
                 if (tkz->is_eof) {
-                    lxb_html_tokenizer_state_token_set_end_oef(tkz);
+                    lxb_html_tokenizer_state_token_set_end_eof(tkz);
 
                     lxb_html_tokenizer_error_add(tkz->parse_errors,
                                                tkz->token->end,
@@ -1377,7 +1377,7 @@ lxb_html_tokenizer_state_bogus_comment(lxb_html_tokenizer_t *tkz,
 
                 if (tkz->is_eof) {
                     if (tkz->token->begin != NULL) {
-                        lxb_html_tokenizer_state_token_set_end_oef(tkz);
+                        lxb_html_tokenizer_state_token_set_end_eof(tkz);
                     }
 
                     lxb_html_tokenizer_state_set_text(tkz);
@@ -1476,7 +1476,7 @@ lxb_html_tokenizer_state_markup_declaration_open(lxb_html_tokenizer_t *tkz,
     }
 
     if (tkz->is_eof) {
-        lxb_html_tokenizer_state_token_set_end_oef(tkz);
+        lxb_html_tokenizer_state_token_set_end_eof(tkz);
 
         tkz->token->begin = tkz->token->end;
     }
@@ -1657,7 +1657,7 @@ lxb_html_tokenizer_state_cdata_section(lxb_html_tokenizer_t *tkz,
 
                     if (tkz->token->begin != NULL) {
                         lxb_html_tokenizer_state_append_data_m(tkz, data);
-                        lxb_html_tokenizer_state_token_set_end_oef(tkz);
+                        lxb_html_tokenizer_state_token_set_end_eof(tkz);
                     }
 
                     lxb_html_tokenizer_state_set_text(tkz);

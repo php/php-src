@@ -53,6 +53,12 @@ lxb_html_node_is_void(lxb_dom_node_t *node)
     return false;
 }
 
+lxb_inline bool
+lxb_html_node_is(const lxb_dom_node_t *node, lxb_tag_id_t tag_id)
+{
+    return node->local_name == tag_id && node->ns == LXB_NS_HTML;
+}
+
 /*
  * No inline functions for ABI.
  */

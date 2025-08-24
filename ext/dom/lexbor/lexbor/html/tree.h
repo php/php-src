@@ -277,7 +277,7 @@ lxb_html_tree_create_node(lxb_html_tree_t *tree,
 }
 
 lxb_inline bool
-lxb_html_tree_node_is(lxb_dom_node_t *node, lxb_tag_id_t tag_id)
+lxb_html_tree_node_is(const lxb_dom_node_t *node, lxb_tag_id_t tag_id)
 {
     return node->local_name == tag_id && node->ns == LXB_NS_HTML;
 }
@@ -373,61 +373,6 @@ lxb_html_tree_attach_document(lxb_html_tree_t *tree, lxb_html_document_t *doc)
 {
     tree->document = doc;
 }
-
-/*
- * No inline functions for ABI.
- */
-LXB_API lxb_status_t
-lxb_html_tree_begin_noi(lxb_html_tree_t *tree, lxb_html_document_t *document);
-
-LXB_API lxb_status_t
-lxb_html_tree_chunk_noi(lxb_html_tree_t *tree, const lxb_char_t *html,
-                        size_t size);
-
-LXB_API lxb_status_t
-lxb_html_tree_end_noi(lxb_html_tree_t *tree);
-
-LXB_API lxb_status_t
-lxb_html_tree_build_noi(lxb_html_tree_t *tree, lxb_html_document_t *document,
-                        const lxb_char_t *html, size_t size);
-
-LXB_API lxb_dom_node_t *
-lxb_html_tree_create_node_noi(lxb_html_tree_t *tree,
-                              lxb_tag_id_t tag_id, lxb_ns_id_t ns);
-
-LXB_API bool
-lxb_html_tree_node_is_noi(lxb_dom_node_t *node, lxb_tag_id_t tag_id);
-
-LXB_API lxb_dom_node_t *
-lxb_html_tree_current_node_noi(lxb_html_tree_t *tree);
-
-LXB_API lxb_dom_node_t *
-lxb_html_tree_adjusted_current_node_noi(lxb_html_tree_t *tree);
-
-LXB_API lxb_html_element_t *
-lxb_html_tree_insert_html_element_noi(lxb_html_tree_t *tree,
-                                      lxb_html_token_t *token);
-
-LXB_API void
-lxb_html_tree_insert_node_noi(lxb_dom_node_t *to, lxb_dom_node_t *node,
-                              lxb_html_tree_insertion_position_t ipos);
-
-LXB_API void
-lxb_html_tree_acknowledge_token_self_closing_noi(lxb_html_tree_t *tree,
-                                             lxb_html_token_t *token);
-
-LXB_API bool
-lxb_html_tree_mathml_text_integration_point_noi(lxb_dom_node_t *node);
-
-LXB_API bool
-lxb_html_tree_scripting_noi(lxb_html_tree_t *tree);
-
-LXB_API void
-lxb_html_tree_scripting_set_noi(lxb_html_tree_t *tree, bool scripting);
-
-LXB_API void
-lxb_html_tree_attach_document_noi(lxb_html_tree_t *tree,
-                                  lxb_html_document_t *doc);
 
 
 #ifdef __cplusplus

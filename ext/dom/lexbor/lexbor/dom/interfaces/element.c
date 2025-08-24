@@ -385,8 +385,8 @@ done:
 
     attr->owner = element;
 
-    if (doc->ev_insert != NULL) {
-        doc->ev_insert(lxb_dom_interface_node(attr));
+    if (doc->node_cb->insert != NULL) {
+        doc->node_cb->insert(lxb_dom_interface_node(attr));
     }
 
     return LXB_STATUS_OK;

@@ -305,13 +305,18 @@ done:
 }
 
 size_t
-lexbor_conv_dec_to_hex(uint32_t number, lxb_char_t *out, size_t length)
+lexbor_conv_dec_to_hex(uint32_t number, lxb_char_t *out, size_t length,
+                       bool upper)
 {
     lxb_char_t c;
     size_t len;
     uint32_t tmp;
+    const lxb_char_t *map_str;
 
-    static const lxb_char_t map_str[] = "0123456789abcdef";
+    static const lxb_char_t map_str_l[] = "0123456789abcdef";
+    static const lxb_char_t map_str_u[] = "0123456789ABCDEF";
+
+    map_str = (upper) ? map_str_u : map_str_l;
 
     if(number != 0) {
         tmp = number;

@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 #include "lexbor/core/str.h"
+#include "lexbor/core/avl.h"
 
 #include "lexbor/dom/interfaces/document.h"
 #include "lexbor/dom/interfaces/node.h"
@@ -47,6 +48,9 @@ struct lxb_dom_element {
 
     lxb_dom_attr_t                 *attr_id;
     lxb_dom_attr_t                 *attr_class;
+
+    lexbor_avl_node_t              *style;
+    void                           *list;  /* lxb_css_rule_declaration_list_t */
 
     lxb_dom_element_custom_state_t custom_state;
 };
@@ -277,6 +281,11 @@ lxb_dom_element_ns_id(lxb_dom_element_t *element)
     return lxb_dom_interface_node(element)->ns;
 }
 
+lxb_inline lxb_dom_document_t *
+lxb_dom_element_document(const lxb_dom_element_t *element)
+{
+    return lxb_dom_interface_node(element)->owner_document;
+}
 
 /*
  * No inline functions for ABI.

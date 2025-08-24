@@ -109,7 +109,7 @@ lxb_css_value_length_percentage_type_t;
 typedef struct {
     double               num;
     bool                 is_float;
-    lxb_css_unit_angel_t unit;
+    lxb_css_unit_angle_t unit;
 }
 lxb_css_value_angle_t;
 

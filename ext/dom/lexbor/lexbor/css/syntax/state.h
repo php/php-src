@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -49,22 +49,12 @@ lxb_css_syntax_state_plus(lxb_css_syntax_tokenizer_t *tkz, lxb_css_syntax_token_
                           const lxb_char_t *data, const lxb_char_t *end);
 
 const lxb_char_t *
-lxb_css_syntax_state_plus_process(lxb_css_syntax_tokenizer_t *tkz,
-                                  lxb_css_syntax_token_t *token,
-                                  const lxb_char_t *data, const lxb_char_t *end);
-
-const lxb_char_t *
 lxb_css_syntax_state_comma(lxb_css_syntax_tokenizer_t *tkz, lxb_css_syntax_token_t *token,
                            const lxb_char_t *data, const lxb_char_t *end);
 
 const lxb_char_t *
 lxb_css_syntax_state_minus(lxb_css_syntax_tokenizer_t *tkz, lxb_css_syntax_token_t *token,
                            const lxb_char_t *data, const lxb_char_t *end);
-
-const lxb_char_t *
-lxb_css_syntax_state_minus_process(lxb_css_syntax_tokenizer_t *tkz,
-                                   lxb_css_syntax_token_t *token,
-                                   const lxb_char_t *data, const lxb_char_t *end);
 
 const lxb_char_t *
 lxb_css_syntax_state_full_stop(lxb_css_syntax_tokenizer_t *tkz, lxb_css_syntax_token_t *token,
@@ -111,14 +101,24 @@ lxb_css_syntax_state_consume_before_numeric(lxb_css_syntax_tokenizer_t *tkz, lxb
                                             const lxb_char_t *data, const lxb_char_t *end);
 
 const lxb_char_t *
-lxb_css_syntax_state_ident_like_begin(lxb_css_syntax_tokenizer_t *tkz,
-                                      lxb_css_syntax_token_t *token,
-                                      const lxb_char_t *data, const lxb_char_t *end);
+lxb_css_syntax_state_ident_like(lxb_css_syntax_tokenizer_t *tkz,
+                                lxb_css_syntax_token_t *token,
+                                const lxb_char_t *data, const lxb_char_t *end);
 
 const lxb_char_t *
-lxb_css_syntax_state_ident_like_not_url_begin(lxb_css_syntax_tokenizer_t *tkz,
+lxb_css_syntax_state_ident_like_not_url_start(lxb_css_syntax_tokenizer_t *tkz,
                                               lxb_css_syntax_token_t *token,
                                               const lxb_char_t *data, const lxb_char_t *end);
+
+const lxb_char_t *
+lxb_css_syntax_state_ident_like_not_url(lxb_css_syntax_tokenizer_t *tkz,
+                                        lxb_css_syntax_token_t *token,
+                                        const lxb_char_t *data, const lxb_char_t *end);
+
+const lxb_char_t *
+lxb_css_syntax_state_ident_like_not_url_surrogate(lxb_css_syntax_tokenizer_t *tkz,
+                                                  lxb_css_syntax_token_t *token,
+                                                  const lxb_char_t *data, const lxb_char_t *end);
 
 
 #ifdef __cplusplus

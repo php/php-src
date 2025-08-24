@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2021 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -32,37 +32,46 @@ typedef enum {
 }
 lxb_dom_document_dtype_t;
 
+typedef struct lxb_dom_document_css lxb_dom_document_css_t;
+
+typedef struct {
+    lxb_dom_node_cb_insert_f    insert;
+    lxb_dom_node_cb_remove_f    remove;
+    lxb_dom_node_cb_destroy_f   destroy;
+    lxb_dom_node_cb_set_value_f set_value;
+}
+lxb_dom_document_node_cb_t;
+
 struct lxb_dom_document {
-    lxb_dom_node_t              node;
+    lxb_dom_node_t                    node;
 
-    lxb_dom_document_cmode_t    compat_mode;
-    lxb_dom_document_dtype_t    type;
+    lxb_dom_document_cmode_t          compat_mode;
+    lxb_dom_document_dtype_t          type;
 
-    lxb_dom_document_type_t     *doctype;
-    lxb_dom_element_t           *element;
+    lxb_dom_document_type_t           *doctype;
+    lxb_dom_element_t                 *element;
 
-    lxb_dom_interface_create_f  create_interface;
-    lxb_dom_interface_clone_f   clone_interface;
-    lxb_dom_interface_destroy_f destroy_interface;
+    lxb_dom_interface_create_f        create_interface;
+    lxb_dom_interface_clone_f         clone_interface;
+    lxb_dom_interface_destroy_f       destroy_interface;
 
-    lxb_dom_event_insert_f      ev_insert;
-    lxb_dom_event_remove_f      ev_remove;
-    lxb_dom_event_destroy_f     ev_destroy;
-    lxb_dom_event_set_value_f   ev_set_value;
+    const lxb_dom_document_node_cb_t  *node_cb;
 
-    lexbor_mraw_t               *mraw;
-    lexbor_mraw_t               *text;
-    lexbor_hash_t               *tags;
-    lexbor_hash_t               *attrs;
-    lexbor_hash_t               *prefix;
-    lexbor_hash_t               *ns;
-    void                        *parser;
-    void                        *user;
+    lexbor_mraw_t                     *mraw;
+    lexbor_mraw_t                     *text;
+    lexbor_hash_t                     *tags;
+    lexbor_hash_t                     *attrs;
+    lexbor_hash_t                     *prefix;
+    lexbor_hash_t                     *ns;
+    void                              *parser;
+    void                              *user;
 
-    bool                        tags_inherited;
-    bool                        ns_inherited;
+    lxb_dom_document_css_t            *css;
 
-    bool                        scripting;
+    bool                              tags_inherited;
+    bool                              ns_inherited;
+
+    bool                              scripting;
 };
 
 
@@ -76,9 +85,35 @@ lxb_dom_document_interface_clone(lxb_dom_document_t *document,
 LXB_API lxb_dom_document_t *
 lxb_dom_document_interface_destroy(lxb_dom_document_t *document);
 
+/*
+ * Creating a document.
+ *
+ * The function creates and returns a zeroed document.
+ * If another document is passed as an argument, its memory pool will be used
+ * to conscious the new one.
+ *
+ * @param[in] lxb_dom_document_t *. Owner document, can be NULL.
+ *
+ * @return lxb_dom_document_t *. if successful, otherwise returns a NULL value.
+ */
 LXB_API lxb_dom_document_t *
 lxb_dom_document_create(lxb_dom_document_t *owner);
 
+/*
+ * Document Initialization.
+ *
+ * The function expects the document to be zeroed.
+ *
+ * @param[in] lxb_dom_document_t *. If NULL, LXB_STATUS_ERROR_OBJECT_IS_NULL is returned.
+ * @param[in] lxb_dom_document_t *. Owner document, can be NULL.
+ * @param[in] lxb_dom_interface_create_f. Required. Callback for creating interfaces.
+ * @param[in] lxb_dom_interface_clone_f. Required. Callback for cloning interfaces.
+ * @param[in] lxb_dom_interface_destroy_f. Required. Callback for destroying interfaces.
+ * @param[in] lxb_dom_document_dtype_t. Document Type. Currently HTML or XML.
+ * @param[in] unsigned int. Document Namespace. See lexbor/ns.
+ *
+ * @return LXB_STATUS_OK if successful, otherwise an error status value.
+ */
 LXB_API lxb_status_t
 lxb_dom_document_init(lxb_dom_document_t *document, lxb_dom_document_t *owner,
                       lxb_dom_interface_create_f create_interface,
@@ -134,6 +169,10 @@ lxb_dom_document_root(lxb_dom_document_t *document);
 LXB_API lxb_dom_node_t *
 lxb_dom_document_import_node(lxb_dom_document_t *doc, lxb_dom_node_t *node,
                              bool deep);
+
+LXB_API void
+lxb_dom_document_set_default_node_cb(lxb_dom_document_t *document);
+
 
 /*
  * Inline functions

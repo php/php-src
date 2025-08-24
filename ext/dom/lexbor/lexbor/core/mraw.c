@@ -243,6 +243,8 @@ lexbor_mraw_realloc_tail(lexbor_mraw_t *mraw, void *data, void *begin,
                          size_t size, size_t begin_len, size_t new_size,
                          bool *is_valid)
 {
+    size_t length;
+    uint8_t *tmp;
     lexbor_mem_chunk_t *chunk = mraw->mem->chunk;
 
     if (chunk->size > (begin_len + new_size)) {
@@ -267,35 +269,26 @@ lexbor_mraw_realloc_tail(lexbor_mraw_t *mraw, void *data, void *begin,
      * If the tail is short then we increase the current data.
      */
     if (begin_len == lexbor_mraw_meta_size()) {
-        void *new_data;
-        lexbor_mem_chunk_t new_chunk;
-
-        *is_valid = true;
-
-        lexbor_mem_chunk_init(mraw->mem, &new_chunk,
-                              new_size + lexbor_mraw_meta_size());
-        if(new_chunk.data == NULL) {
-            return NULL;
-        }
-
-        lexbor_mraw_meta_set(new_chunk.data, &new_size);
-        new_data = lexbor_mraw_data_begin(new_chunk.data);
-
-        if (size != 0) {
-            memcpy(new_data, data, sizeof(uint8_t) * size);
-        }
-
 #if defined(LEXBOR_HAVE_ADDRESS_SANITIZER)
         ASAN_UNPOISON_MEMORY_REGION(chunk->data, chunk->size);
 #endif
+        *is_valid = true;
 
-        lexbor_mem_chunk_destroy(mraw->mem, chunk, false);
+        length = lexbor_mem_align(new_size + lexbor_mraw_meta_size()
+                                  + mraw->mem->chunk_min_size);
 
-        chunk->data = new_chunk.data;
-        chunk->size = new_chunk.size;
+        tmp = lexbor_realloc(chunk->data, length);
+        if (tmp == NULL) {
+            return NULL;
+        }
+
+        chunk->data = tmp;
+        chunk->size = length;
         chunk->length = new_size + lexbor_mraw_meta_size();
 
-        return new_data;
+        lexbor_mraw_meta_set(tmp, &new_size);
+
+        return lexbor_mraw_data_begin(tmp);
     }
 
     *is_valid = false;

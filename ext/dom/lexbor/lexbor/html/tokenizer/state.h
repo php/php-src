@@ -105,7 +105,7 @@ extern "C" {
     }                                                                          \
     while (0)
 
-#define lxb_html_tokenizer_state_token_set_end_oef(tkz)                        \
+#define lxb_html_tokenizer_state_token_set_end_eof(tkz)                        \
     (tkz->token->end = tkz->last)
 
 #define lxb_html_tokenizer_state_token_attr_add_m(tkz, attr, v_return)         \

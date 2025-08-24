@@ -531,7 +531,7 @@ lxb_html_tree_append_attributes_from_element(lxb_html_tree_t *tree,
             }
         }
 
-        lxb_dom_element_attr_append(element, attr);
+        lxb_dom_element_attr_append(element, new_attr);
 
         attr = attr->next;
     }

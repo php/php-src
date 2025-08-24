@@ -1,4 +1,4 @@
-From 7c7c35d8ea9f65f081564b3ad1bfe9f0db33dd69 Mon Sep 17 00:00:00 2001
+From 4c133fe5adfe4b8ccdd8b014d884b685143b9e66 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Sat, 26 Aug 2023 15:08:59 +0200
 Subject: [PATCH 1/6] Expose line and column information for use in PHP
@@ -15,10 +15,10 @@ Subject: [PATCH 1/6] Expose line and column information for use in PHP
  8 files changed, 48 insertions(+), 5 deletions(-)
 
 diff --git a/source/lexbor/dom/interfaces/node.h b/source/lexbor/dom/interfaces/node.h
-index c37b790..8ac218b 100644
+index b052cf5..b5d2c50 100644
 --- a/source/lexbor/dom/interfaces/node.h
 +++ b/source/lexbor/dom/interfaces/node.h
-@@ -58,6 +58,8 @@ struct lxb_dom_node {
+@@ -83,6 +83,8 @@ struct lxb_dom_node {
  
      lxb_dom_node_type_t    type;
  
@@ -103,7 +103,7 @@ index ba9602f..74bb55e 100644
      /* Entities */
      const lexbor_sbst_entry_static_t *entity;
 diff --git a/source/lexbor/html/tokenizer/state.h b/source/lexbor/html/tokenizer/state.h
-index 0892846..77b86ac 100644
+index 17939b9..5b095b4 100644
 --- a/source/lexbor/html/tokenizer/state.h
 +++ b/source/lexbor/html/tokenizer/state.h
 @@ -90,6 +90,8 @@ extern "C" {
@@ -116,10 +116,10 @@ index 0892846..77b86ac 100644
      while (0)
  
 diff --git a/source/lexbor/html/tree.c b/source/lexbor/html/tree.c
-index 0f067e4..bdec6a5 100644
+index ece26e9..91bfd17 100644
 --- a/source/lexbor/html/tree.c
 +++ b/source/lexbor/html/tree.c
-@@ -434,6 +434,9 @@ lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
+@@ -427,6 +427,9 @@ lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
          return NULL;
      }
  
@@ -129,7 +129,7 @@ index 0f067e4..bdec6a5 100644
      lxb_status_t status;
      lxb_dom_element_t *element = lxb_dom_interface_element(node);
  
-@@ -770,6 +773,11 @@ lxb_html_tree_insert_character_for_data(lxb_html_tree_t *tree,
+@@ -763,6 +766,11 @@ lxb_html_tree_insert_character_for_data(lxb_html_tree_t *tree,
  
      lxb_dom_interface_text(text)->char_data.data = *str;
  
@@ -141,7 +141,7 @@ index 0f067e4..bdec6a5 100644
      if (ret_node != NULL) {
          *ret_node = text;
      }
-@@ -809,6 +817,9 @@ lxb_html_tree_insert_comment(lxb_html_tree_t *tree,
+@@ -802,6 +810,9 @@ lxb_html_tree_insert_comment(lxb_html_tree_t *tree,
          return NULL;
      }
  
@@ -184,5 +184,5 @@ index 2fd06cb..ed1859f 100644
  lxb_html_tree_error_t;
  
 -- 
-2.44.0
+2.49.0
 

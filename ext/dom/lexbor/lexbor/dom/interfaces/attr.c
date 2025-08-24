@@ -213,9 +213,9 @@ lxb_dom_attr_set_value(lxb_dom_attr_t *attr,
     lxb_status_t status;
     lxb_dom_document_t *doc = lxb_dom_interface_node(attr)->owner_document;
 
-    if (doc->ev_set_value != NULL) {
-        status = doc->ev_set_value(lxb_dom_interface_node(attr),
-                                   value, value_len);
+    if (doc->node_cb->set_value != NULL) {
+        status = doc->node_cb->set_value(lxb_dom_interface_node(attr),
+                                         value, value_len);
         if (status != LXB_STATUS_OK) {
             return status;
         }
@@ -285,8 +285,16 @@ lxb_status_t
 lxb_dom_attr_clone_name_value(lxb_dom_attr_t *attr_from,
                               lxb_dom_attr_t *attr_to)
 {
+    lexbor_str_t *value;
+
     attr_to->node.local_name = attr_from->node.local_name;
     attr_to->qualified_name = attr_from->qualified_name;
+
+    value = attr_from->value;
+
+    if (value != NULL && value->data != NULL) {
+        return lxb_dom_attr_set_value(attr_to, value->data, value->length);
+    }
 
     return LXB_STATUS_OK;
 }
@@ -324,8 +332,8 @@ lxb_dom_attr_remove(lxb_dom_attr_t *attr)
     lxb_dom_element_t *element = attr->owner;
     lxb_dom_document_t *doc = lxb_dom_interface_node(attr)->owner_document;
 
-    if (doc->ev_remove != NULL) {
-        doc->ev_remove(lxb_dom_interface_node(attr));
+    if (doc->node_cb->remove != NULL) {
+        doc->node_cb->remove(lxb_dom_interface_node(attr));
     }
 
     if (element->attr_id == attr) {

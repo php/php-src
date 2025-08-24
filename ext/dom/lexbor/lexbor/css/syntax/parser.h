@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Alexander Borisov
+ * Copyright (C) 2020-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -83,11 +83,6 @@ lxb_css_syntax_parser_pipe_push(lxb_css_parser_t *parser,
                                 lxb_css_parser_state_f state_back,
                                 const lxb_css_syntax_cb_pipe_t *pipe,
                                 void *ctx, lxb_css_syntax_token_type_t stop);
-
-LXB_API lxb_status_t
-lxb_css_syntax_parser_tkz_cb(lxb_css_syntax_tokenizer_t *tkz,
-                             const lxb_char_t **data, const lxb_char_t **end,
-                             void *ctx);
 
 LXB_API const lxb_css_syntax_token_t *
 lxb_css_syntax_parser_start_block(lxb_css_parser_t *parser,
