@@ -1683,7 +1683,6 @@ PHP_ADD_SOURCES([main/poll], m4_normalize([
     poll_backend_eventport.c
     poll_backend_kqueue.c
     poll_backend_poll.c
-    poll_backend_select.c
     poll_core.c
     poll_fd_table.c
   ]),
