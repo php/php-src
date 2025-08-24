@@ -3,7 +3,7 @@ Stream polling - socket write / read multiple times with edge triggering
 --SKIPIF--
 <?php
 require_once __DIR__ . '/stream_poll.inc';
-pt_skip_for_backend(['poll', 'select'], 'does not support edger triggering')
+pt_skip_for_backend(['poll', 'select'], 'does not support edge triggering')
 ?>
 --FILE--
 <?php
