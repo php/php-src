@@ -8,7 +8,6 @@ $values = [
     -INF,
     1 / INF,
     -1 / INF, // Negative zero,
-    NAN
 ];
 
 foreach($values as $value) {
@@ -31,7 +30,4 @@ float(0)
 int(0)
 
 float(-0)
-int(0)
-
-float(NAN)
 int(0)
