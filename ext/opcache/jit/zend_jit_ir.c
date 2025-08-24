@@ -7728,7 +7728,14 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 			if_double = ir_IF(ir_EQ(type, ir_CONST_U8(IS_DOUBLE)));
 			ir_IF_TRUE(if_double);
 		}
-		ref = ir_NE(jit_Z_DVAL(jit, op1_addr), ir_CONST_DOUBLE(0.0));
+
+		ir_ref dval = jit_Z_DVAL(jit, op1_addr);ir_ref is_nan = ir_NE(dval, dval);
+		ir_ref if_val = ir_IF(is_nan);
+		ir_IF_TRUE_cold(if_val);
+			ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_check_nan_to_bool_coercion));
+		ir_MERGE_WITH_EMPTY_FALSE(if_val);
+
+		ref = ir_NE(dval, ir_CONST_DOUBLE(0.0));
 		if (branch_opcode == ZEND_BOOL || branch_opcode == ZEND_BOOL_NOT) {
 			if (set_bool_not) {
 				jit_set_Z_TYPE_INFO_ref(jit, jit_ZVAL_ADDR(jit, res_addr),
