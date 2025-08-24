@@ -2885,8 +2885,8 @@ static zend_result zend_try_compile_cv(znode *result, zend_ast *ast, uint32_t ty
 			return FAILURE;
 		}
 
-		if (zend_string_equals_literal(name, "http_response_header")) {
-			if (type == BP_VAR_R && !CG(has_assigned_to_http_response_header)) {
+		if (!CG(has_assigned_to_http_response_header) && zend_string_equals_literal(name, "http_response_header")) {
+			if (type == BP_VAR_R) {
 				zend_error(E_DEPRECATED,
 					"The predefined locally scoped $http_response_header variable is deprecated,"
 					" call http_get_last_response_headers() instead");
@@ -3457,7 +3457,6 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 	if (is_this_fetch(var_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 	}
-	// TODO: Mark assignment to http_response_header?
 
 	zend_ensure_writable_variable(var_ast);
 

@@ -1,5 +1,5 @@
 --TEST--
-$http_reponse_header using suggested cross-compatible version workaround
+Ensure suggested cross-version compatible code for $http_reponse_header provided by the RFC works
 --SKIPIF--
 <?php require 'server.inc'; http_server_skipif(); ?>
 --INI--
