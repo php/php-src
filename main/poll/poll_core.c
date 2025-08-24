@@ -20,7 +20,6 @@ static int num_registered_backends = 0;
 
 /* Forward declarations for backend ops */
 
-extern const php_poll_backend_ops php_poll_backend_poll_ops;
 #ifdef HAVE_EPOLL
 extern const php_poll_backend_ops php_poll_backend_epoll_ops;
 #endif
@@ -33,7 +32,7 @@ extern const php_poll_backend_ops php_poll_backend_eventport_ops;
 #ifdef _WIN32
 extern const php_poll_backend_ops php_poll_backend_iocp_ops;
 #endif
-extern const php_poll_backend_ops php_poll_backend_select_ops;
+extern const php_poll_backend_ops php_poll_backend_poll_ops;
 
 /* Register all available backends */
 PHPAPI void php_poll_register_backends(void)
@@ -68,11 +67,6 @@ PHPAPI void php_poll_register_backends(void)
 
 	/* Poll or its emulation is always available */
 	registered_backends[num_registered_backends++] = &php_poll_backend_poll_ops;
-
-	/* select() as a fallback */
-	if (php_poll_backend_select_ops.is_available()) {
-		registered_backends[num_registered_backends++] = &php_poll_backend_select_ops;
-	}
 }
 
 /* Get backend operations */
