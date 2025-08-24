@@ -1411,8 +1411,8 @@ AC_DEFUN([PHP_POLL_MECHANISMS],
     poll_mechanisms="$poll_mechanisms eventport"
   ])
 
-  dnl Set poll mechanisms including poll and select that are always available
-  poll_mechanisms="$poll_mechanisms poll select"
+  dnl Set poll mechanisms including poll that is always available
+  poll_mechanisms="$poll_mechanisms poll"
 
   AC_MSG_RESULT([$poll_mechanisms])
 ])
