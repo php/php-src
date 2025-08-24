@@ -29,7 +29,7 @@ extern const php_poll_backend_ops php_poll_backend_kqueue_ops;
 #ifdef HAVE_EVENT_PORTS
 extern const php_poll_backend_ops php_poll_backend_eventport_ops;
 #endif
-#ifdef _WIN32
+#ifdef PHP_WIN32
 extern const php_poll_backend_ops php_poll_backend_iocp_ops;
 #endif
 extern const php_poll_backend_ops php_poll_backend_poll_ops;

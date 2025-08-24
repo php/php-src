@@ -14,7 +14,7 @@
 
 #include "php_poll_internal.h"
 
-#ifdef _WIN32
+#ifdef PHP_WIN32
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -391,4 +391,4 @@ const php_poll_backend_ops php_poll_backend_iocp_ops = {
 	.supports_et = true /* IOCP provides completion-based model which is naturally edge-triggered */
 };
 
-#endif /* _WIN32 */
+#endif /* PHP_WIN32 */
