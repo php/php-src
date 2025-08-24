@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2024 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -26,8 +26,8 @@ extern "C" {
 #include "lexbor/core/types.h"
 #include "lexbor/core/lexbor.h"
 
-#define LEXBOR_VERSION_MAJOR 1
-#define LEXBOR_VERSION_MINOR 8
+#define LEXBOR_VERSION_MAJOR 2
+#define LEXBOR_VERSION_MINOR 0
 #define LEXBOR_VERSION_PATCH 0
 
 #define LEXBOR_VERSION_STRING LEXBOR_STRINGIZE(LEXBOR_VERSION_MAJOR) "."       \

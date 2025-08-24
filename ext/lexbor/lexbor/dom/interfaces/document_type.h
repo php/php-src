@@ -16,7 +16,6 @@ extern "C" {
 #include "lexbor/dom/interfaces/document.h"
 #include "lexbor/dom/interfaces/node.h"
 #include "lexbor/dom/interfaces/attr.h"
-#include "lexbor/dom/interfaces/document_type.h"
 
 
 struct lxb_dom_document_type {
