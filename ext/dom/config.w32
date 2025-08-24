@@ -36,7 +36,7 @@ if (PHP_DOM == "yes") {
 		ADD_SOURCES("ext/dom/lexbor/lexbor/css/syntax/tokenizer", "error.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/ns", "ns.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/tag", "tag.c", "dom");
-		ADD_FLAG("CFLAGS_DOM", "/D LEXBOR_STATIC ");
+		ADD_FLAG("CFLAGS_DOM", "/D LEXBOR_STATIC /utf-8 ");
 
 		AC_DEFINE("HAVE_DOM", 1, "Define to 1 if the PHP extension 'dom' is available.");
 
