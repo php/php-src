@@ -335,6 +335,10 @@ static inline zend_result ct_eval_bool_cast(zval *result, zval *op) {
 		ZVAL_TRUE(result);
 		return SUCCESS;
 	}
+	/* NAN warns when casting */
+	if (Z_TYPE_P(op) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op))) {
+		return FAILURE;
+	}
 
 	ZVAL_BOOL(result, zend_is_true(op));
 	return SUCCESS;
