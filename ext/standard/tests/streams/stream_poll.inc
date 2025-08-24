@@ -102,6 +102,7 @@ function pt_print_events($events, $read_data = false): void {
         echo "\n";
     }
 }
+
 function pt_expect_events($events, $expected, $poll_ctx = null): void {
     if (!is_array($events)) {
         die("Events must be an array\n");
@@ -114,14 +115,14 @@ function pt_expect_events($events, $expected, $poll_ctx = null): void {
     $event_count = count($events);
     $expected_count = count($expected);
 
-    if ($event_count !== $expected_count) {
-        echo "Event count mismatch: got $event_count, expected $expected_count\n";
-        pt_print_mismatched_events($events, $expected);
-        return;
-    }
-
     // Get current backend name for backend-specific expectations
     $backend_name = $poll_ctx ? stream_poll_backend_name($poll_ctx) : 'unknown';
+
+    if ($event_count !== $expected_count) {
+        echo "Event count mismatch: got $event_count, expected $expected_count\n";
+        pt_print_mismatched_events($events, $expected, [], $backend_name);
+        return;
+    }
 
     // Convert events to comparable format for matching
     $actual_events = [];
@@ -190,7 +191,7 @@ function pt_expect_events($events, $expected, $poll_ctx = null): void {
         echo "Events matched - count: $event_count\n";
     } else {
         echo "Events did not match:\n";
-        pt_print_mismatched_events($events, $resolved_expected, $matched);
+        pt_print_mismatched_events($events, $expected, $matched, $backend_name);
     }
 }
 
@@ -229,7 +230,7 @@ function pt_event_flags_to_string($flags): string {
     return empty($names) ? 'NONE' : implode('|', $names);
 }
 
-function pt_print_mismatched_events($actual_events, $expected_events, $matched = []): void {
+function pt_print_mismatched_events($actual_events, $expected_events, $matched = [], $backend_name = null): void {
     echo "Actual events:\n";
     foreach ($actual_events as $i => $event) {
         $match_status = isset($matched[$i]) ? " [MATCHED]" : " [UNMATCHED]";
@@ -241,7 +242,13 @@ function pt_print_mismatched_events($actual_events, $expected_events, $matched =
     foreach ($expected_events as $i => $exp_event) {
         $was_matched = in_array($i, $matched);
         $match_status = $was_matched ? " [MATCHED]" : " [UNMATCHED]";
-        $event_names = pt_event_flags_to_string($exp_event['events']);
+
+        $events_value = $exp_event['events'];
+        if (is_array($events_value) && $backend_name !== null) {
+            $events_value = pt_resolve_backend_specific_value($events_value, $backend_name);
+        }
+
+        $event_names = pt_event_flags_to_string($events_value);
         echo "  Event[$i]: $event_names, user data: " . $exp_event['data'];
         if (isset($exp_event['read'])) {
             echo ", read data: '" . $exp_event['read'] . "'";
