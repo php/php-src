@@ -10210,6 +10210,7 @@ static void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	do {
+		// TODO do not do this for NAN?
 		if (opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL) {
 			if (left_node.op_type == IS_CONST) {
 				if (Z_TYPE(left_node.u.constant) == IS_FALSE) {
