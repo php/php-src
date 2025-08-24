@@ -2474,6 +2474,18 @@ function gen_vm_opcodes_header(
     $str .= "#define ZEND_VM_KIND_GOTO\t" . ZEND_VM_KIND_GOTO . "\n";
     $str .= "#define ZEND_VM_KIND_HYBRID\t" . ZEND_VM_KIND_HYBRID . "\n";
     $str .= "#define ZEND_VM_KIND_TAILCALL\t" . ZEND_VM_KIND_TAILCALL . "\n";
+    $str .= <<<ENDNAMES
+static const char *const zend_vm_kind_name[] = {
+    NULL,
+    "ZEND_VM_KIND_CALL",
+    "ZEND_VM_KIND_SWITCH",
+    "ZEND_VM_KIND_GOTO",
+    "ZEND_VM_KIND_HYBRID",
+    "ZEND_VM_KIND_TAILCALL",
+};
+
+ENDNAMES;
+    $str .= "#define ZEND_VM_KIND_AS_STRING\tzend_vm_kind_name[ZEND_VM_KIND]\n";
     $str .= "#if 0\n";
     if ($GLOBALS["vm_kind_name"][ZEND_VM_KIND] === "ZEND_VM_KIND_HYBRID") {
         $str .= "/* HYBRID requires support for computed GOTO and global register variables*/\n";
