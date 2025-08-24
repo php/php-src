@@ -217,7 +217,12 @@ dnl supports it. This can help reduce the binary size and startup time.
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
                        [CFLAGS="$CFLAGS -fvisibility=hidden"])
 
+dnl to disable executable stack on haiku due
+dnl to missing elf .note.GNU-stack part
 case $host_alias in
+  *haiku*)
+    LDFLAGS="$LDFLAGS -Wl,-z,noexecstack"
+    ;;
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     ;;
