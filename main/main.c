@@ -730,7 +730,7 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateErrorLog)
 {
-	/* Only do the safemode/open_basedir check at runtime */
+	/* Only do the open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) &&
 			new_value && zend_string_equals_literal(new_value, "syslog")) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
@@ -745,7 +745,7 @@ static PHP_INI_MH(OnUpdateErrorLog)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateMailLog)
 {
-	/* Only do the safemode/open_basedir check at runtime */
+	/* Only do the open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
