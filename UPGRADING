@@ -360,6 +360,16 @@ PHP 8.5 UPGRADE NOTES
     operators" RFC, meaning that incrementing non-numeric strings is now
     deprecated. Instead the str_increment() function should be used.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#enact_follow-up_phase_of_the_path_to_saner_incrementdecrement_operators_rfc
+  . The following closure binding issues, which already emit an E_WARNING, are
+    now deprecated:
+    - Binding an instance to a static closure
+    - Binding methods to objects that are not instances of the class
+      (or subclass) that the method is defined
+    - Unbinding $this from a method
+    - Unbinding $this from a closure that uses `$this`
+    - Binding a closure to the scope of an internal class
+    - Rebinding the scope of a closure created from a function or method
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_closure_binding_issues
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are
