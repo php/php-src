@@ -351,11 +351,11 @@ php_poll_error php_poll_errno_to_error(int err)
 #ifdef ENOSYS
 		case ENOSYS:
 #endif
-#ifdef EOPNOTSUPP
-		case EOPNOTSUPP:
-#endif
-#ifdef ENOTSUP
+#if ENOTSUP
 		case ENOTSUP:
+#endif
+#if defined(EOPNOTSUPP) && EOPNOTSUPP != ENOTSUP
+		case EOPNOTSUPP:
 #endif
 			return PHP_POLL_ERR_NOSUPPORT;
 

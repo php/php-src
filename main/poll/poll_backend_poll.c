@@ -14,10 +14,6 @@
 
 #include "php_poll_internal.h"
 
-#include <poll.h>
-#include <stdlib.h>
-#include <string.h>
-
 typedef struct {
 	php_poll_fd_table *fd_table;
 	struct pollfd *temp_fds;
