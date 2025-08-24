@@ -1,5 +1,10 @@
 --TEST--
 Stream polling - socket write / read few time only
+--SKIPIF--
+<?php
+require_once __DIR__ . '/stream_poll.inc';
+pt_skip_for_backend(['poll', 'select'], 'does not support edge triggering')
+?>
 --FILE--
 <?php
 require_once __DIR__ . '/stream_poll.inc';
