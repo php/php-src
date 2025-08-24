@@ -737,17 +737,6 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 }
 /* }}} */
 
-/* Emit warning when using this INI setting as it is removed */
-static PHP_INI_MH(OnChangeDisableClasses)
-{
-	if (stage != PHP_INI_SYSTEM) {
-			return FAILURE;
-	}
-	php_error_docref("disable_classes", E_WARNING, "The disable_classes INI setting has been removed and has no effect");
-
-	return FAILURE;
-}
-
 /* defined in browscap.c */
 PHP_INI_MH(OnChangeBrowscap);
 
@@ -848,7 +837,6 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("mail.force_extra_parameters",NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnChangeMailForceExtra)
 	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
-	PHP_INI_ENTRY("disable_classes",			"",			PHP_INI_SYSTEM,		OnChangeDisableClasses)
 	PHP_INI_ENTRY("max_file_uploads",			"20",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
 	PHP_INI_ENTRY("max_multipart_body_parts",	"-1",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
 
@@ -2375,7 +2363,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[18]; /* Remember to change this if the number of directives change */
+			const char *directives[19]; /* Remember to change this if the number of directives change */
 		} directives[2] = {
 			{
 				E_DEPRECATED,
@@ -2406,6 +2394,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 					"safe_mode_protected_env_vars",
 					"zend.ze1_compatibility_mode",
 					"track_errors",
+					"disable_classes",
 					NULL
 				}
 			}
