@@ -1275,9 +1275,10 @@ ZEND_API size_t zend_get_page_size(void)
 	SYSTEM_INFO system_info;
 	GetSystemInfo(&system_info);
 	return system_info.dwPageSize;
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__APPLE__)
 	/* This returns the value obtained from
-	 * the auxv vector, avoiding a syscall. */
+	 * the auxv vector, avoiding a
+	 * syscall (on FreeBSD)/function call (on macOS). */
 	return getpagesize();
 #else
 	return (size_t) sysconf(_SC_PAGESIZE);
