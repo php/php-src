@@ -14,8 +14,6 @@
 
 #include "php_poll_internal.h"
 
-#ifdef HAVE_POLL
-
 #include <poll.h>
 #include <stdlib.h>
 #include <string.h>
@@ -217,8 +215,8 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 	poll_build_context build_ctx = { .fds = backend_data->temp_fds, .index = 0 };
 	php_poll_fd_table_foreach(backend_data->fd_table, poll_build_fds_callback, &build_ctx);
 
-	/* Call poll() */
-	int nfds = poll(backend_data->temp_fds, fd_count, timeout);
+	/* Call poll() or its emulation (Windows) */
+	int nfds = php_poll2(backend_data->temp_fds, fd_count, timeout);
 
 	if (nfds <= 0) {
 		return nfds; /* Return 0 for timeout, -1 for error */
@@ -288,5 +286,3 @@ const php_poll_backend_ops php_poll_backend_poll_ops = {
 	.get_suitable_max_events = poll_backend_get_suitable_max_events,
 	.supports_et = false,
 };
-
-#endif /* HAVE_POLL */
