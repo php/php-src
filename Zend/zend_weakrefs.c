@@ -190,7 +190,9 @@ ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key) {
 ZEND_API void zend_weakrefs_hash_clean(HashTable *ht) {
 	zend_ulong obj_key;
 	ZEND_HASH_FOREACH_NUM_KEY(ht, obj_key) {
-		zend_weakrefs_hash_del(ht, zend_weakref_key_to_object(obj_key));
+		/* Call zend_weakref_unregister to avoid an unneccessary
+		 * zend_hash_index_find lookup in zend_weakrefs_hash_del. */
+		zend_weakref_unregister(zend_weakref_key_to_object(obj_key), ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_BARE_HT), 1);
 	} ZEND_HASH_FOREACH_END();
 }
 
