@@ -25,10 +25,10 @@
 #endif
 
 ZEND_TLS lxb_url_parser_t lexbor_parser;
-ZEND_TLS unsigned short int lexbor_urls;
+ZEND_TLS unsigned short int parsed_urls;
 
-#define LEXBOR_MAX_URL_COUNT 500
-#define LEXBOR_MRAW_BYTE_SIZE 8192
+static const unsigned short int maximum_parses_before_cleanup = 500;
+static const size_t lexbor_mraw_byte_size = 8192;
 
 static zend_always_inline void zval_string_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
 {
@@ -53,16 +53,6 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexb
 		lexbor_str->data = (lxb_char_t *) "";
 		lexbor_str->length = 0;
 	}
-}
-
-static void lexbor_cleanup_parser(void)
-{
-	if (++lexbor_urls % LEXBOR_MAX_URL_COUNT == 0) {
-		lexbor_mraw_clean(lexbor_parser.mraw);
-		lexbor_urls = 0;
-	}
-
-	lxb_url_parser_clean(&lexbor_parser);
 }
 
 /**
@@ -247,7 +237,7 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
 }
 
-static lxb_status_t lexbor_serialize_callback(const lxb_char_t *data, size_t length, void *ctx)
+static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, size_t length, void *ctx)
 {
 	smart_str *uri_str = ctx;
 
@@ -258,7 +248,7 @@ static lxb_status_t lexbor_serialize_callback(const lxb_char_t *data, size_t len
 	return LXB_STATUS_OK;
 }
 
-static zend_result lexbor_read_scheme(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_scheme_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
@@ -269,7 +259,7 @@ static zend_result lexbor_read_scheme(const struct uri_internal_t *internal_uri,
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_scheme(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_scheme_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = internal_uri->uri;
 	lexbor_str_t str = {0};
@@ -285,7 +275,7 @@ static zend_result lexbor_write_scheme(struct uri_internal_t *internal_uri, zval
 	return SUCCESS;
 }
 
-static zend_result lexbor_read_username(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_username_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
@@ -298,7 +288,7 @@ static zend_result lexbor_read_username(const struct uri_internal_t *internal_ur
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_username(uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_username_write(uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = internal_uri->uri;
 	lexbor_str_t str = {0};
@@ -314,7 +304,7 @@ static zend_result lexbor_write_username(uri_internal_t *internal_uri, zval *val
 	return SUCCESS;
 }
 
-static zend_result lexbor_read_password(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_password_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
@@ -327,7 +317,7 @@ static zend_result lexbor_read_password(const struct uri_internal_t *internal_ur
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_password(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_password_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = internal_uri->uri;
 	lexbor_str_t str = {0};
@@ -354,21 +344,21 @@ static zend_result init_idna(void)
 	return lxb_unicode_idna_init(lexbor_parser.idna) == LXB_STATUS_OK ? SUCCESS : FAILURE;
 }
 
-static zend_result lexbor_read_host(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_host_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_IPV4) {
 		smart_str host_str = {0};
 
-		lxb_url_serialize_host_ipv4(lexbor_uri->host.u.ipv4, lexbor_serialize_callback, &host_str);
+		lxb_url_serialize_host_ipv4(lexbor_uri->host.u.ipv4, serialize_to_smart_str_callback, &host_str);
 
 		ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 	} else if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_IPV6) {
 		smart_str host_str = {0};
 
 		smart_str_appendc(&host_str, '[');
-		lxb_url_serialize_host_ipv6(lexbor_uri->host.u.ipv6, lexbor_serialize_callback, &host_str);
+		lxb_url_serialize_host_ipv6(lexbor_uri->host.u.ipv6, serialize_to_smart_str_callback, &host_str);
 		smart_str_appendc(&host_str, ']');
 
 		ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
@@ -381,7 +371,7 @@ static zend_result lexbor_read_host(const struct uri_internal_t *internal_uri, u
 				if (init_idna() == FAILURE) {
 					return FAILURE;
 				}
-				lxb_url_serialize_host_unicode(lexbor_parser.idna, &lexbor_uri->host, lexbor_serialize_callback, &host_str);
+				lxb_url_serialize_host_unicode(lexbor_parser.idna, &lexbor_uri->host, serialize_to_smart_str_callback, &host_str);
 				lxb_unicode_idna_clean(lexbor_parser.idna);
 
 				ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
@@ -401,7 +391,7 @@ static zend_result lexbor_read_host(const struct uri_internal_t *internal_uri, u
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_host(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_host_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = internal_uri->uri;
 	lexbor_str_t str = {0};
@@ -417,7 +407,7 @@ static zend_result lexbor_write_host(struct uri_internal_t *internal_uri, zval *
 	return SUCCESS;
 }
 
-static zend_result lexbor_read_port(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_port_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
@@ -430,7 +420,7 @@ static zend_result lexbor_read_port(const struct uri_internal_t *internal_uri, u
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_port(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_port_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = internal_uri->uri;
 	lexbor_str_t str = {0};
@@ -446,7 +436,7 @@ static zend_result lexbor_write_port(struct uri_internal_t *internal_uri, zval *
 	return SUCCESS;
 }
 
-static zend_result lexbor_read_path(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_path_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
@@ -459,7 +449,7 @@ static zend_result lexbor_read_path(const struct uri_internal_t *internal_uri, u
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_path(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_path_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = internal_uri->uri;
 	lexbor_str_t str = {0};
@@ -475,7 +465,7 @@ static zend_result lexbor_write_path(struct uri_internal_t *internal_uri, zval *
 	return SUCCESS;
 }
 
-static zend_result lexbor_read_query(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_query_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
@@ -488,7 +478,7 @@ static zend_result lexbor_read_query(const struct uri_internal_t *internal_uri, 
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_query(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_query_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = internal_uri->uri;
 	lexbor_str_t str = {0};
@@ -504,7 +494,7 @@ static zend_result lexbor_write_query(struct uri_internal_t *internal_uri, zval 
 	return SUCCESS;
 }
 
-static zend_result lexbor_read_fragment(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_fragment_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
@@ -517,7 +507,7 @@ static zend_result lexbor_read_fragment(const struct uri_internal_t *internal_ur
 	return SUCCESS;
 }
 
-static zend_result lexbor_write_fragment(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_fragment_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = internal_uri->uri;
 	lexbor_str_t str = {0};
@@ -536,7 +526,7 @@ static zend_result lexbor_write_fragment(struct uri_internal_t *internal_uri, zv
 PHP_RINIT_FUNCTION(uri_parser_whatwg)
 {
 	lexbor_mraw_t *mraw = lexbor_mraw_create();
-	lxb_status_t status = lexbor_mraw_init(mraw, LEXBOR_MRAW_BYTE_SIZE);
+	lxb_status_t status = lexbor_mraw_init(mraw, lexbor_mraw_byte_size);
 	if (status != LXB_STATUS_OK) {
 		lexbor_mraw_destroy(mraw, true);
 		return FAILURE;
@@ -549,7 +539,7 @@ PHP_RINIT_FUNCTION(uri_parser_whatwg)
 		return FAILURE;
 	}
 
-	lexbor_urls = 0;
+	parsed_urls = 0;
 
 	return SUCCESS;
 }
@@ -559,14 +549,24 @@ PHP_RSHUTDOWN_FUNCTION(uri_parser_whatwg)
 	lxb_url_parser_memory_destroy(&lexbor_parser);
 	lxb_url_parser_destroy(&lexbor_parser, false);
 
-	lexbor_urls = 0;
+	parsed_urls = 0;
 
 	return SUCCESS;
 }
 
-lxb_url_t *lexbor_parse_uri_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
+static void reset_parser_state(void)
 {
-	lexbor_cleanup_parser();
+	if (++parsed_urls % maximum_parses_before_cleanup == 0) {
+		lexbor_mraw_clean(lexbor_parser.mraw);
+		parsed_urls = 0;
+	}
+
+	lxb_url_parser_clean(&lexbor_parser);
+}
+
+lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
+{
+	reset_parser_state();
 
 	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) uri_str, uri_str_len);
 	const char *reason = fill_errors(errors);
@@ -579,19 +579,19 @@ lxb_url_t *lexbor_parse_uri_ex(const char *uri_str, size_t uri_str_len, const lx
 	return url;
 }
 
-static void *lexbor_parse_uri(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
+static void *php_uri_parser_whatwg_parse(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
 {
-	return lexbor_parse_uri_ex(uri_str, uri_str_len, base_url, errors, silent);
+	return php_uri_parser_whatwg_parse_ex(uri_str, uri_str_len, base_url, errors, silent);
 }
 
-static void *lexbor_clone_uri(void *uri)
+static void *php_uri_parser_whatwg_clone(void *uri)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
 	return lxb_url_clone(lexbor_parser.mraw, lexbor_uri);
 }
 
-static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
+static zend_string *php_uri_parser_whatwg_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
 {
 	const lxb_url_t *lexbor_uri = uri;
 	smart_str uri_str = {0};
@@ -603,13 +603,13 @@ static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t rec
 			if (init_idna() == FAILURE) {
 				return NULL;
 			}
-			lxb_url_serialize_idna(lexbor_parser.idna, lexbor_uri, lexbor_serialize_callback, &uri_str, exclude_fragment);
+			lxb_url_serialize_idna(lexbor_parser.idna, lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			lxb_unicode_idna_clean(lexbor_parser.idna);
 			break;
 		case URI_RECOMPOSITION_RAW_ASCII:
 			ZEND_FALLTHROUGH;
 		case URI_RECOMPOSITION_NORMALIZED_ASCII:
-			lxb_url_serialize(lexbor_uri, lexbor_serialize_callback, &uri_str, exclude_fragment);
+			lxb_url_serialize(lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
@@ -617,24 +617,24 @@ static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t rec
 	return smart_str_extract(&uri_str);
 }
 
-static void lexbor_free_uri(void *uri)
+static void php_uri_parser_whatwg_free(void *uri)
 {
 }
 
-const uri_parser_t lexbor_uri_parser = {
-	.name = URI_PARSER_WHATWG,
-	.parse_uri = lexbor_parse_uri,
-	.clone_uri = lexbor_clone_uri,
-	.uri_to_string = lexbor_uri_to_string,
-	.free_uri = lexbor_free_uri,
+const uri_parser_t php_uri_parser_whatwg = {
+	.name = PHP_URI_PARSER_WHATWG,
+	.parse_uri = php_uri_parser_whatwg_parse,
+	.clone_uri = php_uri_parser_whatwg_clone,
+	.uri_to_string = php_uri_parser_whatwg_to_string,
+	.free_uri = php_uri_parser_whatwg_free,
 	{
-		.scheme = {.read_func = lexbor_read_scheme, .write_func = lexbor_write_scheme},
-		.username = {.read_func = lexbor_read_username, .write_func = lexbor_write_username},
-		.password = {.read_func = lexbor_read_password, .write_func = lexbor_write_password},
-		.host = {.read_func = lexbor_read_host, .write_func = lexbor_write_host},
-		.port = {.read_func = lexbor_read_port, .write_func = lexbor_write_port},
-		.path = {.read_func = lexbor_read_path, .write_func = lexbor_write_path},
-		.query = {.read_func = lexbor_read_query, .write_func = lexbor_write_query},
-		.fragment = {.read_func = lexbor_read_fragment, .write_func = lexbor_write_fragment},
+		.scheme = {.read_func = php_uri_parser_whatwg_scheme_read, .write_func = php_uri_parser_whatwg_scheme_write},
+		.username = {.read_func = php_uri_parser_whatwg_username_read, .write_func = php_uri_parser_whatwg_username_write},
+		.password = {.read_func = php_uri_parser_whatwg_password_read, .write_func = php_uri_parser_whatwg_password_write},
+		.host = {.read_func = php_uri_parser_whatwg_host_read, .write_func = php_uri_parser_whatwg_host_write},
+		.port = {.read_func = php_uri_parser_whatwg_port_read, .write_func = php_uri_parser_whatwg_port_write},
+		.path = {.read_func = php_uri_parser_whatwg_path_read, .write_func = php_uri_parser_whatwg_path_write},
+		.query = {.read_func = php_uri_parser_whatwg_query_read, .write_func = php_uri_parser_whatwg_query_write},
+		.fragment = {.read_func = php_uri_parser_whatwg_fragment_read, .write_func = php_uri_parser_whatwg_fragment_write},
 	}
 };

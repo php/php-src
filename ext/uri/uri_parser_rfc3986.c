@@ -20,61 +20,59 @@
 #include "Zend/zend_smart_str.h"
 #include "Zend/zend_exceptions.h"
 
-static void uriparser_free_uri(void *uri);
-
-static void *uriparser_malloc(UriMemoryManager *memory_manager, size_t size)
+static void *php_uri_parser_rfc3986_memory_manager_malloc(UriMemoryManager *memory_manager, size_t size)
 {
 	return emalloc(size);
 }
 
-static void *uriparser_calloc(UriMemoryManager *memory_manager, size_t nmemb, size_t size)
+static void *php_uri_parser_rfc3986_memory_manager_calloc(UriMemoryManager *memory_manager, size_t nmemb, size_t size)
 {
 	return ecalloc(nmemb, size);
 }
 
-static void *uriparser_realloc(UriMemoryManager *memory_manager, void *ptr, size_t size)
+static void *php_uri_parser_rfc3986_memory_manager_realloc(UriMemoryManager *memory_manager, void *ptr, size_t size)
 {
 	return erealloc(ptr, size);
 }
 
-static void *uriparser_reallocarray(UriMemoryManager *memory_manager, void *ptr, size_t nmemb, size_t size)
+static void *php_uri_parser_rfc3986_memory_manager_reallocarray(UriMemoryManager *memory_manager, void *ptr, size_t nmemb, size_t size)
 {
 	return safe_erealloc(ptr, nmemb, size, 0);
 }
 
-static void uriparser_free(UriMemoryManager *memory_manager, void *ptr)
+static void php_uri_parser_rfc3986_memory_manager_free(UriMemoryManager *memory_manager, void *ptr)
 {
 	efree(ptr);
 }
 
-static const UriMemoryManager uriparser_mm = {
-	.malloc = uriparser_malloc,
-	.calloc = uriparser_calloc,
-	.realloc = uriparser_realloc,
-	.reallocarray = uriparser_reallocarray,
-	.free = uriparser_free,
+static const UriMemoryManager php_uri_parser_rfc3986_memory_manager = {
+	.malloc = php_uri_parser_rfc3986_memory_manager_malloc,
+	.calloc = php_uri_parser_rfc3986_memory_manager_calloc,
+	.realloc = php_uri_parser_rfc3986_memory_manager_realloc,
+	.reallocarray = php_uri_parser_rfc3986_memory_manager_reallocarray,
+	.free = php_uri_parser_rfc3986_memory_manager_free,
 	.userData = NULL,
 };
 
 /* The library expects a pointer to a non-const UriMemoryManager, but does
  * not actually modify it (and neither does our implementation). Use a
  * const struct with a non-const pointer for convenience. */
-static UriMemoryManager* const mm = (UriMemoryManager*)&uriparser_mm;
+static UriMemoryManager* const mm = (UriMemoryManager*)&php_uri_parser_rfc3986_memory_manager;
 
 static inline size_t get_text_range_length(const UriTextRangeA *range)
 {
 	return range->afterLast - range->first;
 }
 
-ZEND_ATTRIBUTE_NONNULL static void uriparser_copy_uri(UriUriA *new_uriparser_uri, const UriUriA *uriparser_uri)
+ZEND_ATTRIBUTE_NONNULL static void copy_uri(UriUriA *new_uriparser_uri, const UriUriA *uriparser_uri)
 {
 	int result = uriCopyUriMmA(new_uriparser_uri, uriparser_uri, mm);
 	ZEND_ASSERT(result == URI_SUCCESS);
 }
 
-ZEND_ATTRIBUTE_NONNULL static UriUriA *get_normalized_uri(uriparser_uris_t *uriparser_uris) {
+ZEND_ATTRIBUTE_NONNULL static UriUriA *get_normalized_uri(php_uri_parser_rfc3986_uris *uriparser_uris) {
 	if (!uriparser_uris->normalized_uri_initialized) {
-		uriparser_copy_uri(&uriparser_uris->normalized_uri, &uriparser_uris->uri);
+		copy_uri(&uriparser_uris->normalized_uri, &uriparser_uris->uri);
 		int result = uriNormalizeSyntaxExMmA(&uriparser_uris->normalized_uri, (unsigned int)-1, mm);
 		ZEND_ASSERT(result == URI_SUCCESS);
 		uriparser_uris->normalized_uri_initialized = true;
@@ -83,7 +81,7 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_normalized_uri(uriparser_uris_t *urip
 	return &uriparser_uris->normalized_uri;
 }
 
-ZEND_ATTRIBUTE_NONNULL static UriUriA *uriparser_read_uri(uriparser_uris_t *uriparser_uris, uri_component_read_mode_t read_mode)
+ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_reading(php_uri_parser_rfc3986_uris *uriparser_uris, uri_component_read_mode_t read_mode)
 {
 	switch (read_mode) {
 		case URI_COMPONENT_READ_RAW:
@@ -96,9 +94,9 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *uriparser_read_uri(uriparser_uris_t *urip
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->scheme.first != NULL && uriparser_uri->scheme.afterLast != NULL) {
@@ -111,9 +109,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_scheme(const uri_intern
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
@@ -125,9 +123,9 @@ ZEND_ATTRIBUTE_NONNULL zend_result uriparser_read_userinfo(const uri_internal_t 
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
@@ -148,9 +146,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_username(const uri_inte
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
@@ -168,9 +166,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_password(const uri_inte
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL) {
@@ -204,9 +202,9 @@ ZEND_ATTRIBUTE_NONNULL static size_t str_to_int(const char *str, size_t len)
 	return result;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->portText.first != NULL && uriparser_uri->portText.afterLast != NULL) {
@@ -218,9 +216,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_port(const uri_internal
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->pathHead != NULL) {
@@ -247,9 +245,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_path(const uri_internal
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->query.first != NULL && uriparser_uri->query.afterLast != NULL) {
@@ -261,9 +259,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_query(const uri_interna
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->fragment.first != NULL && uriparser_uri->fragment.afterLast != NULL) {
@@ -275,15 +273,15 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_fragment(const uri_inte
 	return SUCCESS;
 }
 
-static uriparser_uris_t *uriparser_create_uris(void)
+static php_uri_parser_rfc3986_uris *uriparser_create_uris(void)
 {
-	uriparser_uris_t *uriparser_uris = ecalloc(1, sizeof(*uriparser_uris));
+	php_uri_parser_rfc3986_uris *uriparser_uris = ecalloc(1, sizeof(*uriparser_uris));
 	uriparser_uris->normalized_uri_initialized = false;
 
 	return uriparser_uris;
 }
 
-uriparser_uris_t *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len, const uriparser_uris_t *uriparser_base_urls, bool silent)
+php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str, size_t uri_str_len, const php_uri_parser_rfc3986_uris *uriparser_base_urls, bool silent)
 {
 	UriUriA uri = {0};
 
@@ -326,7 +324,7 @@ uriparser_uris_t *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len
 	/* Make the resulting URI independent of the 'uri_str'. */
 	uriMakeOwnerMmA(&uri, mm);
 
-	uriparser_uris_t *uriparser_uris = uriparser_create_uris();
+	php_uri_parser_rfc3986_uris *uriparser_uris = uriparser_create_uris();
 	uriparser_uris->uri = uri;
 
 	return uriparser_uris;
@@ -338,31 +336,31 @@ uriparser_uris_t *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len
 	return NULL;
 }
 
-void *uriparser_parse_uri(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
+void *php_uri_parser_rfc3986_parse(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
 {
-	return uriparser_parse_uri_ex(uri_str, uri_str_len, base_url, silent);
+	return php_uri_parser_rfc3986_parse_ex(uri_str, uri_str_len, base_url, silent);
 }
 
 /* When calling a wither successfully, the normalized URI is surely invalidated, therefore
  * it doesn't make sense to copy it. In case of failure, an exception is thrown, and the URI object
  * is discarded altogether. */
-ZEND_ATTRIBUTE_NONNULL static void *uriparser_clone_uri(void *uri)
+ZEND_ATTRIBUTE_NONNULL static void *php_uri_parser_rfc3986_clone(void *uri)
 {
-	const uriparser_uris_t *uriparser_uris = uri;
+	const php_uri_parser_rfc3986_uris *uriparser_uris = uri;
 
-	uriparser_uris_t *new_uriparser_uris = uriparser_create_uris();
-	uriparser_copy_uri(&new_uriparser_uris->uri, &uriparser_uris->uri);
+	php_uri_parser_rfc3986_uris *new_uriparser_uris = uriparser_create_uris();
+	copy_uri(&new_uriparser_uris->uri, &uriparser_uris->uri);
 	if (uriparser_uris->normalized_uri_initialized) {
-		uriparser_copy_uri(&new_uriparser_uris->normalized_uri, &uriparser_uris->normalized_uri);
+		copy_uri(&new_uriparser_uris->normalized_uri, &uriparser_uris->normalized_uri);
 		new_uriparser_uris->normalized_uri_initialized = true;
 	}
 
 	return new_uriparser_uris;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
+ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_rfc3986_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
 {
-	uriparser_uris_t *uriparser_uris = uri;
+	php_uri_parser_rfc3986_uris *uriparser_uris = uri;
 	const UriUriA *uriparser_uri;
 
 	if (recomposition_mode == URI_RECOMPOSITION_RAW_ASCII || recomposition_mode == URI_RECOMPOSITION_RAW_UNICODE) {
@@ -391,9 +389,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_string *uriparser_uri_to_string(void *uri, ur
 	return uri_string;
 }
 
-ZEND_ATTRIBUTE_NONNULL static void uriparser_free_uri(void *uri)
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_rfc3986_free(void *uri)
 {
-	uriparser_uris_t *uriparser_uris = uri;
+	php_uri_parser_rfc3986_uris *uriparser_uris = uri;
 
 	uriFreeUriMembersMmA(&uriparser_uris->uri, mm);
 	uriFreeUriMembersMmA(&uriparser_uris->normalized_uri, mm);
@@ -401,20 +399,20 @@ ZEND_ATTRIBUTE_NONNULL static void uriparser_free_uri(void *uri)
 	efree(uriparser_uris);
 }
 
-const uri_parser_t uriparser_uri_parser = {
-	.name = URI_PARSER_RFC3986,
-	.parse_uri = uriparser_parse_uri,
-	.clone_uri = uriparser_clone_uri,
-	.uri_to_string = uriparser_uri_to_string,
-	.free_uri = uriparser_free_uri,
+const uri_parser_t php_uri_parser_rfc3986 = {
+	.name = PHP_URI_PARSER_RFC3986,
+	.parse_uri = php_uri_parser_rfc3986_parse,
+	.clone_uri = php_uri_parser_rfc3986_clone,
+	.uri_to_string = php_uri_parser_rfc3986_to_string,
+	.free_uri = php_uri_parser_rfc3986_free,
 	{
-		.scheme = {.read_func = uriparser_read_scheme, .write_func = NULL},
-		.username = {.read_func = uriparser_read_username, .write_func = NULL},
-		.password = {.read_func = uriparser_read_password, .write_func = NULL},
-		.host = {.read_func = uriparser_read_host, .write_func = NULL},
-		.port = {.read_func = uriparser_read_port, .write_func = NULL},
-		.path = {.read_func = uriparser_read_path, .write_func = NULL},
-		.query = {.read_func = uriparser_read_query, .write_func = NULL},
-		.fragment = {.read_func = uriparser_read_fragment, .write_func = NULL},
+		.scheme = {.read_func = php_uri_parser_rfc3986_scheme_read, .write_func = NULL},
+		.username = {.read_func = php_uri_parser_rfc3986_username_read, .write_func = NULL},
+		.password = {.read_func = php_uri_parser_rfc3986_password_read, .write_func = NULL},
+		.host = {.read_func = php_uri_parser_rfc3986_host_read, .write_func = NULL},
+		.port = {.read_func = php_uri_parser_rfc3986_port_read, .write_func = NULL},
+		.path = {.read_func = php_uri_parser_rfc3986_path_read, .write_func = NULL},
+		.query = {.read_func = php_uri_parser_rfc3986_query_read, .write_func = NULL},
+		.fragment = {.read_func = php_uri_parser_rfc3986_fragment_read, .write_func = NULL},
 	}
 };

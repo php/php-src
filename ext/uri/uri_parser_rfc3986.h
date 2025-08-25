@@ -20,16 +20,16 @@
 #include <uriparser/Uri.h>
 #include "php_uri_common.h"
 
-extern const uri_parser_t uriparser_uri_parser;
+extern const uri_parser_t php_uri_parser_rfc3986;
 
-typedef struct uriparser_uris_t {
+typedef struct php_uri_parser_rfc3986_uris {
 	UriUriA uri;
 	UriUriA normalized_uri;
 	bool normalized_uri_initialized;
-} uriparser_uris_t;
+} php_uri_parser_rfc3986_uris;
 
-zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
+zend_result php_uri_parser_rfc3986_userinfo_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
 
-uriparser_uris_t *uriparser_parse_uri_ex(const char *uri_str, size_t uri_str_len, const uriparser_uris_t *uriparser_base_url, bool silent);
+php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str, size_t uri_str_len, const php_uri_parser_rfc3986_uris *uriparser_base_url, bool silent);
 
 #endif

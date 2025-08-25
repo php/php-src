@@ -393,7 +393,7 @@ static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor
 		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, uri_rfc3986_uri_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &uriparser_uri_parser, uri_str, base_url_object, is_constructor, is_constructor, NULL);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &php_uri_parser_rfc3986, uri_str, base_url_object, is_constructor, is_constructor, NULL);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, parse)
@@ -480,7 +480,7 @@ static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 		Z_PARAM_ZVAL(errors)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &lexbor_uri_parser, uri_str, base_url_object, is_constructor, is_constructor, errors);
+	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, &php_uri_parser_whatwg, uri_str, base_url_object, is_constructor, is_constructor, errors);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, parse)
@@ -510,7 +510,7 @@ static void read_uriparser_userinfo(INTERNAL_FUNCTION_PARAMETERS, uri_component_
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	if (UNEXPECTED(uriparser_read_userinfo(internal_uri, read_mode, return_value) == FAILURE)) {
+	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_read(internal_uri, read_mode, return_value) == FAILURE)) {
 		zend_throw_error(NULL, "The userinfo component cannot be retrieved");
 		RETURN_THROWS();
 	}
@@ -794,7 +794,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *uri_parser
 
 PHP_METHOD(Uri_Rfc3986_Uri, __unserialize)
 {
-	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PARSER_RFC3986);
+	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PARSER_RFC3986);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, __debugInfo)
@@ -947,7 +947,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 
 PHP_METHOD(Uri_WhatWg_Url, __unserialize)
 {
-	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PARSER_WHATWG);
+	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PARSER_WHATWG);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
@@ -1049,11 +1049,11 @@ static PHP_MINIT_FUNCTION(uri)
 
 	zend_hash_init(&uri_parsers, 4, NULL, NULL, true);
 
-	if (php_uri_parser_register(&uriparser_uri_parser) == FAILURE) {
+	if (php_uri_parser_register(&php_uri_parser_rfc3986) == FAILURE) {
 		return FAILURE;
 	}
 
-	if (php_uri_parser_register(&lexbor_uri_parser) == FAILURE) {
+	if (php_uri_parser_register(&php_uri_parser_whatwg) == FAILURE) {
 		return FAILURE;
 	}
 
