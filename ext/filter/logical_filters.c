@@ -630,7 +630,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 		if (
 			/* Skipping these checks is possible because the new URI implementations perform comprehensive validations. */
-			strcmp(uri_parser->name, URI_PARSER_PHP) == 0 &&
+			strcmp(uri_parser->name, PHP_URI_PARSER_PHP_PARSE_URL) == 0 &&
 			/* An IPv6 enclosed by square brackets is a valid hostname.*/
 			!php_filter_is_valid_ipv6_hostname(uri->host) &&
 			/* Validate domain.
@@ -651,7 +651,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (strcmp(uri_parser->name, URI_PARSER_PHP) == 0 &&
+	if (strcmp(uri_parser->name, PHP_URI_PARSER_PHP_PARSE_URL) == 0 &&
 		(
 			(uri->user != NULL && !is_userinfo_valid(uri->user)) ||
 			(uri->password != NULL && !is_userinfo_valid(uri->password))

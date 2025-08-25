@@ -20,6 +20,6 @@
 
 #include "php_uri_common.h"
 
-extern const uri_parser_t parse_url_uri_parser;
+extern const uri_parser_t php_uri_parser_php_parse_url;
 
 #endif
