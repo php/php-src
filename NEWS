@@ -29,6 +29,7 @@ PHP                                                                        NEWS
     (ilutov)
   . Prohibit pipe & arrow function combination that leads to confusing parse
     trees. (ilutov)
+  . The disable_classes INI directive has been removed. (Girgias)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL

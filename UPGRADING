@@ -55,6 +55,9 @@ PHP 8.5 UPGRADE NOTES
     ReflectionAttribute::newInstance() was called an error would be thrown.
     The error can be delayed from compilation to runtime using the new
     #[\DelayedTargetValidation] attribute.
+  . The disable_classes INI setting has been removed as it causes various
+    engine assumptions to be broken.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#remove_disable_classes_ini_setting
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
