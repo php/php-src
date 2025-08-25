@@ -341,19 +341,15 @@ void *php_uri_parser_rfc3986_parse(const char *uri_str, size_t uri_str_len, cons
 	return php_uri_parser_rfc3986_parse_ex(uri_str, uri_str_len, base_url, silent);
 }
 
-/* When calling a wither successfully, the normalized URI is surely invalidated, therefore
- * it doesn't make sense to copy it. In case of failure, an exception is thrown, and the URI object
- * is discarded altogether. */
 ZEND_ATTRIBUTE_NONNULL static void *php_uri_parser_rfc3986_clone(void *uri)
 {
 	const php_uri_parser_rfc3986_uris *uriparser_uris = uri;
 
 	php_uri_parser_rfc3986_uris *new_uriparser_uris = uriparser_create_uris();
 	copy_uri(&new_uriparser_uris->uri, &uriparser_uris->uri);
-	if (uriparser_uris->normalized_uri_initialized) {
-		copy_uri(&new_uriparser_uris->normalized_uri, &uriparser_uris->normalized_uri);
-		new_uriparser_uris->normalized_uri_initialized = true;
-	}
+	/* Do not copy the normalized URI: The expected action after cloning is
+	 * modifying the cloned URL (which will invalidate the cached normalized
+	 * URI). */
 
 	return new_uriparser_uris;
 }
