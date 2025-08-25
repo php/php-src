@@ -165,7 +165,7 @@ static void *parse_url_parse_uri(const char *uri_str, size_t uri_str_len, const 
 
 static void parse_url_free_uri(void *uri)
 {
-	php_url *parse_url_uri = (php_url *) uri;
+	php_url *parse_url_uri = uri;
 
 	php_url_free(parse_url_uri);
 }
