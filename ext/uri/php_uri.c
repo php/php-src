@@ -28,6 +28,7 @@
 #include "php_uri.h"
 #include "uri_parser_whatwg.h"
 #include "uri_parser_rfc3986.h"
+#include "uri_parser_php_parse_url.h"
 #include "php_uri_arginfo.h"
 #include "uriparser/src/UriConfig.h"
 
@@ -1054,6 +1055,10 @@ static PHP_MINIT_FUNCTION(uri)
 	}
 
 	if (php_uri_parser_register(&php_uri_parser_whatwg) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (php_uri_parser_register(&parse_url_uri_parser) == FAILURE) {
 		return FAILURE;
 	}
 
