@@ -111,14 +111,15 @@ PHPAPI const php_uri_parser *php_uri_get_parser(zend_string *uri_parser_name)
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri_internal *php_uri_parse(const php_uri_parser *uri_parser, const char *uri_str, size_t uri_str_len, bool silent)
 {
-	php_uri_internal *internal_uri = emalloc(sizeof(*internal_uri));
-	internal_uri->parser = uri_parser;
-	internal_uri->uri = uri_parser->parse(uri_str, uri_str_len, NULL, NULL, silent);
+	void *parsed = uri_parser->parse(uri_str, uri_str_len, NULL, NULL, silent);
 
-	if (UNEXPECTED(internal_uri->uri == NULL)) {
-		efree(internal_uri);
+	if (parsed == NULL) {
 		return NULL;
 	}
+
+	php_uri_internal *internal_uri = emalloc(sizeof(*internal_uri));
+	internal_uri->parser = uri_parser;
+	internal_uri->uri = parsed;
 
 	return internal_uri;
 }
