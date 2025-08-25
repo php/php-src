@@ -5283,6 +5283,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_CAST:
 			switch (opline->extended_value) {
 				case IS_LONG:
+					return (t1 & (MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT));
 				case IS_DOUBLE:
 					return (t1 & MAY_BE_OBJECT);
 				case IS_STRING:

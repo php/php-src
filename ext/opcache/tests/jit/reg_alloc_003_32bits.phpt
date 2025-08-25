@@ -23,5 +23,5 @@ function test($char_code) {
 echo test(65), "\n";
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion from float 4294967168 to int loses precision in %s on line %d
+Warning: non-representable float 4294967168 was cast to int in %s on line %d
 correct

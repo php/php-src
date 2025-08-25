@@ -74,10 +74,16 @@ foreach($args_array as $args) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --
+
+Warning: non-representable float 20000000000 was cast to int in %s on line %d
+
+Warning: non-representable float 2000000000000 was cast to int in %s on line %d
+
+Warning: non-representable float 22000000000000 was cast to int in %s on line %d
 2 0 12
    361100 37777775456 2322
                          

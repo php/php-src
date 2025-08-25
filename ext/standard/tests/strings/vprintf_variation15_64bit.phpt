@@ -44,7 +44,7 @@ foreach($formats as $format) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --
@@ -56,6 +56,8 @@ int(16)
 int(22)
 
 -- Iteration 3 --
+
+Warning: non-representable float 1.0E+21 was cast to int in %s on line %d
    1234000 3875820019684212736 120
 int(34)
 
