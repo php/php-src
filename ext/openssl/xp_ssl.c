@@ -2640,14 +2640,19 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		return NULL;
 	}
 
-	uri_internal_t *internal_uri = php_uri_parse(uri_parser, resourcename, resourcenamelen, true);
-	if (internal_uri == NULL) {
+	void *parsed = uri_parser->parse_uri(resourcename, resourcenamelen,
+		/* base_url */ NULL, /* errors */ NULL, /* silent */ true);
+	if (parsed == NULL) {
 		return NULL;
 	}
+	uri_internal_t internal_uri = {
+		.parser = uri_parser,
+		.uri = parsed,
+	};
 
 	char * url_name = NULL;
 	zval host_zv;
-	zend_result result = php_uri_get_host(internal_uri, URI_COMPONENT_READ_RAW, &host_zv);
+	zend_result result = php_uri_get_host(&internal_uri, URI_COMPONENT_READ_RAW, &host_zv);
 	if (result == SUCCESS && Z_TYPE(host_zv) == IS_STRING) {
 		const char * host = Z_STRVAL(host_zv);
 		size_t len = Z_STRLEN(host_zv);
@@ -2662,7 +2667,7 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		}
 	}
 
-	php_uri_free(internal_uri);
+	uri_parser->free_uri(parsed);
 	zval_ptr_dtor(&host_zv);
 
 	return url_name;
