@@ -32,7 +32,7 @@ class lib {
 
   function stream_stat() {
     return [
-      'dev'   => 3632233996,
+      'dev'   => PHP_INT_MAX,
       'size'  => strlen($this->bytes),
       'ino'   => $this->ino
     ];

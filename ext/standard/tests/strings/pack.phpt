@@ -97,7 +97,7 @@ print_r(unpack("v", pack("v", -1000)));
 print_r(unpack("v", pack("v", -64434)));
 print_r(unpack("v", pack("v", -65535)));
 ?>
---EXPECT--
+--EXPECTF--
 Array
 (
     [1] => h
@@ -143,10 +143,14 @@ Array
 (
     [1] => -64434
 )
+
+Warning: non-representable float 4294967296 was cast to int in %s on line %d
 Array
 (
     [1] => 0
 )
+
+Warning: non-representable float -4294967296 was cast to int in %s on line %d
 Array
 (
     [1] => 0
@@ -159,10 +163,14 @@ Array
 (
     [1] => 0
 )
+
+Warning: non-representable float 2147483650 was cast to int in %s on line %d
 Array
 (
     [1] => -2147483646
 )
+
+Warning: non-representable float 4294967295 was cast to int in %s on line %d
 Array
 (
     [1] => -1
@@ -227,14 +235,20 @@ Array
 (
     [1] => 0
 )
+
+Warning: non-representable float 2147483650 was cast to int in %s on line %d
 Array
 (
     [1] => -2147483646
 )
+
+Warning: non-representable float 4294967296 was cast to int in %s on line %d
 Array
 (
     [1] => 0
 )
+
+Warning: non-representable float 2147483650 was cast to int in %s on line %d
 Array
 (
     [1] => -2147483648
@@ -299,10 +313,14 @@ Array
 (
     [1] => 0
 )
+
+Warning: non-representable float 2147483650 was cast to int in %s on line %d
 Array
 (
     [1] => -2147483646
 )
+
+Warning: non-representable float 4294967296 was cast to int in %s on line %d
 Array
 (
     [1] => 0

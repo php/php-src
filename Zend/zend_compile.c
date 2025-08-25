@@ -9926,14 +9926,14 @@ ZEND_API bool zend_is_op_long_compatible(const zval *op)
 	}
 
 	if (Z_TYPE_P(op) == IS_DOUBLE
-		&& !zend_is_long_compatible(Z_DVAL_P(op), zend_dval_to_lval(Z_DVAL_P(op)))) {
+		&& !zend_is_long_compatible(Z_DVAL_P(op), zend_dval_to_lval_silent(Z_DVAL_P(op)))) {
 		return false;
 	}
 
 	if (Z_TYPE_P(op) == IS_STRING) {
 		double dval = 0;
 		uint8_t is_num = is_numeric_str_function(Z_STR_P(op), NULL, &dval);
-		if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(dval, zend_dval_to_lval(dval)))) {
+		if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(dval, zend_dval_to_lval_silent(dval)))) {
 			return false;
 		}
 	}
@@ -10153,7 +10153,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(key), value);
 					break;
 				case IS_DOUBLE: {
-					zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
+					zend_long lval = zend_dval_to_lval_silent(Z_DVAL_P(key));
 					/* Incompatible float will generate an error, leave this to run-time */
 					if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 						zval_ptr_dtor_nogc(value);

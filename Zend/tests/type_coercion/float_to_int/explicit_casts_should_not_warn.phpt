@@ -1,5 +1,5 @@
 --TEST--
-Explicit (int) cast must not warn
+Explicit (int) cast must not warn if value is representable
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
@@ -25,14 +25,24 @@ foreach($values as $value) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 int(3)
 int(3)
+
+Warning: non-representable float 1.0E+121 was cast to int in %s on line %d
 int(0)
+
+Warning: non-representable float 1.0E+301 was cast to int in %s on line %d
 int(0)
+
+Warning: non-representable float NAN was cast to int in %s on line %d
 int(0)
 int(3)
 int(3)
+
+Warning: non-representable float-string 1.0E+121 was cast to int in %s on line %d
 int(9223372036854775807)
+
+Warning: non-representable float-string 1.0E+301 was cast to int in %s on line %d
 int(9223372036854775807)
 int(0)

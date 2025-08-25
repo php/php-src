@@ -75,7 +75,10 @@ var_dump($string);
 
 ?>
 --EXPECTF--
+Warning: non-representable float 1.0E+121 was cast to int in %s on line %d
 int(0)
+
+Warning: non-representable float-string 1.0E+121 was cast to int in %s on line %d
 int(2147483647)
 Attempt to read
 Float

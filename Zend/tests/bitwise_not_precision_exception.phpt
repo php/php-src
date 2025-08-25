@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-Implicit conversion from float INF to int loses precision
+non-representable float INF was cast to int
