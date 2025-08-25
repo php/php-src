@@ -65,6 +65,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19507 (Corrupted result after recursive tokenization during
     token_get_all()). (kubawerlos, nielsdos, Arnaud)
 
+- URI:
+  . Clean up naming of internal API (header names, symbol names).
+    (Máté Kocsis, timwolla)
+
 14 Aug 2025, PHP 8.5.0beta1
 
 - Core:
