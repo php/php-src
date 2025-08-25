@@ -356,6 +356,20 @@ PHP 8.5 UPGRADE NOTES
   . Constant redeclaration is deprecated and that behavior will trigger an
     error in PHP 9.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_constant_redeclaration
+  . Enacted the follow-up phase of the "Path to Saner Increment/Decrement
+    operators" RFC, meaning that incrementing non-numeric strings is now
+    deprecated. Instead the str_increment() function should be used.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#enact_follow-up_phase_of_the_path_to_saner_incrementdecrement_operators_rfc
+  . The following closure binding issues, which already emit an E_WARNING, are
+    now deprecated:
+    - Binding an instance to a static closure
+    - Binding methods to objects that are not instances of the class
+      (or subclass) that the method is defined
+    - Unbinding $this from a method
+    - Unbinding $this from a closure that uses `$this`
+    - Binding a closure to the scope of an internal class
+    - Rebinding the scope of a closure created from a function or method
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_closure_binding_issues
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are
@@ -883,6 +897,11 @@ PHP 8.5 UPGRADE NOTES
   . Creating exception objects is now much faster.
   . The parts of the code that used SSE2 have been adapted to use SIMD
     with ARM NEON as well.
+  . Introduced the TAILCALL VM, enabled by default when compiling with Clang>=19
+    on x86_64 or aarch64. The TAILCALL VM is as fast as the HYBRID VM used when
+    compiling with GCC. This makes PHP binaries built with Clang>=19 as fast as
+    binaries built with GCC. The performance of the CALL VM, used with other
+    compilers, has also improved considerably.
 
 - Intl:
   . Now avoids creating extra string copies when converting strings

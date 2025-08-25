@@ -54,6 +54,8 @@
 #include "mod_mm.h"
 #endif
 
+#include "zend_attributes.h"
+
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps)
 
 static zend_result php_session_rfc1867_callback(unsigned int event, void *event_data, void **extra);
@@ -649,7 +651,7 @@ static PHP_INI_MH(OnUpdateSaveDir)
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 
-	/* Only do the safemode/open_basedir check at runtime */
+	/* Only do the open_basedir check at runtime */
 	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
 		char *p;
 
@@ -1502,6 +1504,8 @@ PHPAPI zend_result php_session_reset_id(void)
 	/* zend_hash_str_del(EG(zend_constants), ZEND_STRL("sid")); */
 	sid = zend_get_constant_str(ZEND_STRL("SID"));
 
+	zend_constant *new_sid_constant = NULL;
+
 	if (PS(define_sid)) {
 		smart_str var = {0};
 
@@ -1513,7 +1517,7 @@ PHPAPI zend_result php_session_reset_id(void)
 			zval_ptr_dtor(sid);
 			ZVAL_STR(sid, smart_str_extract(&var));
 		} else {
-			REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s),  CONST_DEPRECATED);
+			new_sid_constant = REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s),  CONST_DEPRECATED);
 			smart_str_free(&var);
 		}
 	} else {
@@ -1521,8 +1525,16 @@ PHPAPI zend_result php_session_reset_id(void)
 			zval_ptr_dtor(sid);
 			ZVAL_EMPTY_STRING(sid);
 		} else {
-			REGISTER_STRINGL_CONSTANT("SID", "", 0, CONST_DEPRECATED);
+			new_sid_constant = REGISTER_STRINGL_CONSTANT("SID", "", 0, CONST_DEPRECATED);
 		}
+	}
+	if (new_sid_constant != NULL) {
+		zend_string *deprecation_reason = zend_string_init("as GET/POST sessions were deprecated", strlen("as GET/POST sessions were deprecated"), 1);
+		zend_attribute *deprecation_attrib = zend_add_global_constant_attribute(new_sid_constant, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+		ZVAL_STR(&deprecation_attrib->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
+		deprecation_attrib->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+		ZVAL_STR(&deprecation_attrib->args[1].value, deprecation_reason);
+		deprecation_attrib->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 	}
 
 	/* Apply trans sid if sid cookie is not set */

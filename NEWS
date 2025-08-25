@@ -15,6 +15,16 @@ PHP                                                                        NEWS
   . Added support for configuring the URI parser for the FTP/FTPS as well as
     the SSL/TLS stream wrappers as described in
     https://wiki.php.net/rfc/url_parsing_api#plugability. (kocsismate)
+  . Fixed bug GH-19548 (Shared memory violation on property inheritance).
+    (alexandre-daubois)
+  . Fixed bug GH-19544 (GC treats ZEND_WEAKREF_TAG_MAP references as WeakMap
+    references). (Arnaud, timwolla)
+  . Introduced the TAILCALL VM, enabled by default when compiling with Clang>=19
+    on x86_64 or aarch64. (Arnaud)
+  . Enacted the follow-up phase of the "Path to Saner Increment/Decrement
+    operators" RFC, meaning that incrementing non-numeric strings is now
+    deprecated. (Girgias).
+  . Various closure binding issues are now deprecated. (alexandre-daubois)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
@@ -30,6 +40,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
     (Jakub Zelenka)
+
+- Phar:
+  . Fixed memory leaks when verifying OpenSSL signature. (Girgias)
 
 - Session:
   . Added support for partitioned cookies. (nielsdos)
@@ -47,6 +60,10 @@ PHP                                                                        NEWS
   . Passing integers outside the interval [0, 255] to chr() is now deprecated.
     (Girgias)
   . Added support for partitioned cookies. (nielsdos)
+
+- Tokenizer:
+  . Fixed bug GH-19507 (Corrupted result after recursive tokenization during
+    token_get_all()). (kubawerlos, nielsdos, Arnaud)
 
 14 Aug 2025, PHP 8.5.0beta1
 

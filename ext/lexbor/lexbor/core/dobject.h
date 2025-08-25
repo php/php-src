@@ -40,10 +40,6 @@ LXB_API lexbor_dobject_t *
 lexbor_dobject_destroy(lexbor_dobject_t *dobject, bool destroy_self);
 
 
-LXB_API uint8_t *
-lexbor_dobject_init_list_entries(lexbor_dobject_t *dobject, size_t pos);
-
-
 LXB_API void *
 lexbor_dobject_alloc(lexbor_dobject_t *dobject);
 
