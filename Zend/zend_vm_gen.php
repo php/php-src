@@ -1465,7 +1465,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                 switch ($kind) {
                     case ZEND_VM_KIND_CALL:
                     case ZEND_VM_KIND_TAILCALL:
-                        out($f,$prolog."ZEND_NULL${variant}_HANDLER,\n");
+                        out($f,$prolog."ZEND_NULL{$variant}_HANDLER,\n");
                         break;
                     case ZEND_VM_KIND_SWITCH:
                         out($f,$prolog."-1,\n");
@@ -1512,7 +1512,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                 switch ($kind) {
                     case ZEND_VM_KIND_CALL:
                     case ZEND_VM_KIND_TAILCALL:
-                        out($f,$prolog."ZEND_NULL${variant}_HANDLER,\n");
+                        out($f,$prolog."ZEND_NULL{$variant}_HANDLER,\n");
                         break;
                     case ZEND_VM_KIND_SWITCH:
                         out($f,$prolog."-1,\n");
