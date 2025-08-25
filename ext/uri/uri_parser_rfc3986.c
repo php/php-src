@@ -64,6 +64,11 @@ static inline size_t get_text_range_length(const UriTextRangeA *range)
 	return range->afterLast - range->first;
 }
 
+static inline bool has_text_range(const UriTextRangeA *range)
+{
+	return range->first != NULL && range->afterLast != NULL;
+}
+
 ZEND_ATTRIBUTE_NONNULL static void copy_uri(UriUriA *new_uriparser_uri, const UriUriA *uriparser_uri)
 {
 	int result = uriCopyUriMmA(new_uriparser_uri, uriparser_uri, mm);
@@ -111,7 +116,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(const ur
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
-	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
+	if (has_text_range(&uriparser_uri->userInfo)) {
 		ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, get_text_range_length(&uriparser_uri->userInfo));
 	} else {
 		ZVAL_NULL(retval);
@@ -124,7 +129,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(c
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
-	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
+	if (has_text_range(&uriparser_uri->userInfo)) {
 		size_t length = get_text_range_length(&uriparser_uri->userInfo);
 		const char *c = memchr(uriparser_uri->userInfo.first, ':', length);
 
@@ -146,7 +151,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(c
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
-	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
+	if (has_text_range(&uriparser_uri->userInfo)) {
 		const char *c = memchr(uriparser_uri->userInfo.first, ':', get_text_range_length(&uriparser_uri->userInfo));
 
 		if (c != NULL && uriparser_uri->userInfo.afterLast - c - 1 > 0) {
@@ -165,7 +170,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
-	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL) {
+	if (has_text_range(&uriparser_uri->hostText)) {
 		if (uriparser_uri->hostData.ip6 != NULL || uriparser_uri->hostData.ipFuture.first != NULL) {
 			/* the textual representation of the host is always accessible in the .hostText field no matter what the host is */
 			smart_str host_str = {0};
@@ -200,7 +205,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
-	if (uriparser_uri->portText.first != NULL && uriparser_uri->portText.afterLast != NULL) {
+	if (has_text_range(&uriparser_uri->portText)) {
 		ZVAL_LONG(retval, str_to_int(uriparser_uri->portText.first, get_text_range_length(&uriparser_uri->portText)));
 	} else {
 		ZVAL_NULL(retval);
@@ -241,7 +246,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(cons
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
-	if (uriparser_uri->query.first != NULL && uriparser_uri->query.afterLast != NULL) {
+	if (has_text_range(&uriparser_uri->query)) {
 		ZVAL_STRINGL(retval, uriparser_uri->query.first, get_text_range_length(&uriparser_uri->query));
 	} else {
 		ZVAL_NULL(retval);
@@ -254,7 +259,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(c
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
-	if (uriparser_uri->fragment.first != NULL && uriparser_uri->fragment.afterLast != NULL) {
+	if (has_text_range(&uriparser_uri->fragment)) {
 		ZVAL_STRINGL(retval, uriparser_uri->fragment.first, get_text_range_length(&uriparser_uri->fragment));
 	} else {
 		ZVAL_NULL(retval);
