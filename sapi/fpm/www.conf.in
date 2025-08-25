@@ -474,9 +474,8 @@ pm.max_spare_servers = 3
 ; For php_*flag, valid values are on, off, 1, 0, true, false, yes or no.
 
 ; Defining 'extension' will load the corresponding shared extension from
-; extension_dir. Defining 'disable_functions' or 'disable_classes' will not
-; overwrite previously defined php.ini values, but will append the new value
-; instead.
+; extension_dir. Defining 'disable_functions' will not overwrite previously
+; defined php.ini values, but will append the new value instead.
 
 ; Note: path INI options can be relative and will be expanded with the prefix
 ; (pool, global or @prefix@)
