@@ -4886,9 +4886,17 @@ function parseConstLike(
             $phpDocType = 'string';
         } elseif ($const->value instanceof Expr\ConstFetch
             && $const->value->name instanceof Node\Name\FullyQualified
-            && $const->value->name->name === 'false'
+            && (
+                $const->value->name->name === 'false'
+                || $const->value->name->name === 'true'
+            )
         ) {
             $phpDocType = 'bool';
+        } elseif ($const->value instanceof Expr\ConstFetch
+            && $const->value->name instanceof Node\Name\FullyQualified
+            && $const->value->name->name === 'null'
+        ) {
+            $phpDocType = 'null';
         } else {
             throw new Exception("Missing type for constant " . $name->__toString());
         }
