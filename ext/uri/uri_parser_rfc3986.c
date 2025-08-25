@@ -100,8 +100,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(con
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->scheme.first != NULL && uriparser_uri->scheme.afterLast != NULL) {
-		zend_string *str = zend_string_init(uriparser_uri->scheme.first, get_text_range_length(&uriparser_uri->scheme), false);
-		ZVAL_NEW_STR(retval, str);
+		ZVAL_STRINGL(retval, uriparser_uri->scheme.first, get_text_range_length(&uriparser_uri->scheme));
 	} else {
 		ZVAL_NULL(retval);
 	}
