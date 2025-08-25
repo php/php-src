@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eb624df6b39083abc81b8636e965370cea9e093f */
+ * Stub hash: d0fd94afead7757b462eaa10e971b4ae86820f2f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -129,6 +129,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_zend_test_zend_ini_parse_uquantity arginfo_zend_test_zend_ini_parse_quantity
 
 #define arginfo_zend_test_zend_ini_str arginfo_zend_get_current_func_name
+
+#define arginfo_zend_test_zstr_init_literal arginfo_zend_get_current_func_name
 
 #if defined(ZEND_CHECK_STACK_LIMIT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_call_stack_get, 0, 0, IS_ARRAY, 1)
@@ -314,6 +316,7 @@ static ZEND_FUNCTION(zend_call_method_if_exists);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
+static ZEND_FUNCTION(zend_test_zstr_init_literal);
 #if defined(ZEND_CHECK_STACK_LIMIT)
 static ZEND_FUNCTION(zend_test_zend_call_stack_get);
 static ZEND_FUNCTION(zend_test_zend_call_stack_use_all);
@@ -444,6 +447,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
+	ZEND_FE(zend_test_zstr_init_literal, arginfo_zend_test_zstr_init_literal)
 #if defined(ZEND_CHECK_STACK_LIMIT)
 	ZEND_FE(zend_test_zend_call_stack_get, arginfo_zend_test_zend_call_stack_get)
 	ZEND_FE(zend_test_zend_call_stack_use_all, arginfo_zend_test_zend_call_stack_use_all)

@@ -594,6 +594,13 @@ static ZEND_FUNCTION(zend_test_zend_ini_str)
 	RETURN_STR(ZT_G(str_test));
 }
 
+static ZEND_FUNCTION(zend_test_zstr_init_literal)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_STR(ZSTR_INIT_LITERAL("foo\0bar", false));
+}
+
 static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8)
 {
 	zend_string *str;
