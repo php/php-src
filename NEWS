@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
+  . Fixed bug GH-19577 (Avoid integer overflow when using a small offset
+    and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
 
 - Tidy:
   . Fixed GH-19021 build issue with libtidy in regard of tidyOptIsReadonly
