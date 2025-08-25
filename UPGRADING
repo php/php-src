@@ -19,12 +19,6 @@ PHP 8.5 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- BZ2:
-  . bzcompress() now throws a ValueError when $block_size is not between
-    1 and 9.
-  . bzcompress() now throws a ValueError when $work_factor is not between
-    0 and 250.
-
 - Core:
   . It is no longer possible to use "array" and "callable" as class alias names
     in class_alias().
@@ -58,6 +52,12 @@ PHP 8.5 UPGRADE NOTES
   . The disable_classes INI setting has been removed as it causes various
     engine assumptions to be broken.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#remove_disable_classes_ini_setting
+
+- BZ2:
+  . bzcompress() now throws a ValueError when $block_size is not between
+    1 and 9.
+  . bzcompress() now throws a ValueError when $work_factor is not between
+    0 and 250.
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
