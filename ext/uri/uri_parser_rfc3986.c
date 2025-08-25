@@ -98,7 +98,7 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *uriparser_read_uri(uriparser_uris_t *urip
 
 ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->scheme.first != NULL && uriparser_uri->scheme.afterLast != NULL) {
@@ -113,7 +113,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_scheme(const uri_intern
 
 ZEND_ATTRIBUTE_NONNULL zend_result uriparser_read_userinfo(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
@@ -127,7 +127,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result uriparser_read_userinfo(const uri_internal_t 
 
 ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
@@ -150,7 +150,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_username(const uri_inte
 
 ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->userInfo.first != NULL && uriparser_uri->userInfo.afterLast != NULL) {
@@ -170,7 +170,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_password(const uri_inte
 
 ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->hostText.first != NULL && uriparser_uri->hostText.afterLast != NULL) {
@@ -206,7 +206,7 @@ ZEND_ATTRIBUTE_NONNULL static size_t str_to_int(const char *str, size_t len)
 
 ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->portText.first != NULL && uriparser_uri->portText.afterLast != NULL) {
@@ -220,7 +220,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_port(const uri_internal
 
 ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->pathHead != NULL) {
@@ -249,7 +249,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_path(const uri_internal
 
 ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->query.first != NULL && uriparser_uri->query.afterLast != NULL) {
@@ -263,7 +263,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_query(const uri_interna
 
 ZEND_ATTRIBUTE_NONNULL static zend_result uriparser_read_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = uriparser_read_uri(internal_uri->uri, read_mode);
 	ZEND_ASSERT(uriparser_uri != NULL);
 
 	if (uriparser_uri->fragment.first != NULL && uriparser_uri->fragment.afterLast != NULL) {
@@ -348,7 +348,7 @@ void *uriparser_parse_uri(const char *uri_str, size_t uri_str_len, const void *b
  * is discarded altogether. */
 ZEND_ATTRIBUTE_NONNULL static void *uriparser_clone_uri(void *uri)
 {
-	uriparser_uris_t *uriparser_uris = uri;
+	const uriparser_uris_t *uriparser_uris = uri;
 
 	uriparser_uris_t *new_uriparser_uris = uriparser_create_uris();
 	uriparser_copy_uri(&new_uriparser_uris->uri, &uriparser_uris->uri);
@@ -363,7 +363,7 @@ ZEND_ATTRIBUTE_NONNULL static void *uriparser_clone_uri(void *uri)
 ZEND_ATTRIBUTE_NONNULL static zend_string *uriparser_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
 {
 	uriparser_uris_t *uriparser_uris = uri;
-	UriUriA *uriparser_uri;
+	const UriUriA *uriparser_uri;
 
 	if (recomposition_mode == URI_RECOMPOSITION_RAW_ASCII || recomposition_mode == URI_RECOMPOSITION_RAW_UNICODE) {
 		uriparser_uri = &uriparser_uris->uri;

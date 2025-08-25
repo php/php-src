@@ -260,7 +260,7 @@ static lxb_status_t lexbor_serialize_callback(const lxb_char_t *data, size_t len
 
 static zend_result lexbor_read_scheme(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	lxb_url_t *lexbor_uri = internal_uri->uri;
+	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	ZEND_ASSERT(lexbor_uri->scheme.type != LXB_URL_SCHEMEL_TYPE__UNDEF);
 
@@ -287,7 +287,7 @@ static zend_result lexbor_write_scheme(struct uri_internal_t *internal_uri, zval
 
 static zend_result lexbor_read_username(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	lxb_url_t *lexbor_uri = internal_uri->uri;
+	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	if (lexbor_uri->username.length) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->username.data, lexbor_uri->username.length);
@@ -316,7 +316,7 @@ static zend_result lexbor_write_username(uri_internal_t *internal_uri, zval *val
 
 static zend_result lexbor_read_password(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	lxb_url_t *lexbor_uri = internal_uri->uri;
+	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	if (lexbor_uri->password.length > 0) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->password.data, lexbor_uri->password.length);
@@ -356,7 +356,7 @@ static zend_result init_idna(void)
 
 static zend_result lexbor_read_host(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	lxb_url_t *lexbor_uri = internal_uri->uri;
+	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	if (lexbor_uri->host.type == LXB_URL_HOST_TYPE_IPV4) {
 		smart_str host_str = {0};
@@ -419,7 +419,7 @@ static zend_result lexbor_write_host(struct uri_internal_t *internal_uri, zval *
 
 static zend_result lexbor_read_port(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	lxb_url_t *lexbor_uri = internal_uri->uri;
+	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	if (lexbor_uri->has_port) {
 		ZVAL_LONG(retval, lexbor_uri->port);
@@ -448,7 +448,7 @@ static zend_result lexbor_write_port(struct uri_internal_t *internal_uri, zval *
 
 static zend_result lexbor_read_path(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	lxb_url_t *lexbor_uri = internal_uri->uri;
+	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	if (lexbor_uri->path.str.length) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->path.str.data, lexbor_uri->path.str.length);
@@ -477,7 +477,7 @@ static zend_result lexbor_write_path(struct uri_internal_t *internal_uri, zval *
 
 static zend_result lexbor_read_query(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	lxb_url_t *lexbor_uri = internal_uri->uri;
+	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	if (lexbor_uri->query.length) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->query.data, lexbor_uri->query.length);
@@ -506,7 +506,7 @@ static zend_result lexbor_write_query(struct uri_internal_t *internal_uri, zval 
 
 static zend_result lexbor_read_fragment(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
-	lxb_url_t *lexbor_uri = internal_uri->uri;
+	const lxb_url_t *lexbor_uri = internal_uri->uri;
 
 	if (lexbor_uri->fragment.length) {
 		ZVAL_STRINGL(retval, (const char *) lexbor_uri->fragment.data, lexbor_uri->fragment.length);
@@ -586,14 +586,14 @@ static void *lexbor_parse_uri(const char *uri_str, size_t uri_str_len, const voi
 
 static void *lexbor_clone_uri(void *uri)
 {
-	lxb_url_t *lexbor_uri = (lxb_url_t *) uri;
+	const lxb_url_t *lexbor_uri = uri;
 
 	return lxb_url_clone(lexbor_parser.mraw, lexbor_uri);
 }
 
 static zend_string *lexbor_uri_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
 {
-	lxb_url_t *lexbor_uri = (lxb_url_t *) uri;
+	const lxb_url_t *lexbor_uri = uri;
 	smart_str uri_str = {0};
 
 	switch (recomposition_mode) {
