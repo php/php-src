@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   . Prohibit pipe & arrow function combination that leads to confusing parse
     trees. (ilutov)
   . The disable_classes INI directive has been removed. (Girgias)
+  . The locally predefined variable $http_response_header is deprecated.
+    (Girgias)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
