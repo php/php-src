@@ -1,7 +1,5 @@
 --TEST--
 $http_reponse_header should warn once per oparray
---INI--
-allow_url_fopen=1
 --FILE--
 <?php
 

@@ -339,7 +339,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_arra
 	CG(context).try_catch_offset = -1;
 	CG(context).current_brk_cont = -1;
 	CG(context).last_brk_cont = 0;
-	CG(has_assigned_to_http_response_header) = false;
+	CG(context).has_assigned_to_http_response_header = false;
 	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
 	CG(context).in_jmp_frameless_branch = false;
@@ -2885,13 +2885,13 @@ static zend_result zend_try_compile_cv(znode *result, zend_ast *ast, uint32_t ty
 			return FAILURE;
 		}
 
-		if (!CG(has_assigned_to_http_response_header) && zend_string_equals_literal(name, "http_response_header")) {
+		if (!CG(context).has_assigned_to_http_response_header && zend_string_equals_literal(name, "http_response_header")) {
 			if (type == BP_VAR_R) {
 				zend_error(E_DEPRECATED,
 					"The predefined locally scoped $http_response_header variable is deprecated,"
 					" call http_get_last_response_headers() instead");
 			} else if (type == BP_VAR_W) {
-				CG(has_assigned_to_http_response_header) = true;
+				CG(context).has_assigned_to_http_response_header = true;
 			}
 		}
 
