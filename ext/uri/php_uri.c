@@ -1084,9 +1084,9 @@ PHP_RINIT_FUNCTION(uri)
 	return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(uri)
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri)
 {
-	if (PHP_RSHUTDOWN(uri_parser_whatwg)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE) {
+	if (ZEND_MODULE_POST_ZEND_DEACTIVATE_N(uri_parser_whatwg)() == FAILURE) {
 		return FAILURE;
 	}
 
@@ -1101,8 +1101,10 @@ zend_module_entry uri_module_entry = {
 	PHP_MINIT(uri),                 /* PHP_MINIT - Module initialization */
 	PHP_MSHUTDOWN(uri),             /* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(uri),                 /* PHP_RINIT - Request initialization */
-	PHP_RSHUTDOWN(uri),             /* PHP_RSHUTDOWN - Request shutdown */
+	NULL,                           /* PHP_RSHUTDOWN - Request shutdown */
 	PHP_MINFO(uri),                 /* PHP_MINFO - Module info */
 	PHP_VERSION,                    /* Version */
-	STANDARD_MODULE_PROPERTIES
+	NO_MODULE_GLOBALS,
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(uri),
+	STANDARD_MODULE_PROPERTIES_EX
 };

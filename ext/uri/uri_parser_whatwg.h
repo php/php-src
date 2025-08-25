@@ -25,6 +25,6 @@ extern const uri_parser_t php_uri_parser_whatwg;
 lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent);
 
 PHP_RINIT_FUNCTION(uri_parser_whatwg);
-PHP_RSHUTDOWN_FUNCTION(uri_parser_whatwg);
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri_parser_whatwg);
 
 #endif
