@@ -1273,7 +1273,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 }
 /* }}} */
 
-static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
+static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
 		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
@@ -1653,7 +1653,7 @@ static void reflection_enum_case_factory(zend_class_entry *ce, zend_string *name
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
 }
 
-static int get_parameter_default(zval *result, parameter_reference *param) {
+static zend_result get_parameter_default(zval *result, parameter_reference *param) {
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		if (param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
 			/* We don't have a way to determine the default value for this case right now. */
@@ -4523,16 +4523,16 @@ ZEND_METHOD(ReflectionClass, getMethod)
 static bool _addmethod(zend_function *mptr, zend_class_entry *ce, HashTable *ht, zend_long filter)
 {
 	if ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce) {
-		return 0;
+		return false;
 	}
 
 	if (mptr->common.fn_flags & filter) {
 		zval method;
 		reflection_method_factory(ce, mptr, NULL, &method);
 		zend_hash_next_index_insert_new(ht, &method);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -7100,7 +7100,7 @@ ZEND_METHOD(ReflectionReference, __construct)
 
 static bool is_ignorable_reference(HashTable *ht, zval *ref) {
 	if (Z_REFCOUNT_P(ref) != 1) {
-		return 0;
+		return false;
 	}
 
 	/* Directly self-referential arrays are treated as proper references
