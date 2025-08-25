@@ -29,6 +29,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
 
+- GD:
+  . Fixed bug GH-19579 (imagefilledellipse underflow on width argument).
+    (David Carlier)
+
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
