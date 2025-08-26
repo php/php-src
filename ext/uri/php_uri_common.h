@@ -41,11 +41,9 @@ typedef enum php_uri_component_read_mode {
 	PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE,
 } php_uri_component_read_mode;
 
-struct uri_internal_t;
+typedef zend_result (*php_uri_property_handler_read)(void *uri, php_uri_component_read_mode read_mode, zval *retval);
 
-typedef zend_result (*php_uri_property_handler_read)(const struct uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval);
-
-typedef zend_result (*php_uri_property_handler_write)(struct uri_internal_t *internal_uri, zval *value, zval *errors);
+typedef zend_result (*php_uri_property_handler_write)(void *uri, zval *value, zval *errors);
 
 typedef enum php_uri_property_name {
 	PHP_URI_PROPERTY_NAME_SCHEME,

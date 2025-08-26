@@ -99,16 +99,14 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_reading(php_uri_parser_rfc398
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_writing(uri_internal_t *internal_uri)
+ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_writing(php_uri_parser_rfc3986_uris *uriparser_uris)
 {
-	php_uri_parser_rfc3986_uris *uriparser_uris = internal_uri->uri;
-
 	return &uriparser_uris->uri;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->scheme)) {
 		ZVAL_STRINGL(retval, uriparser_uri->scheme.first, get_text_range_length(&uriparser_uri->scheme));
@@ -119,9 +117,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(con
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_scheme_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_scheme_write(void *uri, zval *value, zval *errors)
 {
-	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
 
 	if (Z_TYPE_P(value) == IS_NULL) {
@@ -143,9 +141,9 @@ static zend_result php_uri_parser_rfc3986_scheme_write(struct uri_internal_t *in
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->userInfo)) {
 		ZVAL_STRINGL(retval, uriparser_uri->userInfo.first, get_text_range_length(&uriparser_uri->userInfo));
@@ -156,9 +154,9 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(const ur
 	return SUCCESS;
 }
 
-zend_result php_uri_parser_rfc3986_userinfo_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+zend_result php_uri_parser_rfc3986_userinfo_write(void *uri, zval *value, zval *errors)
 {
-	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
 
 	if (Z_TYPE_P(value) == IS_NULL) {
@@ -183,9 +181,9 @@ zend_result php_uri_parser_rfc3986_userinfo_write(struct uri_internal_t *interna
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->userInfo)) {
 		size_t length = get_text_range_length(&uriparser_uri->userInfo);
@@ -205,9 +203,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(c
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->userInfo)) {
 		const char *c = memchr(uriparser_uri->userInfo.first, ':', get_text_range_length(&uriparser_uri->userInfo));
@@ -224,9 +222,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(c
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->hostText)) {
 		if (uriparser_uri->hostData.ip6 != NULL || uriparser_uri->hostData.ipFuture.first != NULL) {
@@ -248,9 +246,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_host_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_host_write(void *uri, zval *value, zval *errors)
 {
-	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
 
 	if (Z_TYPE_P(value) == IS_NULL) {
@@ -296,9 +294,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char
 	return (zend_long)result;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->portText) && get_text_range_length(&uriparser_uri->portText) > 0) {
 		ZVAL_LONG(retval, port_str_to_zend_long_checked(uriparser_uri->portText.first, get_text_range_length(&uriparser_uri->portText)));
@@ -309,9 +307,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_port_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_port_write(void *uri, zval *value, zval *errors)
 {
-	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
 
 	if (Z_TYPE_P(value) == IS_NULL) {
@@ -338,9 +336,9 @@ static zend_result php_uri_parser_rfc3986_port_write(struct uri_internal_t *inte
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (uriparser_uri->pathHead != NULL) {
 		smart_str str = {0};
@@ -366,9 +364,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(const
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_path_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_path_write(void *uri, zval *value, zval *errors)
 {
-	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
 
 	if (Z_STRLEN_P(value) == 0) {
@@ -390,9 +388,9 @@ static zend_result php_uri_parser_rfc3986_path_write(struct uri_internal_t *inte
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->query)) {
 		ZVAL_STRINGL(retval, uriparser_uri->query.first, get_text_range_length(&uriparser_uri->query));
@@ -403,9 +401,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(cons
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_query_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_query_write(void *uri, zval *value, zval *errors)
 {
-	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
 
 	if (Z_TYPE_P(value) == IS_NULL) {
@@ -427,9 +425,9 @@ static zend_result php_uri_parser_rfc3986_query_write(struct uri_internal_t *int
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
 {
-	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
+	const UriUriA *uriparser_uri = get_uri_for_reading(uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->fragment)) {
 		ZVAL_STRINGL(retval, uriparser_uri->fragment.first, get_text_range_length(&uriparser_uri->fragment));
@@ -440,9 +438,9 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(c
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_rfc3986_fragment_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+static zend_result php_uri_parser_rfc3986_fragment_write(void *uri, zval *value, zval *errors)
 {
-	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	UriUriA *uriparser_uri = get_uri_for_writing(uri);
 	int result;
 
 	if (Z_TYPE_P(value) == IS_NULL) {
