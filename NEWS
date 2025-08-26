@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0beta2
+?? ??? ????, PHP 8.5.0beta3
+
+
+28 Aug 2025, PHP 8.5.0beta2
 
 - Core:
   . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
