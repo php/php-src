@@ -138,8 +138,8 @@ static void zend_weakref_unregister(zend_object *object, void *payload, bool wea
 		if (weakref_free) {
 			zend_weakref_unref_single(ptr, tag, object);
 		} else {
-			/* The optimization of skipping unref is only used in the destructor of WeakMap */
-			ZEND_ASSERT(ZEND_WEAKREF_GET_TAG(payload) == ZEND_WEAKREF_TAG_MAP);
+			/* The optimization of skipping unref is used for zend_weakrefs_hash_clean_ex() */
+			ZEND_ASSERT(ZEND_WEAKREF_GET_TAG(payload) == ZEND_WEAKREF_TAG_MAP || ZEND_WEAKREF_GET_TAG(payload) == ZEND_WEAKREF_TAG_BARE_HT);
 		}
 		return;
 	}
@@ -163,8 +163,8 @@ static void zend_weakref_unregister(zend_object *object, void *payload, bool wea
 		zend_weakref_unref_single(
 			ZEND_WEAKREF_GET_PTR(payload), ZEND_WEAKREF_GET_TAG(payload), object);
 	} else {
-		/* The optimization of skipping unref is only used in the destructor of WeakMap */
-		ZEND_ASSERT(ZEND_WEAKREF_GET_TAG(payload) == ZEND_WEAKREF_TAG_MAP);
+		/* The optimization of skipping unref is used for zend_weakrefs_hash_clean_ex() */
+		ZEND_ASSERT(ZEND_WEAKREF_GET_TAG(payload) == ZEND_WEAKREF_TAG_MAP || ZEND_WEAKREF_GET_TAG(payload) == ZEND_WEAKREF_TAG_BARE_HT);
 	}
 }
 
@@ -187,11 +187,20 @@ ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key) {
 	return FAILURE;
 }
 
-ZEND_API void zend_weakrefs_hash_clean(HashTable *ht) {
+static void zend_weakrefs_hash_clean_ex(HashTable *ht, int type) {
 	zend_ulong obj_key;
-	ZEND_HASH_FOREACH_NUM_KEY(ht, obj_key) {
-		zend_weakrefs_hash_del(ht, zend_weakref_key_to_object(obj_key));
+	ZEND_HASH_MAP_FOREACH_NUM_KEY(ht, obj_key) {
+		/* Optimization: Don't call zend_weakref_unref_single to free individual entries from ht when unregistering (which would do a hash table lookup, call zend_hash_index_del, and skip over any bucket collisions).
+		 * Let freeing the corresponding values for WeakMap entries be done in zend_hash_clean, freeing objects sequentially.
+		 * The performance difference is notable for larger WeakMaps with worse cache locality. */
+		zend_weakref_unregister(
+			zend_weakref_key_to_object(obj_key), ZEND_WEAKREF_ENCODE(ht, type), 0);
 	} ZEND_HASH_FOREACH_END();
+	zend_hash_clean(ht);
+}
+
+ZEND_API void zend_weakrefs_hash_clean(HashTable *ht) {
+	zend_weakrefs_hash_clean_ex(ht, ZEND_WEAKREF_TAG_BARE_HT);
 }
 
 void zend_weakrefs_init(void) {
@@ -340,14 +349,7 @@ static zend_object *zend_weakmap_create_object(zend_class_entry *ce)
 static void zend_weakmap_free_obj(zend_object *object)
 {
 	zend_weakmap *wm = zend_weakmap_from(object);
-	zend_ulong obj_key;
-	ZEND_HASH_MAP_FOREACH_NUM_KEY(&wm->ht, obj_key) {
-		/* Optimization: Don't call zend_weakref_unref_single to free individual entries from wm->ht when unregistering (which would do a hash table lookup, call zend_hash_index_del, and skip over any bucket collisions).
-		 * Let freeing the corresponding values for WeakMap entries be done in zend_hash_destroy, freeing objects sequentially.
-		 * The performance difference is notable for larger WeakMaps with worse cache locality. */
-		zend_weakref_unregister(
-			zend_weakref_key_to_object(obj_key), ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP), 0);
-	} ZEND_HASH_FOREACH_END();
+	zend_weakrefs_hash_clean_ex(&wm->ht, ZEND_WEAKREF_TAG_MAP);
 	zend_hash_destroy(&wm->ht);
 	zend_object_std_dtor(&wm->std);
 }

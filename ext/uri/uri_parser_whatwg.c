@@ -24,7 +24,9 @@
 #include <arpa/inet.h>
 #endif
 
+ZEND_TLS lexbor_mraw_t lexbor_mraw = {0};
 ZEND_TLS lxb_url_parser_t lexbor_parser = {0};
+ZEND_TLS lxb_unicode_idna_t lexbor_idna = {0};
 
 static const size_t lexbor_mraw_byte_size = 8192;
 
@@ -331,17 +333,6 @@ static zend_result php_uri_parser_whatwg_password_write(struct uri_internal_t *i
 	return SUCCESS;
 }
 
-static zend_result init_idna(void)
-{
-	if (lexbor_parser.idna != NULL) {
-		return SUCCESS;
-	}
-
-	lexbor_parser.idna = lxb_unicode_idna_create();
-
-	return lxb_unicode_idna_init(lexbor_parser.idna) == LXB_STATUS_OK ? SUCCESS : FAILURE;
-}
-
 static zend_result php_uri_parser_whatwg_host_read(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = internal_uri->uri;
@@ -366,11 +357,8 @@ static zend_result php_uri_parser_whatwg_host_read(const struct uri_internal_t *
 		switch (read_mode) {
 			case URI_COMPONENT_READ_NORMALIZED_UNICODE: {
 				smart_str host_str = {0};
-				if (init_idna() == FAILURE) {
-					return FAILURE;
-				}
-				lxb_url_serialize_host_unicode(lexbor_parser.idna, &lexbor_uri->host, serialize_to_smart_str_callback, &host_str);
-				lxb_unicode_idna_clean(lexbor_parser.idna);
+				lxb_url_serialize_host_unicode(&lexbor_idna, &lexbor_uri->host, serialize_to_smart_str_callback, &host_str);
+				lxb_unicode_idna_clean(&lexbor_idna);
 
 				ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 				break;
@@ -523,27 +511,47 @@ static zend_result php_uri_parser_whatwg_fragment_write(struct uri_internal_t *i
 
 PHP_RINIT_FUNCTION(uri_parser_whatwg)
 {
-	lexbor_mraw_t *mraw = lexbor_mraw_create();
-	lxb_status_t status = lexbor_mraw_init(mraw, lexbor_mraw_byte_size);
+	lxb_status_t status;
+	
+	status = lexbor_mraw_init(&lexbor_mraw, lexbor_mraw_byte_size);
 	if (status != LXB_STATUS_OK) {
-		lexbor_mraw_destroy(mraw, true);
-		return FAILURE;
+		goto fail;
 	}
 
-	status = lxb_url_parser_init(&lexbor_parser, mraw);
+	status = lxb_url_parser_init(&lexbor_parser, &lexbor_mraw);
 	if (status != LXB_STATUS_OK) {
-		lxb_url_parser_destroy(&lexbor_parser, false);
-		lexbor_mraw_destroy(mraw, true);
-		return FAILURE;
+		goto fail;
+	}
+
+	status = lxb_unicode_idna_init(&lexbor_idna);
+	if (status != LXB_STATUS_OK) {
+		goto fail;
 	}
 
 	return SUCCESS;
+
+ fail:
+
+	/* Unconditionally calling the _destroy() functions is
+	 * safe on a zeroed structure. */
+	lxb_unicode_idna_destroy(&lexbor_idna, false);
+	memset(&lexbor_idna, 0, sizeof(lexbor_idna));
+	lxb_url_parser_destroy(&lexbor_parser, false);
+	memset(&lexbor_parser, 0, sizeof(lexbor_parser));
+	lexbor_mraw_destroy(&lexbor_mraw, false);
+	memset(&lexbor_mraw, 0, sizeof(lexbor_mraw));
+
+	return FAILURE;
 }
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri_parser_whatwg)
 {
-	lxb_url_parser_memory_destroy(&lexbor_parser);
+	lxb_unicode_idna_destroy(&lexbor_idna, false);
+	memset(&lexbor_idna, 0, sizeof(lexbor_idna));
 	lxb_url_parser_destroy(&lexbor_parser, false);
+	memset(&lexbor_parser, 0, sizeof(lexbor_parser));
+	lexbor_mraw_destroy(&lexbor_mraw, false);
+	memset(&lexbor_mraw, 0, sizeof(lexbor_mraw));
 
 	return SUCCESS;
 }
@@ -584,11 +592,8 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, uri_recomposition
 		case URI_RECOMPOSITION_RAW_UNICODE:
 			ZEND_FALLTHROUGH;
 		case URI_RECOMPOSITION_NORMALIZED_UNICODE:
-			if (init_idna() == FAILURE) {
-				return NULL;
-			}
-			lxb_url_serialize_idna(lexbor_parser.idna, lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
-			lxb_unicode_idna_clean(lexbor_parser.idna);
+			lxb_url_serialize_idna(&lexbor_idna, lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
+			lxb_unicode_idna_clean(&lexbor_idna);
 			break;
 		case URI_RECOMPOSITION_RAW_ASCII:
 			ZEND_FALLTHROUGH;

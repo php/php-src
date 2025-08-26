@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0beta2
+?? ??? ????, PHP 8.5.0beta3
+
+- Session:
+  . Fix RC violation of session SID constant deprecation attribute. (ilutov)
+
+28 Aug 2025, PHP 8.5.0beta2
 
 - Core:
   . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
@@ -29,6 +34,9 @@ PHP                                                                        NEWS
     (ilutov)
   . Prohibit pipe & arrow function combination that leads to confusing parse
     trees. (ilutov)
+  . The disable_classes INI directive has been removed. (Girgias)
+  . The locally predefined variable $http_response_header is deprecated.
+    (Girgias)
 
 - Filter:
   . Added support for configuring the URI parser for FILTER_VALIDATE_URL
@@ -44,6 +52,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
     (Jakub Zelenka)
+
+- PDO:
+  . Driver specific constants in the PDO class are now deprecated. (Arnaud)
 
 - Phar:
   . Fixed memory leaks when verifying OpenSSL signature. (Girgias)

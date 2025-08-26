@@ -413,41 +413,6 @@ static PHP_INI_MH(OnSetLogFilter)
 }
 /* }}} */
 
-/* {{{ php_disable_classes */
-static void php_disable_classes(void)
-{
-	char *s = NULL, *e;
-
-	if (!*(INI_STR("disable_classes"))) {
-		return;
-	}
-
-	e = PG(disable_classes) = strdup(INI_STR("disable_classes"));
-
-	while (*e) {
-		switch (*e) {
-			case ' ':
-			case ',':
-				if (s) {
-					*e = '\0';
-					zend_disable_class(s, e-s);
-					s = NULL;
-				}
-				break;
-			default:
-				if (!s) {
-					s = e;
-				}
-				break;
-		}
-		e++;
-	}
-	if (s) {
-		zend_disable_class(s, e-s);
-	}
-}
-/* }}} */
-
 /* {{{ php_binary_init */
 static void php_binary_init(void)
 {
@@ -872,7 +837,6 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("mail.force_extra_parameters",NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnChangeMailForceExtra)
 	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
-	PHP_INI_ENTRY("disable_classes",			"",			PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("max_file_uploads",			"20",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
 	PHP_INI_ENTRY("max_multipart_body_parts",	"-1",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
 
@@ -2105,9 +2069,6 @@ static void core_globals_dtor(php_core_globals *core_globals)
 	ZEND_ASSERT(!core_globals->last_error_message);
 	ZEND_ASSERT(!core_globals->last_error_file);
 
-	if (core_globals->disable_classes) {
-		free(core_globals->disable_classes);
-	}
 	if (core_globals->php_binary) {
 		free(core_globals->php_binary);
 	}
@@ -2372,9 +2333,8 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		}
 	}
 
-	/* disable certain classes and functions as requested by php.ini */
+	/* disable certain functions as requested by php.ini */
 	zend_disable_functions(INI_STR("disable_functions"));
-	php_disable_classes();
 
 	/* make core report what it should */
 	if ((module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core")-1)) != NULL) {
@@ -2403,7 +2363,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[18]; /* Remember to change this if the number of directives change */
+			const char *directives[19]; /* Remember to change this if the number of directives change */
 		} directives[2] = {
 			{
 				E_DEPRECATED,
@@ -2434,6 +2394,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 					"safe_mode_protected_env_vars",
 					"zend.ze1_compatibility_mode",
 					"track_errors",
+					"disable_classes",
 					NULL
 				}
 			}

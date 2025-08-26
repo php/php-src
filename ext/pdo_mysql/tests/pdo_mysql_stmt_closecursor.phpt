@@ -21,7 +21,7 @@ MySQLPDOTest::skip();
         // This one should fail. I let it fail to prove that closeCursor() makes a difference.
         // If no error messages gets printed do not know if proper usage of closeCursor() makes any
         // difference or not. That's why we need to cause an error here.
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
         $stmt1 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
         // query() shall fail!
         $stmt2 = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC");
@@ -46,7 +46,7 @@ MySQLPDOTest::skip();
         $stmt2->execute();
         $stmt2->closeCursor();
 
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
         // check if changing the fetch mode from unbuffered to buffered will
         // cause any harm to a statement created prior to the change
         $stmt1->execute();
@@ -110,33 +110,33 @@ MySQLPDOTest::skip();
 
     try {
         printf("Testing emulated PS...\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn on emulated prepared statements\n");
 
         printf("Buffered...\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
         MySQLPDOTest::createTestTable($table, $db);
         pdo_mysql_stmt_closecursor($db);
 
         printf("Unbuffered...\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
         MySQLPDOTest::createTestTable($table, $db);
         pdo_mysql_stmt_closecursor($db);
 
         printf("Testing native PS...\n");
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn off emulated prepared statements\n");
 
         printf("Buffered...\n");
         MySQLPDOTest::createTestTable($table, $db);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
         pdo_mysql_stmt_closecursor($db);
 
         printf("Unbuffered...\n");
         MySQLPDOTest::createTestTable($table, $db);
-        $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
         pdo_mysql_stmt_closecursor($db);
 
     } catch (PDOException $e) {
@@ -156,23 +156,23 @@ $db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_closecursor');
 Testing emulated PS...
 Buffered...
 
-Warning: PDO::query(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
+Warning: PDO::query(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the Pdo\Mysql::ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
 in = 0 -> id = 1 (integer) / label = 'a' (string)
 in = 0 -> id = 2 (integer) / label = 'b' (string)
 Unbuffered...
 
-Warning: PDO::query(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
+Warning: PDO::query(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the Pdo\Mysql::ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
 in = 0 -> id = 1 (integer) / label = 'a' (string)
 in = 0 -> id = 2 (integer) / label = 'b' (string)
 Testing native PS...
 Buffered...
 
-Warning: PDO::query(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
+Warning: PDO::query(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the Pdo\Mysql::ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
 in = 0 -> id = 1 (integer) / label = 'a' (string)
 in = 0 -> id = 2 (integer) / label = 'b' (string)
 Unbuffered...
 
-Warning: PDO::query(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
+Warning: PDO::query(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the Pdo\Mysql::ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
 in = 0 -> id = 1 (integer) / label = 'a' (string)
 in = 0 -> id = 2 (integer) / label = 'b' (string)
 done!

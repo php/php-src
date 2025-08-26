@@ -19,12 +19,6 @@ PHP 8.5 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- BZ2:
-  . bzcompress() now throws a ValueError when $block_size is not between
-    1 and 9.
-  . bzcompress() now throws a ValueError when $work_factor is not between
-    0 and 250.
-
 - Core:
   . It is no longer possible to use "array" and "callable" as class alias names
     in class_alias().
@@ -55,6 +49,15 @@ PHP 8.5 UPGRADE NOTES
     ReflectionAttribute::newInstance() was called an error would be thrown.
     The error can be delayed from compilation to runtime using the new
     #[\DelayedTargetValidation] attribute.
+  . The disable_classes INI setting has been removed as it causes various
+    engine assumptions to be broken.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#remove_disable_classes_ini_setting
+
+- BZ2:
+  . bzcompress() now throws a ValueError when $block_size is not between
+    1 and 9.
+  . bzcompress() now throws a ValueError when $work_factor is not between
+    0 and 250.
 
 - DOM:
   . Cloning a DOMNamedNodeMap, DOMNodeList, Dom\NamedNodeMap, Dom\NodeList,
@@ -424,6 +427,51 @@ PHP 8.5 UPGRADE NOTES
   . The "uri:" DSN scheme has been deprecated due to security concerns with
     DSNs coming from remote URIs.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_pdo_s_urischeme
+  . Driver specific constants in the PDO class have been deprecated.
+    List of affected constants and their replacement:
+        PDO::DBLIB_ATTR_CONNECTION_TIMEOUT => Pdo\Dblib::ATTR_CONNECTION_TIMEOUT
+        PDO::DBLIB_ATTR_QUERY_TIMEOUT => Pdo\Dblib::ATTR_QUERY_TIMEOUT
+        PDO::DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER => Pdo\Dblib::ATTR_STRINGIFY_UNIQUEIDENTIFIER
+        PDO::DBLIB_ATTR_VERSION => Pdo\Dblib::ATTR_VERSION
+        PDO::DBLIB_ATTR_TDS_VERSION => Pdo\Dblib::ATTR_TDS_VERSION
+        PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS => Pdo\Dblib::ATTR_SKIP_EMPTY_ROWSETS
+        PDO::DBLIB_ATTR_DATETIME_CONVERT => Pdo\Dblib::ATTR_DATETIME_CONVERT
+        PDO::FB_ATTR_DATE_FORMAT => Pdo\Firebird::ATTR_DATE_FORMAT
+        PDO::FB_ATTR_TIME_FORMAT => Pdo\Firebird::ATTR_TIME_FORMAT
+        PDO::FB_ATTR_TIMESTAMP_FORMAT => Pdo\Firebird::ATTR_TIMESTAMP_FORMAT
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => Pdo\Mysql::ATTR_USE_BUFFERED_QUERY
+        PDO::MYSQL_ATTR_LOCAL_INFILE => Pdo\Mysql::ATTR_LOCAL_INFILE
+        PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY => Pdo\Mysql::ATTR_LOCAL_INFILE_DIRECTORY
+        PDO::MYSQL_ATTR_INIT_COMMAND => Pdo\Mysql::ATTR_INIT_COMMAND
+        PDO::MYSQL_ATTR_MAX_BUFFER_SIZE => Pdo\Mysql::ATTR_MAX_BUFFER_SIZE
+        PDO::MYSQL_ATTR_READ_DEFAULT_FILE => Pdo\Mysql::ATTR_READ_DEFAULT_FILE
+        PDO::MYSQL_ATTR_READ_DEFAULT_GROUP => Pdo\Mysql::ATTR_READ_DEFAULT_GROUP
+        PDO::MYSQL_ATTR_COMPRESS => Pdo\Mysql::ATTR_COMPRESS
+        PDO::MYSQL_ATTR_DIRECT_QUERY => Pdo\Mysql::ATTR_DIRECT_QUERY
+        PDO::MYSQL_ATTR_FOUND_ROWS => Pdo\Mysql::ATTR_FOUND_ROWS
+        PDO::MYSQL_ATTR_IGNORE_SPACE => Pdo\Mysql::ATTR_IGNORE_SPACE
+        PDO::MYSQL_ATTR_SSL_KEY => Pdo\Mysql::ATTR_SSL_KEY
+        PDO::MYSQL_ATTR_SSL_CERT => Pdo\Mysql::ATTR_SSL_CERT
+        PDO::MYSQL_ATTR_SSL_CA => Pdo\Mysql::ATTR_SSL_CA
+        PDO::MYSQL_ATTR_SSL_CAPATH => Pdo\Mysql::ATTR_SSL_CAPATH
+        PDO::MYSQL_ATTR_SSL_CIPHER => Pdo\Mysql::ATTR_SSL_CIPHER
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT
+        PDO::MYSQL_ATTR_SERVER_PUBLIC_KEY => Pdo\Mysql::ATTR_SERVER_PUBLIC_KEY
+        PDO::MYSQL_ATTR_MULTI_STATEMENTS => Pdo\Mysql::ATTR_MULTI_STATEMENTS
+        PDO::ODBC_ATTR_USE_CURSOR_LIBRARY => Pdo\Odbc::ATTR_USE_CURSOR_LIBRARY
+        PDO::ODBC_ATTR_ASSUME_UTF8 => Pdo\Odbc::ATTR_ASSUME_UTF8
+        PDO::ODBC_SQL_USE_IF_NEEDED => Pdo\Odbc::SQL_USE_IF_NEEDED
+        PDO::ODBC_SQL_USE_DRIVER => Pdo\Odbc::SQL_USE_DRIVER
+        PDO::ODBC_SQL_USE_ODBC => Pdo\Odbc::SQL_USE_ODBC
+        PDO::PGSQL_ATTR_DISABLE_PREPARES => Pdo\Pgsql::ATTR_DISABLE_PREPARES
+        PDO::SQLITE_ATTR_EXTENDED_RESULT_CODES => Pdo\Sqlite::ATTR_EXTENDED_RESULT_CODES
+        PDO::SQLITE_ATTR_OPEN_FLAGS => Pdo\Sqlite::OPEN_FLAGS
+        PDO::SQLITE_ATTR_READONLY_STATEMENT => Pdo\Sqlite::ATTR_READONLY_STATEMENT
+        PDO::SQLITE_DETERMINISTIC => Pdo\Sqlite::DETERMINISTIC
+        PDO::SQLITE_OPEN_READONLY => Pdo\Sqlite::OPEN_READONLY
+        PDO::SQLITE_OPEN_READWRITE => Pdo\Sqlite::OPEN_READWRITE
+        PDO::SQLITE_OPEN_CREATE => Pdo\Sqlite::OPEN_CREATE
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_driver_specific_pdo_constants_and_methods
 
 - Reflection:
   . The setAccessible() methods of various Reflection objects have been
@@ -461,6 +509,9 @@ PHP 8.5 UPGRADE NOTES
   . Passing integers outside the interval [0, 255] to chr() is now deprecated.
     This is because a byte can only hold a value within this interval.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_integers_outside_the_interval_0_255_to_chr
+  . Relying locally predefined variable $http_response_header is deprecated.
+    Instead one should call the http_get_last_response_headers() function.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_http_response_header_predefined_variable
 
 - XML:
   . The xml_parser_free() function has been deprecated, as XMLParser objects

@@ -22,7 +22,7 @@ $string = str_repeat("0123456789", 50);
 $db->exec("INSERT INTO bug80783a VALUES('$string')");
 
 $stmt = $db->prepare("SELECT name FROM bug80783a");
-$stmt->setAttribute(PDO::ODBC_ATTR_ASSUME_UTF8, true);
+$stmt->setAttribute(Pdo\Odbc::ATTR_ASSUME_UTF8, true);
 $stmt->bindColumn(1, $data, PDO::PARAM_STR);
 $stmt->execute();
 $stmt->fetch(PDO::FETCH_BOUND);
