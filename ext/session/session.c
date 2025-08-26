@@ -1529,8 +1529,8 @@ PHPAPI zend_result php_session_reset_id(void)
 		}
 	}
 	if (new_sid_constant != NULL) {
-		zend_string *deprecation_reason = zend_string_init("as GET/POST sessions were deprecated", strlen("as GET/POST sessions were deprecated"), 1);
-		zend_attribute *deprecation_attrib = zend_add_global_constant_attribute(new_sid_constant, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+		zend_string *deprecation_reason = zend_string_init("as GET/POST sessions were deprecated", strlen("as GET/POST sessions were deprecated"), 0);
+		zend_attribute *deprecation_attrib = zend_add_attribute(&new_sid_constant->attributes, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2, 0, 0, 0);
 		ZVAL_STR(&deprecation_attrib->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 		deprecation_attrib->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 		ZVAL_STR(&deprecation_attrib->args[1].value, deprecation_reason);
