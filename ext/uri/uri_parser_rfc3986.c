@@ -348,7 +348,7 @@ ZEND_ATTRIBUTE_NONNULL static void *php_uri_parser_rfc3986_clone(void *uri)
 	php_uri_parser_rfc3986_uris *new_uriparser_uris = uriparser_create_uris();
 	copy_uri(&new_uriparser_uris->uri, &uriparser_uris->uri);
 	/* Do not copy the normalized URI: The expected action after cloning is
-	 * modifying the cloned URL (which will invalidate the cached normalized
+	 * modifying the cloned URI (which will invalidate the cached normalized
 	 * URI). */
 
 	return new_uriparser_uris;
