@@ -143,6 +143,7 @@ $vm_kind_name = array(
     ZEND_VM_KIND_SWITCH    => "ZEND_VM_KIND_SWITCH",
     ZEND_VM_KIND_GOTO      => "ZEND_VM_KIND_GOTO",
     ZEND_VM_KIND_HYBRID    => "ZEND_VM_KIND_HYBRID",
+    ZEND_VM_KIND_TAILCALL  => "ZEND_VM_KIND_TAILCALL",
 );
 
 $op_types = array(
