@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: aab38646ace967e985c348b78251474693da95a7 */
+ * Stub hash: f61df8d477588718e0eb1b055e5a3e138e6bcad3 */
 
 static void register_password_symbols(int module_number)
 {

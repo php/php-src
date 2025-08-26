@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: da00cabc7b6930f1b834af8978b38945df96212f */
+ * Stub hash: d7ff53b73d3921c41ffd8279ea724bcd3a6d8542 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dba_popen, 0, 2, Dba\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)

@@ -4874,7 +4874,32 @@ function parseConstLike(
     }
 
     if ($type === null && $phpDocType === null) {
-        throw new Exception("Missing type for constant " . $name->__toString());
+        if ($const->value instanceof Node\Scalar\Float_) {
+            $phpDocType = 'float';
+        } elseif ($const->value instanceof Node\Scalar\Int_
+            || ($const->value instanceof Expr\UnaryMinus
+                && $const->value->expr instanceof Node\Scalar\Int_
+            )
+        ) {
+            $phpDocType = 'int';
+        } elseif ($const->value instanceof Node\Scalar\String_) {
+            $phpDocType = 'string';
+        } elseif ($const->value instanceof Expr\ConstFetch
+            && $const->value->name instanceof Node\Name\FullyQualified
+            && (
+                $const->value->name->name === 'false'
+                || $const->value->name->name === 'true'
+            )
+        ) {
+            $phpDocType = 'bool';
+        } elseif ($const->value instanceof Expr\ConstFetch
+            && $const->value->name instanceof Node\Name\FullyQualified
+            && $const->value->name->name === 'null'
+        ) {
+            $phpDocType = 'null';
+        } else {
+            throw new Exception("Missing type for constant " . $name->__toString());
+        }
     }
 
     $constType = $type ? Type::fromNode($type) : null;
