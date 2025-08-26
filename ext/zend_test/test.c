@@ -40,6 +40,7 @@
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
 #include "zend_mm_custom_handlers.h"
+#include "ext/uri/php_uri.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -722,6 +723,72 @@ static ZEND_FUNCTION(zend_test_crash)
 
 	char *invalid = (char *) 1;
 	php_printf("%s", invalid);
+}
+
+static ZEND_FUNCTION(zend_test_uri_parser)
+{
+	zend_string *uri_string;
+	zend_string *parser_name;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(uri_string)
+		Z_PARAM_STR(parser_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	uri_parser_t *parser = php_uri_get_parser(parser_name);
+	if (parser == NULL) {
+		zend_argument_value_error(1, "Unknown parser");
+		RETURN_THROWS();
+	}
+
+	uri_internal_t *uri = php_uri_parse(parser, ZSTR_VAL(uri_string), ZSTR_LEN(uri_string), false);
+	if (uri == NULL) {
+		RETURN_THROWS();
+	}
+
+	zval value;
+
+	array_init(return_value);
+	zval normalized;
+	array_init(&normalized);
+	php_uri_get_scheme(uri, URI_COMPONENT_READ_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_SCHEME), &value);
+	php_uri_get_username(uri, URI_COMPONENT_READ_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_USERNAME), &value);
+	php_uri_get_password(uri, URI_COMPONENT_READ_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_PASSWORD), &value);
+	php_uri_get_host(uri, URI_COMPONENT_READ_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_HOST), &value);
+	php_uri_get_port(uri, URI_COMPONENT_READ_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_PORT), &value);
+	php_uri_get_path(uri, URI_COMPONENT_READ_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_PATH), &value);
+	php_uri_get_query(uri, URI_COMPONENT_READ_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_QUERY), &value);
+	php_uri_get_fragment(uri, URI_COMPONENT_READ_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &value);
+	zend_hash_str_add(Z_ARR_P(return_value), "normalized", strlen("normalized"), &normalized);
+	zval raw;
+	array_init(&raw);
+	php_uri_get_scheme(uri, URI_COMPONENT_READ_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_SCHEME), &value);
+	php_uri_get_username(uri, URI_COMPONENT_READ_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_USERNAME), &value);
+	php_uri_get_password(uri, URI_COMPONENT_READ_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_PASSWORD), &value);
+	php_uri_get_host(uri, URI_COMPONENT_READ_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_HOST), &value);
+	php_uri_get_port(uri, URI_COMPONENT_READ_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_PORT), &value);
+	php_uri_get_path(uri, URI_COMPONENT_READ_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_PATH), &value);
+	php_uri_get_query(uri, URI_COMPONENT_READ_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_QUERY), &value);
+	php_uri_get_fragment(uri, URI_COMPONENT_READ_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &value);
+	zend_hash_str_add(Z_ARR_P(return_value), "raw", strlen("raw"), &raw);
+
+	php_uri_free(uri);
 }
 
 static bool has_opline(zend_execute_data *execute_data)

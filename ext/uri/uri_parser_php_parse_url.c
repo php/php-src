@@ -21,17 +21,21 @@
 #include "Zend/zend_exceptions.h"
 #include "ext/standard/url.h"
 
-static void decode_component(zval *zv, uri_component_read_mode_t read_mode)
+static zend_string *decode_component(zend_string *in, uri_component_read_mode_t read_mode)
 {
-	if (Z_TYPE_P(zv) != IS_STRING) {
-		return;
-	}
+	switch (read_mode) {
+	case URI_COMPONENT_READ_RAW:
+		return zend_string_copy(in);
+	case URI_COMPONENT_READ_NORMALIZED_ASCII:
+	case URI_COMPONENT_READ_NORMALIZED_UNICODE: {
+		zend_string *out = zend_string_alloc(ZSTR_LEN(in), false);
 
-	if (read_mode == URI_COMPONENT_READ_RAW) {
-		return;
-	}
+		ZSTR_LEN(out) = php_raw_url_decode_ex(ZSTR_VAL(out), ZSTR_VAL(in), ZSTR_LEN(in));
 
-	php_raw_url_decode(Z_STRVAL_P(zv), Z_STRLEN_P(zv));
+		return out;
+	}
+	EMPTY_SWITCH_DEFAULT_CASE();
+	}
 }
 
 static zend_result uri_parser_php_parse_url_scheme_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
@@ -39,8 +43,7 @@ static zend_result uri_parser_php_parse_url_scheme_read(const uri_internal_t *in
 	const php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->scheme) {
-		ZVAL_STR_COPY(retval, parse_url_uri->scheme);
-		decode_component(retval, read_mode);
+		ZVAL_STR(retval, decode_component(parse_url_uri->scheme, read_mode));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -53,8 +56,7 @@ static zend_result uri_parser_php_parse_url_username_read(const uri_internal_t *
 	const php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->user) {
-		ZVAL_STR_COPY(retval, parse_url_uri->user);
-		decode_component(retval, read_mode);
+		ZVAL_STR(retval, decode_component(parse_url_uri->user, read_mode));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -67,8 +69,7 @@ static zend_result uri_parser_php_parse_url_password_read(const uri_internal_t *
 	const php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->pass) {
-		ZVAL_STR_COPY(retval, parse_url_uri->pass);
-		decode_component(retval, read_mode);
+		ZVAL_STR(retval, decode_component(parse_url_uri->pass, read_mode));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -81,8 +82,7 @@ static zend_result uri_parser_php_parse_url_host_read(const uri_internal_t *inte
 	const php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->host) {
-		ZVAL_STR_COPY(retval, parse_url_uri->host);
-		decode_component(retval, read_mode);
+		ZVAL_STR(retval, decode_component(parse_url_uri->host, read_mode));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -96,7 +96,6 @@ static zend_result uri_parser_php_parse_url_port_read(const uri_internal_t *inte
 
 	if (parse_url_uri->port) {
 		ZVAL_LONG(retval, parse_url_uri->port);
-		decode_component(retval, read_mode);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -109,8 +108,7 @@ static zend_result uri_parser_php_parse_url_path_read(const uri_internal_t *inte
 	const php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->path) {
-		ZVAL_STR_COPY(retval, parse_url_uri->path);
-		decode_component(retval, read_mode);
+		ZVAL_STR(retval, decode_component(parse_url_uri->path, read_mode));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -123,8 +121,7 @@ static zend_result uri_parser_php_parse_url_query_read(const uri_internal_t *int
 	const php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->query) {
-		ZVAL_STR_COPY(retval, parse_url_uri->query);
-		decode_component(retval, read_mode);
+		ZVAL_STR(retval, decode_component(parse_url_uri->query, read_mode));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -137,8 +134,7 @@ static zend_result uri_parser_php_parse_url_fragment_read(const uri_internal_t *
 	const php_url *parse_url_uri = internal_uri->uri;
 
 	if (parse_url_uri->fragment) {
-		ZVAL_STR_COPY(retval, parse_url_uri->fragment);
-		decode_component(retval, read_mode);
+		ZVAL_STR(retval, decode_component(parse_url_uri->fragment, read_mode));
 	} else {
 		ZVAL_NULL(retval);
 	}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b767745e4e7be7cb4ba294e238a1b0f63da8479e */
+ * Stub hash: eb624df6b39083abc81b8636e965370cea9e093f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
@@ -190,6 +190,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_opcache_preloading arginfo_zend_test_is_pcre_bundled
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_uri_parser, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, parser, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -332,6 +337,7 @@ static ZEND_FUNCTION(zend_test_log_err_debug);
 static ZEND_FUNCTION(zend_test_compile_to_ast);
 static ZEND_FUNCTION(zend_test_gh18756);
 static ZEND_FUNCTION(zend_test_opcache_preloading);
+static ZEND_FUNCTION(zend_test_uri_parser);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -461,6 +467,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_compile_to_ast, arginfo_zend_test_compile_to_ast)
 	ZEND_FE(zend_test_gh18756, arginfo_zend_test_gh18756)
 	ZEND_FE(zend_test_opcache_preloading, arginfo_zend_test_opcache_preloading)
+	ZEND_FE(zend_test_uri_parser, arginfo_zend_test_uri_parser)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
