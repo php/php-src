@@ -5,6 +5,12 @@ PHP                                                                        NEWS
 - Session:
   . Fix RC violation of session SID constant deprecation attribute. (ilutov)
 
+- URI:
+  . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
+  . Fixed memory management of the internal "parse_url" URI parser.
+    (timwolla)
+  . Clean up naming of internal API. (timwolla)
+
 28 Aug 2025, PHP 8.5.0beta2
 
 - Core:
