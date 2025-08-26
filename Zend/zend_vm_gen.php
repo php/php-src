@@ -705,6 +705,114 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         $op_data_get_zval_ptr_deref, $op_data_get_zval_ptr_ptr,
         $op_data_free_op;
 
+    global $operand_usage;
+    $pattern = '#
+          (?P<get_type> \\bOP(?P<get_type_op>1|2|_DATA)_TYPE\\b)
+        | (?P<ret_type> \\bRETURN_VALUE_USED\\b)
+        | (?P<get_op>   \\bGET_OP(?P<get_op_op>1|2|_DATA)_[A-Z_]*\\()
+        | (?P<get_ret>  \\bRETURN_VALUE\\b)
+        | (?P<free_op>  \\bFREE_OP(?P<free_op_op>1|2|_DATA)(?:_[A-Z_]*)?\\()
+        | (?P<access>   \\bopline->(?P<access_op>op1|op2|result)\\b)
+        | (?P<ext_value>\\bopline->extended_value\\b)
+        | (?P<opline>   \\bOPLINE_CC?\\b)
+        | (?P<handler>  \\bZEND_VM_DISPATCH_TO_(?:HANDLER|HELPER)\\((?P<handler_name>[^,) ]+)[^)]*\\)?\\b)
+        | (?P<smart_br> \\bZEND_VM_SMART_BRANCH)
+    #x';
+
+    preg_match_all($pattern, $code, $m, PREG_SET_ORDER);
+    $usages = [];
+    $op_type = fn ($op) => match ($op) {
+        '1' =>      $op1,
+        '2' =>      $op2,
+        '_DATA_' => $extra_spec['OP_DATA'] ?? 'ANY',
+    };
+
+    foreach ($m as $set) {
+        switch (true) {
+            case !empty($set['get_type']):
+                $op_type = match ($set['get_type_op']) {
+                    '1' =>      $op1,
+                    '2' =>      $op2,
+                    '_DATA' => $extra_spec['OP_DATA'] ?? 'ANY',
+                };
+                if ($extra_spec['OBSERVER'] ?? false) {
+                    /* Unspecialized variant, will fetch wide op */
+                } else if ($op_type === 'ANY') {
+                    $usages[] = sprintf('ZEND_VM_USES_OP%s_TYPE', $set['get_type_op']);
+                }
+                break;
+            case !empty($set['ret_type']):
+                if ($extra_spec['OBSERVER'] ?? false) {
+                    /* Unspecialized variant, will fetch wide op */
+                } else if (!isset($extra_spec['RETVAL'])) {
+                    $usages[] = 'ZEND_VM_USES_RESULT_TYPE';
+                }
+                break;
+            case !empty($set['get_ret']):
+                if ($extra_spec['OBSERVER'] ?? false) {
+                    /* Unspecialized variant, will fetch wide op */
+                } else if (!isset($extra_spec['RETVAL'])) {
+                    $usages[] = 'ZEND_VM_USES_RESULT';
+                }
+                break;
+            case !empty($set['get_op']):
+                $usages[] = sprintf('ZEND_VM_USES_OP%s', $set['get_op_op']);
+                break;
+            case !empty($set['free_op']):
+                $usages[] = sprintf('ZEND_VM_USES_OP%s', $set['free_op_op']);
+                break;
+            case !empty($set['access']):
+                $op = match ($set['access_op']) {
+                    'op1' =>    'OP1',
+                    'op2' =>    'OP2',
+                    'result' => 'RESULT',
+                };
+                $usages[] = sprintf('ZEND_VM_USES_%s', $op);
+                break;
+            case !empty($set['ext_value']):
+                $usages[] = 'ZEND_VM_USES_EXTENDED_VALUE';
+                break;
+            case !empty($set['opline']):
+                $usages[] = 'ZEND_VM_USES_OPLINE';
+                break;
+            case !empty($set['handler']):
+                $handler_name = $set['handler_name'];
+                if (in_array($handler_name, [
+                    'zend_add_helper',
+                    'zend_sub_helper',
+                    'zend_mul_helper',
+                    'zend_mod_helper',
+                    'zend_shift_left_helper',
+                    'zend_shift_right_helper',
+                    'zend_bw_or_helper',
+                    'zend_bw_and_helper',
+                    'zend_bw_not_helper',
+                    'zend_bw_xor_helper',
+                    'zend_is_equal_helper',
+                    'zend_is_not_equal_helper',
+                    'zend_is_smaller_helper',
+                    'zend_is_smaller_or_equal_helper',
+                    'zend_case_helper',
+                ])) {
+                    /* This is a slow path, will fetch wide op
+                     * or pass type and return_value as arguments */
+                } else {
+                    $usages[] = function () use (&$operand_usage, $handler_name, $name) {
+                        return $operand_usage[$handler_name];
+                    };
+                }
+                break;
+            case !empty($set['smart_br']):
+                $usages[] = 'ZEND_VM_USES_RESULT';
+                $usages[] = 'ZEND_VM_USES_RESULT_TYPE';
+                break;
+            default:
+                throw new Exception(json_encode($m));
+        }
+    }
+
+    $operand_usage[$name] = [...($operand_usage[$name] ?? []), ...$usages];
+
     // Specializing
     $specialized_replacements = array(
         "/OP1_TYPE/" => $op1_type[$op1],
@@ -748,6 +856,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/GET_OP_DATA_ZVAL_PTR_PTR\(([^)]*)\)/" => $op_data_get_zval_ptr_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/FREE_OP_DATA\(\)/" => $op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/RETURN_VALUE_USED\(opline\)/" => isset($extra_spec['RETVAL']) ? $extra_spec['RETVAL'] : "RETURN_VALUE_USED(opline)",
+        "/RETURN_VALUE\(opline\)/" => isset($extra_spec['RETVAL']) ? ($extra_spec['RETVAL'] ? "EX_VAR(opline->result.var)" : "NULL") : "RETURN_VALUE(opline)",
         "/arg_num <= MAX_ARG_FLAG_NUM/" => isset($extra_spec['QUICK_ARG']) ? $extra_spec['QUICK_ARG'] : "arg_num <= MAX_ARG_FLAG_NUM",
         "/ZEND_VM_SMART_BRANCH\(\s*([^,)]*)\s*,\s*([^)]*)\s*\)/" => isset($extra_spec['SMART_BRANCH']) ?
             ($extra_spec['SMART_BRANCH'] == 1 ?
@@ -2526,9 +2635,27 @@ function gen_vm_opcodes_header(
     $str .= "#define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)\n";
     $str .= "#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)\n";
     $str .= "\n";
+
+    $operand_usage_flags = [
+        'ZEND_VM_USES_OP1',
+        'ZEND_VM_USES_OP2',
+        'ZEND_VM_USES_OP_DATA',
+        'ZEND_VM_USES_RESULT',
+        'ZEND_VM_USES_OP1_TYPE',
+        'ZEND_VM_USES_OP2_TYPE',
+        'ZEND_VM_USES_OP_DATA_TYPE',
+        'ZEND_VM_USES_RESULT_TYPE',
+        'ZEND_VM_USES_EXTENDED_VALUE',
+    ];
+    foreach ($operand_usage_flags as $bit => $name) {
+        $str .= sprintf("#define %-28s (1<<%d)\n", $name, $bit);
+    }
+    $str .= "\n";
+
     $str .= "BEGIN_EXTERN_C()\n\n";
     $str .= "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode);\n";
     $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);\n";
+    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_operand_usage(uint8_t opcode);\n";
     $str .= "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length);\n\n";
     $str .= "END_EXTERN_C()\n\n";
 
@@ -2552,7 +2679,9 @@ function gen_vm_opcodes_header(
 function gen_vm($def, $skel) {
     global $definition_file, $skeleton_file, $executor_file,
         $op_types, $list, $opcodes, $helpers, $params, $opnames,
-        $vm_op_flags, $used_extra_spec;
+        $vm_op_flags, $used_extra_spec, $operand_usage;
+
+    $operand_usage = [];
 
     // Load definition file
     $in = @file($def);
@@ -2824,55 +2953,6 @@ function gen_vm($def, $skel) {
     $str = gen_vm_opcodes_header($opcodes, $max_opcode, $max_opcode_len, $vm_op_flags);
     write_file_if_changed(__DIR__ . "/zend_vm_opcodes.h", $str);
     echo "zend_vm_opcodes.h generated successfully.\n";
-
-    // zend_vm_opcodes.c
-    $f = fopen(__DIR__ . "/zend_vm_opcodes.c", "w+") or die("ERROR: Cannot create zend_vm_opcodes.c\n");
-
-    // Insert header
-    out($f, HEADER_TEXT);
-    fputs($f,"#include <stdio.h>\n");
-    fputs($f,"#include <zend.h>\n");
-    fputs($f,"#include <zend_vm_opcodes.h>\n\n");
-
-    fputs($f,"static const char *zend_vm_opcodes_names[".($max_opcode + 1)."] = {\n");
-    for ($i = 0; $i <= $max_opcode; $i++) {
-        fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
-    }
-    fputs($f, "};\n\n");
-
-    fputs($f,"static uint32_t zend_vm_opcodes_flags[".($max_opcode + 1)."] = {\n");
-    for ($i = 0; $i <= $max_opcode; $i++) {
-        fprintf($f, "\t0x%08x,\n", isset($opcodes[$i]["flags"]) ? $opcodes[$i]["flags"] : 0);
-    }
-    fputs($f, "};\n\n");
-
-    fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode) {\n");
-    fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
-    fputs($f, "\t\treturn NULL;\n");
-    fputs($f, "\t}\n");
-    fputs($f, "\treturn zend_vm_opcodes_names[opcode];\n");
-    fputs($f, "}\n");
-
-    fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode) {\n");
-    fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
-    fputs($f, "\t\topcode = ZEND_NOP;\n");
-    fputs($f, "\t}\n");
-    fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
-    fputs($f, "}\n");
-
-    fputs($f, "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length) {\n");
-    fputs($f, "\tuint8_t opcode;\n");
-    fputs($f, "\tfor (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {\n");
-    fputs($f, "\t\tconst char *opcode_name = zend_vm_opcodes_names[opcode];\n");
-    fputs($f, "\t\tif (opcode_name && strncmp(opcode_name, name, length) == 0) {\n");
-    fputs($f, "\t\t\treturn opcode;\n");
-    fputs($f, "\t\t}\n");
-    fputs($f, "\t}\n");
-    fputs($f, "\treturn ZEND_VM_LAST_OPCODE + 1;\n");
-    fputs($f, "}\n");
-
-    fclose($f);
-    echo "zend_vm_opcodes.c generated successfully.\n";
 
     // Generate zend_vm_execute.h
     $f = fopen(__DIR__ . "/zend_vm_execute.h", "w+") or die("ERROR: Cannot create zend_vm_execute.h\n");
@@ -3206,6 +3286,86 @@ function gen_vm($def, $skel) {
 
     fclose($f);
     echo "zend_vm_execute.h generated successfully.\n";
+
+    // zend_vm_opcodes.c
+    $f = fopen(__DIR__ . "/zend_vm_opcodes.c", "w+") or die("ERROR: Cannot create zend_vm_opcodes.c\n");
+
+    // Insert header
+    out($f, HEADER_TEXT);
+    fputs($f,"#include <stdio.h>\n");
+    fputs($f,"#include <zend.h>\n");
+    fputs($f,"#include <zend_vm_opcodes.h>\n\n");
+
+    fputs($f,"static const char *zend_vm_opcodes_names[".($max_opcode + 1)."] = {\n");
+    for ($i = 0; $i <= $max_opcode; $i++) {
+        fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
+    }
+    fputs($f, "};\n\n");
+
+    fputs($f,"static uint32_t zend_vm_opcodes_flags[".($max_opcode + 1)."] = {\n");
+    for ($i = 0; $i <= $max_opcode; $i++) {
+        fprintf($f, "\t0x%08x,\n", isset($opcodes[$i]["flags"]) ? $opcodes[$i]["flags"] : 0);
+    }
+    fputs($f, "};\n\n");
+
+    fputs($f,"static uint32_t zend_vm_operand_usage[".($max_opcode + 1)."] = {\n");
+    $resolve = function ($usages) use (&$resolve) {
+        foreach ($usages as $usage) {
+            if ($usage instanceof Closure) {
+                yield from $resolve($usage());
+            } else {
+                yield $usage;
+            }
+        }
+    };
+    for ($i = 0; $i <= $max_opcode; $i++) {
+        $name = $opcodes[$i]["op"] ?? 'UNUSED';
+        $usages = array_unique([...$resolve($operand_usage[$name] ?? [])]);
+        if ($usages !== []) {
+            sort($usages);
+            fprintf($f,"\t/* %s */ %s,\n", $name, implode(' | ', $usages));
+        } else {
+            fprintf($f,"\t/* %s */ 0,\n", $name);
+        }
+    }
+    fputs($f, "};\n\n");
+
+    fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode) {\n");
+    fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
+    fputs($f, "\t\treturn NULL;\n");
+    fputs($f, "\t}\n");
+    fputs($f, "\treturn zend_vm_opcodes_names[opcode];\n");
+    fputs($f, "}\n");
+
+    fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode) {\n");
+    fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
+    fputs($f, "\t\topcode = ZEND_NOP;\n");
+    fputs($f, "\t}\n");
+    fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
+    fputs($f, "}\n");
+
+    fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_operand_usage(uint8_t opcode) {\n");
+    fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
+    fputs($f, "\t\topcode = ZEND_NOP;\n");
+    fputs($f, "\t}\n");
+    fputs($f, "\treturn zend_vm_operand_usage[opcode];\n");
+    fputs($f, "}\n");
+
+    fputs($f, "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length) {\n");
+    fputs($f, "\tuint8_t opcode;\n");
+    fputs($f, "\tfor (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {\n");
+    fputs($f, "\t\tconst char *opcode_name = zend_vm_opcodes_names[opcode];\n");
+    fputs($f, "\t\tif (opcode_name && strncmp(opcode_name, name, length) == 0) {\n");
+    fputs($f, "\t\t\treturn opcode;\n");
+    fputs($f, "\t\t}\n");
+    fputs($f, "\t}\n");
+    fputs($f, "\treturn ZEND_VM_LAST_OPCODE + 1;\n");
+    fputs($f, "}\n");
+
+    fclose($f);
+    echo "zend_vm_opcodes.c generated successfully.\n";
+
+
 }
 
 function write_file_if_changed(string $filename, string $contents) {

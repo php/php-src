@@ -377,8 +377,7 @@ static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_o
 				case ZEND_YIELD:
 				case ZEND_YIELD_FROM:
 				case ZEND_ASSERT_CHECK:
-					def_opline->result_type = IS_UNUSED;
-					def_opline->result.var = 0;
+					SET_UNUSED(def_opline->result);
 					def_op->result_def = -1;
 					var->definition = -1;
 					return 1;

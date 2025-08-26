@@ -35,7 +35,7 @@
 
 #define SET_UNUSED(op) do { \
 	op ## _type = IS_UNUSED; \
-	op.num = (uint32_t) -1; \
+	op.num = 0; \
 } while (0)
 
 #define MAKE_NOP(opline) do { \

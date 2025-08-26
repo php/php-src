@@ -22,6 +22,7 @@
 #include "zend.h"
 #include "ZendAccelerator.h"
 #include "zend_persist.h"
+#include "zend_alloc.h"
 #include "zend_extensions.h"
 #include "zend_shared_alloc.h"
 #include "zend_vm.h"
@@ -388,6 +389,214 @@ static void zend_persist_type(zend_type *type) {
 	} ZEND_TYPE_FOREACH_END();
 }
 
+typedef union _znode_op32 {
+	uint32_t      constant;
+	uint32_t      var;
+	uint32_t      num;
+	uint32_t      opline_num; /*  Needs to be signed */
+	uint32_t      jmp_offset;
+} znode_op32;
+
+/* 32 bit operands; total size: 28 bytes (24 + 4 for alignment) */
+typedef struct _zend_op32 {
+	zend_vm_opcode_handler_t handler;
+	znode_op32 op1;
+	znode_op32 op2;
+	znode_op32 result;
+	uint32_t extended_value;
+	uint32_t _alignment;
+} zend_op32;
+
+typedef union _znode_op16 {
+	uint16_t      constant;
+	uint16_t      var;
+	uint16_t      num;
+	uint16_t      opline_num; /*  Needs to be signed */
+	uint16_t      jmp_offset;
+} znode_op16;
+
+/* 16 bit operands; total size: 16 bytes */
+typedef struct _zend_op16 {
+	zend_vm_opcode_handler_t handler;
+	znode_op16 op1;
+	znode_op16 op2;
+	znode_op16 result;
+	uint16_t extended_value;
+} zend_op16;
+
+static void dump_opcodes_sizes(zend_op_array *op_array)
+{
+	zend_op *op = op_array->opcodes;
+	zend_op *end = op + op_array->last;
+
+	size_t orig_size = op_array->last * sizeof(zend_op);
+
+	/* Size if oplines are encoded as
+	 * either _zend_op16 (16 bit operands, 16 bytes total)
+	 * or _zend_op32 (32 bit operands, 28 bytes total).
+	 * Op types are fetched from the original zend_op.
+	 */
+	size_t slim_size = 0;
+
+	/* Size if zend_op can exist in 3 sizes, and have a variable number of
+	 * operands (arity is fixed per opcode).
+	 * Handler is replaced by a uint16_t handler index field.
+	 * OP_DATA is encoded as an operand.
+	 * Extended_value, if needed, is encoded as a field of the same size as other operands.
+	 * Operand types, if needed, are encoded on 4 bits each.
+	 *
+	 * Alignment: Ensuring alignment has a worse overhead of 1 byte per opline
+	 * if we only care about handler_id, or 3 bytes if we align all fields.
+	 *
+	 * Example for an opcode needing op1, op2, op1_type, result:
+	 * struct {
+	 *    uint16_t handler_id;
+	 *    uint8_t op1;
+	 *    uint8_t op2;
+	 *    uint8_t result;
+	 *    uint8_t types { uint8_t op1:4 };
+	 * } // Total: 6-8 bytes
+	 *
+	 * Example for an opcode needing op1, op2, result:
+	 * struct {
+	 *    uint16_t handler_id;
+	 *    uint8_t op1;
+	 *    uint8_t op2;
+	 *    uint8_t result;
+	 * } // Total: 5-8 bytes
+	 *
+	 * Example for an opcode needing op1, op2, result, extended_data, op2_type
+	 * struct {
+	 *    uint16_t handler_id;
+	 *    uint8_t op1;
+	 *    uint8_t op2;
+	 *    uint8_t result;
+	 *    uint8_t types { uint8_t op2:4 };
+	 *    uint8_t extended_data;
+	 * } // Total: 8 bytes
+	 *
+	 * Example for a 32bit opcode needing op1, op2, op2_type:
+	 * struct {
+	 *    uint16_t handler_id;
+	 *    uint32_t op1;
+	 *    uint32_t op2;
+	 *    uint8_t types { uint8_t op2:4 };
+	 * } // Total: 12-16 bytes
+	 *
+	 * We could actually generate structs for each handler.
+	 */
+	size_t variable_size_handler_aligned = 0;
+	size_t variable_size_all_aligned = 0;
+
+	size_t num_oplines_per_size[5] = {0};
+	size_t total_num_operands = 0;
+	size_t total_num_types = 0;
+	size_t total_num_extended_values = 0;
+	size_t num_oplines = 0; /* op_array->last without OP_DATA */
+
+	for (; op < end; op++) {
+
+		size_t op_size;
+		uint32_t op3 = 0;
+
+		/* Constants are a negative offset. Assume it's a positive offset. */
+#define OP_VALUE(_op) (                             \
+		_op ## _type == IS_CONST                    \
+			? ((uint32_t)-(int32_t)_op.constant)    \
+			: _op.num)                              \
+
+		if (op + 1 < end && (op+1)->opcode == ZEND_OP_DATA) {
+			op3 = OP_VALUE((op+1)->op1);
+		}
+		if (OP_VALUE(op->op1) <= UINT8_MAX && OP_VALUE(op->op2) <= UINT8_MAX
+				&& op3 <= UINT8_MAX && OP_VALUE(op->result) <= UINT8_MAX
+				&& op->extended_value <= UINT8_MAX) {
+			op_size = 1;
+		} else if (OP_VALUE(op->op1) <= UINT16_MAX && OP_VALUE(op->op2) <= UINT16_MAX
+				&& op3 <= UINT16_MAX && OP_VALUE(op->result) <= UINT16_MAX
+				&& op->extended_value <= UINT16_MAX) {
+			op_size = 2;
+		} else {
+			op_size = 4;
+		}
+
+		if (op_size < 4) {
+			slim_size += sizeof(zend_op16);
+		} else {
+			slim_size += sizeof(zend_op32);
+		}
+
+		if (op->opcode == ZEND_OP_DATA) {
+			continue;
+		}
+
+		num_oplines++;
+		num_oplines_per_size[op_size]++;
+
+		uint32_t operand_usage = zend_get_opcode_operand_usage(op->opcode);
+		/*
+		ZEND_ASSERT(op->op1.num == 0 || (operand_usage & ZEND_VM_USES_OP1));
+		ZEND_ASSERT(op->op2.num == 0 || (operand_usage & ZEND_VM_USES_OP2));
+		ZEND_ASSERT(op3 == 0 || (operand_usage & ZEND_VM_USES_OP_DATA));
+		ZEND_ASSERT(op->result.num == 0 || (operand_usage & ZEND_VM_USES_RESULT)
+				|| op->opcode == ZEND_ROPE_ADD);
+		ZEND_ASSERT(op->extended_value == 0 || (operand_usage & ZEND_VM_USES_EXTENDED_VALUE)
+				|| op->opcode == ZEND_ROPE_INIT);
+		*/
+
+		size_t types_used = 0
+			+ (bool)(operand_usage & ZEND_VM_USES_OP1_TYPE)
+			+ (bool)(operand_usage & ZEND_VM_USES_OP2_TYPE)
+			+ (bool)(operand_usage & ZEND_VM_USES_OP_DATA_TYPE)
+			+ (bool)(operand_usage & ZEND_VM_USES_RESULT_TYPE)
+			;
+
+		size_t num_operands = 0
+			+ (bool)(operand_usage & ZEND_VM_USES_OP1)
+			+ (bool)(operand_usage & ZEND_VM_USES_OP2)
+			+ (bool)(operand_usage & ZEND_VM_USES_OP_DATA)
+			+ (bool)(operand_usage & ZEND_VM_USES_RESULT)
+			+ (bool)(operand_usage & ZEND_VM_USES_EXTENDED_VALUE)
+			;
+
+		size_t size = 2 // handler_id
+			+ (num_operands * op_size)
+			+ ((types_used + 2 - 1) / 2)
+			;
+
+		variable_size_handler_aligned += ZEND_MM_ALIGNED_SIZE_EX(size, 2);
+		variable_size_all_aligned += ZEND_MM_ALIGNED_SIZE_EX(size, 4);
+		total_num_operands += num_operands;
+		total_num_types += types_used;
+		total_num_extended_values += (bool)(operand_usage & ZEND_VM_USES_EXTENDED_VALUE);
+	}
+
+	fprintf(stderr, "dump_opcode_sizes: %s:%" PRIu32 " orig: %zu"
+					" slim: %zu (%zd%%)"
+					" variable: %zu (%zd%%)"
+					" variable aligned: %zu (%zd%%)"
+					" ops: %zu operands: %zu"
+					" types: %zu extended_value: %zu"
+					" 8bit_oplines: %zu 16bit_oplines: %zu 32bit_oplines: %zu"
+					"\n",
+			ZSTR_VAL(op_array->filename),
+			op_array->line_start,
+			orig_size,
+			slim_size,
+			((ssize_t)slim_size - (ssize_t)orig_size) * 100 / (ssize_t)orig_size,
+			variable_size_handler_aligned,
+			((ssize_t)variable_size_handler_aligned - (ssize_t)orig_size) * 100 / (ssize_t)orig_size,
+			variable_size_all_aligned,
+			((ssize_t)variable_size_all_aligned - (ssize_t)orig_size) * 100 / (ssize_t)orig_size,
+			num_oplines,
+			total_num_operands,
+			total_num_types,
+			total_num_extended_values,
+			num_oplines_per_size[1],
+			num_oplines_per_size[2],
+			num_oplines_per_size[4]);
+}
+
 static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_script* main_persistent_script)
 {
 	zend_op *persist_ptr;
@@ -627,6 +836,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 		efree(op_array->opcodes);
 		op_array->opcodes = new_opcodes;
+
+		dump_opcodes_sizes(op_array);
 	}
 
 	if (op_array->filename) {

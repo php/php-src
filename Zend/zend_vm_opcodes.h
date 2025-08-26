@@ -105,10 +105,21 @@ typedef const void* zend_vm_opcode_handler_t;
 #define ZEND_VM_OP1_FLAGS(flags) (flags & 0xff)
 #define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)
 
+#define ZEND_VM_USES_OP1             (1<<0)
+#define ZEND_VM_USES_OP2             (1<<1)
+#define ZEND_VM_USES_OP_DATA         (1<<2)
+#define ZEND_VM_USES_RESULT          (1<<3)
+#define ZEND_VM_USES_OP1_TYPE        (1<<4)
+#define ZEND_VM_USES_OP2_TYPE        (1<<5)
+#define ZEND_VM_USES_OP_DATA_TYPE    (1<<6)
+#define ZEND_VM_USES_RESULT_TYPE     (1<<7)
+#define ZEND_VM_USES_EXTENDED_VALUE  (1<<8)
+
 BEGIN_EXTERN_C()
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode);
 ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);
+ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_operand_usage(uint8_t opcode);
 ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length);
 
 END_EXTERN_C()

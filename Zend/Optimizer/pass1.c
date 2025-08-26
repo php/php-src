@@ -236,7 +236,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						opline->opcode = ZEND_DECLARE_CONST;
 						opline->op1_type = IS_CONST;
 						opline->op2_type = IS_CONST;
-						opline->result_type = IS_UNUSED;
+						SET_UNUSED(opline->result);
 						opline->op1.constant = send1_opline->op1.constant;
 						opline->op2.constant = send2_opline->op1.constant;
 						opline->result.num = 0;
@@ -321,7 +321,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					should_jmp = !should_jmp;
 				}
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
-				opline->op1_type = IS_UNUSED;
+				SET_UNUSED(opline->op1);
 				if (should_jmp) {
 					opline->opcode = ZEND_JMP;
 					COPY_NODE(opline->op1, opline->op2);

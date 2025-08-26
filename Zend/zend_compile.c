@@ -2708,7 +2708,7 @@ void zend_emit_final_return(bool return_one) /* {{{ */
 	}
 
 	ret = zend_emit_op(NULL, returns_reference ? ZEND_RETURN_BY_REF : ZEND_RETURN, &zn, NULL);
-	ret->extended_value = -1;
+	ret->extended_value = 0;
 }
 /* }}} */
 
@@ -3051,7 +3051,7 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 	zend_ast *dim_ast = ast->child[1];
 	zend_op *opline;
 
-	znode var_node, dim_node;
+	znode var_node, dim_node = {0};
 
 	if (is_globals_fetch(var_ast)) {
 		if (dim_ast == NULL) {
@@ -3121,7 +3121,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 	zend_ast *obj_ast = ast->child[0];
 	zend_ast *prop_ast = ast->child[1];
 
-	znode obj_node, prop_node;
+	znode obj_node = {0}, prop_node;
 	zend_op *opline;
 	bool nullsafe = ast->kind == ZEND_AST_NULLSAFE_PROP;
 
@@ -5236,7 +5236,7 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 	zend_ast *method_ast = ast->child[1];
 	zend_ast *args_ast = ast->child[2];
 
-	znode obj_node, method_node;
+	znode obj_node = {0}, method_node;
 	zend_op *opline;
 	zend_function *fbc = NULL;
 	bool nullsafe = ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL;
@@ -5349,6 +5349,7 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		if (zend_is_constructor(Z_STR_P(name))) {
 			zval_ptr_dtor(name);
 			method_node.op_type = IS_UNUSED;
+			method_node.u.op.num = 0;
 		}
 	}
 
@@ -7782,7 +7783,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 
 		CG(zend_lineno) = param_ast->lineno;
 
-		znode var_node, default_node;
+		znode var_node, default_node = {0};
 		uint8_t opcode;
 		zend_op *opline;
 		zend_arg_info *arg_info;
@@ -11221,7 +11222,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 	uint32_t i, j;
 	uint32_t rope_init_lineno = -1;
 	zend_op *opline = NULL, *init_opline;
-	znode elem_node, last_const_node;
+	znode elem_node, last_const_node = {0};
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t reserved_op_number = -1;
 
