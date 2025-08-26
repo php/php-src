@@ -846,7 +846,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
                         $handler = $matches[1];
                         $opcode = $opcodes[$opnames[$handler]];
                         $inline =
-                            ZEND_VM_KIND == ZEND_VM_KIND_HYBRID &&
+                            ZEND_VM_GEN_KIND == ZEND_VM_KIND_HYBRID &&
                             isset($opcode["use"]) &&
                             is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec) &&
                             is_hot_handler($opcodes[$opnames[$name]]["hot"], $op1, $op2, $extra_spec) ?
@@ -1091,7 +1091,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
         case ZEND_VM_KIND_CALL:
         case ZEND_VM_KIND_TAILCALL:
             $cconv = $kind === ZEND_VM_KIND_TAILCALL ? 'ZEND_OPCODE_HANDLER_CCONV' : 'ZEND_OPCODE_HANDLER_FUNC_CCONV';
-            if ($opcode["hot"] && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
+            if ($opcode["hot"] && ZEND_VM_GEN_KIND == ZEND_VM_KIND_HYBRID && is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
                 if (isset($opcode["use"])) {
                     out($f,"static zend_always_inline ZEND_OPCODE_HANDLER_RET {$cconv} {$spec_name}_INLINE_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
                     $additional_func = true;
@@ -2485,21 +2485,20 @@ static const char *const zend_vm_kind_name[] = {
 };
 
 ENDNAMES;
-    $str .= "#define ZEND_VM_KIND_AS_STRING\tzend_vm_kind_name[ZEND_VM_KIND]\n";
     $str .= "#if 0\n";
-    if ($GLOBALS["vm_kind_name"][ZEND_VM_KIND] === "ZEND_VM_KIND_HYBRID") {
+    if ($GLOBALS["vm_kind_name"][ZEND_VM_GEN_KIND] === "ZEND_VM_KIND_HYBRID") {
         $str .= "/* HYBRID requires support for computed GOTO and global register variables*/\n";
         $str .= "#elif (defined(__GNUC__) && defined(HAVE_GCC_GLOBAL_REGS))\n";
         $str .= "# define ZEND_VM_KIND\t\tZEND_VM_KIND_HYBRID\n";
     }
-    if ($GLOBALS["vm_kind_name"][ZEND_VM_KIND] === "ZEND_VM_KIND_HYBRID" || $GLOBALS["vm_kind_name"][ZEND_VM_KIND] === "ZEND_VM_KIND_CALL") {
+    if ($GLOBALS["vm_kind_name"][ZEND_VM_GEN_KIND] === "ZEND_VM_KIND_HYBRID" || $GLOBALS["vm_kind_name"][ZEND_VM_GEN_KIND] === "ZEND_VM_KIND_CALL") {
         $str .= "#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(__aarch64__))\n";
         $str .= "# define ZEND_VM_KIND\t\tZEND_VM_KIND_TAILCALL\n";
         $str .= "#else\n";
         $str .= "# define ZEND_VM_KIND\t\tZEND_VM_KIND_CALL\n";
     } else {
         $str .= "#else\n";
-        $str .= "#define ZEND_VM_KIND\t\t" . $GLOBALS["vm_kind_name"][ZEND_VM_KIND] . "\n";
+        $str .= "#define ZEND_VM_KIND\t\t" . $GLOBALS["vm_kind_name"][ZEND_VM_GEN_KIND] . "\n";
     }
     $str .= "#endif\n";
     $str .= "\n";
@@ -2753,9 +2752,9 @@ function gen_vm($def, $skel) {
             }
 
             // Store parameters
-            if ((ZEND_VM_KIND == ZEND_VM_KIND_GOTO
-             || ZEND_VM_KIND == ZEND_VM_KIND_SWITCH
-             || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && $hot))
+            if ((ZEND_VM_GEN_KIND == ZEND_VM_KIND_GOTO
+             || ZEND_VM_GEN_KIND == ZEND_VM_KIND_SWITCH
+             || (ZEND_VM_GEN_KIND == ZEND_VM_KIND_HYBRID && $hot))
              && $param) {
                 foreach (explode(",", $param ) as $p) {
                     $p = trim($p);
@@ -2817,7 +2816,7 @@ function gen_vm($def, $skel) {
                 die("ERROR ($def:$lineno): Opcode with name '$op' is not defined.\n");
             }
             $opcodes[$opnames[$dsc['op']]]['alias'] = $op;
-            if (!ZEND_VM_SPEC && ZEND_VM_KIND == ZEND_VM_KIND_SWITCH) {
+            if (!ZEND_VM_SPEC && ZEND_VM_GEN_KIND == ZEND_VM_KIND_SWITCH) {
                 $code = $opnames[$op];
                 $opcodes[$code]['use'] = 1;
             }
@@ -2930,7 +2929,7 @@ function gen_vm($def, $skel) {
     out($f, "255\n};\n\n");
 
     // Generate specialized executor
-    gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_KIND, "execute", "zend_vm_init");
+    gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_GEN_KIND, "execute", "zend_vm_init");
     out($f, "\n");
 
     // Generate zend_vm_get_opcode_handler() function
@@ -3024,7 +3023,7 @@ function gen_vm($def, $skel) {
     out($f, "}\n");
     out($f, "#endif\n\n");
 
-    if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_CALL) {
+    if (ZEND_VM_GEN_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_GEN_KIND == ZEND_VM_KIND_CALL) {
         // Generate zend_vm_get_opcode_handler_func() function
         out($f, "#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL\n");
         out($f,"static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op* op)\n");
@@ -3135,10 +3134,10 @@ function gen_vm($def, $skel) {
     out($f, "}\n\n");
 
     // Generate zend_vm_call_opcode_handler() function
-    if (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
+    if (ZEND_VM_GEN_KIND == ZEND_VM_KIND_CALL || ZEND_VM_GEN_KIND == ZEND_VM_KIND_HYBRID) {
         out($f, "ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data* ex)\n");
         out($f, "{\n");
-        if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
+        if (ZEND_VM_GEN_KIND == ZEND_VM_KIND_HYBRID) {
             out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL)\n");
             out($f, "\tzend_vm_opcode_handler_func_t handler;\n");
             out($f,"#endif\n");
@@ -3157,7 +3156,7 @@ function gen_vm($def, $skel) {
         out($f, "\n");
         out($f, "\tLOAD_OPLINE();\n");
         out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
-        if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
+        if (ZEND_VM_GEN_KIND == ZEND_VM_KIND_HYBRID) {
             out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
             out($f, "\thandler = zend_vm_get_opcode_handler_func(zend_user_opcodes[opline->opcode], opline);\n");
             out($f, "\thandler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
@@ -3165,7 +3164,7 @@ function gen_vm($def, $skel) {
             out($f,"#else\n");
         }
         out($f, "\t(OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-        if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
+        if (ZEND_VM_GEN_KIND == ZEND_VM_KIND_HYBRID) {
             out($f, "\tif (EXPECTED(opline)) {\n");
             out($f,"#endif\n");
         } else {
@@ -3248,16 +3247,16 @@ for ($i = 1; $i < $argc; $i++) {
         $kind = substr($argv[$i], strlen("--with-vm-kind="));
         switch ($kind) {
             case "CALL":
-                define("ZEND_VM_KIND", ZEND_VM_KIND_CALL);
+                define("ZEND_VM_GEN_KIND", ZEND_VM_KIND_CALL);
                 break;
             case "SWITCH":
-                define("ZEND_VM_KIND", ZEND_VM_KIND_SWITCH);
+                define("ZEND_VM_GEN_KIND", ZEND_VM_KIND_SWITCH);
                 break;
             case "GOTO":
-                define("ZEND_VM_KIND", ZEND_VM_KIND_GOTO);
+                define("ZEND_VM_GEN_KIND", ZEND_VM_KIND_GOTO);
                 break;
             case "HYBRID":
-                define("ZEND_VM_KIND", ZEND_VM_KIND_HYBRID);
+                define("ZEND_VM_GEN_KIND", ZEND_VM_KIND_HYBRID);
                 break;
             default:
                 echo("ERROR: Invalid vm kind '$kind'\n");
@@ -3281,9 +3280,9 @@ for ($i = 1; $i < $argc; $i++) {
 }
 
 // Using defaults
-if (!defined("ZEND_VM_KIND")) {
+if (!defined("ZEND_VM_GEN_KIND")) {
     // Using CALL threading by default
-    define("ZEND_VM_KIND", ZEND_VM_KIND_HYBRID);
+    define("ZEND_VM_GEN_KIND", ZEND_VM_KIND_HYBRID);
 }
 if (!defined("ZEND_VM_SPEC")) {
     // Using specialized executor by default
