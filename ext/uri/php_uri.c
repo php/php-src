@@ -137,11 +137,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_get_property(const uri_interna
 		return FAILURE;
 	}
 
-	zend_result result = property_handler->read_func(internal_uri, read_mode, zv);
-
-	ZEND_ASSERT(result == FAILURE || (Z_TYPE_P(zv) == IS_STRING && GC_REFCOUNT(Z_STR_P(zv)) == 2) || Z_TYPE_P(zv) == IS_NULL || Z_TYPE_P(zv) == IS_LONG);
-
-	return result;
+	return property_handler->read_func(internal_uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv)
