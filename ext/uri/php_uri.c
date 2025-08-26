@@ -28,6 +28,7 @@
 #include "php_uri.h"
 #include "uri_parser_whatwg.h"
 #include "uri_parser_rfc3986.h"
+#include "uri_parser_php_parse_url.h"
 #include "php_uri_arginfo.h"
 #include "uriparser/src/UriConfig.h"
 
@@ -109,7 +110,7 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 PHPAPI uri_parser_t *php_uri_get_parser(const zend_string *uri_parser_name)
 {
 	if (uri_parser_name == NULL) {
-		return uri_parser_by_name(URI_PARSER_PHP, sizeof(URI_PARSER_PHP) - 1);
+		return uri_parser_by_name(PHP_URI_PARSER_PHP_PARSE_URL, sizeof(PHP_URI_PARSER_PHP_PARSE_URL) - 1);
 	}
 
 	return uri_parser_by_name(ZSTR_VAL(uri_parser_name), ZSTR_LEN(uri_parser_name));
@@ -1021,8 +1022,8 @@ PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser)
 
 	ZEND_ASSERT(uri_parser->name != NULL);
 	ZEND_ASSERT(uri_parser->parse_uri != NULL);
-	ZEND_ASSERT(uri_parser->clone_uri != NULL || strcmp(uri_parser->name, URI_PARSER_PHP) == 0);
-	ZEND_ASSERT(uri_parser->uri_to_string != NULL || strcmp(uri_parser->name, URI_PARSER_PHP) == 0);
+	ZEND_ASSERT(uri_parser->clone_uri != NULL || strcmp(uri_parser->name, PHP_URI_PARSER_PHP_PARSE_URL) == 0);
+	ZEND_ASSERT(uri_parser->uri_to_string != NULL || strcmp(uri_parser->name, PHP_URI_PARSER_PHP_PARSE_URL) == 0);
 	ZEND_ASSERT(uri_parser->free_uri != NULL);
 
 	zend_result result = zend_hash_add_ptr(&uri_parsers, key, (void *) uri_parser) != NULL ? SUCCESS : FAILURE;
@@ -1054,6 +1055,10 @@ static PHP_MINIT_FUNCTION(uri)
 	}
 
 	if (php_uri_parser_register(&php_uri_parser_whatwg) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (php_uri_parser_register(&php_uri_parser_php_parse_url) == FAILURE) {
 		return FAILURE;
 	}
 

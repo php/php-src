@@ -17,8 +17,6 @@
 #ifndef URL_H
 #define URL_H
 
-PHP_MINIT_FUNCTION(url);
-
 typedef struct php_url {
 	zend_string *scheme;
 	zend_string *user;
