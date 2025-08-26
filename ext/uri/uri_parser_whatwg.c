@@ -27,9 +27,7 @@
 ZEND_TLS lexbor_mraw_t lexbor_mraw = {0};
 ZEND_TLS lxb_url_parser_t lexbor_parser = {0};
 ZEND_TLS lxb_unicode_idna_t lexbor_idna = {0};
-ZEND_TLS unsigned short int parsed_urls;
 
-static const unsigned short int maximum_parses_before_cleanup = 500;
 static const size_t lexbor_mraw_byte_size = 8192;
 
 static zend_always_inline void zval_string_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
@@ -530,8 +528,6 @@ PHP_RINIT_FUNCTION(uri_parser_whatwg)
 		goto fail;
 	}
 
-	parsed_urls = 0;
-
 	return SUCCESS;
 
  fail:
@@ -548,7 +544,7 @@ PHP_RINIT_FUNCTION(uri_parser_whatwg)
 	return FAILURE;
 }
 
-PHP_RSHUTDOWN_FUNCTION(uri_parser_whatwg)
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri_parser_whatwg)
 {
 	lxb_unicode_idna_destroy(&lexbor_idna, false);
 	memset(&lexbor_idna, 0, sizeof(lexbor_idna));
@@ -557,24 +553,12 @@ PHP_RSHUTDOWN_FUNCTION(uri_parser_whatwg)
 	lexbor_mraw_destroy(&lexbor_mraw, false);
 	memset(&lexbor_mraw, 0, sizeof(lexbor_mraw));
 
-	parsed_urls = 0;
-
 	return SUCCESS;
-}
-
-static void reset_parser_state(void)
-{
-	if (++parsed_urls % maximum_parses_before_cleanup == 0) {
-		lexbor_mraw_clean(lexbor_parser.mraw);
-		parsed_urls = 0;
-	}
-
-	lxb_url_parser_clean(&lexbor_parser);
 }
 
 lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
 {
-	reset_parser_state();
+	lxb_url_parser_clean(&lexbor_parser);
 
 	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) uri_str, uri_str_len);
 	const char *reason = fill_errors(errors);
@@ -624,6 +608,9 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, uri_recomposition
 
 static void php_uri_parser_whatwg_free(void *uri)
 {
+	lxb_url_t *lexbor_uri = uri;
+
+	lxb_url_destroy(lexbor_uri);
 }
 
 const uri_parser_t php_uri_parser_whatwg = {
