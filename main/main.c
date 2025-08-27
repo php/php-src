@@ -1840,7 +1840,9 @@ zend_result php_request_startup(void)
 {
 	zend_result retval = SUCCESS;
 
-	ZEND_ASSERT(zend_mm_check_in_userinput());
+#if ZEND_DEBUG
+	zend_mm_check_in_userinput();
+#endif
 
 	zend_interned_strings_activate();
 

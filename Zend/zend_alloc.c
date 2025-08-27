@@ -2856,12 +2856,10 @@ ZEND_API void zend_mm_userinput_end(void)
 #endif
 }
 
-ZEND_API bool zend_mm_check_in_userinput(void)
+ZEND_API void zend_mm_check_in_userinput(void)
 {
 #if ZEND_MM_HEAP_PROTECTION
-	return AG(use_userinput_zone);
-#else
-	return true;
+	ZEND_ASSERT(AG(use_userinput_zone));
 #endif
 }
 
