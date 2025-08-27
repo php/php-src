@@ -1002,6 +1002,21 @@ static void php_zip_cancel_callback_free(void *ptr)
 }
 #endif
 
+static void php_zip_object_dtor(zend_object *object)
+{
+	zend_objects_destroy_object(object);
+
+	ze_zip_object *intern = php_zip_fetch_object(object);
+
+	if (intern->za) {
+		if (zip_close(intern->za) != 0) {
+			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
+			zip_discard(intern->za);
+		}
+		intern->za = NULL;
+	}
+}
+
 static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 {
 	ze_zip_object * intern = php_zip_fetch_object(object);
@@ -2995,6 +3010,10 @@ PHP_METHOD(ZipArchive, getStream)
 #ifdef HAVE_PROGRESS_CALLBACK
 static void php_zip_progress_callback(zip_t *arch, double state, void *ptr)
 {
+	if (!EG(active)) {
+		return;
+	}
+
 	zval cb_args[1];
 	ze_zip_object *obj = ptr;
 
@@ -3040,6 +3059,10 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 {
 	zval cb_retval;
 	ze_zip_object *obj = ptr;
+
+	if (!EG(active)) {
+		return 0;
+	}
 
 	zend_call_known_fcc(&obj->cancel_callback, &cb_retval, 0, NULL, NULL);
 	if (Z_ISUNDEF(cb_retval)) {
@@ -3128,6 +3151,7 @@ static PHP_MINIT_FUNCTION(zip)
 	memcpy(&zip_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zip_object_handlers.offset = XtOffsetOf(ze_zip_object, zo);
 	zip_object_handlers.free_obj = php_zip_object_free_storage;
+	zip_object_handlers.dtor_obj = php_zip_object_dtor;
 	zip_object_handlers.clone_obj = NULL;
 	zip_object_handlers.get_property_ptr_ptr = php_zip_get_property_ptr_ptr;
 
