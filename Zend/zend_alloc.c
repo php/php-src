@@ -2136,19 +2136,21 @@ ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
 	zend_mm_init_key(heap);
 
 	/* Update shadow pointers with new key */
-	for (int i = 0; i < ZEND_MM_BINS; i++) {
-		zend_mm_free_slot *slot = heap->free_slot[i];
-		if (!slot) {
-			continue;
-		}
-		zend_mm_free_slot *next;
-		while ((next = slot->next_free_slot)) {
-			zend_mm_free_slot *shadow = ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, i);
-			if (UNEXPECTED(next != zend_mm_decode_free_slot_key(old_key, shadow))) {
-				zend_mm_panic("zend_mm_heap corrupted");
+	for (int i = 0; i < ZEND_MM_ZONES; i++) {
+		for (int j = 0; j < ZEND_MM_BINS; j++) {
+			zend_mm_free_slot *slot = ZEND_MM_ZONE_FREE_SLOT(heap, i)[j];
+			if (!slot) {
+				continue;
 			}
-			zend_mm_set_next_free_slot(heap, i, slot, next);
-			slot = next;
+			zend_mm_free_slot *next;
+			while ((next = slot->next_free_slot)) {
+				zend_mm_free_slot *shadow = ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, j);
+				if (UNEXPECTED(next != zend_mm_decode_free_slot_key(old_key, shadow))) {
+					zend_mm_panic("zend_mm_heap corrupted");
+				}
+				zend_mm_set_next_free_slot(heap, j, slot, next);
+				slot = next;
+			}
 		}
 	}
 #endif
