@@ -2024,7 +2024,9 @@ ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 {
 	zend_auto_global *auto_global;
 
-	ZEND_ASSERT(zend_mm_check_in_userinput());
+#if ZEND_DEBUG
+	zend_mm_check_in_userinput();
+#endif
 
 	ZEND_HASH_MAP_FOREACH_PTR(CG(auto_globals), auto_global) {
 		auto_global->armed = auto_global->jit || auto_global->auto_global_callback;
