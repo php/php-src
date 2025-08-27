@@ -391,7 +391,11 @@ struct _zend_mm_chunk {
 	uint32_t           free_tail;               /* number of free pages at the end of chunk */
 	uint32_t           num;
 	/* align heap_slot to cache line boundary (assumed to be 64 bytes) */
+#if ZEND_MM_HEAP_PROTECTION
 	char               reserve[64 - (sizeof(void*) * 4 + sizeof(uint32_t) * 3)];
+#else
+	char               reserve[64 - (sizeof(void*) * 3 + sizeof(uint32_t) * 3)];
+#endif
 	zend_mm_heap       heap_slot;               /* used only in main chunk */
 #if ZEND_MM_HEAP_PROTECTION
 	zend_mm_zone      *zone;
@@ -400,6 +404,8 @@ struct _zend_mm_chunk {
 	zend_mm_page_info  map[ZEND_MM_PAGES];      /* 2 KB = 512 * 4 */
 };
 
+ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_OFFSET(XtOffsetOf(zend_mm_chunk, heap_slot), 64) == 0,
+		"zend_mm_chunk.heap_slot should be aligned to cache line boundary");
 ZEND_STATIC_ASSERT(sizeof(zend_mm_chunk) <= ZEND_MM_FIRST_PAGE * ZEND_MM_PAGE_SIZE, "");
 
 struct _zend_mm_page {
