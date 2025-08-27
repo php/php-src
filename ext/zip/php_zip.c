@@ -1004,8 +1004,10 @@ static void php_zip_cancel_callback_free(void *ptr)
 }
 #endif
 
-static void php_zip_object_free_storage(zend_object *object) /* {{{ */
+static void php_zip_object_dtor(zend_object *object) /* {{{ */
 {
+	zend_objects_destroy_object(object);
+
 	ze_zip_object * intern = php_zip_fetch_object(object);
 	int i;
 
@@ -1034,7 +1036,6 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 #endif
 
 	intern->za = NULL;
-	zend_object_std_dtor(&intern->zo);
 
 	if (intern->filename) {
 		efree(intern->filename);
@@ -3119,7 +3120,7 @@ static PHP_MINIT_FUNCTION(zip)
 {
 	memcpy(&zip_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zip_object_handlers.offset = XtOffsetOf(ze_zip_object, zo);
-	zip_object_handlers.free_obj = php_zip_object_free_storage;
+	zip_object_handlers.dtor_obj = php_zip_object_dtor;
 	zip_object_handlers.clone_obj = NULL;
 	zip_object_handlers.get_property_ptr_ptr = php_zip_get_property_ptr_ptr;
 
