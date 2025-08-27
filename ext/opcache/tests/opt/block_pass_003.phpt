@@ -20,4 +20,40 @@ DONE
 Warning: Cannot use int as array in %s on line %d
 
 Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
 DONE
