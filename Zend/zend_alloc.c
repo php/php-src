@@ -2770,7 +2770,8 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *ptr 
 
 typedef struct _zend_alloc_globals {
 	zend_mm_heap *mm_heap;
-	uint32_t      use_userinput_zone;
+	uint32_t      userinput_zone_activated;   /* Whether the userinput zone is currently active */
+	bool          enable_userinput_isolation; /* Whether to switch to the userinput zone before handling user inputs */
 } zend_alloc_globals;
 
 #ifdef ZTS
@@ -2841,17 +2842,21 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 ZEND_API void zend_mm_userinput_begin(void)
 {
 #if ZEND_MM_HEAP_PROTECTION
-	AG(use_userinput_zone)++;
-	AG(mm_heap)->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_USERINPUT);
+	if (AG(enable_userinput_isolation)) {
+		AG(userinput_zone_activated)++;
+		AG(mm_heap)->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_USERINPUT);
+	}
 #endif
 }
 
 ZEND_API void zend_mm_userinput_end(void)
 {
 #if ZEND_MM_HEAP_PROTECTION
-	AG(use_userinput_zone)--;
-	if (!AG(use_userinput_zone)) {
-		AG(mm_heap)->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_DEFAULT);
+	if (AG(enable_userinput_isolation)) {
+		AG(userinput_zone_activated)--;
+		if (!AG(userinput_zone_activated)) {
+			AG(mm_heap)->zone_free_slot = ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_DEFAULT);
+		}
 	}
 #endif
 }
@@ -2859,7 +2864,12 @@ ZEND_API void zend_mm_userinput_end(void)
 ZEND_API void zend_mm_check_in_userinput(void)
 {
 #if ZEND_MM_HEAP_PROTECTION
-	ZEND_ASSERT(AG(use_userinput_zone));
+	if (AG(enable_userinput_isolation)) {
+		ZEND_ASSERT(AG(userinput_zone_activated));
+		ZEND_ASSERT(AG(mm_heap)->zone_free_slot == ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_USERINPUT));
+	} else {
+		ZEND_ASSERT(AG(mm_heap)->zone_free_slot == ZEND_MM_ZONE_FREE_SLOT(AG(mm_heap), ZEND_MM_ZONE_DEFAULT));
+	}
 #endif
 }
 
@@ -3160,9 +3170,11 @@ ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
 
 	if (!full_shutdown) {
-		ZEND_ASSERT(AG(use_userinput_zone) == 0 || silent);
-		AG(use_userinput_zone) = 0;
-		zend_mm_userinput_begin();
+		if (AG(enable_userinput_isolation)) {
+			ZEND_ASSERT(AG(userinput_zone_activated) == 0 || silent);
+			AG(userinput_zone_activated) = 0;
+			zend_mm_userinput_begin();
+		}
 	}
 }
 
@@ -3477,7 +3489,9 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 {
 	char *tmp;
 
-	alloc_globals->use_userinput_zone = 0;
+	tmp = getenv("ZEND_MM_USERINPUT_ISOLATION");
+	alloc_globals->enable_userinput_isolation = !(tmp && !ZEND_ATOL(tmp));
+	alloc_globals->userinput_zone_activated = 0;
 
 #if ZEND_MM_CUSTOM
 	tmp = getenv("USE_ZEND_ALLOC");
