@@ -1340,7 +1340,7 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 }
 /* }}} */
 
-/* We can not add #[Deprecated] attributes in @generate-function-entries stubs,
+/* We cannot add #[Deprecated] attributes in @generate-function-entries stubs,
  * and PDO drivers have no way to add them either, so we hard-code deprecation
  * info here and add the attribute manually in pdo_hash_methods() */
 struct driver_specific_method_deprecation {
