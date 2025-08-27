@@ -1444,15 +1444,18 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 			}
 		}
 		if (new_name) {
-			zend_attribute *attr = zend_add_function_attribute(func_p,
-					ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+			uint32_t flags = dbh->is_persistent ? ZEND_ATTRIBUTE_PERSISTENT : 0;
+			zend_attribute *attr = zend_add_attribute(
+					&func_p->common.attributes,
+					ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED),
+					2, flags, 0, 0);
 
 			attr->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 			ZVAL_STR(&attr->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 
 			char *message;
 			size_t len = zend_spprintf(&message, 0, "use %s() instead", new_name);
-			zend_string *message_str = zend_string_init_interned(message, len, true);
+			zend_string *message_str = zend_string_init(message, len, dbh->is_persistent);
 			efree(message);
 
 			attr->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
