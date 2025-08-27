@@ -2810,8 +2810,12 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 	}
 #endif
 
-	if (AG(mm_heap)->main_chunk) {
-		zend_mm_chunk *chunk = AG(mm_heap)->main_chunk;
+	zend_mm_zone *zone;
+	ZEND_MM_ZONE_FOREACH(AG(mm_heap), zone) {
+		zend_mm_chunk *chunk = zone->chunks;
+		if (chunk == NULL) {
+			continue;
+		}
 
 		do {
 			if (ptr >= (void*)chunk
@@ -2819,8 +2823,8 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 				return 1;
 			}
 			chunk = chunk->next;
-		} while (chunk != AG(mm_heap)->main_chunk);
-	}
+		} while (chunk != zone->chunks);
+	} ZEND_MM_ZONE_FOREACH_END();
 
 	zend_mm_huge_list *block = AG(mm_heap)->huge_list;
 	while (block) {
