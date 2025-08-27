@@ -1,5 +1,5 @@
 --TEST--
-FPM: bug75712 - getenv should not read from $_ENV and $_SERVER
+FPM: bug75712 - getenv should not read from $_ENV and $_SERVER (register_argc_argv=off)
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
@@ -15,7 +15,7 @@ listen = {{ADDR}}
 pm = static
 pm.max_children = 1
 env[TEST] = test
-php_value[register_argc_argv] = on
+php_value[register_argc_argv] = off
 EOT;
 
 $code = <<<EOT

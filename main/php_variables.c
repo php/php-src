@@ -785,10 +785,13 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 PHPAPI zend_result php_hash_environment(void)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));
+	/* Register $argc and $argv for CLI SAPIs. $_SERVER['argc'] and $_SERVER['argv']
+	 * will be registered in php_auto_globals_create_server() which clears
+	 * PG(http_globals)[TRACK_VARS_SERVER] anyways, making registration at this point
+	 * useless.
+	 */
+	php_build_argv(NULL, NULL);
 	zend_activate_auto_globals();
-	if (PG(register_argc_argv) || SG(request_info).argc) {
-		php_build_argv(SG(request_info).query_string, &PG(http_globals)[TRACK_VARS_SERVER]);
-	}
 	return SUCCESS;
 }
 /* }}} */
@@ -885,6 +888,7 @@ static bool php_auto_globals_create_server(zend_string *name)
 				zend_hash_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGC), argc);
 			}
 		} else if (PG(register_argc_argv)) {
+			zend_error(E_DEPRECATED, "Deriving $_SERVER['argc'] and $_SERVER['argv'] from $_SERVER['QUERY_STRING'] is deprecated, configure register_argc_argv=0 to suppress this message and access the query parameters via $_SERVER['QUERY_STRING'] or $_GET");
 			php_build_argv(SG(request_info).query_string, &PG(http_globals)[TRACK_VARS_SERVER]);
 		}
 
