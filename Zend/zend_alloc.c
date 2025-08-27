@@ -2130,6 +2130,7 @@ static void zend_mm_init_key(zend_mm_heap *heap)
 
 ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
 {
+#if ZEND_MM_HEAP_PROTECTION
 	uintptr_t old_key = heap->shadow_key;
 
 	zend_mm_init_key(heap);
@@ -2150,6 +2151,7 @@ ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
 			slot = next;
 		}
 	}
+#endif
 
 #if ZEND_DEBUG
 	heap->pid = getpid();
