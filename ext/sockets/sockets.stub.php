@@ -1783,6 +1783,62 @@ const AI_NUMERICSERV = UNKNOWN;
 const SOL_LOCAL = UNKNOWN;
 #endif
 
+#ifdef SOL_PACKET
+/**
+ * @var int
+ * @cvalue SOL_PACKET
+ */
+const SOL_PACKET = UNKNOWN;
+#endif
+
+#ifdef PACKET_FANOUT
+/**
+ * @var int
+ * @cvalue PACKET_FANOUT
+ */
+const PACKET_FANOUT = UNKNOWN;
+#endif
+
+#ifdef PACKET_FANOUT_HASH
+/**
+ * @var int
+ * @cvalue PACKET_FANOUT_HASH
+ */
+const PACKET_FANOUT_HASH = UNKNOWN;
+#endif
+
+#ifdef PACKET_FANOUT_CPU
+/**
+ * @var int
+ * @cvalue PACKET_FANOUT_CPU
+ */
+const PACKET_FANOUT_CPU = UNKNOWN;
+#endif
+
+#ifdef PACKET_FANOUT_ROLLOVER
+/**
+ * @var int
+ * @cvalue PACKET_FANOUT_ROLLOVER
+ */
+const PACKET_FANOUT_ROLLOVER = UNKNOWN;
+#endif
+
+#ifdef PACKET_FANOUT_RND
+/**
+ * @var int
+ * @cvalue PACKET_FANOUT_RND
+ */
+const PACKET_FANOUT_RND = UNKNOWN;
+#endif
+
+#ifdef PACKET_FANOUT_QM
+/**
+ * @var int
+ * @cvalue PACKET_FANOUT_QM
+ */
+const PACKET_FANOUT_QM = UNKNOWN;
+#endif
+
 #if (defined(IPV6_RECVPKTINFO) && defined(HAVE_IPV6))
 /**
  * IPv6 ancillary data
