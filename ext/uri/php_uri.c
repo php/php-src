@@ -69,38 +69,38 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 		return result;
 	}
 
-	const uri_property_handlers_t property_handlers = internal_uri->parser->property_handlers;
+	const uri_parser_t *parser = internal_uri->parser;
 
 	zval tmp;
-	if (property_handlers.scheme.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.scheme.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_SCHEME), &tmp);
 	}
 
-	if (property_handlers.username.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.username.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_USERNAME), &tmp);
 	}
 
-	if (property_handlers.password.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.password.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PASSWORD), &tmp);
 	}
 
-	if (property_handlers.host.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.host.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
 	}
 
-	if (property_handlers.port.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.port.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
 	}
 
-	if (property_handlers.path.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.path.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PATH), &tmp);
 	}
 
-	if (property_handlers.query.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.query.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_QUERY), &tmp);
 	}
 
-	if (property_handlers.fragment.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.fragment.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_FRAGMENT), &tmp);
 	}
 
