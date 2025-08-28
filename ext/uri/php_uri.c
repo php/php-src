@@ -52,7 +52,7 @@ static const zend_module_dep uri_deps[] = {
 
 static zend_array uri_parsers;
 
-static uri_parser_t *uri_parser_by_name(const char *uri_parser_name, size_t uri_parser_name_len)
+static const uri_parser_t *uri_parser_by_name(const char *uri_parser_name, size_t uri_parser_name_len)
 {
 	return zend_hash_str_find_ptr(&uri_parsers, uri_parser_name, uri_parser_name_len);
 }
@@ -107,7 +107,7 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	return result;
 }
 
-PHPAPI uri_parser_t *php_uri_get_parser(const zend_string *uri_parser_name)
+PHPAPI const uri_parser_t *php_uri_get_parser(const zend_string *uri_parser_name)
 {
 	if (uri_parser_name == NULL) {
 		return uri_parser_by_name(PHP_URI_PARSER_PHP_PARSE_URL, sizeof(PHP_URI_PARSER_PHP_PARSE_URL) - 1);

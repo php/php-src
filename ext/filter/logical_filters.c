@@ -612,7 +612,7 @@ zend_result php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int parser_name_set;
 	FETCH_STR_OPTION(parser_name, URL_OPTION_URI_PARSER_CLASS);
 
-	uri_parser_t *uri_parser = php_uri_get_parser(parser_name_set ? parser_name : NULL);
+	const uri_parser_t *uri_parser = php_uri_get_parser(parser_name_set ? parser_name : NULL);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): \"uri_parser_class\" option has invalid value", get_active_function_name());
 		RETURN_VALIDATION_FAILED
