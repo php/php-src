@@ -918,6 +918,11 @@ jobs:
         with:
           repository: krakjoe/apcu
           path: apcu
+      - name: git checkout igbinary
+        uses: actions/checkout@v5
+        with:
+          repository: igbinary/igbinary
+          path: igbinary
       - name: git checkout imagick
         uses: actions/checkout@v5
         with:
@@ -974,6 +979,12 @@ jobs:
       - name: build apcu
         run: |
           cd apcu
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build igbinary
+        run: |
+          cd igbinary
           /opt/php/bin/phpize
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
