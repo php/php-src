@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ed71027bd233a3a7ca851a3b1285ec24ea1692f2 */
+ * Stub hash: f9a67a1fe953092e7091c0978174412f31f326ac */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -952,6 +952,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(PACKET_FANOUT_HASH)
 	REGISTER_LONG_CONSTANT("PACKET_FANOUT_HASH", PACKET_FANOUT_HASH, CONST_PERSISTENT);
+#endif
+#if defined(PACKET_FANOUT_LB)
+	REGISTER_LONG_CONSTANT("PACKET_FANOUT_LB", PACKET_FANOUT_LB, CONST_PERSISTENT);
 #endif
 #if defined(PACKET_FANOUT_CPU)
 	REGISTER_LONG_CONSTANT("PACKET_FANOUT_CPU", PACKET_FANOUT_CPU, CONST_PERSISTENT);

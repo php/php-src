@@ -1807,6 +1807,14 @@ const PACKET_FANOUT = UNKNOWN;
 const PACKET_FANOUT_HASH = UNKNOWN;
 #endif
 
+#ifdef PACKET_FANOUT_LB
+/**
+ * @var int
+ * @cvalue PACKET_FANOUT_LB
+ */
+const PACKET_FANOUT_LB = UNKNOWN;
+#endif
+
 #ifdef PACKET_FANOUT_CPU
 /**
  * @var int
