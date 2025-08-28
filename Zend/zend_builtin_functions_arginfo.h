@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9b49f527064695c812cd204d9efc63c13681d942 */
+ * Stub hash: 754be326aa54bdac769a16875276cf0161491718 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clone, 0, 1, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
@@ -47,6 +47,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_error_reporting, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error_level, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_exit_status arginfo_func_num_args
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_define, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, constant_name, IS_STRING, 0)
@@ -260,6 +262,7 @@ ZEND_FUNCTION(strncmp);
 ZEND_FUNCTION(strcasecmp);
 ZEND_FUNCTION(strncasecmp);
 ZEND_FUNCTION(error_reporting);
+ZEND_FUNCTION(exit_status);
 ZEND_FUNCTION(define);
 ZEND_FUNCTION(defined);
 ZEND_FUNCTION(get_class);
@@ -325,6 +328,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("strcasecmp", zif_strcasecmp, arginfo_strcasecmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("strncasecmp", zif_strncasecmp, arginfo_strncasecmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(error_reporting, arginfo_error_reporting)
+	ZEND_FE(exit_status, arginfo_exit_status)
 	ZEND_FE(define, arginfo_define)
 	ZEND_FE(defined, arginfo_defined)
 	ZEND_FE(get_class, arginfo_get_class)
