@@ -1132,11 +1132,10 @@ tail_call:
 					goto handle_ht;
 				}
 			}
-handle_zvals:;
-			bool is_primitive = true;
+handle_zvals:
 			for (; n != 0; n--) {
 				if (Z_COLLECTABLE_P(zv)) {
-					is_primitive = false;
+					zvals_ht = NULL;
 					ref = Z_COUNTED_P(zv);
 					GC_DELREF(ref);
 					if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
@@ -1153,16 +1152,15 @@ handle_zvals:;
 							}
 							zv++;
 						}
-						zvals_ht = NULL;
 						goto tail_call;
 					}
 				}
 				zv++;
 			}
-			if (is_primitive && zvals_ht) {
+			if (zvals_ht) {
 				GC_ADD_FLAGS(zvals_ht, GC_NOT_COLLECTABLE);
+				zvals_ht = NULL;
 			}
-			zvals_ht = NULL;
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		ZEND_ASSERT(((zend_array*)ref) != &EG(symbol_table));
