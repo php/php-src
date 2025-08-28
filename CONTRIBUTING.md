@@ -26,6 +26,7 @@ had several contributions accepted, commit privileges are often quickly granted.
 * [What happens when your contribution is applied?](#what-happens-when-your-contribution-is-applied)
 * [Git commit rules](#git-commit-rules)
 * [Copyright and license headers](#copyright-and-license-headers)
+* [NEWS file](#news)
 
 ## Pull requests
 
@@ -385,11 +386,8 @@ The next few rules are more of a technical nature:
    later branches) an empty merge should be done.
 
 2. All news updates intended for public viewing, such as new features, bug
-   fixes, improvements, etc., should go into the NEWS file of *any stable
-   release* version with the given change. In other words, news about a bug fix
-   which went into PHP-5.4, PHP-5.5 and master should be noted in both
-   PHP-5.4/NEWS and PHP-5.5/NEWS but not master, which is not a public released
-   version yet.
+   fixes, improvements, etc., should go into the NEWS file. See the section on
+   [NEWS](#news) below.
 
 3. Do not commit multiple files and dump all messages in one commit. If you
    modified several unrelated files, commit each group separately and provide a
@@ -422,14 +420,13 @@ An Example from the git project (commit 2b34e486bc):
     'arg' variable no longer is available.
 
 If you fix some bugs, you should note the bug ID numbers in your commit message.
-Bug ID should be prefixed by `#`.
 
 Example:
 
-    Fixed bug #14016 (pgsql notice handler double free crash bug.)
+    Fixed GH-14009: Fix prototype for trait method.
 
-When you change the NEWS file for a bug fix, then please keep the bugs sorted in
-decreasing order under the fixed version.
+When you change the NEWS file for a bug fix, then please keep the bugs sorted
+under the fixed version.
 
 ## Copyright and license headers
 
@@ -452,5 +449,91 @@ New source code files should include the following header block:
   +----------------------------------------------------------------------+
 */
 ```
+
+## NEWS
+
+The purpose of the NEWS file is to record all the changes that are relevant for
+users and developers alike. These could be bug fixes, feature additions, syntax
+additions, or deprecations.
+
+### Format
+
+Each PHP version has a section, starting with the format:
+
+    {DD} {MMM} {YYY}, PHP {version}
+
+Such as:
+
+    06 Jun 2024, PHP 8.1.29
+
+In each section, entries are ordered by their extension. Extensions are listed
+alphabetically, with the exception of "Core", which MUST be listed first. Each
+extension's section starts with: `- {name}:\n`
+
+For each extension, entries are indented by two spaces, followed by `. ` (a
+period and a space).
+
+Entries MUST start with a capital and end with a period (`.`). The period goes
+outside of the `{issue-description}`.
+
+Each entry SHOULD be followed by the name of the contributor, their php.net
+account name, or their GitHub handle if they so choose.
+
+Entries MUST be wrapped at 80 characters.
+
+If an entry pertains a bug fix, they MUST be formatted as:
+
+    Fixed bug GH-{number} ({issue-description}). ({contributor})
+
+Bug fix entries SHOULD be clustered together, and ordered according to their
+issue number. The `{issue-description}` SHOULD represent what the actual bug
+fix is about, and not necessarily what the user reported. Edit the description
+in the GitHub ticket to match.
+
+On the rare occasion where a bug from our deprecated bug system is fixed, the
+entry MUST be formatted as:
+
+	Fixed bug #{number} ({issue-description}). ({contributor})
+
+An example:
+
+```
+31 Jul 2025, PHP 8.5.0alpha4
+
+- Core:
+  . Added PHP_BUILD_PROVIDER constant. (timwolla)
+  . Fixed bug GH-16665 (\array and \callable should not be usable in
+    class_alias). (nielsdos)
+  . Fixed bug GH-19326 (Calling Generator::throw() on a running generator with
+    a non-Generator delegate crashes). (Arnaud)
+
+- OPcache:
+  . Make OPcache non-optional. (Arnaud, timwolla)
+
+- OpenSSL:
+  . Add $digest_algo parameter to openssl_public_encrypt() and
+    openssl_private_decrypt() functions. (Jakub Zelenka)
+ ```
+
+### Branches
+
+Depending on what sort of fix it is, or where in the release cycle we are,
+different NEWS files must be updated.
+
+*Security fixes*: In the lowest security-supported branch which received the
+security fix, and in each newer branch, except for master unless alpha releases
+have been tagged, and a release branch has not been created.
+
+*Bug fixes*: In the lowest supported branch, and in each newer branch, except
+for master unless alpha releases have been tagged, and a release branch has not
+been created.
+
+*Feature additions*: In master only.
+
+If for some reason a feature is introduced in a branch lower than master,
+although this is strictly prohibited by other policies, then the entry must
+also be in master.
+
+## Thanks
 
 Thank you for contributing to PHP!
