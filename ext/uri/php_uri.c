@@ -727,7 +727,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 }
 
-static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *uri_parser_name)
+static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 {
 	HashTable *data;
 
@@ -763,7 +763,6 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *uri_parser
 	}
 
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
-	internal_uri->parser = uri_parser_by_name(uri_parser_name, strlen(uri_parser_name));
 	if (internal_uri->uri != NULL) {
 		internal_uri->parser->free_uri(internal_uri->uri);
 	}
@@ -789,7 +788,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *uri_parser
 
 PHP_METHOD(Uri_Rfc3986_Uri, __unserialize)
 {
-	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PARSER_RFC3986);
+	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, __debugInfo)
@@ -942,7 +941,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 
 PHP_METHOD(Uri_WhatWg_Url, __unserialize)
 {
-	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PARSER_WHATWG);
+	uri_unserialize(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
