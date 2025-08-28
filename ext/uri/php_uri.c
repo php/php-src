@@ -359,6 +359,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 	}
 
 	if (pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE) {
+		uri_parser->free_uri(uri);
 		RETURN_THROWS();
 	}
 
