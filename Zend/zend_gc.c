@@ -1044,7 +1044,7 @@ next:
  * counts and mark visited nodes grey. See MarkGray() in Bacon & Rajan. */
 static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 {
-	HashTable *ht, *zvals_ht = NULL;
+	HashTable *ht, *primitive_ht = NULL;
 	Bucket *p;
 	zval *zv;
 	uint32_t n;
@@ -1135,7 +1135,7 @@ tail_call:
 handle_zvals:
 			for (; n != 0; n--) {
 				if (Z_COLLECTABLE_P(zv)) {
-					zvals_ht = NULL;
+					primitive_ht = NULL;
 					ref = Z_COUNTED_P(zv);
 					GC_DELREF(ref);
 					if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
@@ -1157,9 +1157,9 @@ handle_zvals:
 				}
 				zv++;
 			}
-			if (zvals_ht) {
-				GC_ADD_FLAGS(zvals_ht, GC_NOT_COLLECTABLE);
-				zvals_ht = NULL;
+			if (primitive_ht) {
+				GC_ADD_FLAGS(primitive_ht, GC_NOT_COLLECTABLE);
+				primitive_ht = NULL;
 			}
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
@@ -1170,13 +1170,12 @@ handle_ht:
 		if (GC_FLAGS(ht) & GC_NOT_COLLECTABLE) {
 			goto next;
 		}
+		primitive_ht = ht;
 		if (HT_IS_PACKED(ht)) {
             zv = ht->arPacked;
-            zvals_ht = ht;
             goto handle_zvals;
 		}
 
-		bool is_primitive = true;
 		p = ht->arData;
 		for (; n != 0; n--) {
 			zv = &p->val;
@@ -1184,7 +1183,7 @@ handle_ht:
 				zv = Z_INDIRECT_P(zv);
 			}
 			if (Z_COLLECTABLE_P(zv)) {
-				is_primitive = false;
+				primitive_ht = NULL;
 				ref = Z_COUNTED_P(zv);
 				GC_DELREF(ref);
 				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
@@ -1210,8 +1209,9 @@ handle_ht:
 			}
 			p++;
 		}
-		if (is_primitive) {
+		if (primitive_ht) {
 			GC_ADD_FLAGS(ht, GC_NOT_COLLECTABLE);
+			primitive_ht = NULL;
 		}
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_COLLECTABLE(((zend_reference*)ref)->val)) {
