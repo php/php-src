@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
 
+- PCRE:
+  . Upgraded to pcre2lib from 10.45 to 10.46. (nielsdos)
+
 - Session:
   . Fix RC violation of session SID constant deprecation attribute. (ilutov)
 
