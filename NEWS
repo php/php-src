@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0beta3
 
+- Opcache:
+  . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
+
 - Session:
   . Fix RC violation of session SID constant deprecation attribute. (ilutov)
 
@@ -54,7 +57,6 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug GH-19493 (JIT variable not stored before YIELD). (Arnaud)
-  . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
 
 - OpenSSL:
   . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
