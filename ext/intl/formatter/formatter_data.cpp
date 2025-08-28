@@ -52,7 +52,7 @@ void formatter_data_free( formatter_data* nf_data )
  */
 formatter_data* formatter_data_create( void )
 {
-	formatter_data* nf_data = ecalloc( 1, sizeof(formatter_data) );
+	formatter_data* nf_data = reinterpret_cast<formatter_data *>(ecalloc( 1, sizeof(formatter_data) ));
 
 	formatter_data_init( nf_data );
 
