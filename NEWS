@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Session:
   . Fix RC violation of session SID constant deprecation attribute. (ilutov)
 
+- Standard:
+  . Fix GH-19610 (Deprecation warnings in functions taking as argument).
+    (Girgias)
+
 - URI:
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
   . Fixed memory management of the internal "parse_url" URI parser.

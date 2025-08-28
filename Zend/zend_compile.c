@@ -7800,6 +7800,8 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				ZSTR_VAL(name));
 		} else if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_THIS))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as parameter");
+		} else if (zend_string_equals_literal(name, "http_response_header")) {
+			CG(context).has_assigned_to_http_response_header = true;
 		}
 
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
