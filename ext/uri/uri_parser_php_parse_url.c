@@ -158,6 +158,10 @@ static void uri_parser_php_parse_url_free(void *uri)
 {
 	php_url *parse_url_uri = uri;
 
+	if (UNEXPECTED(parse_url_uri == NULL)) {
+		return;
+	}
+
 	php_url_free(parse_url_uri);
 }
 
