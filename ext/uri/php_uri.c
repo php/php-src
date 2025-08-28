@@ -954,14 +954,29 @@ PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
 	RETURN_ARR(uri_get_debug_properties(object));
 }
 
-static zend_object *uri_create_object_handler(zend_class_entry *class_type)
+static uri_object_t *uri_create_object_handler(zend_class_entry *class_type, const uri_parser_t *parser)
 {
 	uri_object_t *uri_object = zend_object_alloc(sizeof(*uri_object), class_type);
 
 	zend_object_std_init(&uri_object->std, class_type);
 	object_properties_init(&uri_object->std, class_type);
 
-	return &uri_object->std;
+	uri_object->internal = (uri_internal_t){
+		.parser = parser,
+		.uri = NULL,
+	};
+
+	return uri_object;
+}
+
+static zend_object *uri_create_object_handler_rfc3986(zend_class_entry *ce)
+{
+	return &uri_create_object_handler(ce, &php_uri_parser_rfc3986)->std;
+}
+
+static zend_object *uri_create_object_handler_whatwg(zend_class_entry *ce)
+{
+	return &uri_create_object_handler(ce, &php_uri_parser_whatwg)->std;
 }
 
 static void uri_free_obj_handler(zend_object *object)
@@ -984,11 +999,8 @@ static zend_object *uri_clone_obj_handler(zend_object *object)
 
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	zend_object *new_object = uri_create_object_handler(object->ce);
-	ZEND_ASSERT(new_object != NULL);
-	uri_object_t *new_uri_object = uri_object_from_obj(new_object);
-
-	new_uri_object->internal.parser = internal_uri->parser;
+	uri_object_t *new_uri_object = uri_object_from_obj(object->ce->create_object(object->ce));
+	ZEND_ASSERT(new_uri_object->internal.parser == internal_uri->parser);
 
 	void *uri = internal_uri->parser->clone_uri(internal_uri->uri);
 	ZEND_ASSERT(uri != NULL);
@@ -1020,7 +1032,7 @@ PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser)
 static PHP_MINIT_FUNCTION(uri)
 {
 	uri_rfc3986_uri_ce = register_class_Uri_Rfc3986_Uri();
-	uri_rfc3986_uri_ce->create_object = uri_create_object_handler;
+	uri_rfc3986_uri_ce->create_object = uri_create_object_handler_rfc3986;
 	uri_rfc3986_uri_ce->default_object_handlers = &uri_rfc3986_uri_object_handlers;
 	memcpy(&uri_rfc3986_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	uri_rfc3986_uri_object_handlers.offset = XtOffsetOf(uri_object_t, std);
@@ -1028,7 +1040,7 @@ static PHP_MINIT_FUNCTION(uri)
 	uri_rfc3986_uri_object_handlers.clone_obj = uri_clone_obj_handler;
 
 	uri_whatwg_url_ce = register_class_Uri_WhatWg_Url();
-	uri_whatwg_url_ce->create_object = uri_create_object_handler;
+	uri_whatwg_url_ce->create_object = uri_create_object_handler_whatwg;
 	uri_whatwg_url_ce->default_object_handlers = &uri_whatwg_uri_object_handlers;
 	memcpy(&uri_whatwg_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	uri_whatwg_uri_object_handlers.offset = XtOffsetOf(uri_object_t, std);
