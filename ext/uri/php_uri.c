@@ -325,7 +325,6 @@ static zend_result pass_errors_by_ref_and_free(zval *errors_zv, zval *errors)
 
 	ZEND_TRY_ASSIGN_REF_ARR(errors_zv, Z_ARRVAL_P(errors));
 	if (EG(exception)) {
-		zval_ptr_dtor(errors);
 		return FAILURE;
 	}
 
