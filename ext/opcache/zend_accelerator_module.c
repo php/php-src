@@ -162,6 +162,11 @@ static ZEND_INI_MH(OnEnable)
 		/* It may be only temporary disabled */
 		bool *p = (bool *) ZEND_INI_GET_ADDR();
 		if (zend_ini_parse_bool(new_value)) {
+			if (*p) {
+				/* Do not warn if OPcache is enabled, as the update would be a noop anyways. */
+				return SUCCESS;
+			}
+
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
 			return FAILURE;
 		} else {
