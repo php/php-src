@@ -1000,16 +1000,6 @@ static zend_object *uri_clone_obj_handler(zend_object *object)
 	return &new_uri_object->std;
 }
 
-ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_implementation_set_object_handlers(zend_class_entry *ce, zend_object_handlers *object_handlers)
-{
-	ce->create_object = uri_create_object_handler;
-	ce->default_object_handlers = object_handlers;
-	memcpy(object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	object_handlers->offset = XtOffsetOf(uri_object_t, std);
-	object_handlers->free_obj = uri_free_obj_handler;
-	object_handlers->clone_obj = uri_clone_obj_handler;
-}
-
 PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser)
 {
 	zend_string *key = zend_string_init_interned(uri_parser->name, strlen(uri_parser->name), true);
@@ -1030,10 +1020,20 @@ PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser)
 static PHP_MINIT_FUNCTION(uri)
 {
 	uri_rfc3986_uri_ce = register_class_Uri_Rfc3986_Uri();
-	php_uri_implementation_set_object_handlers(uri_rfc3986_uri_ce, &uri_rfc3986_uri_object_handlers);
+	uri_rfc3986_uri_ce->create_object = uri_create_object_handler;
+	uri_rfc3986_uri_ce->default_object_handlers = &uri_rfc3986_uri_object_handlers;
+	memcpy(&uri_rfc3986_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	uri_rfc3986_uri_object_handlers.offset = XtOffsetOf(uri_object_t, std);
+	uri_rfc3986_uri_object_handlers.free_obj = uri_free_obj_handler;
+	uri_rfc3986_uri_object_handlers.clone_obj = uri_clone_obj_handler;
 
 	uri_whatwg_url_ce = register_class_Uri_WhatWg_Url();
-	php_uri_implementation_set_object_handlers(uri_whatwg_url_ce, &uri_whatwg_uri_object_handlers);
+	uri_whatwg_url_ce->create_object = uri_create_object_handler;
+	uri_whatwg_url_ce->default_object_handlers = &uri_whatwg_uri_object_handlers;
+	memcpy(&uri_whatwg_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	uri_whatwg_uri_object_handlers.offset = XtOffsetOf(uri_object_t, std);
+	uri_whatwg_uri_object_handlers.free_obj = uri_free_obj_handler;
+	uri_whatwg_uri_object_handlers.clone_obj = uri_clone_obj_handler;
 
 	uri_comparison_mode_ce = register_class_Uri_UriComparisonMode();
 	uri_exception_ce = register_class_Uri_UriException(zend_ce_exception);
