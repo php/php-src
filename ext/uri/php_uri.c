@@ -764,9 +764,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS, const char *uri_parser
 
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	internal_uri->parser = uri_parser_by_name(uri_parser_name, strlen(uri_parser_name));
-	if (internal_uri->uri != NULL) {
-		internal_uri->parser->free_uri(internal_uri->uri);
-	}
+	internal_uri->parser->free_uri(internal_uri->uri);
 	internal_uri->uri = internal_uri->parser->parse_uri(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
 	if (internal_uri->uri == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
@@ -968,11 +966,8 @@ static void uri_free_obj_handler(zend_object *object)
 {
 	uri_object_t *uri_object = uri_object_from_obj(object);
 
-	if (UNEXPECTED(uri_object->internal.uri != NULL)) {
-		uri_object->internal.parser->free_uri(uri_object->internal.uri);
-		uri_object->internal.parser = NULL;
-		uri_object->internal.uri = NULL;
-	}
+	uri_object->internal.parser->free_uri(uri_object->internal.uri);
+	uri_object->internal.uri = NULL;
 
 	zend_object_std_dtor(&uri_object->std);
 }
