@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "../../../Zend/zend_types.h"
+#include "Zend/zend_types.h"
 #include "Zend/zend_API.h"
 
 static ZEND_COLD void undef_result_after_exception(void) {
