@@ -2286,12 +2286,10 @@ int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
 
 		/* Host data - IPvFuture (may affect host text) */
 		if (uri->hostData.ipFuture.first != NULL) {
-			/* NOTE: .hostData.ipFuture may hold the very same range pointers
-			 *       as .hostText; then we need to prevent freeing memory twice. */
-			if (uri->hostText.first == uri->hostData.ipFuture.first) {
-				uri->hostText.first = NULL;
-				uri->hostText.afterLast = NULL;
-			}
+			/* NOTE: .hostData.ipFuture holds the very same range pointers
+			 *       as .hostText; we must not free memory twice. */
+			uri->hostText.first = NULL;
+			uri->hostText.afterLast = NULL;
 
 			if (uri->hostData.ipFuture.first != uri->hostData.ipFuture.afterLast) {
 				memory->free(memory, (URI_CHAR *)uri->hostData.ipFuture.first);
@@ -2332,20 +2330,7 @@ int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
 	}
 
 	/* Path */
-	if (uri->pathHead != NULL) {
-		URI_TYPE(PathSegment) * segWalk = uri->pathHead;
-		while (segWalk != NULL) {
-			URI_TYPE(PathSegment) * const next = segWalk->next;
-			if (uri->owner && (segWalk->text.first != NULL)
-					&& (segWalk->text.first < segWalk->text.afterLast)) {
-				memory->free(memory, (URI_CHAR *)segWalk->text.first);
-			}
-			memory->free(memory, segWalk);
-			segWalk = next;
-		}
-		uri->pathHead = NULL;
-		uri->pathTail = NULL;
-	}
+	URI_FUNC(FreeUriPath)(uri, memory);
 
 	if (uri->owner) {
 		/* Query */

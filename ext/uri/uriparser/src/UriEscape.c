@@ -229,9 +229,12 @@ URI_CHAR * URI_FUNC(EscapeEx)(const URI_CHAR * inFirst,
 			/* Percent encode */
 			{
 				const unsigned char code = (unsigned char)read[0];
+				/* Uppercase recommended in (last sentence of) section 2.1   *
+				 * of RFC 3986:                                              *
+				 * https://datatracker.ietf.org/doc/html/rfc3986#section-2.1 */
 				write[0] = _UT('%');
-				write[1] = URI_FUNC(HexToLetter)(code >> 4);
-				write[2] = URI_FUNC(HexToLetter)(code & 0x0f);
+				write[1] = URI_FUNC(HexToLetterEx)(code >> 4, URI_TRUE);
+				write[2] = URI_FUNC(HexToLetterEx)(code & 0x0f, URI_TRUE);
 				write += 3;
 			}
 			prevWasCr = URI_FALSE;
