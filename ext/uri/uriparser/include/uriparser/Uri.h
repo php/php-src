@@ -134,7 +134,11 @@ typedef struct URI_TYPE(PathSegmentStruct) {
 typedef struct URI_TYPE(HostDataStruct) {
 	UriIp4 * ip4; /**< IPv4 address */
 	UriIp6 * ip6; /**< IPv6 address */
-	URI_TYPE(TextRange) ipFuture; /**< IPvFuture address */
+	URI_TYPE(TextRange) ipFuture; /**< IPvFuture address
+		@note
+		With non-<c>NULL</c> members in UriUriStructA.hostData context,
+		this text range's pointers must be <em>idential</em> to those
+		of UriUriStructA.hostText at all times. */
 } URI_TYPE(HostData); /**< @copydoc UriHostDataStructA */
 
 
@@ -210,6 +214,48 @@ typedef struct URI_TYPE(QueryListStruct) {
  * @since 0.9.9
  */
 URI_PUBLIC UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri);
+
+
+
+/**
+ * Converts an IPv6 text representation into 16 bytes.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param output       <b>OUT</b>: Output destination, can be <c>NULL</c>
+ * @param first        <b>IN</b>: First character of IPv6 text to parse
+ * @param afterLast    <b>IN</b>: Position to stop parsing at
+ * @return Error code or <c>URI_SUCCESS</c> on success
+ *
+ * @see uriParseIpFourAddressA
+ * @see uriParseIpSixAddressMmA
+ * @see uriIsWellFormedHostIp6A
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(ParseIpSixAddress)(UriIp6 * output,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Converts an IPv6 text representation into 16 bytes.
+ *
+ * @param output       <b>OUT</b>: Output destination, can be <c>NULL</c>
+ * @param first        <b>IN</b>: First character of IPv6 text to parse
+ * @param afterLast    <b>IN</b>: Position to stop parsing at
+ * @param memory       <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return Error code or <c>URI_SUCCESS</c> on success
+ *
+ * @see uriParseIpFourAddressA
+ * @see uriParseIpSixAddressA
+ * @see uriIsWellFormedHostIp6MmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(ParseIpSixAddressMm)(UriIp6 * output,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
 
 
 
@@ -1182,6 +1228,992 @@ URI_PUBLIC int URI_FUNC(MakeOwner)(URI_TYPE(Uri) * uri);
  */
 URI_PUBLIC int URI_FUNC(MakeOwnerMm)(URI_TYPE(Uri) * uri,
                                      UriMemoryManager * memory);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed fragment
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetFragmentA
+ * @see uriSetFragmentMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedFragment)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed IPv4 address
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp4MmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostIp4)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed IPv6 address
+ * according to RFC 3986 or not.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_SUCCESS</c> if non-<c>NULL</c> and well-formed, else an error code
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6MmA
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriParseIpSixAddressA
+ * @see uriParseIpSixAddressMmA
+ * @since 0.9.9
+ */
+int URI_FUNC(IsWellFormedHostIp6)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed IPv6 address
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           <c>URI_SUCCESS</c> if non-<c>NULL</c> and well-formed, else an error code
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureMmA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @since 0.9.9
+ */
+int URI_FUNC(IsWellFormedHostIp6Mm)(const URI_CHAR * first, const URI_CHAR * afterLast, UriMemoryManager * memory);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed IPvFuture address
+ * according to RFC 3986 or not.
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_SUCCESS</c> if non-<c>NULL</c> and well-formed, else an error code
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureMmA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostIpFutureMmA
+ * @since 0.9.9
+ */
+int URI_FUNC(IsWellFormedHostIpFuture)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed IPvFuture address
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           <c>URI_SUCCESS</c> if non-<c>NULL</c> and well-formed, else an error code
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostIpFutureMmA
+ * @since 0.9.9
+ */
+int URI_FUNC(IsWellFormedHostIpFutureMm)(const URI_CHAR * first, const URI_CHAR * afterLast, UriMemoryManager * memory);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed registered host name
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetHostRegNameA
+ * @see uriSetHostRegNameMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedHostRegName)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed path
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @param hasHost    <b>IN</b>: Wether the target %URI has a non-<c>NULL</c> host set or not
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetPathA
+ * @see uriSetPathMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedPath)(const URI_CHAR * first, const URI_CHAR * afterLast, UriBool hasHost);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed port text
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetPortTextA
+ * @see uriSetPortTextMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedPort)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed query
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetQueryA
+ * @see uriSetQueryMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedQuery)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+/**
+ * Determines if the given text range contains a well-formed scheme
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetSchemeA
+ * @see uriSetSchemeMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedScheme)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+
+/**
+ * Determines if the given text range contains a well-formed user info
+ * according to RFC 3986 or not.
+ *
+ * @param first      <b>IN</b>: Pointer to first character
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in
+ * @return           <c>URI_TRUE</c> if non-<c>NULL</c> and well-formed, else <c>URI_FALSE</c>
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriIsWellFormedHostIp4A
+ * @see uriIsWellFormedHostIp6A
+ * @see uriIsWellFormedHostIpFutureA
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriIsWellFormedPathA
+ * @see uriIsWellFormedPortA
+ * @see uriIsWellFormedQueryA
+ * @see uriIsWellFormedSchemeA
+ * @see uriSetUserInfoA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC UriBool URI_FUNC(IsWellFormedUserInfo)(const URI_CHAR * first, const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the fragment of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetFragment)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the fragment of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedFragmentA
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetFragmentMm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostRegName)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostRegNameA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostRegNameMm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIp4)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIp4Mm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp6A
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIp6)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp6A
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIp6Mm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIpFuture)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the host of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedHostIp4A
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetHostIpFutureMm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the path of the given %URI to the given value.
+ *
+ * Non-<c>NULL</c> values must start with a leading slash for %URIs that have a host.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedPathA
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPathMmA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetPath)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the path of the given %URI to the given value.
+ *
+ * Non-<c>NULL</c> values must start with a leading slash for %URIs that have a host.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedPathA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPathA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetPathMm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the port text of the given %URI to the given value.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedPortA
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetPortText)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the port text of the given %URI to the given value.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedPortA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetPortTextMm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the query of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedQueryA
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetQuery)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the query of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedQueryA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetQueryMm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the scheme of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedSchemeA
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetScheme)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the scheme of the given %URI to the given value.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedSchemeA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetSchemeMm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
+
+
+
+/**
+ * Sets the user info of the given %URI to the given value.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * Uses default libc-based memory manager.
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetFragmentA
+ * @see uriSetHostIp4A
+ * @see uriSetHostIp6A
+ * @see uriSetHostIpFutureA
+ * @see uriSetHostRegNameA
+ * @see uriSetPortTextA
+ * @see uriSetQueryA
+ * @see uriSetSchemeA
+ * @see uriSetUserInfoMmA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetUserInfo)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast);
+
+
+
+/**
+ * Sets the user info of the given %URI to the given value.
+ *
+ * The %URI must have a non-<c>NULL</c> host set.
+ *
+ * Parameters <c>first</c> and <c>afterLast</c> must both be <c>NULL</c>
+ * or non-<c>NULL</c> at the same time.
+ *
+ * The function may make the %URI own its memory if needed (if it is not already owned).
+ *
+ * @param uri        <b>INOUT</b>: %URI to modify
+ * @param first      <b>IN</b>: Pointer to first character, can be <c>NULL</c>
+ * @param afterLast  <b>IN</b>: Pointer to character after the last one still in, can be <c>NULL</c>
+ * @param memory     <b>IN</b>: Memory manager to use, <c>NULL</c> for default libc
+ * @return           Error code or 0 on success
+ *
+ * @see uriIsWellFormedUserInfoA
+ * @see uriSetFragmentMmA
+ * @see uriSetHostIp4MmA
+ * @see uriSetHostIp6MmA
+ * @see uriSetHostIpFutureMmA
+ * @see uriSetHostRegNameMmA
+ * @see uriSetPortTextMmA
+ * @see uriSetQueryMmA
+ * @see uriSetSchemeMmA
+ * @see uriSetUserInfoA
+ * @since 0.9.9
+ */
+URI_PUBLIC int URI_FUNC(SetUserInfoMm)(URI_TYPE(Uri) * uri,
+		const URI_CHAR * first,
+		const URI_CHAR * afterLast,
+		UriMemoryManager * memory);
 
 
 
