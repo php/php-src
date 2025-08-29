@@ -95,8 +95,6 @@ static inline bool may_have_side_effects(
 		case ZEND_DIV:
 		case ZEND_MOD:
 		case ZEND_BOOL_XOR:
-		case ZEND_BOOL:
-		case ZEND_BOOL_NOT:
 		case ZEND_BW_NOT:
 		case ZEND_SL:
 		case ZEND_SR:
@@ -106,7 +104,6 @@ static inline bool may_have_side_effects(
 		case ZEND_IS_SMALLER_OR_EQUAL:
 		case ZEND_CASE:
 		case ZEND_CASE_STRICT:
-		case ZEND_CAST:
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
 		case ZEND_INIT_ARRAY:
@@ -126,6 +123,27 @@ static inline bool may_have_side_effects(
 		case ZEND_ARRAY_KEY_EXISTS:
 			/* No side effects */
 			return 0;
+		case ZEND_CAST: {
+			uint32_t t1 = OP1_INFO();
+			/* Cast from NAN emits warning */
+			if (t1 & MAY_BE_DOUBLE) {
+				return true;
+			}
+			if (t1 & MAY_BE_ARRAY) {
+				/* Array cast to string emits warning */
+				return opline->extended_value == IS_STRING;
+			}
+			return false;
+		}
+		case ZEND_BOOL:
+		case ZEND_BOOL_NOT: {
+			uint32_t t1 = OP1_INFO();
+			/* Cast from NAN emits warning */
+			if (t1 & MAY_BE_DOUBLE) {
+				return true;
+			}
+			return false;
+		}
 		case ZEND_FREE:
 			return opline->extended_value == ZEND_FREE_VOID_CAST;
 		case ZEND_ADD_ARRAY_ELEMENT:

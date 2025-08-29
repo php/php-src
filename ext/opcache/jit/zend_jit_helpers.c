@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "../../../Zend/zend_portability.h"
 #include "Zend/zend_API.h"
 
 static ZEND_COLD void undef_result_after_exception(void) {
@@ -2564,6 +2565,11 @@ static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)
 {
 	zend_error(E_WARNING, "Trying to access array offset on %s", zend_zval_value_name(container));
+}
+
+static void ZEND_FASTCALL zend_jit_check_nan_to_bool_coercion(void)
+{
+	zend_nan_coerced_to_type_warning(_IS_BOOL);
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_property_read(zval *container, const char *property_name)
