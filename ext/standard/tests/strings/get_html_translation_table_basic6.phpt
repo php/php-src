@@ -3,7 +3,7 @@ Test get_html_translation_table() function : basic functionality - HTML 5/Window
 --FILE--
 <?php
 
-function so($a,$b) { return ord($a) - ord($b); }
+function so($a,$b) { return ord($a[0]) - ord($b[0]); }
 
 echo "*** Testing get_html_translation_table() : basic functionality - HTML 5/Windows-1251 ***\n";
 
