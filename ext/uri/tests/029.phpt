@@ -5,6 +5,33 @@ uri
 --FILE--
 <?php
 
+$uri1 = Uri\Rfc3986\Uri::parse("https://example.com?foo=bar");
+$uri2 = $uri1->withQuery("foo=baz");
+$uri3 = $uri2->withQuery(null);
+
+var_dump($uri1->getQuery());
+var_dump($uri2->getQuery());
+var_dump($uri3->getQuery());
+
+$uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
+$uri2 = $uri1->withQuery("?foo=bar&foo=baz");
+$uri3 = $uri1->withQuery("foo=bar&foo=baz");
+$uri4 = $uri3->withQuery("t%65st");
+$uri5 = $uri4->withQuery("foo=foo%26bar&baz=/qux%3D");
+
+var_dump($uri1->getQuery());
+var_dump($uri2->getQuery());
+var_dump($uri3->getQuery());
+var_dump($uri4->getQuery());
+var_dump($uri4->getRawQuery());
+var_dump($uri5->getQuery());
+
+try {
+    $uri5->withQuery("#");
+} catch (Uri\InvalidUriException $e) {
+    echo $e->getMessage() . "\n";
+}
+
 $url1 = Uri\WhatWg\Url::parse("https://example.com?foo=bar");
 $url2 = $url1->withQuery("?foo=baz");
 $url3 = $url2->withQuery(null);
@@ -29,6 +56,16 @@ var_dump($url6->getQuery());
 
 ?>
 --EXPECT--
+string(7) "foo=bar"
+string(7) "foo=baz"
+NULL
+NULL
+string(16) "?foo=bar&foo=baz"
+string(15) "foo=bar&foo=baz"
+string(4) "test"
+string(6) "t%65st"
+string(25) "foo=foo%26bar&baz=/qux%3D"
+The specified query is malformed
 string(7) "foo=bar"
 string(7) "foo=baz"
 NULL

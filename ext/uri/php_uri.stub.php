@@ -32,9 +32,13 @@ namespace Uri\Rfc3986 {
 
         public function getRawScheme(): ?string {}
 
+        public function withScheme(?string $scheme): static {}
+
         public function getUserInfo(): ?string {}
 
         public function getRawUserInfo(): ?string {}
+
+        public function withUserInfo(#[\SensitiveParameter] ?string $userinfo): static {}
 
         public function getUsername(): ?string {}
 
@@ -48,19 +52,29 @@ namespace Uri\Rfc3986 {
 
         public function getRawHost(): ?string {}
 
+        public function withHost(?string $host): static {}
+
         public function getPort(): ?int {}
+
+        public function withPort(?int $port): static {}
 
         public function getPath(): string {}
 
         public function getRawPath(): string {}
 
+        public function withPath(string $path): static {}
+
         public function getQuery(): ?string {}
 
         public function getRawQuery(): ?string {}
 
+        public function withQuery(?string $query): static {}
+
         public function getFragment(): ?string {}
 
         public function getRawFragment(): ?string {}
+
+        public function withFragment(?string $fragment): static {}
 
         public function equals(\Uri\Rfc3986\Uri $uri, \Uri\UriComparisonMode $comparisonMode = \Uri\UriComparisonMode::ExcludeFragment): bool {}
 
@@ -157,26 +171,31 @@ namespace Uri\WhatWg {
 
         public function getUnicodeHost(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withHost */
         public function withHost(?string $host): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPort */
         public function getPort(): ?int {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withPort */
         public function withPort(?int $port): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getPath */
         public function getPath(): string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withPath */
         public function withPath(string $path): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getQuery */
         public function getQuery(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withQuery */
         public function withQuery(?string $query): static {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::getFragment */
         public function getFragment(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withFragment */
         public function withFragment(?string $fragment): static {}
 
         public function equals(\Uri\WhatWg\Url $url, \Uri\UriComparisonMode $comparisonMode = \Uri\UriComparisonMode::ExcludeFragment): bool {}
