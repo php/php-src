@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "Zend/zend_types.h"
 #include "Zend/zend_API.h"
 
 static ZEND_COLD void undef_result_after_exception(void) {
@@ -2559,6 +2560,14 @@ static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 {
 	ZVAL_NEW_REF(arg, arg);
 	zend_error(E_NOTICE, "Only variables should be passed by reference");
+}
+
+static void ZEND_FASTCALL zend_jit_invalid_array_use(const zval *container)
+{
+	/* Warning should not occur on null */
+	if (Z_TYPE_P(container) != IS_NULL) {
+		zend_error(E_WARNING, "Cannot use %s as array", zend_zval_type_name(container));
+	}
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)

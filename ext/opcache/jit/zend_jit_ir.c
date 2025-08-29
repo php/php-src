@@ -16,6 +16,7 @@
  *  +----------------------------------------------------------------------+
  */
 
+#include "Zend/zend_type_info.h"
 #include "jit/ir/ir.h"
 #include "jit/ir/ir_builder.h"
 #include "jit/tls/zend_jit_tls.h"
@@ -12786,7 +12787,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 				}
 			}
 
-			if (opline->opcode != ZEND_FETCH_DIM_IS && opline->opcode != ZEND_FETCH_LIST_R) {
+			if (opline->opcode != ZEND_FETCH_DIM_IS) {
 				ir_ref ref;
 
 				may_throw = 1;
@@ -12796,7 +12797,11 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 					jit_SET_EX_OPLINE(jit, opline);
 					ref = jit_ZVAL_ADDR(jit, op1_addr);
 				}
-				ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_invalid_array_access), ref);
+				if (opline->opcode == ZEND_FETCH_LIST_R) {
+					ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_invalid_array_use), ref);
+				} else {
+					ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_invalid_array_access), ref);
+				}
 			}
 
 			jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
