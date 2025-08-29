@@ -106,6 +106,14 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_writing(uri_internal_t *inter
 	return &uriparser_uris->uri;
 }
 
+ZEND_ATTRIBUTE_NONNULL static void reset_normalized_uri_after_writing(uri_internal_t *internal_uri)
+{
+	php_uri_parser_rfc3986_uris *uriparser_uris = internal_uri->uri;
+
+	uriFreeUriMembersMmA(&uriparser_uris->normalized_uri, mm);
+	uriparser_uris->normalized_uri_initialized = false;
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
@@ -134,6 +142,8 @@ static zend_result php_uri_parser_rfc3986_scheme_write(struct uri_internal_t *in
 		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified scheme is malformed", 0);
 		return FAILURE;
 	}
+
+	reset_normalized_uri_after_writing(internal_uri);
 
 	return SUCCESS;
 }
@@ -167,9 +177,10 @@ zend_result php_uri_parser_rfc3986_userinfo_write(struct uri_internal_t *interna
 		return FAILURE;
 	}
 
+	reset_normalized_uri_after_writing(internal_uri);
+
 	return SUCCESS;
 }
-
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
@@ -252,6 +263,8 @@ static zend_result php_uri_parser_rfc3986_host_write(struct uri_internal_t *inte
 		return FAILURE;
 	}
 
+	reset_normalized_uri_after_writing(internal_uri);
+
 	return SUCCESS;
 }
 
@@ -303,6 +316,8 @@ static zend_result php_uri_parser_rfc3986_port_write(struct uri_internal_t *inte
 		return FAILURE;
 	}
 
+	reset_normalized_uri_after_writing(internal_uri);
+
 	return SUCCESS;
 }
 
@@ -350,6 +365,8 @@ static zend_result php_uri_parser_rfc3986_path_write(struct uri_internal_t *inte
 		return FAILURE;
 	}
 
+	reset_normalized_uri_after_writing(internal_uri);
+
 	return SUCCESS;
 }
 
@@ -382,6 +399,8 @@ static zend_result php_uri_parser_rfc3986_query_write(struct uri_internal_t *int
 		return FAILURE;
 	}
 
+	reset_normalized_uri_after_writing(internal_uri);
+
 	return SUCCESS;
 }
 
@@ -413,6 +432,8 @@ static zend_result php_uri_parser_rfc3986_fragment_write(struct uri_internal_t *
 		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified fragment is malformed", 0);
 		return FAILURE;
 	}
+
+	reset_normalized_uri_after_writing(internal_uri);
 
 	return SUCCESS;
 }
