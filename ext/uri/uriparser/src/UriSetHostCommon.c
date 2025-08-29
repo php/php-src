@@ -219,6 +219,9 @@ int URI_FUNC(InternalSetHostMm)(URI_TYPE(Uri) * uri,
 					{
 						const int res = URI_FUNC(ParseIpFourAddress)(uri->hostData.ip4->data, first, afterLast);
 						assert(res == URI_SUCCESS);  /* because checked for well-formedness earlier */
+						if (res != URI_SUCCESS) {
+							return URI_ERROR_MALLOC;
+						}
 					}
 				}
 				break;
