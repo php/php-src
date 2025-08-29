@@ -21,4 +21,4 @@ Should not warn:
 Disabling:
 Should warn:
 
-Warning: Zend OPcache can't be temporary enabled (it may be only disabled till the end of request) in %s on line %d
+Warning: Zend OPcache can't be temporarily enabled (it may be only disabled till the end of request) in %s on line %d

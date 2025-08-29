@@ -32,7 +32,7 @@ $tester->start(iniEntries: [
     'opcache.log_verbosity_level' => '2',
 ]);
 $tester->expectLogStartNotices();
-$tester->expectLogPattern("/Zend OPcache can't be temporary enabled. Are you using php_admin_value\\[opcache.enable\\]=1 in an individual pool's configuration?/");
+$tester->expectLogPattern("/Zend OPcache can't be temporarily enabled. Are you using php_admin_value\\[opcache.enable\\]=1 in an individual pool's configuration?/");
 echo $tester
     ->request()
     ->getBody();
