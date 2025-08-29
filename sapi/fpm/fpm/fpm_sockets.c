@@ -27,6 +27,7 @@
 #include "fpm_env.h"
 #include "fpm_cleanup.h"
 #include "fpm_scoreboard.h"
+#include "zend_smart_string.h"
 
 struct listening_socket_s {
 	int refcount;
@@ -58,40 +59,24 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 	unsigned i;
 	unsigned socket_set_count = 0;
 	unsigned socket_set[FPM_ENV_SOCKET_SET_MAX];
-	unsigned socket_set_buf = 0;
 	char envname[32];
-	char *env_value = 0;
-	int p = 0;
+	smart_string env_str = {0};
 	struct listening_socket_s *ls = sockets_list.data;
 
 	for (i = 0; i < sockets_list.used; i++, ls++) {
 		if (which != FPM_CLEANUP_PARENT_EXEC) {
 			close(ls->sock);
 		} else { /* on PARENT EXEC we want socket fds to be inherited through environment variable */
-			char fd[32];
-			char *tmpenv_value;
-			snprintf(fd, sizeof(fd), "%d", ls->sock);
-
-			socket_set_buf = (i % FPM_ENV_SOCKET_SET_SIZE == 0 && i) ? 1 : 0;
-			tmpenv_value = realloc(env_value, p + (p ? 1 : 0) + strlen(ls->key) + 1 + strlen(fd) + socket_set_buf + 1);
-			if (!tmpenv_value) {
-				zlog(ZLOG_SYSERROR, "failure to inherit data on parent exec for socket `%s` due to memory allocation failure", ls->key);
-				free(ls->key);
-				break;
-			}
-
-			env_value = tmpenv_value;
-
 			if (i % FPM_ENV_SOCKET_SET_SIZE == 0) {
-				socket_set[socket_set_count] = p + socket_set_buf;
+				smart_string_appendc(&env_str, '\0');
+				socket_set[socket_set_count] = env_str.len;
 				socket_set_count++;
-				if (i) {
-					*(env_value + p + 1) = 0;
-				}
+			} else {
+				smart_string_appendc(&env_str, ',');
 			}
-
-			p += sprintf(env_value + p + socket_set_buf, "%s%s=%s", (p && !socket_set_buf) ? "," : "", ls->key, fd);
-			p += socket_set_buf;
+			smart_string_appends(&env_str, ls->key);
+			smart_string_appendc(&env_str, '=');
+			smart_string_append_long(&env_str, ls->sock);
 		}
 
 		if (which == FPM_CLEANUP_PARENT_EXIT_MAIN) {
@@ -102,14 +87,15 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 		free(ls->key);
 	}
 
-	if (env_value) {
+	if (env_str.c) {
+		smart_string_appendc(&env_str, '\0');
 		for (i = 0; i < socket_set_count; i++) {
 			fpm_sockets_get_env_name(envname, sizeof(envname), i);
-			setenv(envname, env_value + socket_set[i], 1);
+			setenv(envname, env_str.c + socket_set[i], 1);
 		}
 		fpm_sockets_get_env_name(envname, sizeof(envname), socket_set_count);
 		unsetenv(envname);
-		free(env_value);
+		smart_string_free(&env_str);
 	}
 
 	fpm_array_free(&sockets_list);
