@@ -4391,7 +4391,7 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 					ZSTR_INIT_LITERAL("description", 0));
 				arg = zend_ast_create(ZEND_AST_NAMED_ARG, name, arg);
 			}
-			zend_ast_list_add((zend_ast *) args, arg);
+			args = (zend_ast_list *)zend_ast_list_add((zend_ast *) args, arg);
 		}
 
 		zend_compile_call_common(result, (zend_ast*)args, fbc, lineno);

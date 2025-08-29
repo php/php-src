@@ -248,6 +248,14 @@ char *alloca();
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
+#if __STDC_VERSION__ >= 202311L || (defined(__cplusplus) && __cplusplus >= 201703L)
+# define ZEND_ATTRIBUTE_NODISCARD [[nodiscard]]
+#elif __has_attribute(__warn_unused_result__)
+# define ZEND_ATTRIBUTE_NODISCARD __attribute__((__warn_unused_result__))
+#else
+# define ZEND_ATTRIBUTE_NODISCARD
+#endif
+
 #if ZEND_GCC_VERSION >= 3000
 # define ZEND_ATTRIBUTE_CONST __attribute__((const))
 #else

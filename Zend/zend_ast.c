@@ -498,7 +498,7 @@ static inline bool is_power_of_two(uint32_t n) {
 	return ((n != 0) && (n == (n & (~n + 1))));
 }
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *ast, zend_ast *op) {
+ZEND_ATTRIBUTE_NODISCARD ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *ast, zend_ast *op) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	if (list->children >= 4 && is_power_of_two(list->children)) {
 			list = zend_ast_realloc(list,
@@ -2956,7 +2956,7 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 		/* Since constants are already stored in a list, just add the attributes
 		 * to that list instead of storing them elsewhere;
 		 * zend_compile_const_decl() checks the kind of the list elements. */
-		zend_ast_list_add(ast, attr);
+		ast = zend_ast_list_add(ast, attr);
 		break;
 	EMPTY_SWITCH_DEFAULT_CASE()
 	}
