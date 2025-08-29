@@ -1143,9 +1143,7 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 
 #if LIBXML_VERSION < 21300
 		/* Must be first before transferring the ref to ensure the old document dictionary stays alive. */
-		if (LIBXML_VERSION < 21000 || nodep->type == XML_ATTRIBUTE_NODE) {
-			libxml_fixup_name_and_content_outer(old_doc, new_document, nodep);
-		}
+		libxml_fixup_name_and_content_outer(old_doc, new_document, nodep);
 #endif
 
 		php_dom_transfer_document_ref(nodep, dom_object_new_document->document);
