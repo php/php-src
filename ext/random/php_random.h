@@ -151,7 +151,7 @@ static inline php_random_randomizer *php_random_randomizer_from_obj(zend_object 
 PHPAPI void *php_random_status_alloc(const php_random_algo *algo, const bool persistent);
 PHPAPI void *php_random_status_copy(const php_random_algo *algo, void *old_status, void *new_status);
 PHPAPI void php_random_status_free(void *status, const bool persistent);
-PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, zend_object_handlers *handlers, const php_random_algo *algo);
+PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, const php_random_algo *algo);
 PHPAPI void php_random_engine_common_free_object(zend_object *object);
 PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object);
 PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t umax);

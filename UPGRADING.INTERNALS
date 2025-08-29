@@ -39,6 +39,10 @@ PHP 8.5 INTERNALS UPGRADE NOTES
   . Hash functions now use proper hash_spec_result enum for return values
     instead of using SUCCESS and FAILURE.
 
+- Random
+  . The handlers parameter of php_random_engine_common_init() has been
+    removed. Use the default_object_handlers field on the CE instead.
+
 - Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
     a value to a non-reference zval.
