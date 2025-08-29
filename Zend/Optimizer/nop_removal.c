@@ -34,7 +34,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx
 {
 	zend_op *end, *opline;
 	uint32_t new_count, i, shift;
-	int j;
 	uint32_t *shiftlist;
 	ALLOCA_FLAG(use_heap);
 
@@ -81,7 +80,7 @@ void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		}
 
 		/* update try/catch array */
-		for (j = 0; j < op_array->last_try_catch; j++) {
+		for (uint32_t j = 0; j < op_array->last_try_catch; j++) {
 			op_array->try_catch_array[j].try_op -= shiftlist[op_array->try_catch_array[j].try_op];
 			op_array->try_catch_array[j].catch_op -= shiftlist[op_array->try_catch_array[j].catch_op];
 			if (op_array->try_catch_array[j].finally_op) {
