@@ -83,19 +83,22 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t proper
 
 static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, zval *property_zv)
 {
+	zend_object *old_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
 	URI_ASSERT_INITIALIZATION(internal_uri);
+
+	zend_object *new_object = old_object->handlers->clone_obj(old_object);
+	if (new_object == NULL) {
+		RETURN_THROWS();
+	}
 
 	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
 	ZEND_ASSERT(property_handler != NULL);
 
-	zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS));
-	ZEND_ASSERT(new_object != NULL);
-
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
 	URI_ASSERT_INITIALIZATION(new_internal_uri);
 	if (UNEXPECTED(property_handler->write_func == NULL)) {
-		zend_readonly_property_modification_error_ex(ZSTR_VAL(Z_OBJ_P(ZEND_THIS)->ce->name),
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(old_object->ce->name),
 			ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		zend_object_release(new_object);
 		RETURN_THROWS();
@@ -110,7 +113,7 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_na
 	}
 
 	ZEND_ASSERT(Z_ISUNDEF(errors));
-	RETVAL_OBJ(new_object);
+	RETURN_OBJ(new_object);
 }
 
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name)
