@@ -9,7 +9,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 --INI--
 opcache.jit=1254
 fatal_error_backtraces=1
-memory_limit=2M
+memory_limit=4M
 --CREDITS--
 arnaud-lb
 YuanchengJiang
@@ -26,6 +26,6 @@ class DestructableObject
 $_ = new DestructableObject();
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 2097152 bytes exhausted %s
+Fatal error: Allowed memory size of 4194304 bytes exhausted %s
 Stack trace:
 %A
