@@ -212,7 +212,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
-	if (has_text_range(&uriparser_uri->portText)) {
+	if (has_text_range(&uriparser_uri->portText) && get_text_range_length(&uriparser_uri->portText) > 0) {
 		ZVAL_LONG(retval, port_str_to_zend_long_checked(uriparser_uri->portText.first, get_text_range_length(&uriparser_uri->portText)));
 	} else {
 		ZVAL_NULL(retval);
