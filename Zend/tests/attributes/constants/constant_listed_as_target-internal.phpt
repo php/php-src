@@ -3,9 +3,10 @@ Constants listed in valid targets when used wrong (internal attribute)
 --FILE--
 <?php
 
-#[Deprecated]
-class Example {}
+function demo(
+	#[Deprecated] $v
+) {}
 
 ?>
 --EXPECTF--
-Fatal error: Attribute "Deprecated" cannot target class (allowed targets: function, method, class constant, constant) in %s on line %d
+Fatal error: Attribute "Deprecated" cannot target parameter (allowed targets: class, function, method, class constant, constant) in %s on line %d

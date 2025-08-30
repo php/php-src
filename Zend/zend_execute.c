@@ -2006,6 +2006,27 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_consta
 	zend_string_release(message_suffix);
 }
 
+ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
+	zend_class_entry *trait,
+	const zend_string *used_by
+) {
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (get_deprecation_suffix_from_attribute(trait->attributes, trait, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = trait->type == ZEND_INTERNAL_CLASS ? E_DEPRECATED : E_USER_DEPRECATED;
+
+	zend_error_unchecked(code, "Trait %s used by %s is deprecated%S",
+		ZSTR_VAL(trait->name),
+		ZSTR_VAL(used_by),
+		message_suffix
+	);
+
+	zend_string_release(message_suffix);
+}
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void)
 {
 	zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
