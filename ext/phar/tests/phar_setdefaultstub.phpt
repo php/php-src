@@ -53,7 +53,7 @@ try {
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECT--
-string(6643) "<?php
+string(6644) "<?php
 
 $web = 'index.php';
 
@@ -129,7 +129,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
@@ -163,7 +163,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6643;
+const LEN = 6644;
 
 static function go($return = false)
 {
@@ -348,7 +348,7 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-string(6654) "<?php
+string(6655) "<?php
 
 $web = 'index.php';
 
@@ -424,7 +424,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
@@ -458,7 +458,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6654;
+const LEN = 6655;
 
 static function go($return = false)
 {
@@ -643,7 +643,7 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-string(6656) "<?php
+string(6657) "<?php
 
 $web = 'the/web.php';
 
@@ -719,7 +719,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
@@ -753,7 +753,7 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6656;
+const LEN = 6657;
 
 static function go($return = false)
 {
@@ -938,5 +938,5 @@ __HALT_COMPILER(); ?>
 "
 ============================================================================
 ============================================================================
-int(7034)
+int(7035)
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
