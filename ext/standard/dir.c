@@ -476,8 +476,7 @@ PHP_FUNCTION(glob)
 #ifdef PHP_GLOB_NOMATCH
 no_results:
 #endif
-		array_init(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 
 	array_init(return_value);
