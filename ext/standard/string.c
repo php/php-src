@@ -4396,16 +4396,41 @@ static zend_long php_str_replace_in_subject(
 							ZSTR_VAL(search_str), ZSTR_LEN(search_str),
 							replace_value, replace_len, &replace_count);
 				} else {
-					zend_long old_replace_count = replace_count;
+					/* OPTIMIZATION:
+					 * Instead of freeing and re-creating the lowercase subject on each
+					 * iteration, we create it once and then update it with a case-
+					 * insensitive replacement. This avoids repeated calls to zend_string_tolower
+					 * on a potentially large string when using an array of search terms.
+					 */
+					zend_long replacements_in_step = 0;
 
 					if (!lc_subject_str) {
 						lc_subject_str = zend_string_tolower(subject_str);
 					}
+
 					tmp_result = php_str_to_str_i_ex(subject_str, ZSTR_VAL(lc_subject_str),
-							search_str, replace_value, replace_len, &replace_count);
-					if (replace_count != old_replace_count) {
-						zend_string_release_ex(lc_subject_str, 0);
-						lc_subject_str = NULL;
+							search_str, replace_value, replace_len, &replacements_in_step);
+
+					if (replacements_in_step > 0) {
+						replace_count += replacements_in_step;
+
+						/* Update lc_subject_str with a case-sensitive replacement using lowercase values */
+						zend_string *lc_search_str = zend_string_tolower(search_str);
+						zend_string *tmp_replace = zend_string_init(replace_value, replace_len, 0);
+						zend_string *lc_replace_str = zend_string_tolower(tmp_replace);
+						zend_string_release(tmp_replace);
+
+						zend_long dummy_count = 0;
+						zend_string *next_lc_subject_str = php_str_to_str_ex(lc_subject_str,
+							ZSTR_VAL(lc_search_str), ZSTR_LEN(lc_search_str),
+							ZSTR_VAL(lc_replace_str), ZSTR_LEN(lc_replace_str),
+							&dummy_count);
+
+						zend_string_release(lc_subject_str);
+						lc_subject_str = next_lc_subject_str;
+
+						zend_string_release(lc_search_str);
+						zend_string_release(lc_replace_str);
 					}
 				}
 			} else {
