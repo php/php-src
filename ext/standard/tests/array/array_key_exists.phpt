@@ -82,7 +82,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing basic functionalities ***
 -- Iteration 1 --
 bool(true)
@@ -104,7 +104,11 @@ bool(true)
 ** Variation loop 1 **
 -- Iteration 1 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -112,7 +116,11 @@ bool(false)
 bool(true)
 -- Iteration 2 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -120,7 +128,11 @@ bool(false)
 bool(true)
 -- Iteration 3 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -128,7 +140,11 @@ bool(false)
 bool(true)
 -- Iteration 4 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -136,7 +152,11 @@ bool(false)
 bool(true)
 -- Iteration 5 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -144,7 +164,11 @@ bool(false)
 bool(false)
 -- Iteration 6 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -152,7 +176,11 @@ bool(false)
 bool(false)
 -- Iteration 7 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -162,7 +190,11 @@ bool(true)
 ** Variation loop 2 **
 -- Iteration 1 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -170,7 +202,11 @@ bool(false)
 bool(false)
 -- Iteration 2 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -178,7 +214,11 @@ bool(false)
 bool(false)
 -- Iteration 3 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -186,7 +226,11 @@ bool(false)
 bool(true)
 -- Iteration 4 --
 bool(true)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(true)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(true)
 bool(false)
 bool(true)
@@ -194,7 +238,11 @@ bool(false)
 bool(true)
 -- Iteration 5 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)

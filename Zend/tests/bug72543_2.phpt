@@ -9,7 +9,8 @@ unset($ref);
 $arr[0][$arr[0]] = null;
 var_dump($arr);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 array(1) {
   [0]=>
   array(1) {
