@@ -3725,6 +3725,40 @@ static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char
 
 ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
+#if defined(__SSE2__)
+	if (needle_len >= 4) {
+		const char *p;
+		__m128i first_chars = _mm_set1_epi8(needle[0]);
+		__m128i last_chars = _mm_set1_epi8(needle[needle_len - 1]);
+
+		for (p = haystack; p <= end - needle_len; p += 16) {
+			__m128i haystack_first_chars = _mm_loadu_si128((__m128i*)p);
+			__m128i haystack_last_chars = _mm_loadu_si128((__m128i*)(p + needle_len - 1));
+			__m128i eq_first = _mm_cmpeq_epi8(first_chars, haystack_first_chars);
+			__m128i eq_last = _mm_cmpeq_epi8(last_chars, haystack_last_chars);
+			unsigned long mask = _mm_movemask_epi8(_mm_and_si128(eq_first, eq_last));
+
+			while (mask > 0) {
+				unsigned long bit = 1UL << __builtin_ctzl(mask);
+				size_t ofs = __builtin_ctzl(mask);
+				if (memcmp(p + ofs + 1, needle + 1, needle_len - 2) == 0) {
+					return p + ofs;
+				}
+				mask &= ~bit;
+			}
+		}
+
+		// Handle the remainder of the string if its length is not a multiple of 16
+		for (; p <= end - needle_len; p++) {
+			if (p[0] == needle[0] && memcmp(p + 1, needle + 1, needle_len - 1) == 0) {
+				return p;
+			}
+		}
+
+		return NULL;
+	}
+#endif
+
 	unsigned int td[256];
 	size_t i;
 	const char *p;
@@ -3739,12 +3773,7 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 	end -= needle_len;
 
 	while (p <= end) {
-		for (i = 0; i < needle_len; i++) {
-			if (needle[i] != p[i]) {
-				break;
-			}
-		}
-		if (i == needle_len) {
+		if (memcmp(p, needle, needle_len) == 0) {
 			return p;
 		}
 		if (UNEXPECTED(p == end)) {
