@@ -77,7 +77,7 @@ struct _soapService {
 
 	struct _soap_functions {
 		HashTable *ft;
-		int functions_all;
+		bool functions_all;
 	} soap_functions;
 
 	struct _soap_class {
