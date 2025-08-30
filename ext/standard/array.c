@@ -7092,7 +7092,7 @@ PHP_FUNCTION(array_combine)
 	HashTable *values, *keys;
 	uint32_t pos_values = 0;
 	zval *entry_keys, *entry_values;
-	uint32_t num_keys, num_values;
+	int num_keys, num_values;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(keys)
@@ -7112,48 +7112,29 @@ PHP_FUNCTION(array_combine)
 	}
 
 	array_init_size(return_value, num_keys);
-
-	/* Fast path for packed arrays without holes */
-	if (HT_IS_PACKED(keys) && HT_IS_WITHOUT_HOLES(keys) &&
-	    HT_IS_PACKED(values) && HT_IS_WITHOUT_HOLES(values)) {
-		uint32_t i;
-		for (i = 0; i < num_keys; i++) {
-			entry_keys = &keys->arPacked[i];
-			entry_values = &values->arPacked[i];
-
-			if (Z_TYPE_P(entry_keys) == IS_LONG) {
-				zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry_keys), entry_values);
-			} else {
-				zend_string *tmp_key;
-				zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
-				zend_symtable_update(Z_ARRVAL_P(return_value), key, entry_values);
-				zend_tmp_string_release(tmp_key);
+	ZEND_HASH_FOREACH_VAL(keys, entry_keys) {
+		while (1) {
+			if (pos_values >= values->nNumUsed) {
+				break;
 			}
-		}
-	} else {
-		ZEND_HASH_FOREACH_VAL(keys, entry_keys) {
-			while (1) {
-				if (pos_values >= values->nNumUsed) {
-					break;
+			entry_values = ZEND_HASH_ELEMENT(values, pos_values);
+			if (Z_TYPE_P(entry_values) != IS_UNDEF) {
+				if (Z_TYPE_P(entry_keys) == IS_LONG) {
+					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
+						Z_LVAL_P(entry_keys), entry_values);
+				} else {
+					zend_string *tmp_key;
+					zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
+					entry_values = zend_symtable_update(Z_ARRVAL_P(return_value),
+						key, entry_values);
+					zend_tmp_string_release(tmp_key);
 				}
-				entry_values = ZEND_HASH_ELEMENT(values, pos_values);
-				if (Z_TYPE_P(entry_values) != IS_UNDEF) {
-					if (Z_TYPE_P(entry_keys) == IS_LONG) {
-						zend_hash_index_update(Z_ARRVAL_P(return_value),
-							Z_LVAL_P(entry_keys), entry_values);
-					} else {
-						zend_string *tmp_key;
-						zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
-						zend_symtable_update(Z_ARRVAL_P(return_value),
-							key, entry_values);
-						zend_tmp_string_release(tmp_key);
-					}
-					pos_values++;
-					break;
-				}
+				zval_add_ref(entry_values);
 				pos_values++;
+				break;
 			}
-		} ZEND_HASH_FOREACH_END();
-	}
+			pos_values++;
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
