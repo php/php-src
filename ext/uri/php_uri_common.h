@@ -159,6 +159,10 @@ static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
 #define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
 #define Z_URI_INTERNAL_P(zv) uri_internal_from_obj(Z_OBJ_P((zv)))
 
+PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const uri_parser_t *parser);
+PHPAPI void php_uri_object_handler_free(zend_object *object);
+PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
+
 #define PHP_URI_PARSER_RFC3986 "Uri\\Rfc3986\\Uri"
 #define PHP_URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
 #define PHP_URI_PARSER_PHP_PARSE_URL "parse_url"
