@@ -234,6 +234,14 @@ case $host_alias in
     ;;
 esac
 
+dnl to disable executable stack on haiku due
+dnl to missing elf .note.GNU-stack part
+case $host_alias in
+  *haiku*)
+    LDFLAGS="$LDFLAGS -Wl,-z,noexecstack"
+    ;;
+esac
+
 dnl Detect musl libc
 AC_MSG_CHECKING([whether we are using musl libc])
 if command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1
