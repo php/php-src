@@ -1263,19 +1263,26 @@ PHP_FUNCTION(str_increment)
 	} while (carry && position-- > 0);
 
 	if (UNEXPECTED(carry)) {
-		zend_string *tmp = zend_string_alloc(ZSTR_LEN(incremented)+1, 0);
-		memcpy(ZSTR_VAL(tmp) + 1, ZSTR_VAL(incremented), ZSTR_LEN(incremented));
-		ZSTR_VAL(tmp)[ZSTR_LEN(incremented)+1] = '\0';
-		switch (ZSTR_VAL(incremented)[0]) {
+		/* Optimization: extend the string in-place instead of allocating a new one */
+		incremented = zend_string_extend(incremented, ZSTR_LEN(incremented) + 1, 0);
+		memmove(ZSTR_VAL(incremented) + 1, ZSTR_VAL(incremented), ZSTR_LEN(incremented) - 1);
+		switch (ZSTR_VAL(incremented)[1]) { /* Check the first char of the old string */
 			case '0':
-				ZSTR_VAL(tmp)[0] = '1';
+				ZSTR_VAL(incremented)[0] = '1';
+				break;
+			case 'a':
+				ZSTR_VAL(incremented)[0] = 'a';
+				break;
+			case 'A':
+				ZSTR_VAL(incremented)[0] = 'A';
 				break;
 			default:
-				ZSTR_VAL(tmp)[0] = ZSTR_VAL(incremented)[0];
+				/* Should not happen with alphanumeric strings */
+				ZSTR_VAL(incremented)[0] = ZSTR_VAL(incremented)[1];
 				break;
 		}
-		zend_string_efree(incremented);
-		RETURN_NEW_STR(tmp);
+		ZSTR_VAL(incremented)[ZSTR_LEN(incremented)] = '\0';
+		RETURN_NEW_STR(incremented);
 	}
 	RETURN_NEW_STR(incremented);
 }
