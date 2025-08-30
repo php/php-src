@@ -1,5 +1,5 @@
 --TEST--
-#[\Deprecated]: Using multiple traits with conflict resolution meaning a trait is not used
+#[\Deprecated]: `insteadof` rendering a trait unused still triggers deprecation messages
 --FILE--
 <?php
 
