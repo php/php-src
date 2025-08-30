@@ -9,9 +9,12 @@ if (PHP_MBSTRING != "no") {
 		EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", PHP_MBSTRING_SHARED);
 		ADD_EXTENSION_DEP('mbstring', 'pcre');
 
+        FSO.CopyFile("ext\\mbstring\\oniguruma\\src\\oniguruma.h",
+            "ext\\mbstring\\oniguruma\\oniguruma.h", true);
+
 		STDOUT.WriteLine("Using bundled libmbfl...");
 
-		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring -Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
+		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring -Iext/mbstring/libmbfl -Iext/mbstring/oniguruma -Iext/mbstring/libmbfl/mbfl \
 			/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
 
 		ADD_FLAG("CFLAGS_BD_EXT_MBSTRING", "/utf-8")
