@@ -15,4 +15,4 @@ ini_set('opcache.enable', 1);
 --EXPECTF--
 Should warn, since the INI was initialized to 0:
 
-Warning: Zend OPcache can't be temporarily enabled (it may be only disabled till the end of request) in %s on line %d
+Warning: Zend OPcache can't be temporarily enabled (it may be only disabled until the end of request) in %s on line %d

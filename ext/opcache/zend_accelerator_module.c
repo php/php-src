@@ -171,10 +171,10 @@ static ZEND_INI_MH(OnEnable)
 				if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
 					zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled. Are you using php_admin_value[opcache.enable]=1 in an individual pool's configuration?");
 				} else {
-					zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled (it may be only disabled till the end of request)");
+					zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled (it may be only disabled until the end of request)");
 				}
 			} else {
-				zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled (it may be only disabled till the end of request)");
+				zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled (it may be only disabled until the end of request)");
 			}
 			return FAILURE;
 		} else {
