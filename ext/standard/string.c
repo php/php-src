@@ -1885,6 +1885,23 @@ PHP_FUNCTION(str_ends_with)
 }
 /* }}} */
 
+/* {{{ Returns the first character of a string */
+PHP_FUNCTION(str_first_char)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(str) == 0) {
+		RETURN_EMPTY_STRING();
+	}
+
+	RETURN_STRINGL(ZSTR_VAL(str), 1);
+}
+/* }}} */
+
 static inline void _zend_strpos(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
 {
 	const char *found = NULL;

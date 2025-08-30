@@ -2446,6 +2446,9 @@ function str_starts_with(string $haystack, string $needle): bool {}
 /** @compile-time-eval */
 function str_ends_with(string $haystack, string $needle): bool {}
 
+/** @compile-time-eval */
+function str_first_char(string $string): string {}
+
 /**
  * @compile-time-eval
  * @refcount 1
