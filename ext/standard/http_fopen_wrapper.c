@@ -393,7 +393,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	uri_parser_t *uri_parser = php_stream_context_get_uri_parser("http", context);
+	const uri_parser_t *uri_parser = php_stream_context_get_uri_parser("http", context);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;

@@ -735,7 +735,7 @@ static ZEND_FUNCTION(zend_test_uri_parser)
 		Z_PARAM_STR(parser_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	uri_parser_t *parser = php_uri_get_parser(parser_name);
+	const uri_parser_t *parser = php_uri_get_parser(parser_name);
 	if (parser == NULL) {
 		zend_argument_value_error(1, "Unknown parser");
 		RETURN_THROWS();
