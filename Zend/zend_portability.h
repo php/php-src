@@ -792,6 +792,12 @@ extern "C++" {
 # define ZEND_NONSTRING
 #endif
 
+#if __has_attribute(returns_nonnull)
+# define ZEND_RETURNS_NONNULL __attribute__((returns_nonnull))
+#else
+# define ZEND_RETURNS_NONNULL
+#endif
+
 #define __ZEND_DO_PRAGMA(x) _Pragma(#x)
 #define _ZEND_DO_PRAGMA(x) __ZEND_DO_PRAGMA(x)
 #if defined(__clang__)
