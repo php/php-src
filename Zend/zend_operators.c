@@ -3089,16 +3089,50 @@ ZEND_API char* ZEND_FASTCALL zend_str_toupper_dup_ex(const char *source, size_t 
 
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, bool persistent) /* {{{ */
 {
-	zend_string *res = zend_string_alloc(ZSTR_LEN(str), persistent);
-	zend_str_tolower_impl(ZSTR_VAL(res), ZSTR_VAL(str), ZSTR_LEN(str));
-	ZSTR_VAL(res)[ZSTR_LEN(res)] = '\0';
+	size_t length = ZSTR_LEN(str);
+	unsigned char *p = (unsigned char *) ZSTR_VAL(str);
+	unsigned char *end = p + length;
 
-	if (memcmp(ZSTR_VAL(res), ZSTR_VAL(str), ZSTR_LEN(str)) == 0) {
-		zend_string_release_ex(res, persistent);
-		return zend_string_copy(str);
+#ifdef HAVE_BLOCKCONV
+	BLOCKCONV_INIT_RANGE('A', 'Z');
+	while (p + BLOCKCONV_STRIDE <= end) {
+		BLOCKCONV_LOAD(p);
+		if (BLOCKCONV_FOUND()) {
+			zend_string *res = zend_string_alloc(length, persistent);
+			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
+			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
+
+			/* Lowercase the chunk we already compared. */
+			BLOCKCONV_INIT_DELTA('a' - 'A');
+			BLOCKCONV_STORE(q);
+
+			/* Lowercase the rest of the string. */
+			p += BLOCKCONV_STRIDE;
+			q += BLOCKCONV_STRIDE;
+			zend_str_tolower_impl((char *) q, (const char *) p, end - p);
+			ZSTR_VAL(res)[length] = '\0';
+			return res;
+		}
+		p += BLOCKCONV_STRIDE;
+	}
+#endif
+
+	while (p < end) {
+		if (*p != zend_tolower_ascii(*p)) {
+			zend_string *res = zend_string_alloc(length, persistent);
+			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
+
+			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
+			while (p < end) {
+				*q++ = zend_tolower_ascii(*p++);
+			}
+			ZSTR_VAL(res)[length] = '\0';
+			return res;
+		}
+		p++;
 	}
 
-	return res;
+	return zend_string_copy(str);
 }
 /* }}} */
 
@@ -3691,40 +3725,6 @@ static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char
 
 ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
 {
-#if defined(__SSE2__)
-	if (needle_len >= 4) {
-		const char *p;
-		__m128i first_chars = _mm_set1_epi8(needle[0]);
-		__m128i last_chars = _mm_set1_epi8(needle[needle_len - 1]);
-
-		for (p = haystack; p <= end - needle_len; p += 16) {
-			__m128i haystack_first_chars = _mm_loadu_si128((__m128i*)p);
-			__m128i haystack_last_chars = _mm_loadu_si128((__m128i*)(p + needle_len - 1));
-			__m128i eq_first = _mm_cmpeq_epi8(first_chars, haystack_first_chars);
-			__m128i eq_last = _mm_cmpeq_epi8(last_chars, haystack_last_chars);
-			unsigned long mask = _mm_movemask_epi8(_mm_and_si128(eq_first, eq_last));
-
-			while (mask > 0) {
-				unsigned long bit = 1UL << __builtin_ctzl(mask);
-				size_t ofs = __builtin_ctzl(mask);
-				if (memcmp(p + ofs + 1, needle + 1, needle_len - 2) == 0) {
-					return p + ofs;
-				}
-				mask &= ~bit;
-			}
-		}
-
-		// Handle the remainder of the string if its length is not a multiple of 16
-		for (; p <= end - needle_len; p++) {
-			if (p[0] == needle[0] && memcmp(p + 1, needle + 1, needle_len - 1) == 0) {
-				return p;
-			}
-		}
-
-		return NULL;
-	}
-#endif
-
 	unsigned int td[256];
 	size_t i;
 	const char *p;
@@ -3739,7 +3739,12 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 	end -= needle_len;
 
 	while (p <= end) {
-		if (memcmp(p, needle, needle_len) == 0) {
+		for (i = 0; i < needle_len; i++) {
+			if (needle[i] != p[i]) {
+				break;
+			}
+		}
+		if (i == needle_len) {
 			return p;
 		}
 		if (UNEXPECTED(p == end)) {
