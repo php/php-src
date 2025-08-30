@@ -6074,30 +6074,30 @@ PHP_FUNCTION(str_word_count)
 			RETURN_THROWS();
 	}
 
+	char mask[256];
+	memset(mask, 0, 256);
+	for (int i = 0; i < 256; i++) {
+		if (isalpha(i)) {
+			mask[i] = 1;
+		}
+	}
+	mask['\''] = 1;
+	mask['-'] = 1;
+
 	if (char_list) {
-		php_charmask((const unsigned char *) char_list, char_list_len, ch);
+		php_charmask((const unsigned char *) char_list, char_list_len, mask);
 	}
 
 	p = ZSTR_VAL(str);
 	e = ZSTR_VAL(str) + ZSTR_LEN(str);
 
-	/* first character cannot be ' or -, unless explicitly allowed by the user */
-	if ((*p == '\'' && (!char_list || !ch['\''])) || (*p == '-' && (!char_list || !ch['-']))) {
-		p++;
-	}
-	/* last character cannot be -, unless explicitly allowed by the user */
-	if (*(e - 1) == '-' && (!char_list || !ch['-'])) {
-		e--;
-	}
-
 	while (p < e) {
-		s = p;
-		while (p < e && (isalpha((unsigned char)*p) || (char_list && ch[(unsigned char)*p]) || *p == '\'' || *p == '-')) {
-			p++;
-		}
-		if (p > s) {
-			switch (type)
-			{
+		if (mask[(unsigned char)*p]) {
+			s = p;
+			while (p < e && mask[(unsigned char)*p]) {
+				p++;
+			}
+			switch (type) {
 				case 1:
 					add_next_index_stringl(return_value, s, p - s);
 					break;
