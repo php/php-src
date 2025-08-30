@@ -157,7 +157,7 @@ int fuzzer_init_php(const char *extra_ini)
 	if (extra_ini) {
 		ini_len += extra_ini_len + 1;
 	}
-	char *p = malloc(ini_len + 1);
+	char *p = pmalloc(ini_len + 1);
 	fuzzer_module.ini_entries = p;
 	p = zend_mempcpy(p, HARDCODED_INI, sizeof(HARDCODED_INI) - 1);
 	if (extra_ini) {

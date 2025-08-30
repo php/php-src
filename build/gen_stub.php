@@ -2491,7 +2491,7 @@ abstract class VariableLike
                     }
 
                     $classTypeCount = count($arginfoType->classTypes);
-                    $code .= "\tzend_type_list *{$variableLikeType}_{$variableLikeName}_type_list = malloc(ZEND_TYPE_LIST_SIZE($classTypeCount));\n";
+                    $code .= "\tzend_type_list *{$variableLikeType}_{$variableLikeName}_type_list = pmalloc(ZEND_TYPE_LIST_SIZE($classTypeCount));\n";
                     $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->num_types = $classTypeCount;\n";
 
                     foreach ($arginfoType->classTypes as $k => $classType) {

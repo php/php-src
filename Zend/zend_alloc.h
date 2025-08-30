@@ -185,6 +185,10 @@ ZEND_API void * __zend_realloc(void *p, size_t len ZEND_FILE_LINE_DC ZEND_FILE_L
 ZEND_API void __zend_free(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 
+#define pmalloc(size) (__zend_malloc(size ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+#define pcalloc(nmemb, size) (__zend_calloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+#define prealloc(ptr, size) (__zend_realloc((ptr), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC))
+
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent) ((persistent)?__zend_malloc(size ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC):emalloc(size))
 #define safe_pemalloc(nmemb, size, offset, persistent)	((persistent)?_safe_malloc(nmemb, size, offset):safe_emalloc(nmemb, size, offset))

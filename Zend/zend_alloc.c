@@ -3300,7 +3300,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 	tmp = getenv("USE_ZEND_ALLOC");
 	if (tmp && !ZEND_ATOL(tmp)) {
 		bool tracked = (tmp = getenv("USE_TRACKED_ALLOC")) && ZEND_ATOL(tmp);
-		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
+		zend_mm_heap *mm_heap = alloc_globals->mm_heap = pmalloc(sizeof(zend_mm_heap));
 		memset(mm_heap, 0, sizeof(zend_mm_heap));
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
 		mm_heap->limit = (size_t)Z_L(-1) >> 1;
@@ -3316,7 +3316,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 			mm_heap->custom_heap._malloc = tracked_malloc;
 			mm_heap->custom_heap._free = tracked_free;
 			mm_heap->custom_heap._realloc = tracked_realloc;
-			mm_heap->tracked_allocs = malloc(sizeof(HashTable));
+			mm_heap->tracked_allocs = pmalloc(sizeof(HashTable));
 			zend_hash_init(mm_heap->tracked_allocs, 1024, NULL, NULL, 1);
 		}
 		return;

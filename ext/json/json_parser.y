@@ -27,7 +27,7 @@ int json_yydebug = 1;
 #endif
 
 #ifdef _MSC_VER
-#define YYMALLOC malloc
+#define YYMALLOC pmalloc
 #define YYFREE free
 #endif
 

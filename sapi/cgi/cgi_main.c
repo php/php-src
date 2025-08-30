@@ -761,7 +761,7 @@ static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
 			int ret, len = (int)strlen(message);
-			char *buf = malloc(len+2);
+			char *buf = pmalloc(len+2);
 
 			memcpy(buf, message, len);
 			memcpy(buf + len, "\n", sizeof("\n"));
@@ -2433,7 +2433,7 @@ do_repeat:
 					}
 
 					len += 2;
-					s = malloc(len);
+					s = pmalloc(len);
 					*s = '\0';			/* we are pretending it came from the environment  */
 					for (i = php_optind; i < argc; i++) {
 						strlcat(s, argv[i], len);

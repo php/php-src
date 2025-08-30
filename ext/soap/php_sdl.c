@@ -2373,7 +2373,7 @@ static void make_persistent_restriction_int(void *data)
 	sdlRestrictionIntPtr *rest = (sdlRestrictionIntPtr *)data;
 	sdlRestrictionIntPtr prest = NULL;
 
-	prest = malloc(sizeof(sdlRestrictionInt));
+	prest = pmalloc(sizeof(sdlRestrictionInt));
 	*prest = **rest;
 	*rest = prest;
 }
@@ -2383,7 +2383,7 @@ static void make_persistent_restriction_char_int(sdlRestrictionCharPtr *rest)
 {
 	sdlRestrictionCharPtr prest = NULL;
 
-	prest = malloc(sizeof(sdlRestrictionChar));
+	prest = pmalloc(sizeof(sdlRestrictionChar));
 	memset(prest, 0, sizeof(sdlRestrictionChar));
 	prest->value = strdup((*rest)->value);
 	prest->fixed = (*rest)->fixed;
@@ -2428,11 +2428,11 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 	sdlTypePtr ptype;
 	zend_string *key;
 
-	pheaders = malloc(sizeof(HashTable));
+	pheaders = pmalloc(sizeof(HashTable));
 	zend_hash_init(pheaders, zend_hash_num_elements(headers), NULL, delete_header_persistent, 1);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(headers, key, tmp) {
-		pheader = malloc(sizeof(sdlSoapBindingFunctionHeader));
+		pheader = pmalloc(sizeof(sdlSoapBindingFunctionHeader));
 		memset(pheader, 0, sizeof(sdlSoapBindingFunctionHeader));
 		*pheader = *tmp;
 
@@ -2492,11 +2492,11 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 	encodePtr penc;
 	zend_string *key;
 
-	pparams = malloc(sizeof(HashTable));
+	pparams = pmalloc(sizeof(HashTable));
 	zend_hash_init(pparams, zend_hash_num_elements(params), NULL, delete_parameter_persistent, 1);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(params, key, tmp) {
-		pparam = malloc(sizeof(sdlParam));
+		pparam = pmalloc(sizeof(sdlParam));
 		memset(pparam, 0, sizeof(sdlParam));
 		*pparam = *tmp;
 
@@ -2534,11 +2534,11 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 	sdlFaultPtr tmp, pfault;
 	zend_string *key;
 
-	pfaults = malloc(sizeof(HashTable));
+	pfaults = pmalloc(sizeof(HashTable));
 	zend_hash_init(pfaults, zend_hash_num_elements(faults), NULL, delete_fault_persistent, 1);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(faults, key, tmp) {
-		pfault = malloc(sizeof(sdlFault));
+		pfault = pmalloc(sizeof(sdlFault));
 		memset(pfault, 0, sizeof(sdlFault));
 		*pfault = *tmp;
 
@@ -2552,7 +2552,7 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 		if (func->binding->bindingType == BINDING_SOAP && pfault->bindingAttributes) {
 			sdlSoapBindingFunctionFaultPtr soap_binding;
 
-		   	soap_binding = malloc(sizeof(sdlSoapBindingFunctionFault));
+		   	soap_binding = pmalloc(sizeof(sdlSoapBindingFunctionFault));
 			memset(soap_binding, 0, sizeof(sdlSoapBindingFunctionFault));
 			*soap_binding = *(sdlSoapBindingFunctionFaultPtr)pfault->bindingAttributes;
 			if (soap_binding->ns) {
@@ -2579,7 +2579,7 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 	sdlAttributePtr pattr;
 	zend_string *key;
 
-	pattr = malloc(sizeof(sdlAttribute));
+	pattr = pmalloc(sizeof(sdlAttribute));
 	memset(pattr, 0, sizeof(sdlAttribute));
 
 	*pattr = *attr;
@@ -2608,12 +2608,12 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 	if (pattr->extraAttributes) {
 		sdlExtraAttributePtr tmp, pextra;
 
-		pattr->extraAttributes = malloc(sizeof(HashTable));
+		pattr->extraAttributes = pmalloc(sizeof(HashTable));
 		zend_hash_init(pattr->extraAttributes, zend_hash_num_elements(attr->extraAttributes), NULL, delete_extra_attribute_persistent, 1);
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(attr->extraAttributes, key, tmp) {
 			if (key) {
-				pextra = malloc(sizeof(sdlExtraAttribute));
+				pextra = pmalloc(sizeof(sdlExtraAttribute));
 				memset(pextra, 0, sizeof(sdlExtraAttribute));
 
 				if (tmp->ns) {
@@ -2638,7 +2638,7 @@ static sdlContentModelPtr make_persistent_sdl_model(sdlContentModelPtr model, Ha
 	sdlContentModelPtr pmodel;
 	sdlContentModelPtr tmp, pcontent;
 
-	pmodel = malloc(sizeof(sdlContentModel));
+	pmodel = pmalloc(sizeof(sdlContentModel));
 	memset(pmodel, 0, sizeof(sdlContentModel));
 	*pmodel = *model;
 
@@ -2652,7 +2652,7 @@ static sdlContentModelPtr make_persistent_sdl_model(sdlContentModelPtr model, Ha
 		case XSD_CONTENT_SEQUENCE:
 		case XSD_CONTENT_ALL:
 		case XSD_CONTENT_CHOICE:
-			pmodel->u.content = malloc(sizeof(HashTable));
+			pmodel->u.content = pmalloc(sizeof(HashTable));
 			zend_hash_init(pmodel->u.content, zend_hash_num_elements(model->u.content), NULL, delete_model_persistent, 1);
 
 			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
@@ -2686,7 +2686,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 	zend_string *key;
 	sdlTypePtr ptype = NULL;
 
-	ptype = malloc(sizeof(sdlType));
+	ptype = pmalloc(sizeof(sdlType));
 	memset(ptype, 0, sizeof(sdlType));
 
 	*ptype = *type;
@@ -2713,7 +2713,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 	}
 
 	if (ptype->restrictions) {
-		ptype->restrictions = malloc(sizeof(sdlRestrictions));
+		ptype->restrictions = pmalloc(sizeof(sdlRestrictions));
 		memset(ptype->restrictions, 0, sizeof(sdlRestrictions));
 		*ptype->restrictions = *type->restrictions;
 
@@ -2753,7 +2753,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 
 		if (type->restrictions->enumeration) {
 			sdlRestrictionCharPtr tmp, penum;
-			ptype->restrictions->enumeration = malloc(sizeof(HashTable));
+			ptype->restrictions->enumeration = pmalloc(sizeof(HashTable));
 			zend_hash_init(ptype->restrictions->enumeration, zend_hash_num_elements(type->restrictions->enumeration), NULL, delete_restriction_var_char_persistent, 1);
 			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(type->restrictions->enumeration, key, tmp) {
 				penum = tmp;
@@ -2767,7 +2767,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 	if (ptype->elements) {
 		sdlTypePtr tmp, pelem;
 
-		ptype->elements = malloc(sizeof(HashTable));
+		ptype->elements = pmalloc(sizeof(HashTable));
 		zend_hash_init(ptype->elements, zend_hash_num_elements(type->elements), NULL, delete_type_persistent, 1);
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(type->elements, key, tmp) {
@@ -2785,7 +2785,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 	if (ptype->attributes) {
 		sdlAttributePtr tmp, pattr;
 
-		ptype->attributes = malloc(sizeof(HashTable));
+		ptype->attributes = pmalloc(sizeof(HashTable));
 		zend_hash_init(ptype->attributes, zend_hash_num_elements(type->attributes), NULL, delete_attribute_persistent, 1);
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(type->attributes, key, tmp) {
@@ -2810,7 +2810,7 @@ static encodePtr make_persistent_sdl_encoder(encodePtr enc, HashTable *ptr_map, 
 {
 	encodePtr penc = NULL;
 
-	penc = malloc(sizeof(encode));
+	penc = pmalloc(sizeof(encode));
 	memset(penc, 0, sizeof(encode));
 
 	*penc = *enc;
@@ -2834,7 +2834,7 @@ static sdlBindingPtr make_persistent_sdl_binding(sdlBindingPtr bind, HashTable *
 {
 	sdlBindingPtr pbind = NULL;
 
-	pbind = malloc(sizeof(sdlBinding));
+	pbind = pmalloc(sizeof(sdlBinding));
 	memset(pbind, 0, sizeof(sdlBinding));
 
 	*pbind = *bind;
@@ -2849,7 +2849,7 @@ static sdlBindingPtr make_persistent_sdl_binding(sdlBindingPtr bind, HashTable *
 	if (pbind->bindingType == BINDING_SOAP && pbind->bindingAttributes) {
 		sdlSoapBindingPtr soap_binding;
 
-		soap_binding = malloc(sizeof(sdlSoapBinding));
+		soap_binding = pmalloc(sizeof(sdlSoapBinding));
 		memset(soap_binding, 0, sizeof(sdlSoapBinding));
 		*soap_binding = *(sdlSoapBindingPtr)pbind->bindingAttributes;
 		pbind->bindingAttributes = soap_binding;
@@ -2862,7 +2862,7 @@ static sdlFunctionPtr make_persistent_sdl_function(sdlFunctionPtr func, HashTabl
 {
 	sdlFunctionPtr pfunc = NULL;
 
-	pfunc = malloc(sizeof(sdlFunction));
+	pfunc = pmalloc(sizeof(sdlFunction));
 	memset(pfunc, 0, sizeof(sdlFunction));
 
 	*pfunc = *func;
@@ -2888,7 +2888,7 @@ static sdlFunctionPtr make_persistent_sdl_function(sdlFunctionPtr func, HashTabl
 		if (pfunc->binding->bindingType == BINDING_SOAP && pfunc->bindingAttributes) {
 			sdlSoapBindingFunctionPtr soap_binding;
 
-		   	soap_binding = malloc(sizeof(sdlSoapBindingFunction));
+		   	soap_binding = pmalloc(sizeof(sdlSoapBindingFunction));
 			memset(soap_binding, 0, sizeof(sdlSoapBindingFunction));
 			*soap_binding = *(sdlSoapBindingFunctionPtr)pfunc->bindingAttributes;
 			if (soap_binding->soapAction) {
@@ -2924,7 +2924,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 	zend_hash_init(&bp_encoders, 0, NULL, NULL, 0);
 	zend_hash_init(&ptr_map, 0, NULL, NULL, 0);
 
-	psdl = malloc(sizeof(*sdl));
+	psdl = pmalloc(sizeof(*sdl));
 	memset(psdl, 0, sizeof(*sdl));
 
 	if (sdl->source) {
@@ -2938,7 +2938,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		sdlTypePtr tmp;
 		sdlTypePtr ptype;
 
-		psdl->groups = malloc(sizeof(HashTable));
+		psdl->groups = pmalloc(sizeof(HashTable));
 		zend_hash_init(psdl->groups, zend_hash_num_elements(sdl->groups), NULL, delete_type_persistent, 1);
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->groups, key, tmp) {
@@ -2957,7 +2957,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		sdlTypePtr tmp;
 		sdlTypePtr ptype;
 
-		psdl->types = malloc(sizeof(HashTable));
+		psdl->types = pmalloc(sizeof(HashTable));
 		zend_hash_init(psdl->types, zend_hash_num_elements(sdl->types), NULL, delete_type_persistent, 1);
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->types, key, tmp) {
@@ -2976,7 +2976,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		sdlTypePtr tmp;
 		sdlTypePtr ptype;
 
-		psdl->elements = malloc(sizeof(HashTable));
+		psdl->elements = pmalloc(sizeof(HashTable));
 		zend_hash_init(psdl->elements, zend_hash_num_elements(sdl->elements), NULL, delete_type_persistent, 1);
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->elements, key, tmp) {
@@ -2995,7 +2995,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		encodePtr tmp;
 		encodePtr penc;
 
-		psdl->encoders = malloc(sizeof(HashTable));
+		psdl->encoders = pmalloc(sizeof(HashTable));
 		zend_hash_init(psdl->encoders, zend_hash_num_elements(sdl->encoders), NULL, delete_encoder_persistent, 1);
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->encoders, key, tmp) {
@@ -3037,7 +3037,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		sdlBindingPtr tmp;
 		sdlBindingPtr pbind;
 
-		psdl->bindings = malloc(sizeof(HashTable));
+		psdl->bindings = pmalloc(sizeof(HashTable));
 		zend_hash_init(psdl->bindings, zend_hash_num_elements(sdl->bindings), NULL, delete_binding_persistent, 1);
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->bindings, key, tmp) {
@@ -3074,7 +3074,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		sdlFunctionPtr tmp;
 		sdlFunctionPtr preq;
 
-		psdl->requests = malloc(sizeof(HashTable));
+		psdl->requests = pmalloc(sizeof(HashTable));
 		zend_hash_init(psdl->requests, zend_hash_num_elements(sdl->requests), NULL, NULL, 1);
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(sdl->requests, key, zv) {
@@ -3336,7 +3336,7 @@ cache_in_memory:
 			sdl_cache_bucket p;
 
 			if (SOAP_GLOBAL(mem_cache) == NULL) {
-				SOAP_GLOBAL(mem_cache) = malloc(sizeof(HashTable));
+				SOAP_GLOBAL(mem_cache) = pmalloc(sizeof(HashTable));
 				zend_hash_init(SOAP_GLOBAL(mem_cache), 0, NULL, delete_psdl, 1);
 			} else if (SOAP_GLOBAL(cache_limit) > 0 &&
 			           SOAP_GLOBAL(cache_limit) <= (zend_long)zend_hash_num_elements(SOAP_GLOBAL(mem_cache))) {

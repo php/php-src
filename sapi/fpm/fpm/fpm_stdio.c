@@ -191,7 +191,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 
 	create_log_stream = !child->log_stream;
 	if (create_log_stream) {
-		log_stream = child->log_stream = malloc(sizeof(struct zlog_stream));
+		log_stream = child->log_stream = pmalloc(sizeof(struct zlog_stream));
 		zlog_stream_init_ex(log_stream, ZLOG_WARNING, STDERR_FILENO);
 		zlog_stream_set_decorating(log_stream, child->wp->config->decorate_workers_output);
 		zlog_stream_set_wrapping(log_stream, ZLOG_TRUE);

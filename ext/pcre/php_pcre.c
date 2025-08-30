@@ -357,7 +357,7 @@ PHP_INI_END()
 static char *_pcre2_config_str(uint32_t what)
 {/*{{{*/
 	int len = pcre2_config(what, NULL);
-	char *ret = (char *) malloc(len + 1);
+	char *ret = (char *) pmalloc(len + 1);
 
 	len = pcre2_config(what, ret);
 	if (!len) {

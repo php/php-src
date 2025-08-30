@@ -1323,7 +1323,7 @@ static const maker_note_type maker_note_array[] = {
 
 static HashTable *exif_make_tag_ht(tag_info_type *tag_table)
 {
-	HashTable *ht = malloc(sizeof(HashTable));
+	HashTable *ht = pmalloc(sizeof(HashTable));
 	zend_hash_init(ht, 0, NULL, NULL, 1);
 	while (tag_table->Tag != TAG_END_OF_LIST) {
 		if (!zend_hash_index_add_ptr(ht, tag_table->Tag, tag_table->Desc)) {

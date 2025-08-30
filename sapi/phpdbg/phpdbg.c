@@ -1210,7 +1210,7 @@ phpdbg_main:
 				if (zend_extensions_list) {
 					zend_extensions_list = realloc(zend_extensions_list, sizeof(char*) * zend_extensions_len);
 				} else {
-					zend_extensions_list = malloc(sizeof(char*) * zend_extensions_len);
+					zend_extensions_list = pmalloc(sizeof(char*) * zend_extensions_len);
 				}
 				zend_extensions_list[zend_extensions_len-1] = strdup(php_optarg);
 			break;

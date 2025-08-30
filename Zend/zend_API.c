@@ -3083,7 +3083,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		}
 		lowercase_name = zend_string_tolower_ex(internal_function->function_name, type == MODULE_PERSISTENT);
 		lowercase_name = zend_new_interned_string(lowercase_name);
-		reg_function = malloc(sizeof(zend_internal_function));
+		reg_function = pmalloc(sizeof(zend_internal_function));
 		memcpy(reg_function, &function, sizeof(zend_internal_function));
 		if (zend_hash_add_ptr(target_function_table, lowercase_name, reg_function) == NULL) {
 			unload=1;
@@ -3150,7 +3150,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 
 			/* Treat return type as an extra argument */
 			num_args++;
-			new_arg_info = malloc(sizeof(zend_internal_arg_info) * num_args);
+			new_arg_info = pmalloc(sizeof(zend_internal_arg_info) * num_args);
 			memcpy(new_arg_info, arg_info, sizeof(zend_internal_arg_info) * num_args);
 			reg_function->arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
@@ -3176,7 +3176,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						new_arg_info[i].type.type_mask |= _ZEND_TYPE_NAME_BIT;
 					} else {
 						/* Union type */
-						zend_type_list *list = malloc(ZEND_TYPE_LIST_SIZE(num_types));
+						zend_type_list *list = pmalloc(ZEND_TYPE_LIST_SIZE(num_types));
 						list->num_types = num_types;
 						ZEND_TYPE_SET_LIST(new_arg_info[i].type, list);
 						ZEND_TYPE_FULL_MASK(new_arg_info[i].type) |= _ZEND_TYPE_UNION_BIT;
@@ -3487,7 +3487,7 @@ ZEND_API int zend_next_free_module(void) /* {{{ */
 
 static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class_entry, uint32_t ce_flags) /* {{{ */
 {
-	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
+	zend_class_entry *class_entry = pmalloc(sizeof(zend_class_entry));
 	zend_string *lowercase_name;
 	*class_entry = *orig_class_entry;
 

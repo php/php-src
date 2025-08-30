@@ -1285,7 +1285,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 
 	if (*hstbuflen == 0) {
 		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pmalloc (*hstbuflen);
 	}
 
 	while (( res =
@@ -1311,7 +1311,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 
 	if (*hstbuflen == 0) {
 		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pmalloc (*hstbuflen);
 	}
 
 	while ((NULL == ( hp =
@@ -1329,7 +1329,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 {
 	if (*hstbuflen == 0) {
 		*hstbuflen = sizeof(struct hostent_data);
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pmalloc (*hstbuflen);
 	} else {
 		if (*hstbuflen < sizeof(struct hostent_data)) {
 			*hstbuflen = sizeof(struct hostent_data);
