@@ -19,7 +19,8 @@ foreach ($db->query('SELECT testing(name) FROM test_pdo_sqlite_createaggregate')
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::sqliteCreateAggregate() is deprecated since 8.5, use Pdo\Sqlite::createAggregate() instead in %s on line %d
 array(2) {
   ["testing(name)"]=>
   string(2) "12"
