@@ -129,7 +129,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
@@ -424,7 +424,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
@@ -719,7 +719,7 @@ exit;
 $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
 if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
 header('HTTP/1.0 404 Not Found');
-echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
 exit;
 }
 $b = pathinfo($a);
