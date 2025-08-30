@@ -1328,11 +1328,10 @@ PHP_FUNCTION(str_decrement)
 			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
 			RETURN_THROWS();
 		}
-		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
-		memcpy(ZSTR_VAL(tmp), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
-		ZSTR_VAL(tmp)[ZSTR_LEN(decremented) - 1] = '\0';
-		zend_string_efree(decremented);
-		RETURN_NEW_STR(tmp);
+		/* Optimization: move memory in-place instead of allocating a new string */
+		memmove(ZSTR_VAL(decremented), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
+		decremented = zend_string_truncate(decremented, ZSTR_LEN(decremented) - 1, 0);
+		RETURN_NEW_STR(decremented);
 	}
 	RETURN_NEW_STR(decremented);
 }
