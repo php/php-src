@@ -190,11 +190,11 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static size_t str_to_int(const char *str, size_t len)
+ZEND_ATTRIBUTE_NONNULL static zend_ulong str_to_int(const char *str, size_t len)
 {
-	size_t result = 0;
+	zend_ulong result = 0;
 
-	for (size_t i = 0; i < len; ++i) {
+	for (zend_ulong i = 0; i < len; ++i) {
 		result = result * 10 + (str[i] - '0');
 	}
 
@@ -318,6 +318,20 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 
 	/* Make the resulting URI independent of the 'uri_str'. */
 	uriMakeOwnerMmA(&uri, mm);
+
+	if (has_text_range(&uri.portText)) {
+		size_t port_length = get_text_range_length(&uri.portText);
+		if (
+			port_length > 5
+			|| str_to_int(uri.portText.first, port_length) > 65535
+		) {
+			if (!silent) {
+				zend_throw_exception(uri_invalid_uri_exception_ce, "The port is out of range", 0);
+			}
+
+			goto fail;
+		}
+	}
 
 	php_uri_parser_rfc3986_uris *uriparser_uris = uriparser_create_uris();
 	uriparser_uris->uri = uri;
