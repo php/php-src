@@ -1678,7 +1678,7 @@ phpdbg_out:
 
 		/* backup globals when cleaning */
 		if ((cleaning > 0) && !quit_immediately) {
-			settings = calloc(1, sizeof(zend_phpdbg_globals));
+			settings = pcalloc(1, sizeof(zend_phpdbg_globals));
 
 			php_phpdbg_globals_ctor(settings);
 

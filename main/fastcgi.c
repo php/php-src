@@ -869,7 +869,7 @@ static void fcgi_hook_dummy(void) {
 
 fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(void), void(*on_read)(void), void(*on_close)(void))
 {
-	fcgi_request *req = calloc(1, sizeof(fcgi_request));
+	fcgi_request *req = pcalloc(1, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
 	req->fd = -1;
 	req->id = -1;

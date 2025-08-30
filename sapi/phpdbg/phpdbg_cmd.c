@@ -460,7 +460,7 @@ PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) 
 
 /* {{{ */
 PHPDBG_API void phpdbg_stack_separate(phpdbg_param_t *param) {
-	phpdbg_param_t *stack = calloc(1, sizeof(phpdbg_param_t));
+	phpdbg_param_t *stack = pcalloc(1, sizeof(phpdbg_param_t));
 
 	stack->type = STACK_PARAM;
 	stack->next = param->next;
