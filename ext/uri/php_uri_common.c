@@ -92,6 +92,10 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_na
 		RETURN_THROWS();
 	}
 
+	/* Assign the object early. The engine will take care of destruction in
+	 * case of an exception being thrown. */
+	RETVAL_OBJ(new_object);
+
 	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
 	ZEND_ASSERT(property_handler != NULL);
 
@@ -100,7 +104,6 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_na
 	if (UNEXPECTED(property_handler->write_func == NULL)) {
 		zend_readonly_property_modification_error_ex(ZSTR_VAL(old_object->ce->name),
 			ZSTR_VAL(get_known_string_by_property_name(property_name)));
-		zend_object_release(new_object);
 		RETURN_THROWS();
 	}
 
@@ -108,12 +111,10 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, uri_property_na
 	ZVAL_UNDEF(&errors);
 	if (UNEXPECTED(property_handler->write_func(new_internal_uri, property_zv, &errors) == FAILURE)) {
 		zval_ptr_dtor(&errors);
-		zend_object_release(new_object);
 		RETURN_THROWS();
 	}
 
 	ZEND_ASSERT(Z_ISUNDEF(errors));
-	RETURN_OBJ(new_object);
 }
 
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name)
