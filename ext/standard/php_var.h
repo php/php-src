@@ -42,6 +42,8 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init(void);
 PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d);
 PHPAPI HashTable *php_var_unserialize_get_allowed_classes(php_unserialize_data_t d);
 PHPAPI void php_var_unserialize_set_allowed_classes(php_unserialize_data_t d, HashTable *classes);
+PHPAPI zval *php_var_unserialize_get_allowed_classes_callback(php_unserialize_data_t d);
+PHPAPI void php_var_unserialize_set_allowed_classes_callback(php_unserialize_data_t d, zval *callback);
 PHPAPI void php_var_unserialize_set_max_depth(php_unserialize_data_t d, zend_long max_depth);
 PHPAPI zend_long php_var_unserialize_get_max_depth(php_unserialize_data_t d);
 PHPAPI void php_var_unserialize_set_cur_depth(php_unserialize_data_t d, zend_long cur_depth);
