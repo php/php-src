@@ -29,7 +29,7 @@
 		: _erealloc((ptr), (size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC) )
 
 #define pemalloc_rel_orig(size, persistent)	((persistent) ? pmalloc((size)) : emalloc_rel_orig((size)))
-#define perealloc_rel_orig(ptr, size, persistent)	((persistent) ? realloc((ptr), (size)) : erealloc_rel_orig((ptr), (size)))
+#define perealloc_rel_orig(ptr, size, persistent)	((persistent) ? prealloc((ptr), (size)) : erealloc_rel_orig((ptr), (size)))
 #else
 # define pemalloc_rel_orig(size, persistent)				pemalloc((size), (persistent))
 # define perealloc_rel_orig(ptr, size, persistent)			perealloc((ptr), (size), (persistent))

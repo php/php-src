@@ -1300,7 +1300,7 @@ ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ *
 
 	snprintf(new_info, new_info_length, "    with %s v%s, %s, by %s\n", extension->name, extension->version, extension->copyright, extension->author);
 
-	zend_version_info = (char *) realloc(zend_version_info, zend_version_info_length+new_info_length + 1);
+	zend_version_info = (char *) prealloc(zend_version_info, zend_version_info_length+new_info_length + 1);
 	strncat(zend_version_info, new_info, new_info_length);
 	zend_version_info_length += new_info_length;
 	free(new_info);

@@ -254,7 +254,7 @@ static void tsrm_update_active_threads(void)
 			if (p->count < id_count) {
 				int j;
 
-				p->storage = (void *) realloc(p->storage, sizeof(void *)*id_count);
+				p->storage = (void *) prealloc(p->storage, sizeof(void *)*id_count);
 				for (j=p->count; j<id_count; j++) {
 					if (resource_types_table[j].fast_offset) {
 						p->storage[j] = (void *) (((char*)p) + resource_types_table[j].fast_offset);

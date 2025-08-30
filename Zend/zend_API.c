@@ -2519,7 +2519,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 			dl_loaded_count++;
 		}
 	} ZEND_HASH_FOREACH_END();
-	module_request_startup_handlers = (zend_module_entry**)realloc(
+	module_request_startup_handlers = (zend_module_entry**)prealloc(
 		module_request_startup_handlers,
 	    sizeof(zend_module_entry*) *
 		(startup_count + 1 +
@@ -2531,7 +2531,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	module_post_deactivate_handlers = module_request_shutdown_handlers + shutdown_count + 1;
 	module_post_deactivate_handlers[post_deactivate_count] = NULL;
 	/* Cannot reuse module_request_startup_handlers because it is freed in zend_destroy_modules, which happens before zend_unload_modules. */
-	modules_dl_loaded = realloc(modules_dl_loaded, sizeof(zend_module_entry*) * (dl_loaded_count + 1));
+	modules_dl_loaded = prealloc(modules_dl_loaded, sizeof(zend_module_entry*) * (dl_loaded_count + 1));
 	modules_dl_loaded[dl_loaded_count] = NULL;
 	startup_count = 0;
 
@@ -2558,7 +2558,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	class_cleanup_handlers = (zend_class_entry**)realloc(
+	class_cleanup_handlers = (zend_class_entry**)prealloc(
 		class_cleanup_handlers,
 		sizeof(zend_class_entry*) *
 		(class_count + 1));
@@ -3101,8 +3101,8 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						zend_flf_capacity *= 2;
 					}
 					/* +1 for NULL terminator */
-					zend_flf_handlers = realloc(zend_flf_handlers, (zend_flf_capacity + 1) * sizeof(void *));
-					zend_flf_functions = realloc(zend_flf_functions, (zend_flf_capacity + 1) * sizeof(zend_function *));
+					zend_flf_handlers = prealloc(zend_flf_handlers, (zend_flf_capacity + 1) * sizeof(void *));
+					zend_flf_functions = prealloc(zend_flf_functions, (zend_flf_capacity + 1) * sizeof(zend_function *));
 				}
 				zend_flf_handlers[zend_flf_count] = flf_info->handler;
 				zend_flf_functions[zend_flf_count] = (zend_function *)reg_function;
