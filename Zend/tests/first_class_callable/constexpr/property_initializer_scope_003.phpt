@@ -23,7 +23,7 @@ var_dump(($c->d)("abc"));
 --EXPECTF--
 object(Closure)#%d (2) {
   ["function"]=>
-  string(11) "C::myMethod"
+  string(11) "P::myMethod"
   ["parameter"]=>
   array(1) {
     ["$foo"]=>

@@ -1,5 +1,5 @@
 --TEST--
-FCC in initializer errors for static reference to instance method (Exception).
+FCC in initializer emits deprecation for static reference to trait method (Exception).
 --FILE--
 <?php
 

@@ -26,6 +26,6 @@ var_dump(Closure);
 Autoloading AutoloadedClass
 object(Closure)#%d (1) {
   ["function"]=>
-  string(16) "withStaticMethod"
+  string(33) "AutoloadedClass::withStaticMethod"
 }
 Called AutoloadedClass::withStaticMethod
