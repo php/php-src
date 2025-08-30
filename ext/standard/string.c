@@ -5805,16 +5805,42 @@ PHP_FUNCTION(str_pad)
 	}
 
 	/* First we pad on the left. */
-	for (i = 0; i < left_pad; i++)
-		ZSTR_VAL(result)[ZSTR_LEN(result)++] = pad_str[i % pad_str_len];
+	if (left_pad > 0) {
+		if (pad_str_len == 1) {
+			memset(ZSTR_VAL(result), *pad_str, left_pad);
+		} else {
+			char *p = ZSTR_VAL(result);
+			for (i = 0; i < left_pad / pad_str_len; i++) {
+				memcpy(p, pad_str, pad_str_len);
+				p += pad_str_len;
+			}
+			if (left_pad % pad_str_len) {
+				memcpy(p, pad_str, left_pad % pad_str_len);
+			}
+		}
+		ZSTR_LEN(result) += left_pad;
+	}
 
 	/* Then we copy the input string. */
 	memcpy(ZSTR_VAL(result) + ZSTR_LEN(result), ZSTR_VAL(input), ZSTR_LEN(input));
 	ZSTR_LEN(result) += ZSTR_LEN(input);
 
 	/* Finally, we pad on the right. */
-	for (i = 0; i < right_pad; i++)
-		ZSTR_VAL(result)[ZSTR_LEN(result)++] = pad_str[i % pad_str_len];
+	if (right_pad > 0) {
+		if (pad_str_len == 1) {
+			memset(ZSTR_VAL(result) + ZSTR_LEN(result), *pad_str, right_pad);
+		} else {
+			char *p = ZSTR_VAL(result) + ZSTR_LEN(result);
+			for (i = 0; i < right_pad / pad_str_len; i++) {
+				memcpy(p, pad_str, pad_str_len);
+				p += pad_str_len;
+			}
+			if (right_pad % pad_str_len) {
+				memcpy(p, pad_str, right_pad % pad_str_len);
+			}
+		}
+		ZSTR_LEN(result) += right_pad;
+	}
 
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
