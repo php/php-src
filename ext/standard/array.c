@@ -3116,10 +3116,12 @@ PHP_FUNCTION(range)
 
 			RANGE_CHECK_DOUBLE_INIT_ARRAY(start_double, end_double, step_double);
 
+			element = start_double;
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (i = 0, element = start_double; i < size && element >= end_double; ++i, element = start_double - (i * step_double)) {
+				for (i = 0; i < size; i++) {
 					ZEND_HASH_FILL_SET_DOUBLE(element);
 					ZEND_HASH_FILL_NEXT();
+					element -= step_double;
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (end_double > start_double) { /* Increasing float range */
@@ -3132,10 +3134,12 @@ PHP_FUNCTION(range)
 
 			RANGE_CHECK_DOUBLE_INIT_ARRAY(end_double, start_double, step_double);
 
+			element = start_double;
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (i = 0, element = start_double; i < size && element <= end_double; ++i, element = start_double + (i * step_double)) {
+				for (i = 0; i < size; i++) {
 					ZEND_HASH_FILL_SET_DOUBLE(element);
 					ZEND_HASH_FILL_NEXT();
+					element += step_double;
 				}
 			} ZEND_HASH_FILL_END();
 		} else {
@@ -3146,8 +3150,9 @@ PHP_FUNCTION(range)
 	} else {
 		ZEND_ASSERT(start_type == IS_LONG && end_type == IS_LONG && !is_step_double);
 		/* unsigned_step is a zend_ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
-		zend_ulong unsigned_step= (zend_ulong)step;
+		zend_ulong unsigned_step = (zend_ulong)step;
 		uint32_t i, size;
+		zend_long current_val;
 
 		/* Decreasing int range */
 		if (start_long > end_long) {
@@ -3157,10 +3162,12 @@ PHP_FUNCTION(range)
 
 			RANGE_CHECK_LONG_INIT_ARRAY(start_long, end_long, unsigned_step);
 
+			current_val = start_long;
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (i = 0; i < size; ++i) {
-					ZEND_HASH_FILL_SET_LONG(start_long - (i * unsigned_step));
+					ZEND_HASH_FILL_SET_LONG(current_val);
 					ZEND_HASH_FILL_NEXT();
+					current_val -= unsigned_step;
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (end_long > start_long) { /* Increasing int range */
@@ -3173,10 +3180,12 @@ PHP_FUNCTION(range)
 
 			RANGE_CHECK_LONG_INIT_ARRAY(end_long, start_long, unsigned_step);
 
+			current_val = start_long;
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (i = 0; i < size; ++i) {
-					ZEND_HASH_FILL_SET_LONG(start_long + (i * unsigned_step));
+					ZEND_HASH_FILL_SET_LONG(current_val);
 					ZEND_HASH_FILL_NEXT();
+					current_val += unsigned_step;
 				}
 			} ZEND_HASH_FILL_END();
 		} else {
@@ -7083,7 +7092,7 @@ PHP_FUNCTION(array_combine)
 	HashTable *values, *keys;
 	uint32_t pos_values = 0;
 	zval *entry_keys, *entry_values;
-	int num_keys, num_values;
+	uint32_t num_keys, num_values;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(keys)
@@ -7103,29 +7112,48 @@ PHP_FUNCTION(array_combine)
 	}
 
 	array_init_size(return_value, num_keys);
-	ZEND_HASH_FOREACH_VAL(keys, entry_keys) {
-		while (1) {
-			if (pos_values >= values->nNumUsed) {
-				break;
+
+	/* Fast path for packed arrays without holes */
+	if (HT_IS_PACKED(keys) && HT_IS_WITHOUT_HOLES(keys) &&
+	    HT_IS_PACKED(values) && HT_IS_WITHOUT_HOLES(values)) {
+		uint32_t i;
+		for (i = 0; i < num_keys; i++) {
+			entry_keys = &keys->arPacked[i];
+			entry_values = &values->arPacked[i];
+
+			if (Z_TYPE_P(entry_keys) == IS_LONG) {
+				zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry_keys), entry_values);
+			} else {
+				zend_string *tmp_key;
+				zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
+				zend_symtable_update(Z_ARRVAL_P(return_value), key, entry_values);
+				zend_tmp_string_release(tmp_key);
 			}
-			entry_values = ZEND_HASH_ELEMENT(values, pos_values);
-			if (Z_TYPE_P(entry_values) != IS_UNDEF) {
-				if (Z_TYPE_P(entry_keys) == IS_LONG) {
-					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
-						Z_LVAL_P(entry_keys), entry_values);
-				} else {
-					zend_string *tmp_key;
-					zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
-					entry_values = zend_symtable_update(Z_ARRVAL_P(return_value),
-						key, entry_values);
-					zend_tmp_string_release(tmp_key);
-				}
-				zval_add_ref(entry_values);
-				pos_values++;
-				break;
-			}
-			pos_values++;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} else {
+		ZEND_HASH_FOREACH_VAL(keys, entry_keys) {
+			while (1) {
+				if (pos_values >= values->nNumUsed) {
+					break;
+				}
+				entry_values = ZEND_HASH_ELEMENT(values, pos_values);
+				if (Z_TYPE_P(entry_values) != IS_UNDEF) {
+					if (Z_TYPE_P(entry_keys) == IS_LONG) {
+						zend_hash_index_update(Z_ARRVAL_P(return_value),
+							Z_LVAL_P(entry_keys), entry_values);
+					} else {
+						zend_string *tmp_key;
+						zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
+						zend_symtable_update(Z_ARRVAL_P(return_value),
+							key, entry_values);
+						zend_tmp_string_release(tmp_key);
+					}
+					pos_values++;
+					break;
+				}
+				pos_values++;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
