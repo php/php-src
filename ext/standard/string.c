@@ -1263,26 +1263,19 @@ PHP_FUNCTION(str_increment)
 	} while (carry && position-- > 0);
 
 	if (UNEXPECTED(carry)) {
-		/* Optimization: extend the string in-place instead of allocating a new one */
-		incremented = zend_string_extend(incremented, ZSTR_LEN(incremented) + 1, 0);
-		memmove(ZSTR_VAL(incremented) + 1, ZSTR_VAL(incremented), ZSTR_LEN(incremented) - 1);
-		switch (ZSTR_VAL(incremented)[1]) { /* Check the first char of the old string */
+		zend_string *tmp = zend_string_alloc(ZSTR_LEN(incremented)+1, 0);
+		memcpy(ZSTR_VAL(tmp) + 1, ZSTR_VAL(incremented), ZSTR_LEN(incremented));
+		ZSTR_VAL(tmp)[ZSTR_LEN(incremented)+1] = '\0';
+		switch (ZSTR_VAL(incremented)[0]) {
 			case '0':
-				ZSTR_VAL(incremented)[0] = '1';
-				break;
-			case 'a':
-				ZSTR_VAL(incremented)[0] = 'a';
-				break;
-			case 'A':
-				ZSTR_VAL(incremented)[0] = 'A';
+				ZSTR_VAL(tmp)[0] = '1';
 				break;
 			default:
-				/* Should not happen with alphanumeric strings */
-				ZSTR_VAL(incremented)[0] = ZSTR_VAL(incremented)[1];
+				ZSTR_VAL(tmp)[0] = ZSTR_VAL(incremented)[0];
 				break;
 		}
-		ZSTR_VAL(incremented)[ZSTR_LEN(incremented)] = '\0';
-		RETURN_NEW_STR(incremented);
+		zend_string_efree(incremented);
+		RETURN_NEW_STR(tmp);
 	}
 	RETURN_NEW_STR(incremented);
 }
@@ -1335,10 +1328,11 @@ PHP_FUNCTION(str_decrement)
 			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
 			RETURN_THROWS();
 		}
-		/* Optimization: move memory in-place instead of allocating a new string */
-		memmove(ZSTR_VAL(decremented), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
-		decremented = zend_string_truncate(decremented, ZSTR_LEN(decremented) - 1, 0);
-		RETURN_NEW_STR(decremented);
+		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
+		memcpy(ZSTR_VAL(tmp), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
+		ZSTR_VAL(tmp)[ZSTR_LEN(decremented) - 1] = '\0';
+		zend_string_efree(decremented);
+		RETURN_NEW_STR(tmp);
 	}
 	RETURN_NEW_STR(decremented);
 }
@@ -4396,41 +4390,16 @@ static zend_long php_str_replace_in_subject(
 							ZSTR_VAL(search_str), ZSTR_LEN(search_str),
 							replace_value, replace_len, &replace_count);
 				} else {
-					/* OPTIMIZATION:
-					 * Instead of freeing and re-creating the lowercase subject on each
-					 * iteration, we create it once and then update it with a case-
-					 * insensitive replacement. This avoids repeated calls to zend_string_tolower
-					 * on a potentially large string when using an array of search terms.
-					 */
-					zend_long replacements_in_step = 0;
+					zend_long old_replace_count = replace_count;
 
 					if (!lc_subject_str) {
 						lc_subject_str = zend_string_tolower(subject_str);
 					}
-
 					tmp_result = php_str_to_str_i_ex(subject_str, ZSTR_VAL(lc_subject_str),
-							search_str, replace_value, replace_len, &replacements_in_step);
-
-					if (replacements_in_step > 0) {
-						replace_count += replacements_in_step;
-
-						/* Update lc_subject_str with a case-sensitive replacement using lowercase values */
-						zend_string *lc_search_str = zend_string_tolower(search_str);
-						zend_string *tmp_replace = zend_string_init(replace_value, replace_len, 0);
-						zend_string *lc_replace_str = zend_string_tolower(tmp_replace);
-						zend_string_release(tmp_replace);
-
-						zend_long dummy_count = 0;
-						zend_string *next_lc_subject_str = php_str_to_str_ex(lc_subject_str,
-							ZSTR_VAL(lc_search_str), ZSTR_LEN(lc_search_str),
-							ZSTR_VAL(lc_replace_str), ZSTR_LEN(lc_replace_str),
-							&dummy_count);
-
-						zend_string_release(lc_subject_str);
-						lc_subject_str = next_lc_subject_str;
-
-						zend_string_release(lc_search_str);
-						zend_string_release(lc_replace_str);
+							search_str, replace_value, replace_len, &replace_count);
+					if (replace_count != old_replace_count) {
+						zend_string_release_ex(lc_subject_str, 0);
+						lc_subject_str = NULL;
 					}
 				}
 			} else {
@@ -5836,42 +5805,16 @@ PHP_FUNCTION(str_pad)
 	}
 
 	/* First we pad on the left. */
-	if (left_pad > 0) {
-		if (pad_str_len == 1) {
-			memset(ZSTR_VAL(result), *pad_str, left_pad);
-		} else {
-			char *p = ZSTR_VAL(result);
-			for (i = 0; i < left_pad / pad_str_len; i++) {
-				memcpy(p, pad_str, pad_str_len);
-				p += pad_str_len;
-			}
-			if (left_pad % pad_str_len) {
-				memcpy(p, pad_str, left_pad % pad_str_len);
-			}
-		}
-		ZSTR_LEN(result) += left_pad;
-	}
+	for (i = 0; i < left_pad; i++)
+		ZSTR_VAL(result)[ZSTR_LEN(result)++] = pad_str[i % pad_str_len];
 
 	/* Then we copy the input string. */
 	memcpy(ZSTR_VAL(result) + ZSTR_LEN(result), ZSTR_VAL(input), ZSTR_LEN(input));
 	ZSTR_LEN(result) += ZSTR_LEN(input);
 
 	/* Finally, we pad on the right. */
-	if (right_pad > 0) {
-		if (pad_str_len == 1) {
-			memset(ZSTR_VAL(result) + ZSTR_LEN(result), *pad_str, right_pad);
-		} else {
-			char *p = ZSTR_VAL(result) + ZSTR_LEN(result);
-			for (i = 0; i < right_pad / pad_str_len; i++) {
-				memcpy(p, pad_str, pad_str_len);
-				p += pad_str_len;
-			}
-			if (right_pad % pad_str_len) {
-				memcpy(p, pad_str, right_pad % pad_str_len);
-			}
-		}
-		ZSTR_LEN(result) += right_pad;
-	}
+	for (i = 0; i < right_pad; i++)
+		ZSTR_VAL(result)[ZSTR_LEN(result)++] = pad_str[i % pad_str_len];
 
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
@@ -6105,30 +6048,30 @@ PHP_FUNCTION(str_word_count)
 			RETURN_THROWS();
 	}
 
-	char mask[256];
-	memset(mask, 0, 256);
-	for (int i = 0; i < 256; i++) {
-		if (isalpha(i)) {
-			mask[i] = 1;
-		}
-	}
-	mask['\''] = 1;
-	mask['-'] = 1;
-
 	if (char_list) {
-		php_charmask((const unsigned char *) char_list, char_list_len, mask);
+		php_charmask((const unsigned char *) char_list, char_list_len, ch);
 	}
 
 	p = ZSTR_VAL(str);
 	e = ZSTR_VAL(str) + ZSTR_LEN(str);
 
+	/* first character cannot be ' or -, unless explicitly allowed by the user */
+	if ((*p == '\'' && (!char_list || !ch['\''])) || (*p == '-' && (!char_list || !ch['-']))) {
+		p++;
+	}
+	/* last character cannot be -, unless explicitly allowed by the user */
+	if (*(e - 1) == '-' && (!char_list || !ch['-'])) {
+		e--;
+	}
+
 	while (p < e) {
-		if (mask[(unsigned char)*p]) {
-			s = p;
-			while (p < e && mask[(unsigned char)*p]) {
-				p++;
-			}
-			switch (type) {
+		s = p;
+		while (p < e && (isalpha((unsigned char)*p) || (char_list && ch[(unsigned char)*p]) || *p == '\'' || *p == '-')) {
+			p++;
+		}
+		if (p > s) {
+			switch (type)
+			{
 				case 1:
 					add_next_index_stringl(return_value, s, p - s);
 					break;
