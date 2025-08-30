@@ -3089,50 +3089,16 @@ ZEND_API char* ZEND_FASTCALL zend_str_toupper_dup_ex(const char *source, size_t 
 
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, bool persistent) /* {{{ */
 {
-	size_t length = ZSTR_LEN(str);
-	unsigned char *p = (unsigned char *) ZSTR_VAL(str);
-	unsigned char *end = p + length;
+	zend_string *res = zend_string_alloc(ZSTR_LEN(str), persistent);
+	zend_str_tolower_impl(ZSTR_VAL(res), ZSTR_VAL(str), ZSTR_LEN(str));
+	ZSTR_VAL(res)[ZSTR_LEN(res)] = '\0';
 
-#ifdef HAVE_BLOCKCONV
-	BLOCKCONV_INIT_RANGE('A', 'Z');
-	while (p + BLOCKCONV_STRIDE <= end) {
-		BLOCKCONV_LOAD(p);
-		if (BLOCKCONV_FOUND()) {
-			zend_string *res = zend_string_alloc(length, persistent);
-			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
-			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
-
-			/* Lowercase the chunk we already compared. */
-			BLOCKCONV_INIT_DELTA('a' - 'A');
-			BLOCKCONV_STORE(q);
-
-			/* Lowercase the rest of the string. */
-			p += BLOCKCONV_STRIDE;
-			q += BLOCKCONV_STRIDE;
-			zend_str_tolower_impl((char *) q, (const char *) p, end - p);
-			ZSTR_VAL(res)[length] = '\0';
-			return res;
-		}
-		p += BLOCKCONV_STRIDE;
-	}
-#endif
-
-	while (p < end) {
-		if (*p != zend_tolower_ascii(*p)) {
-			zend_string *res = zend_string_alloc(length, persistent);
-			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
-
-			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
-			while (p < end) {
-				*q++ = zend_tolower_ascii(*p++);
-			}
-			ZSTR_VAL(res)[length] = '\0';
-			return res;
-		}
-		p++;
+	if (memcmp(ZSTR_VAL(res), ZSTR_VAL(str), ZSTR_LEN(str)) == 0) {
+		zend_string_release_ex(res, persistent);
+		return zend_string_copy(str);
 	}
 
-	return zend_string_copy(str);
+	return res;
 }
 /* }}} */
 
