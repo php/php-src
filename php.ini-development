@@ -639,7 +639,7 @@ ignore_repeated_source = Off
 ; the order in which that data is registered. The values for this directive
 ; are specified in the same manner as the variables_order directive,
 ; EXCEPT one. Leaving this value empty will cause PHP to use the value set
-; in the variables_order  directive. It does not mean it will leave the super
+; in the variables_order directive. It does not mean it will leave the super
 ; globals array REQUEST empty.
 ; Default Value: None
 ; Development Value: "GP"
