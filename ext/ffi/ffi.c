@@ -2335,7 +2335,7 @@ static void zend_ffi_scope_hash_dtor(zval *zv) /* {{{ */
 		zend_hash_destroy(scope->tags);
 		free(scope->tags);
 	}
-	free(scope);
+	pefree(scope, 1);
 }
 /* }}} */
 
@@ -3333,12 +3333,12 @@ static zend_ffi *zend_ffi_load(const char *filename, zend_bool preload) /* {{{ *
 		}
 
 		if (!scope) {
-			scope = malloc(sizeof(zend_ffi_scope));
+			scope = pemalloc(sizeof(zend_ffi_scope), 1);
 			scope->symbols = FFI_G(symbols);
 			scope->tags = FFI_G(tags);
 
 			if (!FFI_G(scopes)) {
-				FFI_G(scopes) = malloc(sizeof(HashTable));
+				FFI_G(scopes) = pemalloc(sizeof(HashTable), 1);
 				zend_hash_init(FFI_G(scopes), 0, NULL, zend_ffi_scope_hash_dtor, 1);
 			}
 
@@ -5215,7 +5215,7 @@ static ZEND_GSHUTDOWN_FUNCTION(ffi)
 {
 	if (ffi_globals->scopes) {
 		zend_hash_destroy(ffi_globals->scopes);
-		free(ffi_globals->scopes);
+		pefree(ffi_globals->scopes, 1);
 	}
 	zend_hash_destroy(&ffi_globals->types);
 }

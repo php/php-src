@@ -100,7 +100,7 @@ void clean_module_constants(int module_number)
 
 void zend_startup_constants(void)
 {
-	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
+	EG(zend_constants) = (HashTable *) pemalloc(sizeof(HashTable), 1);
 	zend_hash_init(EG(zend_constants), 128, NULL, ZEND_CONSTANT_DTOR, 1);
 }
 
@@ -145,7 +145,7 @@ void zend_register_standard_constants(void)
 void zend_shutdown_constants(void)
 {
 	zend_hash_destroy(EG(zend_constants));
-	free(EG(zend_constants));
+	pefree(EG(zend_constants), 1);
 }
 
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)

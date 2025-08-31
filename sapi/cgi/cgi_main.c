@@ -758,12 +758,12 @@ static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
 			int ret, len = (int)strlen(message);
-			char *buf = malloc(len+2);
-
+			char *buf = pemalloc(len+2, 0);
+			
 			memcpy(buf, message, len);
 			memcpy(buf + len, "\n", sizeof("\n"));
 			ret = fcgi_write(request, FCGI_STDERR, buf, (int)(len + 1));
-			free(buf);
+			pefree(buf, 0);
 			if (ret < 0) {
 				php_handle_aborted_connection();
 			}
@@ -1801,7 +1801,8 @@ int main(int argc, char *argv[])
 	if((query_string = getenv("QUERY_STRING")) != NULL && strchr(query_string, '=') == NULL) {
 		/* we've got query string that has no = - apache CGI will pass it to command line */
 		unsigned char *p;
-		decoded_query_string = strdup(query_string);
+
+		decoded_query_string = pestrdup(query_string, 0);
 		php_url_decode(decoded_query_string, strlen(decoded_query_string));
 		for (p = (unsigned char *)decoded_query_string; *p &&  *p <= ' '; p++) {
 			/* skip all leading spaces */
@@ -1809,7 +1810,7 @@ int main(int argc, char *argv[])
 		if(*p == '-') {
 			skip_getopt = 1;
 		}
-		free(decoded_query_string);
+		pefree(decoded_query_string, 0);
 	}
 
 	while (!skip_getopt && (c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
@@ -2438,7 +2439,7 @@ parent_loop_end:
 					}
 
 					len += 2;
-					s = malloc(len);
+					s = pemalloc(len, 0);
 					*s = '\0';			/* we are pretending it came from the environment  */
 					for (i = php_optind; i < argc; i++) {
 						strlcat(s, argv[i], len);
@@ -2507,7 +2508,7 @@ parent_loop_end:
 					}
 
 					if (free_query_string && SG(request_info).query_string) {
-						free(SG(request_info).query_string);
+						pefree(SG(request_info).query_string, 0);
 						SG(request_info).query_string = NULL;
 					}
 
