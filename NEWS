@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed hard_timeout with --enable-zend-max-execution-timers. (Appla)
   . Fixed bug GH-19792 (SCCP causes UAF for return value if both warning and
     exception are triggered). (nielsdos)
+  . Fixed bug GH-19653 (Closure named argument unpacking between temporary
+    closures can cause a crash). (nielsdos, Arnaud, Bob)
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
