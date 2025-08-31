@@ -135,7 +135,6 @@ typedef struct {
 	unsigned is_pipe:1;		/* stream is an actual pipe, currently Windows only*/
 	unsigned cached_fstat:1;	/* sb is valid */
 	unsigned is_pipe_blocking:1; /* allow blocking read() on pipes, currently Windows only */
-	unsigned no_forced_fstat:1;  /* Use fstat cache even if forced */
 	unsigned is_seekable:1;		/* don't try and seek, if not set */
 	unsigned _reserved:26;
 
@@ -161,7 +160,7 @@ typedef struct {
 
 static int do_fstat(php_stdio_stream_data *d, int force)
 {
-	if (!d->cached_fstat || (force && !d->no_forced_fstat)) {
+	if (!d->cached_fstat || force) {
 		int fd;
 		int r;
 
@@ -1188,30 +1187,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 				efree(persistent_id);
 			}
 
-			/* WIN32 always set ISREG flag */
 #ifndef PHP_WIN32
-			/* sanity checks for include/require.
-			 * We check these after opening the stream, so that we save
-			 * on fstat() syscalls */
-			if (options & STREAM_OPEN_FOR_INCLUDE) {
-				php_stdio_stream_data *self = (php_stdio_stream_data*)ret->abstract;
-				int r;
-
-				r = do_fstat(self, 0);
-				if ((r == 0 && !S_ISREG(self->sb.st_mode))) {
-					if (opened_path) {
-						zend_string_release_ex(*opened_path, 0);
-						*opened_path = NULL;
-					}
-					php_stream_close(ret);
-					return NULL;
-				}
-
-				/* Make sure the fstat result is reused when we later try to get the
-				 * file size. */
-				self->no_forced_fstat = 1;
-			}
-
 			if (options & STREAM_USE_BLOCKING_PIPE) {
 				php_stdio_stream_data *self = (php_stdio_stream_data*)ret->abstract;
 				self->is_pipe_blocking = 1;
