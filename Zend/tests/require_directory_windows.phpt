@@ -15,7 +15,7 @@ require $dir;
 --EXPECTF--
 Warning: require(%s): Failed to open stream: Permission denied in %s on line %d
 
-Fatal error: Uncaught Error: Failed opening required '%s' (include_path='.:') in %s:%d
+Fatal error: Uncaught Error: Failed opening required '%s' (include_path='%s') in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
