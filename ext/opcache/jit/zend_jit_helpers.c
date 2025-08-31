@@ -2576,7 +2576,7 @@ static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)
 	zend_error(E_WARNING, "Trying to access array offset on %s", zend_zval_value_name(container));
 }
 
-static void ZEND_FASTCALL zend_jit_check_nan_to_bool_coercion(void)
+static void ZEND_FASTCALL zend_jit_nan_coerced_to_type_warning(void)
 {
 	zend_nan_coerced_to_type_warning(_IS_BOOL);
 }

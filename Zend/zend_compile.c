@@ -10028,17 +10028,9 @@ ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op)
 		return Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op);
 	}
 	/* Can happen when called from zend_optimizer_eval_unary_op() */
-	if (
-		opcode == ZEND_IS_EQUAL
-		|| opcode == ZEND_IS_NOT_EQUAL
-		|| opcode == ZEND_BOOL
-		|| opcode == ZEND_BOOL_NOT
-	) {
-		/* BW_NOT on string does not convert the string into an integer. */
-		if (Z_TYPE_P(op) == IS_DOUBLE) {
-			return true;
-		}
-		return false;
+	if (opcode == ZEND_BOOL || opcode == ZEND_BOOL_NOT) {
+		/* ZEND_BOOL/ZEND_BOOL_NOT warns when casting NAN. */
+		return Z_TYPE_P(op) == IS_DOUBLE;
 	}
 
 	return 0;

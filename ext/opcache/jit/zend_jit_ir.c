@@ -16,6 +16,7 @@
  *  +----------------------------------------------------------------------+
  */
 
+#include "../../../Zend/zend_types.h"
 #include "Zend/zend_type_info.h"
 #include "jit/ir/ir.h"
 #include "jit/ir/ir_builder.h"
@@ -7570,7 +7571,10 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 	}
 
 	if (Z_MODE(op1_addr) == IS_CONST_ZVAL) {
-		if (zend_is_true(Z_ZV(op1_addr))) {
+		zval *op1 = Z_ZV(op1_addr);
+		/* NAN Value must cause a warning to be emitted */
+		// TODO function JIT does not emit warning
+		if ((Z_TYPE_P(op1) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op1))) || zend_is_true(op1)) {
 			always_true = 1;
 		} else {
 			always_false = 1;
@@ -7738,10 +7742,11 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 			ir_IF_TRUE(if_double);
 		}
 
-		ir_ref dval = jit_Z_DVAL(jit, op1_addr);ir_ref is_nan = ir_NE(dval, dval);
+		ir_ref dval = jit_Z_DVAL(jit, op1_addr);
+		ir_ref is_nan = ir_NE(dval, dval);
 		ir_ref if_val = ir_IF(is_nan);
 		ir_IF_TRUE_cold(if_val);
-			ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_check_nan_to_bool_coercion));
+			ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_nan_coerced_to_type_warning));
 		ir_MERGE_WITH_EMPTY_FALSE(if_val);
 
 		ref = ir_NE(dval, ir_CONST_DOUBLE(0.0));
