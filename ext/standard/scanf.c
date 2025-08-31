@@ -351,7 +351,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
-			value = ZEND_STRTOUL(format-1, &end, 10);
+			value = strtoul(format-1, &end, 10);
 			if (*end != '$') {
 				goto notXpg;
 			}
@@ -398,7 +398,7 @@ xpgCheckDone:
 		 * Parse any width specifier.
 		 */
 		if (isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUL(format-1, &format, 10);
+			value = strtoul(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
 			ch = format++;
 		}
@@ -695,7 +695,7 @@ literal:
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
 		} else if ( isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUL(format-1, &end, 10);
+			value = strtoul(format-1, &end, 10);
 			if (*end == '$') {
 				format = end+1;
 				ch = format++;
@@ -707,7 +707,7 @@ literal:
 		 * Parse any width specifier.
 		 */
 		if ( isdigit(UCHAR(*ch))) {
-			width = ZEND_STRTOUL(format-1, &format, 10);
+			width = strtoul(format-1, &format, 10);
 			ch = format++;
 		} else {
 			width = 0;
