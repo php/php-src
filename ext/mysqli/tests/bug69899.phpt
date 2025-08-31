@@ -6,14 +6,11 @@ free_result is called on a prepared statement followed by closing that
 statement. This is due to mysqlnd_stmt::free_result (mysqlnd_ps.c) which
 unconditionally sets the connection of the statement to ready, despite the fact
 that it might already be closed.
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once __DIR__ . '/skipif.inc';
 require_once __DIR__ . '/skipifconnectfailure.inc';
-require_once __DIR__ . '/connect.inc';
-if (!$IS_MYSQLND) {
-    die('skip mysqlnd only');
-}
 ?>
 --FILE--
 <?php

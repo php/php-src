@@ -1,9 +1,7 @@
 --TEST--
 Shutdown crash when attached/removed same key segment multiple times
---SKIPIF--
-<?php
-if (!extension_loaded("sysvshm")){ print 'skip'; }
-?>
+--EXTENSIONS--
+sysvshm
 --FILE--
 <?php
 

@@ -1,9 +1,10 @@
 --TEST--
 ziparchive::properties isset()/empty() checks
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
 if (!method_exists('ZipArchive', 'isCompressionMethodSupported')) die('skip needs libzip >= 1.7');
 ?>
 --FILE--

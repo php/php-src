@@ -1,11 +1,7 @@
 --TEST--
 curl_multi_errno and curl_multi_strerror basic test
---SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-        exit("skip curl extension not loaded");
-}
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

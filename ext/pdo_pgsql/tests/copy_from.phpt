@@ -1,8 +1,9 @@
 --TEST--
 PDO PgSQL pgsqlCopyFromArray and pgsqlCopyFromFile
+--EXTENSIONS--
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -14,7 +15,7 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->exec('CREATE TABLE test (a integer not null primary key, b text, c integer)');
+$db->exec('CREATE TABLE test_copy_from (a integer not null primary key, b text, c integer)');
 
 echo "Preparing test file and array for CopyFrom tests\n";
 
@@ -38,9 +39,9 @@ file_put_contents($filenameWithDifferentNullValuesAndSelectedFields, implode("\n
 
 echo "Testing pgsqlCopyFromArray() with default parameters\n";
 $db->beginTransaction();
-var_dump($db->pgsqlCopyFromArray('test',$tableRows));
+var_dump($db->pgsqlCopyFromArray('test_copy_from',$tableRows));
 
-$stmt = $db->query("select * from test");
+$stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
@@ -48,8 +49,8 @@ $db->rollback();
 
 echo "Testing pgsqlCopyFromArray() with different field separator and not null indicator\n";
 $db->beginTransaction();
-var_dump($db->pgsqlCopyFromArray('test',$tableRowsWithDifferentNullValues,";","NULL"));
-$stmt = $db->query("select * from test");
+var_dump($db->pgsqlCopyFromArray('test_copy_from',$tableRowsWithDifferentNullValues,";","NULL"));
+$stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
@@ -57,8 +58,8 @@ $db->rollback();
 
 echo "Testing pgsqlCopyFromArray() with only selected fields\n";
 $db->beginTransaction();
-var_dump($db->pgsqlCopyFromArray('test',$tableRowsWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
-$stmt = $db->query("select * from test");
+var_dump($db->pgsqlCopyFromArray('test_copy_from',$tableRowsWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
+$stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
@@ -75,9 +76,9 @@ $db->rollback();
 
 echo "Testing pgsqlCopyFromFile() with default parameters\n";
 $db->beginTransaction();
-var_dump($db->pgsqlCopyFromFile('test',$filename));
+var_dump($db->pgsqlCopyFromFile('test_copy_from',$filename));
 
-$stmt = $db->query("select * from test");
+$stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
@@ -85,8 +86,8 @@ $db->rollback();
 
 echo "Testing pgsqlCopyFromFile() with different field separator and not null indicator\n";
 $db->beginTransaction();
-var_dump($db->pgsqlCopyFromFile('test',$filenameWithDifferentNullValues,";","NULL"));
-$stmt = $db->query("select * from test");
+var_dump($db->pgsqlCopyFromFile('test_copy_from',$filenameWithDifferentNullValues,";","NULL"));
+$stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
@@ -94,8 +95,8 @@ $db->rollback();
 
 echo "Testing pgsqlCopyFromFile() with only selected fields\n";
 $db->beginTransaction();
-var_dump($db->pgsqlCopyFromFile('test',$filenameWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
-$stmt = $db->query("select * from test");
+var_dump($db->pgsqlCopyFromFile('test_copy_from',$filenameWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
+$stmt = $db->query("select * from test_copy_from");
 foreach($stmt as $r) {
     var_dump($r);
 }
@@ -113,7 +114,7 @@ $db->rollback();
 echo "Testing pgsqlCopyFromFile() with non existing file\n";
 $db->beginTransaction();
 try {
-    var_dump($db->pgsqlCopyFromFile('test',"nonexisting/foo.csv",";","NULL",'a,c'));
+    var_dump($db->pgsqlCopyFromFile('test_copy_from',"nonexisting/foo.csv",";","NULL",'a,c'));
 } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
 }
@@ -123,6 +124,12 @@ $db->rollback();
 foreach (array($filename, $filenameWithDifferentNullValues, $filenameWithDifferentNullValuesAndSelectedFields) as $f) {
     @unlink($f);
 }
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->query('DROP TABLE IF EXISTS test_copy_from CASCADE');
 ?>
 --EXPECTF--
 Preparing test file and array for CopyFrom tests

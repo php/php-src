@@ -1,0 +1,29 @@
+// vim:ft=javascript
+
+EXTENSION("lexbor", "php_lexbor.c", false, "/I " + configure_module_dirname + " /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+PHP_LEXBOR="yes";
+ADD_SOURCES("ext/lexbor/lexbor/ports/windows_nt/lexbor/core", "memory.c", "lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/core", "array_obj.c array.c avl.c bst.c diyfp.c conv.c dobject.c dtoa.c hash.c mem.c mraw.c plog.c print.c serialize.c shs.c str.c strtod.c", "lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/dom", "interface.c", "lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/dom/interfaces", "attr.c cdata_section.c character_data.c comment.c document.c document_fragment.c document_type.c element.c node.c processing_instruction.c shadow_root.c text.c", "lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/html/tokenizer", "error.c state_comment.c state_doctype.c state_rawtext.c state_rcdata.c state_script.c state.c", "lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/html/tree", "active_formatting.c open_elements.c error.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/html/tree/insertion_mode", "after_after_body.c after_after_frameset.c after_body.c after_frameset.c after_head.c before_head.c before_html.c foreign_content.c in_body.c in_caption.c in_cell.c in_column_group.c in_frameset.c in_head.c in_head_noscript.c initial.c in_row.c in_select.c in_select_in_table.c in_table_body.c in_table.c in_table_text.c in_template.c text.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/html", "encoding.c interface.c parser.c token.c token_attr.c tokenizer.c tree.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/encoding", "decode.c encode.c encoding.c multi.c range.c res.c single.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/html/interfaces", "anchor_element.c area_element.c audio_element.c base_element.c body_element.c br_element.c button_element.c canvas_element.c data_element.c data_list_element.c details_element.c dialog_element.c directory_element.c div_element.c d_list_element.c document.c element.c embed_element.c field_set_element.c font_element.c form_element.c frame_element.c frame_set_element.c head_element.c heading_element.c hr_element.c html_element.c iframe_element.c image_element.c input_element.c label_element.c legend_element.c li_element.c link_element.c map_element.c marquee_element.c media_element.c menu_element.c meta_element.c meter_element.c mod_element.c object_element.c o_list_element.c opt_group_element.c option_element.c output_element.c paragraph_element.c param_element.c picture_element.c pre_element.c progress_element.c quote_element.c script_element.c select_element.c slot_element.c source_element.c span_element.c style_element.c table_caption_element.c table_cell_element.c table_col_element.c table_element.c table_row_element.c table_section_element.c template_element.c text_area_element.c time_element.c title_element.c track_element.c u_list_element.c unknown_element.c video_element.c window.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/css", "state.c log.c parser.c css.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/css/selectors", "state.c selectors.c selector.c pseudo_state.c pseudo.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/css/syntax", "state.c parser.c syntax.c anb.c tokenizer.c token.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/css/syntax/tokenizer", "error.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/ns", "ns.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/punycode", "punycode.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/tag", "tag.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/unicode", "idna.c unicode.c","lexbor");
+ADD_SOURCES("ext/lexbor/lexbor/url", "url.c","lexbor");
+ADD_FLAG("CFLAGS_LEXBOR", "/D LEXBOR_BUILDING /utf-8");
+
+AC_DEFINE("HAVE_LEXBOR", 1, "Define to 1 if the PHP extension 'lexbor' is available.");
+AC_DEFINE("LEXBOR_VERSION", "2.5.0", "Define the main Lexbor version")
+
+PHP_INSTALL_HEADERS("ext/lexbor", "php_lexbor.h lexbor/");

@@ -1,4 +1,7 @@
-@echo off
+if /i "%GITHUB_ACTIONS%" neq "True" (
+    echo for CI only
+    exit /b 3
+)
 
 set SDK_REMOTE=https://github.com/php/php-sdk-binary-tools.git
 set SDK_BRANCH=%PHP_BUILD_SDK_BRANCH%
@@ -20,7 +23,7 @@ if not exist "%SDK_RUNNER%" (
 
 if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 	echo Cloning remote SDK repository
-	git clone --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
+	git clone --branch %SDK_BRANCH% %SDK_REMOTE% --depth 1 "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
 )
 
 for /f "tokens=*" %%a in ('type %PHP_BUILD_CACHE_SDK_DIR%\VERSION') do set GOT_SDK_VER=%%a
@@ -38,7 +41,9 @@ if not exist "%SDK_RUNNER%" (
 	exit /b 3
 )
 
-cmd /c %SDK_RUNNER% -t %APPVEYOR_BUILD_FOLDER%\.github\scripts\windows\build_task.bat
+for /f "delims=" %%T in ('call .github\scripts\windows\find-vs-toolset.bat %PHP_BUILD_CRT%') do set "VS_TOOLSET=%%T"
+echo Got VS Toolset %VS_TOOLSET%
+cmd /c %SDK_RUNNER% -s %VS_TOOLSET% -t .github\scripts\windows\build_task.bat
 if %errorlevel% neq 0 exit /b 3
 
 exit /b 0

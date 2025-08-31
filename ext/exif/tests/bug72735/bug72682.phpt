@@ -1,7 +1,7 @@
 --TEST--
 Bug #72735 MakerNote regression
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 foreach (['nokia.jpg', 'samsung.jpg', 'panasonic.jpg'] as $picture) {

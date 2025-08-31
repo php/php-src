@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -47,8 +47,6 @@ zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
 
-	intern->zo.handlers = &Spoofchecker_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -63,24 +61,25 @@ zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 
 static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 {
-	zend_object *new_obj_val;
-	Spoofchecker_object *sfo, *new_sfo;
+	Spoofchecker_object *spoofchecker_orig = php_intl_spoofchecker_fetch_object(object);
+	zend_object *new_obj_val               = Spoofchecker_ce_ptr->create_object(object->ce);
+	Spoofchecker_object *spoofchecker_new  = php_intl_spoofchecker_fetch_object(new_obj_val);
 
-    sfo = php_intl_spoofchecker_fetch_object(object);
-    intl_error_reset(SPOOFCHECKER_ERROR_P(sfo));
+	zend_objects_clone_members(&spoofchecker_new->zo, &spoofchecker_orig->zo);
 
-	new_obj_val = Spoofchecker_ce_ptr->create_object(object->ce);
-	new_sfo = php_intl_spoofchecker_fetch_object(new_obj_val);
-	/* clone standard parts */
-	zend_objects_clone_members(&new_sfo->zo, &sfo->zo);
-	/* clone internal object */
-	new_sfo->uspoof = uspoof_clone(sfo->uspoof, SPOOFCHECKER_ERROR_CODE_P(new_sfo));
-	if(U_FAILURE(SPOOFCHECKER_ERROR_CODE(new_sfo))) {
-		/* set up error in case error handler is interested */
-		intl_error_set( NULL, SPOOFCHECKER_ERROR_CODE(new_sfo), "Failed to clone SpoofChecker object", 0 );
-		Spoofchecker_objects_free(&new_sfo->zo); /* free new object */
-		zend_error(E_ERROR, "Failed to clone SpoofChecker object");
+	if (spoofchecker_orig->uspoof != NULL) {
+		/* guaranteed to return NULL if it fails */
+		UErrorCode error = U_ZERO_ERROR;
+		spoofchecker_new->uspoof = uspoof_clone(spoofchecker_orig->uspoof, &error);
+		if (U_FAILURE(error)) {
+			/* free new object */
+			Spoofchecker_objects_free(&spoofchecker_new->zo);
+			zend_throw_error(NULL, "Failed to clone SpoofChecker");
+		}
+	} else {
+		zend_throw_error(NULL, "Cannot clone uninitialized SpoofChecker");
 	}
+
 	return new_obj_val;
 }
 /* }}} */
@@ -90,12 +89,10 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
  */
 void spoofchecker_register_Spoofchecker_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'Spoofchecker' class. */
-	INIT_CLASS_ENTRY(ce, "Spoofchecker", class_Spoofchecker_methods);
-	ce.create_object = Spoofchecker_object_create;
-	Spoofchecker_ce_ptr = zend_register_internal_class(&ce);
+	Spoofchecker_ce_ptr = register_class_Spoofchecker();
+	Spoofchecker_ce_ptr->create_object = Spoofchecker_object_create;
+	Spoofchecker_ce_ptr->default_object_handlers = &Spoofchecker_handlers;
 
 	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);
@@ -132,6 +129,13 @@ void spoofchecker_object_destroy(Spoofchecker_object* co)
 		uspoof_close(co->uspoof);
 		co->uspoof = NULL;
 	}
+
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+	if (co->uspoofres) {
+		uspoof_closeCheckResult(co->uspoofres);
+		co->uspoofres = NULL;
+	}
+#endif
 
 	intl_error_reset(SPOOFCHECKER_ERROR_P(co));
 }

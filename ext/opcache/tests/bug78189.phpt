@@ -1,8 +1,9 @@
 --TEST--
 Bug #78189 (file cache strips last character of uname hash)
+--EXTENSIONS--
+opcache
 --SKIPIF--
 <?php
-if (!extension_loaded('Zend OPcache')) die('skip opcache extension not available');
 if (substr(PHP_OS, 0, 3) !== 'WIN') die('skip this test is for Windows platforms only');
 ?>
 --INI--

@@ -1,10 +1,8 @@
 --TEST--
 Test 8: Stream Wrapper Includes
---SKIPIF--
-<?php
-    require_once __DIR__ .'/skipif.inc';
-    if (!extension_loaded('zlib')) die('skip zlib extension not available');
-?>
+--EXTENSIONS--
+zlib
+xsl
 --FILE--
 <?php
 echo "Test 8: Stream Wrapper Includes ";
@@ -19,6 +17,7 @@ chdir(__DIR__);
 $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXML($dom);
+?>
 --EXPECT--
 Test 8: Stream Wrapper Includes 
 <?xml version="1.0" encoding="iso-8859-1"?>

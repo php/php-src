@@ -1,7 +1,7 @@
 --TEST--
 DOMParentNode::prepend()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 declare(strict_types=1);

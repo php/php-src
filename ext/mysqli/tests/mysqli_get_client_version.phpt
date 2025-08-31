@@ -1,7 +1,7 @@
 --TEST--
 mysqli_get_client_version()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
     if (!is_int($info = mysqli_get_client_version()) || ($info < 100))

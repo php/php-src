@@ -1,17 +1,20 @@
 --TEST--
-dom: Bug #79968 - Crash when calling before without valid hierachy
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+dom: Bug #79968 - Crash when calling before without valid hierarchy
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
 $cdata = new DOMText;
 
-try {
-    $cdata->before("string");
-} catch (DOMException $e) {
-    echo $e->getMessage();
-}
+$cdata->before("string");
+$cdata->after("string");
+$cdata->replaceWith("string");
+
+$dom = new DOMDocument();
+$dom->adoptNode($cdata);
+var_dump($dom->saveXML($cdata));
+
 ?>
 --EXPECT--
-Hierarchy Request Error
+string(0) ""

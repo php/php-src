@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@ pcre2_internal.h, which is #included by pcre2test before this file. */
 
 #ifndef OP_LISTS_DEFINED
 static const char *OP_names[] = { OP_NAME_LIST };
+STATIC_ASSERT(sizeof(OP_names)/sizeof(*OP_names) == OP_TABLE_LENGTH, OP_names);
 #define OP_LISTS_DEFINED
 #endif
 
@@ -65,13 +66,17 @@ static const char *OP_names[] = { OP_NAME_LIST };
 #define print_custring        PCRE2_SUFFIX(print_custring_)
 #define print_custring_bylen  PCRE2_SUFFIX(print_custring_bylen_)
 #define print_prop            PCRE2_SUFFIX(print_prop_)
+#define print_char_list       PCRE2_SUFFIX(print_char_list_)
+#define print_map             PCRE2_SUFFIX(print_map_)
+#define print_class           PCRE2_SUFFIX(print_class_)
 
 /* Table of sizes for the fixed-length opcodes. It's defined in a macro so that
 the definition is next to the definition of the opcodes in pcre2_internal.h.
 The contents of the table are, however, mode-dependent. */
 
 static const uint8_t OP_lengths[] = { OP_LENGTHS };
-
+STATIC_ASSERT(sizeof(OP_lengths)/sizeof(*OP_lengths) == OP_TABLE_LENGTH,
+              PCRE2_SUFFIX(OP_lengths_));
 
 
 /*************************************************
@@ -230,18 +235,48 @@ for (; len > 0; len--)
 /* When there is no UTF/UCP support, the table of names does not exist. This
 function should not be called in such configurations, because a pattern that
 tries to use Unicode properties won't compile. Rather than put lots of #ifdefs
-into the main code, however, we just put one into this function. */
+into the main code, however, we just put one into this function.
+
+Now that the table contains both full names and their abbreviations, we do some
+fiddling to try to get the full name, which is either the longer of two found
+names, or a 3-character script name. */
 
 static const char *
 get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
 #ifdef SUPPORT_UNICODE
-int i;
-for (i = PRIV(utt_size) - 1; i >= 0; i--)
+int count = 0;
+const char *yield = "??";
+size_t len = 0;
+unsigned int ptypex = (ptype == PT_SC)? PT_SCX : ptype;
+
+for (ptrdiff_t i = PRIV(utt_size) - 1; i >= 0; i--)
   {
-  if (ptype == PRIV(utt)[i].type && pvalue == PRIV(utt)[i].value) break;
+  const ucp_type_table *u = PRIV(utt) + i;
+
+  if ((ptype == u->type || ptypex == u->type) && pvalue == u->value)
+    {
+    const char *s = PRIV(utt_names) + u->name_offset;
+    size_t sl = strlen(s);
+
+    if (sl == 3 && (u->type == PT_SC || u->type == PT_SCX))
+      {
+      yield = s;
+      break;
+      }
+
+    if (sl > len)
+      {
+      yield = s;
+      len = sl;
+      }
+
+    if (++count >= 2) break;
+    }
   }
-return (i >= 0)? PRIV(utt_names) + PRIV(utt)[i].name_offset : "??";
+
+return yield;
+
 #else   /* No UTF support */
 (void)ptype;
 (void)pvalue;
@@ -273,17 +308,309 @@ print_prop(FILE *f, PCRE2_SPTR code, const char *before, const char *after)
 {
 if (code[1] != PT_CLIST)
   {
-  fprintf(f, "%s%s %s%s", before, OP_names[*code], get_ucpname(code[1],
-    code[2]), after);
+  const char *sc = (code[1] == PT_SC)? "script:" : "";
+  const char *s = get_ucpname(code[1], code[2]);
+  fprintf(f, "%s%s %s%c%s%s", before, OP_names[*code], sc, toupper(s[0]), s+1, after);
   }
 else
   {
-  const char *not = (*code == OP_PROP)? "" : "not ";
   const uint32_t *p = PRIV(ucd_caseless_sets) + code[2];
-  fprintf (f, "%s%sclist", before, not);
+  fprintf (f, "%s%sclist", before, (*code == OP_PROP)? "" : "not ");
   while (*p < NOTACHAR) fprintf(f, " %04x", *p++);
   fprintf(f, "%s", after);
   }
+}
+
+
+
+/*************************************************
+*              Print character list              *
+*************************************************/
+
+/* Prints the characters and character ranges in a character list.
+
+Arguments:
+  f            file to write to
+  code         pointer in the compiled code
+*/
+
+static PCRE2_SPTR
+print_char_list(FILE *f, PCRE2_SPTR code, const uint8_t *char_lists_end)
+{
+uint32_t type, list_ind;
+uint32_t char_list_add = XCL_CHAR_LIST_LOW_16_ADD;
+uint32_t range_start = ~(uint32_t)0, range_end = 0;
+const uint8_t *next_char;
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+type = (uint32_t)(code[0] << 8) | code[1];
+code += 2;
+#else
+type = code[0];
+code++;
+#endif  /* CODE_UNIT_WIDTH */
+
+/* Align characters. */
+next_char = char_lists_end - (GET(code, 0) << 1);
+type &= XCL_TYPE_MASK;
+list_ind = 0;
+
+if ((type & XCL_BEGIN_WITH_RANGE) != 0)
+  range_start = XCL_CHAR_LIST_LOW_16_START;
+
+while (type > 0)
+  {
+  uint32_t item_count = type & XCL_ITEM_COUNT_MASK;
+
+  if (item_count == XCL_ITEM_COUNT_MASK)
+    {
+    if (list_ind <= 1)
+      {
+      item_count = *(const uint16_t*)next_char;
+      next_char += 2;
+      }
+    else
+      {
+      item_count = *(const uint32_t*)next_char;
+      next_char += 4;
+      }
+    }
+
+  while (item_count > 0)
+    {
+    if (list_ind <= 1)
+      {
+      range_end = *(const uint16_t*)next_char;
+      next_char += 2;
+      }
+    else
+      {
+      range_end = *(const uint32_t*)next_char;
+      next_char += 4;
+      }
+
+    if ((range_end & XCL_CHAR_END) != 0)
+      {
+      range_end = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+
+      if (range_start < range_end)
+        fprintf(f, "\\x{%x}-", range_start);
+
+      fprintf(f, "\\x{%x}", range_end);
+      range_start = ~(uint32_t)0;
+      }
+    else
+      range_start = char_list_add + (range_end >> XCL_CHAR_SHIFT);
+
+    item_count--;
+    }
+
+  list_ind++;
+  type >>= XCL_TYPE_BIT_LEN;
+
+  /* The following code could be optimized to 8/16/32 bit,
+  but it is not worth it for a debugging function. */
+
+  if (range_start == ~(uint32_t)0)
+    {
+    if ((type & XCL_BEGIN_WITH_RANGE) != 0)
+      {
+      if (list_ind == 1) range_start = XCL_CHAR_LIST_HIGH_16_START;
+      else if (list_ind == 2) range_start = XCL_CHAR_LIST_LOW_32_START;
+      else range_start = XCL_CHAR_LIST_HIGH_32_START;
+      }
+    }
+  else if ((type & XCL_BEGIN_WITH_RANGE) == 0)
+    {
+    fprintf(f, "\\x{%x}-", range_start);
+
+    if (list_ind == 1) range_end = XCL_CHAR_LIST_LOW_16_END;
+    else if (list_ind == 2) range_end = XCL_CHAR_LIST_HIGH_16_END;
+    else if (list_ind == 3) range_end = XCL_CHAR_LIST_LOW_32_END;
+    else range_end = XCL_CHAR_LIST_HIGH_32_END;
+
+    fprintf(f, "\\x{%x}", range_end);
+    range_start = ~(uint32_t)0;
+    }
+
+  if (list_ind == 1) char_list_add = XCL_CHAR_LIST_HIGH_16_ADD;
+  else if (list_ind == 2) char_list_add = XCL_CHAR_LIST_LOW_32_ADD;
+  else char_list_add = XCL_CHAR_LIST_HIGH_32_ADD;
+  }
+
+return code + LINK_SIZE;
+}
+
+
+
+/*************************************************
+*       Print a character bitmap                 *
+*************************************************/
+
+/* Prints a 32-byte bitmap, which occurs within a character class opcode.
+
+Arguments:
+  f            file to write to
+  map          pointer to the bitmap
+  negated      TRUE if the bitmap will be printed as negated
+
+Returns:       nothing
+*/
+
+static void
+print_map(FILE *f, const uint8_t *map, BOOL negated)
+{
+BOOL first = TRUE;
+uint8_t inverted_map[32];
+int i;
+
+if (negated)
+  {
+  /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
+  for (i = 0; i < 32; i++) inverted_map[i] = 255 ^ map[i];
+  map = inverted_map;
+  }
+
+for (i = 0; i < 256; i++)
+  {
+  if ((map[i/8] & (1u << (i&7))) != 0)
+    {
+    int j;
+    for (j = i+1; j < 256; j++)
+      if ((map[j/8] & (1u << (j&7))) == 0) break;
+    if (i == '-' || i == '\\' || i == ']' || (first && i == '^'))
+      fprintf(f, "\\");
+    if (PRINTABLE(i)) fprintf(f, "%c", i);
+      else fprintf(f, "\\x%02x", i);
+    first = FALSE;
+    if (--j > i)
+      {
+      if (j != i + 1) fprintf(f, "-");
+      if (j == '-' || j == '\\' || j == ']') fprintf(f, "\\");
+      if (PRINTABLE(j)) fprintf(f, "%c", j);
+        else fprintf(f, "\\x%02x", j);
+      }
+    i = j;
+    }
+  }
+}
+
+
+
+/*************************************************
+*       Print character class                    *
+*************************************************/
+
+/* Prints a character class, which must be either an OP_CLASS, OP_NCLASS, or
+OP_XCLASS.
+
+Arguments:
+  f            file to write to
+  type         OP_CLASS, OP_NCLASS, or OP_XCLASS
+  code         pointer in the compiled code (after the OP tag)
+  utf          TRUE if re is UTF (will be FALSE if UTF is not supported)
+  before       text to print before
+  after        text to print after
+
+Returns:       nothing
+*/
+
+static void
+print_class(FILE *f, int type, PCRE2_SPTR code, const uint8_t *char_lists_end,
+  BOOL utf, const char *before, const char *after)
+{
+BOOL printmap, negated;
+PCRE2_SPTR ccode;
+
+/* Negative XCLASS and NCLASS both have a bitmap indicating which characters
+are accepted. For clarity we print this inverted and prefixed by "^". */
+if (type == OP_XCLASS)
+  {
+  ccode = code + LINK_SIZE;
+  printmap = (*ccode & XCL_MAP) != 0;
+  negated = (*ccode & XCL_NOT) != 0;
+  ccode++;
+  }
+else  /* CLASS or NCLASS */
+  {
+  printmap = TRUE;
+  negated = type == OP_NCLASS;
+  ccode = code;
+  }
+
+fprintf(f, "%s[%s", before, negated? "^" : "");
+
+/* Print a bit map */
+if (printmap)
+  {
+  print_map(f, (const uint8_t *)ccode, negated);
+  ccode += 32 / sizeof(PCRE2_UCHAR);
+  }
+
+/* For an XCLASS there is always some additional data */
+if (type == OP_XCLASS)
+  {
+  PCRE2_UCHAR ch;
+
+  while ((ch = *ccode++) != XCL_END)
+    {
+    const char *notch = "";
+
+    if (ch >= XCL_LIST)
+      {
+      ccode = print_char_list(f, ccode - 1, char_lists_end);
+      break;
+      }
+
+    switch(ch)
+      {
+      case XCL_NOTPROP:
+      notch = "^";
+      /* Fall through */
+      case XCL_PROP:
+        {
+        unsigned int ptype = *ccode++;
+        unsigned int pvalue = *ccode++;
+        const char *s;
+        switch(ptype)
+          {
+          case PT_PXGRAPH:
+          fprintf(f, "[:%sgraph:]", notch);
+          break;
+          case PT_PXPRINT:
+          fprintf(f, "[:%sprint:]", notch);
+          break;
+          case PT_PXPUNCT:
+          fprintf(f, "[:%spunct:]", notch);
+          break;
+          case PT_PXXDIGIT:
+          fprintf(f, "[:%sxdigit:]", notch);
+          break;
+          default:
+          s = get_ucpname(ptype, pvalue);
+          fprintf(f, "\\%c{%c%s}", ((notch[0] == '^')? 'P':'p'),
+            toupper(s[0]), s+1);
+          break;
+          }
+        }
+      break;
+
+      default:
+      ccode += 1 + print_char(f, ccode, utf);
+      if (ch == XCL_RANGE)
+        {
+        fprintf(f, "-");
+        ccode += 1 + print_char(f, ccode, utf);
+        }
+      break;
+      }
+    }
+
+  PCRE2_ASSERT(ccode == code + (GET(code, 0) - 1));
+  }
+
+/* Indicate a non-UTF class which was created by negation */
+fprintf(f, "]%s", after);
 }
 
 
@@ -312,7 +639,7 @@ uint32_t nesize = re->name_entry_size;
 BOOL utf = (re->overall_options & PCRE2_UTF) != 0;
 
 nametable = (PCRE2_SPTR)((uint8_t *)re + sizeof(pcre2_real_code));
-code = codestart = nametable + re->name_count * re->name_entry_size;
+code = codestart = (PCRE2_SPTR)((uint8_t *)re + re->code_start);
 
 for(;;)
   {
@@ -329,20 +656,6 @@ for(;;)
 
   switch(*code)
     {
-/* ========================================================================== */
-      /* These cases are never obeyed. This is a fudge that causes a compile-
-      time error if the vectors OP_names or OP_lengths, which are indexed
-      by opcode, are not the correct length. It seems to be the only way to do
-      such a check at compile time, as the sizeof() operator does not work in
-      the C preprocessor. */
-
-      case OP_TABLE_LENGTH:
-      case OP_TABLE_LENGTH +
-        ((sizeof(OP_names)/sizeof(const char *) == OP_TABLE_LENGTH) &&
-        (sizeof(OP_lengths) == OP_TABLE_LENGTH)):
-      return;
-/* ========================================================================== */
-
     case OP_END:
     fprintf(f, "    %s\n", OP_names[*code]);
     fprintf(f, "------------------------------------------------------------------\n");
@@ -394,13 +707,26 @@ for(;;)
     case OP_ASSERTBACK_NOT:
     case OP_ASSERT_NA:
     case OP_ASSERTBACK_NA:
+    case OP_ASSERT_SCS:
     case OP_ONCE:
     case OP_SCRIPT_RUN:
     case OP_COND:
     case OP_SCOND:
-    case OP_REVERSE:
     if (print_lengths) fprintf(f, "%3d ", GET(code, 1));
       else fprintf(f, "    ");
+    fprintf(f, "%s", OP_names[*code]);
+    break;
+
+    case OP_REVERSE:
+    if (print_lengths) fprintf(f, "%3d ", GET2(code, 1));
+      else fprintf(f, "    ");
+    fprintf(f, "%s", OP_names[*code]);
+    break;
+
+    case OP_VREVERSE:
+    if (print_lengths) fprintf(f, "%3d %d ", GET2(code, 1),
+      GET2(code, 1 + IMM2_SIZE));
+    else fprintf(f, "    ");
     fprintf(f, "%s", OP_names[*code]);
     break;
 
@@ -415,7 +741,7 @@ for(;;)
     case OP_DNCREF:
       {
       PCRE2_SPTR entry = nametable + (GET2(code, 1) * nesize) + IMM2_SIZE;
-      fprintf(f, " %s Cond ref <", flag);
+      fprintf(f, " %s Capture ref <", flag);
       print_custring(f, entry);
       fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
       }
@@ -532,7 +858,7 @@ for(;;)
     case OP_NOT:
     fprintf(f, " %s [^", flag);
     extra = print_char(f, code + 1, utf);
-    fprintf(f, "]");
+    fprintf(f, "] (not)");
     break;
 
     case OP_NOTSTARI:
@@ -558,7 +884,7 @@ for(;;)
     case OP_NOTPOSQUERY:
     fprintf(f, " %s [^", flag);
     extra = print_char(f, code + 1, utf);
-    fprintf(f, "]%s", OP_names[*code]);
+    fprintf(f, "]%s (not)", OP_names[*code]);
     break;
 
     case OP_NOTEXACTI:
@@ -580,6 +906,7 @@ for(;;)
     if (*code == OP_NOTMINUPTO || *code == OP_NOTMINUPTOI) fprintf(f, "?");
       else
     if (*code == OP_NOTPOSUPTO || *code == OP_NOTPOSUPTOI) fprintf(f, "+");
+    fprintf(f, " (not)");
     break;
 
     case OP_RECURSE:
@@ -590,14 +917,17 @@ for(;;)
 
     case OP_REFI:
     flag = "/i";
+    extra = code[1 + IMM2_SIZE];
     /* Fall through */
     case OP_REF:
     fprintf(f, " %s \\%d", flag, GET2(code,1));
+    if (extra != 0) fprintf(f, " 0x%02x", extra);
     ccode = code + OP_lengths[*code];
     goto CLASS_REF_REPEAT;
 
     case OP_DNREFI:
     flag = "/i";
+    extra = code[1 + 2*IMM2_SIZE];
     /* Fall through */
     case OP_DNREF:
       {
@@ -605,6 +935,7 @@ for(;;)
       fprintf(f, " %s \\k<", flag);
       print_custring(f, entry);
       fprintf(f, ">%d", GET2(code, 1 + IMM2_SIZE));
+      if (extra != 0) fprintf(f, " 0x%02x", extra);
       }
     ccode = code + OP_lengths[*code];
     goto CLASS_REF_REPEAT;
@@ -634,171 +965,115 @@ for(;;)
     print_prop(f, code, "    ", "");
     break;
 
-    /* OP_XCLASS cannot occur in 8-bit, non-UTF mode. However, there's no harm
-    in having this code always here, and it makes it less messy without all
-    those #ifdefs. */
+#ifdef SUPPORT_WIDE_CHARS
+    case OP_ECLASS:
+    extra = GET(code, 1);
+    fprintf(f, "    eclass[\n");
+    /* We print the opcodes contained inside as well. */
+    ccode = code + 1 + LINK_SIZE + 1;
+    if ((ccode[-1] & ECL_MAP) != 0)
+      {
+      const uint8_t *map = (const uint8_t *)ccode;
+      /* The first 6 ASCII characters (SOH...ACK) are totally, utterly useless.
+      If they're set in the bitmap, then it's clearly been formed by negation.*/
+      BOOL print_negated = (map[0] & 0x7e) == 0x7e;
+
+      fprintf(f, "          bitmap: [%s", print_negated? "^" : "");
+      print_map(f, map, print_negated);
+      fprintf(f, "]\n");
+      ccode += 32 / sizeof(PCRE2_UCHAR);
+      }
+    else
+      fprintf(f, "          no bitmap\n");
+    while (ccode < code + extra)
+      {
+      if (print_lengths)
+        fprintf(f, "%3d ", (int)(ccode - codestart));
+      else
+        fprintf(f, "    ");
+
+      switch (*ccode)
+        {
+        case ECL_AND:
+        fprintf(f, "      AND\n");
+        ccode += 1;
+        break;
+        case ECL_OR:
+        fprintf(f, "      OR\n");
+        ccode += 1;
+        break;
+        case ECL_XOR:
+        fprintf(f, "      XOR\n");
+        ccode += 1;
+        break;
+        case ECL_NOT:
+        fprintf(f, "      NOT\n");
+        ccode += 1;
+        break;
+
+        case ECL_XCLASS:
+        print_class(f, OP_XCLASS, ccode+1, (uint8_t*)codestart, utf,
+                    "      xclass: ", "\n");
+        ccode += GET(ccode, 1);
+        break;
+
+        default:
+        fprintf(f, "      UNEXPECTED\n");
+        ccode += 1;
+        break;
+        }
+      }
+    fprintf(f, "        ]");
+    goto CLASS_REF_REPEAT;
+#endif  /* SUPPORT_WIDE_CHARS */
 
     case OP_CLASS:
     case OP_NCLASS:
+#ifdef SUPPORT_WIDE_CHARS
     case OP_XCLASS:
+    if (*code == OP_XCLASS)
+      extra = GET(code, 1);
+#endif
+    print_class(f, *code, code+1, (uint8_t*)codestart, utf, "    ", "");
+    ccode = code + OP_lengths[*code] + extra;
+
+    /* Handle repeats after a class or a back reference */
+
+    CLASS_REF_REPEAT:
+    switch(*ccode)
       {
       unsigned int min, max;
-      BOOL printmap;
-      BOOL invertmap = FALSE;
-      uint8_t *map;
-      uint8_t inverted_map[32];
 
-      fprintf(f, "    [");
+      case OP_CRSTAR:
+      case OP_CRMINSTAR:
+      case OP_CRPLUS:
+      case OP_CRMINPLUS:
+      case OP_CRQUERY:
+      case OP_CRMINQUERY:
+      case OP_CRPOSSTAR:
+      case OP_CRPOSPLUS:
+      case OP_CRPOSQUERY:
+      fprintf(f, "%s", OP_names[*ccode]);
+      extra += OP_lengths[*ccode];
+      break;
 
-      if (*code == OP_XCLASS)
-        {
-        extra = GET(code, 1);
-        ccode = code + LINK_SIZE + 1;
-        printmap = (*ccode & XCL_MAP) != 0;
-        if ((*ccode & XCL_NOT) != 0)
-          {
-          invertmap = (*ccode & XCL_HASPROP) == 0;
-          fprintf(f, "^");
-          }
-        ccode++;
-        }
-      else
-        {
-        printmap = TRUE;
-        ccode = code + 1;
-        }
+      case OP_CRRANGE:
+      case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
+      min = GET2(ccode,1);
+      max = GET2(ccode,1 + IMM2_SIZE);
+      if (max == 0) fprintf(f, "{%u,}", min);
+      else fprintf(f, "{%u,%u}", min, max);
+      if (*ccode == OP_CRMINRANGE) fprintf(f, "?");
+      else if (*ccode == OP_CRPOSRANGE) fprintf(f, "+");
+      extra += OP_lengths[*ccode];
+      break;
 
-      /* Print a bit map */
+      /* Do nothing if it's not a repeat; this code stops picky compilers
+      warning about the lack of a default code path. */
 
-      if (printmap)
-        {
-        map = (uint8_t *)ccode;
-        if (invertmap)
-          {
-          /* Using 255 ^ instead of ~ avoids clang sanitize warning. */
-          for (i = 0; i < 32; i++) inverted_map[i] = 255 ^ map[i];
-          map = inverted_map;
-          }
-
-        for (i = 0; i < 256; i++)
-          {
-          if ((map[i/8] & (1u << (i&7))) != 0)
-            {
-            int j;
-            for (j = i+1; j < 256; j++)
-              if ((map[j/8] & (1u << (j&7))) == 0) break;
-            if (i == '-' || i == ']') fprintf(f, "\\");
-            if (PRINTABLE(i)) fprintf(f, "%c", i);
-              else fprintf(f, "\\x%02x", i);
-            if (--j > i)
-              {
-              if (j != i + 1) fprintf(f, "-");
-              if (j == '-' || j == ']') fprintf(f, "\\");
-              if (PRINTABLE(j)) fprintf(f, "%c", j);
-                else fprintf(f, "\\x%02x", j);
-              }
-            i = j;
-            }
-          }
-        ccode += 32 / sizeof(PCRE2_UCHAR);
-        }
-
-      /* For an XCLASS there is always some additional data */
-
-      if (*code == OP_XCLASS)
-        {
-        PCRE2_UCHAR ch;
-        while ((ch = *ccode++) != XCL_END)
-          {
-          BOOL not = FALSE;
-          const char *notch = "";
-
-          switch(ch)
-            {
-            case XCL_NOTPROP:
-            not = TRUE;
-            notch = "^";
-            /* Fall through */
-
-            case XCL_PROP:
-              {
-              unsigned int ptype = *ccode++;
-              unsigned int pvalue = *ccode++;
-
-              switch(ptype)
-                {
-                case PT_PXGRAPH:
-                fprintf(f, "[:%sgraph:]", notch);
-                break;
-
-                case PT_PXPRINT:
-                fprintf(f, "[:%sprint:]", notch);
-                break;
-
-                case PT_PXPUNCT:
-                fprintf(f, "[:%spunct:]", notch);
-                break;
-
-                default:
-                fprintf(f, "\\%c{%s}", (not? 'P':'p'),
-                  get_ucpname(ptype, pvalue));
-                break;
-                }
-              }
-            break;
-
-            default:
-            ccode += 1 + print_char(f, ccode, utf);
-            if (ch == XCL_RANGE)
-              {
-              fprintf(f, "-");
-              ccode += 1 + print_char(f, ccode, utf);
-              }
-            break;
-            }
-          }
-        }
-
-      /* Indicate a non-UTF class which was created by negation */
-
-      fprintf(f, "]%s", (*code == OP_NCLASS)? " (neg)" : "");
-
-      /* Handle repeats after a class or a back reference */
-
-      CLASS_REF_REPEAT:
-      switch(*ccode)
-        {
-        case OP_CRSTAR:
-        case OP_CRMINSTAR:
-        case OP_CRPLUS:
-        case OP_CRMINPLUS:
-        case OP_CRQUERY:
-        case OP_CRMINQUERY:
-        case OP_CRPOSSTAR:
-        case OP_CRPOSPLUS:
-        case OP_CRPOSQUERY:
-        fprintf(f, "%s", OP_names[*ccode]);
-        extra += OP_lengths[*ccode];
-        break;
-
-        case OP_CRRANGE:
-        case OP_CRMINRANGE:
-        case OP_CRPOSRANGE:
-        min = GET2(ccode,1);
-        max = GET2(ccode,1 + IMM2_SIZE);
-        if (max == 0) fprintf(f, "{%u,}", min);
-        else fprintf(f, "{%u,%u}", min, max);
-        if (*ccode == OP_CRMINRANGE) fprintf(f, "?");
-        else if (*ccode == OP_CRPOSRANGE) fprintf(f, "+");
-        extra += OP_lengths[*ccode];
-        break;
-
-        /* Do nothing if it's not a repeat; this code stops picky compilers
-        warning about the lack of a default code path. */
-
-        default:
-        break;
-        }
+      default:
+      break;
       }
     break;
 

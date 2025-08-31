@@ -1,14 +1,10 @@
 --TEST--
 Test compress.zlib:// scheme with the file_get_contents
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-$inputFileName = __DIR__."/004.txt.gz";
+$inputFileName = __DIR__."/data/test.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 readfile($srcFile);
 ?>

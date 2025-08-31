@@ -1,11 +1,13 @@
 --TEST--
 imagefilter() function test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available.");
+    if (!function_exists("imagefilter")) die("skip requires imagefilter function");
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
     }
-    if (!function_exists("imagefilter")) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php
@@ -45,7 +47,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 
     $im = imagecreatefrompng($SOURCE_IMG);
 
-    if (imagefilter($im, IMG_FILTER_COLORIZE, -127.12, -127.98, 127)) {
+    if (imagefilter($im, IMG_FILTER_COLORIZE, -127, -127, 127)) {
         imagepng($im, $SAVE_DIR . "/IMG_FILTER_COLORIZE.png");
         echo "IMG_FILTER_COLORIZE success\n";
         unlink($SAVE_DIR . "/IMG_FILTER_COLORIZE.png");
@@ -93,7 +95,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
         echo "IMG_FILTER_SCATTER failed\n";
     }
 ?>
---EXPECT--
+--EXPECTF--
 IMG_FILTER_NEGATE success
 IMG_FILTER_GRAYSCALE success
 IMG_FILTER_EDGEDETECT success

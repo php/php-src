@@ -1,15 +1,22 @@
 --TEST--
 IntlTimeZone::createEnumeration(): errors
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
-var_dump(IntlTimeZone::createEnumeration(array()));
+try {
+	var_dump(IntlTimeZone::createEnumeration([]));
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+try {
+	var_dump(IntlTimeZone::createEnumeration(new stdClass()));
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: IntlTimeZone::createEnumeration(): intltz_create_enumeration: invalid argument type in %s on line %d
-bool(false)
+--EXPECT--
+TypeError: IntlTimeZone::createEnumeration(): Argument #1 ($countryOrRawOffset) must be of type string|int|null, array given
+TypeError: IntlTimeZone::createEnumeration(): Argument #1 ($countryOrRawOffset) must be of type string|int|null, stdClass given

@@ -2,8 +2,8 @@
 bc_raisemod's expo can't be negative
 --CREDITS--
 Gabriel Caruso (carusogabriel34@gmail.com)
---SKIPIF--
-<?php if(!extension_loaded('bcmath')) die('skip bcmath extension not loaded'); ?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 try {

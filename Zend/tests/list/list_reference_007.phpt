@@ -6,10 +6,10 @@
 class StorageRef implements ArrayAccess {
     private $s = [];
     function __construct(array $a) { $this->s = $a; }
-    function offsetSet ($k, $v) { $this->s[$k] = $v; }
-    function &offsetGet ($k) { return $this->s[$k]; }
-    function offsetExists ($k) { return isset($this->s[$k]); }
-    function offsetUnset ($k) { unset($this->s[$k]); }
+    function offsetSet ($k, $v): void { $this->s[$k] = $v; }
+    function &offsetGet ($k): mixed { return $this->s[$k]; }
+    function offsetExists ($k): bool { return isset($this->s[$k]); }
+    function offsetUnset ($k): void { unset($this->s[$k]); }
 }
 
 $a = new StorageRef([1, 2]);

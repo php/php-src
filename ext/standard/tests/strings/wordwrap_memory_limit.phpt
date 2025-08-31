@@ -2,7 +2,7 @@
 No overflow should occur during the memory_limit check for wordwrap()
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN' && PHP_INT_SIZE == 4) die("skip this test is not for 32bit Windows platforms");
+if (PHP_INT_SIZE == 4) die("skip this test is not for 32bit platforms");
 if (getenv("USE_ZEND_ALLOC") === "0") die("skip Zend MM disabled");
 ?>
 --INI--

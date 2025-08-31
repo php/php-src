@@ -1,13 +1,9 @@
 --TEST--
 MessageFormatter::setPattern() invalidates arg types cache
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-//ini_set("intl.default_locale", "nl");
 
 $mf = new MessageFormatter('en_US',
     "{0,number} -- {1,ordinal}");

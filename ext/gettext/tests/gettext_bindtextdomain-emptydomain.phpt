@@ -1,11 +1,7 @@
 --TEST--
 Test if bindtextdomain() errors if the domain is empty.
---SKIPIF--
-<?php
-if (!extension_loaded("gettext")) {
-    die("skip gettext extension is not loaded.\n");
-}
-?>
+--EXTENSIONS--
+gettext
 --FILE--
 <?php
 
@@ -19,7 +15,7 @@ try {
 
 ?>
 --EXPECT--
-bindtextdomain(): Argument #1 ($domain) cannot be empty
+bindtextdomain(): Argument #1 ($domain) must not be empty
 --CREDITS--
 Till Klampaeckel, till@php.net
 PHP Testfest Berlin 2009-05-09

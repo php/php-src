@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, string data
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 
@@ -28,4 +28,4 @@ try {
 --EXPECT--
 books
 books
-XMLReader::XML(): Argument #1 ($source) cannot be empty
+XMLReader::XML(): Argument #1 ($source) must not be empty

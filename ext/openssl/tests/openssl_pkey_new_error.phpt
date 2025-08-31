@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkey_new() error tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 /* openssl_pkey_get_details() segfaults when getting the information
@@ -28,6 +28,6 @@ try {
 }
 ?>
 --EXPECT--
-openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given
-openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given
-openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, bool given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type OpenSSLAsymmetricKey, false given

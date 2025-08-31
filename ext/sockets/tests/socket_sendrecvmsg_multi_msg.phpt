@@ -1,10 +1,9 @@
 --TEST--
 sendmsg()/recvmsg(): test ability to receive multiple messages (WIN32)
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets'))
-    die('skip sockets extension not available.');
-
 require 'ipv6_skipif.inc';
 
 if (!defined('IPPROTO_IPV6'))

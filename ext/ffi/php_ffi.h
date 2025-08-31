@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -30,7 +30,7 @@ typedef struct _zend_ffi_type  zend_ffi_type;
 
 ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	zend_ffi_api_restriction restriction;
-	zend_bool is_cli;
+	bool is_cli;
 
 	/* predefined ffi_types */
 	HashTable types;
@@ -54,9 +54,9 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	int line;
 	HashTable *symbols;
 	HashTable *tags;
-	zend_bool allow_vla;
-	zend_bool attribute_parsing;
-	zend_bool persistent;
+	bool allow_vla;
+	bool attribute_parsing;
+	bool persistent;
 	uint32_t  default_type_attr;
 ZEND_END_MODULE_GLOBALS(ffi)
 
@@ -206,55 +206,56 @@ typedef struct _zend_ffi_val {
 	};
 } zend_ffi_val;
 
-int zend_ffi_parse_decl(const char *str, size_t len);
-int zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl);
+zend_result zend_ffi_parse_decl(const char *str, size_t len);
+zend_result zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl);
+void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl);
 
 /* parser callbacks */
 void ZEND_NORETURN zend_ffi_parser_error(const char *msg, ...);
-int zend_ffi_is_typedef_name(const char *name, size_t name_len);
+bool zend_ffi_is_typedef_name(const char *name, size_t name_len);
 void zend_ffi_resolve_typedef(const char *name, size_t name_len, zend_ffi_dcl *dcl);
 void zend_ffi_resolve_const(const char *name, size_t name_len, zend_ffi_val *val);
-void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, zend_bool incomplete);
+void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, bool incomplete);
 void zend_ffi_make_enum_type(zend_ffi_dcl *dcl);
-void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name_len, zend_ffi_val *val, int64_t *min, int64_t *max, int64_t *last);
+void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name_len, const zend_ffi_val *val, int64_t *min, int64_t *max, int64_t *last);
 void zend_ffi_make_struct_type(zend_ffi_dcl *dcl);
 void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_len, zend_ffi_dcl *field_dcl);
 void zend_ffi_add_anonymous_field(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_dcl);
-void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_len, zend_ffi_dcl *field_dcl, zend_ffi_val *bits);
+void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_len, zend_ffi_dcl *field_dcl, const zend_ffi_val *bits);
 void zend_ffi_adjust_struct_size(zend_ffi_dcl *dcl);
 void zend_ffi_make_pointer_type(zend_ffi_dcl *dcl);
-void zend_ffi_make_array_type(zend_ffi_dcl *dcl, zend_ffi_val *len);
+void zend_ffi_make_array_type(zend_ffi_dcl *dcl, const zend_ffi_val *len);
 void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *nested_dcl);
 void zend_ffi_add_arg(HashTable **args, const char *name, size_t name_len, zend_ffi_dcl *arg_dcl);
 void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl);
 void zend_ffi_add_attribute(zend_ffi_dcl *dcl, const char *name, size_t name_len);
-void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t name_len, int n, zend_ffi_val *val);
-void zend_ffi_add_msvc_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t name_len, zend_ffi_val *val);
+void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t name_len, int n, const zend_ffi_val *val);
+void zend_ffi_add_msvc_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t name_len, const zend_ffi_val *val);
 void zend_ffi_set_abi(zend_ffi_dcl *dcl, uint16_t abi);
 void zend_ffi_nested_declaration(zend_ffi_dcl *dcl, zend_ffi_dcl *nested_dcl);
 void zend_ffi_align_as_type(zend_ffi_dcl *dcl, zend_ffi_dcl *align_dcl);
-void zend_ffi_align_as_val(zend_ffi_dcl *dcl, zend_ffi_val *align_val);
+void zend_ffi_align_as_val(zend_ffi_dcl *dcl, const zend_ffi_val *align_val);
 void zend_ffi_validate_type_name(zend_ffi_dcl *dcl);
 
-void zend_ffi_expr_conditional(zend_ffi_val *val, zend_ffi_val *op2, zend_ffi_val *op3);
+void zend_ffi_expr_conditional(zend_ffi_val *val, const zend_ffi_val *op2, const zend_ffi_val *op3);
 void zend_ffi_expr_bool_or(zend_ffi_val *val, zend_ffi_val *op2);
 void zend_ffi_expr_bool_and(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_bw_or(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_bw_xor(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_bw_and(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_is_equal(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_is_not_equal(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_is_less(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_is_greater(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_is_less_or_equal(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_is_greater_or_equal(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_shift_left(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_shift_right(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_add(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_sub(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_mul(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_div(zend_ffi_val *val, zend_ffi_val *op2);
-void zend_ffi_expr_mod(zend_ffi_val *val, zend_ffi_val *op2);
+void zend_ffi_expr_bw_or(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_bw_xor(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_bw_and(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_is_equal(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_is_not_equal(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_is_less(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_is_greater(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_is_less_or_equal(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_is_greater_or_equal(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_shift_left(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_shift_right(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_add(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_sub(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_mul(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_div(zend_ffi_val *val, const zend_ffi_val *op2);
+void zend_ffi_expr_mod(zend_ffi_val *val, const zend_ffi_val *op2);
 void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl);
 void zend_ffi_expr_plus(zend_ffi_val *val);
 void zend_ffi_expr_neg(zend_ffi_val *val);

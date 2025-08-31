@@ -1,8 +1,9 @@
 --TEST--
 Testing mb_ereg() named subpatterns
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
 ?>
 --FILE--

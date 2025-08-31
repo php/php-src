@@ -1,8 +1,9 @@
 --TEST--
 Bug #74950 (null pointer deref in zim_simplexml_element_getDocNamespaces)
+--EXTENSIONS--
+simplexml
 --SKIPIF--
 <?php
-if (!extension_loaded("simplexml")) die("skip SimpleXML not available");
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 ?>
 --FILE--

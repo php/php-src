@@ -1,7 +1,7 @@
 --TEST--
 Phar: phar:// require from within
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--

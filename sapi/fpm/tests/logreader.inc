@@ -16,7 +16,7 @@ class LogReader
      *
      * @var string|null
      */
-    private ?string $currentSourceName;
+    private ?string $currentSourceName = null;
 
     /**
      * Log descriptors.
@@ -116,8 +116,11 @@ class LogReader
      */
     public function printLogs(): void
     {
+        if (empty($this->sources)) {
+            return;
+        }
         $hasMultipleDescriptors = count($this->sources) > 1;
-        echo "LOGS:\n";
+        echo "\nLOGS:\n";
         foreach ($this->sources as $name => $source) {
             if ($hasMultipleDescriptors) {
                 echo ">>> source: $name\n";
@@ -128,6 +131,7 @@ class LogReader
             }
             $this->printSeparator();
         }
+        echo "\n";
     }
 
     /**
@@ -137,14 +141,13 @@ class LogReader
      *
      * @return false
      */
-    private function printError(?string $errorMessage): bool
+    public function printError(?string $errorMessage): bool
     {
         if (is_null($errorMessage)) {
             return false;
         }
-        echo "ERROR: " . $errorMessage . "\n\n";
+        echo "ERROR: " . $errorMessage . "\n";
         $this->printLogs();
-        echo "\n";
 
         return false;
     }
@@ -155,19 +158,28 @@ class LogReader
      * @param callable    $matcher             Callback to identify a match
      * @param string|null $notFoundMessage     Error message if matcher does not succeed.
      * @param bool        $checkAllLogs        Whether to also check past logs.
-     * @param int         $timeoutSeconds      Timeout in seconds for reading of all messages.
-     * @param int         $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
+     * @param int|null    $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null    $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
      *
      * @return bool
      * @throws \Exception
      */
     public function readUntil(
         callable $matcher,
-        string $notFoundMessage = null,
+        ?string $notFoundMessage = null,
         bool $checkAllLogs = false,
-        int $timeoutSeconds = 3,
-        int $timeoutMicroseconds = 0
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
+        if (is_null($timeoutSeconds) && is_null($timeoutMicroseconds)) {
+            $timeoutSeconds      = 3;
+            $timeoutMicroseconds = 0;
+        } elseif (is_null($timeoutSeconds)) {
+            $timeoutSeconds = 0;
+        } elseif (is_null($timeoutMicroseconds)) {
+            $timeoutMicroseconds = 0;
+        }
+
         $startTime = microtime(true);
         $endTime   = $startTime + $timeoutSeconds + ($timeoutMicroseconds / 1_000_000);
         if ($checkAllLogs) {

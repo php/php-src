@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -83,9 +83,9 @@ typedef struct {
 
 	const char *content_type;
 
-	zend_bool headers_only;
-	zend_bool no_headers;
-	zend_bool headers_read;
+	bool headers_only;
+	bool no_headers;
+	bool headers_read;
 
 	sapi_post_entry *post_entry;
 
@@ -108,6 +108,26 @@ typedef struct {
 	int proto_num;
 } sapi_request_info;
 
+typedef struct {
+	bool throw_exceptions;
+	struct {
+		bool set;
+		zend_long value;
+	} options_cache[5];
+} sapi_request_parse_body_context;
+
+typedef enum {
+	REQUEST_PARSE_BODY_OPTION_max_file_uploads = 0,
+	REQUEST_PARSE_BODY_OPTION_max_input_vars,
+	REQUEST_PARSE_BODY_OPTION_max_multipart_body_parts,
+	REQUEST_PARSE_BODY_OPTION_post_max_size,
+	REQUEST_PARSE_BODY_OPTION_upload_max_filesize,
+} request_parse_body_option;
+
+#define REQUEST_PARSE_BODY_OPTION_GET(name, fallback) \
+	(SG(request_parse_body_context).options_cache[REQUEST_PARSE_BODY_OPTION_ ## name].set \
+		? SG(request_parse_body_context).options_cache[REQUEST_PARSE_BODY_OPTION_ ## name].value \
+		: (fallback))
 
 typedef struct _sapi_globals_struct {
 	void *server_context;
@@ -122,11 +142,12 @@ typedef struct _sapi_globals_struct {
 	HashTable *rfc1867_uploaded_files;
 	zend_long post_max_size;
 	int options;
-	zend_bool sapi_started;
+	bool sapi_started;
 	double global_request_time;
 	HashTable known_post_content_types;
 	zval callback_func;
 	zend_fcall_info_cache fci_cache;
+	sapi_request_parse_body_context request_parse_body_context;
 } sapi_globals_struct;
 
 
@@ -164,13 +185,17 @@ END_EXTERN_C()
 typedef struct {
 	const char *line; /* If you allocated this, you need to free it yourself */
 	size_t line_len;
-	zend_long response_code; /* long due to zend_parse_parameters compatibility */
+	union {
+		zend_long response_code; /* long due to zend_parse_parameters compatibility */
+		size_t header_len; /* the "Key" in "Key: Value", for optimization */
+	};
 } sapi_header_line;
 
 typedef enum {					/* Parameter: 			*/
 	SAPI_HEADER_REPLACE,		/* sapi_header_line* 	*/
 	SAPI_HEADER_ADD,			/* sapi_header_line* 	*/
 	SAPI_HEADER_DELETE,			/* sapi_header_line* 	*/
+	SAPI_HEADER_DELETE_PREFIX,	/* sapi_header_line* 	*/
 	SAPI_HEADER_DELETE_ALL,		/* void					*/
 	SAPI_HEADER_SET_STATUS		/* int 					*/
 } sapi_header_op_enum;
@@ -178,14 +203,14 @@ typedef enum {					/* Parameter: 			*/
 BEGIN_EXTERN_C()
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg);
 
-/* Deprecated functions. Use sapi_header_op instead. */
-SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace);
+SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, bool duplicate, bool replace);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1)
 
 
 SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
+SAPI_API void sapi_read_post_data(void);
 SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
 SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entry);
 SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry);
@@ -238,7 +263,7 @@ struct _sapi_module_struct {
 
 	void (*register_server_variables)(zval *track_vars_array);
 	void (*log_message)(const char *message, int syslog_type_int);
-	double (*get_request_time)(void);
+	zend_result (*get_request_time)(double *request_time);
 	void (*terminate_process)(void);
 
 	char *php_ini_path_override;
@@ -262,7 +287,7 @@ struct _sapi_module_struct {
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;
 
-	char *ini_entries;
+	const char *ini_entries;
 	const zend_function_entry *additional_functions;
 	unsigned int (*input_filter_init)(void);
 };

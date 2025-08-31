@@ -1,15 +1,19 @@
 --TEST--
 mysqli_fetch_array() - large packages (to test compression)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+require_once 'skipifconnectfailure.inc';
 ?>
+--CONFLICTS--
+all
 --INI--
 memory_limit=-1
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     function mysqli_fetch_array_large($offset, $link, $package_size) {
 
@@ -161,7 +165,7 @@ memory_limit=-1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 stop: %s

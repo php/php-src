@@ -1,9 +1,7 @@
 --TEST--
 Phar: fopen a .phar for writing (new file)
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=1
 phar.require_hash=0

@@ -1,9 +1,7 @@
 --TEST--
 Bug #81708 (UAF due to php_filter_float() failing for ints)
---SKIPIF--
-<?php
-if (!extension_loaded("filter")) die("skip filter extension not available");
-?>
+--EXTENSIONS--
+filter
 --INI--
 opcache.enable_cli=0
 --FILE--

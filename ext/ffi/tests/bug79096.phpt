@@ -1,13 +1,10 @@
 --TEST--
 Bug #79096 (FFI Struct Segfault)
---SKIPIF--
-<?php
-if (!extension_loaded('ffi')) die('skip ffi extension not available');
-if (!extension_loaded('zend-test')) die('skip zend-test extension not available');
-?>
+--EXTENSIONS--
+ffi
+zend_test
 --FILE--
 <?php
-require_once('utils.inc');
 $header = <<<HEADER
 struct bug79096 {
     uint64_t a;
@@ -17,16 +14,7 @@ struct bug79096 {
 struct bug79096 bug79096(void);
 HEADER;
 
-if (PHP_OS_FAMILY !== 'Windows') {
-    $ffi = FFI::cdef($header);
-} else {
-    try {
-        $ffi = FFI::cdef($header, 'php_zend_test.dll');
-    } catch (FFI\Exception $ex) {
-        $ffi = FFI::cdef($header, ffi_get_php_dll_name());
-    }
-}
-
+$ffi = FFI::cdef($header);
 $struct = $ffi->bug79096();
 var_dump($struct);
 ?>

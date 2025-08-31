@@ -20,26 +20,34 @@ function reflectClassConstant($base, $constant) {
     var_dump($constInfo->isPrivate());
     echo "isProtected():\n";
     var_dump($constInfo->isProtected());
+    echo "isFinal():\n";
+    var_dump($constInfo->isFinal());
     echo "getModifiers():\n";
     var_dump($constInfo->getModifiers());
     echo "getDeclaringClass():\n";
     var_dump($constInfo->getDeclaringClass());
     echo "getDocComment():\n";
     var_dump($constInfo->getDocComment());
+    echo "hasType():\n";
+    var_dump($constInfo->hasType());
+    echo "getType():\n";
+    echo $constInfo->getType() ?? "NULL";
     echo "\n**********************************\n";
 }
 
 class TestClass {
-    public const /** My Doc comment */ PUB = true;
+    public const bool /** My Doc comment */ PUB = true;
     /** Another doc comment */
     protected const PROT = 4;
     private const PRIV = "keepOut";
+    public final const FINAL = "foo";
 }
 $instance = new TestClass();
 
 reflectClassConstant("TestClass", "PUB");
 reflectClassConstant("TestClass", "PROT");
 reflectClassConstant("TestClass", "PRIV");
+reflectClassConstant("TestClass", "FINAL");
 reflectClassConstant($instance, "PRIV");
 reflectClassConstant($instance, "BAD_CONST");
 
@@ -49,7 +57,8 @@ reflectClassConstant($instance, "BAD_CONST");
 Reflecting on class constant TestClass::PUB
 
 __toString():
-string(35) "Constant [ public bool PUB ] { 1 }
+string(57) "/** My Doc comment */
+Constant [ public bool PUB ] { 1 }
 "
 getName():
 string(3) "PUB"
@@ -61,6 +70,8 @@ isPrivate():
 bool(false)
 isProtected():
 bool(false)
+isFinal():
+bool(false)
 getModifiers():
 int(1)
 getDeclaringClass():
@@ -70,13 +81,17 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 string(21) "/** My Doc comment */"
-
+hasType():
+bool(true)
+getType():
+bool
 **********************************
 **********************************
 Reflecting on class constant TestClass::PROT
 
 __toString():
-string(38) "Constant [ protected int PROT ] { 4 }
+string(65) "/** Another doc comment */
+Constant [ protected int PROT ] { 4 }
 "
 getName():
 string(4) "PROT"
@@ -88,6 +103,8 @@ isPrivate():
 bool(false)
 isProtected():
 bool(true)
+isFinal():
+bool(false)
 getModifiers():
 int(2)
 getDeclaringClass():
@@ -97,7 +114,10 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 string(26) "/** Another doc comment */"
-
+hasType():
+bool(false)
+getType():
+NULL
 **********************************
 **********************************
 Reflecting on class constant TestClass::PRIV
@@ -115,6 +135,8 @@ isPrivate():
 bool(true)
 isProtected():
 bool(false)
+isFinal():
+bool(false)
 getModifiers():
 int(4)
 getDeclaringClass():
@@ -124,7 +146,42 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 bool(false)
+hasType():
+bool(false)
+getType():
+NULL
+**********************************
+**********************************
+Reflecting on class constant TestClass::FINAL
 
+__toString():
+string(47) "Constant [ final public string FINAL ] { foo }
+"
+getName():
+string(5) "FINAL"
+getValue():
+string(3) "foo"
+isPublic():
+bool(true)
+isPrivate():
+bool(false)
+isProtected():
+bool(false)
+isFinal():
+bool(true)
+getModifiers():
+int(33)
+getDeclaringClass():
+object(ReflectionClass)#3 (1) {
+  ["name"]=>
+  string(9) "TestClass"
+}
+getDocComment():
+bool(false)
+hasType():
+bool(false)
+getType():
+NULL
 **********************************
 **********************************
 Reflecting on class constant TestClass::PRIV
@@ -142,6 +199,8 @@ isPrivate():
 bool(true)
 isProtected():
 bool(false)
+isFinal():
+bool(false)
 getModifiers():
 int(4)
 getDeclaringClass():
@@ -151,7 +210,10 @@ object(ReflectionClass)#3 (1) {
 }
 getDocComment():
 bool(false)
-
+hasType():
+bool(false)
+getType():
+NULL
 **********************************
 
 Fatal error: Uncaught ReflectionException: Constant TestClass::BAD_CONST does not exist in %s:%d

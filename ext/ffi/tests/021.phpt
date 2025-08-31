@@ -1,7 +1,7 @@
 --TEST--
 FFI 021: packed enums
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
@@ -53,5 +53,66 @@ test(4, "enum __attribute__((packed)) {a14=-0x80000000}");
 test(8, "enum __attribute__((packed)) {a14=-0x80000001}");
 ?>
 ok
---EXPECT--
+--EXPECTF--
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
+
+Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
 ok

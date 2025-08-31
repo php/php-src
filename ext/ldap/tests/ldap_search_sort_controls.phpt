@@ -2,9 +2,10 @@
 ldap_search() test with sort and VLV controls
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 require_once('skipifcontrol.inc');
 skipifunsupportedcontrol(LDAP_CONTROL_SORTREQUEST);
@@ -14,7 +15,7 @@ skipifunsupportedcontrol(LDAP_CONTROL_VLVREQUEST);
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 /* First test with only SORT control */
@@ -74,11 +75,12 @@ var_dump(
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(4) {
   ["count"]=>
   int(3)
@@ -146,7 +148,8 @@ array(1) {
     }
   }
 }
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(3) {
   ["count"]=>
   int(2)

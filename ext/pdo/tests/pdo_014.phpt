@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDOStatement SPL iterator
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -14,20 +15,23 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group2\')');
-$SELECT = 'SELECT val, grp FROM test';
+$db->exec('CREATE TABLE test014(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
+$db->exec("INSERT INTO test014 VALUES(1, 'A', 'Group1')");
+$db->exec("INSERT INTO test014 VALUES(2, 'B', 'Group2')");
+$SELECT = 'SELECT val, grp FROM test014';
 
-class Test
+class TestClass
 {
+    public $val;
+    public $grp;
+
     function __construct($name = 'N/A')
     {
         echo __METHOD__ . "($name)\n";
     }
 }
 
-$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, TestClass::class, array('WOW'));
 
 $it = new IteratorIterator($stmt); /* check if we can convert that thing */
 
@@ -67,16 +71,22 @@ foreach($stmt as $data)
 }
 
 ?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test014");
+?>
 --EXPECTF--
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>

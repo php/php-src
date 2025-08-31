@@ -1,11 +1,12 @@
 --TEST--
 FFI 200: PHP callbacks
+--EXTENSIONS--
+ffi
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('utils.inc'); ?>
 <?php
 try {
-    FFI::cdef("void* zend_write;", ffi_get_php_dll_name());
+    FFI::cdef("void* zend_write;");
 } catch (Throwable $e) {
     die('skip PHP symbols not available');
 }
@@ -19,7 +20,7 @@ require_once('utils.inc');
 $zend = FFI::cdef("
     typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
     extern zend_write_func_t zend_write;
-", ffi_get_php_dll_name());
+");
 
 echo "Hello World!\n";
 

@@ -24,10 +24,10 @@ default_charset=cp1253
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "διαδρομή δοκιμής";
-$prefix = create_data("dir_cp1253", "${item}42", 1253);
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}42";
+$prefix = create_data("dir_cp1253", "{$item}42", 1253);
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}42";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));

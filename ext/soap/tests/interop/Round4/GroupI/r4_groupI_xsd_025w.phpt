@@ -1,19 +1,16 @@
 --TEST--
 SOAP Interop Round4 GroupI XSD 025 (php/wsdl): echoNestedMultiOccurs
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPMultiOccursComplexType {
-    function __construct($s, $i, $f, $c) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-        $this->varMultiOccurs = $c;
-    }
+    function __construct(
+        public $varString, public $varInt, public $varFloat, public $varMultiOccurs
+    ) {}
 }
 $struct = new SOAPMultiOccursComplexType("arg",34,12.345,array("red","green","blue"));
 $client = new SoapClient(__DIR__."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));

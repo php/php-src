@@ -1,12 +1,11 @@
 --TEST--
 IntlRuleBasedBreakIterator::__construct: basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=pt_PT
 --FILE--
 <?php
-ini_set("intl.default_locale", "pt_PT");
 
 $rules = <<<RULES
 \$LN = [[:letter:] [:number:]];

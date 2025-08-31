@@ -48,34 +48,10 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 }
 /* }}} */
 
-static void fpm_php_disable(char *value, int (*zend_disable)(const char *, size_t)) /* {{{ */
-{
-	char *s = 0, *e = value;
-
-	while (*e) {
-		switch (*e) {
-			case ' ':
-			case ',':
-				if (s) {
-					*e = '\0';
-					zend_disable(s, e - s);
-					s = 0;
-				}
-				break;
-			default:
-				if (!s) {
-					s = e;
-				}
-				break;
-		}
-		e++;
-	}
-
-	if (s) {
-		zend_disable(s, e - s);
-	}
-}
-/* }}} */
+#define FPM_PHP_INI_ALTERING_ERROR   -1
+#define FPM_PHP_INI_APPLIED          1
+#define FPM_PHP_INI_EXTENSION_FAILED 0
+#define FPM_PHP_INI_EXTENSION_LOADED 2
 
 int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 {
@@ -87,44 +63,65 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 
 	if (!strcmp(name, "extension") && *value) {
 		zval zv;
+		zend_interned_strings_switch_storage(0);
+
+#if ZEND_RC_DEBUG
+		bool orig_rc_debug = zend_rc_debug;
+		/* Loading extensions after php_module_startup() breaks some invariants.
+		 * For instance, it will update the refcount of persistent strings,
+		 * which is normally not allowed at this stage. */
+		zend_rc_debug = false;
+#endif
+
 		php_dl(value, MODULE_PERSISTENT, &zv, 1);
-		return Z_TYPE(zv) == IS_TRUE;
+
+#if ZEND_RC_DEBUG
+		zend_rc_debug = orig_rc_debug;
+#endif
+
+		zend_interned_strings_switch_storage(1);
+		return Z_TYPE(zv) == IS_TRUE ? FPM_PHP_INI_EXTENSION_LOADED : FPM_PHP_INI_EXTENSION_FAILED;
 	}
 
 	if (fpm_php_zend_ini_alter_master(name, name_len, value, value_len, mode, PHP_INI_STAGE_ACTIVATE) == FAILURE) {
-		return -1;
+		return FPM_PHP_INI_ALTERING_ERROR;
 	}
 
 	if (!strcmp(name, "disable_functions") && *value) {
 		zend_disable_functions(value);
-		return 1;
+		return FPM_PHP_INI_APPLIED;
 	}
 
-	if (!strcmp(name, "disable_classes") && *value) {
-		char *v = strdup(value);
-		PG(disable_classes) = v;
-		fpm_php_disable(v, zend_disable_class);
-		return 1;
-	}
-
-	return 1;
+	return FPM_PHP_INI_APPLIED;
 }
 /* }}} */
 
 static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
+	int apply_result;
+	bool extension_loaded = false;
 
 	for (kv = wp->config->php_values; kv; kv = kv->next) {
-		if (fpm_php_apply_defines_ex(kv, ZEND_INI_USER) == -1) {
+		apply_result = fpm_php_apply_defines_ex(kv, ZEND_INI_USER);
+		if (apply_result == FPM_PHP_INI_ALTERING_ERROR) {
 			zlog(ZLOG_ERROR, "Unable to set php_value '%s'", kv->key);
+		} else if (apply_result == FPM_PHP_INI_EXTENSION_LOADED) {
+			extension_loaded = true;
 		}
 	}
 
 	for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
-		if (fpm_php_apply_defines_ex(kv, ZEND_INI_SYSTEM) == -1) {
+		apply_result = fpm_php_apply_defines_ex(kv, ZEND_INI_SYSTEM);
+		if (apply_result == FPM_PHP_INI_ALTERING_ERROR) {
 			zlog(ZLOG_ERROR, "Unable to set php_admin_value '%s'", kv->key);
+		} else if (apply_result == FPM_PHP_INI_EXTENSION_LOADED) {
+			extension_loaded = true;
 		}
+	}
+
+	if (extension_loaded) {
+		zend_collect_module_handlers();
 	}
 
 	return 0;
@@ -146,7 +143,7 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 	char max_workers[10 + 1]; /* 4294967295 */
 	int len;
 
-	len = sprintf(max_workers, "%u", (unsigned int) wp->config->pm_max_children);
+	len = snprintf(max_workers, sizeof(max_workers), "%u", (unsigned int) wp->config->pm_max_children);
 
 	fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, max_workers, len);
 	fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  max_workers, len);
@@ -220,6 +217,9 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		limit_extensions = wp->limit_extensions;
 		wp->limit_extensions = NULL;
 	}
+
+	php_child_init();
+
 	return 0;
 }
 /* }}} */
@@ -252,13 +252,13 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 }
 /* }}} */
 
-char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
+bool fpm_php_is_key_in_table(zend_string *table, const char *key, size_t key_len) /* {{{ */
 {
-	zval *data, *tmp;
+	zval *data;
 	zend_string *str;
-	if (!table || !key) {
-		return NULL;
-	}
+
+	ZEND_ASSERT(table);
+	ZEND_ASSERT(key);
 
 	/* inspired from ext/standard/info.c */
 
@@ -270,12 +270,12 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 		return NULL;
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), str, tmp) {
-		if (str && !strncmp(ZSTR_VAL(str), key, ZSTR_LEN(str))) {
-			return Z_STRVAL_P(tmp);
+	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(data), str) {
+		if (str && zend_string_equals_cstr(str, key, key_len)) {
+			return true;
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return NULL;
+	return false;
 }
 /* }}} */

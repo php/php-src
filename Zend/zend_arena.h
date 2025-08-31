@@ -84,7 +84,7 @@ static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t
 
 	size = zend_safe_address(unit_size, count, 0, &overflow);
 	if (UNEXPECTED(overflow)) {
-		zend_error(E_ERROR, "Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
 	}
 	ret = zend_arena_alloc(arena_ptr, size);
 	memset(ret, 0, size);
@@ -110,7 +110,7 @@ static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *
 	arena->ptr = (char*)checkpoint;
 }
 
-static zend_always_inline zend_bool zend_arena_contains(zend_arena *arena, void *ptr)
+static zend_always_inline bool zend_arena_contains(zend_arena *arena, void *ptr)
 {
 	while (arena) {
 		if ((char*)ptr > (char*)arena && (char*)ptr <= arena->ptr) {
@@ -180,7 +180,7 @@ static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t
 
 	size = zend_safe_address(unit_size, count, 0, &overflow);
 	if (UNEXPECTED(overflow)) {
-		zend_error(E_ERROR, "Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
 	}
 	ret = zend_arena_alloc(arena_ptr, size);
 	memset(ret, 0, size);
@@ -213,7 +213,7 @@ static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *
 	}
 }
 
-static zend_always_inline zend_bool zend_arena_contains(zend_arena *arena, void *ptr)
+static zend_always_inline bool zend_arena_contains(zend_arena *arena, void *ptr)
 {
 	/* TODO: Dummy */
 	return 1;

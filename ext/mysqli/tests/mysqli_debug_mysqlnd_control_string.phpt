@@ -1,9 +1,10 @@
 --TEST--
 mysqli_debug() - all control string options supported by both mysqlnd and libmysql except oOaA
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_debug'))
     die("skip: mysqli_debug() not available");
@@ -13,14 +14,11 @@ if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
 
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     die("skip: debug functionality not enabled");
-
-if (!$IS_MYSQLND)
-    die("SKIP Libmysql feature not sufficiently spec'd in MySQL C API documentation");
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     function try_control_string($link, $control_string, $trace_file, $offset) {
 
@@ -42,7 +40,7 @@ if (!$IS_MYSQLND)
                 mysqli_error($link));
             return false;
         }
-        while ($row = mysqli_fetch_assoc($res))
+        while (mysqli_fetch_assoc($res))
             ;
         mysqli_free_result($res);
 
@@ -72,7 +70,7 @@ if (!$IS_MYSQLND)
         printf("[025] Timestamp not found. One reason could be that the test is borked and does not recognize the format of the gettimeofday() system call. Check manually (and fix the test, if needed :-)). First characters from trace are '%s'\n", substr($trace, 0, 80));
 
     // i - add PID of the current process
-    // currently PHP is not multi-threaded, so it should be save to test for the PID of this PHP process
+    // currently PHP is not multi-threaded, so it should be safe to test for the PID of this PHP process
     if (false === ($pid = getmypid()))
         $pid = "[\d]+";
 
@@ -99,7 +97,7 @@ if (!$IS_MYSQLND)
     // -t,[N] - maximum nesting level
     $trace = try_control_string($link, 't,1:n:O,' . $trace_file, $trace_file, 70);
     $lines = explode("\n", $trace);
-    foreach ($lines as $k => $line) {
+    foreach ($lines as $line) {
         $line = trim($line);
         if (!preg_match("@^(\d+):+@ismU", $line, $matches)) {
             printf("[075] Nesting level seem to be missing, first characters from trace are '%s'\n", substr($line, 0, 80));
@@ -115,7 +113,7 @@ if (!$IS_MYSQLND)
     // omitting t
     $trace = try_control_string($link, 'n:O,' . $trace_file, $trace_file, 80);
     $lines = explode("\n", $trace);
-    foreach ($lines as $k => $line) {
+    foreach ($lines as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>[\w]+@ism", $line, $matches)) {
             printf("[085] Looks like a function call, but there should be none in the trace file, first characters from trace are '%s'\n",
@@ -126,7 +124,7 @@ if (!$IS_MYSQLND)
     // -f[,functions] - Limit debugger list to specified functions. Empty list -> all functions
     $lines_all_funcs = explode("\n", try_control_string($link, 't:O,' . $trace_file, $trace_file, 90));
     $functions_all_funcs = array();
-    foreach ($lines_all_funcs as $k => $line) {
+    foreach ($lines_all_funcs as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>([\w:]+)@ism", $line, $matches)) {
             $functions_all_funcs[$matches[1]] = $matches[1];
@@ -135,7 +133,7 @@ if (!$IS_MYSQLND)
 
     $lines_trace = explode("\n", try_control_string($link, 't:f:O,' . $trace_file, $trace_file, 100));
     $functions_trace = array();
-    foreach ($lines_trace as $k => $line) {
+    foreach ($lines_trace as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>([\w:]+)@ism", $line, $matches)) {
             $functions_trace[$matches[1]] = $matches[1];
@@ -171,7 +169,7 @@ if (!$IS_MYSQLND)
 
     $lines_trace = explode("\n", try_control_string($link, $control_string, $trace_file, 110));
     $functions_trace = array();
-    foreach ($lines_trace as $k => $line) {
+    foreach ($lines_trace as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>([\w:]+)@ism", $line, $matches)) {
             $functions_trace[$matches[1]] = $matches[1];
@@ -202,27 +200,22 @@ if (!$IS_MYSQLND)
         var_dump($tmp);
     }
 
-    if ($IS_MYSQLND) {
-        // mysqlnd only option
-        // m - trace memory allocations
-        $trace = try_control_string($link, 't:O,' . $trace_file . ':m', $trace_file, 120);
-        if (!preg_match("@^[|\s]*>\_mysqlnd_p?efree@ismU", $trace, $matches) &&
-                !preg_match("@^[|\s]*>\_mysqlnd_p?emalloc@ismU", $trace, $matches)) {
-            printf("[125] Memory dump does neither contain _mysqlnd_pefree nor _mysqlnd_pemalloc calls - check manually.\n");
-            var_dump($trace);
-        }
-
+    // m - trace memory allocations
+    $trace = try_control_string($link, 't:O,' . $trace_file . ':m', $trace_file, 120);
+    if (!preg_match("@^[|\s]*>\_mysqlnd_p?efree@ismU", $trace, $matches) &&
+            !preg_match("@^[|\s]*>\_mysqlnd_p?emalloc@ismU", $trace, $matches)) {
+        printf("[125] Memory dump does neither contain _mysqlnd_pefree nor _mysqlnd_pemalloc calls - check manually.\n");
+        var_dump($trace);
     }
 
     mysqli_close($link);
     print "done";
-    if ($IS_MYSQLND)
-        print "libmysql/DBUG package prints some debug info here.";
+    print "libmysql/DBUG package prints some debug info here.";
     @unlink($trace_file);
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 [083][control string 'n:O,%smysqli_debug_phpt.trace'] Trace file has not been written.

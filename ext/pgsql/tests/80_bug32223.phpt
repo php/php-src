@@ -1,10 +1,12 @@
 --TEST--
 Bug #32223 (weird behaviour of pg_last_notice)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 
-_skip_lc_messages();
+_skip_lc_messages($conn);
 
 @pg_query($conn, "CREATE LANGUAGE 'plpgsql' HANDLER plpgsql_call_handler LANCOMPILER 'PL/pgSQL'");
 $res = @pg_query($conn, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '
@@ -20,15 +22,15 @@ pgsql.ignore_notice=0
 --FILE--
 <?php
 
-require_once('config.inc');
-require_once('lcmess.inc');
+require_once('inc/config.inc');
+require_once('inc/lcmess.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-_set_lc_messages();
+_set_lc_messages($dbh);
 
 $res = pg_query($dbh, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '
 begin
@@ -53,8 +55,10 @@ pg_close($dbh);
 
 ?>
 --EXPECTF--
-resource(%d) of type (pgsql result)
-resource(%d) of type (pgsql result)
+object(PgSql\Result)#%d (0) {
+}
+object(PgSql\Result)#%d (0) {
+}
 array(1) {
   [0]=>
   string(1) "f"

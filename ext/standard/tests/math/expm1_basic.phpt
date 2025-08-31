@@ -16,7 +16,6 @@ $values = array(10,
                 "039",
                 true,
                 false,
-                null,
                 );
 
 // loop through each element of $values to check the behaviour of expm1()
@@ -61,7 +60,4 @@ float(8.6593400423994E+16)
 float(1.718281828459)
 
 -- Iteration 11 --
-float(0)
-
--- Iteration 12 --
 float(0)

@@ -1,9 +1,7 @@
 --TEST--
 stream_get_meta_data() on zip stream
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $dirname = __DIR__ . '/';
@@ -47,7 +45,7 @@ array(8) {
   ["unread_bytes"]=>
   int(0)
   ["seekable"]=>
-  bool(false)
+  bool(%s)
   ["uri"]=>
   string(3) "foo"
 }
@@ -67,7 +65,7 @@ array(9) {
   ["unread_bytes"]=>
   int(0)
   ["seekable"]=>
-  bool(false)
+  bool(%s)
   ["uri"]=>
   string(%d) "zip://%stest_with_comment.zip#foo"
 }

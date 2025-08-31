@@ -1,7 +1,7 @@
 --TEST--
 Tokenization of only the <?php tag
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip tokenizer extension not enabled"; ?>
+--EXTENSIONS--
+tokenizer
 --INI--
 short_open_tag=1
 --FILE--

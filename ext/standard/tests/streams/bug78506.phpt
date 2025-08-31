@@ -4,7 +4,7 @@ Bug #78506: Error in a php_user_filter::filter() is not reported
 <?php
 
 class MyFilter extends php_user_filter {
-    public function filter($in, $out, &$consumed, $closing)
+    public function filter($in, $out, &$consumed, $closing): int
     {
         stream_bucket_make_writeable($in);
         return PSFS_ERR_FATAL;

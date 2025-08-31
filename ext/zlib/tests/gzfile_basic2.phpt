@@ -1,9 +1,7 @@
 --TEST--
 Test function gzfile() reading a plain relative file
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $plaintxt = <<<EOT
@@ -11,7 +9,7 @@ hello world
 is a very common test
 for all languages
 EOT;
-$dirname = 'gzfile_temp';
+$dirname = 'gzfile_temp2';
 $filename = $dirname.'/gzfile_basic2.txt';
 mkdir($dirname);
 $h = fopen($filename, 'w');
@@ -21,8 +19,13 @@ fclose($h);
 
 var_dump(gzfile( $filename ) );
 
-unlink($filename);
-rmdir($dirname);
+?>
+--CLEAN--
+<?php
+$dirname = 'gzfile_temp2';
+$filename = $dirname.'/gzfile_basic2.txt';
+@unlink($filename);
+@rmdir($dirname);
 ?>
 --EXPECT--
 array(3) {

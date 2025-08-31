@@ -1,16 +1,15 @@
 --TEST--
 Trying implicit reconnect after wait_timeout and KILL using mysqli_ping()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
---INI--
-mysqli.reconnect=0
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once("table.inc");
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[001] Cannot create second database connection, [%d] %s\n",
@@ -68,7 +67,7 @@ mysqli.reconnect=0
     if (false !== @mysqli_ping($link))
         printf("[010] Reconnect should not have happened");
 
-    if ($res = @mysqli_query($link, "SELECT DATABASE() as _dbname"))
+    if (@mysqli_query($link, "SELECT DATABASE() as _dbname"))
         printf("[011] Executing a query should not be possible, connection should be closed, [%d] %s\n",
             mysqli_errno($link), mysqli_error($link));
 
@@ -84,17 +83,14 @@ mysqli.reconnect=0
       the server always manages to send a full a reply. Whereas MySQl 5.5
       may not. The behaviour is undefined. Any return value is fine.
     */
-    if ($IS_MYSQLND) {
-        /*
-        mysqlnd is a bit more verbose than libmysql. mysqlnd should print:
-        Warning: mysqli_query(): MySQL server has gone away in %s on line %d
+    /*
+    mysqlnd is a bit more verbose than libmysql. mysqlnd should print:
+    Warning: mysqli_query(): MySQL server has gone away in %s on line %d
 
-        Warning: mysqli_query(): Error reading result set's header in %d on line %d
-        */
-        @mysqli_query($link, sprintf('KILL %d', $thread_id_timeout));
-    } else {
-        mysqli_query($link, sprintf('KILL %d', $thread_id_timeout));
-    }
+    Warning: mysqli_query(): Error reading result set's header in %d on line %d
+    */
+    @mysqli_query($link, sprintf('KILL %d', $thread_id_timeout));
+
     // Give the server a second to really kill the other thread...
     sleep(1);
 
@@ -115,7 +111,7 @@ mysqli.reconnect=0
     if (false !== ($tmp = @mysqli_ping($link)))
         printf("[016] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
 
-    if ($res = @mysqli_query($link, "SELECT DATABASE() as _dbname"))
+    if (@mysqli_query($link, "SELECT DATABASE() as _dbname"))
         printf("[017] Running a query should not be possible, connection should be gone, [%d] %s\n",
             mysqli_errno($link), mysqli_error($link));
 

@@ -1,7 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - with predefined language constants
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 /*
@@ -10,6 +10,7 @@ Test token_get_all() function : usage variations - with predefined language cons
  *   __CLASS__    - T_CLASS_C
  *   __TRAIT__    - T_TRAIT_C
  *   __FUNCTION__ - T_FUNC_C
+ *   __PROPERTY__ - T_PROPERTY_C
  *   __LINE__     - T_LINE
  *   __METHOD__   - T_METHOD_C
 */

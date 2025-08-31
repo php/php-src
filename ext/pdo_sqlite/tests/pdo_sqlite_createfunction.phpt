@@ -1,26 +1,23 @@
 --TEST--
 PDO_sqlite: Testing sqliteCreateFunction()
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
 $db = new PDO('sqlite::memory:');
 
-$db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
+$db->query('CREATE TABLE test_pdo_sqlite_createfunction (id INT AUTO INCREMENT, name TEXT)');
 
-$db->query('INSERT INTO foobar VALUES (NULL, "PHP")');
-$db->query('INSERT INTO foobar VALUES (NULL, "PHP6")');
+$db->query('INSERT INTO test_pdo_sqlite_createfunction VALUES (NULL, "PHP"), (NULL, "PHP6")');
 
 
 $db->sqliteCreateFunction('testing', function($v) { return strtolower($v); });
 
 
-foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
+foreach ($db->query('SELECT testing(name) FROM test_pdo_sqlite_createfunction') as $row) {
     var_dump($row);
 }
-
-$db->query('DROP TABLE foobar');
 
 ?>
 --EXPECT--

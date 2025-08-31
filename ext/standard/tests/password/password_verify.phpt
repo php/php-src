@@ -20,11 +20,13 @@ var_dump(password_verify("foo", "$1"));
 
 echo "OK!";
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(false)
 bool(false)
 bool(true)
+
+Deprecated: password_verify(): Passing null to parameter #2 ($hash) of type string is deprecated in %s on line %d
 bool(false)
 bool(true)
 bool(false)

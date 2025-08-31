@@ -1,5 +1,9 @@
 --TEST--
 DBA Optimize Test
+--EXTENSIONS--
+dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
     require_once __DIR__ .'/skipif.inc';

@@ -4,6 +4,7 @@ Bug #54547: wrong equality of string numbers near LONG_MAX with 64-bit longs
 <?php
 if (PHP_INT_MAX !== 9223372036854775807)
     die("skip for 64-bit long systems only");
+?>
 --FILE--
 <?php
 var_dump("9223372036854775807" == "9223372036854775808");

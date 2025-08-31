@@ -4,10 +4,8 @@ Test DOMDocument::loadHTMLFile when an empty string is passed
 Verifies that an error message is showed if an empty string is passed as argument
 --CREDITS--
 Antonio Diaz Ruiz <dejalatele@gmail.com>
---INI--
-assert.bail=true
---SKIPIF--
-<?php include('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();

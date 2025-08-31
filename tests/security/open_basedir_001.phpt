@@ -1,5 +1,5 @@
 --TEST--
-openbase_dir runtime tightning
+openbase_dir runtime hardening
 --SKIPIF--
 <?php
 if(PHP_OS_FAMILY === "Windows") {
@@ -8,6 +8,7 @@ if(PHP_OS_FAMILY === "Windows") {
 if (!is_dir("/usr/local/bin")) {
     die('skip.. no /usr/local/bin on this machine');
 }
+?>
 --INI--
 open_basedir=/usr/local
 --FILE--

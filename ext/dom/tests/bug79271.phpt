@@ -1,9 +1,7 @@
 --TEST--
 Bug #79271 (DOMDocumentType::$childNodes is NULL)
---SKIPIF--
-<?php
-if (!extension_loaded('dom')) die('skip dom extension not available');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom = new DOMImplementation();

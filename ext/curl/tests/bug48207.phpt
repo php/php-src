@@ -3,8 +3,8 @@ Test curl_setopt() CURLOPT_FILE readonly file handle
 --CREDITS--
 Mark van der Velden
 #testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 /*
@@ -43,7 +43,6 @@ try {
 }
 
 curl_exec($ch);
-curl_close($ch);
 is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>

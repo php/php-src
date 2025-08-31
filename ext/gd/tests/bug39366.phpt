@@ -1,10 +1,7 @@
 --TEST--
 Bug #39366 (imagerotate does not respect alpha with angles>45)
---SKIPIF--
-<?php
-    if (!extension_loaded('gd')) die("skip gd extension not available\n");
-    if (!function_exists("imagerotate")) die("skip requires bundled GD library\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

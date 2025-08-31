@@ -1,5 +1,7 @@
 --TEST--
 Bug #38698 (Bug #38698 for some keys cdbmake creates corrupted db and cdb can't read valid db)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'cdb_make';

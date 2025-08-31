@@ -1,7 +1,7 @@
 --TEST--
 SoapFault class: Invalid Fault code warning given? Can't be an empty string, an array of not 2 elements etc.
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

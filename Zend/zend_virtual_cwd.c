@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -120,7 +120,7 @@ static cwd_state main_cwd_state; /* True global */
 
 static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 {
-	zend_stat_t buf;
+	zend_stat_t buf = {0};
 
 	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
 		return (0);
@@ -131,7 +131,7 @@ static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 
 static int php_is_file_ok(const cwd_state *state)  /* {{{ */
 {
-	zend_stat_t buf;
+	zend_stat_t buf = {0};
 
 	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
 		return (0);
@@ -230,22 +230,20 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_cwd_activate(void) /* {{{ */
+CWD_API void virtual_cwd_activate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd == NULL) {
 		CWD_STATE_COPY(&CWDG(cwd), &main_cwd_state);
 	}
-	return 0;
 }
 /* }}} */
 
-CWD_API int virtual_cwd_deactivate(void) /* {{{ */
+CWD_API void virtual_cwd_deactivate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd != NULL) {
 		CWD_STATE_FREE(&CWDG(cwd));
 		CWDG(cwd).cwd = NULL;
 	}
-	return 0;
 }
 /* }}} */
 
@@ -317,7 +315,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 #ifdef ZEND_WIN32
 static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
-	register zend_ulong h;
+	zend_ulong h;
 	size_t bucket_key_len;
 	const char *bucket_key_start = tsrm_win32_get_path_sid_key(path, path_len, &bucket_key_len);
 	const char *bucket_key = bucket_key_start;
@@ -341,7 +339,7 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 #else
 static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
-	register zend_ulong h;
+	zend_ulong h;
 	const char *e = path + path_len;
 
 	for (h = Z_UL(2166136261); path < e;) {
@@ -502,7 +500,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 	do { free(pathw); } while(0);
 
 #else
-	zend_stat_t st;
+	zend_stat_t st = {0};
 #endif
 	realpath_cache_bucket *bucket;
 	char *tmp;
@@ -603,6 +601,7 @@ retry_reparse_point:
 			if (!pathw) {
 				return (size_t)-1;
 			}
+			PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, (size_t)-1, 1);
 			hFind = FindFirstFileExW(pathw, FindExInfoBasic, &dataw, FindExSearchNameMatch, NULL, 0);
 			if (INVALID_HANDLE_VALUE == hFind) {
 				if (use_realpath == CWD_REALPATH) {
@@ -712,7 +711,7 @@ retry_reparse_tag_cloud:
 					FREE_PATHW()
 					return (size_t)-1;
 				}
-				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
+				memcpy(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
 				tmpsubstname[substitutename_len] = L'\0';
 				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
 				if (!substitutename || substitutename_len >= MAXPATHLEN) {
@@ -747,7 +746,7 @@ retry_reparse_tag_cloud:
 					FREE_PATHW()
 					return (size_t)-1;
 				}
-				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
+				memcpy(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
 				tmpsubstname[substitutename_len] = L'\0';
 				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
 				if (!substitutename || substitutename_len >= MAXPATHLEN) {
@@ -948,7 +947,7 @@ retry_reparse_tag_cloud:
 			if (i <= start + 1) {
 				j = start;
 			} else {
-				/* some leading directories may be unaccessable */
+				/* some leading directories may be inaccessible */
 				j = tsrm_realpath_r(path, start, i-1, ll, t, save ? CWD_FILEPATH : use_realpath, 1, NULL);
 				if (j > start && j != (size_t)-1) {
 					path[j++] = DEFAULT_SLASH;
@@ -1008,7 +1007,7 @@ retry_reparse_tag_cloud:
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath) /* {{{ */
 {
 	size_t path_length = strlen(path);
-	char resolved_path[MAXPATHLEN] = {0};
+	char resolved_path[MAXPATHLEN];
 	size_t start = 1;
 	int ll = 0;
 	time_t t;
@@ -1130,6 +1129,9 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		/* skip DRIVE name */
 		resolved_path[0] = toupper(resolved_path[0]);
 		resolved_path[2] = DEFAULT_SLASH;
+		if (path_length == 2) {
+			resolved_path[3] = '\0';
+		}
 		start = 3;
 	}
 #endif
@@ -1139,7 +1141,13 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
 
 	if (path_length == (size_t)-1) {
+#ifdef ZEND_WIN32
+		if (errno != EACCES) {
+			errno = ENOENT;
+		}
+#else
 		errno = ENOENT;
+#endif
 		return 1;
 	}
 
@@ -1344,7 +1352,7 @@ CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
 }
 /* }}} */
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	cwd_state new_state;
@@ -1415,7 +1423,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 	}
 
 	if (link) {
-#if HAVE_LCHOWN
+#ifdef HAVE_LCHOWN
 		ret = lchown(new_state.cwd, owner, group);
 #else
 		ret = -1;
@@ -1671,8 +1679,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	dir = CWDG(cwd).cwd;
 
 	ptr = command_line = (char *) emalloc(command_length + sizeof("cd '' ; ") + dir_length + extra+1+1);
-	memcpy(ptr, "cd ", sizeof("cd ")-1);
-	ptr += sizeof("cd ")-1;
+	ptr = zend_mempcpy(ptr, "cd ", sizeof("cd ") - 1);
 
 	if (CWDG(cwd).cwd_length == 0) {
 		*ptr++ = DEFAULT_SLASH;
@@ -1684,7 +1691,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 				*ptr++ = '\'';
 				*ptr++ = '\\';
 				*ptr++ = '\'';
-				/* fall-through */
+				ZEND_FALLTHROUGH;
 			default:
 				*ptr++ = *dir;
 			}

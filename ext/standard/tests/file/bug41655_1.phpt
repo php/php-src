@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --INI--
-open_basedir="{TMP}"
+open_basedir="/some_directory_we_are_hopefully_not_running_tests_from"
 --FILE--
 <?php
 $a=glob("./*.jpeg");
@@ -17,5 +17,6 @@ var_dump($a);
 echo "Done\n";
 ?>
 --EXPECT--
-bool(false)
+array(0) {
+}
 Done

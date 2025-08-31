@@ -1,9 +1,7 @@
 --TEST--
 CURL file uploading from stream
---SKIPIF--
-<?php include 'skipif.inc'; ?>
-<?php
-if (curl_version()['version_number'] < 0x73800) die('skip requires curl >= 7.56.0');
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';
@@ -19,7 +17,6 @@ $params = array('file' => $file);
 var_dump(curl_setopt($ch, CURLOPT_POSTFIELDS, $params));
 
 var_dump(curl_exec($ch));
-curl_close($ch);
 ?>
 --EXPECT--
 bool(true)

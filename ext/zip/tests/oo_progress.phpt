@@ -1,9 +1,10 @@
 --TEST--
-registerProgressCallback
+ZipArchive::registerProgressCallback() with a normal callback
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
 if (!method_exists('ZipArchive', 'registerProgressCallback')) die('skip libzip too old');
 ?>
 --INI--
@@ -12,8 +13,6 @@ date.timezone=UTC
 <?php
 $dirname = dirname(__FILE__) . '/';
 $file = $dirname . '__tmp_oo_progress.zip';
-
-@unlink($file);
 
 $zip = new ZipArchive;
 if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
@@ -31,6 +30,13 @@ var_dump($zip->close());
 unlink($file);
 ?>
 Done
+--CLEAN--
+<?php
+$dirname = dirname(__FILE__) . '/';
+$file = $dirname . '__tmp_oo_progress.zip';
+
+@unlink($file);
+?>
 --EXPECT--
 bool(true)
 bool(true)

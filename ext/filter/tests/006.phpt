@@ -1,12 +1,12 @@
 --TEST--
 filter_input() test
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --POST--
 foo=<b>abc</b>
 --FILE--
 <?php
-echo filter_input(INPUT_POST, 'foo', FILTER_SANITIZE_STRIPPED);
+echo filter_input(INPUT_POST, 'foo', FILTER_SANITIZE_SPECIAL_CHARS);
 ?>
 --EXPECT--
-abc
+&#60;b&#62;abc&#60;/b&#62;

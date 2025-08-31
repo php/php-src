@@ -1,10 +1,10 @@
 --TEST--
 Check libcurl config on windows
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
-if (!extension_loaded("curl")) {
-    die('skip - curl extension not available in this build');
-}
+
 if(substr(PHP_OS, 0, 3) != 'WIN' )
   die("skip for windows only");
 ?>
@@ -48,7 +48,13 @@ PSL => No
 HTTPS_PROXY => Yes
 MULTI_SSL => %s
 BROTLI => %s
-Protocols => dict, file, ftp, ftps, gopher, %r(gophers, )?%rhttp, https, imap, imaps, ldap, ldaps, %r(mqtt, )?%rpop3, pop3s, rtsp, scp, sftp, smb, smbs, smtp, smtps, telnet, tftp
+ALTSVC => Yes
+HTTP3 => No
+UNICODE => No
+ZSTD => No
+HSTS => Yes
+GSASL => No
+Protocols => dict, file, ftp, ftps, gopher, %r(gophers, )?%rhttp, https, imap, imaps, ldap, ldaps, %r(mqtt, )?%rpop3, pop3s, rtsp, scp, sftp, smb, smbs, smtp, smtps, telnet, tftp%r(, ws)?(, wss)?%r
 Host => %s-pc-win32
 SSL Version => OpenSSL/%s
 ZLib Version => %s

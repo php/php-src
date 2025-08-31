@@ -1,11 +1,7 @@
 --TEST--
 curl_multi_setopt basic test
---SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-        exit("skip curl extension not loaded");
-}
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

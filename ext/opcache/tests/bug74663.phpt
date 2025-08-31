@@ -8,8 +8,8 @@ opcache.enable_file_override=1
 opcache.validate_timestamps=1
 opcache.revalidate_freq=0
 opcache.protect_memory=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $file = __DIR__ . "/bug74663.inc";

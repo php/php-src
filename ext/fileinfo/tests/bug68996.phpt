@@ -1,7 +1,7 @@
 --TEST--
 Bug #68996 (Invalid free of CG(interned_empty_string))
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --INI--
 html_errors=1
 --FILE--

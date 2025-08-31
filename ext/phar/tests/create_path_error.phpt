@@ -1,7 +1,7 @@
 --TEST--
 Phar: create with illegal path
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=1
@@ -65,10 +65,10 @@ foreach($checks as $check)
 --EXPECTF--
 string(5) "query"
 string(5) "query"
-1:Error: file_put_contents(phar://%s//): Failed to open stream: phar error: file "" in phar "%s" cannot be empty
-2:Error: file_put_contents(phar://%s/.): Failed to open stream: phar error: file "" in phar "%s" cannot be empty
-3:Error: file_put_contents(phar://%s/../): Failed to open stream: phar error: file "" in phar "%s" cannot be empty
-4:Error: file_put_contents(phar://%s/a/..): Failed to open stream: phar error: file "" in phar "%s" cannot be empty
+1:Error: file_put_contents(phar://%s//): Failed to open stream: phar error: file "" in phar "%s" must not be empty
+2:Error: file_put_contents(phar://%s/.): Failed to open stream: phar error: file "" in phar "%s" must not be empty
+3:Error: file_put_contents(phar://%s/../): Failed to open stream: phar error: file "" in phar "%s" must not be empty
+4:Error: file_put_contents(phar://%s/a/..): Failed to open stream: phar error: file "" in phar "%s" must not be empty
 5:
 6:
 7:

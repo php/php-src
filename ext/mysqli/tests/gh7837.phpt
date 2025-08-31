@@ -1,16 +1,14 @@
 --TEST--
 Bug GH-7837 (large bigints may be truncated)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once "skipif.inc";
 require_once 'skipifconnectfailure.inc';
-if (!$IS_MYSQLND) {
-    die("skip requires mysqlnd");
-}
 ?>
 --FILE--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 $mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 $mysql->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, true);
@@ -24,7 +22,7 @@ var_dump($result->fetch_all());
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 array(3) {

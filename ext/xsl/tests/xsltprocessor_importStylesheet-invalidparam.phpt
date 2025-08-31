@@ -1,11 +1,7 @@
 --TEST--
 XSLTProcessor::importStylesheet() - Test with invalid stylesheet
---SKIPIF--
-<?php
-if (!extension_loaded('xsl')) {
-    exit('Skip - XSL extension not loaded');
-}
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 
@@ -13,7 +9,7 @@ $xslt = new XSLTProcessor();
 $dummy = new stdClass();
 try {
     var_dump($xslt->importStylesheet($dummy));
-} catch (ValueError $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 

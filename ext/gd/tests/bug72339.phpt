@@ -1,10 +1,18 @@
 --TEST--
 Bug #72339 Integer Overflow in _gd2GetHeader() resulting in heap overflow
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
 if (!function_exists("imagecreatefromgd2")) print "skip";
-if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
-    die("skip test requires GD 2.2.2 or higher");
+
+if (!GD_BUNDLED) {
+    if (version_compare(GD_VERSION, '2.2.2', '<')) {
+        die("skip test requires GD 2.2.2 or higher");
+    }
+    if (version_compare(GD_VERSION, '2.3.3', '>=')) {
+        die("skip test requires GD 2.3.2 or older");
+    }
 }
 ?>
 --FILE--
@@ -25,9 +33,6 @@ fclose($fh);
 
 $im = imagecreatefromgd2($fname);
 
-if ($im) {
-    imagedestroy($im);
-}
 unlink($fname);
 
 ?>

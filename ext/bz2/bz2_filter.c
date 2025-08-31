@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -24,9 +24,9 @@
 /* {{{ data structure */
 
 enum strm_status {
-    PHP_BZ2_UNINITIALIZED,
-    PHP_BZ2_RUNNING,
-    PHP_BZ2_FINISHED
+	PHP_BZ2_UNINITIALIZED,
+	PHP_BZ2_RUNNING,
+	PHP_BZ2_FINISHED
 };
 
 typedef struct _php_bz2_filter_data {
@@ -50,12 +50,12 @@ typedef struct _php_bz2_filter_data {
 
 static void *php_bz2_alloc(void *opaque, int items, int size)
 {
-	return (void *)safe_pemalloc(items, size, 0, ((php_bz2_filter_data*)opaque)->persistent);
+	return safe_pemalloc(items, size, 0, ((php_bz2_filter_data*)opaque)->persistent);
 }
 
 static void php_bz2_free(void *opaque, void *address)
 {
-	pefree((void *)address, ((php_bz2_filter_data*)opaque)->persistent);
+	pefree(address, ((php_bz2_filter_data*)opaque)->persistent);
 }
 /* }}} */
 

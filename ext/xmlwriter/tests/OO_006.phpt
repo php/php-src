@@ -1,9 +1,7 @@
 --TEST--
 XMLWriter: libxml2 XML Writer, startDTD/writeElementNS
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 

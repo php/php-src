@@ -1,19 +1,17 @@
 --TEST--
 compress.zlib:// wrapper
---SKIPIF--
-<?php if (!extension_loaded("zlib")) die("skip"); ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-chdir(__DIR__. "/../../..");
-
-$pfx = str_repeat('../', substr_count($_SERVER['PHP_SELF'], '../'));
+chdir(__DIR__. "/data");
 
 // Relative path
-$fp = fopen("compress.zlib://{$pfx}ext/xsl/tests/xslt.xsl.gz", "rb");
+$fp = fopen("compress.zlib://test.txt.gz", "rb");
 fclose($fp);
 
 // Absolute path
-$fp = fopen("compress.zlib://". __DIR__. "/../../../ext/xsl/tests/xslt.xsl.gz", "rb");
+$fp = fopen("compress.zlib://". __DIR__. "/data/test.txt.gz", "rb");
 fclose($fp);
 
 echo "ok\n";

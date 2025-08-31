@@ -1,10 +1,13 @@
 --TEST--
 Bug #50194 (imagettftext broken on transparent background w/o alphablending)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!function_exists('imagettftext')) die('skip imagettftext() not available');
-//die('skip freetype issues');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
@@ -29,8 +32,6 @@ if (isset($matches[1]) && $matches[1] > 2000) {
 } else {
     echo "The images are similar.\n";
 }
-
-imagedestroy($im);
 ?>
 --EXPECT--
 The images are similar.

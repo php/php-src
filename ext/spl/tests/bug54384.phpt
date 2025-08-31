@@ -24,7 +24,7 @@ test( function() {
 echo "FilterIterator... ";
 class FilterIteratorTest extends FilterIterator {
     function __construct(){}
-    function accept(){}
+    function accept(): bool {}
 }
 test( function() {
     $o = new FilterIteratorTest;
@@ -34,7 +34,7 @@ test( function() {
 echo "RecursiveFilterIterator... ";
 class RecursiveFilterIteratorTest extends RecursiveFilterIterator {
     function __construct(){}
-    function accept(){}
+    function accept(): bool {}
 }
 test( function() {
 $o = new RecursiveFilterIteratorTest;

@@ -1,7 +1,7 @@
 --TEST--
 Bug GH-9720 (Null pointer dereference while serializing the response)
---SKIPIF--
-<?php require_once("skipif.inc"); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 error_reporting(E_ALL);

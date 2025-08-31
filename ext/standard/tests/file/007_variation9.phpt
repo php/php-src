@@ -25,6 +25,7 @@ var_dump( fwrite($file_handle, $string) );  //Check for write operation; fails
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 echo "*** Done ***\n";
+?>
 --CLEAN--
 <?php
 unlink(__DIR__."/007_variation9.tmp");

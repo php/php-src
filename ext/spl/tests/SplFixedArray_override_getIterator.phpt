@@ -32,6 +32,7 @@ $a[2] = "f";
 foreach ($a as $k => $v) {
   echo "$k => $v\n";
 }
+?>
 --EXPECT--
 ==SplFixedArray instance==
 0 => a

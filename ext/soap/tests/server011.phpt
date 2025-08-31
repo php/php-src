@@ -1,7 +1,13 @@
 --TEST--
 SOAP Server 11: bind
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+if (PHP_OS_FAMILY === "Windows") {
+    die("skip currently unsupported on Windows");
+}
+?>
+--EXTENSIONS--
+soap
 --GET--
 wsdl
 --INI--

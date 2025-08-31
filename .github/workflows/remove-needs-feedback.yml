@@ -1,0 +1,24 @@
+name: Remove needs feedback label
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: "github.repository == 'php/php-src' && contains(github.event.issue.labels.*.name, 'Status: Needs Feedback') && github.event.issue.user.login == github.event.sender.login"
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions-ecosystem/action-remove-labels@v1
+        with:
+          labels: "Status: Needs Feedback"
+      - uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: "Status: Needs Triage"

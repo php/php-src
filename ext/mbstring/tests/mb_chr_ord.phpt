@@ -1,7 +1,7 @@
 --TEST--
 mb_chr() and mb_ord()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 ini_set('internal_encoding', 'utf-8');

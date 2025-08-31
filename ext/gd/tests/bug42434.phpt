@@ -1,11 +1,7 @@
 --TEST--
 Bug #42434 (ImageLine w/ antialias = 1px shorter)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) {
-    die('skip gd extension not available');
-}
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreatetruecolor(10, 2);
@@ -19,8 +15,6 @@ if (imagecolorat($im, 9, 0) == 0x000000) {
 } else {
     echo 'Bugged';
 }
-
-imagedestroy($im);
 ?>
 --EXPECT--
 DONE

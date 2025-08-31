@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -40,13 +40,23 @@
 #define SAVE_CURL_ERROR(__handle, __err) \
     do { (__handle)->err.no = (int) __err; } while (0)
 
+
+ZEND_BEGIN_MODULE_GLOBALS(curl)
+	HashTable persistent_curlsh;
+ZEND_END_MODULE_GLOBALS(curl)
+
+ZEND_EXTERN_MODULE_GLOBALS(curl)
+
+#define CURL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(curl, v)
+
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
+PHP_GINIT_FUNCTION(curl);
+PHP_GSHUTDOWN_FUNCTION(curl);
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache fcc;
 	FILE                 *fp;
 	smart_str             buf;
 	int                   method;
@@ -54,8 +64,7 @@ typedef struct {
 } php_curl_write;
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache fcc;
 	FILE                 *fp;
 	zend_resource        *res;
 	int                   method;
@@ -63,19 +72,19 @@ typedef struct {
 } php_curl_read;
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
-	int                   method;
-} php_curl_progress, php_curl_fnmatch, php_curlm_server_push;
-
-typedef struct {
 	php_curl_write    *write;
 	php_curl_write    *write_header;
 	php_curl_read     *read;
 	zval               std_err;
-	php_curl_progress *progress;
-#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
-	php_curl_fnmatch  *fnmatch;
+	zend_fcall_info_cache progress;
+	zend_fcall_info_cache xferinfo;
+	zend_fcall_info_cache fnmatch;
+	zend_fcall_info_cache debug;
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+	zend_fcall_info_cache prereq;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+	zend_fcall_info_cache sshhostkey;
 #endif
 } php_curl_handlers;
 
@@ -89,21 +98,22 @@ struct _php_curl_send_headers {
 };
 
 struct _php_curl_free {
-	zend_llist str;
 	zend_llist post;
 	zend_llist stream;
-	HashTable *slist;
+	HashTable slist;
 };
 
 typedef struct {
 	CURL                         *cp;
-	php_curl_handlers            *handlers;
+	php_curl_handlers             handlers;
 	struct _php_curl_free        *to_free;
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
-	zend_bool                     in_callback;
+	bool                     in_callback;
 	uint32_t*                     clone;
 	zval                          postfields;
+	/* For CURLOPT_PRIVATE */
+	zval private_data;
 	/* CurlShareHandle object set using CURLOPT_SHARE. */
 	struct _php_curlsh *share;
 	zend_object                   std;
@@ -112,14 +122,13 @@ typedef struct {
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
-	php_curlm_server_push	*server_push;
+	zend_fcall_info_cache server_push;
 } php_curlm_handlers;
 
 typedef struct {
-	int         still_running;
 	CURLM      *multi;
 	zend_llist  easyh;
-	php_curlm_handlers	*handlers;
+	php_curlm_handlers handlers;
 	struct {
 		int no;
 	} err;
@@ -138,8 +147,11 @@ php_curl *init_curl_handle_into_zval(zval *curl);
 void init_curl_handle(php_curl *ch);
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
-void _php_curl_verify_handlers(php_curl *ch, int reporterror);
+void _php_curl_verify_handlers(php_curl *ch, bool reporterror);
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
+
+/* Consumes `zv` */
+zend_long php_curl_get_long(zval *zv);
 
 static inline php_curl *curl_from_obj(zend_object *obj) {
 	return (php_curl *)((char *)(obj) - XtOffsetOf(php_curl, std));
@@ -153,9 +165,11 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 
 #define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
 
-void curl_multi_register_class(const zend_function_entry *method_entries);
-void curl_share_register_class(const zend_function_entry *method_entries);
+void curl_multi_register_handlers(void);
+void curl_share_register_handlers(void);
+void curl_share_persistent_register_handlers(void);
+void curl_share_free_persistent_curlsh(zval *data);
 void curlfile_register_class(void);
-int curl_cast_object(zend_object *obj, zval *result, int type);
+zend_result curl_cast_object(zend_object *obj, zval *result, int type);
 
 #endif  /* _PHP_CURL_PRIVATE_H */

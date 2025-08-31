@@ -8,7 +8,7 @@ Test array_diff_assoc() function : usage variations - compare integers, floats a
 
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 $arr_default_int = array(1, 2, 3, 'a');
-$arr_float = array(0 => 1.00, 1.00 => 2.00, 2.00 => 3.00, 'b');
+$arr_float = array(0 => 1.00, 1 => 2.00, 2 => 3.00, 'b');
 $arr_string = array('1', '2', '3', 'c');
 $arr_string_float = array('0' => '1.00', '1.00' => '2.00', '2.00' => '3.00', 'd');
 

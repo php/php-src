@@ -4,8 +4,8 @@ Bug #75357 (segfault loading WordPress wp-admin)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

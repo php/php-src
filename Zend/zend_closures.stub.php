@@ -1,7 +1,11 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class Closure
 {
     private function __construct() {}
@@ -17,4 +21,6 @@ final class Closure
     public function call(object $newThis, mixed ...$args): mixed {}
 
     public static function fromCallable(callable $callback): Closure {}
+
+    public static function getCurrent(): Closure {}
 }

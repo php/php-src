@@ -1,27 +1,16 @@
 --TEST--
 mysqli_fetch_field()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
     // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-    $mysqli = new mysqli();
-    $res = false;
-    try {
-        new mysqli_result($mysqli);
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
-    }
-
-    require('table.inc');
-    if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    require 'table.inc';
+    $mysqli = $link;
 
     // Make sure that client, connection and result charsets are all the
     // same. Not sure whether this is strictly necessary.
@@ -41,10 +30,6 @@ require_once('skipifconnectfailure.inc');
     if ($tmp->charsetnr != $charsetInfo->number) {
         printf("[005] Expecting charset %s/%d got %d\n",
             $charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
-    }
-    if ($tmp->length != $charsetInfo->max_length) {
-        printf("[006] Expecting length %d got %d\n",
-            $charsetInfo->max_length, $tmp->max_length);
     }
     if ($tmp->db != $db) {
         printf("[007] Expecting database '%s' got '%s'\n",
@@ -66,10 +51,9 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-mysqli object is not fully initialized
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
@@ -86,7 +70,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(11)
   ["charsetnr"]=>

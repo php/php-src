@@ -1,16 +1,14 @@
 --TEST--
 Bug #52891 (Wrong data inserted with mysqli/mysqlnd when using bind_param,value > LONG_MAX)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-if (!$IS_MYSQLND) {
-    die("skip: test applies only to mysqlnd");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
@@ -97,7 +95,7 @@ if (!$IS_MYSQLND) {
 ?>
 --CLEAN--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",

@@ -1,9 +1,7 @@
 --TEST--
 Bug # #68937 (Segfault in curl_multi_exec)
---SKIPIF--
-<?php
-include 'skipif.inc';
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -33,7 +31,6 @@ function curl_read($ch, $fp, $len) {
 }
 
 curl_exec($ch);
-curl_close($ch);
 ?>
 --EXPECT--
 NULL

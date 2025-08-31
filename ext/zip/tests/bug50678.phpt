@@ -1,9 +1,7 @@
 --TEST--
 Bug #50678 (files extracted by ZipArchive class lost their original modified time)
---SKIPIF--
-<?php
-if (!extension_loaded('zip')) die('skip zip extension not available');
-?>
+--EXTENSIONS--
+zip
 --INI--
 date.timezone=UTC
 --FILE--

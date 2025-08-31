@@ -1,7 +1,7 @@
 --TEST--
 Bug #61860: Offsets may be wrong for grapheme_stri* functions
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $haystack = 'Auf der Straße nach Paris habe ich mit dem Fahrer gesprochen';

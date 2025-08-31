@@ -1,9 +1,7 @@
 --TEST--
 zip::open() function
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 
@@ -44,5 +42,5 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 --EXPECT--
 ER_OPEN: ok
 create: ok
-ZipArchive::open(): Argument #1 ($filename) cannot be empty
+ZipArchive::open(): Argument #1 ($filename) must not be empty
 OK

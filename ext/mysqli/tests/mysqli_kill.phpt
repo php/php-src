@@ -1,19 +1,17 @@
 --TEST--
 mysqli_kill()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require 'table.inc';
 
-    require('table.inc');
-
-    // Zend will cast the NULL to 0
     try {
-        mysqli_kill($link, null);
+        mysqli_kill($link, 0);
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
@@ -21,26 +19,18 @@ require_once('skipifconnectfailure.inc');
     if (!$thread_id = mysqli_thread_id($link))
         printf("[004] Cannot determine thread id, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    $tmp = mysqli_kill($link, $thread_id);
-    if (!is_bool($tmp))
-        printf("[005] Expecting boolean/any, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_kill($link, $thread_id);
 
     if ($res = mysqli_query($link, "SELECT id FROM test LIMIT 1"))
-        pintf("[006] Expecting boolean/false, got %s/%s\n", gettype($res), $res);
+        printf("[006] Expecting boolean/false, got %s/%s\n", gettype($res), $res);
 
     var_dump($error = mysqli_error($link));
     if (!is_string($error) || ('' === $error))
         printf("[007] Expecting string/any non empty, got %s/%s\n", gettype($error), $error);
     var_dump($res);
     var_dump($link);
-    if ($IS_MYSQLND) {
-        if ($link->info != 'Records: 6  Duplicates: 0  Warnings: 0') {
-            printf("[008] mysqlnd used to be more verbose and used to support SELECT\n");
-        }
-    } else {
-        if ($link->info != NULL) {
-            printf("[008] Time for wonders - libmysql has started to support SELECT, change test\n");
-        }
+    if ($link->info != 'Records: 6  Duplicates: 0  Warnings: 0') {
+        printf("[008] mysqlnd used to be more verbose and used to support SELECT\n");
     }
 
     mysqli_close($link);
@@ -77,10 +67,14 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 string(%d) "%s"
 bool(false)
 object(mysqli)#%d (%d) {
@@ -131,10 +125,14 @@ object(mysqli)#%d (%d) {
   ["warning_count"]=>
   int(0)
 }
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 array(1) {
   ["id"]=>
   string(1) "1"
 }
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 done!

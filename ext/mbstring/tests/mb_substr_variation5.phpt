@@ -1,10 +1,7 @@
 --TEST--
 Test mb_substr() function : usage variations - pass different integers to $length arg
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_substr') or die("skip mb_substr() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

@@ -1,9 +1,7 @@
 --TEST--
 Test Z_PARAM_ITERABLE() and Z_PARAM_ITERABLE_OR_NULL
---SKIPIF--
-<?php
-if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
@@ -42,8 +40,8 @@ try {
 
 ?>
 --EXPECT--
-zend_iterable(): Argument #1 ($arg1) must be of type iterable, string given
-zend_iterable(): Argument #1 ($arg1) must be of type iterable, int given
-zend_iterable(): Argument #1 ($arg1) must be of type iterable, null given
-zend_iterable(): Argument #2 ($arg2) must be of type ?iterable, string given
+zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, string given
+zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, int given
+zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, null given
+zend_iterable(): Argument #2 ($arg2) must be of type Traversable|array|null, string given
 

@@ -1,9 +1,9 @@
 --TEST--
 openssl_encrypt() with CCM cipher algorithm tests
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl"))
-    die("skip");
 if (!in_array('aes-256-ccm', openssl_get_cipher_methods()))
     die("skip: aes-256-ccm not available");
 ?>
@@ -24,7 +24,7 @@ foreach ($methods as $method) {
 }
 
 // Empty IV error
-var_dump(openssl_encrypt('data', $method, 'password', 0, NULL, $tag, ''));
+var_dump(openssl_encrypt('data', $method, 'password', 0, '', $tag, ''));
 
 // Test setting different IV length and tag length
 var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 10), $tag, '', 14));

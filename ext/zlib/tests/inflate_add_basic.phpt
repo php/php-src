@@ -1,10 +1,10 @@
 --TEST--
 Test incremental inflate_add() functionality
+--EXTENSIONS--
+zlib
 --SKIPIF--
 <?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 ?>
 --FILE--
 <?php

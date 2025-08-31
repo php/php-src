@@ -1,7 +1,7 @@
 --TEST--
 Test DOMDocument::load() with invalid paths
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 // create dom document
@@ -23,5 +23,5 @@ var_dump($dom->load(str_repeat(" ", PHP_MAXPATHLEN + 1)));
 ?>
 --EXPECT--
 DOMDocument::load(): Argument #1 ($filename) must not be empty
-Path to document must not contain any null bytes
+DOMDocument::load(): Argument #1 ($filename) must not contain any null bytes
 bool(false)

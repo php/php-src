@@ -3,9 +3,7 @@ ZE2: set_exception_handler()
 --FILE--
 <?php
 class MyException extends Exception {
-    function __construct($_error) {
-        $this->error = $_error;
-    }
+    function __construct(public $error) {}
 
     function getException()
     {

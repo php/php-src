@@ -3,14 +3,15 @@ ldap_bind() - Binding that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 
 // Invalid password

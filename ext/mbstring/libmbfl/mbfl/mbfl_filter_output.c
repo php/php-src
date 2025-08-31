@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by Moriyoshi Koizumi <moriyoshi@php.net> on 20 Dec 2002. The file
  * mbfilter.c is included in this package .
  *
@@ -39,5 +39,5 @@ int mbfl_filter_output_pipe(int c, void* data)
 
 int mbfl_filter_output_null(int c, void* data)
 {
-	return c;
+	return 0;
 }

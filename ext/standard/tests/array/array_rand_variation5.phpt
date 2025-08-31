@@ -12,8 +12,7 @@ echo "*** Testing array_rand() : with invalid values for 'req_num' ***\n";
 
 // initialise associative arrays
 $input = array(
-  1 => 'one', 2.2 => 'float key', 0.9 => 'decimal key',
-  2e2 => 'exp key1', 2000e-3 => 'negative exp key',
+  1 => 'one',
   0xabc => 2748, 0x12f => '303', 0xff => "255",
   0123 => 83, 012 => 10, 010 => "8"
 );

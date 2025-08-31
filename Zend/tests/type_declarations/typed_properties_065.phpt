@@ -6,10 +6,10 @@ Typed property on by-ref array dimension
 $a = new class implements ArrayAccess {
     public int $foo = 1;
 
-    function offsetExists($o) { return 1; }
-    function &offsetGet($o) { return $this->foo; }
-    function offsetSet($o, $v) { print "offsetSet($v)\n"; }
-    function offsetUnset($o) { print "offsetUnset() ?!?"; }
+    function offsetExists($o): bool { return 1; }
+    function &offsetGet($o): mixed { return $this->foo; }
+    function offsetSet($o, $v): void { print "offsetSet($v)\n"; }
+    function offsetUnset($o): void { print "offsetUnset() ?!?"; }
 };
 
 $a[0] += 1;

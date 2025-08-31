@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -31,20 +31,14 @@
 #include "sysvsem_arginfo.h"
 #include "php_sysvsem.h"
 #include "ext/standard/info.h"
-#include "Zend/zend_interfaces.h"
 
-#if !HAVE_SEMUN
-
+#ifndef HAVE_UNION_SEMUN
 union semun {
 	int val;                    /* value for SETVAL */
 	struct semid_ds *buf;       /* buffer for IPC_STAT, IPC_SET */
 	unsigned short int *array;  /* array for GETALL, SETALL */
 	struct seminfo *__buf;      /* buffer for IPC_INFO */
 };
-
-#undef HAVE_SEMUN
-#define HAVE_SEMUN 1
-
 #endif
 
 /* {{{ sysvsem_module_entry */
@@ -101,7 +95,6 @@ static zend_object *sysvsem_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &sysvsem_object_handlers;
 
 	return &intern->std;
 }
@@ -151,13 +144,9 @@ static void sysvsem_free_obj(zend_object *object)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvsem)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "SysvSemaphore", class_SysvSemaphore_methods);
-	sysvsem_ce = zend_register_internal_class(&ce);
-	sysvsem_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	sysvsem_ce = register_class_SysvSemaphore();
 	sysvsem_ce->create_object = sysvsem_create_object;
-	sysvsem_ce->serialize = zend_class_serialize_deny;
-	sysvsem_ce->unserialize = zend_class_unserialize_deny;
+	sysvsem_ce->default_object_handlers = &sysvsem_object_handlers;
 
 	memcpy(&sysvsem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvsem_object_handlers.offset = XtOffsetOf(sysvsem_sem, std);
@@ -179,17 +168,11 @@ PHP_MINFO_FUNCTION(sysvsem)
 }
 /* }}} */
 
-#define SETVAL_WANTS_PTR
-
-#if defined(_AIX)
-#undef SETVAL_WANTS_PTR
-#endif
-
 /* {{{ Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
 	zend_long key, max_acquire = 1, perm = 0666;
-	zend_bool auto_release = 1;
+	bool auto_release = 1;
 	int semid;
 	struct sembuf sop[3];
 	int count;
@@ -253,24 +236,11 @@ PHP_FUNCTION(sem_get)
 	/* If we are the only user, then take this opportunity to set the max. */
 
 	if (count == 1) {
-#if HAVE_SEMUN
-		/* This is correct for Linux which has union semun. */
 		union semun semarg;
 		semarg.val = max_acquire;
 		if (semctl(semid, SYSVSEM_SEM, SETVAL, semarg) == -1) {
 			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 		}
-#elif defined(SETVAL_WANTS_PTR)
-		/* This is correct for Solaris 2.6 which does not have union semun. */
-		if (semctl(semid, SYSVSEM_SEM, SETVAL, &max_acquire) == -1) {
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x%lx: %s", key, strerror(errno));
-		}
-#else
-		/* This works for i.e. AIX */
-		if (semctl(semid, SYSVSEM_SEM, SETVAL, max_acquire) == -1) {
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x%lx: %s", key, strerror(errno));
-		}
-#endif
 	}
 
 	/* Set semaphore 1 back to zero. */
@@ -296,10 +266,10 @@ PHP_FUNCTION(sem_get)
 /* }}} */
 
 /* {{{ php_sysvsem_semop */
-static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
+static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, bool acquire)
 {
 	zval *arg_id;
-	zend_bool nowait = 0;
+	bool nowait = 0;
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 
@@ -341,14 +311,14 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 /* {{{ Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
-	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
-	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
@@ -363,10 +333,8 @@ PHP_FUNCTION(sem_remove)
 {
 	zval *arg_id;
 	sysvsem_sem *sem_ptr;
-#if HAVE_SEMUN
 	union semun un;
 	struct semid_ds buf;
-#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &arg_id, sysvsem_ce) == FAILURE) {
 		RETURN_THROWS();
@@ -374,21 +342,13 @@ PHP_FUNCTION(sem_remove)
 
 	sem_ptr = Z_SYSVSEM_P(arg_id);
 
-#if HAVE_SEMUN
 	un.buf = &buf;
 	if (semctl(sem_ptr->semid, 0, IPC_STAT, un) < 0) {
-#else
-	if (semctl(sem_ptr->semid, 0, IPC_STAT, NULL) < 0) {
-#endif
 		php_error_docref(NULL, E_WARNING, "SysV semaphore for key 0x%x does not (any longer) exist", sem_ptr->key);
 		RETURN_FALSE;
 	}
 
-#if HAVE_SEMUN
 	if (semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
-#else
-	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
-#endif
 		php_error_docref(NULL, E_WARNING, "Failed for SysV semaphore for key 0x%x: %s", sem_ptr->key, strerror(errno));
 		RETURN_FALSE;
 	}

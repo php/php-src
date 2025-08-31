@@ -52,10 +52,12 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 Check invalid params:
 ReflectionClass::getProperty() expects exactly 1 argument, 0 given
 ReflectionClass::getProperty() expects exactly 1 argument, 2 given
+
+Deprecated: ReflectionClass::getProperty(): Passing null to parameter #1 ($name) of type string is deprecated in %s on line %d
 Property C::$ does not exist
 Property C::$1 does not exist
 Property C::$1.5 does not exist

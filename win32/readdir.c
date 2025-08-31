@@ -21,10 +21,6 @@
  * The DIR typedef is not compatible with Unix.
  **********************************************************************/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 DIR *opendir(const char *dir)
 {/*{{{*/
 	DIR *dp;
@@ -32,7 +28,7 @@ DIR *opendir(const char *dir)
 	HANDLE handle;
 	char resolved_path_buff[MAXPATHLEN];
 	size_t resolvedw_len, filespecw_len, index;
-	zend_bool might_need_prefix;
+	bool might_need_prefix;
 
 	if (!VCWD_REALPATH(dir, resolved_path_buff)) {
 		return NULL;
@@ -63,7 +59,7 @@ DIR *opendir(const char *dir)
 		wcscpy(filespecw, resolvedw);
 		index = resolvedw_len - 1;
 	}
-	if (index >= 0 && filespecw[index] == L'/' || index == 0 && filespecw[index] == L'\\')
+	if ((index >= 0 && filespecw[index] == L'/') || (index == 0 && filespecw[index] == L'\\'))
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
 
@@ -124,6 +120,13 @@ struct dirent *readdir(DIR *dp)
 
 	dp->dent.d_ino = 1;
 	dp->dent.d_off = dp->offset;
+	if (dp->fileinfo.dwFileAttributes & (FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_DEVICE)) {
+		dp->dent.d_type = DT_UNKNOWN; /* conservative */
+	} else if (dp->fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+		dp->dent.d_type = DT_DIR;
+	} else {
+		dp->dent.d_type = DT_REG;
+	}
 
 	return &(dp->dent);
 }/*}}}*/
@@ -151,7 +154,7 @@ int rewinddir(DIR *dp)
 	wchar_t *filespecw;
 	HANDLE handle;
 	size_t dirw_len, filespecw_len, index;
-	zend_bool might_need_prefix;
+	bool might_need_prefix;
 
 	FindClose(dp->handle);
 
@@ -196,7 +199,3 @@ int rewinddir(DIR *dp)
 
 	return 0;
 }/*}}}*/
-
-#ifdef __cplusplus
-}
-#endif

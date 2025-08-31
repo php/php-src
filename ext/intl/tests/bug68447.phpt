@@ -1,7 +1,7 @@
 --TEST--
 Bug #68447: grapheme_extract take an extra trailing character
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $katsushikaku = "葛󠄁飾区";

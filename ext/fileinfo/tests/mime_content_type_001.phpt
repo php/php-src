@@ -1,7 +1,7 @@
 --TEST--
 mime_content_type(): Testing wrong parameters
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 
@@ -47,5 +47,5 @@ mime_content_type(): Argument #1 ($filename) must be of type resource|string, st
 mime_content_type(): Argument #1 ($filename) must be of type resource|string, array given
 
 Warning: mime_content_type(foo/inexistent): Failed to open stream: No such file or directory in %s on line %d
-mime_content_type(): Argument #1 ($filename) cannot be empty
+mime_content_type(): Argument #1 ($filename) must not be empty
 mime_content_type(): Argument #1 ($filename) must not contain any null bytes

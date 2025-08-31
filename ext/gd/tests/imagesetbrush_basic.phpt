@@ -3,10 +3,12 @@ Test imagesetbrush() function : basic functionality
 --CREDITS--
 Erick Belluci Tedeschi <erickbt86 [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
 }
 ?>
 --FILE--

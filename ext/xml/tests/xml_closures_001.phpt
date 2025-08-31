@@ -1,7 +1,7 @@
 --TEST--
 XML parser test using closures as callbacks
---SKIPIF--
-<?php include("skipif.inc"); ?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 chdir(__DIR__);
@@ -29,7 +29,6 @@ $fp = fopen("xmltest.xml", "r");
 while ($data = fread($fp, 4096)) {
     xml_parse($xp, $data, feof($fp));
 }
-xml_parser_free($xp);
 
 ?>
 --EXPECT--

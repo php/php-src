@@ -1,15 +1,14 @@
 --TEST--
 mysqli_stmt_data_seek()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -34,24 +33,21 @@ require_once('skipifconnectfailure.inc');
     if (!mysqli_stmt_store_result($stmt))
         printf("[008] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    if (!is_null($tmp = mysqli_stmt_data_seek($stmt, 2)))
-        printf("[009] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_data_seek($stmt, 2);
 
     if (!mysqli_stmt_fetch($stmt))
         printf("[010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     var_dump($id);
 
-    if (!is_null($tmp = mysqli_stmt_data_seek($stmt, 0)))
-        printf("[011] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_data_seek($stmt, 0);
 
     if (!mysqli_stmt_fetch($stmt))
         printf("[012] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     var_dump($id);
 
-    if (!is_null($tmp = mysqli_stmt_data_seek($stmt, mysqli_stmt_num_rows($stmt) + 100)))
-        printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_data_seek($stmt, mysqli_stmt_num_rows($stmt) + 100);
 
     if (mysqli_stmt_fetch($stmt))
         printf("[014] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -82,9 +78,9 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
---EXPECTF--
+--EXPECT--
 mysqli_stmt object is not fully initialized
 int(3)
 int(1)

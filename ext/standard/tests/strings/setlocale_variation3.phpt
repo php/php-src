@@ -2,6 +2,7 @@
 Test setlocale() function : usage variations - setting system locale = 0
 --SKIPIF--
 <?php
+if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
@@ -46,7 +47,7 @@ if($locale_info_before ==  $locale_info_after){
 
 echo "\nDone\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing setlocale() : usage variations - setting system locale = 0 ***
 Locale info, before setting the locale
 array(18) {
@@ -83,17 +84,13 @@ array(18) {
   ["n_sign_posn"]=>
   int(1)
   ["grouping"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
+  array(%d) {%A
+    [%d]=>
     int(3)
   }
   ["mon_grouping"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
+  array(%d) {%A
+    [%d]=>
     int(3)
   }
 }
@@ -133,17 +130,13 @@ array(18) {
   ["n_sign_posn"]=>
   int(1)
   ["grouping"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
+  array(%d) {%A
+    [%d]=>
     int(3)
   }
   ["mon_grouping"]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
+  array(%d) {%A
+    [%d]=>
     int(3)
   }
 }

@@ -1,10 +1,8 @@
 --TEST--
 SPL: SimpleXMLIterator and overridden iterator methods()
---SKIPIF--
-<?php
-if (!extension_loaded('simplexml')) print 'skip';
-if (!extension_loaded("libxml")) print "skip LibXML not present";
-?>
+--EXTENSIONS--
+simplexml
+libxml
 --FILE--
 <?php
 
@@ -37,37 +35,37 @@ EOF;
 
 class SXETest extends SimpleXMLIterator
 {
-    function rewind()
+    function rewind(): void
     {
         echo __METHOD__ . "\n";
-        return parent::rewind();
+        parent::rewind();
     }
-    function valid()
+    function valid(): bool
     {
         echo __METHOD__ . "\n";
         return parent::valid();
     }
-    function current()
+    function current(): SimpleXMLElement
     {
         echo __METHOD__ . "\n";
         return parent::current();
     }
-    function key()
+    function key(): string
     {
         echo __METHOD__ . "\n";
         return parent::key();
     }
-    function next()
+    function next(): void
     {
         echo __METHOD__ . "\n";
-        return parent::next();
+        parent::next();
     }
-    function hasChildren()
+    function hasChildren(): bool
     {
         echo __METHOD__ . "\n";
         return parent::hasChildren();
     }
-    function getChildren()
+    function getChildren(): ?SimpleXMLIterator
     {
         echo __METHOD__ . "\n";
         return parent::getChildren();

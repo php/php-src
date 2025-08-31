@@ -4,8 +4,8 @@
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at the following url:        |
-   | http://www.php.net/license/3_01.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -418,7 +418,7 @@ int LSAPI_Postfork_Parent(LSAPI_Request * pReq);
 #define LSAPI_LOG_PID            (0x10000)
 
 void LSAPI_Log(int flag, const char * fmt, ...)
-#if __GNUC__
+#ifdef __GNUC__
         __attribute__((format(printf, 2, 3)))
 #endif
 ;

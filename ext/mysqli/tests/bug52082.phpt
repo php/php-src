@@ -1,13 +1,14 @@
 --TEST--
 Bug #52082 (character_set_client & character_set_connection reset after mysqli_change_user)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
     $link = mysqli_init();
     $link->options(MYSQLI_SET_CHARSET_NAME, "latin2");
     if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {

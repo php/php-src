@@ -24,13 +24,15 @@ image_type_to_mime_type()
     var_dump($result);
 ?>
 --EXPECT--
-array(16) {
+array(18) {
   ["test-1pix.bmp"]=>
   string(9) "image/bmp"
   ["test12pix.webp"]=>
   string(10) "image/webp"
   ["test1bpix.bmp"]=>
   string(9) "image/bmp"
+  ["test1pix.avif"]=>
+  string(10) "image/avif"
   ["test1pix.bmp"]=>
   string(9) "image/bmp"
   ["test1pix.jp2"]=>
@@ -47,6 +49,8 @@ array(16) {
   string(10) "image/webp"
   ["test4pix.gif"]=>
   string(9) "image/gif"
+  ["test4pix.heic"]=>
+  string(10) "image/heif"
   ["test4pix.iff"]=>
   string(9) "image/iff"
   ["test4pix.png"]=>

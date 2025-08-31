@@ -6,6 +6,15 @@ Attribute flags value is validated.
 #[Attribute(-1)]
 class A1 { }
 
+#[A1]
+class Foo { }
+
+try {
+    var_dump((new ReflectionClass(Foo::class))->getAttributes()[0]->newInstance());
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
---EXPECTF--
-Fatal error: Invalid attribute flags specified in %s
+--EXPECT--
+Invalid attribute flags specified

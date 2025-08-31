@@ -35,7 +35,7 @@ class StudentIdFilter extends FilterIterator
         $this->id = $other->getId();
     }
 
-    public function accept()
+    public function accept(): bool
     {
         echo "ACCEPT ".$this->current()->getId()." == ".$this->id."\n";
         return $this->current()->getId() == $this->id;
@@ -69,8 +69,8 @@ class StudentList implements IteratorAggregate
         return false;
     }
 
-    public function getIterator() {
-        return new CachingIterator($this->students->getIterator(), true);
+    public function getIterator(): Traversable {
+        return new CachingIterator($this->students->getIterator());
     }
 }
 

@@ -1,8 +1,9 @@
 --TEST--
-Bug #46064.2 (Exception when creating ReflectionProperty object on dynamicly created property)
+Bug #46064.2 (Exception when creating ReflectionProperty object on dynamically created property)
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class foo {
 }
 
@@ -14,6 +15,7 @@ $p = new ReflectionObject($x);
 var_dump($p->getProperty('test'));
 
 
+#[AllowDynamicProperties]
 class bar {
     public function __construct() {
         $this->a = 1;

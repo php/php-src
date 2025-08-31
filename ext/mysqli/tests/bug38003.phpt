@@ -1,7 +1,7 @@
 --TEST--
 Bug #38003 (in classes inherited from MySQLi it's possible to call private constructors from invalid context)
---SKIPIF--
-<?php if (!extension_loaded("mysqli")) print "skip"; ?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
 

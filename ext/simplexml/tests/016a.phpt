@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: concatenating attributes
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<EOF

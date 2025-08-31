@@ -1,9 +1,7 @@
 --TEST--
 DOMNode::getNodePath()
---SKIPIF--
-<?php
-include('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $file = __DIR__.'/book.xml';

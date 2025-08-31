@@ -1,8 +1,9 @@
 --TEST--
 Bug #77973 (Uninitialized read in gdImageCreateFromXbm)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die("skip gd extension not available");
 if (!function_exists('imagecreatefromxbm')) die("skip imagecreatefromxbm not available");
 ?>
 --FILE--
@@ -14,7 +15,7 @@ $im = imagecreatefromxbm($filepath);
 var_dump($im);
 ?>
 --EXPECTF--
-Warning: imagecreatefromxbm(): Invalid XBM in %s on line %d
+Warning: imagecreatefromxbm(): %cnvalid XBM in %s on line %d
 
 Warning: imagecreatefromxbm(): "%s" is not a valid XBM file in %s on line %d
 bool(false)

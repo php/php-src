@@ -8,7 +8,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 --FILE--
 <?php
 try {
-    chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", null);
+    chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", 0);
 } catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }

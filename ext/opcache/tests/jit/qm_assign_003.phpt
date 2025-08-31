@@ -4,7 +4,6 @@ JIT QM_ASSIGN: 003 missing type store
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo() {
@@ -19,13 +18,8 @@ function foo() {
         }
     }
 }
-foo();
+@foo();
 ?>
 DONE
---EXPECTF--
-Warning: Undefined variable $cnt in %sqm_assign_003.php on line 3
-
-Warning: Undefined variable $a in %sqm_assign_003.php on line 4
-
-Warning: Undefined variable $cnt in %sqm_assign_003.php on line 3
+--EXPECT--
 DONE

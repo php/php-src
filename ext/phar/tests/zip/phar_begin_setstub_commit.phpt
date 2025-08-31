@@ -1,9 +1,7 @@
 --TEST--
 Phar::startBuffering()/setStub()/stopBuffering() zip-based
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -62,7 +60,11 @@ string(5) "Hello"
 string(5) "World"
 string(%d) "<?php var_dump("Second"); Phar::mapPhar("phar_begin_setstub_commit.phar"); __HALT_COMPILER(); ?>
 "
+
+Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d
 string(%d) "<?php var_dump("First resource"); Phar::mapPhar("phar_begin_setstub_commit.phar"); __HALT_COMPILER(); ?>
 "
+
+Deprecated: Calling Phar::setStub(resource $stub, int $length) is deprecated in %s on line %d
 string(%d) "<?php var_dump("First resource"); Phar::mapPhar("phar_begin_setstub_commit.phar"); __HALT_COMPILER(); ?>
 "

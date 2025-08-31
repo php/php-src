@@ -1,8 +1,9 @@
 --TEST--
 Bug #72402: _php_mb_regex_ereg_replace_exec - double free
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--

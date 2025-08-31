@@ -1,0 +1,4 @@
+*.so
+*.o
+main
+main.dSYM

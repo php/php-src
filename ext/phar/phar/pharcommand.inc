@@ -92,7 +92,7 @@ class PharCommand extends CLICommand
                 'typ' => 'select',
                 'val' => NULL,
                 'inf' => '<method> Selects the hash algorithm.',
-                'select' => array('md5' => 'MD5','sha1' => 'SHA1')
+                'select' => ['md5' => 'MD5','sha1' => 'SHA1', 'sha256' => 'SHA256', 'sha512' => 'SHA512', 'openssl' => 'OPENSSL', 'openssl_sha256' => 'OPENSSL_SHA256', 'openssl_sha512' => 'OPENSSL_SHA512']
             ),
             'i' => array(
                 'typ' => 'regex',
@@ -156,6 +156,8 @@ class PharCommand extends CLICommand
         $hash_avail = Phar::getSupportedSignatures();
         $hash_optional = array('SHA-256' => 'SHA256',
                                'SHA-512' => 'SHA512',
+                               'OpenSSL_sha256' => 'OpenSSL_SHA256',
+                               'OpenSSL_sha512' => 'OpenSSL_SHA512',
                                'OpenSSL' => 'OpenSSL');
         if (!in_array('OpenSSL', $hash_avail)) {
             unset($phar_args['y']);
@@ -223,13 +225,13 @@ class PharCommand extends CLICommand
                 }
             }
             if ($pear) {
-                $apiver = `pear -q info PHP_Archive 2>/dev/null|grep 'API Version'`;
+                $apiver = (string) shell_exec("pear -q info PHP_Archive 2>/dev/null|grep 'API Version'");
                 $apiver = trim(substr($apiver, strlen('API Version')));
             }
             if ($apiver) {
                 self::notice("PEAR package PHP_Archive: API Version: $apiver.\n");
-                $files  = explode("\n", `pear list-files PHP_Archive`);
-                $phpdir = `pear config-get php_dir 2>/dev/null`;
+                $files  = explode("\n", (string) shell_exec("pear list-files PHP_Archive"));
+                $phpdir = (string) shell_exec("pear config-get php_dir 2>/dev/null");
                 $phpdir = trim($phpdir);
                 self::notice("PEAR package PHP_Archive: $phpdir.\n");
                 if (is_dir($phpdir)) {
@@ -246,7 +248,7 @@ class PharCommand extends CLICommand
                         }
                     }
                 } else {
-                    self::notice("PEAR package PHP_Archive: corrupt or inaccessible base dir: $php_dir.\n");
+                    self::notice("PEAR package PHP_Archive: corrupt or inaccessible base dir: $phpdir.\n");
                 }
             }
             if (isset($found)) {
@@ -259,7 +261,7 @@ class PharCommand extends CLICommand
                     self::error($msg);
                 }
             }
-            $arg = $found;
+            return null;
         }
         return self::cli_arg_typ_file($arg);
     }
@@ -429,6 +431,16 @@ class PharCommand extends CLICommand
                     self::error("Cannot use OpenSSL signing without key.\n");
                 }
                 return Phar::OPENSSL;
+            case 'openssl_sha256':
+                if (!$privkey) {
+                    self::error("Cannot use OpenSSL signing without key.\n");
+                }
+                return Phar::OPENSSL_SHA256;
+            case 'openssl_sha512':
+                if (!$privkey) {
+                    self::error("Cannot use OpenSSL signing without key.\n");
+                }
+                return Phar::OPENSSL_SHA512;
         }
     }
     // }}}
@@ -618,15 +630,15 @@ class PharCommand extends CLICommand
      * This function will take a directory and iterate through
      * it and get the files to insert into the Phar archive.
      *
-     * @param Phar        $phar      The phar object.
-     * @param string      $input     The input directory
-     * @param string      $regex     The regex used in RegexIterator.
-     * @param string      $invregex  The InvertedRegexIterator expression.
-     * @param SplFileInfo $stub Stub file object
-     * @param mixed       $compress  Compression algorithm or NULL
-     * @param boolean     $noloader  Whether to prevent adding the loader
+     * @param Phar         $phar      The phar object.
+     * @param string       $input     The input directory
+     * @param string       $regex     The regex used in RegexIterator.
+     * @param string       $invregex  The InvertedRegexIterator expression.
+     * @param ?SplFileInfo $stub Stub file object
+     * @param mixed        $compress  Compression algorithm or NULL
+     * @param boolean      $noloader  Whether to prevent adding the loader
      */
-    static function phar_add(Phar $phar, $level, $input, $regex, $invregex, SplFileInfo $stub = NULL, $compress = NULL, $noloader = false)
+    static function phar_add(Phar $phar, $level, $input, $regex, $invregex, ?SplFileInfo $stub, $compress = NULL, $noloader = false)
     {
         if ($input && is_file($input) && !is_dir($input)) {
             return self::phar_add_file($phar, $level, $input, $input, $compress);
@@ -1286,7 +1298,7 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_inf_meta_get()
     {
-        return "Get meta information of a PHAR entry or a PHAR package in serialized from. " .
+        return "Get meta information of a PHAR entry or a PHAR package in serialized form. " .
                "If no output file is specified for meta data then stdout is being used.\n" .
                "You can also specify a particular index using -k. In that case the metadata is " .
                "expected to be an array and the value of the given index is returned using echo " .
@@ -1586,7 +1598,7 @@ class PharCommand extends CLICommand
             if (is_bool($v)) {
                 $v = $v ? 'enabled' : 'disabled';
             }
-            printf("%-${klen}s  %s\n", $k.':', $v);
+            printf("%-{$klen}s  %s\n", $k.':', $v);
         }
     }
     // }}}

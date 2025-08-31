@@ -1,8 +1,9 @@
 --TEST--
 Bug #66797 (mb_substr only takes 32-bit signed integer)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 if (PHP_INT_SIZE != 8) die('skip this test is for 64bit platforms only');
 ?>
 --FILE--

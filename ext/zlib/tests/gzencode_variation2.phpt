@@ -1,16 +1,12 @@
 --TEST--
 Test gzencode() function : variation - verify header contents with all encoding modes
+--EXTENSIONS--
+zlib
 --SKIPIF--
 <?php
-
 if( substr(PHP_OS, 0, 3) == "WIN" ) {
   die("skip.. Do not run on Windows");
 }
-
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-
 if (PHP_OS == "Darwin") {
     print "skip - OS is encoded in headers, tested header is non Darwin";
 }

@@ -2,10 +2,8 @@
 DOMDocument::loadHTML() should fail if empty string provided as input
 --CREDITS--
 Knut Urdalen <knut@php.net>
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();

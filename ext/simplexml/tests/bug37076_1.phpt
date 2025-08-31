@@ -1,7 +1,7 @@
 --TEST--
 Bug #37076 (SimpleXML ignores .=) (appending to unnamed attribute)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

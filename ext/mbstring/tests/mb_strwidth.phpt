@@ -1,7 +1,7 @@
 --TEST--
 mb_strwidth()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 ini_set('include_path', __DIR__);

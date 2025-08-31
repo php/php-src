@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -86,7 +86,7 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		case FORMAT_TYPE_CURRENCY:
-			if (getThis()) {
+			if (hasThis()) {
 				const char *space;
 				const char *class_name = get_active_class_name(&space);
 				zend_argument_value_error(2, "cannot be NumberFormatter::TYPE_CURRENCY constant, "
@@ -96,7 +96,7 @@ PHP_FUNCTION( numfmt_parse )
 			}
 			goto cleanup;
 		default:
-			zend_argument_value_error(getThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
+			zend_argument_value_error(hasThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
 			goto cleanup;
 	}
 
@@ -135,7 +135,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
 		RETURN_THROWS();
@@ -165,8 +165,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	/* Convert parsed currency to UTF-8 and pass it back to caller. */
 	u8str = intl_convert_utf16_to_utf8(currency, u_strlen(currency), &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Currency conversion to UTF-8 failed" );
-	zval_ptr_dtor( zcurrency );
-	ZVAL_NEW_STR(zcurrency, u8str);
+	ZEND_TRY_ASSIGN_REF_NEW_STR(zcurrency, u8str);
 
 	RETVAL_DOUBLE( number );
 }

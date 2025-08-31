@@ -1,20 +1,16 @@
 --TEST--
 mysqli_close()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
-    $tmp    = NULL;
-    $link   = NULL;
-
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     $tmp = $mysqli->close();
     if (true !== $tmp)

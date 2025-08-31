@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -110,16 +110,13 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
  *
  * Ignores `locale' stuff.
  */
-static zend_long collator_u_strtol(nptr, endptr, base)
-	const UChar *nptr;
-	UChar **endptr;
-	register int base;
+static zend_long collator_u_strtol(const UChar *nptr, UChar **endptr, int base)
 {
-	register const UChar *s = nptr;
-	register zend_ulong acc;
-	register UChar c;
-	register zend_ulong cutoff;
-	register int neg = 0, any, cutlim;
+	const UChar *s = nptr;
+	zend_ulong acc;
+	UChar c;
+	zend_ulong cutoff;
+	int neg = 0, any, cutlim;
 
 	if (s == NULL) {
 		errno = ERANGE;
@@ -203,11 +200,19 @@ static zend_long collator_u_strtol(nptr, endptr, base)
 }
 /* }}} */
 
+/* Consume (trailing) whitespace just like collator_u_strtol() consumes leading whitespace */
+static zend_always_inline UChar *collator_skip_ws(UChar *end_ptr)
+{
+	while (u_isspace(*end_ptr)) {
+		end_ptr++;
+	}
+	return end_ptr;
+}
 
 /* {{{ collator_is_numeric]
  * Taken from PHP6:is_numeric_unicode()
  */
-zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double *dval, bool allow_errors )
+uint8_t collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double *dval, bool allow_errors )
 {
 	zend_long local_lval;
 	double local_dval;
@@ -220,6 +225,7 @@ zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, dou
 	errno=0;
 	local_lval = collator_u_strtol(str, &end_ptr_long, 10);
 	if (errno != ERANGE) {
+		end_ptr_long = collator_skip_ws(end_ptr_long);
 		if (end_ptr_long == str+length) { /* integer string */
 			if (lval) {
 				*lval = local_lval;
@@ -236,6 +242,7 @@ zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, dou
 	if (local_dval == 0 && end_ptr_double == str) {
 		end_ptr_double = NULL;
 	} else {
+		end_ptr_double = collator_skip_ws(end_ptr_double);
 		if (end_ptr_double == str+length) { /* floating point string */
 			if (!zend_finite(local_dval)) {
 				/* "inf","nan" and maybe other weird ones */

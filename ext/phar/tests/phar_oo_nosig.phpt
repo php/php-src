@@ -1,7 +1,7 @@
 --TEST--
 Phar::getSignature() no signature
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -14,8 +14,7 @@ var_dump($phar->getSignature());
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . '/files/phar_oo_test.phar.php');
-__halt_compiler();
+unlink(__DIR__ . '/files/phar_oo_nosig.phar.php');
 ?>
 --EXPECT--
 bool(false)

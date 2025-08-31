@@ -1,8 +1,7 @@
 --TEST--
 openssl_cms_encrypt() pem test
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip";
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $infile = __DIR__ . "/plain.txt";
@@ -14,8 +13,9 @@ $decryptfile = $tname . ".pemout";
 $single_cert = "file://" . __DIR__ . "/cert.crt";
 $privkey = "file://" . __DIR__ . "/private_rsa_1024.key";
 $headers = array("test@test", "testing openssl_cms_encrypt()");
+$cipher = OPENSSL_CIPHER_AES_128_CBC;
 
-var_dump(openssl_cms_encrypt($infile, $cryptfile, $single_cert, $headers, OPENSSL_CMS_BINARY, OPENSSL_ENCODING_PEM));
+var_dump(openssl_cms_encrypt($infile, $cryptfile, $single_cert, $headers, OPENSSL_CMS_BINARY, OPENSSL_ENCODING_PEM, $cipher));
 if (openssl_cms_decrypt($cryptfile, $decryptfile, $single_cert, $privkey, OPENSSL_ENCODING_PEM) == false) {
     print "PEM decrypt error\n";
     print "recipient:\n";

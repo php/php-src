@@ -1,19 +1,19 @@
 --TEST--
 FFI 022: structure/union alignment
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
 function test_size($size, $type) {
-    if (FFI::sizeof(FFI::new($type)) !== $size) {
+    if (FFI::sizeof(FFI::cdef()->new($type)) !== $size) {
         echo "FAIL: sizeof($type) != $size\n";
     }
 }
 
 function test_align($align, $type) {
-    if (FFI::alignof(FFI::new($type)) !== $align) {
+    if (FFI::alignof(FFI::cdef()->new($type)) !== $align) {
         echo "FAIL: alignof($type) != $align\n";
     }
 }

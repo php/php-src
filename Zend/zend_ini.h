@@ -19,6 +19,8 @@
 #ifndef ZEND_INI_H
 #define ZEND_INI_H
 
+#include "zend_modules.h"
+
 #define ZEND_INI_USER	(1<<0)
 #define ZEND_INI_PERDIR	(1<<1)
 #define ZEND_INI_SYSTEM	(1<<2)
@@ -58,6 +60,7 @@ struct _zend_ini_entry {
 	uint8_t orig_modifiable;
 	uint8_t modified;
 
+	const zend_ini_entry_def *def;
 };
 
 BEGIN_EXTERN_C()
@@ -72,7 +75,9 @@ ZEND_API void zend_copy_ini_directives(void);
 ZEND_API void zend_ini_sort_entries(void);
 
 ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number);
+ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_entry, int module_number, int module_type);
 ZEND_API void zend_unregister_ini_entries(int module_number);
+ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type);
 ZEND_API void zend_ini_refresh_caches(int stage);
 ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage);
 ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change);
@@ -84,9 +89,57 @@ ZEND_API void display_ini_entries(zend_module_entry *module);
 ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, int orig);
 ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig);
 ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig);
-ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, zend_bool *exists);
+ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, bool *exists);
+ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig);
+ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
-ZEND_API zend_bool zend_ini_parse_bool(zend_string *str);
+ZEND_API bool zend_ini_parse_bool(zend_string *str);
+
+/**
+ * Parses an ini quantity
+ *
+ * The value parameter must be a string in the form
+ *
+ *     sign? digits ws* multiplier?
+ *
+ * with
+ *
+ *     sign: [+-]
+ *     digit: [0-9]
+ *     digits: digit+
+ *     ws: [ \t\n\r\v\f]
+ *     multiplier: [KMG]
+ *
+ * Leading and trailing whitespaces are ignored.
+ *
+ * If the string is empty or consists only of only whitespaces, 0 is returned.
+ *
+ * Digits is parsed as decimal unless the first digit is '0', in which case
+ * digits is parsed as octal.
+ *
+ * The multiplier is case-insensitive. K, M, and G multiply the quantity by
+ * 2**10, 2**20, and 2**30, respectively.
+ *
+ * For backwards compatibility, ill-formatted values are handled as follows:
+ * - No leading digits: value is treated as '0'
+ * - Invalid multiplier: multiplier is ignored
+ * - Invalid characters between digits and multiplier: invalid characters are
+ *   ignored
+ * - Integer overflow: The result of the overflow is returned
+ *
+ * In any of these cases an error string is stored in *errstr (caller must
+ * release it), otherwise *errstr is set to NULL.
+ */
+ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr);
+
+/**
+ * Unsigned variant of zend_ini_parse_quantity
+ */
+ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr);
+
+ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string *setting);
+
+ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting);
 
 ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
@@ -141,15 +194,15 @@ END_EXTERN_C()
 #define INI_INT(name) zend_ini_long((name), strlen(name), 0)
 #define INI_FLT(name) zend_ini_double((name), strlen(name), 0)
 #define INI_STR(name) zend_ini_string_ex((name), strlen(name), 0, NULL)
-#define INI_BOOL(name) ((zend_bool) INI_INT(name))
+#define INI_BOOL(name) ((bool) INI_INT(name))
 
 #define INI_ORIG_INT(name)	zend_ini_long((name), strlen(name), 1)
 #define INI_ORIG_FLT(name)	zend_ini_double((name), strlen(name), 1)
 #define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
-#define INI_ORIG_BOOL(name) ((zend_bool) INI_ORIG_INT(name))
+#define INI_ORIG_BOOL(name) ((bool) INI_ORIG_INT(name))
 
-#define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number)
-#define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number)
+#define REGISTER_INI_ENTRIES() zend_register_ini_entries_ex(ini_entries, module_number, type)
+#define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries_ex(module_number, type)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
 #define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), strlen(name), displayer)
@@ -161,8 +214,12 @@ ZEND_API ZEND_INI_MH(OnUpdateBool);
 ZEND_API ZEND_INI_MH(OnUpdateLong);
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero);
 ZEND_API ZEND_INI_MH(OnUpdateReal);
+/* char* versions */
 ZEND_API ZEND_INI_MH(OnUpdateString);
 ZEND_API ZEND_INI_MH(OnUpdateStringUnempty);
+/* zend_string* versions */
+ZEND_API ZEND_INI_MH(OnUpdateStr);
+ZEND_API ZEND_INI_MH(OnUpdateStrNotEmpty);
 END_EXTERN_C()
 
 #define ZEND_INI_DISPLAY_ORIG	1
@@ -180,8 +237,8 @@ END_EXTERN_C()
 /* INI parsing engine */
 typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg);
 BEGIN_EXTERN_C()
-ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg);
-ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg);
+ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg);
+ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg);
 END_EXTERN_C()
 
 /* INI entries */

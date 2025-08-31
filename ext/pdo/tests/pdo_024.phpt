@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: assert that bindParam does not modify parameter
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -18,15 +19,15 @@ switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
     case 'dblib':
         // environment settings can influence how the table is created if specifics are missing
         // https://msdn.microsoft.com/en-us/library/ms174979.aspx#Nullability Rules Within a Table Definition
-        $sql = 'create table test (id int, name varchar(10) null)';
+        $sql = 'create table test024 (id int, name varchar(10) null)';
         break;
     default:
-        $sql = 'create table test (id int, name varchar(10))';
+        $sql = 'create table test024 (id int, name varchar(10))';
         break;
 }
 $db->exec($sql);
 
-$stmt = $db->prepare('insert into test (id, name) values(0, :name)');
+$stmt = $db->prepare('insert into test024 (id, name) values(0, :name)');
 $name = NULL;
 $before_bind = $name;
 $stmt->bindParam(':name', $name, PDO::PARAM_NULL);
@@ -36,8 +37,14 @@ if ($name !== $before_bind) {
     echo "bind: success\n";
 }
 var_dump($stmt->execute());
-var_dump($db->query('select name from test where id=0')->fetchColumn());
+var_dump($db->query('select name from test024 where id=0')->fetchColumn());
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test024");
 ?>
 --EXPECT--
 bind: success

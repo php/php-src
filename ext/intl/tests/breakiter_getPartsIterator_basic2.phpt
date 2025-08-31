@@ -1,15 +1,13 @@
 --TEST--
 IntlBreakIterator::getPartsIterator(): basic test, ICU >= 58.1
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '57.1') <= 0) die('skip for ICU >= 58.1');
+if (version_compare(INTL_ICU_VERSION, '57.1') <= 0) die('skip for ICU > 57.1');
 ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
 
 $bi = IntlBreakIterator::createWordInstance('pt');
 $pi = $bi->getPartsIterator();

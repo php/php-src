@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -23,13 +23,15 @@
 
 struct st_mysqlnd_debug_methods
 {
-	enum_func_status (*open)(MYSQLND_DEBUG * self, zend_bool reopen);
+	enum_func_status (*open)(MYSQLND_DEBUG * self, bool reopen);
 	void			 (*set_mode)(MYSQLND_DEBUG * self, const char * const mode);
 	enum_func_status (*log)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
 							unsigned int level, const char * type, const char *message);
-	enum_func_status (*log_va)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
-							   unsigned int level, const char * type, const char *format, ...);
-	zend_bool (*func_enter)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
+	enum_func_status (*log_va)(
+		MYSQLND_DEBUG * self, unsigned int line, const char * const file,
+		unsigned int level, const char * type, const char *format, ...)
+			ZEND_ATTRIBUTE_FORMAT(printf, 6, 7);
+	bool (*func_enter)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
 							const char * const func_name, unsigned int func_name_len);
 	enum_func_status (*func_leave)(MYSQLND_DEBUG * self, unsigned int line, const char * const file, uint64_t call_time);
 	enum_func_status (*close)(MYSQLND_DEBUG * self);
@@ -117,7 +119,7 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 #define DBG_ENTER_EX2(dbg_obj1, dbg_obj2, func_name) \
 					struct timeval __dbg_prof_tp = {0}; \
 					uint64_t __dbg_prof_start = 0; /* initialization is needed */ \
-					zend_bool dbg_skip_trace = TRUE; \
+					bool dbg_skip_trace = TRUE; \
 					((void)__dbg_prof_start); \
 					if ((dbg_obj1)) { \
 						dbg_skip_trace = !(dbg_obj1)->m->func_enter((dbg_obj1), __LINE__, __FILE__, func_name, strlen(func_name)); \

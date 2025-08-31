@@ -35,10 +35,6 @@ $arrays = array (
        array(0 => "0", 1 => array(1 => "one")),
        array(1 => "1", 2 => array(1 => "one", 2 => "two", 3 => 1, 4 => "4")),
 
-       // arrays with float keys
-/*3*/  array(2.3333 => "float", 44.44 => array(1.1 => "float")),
-       array(1.2 => "f1", 3.33 => "f2", 4.89999922839999 => array(1.1 => "f1"), 3333333.333333 => "f4"),
-
        // arrays with string keys
 /*5*/  array('\tHello' => array("hello", 'world'), '\v\fworld' => 2.2, 'pen\n' => 111),
        array("\tHello" => array("hello", 'world'), "\v\fworld" => 2.2, "pen\n" => 111),
@@ -162,27 +158,35 @@ array(6) {
 }
 -- Iteration 3 --
 -- With default argument --
-array(2) {
-  [0]=>
-  string(5) "float"
-  [1]=>
-  array(1) {
+array(3) {
+  ["\tHello"]=>
+  array(2) {
+    [0]=>
+    string(5) "hello"
     [1]=>
-    string(5) "float"
+    string(5) "world"
   }
+  ["\v\fworld"]=>
+  float(2.2)
+  ["pen\n"]=>
+  int(111)
 }
 -- With more arguments --
-array(6) {
-  [0]=>
-  string(5) "float"
-  [1]=>
-  array(1) {
+array(7) {
+  ["\tHello"]=>
+  array(2) {
+    [0]=>
+    string(5) "hello"
     [1]=>
-    string(5) "float"
+    string(5) "world"
   }
-  [2]=>
+  ["\v\fworld"]=>
+  float(2.2)
+  ["pen\n"]=>
+  int(111)
+  [0]=>
   string(3) "one"
-  [3]=>
+  [1]=>
   int(2)
   ["string"]=>
   string(5) "hello"
@@ -198,35 +202,37 @@ array(6) {
 }
 -- Iteration 4 --
 -- With default argument --
-array(4) {
-  [0]=>
-  string(2) "f1"
-  [1]=>
-  string(2) "f2"
-  [2]=>
-  array(1) {
+array(3) {
+  ["	Hello"]=>
+  array(2) {
+    [0]=>
+    string(5) "hello"
     [1]=>
-    string(2) "f1"
+    string(5) "world"
   }
-  [3]=>
-  string(2) "f4"
+  ["world"]=>
+  float(2.2)
+  ["pen
+"]=>
+  int(111)
 }
 -- With more arguments --
-array(8) {
-  [0]=>
-  string(2) "f1"
-  [1]=>
-  string(2) "f2"
-  [2]=>
-  array(1) {
+array(7) {
+  ["	Hello"]=>
+  array(2) {
+    [0]=>
+    string(5) "hello"
     [1]=>
-    string(2) "f1"
+    string(5) "world"
   }
-  [3]=>
-  string(2) "f4"
-  [4]=>
+  ["world"]=>
+  float(2.2)
+  ["pen
+"]=>
+  int(111)
+  [0]=>
   string(3) "one"
-  [5]=>
+  [1]=>
   int(2)
   ["string"]=>
   string(5) "hello"
@@ -243,96 +249,6 @@ array(8) {
 -- Iteration 5 --
 -- With default argument --
 array(3) {
-  ["\tHello"]=>
-  array(2) {
-    [0]=>
-    string(5) "hello"
-    [1]=>
-    string(5) "world"
-  }
-  ["\v\fworld"]=>
-  float(2.2)
-  ["pen\n"]=>
-  int(111)
-}
--- With more arguments --
-array(7) {
-  ["\tHello"]=>
-  array(2) {
-    [0]=>
-    string(5) "hello"
-    [1]=>
-    string(5) "world"
-  }
-  ["\v\fworld"]=>
-  float(2.2)
-  ["pen\n"]=>
-  int(111)
-  [0]=>
-  string(3) "one"
-  [1]=>
-  int(2)
-  ["string"]=>
-  string(5) "hello"
-  ["array"]=>
-  array(3) {
-    [0]=>
-    string(1) "a"
-    [1]=>
-    string(1) "b"
-    [2]=>
-    string(1) "c"
-  }
-}
--- Iteration 6 --
--- With default argument --
-array(3) {
-  ["	Hello"]=>
-  array(2) {
-    [0]=>
-    string(5) "hello"
-    [1]=>
-    string(5) "world"
-  }
-  ["world"]=>
-  float(2.2)
-  ["pen
-"]=>
-  int(111)
-}
--- With more arguments --
-array(7) {
-  ["	Hello"]=>
-  array(2) {
-    [0]=>
-    string(5) "hello"
-    [1]=>
-    string(5) "world"
-  }
-  ["world"]=>
-  float(2.2)
-  ["pen
-"]=>
-  int(111)
-  [0]=>
-  string(3) "one"
-  [1]=>
-  int(2)
-  ["string"]=>
-  string(5) "hello"
-  ["array"]=>
-  array(3) {
-    [0]=>
-    string(1) "a"
-    [1]=>
-    string(1) "b"
-    [2]=>
-    string(1) "c"
-  }
-}
--- Iteration 7 --
--- With default argument --
-array(3) {
   [0]=>
   string(5) "hello"
   ["Hello world"]=>
@@ -374,7 +290,7 @@ array(7) {
     string(1) "c"
   }
 }
--- Iteration 8 --
+-- Iteration 6 --
 -- With default argument --
 array(4) {
   [""]=>

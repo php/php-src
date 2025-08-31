@@ -1,7 +1,7 @@
 --TEST--
 Bug #79852: count(DOMNodeList) doesn't match count(IteratorIterator(DOMNodeList))
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

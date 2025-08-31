@@ -112,6 +112,8 @@ ZEND_API void zend_llist_destroy(zend_llist *l)
 		current = next;
 	}
 
+	l->head  = NULL;
+	l->tail  = NULL;
 	l->count = 0;
 }
 
@@ -119,7 +121,6 @@ ZEND_API void zend_llist_destroy(zend_llist *l)
 ZEND_API void zend_llist_clean(zend_llist *l)
 {
 	zend_llist_destroy(l);
-	l->head = l->tail = NULL;
 }
 
 

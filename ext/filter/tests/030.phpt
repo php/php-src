@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and IPv6
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $ipv6_test = array(

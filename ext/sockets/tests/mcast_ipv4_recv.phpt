@@ -1,10 +1,10 @@
 --TEST--
 Multicast support: IPv4 receive options
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 if (getenv('SKIP_ONLINE_TESTS')) die('skip online test');
 $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 $br = socket_bind($s, '0.0.0.0', 0);
@@ -18,6 +18,7 @@ if ($so === false) {
 if (!defined("MCAST_BLOCK_SOURCE")) {
     die('skip source operations are unavailable');
 }
+?>
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";

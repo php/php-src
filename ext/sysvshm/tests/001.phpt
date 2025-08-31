@@ -1,8 +1,10 @@
 --TEST--
 ftok() tests
+--EXTENSIONS--
+sysvshm
 --SKIPIF--
 <?php
-if (!extension_loaded("sysvshm")){ print 'skip'; }
+
 if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
@@ -33,7 +35,7 @@ var_dump(ftok(__FILE__,"q"));
 echo "Done\n";
 ?>
 --EXPECTF--
-ftok(): Argument #1 ($filename) cannot be empty
+ftok(): Argument #1 ($filename) must not be empty
 ftok(): Argument #2 ($project_id) must be a single character
 ftok(): Argument #2 ($project_id) must be a single character
 

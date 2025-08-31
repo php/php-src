@@ -70,6 +70,7 @@ struct fpm_worker_pool_config_s {
 	int pm_start_servers;
 	int pm_min_spare_servers;
 	int pm_max_spare_servers;
+	int pm_max_spawn_rate;
 	int pm_process_idle_timeout;
 	int pm_max_requests;
 	char *pm_status_path;
@@ -78,6 +79,7 @@ struct fpm_worker_pool_config_s {
 	char *ping_response;
 	char *access_log;
 	char *access_format;
+	struct key_value_s *access_suppress_paths;
 	char *slowlog;
 	int request_slowlog_timeout;
 	int request_slowlog_trace_depth;
@@ -101,6 +103,9 @@ struct fpm_worker_pool_config_s {
 	/* Using Posix ACL */
 	char *listen_acl_users;
 	char *listen_acl_groups;
+#endif
+#ifdef SO_SETFIB
+	int listen_setfib;
 #endif
 };
 

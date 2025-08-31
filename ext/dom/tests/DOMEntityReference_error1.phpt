@@ -1,7 +1,7 @@
 --TEST--
 DOMEntityReference - DOM_INVALID_CHARACTER_ERR raised if name contains an invalid character
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 try {

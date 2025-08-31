@@ -3,7 +3,7 @@ Bug #62715 (ReflectionParameter::isDefaultValueAvailable() wrong result)
 --FILE--
 <?php
 
-function test(PDO $a = null, $b = 0, array $c) {}
+function test(?PDO $a = null, $b = 0, array $c) {}
 $r = new ReflectionFunction('test');
 
 foreach ($r->getParameters() as $p) {
@@ -17,9 +17,9 @@ foreach ($r->getParameters() as $p) {
 }
 ?>
 --EXPECTF--
-Deprecated: Required parameter $c follows optional parameter $b in %s on line %d
-bool(true)
-bool(true)
+Deprecated: test(): Optional parameter $a declared before required parameter $c is implicitly treated as a required parameter in %s on line %d
+
+Deprecated: test(): Optional parameter $b declared before required parameter $c is implicitly treated as a required parameter in %s on line %d
 bool(false)
-NULL
-int(0)
+bool(false)
+bool(false)

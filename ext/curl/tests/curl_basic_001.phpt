@@ -3,8 +3,8 @@ Test curl_exec() function with basic functionality
 --CREDITS--
 Sebastian Deutsch <sebastian.deutsch@9elements.com>
 TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -19,7 +19,6 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   ob_start(); // start output buffering
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
   $ok = curl_exec($ch);
-  curl_close($ch);
   $curl_content = ob_get_contents();
   ob_end_clean();
 

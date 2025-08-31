@@ -1,5 +1,9 @@
 --TEST--
 DBA Handler Test
+--EXTENSIONS--
+dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
 $handler="flatfile";
@@ -31,14 +35,10 @@ check(dba_handlers());
 
 echo "Test 2\n";
 
-check(dba_handlers(null));
+check(dba_handlers(false));
 
-echo "Test 3\n";
-
-check(dba_handlers(0));
-
-echo "Test 4 - full info\n";
-$h = dba_handlers(1);
+echo "Test 3 - full info\n";
+$h = dba_handlers(true);
 foreach ($h as $key => $val) {
     if ($key === "flatfile") {
         echo "Success: flatfile enabled\n";
@@ -56,7 +56,5 @@ Test 1
 Success: flatfile enabled
 Test 2
 Success: flatfile enabled
-Test 3
-Success: flatfile enabled
-Test 4 - full info
+Test 3 - full info
 Success: flatfile enabled

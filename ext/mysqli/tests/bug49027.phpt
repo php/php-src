@@ -1,13 +1,14 @@
 --TEST--
 Bug #49027 (mysqli_options() doesn't work when using mysqlnd)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include ("connect.inc");
+    include 'connect.inc';
 
     $link = mysqli_init();
     if (!mysqli_options($link, MYSQLI_INIT_COMMAND, "SELECT 1")) {
@@ -48,7 +49,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 array(1) {

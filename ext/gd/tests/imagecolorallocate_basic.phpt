@@ -1,10 +1,9 @@
 --TEST--
 Test imagecolorallocate() function : basic functionality
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
 if(!function_exists('imagecreatetruecolor')) {
     die('skip imagecreatetruecolor function is not available');
 }

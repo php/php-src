@@ -2,10 +2,9 @@
 FTP ftp_fget file for both binary and ASCII transfer modes
 --CREDITS--
 Nathaniel McHugh
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';
@@ -25,7 +24,7 @@ $position = ftell($fp);
 //test binary data transfer
 var_dump(ftp_fget($ftp, $fp, 'binary data.bin', FTP_BINARY));
 fseek($fp, $position);
-var_dump(urlencode(fgets($fp)));
+echo json_encode(fgets($fp)), "\n";
 
 //test non-existent file request
 ftp_fget($ftp, $fp ,'a warning.txt', FTP_ASCII);
@@ -38,6 +37,6 @@ bool(true)
 bool(true)
 For sale: baby shoes, never worn.
 bool(true)
-string(21) "BINARYFoo%00Bar%0D%0A"
+"BINARYFoo\u0000Bar\r\n"
 
 Warning: ftp_fget(): a warning: No such file or directory  in %sftp_fget_basic.php on line %d

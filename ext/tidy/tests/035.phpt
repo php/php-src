@@ -1,9 +1,7 @@
 --TEST--
 tidyNode::__construct()
---SKIPIF--
-<?php
-  if (!extension_loaded('tidy')) die ('skip tidy not present');
-?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 new tidyNode;

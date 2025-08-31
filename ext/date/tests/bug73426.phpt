@@ -14,7 +14,7 @@ var_dump(DateTime::createFromFormat($format, $date));
 var_dump(DateTime::getLastErrors());
 ?>
 --EXPECTF--
-object(DateTime)#%d (%d) {
+object(DateTime)#1 (3) {
   ["date"]=>
   string(26) "2016-01-16 12:00:00.000000"
   ["timezone_type"]=>

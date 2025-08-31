@@ -1,0 +1,17 @@
+name: "Pull Request Labeler"
+on:
+  - pull_request_target
+
+permissions:
+  contents: read
+
+jobs:
+  triage:
+    if: github.repository == 'php/php-src'
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"

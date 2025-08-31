@@ -2,8 +2,8 @@
 Phar web-based phar with fatal error
 --INI--
 default_charset=UTF-8
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/fatal_error_webphar.php
 REQUEST_URI=/fatal_error_webphar.php/index.php

@@ -74,7 +74,7 @@ unlink("EmptyFileSHA1.txt");
 *** Testing for error conditions ***
 
 -- No filename --
-Path cannot be empty
+Path must not be empty
 
 -- invalid filename --
 
@@ -87,7 +87,9 @@ Warning: sha1_file(12): Failed to open stream: No such file or directory in %s o
 bool(false)
 
 -- NULL as filename --
-Path cannot be empty
+
+Deprecated: sha1_file(): Passing null to parameter #1 ($filename) of type string is deprecated in %s on line %d
+Path must not be empty
 
 -- Hexadecimal Output for Empty file as Argument --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"

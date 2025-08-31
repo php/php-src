@@ -1,9 +1,7 @@
 --TEST--
 curl_multi_close return false when supplied resource not valid cURL multi handle
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) print 'skip';
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $cmh = curl_multi_init();

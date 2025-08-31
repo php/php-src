@@ -1,7 +1,7 @@
 --TEST--
 Bug #38406 (crash when assigning objects to SimpleXML attributes)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

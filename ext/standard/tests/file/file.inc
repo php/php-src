@@ -68,7 +68,7 @@ function fill_buffer(&$buffer, $fill_type, $fill_size) {
     return false;
   }
 
-  $tmp_buff = str_repeat($data, ($fill_size/$size_divider) + $add_value );
+  $tmp_buff = str_repeat($data, (int)(($fill_size/$size_divider) + $add_value) );
 
   if ( strlen($tmp_buff) > $fill_size ) {
     $buffer = substr($tmp_buff, 0, $fill_size);
@@ -128,7 +128,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
       if ( $size <= $chunk_size ) {
         $chunk_size = $size;
       }
-      $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+      $num_values = str_repeat($data, (int) (($chunk_size/$size_divider) + $add_value) );
       $bytes_written = fwrite($file_handle, $num_values, $chunk_size);
       if ( $bytes_written != $chunk_size ) {
             return false;
@@ -136,7 +136,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
       $size -= $chunk_size;
     } while ( $size > 0 );
   } else {
-    $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+    $num_values = str_repeat($data, (int) (($chunk_size/$size_divider) + $add_value) );
     $bytes_written = fwrite($file_handle, $num_values, $file_size);
     if ( $bytes_written != $file_size ) {
       return false;
@@ -591,6 +591,8 @@ $all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                        "blksize", "blocks");
 
 function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
+  $stat_time_diff_keys = array(8, 'atime');
+
   // dump the stat if requested
   if ( $flag == true ) {
     var_dump($stat1);
@@ -606,8 +608,13 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
     {
        case "==":
          if ( $stat1[ $fields[$index] ] != $stat2[ $fields[$index] ] ) {
-           $result = false;
-           echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
+          if ( ! in_array( $fields[$index], $stat_time_diff_keys ) ) {
+            $result = false;
+            echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
+          } elseif (abs($stat1[ $fields[$index] ] - $stat2[ $fields[$index] ]) > 2) {
+            $result = false;
+            echo "Error: stat1 differs too much from stat2 at key value: $fields[$index]\n";
+          }
          }
          break;
 

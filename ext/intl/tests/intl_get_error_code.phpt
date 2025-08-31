@@ -1,15 +1,12 @@
 --TEST--
 intl_get_error_code()
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 /*
  * Check getting global error code.
  */
-
-// Suppress warning messages.
-error_reporting( E_ERROR );
 
 if( collator_get_locale(new Collator('en_US'), -1) !== false )
     echo "failed\n";

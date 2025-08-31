@@ -1,8 +1,12 @@
 --TEST--
 Bug #73213 (Integer overflow in imageline() with antialiasing)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

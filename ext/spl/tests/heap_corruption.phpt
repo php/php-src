@@ -10,7 +10,7 @@ class myHeap extends SplHeap
 {
     public $allow_compare = true;
 
-    public function compare($v1, $v2)
+    public function compare($v1, $v2): int
     {
         if ($this->allow_compare == true)
         {

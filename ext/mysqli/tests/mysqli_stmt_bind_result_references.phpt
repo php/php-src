@@ -1,13 +1,14 @@
 --TEST--
 mysqli_stmt_bind_result() - playing with references
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     $stmt = mysqli_stmt_init($link);
     if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
@@ -242,7 +243,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 plain vanilla...
@@ -291,9 +292,9 @@ string(1) "a"
 reference, object, forward declaration...
 int(1)
 object(bar)#%d (2) {
-  ["bar"]=>
-  &string(1) "a"
   ["foo"]=>
+  &string(1) "a"
+  ["bar"]=>
   &string(1) "a"
 }
 string(1) "a"
@@ -301,13 +302,13 @@ references, object, private...
 int(1)
 string(1) "a"
 object(mega_bar)#5 (4) {
+  ["foo"]=>
+  &string(1) "a"
+  ["bar"]=>
+  &string(1) "a"
   [%s]=>
   &int(1)
   ["id_ref"]=>
   &int(1)
-  ["bar"]=>
-  &string(1) "a"
-  ["foo"]=>
-  &string(1) "a"
 }
 done!

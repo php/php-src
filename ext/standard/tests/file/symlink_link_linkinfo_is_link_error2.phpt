@@ -19,18 +19,15 @@ $linkname = __DIR__."/symlink_link_linkinfo_is_link_link_error2.tmp";
 echo "*** Testing link() for error conditions ***\n";
 
 //invalid arguments
-var_dump( link(NULL, $linkname) );  // NULL as filename
 var_dump( link('', $linkname) );  // empty string as filename
 var_dump( link(' ', $linkname) );  // space as filename
 var_dump( link(false, $linkname) );  // boolean false as filename
-var_dump( link($filename, NULL) );  // NULL as linkname
 var_dump( link($filename, '') );  // '' as linkname
 var_dump( link($filename, false) );  // false as linkname
 
 echo "\n*** Testing is_link() for error conditions ***\n";
 
 //invalid arguments
-var_dump( is_link(NULL) );  // NULL as linkname
 var_dump( is_link('') );  // empty string as linkname
 var_dump( is_link(' ') );  // space as linkname
 var_dump( is_link(false) );  // boolean false as linkname
@@ -60,14 +57,7 @@ bool(false)
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
-bool(false)
-
-Warning: link(): No such file or directory in %s on line %d
-bool(false)
-
 *** Testing is_link() for error conditions ***
-bool(false)
 bool(false)
 bool(false)
 bool(false)

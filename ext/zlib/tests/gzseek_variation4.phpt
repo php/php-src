@@ -1,11 +1,7 @@
 --TEST--
 Test function gzseek() by calling it with SEEK_SET when writing
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $f = "gzseek_variation4.gz";

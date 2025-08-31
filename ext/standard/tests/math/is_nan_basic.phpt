@@ -11,7 +11,6 @@ $values = array(234,
                 "234",
                 "234.5",
                 "23.45e1",
-                null,
                 true,
                 false,
                 pow(0, -2),
@@ -24,8 +23,8 @@ for ($i = 0; $i < count($values); $i++) {
 }
 
 ?>
---EXPECT--
-bool(false)
+--EXPECTF--
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)

@@ -2,6 +2,8 @@
 Wrong hostname
 --CREDITS--
 Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');

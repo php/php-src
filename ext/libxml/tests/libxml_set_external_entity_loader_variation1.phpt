@@ -1,7 +1,7 @@
 --TEST--
 libxml_set_external_entity_loader() variation: resolve externals and entities
---SKIPIF--
-<?php if (!extension_loaded('dom')) die('skip dom extension not available'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 chdir(__DIR__);
@@ -61,7 +61,7 @@ string(13) "-//FOO/ENTITY"
 string(32) "http://example.com/fooentity.ent"
 array(4) {
   ["directory"]=>
-  string(%d) "%s"
+  %r(NULL|string\(%d\) "%s")%r
   ["intSubName"]=>
   string(3) "foo"
   ["extSubURI"]=>

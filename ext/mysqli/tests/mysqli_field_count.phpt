@@ -1,15 +1,14 @@
 --TEST--
 mysqli_field_count()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     var_dump(mysqli_field_count($link));
 
@@ -40,9 +39,10 @@ require_once('skipifconnectfailure.inc');
     }
 
     print "done!";
+?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 int(0)

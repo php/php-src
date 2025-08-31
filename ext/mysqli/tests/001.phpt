@@ -1,12 +1,16 @@
 --TEST--
 mysqli connect
+--EXTENSIONS--
+mysqli
+--CONFLICTS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
+// TODO Not conflicting with parallel?
     require_once("connect.inc");
 
     $test = "";

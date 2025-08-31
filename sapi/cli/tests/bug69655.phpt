@@ -17,11 +17,11 @@ foreach (['MKCO', 'MKCOLL', 'M'] as $method) {
 }
 ?>
 --EXPECTF--
-Warning: file_get_contents(http://localhost:8964): Failed to open stream: HTTP request failed! HTTP/1.1 501 Not Implemented
+Warning: file_get_contents(http://localhost:%d): Failed to open stream: HTTP request failed! HTTP/1.1 501 Not Implemented
  in %s on line %d
 
-Warning: file_get_contents(http://localhost:8964): Failed to open stream: HTTP request failed! HTTP/1.1 501 Not Implemented
+Warning: file_get_contents(http://localhost:%d): Failed to open stream: HTTP request failed! HTTP/1.1 501 Not Implemented
  in %s on line %d
 
-Warning: file_get_contents(http://localhost:8964): Failed to open stream: HTTP request failed! HTTP/1.1 501 Not Implemented
+Warning: file_get_contents(http://localhost:%d): Failed to open stream: HTTP request failed! HTTP/1.1 501 Not Implemented
  in %s on line %d

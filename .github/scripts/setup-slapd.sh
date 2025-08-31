@@ -1,5 +1,5 @@
 #!/bin/sh
-set -ex
+set -e
 
 # Create TLS certificate
 sudo mkdir -p /etc/ldap/ssl
@@ -42,9 +42,9 @@ sudo sed -e 's|^\s*SLAPD_SERVICES\s*=.*$|SLAPD_SERVICES="ldap:/// ldaps:/// ldap
 # Configure LDAP database.
 DBDN=`sudo ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(&(olcRootDN=*)(olcSuffix=*))' dn | grep -i '^dn:' | sed -e 's/^dn:\s*//'`;
 
-sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/ppolicy.ldif
-
-sudo service slapd restart
+if test -f "/etc/ldap/schema/ppolicy.ldif"; then
+  sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/ppolicy.ldif
+fi
 
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// << EOF
 dn: $DBDN
@@ -72,6 +72,9 @@ olcTLSCertificateKeyFile: /etc/ldap/ssl/server.key
 add: olcTLSVerifyClient
 olcTLSVerifyClient: never
 -
+add: olcTLSProtocolMin
+olcTLSProtocolMin: 3.3
+-
 add: olcAuthzRegexp
 olcAuthzRegexp: uid=usera,cn=digest-md5,cn=auth cn=usera,dc=my-domain,dc=com
 -
@@ -89,8 +92,6 @@ olcModuleLoad: ppolicy
 add: olcModuleLoad
 olcModuleLoad: dds
 EOF
-
-sudo service slapd restart
 
 sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// << EOF
 dn: olcOverlay=sssvlv,$DBDN
@@ -116,16 +117,12 @@ objectClass: olcDdsConfig
 olcOverlay: dds
 EOF
 
-sudo service slapd restart
-
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// << EOF
 dn: $DBDN
 changetype: modify
 add: olcDbIndex
 olcDbIndex: entryExpireTimestamp eq
 EOF
-
-sudo service slapd restart
 
 ldapadd -H ldapi:/// -D cn=Manager,dc=my-domain,dc=com -w secret <<EOF
 dn: dc=my-domain,dc=com
@@ -163,6 +160,8 @@ o: php ldap tests
 ## pwdAllowUserChange: TRUE
 ## pwdSafeModify: FALSE
 EOF
+
+sudo service slapd restart
 
 # Verify TLS connection
 tries=0

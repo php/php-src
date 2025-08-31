@@ -1,9 +1,7 @@
 --TEST--
 Bug #79068 (gdTransformAffineCopy() changes interpolation method)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $src = imagecreatetruecolor(100, 100);

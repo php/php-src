@@ -2,9 +2,13 @@
 Bug #73161 (imagecreatefromgd2() may leak memory)
 --DESCRIPTION--
 We're testing for a memory leak that might not even show up with valgrind.
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.3.3', '>=')) {
+        die("skip test requires GD 2.3.2 or older");
+    }
 ?>
 --FILE--
 <?php

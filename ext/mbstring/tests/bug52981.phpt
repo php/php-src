@@ -1,7 +1,7 @@
 --TEST--
 Bug #52981 (Unicode properties are outdated (from Unicode 3.2))
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 function test($str)

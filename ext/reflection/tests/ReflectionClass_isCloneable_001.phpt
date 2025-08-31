@@ -1,7 +1,8 @@
 --TEST--
 Testing ReflectionClass::isCloneable()
---SKIPIF--
-<?php if (!extension_loaded('simplexml') || !extension_loaded('xmlwriter')) die("skip SimpleXML and XMLWriter is required for this test"); ?>
+--EXTENSIONS--
+simplexml
+xmlwriter
 --FILE--
 <?php
 
@@ -48,10 +49,14 @@ $obj = new ReflectionClass('xmlwriter');
 var_dump($obj->isCloneable());
 $obj = new ReflectionObject(new XMLWriter);
 var_dump($obj->isCloneable());
-$h = clone new xmlwriter;
+try {
+    $h = clone new xmlwriter;
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 User class
 bool(true)
 bool(true)
@@ -67,8 +72,4 @@ bool(true)
 Internal class - XMLWriter
 bool(false)
 bool(false)
-
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class XMLWriter in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Error: Trying to clone an uncloneable object of class XMLWriter

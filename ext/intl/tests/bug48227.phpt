@@ -1,7 +1,7 @@
 --TEST--
 Bug #48227 (NumberFormatter::format leaks memory)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -15,8 +15,10 @@ foreach (['', 1, NULL, $x] as $value) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 NumberFormatter::format(): Argument #1 ($num) must be of type int|float, string given
 string(1) "1"
+
+Deprecated: NumberFormatter::format(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 string(1) "0"
 NumberFormatter::format(): Argument #1 ($num) must be of type int|float, NumberFormatter given

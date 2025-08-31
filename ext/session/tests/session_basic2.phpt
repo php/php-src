@@ -3,13 +3,14 @@ Test basic function : variation2
 --INI--
 session.use_strict_mode=1
 session.save_handler=files
-session.hash_bits_per_character=4
 session.gc_probability=1
 session.gc_divisor=1000
 session.gc_maxlifetime=300
 session.save_path=
 session.sid_length=32
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -19,7 +20,7 @@ ob_start();
 
 echo "*** Testing basic session functionality : variation2 ***\n";
 
-$session_id = 'testid';
+$session_id = 'session-basic2';
 session_id($session_id);
 $path = __DIR__;
 var_dump(session_save_path($path));
@@ -55,7 +56,7 @@ ob_end_flush();
 *** Testing basic session functionality : variation2 ***
 string(0) ""
 *** Without lazy_write ***
-string(6) "testid"
+string(14) "session-basic2"
 bool(true)
 bool(true)
 bool(true)

@@ -1,21 +1,26 @@
 --TEST--
 PostgreSQL pg_escape_bytea() functions (hex format)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_bytea_not_hex();
 ?>
 --FILE--
 <?php
 // optional functions
 
-include('config.inc');
+include('inc/config.inc');
+$table_name = "table_18pg_escape_bytea_hex";
 
 $db = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+
 @pg_query($db, "SET bytea_output = 'hex'");
 
 $image = file_get_contents(__DIR__ . '/php.gif');
-$esc_image = pg_escape_bytea($image);
+$esc_image = pg_escape_bytea($db, $image);
 
 pg_query($db, 'INSERT INTO '.$table_name.' (num, bin) VALUES (9876, \''.$esc_image.'\');');
 $result = pg_query($db, 'SELECT * FROM '.$table_name.' WHERE num = 9876');
@@ -28,6 +33,14 @@ if ($unesc_image !== $image) {
 else {
     echo "OK";
 }
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_18pg_escape_bytea_hex";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 OK

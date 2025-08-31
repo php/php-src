@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strtolower() function : usage variations - pass different characters to check conversion is correct
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strtolower') or die("skip mb_strtolower() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

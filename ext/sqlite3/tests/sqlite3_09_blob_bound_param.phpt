@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::prepare Bound Variable Blob test
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 

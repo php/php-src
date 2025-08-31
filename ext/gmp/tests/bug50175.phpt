@@ -1,7 +1,7 @@
 --TEST--
 Bug #50175: gmp_init() results 0 on given base and number starting with 0x or 0b
---SKIPIF--
-<?php if (!extension_loaded('gmp')) die('skip gmp extension not loaded'); ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 

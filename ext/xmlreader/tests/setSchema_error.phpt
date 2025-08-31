@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: setSchema Error
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip XMLReader extension required"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 
@@ -37,7 +37,7 @@ var_dump(@$reader->setSchema('schema-bad.xsd'));
 $reader->close();
 ?>
 --EXPECT--
-XMLReader::setSchema(): Argument #1 ($filename) cannot be empty
+XMLReader::setSchema(): Argument #1 ($filename) must not be empty
 Schema must be set prior to reading
 Schema must be set prior to reading
 bool(false)

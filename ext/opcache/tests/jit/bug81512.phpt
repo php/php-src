@@ -4,7 +4,6 @@ Bug #81512: Unexpected behavior with arrays and JIT
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 --FILE--
 <?php
 $pipe = [['val1'],['val2'],];
@@ -19,7 +18,6 @@ for ($i = 0; $i < 30; ++$i) {
 function is_pipeline($pipeline): bool {
         foreach ($pipeline as $stage) {
                 if (!is_array($stage)) {
-                		var_dump($stage);
                         return false; // must never happen
                 }
 

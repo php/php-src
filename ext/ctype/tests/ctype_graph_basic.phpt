@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_graph() function : basic functionality
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 echo "*** Testing ctype_graph() : basic functionality ***\n";

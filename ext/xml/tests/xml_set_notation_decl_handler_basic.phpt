@@ -1,11 +1,7 @@
 --TEST--
 Test xml_set_notation_decl_handler function : basic
---SKIPIF--
-<?php
-if (!extension_loaded("xml")) {
-    print "skip - XML extension not loaded";
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 class XML_Parser
@@ -33,11 +29,9 @@ class XML_Parser
     function parse($data)
     {
         $parser = xml_parser_create();
-        xml_set_object($parser, $this);
-        xml_set_notation_decl_handler($parser, "notation_decl_handler");
-        xml_set_unparsed_entity_decl_handler($parser, "unparsed_entity_decl_handler");
+        xml_set_notation_decl_handler($parser, $this->notation_decl_handler(...));
+        xml_set_unparsed_entity_decl_handler($parser, $this->unparsed_entity_decl_handler(...));
         xml_parse($parser, $data, true);
-        xml_parser_free($parser);
     }
 }
 

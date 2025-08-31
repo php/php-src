@@ -1,8 +1,9 @@
 --TEST--
 Bug #64130 (COM obj parameters passed by reference are not updated)
+--EXTENSIONS--
+com_dotnet
 --SKIPIF--
 <?php
-if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
 if (PHP_INT_SIZE != 4) die('skip for 32bit platforms only');
 try {
     $ie = new com('InternetExplorer.Application');

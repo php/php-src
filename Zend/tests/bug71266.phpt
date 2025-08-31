@@ -16,7 +16,9 @@ $obj = (object) $arr;
 next($obj);
 var_dump(current($arr));
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
 int(42)
+
+Deprecated: next(): Calling next() on an object is deprecated in %s on line %d
 int(1)

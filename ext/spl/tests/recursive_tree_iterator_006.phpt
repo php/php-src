@@ -27,7 +27,7 @@ class RecursiveArrayIteratorAggregated implements IteratorAggregate {
     function __construct($it) {
         $this->it = new RecursiveArrayIterator($it);
     }
-    function getIterator() {
+    function getIterator(): Traversable {
         return $this->it;
     }
 }

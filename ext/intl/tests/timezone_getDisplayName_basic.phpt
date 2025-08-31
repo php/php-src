@@ -1,12 +1,9 @@
 --TEST--
 IntlTimeZone::getDisplayName(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $lsb = IntlTimeZone::createTimeZone('Europe/Lisbon');
 
@@ -19,4 +16,4 @@ var_dump($lsb->getDisplayName());
 ?>
 --EXPECTF--
 string(%d) "Western European%sTime"
-string(%d) "Hora%sda Europa Ocidental"
+string(%d) "Hora%sda Europa Ocidental"

@@ -6,9 +6,14 @@ function skipFunction($function): bool {
      || $function === 'readline'
      || $function === 'readline_read_history'
      || $function === 'readline_write_history'
+        /* terminates script */
+     || $function === 'exit'
+     || $function === 'die'
+     || $function === 'zend_trigger_bailout'
         /* intentionally violate invariants */
      || $function === 'zend_create_unterminated_string'
      || $function === 'zend_test_array_return'
+     || $function === 'zend_test_crash'
      || $function === 'zend_leak_bytes'
         /* mess with output */
      || (is_string($function) && str_starts_with($function, 'ob_'))
@@ -23,6 +28,7 @@ function skipFunction($function): bool {
      || $function === 'mail'
      || $function === 'mb_send_mail'
      || $function === 'pcntl_fork'
+     || $function === 'pcntl_rfork'
      || $function === 'posix_kill'
      || $function === 'posix_setrlimit'
      || $function === 'sapi_windows_generate_ctrl_event'

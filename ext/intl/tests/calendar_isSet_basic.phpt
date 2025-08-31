@@ -1,13 +1,9 @@
 --TEST--
 IntlCalendar::isSet() basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('UTC');
 var_dump($intlcal->isSet(IntlCalendar::FIELD_MINUTE));
@@ -19,4 +15,4 @@ var_dump(intlcal_is_set($intlcal, IntlCalendar::FIELD_MINUTE));
 --EXPECT--
 bool(true)
 bool(false)
-bool(true)
+bool(true)

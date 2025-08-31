@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8b3d31a0fc1542bcb432f1200a7b9f49afbf0f1f */
+ * Stub hash: 63de1d37ab303e1d6af7c96eaeeba09d7f35d116 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_preg_match, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
@@ -63,6 +63,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_preg_last_error_msg, 0, 0, IS_ST
 ZEND_END_ARG_INFO()
 
 
+ZEND_FRAMELESS_FUNCTION(preg_match, 2);
+static const zend_frameless_function_info frameless_function_infos_preg_match[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(preg_match, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(preg_replace, 3);
+static const zend_frameless_function_info frameless_function_infos_preg_replace[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(preg_replace, 3), 3 },
+	{ 0 },
+};
+
 ZEND_FUNCTION(preg_match);
 ZEND_FUNCTION(preg_match_all);
 ZEND_FUNCTION(preg_replace);
@@ -75,18 +87,40 @@ ZEND_FUNCTION(preg_grep);
 ZEND_FUNCTION(preg_last_error);
 ZEND_FUNCTION(preg_last_error_msg);
 
-
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(preg_match, arginfo_preg_match)
+	ZEND_RAW_FENTRY("preg_match", zif_preg_match, arginfo_preg_match, 0, frameless_function_infos_preg_match, NULL)
 	ZEND_FE(preg_match_all, arginfo_preg_match_all)
-	ZEND_FE(preg_replace, arginfo_preg_replace)
+	ZEND_RAW_FENTRY("preg_replace", zif_preg_replace, arginfo_preg_replace, 0, frameless_function_infos_preg_replace, NULL)
 	ZEND_FE(preg_filter, arginfo_preg_filter)
 	ZEND_FE(preg_replace_callback, arginfo_preg_replace_callback)
 	ZEND_FE(preg_replace_callback_array, arginfo_preg_replace_callback_array)
 	ZEND_FE(preg_split, arginfo_preg_split)
-	ZEND_FE(preg_quote, arginfo_preg_quote)
+	ZEND_RAW_FENTRY("preg_quote", zif_preg_quote, arginfo_preg_quote, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(preg_grep, arginfo_preg_grep)
 	ZEND_FE(preg_last_error, arginfo_preg_last_error)
 	ZEND_FE(preg_last_error_msg, arginfo_preg_last_error_msg)
 	ZEND_FE_END
 };
+
+static void register_php_pcre_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_UNMATCHED_AS_NULL", PREG_UNMATCHED_AS_NULL, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_NO_ERROR", PHP_PCRE_NO_ERROR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_INTERNAL_ERROR", PHP_PCRE_INTERNAL_ERROR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_BACKTRACK_LIMIT_ERROR", PHP_PCRE_BACKTRACK_LIMIT_ERROR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_RECURSION_LIMIT_ERROR", PHP_PCRE_RECURSION_LIMIT_ERROR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_JIT_STACKLIMIT_ERROR", PHP_PCRE_JIT_STACKLIMIT_ERROR, CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PCRE_VERSION", php_pcre_version, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PCRE_VERSION_MAJOR", PCRE2_MAJOR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PCRE_VERSION_MINOR", PCRE2_MINOR, CONST_PERSISTENT);
+	REGISTER_BOOL_CONSTANT("PCRE_JIT_SUPPORT", PHP_PCRE_JIT_SUPPORT, CONST_PERSISTENT);
+}

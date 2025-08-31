@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -41,6 +41,12 @@ typedef struct _php_process_handle {
 #endif
 	int npipes;
 	zend_resource **pipes;
-	char *command;
+	zend_string *command;
 	php_process_env env;
+#ifdef HAVE_SYS_WAIT_H
+	/* We can only request the status once before it becomes unavailable.
+	 * Cache the result so we can request it multiple times. */
+	int cached_exit_wait_status_value;
+	bool has_cached_exit_wait_status;
+#endif
 } php_process_handle;

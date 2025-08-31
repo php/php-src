@@ -1,9 +1,7 @@
 --TEST--
 Bug #78473 (odbc_close() closes arbitrary resources)
---SKIPIF--
-<?php
-if (!extension_loaded('odbc')) die('skip odbc extension not available');
-?>
+--EXTENSIONS--
+odbc
 --FILE--
 <?php
 try {
@@ -13,6 +11,6 @@ try {
 }
 var_dump(STDIN);
 ?>
---EXPECTF--
-odbc_close(): supplied resource is not a valid ODBC-Link resource
-resource(%d) of type (stream)
+--EXPECT--
+odbc_close(): Argument #1 ($odbc) must be of type Odbc\Connection, resource given
+resource(1) of type (stream)

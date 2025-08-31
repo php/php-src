@@ -1,9 +1,7 @@
 --TEST--
 Bug #73100 (session_destroy null dereference in ps_files_path_create)
---SKIPIF--
-<?php
-if (!extension_loaded('session')) die('skip session extension not available');
-?>
+--EXTENSIONS--
+session
 --INI--
 session.save_path=
 session.save_handler=files
@@ -24,7 +22,7 @@ try {
 --EXPECTF--
 bool(true)
 
-Warning: session_module_name(): Session save handler module cannot be changed when a session is active in %s on line %d
+Warning: session_module_name(): Session save handler module cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(true)
 session_module_name(): Argument #1 ($module) cannot be "user"
 ===DONE===

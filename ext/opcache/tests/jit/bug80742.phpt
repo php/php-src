@@ -1,5 +1,7 @@
 --TEST--
 Bug #80742 (Opcache JIT makes some boolean logic unexpectedly be true)
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -55,6 +57,7 @@ eq(3.0, 3.0, true, false);
 eq(3.0,	2.0, true, false);
 eq(3.0, NAN, true, false);
 eq(NAN, NAN, true, false);
+?>
 --EXPECT--
 bool(false)
 bool(false)

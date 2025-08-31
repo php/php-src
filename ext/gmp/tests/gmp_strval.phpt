@@ -1,7 +1,7 @@
 --TEST--
 gmp_strval() tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -66,7 +66,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 gmp_strval(): Argument #1 ($num) is not an integer string
-gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36
+gmp_strval(): Argument #1 ($num) is not an integer string
 gmp_strval(): Argument #1 ($num) must be of type GMP|string|int, resource given
 string(7) "9765456"
 gmp_strval(): Argument #2 ($base) must be between 2 and 62, or -2 and -36

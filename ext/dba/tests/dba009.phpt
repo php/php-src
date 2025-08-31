@@ -1,10 +1,14 @@
 --TEST--
 DBA dba_popen Test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     require_once(__DIR__ .'/skipif.inc');
     print("info $HND handler used");
 ?>
+--CONFLICTS--
+dba
 --FILE--
 <?php
     require_once(__DIR__ .'/test.inc');

@@ -1,9 +1,7 @@
 --TEST--
 Bug #74416 Wrong reflection on DOMNode::cloneNode
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $rm = new ReflectionMethod(DOMNode::class, "cloneNode");

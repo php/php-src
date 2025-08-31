@@ -4,8 +4,8 @@
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at the following url:        |
-   | http://www.php.net/license/3_01.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -74,10 +74,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/un.h>
+#include <php_config.h>
 
 #include "lsapilib.h"
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+#ifdef HAVE_PRCTL
 #include <sys/prctl.h>
 #endif
 
@@ -301,7 +302,7 @@ void lsapi_perror(const char * pMessage, int err_no)
 }
 
 
-static int lsapi_parent_dead()
+static int lsapi_parent_dead(void)
 {
     // Return non-zero if the parent is dead.  0 if still alive.
     if (!s_ppid) {
@@ -359,6 +360,7 @@ static void lsapi_enable_core_dump(void)
     int  mib[2];
     size_t len;
 
+#if !defined(__OpenBSD__)
     len = 2;
     if ( sysctlnametomib("kern.sugid_coredump", mib, &len) == 0 )
     {
@@ -367,11 +369,20 @@ static void lsapi_enable_core_dump(void)
             perror( "sysctl: Failed to set 'kern.sugid_coredump', "
                     "core dump may not be available!");
     }
+#else
+    int set = 3;
+    len = sizeof(set);
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_NOSUIDCOREDUMP;
+    if (sysctl(mib, 2, NULL, 0, &set, len) == 0) {
+	    s_enable_core_dump = 1;
+    }
+#endif
 
 
 #endif
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+#ifdef HAVE_PRCTL
     if (prctl(PR_SET_DUMPABLE, s_enable_core_dump,0,0,0) == -1)
         perror( "prctl: Failed to set dumpable, "
                     "core dump may not be available!");
@@ -911,6 +922,7 @@ static int LSAPI_perror_r( LSAPI_Request * pReq, const char * pErr1, const char 
 }
 
 
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
 static int lsapi_lve_error( LSAPI_Request * pReq )
 {
     static const char * headers[] =
@@ -934,10 +946,8 @@ static int lsapi_lve_error( LSAPI_Request * pReq )
     return 0;
 }
 
-
 static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
 {
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     if ( s_lve && uid ) //root user should not do that
     {
         uint32_t cookie;
@@ -945,22 +955,19 @@ static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
         ret = (*fp_lve_enter)(s_lve, uid, -1, -1, &cookie);
         if ( ret < 0 )
         {
-            //lsapi_log("enter LVE (%d) : ressult: %d !\n", uid, ret );
+            //lsapi_log("enter LVE (%d) : result: %d !\n", uid, ret );
             LSAPI_perror_r(pReq, "LSAPI: lve_enter() failure, reached resource limit.", NULL );
             lsapi_lve_error( pReq );
             return -1;
         }
     }
-#endif
 
     return 0;
 }
 
-
 static int lsapi_jailLVE( LSAPI_Request * pReq, uid_t uid, struct passwd * pw )
 {
     int ret = 0;
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     char  error_msg[1024] = "";
     ret = (*fp_lve_jail)( pw, error_msg );
     if ( ret < 0 )
@@ -970,12 +977,10 @@ static int lsapi_jailLVE( LSAPI_Request * pReq, uid_t uid, struct passwd * pw )
         LSAPI_perror_r( pReq, "LSAPI: jail() failure.", NULL );
         return -1;
     }
-#endif
     return ret;
 }
 
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
 static int lsapi_initLVE(void)
 {
     const char * pEnv;
@@ -1354,30 +1359,6 @@ static inline int lsapi_notify_pid( int fd )
         return -1;
     return 0;
 }
-
-
-static char s_conn_key_packet[16];
-static inline int init_conn_key( int fd )
-{
-    struct lsapi_packet_header * pHeader = (struct lsapi_packet_header *)s_conn_key_packet;
-    struct timeval tv;
-    int i;
-    gettimeofday( &tv, NULL );
-    srand( (tv.tv_sec % 0x1000 + tv.tv_usec) ^ rand() );
-    for( i = 8; i < 16; ++i )
-    {
-        s_conn_key_packet[i]=(int) (256.0*rand()/(RAND_MAX+1.0));
-    }
-    lsapi_buildPacketHeader( pHeader, LSAPI_REQ_RECEIVED,
-                        8 + LSAPI_PACKET_HEADER_LEN );
-    if ( write( fd, s_conn_key_packet, LSAPI_PACKET_HEADER_LEN+8 )
-                < LSAPI_PACKET_HEADER_LEN+8 )
-        return -1;
-    return 0;
-
-
-}
-
 
 static int readReq( LSAPI_Request * pReq )
 {
@@ -1945,7 +1926,7 @@ ssize_t LSAPI_Write_r( LSAPI_Request * pReq, const char * pBuf, size_t len )
 }
 
 
-#if defined(__FreeBSD__ ) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__ )
 ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
 {
     ssize_t ret;
@@ -1957,6 +1938,40 @@ ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
         *off += ret;
     }
     return ret;
+}
+#endif
+
+#if defined(__OpenBSD__) || defined(__NetBSD__)
+ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
+{
+    ssize_t ret;
+    off_t written = 0;
+    const size_t bufsiz = 16384;
+    unsigned char in[bufsiz] = {0};
+
+    if (lseek(fdIn, *off, SEEK_SET) == -1) {
+        return -1;
+    }
+
+    while (size > 0) {
+	    size_t tor = size > sizeof(in) ? sizeof(in) : size;
+	    ssize_t c = read(fdIn, in, tor);
+	    if (c <= 0) {
+		    goto end;
+	    }
+
+	    ssize_t w = write(fdOut, in, c);
+	    if (w != c) {
+		    goto end;
+	    }
+
+	    written += w;
+	    size -= c;
+    }
+
+end:
+    *off += written;
+    return 0;
 }
 #endif
 
@@ -2637,8 +2652,8 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
     {
     case '/':
         pAddr->sa_family = AF_UNIX;
-        strncpy( ((struct sockaddr_un *)pAddr)->sun_path, p,
-                sizeof(((struct sockaddr_un *)pAddr)->sun_path) );
+        memccpy(((struct sockaddr_un *)pAddr)->sun_path, p, 0,
+                sizeof(((struct sockaddr_un *)pAddr)->sun_path));
         return 0;
 
     case '[':
@@ -2673,8 +2688,7 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
             ((struct sockaddr_in *)pAddr)->sin_addr.s_addr = htonl( INADDR_LOOPBACK );
         else
         {
-            ((struct sockaddr_in *)pAddr)->sin_addr.s_addr = inet_addr( p );
-            if ( ((struct sockaddr_in *)pAddr)->sin_addr.s_addr == INADDR_BROADCAST)
+            if (!inet_pton(AF_INET, p, &((struct sockaddr_in *)pAddr)->sin_addr))
             {
                 doAddrInfo = 1;
             }
@@ -3111,11 +3125,11 @@ static void lsapi_check_child_status( long tmCur )
 //}
 
 
-void set_skip_write()
+void set_skip_write(void)
 {   s_skip_write = 1;   }
 
 
-int is_enough_free_mem()
+int is_enough_free_mem(void)
 {
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     //minimum 1GB or 10% available free memory
@@ -3783,7 +3797,7 @@ void LSAPI_No_Check_ppid(void)
 }
 
 
-int LSAPI_Get_ppid()
+int LSAPI_Get_ppid(void)
 {
     return(s_ppid);
 }
@@ -4189,7 +4203,7 @@ void lsapi_MD5Update(struct lsapi_MD5Context *ctx, unsigned char const *buf, uns
 
 
 /*
- * Final wrapup - pad to 64-byte boundary with the bit pattern
+ * Final wrap-up - pad to 64-byte boundary with the bit pattern
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void lsapi_MD5Final(unsigned char digest[16], struct lsapi_MD5Context *ctx)

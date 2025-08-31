@@ -1,7 +1,7 @@
 --TEST--
 FR #77711 (CURLFile should support UNICODE filenames)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';
@@ -19,7 +19,6 @@ $params = array('file' => $file);
 var_dump(curl_setopt($ch, CURLOPT_POSTFIELDS, $params));
 
 var_dump(curl_exec($ch));
-curl_close($ch);
 ?>
 --EXPECTF--
 bool(true)

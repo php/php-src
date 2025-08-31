@@ -1,9 +1,7 @@
 --TEST--
 Bug #63839 (iconv_mime_decode_headers function is skipping headers)
---SKIPIF--
-<?php
-if (!extension_loaded('iconv')) die('skip iconv extension not available');
-?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 $headers = 'From: "xyz" <xyz@xyz.com>

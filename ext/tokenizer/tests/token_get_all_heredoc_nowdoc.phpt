@@ -1,7 +1,7 @@
 --TEST--
 Flexible heredoc and nowdoc testing with token_get_all
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

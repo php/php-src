@@ -1,5 +1,5 @@
 --TEST--
-__TRAIT__: Basics, a constant denoiting the trait of definition.
+__TRAIT__: Basics, a constant denoting the trait of definition.
 --FILE--
 <?php
 

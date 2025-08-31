@@ -1,8 +1,8 @@
 --TEST--
 gmp_setbit() with large index
+--EXTENSIONS--
+gmp
 --SKIPIF--
-<?php if (getenv("TRAVIS") === "true") die("skip not suitable for Travis-CI"); ?>
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 <?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow test"); ?>
 <?php
@@ -41,5 +41,5 @@ FFFFFFFF
 3FFFFFFFF
 FFFFFFFFF
 3FFFFFFFFF
-gmp_setbit(): Argument #2 ($index) must be less than %d * %d
+gmp_setbit(): Argument #2 ($index) must be between 0 and %d * %d
 Done

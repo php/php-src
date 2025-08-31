@@ -1,7 +1,7 @@
 --TEST--
 Cloning numfmt
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 include_once( 'ut_common.inc' );

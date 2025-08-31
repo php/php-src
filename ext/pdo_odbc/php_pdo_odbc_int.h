@@ -2,10 +2,10 @@
   +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.0 of the PHP license,       |
+  | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_0.txt.                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -13,6 +13,8 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
+
+/* internal header; not supposed to be installed */
 
 #ifdef PHP_WIN32
 # define PDO_ODBC_TYPE	"Win32"
@@ -91,10 +93,6 @@
 # include <cli0env.h>
 #endif
 
-#ifdef HAVE_ODBCSDK_H
-# include <odbcsdk.h>
-#endif
-
 /* }}} */
 
 /* {{{ Figure out the type for handles */
@@ -116,7 +114,7 @@
 typedef struct {
 	char last_state[6];
 	char last_err_msg[SQL_MAX_MESSAGE_LENGTH];
-	SDWORD last_error;
+	SQLINTEGER last_error;
 	const char *file, *what;
 	int line;
 } pdo_odbc_errinfo;
@@ -133,7 +131,7 @@ typedef struct {
 	char *data;
 	zend_ulong datalen;
 	SQLLEN fetched_len;
-	SWORD	coltype;
+	SQLSMALLINT coltype;
 	char colname[128];
 	unsigned is_long;
 	unsigned is_unicode:1;

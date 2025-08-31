@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -24,7 +24,7 @@
 
 #include "SAPI.h"
 
-#if defined(HAVE_LIBDL)
+#ifdef HAVE_LIBDL
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -58,14 +58,26 @@ PHPAPI PHP_FUNCTION(dl)
 		RETURN_FALSE;
 	}
 
+#if ZEND_RC_DEBUG
+	bool orig_rc_debug = zend_rc_debug;
+	/* FIXME: Loading extensions during the request breaks some invariants. In
+	 * particular, it will create persistent interned strings, which is not
+	 * allowed at this stage. */
+	zend_rc_debug = false;
+#endif
+
 	php_dl(filename, MODULE_TEMPORARY, return_value, 0);
 	if (Z_TYPE_P(return_value) == IS_TRUE) {
 		EG(full_tables_cleanup) = 1;
 	}
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = orig_rc_debug;
+#endif
 }
 /* }}} */
 
-#if defined(HAVE_LIBDL)
+#ifdef HAVE_LIBDL
 
 /* {{{ php_load_shlib */
 PHPAPI void *php_load_shlib(const char *path, char **errp)
@@ -165,7 +177,7 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 
 #ifdef PHP_WIN32
 	if (!php_win32_image_compatible(handle, &err1)) {
-			php_error_docref(NULL, error_type, err1);
+			php_error_docref(NULL, error_type, "%s", err1);
 			efree(err1);
 			DL_UNLOAD(handle);
 			return FAILURE;
@@ -193,6 +205,11 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 		return FAILURE;
 	}
 	module_entry = get_module();
+	if (zend_hash_str_exists(&module_registry, module_entry->name, strlen(module_entry->name))) {
+		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module_entry->name);
+		DL_UNLOAD(handle);
+		return FAILURE;
+	}
 	if (module_entry->zend_api != ZEND_MODULE_API_NO) {
 			php_error_docref(NULL, error_type,
 					"%s: Unable to initialize module\n"
@@ -213,14 +230,13 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 		DL_UNLOAD(handle);
 		return FAILURE;
 	}
-	module_entry->type = type;
-	module_entry->module_number = zend_next_free_module();
-	module_entry->handle = handle;
 
-	if ((module_entry = zend_register_module_ex(module_entry)) == NULL) {
+	if ((module_entry = zend_register_module_ex(module_entry, type)) == NULL) {
 		DL_UNLOAD(handle);
 		return FAILURE;
 	}
+
+	module_entry->handle = handle;
 
 	if ((type == MODULE_TEMPORARY || start_now) && zend_startup_module_ex(module_entry) == FAILURE) {
 		DL_UNLOAD(handle);
@@ -242,7 +258,7 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 
 static void php_dl_error(const char *filename)
 {
-    php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", filename);
+	php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", filename);
 }
 
 PHPAPI void *php_load_shlib(const char *path, char **errp)
@@ -254,9 +270,9 @@ PHPAPI void *php_load_shlib(const char *path, char **errp)
 
 PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 {
-    php_dl_error(filename);
+	php_dl_error(filename);
 
-    return FAILURE;
+	return FAILURE;
 }
 
 #endif
@@ -264,12 +280,12 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 /* {{{ php_dl */
 PHPAPI void php_dl(const char *file, int type, zval *return_value, int start_now)
 {
-    /* Load extension */
-    if (php_load_extension(file, type, start_now) == FAILURE) {
-        RETVAL_FALSE;
-    } else {
-        RETVAL_TRUE;
-    }
+	/* Load extension */
+	if (php_load_extension(file, type, start_now) == FAILURE) {
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
 }
 /* }}} */
 
@@ -280,5 +296,5 @@ PHP_MINFO_FUNCTION(dl)
 #else
 #define PHP_DL_SUPPORT_STATUS "unavailable"
 #endif
-    php_info_print_table_row(2, "Dynamic Library Support", PHP_DL_SUPPORT_STATUS);
+	php_info_print_table_row(2, "Dynamic Library Support", PHP_DL_SUPPORT_STATUS);
 }

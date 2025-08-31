@@ -11,7 +11,7 @@ object(SplTempFileObject)#1 (5) {
   ["fileName":"SplFileInfo":private]=>
   string(12) "php://memory"
   ["openMode":"SplFileObject":private]=>
-  string(1) "w"
+  string(2) "wb"
   ["delimiter":"SplFileObject":private]=>
   string(1) ","
   ["enclosure":"SplFileObject":private]=>

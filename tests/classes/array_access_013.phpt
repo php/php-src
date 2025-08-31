@@ -5,10 +5,10 @@ ZE2 ArrayAccess and exceptions
 
 class Test implements ArrayAccess
 {
-        public function offsetExists($offset)      { throw new Exception(__METHOD__); return false; }
-        public function offsetGet($offset)         { throw new Exception(__METHOD__); return $offset; }
-        public function offsetSet($offset, $data ) { throw new Exception(__METHOD__); }
-        public function offsetUnset($offset)       { throw new Exception(__METHOD__); }
+        public function offsetExists($offset): bool      { throw new Exception(__METHOD__); return false; }
+        public function offsetGet($offset): mixed         { throw new Exception(__METHOD__); return $offset; }
+        public function offsetSet($offset, $data ): void { throw new Exception(__METHOD__); }
+        public function offsetUnset($offset): void       { throw new Exception(__METHOD__); }
 }
 
 $t = new Test;

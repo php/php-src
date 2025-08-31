@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2c2759e6c1894713439e3ee8da7f56810d00d8cf */
+ * Stub hash: d14d30fb232f08da37ba0df0b9186eb8bac5e1a4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_COMPersistHelper___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, variant, variant, 1, "null")
@@ -30,7 +30,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_COMPersistHelper_SaveToStream arginfo_class_COMPersistHelper_LoadFromStream
 
-
 ZEND_METHOD(COMPersistHelper, __construct);
 ZEND_METHOD(COMPersistHelper, GetCurFileName);
 ZEND_METHOD(COMPersistHelper, SaveToFile);
@@ -39,7 +38,6 @@ ZEND_METHOD(COMPersistHelper, GetMaxStreamSize);
 ZEND_METHOD(COMPersistHelper, InitNew);
 ZEND_METHOD(COMPersistHelper, LoadFromStream);
 ZEND_METHOD(COMPersistHelper, SaveToStream);
-
 
 static const zend_function_entry class_COMPersistHelper_methods[] = {
 	ZEND_ME(COMPersistHelper, __construct, arginfo_class_COMPersistHelper___construct, ZEND_ACC_PUBLIC)
@@ -52,3 +50,13 @@ static const zend_function_entry class_COMPersistHelper_methods[] = {
 	ZEND_ME(COMPersistHelper, SaveToStream, arginfo_class_COMPersistHelper_SaveToStream, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_COMPersistHelper(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "COMPersistHelper", class_COMPersistHelper_methods);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+
+	return class_entry;
+}

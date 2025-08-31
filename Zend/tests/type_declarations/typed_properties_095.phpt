@@ -1,7 +1,8 @@
 --TEST--
 Typed properties in internal classes
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip requires zend-test'); ?>
+--EXTENSIONS--
+zend_test
+spl
 --FILE--
 <?php
 
@@ -70,6 +71,14 @@ object(_ZendTestClass)#1 (3) {
   }
   ["classUnionProp"]=>
   NULL
+  ["classIntersectionProp"]=>
+  uninitialized(Traversable&Countable)
+  ["readonlyProp"]=>
+  uninitialized(int)
+  ["finalProp"]=>
+  uninitialized(int)
+  ["dnfProperty"]=>
+  uninitialized(Iterator|(Traversable&Countable))
 }
 int(123)
 Cannot assign string to property _ZendTestClass::$intProp of type int
@@ -82,6 +91,14 @@ object(Test)#4 (3) {
   }
   ["classUnionProp"]=>
   NULL
+  ["classIntersectionProp"]=>
+  uninitialized(Traversable&Countable)
+  ["readonlyProp"]=>
+  uninitialized(int)
+  ["finalProp"]=>
+  uninitialized(int)
+  ["dnfProperty"]=>
+  uninitialized(Iterator|(Traversable&Countable))
 }
 int(123)
 Cannot assign string to property _ZendTestClass::$staticIntProp of type int

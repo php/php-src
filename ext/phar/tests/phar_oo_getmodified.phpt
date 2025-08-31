@@ -1,8 +1,8 @@
 --TEST--
 Phar::getModified()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not present"); ?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -26,7 +26,6 @@ var_dump($phar->getModified());
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--

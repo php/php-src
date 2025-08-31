@@ -8,10 +8,6 @@ Test strtr() function : usage variations - unexpected inputs for 'replace_pairs'
 
 echo "*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
-
 //defining a class
 class sample  {
   public function __toString() {
@@ -58,12 +54,6 @@ $replace_pairs_arr =  array (
 
   // resource
   $file_handle,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
 );
 
 // loop through with each element of the $replace_pairs array to test strtr() function
@@ -88,22 +78,22 @@ echo "*** Done ***";
 *** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***
 
 -- Iteration 1 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 2 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 3 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 4 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 5 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 6 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 7 --
 string(6) "012atm"
@@ -115,32 +105,26 @@ string(6) "012atm"
 string(6) "122atm"
 
 -- Iteration 10 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, true given
 
 -- Iteration 11 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, false given
 
 -- Iteration 12 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, true given
 
 -- Iteration 13 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, false given
 
 -- Iteration 14 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, null given
 
 -- Iteration 15 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, null given
 
 -- Iteration 16 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, sample given
 
 -- Iteration 17 --
-strtr(): Argument #2 ($from) must be of type array|string, resource given
-
--- Iteration 18 --
-strtr(): Argument #2 ($from) must be of type array, string given
-
--- Iteration 19 --
-strtr(): Argument #2 ($from) must be of type array, string given
+strtr(): Argument #2 ($from) must be of type array, resource given
 *** Done ***

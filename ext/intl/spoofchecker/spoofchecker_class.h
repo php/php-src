@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -28,7 +28,10 @@ typedef struct {
 	intl_error  err;
 
 	// ICU Spoofchecker
-	USpoofChecker*      uspoof;
+	USpoofChecker*     uspoof;
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+	USpoofCheckResult* uspoofres;
+#endif
 
 	zend_object     zo;
 } Spoofchecker_object;
@@ -70,7 +73,7 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
 #define SPOOFCHECKER_CHECK_STATUS(co, msg)                                        \
     intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));           \
     if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {                                  \
-        intl_errors_set_custom_msg(SPOOFCHECKER_ERROR_P(co), msg, 0); \
+        intl_errors_set_custom_msg(SPOOFCHECKER_ERROR_P(co), msg); \
         RETURN_FALSE;                                                           \
     }                                                                           \
 

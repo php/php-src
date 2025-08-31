@@ -142,7 +142,7 @@ function ut_nfmt_create( $locale, $style, $pattern = null )
         return numfmt_create( $locale, $style, $pattern );
     }
 }
-function ut_nfmt_format( $fmt, $number, $type = null )
+function ut_nfmt_format( $fmt, $number, $type = NumberFormatter::TYPE_DEFAULT )
 {
     return $GLOBALS['oo-mode'] ? $fmt->format( $number, $type ) : numfmt_format( $fmt, $number, $type );
 }

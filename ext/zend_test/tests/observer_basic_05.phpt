@@ -1,9 +1,10 @@
 --TEST--
 Observer: Basic observability of functions only (no includes)
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_functions=1
 --FILE--
 <?php

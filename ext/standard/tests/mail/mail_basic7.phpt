@@ -207,7 +207,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mail() : basic functionality ***
 
 
@@ -242,7 +242,7 @@ TypeError: Header "foo1" must only contain numeric keys, "foo2" found
 TypeError: Header "foo2" must only contain values of type string, array found
 TypeError: Header "foo3" must only contain values of type string, int found
 TypeError: Header "foo4" must only contain values of type string, float found
-TypeError: Header "foo5" must only contain values of type string, bool found
+TypeError: Header "foo5" must only contain values of type string, false found
 TypeError: Header "foo6" must only contain values of type string, null found
 TypeError: Header "foo7" must only contain values of type string, stdClass found
 
@@ -258,4 +258,4 @@ Subject: Test Subject
 foo9: %&$#!
 
 A Message
-ValueError: Header "foo10" has invalid format, or contains invalid characters
+ValueError: Header "foo10" contains NULL character that is not allowed in the header

@@ -1,9 +1,7 @@
 --TEST--
 Bug #60192 (SegFault when Collator not constructed properly)
---SKIPIF--
-<?php
-    if (!extension_loaded('intl')) { die('skip intl extension not available'); }
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 class Collator2 extends Collator{
@@ -13,11 +11,11 @@ class Collator2 extends Collator{
 }
 
 $c = new Collator2();
-$a = $c->compare('h', 'H');
+try {
+	$a = $c->compare('h', 'H');
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Object not initialized in %s:%d
-Stack trace:
-#0 %s(%d): Collator->compare('h', 'H')
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Object not initialized

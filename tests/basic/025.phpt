@@ -11,9 +11,7 @@ a=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 var_dump($_POST, $HTTP_RAW_POST_DATA);
 ?>
 --EXPECTF--
-Warning: Unknown: POST Content-Length of 2050 bytes exceeds the limit of 1024 bytes in Unknown on line 0
-
-Warning: Cannot modify header information - headers already sent in Unknown on line 0
+Warning: PHP Request Startup: POST Content-Length of 2050 bytes exceeds the limit of 1024 bytes in Unknown on line 0
 
 Warning: Undefined variable $HTTP_RAW_POST_DATA in %s on line %d
 array(0) {

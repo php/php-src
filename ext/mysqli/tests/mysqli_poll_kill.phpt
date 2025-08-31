@@ -1,17 +1,14 @@
 --TEST--
 int mysqli_poll() and kill
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('connect.inc');
-require_once('skipifconnectfailure.inc');
-
-if (!$IS_MYSQLND)
-    die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     function get_connection() {
         global $host, $user, $passwd, $db, $port, $socket;
@@ -30,7 +27,7 @@ if (!$IS_MYSQLND)
     // Sleep 0.1s - the asynchronous query should have been processed after the wait period
     usleep(100000);
     $thread_id = mysqli_thread_id($link);
-    mysqli_kill(get_connection(), $thread_id);
+    get_connection()->query('KILL '.$thread_id);
 
     $links = array($link);
     $errors = array($link);
@@ -60,7 +57,7 @@ if (!$IS_MYSQLND)
     if (!is_array($reject) || !empty($reject))
         printf("[007] Expecting empty array got %s/%s\n", gettype($reject), var_export($reject, true));
 
-    // Lets pass a dead connection
+    // Let's pass a dead connection
     $links = array($link);
     $errors = array($link);
     $reject = array($link);
@@ -85,7 +82,7 @@ if (!$IS_MYSQLND)
 
     usleep(100000);
     $thread_id = mysqli_thread_id($link);
-    mysqli_kill(get_connection(), $thread_id);
+    get_connection()->query('KILL '.$thread_id);
 
     // Yes, 1 - fetch OK packet of kill!
     $processed = 0;
@@ -143,7 +140,7 @@ if (!$IS_MYSQLND)
 
     $link = get_connection();
     $thread_id = mysqli_thread_id($link);
-    mysqli_kill(get_connection(), $thread_id);
+    get_connection()->query('KILL '.$thread_id);
     // Sleep 0.1s  to ensure the KILL gets recognized
     usleep(100000);
     if (false !== ($tmp = mysqli_query($link, "SELECT 1 AS 'processed before killed'", MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))

@@ -14,10 +14,10 @@ class Outer {
         /* create a child object implementing array access */
         /* this grants you access to protected methods and members */
         return new class($this->data) implements ArrayAccess {
-            public function offsetGet($offset) { return $this->data[$offset]; }
-            public function offsetSet($offset, $data) { return ($this->data[$offset] = $data); }
-            public function offsetUnset($offset) { unset($this->data[$offset]); }
-            public function offsetExists($offset) { return isset($this->data[$offset]); }
+            public function offsetGet($offset): mixed { return $this->data[$offset]; }
+            public function offsetSet($offset, $data): void { $this->data[$offset] = $data; }
+            public function offsetUnset($offset): void { unset($this->data[$offset]); }
+            public function offsetExists($offset): bool { return isset($this->data[$offset]); }
         };
     }
 }

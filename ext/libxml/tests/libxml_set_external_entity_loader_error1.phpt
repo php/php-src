@@ -1,7 +1,7 @@
 --TEST--
 libxml_set_external_entity_loader() error: bad arguments
---SKIPIF--
-<?php if (!extension_loaded('dom')) die('skip dom extension not available'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xml = <<<XML
@@ -21,7 +21,7 @@ try {
 
 echo "Done.\n";
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
-Exception: Too few arguments to function {closure}(), 3 passed and exactly 4 expected
+Exception: Too few arguments to function {closure:%s:%d}(), 3 passed and exactly 4 expected
 Done.

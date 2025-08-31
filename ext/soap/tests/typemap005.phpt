@@ -1,8 +1,8 @@
 --TEST--
 SOAP typemap 5: SoapServer support for typemap's from_xml() (without WSDL)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
-<?php if (!extension_loaded('simplexml')) die("skip simplexml extension not available"); ?>
+--EXTENSIONS--
+soap
+simplexml
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

@@ -34,7 +34,7 @@ NULL
 
 Warning: Undefined variable $c in %s on line %d
 
-Warning: Trying to access array offset on value of type null in %s on line %d
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 
 Warning: Undefined array key "epic_magic" in %s on line %d
@@ -49,5 +49,5 @@ bool(false)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %sbug62978.php on line %d
 
-Warning: Undefined array key 5 in %s on line %d
+Warning: Undefined array key %d in %s on line %d
 NULL

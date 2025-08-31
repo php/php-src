@@ -4,7 +4,7 @@ Overriding SplFixedArray::offsetGet() only
 <?php
 
 class MyArray extends SplFixedArray {
-    public function offsetGet($key) {
+    public function offsetGet($key): mixed {
         return "prefix_" . parent::offsetGet($key);
     }
 }

@@ -4,8 +4,8 @@ revalidate_path 01: OPCache must cache only resolved real paths when revalidate_
 opcache.enable=1
 opcache.enable_cli=1
 opcache.revalidate_path=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --CONFLICTS--
 server
 --FILE--
@@ -30,7 +30,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     @rmdir($link);
     $ln = str_replace('/', '\\', $link);
     $d1 = realpath($dir1);
-    `mklink /j $ln $d1`;
+    shell_exec("mklink /j $ln $d1");
 } else {
     @unlink($link);
     @symlink($dir1, $link);
@@ -45,7 +45,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     @rmdir($link);
     $ln = str_replace('/', '\\', $link);
     $d2 = realpath($dir2);
-    `mklink /j $ln $d2`;
+    shell_exec("mklink /j $ln $d2");
 } else {
     @unlink($link);
     @symlink($dir2, $link);

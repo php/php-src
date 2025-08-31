@@ -12,6 +12,7 @@ class test_props {
 class test {
     public $array = array(1,2,3);
     public $string = "string";
+    public $object;
 
     public function __construct() {
         $this->object = new test_props;

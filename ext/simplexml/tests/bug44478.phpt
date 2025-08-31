@@ -1,7 +1,7 @@
 --TEST--
 Bug #44478 (Inconsistent behaviour when assigning new nodes)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml_element = new simpleXMLElement('<root></root>');

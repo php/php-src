@@ -1,10 +1,9 @@
 --TEST--
 PAM: SHA-256, mysqlnd.sha256_server_public_key
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-
 ob_start();
 phpinfo(INFO_MODULES);
 $tmp = ob_get_contents();
@@ -12,9 +11,9 @@ ob_end_clean();
 if (!stristr($tmp, "auth_plugin_sha256_password"))
     die("skip SHA256 auth plugin not built-in to mysqlnd");
 
-require_once('connect.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-        die(printf("skip: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (mysqli_get_server_version($link) < 50606)
     die("skip: SHA-256 requires MySQL 5.6.6+");
@@ -57,11 +56,8 @@ if (strlen($key) != fwrite($fp, $key)) {
     die(sprintf("skip Failed to create pub key file"));
 }
 
-
-if (!$link->query("SET @@session.old_passwords=2")) {
-    @unlink($file);
-    die(sprintf("skip Cannot set @@session.old_passwords=2 [%d] %s", $link->errno, $link->error));
-}
+// Ignore errors because this variable exists only in MySQL 5.6 and 5.7
+$link->query("SET @@session.old_passwords=2");
 
 $link->query('DROP USER shatest');
 $link->query("DROP USER shatest@localhost");
@@ -72,8 +68,8 @@ if (!$link->query('CREATE USER shatest@"%" IDENTIFIED WITH sha256_password') ||
     die(sprintf("skip CREATE USER failed [%d] %s", $link->errno, $link->error));
 }
 
-if (!$link->query('SET PASSWORD FOR shatest@"%" = PASSWORD("shatest")') ||
-    !$link->query('SET PASSWORD FOR shatest@"localhost" = PASSWORD("shatest")')) {
+if (!$link->query('SET PASSWORD FOR shatest@"%" = "shatest"') ||
+    !$link->query('SET PASSWORD FOR shatest@"localhost" = "shatest"')) {
     die(sprintf("skip SET PASSWORD failed [%d] %s", $link->errno, $link->error));
 }
 
@@ -89,12 +85,13 @@ if (!$link->query(sprintf("GRANT SELECT ON TABLE %s.test TO shatest@'%%'", $db))
 }
 
 $link->close();
+echo "nocache";
 ?>
 --INI--
 mysqlnd.sha256_server_public_key="test_sha256_ini"
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
 
     $link = new mysqli($host, 'shatest', 'shatest', $db, $port, $socket);
@@ -116,7 +113,7 @@ mysqlnd.sha256_server_public_key="test_sha256_ini"
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 	$link->query('DROP USER shatest');
 	$link->query('DROP USER shatest@localhost');
 	$file = "test_sha256_ini";

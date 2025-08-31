@@ -26,7 +26,12 @@ class foo {
 new foo;
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicit conversion from float 3428599296 to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float 3459455488 to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float 3459616768 to int loses precision in %s on line %d
 array(3) {
   [-866368000]=>
   int(1)
@@ -35,7 +40,11 @@ array(3) {
   [-835350528]=>
   int(3)
 }
+
+Deprecated: Implicit conversion from float 3459455488 to int loses precision in %s on line %d
 int(2)
+
+Deprecated: Implicit conversion from float 3459616768 to int loses precision in %s on line %d
 array(1) {
   [-835350528]=>
   int(3)

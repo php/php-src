@@ -36,27 +36,11 @@
 #include <winsock2.h>
 #include <windows.h>
 
+#include <intsafe.h>
 #include <float.h>
 
-#define HAVE_STDIOSTR_H 1
-#define HAVE_CLASS_ISTDIOSTREAM
-#define istdiostream stdiostream
-
-#if _MSC_VER < 1900
-#define snprintf _snprintf
-#endif
 #define strcasecmp(s1, s2) _stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
-
-#ifndef __cplusplus
-/* This will cause the compilation process to be MUCH longer, but will generate
- * a much quicker PHP binary
- */
-#ifdef ZEND_WIN32_FORCE_INLINE
-# undef inline
-# define inline __forceinline
-#endif
-#endif
 
 #ifdef LIBZEND_EXPORTS
 #	define ZEND_API __declspec(dllexport)

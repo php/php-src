@@ -1,10 +1,7 @@
 --TEST--
 Test mb_stristr() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_stristr') or die("skip mb_stristr() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 echo "*** Testing mb_stristr() : basic functionality ***\n";

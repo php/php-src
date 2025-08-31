@@ -1,12 +1,12 @@
 --TEST--
 FFI 024: anonymous struct/union
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-    $p = FFI::new("
+    $p = FFI::cdef()->new("
     struct {
         int a;
         struct {

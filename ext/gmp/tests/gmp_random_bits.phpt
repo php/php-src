@@ -1,7 +1,7 @@
 --TEST--
 gmp_random_bits() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -40,7 +40,7 @@ while (1) {
 
 echo "Done\n";
 ?>
---EXPECT--
-gmp_random_bits(): Argument #1 ($bits) must be greater than or equal to 1
-gmp_random_bits(): Argument #1 ($bits) must be greater than or equal to 1
+--EXPECTF--
+gmp_random_bits(): Argument #1 ($bits) must be between 1 and %d
+gmp_random_bits(): Argument #1 ($bits) must be between 1 and %d
 Done

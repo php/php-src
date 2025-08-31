@@ -1,7 +1,7 @@
 --TEST--
 Request #50698_2 (SoapClient should handle wsdls with some incompatible endpoints -- EDGECASE: Large mix of compatible and incompatible endpoints.)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

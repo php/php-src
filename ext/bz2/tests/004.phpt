@@ -1,7 +1,7 @@
 --TEST--
 bzread() tests with invalid files
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+--EXTENSIONS--
+bz2
 --FILE--
 <?php
 
@@ -112,8 +112,8 @@ array(2) {
 }
 string(10) "DATA_ERROR"
 int(-4)
-bzread(): supplied resource is not a valid stream resource
-bzerror(): supplied resource is not a valid stream resource
-bzerrstr(): supplied resource is not a valid stream resource
-bzerrno(): supplied resource is not a valid stream resource
+bzread(): Argument #1 ($bz) must be an open stream resource
+bzerror(): Argument #1 ($bz) must be an open stream resource
+bzerrstr(): Argument #1 ($bz) must be an open stream resource
+bzerrno(): Argument #1 ($bz) must be an open stream resource
 Done

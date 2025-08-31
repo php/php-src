@@ -3,8 +3,8 @@ Bug #74019	(Segfault with list)
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

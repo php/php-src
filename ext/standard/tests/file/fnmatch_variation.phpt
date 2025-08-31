@@ -127,8 +127,6 @@ match_($bool_arr, $bool_arr);
 
 echo "\n--- With NULL ---\n";
 $null_arr = array(
-  NULL,
-  null,
   "",
   "\0",
   "string",
@@ -399,42 +397,20 @@ bool(true)
 --- With NULL ---
 -- Iteration 0 --
 bool(true)
-bool(true)
-bool(true)
 fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
 bool(false)
 -- Iteration 1 --
-bool(true)
-bool(true)
-bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
-bool(false)
-bool(false)
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
+fnmatch(): Argument #1 ($pattern) must not contain any null bytes
 -- Iteration 2 --
-bool(true)
-bool(true)
-bool(true)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)
+fnmatch(): Argument #2 ($filename) must not contain any null bytes
+bool(true)
 bool(false)
 -- Iteration 3 --
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
-fnmatch(): Argument #1 ($pattern) must not contain any null bytes
--- Iteration 4 --
-bool(false)
-bool(false)
-bool(false)
-fnmatch(): Argument #2 ($filename) must not contain any null bytes
-bool(true)
-bool(false)
--- Iteration 5 --
-bool(false)
-bool(false)
 bool(false)
 fnmatch(): Argument #2 ($filename) must not contain any null bytes
 bool(false)

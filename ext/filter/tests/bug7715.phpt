@@ -1,9 +1,9 @@
 --TEST--
-bug 7715, floats value with integer or incomplete input
+Bug #7715 (floats value with integer or incomplete input)
 --INI--
 precision=14
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $data = array(

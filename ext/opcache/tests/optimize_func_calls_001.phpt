@@ -1,7 +1,7 @@
 --TEST--
 Don't create FETCH_DIM_R with UNUSED op2
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

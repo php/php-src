@@ -1,5 +1,7 @@
 --TEST--
 Check for default OpenSSL config path on Windows
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
@@ -19,7 +21,7 @@ ob_end_clean();
 preg_match(",Openssl default config [^ ]* (.*),", $info, $m);
 
 if (isset($m[1])) {
-    var_dump(str_replace('/', '\\', strtolower($m[1])));
+    var_dump(str_replace('\\/', '\\', strtolower($m[1])));
 } else {
     echo $info;
 }

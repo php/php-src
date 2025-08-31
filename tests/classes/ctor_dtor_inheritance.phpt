@@ -67,31 +67,31 @@ base Object
 Testing class derived
 derived Object
 (
-    [other] => other
     [name] => init
+    [other] => other
 )
 base::__construct
 derived Object
 (
-    [other] => other
     [name] => base
+    [other] => other
 )
 derived::__construct
 derived Object
 (
-    [other] => other
     [name] => derived
+    [other] => other
 )
 base::__destruct
 derived Object
 (
-    [other] => other
     [name] => derived
+    [other] => other
 )
 derived::__destruct
 derived Object
 (
-    [other] => other
     [name] => derived
+    [other] => other
 )
 Done

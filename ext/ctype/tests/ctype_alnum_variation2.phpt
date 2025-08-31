@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_alnum() function : usage variations - different integers
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*
@@ -14,7 +14,7 @@ echo "*** Testing ctype_alnum() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-    if (ctype_alnum($i)) {
+    if (ctype_alnum(chr($i))) {
         echo "character code $i is alpha numeric\n";
     }
 }

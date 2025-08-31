@@ -1,14 +1,14 @@
 --TEST--
 Interface of the class mysqli_result
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('connect.inc');
-    require('table.inc');
+    require 'table.inc';
 
     $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
     $mysqli_result = $mysqli->query('SELECT * FROM test');
@@ -27,6 +27,7 @@ require_once('skipifconnectfailure.inc');
         '__construct'           => true,
         'close'                 => true,
         'data_seek'             => true,
+        'fetch_all'             => true,
         'fetch_array'           => true,
         'fetch_assoc'           => true,
         'fetch_field'           => true,
@@ -34,13 +35,12 @@ require_once('skipifconnectfailure.inc');
         'fetch_fields'          => true,
         'fetch_object'          => true,
         'fetch_row'             => true,
+        'fetch_column'          => true,
         'field_seek'            => true,
         'free'                  => true,
         'free_result'           => true,
         'getIterator'           => true,
     );
-    if ($IS_MYSQLND)
-        $expected_methods['fetch_all'] = true;
 
     foreach ($methods as $k => $method) {
         if (isset($expected_methods[$method])) {
@@ -69,12 +69,12 @@ require_once('skipifconnectfailure.inc');
     printf("\nClass variables:\n");
     $variables = array_keys(get_class_vars(get_class($mysqli_result)));
     sort($variables);
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
     printf("\nObject variables:\n");
     $variables = array_keys(get_object_vars($mysqli_result));
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
     printf("\nMagic, magic properties:\n");
@@ -110,8 +110,7 @@ require_once('skipifconnectfailure.inc');
     printf("mysqli_result->unknown = '%s'\n", @$mysqli_result->unknown);
 
     printf("\nConstructor:\n");
-    if (!is_object($res = new mysqli_result($link)))
-        printf("[001] Expecting object/mysqli_result got %s/%s\n", gettye($res), $res);
+    $res = new mysqli_result($link);
 
     try {
         $res->num_rows;
@@ -122,28 +121,19 @@ require_once('skipifconnectfailure.inc');
     if (!mysqli_query($link, "SELECT id FROM test ORDER BY id"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($res = new mysqli_result($link)))
-        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!is_object($res = new mysqli_result($link, MYSQLI_STORE_RESULT)))
-        printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!is_object($res = new mysqli_result($link, MYSQLI_USE_RESULT)))
-        printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    new mysqli_result($link);
+    new mysqli_result($link, MYSQLI_STORE_RESULT);
+    new mysqli_result($link, MYSQLI_USE_RESULT);
 
     $valid = array(MYSQLI_STORE_RESULT, MYSQLI_USE_RESULT);
     do {
         $mode = mt_rand(-1000, 1000);
     } while (in_array($mode, $valid));
 
-    if ($TEST_EXPERIMENTAL) {
-        ob_start();
-        if (!is_object($res = new mysqli_result($link, $mode)))
-            printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-        $content = ob_get_contents();
-        ob_end_clean();
-        if (!stristr($content, 'Invalid value for resultmode'))
-            printf("[009] Expecting warning because of invalid resultmode\n");
+    try {
+        new mysqli_result($link, $mode);
+    } catch (ValueError $ex) {
+        echo $ex->getMessage(), "\n";
     }
 
     print "done!";
@@ -163,11 +153,6 @@ num_rows
 type
 
 Object variables:
-current_field
-field_count
-lengths
-num_rows
-type
 
 Magic, magic properties:
 mysqli_result->current_field = '0'/integer ('0'/integer)
@@ -181,4 +166,5 @@ mysqli_result->unknown = ''
 
 Constructor:
 mysqli_result object is already closed
+mysqli_result::__construct(): Argument #2 ($result_mode) must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT
 done!

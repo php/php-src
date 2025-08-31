@@ -1,12 +1,9 @@
 --TEST--
 IntlTimeZone::useDaylightTime: basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $lsb = IntlTimeZone::createTimeZone('Europe/Lisbon');
 $gmt = IntlTimeZone::getGMT();
 
@@ -20,4 +17,4 @@ var_dump(intltz_use_daylight_time($gmt));
 bool(true)
 bool(false)
 bool(true)
-bool(false)
+bool(false)

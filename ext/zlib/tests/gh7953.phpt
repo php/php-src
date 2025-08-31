@@ -1,9 +1,7 @@
 --TEST--
 GH-7953 (ob_clean() only may not set Content-* header)
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) die("skip zlib extension not available");
-?>
+--EXTENSIONS--
+zlib
 --CGI--
 --ENV--
 HTTP_ACCEPT_ENCODING=gzip

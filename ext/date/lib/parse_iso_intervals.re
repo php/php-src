@@ -86,7 +86,7 @@ typedef struct _Scanner {
 	int have_end_date;
 } Scanner;
 
-static void add_error(Scanner *s, char *error)
+static void add_error(Scanner *s, const char *error)
 {
 	s->errors->error_count++;
 	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));

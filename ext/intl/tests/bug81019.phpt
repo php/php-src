@@ -1,5 +1,7 @@
 --TEST--
 Bug #81019: Unable to clone NumberFormatter after failed parse()
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

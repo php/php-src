@@ -18,8 +18,10 @@ $format = '%b %d %Y %H:%M:%S';
 var_dump( strptime('foo', $format) );
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strptime() : error conditions ***
 
 -- Testing strptime() function on failure --
+
+Deprecated: Function strptime() is deprecated since 8.2, use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead in %s on line %d
 bool(false)

@@ -4,8 +4,8 @@ Test that return types in zend_func_info.c match return types in stubs
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -16,7 +16,7 @@ foreach (get_defined_functions()["internal"] as $function) {
     if (in_array($function, ["extract", "compact", "get_defined_vars"])) {
         continue;
     }
-    $contents .= "    \$result = {$function}();\n";
+    $contents .= "    \$result = \\{$function}();\n";
 }
 $contents .= "}\n";
 

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<container xmlns="some:ns" xmlns:bar="another:ns">
+    <x>
+        <subcontainer>
+            <test xmlns="x:y" />
+            <child2 />
+        </subcontainer>
+        <subcontainer2>
+            <foo xmlns="some:ns" />
+        </subcontainer2>
+    </x>
+</container>

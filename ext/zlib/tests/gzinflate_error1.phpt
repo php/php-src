@@ -1,14 +1,10 @@
 --TEST--
 Test gzinflate() function : error conditions
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-include(__DIR__ . '/data.inc');
+include(__DIR__ . '/data/data.inc');
 
 echo "*** Testing gzinflate() : error conditions ***\n";
 

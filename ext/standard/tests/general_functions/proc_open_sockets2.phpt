@@ -9,7 +9,7 @@ function poll($pipe, $read = true)
     $w = ($read == false) ? [$pipe] : null;
     $e = null;
 
-    if (!stream_select($r, $w, $e, null, 0)) {
+    if (!stream_select($r, $w, $e, null)) {
         throw new \Error("Select failed");
     }
 }
@@ -59,7 +59,7 @@ fclose($pipes[0]);
 printf("STDOUT << %s\n", read_pipe($pipes[1]));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 STDOUT << hello

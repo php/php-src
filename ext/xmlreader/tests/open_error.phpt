@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: open error
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip XMLReader extension required"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 $reader = new XMLReader();

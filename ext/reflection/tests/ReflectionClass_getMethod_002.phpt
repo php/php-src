@@ -54,10 +54,12 @@ try {
 
 
 ?>
---EXPECT--
+--EXPECTF--
 Check invalid params:
 ReflectionClass::getMethod() expects exactly 1 argument, 0 given
 ReflectionClass::getMethod() expects exactly 1 argument, 2 given
+
+Deprecated: ReflectionClass::getMethod(): Passing null to parameter #1 ($name) of type string is deprecated in %s on line %d
 Method C::() does not exist
 Method C::1() does not exist
 Method C::1.5() does not exist

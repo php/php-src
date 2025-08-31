@@ -1,9 +1,11 @@
 --TEST--
 Test max colors for a gd image.
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available\n");
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.3.3', '>=')) {
+        die("skip test requires GD 2.3.2 or older");
     }
 ?>
 --FILE--

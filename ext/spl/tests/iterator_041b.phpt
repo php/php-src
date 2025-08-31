@@ -24,34 +24,34 @@ class MyArrayIterator extends ArrayIterator
         self::fail(1, __FUNCTION__);
     }
 
-    function rewind()
+    function rewind(): void
     {
         self::fail(2, __FUNCTION__);
-        return parent::rewind();
+        parent::rewind();
     }
 
-    function valid()
+    function valid(): bool
     {
         self::fail(3, __FUNCTION__);
         return parent::valid();
     }
 
-    function current()
+    function current(): mixed
     {
         self::fail(4, __FUNCTION__);
         return parent::current();
     }
 
-    function key()
+    function key(): string|int|null
     {
         self::fail(5, __FUNCTION__);
         return parent::key();
     }
 
-    function next()
+    function next(): void
     {
         self::fail(6, __FUNCTION__);
-        return parent::next();
+        parent::next();
     }
 
     function __destruct()

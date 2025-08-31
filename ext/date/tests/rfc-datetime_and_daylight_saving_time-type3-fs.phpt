@@ -2,8 +2,6 @@
 RFC: DateTime and Daylight Saving Time Transitions (zone type 3, fs)
 --CREDITS--
 Daniel Convissor <danielc@php.net>
---XFAIL--
-Still not quite right
 --FILE--
 <?php
 

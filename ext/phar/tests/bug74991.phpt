@@ -1,7 +1,7 @@
 --TEST--
 Phar: PHP bug #74991: include_path has a 4096 char (minus "__DIR__:") limit, in some PHAR cases
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -15,6 +15,7 @@ $p['some/file'] = "<?php const MAXPATHLEN = 4096, OVERFLOW = 1, PATH = 'path'; s
 $p->setStub("<?php Phar::mapPhar('sample.phar'); __HALT_COMPILER();");
 // execute the phar code:
 require('phar://sample.phar/some/file');
+?>
 --CLEAN--
 <?php
 unlink('path/needle.php');

@@ -1,15 +1,15 @@
 --TEST--
 mysqli_connect_error()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
-    $tmp    = NULL;
     $link   = NULL;
 
     // too many parameter
@@ -28,7 +28,7 @@ require_once('skipifconnectfailure.inc');
 
     mysqli_close($link);
 
-    if ($link = @my_mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
+    if (false !== @my_mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
         printf("[003] Connect to the server should fail using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
             $host, $user . 'unknown_really', $db, $port, $socket);
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug #66109 (Option CURLOPT_CUSTOMREQUEST can't be reset to default.)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';
@@ -15,9 +15,6 @@ var_dump(curl_exec($ch));
 
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, NULL);
 var_dump(curl_exec($ch));
-
-curl_close($ch);
-
 ?>
 --EXPECT--
 string(6) "DELETE"

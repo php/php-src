@@ -1,7 +1,7 @@
 --TEST--
 DOMXPath Tests
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 require_once("dom_test.inc");
@@ -69,5 +69,5 @@ myval
 float(1)
 bool(true)
 float(4)
-Unable to call handler non_existent()
-Unable to call handler non_existent()
+DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be a callable, function "non_existent" not found or invalid function name
+DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array with valid callbacks as values, function "non_existant" not found or invalid function name

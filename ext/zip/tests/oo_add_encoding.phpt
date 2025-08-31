@@ -1,9 +1,10 @@
 --TEST--
 ziparchive::addEmptyDir with encoding option
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php

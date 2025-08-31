@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: casting instances
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -25,8 +25,8 @@ var_dump((bool)$foo);
 var_dump((bool)$people);
 var_dump((int)$foo);
 var_dump((int)$people);
-var_dump((double)$foo);
-var_dump((double)$people);
+var_dump((float)$foo);
+var_dump((float)$people);
 var_dump((string)$foo);
 var_dump((string)$people);
 var_dump((array)$foo);

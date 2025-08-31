@@ -1,5 +1,6 @@
 --TEST--
 This test illustrates the impact of invoking destructors when refcount is decremented to 0 on foreach.
+--DESCRIPTION--
 It will pass only if the 'contentious code' in PHPValue.decReferences() is enabled.
 --FILE--
 <?php

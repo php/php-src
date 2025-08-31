@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,6 +18,13 @@
 
 #ifndef _ZEND_BITSET_H_
 #define _ZEND_BITSET_H_
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+
+#include "zend_portability.h"
+#include "zend_long.h"
 
 typedef zend_ulong *zend_bitset;
 
@@ -38,7 +45,7 @@ typedef zend_ulong *zend_bitset;
 	(zend_bitset)do_alloca((n) * ZEND_BITSET_ELM_SIZE, use_heap)
 
 /* Number of trailing zero bits (0x01 -> 0; 0x40 -> 6; 0x00 -> LEN) */
-static zend_always_inline int zend_ulong_ntz(zend_ulong num)
+ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_ulong_ntz(zend_ulong num)
 {
 #if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) \
 	&& SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
@@ -53,7 +60,6 @@ static zend_always_inline int zend_ulong_ntz(zend_ulong num)
 #else
 	if (!BitScanForward(&index, num)) {
 #endif
-		/* undefined behavior */
 		return SIZEOF_ZEND_LONG * 8;
 	}
 
@@ -76,7 +82,7 @@ static zend_always_inline int zend_ulong_ntz(zend_ulong num)
 }
 
 /* Number of leading zero bits (Undefined for zero) */
-static zend_always_inline int zend_ulong_nlz(zend_ulong num)
+ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_ulong_nlz(zend_ulong num)
 {
 #if (defined(__GNUC__) || __has_builtin(__builtin_clzl)) \
 	&& SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CLZL)
@@ -91,7 +97,6 @@ static zend_always_inline int zend_ulong_nlz(zend_ulong num)
 #else
 	if (!BitScanReverse(&index, num)) {
 #endif
-		/* undefined behavior */
 		return SIZEOF_ZEND_LONG * 8;
 	}
 
@@ -122,7 +127,7 @@ static inline uint32_t zend_bitset_len(uint32_t n)
 	return (n + ((sizeof(zend_long) * 8) - 1)) / (sizeof(zend_long) * 8);
 }
 
-static inline zend_bool zend_bitset_in(zend_bitset set, uint32_t n)
+static inline bool zend_bitset_in(zend_bitset set, uint32_t n)
 {
 	return ZEND_BIT_TEST(set, n);
 }
@@ -158,7 +163,7 @@ static inline void zend_bitset_fill(zend_bitset set, uint32_t len)
 	memset(set, 0xff, len * ZEND_BITSET_ELM_SIZE);
 }
 
-static inline zend_bool zend_bitset_equal(zend_bitset set1, zend_bitset set2, uint32_t len)
+static inline bool zend_bitset_equal(zend_bitset set1, zend_bitset set2, uint32_t len)
 {
     return memcmp(set1, set2, len * ZEND_BITSET_ELM_SIZE) == 0;
 }
@@ -213,7 +218,7 @@ static inline void zend_bitset_union_with_difference(zend_bitset set1, zend_bits
 	}
 }
 
-static inline zend_bool zend_bitset_subset(zend_bitset set1, zend_bitset set2, uint32_t len)
+static inline bool zend_bitset_subset(zend_bitset set1, zend_bitset set2, uint32_t len)
 {
 	uint32_t i;
 

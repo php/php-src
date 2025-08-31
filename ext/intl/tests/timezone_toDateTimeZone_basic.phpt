@@ -1,14 +1,12 @@
 --TEST--
 IntlTimeZone::toDateTimeZone(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+date.timezone=Europe/Lisbon
+intl.default_locale=nl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-date_default_timezone_set('Europe/Lisbon');
 
 function do_test(IntlTimeZone $tz, $proc = false) {
     var_dump($tz->getID(), $tz->getRawOffset());

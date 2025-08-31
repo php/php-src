@@ -25,6 +25,6 @@ function test(&$param) {
 
 ?>
 --EXPECT--
-test(): Argument #1 ($param) cannot be passed by reference
-test(): Argument #1 ($param) cannot be passed by reference
+test(): Argument #1 ($param) could not be passed by reference
+test(): Argument #1 ($param) could not be passed by reference
 int(1)

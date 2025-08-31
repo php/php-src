@@ -1,10 +1,8 @@
 --TEST--
 Bug #69279 (Compressed ZIP Phar extractTo() creates garbage files)
---SKIPIF--
-<?php
-if (!extension_loaded('phar')) die('skip phar extension not available');
-if (!extension_loaded('zlib')) die('skip zlib extension not available');
-?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.readonly=0
 --FILE--

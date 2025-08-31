@@ -1,9 +1,7 @@
 --TEST--
 Bug #37360 (gdimagecreatefromgif, bad image sizes)
---SKIPIF--
-<?php
-    if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $small = imagecreatetruecolor(10, 10);

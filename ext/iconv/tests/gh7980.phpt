@@ -1,9 +1,7 @@
 --TEST--
 Bug GH-7980 (Unexpected result for iconv_mime_decode)
---SKIPIF--
-<?php
-if (!extension_loaded("iconv")) die("skip iconv extension not available");
-?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 $subject = '=?windows-1258?Q?DSI_Charg=E9_de_Formation_Jean_Dupont?= <jdupont@example.fr>';

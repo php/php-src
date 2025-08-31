@@ -65,7 +65,7 @@ static void zend_vm_trace_init(void)
 	if (f) {
 		zend_hash_sort(&vm_trace_ht, (bucket_compare_func_t)zend_vm_trace_compare, 0);
 		prev_key = NULL;
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&vm_trace_ht, key, val) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(&vm_trace_ht, key, val) {
 			if (prev_key) {
 				fprintf(f, ADDR_FMT" "ADDR_FMT" t %s\n", prev_addr, Z_LVAL_P(val) - prev_addr, ZSTR_VAL(prev_key));
 			}

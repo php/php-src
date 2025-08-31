@@ -10,7 +10,7 @@ chdir("..");
 chdir("..");
 ?>
 --EXPECTF--
-bool(false)
+string(%d) "%ssecurity"
 
 Warning: chdir(): open_basedir restriction in effect. File(..) is not within the allowed path(s): (%s) in %s on line %d
 --CLEAN--

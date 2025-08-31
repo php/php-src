@@ -1,8 +1,9 @@
 --TEST--
 PDO PgSQL Bug #38671 (PDO#getAttribute() cannot be called with platform-specific attribute names)
+--EXTENSIONS--
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -17,7 +18,7 @@ $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 $attrs = array(
     // Extensive test: default value and set+get values
     PDO::ATTR_EMULATE_PREPARES			=> array(null, true, false),
-    PDO::PGSQL_ATTR_DISABLE_PREPARES	=> array(null, true, false),
+    Pdo\Pgsql::ATTR_DISABLE_PREPARES	=> array(null, true, false),
 
     // Just test the default
     PDO::ATTR_AUTOCOMMIT			=> array(null),
@@ -93,6 +94,6 @@ array(1) {
 ERR
 ERR
 string(5) "pgsql"
-ERR
+bool(true)
 ERR
 int(4)

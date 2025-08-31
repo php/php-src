@@ -3,9 +3,13 @@ Testing passing negative start angle to imagearc() of GD library
 --CREDITS--
 Edgar Ferreira da Silva <contato [at] edgarfs [dot] com [dot] br>
 #testfest PHPSP on 2009-06-20
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded("gd")) die("skip GD not present");
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

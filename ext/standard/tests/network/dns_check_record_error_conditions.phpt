@@ -15,5 +15,5 @@ try {
 }
 ?>
 --EXPECT--
-dns_check_record(): Argument #1 ($hostname) cannot be empty
+dns_check_record(): Argument #1 ($hostname) must not be empty
 dns_check_record(): Argument #2 ($type) must be a valid DNS record type

@@ -10,7 +10,7 @@ echo "*** Testing new DateTime() : with user space __construct magic method ***\
 
 class DateTimeExt extends DateTime
 {
-    public function __construct ($date = null, DateTimeZone  $dtz = null)
+    public function __construct ($date = null, ?DateTimeZone $dtz = null)
     {
         if($dtz === null)
         {

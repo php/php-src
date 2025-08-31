@@ -1,9 +1,7 @@
 --TEST--
 Test posix_kill() function : error conditions
---SKIPIF--
-<?php
-    if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
 echo "*** Testing posix_kill() : error conditions ***\n";

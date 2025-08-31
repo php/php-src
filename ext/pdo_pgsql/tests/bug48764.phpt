@@ -1,8 +1,9 @@
 --TEST--
 Bug #48764 (PDO_pgsql::query always uses implicit prepared statements if v3 proto available)
+--EXTENSIONS--
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -12,7 +13,7 @@ $db = PDOTest::factory();
 $client_version = $db->getAttribute(PDO::ATTR_CLIENT_VERSION);
 $server_version = $db->getAttribute(PDO::ATTR_SERVER_VERSION);
 
-if (version_compare($server_version, '7.4', '<') || version_compare($client_version, '7.4', '<') || version_compare($server_version, '10', '>=')) {
+if (version_compare($server_version, '10', '>=')) {
         die('skip');
 }
 

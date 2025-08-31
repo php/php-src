@@ -1,10 +1,12 @@
 --TEST--
 Observer: Basic observability of closures
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
+opcache.optimization_level=0x7FFFBFFF & ~0x0080
 --FILE--
 <?php
 $bar = function() {
@@ -23,27 +25,41 @@ $foo($bar);
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_closure_%d.php' -->
-<file '%s%eobserver_closure_%d.php'>
-  <!-- init {closure}() -->
-  <{closure}>
+<!-- init '%s' -->
+<file '%s'>
+  <!-- init {closure:%s:%d}() -->
+  <{closure:%s:%d}>
 Answer
-    <!-- init {closure}() -->
-    <{closure}>
+    <!-- init {closure:%s:%d}() -->
+    <{closure:%s:%d}>
+      <!-- init array_sum() -->
+      <array_sum>
+      </array_sum>
+      <!-- init var_dump() -->
+      <var_dump>
 int(42)
-    </{closure}>
-  </{closure}>
-  <{closure}>
+      </var_dump>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
+  <{closure:%s:%d}>
 Answer
-    <{closure}>
+    <{closure:%s:%d}>
+      <array_sum>
+      </array_sum>
+      <var_dump>
 int(42)
-    </{closure}>
-  </{closure}>
-  <{closure}>
+      </var_dump>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
+  <{closure:%s:%d}>
 Answer
-    <{closure}>
+    <{closure:%s:%d}>
+      <array_sum>
+      </array_sum>
+      <var_dump>
 int(42)
-    </{closure}>
-  </{closure}>
+      </var_dump>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
 DONE
-</file '%s%eobserver_closure_%d.php'>
+</file '%s'>

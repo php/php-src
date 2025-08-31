@@ -1,8 +1,9 @@
 --TEST--
 Bug #79106 (PDO may fetch wrong column indexes with PDO::FETCH_BOTH) - collision
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip pdo extension not available');
 $dir = getenv('REDIR_TEST_DIR');
 if (!$dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';

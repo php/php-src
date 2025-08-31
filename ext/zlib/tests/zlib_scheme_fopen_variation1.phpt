@@ -1,14 +1,10 @@
 --TEST--
 Test compress.zlib:// scheme with the fopen on a file scheme
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-$inputFileName = __DIR__."/004.txt.gz";
+$inputFileName = __DIR__."/data/test.txt.gz";
 $srcFile = "file://$inputFileName";
 $compressedFile = "compress.zlib://$srcFile";
 
@@ -18,7 +14,7 @@ fpassthru($h);
 fclose($h);
 ?>
 --EXPECTF--
-file=compress.zlib://file://%s/004.txt.gz
+file=compress.zlib://file://%s/test.txt.gz
 
 When you're taught through feelings
 Destiny flying high above

@@ -1,7 +1,7 @@
 --TEST--
 Bug 67395: token_name() does not return name for T_POW and T_POW_EQUAL token
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

@@ -1,8 +1,7 @@
 --TEST--
 gzopen(), gzread(), gzwrite() for non-compressed data
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) print "skip"; ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $original = str_repeat("hallo php",4096);

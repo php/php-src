@@ -1,7 +1,7 @@
 --TEST--
 Testing xpath() with invalid XML
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) die('skip simplexml extension not loaded'); ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 // gracefully recover from parsing of invalid XML; not available in PHP

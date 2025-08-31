@@ -1,14 +1,14 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f47161a8575ef53f7c0fa6037c30e0c70462a281 */
+ * Stub hash: 29606d7114a0698b8ae231173a624b17c196ffec */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_connect, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ftp_connect, 0, 1, FTP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "21")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_LONG, 0, "90")
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_FTP_SSL)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_ssl_connect, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ftp_ssl_connect, 0, 1, FTP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "21")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_LONG, 0, "90")
@@ -16,60 +16,60 @@ ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_login, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, username, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_pwd, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_cdup, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_chdir, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_exec, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_raw, 0, 2, IS_ARRAY, 1)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_mkdir, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ftp_rmdir arginfo_ftp_chdir
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_chmod, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, permissions, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_alloc, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_nlist, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_rawlist, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, recursive, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
@@ -79,7 +79,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_ftp_systype arginfo_ftp_pwd
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_fget, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
@@ -87,7 +87,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_fget, 0, 3, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_nb_fget, 0, 3, IS_LONG, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
@@ -95,20 +95,20 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_nb_fget, 0, 3, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_pasv, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_get, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, local_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_nb_get, 0, 3, IS_LONG, 0)
-	ZEND_ARG_INFO(0, ftp)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_nb_get, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, local_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
@@ -116,11 +116,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_nb_get, 0, 3, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_nb_continue, 0, 1, IS_LONG, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_fput, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
@@ -128,7 +128,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_fput, 0, 3, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_nb_fput, 0, 3, IS_LONG, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
@@ -136,7 +136,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_nb_fput, 0, 3, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_put, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, local_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
@@ -144,14 +144,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_put, 0, 3, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_append, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, local_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_nb_put, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, local_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "FTP_BINARY")
@@ -159,20 +159,20 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_nb_put, 0, 3, MAY_BE_LONG|MA
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_size, 0, 2, IS_LONG, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ftp_mdtm arginfo_ftp_size
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_rename, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_delete, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -182,17 +182,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ftp_quit arginfo_ftp_cdup
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_set_option, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, ftp)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_set_option, 0, 3, IS_TRUE, 0)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_get_option, 0, 2, MAY_BE_LONG|MAY_BE_BOOL)
-	ZEND_ARG_INFO(0, ftp)
+	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-
 
 ZEND_FUNCTION(ftp_connect);
 #if defined(HAVE_FTP_SSL)
@@ -232,7 +231,6 @@ ZEND_FUNCTION(ftp_close);
 ZEND_FUNCTION(ftp_set_option);
 ZEND_FUNCTION(ftp_get_option);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftp_connect, arginfo_ftp_connect)
 #if defined(HAVE_FTP_SSL)
@@ -269,8 +267,36 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftp_delete, arginfo_ftp_delete)
 	ZEND_FE(ftp_site, arginfo_ftp_site)
 	ZEND_FE(ftp_close, arginfo_ftp_close)
-	ZEND_FALIAS(ftp_quit, ftp_close, arginfo_ftp_quit)
+	ZEND_RAW_FENTRY("ftp_quit", zif_ftp_close, arginfo_ftp_quit, 0, NULL, NULL)
 	ZEND_FE(ftp_set_option, arginfo_ftp_set_option)
 	ZEND_FE(ftp_get_option, arginfo_ftp_get_option)
 	ZEND_FE_END
 };
+
+static void register_ftp_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("FTP_ASCII", FTPTYPE_ASCII, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_TEXT", FTPTYPE_ASCII, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_BINARY", FTPTYPE_IMAGE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_IMAGE", FTPTYPE_IMAGE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_AUTORESUME", PHP_FTP_AUTORESUME, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_TIMEOUT_SEC", PHP_FTP_OPT_TIMEOUT_SEC, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_AUTOSEEK", PHP_FTP_OPT_AUTOSEEK, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_USEPASVADDRESS", PHP_FTP_OPT_USEPASVADDRESS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_FAILED", PHP_FTP_FAILED, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_FINISHED", PHP_FTP_FINISHED, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FTP_MOREDATA", PHP_FTP_MOREDATA, CONST_PERSISTENT);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ftp_login", sizeof("ftp_login") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+}
+
+static zend_class_entry *register_class_FTP_Connection(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "FTP", "Connection", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	return class_entry;
+}

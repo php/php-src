@@ -1,12 +1,9 @@
 --TEST--
 MessageFrormatter parses and formats dates with millisecond precision
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 date_default_timezone_set('Europe/Lisbon'); //ignored for now, see bug #58756
 
 $d = 1336308097.123;

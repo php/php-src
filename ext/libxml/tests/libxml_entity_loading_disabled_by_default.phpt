@@ -1,9 +1,10 @@
 --TEST--
 libxml_disable_entity_loader()
---SKIPIF--
-<?php
-if (!extension_loaded('libxml')) die('skip libxml extension not available');
-if (!extension_loaded('dom')) die('skip dom extension not available');
+--EXTENSIONS--
+libxml
+dom
+xml
+simplexml
 --FILE--
 <?php
 
@@ -29,7 +30,6 @@ function parseXML2($xml) {
 function parseXML3($xml) {
   $p = xml_parser_create();
   xml_parse_into_struct($p, $xml, $vals, $index);
-  xml_parser_free($p);
   return var_export($vals, true);
 }
 
@@ -45,7 +45,7 @@ var_dump(strpos(parseXML4($xml), 'SECRET_DATA') === false);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

@@ -1,9 +1,7 @@
 --TEST--
-FR #51368 (php_filter_float does not allow custom thousand separators)
---SKIPIF--
-<?php
-if (!extension_loaded('filter')) die('skip filter extension not available');
-?>
+Bug #51368 (php_filter_float does not allow custom thousand separators)
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $options = ['flags' => FILTER_FLAG_ALLOW_THOUSAND, 'options' => ['thousand' => ' ']];
@@ -23,4 +21,4 @@ try {
 --EXPECT--
 float(1000)
 float(1234.567)
-filter_var(): "thousand" option cannot be empty
+filter_var(): "thousand" option must not be empty

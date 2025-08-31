@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #44861 (scrollable cursor don't work with pgsql)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 $allowed = array('oci', 'pgsql');
@@ -26,12 +27,19 @@ $db = PDOTest::factory();
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
-    $from = 'FROM DUAL';
-    $ob = '1';
-} else {
-    $from = '';
-    $ob = 'r';
+switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+    case 'oci':
+        $from = 'FROM DUAL';
+        $ob = '1';
+        break;
+    case 'firebird':
+        $from = 'FROM RDB$DATABASE';
+        $ob = 'r';
+        break;
+    default:
+        $from = '';
+        $ob = 'r';
+        break;
 }
 
 $query = "SELECT 'row1' AS r $from UNION SELECT 'row2' $from UNION SELECT 'row3' $from UNION SELECT 'row4' $from ORDER BY $ob";

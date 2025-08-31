@@ -1,15 +1,14 @@
 --TEST--
 IntlTimeZone::createTimeZone(): errors
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 var_dump(IntlTimeZone::createTimeZone("foo\x80"));
+echo intl_get_error_message(), PHP_EOL;
+
 ?>
---EXPECTF--
-Warning: IntlTimeZone::createTimeZone(): intltz_create_time_zone: could not convert time zone id to UTF-16 in %s on line %d
+--EXPECT--
 NULL
+IntlTimeZone::createTimeZone(): could not convert time zone id to UTF-16: U_INVALID_CHAR_FOUND

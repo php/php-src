@@ -1,9 +1,8 @@
 --TEST--
 FTP with bogus parameters
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';
@@ -29,4 +28,4 @@ bool(true)
 
 Warning: ftp_login(): Not logged in. in %s on line %d
 bool(false)
-bool(true)
+bool(false)

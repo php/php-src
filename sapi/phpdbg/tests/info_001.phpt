@@ -34,7 +34,7 @@ prompt> [Variables in foo() (1)]
 Address            Refs    Type      Variable
 %s %d       string    $baz
 string (4) "test"
-prompt> [Superglobal variables (8)]
+prompt> [Superglobal variables (7)]
 Address            Refs    Type      Variable
 %s 2       array     $_GET
 %s 2       array     $_POST
@@ -43,7 +43,6 @@ Address            Refs    Type      Variable
 %s 2       array     $_ENV
 %s 1       array     $_REQUEST
 %s 2       array     $_FILES
-%s 1       array     &$GLOBALS
 prompt> ------------------------------------------------
 Function Breakpoints:
 #0		foo

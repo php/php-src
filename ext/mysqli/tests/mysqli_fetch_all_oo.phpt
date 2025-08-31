@@ -1,27 +1,15 @@
 --TEST--
 $mysqli->fetch_all() (introduced with mysqlnd)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-
-if (!function_exists('mysqli_fetch_all'))
-    die("skip: function only available with mysqlnd");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp    = NULL;
-    $link   = NULL;
-
-    $mysqli = new mysqli();
-
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
-
-    require('table.inc');
+    require 'table.inc';
+    $mysqli = $link;
     if (!$res = $mysqli->query("SELECT * FROM test ORDER BY id LIMIT 2")) {
         printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
     }
@@ -98,14 +86,14 @@ if (!function_exists('mysqli_fetch_all'))
             return false;
         }
 
-        if (!$link->query($sql = sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
+        if (!$link->query(sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
                 // don't bail, engine might not support the datatype
                 return false;
         }
 
         if (is_null($php_value)) {
             if (!$link->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
-                printf("[%04d] [%d] %s\n", $offset + 1, $link->errno, $link->error);
+                printf("[%04d] [%d] %s - %s\n", $offset + 1, $link->errno, $link->error, $sql);
                 return false;
             }
         } else {
@@ -116,7 +104,7 @@ if (!function_exists('mysqli_fetch_all'))
                 }
             } else {
                 if (!$link->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
-                    printf("[%04di] [%d] %s\n", $offset + 1, $link->errno, $link->error);
+                    printf("[%04di] [%d] %s - %s\n", $offset + 1, $link->errno, $link->error, $sql);
                     return false;
                 }
             }
@@ -133,25 +121,21 @@ if (!function_exists('mysqli_fetch_all'))
         }
         $row = $tmp[0];
 
-        $fields = mysqli_fetch_fields($res);
-
-        if (!(gettype($php_value)=="unicode" && ($fields[1]->flags & 128))) {
-            if ($regexp_comparison) {
-                if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
-                    printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
-                        gettype($php_value), $php_value, $regexp_comparison,
-                        gettype($row[1]), $row[1],
-                        gettype($row['label']), $row['label'], $link->errno, $link->error);
-                    return false;
-                }
-            } else {
-                if (($row['label'] !== $php_value) || ($row[1] != $php_value)) {
-                    printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
-                        gettype($php_value), $php_value,
-                        gettype($row[1]), $row[1],
-                        gettype($row['label']), $row['label'], $link->errno, $link->error);
-                    return false;
-                }
+        if ($regexp_comparison) {
+            if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
+                printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
+                    gettype($php_value), $php_value, $regexp_comparison,
+                    gettype($row[1]), $row[1],
+                    gettype($row['label']), $row['label'], $link->errno, $link->error);
+                return false;
+            }
+        } else {
+            if (($row['label'] !== $php_value) || ($row[1] != $php_value)) {
+                printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
+                    gettype($php_value), $php_value,
+                    gettype($row[1]), $row[1],
+                    gettype($row['label']), $row['label'], $link->errno, $link->error);
+                return false;
             }
         }
 
@@ -307,9 +291,9 @@ if (!function_exists('mysqli_fetch_all'))
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
---EXPECTF--
+--EXPECT--
 [005]
 array(2) {
   [0]=>
@@ -435,6 +419,6 @@ array(1) {
     string(1) "1"
   }
 }
-mysqli_result::fetch_all(): Argument #1 ($mode) must be one of MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC, or MYSQLI_FETCH_BOTH
+mysqli_result::fetch_all(): Argument #1 ($mode) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
 mysqli_result object is already closed
 done!

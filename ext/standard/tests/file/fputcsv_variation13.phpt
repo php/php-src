@@ -52,7 +52,7 @@ foreach ($csv_lists as $csv_list) {
 
     // write to a file in csv format
     try {
-      var_dump( fputcsv($file_handle, $csv_field, '+', '%%') );
+      var_dump( fputcsv($file_handle, $csv_field, '+', '%%', escape: "\\") );
     } catch (ValueError $e) {
       echo $e->getMessage(), "\n";
     }

@@ -1,12 +1,12 @@
 --TEST--
 SOAP Interop Round4 GroupI XSD 031 (php/wsdl): echoVoidSoapHeader(2)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$hdr = new SoapHeader("http://soapinterop.org/","echoMeStringRequest", array(), 1);
+$hdr = new SoapHeader("http://soapinterop.org/","echoMeStringRequest", array(), true);
 $client = new SoapClient(__DIR__."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->__soapCall("echoVoidSoapHeader",array(),null,$hdr);
 echo $client->__getlastrequest();

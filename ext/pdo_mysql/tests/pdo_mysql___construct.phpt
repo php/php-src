@@ -1,17 +1,18 @@
 --TEST--
 MySQL PDO->__construct() - Generic + DSN
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
+if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     function tryandcatch($offset, $code) {
-
         try {
             eval($code);
             assert(sprintf("[%03d] Should have failed\n", $offset) != '');
@@ -27,7 +28,6 @@ MySQLPDOTest::skip();
     }
 
     try {
-
         try {
             if (NULL !== ($db = @new PDO()))
                 printf("[001] Too few parameters\n");
@@ -102,7 +102,6 @@ MySQLPDOTest::skip();
             try { $db = @new PDO($dsn, $user, $pass); } catch (PDOException $e) {
                 printf("[017] DSN=%s, %s\n", $dsn, $e->getMessage());
             }
-
         }
 
         // what about long values for a valid option ...
@@ -140,7 +139,6 @@ MySQLPDOTest::skip();
                 // atoi('abc') = 0, 0 -> fallback to default 3306 -> may or may not fail!
             } catch (PDOException $e) {
             }
-
         }
 
         if (PDO_MYSQL_TEST_DB) {
@@ -159,7 +157,6 @@ MySQLPDOTest::skip();
             try { $db = @new PDO($dsn, $user, $pass); } catch (PDOException $e) {
                 printf("[023] DSN=%s, %s\n", $dsn, $e->getMessage());
             }
-
         }
 
         if (PDO_MYSQL_TEST_SOCKET && (stristr(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_SOCKET) !== false)) {
@@ -177,7 +174,6 @@ MySQLPDOTest::skip();
             try { $db = @new PDO($dsn, $user, $pass); } catch (PDOException $e) {
                 printf("[025] DSN=%s, %s\n", $dsn, $e->getMessage());
             }
-
         }
 
         $have_charset_support = false;
@@ -236,9 +232,7 @@ MySQLPDOTest::skip();
                 } else {
                     printf("[030] You're trying to run the tests with charset '%s' which seems not supported by the server!", $charset);
                 }
-
             }
-
         }
 
         if ($have_charset_support) {
@@ -280,10 +274,8 @@ MySQLPDOTest::skip();
                 } catch (PDOException $e) {
                     printf("[034] %s\n", $e->getMessage());
                 }
-
             }
         }
-
     } catch (PDOException $e) {
         printf("[001] %s, [%s] %s\n",
             $e->getMessage(),

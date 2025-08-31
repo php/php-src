@@ -1,14 +1,12 @@
 --TEST--
 IntlCalendar::fromDateTime(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=nl_NL
+date.timezone=Europe/Lisbon
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl_NL");
-date_default_timezone_set('Europe/Lisbon');
 
 $cal = IntlCalendar::fromDateTime('2012-01-01 00:00:00 Europe/Rome');
 var_dump(

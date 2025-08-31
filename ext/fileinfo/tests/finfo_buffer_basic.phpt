@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_buffer() function : basic functionality
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 $magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
@@ -27,7 +27,6 @@ foreach( $options as $option ) {
     foreach( $buffers as $string ) {
         var_dump( finfo_buffer( $finfo, $string, $option ) );
     }
-    finfo_close( $finfo );
 }
 
 ?>

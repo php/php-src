@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,32 +19,29 @@
 #include "php.h"
 #include "md5.h"
 
-PHPAPI void make_digest(char *md5str, const unsigned char *digest) /* {{{ */
+PHPAPI void make_digest(char *md5str, const unsigned char *digest)
 {
 	make_digest_ex(md5str, digest, 16);
 }
-/* }}} */
 
-PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /* {{{ */
+PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, size_t len)
 {
 	static const char hexits[17] = "0123456789abcdef";
-	int i;
 
-	for (i = 0; i < len; i++) {
+	for (size_t i = 0; i < len; i++) {
 		md5str[i * 2]       = hexits[digest[i] >> 4];
 		md5str[(i * 2) + 1] = hexits[digest[i] &  0x0F];
 	}
 	md5str[len * 2] = '\0';
 }
-/* }}} */
 
-/* {{{ Calculate the md5 hash of a string */
+/* Calculate the md5 hash of a string */
 PHP_FUNCTION(md5)
 {
 	zend_string *arg;
-	zend_bool raw_output = 0;
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
+	bool raw_output = false;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(arg)
@@ -63,14 +60,13 @@ PHP_FUNCTION(md5)
 	}
 
 }
-/* }}} */
 
-/* {{{ Calculate the md5 hash of given filename */
+/* Calculate the md5 hash of given filename */
 PHP_FUNCTION(md5_file)
 {
 	char          *arg;
 	size_t           arg_len;
-	zend_bool raw_output = 0;
+	bool raw_output = false;
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
@@ -113,7 +109,6 @@ PHP_FUNCTION(md5_file)
 		make_digest_ex(Z_STRVAL_P(return_value), digest, 16);
 	}
 }
-/* }}} */
 
 /*
  * This is an OpenSSL-compatible implementation of the RSA Data Security,
@@ -290,7 +285,7 @@ static const void *body(PHP_MD5_CTX *ctx, const void *data, size_t size)
 	return ptr;
 }
 
-PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx)
+PHPAPI void PHP_MD5InitArgs(PHP_MD5_CTX *ctx, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	ctx->a = 0x67452301;
 	ctx->b = 0xefcdab89;

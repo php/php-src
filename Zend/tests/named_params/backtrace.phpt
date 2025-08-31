@@ -40,7 +40,7 @@ array(1) {
     }
   }
 }
-#0  test(1, 2, x: 3, y: 4) called at [%s:10]
+#0 %s(10): test(1, 2, x: 3, y: 4)
 array(1) {
   [0]=>
   array(4) {

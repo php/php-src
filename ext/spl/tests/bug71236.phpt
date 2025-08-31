@@ -8,10 +8,16 @@ spl_autoload_register();
 var_dump(spl_autoload_functions());
 
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  object(Closure)#1 (1) {
+  object(Closure)#%d (4) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
     ["parameter"]=>
     array(1) {
       ["$class"]=>

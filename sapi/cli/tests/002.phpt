@@ -7,9 +7,11 @@ include "skipif.inc";
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n -r "var_dump('hello');"`);
+var_dump(shell_exec(<<<SHELL
+$php -n -r "var_dump('hello');"
+SHELL));
 
 echo "Done\n";
 ?>

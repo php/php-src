@@ -10,7 +10,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 echo "*** Testing file() : variation ***\n";
-$mainDir = "fileVar8.dir";
+$mainDir = "fileVar8_win32.dir";
 $subDir = "fileVar8Sub";
 $absMainDir = __DIR__."\\".$mainDir;
 mkdir($absMainDir);
@@ -54,12 +54,21 @@ for($i = 0; $i<count($allDirs); $i++) {
   var_dump(file($dir."\\".$filename));
 }
 
-unlink($absFile);
 chdir($old_dir_path);
-rmdir($absSubDir);
-rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$mainDir = "fileVar8_win32.dir";
+$subDir = "fileVar8Sub";
+$absMainDir = __DIR__."/".$mainDir;
+$absSubDir = $absMainDir."/".$subDir;
+$filename = 'FileGetContentsVar7.tmp';
+$absFile = $absSubDir.'/'.$filename;
+unlink($absFile);
+rmdir($absSubDir);
+rmdir($absMainDir);
 ?>
 --EXPECTF--
 *** Testing file() : variation ***
@@ -90,12 +99,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: file(%sfileVar8.dir\fileVar8Sub\..\\\fileVar8Sub\\..\\..\fileVar8Sub\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file(%sfileVar8_win32.dir\fileVar8Sub\..\\\fileVar8Sub\\..\\..\fileVar8Sub\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file(%sfileVar8.dir\fileVar8Sub\BADDIR\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file(%sfileVar8_win32.dir\fileVar8Sub\BADDIR\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --

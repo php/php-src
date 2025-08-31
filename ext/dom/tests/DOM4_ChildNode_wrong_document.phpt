@@ -1,39 +1,32 @@
 --TEST--
 DOMChildNode::after(), before, replaceWith with DOMNode from wrong document throws exception
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 require_once("dom_test.inc");
 
-$dom1 = new DOMDocument;
-$dom1->loadXML('<test/>');
+function test($method) {
+    $dom1 = new DOMDocument;
+    $dom1->loadXML('<test/>');
 
-$dom2 = new DOMDocument;
-$dom2->loadXML('<test><foo /></test>');
+    $dom2 = new DOMDocument;
+    $dom2->loadXML('<test><foo /></test>');
 
-$element = $dom1->documentElement;
+    $element = $dom1->documentElement;
 
-try {
-    $element->after($dom2->documentElement->firstChild);
-    echo "FAIL";
-} catch (DOMException $e) {
-    echo $e->getMessage() . "\n";
+    try {
+        $element->$method($dom2->documentElement->firstChild);
+        echo "FAIL";
+    } catch (DOMException $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
 
-try {
-    $element->before($dom2->documentElement->firstChild);
-    echo "FAIL";
-} catch (DOMException $e) {
-    echo $e->getMessage() . "\n";
-}
+test("after");
+test("before");
+test("replaceWith");
 
-try {
-    $element->replaceWith($dom2->documentElement->firstChild);
-    echo "FAIL";
-} catch (DOMException $e) {
-    echo $e->getMessage();
-}
 ?>
 --EXPECT--
 Wrong Document Error

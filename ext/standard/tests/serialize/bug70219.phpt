@@ -1,9 +1,9 @@
 --TEST--
 Bug #70219 Use after free vulnerability in session deserializer
---SKIPIF--
-<?php
-if (!extension_loaded('session')) die('skip session extension not available');
-?>
+--EXTENSIONS--
+session
+--INI--
+error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 class obj implements Serializable {
@@ -31,5 +31,5 @@ var_dump($data);
 --EXPECTF--
 Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s on line %d
 
-Notice: unserialize(): Error at offset 55 of 56 bytes in %s on line %d
+Warning: unserialize(): Error at offset 55 of 56 bytes in %s on line %d
 bool(false)

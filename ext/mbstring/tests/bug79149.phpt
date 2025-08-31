@@ -1,9 +1,7 @@
 --TEST--
 Bug #79149 (SEGV in mb_convert_encoding with non-string encodings)
---SKIPIF--
-<?php
-if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 try {

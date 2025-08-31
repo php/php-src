@@ -1,7 +1,7 @@
 --TEST--
 pcntl_exec() 3
---SKIPIF--
-<?php if (!extension_loaded("pcntl")) print "skip"; ?>
+--EXTENSIONS--
+pcntl
 --FILE--
 <?php
 $file = tempnam(sys_get_temp_dir(),"php");

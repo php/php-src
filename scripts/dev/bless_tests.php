@@ -62,9 +62,11 @@ function getFiles(array $dirsOrFiles): \Iterator {
 }
 
 function normalizeOutput(string $out): string {
-    $out = preg_replace('/in (\/|[A-Z]:\\\\).+ on line \d+$/m', 'in %s on line %d', $out);
-    $out = preg_replace('/in (\/|[A-Z]:\\\\).+:\d+$/m', 'in %s:%d', $out);
-    $out = preg_replace('/^#(\d+) (\/|[A-Z]:\\\\).+\(\d+\):/m', '#$1 %s(%d):', $out);
+    $out = preg_replace('/in (\/|[A-Z]:\\\\)\S+ on line \d+/m', 'in %s on line %d', $out);
+    $out = preg_replace('/in (\/|[A-Z]:\\\\)\S+:\d+/m', 'in %s:%d', $out);
+    $out = preg_replace('/\{closure:(\/|[A-Z]:\\\\)\S+:\d+\}/', '{closure:%s:%d}', $out);
+    $out = preg_replace('/object\(([A-Za-z0-9\\\\]*)\)#\d+/', 'object($1)#%d', $out);
+    $out = preg_replace('/^#(\d+) (\/|[A-Z]:\\\\)\S+\(\d+\):/m', '#$1 %s(%d):', $out);
     $out = preg_replace('/Resource id #\d+/', 'Resource id #%d', $out);
     $out = preg_replace('/resource\(\d+\) of type/', 'resource(%d) of type', $out);
     $out = preg_replace(
@@ -72,6 +74,7 @@ function normalizeOutput(string $out): string {
         'Resource ID#%d used as offset, casting to integer (%d)',
         $out);
     $out = preg_replace('/string\(\d+\) "([^"]*%d)/', 'string(%d) "$1', $out);
+    $out = str_replace("\0", '%0', $out);
     return $out;
 }
 
@@ -86,6 +89,7 @@ function formatToRegex(string $format): string {
     $result = str_replace('%x', '[0-9a-fA-F]+', $result);
     $result = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $result);
     $result = str_replace('%c', '.', $result);
+    $result = str_replace('%0', '\0', $result);
     return "/^$result$/s";
 }
 
@@ -113,7 +117,7 @@ function generateMinimallyDifferingOutput(string $out, string $oldExpect) {
 
 function insertOutput(string $phpt, string $out): string {
     return preg_replace_callback('/--EXPECTF?--.*?(--CLEAN--|$)/sD', function($matches) use($out) {
-        $hasWildcard = preg_match('/%[resSaAwidxfc]/', $out);
+        $hasWildcard = preg_match('/%[resSaAwidxfc0]/', $out);
         $F = $hasWildcard ? 'F' : '';
         return "--EXPECT$F--\n" . $out . "\n" . $matches[1];
     }, $phpt);

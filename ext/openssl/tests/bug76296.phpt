@@ -1,7 +1,7 @@
 --TEST--
 Bug #76296 openssl_pkey_get_public does not respect open_basedir
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $dir = __DIR__ . '/bug76296_openbasedir';

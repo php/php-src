@@ -2,16 +2,17 @@
 ldap_get_option() and ldap_set_option() tests related to ldap controls
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 function build_ctrl_paged_value($int, $cookie)
@@ -62,7 +63,7 @@ var_dump(
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
@@ -104,7 +105,8 @@ array(1) {
     }
   }
 }
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 int(1)
 bool(true)
 bool(false)

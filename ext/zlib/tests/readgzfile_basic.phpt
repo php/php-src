@@ -1,9 +1,7 @@
 --TEST--
 Test function readgzfile() reading a gzip relative file
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $plaintxt = <<<EOT

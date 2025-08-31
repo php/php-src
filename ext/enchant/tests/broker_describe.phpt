@@ -2,13 +2,10 @@
 enchant_broker_describe() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
+--EXTENSIONS--
+enchant
 --SKIPIF--
 <?php
-if (!extension_loaded('enchant')) {
-    echo "skip: Enchant extension not enabled\n";
-    exit;
-}
-
 $broker = enchant_broker_init();
 
 if (!$broker) {
@@ -44,7 +41,7 @@ if($broker) {
 
     }
     } else {
-        echo "failed, brocker describe array \n";
+        echo "failed, broker describe array \n";
     }
 
     @enchant_broker_free($broker);

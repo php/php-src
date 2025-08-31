@@ -1,5 +1,7 @@
 --TEST--
 Test session_start() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -24,7 +26,7 @@ ob_end_flush();
 *** Testing session_start() : variation ***
 string(%d) "%s"
 
-Notice: session_start(): Ignoring session_start() because a session is already active in %s on line %d
+Notice: session_start(): Ignoring session_start() because a session is already active (session started automatically) in %s on line %d
 bool(true)
 string(%d) "%s"
 bool(true)

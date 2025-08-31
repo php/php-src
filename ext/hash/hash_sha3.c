@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -190,8 +190,7 @@ static void PHP_SHA3_Final(unsigned char* digest,
 	// Square output for digest
 	for(;;) {
 		int bs = (len < block_size) ? len : block_size;
-		memcpy(digest, ctx->state, bs);
-		digest += bs;
+		digest = zend_mempcpy(digest, ctx->state, bs);
 		len -= bs;
 		if (!len) break;
 		permute(ctx);
@@ -201,26 +200,26 @@ static void PHP_SHA3_Final(unsigned char* digest,
 	ZEND_SECURE_ZERO(ctx, sizeof(PHP_SHA3_CTX));
 }
 
-static int php_sha3_unserialize(php_hashcontext_object *hash,
+static hash_spec_result php_sha3_unserialize(php_hashcontext_object *hash,
 				zend_long magic,
 				const zval *zv,
 				size_t block_size)
 {
 	PHP_SHA3_CTX *ctx = (PHP_SHA3_CTX *) hash->context;
-	int r = FAILURE;
+	hash_spec_result r = HASH_SPEC_FAILURE;
 	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
-		&& (r = php_hash_unserialize_spec(hash, zv, PHP_SHA3_SPEC)) == SUCCESS
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_SHA3_SPEC)) == HASH_SPEC_SUCCESS
 		&& ctx->pos < block_size) {
-		return SUCCESS;
-	} else {
-		return r != SUCCESS ? r : -2000;
+		return HASH_SPEC_SUCCESS;
 	}
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
 }
 
 // ==========================================================================
 
 #define DECLARE_SHA3_OPS(bits) \
-void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
+void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx, ZEND_ATTRIBUTE_UNUSED HashTable *args) { \
 	PHP_SHA3_Init(ctx, bits); \
 } \
 void PHP_SHA3##bits##Update(PHP_SHA3_##bits##_CTX* ctx, \
@@ -293,29 +292,29 @@ const php_hash_ops php_hash_sha3_##bits##_ops = { \
 #endif
 #define PHP_KECCAK_SPEC "b200IiIIB"
 
-static int php_keccak_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv)
+static hash_spec_result php_keccak_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv)
 {
 	*magic = PHP_HASH_SERIALIZE_MAGIC_KECCAK;
 	return php_hash_serialize_spec(hash, zv, PHP_KECCAK_SPEC);
 }
 
-static int php_keccak_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+static hash_spec_result php_keccak_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
 {
 	Keccak_HashInstance *ctx = (Keccak_HashInstance *) hash->context;
-	int r = FAILURE;
+	hash_spec_result r = HASH_SPEC_FAILURE;
 	if (magic == PHP_HASH_SERIALIZE_MAGIC_KECCAK
-		&& (r = php_hash_unserialize_spec(hash, zv, PHP_KECCAK_SPEC)) == SUCCESS
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_KECCAK_SPEC)) == HASH_SPEC_SUCCESS
 		&& ctx->sponge.byteIOIndex < ctx->sponge.rate / 8) {
-		return SUCCESS;
-	} else {
-		return r != SUCCESS ? r : -2000;
+		return HASH_SPEC_SUCCESS;
 	}
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
 }
 
 // ==========================================================================
 
 #define DECLARE_SHA3_OPS(bits) \
-void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx) { \
+void PHP_SHA3##bits##Init(PHP_SHA3_##bits##_CTX* ctx, ZEND_ATTRIBUTE_UNUSED HashTable *args) { \
 	ZEND_ASSERT(sizeof(Keccak_HashInstance) <= sizeof(PHP_SHA3_##bits##_CTX)); \
 	Keccak_HashInitialize_SHA3_##bits((Keccak_HashInstance *)ctx); \
 } \

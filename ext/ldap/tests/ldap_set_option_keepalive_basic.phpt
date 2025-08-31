@@ -2,12 +2,12 @@
 ldap_set_option() - Basic test for TCP keepalive ldap options
 --CREDITS--
 Chad Sikorra <Chad.Sikorra@gmail.com>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 foreach([
     LDAP_OPT_X_KEEPALIVE_IDLE,

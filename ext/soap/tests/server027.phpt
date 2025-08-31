@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 27: setObject and getFunctions
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class Foo {

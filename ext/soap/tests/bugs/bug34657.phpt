@@ -1,9 +1,7 @@
 --TEST--
 Bug #34657 (If you get a communication problem when loading the WSDL, it fatal's)
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 try {

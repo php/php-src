@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDOStatement::execute with parameters
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -15,12 +16,12 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
-    $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+    $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
 }
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
+$db->exec('CREATE TABLE test021(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
-$select = $db->prepare('SELECT COUNT(id) FROM test');
+$select = $db->prepare('SELECT COUNT(id) FROM test021');
 
 $data = array(
     array('10', 'Abc', 'zxy'),
@@ -33,7 +34,7 @@ $data = array(
 
 
 // Insert using question mark placeholders
-$stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test021 VALUES(?, ?, ?)");
 foreach ($data as $row) {
     $stmt->execute($row);
 }
@@ -42,7 +43,7 @@ $num = $select->fetchColumn();
 echo 'There are ' . $num . " rows in the table.\n";
 
 // Insert using named parameters
-$stmt2 = $db->prepare("INSERT INTO test VALUES(:first, :second, :third)");
+$stmt2 = $db->prepare("INSERT INTO test021 VALUES(:first, :second, :third)");
 foreach ($data as $row) {
     $stmt2->execute(array(':first'=>($row[0] + 5), ':second'=>$row[1],
         ':third'=>$row[2]));
@@ -53,6 +54,12 @@ $num = $select->fetchColumn();
 echo 'There are ' . $num . " rows in the table.\n";
 
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test021");
 ?>
 --EXPECT--
 There are 6 rows in the table.

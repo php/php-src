@@ -45,7 +45,6 @@ typedef int (*output_function_t)(int, void*);
 typedef int (*flush_function_t)(void *);
 
 struct _mbfl_convert_filter {
-	void (*filter_ctor)(mbfl_convert_filter *filter);
 	void (*filter_dtor)(mbfl_convert_filter *filter);
 	void (*filter_copy)(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 	int (*filter_function)(int c, mbfl_convert_filter *filter);
@@ -58,7 +57,7 @@ struct _mbfl_convert_filter {
 	const mbfl_encoding *from;
 	const mbfl_encoding *to;
 	int illegal_mode;
-	int illegal_substchar;
+	uint32_t illegal_substchar;
 	size_t num_illegalchar;
 	void *opaque;
 };
@@ -81,5 +80,8 @@ MBFLAPI extern int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter);
 
 MBFLAPI extern void mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_memory_device *src);
 MBFLAPI extern int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char *p);
+
+MBFLAPI extern zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encoding *from, const mbfl_encoding *to, uint32_t replacement_char, unsigned int error_mode, unsigned int *num_errors);
+MBFLAPI extern void mb_illegal_output(uint32_t bad_cp, mb_from_wchar_fn fn, mb_convert_buf* buf);
 
 #endif /* MBFL_CONVERT_H */

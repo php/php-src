@@ -1,7 +1,7 @@
 --TEST--
 Bug #37278 (SOAP not respecting uri in __soapCall)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 $options = array(

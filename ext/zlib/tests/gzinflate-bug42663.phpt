@@ -1,7 +1,7 @@
 --TEST--
 Bug #42663 (gzinflate() try to allocate all memory with truncated $data)
---SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 // build a predictable string
@@ -19,7 +19,7 @@ var_dump(gzinflate($truncated));
 ?>
 --EXPECTF--
 int(168890)
-int(66743)
+int(667%d)
 int(65535)
 
 Warning: gzinflate(): data error in %s on line %d

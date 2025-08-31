@@ -1,7 +1,7 @@
 --TEST--
 Bug #80560: Strings containing only a base prefix return 0 object
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 

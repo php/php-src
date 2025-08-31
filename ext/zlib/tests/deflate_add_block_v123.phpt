@@ -1,10 +1,10 @@
 --TEST--
 Test deflate_add() errors with ZLIB_BLOCK in zlib < 1.2.4
+--EXTENSIONS--
+zlib
 --SKIPIF--
 <?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
+
 if (ZLIB_VERNUM >= 0x1240) {
     print "skip - ZLIB < 1.2.4 required for test";
 }

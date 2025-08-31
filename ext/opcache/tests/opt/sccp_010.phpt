@@ -6,8 +6,9 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0x20000
 opcache.preload=
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+zend_test.observer.enabled=0
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function foo() {

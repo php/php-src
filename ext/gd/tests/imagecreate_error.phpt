@@ -1,8 +1,9 @@
 --TEST--
 Testing imagecreate(): error on out of bound parameters
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded("gd")) die("skip GD not present");
     if (!function_exists("imagecreate")) die("skip GD Version not compatible");
 ?>
 --FILE--

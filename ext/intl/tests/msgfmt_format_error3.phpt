@@ -1,20 +1,22 @@
 --TEST--
 MessageFormatter::format() given negative arg key
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.use_exceptions=On
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $fmt = <<<EOD
 {foo,number,percent}
 EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
-var_dump($mf->format(array("foo" => 7, -1 => "bar")));
+try {
+    var_dump($mf->format(array("foo" => 7, -1 => "bar")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: MessageFormatter::format(): Found negative or too large array key in %s on line %d
-bool(false)
+--EXPECT--
+IntlException: MessageFormatter::format(): Found negative or too large array key

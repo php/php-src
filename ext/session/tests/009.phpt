@@ -1,5 +1,7 @@
 --TEST--
 unset($_SESSION["name"]); test
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -13,14 +15,14 @@ session.save_handler=files
 error_reporting(E_ALL);
 ob_start();
 
-session_id("abtest");
+session_id("test009");
 
 ### Phase 1 cleanup
 session_start();
 session_destroy();
 
 ### Phase 2 $_SESSION["c"] does not contain any value
-session_id("abtest");
+session_id("test009");
 session_start();
 var_dump($_SESSION);
 $_SESSION["name"] = "foo";

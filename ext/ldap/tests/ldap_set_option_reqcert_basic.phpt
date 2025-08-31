@@ -1,13 +1,13 @@
 --TEST--
 ldap_option_reqcert_basic() - Error test for TLS require cert ldap option
---SKIPIF--
-<?php require 'skipif.inc'; ?>
+--EXTENSIONS--
+ldap
 --CREDITS--
 Edwin Hoksberg <edwin@edwinhoksberg.nl>
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 foreach([
     LDAP_OPT_X_TLS_NEVER,

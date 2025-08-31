@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <intsafe.h>
@@ -27,6 +27,21 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
+
+#if SIZEOF_ZEND_LONG == 8
+#define PHP_DISP_E_DIVBYZERO ((zend_long) (ULONG) DISP_E_DIVBYZERO)
+#define PHP_DISP_E_OVERFLOW ((zend_long) (ULONG) DISP_E_OVERFLOW)
+#define PHP_DISP_E_BADINDEX ((zend_long) (ULONG) DISP_E_BADINDEX)
+#define PHP_DISP_E_PARAMNOTFOUND ((zend_long) (ULONG) DISP_E_PARAMNOTFOUND)
+#define PHP_MK_E_UNAVAILABLE ((zend_long) (ULONG) MK_E_UNAVAILABLE)
+#else
+#define PHP_DISP_E_DIVBYZERO DISP_E_DIVBYZERO
+#define PHP_DISP_E_OVERFLOW DISP_E_OVERFLOW
+#define PHP_DISP_E_BADINDEX DISP_E_BADINDEX
+#define PHP_DISP_E_PARAMNOTFOUND DISP_E_PARAMNOTFOUND
+#define PHP_MK_E_UNAVAILABLE MK_E_UNAVAILABLE
+#endif
+
 #include "com_extension_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(com_dotnet)
@@ -86,7 +101,6 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		ITypeLib *pTL;
 		char *typelib_name;
 		char *modifier, *ptr;
-		int mode = CONST_CS | CONST_PERSISTENT;	/* CONST_PERSISTENT is ok here */
 
 		if (typelib_name_buffer[0]==';') {
 			continue;
@@ -114,7 +128,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		}
 
 		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page))) != NULL) {
-			php_com_import_typelib(pTL, mode, COMG(code_page));
+			php_com_import_typelib(pTL, CONST_PERSISTENT, COMG(code_page));
 			ITypeLib_Release(pTL);
 		}
 	}
@@ -135,10 +149,10 @@ static ZEND_INI_MH(OnAutoregisterCasesensitive)
 }
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("com.allow_dcom",				"0", PHP_INI_SYSTEM, OnUpdateBool, allow_dcom, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_BOOLEAN("com.autoregister_verbose",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_verbose, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_BOOLEAN("com.autoregister_typelib",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_on, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnAutoregisterCasesensitive, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_BOOLEAN("com.allow_dcom",				"0", PHP_INI_SYSTEM, OnUpdateBool, allow_dcom, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_BOOLEAN("com.autoregister_verbose",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_verbose, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_BOOLEAN("com.autoregister_typelib",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_on, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnAutoregisterCasesensitive, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
 	STD_PHP_INI_ENTRY("com.code_page", "", PHP_INI_ALL, OnUpdateLong, code_page, zend_com_dotnet_globals, com_dotnet_globals)
 	PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypeLibFileUpdate)
 	PHP_INI_ENTRY("com.dotnet_version", NULL, PHP_INI_SYSTEM, NULL)
@@ -159,123 +173,39 @@ static PHP_GINIT_FUNCTION(com_dotnet)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(com_dotnet)
 {
-	zend_class_entry ce, *tmp;
+	zend_class_entry *tmp;
 
-	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);
 	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 
-	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
-	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_ce_exception);
-	php_com_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
+	php_com_exception_class_entry = register_class_com_exception(zend_ce_exception);
 /*	php_com_exception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 
-	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
-	php_com_saproxy_class_entry = zend_register_internal_class(&ce);
-	php_com_saproxy_class_entry->ce_flags |= ZEND_ACC_FINAL;
+	php_com_saproxy_class_entry = register_class_com_safearray_proxy();
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
+	php_com_saproxy_class_entry->create_object = php_com_saproxy_create_object;
+	php_com_saproxy_class_entry->default_object_handlers = &php_com_saproxy_handlers;
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 
-	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
-	ce.create_object = php_com_object_new;
-	php_com_variant_class_entry = zend_register_internal_class(&ce);
+	php_com_variant_class_entry = register_class_variant();
+	php_com_variant_class_entry->default_object_handlers = &php_com_object_handlers;
+	php_com_variant_class_entry->create_object = php_com_object_new;
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
-	php_com_variant_class_entry->serialize = zend_class_serialize_deny;
-	php_com_variant_class_entry->unserialize = zend_class_unserialize_deny;
 
-	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
-	ce.create_object = php_com_object_new;
-	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
+	tmp = register_class_com(php_com_variant_class_entry);
+	tmp->default_object_handlers = &php_com_object_handlers;
+	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
-	tmp->serialize = zend_class_serialize_deny;
-	tmp->unserialize = zend_class_unserialize_deny;
 
-#if HAVE_MSCOREE_H
-	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
-	ce.create_object = php_com_object_new;
-	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
+#ifdef HAVE_MSCOREE_H
+	tmp = register_class_dotnet(php_com_variant_class_entry);
+	tmp->default_object_handlers = &php_com_object_handlers;
+	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
-	tmp->serialize = zend_class_serialize_deny;
-	tmp->unserialize = zend_class_unserialize_deny;
 #endif
 
 	REGISTER_INI_ENTRIES();
 
-#define COM_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS|CONST_PERSISTENT)
-
-#if SIZEOF_ZEND_LONG == 8
-# define COM_ERR_CONST(x) REGISTER_LONG_CONSTANT(#x, (zend_long) (ULONG) (x), CONST_CS|CONST_PERSISTENT)
-#else
-# define COM_ERR_CONST COM_CONST
-#endif
-
-	COM_CONST(CLSCTX_INPROC_SERVER);
-	COM_CONST(CLSCTX_INPROC_HANDLER);
-	COM_CONST(CLSCTX_LOCAL_SERVER);
-	COM_CONST(CLSCTX_REMOTE_SERVER);
-	COM_CONST(CLSCTX_SERVER);
-	COM_CONST(CLSCTX_ALL);
-
-#if 0
-	COM_CONST(DISPATCH_METHOD);
-	COM_CONST(DISPATCH_PROPERTYGET);
-	COM_CONST(DISPATCH_PROPERTYPUT);
-#endif
-
-	COM_CONST(VT_NULL);
-	COM_CONST(VT_EMPTY);
-	COM_CONST(VT_UI1);
-	COM_CONST(VT_I1);
-	COM_CONST(VT_UI2);
-	COM_CONST(VT_I2);
-	COM_CONST(VT_UI4);
-	COM_CONST(VT_I4);
-	COM_CONST(VT_R4);
-	COM_CONST(VT_R8);
-	COM_CONST(VT_BOOL);
-	COM_CONST(VT_ERROR);
-	COM_CONST(VT_CY);
-	COM_CONST(VT_DATE);
-	COM_CONST(VT_BSTR);
-	COM_CONST(VT_DECIMAL);
-	COM_CONST(VT_UNKNOWN);
-	COM_CONST(VT_DISPATCH);
-	COM_CONST(VT_VARIANT);
-	COM_CONST(VT_INT);
-	COM_CONST(VT_UINT);
-	COM_CONST(VT_ARRAY);
-	COM_CONST(VT_BYREF);
-
-	COM_CONST(CP_ACP);
-	COM_CONST(CP_MACCP);
-	COM_CONST(CP_OEMCP);
-	COM_CONST(CP_UTF7);
-	COM_CONST(CP_UTF8);
-	COM_CONST(CP_SYMBOL);
-	COM_CONST(CP_THREAD_ACP);
-
-	COM_CONST(VARCMP_LT);
-	COM_CONST(VARCMP_EQ);
-	COM_CONST(VARCMP_GT);
-	COM_CONST(VARCMP_NULL);
-	COM_CONST(LOCALE_SYSTEM_DEFAULT);
-
-	COM_CONST(NORM_IGNORECASE);
-	COM_CONST(NORM_IGNORENONSPACE);
-	COM_CONST(NORM_IGNORESYMBOLS);
-	COM_CONST(NORM_IGNOREWIDTH);
-	COM_CONST(NORM_IGNOREKANATYPE);
-#ifdef NORM_IGNOREKASHIDA
-	COM_CONST(NORM_IGNOREKASHIDA);
-#endif
-	COM_ERR_CONST(DISP_E_DIVBYZERO);
-	COM_ERR_CONST(DISP_E_OVERFLOW);
-	COM_ERR_CONST(DISP_E_BADINDEX);
-	COM_ERR_CONST(MK_E_UNAVAILABLE);
-
-#if SIZEOF_ZEND_LONG == 8
-	COM_CONST(VT_UI8);
-	COM_CONST(VT_I8);
-#endif
+	register_com_extension_symbols(module_number);
 
 	PHP_MINIT(com_typeinfo)(INIT_FUNC_ARGS_PASSTHRU);
 
@@ -287,7 +217,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 {
 	UNREGISTER_INI_ENTRIES();
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	if (COMG(dotnet_runtime_stuff)) {
 		php_com_dotnet_mshutdown();
 	}
@@ -310,7 +240,7 @@ PHP_RINIT_FUNCTION(com_dotnet)
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 {
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	if (COMG(dotnet_runtime_stuff)) {
 		php_com_dotnet_rshutdown();
 	}
@@ -325,13 +255,13 @@ PHP_MINFO_FUNCTION(com_dotnet)
 {
 	php_info_print_table_start();
 
-	php_info_print_table_header(2, "COM support", "enabled");
-	php_info_print_table_header(2, "DCOM support", COMG(allow_dcom) ? "enabled" : "disabled");
+	php_info_print_table_row(2, "COM support", "enabled");
+	php_info_print_table_row(2, "DCOM support", COMG(allow_dcom) ? "enabled" : "disabled");
 
-#if HAVE_MSCOREE_H
-	php_info_print_table_header(2, ".Net support", "enabled");
+#ifdef HAVE_MSCOREE_H
+	php_info_print_table_row(2, ".Net support", "enabled");
 #else
-	php_info_print_table_header(2, ".Net support", "not present in this build");
+	php_info_print_table_row(2, ".Net support", "not present in this build");
 #endif
 
 	php_info_print_table_end();

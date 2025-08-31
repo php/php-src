@@ -1,20 +1,17 @@
 --TEST--
 Checks that GdImage instances cannot be cloned
---SKIPIF--
-<?php
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 
+try {
     $img_src = imagecreatetruecolor(32, 32);
     $img_dst = clone $img_src;
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class GdImage in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Trying to clone an uncloneable object of class GdImage

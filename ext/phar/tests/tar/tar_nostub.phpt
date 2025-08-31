@@ -1,7 +1,7 @@
 --TEST--
 Phar: tar-based phar, third-party tar with no stub, Phar->getStub()
---SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=1
 phar.require_hash=0

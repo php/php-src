@@ -1,7 +1,7 @@
 --TEST--
 locale_accept_from_http
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

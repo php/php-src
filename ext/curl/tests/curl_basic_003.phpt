@@ -3,8 +3,8 @@ Test curl_opt() function with POST parameters
 --CREDITS--
 Sebastian Deutsch <sebastian.deutsch@9elements.com>
 TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -23,8 +23,6 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
 
   $curl_content = curl_exec($ch);
-  curl_close($ch);
-
   var_dump( $curl_content );
 ?>
 --EXPECT--

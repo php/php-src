@@ -1,9 +1,7 @@
 --TEST--
 DBLIB
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
-?>
+--EXTENSIONS--
+pdo_dblib
 --REDIRECTTEST--
 # magic auto-configuration
 

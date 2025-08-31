@@ -2,9 +2,10 @@
 Test the use of controls
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 require_once('skipifcontrol.inc');
 skipifunsupportedcontrol(LDAP_CONTROL_ASSERT);
@@ -14,7 +15,7 @@ skipifunsupportedcontrol(LDAP_CONTROL_VALUESRETURNFILTER);
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 /* Test assertion control */
@@ -54,7 +55,7 @@ var_dump(
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
@@ -65,7 +66,8 @@ Warning: ldap_modify(): Modify: Assertion Failed in %s on line %d
 Warning: ldap_delete(): Delete: Assertion Failed in %s on line %d
 
 Warning: ldap_compare(): Compare: Assertion Failed in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -88,7 +90,8 @@ array(2) {
 }
 bool(false)
 bool(true)
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -110,7 +113,8 @@ array(2) {
   }
 }
 bool(false)
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -138,7 +142,8 @@ bool(false)
 bool(true)
 int(-1)
 bool(true)
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(4) {
   ["count"]=>
   int(3)
@@ -149,7 +154,8 @@ array(4) {
   [2]=>
   string(10) "Antarctica"
 }
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(3) {
   ["count"]=>
   int(2)

@@ -8,7 +8,7 @@ disable_functions=dl
 <?php
 $disabled_function = 'dl';
 
-/* exclude_disabled parameters is harded to true */
+/* exclude_disabled parameters is hardcoded to true */
 
 $functions = get_defined_functions();
 var_dump(in_array($disabled_function, $functions['internal']));
@@ -22,6 +22,8 @@ var_dump(in_array($disabled_function, $functions['internal']));
 --EXPECTF--
 bool(false)
 
-Deprecated: get_defined_functions(): Setting $exclude_disabled to false has no effect in %s on line %d
+Deprecated: get_defined_functions(): The $exclude_disabled parameter has no effect since PHP 8.0 in %s on line %d
 bool(false)
+
+Deprecated: get_defined_functions(): The $exclude_disabled parameter has no effect since PHP 8.0 in %s on line %d
 bool(false)

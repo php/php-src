@@ -1,7 +1,7 @@
 --TEST--
 Bug #35142 (SOAP Client/Server Complex Object Support)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -17,6 +17,7 @@ function PostEvents($x) {
 }
 
 class TestSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -24,9 +25,12 @@ class TestSoapClient extends SoapClient {
     $this->server->addFunction('PostEvents');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
-        echo "$request\n";
+  function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): string {
+    echo "$request\n";
+    ob_start();
     $this->server->handle($request);
+    $response = ob_get_contents();
+    ob_end_clean();
     return $response;
   }
 

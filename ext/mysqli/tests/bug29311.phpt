@@ -1,13 +1,14 @@
 --TEST--
 Bug #29311 (Cannot override mysqli constructor)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     /* class 1 calls parent constructor */
     class mysql1 extends mysqli {

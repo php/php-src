@@ -1,9 +1,7 @@
 --TEST--
 Bug #81122 (SSRF bypass in FILTER_VALIDATE_URL)
---SKIPIF--
-<?php
-if (!extension_loaded('filter')) die("skip filter extension not available");
-?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $urls = [

@@ -1,7 +1,7 @@
 --TEST--
 Check for number base recognition
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
         /* Binary */

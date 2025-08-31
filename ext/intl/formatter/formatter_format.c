@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -59,7 +59,7 @@ PHP_FUNCTION( numfmt_format )
 
 	switch(type) {
 		case FORMAT_TYPE_INT32:
-			convert_to_long_ex(number);
+			convert_to_long(number);
 			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
 				formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
@@ -91,7 +91,7 @@ PHP_FUNCTION( numfmt_format )
 			break;
 
 		case FORMAT_TYPE_DOUBLE:
-			convert_to_double_ex(number);
+			convert_to_double(number);
 			formatted_len = unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo));
@@ -104,7 +104,7 @@ PHP_FUNCTION( numfmt_format )
 			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 			break;
 		case FORMAT_TYPE_CURRENCY:
-			if (getThis()) {
+			if (hasThis()) {
 				const char *space;
 				const char *class_name = get_active_class_name(&space);
 				zend_argument_value_error(2, "cannot be NumberFormatter::TYPE_CURRENCY constant, "
@@ -114,7 +114,7 @@ PHP_FUNCTION( numfmt_format )
 			}
 			RETURN_THROWS();
 		default:
-			zend_argument_value_error(getThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
+			zend_argument_value_error(hasThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
 			RETURN_THROWS();
 	}
 
@@ -164,7 +164,7 @@ PHP_FUNCTION( numfmt_format_currency )
 
 	if( U_FAILURE( INTL_DATA_ERROR_CODE((nfo)) ) ) {
 		intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((nfo)) );
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(nfo), "Number formatting failed", 0 );
+		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(nfo), "Number formatting failed");
 		RETVAL_FALSE;
 		if (formatted != format_buf) {
 			efree(formatted);

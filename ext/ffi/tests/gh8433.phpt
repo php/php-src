@@ -1,9 +1,9 @@
 --TEST--
 GH-8433 (Assigning function pointers to structs in FFI leaks memory)
---SKIPIF--
-<?php
-if (!extension_loaded("ffi")) die("skip ffi extension not available");
-?>
+--EXTENSIONS--
+ffi
+--INI--
+ffi.enable=1
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 msg_send() data types when not serializing
---SKIPIF--
-<?php if (!extension_loaded("sysvmsg")) die("skip sysvmsg extensions is not available")?>
+--EXTENSIONS--
+sysvmsg
 --FILE--
 <?php
 

@@ -1,9 +1,7 @@
 --TEST--
 Bug #65732 (grapheme_*() is not Unicode compliant on CR LF sequence)
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not available');
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 var_dump(grapheme_strlen("\r\n"));

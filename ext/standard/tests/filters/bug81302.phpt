@@ -1,9 +1,7 @@
 --TEST--
 Bug #81302 (Stream position after stream filter removed)
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die("skip zlib extension not available");
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $f = fopen("php://memory", "w+b");

@@ -3,10 +3,8 @@ using different image sizes imagecolormatch() of GD library
 --CREDITS--
 Paulo Alves de Sousa Filho <pspalves [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
---SKIPIF--
-<?php
-if (!extension_loaded("gd")) die("skip GD not present");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $ima = imagecreatetruecolor(110, 20);

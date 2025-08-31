@@ -3,9 +3,8 @@ htmlentities() test 9 (mbstring / Shift_JIS)
 --INI--
 output_handler=
 internal_encoding=Shift_JIS
---SKIPIF--
-<?php
-    extension_loaded("mbstring") or die("skip mbstring not available\n");
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
     mb_internal_encoding('Shift_JIS');

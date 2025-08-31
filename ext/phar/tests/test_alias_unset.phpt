@@ -1,7 +1,7 @@
 --TEST--
 Phar: test for the odd case where we intend to remove an archive from memory
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--

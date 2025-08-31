@@ -1,12 +1,10 @@
 --TEST--
 imageloadfont() function crashes
---SKIPIF--
-<?php
-    if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
-$filename = __DIR__ .  '/font.gdf';
+$filename = __DIR__ .  '/imageloadfont_invalid.gdf';
 $bin = "\x41\x41\x41\x41\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00";
 $fp = fopen($filename, 'wb');
 fwrite($fp, $bin);

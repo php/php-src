@@ -1,7 +1,7 @@
 --TEST--
 Bug #73478: openssl_pkey_new() generates wrong pub/priv keys with Diffie Hellman
---SKIPIF--
-<?php if (!extension_loaded("openssl")) die("skip openssl not loaded"); ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $details = [

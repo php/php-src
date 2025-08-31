@@ -1,14 +1,19 @@
 --TEST--
 Multicast support: IPv6 receive options (limited)
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 if (!defined('IPPROTO_IPV6')) {
     die('skip IPv6 not available.');
 }
-$s = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
+// hide the output from socket_create() because it can raise
+// a warning if (for example) the linux kernel is lacking ipv6
+$s = @socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
+if ($s === false) {
+    die("skip unable to create socket");
+}
 $br = socket_bind($s, '::', 3000);
 /* On Linux, there is no route ff00::/8 by default on lo, which makes it
  * troublesome to send multicast traffic from lo, which we must since
@@ -38,6 +43,7 @@ if (defined("MCAST_JOIN_SOURCE_GROUP")) {
         die('skip protocol independent multicast API is available.');
     }
 }
+?>
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";

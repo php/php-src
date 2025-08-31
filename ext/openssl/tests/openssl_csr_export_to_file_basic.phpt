@@ -1,7 +1,11 @@
 --TEST--
 openssl_csr_export_to_file() tests
+--EXTENSIONS--
+openssl
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 $csrfile = __DIR__ . "/openssl_csr_export_to_file_csr.tmp";
@@ -25,7 +29,7 @@ $dn = array(
 );
 
 $args = array(
-    "digest_alg" => "sha1",
+    "digest_alg" => "sha256",
     "private_key_bits" => 2048,
     "private_key_type" => OPENSSL_KEYTYPE_DSA,
     "encrypt_key" => true,
@@ -66,12 +70,12 @@ BggTncBh9ozkVQGS/P1m0zn/SKSgDO+6DdeLHLMjpUASaoYfsay4PJLAdnTqLOeM
 g6qNE6u0ebZXVfmpSmV1pSZ6kQnxbsb6rX1iOZxkwHnVWYb40Hy0EILo31x6BVqB
 m159m7s38ChiRHqlj20DmRfxXjiT5YDgYYQ29wQBTVQrTN5O9UW5Y+eKTXd8r6te
 dsbIBXdKN7NeX7ksGYHq1I3hLsP8EyvZO78qfjKyEB0Jj3UCAwEAAaAAMA0GCSqG
-SIb3DQEBBQUAA4IBAQCamzVmIbElkiDQKzQpkfU5tHjrWPrHDSB186NI0sQ8i6GQ
-1YT6yPAXBPTQ1aER/6uAZJL5HfWEX8V1rKbe8GkPAPCHHQzmHyWlaO2EHS57zJhk
-sRrhqkhhkSNiDg4OrsguhRtbB2VMGeDbqHGI89uGqqGHUiZc/Bh8N7WFXZkUU/A0
-sfBgVeqg0P4SWez5fHXqBNcjMdMI5f0bikcDZSIfTHS8FX+PMurLBC8UPB0YNIOl
-1r2Lvo+6YUHOziG1OwQd3K0xxu/JzzOE+lMB73ynz4V6DY5Qv3qVno1GpupvgmQA
-JViHkCA9x6m8RJXAFvqmgLlWlUzbDv/cRrDfjWjR
+SIb3DQEBCwUAA4IBAQCNtCIfMHBDRvNqHmrDfR/+A7ZJ+n/XzA2uQhvjEq91DeT8
+IE7gjUtmj2sqKmHGIDO4uN4F9ZHYzcNk23n6CMljYqJLbB2dHC0V6vkDB7qod1TH
+/SK39Yj0ji2AT45LD5rLH3vd1bjxdwwhyPyGhshKOIdnmBv4mwTRANIsiISMQV4Y
+ZPAXJ5DTKkgdsY14hqhyWct1bWMPpj2MCLQGjKxK8vmbiKaNL1XxAS7chTXoy7un
+NvBKc82Wy3XEuC9AkNFEytD6kA9gu8nFydvYTOvvhaQrf9RzwSitgi9Vj3mbujsN
+f1JMPX0/eHrKvG9wBZu28FdS54xoWGeD1NGraW24
 -----END CERTIFICATE REQUEST-----
 "
 

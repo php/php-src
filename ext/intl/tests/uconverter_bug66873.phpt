@@ -1,12 +1,16 @@
 --TEST--
 Bug #66873 - crash in UConverter with invalid encoding
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
+try {
     $o = new UConverter(1, 1);
     $o->toUCallback(1, 1, 1, $b);
     var_dump($o->getErrorCode());
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
 --EXPECT--
-int(27)
+IntlException: UConverter::__construct(): returned error 4: U_FILE_ACCESS_ERROR

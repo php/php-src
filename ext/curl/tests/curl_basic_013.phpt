@@ -2,8 +2,8 @@
 Test curl_opt() function with CURLOPT_HTTP_VERSION/CURL_HTTP_VERSION_1_1
 --CREDITS--
 TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -21,7 +21,6 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
 
   $curl_content = curl_exec($ch);
-  curl_close($ch);
 
   var_dump( $curl_content );
 ?>

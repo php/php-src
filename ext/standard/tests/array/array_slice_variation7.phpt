@@ -33,18 +33,6 @@ $inputs = array(
        -2345 => 'negative',
        ),
 
-       // float data
-/*2*/  'float' => array(
-       10.5 => 'positive',
-       -10.5 => 'negative',
-       .5 => 'half',
-       ),
-
-/*3*/  'extreme floats' => array(
-       12.3456789000e6 => 'large',
-       12.3456789000E-10 => 'small',
-       ),
-
        // null data
 /*4*/ 'null uppercase' => array(
        NULL => 'null 1',
@@ -132,43 +120,7 @@ array(4) {
   string(8) "negative"
 }
 
--- Iteration 2 : key type is float --
-$preserve_keys = TRUE
-array(3) {
-  [10]=>
-  string(8) "positive"
-  [-10]=>
-  string(8) "negative"
-  [0]=>
-  string(4) "half"
-}
-$preserve_keys = FALSE
-array(3) {
-  [0]=>
-  string(8) "positive"
-  [1]=>
-  string(8) "negative"
-  [2]=>
-  string(4) "half"
-}
-
--- Iteration 3 : key type is extreme floats --
-$preserve_keys = TRUE
-array(2) {
-  [12345678]=>
-  string(5) "large"
-  [0]=>
-  string(5) "small"
-}
-$preserve_keys = FALSE
-array(2) {
-  [0]=>
-  string(5) "large"
-  [1]=>
-  string(5) "small"
-}
-
--- Iteration 4 : key type is null uppercase --
+-- Iteration 2 : key type is null uppercase --
 $preserve_keys = TRUE
 array(1) {
   [""]=>
@@ -180,7 +132,7 @@ array(1) {
   string(6) "null 1"
 }
 
--- Iteration 5 : key type is null lowercase --
+-- Iteration 3 : key type is null lowercase --
 $preserve_keys = TRUE
 array(1) {
   [""]=>
@@ -192,7 +144,7 @@ array(1) {
   string(6) "null 2"
 }
 
--- Iteration 6 : key type is bool lowercase --
+-- Iteration 4 : key type is bool lowercase --
 $preserve_keys = TRUE
 array(2) {
   [1]=>
@@ -208,7 +160,7 @@ array(2) {
   string(6) "lowerf"
 }
 
--- Iteration 7 : key type is bool uppercase --
+-- Iteration 5 : key type is bool uppercase --
 $preserve_keys = TRUE
 array(2) {
   [1]=>
@@ -224,7 +176,7 @@ array(2) {
   string(6) "upperf"
 }
 
--- Iteration 8 : key type is empty double quotes --
+-- Iteration 6 : key type is empty double quotes --
 $preserve_keys = TRUE
 array(1) {
   [""]=>
@@ -236,7 +188,7 @@ array(1) {
   string(6) "emptyd"
 }
 
--- Iteration 9 : key type is empty single quotes --
+-- Iteration 7 : key type is empty single quotes --
 $preserve_keys = TRUE
 array(1) {
   [""]=>
@@ -248,7 +200,7 @@ array(1) {
   string(6) "emptys"
 }
 
--- Iteration 10 : key type is string --
+-- Iteration 8 : key type is string --
 $preserve_keys = TRUE
 array(3) {
   ["stringd"]=>
@@ -268,7 +220,7 @@ array(3) {
   string(7) "stringh"
 }
 
--- Iteration 11 : key type is undefined --
+-- Iteration 9 : key type is undefined --
 $preserve_keys = TRUE
 array(1) {
   [""]=>
@@ -280,7 +232,7 @@ array(1) {
   string(9) "undefined"
 }
 
--- Iteration 12 : key type is unset --
+-- Iteration 10 : key type is unset --
 $preserve_keys = TRUE
 array(1) {
   [""]=>

@@ -1,15 +1,9 @@
 --TEST--
 IntlCalendar::getMinimum(), ::getActualMinimum(), ::getGreatestMinimum() basic test
---INI--
-date.timezone=Atlantic/Azores
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('UTC');
 $intlcal->setTime(strtotime('2012-02-29 05:06:07 +0000') * 1000);
@@ -29,4 +23,4 @@ int(1)
 int(1)
 int(1)
 int(1)
-int(1)
+int(1)

@@ -3,6 +3,7 @@ Reflection and property_exists()
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class A
 {
     public    $a = 1;

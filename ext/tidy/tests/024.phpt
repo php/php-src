@@ -1,10 +1,7 @@
 --TEST--
 libtidy handling of 'new-blocklevel-tags'
---SKIPIF--
-<?php
-if (!extension_loaded('tidy')) die('skip');
-if (strtotime(tidy_get_release()) < strtotime('20 january 2007')) die ('skip old libtidy');
-?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 

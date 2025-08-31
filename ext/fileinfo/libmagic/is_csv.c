@@ -32,12 +32,13 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_csv.c,v 1.4 2019/06/26 20:31:31 christos Exp $")
+FILE_RCSID("@(#)$File: is_csv.c,v 1.15 2024/05/18 15:16:13 christos Exp $")
 #endif
 
 #include <string.h>
 #include "magic.h"
 #else
+#define CAST(a, b)	((a)(b))
 #include <sys/types.h>
 #endif
 
@@ -94,8 +95,7 @@ csv_parse(const unsigned char *uc, const unsigned char *ue)
 	size_t nf = 0, tf = 0, nl = 0;
 
 	while (uc < ue) {
-		unsigned char c;
-		switch (c = *uc++) {
+		switch (*uc++) {
 		case '"':
 			// Eat until the matching quote
 			uc = eatquote(uc, ue);
@@ -108,7 +108,7 @@ csv_parse(const unsigned char *uc, const unsigned char *ue)
 			nl++;
 #if CSV_LINES
 			if (nl == CSV_LINES)
-				return tf != 0 && tf == nf;
+				return tf > 1 && tf == nf;
 #endif
 			if (tf == 0) {
 				// First time and no fields, give up
@@ -126,12 +126,13 @@ csv_parse(const unsigned char *uc, const unsigned char *ue)
 			break;
 		}
 	}
-	return tf && nl > 2;
+	return tf > 1 && nl >= 2;
 }
 
 #ifndef TEST
 int
-file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text)
+file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text,
+    const char *code)
 {
 	const unsigned char *uc = CAST(const unsigned char *, b->fbuf);
 	const unsigned char *ue = uc + b->flen;
@@ -150,12 +151,13 @@ file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text)
 		return 1;
 
 	if (mime) {
-		if (file_printf(ms, "application/csv") == -1)
+		if (file_printf(ms, "text/csv") == -1)
 			return -1;
 		return 1;
 	}
 
-	if (file_printf(ms, "CSV text") == -1)
+	if (file_printf(ms, "CSV %s%stext", code ? code : "",
+	    code ? " " : "") == -1)
 		return -1;
 
 	return 1;
@@ -175,7 +177,7 @@ file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text)
 int
 main(int argc, char *argv[])
 {
-	int fd, rv;
+	int fd;
 	struct stat st;
 	unsigned char *p;
 
@@ -185,7 +187,7 @@ main(int argc, char *argv[])
 	if (fstat(fd, &st) == -1)
 		err(EXIT_FAILURE, "Can't stat `%s'", argv[1]);
 
-	if ((p = malloc(st.st_size)) == NULL)
+	if ((p = CAST(unsigned char *, malloc(st.st_size))) == NULL)
 		err(EXIT_FAILURE, "Can't allocate %jd bytes",
 		    (intmax_t)st.st_size);
 	if (read(fd, p, st.st_size) != st.st_size)

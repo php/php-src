@@ -1,7 +1,8 @@
 --TEST--
 SOAP XML Schema 27: SOAP 1.1 Multidimensional array
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";

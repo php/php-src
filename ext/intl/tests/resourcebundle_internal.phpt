@@ -1,7 +1,8 @@
 --TEST--
 Test ResourceBundle::__construct() with internal ICU bundles
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' )) print 'skip intl extension not loaded'; ?>
 <?php if( !defined('INTL_ICU_DATA_VERSION')) print 'skip INTL_ICU_DATA_VERSION constant not defined'; ?>
 <?php if( version_compare(INTL_ICU_DATA_VERSION, '4.4', '<')) print 'skip for ICU >= 4.4'; ?>
 --FILE--

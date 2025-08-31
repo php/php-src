@@ -1,9 +1,12 @@
 --TEST--
 Bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes while curl_multi_exec)
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
-if (!extension_loaded("curl")) {
-    exit("skip curl extension not loaded");
+if (curl_version()['version_number'] === 0x080a00) {
+    // https://github.com/php/php-src/issues/15997
+    die('xfail due to a libcurl bug');
 }
 ?>
 --FILE--

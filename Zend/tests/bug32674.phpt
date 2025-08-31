@@ -9,31 +9,31 @@ class collection implements Iterator {
   public function __construct() {
   }
 
-  public function rewind() {
+  public function rewind(): void {
     reset($this->_elements);
   }
 
-  public function count() {
+  public function count(): int {
     return count($this->_elements);
   }
 
-  public function current() {
+  public function current(): mixed {
     $element = current($this->_elements);
     return $element;
   }
 
-  public function next() {
+  public function next(): void {
     $element = next($this->_elements);
-    return $element;
+    $element;
   }
 
-  public function key() {
+  public function key(): mixed {
     $this->_fillCollection();
     $element = key($this->_elements);
     return $element;
   }
 
-  public function valid() {
+  public function valid(): bool {
     throw new Exception('shit happened');
 
     return ($this->current() !== false);

@@ -1,14 +1,10 @@
 --TEST--
 Test function ftruncate() on zlib wrapper by calling it with its expected arguments
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $f2 = "zlib_wrapper_ftruncate_basic.txt.gz";
 copy($f, $f2);
 

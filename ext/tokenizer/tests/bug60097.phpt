@@ -1,7 +1,7 @@
 --TEST--
 Bug 60097: token_get_all fails to lex nested heredoc
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

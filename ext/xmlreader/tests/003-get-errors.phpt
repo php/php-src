@@ -2,8 +2,8 @@
 XMLReader: libxml2 XML Reader, Get an attribute, with invalid arguments
 --CREDITS--
 Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2017
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 // Set up test data in a new file
@@ -69,7 +69,7 @@ unlink(__DIR__.'/003-get-errors.xml');
 book
 bool(true)
 num: 1
-XMLReader::getAttribute(): Argument #1 ($name) cannot be empty
+XMLReader::getAttribute(): Argument #1 ($name) must not be empty
 num: 1
 NULL
 num: 1

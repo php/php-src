@@ -31,12 +31,6 @@ file_put_contents($filename,"");
 link($filename, $hardlink);
 run_test($hardlink);
 
-unlink($chainlink);
-unlink($softlink);
-unlink($hardlink);
-unlink($filename);
-
-
 function run_test($file) {
     $data = "Here is some data";
     $extra = ", more data";
@@ -48,6 +42,17 @@ function run_test($file) {
 
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$filename = __DIR__.'/filePutContentsVar9.tmp';
+$softlink = __DIR__.'/filePutContentsVar9.SoftLink';
+$hardlink = __DIR__.'/filePutContentsVar9.HardLink';
+$chainlink = __DIR__.'/filePutContentsVar9.ChainLink';
+unlink($chainlink);
+unlink($softlink);
+unlink($hardlink);
+unlink($filename);
 ?>
 --EXPECT--
 *** Testing file_put_contents() : usage variation ***

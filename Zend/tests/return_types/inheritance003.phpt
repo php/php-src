@@ -8,8 +8,8 @@ interface A {
 }
 
 class B implements A {
-    function foo(): StdClass {}
+    function foo(): stdClass {}
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::foo(): StdClass must be compatible with A::foo(): A in %s on line %d
+Fatal error: Declaration of B::foo(): stdClass must be compatible with A::foo(): A in %s on line %d

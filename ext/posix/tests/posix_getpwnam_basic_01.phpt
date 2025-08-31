@@ -3,10 +3,8 @@ Test posix_getpwnam() function : basic functionality
 --CREDITS--
 Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 User Group: PHPSP #phptestfestbrasil
---SKIPIF--
-<?php
-    if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
   $uid = posix_geteuid();
@@ -17,16 +15,16 @@ User Group: PHPSP #phptestfestbrasil
   var_dump($username == $info['name']);
 ?>
 ===DONE====
---EXPECTREGEX--
+--EXPECTF--
 Array
-\(
-    \[name\] => [^\r\n]+
-    \[passwd\] => [^\r\n]+
-    \[uid\] => [0-9]+
-    \[gid\] => [0-9]+
-    \[gecos\] => [^\r\n]*
-    \[dir\] => [^\r\n]+
-    \[shell\] => [^\r\n]+
-\)
-bool\(true\)
+(
+    [name] => %s
+    [passwd] => %S
+    [uid] => %d
+    [gid] => %d
+    [gecos] => %S
+    [dir] => %s
+    [shell] => %s
+)
+bool(true)
 ===DONE====

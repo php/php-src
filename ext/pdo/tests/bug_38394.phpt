@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #38394 (Prepared statement error stops subsequent statements)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'sqlite2', strlen('sqlite2'))) die('skip not relevant for pdo_sqlite2 driver');
@@ -15,8 +16,8 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();
-$db->exec("CREATE TABLE test (a INT, b INT, c INT)");
-$s = $db->prepare("INSERT INTO test (a,b,c) VALUES (:a,:b,:c)");
+$db->exec("CREATE TABLE test38394 (a INT, b INT, c INT)");
+$s = $db->prepare("INSERT INTO test38394 (a,b,c) VALUES (:a,:b,:c)");
 
 $s->execute(array('a' => 1, 'b' => 2, 'c' => 3));
 
@@ -24,7 +25,13 @@ $s->execute(array('a' => 1, 'b' => 2, 'c' => 3));
 
 $s->execute(array('a' => 9, 'b' => 10, 'c' => 11));
 
-var_dump($db->query("SELECT * FROM test")->fetchAll(PDO::FETCH_ASSOC));
+var_dump($db->query("SELECT * FROM test38394")->fetchAll(PDO::FETCH_ASSOC));
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test38394");
 ?>
 --EXPECT--
 array(2) {

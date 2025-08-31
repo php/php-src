@@ -4,7 +4,7 @@ SPL: FixedArray: Trying to access inexistent item
 <?php
 
 try {
-    $a = new SplFixedArray(NULL);
+    $a = new SplFixedArray(0);
     echo $a[0]++;
 } catch (Exception $e) {
     echo $e->getMessage();

@@ -1,7 +1,7 @@
 --TEST--
 Phar object: access through SplFileObject
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--

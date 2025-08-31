@@ -1,8 +1,12 @@
 --TEST--
 Bug 72482 (Ilegal write/read access caused by gdImageAALine overflow)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

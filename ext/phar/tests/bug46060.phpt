@@ -1,7 +1,8 @@
 --TEST--
 Phar: Bug #46060: addEmptyDir() breaks
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (getenv('SKIP_SLOW_TESTS')) die('skip'); ?>
 --INI--
 phar.require_hash=0

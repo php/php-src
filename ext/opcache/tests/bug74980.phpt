@@ -3,8 +3,8 @@ Bug #74980 (Narrowing occurred during type inference)
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

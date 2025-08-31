@@ -1,12 +1,9 @@
 --TEST--
 IntlTimeZone::createEnumeration(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $tz = IntlTimeZone::createEnumeration();
 var_dump(get_class($tz));
 $count = count(iterator_to_array($tz));
@@ -21,4 +18,4 @@ var_dump($count == $count2);
 string(12) "IntlIterator"
 bool(true)
 string(12) "IntlIterator"
-bool(true)
+bool(true)

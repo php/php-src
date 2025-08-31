@@ -1,13 +1,9 @@
 --TEST--
 IntlCalendar::isLenient(), ::setLenient() basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal1 = IntlCalendar::createInstance('UTC');
 var_dump($intlcal1->isLenient());
@@ -23,4 +19,4 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
-bool(true)
+bool(true)

@@ -1,9 +1,10 @@
 --TEST--
 ziparchive::addFromString and FL_OVERWRITE
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php

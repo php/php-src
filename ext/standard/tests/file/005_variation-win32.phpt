@@ -5,6 +5,7 @@ Test fileatime(), filemtime(), filectime() & touch() functions : usage variation
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip Windows-only test');
 }
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
@@ -138,7 +139,7 @@ unlink($file_path."/005_variation_softlink.tmp");
 unlink($file_path."/005_variation_hardlink.tmp");
 unlink($file_path."/005_variation1.tmp");
 unlink($file_path."/005_variation_copy.tmp");
-unlink($file_path."/005_variation_touch.tmp");
+@unlink($file_path."/005_variation_touch.tmp");
 unlink($file_path."/005_variation_touch_fly.tmp");
 unlink($file_path."/005_variation_touch_new.tmp");
 ?>

@@ -5,27 +5,27 @@ SPL: EmptyIterator
 
 class EmptyIteratorEx extends EmptyIterator
 {
-    function rewind()
+    function rewind(): void
     {
         echo __METHOD__ . "\n";
         parent::rewind();
     }
-    function valid()
+    function valid(): false
     {
         echo __METHOD__ . "\n";
         return parent::valid();
     }
-    function current()
+    function current(): never
     {
         echo __METHOD__ . "\n";
-        return parent::current();
+        parent::current();
     }
-    function key()
+    function key(): never
     {
         echo __METHOD__ . "\n";
-        return parent::key();
+        parent::key();
     }
-    function next()
+    function next(): void
     {
         echo __METHOD__ . "\n";
         parent::next();

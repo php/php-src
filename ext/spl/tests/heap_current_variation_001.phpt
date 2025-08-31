@@ -8,7 +8,7 @@ Mike Sullivan <mikesul@php.net>
 
 class myHeap extends SplHeap
 {
-    public function compare($v1, $v2)
+    public function compare($v1, $v2): int
     {
         throw new Exception('');
     }

@@ -1,15 +1,17 @@
 --TEST--
 FFI 009: memcpy(), memcmp(), memset() and sizeof()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-$a = FFI::new("int[3]");
+$ffi = FFI::cdef();
+
+$a = $ffi->new("int[3]");
 $a[1] = 10;
 $a[2] = 20;
-$b = FFI::new("int[4]");
+$b = $ffi->new("int[4]");
 var_dump(FFI::memcmp($b, $a, FFI::sizeof($a)));
 FFI::memcpy($b, $a, FFI::sizeof($a));
 var_dump($b);

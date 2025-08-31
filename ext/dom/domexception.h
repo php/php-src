@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -45,5 +45,8 @@ typedef enum {
 /* Introduced in DOM Level 3: */
 	VALIDATION_ERR                 = 16
 } dom_exception_code;
+
+void php_dom_throw_error(dom_exception_code error_code, bool strict_error);
+void php_dom_throw_error_with_message(dom_exception_code error_code, const char *error_message, bool strict_error);
 
 #endif /* DOM_EXCEPTION_H */

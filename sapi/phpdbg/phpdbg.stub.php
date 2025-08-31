@@ -1,6 +1,28 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+/**
+ * @var string
+ * @cvalue PHPDBG_VERSION
+ */
+const PHPDBG_VERSION = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHPDBG_COLOR_PROMPT
+ */
+const PHPDBG_COLOR_PROMPT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHPDBG_COLOR_NOTICE
+ */
+const PHPDBG_COLOR_NOTICE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHPDBG_COLOR_ERROR
+ */
+const PHPDBG_COLOR_ERROR = UNKNOWN;
 
 function phpdbg_break_next(): void {}
 

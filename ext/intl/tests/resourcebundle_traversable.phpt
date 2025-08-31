@@ -1,7 +1,7 @@
 --TEST--
 Bug #55610: ResourceBundle does not implement Traversable
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
     include "resourcebundle.inc";

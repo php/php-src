@@ -1,7 +1,7 @@
 --TEST--
 libxml_use_internal_errors()
---SKIPIF--
-<?php if (!extension_loaded('libxml')) die('skip libxml extension not available'); ?>
+--EXTENSIONS--
+libxml
 --FILE--
 <?php
 

@@ -1,8 +1,9 @@
 --TEST--
 Bug #70096 (Repeated iptcembed() adds superfluous FF bytes)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!function_exists('imagejpeg')) die('skip imagejpeg not available');
 ?>
 --FILE--
@@ -10,7 +11,6 @@ if (!function_exists('imagejpeg')) die('skip imagejpeg not available');
 $filename = __DIR__ . '/bug70096.jpg';
 $im = imagecreatetruecolor(10, 10);
 imagejpeg($im, $filename);
-imagedestroy($im);
 $data = "\x1C\x02x\x00\x0ATest image"
     . "\x1C\x02t\x00\x22Copyright 2008-2009, The PHP Group";
 $content1 = iptcembed($data, $filename);

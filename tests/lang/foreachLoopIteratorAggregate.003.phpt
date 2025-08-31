@@ -6,31 +6,31 @@ class EnglishMealIterator implements Iterator {
     private $pos=0;
     private $myContent=array("breakfast", "dinner", "tea");
 
-    public function valid() {
+    public function valid(): bool {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return $this->pos<3;
     }
 
-    public function next() {
+    public function next(): void {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
-        return $this->myContent[$this->pos++];
+        $this->myContent[$this->pos++];
     }
 
-    public function rewind() {
+    public function rewind(): void {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos=0;
     }
 
-    public function current() {
+    public function current(): mixed {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return $this->myContent[$this->pos];
     }
 
-    public function key() {
+    public function key(): mixed {
         global $indent;
         echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
         return "meal " . $this->pos;
@@ -39,19 +39,19 @@ class EnglishMealIterator implements Iterator {
 }
 
 class A1 implements IteratorAggregate {
-    function getIterator() {
+    function getIterator(): Traversable {
         return new EnglishMealIterator;
     }
 }
 
 class A2 implements IteratorAggregate {
-    function getIterator() {
+    function getIterator(): Traversable {
         return new A1;
     }
 }
 
 class A3 implements IteratorAggregate {
-    function getIterator() {
+    function getIterator(): Traversable {
         return new A2;
     }
 }

@@ -1,9 +1,10 @@
 --TEST--
 Bug #79576 ("TYPE *" shows unhelpful message when type is not defined)
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-if (!extension_loaded('ffi')) die('skip ffi extension not available');
-if (PHP_DEBUG || getenv('SKIP_ASAN')) echo "xfail: FFI cleanup after parser error is nor implemented";
+if (PHP_DEBUG || getenv('SKIP_ASAN')) echo "xleak FFI cleanup after parser error is not implemented";
 ?>
 --FILE--
 <?php

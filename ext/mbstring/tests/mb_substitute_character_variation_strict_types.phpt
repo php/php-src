@@ -1,9 +1,7 @@
 --TEST--
 Test mb_substitute_character() function : usage variation
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 declare(strict_types=1);
@@ -141,13 +139,13 @@ int(12345)
 --lowercase null--
 int(12345)
 --lowercase true--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, bool given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, true given
 --lowercase false--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, bool given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, false given
 --uppercase TRUE--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, bool given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, true given
 --uppercase FALSE--
-TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, bool given
+TypeError: mb_substitute_character(): Argument #1 ($substitute_character) must be of type string|int|null, false given
 --empty string DQ--
 ValueError: mb_substitute_character(): Argument #1 ($substitute_character) must be "none", "long", "entity" or a valid codepoint
 --empty string SQ--

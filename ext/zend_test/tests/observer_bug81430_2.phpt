@@ -1,13 +1,16 @@
 --TEST--
 Bug #81430 (Attribute instantiation leaves dangling execute_data pointer)
---SKIPIF--
-<?php
-if (!extension_loaded("zend-test")) die("skip zend_test extension not available");
-?>
+--EXTENSIONS--
+zend_test
 --INI--
 memory_limit=20M
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
+--SKIPIF--
+<?php
+if (getenv("USE_ZEND_ALLOC") === "0") die("skip requires zmm");
+?>
 --FILE--
 <?php
 
@@ -27,9 +30,24 @@ call_user_func([$r->getAttributes(A::class)[0], 'newInstance']);
 --EXPECTF--
 <!-- init '%s' -->
 <file '%s'>
-  <!-- init A::__construct() -->
-  <A::__construct>
+  <!-- init ReflectionFunction::__construct() -->
+  <ReflectionFunction::__construct>
+  </ReflectionFunction::__construct>
+  <!-- init ReflectionFunctionAbstract::getAttributes() -->
+  <ReflectionFunctionAbstract::getAttributes>
+  </ReflectionFunctionAbstract::getAttributes>
+  <!-- init ReflectionAttribute::newInstance() -->
+  <ReflectionAttribute::newInstance>
+    <!-- init A::__construct() -->
+    <A::__construct>
+      <!-- init array_map() -->
+      <array_map>
+        <!-- init str_repeat() -->
+        <str_repeat>
 
 Fatal error: Allowed memory size of %d bytes exhausted %s in %s on line %d
-  </A::__construct>
+        </str_repeat>
+      </array_map>
+    </A::__construct>
+  </ReflectionAttribute::newInstance>
 </file '%s'>

@@ -1,7 +1,7 @@
 --TEST--
 Bug #70284 (Use after free vulnerability in unserialize() with GMP)
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 

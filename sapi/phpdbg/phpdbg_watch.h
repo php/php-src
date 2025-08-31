@@ -2,10 +2,10 @@
    +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,	  |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -106,12 +106,7 @@ typedef struct _phpdbg_watch_element {
 typedef struct {
 	/* to watch rehashes (yes, this is not *perfect*, but good enough for everything in PHP...) */
 	phpdbg_watchpoint_t hash_watch; /* must be first element */
-	Bucket *last;
-	zend_string *last_str;
-	zend_ulong last_idx;
-
 	HashTable *ht;
-	size_t data_size;
 	HashTable watches; /* contains phpdbg_watch_element */
 } phpdbg_watch_ht_info;
 
@@ -120,9 +115,9 @@ void phpdbg_destroy_watchpoints(void);
 void phpdbg_purge_watchpoint_tree(void);
 
 #ifndef _WIN32
-int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context);
+zend_result phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context);
 #else
-int phpdbg_watchpoint_segfault_handler(void *addr);
+zend_result phpdbg_watchpoint_segfault_handler(void *addr);
 #endif
 
 void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *watch);
@@ -135,7 +130,7 @@ int phpdbg_print_changed_zvals(void);
 
 void phpdbg_list_watchpoints(void);
 
-void phpdbg_watch_efree(void *ptr);
+void phpdbg_watch_efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 
 static long phpdbg_pagesize;

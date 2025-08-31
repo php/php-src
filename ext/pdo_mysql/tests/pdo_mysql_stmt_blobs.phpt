@@ -1,14 +1,15 @@
 --TEST--
 MySQL Prepared Statements and BLOBs
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     $blobs = array(
@@ -24,11 +25,11 @@ MySQLPDOTest::skip();
 
     function test_blob($db, $offset, $sql_type, $test_len) {
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec(sprintf('CREATE TABLE test(id INT, label %s) ENGINE=%s', $sql_type, PDO_MYSQL_TEST_ENGINE));
+        $db->exec('DROP TABLE IF EXISTS test_stmt_blobs');
+        $db->exec(sprintf('CREATE TABLE test_stmt_blobs(id INT, label %s) ENGINE=%s', $sql_type, PDO_MYSQL_TEST_ENGINE));
 
         $value = str_repeat('a', $test_len);
-        $stmt = $db->prepare('INSERT INTO test(id, label) VALUES (?, ?)');
+        $stmt = $db->prepare('INSERT INTO test_stmt_blobs(id, label) VALUES (?, ?)');
         $stmt->bindValue(1, 1);
         $stmt->bindValue(2, $value);
         if (!$stmt->execute()) {
@@ -37,7 +38,7 @@ MySQLPDOTest::skip();
             return false;
         }
 
-        $stmt = $db->query('SELECT id, label FROM test');
+        $stmt = $db->query('SELECT id, label FROM test_stmt_blobs');
         $id = $label = NULL;
         $stmt->bindColumn(1, $id, PDO::PARAM_INT);
         $stmt->bindColumn(2, $label, PDO::PARAM_LOB);
@@ -48,9 +49,15 @@ MySQLPDOTest::skip();
             return false;
         }
 
-        if ($label !== $value) {
+        if (!is_resource($label)) {
+            printf("[%03d + 3] Returned value is not a stream resource\n", $offset);
+            return false;
+        }
+
+        $contents = stream_get_contents($label);
+        if ($contents !== $value) {
             printf("[%03d + 3] Returned value seems to be wrong (%d vs. %d characters). Check manually\n",
-                $offset, strlen($label), strlen($value));
+                $offset, strlen($contents), strlen($value));
             return false;
         }
 
@@ -60,7 +67,7 @@ MySQLPDOTest::skip();
             return false;
         }
 
-        $stmt = $db->query('SELECT id, label FROM test');
+        $stmt = $db->query('SELECT id, label FROM test_stmt_blobs');
         $ret = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($ret['label'] !== $value) {
@@ -90,9 +97,9 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_stmt_blobs');
 ?>
 --EXPECT--
 done!

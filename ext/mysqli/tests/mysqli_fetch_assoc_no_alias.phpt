@@ -1,13 +1,14 @@
 --TEST--
 mysqli_fetch_assoc()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     if (!$res = mysqli_query($link, "SELECT 1, 2")) {
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -38,7 +39,7 @@ require_once('skipifconnectfailure.inc');
     mysqli_free_result($res);
 
     /* Now do it with unbuffered queries */
-    if (!$res = mysqli_real_query($link, "SELECT 1, 2")) {
+    if (false === mysqli_real_query($link, "SELECT 1, 2")) {
         printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (!$res = mysqli_use_result($link)) {
@@ -48,7 +49,7 @@ require_once('skipifconnectfailure.inc');
     var_dump(mysqli_fetch_assoc($res));
     mysqli_free_result($res);
 
-    if (!$res = mysqli_real_query($link, "SELECT 1 AS a, 2")) {
+    if (false === mysqli_real_query($link, "SELECT 1 AS a, 2")) {
         printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (!$res = mysqli_use_result($link)) {
@@ -58,7 +59,7 @@ require_once('skipifconnectfailure.inc');
     var_dump(mysqli_fetch_assoc($res));
     mysqli_free_result($res);
 
-    if (!$res = mysqli_real_query($link, "SELECT 1 AS a, 2, 2 as '2'")) {
+    if (false === mysqli_real_query($link, "SELECT 1 AS a, 2, 2 as '2'")) {
         printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (!$res = mysqli_use_result($link)) {
@@ -68,7 +69,7 @@ require_once('skipifconnectfailure.inc');
     var_dump(mysqli_fetch_assoc($res));
     mysqli_free_result($res);
 
-    if (!$res = mysqli_real_query($link, "SELECT 1 AS a, 2 as '2', 2")) {
+    if (false === mysqli_real_query($link, "SELECT 1 AS a, 2 as '2', 2")) {
         printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     if (!$res = mysqli_use_result($link)) {

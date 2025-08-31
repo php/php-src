@@ -2,10 +2,8 @@
 UConverter::getSourceEncoding()
 --CREDITS--
 Andy McNeice - PHP Testfest 2017
---INI--
-intl.error_level = E_WARNING
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $c = new UConverter('utf-32', 'ascii');

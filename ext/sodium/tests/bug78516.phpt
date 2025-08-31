@@ -1,8 +1,9 @@
 --TEST--
 Bug #78516 (password_hash(): Memory cost is not in allowed range)
+--EXTENSIONS--
+sodium
 --SKIPIF--
 <?php
-if (!extension_loaded('sodium')) die('skip sodium extension not available');
 if (!defined('PASSWORD_ARGON2ID')) die('skip PASSWORD_ARGON2ID not available');
 ?>
 --FILE--

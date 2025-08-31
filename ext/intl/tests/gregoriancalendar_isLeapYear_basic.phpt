@@ -1,15 +1,12 @@
 --TEST--
 IntlGregorianCalendar::isLeapYear(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+date.timezone=Europe/Amsterdam
+intl.default_locale=nl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-
-date_default_timezone_set('Europe/Amsterdam');
 
 $intlcal = new IntlGregorianCalendar();
 
@@ -23,4 +20,4 @@ var_dump(intlgregcal_is_leap_year($intlcal, 1900));
 bool(true)
 bool(false)
 bool(true)
-bool(false)
+bool(false)

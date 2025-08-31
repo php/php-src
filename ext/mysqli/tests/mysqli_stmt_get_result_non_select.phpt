@@ -1,12 +1,10 @@
 --TEST--
 mysqli_stmt_get_result() - SHOW, DESCRIBE, EXPLAIN
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-
-if (!function_exists('mysqli_stmt_get_result'))
-    die('skip mysqli_stmt_get_result not available');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -15,7 +13,7 @@ if (!function_exists('mysqli_stmt_get_result'))
     mysqli_stmt_bind_result.phpt already. Restrict
     this test case to the basics.
     */
-    require('table.inc');
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -35,12 +33,12 @@ if (!function_exists('mysqli_stmt_get_result'))
             printf("[004] It is very unlikely that SHOW ENGINES returns no data, check manually\n");
         } else {
             $found = false;
-            foreach ($engines as $k => $engine)
-                foreach ($engine as $k => $v)
-                    if (stristr($v, 'MyISAM')) {
-                        $found = true;
-                        break;
-                    }
+            foreach ($engines as $engine) {
+                if (stristr($engine[0], 'MyISAM')) {
+                    $found = true;
+                    break;
+                }
+            }
             if (!$found)
                 printf("[005] It is very unlikely that SHOW ENGINES does not show MyISAM, check manually\n");
         }
@@ -88,7 +86,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

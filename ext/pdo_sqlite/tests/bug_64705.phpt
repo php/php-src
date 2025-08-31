@@ -1,9 +1,7 @@
 --TEST--
 Bug #64705 errorInfo property of PDOException is null when PDO::__construct() fails
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 $dsn = 'sqlite:./bug64705NonExistingDir/bug64705NonExistingDb';
@@ -13,5 +11,5 @@ try {
   var_dump(!empty($e->errorInfo) && is_array($e->errorInfo));
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

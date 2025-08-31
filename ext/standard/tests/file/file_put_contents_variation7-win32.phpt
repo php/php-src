@@ -71,10 +71,20 @@ for($i = 0; $i<count($allDirs); $i++) {
 }
 
 chdir($old_dir_path);
-rmdir($absSubDir);
-rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$mainDir = "filePutContentsVar7.dir";
+$subDir = "filePutContentsVar7Sub";
+$absMainDir = __DIR__."/".$mainDir;
+$absSubDir = $absMainDir."/".$subDir;
+$filename = 'FileGetContentsVar7.tmp';
+$absFile = $absSubDir.'/'.$filename;
+@unlink($absFile);
+rmdir($absSubDir);
+rmdir($absMainDir);
 ?>
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***

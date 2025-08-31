@@ -1,7 +1,7 @@
 --TEST--
 Phar - bug #69720 - Null pointer dereference in phar_get_fp_offset()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {

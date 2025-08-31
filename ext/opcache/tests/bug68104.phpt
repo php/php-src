@@ -6,8 +6,12 @@ manuel <manuel@mausz.at>
 opcache.enable=1
 opcache.enable_cli=1
 disable_functions=dl
+--EXTENSIONS--
+opcache
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+if (getenv('SKIP_ASAN')) die('xleak dl() crashes LSan');
+?>
 --FILE--
 <?php
 var_dump(is_callable("dl"));

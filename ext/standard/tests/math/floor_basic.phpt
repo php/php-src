@@ -33,7 +33,7 @@ foreach($values as $value) {
 };
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing floor() : basic functionality ***
 
 -- floor 0 --
@@ -94,4 +94,6 @@ float(1)
 float(0)
 
 -- floor  --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)

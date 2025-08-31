@@ -19,8 +19,6 @@ EOD;
 $str_arr = array(
   "",
   '',
-  NULL,
-  null,
   FALSE,
   false,
   $heredoc_str
@@ -62,12 +60,6 @@ string(0) ""
 string(0) ""
 string(0) ""
 -- Iteration 5 --
-string(0) ""
-string(0) ""
--- Iteration 6 --
-string(0) ""
-string(0) ""
--- Iteration 7 --
 string(0) ""
 string(0) ""
 *** Done ***

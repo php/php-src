@@ -1,8 +1,9 @@
 --TEST--
 imagecreatefromstring() - WEBP format
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip ext/gd required');
 if (!(imagetypes() & IMG_WEBP)) die('skip WEBP support required');
 ?>
 --FILE--

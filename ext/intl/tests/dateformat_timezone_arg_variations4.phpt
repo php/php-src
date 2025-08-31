@@ -1,13 +1,11 @@
 --TEST--
 IntlDateFormatter: several forms of the timezone arg
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
+--EXTENSIONS--
+intl
+--INI--
+date.timezone=Atlantic/Azores
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("date.timezone", 'Atlantic/Azores');
 
 $ts = strtotime('2012-01-01 00:00:00 UTC');
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug #49490 (XPath namespace prefix conflict).
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();

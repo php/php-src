@@ -1,5 +1,5 @@
 --TEST--
-ZE2 ArrayAccess::offsetGet ambiguties
+ZE2 ArrayAccess::offsetGet ambiguities
 --INI--
 error_reporting=4095
 --FILE--
@@ -8,11 +8,11 @@ class ObjectOne implements ArrayAccess {
 
     public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 
-    function offsetExists($index) {
+    function offsetExists($index): bool {
         echo __METHOD__ . "($index)\n";
         return array_key_exists($index, $this->a);
     }
-    function offsetGet($index) {
+    function offsetGet($index): mixed {
         echo __METHOD__ . "($index)\n";
         switch($index) {
         case 1:
@@ -24,14 +24,14 @@ class ObjectOne implements ArrayAccess {
         }
         return $this->a[$index];
     }
-    function offsetSet($index, $newval) {
+    function offsetSet($index, $newval): void {
         echo __METHOD__ . "($index,$newval)\n";
         if ($index==3) {
             $this->cnt = $newval;
         }
-        return $this->a[$index] = $newval;
+        $this->a[$index] = $newval;
     }
-    function offsetUnset($index) {
+    function offsetUnset($index): void {
         echo __METHOD__ . "($index)\n";
         unset($this->a[$index]);
     }

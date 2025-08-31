@@ -4,8 +4,8 @@ DomDocument::$strictErrorChecking - ensure turning off actually works
 Vincent Tsao <notes4vincent@gmail.com>
 (and Dan Convissor)
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -56,4 +56,4 @@ See if strictErrorChecking is off
 bool(false)
 Should raise PHP error because strictErrorChecking is off
 
-Warning: DOMDocument::createAttribute(): Invalid Character Error in %sDOMDocument_strictErrorChecking_variation.php on line %d
+Warning: DOMDocument::createAttribute(): Invalid Character Error in %s on line %d

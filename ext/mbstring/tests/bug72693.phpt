@@ -1,8 +1,9 @@
 --TEST--
 Bug #72693 (mb_ereg_search increments search position when a match zero-width)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip ext/mbstring required');
 if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--

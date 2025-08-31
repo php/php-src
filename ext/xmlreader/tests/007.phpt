@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, setRelaxNGSchema
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 
@@ -53,4 +53,4 @@ $reader->close();
 --EXPECT--
 file relaxNG: ok
 string relaxNG: ok
-XMLReader::setRelaxNGSchema(): Argument #1 ($filename) cannot be empty
+XMLReader::setRelaxNGSchema(): Argument #1 ($filename) must not be empty

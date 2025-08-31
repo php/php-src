@@ -1,7 +1,7 @@
 --TEST--
 DomDocument::schemaValidate() - invalid path to schema
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

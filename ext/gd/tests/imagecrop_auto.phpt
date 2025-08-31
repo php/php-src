@@ -1,8 +1,13 @@
 --TEST--
 Testing imagecropauto()
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if ( ! extension_loaded('gd') || !function_exists('imagecrop')) die( 'skip GD imagecropauto not present; skipping test' );
+if (!function_exists('imagecrop')) die( 'skip GD imagecropauto not present; skipping test' );
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

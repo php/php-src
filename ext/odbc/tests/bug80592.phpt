@@ -1,5 +1,7 @@
 --TEST--
 Bug #80592 (all floats are the same in ODBC parameters)
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

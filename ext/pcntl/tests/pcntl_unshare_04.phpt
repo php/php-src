@@ -1,9 +1,10 @@
 --TEST--
 pcntl_unshare() with wrong flag
+--EXTENSIONS--
+pcntl
+posix
 --SKIPIF--
 <?php
-if (!extension_loaded("pcntl")) die("skip");
-if (!extension_loaded("posix")) die("skip posix extension not available");
 if (!function_exists("pcntl_unshare")) die("skip pcntl_unshare is not available");
 try {
     if (@pcntl_unshare(42) == false && pcntl_get_last_error() == PCNTL_EPERM) {
@@ -22,4 +23,4 @@ try {
 
 ?>
 --EXPECT--
-pcntl_unshare(): Argument #1 ($flags) must be a combination of CLONE_* flags
+pcntl_unshare(): Argument #1 ($flags) must be a combination of CLONE_* flags, or at least one flag is unsupported by the kernel 

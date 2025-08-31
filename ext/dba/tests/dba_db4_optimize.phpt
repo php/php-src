@@ -1,5 +1,9 @@
 --TEST--
 DBA DB4 Optimize Test
+--EXTENSIONS--
+dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";

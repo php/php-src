@@ -54,9 +54,9 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 			if (!bias)
 				bias = +1;
 		}
-     }
+	}
 
-     return 0;
+	return 0;
 }
 /* }}} */
 
@@ -64,8 +64,8 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 static int
 compare_left(char const **a, char const *aend, char const **b, char const *bend)
 {
-     /* Compare two left-aligned numbers: the first to have a
-        different value wins. */
+	/* Compare two left-aligned numbers: the first to have a
+	   different value wins. */
 	for(;; (*a)++, (*b)++) {
 		if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
 			(*b == bend || !isdigit((int)(unsigned char)**b)))
@@ -78,21 +78,20 @@ compare_left(char const **a, char const *aend, char const **b, char const *bend)
 			 return -1;
 		 else if (**a > **b)
 			 return +1;
-     }
+	}
 
-     return 0;
+	return 0;
 }
 /* }}} */
 
 /* {{{ strnatcmp_ex */
-PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case)
+PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive)
 {
 	unsigned char ca, cb;
 	char const *ap, *bp;
 	char const *aend = a + a_len,
 			   *bend = b + b_len;
 	int fractional, result;
-	short leading = 1;
 
 	if (a_len == 0 || b_len == 0) {
 		return (a_len == b_len ? 0 : (a_len > b_len ? 1 : -1));
@@ -100,19 +99,19 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 
 	ap = a;
 	bp = b;
+
+	ca = *ap; cb = *bp;
+
+	/* skip over leading zeros */
+	while (ca == '0' && (ap+1 < aend) && isdigit((int)(unsigned char)*(ap+1))) {
+		ca = *++ap;
+	}
+
+	while (cb == '0' && (bp+1 < bend) && isdigit((int)(unsigned char)*(bp+1))) {
+		cb = *++bp;
+	}
+
 	while (1) {
-		ca = *ap; cb = *bp;
-
-		/* skip over leading zeros */
-		while (leading && ca == '0' && (ap+1 < aend) && isdigit((int)(unsigned char)*(ap+1))) {
-			ca = *++ap;
-		}
-
-		while (leading && cb == '0' && (bp+1 < bend) && isdigit((int)(unsigned char)*(bp+1))) {
-			cb = *++bp;
-		}
-
-		leading = 0;
 
 		/* Skip consecutive whitespace */
 		while (isspace((int)(unsigned char)ca)) {
@@ -147,7 +146,7 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			}
 		}
 
-		if (fold_case) {
+		if (is_case_insensitive) {
 			ca = toupper((int)(unsigned char)ca);
 			cb = toupper((int)(unsigned char)cb);
 		}
@@ -166,6 +165,8 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			return -1;
 		else if (bp >= bend)
 			return 1;
+
+		ca = *ap; cb = *bp;
 	}
 }
 /* }}} */

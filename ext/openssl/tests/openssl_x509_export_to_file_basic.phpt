@@ -1,7 +1,7 @@
 --TEST--
 openssl_x509_export_to_file() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $outfilename = __DIR__ . "/openssl_x509_export_to_file__outfilename.tmp";

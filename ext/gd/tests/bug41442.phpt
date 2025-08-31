@@ -1,10 +1,13 @@
 --TEST--
 Bug #41442 (imagegd2() under output control)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available.");
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.3.3', '>=')) {
+        die("skip test requires GD 2.3.2 or older");
     }
+
     if (!function_exists("imagegd2")) {
         die("skip GD2 support unavailable");
     }

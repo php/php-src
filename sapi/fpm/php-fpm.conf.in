@@ -53,7 +53,7 @@
 ; Log buffering specifies if the log line is buffered which means that the
 ; line is written in a single write operation. If the value is false, then the
 ; data is written directly into the file descriptor. It is an experimental
-; option that can potentionaly improve logging performance and memory usage
+; option that can potentially improve logging performance and memory usage
 ; for some heavy logging scenarios. This option is ignored if logging to syslog
 ; as it has to be always buffered.
 ; Default value: yes
@@ -112,7 +112,6 @@
 ; - poll       (any POSIX os)
 ; - epoll      (linux >= 2.5.44)
 ; - kqueue     (FreeBSD >= 4.1, OpenBSD >= 2.9, NetBSD >= 2.0)
-; - /dev/poll  (Solaris >= 7)
 ; - port       (Solaris >= 10)
 ; Default Value: not set (auto detection)
 ;events.mechanism = epoll

@@ -1,7 +1,9 @@
 --TEST--
 tidy_get_opt_doc()
+--EXTENSIONS--
+tidy
 --SKIPIF--
-<?php if (!extension_loaded("tidy") || !function_exists('tidy_get_opt_doc')) print "skip"; ?>
+<?php if (!function_exists('tidy_get_opt_doc')) print "skip"; ?>
 --FILE--
 <?php
 

@@ -10,12 +10,14 @@ runs:
       run: |
         set -x
 
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/lib/i386-linux-gnu/pkgconfig"
         ./buildconf --force
         export CFLAGS="-m32 -msse2"
         export CXXFLAGS="-m32 -msse2"
         export LDFLAGS=-L/usr/lib/i386-linux-gnu
         ./configure ${{ inputs.configurationParameters }} \
             --enable-option-checking=fatal \
+            --build=i686-pc-linux-gnu \
             --prefix=/usr \
             --enable-phpdbg \
             --enable-fpm \
@@ -25,6 +27,7 @@ runs:
             --with-pgsql \
             --with-pdo-pgsql \
             --with-pdo-sqlite \
+            --with-pdo-firebird \
             --without-pear \
             --enable-gd \
             --with-jpeg \
@@ -32,13 +35,10 @@ runs:
             --with-freetype \
             --with-xpm \
             --enable-exif \
-            --with-zip \
             --with-zlib \
-            --with-zlib-dir=/usr \
             --enable-soap \
             --enable-xmlreader \
             --with-xsl \
-            --with-tidy \
             --enable-sysvsem \
             --enable-sysvshm \
             --enable-shmop \
@@ -54,11 +54,10 @@ runs:
             --enable-bcmath \
             --enable-calendar \
             --enable-ftp \
-            --with-pspell=/usr \
-            --with-kerberos \
             --enable-sysvmsg \
             --with-ffi \
             --enable-zend-test \
+            --enable-dl-test=shared \
             --with-mhash \
             --with-sodium \
             --enable-dba \

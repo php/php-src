@@ -1,8 +1,9 @@
 --TEST--
 PDO PgSQL PGSQL_ATTR_DISABLE_PREPARES
+--EXTENSIONS--
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -27,7 +28,7 @@ $stmt->execute();
 $first = $stmt->fetchAll();
 
 $stmt3 = $db->prepare("SELECT (?)::int4", array(
-    PDO::PGSQL_ATTR_DISABLE_PREPARES => true));
+    Pdo\Pgsql::ATTR_DISABLE_PREPARES => true));
 $stmt3->execute(array(3));
 var_dump($stmt3->fetch());
 $stmt3->execute(array(4));

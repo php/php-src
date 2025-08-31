@@ -1,7 +1,7 @@
 --TEST--
 Phar: set alias with invalid alias containing / \ : or ;
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -31,10 +31,6 @@ try {
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
-?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECTF--
 Invalid alias "hi/" specified for phar "%sinvalid_alias.phar"

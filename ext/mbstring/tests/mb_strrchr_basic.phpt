@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strrchr() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strrchr') or die("skip mb_strrchr() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 echo "*** Testing mb_strrchr() : basic functionality ***\n";
@@ -20,7 +17,6 @@ var_dump(bin2hex(mb_strrchr($string_ascii, 'd', false, 'ISO-8859-1')));
 var_dump(bin2hex(mb_strrchr($string_ascii, 'd')));
 var_dump(bin2hex(mb_strrchr($string_ascii, 'd', true)));
 
-
 echo "\n-- ASCII string: needle doesn't exist --\n";
 var_dump(mb_strrchr($string_ascii, '123'));
 
@@ -30,10 +26,13 @@ var_dump(bin2hex(mb_strrchr($string_mb, $needle1)));
 var_dump(bin2hex(mb_strrchr($string_mb, $needle1, false, 'utf-8')));
 var_dump(bin2hex(mb_strrchr($string_mb, $needle1, true)));
 
-
 echo "\n-- Multibyte string: needle doesn't exist --\n";
 $needle2 = base64_decode('44GT44KT44Gr44Gh44Gv44CB5LiW55WM');
 var_dump(mb_strrchr($string_mb, $needle2));
+
+echo "\n-- Regression tests --\n";
+// Regression test from when mb_strrchr was being reimplemented
+var_dump(mb_strrchr("\x00t\x00", "", false, "UTF32"));
 
 ?>
 --EXPECT--
@@ -54,3 +53,6 @@ string(0) ""
 
 -- Multibyte string: needle doesn't exist --
 bool(false)
+
+-- Regression tests --
+string(0) ""

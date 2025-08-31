@@ -1,7 +1,7 @@
 --TEST--
 openssl_seal() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 // simple tests
@@ -9,7 +9,7 @@ $a = 1;
 $b = array(1);
 $c = array(1);
 $d = array(1);
-$method = "RC4";
+$method = "AES-128-ECB";
 
 var_dump(openssl_seal($a, $b, $c, $d, $method));
 
@@ -40,13 +40,13 @@ var_dump(openssl_seal($data, $sealed, $ekeys, array($wrong), $method));
 --EXPECTF--
 Warning: openssl_seal(): Not a public key (1th member of pubkeys) in %s on line %d
 bool(false)
-openssl_seal(): Argument #4 ($public_key) cannot be empty
-int(19)
-int(19)
+openssl_seal(): Argument #4 ($public_key) must not be empty
+int(32)
+int(32)
 
 Warning: openssl_seal(): Not a public key (2th member of pubkeys) in %s on line %d
 bool(false)
-openssl_seal(): Argument #4 ($public_key) cannot be empty
+openssl_seal(): Argument #4 ($public_key) must not be empty
 
 Warning: openssl_seal(): Not a public key (1th member of pubkeys) in %s on line %d
 bool(false)

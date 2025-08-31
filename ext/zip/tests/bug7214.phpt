@@ -1,9 +1,7 @@
 --TEST--
 Bug #7214 (zip_entry_read() binary safe)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
- ?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $zip = zip_open(__DIR__."/binarynull.zip");
@@ -19,13 +17,13 @@ if (strlen($contents) == zip_entry_filesize($entry)) {
 
 ?>
 --EXPECTF--
-Deprecated: Function zip_open() is deprecated in %s on line %d
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_filesize() is deprecated in %s on line %d
+Deprecated: Function zip_entry_filesize() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_read() is deprecated in %s on line %d
+Deprecated: Function zip_entry_read() is deprecated since 8.0, use ZipArchive::getFromIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_filesize() is deprecated in %s on line %d
+Deprecated: Function zip_entry_filesize() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 Ok

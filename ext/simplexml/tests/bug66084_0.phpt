@@ -1,7 +1,7 @@
 --TEST--
 Bug #66084 simplexml_load_string() mangles empty node name, var_dump variant
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip simplexml not available"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 echo var_dump(simplexml_load_string('<a><b/><c><x/></c></a>')), "\n";

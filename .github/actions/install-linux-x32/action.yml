@@ -6,7 +6,7 @@ runs:
       run: |
         set -x
         make install
-        mkdir /etc/php.d
+        mkdir -p /etc/php.d
         chmod 777 /etc/php.d
         echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
         echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/pdo_mysql.ini

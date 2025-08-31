@@ -1,13 +1,14 @@
 --TEST--
 Prepared Statement formatter truncates fractional seconds from date/time column (bug #76386)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-require_once("connect.inc");
+require_once 'connect.inc';
 
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die("skip Cannot connect to check required version");
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+}
 
 /* Fractional seconds are supported with servers >= 5.6.4. */
 if (mysqli_get_server_version($link) < 50604) {
@@ -17,7 +18,7 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 // test part 1 - TIMESTAMP(n)
 $link = new mysqli($host, $user, $passwd, $db, $port, $socket);
 $link->query('DROP TABLE IF EXISTS ts_test;');
@@ -44,7 +45,7 @@ if ($stmt) {
     var_dump($ts, $ts2, $ts2b, $ts4, $ts4b, $ts6, $ts6b);
     $stmt->free_result();
 } else {
-    echo('[FIRST][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL);
+    echo '[FIRST][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL;
 }
 $link->close();
 
@@ -66,14 +67,14 @@ $link->query('INSERT INTO t_test VALUES ();');
 $stmt = $link->prepare('SELECT * FROM t_test;');
 if ($stmt) {
     $stmt->execute();
-    $tid = $t = $t2 = $t3 = $t4 = null;
+    $tid = $t = $t2 = $t4 = null;
     $stmt->bind_result($tid, $t, $t2, $t4, $t6);
     while ($stmt->fetch()) {
         var_dump($t, $t2, $t4, $t6);
     }
     $stmt->free_result();
 } else {
-    echo('[SECOND][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL);
+    echo '[SECOND][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL;
 }
 $link->close();
 ?>
@@ -95,7 +96,7 @@ string(13) "11:00:00.4444"
 string(15) "11:00:00.006054"
 --CLEAN--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 $link = new mysqli($host, $user, $passwd, $db, $port, $socket);
 $link->query('DROP TABLE ts_test;');
 $link->query('DROP TABLE t_test;');

@@ -2,9 +2,12 @@
 Function snmp2_walk
 --CREDITS--
 Olivier Doucet Olivier Doucet Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
+if (getenv('SKIP_ASAN')) die('skip Timeouts under ASAN');
 ?>
 --FILE--
 <?php

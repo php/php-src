@@ -1,9 +1,69 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
-class GMP
+/**
+ * @var int
+ * @cvalue GMP_ROUND_ZERO
+ */
+const GMP_ROUND_ZERO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GMP_ROUND_PLUSINF
+ */
+const GMP_ROUND_PLUSINF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GMP_ROUND_MINUSINF
+ */
+const GMP_ROUND_MINUSINF = UNKNOWN;
+
+#ifdef mpir_version
+/**
+ * @var string
+ * @cvalue GMP_MPIR_VERSION_STRING
+ */
+const GMP_MPIR_VERSION = UNKNOWN;
+#endif
+/**
+ * @var string
+ * @cvalue GMP_VERSION_STRING
+ */
+const GMP_VERSION = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue GMP_MSW_FIRST
+ */
+const GMP_MSW_FIRST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GMP_LSW_FIRST
+ */
+const GMP_LSW_FIRST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GMP_LITTLE_ENDIAN
+ */
+const GMP_LITTLE_ENDIAN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GMP_BIG_ENDIAN
+ */
+const GMP_BIG_ENDIAN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GMP_NATIVE_ENDIAN
+ */
+const GMP_NATIVE_ENDIAN = UNKNOWN;
+
+final class GMP
 {
+    public function __construct(int|string $num = 0, int $base = 0) {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 }
 
 function gmp_init(int|string $num, int $base = 0): GMP {}
@@ -22,6 +82,10 @@ function gmp_sub(GMP|int|string $num1, GMP|int|string $num2): GMP {}
 
 function gmp_mul(GMP|int|string $num1, GMP|int|string $num2): GMP {}
 
+/**
+ * @return array<int, GMP>
+ * @refcount 1
+ */
 function gmp_div_qr(GMP|int|string $num1, GMP|int|string $num2, int $rounding_mode = GMP_ROUND_ZERO): array {}
 
 function gmp_div_q(GMP|int|string $num1, GMP|int|string $num2, int $rounding_mode = GMP_ROUND_ZERO): GMP {}
@@ -43,10 +107,18 @@ function gmp_fact(GMP|int|string $num): GMP {}
 
 function gmp_sqrt(GMP|int|string $num): GMP {}
 
+/**
+ * @return array<int, GMP>
+ * @refcount 1
+ */
 function gmp_sqrtrem(GMP|int|string $num): array {}
 
 function gmp_root(GMP|int|string $num, int $nth): GMP {}
 
+/**
+ * @return array<int, GMP>
+ * @refcount 1
+ */
 function gmp_rootrem(GMP|int|string $num, int $nth): array {}
 
 function gmp_pow(GMP|int|string $num, int $exponent): GMP {}
@@ -61,6 +133,10 @@ function gmp_prob_prime(GMP|int|string $num, int $repetitions = 10): int {}
 
 function gmp_gcd(GMP|int|string $num1, GMP|int|string $num2): GMP {}
 
+/**
+ * @return array<string, GMP>
+ * @refcount 1
+ */
 function gmp_gcdext(GMP|int|string $num1, GMP|int|string $num2): array {}
 
 function gmp_lcm(GMP|int|string $num1, GMP|int|string $num2): GMP {}

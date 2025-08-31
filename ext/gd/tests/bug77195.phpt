@@ -1,8 +1,9 @@
 --TEST--
 Bug #77195 (Incorrect error handling of imagecreatefromjpeg())
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!gd_info()['JPEG Support']) die('skip JPEG support not available');
 ?>
 --FILE--

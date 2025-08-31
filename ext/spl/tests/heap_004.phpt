@@ -3,7 +3,7 @@ SPL: SplHeap: exceptions
 --FILE--
 <?php
 class myHeap extends SplHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b): int {
         throw new exception("foo");
     }
 }

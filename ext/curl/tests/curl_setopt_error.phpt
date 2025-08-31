@@ -3,8 +3,8 @@ curl_setopt() basic parameter test
 --CREDITS--
 Paul Sohier
 #phptestfest utrecht
---SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 echo "*** curl_setopt() call with incorrect parameters\n";

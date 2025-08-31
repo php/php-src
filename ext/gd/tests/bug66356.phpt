@@ -1,9 +1,7 @@
 --TEST--
 Bug #66356 (Heap Overflow Vulnerability in imagecrop())
---SKIPIF--
-<?php
-    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $img = imagecreatetruecolor(10, 10);
@@ -40,7 +38,7 @@ Array
     [height] => 10
 )
 
-Warning: imagecrop(): One parameter to a memory allocation multiplication is negative or zero, failing operation gracefully
+Warning: imagecrop(): %cne parameter to a memory allocation multiplication is negative or zero, failing operation gracefully
  in %s on line %d
 bool(false)
 object(GdImage)#2 (0) {
@@ -48,6 +46,6 @@ object(GdImage)#2 (0) {
 object(GdImage)#2 (0) {
 }
 
-Warning: imagecrop(): Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagecrop(): %croduct of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %s on line %d
 bool(false)

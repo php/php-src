@@ -1,7 +1,5 @@
 --TEST--
 highlight_file() and output buffer
---INI--
-log_errors_max_len=4096
 --FILE--
 <?php
 

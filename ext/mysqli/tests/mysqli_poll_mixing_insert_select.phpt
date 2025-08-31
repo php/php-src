@@ -1,17 +1,14 @@
 --TEST--
 mysqli_poll() & INSERT SELECT
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('connect.inc');
-require_once('skipifconnectfailure.inc');
-
-if (!$IS_MYSQLND)
-    die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once('table.inc');
+    require_once 'table.inc';
 
     function get_connection() {
         global $host, $user, $passwd, $db, $port, $socket;
@@ -47,11 +44,11 @@ if (!$IS_MYSQLND)
     mysqli_close($link);
 
     $links = array();
-    for ($i = 0; $i < count($queries); $i++) {
+    foreach ($queries as $query) {
 
         $link = get_connection();
 
-        if (true !== ($tmp = mysqli_query($link, $queries[$i], MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
+        if (true !== ($tmp = mysqli_query($link, $query, MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))
             printf("[002] Expecting true got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
         // WARNING KLUDGE NOTE
@@ -60,7 +57,7 @@ if (!$IS_MYSQLND)
         usleep(20000);
 
         $links[mysqli_thread_id($link)] = array(
-            'query' => $queries[$i],
+            'query' => $query,
             'link' => $link,
             'processed' => false,
         );
@@ -69,7 +66,7 @@ if (!$IS_MYSQLND)
     $saved_errors = array();
     do {
         $poll_links = $poll_errors = $poll_reject = array();
-        foreach ($links as $thread_id => $link) {
+        foreach ($links as $link) {
             if (!$link['processed']) {
                 $poll_links[] = $link['link'];
                 $poll_errors[] = $link['link'];
@@ -96,7 +93,7 @@ if (!$IS_MYSQLND)
 
             if (is_object($res = mysqli_reap_async_query($link))) {
                 // result set object
-                while ($row = mysqli_fetch_assoc($res)) {
+                while (mysqli_fetch_assoc($res)) {
                     // eat up all results
                     ;
                 }
@@ -123,9 +120,9 @@ if (!$IS_MYSQLND)
         }
 
         if (!$res = mysqli_query($link['link'], 'SELECT * FROM test WHERE id = 100'))
-            printf("[005] Expecting true got %s/%s\n", gettype($tmp), var_export($tmp, true));
+            printf("[005] Expecting true got %s/%s\n", gettype($res), var_export($res, true));
         if (!$row = mysqli_fetch_row($res))
-            printf("[006] Expecting true got %s/%s\n", gettype($tmp), var_export($tmp, true));
+            printf("[006] Expecting true got %s/%s\n", gettype($row), var_export($row, true));
 
         mysqli_free_result($res);
     }
@@ -160,7 +157,7 @@ if (!$IS_MYSQLND)
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

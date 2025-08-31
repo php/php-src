@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -174,7 +174,7 @@ static inline void TigerDigest(unsigned char *digest_str, unsigned int digest_le
 	}
 }
 
-PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context)
+PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 	context->state[0] = L64(0x0123456789ABCDEF);
@@ -182,7 +182,7 @@ PHP_HASH_API void PHP_3TIGERInit(PHP_TIGER_CTX *context)
 	context->state[2] = L64(0xF096A5B4C3B2E187);
 }
 
-PHP_HASH_API void PHP_4TIGERInit(PHP_TIGER_CTX *context)
+PHP_HASH_API void PHP_4TIGERInit(PHP_TIGER_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(*context));
 	context->passes = 1;
@@ -239,17 +239,17 @@ PHP_HASH_API void PHP_TIGER192Final(unsigned char digest[24], PHP_TIGER_CTX *con
 	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 
-static int php_tiger_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+static hash_spec_result php_tiger_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
 {
 	PHP_TIGER_CTX *ctx = (PHP_TIGER_CTX *) hash->context;
-	int r = FAILURE;
+	hash_spec_result r = HASH_SPEC_FAILURE;
 	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
-		&& (r = php_hash_unserialize_spec(hash, zv, PHP_TIGER_SPEC)) == SUCCESS
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_TIGER_SPEC)) == HASH_SPEC_SUCCESS
 		&& ctx->length < sizeof(ctx->buffer)) {
-		return SUCCESS;
-	} else {
-		return r != SUCCESS ? r : -2000;
+		return HASH_SPEC_SUCCESS;
 	}
+
+    return r != HASH_SPEC_SUCCESS ? r : CONTEXT_VALIDATION_FAILURE;
 }
 
 #define PHP_HASH_TIGER_OPS(p, b) \

@@ -5,8 +5,25 @@
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
 # Adapted to Git by Stanislav Malyshev <stas@php.net>.
 
+# Check whether gtar is present (GNU tar)
+tar="$(which gtar)"
+tar="${tar:-$(which tar)}"
+
+# Handle GNU vs. BSD checksum utilities
+md5sum="$(which md5sum)"
+md5sum="${md5sum:-$(which md5)}"
+
+# GNU touch is preferred since it handles local TZ in timestamps
+touch="$(which gtouch)"
+touch="${touch:-$(which touch)}"
+
+if [[ $($tar --version) == *"bsdtar"* ]]; then
+  echo "Found bsdtar at $tar, but this script needs GNU tar."
+  exit 1
+fi
+
 # Go to project root directory.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)" || exit
 
 # Process options and arguments.
 while :; do
@@ -57,7 +74,7 @@ EXAMPLES:
     scripts/dev/makedist php-7.4.0RC1
 
   Create release packages from a remote Git repository for the tag php-7.4.0:
-    scripts/dev/makedist --remote=git@git.php.net:php-src.git php-7.4.0
+    scripts/dev/makedist --remote=git@github.com:php/php-src.git php-7.4.0
 HELP
       exit
       ;;
@@ -124,7 +141,7 @@ fi
 
 # Export PHP.
 echo "makedist: Exporting $treeish from $git"
-git archive --format=tar $remote_option --prefix=$prefix/ $treeish | tar xvf - || exit 4
+git archive --format=tar $remote_option --prefix=$prefix/ $treeish | "$tar" xvf - || exit 4
 
 cd $prefix || exit 5
 
@@ -158,20 +175,21 @@ else
 fi
 
 # Reset the modification and access times of all files to be packaged.
-echo "makedist: Resetting the modification and access times of package files."
-touch -c NEWS
-find . -exec touch -r NEWS -c {} \;
+commitDate="$(git log -1 --format=%cI $treeish)"
+echo "makedist: Resetting the modification and access times of package files to $commitDate"
+"$touch" -c -d"$commitDate" NEWS
+find . -exec "$touch" -r NEWS -c {} \;
 
 cd ..
 
 echo ""
 echo "makedist: Creating $prefix.tar archive."
-tar cf "$prefix".tar "$prefix"
+"$tar" cf "$prefix".tar --owner=0 --group=0 --numeric-owner --sort=name "$prefix"
 rm -rf "$prefix" "$prefix".tar.*
 
 echo "makedist: Creating $prefix.tar.gz archive."
 gzip -9 -k "$prefix".tar || exit 6
-md5sum "$prefix".tar.gz
+"$md5sum" "$prefix".tar.gz
 gzip -t "$prefix".tar.gz
 
 sync
@@ -179,7 +197,7 @@ sleep 2
 
 echo "makedist: Creating $prefix.tar.bz2 archive."
 bzip2 -9 -k $prefix.tar || exit 7
-md5sum $prefix.tar.bz2
+"$md5sum" $prefix.tar.bz2
 bzip2 -t $prefix.tar.bz2
 
 sync
@@ -187,7 +205,7 @@ sleep 2
 
 echo "makedist: Creating $prefix.tar.xz archive."
 xz -9 -k "$prefix".tar || exit 9
-md5sum "$prefix".tar.xz
+"$md5sum" "$prefix".tar.xz
 xz -t "$prefix".tar.xz
 
 echo ""

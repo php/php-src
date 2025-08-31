@@ -4,8 +4,8 @@ Test that the directives listed with `opcache_get_configuration` include all tho
 opcache.enable=1
 opcache.enable_cli=1
 opcache.opt_debug_level=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $opts = opcache_get_configuration()['directives'];

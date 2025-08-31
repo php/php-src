@@ -1,7 +1,7 @@
 --TEST--
 curl_copy_handle() allows to post CURLFile multiple times if postfields change
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';
@@ -42,8 +42,14 @@ curl_close($ch3);
 bool(true)
 bool(true)
 string(%d) "abc.txt|application/octet-stream|5"
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 string(%d) "def.txt|application/octet-stream|11"
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 string(%d) "def.txt|application/octet-stream|11"
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 ===DONE===
 --CLEAN--
 <?php

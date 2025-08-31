@@ -36,10 +36,10 @@ try {
 var_dump($str);
 
 $str2 = "F0o B4r 1s bar foo";
-var_dump(str_word_count($str2, NULL, "04"));
-var_dump(str_word_count($str2, NULL, "01"));
-var_dump(str_word_count($str2, NULL, "014"));
-var_dump(str_word_count($str2, NULL, ""));
+var_dump(str_word_count($str2, 0, "04"));
+var_dump(str_word_count($str2, 0, "01"));
+var_dump(str_word_count($str2, 0, "014"));
+var_dump(str_word_count($str2, 0, ""));
 var_dump(str_word_count($str2, 1, "04"));
 var_dump(str_word_count($str2, 1, "01"));
 var_dump(str_word_count($str2, 1, "014"));

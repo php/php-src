@@ -1,8 +1,9 @@
 --TEST--
 Return type for internal functions
+--EXTENSIONS--
+zend_test
 --SKIPIF--
 <?php
-if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
 // Internal function return types are only checked in debug builds
 if (!PHP_DEBUG) die('skip requires debug build');
 ?>

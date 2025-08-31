@@ -1,13 +1,11 @@
 --TEST--
 IntlCalendar::clear() basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=nl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance('UTC');
 var_dump($intlcal->clear());
@@ -35,4 +33,4 @@ int(0)
 int(0)
 int(0)
 int(0)
-float(-3600000)
+float(-3600000)

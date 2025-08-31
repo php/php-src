@@ -1,5 +1,7 @@
 --TEST--
 Error during socket_sendmsg() or socket_recvmsg()
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 

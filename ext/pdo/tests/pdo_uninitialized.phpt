@@ -1,7 +1,7 @@
 --TEST--
 Uninitialized PDO objects
---SKIPIF--
-<?php if (!extension_loaded('pdo')) die('skip'); ?>
+--EXTENSIONS--
+pdo
 --FILE--
 <?php
 
@@ -34,6 +34,6 @@ try {
 
 ?>
 --EXPECT--
-PDO object is not initialized, constructor was not called
-PDO object is uninitialized
-PDO object is uninitialized
+MyPDO object is uninitialized
+MyPDOStatement object is uninitialized
+MyPDOStatement object is uninitialized

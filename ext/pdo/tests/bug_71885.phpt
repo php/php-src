@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: FR #71885 (Allow escaping question mark placeholders)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'pgsql', strlen('pgsql'))) die('skip not relevant for pgsql driver');
@@ -18,9 +19,9 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$db->exec("CREATE TABLE test (a int)");
+$db->exec("CREATE TABLE test71885 (a int)");
 
-$sql = "SELECT * FROM test WHERE a ?? 1";
+$sql = "SELECT * FROM test71885 WHERE a ?? 1";
 
 try {
     $db->exec($sql);
@@ -46,6 +47,12 @@ try {
     var_dump(strpos($e->getMessage(), "?") !== false);
 }
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test71885");
 ?>
 --EXPECT--
 bool(true)

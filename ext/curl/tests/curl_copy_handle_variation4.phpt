@@ -1,7 +1,7 @@
 --TEST--
 curl_copy_handle() allows to post CURLFile multiple times with curl_multi_exec()
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';
@@ -12,7 +12,7 @@ curl_setopt($ch1, CURLOPT_SAFE_UPLOAD, 1);
 curl_setopt($ch1, CURLOPT_URL, "{$host}/get.php?test=file");
 // curl_setopt($ch1, CURLOPT_RETURNTRANSFER, 1);
 
-$filename = __DIR__ . '/АБВ.txt';
+$filename = __DIR__ . '/curl_copy_handle_variation4.txt';
 file_put_contents($filename, "Test.");
 $file = curl_file_create($filename);
 $params = array('file' => $file);
@@ -39,8 +39,8 @@ curl_multi_close($mh);
 ===DONE===
 --EXPECT--
 bool(true)
-АБВ.txt|application/octet-stream|5АБВ.txt|application/octet-stream|5===DONE===
+curl_copy_handle_variation4.txt|application/octet-stream|5curl_copy_handle_variation4.txt|application/octet-stream|5===DONE===
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/АБВ.txt');
+@unlink(__DIR__ . '/curl_copy_handle_variation4.txt');
 ?>

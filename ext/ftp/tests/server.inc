@@ -4,59 +4,21 @@ $socket = null;
 $errno = 0;
 $context = stream_context_create(array('ssl' => array('local_cert' => dirname(__FILE__).'/cert.pem')));
 
-for ($i=0; $i<10 && !$socket; ++$i) {
-    $port = rand(50000, 65535);
-
-    $socket = @stream_socket_server("tcp://127.0.0.1:$port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
-}
-//set anther random port that is not the same as $port
-do{
-    $pasv_port = rand(50000, 65535);
-}while($pasv_port == $port);
-
+$socket = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 if (!$socket) {
     echo "$errstr ($errno)\n";
     die("could not start/bind the ftp server\n");
 }
 
+$socket_name = stream_socket_get_name($socket, false);
+$port = (int) substr($socket_name, strrpos($socket_name, ':') + 1);
+
 $pid = pcntl_fork();
 
-function pasv_listen($action){
-    global $pasv_port, $tmp_file;
-    $tmp_file = 'nm2.php';
-    $pid = pcntl_fork();
-    if($pid === 0){
-        $soc  = stream_socket_server("tcp://127.0.0.1:$pasv_port");
-        $fs = stream_socket_accept($soc, 3);
-        switch ($action) {
-            case 'fget':
-            case 'get':
-            //listen for 3 seconds 3 seconds
-            fputs($fs, "I am passive.\r\n");
-            break;
-            case 'put':
-            file_put_contents($tmp_file,  stream_get_contents($fs));
-            break;
-            case 'list':
-            fputs($fs, "drwxr-x---   3 owner  group      4096 Jul 12 12:16 .\r\n");
-            fputs($fs, "drwxr-x---   3 owner  group      4096 Jul 12 12:16 ..\r\n");
-            fputs($fs, "drwxr-x---   3 owner  group      4096 Jul 12 12:16 public_ftp\r\n");
-            break;
-            case 'list_null':
-            fputs($fs, "\r\n");
-            break;
-        }
-        fclose($fs);
-        exit;
-    }
-}
-
 if ($pid) {
-
     function dump_and_exit($buf)
     {
         var_dump($buf);
-        fclose($GLOBALS['s']);
         exit;
     }
 
@@ -90,9 +52,13 @@ if ($pid) {
 
     if (!$s) die("Error accepting a new connection\n");
 
+    register_shutdown_function(function() use($pid, $s) {
+        fclose($s);
+        pcntl_waitpid($pid, $status);
+    });
+
     fputs($s, "220----- PHP FTP server 0.3 -----\r\n220 Service ready\r\n");
     $buf = fread($s, 2048);
-
 
     function user_auth($buf) {
         global $user, $s, $ssl, $bug37799;
@@ -144,7 +110,6 @@ if ($pid) {
         $user = $m[1];
         if ($user !== 'user' && $user !== 'anonymous') {
             fputs($s, "530 Not logged in.\r\n");
-            fclose($s);
             exit;
         }
 
@@ -164,7 +129,6 @@ if ($pid) {
                 fputs($s, "230 User logged in\r\n");
             } else {
                 fputs($s, "530 Not logged in.\r\n");
-                fclose($s);
                 exit;
             }
         }
@@ -219,6 +183,7 @@ if ($pid) {
             fputs($s, "200 OK\r\n");
 
         } elseif ($buf === "QUIT\r\n") {
+            fputs($s, "221 Bye\r\n");
             break;
 
         } elseif (preg_match("~^PORT (\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\r\n$~", $buf, $m)) {
@@ -422,6 +387,10 @@ if ($pid) {
                 case "/bug73457":
                     fputs($s, "150 File status okay; about to open data connection.\r\n");
                     break;
+                case "gh10521":
+                    // Just a side channel for getting the received file size.
+                    fputs($s, "425 Can't open data connection (".$GLOBALS['rest_pos'].").\r\n");
+                    break;
 
                 default:
                     fputs($s, "550 {$matches[1]}: No such file or directory \r\n");
@@ -437,25 +406,20 @@ if ($pid) {
             $i=0;
 
             if (empty($bug73457)) {
-                do {
-                    if (!empty($ssl)) {
-                        $soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
-                    } else {
-                        $soc = @stream_socket_server("tcp://127.0.0.1:$pasv_port");
-                    }
-                    /* Could bind port, Try another port */
-                    if (!$soc) {
-                        $pasv_port = rand(50000, 65535);
-                    }
-                    $i++;
-                } while ($i<10 && !$soc);
-
+                if (!empty($ssl)) {
+                    $soc = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+                } else {
+                    $soc = stream_socket_server("tcp://127.0.0.1:0");
+                }
                 if (!$soc) {
                     echo "$errstr ($errno)\n";
                     die("could not bind passive port\n");
                 }
+
+                $soc_name = stream_socket_get_name($soc, false);
+                $pasv_port = (int) substr($soc_name, strrpos($soc_name, ':') + 1);
             } else {
-                $pasv_port=1234;
+                $pasv_port = 1234;
             }
 
             $p2 = $pasv_port % ((int) 1 << 8);
@@ -467,7 +431,7 @@ if ($pid) {
             }
 
         } elseif (preg_match('/^EPSV/', $buf, $matches)) {
-            fputs($s, "550 Extended passsive mode not supported.\r\n");
+            fputs($s, "550 Extended passive mode not supported.\r\n");
         } elseif (preg_match('/^SITE EXEC/', $buf, $matches)) {
             fputs($s, "200 OK\r\n");
 
@@ -487,8 +451,27 @@ if ($pid) {
             fputs($s, "200 " . $matches[1] . " bytes allocated\r\n");
 
         }elseif (preg_match('/^LIST www\//', $buf, $matches)) {
-            fputs($s, "226 Transfer complete\r\n");
+            if (empty($pasv)) {
+                fputs($s, "150 File status okay; about to open data connection\r\n");
+                if (!$fs = stream_socket_client("tcp://$host:$port")) {
+                    fputs($s, "425 Can't open data connection\r\n");
+                    continue;
+                }
+            } else {
+                fputs($s, "125 Data connection already open; transfer starting.\r\n");
+                $fs = $pasvs;
+            }
 
+
+            if ((!empty($ssl)) && (!stream_socket_enable_crypto($pasvs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER))) {
+                die("SSLv23 handshake failed.\n");
+            }
+
+            fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
+            fputs($s, "226 Closing data Connection.\r\n");
+            fclose($fs);
+
+            fputs($s, "226 Transfer complete\r\n");
         }elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
             fputs($s, "425 Error establishing connection\r\n");
 
@@ -553,7 +536,6 @@ if ($pid) {
             dump_and_exit($buf);
         }
     }
-    fclose($s);
     exit;
 }
 

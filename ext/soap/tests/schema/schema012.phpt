@@ -1,7 +1,8 @@
 --TEST--
 SOAP XML Schema 12: simpleType/list (inline type) (as array)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";

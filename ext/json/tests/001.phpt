@@ -31,6 +31,8 @@ NULL
 NULL
 NULL
 NULL
+
+Deprecated: json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
 NULL
 object(stdClass)#%d (1) {
   ["test"]=>

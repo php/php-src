@@ -1,8 +1,9 @@
 --TEST--
 Bug #39780 (PNG image with CRC/data error raises a fatal error)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) die("skip gd extension not available\n");
     if (!GD_BUNDLED) die("skip requires bundled GD library\n");
 ?>
 --FILE--

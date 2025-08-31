@@ -1,13 +1,14 @@
 --TEST--
 PS using cursor and returning multiple result sets
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . '/connect.inc');
+require_once __DIR__ . '/connect.inc';
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $db = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
@@ -70,6 +71,13 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->next_result();
 
+?>
+--CLEAN--
+<?php
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP PROCEDURE IF EXISTS testPs');
+$link->close();
 ?>
 --EXPECT--
 use_result:

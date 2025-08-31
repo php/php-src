@@ -1,9 +1,10 @@
 --TEST--
 Observer: Generator with explicit return
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
 --FILE--
@@ -28,8 +29,8 @@ function doSomething() {
 echo doSomething() . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_generator_%d.php' -->
-<file '%s%eobserver_generator_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
   <!-- init doSomething() -->
   <doSomething>
     <!-- init getResults() -->
@@ -44,7 +45,10 @@ echo doSomething() . PHP_EOL;
 12
     <getResults>
     </getResults:1337>
+    <!-- init Generator::getReturn() -->
+    <Generator::getReturn>
+    </Generator::getReturn:1337>
 1337
   </doSomething:'Done'>
 Done
-</file '%s%eobserver_generator_%d.php'>
+</file '%s'>

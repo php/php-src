@@ -1,8 +1,9 @@
 --TEST--
 imagecreatefromwbmp with invalid wbmp
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!function_exists('imagecreatefromwbmp')) die("skip gd extension not available\n");
     if (GD_BUNDLED) die("skip requires extern GD\n");
 ?>
 --FILE--
@@ -42,6 +43,6 @@ $im = imagecreatefromwbmp($filename);
 unlink($filename);
 ?>
 --EXPECTF--
-gd warning: Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagecreatefromwbmp(): %croduct of memory allocation multiplication would exceed INT_MAX, failing operation gracefully%win %s on line %d
 
 Warning: imagecreatefromwbmp(): "%s_tmp.wbmp" is not a valid WBMP file in %s on line %d

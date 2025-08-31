@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -50,8 +50,6 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	obj = emalloc(sizeof(*obj));
 	memset(obj, 0, sizeof(*obj));
 	obj->code_page = codepage;
-	obj->ce = php_com_variant_class_entry;
-	obj->zo.ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
 	V_VT(&obj->v) = VT_DISPATCH;
@@ -61,7 +59,6 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
 
 	zend_object_std_init(&obj->zo, php_com_variant_class_entry);
-	obj->zo.handlers = &php_com_object_handlers;
 	ZVAL_OBJ(z, &obj->zo);
 }
 
@@ -73,8 +70,6 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 	obj = emalloc(sizeof(*obj));
 	memset(obj, 0, sizeof(*obj));
 	obj->code_page = codepage;
-	obj->ce = php_com_variant_class_entry;
-	obj->zo.ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
 	VariantCopyInd(&obj->v, v);
@@ -85,13 +80,12 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 	}
 
 	zend_object_std_init(&obj->zo, php_com_variant_class_entry);
-	obj->zo.handlers = &php_com_object_handlers;
 	ZVAL_OBJ(z, &obj->zo);
 }
 
 /* this is a convenience function for fetching a particular
  * element from a (possibly multi-dimensional) safe array */
-PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1)
+PHP_COM_DOTNET_API bool php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1)
 {
 	UINT dims;
 	LONG lbound, ubound;

@@ -1,9 +1,7 @@
 --TEST--
 Bug #46739 (array returned by curl_getinfo should contain content_type key)
---SKIPIF--
-<?php
-include 'skipif.inc';
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';

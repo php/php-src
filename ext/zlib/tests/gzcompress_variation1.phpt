@@ -1,26 +1,22 @@
 --TEST--
 Test gzcompress() function : variation
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-include(__DIR__ . '/data.inc');
+include(__DIR__ . '/data/data.inc');
 
 echo "*** Testing gzcompress() : variation ***\n";
 
 echo "\n-- Testing multiple compression --\n";
 $output = gzcompress($data);
-var_dump( md5($output));
-var_dump(md5(gzcompress($output)));
+var_dump(strlen($output));
+var_dump(strlen(gzcompress($output)));
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing gzcompress() : variation ***
 
 -- Testing multiple compression --
-string(32) "764809aef15bb34cb73ad49ecb600d99"
-string(32) "eba942bc2061f23ea8688cc5101872a4"
+int(1%d)
+int(1%d)

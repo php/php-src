@@ -1,9 +1,7 @@
 --TEST--
 Bug #80545 (bcadd('a', 'a') and bcadd('1', 'a') doesn't throw an exception)
---SKIPIF--
-<?php
-if (!extension_loaded('bcmath')) die('skip bcmath extension not available');
-?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 

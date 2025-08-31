@@ -3,8 +3,8 @@ Test curl_copy_handle() after exec()
 --CREDITS--
 Rick Buitenman <rick@meritos.nl>
 #testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -23,10 +23,9 @@ Rick Buitenman <rick@meritos.nl>
 
   $curl_content = curl_exec($ch);
   $copy = curl_copy_handle($ch);
-  curl_close($ch);
+  $ch = null;
 
   $curl_content_copy = curl_exec($copy);
-  curl_close($copy);
 
   var_dump( $curl_content_copy );
 ?>

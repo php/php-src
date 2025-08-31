@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,7 +22,7 @@
  * */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -56,6 +56,14 @@ typedef struct {
 } php_com_saproxy_iter;
 
 #define SA_FETCH(zv)			(php_com_saproxy*)Z_OBJ_P(zv)
+
+zend_object *php_com_saproxy_create_object(zend_class_entry *class_type)
+{
+	php_com_saproxy *intern = emalloc(sizeof(*intern));
+	memset(intern, 0, sizeof(*intern));
+	zend_object_std_init(&intern->std, class_type);
+	return &intern->std;
+}
 
 static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, int ndims)
 {
@@ -111,8 +119,8 @@ static zval *saproxy_read_dimension(zend_object *object, zval *offset, int type,
 		}
 		VariantInit(&v);
 
-		res = php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
-			   	Z_STRLEN(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
+		res = php_com_do_invoke(proxy->obj, Z_STR(proxy->indices[0]),
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
 			   	proxy->dimensions, args, 0);
 
 		efree(args);
@@ -228,8 +236,8 @@ static void saproxy_write_dimension(zend_object *object, zval *offset, zval *val
 			return;
 		}
 		VariantInit(&v);
-		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
-					Z_STRLEN(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
+		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STR(proxy->indices[0]),
+					DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
 					args, 0)) {
 			VariantClear(&v);
 		}
@@ -317,7 +325,7 @@ static zend_function *saproxy_method_get(zend_object **object, zend_string *name
 
 static zend_function *saproxy_constructor_get(zend_object *object)
 {
-	/* user cannot instantiate */
+	zend_throw_error(NULL, "Cannot directly construct com_safeproxy_array; it is for internal usage only");
 	return NULL;
 }
 
@@ -332,12 +340,12 @@ static int saproxy_objects_compare(zval *object1, zval *object2)
 	return -1;
 }
 
-static int saproxy_object_cast(zend_object *readobj, zval *writeobj, int type)
+static zend_result saproxy_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zend_object *object, zend_long *count)
+static zend_result saproxy_count_elements(zend_object *object, zend_long *count)
 {
 	php_com_saproxy *proxy = (php_com_saproxy*) object;
 	LONG ubound, lbound;
@@ -365,7 +373,9 @@ static void saproxy_free_storage(zend_object *object)
 //???		}
 //???	}
 
-	OBJ_RELEASE(&proxy->obj->zo);
+	if (proxy->obj != NULL) {
+		OBJ_RELEASE(&proxy->obj->zo);
+	}
 
 	zend_object_std_dtor(object);
 
@@ -392,6 +402,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_free_storage,
 	zend_objects_destroy_object,
 	saproxy_clone,
+	NULL, /* clone_with */
 	saproxy_property_read,
 	saproxy_property_write,
 	saproxy_read_dimension,
@@ -415,7 +426,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	NULL,									/* get_properties_for */
 };
 
-int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index)
+void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index)
 {
 	php_com_saproxy *proxy, *rel = NULL;
 
@@ -440,10 +451,7 @@ int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index
 	ZVAL_DUP(&proxy->indices[proxy->dimensions-1], index);
 
 	zend_object_std_init(&proxy->std, php_com_saproxy_class_entry);
-	proxy->std.handlers = &php_com_saproxy_handlers;
 	ZVAL_OBJ(proxy_out, &proxy->std);
-
-	return 1;
 }
 
 /* iterator */
@@ -458,7 +466,7 @@ static void saproxy_iter_dtor(zend_object_iterator *iter)
 	efree(I);
 }
 
-static int saproxy_iter_valid(zend_object_iterator *iter)
+static zend_result saproxy_iter_valid(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 

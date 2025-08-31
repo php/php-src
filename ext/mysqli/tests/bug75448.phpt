@@ -1,9 +1,10 @@
 --TEST--
 mysqli_prepare() called on a closed connection should return FALSE (bug #75448)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

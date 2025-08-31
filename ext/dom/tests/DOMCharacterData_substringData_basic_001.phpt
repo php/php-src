@@ -3,8 +3,8 @@ __DOMCharacterData::substringData pull mid section of string
 --CREDITS--
 Nic Rosental nicrosental@gmail.com
 # TestFest Atlanta 2009-5-28
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

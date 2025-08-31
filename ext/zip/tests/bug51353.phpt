@@ -1,9 +1,11 @@
 --TEST--
 Bug #51353 ZIP64 problem, archive with 100000 items
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
-if(!extension_loaded('zip')) die('skip');
 die('skip the test might get very long, activate it manually');
+?>
 --FILE--
 <?php
 /* This test might get very long depending on the mashine it's running on. Therefore
@@ -38,6 +40,7 @@ if ($r) {
 }
 
 echo "OK";
+?>
 --CLEAN--
 <?php
 $base_path = __DIR__;

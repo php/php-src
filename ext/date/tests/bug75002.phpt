@@ -16,7 +16,7 @@ foreach (new aaa($start) as $y) {
 ?>
 ==DONE==
 --EXPECTF--
-Fatal error: Uncaught Error: DatePeriod has not been initialized correctly in %sbug75002.php:%d
+Fatal error: Uncaught DateObjectError: Object of type DatePeriod has not been correctly initialized by calling parent::__construct() in its constructor in %sbug75002.php:%d
 Stack trace:
 #0 {main}
   thrown in %sbug75002.php on line %d

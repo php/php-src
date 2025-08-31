@@ -1,9 +1,10 @@
 --TEST--
 Phar: test edge cases of intercepted functions when the underlying phar archive has been unlinkArchive()d
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php
 if (defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip");
-if (!extension_loaded("phar")) die("skip");
 ?>
 --INI--
 phar.readonly=0
@@ -26,8 +27,10 @@ opendir("foo/hi");
 include $pname . '/foo/hi';
 ?>
 --CLEAN--
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.php'); ?>
+<?php
+@unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.php');
+?>
 --EXPECTF--
 Warning: readfile(foo/hi): Failed to open stream: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
 

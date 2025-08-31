@@ -13,4 +13,4 @@ function test() {
 }
 ?>
 --EXPECTF--
-#0  test(Array ([0] => Array ([0] => a),[1] => b Object ())) called at [%sbug73916.php:%d]
+#0 %s(%d): test(Array)

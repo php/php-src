@@ -1,9 +1,10 @@
 --TEST--
 Bug #74432, BC issue on undocumented connect string
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -11,7 +12,7 @@ require_once('skipifconnectfailure.inc');
         supported alternative, ensure changes doesn't cause BC breach. Otherwise,
         the test should be removed once the undocumented behavior changes. */
 
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $handle = mysqli_connect("$host:$port", $user, $passwd);
 

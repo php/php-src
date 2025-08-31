@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,9 +18,11 @@
 #ifndef PHP_GD_H
 #define PHP_GD_H
 
+#include "zend_string.h"
+#include "php_streams.h"
+
 #if defined(HAVE_LIBGD) || defined(HAVE_GD_BUNDLED)
 
-/* open_basedir and safe_mode checks */
 #define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                       \
 	if (!filename || php_check_open_basedir(filename)) {      \
 		php_error_docref(NULL, E_WARNING, errormsg);      \
@@ -39,6 +41,7 @@
 #define PHP_GDIMG_TYPE_WEBP     11
 #define PHP_GDIMG_TYPE_BMP      12
 #define PHP_GDIMG_TYPE_TGA      13
+#define PHP_GDIMG_TYPE_AVIF     14
 
 #define PHP_IMG_GIF    1
 #define PHP_IMG_JPG    2
@@ -49,6 +52,36 @@
 #define PHP_IMG_WEBP  32
 #define PHP_IMG_BMP   64
 #define PHP_IMG_TGA  128
+#define PHP_IMG_AVIF 256
+
+/* Section Filters Declarations */
+/* IMPORTANT NOTE FOR NEW FILTER
+ * Do not forget to update:
+ * IMAGE_FILTER_MAX: define the last filter index
+ * IMAGE_FILTER_MAX_ARGS: define the biggest amount of arguments
+ * image_filter array in PHP_FUNCTION(imagefilter)
+ * */
+#define IMAGE_FILTER_NEGATE         0
+#define IMAGE_FILTER_GRAYSCALE      1
+#define IMAGE_FILTER_BRIGHTNESS     2
+#define IMAGE_FILTER_CONTRAST       3
+#define IMAGE_FILTER_COLORIZE       4
+#define IMAGE_FILTER_EDGEDETECT     5
+#define IMAGE_FILTER_EMBOSS         6
+#define IMAGE_FILTER_GAUSSIAN_BLUR  7
+#define IMAGE_FILTER_SELECTIVE_BLUR 8
+#define IMAGE_FILTER_MEAN_REMOVAL   9
+#define IMAGE_FILTER_SMOOTH         10
+#define IMAGE_FILTER_PIXELATE       11
+#define IMAGE_FILTER_SCATTER		12
+#define IMAGE_FILTER_MAX            12
+#define IMAGE_FILTER_MAX_ARGS       6
+
+#ifdef HAVE_GD_BUNDLED
+#define GD_BUNDLED 1
+#else
+#define GD_BUNDLED 0
+#endif
 
 #ifdef PHP_WIN32
 #	ifdef PHP_GD_EXPORTS
@@ -68,6 +101,7 @@ PHPAPI extern const char php_sig_png[8];
 PHPAPI extern const char php_sig_bmp[2];
 PHPAPI extern const char php_sig_riff[4];
 PHPAPI extern const char php_sig_webp[4];
+PHPAPI extern const char php_sig_avif[4];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry

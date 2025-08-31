@@ -3,6 +3,7 @@ Bug #78662 (stream_write bad error detection)
 --FILE--
 <?php
 class FailedStream {
+    public $context;
     function stream_open($path, $mode, $options, &$opened_path)
     {
         return true;

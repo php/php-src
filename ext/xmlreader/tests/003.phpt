@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, attributes test
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 $filename = __DIR__ . '/_003.xml';
@@ -88,4 +88,4 @@ num: 1
 idx: 2
 bool(false)
 bool(false)
-XMLReader::moveToAttribute(): Argument #1 ($name) cannot be empty
+XMLReader::moveToAttribute(): Argument #1 ($name) must not be empty

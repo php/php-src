@@ -1,13 +1,9 @@
 --TEST--
 IntlCalendar::getNow() basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $now = IntlCalendar::getNow();
 $proc_now = intlcal_get_now();

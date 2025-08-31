@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strripos() function : with empty needle
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strripos') or die("skip mb_strripos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

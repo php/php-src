@@ -1,10 +1,9 @@
 --TEST--
 imagefttext() function test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available.");
-    }
     if (!function_exists("imagefttext")) {
         die("skip imagefttext() not available.");
     }
@@ -41,11 +40,10 @@ imagefttext() function test
 
     $im = imagecreate(256, 256);
     var_dump(testrun($im, $fontfile_8859));
-    imagedestroy($im);
+    $im = null;
 
     $im = imagecreatetruecolor(256, 256);
     var_dump(testrun($im, $fontfile_8859));
-    imagedestroy($im);
 ?>
 --EXPECT--
 bool(true)

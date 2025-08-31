@@ -1,8 +1,9 @@
 --TEST--
 Test mb_ereg() function : usage variations - different regex features in $pattern
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
 ?>
 --FILE--

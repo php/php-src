@@ -1,5 +1,7 @@
 --TEST--
 Type inference for $ary[$idx]->prop +=
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

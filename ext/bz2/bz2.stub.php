@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 /**
  * @param string|resource $file
@@ -30,13 +30,17 @@ function bzflush($bz): bool {}
 function bzclose($bz): bool {}
 
 /** @param resource $bz */
-function bzerrno($bz): int|false {}
+function bzerrno($bz): int {}
 
 /** @param resource $bz */
-function bzerrstr($bz): string|false {}
+function bzerrstr($bz): string {}
 
-/** @param resource $bz */
-function bzerror($bz): array|false {}
+/**
+ * @param resource $bz
+ * @return array<string, int|string>
+ * @refcount 1
+ */
+function bzerror($bz): array {}
 
 function bzcompress(string $data, int $block_size = 4, int $work_factor = 0): string|int {}
 

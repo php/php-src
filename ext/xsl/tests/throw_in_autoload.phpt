@@ -1,9 +1,7 @@
 --TEST--
 Fork of bug33853.phpt with exit replaced by throw
---SKIPIF--
-<?php
-if (!extension_loaded('xsl')) die('skip xsl not loaded');
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 
@@ -30,12 +28,14 @@ $proc->registerPhpFunctions();
 $xsl = $proc->importStylesheet($xsl);
 try {
     $newdom = $proc->transformToDoc($inputdom);
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
+    echo $e->getPrevious()->getMessage(), "\n";
 }
 ?>
 ===DONE===
 --EXPECT--
 string(4) "TeSt"
+Invalid callback TeSt::dateLang, class "TeSt" not found
 Autoload exception
 ===DONE===

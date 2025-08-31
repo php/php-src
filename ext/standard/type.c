@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,7 +15,6 @@
 */
 
 #include "php.h"
-#include "php_incomplete_class.h"
 
 /* {{{ Returns the type of the variable */
 PHP_FUNCTION(gettype)
@@ -100,31 +99,31 @@ PHP_FUNCTION(settype)
 	} else {
 		ptr = Z_REFVAL_P(var);
 	}
-	if (zend_string_equals_literal_ci(type, "integer")) {
+	if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INTEGER))) {
 		convert_to_long(ptr);
-	} else if (zend_string_equals_literal_ci(type, "int")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_INT))) {
 		convert_to_long(ptr);
-	} else if (zend_string_equals_literal_ci(type, "float")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_FLOAT))) {
 		convert_to_double(ptr);
-	} else if (zend_string_equals_literal_ci(type, "double")) { /* deprecated */
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_DOUBLE))) { /* deprecated */
 		convert_to_double(ptr);
-	} else if (zend_string_equals_literal_ci(type, "string")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_STRING))) {
 		convert_to_string(ptr);
-	} else if (zend_string_equals_literal_ci(type, "array")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_ARRAY))) {
 		convert_to_array(ptr);
-	} else if (zend_string_equals_literal_ci(type, "object")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_OBJECT))) {
 		convert_to_object(ptr);
-	} else if (zend_string_equals_literal_ci(type, "bool")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_BOOL))) {
 		convert_to_boolean(ptr);
-	} else if (zend_string_equals_literal_ci(type, "boolean")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_BOOLEAN))) {
 		convert_to_boolean(ptr);
-	} else if (zend_string_equals_literal_ci(type, "null")) {
+	} else if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE))) {
 		convert_to_null(ptr);
 	} else {
 		if (ptr == &tmp) {
 			zval_ptr_dtor(&tmp);
 		}
-		if (zend_string_equals_literal_ci(type, "resource")) {
+		if (zend_string_equals_ci(type, ZSTR_KNOWN(ZEND_STR_RESOURCE))) {
 			zend_value_error("Cannot convert to resource type");
 		} else {
 			zend_argument_value_error(2, "must be a valid type");
@@ -321,6 +320,19 @@ PHP_FUNCTION(is_array)
 }
 /* }}} */
 
+/* {{{ Returns true if $array is an array whose keys are all numeric, sequential, and start at 0 */
+PHP_FUNCTION(array_is_list)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_array_is_list(array));
+}
+/* }}} */
+
 /* {{{ Returns true if variable is an object
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_object)
@@ -329,15 +341,8 @@ PHP_FUNCTION(is_object)
 }
 /* }}} */
 
-/* {{{ Returns true if value is a number or a numeric string */
-PHP_FUNCTION(is_numeric)
+static inline void _zend_is_numeric(zval *return_value, zval *arg)
 {
-	zval *arg;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
-	ZEND_PARSE_PARAMETERS_END();
-
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -357,7 +362,28 @@ PHP_FUNCTION(is_numeric)
 			break;
 	}
 }
+
+/* {{{ Returns true if value is a number or a numeric string */
+PHP_FUNCTION(is_numeric)
+{
+	zval *arg;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	_zend_is_numeric(return_value, arg);
+}
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(is_numeric, 1)
+{
+	zval *arg;
+
+	Z_FLF_PARAM_ZVAL(1, arg);
+
+	_zend_is_numeric(return_value, arg);
+}
 
 /* {{{ Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)
@@ -389,9 +415,8 @@ PHP_FUNCTION(is_callable)
 {
 	zval *var, *callable_name = NULL;
 	zend_string *name;
-	char *error;
-	zend_bool retval;
-	zend_bool syntax_only = 0;
+	bool retval;
+	bool syntax_only = 0;
 	int check_flags = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -405,14 +430,10 @@ PHP_FUNCTION(is_callable)
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
+		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, NULL);
 		ZEND_TRY_ASSIGN_REF_STR(callable_name, name);
 	} else {
-		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error);
-	}
-	if (error) {
-		/* ignore errors */
-		efree(error);
+		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, NULL);
 	}
 
 	RETURN_BOOL(retval);

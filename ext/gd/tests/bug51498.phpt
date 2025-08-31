@@ -1,10 +1,14 @@
 --TEST--
 Bug #51498 (imagefilledellipse does not work for large circles)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die("skip gd extension not available");
 if (!GD_BUNDLED && version_compare(GD_VERSION, "2.3.0") < 0) {
     die("skip test requires GD 2.3.0 or higher");
+}
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
 }
 ?>
 --FILE--

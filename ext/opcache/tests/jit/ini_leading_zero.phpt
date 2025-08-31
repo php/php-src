@@ -4,8 +4,8 @@ Leading zero in opcache.jit option
 opcache.enable=1
 opcache.enable_cli=1
 opcache.jit=0205
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 ===DONE===
 --EXPECT--

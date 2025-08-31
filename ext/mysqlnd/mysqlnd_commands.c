@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -22,6 +22,7 @@
 #include "mysqlnd_auth.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd_charset.h"
 
 
 /* {{{ mysqlnd_command::set_option */
@@ -106,18 +107,6 @@ MYSQLND_METHOD(mysqlnd_command, init_db)(MYSQLND_CONN_DATA * const conn, const M
 	  a protocol of giving back -1. Thus we have to follow it :(
 	*/
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
-	if (ret == PASS) {
-		if (conn->connect_or_select_db.s) {
-			mnd_pefree(conn->connect_or_select_db.s, conn->persistent);
-		}
-		conn->connect_or_select_db.s = mnd_pestrndup(db.s, db.l, conn->persistent);
-		conn->connect_or_select_db.l = db.l;
-		if (!conn->connect_or_select_db.s) {
-			/* OOM */
-			SET_OOM_ERROR(conn->error_info);
-			ret = FAIL;
-		}
-	}
 
 	DBG_RETURN(ret);
 }
@@ -192,7 +181,7 @@ MYSQLND_METHOD(mysqlnd_command, statistics)(MYSQLND_CONN_DATA * const conn, zend
 
 /* {{{ mysqlnd_command::process_kill */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_command, process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const zend_bool read_response)
+MYSQLND_METHOD(mysqlnd_command, process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const bool read_response)
 {
 	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
@@ -259,35 +248,6 @@ MYSQLND_METHOD(mysqlnd_command, refresh)(MYSQLND_CONN_DATA * const conn, const u
 /* }}} */
 
 
-/* {{{ mysqlnd_command::shutdown */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_command, shutdown)(MYSQLND_CONN_DATA * const conn, const uint8_t level)
-{
-	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
-	zend_uchar bits[1];
-	enum_func_status ret = FAIL;
-
-	DBG_ENTER("mysqlnd_command::shutdown");
-	int1store(bits, level);
-
-	ret = send_command(conn->payload_decoder_factory, COM_SHUTDOWN, bits, 1, FALSE,
-					   &conn->state,
-					   conn->error_info,
-					   conn->upsert_status,
-					   conn->stats,
-					   conn->m->send_close,
-					   conn);
-	if (PASS == ret) {
-		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_OK_PACKET, FALSE, COM_SHUTDOWN, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message);
-	}
-
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_command::quit */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, quit)(MYSQLND_CONN_DATA * const conn)
@@ -338,7 +298,7 @@ MYSQLND_METHOD(mysqlnd_command, query)(MYSQLND_CONN_DATA * const conn, MYSQLND_C
 
 /* {{{ mysqlnd_command::change_user */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_command, change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const zend_bool silent)
+MYSQLND_METHOD(mysqlnd_command, change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const bool silent)
 {
 	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
 	enum_func_status ret = FAIL;
@@ -529,7 +489,7 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 
 	DBG_ENTER("mysqlnd_command::enable_ssl");
 
-	DBG_INF_FMT("client_capability_flags=%lu", client_capabilities);
+	DBG_INF_FMT("client_capability_flags=%zu", client_capabilities);
 	DBG_INF_FMT("CLIENT_LONG_PASSWORD=	%d", client_capabilities & CLIENT_LONG_PASSWORD? 1:0);
 	DBG_INF_FMT("CLIENT_FOUND_ROWS=		%d", client_capabilities & CLIENT_FOUND_ROWS? 1:0);
 	DBG_INF_FMT("CLIENT_LONG_FLAG=		%d", client_capabilities & CLIENT_LONG_FLAG? 1:0);
@@ -563,7 +523,7 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 
 #ifdef MYSQLND_SSL_SUPPORTED
 	if (client_capabilities & CLIENT_SSL) {
-		const zend_bool server_has_ssl = (server_capabilities & CLIENT_SSL)? TRUE:FALSE;
+		const bool server_has_ssl = (server_capabilities & CLIENT_SSL)? TRUE:FALSE;
 		if (server_has_ssl == FALSE) {
 			goto close_conn;
 		} else {
@@ -580,6 +540,8 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 			conn->vio->data->m.set_client_option(conn->vio, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify);
 
 			if (FAIL == conn->vio->data->m.enable_ssl(conn->vio)) {
+				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+				SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Cannot connect to MySQL using SSL");
 				goto end;
 			}
 		}
@@ -624,7 +586,7 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 	DBG_ENTER("mysqlnd_command::handshake");
 
 	DBG_INF_FMT("stream=%p", conn->vio->data->m.get_stream(conn->vio));
-	DBG_INF_FMT("[user=%s] [db=%s:%d] [flags=%llu]", user, db, db_len, mysql_flags);
+	DBG_INF_FMT("[user=%s] [db=%s:%zu] [flags=%zu]", user, db, db_len, mysql_flags);
 
 	conn->payload_decoder_factory->m.init_greet_packet(&greet_packet);
 
@@ -637,11 +599,11 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 		SET_CLIENT_ERROR(conn->error_info, greet_packet.error_no, greet_packet.sqlstate, greet_packet.error);
 		goto err;
 	} else if (greet_packet.pre41) {
-		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet.server_version);
-		php_error_docref(NULL, E_WARNING, "Connecting to 3.22, 3.23 & 4.0 "
-						" is not supported. Server is %-.32s", greet_packet.server_version);
-		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
-						 "Connecting to 3.22, 3.23 & 4.0 servers is not supported");
+		char * msg;
+		mnd_sprintf(&msg, 0, "Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet.server_version);
+		DBG_ERR(msg);
+		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
+		mnd_sprintf_free(msg);
 		goto err;
 	}
 
@@ -649,13 +611,12 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 	conn->protocol_version	= greet_packet.protocol_version;
 	conn->server_version	= mnd_pestrdup(greet_packet.server_version, conn->persistent);
 
-	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
-	if (!conn->greet_charset) {
-		php_error_docref(NULL, E_WARNING,
-			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet.charset_no);
-		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
-			"Server sent charset unknown to the client. Please, report to the developers");
-		goto err;
+	const MYSQLND_CHARSET *read_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
+	if (!read_charset) {
+		greet_packet.charset_no = conn->m->get_server_version(conn) >= 50500 ? MYSQLND_UTF8_MB4_DEFAULT_ID : MYSQLND_UTF8_MB3_DEFAULT_ID;
+		conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
+	} else {
+		conn->greet_charset = read_charset;
 	}
 
 	conn->server_capabilities 	= greet_packet.server_capabilities;
@@ -689,7 +650,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_command)
 	MYSQLND_METHOD(mysqlnd_command, statistics),
 	MYSQLND_METHOD(mysqlnd_command, process_kill),
 	MYSQLND_METHOD(mysqlnd_command, refresh),
-	MYSQLND_METHOD(mysqlnd_command, shutdown),
 	MYSQLND_METHOD(mysqlnd_command, quit),
 	MYSQLND_METHOD(mysqlnd_command, query),
 	MYSQLND_METHOD(mysqlnd_command, change_user),

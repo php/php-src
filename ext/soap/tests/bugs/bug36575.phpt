@@ -1,7 +1,7 @@
 --TEST--
 Bug #36575 (Incorrect complex type instantiation with hierarchies)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

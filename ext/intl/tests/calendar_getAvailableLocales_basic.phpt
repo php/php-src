@@ -1,13 +1,11 @@
 --TEST--
 IntlCalendar::getAvailableLocales() basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=nl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $locales = IntlCalendar::getAvailableLocales();
 var_dump(count($locales) > 100);
@@ -18,4 +16,4 @@ var_dump(in_array('pt', $locales));
 ?>
 --EXPECT--
 bool(true)
-bool(true)
+bool(true)

@@ -1,11 +1,9 @@
 --TEST--
 Test grapheme_strpos-alike functions with empty needle
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-
-ini_set("intl.error_level", E_WARNING);
 
 var_dump(grapheme_strpos("abc", ""));
 var_dump(grapheme_strpos("abc", "", -1));

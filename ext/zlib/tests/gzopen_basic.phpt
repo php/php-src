@@ -1,18 +1,14 @@
 --TEST--
 Test gzopen() function : basic functionality
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 echo "*** Testing gzopen() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$filename = __DIR__."/004.txt.gz";
+$filename = __DIR__."/data/test.txt.gz";
 $mode = 'r';
 $use_include_path = false;
 

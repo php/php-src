@@ -1,10 +1,8 @@
 --TEST--
 #79029 (Use After Free's in XMLReader / XMLWriter)
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) print "skip xmlwriter extension not available";
-if (!extension_loaded("xmlreader")) print "skip xmlreader extension not available";
-?>
+--EXTENSIONS--
+xmlwriter
+xmlreader
 --FILE--
 <?php
 $x = array( new XMLWriter() );
@@ -28,7 +26,7 @@ okey
 @unlink("bug79029_3.txt");
 ?>
 --EXPECTF--
-Warning: fclose(): %d is not a valid stream resource in %sbug79029.php on line %d
+Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %sbug79029.php on line %d
 
-Warning: fclose(): %d is not a valid stream resource in %sbug79029.php on line %d
+Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %sbug79029.php on line %d
 okey

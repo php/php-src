@@ -12,8 +12,12 @@ try {
 
 $wrs = 'O:13:"WeakReference":0:{}';
 
-var_dump(@unserialize($wrs));
+try {
+	var_dump(unserialize($wrs));
+} catch (Exception $ex) {
+    var_dump($ex->getMessage());
+}
 ?>
 --EXPECT--
 string(47) "Serialization of 'WeakReference' is not allowed"
-bool(false)
+string(49) "Unserialization of 'WeakReference' is not allowed"

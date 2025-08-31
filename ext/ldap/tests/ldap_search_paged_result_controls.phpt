@@ -2,9 +2,10 @@
 ldap_search() test with paged result controls
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 require_once('skipifcontrol.inc');
 skipifunsupportedcontrol(LDAP_CONTROL_PAGEDRESULTS);
@@ -13,7 +14,7 @@ skipifunsupportedcontrol(LDAP_CONTROL_PAGEDRESULTS);
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 $dn = "$base";
@@ -32,11 +33,12 @@ var_dump(
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(3) {
   ["count"]=>
   int(2)
@@ -74,7 +76,8 @@ array(3) {
   }
 }
 bool(true)
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)

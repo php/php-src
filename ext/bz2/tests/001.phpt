@@ -1,7 +1,7 @@
 --TEST--
 bzopen() and invalid parameters
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+--EXTENSIONS--
+bz2
 --FILE--
 <?php
 
@@ -42,8 +42,8 @@ var_dump(bzopen($fp, "r"));
 
 ?>
 --EXPECTF--
-bzopen(): Argument #1 ($file) cannot be empty
-bzopen(): Argument #1 ($file) cannot be empty
+bzopen(): Argument #1 ($file) must not be empty
+bzopen(): Argument #1 ($file) must not be empty
 bzopen(): Argument #2 ($mode) must be either "r" or "w"
 bzopen(): Argument #2 ($mode) must be either "r" or "w"
 bzopen(): Argument #2 ($mode) must be either "r" or "w"

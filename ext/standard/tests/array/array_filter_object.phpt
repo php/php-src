@@ -47,7 +47,7 @@ class FinalClass
 {
   private $var4;
   final function finalMethod() {
-    echo 'This can not be overloaded';
+    echo 'This cannot be overloaded';
   }
 }
 
@@ -105,10 +105,10 @@ array(5) {
   }
   [2]=>
   object(ChildClass)#%d (2) {
-    ["var3":"ChildClass":private]=>
-    NULL
     ["var2":protected]=>
     int(5)
+    ["var3":"ChildClass":private]=>
+    NULL
   }
   [3]=>
   object(FinalClass)#%d (1) {
@@ -130,10 +130,10 @@ array(5) {
   }
   [2]=>
   object(ChildClass)#%d (2) {
-    ["var3":"ChildClass":private]=>
-    NULL
     ["var2":protected]=>
     int(5)
+    ["var3":"ChildClass":private]=>
+    NULL
   }
   [3]=>
   object(FinalClass)#%d (1) {

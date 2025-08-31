@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,7 +27,6 @@
 
 PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count);
 PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count);
-PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *coptions);
 
 extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry
@@ -48,10 +47,10 @@ typedef enum {
 } php_pcre_error_code;
 
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex);
-PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware);
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bool locale_aware);
 
 PHPAPI void  php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
-	zval *subpats, int global, int use_flags, zend_long flags, zend_off_t start_offset);
+	zval *subpats, bool global, zend_long flags, zend_off_t start_offset);
 
 PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str,
 	size_t limit, size_t *replace_count);
@@ -77,9 +76,8 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	zend_long backtrack_limit;
 	zend_long recursion_limit;
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	zend_bool jit;
+	bool jit;
 #endif
-	zend_bool per_request_cache;
 	php_pcre_error_code error_code;
 	/* Used for unmatched subpatterns in OFFSET_CAPTURE mode */
 	zval unmatched_null_pair;

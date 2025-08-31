@@ -23,7 +23,6 @@ var_dump( fnmatch(100, 100) );
 var_dump( fnmatch("string", "string") );
 var_dump( fnmatch(TRUE, TRUE) );
 var_dump( fnmatch(FALSE, FALSE) );
-var_dump( fnmatch(NULL, NULL) );
 
 echo "\n*** Done ***\n";
 ?>
@@ -36,7 +35,6 @@ bool(true)
 bool(true)
 bool(false)
 *** Testing fnmatch() with other than file ***
-bool(true)
 bool(true)
 bool(true)
 bool(true)

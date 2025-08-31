@@ -4,7 +4,6 @@ JIT BW_NOT: 002 Exception handling
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 --FILE--
 <?php
@@ -17,7 +16,7 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot perform bitwise not on bool in %sbw_not_002.php:5
+Fatal error: Uncaught TypeError: Cannot perform bitwise not on true in %sbw_not_002.php:5
 Stack trace:
 #0 %sbw_not_002.php(8): test()
 #1 {main}

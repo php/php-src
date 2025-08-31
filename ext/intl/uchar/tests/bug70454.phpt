@@ -1,7 +1,7 @@
 --TEST--
 Bug #70454 (IntlChar::forDigit second parameter should be optional)
---SKIPIF--
-<?php if (!extension_loaded('intl')) die("skip requires ext/intl") ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 var_dump(IntlChar::forDigit(0));

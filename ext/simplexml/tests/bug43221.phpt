@@ -1,7 +1,7 @@
 --TEST--
 Bug #43221 (SimpleXML adding default namespace in addAttribute)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml = simplexml_load_string('<?xml version="1.0" encoding="utf-8"?><root />');

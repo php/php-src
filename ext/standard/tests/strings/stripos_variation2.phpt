@@ -24,8 +24,6 @@ $needle = array(
 
   //nulls
   '\0',
-  NULL,
-  null,
 
   //boolean false
   FALSE,
@@ -123,99 +121,93 @@ int(12)
 int(0)
 int(13)
 -- Iteration 15 --
-int(0)
+int(14)
 int(14)
 -- Iteration 16 --
-int(0)
-int(15)
--- Iteration 17 --
-int(14)
-int(51)
--- Iteration 18 --
 int(16)
-bool(false)
--- Iteration 19 --
+int(16)
+-- Iteration 17 --
 int(15)
 bool(false)
--- Iteration 20 --
+-- Iteration 18 --
 int(17)
-bool(false)
--- Iteration 21 --
+int(17)
+-- Iteration 19 --
 int(18)
-bool(false)
--- Iteration 22 --
+int(18)
+-- Iteration 20 --
 int(20)
-bool(false)
--- Iteration 23 --
+int(20)
+-- Iteration 21 --
 int(21)
-bool(false)
+int(21)
+-- Iteration 22 --
+int(24)
+int(24)
+-- Iteration 23 --
+int(26)
+int(26)
 -- Iteration 24 --
-int(24)
-int(24)
+int(27)
+int(27)
 -- Iteration 25 --
-int(26)
-int(26)
+int(28)
+int(28)
 -- Iteration 26 --
-int(27)
-int(27)
+int(29)
+int(29)
 -- Iteration 27 --
-int(28)
-int(28)
+bool(false)
+bool(false)
 -- Iteration 28 --
-int(29)
-int(29)
+bool(false)
+bool(false)
 -- Iteration 29 --
-bool(false)
-bool(false)
+int(31)
+int(31)
 -- Iteration 30 --
-bool(false)
-bool(false)
+int(32)
+int(32)
 -- Iteration 31 --
-int(31)
-int(31)
+int(33)
+int(33)
 -- Iteration 32 --
-int(32)
-int(32)
+int(35)
+int(35)
 -- Iteration 33 --
-int(33)
-int(33)
+int(34)
+int(34)
 -- Iteration 34 --
-int(35)
-int(35)
+int(36)
+int(36)
 -- Iteration 35 --
-int(34)
-int(34)
+int(37)
+int(37)
 -- Iteration 36 --
-int(36)
-int(36)
+int(37)
+int(37)
 -- Iteration 37 --
-int(37)
-int(37)
+int(43)
+int(43)
 -- Iteration 38 --
-int(37)
-int(37)
+int(52)
+int(52)
 -- Iteration 39 --
-int(43)
-int(43)
--- Iteration 40 --
-int(52)
-int(52)
--- Iteration 41 --
 int(19)
 bool(false)
+-- Iteration 40 --
+int(58)
+int(58)
+-- Iteration 41 --
+bool(false)
+bool(false)
 -- Iteration 42 --
-int(58)
-int(58)
+bool(false)
+bool(false)
 -- Iteration 43 --
 bool(false)
 bool(false)
 -- Iteration 44 --
-bool(false)
-bool(false)
--- Iteration 45 --
-bool(false)
-bool(false)
--- Iteration 46 --
 int(0)
 bool(false)
 *** Done ***

@@ -3,10 +3,9 @@ FTP with bogus resource
 --CREDITS--
 Michael Paul da Rosa <michael [at] michaelpaul [dot] com [dot] br>
 PHP TestFest Dublin 2017
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 $ftp = tmpfile();
@@ -180,36 +179,36 @@ try {
 fclose($ftp);
 ?>
 --EXPECT--
-ftp_login(): supplied resource is not a valid FTP Buffer resource
-ftp_pwd(): supplied resource is not a valid FTP Buffer resource
-ftp_cdup(): supplied resource is not a valid FTP Buffer resource
-ftp_chdir(): supplied resource is not a valid FTP Buffer resource
-ftp_exec(): supplied resource is not a valid FTP Buffer resource
-ftp_raw(): supplied resource is not a valid FTP Buffer resource
-ftp_mkdir(): supplied resource is not a valid FTP Buffer resource
-ftp_rmdir(): supplied resource is not a valid FTP Buffer resource
-ftp_chmod(): supplied resource is not a valid FTP Buffer resource
-ftp_alloc(): supplied resource is not a valid FTP Buffer resource
-ftp_nlist(): supplied resource is not a valid FTP Buffer resource
-ftp_rawlist(): supplied resource is not a valid FTP Buffer resource
-ftp_mlsd(): supplied resource is not a valid FTP Buffer resource
-ftp_systype(): supplied resource is not a valid FTP Buffer resource
-ftp_fget(): supplied resource is not a valid FTP Buffer resource
-ftp_nb_fget(): supplied resource is not a valid FTP Buffer resource
-ftp_pasv(): supplied resource is not a valid FTP Buffer resource
-ftp_get(): supplied resource is not a valid FTP Buffer resource
-ftp_nb_get(): supplied resource is not a valid FTP Buffer resource
-ftp_nb_continue(): supplied resource is not a valid FTP Buffer resource
-ftp_fput(): supplied resource is not a valid FTP Buffer resource
-ftp_nb_fput(): supplied resource is not a valid FTP Buffer resource
-ftp_put(): supplied resource is not a valid FTP Buffer resource
-ftp_append(): supplied resource is not a valid FTP Buffer resource
-ftp_nb_put(): supplied resource is not a valid FTP Buffer resource
-ftp_size(): supplied resource is not a valid FTP Buffer resource
-ftp_mdtm(): supplied resource is not a valid FTP Buffer resource
-ftp_rename(): supplied resource is not a valid FTP Buffer resource
-ftp_delete(): supplied resource is not a valid FTP Buffer resource
-ftp_site(): supplied resource is not a valid FTP Buffer resource
-ftp_close(): supplied resource is not a valid FTP Buffer resource
-ftp_set_option(): supplied resource is not a valid FTP Buffer resource
-ftp_get_option(): supplied resource is not a valid FTP Buffer resource
+ftp_login(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_pwd(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_cdup(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_chdir(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_exec(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_raw(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_mkdir(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_rmdir(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_chmod(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_alloc(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nlist(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_rawlist(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_mlsd(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_systype(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_fget(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_fget(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_pasv(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_get(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_get(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_continue(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_fput(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_fput(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_put(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_append(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_nb_put(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_size(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_mdtm(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_rename(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_delete(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_site(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_close(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_set_option(): Argument #1 ($ftp) must be of type FTP\Connection, resource given
+ftp_get_option(): Argument #1 ($ftp) must be of type FTP\Connection, resource given

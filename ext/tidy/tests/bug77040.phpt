@@ -1,9 +1,7 @@
 --TEST--
 Bug #77040 (tidyNode::isHtml() is completely broken)
---SKIPIF--
-<?php
-if (!extension_loaded('tidy')) die('skip tidy extension not available');
-?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 $tidy = new tidy;

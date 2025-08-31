@@ -1,17 +1,17 @@
 --TEST--
 Bug #78563: parsers should not be clonable
---SKIPIF--
-<?php include("skipif.inc"); ?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 
-$parser = xml_parser_create();
-clone $parser;
+try {
+    $parser = xml_parser_create();
+    clone $parser;
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 
 ?>
-===DONE===
---EXPECTF--
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class XMLParser in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Trying to clone an uncloneable object of class XMLParser

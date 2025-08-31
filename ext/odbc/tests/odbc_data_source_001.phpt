@@ -1,11 +1,13 @@
 --TEST--
 odbc_data_source(): Basic test
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php
-    include 'skipif.inc';
-    if (odbc_data_source($conn, SQL_FETCH_FIRST) === NULL) {
-        die("skip no data sources defined on this system");
-    }
+include 'skipif.inc';
+if (odbc_data_source($conn, SQL_FETCH_FIRST) === NULL) {
+    die("skip no data sources defined on this system");
+}
 ?>
 --FILE--
 <?php
@@ -15,7 +17,7 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 try {
-    var_dump(odbc_data_source($conn, NULL));
+    var_dump(odbc_data_source($conn, SQL_FETCH_FIRST + SQL_FETCH_NEXT));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }

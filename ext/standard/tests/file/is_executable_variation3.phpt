@@ -23,9 +23,7 @@ $invalid_files = array(
   -2.34555,
   TRUE,
   FALSE,
-  NULL,
   " ",
-  @$file_handle
 );
 /* loop through to test each element in the above array
    is an executable file */
@@ -40,8 +38,6 @@ echo "Done\n";
 *** Testing is_executable(): usage variations ***
 
 *** Testing is_executable() on invalid files ***
-bool(false)
-bool(false)
 bool(false)
 bool(false)
 bool(false)

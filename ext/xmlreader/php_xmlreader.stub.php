@@ -1,81 +1,225 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class XMLReader
 {
-    /** @return bool */
-    public function close() {}
+    /* Constants for NodeType - cannot define common types to share with dom as there are differences in these types */
 
-    /** @return string|null */
-    public function getAttribute(string $name) {}
+    /**
+     * @cvalue XML_READER_TYPE_NONE
+     */
+    public const int NONE = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_ELEMENT
+     */
+    public const int ELEMENT = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_ATTRIBUTE
+     */
+    public const int ATTRIBUTE = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_TEXT
+     */
+    public const int TEXT = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_CDATA
+     */
+    public const int CDATA = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_ENTITY_REFERENCE
+     */
+    public const int ENTITY_REF = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_ENTITY
+     */
+    public const int ENTITY = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_PROCESSING_INSTRUCTION
+     */
+    public const int PI = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_COMMENT
+     */
+    public const int COMMENT = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_DOCUMENT
+     */
+    public const int DOC = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_DOCUMENT_TYPE
+     */
+    public const int DOC_TYPE = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_DOCUMENT_FRAGMENT
+     */
+    public const int DOC_FRAGMENT = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_NOTATION
+     */
+    public const int NOTATION = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_WHITESPACE
+     */
+    public const int WHITESPACE = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_SIGNIFICANT_WHITESPACE
+     */
+    public const int SIGNIFICANT_WHITESPACE = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_END_ELEMENT
+     */
+    public const int END_ELEMENT = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_END_ENTITY
+     */
+    public const int END_ENTITY = UNKNOWN;
+    /**
+     * @cvalue XML_READER_TYPE_XML_DECLARATION
+     */
+    public const int XML_DECLARATION = UNKNOWN;
 
-    /** @return string|null */
-    public function getAttributeNo(int $index) {}
+    /* Constants for Parser options */
 
-    /** @return string|null */
-    public function getAttributeNs(string $name, string $namespace) {}
+    /**
+     * @cvalue XML_PARSER_LOADDTD
+     */
+    public const int LOADDTD = UNKNOWN;
+    /**
+     * @cvalue XML_PARSER_DEFAULTATTRS
+     */
+    public const int DEFAULTATTRS = UNKNOWN;
+    /**
+     * @cvalue XML_PARSER_VALIDATE
+     */
+    public const int VALIDATE = UNKNOWN;
+    /**
+     * @cvalue XML_PARSER_SUBST_ENTITIES
+     */
+    public const int SUBST_ENTITIES = UNKNOWN;
 
-    /** @return bool */
-    public function getParserProperty(int $property) {}
 
-    /** @return bool */
-    public function isValid() {}
+    /** @virtual */
+    public int $attributeCount;
 
-    /** @return string|null */
-    public function lookupNamespace(string $prefix) {}
+    /** @virtual */
+    public string $baseURI;
 
-    /** @return bool */
-    public function moveToAttribute(string $name) {}
+    /** @virtual */
+    public int $depth;
 
-    /** @return bool */
-    public function moveToAttributeNo(int $index) {}
+    /** @virtual */
+    public bool $hasAttributes;
 
-    /** @return bool */
-    public function moveToAttributeNs(string $name, string $namespace) {}
+    /** @virtual */
+    public bool $hasValue;
 
-    /** @return bool */
-    public function moveToElement() {}
+    /** @virtual */
+    public bool $isDefault;
 
-    /** @return bool */
-    public function moveToFirstAttribute() {}
+    /** @virtual */
+    public bool $isEmptyElement;
 
-    /** @return bool */
-    public function moveToNextAttribute() {}
+    /** @virtual */
+    public string $localName;
 
-    /** @return bool */
-    public function read() {}
+    /** @virtual */
+    public string $name;
 
-    /** @return bool */
-    public function next(?string $name = null) {}
+    /** @virtual */
+    public string $namespaceURI;
+
+    /** @virtual */
+    public int $nodeType;
+
+    /** @virtual */
+    public string $prefix;
+
+    /** @virtual */
+    public string $value;
+
+    /** @virtual */
+    public string $xmlLang;
+
+    /** @tentative-return-type */
+    public function close(): true {}
+
+    /** @tentative-return-type */
+    public function getAttribute(string $name): ?string {}
+
+    /** @tentative-return-type */
+    public function getAttributeNo(int $index): ?string {}
+
+    /** @tentative-return-type */
+    public function getAttributeNs(string $name, string $namespace): ?string {}
+
+    /** @tentative-return-type */
+    public function getParserProperty(int $property): bool {}
+
+    /** @tentative-return-type */
+    public function isValid(): bool {}
+
+    /** @tentative-return-type */
+    public function lookupNamespace(string $prefix): ?string {}
+
+    /** @tentative-return-type */
+    public function moveToAttribute(string $name): bool {}
+
+    /** @tentative-return-type */
+    public function moveToAttributeNo(int $index): bool {}
+
+    /** @tentative-return-type */
+    public function moveToAttributeNs(string $name, string $namespace): bool {}
+
+    /** @tentative-return-type */
+    public function moveToElement(): bool {}
+
+    /** @tentative-return-type */
+    public function moveToFirstAttribute(): bool {}
+
+    /** @tentative-return-type */
+    public function moveToNextAttribute(): bool {}
+
+    /** @tentative-return-type */
+    public function read(): bool {}
+
+    /** @tentative-return-type */
+    public function next(?string $name = null): bool {}
 
     /** @return bool|XMLReader */
-    public static function open(string $uri, ?string $encoding = null, int $flags = 0) {}
+    public static function open(string $uri, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
 
-    /** @return string */
-    public function readInnerXml() {}
+    public static function fromUri(string $uri, ?string $encoding = null, int $flags = 0): static {}
 
-    /** @return string */
-    public function readOuterXml() {}
+    /** @param resource $stream */
+    public static function fromStream($stream, ?string $encoding = null, int $flags = 0, ?string $documentUri = null): static {}
 
-    /** @return string */
-    public function readString() {}
+    /** @tentative-return-type */
+    public function readInnerXml(): string {}
 
-    /** @return bool */
-    public function setSchema(?string $filename) {}
+    /** @tentative-return-type */
+    public function readOuterXml(): string {}
 
-    /** @return bool */
-    public function setParserProperty(int $property, bool $value) {}
+    /** @tentative-return-type */
+    public function readString(): string {}
 
-    /** @return bool */
-    public function setRelaxNGSchema(?string $filename) {}
+    /** @tentative-return-type */
+    public function setSchema(?string $filename): bool {}
 
-    /** @return bool */
-    public function setRelaxNGSchemaSource(?string $source) {}
+    /** @tentative-return-type */
+    public function setParserProperty(int $property, bool $value): bool {}
+
+    /** @tentative-return-type */
+    public function setRelaxNGSchema(?string $filename): bool {}
+
+    /** @tentative-return-type */
+    public function setRelaxNGSchemaSource(?string $source): bool {}
 
     /** @return bool|XMLReader */
-    public static function XML(string $source, ?string $encoding = null, int $flags = 0) {}
+    public static function XML(string $source, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
 
-    /** @return DOMNode|false */
-    public function expand(?DOMNode $baseNode = null) {}
+    public static function fromString(string $source, ?string $encoding = null, int $flags = 0): static {}
+
+    /** @tentative-return-type */
+    public function expand(?DOMNode $baseNode = null): DOMNode|false {}
 }

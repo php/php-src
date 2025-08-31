@@ -1,7 +1,11 @@
 --TEST--
 openssl_pkey_new() basic usage tests
+--EXTENSIONS--
+openssl
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 function openssl_pkey_test_cmp($expected, $bin_key) {
@@ -26,6 +30,11 @@ $phex = "EECFAE81B1B9B3C908810B10A1B5600199EB9F44AEF4FDA493B81A9E3D84F632" .
 $qhex = "C97FB1F027F453F6341233EAAAD1D9353F6C42D08866B1D05A0F2035028B9D86" .
         "9840B41666B42E92EA0DA3B43204B5CFCE3352524D0416A5A441E700AF461503";
 
+$dphex = "11";
+$dqhex = "11";
+$qinvhex = "b06c4fdabb6301198d265bdbae9423b380f271f73453885093077fcd39e2119f" .
+           "c98632154f5883b167a967bf402b4e9e2e0f9656e698ea3666edfb25798039f7";
+
 $rsa= openssl_pkey_new(array(
     'rsa' => array(
         'n' => hex2bin($nhex),
@@ -33,6 +42,9 @@ $rsa= openssl_pkey_new(array(
         'd' => hex2bin($dhex),
         'p' => hex2bin($phex),
         'q' => hex2bin($qhex),
+        'dmp1' => hex2bin($dphex),
+        'dmq1' => hex2bin($dqhex),
+        'iqmp' => hex2bin($qinvhex),
     )
 ));
 $details = openssl_pkey_get_details($rsa);
@@ -42,6 +54,10 @@ openssl_pkey_test_cmp($ehex, $rsa_details['e']);
 openssl_pkey_test_cmp($dhex, $rsa_details['d']);
 openssl_pkey_test_cmp($phex, $rsa_details['p']);
 openssl_pkey_test_cmp($qhex, $rsa_details['q']);
+openssl_pkey_test_cmp($dphex, $rsa_details['dmp1']);
+openssl_pkey_test_cmp($dqhex, $rsa_details['dmq1']);
+openssl_pkey_test_cmp($qinvhex, $rsa_details['iqmp']);
+echo "\n";
 
 // DSA
 $phex = '00f8000ae45b2dacb47dd977d58b719d097bdf07cb2c17660ad898518c08' .
@@ -95,6 +111,10 @@ int(0)
 int(0)
 int(0)
 int(0)
+int(0)
+int(0)
+int(0)
+
 int(0)
 int(0)
 int(0)

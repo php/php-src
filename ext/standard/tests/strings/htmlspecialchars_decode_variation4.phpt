@@ -33,22 +33,22 @@ echo "Done";
 --EXPECT--
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iteration 1 --
-string(90) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... " double quote string ""
+string(85) "Roy&#039s height > Sam's \$height... 1111 &ap; 0000 = 0000... " double quote string ""
 string(90) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... " double quote string ""
 string(100) "Roy&#039s height > Sam&#039;s \$height... 1111 &ap; 0000 = 0000... &quot; double quote string &quot;"
 string(85) "Roy&#039s height > Sam's \$height... 1111 &ap; 0000 = 0000... " double quote string ""
 -- Iteration 2 --
-string(88) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r " double quote\f\v string ""
+string(78) "Roy's height > Sam's height... \t\t 13 < 15...\n\r " double quote\f\v string ""
 string(88) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r " double quote\f\v string ""
 string(98) "Roy&#039;s height > Sam&#039;s height... \t\t 13 < 15...\n\r &quot; double quote\f\v string &quot;"
 string(78) "Roy's height > Sam's height... \t\t 13 < 15...\n\r " double quote\f\v string ""
 -- Iteration 3 --
-string(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
+string(38) "\nRoy's height &gt\t; Sam's\v height\f"
 string(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
 string(48) "\nRoy&#039;s height &gt\t; Sam&#039;s\v height\f"
 string(38) "\nRoy's height &gt\t; Sam's\v height\f"
 -- Iteration 4 --
-string(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
+string(38) "\r\tRoy's height &gt\r; Sam\t's height"
 string(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
 string(48) "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height"
 string(38) "\r\tRoy's height &gt\r; Sam\t's height"

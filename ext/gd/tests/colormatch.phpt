@@ -1,9 +1,7 @@
 --TEST--
 imagecolormatch
---SKIPIF--
-<?php
-        if (!function_exists('imagecolormatch')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 
@@ -17,8 +15,6 @@ try {
 }
 
 echo "ok\n";
-
-imagedestroy($im);
 ?>
 --EXPECT--
 imagecolormatch(): Argument #2 ($image2) must have at least one color

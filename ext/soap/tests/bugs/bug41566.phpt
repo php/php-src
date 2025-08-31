@@ -1,7 +1,7 @@
 --TEST--
 Bug #41566 (SOAP Server not properly generating href attributes)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function test() {

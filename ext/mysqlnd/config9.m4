@@ -6,8 +6,21 @@ PHP_ARG_ENABLE([mysqlnd],
   [no],
   [yes])
 
-PHP_ARG_ENABLE([mysqlnd_compression_support],
-  [whether to disable compressed protocol support in mysqlnd],
+dnl Empty variable means 'no' (for phpize builds).
+AS_VAR_IF([PHP_OPENSSL],, [PHP_OPENSSL=no])
+
+PHP_ARG_WITH([mysqlnd-ssl],
+  [whether to enable extended SSL support in mysqlnd],
+  [AS_HELP_STRING([--with-mysqlnd-ssl],
+    [Explicitly enable extended SSL support in the mysqlnd extension when
+    building without openssl extension or when using phpize. If the openssl
+    extension is enabled at the configure step (--with-openssl), extended SSL is
+    enabled implicitly regardless of this option.])],
+  [$PHP_OPENSSL],
+  [no])
+
+PHP_ARG_ENABLE([mysqlnd-compression-support],
+  [whether to enable compressed protocol support in mysqlnd],
   [AS_HELP_STRING([--disable-mysqlnd-compression-support],
     [Disable support for the MySQL compressed protocol in mysqlnd])],
   [yes],
@@ -15,35 +28,48 @@ PHP_ARG_ENABLE([mysqlnd_compression_support],
 
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
-  mysqlnd_ps_sources="mysqlnd_ps.c mysqlnd_ps_codec.c"
-  mysqlnd_base_sources="mysqlnd_connection.c mysqlnd_alloc.c mysqlnd_charset.c mysqlnd_wireprotocol.c \
-                   mysqlnd_loaddata.c mysqlnd_reverse_api.c mysqlnd_vio.c mysqlnd_protocol_frame_codec.c \
-                   mysqlnd_statistics.c mysqlnd_driver.c mysqlnd_ext_plugin.c mysqlnd_auth.c \
-				   mysqlnd_result.c mysqlnd_result_meta.c mysqlnd_debug.c mysqlnd_commands.c \
-				   mysqlnd_block_alloc.c mysqlnd_read_buffer.c mysqlnd_plugin.c php_mysqlnd.c"
+  AS_VAR_IF([PHP_MYSQLND_COMPRESSION_SUPPORT], [no],,
+    [PHP_SETUP_ZLIB([MYSQLND_SHARED_LIBADD],
+      [AC_DEFINE([MYSQLND_COMPRESSION_ENABLED], [1],
+        [Define to 1 if mysqlnd has compressed protocol support.])])])
 
+  AC_DEFINE([MYSQLND_SSL_SUPPORTED], [1],
+    [Define to 1 if mysqlnd core SSL is enabled.])
 
-  if test "$PHP_MYSQLND_COMPRESSION_SUPPORT" != "no"; then
-    PKG_CHECK_MODULES([ZLIB], [zlib])
-    PHP_EVAL_LIBLINE($ZLIB_LIBS, MYSQLND_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($ZLIB_CFLAGS)
-    AC_DEFINE([MYSQLND_COMPRESSION_ENABLED], 1, [Enable compressed protocol support])
-  fi
+  PHP_NEW_EXTENSION([mysqlnd], m4_normalize([
+    mysqlnd_alloc.c
+    mysqlnd_auth.c
+    mysqlnd_block_alloc.c
+    mysqlnd_charset.c
+    mysqlnd_commands.c
+    mysqlnd_connection.c
+    mysqlnd_debug.c
+    mysqlnd_driver.c
+    mysqlnd_ext_plugin.c
+    mysqlnd_loaddata.c
+    mysqlnd_plugin.c
+    mysqlnd_protocol_frame_codec.c
+    mysqlnd_ps_codec.c
+    mysqlnd_ps.c
+    mysqlnd_read_buffer.c
+    mysqlnd_result_meta.c
+    mysqlnd_result.c
+    mysqlnd_reverse_api.c
+    mysqlnd_statistics.c
+    mysqlnd_vio.c
+    mysqlnd_wireprotocol.c
+    php_mysqlnd.c
+  ]),
+  [$ext_shared],,
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-  AC_DEFINE([MYSQLND_SSL_SUPPORTED], 1, [Enable core mysqlnd SSL code])
+  AS_VAR_IF([PHP_MYSQLND_SSL], [no],,
+    [PHP_SETUP_OPENSSL([MYSQLND_SHARED_LIBADD], [
+      AC_DEFINE([MYSQLND_HAVE_SSL], [1],
+        [Define to 1 if mysqlnd extended SSL is enabled through a system library.])
+      PHP_ADD_EXTENSION_DEP(mysqlnd, hash)
+    ])])
 
-  test -z "$PHP_OPENSSL" && PHP_OPENSSL=no
-
-  if test "$PHP_OPENSSL" != "no" || test "$PHP_OPENSSL_DIR" != "no"; then
-    PHP_SETUP_OPENSSL(MYSQLND_SHARED_LIBADD, [AC_DEFINE(MYSQLND_HAVE_SSL,1,[Enable mysqlnd code that uses OpenSSL directly])])
-  fi
-
-  mysqlnd_sources="$mysqlnd_base_sources $mysqlnd_ps_sources"
-  PHP_NEW_EXTENSION(mysqlnd, $mysqlnd_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-  PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
   PHP_INSTALL_HEADERS([ext/mysqlnd/])
-fi
-
-if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes" || test "$PHP_MYSQLI" != "no"; then
-  PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
+  PHP_SUBST([MYSQLND_SHARED_LIBADD])
 fi

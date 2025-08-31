@@ -1,12 +1,12 @@
 --TEST--
 FFI 032: bit-fields access
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-$p = FFI::new("
+$p = FFI::cdef()->new("
     union {
         struct __attribute__((packed)) {
             int a:2;

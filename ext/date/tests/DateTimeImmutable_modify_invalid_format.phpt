@@ -4,9 +4,12 @@ DateTimeImmutable::modify() with invalid format
 <?php
 
 $datetime = new DateTimeImmutable;
-var_dump($datetime->modify(''));
+try {
+	var_dump($datetime->modify(''));
+} catch (DateMalformedStringException $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECTF--
-Warning: DateTimeImmutable::modify(): Failed to parse time string () at position 0 ( in %s on line %d
-bool(false)
+DateMalformedStringException: DateTimeImmutable::modify(): Failed to parse time string () at position 0 ( ): Empty string

@@ -1,7 +1,8 @@
 --TEST--
 SOAP XML Schema 77: Attributes form qualified/unqualified (attributeFormDefault - default)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";

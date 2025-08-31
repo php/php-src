@@ -1,7 +1,7 @@
 --TEST--
 Bug #70455 Missing constant: IntlChar::NO_NUMERIC_VALUE
---SKIPIF--
-<?php if (!extension_loaded('intl')) die("skip requires ext/intl") ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $value = IntlChar::getNumericValue("x");

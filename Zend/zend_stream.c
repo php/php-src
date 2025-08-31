@@ -39,7 +39,7 @@ static void zend_stream_stdio_closer(void *handle) /* {{{ */
 
 static size_t zend_stream_stdio_fsizer(void *handle) /* {{{ */
 {
-	zend_stat_t buf;
+	zend_stat_t buf = {0};
 	if (handle && zend_fstat(fileno((FILE*)handle), &buf) == 0) {
 #ifdef S_ISREG
 		if (!S_ISREG(buf.st_mode)) {
@@ -64,25 +64,36 @@ ZEND_API void zend_stream_init_fp(zend_file_handle *handle, FILE *fp, const char
 	memset(handle, 0, sizeof(zend_file_handle));
 	handle->type = ZEND_HANDLE_FP;
 	handle->handle.fp = fp;
-	handle->filename = filename;
+	handle->filename = filename ? zend_string_init(filename, strlen(filename), 0) : NULL;
 }
 
 ZEND_API void zend_stream_init_filename(zend_file_handle *handle, const char *filename) {
 	memset(handle, 0, sizeof(zend_file_handle));
 	handle->type = ZEND_HANDLE_FILENAME;
-	handle->filename = filename;
+	handle->filename = filename ? zend_string_init(filename, strlen(filename), 0) : NULL;
 }
 
-ZEND_API zend_result zend_stream_open(const char *filename, zend_file_handle *handle) /* {{{ */
+ZEND_API void zend_stream_init_filename_ex(zend_file_handle *handle, zend_string *filename) {
+	memset(handle, 0, sizeof(zend_file_handle));
+	handle->type = ZEND_HANDLE_FILENAME;
+	handle->filename = zend_string_copy(filename);
+}
+
+ZEND_API zend_result zend_stream_open(zend_file_handle *handle) /* {{{ */
 {
 	zend_string *opened_path;
+
+	ZEND_ASSERT(handle->type == ZEND_HANDLE_FILENAME);
 	if (zend_stream_open_function) {
-		return zend_stream_open_function(filename, handle);
+		return zend_stream_open_function(handle);
 	}
 
-	zend_stream_init_fp(handle, zend_fopen(filename, &opened_path), filename);
-	handle->opened_path = opened_path;
-	return handle->handle.fp ? SUCCESS : FAILURE;
+	handle->handle.fp = zend_fopen(handle->filename, &opened_path);
+	if (!handle->handle.fp) {
+		return FAILURE;
+	}
+	handle->type = ZEND_HANDLE_FP;
+	return SUCCESS;
 } /* }}} */
 
 static int zend_stream_getc(zend_file_handle *file_handle) /* {{{ */
@@ -124,7 +135,7 @@ ZEND_API zend_result zend_stream_fixup(zend_file_handle *file_handle, char **buf
 	}
 
 	if (file_handle->type == ZEND_HANDLE_FILENAME) {
-		if (zend_stream_open(file_handle->filename, file_handle) == FAILURE) {
+		if (zend_stream_open(file_handle) == FAILURE) {
 			return FAILURE;
 		}
 	}
@@ -199,11 +210,14 @@ ZEND_API zend_result zend_stream_fixup(zend_file_handle *file_handle, char **buf
 	return SUCCESS;
 } /* }}} */
 
-ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
+static void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 {
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
-			fclose(fh->handle.fp);
+			if (fh->handle.fp) {
+				fclose(fh->handle.fp);
+				fh->handle.fp = NULL;
+			}
 			break;
 		case ZEND_HANDLE_STREAM:
 			if (fh->handle.stream.closer && fh->handle.stream.handle) {
@@ -225,22 +239,22 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 		efree(fh->buf);
 		fh->buf = NULL;
 	}
-	if (fh->free_filename && fh->filename) {
-		efree((char*)fh->filename);
+	if (fh->filename) {
+		zend_string_release(fh->filename);
 		fh->filename = NULL;
 	}
 }
 /* }}} */
 
 /* return int to be compatible with Zend linked list API */
-ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2) /* {{{ */
+static int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2) /* {{{ */
 {
 	if (fh1->type != fh2->type) {
 		return 0;
 	}
 	switch (fh1->type) {
 		case ZEND_HANDLE_FILENAME:
-			return strcmp(fh1->filename, fh2->filename) == 0;
+			return zend_string_equals(fh1->filename, fh2->filename);
 		case ZEND_HANDLE_FP:
 			return fh1->handle.fp == fh2->handle.fp;
 		case ZEND_HANDLE_STREAM:
@@ -249,4 +263,26 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 			return 0;
 	}
 	return 0;
+} /* }}} */
+
+ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle) /* {{{ */
+{
+	if (file_handle->in_list) {
+		zend_llist_del_element(&CG(open_files), file_handle, (int (*)(void *, void *)) zend_compare_file_handles);
+		/* zend_file_handle_dtor() operates on the copy, so we have to NULLify the original here */
+		file_handle->opened_path = NULL;
+		file_handle->filename = NULL;
+	} else {
+		zend_file_handle_dtor(file_handle);
+	}
+} /* }}} */
+
+void zend_stream_init(void) /* {{{ */
+{
+	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_file_handle_dtor, 0);
+} /* }}} */
+
+void zend_stream_shutdown(void) /* {{{ */
+{
+	zend_llist_destroy(&CG(open_files));
 } /* }}} */

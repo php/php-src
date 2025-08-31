@@ -1,9 +1,7 @@
 --TEST--
 getComment
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $dirname = __DIR__ . '/';
@@ -32,4 +30,4 @@ $zip->close();
 Zip archive comment
 string(11) "foo comment"
 string(11) "foo comment"
-ZipArchive::getCommentName(): Argument #1 ($name) cannot be empty
+ZipArchive::getCommentName(): Argument #1 ($name) must not be empty

@@ -1,14 +1,15 @@
 --TEST--
 Bug #35759 (mysqli_stmt_bind_result() makes huge allocation when column empty)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-    require_once("connect.inc");
+    require_once 'connect.inc';
     $col_num= 1000;
 
     $mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
@@ -53,6 +54,6 @@ require_once('skipifconnectfailure.inc');
     echo "done!";
 ?>
 --CLEAN--
-<?php require("clean_table.inc"); ?>
+<?php require 'clean_table.inc'; ?>
 --EXPECT--
 done!

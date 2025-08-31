@@ -15,9 +15,13 @@ var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strftime() : usage variation ***
 
 -- Testing strftime() function with a literal % character to format --
+
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(1) "%"
+
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(1) "%"

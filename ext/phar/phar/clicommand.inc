@@ -30,9 +30,9 @@ abstract class CLICommand
         $this->typs = self::getArgTyps($this);
 
         if ($argc < 2) {
-            self::error("No command given, check ${argv[0]} help\n");
+            self::error("No command given, check {$argv[0]} help\n");
         } elseif (!isset($this->cmds[$argv[1]]['run'])) {
-            self::error("Unknown command '${argv[1]}', check ${argv[0]} help\n");
+            self::error("Unknown command '{$argv[1]}', check {$argv[0]} help\n");
         } else {
             $command = $argv[1];
         }
@@ -46,12 +46,12 @@ abstract class CLICommand
                     if (strlen($argv[$i]) == 2 && isset($this->args[$argv[$i][1]])) {
                         $arg = $argv[$i][1];
                         if (++$i >= $argc) {
-                            self::error("Missing argument to parameter '$arg' of command '$command', check ${argv[0]} help\n");
+                            self::error("Missing argument to parameter '$arg' of command '$command', check {$argv[0]} help\n");
                         } else {
                             $this->args[$arg]['val'] = $this->checkArgTyp($arg, $i, $argc, $argv);
                         }
                     }  else {
-                        self::error("Unknown parameter '${argv[$i]}' to command $command, check ${argv[0]} help\n");
+                        self::error("Unknown parameter '{$argv[$i]}' to command $command, check {$argv[0]} help\n");
                     }
                 } else {
                     break;
@@ -61,7 +61,7 @@ abstract class CLICommand
             if (isset($this->args[''])) {
                 if ($i >= $argc) {
                     if (isset($this->args['']['require']) && $this->args['']['require']) {
-                        self::error("Missing default trailing arguments to command $command, check ${argv[0]} help\n");
+                        self::error("Missing default trailing arguments to command $command, check {$argv[0]} help\n");
                     }
                 } else {
                     $this->args['']['val'] = array();
@@ -70,12 +70,12 @@ abstract class CLICommand
                     }
                 }
             } else if ($i < $argc) {
-                self::error("Unexpected default arguments to command $command, check ${argv[0]} help\n");
+                self::error("Unexpected default arguments to command $command, check {$argv[0]} help\n");
             }
 
             foreach($this->args as $arg => $inf) {
                 if (strlen($arg) && !isset($inf['val']) && isset($inf['required']) && $inf['required']) {
-                    $missing .=  "Missing parameter '-$arg' to command $command, check ${argv[0]} help\n";
+                    $missing .=  "Missing parameter '-$arg' to command $command, check {$argv[0]} help\n";
                 }
             }
 
@@ -265,7 +265,7 @@ abstract class CLICommand
                 $sp3 = $this->cli_get_SP3($l, $ls, $inf);
                 $l3  = strlen($sp3);
                 foreach($conf['select'] as $opt => $what) {
-                    $inf .= $this->cli_wordwrap($sp2 . "  " . sprintf("%-${ls}s  ", $opt) . $what, $l3, $sp3) . "\n";
+                    $inf .= $this->cli_wordwrap($sp2 . "  " . sprintf("%-{$ls}s  ", $opt) . $what, $l3, $sp3) . "\n";
                 }
             }
         }

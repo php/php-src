@@ -1,8 +1,9 @@
 --TEST--
 Bug #81211 (Symlinks are followed when creating PHAR archive)
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php
-if (!extension_loaded('phar')) die('skip phar extension is not available');
 if (PHP_OS_FAMILY === 'Windows') {
     if (false === include __DIR__ . '/../../standard/tests/file/windows_links/common.inc') {
         die('skip windows_links/common.inc is not available');

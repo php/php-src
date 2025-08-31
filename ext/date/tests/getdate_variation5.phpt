@@ -1,5 +1,5 @@
 --TEST--
-Test getdate() function : usage variation - Verifyig with different timezones on Unix epoch timestamp
+Test getdate() function : usage variation - Verifying with different timezones on Unix epoch timestamp
 --FILE--
 <?php
 echo "*** Testing getdate() : usage variation ***\n";

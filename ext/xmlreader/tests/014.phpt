@@ -1,9 +1,9 @@
 --TEST--
-XMLReader: libxml2 XML Reader, read-only element values can not be modified
+XMLReader: libxml2 XML Reader, read-only element values cannot be modified
 --CREDITS--
 Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2017
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 // Set up test data in a new file
@@ -54,6 +54,6 @@ $reader->close();
 unlink(__DIR__.'/_014.xml');
 ?>
 --EXPECT--
-Cannot write to read-only property
-Cannot write to read-only property
-Cannot write to read-only property
+Cannot modify readonly property XMLReader::$value
+Cannot modify readonly property XMLReader::$value
+Cannot modify readonly property XMLReader::$name

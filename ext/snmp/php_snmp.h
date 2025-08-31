@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -24,7 +24,7 @@
 
 #define PHP_SNMP_VERSION PHP_VERSION
 
-#if HAVE_SNMP
+#ifdef HAVE_SNMP
 
 #ifndef DLEXPORT
 #define DLEXPORT
@@ -92,8 +92,26 @@ ZEND_END_MODULE_GLOBALS(snmp)
 #define SNMP_G(v) (snmp_globals.v)
 #endif
 
-#define REGISTER_SNMP_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(php_snmp_ce, const_name, sizeof(const_name)-1, (zend_long)value);
+#define SNMP_VALUE_LIBRARY	(0 << 0)
+#define SNMP_VALUE_PLAIN	(1 << 0)
+#define SNMP_VALUE_OBJECT	(1 << 1)
+
+#define PHP_SNMP_ERRNO_NOERROR			0
+#define PHP_SNMP_ERRNO_GENERIC			(1 << 1)
+#define PHP_SNMP_ERRNO_TIMEOUT			(1 << 2)
+#define PHP_SNMP_ERRNO_ERROR_IN_REPLY		(1 << 3)
+#define PHP_SNMP_ERRNO_OID_NOT_INCREASING	(1 << 4)
+#define PHP_SNMP_ERRNO_OID_PARSING_ERROR	(1 << 5)
+#define PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES	(1 << 6)
+#define PHP_SNMP_ERRNO_ANY	( \
+		PHP_SNMP_ERRNO_GENERIC | \
+		PHP_SNMP_ERRNO_TIMEOUT | \
+		PHP_SNMP_ERRNO_ERROR_IN_REPLY | \
+		PHP_SNMP_ERRNO_OID_NOT_INCREASING | \
+		PHP_SNMP_ERRNO_OID_PARSING_ERROR | \
+		PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES | \
+		PHP_SNMP_ERRNO_NOERROR \
+	)
 
 #else
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug GH-9308: GMP throws the wrong error when a GMP object is passed to gmp_init()
---SKIPIF--
-<?php extension_loaded('gmp') or die('skip gmp extension is not available'); ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 declare(strict_types=1);

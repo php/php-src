@@ -1,7 +1,7 @@
 --TEST--
 Bug #80595 (Resetting POSTFIELDS to empty array breaks request)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';

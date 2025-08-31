@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -80,5 +80,7 @@ PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parse
 PHP_JSON_API int php_json_parse(php_json_parser *parser);
 
 int php_json_yyparse(php_json_parser *parser);
+
+const php_json_parser_methods* php_json_get_validate_methods(void);
 
 #endif	/* PHP_JSON_PARSER_H */

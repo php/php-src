@@ -1,9 +1,7 @@
 --TEST--
 Bug #54971 (Wrong result when using iterator_to_array with use_keys on true)
---SKIPIF--
-<?php
-if (!extension_loaded('dom')) die("skip this test needs --enable-dom");
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

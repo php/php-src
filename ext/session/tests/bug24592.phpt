@@ -1,5 +1,7 @@
 --TEST--
 Bug #24592 (crash when multiple NULL values are being stored)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

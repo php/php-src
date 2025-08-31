@@ -1,7 +1,7 @@
 --TEST--
 Test exif_read_data on unavailable file
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 $infile = __DIR__.'/bug73115.JPG';

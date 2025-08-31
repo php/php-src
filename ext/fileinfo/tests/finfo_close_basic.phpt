@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_close() function : basic functionality
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 echo "*** Testing finfo_close() : basic functionality ***\n";
@@ -21,7 +21,10 @@ unset( $finfo );
 ?>
 --EXPECTF--
 *** Testing finfo_close() : basic functionality ***
-resource(%d) of type (file_info)
+object(finfo)#%d (0) {
+}
+
+Deprecated: Function finfo_close() is deprecated since 8.5, as finfo objects are freed automatically in %s on line %d
 bool(true)
 object(finfo)#%d (%d) {
 }

@@ -1,13 +1,13 @@
 --TEST--
 Test parameter handling in socket_select().
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not valid for Windows');
 }
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+?>
 --FILE--
 <?php
 $sockets = array();

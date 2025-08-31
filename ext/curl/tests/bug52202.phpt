@@ -1,9 +1,7 @@
 --TEST--
 Bug #52202 (CURLOPT_PRIVATE gets clobbered)
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) exit("skip curl extension not loaded");
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $curl = curl_init("http://www.google.com");

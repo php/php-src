@@ -4,7 +4,6 @@ JIT Shift Right: 004
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 --FILE--
 <?php
@@ -28,6 +27,8 @@ Warning: Undefined variable $a in %sshift_right_004.php on line 8
 Warning: Undefined variable $c in %sshift_right_004.php on line 7
 
 Warning: Undefined array key 0 in %sshift_right_004.php on line 7
+
+Deprecated: Implicit conversion from float %f to int loses precision in %sshift_right_004.php on line 8
 
 Warning: A non-numeric value encountered in %sshift_right_004.php on line 7
 

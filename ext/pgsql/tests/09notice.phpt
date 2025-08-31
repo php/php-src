@@ -1,24 +1,26 @@
 --TEST--
 PostgreSQL notice function
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 
-include("skipif.inc");
+include("inc/skipif.inc");
 
-_skip_lc_messages();
+_skip_lc_messages($conn);
 
 ?>
 --FILE--
 <?php
-include 'config.inc';
-include 'lcmess.inc';
+include 'inc/config.inc';
+include 'inc/lcmess.inc';
 
 ini_set('pgsql.log_notice', TRUE);
 ini_set('pgsql.ignore_notice', FALSE);
 
 $db = pg_connect($conn_str);
 
-_set_lc_messages();
+_set_lc_messages($db);
 
 $res = pg_query($db, 'SET client_min_messages TO NOTICE;');
 var_dump($res);
@@ -49,7 +51,8 @@ try {
 }
 ?>
 --EXPECTF--
-resource(%d) of type (pgsql result)
+object(PgSql\Result)#%d (0) {
+}
 string(0) ""
 array(0) {
 }

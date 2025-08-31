@@ -1,10 +1,11 @@
 --TEST--
 libxml_set_external_entity_loader() variation: restore original handler; returning NULL
---SKIPIF--
-<?php if (!extension_loaded('dom')) die('skip dom extension not available'); ?>
+--EXTENSIONS--
+dom
 --CLEAN--
 <?php
 @unlink(__DIR__ . "/foobar.dtd");
+?>
 --FILE--
 <?php
 chdir(__DIR__);
@@ -38,6 +39,8 @@ echo "Done.\n";
 --EXPECTF--
 string(10) "-//FOO/BAR"
 string(%d) "%sfoobar.dtd"
+
+Warning: DOMDocument::validate(): Failed to load external entity "-//FOO/BAR" in %s on line %d
 
 Warning: DOMDocument::validate(): Could not load the external subset "foobar.dtd" in %s on line %d
 bool(false)

@@ -1,16 +1,14 @@
 --TEST--
 mysqli_stmt_send_long_data() - exceed packet size, mysqlnd
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-
-if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
-    die("skip: warnings only available in mysqlnd");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -42,8 +40,6 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
 
     // let's ignore upper limits for LONGBLOB (2^32) ...
     // maximum packet size up to which we test is 10M
-    $tmp = '';
-    $blob = '';
     $tmp = str_repeat('a', 1024);
 
     $limit = min(floor($max_allowed_packet / 1024 / 2), 10240);
@@ -96,7 +92,7 @@ Warning: mysqli_stmt_send_long_data(): There was an error while sending long dat
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

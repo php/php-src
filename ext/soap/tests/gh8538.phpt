@@ -1,7 +1,7 @@
 --TEST--
 Bug GH-8538 (SoapClient may strip parts of nmtokens)
---SKIPIF--
-<?php require_once("skipif.inc"); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 $client = new SoapClient(__DIR__ . "/gh8538.wsdl"); 

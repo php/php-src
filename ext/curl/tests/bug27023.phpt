@@ -2,8 +2,8 @@
 Bug #27023 (CURLOPT_POSTFIELDS does not parse content types for files)
 --INI--
 error_reporting = E_ALL & ~E_DEPRECATED
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -33,9 +33,6 @@ $file = curl_file_create(__DIR__ . '/curl_testdata1.txt', "text/plain", "foo.txt
 $params = array('file' => $file);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 var_dump(curl_exec($ch));
-
-
-curl_close($ch);
 ?>
 --EXPECTF--
 string(%d) "curl_testdata1.txt|application/octet-stream|6"

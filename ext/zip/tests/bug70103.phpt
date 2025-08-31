@@ -1,9 +1,7 @@
 --TEST--
 Bug #70103 (ZipArchive::addGlob ignores remove_all_path option)
---SKIPIF--
-<?php
-if (!extension_loaded('zip')) die('skip zip support not available');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $dir = __DIR__ . '/bug70103';

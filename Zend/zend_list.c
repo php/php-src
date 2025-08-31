@@ -31,13 +31,12 @@ static HashTable list_destructors;
 
 ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 {
-	int index;
 	zval zv;
 
-	index = zend_hash_next_free_element(&EG(regular_list));
+	zend_long index = zend_hash_next_free_element(&EG(regular_list));
 	if (index == 0) {
 		index = 1;
-	} else if (index == INT_MAX) {
+	} else if (index == ZEND_LONG_MAX) {
 		zend_error_noreturn(E_ERROR, "Resource ID space overflow");
 	}
 	ZVAL_NEW_RES(&zv, index, ptr, type);
@@ -215,13 +214,18 @@ void zend_init_rsrc_plist(void)
 
 void zend_close_rsrc_list(HashTable *ht)
 {
-	zend_resource *res;
+	/* Reload ht->arData on each iteration, as it may be reallocated. */
+	uint32_t i = ht->nNumUsed;
 
-	ZEND_HASH_REVERSE_FOREACH_PTR(ht, res) {
-		if (res->type >= 0) {
-			zend_resource_dtor(res);
+	while (i-- > 0) {
+		zval *p = ZEND_HASH_ELEMENT(ht, i);
+		if (Z_TYPE_P(p) != IS_UNDEF) {
+			zend_resource *res = Z_PTR_P(p);
+			if (res->type >= 0) {
+				zend_resource_dtor(res);
+			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	}
 }
 
 
@@ -272,6 +276,7 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 	ZVAL_PTR(&zv, lde);
 
 	if (zend_hash_next_index_insert(&list_destructors, &zv) == NULL) {
+		free(lde);
 		return FAILURE;
 	}
 	return list_destructors.nNextFreeElement-1;
@@ -281,7 +286,7 @@ ZEND_API int zend_fetch_list_dtor_id(const char *type_name)
 {
 	zend_rsrc_list_dtors_entry *lde;
 
-	ZEND_HASH_FOREACH_PTR(&list_destructors, lde) {
+	ZEND_HASH_PACKED_FOREACH_PTR(&list_destructors, lde) {
 		if (lde->type_name && (strcmp(type_name, lde->type_name) == 0)) {
 			return lde->resource_id;
 		}

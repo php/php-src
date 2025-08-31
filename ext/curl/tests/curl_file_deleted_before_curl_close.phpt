@@ -2,8 +2,8 @@
 Memory corruption error if fp of just created file is closed before curl_close.
 --CREDITS--
 Alexey Shein <confik@gmail.com>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -35,5 +35,6 @@ echo "Closed correctly\n";
 <?php
 unlink(__DIR__ . '/curl_file_deleted_before_curl_close.tmp');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 Closed correctly

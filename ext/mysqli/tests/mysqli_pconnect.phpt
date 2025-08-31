@@ -1,13 +1,14 @@
 --TEST--
 mysqli_pconnect()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $host = 'p:' . $host;
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))

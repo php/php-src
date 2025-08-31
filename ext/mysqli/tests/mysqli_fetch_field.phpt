@@ -1,17 +1,16 @@
 --TEST--
 mysqli_fetch_field()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
     // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
 
-    require('table.inc');
+    require 'table.inc';
 
     // Make sure that client, connection and result charsets are all the
     // same. Not sure whether this is strictly necessary.
@@ -34,10 +33,6 @@ require_once('skipifconnectfailure.inc');
     if ($tmp->charsetnr != $charsetInfo->number) {
         printf("[004] Expecting charset %s/%d got %d\n",
             $charsetInfo->charset, $charsetInfo->number, $tmp->charsetnr);
-    }
-    if ($tmp->length != $charsetInfo->max_length) {
-        printf("[005] Expecting length %d got %d\n",
-            $charsetInfo->max_length, $tmp->max_length);
     }
     if ($tmp->db != $db) {
         printf("011] Expecting database '%s' got '%s'\n",
@@ -78,7 +73,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 object(stdClass)#%d (13) {
@@ -97,7 +92,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(11)
   ["charsetnr"]=>
@@ -159,7 +154,7 @@ object(stdClass)#%d (13) {
   ["catalog"]=>
   string(%d) "%s"
   ["max_length"]=>
-  int(1)
+  int(0)
   ["length"]=>
   int(11)
   ["charsetnr"]=>

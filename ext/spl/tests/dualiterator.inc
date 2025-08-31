@@ -75,7 +75,7 @@ class DualIterator implements Iterator
 
     /** rewind both inner iterators
      */
-    function rewind()
+    function rewind(): void
     {
         $this->lhs->rewind();
         $this->rhs->rewind();
@@ -83,14 +83,14 @@ class DualIterator implements Iterator
 
     /** @return whether both inner iterators are valid
      */
-    function valid()
+    function valid(): bool
     {
         return $this->lhs->valid() && $this->rhs->valid();
     }
 
     /** @return current value depending on CURRENT_* flags
      */
-    function current()
+    function current(): mixed
     {
         switch($this->flags & 0x0F)
         {
@@ -108,7 +108,7 @@ class DualIterator implements Iterator
 
     /** @return key value depending on KEY_* flags
      */
-    function key()
+    function key(): mixed
     {
         switch($this->flags & 0xF0)
         {
@@ -124,7 +124,7 @@ class DualIterator implements Iterator
 
     /** move both inner iterators forward
      */
-    function next()
+    function next(): void
     {
         $this->lhs->next();
         $this->rhs->next();

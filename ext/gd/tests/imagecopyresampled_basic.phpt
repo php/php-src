@@ -1,8 +1,12 @@
 --TEST--
 imagecopyresampled()
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!function_exists('imagecopyresampled')) die('skip imagecopyresampled() not available');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
@@ -43,11 +47,6 @@ imagepng($image_sml, $dest_sml);
 
 list($width, $height) = getimagesize($dest_sml);
 echo "Size of copy: width=". $width . " height=" . $height . "\n";
-
-imagedestroy($image_lge);
-imagedestroy($image_sml);
-
-
 echo "Done\n";
 ?>
 --CLEAN--

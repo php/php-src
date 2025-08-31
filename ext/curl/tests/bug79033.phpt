@@ -1,7 +1,7 @@
 --TEST--
 Bug #79033 (Curl timeout error with specific url and post)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';

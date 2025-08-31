@@ -1,7 +1,7 @@
 --TEST--
 Phar::convertToPhar() from tar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -39,7 +39,6 @@ var_dump(strlen($phar->getStub()));
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
 __HALT_COMPILER();

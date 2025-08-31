@@ -1,8 +1,9 @@
 --TEST--
 Phar::buildFromDirectory() - non-directory passed as first parameter
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php
-    if (!extension_loaded("phar")) die("skip");
     if (substr(PHP_OS, 0, 3) == "WIN") die("skip not for Windows");
 ?>
 --INI--
@@ -17,11 +18,6 @@ try {
     var_dump(get_class($e));
     echo $e->getMessage() . "\n";
 }
-?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/buildfromdirectory2.phar');
-__HALT_COMPILER();
 ?>
 --EXPECTF--
 %s(24) "UnexpectedValueException"

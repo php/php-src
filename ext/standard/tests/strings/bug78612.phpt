@@ -3,8 +3,8 @@ Bug #78612 (strtr leaks memory when integer keys are used and the subject string
 --FILE--
 <?php
 
-$find_replace = array();
-$_a = 7111222333000001;
+$find_replace = [];
+$_a = 333000001;
 $_b = 5000001;
 
 for ($j=0; $j<10; $j++) {

@@ -1,18 +1,14 @@
 --TEST--
 Test function gzpassthru() by calling it with its expected arguments
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 
 // note that gzpassthru is an alias to fpassthru. parameter checking tests will be
 // the same as fpassthru
 
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f, 'r');
 var_dump(gzpassthru($h));
 var_dump(gzpassthru($h));

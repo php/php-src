@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -17,15 +17,15 @@
 #include "php.h"
 #include "php_network.h"
 
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
 
-#if HAVE_NET_IF_H
+#ifdef HAVE_NET_IF_H
 # include <net/if.h>
 #endif
 
-#if HAVE_GETIFADDRS
+#ifdef HAVE_GETIFADDRS
 # include <ifaddrs.h>
 #elif defined(__PASE__)
 /* IBM i implements getifaddrs, but under its own name */
@@ -52,8 +52,6 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 
 	if (!addr) { return NULL; }
 
-	/* Prefer inet_ntop() as it's more task-specific and doesn't have to be demangled */
-#if HAVE_INET_NTOP
 	switch (addr->sa_family) {
 #ifdef AF_INET6
 		case AF_INET6: {
@@ -76,14 +74,13 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 			break;
 		}
 	}
-#endif
 
 	/* Fallback on getnameinfo() */
 	switch (addr->sa_family) {
 #ifdef AF_INET6
 		case AF_INET6:
 			addrlen = sizeof(struct sockaddr_in6);
-			/* fallthrough */
+			ZEND_FALLTHROUGH;
 #endif
 		case AF_INET: {
 			zend_string *ret = zend_string_alloc(NI_MAXHOST, 0);
@@ -102,7 +99,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 	return NULL;
 }
 
-#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
+#if defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__)
 static void iface_append_unicast(zval *unicast, zend_long flags,
                                  struct sockaddr *addr, struct sockaddr *netmask,
                                  struct sockaddr *broadcast, struct sockaddr *ptp) {
@@ -190,7 +187,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	for (p = pAddresses; p; p = p->Next) {
 		zval iface, unicast;
 
-		if ((IF_TYPE_ETHERNET_CSMACD != p->IfType) && (IF_TYPE_SOFTWARE_LOOPBACK != p->IfType)) {
+		if ((IF_TYPE_ETHERNET_CSMACD != p->IfType) && (IF_TYPE_IEEE80211 != p->IfType) && (IF_TYPE_SOFTWARE_LOOPBACK != p->IfType)) {
 			continue;
 		}
 
@@ -264,7 +261,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	FREE(pAddresses);
 #undef MALLOC
 #undef FREE
-#elif HAVE_GETIFADDRS || defined(__PASE__) /* !PHP_WIN32 */
+#elif defined(HAVE_GETIFADDRS) || defined(__PASE__) /* !PHP_WIN32 */
 	struct ifaddrs *addrs = NULL, *p;
 
 	ZEND_PARSE_PARAMETERS_NONE();

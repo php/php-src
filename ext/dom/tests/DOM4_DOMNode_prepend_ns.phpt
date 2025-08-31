@@ -1,7 +1,7 @@
 --TEST--
 DOMNode::prepend() with namespace
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 require_once("dom_test.inc");

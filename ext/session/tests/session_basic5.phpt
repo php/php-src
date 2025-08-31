@@ -5,13 +5,13 @@ session.use_strict_mode=0
 session.use_only_cookies=0
 session.use_trans_sid=1
 session.save_handler=files
-session.hash_bits_per_character=4
-session.hash_function=0
 session.gc_probability=1
 session.gc_divisor=1000
 session.gc_maxlifetime=300
 session.save_path=
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -24,7 +24,7 @@ ini_set('session.trans_sid_hosts','php.net,example.com');
 echo "*** Testing basic session functionality : variation5 use_trans_sid ***\n";
 echo "*** Test trans sid ***\n";
 
-$session_id = 'testid';
+$session_id = 'session-basic5';
 session_id($session_id);
 session_start();
 // Should add session ID to allowed hosts only for SECURITY
@@ -234,120 +234,125 @@ var_dump(session_destroy());
 
 ob_end_flush();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
+
+Deprecated: ini_set(): Usage of session.trans_sid_hosts INI setting is deprecated in %s on line 5
 *** Testing basic session functionality : variation5 use_trans_sid ***
 *** Test trans sid ***
 
-<a href="/?PHPSESSID=testid">test</a>
-<a href="/path?PHPSESSID=testid">test</a>
-<a href="/path/?PHPSESSID=testid">test</a>
-<a href="/path/?foo=var&PHPSESSID=testid">test</a>
-<a href="../?PHPSESSID=testid">test</a>
-<a href="../path?PHPSESSID=testid">test</a>
-<a href="../path/?PHPSESSID=testid">test</a>
-<a href="../path/?foo=var&PHPSESSID=testid">test</a>
+<a href="/?PHPSESSID=session-basic5">test</a>
+<a href="/path?PHPSESSID=session-basic5">test</a>
+<a href="/path/?PHPSESSID=session-basic5">test</a>
+<a href="/path/?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="../?PHPSESSID=session-basic5">test</a>
+<a href="../path?PHPSESSID=session-basic5">test</a>
+<a href="../path/?PHPSESSID=session-basic5">test</a>
+<a href="../path/?foo=var&PHPSESSID=session-basic5">test</a>
 
-<a href="/?PHPSESSID=testid#bar">test</a>
-<a href="/path/?PHPSESSID=testid#bar">test</a>
-<a href="/path/?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="../?PHPSESSID=testid#bar">test</a>
-<a href="../path/?PHPSESSID=testid#bar">test</a>
-<a href="../path/?foo=var&PHPSESSID=testid#bar">test</a>
+<a href="/?PHPSESSID=session-basic5#bar">test</a>
+<a href="/path/?PHPSESSID=session-basic5#bar">test</a>
+<a href="/path/?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="../?PHPSESSID=session-basic5#bar">test</a>
+<a href="../path/?PHPSESSID=session-basic5#bar">test</a>
+<a href="../path/?foo=var&PHPSESSID=session-basic5#bar">test</a>
 
-<a href="/?foo&PHPSESSID=testid">test</a>
-<a href="/?foo&PHPSESSID=testid#bar">test</a>
-<a href="/?foo=var&PHPSESSID=testid">test</a>
-<a href="/?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="../?foo&PHPSESSID=testid">test</a>
-<a href="../?foo&PHPSESSID=testid#bar">test</a>
-<a href="../?foo=var&PHPSESSID=testid">test</a>
-<a href="../?foo=var&PHPSESSID=testid#bar">test</a>
+<a href="/?foo&PHPSESSID=session-basic5">test</a>
+<a href="/?foo&PHPSESSID=session-basic5#bar">test</a>
+<a href="/?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="/?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="../?foo&PHPSESSID=session-basic5">test</a>
+<a href="../?foo&PHPSESSID=session-basic5#bar">test</a>
+<a href="../?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="../?foo=var&PHPSESSID=session-basic5#bar">test</a>
 
-<a href="file.php?PHPSESSID=testid">test</a>
-<a href="file.php?foo&PHPSESSID=testid">test</a>
-<a href="file.php?foo=var&PHPSESSID=testid">test</a>
-<a href="file.php?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="../file.php?PHPSESSID=testid">test</a>
-<a href="../file.php?foo&PHPSESSID=testid">test</a>
-<a href="../file.php?foo=var&PHPSESSID=testid">test</a>
-<a href="../file.php?foo=var&PHPSESSID=testid#bar">test</a>
+<a href="file.php?PHPSESSID=session-basic5">test</a>
+<a href="file.php?foo&PHPSESSID=session-basic5">test</a>
+<a href="file.php?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="../file.php?PHPSESSID=session-basic5">test</a>
+<a href="../file.php?foo&PHPSESSID=session-basic5">test</a>
+<a href="../file.php?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="../file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
 
-<a href="http://php.net/?PHPSESSID=testid">test</a>
-<a href="http://php.net/?PHPSESSID=testid">test</a>
-<a href="http://php.net/?PHPSESSID=testid#bar">test</a>
-<a href="http://php.net/?foo&PHPSESSID=testid">test</a>
-<a href="http://php.net/?foo&PHPSESSID=testid#bar">test</a>
-<a href="http://php.net/?foo=var&PHPSESSID=testid">test</a>
-<a href="http://php.net/?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="http://php.net/file.php?PHPSESSID=testid">test</a>
-<a href="http://php.net/file.php?PHPSESSID=testid#bar">test</a>
-<a href="http://php.net/file.php?foo&PHPSESSID=testid">test</a>
-<a href="http://php.net/file.php?foo&PHPSESSID=testid#bar">test</a>
-<a href="http://php.net/file.php?foo=var&PHPSESSID=testid">test</a>
-<a href="http://php.net/file.php?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="http://php.net/some/path/file.php?PHPSESSID=testid">test</a>
-<a href="http://php.net/some/path/file.php?foo&PHPSESSID=testid">test</a>
-<a href="http://php.net/some/path/file.php?foo=var&PHPSESSID=testid">test</a>
-<a href="http://php.net/some/path/file.php?foo=var&PHPSESSID=testid#bar">test</a>
+<a href="http://php.net/?PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/?PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/?PHPSESSID=session-basic5#bar">test</a>
+<a href="http://php.net/?foo&PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/?foo&PHPSESSID=session-basic5#bar">test</a>
+<a href="http://php.net/?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="http://php.net/file.php?PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/file.php?PHPSESSID=session-basic5#bar">test</a>
+<a href="http://php.net/file.php?foo&PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/file.php?foo&PHPSESSID=session-basic5#bar">test</a>
+<a href="http://php.net/file.php?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="http://php.net/some/path/file.php?PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/some/path/file.php?foo&PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/some/path/file.php?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="http://php.net/some/path/file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
 
-<a href="https://php.net/?PHPSESSID=testid">test</a>
-<a href="https://php.net/?PHPSESSID=testid">test</a>
-<a href="https://php.net/?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="https://php.net/file.php?PHPSESSID=testid">test</a>
-<a href="https://php.net/file.php?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="https://php.net/some/path/file.php?PHPSESSID=testid">test</a>
-<a href="https://php.net/some/path/file.php?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="https://php.net:8443/?PHPSESSID=testid">test</a>
-<a href="https://php.net:8443/?PHPSESSID=testid">test</a>
-<a href="https://php.net:8443/?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="https://php.net:8443/file.php?PHPSESSID=testid">test</a>
-<a href="https://php.net:8443/file.php?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="https://php.net:8443/some/path/file.php?PHPSESSID=testid">test</a>
-<a href="https://php.net:8443/some/path/file.php?foo=var&PHPSESSID=testid#bar">test</a>
+<a href="https://php.net/?PHPSESSID=session-basic5">test</a>
+<a href="https://php.net/?PHPSESSID=session-basic5">test</a>
+<a href="https://php.net/?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="https://php.net/file.php?PHPSESSID=session-basic5">test</a>
+<a href="https://php.net/file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="https://php.net/some/path/file.php?PHPSESSID=session-basic5">test</a>
+<a href="https://php.net/some/path/file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="https://php.net:8443/?PHPSESSID=session-basic5">test</a>
+<a href="https://php.net:8443/?PHPSESSID=session-basic5">test</a>
+<a href="https://php.net:8443/?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="https://php.net:8443/file.php?PHPSESSID=session-basic5">test</a>
+<a href="https://php.net:8443/file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="https://php.net:8443/some/path/file.php?PHPSESSID=session-basic5">test</a>
+<a href="https://php.net:8443/some/path/file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
 
-<a href="//php.net/?PHPSESSID=testid">test</a>
-<a href="//php.net/?PHPSESSID=testid">test</a>
-<a href="//php.net/?PHPSESSID=testid#bar">test</a>
-<a href="//php.net/?foo&PHPSESSID=testid">test</a>
-<a href="//php.net/?foo&PHPSESSID=testid#bar">test</a>
-<a href="//php.net/?foo=var&PHPSESSID=testid">test</a>
-<a href="//php.net/?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="//php.net/file.php?PHPSESSID=testid">test</a>
-<a href="//php.net/file.php?PHPSESSID=testid#bar">test</a>
-<a href="//php.net/file.php?foo&PHPSESSID=testid">test</a>
-<a href="//php.net/file.php?foo&PHPSESSID=testid#bar">test</a>
-<a href="//php.net/file.php?foo=var&PHPSESSID=testid">test</a>
-<a href="//php.net/file.php?foo=var&PHPSESSID=testid#bar">test</a>
-<a href="//php.net/some/path/file.php?PHPSESSID=testid">test</a>
-<a href="//php.net/some/path/file.php?foo&PHPSESSID=testid">test</a>
-<a href="//php.net/some/path/file.php?foo=var&PHPSESSID=testid">test</a>
-<a href="//php.net/some/path/file.php?foo=var&PHPSESSID=testid#bar">test</a>
+<a href="//php.net/?PHPSESSID=session-basic5">test</a>
+<a href="//php.net/?PHPSESSID=session-basic5">test</a>
+<a href="//php.net/?PHPSESSID=session-basic5#bar">test</a>
+<a href="//php.net/?foo&PHPSESSID=session-basic5">test</a>
+<a href="//php.net/?foo&PHPSESSID=session-basic5#bar">test</a>
+<a href="//php.net/?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="//php.net/?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="//php.net/file.php?PHPSESSID=session-basic5">test</a>
+<a href="//php.net/file.php?PHPSESSID=session-basic5#bar">test</a>
+<a href="//php.net/file.php?foo&PHPSESSID=session-basic5">test</a>
+<a href="//php.net/file.php?foo&PHPSESSID=session-basic5#bar">test</a>
+<a href="//php.net/file.php?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="//php.net/file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
+<a href="//php.net/some/path/file.php?PHPSESSID=session-basic5">test</a>
+<a href="//php.net/some/path/file.php?foo&PHPSESSID=session-basic5">test</a>
+<a href="//php.net/some/path/file.php?foo=var&PHPSESSID=session-basic5">test</a>
+<a href="//php.net/some/path/file.php?foo=var&PHPSESSID=session-basic5#bar">test</a>
 
-<form action="script.php" method="post"><input type="hidden" name="PHPSESSID" value="testid" />
+<form action="script.php" method="post"><input type="hidden" name="PHPSESSID" value="session-basic5" />
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="../script.php" method="post"><input type="hidden" name="PHPSESSID" value="testid" />r
+<form action="../script.php" method="post"><input type="hidden" name="PHPSESSID" value="session-basic5" />r
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="/path/script.php" method="post"><input type="hidden" name="PHPSESSID" value="testid" />
+<form action="/path/script.php" method="post"><input type="hidden" name="PHPSESSID" value="session-basic5" />
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form action="../path/script.php" method="post"><input type="hidden" name="PHPSESSID" value="testid" />
+<form action="../path/script.php" method="post"><input type="hidden" name="PHPSESSID" value="session-basic5" />
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form method="post" action="http://php.net/script.php"><input type="hidden" name="PHPSESSID" value="testid" />
+<form method="post" action="http://php.net/script.php"><input type="hidden" name="PHPSESSID" value="session-basic5" />
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form method="post" action="https://php.net/script.php"><input type="hidden" name="PHPSESSID" value="testid" />
+<form method="post" action="https://php.net/script.php"><input type="hidden" name="PHPSESSID" value="session-basic5" />
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
-<form method="post" action="//php.net/script.php"><input type="hidden" name="PHPSESSID" value="testid" />
+<form method="post" action="//php.net/script.php"><input type="hidden" name="PHPSESSID" value="session-basic5" />
   <input type="text" name="test1"></input>
   <input type="text" name="test2" />
 </form>
@@ -436,5 +441,5 @@ ob_end_flush();
 bool(true)
 *** Cleanup ***
 bool(true)
-string(6) "testid"
+string(14) "session-basic5"
 bool(true)

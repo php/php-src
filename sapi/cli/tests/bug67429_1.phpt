@@ -8,7 +8,7 @@ include "skipif.inc";
 <?php
 include "php_cli_server.inc";
 
-$proc_handle = php_cli_server_start(<<<PHP
+php_cli_server_start(<<<PHP
 http_response_code(308);
 PHP
 );

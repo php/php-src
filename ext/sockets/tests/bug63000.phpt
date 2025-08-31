@@ -1,10 +1,7 @@
 --TEST--
 Bug #63000: Multicast on OSX
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);

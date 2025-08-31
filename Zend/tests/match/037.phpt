@@ -53,13 +53,13 @@ var_dump(match(3) {
 
 ?>
 --EXPECTF--
-string(%d) "UnhandledMatchError: Unhandled match value of type bool in %s037.php:4
+string(%d) "UnhandledMatchError: Unhandled match case true in %s:%d
 Stack trace:
 #0 {main}"
-string(%d) "UnhandledMatchError: Unhandled match value of type int in %s037.php:12
+string(%d) "UnhandledMatchError: Unhandled match case 6 in %s:%d
 Stack trace:
 #0 {main}"
-string(%d) "UnhandledMatchError: Unhandled match value of type string in %s037.php:20
+string(%d) "UnhandledMatchError: Unhandled match case '3' in %s:%d
 Stack trace:
 #0 {main}"
 string(3) "foo"

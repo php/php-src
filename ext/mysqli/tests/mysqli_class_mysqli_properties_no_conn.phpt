@@ -1,20 +1,21 @@
 --TEST--
 Interface of the class mysqli
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     function dump_properties($mysqli) {
 
         printf("\nClass variables:\n");
         $variables = array_keys(get_class_vars(get_class($mysqli)));
         sort($variables);
-        foreach ($variables as $k => $var) {
+        foreach ($variables as $var) {
             try {
                 printf("%s = '%s'\n", $var, var_export($mysqli->$var, true));
             } catch (Error $exception) {
@@ -24,7 +25,7 @@ require_once('skipifconnectfailure.inc');
 
         printf("\nObject variables:\n");
         $variables = array_keys(get_object_vars($mysqli));
-        foreach ($variables as $k => $var) {
+        foreach ($variables as $var) {
             try {
                 printf("%s = '%s'\n", $var, var_export($mysqli->$var, true));
             } catch (Error $exception) {
@@ -45,11 +46,7 @@ require_once('skipifconnectfailure.inc');
             echo $exception->getMessage() . "\n";
         }
 
-        try {
-            $mysqli->client_info;
-        } catch (Error $exception) {
-            echo $exception->getMessage() . "\n";
-        }
+        printf("mysqli->client_info = '%s'/%s\n", $mysqli->client_info, gettype($mysqli->client_info));
 
         printf("mysqli->client_version = '%s'/%s\n", $mysqli->client_version, gettype($mysqli->client_version));
 
@@ -236,13 +233,13 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 ?>
 --CLEAN--
-<?php require_once("clean_table.inc"); ?>
+<?php require_once 'clean_table.inc'; ?>
 --EXPECTF--
 Without RS
 
 Class variables:
 Property access is not allowed yet
-Property access is not allowed yet
+client_info = '%s'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = ''%s'
@@ -261,29 +258,11 @@ mysqli object is already closed
 mysqli object is already closed
 
 Object variables:
-Property access is not allowed yet
-Property access is not allowed yet
-client_version = '%s'
-connect_errno = '%s'
-connect_error = ''%s'
-mysqli object is already closed
-mysqli object is already closed
-Property access is not allowed yet
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
 
 Magic, magic properties:
 mysqli object is already closed
 Property access is not allowed yet
-Property access is not allowed yet
+mysqli->client_info = '%s'/string
 mysqli->client_version = '%d'/integer
 mysqli object is already closed
 mysqli object is already closed
@@ -324,7 +303,7 @@ mysqli object is already closed
 
 Class variables:
 Property access is not allowed yet
-Property access is not allowed yet
+client_info = '%s'
 client_version = '%s'
 connect_errno = '%s'
 connect_error = '%s'
@@ -343,29 +322,11 @@ mysqli object is already closed
 mysqli object is already closed
 
 Object variables:
-Property access is not allowed yet
-Property access is not allowed yet
-client_version = '%s'
-connect_errno = '%s'
-connect_error = '%s'
-mysqli object is already closed
-mysqli object is already closed
-Property access is not allowed yet
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
-mysqli object is already closed
 
 Magic, magic properties:
 mysqli object is already closed
 Property access is not allowed yet
-Property access is not allowed yet
+mysqli->client_info = '%s'/string
 mysqli->client_version = '%d'/integer
 mysqli object is already closed
 mysqli object is already closed

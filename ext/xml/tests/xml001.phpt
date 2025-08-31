@@ -1,8 +1,9 @@
 --TEST--
 XML parser test, function callbacks
+--EXTENSIONS--
+xml
 --SKIPIF--
 <?php
-require_once("skipif.inc");
 XML_SAX_IMPL == 'libxml' && die('skip this test is not intended for libxml SAX parser');
 ?>
 --FILE--
@@ -29,7 +30,6 @@ while ($data = fread($fp, 4096)) {
     }
 }
 print "parse complete\n";
-xml_parser_free($xml_parser);
 
 function startElement($parser, $name, $attribs)
 {

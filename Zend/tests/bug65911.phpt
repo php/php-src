@@ -6,6 +6,7 @@ class A {}
 
 class B
 {
+    public $foo;
     public function go()
     {
         $this->foo = 'bar';

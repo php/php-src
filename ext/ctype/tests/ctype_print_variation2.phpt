@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_print() function : usage variations - different integers
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*
@@ -14,7 +14,7 @@ echo "*** Testing ctype_print() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-    if (ctype_print($i)) {
+    if (ctype_print(chr($i))) {
         echo "character code $i is a printable character\n";
     }
 }

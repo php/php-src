@@ -1,7 +1,7 @@
 --TEST--
 Bug #52929 (Segfault in filter_var with FILTER_VALIDATE_EMAIL with large amount of data)
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 var_dump(filter_var('valid@email.address', FILTER_VALIDATE_EMAIL));

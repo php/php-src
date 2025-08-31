@@ -4,12 +4,11 @@ Register Alloction 004: Check guard before register load
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 opcache.jit=tracing
 opcache.jit_hot_func=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function createTree($depth) {

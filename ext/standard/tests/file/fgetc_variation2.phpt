@@ -30,5 +30,5 @@ echo "Done";
 --EXPECT--
 *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with closed handle --
-fgetc(): supplied resource is not a valid stream resource
+fgetc(): Argument #1 ($stream) must be an open stream resource
 Done

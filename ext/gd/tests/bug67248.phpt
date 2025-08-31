@@ -1,8 +1,9 @@
 --TEST--
 Bug #67248 (imageaffinematrixget missing check of parameters)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-        if(!extension_loaded('gd')){ die('skip gd extension not available'); }
         if(!function_exists('imageaffinematrixget')) die('skip imageaffinematrixget() not available');
 ?>
 --FILE--

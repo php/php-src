@@ -27,6 +27,7 @@
 #include "timelib_private.h"
 
 #define TIMELIB_SUPPORTS_V2DATA
+#define TIMELIB_SUPPORT_SLIM_FILE
 #include "timezonedb.h"
 
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
@@ -127,6 +128,9 @@ static int read_tzif_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
 			break;
 		case '3':
 			version = 3;
+			break;
+		case '4':
+			version = 4;
 			break;
 		default:
 			return -1;
@@ -248,7 +252,9 @@ static int read_64bit_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	memcpy(buffer, *tzf, sizeof(unsigned char) * 6 * tz->bit64.typecnt);
 	*tzf += sizeof(unsigned char) * 6 * tz->bit64.typecnt;
 
-	tz->type = (ttinfo*) timelib_calloc(1, tz->bit64.typecnt * sizeof(ttinfo));
+	// We add two extra to have space for potential new ttinfo entries due to new types defined in the
+	// POSIX string
+	tz->type = (ttinfo*) timelib_calloc(1, (tz->bit64.typecnt + 2) * sizeof(ttinfo));
 	if (!tz->type) {
 		timelib_free(buffer);
 		return TIMELIB_ERROR_CANNOT_ALLOCATE;
@@ -349,16 +355,92 @@ static void skip_32bit_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	}
 }
 
-static void skip_posix_string(const unsigned char **tzf, timelib_tzinfo *tz)
+static void read_posix_string(const unsigned char **tzf, timelib_tzinfo *tz)
 {
-	int n_count = 0;
+	const unsigned char *begin;
 
-	do {
-		if (*tzf[0] == '\n') {
-			n_count++;
-		}
+	// POSIX string is delimited by \n
+	(*tzf)++;
+	begin = *tzf;
+
+	while (*tzf[0] != '\n') {
 		(*tzf)++;
-	} while (n_count < 2);
+	}
+
+	tz->posix_string = timelib_calloc(1, *tzf - begin + 1);
+	memcpy(tz->posix_string, begin, *tzf - begin);
+
+	// skip over closing \n
+	(*tzf)++;
+}
+
+static signed int find_ttinfo_index(timelib_tzinfo *tz, int32_t offset, int isdst, char *abbr)
+{
+	uint64_t i;
+
+	for (i = 0; i < tz->bit64.typecnt; i++) {
+		if (
+			(offset == tz->type[i].offset) &&
+			(isdst == tz->type[i].isdst) &&
+			(strcmp(abbr, &tz->timezone_abbr[tz->type[i].abbr_idx]) == 0)
+		) {
+			return i;
+		}
+	}
+
+	return TIMELIB_UNSET;
+}
+
+static unsigned int add_abbr(timelib_tzinfo *tz, char *abbr)
+{
+	size_t old_length = tz->bit64.charcnt;
+	size_t new_length = old_length + strlen(abbr) + 1;
+	tz->timezone_abbr = (char*) timelib_realloc(tz->timezone_abbr, new_length);
+	memcpy(tz->timezone_abbr + old_length, abbr, strlen(abbr));
+	tz->bit64.charcnt = new_length;
+	tz->timezone_abbr[new_length - 1] = '\0';
+
+	return old_length;
+}
+
+static signed int add_new_ttinfo_index(timelib_tzinfo *tz, int32_t offset, int isdst, char *abbr)
+{
+	tz->type[tz->bit64.typecnt].offset = offset;
+	tz->type[tz->bit64.typecnt].isdst = isdst;
+	tz->type[tz->bit64.typecnt].abbr_idx = add_abbr(tz, abbr);
+	tz->type[tz->bit64.typecnt].isstdcnt = 0;
+	tz->type[tz->bit64.typecnt].isgmtcnt = 0;
+
+	++tz->bit64.typecnt;
+
+	return tz->bit64.typecnt - 1;
+}
+
+static int integrate_posix_string(timelib_tzinfo *tz)
+{
+	tz->posix_info = timelib_parse_posix_str(tz->posix_string);
+	if (!tz->posix_info) {
+		return 0;
+	}
+
+	tz->posix_info->type_index_std_type = find_ttinfo_index(tz, tz->posix_info->std_offset, 0, tz->posix_info->std);
+	if (tz->posix_info->type_index_std_type == TIMELIB_UNSET) {
+		tz->posix_info->type_index_std_type = add_new_ttinfo_index(tz, tz->posix_info->std_offset, 0, tz->posix_info->std);
+		return 1;
+	}
+
+	/* If there is no DST set for this zone, return */
+	if (!tz->posix_info->dst) {
+		return 1;
+	}
+
+	tz->posix_info->type_index_dst_type = find_ttinfo_index(tz, tz->posix_info->dst_offset, 1, tz->posix_info->dst);
+	if (tz->posix_info->type_index_dst_type == TIMELIB_UNSET) {
+		tz->posix_info->type_index_dst_type = add_new_ttinfo_index(tz, tz->posix_info->dst_offset, 1, tz->posix_info->dst);
+		return 1;
+	}
+
+	return 1;
 }
 
 static void read_location(const unsigned char **tzf, timelib_tzinfo *tz)
@@ -389,14 +471,51 @@ static void set_default_location_and_comments(const unsigned char **tzf, timelib
 	tz->location.comments[1] = '\0';
 }
 
+static char *format_ut_time(timelib_sll ts, timelib_tzinfo *tz)
+{
+	char *tmp = timelib_calloc(1, 64);
+	timelib_time *t = timelib_time_ctor();
+
+	timelib_unixtime2gmt(t, ts);
+	snprintf(
+		tmp, 64,
+		"%04lld-%02lld-%02lld %02lld:%02lld:%02lld UT",
+		t->y, t->m, t->d,
+		t->h, t->i, t->s
+	);
+
+	timelib_time_dtor(t);
+	return tmp;
+}
+
+static char *format_offset_type(timelib_tzinfo *tz, int i)
+{
+	char *tmp = timelib_calloc(1, 64);
+
+	snprintf(
+		tmp, 64,
+		"%3d [%6ld %1d %3d '%s' (%d,%d)]",
+		i,
+		(long int) tz->type[i].offset,
+		tz->type[i].isdst,
+		tz->type[i].abbr_idx,
+		&tz->timezone_abbr[tz->type[i].abbr_idx],
+		tz->type[i].isstdcnt,
+		tz->type[i].isgmtcnt
+	);
+
+	return tmp;
+}
+
 void timelib_dump_tzinfo(timelib_tzinfo *tz)
 {
-	uint32_t i;
+	uint32_t  i;
+	char     *date_str, *trans_str;
 
 	printf("Country Code:      %s\n", tz->location.country_code);
 	printf("Geo Location:      %f,%f\n", tz->location.latitude, tz->location.longitude);
 	printf("Comments:\n%s\n",          tz->location.comments);
-	printf("BC:                %s\n",  tz->bc ? "" : "yes");
+	printf("BC:                %s\n",  tz->bc ? "no" : "yes");
 	printf("Slim File:         %s\n",  detect_slim_file(tz) ? "yes" : "no");
 
 	printf("\n64-bit:\n");
@@ -407,31 +526,54 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	printf("Local types count: " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit64.typecnt);
 	printf("Zone Abbr. count:  " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->bit64.charcnt);
 
-	printf ("%16s (%20s) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
-		"", "", 0,
-		(long int) tz->type[0].offset,
-		tz->type[0].isdst,
-		tz->type[0].abbr_idx,
-		&tz->timezone_abbr[tz->type[0].abbr_idx],
-		tz->type[0].isstdcnt,
-		tz->type[0].isgmtcnt
-		);
+	trans_str = format_offset_type(tz, 0);
+	printf("%22s (%20s) = %s\n", "", "", trans_str);
+	timelib_free(trans_str);
+
 	for (i = 0; i < tz->bit64.timecnt; i++) {
-		printf ("%016" PRIX64 " (%20" PRId64 ") = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
-			tz->trans[i], tz->trans[i], tz->trans_idx[i],
-			(long int) tz->type[tz->trans_idx[i]].offset,
-			tz->type[tz->trans_idx[i]].isdst,
-			tz->type[tz->trans_idx[i]].abbr_idx,
-			&tz->timezone_abbr[tz->type[tz->trans_idx[i]].abbr_idx],
-			tz->type[tz->trans_idx[i]].isstdcnt,
-			tz->type[tz->trans_idx[i]].isgmtcnt
-			);
+		date_str = format_ut_time(tz->trans[i], tz);
+		trans_str = format_offset_type(tz, tz->trans_idx[i]);
+		printf(
+			"%s (%20" PRId64 ") = %s\n",
+			date_str,
+			tz->trans[i],
+			trans_str
+		);
+		timelib_free(date_str);
+		timelib_free(trans_str);
 	}
 	for (i = 0; i < tz->bit64.leapcnt; i++) {
-		printf ("%016" PRIX64 " (%20ld) = %d\n",
-			tz->leap_times[i].trans,
+		date_str = format_ut_time(tz->trans[i], tz);
+		printf (
+			"%s (%20ld) = %d\n",
+			date_str,
 			(long) tz->leap_times[i].trans,
-			tz->leap_times[i].offset);
+			tz->leap_times[i].offset
+		);
+		timelib_free(date_str);
+	}
+
+	if (!tz->posix_string) {
+		printf("\n%43sNo POSIX string\n", "");
+		return;
+	}
+
+	if (strcmp("", tz->posix_string) == 0) {
+		printf("\n%43sEmpty POSIX string\n", "");
+		return;
+	}
+
+	printf("\n%43sPOSIX string: %s\n", "", tz->posix_string);
+	if (tz->posix_info && tz->posix_info->std) {
+		trans_str = format_offset_type(tz, tz->posix_info->type_index_std_type);
+		printf("%43sstd: %s\n", "", trans_str);
+		timelib_free(trans_str);
+
+		if (tz->posix_info->dst) {
+			trans_str = format_offset_type(tz, tz->posix_info->type_index_dst_type);
+			printf("%43sdst: %s\n", "", trans_str);
+			timelib_free(trans_str);
+		}
 	}
 }
 
@@ -486,6 +628,9 @@ static int skip_64bit_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
 	} else if (memcmp(*tzf, "TZif3", 5) == 0) {
 		*tzf += 20;
 		return 1;
+	} else if (memcmp(*tzf, "TZif4", 5) == 0) {
+		*tzf += 20;
+		return 1;
 	} else {
 		return 0;
 	}
@@ -520,7 +665,7 @@ timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *t
 	timelib_tzinfo *tmp;
 	int version;
 	int transitions_result, types_result;
-	unsigned int type; /* TIMELIB_TZINFO_PHP or TIMELIB_TZINFO_ZONEINFO */
+	unsigned int type = TIMELIB_TZINFO_ZONEINFO; /* TIMELIB_TZINFO_PHP or TIMELIB_TZINFO_ZONEINFO */
 
 	*error_code = TIMELIB_ERROR_NO_ERROR;
 
@@ -528,7 +673,7 @@ timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *t
 		tmp = timelib_tzinfo_ctor(timezone);
 
 		version = read_preamble(&tzf, tmp, &type);
-		if (version < 2 || version > 3) {
+		if (version < 2 || version > 4) {
 			*error_code = TIMELIB_ERROR_UNSUPPORTED_VERSION;
 			timelib_tzinfo_dtor(tmp);
 			return NULL;
@@ -538,10 +683,6 @@ timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *t
 		read_32bit_header(&tzf, tmp);
 		skip_32bit_transitions(&tzf, tmp);
 		skip_32bit_types(&tzf, tmp);
-
-		if (detect_slim_file(tmp)) {
-			*error_code = TIMELIB_ERROR_SLIM_FILE;
-		}
 
 		if (!skip_64bit_preamble(&tzf, tmp)) {
 			/* 64 bit preamble is not in place */
@@ -561,7 +702,15 @@ timelib_tzinfo *timelib_parse_tzfile(const char *timezone, const timelib_tzdb *t
 			timelib_tzinfo_dtor(tmp);
 			return NULL;
 		}
-		skip_posix_string(&tzf, tmp);
+
+		read_posix_string(&tzf, tmp);
+		if (strcmp("", tmp->posix_string) == 0) {
+			*error_code = TIMELIB_ERROR_EMPTY_POSIX_STRING;
+		} else if (!integrate_posix_string(tmp)) {
+			*error_code = TIMELIB_ERROR_CORRUPT_POSIX_STRING;
+			timelib_tzinfo_dtor(tmp);
+			return NULL;
+		}
 
 		if (type == TIMELIB_TZINFO_PHP) {
 			read_location(&tzf, tmp);
@@ -585,6 +734,10 @@ void timelib_tzinfo_dtor(timelib_tzinfo *tz)
 	TIMELIB_TIME_FREE(tz->timezone_abbr);
 	TIMELIB_TIME_FREE(tz->leap_times);
 	TIMELIB_TIME_FREE(tz->location.comments);
+	TIMELIB_TIME_FREE(tz->posix_string);
+	if (tz->posix_info) {
+		timelib_posix_str_dtor(tz->posix_info);
+	}
 	TIMELIB_TIME_FREE(tz);
 	tz = NULL;
 }
@@ -623,16 +776,33 @@ timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 		memcpy(tmp->leap_times, tz->leap_times, tz->bit64.leapcnt * sizeof(tlinfo));
 	}
 
+	if (tz->posix_string) {
+		tmp->posix_string = timelib_strdup(tz->posix_string);
+	}
+
 	return tmp;
 }
 
-static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib_sll *transition_time)
+/**
+ * Algorithm From RFC 8536, Section 3.2
+ * https://tools.ietf.org/html/rfc8536#section-3.2
+ */
+ttinfo* timelib_fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib_sll *transition_time)
 {
-	uint32_t i;
+	uint32_t left, right;
 
-	/* If there is no transition time, we pick the first one, if that doesn't
-	 * exist we return NULL */
+	/* RFC 8536: If there are no transitions, local time for all timestamps is specified
+	 * by the TZ string in the footer if present and nonempty; otherwise, it is specified
+	 * by time type 0.
+	 *
+	 * timelib: If there is also no time type 0, return NULL.
+	 */
 	if (!tz->bit64.timecnt || !tz->trans) {
+		if (tz->posix_info) {
+			*transition_time = INT64_MIN;
+			return timelib_fetch_posix_timezone_offset(tz, ts, NULL);
+		}
+
 		if (tz->bit64.typecnt == 1) {
 			*transition_time = INT64_MIN;
 			return &(tz->type[0]);
@@ -640,25 +810,45 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 		return NULL;
 	}
 
-	/* If the TS is lower than the first transition time, then we scan over
-	 * all the transition times to find the first non-DST one, or the first
-	 * one in case there are only DST entries. Not sure which smartass came up
-	 * with this idea in the first though :) */
+	/* RFC 8536: Local time for timestamps before the first transition is specified by
+	 * the first time type (time type 0). */
 	if (ts < tz->trans[0]) {
 		*transition_time = INT64_MIN;
 		return &(tz->type[0]);
 	}
 
-	/* In all other cases we loop through the available transition times to find
-	 * the correct entry */
-	for (i = 0; i < tz->bit64.timecnt; i++) {
-		if (ts < tz->trans[i]) {
-			*transition_time = tz->trans[i - 1];
-			return &(tz->type[tz->trans_idx[i - 1]]);
+	/* RFC 8536: Local time for timestamps on or after the last transition is specified
+	 * by the TZ string in the footer (Section 3.3) if present and nonempty; otherwise,
+	 * it is unspecified.
+	 *
+	 * timelib: For 'unspecified', timelib assumes the last transition
+	 */
+	if (ts >= tz->trans[tz->bit64.timecnt - 1]) {
+		if (tz->posix_info) {
+			return timelib_fetch_posix_timezone_offset(tz, ts, transition_time);
+		}
+
+		*transition_time = tz->trans[tz->bit64.timecnt - 1];
+		return &(tz->type[tz->trans_idx[tz->bit64.timecnt - 1]]);
+	}
+
+	/* RFC 8536: The type corresponding to a transition time specifies local time for
+	 * timestamps starting at the given transition time and continuing up to, but not
+	 * including, the next transition time. */
+	left = 0;
+	right = tz->bit64.timecnt - 1;
+
+	while (right - left > 1) {
+		uint32_t mid = (left + right) >> 1;
+
+		if (ts < tz->trans[mid]) {
+			right = mid;
+		} else {
+			left = mid;
 		}
 	}
-	*transition_time = tz->trans[tz->bit64.timecnt - 1];
-	return &(tz->type[tz->trans_idx[tz->bit64.timecnt - 1]]);
+	*transition_time = tz->trans[left];
+	return &(tz->type[tz->trans_idx[left]]);
 }
 
 static tlinfo* fetch_leaptime_offset(timelib_tzinfo *tz, timelib_sll ts)
@@ -682,7 +872,7 @@ int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz)
 	ttinfo *to;
 	timelib_sll dummy;
 
-	if ((to = fetch_timezone_offset(tz, ts, &dummy))) {
+	if ((to = timelib_fetch_timezone_offset(tz, ts, &dummy))) {
 		return to->isdst;
 	}
 	return -1;
@@ -697,7 +887,7 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 	timelib_time_offset *tmp = timelib_time_offset_ctor();
 	timelib_sll                transition_time;
 
-	if ((to = fetch_timezone_offset(tz, ts, &transition_time))) {
+	if ((to = timelib_fetch_timezone_offset(tz, ts, &transition_time))) {
 		offset = to->offset;
 		abbr = &(tz->timezone_abbr[to->abbr_idx]);
 		tmp->is_dst = to->isdst;
@@ -720,23 +910,64 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 	return tmp;
 }
 
+int timelib_get_time_zone_offset_info(timelib_sll ts, timelib_tzinfo *tz, int32_t* offset, timelib_sll* transition_time, unsigned int* is_dst)
+{
+	ttinfo *to;
+	timelib_sll tmp_transition_time;
+
+	if (tz == NULL) {
+		return 0;
+	}
+
+	if ((to = timelib_fetch_timezone_offset(tz, ts, &tmp_transition_time))) {
+		if (offset) {
+			*offset = to->offset;
+		}
+		if (is_dst) {
+			*is_dst = to->isdst;
+		}
+		if (transition_time) {
+			*transition_time = tmp_transition_time;
+		}
+		return 1;
+	}
+	return 0;
+}
+
 timelib_sll timelib_get_current_offset(timelib_time *t)
 {
-	timelib_time_offset *gmt_offset;
-	timelib_sll retval;
-
 	switch (t->zone_type) {
 		case TIMELIB_ZONETYPE_ABBR:
 		case TIMELIB_ZONETYPE_OFFSET:
 			return t->z + (t->dst * 3600);
 
-		case TIMELIB_ZONETYPE_ID:
-			gmt_offset = timelib_get_time_zone_info(t->sse, t->tz_info);
-			retval = gmt_offset->offset;
-			timelib_time_offset_dtor(gmt_offset);
-			return retval;
+		case TIMELIB_ZONETYPE_ID: {
+			int32_t      offset = 0;
+			timelib_get_time_zone_offset_info(t->sse, t->tz_info, &offset, NULL, NULL);
+			return offset;
+		}
 
 		default:
 			return 0;
 	}
+}
+
+int timelib_same_timezone(timelib_time *one, timelib_time *two)
+{
+    if (one->zone_type != two->zone_type) {
+        return 0;
+    }
+
+    if (one->zone_type == TIMELIB_ZONETYPE_ABBR || one->zone_type == TIMELIB_ZONETYPE_OFFSET) {
+        if ((one->z + (one->dst * 3600)) == (two->z + (two->dst * 3600))) {
+            return 1;
+        }
+        return 0;
+    }
+
+    if (one->zone_type == TIMELIB_ZONETYPE_ID && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
+        return 1;
+    }
+
+    return 0;
 }

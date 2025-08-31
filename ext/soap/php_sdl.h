@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -58,7 +58,7 @@ struct _sdl {
 	HashTable *groups;           /* array of sdlTypesPtr */
 	char      *target_ns;
 	char      *source;
-	zend_bool  is_persistent;
+	bool  is_persistent;
 };
 
 typedef struct sdlCtx {
@@ -94,9 +94,9 @@ typedef struct _sdlSoapBindingFunctionHeader {
 	char                *name;
 	char                *ns;
 	sdlEncodingUse       use;
+	sdlRpcEncodingStyle  encodingStyle; /* not implemented yet */
 	sdlTypePtr           element;
 	encodePtr            encode;
-	sdlRpcEncodingStyle  encodingStyle; /* not implemented yet */
 	HashTable           *headerfaults;  /* array of sdlSoapBindingFunctionHeaderPtr */
 } sdlSoapBindingFunctionHeader, *sdlSoapBindingFunctionHeaderPtr;
 
@@ -195,9 +195,9 @@ typedef enum _sdlForm {
 
 struct _sdlType {
 	sdlTypeKind         kind;
+	char                nillable;
 	char               *name;
 	char               *namens;
-	char                nillable;
 	HashTable          *elements;             /* array of sdlTypePtr */
 	HashTable          *attributes;           /* array of sdlAttributePtr */
 	sdlRestrictionsPtr  restrictions;
@@ -255,12 +255,9 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl);
 
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const xmlChar *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);
-encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, int len);
+encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, size_t len);
 
-sdlBindingPtr get_binding_from_type(sdlPtr sdl, sdlBindingType type);
-sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
-
-void delete_sdl(void *handle);
+void delete_sdl(sdl *handle);
 void delete_sdl_impl(void *handle);
 
 void sdl_set_uri_credentials(sdlCtx *ctx, char *uri);

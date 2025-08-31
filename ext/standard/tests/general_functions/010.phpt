@@ -12,7 +12,7 @@ class test {
 }
 
 try {
-    register_shutdown_function(array("test","__call"));
+    var_dump(register_shutdown_function(array("test","__call")));
 } catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }

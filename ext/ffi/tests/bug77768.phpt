@@ -1,8 +1,9 @@
 --TEST--
 Bug #77768 (Redeclaration of builtin types and repeated declarations)
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 try {
     $libc = FFI::cdef("int printf(const char *format, ...);", "libc.so.6");
 } catch (Throwable $_) {
@@ -32,7 +33,7 @@ int printf(const char *format, ...);
 ");
 
 var_dump(FFI::sizeof($x->new("uint8_t")));
-var_dump(FFI::sizeof(FFI::new("uint8_t")));
+var_dump(FFI::sizeof(FFI::cdef()->new("uint8_t")));
 ?>
 --EXPECT--
 int(4)

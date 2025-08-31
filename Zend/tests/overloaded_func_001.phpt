@@ -1,9 +1,7 @@
 --TEST--
 Overloaded function 001
---SKIPIF--
-<?php
-if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 $o = new _ZendTestChildClass();

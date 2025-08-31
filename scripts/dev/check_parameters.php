@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -20,18 +20,15 @@ define('REPORT_LEVEL', 1); // 0 reports less false-positives. up to level 5.
 define('VERSION', '7.0');  // minimum is 7.0
 define('PHPDIR', realpath(dirname(__FILE__) . '/../..'));
 
-
 // be sure you have enough memory and stack for PHP. pcre will push the limits!
 ini_set('pcre.backtrack_limit', 10000000);
 
-
 // ------------------------ end of config ----------------------------
-
 
 $API_params = array(
     'a' => array('zval**'), // array
     'A' => array('zval**'), // array or object
-    'b' => array('zend_bool*'), // boolean
+    'b' => array('bool*'), // boolean
     'd' => array('double*'), // double
     'f' => array('zend_fcall_info*', 'zend_fcall_info_cache*'), // function
     'h' => array('HashTable**'), // array as an HashTable*
@@ -51,7 +48,7 @@ $API_params = array(
 /** reports an error, according to its level */
 function error($str, $level = 0)
 {
-    global $current_file, $current_function, $line;
+    global $current_file, $current_function, $line, $error_reported;
 
     if ($level <= REPORT_LEVEL) {
         if (strpos($current_file,PHPDIR) === 0) {
@@ -60,9 +57,9 @@ function error($str, $level = 0)
             $filename = $current_file;
         }
         echo $filename , " [$line] $current_function : $str\n";
+        $error_reported = true;
     }
 }
-
 
 /** this updates the global var $line (for error reporting) */
 function update_lineno($offset)
@@ -98,7 +95,6 @@ function update_lineno($offset)
     } while (true);
 }
 
-
 /** parses the sources and fetches its vars name, type and if they are initialized or not */
 function get_vars($txt)
 {
@@ -119,10 +115,9 @@ function get_vars($txt)
         }
     }
 
-//	if ($GLOBALS['current_function'] == 'for_debugging') { print_r($m);print_r($ret); }
+// if ($GLOBALS['current_function'] == 'for_debugging') { print_r($m);print_r($ret); }
     return $ret;
 }
-
 
 /** run diagnostic checks against one var. */
 function check_param($db, $idx, $exp, $optional, $allow_uninit = false)
@@ -179,10 +174,9 @@ function get_params($vars, $str)
         }
     }
 
-//	if ($GLOBALS['current_function'] == 'for_debugging') { var_dump($m); var_dump($ret); }
+// if ($GLOBALS['current_function'] == 'for_debugging') { var_dump($m); var_dump($ret); }
     return $ret;
 }
-
 
 /** run tests on a function. the code is passed in $txt */
 function check_function($name, $txt, $offset)
@@ -238,7 +232,7 @@ function check_function($name, $txt, $offset)
                     // nullable arguments
                     case '!':
                         if (in_array($last_char, array('l', 'L', 'd', 'b'))) {
-                            check_param($params, ++$j, 'zend_bool*', $optional);
+                            check_param($params, ++$j, 'bool*', $optional);
                         }
                     break;
 
@@ -290,7 +284,6 @@ function check_function($name, $txt, $offset)
     }
 }
 
-
 /** the main recursion function. splits files in functions and calls the other functions */
 function recurse($path)
 {
@@ -318,7 +311,6 @@ function recurse($path)
         if (count($split) < 2) continue; // no functions defined on this file
         array_shift($split); // the first part isn't relevant
 
-
         // generate the line offsets array
         $j = 0;
         $lines = preg_split("/(\r\n?|\n)/S", $txt, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -331,7 +323,6 @@ function recurse($path)
 
         $GLOBALS['lines_offset'] = $lines_offset;
         $GLOBALS['current_file'] = $file;
-
 
         for ($i = 0; $i < count($split); $i+=2) {
             // if the /* }}} */ comment is found use it to reduce false positives
@@ -372,6 +363,9 @@ foreach($dirs as $dir) {
     }
 }
 
+$error_reported = false;
 foreach ($dirs as $dir) {
     recurse(realpath($dir));
 }
+
+exit($error_reported === false ? 0 : 2);

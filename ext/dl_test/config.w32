@@ -1,0 +1,8 @@
+// vim:ft=javascript
+
+ARG_ENABLE("dl-test", "enable dl_test extension", "no");
+
+if (PHP_DL_TEST != "no") {
+	EXTENSION("dl_test", "dl_test.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	ADD_FLAG("CFLAGS_DL_TEST", "/D PHP_DL_TEST_EXPORTS ");
+}

@@ -3,7 +3,7 @@ Bug #46164 - 1 (stream_filter_remove() closes the stream)
 --FILE--
 <?php
 class user_filter extends php_user_filter {
-    function filter($in, $out, &$consumed, $closing) {
+    function filter($in, $out, &$consumed, $closing): int {
         while($bucket = stream_bucket_make_writeable($in)) {
             $consumed += $bucket->datalen;
             stream_bucket_append($out, $bucket);

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -83,7 +83,7 @@ const php_hash_ops php_hash_fnv1a64_ops = {
 /* {{{ PHP_FNV132Init
  * 32-bit FNV-1 hash initialisation
  */
-PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context)
+PHP_HASH_API void PHP_FNV132Init(PHP_FNV132_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = PHP_FNV1_32_INIT;
 }
@@ -118,7 +118,7 @@ PHP_HASH_API void PHP_FNV132Final(unsigned char digest[4], PHP_FNV132_CTX * cont
 /* {{{ PHP_FNV164Init
  * 64-bit FNV-1 hash initialisation
  */
-PHP_HASH_API void PHP_FNV164Init(PHP_FNV164_CTX *context)
+PHP_HASH_API void PHP_FNV164Init(PHP_FNV164_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = PHP_FNV1_64_INIT;
 }
@@ -161,7 +161,7 @@ PHP_HASH_API void PHP_FNV164Final(unsigned char digest[8], PHP_FNV164_CTX * cont
  *  alternate - if > 0 use the alternate version
  *
  * returns:
- *  32 bit hash as a static hash type
+ *  32-bit hash as a static hash type
  */
 static uint32_t
 fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate)
@@ -204,7 +204,7 @@ fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate)
  *  alternate - if > 0 use the alternate version
  *
  * returns:
- *  64 bit hash as a static hash type
+ *  64-bit hash as a static hash type
  */
 static uint64_t
 fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate)

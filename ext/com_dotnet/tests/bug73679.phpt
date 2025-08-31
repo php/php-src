@@ -1,9 +1,11 @@
 --TEST--
 Bug #73679 DOTNET read access violation using invalid codepage
+--EXTENSIONS--
+com_dotnet
 --SKIPIF--
 <?php
-if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present";
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
+if (!class_exists("dotnet")) die("skip mscoree not available");
 ?>
 --FILE--
 <?php

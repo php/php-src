@@ -1,7 +1,7 @@
 --TEST--
 Bug #54395 (Phar::mount() crashes when calling with wrong parameters)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 

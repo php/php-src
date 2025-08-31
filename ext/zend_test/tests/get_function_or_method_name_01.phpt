@@ -1,7 +1,7 @@
 --TEST--
 get_function_or_method_name when included file is scoped
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

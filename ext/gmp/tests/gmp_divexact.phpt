@@ -1,8 +1,9 @@
 --TEST--
 gmp_divexact() tests
+--EXTENSIONS--
+gmp
 --SKIPIF--
 <?php
-if (!extension_loaded("gmp")) die ("skip");
 if (!defined('GMP_VERSION') || version_compare("4.2.1", GMP_VERSION, ">=")) {
     die("skip your GMP is too old and will crash");
 }
@@ -41,7 +42,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(1) "0"
-Division by zero
+gmp_divexact(): Argument #2 ($num2) Division by zero
 string(2) "10"
 string(3) "512"
 string(19) "5000000000000000000"

@@ -1,10 +1,9 @@
 --TEST--
 Phar: a non-executable zip with no stub named .phar.zip
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=1
-detect_unicode=0
 zend.multibyte=0
 --FILE--
 <?php

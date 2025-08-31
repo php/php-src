@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -89,7 +89,7 @@ zend_string *phpdbg_compile_stackframe(zend_execute_data *ex) {
 	return s.s;
 }
 
-void phpdbg_print_cur_frame_info() {
+void phpdbg_print_cur_frame_info(void) {
 	const char *file_chr = zend_get_executed_filename();
 	zend_string *file = zend_string_init(file_chr, strlen(file_chr), 0);
 
@@ -122,7 +122,7 @@ void phpdbg_switch_frame(int frame) /* {{{ */
 	int i = 0;
 
 	if (PHPDBG_FRAME(num) == frame) {
-		phpdbg_notice("frame", "id=\"%d\"", "Already in frame #%d", frame);
+		phpdbg_notice("Already in frame #%d", frame);
 		return;
 	}
 
@@ -137,12 +137,12 @@ void phpdbg_switch_frame(int frame) /* {{{ */
 			} while (execute_data && execute_data->opline == NULL);
 		}
 	} phpdbg_catch_access {
-		phpdbg_error("signalsegv", "", "Couldn't switch frames, invalid data source");
+		phpdbg_error("Couldn't switch frames, invalid data source");
 		return;
 	} phpdbg_end_try_access();
 
 	if (execute_data == NULL) {
-		phpdbg_error("frame", "type=\"maxnum\" id=\"%d\"", "No frame #%d", frame);
+		phpdbg_error("No frame #%d", frame);
 		return;
 	}
 
@@ -158,10 +158,10 @@ void phpdbg_switch_frame(int frame) /* {{{ */
 
 	phpdbg_try_access {
 		zend_string *s = phpdbg_compile_stackframe(EG(current_execute_data));
-		phpdbg_notice("frame", "id=\"%d\" frameinfo=\"%.*s\"", "Switched to frame #%d: %.*s", frame, (int) ZSTR_LEN(s), ZSTR_VAL(s));
+		phpdbg_notice("Switched to frame #%d: %.*s", frame, (int) ZSTR_LEN(s), ZSTR_VAL(s));
 		zend_string_release(s);
 	} phpdbg_catch_access {
-		phpdbg_notice("frame", "id=\"%d\"", "Switched to frame #%d", frame);
+		phpdbg_notice("Switched to frame #%d", frame);
 	} phpdbg_end_try_access();
 
 	phpdbg_print_cur_frame_info();
@@ -171,36 +171,29 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 {
 	zval *funcname, *class, class_zv, *args, *argstmp;
 
-	funcname = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("function"));
+	funcname = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FUNCTION));
 
-	if ((class = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("object")))) {
+	if ((class = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_OBJECT)))) {
 		ZVAL_NEW_STR(&class_zv, Z_OBJCE_P(class)->name);
 		class = &class_zv;
 	} else {
-		class = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("class"));
+		class = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_CLASS));
 	}
 
 	if (class) {
-		zval *type = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("type"));
+		zval *type = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_TYPE));
 
-		phpdbg_xml(" symbol=\"%s%s%s\"", Z_STRVAL_P(class), Z_STRVAL_P(type), Z_STRVAL_P(funcname));
 		phpdbg_out("%s%s%s(", Z_STRVAL_P(class), Z_STRVAL_P(type), Z_STRVAL_P(funcname));
 	} else {
-		phpdbg_xml(" symbol=\"%s\"", Z_STRVAL_P(funcname));
 		phpdbg_out("%s(", Z_STRVAL_P(funcname));
 	}
 
-	args = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("args"));
-	if (args) {
-		phpdbg_xml(">");
-	} else {
-		phpdbg_xml(" />");
-	}
+	args = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_ARGS));
 
 	if (args) {
 		const zend_function *func = NULL;
 		const zend_arg_info *arginfo = NULL;
-		zend_bool is_variadic = 0;
+		bool is_variadic = 0;
 		int j = 0, m;
 
 		phpdbg_try_access {
@@ -216,7 +209,6 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 			if (j) {
 				phpdbg_out(", ");
 			}
-			phpdbg_xml("<arg %r");
 			if (m && j < m) {
 				char *arg_name = NULL;
 
@@ -232,11 +224,8 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 					is_variadic = arginfo ? ZEND_ARG_IS_VARIADIC(&arginfo[j]) : 0;
 				}
 
-				phpdbg_xml(" variadic=\"%s\" name=\"%s\">", is_variadic ? "variadic" : "", arg_name ? arg_name : "");
 				phpdbg_out("%s=%s", arg_name ? arg_name : "?", is_variadic ? "[": "");
 
-			} else {
-				phpdbg_xml(">");
 			}
 			++j;
 
@@ -245,32 +234,27 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 				php_printf("%s", arg_print);
 				efree(arg_print);
 			}
-
-			phpdbg_xml("</arg>");
 		} ZEND_HASH_FOREACH_END();
 
 		if (is_variadic) {
 			phpdbg_out("]");
 		}
-		phpdbg_xml("</frame>");
 	}
 	phpdbg_out(")");
 }
 
 void phpdbg_dump_backtrace(size_t num) /* {{{ */
 {
-	HashPosition position;
 	zval zbacktrace;
 	zval *tmp;
-	zval startline, startfile;
-	const char *startfilename;
-	zval *file = &startfile, *line = &startline;
+	zend_string *file = NULL;
+	zend_long line = 0;
 	int i = 0, limit = num;
 
 	PHPDBG_OUTPUT_BACKUP();
 
 	if (limit < 0) {
-		phpdbg_error("backtrace", "type=\"minnum\"", "Invalid backtrace size %d", limit);
+		phpdbg_error("Invalid backtrace size %d", limit);
 
 		PHPDBG_OUTPUT_BACKUP_RESTORE();
 		return;
@@ -279,42 +263,43 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 	phpdbg_try_access {
 		zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit);
 	} phpdbg_catch_access {
-		phpdbg_error("signalsegv", "", "Couldn't fetch backtrace, invalid data source");
+		phpdbg_error("Couldn't fetch backtrace, invalid data source");
 		return;
 	} phpdbg_end_try_access();
 
-	phpdbg_xml("<backtrace %r>");
+	line = zend_get_executed_lineno();
+	file = zend_get_executed_filename_ex();
 
-	Z_LVAL(startline) = zend_get_executed_lineno();
-	startfilename = zend_get_executed_filename();
-	Z_STR(startfile) = zend_string_init(startfilename, strlen(startfilename), 0);
-
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
-	tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position);
-	while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position))) {
+	zval *function_name = NULL;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(zbacktrace), tmp) {
 		if (file) { /* userland */
 			phpdbg_out("frame #%d: ", i);
-			phpdbg_xml("<frame %r id=\"%d\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", i, Z_STRVAL_P(file), Z_LVAL_P(line));
 			phpdbg_dump_prototype(tmp);
-			phpdbg_out(" at %s:%ld\n", Z_STRVAL_P(file), Z_LVAL_P(line));
+			phpdbg_out(" at %s:"ZEND_LONG_FMT"\n", ZSTR_VAL(file), line);
 			i++;
 		} else {
 			phpdbg_out(" => ");
-			phpdbg_xml("<frame %r id=\"%d\" internal=\"internal\"", i);
 			phpdbg_dump_prototype(tmp);
 			phpdbg_out(" (internal function)\n");
 		}
 
-		file = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("file"));
-		line = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("line"));
-		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
+		file = zend_hash_find_ptr(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FILE));
+		zval *line_zv = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_LINE));
+		if (line_zv) {
+			line = Z_LVAL_P(line_zv);
+		}
+		function_name = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FUNCTION));
+	} ZEND_HASH_FOREACH_END();
+
+	/* This is possible for fibers' start closure for example, which have a frame that doesn't contain the info
+	 * of which location stated the fiber if that stack frame is already torn down. same behaviour with debug_backtrace(). */
+	if (file == NULL) {
+		phpdbg_writeln(" => %s (internal function)", Z_STRVAL_P(function_name));
+	} else {
+		phpdbg_writeln("frame #%d: {main} at %s:"ZEND_LONG_FMT, i, ZSTR_VAL(file), line);
 	}
 
-	phpdbg_writeln("frame", "id=\"%d\" symbol=\"{main}\" file=\"%s\" line=\"%d\"", "frame #%d: {main} at %s:%ld", i, Z_STRVAL_P(file), Z_LVAL_P(line));
-	phpdbg_xml("</backtrace>");
-
 	zval_ptr_dtor_nogc(&zbacktrace);
-	zend_string_release(Z_STR(startfile));
 
 	PHPDBG_OUTPUT_BACKUP_RESTORE();
 } /* }}} */
@@ -338,7 +323,7 @@ void phpdbg_open_generator_frame(zend_generator *gen) {
 	gen->execute_data->prev_execute_data = NULL;
 
 	s = phpdbg_compile_stackframe(EG(current_execute_data));
-	phpdbg_notice("frame", "handle=\"%d\" frameinfo=\"%.*s\"", "Switched to generator with handle #%d: %.*s", gen->std.handle, (int) ZSTR_LEN(s), ZSTR_VAL(s));
+	phpdbg_notice("Switched to generator with handle #%d: %.*s", gen->std.handle, (int) ZSTR_LEN(s), ZSTR_VAL(s));
 	zend_string_release(s);
 	phpdbg_print_cur_frame_info();
 }

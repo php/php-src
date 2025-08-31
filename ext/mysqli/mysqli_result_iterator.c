@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -17,13 +17,12 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
 
 #include "php.h"
-#include "php_ini.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 #include "zend_interfaces.h"
@@ -74,7 +73,7 @@ static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter)
 /* }}} */
 
 /* {{{ */
-static int php_mysqli_result_iterator_valid(zend_object_iterator *iter)
+static zend_result php_mysqli_result_iterator_valid(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
@@ -119,12 +118,8 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-#ifdef MYSQLI_USE_MYSQLND
 		if (result->unbuf->eof_reached) {
-#else
-		if (result->eof) {
-#endif
-			php_error_docref(NULL, E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
+			zend_error(E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
 			return;
 		}
 	} else {

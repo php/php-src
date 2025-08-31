@@ -1,16 +1,14 @@
 --TEST--
 Bug #47050 (mysqli_poll() modifies improper variables)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-if (!defined("MYSQLI_ASYNC")) {
-    die("skip mysqlnd only");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include ("connect.inc");
+    include 'connect.inc';
 
     $link1 = my_mysqli_connect($host, $user, $passwd, null, $port, $socket);
     mysqli_select_db($link1, $db);

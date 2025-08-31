@@ -3,7 +3,7 @@ Reflection Bug #36337 (ReflectionProperty fails to return correct visibility)
 --FILE--
 <?php
 
-abstract class enum {
+abstract class enum_ {
     protected $_values;
 
     public function __construct() {
@@ -13,7 +13,7 @@ abstract class enum {
 
 }
 
-final class myEnum extends enum {
+final class myEnum extends enum_ {
     public $_values = array(
            0 => 'No value',
        );

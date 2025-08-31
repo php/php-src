@@ -35,6 +35,6 @@ echo "Done";
 --EXPECT--
 *** Testing fgets() : usage variations ***
 -- Testing fgets() with closed handle --
-fgets(): supplied resource is not a valid stream resource
-fgets(): supplied resource is not a valid stream resource
+fgets(): Argument #1 ($stream) must be an open stream resource
+fgets(): Argument #1 ($stream) must be an open stream resource
 Done

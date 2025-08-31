@@ -42,7 +42,7 @@ foreach( $string_array as $string )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtok() : with invalid escape sequences in token ***
 
 --- Iteration 1 ---
@@ -69,6 +69,8 @@ bool(false)
 string(1) " "
 string(1) "r"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 
@@ -91,11 +93,15 @@ bool(false)
 string(5) "hello"
 string(6) " world"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 string(1) " "
 string(1) "r"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 
@@ -113,6 +119,8 @@ bool(false)
 string(6) "hello\"
 string(6) " world"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 string(1) "/"

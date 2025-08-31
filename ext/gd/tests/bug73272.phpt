@@ -1,8 +1,12 @@
 --TEST--
 Bug #73272 (imagescale() is not affected by, but affects imagesetinterpolation())
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

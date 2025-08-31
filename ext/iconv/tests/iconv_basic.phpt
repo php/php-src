@@ -1,10 +1,7 @@
 --TEST--
 Test iconv() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv') or die("skip iconv() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 /*

@@ -16,7 +16,7 @@ $diff_un = unserialize($diff_s);
 $p = new DatePeriod($start, $diff_un, 2);
 var_dump($diff_un, $p);
 
-$unser = DateInterval::__set_state(array(
+$unser = \DateInterval::__set_state(array(
    'y' => 7,
    'm' => 6,
    'd' => 5,
@@ -33,7 +33,7 @@ var_dump($unser, $p);
 
 ?>
 --EXPECTF--
-object(DateInterval)#%d (16) {
+object(DateInterval)#%d (%d) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -48,27 +48,15 @@ object(DateInterval)#%d (16) {
   int(0)
   ["f"]=>
   float(0)
-  ["weekday"]=>
-  int(0)
-  ["weekday_behavior"]=>
-  int(0)
-  ["first_last_day_of"]=>
-  int(0)
   ["invert"]=>
   int(0)
   ["days"]=>
   int(0)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
-  int(0)
-  ["have_weekday_relative"]=>
-  int(0)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
-string(332) "O:12:"DateInterval":16:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:6:"invert";i:0;s:4:"days";i:0;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;}"
-DateInterval::__set_state(array(
+string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:0;s:11:"from_string";b:0;}"
+\DateInterval::__set_state(array(
    'y' => 0,
    'm' => 0,
    'd' => 0,
@@ -76,16 +64,10 @@ DateInterval::__set_state(array(
    'i' => 0,
    's' => 0,
    'f' => 0.0,
-   'weekday' => 0,
-   'weekday_behavior' => 0,
-   'first_last_day_of' => 0,
    'invert' => 0,
    'days' => 0,
-   'special_type' => 0,
-   'special_amount' => 0,
-   'have_weekday_relative' => 0,
-   'have_special_relative' => 0,
-))object(DateInterval)#%d (16) {
+   'from_string' => false,
+))object(DateInterval)#%d (%d) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -100,28 +82,16 @@ DateInterval::__set_state(array(
   int(0)
   ["f"]=>
   float(0)
-  ["weekday"]=>
-  int(0)
-  ["weekday_behavior"]=>
-  int(0)
-  ["first_last_day_of"]=>
-  int(0)
   ["invert"]=>
   int(0)
   ["days"]=>
   int(0)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
-  int(0)
-  ["have_weekday_relative"]=>
-  int(0)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
-object(DatePeriod)#%d (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTime)#%d (3) {
+  object(DateTime)#%d (%d) {
     ["date"]=>
     string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
@@ -134,7 +104,7 @@ object(DatePeriod)#%d (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (16) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -149,31 +119,21 @@ object(DatePeriod)#%d (6) {
     int(0)
     ["f"]=>
     float(0)
-    ["weekday"]=>
-    int(0)
-    ["weekday_behavior"]=>
-    int(0)
-    ["first_last_day_of"]=>
-    int(0)
     ["invert"]=>
     int(0)
     ["days"]=>
     int(0)
-    ["special_type"]=>
-    int(0)
-    ["special_amount"]=>
-    int(0)
-    ["have_weekday_relative"]=>
-    int(0)
-    ["have_special_relative"]=>
-    int(0)
+    ["from_string"]=>
+    bool(false)
   }
   ["recurrences"]=>
   int(3)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }
-object(DateInterval)#%d (16) {
+object(DateInterval)#%d (%d) {
   ["y"]=>
   int(7)
   ["m"]=>
@@ -188,28 +148,16 @@ object(DateInterval)#%d (16) {
   int(2)
   ["f"]=>
   float(0.876543)
-  ["weekday"]=>
-  int(-1)
-  ["weekday_behavior"]=>
-  int(-1)
-  ["first_last_day_of"]=>
-  int(-1)
   ["invert"]=>
   int(1)
   ["days"]=>
   int(2400)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
-  int(-1)
-  ["have_weekday_relative"]=>
-  int(0)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
-object(DatePeriod)#%d (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTime)#%d (3) {
+  object(DateTime)#%d (%d) {
     ["date"]=>
     string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
@@ -222,7 +170,7 @@ object(DatePeriod)#%d (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (16) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -237,27 +185,17 @@ object(DatePeriod)#%d (6) {
     int(0)
     ["f"]=>
     float(0)
-    ["weekday"]=>
-    int(0)
-    ["weekday_behavior"]=>
-    int(0)
-    ["first_last_day_of"]=>
-    int(0)
     ["invert"]=>
     int(0)
     ["days"]=>
     int(0)
-    ["special_type"]=>
-    int(0)
-    ["special_amount"]=>
-    int(0)
-    ["have_weekday_relative"]=>
-    int(0)
-    ["have_special_relative"]=>
-    int(0)
+    ["from_string"]=>
+    bool(false)
   }
   ["recurrences"]=>
   int(3)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }

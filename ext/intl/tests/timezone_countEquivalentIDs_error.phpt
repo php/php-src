@@ -1,15 +1,14 @@
 --TEST--
 IntlTimeZone::countEquivalentIDs(): errors
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 var_dump(IntlTimeZone::countEquivalentIDs("foo\x80"));
+echo intl_get_error_message(), PHP_EOL;
+
 ?>
---EXPECTF--
-Warning: IntlTimeZone::countEquivalentIDs(): intltz_count_equivalent_ids: could not convert time zone id to UTF-16 in %s on line %d
+--EXPECT--
 bool(false)
+IntlTimeZone::countEquivalentIDs(): could not convert time zone id to UTF-16: U_INVALID_CHAR_FOUND

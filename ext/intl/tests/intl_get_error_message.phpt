@@ -1,15 +1,12 @@
 --TEST--
 intl_get_error_message()
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 /*
  * Check getting global error message.
  */
-
-// Suppress warning messages.
-error_reporting( E_ERROR );
 
 if( collator_get_locale(new Collator('en_US'), -1) !== false )
     echo "failed\n";
@@ -18,4 +15,4 @@ else
 
 ?>
 --EXPECT--
-Error getting locale by type: U_ILLEGAL_ARGUMENT_ERROR
+collator_get_locale(): Error getting locale by type: U_ILLEGAL_ARGUMENT_ERROR

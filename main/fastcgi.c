@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -30,8 +30,6 @@
 #ifdef _WIN32
 
 #include <windows.h>
-
-typedef unsigned int in_addr_t;
 
 struct sockaddr_un {
 	short   sun_family;
@@ -154,12 +152,12 @@ typedef struct _fcgi_begin_request_rec {
 } fcgi_begin_request_rec;
 
 typedef struct _fcgi_end_request {
-    unsigned char appStatusB3;
-    unsigned char appStatusB2;
-    unsigned char appStatusB1;
-    unsigned char appStatusB0;
-    unsigned char protocolStatus;
-    unsigned char reserved[3];
+	unsigned char appStatusB3;
+	unsigned char appStatusB2;
+	unsigned char appStatusB1;
+	unsigned char appStatusB0;
+	unsigned char protocolStatus;
+	unsigned char reserved[3];
 } fcgi_end_request;
 
 typedef struct _fcgi_end_request_rec {
@@ -200,9 +198,9 @@ typedef struct _fcgi_hash {
 typedef struct _fcgi_req_hook 	fcgi_req_hook;
 
 struct _fcgi_req_hook {
-	void(*on_accept)();
-	void(*on_read)();
-	void(*on_close)();
+	void(*on_accept)(void);
+	void(*on_read)(void);
+	void(*on_close)(void);
 };
 
 struct _fcgi_request {
@@ -511,11 +509,8 @@ int fcgi_init(void)
 
 			str = getenv("_FCGI_SHUTDOWN_EVENT_");
 			if (str != NULL) {
-				zend_long ev;
-				HANDLE shutdown_event;
-
-				ZEND_ATOL(ev, str);
-				shutdown_event = (HANDLE) ev;
+				zend_long ev = ZEND_ATOL(str);
+				HANDLE shutdown_event = (HANDLE) ev;
 				if (!CreateThread(NULL, 0, fcgi_shutdown_thread,
 				                  shutdown_event, 0, NULL)) {
 					return -1;
@@ -523,9 +518,7 @@ int fcgi_init(void)
 			}
 			str = getenv("_FCGI_MUTEX_");
 			if (str != NULL) {
-				zend_long mt;
-				ZEND_ATOL(mt, str);
-				fcgi_accept_mutex = (HANDLE) mt;
+				fcgi_accept_mutex = (HANDLE) ZEND_ATOL(str);
 			}
 			return is_fastcgi = 1;
 		} else {
@@ -688,8 +681,7 @@ int fcgi_listen(const char *path, int backlog)
 		if (!*host || !strncmp(host, "*", sizeof("*")-1)) {
 			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
 		} else {
-			sa.sa_inet.sin_addr.s_addr = inet_addr(host);
-			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
+			if (!inet_pton(AF_INET, host, &sa.sa_inet.sin_addr)) {
 				struct hostent *hep;
 
 				if(strlen(host) > MAXFQDNLEN) {
@@ -745,8 +737,8 @@ int fcgi_listen(const char *path, int backlog)
 		memset(&sa.sa_unix, 0, sizeof(sa.sa_unix));
 		sa.sa_unix.sun_family = AF_UNIX;
 		memcpy(sa.sa_unix.sun_path, path, path_len + 1);
-		sock_len = (size_t)(((struct sockaddr_un *)0)->sun_path)	+ path_len;
-#ifdef HAVE_SOCKADDR_UN_SUN_LEN
+		sock_len = XtOffsetOf(struct sockaddr_un, sun_path) + path_len;
+#ifdef HAVE_STRUCT_SOCKADDR_UN_SUN_LEN
 		sa.sa_unix.sun_len = sock_len;
 #endif
 		unlink(path);
@@ -871,11 +863,11 @@ void fcgi_set_allowed_clients(char *ip)
 	}
 }
 
-static void fcgi_hook_dummy() {
+static void fcgi_hook_dummy(void) {
 	return;
 }
 
-fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_read)(), void(*on_close)())
+fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(void), void(*on_read)(void), void(*on_close)(void))
 {
 	fcgi_request *req = calloc(1, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
@@ -966,9 +958,9 @@ static inline ssize_t safe_read(fcgi_request *req, const void *buf, size_t count
 		tmp = count - n;
 
 		if (!req->tcp) {
-			unsigned int in_len = tmp > UINT_MAX ? UINT_MAX : (unsigned int)tmp;
+			unsigned int in_len = tmp > INT_MAX ? INT_MAX : (unsigned int)tmp;
 
-			ret = read(req->fd, ((char*)buf)+n, in_len);
+			ret = _read(req->fd, ((char*)buf)+n, in_len);
 		} else {
 			int in_len = tmp > INT_MAX ? INT_MAX : (int)tmp;
 
@@ -1032,7 +1024,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			val_len |= *p++;
 		}
 		if (UNEXPECTED(name_len + val_len > (unsigned int) (end - p))) {
-			/* Malformated request */
+			/* Malformed request */
 			return 0;
 		}
 		fcgi_hash_set(&req->env, FCGI_HASH_FUNC(p, name_len), (char*)p, name_len, (char*)p + name_len, val_len);
@@ -1191,10 +1183,8 @@ static int fcgi_read_request(fcgi_request *req)
 				*p++ = (zlen >> 8) & 0xff;
 				*p++ = zlen & 0xff;
 			}
-			memcpy(p, q->var, q->var_len);
-			p += q->var_len;
-			memcpy(p, Z_STRVAL_P(value), zlen);
-			p += zlen;
+			p = zend_mempcpy(p, q->var, q->var_len);
+			p = zend_mempcpy(p, Z_STRVAL_P(value), zlen);
 			q = q->list_next;
 		}
 		len = (int)(p - buf - sizeof(fcgi_header));
@@ -1203,7 +1193,7 @@ static int fcgi_read_request(fcgi_request *req)
 			req->keep = 0;
 			return 0;
 		}
-		return 0;
+		return 2;
 	} else {
 		return 0;
 	}
@@ -1320,7 +1310,7 @@ int fcgi_is_closed(fcgi_request *req)
 	return (req->fd < 0);
 }
 
-static int fcgi_is_allowed() {
+static int fcgi_is_allowed(void) {
 	int i;
 
 	if (client_sa.sa.sa_family == AF_UNIX) {
@@ -1424,6 +1414,16 @@ int fcgi_accept_request(fcgi_request *req)
 					return -1;
 				}
 
+#if defined(F_SETFD) && defined(FD_CLOEXEC)
+				int fd_attrs = fcntl(req->fd, F_GETFD);
+				if (0 > fd_attrs) {
+					fcgi_log(FCGI_WARNING, "failed to get attributes of the connection socket");
+				}
+				if (0 > fcntl(req->fd, F_SETFD, fd_attrs | FD_CLOEXEC)) {
+					fcgi_log(FCGI_WARNING, "failed to change attribute of the connection socket");
+				}
+#endif
+
 #ifdef _WIN32
 				break;
 #else
@@ -1471,7 +1471,8 @@ int fcgi_accept_request(fcgi_request *req)
 			return -1;
 		}
 		req->hook.on_read();
-		if (fcgi_read_request(req)) {
+		int read_result = fcgi_read_request(req);
+		if (read_result == 1) {
 #ifdef _WIN32
 			if (is_impersonate && !req->tcp) {
 				pipe = (HANDLE)_get_osfhandle(req->fd);
@@ -1482,7 +1483,7 @@ int fcgi_accept_request(fcgi_request *req)
 			}
 #endif
 			return req->fd;
-		} else {
+		} else if (read_result == 0) {
 			fcgi_close(req, 1, 1);
 		}
 	}
@@ -1588,23 +1589,20 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		if (!req->out_hdr) {
 			open_packet(req, type);
 		}
-		memcpy(req->out_pos, str, len);
-		req->out_pos += len;
+		req->out_pos = zend_mempcpy(req->out_pos, str, len);
 	} else if (len - limit < (int)(sizeof(req->out_buf) - sizeof(fcgi_header))) {
 		if (limit > 0) {
 			if (!req->out_hdr) {
 				open_packet(req, type);
 			}
-			memcpy(req->out_pos, str, limit);
-			req->out_pos += limit;
+			req->out_pos = zend_mempcpy(req->out_pos, str, limit);
 		}
 		if (!fcgi_flush(req, 0)) {
 			return -1;
 		}
 		if (len > limit) {
 			open_packet(req, type);
-			memcpy(req->out_pos, str + limit, len - limit);
-			req->out_pos += len - limit;
+			req->out_pos = zend_mempcpy(req->out_pos, str + limit, len - limit);
 		}
 	} else {
 		int pos = 0;
@@ -1640,8 +1638,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		}
 		if (pad) {
 			open_packet(req, type);
-			memcpy(req->out_pos, str + len - rest,  rest);
-			req->out_pos += rest;
+			req->out_pos = zend_mempcpy(req->out_pos, str + len - rest, rest);
 		}
 	}
 #endif
@@ -1743,7 +1740,7 @@ void fcgi_free_mgmt_var_cb(zval *zv)
 	pefree(Z_STR_P(zv), 1);
 }
 
-const char *fcgi_get_last_client_ip()
+const char *fcgi_get_last_client_ip(void)
 {
 	static char str[INET6_ADDRSTRLEN];
 

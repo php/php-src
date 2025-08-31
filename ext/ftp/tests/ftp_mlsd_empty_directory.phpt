@@ -1,9 +1,8 @@
 --TEST--
 ftp_mlsd() must not return false on empty directories
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,13 +27,6 @@ static zend_object_handlers IntlDateFormatter_handlers;
 /*
  * Auxiliary functions needed by objects of 'IntlDateFormatter' class
  */
-
-/* {{{ IntlDateFormatter_objects_dtor */
-static void IntlDateFormatter_object_dtor(zend_object *object )
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
 
 /* {{{ IntlDateFormatter_objects_free */
 void IntlDateFormatter_object_free( zend_object *object )
@@ -64,8 +57,6 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 	intern->calendar			= -1;
 	intern->requested_locale	= NULL;
 
-	intern->zo.handlers = &IntlDateFormatter_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -73,27 +64,23 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 /* {{{ IntlDateFormatter_object_clone */
 zend_object *IntlDateFormatter_object_clone(zend_object *object)
 {
-	IntlDateFormatter_object *dfo, *new_dfo;
-	zend_object *new_obj;
+	IntlDateFormatter_object     *dfo = php_intl_dateformatter_fetch_object(object);
+	zend_object              *new_obj = IntlDateFormatter_ce_ptr->create_object(object->ce);
+	IntlDateFormatter_object *new_dfo = php_intl_dateformatter_fetch_object(new_obj);
 
-	dfo = php_intl_dateformatter_fetch_object(object);
-	intl_error_reset(INTL_DATA_ERROR_P(dfo));
-
-	new_obj = IntlDateFormatter_ce_ptr->create_object(object->ce);
-	new_dfo = php_intl_dateformatter_fetch_object(new_obj);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_dfo->zo, &dfo->zo);
+
 	/* clone formatter object */
-	if (dfo->datef_data.udatf != NULL) {
-		DATE_FORMAT_OBJECT(new_dfo) = udat_clone(DATE_FORMAT_OBJECT(dfo),  &INTL_DATA_ERROR_CODE(dfo));
-		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
-			/* set up error in case error handler is interested */
-			intl_errors_set(INTL_DATA_ERROR_P(dfo), INTL_DATA_ERROR_CODE(dfo),
-					"Failed to clone IntlDateFormatter object", 0 );
-			zend_throw_exception(NULL, "Failed to clone IntlDateFormatter object", 0);
+	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
+		UErrorCode error = U_ZERO_ERROR;
+		DATE_FORMAT_OBJECT(new_dfo) = udat_clone(DATE_FORMAT_OBJECT(dfo), &error);
+
+		if (U_FAILURE(error)) {
+			zend_throw_error(NULL, "Failed to clone IntlDateFormatter");
 		}
 	} else {
-		zend_throw_exception(NULL, "Cannot clone unconstructed IntlDateFormatter", 0);
+		zend_throw_error(NULL, "Cannot clone uninitialized IntlDateFormatter");
 	}
 	return new_obj;
 }
@@ -108,18 +95,15 @@ zend_object *IntlDateFormatter_object_clone(zend_object *object)
  */
 void dateformat_register_IntlDateFormatter_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlDateFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "IntlDateFormatter", class_IntlDateFormatter_methods );
-	ce.create_object = IntlDateFormatter_object_create;
-	IntlDateFormatter_ce_ptr = zend_register_internal_class( &ce );
+	IntlDateFormatter_ce_ptr = register_class_IntlDateFormatter();
+	IntlDateFormatter_ce_ptr->create_object = IntlDateFormatter_object_create;
+	IntlDateFormatter_ce_ptr->default_object_handlers = &IntlDateFormatter_handlers;
 
 	memcpy(&IntlDateFormatter_handlers, &std_object_handlers,
 		sizeof IntlDateFormatter_handlers);
 	IntlDateFormatter_handlers.offset = XtOffsetOf(IntlDateFormatter_object, zo);
 	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;
-	IntlDateFormatter_handlers.dtor_obj = IntlDateFormatter_object_dtor;
 	IntlDateFormatter_handlers.free_obj = IntlDateFormatter_object_free;
 }
 /* }}} */

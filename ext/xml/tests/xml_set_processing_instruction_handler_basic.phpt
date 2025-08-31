@@ -1,11 +1,7 @@
 --TEST--
 Test xml_set_processing_instruction_handler function : basic
---SKIPIF--
-<?php
-if (!extension_loaded("xml")) {
-    print "skip - XML extension not loaded";
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 class XML_Parser
@@ -20,10 +16,8 @@ class XML_Parser
     function parse($data)
     {
         $parser = xml_parser_create();
-        xml_set_object($parser, $this);
-        xml_set_processing_instruction_handler($parser, "PIHandler");
+        xml_set_processing_instruction_handler($parser, $this->PIHandler(...));
         xml_parse($parser, $data, true);
-        xml_parser_free($parser);
     }
 
 

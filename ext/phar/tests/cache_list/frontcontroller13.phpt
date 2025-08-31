@@ -3,8 +3,8 @@ Phar front controller mime type not string/int [cache_list]
 --INI--
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller13.php
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller13.php
 REQUEST_URI=/frontcontroller13.php/a.php

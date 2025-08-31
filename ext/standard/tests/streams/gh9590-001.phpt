@@ -1,5 +1,7 @@
 --TEST--
 Bug GH-9590 001 (stream_select does not abort upon exception or empty valid fd set)
+--EXTENSIONS--
+posix
 --SKIPIF--
 <?php
 if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, -1)) {

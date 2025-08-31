@@ -16,8 +16,12 @@ function p($str)
 setlocale(LC_ALL, 'C');
 p('あ');
 ?>
---EXPECT--
+--EXPECTF--
 あ
+
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 あ
 e38182
+
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 e38182

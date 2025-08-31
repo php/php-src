@@ -1,9 +1,7 @@
 --TEST--
 Bug 79154 (mb_convert_encoding() can modify $from_encoding)
---SKIPIF--
-<?php
-if (!extension_loaded('mbstring')) die('mbstring extension not available');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 class Utf8Encoding

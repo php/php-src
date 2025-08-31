@@ -3,8 +3,8 @@ Test curl_opt() function with CURLOPT_WRITEFUNCTION parameter set to a closure
 --CREDITS--
 ?
 TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -24,7 +24,6 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   });
 
   curl_exec($ch);
-  curl_close($ch);
   ob_end_flush();
   echo "Data: $alldata";
 ?>

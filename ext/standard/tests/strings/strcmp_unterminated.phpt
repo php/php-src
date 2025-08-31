@@ -1,9 +1,7 @@
 --TEST--
 strnat(case)cmp(): potential OOB access for unterminated strings
---SKIPIF--
-<?php
-if (!function_exists('zend_create_unterminated_string')) die('skip zend_test extension not available');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 $a = zend_create_unterminated_string('333');

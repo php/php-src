@@ -1,8 +1,9 @@
 --TEST--
 Bug #53574 (Integer overflow in SdnToJulian; leads to segfault)
+--EXTENSIONS--
+calendar
 --SKIPIF--
 <?php
-include 'skipif.inc';
 if (PHP_INT_SIZE == 4) {
         die("skip this test is for 64bit platform only");
 }

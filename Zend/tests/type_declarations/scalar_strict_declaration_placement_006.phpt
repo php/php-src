@@ -1,11 +1,7 @@
 --TEST--
 Test strict declaration being first operation only 006
---SKIPIF--
-<?php
-if (!extension_loaded("mbstring")) {
-  die("skip Requires mbstring extension");
-}
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 zend.multibyte=1
 --FILE--

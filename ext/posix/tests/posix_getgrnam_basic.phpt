@@ -1,9 +1,13 @@
 --TEST--
 Test posix_getgrnam() function : basic functionality
+--EXTENSIONS--
+posix
 --SKIPIF--
 <?php
-    if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
-    if (!posix_getgroups()) die('skip - groups unavailable (ci)');
+if (!posix_getgroups()) die('skip - groups unavailable (ci)');
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
 ?>
 --FILE--
 <?php
@@ -19,7 +23,7 @@ array(4) {
   ["name"]=>
   string(%d) "%s"
   ["passwd"]=>
-  string(1) "%s"
+  string(%d) "%S"
   ["members"]=>
 %a
   ["gid"]=>

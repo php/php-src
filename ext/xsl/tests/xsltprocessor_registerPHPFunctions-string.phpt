@@ -1,11 +1,7 @@
 --TEST--
 Check xsltprocessor::registerPHPFunctions with string
---SKIPIF--
-<?php
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include __DIR__ .'/prepare.inc';

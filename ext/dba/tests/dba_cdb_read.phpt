@@ -1,10 +1,14 @@
 --TEST--
 DBA CDB handler test (read only)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-    $handler = 'cdb_make';
-    require_once __DIR__ .'/skipif.inc';
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+check_skip('cdb_make');
 ?>
+--CONFLICTS--
+test.cdb
 --FILE--
 <?php
     echo "database handler: cdb\n";
@@ -47,7 +51,7 @@ DBA CDB handler test (read only)
         echo "\n=";
         for ($i=0; $i < strlen($keys); $i++) {
             $key = substr($keys, $i, 1);
-            echo dba_fetch($key, $skip[$key], $db_file);
+            echo dba_fetch($key, $db_file, $skip[$key]);
             $skip[$key]++;
         }
         dba_close($db_file);

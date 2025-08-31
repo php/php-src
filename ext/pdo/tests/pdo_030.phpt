@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: extending PDO (4)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -35,7 +36,7 @@ class PDOStatementX extends PDOStatement
         echo __METHOD__ . "()\n";
     }
 
-    function execute($params = array())
+    function execute($params = array()): bool
     {
         echo __METHOD__ . "()\n";
         parent::execute();
@@ -49,7 +50,7 @@ class PDODatabase extends PDO
         echo __METHOD__ . "()\n";
     }
 
-    function query($sql, ...$rest)
+    function query($sql, ...$rest): PDOStatement|false
     {
         echo __METHOD__ . "()\n";
         return parent::query($sql);
@@ -59,9 +60,9 @@ class PDODatabase extends PDO
 $db = PDOTest::factory('PDODatabase');
 var_dump(get_class($db));
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
+$db->exec('CREATE TABLE test030(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
-$stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test030 VALUES(?, ?, ?)");
 var_dump(get_class($stmt));
 foreach ($data as $row) {
     $stmt->execute($row);
@@ -74,7 +75,7 @@ echo "===QUERY===\n";
 var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
 $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatementx', array($db)));
 var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
-$stmt = $db->query('SELECT * FROM test');
+$stmt = $db->query('SELECT * FROM test030');
 var_dump(get_class($stmt));
 var_dump(get_class($stmt->dbh));
 
@@ -86,6 +87,12 @@ foreach($stmt as $obj) {
 
 echo "===DONE===\n";
 exit(0);
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test030");
 ?>
 --EXPECTF--
 string(11) "PDODatabase"

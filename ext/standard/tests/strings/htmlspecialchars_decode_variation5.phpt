@@ -32,12 +32,12 @@ echo "Done";
 --EXPECT--
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iteration 1 --
-string(89) "Roy&#039s height > Sam&#039;s $height... 1111 &ap; 0000 = 0000... " double quote string ""
+string(84) "Roy&#039s height > Sam's $height... 1111 &ap; 0000 = 0000... " double quote string ""
 string(89) "Roy&#039s height > Sam&#039;s $height... 1111 &ap; 0000 = 0000... " double quote string ""
 string(99) "Roy&#039s height > Sam&#039;s $height... 1111 &ap; 0000 = 0000... &quot; double quote string &quot;"
 string(84) "Roy&#039s height > Sam's $height... 1111 &ap; 0000 = 0000... " double quote string ""
 -- Iteration 2 --
-string(82) "Roy&#039;s height > Sam&#039;s height... 		 13 < 15...
+string(72) "Roy's height > Sam's height... 		 13 < 15...
  " double quote string ""
 string(82) "Roy&#039;s height > Sam&#039;s height... 		 13 < 15...
  " double quote string ""
@@ -46,8 +46,8 @@ string(92) "Roy&#039;s height > Sam&#039;s height... 		 13 < 15...
 string(72) "Roy's height > Sam's height... 		 13 < 15...
  " double quote string ""
 -- Iteration 3 --
-string(44) "
-Roy&#039;s height &gt	; Sam&#039;s height"
+string(34) "
+Roy's height &gt	; Sam's height"
 string(44) "
 Roy&#039;s height &gt	; Sam&#039;s height"
 string(44) "
@@ -55,7 +55,7 @@ Roy&#039;s height &gt	; Sam&#039;s height"
 string(34) "
 Roy's height &gt	; Sam's height"
 -- Iteration 4 --
-string(44) "	Roy&#039;s height &gt; Sam	&#039;s height"
+string(34) "	Roy's height &gt; Sam	's height"
 string(44) "	Roy&#039;s height &gt; Sam	&#039;s height"
 string(44) "	Roy&#039;s height &gt; Sam	&#039;s height"
 string(34) "	Roy's height &gt; Sam	's height"

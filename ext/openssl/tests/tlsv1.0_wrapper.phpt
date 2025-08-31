@@ -1,8 +1,9 @@
 --TEST--
 tlsv1.0 stream wrapper
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
@@ -13,11 +14,11 @@ $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
-    $server = stream_socket_server('tlsv1.0://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tlsv1.0://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
     for ($i = 0; $i < (phpt_has_sslv3() ? 3 : 2); $i++) {
         @stream_socket_accept($server, 3);
@@ -30,18 +31,16 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
-    phpt_wait();
-
-    $client = stream_socket_client("tlsv1.0://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = stream_socket_client("tlsv1.0://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("sslv3://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("tlsv1.2://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 CODE;
 

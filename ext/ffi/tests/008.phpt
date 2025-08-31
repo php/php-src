@@ -1,12 +1,14 @@
 --TEST--
 FFI 008: Array iteration
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-$a = FFI::new("int[3]");
+$ffi = FFI::cdef();
+
+$a = $ffi->new("int[3]");
 $a[1] = 10;
 $a[2] = 20;
 var_dump(count($a));
@@ -14,7 +16,7 @@ foreach ($a as $key => $val) {
     echo "$key => $val\n";
 }
 
-$a = FFI::new("struct {int x,y;}");
+$a = $ffi->new("struct {int x,y;}");
 try {
     var_dump(count($a));
 } catch (Throwable $e) {

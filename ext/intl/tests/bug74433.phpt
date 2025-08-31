@@ -1,7 +1,7 @@
 --TEST--
 Bug #74433 Wrong reflection on the Normalizer methods
---SKIPIF--
-<?php if (!extension_loaded('intl')) die('skip intl extension not available'); ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $rm = new ReflectionMethod(Normalizer::class, 'isNormalized');

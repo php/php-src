@@ -1,13 +1,15 @@
 --TEST--
 FFI 005: Array assignment
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-$m = FFI::new("int[2][2]");
-$v = FFI::new("int[2]");
+$ffi = FFI::cdef();
+
+$m = $ffi->new("int[2][2]");
+$v = $ffi->new("int[2]");
 $v[1] = 42;
 $m[1] = $v;
 var_dump($m);

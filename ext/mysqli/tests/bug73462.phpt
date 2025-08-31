@@ -1,23 +1,24 @@
 --TEST--
 Bug #73462 (Persistent connections don't set $connect_errno)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     /* Initial persistent connection */
-    $mysql_1 = new mysqli('p:'.$host, $user, $passwd, $db);
-    $result = $mysql_1->query("SHOW STATUS LIKE 'Connections'");
+    $mysql_1 = new mysqli('p:'.$host, $user, $passwd, $db, $port);
+    $result = $mysql_1->query("SELECT CONNECTION_ID()");
     $c1 = $result->fetch_row();
     $result->free();
     $mysql_1->close();
 
     /* Failed connection to invalid host */
-    $mysql_2 = @new mysqli(' !!! invalid !!! ', $user, $passwd, $db);
+    $mysql_2 = @new mysqli(' !!! invalid !!! ', $user, $passwd, $db, $port);
     try {
         $mysql_2->close();
     } catch (Error $exception) {
@@ -25,9 +26,9 @@ require_once('skipifconnectfailure.inc');
     }
 
     /* Re-use persistent connection */
-    $mysql_3 = new mysqli('p:'.$host, $user, $passwd, $db);
+    $mysql_3 = new mysqli('p:'.$host, $user, $passwd, $db, $port);
     $error = mysqli_connect_errno();
-    $result = $mysql_3->query("SHOW STATUS LIKE 'Connections'");
+    $result = $mysql_3->query("SELECT CONNECTION_ID()");
     $c3 = $result->fetch_row();
     $result->free();
     $mysql_3->close();

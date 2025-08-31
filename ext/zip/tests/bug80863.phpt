@@ -1,9 +1,7 @@
 --TEST--
 Bug #80863 (ZipArchive::extractTo() ignores references)
---SKIPIF--
-<?php
-if (!extension_loaded('zip')) die("skip zip extension not available");
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $archive = __DIR__ . "/bug80863.zip";

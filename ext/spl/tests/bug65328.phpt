@@ -13,10 +13,7 @@ class Tree
      */
     protected $head;
 
-    /**
-     * @param Node $head
-     */
-    public function __construct(Node $head = null)
+    public function __construct(?Node $head = null)
     {
         $this->head = $head ? : new Node('HEAD');
     }
@@ -68,7 +65,7 @@ class Tree
     /**
      * @return \RecursiveIteratorIterator
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return new \RecursiveIteratorIterator(
             $this->head->getChildren(),
@@ -112,10 +109,10 @@ class Node extends \RecursiveArrayIterator implements \Countable
     /**
      * @param mixed $data
      * @param mixed $uid
-     * @param Node $parent
+     * @param Node|null $parent
      * @param bool $assureUnique
      */
-    public function __construct($data, $uid = null, Node $parent = null, $assureUnique = false)
+    public function __construct($data, $uid = null, ?Node $parent = null, $assureUnique = false)
     {
         if(null !== $parent) {
             $this->parent = $parent;
@@ -221,10 +218,7 @@ class Node extends \RecursiveArrayIterator implements \Countable
         return $this->parent;
     }
 
-    /**
-     * @return Node
-     */
-    public function current()
+    public function current(): Node
     {
         return $this->children[$this->index];
     }
@@ -232,55 +226,37 @@ class Node extends \RecursiveArrayIterator implements \Countable
     /**
      * @return scalar
      */
-    public function key()
+    public function key(): string|int|null
     {
         return $this->index;
     }
 
-    /**
-     * @return void
-     */
-    public function next()
+    public function next(): void
     {
         ++$this->index;
     }
 
-    /**
-     * @return void
-     */
-    public function rewind()
+    public function rewind(): void
     {
         $this->index = 0;
     }
 
-    /**
-     * @return bool
-     */
-    public function valid()
+    public function valid(): bool
     {
         return array_key_exists($this->index, $this->children);
     }
 
-    /**
-     * @return int
-     */
-    public function count()
+    public function count(): int
     {
         return count($this->children);
     }
 
-    /**
-     * @return bool
-     */
-    public function hasChildren()
+    public function hasChildren(): bool
     {
         return !empty($this->children);
     }
 
-    /**
-     * @return \RecursiveArrayIterator
-     */
-    public function getChildren()
+    public function getChildren(): RecursiveArrayIterator
     {
         return new \RecursiveArrayIterator($this->children);
     }

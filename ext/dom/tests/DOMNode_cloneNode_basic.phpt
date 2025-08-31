@@ -1,9 +1,7 @@
 --TEST--
 DOM cloneNode : Basic Functionality
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --CREDITS--
 Simon Hughes <odbc3@hotmail.com>
 --FILE--

@@ -1,10 +1,8 @@
 --TEST--
 Bug #81577: (Exceptions in interrupt handlers)
---SKIPIF--
-<?php
-if (!extension_loaded("pcntl")) print "skip pcntl extension not available";
-elseif (!extension_loaded('posix')) die('skip posix extension not available');
-?>
+--EXTENSIONS--
+pcntl
+posix
 --FILE--
 <?php
 class C {

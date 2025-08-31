@@ -1,7 +1,7 @@
 --TEST--
 Bug #41175 (addAttribute() fails to add an attribute with an empty value)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

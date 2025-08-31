@@ -17,4 +17,4 @@ class U extends X {
 
 ?>
 --EXPECTF--
-Fatal error: Could not check compatibility between T::method($r): B and X::method($a): A, because class B is not available in %s on line %d
+Fatal error: Could not check compatibility between U::method($r): B and X::method($a): A, because class B is not available in %s on line %d

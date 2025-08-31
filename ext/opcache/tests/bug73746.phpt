@@ -1,7 +1,7 @@
 --TEST--
 Bug #73746 (Method that returns string returns UNKNOWN:0 instead)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 namespace Core\Bundle\Service\Property\Room\Rooms;
@@ -11,7 +11,7 @@ class CountryMapping
     const CZ = 'CZ';
     const EN = 'EN';
 
-    public function get(string $countryIsoCode = null) : string // Works correctly if return type is removed
+    public function get(?string $countryIsoCode = null) : string // Works correctly if return type is removed
     {
         switch (strtoupper($countryIsoCode)) {
         case 'CZ':

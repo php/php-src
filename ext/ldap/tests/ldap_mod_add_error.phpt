@@ -3,29 +3,31 @@ ldap_mod_add() - ldap_mod_add() operations that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 // DN not found
-var_dump(ldap_mod_add($link, "dc=my-domain,$base", array()));
+var_dump(ldap_mod_add($link, "dc=my-domain,$base", ["dc" => "my-domain"]));
 
 // Invalid DN
-var_dump(ldap_mod_add($link, "weirdAttribute=val", array()));
+var_dump(ldap_mod_add($link, "weirdAttribute=val", ["dc" => "my-domain"]));
 
-$entry = array(
-    "objectClass"	=> array(
+$entry = [
+    "objectClass" => [
         "top",
         "dcObject",
-        "organization"),
-    "dc"			=> "my-domain",
-    "o"				=> "my-domain",
-);
+        "organization",
+    ],
+    "dc" => "my-domain",
+    "o"	 => "my-domain",
+];
 
 ldap_add($link, "dc=my-domain,$base", $entry);
 
@@ -43,7 +45,7 @@ var_dump(ldap_mod_add($link, "dc=my-domain,$base", $entry2));
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
 ?>

@@ -5,8 +5,6 @@
 
 #include "fpm_events.h"
 
-/* spawn max 32 children at once */
-#define FPM_MAX_SPAWN_RATE (32)
 /* 1s (in ms) heartbeat for idle server maintenance */
 #define FPM_IDLE_SERVER_MAINTENANCE_HEARTBEAT (1000)
 /* a minimum of 130ms heartbeat for pctl */

@@ -12,5 +12,6 @@ while ($i < 1026) {
 }
 ?>
 ==NOCRASH==
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property Z::$prop is deprecated in %s on line %d
 ==NOCRASH==

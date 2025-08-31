@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -15,6 +15,8 @@
   |         Johannes Schlueter <johannes@mysql.com>                      |
   +----------------------------------------------------------------------+
 */
+
+/* internal header; not supposed to be installed */
 
 #ifndef PHP_PDO_MYSQL_INT_H
 #define PHP_PDO_MYSQL_INT_H
@@ -34,12 +36,12 @@ typedef _Bool       my_bool;
 #if defined(PDO_USE_MYSQLND) && PHP_DEBUG && !defined(PHP_WIN32)
 #define PDO_DBG_ENABLED 1
 
-#define PDO_DBG_INF(msg) do { if (dbg_skip_trace == FALSE) PDO_MYSQL_G(dbg)->m->log(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
-#define PDO_DBG_ERR(msg) do { if (dbg_skip_trace == FALSE) PDO_MYSQL_G(dbg)->m->log(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
-#define PDO_DBG_INF_FMT(...) do { if (dbg_skip_trace == FALSE) PDO_MYSQL_G(dbg)->m->log_va(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
-#define PDO_DBG_ERR_FMT(...) do { if (dbg_skip_trace == FALSE) PDO_MYSQL_G(dbg)->m->log_va(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
+#define PDO_DBG_INF(msg) do { if (!dbg_skip_trace) PDO_MYSQL_G(dbg)->m->log(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
+#define PDO_DBG_ERR(msg) do { if (!dbg_skip_trace) PDO_MYSQL_G(dbg)->m->log(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
+#define PDO_DBG_INF_FMT(...) do { if (!dbg_skip_trace) PDO_MYSQL_G(dbg)->m->log_va(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
+#define PDO_DBG_ERR_FMT(...) do { if (!dbg_skip_trace) PDO_MYSQL_G(dbg)->m->log_va(PDO_MYSQL_G(dbg), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
 #define PDO_DBG_ENTER(func_name) \
-	zend_bool dbg_skip_trace = TRUE; \
+	bool dbg_skip_trace = true; \
 	((void) dbg_skip_trace); \
 	if (PDO_MYSQL_G(dbg)) \
 		dbg_skip_trace = !PDO_MYSQL_G(dbg)->m->func_enter(PDO_MYSQL_G(dbg), __LINE__, __FILE__, func_name, strlen(func_name));
@@ -76,7 +78,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pdo_mysql)
 	/* dummy member so we get at least one member in the struct
 	 * and avoids build errors.
 	 */
-	void *dummymemmber;
+	void *dummymember;
 #endif
 ZEND_END_MODULE_GLOBALS(pdo_mysql)
 
@@ -120,12 +122,6 @@ typedef struct {
 	pdo_mysql_db_handle 	*H;
 	MYSQL_RES				*result;
 	const MYSQL_FIELD		*fields;
-	MYSQL_ROW				current_data;
-#ifdef PDO_USE_MYSQLND
-	const size_t			*current_lengths;
-#else
-	unsigned long			*current_lengths;
-#endif
 	pdo_mysql_error_info 	einfo;
 #ifdef PDO_USE_MYSQLND
 	MYSQLND_STMT 			*stmt;
@@ -137,10 +133,14 @@ typedef struct {
 #ifndef PDO_USE_MYSQLND
 	my_bool					*in_null;
 	zend_ulong			*in_length;
-#endif
 	PDO_MYSQL_PARAM_BIND	*bound_result;
 	my_bool					*out_null;
 	zend_ulong				*out_length;
+	MYSQL_ROW				current_data;
+	unsigned long			*current_lengths;
+#else
+	zval					*current_row;
+#endif
 	unsigned				max_length:1;
 	/* Whether all result sets have been fully consumed.
 	 * If this flag is not set, they need to be consumed during destruction. */
@@ -148,6 +148,8 @@ typedef struct {
 } pdo_mysql_stmt;
 
 extern const pdo_driver_t pdo_mysql_driver;
+
+extern int pdo_mysql_scanner(pdo_scanner_t *s);
 
 extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
 #define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__)
@@ -165,7 +167,6 @@ enum {
 	PDO_MYSQL_ATTR_MAX_BUFFER_SIZE,
 #endif
 	PDO_MYSQL_ATTR_COMPRESS,
-	PDO_MYSQL_ATTR_DIRECT_QUERY,
 	PDO_MYSQL_ATTR_FOUND_ROWS,
 	PDO_MYSQL_ATTR_IGNORE_SPACE,
 	PDO_MYSQL_ATTR_SSL_KEY,
@@ -179,6 +180,9 @@ enum {
 	PDO_MYSQL_ATTR_MULTI_STATEMENTS,
 #ifdef PDO_USE_MYSQLND
 	PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT,
+#endif
+#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+	PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY,
 #endif
 };
 

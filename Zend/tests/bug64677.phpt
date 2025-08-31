@@ -7,7 +7,7 @@ class cat {
     }
 }
 $cat = new cat();
-$cat->show_output('Files: ', trim(`cd .`)); // this gives invalid args to shell_exec
+$cat->show_output('Files: ', trim((string) `cd .`)); // this gives invalid args to shell_exec
 $cat->show_output('Files: ', `cd .`); // this causes a segmentation fault
 $cat->show_output(`cd .`); // this causes a segmentation fault
 
@@ -17,5 +17,12 @@ function show_outputa($prepend, $output) {
 show_outputa('Files: ', `cd .`); // this works as expected
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: The backtick (`) operator is deprecated, use shell_exec() instead in %s on line %d
+
+Deprecated: The backtick (`) operator is deprecated, use shell_exec() instead in %s on line %d
+
+Deprecated: The backtick (`) operator is deprecated, use shell_exec() instead in %s on line %d
+
+Deprecated: The backtick (`) operator is deprecated, use shell_exec() instead in %s on line %d
 Okey

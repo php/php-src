@@ -1,7 +1,7 @@
 --TEST--
 openssl_cms_verify() der tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $outfile = tempnam(sys_get_temp_dir(), "ssl");

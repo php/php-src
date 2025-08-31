@@ -1,5 +1,7 @@
 --TEST--
 Bug #51338 (URL-Rewriter should not get enabled if use_only_cookies is set to 1)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -11,6 +13,7 @@ session_start();
 print_r(ob_list_handlers());
 ?>
 --EXPECT--
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 Array
 (
 )

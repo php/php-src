@@ -1,9 +1,7 @@
 --TEST--
 setCompressionName and setCompressionIndex methods
---SKIPIF--
-<?php
-if (!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $tmpfile = __DIR__ . '/oo_setcompression.zip';
@@ -63,57 +61,57 @@ bool(true)
 bool(true)
 bool(true)
 
-Deprecated: Function zip_open() is deprecated in %s on line %d
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_name() is deprecated in %s on line %d
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_compressionmethod() is deprecated in %s on line %d
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry1.txt: deflated
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_name() is deprecated in %s on line %d
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_compressionmethod() is deprecated in %s on line %d
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry2.txt: deflated
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_name() is deprecated in %s on line %d
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_compressionmethod() is deprecated in %s on line %d
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 dir/entry3.txt: stored
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_name() is deprecated in %s on line %d
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_compressionmethod() is deprecated in %s on line %d
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry4.txt: deflated
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_name() is deprecated in %s on line %d
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_compressionmethod() is deprecated in %s on line %d
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry5.txt: stored
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_name() is deprecated in %s on line %d
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_compressionmethod() is deprecated in %s on line %d
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry6.txt: deflated
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_name() is deprecated in %s on line %d
+Deprecated: Function zip_entry_name() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_entry_compressionmethod() is deprecated in %s on line %d
+Deprecated: Function zip_entry_compressionmethod() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry7.txt: deflated
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 
-Deprecated: Function zip_close() is deprecated in %s on line %d
+Deprecated: Function zip_close() is deprecated since 8.0, use ZipArchive::close() instead in %s on line %d

@@ -1,9 +1,9 @@
 --TEST--
 Phar::buildFromIterator() RegexIterator(RecursiveIteratorIterator), SplFileInfo as current
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
+--CONFLICTS--
+all
 --INI--
 phar.require_hash=0
 phar.readonly=0

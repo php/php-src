@@ -1,30 +1,27 @@
 --TEST--
 IntlTimeZone::createTimeZoneIDEnumeration(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 $enum = IntlTimeZone::createTimeZoneIDEnumeration(
     IntlTimeZone::TYPE_ANY,
     'PT',
     -3600000);
-print_r(iterator_to_array($enum));
+var_dump(iterator_to_array($enum));
 
 $enum = intltz_create_time_zone_id_enumeration(
     IntlTimeZone::TYPE_ANY,
     'PT',
     -3600000);
-print_r(iterator_to_array($enum));
+var_dump(iterator_to_array($enum));
 ?>
 --EXPECT--
-Array
-(
-    [0] => Atlantic/Azores
-)
-Array
-(
-    [0] => Atlantic/Azores
-)
+array(1) {
+  [0]=>
+  string(15) "Atlantic/Azores"
+}
+array(1) {
+  [0]=>
+  string(15) "Atlantic/Azores"
+}

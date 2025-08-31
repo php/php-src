@@ -5,6 +5,7 @@ Test filesize() function: usage variations - size of dir/subdir
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip only valid for Linux');
 }
+?>
 --FILE--
 <?php
 $file_path = __DIR__;

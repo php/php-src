@@ -1,7 +1,8 @@
 --TEST--
 XMLReader: Schema validation
+--EXTENSIONS--
+xmlreader
 --SKIPIF--
-<?php if (!extension_loaded('xmlreader')) die('skip');?>
 <?php if (!method_exists('XMLReader','setSchema')) die('skip XMLReader::setSchema() not supported');?>
 --FILE--
 <?php

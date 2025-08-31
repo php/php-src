@@ -1,11 +1,16 @@
 --TEST--
 readline_callback_handler_install(): Basic test
+lsan disabled due to a leak on ubuntu focal only.
+--EXTENSIONS--
+readline
 --SKIPIF--
-<?php if (!extension_loaded("readline") || !function_exists('readline_callback_handler_install')) die("skip");
+<?php if (!function_exists('readline_callback_handler_install')) die("skip");
 if (READLINE_LIB != "libedit") die("skip libedit only");
 ?>
 --INI--
 zend.signal_check=0
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 

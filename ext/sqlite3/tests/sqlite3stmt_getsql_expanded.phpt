@@ -1,8 +1,9 @@
 --TEST--
 SQLite3Stmt::getSQL expanded test
+--EXTENSIONS--
+sqlite3
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc');
-
+<?php
 if (SQLite3::version()['versionNumber'] < 3014000) {
     die('skip SQLite < 3.14 installed, requires SQLite >= 3.14');
 }
