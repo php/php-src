@@ -4,8 +4,8 @@ ZE2 __call() signature check
 <?php
 
 class Test {
-	function __call() {
-	}
+    function __call() {
+    }
 }
 
 ?>

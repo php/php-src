@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -24,7 +22,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20190529
+#define PHP_API_VERSION 20240925
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -72,7 +70,6 @@
 #	else
 #		define PHPAPI
 #	endif
-#	define THREAD_LS
 #	define PHP_DIR_SEPARATOR '/'
 #	define PHP_EOL "\n"
 #endif
@@ -97,13 +94,6 @@ typedef int gid_t;
 typedef char * caddr_t;
 typedef int pid_t;
 
-# ifndef PHP_DEBUG
-#  ifdef inline
-#   undef inline
-#  endif
-#  define inline		__inline
-# endif
-
 # define M_TWOPI        (M_PI * 2.0)
 # define off_t			_off_t
 
@@ -119,24 +109,17 @@ typedef int pid_t;
 # endif
 #endif
 
-#if PHP_DEBUG
-#undef NDEBUG
-#else
-#ifndef NDEBUG
-#define NDEBUG
-#endif
-#endif
 #include <assert.h>
 
-#if HAVE_UNIX_H
+#ifdef HAVE_UNIX_H
 #include <unix.h>
 #endif
 
-#if HAVE_ALLOCA_H
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
 
-#if HAVE_BUILD_DEFS_H
+#ifdef HAVE_BUILD_DEFS_H
 #include <build-defs.h>
 #endif
 
@@ -189,6 +172,10 @@ END_EXTERN_C()
 #define explicit_bzero php_explicit_bzero
 #endif
 
+BEGIN_EXTERN_C()
+PHPAPI int php_safe_bcmp(const zend_string *a, const zend_string *b);
+END_EXTERN_C()
+
 #ifndef HAVE_STRTOK_R
 BEGIN_EXTERN_C()
 char *strtok_r(char *s, const char *delim, char **last);
@@ -207,28 +194,20 @@ typedef unsigned int socklen_t;
 #define SET_MUTEX(a)
 #define FREE_MUTEX(a)
 
-/*
- * Then the ODBC support can use both iodbc and Solid,
- * uncomment this.
- * #define HAVE_ODBC (HAVE_IODBC|HAVE_SOLID)
- */
-
 #include <stdlib.h>
 #include <ctype.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #include <stdarg.h>
-
-#include "php_stdint.h"
 
 #include "zend_hash.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
 #include <string.h>
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 # ifdef PHP_WIN32
 #include "win32/param.h"
 # else
@@ -239,14 +218,6 @@ typedef unsigned int socklen_t;
 
 #include <limits.h>
 
-#ifndef LONG_MAX
-#define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-#define LONG_MIN (- LONG_MAX - 1)
-#endif
-
 #ifndef INT_MAX
 #define INT_MAX 2147483647
 #endif
@@ -255,13 +226,7 @@ typedef unsigned int socklen_t;
 #define INT_MIN (- INT_MAX - 1)
 #endif
 
-/* double limits */
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define PHP_DOUBLE_MAX_LENGTH (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define PHP_DOUBLE_MAX_LENGTH 1080
-#endif
+#define PHP_DOUBLE_MAX_LENGTH ZEND_DOUBLE_MAX_LENGTH
 
 #define PHP_GCC_VERSION ZEND_GCC_VERSION
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
@@ -295,11 +260,12 @@ END_EXTERN_C()
 #define php_ignore_value(x) ZEND_IGNORE_VALUE(x)
 
 /* global variables */
-#if !defined(PHP_WIN32)
-#define PHP_SLEEP_NON_VOID
+#ifndef PHP_WIN32
 #define php_sleep sleep
 extern char **environ;
-#endif	/* !defined(PHP_WIN32) */
+#endif	/* ifndef PHP_WIN32 */
+
+extern const char php_build_date[];
 
 #ifdef PHP_PWRITE_64
 ssize_t pwrite(int, void *, size_t, off64_t);
@@ -312,16 +278,18 @@ ssize_t pread(int, void *, size_t, off64_t);
 BEGIN_EXTERN_C()
 void phperror(char *error);
 PHPAPI size_t php_write(void *buf, size_t size);
-PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
-		2);
-PHPAPI int php_get_module_initialized(void);
+PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
+PHPAPI size_t php_printf_unchecked(const char *format, ...);
+PHPAPI bool php_during_module_startup(void);
+PHPAPI bool php_during_module_shutdown(void);
+PHPAPI bool php_get_module_initialized(void);
 #ifdef HAVE_SYSLOG_H
 #include "php_syslog.h"
 #define php_log_err(msg) php_log_err_with_severity(msg, LOG_NOTICE)
 #else
 #define php_log_err(msg) php_log_err_with_severity(msg, 5)
 #endif
-PHPAPI ZEND_COLD void php_log_err_with_severity(char *log_message, int syslog_type_int);
+PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int syslog_type_int);
 int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 int cfgparse(void);
 END_EXTERN_C()
@@ -334,18 +302,20 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handli
 {
 	zend_replace_error_handling(error_handling, exception_class, NULL);
 }
-static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
+static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling(void) {}
 
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...);
 PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
 PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 #ifdef PHP_WIN32
+PHPAPI ZEND_COLD void php_win32_docref1_from_error(DWORD error, const char *param1);
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
 END_EXTERN_C()
@@ -358,12 +328,12 @@ END_EXTERN_C()
 #define phpin zendin
 
 #define php_memnstr zend_memnstr
+#define php_memnistr zend_memnistr
 
 /* functions */
 BEGIN_EXTERN_C()
 PHPAPI extern int (*php_register_internal_extensions_func)(void);
 PHPAPI int php_register_internal_extensions(void);
-PHPAPI int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(void);
 PHPAPI char *php_get_current_user(void);
@@ -445,5 +415,11 @@ END_EXTERN_C()
 #define PHP_CONNECTION_TIMEOUT 2
 
 #include "php_reentrancy.h"
+
+/* the following typedefs are deprecated and will be removed in PHP
+ * 9.0; use the standard C99 types instead */
+typedef bool zend_bool;
+typedef intptr_t zend_intptr_t;
+typedef uintptr_t zend_uintptr_t;
 
 #endif

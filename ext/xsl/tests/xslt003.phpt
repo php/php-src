@@ -1,7 +1,7 @@
 --TEST--
 Test 3: Using Parameters
---SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 echo "Test 3: Using Parameters";
@@ -11,6 +11,7 @@ $proc->setParameter( "", "foo","hello world");
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
+?>
 --EXPECT--
 Test 3: Using Parameters
 <?xml version="1.0" encoding="iso-8859-1"?>

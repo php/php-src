@@ -2,12 +2,6 @@
 Test array_chunk() function : basic functionality - 'preserve_keys' as true/false
 --FILE--
 <?php
-/* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks
- *              Chunks an array into size  large chunks.
- * Source code: ext/standard/array.c
-*/
-
 echo "*** Testing array_chunk() : basic functionality ***\n";
 $size = 2;
 

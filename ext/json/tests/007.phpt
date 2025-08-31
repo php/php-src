@@ -1,7 +1,5 @@
 --TEST--
 json_last_error() tests
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 var_dump(json_decode("[1]"));

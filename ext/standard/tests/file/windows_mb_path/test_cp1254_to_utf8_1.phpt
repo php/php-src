@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+dir_cp1254
 --FILE--
 <?php
 /*
@@ -19,10 +21,10 @@ skip_if_no_required_exts();
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "çokbaytlı işleri";
-$prefix = create_data("dir_cp1254", "${item}42");
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}42";
+$prefix = create_data("dir_cp1254", "{$item}42");
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}42";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));
@@ -36,7 +38,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1254");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -48,4 +49,3 @@ bool(true)
 string(%d) "%s\çokbaytlı işleri42\çokbaytlı işleri4"
 Active code page: %d
 bool(true)
-===DONE===

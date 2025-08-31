@@ -1,5 +1,5 @@
 --TEST--
-SPL: spl_autoload_unregister() with closures and invokables
+SPL: spl_autoload_unregister() with closures and invocables
 --FILE--
 <?php
 $closure = function($class) {
@@ -38,10 +38,8 @@ spl_autoload_unregister($al1);
 $y = new TestY;
 
 ?>
-===DONE===
 --EXPECT--
 closure called with class TestX
 Autoloader('d1') called with TestX
 WorkingAutoloader() called with TestX
 WorkingAutoloader() called with TestY
-===DONE===

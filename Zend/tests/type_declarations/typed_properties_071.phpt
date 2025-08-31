@@ -2,7 +2,7 @@
 Test assignment to typed reference with weak type conversion
 --FILE--
 <?php
-  
+
 class Test {
     public string $x = "x";
 }

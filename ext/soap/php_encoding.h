@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -37,7 +35,7 @@
 #define SOAP_1_2_ENC_NAMESPACE "http://www.w3.org/2003/05/soap-encoding"
 #define SOAP_1_2_ENC_NS_PREFIX "enc"
 
-#define SCHEMA_NAMESPACE "http://www.w3.org/2001/XMLSchema"
+#define XSD_DRAFT_2000_NAMESPACE "http://www.w3.org/2000/10/XMLSchema"
 #define XSD_NAMESPACE "http://www.w3.org/2001/XMLSchema"
 #define XSD_NS_PREFIX "xsd"
 #define XSI_NAMESPACE "http://www.w3.org/2001/XMLSchema-instance"
@@ -172,10 +170,18 @@
 #define UNKNOWN_TYPE 999998
 #define END_KNOWN_TYPES 999999
 
+#define Z_VAR_ENC_TYPE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_VAR_ENC_VALUE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_VAR_ENC_STYPE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
+#define Z_VAR_ENC_NS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
+#define Z_VAR_ENC_NAME_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
+#define Z_VAR_ENC_NAMENS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
+
 struct _encodeType {
 	int type;
 	char *type_str;
 	char *ns;
+	zend_string *clark_notation;
 	sdlTypePtr sdl_type;
 	soapMappingPtr map;
 };
@@ -200,8 +206,8 @@ void whiteSpace_collapse(xmlChar* str);
 xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style, xmlNodePtr parent);
 zval *sdl_guess_convert_zval(zval *ret, encodeTypePtr enc, xmlNodePtr data);
 
-void encode_finish();
-void encode_reset_ns();
+void encode_finish(void);
+void encode_reset_ns(void);
 xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns);
 
 encodePtr get_conversion(int encode);
@@ -209,7 +215,7 @@ encodePtr get_conversion(int encode);
 void delete_encoder(zval *zv);
 void delete_encoder_persistent(zval *zv);
 
-extern const encode defaultEncoding[];
+extern encode defaultEncoding[];
 extern int numDefaultEncodings;
 
 #endif

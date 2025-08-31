@@ -1,10 +1,8 @@
 --TEST--
-SPL: SimpleXMLIterator and overriden count()
---SKIPIF--
-<?php
-if (!extension_loaded('simplexml')) print 'skip';
-if (!extension_loaded("libxml")) print "skip LibXML not present";
-?>
+SPL: SimpleXMLIterator and overridden count()
+--EXTENSIONS--
+simplexml
+libxml
 --FILE--
 <?php
 
@@ -19,11 +17,11 @@ EOF;
 
 class SXETest extends SimpleXMLIterator
 {
-	function count()
-	{
-		echo __METHOD__ . "\n";
-		return parent::count();
-	}
+    function count(): int
+    {
+        echo __METHOD__ . "\n";
+        return parent::count();
+    }
 }
 
 $sxe = new SXETest($xml);
@@ -33,7 +31,6 @@ var_dump(count($sxe->elem1));
 var_dump(count($sxe->elem2));
 
 ?>
-===DONE===
 --EXPECT--
 SXETest::count
 int(3)
@@ -41,4 +38,3 @@ SXETest::count
 int(1)
 SXETest::count
 int(2)
-===DONE===

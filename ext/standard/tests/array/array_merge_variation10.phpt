@@ -2,11 +2,6 @@
 Test array_merge() function : usage variations - position of internal array pointer
 --FILE--
 <?php
-/* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Check the position of the internal array pointer after calling array_merge().
  * This test is also passing more than two arguments to array_merge().

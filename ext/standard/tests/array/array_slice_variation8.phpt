@@ -2,11 +2,6 @@
 Test array_slice() function : usage variations - multidimensional arrays
 --FILE--
 <?php
-/* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_slice when passed
  * 1. a two-dimensional array as $input argument

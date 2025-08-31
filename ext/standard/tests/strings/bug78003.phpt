@@ -8,9 +8,7 @@ var_dump(
     strip_tags('<foo<?>bar>')
 );
 ?>
-===DONE===
 --EXPECT--
 string(0) ""
 string(0) ""
 string(0) ""
-===DONE===

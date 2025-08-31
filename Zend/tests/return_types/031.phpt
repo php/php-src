@@ -3,10 +3,10 @@ Nullable return type inheritance rules (non-nullable and nullable)
 --FILE--
 <?php
 class A {
-	function foo(): int {}
+    function foo(): int {}
 }
 class B extends A {
-	function foo(): ?int {}
+    function foo(): ?int {}
 }
 ?>
 DONE

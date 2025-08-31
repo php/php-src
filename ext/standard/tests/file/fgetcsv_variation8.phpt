@@ -3,11 +3,6 @@ Test fgetcsv() : usage variations - with different delimiter and enclosure
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
-/*
   Testing fgetcsv() to read from a file when provided with values of delimiter and
   enclosure that are not present in the line read by fgetcsv()
 */
@@ -79,7 +74,7 @@ foreach ($csv_lists as $csv_list) {
     fseek($file_handle, 0, SEEK_SET);
     $del = "+";
     $enc = "%";
-    var_dump( fgetcsv($file_handle, 1024, $del, $enc) );
+    var_dump( fgetcsv($file_handle, 1024, $del, $enc, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

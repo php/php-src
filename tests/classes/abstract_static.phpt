@@ -5,14 +5,14 @@ ZE2 A static abstract methods
 
 interface showable
 {
-	static function show();
+    static function show();
 }
 
 class pass implements showable
 {
-	static function show() {
-		echo "Call to function show()\n";
-	}
+    static function show() {
+        echo "Call to function show()\n";
+    }
 }
 
 pass::show();
@@ -20,7 +20,7 @@ pass::show();
 eval('
 class fail
 {
-	abstract static function func();
+    abstract static function func();
 }
 ');
 
@@ -31,4 +31,4 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call to function show()
 
-Fatal error: Class fail contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (fail::func) in %sabstract_static.php(%d) : eval()'d code on line %d
+Fatal error: Class fail declares abstract method func() and must therefore be declared abstract in %sabstract_static.php(%d) : eval()'d code on line %d

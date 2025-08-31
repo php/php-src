@@ -2,11 +2,6 @@
 Test array_intersect() function : usage variations - two dimensional arrays for $arr1 and $arr2 arguments(Bug#43109)
 --FILE--
 <?php
-/* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Testing the behavior of array_intersect() by passing 2-D arrays
 * to both $arr1 and $arr2 argument.
@@ -61,37 +56,37 @@ echo "Done";
 -- Passing the entire 2-D array to $arr1 and $arr2 --
 - With default arguments -
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 array(4) {
   [0]=>
   array(4) {
@@ -136,53 +131,53 @@ array(4) {
 }
 - With more arguments -
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 array(4) {
   [0]=>
   array(4) {

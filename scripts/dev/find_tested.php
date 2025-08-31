@@ -1,7 +1,6 @@
 #!/usr/bin/env php
 <?php
 
-
 $usage = <<<USAGE
 
 Usage: php find_tested.php [path_to_test_files] ([extension])
@@ -16,7 +15,6 @@ A test status of "verify" for a method means that there is at least one other me
 
 USAGE;
 
-
 /* method record fields */
 define("CLASS_NAME", "CLASS_NAME");
 define("METHOD_NAME", "METHOD_NAME");
@@ -24,7 +22,6 @@ define("EXTENSION_NAME", "EXTENSION_NAME");
 define("IS_DUPLICATE", "IS_DUPLICATE");
 define("IS_TESTED", "IS_TESTED");
 define("TESTS", "TESTS");
-
 
 // process command line args
 $num_params = $argc;
@@ -49,7 +46,6 @@ if ($num_params == 3) {
 } else {
     $extension_name = false;
 }
-
 
 $method_info = populate_method_info();
 
@@ -201,28 +197,27 @@ function get_phpt_files($dir, &$phpt_file_count, &$all_phpt)
  * Extract tests from a specified file, returns an array of tested function tokens
  */
 function extract_tests($file) {
-	$code = file_get_contents($file);
+    $code = file_get_contents($file);
 
-	if (!preg_match('/--FILE--\s*(.*)\s*--(EXPECTF|EXPECTREGEX|EXPECT)?--/is', $code, $r)) {
-		//print "Unable to get code in ".$file."\n";
-		return array();
-	}
+    if (!preg_match('/--FILE--\s*(.*)\s*--(EXPECTF|EXPECTREGEX|EXPECT)?--/is', $code, $r)) {
+        //print "Unable to get code in ".$file."\n";
+        return array();
+    }
 
-	$tokens = token_get_all($r[1]);
-	$functions = array_filter($tokens, 'filter_functions');
-	$functions = array_map( 'map_token_value',$functions);
-	$functions = array_unique($functions);
+    $tokens = token_get_all($r[1]);
+    $functions = array_filter($tokens, 'filter_functions');
+    $functions = array_map( 'map_token_value',$functions);
+    $functions = array_unique($functions);
 
-	return $functions;
+    return $functions;
 }
 
 function filter_functions($x) {
-	return $x[0] == 307;
+    return $x[0] == 307;
 }
 
 function map_token_value($x) {
-	return $x[1];
+    return $x[1];
 }
-
 
 ?>

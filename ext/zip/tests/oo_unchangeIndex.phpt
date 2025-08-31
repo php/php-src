@@ -2,8 +2,8 @@
 Test basic ZipArchive::unchangeIndex() Method
 --CREDITS--
 PHP TestFest 2017 - Bergfreunde, Florian Engelhardt
---SKIPIF--
-<?php if (!extension_loaded("zip")) print "skip"; ?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $dirname = __DIR__ . '/';
@@ -27,6 +27,8 @@ $zip->unchangeIndex(0);
 
 var_dump($zip->getNameIndex(0));
 var_dump($zip->getCommentIndex(0));
+
+$zip->close();
 
 var_dump(md5_file($file));
 ?>

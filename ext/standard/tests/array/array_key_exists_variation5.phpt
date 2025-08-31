@@ -2,12 +2,6 @@
 Test array_key_exists() function : usage variations - multidimensional arrays
 --FILE--
 <?php
-/* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array
- * Source code: ext/standard/array.c
- * Alias to functions: key_exists
- */
-
 /*
  * Test how array_key_exists() behaves with multi-dimensional arrays
  */

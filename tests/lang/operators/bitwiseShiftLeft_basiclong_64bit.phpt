@@ -24,8 +24,8 @@ error_reporting(E_ERROR);
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	  echo "--- testing: $longVal << $otherVal ---\n";
-	  try {
+      echo "--- testing: $longVal << $otherVal ---\n";
+      try {
         var_dump($longVal<<$otherVal);
       } catch (ArithmeticError $e) {
         echo "Exception: " . $e->getMessage() . "\n";
@@ -35,8 +35,8 @@ foreach ($longVals as $longVal) {
 
 foreach ($otherVals as $otherVal) {
    foreach($longVals as $longVal) {
-	  echo "--- testing: $otherVal << $longVal ---\n";
-	  try {
+      echo "--- testing: $otherVal << $longVal ---\n";
+      try {
         var_dump($otherVal<<$longVal);
       } catch (ArithmeticError $e) {
         echo "Exception: " . $e->getMessage() . "\n";
@@ -45,7 +45,6 @@ foreach ($otherVals as $otherVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 << 0 ---
 int(9223372036854775807)
@@ -587,4 +586,3 @@ Exception: Bit shift by negative number
 Exception: Bit shift by negative number
 --- testing: 9223372036854775807 << -9.2233720368548E+18 ---
 Exception: Bit shift by negative number
-===DONE===

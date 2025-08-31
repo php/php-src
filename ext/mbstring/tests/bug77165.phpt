@@ -1,5 +1,7 @@
 --TEST--
 Bug #77165: mb_check_encoding crashes when argument given an empty array
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 var_dump(mb_check_encoding(array()));

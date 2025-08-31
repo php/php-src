@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -17,10 +15,8 @@
  */
 
 #include "php.h"
-#include "php_globals.h"
 #include "php_network.h"
-#include "php_open_temporary_file.h"
-#include "ext/standard/file.h"
+#include "ext/standard/file.h"  /* For FG(stream_filters) */
 #include <stddef.h>
 #include <fcntl.h>
 
@@ -42,22 +38,22 @@ PHPAPI HashTable *_php_get_stream_filters_hash(void)
 }
 
 /* API for registering GLOBAL filters */
-PHPAPI int php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory)
+PHPAPI zend_result php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory)
 {
-	int ret;
-	zend_string *str = zend_string_init_interned(filterpattern, strlen(filterpattern), 1);
+	zend_result ret;
+	zend_string *str = zend_string_init_interned(filterpattern, strlen(filterpattern), true);
 	ret = zend_hash_add_ptr(&stream_filters_hash, str, (void*)factory) ? SUCCESS : FAILURE;
-	zend_string_release_ex(str, 1);
+	zend_string_release_ex(str, true);
 	return ret;
 }
 
-PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern)
+PHPAPI zend_result php_stream_filter_unregister_factory(const char *filterpattern)
 {
 	return zend_hash_str_del(&stream_filters_hash, filterpattern, strlen(filterpattern));
 }
 
 /* API for registering VOLATILE wrappers */
-PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory)
+PHPAPI zend_result php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory)
 {
 	if (!FG(stream_filters)) {
 		ALLOC_HASHTABLE(FG(stream_filters));
@@ -70,9 +66,9 @@ PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpatter
 
 /* Buckets */
 
-PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent)
+PHPAPI php_stream_bucket *php_stream_bucket_new(const php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent)
 {
-	int is_persistent = php_stream_is_persistent(stream);
+	bool is_persistent = php_stream_is_persistent(stream);
 	php_stream_bucket *bucket;
 
 	bucket = (php_stream_bucket*)pemalloc(sizeof(php_stream_bucket), is_persistent);
@@ -80,10 +76,10 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
 
 	if (is_persistent && !buf_persistent) {
 		/* all data in a persistent bucket must also be persistent */
-		bucket->buf = pemalloc(buflen, 1);
+		bucket->buf = pemalloc(buflen, true);
 		memcpy(bucket->buf, buf, buflen);
 		bucket->buflen = buflen;
-		bucket->own_buf = 1;
+		bucket->own_buf = true;
 	} else {
 		bucket->buf = buf;
 		bucket->buflen = buflen;
@@ -120,7 +116,7 @@ PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bu
 	memcpy(retval->buf, bucket->buf, retval->buflen);
 
 	retval->refcount = 1;
-	retval->own_buf = 1;
+	retval->own_buf = true;
 
 	php_stream_bucket_delref(bucket);
 
@@ -136,14 +132,14 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	(*left)->buflen = length;
 	memcpy((*left)->buf, in->buf, length);
 	(*left)->refcount = 1;
-	(*left)->own_buf = 1;
+	(*left)->own_buf = true;
 	(*left)->is_persistent = in->is_persistent;
 
 	(*right)->buflen = in->buflen - length;
 	(*right)->buf = pemalloc((*right)->buflen, in->is_persistent);
 	memcpy((*right)->buf, in->buf + length, (*right)->buflen);
 	(*right)->refcount = 1;
-	(*right)->own_buf = 1;
+	(*right)->own_buf = true;
 	(*right)->is_persistent = in->is_persistent;
 
 	return SUCCESS;
@@ -239,8 +235,9 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		memcpy(wildname, filtername, n+1);
 		period = wildname + (period - filtername);
 		while (period && !filter) {
-			*period = '\0';
-			strncat(wildname, ".*", 2);
+			ZEND_ASSERT(period[0] == '.');
+			period[1] = '*';
+			period[2] = '\0';
 			if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, wildname, strlen(wildname)))) {
 				filter = factory->create_filter(filtername, filterparams, persistent);
 			}
@@ -254,9 +251,9 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	if (filter == NULL) {
 		/* TODO: these need correct docrefs */
 		if (factory == NULL)
-			php_error_docref(NULL, E_WARNING, "unable to locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "Unable to locate filter \"%s\"", filtername);
 		else
-			php_error_docref(NULL, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "Unable to create or locate filter \"%s\"", filtername);
 	}
 
 	return filter;
@@ -283,7 +280,7 @@ PHPAPI void php_stream_filter_free(php_stream_filter *filter)
 	pefree(filter, filter->is_persistent);
 }
 
-PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI void php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	filter->next = chain->head;
 	filter->prev = NULL;
@@ -295,8 +292,6 @@ PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stre
 	}
 	chain->head = filter;
 	filter->chain = chain;
-
-	return SUCCESS;
 }
 
 PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter)
@@ -304,7 +299,7 @@ PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_strea
 	php_stream_filter_prepend_ex(chain, filter);
 }
 
-PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	php_stream *stream = chain->stream;
 
@@ -359,8 +354,6 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 			case PSFS_PASS_ON:
 				/* If any data is consumed, we cannot rely upon the existing read buffer,
 				   as the filtered data must replace the existing data, so invalidate the cache */
-				/* note that changes here should be reflected in
-				   main/streams/streams.c::php_stream_fill_read_buffer */
 				stream->writepos = 0;
 				stream->readpos = 0;
 
@@ -398,7 +391,7 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 	}
 }
 
-PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
+PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish)
 {
 	php_stream_bucket_brigade brig_a = { NULL, NULL }, brig_b = { NULL, NULL }, *inp = &brig_a, *outp = &brig_b, *brig_temp;
 	php_stream_bucket *bucket;
@@ -406,7 +399,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	php_stream_filter *current;
 	php_stream *stream;
 	size_t flushed_size = 0;
-	long flags = (finish ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC);
+	int flags = (finish ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC);
 
 	if (!filter->chain || !filter->chain->stream) {
 		/* Filter is not attached to a chain, or chain is somehow not part of a stream */
@@ -419,7 +412,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	for(current = filter; current; current = current->next) {
 		php_stream_filter_status_t status;
 
-		status = filter->fops->filter(stream, current, inp, outp, NULL, flags);
+		status = current->fops->filter(stream, current, inp, outp, NULL, flags);
 		if (status == PSFS_FEED_ME) {
 			/* We've flushed the data far enough */
 			return SUCCESS;
@@ -471,7 +464,10 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	} else if (chain == &(stream->writefilters)) {
 		/* Send flushed data to the stream */
 		while ((bucket = inp->head)) {
-			stream->ops->write(stream, bucket->buf, bucket->buflen);
+			ssize_t count = stream->ops->write(stream, bucket->buf, bucket->buflen);
+			if (count > 0) {
+				stream->position += count;
+			}
 			php_stream_bucket_unlink(bucket);
 			php_stream_bucket_delref(bucket);
 		}
@@ -480,7 +476,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	return SUCCESS;
 }
 
-PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor)
+PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor)
 {
 	if (filter->prev) {
 		filter->prev->next = filter->next;

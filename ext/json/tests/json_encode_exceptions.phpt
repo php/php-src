@@ -1,14 +1,12 @@
 --TEST--
 Test json_encode() function : JSON_THROW_ON_ERROR flag
---SKIPIF--
-<?php if(!extension_loaded('json')) die('skip json extension not loaded') ?>
 --FILE--
 <?php
 
 try {
-	var_dump(json_encode("\x80", JSON_THROW_ON_ERROR));
+    var_dump(json_encode("\x80", JSON_THROW_ON_ERROR));
 } catch (JsonException $e) {
-	var_dump($e);
+    var_dump($e);
 }
 
 // JSON_PARTIAL_OUTPUT_ON_ERROR is incompatible with exceptions

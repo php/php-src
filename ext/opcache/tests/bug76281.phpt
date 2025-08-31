@@ -1,7 +1,7 @@
 --TEST--
 Bug #76281: Opcache causes incorrect "undefined variable" errors
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

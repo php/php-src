@@ -2,16 +2,17 @@
 Test curl_setopt() with curl_multi function with basic functionality
 --CREDITS--
 TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
+--EXTENSIONS--
+curl
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php
+if (curl_version()['version_number'] === 0x080a00) {
+    // https://github.com/php/php-src/issues/15997
+    die('xfail due to a libcurl bug');
+}
+?>
 --FILE--
 <?php
-/* Prototype  : bool curl_setopt(resource ch, int option, mixed value)
- * Description: Set an option for a cURL transfer
- * Source code: ext/curl/interface.c
- * Alias to functions:
- */
-
   include 'server.inc';
   $host = curl_cli_server_start();
 
@@ -63,11 +64,9 @@ TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
   var_dump( $curl_content );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl_exec() : basic functionality ***
 string(75) "Hello World!
 Hello World!Hello World!
 Hello World!Hello World!
 Hello World!"
-===DONE===

@@ -3,8 +3,9 @@ Check for JIT enablement status
 --SKIPIF--
 <?php
 if (ini_get("pcre.jit") === FALSE) {
-	die("skip no jit built");
+    die("skip no jit built");
 }
+?>
 --FILE--
 <?php
 

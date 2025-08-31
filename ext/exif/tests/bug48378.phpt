@@ -1,7 +1,7 @@
 --TEST--
 Bug #48378 (Infinite recursion due to corrupt JPEG)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 exif_read_data(

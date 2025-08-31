@@ -1,12 +1,14 @@
 --TEST--
 spoofchecker with restriction level
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if(!extension_loaded('intl') || !class_exists("Spoofchecker")) print 'skip'; ?>
+<?php if(!class_exists("Spoofchecker")) print 'skip'; ?>
 <?php
-	$r = new ReflectionClass("SpoofChecker");
-	if (false === $r->getConstant("SINGLE_SCRIPT_RESTRICTIVE")) {
-		die("skip Incompatible ICU version");
-	}
+    $r = new ReflectionClass("SpoofChecker");
+    if (false === $r->getConstant("SINGLE_SCRIPT_RESTRICTIVE")) {
+        die("skip Incompatible ICU version");
+    }
 ?>
 --FILE--
 <?php

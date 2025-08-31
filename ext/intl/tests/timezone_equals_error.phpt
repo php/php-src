@@ -1,12 +1,9 @@
 --TEST--
 IntlTimeZone equals handler: error test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 class A extends IntlTimeZone {
 function __construct() {}
@@ -16,13 +13,12 @@ $tz = new A();
 $tz2 = intltz_get_gmt();
 var_dump($tz, $tz2);
 try {
-var_dump($tz == $tz2);
-} catch (Exception $e) {
-	var_dump(get_class($e), $e->getMessage());
+	var_dump($tz == $tz2);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
-==DONE==
 --EXPECT--
 object(A)#1 (1) {
   ["valid"]=>
@@ -38,6 +34,4 @@ object(IntlTimeZone)#2 (4) {
   ["currentOffset"]=>
   int(0)
 }
-string(9) "Exception"
-string(63) "Comparison with at least one unconstructed IntlTimeZone operand"
-==DONE==
+Exception: Comparison with at least one unconstructed IntlTimeZone operand

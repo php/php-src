@@ -1,14 +1,14 @@
 --TEST--
 Test ResourceBundle implements Countable
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-	include "resourcebundle.inc";
+    include "resourcebundle.inc";
 
-	$r = new ResourceBundle( 'es', BUNDLE );
+    $r = new ResourceBundle( 'es', BUNDLE );
 
-	var_dump($r instanceof Countable);
+    var_dump($r instanceof Countable);
 ?>
 --EXPECT--
 bool(true)

@@ -1,17 +1,13 @@
 --TEST--
 Test session_unset() function : basic functionality
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : void session_unset(void)
- * Description : Free all session variables
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_unset() : basic functionality ***\n";
 

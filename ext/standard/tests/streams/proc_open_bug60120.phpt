@@ -19,8 +19,9 @@ if (\$input) {
 TMPFILE
 );
 
-$command = sprintf("%s -n %s", PHP_BINARY, $file);
+$command = sprintf("%s -n %s", getenv('TEST_PHP_EXECUTABLE_ESCAPED'), escapeshellarg($file));
 
+/* PATH is needed to find ASan DLLs (and maybe others) on Windows */
 $process = proc_open(
     $command,
     [
@@ -30,16 +31,16 @@ $process = proc_open(
     ],
     $pipes,
     getcwd(),
-    [],
+    ['PATH' => getenv('PATH')],
     [
-        'suppress_errors' => true, 
+        'suppress_errors' => true,
         'bypass_shell' => false
     ]
 );
 
 if (!is_resource($process)) {
     die(sprintf(
-        "could not open process \"%s\"", 
+        "could not open process \"%s\"",
         $command));
 }
 
@@ -88,10 +89,13 @@ var_dump(
 fclose($pipes[1]);
 fclose($pipes[2]);
 ?>
+--CLEAN--
+<?php
+$file = preg_replace("~\.clean\.php$~", ".io.php", __FILE__);
+unlink($file);
+?>
 --EXPECTF--
 string(10000) "%s"
 string(10000) "%s"
 string(0) ""
 string(0) ""
---CLEAN--
-unlink($file);

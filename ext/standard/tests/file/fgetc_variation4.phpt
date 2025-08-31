@@ -2,11 +2,6 @@
 Test fgetc() function : usage variations - different read modes
 --FILE--
 <?php
-/*
- Prototype: string fgetc ( resource $handle );
- Description: Gets character from file pointer
-*/
-
 /* read from fie using fgetc, file opened using different
    read read modes */
 

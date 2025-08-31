@@ -1,8 +1,9 @@
 --TEST--
 PDO PgSQL Bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used), 32-bit
+--EXTENSIONS--
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -17,10 +18,10 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
 // create the table
-$db->exec("CREATE TEMPORARY TABLE bugtest_62498 (int2col INT2, int4col INT4, int8col INT8, stringcol VARCHAR(255), boolcol BOOLEAN, datecol DATE, textcol TEXT, tscol TIMESTAMP, byteacol BYTEA)");
+$db->exec("CREATE TEMPORARY TABLE test62498_32 (int2col INT2, int4col INT4, int8col INT8, stringcol VARCHAR(255), boolcol BOOLEAN, datecol DATE, textcol TEXT, tscol TIMESTAMP, byteacol BYTEA)");
 
 // insert some data
-$statement = $db->prepare("INSERT INTO bugtest_62498 (int2col, int4col, int8col, stringcol, boolcol, datecol, textcol, tscol, byteacol) VALUES (:int2val, :int4val, :int8val, :stringval, :boolval, :dateval, :textval, :tsval, :byteaval)");
+$statement = $db->prepare("INSERT INTO test62498_32 (int2col, int4col, int8col, stringcol, boolcol, datecol, textcol, tscol, byteacol) VALUES (:int2val, :int4val, :int8val, :stringval, :boolval, :dateval, :textval, :tsval, :byteaval)");
 $vals = array(
     "int2val" => "42",
     "int4val" => "42",
@@ -34,7 +35,7 @@ $vals = array(
 );
 $statement->execute($vals);
 
-$select = $db->query('SELECT int2col, int4col, int8col, stringcol, boolcol, datecol, textcol, tscol, byteacol FROM bugtest_62498');
+$select = $db->query('SELECT int2col, int4col, int8col, stringcol, boolcol, datecol, textcol, tscol, byteacol FROM test62498_32');
 $meta = [];
 for ($i=0; $i < count($vals); $i++) {
   $meta[] = $select->getColumnMeta($i);
@@ -43,6 +44,12 @@ var_dump($meta);
 
 ?>
 Done
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec("DROP TABLE IF EXISTS test62498_32");
+?>
 --EXPECTF--
 Begin test...
 array(9) {
@@ -53,17 +60,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(4) "int2"
+    ["pdo_type"]=>
+    int(1)
     ["name"]=>
     string(7) "int2col"
     ["len"]=>
     int(2)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(1)
   }
   [1]=>
   array(8) {
@@ -72,17 +79,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(4) "int4"
+    ["pdo_type"]=>
+    int(1)
     ["name"]=>
     string(7) "int4col"
     ["len"]=>
     int(4)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(1)
   }
   [2]=>
   array(8) {
@@ -91,17 +98,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(4) "int8"
+    ["pdo_type"]=>
+    int(1)
     ["name"]=>
     string(7) "int8col"
     ["len"]=>
     int(8)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(2)
   }
   [3]=>
   array(8) {
@@ -110,17 +117,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(7) "varchar"
+    ["pdo_type"]=>
+    int(2)
     ["name"]=>
     string(9) "stringcol"
     ["len"]=>
     int(-1)
     ["precision"]=>
     int(259)
-    ["pdo_type"]=>
-    int(2)
   }
   [4]=>
   array(8) {
@@ -129,17 +136,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(4) "bool"
+    ["pdo_type"]=>
+    int(5)
     ["name"]=>
     string(7) "boolcol"
     ["len"]=>
     int(1)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(5)
   }
   [5]=>
   array(8) {
@@ -148,17 +155,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(4) "date"
+    ["pdo_type"]=>
+    int(2)
     ["name"]=>
     string(7) "datecol"
     ["len"]=>
     int(4)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(2)
   }
   [6]=>
   array(8) {
@@ -167,17 +174,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(4) "text"
+    ["pdo_type"]=>
+    int(2)
     ["name"]=>
     string(7) "textcol"
     ["len"]=>
     int(-1)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(2)
   }
   [7]=>
   array(8) {
@@ -186,17 +193,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(9) "timestamp"
+    ["pdo_type"]=>
+    int(2)
     ["name"]=>
     string(5) "tscol"
     ["len"]=>
     int(8)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(2)
   }
   [8]=>
   array(8) {
@@ -205,17 +212,17 @@ array(9) {
     ["pgsql:table_oid"]=>
     int(%d)
     ["table"]=>
-    string(13) "bugtest_62498"
+    string(%s) "test62498_32"
     ["native_type"]=>
     string(5) "bytea"
+    ["pdo_type"]=>
+    int(3)
     ["name"]=>
     string(8) "byteacol"
     ["len"]=>
     int(-1)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(3)
   }
 }
 Done

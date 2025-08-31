@@ -1,0 +1,2 @@
+<?php
+print "included\n";

@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,19 +14,14 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_compare.h"
 #include "intl_convert.h"
 
-/* {{{ proto int Collator::compare( string $str1, string $str2 )
- * Compare two strings. }}} */
-/* {{{ proto int collator_compare( Collator $coll, string $str1, string $str2 )
- * Compare two strings.
- */
+/* {{{ Compare two strings. */
 PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
@@ -49,10 +42,7 @@ PHP_FUNCTION( collator_compare )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oss",
 		&object, Collator_ce_ptr, &str1, &str1_len, &str2, &str2_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_compare: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -60,11 +50,10 @@ PHP_FUNCTION( collator_compare )
 
 	if (!co || !co->ucoll) {
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Object not initialized", 0 );
+		intl_errors_set_custom_msg(COLLATOR_ERROR_P( co ), "Object not initialized");
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*
@@ -80,8 +69,7 @@ PHP_FUNCTION( collator_compare )
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
 
 		/* Set error messages. */
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Error converting first argument to UTF-16", 0 );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Error converting first argument to UTF-16");
 		if (ustr1) {
 			efree( ustr1 );
 		}
@@ -96,8 +84,7 @@ PHP_FUNCTION( collator_compare )
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
 
 		/* Set error messages. */
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Error converting second argument to UTF-16", 0 );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Error converting second argument to UTF-16");
 		if (ustr1) {
 			efree( ustr1 );
 		}

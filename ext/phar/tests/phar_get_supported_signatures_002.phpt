@@ -1,8 +1,9 @@
 --TEST--
 Phar::getSupportedSignatures()
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
 $arr = Phar::getSupportedSignatures();
 if (in_array("OpenSSL", $arr)) die("skip openssl support enabled");
 ?>
@@ -12,8 +13,6 @@ phar.readonly=0
 --FILE--
 <?php
 var_dump(Phar::getSupportedSignatures());
-?>
-===DONE===
 ?>
 --EXPECT--
 array(4) {
@@ -26,4 +25,3 @@ array(4) {
   [3]=>
   string(7) "SHA-512"
 }
-===DONE===

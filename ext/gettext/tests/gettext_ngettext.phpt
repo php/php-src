@@ -1,13 +1,13 @@
 --TEST--
 Test ngettext() functionality
+--EXTENSIONS--
+gettext
 --SKIPIF--
 <?php
-	if (!extension_loaded("gettext")) {
-		die("SKIP extension gettext not loaded\n");
-	}
-	if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
-		die("SKIP en_US.UTF-8 locale not supported.");
-	}
+    
+    if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
+        die("SKIP en_US.UTF-8 locale not supported.");
+    }
 ?>
 --FILE--
 <?php

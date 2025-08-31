@@ -17,31 +17,37 @@ $fp = fopen(__FILE__, "r");
 var_dump($arr[$fp]);
 
 $obj = new stdClass;
-var_dump($arr[$obj]);
+try {
+    var_dump($arr[$obj]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $arr1 = Array(1,2,3);
-var_dump($arr[$arr1]);
+try {
+    var_dump($arr[$arr1]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
 --EXPECTF--
 int(2)
+
+Deprecated: Implicit conversion from float 0.0836 to int loses precision in %s on line %d
 int(1)
 
-Notice: Undefined index:  in %s on line %d
+Warning: Undefined array key "" in %s on line %d
 NULL
 
-Notice: Undefined index: run away in %s on line %d
+Warning: Undefined array key "run away" in %s on line %d
 NULL
 int(2)
 int(1)
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
-
-Warning: Illegal offset type in %s on line %d
-NULL
-
-Warning: Illegal offset type in %s on line %d
-NULL
+Cannot access offset of type stdClass on array
+Cannot access offset of type array on array
 Done

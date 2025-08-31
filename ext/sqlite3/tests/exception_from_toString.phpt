@@ -1,5 +1,7 @@
 --TEST--
 Check that exceptions from __toString() are handled correctly
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 

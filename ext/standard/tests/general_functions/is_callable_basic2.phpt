@@ -2,16 +2,6 @@
 Test is_callable() function : usage variations - on objects
 --FILE--
 <?php
-/* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
-   Description: Verify that the contents of a variable can be called as a function
-                In case of objects, $var = array($SomeObject, 'MethodName')
-*/
-
-/* Prototype: void check_iscallable_objects( $methods );
-   Description: use is_callable() on given $method to check if the array
-                contains a valid method name;
-                returns true if valid function name, false otherwise
-*/
 function check_iscallable_objects( $methods ) {
   global $loop_counter;
   $counter = 1;
@@ -116,6 +106,7 @@ foreach($objects as $object) {
     array( @$temp_class_obj->value, 100 ),
     array( $object, 'func' ),
     array( 'object_class', 'foo1' ),
+    $object,
   );
   /* use check_iscallable_objects() to check whether given object/string
      has valid method name */
@@ -124,7 +115,6 @@ foreach($objects as $object) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing is_callable() on objects ***
 
@@ -207,13 +197,21 @@ object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 1 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
+bool(false)
+object_class::foo1
+-- Innerloop iteration 11 of Outerloop iteration 1 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+object_class::__invoke
+bool(false)
+object_class::__invoke
 --- Outerloop iteration 2 ---
 -- Innerloop iteration 1 of Outerloop iteration 2 --
 bool(false)
@@ -288,13 +286,21 @@ no_member_class::func
 bool(false)
 no_member_class::func
 -- Innerloop iteration 10 of Outerloop iteration 2 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
+bool(false)
+object_class::foo1
+-- Innerloop iteration 11 of Outerloop iteration 2 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+no_member_class::__invoke
+bool(false)
+no_member_class::__invoke
 --- Outerloop iteration 3 ---
 -- Innerloop iteration 1 of Outerloop iteration 3 --
 bool(false)
@@ -369,13 +375,21 @@ contains_object_class::func
 bool(true)
 contains_object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 3 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
+bool(false)
+object_class::foo1
+-- Innerloop iteration 11 of Outerloop iteration 3 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+contains_object_class::__invoke
+bool(false)
+contains_object_class::__invoke
 --- Outerloop iteration 4 ---
 -- Innerloop iteration 1 of Outerloop iteration 4 --
 bool(false)
@@ -450,13 +464,21 @@ contains_object_class::func
 bool(true)
 contains_object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 4 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
+bool(false)
+object_class::foo1
+-- Innerloop iteration 11 of Outerloop iteration 4 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+contains_object_class::__invoke
+bool(false)
+contains_object_class::__invoke
 --- Outerloop iteration 5 ---
 -- Innerloop iteration 1 of Outerloop iteration 5 --
 bool(true)
@@ -531,13 +553,21 @@ object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 5 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
+bool(false)
+object_class::foo1
+-- Innerloop iteration 11 of Outerloop iteration 5 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+object_class::__invoke
+bool(false)
+object_class::__invoke
 --- Outerloop iteration 6 ---
 -- Innerloop iteration 1 of Outerloop iteration 6 --
 bool(false)
@@ -612,13 +642,21 @@ no_member_class::func
 bool(false)
 no_member_class::func
 -- Innerloop iteration 10 of Outerloop iteration 6 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
+bool(false)
+object_class::foo1
+-- Innerloop iteration 11 of Outerloop iteration 6 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+no_member_class::__invoke
+bool(false)
+no_member_class::__invoke
 --- Outerloop iteration 7 ---
 -- Innerloop iteration 1 of Outerloop iteration 7 --
 bool(true)
@@ -693,13 +731,21 @@ object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 7 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
+bool(false)
+object_class::foo1
+-- Innerloop iteration 11 of Outerloop iteration 7 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+object_class::__invoke
+bool(false)
+object_class::__invoke
 --- Outerloop iteration 8 ---
 -- Innerloop iteration 1 of Outerloop iteration 8 --
 bool(false)
@@ -774,11 +820,17 @@ Array
 bool(false)
 Array
 -- Innerloop iteration 10 of Outerloop iteration 8 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
-===DONE===
+bool(false)
+object_class::foo1
+-- Innerloop iteration 11 of Outerloop iteration 8 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+bool(false)

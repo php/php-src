@@ -1,13 +1,14 @@
 --TEST--
 Bug #68799 (Free called on uninitialized pointer)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 /*
 * Pollute the heap. Helps trigger bug. Sometimes not needed.
 */
 class A {
+    public $a;
     function __construct() {
         $a = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa';
         $this->a = $a . $a . $a . $a . $a . $a;
@@ -39,7 +40,6 @@ print_r(exif_read_data(__DIR__.'/bug68799.jpg'));
 
 ?>
 --EXPECTF--
-Warning: exif_read_data(bug68799.jpg): Process tag(x9C9D=Author     ): Illegal components(%d) in %s on line %d
 Array
 (
     [FileName] => bug68799.jpg
@@ -47,7 +47,7 @@ Array
     [FileSize] => 735
     [FileType] => 2
     [MimeType] => image/jpeg
-    [SectionsFound] => ANY_TAG, IFD0
+    [SectionsFound] => ANY_TAG, IFD0, WINXP
     [COMPUTED] => Array
         (
             [html] => width="1" height="1"
@@ -60,4 +60,5 @@ Array
     [XResolution] => 96/1
     [YResolution] => 96/1
     [ResolutionUnit] => 2
+    [Author] => 
 )

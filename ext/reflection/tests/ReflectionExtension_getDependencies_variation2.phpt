@@ -7,10 +7,10 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 $standard = new ReflectionExtension('standard');
 var_dump($standard->getDependencies());
 ?>
-==DONE==
 --EXPECTF--
-array(1) {
+array(%d) {
+  ["uri"]=>
+  %s(8) "Required"
   ["session"]=>
   %s(8) "Optional"
 }
-==DONE==

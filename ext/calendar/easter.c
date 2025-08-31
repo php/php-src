@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,6 +13,7 @@
    | Authors: Shane Caraveo             <shane@caraveo.com>               |
    |          Colin Viebrock            <colin@easydns.com>               |
    |          Hartmut Holzgraefe        <hholzgra@php.net>                |
+   |          Arne Perschke             <a.perschke@hctec.net>            |
    +----------------------------------------------------------------------+
  */
 
@@ -23,17 +22,27 @@
 #include "sdncal.h"
 #include <time.h>
 
-static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
+/**
+ * If `gm` is true this will return the timestamp at midnight on Easter of the given year. If it is false this
+ * will return the number of days Easter is after March 21st.
+ */
+static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 {
-
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
 	struct tm te;
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
+	const zend_long max_year = (zend_long)(ZEND_LONG_MAX / 5) * 4;
+	bool year_is_null = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(),
+		"|l!l", &year, &year_is_null, &method) == FAILURE) {
+			RETURN_THROWS();
+	}
 
 	/* Default to the current year if year parameter is not given */
-	{
+	if (year_is_null) {
 		time_t a;
 		struct tm b, *res;
 		time(&a);
@@ -45,15 +54,32 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 		}
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(),
-		"|ll", &year, &method) == FAILURE) {
-			return;
+	if (year <= 0 || year > max_year) {
+		zend_argument_value_error(1, "must be between 1 and " ZEND_LONG_FMT, max_year);
+		RETURN_THROWS();
 	}
 
-	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */
-		php_error_docref(NULL, E_WARNING, "This function is only valid for years between 1970 and 2037 inclusive");
-		RETURN_FALSE;
+	#ifdef ZEND_ENABLE_ZVAL_LONG64
+	/* Compiling for 64bit, allow years between 1970 and 2.000.000.000 */
+	if (gm && year < 1970) {
+		/* timestamps only start after 1970 */
+		zend_argument_value_error(1, "must be a year after 1970 (inclusive)");
+		RETURN_THROWS();
 	}
+
+	if (gm && year > 2000000000) {
+		/* timestamps only go up to the year 2.000.000.000 */
+		zend_argument_value_error(1, "must be a year before 2.000.000.000 (inclusive)");
+		RETURN_THROWS();
+	}
+	#else
+	/* Compiling for 32bit, allow years between 1970 and 2037 */
+	if (gm && (year < 1970 || year > 2037)) {
+		zend_argument_value_error(1, "must be between 1970 and 2037 (inclusive)");
+		RETURN_THROWS();
+	}
+	#endif
+
 
 	golden = (year % 19) + 1;					/* the Golden number */
 
@@ -114,21 +140,19 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 	} else {							/* return the days after March 21 */
 	    result = easter;
 	}
-    ZVAL_LONG(return_value, result);
+	ZVAL_LONG(return_value, result);
 }
 
-/* {{{ proto int easter_date([int year])
-   Return the timestamp of midnight on Easter of a given year (defaults to current year) */
+/* {{{ Return the timestamp of midnight on Easter of a given year (defaults to current year) */
 PHP_FUNCTION(easter_date)
 {
-	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
-/* {{{ proto int easter_days([int year, [int method]])
-   Return the number of days after March 21 that Easter falls on for a given year (defaults to current year) */
+/* {{{ Return the number of days after March 21 that Easter falls on for a given year (defaults to current year) */
 PHP_FUNCTION(easter_days)
 {
-	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */

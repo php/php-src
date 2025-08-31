@@ -1,25 +1,26 @@
 --TEST--
 SOAP XML Schema 85: Extension of complex type (elements order)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";
 $schema = <<<EOF
-	<complexType name="testType2">
-		<sequence>
-			<element name="int" type="int"/>
-		</sequence>
-	</complexType>
-	<complexType name="testType">
-		<complexContent>
-			<extension base="tns:testType2">
-				<sequence>
-					<element name="int2" type="int"/>
-				</sequence>
-			</extension>
-		</complexContent>
-	</complexType>
+    <complexType name="testType2">
+        <sequence>
+            <element name="int" type="int"/>
+        </sequence>
+    </complexType>
+    <complexType name="testType">
+        <complexContent>
+            <extension base="tns:testType2">
+                <sequence>
+                    <element name="int2" type="int"/>
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
 EOF;
 class A {
   public $int = 1;

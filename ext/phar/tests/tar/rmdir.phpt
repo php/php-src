@@ -1,7 +1,7 @@
 --TEST--
 Phar: rmdir test tar-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -21,7 +21,7 @@ $files = array();
 $files['a/x'] = 'a';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 $tar->mkdir('a');
 

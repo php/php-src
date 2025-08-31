@@ -3,8 +3,8 @@ Test curl_copy_handle() with simple POST
 --CREDITS--
 Rick Buitenman <rick@meritos.nl>
 #testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -22,14 +22,12 @@ Rick Buitenman <rick@meritos.nl>
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
 
   $copy = curl_copy_handle($ch);
-  curl_close($ch);
+  $ch = null;
 
   $curl_content = curl_exec($copy);
-  curl_close($copy);
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl copy handle with simple POST ***
 string(163) "array(1) {
@@ -45,4 +43,3 @@ array(3) {
   string(8) "John Doe"
 }
 "
-===DONE=== 

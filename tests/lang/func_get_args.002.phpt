@@ -5,7 +5,7 @@ func_get_args with variable number of args
 
 function foo($a)
 {
-	var_dump(func_get_args());
+    var_dump(func_get_args());
 }
 foo(1, 2, 3);
 

@@ -3,15 +3,15 @@ __construct() with no arguments.
 --CREDITS--
 Nic Rosental nicrosental@gmail.com
 # TestFest Atlanta 2009-5-14
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
-	try {
-	    $section = new DOMCDataSection();
-	} catch (TypeError $e) {
-	    echo $e->getMessage();
-	}
+    try {
+        $section = new DOMCDataSection();
+    } catch (TypeError $e) {
+        echo $e->getMessage();
+    }
 ?>
 --EXPECT--
-DOMCdataSection::__construct() expects exactly 1 parameter, 0 given
+DOMCdataSection::__construct() expects exactly 1 argument, 0 given

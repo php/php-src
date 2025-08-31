@@ -1,8 +1,8 @@
 --TEST--
 Phar object: getContent() (verify it works with compression)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.readonly=0
 --FILE--
@@ -19,7 +19,6 @@ $phar2 = new Phar($fname2);
 var_dump($phar2['a']->isCompressed());
 echo $phar2['a']->getContent() . "\n";
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -30,4 +29,3 @@ __halt_compiler();
 bool(true)
 file contents
 this works
-===DONE===

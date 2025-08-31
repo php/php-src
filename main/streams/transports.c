@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -61,9 +59,10 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 {
 	php_stream *stream = NULL;
 	php_stream_transport_factory factory = NULL;
-	const char *p, *protocol = NULL;
+	const char *p, *protocol, *orig_path = NULL;
 	size_t n = 0;
-	int failed = 0;
+	bool failed = false;
+	bool bailout = false;
 	zend_string *error_text = NULL;
 	struct timeval default_timeout = { 0, 0 };
 
@@ -77,7 +76,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	if (persistent_id) {
 		switch(php_stream_from_persistent_id(persistent_id, &stream)) {
 			case PHP_STREAM_PERSISTENT_SUCCESS:
-				/* use a 0 second timeout when checking if the socket
+				/* use a 0-second timeout when checking if the socket
 				 * has already died */
 				if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL)) {
 					return stream;
@@ -95,6 +94,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		}
 	}
 
+	orig_path = name;
 	for (p = name; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
@@ -130,50 +130,58 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	}
 
 	stream = (factory)(protocol, n,
-			(char*)name, namelen, persistent_id, options, flags, timeout,
+			name, namelen, persistent_id, options, flags, timeout,
 			context STREAMS_REL_CC);
 
 	if (stream) {
-		php_stream_context_set(stream, context);
+		zend_try {
+			php_stream_context_set(stream, context);
+			stream->orig_path = pestrdup(orig_path, persistent_id ? 1 : 0);
 
-		if ((flags & STREAM_XPORT_SERVER) == 0) {
-			/* client */
+			if ((flags & STREAM_XPORT_SERVER) == 0) {
+				/* client */
 
-			if (flags & (STREAM_XPORT_CONNECT|STREAM_XPORT_CONNECT_ASYNC)) {
-				if (-1 == php_stream_xport_connect(stream, name, namelen,
-							flags & STREAM_XPORT_CONNECT_ASYNC ? 1 : 0,
-							timeout, &error_text, error_code)) {
+				if (flags & (STREAM_XPORT_CONNECT|STREAM_XPORT_CONNECT_ASYNC)) {
+					if (-1 == php_stream_xport_connect(stream, name, namelen,
+								flags & STREAM_XPORT_CONNECT_ASYNC ? 1 : 0,
+								timeout, &error_text, error_code)) {
 
-					ERR_RETURN(error_string, error_text, "connect() failed: %s");
+						ERR_RETURN(error_string, error_text, "connect() failed: %s");
 
-					failed = 1;
-				}
-			}
-
-		} else {
-			/* server */
-			if (flags & STREAM_XPORT_BIND) {
-				if (0 != php_stream_xport_bind(stream, name, namelen, &error_text)) {
-					ERR_RETURN(error_string, error_text, "bind() failed: %s");
-					failed = 1;
-				} else if (flags & STREAM_XPORT_LISTEN) {
-					zval *zbacklog = NULL;
-					int backlog = 32;
-
-					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
-						backlog = zval_get_long(zbacklog);
-					}
-
-					if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {
-						ERR_RETURN(error_string, error_text, "listen() failed: %s");
-						failed = 1;
+						failed = true;
 					}
 				}
+
+			} else {
+				/* server */
+				if (flags & STREAM_XPORT_BIND) {
+					if (0 != php_stream_xport_bind(stream, name, namelen, &error_text)) {
+						ERR_RETURN(error_string, error_text, "bind() failed: %s");
+						failed = true;
+					} else if (flags & STREAM_XPORT_LISTEN) {
+						zval *zbacklog = NULL;
+						int backlog = 32;
+
+						if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
+							backlog = zval_get_long(zbacklog);
+						}
+
+						if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {
+							ERR_RETURN(error_string, error_text, "listen() failed: %s");
+							failed = true;
+						}
+					}
+					if (!failed) {
+						stream->flags |= PHP_STREAM_FLAG_NO_IO;
+					}
+				}
 			}
-		}
+		} zend_catch {
+			bailout = true;
+		} zend_end_try();
 	}
 
-	if (failed) {
+	if (failed || bailout) {
 		/* failure means that they don't get a stream to play with */
 		if (persistent_id) {
 			php_stream_pclose(stream);
@@ -181,6 +189,9 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 			php_stream_close(stream);
 		}
 		stream = NULL;
+		if (bailout) {
+			zend_bailout();
+		}
 	}
 
 	return stream;
@@ -359,7 +370,7 @@ PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_cr
 		return param.outputs.returncode;
 	}
 
-	php_error_docref("streams.crypto", E_WARNING, "this stream does not support SSL/crypto");
+	php_error_docref("streams.crypto", E_WARNING, "This stream does not support SSL/crypto");
 
 	return ret;
 }
@@ -379,7 +390,7 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate)
 		return param.outputs.returncode;
 	}
 
-	php_error_docref("streams.crypto", E_WARNING, "this stream does not support SSL/crypto");
+	php_error_docref("streams.crypto", E_WARNING, "This stream does not support SSL/crypto");
 
 	return ret;
 }
@@ -401,7 +412,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 	}
 
 	if (stream->readfilters.head) {
-		php_error_docref(NULL, E_WARNING, "cannot peek or fetch OOB data from a filtered stream");
+		php_error_docref(NULL, E_WARNING, "Cannot peek or fetch OOB data from a filtered stream");
 		return -1;
 	}
 
@@ -471,7 +482,7 @@ PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t b
 	oob = (flags & STREAM_OOB) == STREAM_OOB;
 
 	if ((oob || addr) && stream->writefilters.head) {
-		php_error_docref(NULL, E_WARNING, "cannot write OOB data, or data to a targeted address on a filtered stream");
+		php_error_docref(NULL, E_WARNING, "Cannot write OOB data, or data to a targeted address on a filtered stream");
 		return -1;
 	}
 

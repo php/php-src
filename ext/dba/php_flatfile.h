@@ -1,7 +1,7 @@
 #ifndef PHP_FLATFILE_H
 #define PHP_FLATFILE_H
 
-#if DBA_FLATFILE
+#ifdef DBA_FLATFILE
 
 #include "php_dba.h"
 

@@ -1,5 +1,5 @@
 --TEST--
-Bug #30578 (Output buffers flushed before calling __desctruct functions)
+Bug #30578 (Output buffers flushed before calling __destruct functions)
 --FILE--
 <?php
 

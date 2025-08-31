@@ -3,7 +3,6 @@ Test preg_quote() function : basic functionality
 --FILE--
 <?php
 /*
-* proto string preg_quote(string str [, string delim_char])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 $string_before = '/this *-has \ metacharacters^ in $';

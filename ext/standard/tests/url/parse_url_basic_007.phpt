@@ -2,20 +2,14 @@
 Test parse_url() function: Parse a load of URLs without specifying PHP_URL_PATH as the URL component
 --FILE--
 <?php
-/* Prototype  : proto mixed parse_url(string url, [int url_component])
- * Description: Parse a URL and return its components
- * Source code: ext/standard/url.c
- * Alias to functions:
- */
-
 /*
  * Parse a load of URLs without specifying PHP_URL_PATH as the URL component
  */
 include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
-	echo "--> $url   : ";
-	var_dump(parse_url($url, PHP_URL_PATH));
+    echo "--> $url   : ";
+    var_dump(parse_url($url, PHP_URL_PATH));
 }
 
 echo "Done";
@@ -111,6 +105,8 @@ echo "Done";
 -->    : string(0) ""
 --> /   : string(1) "/"
 --> /rest/Users?filter={"id":"123"}   : string(11) "/rest/Users"
+--> %:x   : string(3) "%:x"
+--> https://example.com:0/   : string(1) "/"
 --> http:///blah.com   : bool(false)
 --> http://:80   : bool(false)
 --> http://user@:80   : bool(false)

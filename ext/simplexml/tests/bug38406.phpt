@@ -1,7 +1,7 @@
 --TEST--
 Bug #38406 (crash when assigning objects to SimpleXML attributes)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -13,7 +13,12 @@ $item->otherAttribute = $item->attribute;
 var_dump($item->otherAttribute);
 
 $a = array();
-$item->$a = new stdclass;
+
+try {
+    $item->$a = new stdclass;
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
@@ -27,7 +32,6 @@ object(SimpleXMLElement)#%d (1) {
   string(9) "something"
 }
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: It is not yet possible to assign complex types to properties in %s on line %d
+Warning: Array to string conversion in %s on line %d
+It's not possible to assign a complex type to properties, stdClass given
 Done

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
+#include "gd_errors.h"
 #include "gdhelpers.h"
 
 #ifdef HAVE_LIBWEBP
@@ -56,7 +57,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 			if (filedata) {
 				gdFree(filedata);
 			}
-			zend_error(E_ERROR, "WebP decode: realloc failed");
+			gd_error("WebP decode: realloc failed");
 			return NULL;
 		}
 
@@ -67,7 +68,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	} while (n>0 && n!=EOF);
 
 	if (WebPGetInfo(filedata,size, &width, &height) == 0) {
-		zend_error(E_ERROR, "gd-webp cannot get webp info");
+		gd_error("gd-webp cannot get webp info");
 		gdFree(filedata);
 		return NULL;
 	}
@@ -79,7 +80,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	}
 	argb = WebPDecodeARGB(filedata, size, &width, &height);
 	if (!argb) {
-		zend_error(E_ERROR, "gd-webp cannot allocate temporary buffer");
+		gd_error("gd-webp cannot allocate temporary buffer");
 		gdFree(filedata);
 		gdImageDestroy(im);
 		return NULL;
@@ -100,7 +101,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	return im;
 }
 
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
+void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 {
 	uint8_t *argb;
 	int x, y;
@@ -113,12 +114,12 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
 	}
 
 	if (!gdImageTrueColor(im)) {
-		zend_error(E_ERROR, "Paletter image not supported by webp");
+		gd_error("Palette image not supported by webp");
 		return;
 	}
 
-	if (quantization == -1) {
-		quantization = 80;
+	if (quality == -1) {
+		quality = 80;
 	}
 
 	if (overflow2(gdImageSX(im), 4)) {
@@ -151,9 +152,15 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
 			*(p++) = a;
 		}
 	}
-	out_size = WebPEncodeRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, quantization, &out);
+
+	if (quality >= gdWebpLossless) {
+		out_size = WebPEncodeLosslessRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, &out);
+	} else {
+		out_size = WebPEncodeRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, quality, &out);
+	}
+
 	if (out_size == 0) {
-		zend_error(E_ERROR, "gd-webp encoding failed");
+		gd_error("gd-webp encoding failed");
 		goto freeargb;
 	}
 	gdPutBuf(out, out_size, outfile);
@@ -163,10 +170,10 @@ freeargb:
 	gdFree(argb);
 }
 
-void gdImageWebpEx (gdImagePtr im, FILE * outFile, int quantization)
+void gdImageWebpEx (gdImagePtr im, FILE * outFile, int quality)
 {
 	gdIOCtx *out = gdNewFileCtx(outFile);
-	gdImageWebpCtx(im, out, quantization);
+	gdImageWebpCtx(im, out, quality);
 	out->gd_free(out);
 }
 
@@ -188,11 +195,11 @@ void * gdImageWebpPtr (gdImagePtr im, int *size)
 	return rv;
 }
 
-void * gdImageWebpPtrEx (gdImagePtr im, int *size, int quantization)
+void * gdImageWebpPtrEx (gdImagePtr im, int *size, int quality)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImageWebpCtx(im, out, quantization);
+	gdImageWebpCtx(im, out, quality);
 	rv = gdDPExtractData(out, size);
 	out->gd_free(out);
 	return rv;

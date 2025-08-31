@@ -62,44 +62,44 @@ print "\nDone\n";
 
 ?>
 --EXPECTF--
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 
-Notice: Uninitialized string offset: %s in %s on line 6
+Warning: Uninitialized string offset %d in %s on line %d
 
-Notice: Uninitialized string offset: 0 in %s on line %d
+Warning: Uninitialized string offset 0 in %s on line %d
 
-Notice: Uninitialized string offset: 0 in %s on line %d
+Warning: Uninitialized string offset 0 in %s on line %d
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 
-Notice: Uninitialized string offset: %i in %s on line %d
+Warning: Uninitialized string offset %i in %s on line %d
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 
-Notice: Uninitialized string offset: %i in %s on line %d
+Warning: Uninitialized string offset %i in %s on line %d
 
-Notice: Uninitialized string offset: 0 in %s on line %d
+Warning: Uninitialized string offset 0 in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line %d
+Warning: Uninitialized string offset 4 in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line %d
+Warning: Uninitialized string offset 4 in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line %d
+Warning: Uninitialized string offset 4 in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line %d
+Warning: Uninitialized string offset 4 in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line %d
+Warning: Uninitialized string offset 4 in %s on line %d
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 
-Notice: Uninitialized string offset: 12 in %s on line %d
+Warning: Uninitialized string offset 12 in %s on line %d
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 
-Notice: Uninitialized string offset: 12 in %s on line %d
+Warning: Uninitialized string offset 12 in %s on line %d
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 b
 Done

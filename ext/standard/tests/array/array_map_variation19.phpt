@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - callback pass semantics
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_map() with a pass-by-value callback forced to behave as a pass-by-reference function.
  */

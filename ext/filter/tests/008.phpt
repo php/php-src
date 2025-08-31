@@ -1,17 +1,16 @@
 --TEST--
 filter_list()
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 
 var_dump(filter_list());
-var_dump(filter_list(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--
-array(22) {
+--EXPECT--
+array(21) {
   [0]=>
   string(3) "int"
   [1]=>
@@ -51,13 +50,8 @@ array(22) {
   [18]=>
   string(12) "number_float"
   [19]=>
-  string(12) "magic_quotes"
-  [20]=>
   string(11) "add_slashes"
-  [21]=>
+  [20]=>
   string(8) "callback"
 }
-
-Warning: filter_list() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
 Done

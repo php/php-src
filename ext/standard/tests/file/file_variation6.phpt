@@ -3,19 +3,26 @@ file() with a range of integer flag values
 --FILE--
 <?php
 
-$filepath = __FILE__ . ".tmp";
+$filepath = __DIR__ . '/file_variation_6.tmp';
 $fd = fopen($filepath, "w+");
 fwrite($fd, "Line 1\nLine 2\nLine 3");
 fclose($fd);
 
 for ($flags = 0; $flags <= 32; $flags++) {
-	var_dump(file($filepath, $flags));
+    try {
+        var_dump(file($filepath, $flags));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
-
-unlink($filepath);
 
 ?>
---EXPECTF--
+--CLEAN--
+<?php
+$filepath = __DIR__ . '/file_variation_6.tmp';
+unlink($filepath);
+?>
+--EXPECT--
 array(3) {
   [0]=>
   string(7) "Line 1
@@ -88,6 +95,14 @@ array(3) {
   [2]=>
   string(6) "Line 3"
 }
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
 array(3) {
   [0]=>
   string(7) "Line 1
@@ -160,102 +175,12 @@ array(3) {
   [2]=>
   string(6) "Line 3"
 }
-array(3) {
-  [0]=>
-  string(7) "Line 1
-"
-  [1]=>
-  string(7) "Line 2
-"
-  [2]=>
-  string(6) "Line 3"
-}
-array(3) {
-  [0]=>
-  string(7) "Line 1
-"
-  [1]=>
-  string(7) "Line 2
-"
-  [2]=>
-  string(6) "Line 3"
-}
-array(3) {
-  [0]=>
-  string(6) "Line 1"
-  [1]=>
-  string(6) "Line 2"
-  [2]=>
-  string(6) "Line 3"
-}
-array(3) {
-  [0]=>
-  string(6) "Line 1"
-  [1]=>
-  string(6) "Line 2"
-  [2]=>
-  string(6) "Line 3"
-}
-array(3) {
-  [0]=>
-  string(7) "Line 1
-"
-  [1]=>
-  string(7) "Line 2
-"
-  [2]=>
-  string(6) "Line 3"
-}
-array(3) {
-  [0]=>
-  string(7) "Line 1
-"
-  [1]=>
-  string(7) "Line 2
-"
-  [2]=>
-  string(6) "Line 3"
-}
-array(3) {
-  [0]=>
-  string(6) "Line 1"
-  [1]=>
-  string(6) "Line 2"
-  [2]=>
-  string(6) "Line 3"
-}
-array(3) {
-  [0]=>
-  string(6) "Line 1"
-  [1]=>
-  string(6) "Line 2"
-  [2]=>
-  string(6) "Line 3"
-}
-
-Warning: file(): '24' flag is not supported in %s on line %d
-bool(false)
-
-Warning: file(): '25' flag is not supported in %s on line %d
-bool(false)
-
-Warning: file(): '26' flag is not supported in %s on line %d
-bool(false)
-
-Warning: file(): '27' flag is not supported in %s on line %d
-bool(false)
-
-Warning: file(): '28' flag is not supported in %s on line %d
-bool(false)
-
-Warning: file(): '29' flag is not supported in %s on line %d
-bool(false)
-
-Warning: file(): '30' flag is not supported in %s on line %d
-bool(false)
-
-Warning: file(): '31' flag is not supported in %s on line %d
-bool(false)
-
-Warning: file(): '32' flag is not supported in %s on line %d
-bool(false)
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value

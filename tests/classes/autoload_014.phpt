@@ -8,7 +8,7 @@ spl_autoload_register(function ($name) {
 });
 
 try {
-  new ReflectionMethod("UndefC::test");
+  new ReflectionMethod("UndefC", "test");
 }
 catch (ReflectionException $e) {
   echo $e->getMessage();
@@ -16,4 +16,4 @@ catch (ReflectionException $e) {
 ?>
 --EXPECT--
 In autoload: string(6) "UndefC"
-Class UndefC does not exist
+Class "UndefC" does not exist

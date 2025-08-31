@@ -5,7 +5,7 @@ Reflection Bug #31651 (ReflectionClass::getDefaultProperties segfaults with arra
 
 class Test
 {
-	public $a = array('a' => 1);
+    public $a = array('a' => 1);
 }
 
 $ref = new ReflectionClass('Test');

@@ -18,13 +18,13 @@ $junk0 = $base . DIRECTORY_SEPARATOR . "Серёжка2";
 mkdir($base);
 mkdir($dir0);
 mkdir($dir1);
-`mklink /J $junk0 $dir0`;
+shell_exec("mklink /J $junk0 $dir0");
 
 var_dump(
-	readlink($dir0),
-	readlink($dir1),
-	readlink($junk0),
-	strlen(readlink($dir0)) === strlen(readlink($junk0))
+    readlink($dir0),
+    readlink($dir1),
+    readlink($junk0),
+    strlen(readlink($dir0)) === strlen(readlink($junk0))
 );
 
 ?>

@@ -1,15 +1,17 @@
 --TEST--
 FFI 011: cast()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-$a = FFI::new("uint8_t[4]");
+$ffi = FFI::cdef();
+
+$a = $ffi->new("uint8_t[4]");
 $a[0] = 255;
 $a[1] = 255;
-var_dump(FFI::cast("uint16_t[2]", $a));
+var_dump($ffi->cast("uint16_t[2]", $a));
 ?>
 --EXPECTF--
 object(FFI\CData:uint16_t[2])#%d (2) {

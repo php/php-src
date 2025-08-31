@@ -4,15 +4,15 @@ ZE2 You cannot overload a static method with a non static method
 <?php
 
 class pass {
-	static function show() {
-		echo "Call to function pass::show()\n";
-	}
+    static function show() {
+        echo "Call to function pass::show()\n";
+    }
 }
 
 class fail extends pass {
-	function show() {
-		echo "Call to function fail::show()\n";
-	}
+    function show() {
+        echo "Call to function fail::show()\n";
+    }
 }
 
 pass::show();

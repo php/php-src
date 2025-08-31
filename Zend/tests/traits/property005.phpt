@@ -21,7 +21,7 @@ echo "POST-CLASS-GUARD\n";
 // now we do the test for a fatal error
 
 class TraitsTest {
-	use THello1;
+    use THello1;
     public $hello;
 }
 

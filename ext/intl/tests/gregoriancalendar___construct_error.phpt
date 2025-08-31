@@ -1,40 +1,56 @@
 --TEST--
 IntlGregorianCalendar::__construct(): bad arguments
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
-function print_exception($e) {
-	echo "\nException: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
-}
-
-var_dump(intlgregcal_create_instance(1,2,3,4,5,6,7));
-var_dump(intlgregcal_create_instance(1,2,3,4,5,6,7,8));
-var_dump(intlgregcal_create_instance(1,2,3,4));
 try {
-	var_dump(new IntlGregorianCalendar(1,2,NULL,4));
-} catch (IntlException $e) {
-	print_exception($e);
+    var_dump(intlgregcal_create_instance(1,2,3,4,5,6,7));
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
 }
 try {
-	var_dump(new IntlGregorianCalendar(1,2,3,4,NULL,array()));
+    var_dump(intlgregcal_create_instance(1,2,3,4,5,6,7,8));
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(intlgregcal_create_instance(1,2,3,4));
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(new IntlGregorianCalendar(1,2,NULL,4));
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(new IntlGregorianCalendar(1,2,3,4,5,array()));
 } catch (TypeError $e) {
-	print_exception($e);
+    echo $e->getMessage(), "\n";
 }
+
+$cal = new IntlGregorianCalendar();
+try {
+    $cal->__construct();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
 --EXPECTF--
-Warning: intlgregcal_create_instance(): intlgregcal_create_instance: too many arguments in %s on line %d
-NULL
+Deprecated: Function intlgregcal_create_instance() is deprecated since 8.4, use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
+Too many arguments
 
-Warning: intlgregcal_create_instance(): intlgregcal_create_instance: too many arguments in %s on line %d
-NULL
+Deprecated: Function intlgregcal_create_instance() is deprecated since 8.4, use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
+Too many arguments
 
-Warning: intlgregcal_create_instance(): intlgregcal_create_instance: no variant with 4 arguments (excluding trailing NULLs) in %s on line %d
-NULL
+Deprecated: Function intlgregcal_create_instance() is deprecated since 8.4, use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
+No variant with 4 arguments (excluding trailing NULLs)
 
-Exception: IntlGregorianCalendar::__construct(): intlgregcal_create_instance: no variant with 4 arguments (excluding trailing NULLs) in %s on line %d
+Deprecated: Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
+No variant with 4 arguments (excluding trailing NULLs)
 
-Exception: IntlGregorianCalendar::__construct() expects parameter 6 to be int, array given in %s on line %d
+Deprecated: Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
+IntlGregorianCalendar::__construct(): Argument #6 ($second) must be of type int, array given
+IntlGregorianCalendar object is already constructed

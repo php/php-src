@@ -1,9 +1,7 @@
 --TEST--
 Bug #61221 - imagegammacorrect function loses alpha channel
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $imagew = 50;
@@ -17,7 +15,6 @@ imageline($img, 0, $imageh / 2, $imagew - 1, $imageh / 2, $redsolid);
 imagegammacorrect($img, 1, 1);
 $color = imagecolorat($img, 0, 0);
 var_dump($color === $blacktransparent);
-imagedestroy($img);
 ?>
 --EXPECT--
 bool(true)

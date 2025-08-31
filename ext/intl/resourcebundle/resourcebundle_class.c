@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -30,6 +28,7 @@
 #include "resourcebundle/resourcebundle.h"
 #include "resourcebundle/resourcebundle_iterator.h"
 #include "resourcebundle/resourcebundle_class.h"
+#include "resourcebundle/resourcebundle_arginfo.h"
 
 zend_class_entry *ResourceBundle_ce_ptr = NULL;
 
@@ -68,45 +67,44 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 	rb->me = NULL;
 	rb->child = NULL;
 
-	rb->zend.handlers = &ResourceBundle_object_handlers;
-
 	return &rb->zend;
 }
 /* }}} */
 
 /* {{{ ResourceBundle_ctor */
-static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static zend_result resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
-	const char *bundlename;
+	char           *bundlename;
 	size_t		bundlename_len = 0;
-	const char *locale;
+	char           *locale;
 	size_t		locale_len = 0;
-	zend_bool	fallback = 1;
-	int         zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
+	bool	fallback = true;
 
 	zval                  *object = return_value;
 	ResourceBundle_object *rb = Z_INTL_RESOURCEBUNDLE_P( object );
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "s!s!|b",
-		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
-	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_ctor: unable to parse input parameters", 0 );
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING_OR_NULL(locale, locale_len)
+		Z_PARAM_STRING_OR_NULL(bundlename, bundlename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(fallback)
+	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
+
+	if (rb->me) {
+		zend_throw_error(NULL, "ResourceBundle object is already constructed");
 		return FAILURE;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 
 	if (locale == NULL) {
-		locale = intl_locale_get_default();
+		locale = (char *)intl_locale_get_default();
 	}
 
 	if (bundlename_len >= MAXPATHLEN) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"Bundle name too long", 0 );
-		zval_ptr_dtor(return_value);
-		ZVAL_NULL(return_value);
+		zend_argument_value_error(2, "is too long");
 		return FAILURE;
 	}
 
@@ -116,18 +114,18 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 		rb->me = ures_openDirect(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
 	}
 
-	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle");
+	INTL_CTOR_CHECK_STATUS(rb, "Cannot load libICU resource bundle");
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING ||
 			INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
 		char *pbuf;
 		intl_errors_set_code(NULL, INTL_DATA_ERROR_CODE(rb));
-		spprintf(&pbuf, 0, "resourcebundle_ctor: Cannot load libICU resource "
+		spprintf(&pbuf, 0, "Cannot load libICU resource "
 				"'%s' without fallback from %s to %s",
 				bundlename ? bundlename : "(default data)", locale,
 				ures_getLocaleByType(
 					rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)));
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf, 1);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf);
 		efree(pbuf);
 		return FAILURE;
 	}
@@ -136,39 +134,28 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constr
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle__construct */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle___construct, 0, 0, 2 )
-	ZEND_ARG_INFO( 0, locale )
-	ZEND_ARG_INFO( 0, bundlename )
-	ZEND_ARG_INFO( 0, fallback )
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ proto ResourceBundle::__construct( string $locale [, string $bundlename [, bool $fallback = true ]] )
- * ResourceBundle object constructor
- */
+/* {{{ ResourceBundle object constructor */
 PHP_METHOD( ResourceBundle, __construct )
 {
-	zend_error_handling error_handling;
+	const bool old_use_exception = INTL_G(use_exceptions);
+	const zend_long old_error_level = INTL_G(error_level);
+	INTL_G(use_exceptions) = true;
+	INTL_G(error_level) = 0;
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = ZEND_THIS;
-	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
-		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
-		}
+	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+		ZEND_ASSERT(EG(exception));
 	}
-	zend_restore_error_handling(&error_handling);
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 /* }}} */
 
-/* {{{ proto ResourceBundle ResourceBundle::create( string $locale [, string $bundlename [, bool $fallback = true ]] )
-proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename [, bool $fallback = true ]] )
-*/
+/* {{{ */
 PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
-	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+	if (resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -176,108 +163,146 @@ PHP_FUNCTION( resourcebundle_create )
 /* }}} */
 
 /* {{{ resourcebundle_array_fetch */
-static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_value, int fallback)
+static zval *resource_bundle_array_fetch(
+	zend_object *object, zend_string *offset_str, zend_long offset_int,
+	zval *return_value, bool fallback, uint32_t offset_arg_num)
 {
-	int32_t     meindex = 0;
-	char *      mekey = NULL;
-    zend_bool    is_numeric = 0;
-	char         *pbuf;
+	int32_t index = 0;
+	char *key = NULL;
+	bool is_numeric = offset_str == NULL;
+	char *pbuf;
 	ResourceBundle_object *rb;
 
-	intl_error_reset( NULL );
-	RESOURCEBUNDLE_METHOD_FETCH_OBJECT;
+	rb = php_intl_resourcebundle_fetch_object(object);
+	intl_error_reset(NULL);
+	intl_error_reset(INTL_DATA_ERROR_P(rb));
 
-	if(Z_TYPE_P(offset) == IS_LONG) {
-		is_numeric = 1;
-		meindex = (int32_t)Z_LVAL_P(offset);
-		rb->child = ures_getByIndex( rb->me, meindex, rb->child, &INTL_DATA_ERROR_CODE(rb) );
-	} else if(Z_TYPE_P(offset) == IS_STRING) {
-		mekey = Z_STRVAL_P(offset);
-		rb->child = ures_getByKey(rb->me, mekey, rb->child, &INTL_DATA_ERROR_CODE(rb) );
+	if (offset_str) {
+		if (UNEXPECTED(ZSTR_LEN(offset_str) == 0)) {
+			if (offset_arg_num) {
+				zend_argument_must_not_be_empty_error(offset_arg_num);
+			} else {
+				zend_value_error("Offset must not be empty");
+			}
+			return NULL;
+		}
+		key = ZSTR_VAL(offset_str);
+		rb->child = ures_getByKey(rb->me, key, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else {
-		intl_errors_set(INTL_DATA_ERROR_P(rb), U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_get: index should be integer or string", 0);
-		RETURN_NULL();
+		if (UNEXPECTED(offset_int < (zend_long)INT32_MIN || offset_int > (zend_long)INT32_MAX)) {
+			if (offset_arg_num) {
+				zend_argument_value_error(offset_arg_num, "index must be between %d and %d", INT32_MIN, INT32_MAX);
+			} else {
+				zend_value_error("Index must be between %d and %d", INT32_MIN, INT32_MAX);
+			}
+			return NULL;
+		}
+		index = (int32_t)offset_int;
+		rb->child = ures_getByIndex(rb->me, index, rb->child, &INTL_DATA_ERROR_CODE(rb));
 	}
 
 	intl_error_set_code( NULL, INTL_DATA_ERROR_CODE(rb) );
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(rb))) {
 		if (is_numeric) {
-			spprintf( &pbuf, 0, "Cannot load resource element %d", meindex );
+			spprintf( &pbuf, 0, "Cannot load resource element %d", index );
 		} else {
-			spprintf( &pbuf, 0, "Cannot load resource element '%s'", mekey );
+			spprintf( &pbuf, 0, "Cannot load resource element '%s'", key );
 		}
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf, 1 );
+		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf);
 		efree(pbuf);
-		RETURN_NULL();
+		RETVAL_NULL();
+		return return_value;
 	}
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING || INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
 		UErrorCode icuerror;
 		const char * locale = ures_getLocaleByType( rb->me, ULOC_ACTUAL_LOCALE, &icuerror );
 		if (is_numeric) {
-			spprintf( &pbuf, 0, "Cannot load element %d without fallback from to %s", meindex, locale );
+			spprintf(&pbuf, 0, "Cannot load element %d without fallback from to %s", index, locale);
 		} else {
-			spprintf( &pbuf, 0, "Cannot load element '%s' without fallback from to %s", mekey, locale );
+			spprintf(&pbuf, 0, "Cannot load element '%s' without fallback from to %s", key, locale);
 		}
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf, 1 );
+		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf);
 		efree(pbuf);
-		RETURN_NULL();
+		RETVAL_NULL();
+		return return_value;
 	}
 
 	resourcebundle_extract_value( return_value, rb );
+	return return_value;
 }
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-zval *resourcebundle_array_get(zval *object, zval *offset, int type, zval *rv)
+zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
 {
-	if(offset == NULL) {
-		php_error( E_ERROR, "Cannot apply [] to ResourceBundle object" );
+	if (offset == NULL) {
+		zend_throw_error(NULL, "Cannot apply [] to ResourceBundle object");
+		return NULL;
 	}
-	ZVAL_NULL(rv);
-	resourcebundle_array_fetch(object, offset, rv, 1);
-	return rv;
+
+	ZVAL_DEREF(offset);
+	if (Z_TYPE_P(offset) == IS_LONG) {
+		return resource_bundle_array_fetch(object, /* offset_str */ NULL, Z_LVAL_P(offset), rv, /* fallback */ true, /* arg_num */ 0);
+	} else if (Z_TYPE_P(offset) == IS_STRING) {
+		return resource_bundle_array_fetch(object, Z_STR_P(offset), /* offset_int */ 0, rv, /* fallback */ true, /* arg_num */ 0);
+	} else {
+		zend_illegal_container_offset(object->ce->name, offset, type);
+		return NULL;
+	}
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle_get */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, index )
-	ZEND_ARG_INFO( 0, fallback )
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ proto mixed ResourceBundle::get( int|string $resindex [, bool $fallback = true ] )
- * proto mixed resourcebundle_get( ResourceBundle $rb, int|string $resindex [, bool $fallback = true ] )
- * Get resource identified by numerical index or key name.
- */
+/* {{{ Get resource identified by numerical index or key name. */
 PHP_FUNCTION( resourcebundle_get )
 {
-	zend_bool   fallback = 1;
-	zval *		offset;
-	zval *      object;
+	bool fallback = true;
+	zend_object *resource_bundle = NULL;
+	zend_string *offset_str = NULL;
+	zend_long offset_long = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz|b",	&object, ResourceBundle_ce_ptr, &offset, &fallback ) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_get: unable to parse input params", 0);
-		RETURN_FALSE;
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJ_OF_CLASS(resource_bundle, ResourceBundle_ce_ptr)
+		Z_PARAM_STR_OR_LONG(offset_str, offset_long)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(fallback)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *retval = resource_bundle_array_fetch(resource_bundle, offset_str, offset_long, return_value, fallback, /* arg_num */ 2);
+	if (!retval) {
+		RETURN_THROWS();
 	}
+}
+/* }}} */
 
-	resourcebundle_array_fetch(object, offset, return_value, fallback);
+PHP_METHOD(ResourceBundle , get)
+{
+	bool fallback = true;
+	zend_string *offset_str = NULL;
+	zend_long offset_long = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR_OR_LONG(offset_str, offset_long)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(fallback)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *retval = resource_bundle_array_fetch(Z_OBJ_P(ZEND_THIS), offset_str, offset_long, return_value, fallback, /* arg_num */ 1);
+	if (!retval) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
 /* {{{ resourcebundle_array_count */
-int resourcebundle_array_count(zval *object, zend_long *count)
+static zend_result resourcebundle_array_count(zend_object *object, zend_long *count)
 {
-	ResourceBundle_object *rb;
-	RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK;
+	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
 
 	if (rb->me == NULL) {
 		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,
-				"Found unconstructed ResourceBundle", 0);
-		return 0;
+				"Found unconstructed ResourceBundle");
+		return FAILURE;
 	}
 
 	*count = ures_getSize( rb->me );
@@ -286,24 +311,14 @@ int resourcebundle_array_count(zval *object, zend_long *count)
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle_count */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_count, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ proto int ResourceBundle::count()
- * proto int resourcebundle_count( ResourceBundle $bundle )
- * Get resources count
- */
+/* {{{ Get resources count */
 PHP_FUNCTION( resourcebundle_count )
 {
 	int32_t                len;
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
 
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, ResourceBundle_ce_ptr ) == FAILURE ) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_count: unable to parse input params", 0);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RESOURCEBUNDLE_METHOD_FETCH_OBJECT;
@@ -312,16 +327,7 @@ PHP_FUNCTION( resourcebundle_count )
 	RETURN_LONG( len );
 }
 
-/* {{{ arginfo_resourcebundle_getlocales */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_getlocales, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, bundlename )
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ proto array ResourceBundle::getLocales( string $bundlename )
- * proto array resourcebundle_locales( string $bundlename )
- * Get available locales from ResourceBundle name
- */
+/* {{{ Get available locales from ResourceBundle name */
 PHP_FUNCTION( resourcebundle_locales )
 {
 	char * bundlename;
@@ -333,16 +339,13 @@ PHP_FUNCTION( resourcebundle_locales )
 
 	intl_errors_reset( NULL );
 
-	if( zend_parse_parameters(ZEND_NUM_ARGS(), "s", &bundlename, &bundlename_len ) == FAILURE )
-	{
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_locales: unable to parse input params", 0);
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(bundlename, bundlename_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (bundlename_len >= MAXPATHLEN) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"resourcebundle_locales: bundle name too long", 0 );
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
 	}
 
 	if(bundlename_len == 0) {
@@ -364,15 +367,7 @@ PHP_FUNCTION( resourcebundle_locales )
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle_get_error_code */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_code, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ proto string ResourceBundle::getErrorCode( )
- * proto string resourcebundle_get_error_code( ResourceBundle $bundle )
- * Get text description for ResourceBundle's last error code.
- */
+/* {{{ Get text description for ResourceBundle's last error code. */
 PHP_FUNCTION( resourcebundle_get_error_code )
 {
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
@@ -380,9 +375,7 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, ResourceBundle_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_get_error_code: unable to parse input params", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	rb = Z_INTL_RESOURCEBUNDLE_P( object );
@@ -391,15 +384,7 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle_get_error_message */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_message, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ proto string ResourceBundle::getErrorMessage( )
- * proto string resourcebundle_get_error_message( ResourceBundle $bundle )
- * Get text description for ResourceBundle's last error.
- */
+/* {{{ Get text description for ResourceBundle's last error. */
 PHP_FUNCTION( resourcebundle_get_error_message )
 {
 	zend_string* message = NULL;
@@ -408,9 +393,7 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, ResourceBundle_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_get_error_message: unable to parse input params", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	rb = Z_INTL_RESOURCEBUNDLE_P( object );
@@ -419,34 +402,21 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 }
 /* }}} */
 
-/* {{{ ResourceBundle_class_functions
- * Every 'ResourceBundle' class method has an entry in this table
- */
-static const zend_function_entry ResourceBundle_class_functions[] = {
-	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_resourcebundle_get, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( count, ZEND_FN(resourcebundle_count), arginfo_resourcebundle_count, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( getLocales, ZEND_FN(resourcebundle_locales), arginfo_resourcebundle_getlocales, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )
-	ZEND_NAMED_ME( getErrorCode, ZEND_FN(resourcebundle_get_error_code), arginfo_resourcebundle_get_error_code, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( getErrorMessage, ZEND_FN(resourcebundle_get_error_message), arginfo_resourcebundle_get_error_message, ZEND_ACC_PUBLIC )
-	PHP_FE_END
-};
-/* }}} */
+PHP_METHOD(ResourceBundle, getIterator) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
 
 /* {{{ resourcebundle_register_class
  * Initialize 'ResourceBundle' class
  */
 void resourcebundle_register_class( void )
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY( ce, "ResourceBundle", ResourceBundle_class_functions );
-
-	ce.create_object = ResourceBundle_object_create;
-	ce.get_iterator = resourcebundle_get_iterator;
-
-	ResourceBundle_ce_ptr = zend_register_internal_class( &ce );
+	ResourceBundle_ce_ptr = register_class_ResourceBundle(zend_ce_aggregate, zend_ce_countable);
+	ResourceBundle_ce_ptr->create_object = ResourceBundle_object_create;
+	ResourceBundle_ce_ptr->default_object_handlers = &ResourceBundle_object_handlers;
+	ResourceBundle_ce_ptr->get_iterator = resourcebundle_get_iterator;
 
 	ResourceBundle_object_handlers = std_object_handlers;
 	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
@@ -454,7 +424,5 @@ void resourcebundle_register_class( void )
 	ResourceBundle_object_handlers.free_obj = ResourceBundle_object_free;
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
-
-	zend_class_implements(ResourceBundle_ce_ptr, 2, zend_ce_traversable, zend_ce_countable);
 }
 /* }}} */

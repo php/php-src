@@ -4,18 +4,26 @@ defining INI options with -d
 <?php
 include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 ?>
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n -d max_execution_time=111 -r 'var_dump(ini_get("max_execution_time"));'`);
-var_dump(`$php -n -d max_execution_time=500 -r 'var_dump(ini_get("max_execution_time"));'`);
-var_dump(`$php -n -d max_execution_time=500 -d max_execution_time=555 -r 'var_dump(ini_get("max_execution_time"));'`);
-var_dump(`$php -n -d upload_tmp_dir=/test/path -d max_execution_time=555 -r 'var_dump(ini_get("max_execution_time")); var_dump(ini_get("upload_tmp_dir"));'`);
+var_dump(shell_exec(<<<SHELL
+$php -n -d max_execution_time=111 -r 'var_dump(ini_get("max_execution_time"));'
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -d max_execution_time=500 -r 'var_dump(ini_get("max_execution_time"));'
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -d max_execution_time=500 -d max_execution_time=555 -r 'var_dump(ini_get("max_execution_time"));'
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -d upload_tmp_dir=/test/path -d max_execution_time=555 -r 'var_dump(ini_get("max_execution_time")); var_dump(ini_get("upload_tmp_dir"));'
+SHELL));
 
 echo "Done\n";
 ?>

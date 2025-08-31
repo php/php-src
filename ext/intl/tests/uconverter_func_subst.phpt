@@ -1,7 +1,7 @@
 --TEST--
-Basic UConverter::convert() w/ Subsitution
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+Basic UConverter::convert() w/ Substitution
+--EXTENSIONS--
+intl
 --INI--
 intl.use_exceptions=false
 --FILE--
@@ -21,10 +21,11 @@ foreach(array('?','','??') as $subst) {
     var_dump($ret);
   }
 }
+?>
 --EXPECT--
 string(23) "This is an ascii string"
 string(12) "Snowman: (?)"
-Error: transcode() returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
-Error: transcode() returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
-Error: transcode() returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
-Error: transcode() returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
+Error: UConverter::transcode(): returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
+Error: UConverter::transcode(): returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
+Error: UConverter::transcode(): returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR
+Error: UConverter::transcode(): returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR

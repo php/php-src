@@ -3,13 +3,13 @@ Class public constant visibility
 --FILE--
 <?php
 class A {
-	public const publicConst = 'publicConst';
-	static function staticConstDump() {
-		var_dump(self::publicConst);
-	}
-	function constDump() {
-		var_dump(self::publicConst);
-	}
+    public const publicConst = 'publicConst';
+    static function staticConstDump() {
+        var_dump(self::publicConst);
+    }
+    function constDump() {
+        var_dump(self::publicConst);
+    }
 }
 
 var_dump(A::publicConst);

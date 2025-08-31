@@ -12,7 +12,7 @@ $cfg = <<<EOT
 error_log = {{FILE:LOG}}
 [unconfined]
 listen = {{ADDR}}
-pm = static 
+pm = static
 pm.max_children = 1
 pm.status_path = /status
 EOT;

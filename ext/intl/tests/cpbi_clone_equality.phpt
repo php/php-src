@@ -1,13 +1,11 @@
 --TEST--
 IntlCodePointBreakIterator: clone and equality
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=pt_PT
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
 
 $text = 'ตัวอย่างข้อความ';
 $text2 = 'foo';
@@ -25,9 +23,7 @@ $it_clone->setText($text2);
 var_dump($it == $it_clone);
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(false)
 bool(true)
-==DONE==

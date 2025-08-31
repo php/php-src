@@ -3,8 +3,8 @@ Execution ordering with comparison operators.
 --FILE--
 <?php
 function f($x) {
-	echo "f($x) ";
-	return $x;
+    echo "f($x) ";
+    return $x;
 }
 
 echo "Function call args:\n";

@@ -1,17 +1,13 @@
 --TEST--
 Test function feof() by calling it with its expected arguments
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 // note that gzeof is an alias to gzeof. parameter checking tests will be
 // the same as gzeof
 
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 
 echo "-- test 1 --\n";
 $h = gzopen($f, 'r');
@@ -36,7 +32,6 @@ gzclose($h);
 
 
 ?>
-===DONE===
 --EXPECT--
 -- test 1 --
 bool(false)
@@ -55,4 +50,3 @@ reading 250 characters. eof should be true
 bool(true)
 reading 20 characters. eof should be true still
 bool(true)
-===DONE===

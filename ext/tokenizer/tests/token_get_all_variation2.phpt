@@ -1,14 +1,9 @@
 --TEST--
 Test token_get_all() function : usage variations - with different arithmetic operators
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Passing 'source' argument with different arithmetic operators to test them for token
  * Arithmetic operators: +, -, *, /, % are not listed as specific operator tokens,

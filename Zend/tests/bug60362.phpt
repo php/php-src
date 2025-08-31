@@ -59,6 +59,7 @@ if (empty($arr['exists'][1][0])) {
     var_dump($arr['exists'][1][0]);
 }
 echo "DONE";
+?>
 --EXPECT--
 sub-key 'non_existent' is not set.
 sub-key 1 is set: string(1) "o"

@@ -12,31 +12,35 @@ const STRING_ADD_VAL = "this" . " is a test";
 const NULL_VAL = null;
 
 function int_val(int $a = INT_VAL): int {
-	return $a;
+    return $a;
 }
 
 function float_val(float $a = FLOAT_VAL): float {
-	return $a;
+    return $a;
 }
 
 function string_val(string $a = STRING_VAL): string {
-	return $a;
+    return $a;
 }
 
 function int_add_val(int $a = INT_ADD_VAL): int {
-	return $a;
+    return $a;
 }
 
 function float_add_val(float $a = FLOAT_ADD_VAL): float {
-	return $a;
+    return $a;
 }
 
 function string_add_val(string $a = STRING_ADD_VAL): string {
-	return $a;
+    return $a;
 }
 
 function int_val_default_null(int $a = NULL_VAL) {
-	return $a;
+    return $a;
+}
+
+function nullable_int_val_default_null(?int $a = NULL_VAL) {
+    return $a;
 }
 
 echo "Testing int val" . PHP_EOL;
@@ -58,13 +62,27 @@ echo "Testing string add val" . PHP_EOL;
 var_dump(string_add_val());
 
 echo "Testing int with default null constant" . PHP_EOL;
-var_dump(int_val_default_null());
+try {
+    var_dump(int_val_default_null());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Testing int with null null constant" . PHP_EOL;
-var_dump(int_val_default_null(null));
+try {
+    var_dump(int_val_default_null(null));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+echo "Testing nullable int with default null constant" . PHP_EOL;
+var_dump(nullable_int_val_default_null());
+
+echo "Testing nullable int with null null constant" . PHP_EOL;
+var_dump(nullable_int_val_default_null(null));
 
 ?>
---EXPECT--
+--EXPECTF--
 Testing int val
 int(10)
 Testing float val
@@ -78,6 +96,10 @@ float(10.7)
 Testing string add val
 string(14) "this is a test"
 Testing int with default null constant
-NULL
+int_val_default_null(): Argument #1 ($a) must be of type int, null given, called in %s on line %d
 Testing int with null null constant
+int_val_default_null(): Argument #1 ($a) must be of type int, null given, called in %s on line %d
+Testing nullable int with default null constant
+NULL
+Testing nullable int with null null constant
 NULL

@@ -7,9 +7,9 @@ TestFest London May 2009
 <?php
 $h = new SplMinHeap();
 try {
-	$h->top();
+    $h->top();
 } catch (Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 ?>
 --EXPECT--

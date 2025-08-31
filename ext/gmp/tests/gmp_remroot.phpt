@@ -1,11 +1,9 @@
 --TEST--
 gmp_rootrem() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
-
-var_dump(gmp_rootrem());
 
 var_dump(gmp_rootrem(1000, 3));
 var_dump(gmp_rootrem(100, 3));
@@ -13,16 +11,27 @@ var_dump(gmp_rootrem(-100, 3));
 
 var_dump(gmp_rootrem(1000, 4));
 var_dump(gmp_rootrem(100, 4));
-var_dump(gmp_rootrem(-100, 4));
+try {
+    var_dump(gmp_rootrem(-100, 4));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(gmp_rootrem(0, 3));
-var_dump(gmp_rootrem(100, 0));
-var_dump(gmp_rootrem(100, -3));
+
+try {
+    var_dump(gmp_rootrem(100, 0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_rootrem(100, -3));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Warning: gmp_rootrem() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 array(2) {
   [0]=>
   object(GMP)#%d (1) {
@@ -83,9 +92,7 @@ array(2) {
     string(2) "19"
   }
 }
-
-Warning: gmp_rootrem(): Can't take even root of negative number in %s on line %d
-bool(false)
+gmp_rootrem(): Argument #2 ($nth) must be odd if argument #1 ($a) is negative
 array(2) {
   [0]=>
   object(GMP)#%d (1) {
@@ -98,9 +105,5 @@ array(2) {
     string(1) "0"
   }
 }
-
-Warning: gmp_rootrem(): The root must be positive in %s on line %d
-bool(false)
-
-Warning: gmp_rootrem(): The root must be positive in %s on line %d
-bool(false)
+gmp_rootrem(): Argument #2 ($nth) must be greater than or equal to 1
+gmp_rootrem(): Argument #2 ($nth) must be greater than or equal to 1

@@ -1,10 +1,16 @@
 --TEST--
 Phar::chmod zip-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
+?>
 --FILE--
 <?php
 
@@ -19,22 +25,21 @@ $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
 try {
-	var_dump($phar['a.php']->isExecutable());
-	$phar['a.php']->chmod(0777);
-	var_dump($phar['a.php']->isExecutable());
-	$phar['a.php']->chmod(0666);
-	var_dump($phar['a.php']->isExecutable());
-	echo "test dir\n";
-	var_dump($phar['test']->isExecutable());
-	$phar['test']->chmod(0777);
-	var_dump($phar['test']->isExecutable());
-	$phar['test']->chmod(0666);
-	var_dump($phar['test']->isExecutable());
+    var_dump($phar['a.php']->isExecutable());
+    $phar['a.php']->chmod(0777);
+    var_dump($phar['a.php']->isExecutable());
+    $phar['a.php']->chmod(0666);
+    var_dump($phar['a.php']->isExecutable());
+    echo "test dir\n";
+    var_dump($phar['test']->isExecutable());
+    $phar['test']->chmod(0777);
+    var_dump($phar['test']->isExecutable());
+    $phar['test']->chmod(0666);
+    var_dump($phar['test']->isExecutable());
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -42,4 +47,3 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 --EXPECTF--
 bool(false)
 Cannot modify permissions for file "a.php" in phar "%sa.phar.zip", write operations are prohibited
-===DONE===

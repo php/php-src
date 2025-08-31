@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDO::FETCH_BOUND
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip not relevant for oci driver - cannot reexecute after closing cursors without reparse');
@@ -16,16 +17,16 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
-	$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+    $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, true);
 }
 
-$db->exec('CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
-$db->exec('INSERT INTO test VALUES(0, \'String0\')');
-$db->exec('INSERT INTO test VALUES(1, \'String1\')');
-$db->exec('INSERT INTO test VALUES(2, \'String2\')');
+$db->exec('CREATE TABLE test016(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
+$db->exec("INSERT INTO test016 VALUES(0, 'String0')");
+$db->exec("INSERT INTO test016 VALUES(1, 'String1')");
+$db->exec("INSERT INTO test016 VALUES(2, 'String2')");
 
-$stmt1 = $db->prepare('SELECT COUNT(idx) FROM test');
-$stmt2 = $db->prepare('SELECT idx, txt FROM test ORDER by idx');
+$stmt1 = $db->prepare('SELECT COUNT(idx) FROM test016');
+$stmt2 = $db->prepare('SELECT idx, txt FROM test016 ORDER by idx');
 
 $stmt1->execute();
 var_dump($stmt1->fetchColumn());
@@ -42,39 +43,39 @@ $stmt2->bindColumn('txt', $txt);
 $stmt2->execute();
 
 while($stmt2->fetch(PDO::FETCH_BOUND)) {
-	var_dump(array($idx=>$txt));
+    var_dump(array($idx=>$txt));
 }
 
 echo "===ALONE===\n";
 
-$stmt3 = $db->prepare('SELECT txt FROM test WHERE idx=:inp');
+$stmt3 = $db->prepare('SELECT txt FROM test016 WHERE idx=:inp');
 $stmt3->bindParam(':inp', $idx); /* by foreign name */
 
-$stmt4 = $db->prepare('SELECT idx FROM test WHERE txt=:txt');
+$stmt4 = $db->prepare('SELECT idx FROM test016 WHERE txt=:txt');
 $stmt4->bindParam(':txt', $txt);  /* using same name */
 
 foreach($cont as $idx => $txt)
 {
-	var_dump(array($idx=>$txt));
-	var_dump($stmt3->execute());
+    var_dump(array($idx=>$txt));
+    var_dump($stmt3->execute());
 
-	if ($idx == 0) {
-		/* portability-wise, you may only bindColumn()s
-		 * after execute() has been called at least once */
-		$stmt3->bindColumn('txt', $col1);
-	}
-	var_dump($stmt3->fetch(PDO::FETCH_BOUND));
-	$stmt3->closeCursor();
+    if ($idx == 0) {
+        /* portability-wise, you may only bindColumn()s
+         * after execute() has been called at least once */
+        $stmt3->bindColumn('txt', $col1);
+    }
+    var_dump($stmt3->fetch(PDO::FETCH_BOUND));
+    $stmt3->closeCursor();
 
-	var_dump($stmt4->execute());
-	if ($idx == 0) {
-		/* portability-wise, you may only bindColumn()s
-		 * after execute() has been called at least once */
-		$stmt4->bindColumn('idx', $col2);
-	}
-	var_dump($stmt4->fetch(PDO::FETCH_BOUND));
-	$stmt4->closeCursor();
-	var_dump(array($col2=>$col1));
+    var_dump($stmt4->execute());
+    if ($idx == 0) {
+        /* portability-wise, you may only bindColumn()s
+         * after execute() has been called at least once */
+        $stmt4->bindColumn('idx', $col2);
+    }
+    var_dump($stmt4->fetch(PDO::FETCH_BOUND));
+    $stmt4->closeCursor();
+    var_dump(array($col2=>$col1));
 }
 
 echo "===REBIND/SAME===\n";
@@ -83,15 +84,15 @@ $stmt4->bindColumn('idx', $col1);
 
 foreach($cont as $idx => $txt)
 {
-	var_dump(array($idx=>$txt));
-	var_dump($stmt3->execute());
-	var_dump($stmt3->fetch(PDO::FETCH_BOUND));
-	$stmt3->closeCursor();
-	var_dump($col1);
-	var_dump($stmt4->execute());
-	var_dump($stmt4->fetch(PDO::FETCH_BOUND));
-	$stmt4->closeCursor();
-	var_dump($col1);
+    var_dump(array($idx=>$txt));
+    var_dump($stmt3->execute());
+    var_dump($stmt3->fetch(PDO::FETCH_BOUND));
+    $stmt3->closeCursor();
+    var_dump($col1);
+    var_dump($stmt4->execute());
+    var_dump($stmt4->fetch(PDO::FETCH_BOUND));
+    $stmt4->closeCursor();
+    var_dump($col1);
 }
 
 echo "===REBIND/CONFLICT===\n";
@@ -102,10 +103,16 @@ $stmt2->execute();
 
 while($stmt2->fetch(PDO::FETCH_BOUND))
 {
-	var_dump($col1);
+    var_dump($col1);
 }
 
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test016");
 ?>
 --EXPECT--
 string(1) "3"

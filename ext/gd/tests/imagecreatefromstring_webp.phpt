@@ -1,8 +1,9 @@
 --TEST--
 imagecreatefromstring() - WEBP format
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip ext/gd required');
 if (!(imagetypes() & IMG_WEBP)) die('skip WEBP support required');
 ?>
 --FILE--
@@ -13,8 +14,6 @@ var_dump(imagesx($im));
 var_dump(imagesy($im));
 
 ?>
-===DONE===
 --EXPECT--
 int(10)
 int(10)
-===DONE===

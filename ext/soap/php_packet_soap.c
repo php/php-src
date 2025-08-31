@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -21,7 +19,7 @@
 #include "php_soap.h"
 
 /* SOAP client calls this function to parse response from SOAP server */
-int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value, zval *soap_headers)
+bool parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value, zval *soap_headers)
 {
 	char* envelope_ns = NULL;
 	xmlDocPtr response;
@@ -35,20 +33,20 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 	/* Response for one-way opearation */
 	if (buffer_size == 0) {
-		return TRUE;
+		return true;
 	}
 
 	/* Parse XML packet */
 	response = soap_xmlParseMemory(buffer, buffer_size);
 
 	if (!response) {
-		add_soap_fault(this_ptr, "Client", "looks like we got no XML document", NULL, NULL);
-		return FALSE;
+		add_soap_fault(this_ptr, "Client", "looks like we got no XML document", NULL, NULL, SOAP_GLOBAL(lang_en));
+		return false;
 	}
 	if (xmlGetIntSubset(response) != NULL) {
-		add_soap_fault(this_ptr, "Client", "DTD are not supported by SOAP", NULL, NULL);
+		add_soap_fault(this_ptr, "Client", "DTD are not supported by SOAP", NULL, NULL, SOAP_GLOBAL(lang_en));
 		xmlFreeDoc(response);
-		return FALSE;
+		return false;
 	}
 
 	/* Get <Envelope> element */
@@ -65,34 +63,34 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				envelope_ns = SOAP_1_2_ENV_NAMESPACE;
 				soap_version = SOAP_1_2;
 			} else {
-				add_soap_fault(this_ptr, "VersionMismatch", "Wrong Version", NULL, NULL);
+				add_soap_fault(this_ptr, "VersionMismatch", "Wrong Version", NULL, NULL, SOAP_GLOBAL(lang_en));
 				xmlFreeDoc(response);
-				return FALSE;
+				return false;
 			}
 		}
 		trav = trav->next;
 	}
 	if (env == NULL) {
-		add_soap_fault(this_ptr, "Client", "looks like we got XML without \"Envelope\" element", NULL, NULL);
+		add_soap_fault(this_ptr, "Client", "looks like we got XML without \"Envelope\" element", NULL, NULL, SOAP_GLOBAL(lang_en));
 		xmlFreeDoc(response);
-		return FALSE;
+		return false;
 	}
 
 	attr = env->properties;
 	while (attr != NULL) {
 		if (attr->ns == NULL) {
-			add_soap_fault(this_ptr, "Client", "A SOAP Envelope element cannot have non Namespace qualified attributes", NULL, NULL);
+			add_soap_fault(this_ptr, "Client", "A SOAP Envelope element cannot have non Namespace qualified attributes", NULL, NULL, SOAP_GLOBAL(lang_en));
 			xmlFreeDoc(response);
-			return FALSE;
+			return false;
 		} else if (attr_is_equal_ex(attr,"encodingStyle",SOAP_1_2_ENV_NAMESPACE)) {
 			if (soap_version == SOAP_1_2) {
-				add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Envelope", NULL, NULL);
+				add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Envelope", NULL, NULL, SOAP_GLOBAL(lang_en));
 				xmlFreeDoc(response);
-				return FALSE;
+				return false;
 			} else if (strcmp((char*)attr->children->content, SOAP_1_1_ENC_NAMESPACE) != 0) {
-				add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL);
+				add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL, SOAP_GLOBAL(lang_en));
 				xmlFreeDoc(response);
-				return FALSE;
+				return false;
 			}
 		}
 		attr = attr->next;
@@ -122,53 +120,53 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		trav = trav->next;
 	}
 	if (body == NULL) {
-		add_soap_fault(this_ptr, "Client", "Body must be present in a SOAP envelope", NULL, NULL);
+		add_soap_fault(this_ptr, "Client", "Body must be present in a SOAP envelope", NULL, NULL, SOAP_GLOBAL(lang_en));
 		xmlFreeDoc(response);
-		return FALSE;
+		return false;
 	}
 	attr = body->properties;
 	while (attr != NULL) {
 		if (attr->ns == NULL) {
 			if (soap_version == SOAP_1_2) {
-				add_soap_fault(this_ptr, "Client", "A SOAP Body element cannot have non Namespace qualified attributes", NULL, NULL);
+				add_soap_fault(this_ptr, "Client", "A SOAP Body element cannot have non Namespace qualified attributes", NULL, NULL, SOAP_GLOBAL(lang_en));
 				xmlFreeDoc(response);
-				return FALSE;
+				return false;
 			}
 		} else if (attr_is_equal_ex(attr,"encodingStyle",SOAP_1_2_ENV_NAMESPACE)) {
 			if (soap_version == SOAP_1_2) {
-				add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Body", NULL, NULL);
+				add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Body", NULL, NULL, SOAP_GLOBAL(lang_en));
 				xmlFreeDoc(response);
-				return FALSE;
+				return false;
 			} else if (strcmp((char*)attr->children->content, SOAP_1_1_ENC_NAMESPACE) != 0) {
-				add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL);
+				add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL, SOAP_GLOBAL(lang_en));
 				xmlFreeDoc(response);
-				return FALSE;
+				return false;
 			}
 		}
 		attr = attr->next;
 	}
 	if (trav != NULL && soap_version == SOAP_1_2) {
-		add_soap_fault(this_ptr, "Client", "A SOAP 1.2 envelope can contain only Header and Body", NULL, NULL);
+		add_soap_fault(this_ptr, "Client", "A SOAP 1.2 envelope can contain only Header and Body", NULL, NULL, SOAP_GLOBAL(lang_en));
 		xmlFreeDoc(response);
-		return FALSE;
+		return false;
 	}
 
 	if (head != NULL) {
 		attr = head->properties;
 		while (attr != NULL) {
 			if (attr->ns == NULL) {
-				add_soap_fault(this_ptr, "Client", "A SOAP Header element cannot have non Namespace qualified attributes", NULL, NULL);
+				add_soap_fault(this_ptr, "Client", "A SOAP Header element cannot have non Namespace qualified attributes", NULL, NULL, SOAP_GLOBAL(lang_en));
 				xmlFreeDoc(response);
-				return FALSE;
+				return false;
 			} else if (attr_is_equal_ex(attr,"encodingStyle",SOAP_1_2_ENV_NAMESPACE)) {
 				if (soap_version == SOAP_1_2) {
-					add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Header", NULL, NULL);
+					add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Header", NULL, NULL, SOAP_GLOBAL(lang_en));
 					xmlFreeDoc(response);
-					return FALSE;
+					return false;
 				} else if (strcmp((char*)attr->children->content, SOAP_1_1_ENC_NAMESPACE) != 0) {
-					add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL);
+					add_soap_fault(this_ptr, "Client", "Unknown data encoding style", NULL, NULL, SOAP_GLOBAL(lang_en));
 					xmlFreeDoc(response);
-					return FALSE;
+					return false;
 				}
 			}
 			attr = attr->next;
@@ -179,6 +177,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	fault = get_node_ex(body->children,"Fault",envelope_ns);
 	if (fault != NULL) {
 		char *faultcode = NULL;
+		zend_string *lang = ZSTR_EMPTY_ALLOC();
 		zend_string *faultstring = NULL, *faultactor = NULL;
 		zval details;
 		xmlNodePtr tmp;
@@ -194,6 +193,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			if (tmp != NULL && tmp->children != NULL) {
 				zval zv;
 				master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+				convert_to_string(&zv)
 				faultstring = Z_STR(zv);
 			}
 
@@ -201,6 +201,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			if (tmp != NULL && tmp->children != NULL) {
 				zval zv;
 				master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+				convert_to_string(&zv)
 				faultactor = Z_STR(zv);
 			}
 
@@ -219,12 +220,19 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 			tmp = get_node(fault->children,"Reason");
 			if (tmp != NULL && tmp->children != NULL) {
-				/* TODO: lang attribute */
 				tmp = get_node(tmp->children,"Text");
 				if (tmp != NULL && tmp->children != NULL) {
 					zval zv;
 					master_to_zval(&zv, get_conversion(IS_STRING), tmp);
+					convert_to_string(&zv)
 					faultstring = Z_STR(zv);
+
+					/* xml:lang is required by SOAP 1.2, but for BC reasons we allow it to be missing */
+					xmlAttrPtr lang_attr = get_attribute_ex(tmp->properties, "lang", (const char *) XML_XML_NAMESPACE);
+					if (lang_attr != NULL && lang_attr->children != NULL) {
+						const char *lang_str = (const char *) lang_attr->children->content;
+						lang = zend_string_init(lang_str, strlen(lang_str), false);
+					}
 				}
 			}
 
@@ -233,18 +241,19 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				master_to_zval(&details, NULL, tmp);
 			}
 		}
-		add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor ? ZSTR_VAL(faultactor) : NULL, &details);
+		add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor ? ZSTR_VAL(faultactor) : NULL, &details, lang);
 		if (faultstring) {
 			zend_string_release_ex(faultstring, 0);
 		}
 		if (faultactor) {
 			zend_string_release_ex(faultactor, 0);
 		}
+		zend_string_release_ex(lang, false);
 		if (Z_REFCOUNTED(details)) {
 			Z_DELREF(details);
 		}
 		xmlFreeDoc(response);
-		return FALSE;
+		return false;
 	}
 
 	/* Parse content of <Body> element */
@@ -318,7 +327,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 /*
 						add_soap_fault(this_ptr, "Client", "Can't find response data", NULL, NULL);
 						xmlFreeDoc(response);
-						return FALSE;
+						return false;
 */
 					} else {
 						/* Decoding value of parameter */
@@ -419,5 +428,5 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	}
 
 	xmlFreeDoc(response);
-	return TRUE;
+	return true;
 }

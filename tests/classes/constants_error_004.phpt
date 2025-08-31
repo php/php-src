@@ -10,7 +10,8 @@ Class constant whose initial value references a non-existent class
   $a = new C();
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Class 'D' not found in %s:%d
+Fatal error: Uncaught Error: Class "D" not found in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): [constant expression]()
+#1 {main}
   thrown in %s on line %d

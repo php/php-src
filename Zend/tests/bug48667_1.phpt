@@ -7,4 +7,4 @@ abstract class A implements Iterator, IteratorAggregate { }
 
 ?>
 --EXPECTF--
-Fatal error: Class A cannot implement both IteratorAggregate and Iterator at the same time in %s on line %d
+Fatal error: Class A cannot implement both Iterator and IteratorAggregate at the same time in %s on line %d

@@ -6,11 +6,11 @@ Parsing test
 require_once __DIR__ . '/exceptions.inc';
 
 try {
-	echo 'TRY' . PHP_EOL;
+    echo 'TRY' . PHP_EOL;
 } catch(Exception1 | Exception2 $e) {
-	echo 'Exception';
+    echo 'Exception';
 } finally {
-	echo 'FINALLY' . PHP_EOL;
+    echo 'FINALLY' . PHP_EOL;
 }
 
 ?>

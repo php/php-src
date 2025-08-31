@@ -3,36 +3,36 @@ ldap_add() - Basic add operation
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 var_dump(
-	ldap_add($link, "dc=my-domain,$base", array(
-		"objectClass"	=> array(
-			"top",
-			"dcObject",
-			"organization"),
-		"dc"			=> "my-domain",
-		"o"				=> "my-domain",
-	)),
-	ldap_get_entries(
-		$link,
-		ldap_search($link, "$base", "(o=my-domain)")
-	)
+    ldap_add($link, "dc=my-domain,$base", array(
+        "objectClass"	=> array(
+            "top",
+            "dcObject",
+            "organization"),
+        "dc"			=> "my-domain",
+        "o"				=> "my-domain",
+    )),
+    ldap_get_entries(
+        $link,
+        ldap_search($link, "$base", "(o=my-domain)")
+    )
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
 ?>
@@ -80,4 +80,3 @@ array(2) {
     string(%d) "dc=my-domain,%s"
   }
 }
-===DONE===

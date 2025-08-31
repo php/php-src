@@ -3,8 +3,8 @@ Throwings NEWs should not be DCEd
 --INI--
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -39,4 +39,4 @@ try { test4(); } catch (Error $e) { echo $e->getMessage(), "\n"; }
 Cannot instantiate abstract class Foo
 Cannot instantiate interface Bar
 Cannot instantiate trait Baz
-Cannot declare self-referencing constant 'Abc::BAR'
+Cannot declare self-referencing constant Abc::BAR

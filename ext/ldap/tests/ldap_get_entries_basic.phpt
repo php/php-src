@@ -3,29 +3,29 @@ ldap_get_entries() - Basic modify operation
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 var_dump(
-	ldap_get_entries(
-		$link,
-		ldap_search($link, "$base", "(o=test)")
-	)
+    ldap_get_entries(
+        $link,
+        ldap_search($link, "$base", "(o=test)")
+    )
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
@@ -60,4 +60,3 @@ array(2) {
     string(%d) "o=test,%s"
   }
 }
-===DONE===

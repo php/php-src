@@ -4,7 +4,7 @@ stream userfilter test
 <?php
 
 class testfilter extends php_user_filter {
-  function filter($in, $out, &$consumed, $closing) {
+  function filter($in, $out, &$consumed, $closing): int {
     while ($bucket = stream_bucket_make_writeable($in)) {
       $bucket->data = strtoupper($bucket->data);
       $consumed += strlen($bucket->data);
@@ -13,8 +13,9 @@ class testfilter extends php_user_filter {
     return PSFS_PASS_ON;
   }
 
-  function oncreate() {
+  function oncreate(): bool {
     echo "params: {$this->params}\n";
+    return true;
   }
 }
 

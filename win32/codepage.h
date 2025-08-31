@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -78,7 +76,7 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env);
 /* This function tries to make the best guess to convert any
    given string to a wide char, also preferring the fastest code
    path to unicode. It returns NULL on fail. */
-__forceinline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
+zend_always_inline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *ret = NULL;
 
@@ -119,7 +117,7 @@ __forceinline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t 
 /* This function converts from unicode function output back to PHP. If
 	the PHP's current charset is not compatible with unicode, so the currently
 	configured CP will be used. */
-__forceinline static char *php_win32_cp_conv_w_to_any(const wchar_t* in, size_t in_len, size_t *out_len)
+zend_always_inline static char *php_win32_cp_conv_w_to_any(const wchar_t* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	return php_win32_cp_conv_w_to_cur(in, in_len, out_len);
 }/*}}}*/

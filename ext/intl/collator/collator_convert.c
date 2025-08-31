@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,7 +14,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -40,8 +38,6 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 {
 	const char* old_val;
 	size_t      old_val_len;
-	UChar*      new_val      = NULL;
-	int32_t     new_val_len  = 0;
 	zval        znew_val;
 
 	/* Process string values only. */
@@ -51,17 +47,13 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 	old_val     = Z_STRVAL_P( hashData );
 	old_val_len = Z_STRLEN_P( hashData );
 
-	/* Convert it from UTF-8 to UTF-16LE and save the result to new_val[_len]. */
-	intl_convert_utf8_to_utf16( &new_val, &new_val_len, old_val, old_val_len, status );
+	/* Convert it from UTF-8 to UTF-16LE. */
+	zend_string *zstr = intl_convert_utf8_to_utf16_zstr( old_val, old_val_len, status );
 	if( U_FAILURE( *status ) )
 		return;
 
 	/* Update current hash item with the converted value. */
-	ZVAL_STRINGL( &znew_val, (char*)new_val, UBYTES(new_val_len + 1) );
-	//???
-	efree(new_val);
-	/* hack to fix use of initialized value */
-	Z_STRLEN(znew_val) = Z_STRLEN(znew_val) - UBYTES(1);
+	ZVAL_NEW_STR( &znew_val, zstr );
 
 	if( hashKey)
 	{
@@ -176,38 +168,23 @@ zval* collator_convert_zstr_utf16_to_utf8( zval* utf16_zval, zval *rv )
 }
 /* }}} */
 
-/* {{{ collator_convert_zstr_utf8_to_utf16
- *
- * Convert string from utf8 to utf16.
- *
- * @param  zval* utf8_zval String to convert.
- *
- * @return zval* Converted string.
- */
-zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval, zval *rv )
+zend_string *collator_convert_zstr_utf8_to_utf16(zend_string *utf8_str)
 {
-	zval* zstr        = NULL;
-	UChar* ustr       = NULL;
-	int32_t ustr_len   = 0;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* Convert the string to UTF-16. */
-	intl_convert_utf8_to_utf16(
-			&ustr, &ustr_len,
-			Z_STRVAL_P( utf8_zval ), Z_STRLEN_P( utf8_zval ),
-			&status );
-	if( U_FAILURE( status ) )
-		php_error( E_WARNING, "Error casting object to string in collator_convert_zstr_utf8_to_utf16()" );
-
-	/* Set string. */
-	zstr = rv;
-	ZVAL_STRINGL( zstr, (char*)ustr, UBYTES(ustr_len));
-	//???
-	efree((char *)ustr);
+	zend_string *zstr = intl_convert_utf8_to_utf16_zstr(
+			ZSTR_VAL(utf8_str), ZSTR_LEN(utf8_str),
+			&status);
+	// FIXME Or throw error or use intl internal error handler
+	if (U_FAILURE(status)) {
+		php_error(E_WARNING,
+			"Error casting object to string in collator_convert_zstr_utf8_to_utf16()");
+		zstr = ZSTR_EMPTY_ALLOC();
+	}
 
 	return zstr;
 }
-/* }}} */
 
 /* {{{ collator_convert_object_to_string
  * Convert object to UTF16-encoded string.
@@ -216,8 +193,6 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 {
 	zval* zstr        = NULL;
 	UErrorCode status = U_ZERO_ERROR;
-	UChar* ustr       = NULL;
-	int32_t ustr_len  = 0;
 
 	/* Bail out if it's not an object. */
 	if( Z_TYPE_P( obj ) != IS_OBJECT )
@@ -226,38 +201,13 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	}
 
 	/* Try object's handlers. */
-	if( Z_OBJ_HT_P(obj)->get )
+	zstr = rv;
+
+	if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
 	{
-		zstr = Z_OBJ_HT_P(obj)->get( obj, rv );
-
-		switch( Z_TYPE_P( zstr ) )
-		{
-			case IS_OBJECT:
-				{
-					/* Bail out. */
-					zval_ptr_dtor( zstr );
-					COLLATOR_CONVERT_RETURN_FAILED( obj );
-				} break;
-
-			case IS_STRING:
-				break;
-
-			default:
-				{
-					convert_to_string( zstr );
-				} break;
-		}
-	}
-	else if( Z_OBJ_HT_P(obj)->cast_object )
-	{
-		zstr = rv;
-
-		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING ) == FAILURE )
-		{
-			/* cast_object failed => bail out. */
-			zval_ptr_dtor( zstr );
-			COLLATOR_CONVERT_RETURN_FAILED( obj );
-		}
+		/* cast_object failed => bail out. */
+		zval_ptr_dtor( zstr );
+		COLLATOR_CONVERT_RETURN_FAILED( obj );
 	}
 
 	/* Object wasn't successfully converted => bail out. */
@@ -267,24 +217,20 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	}
 
 	/* Convert the string to UTF-16. */
-	intl_convert_utf8_to_utf16(
-			&ustr, &ustr_len,
+	zend_string *converted_str = intl_convert_utf8_to_utf16_zstr(
 			Z_STRVAL_P( zstr ), Z_STRLEN_P( zstr ),
 			&status );
-	if( U_FAILURE( status ) )
+	// FIXME Or throw error or use intl internal error handler
+	if( U_FAILURE( status ) ) {
 		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
+		converted_str = ZSTR_EMPTY_ALLOC();
+	}
 
 	/* Cleanup zstr to hold utf16 string. */
 	zval_ptr_dtor_str( zstr );
 
 	/* Set string. */
-	ZVAL_STRINGL( zstr, (char*)ustr, UBYTES(ustr_len));
-	//???
-	efree((char *)ustr);
-
-	/* Don't free ustr cause it's set in zstr without copy.
-	 * efree( ustr );
-	 */
+	ZVAL_STR( zstr, converted_str );
 
 	return zstr;
 }
@@ -345,7 +291,7 @@ zval* collator_convert_string_to_double( zval* str, zval *rv )
  */
 zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 {
-	int is_numeric = 0;
+	uint8_t is_numeric = 0;
 	zend_long lval      = 0;
 	double dval    = 0;
 
@@ -354,7 +300,7 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 		COLLATOR_CONVERT_RETURN_FAILED( str );
 	}
 
-	if( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, 1 ) ) )
+	if ( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, /* allow_errors */ false ) ) )
 	{
 		if( is_numeric == IS_LONG ) {
 			ZVAL_LONG(rv, lval);
@@ -371,42 +317,26 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 }
 /* }}} */
 
-/* {{{ collator_make_printable_zval
- *
- * Returns string from input zval.
+/* Returns string from input zval.
  *
  * @param  zval* arg zval to get string from
  *
- * @return zval* UTF16 string.
+ * @return zend_string* UTF16 string.
  */
-zval* collator_make_printable_zval( zval* arg, zval *rv)
+zend_string *collator_zval_to_string(zval *arg)
 {
-	zval arg_copy;
-	zval* str    = NULL;
-
-	if( Z_TYPE_P(arg) != IS_STRING )
-	{
-
-		int use_copy = zend_make_printable_zval(arg, &arg_copy);
-
-		if( use_copy )
-		{
-			str = collator_convert_zstr_utf8_to_utf16( &arg_copy, rv );
-			zval_ptr_dtor_str( &arg_copy );
-		}
-		else
-		{
-			str = collator_convert_zstr_utf8_to_utf16( arg, rv );
-		}
-	}
-	else
-	{
-		COLLATOR_CONVERT_RETURN_FAILED( arg );
+	// TODO: This is extremely weird in that it leaves pre-existing strings alone and does not
+	// perform a UTF-8 to UTF-16 conversion for them. The assumption is that values that are
+	// already strings have already been converted beforehand. It would be good to clean this up.
+	if (Z_TYPE_P(arg) == IS_STRING) {
+		return zend_string_copy(Z_STR_P(arg));
 	}
 
-	return str;
+	zend_string *utf8_str = zval_get_string(arg);
+	zend_string *utf16_str = collator_convert_zstr_utf8_to_utf16(utf8_str);
+	zend_string_release(utf8_str);
+	return utf16_str;
 }
-/* }}} */
 
 /* {{{ collator_normalize_sort_argument
  *
@@ -423,7 +353,7 @@ zval* collator_normalize_sort_argument( zval* arg, zval *rv )
 
 	if( Z_TYPE_P( arg ) != IS_STRING )
 	{
-		/* If its not a string then nothing to do.
+		/* If it's not a string then nothing to do.
 		 * Return original arg.
 		 */
 		COLLATOR_CONVERT_RETURN_FAILED( arg );

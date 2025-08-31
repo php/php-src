@@ -3,10 +3,10 @@ Bug #60611 (Segmentation fault with Cls::{expr}() syntax)
 --FILE--
 <?php
 class Cls {
-	function __call($name, $arg) {
-	}
-	static function __callStatic($name, $arg) {
-	}
+    function __call($name, $arg) {
+    }
+    static function __callStatic($name, $arg) {
+    }
 }
 
 $cls = new Cls;

@@ -2,12 +2,6 @@
 Test get_defined_vars() function
 --FILE--
 <?php
-/* Prototype: array get_defined_vars  ( void  )
-   Description: This function returns a multidimensional array containing a list of all defined
-   variables, be them environment, server or user-defined variables, within the scope that
-   get_defined_vars() is called.
-*/
-
 echo "Simple testcase for get_defined_vars() function\n\n";
 
 function f1() {
@@ -15,7 +9,7 @@ function f1() {
   $vars = get_defined_vars();
 
   if (count($vars) != 0) {
-	 echo "TEST FAILED\n";
+     echo "TEST FAILED\n";
   }
 
   echo "\n-- ..define some local variables --\n";
@@ -33,7 +27,7 @@ function f2() {
   $vars= get_defined_vars();
 
   if (count($vars) != 0) {
-	 echo "TEST FAILED\n";
+     echo "TEST FAILED\n";
   }
 
   echo "\n-- ...define some variables --\n";
@@ -63,7 +57,6 @@ if (count($vars) == 0) {
 f1();
 
 ?>
-===DONE===
 --EXPECT--
 Simple testcase for get_defined_vars() function
 
@@ -149,4 +142,3 @@ array(9) {
   ["b1"]=>
   bool(true)
 }
-===DONE===

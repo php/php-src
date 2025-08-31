@@ -1,7 +1,7 @@
 --TEST--
 Bug #40609 (Segfaults when using more than one SoapVar in a request)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

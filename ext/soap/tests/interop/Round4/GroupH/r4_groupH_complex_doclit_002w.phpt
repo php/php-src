@@ -1,24 +1,17 @@
 --TEST--
 SOAP Interop Round4 GroupH Complex Doc Lit 002 (php/wsdl): echoBaseStructFault
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPStruct {
-    function __construct($s, $i, $f) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-    }
+    function __construct(public $varString, public $varInt, public $varFloat) {}
 }
 class BaseStruct {
-    function __construct($f, $s) {
-        $this->structMessage = $f;
-        $this->shortMessage = $s;
-    }
+    function __construct(public $structMessage, public $shortMessage) {}
 }
 $struct = new BaseStruct(new SOAPStruct("a1",11,12.345),11);
 $client = new SoapClient(__DIR__."/round4_groupH_complex_doclit.wsdl",array("trace"=>1,"exceptions"=>0));

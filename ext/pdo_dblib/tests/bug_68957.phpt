@@ -1,13 +1,17 @@
 --TEST--
 PDO_DBLIB bug #68957 PDO::query doesn't support several queries
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
+
+$db = getDbConnection();
 
 $query = "declare @myInt int = 1; select @myInt;";
 $stmt = $db->query($query);

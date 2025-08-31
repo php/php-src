@@ -1,38 +1,33 @@
 --TEST--
 mysqli_dump_debug_info()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once 'connect.inc';
 
-	$tmp	= NULL;
-	$link	= NULL;
+    if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
+        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n", $host, $user, $db, $port, $socket);
 
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
-		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n", $host, $user, $db, $port, $socket);
+    if (!is_bool($tmp = $mysqli->dump_debug_info()))
+        printf("[003] Expecting boolean/[true|false] value, got %s/%s, [%d] %s\n",
+            gettype($tmp), $tmp,
+            $mysqli->errno, $mysqli->error);
 
-	if (NULL !== ($tmp = @$mysqli->dump_debug_info($link)))
-		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
+    $mysqli->close();
 
-	if (!is_bool($tmp = $mysqli->dump_debug_info()))
-		printf("[003] Expecting boolean/[true|false] value, got %s/%s, [%d] %s\n",
-			gettype($tmp), $tmp,
-			$mysqli->errno, $mysqli->error);
+    try {
+        $mysqli->dump_debug_info();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	$mysqli->close();
-
-	if (false !== ($tmp = $mysqli->dump_debug_info()))
-		printf("[004] Expecting false, got %s/%s, [%d] %s\n",
-			gettype($tmp), $tmp,
-			$mysqli->errno, $mysqli->error);
-
-	print "done!";
+    print "done!";
 ?>
---EXPECTF--
-Warning: mysqli::dump_debug_info(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

@@ -3,40 +3,40 @@ http:// and ignore_errors
 --INI--
 allow_url_fopen=1
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
+<?php require 'server.inc'; http_server_skipif(); ?>
 --FILE--
 <?php
 require 'server.inc';
 
 function do_test($context_options) {
 
-	$context = stream_context_create(array('http' => $context_options));
+    $context = stream_context_create(array('http' => $context_options));
 
-	$responses = array(
-		"data://text/plain,HTTP/1.0 200 Ok\r\nX-Foo: bar\r\n\r\n1",
-		"data://text/plain,HTTP/1.0 404 Not found\r\nX-bar: baz\r\n\r\n2",
-	);
+    $responses = array(
+        "data://text/plain,HTTP/1.1 200 Ok\r\nX-Foo: bar\r\n\r\n1",
+        "data://text/plain,HTTP/1.1 404 Not found\r\nX-bar: baz\r\n\r\n2",
+    );
 
-	$pid = http_server("tcp://127.0.0.1:12342", $responses, $output);
+    ['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
-	foreach($responses as $r) {
+    foreach($responses as $r) {
 
-		$fd = fopen('http://127.0.0.1:12342/foo/bar', 'rb', false, $context);
-		var_dump($fd);
+        $fd = fopen("$uri/foo/bar", 'rb', false, $context);
+        var_dump($fd);
 
-		if ($fd) {
-			$meta_data = stream_get_meta_data($fd);
-			var_dump($meta_data['wrapper_data']);
+        if ($fd) {
+            $meta_data = stream_get_meta_data($fd);
+            var_dump($meta_data['wrapper_data']);
 
-			var_dump(stream_get_contents($fd));
-		}
+            var_dump(stream_get_contents($fd));
+        }
 
-		fseek($output, 0, SEEK_SET);
-		var_dump(stream_get_contents($output));
-		fseek($output, 0, SEEK_SET);
-	}
+        fseek($output, 0, SEEK_SET);
+        var_dump(stream_get_contents($output));
+        fseek($output, 0, SEEK_SET);
+    }
 
-	http_server_kill($pid);
+    http_server_kill($pid);
 }
 
 echo "-- Test: requests without ignore_errors --\n";
@@ -57,22 +57,22 @@ do_test(array('ignore_errors' => 1));
 resource(%d) of type (stream)
 array(2) {
   [0]=>
-  string(15) "HTTP/1.0 200 Ok"
+  string(15) "HTTP/1.1 200 Ok"
   [1]=>
   string(10) "X-Foo: bar"
 }
 string(1) "1"
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: HTTP request failed! HTTP/1.0 404 Not found
+Warning: fopen(http://%s:%d/foo/bar): Failed to open stream: HTTP request failed! HTTP/1.1 404 Not found
  in %s on line %d
 bool(false)
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
@@ -80,26 +80,26 @@ Connection: close
 resource(%d) of type (stream)
 array(2) {
   [0]=>
-  string(15) "HTTP/1.0 200 Ok"
+  string(15) "HTTP/1.1 200 Ok"
   [1]=>
   string(10) "X-Foo: bar"
 }
 string(1) "1"
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
 resource(%d) of type (stream)
 array(2) {
   [0]=>
-  string(22) "HTTP/1.0 404 Not found"
+  string(22) "HTTP/1.1 404 Not found"
   [1]=>
   string(10) "X-bar: baz"
 }
 string(1) "2"
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
@@ -107,26 +107,26 @@ Connection: close
 resource(%d) of type (stream)
 array(2) {
   [0]=>
-  string(15) "HTTP/1.0 200 Ok"
+  string(15) "HTTP/1.1 200 Ok"
   [1]=>
   string(10) "X-Foo: bar"
 }
 string(1) "1"
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "
 resource(%d) of type (stream)
 array(2) {
   [0]=>
-  string(22) "HTTP/1.0 404 Not found"
+  string(22) "HTTP/1.1 404 Not found"
   [1]=>
   string(10) "X-bar: baz"
 }
 string(1) "2"
-string(%d) "GET /foo/bar HTTP/1.0
-Host: 127.0.0.1:12342
+string(%d) "GET /foo/bar HTTP/1.1
+Host: %s:%d
 Connection: close
 
 "

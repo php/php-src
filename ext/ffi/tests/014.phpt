@@ -1,14 +1,16 @@
 --TEST--
 FFI 014: Size of nested types
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-var_dump(FFI::sizeof(FFI::new("uint32_t[2]")));
-var_dump(FFI::sizeof(FFI::new("uint32_t([2])")));
-var_dump(FFI::sizeof(FFI::new("uint32_t([2])[2]")));
+$ffi = FFI::cdef();
+
+var_dump(FFI::sizeof($ffi->new("uint32_t[2]")));
+var_dump(FFI::sizeof($ffi->new("uint32_t([2])")));
+var_dump(FFI::sizeof($ffi->new("uint32_t([2])[2]")));
 ?>
 ok
 --EXPECT--

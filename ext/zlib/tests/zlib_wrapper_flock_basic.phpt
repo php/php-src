@@ -1,19 +1,13 @@
 --TEST--
-Test function stream_get_meta_data on a zlib stream
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+Test function flock on a zlib stream
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f,'r');
-var_dump(flock($h, LOCK_SH));
+var_dump(flock($h, LOCK_EX));
 gzclose($h);
 ?>
-===DONE===
 --EXPECT--
-bool(false)
-===DONE===
+bool(true)

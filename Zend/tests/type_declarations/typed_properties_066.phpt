@@ -4,7 +4,7 @@ Typed property assignment must not overwrite constants
 <?php
 
 class Foo {
-	public float $x = 0.0;
+    public float $x = 0.0;
 };
 
 $x = new Foo;

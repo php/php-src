@@ -3,11 +3,6 @@ Test fgetcsv() : usage variations - with default enclosure, blank line
 --FILE--
 <?php
 /*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
-/*
   Testing fgetcsv() to read a file containing blank line when provided with
   default enclosure argument
 */
@@ -53,7 +48,7 @@ $loop_counter = 1;
 
     // read the line which is a blank line to see the working of fgetcsv
     $fp_pos = ftell($file_handle);
-    var_dump( fgetcsv($file_handle, 1024, '+') );
+    var_dump( fgetcsv($file_handle, 1024, '+', escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

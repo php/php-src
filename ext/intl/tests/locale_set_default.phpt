@@ -1,7 +1,7 @@
 --TEST--
 locale_set_default($locale)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -67,23 +67,29 @@ function ut_main()
     );
 
 /*
-	$locales = array(
-		'es'
-	);
+    $locales = array(
+        'es'
+    );
 */
     $res_str = '';
 
     foreach( $locales as $locale )
     {
         $isSuccessful = ut_loc_set_default( $locale);
-	if ($isSuccessful ){
-		$lang = ut_loc_get_default( );
-		$res_str .= "$locale: set locale '$lang'";
-	}
-	else{
-		$res_str .= "$locale: Error in set locale";
-	}
+    if ($isSuccessful ){
+        $lang = ut_loc_get_default( );
+        $res_str .= "$locale: set locale '$lang'";
+    }
+    else{
+        $res_str .= "$locale: Error in set locale";
+    }
         $res_str .= "\n";
+    }
+
+    try {
+        ut_loc_set_default("a-\0DE");
+    } catch (\ValueError $e) {
+        echo $e->getMessage(), PHP_EOL;
     }
 
     return $res_str;
@@ -95,6 +101,8 @@ ut_run();
 
 ?>
 --EXPECT--
+Locale::setDefault(): Argument #1 ($locale) must not contain any null bytes
+locale_set_default(): Argument #1 ($locale) must not contain any null bytes
 uk-ua_CALIFORNIA@currency=;currency=GRN: set locale 'uk-ua_CALIFORNIA@currency=;currency=GRN'
 root: set locale 'root'
 uk@currency=EURO: set locale 'uk@currency=EURO'

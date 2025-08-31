@@ -4,11 +4,6 @@ Test fileinode() function: usage variations - diff. path notations
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
 /* Passing file names with different notations, using slashes, wild-card chars */
 
 $file_path = __DIR__;
@@ -40,7 +35,11 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( fileinode( $file_path."/".$file ) );
+  try {
+    var_dump( fileinode( $file_path."/".$file ) );
+  } catch (Error $e) {
+    echo $e->getMessage(), "\n";
+  }
   clearstatcache();
   $count++;
 }
@@ -76,11 +75,11 @@ Warning: fileinode(): stat failed for %s/fileinode_variation3/fileinode*.tmp in 
 bool(false)
 - Iteration 7 -
 
-Warning: fileinode() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+Warning: fileinode(): Filename contains null byte in %s on line %d
+bool(false)
 - Iteration 8 -
 
-Warning: fileinode() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+Warning: fileinode(): Filename contains null byte in %s on line %d
+bool(false)
 
 *** Done ***

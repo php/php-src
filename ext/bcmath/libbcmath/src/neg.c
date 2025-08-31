@@ -29,19 +29,11 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
+#include <stdbool.h>
 #include "bcmath.h"
-#include "private.h"
 
 /* In some places we need to check if the number is negative. */
-
-char
-bc_is_neg (num)
-     bc_num num;
+bool bc_is_neg(bc_num num)
 {
-  return num->n_sign == MINUS;
+	return num->n_sign == MINUS;
 }

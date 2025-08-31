@@ -1,8 +1,7 @@
 --TEST--
 Bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction)
---SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip curl extension not loaded";
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   $base_dir = __DIR__ . DIRECTORY_SEPARATOR . "bug61948";
@@ -14,13 +13,12 @@ Bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction)
   var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, ""));
   var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, "$base_dir/foo"));
   var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, "c:/xxx/bar"));
-  curl_close($ch);
 ?>
 --CLEAN--
 <?php
-	$base_dir = __DIR__ . DIRECTORY_SEPARATOR . "bug61948";
-	rmdir("$base_dir/foo");
-	rmdir($base_dir);
+    $base_dir = __DIR__ . DIRECTORY_SEPARATOR . "bug61948";
+    rmdir("$base_dir/foo");
+    rmdir($base_dir);
 ?>
 --EXPECTF--
 %a

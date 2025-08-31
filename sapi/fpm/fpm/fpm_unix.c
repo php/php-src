@@ -8,11 +8,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <pwd.h>
 #include <grp.h>
 
 #ifdef HAVE_PRCTL
 #include <sys/prctl.h>
+#endif
+
+#ifdef HAVE_PROCCTL
+#include <sys/procctl.h>
+#endif
+
+#ifdef HAVE_SETPFLAGS
+#include <priv.h>
 #endif
 
 #ifdef HAVE_APPARMOR
@@ -21,6 +30,10 @@
 
 #ifdef HAVE_SYS_ACL_H
 #include <sys/acl.h>
+#endif
+
+#ifdef HAVE_SELINUX
+#include <selinux/selinux.h>
 #endif
 
 #include "fpm.h"
@@ -34,7 +47,84 @@
 
 size_t fpm_pagesize;
 
-int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
+
+static inline bool fpm_unix_is_id(const char* name)
+{
+	return strlen(name) == strspn(name, "0123456789");
+}
+
+static struct passwd *fpm_unix_get_passwd(struct fpm_worker_pool_s *wp, const char *name, int flags)
+{
+	struct passwd *pwd = getpwnam(name);
+	if (!pwd) {
+		zlog(flags, "[pool %s] cannot get uid for user '%s'", wp->config->name, name);
+		return NULL;
+	}
+
+	return pwd;
+}
+
+static inline bool fpm_unix_check_listen_address(struct fpm_worker_pool_s *wp, const char *address, int flags)
+{
+	if (wp->listen_address_domain != FPM_AF_UNIX) {
+		return true;
+	}
+
+	struct sockaddr_un test_socket;
+	size_t address_length = strlen(address);
+	size_t socket_length = sizeof(test_socket.sun_path);
+
+	if (address_length < socket_length) {
+		return true;
+	}
+
+	zlog(
+		flags,
+		"[pool %s] cannot bind to UNIX socket '%s' as path is too long (found length: %zu, "
+			"maximal length: %zu)",
+		wp->config->name,
+		address,
+		address_length,
+		socket_length
+	);
+
+	return false;
+}
+
+static inline bool fpm_unix_check_passwd(struct fpm_worker_pool_s *wp, const char *name, int flags)
+{
+	return !name || fpm_unix_is_id(name) || fpm_unix_get_passwd(wp, name, flags);
+}
+
+static struct group *fpm_unix_get_group(struct fpm_worker_pool_s *wp, const char *name, int flags)
+{
+	struct group *group = getgrnam(name);
+	if (!group) {
+		zlog(flags, "[pool %s] cannot get gid for group '%s'", wp->config->name, name);
+		return NULL;
+	}
+
+	return group;
+}
+
+static inline bool fpm_unix_check_group(struct fpm_worker_pool_s *wp, const char *name, int flags)
+{
+	return !name || fpm_unix_is_id(name) || fpm_unix_get_group(wp, name, flags);
+}
+
+bool fpm_unix_test_config(struct fpm_worker_pool_s *wp)
+{
+	struct fpm_worker_pool_config_s *config = wp->config;
+	return (
+		fpm_unix_check_passwd(wp, config->user, ZLOG_ERROR) &&
+		fpm_unix_check_group(wp, config->group, ZLOG_ERROR) &&
+		fpm_unix_check_listen_address(wp, config->listen_address, ZLOG_SYSERROR) &&
+		fpm_unix_check_passwd(wp, config->listen_owner, ZLOG_SYSERROR) &&
+		fpm_unix_check_group(wp, config->listen_group, ZLOG_SYSERROR)
+	);
+}
+
+int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct fpm_worker_pool_config_s *c = wp->config;
 #ifdef HAVE_FPM_ACL
@@ -93,11 +183,10 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 				if ((end = strchr(p, ','))) {
 					*end++ = 0;
 				}
-				pwd = getpwnam(p);
+				pwd = fpm_unix_get_passwd(wp, p, ZLOG_SYSERROR);
 				if (pwd) {
 					zlog(ZLOG_DEBUG, "[pool %s] user '%s' have uid=%d", wp->config->name, p, pwd->pw_uid);
 				} else {
-					zlog(ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, p);
 					acl_free(acl);
 					efree(tmp);
 					return -1;
@@ -126,11 +215,10 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 				if ((end = strchr(p, ','))) {
 					*end++ = 0;
 				}
-				grp = getgrnam(p);
+				grp = fpm_unix_get_group(wp, p, ZLOG_SYSERROR);
 				if (grp) {
 					zlog(ZLOG_DEBUG, "[pool %s] group '%s' have gid=%d", wp->config->name, p, grp->gr_gid);
 				} else {
-					zlog(ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, p);
 					acl_free(acl);
 					efree(tmp);
 					return -1;
@@ -163,34 +251,40 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 #endif
 
 	if (c->listen_owner && *c->listen_owner) {
-		struct passwd *pwd;
+		if (fpm_unix_is_id(c->listen_owner)) {
+			wp->socket_uid = strtoul(c->listen_owner, 0, 10);
+		} else {
+			struct passwd *pwd;
 
-		pwd = getpwnam(c->listen_owner);
-		if (!pwd) {
-			zlog(ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, c->listen_owner);
-			return -1;
+			pwd = fpm_unix_get_passwd(wp, c->listen_owner, ZLOG_SYSERROR);
+			if (!pwd) {
+				return -1;
+			}
+
+			wp->socket_uid = pwd->pw_uid;
+			wp->socket_gid = pwd->pw_gid;
 		}
-
-		wp->socket_uid = pwd->pw_uid;
-		wp->socket_gid = pwd->pw_gid;
 	}
 
 	if (c->listen_group && *c->listen_group) {
-		struct group *grp;
+		if (fpm_unix_is_id(c->listen_group)) {
+			wp->socket_gid = strtoul(c->listen_group, 0, 10);
+		} else {
+			struct group *grp;
 
-		grp = getgrnam(c->listen_group);
-		if (!grp) {
-			zlog(ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, c->listen_group);
-			return -1;
+			grp = fpm_unix_get_group(wp, c->listen_group, ZLOG_SYSERROR);
+			if (!grp) {
+				return -1;
+			}
+			wp->socket_gid = grp->gr_gid;
 		}
-		wp->socket_gid = grp->gr_gid;
 	}
 
 	return 0;
 }
 /* }}} */
 
-int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *path) /* {{{ */
+int fpm_unix_set_socket_permissions(struct fpm_worker_pool_s *wp, const char *path) /* {{{ */
 {
 #ifdef HAVE_FPM_ACL
 	if (wp->socket_acl) {
@@ -208,7 +302,7 @@ int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *pa
 		/* Copy the new ACL entry from config */
 		for (i=ACL_FIRST_ENTRY ; acl_get_entry(aclconf, i, &entryconf) ; i=ACL_NEXT_ENTRY) {
 			if (0 > acl_create_entry (&aclfile, &entryfile) ||
-			    0 > acl_copy_entry(entryfile, entryconf)) {
+				0 > acl_copy_entry(entryfile, entryconf)) {
 				zlog(ZLOG_SYSERROR, "[pool %s] failed to add entry to the ACL of the socket '%s'", wp->config->name, path);
 				acl_free(aclfile);
 				return -1;
@@ -241,7 +335,7 @@ int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *pa
 }
 /* }}} */
 
-int fpm_unix_free_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
+int fpm_unix_free_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 #ifdef HAVE_FPM_ACL
 	if (wp->socket_acl) {
@@ -259,14 +353,18 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (is_root) {
 		if (wp->config->user && *wp->config->user) {
-			if (strlen(wp->config->user) == strspn(wp->config->user, "0123456789")) {
+			if (fpm_unix_is_id(wp->config->user)) {
 				wp->set_uid = strtoul(wp->config->user, 0, 10);
+				pwd = getpwuid(wp->set_uid);
+				if (pwd) {
+					wp->set_gid = pwd->pw_gid;
+					wp->set_user = strdup(pwd->pw_name);
+				}
 			} else {
 				struct passwd *pwd;
 
-				pwd = getpwnam(wp->config->user);
+				pwd = fpm_unix_get_passwd(wp, wp->config->user, ZLOG_ERROR);
 				if (!pwd) {
-					zlog(ZLOG_ERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, wp->config->user);
 					return -1;
 				}
 
@@ -279,14 +377,13 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 		}
 
 		if (wp->config->group && *wp->config->group) {
-			if (strlen(wp->config->group) == strspn(wp->config->group, "0123456789")) {
+			if (fpm_unix_is_id(wp->config->group)) {
 				wp->set_gid = strtoul(wp->config->group, 0, 10);
 			} else {
 				struct group *grp;
 
-				grp = getgrnam(wp->config->group);
+				grp = fpm_unix_get_group(wp, wp->config->group, ZLOG_ERROR);
 				if (!grp) {
-					zlog(ZLOG_ERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, wp->config->group);
 					return -1;
 				}
 				wp->set_gid = grp->gr_gid;
@@ -384,7 +481,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			}
 		}
 		if (wp->set_uid) {
-			if (0 > initgroups(wp->config->user, wp->set_gid)) {
+			if (0 > initgroups(wp->set_user ? wp->set_user : wp->config->user, wp->set_gid)) {
 				zlog(ZLOG_SYSERROR, "[pool %s] failed to initgroups(%s, %d)", wp->config->name, wp->config->user, wp->set_gid);
 				return -1;
 			}
@@ -396,8 +493,30 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 #ifdef HAVE_PRCTL
-	if (wp->config->process_dumpable && 0 > prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
-		zlog(ZLOG_SYSERROR, "[pool %s] failed to prctl(PR_SET_DUMPABLE)", wp->config->name);
+	if (wp->config->process_dumpable) {
+		int dumpable = 1;
+#ifdef HAVE_SELINUX
+		if (security_get_boolean_active("deny_ptrace") == 1) {
+			zlog(ZLOG_SYSERROR, "[pool %s] ptrace is denied", wp->config->name);
+			dumpable = 0;
+		}
+#endif
+		if (dumpable && 0 > prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to prctl(PR_SET_DUMPABLE)", wp->config->name);
+		}
+	}
+#endif
+
+#ifdef HAVE_PROCCTL
+	int dumpable = PROC_TRACE_CTL_ENABLE;
+	if (wp->config->process_dumpable && -1 == procctl(P_PID, getpid(), PROC_TRACE_CTL, &dumpable)) {
+		zlog(ZLOG_SYSERROR, "[pool %s] failed to procctl(PROC_TRACE_CTL)", wp->config->name);
+	}
+#endif
+
+#ifdef HAVE_SETPFLAGS
+	if (wp->config->process_dumpable && 0 > setpflags(__PROC_PROTECT, 0)) {
+		zlog(ZLOG_SYSERROR, "[pool %s] failed to setpflags(__PROC_PROTECT)", wp->config->name);
 	}
 #endif
 
@@ -414,19 +533,25 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			return -1;
 		}
 
-		new_con = malloc(strlen(con) + strlen(wp->config->apparmor_hat) + 3); // // + 0 Byte
+		size_t new_con_length = strlen(con) + strlen(wp->config->apparmor_hat) + 3; // // + 0 Byte
+		new_con = malloc(new_con_length);
 		if (!new_con) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to allocate memory for apparmor hat change.", wp->config->name);
+			free(con);
 			return -1;
 		}
 
-		if (0 > sprintf(new_con, "%s//%s", con, wp->config->apparmor_hat)) {
+		if (0 > snprintf(new_con, new_con_length, "%s//%s", con, wp->config->apparmor_hat)) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to construct apparmor confinement.", wp->config->name);
+			free(con);
+			free(new_con);
 			return -1;
 		}
 
 		if (0 > aa_change_profile(new_con)) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to change to new confinement (%s). Please check if \"/proc/*/attr/current\" is read and writeable and \"change_profile -> %s//*\" is allowed.", wp->config->name, new_con, con);
+			free(con);
+			free(new_con);
 			return -1;
 		}
 
@@ -439,7 +564,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_unix_init_main() /* {{{ */
+int fpm_unix_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 	int is_root = !geteuid();
@@ -450,7 +575,7 @@ int fpm_unix_init_main() /* {{{ */
 		r.rlim_max = r.rlim_cur = (rlim_t) fpm_global_config.rlimit_files;
 
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
-			zlog(ZLOG_SYSERROR, "failed to set rlimit_core for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d)", fpm_global_config.rlimit_files);
+			zlog(ZLOG_SYSERROR, "failed to set rlimit_files for this pool. Please check your system limits or decrease rlimit_files. setrlimit(RLIMIT_NOFILE, %d)", fpm_global_config.rlimit_files);
 			return -1;
 		}
 	}
@@ -474,7 +599,7 @@ int fpm_unix_init_main() /* {{{ */
 		 *
 		 * The parent process has then to wait for the master
 		 * process to initialize to return a consistent exit
-		 * value. For this pupose, the master process will
+		 * value. For this purpose, the master process will
 		 * send \"1\" into the pipe if everything went well
 		 * and \"0\" otherwise.
 		 */
@@ -576,4 +701,3 @@ int fpm_unix_init_main() /* {{{ */
 
 	return 0;
 }
-/* }}} */

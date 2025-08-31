@@ -1,7 +1,7 @@
 --TEST--
 Phar object: iterate test with sub-directories and RecursiveIteratorIterator
---SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -15,10 +15,9 @@ $phar['sub/top.txt'] = 'there';
 $phar['another.file.txt'] = 'wowee';
 $newphar = new Phar($fname);
 foreach (new RecursiveIteratorIterator($newphar) as $path => $obj) {
-	var_dump($obj->getPathName());
+    var_dump($obj->getPathName());
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -28,4 +27,3 @@ __halt_compiler();
 string(%d) "phar://%sphar_dir_iterate.phar.php%canother.file.txt"
 string(%d) "phar://%sphar_dir_iterate.phar.php/sub%ctop.txt"
 string(%d) "phar://%sphar_dir_iterate.phar.php%ctop.txt"
-===DONE===

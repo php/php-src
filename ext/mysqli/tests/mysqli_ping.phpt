@@ -1,47 +1,49 @@
 --TEST--
 mysqli_ping()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once 'connect.inc';
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
 
-	$tmp    = NULL;
-	$link   = NULL;
+    var_dump(mysqli_ping($link));
 
-	if (!is_null($tmp = @mysqli_ping()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    // provoke an error to check if mysqli_ping resets it
+    mysqli_query($link, 'SELECT * FROM unknown_table');
+    if (!($errno = mysqli_errno($link)))
+        printf("[003] Statement should have caused an error\n");
 
-	require('table.inc');
+    var_dump(mysqli_ping($link));
+    if ($errno === mysqli_errno($link))
+        printf("[004] Error codes should have been reset\n");
 
-	if (!is_null($tmp = @mysqli_ping($link, $link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_close($link);
 
-	var_dump(mysqli_ping($link));
+    try {
+        mysqli_ping($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	// provoke an error to check if mysqli_ping resets it
-	$res = mysqli_query($link, 'SELECT * FROM unknown_table');
-	if (!($errno = mysqli_errno($link)))
-		printf("[003] Statement should have caused an error\n");
-
-	var_dump(mysqli_ping($link));
-	if ($errno === mysqli_errno($link))
-		printf("[004] Error codes should have been reset\n");
-
-	mysqli_close($link);
-
-	if (false !== ($tmp = mysqli_ping($link)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
-
-	print "done!";
+    print "done!";
 ?>
 --EXPECTF--
-bool(true)
+
+Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s
 bool(true)
 
-Warning: mysqli_ping(): Couldn't fetch mysqli in %s on line %d
+Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s
+bool(true)
+
+Deprecated: Function mysqli_ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this function is now redundant in %s
+mysqli object is already closed
 done!

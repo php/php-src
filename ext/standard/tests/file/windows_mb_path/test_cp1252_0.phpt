@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(437, "oem");
 
 ?>
+--CONFLICTS--
+file
 --INI--
 internal_encoding=cp1252
 --FILE--
@@ -33,10 +35,8 @@ system("dir /b " . $fn);
 remove_data("file");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\gef‰ﬂ"
 bool(true)
 bool(true)
 gef‰ﬂ
-===DONE===

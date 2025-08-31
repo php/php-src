@@ -5,7 +5,7 @@ Testing register_shutdown_function()
 
 function foo()
 {
-	print "foo";
+    print "foo";
 }
 
 register_shutdown_function("foo");

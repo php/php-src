@@ -1,54 +1,78 @@
 --TEST--
-Test of compare object handler for DateTime objects
+Test of compare object handler for DateTimeZone objects
 --FILE--
 <?php
 
-// NB: DateTimeZone class does not define a customized compare class handler so standard object handler will be used
+$timezones = array(
+    ['+0200', '-0200'],
+    ['EST', 'PST'],
+    ['Europe/Amsterdam', 'Europe/Berlin']
+);
 
-echo "Simple test for DateTimeZone compare object handler\n";
-
-//Set the default time zone
-date_default_timezone_set("Europe/London");
-
-class DateTimeZoneExt1 extends DateTimeZone {
+foreach ($timezones as [$timezone1, $timezone2]) {
+    compare_timezones($timezone1, $timezone1);
+    compare_timezones($timezone1, $timezone2);
 }
 
-class DateTimeZoneExt2 extends DateTimeZone{
-	public $foo = "Hello";
-	private $bar = 99;
+try {
+	var_dump(new DateTimeZone('Europe/Berlin') == new DateTimeZone('CET'));
+} catch (DateException $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
-class DateTimeZoneExt3 extends DateTimeZoneExt2 {
+function compare_timezones($timezone1, $timezone2)
+{
+    $tz1 = new DateTimeZone($timezone1);
+    $tz2 = new DateTimeZone($timezone2);
+    echo "compare $timezone1 with $timezone2\n";
+    echo "< ";
+    var_dump($tz1 < $tz2);
+    echo "= ";
+    var_dump($tz1 == $tz2);
+    echo "> ";
+    var_dump($tz1 > $tz2);
 }
 
-$obj1 = new DateTimeZone("Europe/London");
-$obj2 = new DateTimeZoneExt1("Europe/London");
-$obj3 = new DateTimeZoneExt2("Europe/London");
-$obj4 = new DateTimeZoneExt3("Europe/London");
+// Test comparison of uninitialized DateTimeZone objects.
+class MyDateTimeZone extends DateTimeZone {
+    function __construct() {
+         // parent ctor not called
+    }
+}
 
-echo "\n-- All the following tests should compare equal --\n";
-var_dump($obj1 == $obj1);
-echo "\n-- All the following tests should compare NOT equal --\n";
-var_dump($obj1 == $obj2);
-var_dump($obj1 == $obj3);
-var_dump($obj1 == $obj4);
-var_dump($obj2 == $obj3);
-var_dump($obj2 == $obj4);
-var_dump($obj3 == $obj4);
+$tz1 = new MyDateTimeZone();
+$tz2 = new MyDateTimeZone();
+try {
+    var_dump($tz1 == $tz2);
+} catch (Error $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 
 ?>
-===DONE===
---EXPECT--
-Simple test for DateTimeZone compare object handler
-
--- All the following tests should compare equal --
-bool(true)
-
--- All the following tests should compare NOT equal --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-===DONE===
+--EXPECTF--
+compare +0200 with +0200
+< bool(false)
+= bool(true)
+> bool(false)
+compare +0200 with -0200
+< bool(false)
+= bool(false)
+> bool(false)
+compare EST with EST
+< bool(false)
+= bool(true)
+> bool(false)
+compare EST with PST
+< bool(false)
+= bool(false)
+> bool(false)
+compare Europe/Amsterdam with Europe/Amsterdam
+< bool(false)
+= bool(true)
+> bool(false)
+compare Europe/Amsterdam with Europe/Berlin
+< bool(false)
+= bool(false)
+> bool(false)
+DateException: Cannot compare two different kinds of DateTimeZone objects
+DateObjectError: Trying to compare uninitialized DateTimeZone objects

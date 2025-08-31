@@ -2,11 +2,6 @@
 Test strip_tags() function : usage variations - valid value for 'str' and invalid values for 'allowable_tags'
 --FILE--
 <?php
-/* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string
- * Source code: ext/standard/string.c
-*/
-
 /*
  * testing functionality of strip_tags() by giving valid value for $str and invalid values for $allowable_tags argument
 */
@@ -36,6 +31,7 @@ foreach($quotes as $string_value)
 }
 
 echo "Done";
+?>
 --EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --

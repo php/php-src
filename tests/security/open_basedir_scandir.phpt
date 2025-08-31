@@ -29,56 +29,56 @@ bool(true)
 
 Warning: scandir(): open_basedir restriction in effect. File(../bad) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: scandir(../bad): failed to open dir: %s in %s on line %d
+Warning: scandir(../bad): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 
 Warning: scandir(): open_basedir restriction in effect. File(../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: scandir(../bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: scandir(../bad/bad.txt): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 
 Warning: scandir(): open_basedir restriction in effect. File(..) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: scandir(..): failed to open dir: %s in %s on line %d
+Warning: scandir(..): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 
 Warning: scandir(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: scandir(../): failed to open dir: %s in %s on line %d
+Warning: scandir(../): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 
 Warning: scandir(): open_basedir restriction in effect. File(/) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: scandir(/): failed to open dir: %s in %s on line %d
+Warning: scandir(/): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 
 Warning: scandir(): open_basedir restriction in effect. File(../bad/.) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: scandir(../bad/.): failed to open dir: %s in %s on line %d
+Warning: scandir(../bad/.): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 
 Warning: scandir(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: scandir(%s/test/bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/test/bad/bad.txt): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 
 Warning: scandir(): open_basedir restriction in effect. File(%s/test/bad/../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: scandir(%s/test/bad/../bad/bad.txt): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/test/bad/../bad/bad.txt): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)

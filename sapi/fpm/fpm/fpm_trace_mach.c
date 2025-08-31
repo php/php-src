@@ -18,7 +18,7 @@ static vm_offset_t target_page_base;
 static vm_offset_t local_page;
 static mach_msg_type_number_t local_size;
 
-static void fpm_mach_vm_deallocate() /* {{{ */
+static void fpm_mach_vm_deallocate(void)
 {
 	if (local_page) {
 		mach_vm_deallocate(mach_task_self(), local_page, local_size);
@@ -27,7 +27,6 @@ static void fpm_mach_vm_deallocate() /* {{{ */
 		local_size = 0;
 	}
 }
-/* }}} */
 
 static int fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
 {

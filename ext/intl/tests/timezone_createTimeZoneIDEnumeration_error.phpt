@@ -1,38 +1,16 @@
 --TEST--
-IntlTimeZone::createTimeZoneIDEnumeration(): errors
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+IntlTimeZone::createTimeZoneIDEnumeration() invalid zone type
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
-var_dump(IntlTimeZone::createTimeZoneIDEnumeration());
-var_dump(IntlTimeZone::createTimeZoneIDEnumeration(array()));
-var_dump(IntlTimeZone::createTimeZoneIDEnumeration(-1));
-var_dump(IntlTimeZone::createTimeZoneIDEnumeration(IntlTimeZone::TYPE_ANY, array()));
-var_dump(IntlTimeZone::createTimeZoneIDEnumeration(IntlTimeZone::TYPE_ANY, "PT", "a80"));
---EXPECTF--
-Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects at least 1 parameter, 0 given in %s on line %d
+try {
+	var_dump(IntlTimeZone::createTimeZoneIDEnumeration(-1));
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 
-Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad arguments in %s on line %d
-bool(false)
-
-Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects parameter 1 to be int, array given in %s on line %d
-
-Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad arguments in %s on line %d
-bool(false)
-
-Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad zone type in %s on line %d
-bool(false)
-
-Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects parameter 2 to be string, array given in %s on line %d
-
-Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad arguments in %s on line %d
-bool(false)
-
-Warning: IntlTimeZone::createTimeZoneIDEnumeration() expects parameter 3 to be int, string given in %s on line %d
-
-Warning: IntlTimeZone::createTimeZoneIDEnumeration(): intltz_create_time_zone_id_enumeration: bad arguments in %s on line %d
-bool(false)
+?>
+--EXPECT--
+ValueError: IntlTimeZone::createTimeZoneIDEnumeration(): Argument #1 ($type) must be one of IntlTimeZone::TYPE_ANY, IntlTimeZone::TYPE_CANONICAL, or IntlTimeZone::TYPE_CANONICAL_LOCATION

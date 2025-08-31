@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplDoublyLinkedList with overriden count()
+SPL: SplDoublyLinkedList with overridden count()
 --FILE--
 <?php
 $obj = new SplDoublyLinkedList();
@@ -7,7 +7,7 @@ $obj[] = 1;
 $obj[] = 2;
 var_dump(count($obj));
 class SplDoublyLinkedList2 extends SplDoublyLinkedList{
-    public function count() {
+    public function count(): int {
         return -parent::count();
     }
 }

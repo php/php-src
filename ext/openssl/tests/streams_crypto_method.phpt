@@ -1,21 +1,24 @@
 --TEST--
 Specific crypto method for ssl:// transports.
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'streams_crypto_method.pem.tmp';
+
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/streams_crypto_method.pem',
+        'local_cert' => '%s',
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     $client = @stream_socket_accept($server);
     if ($client) {
@@ -33,9 +36,10 @@ $serverCode = <<<'CODE'
         fclose($client);
     }
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-    $serverUri = "https://127.0.0.1:64321/";
+    $serverUri = "https://{{ ADDR }}/";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
@@ -43,12 +47,19 @@ $clientCode = <<<'CODE'
         'verify_peer_name' => false
     ]]);
 
-    phpt_wait();
     echo file_get_contents($serverUri, false, $clientCtx);
 CODE;
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveNewCertAsFileWithKey('streams_crypto_method', $certFile);
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'streams_crypto_method.pem.tmp');
 ?>
 --EXPECT--
 Hello World!

@@ -17,4 +17,4 @@ try {
 ?>
 --EXPECT--
 In autoload: string(6) "UndefI"
-Interface UndefI does not exist
+Interface "UndefI" does not exist

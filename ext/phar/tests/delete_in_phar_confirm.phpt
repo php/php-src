@@ -1,10 +1,11 @@
 --TEST--
 Phar: delete a file within a .phar (confirm disk file is changed)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
+opcache.validate_timestamps=1
 --FILE--
 <?php
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
@@ -34,7 +35,6 @@ include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/b.ph
 include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -45,8 +45,7 @@ This is b/c
 This is a
 This is b
 
-Warning: include(%sdelete_in_phar_confirm.phar.php/b/c.php): failed to open stream: phar error: "b/c.php" is not a file in phar "%sdelete_in_phar_confirm.phar.php" in %sdelete_in_phar_confirm.php on line %d
+Warning: include(%sdelete_in_phar_confirm.phar.php/b/c.php): Failed to open stream: phar error: "b/c.php" is not a file in phar "%sdelete_in_phar_confirm.phar.php" in %sdelete_in_phar_confirm.php on line %d
 
 Warning: include(): Failed opening 'phar://%sdelete_in_phar_confirm.phar.php/b/c.php' for inclusion (include_path='%s') in %sdelete_in_phar_confirm.php on line %d
 
-===DONE===

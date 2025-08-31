@@ -3,15 +3,15 @@ Test typed static property with assign op operators
 --FILE--
 <?php
 function &stringRef() {
-	static $a = "1";
-	$b = $a;
-	$a = &$b;
-	return $a;
+    static $a = "1";
+    $b = $a;
+    $a = &$b;
+    return $a;
 }
 
 class Foo {
-	public static int $i = 0;
-	public static string $s = "1";
+    public static int $i = 0;
+    public static string $s = "1";
 }
 
 Foo::$s .= "1";
@@ -28,12 +28,12 @@ Foo::$i += stringRef();
 var_dump(Foo::$i);
 
 try {
-	Foo::$i += PHP_INT_MAX;
+    Foo::$i += PHP_INT_MAX;
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 var_dump(Foo::$i);
 
 try {
-	Foo::$i .= PHP_INT_MAX;
+    Foo::$i .= PHP_INT_MAX;
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 var_dump(Foo::$i);
 
@@ -43,7 +43,7 @@ string(2) "11"
 string(2) "13"
 string(2) "12"
 int(1)
-Typed property Foo::$i must be int, float used
+Cannot assign float to property Foo::$i of type int
 int(1)
-Typed property Foo::$i must be int, string used
+Cannot assign string to property Foo::$i of type int
 int(1)

@@ -4,13 +4,13 @@ SQLite3::loadExtension with empty extension test
 Jelle Lampaert
 #Belgian Testfest 2009
 --INI--
-sqlite3.extension_dir={TMP}
+sqlite3.extension_dir="{TMP}"
+--EXTENSIONS--
+sqlite3
 --SKIPIF--
 <?php
-require_once(__DIR__ . '/skipif.inc');
-
 if (!method_exists('SQLite3', 'loadExtension')) {
-	die("skip if SQLITE_OMIT_LOAD_EXTENSION defined");
+    die("skip if SQLITE_OMIT_LOAD_EXTENSION defined");
 }
 ?>
 --FILE--
@@ -20,10 +20,10 @@ $db = new SQLite3(':memory:');
 
 try {
   $db->loadExtension("");
-} catch (Extension $ex) {
+} catch (\Throwable $ex) {
   var_dump($ex->getMessage());
 }
 
 ?>
 --EXPECTF--
-Warning: SQLite3::loadExtension(): Empty string as an extension in %s on line %d
+string(63) "SQLite3::loadExtension(): Argument #1 ($name) must not be empty"

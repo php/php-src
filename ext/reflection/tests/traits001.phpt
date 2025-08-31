@@ -19,6 +19,7 @@ var_dump($rFoo->isTrait());
 var_dump($rBar->isTrait());
 echo $rFoo;
 echo $rBar;
+?>
 --EXPECTF--
 bool(true)
 bool(false)

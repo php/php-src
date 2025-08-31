@@ -4,7 +4,7 @@
 <?php
 
 function foo(): \iterable {
-	return [];
+    return [];
 }
 var_dump(foo());
 

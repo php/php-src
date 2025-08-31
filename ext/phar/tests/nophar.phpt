@@ -6,9 +6,7 @@ Phar: phar run without ext/phar with default stub
 <?php
 include __DIR__ . '/files/nophar.phar';
 ?>
-===DONE===
 --EXPECT--
 in b
 <?php include "b/c.php";
 in d
-===DONE===

@@ -1,7 +1,7 @@
 --TEST--
 Phar: tar-based phar, valid 1
---SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -32,8 +32,8 @@ echo $e->getMessage()."\n";
 }
 
 while (false !== ($v = readdir($tar))) {
-	echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
-	echo $v . "\n";
+    echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
+    echo $v . "\n";
 }
 closedir($tar);
 
@@ -41,13 +41,12 @@ closedir($tar);
 echo "second round\n";
 $tar = opendir($alias . '/');
 while (false !== ($v = readdir($tar))) {
-	echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
-	echo $v . "\n";
+    echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
+    echo $v . "\n";
 }
 closedir($tar);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tar_003.phar.tar');
@@ -67,4 +66,3 @@ dir
 internal
 file
 tar_003.phpt
-===DONE===

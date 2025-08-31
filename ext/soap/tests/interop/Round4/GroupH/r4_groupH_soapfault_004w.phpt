@@ -1,12 +1,12 @@
 --TEST--
 SOAP Interop Round4 GroupH SoapFault 004 (php/wsdl): echoMustUnderstandFault
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$hdr = new SoapHeader("http://soapinterop.org/wsdl", "UnknownHeaderRequest", "Hello World", 1);
+$hdr = new SoapHeader("http://soapinterop.org/wsdl", "UnknownHeaderRequest", "Hello World", true);
 $client = new SoapClient(__DIR__."/round4_groupH_soapfault.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->__soapCall("echoVersionMismatchFault",array(), null, $hdr);
 echo $client->__getlastrequest();

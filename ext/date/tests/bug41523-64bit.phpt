@@ -1,7 +1,7 @@
 --TEST--
 Bug #41523 (strtotime('0000-00-00 00:00:00') is parsed as 1999-11-30) (64 bit)
 --SKIPIF--
-<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK"; ?>
+<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --FILE--
 <?php
 date_default_timezone_set("UTC");

@@ -9,24 +9,22 @@ function bar($x='no argument')
 }
 try
 {
-	bar('first try');
+    bar('first try');
 }
 catch (Exception $e)
 {
-	print $e->getMessage()."\n";
+    print $e->getMessage()."\n";
 }
 try
 {
-	call_user_func('bar','second try');
+    call_user_func('bar','second try');
 }
 catch (Exception $e)
 {
-	print $e->getMessage()."\n";
+    print $e->getMessage()."\n";
 }
 
 ?>
-===DONE===
 --EXPECT--
 This is an exception from bar(first try).
 This is an exception from bar(second try).
-===DONE===

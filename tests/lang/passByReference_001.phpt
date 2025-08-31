@@ -4,14 +4,14 @@ passing of function parameters by reference
 <?php
 function f($arg1, &$arg2)
 {
-	var_dump($arg1++);
-	var_dump($arg2++);
+    var_dump($arg1++);
+    var_dump($arg2++);
 }
 
 function g (&$arg1, &$arg2)
 {
-	var_dump($arg1);
-	var_dump($arg2);
+    var_dump($arg1);
+    var_dump($arg2);
 }
 $a = 7;
 $b = 15;

@@ -1,20 +1,10 @@
 --TEST--
 Test gzuncompress() function : basic functionality
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-/* Prototype  : string gzuncompress(string data [, int length])
- * Description: Unzip a gzip-compressed string
- * Source code: ext/zlib/zlib.c
- * Alias to functions:
- */
-
-include(__DIR__ . '/data.inc');
+include(__DIR__ . '/data/data.inc');
 
 echo "*** Testing gzuncompress() : basic functionality ***\n";
 
@@ -31,7 +21,6 @@ echo "\n-- Calling gzuncompress() with max length of $length --\n";
 echo "Result length is ".  strlen(gzuncompress($compressed, $length)) .  "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing gzuncompress() : basic functionality ***
 
@@ -40,4 +29,3 @@ int(0)
 
 -- Calling gzuncompress() with max length of 3547 --
 Result length is 3547
-===DONE===

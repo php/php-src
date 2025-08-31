@@ -1,33 +1,29 @@
 --TEST--
 FFI 100: PHP symbols
+--EXTENSIONS--
+ffi
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php
 try {
-	FFI::cdef("extern void *zend_printf;");
+    FFI::cdef("extern void *zend_printf;");
 } catch (Throwable $e) {
-	die('skip PHP symbols not available');
+    die('skip PHP symbols not available');
 }
 ?>
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-// Check if target supports "fastcall" calling convention
-try {
-	FFI::cdef("extern size_t __attribute__((fastcall)) (*zend_printf)(const char *format);");
-	$fastcall = "__attribute__((fastcall)) ";
-} catch (Throwable $e) {
-	$fastcall = "";
-}
+require_once('utils.inc');
+$fastcall = ffi_get_fastcall_specifier();
 $zend = FFI::cdef("
-	const char *get_zend_version(void);
-	//char *get_zend_version(void);
-	extern size_t (*zend_printf)(const char *format, ...);
+    const char *get_zend_version(void);
+    //char *get_zend_version(void);
+    extern size_t (*zend_printf)(const char *format, ...);
 
-	unsigned long $fastcall zend_hash_func(const char *str, size_t len);
+    unsigned long $fastcall zend_hash_func(const char *str, size_t len);
 
-	void $fastcall zend_str_tolower(char *str, size_t length);
+    void $fastcall zend_str_tolower(char *str, size_t length);
 
 ");
 var_dump(trim(explode("\n",$zend->get_zend_version())[0]));

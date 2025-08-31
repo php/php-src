@@ -47,7 +47,6 @@ autoload_first
 Fatal error: Uncaught Exception: first in %sspl_autoload_012.php:%d
 Stack trace:
 #0 [internal function]: autoload_first('ThisClassDoesNo...')
-#1 [internal function]: spl_autoload_call('ThisClassDoesNo...')
-#2 %sspl_autoload_012.php(%d): class_exists('ThisClassDoesNo...')
-#3 {main}
+#1 %sspl_autoload_012.php(%d): class_exists('ThisClassDoesNo...')
+#2 {main}
   thrown in %s on line %d

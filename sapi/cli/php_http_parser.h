@@ -31,10 +31,10 @@ extern "C" {
 # include <windows.h>
 # include "config.w32.h"
 #else
-# include "php_config.h"
+# include <php_config.h>
 #endif
 
-#include "php_stdint.h"
+#include <stdint.h>
 
 /* Compile with -DPHP_HTTP_PARSER_STRICT=0 to make less checks, but run
  * faster
@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 
-/* Maximium header size allowed */
+/* Maximum header size allowed */
 #define PHP_HTTP_MAX_HEADER_SIZE (80*1024)
 
 
@@ -63,7 +63,7 @@ typedef struct php_http_parser_settings php_http_parser_settings;
  * HEAD request which may contain 'Content-Length' or 'Transfer-Encoding:
  * chunked' headers that indicate the presence of a body.
  *
- * http_data_cb does not return data chunks. It will be call arbitrarally
+ * http_data_cb does not return data chunks. It will be call arbitrarily
  * many times for each string. E.G. you might get 10 callbacks for "on_path"
  * each providing just a few characters more data.
  */

@@ -1,24 +1,24 @@
 --TEST--
-bug 7715, floats value with integer or incomplete input
+Bug #7715 (floats value with integer or incomplete input)
 --INI--
 precision=14
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $data = array(
-	'.23',
-	'-42',
-	'+42',
-	'.4',
-	'-.4',
-	'1000000000000',
-	'-1000000000000',
-	'02.324'
+    '.23',
+    '-42',
+    '+42',
+    '.4',
+    '-.4',
+    '1000000000000',
+    '-1000000000000',
+    '02.324'
 );
 foreach ($data as $val) {
-	$res = filter_var($val, FILTER_VALIDATE_FLOAT);
-	var_dump($res);
+    $res = filter_var($val, FILTER_VALIDATE_FLOAT);
+    var_dump($res);
 }
 echo "\n";
 ?>

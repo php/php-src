@@ -5,7 +5,7 @@ Returning a reference from a function
 
 function &returnByRef(&$arg1)
 {
-	return $arg1;
+    return $arg1;
 }
 
 $a = 7;

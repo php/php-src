@@ -5,37 +5,37 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function test($phpEx)
 {
-	$expected_data_sets = array(
-		1 => array(
-			'id'  => 1,
-		),
-		6 => array(
-			'viewtopic' => strval("phpBB/viewtopic.$phpEx"),
+    $expected_data_sets = array(
+        1 => array(
+            'id'  => 1,
+        ),
+        6 => array(
+            'viewtopic' => strval("phpBB/viewtopic.$phpEx"),
 
-		),
-	);
+        ),
+    );
 
-	$test_cases = array(
-		array(
-			'expected' => array(6),
-		),
-	);
+    $test_cases = array(
+        array(
+            'expected' => array(6),
+        ),
+    );
 
-	foreach ($test_cases as $case => $case_data)
-	{
-		foreach ($case_data['expected'] as $data_set => $expected)
-		{
-			$test_cases[$case]['expected'][$data_set] = $expected_data_sets[$expected];
-		}
-	}
+    foreach ($test_cases as $case => $case_data)
+    {
+        foreach ($case_data['expected'] as $data_set => $expected)
+        {
+            $test_cases[$case]['expected'][$data_set] = $expected_data_sets[$expected];
+        }
+    }
 
-	return $test_cases;
+    return $test_cases;
 }
 var_dump(test("xxx"));
 ?>

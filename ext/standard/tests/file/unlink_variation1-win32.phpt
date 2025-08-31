@@ -8,9 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
 /* Delete file having default permission but its dir having readonly permission
    Delete file having readonly permission but dir having default permission

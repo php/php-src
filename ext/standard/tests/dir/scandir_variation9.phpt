@@ -2,11 +2,6 @@
 Test scandir() function : usage variations - different ints as $sorting_order arg
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Pass different integers as $sorting_order argument to test how scandir()
  * re-orders the array
@@ -26,12 +21,11 @@ mkdir($dir);
 $ints = array (PHP_INT_MAX, -PHP_INT_MAX, 0);
 
 foreach($ints as $sorting_order) {
-	var_dump( scandir($dir, $sorting_order) );
+    var_dump( scandir($dir, $sorting_order) );
 }
 
 delete_files($dir, 2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__ . '/scandir_variation9';
@@ -69,4 +63,3 @@ array(4) {
   [3]=>
   string(9) "file2.tmp"
 }
-===DONE===

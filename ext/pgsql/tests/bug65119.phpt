@@ -1,19 +1,23 @@
 --TEST--
 Bug #65119 (pg_copy_from() modifies input array variable)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
-include 'config.inc';
+include 'inc/config.inc';
+$table_name = 'table_bug65119';
 
 function test(Array $values, $conn_str) {
+  global $table_name;
   $connection = pg_pconnect($conn_str, PGSQL_CONNECT_FORCE_NEW);
-  pg_query("begin");
-  pg_query("CREATE TABLE bug65119 (i INTEGER)");
-  pg_copy_from($connection, "bug65119", $values, "\t", "NULL");
-  pg_query("rollback");
+  pg_query($connection, "BEGIN");
+  pg_query($connection, "CREATE TABLE {$table_name} (i INTEGER)");
+  pg_copy_from($connection, $table_name, $values, "\t", "NULL");
+  pg_query($connection, "ROLLBACK");
 }
 
 $values = Array(1,2,3);

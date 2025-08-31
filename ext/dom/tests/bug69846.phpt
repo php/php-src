@@ -1,7 +1,7 @@
 --TEST--
-Bug #69846 Segmenation fault (access violation) when iterating over DOMNodeList
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+Bug #69846 Segmentation fault (access violation) when iterating over DOMNodeList
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -28,10 +28,9 @@ foreach ($dataNodes AS $node) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 int(3)
-object(DOMText)#%d (19) {
+object(DOMText)#%d (23) {
   ["wholeText"]=>
   string(3) "
   "
@@ -40,6 +39,10 @@ object(DOMText)#%d (19) {
   "
   ["length"]=>
   int(3)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["nodeName"]=>
   string(5) "#text"
   ["nodeValue"]=>
@@ -49,8 +52,10 @@ object(DOMText)#%d (19) {
   int(3)
   ["parentNode"]=>
   NULL
-  ["childNodes"]=>
+  ["parentElement"]=>
   NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
   ["lastChild"]=>
@@ -61,6 +66,8 @@ object(DOMText)#%d (19) {
   NULL
   ["attributes"]=>
   NULL
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
@@ -75,10 +82,24 @@ object(DOMText)#%d (19) {
   string(3) "
   "
 }
-object(DOMElement)#%d (18) {
+object(DOMElement)#%d (27) {
   ["tagName"]=>
   string(5) "form1"
+  ["className"]=>
+  string(0) ""
+  ["id"]=>
+  string(0) ""
   ["schemaTypeInfo"]=>
+  NULL
+  ["firstElementChild"]=>
+  string(22) "(object value omitted)"
+  ["lastElementChild"]=>
+  string(22) "(object value omitted)"
+  ["childElementCount"]=>
+  int(3)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
   NULL
   ["nodeName"]=>
   string(5) "form1"
@@ -92,6 +113,8 @@ object(DOMElement)#%d (18) {
   int(1)
   ["parentNode"]=>
   NULL
+  ["parentElement"]=>
+  NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
   ["firstChild"]=>
@@ -104,6 +127,8 @@ object(DOMElement)#%d (18) {
   NULL
   ["attributes"]=>
   string(22) "(object value omitted)"
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
@@ -121,7 +146,7 @@ object(DOMElement)#%d (18) {
     Value C
   "
 }
-object(DOMText)#%d (19) {
+object(DOMText)#%d (23) {
   ["wholeText"]=>
   string(1) "
 "
@@ -130,6 +155,10 @@ object(DOMText)#%d (19) {
 "
   ["length"]=>
   int(1)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["nodeName"]=>
   string(5) "#text"
   ["nodeValue"]=>
@@ -139,8 +168,10 @@ object(DOMText)#%d (19) {
   int(3)
   ["parentNode"]=>
   NULL
-  ["childNodes"]=>
+  ["parentElement"]=>
   NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
   ["lastChild"]=>
@@ -151,6 +182,8 @@ object(DOMText)#%d (19) {
   NULL
   ["attributes"]=>
   NULL
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
@@ -165,4 +198,3 @@ object(DOMText)#%d (19) {
   string(1) "
 "
 }
-===DONE===

@@ -1,7 +1,7 @@
 --TEST--
 locale_get_all_variants.phpt()
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -12,34 +12,40 @@ locale_get_all_variants.phpt()
 
 function ut_main()
 {
-	$locales  = array(
-		'sl_IT_nedis_KIRTI',
-		'sl_IT_nedis-a-kirti-x-xyz',
-		'sl_IT_rozaj',
-		'sl_IT_NEDIS_ROJAZ_1901',
-		'i-enochian',
-		'zh-hakka',
-		'zh-wuu',
-		'i-tay',
-		'sgn-BE-nl',
-		'sgn-CH-de',
-		'sl_IT_rozaj@currency=EUR'
-	);
+    $locales  = array(
+        'sl_IT_nedis_KIRTI',
+        'sl_IT_nedis-a-kirti-x-xyz',
+        'sl_IT_rozaj',
+        'sl_IT_NEDIS_ROJAZ_1901',
+        'i-enochian',
+        'zh-hakka',
+        'zh-wuu',
+        'i-tay',
+        'sgn-BE-nl',
+        'sgn-CH-de',
+        'sl_IT_rozaj@currency=EUR'
+    );
     $res_str = '';
-	foreach($locales as $locale){
-		$variants_arr = ut_loc_locale_get_all_variants( $locale);
-		$res_str .= "$locale : variants ";
-		if( $variants_arr){
-			foreach($variants_arr as $variant){
-				$res_str .= "'$variant',";
-			}
-		}else{
-			$res_str .= "--none";
-		}
-		$res_str .= "\n";
-	}
+    foreach($locales as $locale){
+        $variants_arr = ut_loc_locale_get_all_variants( $locale);
+        $res_str .= "$locale : variants ";
+        if( $variants_arr){
+            foreach($variants_arr as $variant){
+                $res_str .= "'$variant',";
+            }
+        }else{
+            $res_str .= "--none";
+        }
+        $res_str .= "\n";
+    }
 
-	$res_str .= "\n";
+    try {
+	    ut_loc_locale_get_all_variants("i-\0tay");
+    } catch (\ValueError $e) {
+	    echo $e->getMessage(). PHP_EOL;
+    }
+
+    $res_str .= "\n";
     return $res_str;
 
 }
@@ -49,6 +55,8 @@ ut_run();
 
 ?>
 --EXPECT--
+Locale::getAllVariants(): Argument #1 ($locale) must not contain any null bytes
+locale_get_all_variants(): Argument #1 ($locale) must not contain any null bytes
 sl_IT_nedis_KIRTI : variants 'NEDIS','KIRTI',
 sl_IT_nedis-a-kirti-x-xyz : variants 'NEDIS',
 sl_IT_rozaj : variants 'ROZAJ',

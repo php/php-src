@@ -41,12 +41,4 @@ object(A)#2 (0) {
 object(X)#2 (0) {
 }
 
-Warning: Declaration of Y::method(Z $a) should be compatible with X::method(Y $a) in %s on line %d
-object(Z)#2 (0) {
-}
-object(Y)#2 (0) {
-}
-object(B)#2 (0) {
-}
-object(B)#2 (0) {
-}
+Fatal error: Declaration of Y::method(Z $a) must be compatible with X::method(Y $a) in %s on line %d

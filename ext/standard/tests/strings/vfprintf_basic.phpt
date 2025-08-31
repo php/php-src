@@ -6,20 +6,14 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 precision=14
 --FILE--
 <?php
-/* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream
- * Source code: ext/standard/formatted_print.c
- * Alias to functions:
- */
-
 function writeAndDump($fp, $format, $args)
 {
-	ftruncate( $fp, 0 );
-	$length = vfprintf( $fp, $format, $args );
-	rewind( $fp );
-	$content = stream_get_contents( $fp );
-	var_dump( $content );
-	var_dump( $length );
+    ftruncate( $fp, 0 );
+    $length = vfprintf( $fp, $format, $args );
+    rewind( $fp );
+    $content = stream_get_contents( $fp );
+    var_dump( $content );
+    var_dump( $length );
 }
 
 echo "*** Testing vfprintf() : basic functionality ***\n";
@@ -42,7 +36,6 @@ writeAndDump( $fp, "Testing %b %d %f %s %x %X", array( 9, 6, 2.5502, "foobar", 1
 fclose( $fp );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -68,4 +61,3 @@ string(2) "50"
 int(2)
 string(35) "Testing 1001 6 2.550200 foobar f 41"
 int(35)
-===DONE===

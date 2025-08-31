@@ -1,7 +1,7 @@
 --TEST--
 XMLWriter: libxml2 XML Writer, file buffer, flush
---SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 
@@ -17,8 +17,6 @@ echo file_get_contents($doc_dest);
 unset($xw);
 unlink($doc_dest);
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <tag1/>
-===DONE===

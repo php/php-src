@@ -1,17 +1,19 @@
 --TEST--
 GetImageSize() for compressed swf files
+--EXTENSIONS--
+zlib
 --SKIPIF--
 <?php
-	if (!defined("IMAGETYPE_SWC") || !extension_loaded('zlib')) {
-		die("skip zlib extension is not available");
-	}
+if (!defined("IMAGETYPE_SWC")) {
+    die("skip IMAGETYPE_SWC is not available");
+}
 ?>
 --FILE--
 <?php
-	var_dump(getimagesize(__DIR__ . "/test13pix.swf"));
+    var_dump(getimagesize(__DIR__ . "/test13pix.swf"));
 ?>
 --EXPECT--
-array(5) {
+array(7) {
   [0]=>
   int(550)
   [1]=>
@@ -22,4 +24,8 @@ array(5) {
   string(24) "width="550" height="400""
   ["mime"]=>
   string(29) "application/x-shockwave-flash"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }

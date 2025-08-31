@@ -1,7 +1,7 @@
 --TEST--
 Phar: PharFileInfo::getCRC32
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -13,7 +13,7 @@ $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 
-// compressed file length does not match incompressed lentgh for an uncompressed file
+// compressed file length does not match incompressed length for an uncompressed file
 
 $files = array();
 $files['a/subdir/here'] = array('cont'=>'a','ulen'=>1,'clen'=>1);
@@ -39,11 +39,9 @@ var_dump($b->getCRC32());
 echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
 Phar entry is a directory, does not have a CRC
 Phar entry was not CRC checked
 int(%s)
-===DONE===

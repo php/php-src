@@ -1,9 +1,7 @@
 --TEST--
 Crash when calling a method of a class that inherits PDOStatement
---SKIPIF--
-<?php
-if (!extension_loaded('pdo')) die('skip');
-?>
+--EXTENSIONS--
+pdo
 --FILE--
 <?php
 

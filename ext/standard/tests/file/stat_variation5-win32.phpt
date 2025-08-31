@@ -9,11 +9,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the stats of file opened in write mode and then same in read mode */
 
 $file_path = __DIR__;
@@ -32,7 +27,7 @@ fclose($file_handle);
 $old_stat = stat($filename);
 // clear the stat
 clearstatcache();
-sleep(2);
+sleep(1);
 // opening file again in read mode
 $file_handle = fopen($filename, "r");  // read file
 fclose($file_handle);

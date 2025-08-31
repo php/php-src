@@ -1,5 +1,7 @@
 --TEST--
 Bug #76991: Incorrect tokenization of multiple invalid flexible heredoc strings
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

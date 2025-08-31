@@ -1,9 +1,5 @@
 --TEST--
 SPL: spl_autoload_functions()
---SKIPIF--
-<?php
-if (spl_autoload_functions() !== false) die('skip __autoload() registered by php.ini');
-?>
 --FILE--
 <?php
 
@@ -39,10 +35,9 @@ spl_autoload_unregister('spl_autoload');
 var_dump(spl_autoload_functions());
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECT--
-bool(false)
+--EXPECTF--
+array(0) {
+}
 array(1) {
   [0]=>
   string(12) "spl_autoload"
@@ -61,10 +56,13 @@ array(2) {
   [1]=>
   string(16) "SplAutoloadTest2"
 }
-bool(false)
+
+Deprecated: spl_autoload_unregister(): Using spl_autoload_call() as a callback for spl_autoload_unregister() is deprecated, to remove all registered autoloaders, call spl_autoload_unregister() for all values returned from spl_autoload_functions() in %s on line %d
+array(0) {
+}
 array(1) {
   [0]=>
   string(12) "spl_autoload"
 }
-bool(false)
-===DONE===
+array(0) {
+}

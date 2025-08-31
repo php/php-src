@@ -1,51 +1,35 @@
 --TEST--
 DBA DB4 Multiple File Creation Test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-$handler = "db4";
-require_once(__DIR__ .'/skipif.inc');
-die("info $HND handler used");
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+check_skip('db4');
 ?>
 --FILE--
 <?php
 $handler = "db4";
-require_once(__DIR__ .'/test.inc');
 echo "database handler: $handler\n";
-$db_file1 = $db_filename1 = __DIR__.'/test1.dbm';
-$db_file2 = $db_filename2 = __DIR__.'/test2.dbm';
-if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
-    echo "database file created\n";
-} else {
-    echo "$db_file does not exist\n";
-}
-if (($db_file1=dba_open($db_file1, "n", $handler))!==FALSE) {
-    echo "database file created\n";
-} else {
-    echo "$db_file does not exist\n";
-}
-if (($db_file2=dba_open($db_file2, "n", $handler))!==FALSE) {
-    echo "database file created\n";
-} else {
-    echo "$db_file does not exist\n";
-}
+$db_file1 = __DIR__.'/test1.dbm';
+$db_file2 = __DIR__.'/test2.dbm';
+$db_file1 = dba_open($db_file1, "n", $handler);
+$db_file2 = dba_open($db_file2, "n", $handler);
 var_dump(dba_list());
-dba_close($db_file);
+dba_close($db_file1);
+dba_close($db_file2);
 
-@unlink($db_filename1);
-@unlink($db_filename2);
 ?>
 --CLEAN--
 <?php
-require(__DIR__ .'/clean.inc');
+$db_filename1 = __DIR__.'/test1.dbm';
+$db_filename2 = __DIR__.'/test2.dbm';
+@unlink($db_filename1);
+@unlink($db_filename2);
 ?>
 --EXPECTF--
 database handler: db4
-database file created
-database file created
-database file created
-array(3) {
-  [%d]=>
-  string(%d) "%stest0.dbm"
+array(2) {
   [%d]=>
   string(%d) "%stest1.dbm"
   [%d]=>

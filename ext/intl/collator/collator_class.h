@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -48,7 +46,7 @@ static inline Collator_object *php_intl_collator_fetch_object(zend_object *obj) 
 }
 #define Z_INTL_COLLATOR_P(zv) php_intl_collator_fetch_object(Z_OBJ_P(zv))
 
-void collator_register_Collator_class( void );
+void collator_register_Collator_symbols(int module_number);
 void collator_object_init( Collator_object* co );
 void collator_object_destroy( Collator_object* co );
 
@@ -68,7 +66,7 @@ extern zend_class_entry *Collator_ce_ptr;
     intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );           \
     if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )                                \
     {                                                                           \
-        intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), msg, 0 ); \
+        intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), msg); \
         RETURN_FALSE;                                                           \
     }                                                                           \
 

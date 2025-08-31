@@ -3,7 +3,6 @@ array_udiff_assoc(): Test return type and value for expected input
 --FILE--
 <?php
 /*
-* proto array array_udiff_assoc ( array $array1, array $array2 [, array $ ..., callback $data_compare_func] )
 * Function is implemented in ext/standard/array.c
 */
 class cr {

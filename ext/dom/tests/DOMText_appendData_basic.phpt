@@ -3,8 +3,8 @@ DOMText::appendData basic functionality test
 --CREDITS--
 Mike Sullivan <mike@regexia.com>
 #TestFest 2008 (London)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -28,7 +28,6 @@ echo "Text Content: " . $textnode->data . "\n";
 echo "\n" . $document->saveXML();
 
 ?>
-===DONE===
 --EXPECT--
 Text Length (one append): 4
 Text Length (two appends): 8
@@ -36,5 +35,3 @@ Text Content: data><&"
 
 <?xml version="1.0"?>
 <root><text>data&gt;&lt;&amp;"</text></root>
-===DONE===
-	

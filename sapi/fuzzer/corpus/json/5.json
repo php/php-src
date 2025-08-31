@@ -1,0 +1,5 @@
+[
+{"":"value"},
+{"":"value", "key":"value"},
+{"key":"value", "":"value"}
+]

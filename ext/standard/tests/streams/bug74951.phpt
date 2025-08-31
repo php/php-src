@@ -8,5 +8,6 @@ trait Stream00ploiter{
 }
 stream_wrapper_register('e0ploit','Stream00ploiter');
 $s=fopen('e0ploit://',0);
+?>
 --EXPECTF--
-Warning: fopen(e0ploit://): failed to open stream: operation failed in %s%ebug74951.php on line 7
+Warning: fopen(e0ploit://): Failed to open stream: operation failed in %s%ebug74951.php on line 7

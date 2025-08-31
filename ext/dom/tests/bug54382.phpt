@@ -1,9 +1,7 @@
 --TEST--
 Bug #54382 DOMNode::getAttributeNodeNS doesn't get xmlns* attributes
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xmlString = '<?xml version="1.0" encoding="utf-8" ?>
@@ -22,6 +20,7 @@ if ($ns2 == NULL) {
   echo 'namespace node prefix=' . $ns2->prefix . "\n";
   echo 'namespace node namespaceURI=' . $ns2->namespaceURI . "\n";
 }
+?>
 --EXPECT--
 namespace node prefix=ns2
 namespace node namespaceURI=http://ns2

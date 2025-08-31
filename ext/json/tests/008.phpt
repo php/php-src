@@ -1,7 +1,5 @@
 --TEST--
 json_decode() with large integers
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 $json = '{"largenum":123456789012345678901234567890}';
@@ -12,6 +10,6 @@ var_dump($x->largenum);
 echo "Done\n";
 ?>
 --EXPECT--
-float(1.2345678901235E+29)
+float(1.2345678901234568E+29)
 string(30) "123456789012345678901234567890"
 Done

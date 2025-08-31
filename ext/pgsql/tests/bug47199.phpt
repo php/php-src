@@ -1,23 +1,24 @@
 --TEST--
 Bug #47199 (pg_delete fails on NULL)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once('config.inc');
+require_once('inc/config.inc');
 
 $dbh = pg_connect($conn_str);
 $tbl_name = 'test_47199';
-@pg_query("DROP TABLE $tbl_name");
-pg_query("CREATE TABLE $tbl_name (null_field INT, not_null_field INT NOT NULL)");
+pg_query($dbh, "CREATE TABLE $tbl_name (null_field INT, not_null_field INT NOT NULL)");
 
 pg_insert($dbh, $tbl_name, array('null_field' => null, 'not_null_field' => 1));
 pg_insert($dbh, $tbl_name, array('null_field' => null, 'not_null_field' => 2));
 
-var_dump(pg_fetch_all(pg_query('SELECT * FROM '. $tbl_name)));
+var_dump(pg_fetch_all(pg_query($dbh, 'SELECT * FROM '. $tbl_name)));
 
 $query = pg_delete($dbh, $tbl_name, array('null_field' => NULL,'not_null_field' => 2), PGSQL_DML_STRING|PGSQL_DML_EXEC);
 
@@ -27,13 +28,20 @@ $query = pg_update($dbh, $tbl_name, array('null_field' => NULL, 'not_null_field'
 
 echo $query, "\n";
 
-var_dump(pg_fetch_all(pg_query('SELECT * FROM '. $tbl_name)));
+var_dump(pg_fetch_all(pg_query($dbh, 'SELECT * FROM '. $tbl_name)));
 
-@pg_query("DROP TABLE $tbl_name");
 pg_close($dbh);
 
 echo PHP_EOL."Done".PHP_EOL;
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$dbh = pg_connect($conn_str);
+
+$tbl_name = 'test_47199';
+pg_query($dbh, "DROP TABLE IF EXISTS $tbl_name");
 ?>
 --EXPECT--
 array(2) {

@@ -1,58 +1,54 @@
 --TEST--
 gmp_sub() tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
-var_dump(gmp_sub());
-var_dump(gmp_sub(""));
-var_dump(gmp_sub("", ""));
-var_dump(gmp_sub("", "", ""));
-var_dump(gmp_sub(array(), array()));
+try {
+    var_dump(gmp_sub("", ""));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_sub(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump($g = gmp_sub(10000, 10001));
 var_dump(gmp_strval($g));
 var_dump($g = gmp_sub(10000, -1));
 var_dump(gmp_strval($g));
-var_dump($g = gmp_sub(10000, new stdclass));
-var_dump(gmp_strval($g));
-var_dump($g = gmp_sub(new stdclass, 100));
-var_dump(gmp_strval($g));
+
+try {
+    var_dump($g = gmp_sub(10000, new stdclass));
+    var_dump(gmp_strval($g));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump($g = gmp_sub(new stdclass, 100));
+    var_dump(gmp_strval($g));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: gmp_sub() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: gmp_sub() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_sub(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-bool(false)
-
-Warning: gmp_sub() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-object(GMP)#%d (1) {
+--EXPECT--
+gmp_sub(): Argument #1 ($num1) is not an integer string
+gmp_sub(): Argument #1 ($num1) must be of type GMP|string|int, array given
+object(GMP)#1 (1) {
   ["num"]=>
   string(2) "-1"
 }
 string(2) "-1"
-object(GMP)#%d (1) {
+object(GMP)#3 (1) {
   ["num"]=>
   string(5) "10001"
 }
 string(5) "10001"
-
-Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-string(1) "0"
-
-Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-string(1) "0"
+gmp_sub(): Argument #2 ($num2) must be of type GMP|string|int, stdClass given
+gmp_sub(): Argument #1 ($num1) must be of type GMP|string|int, stdClass given
 Done

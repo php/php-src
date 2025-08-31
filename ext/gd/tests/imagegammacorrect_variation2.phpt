@@ -1,8 +1,12 @@
 --TEST--
 Apply imagegammacorrect() to a step wedge
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
@@ -29,6 +33,9 @@ function test_gamma($in, $out, $constructor)
 
     imagegammacorrect($im, $in, $out);
 
+    if ($constructor === "imagecreate") {
+        imagepalettetotruecolor($im);
+    }
     $filename = __DIR__ . DIRECTORY_SEPARATOR
         . "imagegammacorrect_variation2_{$in}_{$out}.png";
     $kind = $constructor === 'imagecreate' ? 'palette' : 'truecolor';
@@ -61,7 +68,6 @@ function cell_color($im, $x, $y)
     }
 }
 ?>
-===DONE===
 --EXPECT--
 palette gamma (1, 2): The images are equal.
 truecolor gamma (1, 2): The images are equal.
@@ -69,4 +75,3 @@ palette gamma (1, 1): The images are equal.
 truecolor gamma (1, 1): The images are equal.
 palette gamma (2, 1): The images are equal.
 truecolor gamma (2, 1): The images are equal.
-===DONE===

@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -24,8 +22,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
@@ -33,7 +31,7 @@
 /* Cache of the server supported datatypes, initialized in handle_factory */
 zval* pdo_dblib_datatypes;
 
-static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
+static void dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_err *einfo = &H->err;
@@ -57,11 +55,11 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 
 	/* don't return anything if there's nothing to return */
 	if (msg == NULL && einfo->dberr == 0 && einfo->oserr == 0 && einfo->severity == 0) {
-		return 0;
+		return;
 	}
 
 	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
-		msg, einfo->dberr, einfo->severity, stmt ? stmt->active_query_string : "");
+		msg, einfo->dberr, einfo->severity, stmt ? ZSTR_VAL(stmt->active_query_string) : "");
 
 	add_next_index_long(info, einfo->dberr);
 	add_next_index_string(info, message);
@@ -71,12 +69,10 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 	if (einfo->oserrstr) {
 		add_next_index_string(info, einfo->oserrstr);
 	}
-
-	return 1;
 }
 
 
-static int dblib_handle_closer(pdo_dbh_t *dbh)
+static void dblib_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
@@ -93,10 +89,9 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}
-	return 0;
 }
 
-static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static bool dblib_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_stmt *S = ecalloc(1, sizeof(*S));
@@ -108,17 +103,17 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	S->computed_column_name_count = 0;
 	S->err.sqlstate = stmt->error_code;
 
-	return 1;
+	return true;
 }
 
-static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
+static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	RETCODE ret, resret;
 
 	dbsetuserdata(H->link, (BYTE*)&H->err);
 
-	if (FAIL == dbcmd(H->link, sql)) {
+	if (FAIL == dbcmd(H->link, ZSTR_VAL(sql))) {
 		return -1;
 	}
 
@@ -147,14 +142,14 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 	return DBCOUNT(H->link);
 }
 
-static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
+static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
-	zend_bool use_national_character_set = 0;
-
+	bool use_national_character_set = 0;
 	size_t i;
-	char * q;
-	*quotedlen = 0;
+	char *q;
+	size_t quotedlen = 0, extralen = 0;
+	zend_string *quoted_str;
 
 	if (H->assume_national_character_set_strings) {
 		use_national_character_set = 1;
@@ -167,72 +162,79 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unqu
 	}
 
 	/* Detect quoted length, adding extra char for doubled single quotes */
-	for (i = 0; i < unquotedlen; i++) {
-		if (unquoted[i] == '\'') ++*quotedlen;
-		++*quotedlen;
+	for (i = 0; i < ZSTR_LEN(unquoted); i++) {
+		if (ZSTR_VAL(unquoted)[i] == '\'') ++extralen;
+		++quotedlen;
 	}
 
-	*quotedlen += 2; /* +2 for opening, closing quotes */
+	quotedlen += 2; /* +2 for opening, closing quotes */
 	if (use_national_character_set) {
-		++*quotedlen; /* N prefix */
+		++quotedlen; /* N prefix */
 	}
-	q = *quoted = emalloc(*quotedlen + 1); /* Add byte for terminal null */
+
+	if (UNEXPECTED(quotedlen > ZSTR_MAX_LEN - extralen)) {
+		return NULL;
+	}
+
+	quotedlen += extralen;
+	quoted_str = zend_string_alloc(quotedlen, 0);
+	q = ZSTR_VAL(quoted_str);
 	if (use_national_character_set) {
 		*q++ = 'N';
 	}
 	*q++ = '\'';
 
-	for (i = 0; i < unquotedlen; i++) {
-		if (unquoted[i] == '\'') {
+	for (i = 0; i < ZSTR_LEN(unquoted); i++) {
+		if (ZSTR_VAL(unquoted)[i] == '\'') {
 			*q++ = '\'';
 			*q++ = '\'';
 		} else {
-			*q++ = unquoted[i];
+			*q++ = ZSTR_VAL(unquoted)[i];
 		}
 	}
 	*q++ = '\'';
+	*q = '\0';
 
-	*q = 0;
-
-	return 1;
+	return quoted_str;
 }
 
-static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
+static bool pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	if (FAIL == dbcmd(H->link, cmd)) {
-		return 0;
+		return false;
 	}
 
 	if (FAIL == dbsqlexec(H->link)) {
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
-static int dblib_handle_begin(pdo_dbh_t *dbh)
+static bool dblib_handle_begin(pdo_dbh_t *dbh)
 {
 	return pdo_dblib_transaction_cmd("BEGIN TRANSACTION", dbh);
 }
 
-static int dblib_handle_commit(pdo_dbh_t *dbh)
+static bool dblib_handle_commit(pdo_dbh_t *dbh)
 {
 	return pdo_dblib_transaction_cmd("COMMIT TRANSACTION", dbh);
 }
 
-static int dblib_handle_rollback(pdo_dbh_t *dbh)
+static bool dblib_handle_rollback(pdo_dbh_t *dbh)
 {
 	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh);
 }
 
-char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
+zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	RETCODE ret;
-	char *id = NULL;
+	BYTE id[32];
+	size_t len;
 
 	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
@@ -264,35 +266,51 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 		return NULL;
 	}
 
-	id = emalloc(32);
-	*len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
-
+	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
 	dbcancel(H->link);
-	return id;
+
+	return zend_string_init((const char *) id, len, 0);
 }
 
-static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
+static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	zend_long lval;
+	bool bval;
 
 	switch(attr) {
 		case PDO_ATTR_DEFAULT_STR_PARAM:
-			H->assume_national_character_set_strings = zval_get_long(val) == PDO_PARAM_STR_NATL ? 1 : 0;
-			return 1;
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			H->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL ? 1 : 0;
+			return true;
 		case PDO_ATTR_TIMEOUT:
 		case PDO_DBLIB_ATTR_QUERY_TIMEOUT:
-			return SUCCEED == dbsettime(zval_get_long(val)) ? 1 : 0;
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			return SUCCEED == dbsettime(lval);
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			H->stringify_uniqueidentifier = zval_get_long(val);
-			return 1;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->stringify_uniqueidentifier = bval;
+			return true;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
-			H->skip_empty_rowsets = zval_is_true(val);
-			return 1;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->skip_empty_rowsets = bval;
+			return true;
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
-			H->datetime_convert = zval_get_long(val);
-			return 1;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->datetime_convert = bval;
+			return true;
 		default:
-			return 0;
+			return false;
 	}
 }
 
@@ -419,7 +437,9 @@ static const struct pdo_dbh_methods dblib_methods = {
 	NULL, /* check liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
-	NULL  /* in transaction */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
+	NULL, /* get gc */
+	NULL /* scanner */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
@@ -522,7 +542,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 
 	if (!dbh->username && vars[6].optval) {
-		dbh->username = vars[6].optval;
+		dbh->username = pestrdup(vars[6].optval, dbh->is_persistent);
 	}
 
 	if (dbh->username) {
@@ -532,7 +552,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 
 	if (!dbh->password && vars[7].optval) {
-		dbh->password = vars[7].optval;
+		dbh->password = pestrdup(vars[7].optval, dbh->is_persistent);
 	}
 
 	if (dbh->password) {
@@ -541,7 +561,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 	}
 
-#if !PHP_DBLIB_IS_MSSQL
+#ifndef PHP_DBLIB_IS_MSSQL
 	if (vars[0].optval) {
 		DBSETLCHARSET(H->login, vars[0].optval);
 	}
@@ -572,7 +592,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 #endif
 
-#if PHP_DBLIB_IS_MSSQL
+#ifdef PHP_DBLIB_IS_MSSQL
 	/* dblib do not return more than this length from text/image */
 	DBSETOPT(H->link, DBTEXTLIMIT, "2147483647");
 #endif
@@ -609,7 +629,7 @@ cleanup:
 }
 
 const pdo_driver_t pdo_dblib_driver = {
-#if PDO_DBLIB_IS_MSSQL
+#ifdef PDO_DBLIB_IS_MSSQL
 	PDO_DRIVER_HEADER(mssql),
 #elif defined(PHP_WIN32)
 #define PDO_DBLIB_IS_SYBASE

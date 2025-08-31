@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -17,7 +15,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <php.h>
@@ -31,35 +29,27 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 
 zend_class_entry *IntlException_ce_ptr;
 
-/* {{{ intl_error* intl_g_error_get()
- * Return global error structure.
- */
+/* {{{ Return global error structure. */
 static intl_error* intl_g_error_get( void )
 {
 	return &INTL_G( g_error );
 }
 /* }}} */
 
-/* {{{ void intl_free_custom_error_msg( intl_error* err )
- * Free mem.
- */
+/* {{{ Free mem. */
 static void intl_free_custom_error_msg( intl_error* err )
 {
 	if( !err && !( err = intl_g_error_get(  ) ) )
 		return;
 
-	if(err->free_custom_error_message ) {
-		efree( err->custom_error_message );
+	if (err->custom_error_message) {
+		zend_string_release_ex(err->custom_error_message, false);
+		err->custom_error_message = NULL;
 	}
-
-	err->custom_error_message      = NULL;
-	err->free_custom_error_message = 0;
 }
 /* }}} */
 
-/* {{{ intl_error* intl_error_create()
- * Create and initialize  internals of 'intl_error'.
- */
+/* {{{ Create and initialize  internals of 'intl_error'. */
 intl_error* intl_error_create( void )
 {
 	intl_error* err = ecalloc( 1, sizeof( intl_error ) );
@@ -70,9 +60,7 @@ intl_error* intl_error_create( void )
 }
 /* }}} */
 
-/* {{{ void intl_error_init( intl_error* coll_error )
- * Initialize internals of 'intl_error'.
- */
+/* {{{ Initialize internals of 'intl_error'. */
 void intl_error_init( intl_error* err )
 {
 	if( !err && !( err = intl_g_error_get(  ) ) )
@@ -80,13 +68,10 @@ void intl_error_init( intl_error* err )
 
 	err->code                      = U_ZERO_ERROR;
 	err->custom_error_message      = NULL;
-	err->free_custom_error_message = 0;
 }
 /* }}} */
 
-/* {{{ void intl_error_reset( intl_error* err )
- * Set last error code to 0 and unset last error message
- */
+/* {{{ Set last error code to 0 and unset last error message */
 void intl_error_reset( intl_error* err )
 {
 	if( !err && !( err = intl_g_error_get(  ) ) )
@@ -98,64 +83,72 @@ void intl_error_reset( intl_error* err )
 }
 /* }}} */
 
-/* {{{ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg )
- * Set last error message to msg copying it if needed.
- */
-void intl_error_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
+/* {{{ Set last error message to msg copying it if needed. */
+void intl_error_set_custom_msg( intl_error* err, const char* msg)
 {
-	if( !msg )
+	/* See ext/intl/tests/bug70451.phpt and uchar.c:zif_IntlChar_charFromName */
+	if (UNEXPECTED(msg == NULL)) {
 		return;
+	}
+
+	zend_string *method_or_func = get_active_function_or_method_name();
+	zend_string *prefixed_message = zend_string_concat3(
+		ZSTR_VAL(method_or_func), ZSTR_LEN(method_or_func),
+		ZEND_STRL("(): "),
+		msg, strlen(msg)
+	);
+	zend_string_release_ex(method_or_func, false);
 
 	if( !err ) {
-		if( INTL_G( error_level ) )
+		if (INTL_G(error_level)) {
+			/* Docref will prefix the function/method for us, so use original message */
 			php_error_docref( NULL, INTL_G( error_level ), "%s", msg );
-		if( INTL_G( use_exceptions ) )
-			zend_throw_exception_ex( IntlException_ce_ptr, 0, "%s", msg );
+		}
+		if (INTL_G(use_exceptions)) {
+			/* Use this variant as we have a zend_string already */
+			zend_throw_error_exception(IntlException_ce_ptr, prefixed_message, 0, 0);
+		}
 	}
-	if( !err && !( err = intl_g_error_get(  ) ) )
+	if (!err && !(err = intl_g_error_get() )) {
+		zend_string_release_ex(prefixed_message, false);
 		return;
+	}
 
 	/* Free previous message if any */
 	intl_free_custom_error_msg( err );
 
-	/* Mark message copied if any */
-	err->free_custom_error_message = copyMsg;
-
 	/* Set user's error text message */
-	err->custom_error_message = copyMsg ? estrdup( msg ) : (char *) msg;
+	err->custom_error_message = prefixed_message;
 }
 /* }}} */
 
-/* {{{ const char* intl_error_get_message( intl_error* err )
- * Create output message in format "<intl_error_text>: <extra_user_error_text>".
- */
+/* {{{ Create output message in format "<intl_error_text>: <extra_user_error_text>". */
 zend_string * intl_error_get_message( intl_error* err )
 {
 	const char *uErrorName = NULL;
-	zend_string *errMessage = 0;
+	zend_string *errMessage = NULL;
 
 	if( !err && !( err = intl_g_error_get(  ) ) )
 		return ZSTR_EMPTY_ALLOC();
 
 	uErrorName = u_errorName( err->code );
+	size_t uErrorLen = strlen(uErrorName);
 
 	/* Format output string */
-	if( err->custom_error_message )
-	{
-		errMessage = strpprintf(0, "%s: %s", err->custom_error_message, uErrorName );
-	}
-	else
-	{
-		errMessage = strpprintf(0, "%s", uErrorName );
+	if (err->custom_error_message) {
+		errMessage = zend_string_concat3(
+			ZSTR_VAL(err->custom_error_message), ZSTR_LEN(err->custom_error_message),
+			ZEND_STRL(": "),
+			uErrorName, uErrorLen);
+	} else {
+		errMessage = zend_string_init(uErrorName, strlen(uErrorName), false);
 	}
 
 	return errMessage;
 }
 /* }}} */
 
-/* {{{ void intl_error_set_code( intl_error* err, UErrorCode err_code )
- * Set last error code.
- */
+/* {{{ Set last error code. */
 void intl_error_set_code( intl_error* err, UErrorCode err_code )
 {
 	if( !err && !( err = intl_g_error_get(  ) ) )
@@ -165,9 +158,7 @@ void intl_error_set_code( intl_error* err, UErrorCode err_code )
 }
 /* }}} */
 
-/* {{{ void intl_error_get_code( intl_error* err )
- * Return last error code.
- */
+/* {{{ Return last error code. */
 UErrorCode intl_error_get_code( intl_error* err )
 {
 	if( !err && !( err = intl_g_error_get(  ) ) )
@@ -177,28 +168,23 @@ UErrorCode intl_error_get_code( intl_error* err )
 }
 /* }}} */
 
-/* {{{ void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
- * Set error code and message.
- */
-void intl_error_set( intl_error* err, UErrorCode code, const char* msg, int copyMsg )
+/* {{{ Set error code and message. */
+void intl_error_set( intl_error* err, UErrorCode code, const char* msg)
 {
 	intl_error_set_code( err, code );
-	intl_error_set_custom_msg( err, msg, copyMsg );
+	intl_error_set_custom_msg( err, msg);
 }
 /* }}} */
 
-/* {{{ void intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
- * Set error code and message.
- */
-void intl_errors_set( intl_error* err, UErrorCode code, const char* msg, int copyMsg )
+/* {{{ Set error code and message. */
+void intl_errors_set( intl_error* err, UErrorCode code, const char* msg)
 {
 	intl_errors_set_code( err, code );
-	intl_errors_set_custom_msg( err, msg, copyMsg );
+	intl_errors_set_custom_msg( err, msg);
 }
 /* }}} */
 
-/* {{{ void intl_errors_reset( intl_error* err )
- */
+/* {{{ */
 void intl_errors_reset( intl_error* err )
 {
 	if(err) {
@@ -208,19 +194,17 @@ void intl_errors_reset( intl_error* err )
 }
 /* }}} */
 
-/* {{{ void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg )
- */
-void intl_errors_set_custom_msg( intl_error* err, const char* msg, int copyMsg )
+/* {{{ */
+void intl_errors_set_custom_msg(intl_error* err, const char* msg)
 {
 	if(err) {
-		intl_error_set_custom_msg( err, msg, copyMsg );
+		intl_error_set_custom_msg( err, msg);
 	}
-	intl_error_set_custom_msg( NULL, msg, copyMsg );
+	intl_error_set_custom_msg( NULL, msg);
 }
 /* }}} */
 
-/* {{{ intl_errors_set_code( intl_error* err, UErrorCode err_code )
- */
+/* {{{ */
 void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 {
 	if(err) {
@@ -229,17 +213,6 @@ void intl_errors_set_code( intl_error* err, UErrorCode err_code )
 	intl_error_set_code( NULL, err_code );
 }
 /* }}} */
-
-void intl_register_IntlException_class( void )
-{
-	zend_class_entry ce;
-
-	/* Create and register 'IntlException' class. */
-	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
-	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
-		zend_ce_exception );
-	IntlException_ce_ptr->create_object = zend_ce_exception->create_object;
-}
 
 smart_str intl_parse_error_to_string( UParseError* pe )
 {

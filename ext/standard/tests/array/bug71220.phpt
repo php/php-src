@@ -3,8 +3,11 @@ Bug #71220 (Null pointer deref (segfault) in compact via ob_start)
 --FILE--
 <?php
 ob_start("compact");
-ob_end_clean();
+try {
+    ob_end_clean();
+} catch (\Error $e) {
+    echo $e->getMessage();
+}
 ?>
-okey
 --EXPECT--
-okey
+Cannot call compact() dynamically

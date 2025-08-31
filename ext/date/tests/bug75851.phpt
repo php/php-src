@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #75851: Year component overflow with date formats "c", "o", "r" and "y"
 --SKIPIF--
-<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK"; ?>
+<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --INI--
 date.timezone = UTC
 --FILE--
@@ -13,9 +13,9 @@ echo date(DATE_ATOM."\n".DATE_RFC2822."\nc\nr\no\ny\nY\nU\n\n", PHP_INT_MAX);
 ?>
 --EXPECT--
 -292277022657-01-27T08:29:52+00:00
-Fri, 27 Jan -292277022657 08:29:52 +0000
+Sun, 27 Jan -292277022657 08:29:52 +0000
 -292277022657-01-27T08:29:52+00:00
-Fri, 27 Jan -292277022657 08:29:52 +0000
+Sun, 27 Jan -292277022657 08:29:52 +0000
 -292277022657
 -57
 -292277022657

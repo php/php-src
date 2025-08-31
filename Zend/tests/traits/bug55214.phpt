@@ -25,7 +25,7 @@ trait ATrait {
 }
 
 trait Indirect {
-	use ATrait;
+    use ATrait;
 }
 
 class SomeClass {
@@ -33,7 +33,7 @@ class SomeClass {
 }
 
 class UsingIndirect {
-	use Indirect;
+    use Indirect;
 }
 
 $r = SomeClass::get_class_name();

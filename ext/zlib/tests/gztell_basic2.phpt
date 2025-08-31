@@ -1,11 +1,7 @@
 --TEST--
 Test function gztell() by calling it with its expected arguments when writing
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $f = "gztell_basic2.txt.gz";
@@ -22,7 +18,6 @@ foreach ($sizes as $size) {
 gzclose($h);
 unlink($f);
 ?>
-===DONE===
 --EXPECT--
 int(0)
 bytes written=7
@@ -39,4 +34,3 @@ bytes written=15
 tell=142
 bytes written=1000
 tell=1142
-===DONE===

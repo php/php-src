@@ -1,11 +1,7 @@
 --TEST--
 Bug #72202 (curl_close doesn't close cURL handle)
---SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-	exit("skip curl extension not loaded");
-}
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $a = fopen(__FILE__, "r");
@@ -27,7 +23,13 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (Unknown)
 resource(%d) of type (Unknown)
-resource(%d) of type (curl)
-resource(%d) of type (curl)
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
+object(CurlHandle)#1 (0) {
+}
+object(CurlHandle)#1 (0) {
+}
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
+object(CurlHandle)#1 (0) {
+}
+object(CurlHandle)#1 (0) {
+}

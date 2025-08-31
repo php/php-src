@@ -4,19 +4,19 @@ ZE2 A private method cannot be called in a derived class
 <?php
 
 class pass {
-	private static function show() {
-		echo "Call show()\n";
-	}
+    private static function show() {
+        echo "Call show()\n";
+    }
 
-	public static function do_show() {
-		pass::show();
-	}
+    public static function do_show() {
+        pass::show();
+    }
 }
 
 class fail extends pass {
-	static function do_show() {
-		pass::show();
-	}
+    static function do_show() {
+        pass::show();
+    }
 }
 
 pass::do_show();
@@ -27,7 +27,7 @@ echo "Done\n"; // shouldn't be displayed
 --EXPECTF--
 Call show()
 
-Fatal error: Uncaught Error: Call to private method pass::show() from context 'fail' in %s:%d
+Fatal error: Uncaught Error: Call to private method pass::show() from scope fail in %s:%d
 Stack trace:
 #0 %s(%d): fail::do_show()
 #1 {main}

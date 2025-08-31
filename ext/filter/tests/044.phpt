@@ -1,13 +1,13 @@
 --TEST--
 Integer validation with spaces
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --INI--
 precision=14
 --FILE--
 <?php
 $vals = array(
-"	
+"
  ",
 " ",
 " 123",
@@ -15,7 +15,7 @@ $vals = array(
 );
 
 foreach ($vals as $var) {
-	var_dump(filter_var($var, FILTER_VALIDATE_FLOAT));
+    var_dump(filter_var($var, FILTER_VALIDATE_FLOAT));
 }
 ?>
 --EXPECT--

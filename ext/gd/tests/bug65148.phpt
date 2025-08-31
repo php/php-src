@@ -1,9 +1,7 @@
 --TEST--
 Bug #65148 (imagerotate may alter image dimensions)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension is not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 
@@ -39,13 +37,10 @@ foreach ($interpolations as $name => $interpolation) {
   $t = imagecolorallocatealpha($img, 0, 0, 0, 127);
   $imgr = imagerotate($img, -5, $t);
   $results[$name] = array('x' => imagesx($imgr), 'y' => imagesy($imgr));
-  imagedestroy($imgr);
 }
 
-imagedestroy($img);
 print_r($results);
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -176,4 +171,3 @@ Array
         )
 
 )
-===DONE===

@@ -18,11 +18,13 @@ enum fpm_address_domain {
 
 struct fpm_worker_pool_s {
 	struct fpm_worker_pool_s *next;
+	struct fpm_worker_pool_s *shared;
 	struct fpm_worker_pool_config_s *config;
 	char *user, *home;									/* for setting env USER and HOME */
 	enum fpm_address_domain listen_address_domain;
 	int listening_socket;
 	int set_uid, set_gid;								/* config uid and gid */
+	char *set_user;										/* config user name */
 	int socket_uid, socket_gid, socket_mode;
 
 	/* runtime */
@@ -46,9 +48,9 @@ struct fpm_worker_pool_s {
 #endif
 };
 
-struct fpm_worker_pool_s *fpm_worker_pool_alloc();
+struct fpm_worker_pool_s *fpm_worker_pool_alloc(void);
 void fpm_worker_pool_free(struct fpm_worker_pool_s *wp);
-int fpm_worker_pool_init_main();
+int fpm_worker_pool_init_main(void);
 
 void fpm_worker_pool_free_limit_extensions(char **limit_extensions);
 

@@ -70,17 +70,21 @@ struct fpm_worker_pool_config_s {
 	int pm_start_servers;
 	int pm_min_spare_servers;
 	int pm_max_spare_servers;
+	int pm_max_spawn_rate;
 	int pm_process_idle_timeout;
 	int pm_max_requests;
 	char *pm_status_path;
+	char *pm_status_listen;
 	char *ping_path;
 	char *ping_response;
 	char *access_log;
 	char *access_format;
+	struct key_value_s *access_suppress_paths;
 	char *slowlog;
 	int request_slowlog_timeout;
 	int request_slowlog_trace_depth;
 	int request_terminate_timeout;
+	int request_terminate_timeout_track_finished;
 	int rlimit_files;
 	int rlimit_core;
 	char *chroot;
@@ -100,6 +104,9 @@ struct fpm_worker_pool_config_s {
 	char *listen_acl_users;
 	char *listen_acl_groups;
 #endif
+#ifdef SO_SETFIB
+	int listen_setfib;
+#endif
 };
 
 struct ini_value_parser_s {
@@ -116,7 +123,7 @@ enum {
 
 int fpm_conf_init_main(int test_conf, int force_daemon);
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);
-int fpm_conf_write_pid();
-int fpm_conf_unlink_pid();
+int fpm_conf_write_pid(void);
+int fpm_conf_unlink_pid(void);
 
 #endif

@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -32,6 +30,7 @@
 #include "tsrm_win32.h"
 #include "zend_virtual_cwd.h"
 #include "win32/ioutil.h"
+#include "win32/winutil.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;
@@ -71,10 +70,8 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 
 	if (globals->shm) {
 		for (ptr = globals->shm; ptr < (globals->shm + globals->shm_size); ptr++) {
-			UnmapViewOfFile(ptr->addr);
-			CloseHandle(ptr->segment);
 			UnmapViewOfFile(ptr->descriptor);
-			CloseHandle(ptr->info);
+			CloseHandle(ptr->segment);
 		}
 		free(globals->shm);
 	}
@@ -92,7 +89,7 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 TSRM_API void tsrm_win32_startup(void)
 {/*{{{*/
 #ifdef ZTS
-	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
+	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_dtor)tsrm_win32_dtor);
 #else
 	tsrm_win32_ctor(&win32_globals);
 #endif
@@ -105,7 +102,7 @@ TSRM_API void tsrm_win32_shutdown(void)
 #endif
 }/*}}}*/
 
-char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
+const char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
 {/*{{{*/
 	PSID pSid = TWG(impersonation_token_sid);
 	char *ptcSid = NULL;
@@ -256,7 +253,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 		goto Finished;
 	}
 
-	/* Different identity, we need a new impersontated token as well */
+	/* Different identity, we need a new impersonated token as well */
 	if (!TWG(impersonation_token_sid) || !EqualSid(token_sid, TWG(impersonation_token_sid))) {
 		if (TWG(impersonation_token_sid)) {
 			free(TWG(impersonation_token_sid));
@@ -377,14 +374,16 @@ static process_pair *process_get(FILE *stream)
 	process_pair *ptr;
 	process_pair *newptr;
 
-	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
-		if (ptr->stream == stream) {
-			break;
+	if (TWG(process) != NULL) {
+		for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
+			if (ptr->stream == stream) {
+				break;
+			}
 		}
-	}
 
-	if (ptr < (TWG(process) + TWG(process_size))) {
-		return ptr;
+		if (ptr < (TWG(process) + TWG(process_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (process_pair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(process_pair));
@@ -403,19 +402,21 @@ static shm_pair *shm_get(key_t key, void *addr)
 	shm_pair *ptr;
 	shm_pair *newptr;
 
-	for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
-		if (!ptr->descriptor) {
-			continue;
+	if (TWG(shm) != NULL) {
+		for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (!ptr->descriptor) {
+				continue;
+			}
+			if (!addr && ptr->descriptor->shm_perm.key == key) {
+				break;
+			} else if (ptr->addr == addr) {
+				break;
+			}
 		}
-		if (!addr && ptr->descriptor->shm_perm.key == key) {
-			break;
-		} else if (ptr->addr == addr) {
-			break;
-		}
-	}
 
-	if (ptr < (TWG(shm) + TWG(shm_size))) {
-		return ptr;
+		if (ptr < (TWG(shm) + TWG(shm_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (shm_pair*)realloc((void*)TWG(shm), (TWG(shm_size)+1)*sizeof(shm_pair));
@@ -445,7 +446,7 @@ TSRM_API FILE *popen(const char *command, const char *type)
 	return popen_ex(command, type, NULL, NULL);
 }/*}}}*/
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env)
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, const char *env)
 {/*{{{*/
 	FILE *stream = NULL;
 	int fno, type_len, read, mode;
@@ -480,12 +481,13 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
+	size_t cmd_buffer_size = strlen(command) + strlen(TWG(comspec)) + sizeof(" /s /c ") + 2;
+	cmd = malloc(cmd_buffer_size);
 	if (!cmd) {
 		return NULL;
 	}
 
-	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
+	snprintf(cmd, cmd_buffer_size, "%s /s /c \"%s\"", TWG(comspec), command);
 	cmdw = php_win32_cp_any_to_w(cmd);
 	if (!cmdw) {
 		free(cmd);
@@ -611,21 +613,47 @@ TSRM_API int pclose(FILE *stream)
 	return termstat;
 }/*}}}*/
 
+#define SEGMENT_PREFIX "TSRM_SHM_SEGMENT:"
+#define INT_MIN_AS_STRING "-2147483648"
+
+
+#define TSRM_BASE_SHM_KEY_ADDRESS 0x20000000
+/* Returns a number between 0x2000_0000 and 0x3fff_ffff. On Windows, key_t is int. */
+static key_t tsrm_choose_random_shm_key(key_t prev_key) {
+	unsigned char buf[4];
+	if (php_win32_get_random_bytes(buf, 4) != SUCCESS) {
+		return prev_key + 2;
+	}
+	uint32_t n =
+		((uint32_t)(buf[0]) << 24) |
+	    (((uint32_t)buf[1]) << 16) |
+	    (((uint32_t)buf[2]) << 8) |
+	    (((uint32_t)buf[3]));
+	return (n & 0x1fffffff) + TSRM_BASE_SHM_KEY_ADDRESS;
+}
+
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
-	char shm_segment[26], shm_info[29];
-	HANDLE shm_handle, info_handle;
+	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)];
+	HANDLE shm_handle = NULL;
 	BOOL created = FALSE;
 
-	snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
-	snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
+	if (key != IPC_PRIVATE) {
+		snprintf(shm_segment, sizeof(shm_segment), SEGMENT_PREFIX "%d", key);
 
-	shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
-	info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
+		shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
+	} else {
+		/* IPC_PRIVATE always creates a new segment even if IPC_CREAT flag isn't passed. */
+		flags |= IPC_CREAT;
+	}
 
-	if (!shm_handle && !info_handle) {
+	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
+			if (size == 0 || size > SIZE_MAX - sizeof(shm->descriptor)) {
+				return -1;
+			}
+			size += sizeof(shm->descriptor);
 #if SIZEOF_SIZE_T == 8
 			DWORD high = size >> 32;
 			DWORD low = (DWORD)size;
@@ -633,40 +661,39 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 			DWORD high = 0;
 			DWORD low = size;
 #endif
-			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, shm_segment);
-			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
+			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, key == IPC_PRIVATE ? NULL : shm_segment);
 			created		= TRUE;
 		}
-		if (!shm_handle || !info_handle) {
-			if (shm_handle) {
-				CloseHandle(shm_handle);
-			}
-			if (info_handle) {
-				CloseHandle(info_handle);
-			}
+		if (!shm_handle) {
 			return -1;
 		}
 	} else {
 		if (flags & IPC_EXCL) {
-			if (shm_handle) {
-				CloseHandle(shm_handle);
-			}
-			if (info_handle) {
-				CloseHandle(info_handle);
-			}
+			CloseHandle(shm_handle);
 			return -1;
+		}
+	}
+
+	if (key == IPC_PRIVATE) {
+		/* This should call shm_get with a brand new key id that isn't used yet. See https://man7.org/linux/man-pages/man2/shmget.2.html
+		 * Because extensions such as shmop/sysvshm can be used in userland to attach to shared memory segments, use unpredictable high positive numbers to avoid accidentally conflicting with userland. */
+		key = tsrm_choose_random_shm_key(TSRM_BASE_SHM_KEY_ADDRESS);
+		for (shm_pair *ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (ptr->descriptor && ptr->descriptor->shm_perm.key == key) {
+				key = tsrm_choose_random_shm_key(key);
+				ptr = TWG(shm);
+				continue;
+			}
 		}
 	}
 
 	shm = shm_get(key, NULL);
 	if (!shm) {
 		CloseHandle(shm_handle);
-		CloseHandle(info_handle);
 		return -1;
 	}
 	shm->segment = shm_handle;
-	shm->info	 = info_handle;
-	shm->descriptor = MapViewOfFileEx(shm->info, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+	shm->descriptor = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
 
 	if (NULL != shm->descriptor && created) {
 		shm->descriptor->shm_perm.key	= key;
@@ -685,9 +712,10 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	if (NULL != shm->descriptor && (shm->descriptor->shm_perm.key != key || size > shm->descriptor->shm_segsz)) {
 		if (NULL != shm->segment) {
 			CloseHandle(shm->segment);
+			shm->segment = INVALID_HANDLE_VALUE;
 		}
 		UnmapViewOfFile(shm->descriptor);
-		CloseHandle(shm->info);
+		shm->descriptor = NULL;
 		return -1;
 	}
 
@@ -698,18 +726,11 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 {/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return (void*)-1;
 	}
 
-	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
-
-	if (NULL == shm->addr) {
-		int err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(err);
-		return (void*)-1;
-	}
-
+	shm->addr = shm->descriptor + sizeof(shm->descriptor);
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;
@@ -720,8 +741,9 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 TSRM_API int shmdt(const void *shmaddr)
 {/*{{{*/
 	shm_pair *shm = shm_get(0, (void*)shmaddr);
+	int ret;
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return -1;
 	}
 
@@ -729,14 +751,19 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch--;
 
-	return UnmapViewOfFile(shm->addr) ? 0 : -1;
+	ret = 0;
+	if (shm->descriptor->shm_nattch <= 0) {
+		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
+		shm->descriptor = NULL;
+	}
+	return ret;
 }/*}}}*/
 
 TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 {/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return -1;
 	}
 
@@ -763,7 +790,6 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 	}
 }/*}}}*/
 
-#if HAVE_UTIME
 static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
 {
 	// Note that LONGLONG is a 64-bit value
@@ -817,5 +843,4 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	return 1;
 }
 /* }}} */
-#endif
 #endif

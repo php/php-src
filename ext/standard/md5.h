@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,12 +19,7 @@
 #define MD5_H
 
 PHPAPI void make_digest(char *md5str, const unsigned char *digest);
-PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len);
-
-PHP_NAMED_FUNCTION(php_if_md5);
-PHP_NAMED_FUNCTION(php_if_md5_file);
-
-#include "ext/standard/basic_functions.h"
+PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, size_t len);
 
 /*
  * This is an OpenSSL-compatible implementation of the RSA Data Security,
@@ -45,8 +38,10 @@ typedef struct {
 	unsigned char buffer[64];
 	uint32_t block[16];
 } PHP_MD5_CTX;
+#define PHP_MD5_SPEC "llllllb64l16."
 
-PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx);
+#define PHP_MD5Init(ctx) PHP_MD5InitArgs(ctx, NULL)
+PHPAPI void PHP_MD5InitArgs(PHP_MD5_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args);
 PHPAPI void PHP_MD5Update(PHP_MD5_CTX *ctx, const void *data, size_t size);
 PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx);
 

@@ -6,11 +6,11 @@ Bug #71013 (Incorrect exception handler with yield from)
 class FooBar implements Iterator {
     function __construct()   { echo "Constructing new FooBar\n"; }
     function __destruct()    { echo "Destructing FooBar\n"; }
-    function current ()      { throw new Exception; }
-    function key ()          { return 0; }
-    function next ()         {}
-    function rewind ()       {}
-    function valid ()        { return true; }
+    function current (): mixed      { throw new Exception; }
+    function key (): int          { return 0; }
+    function next (): void         {}
+    function rewind (): void       {}
+    function valid (): bool        { return true; }
 }
 
 function foo() {

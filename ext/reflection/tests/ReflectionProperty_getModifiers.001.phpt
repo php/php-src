@@ -7,15 +7,15 @@ Steve Seear <stevseea@php.net>
 <?php
 
 function reflectProperty($class, $property) {
-	$propInfo = new ReflectionProperty($class, $property);
+    $propInfo = new ReflectionProperty($class, $property);
 
-	echo "**********************************\n";
-	echo "Reflecting on property $class::$property\n\n";
+    echo "**********************************\n";
+    echo "Reflecting on property $class::$property\n\n";
 
-	echo "getModifiers():\n";
-	var_dump($propInfo->getModifiers());
+    echo "getModifiers():\n";
+    var_dump($propInfo->getModifiers());
 
-	echo "\n**********************************\n";
+    echo "\n**********************************\n";
 }
 
 class TestClass
@@ -23,8 +23,8 @@ class TestClass
     public $pub;
     static public $stat = "static property";
     /**
- 	 * This property has a comment.
- 	 */
+     * This property has a comment.
+     */
     protected $prot = 4;
     private $priv = "keepOut";
 }

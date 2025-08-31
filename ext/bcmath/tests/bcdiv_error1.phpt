@@ -4,11 +4,29 @@ bcdiv — Divide two arbitrary precision numbers
 TestFest2009
 Antoni Torrents
 antoni@solucionsinternet.com
---SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
-echo bcdiv('10.99', '0');
+try {
+    bcdiv('10.99', '0');
+} catch (DivisionByZeroError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
+
+try {
+    bcdiv('10.99', '0.00');
+} catch (DivisionByZeroError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
+
+try {
+    bcdiv('10.99', '-0.00');
+} catch (DivisionByZeroError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: bcdiv(): Division by zero in %s.php on line %d
+--EXPECT--
+Division by zero
+Division by zero
+Division by zero

@@ -2,16 +2,10 @@
 Test array_filter() function : usage variations - Different types of array for 'input' argument
 --FILE--
 <?php
-/* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback.
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different types of array as 'input' argument.
 */
 
-// callback function returning always false
 function always_false($input)
 {
   return false;
@@ -33,7 +27,7 @@ $input_values = array(
   array(true, false, TRUE, FALSE),  // bool values
   array(null, NULL),  // null values
   array(1 => 'one', 'zero' => 0, -2 => "value"), //associative array
-  array("one" => 1, null => 'null', 5.2 => "float", true => 1, "" => 'empty'),  // associative array with different keys
+  array("one" => 1, null => 'null', 5 => "float", true => 1, "" => 'empty'),  // associative array with different keys
   array(1 => 'one', 2, "key" => 'value')  // combinition of associative and non-associative array
 
 );

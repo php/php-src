@@ -13,7 +13,6 @@ for($i = 0; $i < 5; $i++) {
 
 var_dump($data);
 ?>
-===DONE===
 --EXPECTF--
 array(2) {
   [0]=>
@@ -26,4 +25,3 @@ array(2) {
   array(0) {
   }
 }
-===DONE===

@@ -1,15 +1,11 @@
 --TEST--
 MessageFormatter::format(): DateTime accepted to format dates and times
---INI--
-date.timezone=Atlantic/Azores
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+<?php if (version_compare(INTL_ICU_VERSION, '72.1') >= 0) die('skip for ICU < 72.1'); ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-//ini_set("intl.default_locale", "nl");
 
 $fmt = <<<EOD
 {0,date} {0,time}
@@ -24,8 +20,6 @@ var_dump($mf->format(array($dt)));
 var_dump($mf->format(array($dti)));
 
 ?>
-==DONE==
 --EXPECTF--
 string(%s) "May %d, 2012 %d:%d:42 %s"
 string(%s) "May %d, 2012 %d:%d:42 %s"
-==DONE==

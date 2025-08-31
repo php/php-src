@@ -1,7 +1,7 @@
 --TEST--
 $http_reponse_header (header with trailing whitespace)
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:22349'); ?>
+<?php require 'server.inc'; http_server_skipif(); ?>
 --INI--
 allow_url_fopen=1
 --FILE--
@@ -9,22 +9,25 @@ allow_url_fopen=1
 require 'server.inc';
 
 $responses = array(
-	"data://text/plain,HTTP/1.0 200 Ok\r\nSome:   Header   \r\n\r\nBody",
+    "data://text/plain,HTTP/1.0 200 Ok\r\nSome:   Header   \r\n\r\nBody",
 );
 
-$pid = http_server("tcp://127.0.0.1:22349", $responses, $output);
+['pid' => $pid, 'uri' => $uri] = http_server($responses, $output);
 
-function test() {
-    $f = file_get_contents('http://127.0.0.1:22349/');
-    var_dump($f);
-    var_dump($http_response_header);
-}
-test();
+var_dump(http_get_last_response_headers());
+
+$f = file_get_contents($uri);
+var_dump($f);
+var_dump($http_response_header);
+var_dump(http_get_last_response_headers());
 
 http_server_kill($pid);
+
 ?>
-==DONE==
---EXPECT--
+
+--EXPECTF--
+Deprecated: The predefined locally scoped $http_response_header variable is deprecated, call http_get_last_response_headers() instead in %s on line 14
+NULL
 string(4) "Body"
 array(2) {
   [0]=>
@@ -32,4 +35,9 @@ array(2) {
   [1]=>
   string(14) "Some:   Header"
 }
-==DONE==
+array(2) {
+  [0]=>
+  string(15) "HTTP/1.0 200 Ok"
+  [1]=>
+  string(14) "Some:   Header"
+}

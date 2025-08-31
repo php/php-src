@@ -2,12 +2,6 @@
 Test array_key_exists() function : usage variations - referenced variables
 --FILE--
 <?php
-/* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array
- * Source code: ext/standard/array.c
- * Alias to functions: key_exists
- */
-
 /*
  * Pass referenced variables as arguments to array_key_exists() to test behaviour
  */

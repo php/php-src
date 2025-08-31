@@ -1,17 +1,15 @@
 --TEST--
 imagecopyresampled()
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!function_exists('imagecopyresampled')) die('skip imagecopyresampled() not available');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
-
-/* Prototype  : bool imagecopyresampled  ( resource $dst_image  , resource $src_image  , int $dst_x  , int $dst_y  , int $src_x  , int $src_y  , int $dst_w  , int $dst_h  , int $src_w  , int $src_h  )
- * Description: Copy and resize part of an image with resampling.
- * Source code: ext/standard/image.c
- * Alias to functions:
- */
 
 echo "Simple test of imagecopyresampled() function\n";
 
@@ -49,19 +47,14 @@ imagepng($image_sml, $dest_sml);
 
 list($width, $height) = getimagesize($dest_sml);
 echo "Size of copy: width=". $width . " height=" . $height . "\n";
-
-imagedestroy($image_lge);
-imagedestroy($image_sml);
-
-
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
-	$dest_lge = dirname(realpath(__FILE__)) . '/imagelarge.png';
-	$dest_sml = dirname(realpath(__FILE__)) . '/imagesmall.png';
-	@unlink($dest_lge);
-	@unlink($dest_sml);
+    $dest_lge = dirname(realpath(__FILE__)) . '/imagelarge.png';
+    $dest_sml = dirname(realpath(__FILE__)) . '/imagesmall.png';
+    @unlink($dest_lge);
+    @unlink($dest_sml);
 ?>
 --EXPECT--
 Simple test of imagecopyresampled() function

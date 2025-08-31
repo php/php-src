@@ -1,7 +1,7 @@
 --TEST--
 Transliterator::transliterate (basic)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $t = transliterator_create("Latin; Title");
@@ -12,6 +12,7 @@ echo $t->transliterate($s, 3),"\n";
 echo $t->transliterate($s, 3, 4),"\n";
 
 echo "Done.\n";
+?>
 --EXPECT--
 Kontogiannátos, Basílēs
 Kontogiannátos, Basílēs

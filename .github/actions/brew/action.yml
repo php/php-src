@@ -1,0 +1,29 @@
+name: brew
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+
+        # Patch brew to overwrite always
+        formula_installer="$(brew --repo)"/Library/Homebrew/formula_installer.rb
+        code=" keg.link\(verbose: verbose\?"
+        sudo sed -Ei '' "s/$code.*/$code, overwrite: true\)/" "$formula_installer"
+
+        # Some packages exist on x86 but not arm, or vice versa.
+        # Install them with reinstall to avoid warnings.
+        brew reinstall autoconf webp tidy-html5 libzip libsodium icu4c curl
+        brew install \
+          bison \
+          re2c
+        brew install \
+          bzip2 \
+          enchant \
+          libffi \
+          intltool \
+          libiconv \
+          t1lib \
+          libxml2 \
+          libjpeg \
+          libxslt

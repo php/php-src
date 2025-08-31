@@ -1,14 +1,15 @@
 --TEST--
 Bug #66141 (mysqlnd quote function is wrong with NO_BACKSLASH_ESCAPES after failed query)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-include __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 
 $input = 'Something\', 1 as one, 2 as two  FROM dual; -- f';

@@ -1,7 +1,7 @@
 --TEST--
 bzopen() using fd opened in wrong mode
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+--EXTENSIONS--
+bz2
 --FILE--
 <?php
 
@@ -28,10 +28,18 @@ $fp = fopen("bz_open_002.txt", "wb");
 var_dump(bzopen($fp, "w"));
 
 $fp = fopen("bz_open_002.txt", "br");
-var_dump(bzopen($fp, "r"));
+try {
+    var_dump(bzopen($fp, "r"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $fp = fopen("bz_open_002.txt", "br");
-var_dump(bzopen($fp, "w"));
+try {
+    var_dump(bzopen($fp, "w"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $fp = fopen("bz_open_002.txt", "r");
 var_dump(bzopen($fp, "w"));
@@ -71,59 +79,53 @@ var_dump(bzopen($fp, "w"));
 
 @unlink("bz_open_002.txt");
 
-echo "Done\n";
 ?>
 --EXPECTF--
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: bzopen(): cannot read from a stream opened in write only mode in %s on line %d
+Warning: bzopen(): Cannot read from a stream opened in write only mode in %s on line %d
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: fopen(bz_open_002.txt): failed to open stream: Bad file %s in %s on line %d
+Warning: fopen(bz_open_002.txt): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
+bzopen(): Argument #1 ($file) must be of type string or file-resource, false given
 
-Warning: bzopen(): first parameter has to be string or file-resource in %s on line %d
-bool(false)
-
-Warning: fopen(bz_open_002.txt): failed to open stream: Bad file %s in %s on line %d
-
-Warning: bzopen(): first parameter has to be string or file-resource in %s on line %d
-bool(false)
+Warning: fopen(bz_open_002.txt): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
+bzopen(): Argument #1 ($file) must be of type string or file-resource, false given
 
 Warning: bzopen(): cannot write to a stream opened in read only mode in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot read from a stream opened in write only mode in %s on line %d
+Warning: bzopen(): Cannot read from a stream opened in write only mode in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'rw' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'rw' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'rw' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'rw' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'wr' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'wr' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'wr' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'wr' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'r+' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'r+' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'r+' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'r+' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'w+' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'w+' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'w+' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'w+' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot read from a stream opened in write only mode in %s on line %d
+Warning: bzopen(): Cannot read from a stream opened in write only mode in %s on line %d
 bool(false)
 resource(%d) of type (stream)
-Done

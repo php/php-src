@@ -1,9 +1,7 @@
 --TEST--
 Bug #54446 (Arbitrary file creation via libxslt 'output' extension)
---SKIPIF--
-<?php
-if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include("prepare.inc");
@@ -15,15 +13,15 @@ if (file_exists($outputfile)) {
 
 $sXsl = <<<EOT
 <xsl:stylesheet version="1.0"
-	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-	xmlns:sax="http://icl.com/saxon"
-	extension-element-prefixes="sax">
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:sax="http://icl.com/saxon"
+    extension-element-prefixes="sax">
 
-	<xsl:template match="/">
-		<sax:output href="$outputfile" method="text">
-			<xsl:value-of select="'0wn3d via PHP and libxslt ...'"/>
-		</sax:output>
-	</xsl:template>
+    <xsl:template match="/">
+        <sax:output href="$outputfile" method="text">
+            <xsl:value-of select="'0wn3d via PHP and libxslt ...'"/>
+        </sax:output>
+    </xsl:template>
 
 </xsl:stylesheet>
 EOT;
@@ -69,6 +67,7 @@ if (file_exists($outputfile)) {
 } else {
     print "OK, no file created\n";
 }
+?>
 --EXPECTF--
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 

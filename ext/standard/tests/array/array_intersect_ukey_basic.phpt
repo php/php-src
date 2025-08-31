@@ -3,7 +3,6 @@ array_intersect_ukey(): Basic test.
 --FILE--
 <?php
 /*
-* proto array array_intersect_ukey ( array $array1, array $array2 [, array $ ..., callback $key_compare_func] )
 * Function is implemented in ext/standard/array.c
 */
 function key_compare_func($key1, $key2) {

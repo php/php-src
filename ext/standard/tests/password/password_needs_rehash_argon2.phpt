@@ -19,6 +19,7 @@ var_dump(password_needs_rehash($hash, PASSWORD_ARGON2ID, ['memory_cost' => PASSW
 var_dump(password_needs_rehash($hash, PASSWORD_ARGON2ID, ['time_cost' => PASSWORD_ARGON2_DEFAULT_TIME_COST + 1]));
 
 echo "OK!";
+?>
 --EXPECT--
 bool(false)
 bool(true)

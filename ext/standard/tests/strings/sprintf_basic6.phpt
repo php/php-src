@@ -2,11 +2,6 @@
 Test sprintf() function : basic functionality - exponential format
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
- */
-
 echo "*** Testing sprintf() : basic functionality - using exponential format ***\n";
 
 // Initialise all required variables

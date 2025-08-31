@@ -7,12 +7,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Do not run on Windows');
 }
+?>
 --FILE--
 <?php
-/* Prototype: int fileowner ( string $filename )
- * Description: Returns the user ID of the owner of the file, or
- *              FALSE in case of an error.
- */
 
 /* Creating soft and hard links to a file and applying fileowner() on links */
 

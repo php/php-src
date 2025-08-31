@@ -1,7 +1,7 @@
 --TEST--
 Passing configuration file through tidy_parse_file() (may fail with buggy libtidy)
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
         $tidy = tidy_parse_file(__DIR__."/016.html",

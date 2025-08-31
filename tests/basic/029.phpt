@@ -1,11 +1,7 @@
 --TEST--
 Shift_JIS request
---SKIPIF--
-<?php
-if (!extension_loaded("mbstring")) {
-  die("skip Requires mbstring extension");
-}
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 file_uploads=1
 mbstring.encoding_translation=1
@@ -32,8 +28,10 @@ var_dump($_POST);
 --EXPECTF--
 array(1) {
   ["pics"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file1.txt"
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(10) "text/plain"

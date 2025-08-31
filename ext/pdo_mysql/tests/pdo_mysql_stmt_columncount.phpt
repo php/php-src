@@ -1,63 +1,66 @@
 --TEST--
 MySQL PDOStatement->columnCount()
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-	$db = MySQLPDOTest::factory();
-	MySQLPDOTest::createTestTable($db);
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+    $db = MySQLPDOTest::factory();
 
-	// The only purpose of this is to check if emulated and native PS
-  // return the same. If it works for one, it should work for all.
-	// Internal data structures should be the same in both cases.
-	printf("Testing emulated PS...\n");
-	try {
-		$db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-		if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
-			printf("[002] Unable to turn on emulated prepared statements\n");
+    $table = 'pdo_mysql_stmt_columncount';
+    MySQLPDOTest::createTestTable($table, $db);
 
-		$stmt = $db->prepare("SELECT id, label, '?' as foo FROM test");
-		$stmt->execute();
-		var_dump($stmt->columnCount());
+    // The only purpose of this is to check if emulated and native PS
+    // return the same. If it works for one, it should work for all.
+    // Internal data structures should be the same in both cases.
+    printf("Testing emulated PS...\n");
+    try {
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
+            printf("[002] Unable to turn on emulated prepared statements\n");
 
-		$stmt = $db->query('SELECT * FROM test');
-		var_dump($stmt->columnCount());
+        $stmt = $db->prepare("SELECT id, label, '?' as foo FROM {$table}");
+        $stmt->execute();
+        var_dump($stmt->columnCount());
 
-	} catch (PDOException $e) {
-		printf("[001] %s [%s] %s\n",
-			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
-	}
+        $stmt = $db->query("SELECT * FROM {$table}");
+        var_dump($stmt->columnCount());
 
-	printf("Testing native PS...\n");
-	try {
-		$db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-		if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
-			printf("[004] Unable to turn off emulated prepared statements\n");
+    } catch (PDOException $e) {
+        printf("[001] %s [%s] %s\n",
+            $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
+    }
 
-		$stmt = $db->prepare("SELECT id, label, '?' as foo, 'TODO - Stored Procedure' as bar FROM test");
-		$stmt->execute();
-		var_dump($stmt->columnCount());
+    printf("Testing native PS...\n");
+    try {
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
+            printf("[004] Unable to turn off emulated prepared statements\n");
 
-		$stmt = $db->query('SELECT * FROM test');
-		var_dump($stmt->columnCount());
+        $stmt = $db->prepare("SELECT id, label, '?' as foo, 'TODO - Stored Procedure' as bar FROM {$table}");
+        $stmt->execute();
+        var_dump($stmt->columnCount());
 
-	} catch (PDOException $e) {
-		printf("[003] %s [%s] %s\n",
-			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
-	}
+        $stmt = $db->query("SELECT * FROM {$table}");
+        var_dump($stmt->columnCount());
 
-	print "done!";
+    } catch (PDOException $e) {
+        printf("[003] %s [%s] %s\n",
+            $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
+    }
+
+    print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_columncount');
 ?>
 --EXPECT--
 Testing emulated PS...

@@ -9,13 +9,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 $file_path = __DIR__;
 require "$file_path/file.inc";
 
@@ -30,7 +23,7 @@ echo "*** Testing stat() on dir after subdir and file is created in it ***\n";
 $dirname = "$file_path/lstat_stat_variation8";
 $old_stat = stat($dirname);
 clearstatcache();
-sleep(2);
+sleep(1);
 mkdir("$dirname/lstat_stat_variation8_subdir");
 $file_handle = fopen("$dirname/lstat_stat_variation8a.tmp", "w");
 fclose($file_handle);
@@ -39,8 +32,8 @@ $new_stat = stat($dirname);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
-// compare the stats
-$affected_members = array(3, 9, 10, 'nlink', 'mtime', 'ctime');
+// compare the stat
+$affected_members = array(9, 10, 'mtime', 'ctime');
 clearstatcache();
 var_dump(compare_stats($old_stat, $new_stat, $affected_members, "<"));
 

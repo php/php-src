@@ -2,14 +2,14 @@
 bool socket_shutdown ( resource $socket [, int $how = 2 ] ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
-if (!extension_loaded('sockets')) {
-  die('SKIP sockets extension not available.');
-}
+
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
+    die('skip not for windows');
 }
 ?>
 --FILE--
@@ -19,24 +19,29 @@ $port = 80;
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,0));
+var_dump(socket_shutdown($socket,SHUT_RD));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,1));
+var_dump(socket_shutdown($socket,SHUT_WR));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,2));
+var_dump(socket_shutdown($socket,SHUT_RDWR));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-var_dump(socket_shutdown($socket,0));
+var_dump(socket_shutdown($socket,SHUT_RD));
 
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,-1));
+
+try {
+	socket_shutdown($socket,-1);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
 socket_close($socket);
 ?>
 --CLEAN--
@@ -51,8 +56,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: socket_shutdown(): unable to shutdown socket [%d]: Transport endpoint is not connected in %s on line %d
+Warning: socket_shutdown(): Unable to shutdown socket [%d]: %s in %s on line %d
 bool(false)
 
-Warning: socket_shutdown(): unable to shutdown socket [%d]: Invalid argument in %s on line %d
-bool(false)
+must be one of SHUT_RD, SHUT_WR or SHUT_RDWR

@@ -12,8 +12,6 @@ while ($a->valid()) {
     var_dump($a->current(), $a->next());
 }
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 int(1)
 NULL
@@ -21,4 +19,3 @@ int(2)
 NULL
 int(3)
 NULL
-===DONE===

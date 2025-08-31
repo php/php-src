@@ -1,20 +1,17 @@
 --TEST--
 Test imagecolorallocate() function : usage variations  - passing RED, GREEN, BLUE values more than 255
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
 if(!function_exists('imagecreatetruecolor')) {
     die('skip imagecreatetruecolor function is not available');
 }
 ?>
 --FILE--
 <?php
-/* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
- * Description:  Allocate a color for an image
- * Source code: ext/gd/gd.c
- */
+require  __DIR__ . '/func.inc';
+
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
 $values = array(
@@ -34,75 +31,40 @@ foreach($values as $key => $value) {
       //Need to be created every time to get expected return value
       $im_palette = imagecreate(200, 200);
       $im_true_color = imagecreatetruecolor(200, 200);
-      var_dump( imagecolorallocate($im_palette, $value, 0, 0) );
-      var_dump( imagecolorallocate($im_true_color, $value, 0, 0) );
-      var_dump( imagecolorallocate($im_palette, 0, $value, 0) );
-      var_dump( imagecolorallocate($im_true_color, 0, $value, 0) );
-      var_dump( imagecolorallocate($im_palette, 0, 0, $value) );
-      var_dump( imagecolorallocate($im_true_color, 0, 0, $value) );
+
+      trycatch_dump(
+          fn() => imagecolorallocate($im_palette, $value, 0, 0),
+          fn() => imagecolorallocate($im_true_color, $value, 0, 0),
+          fn() => imagecolorallocate($im_palette, 0, $value, 0),
+          fn() => imagecolorallocate($im_true_color, 0, $value, 0),
+          fn() => imagecolorallocate($im_palette, 0, 0, $value),
+          fn() => imagecolorallocate($im_true_color, 0, 0, $value)
+      );
 };
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Decimal 256--
-
-Warning: imagecolorallocate(): Red component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Red component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Green component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Green component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
-bool(false)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
 
 --Octal 0400--
-
-Warning: imagecolorallocate(): Red component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Red component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Green component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Green component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
-bool(false)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
 
 --Hexa-decimal 0x100--
-
-Warning: imagecolorallocate(): Red component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Red component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Green component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Green component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
-bool(false)
-===DONE===
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)

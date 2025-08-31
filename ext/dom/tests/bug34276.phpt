@@ -1,7 +1,7 @@
 --TEST--
 Bug #34276 (setAttributeNS and default namespace)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xml = <<<HERE
@@ -11,10 +11,10 @@ $xml = <<<HERE
 HERE;
 
 function dump($elems) {
-	foreach ($elems as $elem) {
-		var_dump($elem->nodeName);
-		dump($elem->childNodes);
-	}
+    foreach ($elems as $elem) {
+        var_dump($elem->nodeName);
+        dump($elem->childNodes);
+    }
 }
 
 $dom = new DOMDocument();

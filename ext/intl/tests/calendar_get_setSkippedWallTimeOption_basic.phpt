@@ -1,15 +1,12 @@
 --TEST--
 IntlCalendar::get/setSkippedWallTimeOption(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=nl
+date.timezone=Europe/Amsterdam
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-
-date_default_timezone_set('Europe/Amsterdam');
 
 //25 March 2012, transition to DST
 $intlcal = new IntlGregorianCalendar(2012, 2, 25, 0, 0, 0);
@@ -18,8 +15,8 @@ $intlcal->set(IntlCalendar::FIELD_HOUR_OF_DAY, 2);
 $intlcal->set(IntlCalendar::FIELD_MINUTE, 30);
 echo "Should be 3h30\n";
 var_dump(
-	$intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
-	$intlcal->get(IntlCalendar::FIELD_MINUTE)
+    $intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
+    $intlcal->get(IntlCalendar::FIELD_MINUTE)
 );
 
 var_dump($intlcal->setSkippedWallTimeOption(IntlCalendar::WALLTIME_FIRST));
@@ -28,8 +25,8 @@ $intlcal->set(IntlCalendar::FIELD_HOUR_OF_DAY, 2);
 $intlcal->set(IntlCalendar::FIELD_MINUTE, 30);
 echo "Should be 1h30\n";
 var_dump(
-	$intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
-	$intlcal->get(IntlCalendar::FIELD_MINUTE)
+    $intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
+    $intlcal->get(IntlCalendar::FIELD_MINUTE)
 );
 
 var_dump(intlcal_set_skipped_wall_time_option($intlcal, IntlCalendar::WALLTIME_NEXT_VALID));
@@ -38,14 +35,14 @@ $intlcal->set(IntlCalendar::FIELD_HOUR_OF_DAY, 2);
 $intlcal->set(IntlCalendar::FIELD_MINUTE, 30);
 echo "Should be 3h00\n";
 var_dump(
-	$intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
-	$intlcal->get(IntlCalendar::FIELD_MINUTE)
+    $intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
+    $intlcal->get(IntlCalendar::FIELD_MINUTE)
 );
 
 
 ?>
-==DONE==
---EXPECT--
+--EXPECTF--
+Deprecated: Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
 int(0)
 Should be 3h30
 int(3)
@@ -60,4 +57,3 @@ int(2)
 Should be 3h00
 int(3)
 int(0)
-==DONE==

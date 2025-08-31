@@ -7,6 +7,7 @@ tsa_policy2 = 1.2.3.4.5.6
 
 [ req ]
 default_bits		= 1024
+default_md          = sha256
 default_keyfile 	= privkey.pem
 distinguished_name	= req_distinguished_name
 attributes		= req_attributes

@@ -1,7 +1,7 @@
 --TEST--
 SPL: IteratorIterator and SimpleXMlElement
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) print "skip SimpleXML required"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -13,12 +13,9 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 ');
 
 foreach (new IteratorIterator($root->child) as $child) {
-	echo $child."\n";
+    echo $child."\n";
 }
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Hello
 World
-===DONE===

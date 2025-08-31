@@ -9,7 +9,7 @@ opcache.save_comments=1
 hoho
 */
 function test ($a, $b = 1, $c = "") {
-	static $var = 1;
+    static $var = 1;
 }
 
 $func = new ReflectionFunction("test");

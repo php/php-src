@@ -1,19 +1,16 @@
 --TEST--
 imagedashedline()
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!function_exists('imagedashedline')) die('skip imagedashedline() not available');
+    if (!function_exists('imagedashedline')) die('skip imagedashedline() not available');
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php
-
-/* Prototype  : bool imagedashedline  ( resource $image  , int $x1  , int $y1  , int $x2  , int $y2  , int $color  )
- * Description: Draws a dashed line.
- * This function is deprecated. Use combination of imagesetstyle() and imageline() instead.
- * Source code: ext/standard/image.c
- * Alias to functions:
- */
-
 
 echo "Simple test of imagedashedline() function\n";
 
@@ -44,13 +41,12 @@ $color1 = imagecolorsforindex($image, $col1);
 $color2 = imagecolorsforindex($image, $col2);
 var_dump($color1, $color2);
 
-imagedestroy($image);
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
-	$dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';
-	@unlink($dest);
+    $dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';
+    @unlink($dest);
 ?>
 --EXPECT--
 Simple test of imagedashedline() function

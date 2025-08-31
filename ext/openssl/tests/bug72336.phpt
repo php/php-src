@@ -1,7 +1,7 @@
 --TEST--
 Bug #72336 (openssl_pkey_new does not fail for invalid DSA params)
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $p = '00f8000ae45b2dacb47dd977d58b719d097bdf07cb2c17660ad898518c08' .

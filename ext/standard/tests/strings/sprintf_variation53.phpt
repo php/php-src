@@ -2,11 +2,6 @@
 Test sprintf() function : usage variations - with whitespaces in format strings
 --FILE--
 <?php
-/* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing sprintf() : with  white spaces in format strings ***\n";
 
 // initializing the format array

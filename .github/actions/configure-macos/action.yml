@@ -1,0 +1,72 @@
+name: ./configure
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        BREW_OPT="$(brew --prefix)"/opt
+        export PATH="$BREW_OPT/bison/bin:$PATH"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/openssl@1.1/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/curl/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libffi/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libxml2/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libxslt/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/zlib/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/icu4c/lib/pkgconfig"
+        sed -i -e 's/Requires.private:.*//g' "$BREW_OPT/curl/lib/pkgconfig/libcurl.pc"
+        ./buildconf --force
+        ./configure \
+          --enable-option-checking=fatal \
+          --prefix=/usr/local \
+          --enable-fpm \
+          --with-pdo-mysql=mysqlnd \
+          --with-mysqli=mysqlnd \
+          --with-pgsql="$BREW_OPT"/libpq \
+          --with-pdo-pgsql="$BREW_OPT"/libpq \
+          --with-pdo-sqlite \
+          --without-pear \
+          --enable-gd \
+          --with-jpeg \
+          --with-webp \
+          --with-freetype \
+          --enable-exif \
+          --with-zip \
+          --with-zlib \
+          --enable-soap \
+          --enable-xmlreader \
+          --with-xsl \
+          --with-tidy="$BREW_OPT"/tidy-html5 \
+          --with-libxml \
+          --enable-sysvsem \
+          --enable-sysvshm \
+          --enable-shmop \
+          --enable-pcntl \
+          --with-readline="$BREW_OPT"/readline \
+          --enable-mbstring \
+          --with-curl \
+          --with-gettext="$BREW_OPT"/gettext \
+          --enable-sockets \
+          --with-bz2="$BREW_OPT"/bzip2 \
+          --with-openssl \
+          --with-gmp="$BREW_OPT"/gmp \
+          --with-iconv="$BREW_OPT"/libiconv \
+          --enable-bcmath \
+          --enable-calendar \
+          --enable-ftp \
+          --enable-sysvmsg \
+          --with-ffi \
+          --enable-zend-test \
+          --enable-dl-test=shared \
+          --enable-intl \
+          --with-mhash \
+          --with-sodium \
+          --enable-dba \
+          --enable-werror \
+          --with-config-file-path=/etc \
+          --with-config-file-scan-dir=/etc/php.d \
+          ${{ inputs.configurationParameters }}

@@ -244,7 +244,7 @@ enum flags
 #define start_state (parser->type == PHP_HTTP_REQUEST ? s_start_req : s_start_res)
 
 
-#if HTTP_PARSER_STRICT
+#ifdef HTTP_PARSER_STRICT
 # define STRICT_CHECK(cond) if (cond) goto error
 # define NEW_MESSAGE() (http_should_keep_alive(parser) ? start_state : s_dead)
 #else
@@ -1315,7 +1315,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
 
         nread = 0;
 
-        if (parser->flags & F_UPGRADE || parser->method == PHP_HTTP_CONNECT) {
+        if ((parser->flags & F_UPGRADE) || parser->method == PHP_HTTP_CONNECT) {
           parser->upgrade = 1;
         }
 
@@ -1339,11 +1339,16 @@ size_t php_http_parser_execute (php_http_parser *parser,
           }
         }
 
+        /* We cannot meaningfully support upgrade requests, since we only
+         * support HTTP/1 for now.
+         */
+#if 0
         /* Exit, the rest of the connect is in a different protocol. */
         if (parser->upgrade) {
           CALLBACK2(message_complete);
           return (p - data);
         }
+#endif
 
         if (parser->flags & F_SKIPBODY) {
           CALLBACK2(message_complete);

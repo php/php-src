@@ -34,6 +34,7 @@ EXPORTS
     gzsetparams
     gzread
     gzwrite
+    gzfwrite
     gzprintf
     gzputs
     gzgets

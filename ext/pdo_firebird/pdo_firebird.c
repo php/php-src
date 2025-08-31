@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -17,24 +15,21 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "pdo_firebird_arginfo.h"
 
-static const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
-	PHP_FE_END
-};
-/* }}} */
+static zend_class_entry *PdoFirebird_ce;
 
-/* {{{ pdo_firebird_deps
- */
+/* {{{ pdo_firebird_deps */
 static const zend_module_dep pdo_firebird_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
@@ -45,7 +40,7 @@ zend_module_entry pdo_firebird_module_entry = { /* {{{ */
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_firebird_deps,
 	"PDO_Firebird",
-	pdo_firebird_functions,
+	NULL,
 	PHP_MINIT(pdo_firebird),
 	PHP_MSHUTDOWN(pdo_firebird),
 	NULL,
@@ -60,15 +55,28 @@ zend_module_entry pdo_firebird_module_entry = { /* {{{ */
 ZEND_GET_MODULE(pdo_firebird)
 #endif
 
+#define REGISTER_PDO_FB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, value) \
+		REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, "FB_", "Pdo\\Firebird::", value)
+
 PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 {
-	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_DATE_FORMAT", (zend_long) PDO_FB_ATTR_DATE_FORMAT);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIMESTAMP_FORMAT", (zend_long) PDO_FB_ATTR_TIMESTAMP_FORMAT);
+	REGISTER_PDO_FB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_DATE_FORMAT", (zend_long) PDO_FB_ATTR_DATE_FORMAT);
+	REGISTER_PDO_FB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
+	REGISTER_PDO_FB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_TIMESTAMP_FORMAT", (zend_long) PDO_FB_ATTR_TIMESTAMP_FORMAT);
 
-	php_pdo_register_driver(&pdo_firebird_driver);
+	if (FAILURE == php_pdo_register_driver(&pdo_firebird_driver)) {
+		return FAILURE;
+	}
 
-	return SUCCESS;
+	PdoFirebird_ce = register_class_Pdo_Firebird(pdo_dbh_ce);
+	PdoFirebird_ce->create_object = pdo_dbh_new;
+
+#ifdef ZEND_SIGNALS
+	/* firebird replaces some signals at runtime, suppress warnings. */
+	SIGG(check) = 0;
+#endif
+
+	return php_pdo_register_driver_specific_ce(&pdo_firebird_driver, PdoFirebird_ce);
 }
 /* }}} */
 
@@ -82,8 +90,25 @@ PHP_MSHUTDOWN_FUNCTION(pdo_firebird) /* {{{ */
 
 PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 {
+	char version[64];
+	char api_version[8];
+	isc_get_client_version(version);
+
+	snprintf(api_version, 7, "%d", FB_API_VER);
+
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for Firebird", "enabled");
+	php_info_print_table_row(2, "PDO Driver for Firebird", "enabled");
+	php_info_print_table_row(2, "Client Library Version", version);
+	php_info_print_table_row(2, "Firebird API version", api_version);
 	php_info_print_table_end();
 }
 /* }}} */
+
+PHP_METHOD(Pdo_Firebird, getApiVersion)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(FB_API_VER);
+}

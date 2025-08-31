@@ -7,17 +7,6 @@ if( substr(PHP_OS, 0, 3) == "WIN" )
 ?>
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "at" mode,
    checking for the file creation, write & read operations,
@@ -47,6 +36,7 @@ unlink($file);  //Deleting the file
 fclose( fopen($file, "at") );  //Opening the non-existing file in "at" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
 echo "*** Done ***\n";
+?>
 --CLEAN--
 <?php
 unlink(__DIR__."/007_variation13.tmp");
@@ -57,7 +47,7 @@ resource(%d) of type (stream)
 string(6) "stream"
 int(37)
 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(true)

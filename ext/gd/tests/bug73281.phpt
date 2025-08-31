@@ -1,8 +1,9 @@
 --TEST--
 Bug #73281 (imagescale(…, IMG_BILINEAR_FIXED) can cause black border)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.3', '<=')) die('skip upstream fix not yet released');
 ?>
 --FILE--
@@ -29,7 +30,6 @@ foreach ($coordinates as $coordinate) {
     printf("%3d, %3d: %x\n", $x, $y, imagecolorat($dst, $x, $y));
 }
 ?>
-===DONE===
 --EXPECT--
 truecolor source
   0,   0: ffffff
@@ -42,4 +42,3 @@ palette source
   0, 199: ffffff
 199, 199: ffffff
 199,   0: ffffff
-===DONE===

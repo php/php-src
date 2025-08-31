@@ -4,16 +4,18 @@ executing a file with -F
 <?php
 include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 ?>
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $filename = __DIR__."/010.test.php";
+$filename_escaped = escapeshellarg($filename);
 $filename_txt = __DIR__."/010.test.txt";
+$filename_txt_escaped = escapeshellarg($filename_txt);
 
 $code = '
 <?php
@@ -29,10 +31,9 @@ hello';
 
 file_put_contents($filename_txt, $txt);
 
-var_dump(`cat "$filename_txt" | "$php" -n -F "$filename"`);
+var_dump(shell_exec("cat $filename_txt_escaped | $php -n -F $filename_escaped"));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__."/010.test.php");
@@ -43,4 +44,3 @@ string(25) "
 string(10) "test
 hello"
 "
-===DONE===

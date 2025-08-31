@@ -15,7 +15,6 @@ while (($data = fgetcsv($stream, 0, ',', '"', '')) !== false) {
 }
 fclose($stream);
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -29,4 +28,3 @@ Array
     [0] => \\\line1
 line2\\\
 )
-===DONE===

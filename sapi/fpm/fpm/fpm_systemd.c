@@ -11,7 +11,7 @@
 #include "fpm_systemd.h"
 
 
-static void fpm_systemd() /* {{{ */
+static void fpm_systemd(void)
 {
 	static unsigned long int last=0;
 	struct fpm_worker_pool_s *wp;
@@ -29,13 +29,13 @@ static void fpm_systemd() /* {{{ */
 	}
 
 /*
-	zlog(ZLOG_DEBUG, "systemd %s (Processes active:%d, idle:%d, Requests:%lu, slow:%lu, Traffic:%.3greq/sec)",
+	zlog(ZLOG_DEBUG, "systemd %s (Processes active:%d, idle:%d, Requests:%lu, slow:%lu, Traffic:%.2freq/sec)",
 			fpm_global_config.systemd_watchdog ? "watchdog" : "heartbeat",
 			active, idle, requests, slow_req, ((float)requests - last) * 1000.0 / fpm_global_config.systemd_interval);
 */
 
 	if (0 > sd_notifyf(0, "READY=1\n%s"
-				"STATUS=Processes active: %d, idle: %d, Requests: %lu, slow: %lu, Traffic: %.3greq/sec",
+				"STATUS=Processes active: %d, idle: %d, Requests: %lu, slow: %lu, Traffic: %.2freq/sec",
 				fpm_global_config.systemd_watchdog ? "WATCHDOG=1\n" : "",
 				active, idle, requests, slow_req, ((float)requests - last) * 1000.0 / fpm_global_config.systemd_interval)) {
 		zlog(ZLOG_NOTICE, "failed to notify status to systemd");
@@ -43,7 +43,6 @@ static void fpm_systemd() /* {{{ */
 
 	last = requests;
 }
-/* }}} */
 
 void fpm_systemd_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
@@ -79,7 +78,7 @@ void fpm_systemd_heartbeat(struct fpm_event_s *ev, short which, void *arg) /* {{
 }
 /* }}} */
 
-int fpm_systemd_conf() /* {{{ */
+int fpm_systemd_conf(void)
 {
 	char *watchdog;
 	int  interval = 0;
@@ -109,4 +108,3 @@ int fpm_systemd_conf() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */

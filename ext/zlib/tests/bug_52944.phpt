@@ -1,7 +1,7 @@
 --TEST--
 Bug #52944 (segfault with zlib filter and corrupted data)
---SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+--EXTENSIONS--
+zlib
 --INI--
 allow_url_fopen=1
 --FILE--
@@ -18,7 +18,9 @@ var_dump(fread($fp,1));
 var_dump(fread($fp,1));
 fclose($fp);
 echo "Done.\n";
---EXPECT--
+?>
+--EXPECTF--
+Notice: fread(): zlib: data error in %s on line %d
 bool(false)
 string(0) ""
 Done.

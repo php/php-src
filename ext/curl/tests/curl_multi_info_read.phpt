@@ -2,10 +2,8 @@
 array curl_multi_info_read ( resource $mh [, int &$msgs_in_queue = NULL ] );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) { print("skip"); }
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $urls = array(
@@ -27,10 +25,6 @@ do {
 while ($info = curl_multi_info_read($mh)) {
     var_dump($info);
 }
-
-foreach ($urls as $i => $url) {
-    curl_close($conn[$i]);
-}
 ?>
 --EXPECTF--
 array(3) {
@@ -39,7 +33,8 @@ array(3) {
   ["result"]=>
   int(%d)
   ["handle"]=>
-  resource(%d) of type (curl)
+  object(CurlHandle)#%d (0) {
+  }
 }
 array(3) {
   ["msg"]=>
@@ -47,5 +42,6 @@ array(3) {
   ["result"]=>
   int(%d)
   ["handle"]=>
-  resource(%d) of type (curl)
+  object(CurlHandle)#%d (0) {
+  }
 }

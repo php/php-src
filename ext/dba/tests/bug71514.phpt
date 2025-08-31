@@ -1,8 +1,9 @@
 --TEST--
 Bug #71514 (Bad dba_replace condition because of wrong API usage)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-if (!extension_loaded('dba')) die('skip dba extension not available');
 if (!in_array('inifile', dba_handlers())) die('skip inifile handler not available');
 ?>
 --FILE--
@@ -17,10 +18,8 @@ var_dump(dba_fetch('foo', $db));
 
 dba_close($db);
 ?>
-==DONE==
 --EXPECT--
 string(6) "value2"
-==DONE==
 --CLEAN--
 <?php
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug71514.ini';

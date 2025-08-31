@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(950, "ansi");
 
 ?>
+--CONFLICTS--
+dir_big5
 --INI--
 internal_encoding=big5
 --FILE--
@@ -23,9 +25,9 @@ include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "測試多字節路徑"; // BIG5 string
 $prefix = create_data("dir_big5", $item . "5", 950);
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}5";
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}5";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));
@@ -39,7 +41,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_big5");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s測試多字節路徑5\測試多字節路徑4"
 Active code page: %d
 bool(true)
-===DONE===

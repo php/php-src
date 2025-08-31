@@ -1,5 +1,5 @@
 --TEST--
-Bug #77552 Unintialized php_stream_statbuf in stat functions 
+Bug #77552 Uninitialized php_stream_statbuf in stat functions
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
@@ -15,7 +15,7 @@ $target = $tmpDir.'/folder/target';
 mkdir($target, 0777, true);
 
 $junction = $tmpDir.'/junction';
-$cmd = sprintf('mklink /J "%s" "%s"', $junction, $target); 
+$cmd = sprintf('mklink /J "%s" "%s"', $junction, $target);
 exec($cmd);
 
 $stat = lstat($junction);

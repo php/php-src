@@ -41,13 +41,13 @@ var_dump(unserialize($s));
 --EXPECT--
 string(63) "O:1:"B":2:{i:0;a:1:{i:0;O:8:"stdClass":0:{}}i:1;a:1:{i:0;r:3;}}"
 object(B)#3 (2) {
-  ["data2":"B":private]=>
+  ["data":"A":private]=>
   array(1) {
     [0]=>
     object(stdClass)#4 (0) {
     }
   }
-  ["data":"A":private]=>
+  ["data2":"B":private]=>
   array(1) {
     [0]=>
     object(stdClass)#4 (0) {

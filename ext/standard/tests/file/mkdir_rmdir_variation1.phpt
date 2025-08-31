@@ -5,22 +5,10 @@ Test mkdir() and rmdir() functions: usage variations - perms(0000-0777)
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. only on LINUX');
 }
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/is_readable_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-	unlink ($filename);
-	die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/*  Prototype: bool mkdir ( string $pathname [, int $mode [, bool $recursive [, resource $context]]] );
-    Description: Makes directory
-*/
 
 echo "*** Testing mkdir() and rmdir() for different permissions ***\n";
 

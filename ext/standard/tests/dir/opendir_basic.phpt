@@ -2,11 +2,6 @@
 Test opendir() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of opendir() with absolute and relative paths as $path argument
  */
@@ -40,7 +35,6 @@ var_dump($dh1);
 closedir($dh2);
 var_dump($dh2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/opendir_basic';
@@ -61,4 +55,3 @@ resource(%d) of type (stream)
 -- Close directory handles: --
 resource(%d) of type (Unknown)
 resource(%d) of type (Unknown)
-===DONE===

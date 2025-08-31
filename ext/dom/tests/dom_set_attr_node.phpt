@@ -1,7 +1,7 @@
 --TEST--
 Test: setAttributeNode()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -24,13 +24,13 @@ $dom2 = new DOMDocument();
 $dom2->loadXML($xml2);
 $root2 = $dom2->documentElement;
 try {
-	$root2->setAttributeNode($attr);
+    $root2->setAttributeNode($attr);
 } catch (domexception $e) {
 ob_start();
-	var_dump($e);
-	$contents = ob_get_contents();
-	ob_end_clean();
-	echo preg_replace('/object\(DOMAttr\).+\{.*?\}/s', 'DOMAttr', $contents);
+    var_dump($e);
+    $contents = ob_get_contents();
+    ob_end_clean();
+    echo preg_replace('/object\(DOMAttr\).+\{.*?\}/s', 'DOMAttr', $contents);
 }
 
 ?>
@@ -40,6 +40,8 @@ object(DOMException)#%d (7) {
   string(20) "Wrong Document Error"
   ["string":"Exception":private]=>
   string(0) ""
+  ["code"]=>
+  int(4)
   ["file":protected]=>
   string(%d) "%sdom_set_attr_node.php"
   ["line":protected]=>
@@ -67,6 +69,4 @@ object(DOMException)#%d (7) {
   }
   ["previous":"Exception":private]=>
   NULL
-  ["code"]=>
-  int(4)
 }

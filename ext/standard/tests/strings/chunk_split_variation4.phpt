@@ -2,12 +2,6 @@
 Test chunk_split() function : usage variations - different heredoc strings as 'str' argument
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions: none
-*/
-
 /*
 * Passing different heredoc strings as 'str' argument to the chunk_split()
 * with 'chunklen' 4 and default value of 'ending' that is "\r\n"

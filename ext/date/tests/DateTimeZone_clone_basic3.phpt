@@ -25,7 +25,6 @@ echo "\n-- clone it --\n";
 $d2_clone = clone $d1_clone;
 var_dump($d2_clone);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing clone on DateTime objects ***
 
@@ -38,6 +37,10 @@ object(DateTimeZone)#%d (2) {
 }
 
 -- Add some properties --
+
+Deprecated: Creation of dynamic property DateTimeZone::$property1 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property DateTimeZone::$property2 is deprecated in %s on line %d
 object(DateTimeZone)#%d (4) {
   ["property1"]=>
   int(99)
@@ -62,6 +65,10 @@ object(DateTimeZone)#%d (4) {
 }
 
 -- Add some more properties --
+
+Deprecated: Creation of dynamic property DateTimeZone::$property3 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property DateTimeZone::$property4 is deprecated in %s on line %d
 object(DateTimeZone)#%d (6) {
   ["property1"]=>
   int(99)
@@ -92,4 +99,3 @@ object(DateTimeZone)#%d (6) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-===DONE===

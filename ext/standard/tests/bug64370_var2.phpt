@@ -5,19 +5,17 @@ Test bug #64370 sequential microtime(true) calls
 
 $i = 0;
 while(100000 > $i++) {
-	$m0 = microtime(true);
-	$m1 = microtime(true);
-	$d = $m1 - $m0;
+    $m0 = microtime(true);
+    $m1 = microtime(true);
+    $d = $m1 - $m0;
 
-	/*echo "$d\n";*/
+    /*echo "$d\n";*/
 
-	if ($d < 0) {
-		die("failed in {$i}th iteration");
-	}
+    if ($d < 0) {
+        die("failed in {$i}th iteration");
+    }
 }
 echo "ok\n";
 ?>
-===DONE===
 --EXPECT--
 ok
-===DONE===

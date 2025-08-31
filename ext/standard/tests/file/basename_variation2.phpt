@@ -11,8 +11,8 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $paths = array (
 
-	"foo",
-	"foo/",
+    "foo",
+    "foo/",
     "foo\\",
     "foo.bar",
     "foo.bar/",
@@ -26,8 +26,8 @@ $paths = array (
 
 $suffixes = array (
 
-	".bar",
-	".b",
+    ".bar",
+    ".b",
     ".",
     " ",
     "foo",
@@ -39,10 +39,10 @@ $suffixes = array (
 );
 
 foreach ($paths as $path) {
-	foreach ($suffixes as $suffix) {
-		echo "basename for path $path, supplying suffix $suffix is:\n";
-		var_dump(basename($path, $suffix));
-	}
+    foreach ($suffixes as $suffix) {
+        echo "basename for path $path, supplying suffix $suffix is:\n";
+        var_dump(basename($path, $suffix));
+    }
 }
 
 echo "\ndone\n";

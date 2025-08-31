@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -26,6 +24,7 @@
 
 #define FILTER_FORCE_ARRAY			0x4000000
 #define FILTER_NULL_ON_FAILURE			0x8000000
+#define FILTER_THROW_ON_FAILURE			0x10000000
 
 #define FILTER_FLAG_ALLOW_OCTAL             0x0001
 #define FILTER_FLAG_ALLOW_HEX               0x0002
@@ -48,17 +47,18 @@
 #define FILTER_FLAG_PATH_REQUIRED           0x040000
 #define FILTER_FLAG_QUERY_REQUIRED          0x080000
 
-#define FILTER_FLAG_IPV4                    0x100000
-#define FILTER_FLAG_IPV6                    0x200000
-#define FILTER_FLAG_NO_RES_RANGE            0x400000
-#define FILTER_FLAG_NO_PRIV_RANGE           0x800000
+#define FILTER_FLAG_IPV4                    0x00100000
+#define FILTER_FLAG_IPV6                    0x00200000
+#define FILTER_FLAG_NO_RES_RANGE            0x00400000
+#define FILTER_FLAG_NO_PRIV_RANGE           0x00800000
+#define FILTER_FLAG_GLOBAL_RANGE            0x20000000
 
 #define FILTER_FLAG_HOSTNAME               0x100000
 
 #define FILTER_FLAG_EMAIL_UNICODE          0x100000
 
 #define FILTER_VALIDATE_INT           0x0101
-#define FILTER_VALIDATE_BOOLEAN       0x0102
+#define FILTER_VALIDATE_BOOL          0x0102
 #define FILTER_VALIDATE_FLOAT         0x0103
 
 #define FILTER_VALIDATE_REGEXP        0x0110
@@ -81,7 +81,6 @@
 #define FILTER_SANITIZE_URL           0x0206
 #define FILTER_SANITIZE_NUMBER_INT    0x0207
 #define FILTER_SANITIZE_NUMBER_FLOAT  0x0208
-#define FILTER_SANITIZE_MAGIC_QUOTES  0x0209
 #define FILTER_SANITIZE_FULL_SPECIAL_CHARS 0x020a
 #define FILTER_SANITIZE_ADD_SLASHES   0x020b
 #define FILTER_SANITIZE_LAST          0x020b
@@ -95,14 +94,26 @@
 || (id >= FILTER_VALIDATE_ALL && id <= FILTER_VALIDATE_LAST) \
 || id == FILTER_CALLBACK)
 
-#define RETURN_VALIDATION_FAILED	\
-	zval_ptr_dtor(value);	\
-	if (flags & FILTER_NULL_ON_FAILURE) {	\
-		ZVAL_NULL(value);	\
-	} else {	\
-		ZVAL_FALSE(value);	\
+
+/* When using FILTER_THROW_ON_FAILURE, we can't actually throw the error here
+ * because we don't have access to the name of the filter. Returning FAILURE
+ * from the filter handler indicates that validation failed *and* an exception
+ * should thus be thrown. */
+#define RETURN_VALIDATION_FAILED \
+	if (EG(exception)) { \
+		return SUCCESS; \
+	} else if (flags & FILTER_THROW_ON_FAILURE) { \
+		zval_ptr_dtor(value); \
+		ZVAL_NULL(value); \
+		return FAILURE; \
+	} else if (flags & FILTER_NULL_ON_FAILURE) { \
+		zval_ptr_dtor(value); \
+		ZVAL_NULL(value); \
+	} else { \
+		zval_ptr_dtor(value); \
+		ZVAL_FALSE(value); \
 	}	\
-	return;	\
+	return SUCCESS;	\
 
 #define PHP_FILTER_TRIM_DEFAULT(p, len) PHP_FILTER_TRIM_DEFAULT_EX(p, len, 1);
 

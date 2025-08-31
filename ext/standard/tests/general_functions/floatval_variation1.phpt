@@ -2,35 +2,22 @@
 Testing floatval() and its alias doubleval() functions : usage variations - different data types as $y arg
 --FILE--
 <?php
-/* Prototype: float floatval( mixed $var );
- * Description: Returns the float value of var.
- */
-
-
-
-// get a resource type variable
-$fp = fopen (__FILE__, "r");
-fclose($fp);
-$dfp = opendir ( __DIR__ );
-closedir($dfp);
 
 // other types in an array
 $not_float_types = array (
            "-2147483648" => -2147483648, // max negative integer value
            "2147483647" => 2147483648,  // max positive integer value
-           "file resoruce" => $fp,
-           "directory resource" => $dfp,
+           "stream resource" => STDERR,
            "\"0.0\"" => "0.0", // string
            "\"1.0\"" => "1.0",
-	       "\"-1.3e3\"" => "-1.3e3",
-		   "\"bob-1.3e3\"" => "bob-1.3e3",
+           "\"-1.3e3\"" => "-1.3e3",
+           "\"bob-1.3e3\"" => "bob-1.3e3",
            "\"10 Some dollars\"" => "10 Some dollars",
-	       "\"10.2 Some Dollars\"" => "10.2 Some Dollars",
-	       "\"10.0 dollar\" + 1" => "10.0 dollar" + 1,
-		   "\"10.0 dollar\" + 1.0" => "10.0 dollar" + 1.0,
+           "\"10.2 Some Dollars\"" => "10.2 Some Dollars",
+           "\"10.0 dollar\" + 1" => "10.0 dollar" + 1,
+           "\"10.0 dollar\" + 1.0" => "10.0 dollar" + 1.0,
            "\"\"" => "",
            "true" => true,
-           "NULL" => NULL,
            "null" => null,
                  );
 /* loop through the $not_float_types to see working of
@@ -50,11 +37,10 @@ foreach ($not_float_types as $key => $type ) {
    var_dump( doubleval($type) );
 }
 ?>
-===DONE===
 --EXPECTF--
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line %d
+Warning: A non-numeric value encountered in %s on line %d
 
 *** Testing floatval() on non floating types ***
 
@@ -64,11 +50,8 @@ float(-2147483648)
 -- Iteration : 2147483647 --
 float(2147483648)
 
--- Iteration : file resoruce --
-float(%d)
-
--- Iteration : directory resource --
-float(%d)
+-- Iteration : stream resource --
+float(3)
 
 -- Iteration : "0.0" --
 float(0)
@@ -99,9 +82,6 @@ float(0)
 
 -- Iteration : true --
 float(1)
-
--- Iteration : NULL --
-float(0)
 
 -- Iteration : null --
 float(0)
@@ -114,11 +94,8 @@ float(-2147483648)
 -- Iteration : 2147483647 --
 float(2147483648)
 
--- Iteration : file resoruce --
-float(%d)
-
--- Iteration : directory resource --
-float(%d)
+-- Iteration : stream resource --
+float(3)
 
 -- Iteration : "0.0" --
 float(0)
@@ -150,9 +127,5 @@ float(0)
 -- Iteration : true --
 float(1)
 
--- Iteration : NULL --
-float(0)
-
 -- Iteration : null --
 float(0)
-===DONE===

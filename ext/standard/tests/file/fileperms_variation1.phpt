@@ -7,11 +7,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Do not run on Windows');
 }
+?>
 --FILE--
 <?php
-/* Prototype: int fileperms ( string $filename )
- * Description: Returns the group ID of the file, or FALSE in case of an error.
- */
 
 /* Creating soft and hard links to a file and applying fileperms() on links */
 

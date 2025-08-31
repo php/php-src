@@ -1,7 +1,7 @@
 --TEST--
 Trying instantiate a PDORow object manually
---SKIPIF--
-<?php if (!extension_loaded('pdo')) die('skip'); ?>
+--EXTENSIONS--
+pdo
 --FILE--
 <?php
 

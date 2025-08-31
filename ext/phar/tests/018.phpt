@@ -1,9 +1,7 @@
 --TEST--
 Phar: opendir test, root directory
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -22,8 +20,8 @@ include 'files/phar_test.inc';
 include $fname;
 $dir = opendir('phar://hio/');
 while (false !== ($a = readdir($dir))) {
-	var_dump($a);
-	var_dump(is_dir('phar://hio/' . $a));
+    var_dump($a);
+    var_dump(is_dir('phar://hio/' . $a));
 }
 ?>
 --CLEAN--

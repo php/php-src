@@ -1,13 +1,13 @@
 --TEST--
 Gettext basic test
+--EXTENSIONS--
+gettext
 --SKIPIF--
 <?php
-	if (!extension_loaded("gettext")) {
-		die("skip\n");
-	}
-	if (!setlocale(LC_ALL, 'fi_FI')) {
-		die("skip fi_FI locale not supported.");
-	}
+    
+    if (!setlocale(LC_ALL, 'fi_FI')) {
+        die("skip fi_FI locale not supported.");
+    }
 ?>
 --FILE--
 <?php

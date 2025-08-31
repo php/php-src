@@ -1,5 +1,7 @@
 --TEST--
 Test session_decode() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -8,12 +10,6 @@ session.serialize_handler=blah
 <?php
 
 ob_start();
-
-/*
- * Prototype : string session_decode(void)
- * Description : Decodes session data from a string
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_decode() : variation ***\n";
 
@@ -34,10 +30,10 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_decode() : variation ***
 
-Warning: session_start(): Cannot find serialization handler 'blah' - session startup failed in %s on line %d
+Warning: session_start(): Cannot find session serialization handler "blah" - session startup failed in %s on line %d
 bool(false)
 
-Notice: Undefined variable: _SESSION in %s on line %d
+Warning: Undefined global variable $_SESSION in %s on line %d
 NULL
 array(3) {
   ["foo"]=>
@@ -48,7 +44,7 @@ array(3) {
   float(123.456)
 }
 
-Warning: session_decode(): Session is not active. You cannot decode session data in %s on line %d
+Warning: session_decode(): Session data cannot be decoded when there is no active session in %s on line %d
 bool(false)
 array(3) {
   ["foo"]=>

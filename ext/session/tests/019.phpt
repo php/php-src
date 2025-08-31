@@ -1,5 +1,7 @@
 --TEST--
 serializing references test case using globals
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -14,16 +16,16 @@ session.save_handler=files
 error_reporting(E_ALL);
 
 class TFoo {
-	public $c;
-	function __construct($c) {
-		$this->c = $c;
-	}
-	function inc() {
-		$this->c++;
-	}
+    public $c;
+    function __construct($c) {
+        $this->c = $c;
+    }
+    function inc() {
+        $this->c++;
+    }
 }
 
-session_id("abtest");
+session_id("test019");
 session_start();
 
 $_SESSION["o1"] = new TFoo(42);

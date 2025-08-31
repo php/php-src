@@ -15,6 +15,7 @@ var_dump(0 < $nan);
 var_dump(0 <= $nan);
 var_dump(0 > $nan);
 var_dump(0 >= $nan);
+?>
 --EXPECT--
 ** CONST
 bool(false)

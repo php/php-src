@@ -1,12 +1,12 @@
 --TEST--
 FileInfo - Calling the constructor twice
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 
 $x = new finfo;
-$x->finfo();
+$x->__construct();
 
 echo "done!\n";
 

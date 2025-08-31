@@ -2,10 +2,6 @@
 Test realpath() with relative paths
 --FILE--
 <?php
-/* Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 echo "\n*** Testing basic functions of realpath() with files ***\n";
 
 /* creating directories and files */

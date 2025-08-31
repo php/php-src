@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -67,11 +65,11 @@ static
 int mysqlnd_local_infile_read(void * ptr, zend_uchar * buf, unsigned int buf_len)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
-	int count;
 
 	DBG_ENTER("mysqlnd_local_infile_read");
 
-	count = (int) php_stream_read(info->fd, (char *) buf, buf_len);
+	// TODO Change this, and the return type of the function to ssize_t
+	int count = (int) php_stream_read(info->fd, (char *) buf, buf_len);
 
 	if (count < 0) {
 		strcpy(info->error_msg, "Error reading file");
@@ -92,12 +90,16 @@ int	mysqlnd_local_infile_error(void * ptr, char *error_buf, unsigned int error_b
 	DBG_ENTER("mysqlnd_local_infile_error");
 
 	if (info) {
-		strlcpy(error_buf, info->error_msg, error_buf_len);
+		size_t error_msg_len_with_null_byte = strlen(info->error_msg) + 1;
+		ZEND_ASSERT(error_buf_len >= error_msg_len_with_null_byte);
+
+		memcpy(error_buf, info->error_msg, error_msg_len_with_null_byte);
 		DBG_INF_FMT("have info, %d", info->error_no);
 		DBG_RETURN(info->error_no);
 	}
 
-	strlcpy(error_buf, "Unknown error", error_buf_len);
+	ZEND_ASSERT(error_buf_len >= sizeof("Unknown error"));
+	strcpy(error_buf, "Unknown error");
 	DBG_INF_FMT("no info, %d", CR_UNKNOWN_ERROR);
 	DBG_RETURN(CR_UNKNOWN_ERROR);
 }
@@ -139,7 +141,7 @@ static const char *lost_conn = "Lost connection to MySQL server during LOAD DATA
 
 /* {{{ mysqlnd_handle_local_infile */
 enum_func_status
-mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, zend_bool * is_warning)
+mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filename, bool * is_warning)
 {
 	zend_uchar			*buf = NULL;
 	zend_uchar			empty_packet[MYSQLND_HEADER_SIZE];
@@ -151,13 +153,51 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * const filenam
 	MYSQLND_INFILE		infile;
 	MYSQLND_PFC			* net = conn->protocol_frame_codec;
 	MYSQLND_VIO			* vio = conn->vio;
+	bool				is_local_infile_enabled = (conn->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES;
+	const char*			local_infile_directory = conn->options->local_infile_directory;
+	bool				is_local_infile_dir_set = local_infile_directory != NULL;
+	bool				prerequisities_ok = TRUE;
 
 	DBG_ENTER("mysqlnd_handle_local_infile");
 
-	if (!(conn->options->flags & CLIENT_LOCAL_FILES)) {
-		php_error_docref(NULL, E_WARNING, "LOAD DATA LOCAL INFILE forbidden");
-		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE,
-						"LOAD DATA LOCAL INFILE is forbidden, check mysqli.allow_local_infile");
+	/*
+		if local_infile is disabled, and local_infile_dir is not set, then operation is forbidden
+	*/
+	if (!is_local_infile_enabled && !is_local_infile_dir_set) {
+		SET_CLIENT_ERROR(conn->error_info, CR_LOAD_DATA_LOCAL_INFILE_REJECTED, UNKNOWN_SQLSTATE,
+						"LOAD DATA LOCAL INFILE is forbidden, check related settings like "
+						"mysqli.allow_local_infile|mysqli.local_infile_directory or "
+						"Pdo\\Mysql::ATTR_LOCAL_INFILE|Pdo\\Mysql::ATTR_LOCAL_INFILE_DIRECTORY");
+		prerequisities_ok = FALSE;
+	}
+
+	/*
+		if local_infile_dir is set, then check whether it actually exists, and is accessible
+	*/
+	if (is_local_infile_dir_set) {
+		php_stream *stream = php_stream_opendir(local_infile_directory, REPORT_ERRORS, NULL);
+		if (stream) {
+			php_stream_closedir(stream);
+		} else {
+			SET_CLIENT_ERROR(conn->error_info, CR_LOAD_DATA_LOCAL_INFILE_REJECTED, UNKNOWN_SQLSTATE, "cannot open local_infile_directory");
+			prerequisities_ok = FALSE;
+		}
+	}
+
+	/*
+		if local_infile is disabled and local_infile_dir is set, then we have to check whether
+		filename is located inside its subtree
+		but only in such a case, because when local_infile is enabled, then local_infile_dir is ignored
+	*/
+	if (prerequisities_ok && !is_local_infile_enabled && is_local_infile_dir_set) {
+		if (php_check_specific_open_basedir(local_infile_directory, filename) == -1) {
+			SET_CLIENT_ERROR(conn->error_info, CR_LOAD_DATA_LOCAL_INFILE_REJECTED, UNKNOWN_SQLSTATE,
+							"LOAD DATA LOCAL INFILE DIRECTORY restriction in effect. Unable to open file");
+			prerequisities_ok = FALSE;
+		}
+	}
+
+	if (!prerequisities_ok) {
 		/* write empty packet to server */
 		ret = net->data->m.send(net, vio, empty_packet, 0, conn->stats, conn->error_info);
 		*is_warning = TRUE;

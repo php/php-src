@@ -4,7 +4,6 @@ phpcredits()
 <?php
 
 var_dump(phpcredits());
-var_dump(phpcredits(array()));
 
 echo "--\n";
 var_dump(phpcredits(0));
@@ -40,9 +39,6 @@ PHP Quality Assurance Team
 %wWebsites and Infrastructure team%w
 %a
 bool(true)
-
-Warning: phpcredits() expects parameter 1 to be int, array given in %sphpcredits.php on line 4
-NULL
 --
 PHP Credits
 bool(true)

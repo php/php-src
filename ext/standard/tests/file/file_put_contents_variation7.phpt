@@ -2,14 +2,13 @@
 Test file_put_contents() function : usage variation - various absolute and relative paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip Not for Windows");
+?>
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
 $mainDir = "filePutContentsVar7.dir";
@@ -69,10 +68,20 @@ for($i = 0; $i<count($allDirs); $i++) {
 }
 
 chdir($old_dir_path);
-rmdir($absSubDir);
-rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$mainDir = "filePutContentsVar7.dir";
+$subDir = "filePutContentsVar7Sub";
+$absMainDir = __DIR__."/".$mainDir;
+$absSubDir = $absMainDir."/".$subDir;
+$filename = 'FileGetContentsVar7.tmp';
+$absFile = $absSubDir.'/'.$filename;
+@unlink($absFile);
+rmdir($absSubDir);
+rmdir($absMainDir);
 ?>
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
@@ -91,12 +100,12 @@ Data written correctly
 
 -- Iteration 5 --
 
-Warning: file_put_contents(%sfilePutContentsVar7.dir/filePutContentsVar7Sub/..///filePutContentsVar7Sub//..//../filePutContentsVar7Sub/FileGetContentsVar7.tmp): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sfilePutContentsVar7.dir/filePutContentsVar7Sub/..///filePutContentsVar7Sub//..//../filePutContentsVar7Sub/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
 No data written
 
 -- Iteration 6 --
 
-Warning: file_put_contents(%sfilePutContentsVar7.dir/filePutContentsVar7Sub/BADDIR/FileGetContentsVar7.tmp): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sfilePutContentsVar7.dir/filePutContentsVar7Sub/BADDIR/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
 No data written
 
 -- Iteration 7 --
@@ -113,7 +122,7 @@ Data written correctly
 
 -- Iteration 11 --
 
-Warning: file_put_contents(BADDIR/FileGetContentsVar7.tmp): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(BADDIR/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
 No data written
 
 *** Done ***

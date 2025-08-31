@@ -1,12 +1,9 @@
 --TEST--
 IntlTimeZone clone handler: basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $tz1 = IntlTimeZone::createTimeZone('Europe/Amsterdam');
 print_r($tz1);
@@ -18,7 +15,6 @@ print_r($gmt);
 print_r(clone $gmt);
 
 ?>
-==DONE==
 --EXPECTF--
 IntlTimeZone Object
 (
@@ -48,4 +44,3 @@ IntlTimeZone Object
     [rawOffset] => 0
     [currentOffset] => 0
 )
-==DONE==

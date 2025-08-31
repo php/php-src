@@ -1,8 +1,7 @@
 --TEST--
 Test finfo_file() function : regex rules
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc');
-?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 /**
@@ -21,9 +20,7 @@ var_dump( finfo_file( $finfo, $file ) );
 var_dump( finfo_file( $finfo, $file, FILEINFO_CONTINUE ) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_file() : regex rules ***
 string(28) "text/plain; charset=us-ascii"
 string(%d) "awk%sscript, ASCII text%A"
-===DONE===

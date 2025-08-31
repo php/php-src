@@ -22,22 +22,8 @@ C::s();
 $c = new C();
 $c->s();
 
-get_called_class();
-
-D::m();
-
 ?>
---EXPECTF--
+--EXPECT--
 Called class: D
 Called class: C
 Called class: C
-
-Warning: get_called_class() called from outside a class in %s on line %d
-
-Deprecated: Non-static method D::m() should not be called statically in %s on line %d
-
-Fatal error: Uncaught Error: Using $this when not in object context in %s:%d
-Stack trace:
-#0 %s(%d): D::m()
-#1 {main}
-  thrown in %s on line %d

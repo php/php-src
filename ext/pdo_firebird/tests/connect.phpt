@@ -1,13 +1,16 @@
 --TEST--
 PDO_Firebird: connect/disconnect
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --FILE--
 <?php
-	require("testdb.inc");
+    require("testdb.inc");
 
-	unset($dbh);
-	echo "done\n";
+    $dbh = getDbConnection();
+    unset($dbh);
+    echo "done\n";
 
 ?>
 --EXPECT--

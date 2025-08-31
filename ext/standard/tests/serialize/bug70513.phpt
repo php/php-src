@@ -1,18 +1,18 @@
 --TEST--
 Bug #70513: GMP Deserialization Type Confusion Vulnerability
---SKIPIF--
-<?php if (!extension_loaded('gmp')) die('skip requires gmp');
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
 class obj
 {
-	var $ryat;
+    var $ryat;
 
-	function __wakeup()
-	{
-		$this->ryat = 1;
-	}
+    function __wakeup()
+    {
+        $this->ryat = 1;
+    }
 }
 
 $obj = new stdClass;

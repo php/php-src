@@ -5,7 +5,7 @@ Testing user filter on streams
 class Intercept extends php_user_filter
 {
     public static $cache = '';
-    public function filter($in, $out, &$consumed, $closing)
+    public function filter($in, $out, &$consumed, $closing): int
     {
         while ($bucket = stream_bucket_make_writeable($in)) {
             self::$cache .= $bucket->data;
@@ -24,6 +24,7 @@ stream_filter_append(STDOUT, "intercept_filter");
 
 $out = fwrite(STDOUT, "Goodbye\n");
 var_dump($out);
+?>
 --EXPECT--
 Hello
 int(6)

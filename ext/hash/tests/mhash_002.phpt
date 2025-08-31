@@ -2,6 +2,8 @@
 MHash: mhash_get_block_size() & mhash_get_hash_name() test
 --SKIPIF--
 <?php if(!function_exists('mhash')) { die('skip mhash compatibility layer not available'); } ?>
+--INI--
+error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 $supported_hash_al = array(
@@ -29,16 +31,16 @@ $hc = mhash_count() + 1;
 
 $known_hash_al = array();
 for ($i=0; $i < $hc; $i++) {
-	$known_hash_al[mhash_get_hash_name($i)] = $i;
+    $known_hash_al[mhash_get_hash_name($i)] = $i;
 }
 
 foreach ($supported_hash_al as $name => $len) {
-	if (array_key_exists($name, $known_hash_al)) {
-		$len = mhash_get_block_size($known_hash_al[$name]);
-		echo "$name = $len\n";
-	} else {
-		echo "$name ? $len\n";
-	}
+    if (array_key_exists($name, $known_hash_al)) {
+        $len = mhash_get_block_size($known_hash_al[$name]);
+        echo "$name = $len\n";
+    } else {
+        echo "$name ? $len\n";
+    }
 }
 ?>
 --EXPECTREGEX--

@@ -1,9 +1,7 @@
 --TEST--
 Bug #19366 (gdimagefill() function crashes (fixed in bundled libgd))
---SKIPIF--
-<?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 echo "Alive: create image\n";
@@ -38,8 +36,6 @@ echo "Alive: Send to browser\n";
 //Header("Content-type: image/PNG");
 //ImagePNG($ImHandle);
 
-echo "Alive: Free resources\n";
-imagedestroy($ImHandle);
 echo "Alive: Done\n";
 ?>
 --EXPECT--
@@ -48,5 +44,4 @@ Alive: Define colors
 Alive: Draw
 Alive: ImageString
 Alive: Send to browser
-Alive: Free resources
 Alive: Done

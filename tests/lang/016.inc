@@ -1,5 +1,5 @@
 <?php
 function MyFunc ($a) {
-	echo $a;
+    echo $a;
 }
 ?>

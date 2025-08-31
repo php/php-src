@@ -1,17 +1,16 @@
 --TEST--
 imagefilledpolygon()
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available');
+    if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available');
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php
-
-/* Prototype  : bool imagefilledpolygon  ( resource $image  , array $points  , int $num_points  , int $color  )
- * Description: Draws a filled polygon.
- * Source code: ext/standard/image.c
- * Alias to functions:
- */
 
 echo "Simple test of imagefilledpolygon() function\n";
 
@@ -36,7 +35,7 @@ $bg = imagecolorallocate($image, 0, 0, 0);
 $col_poly = imagecolorallocate($image, 0, 255, 0);
 
 // draw the polygon
-imagefilledpolygon($image, $points, count($points)/2, $col_poly);
+imagefilledpolygon($image, $points, $col_poly);
 
 // output the picture to a file
 imagepng($image, $dest);
@@ -56,15 +55,12 @@ $color2 = imagecolorsforindex($image_in, $col2);
 $color3 = imagecolorsforindex($image_in, $col3);
 var_dump($color1, $color2, $color3);
 
-imagedestroy($image);
-imagedestroy($image_in);
-
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
-	$dest = dirname(realpath(__FILE__)) . '/imagefilledpolygon.png';
-	@unlink($dest);
+    $dest = dirname(realpath(__FILE__)) . '/imagefilledpolygon.png';
+    @unlink($dest);
 ?>
 --EXPECT--
 Simple test of imagefilledpolygon() function

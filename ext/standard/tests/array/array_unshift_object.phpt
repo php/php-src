@@ -2,11 +2,6 @@
 Test array_unshift() function : passing object for 'var' argument
 --FILE--
 <?php
-/* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unshift() by passing
  * an object to the $var argument
@@ -178,10 +173,10 @@ int(5)
 array(5) {
   [0]=>
   object(ChildClass)#%d (2) {
-    ["var3":"ChildClass":private]=>
-    NULL
     ["var2":protected]=>
     int(5)
+    ["var3":"ChildClass":private]=>
+    NULL
   }
   ["f"]=>
   string(5) "first"
@@ -196,10 +191,10 @@ int(7)
 array(7) {
   [0]=>
   object(ChildClass)#%d (2) {
-    ["var3":"ChildClass":private]=>
-    NULL
     ["var2":protected]=>
     int(5)
+    ["var3":"ChildClass":private]=>
+    NULL
   }
   [1]=>
   string(5) "hello"

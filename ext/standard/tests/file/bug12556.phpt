@@ -3,9 +3,9 @@ Bug #12556 (fgetcsv() ignores lengths when quotes not closed)
 --FILE--
 <?php
 $fp = fopen(__DIR__."/test.csv", "r");
-while($line = fgetcsv($fp, 24)) {
-	$line = str_replace("\x0d\x0a", "\x0a", $line);
-	var_dump($line);
+while($line = fgetcsv($fp, 24, escape: "\\")) {
+    $line = str_replace("\x0d\x0a", "\x0a", $line);
+    var_dump($line);
 }
 fclose($fp);
 ?>

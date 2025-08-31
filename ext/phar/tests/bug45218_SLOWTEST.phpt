@@ -1,8 +1,9 @@
 --TEST--
 Phar::buildFromIterator() iterator, too many files for open file handles (Bug #45218)
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 ?>
 --INI--
@@ -18,40 +19,40 @@ class myIterator implements Iterator
     var $a;
     var $count = 1;
 
-    function next() {
-        return (++$this->count < 3000) ? 'f' . $this->count : false;
+    function next(): void {
+        ++$this->count;
     }
-    function current() {
+    function current(): mixed {
         if (($this->count % 100) === 0) {
             echo $this->count, "\n";
         }
         return $GLOBALS['fname2'];
     }
-    function key() {
+    function key(): mixed {
         return 'f' . $this->count;
     }
-    function valid() {
+    function valid(): bool {
         return $this->count < 3000;
     }
+    #[ReturnTypeWillChange]
     function rewind() {
         $this->count = 1;
         return $GLOBALS['fname2'];
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar($fname);
-	$ret = $phar->buildFromIterator(new myIterator);
-	foreach ($ret as $a => $val) {
-		$ret[$a] = str_replace(dirname($fname2) . DIRECTORY_SEPARATOR, '*', $val);
-	}
-	var_dump($ret);
+    chdir(__DIR__);
+    $phar = new Phar($fname);
+    $ret = $phar->buildFromIterator(new myIterator);
+    foreach ($ret as $a => $val) {
+        $ret[$a] = str_replace(dirname($fname2) . DIRECTORY_SEPARATOR, '*', $val);
+    }
+    var_dump($ret);
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -6088,4 +6089,3 @@ array(2999) {
   ["f2999"]=>
   string(22) "*bug45218_SLOWTEST.txt"
 }
-===DONE===

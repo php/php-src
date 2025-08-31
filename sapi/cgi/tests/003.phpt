@@ -4,7 +4,7 @@ strip comments and whitespace with -w
 <?php
 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 
 include "skipif.inc";
@@ -23,12 +23,12 @@ $code ='
 /* some test script */
 
 class test { /* {{{ */
-	public $var = "test"; //test var
-#perl style comment 
-	private $pri; /* private attr */
+    public $var = "test"; //test var
+#perl style comment
+    private $pri; /* private attr */
 
-	function foo(/* void */) {
-	}
+    function foo(/* void */) {
+    }
 }
 /* }}} */
 
@@ -37,9 +37,15 @@ class test { /* {{{ */
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -w "$filename"`);
-var_dump(`$php -n -w "wrong"`);
-var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w`);
+var_dump(shell_exec(<<<SHELL
+$php -n -w "$filename"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -w "wrong"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w
+SHELL));
 
 @unlink($filename);
 

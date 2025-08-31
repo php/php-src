@@ -3,11 +3,6 @@ Test fscanf() function: usage variations - empty file
 --FILE--
 <?php
 
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
-
 /* Test fscanf() to scan an empty file */
 
 $file_path = __DIR__;

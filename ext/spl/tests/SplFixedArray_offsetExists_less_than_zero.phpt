@@ -6,7 +6,7 @@ PHPNW TestFest 2009 - Ben Longden
 <?php
 $array = new SplFixedArray(5);
 if($array->offsetExists(-10) === false) {
-	echo 'PASS';
+    echo 'PASS';
 }
 ?>
 --EXPECT--

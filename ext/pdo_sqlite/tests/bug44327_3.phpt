@@ -1,9 +1,7 @@
 --TEST--
 Bug #44327.3 (PDORow::queryString property & numeric offsets / Crash)
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
@@ -23,11 +21,11 @@ object(PDORow)#%d (2) {
   ["queryString"]=>
   string(25) "select 1 as queryStringxx"
   ["queryStringxx"]=>
-  string(1) "1"
+  int(1)
 }
 string(25) "select 1 as queryStringxx"
 NULL
-string(1) "1"
+int(1)
 ---
 NULL
 NULL

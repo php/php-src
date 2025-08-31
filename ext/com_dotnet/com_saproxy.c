@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -24,7 +22,7 @@
  * */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -37,7 +35,6 @@
 typedef struct {
 	zend_object std;
 	/* the object we a proxying for; we hold a refcount to it */
-	zval *zobj;
 	php_com_dotnet_object *obj;
 
 	/* how many dimensions we are indirecting to get into this element */
@@ -60,6 +57,14 @@ typedef struct {
 
 #define SA_FETCH(zv)			(php_com_saproxy*)Z_OBJ_P(zv)
 
+zend_object *php_com_saproxy_create_object(zend_class_entry *class_type)
+{
+	php_com_saproxy *intern = emalloc(sizeof(*intern));
+	memset(intern, 0, sizeof(*intern));
+	zend_object_std_init(&intern->std, class_type);
+	return &intern->std;
+}
+
 static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, int ndims)
 {
 	int i;
@@ -69,7 +74,7 @@ static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, in
 	}
 }
 
-static zval *saproxy_property_read(zval *object, zval *member, int type, void **cache_slot, zval *rv)
+static zval *saproxy_property_read(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	ZVAL_NULL(rv);
 
@@ -78,15 +83,15 @@ static zval *saproxy_property_read(zval *object, zval *member, int type, void **
 	return rv;
 }
 
-static zval *saproxy_property_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *saproxy_property_write(zend_object *object, zend_string *member, zval *value, void **cache_slot)
 {
 	php_com_throw_exception(E_INVALIDARG, "safearray has no properties");
 	return value;
 }
 
-static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *rv)
+static zval *saproxy_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
-	php_com_saproxy *proxy = SA_FETCH(object);
+	php_com_saproxy *proxy = (php_com_saproxy*) object;
 	UINT dims, i;
 	SAFEARRAY *sa;
 	LONG ubound, lbound;
@@ -108,12 +113,17 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 		}
 		ZVAL_COPY_VALUE(&args[i-1], offset);
 
-		convert_to_string(&proxy->indices[0]);
+		if (!try_convert_to_string(&proxy->indices[0])) {
+			efree(args);
+			return rv;
+		}
 		VariantInit(&v);
 
-		res = php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
-			   	Z_STRLEN(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
+		res = php_com_do_invoke(proxy->obj, Z_STR(proxy->indices[0]),
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
 			   	proxy->dimensions, args, 0);
+
+		efree(args);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(rv, &v, proxy->obj->code_page);
@@ -202,9 +212,9 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 	return rv;
 }
 
-static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
+static void saproxy_write_dimension(zend_object *object, zval *offset, zval *value)
 {
-	php_com_saproxy *proxy = SA_FETCH(object);
+	php_com_saproxy *proxy = (php_com_saproxy*) object;
 	UINT dims, i;
 	HRESULT res;
 	VARIANT v;
@@ -221,10 +231,13 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
 		ZVAL_COPY_VALUE(&args[i-1], offset);
 		ZVAL_COPY_VALUE(&args[i], value);
 
-		convert_to_string(&proxy->indices[0]);
+		if (!try_convert_to_string(&proxy->indices[0])) {
+			efree(args);
+			return;
+		}
 		VariantInit(&v);
-		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
-					Z_STRLEN(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
+		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STR(proxy->indices[0]),
+					DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
 					args, 0)) {
 			VariantClear(&v);
 		}
@@ -275,41 +288,30 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
 	}
 }
 
-#if 0
-static void saproxy_object_set(zval **property, zval *value)
-{
-}
-
-static zval *saproxy_object_get(zval *property)
-{
-	/* Not yet implemented in the engine */
-	return NULL;
-}
-#endif
-
-static int saproxy_property_exists(zval *object, zval *member, int check_empty, void **cache_slot)
+static int saproxy_property_exists(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
 {
 	/* no properties */
 	return 0;
 }
 
-static int saproxy_dimension_exists(zval *object, zval *member, int check_empty)
+static int saproxy_dimension_exists(zend_object *object, zval *member, int check_empty)
 {
-	php_error_docref(NULL, E_WARNING, "Operation not yet supported on a COM object");
+	/* TODO Add support */
+	zend_throw_error(NULL, "Cannot check dimension on a COM object");
 	return 0;
 }
 
-static void saproxy_property_delete(zval *object, zval *member, void **cache_slot)
+static void saproxy_property_delete(zend_object *object, zend_string *member, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete properties from a COM object");
 }
 
-static void saproxy_dimension_delete(zval *object, zval *offset)
+static void saproxy_dimension_delete(zend_object *object, zval *offset)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete dimension from a COM object");
 }
 
-static HashTable *saproxy_properties_get(zval *object)
+static HashTable *saproxy_properties_get(zend_object *object)
 {
 	/* no properties */
 	return NULL;
@@ -321,14 +323,9 @@ static zend_function *saproxy_method_get(zend_object **object, zend_string *name
 	return NULL;
 }
 
-static int saproxy_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS)
-{
-	return FAILURE;
-}
-
 static zend_function *saproxy_constructor_get(zend_object *object)
 {
-	/* user cannot instantiate */
+	zend_throw_error(NULL, "Cannot directly construct com_safeproxy_array; it is for internal usage only");
 	return NULL;
 }
 
@@ -339,17 +336,18 @@ static zend_string* saproxy_class_name_get(const zend_object *object)
 
 static int saproxy_objects_compare(zval *object1, zval *object2)
 {
+	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
 	return -1;
 }
 
-static int saproxy_object_cast(zval *readobj, zval *writeobj, int type)
+static zend_result saproxy_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zval *object, zend_long *count)
+static zend_result saproxy_count_elements(zend_object *object, zend_long *count)
 {
-	php_com_saproxy *proxy = SA_FETCH(object);
+	php_com_saproxy *proxy = (php_com_saproxy*) object;
 	LONG ubound, lbound;
 
 	if (!V_ISARRAY(&proxy->obj->v)) {
@@ -375,22 +373,25 @@ static void saproxy_free_storage(zend_object *object)
 //???		}
 //???	}
 
+	if (proxy->obj != NULL) {
+		OBJ_RELEASE(&proxy->obj->zo);
+	}
+
 	zend_object_std_dtor(object);
 
-	zval_ptr_dtor(proxy->zobj);
 	efree(proxy->indices);
 }
 
-static zend_object* saproxy_clone(zval *object)
+static zend_object* saproxy_clone(zend_object *object)
 {
-	php_com_saproxy *proxy = (php_com_saproxy *)Z_OBJ_P(object);
+	php_com_saproxy *proxy = (php_com_saproxy *) object;
 	php_com_saproxy *cloneproxy;
 
 	cloneproxy = emalloc(sizeof(*cloneproxy));
 	memcpy(cloneproxy, proxy, sizeof(*cloneproxy));
 
-	Z_ADDREF_P(cloneproxy->zobj);
-	cloneproxy->indices = safe_emalloc(cloneproxy->dimensions, sizeof(zval *), 0);
+	GC_ADDREF(&cloneproxy->obj->zo);
+	cloneproxy->indices = safe_emalloc(cloneproxy->dimensions, sizeof(zval), 0);
 	clone_indices(cloneproxy, proxy, proxy->dimensions);
 
 	return &cloneproxy->std;
@@ -401,46 +402,47 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_free_storage,
 	zend_objects_destroy_object,
 	saproxy_clone,
+	NULL, /* clone_with */
 	saproxy_property_read,
 	saproxy_property_write,
 	saproxy_read_dimension,
 	saproxy_write_dimension,
 	NULL,
-	NULL, /* saproxy_object_get, */
-	NULL, /* saproxy_object_set, */
 	saproxy_property_exists,
 	saproxy_property_delete,
 	saproxy_dimension_exists,
 	saproxy_dimension_delete,
 	saproxy_properties_get,
 	saproxy_method_get,
-	saproxy_call_method,
 	saproxy_constructor_get,
 	saproxy_class_name_get,
-	saproxy_objects_compare,
 	saproxy_object_cast,
-	saproxy_count_elements
+	saproxy_count_elements,
+	NULL,									/* get_debug_info */
+	NULL,									/* get_closure */
+	NULL,									/* get_gc */
+	NULL,									/* do_operation */
+	saproxy_objects_compare,				/* compare */
+	NULL,									/* get_properties_for */
 };
 
-int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index)
+void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index)
 {
 	php_com_saproxy *proxy, *rel = NULL;
 
 	proxy = ecalloc(1, sizeof(*proxy));
 	proxy->dimensions = 1;
 
-	if (Z_OBJCE_P(com_object) == php_com_saproxy_class_entry) {
-		rel = SA_FETCH(com_object);
+	if (com_object->ce == php_com_saproxy_class_entry) {
+		rel = (php_com_saproxy*) com_object;
 		proxy->obj = rel->obj;
-		proxy->zobj = rel->zobj;
 		proxy->dimensions += rel->dimensions;
 	} else {
-		proxy->obj = CDNO_FETCH(com_object);
-		proxy->zobj = com_object;
+		proxy->obj = (php_com_dotnet_object*) com_object;
 	}
 
-	Z_ADDREF_P(proxy->zobj);
-	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(zval *), 0);
+	GC_ADDREF(&proxy->obj->zo);
+	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(zval), 0);
 
 	if (rel) {
 		clone_indices(proxy, rel, rel->dimensions);
@@ -449,10 +451,7 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index)
 	ZVAL_DUP(&proxy->indices[proxy->dimensions-1], index);
 
 	zend_object_std_init(&proxy->std, php_com_saproxy_class_entry);
-	proxy->std.handlers = &php_com_saproxy_handlers;
 	ZVAL_OBJ(proxy_out, &proxy->std);
-
-	return 1;
 }
 
 /* iterator */
@@ -467,7 +466,7 @@ static void saproxy_iter_dtor(zend_object_iterator *iter)
 	efree(I);
 }
 
-static int saproxy_iter_valid(zend_object_iterator *iter)
+static zend_result saproxy_iter_valid(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 
@@ -530,7 +529,8 @@ static const zend_object_iterator_funcs saproxy_iter_funcs = {
 	saproxy_iter_get_data,
 	saproxy_iter_get_key,
 	saproxy_iter_move_forwards,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 

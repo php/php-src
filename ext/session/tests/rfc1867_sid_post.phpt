@@ -1,9 +1,8 @@
 --TEST--
 session rfc1867 sid post
 --INI--
+display_startup_errors=0
 file_uploads=1
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 upload_max_filesize=1024
 session.save_path=
 session.name=PHPSESSID
@@ -16,6 +15,8 @@ session.upload_progress.prefix=upload_progress_
 session.upload_progress.name=PHP_SESSION_UPLOAD_PROGRESS
 session.upload_progress.freq=0
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --POST_RAW--
@@ -23,7 +24,7 @@ Content-Type: multipart/form-data; boundary=---------------------------208960602
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHPSESSID"
 
-rfc1867-tests
+rfc1867-sid-post
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHP_SESSION_UPLOAD_PROGRESS"
 
@@ -47,12 +48,14 @@ var_dump($_SESSION["upload_progress_" . basename(__FILE__)]);
 session_destroy();
 ?>
 --EXPECTF--
-string(%d) "rfc1867-tests"
+string(%d) "rfc1867-sid-post"
 bool(true)
 array(2) {
   ["file1"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file1.txt"
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(0) ""
@@ -64,8 +67,10 @@ array(2) {
     int(1)
   }
   ["file2"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file2.txt"
+    ["full_path"]=>
     string(9) "file2.txt"
     ["type"]=>
     string(0) ""

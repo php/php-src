@@ -3,8 +3,8 @@ Test CURLOPT_READDATA without a callback function
 --CREDITS--
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -32,10 +32,9 @@ if (false === $response = curl_exec($ch)) {
     echo $response;
 }
 
-curl_close($ch);
-
 // Clean the temporary file
 @unlink($tempname);
+?>
 --EXPECT--
 array(2) {
   ["hello"]=>

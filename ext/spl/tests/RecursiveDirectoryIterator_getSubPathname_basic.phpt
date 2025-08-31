@@ -24,7 +24,7 @@ while($it->valid()) {
 }
 asort($list);
 foreach ($list as $item) {
-	echo $item . "\n";
+    echo $item . "\n";
 }
 ?>
 --CLEAN--

@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -28,7 +26,7 @@
 #ifndef PHP_WIN32
 #include <netinet/tcp.h>
 #else
-#include <winsock.h>
+#include <winsock2.h>
 #endif
 
 
@@ -83,7 +81,7 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 	zend_uchar * p = buffer;
 
 	DBG_ENTER("mysqlnd_vio::network_read");
-	DBG_INF_FMT("count="MYSQLND_SZ_T_SPEC, count);
+	DBG_INF_FMT("count=%zu", count);
 
 	while (to_read) {
 		ssize_t ret = php_stream_read(net_stream, (char *) p, to_read);
@@ -108,20 +106,33 @@ MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_u
 {
 	ssize_t ret;
 	DBG_ENTER("mysqlnd_vio::network_write");
-	DBG_INF_FMT("sending %u bytes", count);
+	DBG_INF_FMT("sending %zu bytes", count);
 	ret = php_stream_write(vio->data->m.get_stream(vio), (char *)buffer, count);
 	DBG_RETURN(ret);
 }
 /* }}} */
 
+static void mysqlnd_fixup_regular_list(php_stream *net_stream)
+{
+	/*
+	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
+	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
+	  unregistered until the script ends. So, we need to take care of that.
+	*/
+	dtor_func_t origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
+	zend_hash_index_del(&EG(regular_list), net_stream->res->handle);
+	EG(regular_list).pDestructor = origin_dtor;
+	efree(net_stream->res);
+	net_stream->res = NULL;
+}
 
 /* {{{ mysqlnd_vio::open_pipe */
 static php_stream *
-MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	unsigned int streams_options = 0;
-	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
 	DBG_ENTER("mysqlnd_vio::open_pipe");
@@ -131,19 +142,37 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 	streams_options |= IGNORE_URL;
 	net_stream = php_stream_open_wrapper(scheme.s + sizeof("pipe://") - 1, "r+", streams_options, NULL);
 	if (!net_stream) {
-		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown errror while connecting");
+		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown error while connecting");
 		DBG_RETURN(NULL);
 	}
-	/*
-	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
-	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered until the script ends. So, we need to take care of that.
-	*/
-	origin_dtor = EG(regular_list).pDestructor;
-	EG(regular_list).pDestructor = NULL;
-	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
-	EG(regular_list).pDestructor = origin_dtor;
-	net_stream->res = NULL;
+
+	if (persistent) {
+		/* This is a similar hack as for mysqlnd_vio::open_tcp_or_unix.
+		 * The main difference here is that we have no access to the hashed key.
+		 * We can however perform a loop over the persistent resource list to find
+		 * which one corresponds to our newly allocated stream.
+		 * This loop is pretty cheap because it will normally either be the last entry or second to last entry
+		 * in the list, depending on whether the socket connection itself is persistent or not.
+		 * That's why we use a reverse loop. */
+		Bucket *bucket;
+		/* Use a bucket loop to make deletion cheap. */
+		ZEND_HASH_MAP_REVERSE_FOREACH_BUCKET(&EG(persistent_list), bucket) {
+			zend_resource *current_res = Z_RES(bucket->val);
+			if (current_res->ptr == net_stream) {
+				dtor_func_t origin_dtor = EG(persistent_list).pDestructor;
+				EG(persistent_list).pDestructor = NULL;
+				zend_hash_del_bucket(&EG(persistent_list), bucket);
+				EG(persistent_list).pDestructor = origin_dtor;
+				pefree(current_res, 1);
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+#if ZEND_DEBUG
+		php_stream_auto_cleanup(net_stream);
+#endif
+	}
+
+	mysqlnd_fixup_regular_list(net_stream);
 
 	DBG_RETURN(net_stream);
 }
@@ -152,7 +181,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 
 /* {{{ mysqlnd_vio::open_tcp_or_unix */
 static php_stream *
-MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	unsigned int streams_options = 0;
@@ -207,6 +236,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 		zend_resource *le;
 
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_details_len))) {
+			ZEND_ASSERT(le->ptr == net_stream);
 			origin_dtor = EG(persistent_list).pDestructor;
 			/*
 			  in_free will let streams code skip destructing - big HACK,
@@ -220,22 +250,12 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 		}
 #if ZEND_DEBUG
 		/* Shut-up the streams, they don't know what they are doing */
-		net_stream->__exposed = 1;
+		php_stream_auto_cleanup(net_stream);
 #endif
 		mnd_sprintf_free(hashed_details);
 	}
 
-	/*
-	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
-	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered until the script ends. So, we need to take care of that.
-	*/
-	origin_dtor = EG(regular_list).pDestructor;
-	EG(regular_list).pDestructor = NULL;
-	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
-	efree(net_stream->res);
-	net_stream->res = NULL;
-	EG(regular_list).pDestructor = origin_dtor;
+	mysqlnd_fixup_regular_list(net_stream);
 	DBG_RETURN(net_stream);
 }
 /* }}} */
@@ -265,6 +285,7 @@ MYSQLND_METHOD(mysqlnd_vio, post_connect_set_opt)(MYSQLND_VIO * const vio, const
 		}
 
 		net_stream->chunk_size = vio->data->options.net_read_buffer_size;
+		net_stream->flags |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 	}
 
 	DBG_VOID_RETURN;
@@ -299,7 +320,7 @@ MYSQLND_METHOD(mysqlnd_vio, get_open_stream)(MYSQLND_VIO * const vio, const MYSQ
 
 /* {{{ mysqlnd_vio::connect */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_vio, connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const zend_bool persistent,
+MYSQLND_METHOD(mysqlnd_vio, connect)(MYSQLND_VIO * const vio, const MYSQLND_CSTRING scheme, const bool persistent,
 									 MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	enum_func_status ret = FAIL;
@@ -332,7 +353,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			DBG_INF("MYSQLND_OPT_NET_READ_BUFFER_SIZE");
 			net->data->options.net_read_buffer_size = *(unsigned int*) value;
-			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, net->data->options.net_read_buffer_size);
+			DBG_INF_FMT("new_length=%zu", net->data->options.net_read_buffer_size);
 			break;
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 			DBG_INF("MYSQL_OPT_CONNECT_TIMEOUT");
@@ -340,7 +361,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			break;
 		case MYSQLND_OPT_SSL_KEY:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_key) {
 					mnd_pefree(net->data->options.ssl_key, pers);
 				}
@@ -349,7 +370,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_CERT:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_cert) {
 					mnd_pefree(net->data->options.ssl_cert, pers);
 				}
@@ -358,7 +379,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_CA:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_ca) {
 					mnd_pefree(net->data->options.ssl_ca, pers);
 				}
@@ -367,7 +388,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_CAPATH:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_capath) {
 					mnd_pefree(net->data->options.ssl_capath, pers);
 				}
@@ -376,7 +397,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_CIPHER:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_cipher) {
 					mnd_pefree(net->data->options.ssl_cipher, pers);
 				}
@@ -385,7 +406,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_client_option)(MYSQLND_VIO * const net, enum_mys
 			}
 		case MYSQLND_OPT_SSL_PASSPHRASE:
 			{
-				zend_bool pers = net->persistent;
+				bool pers = net->persistent;
 				if (net->data->options.ssl_passphrase) {
 					mnd_pefree(net->data->options.ssl_passphrase, pers);
 				}
@@ -493,7 +514,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 #ifdef MYSQLND_SSL_SUPPORTED
 	php_stream_context * context = php_stream_context_alloc();
 	php_stream * net_stream = net->data->m.get_stream(net);
-	zend_bool any_flag = FALSE;
+	bool any_flag = FALSE;
 
 	DBG_ENTER("mysqlnd_vio::enable_ssl");
 
@@ -544,7 +565,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 	}
 	{
 		zval verify_peer_zval;
-		zend_bool verify;
+		bool verify;
 
 		if (net->data->options.ssl_verify_peer == MYSQLND_SSL_PEER_DEFAULT) {
 			net->data->options.ssl_verify_peer = any_flag? MYSQLND_SSL_PEER_DEFAULT_ACTION:MYSQLND_SSL_PEER_DONT_VERIFY;
@@ -562,11 +583,14 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 		}
 	}
 	php_stream_context_set(net_stream, context);
+	/* php_stream_context_set() increases the refcount of context, but we just want to transfer ownership
+	 * hence the need to decrease the refcount so the refcount will be equal to 1. */
+	ZEND_ASSERT(GC_REFCOUNT(context->res) == 2);
+	GC_DELREF(context->res);
 	if (php_stream_xport_crypto_setup(net_stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL) < 0 ||
 	    php_stream_xport_crypto_enable(net_stream, 1) < 0)
 	{
 		DBG_ERR("Cannot connect to MySQL by using SSL");
-		php_error_docref(NULL, E_WARNING, "Cannot connect to MySQL by using SSL");
 		DBG_RETURN(FAIL);
 	}
 	net->data->ssl = TRUE;
@@ -611,7 +635,7 @@ MYSQLND_METHOD(mysqlnd_vio, disable_ssl)(MYSQLND_VIO * const vio)
 static void
 MYSQLND_METHOD(mysqlnd_vio, free_contents)(MYSQLND_VIO * net)
 {
-	zend_bool pers = net->persistent;
+	bool pers = net->persistent;
 	DBG_ENTER("mysqlnd_vio::free_contents");
 
 	if (net->data->options.ssl_key) {
@@ -647,18 +671,14 @@ MYSQLND_METHOD(mysqlnd_vio, close_stream)(MYSQLND_VIO * const net, MYSQLND_STATS
 	php_stream * net_stream;
 	DBG_ENTER("mysqlnd_vio::close_stream");
 	if (net && (net_stream = net->data->m.get_stream(net))) {
-		zend_bool pers = net->persistent;
+		bool pers = net->persistent;
 		DBG_INF_FMT("Freeing stream. abstract=%p", net_stream->abstract);
 		/* We removed the resource from the stream, so pass FREE_RSRC_DTOR now to force
-		 * destruction to occur during shutdown, because it won't happen through the resource. */
-		/* TODO: The EG(active) check here is dead -- check IN_SHUTDOWN? */
-		if (pers && EG(active)) {
+		 * destruction to occur during shutdown, because it won't happen through the resource
+		 * because we removed the resource from the EG resource list(s). */
+		if (pers) {
 			php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
 		} else {
-			/*
-			  otherwise we will crash because the EG(persistent_list) has been freed already,
-			  before the modules are shut down
-			*/
 			php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 		}
 		net->data->m.set_stream(net, NULL);
@@ -670,7 +690,7 @@ MYSQLND_METHOD(mysqlnd_vio, close_stream)(MYSQLND_VIO * const net, MYSQLND_STATS
 
 
 /* {{{ mysqlnd_vio::init */
-static enum_func_status
+static void
 MYSQLND_METHOD(mysqlnd_vio, init)(MYSQLND_VIO * const net, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	unsigned int buf_size;
@@ -682,7 +702,7 @@ MYSQLND_METHOD(mysqlnd_vio, init)(MYSQLND_VIO * const net, MYSQLND_STATS * const
 	buf_size = MYSQLND_G(net_read_timeout); /* this is long, cast to unsigned int*/
 	net->data->m.set_client_option(net, MYSQL_OPT_READ_TIMEOUT, (char *)&buf_size);
 
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -729,7 +749,7 @@ MYSQLND_METHOD(mysqlnd_vio, set_stream)(MYSQLND_VIO * const vio, php_stream * ne
 
 
 /* {{{ mysqlnd_vio::has_valid_stream */
-static zend_bool
+static bool
 MYSQLND_METHOD(mysqlnd_vio, has_valid_stream)(const MYSQLND_VIO * const vio)
 {
 	DBG_ENTER("mysqlnd_vio::has_valid_stream");
@@ -771,7 +791,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_vio_init */
 PHPAPI MYSQLND_VIO *
-mysqlnd_vio_init(zend_bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
+mysqlnd_vio_init(bool persistent, MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *object_factory, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *factory = object_factory? object_factory : &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 	MYSQLND_VIO * vio;

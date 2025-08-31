@@ -20,6 +20,8 @@
 #ifndef ZEND_LLIST_H
 #define ZEND_LLIST_H
 
+#include "zend_portability.h"
+
 typedef struct _zend_llist_element {
 	struct _zend_llist_element *next;
 	struct _zend_llist_element *prev;
@@ -46,8 +48,8 @@ typedef zend_llist_element* zend_llist_position;
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor, unsigned char persistent);
-ZEND_API void zend_llist_add_element(zend_llist *l, void *element);
-ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element);
+ZEND_API void zend_llist_add_element(zend_llist *l, const void *element);
+ZEND_API void zend_llist_prepend_element(zend_llist *l, const void *element);
 ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare)(void *element1, void *element2));
 ZEND_API void zend_llist_destroy(zend_llist *l);
 ZEND_API void zend_llist_clean(zend_llist *l);
@@ -66,10 +68,25 @@ ZEND_API void *zend_llist_get_last_ex(zend_llist *l, zend_llist_position *pos);
 ZEND_API void *zend_llist_get_next_ex(zend_llist *l, zend_llist_position *pos);
 ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos);
 
-#define zend_llist_get_first(l) zend_llist_get_first_ex(l, NULL)
-#define zend_llist_get_last(l) zend_llist_get_last_ex(l, NULL)
-#define zend_llist_get_next(l) zend_llist_get_next_ex(l, NULL)
-#define zend_llist_get_prev(l) zend_llist_get_prev_ex(l, NULL)
+static zend_always_inline void *zend_llist_get_first(zend_llist *l)
+{
+	return zend_llist_get_first_ex(l, NULL);
+}
+
+static zend_always_inline void *zend_llist_get_last(zend_llist *l)
+{
+	return zend_llist_get_last_ex(l, NULL);
+}
+
+static zend_always_inline void *zend_llist_get_next(zend_llist *l)
+{
+	return zend_llist_get_next_ex(l, NULL);
+}
+
+static zend_always_inline void *zend_llist_get_prev(zend_llist *l)
+{
+	return zend_llist_get_prev_ex(l, NULL);
+}
 
 END_EXTERN_C()
 

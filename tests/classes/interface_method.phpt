@@ -4,7 +4,7 @@ ZE2 An interface method must be abstract
 <?php
 
 interface if_a {
-	function err() {}
+    function err() {}
 }
 
 ?>

@@ -15,7 +15,7 @@ object(stdClass)#1 (1) {
   string(10) "string('')"
 }
 
-Fatal error: Uncaught Error: Cannot access property started with '\0' in %s:%d
+Fatal error: Uncaught Error: Cannot access property starting with "\0" in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

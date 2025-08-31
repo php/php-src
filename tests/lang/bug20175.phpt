@@ -10,24 +10,24 @@ print zend_version()."\n";
  * Storing the result of a function in a static variable.
  * foo_global() increments global variable $foo_count whenever it is executed.
  * When foo_static() is called it checks for the static variable $foo_value
- * being initialised. In case initialisation is necessary foo_global() will be
+ * being initialized. In case initialisation is necessary foo_global() will be
  * called. Since that must happen only once the return value should be equal.
  */
 $foo_count = 0;
 
 function foo_global() {
-	global $foo_count;
-	echo "foo_global()\n";
-	return 'foo:' . ++$foo_count;
+    global $foo_count;
+    echo "foo_global()\n";
+    return 'foo:' . ++$foo_count;
 }
 
 function foo_static() {
-	static $foo_value;
-	echo "foo_static()\n";
-	if (!isset($foo_value)) {
-		$foo_value = foo_global();
-	}
-	return $foo_value;
+    static $foo_value;
+    echo "foo_static()\n";
+    if (!isset($foo_value)) {
+        $foo_value = foo_global();
+    }
+    return $foo_value;
 }
 
 /* Part 2:
@@ -40,45 +40,45 @@ function foo_static() {
 $bar_count = 0;
 
 function bar_global() {
-	global $bar_count;
-	echo "bar_global()\n";
-	return 'bar:' . ++$bar_count;
+    global $bar_count;
+    echo "bar_global()\n";
+    return 'bar:' . ++$bar_count;
 }
 
 function bar_static() {
-	static $bar_value;
-	echo "bar_static()\n";
-	if (!isset($bar_value)) {
-		$bar_value = &bar_global();
-	}
-	return $bar_value;
+    static $bar_value;
+    echo "bar_static()\n";
+    if (!isset($bar_value)) {
+        $bar_value = &bar_global();
+    }
+    return $bar_value;
 }
 
 /* Part 3: TO BE DISCUSSED
  *
  * Storing a reference to the result of a function in a static variable.
  * Same as Part 2 but wow_global() returns a reference so $wow_value
- * should store a reference to $wow_global. Therefor $wow_value is already
- * initialised in second call to wow_static() and hence shouldn't call
+ * should store a reference to $wow_global. Therefore $wow_value is already
+ * initialized in second call to wow_static() and hence shouldn't call
  * wow_global() again.
  */ /*
 $wow_count = 0;
 $wow_name = '';
 
 function &wow_global() {
-	global $wow_count, $wow_name;
-	echo "wow_global()\n";
-	$wow_name = 'wow:' . ++$wow_count;
-	return $wow_name;
+    global $wow_count, $wow_name;
+    echo "wow_global()\n";
+    $wow_name = 'wow:' . ++$wow_count;
+    return $wow_name;
 }
 
 function wow_static() {
-	static $wow_value;
-	echo "wow_static()\n";
-	if (!isset($wow_value)) {
-		$wow_value = &wow_global();
-	}
-	return $wow_value;
+    static $wow_value;
+    echo "wow_static()\n";
+    if (!isset($wow_value)) {
+        $wow_value = &wow_global();
+    }
+    return $wow_value;
 }*/
 
 /* Part 4:
@@ -89,33 +89,33 @@ function wow_static() {
  * The class oop_test uses a static reference to a oop_class instance.
  * When another oop_test instance is created it must reuse the statically
  * stored reference oop_value. This way oop_class gets some singleton behavior
- * since it will be created only once for all insatnces of oop_test.
+ * since it will be created only once for all instances of oop_test.
  */
 $oop_global = 0;
 class oop_class {
-	var $oop_name;
+    var $oop_name;
 
-	function __construct() {
-		global $oop_global;
-		echo "oop_class()\n";
-		$this->oop_name = 'oop:' . ++$oop_global;
-	}
+    function __construct() {
+        global $oop_global;
+        echo "oop_class()\n";
+        $this->oop_name = 'oop:' . ++$oop_global;
+    }
 }
 
 class oop_test {
-	static $oop_value;
+    static $oop_value;
 
-	function __construct() {
-		echo "oop_test()\n";
-	}
+    function __construct() {
+        echo "oop_test()\n";
+    }
 
-	function oop_static() {
-		echo "oop_static()\n";
-		if (!isset(self::$oop_value)) {
-			self::$oop_value = new oop_class;
-		}
-		echo self::$oop_value->oop_name;
-	}
+    function oop_static() {
+        echo "oop_static()\n";
+        if (!isset(self::$oop_value)) {
+            self::$oop_value = new oop_class;
+        }
+        echo self::$oop_value->oop_name;
+    }
 }
 
 print foo_static()."\n";

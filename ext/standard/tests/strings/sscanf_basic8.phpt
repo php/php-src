@@ -3,11 +3,6 @@ Test sscanf() function : basic functionality - hexadecimal format
 --FILE--
 <?php
 
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing sscanf() : basic functionality - - using hexadecimal format ***\n";
 
 $str = "129 12F 123B -123B 01ABC 1G";
@@ -29,7 +24,6 @@ $res = sscanf($str, $format2, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - - using hexadecimal format ***
 
@@ -62,4 +56,3 @@ int(4667)
 int(-4667)
 int(6844)
 int(1)
-===DONE===

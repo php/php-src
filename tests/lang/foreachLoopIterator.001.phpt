@@ -4,38 +4,38 @@ foreach with Iterator.
 <?php
 
 class MealIterator implements Iterator {
-	private $pos=0;
-	private $myContent=array("breakfast", "lunch", "dinner");
+    private $pos=0;
+    private $myContent=array("breakfast", "lunch", "dinner");
 
-	public function valid() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
-		return $this->pos<3;
-	}
+    public function valid(): bool {
+        global $indent;
+        echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+        return $this->pos<3;
+    }
 
-	public function next() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
-		return $this->myContent[$this->pos++];
-	}
+    public function next(): void {
+        global $indent;
+        echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+        $this->myContent[$this->pos++];
+    }
 
-	public function rewind() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
-		$this->pos=0;
-	}
+    public function rewind(): void {
+        global $indent;
+        echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+        $this->pos=0;
+    }
 
-	public function current() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
-		return $this->myContent[$this->pos];
-	}
+    public function current(): mixed {
+        global $indent;
+        echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+        return $this->myContent[$this->pos];
+    }
 
-	public function key() {
-		global $indent;
-		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
-		return "meal " . $this->pos;
-	}
+    public function key(): mixed {
+        global $indent;
+        echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
+        return "meal " . $this->pos;
+    }
 
 }
 
@@ -44,7 +44,7 @@ var_dump($f);
 
 echo "-----( Simple iteration: )-----\n";
 foreach ($f as $k=>$v) {
-	echo "$k => $v\n";
+    echo "$k => $v\n";
 }
 
 $f->rewind();
@@ -54,18 +54,17 @@ $indent = " ";
 echo "\n\n\n-----( Nested iteration: )-----\n";
 $count=1;
 foreach ($f as $k=>$v) {
-	echo "\nTop level "  .  $count++ . ": \n";
-	echo "$k => $v\n";
-	$indent = "     ";
-	foreach ($f as $k=>$v) {
-		echo "     $k => $v\n";
-	}
-	$indent = " ";
+    echo "\nTop level "  .  $count++ . ": \n";
+    echo "$k => $v\n";
+    $indent = "     ";
+    foreach ($f as $k=>$v) {
+        echo "     $k => $v\n";
+    }
+    $indent = " ";
 
 }
 
 ?>
-===DONE===
 --EXPECTF--
 object(MealIterator)#%d (2) {
   ["pos":"MealIterator":private]=>
@@ -129,6 +128,5 @@ meal 0 => breakfast
      --> MealIterator::valid (3)
  --> MealIterator::next (3)
 
-Notice: Undefined offset: 3 in %s on line %d
+Warning: Undefined array key 3 in %s on line %d
  --> MealIterator::valid (4)
-===DONE===

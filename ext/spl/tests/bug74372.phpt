@@ -14,4 +14,4 @@ new Foo;
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected 'ha' (T_STRING) in %s on line %d
+Parse error: syntax error, unexpected identifier "ha" in %s on line %d

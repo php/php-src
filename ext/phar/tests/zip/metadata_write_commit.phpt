@@ -1,9 +1,7 @@
 --TEST--
 Phar with meta-data (write) zip-based
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -23,7 +21,7 @@ $files['c'] = array('cont' => 'c', 'meta' => array('hi', 'there'));
 $files['d'] = array('cont' => 'd', 'meta' => array('hi'=>'there','foo'=>'bar'));
 
 foreach($files as $name => $cont) {
-	var_dump(file_get_contents($p2name.'/'.$name));
+    var_dump(file_get_contents($p2name.'/'.$name));
 }
 
 copy($f2name, $fname);
@@ -36,7 +34,7 @@ $phar['d']->setMetadata(true);
 $phar->setMetadata('hi');
 
 foreach($files as $name => $cont) {
-	var_dump($phar[$name]->getMetadata());
+    var_dump($phar[$name]->getMetadata());
 }
 $phar->stopBuffering();
 
@@ -45,15 +43,14 @@ unset($phar);
 $phar = new Phar($fname);
 
 foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+    var_dump(file_get_contents($pname.'/'.$name));
 }
 
 foreach($files as $name => $cont) {
-	var_dump($phar[$name]->getMetadata());
+    var_dump($phar[$name]->getMetadata());
 }
 var_dump($phar->getMetadata());
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
 --EXPECT--
@@ -84,4 +81,3 @@ array(2) {
 }
 bool(true)
 string(2) "hi"
-===DONE===

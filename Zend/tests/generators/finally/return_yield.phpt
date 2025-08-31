@@ -14,5 +14,6 @@ function foo($f, $t) {
 foreach (foo(1, 5) as $x) {
     echo $x, "\n";
 }
+?>
 --EXPECT--
 1

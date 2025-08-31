@@ -2,12 +2,6 @@
 SPL: Test class_implements() function : variation - no interfaces and autoload
 --FILE--
 <?php
-/* Prototype  : array class_implements(mixed what [, bool autoload ])
- * Description: Return all classes and interfaces implemented by SPL
- * Source code: ext/spl/php_spl.c
- * Alias to functions:
- */
-
 echo "*** Testing class_implements() : variation ***\n";
 
 echo "--- testing no interfaces ---\n";
@@ -24,7 +18,6 @@ var_dump(class_implements('non_existent'));
 var_dump(class_implements('non_existent2', false));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing class_implements() : variation ***
 --- testing no interfaces ---
@@ -41,4 +34,3 @@ bool(false)
 
 Warning: class_implements(): Class non_existent2 does not exist in %s on line %d
 bool(false)
-===DONE===

@@ -8,10 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: string realpath ( string $path );
-   Description: Returns canonicalized absolute pathname
-*/
-
 require __DIR__.'/file.inc';
 
 echo "*** Testing realpath(): usage variations ***\n";
@@ -55,8 +51,6 @@ $file_string = array (
   /* empty filename */
   "",
   '',
-  NULL,
-  null
  );
 for($loop_counter = 0; $loop_counter < count($file_string); $loop_counter++) {
   echo "-- Iteration";
@@ -94,9 +88,5 @@ bool(false)
 -- Iteration3 --
 string(%d) "%s"
 -- Iteration4 --
-string(%d) "%s"
--- Iteration5 --
-string(%d) "%s"
--- Iteration6 --
 string(%d) "%s"
 Done

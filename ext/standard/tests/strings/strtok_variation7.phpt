@@ -2,11 +2,6 @@
 Test strtok() function : usage variations - modifying the input string while tokenising
 --FILE--
 <?php
-/* Prototype  : string strtok ( str $str, str $token )
- * Description: splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token
- * Source code: ext/standard/string.c
-*/
-
 /*
  * Testing strtok() : modifying the input string while it is getting tokenised
 */

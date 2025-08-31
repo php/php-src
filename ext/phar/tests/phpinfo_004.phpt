@@ -1,10 +1,11 @@
 --TEST--
 Phar: phpinfo display 4
+--EXTENSIONS--
+phar
+zlib
+bz2
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("zlib")) die("skip zlib not loaded");
-if (!extension_loaded("bz2")) die("skip bz2 not loaded");
 $arr = Phar::getSupportedSignatures();
 if (in_array("OpenSSL", $arr)) die("skip openssl support enabled");
 ?>
@@ -24,9 +25,9 @@ phpinfo(INFO_MODULES);
 ===DONE===
 --EXPECTF--
 %a
-<h2><a name="module_phar">Phar</a></h2>
+<h2><a name="module_phar" href="#module_phar">Phar</a></h2>
 <table>
-<tr class="h"><th>Phar: PHP Archive support</th><th>enabled</th></tr>
+<tr><td class="e">Phar: PHP Archive support </td><td class="v">enabled </td></tr>
 <tr><td class="e">Phar API version </td><td class="v">1.1.1 </td></tr>
 <tr><td class="e">Phar-based phar archives </td><td class="v">enabled </td></tr>
 <tr><td class="e">Tar-based phar archives </td><td class="v">enabled </td></tr>
@@ -46,9 +47,9 @@ Phar based on pear/PHP_Archive, original concept by Davey Shafik.<br />Phar full
 <tr><td class="e">phar.require_hash</td><td class="v">Off</td><td class="v">Off</td></tr>
 </table>
 %a
-<h2><a name="module_phar">Phar</a></h2>
+<h2><a name="module_phar" href="#module_phar">Phar</a></h2>
 <table>
-<tr class="h"><th>Phar: PHP Archive support</th><th>enabled</th></tr>
+<tr><td class="e">Phar: PHP Archive support </td><td class="v">enabled </td></tr>
 <tr><td class="e">Phar API version </td><td class="v">1.1.1 </td></tr>
 <tr><td class="e">Phar-based phar archives </td><td class="v">enabled </td></tr>
 <tr><td class="e">Tar-based phar archives </td><td class="v">enabled </td></tr>

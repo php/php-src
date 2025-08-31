@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: accessing empty and non existing attributes
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 
@@ -25,7 +25,7 @@ EOF;
 
 $xmlstring = str_replace('012.dtd', __DIR__.'/012.dtd', $xmlstring);
 if (DIRECTORY_SEPARATOR == '\\') {
-	$xmlstring = str_replace('\\',"/", $xmlstring);
+    $xmlstring = str_replace('\\',"/", $xmlstring);
 }
 $reader = new XMLReader();
 $reader->XML($xmlstring);
@@ -39,7 +39,7 @@ echo "\nUsing URI:\n";
 $reader = new XMLReader();
 $file = __DIR__ . '/012.xml';
 if (DIRECTORY_SEPARATOR == '\\') {
-	$file = str_replace('\\',"/", $file);
+    $file = str_replace('\\',"/", $file);
 }
 
 $reader->open($file);
@@ -59,7 +59,6 @@ var_dump($reader->getAttribute('baz'));
 $reader->close();
 
 ?>
-===DONE===
 --EXPECT--
 string(0) ""
 NULL
@@ -71,4 +70,3 @@ string(0) ""
 NULL
 string(0) ""
 string(0) ""
-===DONE===

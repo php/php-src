@@ -6,36 +6,28 @@ Appending to an array via unpack may fail
 <?php
 
 $arr = [1, 2, 3];
-var_dump([PHP_INT_MAX-1 => 0, ...$arr]);
+try {
+    var_dump([PHP_INT_MAX-1 => 0, ...$arr]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-var_dump([PHP_INT_MAX-1 => 0, ...[1, 2, 3]]);
+try {
+    var_dump([PHP_INT_MAX-1 => 0, ...[1, 2, 3]]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 const ARR = [1, 2, 3];
-const ARR2 = [PHP_INT_MAX-1 => 0, ...ARR];
-var_dump(ARR2);
+function test($x = [PHP_INT_MAX-1 => 0, ...ARR]) {}
+try {
+    test();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-array(2) {
-  [9223372036854775806]=>
-  int(0)
-  [9223372036854775807]=>
-  int(1)
-}
-
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-array(2) {
-  [9223372036854775806]=>
-  int(0)
-  [9223372036854775807]=>
-  int(1)
-}
-
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-array(2) {
-  [9223372036854775806]=>
-  int(0)
-  [9223372036854775807]=>
-  int(1)
-}
+--EXPECT--
+Cannot add element to the array as the next element is already occupied
+Cannot add element to the array as the next element is already occupied
+Cannot add element to the array as the next element is already occupied

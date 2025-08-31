@@ -1,5 +1,5 @@
 --TEST--
-Test ReflectionProperty::setAccessible().
+Test that ReflectionProperty::setAccessible() has no effects
 --FILE--
 <?php
 class A {
@@ -17,52 +17,35 @@ $protectedStatic = new ReflectionProperty('A', 'protectedStatic');
 $private         = new ReflectionProperty($a, 'private');
 $privateStatic   = new ReflectionProperty('A', 'privateStatic');
 
-try {
-    var_dump($protected->getValue($a));
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    var_dump($protectedStatic->getValue());
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    var_dump($private->getValue($a));
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    var_dump($privateStatic->getValue());
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-$protected->setAccessible(TRUE);
-$protectedStatic->setAccessible(TRUE);
-$private->setAccessible(TRUE);
-$privateStatic->setAccessible(TRUE);
-
 var_dump($protected->getValue($a));
 var_dump($protectedStatic->getValue());
 var_dump($private->getValue($a));
 var_dump($privateStatic->getValue());
 
 $protected->setValue($a, 'e');
-$protectedStatic->setValue('f');
+$protectedStatic->setValue(null, 'f');
 $private->setValue($a, 'g');
-$privateStatic->setValue('h');
+$privateStatic->setValue(null, 'h');
+
+var_dump($protected->getValue($a));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($a));
+var_dump($privateStatic->getValue());
+
+$protected->setAccessible(FALSE);
+$protectedStatic->setAccessible(FALSE);
+$private->setAccessible(FALSE);
+$privateStatic->setAccessible(FALSE);
+
+var_dump($protected->getValue($a));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($a));
+var_dump($privateStatic->getValue());
+
+$protected->setValue($a, 'i');
+$protectedStatic->setValue('j');
+$private->setValue($a, 'k');
+$privateStatic->setValue(null, 'l');
 
 var_dump($protected->getValue($a));
 var_dump($protectedStatic->getValue());
@@ -75,51 +58,35 @@ $protected       = new ReflectionProperty($b, 'protected');
 $protectedStatic = new ReflectionProperty('B', 'protectedStatic');
 $private         = new ReflectionProperty($a, 'private');
 
-try {
-    var_dump($protected->getValue($b));
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    var_dump($protectedStatic->getValue());
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-try {
-    var_dump($private->getValue($b));
-}
-
-catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
-
-$protected->setAccessible(TRUE);
-$protectedStatic->setAccessible(TRUE);
-$private->setAccessible(TRUE);
-
 var_dump($protected->getValue($b));
 var_dump($protectedStatic->getValue());
 var_dump($private->getValue($b));
 
 $protected->setValue($b, 'e');
-$protectedStatic->setValue('f');
+$protectedStatic->setValue(null, 'f');
 $private->setValue($b, 'g');
 
 var_dump($protected->getValue($b));
 var_dump($protectedStatic->getValue());
 var_dump($private->getValue($b));
+
+$protected->setAccessible(FALSE);
+$protectedStatic->setAccessible(FALSE);
+$private->setAccessible(FALSE);
+
+var_dump($protected->getValue($b));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($b));
+
+$protected->setValue($b, 'h');
+$protectedStatic->setValue(null, 'i');
+$private->setValue($b, 'j');
+
+var_dump($protected->getValue($b));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($b));
 ?>
---EXPECT--
-string(45) "Cannot access non-public member A::$protected"
-string(51) "Cannot access non-public member A::$protectedStatic"
-string(43) "Cannot access non-public member A::$private"
-string(49) "Cannot access non-public member A::$privateStatic"
+--EXPECTF--
 string(1) "a"
 string(1) "b"
 string(1) "c"
@@ -128,12 +95,39 @@ string(1) "e"
 string(1) "f"
 string(1) "g"
 string(1) "h"
-string(45) "Cannot access non-public member B::$protected"
-string(51) "Cannot access non-public member B::$protectedStatic"
-string(43) "Cannot access non-public member A::$private"
-string(1) "a"
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+string(1) "e"
 string(1) "f"
+string(1) "g"
+string(1) "h"
+
+Deprecated: Calling ReflectionProperty::setValue() with a single argument is deprecated in %s on line %d
+string(1) "i"
+string(1) "j"
+string(1) "k"
+string(1) "l"
+string(1) "a"
+string(1) "j"
 string(1) "c"
 string(1) "e"
 string(1) "f"
 string(1) "g"
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionProperty::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+string(1) "e"
+string(1) "f"
+string(1) "g"
+string(1) "h"
+string(1) "i"
+string(1) "j"

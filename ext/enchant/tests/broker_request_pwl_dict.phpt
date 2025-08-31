@@ -2,21 +2,18 @@
 resource enchant_broker_request_pwl_dict(resource $broker, string $filename); function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
---SKIPIF--
-<?php
-if(!extension_loaded('enchant')) die('skip, enchant not loader');
-if(!is_resource(enchant_broker_init())) {die("skip, resource dont load\n");}
-?>
+--EXTENSIONS--
+enchant
 --FILE--
 <?php
 $broker = enchant_broker_init();
 $pathPwlDict = __DIR__ . "/enchant_broker_request_pwl_dict.pwl";
 
-if (is_resource($broker)) {
+if (is_object($broker)) {
     echo("OK\n");
     $requestDict = enchant_broker_request_pwl_dict($broker, $pathPwlDict);
 
-    if (is_resource($requestDict)) {
+    if (is_object($requestDict)) {
         echo("OK\n");
         $dictdescribe = enchant_dict_describe($requestDict);
 

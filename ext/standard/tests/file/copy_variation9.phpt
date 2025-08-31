@@ -4,24 +4,10 @@ Test copy() function: usage variations - destination file access perms
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN')
   die("skip do not run on Windows");
-
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/copy_variation9_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): Trying to copy source file to destination file with and without write permissions */
 
 $file_path = __DIR__;

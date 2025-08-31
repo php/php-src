@@ -89,7 +89,7 @@ int i;
 for (i = 0; i < JIT_NUMBER_OF_COMPILE_MODES; i++)
   {
   if (functions->executable_funcs[i] != NULL)
-    sljit_free_code(functions->executable_funcs[i]);
+    sljit_free_code(functions->executable_funcs[i], NULL);
   PRIV(jit_free_rodata)(functions->read_only_data_heads[i], allocator_data);
   }
 
@@ -110,8 +110,10 @@ pcre2_jit_free_unused_memory(pcre2_general_context *gcontext)
 (void)gcontext;     /* Suppress warning */
 #else  /* SUPPORT_JIT */
 SLJIT_UNUSED_ARG(gcontext);
+#if (defined SLJIT_EXECUTABLE_ALLOCATOR && SLJIT_EXECUTABLE_ALLOCATOR)
 sljit_free_unused_memory_exec();
-#endif  /* SUPPORT_JIT */
+#endif /* SLJIT_EXECUTABLE_ALLOCATOR */
+#endif /* SUPPORT_JIT */
 }
 
 
@@ -135,16 +137,21 @@ return NULL;
 
 pcre2_jit_stack *jit_stack;
 
-if (startsize < 1 || maxsize < 1)
+if (startsize == 0 || maxsize == 0 || maxsize > SIZE_MAX - STACK_GROWTH_RATE)
   return NULL;
 if (startsize > maxsize)
   startsize = maxsize;
-startsize = (startsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
-maxsize = (maxsize + STACK_GROWTH_RATE - 1) & ~(STACK_GROWTH_RATE - 1);
+startsize = (startsize + STACK_GROWTH_RATE - 1) & (size_t)(~(STACK_GROWTH_RATE - 1));
+maxsize = (maxsize + STACK_GROWTH_RATE - 1) & (size_t)(~(STACK_GROWTH_RATE - 1));
 
 jit_stack = PRIV(memctl_malloc)(sizeof(pcre2_real_jit_stack), (pcre2_memctl *)gcontext);
 if (jit_stack == NULL) return NULL;
 jit_stack->stack = sljit_allocate_stack(startsize, maxsize, &jit_stack->memctl);
+if (jit_stack->stack == NULL)
+  {
+  jit_stack->memctl.free(jit_stack, jit_stack->memctl.memory_data);
+  return NULL;
+  }
 return jit_stack;
 
 #endif

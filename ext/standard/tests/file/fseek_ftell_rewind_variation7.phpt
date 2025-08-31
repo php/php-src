@@ -2,16 +2,6 @@
 Test fseek(), ftell() & rewind() functions : usage variations - all r and a modes, SEEK_END
 --FILE--
 <?php
-/* Prototype: int fseek ( resource $handle, int $offset [, int $whence] );
-   Description: Seeks on a file pointer
-
-   Prototype: bool rewind ( resource $handle );
-   Description: Rewind the position of a file pointer
-
-   Prototype: int ftell ( resource $handle );
-   Description: Tells file pointer read/write position
-*/
-
 // include the file.inc for common functions for test
 include ("file.inc");
 

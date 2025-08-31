@@ -44,8 +44,6 @@ $stack_clone = clone $stack;
 $stack_clone->pop();
 echo count($stack)."\n";
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Exception: Can't pop from an empty datastructure
 Exception: Can't shift from an empty datastructure
@@ -58,4 +56,3 @@ Exception: Can't shift from an empty datastructure
 NULL
 NULL
 3
-===DONE===

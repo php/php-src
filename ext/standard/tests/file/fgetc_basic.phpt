@@ -2,15 +2,11 @@
 Test fgetc() function : basic functionality
 --FILE--
 <?php
-/*
- Prototype: string fgetc ( resource $handle );
- Description: Gets character from file pointer
-*/
 // include the header for common test function
 include ("file.inc");
 
 echo "*** Testing fgetc() : basic operations ***\n";
-/* read charecter from different files which are opened in different modes */
+/* read character from different files which are opened in different modes */
 $file_modes = array( "r", "rb", "rt", "r+", "r+b", "r+t");
 
 /* create file with following type of contents */
@@ -46,7 +42,7 @@ for($outerloop_counter = 0; $outerloop_counter < count($file_content_types); $ou
       var_dump( fgetc($file_handle) ); // read a char
       var_dump( ftell($file_handle) ); // file pointer position
       var_dump( feof($file_handle) );  // is it eof()
-      var_dump($file_handle); // dump the $file_handle to see if any thing got modifed
+      var_dump($file_handle); // dump the $file_handle to see if any thing got modified
     } // end of for
 
     // close the file

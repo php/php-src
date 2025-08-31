@@ -5,8 +5,6 @@ session.use_strict_mode=0
 session.use_only_cookies=0
 session.use_trans_sid=1
 session.save_handler=files
-session.hash_bits_per_character=4
-session.hash_function=0
 session.gc_probability=1
 session.gc_divisor=1000
 session.gc_maxlifetime=300
@@ -14,18 +12,14 @@ session.save_path=
 session.name=PHPSESSID
 session.trans_sid_tags="a=href,area=href,frame=src,form="
 url_rewriter.tags="a=href,area=href,frame=src,form="
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : session.use_trans_sid=1
- * Description : Test basic functionality.
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing basic session functionality : variation4 use_trans_sid ***\n";
 
@@ -52,7 +46,11 @@ echo '
 <form action="" method="post">
 </form>
 ';
+?>
 --EXPECT--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 *** Testing basic session functionality : variation4 use_trans_sid ***
 *** Test trans sid ***
 

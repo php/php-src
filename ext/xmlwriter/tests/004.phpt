@@ -1,7 +1,7 @@
 --TEST--
 XMLWriter: libxml2 XML Writer, file buffer, flush
---SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 
@@ -24,12 +24,10 @@ $md5_res = md5('<?xml version="1.0" encoding="UTF-8"?>
 unset($xw);
 unlink($doc_dest);
 if ($md5_out != $md5_res) {
-	echo "failed: $md5_res != $md5_out\n";
+    echo "failed: $md5_res != $md5_out\n";
 } else {
-	echo "ok.\n";
+    echo "ok.\n";
 }
 ?>
-===DONE===
 --EXPECT--
 ok.
-===DONE===

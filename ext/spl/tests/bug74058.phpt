@@ -10,13 +10,13 @@ class MyArrayObject extends ArrayObject
         parent::__construct($input, ArrayObject::ARRAY_AS_PROPS);
     }
 
-    public function offsetSet($x, $v)
+    public function offsetSet($x, $v): void
     {
         echo "offsetSet('{$x}')\n";
-        return parent::offsetSet($x, $v);
+        parent::offsetSet($x, $v);
     }
 
-    public function offsetGet($x)
+    public function offsetGet($x): mixed
     {
         echo "offsetGet('{$x}')\n";
         return parent::offsetGet($x);
@@ -30,13 +30,13 @@ class MyArray extends ArrayObject
         parent::__construct($input);
     }
 
-    public function offsetSet($x, $v)
+    public function offsetSet($x, $v): void
     {
         echo "offsetSet('{$x}')\n";
-        return parent::offsetSet($x, $v);
+        parent::offsetSet($x, $v);
     }
 
-    public function offsetGet($x)
+    public function offsetGet($x): mixed
     {
         echo "offsetGet('{$x}')\n";
         return parent::offsetGet($x);

@@ -4,8 +4,8 @@ ISSUE #57 (segfaults in drupal7)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -15,9 +15,9 @@ class ZException extends Exception {
 function dummy($query) {
     try {
         switch ($query) {
-            case 1;
+            case 1:
             break;
-            case 2;
+            case 2:
             break;
         default:
             throw new Exception('exception');

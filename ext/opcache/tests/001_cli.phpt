@@ -4,8 +4,8 @@
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_cache_only=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $config = opcache_get_configuration();

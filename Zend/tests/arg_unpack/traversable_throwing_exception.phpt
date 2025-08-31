@@ -8,7 +8,7 @@ function test(...$args) {
 }
 
 class Foo implements IteratorAggregate {
-    public function getIterator() {
+    public function getIterator(): Traversable {
         throw new Exception('getIterator');
     }
 }

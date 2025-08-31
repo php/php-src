@@ -3,8 +3,8 @@ DomDocument::schemaValidateSource() - non-conforming schema
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -19,5 +19,5 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::schemaValidateSource(): Element 'books': No matching global declaration available for the validation root. in %s.php on line %d
+Warning: DOMDocument::schemaValidateSource(): Element 'books': No matching global declaration available for the validation root. in %s on line %d
 bool(false)

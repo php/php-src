@@ -5,10 +5,10 @@ SPL: CachingIterator and __toString and flags = 0
 
 function test($it)
 {
-	foreach($it as $v)
-	{
-		var_dump((string)$it);
-	}
+    foreach($it as $v)
+    {
+        var_dump((string)$it);
+    }
 }
 
 $ar = new ArrayIterator(array(1, 2, 3));

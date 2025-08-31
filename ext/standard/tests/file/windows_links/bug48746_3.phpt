@@ -5,12 +5,12 @@ Venkat Raman Don (don.raman@microsoft.com)
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
-	die('skip windows only test');
+    die('skip windows only test');
 }
 include_once __DIR__ . '/common.inc';
 $ret = exec(get_junction().' /? 2>&1', $out);
 if (strpos($out[0], 'recognized')) {
-	die('skip. junction.exe not found in PATH.');
+    die('skip. junction.exe not found in PATH.');
 }
 
 ?>

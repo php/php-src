@@ -7,11 +7,11 @@ file_get_contents() test using offset parameter out of range
 display_errors=false
 --SKIPIF--
 <?php
-	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+    if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-	var_dump(file_get_contents("php://stdin",null,null,8000,1));
+    var_dump(file_get_contents("php://stdin",null,null,8000,1));
 ?>
 --EXPECT--
 bool(false)

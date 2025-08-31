@@ -1,13 +1,17 @@
 --TEST--
 PDO_DBLIB: Emulate how mssql extension names "computed" columns
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
+
+$db = getDbConnection();
 
 $stmt = $db->prepare("SELECT 1, 2 AS named, 3");
 $stmt->execute();

@@ -6,7 +6,7 @@ Optional parameter before variadic parameter
 function f($reqParam, $optParam = null, ...$params) {
     var_dump($reqParam, $optParam, $params);
 }
- 
+
 f(1);
 f(1, 2);
 f(1, 2, 3);

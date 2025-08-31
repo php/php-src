@@ -9,13 +9,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test the effects on stats with changing permissions of file */
 
 $file_path = __DIR__;
@@ -28,7 +21,7 @@ fclose($fp);
 // checking stat() on file after changing its permission
 echo "*** Testing lstat() on a file after changing its access permission ***\n";
 $old_stat = stat($filename);
-sleep(2);
+sleep(1);
 var_dump( chmod($filename, 0777) );
 // clear the stat
 clearstatcache();

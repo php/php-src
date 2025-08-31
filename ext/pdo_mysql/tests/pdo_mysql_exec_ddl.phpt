@@ -1,92 +1,88 @@
 --TEST--
 MySQL PDO->exec(), affected rows
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-	function exec_and_count($offset, &$db, $sql, $exp, $suppress_warning = false) {
+    function exec_and_count($offset, &$db, $sql, $exp, $suppress_warning = false) {
+        try {
+            if ($suppress_warning)
+                $ret = @$db->exec($sql);
+            else
+                $ret = $db->exec($sql);
 
-		try {
+            if ($ret !== $exp) {
+                printf("[%03d] Expecting '%s'/%s got '%s'/%s when running '%s', [%s] %s\n",
+                    $offset, $exp, gettype($exp), $ret, gettype($ret), $sql,
+                    $db->errorCode(), implode(' ', $db->errorInfo()));
+                return false;
+            }
 
-			if ($suppress_warning)
-				$ret = @$db->exec($sql);
-			else
-				$ret = $db->exec($sql);
+        } catch (PDOException $e) {
+            printf("[%03d] '%s' has failed, [%s] %s\n",
+                $offset, $sql, $db->errorCode(), implode(' ', $db->errorInfo()));
+            return false;
+        }
 
-			if ($ret !== $exp) {
-				printf("[%03d] Expecting '%s'/%s got '%s'/%s when running '%s', [%s] %s\n",
-					$offset, $exp, gettype($exp), $ret, gettype($ret), $sql,
-					$db->errorCode(), implode(' ', $db->errorInfo()));
-				return false;
-			}
+        return true;
+    }
 
-		} catch (PDOException $e) {
-			printf("[%03d] '%s' has failed, [%s] %s\n",
-				$offset, $sql, $db->errorCode(), implode(' ', $db->errorInfo()));
-			return false;
-		}
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+    $db = MySQLPDOTest::factory();
 
-		return true;
-	}
+    $db_name = 'pdo_mysql_exec_ddl_db';
+    $db_name_2 = 'pdo_mysql_exec_ddl_db_2';
+    $table = 'pdo_mysql_exec_ddl';
+    $table2 = 'pdo_mysql_exec_ddl_2';
+    /* affected rows related */
+    try {
+        if (1 === @$db->exec("CREATE DATABASE {$db_name}")) {
+            // yippie - we can create databases etc.
+            exec_and_count(3, $db, "ALTER DATABASE {$db_name} CHARACTER SET latin1", 1);
+        }
 
-	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-	$db = MySQLPDOTest::factory();
-	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
+        if (0 === $db->exec("CREATE TABLE {$table} (id INT, col1 CHAR(2))")) {
+            exec_and_count(5, $db, "CREATE INDEX idx1 ON {$table} (id)", 0);
+            exec_and_count(6, $db, "DROP INDEX idx1 ON {$table}", 0);
+            exec_and_count(7, $db, "ALTER TABLE {$table} DROP id", 0);
+            exec_and_count(8, $db, "ALTER TABLE {$table} ADD id INT", 0);
+            exec_and_count(9, $db, "ALTER TABLE {$table} ALTER id SET DEFAULT 1", 0);
+            exec_and_count(10, $db, "RENAME TABLE {$table} TO {$table2}", 0);
+        }
 
-	/* affected rows related */
-	try {
+        /*
+        11.1.2. ALTER LOGFILE GROUP Syntax
+        11.1.3. ALTER SERVER Syntax
+        11.1.5. ALTER TABLESPACE Syntax
+        11.1.8. CREATE LOGFILE GROUP Syntax
+        11.1.9. CREATE SERVER Syntax
+        11.1.11. CREATE TABLESPACE Syntax
+        11.1.14. DROP LOGFILE GROUP Syntax
+        11.1.15. DROP SERVER Syntax
+        11.1.17. DROP TABLESPACE Syntax
+        */
 
-		@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl');
-		@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl2');
-		if (1 === @$db->exec('CREATE DATABASE pdo_exec_ddl')) {
-			// yippie - we can create databases etc.
-			exec_and_count(3, $db, 'ALTER DATABASE pdo_exec_ddl CHARACTER SET latin1', 1);
-		}
+    } catch (PDOException $e) {
+        printf("[001] %s, [%s] %s\n",
+            $e->getMessage(),
+            $db->errorCode(), implode(' ', $db->errorInfo()));
+    }
 
-		exec_and_count(4, $db, 'DROP TABLE IF EXISTS pdo_exec_ddl', 0);
-		exec_and_count(5, $db, 'DROP TABLE IF EXISTS pdo_exec_ddl2', 0);
-		if (0 === $db->exec('CREATE TABLE pdo_exec_ddl(id INT, col1 CHAR(2))')) {
-			exec_and_count(5, $db, 'CREATE INDEX idx1 ON pdo_exec_ddl(id)', 0);
-			exec_and_count(6, $db, 'DROP INDEX idx1 ON pdo_exec_ddl', 0);
-			exec_and_count(7, $db, 'ALTER TABLE pdo_exec_ddl DROP id', 0);
-			exec_and_count(8, $db, 'ALTER TABLE pdo_exec_ddl ADD id INT', 0);
-			exec_and_count(9, $db, 'ALTER TABLE pdo_exec_ddl ALTER id SET DEFAULT 1', 0);
-			exec_and_count(10, $db, 'RENAME TABLE pdo_exec_ddl TO pdo_exec_ddl2', 0);
-		}
-
-		/*
-		11.1.2. ALTER LOGFILE GROUP Syntax
-		11.1.3. ALTER SERVER Syntax
-		11.1.5. ALTER TABLESPACE Syntax
-		11.1.8. CREATE LOGFILE GROUP Syntax
-		11.1.9. CREATE SERVER Syntax
-		11.1.11. CREATE TABLESPACE Syntax
-		11.1.14. DROP LOGFILE GROUP Syntax
-		11.1.15. DROP SERVER Syntax
-		11.1.17. DROP TABLESPACE Syntax
-		*/
-
-	} catch (PDOException $e) {
-		printf("[001] %s, [%s] %s\n",
-			$e->getMessage(),
-			$db->errorCode(), implode(' ', $db->errorInfo()));
-	}
-
-	print "done!";
+    print "done!";
+?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-MySQLPDOTest::dropTestTable($db);
-// clean up
-@$db->exec('DROP TABLE IF EXISTS pdo_exec_ddl');
-@$db->exec('DROP TABLE IF EXISTS pdo_exec_ddl2');
-@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl');
-@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl2');
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_exec_ddl');
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_exec_ddl_2');
+$db->exec('DROP DATABASE IF EXISTS pdo_mysql_exec_ddl_db');
+$db->exec('DROP DATABASE IF EXISTS pdo_mysql_exec_ddl_db_2');
 ?>
 --EXPECT--
 done!

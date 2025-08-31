@@ -1,10 +1,7 @@
 --TEST--
 Test socket_addrinfo_connect()
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $addrinfo = socket_addrinfo_lookup('127.0.0.1', 2000, array(
@@ -13,6 +10,8 @@ $addrinfo = socket_addrinfo_lookup('127.0.0.1', 2000, array(
 ));
 var_dump(socket_addrinfo_connect($addrinfo[0]));
 echo "Done";
---EXPECTF--
-resource(%d) of type (Socket)
+?>
+--EXPECT--
+object(Socket)#2 (0) {
+}
 Done

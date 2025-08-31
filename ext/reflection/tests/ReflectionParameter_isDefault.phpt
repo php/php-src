@@ -2,6 +2,7 @@
 ReflectionParameter::isDefault()
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class A {
 public $defprop;
 }
@@ -23,7 +24,6 @@ $prop2 = new ReflectionProperty($a, 'myprop');
 var_dump($prop1->isDefault());
 var_dump($prop2->isDefault());
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(false)
@@ -31,4 +31,3 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-==DONE==

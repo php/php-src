@@ -1,7 +1,7 @@
 --TEST--
 iconv stream filter
---SKIPIF--
-<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--EXTENSIONS--
+iconv
 --INI--
 iconv.internal_charset=iso-8859-1
 --FILE--
@@ -44,7 +44,7 @@ string(20) "a4b3a4f3a4cba4c1a4cf"
 string(10) "69636f6e76"
 string(2) "0a"
 
-Warning: stream_filter_append(): unable to create or locate filter "convert.iconv.ISO-2022-JP\0EUC-JP" in %siconv_stream_filter_delimiter.php on line %d
+Warning: stream_filter_append(): Unable to create or locate filter "convert.iconv.ISO-2022-JP\0EUC-JP" in %siconv_stream_filter_delimiter.php on line %d
 string(20) "1b244224332473244b24"
 string(10) "41244f1b28"
 string(2) "42"

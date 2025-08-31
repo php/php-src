@@ -8,7 +8,7 @@
 #include "zlog.h"
 
 
-/* MAP_ANON is deprecated, but not in macosx */
+/* MAP_ANON is deprecated, but not in macOS */
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 #define MAP_ANONYMOUS MAP_ANON
 #endif
@@ -50,7 +50,7 @@ int fpm_shm_free(void *mem, size_t size) /* {{{ */
 		return 0;
 	}
 
-	if (fpm_shm_size - size > 0) {
+	if (fpm_shm_size > size) {
 		fpm_shm_size -= size;
 	} else {
 		fpm_shm_size = 0;
@@ -60,8 +60,7 @@ int fpm_shm_free(void *mem, size_t size) /* {{{ */
 }
 /* }}} */
 
-size_t fpm_shm_get_size_allocated() /* {{{*/
+size_t fpm_shm_get_size_allocated(void)
 {
 	return fpm_shm_size;
 }
-/* }}} */

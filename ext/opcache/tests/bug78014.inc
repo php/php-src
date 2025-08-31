@@ -1,4 +1,4 @@
-<?php 
+<?php
 class A {
     function foo() { return 0; }
 }

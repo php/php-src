@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - empty file
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() to read from an empty file */
 
 echo "*** Testing fgetcsv() : reading from file which is having zero content ***\n";
@@ -21,13 +16,13 @@ if (!$fp) {
   echo "Error: failed to create file $filename!\n";
   exit();
 }
-var_dump( fgetcsv($fp) );
+var_dump( fgetcsv($fp, escape: "\\") );
 var_dump( ftell($fp) );
-var_dump( fgetcsv($fp, 1024) );
+var_dump( fgetcsv($fp, 1024, escape: "\\") );
 var_dump( ftell($fp) );
-var_dump( fgetcsv($fp, 1024, "+" ) );
+var_dump( fgetcsv($fp, 1024, "+", escape: "\\" ) );
 var_dump( ftell($fp) );
-var_dump( fgetcsv($fp, 1024, "+", "%") );
+var_dump( fgetcsv($fp, 1024, "+", "%", escape: "\\") );
 var_dump( ftell($fp) );
 
 // close and delete the file

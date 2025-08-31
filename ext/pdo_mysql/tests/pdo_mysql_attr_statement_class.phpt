@@ -1,129 +1,146 @@
 --TEST--
 PDO::ATTR_STATEMENT_CLASS
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-	$db = MySQLPDOTest::factory();
-	MySQLPDOTest::createTestTable($db);
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+    $db = MySQLPDOTest::factory();
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
-	$default =  $db->getAttribute(PDO::ATTR_STATEMENT_CLASS);
-	var_dump($default);
+    $table = 'pdo_mysql_attr_statement_class';
 
-	if (false !== ($tmp = @$db->setAttribute(PDO::ATTR_STATEMENT_CLASS)))
-		printf("[001] Expecting boolean/false got %s\n", var_export($tmp, true));
+    MySQLPDOTest::createTestTable($table, $db);
 
-	if (false !== ($tmp = @$db->setAttribute(PDO::ATTR_STATEMENT_CLASS, 'foo')))
-		printf("[002] Expecting boolean/false got %s\n", var_export($tmp, true));
+    $default =  $db->getAttribute(PDO::ATTR_STATEMENT_CLASS);
+    var_dump($default);
 
-	if (false !== ($tmp = @$db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('classname'))))
-		printf("[003] Expecting boolean/false got %s\n", var_export($tmp, true));
+    try {
+        $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, 'foo');
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
+    }
+    try {
+        $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, ['classname']);
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
+    }
+    // unknown class
+    try {
+        $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, ['classname', []]);
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
+    }
 
-	// unknown class
-	if (false !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('classname', array()))))
-		printf("[004] Expecting boolean/false got %s\n", var_export($tmp, true));
+    // class not derived from PDOStatement
+    class myclass {
+        function __construct() {
+            printf("myclass\n");
+        }
+    }
 
-	// class not derived from PDOStatement
-	class myclass {
-		function __construct() {
-			printf("myclass\n");
-		}
-	}
-	if (false !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('myclass', array()))))
-		printf("[005] Expecting boolean/false got %s\n", var_export($tmp, true));
+    try {
+        $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, ['myclass', []]);
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), \PHP_EOL;
+    }
 
-	// public constructor not allowed
-	class mystatement extends PDOStatement {
-		public function __construct() {
-			printf("mystatement\n");
-		}
-	}
+    // public constructor not allowed
+    class mystatement extends PDOStatement {
+        public function __construct() {
+            printf("mystatement\n");
+        }
+    }
 
-	if (false !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement', array()))))
-		printf("[006] Expecting boolean/false got %s\n", var_export($tmp, true));
+    try {
+        if (false !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, ['mystatement', []])))
+            printf("[006] Expecting boolean/false got %s\n", var_export($tmp, true));
+    } catch (\Error $e) {
+        echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
 
-	// ... but a public destructor is allowed
-	class mystatement2 extends PDOStatement {
-		public function __destruct() {
-			printf("mystatement\n");
-		}
-	}
 
-	if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement2', array()))))
-		printf("[007] Expecting boolean/true got %s\n", var_export($tmp, true));
+    // ... but a public destructor is allowed
+    class mystatement2 extends PDOStatement {
+        public function __destruct() {
+            printf("mystatement\n");
+        }
+    }
 
-	// private constructor
-	class mystatement3 extends PDOStatement {
-		private function __construct($msg) {
-			printf("mystatement3\n");
-			var_dump($msg);
-		}
-	}
-	if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement3', array('param1')))))
-		printf("[008] Expecting boolean/true got %s\n", var_export($tmp, true));
+    if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement2', array()))))
+        printf("[007] Expecting boolean/true got %s\n", var_export($tmp, true));
 
-	// private constructor
-	class mystatement4 extends PDOStatement {
-		private function __construct($msg) {
-			printf("%s\n", get_class($this));
-			var_dump($msg);
-		}
-	}
-	if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement4', array('param1')))))
-		printf("[008] Expecting boolean/true got %s\n", var_export($tmp, true));
+    // private constructor
+    class mystatement3 extends PDOStatement {
+        private function __construct($msg) {
+            printf("mystatement3\n");
+            var_dump($msg);
+        }
+    }
+    if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement3', array('param1')))))
+        printf("[008] Expecting boolean/true got %s\n", var_export($tmp, true));
 
-	var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
-	$stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC LIMIT 2');
+    // private constructor
+    class mystatement4 extends PDOStatement {
+        private function __construct($msg) {
+            printf("%s\n", get_class($this));
+            var_dump($msg);
+        }
+    }
+    if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement4', array('param1')))))
+        printf("[008] Expecting boolean/true got %s\n", var_export($tmp, true));
 
-	class mystatement5 extends mystatement4 {
-		public function fetchAll($fetch_style = 1, $column_index = 1, $ctor_args = array()) {
-			return "no data :)";
-		}
-	}
+    var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
+    $stmt = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC LIMIT 2");
 
-	if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement5', array('mystatement5')))))
-		printf("[009] Expecting boolean/true got %s\n", var_export($tmp, true));
-	$stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC LIMIT 2');
-	var_dump($stmt->fetchAll());
+    class mystatement5 extends mystatement4 {
+        public function fetchAll($fetch_style = 1, ...$fetch_args): array {
+            return [];
+        }
+    }
 
-	if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement'))))
-		printf("[010] Expecting boolean/true got %s\n", var_export($tmp, true));
+    if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement5', array('mystatement5')))))
+        printf("[009] Expecting boolean/true got %s\n", var_export($tmp, true));
+    $stmt = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC LIMIT 2");
+    var_dump($stmt->fetchAll());
 
-	$stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC LIMIT 1');
-	var_dump($stmt->fetchAll());
+    if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement'))))
+        printf("[010] Expecting boolean/true got %s\n", var_export($tmp, true));
 
-	// Yes, this is a fatal error and I want it to fail.
-	abstract class mystatement6 extends mystatement5 {
-	}
-	if (true !== ($tmp = $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('mystatement6', array('mystatement6')))))
-		printf("[011] Expecting boolean/true got %s\n", var_export($tmp, true));
-	$stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC LIMIT 1');
+    $stmt = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC LIMIT 1");
+    var_dump($stmt->fetchAll());
 
-	print "done!";
+    // Yes, this is a fatal error and I want it to fail.
+    abstract class mystatement6 extends mystatement5 {
+    }
+    try {
+        $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, ['mystatement6', ['mystatement6']]);
+        $stmt = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC LIMIT 1");
+    } catch (\Error $e) {
+        echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
 ?>
---EXPECTF--
+--CLEAN--
+<?php
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS pdo_mysql_attr_statement_class');
+?>
+--EXPECT--
 array(1) {
   [0]=>
   string(12) "PDOStatement"
 }
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: user-supplied statement class must be derived from PDOStatement in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: user-supplied statement class cannot have a public constructor in %s on line %d
-
-Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
+PDO::setAttribute(): Argument #2 ($value) PDO::ATTR_STATEMENT_CLASS value must be of type array, string given
+PDO::setAttribute(): Argument #2 ($value) PDO::ATTR_STATEMENT_CLASS class must be a valid class
+PDO::setAttribute(): Argument #2 ($value) PDO::ATTR_STATEMENT_CLASS class must be a valid class
+PDO::setAttribute(): Argument #2 ($value) PDO::ATTR_STATEMENT_CLASS class must be derived from PDOStatement
+TypeError: PDO::setAttribute(): Argument #2 ($value) User-supplied statement class cannot have a public constructor
 array(2) {
   [0]=>
   string(12) "mystatement4"
@@ -137,7 +154,8 @@ mystatement4
 string(6) "param1"
 mystatement5
 string(12) "mystatement5"
-string(10) "no data :)"
+array(0) {
+}
 array(1) {
   [0]=>
   array(4) {
@@ -151,9 +169,4 @@ array(1) {
     string(1) "a"
   }
 }
-
-Fatal error: Uncaught Error: Cannot instantiate abstract class mystatement6 in %s:%d
-Stack trace:
-#0 %s(%d): PDO->query('SELECT id, labe...')
-#1 {main}
-  thrown in %s on line %d
+Error: Cannot instantiate abstract class mystatement6

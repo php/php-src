@@ -9,7 +9,7 @@ $data = array(1, 2, 'foo', 'haha', array(4, 5, 6), 1.3, null);
 
 $fp = fopen($file, 'w');
 
-fputcsv($fp, $data);
+fputcsv($fp, $data, escape: "\\");
 
 var_dump($data);
 
@@ -20,7 +20,7 @@ $file = __DIR__ .'/fgetcsv-test.csv';
 unlink($file);
 ?>
 --EXPECTF--
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 array(7) {
   [0]=>
   int(1)

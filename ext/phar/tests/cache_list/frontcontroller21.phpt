@@ -4,8 +4,12 @@ Phar front controller $_SERVER munging success [cache_list]
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller21.php
 cgi.fix_pathinfo=1
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php
+if (getenv('SKIP_ASAN')) die('xleak LSan crashes for this test');
+?>
 --ENV--
 SCRIPT_NAME=/frontcontroller21.php
 REQUEST_URI=/frontcontroller21.php/index.php?test=hi

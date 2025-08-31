@@ -1,18 +1,14 @@
 --TEST--
 SOAP Interop Round3 GroupD Import2 001 (php/wsdl): echoStruct
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPStruct {
-    function __construct($s, $i, $f) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-    }
+    function __construct(public $varString, public $varInt, public $varFloat) {}
 }
 $struct = new SOAPStruct('arg',34,325.325);
 $client = new SoapClient(__DIR__."/round3_groupD_import2.wsdl",array("trace"=>1,"exceptions"=>0));

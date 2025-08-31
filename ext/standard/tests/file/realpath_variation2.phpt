@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) == 'WIN' )
 ?>
 --FILE--
 <?php
-/* Prototype  : string realpath(string path)
- * Description: Return the resolved path
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing realpath() : variation ***\n";
 
 $paths = array('c:\\',
@@ -35,7 +29,6 @@ foreach($paths as $path) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing realpath() : variation ***
 
@@ -71,4 +64,3 @@ bool(false)
 
 --\tmp\--
 bool(false)
-===DONE===

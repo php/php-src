@@ -3,6 +3,7 @@ Bug #71859 (zend_objects_store_call_destructors operates on realloced memory, cr
 --FILE--
 <?php
 class constructs_in_destructor {
+  public $a;
   public function __destruct() {
     //We are now in zend_objects_store_call_destructors
     //This causes a realloc in zend_objects_store_put

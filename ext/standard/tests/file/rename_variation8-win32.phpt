@@ -6,10 +6,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') die('skip..  for Windows');
 ?>
 --FILE--
 <?php
-/* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
-   Description: Renames a file or directory
-*/
-
 echo "\n*** Testing rename() on non-existing file ***\n";
 $file_path = __DIR__;
 
@@ -50,7 +46,7 @@ rmdir(__DIR__."/rename_basic_dir1");
 --EXPECTF--
 *** Testing rename() on non-existing file ***
 
-Warning: rename(%s/non_existent_file.tmp,%s/rename_variation8_new.tmp): The system cannot find the file specified. (code: 2) in %s on line %d
+Warning: rename(%s/non_existent_file.tmp,%s/rename_variation8_new.tmp): The system cannot find the file specified (code: 2) in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -62,7 +58,7 @@ bool(true)
 
 *** Testing rename() on non-existing directory ***
 
-Warning: rename(%s/non_existent_dir,%s/rename_basic_dir2): The system cannot find the file specified. (code: 2) in %s on line %d
+Warning: rename(%s/non_existent_dir,%s/rename_basic_dir2): The system cannot find the file specified (code: 2) in %s on line %d
 bool(false)
 bool(false)
 bool(false)

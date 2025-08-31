@@ -2,11 +2,6 @@
 Test key() function : usage variations
 --FILE--
 <?php
-/* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays where keys are different data types as $array_arg to key() to test behaviour
  */
@@ -31,18 +26,6 @@ $inputs = array(
        1 => 'one',
        12345 => 'positive',
        -2345 => 'negative',
-       ),
-
-       // float data
-/*2*/  'float' => array(
-       10.5 => 'positive',
-       -10.5 => 'negative',
-       .5 => 'half',
-       ),
-
-/*3*/  'extreme floats' => array(
-       12.3456789000e6 => 'large',
-       12.3456789000E-10 => 'small',
        ),
 
        // null data
@@ -97,13 +80,12 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator : $key data --\n";
   while (key($input) !== NULL) {
-  	var_dump(key($input));
-  	next($input);
+    var_dump(key($input));
+    next($input);
   }
   $iterator++;
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing key() : usage variations ***
 
@@ -113,43 +95,33 @@ int(1)
 int(12345)
 int(-2345)
 
--- Iteration 2 : float data --
-int(10)
-int(-10)
-int(0)
-
--- Iteration 3 : extreme floats data --
-int(12345678)
-int(0)
-
--- Iteration 4 : null uppercase data --
+-- Iteration 2 : null uppercase data --
 string(0) ""
 
--- Iteration 5 : null lowercase data --
+-- Iteration 3 : null lowercase data --
 string(0) ""
 
--- Iteration 6 : bool lowercase data --
+-- Iteration 4 : bool lowercase data --
 int(1)
 int(0)
 
--- Iteration 7 : bool uppercase data --
+-- Iteration 5 : bool uppercase data --
 int(1)
 int(0)
 
--- Iteration 8 : empty double quotes data --
+-- Iteration 6 : empty double quotes data --
 string(0) ""
 
--- Iteration 9 : empty single quotes data --
+-- Iteration 7 : empty single quotes data --
 string(0) ""
 
--- Iteration 10 : string data --
+-- Iteration 8 : string data --
 string(7) "stringd"
 string(7) "strings"
 string(11) "hello world"
 
--- Iteration 11 : undefined data --
+-- Iteration 9 : undefined data --
 string(0) ""
 
--- Iteration 12 : unset data --
+-- Iteration 10 : unset data --
 string(0) ""
-===DONE===

@@ -2,8 +2,8 @@
 Phar front controller mime type extension is not a string
 --INI--
 default_charset=
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller11.php
 REQUEST_URI=/frontcontroller11.php/a.php

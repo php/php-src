@@ -6,30 +6,28 @@ allow_url_fopen=1
 <?php
 
 $streams = array(
-	"data:;base64,\0Zm9vYmFyIGZvb2Jhcg==",
-	"data:;base64,Zm9vYmFy\0IGZvb2Jhcg==",
-	'data:;base64,#Zm9vYmFyIGZvb2Jhcg==',
-	'data:;base64,#Zm9vYmFyIGZvb2Jhc=',
-	);
+    "data:;base64,\0Zm9vYmFyIGZvb2Jhcg==",
+    "data:;base64,Zm9vYmFy\0IGZvb2Jhcg==",
+    'data:;base64,#Zm9vYmFyIGZvb2Jhcg==',
+    'data:;base64,#Zm9vYmFyIGZvb2Jhc=',
+    );
 
 foreach($streams as $stream)
 {
-	var_dump(file_get_contents($stream));
+    try {
+        var_dump(file_get_contents($stream));
+    } catch (ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
-Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s line %d
-NULL
+file_get_contents(): Argument #1 ($filename) must not contain any null bytes
+file_get_contents(): Argument #1 ($filename) must not contain any null bytes
 
-Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s line %d
-NULL
-
-Warning: file_get_contents(data:;base64,#Zm9vYmFyIGZvb2Jhcg==): failed to open stream: rfc2397: unable to decode in %sstream_rfc2397_006.php on line %d
+Warning: file_get_contents(data:;base64,#Zm9vYmFyIGZvb2Jhcg==): Failed to open stream: rfc2397: unable to decode in %sstream_rfc2397_006.php on line %d
 bool(false)
 
-Warning: file_get_contents(data:;base64,#Zm9vYmFyIGZvb2Jhc=): failed to open stream: rfc2397: unable to decode in %sstream_rfc2397_006.php on line %d
+Warning: file_get_contents(data:;base64,#Zm9vYmFyIGZvb2Jhc=): Failed to open stream: rfc2397: unable to decode in %sstream_rfc2397_006.php on line %d
 bool(false)
-===DONE===

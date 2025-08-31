@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #34687 (query doesn't return error information)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -20,10 +21,10 @@ $x = $db->query("UPDATE non_existent_pdo_test_table set foo = 'bar'");
 var_dump($x);
 $code = $db->errorCode();
 if ($code !== '00000' && strlen($code)) {
-	echo "OK: $code\n";
+    echo "OK: $code\n";
 } else {
-	echo "ERR: $code\n";
-	print_r($db->errorInfo());
+    echo "ERR: $code\n";
+    print_r($db->errorInfo());
 }
 
 ?>

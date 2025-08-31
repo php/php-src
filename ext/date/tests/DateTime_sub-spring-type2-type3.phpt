@@ -2,8 +2,6 @@
 DateTime::sub() -- spring type2 type3
 --CREDITS--
 Daniel Convissor <danielc@php.net>
---XFAIL--
-Various bugs exist
 --FILE--
 <?php
 
@@ -26,8 +24,8 @@ test_time_spring_type2_dt_type3_st: SUB: 2010-03-14 00:10:20 EST - P-0Y0M0DT2H6M
 test_time_spring_type2_dt_type3_dt: SUB: 2010-03-14 05:19:56 EDT - P+0Y0M0DT2H3M1S = **2010-03-14 03:16:55 EDT**
 test_time_spring_type2_dt_type3_post: SUB: 2010-03-15 19:59:59 EDT - P+0Y0M1DT16H43M4S = **2010-03-14 03:16:55 EDT**
 test_time_spring_type2_post_type3_prev: SUB: 2010-03-13 18:38:28 EST - P-0Y0M2DT1H21M31S = **2010-03-15 19:59:59 EDT**
-test_time_spring_type2_post_type3_st: SUB: 2010-03-14 00:10:20 EST - P-0Y0M1DT18H49M39S = **2010-03-15 19:59:59 EDT**
+test_time_spring_type2_post_type3_st: SUB: 2010-03-14 00:10:20 EST - P-0Y0M1DT18H49M39S = **2010-03-15 18:59:59 EDT**
 test_time_spring_type2_post_type3_dt: SUB: 2010-03-14 03:16:55 EDT - P-0Y0M1DT16H43M4S = **2010-03-15 19:59:59 EDT**
 test_time_spring_type2_post_type3_post: SUB: 2010-03-15 19:59:59 EDT - P+0Y0M0DT1H2M4S = **2010-03-15 18:57:55 EDT**
-test_time_spring_type2_stsec_type3_dtsec: SUB: 2010-03-15 03:00:00 EDT - P+0Y0M0DT0H0M1S = **2010-03-13 01:59:59 EST**
-test_time_spring_type2_dtsec_type3_stsec: SUB: 2010-03-15 01:59:59 EST - P-0Y0M0DT0H0M1S = **2010-03-15 03:00:00 EDT**
+test_time_spring_type2_stsec_type3_dtsec: SUB: 2010-03-14 03:00:00 EDT - P+0Y0M0DT0H0M1S = **2010-03-14 01:59:59 EST**
+test_time_spring_type2_dtsec_type3_stsec: SUB: 2010-03-14 01:59:59 EST - P-0Y0M0DT0H0M1S = **2010-03-14 03:00:00 EDT**

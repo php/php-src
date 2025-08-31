@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,25 +25,28 @@
 #include "ext/date/php_date.h"
 #include "zend_smart_str.h"
 
-#if HAVE_SYSEXITS_H
-#include <sysexits.h>
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
 #endif
-#if HAVE_SYS_SYSEXITS_H
-#include <sys/sysexits.h>
+
+#ifdef HAVE_SYSEXITS_H
+# include <sysexits.h>
+#endif
+#ifdef HAVE_SYS_SYSEXITS_H
+# include <sys/sysexits.h>
 #endif
 
 #if PHP_SIGCHILD
-#include <signal.h>
+# include <signal.h>
 #endif
 
 #include "php_syslog.h"
 #include "php_mail.h"
 #include "php_ini.h"
-#include "php_string.h"
 #include "exec.h"
 
 #ifdef PHP_WIN32
-#include "win32/sendmail.h"
+# include "win32/sendmail.h"
 #endif
 
 #define SKIP_LONG_HEADER_SEP(str, pos)																	\
@@ -57,39 +58,17 @@
 		continue;																						\
 	}																									\
 
-#define MAIL_ASCIIZ_CHECK(str, len)				\
-	p = str;									\
-	e = p + len;								\
-	while ((p = memchr(p, '\0', (e - p)))) {	\
-		*p = ' ';								\
-	}											\
-
 extern zend_long php_getuid(void);
 
-/* {{{ proto int ezmlm_hash(string addr)
-   Calculate EZMLM list hash value. */
-PHP_FUNCTION(ezmlm_hash)
-{
-	char *str = NULL;
-	unsigned int h = 5381;
-	size_t j, str_len;
+typedef enum {
+	NO_HEADER_ERROR,
+	CONTAINS_LF_ONLY,
+	CONTAINS_CR_ONLY,
+	CONTAINS_CRLF,
+	CONTAINS_NULL
+} php_mail_header_value_error_type;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(str, str_len)
-	ZEND_PARSE_PARAMETERS_END();
-
-	for (j = 0; j < str_len; j++) {
-		h = (h + (h << 5)) ^ (zend_ulong) (unsigned char) tolower(str[j]);
-	}
-
-	h = (h % 53);
-
-	RETURN_LONG((zend_long) h);
-}
-/* }}} */
-
-
-static zend_bool php_mail_build_headers_check_field_value(zval *val)
+static php_mail_header_value_error_type php_mail_build_headers_check_field_value(zval *val)
 {
 	size_t len = 0;
 	zend_string *value = Z_STR_P(val);
@@ -98,24 +77,43 @@ static zend_bool php_mail_build_headers_check_field_value(zval *val)
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.3 */
 	while (len < value->len) {
 		if (*(value->val+len) == '\r') {
+			if (*(value->val+len+1) != '\n') {
+				return CONTAINS_CR_ONLY;
+			}
+
 			if (value->len - len >= 3
-				&&  *(value->val+len+1) == '\n'
 				&& (*(value->val+len+2) == ' '  || *(value->val+len+2) == '\t')) {
 				len += 3;
 				continue;
 			}
-			return FAILURE;
+
+			return CONTAINS_CRLF;
+		}
+		/**
+		 * The RFC does not allow using LF alone for folding. However, LF is
+		 * often treated similarly to CRLF, and there are likely many user
+		 * environments that use LF for folding.
+		 * Therefore, considering such an environment, folding with LF alone
+		 * is allowed.
+		 */
+		if (*(value->val+len) == '\n') {
+			if (value->len - len >= 2
+				&& (*(value->val+len+1) == ' '  || *(value->val+len+1) == '\t')) {
+				len += 2;
+				continue;
+			}
+			return CONTAINS_LF_ONLY;
 		}
 		if (*(value->val+len) == '\0') {
-			return FAILURE;
+			return CONTAINS_NULL;
 		}
 		len++;
 	}
-	return SUCCESS;
+	return NO_HEADER_ERROR;
 }
 
 
-static zend_bool php_mail_build_headers_check_field_name(zend_string *key)
+static bool php_mail_build_headers_check_field_name(zend_string *key)
 {
 	size_t len = 0;
 
@@ -137,12 +135,30 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 	switch(Z_TYPE_P(val)) {
 		case IS_STRING:
 			if (php_mail_build_headers_check_field_name(key) != SUCCESS) {
-				php_error_docref(NULL, E_WARNING, "Header field name (%s) contains invalid chars", ZSTR_VAL(key));
+				zend_value_error("Header name \"%s\" contains invalid characters", ZSTR_VAL(key));
 				return;
 			}
-			if (php_mail_build_headers_check_field_value(val) != SUCCESS) {
-				php_error_docref(NULL, E_WARNING, "Header field value (%s => %s) contains invalid chars or format", ZSTR_VAL(key), Z_STRVAL_P(val));
-				return;
+
+			php_mail_header_value_error_type error_type = php_mail_build_headers_check_field_value(val);
+			switch (error_type) {
+				case NO_HEADER_ERROR:
+					break;
+				case CONTAINS_LF_ONLY:
+					zend_value_error("Header \"%s\" contains LF character that is not allowed in the header", ZSTR_VAL(key));
+					return;
+				case CONTAINS_CR_ONLY:
+					zend_value_error("Header \"%s\" contains CR character that is not allowed in the header", ZSTR_VAL(key));
+					return;
+				case CONTAINS_CRLF:
+					zend_value_error("Header \"%s\" contains CRLF characters that are used as a line separator and are not allowed in the header", ZSTR_VAL(key));
+					return;
+				case CONTAINS_NULL:
+					zend_value_error("Header \"%s\" contains NULL character that is not allowed in the header", ZSTR_VAL(key));
+					return;
+				default:
+					// fallback
+					zend_value_error("Header \"%s\" has invalid format, or contains invalid characters", ZSTR_VAL(key));
+					return;
 			}
 			smart_str_append(s, key);
 			smart_str_appendl(s, ": ", 2);
@@ -153,7 +169,7 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 			php_mail_build_headers_elems(s, key, val);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "headers array elements must be string or array (%s)", ZSTR_VAL(key));
+			zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
 	}
 }
 
@@ -165,105 +181,82 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
 		if (tmp_key) {
-			php_error_docref(NULL, E_WARNING, "Multiple header key must be numeric index (%s)", ZSTR_VAL(tmp_key));
-			continue;
+			zend_type_error("Header \"%s\" must only contain numeric keys, \"%s\" found", ZSTR_VAL(key), ZSTR_VAL(tmp_key));
+			break;
 		}
+		ZVAL_DEREF(tmp_val);
 		if (Z_TYPE_P(tmp_val) != IS_STRING) {
-			php_error_docref(NULL, E_WARNING, "Multiple header values must be string (%s)", ZSTR_VAL(key));
-			continue;
+			zend_type_error("Header \"%s\" must only contain values of type string, %s found", ZSTR_VAL(key), zend_zval_value_name(tmp_val));
+			break;
 		}
 		php_mail_build_headers_elem(s, key, tmp_val);
 	} ZEND_HASH_FOREACH_END();
 }
 
+#define PHP_MAIL_BUILD_HEADER_CHECK(target, s, key, val) \
+do { \
+	if (Z_TYPE_P(val) == IS_STRING) { \
+		php_mail_build_headers_elem(&s, key, val); \
+	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
+		if (zend_string_equals_literal_ci(key, target)) { \
+			zend_type_error("Header \"%s\" must be of type string, array given", target); \
+			break; \
+		} \
+		php_mail_build_headers_elems(&s, key, val); \
+	} else { \
+		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val)); \
+	} \
+} while(0)
 
-PHPAPI zend_string *php_mail_build_headers(zval *headers)
+PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 {
 	zend_ulong idx;
 	zend_string *key;
 	zval *val;
 	smart_str s = {0};
 
-	ZEND_ASSERT(Z_TYPE_P(headers) == IS_ARRAY);
-
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(headers), idx, key, val) {
+	ZEND_HASH_FOREACH_KEY_VAL(headers, idx, key, val) {
 		if (!key) {
-			php_error_docref(NULL, E_WARNING, "Found numeric header (" ZEND_LONG_FMT ")", idx);
-			continue;
+			zend_type_error("Header name cannot be numeric, " ZEND_LONG_FMT " given", idx);
+			break;
 		}
+		ZVAL_DEREF(val);
 		/* https://tools.ietf.org/html/rfc2822#section-3.6 */
-		switch(ZSTR_LEN(key)) {
-			case sizeof("orig-date")-1:
-				if (!strncasecmp("orig-date", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("orig-date", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("from")-1:
-				if (!strncasecmp("from", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("from", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("sender")-1:
-				if (!strncasecmp("sender", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("sender", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("reply-to")-1:
-				if (!strncasecmp("reply-to", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("reply-to", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("to")-1: /* "to", "cc" */
-				if (!strncasecmp("to", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					php_error_docref(NULL, E_WARNING, "Extra header cannot contain 'To' header");
-					continue;
-				}
-				if (!strncasecmp("cc", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("cc", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("bcc")-1:
-				if (!strncasecmp("bcc", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("bcc", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("message-id")-1: /* "references" */
-				if (!strncasecmp("message-id", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("message-id", s, key, val);
-				} else if (!strncasecmp("references", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("references", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("in-reply-to")-1:
-				if (!strncasecmp("in-reply-to", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					PHP_MAIL_BUILD_HEADER_CHECK("in-reply-to", s, key, val);
-				} else {
-					PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				}
-				break;
-			case sizeof("subject")-1:
-				if (!strncasecmp("subject", ZSTR_VAL(key), ZSTR_LEN(key))) {
-					php_error_docref(NULL, E_WARNING, "Extra header cannot contain 'Subject' header");
-					continue;
-				}
-				PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
-				break;
-			default:
-				PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
+		if (zend_string_equals_literal_ci(key, "orig-date")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("orig-date", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "from")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("from", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "sender")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("sender", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "reply-to")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("reply-to", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "to")) {
+			zend_value_error("The additional headers cannot contain the \"To\" header");
+		} else if (zend_string_equals_literal_ci(key, "cc")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("cc", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "bcc")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("bcc", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "message-id")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("message-id", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "references")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("references", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "in-reply-to")) {
+			PHP_MAIL_BUILD_HEADER_CHECK("in-reply-to", s, key, val);
+		} else if (zend_string_equals_literal_ci(key, "subject")) {
+			zend_value_error("The additional headers cannot contain the \"Subject\" header");
+		} else {
+			if (Z_TYPE_P(val) == IS_STRING) {
+				php_mail_build_headers_elem(&s, key, val);
+			} else if (Z_TYPE_P(val) == IS_ARRAY) {
+				php_mail_build_headers_elems(&s, key, val);
+			} else {
+				zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
+			}
+		}
+
+		if (EG(exception)) {
+			smart_str_free(&s);
+			return NULL;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -275,51 +268,38 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 }
 
 
-/* {{{ proto int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
-   Send an email message */
+/* {{{ Send an email message */
 PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL;
 	char *subject=NULL;
-	zend_string *extra_cmd=NULL, *str_headers=NULL, *tmp_headers;
-	zval *headers = NULL;
+	zend_string *extra_cmd=NULL;
+	zend_string *headers_str = NULL;
+	HashTable *headers_ht = NULL;
 	size_t to_len, message_len;
 	size_t subject_len, i;
-	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
-	char *p, *e;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_STRING(to, to_len)
-		Z_PARAM_STRING(subject, subject_len)
-		Z_PARAM_STRING(message, message_len)
+		Z_PARAM_PATH(to, to_len)
+		Z_PARAM_PATH(subject, subject_len)
+		Z_PARAM_PATH(message, message_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(headers)
-		Z_PARAM_STR(extra_cmd)
+		Z_PARAM_ARRAY_HT_OR_STR(headers_ht, headers_str)
+		Z_PARAM_PATH_STR(extra_cmd)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* ASCIIZ check */
-	MAIL_ASCIIZ_CHECK(to, to_len);
-	MAIL_ASCIIZ_CHECK(subject, subject_len);
-	MAIL_ASCIIZ_CHECK(message, message_len);
-	if (headers) {
-		switch(Z_TYPE_P(headers)) {
-			case IS_STRING:
-				tmp_headers = zend_string_init(Z_STRVAL_P(headers), Z_STRLEN_P(headers), 0);
-				MAIL_ASCIIZ_CHECK(ZSTR_VAL(tmp_headers), ZSTR_LEN(tmp_headers));
-				str_headers = php_trim(tmp_headers, NULL, 0, 2);
-				zend_string_release_ex(tmp_headers, 0);
-				break;
-			case IS_ARRAY:
-				str_headers = php_mail_build_headers(headers);
-				break;
-			default:
-				php_error_docref(NULL, E_WARNING, "headers parameter must be string or array");
-				RETURN_FALSE;
+	if (headers_str) {
+		if (UNEXPECTED(zend_str_has_nul_byte(headers_str))) {
+			zend_argument_value_error(4, "must not contain any null bytes");
+			RETURN_THROWS();
 		}
-	}
-	if (extra_cmd) {
-		MAIL_ASCIIZ_CHECK(ZSTR_VAL(extra_cmd), ZSTR_LEN(extra_cmd));
+		headers_str = php_trim(headers_str, NULL, 0, 2);
+	} else if (headers_ht) {
+		headers_str = php_mail_build_headers(headers_ht);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (to_len > 0) {
@@ -362,20 +342,21 @@ PHP_FUNCTION(mail)
 		subject_r = subject;
 	}
 
+	zend_string *force_extra_parameters = zend_ini_str_ex("mail.force_extra_parameters", strlen("mail.force_extra_parameters"), false, NULL);
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
-		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
+		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
-	if (php_mail(to_r, subject_r, message, str_headers ? ZSTR_VAL(str_headers) : NULL, extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
+	if (php_mail(to_r, subject_r, message, headers_str && ZSTR_LEN(headers_str) ? ZSTR_VAL(headers_str) : NULL, extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
 
-	if (str_headers) {
-		zend_string_release_ex(str_headers, 0);
+	if (headers_str) {
+		zend_string_release_ex(headers_str, 0);
 	}
 
 	if (extra_cmd) {
@@ -391,7 +372,7 @@ PHP_FUNCTION(mail)
 /* }}} */
 
 
-void php_mail_log_crlf_to_spaces(char *message) {
+static void php_mail_log_crlf_to_spaces(char *message) {
 	/* Find all instances of carriage returns or line feeds and
 	 * replace them with spaces. Thus, a log line is always one line
 	 * long
@@ -402,7 +383,7 @@ void php_mail_log_crlf_to_spaces(char *message) {
 	}
 }
 
-void php_mail_log_to_syslog(char *message) {
+static void php_mail_log_to_syslog(char *message) {
 	/* Write 'message' to syslog. */
 #ifdef HAVE_SYSLOG_H
 	php_syslog(LOG_NOTICE, "%s", message);
@@ -410,9 +391,9 @@ void php_mail_log_to_syslog(char *message) {
 }
 
 
-void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
+static void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 	/* Write 'message' to the given file. */
-	uint32_t flags = IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
+	uint32_t flags = REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
 	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);
 	if (stream) {
 		php_stream_write(stream, message, message_size);
@@ -421,7 +402,7 @@ void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 }
 
 
-static int php_mail_detect_multiple_crlf(char *hdr) {
+static int php_mail_detect_multiple_crlf(const char *hdr) {
 	/* This function detects multiple/malformed multiple newlines. */
 
 	if (!hdr || !strlen(hdr)) {
@@ -458,27 +439,22 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
 }
 
 
-/* {{{ php_mail
- */
-PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
+/* {{{ php_mail */
+PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
 {
-#ifdef PHP_WIN32
-	int tsm_err;
-	char *tsm_errmsg = NULL;
-#endif
 	FILE *sendmail;
-	int ret;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
 	char *mail_log = INI_STR("mail.log");
-	char *hdr = headers;
+	const char *hdr = headers;
+	char *ahdr = NULL;
 #if PHP_SIGCHILD
-	void (*sig_handler)() = NULL;
+	void (*sig_handler)(int) = NULL;
 #endif
 
 #define MAIL_RET(val) \
-	if (hdr != headers) {	\
-		efree(hdr);	\
+	if (ahdr != NULL) {	\
+		efree(ahdr);	\
 	}	\
 	return val;	\
 
@@ -514,6 +490,12 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		efree(logline);
 	}
 
+	if (EG(exception)) {
+		MAIL_RET(false);
+	}
+
+	char *line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : "\r\n";
+
 	if (PG(mail_x_header)) {
 		const char *tmp = zend_get_executed_filename();
 		zend_string *f;
@@ -521,20 +503,24 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
 		if (headers != NULL && *headers) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), ZSTR_VAL(f), headers);
+			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s%s%s", php_getuid(), ZSTR_VAL(f), line_sep, headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
+			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
+		hdr = ahdr;
 		zend_string_release_ex(f, 0);
 	}
 
 	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
 		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
-		MAIL_RET(0);
+		MAIL_RET(false);
 	}
 
 	if (!sendmail_path) {
 #ifdef PHP_WIN32
+		int tsm_err;
+		char *tsm_errmsg = NULL;
+
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {
@@ -543,11 +529,11 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			} else {
 				php_error_docref(NULL, E_WARNING, "%s", GetSMErrorText(tsm_err));
 			}
-			MAIL_RET(0);
+			MAIL_RET(false);
 		}
-		MAIL_RET(1);
+		MAIL_RET(true);
 #else
-		MAIL_RET(0);
+		MAIL_RET(false);
 #endif
 	}
 	if (extra_cmd != NULL) {
@@ -580,6 +566,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 
 	if (sendmail) {
+		int ret;
 #ifndef PHP_WIN32
 		if (EACCES == errno) {
 			php_error_docref(NULL, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
@@ -591,15 +578,16 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 				signal(SIGCHLD, sig_handler);
 			}
 #endif
-			MAIL_RET(0);
+			MAIL_RET(false);
 		}
 #endif
-		fprintf(sendmail, "To: %s\n", to);
-		fprintf(sendmail, "Subject: %s\n", subject);
+		fprintf(sendmail, "To: %s%s", to, line_sep);
+		fprintf(sendmail, "Subject: %s%s", subject, line_sep);
 		if (hdr != NULL) {
-			fprintf(sendmail, "%s\n", hdr);
+			fprintf(sendmail, "%s%s", hdr, line_sep);
 		}
-		fprintf(sendmail, "\n%s\n", message);
+		fprintf(sendmail, "%s%s%s", line_sep, message, line_sep);
+#ifdef PHP_WIN32
 		ret = pclose(sendmail);
 
 #if PHP_SIGCHILD
@@ -607,10 +595,30 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			signal(SIGCHLD, sig_handler);
 		}
 #endif
-
-#ifdef PHP_WIN32
-		if (ret == -1)
 #else
+		int wstatus = pclose(sendmail);
+#if PHP_SIGCHILD
+		if (sig_handler) {
+			signal(SIGCHLD, sig_handler);
+		}
+#endif
+		/* Determine the wait(2) exit status */
+		if (wstatus == -1) {
+			php_error_docref(NULL, E_WARNING, "Sendmail pclose failed %d (%s)", errno, strerror(errno));
+			MAIL_RET(false);
+		} else if (WIFSIGNALED(wstatus)) {
+			php_error_docref(NULL, E_WARNING, "Sendmail killed by signal %d (%s)", WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
+			MAIL_RET(false);
+		} else {
+			if (WIFEXITED(wstatus)) {
+				ret = WEXITSTATUS(wstatus);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Sendmail did not exit");
+				MAIL_RET(false);
+			}
+		}
+#endif
+
 #if defined(EX_TEMPFAIL)
 		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL))
 #elif defined(EX_OK)
@@ -618,11 +626,11 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #else
 		if (ret != 0)
 #endif
-#endif
 		{
-			MAIL_RET(0);
+			php_error_docref(NULL, E_WARNING, "Sendmail exited with non-zero exit code %d", ret);
+			MAIL_RET(false);
 		} else {
-			MAIL_RET(1);
+			MAIL_RET(true);
 		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
@@ -631,15 +639,14 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			signal(SIGCHLD, sig_handler);
 		}
 #endif
-		MAIL_RET(0);
+		MAIL_RET(false);
 	}
 
-	MAIL_RET(1); /* never reached */
+	MAIL_RET(true); /* never reached */
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(mail)
 {
 	char *sendmail_path = INI_STR("sendmail_path");

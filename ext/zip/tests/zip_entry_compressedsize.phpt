@@ -1,9 +1,7 @@
 --TEST--
 zip_entry_compressedsize() function
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $zip = zip_open(__DIR__."/test_procedural.zip");
@@ -15,8 +13,29 @@ while ($entry = zip_read($zip)) {
 zip_close($zip);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressedsize() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 5
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressedsize() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 4
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressedsize() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 0
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_entry_compressedsize() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 24
+
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
+
+Deprecated: Function zip_close() is deprecated since 8.0, use ZipArchive::close() instead in %s on line %d

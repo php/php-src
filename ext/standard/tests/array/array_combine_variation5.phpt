@@ -2,12 +2,6 @@
 Test array_combine() function : usage variations - associative array with different values(Bug#43424)
 --FILE--
 <?php
-/* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys
- *              and the elements of the second as the corresponding values
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Testing the functionality of array_combine() by passing various
 * associative arrays having different possible values to $keys argument and
@@ -52,8 +46,8 @@ $arrays = array (
        array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 33333333.333),
 
        // arrays with string values
-/*7*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "pen\n"),
-       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  'pen\n'),
+/*7*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "pen\n"),
+       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'),
        array(1 => "hello", "heredoc" => $heredoc),
 
        // array with object, unset variable and resource variable
@@ -117,7 +111,7 @@ array(4) {
   ["3.33"]=>
   float(3.33)
   ["4.8999992284"]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["33333333.333"]=>
   float(33333333.333)
 }

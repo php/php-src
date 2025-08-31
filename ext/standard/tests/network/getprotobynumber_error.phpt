@@ -2,15 +2,14 @@
 getprotobynumber function errors test
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
+--SKIPIF--
+<?php
+if (getenv('SKIP_MSAN')) die('skip msan missing interceptor for getprotobynumber()');
+?>
 --FILE--
 <?php
-	// empty protocol number
-	var_dump(getprotobynumber());
-
-	// invalid protocol number
-	var_dump(getprotobynumber(999));
+// invalid protocol number
+var_dump(getprotobynumber(999));
 ?>
---EXPECTF--
-Warning: getprotobynumber() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+--EXPECT--
 bool(false)

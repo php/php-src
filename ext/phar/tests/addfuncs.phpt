@@ -1,7 +1,7 @@
 --TEST--
 Phar: addFile/addFromString
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -39,7 +39,6 @@ $phar->addFromString('.phar/stub.php', 'hi');
 echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -50,4 +49,3 @@ Entry a does not exist and cannot be created: phar error: file "a" in phar "%sad
 phar error: unable to open file "%s/does/not/exist" to add to phar archive
 Cannot create any files in magic ".phar" directory
 Cannot create any files in magic ".phar" directory
-===DONE===

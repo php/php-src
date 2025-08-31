@@ -2,11 +2,6 @@
 Test array_sum() function : usage variations - array with different float values
 --FILE--
 <?php
-/* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries
- * Source code: ext/standard/array.c
-*/
-
 /*
  * sum of array containing different float values
 */

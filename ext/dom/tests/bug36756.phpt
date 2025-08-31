@@ -1,7 +1,7 @@
 --TEST--
 Bug #36756 (DOMDocument::removeChild corrupts node)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -13,7 +13,6 @@ $node = $xpath->query('/root')->item(0);
 echo $node->nodeName . "\n";
 $dom->removeChild($GLOBALS['dom']->firstChild);
 echo "nodeType: " . $node->nodeType . "\n";
-
 /* Node gets destroyed during removeChild */
 $dom->loadXML('<root><child/></root>');
 $xpath = new DOMXpath($dom);
@@ -24,12 +23,8 @@ $GLOBALS['dom']->removeChild($GLOBALS['dom']->firstChild);
 echo "nodeType: " . $node->nodeType . "\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 root
 nodeType: 1
 child
-
-Warning: Couldn't fetch DOMElement. Node no longer exists in %sbug36756.php on line %d
-
-Notice: Undefined property: DOMElement::$nodeType in %sbug36756.php on line %d
-nodeType:
+nodeType: 1

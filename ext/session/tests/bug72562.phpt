@@ -1,5 +1,7 @@
 --TEST--
 Bug #72562: Use After Free in unserialize() with Unexpected Session Deserialization
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -27,18 +29,18 @@ var_dump($out_2);
 
 function ptr2str($ptr)
 {
-	$out = '';
-	for ($i = 0; $i < 8; $i++) {
-		$out .= chr($ptr & 0xff);
-		$ptr >>= 8;
-	}
-	return $out;
+    $out = '';
+    for ($i = 0; $i < 8; $i++) {
+        $out .= chr($ptr & 0xff);
+        $ptr >>= 8;
+    }
+    return $out;
 }
 ?>
 --EXPECTF--
 Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%ebug72562.php on line %d
 
-Notice: unserialize(): Error at offset 0 of 1 bytes in %s%ebug72562.php on line %d
+Warning: unserialize(): Error at offset 0 of 1 bytes in %s on line %d
 
-Notice: unserialize(): Error at offset 4 of 4 bytes in %s%ebug72562.php on line %d
+Warning: unserialize(): Error at offset 4 of 4 bytes in %s on line %d
 bool(false)

@@ -5,4 +5,4 @@ Multiple trailing commas in function calls is not allowed
 foo($foo,,);
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected ',', expecting ')' in %s on line %d
+Parse error: syntax error, unexpected token ",", expecting ")" in %s on line %d

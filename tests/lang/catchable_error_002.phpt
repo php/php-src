@@ -2,28 +2,28 @@
 Catchable fatal error [2]
 --FILE--
 <?php
-	class Foo {
-	}
+    class Foo {
+    }
 
-	function blah (Foo $a)
-	{
-	}
+    function blah (Foo $a)
+    {
+    }
 
-	function error()
-	{
-		$a = func_get_args();
-		var_dump($a);
-	}
+    function error()
+    {
+        $a = func_get_args();
+        var_dump($a);
+    }
 
-	set_error_handler('error');
+    set_error_handler('error');
 
-	try {
-		blah (new StdClass);
-	} catch (Error $ex) {
-	    echo $ex->getMessage(), "\n";
-	}
-	echo "ALIVE!\n";
+    try {
+        blah (new StdClass);
+    } catch (Error $ex) {
+        echo $ex->getMessage(), "\n";
+    }
+    echo "ALIVE!\n";
 ?>
 --EXPECTF--
-Argument 1 passed to blah() must be an instance of Foo, instance of stdClass given, called in %scatchable_error_002.php on line %d
+blah(): Argument #1 ($a) must be of type Foo, stdClass given, called in %scatchable_error_002.php on line %d
 ALIVE!

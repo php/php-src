@@ -21,9 +21,9 @@ passthru("$php -n $file");
 
 $names = array('HTTP_X_TEST', 'HTTP_X__TEST', 'HTTP_X_');
 foreach ($names as $name) {
-	putenv($name."=".str_repeat("A", 256));
-	passthru("$php -n -q $file");
-	putenv($name);
+    putenv($name."=".str_repeat("A", 256));
+    passthru("$php -n -q $file");
+    putenv($name);
 }
 unlink($file);
 

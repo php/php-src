@@ -5,22 +5,10 @@ Test is_readable() function: usage variations - file/dir with diff. perms
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for windows');
 }
-// Skip if being run by root
-$filename = __DIR__."/is_readable_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype: bool is_readable ( string $filename );
-   Description: Tells whether the filename is readable.
-*/
-
 /* test is_executable() with file/dir having different permissions */
 
 require __DIR__.'/file.inc';
@@ -34,7 +22,7 @@ chmod("$file_path/is_readable_variation2", 0001);
 var_dump( is_readable("$file_path/is_readable_variation2") );  // exp: bool(false)
 chmod("$file_path/is_readable_variation2", 0777);  // chmod to enable deletion of directory
 
-echo "\n*** Testing miscelleneous input for is_readable() function ***\n";
+echo "\n*** Testing miscellaneous input for is_readable() function ***\n";
 $name_prefix = "is_readable_variation2";
 create_files(__DIR__, 1, "numeric", 0755, 1, "w", $name_prefix, 1);
 create_files(__DIR__, 1, "text", 0755, 1, "w", $name_prefix, 2);
@@ -85,7 +73,7 @@ rmdir(__DIR__."/is_readable_variation2/");
 *** Testing is_readable() on directory without read permission ***
 bool(false)
 
-*** Testing miscelleneous input for is_readable() function ***
+*** Testing miscellaneous input for is_readable() function ***
 -- Iteration 1 --
 bool(true)
 -- Iteration 2 --

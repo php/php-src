@@ -1,5 +1,7 @@
 --TEST--
 Bug #41600 (url rewriter tags doesn't work with namespaced tags)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -17,7 +19,7 @@ session.save_handler=files
 
 error_reporting(E_ALL);
 
-session_id("abtest");
+session_id("bug41600");
 session_start();
 ?>
 <a href="link.php?a=b">
@@ -25,4 +27,7 @@ session_start();
 session_destroy();
 ?>
 --EXPECT--
-<a href="link.php?a=b&amp;PHPSESSID=abtest">
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
+<a href="link.php?a=b&amp;PHPSESSID=bug41600">

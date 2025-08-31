@@ -1,9 +1,10 @@
 --TEST--
 Phar: getAlias() with an existing phar.zip
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
+phar.require_hash=0
 --FILE--
 <?php
 
@@ -42,7 +43,6 @@ $phar->setAlias('pinocchio');
 var_dump($phar->getAlias());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -56,4 +56,3 @@ string(13) "jiminycricket"
 Cannot set alias ".phar/alias.txt" directly in phar "%sgetalias.phar.zip", use setAlias
 string(13) "jiminycricket"
 string(9) "pinocchio"
-===DONE===

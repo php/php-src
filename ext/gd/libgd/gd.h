@@ -17,20 +17,6 @@ extern "C" {
 #define GD_EXTRA_VERSION ""
 #define GD_VERSION_STRING "2.0.35"
 
-#ifdef NETWARE
-/* default fontpath for netware systems */
-#define DEFAULT_FONTPATH "sys:/java/nwgfx/lib/x11/fonts/ttf;."
-#define PATHSEPARATOR ";"
-#elif defined(WIN32)
-/* default fontpath for windows systems */
-#define DEFAULT_FONTPATH "c:\\winnt\\fonts;c:\\windows\\fonts;."
-#define PATHSEPARATOR ";"
-#else
-/* default fontpath for unix systems */
-#define DEFAULT_FONTPATH "/usr/X11R6/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/truetype:/usr/X11R6/lib/X11/fonts/TTF:/usr/share/fonts/TrueType:/usr/share/fonts/truetype:/usr/openwin/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/Type1:."
-#define PATHSEPARATOR ":"
-#endif
-
 /* gd.h: declarations file for the graphic-draw module.
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -159,7 +145,8 @@ typedef enum {
 	GD_SINC,
 	GD_TRIANGLE,
 	GD_WEIGHTED4,
-	GD_METHOD_COUNT = 21
+	GD_LINEAR,
+	GD_METHOD_COUNT = 22
 } gdInterpolationMethod;
 
 /* define struct with name and func ptr and add it to gdImageStruct gdInterpolationMethod interpolation; */
@@ -364,6 +351,10 @@ gdImagePtr gdImageCreateFromWebp(FILE *fd);
 gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
 
+gdImagePtr gdImageCreateFromAvif(FILE *infile);
+gdImagePtr gdImageCreateFromAvifPtr(int size, void *data);
+gdImagePtr gdImageCreateFromAvifCtx(gdIOCtx *infile);
+
 gdImagePtr gdImageCreateFromTga( FILE * fp );
 gdImagePtr gdImageCreateFromTgaCtx(gdIOCtx* ctx);
 gdImagePtr gdImageCreateFromTgaPtr(int size, void *data);
@@ -372,9 +363,9 @@ gdImagePtr gdImageCreateFromBmp (FILE * inFile);
 gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
 gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
 
-const char * gdPngGetVersionString();
+const char * gdPngGetVersionString(void);
 
-const char * gdJpegGetVersionString();
+const char * gdJpegGetVersionString(void);
 
 /* A custom data source. */
 /* The source function must return -1 on error, otherwise the number
@@ -444,8 +435,8 @@ void gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short 
  * use of any sort of threads in a module load / shutdown function
  * respectively.
  */
-void gdFontCacheMutexSetup();
-void gdFontCacheMutexShutdown();
+void gdFontCacheMutexSetup(void);
+void gdFontCacheMutexShutdown(void);
 
 /* 2.0.16: for thread-safe use of gdImageStringFT and friends,
  * call this before allowing any thread to call gdImageStringFT.
@@ -615,7 +606,20 @@ void *gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
 void gdImageJpeg(gdImagePtr im, FILE *out, int quality);
 void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization);
+/**
+ * Group: WebP
+ *
+ * Constant: gdWebpLossless
+ *
+ * Lossless quality threshold. When image quality is greater than or equal to
+ * <gdWebpLossless>, the image will be written in the lossless WebP format.
+ *
+ * See also:
+ *   - <gdImageWebpCtx>
+ */
+#define gdWebpLossless 101
+
+void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
 
 /* Best to free this memory with gdFree(), not free() */
 void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
@@ -623,6 +627,12 @@ void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
 gdImagePtr gdImageCreateFromGif(FILE *fd);
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
+
+void gdImageAvif(gdImagePtr im, FILE *outfile);
+void gdImageAvifEx(gdImagePtr im, FILE *outfile, int quality, int speed);
+void *gdImageAvifPtr(gdImagePtr im, int *size);
+void *gdImageAvifPtrEx(gdImagePtr im, int *size, int quality, int speed);
+void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed);
 
 /* A custom data sink. For backwards compatibility. Use
 	gdIOCtx instead. */
@@ -695,10 +705,7 @@ void gdImageCopyResized(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int 
 	substituted automatically. */
 void gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH);
 
-gdImagePtr gdImageRotate90(gdImagePtr src, int ignoretransparent);
-gdImagePtr gdImageRotate180(gdImagePtr src, int ignoretransparent);
-gdImagePtr gdImageRotate270(gdImagePtr src, int ignoretransparent);
-gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
+gdImagePtr gdImageClone(gdImagePtr src);
 
 void gdImageSetBrush(gdImagePtr im, gdImagePtr brush);
 void gdImageSetTile(gdImagePtr im, gdImagePtr tile);
@@ -824,7 +831,7 @@ void gdImageFlipHorizontal(gdImagePtr im);
 void gdImageFlipVertical(gdImagePtr im);
 void gdImageFlipBoth(gdImagePtr im);
 
-#define GD_FLIP_HORINZONTAL 1
+#define GD_FLIP_HORIZONTAL 1
 #define GD_FLIP_VERTICAL 2
 #define GD_FLIP_BOTH 3
 
@@ -855,18 +862,10 @@ gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode);
 gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color, const float threshold);
 
 int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id);
+gdInterpolationMethod gdImageGetInterpolationMethod(gdImagePtr im);
 
-gdImagePtr gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, const unsigned int new_height);
-gdImagePtr gdImageScaleBicubic(gdImagePtr src_img, const unsigned int new_width, const unsigned int new_height);
-gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, const unsigned int height);
-gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width, const unsigned int height);
-gdImagePtr gdImageScaleTwoPass(const gdImagePtr pOrigImage, const unsigned int uOrigWidth, const unsigned int uOrigHeight, const unsigned int uNewWidth, const unsigned int uNewHeight);
 gdImagePtr gdImageScale(const gdImagePtr src, const unsigned int new_width, const unsigned int new_height);
 
-gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, const int bgColor);
-gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int bgColor);
-gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const int bgColor);
-gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor);
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
 
 typedef enum {
@@ -902,7 +901,7 @@ int gdTransformAffineBoundingBox(gdRectPtr src, const double affine[6], gdRectPt
 
 
 #define GD_CMP_IMAGE		1	/* Actual image IS different */
-#define GD_CMP_NUM_COLORS	2	/* Number of Colours in pallette differ */
+#define GD_CMP_NUM_COLORS	2	/* Number of Colours in palette differ */
 #define GD_CMP_COLOR		4	/* Image colours differ */
 #define GD_CMP_SIZE_X		8	/* Image width differs */
 #define GD_CMP_SIZE_Y		16	/* Image heights differ */

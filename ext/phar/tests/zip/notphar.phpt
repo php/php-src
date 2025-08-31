@@ -1,10 +1,9 @@
 --TEST--
 Phar: a non-executable zip with no stub named .phar.zip
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=1
-detect_unicode=0
 zend.multibyte=0
 --FILE--
 <?php
@@ -21,5 +20,5 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-Warning: include(phar://%snotphar.phar.zip/.phar/stub.php): failed to open stream: '%snotphar.phar.zip' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive in %snotphar.php on line %d
+Warning: include(phar://%snotphar.phar.zip/.phar/stub.php): Failed to open stream: '%snotphar.phar.zip' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive in %snotphar.php on line %d
 PK%a

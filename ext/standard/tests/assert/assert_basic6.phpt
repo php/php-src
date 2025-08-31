@@ -1,27 +1,55 @@
 --TEST--
-assert() - basic - Test that bailout works
+assert() - Remove the assert callback
 --INI--
-assert.active = 1
-assert.warning = 1
-assert.callback = f1
-assert.quiet_eval = 1
-assert.bail = 0
+assert.active=1
 --FILE--
 <?php
-function f1($message)
+
+function f1()
 {
-	echo "f1 called\n";
+    echo "foo\n";
 }
 
-//bail out on error
-var_dump($rao = assert_options(ASSERT_BAIL, 1));
-$sa = "0 != 0";
-var_dump($r2 = assert($sa, "0 is 0"));
-echo "If this is printed BAIL hasn't worked";
+assert_options(ASSERT_CALLBACK, "f1");
+var_dump(assert_options(ASSERT_CALLBACK));
+
+try {
+    assert(false);
+} catch (AssertionError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+echo "\n";
+
+assert_options(ASSERT_CALLBACK, null);
+var_dump(assert_options(ASSERT_CALLBACK));
+
+try {
+    assert(false);
+} catch (AssertionError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+?>
 --EXPECTF--
-int(0)
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
-f1 called
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 
-Warning: assert(): 0 is 0: "0 != 0" failed in %s on line 10
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
+string(2) "f1"
+foo
+assert(false)
+
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
+NULL
+assert(false)

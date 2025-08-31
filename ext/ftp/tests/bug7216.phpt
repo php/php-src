@@ -1,9 +1,8 @@
 --TEST--
 Bug #7216 (ftp_mkdir returns nothing)
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 $bug7216=true;

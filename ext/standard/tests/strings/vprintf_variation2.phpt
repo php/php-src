@@ -2,11 +2,6 @@
 Test vprintf() function : usage variations - unexpected values for args argument
 --FILE--
 <?php
-/* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 /*
  * Test vprintf() when different unexpected values are passed to
  * the '$args' arguments of the function
@@ -36,47 +31,47 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-		  // int data
+          // int data
 /*1*/	  0,
-		  1,
-		  12345,
-		  -2345,
+          1,
+          12345,
+          -2345,
 
-		  // float data
+          // float data
 /*5*/	  10.5,
-		  -10.5,
-		  10.1234567e10,
-		  10.7654321E-10,
-		  .5,
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
 
-		  // null data
+          // null data
 /*10*/	  NULL,
-		  null,
+          null,
 
-		  // boolean data
+          // boolean data
 /*12*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // empty data
+          // empty data
 /*16*/	  "",
-		  '',
+          '',
 
-		  // string data
+          // string data
 /*18*/	  "string",
-		  'string',
+          'string',
 
-		  // object data
+          // object data
 /*20*/	  new sample(),
 
-		  // undefined data
+          // undefined data
 /*21*/	  @$undefined_var,
 
-		  // unset data
+          // unset data
 /*22*/	  @$unset_var,
 
-		  // resource data
+          // resource data
 /*23*/		  $file_handle
 );
 
@@ -84,9 +79,15 @@ $values = array(
 $counter = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $counter --\n";
-  $result = vprintf($format,$value);
-  echo "\n";
-  var_dump($result);
+  try {
+    $result = vprintf($format,$value);
+    echo "\n";
+    var_dump($result);
+  } catch (\TypeError $e) {
+    echo $e->getMessage(), "\n";
+  } catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
 };
 
@@ -94,109 +95,74 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : with unexpected values for args argument ***
 
 -- Iteration 1 --
-0
-int(1)
+vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 2 --
-1
-int(1)
+vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 3 --
-12345
-int(5)
+vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 4 --
--2345
-int(5)
+vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 5 --
-10.5
-int(4)
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 6 --
--10.5
-int(5)
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 7 --
-101234567000
-int(12)
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 8 --
-1.07654321E-9
-int(13)
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 9 --
-0.5
-int(3)
+vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 10 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 11 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 12 --
-1
-int(1)
+vprintf(): Argument #2 ($values) must be of type array, true given
 
 -- Iteration 13 --
-
-int(0)
+vprintf(): Argument #2 ($values) must be of type array, false given
 
 -- Iteration 14 --
-1
-int(1)
+vprintf(): Argument #2 ($values) must be of type array, true given
 
 -- Iteration 15 --
-
-int(0)
+vprintf(): Argument #2 ($values) must be of type array, false given
 
 -- Iteration 16 --
-
-int(0)
+vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 17 --
-
-int(0)
+vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 18 --
-string
-int(6)
+vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 19 --
-string
-int(6)
+vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 20 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+vprintf(): Argument #2 ($values) must be of type array, sample given
 
 -- Iteration 21 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 22 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 23 --
-Resource id #%d
-int(%d)
-===DONE===
+vprintf(): Argument #2 ($values) must be of type array, resource given

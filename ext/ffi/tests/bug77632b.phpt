@@ -1,12 +1,13 @@
 --TEST--
 Bug #77632 (FFI function pointers with variadics)
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 try {
-	FFI::cdef("extern void *zend_printf;");
+    FFI::cdef("extern void *zend_printf;");
 } catch (Throwable $_) {
-	die('skip PHP symbols not available');
+    die('skip PHP symbols not available');
 }
 ?>
 --INI--

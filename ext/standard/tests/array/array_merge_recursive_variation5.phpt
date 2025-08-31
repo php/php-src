@@ -2,11 +2,6 @@
 Test array_merge_recursive() function : usage variations - associative array with different values
 --FILE--
 <?php
-/* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_merge_recursive() by passing different
  * associative arrays having different values to $arr1 argument.
@@ -45,8 +40,8 @@ $arrays = array (
        array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => array(1.2, 'f4' => 1.2)),
 
        // arrays with string values
-/*5*/  array(111 => "\tHello", "array" => "col\tor", 2 => "\v\fworld", 3.3 =>  "\tHello"),
-       array(111 => '\tHello', 'array' => 'col\tor', 2 => '\v\fworld', 3.3 =>  '\tHello'),
+/*5*/  array(111 => "\tHello", "array" => "col\tor", 2 => "\v\fworld", 3 =>  "\tHello"),
+       array(111 => '\tHello', 'array' => 'col\tor', 2 => '\v\fworld', 3 =>  '\tHello'),
        array(1 => "hello", "string" => $heredoc, $heredoc),
 
        // array with object, unset variable and resource variable
@@ -199,7 +194,7 @@ array(4) {
   ["f2"]=>
   float(3.33)
   [0]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   array(2) {
     [0]=>
@@ -215,7 +210,7 @@ array(8) {
   ["f2"]=>
   float(3.33)
   [0]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   array(2) {
     [0]=>

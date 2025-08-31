@@ -9,10 +9,7 @@ var_dump(strpos("foo bar", 111));
 // string("11") is contained
 var_dump(strpos("foo 11", "11"));
 ?>
---EXPECTF--
-Deprecated: strpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+--EXPECT--
+int(4)
 bool(false)
-
-Deprecated: strpos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-int(1)
 int(4)

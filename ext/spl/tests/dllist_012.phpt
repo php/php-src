@@ -7,7 +7,6 @@ $a[] = $a;
 
 var_dump($a);
 ?>
-===DONE===
 --EXPECTF--
 object(SplDoublyLinkedList)#%d (2) {
   ["flags":"SplDoublyLinkedList":private]=>
@@ -18,4 +17,3 @@ object(SplDoublyLinkedList)#%d (2) {
     *RECURSION*
   }
 }
-===DONE===

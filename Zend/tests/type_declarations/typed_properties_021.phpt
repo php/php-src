@@ -3,13 +3,14 @@ Test typed properties delay type check on constant
 --FILE--
 <?php
 class Foo {
-	public int $bar = BAR::BAZ;
+    public int $bar = BAR::BAZ;
 }
 
-$foo = new Foo();
+try {
+    $foo = new Foo();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Class 'BAR' not found in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Class "BAR" not found

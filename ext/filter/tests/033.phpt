@@ -1,7 +1,7 @@
 --TEST--
 Test all filters returned by filter_list()
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --INI--
 precision=14
 default_charset=UTF-8
@@ -29,26 +29,5 @@ email               PHP  1  foo@bar.com    httpa.b.c           1.2.3.4   123  12
 url                 PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O'Henry                  aa:bb:cc:dd:ee:ff
 number_int               1                                     1234      123  123                                                    
 number_float             1                                     1234      123  123                                                    
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-
-Deprecated: filter_var(): FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead in %s on line %d
-magic_quotes        PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O\'Henry       하퍼    aa:bb:cc:dd:ee:ff
 add_slashes         PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc<>()          O\'Henry       하퍼    aa:bb:cc:dd:ee:ff
 callback            PHP  1  FOO@BAR.COM    HTTP://A.B.C        1.2.3.4   123  123ABC<>()          O'HENRY        하퍼    AA:BB:CC:DD:EE:FF

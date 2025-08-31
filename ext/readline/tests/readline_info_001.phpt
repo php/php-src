@@ -1,8 +1,10 @@
 --TEST--
 readline_info(): Basic test
+--EXTENSIONS--
+readline
 --SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip");
-if (READLINE_LIB == "libedit") die("skip readline only");
+<?php if (READLINE_LIB == "libedit") die("skip readline only");
+if (getenv('SKIP_REPEAT')) die("skip readline has global state");
 ?>
 --FILE--
 <?php
@@ -23,7 +25,7 @@ var_dump(readline_info('completion_suppress_append'));
 
 ?>
 --EXPECTF--
-array(13) {
+array(%d) {
   ["line_buffer"]=>
   string(0) ""
   ["point"]=>
@@ -43,7 +45,7 @@ array(13) {
   ["completion_append_character"]=>
   string(1) " "
   ["completion_suppress_append"]=>
-  bool(false)
+  bool(false)%A
   ["library_version"]=>
   string(%d) "%s"
   ["readline_name"]=>

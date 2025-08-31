@@ -5,18 +5,18 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function a ($field_type, $allowed_values) {
-	$settings = [
-		'list_string' => [
-			'allowed_values' => $allowed_values,
-		],
-	];
+    $settings = [
+        'list_string' => [
+            'allowed_values' => $allowed_values,
+        ],
+    ];
 
-	return $settings[$field_type];
+    return $settings[$field_type];
 }
 
 var_dump(a("list_string", ["xxx"]));

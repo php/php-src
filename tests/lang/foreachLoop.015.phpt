@@ -6,31 +6,31 @@ Directly modifying a REFERENCED array when foreach'ing over it while using &$val
 define('MAX_LOOPS',5);
 
 function withRefValue($elements, $transform) {
-	echo "\n---( Array with $elements element(s): )---\n";
-	//Build array:
-	for ($i=0; $i<$elements; $i++) {
-		$a[] = "v.$i";
-	}
-	$counter=0;
+    echo "\n---( Array with $elements element(s): )---\n";
+    //Build array:
+    for ($i=0; $i<$elements; $i++) {
+        $a[] = "v.$i";
+    }
+    $counter=0;
 
-	$ref = &$a;
+    $ref = &$a;
 
-	echo "--> State of referenced array before loop:\n";
-	var_dump($a);
+    echo "--> State of referenced array before loop:\n";
+    var_dump($a);
 
-	echo "--> Do loop:\n";
-	foreach ($a as $k=>&$v) {
-		echo "     iteration $counter:  \$k=$k; \$v=$v\n";
-		eval($transform);
-		$counter++;
-		if ($counter>MAX_LOOPS) {
-			echo "  ** Stuck in a loop! **\n";
-			break;
-		}
-	}
+    echo "--> Do loop:\n";
+    foreach ($a as $k=>&$v) {
+        echo "     iteration $counter:  \$k=$k; \$v=$v\n";
+        eval($transform);
+        $counter++;
+        if ($counter>MAX_LOOPS) {
+            echo "  ** Stuck in a loop! **\n";
+            break;
+        }
+    }
 
-	echo "--> State of array after loop:\n";
-	var_dump($a);
+    echo "--> State of array after loop:\n";
+    var_dump($a);
 }
 
 

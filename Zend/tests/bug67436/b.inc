@@ -1,8 +1,10 @@
 <?php
 
 class b extends a {
-	public function test() {
-		echo __METHOD__ . "()\n";
-		parent::test();
-	}
+    private function __invoke() {}
+
+    public function test($arg = c::TESTCONSTANT) {
+        echo __METHOD__ . "()\n";
+        parent::test();
+    }
 }

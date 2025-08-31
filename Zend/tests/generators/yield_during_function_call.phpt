@@ -4,7 +4,7 @@
 <?php
 
 function gen() {
-	var_dump(str_repeat("x", yield));
+    var_dump(str_repeat("x", yield));
 }
 
 $gen = gen();

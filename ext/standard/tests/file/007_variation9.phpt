@@ -2,17 +2,6 @@
 Test fopen and fclose() functions - usage variations - "rt" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "rt" mode,
    checking for the file creation, write & read operations,
@@ -36,6 +25,7 @@ var_dump( fwrite($file_handle, $string) );  //Check for write operation; fails
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 echo "*** Done ***\n";
+?>
 --CLEAN--
 <?php
 unlink(__DIR__."/007_variation9.tmp");
@@ -49,7 +39,7 @@ string(20) "line
 line of text
 li"
 
-Notice: fwrite(): write of 37 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fwrite(): Write of 37 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 bool(true)
 string(7) "Unknown"

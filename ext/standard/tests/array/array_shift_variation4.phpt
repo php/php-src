@@ -2,11 +2,6 @@
 Test array_shift() function : usage variations - multi-dimensional arrays
 --FILE--
 <?php
-/* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test popping elements from a sub-array and popping an array from an array
  */

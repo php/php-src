@@ -12,7 +12,7 @@ $tmp_link = __FILE__.".tmp.link";
 $tmp_link2 = __FILE__.".tmp.link2";
 
 if (symlink(__DIR__."/there_is_no_such_file", $tmp_link)) {
-	rename($tmp_link, $tmp_link2);
+    rename($tmp_link, $tmp_link2);
 }
 
 clearstatcache();
@@ -28,9 +28,9 @@ echo "Done\n";
 --EXPECTF--
 Warning: symlink(): No such file or directory in %srename_variation7-win32.php on line %d
 
-Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link), error 2) in %srename_variation7-win32.php on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link), error 2 in %srename_variation7-win32.php on line %d
 bool(false)
 
-Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link2), error 2) in %srename_variation7-win32.php on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link2), error 2 in %srename_variation7-win32.php on line %d
 bool(false)
 Done

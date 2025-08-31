@@ -27,13 +27,11 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: buffer.c,v 1.6 2019/05/07 02:27:11 christos Exp $")
+FILE_RCSID("@(#)$File: buffer.c,v 1.13 2023/07/02 12:48:39 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#else
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <string.h>
@@ -60,6 +58,8 @@ void
 buffer_fini(struct buffer *b)
 {
 	efree(b->ebuf);
+	b->ebuf = NULL;
+	b->elen = 0;
 }
 
 int
@@ -68,13 +68,18 @@ buffer_fill(const struct buffer *bb)
 	struct buffer *b = CCAST(struct buffer *, bb);
 
 	if (b->elen != 0)
-		return b->elen == CAST(size_t, ~0) ? -1 : 0;
+		return b->elen == FILE_BADSIZE ? -1 : 0;
 
 	if (!S_ISREG(b->st.st_mode))
 		goto out;
 
-	b->elen =  CAST(size_t, b->st.st_size) < b->flen ?
+	b->elen = CAST(size_t, b->st.st_size) < b->flen ?
 	    CAST(size_t, b->st.st_size) : b->flen;
+	if (b->elen == 0) {
+		efree(b->ebuf);
+		b->ebuf = NULL;
+		return 0;
+	}
 	if ((b->ebuf = emalloc(b->elen)) == NULL)
 		goto out;
 
@@ -89,6 +94,6 @@ buffer_fill(const struct buffer *bb)
 
 	return 0;
 out:
-	b->elen = CAST(size_t, ~0);
+	b->elen = FILE_BADSIZE;
 	return -1;
 }

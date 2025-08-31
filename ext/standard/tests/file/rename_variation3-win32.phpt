@@ -8,10 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
-   Description: Renames a file or directory
-*/
-
 require __DIR__.'/file.inc';
 
 /* creating directory */
@@ -25,7 +21,7 @@ mkdir($dirname);
 $filename = "$file_path/rename_variation3.tmp";
 $fp = fopen($filename, "w");
 if (!$fp) {
-	die("Cannot create $filename\n");
+    die("Cannot create $filename\n");
 }
 fclose($fp);
 
@@ -55,9 +51,6 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-unlink($file_path."/rename_variation3_link.tmp");
-unlink($file_path."/rename_variation3.tmp");
-rmdir($file_path."/rename_variation3_dir");
 rmdir($file_path."/rename_variation3.tmp");
 ?>
 --EXPECTF--
@@ -71,7 +64,7 @@ bool(true)
 
 -- Renaming existing file to existing directory name --
 
-Warning: rename(%s/rename_variation3.tmp,%s/rename_variation3_dir): Access is denied. (code: 5) in %s on line %d
+Warning: rename(%s/rename_variation3.tmp,%s/rename_variation3_dir): Access is denied (code: 5) in %s on line %d
 bool(false)
 bool(true)
 bool(true)

@@ -1,13 +1,15 @@
 --TEST--
-Bug #71417: fread() does not detect decoding errors from filter zlib.inflate
+Bug #71417: fread() does not report zlib.inflate errors
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 
 function test($case) {
-	$plain = "The quick brown fox jumps over the lazy dog.";
-	$fn = "bug71417.gz";
-	$compressed = (string) gzencode($plain);
-	
+    $plain = "The quick brown fox jumps over the lazy dog.";
+    $fn = "bug71417.gz";
+    $compressed = (string) gzencode($plain);
+
     if ($case == 1) {
         // 1. Set a random byte in the middle of the compressed data.
         // $ php test-zlib-inflate.php
@@ -35,26 +37,26 @@ function test($case) {
         // 4. Corrupted final length.
         // $ php test-zlib-inflate.phpread: string(0) ""
         // read: string(44) "The quick brown fox jumps over the lazy dog."
-        // $ gunzip test-zlib-inflate.gz 
+        // $ gunzip test-zlib-inflate.gz
         // gzip: test-zlib-inflate.gz: invalid compressed data--length error
         $compressed[strlen($compressed)-2] = 'X';
     }
-	
-	// The gzdecode() function applied to the corrupted compressed data always
-	// detects the error:
-	// --> gzdecode(): PHP Fatal error:  Uncaught ErrorException: gzdecode(): data error in ...
-	echo "gzdecode(): ", rawurldecode(gzdecode($compressed)), "\n";
 
-	file_put_contents($fn, $compressed);
-	
-	$r = fopen($fn, "r");
-	stream_filter_append($r, 'zlib.inflate', STREAM_FILTER_READ, array('window' => 15+16));
-	while (!feof($r)) {
-		$s = fread($r, 100);
-		echo "read: "; var_dump($s);
-	}
-	fclose($r);
-	unlink($fn);
+    // The gzdecode() function applied to the corrupted compressed data always
+    // detects the error:
+    // --> gzdecode(): PHP Fatal error:  Uncaught ErrorException: gzdecode(): data error in ...
+    echo "gzdecode(): ", rawurldecode((string) gzdecode($compressed)), "\n";
+
+    file_put_contents($fn, $compressed);
+
+    $r = fopen($fn, "r");
+    stream_filter_append($r, 'zlib.inflate', STREAM_FILTER_READ, array('window' => 15+16));
+    while (!feof($r)) {
+        $s = fread($r, 100);
+        echo "read: "; var_dump($s);
+    }
+    fclose($r);
+    unlink($fn);
 }
 
 test(1);
@@ -67,16 +69,22 @@ test(4);
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 
+
+Notice: fread(): zlib: data error in %s on line %d
 read: bool(false)
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 
-read: string(32) "The quick brown fox jumps over t"
+read: string(3%d) "The quick brown fox jumps over%s"
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 
+
+Notice: fread(): zlib: data error in %s on line %d
 read: bool(false)
 gzdecode(): 
 Warning: gzdecode(): data error in %s on line %d
 
+
+Notice: fread(): zlib: data error in %s on line %d
 read: bool(false)

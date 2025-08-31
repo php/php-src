@@ -19,7 +19,7 @@ $code = '
 $test = "var";
 
 class test {
-	private $var;
+    private $var;
 }
 
 echo test::$var;
@@ -29,14 +29,18 @@ echo test::$var;
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -l "$filename"`);
-var_dump(`"$php" -n -l some.unknown`);
+var_dump(shell_exec(<<<SHELL
+"$php" -n -l "$filename"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+"$php" -n -l some.unknown
+SHELL));
 
 $code = '
 <?php
 
-class test 
-	private $var;
+class test
+    private $var;
 }
 
 ?>
@@ -45,9 +49,13 @@ class test
 file_put_contents($filename, $code);
 
 if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
-	var_dump(`"$php" -n -l "$filename"`);
+    var_dump(shell_exec(<<<SHELL
+    "$php" -n -l "$filename"
+    SHELL));
 } else {
-	var_dump(`"$php" -n -l "$filename" 2>/dev/null`);
+    var_dump(shell_exec(<<<SHELL
+    "$php" -n -l "$filename" 2>/dev/null
+    SHELL));
 }
 
 @unlink($filename);

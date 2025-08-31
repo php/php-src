@@ -6,7 +6,7 @@ error_reporting=8191
 <?php
 
 class test {
-	static $foo = 1;
+    static $foo = 1;
 }
 
 $t = new test;

@@ -3,7 +3,7 @@
 --FILE--
 <?php
 function foo () {
-	break;
+    break;
 }
 ?>
 --EXPECTF--

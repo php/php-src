@@ -1,11 +1,11 @@
 --TEST--
-SimpleXML: overriden count() method
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+SimpleXML: overridden count() method
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 class SXE extends SimpleXmlElement {
-    public function count() {
+    public function count(): int {
         echo "Called Count!\n";
         return parent::count();
     }
@@ -15,8 +15,6 @@ $str = '<xml><c>asdf</c><c>ghjk</c></xml>';
 $sxe = new SXE($str);
 var_dump(count($sxe));
 ?>
-==Done==
 --EXPECT--
 Called Count!
 int(2)
-==Done==

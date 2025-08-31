@@ -2,10 +2,6 @@
 Test rename() function: basic functionality
 --FILE--
 <?php
-/* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
-   Description: Renames a file or directory
-*/
-
 echo "\n*** Testing rename() by giving stream context as third argument ***\n";
 $file_path = __DIR__;
 

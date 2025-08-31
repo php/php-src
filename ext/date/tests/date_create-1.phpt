@@ -26,7 +26,7 @@ $d[] = date_create("2005-07-14 22:30:41 Europe/Oslo", $tz1);
 $d[] = date_create("2005-07-14 22:30:41 America/Los_Angeles", $tz2);
 
 foreach($d as $date) {
-	echo $date->format(DateTime::ISO8601), "\n";
+    echo $date->format(DateTime::ISO8601), "\n";
 }
 ?>
 --EXPECT--

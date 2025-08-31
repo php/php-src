@@ -1,13 +1,13 @@
 --TEST--
-Test unitialized typed properties normal foreach must not be yielded
+Test uninitialized typed properties normal foreach must not be yielded
 --FILE--
 <?php
 $foo = new class {
-	public int $bar = 10, $qux;
+    public int $bar = 10, $qux;
 };
 
 foreach ($foo as $key => $bar) {
-	var_dump($key, $bar);
+    var_dump($key, $bar);
 }
 ?>
 --EXPECT--

@@ -1,20 +1,20 @@
 --TEST--
 Octal integer overflow
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 function octal_inc($s) {
-	$len = strlen($s);
-	while ($len > 0) {
-		$len--;
-		if ($s[$len] != '7') {
-			$s[$len] = $s[$len] + 1;
-			return $s;
-		}
-		$s[$len] = '0';
-	}
-	return '1'.$s;
+    $len = strlen($s);
+    while ($len > 0) {
+        $len--;
+        if ($s[$len] != '7') {
+            $s[$len] = $s[$len] + 1;
+            return $s;
+        }
+        $s[$len] = '0';
+    }
+    return '1'.$s;
 }
 
 

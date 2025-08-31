@@ -24,6 +24,7 @@ class Foo
 Foo::insteadof();
 
 echo PHP_EOL, "Done", PHP_EOL;
+?>
 --EXPECT--
 TraitB::insteadof
 

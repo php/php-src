@@ -1,7 +1,7 @@
 --TEST--
 Phar::convertToPhar() from zip
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -35,7 +35,6 @@ var_dump($phar->isFileFormat(Phar::PHAR));
 var_dump(strlen($phar->getStub()));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
@@ -54,4 +53,3 @@ bool(true)
 int(6641)
 bool(true)
 int(6641)
-===DONE===

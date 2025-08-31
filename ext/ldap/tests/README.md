@@ -51,7 +51,7 @@ end
 ```
 
 Now you will have a virtual machine up and running on IP-Address `192.168.10.33`
-listening on port 369 for incomming LDAP-connections. The machine is already
+listening on port 369 for incoming LDAP-connections. The machine is already
 configured to execute the LDAP-Tests.
 
 The next step is to go into the PHP-Source-directory. Configure and make the

@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round2 groupB 004 (soap/direct): echoNestedStruct
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 --FILE--
@@ -11,7 +11,7 @@ $param = new SoapParam(new SoapVar(array(
     new SoapVar(34, XSD_INT, null, null, "varInt"),
     new SoapVar(123.45, XSD_FLOAT, null, null, "varFloat"),
     new SoapVar(array(
-	    new SoapVar("arg2", XSD_STRING, null, null, "varString"),
+        new SoapVar("arg2", XSD_STRING, null, null, "varString"),
       new SoapVar(342, XSD_INT, null, null, "varInt"),
       new SoapVar(123.452, XSD_FLOAT, null, null, "varFloat")
     ), SOAP_ENC_OBJECT, "SOAPStruct", "http://soapinterop.org/xsd", 'varStruct')

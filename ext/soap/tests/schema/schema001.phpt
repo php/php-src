@@ -1,14 +1,15 @@
 --TEST--
 SOAP XML Schema 1: simpleType/restriction
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";
 $schema = <<<EOF
-	<simpleType name="testType">
-		<restriction base="xsd:int"/>
-	</simpleType>
+    <simpleType name="testType">
+        <restriction base="xsd:int"/>
+    </simpleType>
 EOF;
 test_schema($schema,'type="tns:testType"',123.5);
 echo "ok";

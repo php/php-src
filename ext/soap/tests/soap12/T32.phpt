@@ -1,12 +1,12 @@
 --TEST--
 SOAP 1.2: T32 echoHeader
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version='1.0' ?>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"> 
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">
   <env:Header>
     <test:requiredHeader xmlns:test="http://example.org/ts-tests"
           env:mustUnderstand="true">foo</test:requiredHeader>

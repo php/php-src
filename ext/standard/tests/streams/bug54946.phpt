@@ -30,14 +30,12 @@ var_dump($retval);
 fclose($stream);
 unlink($filename);
 ?>
-===DONE===
 --EXPECTF--
-Notice: stream_get_contents(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 string(0) ""
 
-Notice: stream_get_contents(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 string(0) ""
 
-Notice: stream_get_contents(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 string(0) ""
-===DONE===

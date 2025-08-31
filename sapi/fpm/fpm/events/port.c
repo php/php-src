@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,14 +19,14 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_PORT
+#ifdef HAVE_PORT_CREATE
 
 #include <port.h>
 #include <poll.h>
 #include <errno.h>
 
 static int fpm_event_port_init(int max);
-static int fpm_event_port_clean();
+static int fpm_event_port_clean(void);
 static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long int timeout);
 static int fpm_event_port_add(struct fpm_event_s *ev);
 static int fpm_event_port_remove(struct fpm_event_s *ev);
@@ -47,19 +45,19 @@ port_event_t *events = NULL;
 int nevents = 0;
 static int pfd = -1;
 
-#endif /* HAVE_PORT */
+#endif /* HAVE_PORT_CREATE */
 
-struct fpm_event_module_s *fpm_event_port_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_port_module(void) /* {{{ */
 {
-#if HAVE_PORT
+#ifdef HAVE_PORT_CREATE
 	return &port_module;
 #else
 	return NULL;
-#endif /* HAVE_PORT */
+#endif /* HAVE_PORT_CREATE */
 }
 /* }}} */
 
-#if HAVE_PORT
+#ifdef HAVE_PORT_CREATE
 
 /*
  * Init the module
@@ -92,7 +90,7 @@ static int fpm_event_port_init(int max) /* {{{ */
 /*
  * Clean the module
  */
-static int fpm_event_port_clean() /* {{{ */
+static int fpm_event_port_clean(void)
 {
 	if (pfd > -1) {
 		close(pfd);
@@ -107,22 +105,24 @@ static int fpm_event_port_clean() /* {{{ */
 	nevents = 0;
 	return 0;
 }
-/* }}} */
 
 /*
  * wait for events or timeout
  */
 static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long int timeout) /* {{{ */
 {
-	int ret, i, nget;
+	int ret;
+	unsigned int i, nget;
 	timespec_t t;
 
 	/* convert timeout into timespec_t */
 	t.tv_sec = (int)(timeout / 1000);
 	t.tv_nsec = (timeout % 1000) * 1000 * 1000;
 
-	/* wait for inconming event or timeout. We want at least one event or timeout */
+	/* wait for incoming event or timeout. We want at least one event or timeout */
 	nget = 1;
+	events[0].portev_user = (void *)-1; /* so we can double check that an event was returned */
+
 	ret = port_getn(pfd, events, nevents, &nget, &t);
 	if (ret < 0) {
 
@@ -130,18 +130,34 @@ static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long in
 		if (errno != EINTR && errno != ETIME) {
 			zlog(ZLOG_WARNING, "poll() returns %d", errno);
 			return -1;
+		} else if (nget > 0 && events[0].portev_user == (void *)-1) {
+			/* This confusing API can return an event at the same time
+			 * that it reports EINTR or ETIME.  If that occurs, just
+			 * report the event.  With EINTR, nget can be > 0 without
+			 * any event, so check that portev_user was filled in.
+			 *
+			 * See discussion thread
+			 *   http://marc.info/?l=opensolaris-networking-discuss&m=125071205204540
+			 */
+			nget = 0;
 		}
 	}
 
 	for (i = 0; i < nget; i++) {
+		struct fpm_event_s *ev;
 
 		/* do we have a ptr to the event ? */
 		if (!events[i].portev_user) {
 			continue;
 		}
 
+		ev = (struct fpm_event_s *)events[i].portev_user;
+
+		/* re-associate for next event */
+		fpm_event_port_add(ev);
+
 		/* fire the event */
-		fpm_event_fire((struct fpm_event_s *)events[i].portev_user);
+		fpm_event_fire(ev);
 
 		/* sanity check */
 		if (fpm_globals.parent_pid != getpid()) {
@@ -180,4 +196,4 @@ static int fpm_event_port_remove(struct fpm_event_s *ev) /* {{{ */
 }
 /* }}} */
 
-#endif /* HAVE_PORT */
+#endif /* HAVE_PORT_CREATE */

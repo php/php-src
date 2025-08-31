@@ -8,10 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: int umask ( [int $mask] );
-   Description: Changes the current umask
-*/
-
 echo "*** Testing umask() : basic functionality ***\n";
 // checking umask() on all the modes
 for($mask = 0000; $mask <= 0777; $mask++) {

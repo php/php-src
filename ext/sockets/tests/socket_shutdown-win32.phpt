@@ -2,14 +2,21 @@
 bool socket_shutdown ( resource $socket [, int $how = 2 ] ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-  die('SKIP sockets extension not available.');
-}
+
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
-	die('skip windows only test');
+    die('skip windows only test');
 }
+if (getenv("SKIP_SLOW_TESTS")) {
+    die("skip slow test");
+}
+if (getenv("SKIP_ONLINE_TESTS")) {
+    die("skip online test");
+}
+
 ?>
 --FILE--
 <?php
@@ -50,10 +57,8 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: socket_shutdown(): unable to shutdown socket [%d]: A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied.
- in %s on line %d
+Warning: socket_shutdown(): Unable to shutdown socket [%d]: A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied in %s on line %d
 bool(false)
 
-Warning: socket_shutdown(): unable to shutdown socket [%d]: An invalid argument was supplied.
- in %s on line %d
+Warning: socket_shutdown(): Unable to shutdown socket [%d]: An invalid argument was supplied in %s on line %d
 bool(false)

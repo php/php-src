@@ -21,10 +21,7 @@ spl_autoload_register('autoloadC');
 
 new C;
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 B -> C
 A -> C
 C -> C
-===DONE===

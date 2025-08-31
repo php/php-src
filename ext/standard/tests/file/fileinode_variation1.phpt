@@ -7,13 +7,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Do not run on Windows');
 }
+?>
 --FILE--
 <?php
-/*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
 /* Creating soft and hard links to a file and applying fileinode() on links */
 
 $file_path = __DIR__;

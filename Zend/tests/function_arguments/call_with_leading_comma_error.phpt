@@ -5,4 +5,4 @@ Leading commas in function calls is not allowed
 foo(,$foo);
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected ',' in %s on line %d
+Parse error: syntax error, unexpected token "," in %s on line %d

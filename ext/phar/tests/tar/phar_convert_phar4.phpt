@@ -1,8 +1,8 @@
 --TEST--
 Phar::convertToPhar() with global metadata
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip"); ?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -42,15 +42,12 @@ var_dump(strlen($phar->getStub()));
 var_dump($phar->getMetadata());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
-__HALT_COMPILER();
 ?>
 --EXPECT--
 bool(false)
@@ -68,4 +65,3 @@ bool(true)
 bool(true)
 int(6641)
 string(2) "hi"
-===DONE===

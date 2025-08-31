@@ -2,11 +2,6 @@
 Test array_unique() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array
- * Source code: ext/standard/array.c
-*/
-
 echo "*** Testing array_unique() : basic functionality ***\n";
 
 // array with default keys

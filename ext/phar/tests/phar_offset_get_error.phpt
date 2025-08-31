@@ -1,7 +1,7 @@
 --TEST--
 Phar: ignore filenames starting with / on offsetSet
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=1
@@ -18,11 +18,11 @@ $p[$iname] = "foobar\n";
 
 try
 {
-	$p[$ename] = "foobar\n";
+    $p[$ename] = "foobar\n";
 }
 catch(Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 include($pname . $iname);
@@ -39,7 +39,6 @@ $a = $p['.phar/stub.php'];
 echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
@@ -47,4 +46,3 @@ Entry /error/.. does not exist and cannot be created: phar error: invalid path "
 foobar
 Cannot set any files or directories in magic ".phar" directory
 Entry .phar/stub.php does not exist
-===DONE===

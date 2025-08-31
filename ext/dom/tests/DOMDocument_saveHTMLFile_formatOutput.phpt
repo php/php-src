@@ -3,13 +3,15 @@ DOMDocument::saveHTMLFile() should format output on demand
 --CREDITS--
 Knut Urdalen <knut@php.net>
 #PHPTestFest2009 Norway 2009-06-09 \o/
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
-require_once __DIR__ .'/skipif.inc';
+if (LIBXML_VERSION >= 21300) die("skip see https://gitlab.gnome.org/GNOME/libxml2/-/issues/756");
 ?>
 --FILE--
 <?php
-$filename = __DIR__."/tmp_savehtmlfile".time().".html";
+$filename = __DIR__."/DOMDocument_saveHTMLFile_formatOutput.html";
 $doc = new DOMDocument('1.0');
 $doc->formatOutput = true;
 $root = $doc->createElement('html');

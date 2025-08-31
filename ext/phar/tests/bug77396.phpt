@@ -1,15 +1,15 @@
 --TEST--
 Bug #77396 Relative filename exceeding maximum path length causes null pointer dereference.
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 $path = '../' . str_repeat("x", PHP_MAXPATHLEN) . '.tar';
-$phar = new PharData($path);
+try {
+    $phar = new PharData($path);
+} catch (UnexpectedValueException $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught UnexpectedValueException: Phar creation or opening failed in %s%ebug77396.php:%d
-Stack trace:
-#0 %s%ebug77396.php(%d): PharData->__construct(%s)
-#1 {main}
-  thrown in %s%ebug77396.php on line %d
+--EXPECT--
+Phar creation or opening failed

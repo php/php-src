@@ -2,14 +2,7 @@
 Test in_array() function : usage variations - haystack as resource/multi dimensional array
 --FILE--
 <?php
-/*
- * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns TRUE
- *              if it is found in the array, FALSE otherwise.
- * Source Code: ext/standard/array.c
-*/
-
-/* Test in_array() with haystack as resouce and multidimensional arrays */
+/* Test in_array() with haystack as resource and multidimensional arrays */
 
 /* checking for Resources */
 echo "*** Testing resource type with in_array() ***\n";
@@ -22,7 +15,7 @@ $dir_handle = opendir( __DIR__ );
 //store resources in array for comparison.
 $resources = array($file_handle, $dir_handle);
 
-// search for resouce type in the resource array
+// search for resource type in the resource array
 var_dump( in_array($file_handle, $resources, true) );
 //checking for (int) type resource
 var_dump( in_array((int)$dir_handle, $resources, true) );
@@ -64,14 +57,14 @@ bool(true)
 bool(false)
 
 *** Testing miscelleneos inputs with in_array() ***
-bool(true)
 bool(false)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(false)
 bool(false)
 bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 Done

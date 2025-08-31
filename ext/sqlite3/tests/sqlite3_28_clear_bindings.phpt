@@ -1,7 +1,7 @@
 --TEST--
 SQLite3_stmt::clear prepared statement results
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 
@@ -23,14 +23,14 @@ var_dump($stmt->bindParam(1, $foo, SQLITE3_TEXT));
 $foo = 'a';
 $results = $stmt->execute();
 while ($result = $results->fetchArray(SQLITE3_NUM)) {
-	var_dump($result);
+    var_dump($result);
 }
 $stmt->reset();
 $stmt->clear();
 var_dump($stmt->bindValue(1, 'b', SQLITE3_TEXT));
 $results = $stmt->execute();
 while ($result = $results->fetchArray(SQLITE3_NUM)) {
-	var_dump($result);
+    var_dump($result);
 }
 $results->finalize();
 

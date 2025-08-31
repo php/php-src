@@ -1,14 +1,13 @@
 --TEST--
 checks zlib compression output size is always the same
---SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+--EXTENSIONS--
+zlib
+--INI--
+zlib.output_compression=4096
+zlib.output_compression_level=9
 --CGI--
 --FILE--
 <?php
-
-// the INI directives from bug #60761 report
-ini_set('zlib.output_compression', '4096');
-ini_set('zlib.output_compression_level', '9');
 
 // try to duplicate the original bug by running this as a CGI
 // test using ob_start and zlib.output_compression(or ob_gzhandler)
@@ -19,14 +18,14 @@ $lens = array();
 
 for ( $i=0 ; $i < 100 ; $i++ ) {
 
-	// can't use ob_gzhandler with zlib.output_compression
-	ob_start();//"ob_gzhandler");
-	phpinfo();
-	$html = ob_get_clean();
+    // can't use ob_gzhandler with zlib.output_compression
+    ob_start();//"ob_gzhandler");
+    phpinfo();
+    $html = ob_get_clean();
 
-	$len = strlen($html);
+    $len = strlen($html);
 
-	$lens[$len] = $len;
+    $lens[$len] = $len;
 }
 
 $lens = array_values($lens);

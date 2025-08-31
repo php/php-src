@@ -5,38 +5,49 @@ assert.active = 1
 assert.warning = 0
 assert.callback =
 assert.bail = 0
-assert.quiet_eval = 1
+assert.exception=0
 --FILE--
 <?php
-function a($file,$line,$myev)
+function a($file, $line, $unused, $desc)
 {
-	        echo "assertion failed - a - $line,\"$myev\"\n";
+            echo "assertion failed - a - $line,\"$desc\"\n";
 }
 
-function b($file,$line,$myev)
+function b($file, $line, $unused, $desc)
 {
-	        echo "assertion failed - b - $line,\"$myev\"\n";
+            echo "assertion failed - b - $line,\"$desc\"\n";
 }
 
 assert_options(ASSERT_ACTIVE,1);
-assert_options(ASSERT_QUIET_EVAL,1);
 assert_options(ASSERT_WARNING,0);
 
 $a = 0;
 
-assert_options(ASSERT_CALLBACK,"a");
-assert('$a != 0');
+assert_options(ASSERT_CALLBACK, "a");
+assert($a != 0);
 
  /* Modify call back using ini_set() */
 ini_set("assert.callback", "b");
-assert('$a != 0');
+assert($a != 0);
 
 ?>
-==DONE==
 --EXPECTF--
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
-assertion failed - a - %d,"$a != 0"
+Deprecated: PHP Startup: assert.warning INI setting is deprecated in Unknown on line 0
 
-Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
-assertion failed - b - %d,"$a != 0"
-==DONE==
+Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant ASSERT_ACTIVE is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
+
+Deprecated: Constant ASSERT_WARNING is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
+assertion failed - a - 18,"assert($a != 0)"
+
+Deprecated: ini_set(): assert.callback INI setting is deprecated in %s on line %d
+assertion failed - b - 22,"assert($a != 0)"

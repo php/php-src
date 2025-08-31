@@ -1,7 +1,7 @@
 --TEST--
 Phar: fopen a .phar for writing (existing file)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -23,9 +23,7 @@ fclose($fp);
 include $pname . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 extra
-===DONE===

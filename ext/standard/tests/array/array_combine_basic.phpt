@@ -2,12 +2,6 @@
 Test array_combine() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys
- *              and the elements of the second as the corresponding values
- * Source code: ext/standard/array.c
-*/
-
 echo "*** Testing array_combine() : basic functionality ***\n";
 
 /* Different arrays for $keys and $values arguments */

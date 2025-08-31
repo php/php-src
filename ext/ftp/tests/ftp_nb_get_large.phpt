@@ -1,8 +1,10 @@
 --TEST--
 Testing ftp_nb_fget can handle large files incl. resume
+--EXTENSIONS--
+ftp
+pcntl
 --SKIPIF--
 <?php
-require 'skipif.inc';
 if (2147483647 == PHP_INT_MAX) {
     die('skip ot supported on this system');
 }

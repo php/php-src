@@ -1,9 +1,7 @@
 --TEST--
 Bug #53579 (stream_get_contents() segfaults on ziparchive streams)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $dirname = __DIR__ . '/';
@@ -11,7 +9,7 @@ $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 $fp = $zip->getStream('foo');
 

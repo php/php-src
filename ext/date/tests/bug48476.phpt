@@ -3,29 +3,35 @@ Bug #48476 (cloning extended DateTime class without calling parent::__constr cra
 --FILE--
 <?php
 class MyDateTime extends DateTime {
-	public function __construct() { }
+    public function __construct() { }
 }
 class MyDateTimeZone extends DateTimeZone {
-	public function __construct() { }
+    public function __construct() { }
 }
 
 $o = new MyDateTime;
-var_dump($o->format("d"));
+try {
+    var_dump($o->format("d"));
+} catch (Error $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 $x = clone $o;
 
-var_dump($x->format("d"));
+try {
+    var_dump($x->format("d"));
+} catch (Error $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 
 clone $o;
 
-
-var_dump(timezone_location_get(clone new MyDateTimezone));
+try {
+    var_dump(timezone_location_get(clone new MyDateTimezone));
+} catch (Error $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: DateTime::format(): The DateTime object has not been correctly initialized by its constructor in %sbug48476.php on line 10
-bool(false)
-
-Warning: DateTime::format(): The DateTime object has not been correctly initialized by its constructor in %sbug48476.php on line 13
-bool(false)
-
-Warning: timezone_location_get(): The DateTimeZone object has not been correctly initialized by its constructor in %sbug48476.php on line 18
-bool(false)
+--EXPECT--
+DateObjectError: Object of type MyDateTime (inheriting DateTime) has not been correctly initialized by calling parent::__construct() in its constructor
+DateObjectError: Object of type MyDateTime (inheriting DateTime) has not been correctly initialized by calling parent::__construct() in its constructor
+DateObjectError: Object of type MyDateTimeZone (inheriting DateTimeZone) has not been correctly initialized by calling parent::__construct() in its constructor

@@ -1,9 +1,8 @@
 --TEST--
 Testing whether ftp_nb_continue() fetches more data
---SKIPIF--
-<?php
-require 'skipif.inc';
-?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

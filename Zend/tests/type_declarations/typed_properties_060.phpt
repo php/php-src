@@ -4,7 +4,7 @@ Test typed properties work fine with simple inheritance
 <?php
 
 class A {
-	public int $a = 1;
+    public int $a = 1;
 }
 class B extends A {}
 
@@ -16,7 +16,7 @@ $o->a = "a";
 --EXPECTF--
 int(1)
 
-Fatal error: Uncaught TypeError: Typed property A::$a must be int, string used in %s:%d
+Fatal error: Uncaught TypeError: Cannot assign string to property A::$a of type int in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

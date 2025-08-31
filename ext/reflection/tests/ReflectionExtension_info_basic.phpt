@@ -12,8 +12,6 @@ $testb = ob_get_clean();
 var_dump($testa);
 var_dump(strlen($testb) > 24);
 ?>
-==DONE==
 --EXPECT--
 NULL
 bool(true)
-==DONE==

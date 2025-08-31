@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -24,8 +22,8 @@
 #include <imagehlp.h>
 
 BOOL CALLBACK StatusRoutine(IMAGEHLP_STATUS_REASON reason,
-		PSTR image_name, PSTR dll_name,
-		ULONG va, ULONG param)
+		PCSTR image_name, PCSTR dll_name,
+		ULONG_PTR va, ULONG_PTR param)
 {
 	switch (reason) {
 		case BindImportModuleFailed:

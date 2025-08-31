@@ -4,12 +4,6 @@ Test file function : variation - test various endings of a file
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file() : variation ***\n";
 $testfile = __DIR__."/fileVar9.txt";
 
@@ -21,16 +15,20 @@ $contents = array(
    "File has\r\nmultiple crlfs\n\r\n"
    );
 
-@unlink($testfile);
 foreach ($contents as $content) {
     $h = fopen($testfile, "w");
     fwrite($h, $content);
     fclose($h);
     var_dump(file($testfile));
-	unlink($testfile);
+    unlink($testfile);
 }
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$testfile = __DIR__."/fileVar9.txt";
+@unlink($testfile);
 ?>
 --EXPECT--
 *** Testing file() : variation ***

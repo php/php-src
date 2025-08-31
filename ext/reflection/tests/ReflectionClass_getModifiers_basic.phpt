@@ -14,8 +14,8 @@ interface f extends d {}
 class g extends b {}
 
 function dump_modifiers($class) {
-	$obj = new ReflectionClass($class);
-	var_dump($obj->getModifiers());
+    $obj = new ReflectionClass($class);
+    var_dump($obj->getModifiers());
 }
 
 dump_modifiers('a');

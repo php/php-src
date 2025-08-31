@@ -5,13 +5,9 @@ Test is_file() function: usage variations - links
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Do not run on Windows');
 }
+?>
 --FILE--
 <?php
-/* Prototype: bool is_file ( string $filename );
-   Description: Tells whether the filename is a regular file
-     Returns TRUE if the filename exists and is a regular file
-*/
-
 /* Creating soft and hard links to a file and applying is_file() on links */
 
 $file_path = __DIR__;

@@ -10,7 +10,6 @@ $replace = array('A:$0', 'B:$0', 'C:$0');
 var_dump(preg_filter($pattern, $replace, $subject));
 
 ?>
-===DONE===
 --EXPECT--
 array(6) {
   [0]=>
@@ -26,4 +25,3 @@ array(6) {
   [7]=>
   string(3) "A:4"
 }
-===DONE===

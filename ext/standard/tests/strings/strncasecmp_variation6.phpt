@@ -2,11 +2,6 @@
 Test strncasecmp() function : usage variations - binary safe - all ASCII chars
 --FILE--
 <?php
-/* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );
- * Description: Binary safe case-insensitive string comparison of the first n characters
- * Source code: Zend/zend_builtin_functions.c
-*/
-
 /* Test strncasecmp() function with binary values passed to 'str1' & 'str2' */
 
 echo "*** Test strncasecmp() function: with binary inputs ***\n";
@@ -15,7 +10,7 @@ echo "*** Test strncasecmp() function: with binary inputs ***\n";
 echo "\n-- Checking with all 256 characters given, in binary format --\n";
 /* loop through to get all 256 character's equivalent binary value, and check working of strncasecmp() */
 $count = 1;
-for($ASCII = 0; $ASCII <= 255; $ASCII++) {
+for($ASCII = 0; $ASCII < 255; $ASCII++) {
   $str1 = decbin($ASCII);  //ASCII value in binary form
   $str2 = decbin( ord( chr($ASCII) ) );  //Getting equivalent ASCII value for the character in binary form
   echo "-- Iteration $count --\n";
@@ -26,7 +21,7 @@ for($ASCII = 0; $ASCII <= 255; $ASCII++) {
 
 echo "\n-- Checking with out of character's range, given in binary format --\n";
 $str1 = decbin(256);
-$str2 = decbin( ord( chr(256) ));
+$str2 = decbin( ord( chr(0) ));
 var_dump( strncasecmp($str1, $str2, 8) );  //comparing all the 8-bits; expected: int(1)
 
 echo "\n*** Done ***\n";
@@ -798,9 +793,6 @@ int(0)
 int(0)
 int(0)
 -- Iteration 255 --
-int(0)
-int(0)
--- Iteration 256 --
 int(0)
 int(0)
 

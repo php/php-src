@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of scandir()
  */
@@ -37,7 +32,6 @@ var_dump(scandir($directory, $sorting_order, $context));
 
 delete_files($directory, 3, "私はガラスを食べられますfile");
 ?>
-===DONE===
 --CLEAN--
 <?php
 $directory = __DIR__ . '/私はガラスを食べられますscandir_basic';
@@ -73,4 +67,3 @@ array(5) {
   [4]=>
   string(1) "."
 }
-===DONE===

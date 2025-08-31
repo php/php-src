@@ -2,12 +2,6 @@
 Test preg_replace() function : basic
 --FILE--
 <?php
-/* Prototype  : proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
- * Description: Perform Perl-style regular expression replacement.
- * Source code: ext/pcre/php_pcre.c
- * Alias to functions:
-*/
-
 $string = '123456789 - Hello, world -           This is a string.';
 var_dump($string);
 
@@ -16,7 +10,7 @@ var_dump(preg_replace('<- This is a string$>',
 
 var_dump(preg_replace('<[0-35-9]>',
                       '4', $string,               					//finds any number that's not 4 and replaces it with a 4
-			    '5', $count));							//limits to 5 replacements returns 444444789
+                '5', $count));							//limits to 5 replacements returns 444444789
 var_dump($count);											//counts the number of replacements made (5)
 
 

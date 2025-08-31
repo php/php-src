@@ -1,7 +1,7 @@
 --TEST--
 Bug #64931 (phar_add_file is too restrictive on filename)
---SKIPIF--
-<?php extension_loaded("phar") or die("skip need ext/phar support"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -13,47 +13,44 @@ echo "Test\n";
 $phar = new Phar(__DIR__."/bug64931.phar");
 $phar->addFile(__DIR__."/src/.pharignore", ".pharignore");
 try {
-	$phar->addFile(__DIR__."/src/.pharignore", ".phar/gotcha");
+    $phar->addFile(__DIR__."/src/.pharignore", ".phar/gotcha");
 } catch (Exception $e) {
-	echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo "CAUGHT: ". $e->getMessage() ."\n";
 }
 
 try {
-	$phar->addFromString(".phar", "gotcha");
+    $phar->addFromString(".phar", "gotcha");
 } catch (Exception $e) {
-	echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo "CAUGHT: ". $e->getMessage() ."\n";
 }
 
 try {
-	$phar->addFromString(".phar//", "gotcha");
+    $phar->addFromString(".phar//", "gotcha");
 } catch (Exception $e) {
-	echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo "CAUGHT: ". $e->getMessage() ."\n";
 }
 
 try {
-	$phar->addFromString(".phar\\", "gotcha");
+    $phar->addFromString(".phar\\", "gotcha");
 } catch (Exception $e) {
-	echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo "CAUGHT: ". $e->getMessage() ."\n";
 }
 
 try {
-	$phar->addFromString(".phar\0", "gotcha");
-} catch (Exception $e) {
-	echo "CAUGHT: ". $e->getMessage() ."\n";
+    $phar->addFromString(".phar\0", "gotcha");
+} catch (ValueError $e) {
+    echo "CAUGHT: ". $e->getMessage() ."\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__."/bug64931.phar");
 ?>
---EXPECTF--
+--EXPECT--
 Test
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
-
-Warning: Phar::addFromString() expects parameter 1 to be a valid path, string given in %s%ebug64931.php on line %d
-===DONE===
+CAUGHT: Phar::addFromString(): Argument #1 ($localName) must not contain any null bytes

@@ -23,8 +23,8 @@ object(Foo)#1 (1) {
   string(3) "bat"
 }
 
-Notice: Object of class Foo could not be converted to int in %sbug33999.php on line 9
+Warning: Object of class Foo could not be converted to int in %s on line %d
 int(1)
 
-Notice: Object of class Foo could not be converted to float in %sbug33999.php on line 12
+Warning: Object of class Foo could not be converted to float in %s on line %d
 float(1)

@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - with line without any csv fields
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() to read a line from a file which doesn't have any CSV field */
 
 echo "*** Testing fgetcsv() : reading the line which is without csv fields ***\n";
@@ -50,7 +45,7 @@ $loop_counter = 1;
 
     // read the line which is without csv fields, provide delimiter and see the working of fgetcsv
     $fp_pos = ftell($file_handle);
-    var_dump( fgetcsv($file_handle) );
+    var_dump( fgetcsv($file_handle, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

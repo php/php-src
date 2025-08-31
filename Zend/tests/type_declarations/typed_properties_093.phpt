@@ -24,7 +24,7 @@ var_dump($test);
 
 ?>
 --EXPECT--
-Typed property Test::$prop must be int, string used
+Cannot assign string to property Test::$prop of type int
 object(Test)#2 (0) {
   ["prop"]=>
   uninitialized(int)

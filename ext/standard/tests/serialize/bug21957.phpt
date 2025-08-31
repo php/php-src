@@ -4,18 +4,18 @@ Bug #21957 (serialize() mangles objects with __sleep)
 <?php
 class test
 {
-	public $a, $b;
+    public $a, $b;
 
-	function __construct()
-	{
-		$this->a = 7;
-		$this->b = 2;
-	}
+    function __construct()
+    {
+        $this->a = 7;
+        $this->b = 2;
+    }
 
-	function __sleep()
-	{
-		$this->b = 0;
-	}
+    function __sleep()
+    {
+        $this->b = 0;
+    }
 }
 
 $t['one'] = 'ABC';

@@ -5,6 +5,6 @@ Bug #47109 (Memory leak on $a->{"a"."b"} when $a is not an object)
 $a->{"a"."b"};
 ?>
 --EXPECTF--
-Notice: Undefined variable: a in %sbug47109.php on line 2
+Warning: Undefined variable $a in %s on line %d
 
-Notice: Trying to get property 'ab' of non-object in %sbug47109.php on line 2
+Warning: Attempt to read property "ab" on null in %s on line %d

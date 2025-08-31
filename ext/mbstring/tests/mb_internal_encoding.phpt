@@ -1,7 +1,7 @@
 --TEST--
 mb_internal_encoding()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 // TODO:
@@ -30,23 +30,18 @@ print "$enc\n";
 print "== INVALID PARAMETER ==\n";
 
 // Note: Other than string type, PHP raises Warning
-$r = mb_internal_encoding('BAD');
-($r === false) ? print "OK_BAD_SET\n" : print "NG_BAD_SET\n";
-$enc = mb_internal_encoding();
-print "$enc\n";
+try {
+    $r = mb_internal_encoding('BAD_NAME');
+    print 'NG_BAD_SET' . \PHP_EOL;
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-$r = mb_internal_encoding($t_ary);
-($r === NULL) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
-$enc = mb_internal_encoding();
-print "$enc\n";
-
-$r = mb_internal_encoding($t_obj);
-($r === NULL) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
 $enc = mb_internal_encoding();
 print "$enc\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 OK_EUC-JP_SET
 EUC-JP
 OK_UTF-8_SET
@@ -54,15 +49,5 @@ UTF-8
 OK_ASCII_SET
 ASCII
 == INVALID PARAMETER ==
-
-Warning: mb_internal_encoding(): Unknown encoding "BAD" in %s on line %d
-OK_BAD_SET
-ASCII
-
-Warning: mb_internal_encoding() expects parameter 1 to be string, array given in %s on line %d
-OK_BAD_ARY_SET
-ASCII
-
-Warning: mb_internal_encoding() expects parameter 1 to be string, object given in %s on line %d
-OK_BAD_OBJ_SET
+mb_internal_encoding(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
 ASCII

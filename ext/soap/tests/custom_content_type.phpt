@@ -1,22 +1,24 @@
 --TEST--
 SOAP customized Content-Type, eg. SwA use case
+--EXTENSIONS--
+soap
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-
-	if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
-		echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
-	}
+    if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
+        echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
+    }
 ?>
---CONFLICTS--
-server
 --FILE--
 <?php
 
 include __DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc";
 
-$args = substr(PHP_OS, 0, 3) == 'WIN'
-    ? ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=php_soap.dll"] : [];
+$args = ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=" . (substr(PHP_OS, 0, 3) == "WIN" ? "php_" : "") . "soap." . PHP_SHLIB_SUFFIX];
+if (php_ini_loaded_file()) {
+  // Necessary such that it works from a development directory in which case extension_dir might not be the real extension dir
+  $args[] = "-c";
+  $args[] = php_ini_loaded_file();
+}
 $code = <<<'PHP'
 /* Receive */
 $content = trim(file_get_contents("php://input")) . PHP_EOL;
@@ -73,8 +75,6 @@ if (strpos($headers, 'Content-Type: application/soap+xml; charset=utf-8; action=
 else
   printf("Content-Type Default OK" . PHP_EOL);
 ?>
-==DONE==
 --EXPECT--
 Content-Type OK
 Content-Type Default OK
-==DONE==

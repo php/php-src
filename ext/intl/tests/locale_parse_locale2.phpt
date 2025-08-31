@@ -1,7 +1,7 @@
 --TEST--
 locale_parse_locale() icu >= 4.8
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -63,7 +63,7 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc',
-	'x-AAAAAA',
+    'x-AAAAAA',
     );
 
 

@@ -23,7 +23,6 @@ var_dump(putenv('FOO=啊a啊啊啊'), getenv("FOO"));
 var_dump(putenv('FOO=啊a啊啊啊啊'), getenv("FOO"));
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 string(3) "啊"
@@ -47,4 +46,3 @@ bool(true)
 string(13) "啊a啊啊啊"
 bool(true)
 string(16) "啊a啊啊啊啊"
-===DONE===

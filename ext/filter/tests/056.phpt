@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and FILTER_VALIDATE_DOMAIN
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 
@@ -25,7 +25,7 @@ array(),
 '\r\n',
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME));
+    var_dump(filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME));
 }
 
 var_dump(filter_var('_example.com', FILTER_VALIDATE_DOMAIN));

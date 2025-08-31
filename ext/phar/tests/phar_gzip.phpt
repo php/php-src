@@ -1,10 +1,8 @@
 --TEST--
 Phar: gzipped phar
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("zlib")) die("skip zlib not available");
-?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -40,7 +38,6 @@ $b = new Phar($fname2);
 var_dump($b->isFileFormat(Phar::PHAR));
 var_dump($b->isCompressed() == Phar::GZ);
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/phar_gzip.phar');
@@ -51,4 +48,3 @@ string(9) "it worked"
 string(%d) "phar://%sphar_gzip.phar/tar_004.php"
 bool(true)
 bool(true)
-===DONE===

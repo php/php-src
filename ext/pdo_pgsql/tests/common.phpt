@@ -1,8 +1,7 @@
 --TEST--
 Postgres
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_pgsql')) print 'skip'; ?>
+--EXTENSIONS--
+pdo_pgsql
 --REDIRECTTEST--
 # magic auto-configuration
 # Also update config.inc if you make changes here...

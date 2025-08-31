@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -38,10 +36,12 @@ typedef struct {
 	intl_error		err;
 
 	// ICU TimeZone
+	// TODO?: a direct change isn't possible due to C inclusion (also it s a const)
+	// but see later it can be made possible through different ICU class usages
 	const TimeZone	*utimezone;
 
 	//whether to delete the timezone on object free
-	zend_bool		should_delete;
+	bool		should_delete;
 
 	zend_object		zo;
 } TimeZone_object;
@@ -62,12 +62,12 @@ static inline TimeZone_object *php_intl_timezone_fetch_object(zend_object *obj) 
 #define TIMEZONE_METHOD_FETCH_OBJECT\
 	TIMEZONE_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (to->utimezone == NULL) { \
-		intl_errors_set(&to->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlTimeZone", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed IntlTimeZone"); \
+		RETURN_THROWS(); \
 	}
 
-zval *timezone_convert_to_datetimezone(const TimeZone *timeZone, intl_error *outside_error, const char *func, zval *ret);
-TimeZone *timezone_process_timezone_argument(zval *zv_timezone, intl_error *error, const char *func);
+zval *timezone_convert_to_datetimezone(const TimeZone *timeZone, intl_error *outside_error, zval *ret);
+TimeZone *timezone_process_timezone_argument(zend_object *timezone_object, zend_string *timezone_string, intl_error *error);
 
 void timezone_object_construct(const TimeZone *zone, zval *object, int owned);
 

@@ -1,7 +1,7 @@
 --TEST--
 Unicode case mapping
---SKIPIF--
-<?php require 'skipif.inc'; ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 
@@ -23,7 +23,7 @@ toCases("ﬀ");
 toCases("İ");
 
 // Make sure that case-conversion in Turkish still works correctly.
-// Using the language-agnostic Unicode case mappins would result in
+// Using the language-agnostic Unicode case mappings would result in
 // characters that are illegal under ISO-8859-9.
 mb_internal_encoding('ISO-8859-9');
 
@@ -57,6 +57,12 @@ echo bin2hex(mb_convert_case($str, MB_CASE_UPPER)), "\n";
 echo bin2hex(mb_convert_case($str, MB_CASE_UPPER_SIMPLE)), "\n";
 echo bin2hex(mb_convert_case($str, MB_CASE_FOLD)), "\n";
 echo bin2hex(mb_convert_case($str, MB_CASE_FOLD_SIMPLE)), "\n";
+
+// Check handling of Greek letter capital sigma
+echo mb_convert_case("ΚΑΛΗΣΠΕΡΑ ΣΑΣ", MB_CASE_TITLE, "UTF-8"), "\n";
+echo mb_convert_case("ΚΑΛΗΣΠΕΡΑ ΣΑΣ", MB_CASE_TITLE_SIMPLE, "UTF-8"), "\n";
+echo mb_convert_case("ΚΑΛΗΣΠΕΡΑ ΣΑΣ", MB_CASE_LOWER, "UTF-8"), "\n";
+echo mb_convert_case("ΚΑΛΗΣΠΕΡΑ ΣΑΣ", MB_CASE_LOWER_SIMPLE, "UTF-8"), "\n";
 
 ?>
 --EXPECT--
@@ -109,3 +115,7 @@ dd
 dd
 69
 69
+Καλησπερα Σας
+Καλησπερα Σασ
+καλησπερα σας
+καλησπερα σασ

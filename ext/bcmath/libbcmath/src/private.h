@@ -31,8 +31,62 @@
 
 /* "Private" routines to bcmath. */
 
+#include <stdbool.h>
+#include <stddef.h>
+#include "zend_portability.h"
+
+#ifndef _BCMATH_PRIV_H_
+#define _BCMATH_PRIV_H_
+
+/* This will be 0x01010101 for 32-bit and 0x0101010101010101 for 64-bit */
+#define SWAR_ONES (~((size_t) 0) / 0xFF)
+/* This repeats a byte `x` into an entire 32/64-bit word.
+ * Example: SWAR_REPEAT(0xAB) will be 0xABABABAB for 32-bit and 0xABABABABABABABAB for 64-bit. */
+#define SWAR_REPEAT(x) (SWAR_ONES * (x))
+
+#if SIZEOF_SIZE_T >= 8
+#  define BC_BSWAP(u) ZEND_BYTES_SWAP64(u)
+   typedef uint64_t BC_VECTOR;
+#  define BC_VECTOR_SIZE 8
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
+#else
+#  define BC_BSWAP(u) ZEND_BYTES_SWAP32(u)
+   typedef uint32_t BC_VECTOR;
+#  define BC_VECTOR_SIZE 4
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
+#endif
+
+#ifdef WORDS_BIGENDIAN
+#  define BC_LITTLE_ENDIAN 0
+#else
+#  define BC_LITTLE_ENDIAN 1
+#endif
+
+/* 64-bytes for 64-bit */
+#define BC_STACK_VECTOR_SIZE 8
+
+#define BC_ARR_SIZE_FROM_LEN(len) (((len) + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE)
+
+/*
+ * Adding more than this many times may cause uint32_t/uint64_t to overflow.
+ * Typically this is 1844 for 64bit and 42 for 32bit.
+ */
+#define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
+
+static const BC_VECTOR BC_POW_10_LUT[9] = {
+	1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000
+};
+
+
 /* routines */
-int _bc_do_compare (bc_num n1, bc_num n2, int use_sign, int ignore_last);
-bc_num _bc_do_add (bc_num n1, bc_num n2, int scale_min);
-bc_num _bc_do_sub (bc_num n1, bc_num n2, int scale_min);
+bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, size_t scale, bool use_sign);
+bc_num _bc_do_add (bc_num n1, bc_num n2);
+bc_num _bc_do_sub (bc_num n1, bc_num n2);
+void bc_multiply_vector(
+	const BC_VECTOR *n1_vector, size_t n1_arr_size, const BC_VECTOR *n2_vector, size_t n2_arr_size,
+	BC_VECTOR *prod_vector, size_t prod_arr_size);
 void _bc_rm_leading_zeros (bc_num num);
+
+#endif

@@ -1,19 +1,22 @@
 --TEST--
 curl_share_close basic test
---SKIPIF--
-<?php if( !extension_loaded( 'curl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
 $sh = curl_share_init();
-//Show that there's a curl_share resource
+//Show that there's a curl_share object
 var_dump($sh);
 
 curl_share_close($sh);
-//Show that resource is no longer a curl_share, and is therefore unusable and "closed"
 var_dump($sh);
 
 ?>
 --EXPECTF--
-resource(%d) of type (curl_share)
-resource(%d) of type (Unknown)
+object(CurlShareHandle)#1 (0) {
+}
+
+Deprecated: Function curl_share_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
+object(CurlShareHandle)#1 (0) {
+}

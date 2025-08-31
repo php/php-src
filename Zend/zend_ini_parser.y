@@ -1,3 +1,4 @@
+%require "3.0"
 %{
 /*
    +----------------------------------------------------------------------+
@@ -31,10 +32,7 @@
 #include "win32/syslog.h"
 #endif
 
-#define YYERROR_VERBOSE
-#define YYSTYPE zval
-
-int ini_parse(void);
+static int ini_parse(void);
 
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
@@ -45,6 +43,7 @@ int ini_parse(void);
 #endif
 
 #define ZEND_SYSTEM_INI CG(ini_parser_unbuffered_errors)
+#define INI_ZVAL_IS_NUMBER 1
 
 static int get_int_val(zval *op) {
 	switch (Z_TYPE_P(op)) {
@@ -62,8 +61,7 @@ static int get_int_val(zval *op) {
 	}
 }
 
-/* {{{ zend_ini_do_op()
-*/
+/* {{{ zend_ini_do_op() */
 static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 {
 	int i_result;
@@ -95,13 +93,16 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 			break;
 	}
 
-	str_len = sprintf(str_result, "%d", i_result);
-	ZVAL_NEW_STR(result, zend_string_init(str_result, str_len, ZEND_SYSTEM_INI));
+	if (INI_SCNG(scanner_mode) != ZEND_INI_SCANNER_TYPED) {
+		str_len = sprintf(str_result, "%d", i_result);
+		ZVAL_NEW_STR(result, zend_string_init(str_result, str_len, ZEND_SYSTEM_INI));
+	} else {
+		ZVAL_LONG(result, i_result);
+	}
 }
 /* }}} */
 
-/* {{{ zend_ini_init_string()
-*/
+/* {{{ zend_ini_init_string() */
 static void zend_ini_init_string(zval *result)
 {
 	if (ZEND_SYSTEM_INI) {
@@ -109,11 +110,11 @@ static void zend_ini_init_string(zval *result)
 	} else {
 		ZVAL_EMPTY_STRING(result);
 	}
+	Z_EXTRA_P(result) = 0;
 }
 /* }}} */
 
-/* {{{ zend_ini_add_string()
-*/
+/* {{{ zend_ini_add_string() */
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
 	int length, op1_len;
@@ -141,8 +142,7 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 }
 /* }}} */
 
-/* {{{ zend_ini_get_constant()
-*/
+/* {{{ zend_ini_get_constant() */
 static void zend_ini_get_constant(zval *result, zval *name)
 {
 	zval *c, tmp;
@@ -169,9 +169,8 @@ static void zend_ini_get_constant(zval *result, zval *name)
 }
 /* }}} */
 
-/* {{{ zend_ini_get_var()
-*/
-static void zend_ini_get_var(zval *result, zval *name)
+/* {{{ zend_ini_get_var() */
+static void zend_ini_get_var(zval *result, zval *name, zval *fallback)
 {
 	zval *curval;
 	char *envvar;
@@ -180,24 +179,28 @@ static void zend_ini_get_var(zval *result, zval *name)
 	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL) {
 		ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(curval), Z_STRLEN_P(curval), ZEND_SYSTEM_INI));
 	/* ..or if not found, try ENV */
-	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL ||
-			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
+	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL) {
 		ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
+		efree(envvar);
+	} else if ((envvar = getenv(Z_STRVAL_P(name))) != NULL) {
+		ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
+	/* ..or if not defined, try fallback value */
+	} else if (fallback) {
+		ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(fallback), strlen(Z_STRVAL_P(fallback)), ZEND_SYSTEM_INI));
 	} else {
 		zend_ini_init_string(result);
 	}
+
 }
 /* }}} */
 
-/* {{{ ini_error()
-*/
+/* {{{ ini_error() */
 static ZEND_COLD void ini_error(const char *msg)
 {
 	char *error_buf;
 	int error_buf_len;
-	char *currently_parsed_filename;
 
-	currently_parsed_filename = zend_ini_scanner_get_filename();
+	const char *const currently_parsed_filename = zend_ini_scanner_get_filename();
 	if (currently_parsed_filename) {
 		error_buf_len = 128 + (int)strlen(msg) + (int)strlen(currently_parsed_filename); /* should be more than enough */
 		error_buf = (char *) emalloc(error_buf_len);
@@ -219,9 +222,8 @@ static ZEND_COLD void ini_error(const char *msg)
 }
 /* }}} */
 
-/* {{{ zend_parse_ini_file()
-*/
-ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+/* {{{ zend_parse_ini_file() */
+ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;
@@ -236,7 +238,6 @@ ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_erro
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse();
-	zend_file_handle_dtor(fh);
 
 	shutdown_ini_scanner();
 
@@ -248,9 +249,8 @@ ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_erro
 }
 /* }}} */
 
-/* {{{ zend_parse_ini_string()
-*/
-ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+/* {{{ zend_parse_ini_string() */
+ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;
@@ -276,21 +276,63 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 }
 /* }}} */
 
-/* {{{ zval_ini_dtor()
-*/
+/* {{{ zval_ini_dtor() */
 static void zval_ini_dtor(zval *zv)
 {
 	if (Z_TYPE_P(zv) == IS_STRING) {
+		if (ZEND_SYSTEM_INI) {
+			GC_MAKE_PERSISTENT_LOCAL(Z_STR_P(zv));
+		}
 		zend_string_release(Z_STR_P(zv));
 	}
 }
 /* }}} */
 
+static inline zend_result convert_to_number(zval *retval, const char *str, const int str_len)
+{
+	uint8_t type;
+	int overflow;
+	zend_long lval;
+	double dval;
+
+	if ((type = is_numeric_string_ex(str, str_len, &lval, &dval, 0, &overflow, NULL)) != 0) {
+		if (type == IS_LONG) {
+			ZVAL_LONG(retval, lval);
+			return SUCCESS;
+		} else if (type == IS_DOUBLE && !overflow) {
+			ZVAL_DOUBLE(retval, dval);
+			return SUCCESS;
+		}
+	}
+
+	return FAILURE;
+}
+
+static void normalize_value(zval *zv)
+{
+	if (INI_SCNG(scanner_mode) != ZEND_INI_SCANNER_TYPED) {
+		return;
+	}
+
+	ZEND_ASSERT(Z_EXTRA_P(zv) == 0 || Z_EXTRA_P(zv) == INI_ZVAL_IS_NUMBER);
+	if (Z_EXTRA_P(zv) == INI_ZVAL_IS_NUMBER && Z_TYPE_P(zv) == IS_STRING) {
+		zval number_rv;
+		if (convert_to_number(&number_rv, Z_STRVAL_P(zv), Z_STRLEN_P(zv)) == SUCCESS) {
+			zval_ptr_dtor(zv);
+			ZVAL_COPY_VALUE(zv, &number_rv);
+		}
+	}
+}
+
 %}
 
 %expect 0
+%define api.prefix {ini_}
 %define api.pure full
+%define api.value.type {zval}
+%define parse.error verbose
 
+%token END 0 "end of file"
 %token TC_SECTION
 %token TC_RAW
 %token TC_CONSTANT
@@ -302,21 +344,22 @@ static void zval_ini_dtor(zval *zv)
 %token TC_DOLLAR_CURLY
 %token TC_VARNAME
 %token TC_QUOTED_STRING
+%token TC_FALLBACK
 %token BOOL_TRUE
 %token BOOL_FALSE
 %token NULL_NULL
 %token END_OF_LINE
 %token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
 %left '|' '&' '^'
-%right '~' '!'
+%precedence '~' '!'
 
-%destructor { zval_ini_dtor(&$$); } TC_RAW TC_CONSTANT TC_NUMBER TC_STRING TC_WHITESPACE TC_LABEL TC_OFFSET TC_VARNAME BOOL_TRUE BOOL_FALSE NULL_NULL
+%destructor { zval_ini_dtor(&$$); } TC_RAW TC_CONSTANT TC_NUMBER TC_STRING TC_WHITESPACE TC_LABEL TC_OFFSET TC_VARNAME BOOL_TRUE BOOL_FALSE NULL_NULL cfg_var_ref constant_literal constant_string encapsed_list expr fallback option_offset section_string_or_value string_or_value var_string_list var_string_list_section
 
 %%
 
 statement_list:
 		statement_list statement
-	|	/* empty */
+	|	%empty { (void) ini_nerrs; }
 ;
 
 statement:
@@ -332,6 +375,9 @@ statement:
 			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG);
+			if (ZEND_SYSTEM_INI) {
+				GC_MAKE_PERSISTENT_LOCAL(Z_STR($1));
+			}
 			zend_string_release(Z_STR($1));
 			zval_ini_dtor(&$3);
 		}
@@ -350,11 +396,11 @@ statement:
 
 section_string_or_value:
 		var_string_list_section			{ $$ = $1; }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
+	|	%empty						{ zend_ini_init_string(&$$); }
 ;
 
 string_or_value:
-		expr							{ $$ = $1; }
+		expr							{ $$ = $1; normalize_value(&$$); }
 	|	BOOL_TRUE						{ $$ = $1; }
 	|	BOOL_FALSE						{ $$ = $1; }
 	|	NULL_NULL						{ $$ = $1; }
@@ -363,13 +409,13 @@ string_or_value:
 
 option_offset:
 		var_string_list					{ $$ = $1; }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
+	|	%empty						{ zend_ini_init_string(&$$); }
 ;
 
 encapsed_list:
 		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
 	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
+	|	%empty						{ zend_ini_init_string(&$$); }
 ;
 
 var_string_list_section:
@@ -401,7 +447,14 @@ expr:
 ;
 
 cfg_var_ref:
-		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2); zend_string_free(Z_STR($2)); }
+		TC_DOLLAR_CURLY TC_VARNAME '}'				{ zend_ini_get_var(&$$, &$2, NULL); zend_string_free(Z_STR($2)); }
+	|	TC_DOLLAR_CURLY TC_VARNAME TC_FALLBACK fallback '}'	{ zend_ini_get_var(&$$, &$2, &$4); zend_string_free(Z_STR($2)); zend_string_free(Z_STR($4)); }
+;
+
+
+fallback:
+		var_string_list	{ $$ = $1; }
+	|	%empty			{ zend_ini_init_string(&$$); }
 ;
 
 constant_literal:
@@ -415,7 +468,11 @@ constant_literal:
 constant_string:
 		TC_CONSTANT						{ zend_ini_get_constant(&$$, &$1); }
 	|	TC_RAW							{ $$ = $1; /*printf("TC_RAW: '%s'\n", Z_STRVAL($1));*/ }
-	|	TC_NUMBER						{ $$ = $1; /*printf("TC_NUMBER: '%s'\n", Z_STRVAL($1));*/ }
+	|	TC_NUMBER {
+			$$ = $1;
+			Z_EXTRA($$) = INI_ZVAL_IS_NUMBER;
+			/*printf("TC_NUMBER: '%s'\n", Z_STRVAL($1));*/
+		}
 	|	TC_STRING						{ $$ = $1; /*printf("TC_STRING: '%s'\n", Z_STRVAL($1));*/ }
 	|	TC_WHITESPACE					{ $$ = $1; /*printf("TC_WHITESPACE: '%s'\n", Z_STRVAL($1));*/ }
 ;

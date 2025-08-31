@@ -17,9 +17,14 @@
 ; Default Value: none
 ;prefix = /path/to/pools/$pool
 
-; Unix user/group of processes
-; Note: The user is mandatory. If the group is not set, the default user's group
-;       will be used.
+; Unix user/group of the child processes. This can be used only if the master
+; process running user is root. It is set after the child process is created.
+; The user and group can be specified either by their name or by their numeric
+; IDs.
+; Note: If the user is root, the executable needs to be started with
+;       --allow-to-run-as-root option to work.
+; Default Values: The user is set to master process running user by default.
+;                 If the group is not set, the user's group is used.
 user = @php_fpm_user@
 group = @php_fpm_group@
 
@@ -36,17 +41,19 @@ group = @php_fpm_group@
 listen = 127.0.0.1:9000
 
 ; Set listen(2) backlog.
-; Default Value: 511 (-1 on FreeBSD and OpenBSD)
+; Default Value: 511 (-1 on Linux, FreeBSD and OpenBSD)
 ;listen.backlog = 511
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
 ; permissions must be set in order to allow connections from a web server. Many
-; BSD-derived systems allow connections regardless of permissions.
-; Default Values: user and group are set as the running user
-;                 mode is set to 0660
+; BSD-derived systems allow connections regardless of permissions. The owner
+; and group can be specified either by name or by their numeric IDs.
+; Default Values: Owner is set to the master process running user. If the group
+;                 is not set, the owner's group is used. Mode is set to 0660.
 ;listen.owner = @php_fpm_user@
 ;listen.group = @php_fpm_group@
 ;listen.mode = 0660
+
 ; When POSIX Access Control Lists are supported you can set them using
 ; these options, value is a comma separated list of user/group names.
 ; When set, listen.owner and listen.group are ignored
@@ -61,6 +68,10 @@ listen = 127.0.0.1:9000
 ; Default Value: any
 ;listen.allowed_clients = 127.0.0.1
 
+; Set the associated the route table (FIB). FreeBSD only
+; Default Value: -1
+;listen.setfib = 1
+
 ; Specify the nice(2) priority to apply to the pool processes (only if set)
 ; The value can vary from -19 (highest priority) to 20 (lower priority)
 ; Note: - It will only work if the FPM master process is launched as root
@@ -69,8 +80,9 @@ listen = 127.0.0.1:9000
 ; Default Value: no set
 ; process.priority = -19
 
-; Set the process dumpable flag (PR_SET_DUMPABLE prctl) even if the process user
-; or group is differrent than the master process user. It allows to create process
+; Set the process dumpable flag (PR_SET_DUMPABLE prctl for Linux or
+; PROC_TRACE_CTL procctl for FreeBSD) even if the process user
+; or group is different than the master process user. It allows to create process
 ; core dump and ptrace the process for the pool user.
 ; Default Value: no
 ; process.dumpable = yes
@@ -92,6 +104,8 @@ listen = 127.0.0.1:9000
 ;                                    state (waiting to process). If the number
 ;                                    of 'idle' processes is greater than this
 ;                                    number then some children will be killed.
+;             pm.max_spawn_rate    - the maximum number of rate to spawn child
+;                                    processes at once.
 ;  ondemand - no children are created at startup. Children will be forked when
 ;             new requests will connect. The following parameter are used:
 ;             pm.max_children           - the maximum number of children that
@@ -127,6 +141,12 @@ pm.min_spare_servers = 1
 ; Note: Mandatory when pm is set to 'dynamic'
 pm.max_spare_servers = 3
 
+; The number of rate to spawn child processes at once.
+; Note: Used only when pm is set to 'dynamic'
+; Note: Mandatory when pm is set to 'dynamic'
+; Default Value: 32
+;pm.max_spawn_rate = 32
+
 ; The number of seconds after which an idle process will be killed.
 ; Note: Used only when pm is set to 'ondemand'
 ; Default Value: 10s
@@ -139,7 +159,7 @@ pm.max_spare_servers = 3
 ;pm.max_requests = 500
 
 ; The URI to view the FPM status page. If this value is not set, no URI will be
-; recognized as a status page. It shows the following informations:
+; recognized as a status page. It shows the following information:
 ;   pool                 - the name of the pool;
 ;   process manager      - static, dynamic or ondemand;
 ;   start time           - the date and time FPM has started;
@@ -209,8 +229,8 @@ pm.max_spare_servers = 3
 ;                          it's always 0 if the process is not in Idle state
 ;                          because memory calculation is done when the request
 ;                          processing has terminated;
-; If the process is in Idle state, then informations are related to the
-; last request the process has served. Otherwise informations are related to
+; If the process is in Idle state, then information is related to the
+; last request the process has served. Otherwise information is related to
 ; the current request being served.
 ; Example output:
 ;   ************************
@@ -236,6 +256,22 @@ pm.max_spare_servers = 3
 ;       may conflict with a real PHP file.
 ; Default Value: not set
 ;pm.status_path = /status
+
+; The address on which to accept FastCGI status request. This creates a new
+; invisible pool that can handle requests independently. This is useful
+; if the main pool is busy with long running requests because it is still possible
+; to get the status before finishing the long running requests.
+;
+; Valid syntaxes are:
+;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific IPv4 address on
+;                            a specific port;
+;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific IPv6 address on
+;                            a specific port;
+;   'port'                 - to listen on a TCP socket to all addresses
+;                            (IPv6 and IPv4-mapped) on a specific port;
+;   '/path/to/unix/socket' - to listen on a unix socket.
+; Default Value: value of the listen option
+;pm.status_listen = 127.0.0.1:9001
 
 ; The ping URI to call the monitoring page of FPM. If this value is not set, no
 ; URI will be recognized as a ping page. This could be used to test from outside
@@ -269,13 +305,13 @@ pm.max_spare_servers = 3
 ;  %d: time taken to serve the request
 ;      it can accept the following format:
 ;      - %{seconds}d (default)
-;      - %{miliseconds}d
-;      - %{mili}d
+;      - %{milliseconds}d
+;      - %{milli}d
 ;      - %{microseconds}d
 ;      - %{micro}d
 ;  %e: an environment variable (same as $_ENV or $_SERVER)
 ;      it must be associated with embraces to specify the name of the env
-;      variable. Some exemples:
+;      variable. Some examples:
 ;      - server specifics like: %{REQUEST_METHOD}e or %{SERVER_PROTOCOL}e
 ;      - HTTP headers like: %{HTTP_HOST}e or %{HTTP_USER_AGENT}e
 ;  %f: script filename
@@ -305,17 +341,33 @@ pm.max_spare_servers = 3
 ;  %t: server time the request was received
 ;      it can accept a strftime(3) format:
 ;      %d/%b/%Y:%H:%M:%S %z (default)
-;      The strftime(3) format must be encapsuled in a %{<strftime_format>}t tag
+;      The strftime(3) format must be encapsulated in a %{<strftime_format>}t tag
 ;      e.g. for a ISO8601 formatted timestring, use: %{%Y-%m-%dT%H:%M:%S%z}t
 ;  %T: time the log has been written (the request has finished)
 ;      it can accept a strftime(3) format:
 ;      %d/%b/%Y:%H:%M:%S %z (default)
-;      The strftime(3) format must be encapsuled in a %{<strftime_format>}t tag
+;      The strftime(3) format must be encapsulated in a %{<strftime_format>}t tag
 ;      e.g. for a ISO8601 formatted timestring, use: %{%Y-%m-%dT%H:%M:%S%z}t
-;  %u: remote user
+;  %u: basic auth user if specified in Authorization header
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
-;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
+;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{milli}d %{kilo}M %C%%"
+
+; A list of request_uri values which should be filtered from the access log.
+;
+; As a security precaution, this setting will be ignored if:
+;     - the request method is not GET or HEAD; or
+;     - there is a request body; or
+;     - there are query parameters; or
+;     - the response code is outwith the successful range of 200 to 299
+;
+; Note: The paths are matched against the output of the access.format tag "%r".
+;       On common configurations, this may look more like SCRIPT_NAME than the
+;       expected pre-rewrite URI.
+;
+; Default Value: not set
+;access.suppress_path[] = /ping
+;access.suppress_path[] = /health_check.php
 
 ; The log file for slow requests
 ; Default Value: not set
@@ -338,6 +390,14 @@ pm.max_spare_servers = 3
 ; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
 ; Default Value: 0
 ;request_terminate_timeout = 0
+
+; The timeout set by 'request_terminate_timeout' ini option is not engaged after
+; application calls 'fastcgi_finish_request' or when application has finished and
+; shutdown functions are being called (registered via register_shutdown_function).
+; This option will enable timeout limit to be applied unconditionally
+; even in such cases.
+; Default Value: no
+;request_terminate_timeout_track_finished = no
 
 ; Set open file descriptor rlimit.
 ; Default Value: system defined value
@@ -366,7 +426,7 @@ pm.max_spare_servers = 3
 
 ; Redirect worker stdout and stderr into main error log. If not set, stdout and
 ; stderr will be redirected to /dev/null according to FastCGI specs.
-; Note: on highloaded environement, this can cause some delay in the page
+; Note: on highloaded environment, this can cause some delay in the page
 ; process time (several ms).
 ; Default Value: no
 ;catch_workers_output = yes
@@ -414,9 +474,8 @@ pm.max_spare_servers = 3
 ; For php_*flag, valid values are on, off, 1, 0, true, false, yes or no.
 
 ; Defining 'extension' will load the corresponding shared extension from
-; extension_dir. Defining 'disable_functions' or 'disable_classes' will not
-; overwrite previously defined php.ini values, but will append the new value
-; instead.
+; extension_dir. Defining 'disable_functions' will not overwrite previously
+; defined php.ini values, but will append the new value instead.
 
 ; Note: path INI options can be relative and will be expanded with the prefix
 ; (pool, global or @prefix@)

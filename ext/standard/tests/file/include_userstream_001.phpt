@@ -7,66 +7,66 @@ allow_url_include=0
 <?php
 class test {
     private $data = '<?php echo "Hello World\n";?>';
-	private $pos;
+    private $pos;
 
-	function stream_open($path, $mode, $options, &$opened_path)
-	{
-		if (strchr($mode, 'a'))
-			$this->pos = strlen($this->data);
-		else
-			$this->po = 0;
+    function stream_open($path, $mode, $options, &$opened_path)
+    {
+        if (strchr($mode, 'a'))
+            $this->pos = strlen($this->data);
+        else
+            $this->po = 0;
 
-		return true;
-	}
+        return true;
+    }
 
-	function stream_read($count)
-	{
-		$ret = substr($this->data, $this->pos, $count);
-		$this->pos += strlen($ret);
-		return $ret;
-	}
+    function stream_read($count)
+    {
+        $ret = substr($this->data, $this->pos, $count);
+        $this->pos += strlen($ret);
+        return $ret;
+    }
 
-	function stream_tell()
-	{
-		return $this->pos;
-	}
+    function stream_tell()
+    {
+        return $this->pos;
+    }
 
-	function stream_eof()
-	{
-		return $this->pos >= strlen($this->data);
-	}
+    function stream_eof()
+    {
+        return $this->pos >= strlen($this->data);
+    }
 
-	function stream_seek($offset, $whence)
-	{
-		switch($whence) {
-			case SEEK_SET:
-				if ($offset < $this->data && $offset >= 0) {
-					$this->pos = $offset;
-					return true;
-				} else {
-					return false;
-				}
-				break;
-			case SEEK_CUR:
-				if ($offset >= 0) {
-					$this->pos += $offset;
-					return true;
-				} else {
-					return false;
-				}
-				break;
-			case SEEK_END:
-				if (strlen($this->data) + $offset >= 0) {
-					$this->pos = strlen($this->data) + $offset;
-					return true;
-				} else {
-					return false;
-				}
-				break;
-			default:
-				return false;
-		}
-	}
+    function stream_seek($offset, $whence)
+    {
+        switch($whence) {
+            case SEEK_SET:
+                if ($offset < $this->data && $offset >= 0) {
+                    $this->pos = $offset;
+                    return true;
+                } else {
+                    return false;
+                }
+                break;
+            case SEEK_CUR:
+                if ($offset >= 0) {
+                    $this->pos += $offset;
+                    return true;
+                } else {
+                    return false;
+                }
+                break;
+            case SEEK_END:
+                if (strlen($this->data) + $offset >= 0) {
+                    $this->pos = strlen($this->data) + $offset;
+                    return true;
+                } else {
+                    return false;
+                }
+                break;
+            default:
+                return false;
+        }
+    }
 
 }
 
@@ -76,6 +76,7 @@ echo @file_get_contents("test1://hello"),"\n";
 @include "test1://hello";
 echo @file_get_contents("test2://hello"),"\n";
 @include "test2://hello";
+?>
 --EXPECT--
 <?php echo "Hello World\n";?>
 <?php echo "Hello World\n";?>

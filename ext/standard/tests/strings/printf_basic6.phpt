@@ -2,11 +2,6 @@
 Test printf() function : basic functionality - exponential format
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 echo "*** Testing printf() : basic functionality - using exponential format ***\n";
 
 // Initialise all required variables
@@ -38,7 +33,6 @@ $result = printf($format3, $arg1, $arg2, $arg3);
 echo "\n";
 var_dump($result);
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using exponential format ***
 
@@ -57,4 +51,3 @@ int(23)
 -- Calling printf() with three arguments --
 1.000000e+3 2.000000E+3 3.000000e+3
 int(35)
-===DONE===

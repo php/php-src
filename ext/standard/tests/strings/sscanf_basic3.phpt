@@ -3,11 +3,6 @@ Test sscanf() function : basic functionality - float format
 --FILE--
 <?php
 
-/* Prototype  : mixed sscanf  ( string $str  , string $format  [, mixed &$...  ] )
- * Description: Parses input from a string according to a format
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing sscanf() : basic functionality -- using float format ***\n";
 
 $str = "Part: Widget Length: 111.53 Width: 22.345 Depth: 12.4";
@@ -24,7 +19,6 @@ $res = sscanf($str, $format, $part, $length, $width, $depth);
 var_dump($res, $part, $length, $width, $depth);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality -- using float format ***
 
@@ -40,4 +34,3 @@ string(6) "Widget"
 float(111.53)
 float(22.345)
 float(12.4)
-===DONE===

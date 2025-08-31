@@ -3,14 +3,14 @@ Test typed static property by ref
 --FILE--
 <?php
 function &ref($a = null) {
-	static $f;
-	if ($a !== null) $f = function &() use (&$a) { return $a; };
-	return $f();
+    static $f;
+    if ($a !== null) $f = function &() use (&$a) { return $a; };
+    return $f();
 }
 
 class Foo {
-	public static int $i;
-	public static string $s = "x";
+    public static int $i;
+    public static string $s = "x";
 }
 
 Foo::$i = &ref(5);
@@ -27,12 +27,12 @@ Foo::$i = "4";
 var_dump($i, Foo::$i);
 
 try {
-	$i = null;
+    $i = null;
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 var_dump($i, Foo::$i);
 
 try {
-	Foo::$i = null;
+    Foo::$i = null;
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 var_dump($i, Foo::$i);
 
@@ -43,17 +43,17 @@ Foo::$i = &ref("0");
 var_dump(Foo::$i, ref());
 
 try {
-	Foo::$i = &ref("x");
+    Foo::$i = &ref("x");
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 var_dump(Foo::$i, ref());
 
 try {
-	Foo::$i = &Foo::$s;
+    Foo::$i = &Foo::$s;
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 var_dump(Foo::$i, Foo::$s);
 
 try {
-	Foo::$s = &Foo::$i;
+    Foo::$s = &Foo::$i;
 } catch (TypeError $e) { print $e->getMessage()."\n"; }
 var_dump(Foo::$i, Foo::$s);
 
@@ -69,14 +69,14 @@ int(4)
 Cannot assign null to reference held by property Foo::$i of type int
 int(4)
 int(4)
-Typed property Foo::$i must be int, null used
+Cannot assign null to property Foo::$i of type int
 int(4)
 int(4)
 string(1) "5"
 string(1) "5"
 int(0)
 int(0)
-Typed property Foo::$i must be int, string used
+Cannot assign string to property Foo::$i of type int
 int(0)
 string(1) "x"
 Reference with value of type string held by property Foo::$s of type string is not compatible with property Foo::$i of type int

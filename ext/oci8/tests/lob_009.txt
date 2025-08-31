@@ -1,6 +1,0 @@
-this
-is
-a 
-test
-file for
-test lob_009.phpt

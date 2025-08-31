@@ -6,16 +6,16 @@ Bug #69970 (Use-after-free vulnerability in spl_recursive_it_move_forward_ex())
 $count = 10;
 
 class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator {
-  function rewind() {
+  function rewind(): void {
     echo "dummy\n";
   }
-  function endChildren() {
-	  global $count;
-	  echo $this->getDepth();
-	  if (--$count > 0) {
-		  // Trigger use-after-free
-		  parent::rewind();
-	  }
+  function endChildren(): void {
+      global $count;
+      echo $this->getDepth();
+      if (--$count > 0) {
+          // Trigger use-after-free
+          parent::rewind();
+      }
   }
 }
 $arr = array("a", array("ba", array("bba", "bbb")));

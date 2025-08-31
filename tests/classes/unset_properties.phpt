@@ -1,73 +1,72 @@
 --TEST--
-Un-setting instance properties causes magic methods to be called when trying to access them from outside the magic
-methods themselves.
+Un-setting instance properties causes magic methods to be called when trying to access them from outside the magic methods themselves.
 --FILE--
 <?php
 
 class Test
 {
-	public    $publicProperty        = 'publicProperty set';
+    public    $publicProperty        = 'publicProperty set';
 
-	protected $protectedProperty     = 'protectedProperty set';
+    protected $protectedProperty     = 'protectedProperty set';
 
-	private   $privateProperty       = 'privateProperty set';
+    private   $privateProperty       = 'privateProperty set';
 
-	public function __get($name)
-	{
-		return '__get "' . $name . '"';
-	}
+    public function __get($name)
+    {
+        return '__get "' . $name . '"';
+    }
 
-	public function __set($name, $value)
-	{
-		$this->$name = $value;
-		echo '__set "' . $name . '" to "' . $value . '"';
-	}
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+        echo '__set "' . $name . '" to "' . $value . '"';
+    }
 
-	public function __isset($name)
-	{
-		echo '__isset "' . $name . '"';
-		return isset($this->$name);
-	}
+    public function __isset($name)
+    {
+        echo '__isset "' . $name . '"';
+        return isset($this->$name);
+    }
 
-	public function getPublicProperty()
-	{
-		return $this->publicProperty;
-	}
+    public function getPublicProperty()
+    {
+        return $this->publicProperty;
+    }
 
-	public function setPublicProperty($publicProperty)
-	{
-		$this->publicProperty = $publicProperty;
-	}
+    public function setPublicProperty($publicProperty)
+    {
+        $this->publicProperty = $publicProperty;
+    }
 
-	public function unsetProtectedProperty()
-	{
-		unset($this->protectedProperty);
-	}
+    public function unsetProtectedProperty()
+    {
+        unset($this->protectedProperty);
+    }
 
-	public function getProtectedProperty()
-	{
-		return $this->protectedProperty;
-	}
+    public function getProtectedProperty()
+    {
+        return $this->protectedProperty;
+    }
 
-	public function setProtectedProperty($protectedProperty)
-	{
-		$this->protectedProperty = $protectedProperty;
-	}
+    public function setProtectedProperty($protectedProperty)
+    {
+        $this->protectedProperty = $protectedProperty;
+    }
 
-	public function unsetPrivateProperty()
-	{
-		unset($this->privateProperty);
-	}
+    public function unsetPrivateProperty()
+    {
+        unset($this->privateProperty);
+    }
 
-	public function getPrivateProperty()
-	{
-		return $this->privateProperty;
-	}
+    public function getPrivateProperty()
+    {
+        return $this->privateProperty;
+    }
 
-	public function setPrivateProperty($privateProperty)
-	{
-		$this->privateProperty = $privateProperty;
-	}
+    public function setPrivateProperty($privateProperty)
+    {
+        $this->privateProperty = $privateProperty;
+    }
 }
 
 // verifying public property

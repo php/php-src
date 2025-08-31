@@ -1,7 +1,7 @@
 --TEST--
 Test 7: Transform To Uri
---SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 echo "Test 7: Transform To Uri";
@@ -12,6 +12,7 @@ $doc = $proc->transformToUri($dom, "file://".__DIR__."/out.xml");
 print file_get_contents(__DIR__."/out.xml");
 unlink(__DIR__."/out.xml");
 print "\n";
+?>
 --EXPECT--
 Test 7: Transform To Uri
 <?xml version="1.0" encoding="iso-8859-1"?>

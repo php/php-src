@@ -1,5 +1,9 @@
 --TEST--
 Tokenization of only the <?php tag
+--EXTENSIONS--
+tokenizer
+--INI--
+short_open_tag=1
 --FILE--
 <?php
 

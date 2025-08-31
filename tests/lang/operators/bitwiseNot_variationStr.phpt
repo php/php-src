@@ -15,7 +15,6 @@ foreach ($strVals as $strVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: '0' ---
 string(2) "cf"
@@ -45,4 +44,3 @@ string(14) "cecdcc9e9d9cdf"
 string(8) "ccd1cb9e"
 --- testing: 'a5.9' ---
 string(8) "9ecad1c6"
-===DONE===

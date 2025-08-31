@@ -1,9 +1,10 @@
 --TEST--
 Bug #77198 (threshold cropping has insufficient precision)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-if (!GD_BUNDLED) die('upstream bugfix has not been released');
+if (!GD_BUNDLED) die('skip upstream bugfix has not been released');
 ?>
 --FILE--
 <?php
@@ -35,9 +36,7 @@ for ($y = 0; $y < 8; $y++) {
             if ($color !== 0x000000) {
                 printf("Pixel at %d, %d: unexpected color (%d)\n", $x, $y, $color);
             }
-            imagedestroy($cropped);
         }
-        imagedestroy($orig);
     }
 }
 

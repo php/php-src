@@ -6,14 +6,15 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.file_update_protection=0
 enable_dl=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 if (extension_loaded("unknown_extension")) {
-	var_dump(1);
+    var_dump(1);
 } else {
-	var_dump(2);
+    var_dump(2);
 }
+?>
 --EXPECT--
 int(2)

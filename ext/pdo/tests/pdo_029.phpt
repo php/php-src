@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: extending PDO (3)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -25,19 +26,19 @@ class PDOStatementX extends PDOStatement
 
     protected function __construct($dbh)
     {
-    	$this->dbh = $dbh;
-    	echo __METHOD__ . "()\n";
+        $this->dbh = $dbh;
+        echo __METHOD__ . "()\n";
     }
 
     function __destruct()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
     }
 
-    function execute($params = array())
+    function execute($params = array()): bool
     {
-    	echo __METHOD__ . "()\n";
-		parent::execute();
+        echo __METHOD__ . "()\n";
+        return parent::execute();
     }
 }
 
@@ -45,25 +46,25 @@ class PDODatabase extends PDO
 {
     function __destruct()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
     }
 
-    function query($sql)
+    function query($sql, ...$rest): PDOStatement|false
     {
-    	echo __METHOD__ . "()\n";
-    	$stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx', array($this))));
-    	$stmt->setFetchMode(PDO::FETCH_ASSOC);
-    	$stmt->execute();
-    	return $stmt;
+        echo __METHOD__ . "()\n";
+        $stmt = $this->prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx', array($this))));
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute();
+        return $stmt;
     }
 }
 
 $db = PDOTest::factory('PDODatabase');
 var_dump(get_class($db));
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
+$db->exec('CREATE TABLE test029(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
-$stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test029 VALUES(?, ?, ?)");
 var_dump(get_class($stmt));
 foreach ($data as $row) {
     $stmt->execute($row);
@@ -73,18 +74,24 @@ unset($stmt);
 
 echo "===QUERY===\n";
 
-$stmt = $db->query('SELECT * FROM test');
+$stmt = $db->query('SELECT * FROM test029');
 var_dump(get_class($stmt));
 var_dump(get_class($stmt->dbh));
 
 echo "===FOREACH===\n";
 
 foreach($stmt as $obj) {
-	var_dump($obj);
+    var_dump($obj);
 }
 
 echo "===DONE===\n";
 exit(0);
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test029");
 ?>
 --EXPECT--
 string(11) "PDODatabase"

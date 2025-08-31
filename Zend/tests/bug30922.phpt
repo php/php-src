@@ -2,12 +2,15 @@
 Bug #30922 (reflective functions crash PHP when interfaces extend themselves)
 --FILE--
 <?php
-interface RecurisiveFooFar extends RecurisiveFooFar {}
-class A implements RecurisiveFooFar {}
+interface RecursiveFooFar extends RecursiveFooFar {}
+class A implements RecursiveFooFar {}
 
 $a = new A();
 var_dump($a instanceOf A);
 echo "ok\n";
 ?>
 --EXPECTF--
-Fatal error: Interface RecurisiveFooFar cannot implement itself in %s on line %d
+Fatal error: Uncaught Error: Interface "RecursiveFooFar" not found in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

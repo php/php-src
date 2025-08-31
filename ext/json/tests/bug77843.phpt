@@ -5,7 +5,7 @@ Bug #77843: Use after free with json serializer
 
 class X implements JsonSerializable {
     public $prop = "value";
-    public function jsonSerialize() {
+    public function jsonSerialize(): mixed {
         global $arr;
         unset($arr[0]);
         var_dump($this);

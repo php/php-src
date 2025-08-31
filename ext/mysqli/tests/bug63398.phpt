@@ -1,13 +1,10 @@
 --TEST--
 Bug #63398 (Segfault when polling closed link)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once("connect.inc");
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
-}
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -19,18 +16,14 @@ mysqli_close($link);
 $read = $error = $reject = array();
 $read[] = $error[] = $reject[] = $link;
 
-mysqli_poll($read, $error, $reject, 1);
+try {
+    mysqli_poll($read, $error, $reject, 1);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "okey";
 ?>
---EXPECTF--
-Warning: mysqli_poll(): [1] Couldn't fetch mysqli in %sbug63398.php on line %d
-
-Warning: mysqli_poll(): [1] Couldn't fetch mysqli in %sbug63398.php on line %d
-
-Warning: mysqli_poll(): No stream arrays were passed in %sbug63398.php on line %d
-
-Warning: mysqli_poll(): [1] Couldn't fetch mysqli in %sbug63398.php on line %d
-
-Warning: mysqli_poll(): [1] Couldn't fetch mysqli in %sbug63398.php on line %d
+--EXPECT--
+mysqli object is already closed
 okey

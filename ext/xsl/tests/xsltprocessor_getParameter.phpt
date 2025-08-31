@@ -1,17 +1,14 @@
 --TEST--
 Check xsltprocessor::getparameter functionality
---SKIPIF--
-<?php
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include __DIR__ .'/prepare.inc';
 $proc->importStylesheet($xsl);
 $proc->setParameter('', 'key', 'value');
 var_dump($proc->getParameter('', 'key'));
+?>
 --EXPECT--
 string(5) "value"
 --CREDITS--

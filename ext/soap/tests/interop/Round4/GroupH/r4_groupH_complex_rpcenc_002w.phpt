@@ -1,17 +1,14 @@
 --TEST--
 SOAP Interop Round4 GroupH Complex RPC Enc 002 (php/wsdl): echoBaseStructFault
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class BaseStruct {
-    function __construct($f, $s) {
-        $this->floatMessage = $f;
-        $this->shortMessage = $s;
-    }
+    function __construct(public $floatMessage, public $shortMessage) {}
 }
 $struct = new BaseStruct(12.345,12);
 $client = new SoapClient(__DIR__."/round4_groupH_complex_rpcenc.wsdl",array("trace"=>1,"exceptions"=>0));

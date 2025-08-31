@@ -8,8 +8,10 @@ Danilo Sanchi sanchi@grupporetina.com
 #PHPTestFest Cesena Italia on 2009-06-20
 --FILE--
 <?php
-  var_dump(time_sleep_until(time()-1));
+
+var_dump(time_sleep_until(time() -1));
+
 ?>
 --EXPECTF--
-Warning: time_sleep_until(): Sleep until to time is less than current time in %s on line 2
+Warning: time_sleep_until(): Argument #1 ($timestamp) must be greater than or equal to the current time in %s on line %d
 bool(false)

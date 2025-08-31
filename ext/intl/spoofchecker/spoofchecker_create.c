@@ -1,11 +1,9 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,35 +13,30 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
 #include "spoofchecker_class.h"
-#include "spoofchecker_create.h"
 #include "intl_data.h"
 
-/* {{{ proto Spoofchecker::__construct()
- * Spoofchecker object constructor.
- */
+/* {{{ Spoofchecker object constructor. */
 PHP_METHOD(Spoofchecker, __construct)
 {
 #if U_ICU_VERSION_MAJOR_NUM < 58
 	int checks;
 #endif
-	zend_error_handling error_handling;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
-	}
-
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	co->uspoof = uspoof_open(SPOOFCHECKER_ERROR_CODE_P(co));
-	INTL_METHOD_CHECK_STATUS(co, "spoofchecker: unable to open ICU Spoof Checker");
+	if (U_FAILURE(INTL_DATA_ERROR_CODE(co))) {
+		zend_throw_exception(IntlException_ce_ptr,
+			"Spoofchecker::__construct(): unable to open ICU Spoof Checker", 0);
+	}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 58
 	/* TODO save it into the object for further suspiction check comparison. */
@@ -54,6 +47,7 @@ PHP_METHOD(Spoofchecker, __construct)
 	 uspoof_check2 APIs when it became stable, to use extended check result APIs.
 	 Subsequent changes in the unicode security algos are to be watched.*/
 	uspoof_setRestrictionLevel(co->uspoof, SPOOFCHECKER_DEFAULT_RESTRICTION_LEVEL);
+	co->uspoofres = uspoof_openCheckResult(SPOOFCHECKER_ERROR_CODE_P(co));
 #else
 	/* Single-script enforcement is on by default. This fails for languages
 	 like Japanese that legally use multiple scripts within a single word,
@@ -62,6 +56,5 @@ PHP_METHOD(Spoofchecker, __construct)
 	checks = uspoof_getChecks(co->uspoof, SPOOFCHECKER_ERROR_CODE_P(co));
 	uspoof_setChecks(co->uspoof, checks & ~USPOOF_SINGLE_SCRIPT, SPOOFCHECKER_ERROR_CODE_P(co));
 #endif
-	zend_restore_error_handling(&error_handling);
 }
 /* }}} */

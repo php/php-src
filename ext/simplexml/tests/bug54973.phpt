@@ -1,7 +1,7 @@
 --TEST--
 Bug #54973: SimpleXML casts integers wrong
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) die('skip simplexml extension not loaded'); ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml = simplexml_load_string("<xml><number>9223372036854775808</number></xml>");
@@ -11,8 +11,8 @@ var_dump($xml->number);
 $int = $xml->number / 1024 / 1024 / 1024;
 var_dump($int);
 
-$double = (double) $xml->number / 1024 / 1024 / 1024;
-var_dump($double);
+$float = (float) $xml->number / 1024 / 1024 / 1024;
+var_dump($float);
 ?>
 --EXPECT--
 object(SimpleXMLElement)#2 (1) {

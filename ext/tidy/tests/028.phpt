@@ -1,7 +1,7 @@
 --TEST--
 tidyNode::getParent()
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 $x = tidy_parse_string("<body><div>Content</div></body>");

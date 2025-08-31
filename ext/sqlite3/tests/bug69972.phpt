@@ -1,9 +1,7 @@
 --TEST--
 Bug #69972 (Use-after-free vulnerability in sqlite3SafetyCheckSickOrOk())
---SKIPIF--
-<?php
-if (!extension_loaded('sqlite3')) die('skip');
-?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 $db = new SQLite3(':memory:');
@@ -20,7 +18,7 @@ echo "Error Msg: " . $db->lastErrorMsg() . "\n";
 --EXPECTF--
 SELECTING from invalid table
 
-Warning: SQLite3::query(): Unable to prepare statement: 1, no such table: non_existent_table in %sbug69972.php on line %d
+Warning: SQLite3::query(): Unable to prepare statement: no such table: non_existent_table in %sbug69972.php on line %d
 Closing database
 bool(true)
 Done

@@ -1,7 +1,7 @@
 --TEST--
-SSA constrution for CFG with unreachable basic blocks
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+SSA construction for CFG with unreachable basic blocks
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 class X {

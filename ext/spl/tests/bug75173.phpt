@@ -13,6 +13,7 @@ foreach ($it as $item) {
         $it->append(new ArrayIterator(['bar']));
     }
 }
+?>
 --EXPECT--
 string(3) "foo"
 string(3) "bar"	

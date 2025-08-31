@@ -1,7 +1,7 @@
 --TEST--
 Bug #53033: Mathematical operations convert objects to integers
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) die('skip simplexml extension not loaded'); ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

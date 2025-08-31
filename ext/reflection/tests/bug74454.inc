@@ -1,4 +1,4 @@
 <?php
 class A {
-	if (wrongsyntax)
+    if (wrongsyntax)
 }

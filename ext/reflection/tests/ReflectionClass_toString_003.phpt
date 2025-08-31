@@ -6,21 +6,21 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 Class A {
-	private function f() {}
+    private function f() {}
 }
 Class B extends A {
-	private function f() {}
+    private function f() {}
 }
 Class C extends B {
 
 }
 Class D extends C {
-	private function f() {}
+    private function f() {}
 }
 foreach (array('A', 'B', 'C', 'D') as $class) {
-	echo "\n\n----( Reflection class $class: )----\n";
-	$rc = new ReflectionClass($class);
-	echo $rc;
+    echo "\n\n----( Reflection class $class: )----\n";
+    $rc = new ReflectionClass($class);
+    echo $rc;
 }
 
 ?>
@@ -66,7 +66,7 @@ Class [ <user> class B extends A ] {
   }
 
   - Methods [1] {
-    Method [ <user, overwrites A> private method f ] {
+    Method [ <user> private method f ] {
       @@ %s 6 - 6
     }
   }
@@ -111,7 +111,7 @@ Class [ <user> class D extends C ] {
   }
 
   - Methods [1] {
-    Method [ <user, overwrites B> private method f ] {
+    Method [ <user> private method f ] {
       @@ %s 12 - 12
     }
   }

@@ -6,7 +6,7 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class C {
-	const myConst = 1;
+    const myConst = 1;
 }
 
 class D extends C {
@@ -19,14 +19,14 @@ var_dump($rc->hasConstant("myConst"));
 echo "Check existing constant, different case: ";
 var_dump($rc->hasConstant("MyCoNsT"));
 echo "Check absent constant: ";
-var_dump($rc->hasConstant("doesntExist"));
+var_dump($rc->hasConstant("doesNotExist"));
 
 
 $rd = new ReflectionClass("D");
 echo "Check inherited constant: ";
 var_dump($rd->hasConstant("myConst"));
 echo "Check absent constant: ";
-var_dump($rd->hasConstant("doesntExist"));
+var_dump($rd->hasConstant("doesNotExist"));
 ?>
 --EXPECT--
 Check existing constant: bool(true)

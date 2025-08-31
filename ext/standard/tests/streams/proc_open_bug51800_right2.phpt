@@ -3,8 +3,8 @@ Bug #51800 proc_open on Windows hangs forever, the right way to do it with more 
 --FILE--
 <?php
 $callee = __DIR__ . "/process_proc_open_bug51800_right2.php";
-$php = PHP_BINARY;
-$cmd = "$php -n $callee";
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
+$cmd = "$php -n " . escapeshellarg($callee);
 
 $status;
 $stdout = "";
@@ -27,17 +27,17 @@ $i0 = $i1 = 0;
 $step = 1024;
 
 while ($i0 < strlen($data0) && $i1 < strlen($data1)) {
-	fwrite(STDOUT, substr($data0, $i0, $step));
-	fwrite(STDERR, substr($data1, $i1, $step));
-	$i0 += $step;
-	$i1 += $step;
+    fwrite(STDOUT, substr($data0, $i0, $step));
+    fwrite(STDERR, substr($data1, $i1, $step));
+    $i0 += $step;
+    $i1 += $step;
 }
 
 exit(0);
 ');
 
 if (!$r) {
-	die("couldn't create helper script '$callee'");
+    die("couldn't create helper script '$callee'");
 }
 
 $process = proc_open($cmd, $descriptors, $pipes);
@@ -63,7 +63,6 @@ var_dump(array(
 ), strlen($stdout), strlen($stderr));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $callee = __DIR__ . "/process_proc_open_bug51800_right2.php";
@@ -80,4 +79,3 @@ array(3) {
 }
 int(1000000)
 int(1000000)
-===DONE===

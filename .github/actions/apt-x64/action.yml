@@ -1,0 +1,80 @@
+name: apt
+inputs:
+  asan:
+    default: false
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+
+        OPCACHE_TLS_TESTS_DEPS="gcc clang lld"
+
+        export DEBIAN_FRONTEND=noninteractive
+
+        # Install sudo in Docker for consistent actions
+        if ! type "sudo" > /dev/null; then
+          apt-get update -y | true
+          apt-get install -y sudo
+        fi
+
+        sudo apt-get update -y | true
+        sudo apt-get install -y \
+          autoconf \
+          gcc \
+          make \
+          curl \
+          unzip \
+          bison \
+          re2c \
+          locales \
+          ldap-utils \
+          openssl \
+          slapd \
+          language-pack-de \
+          libgmp-dev \
+          libicu-dev \
+          libtidy-dev \
+          libenchant-2-dev \
+          libbz2-dev \
+          libsasl2-dev \
+          libxpm-dev \
+          libzip-dev \
+          libsqlite3-dev \
+          libsqlite3-mod-spatialite \
+          libwebp-dev \
+          ${{ inputs.asan == 'false' && 'libavif-dev' || '' }} \
+          libonig-dev \
+          libcurl4-openssl-dev \
+          libxml2-dev \
+          libxslt1-dev \
+          libpq-dev \
+          libedit-dev \
+          libldap2-dev \
+          libsodium-dev \
+          libargon2-dev \
+          libmm-dev \
+          libsnmp-dev \
+          postgresql \
+          postgresql-contrib \
+          snmpd \
+          snmp-mibs-downloader \
+          freetds-dev \
+          unixodbc-dev \
+          llvm \
+          clang \
+          dovecot-core \
+          dovecot-pop3d \
+          dovecot-imapd \
+          sendmail \
+          firebird-dev \
+          liblmdb-dev \
+          libtokyocabinet-dev \
+          libdb-dev \
+          libqdbm-dev \
+          libjpeg-dev \
+          libpng-dev \
+          libfreetype6-dev \
+          $OPCACHE_TLS_TESTS_DEPS

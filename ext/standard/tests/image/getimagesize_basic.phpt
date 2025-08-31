@@ -2,11 +2,6 @@
 Test getimagesize() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array
- * Source code: ext/standard/image.c
- */
-
 $imagetype_filenames = array(
       // GIF file
       "GIF image file" => "200x100.gif",
@@ -45,12 +40,11 @@ foreach($imagetype_filenames as $key => $filename) {
       var_dump( $info );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing getimagesize() : basic functionality ***
 
 -- GIF image file (200x100.gif) --
-array(7) {
+array(9) {
   [0]=>
   int(200)
   [1]=>
@@ -65,12 +59,16 @@ array(7) {
   int(3)
   ["mime"]=>
   string(9) "image/gif"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
 
 -- JPEG image file (200x100.jpg) --
-array(7) {
+array(9) {
   [0]=>
   int(200)
   [1]=>
@@ -85,6 +83,10 @@ array(7) {
   int(3)
   ["mime"]=>
   string(10) "image/jpeg"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(1) {
   ["APP0"]=>
@@ -92,7 +94,7 @@ array(1) {
 }
 
 -- PNG image file (200x100.png) --
-array(6) {
+array(8) {
   [0]=>
   int(200)
   [1]=>
@@ -105,12 +107,16 @@ array(6) {
   int(8)
   ["mime"]=>
   string(9) "image/png"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
 
 -- SWF image file (200x100.swf) --
-array(5) {
+array(7) {
   [0]=>
   int(200)
   [1]=>
@@ -121,12 +127,16 @@ array(5) {
   string(24) "width="200" height="100""
   ["mime"]=>
   string(29) "application/x-shockwave-flash"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
 
 -- BMP image file (200x100.bmp) --
-array(6) {
+array(8) {
   [0]=>
   int(200)
   [1]=>
@@ -139,12 +149,16 @@ array(6) {
   int(24)
   ["mime"]=>
   string(9) "image/bmp"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
 
 -- TIFF intel byte order image file (200x100.tiff) --
-array(5) {
+array(7) {
   [0]=>
   int(200)
   [1]=>
@@ -155,12 +169,16 @@ array(5) {
   string(24) "width="200" height="100""
   ["mime"]=>
   string(10) "image/tiff"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
 
 -- JPC image file (test1pix.jpc) --
-array(7) {
+array(9) {
   [0]=>
   int(1)
   [1]=>
@@ -175,12 +193,16 @@ array(7) {
   int(3)
   ["mime"]=>
   string(24) "application/octet-stream"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
 
 -- JP2 image file (test1pix.jp2) --
-array(7) {
+array(9) {
   [0]=>
   int(1)
   [1]=>
@@ -195,12 +217,16 @@ array(7) {
   int(3)
   ["mime"]=>
   string(9) "image/jp2"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
 
 -- IFF image file (test4pix.iff) --
-array(6) {
+array(8) {
   [0]=>
   int(4)
   [1]=>
@@ -213,7 +239,10 @@ array(6) {
   int(4)
   ["mime"]=>
   string(9) "image/iff"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(0) {
 }
-===DONE===

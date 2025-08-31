@@ -18,10 +18,10 @@ echo 'Done';
 ?>
 --EXPECTF--
 [callback:1]Attempt to flush unerasable buffer - should fail...
-Notice: ob_flush(): failed to flush buffer of callback (0) in %s on line %d
+Notice: ob_flush(): Failed to flush buffer of callback (0) in %s on line %d
 bool(false)
 string(%d) "Attempt to flush unerasable buffer - should fail...
-Notice: ob_flush(): failed to flush buffer of callback (0) in %s on line %d
+Notice: ob_flush(): Failed to flush buffer of callback (0) in %s on line %d
 bool(false)
 "
 Done

@@ -5,24 +5,15 @@ cases: no params, wrong param, wrong param range
 --CREDITS--
 Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-10
---SKIPIF--
-<?php
-	if(!extension_loaded("posix")) {
-        die("SKIP - POSIX extension not loaded");
-    }
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
-var_dump( posix_getsid() );
-var_dump( posix_getsid(array()) );
-var_dump( posix_getsid(-1) );
+try {
+	posix_getsid(-1);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), PHP_EOL;
+}
 ?>
-===DONE===
 --EXPECTF--
-Warning: posix_getsid() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: posix_getsid() expects parameter 1 to be int, array given in %s on line %d
-bool(false)
-bool(false)
-===DONE===
+posix_getsid(): Argument #1 ($process_id) must be between 0 and %d

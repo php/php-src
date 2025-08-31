@@ -17,6 +17,11 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef ZEND_ITERATORS_H
+#define ZEND_ITERATORS_H
+
+#include "zend_types.h"
+
 /* These iterators were designed to operate within the foreach()
  * structures provided by the engine, but could be extended for use
  * with other iterative engine opcodes.
@@ -31,7 +36,7 @@ typedef struct _zend_object_iterator_funcs {
 	void (*dtor)(zend_object_iterator *iter);
 
 	/* check for end of iteration (FAILURE or SUCCESS if data is valid) */
-	int (*valid)(zend_object_iterator *iter);
+	zend_result (*valid)(zend_object_iterator *iter);
 
 	/* fetch the item data for the current element */
 	zval *(*get_current_data)(zend_object_iterator *iter);
@@ -50,6 +55,10 @@ typedef struct _zend_object_iterator_funcs {
 
 	/* invalidate current value/key (optional, may be NULL) */
 	void (*invalidate_current)(zend_object_iterator *iter);
+
+	/* Expose owned values to GC.
+	 * This has the same semantics as the corresponding object handler. */
+	HashTable *(*get_gc)(zend_object_iterator *iter, zval **table, int *n);
 } zend_object_iterator_funcs;
 
 struct _zend_object_iterator {
@@ -68,6 +77,13 @@ typedef struct _zend_class_iterator_funcs {
 	zend_function *zf_rewind;
 } zend_class_iterator_funcs;
 
+typedef struct _zend_class_arrayaccess_funcs {
+	zend_function *zf_offsetget;
+	zend_function *zf_offsetexists;
+	zend_function *zf_offsetset;
+	zend_function *zf_offsetunset;
+} zend_class_arrayaccess_funcs;
+
 BEGIN_EXTERN_C()
 /* given a zval, returns stuff that can be used to iterate it. */
 ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr);
@@ -78,3 +94,5 @@ ZEND_API void zend_iterator_dtor(zend_object_iterator *iter);
 
 ZEND_API void zend_register_iterator_wrapper(void);
 END_EXTERN_C()
+
+#endif /* ZEND_ITERATORS_H */

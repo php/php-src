@@ -20,50 +20,93 @@ $supported_hash_al = array(
 );
 
 foreach ($supported_hash_al as $hash=>$wanted) {
-	$passwd = str_repeat($hash, 10);
-	$salt = str_repeat($hash, 2);
-	$result = mhash_keygen_s2k(constant($hash), $passwd, $salt, 100);
-	if (!strcmp(bin2hex($result), $wanted)) {
-		echo "$hash\nok\n";
-	} else {
-		echo "$hash: ";
-		var_dump($wanted);
-		echo "$hash: ";
-		var_dump(bin2hex($result));
-	}
-	echo "\n";
+    $passwd = str_repeat($hash, 10);
+    $salt = str_repeat($hash, 2);
+    $result = mhash_keygen_s2k(constant($hash), $passwd, $salt, 100);
+    if (!strcmp(bin2hex($result), $wanted)) {
+        echo "$hash\nok\n";
+    } else {
+        echo "$hash: ";
+        var_dump($wanted);
+        echo "$hash: ";
+        var_dump(bin2hex($result));
+    }
+    echo "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant MHASH_MD5 is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_MD5
 ok
 
+
+Deprecated: Constant MHASH_SHA1 is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_SHA1
 ok
 
+
+Deprecated: Constant MHASH_HAVAL256 is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_HAVAL256
 ok
 
+
+Deprecated: Constant MHASH_HAVAL224 is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_HAVAL224
 ok
 
+
+Deprecated: Constant MHASH_HAVAL192 is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_HAVAL192
 ok
 
+
+Deprecated: Constant MHASH_HAVAL160 is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_HAVAL160
 ok
 
+
+Deprecated: Constant MHASH_RIPEMD160 is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_RIPEMD160
 ok
 
+
+Deprecated: Constant MHASH_GOST is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_GOST
 ok
 
+
+Deprecated: Constant MHASH_TIGER is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_TIGER
 ok
 
+
+Deprecated: Constant MHASH_CRC32 is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_CRC32
 ok
 
+
+Deprecated: Constant MHASH_CRC32B is deprecated since 8.5, as the mhash*() functions were deprecated in %s on line %d
+
+Deprecated: Function mhash_keygen_s2k() is deprecated since 8.1 in %s on line %d
 MHASH_CRC32B
 ok

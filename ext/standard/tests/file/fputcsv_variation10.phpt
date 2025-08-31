@@ -2,12 +2,6 @@
 Test fputcsv() : usage variations - with line without any csv fields
 --FILE--
 <?php
-/*
- Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
- Description: Format line as CSV and write to the file pointer
-*/
-
-
 /* Testing fputcsv() to write to a file when the field has no CSV format */
 
 echo "*** Testing fputcsv() : with no CSV format in the field ***\n";
@@ -48,7 +42,7 @@ foreach ($fields as $field) {
     $csv_field = $field;
 
     // write to a file in csv format
-    var_dump( fputcsv($file_handle, $csv_field) );
+    var_dump( fputcsv($file_handle, $csv_field, escape: "\\") );
 
     // check the file pointer position and eof
     var_dump( ftell($file_handle) );

@@ -24,5 +24,5 @@ try {
 
 ?>
 --EXPECT--
-string(41) "syntax error, unexpected 'FOO' (T_STRING)"
-string(41) "syntax error, unexpected 'FOO' (T_STRING)"
+string(41) "syntax error, unexpected identifier "FOO""
+string(41) "syntax error, unexpected identifier "FOO""

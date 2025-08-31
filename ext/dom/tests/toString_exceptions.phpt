@@ -1,5 +1,7 @@
 --TEST--
 Handling of exceptions during __toString
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

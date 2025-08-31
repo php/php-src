@@ -8,12 +8,14 @@ $arrObj->append('foo');
 $arrObj->append('bar');
 $arrObj->append('foo');
 
-$arr = array_unique($arrObj);
-var_dump($arr);
+try {
+    $arr = array_unique($arrObj);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: array_unique() expects parameter 1 to be array, object given in %s on line %d
-NULL
+--EXPECT--
+array_unique(): Argument #1 ($array) must be of type array, ArrayObject given
 Done

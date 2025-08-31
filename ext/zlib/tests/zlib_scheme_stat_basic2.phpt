@@ -1,14 +1,10 @@
 --TEST--
 Test compress.zlib:// scheme with the unlink function
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
-$inputFileName = __DIR__."/004.txt.gz";
+$inputFileName = __DIR__."/data/test.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 echo "file_exists=";
 var_dump(file_exists($srcFile));
@@ -27,7 +23,6 @@ echo "fileatime=";
 var_dump(fileatime($srcFile));
 
 ?>
-===DONE===
 --EXPECTF--
 file_exists=bool(false)
 is_file=bool(false)
@@ -35,12 +30,11 @@ is_dir=bool(false)
 is_readable=bool(false)
 
 filesize=
-Warning: filesize(): stat failed for compress.zlib://%s004.txt.gz in %s on line %d
+Warning: filesize(): stat failed for compress.zlib://%stest.txt.gz in %s on line %d
 bool(false)
 filetype=
-Warning: filetype(): Lstat failed for compress.zlib://%s004.txt.gz in %s on line %d
+Warning: filetype(): Lstat failed for compress.zlib://%stest.txt.gz in %s on line %d
 bool(false)
 fileatime=
-Warning: fileatime(): stat failed for compress.zlib://%s004.txt.gz in %s on line %d
+Warning: fileatime(): stat failed for compress.zlib://%stest.txt.gz in %s on line %d
 bool(false)
-===DONE===

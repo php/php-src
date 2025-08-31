@@ -6,11 +6,11 @@ class Test implements Iterator {
 
     public $arr = array();
 
-    public function rewind()    { return reset($this->arr); }
-    public function current()   { throw new Exception(); }
-    public function key()       { return key($this->arr); }
-    public function next()      { return next($this->arr); }
-    public function valid()     { return (current($this->arr) !== false); }
+    public function rewind(): void    { reset($this->arr); }
+    public function current(): mixed   { throw new Exception(); }
+    public function key(): mixed       { return key($this->arr); }
+    public function next(): void      { next($this->arr); }
+    public function valid(): bool     { return (current($this->arr) !== false); }
 }
 
 $t = new Test();

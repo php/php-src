@@ -113,37 +113,11 @@ DateTime Object
     [timezone_type] => 3
     [timezone] => UTC
 )
-Array
-(
-    [warning_count] => 0
-    [warnings] => Array
-        (
-        )
-
-    [error_count] => 0
-    [errors] => Array
-        (
-        )
-
-)
 ==
 DateTime Object
 (
     [date] => 2004-06-08 00:00:00.000000
     [timezone_type] => 3
     [timezone] => UTC
-)
-Array
-(
-    [warning_count] => 0
-    [warnings] => Array
-        (
-        )
-
-    [error_count] => 0
-    [errors] => Array
-        (
-        )
-
 )
 ==

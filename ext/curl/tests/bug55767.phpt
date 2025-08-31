@@ -1,17 +1,9 @@
 --TEST--
 Test curl_opt() function with POST params from array with a numeric key
---SKIPIF--
-<?php
-include 'skipif.inc';
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
-/* Prototype  : bool curl_setopt(resource ch, int option, mixed value)
- * Description: Set an option for a cURL transfer
- * Source code: ext/curl/interface.c
- * Alias to functions:
- */
-
   include 'server.inc';
   $host = curl_cli_server_start();
 
@@ -28,11 +20,9 @@ include 'skipif.inc';
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
 
   $curl_content = curl_exec($ch);
-  curl_close($ch);
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl sending through GET an POST ***
 string(203) "array(2) {
@@ -50,4 +40,3 @@ array(3) {
   string(8) "John Doe"
 }
 "
-===DONE===

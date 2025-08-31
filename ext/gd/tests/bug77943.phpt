@@ -1,8 +1,12 @@
 --TEST--
 Bug #77943 (imageantialias($image, false); does not work)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
@@ -23,7 +27,5 @@ imageline($im, 10, 0, $width, $height-10, $blue);
 
 test_image_equals_file(__DIR__ . '/bug77943.png', $im);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

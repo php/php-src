@@ -2,8 +2,8 @@
 Test curl_getinfo() function with CURLINFO_EFFECTIVE_URL parameter
 --CREDITS--
 Jean-Marc Fontaine <jmf@durcommefaire.net>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -16,10 +16,7 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   curl_exec($ch);
   $info = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
   var_dump($url == $info);
-  curl_close($ch);
 ?>
-===DONE===
 --EXPECT--
 Hello World!
 Hello World!bool(true)
-===DONE===

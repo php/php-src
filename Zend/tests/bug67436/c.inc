@@ -1,5 +1,5 @@
 <?php
 
 class c {
-	const TESTCONSTANT = "c::TESTCONSTANT";
+    const TESTCONSTANT = "c::TESTCONSTANT";
 }

@@ -4,10 +4,12 @@ Test DOMDocument::loadHTMLFile when an empty document is loaded
 Verifies that an warning message is showed if an empty document is loaded
 --CREDITS--
 Antonio Diaz Ruiz <dejalatele@gmail.com>
---INI--
-assert.bail=true
+--EXTENSIONS--
+dom
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+if (LIBXML_VERSION >= 21400) die("skip libxml >= 2.14 no longer has this non-standard warning");
+?>
 --FILE--
 <?php
 $doc = new DOMDocument();

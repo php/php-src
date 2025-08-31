@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #77849 (Unexpected segfault attempting to use cloned PDO object)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -14,10 +15,11 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();
-$db2 = clone $db;
+try {
+    $db2 = clone $db;
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class PDO in %s
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Trying to clone an uncloneable object of class PDO

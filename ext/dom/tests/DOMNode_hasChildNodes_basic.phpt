@@ -1,14 +1,12 @@
 --TEST--
 Test whether a node has child nodes: hasChildNodes()
---SKIPIF--
-<?php
-include('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
 /* Create an XML document
- * with strcuture
+ * with structure
  * <book>
  *  <title>This is the title</title>
  * </book>

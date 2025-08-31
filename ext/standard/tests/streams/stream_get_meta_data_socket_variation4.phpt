@@ -9,7 +9,7 @@ $server = stream_socket_server('tcp://127.0.0.1:31334');
 /* Connect to it */
 $client = fsockopen('tcp://127.0.0.1:31334');
 if (!$client) {
-	die("Unable to create socket");
+    die("Unable to create socket");
 }
 
 /* Accept that connection */
@@ -27,7 +27,7 @@ echo "\n\nClose the server side socket and read the remaining data from the clie
 fclose($socket);
 fclose($server);
 while(!feof($client)) {
-	fread($client, 1);
+    fread($client, 1);
 }
 var_dump(stream_get_meta_data($client));
 
@@ -36,7 +36,7 @@ fclose($client);
 ?>
 --EXPECTF--
 Write some data:
-array(7) {
+array(8) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
@@ -51,11 +51,13 @@ array(7) {
   int(%i)
   ["seekable"]=>
   bool(false)
+  ["uri"]=>
+  string(21) "tcp://127.0.0.1:31334"
 }
 
 
 Read a line from the client:
-array(7) {
+array(8) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
@@ -70,11 +72,13 @@ array(7) {
   int(%i)
   ["seekable"]=>
   bool(false)
+  ["uri"]=>
+  string(21) "tcp://127.0.0.1:31334"
 }
 
 
 Close the server side socket and read the remaining data from the client:
-array(7) {
+array(8) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
@@ -89,4 +93,6 @@ array(7) {
   int(%i)
   ["seekable"]=>
   bool(false)
+  ["uri"]=>
+  string(21) "tcp://127.0.0.1:31334"
 }

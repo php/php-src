@@ -1,8 +1,9 @@
 --TEST--
 TLSv1.1 and TLSv1.2 bitwise stream crypto flag assignment
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
@@ -11,14 +12,15 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_crypto_flags_002.pem.tmp';
 $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_crypto_flags_002-ca.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
-        'local_cert' => '%s'
+        'local_cert' => '%s',
+        'security_level' => 0,
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     @stream_socket_accept($server, 1);
     @stream_socket_accept($server, 1);
@@ -29,15 +31,14 @@ $serverCode = sprintf($serverCode, $certFile);
 
 $peerName = 'stream_crypto_flags_002';
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer' => true,
         'cafile' => '%s',
         'peer_name' => '%s',
+        'security_level' => 0,
     ]]);
-
-    phpt_wait();
 
     stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT);
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));

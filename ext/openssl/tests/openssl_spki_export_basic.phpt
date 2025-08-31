@@ -1,8 +1,9 @@
 --TEST--
 openssl_spki_export() tests for exporting public key
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
 if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>
 --FILE--
@@ -19,14 +20,12 @@ foreach ($key_sizes as $key_size) {
 
 /* array of available hashings to test */
 $algo = array(
-    OPENSSL_ALGO_MD4,
     OPENSSL_ALGO_MD5,
     OPENSSL_ALGO_SHA1,
     OPENSSL_ALGO_SHA224,
     OPENSSL_ALGO_SHA256,
     OPENSSL_ALGO_SHA384,
     OPENSSL_ALGO_SHA512,
-    OPENSSL_ALGO_RMD160
 );
 
 /* loop over key sizes for test */
@@ -50,8 +49,6 @@ function _uuid() {
 
 ?>
 --EXPECTREGEX--
-\-\-\-\-\-BEGIN PUBLIC KEY\-\-\-\-\-.*\-\-\-\-\-END PUBLIC KEY\-\-\-\-\-
-\-\-\-\-\-BEGIN PUBLIC KEY\-\-\-\-\-.*\-\-\-\-\-END PUBLIC KEY\-\-\-\-\-
 \-\-\-\-\-BEGIN PUBLIC KEY\-\-\-\-\-.*\-\-\-\-\-END PUBLIC KEY\-\-\-\-\-
 \-\-\-\-\-BEGIN PUBLIC KEY\-\-\-\-\-.*\-\-\-\-\-END PUBLIC KEY\-\-\-\-\-
 \-\-\-\-\-BEGIN PUBLIC KEY\-\-\-\-\-.*\-\-\-\-\-END PUBLIC KEY\-\-\-\-\-

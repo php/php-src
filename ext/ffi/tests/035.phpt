@@ -1,19 +1,19 @@
 --TEST--
-FFI 035: FFI::new() not-owned
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+FFI 035: FFI::cdef()->new() not-owned
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
-$p = FFI::new("uint16_t[2]", false);
+$p = FFI::cdef()->new("uint16_t[2]", false);
 var_dump($p);
 
 FFI::free($p);
 try {
-	var_dump($p);
+    var_dump($p);
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 ?>
 --EXPECTF--

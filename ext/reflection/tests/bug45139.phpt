@@ -4,19 +4,19 @@ Bug #45139 (ReflectionProperty returns incorrect declaring class)
 <?php
 
 class A {
-	private $foo;
+    private $foo;
 }
 
 class B extends A {
-	protected $bar;
-	private $baz;
-	private $quux;
+    protected $bar;
+    private $baz;
+    private $quux;
 }
 
 class C extends B {
-	public $foo;
-	private $baz;
-	protected $quux;
+    public $foo;
+    private $baz;
+    protected $quux;
 }
 
 $rc = new ReflectionClass('C');

@@ -1,7 +1,7 @@
 --TEST--
 Bug #29061 (soap extension segfaults)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

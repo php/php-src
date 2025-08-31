@@ -1,13 +1,20 @@
 --TEST--
 PDO_DBLIB: Out of memory on large recordsets
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
+if (getenv('SKIP_REPEAT')) die('skip May fail on repeat');
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
+--CONFLICTS--
+all
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
+
+$db = getDbConnection();
 
 /* This should be sufficient to overflow any buffers */
 $stmt = $db->prepare("select *
@@ -18,7 +25,7 @@ cross join information_schema.columns ic3");
 $x = $stmt->execute();
 $n = 0;
 while (($r = $stmt->fetch())) {
-	$n++;
+    $n++;
 }
 $stmt = null;
 

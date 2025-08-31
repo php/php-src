@@ -1,14 +1,16 @@
 --TEST--
-IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject()
+IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject() for ICU >= 58.1 and < 70.1
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=pt_PT
+date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
-if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '58.1') < 0) die('skip for ICU >= 58.1'); ?>
+if (version_compare(INTL_ICU_VERSION, '58.1') < 0 || version_compare(INTL_ICU_VERSION, '70.1') >= 0) die('skip for ICU >= 58.1 and < 70.1');
+?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
-ini_set("date.timezone", 'Atlantic/Azores');
 
 $ts = strtotime('2012-01-01 00:00:00 UTC');
 
@@ -35,7 +37,6 @@ $df->setCalendar($cal);
 d($df);
 
 ?>
-==DONE==
 --EXPECT--
 dimanche 1 janvier 2012 ap. J.-C. à 03:00:00 heure de Kaliningrad
 int(1)
@@ -52,4 +53,3 @@ bool(false)
 string(9) "gregorian"
 string(3) "UTC"
 
-==DONE==

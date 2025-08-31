@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2018 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -90,7 +90,7 @@ if (codes == NULL || serialized_bytes == NULL || serialized_size == NULL)
 if (number_of_codes <= 0) return PCRE2_ERROR_BADDATA;
 
 /* Compute total size. */
-total_size = sizeof(pcre2_serialized_data) + tables_length;
+total_size = sizeof(pcre2_serialized_data) + TABLES_LENGTH;
 tables = NULL;
 
 for (i = 0; i < number_of_codes; i++)
@@ -121,31 +121,31 @@ data->number_of_codes = number_of_codes;
 
 /* Copy all compiled code data. */
 dst_bytes = bytes + sizeof(pcre2_serialized_data);
-memcpy(dst_bytes, tables, tables_length);
-dst_bytes += tables_length;
+memcpy(dst_bytes, tables, TABLES_LENGTH);
+dst_bytes += TABLES_LENGTH;
 
 for (i = 0; i < number_of_codes; i++)
   {
   re = (const pcre2_real_code *)(codes[i]);
-  (void)memcpy(dst_bytes, (char *)re, re->blocksize);
-  
-  /* Certain fields in the compiled code block are re-set during 
-  deserialization. In order to ensure that the serialized data stream is always 
-  the same for the same pattern, set them to zero here. We can't assume the 
-  copy of the pattern is correctly aligned for accessing the fields as part of 
+  (void)memcpy(dst_bytes, (const char *)re, re->blocksize);
+
+  /* Certain fields in the compiled code block are re-set during
+  deserialization. In order to ensure that the serialized data stream is always
+  the same for the same pattern, set them to zero here. We can't assume the
+  copy of the pattern is correctly aligned for accessing the fields as part of
   a structure. Note the use of sizeof(void *) in the second of these, to
-  specify the size of a pointer. If sizeof(uint8_t *) is used (tables is a 
-  pointer to uint8_t), gcc gives a warning because the first argument is also a 
-  pointer to uint8_t. Casting the first argument to (void *) can stop this, but 
+  specify the size of a pointer. If sizeof(uint8_t *) is used (tables is a
+  pointer to uint8_t), gcc gives a warning because the first argument is also a
+  pointer to uint8_t. Casting the first argument to (void *) can stop this, but
   it didn't stop Coverity giving the same complaint. */
-  
-  (void)memset(dst_bytes + offsetof(pcre2_real_code, memctl), 0, 
+
+  (void)memset(dst_bytes + offsetof(pcre2_real_code, memctl), 0,
     sizeof(pcre2_memctl));
-  (void)memset(dst_bytes + offsetof(pcre2_real_code, tables), 0, 
+  (void)memset(dst_bytes + offsetof(pcre2_real_code, tables), 0,
     sizeof(void *));
   (void)memset(dst_bytes + offsetof(pcre2_real_code, executable_jit), 0,
-    sizeof(void *));        
- 
+    sizeof(void *));
+
   dst_bytes += re->blocksize;
   }
 
@@ -189,12 +189,12 @@ src_bytes = bytes + sizeof(pcre2_serialized_data);
 /* Decode tables. The reference count for the tables is stored immediately
 following them. */
 
-tables = memctl->malloc(tables_length + sizeof(PCRE2_SIZE), memctl->memory_data);
+tables = memctl->malloc(TABLES_LENGTH + sizeof(PCRE2_SIZE), memctl->memory_data);
 if (tables == NULL) return PCRE2_ERROR_NOMEMORY;
 
-memcpy(tables, src_bytes, tables_length);
-*(PCRE2_SIZE *)(tables + tables_length) = number_of_codes;
-src_bytes += tables_length;
+memcpy(tables, src_bytes, TABLES_LENGTH);
+*(PCRE2_SIZE *)(tables + TABLES_LENGTH) = number_of_codes;
+src_bytes += TABLES_LENGTH;
 
 /* Decode the byte stream. We must not try to read the size from the compiled
 code block in the stream, because it might be unaligned, which causes errors on
@@ -232,10 +232,10 @@ for (i = 0; i < number_of_codes; i++)
   if (dst_re->magic_number != MAGIC_NUMBER ||
       dst_re->name_entry_size > MAX_NAME_SIZE + IMM2_SIZE + 1 ||
       dst_re->name_count > MAX_NAME_COUNT)
-    {   
-    memctl->free(dst_re, memctl->memory_data); 
+    {
+    memctl->free(dst_re, memctl->memory_data);
     return PCRE2_ERROR_BADSERIALIZEDDATA;
-    } 
+    }
 
   /* At the moment only one table is supported. */
 

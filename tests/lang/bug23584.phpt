@@ -9,5 +9,5 @@ error_reporting(E_ALL);
 echo $foo;
 
 ?>
---EXPECTREGEX--
-Notice: Undefined variable:.*foo in .* on line 6
+--EXPECTF--
+Warning: Undefined variable $foo in %s on line 6

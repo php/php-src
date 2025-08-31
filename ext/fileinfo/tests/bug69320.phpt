@@ -1,7 +1,7 @@
 --TEST--
 Bug #69320 libmagic crash when running laravel tests
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 
@@ -12,8 +12,8 @@ var_dump(finfo_file(finfo_open(FILEINFO_MIME_TYPE), $fname));
 ?>
 --CLEAN--
 <?php
-	$fname = __DIR__ . DIRECTORY_SEPARATOR . "bug69320.txt";
-	unlink($fname);
+    $fname = __DIR__ . DIRECTORY_SEPARATOR . "bug69320.txt";
+    unlink($fname);
 ?>
 --EXPECT--
 string(10) "text/plain"

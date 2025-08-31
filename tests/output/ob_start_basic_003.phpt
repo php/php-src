@@ -4,7 +4,7 @@ ob_start(): ensure even fatal error test is affected by output buffering.
 <?php
 
 function f() {
-	return "I have stolen your output";
+    return "I have stolen your output";
 }
 
 ob_start('f');

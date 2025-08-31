@@ -1,5 +1,7 @@
 --TEST--
 Type inference for $ary[$idx]->prop +=
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -8,13 +10,13 @@ function test() {
     $ary[0]->y += 2;
     var_dump(is_object($ary[0]));
 }
-test();
+try {
+    test();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECTF--
-Notice: Undefined offset: 0 in %s on line %d
-
-Warning: Creating default object from empty value in %s on line %d
-
-Notice: Undefined property: stdClass::$y in %s on line %d
-bool(true)
+Warning: Undefined array key 0 in %s on line %d
+Attempt to assign property "y" on null

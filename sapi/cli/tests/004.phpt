@@ -7,11 +7,11 @@ include "skipif.inc";
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n --rf unknown`);
-var_dump(`$php -n --rf echo`);
-var_dump(`$php -n --rf phpinfo`);
+var_dump(shell_exec("$php -n --rf unknown"));
+var_dump(shell_exec("$php -n --rf echo"));
+var_dump(shell_exec("$php -n --rf phpinfo"));
 
 echo "Done\n";
 ?>
@@ -20,11 +20,12 @@ string(45) "Exception: Function unknown() does not exist
 "
 string(42) "Exception: Function echo() does not exist
 "
-string(119) "Function [ <internal:standard> function phpinfo ] {
+string(155) "Function [ <internal:standard> function phpinfo ] {
 
   - Parameters [1] {
-    Parameter #0 [ <optional> $what ]
+    Parameter #0 [ <optional> int $flags = INFO_ALL ]
   }
+  - Return [ true ]
 }
 
 "

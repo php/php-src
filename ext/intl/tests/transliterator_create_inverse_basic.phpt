@@ -1,11 +1,9 @@
 --TEST--
 Transliterator::createInverse (basic)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
-
-ini_set("intl.error_level", E_WARNING);
 
 $tr = Transliterator::create("Katakana-Latin");
 $orstr = "オーシャンビュー";
@@ -25,6 +23,7 @@ var_dump($orstr === $recovstr);
 var_dump($orstr === $recovstr2);
 
 echo "Done.\n";
+?>
 --EXPECT--
 オーシャンビュー
 ōshanbyū

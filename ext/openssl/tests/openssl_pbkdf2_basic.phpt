@@ -1,7 +1,9 @@
 --TEST--
 openssl_pbkdf2() tests
+--EXTENSIONS--
+openssl
 --SKIPIF--
-<?php if (!extension_loaded("openssl") || !function_exists("openssl_pbkdf2")) print "skip"; ?>
+<?php if (!function_exists("openssl_pbkdf2")) print "skip"; ?>
 --FILE--
 <?php
 // official test vectors

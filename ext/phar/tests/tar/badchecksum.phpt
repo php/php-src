@@ -1,7 +1,7 @@
 --TEST--
 Phar: tar with bad checksum
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
@@ -14,17 +14,15 @@ $a->addFile('hithere', 'contents', null, 'checksum');
 $a->close();
 
 try {
-	$p = new PharData($fname);
+    $p = new PharData($fname);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECTF--
 phar error: "%sbadchecksum.tar" is a corrupted tar file (checksum mismatch of file "hithere")
-===DONE===

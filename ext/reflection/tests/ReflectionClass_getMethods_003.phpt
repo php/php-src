@@ -6,14 +6,14 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class C {
-	public function pubf1() {}
-	public function pubf2() {}
-	private function privf1() {}
-	private function privf2() {}
-	static public function pubsf1() {}
-	static public function pubsf2() {}
-	static private function privsf1() {}
-	static private function privsf2() {}
+    public function pubf1() {}
+    public function pubf2() {}
+    private function privf1() {}
+    private function privf2() {}
+    static public function pubsf1() {}
+    static public function pubsf2() {}
+    static private function privsf1() {}
+    static private function privsf2() {}
 }
 
 $rc = new ReflectionClass("C");

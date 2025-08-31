@@ -5,25 +5,29 @@
 
 class c1
 {
-	const ZERO = 0;
-	const ONE = 1;
-	const MAX = PHP_INT_MAX;
-	public static $a1 = array(self::ONE => 'one');
-	public static $a2 = array(self::ZERO => 'zero');
-	public static $a3 = array(self::MAX => 'zero');
+    const ZERO = 0;
+    const ONE = 1;
+    const MAX = PHP_INT_MAX;
+    public static $a1 = array(self::ONE => 'one');
+    public static $a2 = array(self::ZERO => 'zero');
+    public static $a3 = array(self::MAX => 'zero');
 }
 
 
 c1::$a1[] = 1;
 c1::$a2[] = 1;
-c1::$a3[] = 1;
+try {
+    c1::$a3[] = 1;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 var_dump(c1::$a1);
 var_dump(c1::$a2);
 var_dump(c1::$a3);
 ?>
 --EXPECTF--
-Warning: Cannot add element to the array as the next element is already occupied in %sbug69017.php on line %d
+Cannot add element to the array as the next element is already occupied
 array(2) {
   [1]=>
   string(3) "one"

@@ -1,13 +1,11 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -42,7 +40,7 @@
 #define MYSQLND_SQLSTATE_LENGTH		5
 #define MYSQLND_SQLSTATE_NULL		"00000"
 
-#define MYSQLND_MAX_ALLOWED_USER_LEN	252		/* 63 char * 4byte . MySQL supports now only 16 char, but let it be forward compatible */
+#define MYSQLND_MAX_ALLOWED_USER_LEN	252		/* 63 char * 4byte . MySQL supports now only 32 char, but let it be forward compatible */
 #define MYSQLND_MAX_ALLOWED_DB_LEN		1024	/* 256 char * 4byte. MySQL supports now only 64 char in the tables, but on the FS could be different. Forward compatible. */
 
 #define MYSQLND_NET_CMD_BUFFER_MIN_SIZE			4096
@@ -131,6 +129,8 @@
 #define CR_PARAMS_NOT_BOUND		2031
 #define CR_INVALID_PARAMETER_NO	2034
 #define CR_INVALID_BUFFER_USE	2035
+#define CR_LOAD_DATA_LOCAL_INFILE_REJECTED 2068
+#define CR_CLIENT_INTERACTION_TIMEOUT 4031
 
 #define MYSQLND_EE_FILENOTFOUND	 7890
 
@@ -149,12 +149,6 @@
 #define TRANS_COR_AND_NO_CHAIN	2
 #define TRANS_COR_RELEASE		4
 #define TRANS_COR_NO_RELEASE	8
-
-typedef enum mysqlnd_extension
-{
-	MYSQLND_MYSQL = 0,
-	MYSQLND_MYSQLI
-} enum_mysqlnd_extension;
 
 enum
 {
@@ -184,18 +178,6 @@ typedef enum mysqlnd_res_type
 	MYSQLND_RES_PS_UNBUF
 } enum_mysqlnd_res_type;
 
-typedef enum mysqlnd_send_query_type
-{
-	MYSQLND_SEND_QUERY_IMPLICIT = 0,
-	MYSQLND_SEND_QUERY_EXPLICIT
-} enum_mysqlnd_send_query_type;
-
-typedef enum mysqlnd_reap_result_type
-{
-	MYSQLND_REAP_RESULT_IMPLICIT = 0,
-	MYSQLND_REAP_RESULT_EXPLICIT
-} enum_mysqlnd_reap_result_type;
-
 typedef enum mysqlnd_send_execute_type
 {
 	MYSQLND_SEND_EXECUTE_IMPLICIT = 0,
@@ -218,21 +200,21 @@ typedef enum mysqlnd_client_option
 	MYSQL_INIT_COMMAND,
 	MYSQL_READ_DEFAULT_FILE,
 	MYSQL_READ_DEFAULT_GROUP,
-	MYSQL_SET_CHARSET_DIR,
+	MYSQL_SET_CHARSET_DIR, /* Unsupported by mysqlnd */
 	MYSQL_SET_CHARSET_NAME,
 	MYSQL_OPT_LOCAL_INFILE,
 	MYSQL_OPT_PROTOCOL,
-	MYSQL_SHARED_MEMORY_BASE_NAME,
+	MYSQL_SHARED_MEMORY_BASE_NAME, /* Unsupported by mysqlnd */
 	MYSQL_OPT_READ_TIMEOUT,
 	MYSQL_OPT_WRITE_TIMEOUT,
-	MYSQL_OPT_USE_RESULT,
-	MYSQL_OPT_USE_REMOTE_CONNECTION,
-	MYSQL_OPT_USE_EMBEDDED_CONNECTION,
-	MYSQL_OPT_GUESS_CONNECTION,
-	MYSQL_SET_CLIENT_IP,
-	MYSQL_SECURE_AUTH,
-	MYSQL_REPORT_DATA_TRUNCATION,
-	MYSQL_OPT_RECONNECT,
+	MYSQL_OPT_USE_RESULT, /* Unsupported by mysqlnd */
+	MYSQL_OPT_USE_REMOTE_CONNECTION, /* Unsupported by mysqlnd; removed in MySQL-8.0 */
+	MYSQL_OPT_USE_EMBEDDED_CONNECTION, /* Unsupported by mysqlnd; removed in MySQL-8.0 */
+	MYSQL_OPT_GUESS_CONNECTION, /* Unsupported by mysqlnd; removed in MySQL-8.0 */
+	MYSQL_SET_CLIENT_IP, /* Unsupported by mysqlnd */
+	MYSQL_SECURE_AUTH, /* Unsupported by mysqlnd; removed in MySQL-8.0 */
+	MYSQL_REPORT_DATA_TRUNCATION, /* Unsupported by mysqlnd */
+	MYSQL_OPT_RECONNECT, /* Unsupported by mysqlnd */
 	MYSQL_OPT_SSL_VERIFY_SERVER_CERT,
 	MYSQL_PLUGIN_DIR,
 	MYSQL_DEFAULT_AUTH,
@@ -255,10 +237,9 @@ typedef enum mysqlnd_client_option
 	MYSQL_OPT_NET_BUFFER_LENGTH,
 	MYSQL_OPT_TLS_VERSION,
 	MYSQL_OPT_SSL_MODE,
+	MYSQL_OPT_LOAD_DATA_LOCAL_DIR,
 	MYSQLND_DEPRECATED_ENUM1 = 200,
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	MYSQLND_OPT_INT_AND_FLOAT_NATIVE = 201,
-#endif
 	MYSQLND_OPT_NET_CMD_BUFFER_SIZE = 202,
 	MYSQLND_OPT_NET_READ_BUFFER_SIZE = 203,
 	MYSQLND_OPT_SSL_KEY = 204,
@@ -300,6 +281,7 @@ typedef enum mysqlnd_field_types
 	MYSQL_TYPE_NEWDATE	= 14,
 	MYSQL_TYPE_VARCHAR	= 15,
 	MYSQL_TYPE_BIT		= 16,
+	MYSQL_TYPE_VECTOR=242,
 	MYSQL_TYPE_JSON=245,
 	MYSQL_TYPE_NEWDECIMAL=246,
 	MYSQL_TYPE_ENUM=247,
@@ -342,6 +324,7 @@ typedef enum mysqlnd_server_option
 #define FIELD_TYPE_NEWDATE		MYSQL_TYPE_NEWDATE
 #define FIELD_TYPE_ENUM			MYSQL_TYPE_ENUM
 #define FIELD_TYPE_SET			MYSQL_TYPE_SET
+#define FIELD_TYPE_VECTOR 		MYSQL_TYPE_VECTOR
 #define FIELD_TYPE_JSON 		MYSQL_TYPE_JSON
 #define FIELD_TYPE_TINY_BLOB	MYSQL_TYPE_TINY_BLOB
 #define FIELD_TYPE_MEDIUM_BLOB	MYSQL_TYPE_MEDIUM_BLOB
@@ -350,7 +333,6 @@ typedef enum mysqlnd_server_option
 #define FIELD_TYPE_VAR_STRING	MYSQL_TYPE_VAR_STRING
 #define FIELD_TYPE_STRING		MYSQL_TYPE_STRING
 #define FIELD_TYPE_CHAR			MYSQL_TYPE_TINY
-#define FIELD_TYPE_INTERVAL		MYSQL_TYPE_ENUM
 #define FIELD_TYPE_GEOMETRY		MYSQL_TYPE_GEOMETRY
 #define FIELD_TYPE_BIT			MYSQL_TYPE_BIT
 
@@ -376,10 +358,6 @@ typedef enum mysqlnd_server_option
 #define IS_NOT_NULL(n)	((n) & NOT_NULL_FLAG)
 #define IS_BLOB(n)		((n) & BLOB_FLAG)
 #define IS_NUM(t)		((t) <= FIELD_TYPE_INT24 || (t) == FIELD_TYPE_YEAR || (t) == FIELD_TYPE_NEWDECIMAL)
-
-
-/* see mysqlnd_charset.c for more information */
-#define MYSQLND_BINARY_CHARSET_NR	63
 
 
 /*
@@ -423,16 +401,13 @@ typedef enum param_bind_flags
 enum mysqlnd_stmt_attr
 {
 	STMT_ATTR_UPDATE_MAX_LENGTH,
-	STMT_ATTR_CURSOR_TYPE,
-	STMT_ATTR_PREFETCH_ROWS
+	STMT_ATTR_CURSOR_TYPE
 };
 
 enum myslqnd_cursor_type
 {
 	CURSOR_TYPE_NO_CURSOR= 0,
 	CURSOR_TYPE_READ_ONLY= 1,
-	CURSOR_TYPE_FOR_UPDATE= 2,
-	CURSOR_TYPE_SCROLLABLE= 4
 };
 
 typedef enum mysqlnd_connection_close_type
@@ -691,23 +666,12 @@ enum php_mysqlnd_server_command
 #define MYSQLND_REFRESH_HOSTS		8	/* Flush host cache */
 #define MYSQLND_REFRESH_STATUS		16	/* Flush status variables */
 #define MYSQLND_REFRESH_THREADS		32	/* Flush thread cache */
-#define MYSQLND_REFRESH_SLAVE		64	/* Reset master info and restart slave */
+#define MYSQLND_REFRESH_REPLICA		64	/* Reset master info and restart replica */
+#define MYSQLND_REFRESH_SLAVE		MYSQLND_REFRESH_REPLICA	/* temporarily for backward compatibility */
 #define MYSQLND_REFRESH_MASTER		128	/* Remove all bin logs in the index */
 #define MYSQLND_REFRESH_BACKUP_LOG	0x200000L
 
 
-#define MYSQLND_STORE_PS		1
-#define MYSQLND_STORE_NO_COPY	2
-#define MYSQLND_STORE_COPY		4
-
-enum mysqlnd_buffered_type
-{
-	MYSQLND_BUFFERED_TYPE_ZVAL = 1,
-	MYSQLND_BUFFERED_TYPE_C
-};
-
-
 #define MYSQLND_CLIENT_NO_FLAG				0
-#define MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA	1
 
 #endif	/* MYSQLND_ENUM_N_DEF_H */

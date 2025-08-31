@@ -1,14 +1,15 @@
 --TEST--
 XML parser test, attributes
+--EXTENSIONS--
+xml
 --SKIPIF--
 <?php
-require_once("skipif.inc");
-if (! @xml_parser_create_ns('ISO-8859-1')) { die("skip xml_parser_create_ns is not supported on this plattform");}
+if (! @xml_parser_create_ns('ISO-8859-1')) { die("skip xml_parser_create_ns is not supported on this platform");}
 ?>
 --FILE--
 <?php
 function start_elem($parser,$name,$attribs) {
-	print "$name ";
+    print "$name ";
 
     foreach($attribs as $key => $value) {
         print "$key = $value ";
@@ -31,7 +32,6 @@ $parser = xml_parser_create_ns("ISO-8859-1","@");
 xml_set_element_handler($parser,'start_elem','end_elem');
 xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
 xml_parse($parser, $xml);
-xml_parser_free($parser);
 ?>
 --EXPECT--
 http://example.com/foo@a 

@@ -1,13 +1,11 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -43,12 +41,8 @@
 #include <php_config.h>
 #endif
 #include "php_standard.h"
-#include "php_string.h"
 #include "SAPI.h"
 #include <locale.h>
-#if HAVE_LANGINFO_H
-#include <langinfo.h>
-#endif
 
 #include <zend_hash.h>
 #include "html_tables.h"
@@ -80,8 +74,7 @@
 #define sjis_lead(c) ((c) != 0x80 && (c) != 0xA0 && (c) < 0xFD)
 #define sjis_trail(c) ((c) >= 0x40  && (c) != 0x7F && (c) < 0xFD)
 
-/* {{{ get_default_charset
- */
+/* {{{ get_default_charset */
 static char *get_default_charset(void) {
 	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
 		return PG(internal_encoding);
@@ -92,14 +85,13 @@ static char *get_default_charset(void) {
 }
 /* }}} */
 
-/* {{{ get_next_char
- */
+/* {{{ get_next_char */
 static inline unsigned int get_next_char(
 		enum entity_charset charset,
 		const unsigned char *str,
 		size_t str_len,
 		size_t *cursor,
-		int *status)
+		zend_result *status)
 {
 	size_t pos = *cursor;
 	unsigned int this_char = 0;
@@ -350,115 +342,48 @@ static inline unsigned int get_next_char(
 	}
 
 	*cursor = pos;
-  	return this_char;
+	return this_char;
 }
 /* }}} */
 
 /* {{{ php_next_utf8_char
  * Public interface for get_next_char used with UTF-8 */
- PHPAPI unsigned int php_next_utf8_char(
+PHPAPI unsigned int php_next_utf8_char(
 		const unsigned char *str,
 		size_t str_len,
 		size_t *cursor,
-		int *status)
+		zend_result *status)
 {
 	return get_next_char(cs_utf_8, str, str_len, cursor, status);
 }
 /* }}} */
 
 /* {{{ entity_charset determine_charset
- * returns the charset identifier based on current locale or a hint.
- * defaults to UTF-8 */
-static enum entity_charset determine_charset(char *charset_hint)
+ * Returns the charset identifier based on an explicitly provided charset,
+ * the internal_encoding and default_charset ini settings, or UTF-8 by default. */
+static enum entity_charset determine_charset(const char *charset_hint, bool quiet)
 {
-	size_t i;
-	enum entity_charset charset = cs_utf_8;
-	size_t len = 0;
-	const zend_encoding *zenc;
-
-	/* Default is now UTF-8 */
-	if (charset_hint == NULL)
-		return cs_utf_8;
-
-	if ((len = strlen(charset_hint)) != 0) {
-		goto det_charset;
+	if (!charset_hint || !*charset_hint) {
+		charset_hint = get_default_charset();
 	}
 
-	zenc = zend_multibyte_get_internal_encoding();
-	if (zenc != NULL) {
-		charset_hint = (char *)zend_multibyte_get_encoding_name(zenc);
-		if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
-			if ((len == 4) /* sizeof (auto|pass) */ &&
-					/* XXX should the "wchar" be ignored as well?? */
-					(!memcmp("pass", charset_hint, 4) ||
-					 !memcmp("auto", charset_hint, 4))) {
-				charset_hint = NULL;
-				len = 0;
-			} else {
-				goto det_charset;
-			}
-		}
-	}
-
-	charset_hint = SG(default_charset);
-	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
-		goto det_charset;
-	}
-
-	/* try to detect the charset for the locale */
-#if HAVE_NL_LANGINFO && defined(CODESET)
-	charset_hint = nl_langinfo(CODESET);
-	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
-		goto det_charset;
-	}
-#endif
-
-	/* try to figure out the charset from the locale */
-	{
-		char *localename;
-		char *dot, *at;
-
-		/* lang[_territory][.codeset][@modifier] */
-		localename = setlocale(LC_CTYPE, NULL);
-
-		dot = strchr(localename, '.');
-		if (dot) {
-			dot++;
-			/* locale specifies a codeset */
-			at = strchr(dot, '@');
-			if (at)
-				len = at - dot;
-			else
-				len = strlen(dot);
-			charset_hint = dot;
-		} else {
-			/* no explicit name; see if the name itself
-			 * is the charset */
-			charset_hint = localename;
-			len = strlen(charset_hint);
-		}
-	}
-
-det_charset:
-
-	if (charset_hint) {
-		int found = 0;
-
+	if (charset_hint && *charset_hint) {
+		size_t len = strlen(charset_hint);
 		/* now walk the charset map and look for the codeset */
-		for (i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
+		for (size_t i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
 			if (len == charset_map[i].codeset_len &&
 			    zend_binary_strcasecmp(charset_hint, len, charset_map[i].codeset, len) == 0) {
-				charset = charset_map[i].charset;
-				found = 1;
-				break;
+				return charset_map[i].charset;
 			}
 		}
-		if (!found) {
-			php_error_docref(NULL, E_WARNING, "charset `%s' not supported, assuming utf-8",
+
+		if (!quiet) {
+			php_error_docref(NULL, E_WARNING, "Charset \"%s\" is not supported, assuming UTF-8",
 					charset_hint);
 		}
 	}
-	return charset;
+
+	return cs_utf_8;
 }
 /* }}} */
 
@@ -526,7 +451,7 @@ static inline unsigned char unimap_bsearch(const uni_to_enc *table, unsigned cod
 /* }}} */
 
 /* {{{ map_from_unicode */
-static inline int map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
+static inline zend_result map_from_unicode(unsigned code, enum entity_charset charset, unsigned *res)
 {
 	unsigned char found;
 	const uni_to_enc *table;
@@ -548,7 +473,7 @@ static inline int map_from_unicode(unsigned code, enum entity_charset charset, u
 			*res = 0xF0; /* numero sign */
 		} else if (code == 0xA7) {
 			*res = 0xFD; /* section sign */
-		} else if (code >= 0x0401 && code <= 0x044F) {
+		} else if (code >= 0x0401 && code <= 0x045F) {
 			if (code == 0x040D || code == 0x0450 || code == 0x045D)
 				return FAILURE;
 			*res = code - 0x360;
@@ -742,13 +667,13 @@ static inline int numeric_entity_is_allowed(unsigned uni_cp, int document_type)
  * On input, *buf should point to the first character after # and on output, it's the last
  * byte read, no matter if there was success or insuccess.
  */
-static inline int process_numeric_entity(const char **buf, unsigned *code_point)
+static inline zend_result process_numeric_entity(const char **buf, unsigned *code_point)
 {
 	zend_long code_l;
 	int hexadecimal = (**buf == 'x' || **buf == 'X'); /* TODO: XML apparently disallows "X" */
 	char *endptr;
 
-	if (hexadecimal && (**buf != '\0'))
+	if (hexadecimal)
 		(*buf)++;
 
 	/* strtol allows whitespace and other stuff in the beginning
@@ -778,14 +703,14 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 /* }}} */
 
 /* {{{ process_named_entity */
-static inline int process_named_entity_html(const char **buf, const char **start, size_t *length)
+static inline zend_result process_named_entity_html(const char **buf, const char **start, size_t *length)
 {
 	*start = *buf;
 
 	/* "&" is represented by a 0x26 in all supported encodings. That means
-	 * the byte after represents a character or is the leading byte of an
+	 * the byte after represents a character or is the leading byte of a
 	 * sequence of 8-bit code units. If in the ranges below, it represents
-	 * necessarily a alpha character because none of the supported encodings
+	 * necessarily an alpha character because none of the supported encodings
 	 * has an overlap with ASCII in the leading byte (only on the second one) */
 	while ((**buf >= 'a' && **buf <= 'z') ||
 			(**buf >= 'A' && **buf <= 'Z') ||
@@ -807,7 +732,7 @@ static inline int process_named_entity_html(const char **buf, const char **start
 /* }}} */
 
 /* {{{ resolve_named_entity_html */
-static inline int resolve_named_entity_html(const char *start, size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
+static zend_result resolve_named_entity_html(const char *start, size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
 {
 	const entity_cp_map *s;
 	zend_ulong hash = zend_inline_hash_func(start, length);
@@ -855,9 +780,7 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #if 0
 		return php_mb2_int_to_char(buf, code);
 #else
-#if ZEND_DEBUG
-		assert(code <= 0xFFU);
-#endif
+		ZEND_ASSERT(code <= 0xFFU);
 		*buf = code;
 		return 1;
 #endif
@@ -866,9 +789,7 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #if 0 /* idem */
 		return php_mb2_int_to_char(buf, code);
 #else
-#if ZEND_DEBUG
-		assert(code <= 0xFFU);
-#endif
+		ZEND_ASSERT(code <= 0xFFU);
 		*buf = code;
 		return 1;
 #endif
@@ -888,112 +809,148 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 /* +2 is 1 because of rest (probably unnecessary), 1 because of terminating 0 */
 #define TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(oldlen) ((oldlen) + (oldlen) / 5 + 2)
 static void traverse_for_entities(
-	const char *old,
-	size_t oldlen,
-	zend_string *ret, /* should have allocated TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(olden) */
-	int all,
-	int flags,
+	const zend_string *input,
+	zend_string *output, /* should have allocated TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(olden) */
+	const int all,
+	const int flags,
 	const entity_ht *inv_map,
-	enum entity_charset charset)
+	const enum entity_charset charset)
 {
-	const char *p,
-			   *lim;
-	char	   *q;
-	int doctype = flags & ENT_HTML_DOC_TYPE_MASK;
+	const char *current_ptr = ZSTR_VAL(input);
+	const char *input_end   = current_ptr + ZSTR_LEN(input); /* terminator address */
+	char *output_ptr		= ZSTR_VAL(output);
+	const int doctype	   = flags & ENT_HTML_DOC_TYPE_MASK;
 
-	lim = old + oldlen; /* terminator address */
-	assert(*lim == '\0');
-
-	for (p = old, q = ZSTR_VAL(ret); p < lim;) {
-		unsigned code, code2 = 0;
-		const char *next = NULL; /* when set, next > p, otherwise possible inf loop */
-
-		/* Shift JIS, Big5 and HKSCS use multi-byte encodings where an
-		 * ASCII range byte can be part of a multi-byte sequence.
-		 * However, they start at 0x40, therefore if we find a 0x26 byte,
-		 * we're sure it represents the '&' character. */
-
-		/* assumes there are no single-char entities */
-		if (p[0] != '&' || (p + 3 >= lim)) {
-			*(q++) = *(p++);
-			continue;
+	while (current_ptr < input_end) {
+		const char *ampersand_ptr = memchr(current_ptr, '&', input_end - current_ptr);
+		if (!ampersand_ptr) {
+			const size_t tail_len = input_end - current_ptr;
+			if (tail_len > 0) {
+				memcpy(output_ptr, current_ptr, tail_len);
+				output_ptr += tail_len;
+			}
+			break;
 		}
 
-		/* now p[3] is surely valid and is no terminator */
+		/* Copy everything up to the found '&' */
+		const size_t chunk_len = ampersand_ptr - current_ptr;
+		if (chunk_len > 0) {
+			memcpy(output_ptr, current_ptr, chunk_len);
+			output_ptr += chunk_len;
+		}
 
-		/* numerical entity */
-		if (p[1] == '#') {
-			next = &p[2];
-			if (process_numeric_entity(&next, &code) == FAILURE)
-				goto invalid_code;
+		/* Now current_ptr points to the '&' character. */
+		current_ptr = ampersand_ptr;
 
-			/* If we're in htmlspecialchars_decode, we're only decoding entities
-			 * that represent &, <, >, " and '. Is this one of them? */
-			if (!all && (code > 63U ||
-					stage3_table_be_apos_00000[code].data.ent.entity == NULL))
-				goto invalid_code;
+		/* If there are less than 4 bytes remaining, there isn't enough for an entity - 
+		 * copy '&' as a normal character. */
+		if (input_end - current_ptr < 4) {
+			const size_t remaining = input_end - current_ptr;
+			memcpy(output_ptr, current_ptr, remaining);
+			output_ptr += remaining;
+			break;
+		}
 
-			/* are we allowed to decode this entity in this document type?
-			 * HTML 5 is the only that has a character that cannot be used in
-			 * a numeric entity but is allowed literally (U+000D). The
-			 * unoptimized version would be ... || !numeric_entity_is_allowed(code) */
-			if (!unicode_cp_is_allowed(code, doctype) ||
-					(doctype == ENT_HTML_DOC_HTML5 && code == 0x0D))
-				goto invalid_code;
+		unsigned code = 0, code2 = 0;
+		const char *entity_end_ptr = NULL;
+
+		if (current_ptr[1] == '#') {
+			/* Processing numeric entity */
+			const char *num_start = current_ptr + 2;
+			entity_end_ptr = num_start;
+			if (process_numeric_entity(&entity_end_ptr, &code) == FAILURE) {
+				goto invalid_incomplete_entity;
+			}
+			if (!all && (code > 63U || stage3_table_be_apos_00000[code].data.ent.entity == NULL)) {
+				/* If we're in htmlspecialchars_decode, we're only decoding entities
+				 * that represent &, <, >, " and '. Is this one of them? */
+				goto invalid_incomplete_entity;
+			} else if (!unicode_cp_is_allowed(code, doctype) ||
+					   (doctype == ENT_HTML_DOC_HTML5 && code == 0x0D)) {
+				/* are we allowed to decode this entity in this document type?
+				 * HTML 5 is the only that has a character that cannot be used in
+				 * a numeric entity but is allowed literally (U+000D). The
+				 * unoptimized version would be ... || !numeric_entity_is_allowed(code) */
+				goto invalid_incomplete_entity;
+			}
 		} else {
-			const char *start;
-			size_t ent_len;
-
-			next = &p[1];
-			start = next;
-
-			if (process_named_entity_html(&next, &start, &ent_len) == FAILURE)
-				goto invalid_code;
-
-			if (resolve_named_entity_html(start, ent_len, inv_map, &code, &code2) == FAILURE) {
-				if (doctype == ENT_HTML_DOC_XHTML && ent_len == 4 && start[0] == 'a'
-							&& start[1] == 'p' && start[2] == 'o' && start[3] == 's') {
-					/* uses html4 inv_map, which doesn't include apos;. This is a
-					 * hack to support it */
-					code = (unsigned) '\'';
+			/* Processing named entity */
+			const char *name_start = current_ptr + 1;
+			/* Search for ';' */
+			const size_t max_search_len = MIN(LONGEST_ENTITY_LENGTH + 1, input_end - name_start);
+			const char *semi_colon_ptr = memchr(name_start, ';', max_search_len);
+			if (!semi_colon_ptr) {
+				goto invalid_incomplete_entity;
+			} else {
+				const size_t name_len = semi_colon_ptr - name_start;
+				if (name_len == 0) {
+					goto invalid_incomplete_entity;
 				} else {
-					goto invalid_code;
+					if (resolve_named_entity_html(name_start, name_len, inv_map, &code, &code2) == FAILURE) {
+						if (doctype == ENT_HTML_DOC_XHTML && name_len == 4 &&
+							name_start[0] == 'a' && name_start[1] == 'p' &&
+							name_start[2] == 'o' && name_start[3] == 's')
+						{
+							/* uses html4 inv_map, which doesn't include apos;. This is a
+							 * hack to support it */
+							code = (unsigned)'\'';
+						} else {
+							goto invalid_incomplete_entity;
+						}
+					}
+					entity_end_ptr = semi_colon_ptr;
 				}
 			}
 		}
 
-		assert(*next == ';');
+		/* At this stage the entity_end_ptr should be always set. */
+		ZEND_ASSERT(entity_end_ptr != NULL);
 
-		if (((code == '\'' && !(flags & ENT_HTML_QUOTE_SINGLE)) ||
-				(code == '"' && !(flags & ENT_HTML_QUOTE_DOUBLE)))
-				/* && code2 == '\0' always true for current maps */)
-			goto invalid_code;
+		/* Check if quotes are allowed for entities representing ' or " */
+		if ((code == '\'' && !(flags & ENT_HTML_QUOTE_SINGLE)) ||
+			(code == '"'  && !(flags & ENT_HTML_QUOTE_DOUBLE)))
+		{
+			goto invalid_complete_entity;
+		}
 
 		/* UTF-8 doesn't need mapping (ISO-8859-1 doesn't either, but
 		 * the call is needed to ensure the codepoint <= U+00FF)  */
 		if (charset != cs_utf_8) {
 			/* replace unicode code point */
-			if (map_from_unicode(code, charset, &code) == FAILURE || code2 != 0)
-				goto invalid_code; /* not representable in target charset */
+			if (map_from_unicode(code, charset, &code) == FAILURE || code2 != 0) {
+				goto invalid_complete_entity;
+			}
 		}
 
-		q += write_octet_sequence((unsigned char*)q, charset, code);
+		/* Write the parsed entity into the output buffer */
+		output_ptr += write_octet_sequence((unsigned char*)output_ptr, charset, code);
 		if (code2) {
-			q += write_octet_sequence((unsigned char*)q, charset, code2);
+			output_ptr += write_octet_sequence((unsigned char*)output_ptr, charset, code2);
 		}
-
-		/* jump over the valid entity; may go beyond size of buffer; np */
-		p = next + 1;
+		/* Move current_ptr past the semicolon */
+		current_ptr = entity_end_ptr + 1;
 		continue;
 
-invalid_code:
-		for (; p < next; p++) {
-			*(q++) = *p;
+invalid_incomplete_entity:
+		/* If the entity is invalid at parse stage or entity_end_ptr was never found, copy '&' as normal */
+		*output_ptr++ = *current_ptr++;
+		continue;
+
+invalid_complete_entity:
+		/* If the entity became invalid after we found entity_end_ptr */
+		if (entity_end_ptr) {
+			const size_t len = entity_end_ptr - current_ptr;
+			memcpy(output_ptr, current_ptr, len);
+			output_ptr += len;
+			current_ptr = entity_end_ptr;
+		} else {
+			*output_ptr++ = *current_ptr++;
 		}
+		continue;
 	}
 
-	*q = '\0';
-	ZSTR_LEN(ret) = (size_t)(q - ZSTR_VAL(ret));
+	*output_ptr = '\0';
+	ZSTR_LEN(output) = (size_t)(output_ptr - ZSTR_VAL(output));
 }
 /* }}} */
 
@@ -1028,7 +985,7 @@ static const entity_ht *unescape_inverse_map(int all, int flags)
  * unicode code points */
 static entity_table_opt determine_entity_table(int all, int doctype)
 {
-	entity_table_opt retval = {NULL};
+	entity_table_opt retval = {0};
 
 	assert(!(doctype == ENT_HTML_DOC_XML1 && all));
 
@@ -1048,7 +1005,7 @@ static entity_table_opt determine_entity_table(int all, int doctype)
  * only the basic ones, i.e., those in basic_entities_ex + the numeric entities
  * that correspond to quotes.
  */
-PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, char *hint_charset)
+PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, const char *hint_charset)
 {
 	zend_string *ret;
 	enum entity_charset charset;
@@ -1060,7 +1017,7 @@ PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int fl
 	}
 
 	if (all) {
-		charset = determine_charset(hint_charset);
+		charset = determine_charset(hint_charset, /* quiet */ 0);
 	} else {
 		charset = cs_8859_1; /* charset shouldn't matter, use ISO-8859-1 for performance */
 	}
@@ -1078,15 +1035,15 @@ PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int fl
 	inverse_map = unescape_inverse_map(all, flags);
 
 	/* replace numeric entities */
-	traverse_for_entities(ZSTR_VAL(str), ZSTR_LEN(str), ret, all, flags, inverse_map, charset);
+	traverse_for_entities(str, ret, all, flags, inverse_map, charset);
 
 	return ret;
 }
 /* }}} */
 
-PHPAPI zend_string *php_escape_html_entities(unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset)
+PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset)
 {
-	return php_escape_html_entities_ex(old, oldlen, all, flags, hint_charset, 1);
+	return php_escape_html_entities_ex(old, oldlen, all, flags, hint_charset, 1, /* quiet */ 0);
 }
 
 /* {{{ find_entity_for_char */
@@ -1096,7 +1053,7 @@ static inline void find_entity_for_char(
 	const entity_stage1_row *table,
 	const unsigned char **entity,
 	size_t *entity_len,
-	unsigned char *old,
+	const unsigned char *old,
 	size_t oldlen,
 	size_t *cursor)
 {
@@ -1116,8 +1073,8 @@ static inline void find_entity_for_char(
 		*entity_len = c->data.ent.entity_len;
 	} else {
 		/* peek at next char */
-		size_t	 cursor_before	= *cursor;
-		int		 status			= SUCCESS;
+		size_t cursor_before = *cursor;
+		zend_result status = SUCCESS;
 		unsigned next_char;
 
 		if (!(*cursor < oldlen))
@@ -1170,13 +1127,12 @@ static inline void find_entity_for_char_basic(
 }
 /* }}} */
 
-/* {{{ php_escape_html_entities
- */
-PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset, zend_bool double_encode)
+/* {{{ php_escape_html_entities */
+PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet)
 {
 	size_t cursor, maxlen, len;
 	zend_string *replaced;
-	enum entity_charset charset = determine_charset(hint_charset);
+	enum entity_charset charset = determine_charset(hint_charset, quiet);
 	int doctype = flags & ENT_HTML_DOC_TYPE_MASK;
 	entity_table_opt entity_table;
 	const enc_to_uni *to_uni_table = NULL;
@@ -1186,7 +1142,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 	size_t replacement_len = 0;
 
 	if (all) { /* replace with all named entities */
-		if (CHARSET_PARTIAL_SUPPORT(charset)) {
+		if (!quiet && CHARSET_PARTIAL_SUPPORT(charset)) {
 			php_error_docref(NULL, E_NOTICE, "Only basic entities "
 				"substitution is supported for multi-byte encodings other than UTF-8; "
 				"functionality is equivalent to htmlspecialchars");
@@ -1228,7 +1184,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 		const unsigned char *mbsequence = NULL;
 		size_t mbseqlen					= 0,
 		       cursor_before			= cursor;
-		int status						= SUCCESS;
+		zend_result status				= SUCCESS;
 		unsigned int this_char			= get_next_char(charset, old, oldlen, &cursor, &status);
 
 		/* guarantee we have at least 40 bytes to write.
@@ -1384,68 +1340,44 @@ encode_amp:
 }
 /* }}} */
 
-/* {{{ php_html_entities
- */
+/* {{{ php_html_entities */
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	zend_string *str, *hint_charset = NULL;
-	char *default_charset;
-	zend_long flags = ENT_COMPAT;
+	zend_long flags = ENT_QUOTES|ENT_SUBSTITUTE;
 	zend_string *replaced;
-	zend_bool double_encode = 1;
+	bool double_encode = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
-		Z_PARAM_STR_EX(hint_charset, 1, 0)
+		Z_PARAM_STR_OR_NULL(hint_charset)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!hint_charset) {
-		default_charset = get_default_charset();
+	if (ZSTR_LEN(str) == 0) {
+		RETURN_EMPTY_STRING();
 	}
-	replaced = php_escape_html_entities_ex((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), all, (int) flags, (hint_charset ? ZSTR_VAL(hint_charset) : default_charset), double_encode);
+	replaced = php_escape_html_entities_ex(
+		(unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), all, (int) flags,
+		hint_charset ? ZSTR_VAL(hint_charset) : NULL, double_encode, /* quiet */ 0);
 	RETVAL_STR(replaced);
 }
 /* }}} */
 
-#define HTML_SPECIALCHARS 	0
-#define HTML_ENTITIES	 	1
-
-/* {{{ register_html_constants
- */
-void register_html_constants(INIT_FUNC_ARGS)
-{
-	REGISTER_LONG_CONSTANT("HTML_SPECIALCHARS", HTML_SPECIALCHARS, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("HTML_ENTITIES", HTML_ENTITIES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_COMPAT", ENT_COMPAT, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_QUOTES", ENT_QUOTES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_NOQUOTES", ENT_NOQUOTES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_IGNORE", ENT_IGNORE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_SUBSTITUTE", ENT_SUBSTITUTE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_DISALLOWED", ENT_DISALLOWED, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_HTML401", ENT_HTML401, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_XML1", ENT_XML1, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_XHTML", ENT_XHTML, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("ENT_HTML5", ENT_HTML5, CONST_PERSISTENT|CONST_CS);
-}
-/* }}} */
-
-/* {{{ proto string htmlspecialchars(string string [, int quote_style[, string encoding[, bool double_encode]]])
-   Convert special characters to HTML entities */
+/* {{{ Convert special characters to HTML entities */
 PHP_FUNCTION(htmlspecialchars)
 {
 	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto string htmlspecialchars_decode(string string [, int quote_style])
-   Convert special HTML entities back to characters */
+/* {{{ Convert special HTML entities back to characters */
 PHP_FUNCTION(htmlspecialchars_decode)
 {
 	zend_string *str;
-	zend_long quote_style = ENT_COMPAT;
+	zend_long quote_style = ENT_QUOTES|ENT_SUBSTITUTE;
 	zend_string *replaced;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1455,44 +1387,32 @@ PHP_FUNCTION(htmlspecialchars_decode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	replaced = php_unescape_html_entities(str, 0 /*!all*/, (int)quote_style, NULL);
-	if (replaced) {
-		RETURN_STR(replaced);
-	}
-	RETURN_FALSE;
+	RETURN_STR(replaced);
 }
 /* }}} */
 
-/* {{{ proto string html_entity_decode(string string [, int quote_style][, string encoding])
-   Convert all HTML entities to their applicable characters */
+/* {{{ Convert all HTML entities to their applicable characters */
 PHP_FUNCTION(html_entity_decode)
 {
 	zend_string *str, *hint_charset = NULL;
-	char *default_charset;
-	zend_long quote_style = ENT_COMPAT;
+	zend_long quote_style = ENT_QUOTES|ENT_SUBSTITUTE;
 	zend_string *replaced;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(quote_style)
-		Z_PARAM_STR(hint_charset)
+		Z_PARAM_STR_OR_NULL(hint_charset)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!hint_charset) {
-		default_charset = get_default_charset();
-	}
-	replaced = php_unescape_html_entities(str, 1 /*all*/, (int)quote_style, (hint_charset ? ZSTR_VAL(hint_charset) : default_charset));
-
-	if (replaced) {
-		RETURN_STR(replaced);
-	}
-	RETURN_FALSE;
+	replaced = php_unescape_html_entities(
+		str, 1 /*all*/, (int)quote_style, hint_charset ? ZSTR_VAL(hint_charset) : NULL);
+	RETURN_STR(replaced);
 }
 /* }}} */
 
 
-/* {{{ proto string htmlentities(string string [, int quote_style[, string encoding[, bool double_encode]]])
-   Convert all applicable characters to HTML entities */
+/* {{{ Convert all applicable characters to HTML entities */
 PHP_FUNCTION(htmlentities)
 {
 	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -1554,12 +1474,11 @@ static inline void write_s3row_data(
 }
 /* }}} */
 
-/* {{{ proto array get_html_translation_table([int table [, int flags [, string encoding]]])
-   Returns the internal translation table used by htmlspecialchars and htmlentities */
+/* {{{ Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
-	zend_long all = HTML_SPECIALCHARS,
-		 flags = ENT_COMPAT;
+	zend_long all = PHP_HTML_SPECIALCHARS,
+		 flags = ENT_QUOTES|ENT_SUBSTITUTE;
 	int doctype;
 	entity_table_opt entity_table;
 	const enc_to_uni *to_uni_table = NULL;
@@ -1578,7 +1497,7 @@ PHP_FUNCTION(get_html_translation_table)
 		Z_PARAM_STRING(charset_hint, charset_hint_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	charset = determine_charset(charset_hint);
+	charset = determine_charset(charset_hint, /* quiet */ 0);
 	doctype = flags & ENT_HTML_DOC_TYPE_MASK;
 	LIMIT_ALL(all, doctype, charset);
 
@@ -1589,7 +1508,7 @@ PHP_FUNCTION(get_html_translation_table)
 		to_uni_table = enc_to_uni_index[charset];
 	}
 
-	if (all) { /* HTML_ENTITIES (actually, any non-zero value for 1st param) */
+	if (all) { /* PHP_HTML_ENTITIES (actually, any non-zero value for 1st param) */
 		const entity_stage1_row *ms_table = entity_table.ms_table;
 
 		if (CHARSET_UNICODE_COMPAT(charset)) {

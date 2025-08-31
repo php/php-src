@@ -1,13 +1,11 @@
 --TEST--
 IntlRuleBasedBreakIterator::getRuleStatusVec(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
+--INI--
+intl.default_locale=pt_PT
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
 
 $rules = <<<RULES
 \$LN = [[:letter:] [:number:]];
@@ -28,11 +26,10 @@ $rbbi = new IntlRuleBasedBreakIterator($rules);
 $rbbi->setText('sdfkjsdf88á.... ,;');
 
 do {
-	var_dump($rbbi->current(), $rbbi->getRuleStatusVec());
+    var_dump($rbbi->current(), $rbbi->getRuleStatusVec());
 } while ($rbbi->next() != IntlBreakIterator::DONE);
 
 ?>
-==DONE==
 --EXPECT--
 int(0)
 array(1) {
@@ -56,4 +53,3 @@ array(1) {
   [0]=>
   int(4)
 }
-==DONE==

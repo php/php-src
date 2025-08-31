@@ -1,14 +1,9 @@
 --TEST--
 Test token_get_all() function : usage variations - with function constructs
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Testing token_get_all() with different function keywords
  *   function - T_FUNCTION(333), return - T_RETURN(335)

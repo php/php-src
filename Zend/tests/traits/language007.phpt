@@ -18,7 +18,7 @@ trait Hello {
  }
 
 class MyHelloWorld extends Base {
-	use Hello;
+    use Hello;
 }
 
 $o = new MyHelloWorld();

@@ -8,4 +8,4 @@ $foo = 'bar';
 var_dump(new namespace::$foo);
 ?>
 --EXPECTF--
-Parse error: %s error%sexpecting%sT_NS_SEPARATOR%sin %sbug43343.php on line 5
+Parse error: syntax error, unexpected token "namespace", expecting ":" in %s on line %d

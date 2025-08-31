@@ -1,7 +1,7 @@
 --TEST--
 Bug #72762: Infinite loop while parsing a file with opcache enabled
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

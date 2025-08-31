@@ -1,14 +1,12 @@
 --TEST--
 Phar: Phar::isValidPharFilename()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=1
 --FILE--
 <?php
 chdir(__DIR__);
-Phar::isValidPharFilename(array());
-echo "*\n";
 var_dump(Phar::isValidPharFilename('*'));
 var_dump(Phar::isValidPharFilename('*', true));
 var_dump(Phar::isValidPharFilename('*', false));
@@ -71,13 +69,11 @@ var_dump(Phar::isValidPharFilename('dir.phar.php', true));
 var_dump(Phar::isValidPharFilename('dir.phar.php', false));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 rmdir(__DIR__ . '/.phar');
---EXPECTF--
-Warning: Phar::isValidPharFilename() expects parameter 1 to be a valid path, array given in %sphar_isvalidpharfilename.php on line %d
-*
+?>
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)
@@ -136,4 +132,3 @@ dir.phar.php
 bool(true)
 bool(true)
 bool(false)
-===DONE===

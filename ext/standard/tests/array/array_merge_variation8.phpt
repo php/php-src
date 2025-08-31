@@ -2,11 +2,6 @@
 Test array_merge() function : usage variations - multi-dimensional arrays
 --FILE--
 <?php
-/* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test array_merge() with multi-dimensional arrays
  */

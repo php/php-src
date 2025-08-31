@@ -4,7 +4,7 @@ ZE2 An interface cannot be instantiated
 <?php
 
 interface if_a {
-	function f_a();
+    function f_a();
 }
 
 $t = new if_a();

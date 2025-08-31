@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test opendir() with different relative paths as $path argument
  */
@@ -70,13 +65,12 @@ clean_dh($dh);
  * and to ensure directory is not in use at CLEAN section so can me removed
  */
 function clean_dh($dh){
-	if (is_resource($dh)) {
-		closedir($dh);
-	}
-	unset($dh);
+    if (is_resource($dh)) {
+        closedir($dh);
+    }
+    unset($dh);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/opendir_variation4-win32-mb';
@@ -112,4 +106,3 @@ resource(%d) of type (stream)
 -- $path = '../../'私はガラスを食べられますlevel_one': --
 bool(true)
 resource(%d) of type (stream)
-===DONE===

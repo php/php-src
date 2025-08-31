@@ -39,7 +39,7 @@ $tester->close();
 Done
 --EXPECTF--
 Test Start
-array(15) {
+array(16) {
   ["pool"]=>
   string(10) "unconfined"
   ["process-manager"]=>
@@ -67,6 +67,8 @@ array(15) {
   ["max-children-reached"]=>
   int(0)
   ["slow-requests"]=>
+  int(0)
+  ["memory-peak"]=>
   int(0)
   ["procs"]=>
   array(1) {

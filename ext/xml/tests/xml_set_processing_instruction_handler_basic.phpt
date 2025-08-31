@@ -1,35 +1,23 @@
 --TEST--
 Test xml_set_processing_instruction_handler function : basic
---SKIPIF--
-<?php
-if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded";
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
-/* Prototype  : proto bool xml_set_processing_instruction_handler  ( resource $parser  , callback $handler  )
- * Description: Sets the processing instruction (PI) handler function for the XML parser.
- * Source code: ext/xml/xml.c
- * Alias to functions:
- */
-
 class XML_Parser
 {
 
     function PIHandler($parser, $target, $data)
-	{
-		echo "Target: " . $target. "\n";
-		echo "Data: " . $data . "\n";
-	}
+    {
+        echo "Target: " . $target. "\n";
+        echo "Data: " . $data . "\n";
+    }
 
     function parse($data)
     {
         $parser = xml_parser_create();
-        xml_set_object($parser, $this);
-        xml_set_processing_instruction_handler($parser, "PIHandler");
+        xml_set_processing_instruction_handler($parser, $this->PIHandler(...));
         xml_parse($parser, $data, true);
-        xml_parser_free($parser);
     }
 
 

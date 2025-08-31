@@ -2,17 +2,6 @@
 Test fopen and fclose() functions - usage variations - "r+t" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "r+t" mode,
    checking for the file creation, write & read operations,
@@ -38,6 +27,7 @@ var_dump( ftell($file_handle) );  //File pointer position after write operation,
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 echo "*** Done ***\n";
+?>
 --CLEAN--
 <?php
 unlink(__DIR__."/007_variation10.tmp");

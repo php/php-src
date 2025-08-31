@@ -1,57 +1,52 @@
 --TEST--
 mysqli_num_fields()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require 'table.inc';
 
-	$tmp    = NULL;
-	$link   = NULL;
+    function func_test_mysqli_num_fields(mysqli $link, string $query, int $expected, int $offset) {
 
-	if (!is_null($tmp = @mysqli_num_fields()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+        if (!($res = mysqli_query($link, $query))) {
+            printf("[%03d] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
+            return;
+        }
 
-	if (!is_null($tmp = @mysqli_num_fields($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+        if ($expected !== ($tmp = mysqli_num_fields($res)))
+            printf("[%03d] Expecting %s/%d, got %s/%d\n", $offset + 1,
+                gettype($expected), $expected,
+                gettype($tmp), $tmp);
 
-	require('table.inc');
+        mysqli_free_result($res);
 
-	function func_test_mysqli_num_fields($link, $query, $expected, $offset, $test_free = false) {
+        try {
+            mysqli_num_fields($res);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
+    }
 
-		if (!($res = mysqli_query($link, $query))) {
-			printf("[%03d] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
-			return;
-		}
+    func_test_mysqli_num_fields($link, "SELECT 1 AS a", 1, 5);
+    func_test_mysqli_num_fields($link, "SELECT id, label FROM test", 2, 10);
+    func_test_mysqli_num_fields($link, "SELECT 1 AS a, NULL AS b, 'foo' AS c", 3, 15);
+    func_test_mysqli_num_fields($link, "SELECT id FROM test", 1, 20);
 
-		if ($expected !== ($tmp = mysqli_num_fields($res)))
-			printf("[%03d] Expecting %s/%d, got %s/%d\n", $offset + 1,
-				gettype($expected), $expected,
-				gettype($tmp), $tmp);
+    mysqli_close($link);
 
-		mysqli_free_result($res);
-
-		if ($test_free && (false !== ($tmp = mysqli_num_fields($res))))
-			printf("[%03d] Expecting false, got %s/%s\n", $offset + 2, gettype($tmp), $tmp);
-	}
-
-	func_test_mysqli_num_fields($link, "SELECT 1 AS a", 1, 5);
-	func_test_mysqli_num_fields($link, "SELECT id, label FROM test", 2, 10);
-	func_test_mysqli_num_fields($link, "SELECT 1 AS a, NULL AS b, 'foo' AS c", 3, 15);
-	func_test_mysqli_num_fields($link, "SELECT id FROM test", 1, 20, true);
-
-	mysqli_close($link);
-
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
---EXPECTF--
-Warning: mysqli_num_fields(): Couldn't fetch mysqli_result in %s on line %d
+--EXPECT--
+mysqli_result object is already closed
+mysqli_result object is already closed
+mysqli_result object is already closed
+mysqli_result object is already closed
 done!
