@@ -190,15 +190,22 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static size_t str_to_int(const char *str, size_t len)
+ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char *str, size_t len)
 {
-	size_t result = 0;
-
-	for (size_t i = 0; i < len; ++i) {
-		result = result * 10 + (str[i] - '0');
+	if (len > MAX_LENGTH_OF_LONG) {
+		return -1;
 	}
 
-	return result;
+	char buf[MAX_LENGTH_OF_LONG + 1];
+	*(char*)zend_mempcpy(buf, str, len) = 0;
+
+	zend_ulong result = ZEND_STRTOUL(buf, NULL, 10);
+
+	if (result > ZEND_LONG_MAX) {
+		return -1;
+	}
+
+	return (zend_long)result;
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
@@ -206,7 +213,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
 	if (has_text_range(&uriparser_uri->portText)) {
-		ZVAL_LONG(retval, str_to_int(uriparser_uri->portText.first, get_text_range_length(&uriparser_uri->portText)));
+		ZVAL_LONG(retval, port_str_to_zend_long_checked(uriparser_uri->portText.first, get_text_range_length(&uriparser_uri->portText)));
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -318,6 +325,17 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 
 	/* Make the resulting URI independent of the 'uri_str'. */
 	uriMakeOwnerMmA(&uri, mm);
+
+	if (
+		has_text_range(&uri.portText)
+		&& port_str_to_zend_long_checked(uri.portText.first, get_text_range_length(&uri.portText)) == -1
+	) {
+		if (!silent) {
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The port is out of range", 0);
+		}
+
+		goto fail;
+	}
 
 	php_uri_parser_rfc3986_uris *uriparser_uris = uriparser_create_uris();
 	uriparser_uris->uri = uri;
