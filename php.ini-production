@@ -633,7 +633,7 @@ ignore_repeated_source = Off
 ; Default Value: "EGPCS"
 ; Development Value: "EGPCS"
 ; Production Value: "EGPCS"
-; http://php.net/variables-order
+; https://php.net/variables-order
 ;variables_order = "EGPCS"
 
 ; This directive determines which super global data (G,P & C) should be
