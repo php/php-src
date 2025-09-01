@@ -25,7 +25,6 @@
 
 static const char HARDCODED_INI[] =
 	"html_errors=0\n"
-	"register_argc_argv=1\n"
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"max_execution_time=0\n"

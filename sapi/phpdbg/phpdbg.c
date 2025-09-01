@@ -982,7 +982,6 @@ static const opt_struct OPTIONS[] = { /* {{{ */
 
 const char phpdbg_ini_hardcoded[] =
 "html_errors=Off\n"
-"register_argc_argv=On\n"
 "implicit_flush=On\n"
 "display_errors=Off\n"
 "log_errors=On\n"
