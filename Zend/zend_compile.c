@@ -4954,6 +4954,25 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	return SUCCESS;
 }
 
+static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode rope_result;
+	if (zend_compile_func_sprintf(&rope_result, args) != SUCCESS) {
+		return FAILURE;
+	}
+
+	/* printf() returns the amount of bytes written, so just an ECHO of the resulting sprintf()
+	 * optimisation might not be enough. At this early stage we can't detect if the result is
+	 * actually used, so we just emit the opcodes and cleanup if they are not used in the
+	 * optimizer later. */
+	znode copy;
+	zend_emit_op_tmp(&copy, ZEND_COPY_TMP, &rope_result, NULL);
+	zend_emit_op(NULL, ZEND_ECHO, &rope_result, NULL);
+	zend_emit_op_tmp(result, ZEND_STRLEN, &copy, NULL);
+
+	return SUCCESS;
+}
+
 static zend_result zend_compile_func_clone(znode *result, zend_ast_list *args)
 {
 	znode arg_node;
@@ -5036,6 +5055,8 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_array_key_exists(result, args);
 	} else if (zend_string_equals_literal(lcname, "sprintf")) {
 		return zend_compile_func_sprintf(result, args);
+	} else if (zend_string_equals_literal(lcname, "printf")) {
+		return zend_compile_func_printf(result, args);
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_CLONE))) {
 		return zend_compile_func_clone(result, args);
 	} else {
