@@ -18,13 +18,15 @@ $timestamps = array(
     0,
     0.0,
     -0.0,
-    PHP_INT_MAX + 1024.0,
-    PHP_INT_MIN - 1025.0,
+    9223372036854775808.0,  // INT64_MAX + 1
+    -9223372036854777856.0, // INT64_MIN - 2048
     NAN,
     +INF,
     -INF,
     1599828571.235628,
     -1599828571.235628,
+    2147483648.0,  // INT32_MAX + 1
+    -2147483649.0, // INT32_MIN - 1
 );
 
 foreach ($timestamps as $ts) {
@@ -240,6 +242,38 @@ DateTime::createFromTimestamp(-1599828571.235628): object(DateTime)#%d (3) {
 DateTimeImmutable::createFromTimestamp(-1599828571.235628): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1919-04-22 11:10:28.764372"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(2147483648.0): object(DateTime)#%d (3) {
+  ["date"]=>
+  string(26) "2038-01-19 03:14:08.000000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(2147483648.0): object(DateTimeImmutable)#%d (3) {
+  ["date"]=>
+  string(26) "2038-01-19 03:14:08.000000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(-2147483649.0): object(DateTime)#%d (3) {
+  ["date"]=>
+  string(26) "1901-12-13 20:45:51.000000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(-2147483649.0): object(DateTimeImmutable)#%d (3) {
+  ["date"]=>
+  string(26) "1901-12-13 20:45:51.000000"
   ["timezone_type"]=>
   int(1)
   ["timezone"]=>
