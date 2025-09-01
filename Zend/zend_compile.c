@@ -28,6 +28,7 @@
 #include "zend_API.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_types.h"
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
@@ -4968,6 +4969,53 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	return SUCCESS;
 }
 
+static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) /* {{{ */
+{
+	/* Special case: printf with a single constant string argument and no format specifiers.
+	 * In this case, just emit ECHO and return the string length if needed. */
+	if (args->children == 1) {
+		zend_eval_const_expr(&args->child[0]);
+		if (args->child[0]->kind != ZEND_AST_ZVAL) {
+			return FAILURE;
+		}
+		zval *format_string = zend_ast_get_zval(args->child[0]);
+		if (Z_TYPE_P(format_string) != IS_STRING) {
+			return FAILURE;
+		}
+		/* Check if there are any format specifiers */
+		if (!memchr(Z_STRVAL_P(format_string), '%', Z_STRLEN_P(format_string))) {
+			/* No format specifiers - just emit ECHO and return string length */
+			znode format_node;
+			zend_compile_expr(&format_node, args->child[0]);
+			zend_emit_op(NULL, ZEND_ECHO, &format_node, NULL);
+
+			/* Return the string length as a constant if the result is used */
+			result->op_type = IS_CONST;
+			ZVAL_LONG(&result->u.constant, Z_STRLEN_P(format_string));
+			return SUCCESS;
+		}
+	}
+
+	/* Fall back to sprintf optimization for format strings with specifiers */
+	znode rope_result;
+	if (zend_compile_func_sprintf(&rope_result, args) != SUCCESS) {
+		return FAILURE;
+	}
+
+	/* printf() returns the amount of bytes written, so just an ECHO of the
+	 * resulting sprintf() optimisation might not be enough. At this early
+	 * stage we can't detect if the result is actually used, so we just emit
+	 * the opcodes and let them be cleaned up by the dead code elimination
+	 * pass in the Zend Optimizer if the result of the printf() is in fact
+	 * unused */
+	znode copy;
+	zend_emit_op_tmp(&copy, ZEND_COPY_TMP, &rope_result, NULL);
+	zend_emit_op(NULL, ZEND_ECHO, &rope_result, NULL);
+	zend_emit_op_tmp(result, ZEND_STRLEN, &copy, NULL);
+
+	return SUCCESS;
+}
+
 static zend_result zend_compile_func_clone(znode *result, zend_ast_list *args)
 {
 	znode arg_node;
@@ -5050,6 +5098,8 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_array_key_exists(result, args);
 	} else if (zend_string_equals_literal(lcname, "sprintf")) {
 		return zend_compile_func_sprintf(result, args);
+	} else if (zend_string_equals_literal(lcname, "printf")) {
+		return zend_compile_func_printf(result, args);
 	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_CLONE))) {
 		return zend_compile_func_clone(result, args);
 	} else {

@@ -99,5 +99,10 @@ PHP 8.6 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- Core:
+  . `printf()` using only `%s` and `%d` will be compiled into the equivalent
+    string interpolation, avoiding the overhead of a function call and repeatedly
+    parsing the format string.
+
 - JSON:
   . Improve performance of encoding arrays and objects.
