@@ -19,9 +19,11 @@
 #include <unicode/ustring.h>
 #include <unicode/uloc.h>
 
+extern "C" {
 #include "php_intl.h"
-#include "formatter_class.h"
 #include "intl_convert.h"
+}
+#include "formatter_class.h"
 
 /* {{{ */
 static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
@@ -65,7 +67,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	/* Create an ICU number formatter. */
-	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+	FORMATTER_OBJECT(nfo) = unum_open(static_cast<UNumberFormatStyle>(style), spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
 
 	if(spattern) {
 		efree(spattern);
@@ -77,7 +79,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 
 /* {{{ Create number formatter. */
-PHP_FUNCTION( numfmt_create )
+U_CFUNC PHP_FUNCTION( numfmt_create )
 {
 	object_init_ex( return_value, NumberFormatter_ce_ptr );
 	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
@@ -88,7 +90,7 @@ PHP_FUNCTION( numfmt_create )
 /* }}} */
 
 /* {{{ NumberFormatter object constructor. */
-PHP_METHOD( NumberFormatter, __construct )
+U_CFUNC PHP_METHOD( NumberFormatter, __construct )
 {
 	const bool old_use_exception = INTL_G(use_exceptions);
 	const zend_long old_error_level = INTL_G(error_level);
@@ -105,7 +107,7 @@ PHP_METHOD( NumberFormatter, __construct )
 /* }}} */
 
 /* {{{ Get formatter's last error code. */
-PHP_FUNCTION( numfmt_get_error_code )
+U_CFUNC PHP_FUNCTION( numfmt_get_error_code )
 {
 	FORMATTER_METHOD_INIT_VARS
 
@@ -124,7 +126,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 /* }}} */
 
 /* {{{ Get text description for formatter's last error code. */
-PHP_FUNCTION( numfmt_get_error_message )
+U_CFUNC PHP_FUNCTION( numfmt_get_error_message )
 {
 	zend_string *message = NULL;
 	FORMATTER_METHOD_INIT_VARS
