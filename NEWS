@@ -193,6 +193,8 @@ PHP                                                                        NEWS
     opened directory has been deprecated. (Girgias)
   . Fixed bug GH-19153 (#[\Attribute] validation should error on
     trait/interface/enum/abstract class). (DanielEScherzer)
+  . Added the exit_status() function to retrieve the current exit
+    status. (alexandre-daubois)
 
 - XML:
   . The xml_parser_free() function has been deprecated. (DanielEScherzer)
