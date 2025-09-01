@@ -14,7 +14,6 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-- Core
   . PG(arg_separator).input and PG(arg_separator).output are now `zend_string*`
     instead of `char*`.
   . DL_LOAD now doesn't use RTLD_DEEPBIND deepbind anymore on platforms
@@ -34,16 +33,6 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     pointer. If the error will be delayed until runtime, it is stored in the
     new `validation_error` field of the `zend_attribute` struct.
     RFC: https://wiki.php.net/rfc/delayedtargetvalidation_attribute
-
-- Hash
-  . Hash functions now use proper hash_spec_result enum for return values
-    instead of using SUCCESS and FAILURE.
-
-- Random
-  . The handlers parameter of php_random_engine_common_init() has been
-    removed. Use the default_object_handlers field on the CE instead.
-
-- Zend
   . Added zend_safe_assign_to_variable_noref() function to safely assign
     a value to a non-reference zval.
   . Added zval_ptr_safe_dtor() to safely destroy a zval when a destructor
@@ -91,13 +80,6 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     from the parent process after a fork().
   . HASH_KEY_IS_* constants have been moved in the zend_hash_key_type enum.
 
-- standard
-  . ext/standard/php_smart_string.h and ext/standard/php_smart_string_public.h
-    were removed. Use the corresponding headers in Zend/ instead.
-
-- URI
-  . Internal API for URI handling was added via the php_uri_*() functions.
-
 ========================
 2. Build system changes
 ========================
@@ -136,26 +118,34 @@ PHP 8.5 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
-- ext/gd
+- Gd:
   . The gdImageScale*() and gdImageRotate*() helpers are now internal in the
     bundled libgd, like they have been in external libgd as of gd-2.1.1.
 
-- ext/json
+- Hash:
+  . Hash functions now use proper hash_spec_result enum for return values
+    instead of using SUCCESS and FAILURE.
+
+- JSON:
   . php_json_encode_serializable_object() now assumes `EG(active)`,
     if not a bailout is caused. Therefore a minor BC break exists if the
     `PHP_JSON_PARTIAL_OUTPUT_ON_ERROR` option is in use.
     However, this situation is highly unlikely.
 
-- ext/libxml
+- Libxml:
   . The refcount APIs now return an `unsigned int` instead of an `int`.
   . Removed php_libxml_xmlCheckUTF8(). Use xmlCheckUTF8() from libxml instead.
 
-- ext/pdo
+- PDO:
   . Added `php_pdo_stmt_valid_db_obj_handle()` to check if the database object
     is still valid. This is useful when a GC cycle is collected and the
     database object can be destroyed prior to destroying the statement.
 
-- ext/standard
+- Random:
+  . The handlers parameter of php_random_engine_common_init() has been
+    removed. Use the default_object_handlers field on the CE instead.
+
+- Standard:
   . Added php_url_decode_ex() and php_raw_url_decode_ex() that unlike their
     non-ex counterparts do not work in-place.
   . The php_std_date() function has been removed. Use php_format_date() with
@@ -165,6 +155,11 @@ PHP 8.5 INTERNALS UPGRADE NOTES
     and image_type_to_extension() is now extensible using the internal APIs
     php_image_register_handler() and php_image_unregister_handler() in
     php_image.h.
+  . ext/standard/php_smart_string.h and ext/standard/php_smart_string_public.h
+    were removed. Use the corresponding headers in Zend/ instead.
+
+- URI:
+  . Internal API for URI handling was added via the php_uri_*() functions.
 
 ========================
 4. OpCode changes

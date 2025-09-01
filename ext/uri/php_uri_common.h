@@ -64,17 +64,6 @@ typedef struct uri_property_handler_t {
 	uri_write_t write_func;
 } uri_property_handler_t;
 
-typedef struct uri_property_handlers_t {
-	uri_property_handler_t scheme;
-	uri_property_handler_t username;
-	uri_property_handler_t password;
-	uri_property_handler_t host;
-	uri_property_handler_t port;
-	uri_property_handler_t path;
-	uri_property_handler_t query;
-	uri_property_handler_t fragment;
-} uri_property_handlers_t;
-
 typedef struct uri_parser_t {
 	/**
 	 * Name (the FQCN) of the URI parser. The "" name is reserved for the handler of the legacy parse_url().
@@ -138,7 +127,16 @@ typedef struct uri_parser_t {
 	 */
 	void (*free_uri)(void *uri);
 
-	const uri_property_handlers_t property_handlers;
+	struct {
+		uri_property_handler_t scheme;
+		uri_property_handler_t username;
+		uri_property_handler_t password;
+		uri_property_handler_t host;
+		uri_property_handler_t port;
+		uri_property_handler_t path;
+		uri_property_handler_t query;
+		uri_property_handler_t fragment;
+	} property_handlers;
 } uri_parser_t;
 
 typedef struct uri_internal_t {

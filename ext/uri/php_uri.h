@@ -47,7 +47,7 @@ PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser);
  * @param uri_parser_name The URI parser name
  * @return The URI parser
  */
-PHPAPI uri_parser_t *php_uri_get_parser(const zend_string *uri_parser_name);
+PHPAPI const uri_parser_t *php_uri_get_parser(const zend_string *uri_parser_name);
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, bool silent);
 
