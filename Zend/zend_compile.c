@@ -4966,20 +4966,8 @@ static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) 
 				/* Check if there are any format specifiers */
 				char *p = Z_STRVAL_P(format_string);
 				char *end = p + Z_STRLEN_P(format_string);
-				bool has_format_specs = false;
 
-				while (p < end) {
-					if (*p == '%') {
-						p++;
-						if (p < end && *p != '%') {
-							has_format_specs = true;
-							break;
-						}
-					}
-					p++;
-				}
-
-				if (!has_format_specs) {
+				if (!memchr(p, '%', end - p)) {
 					/* No format specifiers - just emit ECHO and return string length */
 					znode format_node;
 					zend_compile_expr(&format_node, args->child[0]);
