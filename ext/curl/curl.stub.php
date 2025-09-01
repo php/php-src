@@ -2715,6 +2715,56 @@ const CURLOPT_STREAM_WEIGHT = UNKNOWN;
 const CURLMOPT_PUSHFUNCTION = UNKNOWN;
 /**
  * @var int
+ * @cvalue CURLMOPT_SOCKETFUNCTION
+ */
+const CURLMOPT_SOCKETFUNCTION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLMOPT_TIMERFUNCTION
+ */
+const CURLMOPT_TIMERFUNCTION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_POLL_IN
+ */
+const CURL_POLL_IN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_POLL_OUT
+ */
+const CURL_POLL_OUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_POLL_INOUT
+ */
+const CURL_POLL_INOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_POLL_REMOVE
+ */
+const CURL_POLL_REMOVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_CSELECT_IN
+ */
+const CURL_CSELECT_IN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_CSELECT_OUT
+ */
+const CURL_CSELECT_OUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_CSELECT_ERR
+ */
+const CURL_CSELECT_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_SOCKET_TIMEOUT
+ */
+const CURL_SOCKET_TIMEOUT = UNKNOWN;
+/**
+ * @var int
  * @cvalue CURL_PUSH_OK
  */
 const CURL_PUSH_OK = UNKNOWN;
@@ -3758,6 +3808,9 @@ function curl_escape(CurlHandle $handle, string $string): string|false {}
 function curl_unescape(CurlHandle $handle, string $string): string|false {}
 
 function curl_multi_setopt(CurlMultiHandle $multi_handle, int $option, mixed $value): bool {}
+
+/** @param mixed $socket */
+function curl_multi_socket_action(CurlMultiHandle $multi_handle, $socket, int $what, int &$still_running): int {};
 
 function curl_exec(CurlHandle $handle): string|bool {}
 
