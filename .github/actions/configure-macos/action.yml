@@ -11,7 +11,7 @@ runs:
         set -x
         BREW_OPT="$(brew --prefix)"/opt
         export PATH="$BREW_OPT/bison/bin:$PATH"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/openssl@1.1/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/openssl/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/curl/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libffi/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libxml2/lib/pkgconfig"
