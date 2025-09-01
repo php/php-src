@@ -766,10 +766,10 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 	} while (0)
 
 #define GC_TYPE_MASK				0x0000000f
-#define GC_FLAGS_MASK				0x000003f0
-#define GC_INFO_MASK				0xfffffc00
+#define GC_FLAGS_MASK				0x000007f0
+#define GC_INFO_MASK				0xfffff800
 #define GC_FLAGS_SHIFT				0
-#define GC_INFO_SHIFT				10
+#define GC_INFO_SHIFT				11
 
 static zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
@@ -812,6 +812,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define GC_IMMUTABLE                (1<<6) /* can't be changed in place */
 #define GC_PERSISTENT               (1<<7) /* allocated using malloc */
 #define GC_PERSISTENT_LOCAL         (1<<8) /* persistent, but thread-local */
+#define GC_RESERVED_1               (1<<10)
 
 #define GC_NULL						(IS_NULL         | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_STRING					(IS_STRING       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
