@@ -627,6 +627,14 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 				zval nval;
 				ZVAL_DEREF(tmp);
 				ZVAL_DUP(&nval, tmp);
+
+				if (Z_TYPE_P(arg_elm) != IS_ARRAY) {
+					zend_long filter_id = zval_get_long(arg_elm);
+					if (!PHP_FILTER_ID_EXISTS(filter_id)) {
+						php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, filter_id);
+					}
+				}
+
 				php_filter_call(&nval, -1,
 					Z_TYPE_P(arg_elm) == IS_ARRAY ? Z_ARRVAL_P(arg_elm) : NULL,
 					Z_TYPE_P(arg_elm) == IS_ARRAY ? 0 : zval_get_long(arg_elm),
