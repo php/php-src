@@ -1055,6 +1055,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 		case ZEND_AST_STATIC_CALL:
 		{
 			zend_function *fptr;
+			zend_class_entry *called_scope = NULL;
 			switch (ast->kind) {
 				case ZEND_AST_CALL: {
 					ZEND_ASSERT(ast->child[1]->kind == ZEND_AST_CALLABLE_CONVERT);
@@ -1086,13 +1087,15 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					ZEND_ASSERT(ast->child[2]->kind == ZEND_AST_CALLABLE_CONVERT);
 					zend_ast_fcc *fcc_ast = (zend_ast_fcc*)ast->child[2];
 
+					zend_class_entry *ce = zend_ast_fetch_class(ast->child[0], scope);
+					if (!ce) {
+						return FAILURE;
+					}
+					called_scope = ce;
+
 					fptr = ZEND_MAP_PTR_GET(fcc_ast->fptr);
 
 					if (!fptr) {
-						zend_class_entry *ce = zend_ast_fetch_class(ast->child[0], scope);
-						if (!ce) {
-							return FAILURE;
-						}
 						zend_string *method_name = zend_ast_get_str(ast->child[1]);
 						if (ce->get_static_method) {
 							fptr = ce->get_static_method(ce, method_name);
@@ -1145,7 +1148,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 				}
 			}
 
-			zend_create_fake_closure(result, fptr, scope, scope, NULL);
+			zend_create_fake_closure(result, fptr, fptr->common.scope, called_scope, NULL);
 
 			return SUCCESS;
 		}
