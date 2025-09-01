@@ -9,12 +9,16 @@ $uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
 $uri2 = $uri1->withHost("test.com");
 $uri3 = $uri2->withHost("t%65st.com"); // test.com
 $uri4 = $uri3->withHost(null);
+$uri5 = $uri4->withHost("192.168.0.1");
+$uri6 = $uri5->withHost("[2001:db8:3333:4444:5555:6666:7777:8888]");
 
 var_dump($uri1->getHost());
 var_dump($uri2->getHost());
 var_dump($uri3->getHost());
 var_dump($uri3->getRawHost());
 var_dump($uri4->getRawHost());
+var_dump($uri5->getRawHost());
+var_dump($uri6->getRawHost());
 
 try {
     $uri3->withHost("test.com:8080");
@@ -55,10 +59,14 @@ try {
 $url1 = Uri\WhatWg\Url::parse("https://example.com");
 $url2 = $url1->withHost("test.com");
 $url3 = $url2->withHost("t%65st.com"); // test.com
+$url4 = $url3->withHost("192.168.0.1");
+$url5 = $url4->withHost("[2001:db8:3333:4444:5555:6666:7777:8888]");
 
 var_dump($url1->getAsciiHost());
 var_dump($url2->getAsciiHost());
 var_dump($url3->getAsciiHost());
+var_dump($url4->getAsciiHost());
+var_dump($url5->getAsciiHost());
 
 try {
     $url3->withHost("test.com:8080");
@@ -97,6 +105,8 @@ string(8) "test.com"
 string(8) "test.com"
 string(10) "t%65st.com"
 NULL
+string(11) "192.168.0.1"
+string(40) "[2001:db8:3333:4444:5555:6666:7777:8888]"
 The specified host is malformed
 The specified host is malformed
 string(7) "foo.com"
@@ -105,6 +115,8 @@ The specified host is malformed
 string(11) "example.com"
 string(8) "test.com"
 string(8) "test.com"
+string(11) "192.168.0.1"
+string(40) "[2001:db8:3333:4444:5555:6666:7777:8888]"
 The specified host is malformed
 The specified host is malformed (DomainInvalidCodePoint)
 The specified host is malformed

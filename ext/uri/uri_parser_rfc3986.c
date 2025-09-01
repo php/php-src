@@ -253,9 +253,9 @@ static zend_result php_uri_parser_rfc3986_host_write(struct uri_internal_t *inte
 	int result;
 
 	if (Z_TYPE_P(value) == IS_NULL) {
-		result = uriSetHostRegNameMmA(uriparser_uri, NULL, NULL, mm);
+		result = uriSetHostAutoMmA(uriparser_uri, NULL, NULL, mm);
 	} else {
-		result = uriSetHostRegNameMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
+		result = uriSetHostAutoMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
 	}
 
 	if (result != URI_SUCCESS) {
