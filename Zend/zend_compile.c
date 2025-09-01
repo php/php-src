@@ -4956,6 +4956,45 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 
 static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) /* {{{ */
 {
+	/* Special case: printf with a single constant string argument and no format specifiers.
+	 * In this case, just emit ECHO and return the string length if needed. */
+	if (args->children == 1) {
+		zend_eval_const_expr(&args->child[0]);
+		if (args->child[0]->kind == ZEND_AST_ZVAL) {
+			zval *format_string = zend_ast_get_zval(args->child[0]);
+			if (Z_TYPE_P(format_string) == IS_STRING) {
+				/* Check if there are any format specifiers */
+				char *p = Z_STRVAL_P(format_string);
+				char *end = p + Z_STRLEN_P(format_string);
+				bool has_format_specs = false;
+
+				while (p < end) {
+					if (*p == '%') {
+						p++;
+						if (p < end && *p != '%') {
+							has_format_specs = true;
+							break;
+						}
+					}
+					p++;
+				}
+
+				if (!has_format_specs) {
+					/* No format specifiers - just emit ECHO and return string length */
+					znode format_node;
+					zend_compile_expr(&format_node, args->child[0]);
+					zend_emit_op(NULL, ZEND_ECHO, &format_node, NULL);
+
+					/* Return the string length as a constant if the result is used */
+					result->op_type = IS_CONST;
+					ZVAL_LONG(&result->u.constant, Z_STRLEN_P(format_string));
+					return SUCCESS;
+				}
+			}
+		}
+	}
+
+	/* Fall back to sprintf optimization for format strings with specifiers */
 	znode rope_result;
 	if (zend_compile_func_sprintf(&rope_result, args) != SUCCESS) {
 		return FAILURE;
@@ -4964,7 +5003,7 @@ static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) 
 	/* printf() returns the amount of bytes written, so just an ECHO of the resulting sprintf()
 	 * optimisation might not be enough. At this early stage we can't detect if the result is
 	 * actually used, so we just emit the opcodes and cleanup if they are not used in the
-	 * optimizer later. */
+	 * optimizers block pass later. */
 	znode copy;
 	zend_emit_op_tmp(&copy, ZEND_COPY_TMP, &rope_result, NULL);
 	zend_emit_op(NULL, ZEND_ECHO, &rope_result, NULL);
