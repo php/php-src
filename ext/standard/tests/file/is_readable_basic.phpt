@@ -15,7 +15,7 @@ require __DIR__.'/file.inc';
 echo "*** Testing is_readable(): basic functionality ***\n";
 
 // create a file
-$filename = __DIR__."/is_readable.tmp";
+$filename = __DIR__."/is_readable_basic.tmp";
 create_file($filename);
 
 $counter = 1;

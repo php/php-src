@@ -15,16 +15,22 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec("CREATE TABLE test (a varchar(100), b varchar(100), c varchar(100))");
+$db->exec("CREATE TABLE test42917 (a varchar(100), b varchar(100), c varchar(100))");
 
 for ($i = 0; $i < 5; $i++) {
-    $db->exec("INSERT INTO test (a,b,c) VALUES('test".$i."','".$i."','".$i."')");
+    $db->exec("INSERT INTO test42917 (a,b,c) VALUES('test".$i."','".$i."','".$i."')");
 }
 
-$res = $db->query("SELECT a,b FROM test");
+$res = $db->query("SELECT a,b FROM test42917");
 $res->setFetchMode(PDO::FETCH_KEY_PAIR);
 var_dump($res->fetchAll());
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test42917");
 ?>
 --EXPECT--
 array(5) {

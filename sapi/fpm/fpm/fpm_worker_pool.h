@@ -24,6 +24,7 @@ struct fpm_worker_pool_s {
 	enum fpm_address_domain listen_address_domain;
 	int listening_socket;
 	int set_uid, set_gid;								/* config uid and gid */
+	char *set_user;										/* config user name */
 	int socket_uid, socket_gid, socket_mode;
 
 	/* runtime */

@@ -1,9 +1,7 @@
 --TEST--
 Bug #81490 (ZipArchive::extractTo() may leak memory)
---SKIPIF--
-<?php
-if (!extension_loaded("zip")) die("skip zip extension not available");
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $zip = new ZipArchive();

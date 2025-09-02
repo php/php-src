@@ -34,20 +34,17 @@
 		RETURN_FALSE;						\
 	}
 
-/* {{{ Wraps the old open handler */
 PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
 	size_t save_path_len, session_name_len;
-	int ret;
+	zend_result ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PS_SANITY_CHECK;
-
-	PS(mod_user_is_open) = 1;
 
 	zend_try {
 		ret = PS(default_mod)->s_open(&PS(mod_data), save_path, session_name);
@@ -56,14 +53,16 @@ PHP_METHOD(SessionHandler, open)
 		zend_bailout();
 	} zend_end_try();
 
-	RETVAL_BOOL(SUCCESS == ret);
-}
-/* }}} */
+	if (SUCCESS == ret) {
+		PS(mod_user_is_open) = 1;
+	}
 
-/* {{{ Wraps the old close handler */
+	RETURN_BOOL(SUCCESS == ret);
+}
+
 PHP_METHOD(SessionHandler, close)
 {
-	int ret;
+	zend_result ret;
 
 	// don't return on failure, since not closing the default handler
 	// could result in memory leaks or other nasties
@@ -80,11 +79,9 @@ PHP_METHOD(SessionHandler, close)
 		zend_bailout();
 	} zend_end_try();
 
-	RETVAL_BOOL(SUCCESS == ret);
+	RETURN_BOOL(SUCCESS == ret);
 }
-/* }}} */
 
-/* {{{ Wraps the old read handler */
 PHP_METHOD(SessionHandler, read)
 {
 	zend_string *val;
@@ -102,9 +99,7 @@ PHP_METHOD(SessionHandler, read)
 
 	RETURN_STR(val);
 }
-/* }}} */
 
-/* {{{ Wraps the old write handler */
 PHP_METHOD(SessionHandler, write)
 {
 	zend_string *key, *val;
@@ -117,9 +112,7 @@ PHP_METHOD(SessionHandler, write)
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
-/* }}} */
 
-/* {{{ Wraps the old destroy handler */
 PHP_METHOD(SessionHandler, destroy)
 {
 	zend_string *key;
@@ -132,9 +125,7 @@ PHP_METHOD(SessionHandler, destroy)
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key));
 }
-/* }}} */
 
-/* {{{ Wraps the old gc handler */
 PHP_METHOD(SessionHandler, gc)
 {
 	zend_long maxlifetime;
@@ -151,9 +142,7 @@ PHP_METHOD(SessionHandler, gc)
 	}
 	RETURN_LONG(nrdels);
 }
-/* }}} */
 
-/* {{{ Wraps the old create_sid handler */
 PHP_METHOD(SessionHandler, create_sid)
 {
 	zend_string *id;
@@ -168,4 +157,3 @@ PHP_METHOD(SessionHandler, create_sid)
 
 	RETURN_STR(id);
 }
-/* }}} */

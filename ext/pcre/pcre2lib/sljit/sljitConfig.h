@@ -29,7 +29,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 /*
   This file contains the basic configuration options for the SLJIT compiler
@@ -37,27 +37,6 @@ extern "C" {
   sljitConfigPre.h header file when SLJIT_HAVE_CONFIG_PRE is set to a
   non-zero value.
 */
-
-/* --------------------------------------------------------------------- */
-/*  Architecture                                                         */
-/* --------------------------------------------------------------------- */
-
-/* Architecture selection. */
-/* #define SLJIT_CONFIG_X86_32 1 */
-/* #define SLJIT_CONFIG_X86_64 1 */
-/* #define SLJIT_CONFIG_ARM_V5 1 */
-/* #define SLJIT_CONFIG_ARM_V7 1 */
-/* #define SLJIT_CONFIG_ARM_THUMB2 1 */
-/* #define SLJIT_CONFIG_ARM_64 1 */
-/* #define SLJIT_CONFIG_PPC_32 1 */
-/* #define SLJIT_CONFIG_PPC_64 1 */
-/* #define SLJIT_CONFIG_MIPS_32 1 */
-/* #define SLJIT_CONFIG_MIPS_64 1 */
-/* #define SLJIT_CONFIG_SPARC_32 1 */
-/* #define SLJIT_CONFIG_S390X 1 */
-
-/* #define SLJIT_CONFIG_AUTO 1 */
-/* #define SLJIT_CONFIG_UNSUPPORTED 1 */
 
 /* --------------------------------------------------------------------- */
 /*  Utilities                                                            */
@@ -68,19 +47,19 @@ extern "C" {
 #ifndef SLJIT_UTIL_STACK
 /* Enabled by default */
 #define SLJIT_UTIL_STACK 1
-#endif
+#endif /* SLJIT_UTIL_STACK */
 
 /* Uses user provided allocator to allocate the stack (see SLJIT_UTIL_STACK) */
 #ifndef SLJIT_UTIL_SIMPLE_STACK_ALLOCATION
 /* Disabled by default */
 #define SLJIT_UTIL_SIMPLE_STACK_ALLOCATION 0
-#endif
+#endif /* SLJIT_UTIL_SIMPLE_STACK_ALLOCATION */
 
 /* Single threaded application. Does not require any locks. */
 #ifndef SLJIT_SINGLE_THREADED
 /* Disabled by default. */
 #define SLJIT_SINGLE_THREADED 0
-#endif
+#endif /* SLJIT_SINGLE_THREADED */
 
 /* --------------------------------------------------------------------- */
 /*  Configuration                                                        */
@@ -91,11 +70,13 @@ extern "C" {
 #ifndef SLJIT_STD_MACROS_DEFINED
 /* Disabled by default. */
 #define SLJIT_STD_MACROS_DEFINED 0
-#endif
+#endif /* SLJIT_STD_MACROS_DEFINED */
 
 /* Executable code allocation:
    If SLJIT_EXECUTABLE_ALLOCATOR is not defined, the application should
-   define SLJIT_MALLOC_EXEC, SLJIT_FREE_EXEC, and SLJIT_EXEC_OFFSET. */
+   define SLJIT_MALLOC_EXEC and SLJIT_FREE_EXEC.
+   Optionally, depending on the implementation used for the allocator,
+   SLJIT_EXEC_OFFSET and SLJIT_UPDATE_WX_FLAGS might also be needed. */
 #ifndef SLJIT_EXECUTABLE_ALLOCATOR
 /* Enabled by default. */
 #define SLJIT_EXECUTABLE_ALLOCATOR 1
@@ -112,7 +93,7 @@ extern "C" {
 #ifndef SLJIT_PROT_EXECUTABLE_ALLOCATOR
 /* Disabled by default. */
 #define SLJIT_PROT_EXECUTABLE_ALLOCATOR 0
-#endif
+#endif /* SLJIT_PROT_EXECUTABLE_ALLOCATOR */
 
 /* When SLJIT_WX_EXECUTABLE_ALLOCATOR is enabled SLJIT uses an
    allocator which does not set writable and executable permission
@@ -123,38 +104,27 @@ extern "C" {
 #ifndef SLJIT_WX_EXECUTABLE_ALLOCATOR
 /* Disabled by default. */
 #define SLJIT_WX_EXECUTABLE_ALLOCATOR 0
-#endif
+#endif /* SLJIT_WX_EXECUTABLE_ALLOCATOR */
 
 #endif /* !SLJIT_EXECUTABLE_ALLOCATOR */
-
-/* Force cdecl calling convention even if a better calling
-   convention (e.g. fastcall) is supported by the C compiler.
-   If this option is disabled (this is the default), functions
-   called from JIT should be defined with SLJIT_FUNC attribute.
-   Standard C functions can still be called by using the
-   SLJIT_CALL_CDECL jump type. */
-#ifndef SLJIT_USE_CDECL_CALLING_CONVENTION
-/* Disabled by default */
-#define SLJIT_USE_CDECL_CALLING_CONVENTION 0
-#endif
 
 /* Return with error when an invalid argument is passed. */
 #ifndef SLJIT_ARGUMENT_CHECKS
 /* Disabled by default */
 #define SLJIT_ARGUMENT_CHECKS 0
-#endif
+#endif /* SLJIT_ARGUMENT_CHECKS */
 
 /* Debug checks (assertions, etc.). */
 #ifndef SLJIT_DEBUG
 /* Enabled by default */
 #define SLJIT_DEBUG 1
-#endif
+#endif /* SLJIT_DEBUG */
 
 /* Verbose operations. */
 #ifndef SLJIT_VERBOSE
 /* Enabled by default */
 #define SLJIT_VERBOSE 1
-#endif
+#endif /* SLJIT_VERBOSE */
 
 /*
   SLJIT_IS_FPU_AVAILABLE
@@ -167,6 +137,6 @@ extern "C" {
 
 #ifdef __cplusplus
 } /* extern "C" */
-#endif
+#endif /* __cplusplus */
 
 #endif /* SLJIT_CONFIG_H_ */

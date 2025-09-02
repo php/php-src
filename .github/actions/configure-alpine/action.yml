@@ -1,0 +1,79 @@
+name: ./configure
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
+  skipSlow:
+    default: false
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        ./buildconf --force
+        ./configure \
+          --enable-option-checking=fatal \
+          --prefix=/usr \
+          --enable-phpdbg \
+          --enable-fpm \
+          --with-pdo-mysql=mysqlnd \
+          --with-mysqli=mysqlnd \
+          ${{ inputs.skipSlow == 'false' && '--with-pgsql' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-pgsql' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-sqlite' || '' }} \
+          --enable-intl \
+          --without-pear \
+          --enable-gd \
+          --with-jpeg \
+          --with-webp \
+          --with-freetype \
+          --with-xpm \
+          --enable-exif \
+          --with-zip \
+          --with-zlib \
+          --enable-soap \
+          --enable-xmlreader \
+          --with-xsl \
+          ${{ inputs.skipSlow == 'false' && '--with-tidy' || '' }} \
+          --enable-sysvsem \
+          --enable-sysvshm \
+          --enable-shmop \
+          --enable-pcntl \
+          --with-readline \
+          --enable-mbstring \
+          --with-iconv=/usr \
+          --with-curl \
+          --with-gettext \
+          --enable-sockets \
+          --with-bz2 \
+          --with-openssl \
+          --with-gmp \
+          --enable-bcmath \
+          --enable-calendar \
+          --enable-ftp \
+          ${{ inputs.skipSlow == 'false' && '--with-enchant=/usr' || '' }} \
+          --enable-sysvmsg \
+          --with-ffi \
+          --enable-zend-test \
+          ${{ inputs.skipSlow == 'false' && '--enable-dl-test=shared' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-ldap' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-ldap-sasl' || '' }} \
+          --with-password-argon2 \
+          --with-mhash \
+          --with-sodium \
+          --enable-dba \
+          --with-cdb \
+          --enable-flatfile \
+          --enable-inifile \
+          --with-lmdb \
+          --with-gdbm \
+          ${{ inputs.skipSlow == 'false' && '--with-snmp' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-unixODBC' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-odbc=unixODBC,/usr' || '' }} \
+          --with-config-file-path=/etc \
+          --with-config-file-scan-dir=/etc/php.d \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-dblib' || '' }} \
+          --enable-werror \
+          ${{ inputs.configurationParameters }}

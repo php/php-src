@@ -70,10 +70,8 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 
 	if (globals->shm) {
 		for (ptr = globals->shm; ptr < (globals->shm + globals->shm_size); ptr++) {
-			UnmapViewOfFile(ptr->addr);
-			CloseHandle(ptr->segment);
 			UnmapViewOfFile(ptr->descriptor);
-			CloseHandle(ptr->info);
+			CloseHandle(ptr->segment);
 		}
 		free(globals->shm);
 	}
@@ -376,14 +374,16 @@ static process_pair *process_get(FILE *stream)
 	process_pair *ptr;
 	process_pair *newptr;
 
-	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
-		if (ptr->stream == stream) {
-			break;
+	if (TWG(process) != NULL) {
+		for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
+			if (ptr->stream == stream) {
+				break;
+			}
 		}
-	}
 
-	if (ptr < (TWG(process) + TWG(process_size))) {
-		return ptr;
+		if (ptr < (TWG(process) + TWG(process_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (process_pair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(process_pair));
@@ -402,19 +402,21 @@ static shm_pair *shm_get(key_t key, void *addr)
 	shm_pair *ptr;
 	shm_pair *newptr;
 
-	for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
-		if (!ptr->descriptor) {
-			continue;
+	if (TWG(shm) != NULL) {
+		for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (!ptr->descriptor) {
+				continue;
+			}
+			if (!addr && ptr->descriptor->shm_perm.key == key) {
+				break;
+			} else if (ptr->addr == addr) {
+				break;
+			}
 		}
-		if (!addr && ptr->descriptor->shm_perm.key == key) {
-			break;
-		} else if (ptr->addr == addr) {
-			break;
-		}
-	}
 
-	if (ptr < (TWG(shm) + TWG(shm_size))) {
-		return ptr;
+		if (ptr < (TWG(shm) + TWG(shm_size))) {
+			return ptr;
+		}
 	}
 
 	newptr = (shm_pair*)realloc((void*)TWG(shm), (TWG(shm_size)+1)*sizeof(shm_pair));
@@ -479,12 +481,13 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /s /c ")+2);
+	size_t cmd_buffer_size = strlen(command) + strlen(TWG(comspec)) + sizeof(" /s /c ") + 2;
+	cmd = malloc(cmd_buffer_size);
 	if (!cmd) {
 		return NULL;
 	}
 
-	sprintf(cmd, "%s /s /c \"%s\"", TWG(comspec), command);
+	snprintf(cmd, cmd_buffer_size, "%s /s /c \"%s\"", TWG(comspec), command);
 	cmdw = php_win32_cp_any_to_w(cmd);
 	if (!cmdw) {
 		free(cmd);
@@ -611,7 +614,6 @@ TSRM_API int pclose(FILE *stream)
 }/*}}}*/
 
 #define SEGMENT_PREFIX "TSRM_SHM_SEGMENT:"
-#define DESCRIPTOR_PREFIX "TSRM_SHM_DESCRIPTOR:"
 #define INT_MIN_AS_STRING "-2147483648"
 
 
@@ -633,23 +635,25 @@ static key_t tsrm_choose_random_shm_key(key_t prev_key) {
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
-	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)], shm_info[sizeof(DESCRIPTOR_PREFIX INT_MIN_AS_STRING)];
-	HANDLE shm_handle = NULL, info_handle = NULL;
+	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)];
+	HANDLE shm_handle = NULL;
 	BOOL created = FALSE;
 
 	if (key != IPC_PRIVATE) {
 		snprintf(shm_segment, sizeof(shm_segment), SEGMENT_PREFIX "%d", key);
-		snprintf(shm_info, sizeof(shm_info), DESCRIPTOR_PREFIX "%d", key);
 
 		shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
-		info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
 	} else {
 		/* IPC_PRIVATE always creates a new segment even if IPC_CREAT flag isn't passed. */
 		flags |= IPC_CREAT;
 	}
 
-	if (!shm_handle && !info_handle) {
+	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
+			if (size == 0 || size > SIZE_MAX - sizeof(shm->descriptor)) {
+				return -1;
+			}
+			size += sizeof(shm->descriptor);
 #if SIZEOF_SIZE_T == 8
 			DWORD high = size >> 32;
 			DWORD low = (DWORD)size;
@@ -658,26 +662,14 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 			DWORD low = size;
 #endif
 			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, key == IPC_PRIVATE ? NULL : shm_segment);
-			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), key == IPC_PRIVATE ? NULL : shm_info);
 			created		= TRUE;
 		}
-		if (!shm_handle || !info_handle) {
-			if (shm_handle) {
-				CloseHandle(shm_handle);
-			}
-			if (info_handle) {
-				CloseHandle(info_handle);
-			}
+		if (!shm_handle) {
 			return -1;
 		}
 	} else {
 		if (flags & IPC_EXCL) {
-			if (shm_handle) {
-				CloseHandle(shm_handle);
-			}
-			if (info_handle) {
-				CloseHandle(info_handle);
-			}
+			CloseHandle(shm_handle);
 			return -1;
 		}
 	}
@@ -698,12 +690,10 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	shm = shm_get(key, NULL);
 	if (!shm) {
 		CloseHandle(shm_handle);
-		CloseHandle(info_handle);
 		return -1;
 	}
 	shm->segment = shm_handle;
-	shm->info	 = info_handle;
-	shm->descriptor = MapViewOfFileEx(shm->info, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+	shm->descriptor = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
 
 	if (NULL != shm->descriptor && created) {
 		shm->descriptor->shm_perm.key	= key;
@@ -722,9 +712,10 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	if (NULL != shm->descriptor && (shm->descriptor->shm_perm.key != key || size > shm->descriptor->shm_segsz)) {
 		if (NULL != shm->segment) {
 			CloseHandle(shm->segment);
+			shm->segment = INVALID_HANDLE_VALUE;
 		}
 		UnmapViewOfFile(shm->descriptor);
-		CloseHandle(shm->info);
+		shm->descriptor = NULL;
 		return -1;
 	}
 
@@ -739,14 +730,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 		return (void*)-1;
 	}
 
-	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
-
-	if (NULL == shm->addr) {
-		int err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(err);
-		return (void*)-1;
-	}
-
+	shm->addr = shm->descriptor + sizeof(shm->descriptor);
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;
@@ -767,8 +751,8 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch--;
 
-	ret = UnmapViewOfFile(shm->addr) ? 0 : -1;
-	if (!ret  && shm->descriptor->shm_nattch <= 0) {
+	ret = 0;
+	if (shm->descriptor->shm_nattch <= 0) {
 		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
 		shm->descriptor = NULL;
 	}

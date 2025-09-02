@@ -1,44 +1,36 @@
+# JIS0212.TXT
+# Date: 2015-12-02 23:51:00 GMT [KW]
+# © 2015 Unicode®, Inc.
+# For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 #	Name:             JIS X 0212 (1990) to Unicode
 #	Unicode version:  1.1
-#	Table version:    0.9
+#	Table version:    2.0
 #	Table format:     Format A
-#	Date:             8 March 1994
-#	Authors:          Glenn Adams <glenn@metis.com>
-#                     John H. Jenkins <John_Jenkins@taligent.com>
-#
-#	Copyright (c) 1991-1994 Unicode, Inc.  All Rights reserved.
-#
-#	This file is provided as-is by Unicode, Inc. (The Unicode Consortium).
-#	No claims are made as to fitness for any particular purpose.  No
-#	warranties of any kind are expressed or implied.  The recipient
-#	agrees to determine applicability of information provided.  If this
-#	file has been provided on magnetic media by Unicode, Inc., the sole
-#	remedy for any claim will be exchange of defective media within 90
-#	days of receipt.
-#
-#	Recipient is granted the right to make copies in any form for
-#	internal distribution and to freely use the information supplied
-#	in the creation of products supporting Unicode.  Unicode, Inc.
-#	specifically excludes the right to re-distribute this file directly
-#	to third parties or other organizations whether for profit or not.
+#	Date:             2011 October 14 (header updated: 2015 December 02)
 #
 #	General notes:
 #
-#	This table contains the data the Unicode Consortium has on how
-#       JIS X 0212 (1983) characters map into Unicode.
+#
+# This table contains one set of mappings from JIS X 0212 into Unicode.
+# Note that these data are *possible* mappings only and may not be the
+# same as those used by actual products, nor may they be the best suited
+# for all uses.  For more information on the mappings between various code
+# pages incorporating the repertoire of JIS X 0212 and Unicode, consult the
+# VENDORS mapping data.
+#
 #
 #	Format:  Three tab-separated columns
 #		 Column #1 is the JIS X 0212 code (in hex as 0xXXXX)
 #		 Column #2 is the Unicode (in hex as 0xXXXX)
 #		 Column #3 the Unicode name (follows a comment sign, '#')
-#					The official names for Unicode characters U+4E00
-#					to U+9FA5, inclusive, is "CJK UNIFIED IDEOGRAPH-XXXX",
-#					where XXXX is the code point.  Including all these
-#					names in this file increases its size substantially
-#					and needlessly.  The token "<CJK>" is used for the
-#					name of these characters.  If necessary, it can be
-#					expanded algorithmically by a parser or editor.
+#			The official names for Unicode characters U+4E00
+#			to U+9FA5, inclusive, is "CJK UNIFIED IDEOGRAPH-XXXX",
+#			where XXXX is the code point.  Including all these
+#			names in this file increases its size substantially
+#			and needlessly.  The token "<CJK>" is used for the
+#			name of these characters.  If necessary, it can be
+#			expanded algorithmically by a parser or editor.
 #
 #	The entries are in JIS X 0212 order
 #
@@ -51,27 +43,38 @@
 #			the kuten form.  For example, 0x2121 -> 0x0101 -> 0101;
 #			0x6D63 -> 0x4D43 -> 7767
 #
-#   The kanji mappings are a normative part of ISO/IEC 10646.  The
-#       non-kanji mappings are provisional, pending definition of
-#       official mappings by Japanese standards bodies
-#
-#	Any comments or problems, contact <John_Jenkins@taligent.com>
-#
 #	Notes:
 #
 #	1. JIS X 0212 apparently unified the following two symbols
 #	   into a single character at 0x2922:
-#
+#	
 #	   LATIN CAPITAL LETTER D WITH STROKE
 #	   LATIN CAPITAL LETTER ETH
 #
 #	   However, JIS X 0212 maintains the distinction between
 #	   the lowercase forms of these two elements at 0x2942 and 0x2943.
-#	   Given the structre of these JIS encodings, it is clear that
+#	   Given the structure of these JIS encodings, it is clear that
 #	   0x2922 and 0x2942 are intended to be a capital/small pair.
 #	   Consequently, in the Unicode mapping, 0x2922 is treated as
 #	   LATIN CAPITAL LETTER D WITH STROKE.
 #
+#  Revision History:
+#
+#    [v2.0, 2015 December 02]
+#    updates to copyright notice and terms of use
+#    no changes to character mappings
+#
+#    [v1.0, 2011 October 14]
+#    Updated terms of use to current wording.
+#    Updated contact information.
+#    No changes to the mapping data.
+#
+#    [v0.9, 8 March 1994]
+#    First release.
+#
+#  Use the Unicode reporting form <http://www.unicode.org/reporting.html>
+#    for any questions or comments or to report errors in the data.
+#	  
 0x222F	0x02D8	# BREVE
 0x2230	0x02C7	# CARON (Mandarin Chinese third tone)
 0x2231	0x00B8	# CEDILLA

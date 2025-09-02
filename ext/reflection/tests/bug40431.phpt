@@ -21,6 +21,7 @@ echo "=== 2nd test ===\n";
 class test1 {
 }
 
+#[AllowDynamicProperties]
 class test2 extends test1{
 }
 
@@ -38,6 +39,7 @@ var_dump($props[0]->isProtected());
 
 echo "=== 3rd test ===\n";
 
+#[AllowDynamicProperties]
 class test3 {
 }
 
@@ -59,6 +61,7 @@ class test5 {
     private $value = 1;
 }
 
+#[AllowDynamicProperties]
 class test4 extends test5{
 }
 

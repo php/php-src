@@ -2,6 +2,12 @@
 Bug #38212 (Seg Fault on invalid imagecreatefromgd2part() parameters)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.3.3', '>=')) {
+        die("skip test requires GD 2.3.2 or older");
+    }
+?>
 --FILE--
 <?php
 require __DIR__ . '/func.inc';

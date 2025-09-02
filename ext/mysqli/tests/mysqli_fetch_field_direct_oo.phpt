@@ -4,24 +4,12 @@ $res->fetch_field_direct(s)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $mysqli = new mysqli();
-    try {
-        new mysqli_result($mysqli);
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
-    }
-
-    require('table.inc');
-
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    require 'table.inc';
+    $mysqli = $link;
 
     if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -54,10 +42,9 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-mysqli object is not fully initialized
 mysqli_result::fetch_field_direct(): Argument #1 ($index) must be greater than or equal to 0
 object(stdClass)#%d (13) {
   ["name"]=>

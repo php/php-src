@@ -18,7 +18,11 @@
 
 #include "php.h"
 #include "SAPI.h"
-#include <emmintrin.h>
+#ifdef _M_ARM64
+# include <arm_neon.h>
+#else
+# include <emmintrin.h>
+#endif // _M_ARM64
 
 #include "win32/console.h"
 
@@ -31,7 +35,7 @@ ZEND_TLS const struct php_win32_cp *orig_in_cp = NULL;
 
 #include "cp_enc_map.c"
 
-__forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
+zend_always_inline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
 	wchar_t *ret;
 	int ret_len, tmp_len;
@@ -134,6 +138,18 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 		}
 
 		/* Process aligned chunk. */
+#ifdef _M_ARM64
+		uint8x16_t ver_err = {0};
+		while (end - idx > 15) {
+			const uint8x16_t block = vld1q_u8((const void*)idx);
+			ver_err = vorrq_u8(ver_err, block);
+			idx += 16;
+		}
+		ver_err = vshrq_n_u8(ver_err, 7);
+		if (vmaxvq_u8(ver_err)) {
+			ASCII_FAIL_RETURN()
+		}
+#else
 		__m128i vec_err = _mm_setzero_si128();
 		while (end - idx > 15) {
 			const __m128i block = _mm_load_si128((__m128i *)idx);
@@ -143,6 +159,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 		if (_mm_movemask_epi8(vec_err)) {
 			ASCII_FAIL_RETURN()
 		}
+#endif // _M_ARM64
 	}
 
 	/* Process the trailing part, or otherwise process string < 16 bytes. */
@@ -173,6 +190,22 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 
 		/* Process aligned chunk. */
 		if (end - idx > 15) {
+#ifdef _M_ARM64
+			while (end - idx > 15) {
+				/*
+				vst2q_u8 below will store interlaced vector by 8bits, so this will be little endian wchar
+				at wrote time all windows arm64 is little endian
+				 */
+				uint8x16x2_t vec = {/* .val = */{
+					vld1q_u8((const void*)idx),
+					{0},
+				}};
+
+				vst2q_u8((void*)ret_idx, vec);
+				idx += 16;
+				ret_idx += 16;
+			}
+#else
 			const __m128i mask = _mm_set1_epi32(0);
 			while (end - idx > 15) {
 				const __m128i block = _mm_load_si128((__m128i *)idx);
@@ -187,6 +220,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 				idx += 16;
 				ret_idx += 8;
 			}
+#endif // _M_ARM64
 		}
 	}
 
@@ -207,7 +241,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 }/*}}}*/
 #undef ASCII_FAIL_RETURN
 
-__forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
+zend_always_inline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
 	int r;
 	int target_len, tmp_len;
@@ -272,7 +306,7 @@ PW32CP char *php_win32_cp_conv_from_w(DWORD cp, DWORD flags, const wchar_t* in, 
 }/*}}}*/
 
 /* This is only usable after the startup phase*/
-__forceinline static char *php_win32_cp_get_enc(void)
+zend_always_inline static char *php_win32_cp_get_enc(void)
 {/*{{{*/
 	char *enc = NULL;
 	const zend_encoding *zenc;
@@ -576,7 +610,7 @@ PHP_FUNCTION(sapi_windows_cp_set)
 		cp = php_win32_cp_set_by_id((DWORD)id);
 	}
 	if (!cp) {
-		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage %d", id);
+		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage " ZEND_LONG_FMT, id);
 		RETURN_FALSE;
 	}
 

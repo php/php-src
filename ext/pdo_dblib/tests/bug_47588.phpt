@@ -5,19 +5,24 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
 
-$db->query('CREATE TABLE "Test Table" ("My Field" int, "Another Field" varchar(32) not null default \'test_string\')');
-$db->query('INSERT INTO "Test Table" ("My Field") values(1)');
-$db->query('INSERT INTO "Test Table" ("My Field") values(2)');
-$db->query('INSERT INTO "Test Table" ("My Field") values(3)');
-$rs = $db->query('SELECT * FROM "Test Table"');
+$db = getDbConnection();
+$db->query('CREATE TABLE "Test Table47588" ("My Field" int, "Another Field" varchar(32) not null default \'test_string\')');
+$db->query('INSERT INTO "Test Table47588" ("My Field") values(1), (2), (3)');
+$rs = $db->query('SELECT * FROM "Test Table47588"');
 var_dump($rs->fetchAll(PDO::FETCH_ASSOC));
-$db->query('DROP TABLE "Test Table"');
 echo "Done.\n";
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/config.inc';
+$db = getDbConnection();
+$db->exec('DROP TABLE IF EXISTS "Test Table47588"');
 ?>
 --EXPECT--
 array(3) {

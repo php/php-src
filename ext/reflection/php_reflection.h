@@ -47,6 +47,7 @@ extern PHPAPI zend_class_entry *reflection_enum_ptr;
 extern PHPAPI zend_class_entry *reflection_enum_unit_case_ptr;
 extern PHPAPI zend_class_entry *reflection_enum_backed_case_ptr;
 extern PHPAPI zend_class_entry *reflection_fiber_ptr;
+extern PHPAPI zend_class_entry *reflection_lazy_object_ptr;
 
 PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
 

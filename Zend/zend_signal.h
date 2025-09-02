@@ -25,6 +25,8 @@
 
 #include <signal.h>
 
+#include "zend_portability.h"
+
 #ifndef NSIG
 #define NSIG 65
 #endif

@@ -26,11 +26,15 @@ curl
   var_dump( curl_exec($ch) );
   var_dump( curl_exec($copy) );
 
-  curl_close($ch); // can not close original handle before curl_exec($copy) since it causes char * inputs to be invalid (see also: http://curl.haxx.se/libcurl/c/curl_easy_duphandle.html)
+  curl_close($ch); // cannot close original handle before curl_exec($copy) since it causes char * inputs to be invalid (see also: http://curl.haxx.se/libcurl/c/curl_easy_duphandle.html)
   curl_close($copy);
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing curl copy handle with User Agent ***
 string(9) "cURL phpt"
 string(9) "cURL phpt"
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d

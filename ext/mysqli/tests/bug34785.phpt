@@ -1,14 +1,14 @@
 --TEST--
-Bug #34785 (Can not properly subclass mysqli_stmt)
+Bug #34785 (Cannot properly subclass mysqli_stmt)
 --EXTENSIONS--
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include ("connect.inc");
+    include 'connect.inc';
 
     class my_stmt extends mysqli_stmt
     {

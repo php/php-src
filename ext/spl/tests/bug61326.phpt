@@ -12,7 +12,9 @@ var_dump($aobj1 == $aobj3);
 $aobj3->foo = 'bar';
 var_dump($aobj1 == $aobj3);
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(true)
+
+Deprecated: Creation of dynamic property ArrayObject::$foo is deprecated in %s on line %d
 bool(false)

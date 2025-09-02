@@ -175,6 +175,7 @@ try {
 
 DONE
 --EXPECTF--
+Deprecated: Using ${var} in strings is deprecated, use {$var} instead in %s on line %d
 *** Testing basic functionality of strpos() ***
 int(0)
 int(5)

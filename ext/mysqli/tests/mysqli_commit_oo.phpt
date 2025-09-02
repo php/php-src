@@ -4,21 +4,16 @@ mysqli_commit()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-
-require_once('connect.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!have_innodb($link))
     die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp    = NULL;
-    $link   = NULL;
+    require_once 'connect.inc';
 
     $mysqli = new mysqli();
     try {
@@ -27,10 +22,7 @@ if (!have_innodb($link))
         echo $exception->getMessage() . "\n";
     }
 
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
-        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
-    }
+    $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (true !== ($tmp = $mysqli->commit())) {
         printf("[002] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
@@ -97,9 +89,10 @@ if (!have_innodb($link))
     }
 
     print "done!";
+?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 mysqli object is not fully initialized

@@ -35,8 +35,6 @@
 #ifdef PHP_WIN32
 #include "windows_common.h"
 #include <Mswsock.h>
-#define IPV6_RECVPKTINFO	IPV6_PKTINFO
-#define IPV6_RECVHOPLIMIT	IPV6_HOPLIMIT
 #define msghdr _WSAMSG
 
 static GUID WSARecvMsg_GUID = WSAID_WSARECVMSG;
@@ -109,29 +107,37 @@ static void init_ancillary_registry(void)
 	key.cmsg_type		= type; \
 	zend_hash_str_update_mem(&ancillary_registry.ht, (char*)&key, sizeof(key), (void*)&entry, sizeof(entry))
 
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
+#if defined(IPV6_PKTINFO) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
 			to_zval_read_in6_pktinfo, IPPROTO_IPV6, IPV6_PKTINFO);
 #endif
 
-#if defined(IPV6_HOPLIMIT) && HAVE_IPV6
+#if defined(IPV6_HOPLIMIT) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_HOPLIMIT);
 #endif
 
-#if defined(IPV6_TCLASS) && HAVE_IPV6
+#if defined(IPV6_TCLASS) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
 #endif
 
 #ifdef SO_PASSCRED
-#ifdef ANC_CREDS_UCRED
+#ifdef HAVE_STRUCT_UCRED
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDENTIALS);
 #else
 	PUT_ENTRY(sizeof(struct cmsgcred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDS);
 #endif
+#endif
+
+#if defined(LOCAL_CREDS_PERSISTENT)
+	PUT_ENTRY(SOCKCRED2SIZE(1), 1, 0, from_zval_write_ucred,
+			to_zval_read_ucred, SOL_SOCKET, SCM_CREDS2);
+#elif defined(LOCAL_CREDS)
+	PUT_ENTRY(SOCKCREDSIZE(1), 1, 0, from_zval_write_ucred,
+			to_zval_read_ucred, SOL_SOCKET, SCM_CREDS);
 #endif
 
 #ifdef SCM_RIGHTS
@@ -320,7 +326,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *arg4)
 {
 	struct err_s	err = {0};
@@ -416,43 +422,6 @@ int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 
 void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 {
-	/* IPv6 ancillary data */
-#if defined(IPV6_RECVPKTINFO) && HAVE_IPV6
-	REGISTER_LONG_CONSTANT("IPV6_RECVPKTINFO",		IPV6_RECVPKTINFO,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_PKTINFO",          IPV6_PKTINFO,       CONST_CS | CONST_PERSISTENT);
-#endif
-#if defined(IPV6_RECVHOPLIMIT) && HAVE_IPV6
-	REGISTER_LONG_CONSTANT("IPV6_RECVHOPLIMIT",		IPV6_RECVHOPLIMIT,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_HOPLIMIT",         IPV6_HOPLIMIT,      CONST_CS | CONST_PERSISTENT);
-#endif
-	/* would require some effort:
-	REGISTER_LONG_CONSTANT("IPV6_RECVRTHDR",		IPV6_RECVRTHDR,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_RECVHOPOPTS",		IPV6_RECVHOPOPTS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_RECVDSTOPTS",		IPV6_RECVDSTOPTS,	CONST_CS | CONST_PERSISTENT);
-	*/
-#if defined(IPV6_RECVTCLASS) && HAVE_IPV6
-	REGISTER_LONG_CONSTANT("IPV6_RECVTCLASS",		IPV6_RECVTCLASS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_TCLASS",			IPV6_TCLASS,		CONST_CS | CONST_PERSISTENT);
-#endif
-
-	/*
-	REGISTER_LONG_CONSTANT("IPV6_RTHDR",			IPV6_RTHDR,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_HOPOPTS",			IPV6_HOPOPTS,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_DSTOPTS",			IPV6_DSTOPTS,		CONST_CS | CONST_PERSISTENT);
-	*/
-
-#ifdef SCM_RIGHTS
-	REGISTER_LONG_CONSTANT("SCM_RIGHTS",			SCM_RIGHTS,			CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef SO_PASSCRED
-#ifdef SCM_CREDENTIALS
-	REGISTER_LONG_CONSTANT("SCM_CREDENTIALS",		SCM_CREDENTIALS,	CONST_CS | CONST_PERSISTENT);
-#else
-	REGISTER_LONG_CONSTANT("SCM_CREDS",		SCM_CREDS,	CONST_CS | CONST_PERSISTENT);
-#endif
-	REGISTER_LONG_CONSTANT("SO_PASSCRED",			SO_PASSCRED,		CONST_CS | CONST_PERSISTENT);
-#endif
-
 #ifdef ZTS
 	ancillary_mutex = tsrm_mutex_alloc();
 #endif

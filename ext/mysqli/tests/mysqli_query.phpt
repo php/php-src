@@ -4,13 +4,11 @@ mysqli_query()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     try {
         mysqli_query($link, '');
@@ -47,7 +45,7 @@ require_once('skipifconnectfailure.inc');
         // let's try to play with stored procedures
         mysqli_query($link, 'DROP PROCEDURE IF EXISTS p');
         if (mysqli_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(25)) BEGIN SELECT VERSION() INTO ver_param; END;')) {
-            $res = mysqli_query($link, 'CALL p(@version)');
+            mysqli_query($link, 'CALL p(@version)');
             $res = mysqli_query($link, 'SELECT @version AS p_version');
 
             $tmp = mysqli_fetch_assoc($res);
@@ -103,7 +101,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
@@ -116,7 +114,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-mysqli_query(): Argument #2 ($query) cannot be empty
+mysqli_query(): Argument #2 ($query) must not be empty
 array(1) {
   ["valid"]=>
   string(30) "this is sql but with semicolon"

@@ -183,6 +183,7 @@ if ($pid) {
             fputs($s, "200 OK\r\n");
 
         } elseif ($buf === "QUIT\r\n") {
+            fputs($s, "221 Bye\r\n");
             break;
 
         } elseif (preg_match("~^PORT (\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\r\n$~", $buf, $m)) {
@@ -386,6 +387,10 @@ if ($pid) {
                 case "/bug73457":
                     fputs($s, "150 File status okay; about to open data connection.\r\n");
                     break;
+                case "gh10521":
+                    // Just a side channel for getting the received file size.
+                    fputs($s, "425 Can't open data connection (".$GLOBALS['rest_pos'].").\r\n");
+                    break;
 
                 default:
                     fputs($s, "550 {$matches[1]}: No such file or directory \r\n");
@@ -426,7 +431,7 @@ if ($pid) {
             }
 
         } elseif (preg_match('/^EPSV/', $buf, $matches)) {
-            fputs($s, "550 Extended passsive mode not supported.\r\n");
+            fputs($s, "550 Extended passive mode not supported.\r\n");
         } elseif (preg_match('/^SITE EXEC/', $buf, $matches)) {
             fputs($s, "200 OK\r\n");
 
@@ -446,8 +451,27 @@ if ($pid) {
             fputs($s, "200 " . $matches[1] . " bytes allocated\r\n");
 
         }elseif (preg_match('/^LIST www\//', $buf, $matches)) {
-            fputs($s, "226 Transfer complete\r\n");
+            if (empty($pasv)) {
+                fputs($s, "150 File status okay; about to open data connection\r\n");
+                if (!$fs = stream_socket_client("tcp://$host:$port")) {
+                    fputs($s, "425 Can't open data connection\r\n");
+                    continue;
+                }
+            } else {
+                fputs($s, "125 Data connection already open; transfer starting.\r\n");
+                $fs = $pasvs;
+            }
 
+
+            if ((!empty($ssl)) && (!stream_socket_enable_crypto($pasvs, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER))) {
+                die("SSLv23 handshake failed.\n");
+            }
+
+            fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
+            fputs($s, "226 Closing data Connection.\r\n");
+            fclose($fs);
+
+            fputs($s, "226 Transfer complete\r\n");
         }elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
             fputs($s, "425 Error establishing connection\r\n");
 

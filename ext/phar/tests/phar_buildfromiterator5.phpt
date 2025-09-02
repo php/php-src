@@ -44,14 +44,9 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/buildfromiterator5.phar');
-__HALT_COMPILER();
-?>
 --EXPECTF--
 rewind
 valid
 current
 %s(24) "UnexpectedValueException"
-Iterator myIterator returned an invalid value (must return a string)
+Iterator myIterator returned an invalid value (must return a string, a stream, or an SplFileInfo object)

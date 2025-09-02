@@ -11,10 +11,5 @@ try {
 }
 
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
-?>
 --EXPECTF--
 phar error: "%strunc.tar" is a corrupted tar file (truncated)

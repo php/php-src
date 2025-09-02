@@ -2,78 +2,64 @@
 
 /** @generate-class-entries */
 
-/**
- * @param string $path
- * @param string $mode
- * @param string $handler
- * @param string $handler_params
- * @return resource|false
- */
-function dba_popen($path, $mode, $handler = UNKNOWN, ...$handler_params) {}
+namespace Dba {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
+}
 
-/**
- * @param string $path
- * @param string $mode
- * @param string $handler
- * @param string $handler_params
- * @return resource|false
- */
-function dba_open($path, $mode, $handler = UNKNOWN, ...$handler_params) {}
+namespace {
+#ifdef DBA_LMDB
+    /** @var int */
+    const DBA_LMDB_USE_SUB_DIR = 0;
+    /**
+     * @var int
+     * @cvalue MDB_NOSUBDIR
+     */
+    const DBA_LMDB_NO_SUB_DIR = UNKNOWN;
+#endif
 
-/** @param resource $dba */
-function dba_close($dba): void {}
+    function dba_popen(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null): Dba\Connection|false {}
 
-/**
- * @param string|array $key
- * @param resource $dba
- */
-function dba_exists($key, $dba): bool {}
+    function dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null): Dba\Connection|false {}
 
-/**
- * @param string|array $key
- * @param int|resource $skip actually this parameter is optional, not $dba
- * @param resource $dba
- */
-function dba_fetch($key, $skip, $dba = UNKNOWN): string|false {}
+    function dba_close(Dba\Connection $dba): void {}
 
-/** @return array<int, string>|false */
-function dba_key_split(string|false|null $key): array|false {}
+    function dba_exists(string|array $key, Dba\Connection $dba): bool {}
 
-/** @param resource $dba */
-function dba_firstkey($dba): string|false {}
+    /**
+     * @param Dba\Connection|int $dba overloaded legacy signature has params flipped
+     * @param Dba\Connection|int $skip overloaded legacy signature has params flipped
+     */
+    function dba_fetch(string|array $key, $dba, $skip = 0): string|false {}
 
-/** @param resource $dba */
-function dba_nextkey($dba): string|false {}
+    /** @return array<int, string>|false */
+    function dba_key_split(string|false|null $key): array|false {}
 
-/**
- * @param string|array $key
- * @param resource $dba
- */
-function dba_delete($key, $dba): bool {}
+    function dba_firstkey(Dba\Connection $dba): string|false {}
 
-/**
- * @param string|array $key
- * @param resource $dba
- */
-function dba_insert($key, string $value, $dba): bool {}
+    function dba_nextkey(Dba\Connection $dba): string|false {}
 
-/**
- * @param string|array $key
- * @param resource $dba
- */
-function dba_replace($key, string $value, $dba): bool {}
+    function dba_delete(string|array $key, Dba\Connection $dba): bool {}
 
-/** @param resource $dba */
-function dba_optimize($dba): bool {}
+    function dba_insert(string|array $key, string $value, Dba\Connection $dba): bool {}
 
-/** @param resource $dba */
-function dba_sync($dba): bool {}
+    function dba_replace(string|array $key, string $value, Dba\Connection $dba): bool {}
 
-/**
- * @return array<int|string, string>
- * @refcount 1
- */
-function dba_handlers(bool $full_info = false): array {}
+    function dba_optimize(Dba\Connection $dba): bool {}
 
-/** @return array<int, string> */
-function dba_list(): array {}
+    function dba_sync(Dba\Connection $dba): bool {}
+
+    /**
+     * @return array<int|string, string>
+     * @refcount 1
+     */
+    function dba_handlers(bool $full_info = false): array {}
+
+    /** @return array<int, string> */
+    function dba_list(): array {}
+}

@@ -30,7 +30,7 @@ main();
 usesValue 0
 i is 0
 
-Fatal error: Uncaught Error: Test::usesRef(): Argument #1 ($x) cannot be passed by reference in %s:%d
+Fatal error: Uncaught Error: Test::usesRef(): Argument #1 ($x) could not be passed by reference in %s:%d
 Stack trace:
 #0 %s(%d): main()
 #1 {main}

@@ -4,11 +4,11 @@ resultset constructor
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
@@ -29,6 +29,6 @@ require_once('skipifconnectfailure.inc');
 
     $mysql->close();
 ?>
---EXPECT--
+--EXPECTF--
 string(3) "foo"
-Unknown column 'invalid' in 'field list'
+Unknown column 'invalid' in '%r(SELECT|field list)%r'

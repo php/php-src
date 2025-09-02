@@ -4,11 +4,11 @@ Bug #75018 Data corruption when reading fields of bit type
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 
 $mysqli = new mysqli("$host:$port", $user, $passwd, $db);
 
@@ -34,7 +34,7 @@ while ($row = $result->fetch_assoc()) {
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 string(1) "0"

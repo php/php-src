@@ -32,24 +32,24 @@ foreach($inputs as $key =>$value) {
 
 --Year as decimal number without a century--
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d"
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(2) "08"
 
 --Year as decimal number including the century--
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d"
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(4) "2008"
 
 --Time zone offset--
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%s) "%s"
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%s) "%s"

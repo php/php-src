@@ -50,7 +50,7 @@ int fpm_shm_free(void *mem, size_t size) /* {{{ */
 		return 0;
 	}
 
-	if (fpm_shm_size - size > 0) {
+	if (fpm_shm_size > size) {
 		fpm_shm_size -= size;
 	} else {
 		fpm_shm_size = 0;

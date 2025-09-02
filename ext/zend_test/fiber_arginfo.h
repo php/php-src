@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 72732355038392236e17ce928354667302c4c6bf */
+ * Stub hash: 8cd7626122b050585503ccebe370a61781ff83f2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class__ZendTestFiber___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
@@ -19,13 +19,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class__ZendTestFiber_suspend arginfo_class__ZendTestFiber_resume
 
-
 static ZEND_METHOD(_ZendTestFiber, __construct);
 static ZEND_METHOD(_ZendTestFiber, start);
 static ZEND_METHOD(_ZendTestFiber, resume);
 static ZEND_METHOD(_ZendTestFiber, pipeTo);
 static ZEND_METHOD(_ZendTestFiber, suspend);
-
 
 static const zend_function_entry class__ZendTestFiber_methods[] = {
 	ZEND_ME(_ZendTestFiber, __construct, arginfo_class__ZendTestFiber___construct, ZEND_ACC_PUBLIC)
@@ -41,8 +39,7 @@ static zend_class_entry *register_class__ZendTestFiber(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "_ZendTestFiber", class__ZendTestFiber_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
 }

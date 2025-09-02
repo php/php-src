@@ -41,7 +41,7 @@ POST / HTTP/1.1
 Host: %s:%d
 Connection: close
 
-GET /foo HTTP/1.1
+POST /foo HTTP/1.1
 Host: %s:%d
 Connection: close
 

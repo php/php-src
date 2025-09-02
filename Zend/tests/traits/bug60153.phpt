@@ -1,5 +1,5 @@
 --TEST--
-Bug #60153 (Interface method prototypes not enforced when implementd via traits.)
+Bug #60153 (Interface method prototypes not enforced when implemented via traits.)
 --FILE--
 <?php
 

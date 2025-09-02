@@ -6,19 +6,19 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-$value = FFI::new('char[26]');
+$value = FFI::cdef()->new('char[26]');
 FFI::memcpy($value, implode('', range('a', 'z')), 26);
 
-$slice = FFI::new('char[4]');
+$slice = FFI::cdef()->new('char[4]');
 
 echo 'cast from start' . PHP_EOL;
 FFI::memcpy($slice, $value, 4);
-var_dump($value + 0, $slice, FFI::cast('char[4]', $value));
+var_dump($value + 0, $slice, FFI::cdef()->cast('char[4]', $value));
 echo PHP_EOL;
 
 echo 'cast with offset' . PHP_EOL;
 FFI::memcpy($slice, $value + 4, 4);
-var_dump($value + 4, $slice, FFI::cast('char[4]', $value + 4));
+var_dump($value + 4, $slice, FFI::cdef()->cast('char[4]', $value + 4));
 echo PHP_EOL;
 ?>
 --EXPECTF--

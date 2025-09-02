@@ -50,7 +50,6 @@ typedef struct {
 
 typedef struct {
 	void	*addr;
-	HANDLE	info;
 	HANDLE	segment;
 	struct	shmid_ds	*descriptor;
 } shm_pair;

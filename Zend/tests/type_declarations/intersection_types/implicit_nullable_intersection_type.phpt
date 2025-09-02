@@ -1,10 +1,15 @@
 --TEST--
-Intersection types cannot be implicitly nullable
+Intersection types can be implicitly nullable
 --FILE--
 <?php
 
-function foo(X&Y $foo = null) {}
+function foo(X&Y $foo = null) {
+    var_dump($foo);
+}
+
+foo(null);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use null as default value for parameter $foo of type X&Y in %s on line %d
+Deprecated: foo(): Implicitly marking parameter $foo as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+NULL

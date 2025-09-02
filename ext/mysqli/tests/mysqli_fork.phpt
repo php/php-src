@@ -4,7 +4,6 @@ Forking a child and using the same connection.
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
 
 if (!function_exists('pcntl_fork'))
     die("skip Process Control Functions not available");
@@ -12,16 +11,16 @@ if (!function_exists('pcntl_fork'))
 if (!function_exists('posix_getpid'))
     die("skip POSIX functions not available");
 
-require_once('connect.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!have_innodb($link))
     die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
-    require_once("table.inc");
+    require_once 'table.inc';
 
     $res = mysqli_query($link, "SELECT 'dumped by the parent' AS message");
     $pid = pcntl_fork();
@@ -33,7 +32,6 @@ if (!have_innodb($link))
         case 0:
             /* child */
             exit(0);
-            break;
 
         default:
             /* parent */
@@ -124,8 +122,8 @@ if (!have_innodb($link))
 
             if (!mysqli_query($plink, sprintf($sql, 'stop')) || !mysqli_commit($link))
                 exit(mysqli_errno($plink));
+
             exit(0);
-            break;
 
         default:
             /* parent */
@@ -224,7 +222,7 @@ if (!have_innodb($link))
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

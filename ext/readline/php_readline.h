@@ -17,7 +17,13 @@
 #ifndef PHP_READLINE_H
 #define PHP_READLINE_H
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
+#define READLINE_LIB "libedit"
+#else
+#define READLINE_LIB "readline"
+#endif
+
+#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
 
 extern zend_module_entry readline_module_entry;
 #define phpext_readline_ptr &readline_module_entry

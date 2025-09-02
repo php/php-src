@@ -33,7 +33,8 @@ class Foo
 $class = unserialize(base64_decode($serialized));
 var_dump($class);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property Foo::$notThere is deprecated in %s on line %d
 object(Foo)#1 (4) {
   ["public"]=>
   int(3)

@@ -22,14 +22,17 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
+#include "pdo_dblib_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 static PHP_GINIT_FUNCTION(dblib);
+
+static zend_class_entry *PdoDblib_ce;
 
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -187,19 +190,25 @@ PHP_RSHUTDOWN_FUNCTION(pdo_dblib)
 	return SUCCESS;
 }
 
+#define REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, value) \
+		REGISTER_PDO_CLASS_CONST_LONG_DEPRECATED_ALIAS_85(base_name, "DBLIB_", "Pdo\\Dblib::", value)
+
 PHP_MINIT_FUNCTION(pdo_dblib)
 {
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_CONNECTION_TIMEOUT", (long) PDO_DBLIB_ATTR_CONNECTION_TIMEOUT);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_QUERY_TIMEOUT", (long) PDO_DBLIB_ATTR_QUERY_TIMEOUT);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER", (long) PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_VERSION", (long) PDO_DBLIB_ATTR_VERSION);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_TDS_VERSION", (long) PDO_DBLIB_ATTR_TDS_VERSION);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_SKIP_EMPTY_ROWSETS", (long) PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS);
-	REGISTER_PDO_CLASS_CONST_LONG("DBLIB_ATTR_DATETIME_CONVERT", (long) PDO_DBLIB_ATTR_DATETIME_CONVERT);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_CONNECTION_TIMEOUT", (long) PDO_DBLIB_ATTR_CONNECTION_TIMEOUT);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_QUERY_TIMEOUT", (long) PDO_DBLIB_ATTR_QUERY_TIMEOUT);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_STRINGIFY_UNIQUEIDENTIFIER", (long) PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_VERSION", (long) PDO_DBLIB_ATTR_VERSION);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_TDS_VERSION", (long) PDO_DBLIB_ATTR_TDS_VERSION);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_SKIP_EMPTY_ROWSETS", (long) PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS);
+	REGISTER_PDO_DBLIB_CLASS_CONST_LONG_DEPRECATED_ALIAS_85("ATTR_DATETIME_CONVERT", (long) PDO_DBLIB_ATTR_DATETIME_CONVERT);
 
 	if (FAIL == dbinit()) {
 		return FAILURE;
 	}
+
+	PdoDblib_ce = register_class_Pdo_Dblib(pdo_dbh_ce);
+	PdoDblib_ce->create_object = pdo_dbh_new;
 
 	if (FAILURE == php_pdo_register_driver(&pdo_dblib_driver)) {
 		return FAILURE;
@@ -210,7 +219,7 @@ PHP_MINIT_FUNCTION(pdo_dblib)
 	dbmsghandle((MHANDLEFUNC) pdo_dblib_msg_handler);
 #endif
 
-	return SUCCESS;
+	return php_pdo_register_driver_specific_ce(&pdo_dblib_driver, PdoDblib_ce);
 }
 
 PHP_MSHUTDOWN_FUNCTION(pdo_dblib)
@@ -223,7 +232,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_dblib)
 PHP_MINFO_FUNCTION(pdo_dblib)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for "
+	php_info_print_table_row(2, "PDO Driver for "
 #ifdef PDO_DBLIB_IS_MSSQL
 		"MSSQL"
 #elif defined(PHP_WIN32)

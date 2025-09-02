@@ -2,24 +2,18 @@
 Bug #58756: w.r.t MessageFormatter
 --EXTENSIONS--
 intl
+--INI--
+date.timezone=America/New_York
 --SKIPIF--
 <?php
-
-if (version_compare(INTL_ICU_VERSION, '51.2') < 0) {
-    die('skip for ICU >= 51.2');
-}
 if (str_contains(PHP_OS, 'FreeBSD')) {
     die('xfail Fails on FreeBSD for unknown reason');
 }
 ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-//ini_set("intl.default_locale", "nl");
 
 $time = 1247013673;
-
-ini_set('date.timezone', 'America/New_York');
 
 $msgf = new MessageFormatter('en_US', '{0,date,full} {0,time,h:m:s a V}');
 

@@ -10,6 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN' &&
     !extension_loaded('com_dotnet')) {
     die('skip - either PDOTEST_DSN or com_dotnet extension is needed to setup the connection');
 }
+?>
 --REDIRECTTEST--
 # magic auto-configuration
 

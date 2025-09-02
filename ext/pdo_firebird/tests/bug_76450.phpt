@@ -3,8 +3,6 @@ Bug #76450 (SIGSEGV in firebird_stmt_execute)
 --EXTENSIONS--
 pdo_firebird
 sockets
---ENV--
-LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require_once "payload_server.inc";

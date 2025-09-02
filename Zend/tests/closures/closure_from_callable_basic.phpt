@@ -96,7 +96,7 @@ echo $fn(" OK".PHP_EOL);
 
 
 ?>
---EXPECT--
+--EXPECTF--
 Access public static function OK
 Access public static function with different case OK
 Access public static function with colon scheme OK
@@ -111,9 +111,17 @@ Instance return private static method as callable OK
 Instance return protected static method as callable OK
 Subclass closure over parent class protected method OK
 Subclass closure over parent class static protected method OK
-Access public instance method of parent object through "parent::"  OK
-Access public instance method of self object through "self::"  OK
-Access public instance method of parent object through "self::" to parent method OK
-Access protected instance method of parent object through "self::" to parent method OK
+Access public instance method of parent object through "parent::" 
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
+ OK
+Access public instance method of self object through "self::" 
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
+ OK
+Access public instance method of parent object through "self::" to parent method
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
+ OK
+Access protected instance method of parent object through "self::" to parent method
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
+ OK
 MagicCall __call instance method __call,nonExistentMethod, OK
 MagicCall __callStatic static method __callStatic,nonExistentMethod, OK

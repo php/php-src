@@ -13,7 +13,7 @@ var_dump(parse_ini_string($ini, true, INI_SCANNER_TYPED));
 --EXPECT--
 array(2) {
   ["val1"]=>
-  string(1) "2"
+  int(2)
   ["val2"]=>
-  string(1) "2"
+  int(2)
 }

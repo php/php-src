@@ -3,7 +3,7 @@
 
 // Check if we are being given a mime.types file or if we should use the
 // default URL.
-$source = count($argv) > 1 ? $argv[1] : 'https://cdn.jsdelivr.net/gh/jshttp/mime-db@v1.45.0/db.json';
+$source = count($argv) > 1 ? $argv[1] : 'https://cdn.jsdelivr.net/gh/jshttp/mime-db@v1.52.0/db.json';
 
 // See if we can actually load it.
 $data = @file_get_contents($source);

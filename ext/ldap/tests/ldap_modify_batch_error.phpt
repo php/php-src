@@ -11,7 +11,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 $addGivenName = array(
     array(
@@ -60,12 +60,22 @@ $mods = array(
 );
 
 var_dump(ldap_modify_batch($link, "dc=my-domain,$base", $mods));
+
+// high key with invalid attribute type
+$mods = [
+    99999 => [
+        "attrib"  => "weirdAttribute",
+        "modtype" => LDAP_MODIFY_BATCH_ADD,
+        "values"  => ["value1"],
+    ],
+];
+var_dump(ldap_modify_batch($link, "dc=my-domain,$base", $mods));
 ?>
 --CLEAN--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
 ?>
@@ -77,6 +87,9 @@ Warning: ldap_modify_batch(): Batch Modify: Invalid DN syntax in %s on line %d
 bool(false)
 
 Warning: ldap_modify_batch(): Batch Modify: Naming violation in %s on line %d
+bool(false)
+
+Warning: ldap_modify_batch(): Batch Modify: Undefined attribute type in %s on line %d
 bool(false)
 
 Warning: ldap_modify_batch(): Batch Modify: Undefined attribute type in %s on line %d

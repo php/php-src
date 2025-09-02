@@ -22,6 +22,8 @@
 int load_schema(sdlCtx *ctx, xmlNodePtr schema);
 void schema_pass2(sdlCtx *ctx);
 
+xmlChar *schema_location_construct_uri(const xmlAttr *attribute);
+
 void delete_model(zval *zv);
 void delete_model_persistent(zval *zv);
 void delete_type(zval *zv);

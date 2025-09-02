@@ -5,7 +5,6 @@ openssl
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (OPENSSL_VERSION_NUMBER < 0x10101000) die("skip OpenSSL v1.1.1 required");
 ?>
 --FILE--
 <?php
@@ -17,8 +16,8 @@ $serverCode = <<<'CODE'
         'local_cert' => '%s',
     ]]);
 
-    $server = stream_socket_server('tlsv1.3://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tlsv1.3://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
     for ($i=0; $i < 3; $i++) {
         @stream_socket_accept($server, 3);
@@ -33,15 +32,13 @@ $clientCode = <<<'CODE'
         'verify_peer_name' => false,
     ]]);
 
-    phpt_wait();
-
-    $client = stream_socket_client("tlsv1.3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = stream_socket_client("tlsv1.3://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.0://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("tlsv1.0://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("tlsv1.2://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 CODE;
 

@@ -216,7 +216,7 @@ AC_DEFUN([AX_GCC_FUNC_ATTRIBUTE], [
                     static int bar( void ) __attribute__(($1("foo")));
                 ],
                 [target], [
-                    static int bar( void ) __attribute__(($1("sse2")));
+                    int bar( void ) __attribute__(($1("sse2")));
                 ],
                 [
                  m4_warn([syntax], [Unsupported attribute $1, the test may fail])

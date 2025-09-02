@@ -19,9 +19,9 @@ p('あ');
 --EXPECTF--
 あ
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 あ
 e38182
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 e38182

@@ -38,7 +38,8 @@ struct _zend_call_info {
 	bool               send_unpack;  /* Parameters passed by SEND_UNPACK or SEND_ARRAY */
 	bool               named_args;   /* Function has named arguments */
 	bool               is_prototype; /* An overridden child method may be called */
-	int                     num_args;
+	bool               is_frameless; /* A frameless function sends arguments through operands */
+	int                     num_args;	/* Number of arguments, excluding named and variadic arguments */
 	zend_send_arg_info      arg_info[1];
 };
 
@@ -60,10 +61,10 @@ typedef struct _zend_call_graph {
 
 BEGIN_EXTERN_C()
 
-ZEND_API int zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph);
+ZEND_API void zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph);
 ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph);
 ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, const zend_op_array *op_array);
-ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info);
+ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info);
 
 END_EXTERN_C()
 

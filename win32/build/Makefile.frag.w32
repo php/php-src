@@ -1,7 +1,0 @@
-$(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj: Zend\asm\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.asm
-	$(FIBER_ASSEMBLER) /DBOOST_CONTEXT_EXPORT=EXPORT /nologo /Fo $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj /c Zend\asm\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.asm
-
-$(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj: Zend\asm\make_$(FIBER_ASM_ARCH)_ms_pe_masm.asm
-	$(FIBER_ASSEMBLER) /DBOOST_CONTEXT_EXPORT=EXPORT /nologo /Fo $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj /c Zend\asm\make_$(FIBER_ASM_ARCH)_ms_pe_masm.asm
-
-$(BUILD_DIR)\$(PHPDLL): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj

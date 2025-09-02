@@ -13,13 +13,15 @@ function Test($param) {
 }
 
 class TestSoapClient extends SoapClient {
+  private $server;
+
   function __construct($wsdl, $opt) {
     parent::__construct($wsdl, $opt);
     $this->server = new SoapServer($wsdl, $opt);
     $this->server->addFunction('Test');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0, ?string $uriParserClass = null): string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

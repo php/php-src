@@ -1,7 +1,6 @@
 --TEST--
 Request #71855 (PDO placeholder escaping, part 2)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

@@ -55,10 +55,10 @@ Warning: file_get_contents(1): Failed to open stream: No such file or directory 
 bool(false)
 
 -- Filename: FALSE --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 
 -- Filename: "" --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 
 -- Filename: " " --
 

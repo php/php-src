@@ -15,17 +15,15 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "php_main.h"
 #include "ext/standard/info.h"
 #include "php_spl.h"
 #include "php_spl_arginfo.h"
 #include "spl_functions.h"
-#include "spl_engine.h"
 #include "spl_array.h"
 #include "spl_directory.h"
 #include "spl_iterators.h"
@@ -36,12 +34,7 @@
 #include "spl_heap.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "ext/standard/php_mt_rand.h"
 #include "main/snprintf.h"
-
-#ifdef COMPILE_DL_SPL
-ZEND_GET_MODULE(spl)
-#endif
 
 ZEND_TLS zend_string *spl_autoload_extensions;
 ZEND_TLS HashTable *spl_autoload_functions;
@@ -75,12 +68,13 @@ PHP_FUNCTION(class_parents)
 	zend_class_entry *parent_class, *ce;
 	bool autoload = 1;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -108,11 +102,12 @@ PHP_FUNCTION(class_implements)
 	bool autoload = 1;
 	zend_class_entry *ce;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -136,11 +131,12 @@ PHP_FUNCTION(class_uses)
 	bool autoload = 1;
 	zend_class_entry *ce;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -217,7 +213,7 @@ PHP_FUNCTION(class_uses)
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnexpectedValueException, z_list, sub, allow, ce_flags); \
 
-/* {{{ Return an array containing the names of all clsses and interfaces defined in SPL */
+/* {{{ Return an array containing the names of all classes and interfaces defined in SPL */
 PHP_FUNCTION(spl_classes)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -423,7 +419,7 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 		return NULL;
 	}
 
-	/* We don't use ZEND_HASH_FOREACH here,
+	/* We don't use ZEND_HASH_MAP_FOREACH here,
 	 * because autoloaders may be added/removed during autoloading. */
 	HashPosition pos;
 	zend_hash_internal_pointer_reset_ex(spl_autoload_functions, &pos);
@@ -477,6 +473,7 @@ PHP_FUNCTION(spl_autoload_call)
 } /* }}} */
 
 #define HT_MOVE_TAIL_TO_HEAD(ht)						        \
+	ZEND_ASSERT(!HT_IS_PACKED(ht));						        \
 	do {												        \
 		Bucket tmp = (ht)->arData[(ht)->nNumUsed-1];				\
 		memmove((ht)->arData + 1, (ht)->arData,					\
@@ -491,7 +488,7 @@ static Bucket *spl_find_registered_function(autoload_func_info *find_alfi) {
 	}
 
 	autoload_func_info *alfi;
-	ZEND_HASH_FOREACH_PTR(spl_autoload_functions, alfi) {
+	ZEND_HASH_MAP_FOREACH_PTR(spl_autoload_functions, alfi) {
 		if (autoload_func_info_equals(alfi, find_alfi)) {
 			return _p;
 		}
@@ -531,9 +528,9 @@ PHP_FUNCTION(spl_autoload_register)
 	if (ZEND_FCI_INITIALIZED(fci)) {
 		if (!fcc.function_handler) {
 			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
+			 * with it ourselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
 		}
 
 		if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
@@ -585,14 +582,23 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (fcc.function_handler && zend_string_equals_literal(
 			fcc.function_handler->common.function_name, "spl_autoload_call")) {
-		/* Don't destroy the hash table, as we might be iterating over it right now. */
-		zend_hash_clean(spl_autoload_functions);
+		php_error_docref(NULL, E_DEPRECATED,
+			"Using spl_autoload_call() as a callback for spl_autoload_unregister() is deprecated,"
+			" to remove all registered autoloaders, call spl_autoload_unregister()"
+			" for all values returned from spl_autoload_functions()");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+		if (spl_autoload_functions) {
+			/* Don't destroy the hash table, as we might be iterating over it right now. */
+			zend_hash_clean(spl_autoload_functions);
+		}
 		RETURN_TRUE;
 	}
 
 	if (!fcc.function_handler) {
 		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-		 * with it outselves. It is important that it is not refetched on every call,
+		 * with it ourselves. It is important that it is not refetched on every call,
 		 * because calls may occur from different scopes. */
 		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
 	}
@@ -619,7 +625,7 @@ PHP_FUNCTION(spl_autoload_functions)
 
 	array_init(return_value);
 	if (spl_autoload_functions) {
-		ZEND_HASH_FOREACH_PTR(spl_autoload_functions, alfi) {
+		ZEND_HASH_MAP_FOREACH_PTR(spl_autoload_functions, alfi) {
 			if (alfi->closure) {
 				GC_ADDREF(alfi->closure);
 				add_next_index_object(return_value, alfi->closure);
@@ -690,12 +696,12 @@ PHP_MINFO_FUNCTION(spl)
 	char *strg;
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "SPL support",        "enabled");
+	php_info_print_table_row(2, "SPL support", "enabled");
 
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, 1, ZEND_ACC_INTERFACE)
 	strg = estrdup("");
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
+	ZEND_HASH_MAP_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
 		spl_build_class_list_string(zv, &strg);
 	} ZEND_HASH_FOREACH_END();
 	zend_array_destroy(Z_ARR(list));
@@ -705,7 +711,7 @@ PHP_MINFO_FUNCTION(spl)
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, -1, ZEND_ACC_INTERFACE)
 	strg = estrdup("");
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
+	ZEND_HASH_MAP_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
 		spl_build_class_list_string(zv, &strg);
 	} ZEND_HASH_FOREACH_END();
 	zend_array_destroy(Z_ARR(list));

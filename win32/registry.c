@@ -94,7 +94,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 				memset(name, '\0', max_name+1);
 				memset(value, '\0', max_value+1);
 
-				if (RegEnumValue(key, i, name, &name_len, NULL, &type, value, &value_len) == ERROR_SUCCESS) {
+				if (RegEnumValue(key, i, name, &name_len, NULL, &type, (LPBYTE) value, &value_len) == ERROR_SUCCESS) {
 					if ((type == REG_SZ) || (type == REG_EXPAND_SZ)) {
 						zval data;
 
@@ -116,7 +116,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 					zend_ulong num;
 					zval *tmpdata;
 
-					ZEND_HASH_FOREACH_KEY_VAL(parent_ht, num, index, tmpdata) {
+					ZEND_HASH_MAP_FOREACH_KEY_VAL(parent_ht, num, index, tmpdata) {
 						zend_hash_add(ht, index, tmpdata);
 					} ZEND_HASH_FOREACH_END();
 				}
@@ -263,7 +263,7 @@ void UpdateIniFromRegistry(char *path)
 			zend_string *index;
 			zval *data;
 
-			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, index, data) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, index, data) {
 				zend_alter_ini_entry(index, Z_STR_P(data), PHP_INI_USER, PHP_INI_STAGE_ACTIVATE);
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -287,7 +287,7 @@ char *GetIniPathFromRegistry()
 	if (OpenPhpRegistryKey(NULL, &hKey)) {
 		DWORD buflen = MAXPATHLEN;
 		reg_location = emalloc(MAXPATHLEN+1);
-		if(RegQueryValueEx(hKey, PHPRC_REGISTRY_NAME, 0, NULL, reg_location, &buflen) != ERROR_SUCCESS) {
+		if(RegQueryValueEx(hKey, PHPRC_REGISTRY_NAME, 0, NULL, (LPBYTE) reg_location, &buflen) != ERROR_SUCCESS) {
 			RegCloseKey(hKey);
 			efree(reg_location);
 			reg_location = NULL;

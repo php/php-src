@@ -46,12 +46,16 @@ foreach (["xxh3", "xxh128"] as $a) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(67) "xxh3: Only one of seed or secret is to be passed for initialization"
+
+Deprecated: hash_init(): Passing a secret of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs in %s on line %d
 string(23) "exception in __toString"
 string(57) "xxh3: Secret length must be >= 136 bytes, 17 bytes passed"
 8028aa834c03557a == 8028aa834c03557a == true
 string(69) "xxh128: Only one of seed or secret is to be passed for initialization"
+
+Deprecated: hash_init(): Passing a secret of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs in %s on line %d
 string(23) "exception in __toString"
 string(59) "xxh128: Secret length must be >= 136 bytes, 17 bytes passed"
 54279097795e7218093a05d4d781cbb9 == 54279097795e7218093a05d4d781cbb9 == true

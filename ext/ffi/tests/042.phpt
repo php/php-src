@@ -6,7 +6,7 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-$a = FFI::new("uint8_t[8]");
+$a = FFI::cdef()->new("uint8_t[8]");
 $a[] = 0;
 ?>
 --EXPECTF--

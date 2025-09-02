@@ -12,47 +12,47 @@ $enclosure = '"';
 
 echo 'fgetcsv() with negative length' . \PHP_EOL;
 try {
-    var_dump( fgetcsv($file_handle, -10) );
+    var_dump( fgetcsv($file_handle, -10, escape: "\\") );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    var_dump( fgetcsv($file_handle, -10, $delimiter) );
+    var_dump( fgetcsv($file_handle, -10, $delimiter, escape: "\\") );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    var_dump( fgetcsv($file_handle, -10, $delimiter, $enclosure) );
+    var_dump( fgetcsv($file_handle, -10, $delimiter, $enclosure, escape: "\\") );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 echo 'fgetcsv() with delimiter as empty string' . \PHP_EOL;
 try {
-    var_dump( fgetcsv($file_handle, $length, '', $enclosure) );
+    var_dump( fgetcsv($file_handle, $length, '', $enclosure, escape: "\\") );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 echo 'fgetcsv() with enclosure as empty string' . \PHP_EOL;
 try {
-    var_dump( fgetcsv($file_handle, $length, $delimiter, '') );
+    var_dump( fgetcsv($file_handle, $length, $delimiter, '', escape: "\\") );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 echo 'fgetcsv() with delimiter & enclosure as empty string' . \PHP_EOL;
 try {
-    var_dump( fgetcsv($file_handle, $length, '', '') );
+    var_dump( fgetcsv($file_handle, $length, '', '', escape: "\\") );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 ?>
---EXPECT--
+--EXPECTF--
 fgetcsv() with negative length
-fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
-fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
-fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
+fgetcsv(): Argument #2 ($length) must be between 0 and %d
+fgetcsv(): Argument #2 ($length) must be between 0 and %d
+fgetcsv(): Argument #2 ($length) must be between 0 and %d
 fgetcsv() with delimiter as empty string
 fgetcsv(): Argument #3 ($separator) must be a single character
 fgetcsv() with enclosure as empty string

@@ -30,13 +30,7 @@
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB)
 #endif
 
-#ifdef HAVE_GLOB
-#ifdef PHP_WIN32
-#include "win32/glob.h"
-#else
-#include <glob.h>
-#endif
-#endif
+#include "php_glob.h"
 
 #include "ext/pcre/php_pcre.h"
 
@@ -58,7 +52,7 @@ void zend_accel_blacklist_init(zend_blacklist *blacklist)
 		zend_accel_blacklist_shutdown(blacklist);
 	}
 
-	blacklist->entries = (zend_blacklist_entry *) calloc(sizeof(zend_blacklist_entry), blacklist->size);
+	blacklist->entries = (zend_blacklist_entry *) calloc(blacklist->size, sizeof(zend_blacklist_entry));
 	if (!blacklist->entries) {
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Blacklist initialization: no memory\n");
 		return;
@@ -320,16 +314,15 @@ static void zend_accel_blacklist_loadone(zend_blacklist *blacklist, char *filena
 
 void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 {
-#ifdef HAVE_GLOB
-	glob_t globbuf;
+	php_glob_t globbuf;
 	int    ret;
 	unsigned int i;
 
-	memset(&globbuf, 0, sizeof(glob_t));
+	memset(&globbuf, 0, sizeof(globbuf));
 
-	ret = glob(filename, 0, NULL, &globbuf);
-#ifdef GLOB_NOMATCH
-	if (ret == GLOB_NOMATCH || !globbuf.gl_pathc) {
+	ret = php_glob(filename, 0, NULL, &globbuf);
+#ifdef PHP_GLOB_NOMATCH
+	if (ret == PHP_GLOB_NOMATCH || !globbuf.gl_pathc) {
 #else
 	if (!globbuf.gl_pathc) {
 #endif
@@ -338,11 +331,8 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		for(i=0 ; i<globbuf.gl_pathc; i++) {
 			zend_accel_blacklist_loadone(blacklist, globbuf.gl_pathv[i]);
 		}
-		globfree(&globbuf);
+		php_globfree(&globbuf);
 	}
-#else
-	zend_accel_blacklist_loadone(blacklist, filename);
-#endif
 	zend_accel_blacklist_update_regexp(blacklist);
 }
 

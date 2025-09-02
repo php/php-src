@@ -2,6 +2,12 @@
 Apply imagegammacorrect() to a step wedge
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 require __DIR__ . DIRECTORY_SEPARATOR . 'func.inc';
@@ -27,6 +33,9 @@ function test_gamma($in, $out, $constructor)
 
     imagegammacorrect($im, $in, $out);
 
+    if ($constructor === "imagecreate") {
+        imagepalettetotruecolor($im);
+    }
     $filename = __DIR__ . DIRECTORY_SEPARATOR
         . "imagegammacorrect_variation2_{$in}_{$out}.png";
     $kind = $constructor === 'imagecreate' ? 'palette' : 'truecolor';

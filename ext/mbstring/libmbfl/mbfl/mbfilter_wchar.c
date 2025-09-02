@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by Moriyoshi Koizumi <moriyoshi@php.net> on 20 Dec 2002. The file
  * mbfilter.c is included in this package .
  *
@@ -40,5 +40,9 @@ const mbfl_encoding mbfl_encoding_wchar = {
 	NULL,
 	MBFL_ENCTYPE_WCS4,
 	NULL,
-	NULL
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 };

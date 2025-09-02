@@ -187,14 +187,22 @@ timelib_long timelib_date_to_int(timelib_time *d, int *error)
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
 {
-	if (h > 0) {
-		*hour = floor(h);
-		*min = floor((h - *hour) * 60);
-		*sec = (h - *hour - ((float) *min / 60)) * 3600;
-	} else {
-		*hour = ceil(h);
-		*min = 0 - ceil((h - *hour) * 60);
-		*sec = 0 - (h - *hour - ((float) *min / -60)) * 3600;
+	bool swap = false;
+	int seconds;
+
+	if (h < 0) {
+		swap = true;
+		h = fabs(h);
+	}
+
+	*hour = floor(h);
+	seconds = floor((h - *hour) * 3600);
+
+	*min = seconds / 60;
+	*sec = seconds % 60;
+
+	if (swap) {
+		*hour = 0 - *hour;
 	}
 }
 

@@ -133,7 +133,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 
 #else
 
-#error Unsupported processor. Please open a bug report (bugs.php.net).
+#error Unsupported processor. Please open a bug report (https://github.com/php/php-src/issues).
 
 #endif
 
@@ -155,6 +155,25 @@ static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 	return 1;
 }
 /* }}} */
+
+static inline int fpm_spinlock_with_max_retries(atomic_t *lock, unsigned int max_retries)
+{
+    unsigned int retries = 0;
+
+    for (;;) {
+        if (atomic_cmp_set(lock, 0, 1)) {
+            return 1;
+        }
+
+        sched_yield();
+
+        if (++retries > max_retries) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
 
 #define fpm_unlock(lock) lock = 0
 

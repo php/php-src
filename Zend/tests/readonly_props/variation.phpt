@@ -5,9 +5,11 @@ Readonly variations
 
 class Test {
     public readonly int $prop;
+    public readonly array $array;
 
     public function init() {
         $this->prop = 1;
+        $this->array = [];
     }
 
     public function r() {
@@ -35,6 +37,11 @@ class Test {
 
     public function us() {
         unset($this->prop);
+        echo 'done';
+    }
+
+    public function us_dim() {
+        unset($this->array[0]);
         echo 'done';
     }
 }
@@ -67,9 +74,14 @@ function us($test) {
     echo 'done';
 }
 
+function us_dim($test) {
+    unset($test->array[0]);
+    echo 'done';
+}
+
 foreach ([true, false] as $init) {
     foreach ([true, false] as $scope) {
-        foreach (['r', 'w', 'rw', 'im', 'is', 'us'] as $op) {
+        foreach (['r', 'w', 'rw', 'im', 'is', 'us', 'us_dim'] as $op) {
             $test = new Test();
             if ($init) {
                 $test->init();
@@ -95,24 +107,28 @@ foreach ([true, false] as $init) {
 Init: 1, scope: 1, op: r: 1
 Init: 1, scope: 1, op: w: Cannot modify readonly property Test::$prop
 Init: 1, scope: 1, op: rw: Cannot modify readonly property Test::$prop
-Init: 1, scope: 1, op: im: Cannot modify readonly property Test::$prop
+Init: 1, scope: 1, op: im: Cannot indirectly modify readonly property Test::$prop
 Init: 1, scope: 1, op: is: 1
 Init: 1, scope: 1, op: us: Cannot unset readonly property Test::$prop
+Init: 1, scope: 1, op: us_dim: Cannot indirectly modify readonly property Test::$array
 Init: 1, scope: 0, op: r: 1
 Init: 1, scope: 0, op: w: Cannot modify readonly property Test::$prop
 Init: 1, scope: 0, op: rw: Cannot modify readonly property Test::$prop
-Init: 1, scope: 0, op: im: Cannot modify readonly property Test::$prop
+Init: 1, scope: 0, op: im: Cannot indirectly modify readonly property Test::$prop
 Init: 1, scope: 0, op: is: 1
 Init: 1, scope: 0, op: us: Cannot unset readonly property Test::$prop
+Init: 1, scope: 0, op: us_dim: Cannot indirectly modify readonly property Test::$array
 Init: 0, scope: 1, op: r: Typed property Test::$prop must not be accessed before initialization
 Init: 0, scope: 1, op: w: done
 Init: 0, scope: 1, op: rw: Typed property Test::$prop must not be accessed before initialization
 Init: 0, scope: 1, op: im: Cannot indirectly modify readonly property Test::$prop
 Init: 0, scope: 1, op: is: 0
 Init: 0, scope: 1, op: us: done
+Init: 0, scope: 1, op: us_dim: done
 Init: 0, scope: 0, op: r: Typed property Test::$prop must not be accessed before initialization
-Init: 0, scope: 0, op: w: Cannot initialize readonly property Test::$prop from global scope
+Init: 0, scope: 0, op: w: Cannot modify protected(set) readonly property Test::$prop from global scope
 Init: 0, scope: 0, op: rw: Typed property Test::$prop must not be accessed before initialization
 Init: 0, scope: 0, op: im: Cannot indirectly modify readonly property Test::$prop
 Init: 0, scope: 0, op: is: 0
-Init: 0, scope: 0, op: us: Cannot unset readonly property Test::$prop from global scope
+Init: 0, scope: 0, op: us: Cannot unset protected(set) readonly property Test::$prop from global scope
+Init: 0, scope: 0, op: us_dim: done

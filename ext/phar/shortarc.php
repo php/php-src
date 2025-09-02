@@ -114,7 +114,7 @@ class Extract_Phar
     {
         $fp = fopen(__FILE__, 'rb');
         fseek($fp, self::LEN);
-        $L = unpack('V', $a = fread($fp, 4));
+        $L = unpack('V', $a = (string)fread($fp, 4));
         $m = '';
 
         do {
@@ -122,7 +122,7 @@ class Extract_Phar
             if ($L[1] - strlen($m) < 8192) {
                 $read = $L[1] - strlen($m);
             }
-            $last = fread($fp, $read);
+            $last = (string)fread($fp, $read);
             $m .= $last;
         } while (strlen($last) && strlen($m) < $L[1]);
 

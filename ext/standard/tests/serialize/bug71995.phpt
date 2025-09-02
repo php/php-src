@@ -18,7 +18,7 @@ var_dump($s);
 var_dump(unserialize($s));
 ?>
 --EXPECTF--
-Notice: serialize(): "b" is returned from __sleep() multiple times in %s on line %d
+Warning: serialize(): "b" is returned from __sleep() multiple times in %s on line %d
 string(39) "O:1:"A":1:{s:1:"b";O:8:"stdClass":0:{}}"
 object(A)#%d (1) {
   ["b"]=>

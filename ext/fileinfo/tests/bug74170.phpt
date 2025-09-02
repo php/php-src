@@ -5,6 +5,7 @@ fileinfo
 intl
 --SKIPIF--
 <?php
+if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
 if (setlocale(LC_CTYPE, 'ru_RU.koi8r') === false)
     die('skip ru_RU.koi8r locale is not available');
 ?>

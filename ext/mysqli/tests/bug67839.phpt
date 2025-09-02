@@ -4,13 +4,13 @@ mysqli_float_handling - ensure 4 byte float is handled correctly
 mysqli
 --SKIPIF--
 <?php
-    require_once('skipifconnectfailure.inc');
+    require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 precision=5
 --FILE--
 <?php
-    require('connect.inc');
+    require 'connect.inc';
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
         die();
@@ -62,7 +62,7 @@ precision=5
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECT--
 1: 9.9999: 9.9999

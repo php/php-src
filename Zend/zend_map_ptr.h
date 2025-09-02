@@ -21,19 +21,17 @@
 
 #include "zend_portability.h"
 
+typedef struct _zend_string zend_string;
+
 #define ZEND_MAP_PTR_KIND_PTR           0
 #define ZEND_MAP_PTR_KIND_PTR_OR_OFFSET 1
 
-//#if defined(ZTS) || defined(TSRM_WIN32)
-# define ZEND_MAP_PTR_KIND ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-//#else
-//# define ZEND_MAP_PTR_KIND ZEND_MAP_PTR_KIND_PTR
-//#endif
+#define ZEND_MAP_PTR_KIND ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 
 #define ZEND_MAP_PTR(ptr) \
 	ptr ## __ptr
 #define ZEND_MAP_PTR_DEF(type, name) \
-	type * ZEND_MAP_PTR(name)
+	type ZEND_MAP_PTR(name)
 #define ZEND_MAP_PTR_OFFSET2PTR(offset) \
 	((void**)((char*)CG(map_ptr_base) + offset))
 #define ZEND_MAP_PTR_PTR2OFFSET(ptr) \
@@ -44,52 +42,52 @@
 #define ZEND_MAP_PTR_NEW(ptr) do { \
 		ZEND_MAP_PTR(ptr) = zend_map_ptr_new(); \
 	} while (0)
-
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-# define ZEND_MAP_PTR_NEW_OFFSET() \
-	((uint32_t)(uintptr_t)ZEND_MAP_PTR_PTR2OFFSET(zend_map_ptr_new()))
-# define ZEND_MAP_PTR_GET(ptr) \
-	(*(ZEND_MAP_PTR(ptr)))
-# define ZEND_MAP_PTR_GET_IMM(ptr) \
-	ZEND_MAP_PTR_GET(ptr)
-# define ZEND_MAP_PTR_SET(ptr, val) do { \
-		(*(ZEND_MAP_PTR(ptr))) = (val); \
+#define ZEND_MAP_PTR_NEW_STATIC(ptr) do { \
+		ZEND_MAP_PTR(ptr) = zend_map_ptr_new_static(); \
 	} while (0)
-# define ZEND_MAP_PTR_SET_IMM(ptr, val) \
-	ZEND_MAP_PTR_SET(ptr, val)
-# define ZEND_MAP_PTR_BIASED_BASE(real_base) \
-	(real_base)
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+
+#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 # define ZEND_MAP_PTR_NEW_OFFSET() \
 	((uint32_t)(uintptr_t)zend_map_ptr_new())
 # define ZEND_MAP_PTR_IS_OFFSET(ptr) \
 	(((uintptr_t)ZEND_MAP_PTR(ptr)) & 1L)
 # define ZEND_MAP_PTR_GET(ptr) \
-	(*(ZEND_MAP_PTR_IS_OFFSET(ptr) ? \
-		ZEND_MAP_PTR_OFFSET2PTR((uintptr_t)ZEND_MAP_PTR(ptr)) : \
-		((void**)(ZEND_MAP_PTR(ptr)))))
+	((ZEND_MAP_PTR_IS_OFFSET(ptr) ? \
+		ZEND_MAP_PTR_GET_IMM(ptr) : \
+		((void*)(ZEND_MAP_PTR(ptr)))))
 # define ZEND_MAP_PTR_GET_IMM(ptr) \
-	(*ZEND_MAP_PTR_OFFSET2PTR((uintptr_t)ZEND_MAP_PTR(ptr)))
+	(*ZEND_MAP_PTR_OFFSET2PTR((intptr_t)ZEND_MAP_PTR(ptr)))
 # define ZEND_MAP_PTR_SET(ptr, val) do { \
-		void **__p = (void**)(ZEND_MAP_PTR(ptr)); \
 		if (ZEND_MAP_PTR_IS_OFFSET(ptr)) { \
-			__p = ZEND_MAP_PTR_OFFSET2PTR((uintptr_t)ZEND_MAP_PTR(ptr)); \
+			ZEND_MAP_PTR_SET_IMM(ptr, val); \
+		} else { \
+			ZEND_MAP_PTR_INIT(ptr, val); \
 		} \
-		*__p = (val); \
 	} while (0)
 # define ZEND_MAP_PTR_SET_IMM(ptr, val) do { \
-		void **__p = ZEND_MAP_PTR_OFFSET2PTR((uintptr_t)ZEND_MAP_PTR(ptr)); \
+		void **__p = ZEND_MAP_PTR_OFFSET2PTR((intptr_t)ZEND_MAP_PTR(ptr)); \
 		*__p = (val); \
 	} while (0)
 # define ZEND_MAP_PTR_BIASED_BASE(real_base) \
-	((void*)(((uintptr_t)(real_base)) - 1))
+	((void*)(((uintptr_t)(real_base)) + zend_map_ptr_static_size * sizeof(void *) - 1))
+/* Note: chunked like: [8192..12287][4096..8191][0..4095] */
+#define ZEND_MAP_PTR_STATIC_NUM_TO_PTR(num) \
+	((void **)CG(map_ptr_real_base) + zend_map_ptr_static_size - ZEND_MM_ALIGNED_SIZE_EX((num) + 1, 4096) + ((num) & 4095))
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
 
+BEGIN_EXTERN_C()
+
 ZEND_API void  zend_map_ptr_reset(void);
 ZEND_API void *zend_map_ptr_new(void);
+ZEND_API void *zend_map_ptr_new_static(void);
 ZEND_API void  zend_map_ptr_extend(size_t last);
 ZEND_API void zend_alloc_ce_cache(zend_string *type_name);
+
+ZEND_API extern size_t zend_map_ptr_static_last;
+ZEND_API extern size_t zend_map_ptr_static_size;
+
+END_EXTERN_C()
 
 #endif /* ZEND_MAP_PTR_H */

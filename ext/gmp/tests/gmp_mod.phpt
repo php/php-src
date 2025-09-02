@@ -42,7 +42,7 @@ object(GMP)#2 (1) {
   ["num"]=>
   string(1) "0"
 }
-Modulo by zero
+gmp_mod(): Argument #2 ($num2) Modulo by zero
 gmp_mod(): Argument #1 ($num1) must be of type GMP|string|int, array given
 object(GMP)#4 (1) {
   ["num"]=>

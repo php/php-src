@@ -33,7 +33,7 @@ class MyCSVFile extends SplFileObject
 {
     function current(): array|false
     {
-        return parent::fgetcsv(',', '"');
+        return parent::fgetcsv(',', '"', escape: '');
     }
 }
 
@@ -44,14 +44,14 @@ $v = $phar['a.csv'];
 echo "===3===\n";
 while(!$v->eof())
 {
-    echo $v->key() . "=>" . join('|', $v->fgetcsv()) . "\n";
+    echo $v->key() . "=>" . join('|', $v->fgetcsv(escape: '')) . "\n";
 }
 
 echo "===4===\n";
 $v->rewind();
 while(!$v->eof())
 {
-    $l = $v->fgetcsv();
+    $l = $v->fgetcsv(escape: '');
     echo $v->key() . "=>" . join('|', $l) . "\n";
 }
 
@@ -66,7 +66,7 @@ class MyCSVFile2 extends SplFileObject
     function getCurrentLine(): string
     {
         echo __METHOD__ . "\n";
-        return implode('|', parent::fgetcsv(',', '"'));
+        return implode('|', parent::fgetcsv(',', '"', escape: ''));
     }
 }
 

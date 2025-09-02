@@ -3,7 +3,7 @@
 /** @generate-class-entries */
 
 /** @refcount 1 */
-function textdomain(?string $domain): string {}
+function textdomain(?string $domain = null): string {}
 
 /** @refcount 1 */
 function gettext(string $message): string {}
@@ -18,7 +18,7 @@ function dgettext(string $domain, string $message): string {}
 function dcgettext(string $domain, string $message, int $category): string {}
 
 /** @refcount 1 */
-function bindtextdomain(string $domain, ?string $directory): string|false {}
+function bindtextdomain(string $domain, ?string $directory = null): string|false {}
 
 #ifdef HAVE_NGETTEXT
 /** @refcount 1 */
@@ -37,5 +37,5 @@ function dcngettext(string $domain, string $singular, string $plural, int $count
 
 #ifdef HAVE_BIND_TEXTDOMAIN_CODESET
 /** @refcount 1 */
-function bind_textdomain_codeset(string $domain, ?string $codeset): string|false {}
+function bind_textdomain_codeset(string $domain, ?string $codeset = null): string|false {}
 #endif

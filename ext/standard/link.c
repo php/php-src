@@ -15,8 +15,6 @@
  */
 
 #include "php.h"
-#include "php_filestat.h"
-#include "php_globals.h"
 
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 
@@ -25,25 +23,14 @@
 #endif
 
 #include <stdlib.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifndef PHP_WIN32
 #include <sys/stat.h>
 #endif
 #include <string.h>
-#if HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
-#include <pwd.h>
-#endif
-#endif
-#if HAVE_GRP_H
-# include <grp.h>
-#endif
 #include <errno.h>
-#include <ctype.h>
 
 #include "php_string.h"
 
@@ -75,7 +62,7 @@ PHP_FUNCTION(readlink)
 
 	if (ret == -1) {
 #ifdef PHP_WIN32
-		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
+		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %ld", link, GetLastError());
 #else
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 #endif
@@ -94,15 +81,16 @@ PHP_FUNCTION(linkinfo)
 	char *link;
 	char *dirname;
 	size_t link_len;
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(link, link_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	// TODO Check for empty string
 	dirname = estrndup(link, link_len);
-	php_dirname(dirname, link_len);
+	zend_dirname(dirname, link_len);
 
 	if (php_check_open_basedir(dirname)) {
 		efree(dirname);
@@ -143,7 +131,7 @@ PHP_FUNCTION(symlink)
 	}
 
 	memcpy(dirname, source_p, sizeof(source_p));
-	len = php_dirname(dirname, strlen(dirname));
+	len = zend_dirname(dirname, strlen(dirname));
 
 	if (!expand_filepath_ex(topath, dest_p, dirname, len)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");

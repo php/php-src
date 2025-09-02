@@ -4,19 +4,11 @@ mysqli_query() - unicode (cyrillic)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-require_once('table.inc');
-if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'utf8'"))
-    die("skip UTF8 chatset seems not available");
-mysqli_free_result($res);
-mysqli_close($link);
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include_once("connect.inc");
-
-    require_once('table.inc');
+    require_once 'table.inc';
 
     if (TRUE !== ($tmp = @mysqli_query($link, "set names utf8")))
         printf("[002.5] Expecting TRUE, got %s/%s\n", gettype($tmp), $tmp);
@@ -43,7 +35,7 @@ mysqli_close($link);
         // let's try to play with stored procedures
         mysqli_query($link, 'DROP PROCEDURE IF EXISTS процедурка');
         if (mysqli_query($link, 'CREATE PROCEDURE процедурка(OUT версия VARCHAR(25)) BEGIN SELECT VERSION() INTO версия; END;')) {
-            $res = mysqli_query($link, 'CALL процедурка(@version)');
+            mysqli_query($link, 'CALL процедурка(@version)');
             $res = mysqli_query($link, 'SELECT @version AS п_версия');
 
             $tmp = mysqli_fetch_assoc($res);

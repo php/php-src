@@ -4,15 +4,13 @@ Bug #46614 (Extended MySQLi class gives incorrect empty() result)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-if (!defined("MYSQLI_ASYNC")) {
-    die("skip mysqlnd only");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 class MySQL_Ext extends mysqli{
     protected $fooData = array();
+    private $extData;
 
     public function isEmpty()
     {
@@ -21,7 +19,7 @@ class MySQL_Ext extends mysqli{
     }
 }
 
-include ("connect.inc");
+include 'connect.inc';
 $MySQL_Ext = new MySQL_Ext($host, $user, $passwd, $db, $port, $socket);
 
 $isEmpty = $MySQL_Ext->isEmpty();

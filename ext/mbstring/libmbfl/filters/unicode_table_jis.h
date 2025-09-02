@@ -21,17 +21,11 @@
  * The authors of this file: PHP3 internationalization team
  * You can contact the primary authors; 金本　茂 <sgk@happysize.co.jp>,
  * Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>.
- *
  */
 
 #ifndef UNICODE_TABLE_JIS_H
 #define UNICODE_TABLE_JIS_H
 
-#ifdef UNICODE_TABLE_JIS_DEF
-
-/*
- * Unicode table
- */
 const unsigned short jisx0208_ucs_table[] = {
  /* ku 1 */
  0x3000,0x3001,0x3002,0xFF0C,0xFF0E,0x30FB,0xFF1A,0xFF1B,
@@ -5845,28 +5839,5 @@ const unsigned short ucs_r_jis_table[] = {
 };
 int ucs_r_jis_table_min = 0xFF00;
 int ucs_r_jis_table_max = 0xFF00 + (sizeof (ucs_r_jis_table) / sizeof (unsigned short));
-
-#else
-
-extern const unsigned short jisx0208_ucs_table[];
-extern const unsigned short jisx0212_ucs_table[];
-extern const unsigned short ucs_a1_jis_table[];
-extern const unsigned short ucs_a2_jis_table[];
-extern const unsigned short ucs_i_jis_table[];
-extern const unsigned short ucs_r_jis_table[];
-
-extern const int jisx0208_ucs_table_size;
-extern const int jisx0212_ucs_table_size;
-extern const int ucs_a1_jis_table_min;
-extern const int ucs_a1_jis_table_max;
-extern const int ucs_a2_jis_table_min;
-extern const int ucs_a2_jis_table_max;
-extern const int ucs_i_jis_table_min;
-extern const int ucs_i_jis_table_max;
-extern int ucs_r_jis_table_min;
-extern int ucs_r_jis_table_max;
-
-#endif
-
 
 #endif /* UNICODE_TABLE_JIS_H */

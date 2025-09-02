@@ -19,6 +19,11 @@
 #ifndef ZEND_VM_H
 #define ZEND_VM_H
 
+#include "zend_portability.h"
+
+typedef struct _zend_op zend_op;
+typedef struct _zend_execute_data zend_execute_data;
+
 BEGIN_EXTERN_C()
 
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* opcode);
@@ -29,6 +34,7 @@ ZEND_API const void* ZEND_FASTCALL zend_get_opcode_handler_func(const zend_op *o
 ZEND_API const zend_op *zend_get_halt_op(void);
 ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data *ex);
 ZEND_API int zend_vm_kind(void);
+ZEND_API bool zend_gcc_global_regs(void);
 
 void zend_vm_init(void);
 void zend_vm_dtor(void);

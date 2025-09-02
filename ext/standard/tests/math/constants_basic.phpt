@@ -1,7 +1,5 @@
 --TEST--
 Test for pre-defined math constants
---INI--
-precision=14
 --FILE--
 <?php
 echo "M_E= ";

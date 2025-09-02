@@ -152,8 +152,6 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 		result->meta = NULL;
 		DBG_RETURN(FAIL);
 	}
-	/* COM_FIELD_LIST is broken and has premature EOF, thus we need to hack here and in mysqlnd_res_meta.c */
-	result->field_count = result->meta->field_count;
 
 	/*
 	  2. Follows an EOF packet, which the client of mysqlnd_read_result_metadata()
@@ -185,7 +183,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
-			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR) {
+			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR && conn->error_info->error_no != CR_CLIENT_INTERACTION_TIMEOUT) {
 				php_error_docref(NULL, E_WARNING, "Error reading result set's header");
 			}
 			break;
@@ -286,8 +284,12 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 						  COM_STMT_EXECUTE (even if it is not necessary), so either this or
 						  previous branch always works.
 						*/
+						if (rset_header.field_count != stmt->result->field_count) {
+							stmt->result->m.free_result(stmt->result, TRUE);
+							stmt->result = conn->m->result_init(rset_header.field_count);
+						}
+						result = stmt->result;
 					}
-					result = stmt->result;
 				}
 				if (!result) {
 					SET_OOM_ERROR(conn->error_info);
@@ -298,7 +300,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				if (FAIL == (ret = result->m.read_result_metadata(result, conn))) {
 					/* For PS, we leave them in Prepared state */
 					if (!stmt && conn->current_result) {
-						mnd_efree(conn->current_result);
+						conn->current_result->m.free_result(conn->current_result, TRUE);
 						conn->current_result = NULL;
 					}
 					DBG_ERR("Error occurred while reading metadata");
@@ -328,7 +330,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 					/*
 					  If SERVER_MORE_RESULTS_EXISTS is set then this is either MULTI_QUERY or a CALL()
 					  The first packet after sending the query/com_execute has the bit set only
-					  in this cases. Not sure why it's a needed but it marks that the whole stream
+					  in these cases. Not sure why it's a needed but it marks that the whole stream
 					  will include many result sets. What actually matters are the bits set at the end
 					  of every result set (the EOF packet).
 					*/
@@ -342,8 +344,8 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 					}
 					MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
 				}
+				PACKET_FREE(&fields_eof);
 			} while (0);
-			PACKET_FREE(&fields_eof);
 			break; /* switch break */
 		}
 	} while (0);
@@ -731,8 +733,8 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 				UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 free_end:
 	PACKET_FREE(&row_packet);
+	DBG_INF_FMT("rows=%llu", (unsigned long long)set->row_count);
 end:
-	DBG_INF_FMT("rows=%llu", (unsigned long long)result->stored_data->row_count);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -781,7 +783,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 
 /* {{{ mysqlnd_res::skip_result */
-static enum_func_status
+static void
 MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 {
 	bool fetched_anything;
@@ -806,7 +808,7 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 					? STAT_ROWS_SKIPPED_NORMAL : STAT_ROWS_SKIPPED_PS);
 		}
 	}
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -967,6 +969,13 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 {
 	bool fetched_anything;
 	zval *row_data;
+
+	// We clean the error here because in unbuffered mode we could receive a new error
+	// and therefore consumers of this method are checking for errors
+	MYSQLND_CONN_DATA *conn = result->conn;
+	if (conn) {
+		SET_EMPTY_ERROR(conn->error_info);
+	}
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 	if (FAIL == result->m.fetch_row(result, &row_data, flags, &fetched_anything)) {

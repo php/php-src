@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -38,7 +38,7 @@
  */
 
 /* {{{ inifile_version */
-char *inifile_version()
+const char *inifile_version(void)
 {
 	return "1.0, $Id$";
 }

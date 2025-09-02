@@ -19,24 +19,14 @@
 #endif
 
 #include "php.h"
-#include "php_libsodium.h"
 #include "ext/standard/php_password.h"
 
 #include <sodium.h>
 
-#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+#include "php_libsodium.h"
+#include "sodium_pwhash_arginfo.h"
 
-/**
- * MEMLIMIT is normalized to KB even though sodium uses Bytes in order to
- * present a consistent user-facing API.
- *
- * Threads are fixed at 1 by libsodium.
- *
- * When updating these values, synchronize ext/standard/php_password.h values.
- */
-#define PHP_SODIUM_PWHASH_MEMLIMIT (64 << 10)
-#define PHP_SODIUM_PWHASH_OPSLIMIT 4
-#define PHP_SODIUM_PWHASH_THREADS 1
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 
 static inline int get_options(zend_array *options, size_t *memlimit, size_t *opslimit) {
 	zval *opt;
@@ -171,7 +161,7 @@ static const php_password_algo sodium_algo_argon2id = {
 };
 
 PHP_MINIT_FUNCTION(sodium_password_hash) /* {{{ */ {
-	zend_string *argon2i = zend_string_init("argon2i", strlen("argon2i"), 1);
+	zend_string *argon2i = ZSTR_INIT_LITERAL("argon2i", 1);
 
 	if (php_password_algo_find(argon2i)) {
 		/* Nothing to do. Core has registered these algorithms for us. */
@@ -180,21 +170,14 @@ PHP_MINIT_FUNCTION(sodium_password_hash) /* {{{ */ {
 	}
 	zend_string_release(argon2i);
 
+	register_sodium_pwhash_symbols(module_number);
+
 	if (FAILURE == php_password_algo_register("argon2i", &sodium_algo_argon2i)) {
 		return FAILURE;
 	}
-	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2I", "argon2i", CONST_CS | CONST_PERSISTENT);
-
 	if (FAILURE == php_password_algo_register("argon2id", &sodium_algo_argon2id)) {
 		return FAILURE;
 	}
-	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2ID", "argon2id", CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_MEMORY_COST", PHP_SODIUM_PWHASH_MEMLIMIT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_TIME_COST", PHP_SODIUM_PWHASH_OPSLIMIT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_THREADS", PHP_SODIUM_PWHASH_THREADS, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2_PROVIDER", "sodium", CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }

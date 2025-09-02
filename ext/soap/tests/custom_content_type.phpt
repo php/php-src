@@ -13,8 +13,12 @@ soap
 
 include __DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc";
 
-$args = substr(PHP_OS, 0, 3) == 'WIN'
-    ? ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=php_soap.dll"] : [];
+$args = ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=" . (substr(PHP_OS, 0, 3) == "WIN" ? "php_" : "") . "soap." . PHP_SHLIB_SUFFIX];
+if (php_ini_loaded_file()) {
+  // Necessary such that it works from a development directory in which case extension_dir might not be the real extension dir
+  $args[] = "-c";
+  $args[] = php_ini_loaded_file();
+}
 $code = <<<'PHP'
 /* Receive */
 $content = trim(file_get_contents("php://input")) . PHP_EOL;

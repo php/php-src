@@ -4,6 +4,7 @@ Observer: Unused retvals from generators are still observable
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
 --FILE--
@@ -21,12 +22,20 @@ $gen->current();
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_retval_%d.php' -->
-<file '%s%eobserver_retval_%d.php'>
-  <!-- init foo() -->
-  <foo>
-  </foo:'I should be observable'>
-  <foo>
-  </foo:'Me too!'>
+<!-- init '%s' -->
+<file '%s'>
+  <!-- init Generator::current() -->
+  <Generator::current>
+    <!-- init foo() -->
+    <foo>
+    </foo:'I should be observable'>
+  </Generator::current:'I should be observable'>
+  <!-- init Generator::next() -->
+  <Generator::next>
+    <foo>
+    </foo:'Me too!'>
+  </Generator::next:NULL>
+  <Generator::current>
+  </Generator::current:'Me too!'>
 Done
-</file '%s%eobserver_retval_%d.php'>
+</file '%s'>

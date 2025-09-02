@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -48,7 +48,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 	{
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
-		intl_error_set_custom_msg( NULL, "String conversion of id to UTF-16 failed", 0 );
+		intl_error_set_custom_msg( NULL, "String conversion of id to UTF-16 failed");
 		zval_ptr_dtor( object );
 		return FAILURE;
 	}
@@ -64,15 +64,14 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	{
 		char *buf = NULL;
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
-		spprintf( &buf, 0, "transliterator_create: unable to open ICU transliterator"
+		spprintf( &buf, 0, "unable to open ICU transliterator"
 			" with id \"%s\"", str_id );
 		if( buf == NULL ) {
-			intl_error_set_custom_msg( NULL,
-				"transliterator_create: unable to open ICU transliterator", 0 );
+			intl_error_set_custom_msg(NULL, "unable to open ICU transliterator");
 		}
 		else
 		{
-			intl_error_set_custom_msg( NULL, buf, /* copy message */ 1 );
+			intl_error_set_custom_msg(NULL, buf);
 			efree( buf );
 		}
 		zval_ptr_dtor( object );
@@ -84,8 +83,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 	{
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
-		intl_error_set_custom_msg( NULL,
-			"transliterator_create: internal constructor call failed", 0 );
+		intl_error_set_custom_msg(NULL, "internal constructor call failed");
 		zval_ptr_dtor( object );
 		return FAILURE;
 	}
@@ -105,11 +103,11 @@ PHP_FUNCTION( transliterator_create )
 
 	(void) to; /* unused */
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
-		&str_id, &str_id_len, &direction ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str_id, str_id_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(direction)
+	ZEND_PARSE_PARAMETERS_END();
 
 	object = return_value;
 	res = create_transliterator( str_id, str_id_len, direction, object );
@@ -134,11 +132,11 @@ PHP_FUNCTION( transliterator_create_from_rules )
 					       0x61, 0x6E, 0x73, 0x50, 0x48, 0x50, 0}; /* RulesTransPHP */
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
-		&str_rules, &str_rules_len, &direction ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str_rules, str_rules_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(direction)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if( ( direction != TRANSLITERATOR_FORWARD ) && (direction != TRANSLITERATOR_REVERSE ) )
 	{
@@ -169,12 +167,12 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		char *msg = NULL;
 		smart_str parse_error_str;
 		parse_error_str = intl_parse_error_to_string( &parse_error );
-		spprintf( &msg, 0, "transliterator_create_from_rules: unable to "
+		spprintf( &msg, 0, "unable to "
 			"create ICU transliterator from rules (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "" );
 		smart_str_free( &parse_error_str );
 		if( msg != NULL )
 		{
-			intl_errors_set_custom_msg( INTL_DATA_ERROR_P( to ), msg, 1 );
+			intl_errors_set_custom_msg( INTL_DATA_ERROR_P( to ), msg);
 			efree( msg );
 		}
 		zval_ptr_dtor( return_value );
@@ -182,7 +180,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	}
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
-	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create_from_rules: internal constructor call failed" );
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "internal constructor call failed" );
 }
 /* }}} */
 
@@ -207,11 +205,11 @@ PHP_FUNCTION( transliterator_create_inverse )
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; /* change "to" into new object (from "object" ) */
 
 	utrans = utrans_openInverse( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
-	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create_inverse: could not create "
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "could not create "
 		"inverse ICU transliterator" );
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
-	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create: internal constructor call failed" );
+	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "internal constructor call failed" );
 }
 /* }}} */
 
@@ -225,14 +223,11 @@ PHP_FUNCTION( transliterator_list_ids )
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters_none() == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	en = utrans_openIDs( &status );
 	INTL_CHECK_STATUS( status,
-		"transliterator_list_ids: Failed to obtain registered transliterators" );
+		"Failed to obtain registered transliterators" );
 
 	array_init( return_value );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
@@ -255,8 +250,8 @@ PHP_FUNCTION( transliterator_list_ids )
 	{
 		zend_array_destroy( Z_ARR_P(return_value) );
 		RETVAL_FALSE;
-		intl_error_set_custom_msg( NULL, "transliterator_list_ids: "
-			"Failed to build array of registered transliterators", 0 );
+		intl_error_set_custom_msg( NULL,
+			"Failed to build array of registered transliterators");
 	}
 }
 /* }}} */
@@ -345,13 +340,12 @@ PHP_FUNCTION( transliterator_transliterate )
 	{
 		char *msg;
 		spprintf( &msg, 0,
-			"transliterator_transliterate: Neither \"start\" nor the \"end\" "
+			"Neither \"start\" nor the \"end\" "
 			"arguments can exceed the number of UTF-16 code units "
 			"(in this case, %d)", (int) ustr_len );
 		if(msg != NULL )
 		{
-			intl_errors_set( TRANSLITERATOR_ERROR_P( to ), U_ILLEGAL_ARGUMENT_ERROR,
-				msg, 1 );
+			intl_errors_set(TRANSLITERATOR_ERROR_P(to), U_ILLEGAL_ARGUMENT_ERROR, msg);
 			efree( msg );
 		}
 		goto cleanup;
@@ -387,8 +381,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		else if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 		{
 			intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
-			intl_errors_set_custom_msg( TRANSLITERATOR_ERROR_P( to ),
-				"transliterator_transliterate: transliteration failed", 0 );
+			intl_errors_set_custom_msg( TRANSLITERATOR_ERROR_P( to ), "transliteration failed");
 			goto cleanup;
 		}
 		else
@@ -440,8 +433,6 @@ PHP_FUNCTION( transliterator_get_error_code )
 
 	/* Fetch the object (without resetting its last error code ). */
 	to = Z_INTL_TRANSLITERATOR_P( object );
-	if (to == NULL )
-		RETURN_FALSE;
 
 	RETURN_LONG( (zend_long) TRANSLITERATOR_ERROR_CODE( to ) );
 }
@@ -463,8 +454,6 @@ PHP_FUNCTION( transliterator_get_error_message )
 
 	/* Fetch the object (without resetting its last error code ). */
 	to = Z_INTL_TRANSLITERATOR_P( object );
-	if (to == NULL )
-		RETURN_FALSE;
 
 	/* Return last error message. */
 	message = intl_error_get_message( TRANSLITERATOR_ERROR_P( to ) );

@@ -2,10 +2,6 @@
 enchant_broker_request_dict() must throw ValueError on empty tag
 --EXTENSIONS--
 enchant
---SKIPIF--
-<?php
-if (!is_object(enchant_broker_init())) {die("skip, resource dont load\n");}
-?>
 --FILE--
 <?php
 $broker = enchant_broker_init();
@@ -18,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-enchant_broker_request_dict(): Argument #2 ($tag) cannot be empty
+enchant_broker_request_dict(): Argument #2 ($tag) must not be empty

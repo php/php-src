@@ -9,10 +9,12 @@ if (PHP_OS_FAMILY !== "Windows") {
     $src = __DIR__ . "/bug81145_src.bin";
     define('SIZE_4G', 0x100000000);
     exec("fallocate -l " . (SIZE_4G-0x100) . " " . escapeshellarg($src), $output, $status);
-    if ($status !== 0) die("skip fallocate() not supported");
     @unlink(__DIR__ . "/bug81145_src.bin");
+    if ($status !== 0) die("skip fallocate() not supported");
 }
 ?>
+--CONFLICTS--
+all
 --FILE--
 <?php
 $src = __DIR__ . "/bug81145_src.bin";

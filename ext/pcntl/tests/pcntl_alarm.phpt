@@ -14,7 +14,8 @@ pcntl_alarm(0);
 var_dump(pcntl_alarm(60));
 var_dump(pcntl_alarm(1) > 0);
 $siginfo = array();
-var_dump(pcntl_sigtimedwait(array(SIGALRM),$siginfo,2) === SIGALRM);
+$signo = pcntl_sigtimedwait(array(SIGALRM),$siginfo,2);
+var_dump($signo === SIGALRM);
 ?>
 --EXPECT--
 int(0)

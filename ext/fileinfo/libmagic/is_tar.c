@@ -28,7 +28,7 @@
 /*
  * is_tar() -- figure out whether file is a tar archive.
  *
- * Stolen (by the author!) from the public domain tar program:
+ * Stolen (by the author!) from the file_public domain tar program:
  * Public Domain version written 26 Aug 1985 John Gilmore (ihnp4!hoptoad!gnu).
  *
  * @(#)list.c 1.18 9/23/86 Public Domain - gnu
@@ -40,7 +40,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_tar.c,v 1.44 2019/02/20 02:35:27 christos Exp $")
+FILE_RCSID("@(#)$File: is_tar.c,v 1.50 2022/12/26 17:31:14 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -50,8 +50,8 @@ FILE_RCSID("@(#)$File: is_tar.c,v 1.44 2019/02/20 02:35:27 christos Exp $")
 
 #define	isodigit(c)	( ((c) >= '0') && ((c) <= '7') )
 
-private int is_tar(const unsigned char *, size_t);
-private int from_oct(const char *, size_t);	/* Decode octal number */
+file_private int is_tar(const unsigned char *, size_t);
+file_private int from_oct(const char *, size_t);	/* Decode octal number */
 
 static const char tartype[][32] = {	/* should be equal to messages */
 	"tar archive",			/* found in ../magic/Magdir/archive */
@@ -59,7 +59,7 @@ static const char tartype[][32] = {	/* should be equal to messages */
 	"POSIX tar archive (GNU)",	/*  */
 };
 
-protected int
+file_protected int
 file_is_tar(struct magic_set *ms, const struct buffer *b)
 {
 	const unsigned char *buf = CAST(const unsigned char *, b->fbuf);
@@ -95,17 +95,30 @@ file_is_tar(struct magic_set *ms, const struct buffer *b)
  *	2 for Unix Std (POSIX) tar file,
  *	3 for GNU tar file.
  */
-private int
+file_private int
 is_tar(const unsigned char *buf, size_t nbytes)
 {
+	static const char gpkg_match[] = "/gpkg-1";
+
 	const union record *header = RCAST(const union record *,
 	    RCAST(const void *, buf));
 	size_t i;
 	int sum, recsum;
 	const unsigned char *p, *ep;
+	const char *nulp;
 
 	if (nbytes < sizeof(*header))
 		return 0;
+
+	/* If the file looks like Gentoo GLEP 78 binary package (GPKG),
+	 * don't waste time on further checks and fall back to magic rules.
+	 */
+	nulp = CAST(const char *,
+	    memchr(header->header.name, 0, sizeof(header->header.name)));
+	if (nulp != NULL && nulp >= header->header.name + sizeof(gpkg_match) &&
+	    memcmp(nulp - sizeof(gpkg_match) + 1, gpkg_match,
+	    sizeof(gpkg_match)) == 0)
+	    return 0;
 
 	recsum = from_oct(header->header.chksum, sizeof(header->header.chksum));
 
@@ -140,7 +153,7 @@ is_tar(const unsigned char *buf, size_t nbytes)
  *
  * Result is -1 if the field is invalid (all blank, or non-octal).
  */
-private int
+file_private int
 from_oct(const char *where, size_t digs)
 {
 	int	value;

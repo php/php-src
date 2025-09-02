@@ -22,4 +22,4 @@ enum Suit {
 
 ?>
 --EXPECTF--
-Fatal error: Enum "Suit" may not include properties in %s on line %d
+Fatal error: Enum Suit cannot include properties in %s on line %d

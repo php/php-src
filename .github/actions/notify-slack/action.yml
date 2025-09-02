@@ -1,0 +1,10 @@
+name: Notify Slack
+inputs:
+  token:
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: >-
+        curl -X POST -H 'Content-type: application/json' --data '{"attachments": [{"text": "Job in *nightly* failed", "footer": "<https://github.com/php/php-src/actions/runs/${{ github.run_id }}|View Run>", "color": "danger", "mrkdwn_in": ["text"]}]}' ${{ inputs.token }}

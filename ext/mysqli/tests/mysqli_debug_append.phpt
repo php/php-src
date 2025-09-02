@@ -4,7 +4,7 @@ mysqli_debug() - append to trace file
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_debug'))
     die("skip: mysqli_debug() not available");
@@ -15,21 +15,18 @@ if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     die("skip: debug functionality not enabled");
 
-if (!$IS_MYSQLND)
-    die("SKIP Libmysql feature not sufficiently spec'd in MySQL C API documentation");
-
 if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test is not for Windows platforms");
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     if (true !== ($tmp = mysqli_debug(sprintf('d:t:O,%s/mysqli_debug_phpt.trace', sys_get_temp_dir()))))
         printf("[001] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
     // table.inc will create a database connection and run some SQL queries, therefore
     // the debug file should have entries
-    require_once('table.inc');
+    require_once 'table.inc';
 
     clearstatcache();
     $trace_file = sprintf('%s/mysqli_debug_phpt.trace', sys_get_temp_dir());
@@ -84,12 +81,11 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test is not for Windows platfo
 
     mysqli_close($link);
     print "done";
-    if ($IS_MYSQLND)
-        print "libmysql/DBUG package prints some debug info here."
+    print "libmysql/DBUG package prints some debug info here."
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 done%s

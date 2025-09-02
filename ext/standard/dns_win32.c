@@ -19,25 +19,9 @@
 #include <windows.h>
 #include <Winbase.h >
 #include <Windns.h>
+#include <Ws2tcpip.h>
 
 #include "php_dns.h"
-
-#define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
-
-#define PHP_DNS_A      0x00000001
-#define PHP_DNS_NS     0x00000002
-#define PHP_DNS_CNAME  0x00000010
-#define PHP_DNS_SOA    0x00000020
-#define PHP_DNS_PTR    0x00000800
-#define PHP_DNS_HINFO  0x00001000
-#define PHP_DNS_MX     0x00004000
-#define PHP_DNS_TXT    0x00008000
-#define PHP_DNS_A6     0x01000000
-#define PHP_DNS_SRV    0x02000000
-#define PHP_DNS_NAPTR  0x04000000
-#define PHP_DNS_AAAA   0x08000000
-#define PHP_DNS_ANY    0x10000000
-#define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
 
 PHP_FUNCTION(dns_get_mx) /* {{{ */
 {
@@ -107,7 +91,7 @@ PHP_FUNCTION(dns_check_record)
 	}
 
 	if (hostname_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -141,7 +125,7 @@ PHP_FUNCTION(dns_check_record)
 /* }}} */
 
 /* {{{ php_parserr */
-static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw, zval *subarray)
+static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw, zval *subarray)
 {
 	int type;
 	u_long ttl;
@@ -174,9 +158,14 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 	switch (type) {
 		case DNS_TYPE_A: {
 			IN_ADDR ipaddr;
+			char ip[INET_ADDRSTRLEN];
 			ipaddr.S_un.S_addr = (pRec->Data.A.IpAddress);
-			add_assoc_string(subarray, "type", "A");
-			add_assoc_string(subarray, "ip", inet_ntoa(ipaddr));
+			if (!inet_ntop(AF_INET, &ipaddr, ip, INET_ADDRSTRLEN)) {
+				ZVAL_UNDEF(subarray);
+			} else {
+				add_assoc_string(subarray, "type", "A");
+				add_assoc_string(subarray, "ip", ip);
+			}
 			break;
 		}
 
@@ -271,12 +260,12 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 				for(i=0; i < 8; i++) {
 					if (out[i] != 0) {
-						if (tp > (u_char *)buf) {
+						if (tp > buf) {
 							in_v6_break = 0;
 							tp[0] = ':';
 							tp++;
 						}
-						tp += sprintf((char*)tp,"%x", out[i]);
+						tp += snprintf((char*)tp, sizeof(buf) - (tp - (char *) buf), "%x", out[i]);
 					} else {
 						if (!have_v6_break) {
 							have_v6_break = 1;
@@ -506,21 +495,3 @@ PHP_FUNCTION(dns_get_record)
 	}
 }
 /* }}} */
-
-PHP_MINIT_FUNCTION(dns) {
-	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_NS",    PHP_DNS_NS,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_CNAME", PHP_DNS_CNAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_SOA",   PHP_DNS_SOA,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_PTR",   PHP_DNS_PTR,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_HINFO", PHP_DNS_HINFO, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_MX",    PHP_DNS_MX,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_TXT",   PHP_DNS_TXT,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_SRV",   PHP_DNS_SRV,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_NAPTR", PHP_DNS_NAPTR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_AAAA",  PHP_DNS_AAAA,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_A6",    PHP_DNS_A6,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_ANY",   PHP_DNS_ANY,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DNS_ALL",   PHP_DNS_ALL,   CONST_CS | CONST_PERSISTENT);
-	return SUCCESS;
-}

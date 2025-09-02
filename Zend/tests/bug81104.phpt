@@ -2,9 +2,9 @@
 Bug #81104: Warning: "Failed to set memory limit to ... bytes" emitted after exit in debug
 --INI--
 memory_limit=5M
-report_memleaks=0
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class X {
     public $x;
     public function __construct() { $this->x = [$this]; }

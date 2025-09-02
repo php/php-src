@@ -81,4 +81,6 @@ PHP_JSON_API int php_json_parse(php_json_parser *parser);
 
 int php_json_yyparse(php_json_parser *parser);
 
+const php_json_parser_methods* php_json_get_validate_methods(void);
+
 #endif	/* PHP_JSON_PARSER_H */

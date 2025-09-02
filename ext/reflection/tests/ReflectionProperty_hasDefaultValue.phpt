@@ -3,6 +3,7 @@ reflection: ReflectionProperty::hasDefaultValue
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class TestClass
 {
     public $foo;

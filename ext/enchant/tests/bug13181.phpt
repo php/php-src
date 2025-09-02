@@ -21,13 +21,13 @@ if (!enchant_broker_list_dicts($broker)) {
 ?>
 --FILE--
 <?php
-function get_dictionnary() {
+function get_dictionary() {
     $rBroker = enchant_broker_init();
     $t = enchant_broker_request_dict($rBroker, 'en');
     var_dump($t);
     return $t;
 }
-$rDict = get_dictionnary();
+$rDict = get_dictionary();
 var_dump($rDict);
 enchant_dict_suggest($rDict, "soong");
 

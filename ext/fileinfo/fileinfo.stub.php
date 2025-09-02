@@ -2,6 +2,66 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue MAGIC_NONE
+ */
+const FILEINFO_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MAGIC_SYMLINK
+ */
+const FILEINFO_SYMLINK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MAGIC_MIME
+ */
+const FILEINFO_MIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MAGIC_MIME_TYPE
+ */
+const FILEINFO_MIME_TYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MAGIC_MIME_ENCODING
+ */
+const FILEINFO_MIME_ENCODING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MAGIC_DEVICES
+ */
+const FILEINFO_DEVICES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MAGIC_CONTINUE
+ */
+const FILEINFO_CONTINUE = UNKNOWN;
+#ifdef MAGIC_PRESERVE_ATIME
+/**
+ * @var int
+ * @cvalue MAGIC_PRESERVE_ATIME
+ */
+const FILEINFO_PRESERVE_ATIME = UNKNOWN;
+#endif
+#ifdef MAGIC_RAW
+/**
+ * @var int
+ * @cvalue MAGIC_RAW
+ */
+const FILEINFO_RAW = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue MAGIC_APPLE
+ */
+const FILEINFO_APPLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MAGIC_EXTENSION
+ */
+const FILEINFO_EXTENSION = UNKNOWN;
+
 /** @not-serializable */
 class finfo
 {
@@ -23,18 +83,19 @@ class finfo
     public function buffer(string $string, int $flags = FILEINFO_NONE, $context = null): string|false {}
 
     /**
-     * @return bool
      * @alias finfo_set_flags
+     * @tentative-return-type
      */
-    public function set_flags(int $flags) {} // TODO make return type void
+    public function set_flags(int $flags): true {}
 }
 
 /** @refcount 1 */
 function finfo_open(int $flags = FILEINFO_NONE, ?string $magic_database = null): finfo|false {}
 
-function finfo_close(finfo $finfo): bool {}
+#[\Deprecated(since: '8.5', message: 'as finfo objects are freed automatically')]
+function finfo_close(finfo $finfo): true {}
 
-function finfo_set_flags(finfo $finfo, int $flags): bool {} // TODO make return type void
+function finfo_set_flags(finfo $finfo, int $flags): true {}
 
 /**
  * @param resource|null $context

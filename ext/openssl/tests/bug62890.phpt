@@ -19,8 +19,8 @@ $serverCode = <<<'CODE'
         'security_level' => 1,
     ]]);
 
-    $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
     @stream_socket_accept($server, 3);
 CODE;
 $serverCode = sprintf($serverCode, $certFile);
@@ -33,9 +33,7 @@ $clientCode = <<<'CODE'
         'security_level' => 1,
     ]]);
 
-    phpt_wait();
-
-    $client = stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 CODE;
 

@@ -23,6 +23,7 @@ class StillReturnsStatic extends _ZendTestClass {}
 var_dump(get_class(zend_call_method(_ZendTestClass::class, "returnsStatic")));
 var_dump(get_class(zend_call_method(StillReturnsStatic::class, "returnsStatic")));
 
+?>
 --EXPECT--
 enum(IntIntStaticInt::Life)
 enum(IntIntStaticInt::Life)

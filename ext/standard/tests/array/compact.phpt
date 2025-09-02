@@ -28,7 +28,7 @@ array(2) {
   string(2) "CA"
 }
 
-Warning: compact(): Argument #1 must be string or array of strings, bool given in %s on line %d
+Warning: compact(): Argument #1 must be string or array of strings, true given in %s on line %d
 
 Warning: compact(): Argument #2 must be string or array of strings, int given in %s on line %d
 array(1) {

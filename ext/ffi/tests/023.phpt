@@ -6,13 +6,15 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
+    $ffi = FFI::cdef();
+
     try {
-        var_dump(FFI::sizeof(FFI::new("struct {}")));
+        var_dump(FFI::sizeof($ffi->new("struct {}")));
     } catch (Throwable $e) {
         echo get_class($e) . ": " . $e->getMessage() . "\n";
     }
-    var_dump(FFI::sizeof(FFI::new("struct {int a}")));
-    var_dump(FFI::sizeof(FFI::new("struct {int a; int b}")));
+    var_dump(FFI::sizeof($ffi->new("struct {int a}")));
+    var_dump(FFI::sizeof($ffi->new("struct {int a; int b}")));
 ?>
 ok
 --EXPECT--

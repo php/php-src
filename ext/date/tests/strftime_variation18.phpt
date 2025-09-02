@@ -25,8 +25,8 @@ var_dump( strftime($format, $timestamp) );
 
 -- Testing strftime() function with Day of the month as decimal single digit format --
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%s"
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(2) " 8"

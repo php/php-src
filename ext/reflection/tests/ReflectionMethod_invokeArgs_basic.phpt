@@ -27,7 +27,7 @@ $testClassInstance->prop = "Hello";
 
 $foo = new ReflectionMethod($testClassInstance, 'foo');
 $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
-$methodThatThrows = new ReflectionMethod("TestClass::willThrow");
+$methodThatThrows = ReflectionMethod::createFromMethodName("TestClass::willThrow");
 
 
 echo "Public method:\n";

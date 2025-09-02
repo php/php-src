@@ -71,7 +71,7 @@ static void zend_vm_trace_finish(void)
 	f = fopen("zend_vm_trace.log", "w+");
 	if (f) {
 		zend_hash_sort(&vm_trace_ht, (compare_func_t)zend_vm_trace_compare, 0);
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&vm_trace_ht, key, val) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(&vm_trace_ht, key, val) {
 			fprintf(f, "%s "ZEND_LONG_FMT"\n", ZSTR_VAL(key), Z_LVAL_P(val));
 		} ZEND_HASH_FOREACH_END();
 		fclose(f);

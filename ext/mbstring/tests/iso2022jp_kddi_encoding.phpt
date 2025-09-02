@@ -193,9 +193,31 @@ foreach (array_keys($invalidChars) as $invalid) {
     testInvalidString("\x1B\$B" . $invalid, "\x00\x00\x00%", 'ISO-2022-JP-KDDI', 'UTF-32BE');
   }
 }
+// Try Kanji which starts with a good byte, but the 2nd byte is junk
+testInvalidString("\x1B\$B\x21\xFF", "%", 'ISO-2022-JP-KDDI', 'UTF-8');
 
 foreach (array_keys($truncatedChars) as $truncated)
   testInvalidString("\x1B\$B" . $truncated, "\x00\x00\x00%", 'ISO-2022-JP-KDDI', 'UTF-32BE');
+
+testValidString("\x1B\$B\x76\x27", "\x00\x01\xF1\xEF\x00\x01\xF1\xF5", 'ISO-2022-JP-KDDI', 'UTF-32BE', false); // Japan flag emoji
+testValidString("\x00#\x20\xE3", "\x1B\$B\x71\x69\x1B(B", 'UTF-16BE', 'ISO-2022-JP-KDDI', false); // Phone key emoji
+
+testValidString("\x1B\$(B\x21\x21", "\x30\x00", 'ISO-2022-JP-KDDI', 'UTF-16BE', false); // Try ESC $ ( B escape sequence
+
+// Switch from JISX 0208 Kanji to ASCII
+testValidString("\x30\x00\x00A", "\x1B\$B\x21\x21\x1B(BA", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+// Switch from JISX 0208 Kanji to JISX 0201 Kana
+testValidString("\x30\x00\xFF\x67", "\x1B\$B\x21\x21\x1B(I'\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+
+/* Convert Unicode flag emoji to ISO-2022-JP-KDDI proprietary flag emoji
+ * I am not able to confirm that the kuten codes we are using for these proprietary emoji are the right ones
+ * (There doesn't seem to be any publically available reference, and I don't have a legacy KDDI device)
+ *
+ * However, the conversion does not work in the opposite direction; this is because of the test
+ * `if (s >= (84 * 94) && s < (91 * 94))`, which the kuten code which we are using for flag emoji doesn't match
+ * That test is inherited from the old implementation (from libmbfl), and I have no way to confirm that
+ * changing it won't break anything */
+testValidString("\x00\x01\xF1\xF0\x00\x01\xF1\xF7", "\x1B\$B\x70\x55\x1B(B", "UTF-32BE", "ISO-2022-JP-KDDI", false);
 
 echo "JIS X 0208 (with MS extensions) and KDDI emoji support OK\n";
 
@@ -205,6 +227,8 @@ testValidString("\xFF\x5E", "\x1B\$B!A\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", f
 
 echo "Other mappings from Unicode -> ISO-2022-JP-KDDI OK\n";
 
+testInvalidString("\x1B\$B\x7F\x7E", "%", 'ISO-2022-JP-KDDI', 'UTF-8');
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\xE0", "%", "ISO-2022-JP-KDDI", "UTF-8");
@@ -213,6 +237,8 @@ convertInvalidString("\x1B", "%", "ISO-2022-JP-KDDI", "UTF-8");
 convertInvalidString("\x1B.", "%", "ISO-2022-JP-KDDI", "UTF-8");
 convertInvalidString("\x1B\$", "%", "ISO-2022-JP-KDDI", "UTF-8");
 convertInvalidString("\x1B\$.", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B(", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B(.", "%", "ISO-2022-JP-KDDI", "UTF-8");
 convertInvalidString("\x1B\$(X", "%", "ISO-2022-JP-KDDI", "UTF-8");
 convertInvalidString("\x1B\$B\x9F", "%", "ISO-2022-JP-KDDI", "UTF-8"); // 0x9F does not start any 2-byte character
 convertInvalidString("\xE0\x00", "U+E000", "UTF-16BE", "ISO-2022-JP-KDDI");

@@ -40,7 +40,7 @@ $result = <<<'HEADER'
  * as less likely to be the correct one.
  */
 
-static uint32_t rare_codepoint_bitvec[] = {
+static const uint32_t rare_codepoint_bitvec[] = {
 HEADER;
 
 for ($i = 0; $i < 0xFFFF / 32; $i++) {

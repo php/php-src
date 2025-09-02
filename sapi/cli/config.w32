@@ -4,10 +4,12 @@ ARG_ENABLE('cli', 'Build CLI version of PHP', 'yes');
 ARG_ENABLE('cli-win32', 'Build console-less CLI version of PHP', 'no');
 
 if (PHP_CLI == "yes") {
-	SAPI('cli', 'php_cli.c php_http_parser.c php_cli_server.c php_cli_process_title.c ps_title.c', 'php.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	SAPI('cli', 'php_cli.c php_http_parser.c php_cli_server.c', 'php.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	ADD_SOURCES(configure_module_dirname, 'php_cli_process_title.c ps_title.c', 'cli');
 	ADD_FLAG("LIBS_CLI", "ws2_32.lib");
 	ADD_FLAG("LIBS_CLI", "shell32.lib");
 	ADD_FLAG("LDFLAGS_CLI", "/stack:67108864");
+	PHP_INSTALL_HEADERS("sapi/cli", "cli.h");
 
 	if (CHECK_LIB("edit_a.lib;edit.lib", "cli", PHP_CLI) &&
 		CHECK_HEADER_ADD_INCLUDE("editline/readline.h", "CFLAGS_CLI")) {
@@ -16,7 +18,8 @@ if (PHP_CLI == "yes") {
 }
 
 if (PHP_CLI_WIN32 == "yes") {
-	SAPI('cli_win32', 'cli_win32.c php_cli_process_title.c ps_title.c', 'php-win.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	SAPI('cli_win32', 'cli_win32.c', 'php-win.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	ADD_SOURCES(configure_module_dirname, ' php_cli_process_title.c ps_title.c', 'cli_win32', undefined, PHP_CLI == "yes");
 	ADD_FLAG("LDFLAGS_CLI_WIN32", "/stack:67108864");
 	ADD_FLAG("LIBS_CLI_WIN32", "shell32.lib");
 }

@@ -31,6 +31,7 @@
 #define E_USER_ERROR		(1<<8L)
 #define E_USER_WARNING		(1<<9L)
 #define E_USER_NOTICE		(1<<10L)
+// TODO: Remove in PHP 9.0
 #define E_STRICT			(1<<11L)
 #define E_RECOVERABLE_ERROR	(1<<12L)
 #define E_DEPRECATED		(1<<13L)
@@ -39,7 +40,7 @@
 /* Indicates that this usually fatal error should not result in a bailout */
 #define E_DONT_BAIL			(1<<15L)
 
-#define E_ALL (E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_RECOVERABLE_ERROR | E_DEPRECATED | E_USER_DEPRECATED | E_STRICT)
+#define E_ALL (E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE | E_RECOVERABLE_ERROR | E_DEPRECATED | E_USER_DEPRECATED)
 #define E_CORE (E_CORE_ERROR | E_CORE_WARNING)
 
 /* Fatal errors that are ignored by the silence operator */

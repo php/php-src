@@ -4,7 +4,7 @@ mysqli_field_seek()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -54,9 +54,7 @@ require_once('skipifconnectfailure.inc');
         return $ret;
     }
 
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     // Make sure that client, connection and result charsets are all the
     // same. Not sure whether this is strictly necessary.
@@ -120,7 +118,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 mysqli_field_seek(): Argument #2 ($index) must be greater than or equal to 0

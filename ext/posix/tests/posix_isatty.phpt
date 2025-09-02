@@ -2,15 +2,11 @@
 posix_isatty(): Basic tests
 --EXTENSIONS--
 posix
---SKIPIF--
-<?php
-if (!function_exists('posix_isatty')) die('skip posix_isatty() not found');
-?>
 --FILE--
 <?php
 
-var_dump(posix_isatty(0));
+var_dump(posix_isatty(STDIN));
 
 ?>
---EXPECTF--
-bool(%s)
+--EXPECT--
+bool(false)

@@ -47,15 +47,15 @@ try {
 DONE
 --EXPECT--
 -- Testing array_column() column key parameter should be a string or an integer (testing bool) --
-array_column(): Argument #2 ($column_key) must be of type string|int|null, bool given
-array_column(): Argument #2 ($column_key) must be of type string|int|null, bool given
+array_column(): Argument #2 ($column_key) must be of type string|int|null, false given
+array_column(): Argument #2 ($column_key) must be of type string|int|null, true given
 
 -- Testing array_column() column key parameter should be a string or integer (testing array) --
 array_column(): Argument #2 ($column_key) must be of type string|int|null, array given
 
 -- Testing array_column() index key parameter should be a string or an integer (testing bool) --
-array_column(): Argument #3 ($index_key) must be of type string|int|null, bool given
-array_column(): Argument #3 ($index_key) must be of type string|int|null, bool given
+array_column(): Argument #3 ($index_key) must be of type string|int|null, false given
+array_column(): Argument #3 ($index_key) must be of type string|int|null, true given
 
 -- Testing array_column() index key parameter should be a string or integer (testing array) --
 array_column(): Argument #3 ($index_key) must be of type string|int|null, array given

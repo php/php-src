@@ -9,4 +9,4 @@ enum Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Enum may not include __destruct in %s on line %d
+Fatal error: Enum Foo cannot include magic method __destruct in %s on line %d

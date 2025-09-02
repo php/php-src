@@ -11,8 +11,9 @@ $proc->importStylesheet($xsl);
 $proc->setParameter('', '', '"\'');
 $proc->transformToXml($dom);
 ?>
---EXPECTF--
-Warning: XSLTProcessor::transformToXml(): Cannot create XPath expression (string contains both quote and double-quotes) in %s on line %d
+Done
+--EXPECT--
+Done
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09

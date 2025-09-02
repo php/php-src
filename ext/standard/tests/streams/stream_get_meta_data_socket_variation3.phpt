@@ -31,7 +31,7 @@ fclose($server);
 
 ?>
 --EXPECTF--
-array(7) {
+array(8) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
@@ -46,12 +46,14 @@ array(7) {
   int(0)
   ["seekable"]=>
   bool(false)
+  ["uri"]=>
+  string(21) "tcp://127.0.0.1:31333"
 }
 
 
 Set blocking to false:
 bool(true)
-array(7) {
+array(8) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
@@ -66,12 +68,14 @@ array(7) {
   int(0)
   ["seekable"]=>
   bool(false)
+  ["uri"]=>
+  string(21) "tcp://127.0.0.1:31333"
 }
 
 
 Set blocking to true:
 bool(true)
-array(7) {
+array(8) {
   ["timed_out"]=>
   bool(false)
   ["blocked"]=>
@@ -86,4 +90,6 @@ array(7) {
   int(0)
   ["seekable"]=>
   bool(false)
+  ["uri"]=>
+  string(21) "tcp://127.0.0.1:31333"
 }

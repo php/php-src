@@ -3,7 +3,7 @@ Bug #22382 (fgetcsv() does not handle escaped quotes correctly)
 --FILE--
 <?php
 $fp = fopen(__DIR__."/test2.csv", "r");
-while(($line = fgetcsv($fp, 1024))) {
+while(($line = fgetcsv($fp, 1024, escape: "\\"))) {
     var_dump($line);
 }
 fclose($fp);

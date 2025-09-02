@@ -50,7 +50,7 @@ var_dump(headers_list());
 --EXPECTHEADERS--
 
 --EXPECTF--
-setcookie(): Argument #1 ($name) cannot be empty
+setcookie(): Argument #1 ($name) must not be empty
 setcookie(): Argument #1 ($name) cannot contain "=", ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 setcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"

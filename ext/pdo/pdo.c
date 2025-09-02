@@ -17,7 +17,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <ctype.h>
@@ -40,6 +40,9 @@ zend_class_entry *pdo_exception_ce;
 
 /* the registry of PDO drivers */
 HashTable pdo_driver_hash;
+
+/* the registry of PDO driver specific class entries */
+HashTable pdo_driver_specific_ce_hash;
 
 /* we use persistent resources for the driver connection stuff */
 static int le_ppdo;
@@ -71,7 +74,7 @@ PHP_FUNCTION(pdo_drivers)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
+	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		add_next_index_stringl(return_value, pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -110,12 +113,12 @@ ZEND_GET_MODULE(pdo)
 PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 {
 	if (driver->api_version != PDO_DRIVER_API) {
-		zend_error(E_ERROR, "PDO: driver %s requires PDO API version " ZEND_ULONG_FMT "; this is PDO version %d",
+		zend_error_noreturn(E_ERROR, "PDO: driver %s requires PDO API version " ZEND_ULONG_FMT "; this is PDO version %d",
 			driver->driver_name, driver->api_version, PDO_DRIVER_API);
 		return FAILURE;
 	}
 	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
-		zend_error(E_ERROR, "You MUST load PDO before loading any PDO drivers");
+		zend_error_noreturn(E_ERROR, "The PDO extension must be loaded first in order to load PDO drivers");
 		return FAILURE;	/* NOTREACHED */
 	}
 
@@ -129,9 +132,21 @@ PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver) /* {{{ */
 		return;
 	}
 
+	zend_hash_str_del(&pdo_driver_specific_ce_hash, driver->driver_name, driver->driver_name_len);
 	zend_hash_str_del(&pdo_driver_hash, driver->driver_name, driver->driver_name_len);
 }
 /* }}} */
+
+PDO_API zend_result php_pdo_register_driver_specific_ce(const pdo_driver_t *driver, zend_class_entry *ce) /* {{{ */
+{
+	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
+		zend_error_noreturn(E_ERROR, "The PDO extension must be loaded first in order to load PDO drivers");
+		return FAILURE;	/* NOTREACHED */
+	}
+
+	return zend_hash_str_add_ptr(&pdo_driver_specific_ce_hash, driver->driver_name,
+		driver->driver_name_len, (void*)ce) != NULL ? SUCCESS : FAILURE;
+}
 
 pdo_driver_t *pdo_find_driver(const char *name, int namelen) /* {{{ */
 {
@@ -246,13 +261,14 @@ PHP_MINIT_FUNCTION(pdo)
 	pdo_sqlstate_init_error_table();
 
 	zend_hash_init(&pdo_driver_hash, 0, NULL, NULL, 1);
+	zend_hash_init(&pdo_driver_specific_ce_hash, 0, NULL, NULL, 1);
 
 	le_ppdo = zend_register_list_destructors_ex(NULL, php_pdo_pdbh_dtor,
 		"PDO persistent database", module_number);
 
 	pdo_exception_ce = register_class_PDOException(spl_ce_RuntimeException);
 
-	pdo_dbh_init();
+	pdo_dbh_init(module_number);
 	pdo_stmt_init();
 
 	return SUCCESS;
@@ -263,6 +279,7 @@ PHP_MINIT_FUNCTION(pdo)
 PHP_MSHUTDOWN_FUNCTION(pdo)
 {
 	zend_hash_destroy(&pdo_driver_hash);
+	zend_hash_destroy(&pdo_driver_specific_ce_hash);
 	pdo_sqlstate_fini_error_table();
 	return SUCCESS;
 }
@@ -275,9 +292,9 @@ PHP_MINFO_FUNCTION(pdo)
 	pdo_driver_t *pdriver;
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO support", "enabled");
+	php_info_print_table_row(2, "PDO support", "enabled");
 
-	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
+	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		spprintf(&drivers, 0, "%s, %s", ldrivers, pdriver->driver_name);
 		efree(ldrivers);
 		ldrivers = drivers;

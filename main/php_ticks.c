@@ -23,10 +23,9 @@ struct st_tick_function
 	void *arg;
 };
 
-int php_startup_ticks(void)
+void php_startup_ticks(void)
 {
 	zend_llist_init(&PG(tick_functions), sizeof(struct st_tick_function), NULL, 1);
-	return SUCCESS;
 }
 
 void php_deactivate_ticks(void)
@@ -34,9 +33,9 @@ void php_deactivate_ticks(void)
 	zend_llist_clean(&PG(tick_functions));
 }
 
-void php_shutdown_ticks(void)
+void php_shutdown_ticks(php_core_globals *core_globals)
 {
-	zend_llist_destroy(&PG(tick_functions));
+	zend_llist_destroy(&core_globals->tick_functions);
 }
 
 static int php_compare_tick_functions(void *elem1, void *elem2)

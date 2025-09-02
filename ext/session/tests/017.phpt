@@ -16,7 +16,7 @@ error_reporting(E_ALL);
 
 class Kill {
     function __construct() {
-        global $HTTP_SESSION_VARS;
+        $_SESSION = [];
         session_start();
     }
 }

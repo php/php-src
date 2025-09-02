@@ -326,11 +326,6 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 	zend_string *str = zend_string_safe_alloc(1, len, 0, 0);
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
-	if (end < *p) {
-		zend_string_efree(str);
-		return NULL;
-	}
-
 	for (i = 0; i < len; i++) {
 		if (*p >= end) {
 			zend_string_efree(str);
@@ -539,7 +534,7 @@ failure:
 static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 {
 	if (zend_hash_num_elements(&ce->properties_info) > 0) {
-		zend_property_info *existing_propinfo;
+		zend_property_info *existing_propinfo = NULL;
 		const char *unmangled_class = NULL;
 		const char *unmangled_prop;
 		size_t unmangled_prop_len;
@@ -551,21 +546,25 @@ static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 
 		if (unmangled_class == NULL) {
 			existing_propinfo = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(key));
-			if (existing_propinfo != NULL) {
-				zval_ptr_dtor_str(key);
-				ZVAL_STR_COPY(key, existing_propinfo->name);
-				return 1;
-			}
 		} else {
 			if (!strcmp(unmangled_class, "*")
 			 || !strcasecmp(unmangled_class, ZSTR_VAL(ce->name))) {
 				existing_propinfo = zend_hash_str_find_ptr(
 					&ce->properties_info, unmangled_prop, unmangled_prop_len);
-				if (existing_propinfo != NULL) {
-					zval_ptr_dtor_str(key);
-					ZVAL_STR_COPY(key, existing_propinfo->name);
-					return 1;
-				}
+			}
+		}
+
+		if (existing_propinfo != NULL) {
+			if (!(existing_propinfo->flags & ZEND_ACC_VIRTUAL)) {
+				zval_ptr_dtor_str(key);
+				ZVAL_STR_COPY(key, existing_propinfo->name);
+				return 1;
+			} else {
+				php_error_docref(NULL, E_WARNING,
+					"Cannot unserialize value for virtual property %s::$%s",
+					ZSTR_VAL(existing_propinfo->ce->name), Z_STRVAL_P(key));
+				zval_ptr_dtor_str(key);
+				return -1;
 			}
 		}
 	}
@@ -616,7 +615,7 @@ declared_property:
 						if ((*var_hash)->ref_props) {
 							/* Remove old entry from ref_props table, if it exists. */
 							zend_hash_index_del(
-								(*var_hash)->ref_props, (zend_uintptr_t) data);
+								(*var_hash)->ref_props, (uintptr_t) data);
 						}
 					}
 					/* We may override default property value, but they are usually immutable */
@@ -641,6 +640,20 @@ declared_property:
 				int ret = is_property_visibility_changed(obj->ce, &key);
 
 				if (EXPECTED(!ret)) {
+					if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+						zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
+							ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+						zval_ptr_dtor_str(&key);
+						goto failure;
+					} else if (!(obj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
+						zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
+							ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+						if (EG(exception)) {
+							zval_ptr_dtor_str(&key);
+							goto failure;
+						}
+					}
+
 					data = zend_hash_add_new(ht, Z_STR(key), &EG(uninitialized_zval));
 				} else if (ret < 0) {
 					goto failure;
@@ -691,7 +704,7 @@ second_try:
 					zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
 				}
 				zend_hash_index_update_ptr(
-					(*var_hash)->ref_props, (zend_uintptr_t) data, info);
+					(*var_hash)->ref_props, (uintptr_t) data, info);
 			}
 		}
 
@@ -729,6 +742,19 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	datalen = parse_iv2((*p) + 2, p);
 
+	if (max - (*p) < 2) {
+		return 0;
+	}
+
+	if ((*p)[0] != ':') {
+		return 0;
+	}
+
+	if ((*p)[1] != '{') {
+		(*p) += 1;
+		return 0;
+	}
+
 	(*p) += 2;
 
 	if (datalen < 0 || (max - (*p)) <= datalen) {
@@ -740,6 +766,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	 * with unserialize reading past the end of the passed buffer if the string is not
 	 * appropriately terminated (usually NUL terminated, but '}' is also sufficient.) */
 	if ((*p)[datalen] != '}') {
+		(*p) += datalen;
 		return 0;
 	}
 
@@ -799,7 +826,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 		return 0;
 	}
 
-	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_FLAGS(ht) & HASH_FLAG_PACKED);
+	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_IS_PACKED(ht));
 	if (!process_nested_object_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJ_P(rval))) {
 		if (has_wakeup) {
 			ZVAL_DEREF(rval);
@@ -887,7 +914,7 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	if (!Z_ISREF_P(rval_ref)) {
 		zend_property_info *info = NULL;
 		if ((*var_hash)->ref_props) {
-			info = zend_hash_index_find_ptr((*var_hash)->ref_props, (zend_uintptr_t) rval_ref);
+			info = zend_hash_index_find_ptr((*var_hash)->ref_props, (uintptr_t) rval_ref);
 		}
 		ZVAL_NEW_REF(rval_ref, rval_ref);
 		if (info) {
@@ -1062,6 +1089,9 @@ use_double:
 	*p = YYCURSOR;
 
 	ZVAL_STR(rval, str);
+
+	php_error_docref(NULL, E_DEPRECATED, "Unserializing the 'S' format is deprecated");
+
 	return 1;
 }
 
@@ -1201,20 +1231,15 @@ object ":" uiv ":" ["]	{
 		/* Try to find class directly */
 		BG(serialize_lock)++;
 		ce = zend_lookup_class_ex(class_name, lc_name, 0);
-		zend_string_release_ex(lc_name, 0);
-		if (ce) {
-			BG(serialize_lock)--;
-			if (EG(exception)) {
-				zend_string_release_ex(class_name, 0);
-				return 0;
-			}
-			break;
-		}
 		BG(serialize_lock)--;
-
+		zend_string_release_ex(lc_name, 0);
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
 			return 0;
+		}
+
+		if (ce) {
+			break;
 		}
 
 		/* Check for unserialize callback */
@@ -1227,29 +1252,15 @@ object ":" uiv ":" ["]	{
 		/* Call unserialize callback */
 		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
 
-		ZVAL_STR_COPY(&args[0], class_name);
+		ZVAL_STR(&args[0], class_name);
 		BG(serialize_lock)++;
-		if (call_user_function(NULL, NULL, &user_func, &retval, 1, args) != SUCCESS) {
-			BG(serialize_lock)--;
-			if (EG(exception)) {
-				zend_string_release_ex(class_name, 0);
-				zval_ptr_dtor(&user_func);
-				zval_ptr_dtor(&args[0]);
-				return 0;
-			}
-			php_error_docref(NULL, E_WARNING, "defined (%s) but not found", Z_STRVAL(user_func));
-			incomplete_class = 1;
-			ce = PHP_IC_ENTRY;
-			zval_ptr_dtor(&user_func);
-			zval_ptr_dtor(&args[0]);
-			break;
-		}
+		call_user_function(NULL, NULL, &user_func, &retval, 1, args);
 		BG(serialize_lock)--;
 		zval_ptr_dtor(&retval);
+
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
 			zval_ptr_dtor(&user_func);
-			zval_ptr_dtor(&args[0]);
 			return 0;
 		}
 
@@ -1263,7 +1274,6 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 
 		zval_ptr_dtor(&user_func);
-		zval_ptr_dtor(&args[0]);
 	} while (0);
 
 	*p = YYCURSOR;
@@ -1295,6 +1305,18 @@ object ":" uiv ":" ["]	{
 
 	elements = parse_iv2(*p + 2, p);
 	if (elements < 0 || IS_FAKE_ELEM_COUNT(elements, max - YYCURSOR)) {
+		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
+
+	YYCURSOR = *p;
+
+	if (*(YYCURSOR) != ':') {
+		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
+	if (*(YYCURSOR+1) != '{') {
+		*p = YYCURSOR+1;
 		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
@@ -1408,7 +1430,7 @@ fail:
 
 "}" {
 	/* this is the case where we have less data than planned */
-	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");
+	php_error_docref(NULL, E_WARNING, "Unexpected end of serialized data");
 	return 0; /* not sure if it should be 0 or 1 here? */
 }
 

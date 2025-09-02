@@ -52,11 +52,7 @@ extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_stat
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(MY_STMT *stmt);
 extern void php_clear_mysql(MY_MYSQL *);
-#ifdef MYSQLI_USE_MYSQLND
 extern MYSQLI_WARNING *php_get_warnings(MYSQLND_CONN_DATA * mysql);
-#else
-extern MYSQLI_WARNING *php_get_warnings(MYSQL * mysql);
-#endif
 
 extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
@@ -91,14 +87,8 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *);
 
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 	1
-#ifdef MYSQLI_USE_MYSQLND
 #define MYSQLI_ASYNC	 	8
 #define MYSQLI_STORE_RESULT_COPY_DATA 16
-#else
-/* libmysql */
-#define MYSQLI_ASYNC	 	0
-#define MYSQLI_STORE_RESULT_COPY_DATA	0
-#endif
 
 /* for mysqli_fetch_assoc */
 #define MYSQLI_ASSOC	1

@@ -1,7 +1,9 @@
 --TEST--
 Test debug_zval_dump() function : working on objects
 --SKIPIF--
-<?php if (PHP_ZTS) { print "skip only for no-zts build"; }
+<?php
+if (PHP_ZTS) { print "skip only for no-zts build"; }
+?>
 --INI--
 opcache.enable=0
 --FILE--
@@ -17,6 +19,7 @@ function zval_dump( $values ) {
 
 /* checking on objects type */
 echo "*** Testing debug_zval_dump() on objects ***\n";
+#[AllowDynamicProperties]
 class object_class {
   var $value1 = 1;
   private $value2 = 10;
@@ -45,6 +48,7 @@ class no_member_class{
 }
 
 /* class with member as object of other class */
+#[AllowDynamicProperties]
 class contains_object_class
 {
    var       $p = 30;

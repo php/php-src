@@ -112,7 +112,6 @@
 ; - poll       (any POSIX os)
 ; - epoll      (linux >= 2.5.44)
 ; - kqueue     (FreeBSD >= 4.1, OpenBSD >= 2.9, NetBSD >= 2.0)
-; - /dev/poll  (Solaris >= 7)
 ; - port       (Solaris >= 10)
 ; Default Value: not set (auto detection)
 ;events.mechanism = epoll

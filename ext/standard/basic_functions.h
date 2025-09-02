@@ -51,12 +51,6 @@ PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, con
 PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers);
 PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, bool add_underscore);
 
-#define MT_N (624)
-
-/* Deprecated type aliases -- use the standard types instead */
-typedef uint32_t php_uint32;
-typedef int32_t php_int32;
-
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
@@ -72,6 +66,9 @@ typedef struct _php_basic_globals {
 
 	zval active_ini_file_section;
 
+	/* http_fopen_wrapper.c */
+	zval last_http_headers;
+
 	/* pageinfo.c */
 	zend_long page_uid;
 	zend_long page_gid;
@@ -81,14 +78,6 @@ typedef struct _php_basic_globals {
 	/* filestat.c && main/streams/streams.c */
 	zend_string *CurrentStatFile, *CurrentLStatFile;
 	php_stream_statbuf ssb, lssb;
-
-	/* mt_rand.c */
-	uint32_t state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
-	uint32_t *next;       /* next random value is computed from here */
-	int      left;        /* can *next++ this many times before reloading */
-
-	bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
-	zend_long mt_rand_mode;
 
 	/* syslog.c */
 	char *syslog_device;
@@ -134,8 +123,9 @@ PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
 typedef struct _php_shutdown_function_entry {
-	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
+	zval *params;
+	uint32_t param_count;
 } php_shutdown_function_entry;
 
 PHPAPI extern bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry);

@@ -24,4 +24,4 @@ unlink($filename);
 --EXPECT--
 bool(false)
 bool(false)
-gzeof(): supplied resource is not a valid stream resource
+gzeof(): Argument #1 ($stream) must be an open stream resource

@@ -2,6 +2,13 @@
 Variation of bug #48203 with curl_multi_exec (Crash when file pointers passed to curl are closed before calling curl_multi_exec)
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (curl_version()['version_number'] === 0x080a00) {
+    // https://github.com/php/php-src/issues/15997
+    die('xfail due to a libcurl bug');
+}
+?>
 --FILE--
 <?php
 include 'server.inc';

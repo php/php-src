@@ -2,6 +2,7 @@
 Attempting to access static properties using instance property syntax
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class C {
     public static $x = 'C::$x';
     protected static $y = 'C::$y';
@@ -29,17 +30,17 @@ var_dump(isset($c->y));
 --> Access visible static prop like instance prop:
 bool(false)
 
-Notice: Accessing static property C::$x as non static in %s on line 11
-
 Notice: Accessing static property C::$x as non static in %s on line 12
-
-Warning: Undefined property: C::$x in %s on line %d
 
 Notice: Accessing static property C::$x as non static in %s on line 13
 
-Notice: Accessing static property C::$x as non static in %s on line 15
+Warning: Undefined property: C::$x in %s on line %d
+
+Notice: Accessing static property C::$x as non static in %s on line 14
 
 Notice: Accessing static property C::$x as non static in %s on line 16
+
+Notice: Accessing static property C::$x as non static in %s on line 17
 string(3) "ref"
 string(5) "C::$x"
 

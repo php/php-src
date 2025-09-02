@@ -16,9 +16,7 @@
 
 #include "php.h"
 #include <stdlib.h>
-#include <errno.h>
 #include <ctype.h>
-#include "php_string.h"
 
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
 /* {{{ Calculate the soundex key of a string */

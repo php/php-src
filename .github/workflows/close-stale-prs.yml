@@ -1,0 +1,26 @@
+name: Close stale PRs
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  stale:
+    if: github.repository == 'php/php-src'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-close: 7
+          days-before-stale: 60
+          exempt-pr-labels: RFC,Waiting on Review
+          # Hack to skip issues, unfortunately there's no option to disable issues
+          only-issue-labels: inexistent-label
+          only-pr-labels: Waiting on Author
+          stale-pr-message: There has not been any recent activity in this PR. It will automatically be closed in 7 days if no further action is taken.

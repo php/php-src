@@ -22,7 +22,7 @@
 /* true globals; only used from main thread and from kernel callback */
 static zval ctrl_handler;
 static DWORD ctrl_evt = (DWORD)-1;
-static bool *vm_interrupt_flag = NULL;
+static zend_atomic_bool *vm_interrupt_flag = NULL;
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
@@ -55,8 +55,8 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_init(void)
 	vm_interrupt_flag = &EG(vm_interrupt);
 	ZVAL_UNDEF(&ctrl_handler);
 
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_C", CTRL_C_EVENT, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_BREAK", CTRL_BREAK_EVENT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_C", CTRL_C_EVENT, CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_BREAK", CTRL_BREAK_EVENT, CONST_PERSISTENT);
 }/*}}}*/
 
 PHP_WINUTIL_API void php_win32_signal_ctrl_handler_shutdown(void)
@@ -68,8 +68,27 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_shutdown(void)
 	zend_interrupt_function = orig_interrupt_function;
 	orig_interrupt_function = NULL;
 	vm_interrupt_flag = NULL;
-	ZVAL_UNDEF(&ctrl_handler);
 }/*}}}*/
+
+PHP_WINUTIL_API void php_win32_signal_ctrl_handler_request_shutdown(void)
+{
+	/* Must be initialized and in main thread */
+	if (!vm_interrupt_flag) {
+		return;
+	}
+#ifdef ZTS
+	if (!tsrm_is_main_thread()) {
+		return;
+	}
+#endif
+
+	/* The ctrl_handler must be cleared between requests, otherwise we can crash
+	 * due to accessing a previous request's memory. */
+	if (!Z_ISUNDEF(ctrl_handler)) {
+		zval_ptr_dtor(&ctrl_handler);
+		ZVAL_UNDEF(&ctrl_handler);
+	}
+}
 
 static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 {/*{{{*/
@@ -77,7 +96,7 @@ static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 		return FALSE;
 	}
 
-	(void)InterlockedExchange8(vm_interrupt_flag, 1);
+	zend_atomic_bool_store_ex(vm_interrupt_flag, true);
 
 	ctrl_evt = evt;
 
@@ -97,7 +116,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 		RETURN_THROWS();
 	}
 
-#if ZTS
+#ifdef ZTS
 	if (!tsrm_is_main_thread()) {
 		zend_throw_error(NULL, "CTRL events can only be received on the main thread");
 		RETURN_THROWS();
@@ -125,7 +144,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 		RETURN_FALSE;
 	}
 
-	zval_ptr_dtor_nogc(&ctrl_handler);
+	zval_ptr_dtor(&ctrl_handler);
 	ZVAL_COPY(&ctrl_handler, &fci.function_name);
 
 	RETURN_TRUE;

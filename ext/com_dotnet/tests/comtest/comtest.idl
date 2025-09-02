@@ -1,0 +1,23 @@
+[ uuid(AE8685BE-3758-4BDA-91DB-1459EBA24747),
+  helpstring("PHP COM Test Library"),
+  version(1.0) ]
+library ComTest
+{
+    importlib("stdole32.tlb");
+
+    [ object,
+      uuid(66177FCA-36B3-436B-B475-BE4249DDE0A0),
+      dual ]
+    interface IDocument : IDispatch
+    {
+        [id(1), propget] HRESULT Content([out, retval] BSTR* retvalue);
+        [id(1), propput] HRESULT Content(BSTR newvalue);
+    }
+
+    [ uuid(B13FE324-D595-44C7-97D7-82CE20EDF878) ]
+    coclass Document
+    {
+        interface IDocument;
+        interface IPersistStream;
+    }
+}

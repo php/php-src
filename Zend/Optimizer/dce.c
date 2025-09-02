@@ -80,7 +80,6 @@ static inline bool may_have_side_effects(
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_QM_ASSIGN:
-		case ZEND_FREE:
 		case ZEND_FE_FREE:
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:
@@ -127,6 +126,8 @@ static inline bool may_have_side_effects(
 		case ZEND_ARRAY_KEY_EXISTS:
 			/* No side effects */
 			return 0;
+		case ZEND_FREE:
+			return opline->extended_value == ZEND_FREE_VOID_CAST;
 		case ZEND_ADD_ARRAY_ELEMENT:
 			/* TODO: We can't free two vars. Keep instruction alive. <?php [0, "$a" => "$b"]; */
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && (opline->op2_type & (IS_VAR|IS_TMP_VAR))) {
@@ -139,13 +140,14 @@ static inline bool may_have_side_effects(
 		case ZEND_JMP:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			/* For our purposes a jumps and branches are side effects. */
 			return 1;
 		case ZEND_BEGIN_SILENCE:
@@ -167,6 +169,10 @@ static inline bool may_have_side_effects(
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
+		case ZEND_FRAMELESS_ICALL_0:
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3:
 			/* For now assume all calls have side effects */
 			return 1;
 		case ZEND_RECV:
@@ -246,15 +252,9 @@ static inline bool may_have_side_effects(
 				if ((opline->extended_value & (ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT))) {
 					return 1;
 				}
-
-				if ((opline->extended_value & ZEND_BIND_REF) != 0) {
-					zval *value =
-						(zval*)((char*)op_array->static_variables->arData +
-							(opline->extended_value & ~ZEND_BIND_REF));
-					if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-						/* AST may contain undefined constants */
-						return 1;
-					}
+				/* Modifies static variables which are observable through reflection */
+				if ((opline->extended_value & ZEND_BIND_REF) && opline->op2_type != IS_UNUSED) {
+					return 1;
 				}
 			}
 			return 0;
@@ -414,7 +414,7 @@ static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_o
 static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	zend_ssa *ssa = ctx->ssa;
 	int free_var = -1;
-	zend_uchar free_var_type;
+	uint8_t free_var_type;
 
 	if (opline->opcode == ZEND_NOP) {
 		return 0;
@@ -524,7 +524,7 @@ static inline bool may_throw_dce_exception(const zend_op *opline) {
 	return opline->opcode == ZEND_ADD_ARRAY_ELEMENT && opline->op2_type == IS_UNUSED;
 }
 
-int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_dtor_effects) {
+int dce_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *optimizer_ctx, zend_ssa *ssa, bool reorder_dtor_effects) {
 	int i;
 	zend_ssa_phi *phi;
 	int removed_ops = 0;
@@ -537,20 +537,17 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 	ctx.op_array = op_array;
 	ctx.reorder_dtor_effects = reorder_dtor_effects;
 
+	void *checkpoint = zend_arena_checkpoint(optimizer_ctx->arena);
 	/* We have no dedicated phi vector, so we use the whole ssa var vector instead */
 	ctx.instr_worklist_len = zend_bitset_len(op_array->last);
-	ctx.instr_worklist = alloca(sizeof(zend_ulong) * ctx.instr_worklist_len);
-	memset(ctx.instr_worklist, 0, sizeof(zend_ulong) * ctx.instr_worklist_len);
+	ctx.instr_worklist = zend_arena_calloc(&optimizer_ctx->arena, ctx.instr_worklist_len, sizeof(zend_ulong));
 	ctx.phi_worklist_len = zend_bitset_len(ssa->vars_count);
-	ctx.phi_worklist = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
-	memset(ctx.phi_worklist, 0, sizeof(zend_ulong) * ctx.phi_worklist_len);
-	ctx.phi_worklist_no_val = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
-	memset(ctx.phi_worklist_no_val, 0, sizeof(zend_ulong) * ctx.phi_worklist_len);
+	ctx.phi_worklist = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
+	ctx.phi_worklist_no_val = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
 
 	/* Optimistically assume all instructions and phis to be dead */
-	ctx.instr_dead = alloca(sizeof(zend_ulong) * ctx.instr_worklist_len);
-	memset(ctx.instr_dead, 0, sizeof(zend_ulong) * ctx.instr_worklist_len);
-	ctx.phi_dead = alloca(sizeof(zend_ulong) * ctx.phi_worklist_len);
+	ctx.instr_dead = zend_arena_calloc(&optimizer_ctx->arena, ctx.instr_worklist_len, sizeof(zend_ulong));
+	ctx.phi_dead = zend_arena_alloc(&optimizer_ctx->arena, ctx.phi_worklist_len * sizeof(zend_ulong));
 	memset(ctx.phi_dead, 0xff, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
 	/* Mark non-CV phis as live. Even if the result is unused, we generally cannot remove one
@@ -664,6 +661,8 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 			try_remove_trivial_phi(&ctx, phi);
 		}
 	} FOREACH_PHI_END();
+
+	zend_arena_release(&optimizer_ctx->arena, checkpoint);
 
 	return removed_ops;
 }

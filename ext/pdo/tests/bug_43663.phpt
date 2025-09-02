@@ -11,7 +11,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-class test extends PDO{
+class TestClass extends PDO{
     function __call($name, array $args) {
         echo "Called $name in ".__CLASS__."\n";
     }
@@ -23,10 +23,10 @@ class test extends PDO{
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
-$a = PDOTest::factory(test::class);
+$a = PDOTest::factory(TestClass::class);
 $a->foo();
 $a->bar();
 ?>
 --EXPECT--
-Called foo in test
-Called bar in test
+Called foo in TestClass
+Called bar in TestClass

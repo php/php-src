@@ -59,7 +59,7 @@ DIR *opendir(const char *dir)
 		wcscpy(filespecw, resolvedw);
 		index = resolvedw_len - 1;
 	}
-	if (index >= 0 && filespecw[index] == L'/' || index == 0 && filespecw[index] == L'\\')
+	if ((index >= 0 && filespecw[index] == L'/') || (index == 0 && filespecw[index] == L'\\'))
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
 
@@ -120,6 +120,13 @@ struct dirent *readdir(DIR *dp)
 
 	dp->dent.d_ino = 1;
 	dp->dent.d_off = dp->offset;
+	if (dp->fileinfo.dwFileAttributes & (FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_DEVICE)) {
+		dp->dent.d_type = DT_UNKNOWN; /* conservative */
+	} else if (dp->fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+		dp->dent.d_type = DT_DIR;
+	} else {
+		dp->dent.d_type = DT_REG;
+	}
 
 	return &(dp->dent);
 }/*}}}*/

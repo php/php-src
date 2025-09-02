@@ -4,71 +4,46 @@ mysqli thread_id & kill
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
-    $version = $mysql->server_version;
 
-    var_dump($mysql->ping());
+    var_dump($mysql->query('DO 1'));
 
     $ret = $mysql->kill($mysql->thread_id);
-    if ($IS_MYSQLND) {
-        if ($ret !== true){
-            printf("[001] Expecting boolean/true got %s/%s\n", gettype($ret), var_export($ret, true));
-        }
-    } else {
-        /* libmysql return value seems to depend on server version */
-        if ((($version >= 50123) || ($version <= 40200)) && $version != 50200) {
-            /* TODO: find exact version */
-            if ($ret !== true){
-                printf("[001] Expecting boolean/true got %s/%s @\n", gettype($ret), var_export($ret, true), $version);
-            }
-        } else {
-            if ($ret !== false){
-                printf("[001] Expecting boolean/false got %s/%s @\n", gettype($ret), var_export($ret, true), $version);
-            }
-        }
+    if ($ret !== true){
+        printf("[001] Expecting boolean/true got %s/%s\n", gettype($ret), var_export($ret, true));
     }
 
-    var_dump($mysql->ping());
+    var_dump($mysql->query('DO 1'));
 
     $mysql->close();
 
     $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
-    var_dump(mysqli_ping($mysql));
+    var_dump($mysql->query('DO 1'));
 
     $ret = $mysql->kill($mysql->thread_id);
-    if ($IS_MYSQLND) {
-        if ($ret !== true){
-            printf("[002] Expecting boolean/true got %s/%s\n", gettype($ret), var_export($ret, true));
-        }
-    } else {
-        /* libmysql return value seems to depend on server version */
-        if ((($version >= 50123) || ($version <= 40200)) && $version != 50200) {
-            /* TODO: find exact version */
-            if ($ret !== true){
-                printf("[002] Expecting boolean/true got %s/%s @\n", gettype($ret), var_export($ret, true), $version);
-            }
-        } else {
-            if ($ret !== false){
-            printf("[002] Expecting boolean/false got %s/%s @\n", gettype($ret), var_export($ret, true), $version);
-            }
-        }
+    if ($ret !== true){
+        printf("[002] Expecting boolean/true got %s/%s\n", gettype($ret), var_export($ret, true));
     }
 
-    var_dump(mysqli_ping($mysql));
+    var_dump($mysql->query('DO 1'));
 
     $mysql->close();
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
+
+Deprecated: Method mysqli::kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 bool(false)
 bool(true)
+
+Deprecated: Method mysqli::kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 bool(false)
 done!

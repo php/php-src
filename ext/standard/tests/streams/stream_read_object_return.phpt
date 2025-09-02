@@ -3,6 +3,7 @@ Returning an object from stream_read() is invalid, but should not leak
 --FILE--
 <?php
 class MyStream {
+    public $context;
     function stream_open() {
         return true;
     }

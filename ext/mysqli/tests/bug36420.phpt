@@ -4,12 +4,12 @@ Bug #36420 (segfault when access result->num_rows after calling result->close())
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-require_once("connect.inc");
+require_once 'connect.inc';
 $mysqli = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 $result = $mysqli->query('select 1');

@@ -55,15 +55,13 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 		case ZEND_USER_FUNCTION: {
 			zend_op_array* op_array = &(method->op_array);
 
-			if (op_array) {
-				zend_dump_op_array(op_array, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
+			zend_dump_op_array(op_array, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
 
-				for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
-					zend_op_array *def = op_array->dynamic_func_defs[i];
-					phpdbg_out("\ndynamic def: %i, function name: %.*s\n",
-						i, (int) ZSTR_LEN(def->function_name), ZSTR_VAL(def->function_name));
-					zend_dump_op_array(def, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
-				}
+			for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+				zend_op_array *def = op_array->dynamic_func_defs[i];
+				phpdbg_out("\ndynamic def: %i, function name: %.*s\n",
+					i, (int) ZSTR_LEN(def->function_name), ZSTR_VAL(def->function_name));
+				zend_dump_op_array(def, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
 			}
 		} break;
 
@@ -140,7 +138,7 @@ PHPDBG_PRINT(class) /* {{{ */
 		if (zend_hash_num_elements(&ce->function_table)) {
 			zend_function *method;
 
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 				phpdbg_print_function_helper(method);
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -291,7 +289,7 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	}
 
 	phpdbg_out("%d methods: ", zend_hash_num_elements(&ce->function_table));
-	ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 		if (first) {
 			first = 0;
 		} else {
@@ -304,7 +302,7 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	}
 	phpdbg_out("\n");
 
-	ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 		phpdbg_print_function_helper(method);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -332,13 +330,13 @@ void phpdbg_print_opcodes(const char *function)
 
 		phpdbg_print_opcodes_main();
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
 			if (func->type == ZEND_USER_FUNCTION) {
 				phpdbg_print_opcodes_function(ZSTR_VAL(name), ZSTR_LEN(name));
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		ZEND_HASH_FOREACH_PTR(EG(class_table), ce) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(class_table), ce) {
 			if (ce->type == ZEND_USER_CLASS) {
 				phpdbg_out("\n");
 				phpdbg_print_opcodes_ce(ce);

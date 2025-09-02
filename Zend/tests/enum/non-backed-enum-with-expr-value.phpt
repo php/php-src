@@ -9,4 +9,4 @@ enum Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Case Bar of non-backed enum Foo must not have a value, try adding ": int" to the enum declaration in %s on line %d
+Fatal error: Case Bar of non-backed enum Foo must not have a value in %s on line %d

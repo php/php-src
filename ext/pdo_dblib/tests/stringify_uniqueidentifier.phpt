@@ -5,12 +5,14 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
-if (in_array($db->getAttribute(PDO::DBLIB_ATTR_TDS_VERSION), ['4.2', '4.6'])) die('skip feature unsupported by this TDS version');
+$db = getDbConnection();
+if (in_array($db->getAttribute(Pdo\Dblib::ATTR_TDS_VERSION), ['4.2', '4.6'])) die('skip feature unsupported by this TDS version');
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
 
+$db = getDbConnection();
 
 $testGUID = '82A88958-672B-4C22-842F-216E2B88E72A';
 $testGUIDBinary = base64_decode('WImogitnIkyELyFuK4jnKg==');
@@ -20,10 +22,10 @@ $sql = "SELECT CAST('$testGUID' as uniqueidentifier) as [guid]";
 //--------------------------------------------------------------------------------
 // 1. Get and Set the attribute
 //--------------------------------------------------------------------------------
-$db->setAttribute(PDO::DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, true);
-var_dump(true === $db->getAttribute(PDO::DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER));
-$db->setAttribute(PDO::DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, false);
-var_dump(false === $db->getAttribute(PDO::DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER));
+$db->setAttribute(Pdo\Dblib::ATTR_STRINGIFY_UNIQUEIDENTIFIER, true);
+var_dump(true === $db->getAttribute(Pdo\Dblib::ATTR_STRINGIFY_UNIQUEIDENTIFIER));
+$db->setAttribute(Pdo\Dblib::ATTR_STRINGIFY_UNIQUEIDENTIFIER, false);
+var_dump(false === $db->getAttribute(Pdo\Dblib::ATTR_STRINGIFY_UNIQUEIDENTIFIER));
 
 
 //--------------------------------------------------------------------------------
@@ -52,7 +54,7 @@ var_dump($row['guid'] === $testGUIDBinary);
 // TODO: something from PDO::ATTR_SERVER_VERSION, PDO::ATTR_CLIENT_VERSION or PDO::ATTR_SERVER_INFO should be used
 // to get TDS version and skip this test in this case.
 //--------------------------------------------------------------------------------
-$db->setAttribute(PDO::DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, true);
+$db->setAttribute(Pdo\Dblib::ATTR_STRINGIFY_UNIQUEIDENTIFIER, true);
 $stmt = $db->query($sql);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 

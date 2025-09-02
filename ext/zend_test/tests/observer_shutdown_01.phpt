@@ -4,6 +4,7 @@ Observer: Function calls from a shutdown handler are observable
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
 --FILE--
@@ -24,15 +25,18 @@ function foo() {
 echo 'Done: ' . bar(40) . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_shutdown_%d.php' -->
-<file '%s%eobserver_shutdown_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
+  <!-- init register_shutdown_function() -->
+  <register_shutdown_function>
+  </register_shutdown_function:NULL>
   <!-- init bar() -->
   <bar>
   </bar:40>
 Done: 40
-</file '%s%eobserver_shutdown_%d.php'>
-<!-- init {closure}() -->
-<{closure}>
+</file '%s'>
+<!-- init {closure:%s:%d}() -->
+<{closure:%s:%d}>
   <!-- init foo() -->
   <foo>
     <bar>
@@ -41,4 +45,4 @@ Done: 40
     </bar:42>
   </foo:42>
 Shutdown: 42
-</{closure}:NULL>
+</{closure:%s:%d}:NULL>

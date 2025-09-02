@@ -3,7 +3,7 @@ Bug #71843 (null ptr deref ZEND_RETURN_SPEC_CONST_HANDLER (zend_vm_execute.h:347
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.optimization_level=0xFFFFBFFF
+opcache.optimization_level=0x7FFFBFFF
 --EXTENSIONS--
 opcache
 --FILE--

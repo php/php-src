@@ -15,6 +15,6 @@ var_dump(session_name("foo"));
 var_dump(session_name("bar"));
 ?>
 --EXPECT--
-Warning: PHP Startup: session.name "" cannot be numeric or empty in Unknown on line 0
+Warning: PHP Startup: session.name "" must not be numeric, empty, contain null bytes or any of the following characters "=,;.[ \t\r\n\013\014" in Unknown on line 0
 string(9) "PHPSESSID"
 string(3) "foo"

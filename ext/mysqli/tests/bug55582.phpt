@@ -4,12 +4,11 @@ Bug #55582 mysqli_num_rows() returns always 0 for unbuffered, when mysqlnd is us
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once("connect.inc");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include "connect.inc";
+    include 'connect.inc';
     if (!($link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))) {
         printf("[001] Cannot connect to the server");
     }

@@ -27,6 +27,7 @@ foreach ($options as $option) try {
 	echo "Exception: ", $ex->getMessage(), "\n";
 }
 
+?>
 --EXPECT--
 Exception: ftp_set_option(): Argument #3 ($value) must be greater than 0 for the FTP_TIMEOUT_SEC option
 Exception: ftp_set_option(): Argument #3 ($value) must be of type int for the FTP_TIMEOUT_SEC option, string given

@@ -4,8 +4,6 @@ PDO_Firebird: Bug #76488 PDO Firebird does not support boolean datatype in input
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 
@@ -23,6 +21,7 @@ select trim(s) as s from t where b is not distinct from :p
 SQL;
 
 try {
+  $dbh = getDbConnection();
   $query = $dbh->prepare($sql);
 
   // PDO::PARAM_BOOL

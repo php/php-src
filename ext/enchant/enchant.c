@@ -16,16 +16,23 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
-#include "../spl/spl_exceptions.h"
 #include <enchant.h>
 #include "php_enchant.h"
+
+#define PHP_ENCHANT_MYSPELL 1
+#define PHP_ENCHANT_ISPELL 2
+#ifdef HAVE_ENCHANT_GET_VERSION
+#define PHP_ENCHANT_GET_VERSION enchant_get_version()
+#endif
+
 #include "enchant_arginfo.h"
 
 typedef struct _broker_struct {
@@ -54,7 +61,6 @@ static zend_object *enchant_broker_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &enchant_broker_handlers;
 
 	return &intern->std;
 }
@@ -73,13 +79,9 @@ static zend_object *enchant_dict_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &enchant_dict_handlers;
 
 	return &intern->std;
 }
-
-#define PHP_ENCHANT_MYSPELL 1
-#define PHP_ENCHANT_ISPELL 2
 
 /* {{{ enchant_module_entry */
 zend_module_entry enchant_module_entry = {
@@ -87,7 +89,7 @@ zend_module_entry enchant_module_entry = {
 	"enchant",
 	ext_functions,
 	PHP_MINIT(enchant),
-	PHP_MSHUTDOWN(enchant),
+	NULL,
 	NULL,	/* Replace with NULL if there's nothing to do at request start */
 	NULL,	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(enchant),
@@ -111,9 +113,9 @@ enumerate_providers_fn (const char * const name,
 
 	array_init(&tmp_array);
 
-	add_assoc_string(&tmp_array, "name", (char *)name);
-	add_assoc_string(&tmp_array, "desc", (char *)desc);
-	add_assoc_string(&tmp_array, "file", (char *)file);
+	add_assoc_string(&tmp_array, "name", name);
+	add_assoc_string(&tmp_array, "desc", desc);
+	add_assoc_string(&tmp_array, "file", file);
 	add_next_index_zval(zdesc, &tmp_array);
 }
 /* }}} */
@@ -127,10 +129,10 @@ describe_dict_fn (const char * const lang,
 {
 	zval *zdesc = (zval *) ud;
 	array_init(zdesc);
-	add_assoc_string(zdesc, "lang", (char *)lang);
-	add_assoc_string(zdesc, "name", (char *)name);
-	add_assoc_string(zdesc, "desc", (char *)desc);
-	add_assoc_string(zdesc, "file", (char *)file);
+	add_assoc_string(zdesc, "lang", lang);
+	add_assoc_string(zdesc, "name", name);
+	add_assoc_string(zdesc, "desc", desc);
+	add_assoc_string(zdesc, "file", file);
 }
 /* }}} */
 
@@ -142,10 +144,10 @@ static void php_enchant_list_dicts_fn( const char * const lang_tag,
 	zval tmp_array;
 
 	array_init(&tmp_array);
-	add_assoc_string(&tmp_array, "lang_tag", (char *)lang_tag);
-	add_assoc_string(&tmp_array, "provider_name", (char *)provider_name);
-	add_assoc_string(&tmp_array, "provider_desc", (char *)provider_desc);
-	add_assoc_string(&tmp_array, "provider_file", (char *)provider_file);
+	add_assoc_string(&tmp_array, "lang_tag", lang_tag);
+	add_assoc_string(&tmp_array, "provider_name", provider_name);
+	add_assoc_string(&tmp_array, "provider_desc", provider_desc);
+	add_assoc_string(&tmp_array, "provider_file", provider_file);
 	add_next_index_zval(zdesc, &tmp_array);
 
 }
@@ -187,6 +189,7 @@ PHP_MINIT_FUNCTION(enchant)
 {
 	enchant_broker_ce = register_class_EnchantBroker();
 	enchant_broker_ce->create_object = enchant_broker_create_object;
+	enchant_broker_ce->default_object_handlers = &enchant_broker_handlers;
 
 	memcpy(&enchant_broker_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_broker_handlers.offset = XtOffsetOf(enchant_broker, std);
@@ -196,6 +199,7 @@ PHP_MINIT_FUNCTION(enchant)
 
 	enchant_dict_ce = register_class_EnchantDictionary();
 	enchant_dict_ce->create_object = enchant_dict_create_object;
+	enchant_dict_ce->default_object_handlers = &enchant_dict_handlers;
 
 	memcpy(&enchant_dict_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_dict_handlers.offset = XtOffsetOf(enchant_dict, std);
@@ -203,18 +207,8 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_dict_handlers.clone_obj = NULL;
 	enchant_dict_handlers.compare = zend_objects_not_comparable;
 
-	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL",  PHP_ENCHANT_ISPELL,  CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
-#ifdef HAVE_ENCHANT_GET_VERSION
-	REGISTER_STRING_CONSTANT("LIBENCHANT_VERSION", enchant_get_version(), CONST_CS | CONST_PERSISTENT);
-#endif
-	return SUCCESS;
-}
-/* }}} */
+	register_enchant_symbols(module_number);
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION */
-PHP_MSHUTDOWN_FUNCTION(enchant)
-{
 	return SUCCESS;
 }
 /* }}} */
@@ -324,7 +318,7 @@ PHP_FUNCTION(enchant_broker_get_error)
 
 	msg = enchant_broker_get_error(pbroker->pbroker);
 	if (msg) {
-		RETURN_STRING((char *)msg);
+		RETURN_STRING(msg);
 	}
 	RETURN_FALSE;
 }
@@ -338,11 +332,11 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 	char *value;
 	size_t value_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ols", &broker, enchant_broker_ce, &dict_type, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olp", &broker, enchant_broker_ce, &dict_type, &value, &value_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
+#ifdef HAVE_ENCHANT_BROKER_SET_PARAM
 	enchant_broker *pbroker;
 	if (!value_len) {
 		RETURN_FALSE;
@@ -352,14 +346,12 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 
 	switch (dict_type) {
 		case PHP_ENCHANT_MYSPELL:
-			PHP_ENCHANT_GET_BROKER;
-			enchant_broker_set_param(pbroker->pbroker, "enchant.myspell.dictionary.path", (const char *)value);
+			enchant_broker_set_param(pbroker->pbroker, "enchant.myspell.dictionary.path", value);
 			RETURN_TRUE;
 			break;
 
 		case PHP_ENCHANT_ISPELL:
-			PHP_ENCHANT_GET_BROKER;
-			enchant_broker_set_param(pbroker->pbroker, "enchant.ispell.dictionary.path", (const char *)value);
+			enchant_broker_set_param(pbroker->pbroker, "enchant.ispell.dictionary.path", value);
 			RETURN_TRUE;
 			break;
 
@@ -381,19 +373,17 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 		RETURN_THROWS();
 	}
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
+#ifdef HAVE_ENCHANT_BROKER_SET_PARAM
 	enchant_broker *pbroker;
 	char *value;
 	PHP_ENCHANT_GET_BROKER;
 
 	switch (dict_type) {
 		case PHP_ENCHANT_MYSPELL:
-			PHP_ENCHANT_GET_BROKER;
 			value = enchant_broker_get_param(pbroker->pbroker, "enchant.myspell.dictionary.path");
 			break;
 
 		case PHP_ENCHANT_ISPELL:
-			PHP_ENCHANT_GET_BROKER;
 			value = enchant_broker_get_param(pbroker->pbroker, "enchant.ispell.dictionary.path");
 			break;
 
@@ -439,18 +429,18 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	char *tag;
 	size_t taglen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &broker, enchant_broker_ce, &tag, &taglen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &broker, enchant_broker_ce, &tag, &taglen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
 
 	if (taglen == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
-	pdict = enchant_broker_request_dict(pbroker->pbroker, (const char *)tag);
+	pdict = enchant_broker_request_dict(pbroker->pbroker, tag);
 	if (pdict) {
 		pbroker->nb_dict++;
 
@@ -533,11 +523,16 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 	size_t taglen;
 	enchant_broker * pbroker;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &broker, enchant_broker_ce,  &tag, &taglen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &broker, enchant_broker_ce,  &tag, &taglen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
+
+	if (taglen == 0) {
+		zend_argument_must_not_be_empty_error(2);
+		RETURN_THROWS();
+	}
 
 	RETURN_BOOL(enchant_broker_dict_exists(pbroker->pbroker, tag));
 }
@@ -558,11 +553,21 @@ PHP_FUNCTION(enchant_broker_set_ordering)
 	size_t ptaglen;
 	enchant_broker * pbroker;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oss", &broker, enchant_broker_ce, &ptag, &ptaglen, &pordering, &porderinglen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opp", &broker, enchant_broker_ce, &ptag, &ptaglen, &pordering, &porderinglen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
+
+	if (ptaglen == 0) {
+		zend_argument_must_not_be_empty_error(2);
+		RETURN_THROWS();
+	}
+
+	if (porderinglen == 0) {
+		zend_argument_must_not_be_empty_error(3);
+		RETURN_THROWS();
+	}
 
 	enchant_broker_set_ordering(pbroker->pbroker, ptag, pordering);
 	RETURN_TRUE;
@@ -596,7 +601,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|z", &dict, enchant_dict_ce, &word, &wordlen, &sugg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op|z", &dict, enchant_dict_ce, &word, &wordlen, &sugg) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -641,7 +646,7 @@ PHP_FUNCTION(enchant_dict_check)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -661,7 +666,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 	enchant_dict *pdict;
 	size_t n_sugg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -689,7 +694,7 @@ PHP_FUNCTION(enchant_dict_add)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -699,6 +704,22 @@ PHP_FUNCTION(enchant_dict_add)
 }
 /* }}} */
 
+PHP_FUNCTION(enchant_dict_remove)
+{
+	zval *dict;
+	char *word;
+	size_t wordlen;
+	enchant_dict *pdict;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	PHP_ENCHANT_GET_DICT;
+
+	enchant_dict_remove(pdict->pdict, word, wordlen);
+}
+
 /* {{{ add 'word' to this spell-checking session */
 PHP_FUNCTION(enchant_dict_add_to_session)
 {
@@ -707,7 +728,7 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -717,6 +738,22 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 }
 /* }}} */
 
+PHP_FUNCTION(enchant_dict_remove_from_session)
+{
+	zval *dict;
+	const char *word;
+	size_t wordlen;
+	const enchant_dict *pdict;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	PHP_ENCHANT_GET_DICT;
+
+	enchant_dict_remove_from_session(pdict->pdict, word, wordlen);
+}
+
 /* {{{ whether or not 'word' exists in this spelling-session */
 PHP_FUNCTION(enchant_dict_is_added)
 {
@@ -725,7 +762,7 @@ PHP_FUNCTION(enchant_dict_is_added)
 	size_t wordlen;
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op", &dict, enchant_dict_ce, &word, &wordlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -747,7 +784,7 @@ PHP_FUNCTION(enchant_dict_store_replacement)
 
 	enchant_dict *pdict;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oss", &dict, enchant_dict_ce, &mis, &mislen, &cor, &corlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opp", &dict, enchant_dict_ce, &mis, &mislen, &cor, &corlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 

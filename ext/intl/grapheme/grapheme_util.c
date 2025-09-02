@@ -14,7 +14,7 @@
 
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <php.h>
@@ -27,8 +27,6 @@
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
 #include <unicode/usearch.h>
-
-#include "ext/standard/php_string.h"
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
@@ -53,7 +51,7 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 	*sub_str = NULL;
 
 	if(str_len > INT32_MAX) {
-		/* We can not return long strings from ICU functions, so we won't here too */
+		/* We cannot return long strings from ICU functions, so we won't here too */
 		return;
 	}
 
@@ -89,7 +87,7 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 #define STRPOS_CHECK_STATUS(status, error) \
 	if ( U_FAILURE( (status) ) ) { \
 		intl_error_set_code( NULL, (status) ); \
-		intl_error_set_custom_msg( NULL, (error), 0 ); \
+		intl_error_set_custom_msg( NULL, (error)); \
 		ret_pos = -1; \
 		goto finish; \
 	}
@@ -168,7 +166,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			if(char_pos < offset_pos) {
 				/* last one is beyond our start offset */
 				char_pos = USEARCH_DONE;
-			}			
+			}
 		} else {
 			/* searching backwards is broken, so we search forwards, albeit it's less efficient */
 			int32_t prev_pos = USEARCH_DONE;

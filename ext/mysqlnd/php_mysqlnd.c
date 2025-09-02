@@ -15,6 +15,9 @@
   +----------------------------------------------------------------------+
 */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
@@ -31,7 +34,7 @@ mysqlnd_minfo_print_hash(zval *values)
 	zval *values_entry;
 	zend_string	*string_key;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), string_key, values_entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), string_key, values_entry) {
 		convert_to_string(values_entry);
 		php_info_print_table_row(2, ZSTR_VAL(string_key), Z_STRVAL_P(values_entry));
 	} ZEND_HASH_FOREACH_END();
@@ -63,7 +66,7 @@ mysqlnd_minfo_dump_api_plugins(smart_str * buffer)
 	HashTable *ht = mysqlnd_reverse_api_get_api_list();
 	MYSQLND_REVERSE_API *ext;
 
-	ZEND_HASH_FOREACH_PTR(ht, ext) {
+	ZEND_HASH_MAP_FOREACH_PTR(ht, ext) {
 		if (buffer->s) {
 			smart_str_appendc(buffer, ',');
 		}
@@ -79,7 +82,7 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	char buf[32];
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "mysqlnd", "enabled");
+	php_info_print_table_row(2, "mysqlnd", "enabled");
 	php_info_print_table_row(2, "Version", mysqlnd_get_client_info());
 	php_info_print_table_row(2, "Compression",
 #ifdef MYSQLND_COMPRESSION_ENABLED

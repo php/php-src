@@ -6,7 +6,7 @@ Class A {
     public function privf(Exception $a) {}
     public function pubf(A $a,
                          $b,
-                         C $c = null,
+                         ?C $c = null,
                          $d = K,
                          $e = "15 chars long -",
                          $f = null,
@@ -20,6 +20,7 @@ define('K', "16 chars long --");
 echo new ReflectionClass("C"), "\n";
 ?>
 --EXPECTF--
+Deprecated: A::pubf(): Implicitly marking parameter $h as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 Class [ <user> class C extends A ] {
   @@ %s 14-14
 

@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by Moriyoshi Koizumi <moriyoshi@php.net> on 20 Dec 2002. The file
  * mbfilter.c is included in this package .
  *
@@ -99,13 +99,13 @@ mbfl_name2language(const char *name)
 		}
 	}
 
-	/* serch aliases */
+	/* search aliases */
 	i = 0;
 	while ((language = mbfl_language_ptr_table[i++]) != NULL) {
 		if (language->aliases != NULL) {
 			j = 0;
-			while ((*language->aliases)[j] != NULL) {
-				if (strcasecmp((*language->aliases)[j], name) == 0) {
+			while (language->aliases[j]) {
+				if (strcasecmp(language->aliases[j], name) == 0) {
 					return language;
 				}
 				j++;

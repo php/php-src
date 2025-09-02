@@ -21,9 +21,9 @@ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 EOF;
 
 $sxe = simplexml_load_string($xml);
-var_dump($sxe->children('soap', 1));
+var_dump($sxe->children('soap', true));
 
-$sxe = simplexml_load_string($xml, NULL, 0, 'soap', 1);
+$sxe = simplexml_load_string($xml, NULL, 0, 'soap', true);
 var_dump($sxe->Body);
 var_dump($sxe->Body->children(''));
 var_dump($sxe->Body->children('')->businessList);

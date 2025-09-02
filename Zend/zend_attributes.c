@@ -21,39 +21,93 @@
 #include "zend_API.h"
 #include "zend_attributes.h"
 #include "zend_attributes_arginfo.h"
+#include "zend_exceptions.h"
 #include "zend_smart_str.h"
 
 ZEND_API zend_class_entry *zend_ce_attribute;
 ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
+ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
+ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
+ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
+ZEND_API zend_class_entry *zend_ce_override;
+ZEND_API zend_class_entry *zend_ce_deprecated;
+ZEND_API zend_class_entry *zend_ce_nodiscard;
+ZEND_API zend_class_entry *zend_ce_delayed_target_validation;
+
+static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
 static HashTable internal_attributes;
 
-void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope)
 {
 	// TODO: More proper signature validation: Too many args, incorrect arg names.
 	if (attr->argc > 0) {
 		zval flags;
 
-		/* As this is run in the middle of compilation, fetch the attribute value without
-		 * specifying a scope. The class is not fully linked yet, and we may seen an
-		 * inconsistent state. */
-		if (FAILURE == zend_get_attribute_value(&flags, attr, 0, NULL)) {
-			return;
+		if (FAILURE == zend_get_attribute_value(&flags, attr, 0, scope)) {
+			ZEND_ASSERT(EG(exception));
+			return 0;
 		}
 
 		if (Z_TYPE(flags) != IS_LONG) {
-			zend_error_noreturn(E_ERROR,
+			zend_throw_error(NULL,
 				"Attribute::__construct(): Argument #1 ($flags) must be of type int, %s given",
-				zend_zval_type_name(&flags)
+				zend_zval_value_name(&flags)
 			);
+			zval_ptr_dtor(&flags);
+			return 0;
 		}
 
-		if (Z_LVAL(flags) & ~ZEND_ATTRIBUTE_FLAGS) {
-			zend_error_noreturn(E_ERROR, "Invalid attribute flags specified");
+		uint32_t flags_l = Z_LVAL(flags);
+		if (flags_l & ~ZEND_ATTRIBUTE_FLAGS) {
+			zend_throw_error(NULL, "Invalid attribute flags specified");
+			return 0;
 		}
 
-		zval_ptr_dtor(&flags);
+		return flags_l;
 	}
+
+	return ZEND_ATTRIBUTE_TARGET_ALL;
+}
+
+static zend_string *validate_allow_dynamic_properties(
+		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	ZEND_ASSERT(scope != NULL);
+	const char *msg = NULL;
+	if (scope->ce_flags & ZEND_ACC_TRAIT) {
+		msg = "Cannot apply #[\\AllowDynamicProperties] to trait %s";
+	} else if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		msg = "Cannot apply #[\\AllowDynamicProperties] to interface %s";
+	} else if (scope->ce_flags & ZEND_ACC_READONLY_CLASS) {
+		msg = "Cannot apply #[\\AllowDynamicProperties] to readonly class %s";
+	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
+		msg = "Cannot apply #[\\AllowDynamicProperties] to enum %s";
+	}
+	if (msg != NULL) {
+		return zend_strpprintf(0, msg, ZSTR_VAL(scope->name));
+	}
+	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+	return NULL;
+}
+
+static zend_string *validate_attribute(
+	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	const char *msg = NULL;
+	if (scope->ce_flags & ZEND_ACC_TRAIT) {
+		msg = "Cannot apply #[\\Attribute] to trait %s";
+	} else if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		msg = "Cannot apply #[\\Attribute] to interface %s";
+	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
+		msg = "Cannot apply #[\\Attribute] to enum %s";
+	} else if (scope->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
+		msg = "Cannot apply #[\\Attribute] to abstract class %s";
+	}
+	if (msg != NULL) {
+		return zend_strpprintf(0, msg, ZSTR_VAL(scope->name));
+	}
+	return NULL;
 }
 
 ZEND_METHOD(Attribute, __construct)
@@ -73,12 +127,131 @@ ZEND_METHOD(ReturnTypeWillChange, __construct)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+ZEND_METHOD(AllowDynamicProperties, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(SensitiveParameter, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(SensitiveParameterValue, __construct)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_update_property_ex(zend_ce_sensitive_parameter_value, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_VALUE), value);
+}
+
+ZEND_METHOD(SensitiveParameterValue, getValue)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0));
+}
+
+ZEND_METHOD(SensitiveParameterValue, __debugInfo)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_EMPTY_ARRAY();
+}
+
+static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_object *zobj, zend_prop_purpose purpose)
+{
+	return NULL;
+}
+
+ZEND_METHOD(Override, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(Deprecated, __construct)
+{
+	zend_string *message = NULL;
+	zend_string *since = NULL;
+	zval value;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+		Z_PARAM_STR_OR_NULL(since)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		ZVAL_STR(&value, message);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_deprecated, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+
+	if (since) {
+		ZVAL_STR(&value, since);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_deprecated, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_SINCE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+}
+
+static zend_string *validate_nodiscard(
+	zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	ZEND_ASSERT(CG(in_compilation));
+	const zend_string *prop_info_name = CG(context).active_property_info_name;
+	if (prop_info_name != NULL) {
+		// Applied to a hook
+		return ZSTR_INIT_LITERAL("#[\\NoDiscard] is not supported for property hooks", 0);
+	}
+	zend_op_array *op_array = CG(active_op_array);
+	op_array->fn_flags |= ZEND_ACC_NODISCARD;
+	return NULL;
+}
+
+ZEND_METHOD(NoDiscard, __construct)
+{
+	zend_string *message = NULL;
+	zval value;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		ZVAL_STR(&value, message);
+	} else {
+		ZVAL_NULL(&value);
+	}
+	zend_update_property_ex(zend_ce_nodiscard, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), &value);
+
+	/* The assignment might fail due to 'readonly'. */
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+}
+
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
 {
 	if (attributes) {
 		zend_attribute *attr;
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, lcname)) {
 				return attr;
 			}
@@ -93,11 +266,9 @@ static zend_attribute *get_attribute_str(HashTable *attributes, const char *str,
 	if (attributes) {
 		zend_attribute *attr;
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
-			if (attr->offset == offset && ZSTR_LEN(attr->lcname) == len) {
-				if (0 == memcmp(ZSTR_VAL(attr->lcname), str, len)) {
-					return attr;
-				}
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
+			if (attr->offset == offset && zend_string_equals_cstr(attr->lcname, str, len)) {
+				return attr;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -143,13 +314,101 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, u
 	return SUCCESS;
 }
 
+ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attribute_ce, zend_attribute *attribute_data, zend_class_entry *scope, zend_string *filename)
+{
+	zend_execute_data *call = NULL;
+
+	if (filename) {
+		/* Set up dummy call frame that makes it look like the attribute was invoked
+		 * from where it occurs in the code. */
+		zend_function dummy_func;
+		zend_op *opline;
+
+		memset(&dummy_func, 0, sizeof(zend_function));
+
+		call = zend_vm_stack_push_call_frame_ex(
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_execute_data), sizeof(zval)) +
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op), sizeof(zval)) +
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_function), sizeof(zval)),
+			0, &dummy_func, 0, NULL);
+
+		opline = (zend_op*)(call + 1);
+		memset(opline, 0, sizeof(zend_op));
+		opline->opcode = ZEND_DO_FCALL;
+		opline->lineno = attribute_data->lineno;
+
+		call->opline = opline;
+		call->call = NULL;
+		call->return_value = NULL;
+		call->func = (zend_function*)(call->opline + 1);
+		call->prev_execute_data = EG(current_execute_data);
+
+		memset(call->func, 0, sizeof(zend_function));
+		call->func->type = ZEND_USER_FUNCTION;
+		call->func->op_array.fn_flags =
+			attribute_data->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
+		call->func->op_array.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
+		call->func->op_array.filename = filename;
+
+		EG(current_execute_data) = call;
+	}
+
+	zval *args = NULL;
+	HashTable *named_params = NULL;
+
+	zend_result result = FAILURE;
+
+	uint32_t argc = 0;
+	if (attribute_data->argc) {
+		args = emalloc(attribute_data->argc * sizeof(zval));
+
+		for (uint32_t i = 0; i < attribute_data->argc; i++) {
+			zval val;
+			if (FAILURE == zend_get_attribute_value(&val, attribute_data, i, scope)) {
+				result = FAILURE;
+				goto out;
+			}
+			if (attribute_data->args[i].name) {
+				if (!named_params) {
+					named_params = zend_new_array(0);
+				}
+				zend_hash_add_new(named_params, attribute_data->args[i].name, &val);
+			} else {
+				ZVAL_COPY_VALUE(&args[i], &val);
+				argc++;
+			}
+		}
+	}
+
+	result = object_init_with_constructor(obj, attribute_ce, argc, args, named_params);
+
+ out:
+	for (uint32_t i = 0; i < argc; i++) {
+		zval_ptr_dtor(&args[i]);
+	}
+
+	efree(args);
+
+	if (named_params) {
+		zend_array_destroy(named_params);
+	}
+
+	if (filename) {
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
+	}
+
+	return result;
+}
+
 static const char *target_names[] = {
 	"class",
 	"function",
 	"method",
 	"property",
 	"class constant",
-	"parameter"
+	"parameter",
+	"constant"
 };
 
 ZEND_API zend_string *zend_get_attribute_target_names(uint32_t flags)
@@ -173,7 +432,7 @@ ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *
 {
 	zend_attribute *other;
 
-	ZEND_HASH_FOREACH_PTR(attributes, other) {
+	ZEND_HASH_PACKED_FOREACH_PTR(attributes, other) {
 		if (other != attr && other->offset == attr->offset) {
 			if (zend_string_equals(other->lcname, attr->lcname)) {
 				return 1;
@@ -191,6 +450,9 @@ static void attr_free(zval *v)
 
 	zend_string_release(attr->name);
 	zend_string_release(attr->lcname);
+	if (attr->validation_error != NULL) {
+		zend_string_release(attr->validation_error);
+	}
 
 	for (uint32_t i = 0; i < attr->argc; i++) {
 		if (attr->args[i].name) {
@@ -223,6 +485,7 @@ ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_string 
 	}
 
 	attr->lcname = zend_string_tolower_ex(attr->name, persistent);
+	attr->validation_error = NULL;
 	attr->flags = flags;
 	attr->lineno = lineno;
 	attr->offset = offset;
@@ -244,27 +507,39 @@ static void free_internal_attribute(zval *v)
 	pefree(Z_PTR_P(v), 1);
 }
 
-ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags)
+ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry *ce)
 {
 	zend_internal_attribute *internal_attr;
+	zend_attribute *attr;
 
 	if (ce->type != ZEND_INTERNAL_CLASS) {
 		zend_error_noreturn(E_ERROR, "Only internal classes can be registered as compiler attribute");
 	}
 
-	internal_attr = pemalloc(sizeof(zend_internal_attribute), 1);
-	internal_attr->ce = ce;
-	internal_attr->flags = flags;
-	internal_attr->validator = NULL;
+	ZEND_HASH_FOREACH_PTR(ce->attributes, attr) {
+		if (zend_string_equals(attr->name, zend_ce_attribute->name)) {
+			internal_attr = pemalloc(sizeof(zend_internal_attribute), 1);
+			internal_attr->ce = ce;
+			internal_attr->flags = Z_LVAL(attr->args[0].value);
+			internal_attr->validator = NULL;
 
-	zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
+			zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
+			zend_hash_update_ptr(&internal_attributes, lcname, internal_attr);
+			zend_string_release(lcname);
 
-	zend_hash_update_ptr(&internal_attributes, lcname, internal_attr);
+			return internal_attr;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zend_error_noreturn(E_ERROR, "Classes must be first marked as attribute before being able to be registered as internal attribute class");
+}
+
+ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags)
+{
 	zend_attribute *attr = zend_add_class_attribute(ce, zend_ce_attribute->name, 1);
 	ZVAL_LONG(&attr->args[0].value, flags);
-	zend_string_release(lcname);
 
-	return internal_attr;
+	return zend_mark_internal_attribute(ce);
 }
 
 ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname)
@@ -279,20 +554,38 @@ void zend_register_attribute_ce(void)
 	zend_hash_init(&internal_attributes, 8, NULL, free_internal_attribute, 1);
 
 	zend_ce_attribute = register_class_Attribute();
-	attr = zend_internal_attribute_register(zend_ce_attribute, ZEND_ATTRIBUTE_TARGET_CLASS);
+	attr = zend_mark_internal_attribute(zend_ce_attribute);
 	attr->validator = validate_attribute;
 
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_CLASS"), ZEND_ATTRIBUTE_TARGET_CLASS);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_FUNCTION"), ZEND_ATTRIBUTE_TARGET_FUNCTION);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_METHOD"), ZEND_ATTRIBUTE_TARGET_METHOD);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PROPERTY"), ZEND_ATTRIBUTE_TARGET_PROPERTY);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_CLASS_CONSTANT"), ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PARAMETER"), ZEND_ATTRIBUTE_TARGET_PARAMETER);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_ALL"), ZEND_ATTRIBUTE_TARGET_ALL);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("IS_REPEATABLE"), ZEND_ATTRIBUTE_IS_REPEATABLE);
-
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
-	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute, ZEND_ATTRIBUTE_TARGET_METHOD);
+	zend_mark_internal_attribute(zend_ce_return_type_will_change_attribute);
+
+	zend_ce_allow_dynamic_properties = register_class_AllowDynamicProperties();
+	attr = zend_mark_internal_attribute(zend_ce_allow_dynamic_properties);
+	attr->validator = validate_allow_dynamic_properties;
+
+	zend_ce_sensitive_parameter = register_class_SensitiveParameter();
+	zend_mark_internal_attribute(zend_ce_sensitive_parameter);
+
+	memcpy(&attributes_object_handlers_sensitive_parameter_value, &std_object_handlers, sizeof(zend_object_handlers));
+	attributes_object_handlers_sensitive_parameter_value.get_properties_for = attributes_sensitive_parameter_value_get_properties_for;
+
+	/* This is not an actual attribute, thus the zend_mark_internal_attribute() call is missing. */
+	zend_ce_sensitive_parameter_value = register_class_SensitiveParameterValue();
+	zend_ce_sensitive_parameter_value->default_object_handlers = &attributes_object_handlers_sensitive_parameter_value;
+
+	zend_ce_override = register_class_Override();
+	zend_mark_internal_attribute(zend_ce_override);
+
+	zend_ce_deprecated = register_class_Deprecated();
+	attr = zend_mark_internal_attribute(zend_ce_deprecated);
+
+	zend_ce_nodiscard = register_class_NoDiscard();
+	attr = zend_mark_internal_attribute(zend_ce_nodiscard);
+	attr->validator = validate_nodiscard;
+
+	zend_ce_delayed_target_validation = register_class_DelayedTargetValidation();
+	attr = zend_mark_internal_attribute(zend_ce_delayed_target_validation);
 }
 
 void zend_attributes_shutdown(void)

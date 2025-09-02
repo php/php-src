@@ -48,6 +48,9 @@
 #define smart_string_append_unsigned(str, val) \
 	smart_string_append_unsigned_ex((str), (val), 0)
 
+ZEND_API void smart_string_append_printf(smart_string *dest, const char *format, ...)
+	ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+
 ZEND_API void ZEND_FASTCALL _smart_string_alloc_persistent(smart_string *str, size_t len);
 ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len);
 

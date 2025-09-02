@@ -46,12 +46,21 @@ for($i = 0; $i<count($allDirs); $i++) {
   var_dump(file($dir."/".$filename));
 }
 
-unlink($absFile);
 chdir($old_dir_path);
-rmdir($absSubDir);
-rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$mainDir = "fileVar8.dir";
+$subDir = "fileVar8Sub";
+$absMainDir = __DIR__."/".$mainDir;
+$absSubDir = $absMainDir."/".$subDir;
+$filename = 'FileGetContentsVar7.tmp';
+$absFile = $absSubDir.'/'.$filename;
+unlink($absFile);
+rmdir($absSubDir);
+rmdir($absMainDir);
 ?>
 --EXPECTF--
 *** Testing file() : variation ***

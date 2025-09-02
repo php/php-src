@@ -6,8 +6,8 @@ ffi
 <?php
 $ffi = FFI::cdef('typedef int dummy;');
 var_dump((bool) $ffi);
-var_dump((bool) FFI::type('int'));
-var_dump((bool) FFI::new('int'));
+var_dump((bool) FFI::cdef()->type('int'));
+var_dump((bool) FFI::cdef()->new('int'));
 ?>
 --EXPECT--
 bool(true)

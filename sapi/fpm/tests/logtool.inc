@@ -138,10 +138,10 @@ class LogTool
      */
     private function match(
         callable $matcher,
-        string $notFoundMessage = null,
+        ?string $notFoundMessage = null,
         bool $checkAllLogs = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         if ($this->getError()) {
             return false;
@@ -169,7 +169,7 @@ class LogTool
      * @return bool
      * @throws \Exception
      */
-    public function checkTruncatedMessage(string $line = null): bool
+    public function checkTruncatedMessage(?string $line = null): bool
     {
         if ($this->message === null) {
             throw new \LogicException('The message has not been set');
@@ -355,7 +355,7 @@ class LogTool
      *
      * @return bool
      */
-    private function checkLineLength(string $line, int $lineLen = null): bool
+    private function checkLineLength(string $line, ?int $lineLen = null): bool
     {
         $lineLen = $lineLen ?: strlen($line);
         if ($lineLen > $this->limit) {
@@ -513,7 +513,11 @@ class LogTool
         }
         $this->trace("Matching EXPECTED: $expectedMessage");
 
-        $pattern = sprintf('/^(?:%s )?%s: %s(%s)$/', self::P_TIME, $type, self::P_DEBUG, $expectedMessage);
+        // Allow expected message to contain %s and %s for any string or number as in run-tests.php
+        $expectRe = str_replace('%s', '[^\r\n]+', $expectedMessage);
+        $expectRe = str_replace('%d', '\d+', $expectRe);
+
+        $pattern = sprintf('/^(?:%s )?%s: %s(%s)$/', self::P_TIME, $type, self::P_DEBUG, $expectRe);
         $this->trace("PATTERN: $pattern");
 
         return function ($line) use ($expectedMessage, $pattern, $type, $ignoreErrorFor) {
@@ -565,7 +569,7 @@ class LogTool
     public function readAllEntries(
         string $type,
         string $expectedMessage,
-        string $pool = null,
+        ?string $pool = null,
         string $ignoreErrorFor = self::DEBUG
     ): bool {
         if ($this->getError()) {
@@ -600,12 +604,12 @@ class LogTool
     public function expectEntry(
         string $type,
         string $expectedMessage,
-        string $pool = null,
+        ?string $pool = null,
         string $ignoreErrorFor = self::DEBUG,
         bool $checkAllLogs = false,
         bool $invert = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         if ($this->getError()) {
             return false;
@@ -635,7 +639,7 @@ class LogTool
      * @return bool
      * @throws \Exception
      */
-    public function expectDebug(string $expectedMessage, string $pool = null): bool
+    public function expectDebug(string $expectedMessage, ?string $pool = null): bool
     {
         return $this->expectEntry(self::DEBUG, $expectedMessage, $pool, self::ERROR);
     }
@@ -649,7 +653,7 @@ class LogTool
      * @return bool
      * @throws \Exception
      */
-    public function expectNotice(string $expectedMessage, string $pool = null): bool
+    public function expectNotice(string $expectedMessage, ?string $pool = null): bool
     {
         return $this->expectEntry(self::NOTICE, $expectedMessage, $pool);
     }
@@ -663,7 +667,7 @@ class LogTool
      * @return bool
      * @throws \Exception
      */
-    public function expectWarning(string $expectedMessage, string $pool = null): bool
+    public function expectWarning(string $expectedMessage, ?string $pool = null): bool
     {
         return $this->expectEntry(self::WARNING, $expectedMessage, $pool);
     }
@@ -677,7 +681,7 @@ class LogTool
      * @return bool
      * @throws \Exception
      */
-    public function expectError(string $expectedMessage, string $pool = null): bool
+    public function expectError(string $expectedMessage, ?string $pool = null): bool
     {
         return $this->expectEntry(self::ERROR, $expectedMessage, $pool);
     }
@@ -691,7 +695,7 @@ class LogTool
      * @return bool
      * @throws \Exception
      */
-    public function expectAlert(string $expectedMessage, string $pool = null): bool
+    public function expectAlert(string $expectedMessage, ?string $pool = null): bool
     {
         return $this->expectEntry(self::ALERT, $expectedMessage, $pool);
     }
@@ -712,8 +716,8 @@ class LogTool
         string $pattern,
         bool $invert = false,
         bool $checkAllLogs = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null,
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null,
     ): bool {
         $matchResult = $this->match(
             function ($line) use ($pattern) {
@@ -751,10 +755,10 @@ class LogTool
      */
     private function getMatchDebugMessage(
         string $title,
-        string $pattern = null,
-        string $line = null,
-        string $expectedMessage = null,
-        string $actualMessage = null
+        ?string $pattern = null,
+        ?string $line = null,
+        ?string $expectedMessage = null,
+        ?string $actualMessage = null
     ): string {
         $msg = "$title:\n";
         if ($pattern !== null) {
@@ -784,10 +788,10 @@ class LogTool
      */
     private function traceMatch(
         string $title,
-        string $pattern = null,
-        string $line = null,
-        string $expectedMessage = null,
-        string $actualMessage = null
+        ?string $pattern = null,
+        ?string $line = null,
+        ?string $expectedMessage = null,
+        ?string $actualMessage = null
     ): void {
         if ($this->debug) {
             echo "LogTool - " . $this->getMatchDebugMessage($title, $pattern, $line, $expectedMessage, $actualMessage);
@@ -816,7 +820,7 @@ class LogTool
      *
      * @return false
      */
-    private function error(string $msg, string $line = null, string $ignoreFor = self::DEBUG): bool
+    private function error(string $msg, ?string $line = null, string $ignoreFor = self::DEBUG): bool
     {
         if ($this->error === null && ($line === null || ! str_contains($line, $ignoreFor))) {
             $this->trace("Setting error: $msg");

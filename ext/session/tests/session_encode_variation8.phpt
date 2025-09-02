@@ -16,7 +16,7 @@ echo "*** Testing session_encode() : variation ***\n";
 var_dump(session_start());
 $_SESSION["foo"] = 1234567890;
 $encoded = session_encode();
-var_dump(base64_encode($encoded));
+var_dump($encoded);
 var_dump(session_destroy());
 
 echo "Done";
@@ -29,7 +29,7 @@ Warning: session_start(): Cannot find session serialization handler "blah" - ses
 bool(false)
 
 Warning: session_encode(): Cannot encode non-existent session in %s on line %d
-string(0) ""
+bool(false)
 
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
 bool(false)

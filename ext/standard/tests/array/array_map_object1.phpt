@@ -140,7 +140,7 @@ array_map(): Argument #1 ($callback) must be a valid callback or null, cannot ac
 
 -- class without members --
 EmptyClass
-array_map(): Argument #1 ($callback) must be a valid callback or null, array must have exactly two members
+array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
 
 -- abstract class --
 ChildClass::emptyFunction

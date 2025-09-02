@@ -1,9 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5dfd421cf9ba9eb043c4b4f3c9b9c09c81cc3ccb */
+ * Stub hash: 30c01b4d2e7f836b81a31dc0c1a115883eb41568 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, rows, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, rows, Traversable, MAY_BE_ARRAY, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\"\\t\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nullAs, IS_STRING, 0, "\"\\\\\\\\N\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fields, IS_STRING, 1, "null")
@@ -39,13 +39,12 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pg
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_PDO_PGSql_Ext_pgsqlGetNotify, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fetchMode, IS_LONG, 0, "PDO::FETCH_USE_DEFAULT")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fetchMode, IS_LONG, 0, "PDO::FETCH_DEFAULT")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeoutMilliseconds, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlGetPid, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-
 
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile);
@@ -56,7 +55,6 @@ ZEND_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlGetNotify);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlGetPid);
-
 
 static const zend_function_entry class_PDO_PGSql_Ext_methods[] = {
 	ZEND_ME(PDO_PGSql_Ext, pgsqlCopyFromArray, arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, ZEND_ACC_PUBLIC)

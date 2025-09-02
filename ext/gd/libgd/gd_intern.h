@@ -10,5 +10,11 @@
 #define MAX3(a,b,c) ((a)<(b)?(MAX(b,c)):(MAX(a,c)))
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
-#endif
+/* Internal prototypes: */
 
+/* gd_rotate.c */
+gdImagePtr gdImageRotate90(gdImagePtr src, int ignoretransparent);
+gdImagePtr gdImageRotate180(gdImagePtr src, int ignoretransparent);
+gdImagePtr gdImageRotate270(gdImagePtr src, int ignoretransparent);
+
+#endif

@@ -10,7 +10,7 @@ var_dump(filter_var("\x7f", FILTER_SANITIZE_ENCODED, FILTER_FLAG_STRIP_HIGH));
 var_dump(filter_var("\x7f", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_HIGH));
 ?>
 --EXPECTF--
-Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated since 8.1, use htmlspecialchars() instead in %s on line %d
 string(0) ""
 string(0) ""
 string(0) ""

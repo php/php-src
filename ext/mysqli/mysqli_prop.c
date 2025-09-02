@@ -16,14 +16,12 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
@@ -72,7 +70,7 @@ if (!obj->ptr) { \
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_LONG_OR_STR( __func, __int_func, __get_type, __ret_type, __ret_type_sprint_mod)\
-static int __func(mysqli_object *obj, zval *retval, bool quiet) \
+static zend_result __func(mysqli_object *obj, zval *retval, bool quiet) \
 {\
 	__ret_type l;\
 	__get_type;\
@@ -87,7 +85,7 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet) \
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_LONG( __func, __int_func, __get_type, __ret_type, __ret_type_sprint_mod)\
-static int __func(mysqli_object *obj, zval *retval, bool quiet) \
+static zend_result __func(mysqli_object *obj, zval *retval, bool quiet) \
 {\
 	__ret_type l;\
 	__get_type;\
@@ -99,7 +97,7 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet) \
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_STR_OR_NULL(__func, __int_func, __get_type)\
-static int __func(mysqli_object *obj, zval *retval, bool quiet)\
+static zend_result __func(mysqli_object *obj, zval *retval, bool quiet)\
 {\
 	char *c;\
 	__get_type;\
@@ -114,7 +112,7 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet)\
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_STR(__func, __int_func, __get_type)\
-static int __func(mysqli_object *obj, zval *retval, bool quiet)\
+static zend_result __func(mysqli_object *obj, zval *retval, bool quiet)\
 {\
 	char *c;\
 	__get_type;\
@@ -126,7 +124,7 @@ static int __func(mysqli_object *obj, zval *retval, bool quiet)\
 }
 
 /* {{{ property link_client_version_read */
-static int link_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result link_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, MYSQL_VERSION_ID);
 
@@ -135,7 +133,7 @@ static int link_client_version_read(mysqli_object *obj, zval *retval, bool quiet
 /* }}} */
 
 /* {{{ property link_client_info_read */
-static int link_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result link_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_STRING(retval, MYSQL_SERVER_VERSION);
 
@@ -144,7 +142,7 @@ static int link_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property link_connect_errno_read */
-static int link_connect_errno_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result link_connect_errno_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, (zend_long)MyG(error_no));
 
@@ -153,7 +151,7 @@ static int link_connect_errno_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property link_connect_error_read */
-static int link_connect_error_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result link_connect_error_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	if (MyG(error_msg)) {
 		ZVAL_STRING(retval, MyG(error_msg));
@@ -166,7 +164,7 @@ static int link_connect_error_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property link_affected_rows_read */
-static int link_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result link_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_MYSQL *mysql;
 	my_ulonglong rc;
@@ -194,7 +192,7 @@ static int link_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property link_error_list_read */
-static int link_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result link_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_MYSQL *mysql;
 
@@ -204,32 +202,19 @@ static int link_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 
 	if (mysql) {
 		array_init(retval);
-#ifdef MYSQLI_USE_MYSQLND
-		if (1) {
-			MYSQLND_ERROR_LIST_ELEMENT * message;
-			zend_llist_position pos;
-			for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(&mysql->mysql->data->error_info->error_list, &pos);
-				 message;
-				 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(&mysql->mysql->data->error_info->error_list, &pos))
-			{
-				zval single_error;
-				array_init(&single_error);
-				add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
-				add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
-				add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
-				add_next_index_zval(retval, &single_error);
-			}
-		}
-#else
-		if (mysql_errno(mysql->mysql)) {
+		MYSQLND_ERROR_LIST_ELEMENT * message;
+		zend_llist_position pos;
+		for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(&mysql->mysql->data->error_info->error_list, &pos);
+				message;
+				message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(&mysql->mysql->data->error_info->error_list, &pos))
+		{
 			zval single_error;
 			array_init(&single_error);
-			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_errno(mysql->mysql));
-			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_sqlstate(mysql->mysql));
-			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_error(mysql->mysql));
+			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
+			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
+			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
 			add_next_index_zval(retval, &single_error);
 		}
-#endif
 	} else {
 		ZVAL_EMPTY_ARRAY(retval);
 	}
@@ -255,7 +240,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQ
 /* result properties */
 
 /* {{{ property result_type_read */
-static int result_type_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result result_type_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQL_RES *p;
 
@@ -270,14 +255,10 @@ static int result_type_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property result_lengths_read */
-static int result_lengths_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result result_lengths_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQL_RES *p;
-#ifdef MYSQLI_USE_MYSQLND
 	const size_t *ret;
-#else
-	const unsigned long *ret;
-#endif
 	uint32_t field_count;
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
@@ -306,7 +287,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG_OR_STR(result_num_rows_read, mysql_num_rows, MYSQL
 /* statement properties */
 
 /* {{{ property stmt_id_read */
-static int stmt_id_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result stmt_id_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_STMT *p;
 
@@ -322,7 +303,7 @@ static int stmt_id_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property stmt_affected_rows_read */
-static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result stmt_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_STMT *p;
 	my_ulonglong rc;
@@ -350,7 +331,7 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property stmt_error_list_read */
-static int stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MY_STMT * stmt;
 
@@ -359,7 +340,6 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	if (stmt && stmt->stmt) {
 		array_init(retval);
-#ifdef MYSQLI_USE_MYSQLND
 		if (stmt->stmt->data && stmt->stmt->data->error_info) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
 			zend_llist_position pos;
@@ -375,16 +355,6 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 				add_next_index_zval(retval, &single_error);
 			}
 		}
-#else
-		if (mysql_stmt_errno(stmt->stmt)) {
-			zval single_error;
-			array_init(&single_error);
-			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_stmt_errno(stmt->stmt));
-			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_stmt_sqlstate(stmt->stmt));
-			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_stmt_error(stmt->stmt));
-			add_next_index_zval(retval, &single_error);
-		}
-#endif
 	} else {
 		ZVAL_EMPTY_ARRAY(retval);
 	}

@@ -28,9 +28,9 @@ if (file_exists($sessions) === TRUE) {
 
 var_dump(mkdir($sessions));
 var_dump(chdir($sessions));
+ini_set('open_basedir', '.');
 ini_set("session.save_path", $directory);
 var_dump(session_save_path());
-var_dump(rmdir($sessions));
 
 echo "Done";
 ob_end_flush();
@@ -39,14 +39,13 @@ ob_end_flush();
 <?php
 $directory = __DIR__;
 $sessions = ($directory."/session_save_path_variation5");
-var_dump(rmdir($sessions));
+rmdir($sessions);
 ?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***
 bool(true)
 bool(true)
 
-Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s on line %d
+Warning: ini_set(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%ssession_save_path_variation5) in %s on line %d
 string(0) ""
-bool(true)
 Done

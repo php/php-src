@@ -30,11 +30,9 @@ using icu::UnicodeString;
 
 /* {{{ timezone_convert_datetimezone
  *      The timezone in DateTime and DateTimeZone is not unified. */
-U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
-												void *object,
-												int is_datetime,
-												intl_error *outside_error,
-												const char *func)
+U_CFUNC TimeZone *timezone_convert_datetimezone(
+	int type, void *object, bool is_datetime,
+	intl_error *outside_error)
 {
 	char		*id = NULL,
 				offset_id[] = "GMT+00:00";
@@ -58,11 +56,8 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 			minutes *= minutes > 0 ? 1 : -1;
 
 			if (offset_mins <= -24 * 60 || offset_mins >= 24 * 60) {
-				spprintf(&message, 0, "%s: object has an time zone offset "
-					"that's too large", func);
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-					message, 1);
-				efree(message);
+					"object has an time zone offset that's too large");
 				return NULL;
 			}
 
@@ -82,10 +77,9 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 	UnicodeString s = UnicodeString(id, id_len, US_INV);
 	timeZone = TimeZone::createTimeZone(s);
 	if (*timeZone == TimeZone::getUnknown()) {
-		spprintf(&message, 0, "%s: time zone id '%s' "
-			"extracted from ext/date DateTimeZone not recognized", func, id);
-		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-			message, 1);
+		spprintf(&message, 0, "time zone id '%s' "
+			"extracted from ext/date DateTimeZone not recognized", id);
+		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message);
 		efree(message);
 		delete timeZone;
 		return NULL;
@@ -94,12 +88,11 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 }
 /* }}} */
 
-U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
-		intl_error *err, const char *func)
+U_CFUNC zend_result intl_datetime_decompose(zend_object *obj, double *millis, TimeZone **tz,
+		intl_error *err)
 {
-	zval	retval;
-	zval	zfuncname;
 	char	*message;
+	php_date_obj *datetime = php_date_obj_from_obj(obj);
 
 	if (err && U_FAILURE(err->code)) {
 		return FAILURE;
@@ -109,37 +102,37 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		*millis = ZEND_NAN;
 	}
 	if (tz) {
-		*tz = NULL;
+		*tz = nullptr;
 	}
 
 	if (millis) {
-		php_date_obj *datetime;
+		auto getTimestampMethod = static_cast<zend_function *>(zend_hash_str_find_ptr(&obj->ce->function_table, ZEND_STRL("gettimestamp")));
+		zval retval;
 
-		ZVAL_STRING(&zfuncname, "getTimestamp");
-		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL)
-				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
-			spprintf(&message, 0, "%s: error calling ::getTimeStamp() on the "
-					"object", func);
-			intl_errors_set(err, U_INTERNAL_PROGRAM_ERROR,
-				message, 1);
+		ZEND_ASSERT(getTimestampMethod && "DateTimeInterface is sealed and thus must have this method");
+		zend_call_known_function(getTimestampMethod, obj, obj->ce, &retval, 0, nullptr, nullptr);
+
+		/* An exception has occurred */
+		if (Z_TYPE(retval) == IS_UNDEF) {
+			return FAILURE;
+		}
+		// TODO: Remove this when DateTimeInterface::getTimestamp() no longer has a tentative return type
+		if (Z_TYPE(retval) != IS_LONG) {
+			zval_ptr_dtor(&retval);
+			spprintf(&message, 0, "%s::getTimestamp() did not return an int", ZSTR_VAL(obj->ce->name));
+			intl_errors_set(err, U_INTERNAL_PROGRAM_ERROR, message);
 			efree(message);
-			zval_ptr_dtor(&zfuncname);
 			return FAILURE;
 		}
 
-		datetime = Z_PHPDATE_P(z);
 		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval) + (datetime->time->us / 1000);
-		zval_ptr_dtor(&zfuncname);
 	}
 
 	if (tz) {
-		php_date_obj *datetime;
-		datetime = Z_PHPDATE_P(z);
 		if (!datetime->time) {
-			spprintf(&message, 0, "%s: the %s object is not properly "
-					"initialized", func, ZSTR_VAL(Z_OBJCE_P(z)->name));
-			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-				message, 1);
+			spprintf(&message, 0, "the %s object is not properly "
+					"initialized", ZSTR_VAL(obj->ce->name));
+			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message);
 			efree(message);
 			return FAILURE;
 		}
@@ -147,13 +140,10 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 			*tz = TimeZone::getGMT()->clone();
 		} else {
 			*tz = timezone_convert_datetimezone(datetime->time->zone_type,
-				datetime, 1, NULL, func);
+				datetime, 1, NULL);
 			if (*tz == NULL) {
-				spprintf(&message, 0, "%s: could not convert DateTime's "
-						"time zone", func);
 				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-					message, 1);
-				efree(message);
+					"could not convert DateTime's time zone");
 				return FAILURE;
 			}
 		}
@@ -162,12 +152,11 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	return SUCCESS;
 }
 
-U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
+U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err)
 {
 	double	rv = ZEND_NAN;
 	zend_long	lv;
 	int		type;
-	char	*message;
 
 	if (err && U_FAILURE(err->code)) {
 		return ZEND_NAN;
@@ -182,11 +171,12 @@ try_again:
 		} else if (type == IS_LONG) {
 			rv = U_MILLIS_PER_SECOND * (double)lv;
 		} else {
-			spprintf(&message, 0, "%s: string '%s' is not numeric, "
-					"which would be required for it to be a valid date", func,
+			char *message;
+			spprintf(&message, 0, "string '%s' is not numeric, "
+					"which would be required for it to be a valid date",
 					Z_STRVAL_P(z));
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-				message, 1);
+				message);
 			efree(message);
 		}
 		break;
@@ -198,42 +188,32 @@ try_again:
 		break;
 	case IS_OBJECT:
 		if (instanceof_function(Z_OBJCE_P(z), php_date_get_interface_ce())) {
-			intl_datetime_decompose(z, &rv, NULL, err, func);
+			intl_datetime_decompose(Z_OBJ_P(z), &rv, nullptr, err);
 		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr)) {
 			Calendar_object *co = Z_INTL_CALENDAR_P(z);
 			if (co->ucal == NULL) {
-				spprintf(&message, 0, "%s: IntlCalendar object is not properly "
-						"constructed", func);
 				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-					message, 1);
-				efree(message);
+					"IntlCalendar object is not properly constructed");
 			} else {
 				UErrorCode status = UErrorCode();
 				rv = (double)co->ucal->getTime(status);
 				if (U_FAILURE(status)) {
-					spprintf(&message, 0, "%s: call to internal "
-							"Calendar::getTime() has failed", func);
-					intl_errors_set(err, status, message, 1);
-					efree(message);
+					intl_errors_set(err, status, "call to internal Calendar::getTime() has failed");
 				}
 			}
 		} else {
 			/* TODO: try with cast(), get() to obtain a number */
-			spprintf(&message, 0, "%s: invalid object type for date/time "
-					"(only IntlCalendar and DateTimeInterface permitted)", func);
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-				message, 1);
-			efree(message);
+				"invalid object type for date/time "
+				"(only IntlCalendar and DateTimeInterface permitted)");
 		}
 		break;
 	case IS_REFERENCE:
 		z = Z_REFVAL_P(z);
 		goto try_again;
 	default:
-		spprintf(&message, 0, "%s: invalid PHP type for date", func);
 		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
-			message, 1);
-		efree(message);
+			"invalid PHP type for date");
 		break;
 	}
 

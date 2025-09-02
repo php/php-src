@@ -89,17 +89,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				op_array->try_catch_array[j].finally_end -= shiftlist[op_array->try_catch_array[j].finally_end];
 			}
 		}
-
-		/* update early binding list */
-		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
-			uint32_t *opline_num = &ctx->script->first_early_binding_opline;
-
-			ZEND_ASSERT(op_array == &ctx->script->main_op_array);
-			do {
-				*opline_num -= shiftlist[*opline_num];
-				opline_num = &op_array->opcodes[*opline_num].result.opline_num;
-			} while (*opline_num != (uint32_t)-1);
-		}
 	}
 	free_alloca(shiftlist, use_heap);
 }

@@ -4,13 +4,12 @@ mysqli_change_user() - table locks, GET_LOCK(), temporary tables
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-die("skip - is the server still buggy?");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[001] Cannot create second connection handle, [%d] %s\n",
@@ -20,6 +19,7 @@ die("skip - is the server still buggy?");
         printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     /*
+    Do not verify that we have aquired a lock, as this would block the test
     if ($res = mysqli_query($link2, 'SELECT COUNT(*) AS _num FROM test')) {
         printf("[003] Reading from test should not be possible due to a lock, [%d] %s\n",
             mysqli_errno($link2), mysqli_error($link2));
@@ -101,7 +101,7 @@ die("skip - is the server still buggy?");
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

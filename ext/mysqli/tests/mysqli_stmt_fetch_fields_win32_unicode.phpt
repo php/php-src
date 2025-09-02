@@ -4,12 +4,12 @@ mysqli_stmt_fetch_fields() unicode, win32
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     $bind_res = $id = null;
     if (!($stmt = mysqli_stmt_init($link)) ||
@@ -17,7 +17,7 @@ require_once('skipifconnectfailure.inc');
         !mysqli_stmt_execute($stmt) ||
         !($result = mysqli_stmt_result_metadata($stmt)) ||
         !mysqli_stmt_bind_result($stmt, $id, $bind_res) ||
-        !($fields = mysqli_fetch_fields($result))) {
+        [] === mysqli_fetch_fields($result)) {
         printf("FAIL 1\n");
     }
     while (mysqli_stmt_fetch($stmt)) {
@@ -34,7 +34,7 @@ require_once('skipifconnectfailure.inc');
         printf("FAIL 2\n");
     }
     print "OK: 1\n";
-    if (!($fields = mysqli_fetch_fields($result)))
+    if ([] === mysqli_fetch_fields($result))
         printf("Aua 3\n");
     print "OK: 2\n";
     while (mysqli_stmt_fetch($stmt)) {
@@ -48,7 +48,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 OK: 1

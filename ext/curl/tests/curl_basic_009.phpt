@@ -7,16 +7,14 @@ curl
 --FILE--
 <?php
 
-$url = substr(uniqid(),0,7)."://www.".uniqid().".".uniqid();
+// Make sure the scheme always starts with an alphabetic character.
+$url = 'a' . substr(uniqid(),0,6)."://www.example.com";
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 
 curl_exec($ch);
 var_dump(curl_error($ch));
 var_dump(curl_errno($ch));
-curl_close($ch);
-
-
 ?>
 --EXPECTF--
 string(%d) "%Srotocol%s"

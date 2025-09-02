@@ -4,16 +4,21 @@ PostgreSQL pg_update() (9.0+)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_bytea_not_hex();
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
+$table_name = "table_14pg_update_9";
 
 $db = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1, 'ABC', null)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1, 'ABC', null)");
+
 pg_query($db, "SET standard_conforming_strings = 0");
 
 $fields = array('num'=>'1234', 'str'=>'ABC', 'bin'=>'XYZ');
@@ -25,7 +30,15 @@ echo pg_update($db, $table_name, $fields, $ids, PGSQL_DML_STRING|PGSQL_DML_ESCAP
 
 echo "Ok\n";
 ?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_14pg_update_9";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
+?>
 --EXPECT--
-UPDATE "php_pgsql_test" SET "num"=1234,"str"=E'ABC',"bin"=E'\\x58595a' WHERE "num"=1234;
-UPDATE "php_pgsql_test" SET "num"='1234',"str"='ABC',"bin"='XYZ' WHERE "num"='1234';
+UPDATE "table_14pg_update_9" SET "num"=1234,"str"=E'ABC',"bin"=E'\\x58595a' WHERE "num"=1234;
+UPDATE "table_14pg_update_9" SET "num"='1234',"str"='ABC',"bin"='XYZ' WHERE "num"='1234';
 Ok

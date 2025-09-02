@@ -1,5 +1,5 @@
 --TEST--
-Bug #81626: Error on use static:: in __сallStatic() wrapped to Closure::fromCallable()
+Bug #81626: Error on use static:: in __callStatic() wrapped to Closure::fromCallable()
 --FILE--
 <?php
 class TestClass {

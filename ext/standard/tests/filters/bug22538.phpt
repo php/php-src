@@ -15,7 +15,7 @@ do {
     $path2 = sprintf("%s/%s%db", __DIR__, uniqid(), time());
 } while ($path1 == $path2);
 
-$fp = fopen($path1, "w") or die("Can not open $path1\n");
+$fp = fopen($path1, "w") or die("Cannot open $path1\n");
 $str = "abcdefghijklmnopqrstuvwxyz\n";
 $str_len = strlen($str);
 $cnt = $size;
@@ -24,8 +24,8 @@ while (($cnt -= $str_len) > 0) {
 }
 $cnt = $size - ($str_len + $cnt);
 fclose($fp);
-$fin = fopen($path1, "r") or die("Can not open $path1\n");
-$fout = fopen($path2, "w") or die("Can not open $path2\n");
+$fin = fopen($path1, "r") or die("Cannot open $path1\n");
+$fout = fopen($path2, "w") or die("Cannot open $path2\n");
 stream_filter_append($fout, "string.rot13");
 my_stream_copy_to_stream($fin, $fout);
 fclose($fout);

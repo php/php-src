@@ -28,4 +28,4 @@ try {
 --EXPECT--
 books
 books
-XMLReader::XML(): Argument #1 ($source) cannot be empty
+XMLReader::XML(): Argument #1 ($source) must not be empty

@@ -4,7 +4,6 @@ JIT INC: 022
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 ;opcache.jit_debug=257
 --EXTENSIONS--
@@ -23,7 +22,8 @@ var_dump(inc(1.1));
 var_dump(dec("5"));
 var_dump(dec(1.1));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 string(3) "abd"
 int(6)
 float(2.1)

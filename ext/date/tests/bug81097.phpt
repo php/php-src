@@ -10,5 +10,5 @@ object(DateTimeZone)#%d (%d) {
   ["timezone_type"]=>
   int(1)
   ["timezone"]=>
-  string(6) "+01:45"
+  string(9) "+01:45:30"
 }

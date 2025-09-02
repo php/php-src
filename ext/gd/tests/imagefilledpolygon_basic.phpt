@@ -5,6 +5,9 @@ gd
 --SKIPIF--
 <?php
     if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available');
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php
@@ -51,9 +54,6 @@ $color1 = imagecolorsforindex($image_in, $col1);
 $color2 = imagecolorsforindex($image_in, $col2);
 $color3 = imagecolorsforindex($image_in, $col3);
 var_dump($color1, $color2, $color3);
-
-imagedestroy($image);
-imagedestroy($image_in);
 
 echo "Done\n";
 ?>

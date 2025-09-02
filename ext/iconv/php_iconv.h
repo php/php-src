@@ -41,18 +41,6 @@ PHP_MINIT_FUNCTION(miconv);
 PHP_MSHUTDOWN_FUNCTION(miconv);
 PHP_MINFO_FUNCTION(miconv);
 
-PHP_NAMED_FUNCTION(php_if_iconv);
-PHP_FUNCTION(ob_iconv_handler);
-PHP_FUNCTION(iconv_get_encoding);
-PHP_FUNCTION(iconv_set_encoding);
-PHP_FUNCTION(iconv_strlen);
-PHP_FUNCTION(iconv_substr);
-PHP_FUNCTION(iconv_strpos);
-PHP_FUNCTION(iconv_strrpos);
-PHP_FUNCTION(iconv_mime_encode);
-PHP_FUNCTION(iconv_mime_decode);
-PHP_FUNCTION(iconv_mime_decode_headers);
-
 ZEND_BEGIN_MODULE_GLOBALS(iconv)
 	char *input_encoding;
 	char *internal_encoding;
@@ -79,7 +67,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 /* {{{ typedef enum php_iconv_err_t */
 typedef enum _php_iconv_err_t {
-	PHP_ICONV_ERR_SUCCESS           = SUCCESS,
+	PHP_ICONV_ERR_SUCCESS           = 0,
 	PHP_ICONV_ERR_CONVERTER         = 1,
 	PHP_ICONV_ERR_WRONG_CHARSET     = 2,
 	PHP_ICONV_ERR_TOO_BIG           = 3,

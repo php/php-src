@@ -23,12 +23,13 @@ struct fpm_child_s {
 	struct fpm_child_s *prev, *next;
 	struct timeval started;
 	struct fpm_worker_pool_s *wp;
-	struct fpm_event_s ev_stdout, ev_stderr;
+	struct fpm_event_s ev_stdout, ev_stderr, ev_free;
 	int shm_slot_i;
 	int fd_stdout, fd_stderr;
 	void (*tracer)(struct fpm_child_s *);
 	struct timeval slow_logged;
-	int idle_kill;
+	bool idle_kill;
+	bool postponed_free;
 	pid_t pid;
 	int scoreboard_i;
 	struct zlog_stream *log_stream;

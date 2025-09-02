@@ -393,8 +393,4 @@
 #define XML_NS 1
 #endif
 
-#ifdef PHP_EXPORTS
-#define PCRE_STATIC
-#endif
-
 #endif

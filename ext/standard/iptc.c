@@ -178,7 +178,7 @@ PHP_FUNCTION(iptcembed)
 	size_t inx;
 	zend_string *spoolbuf = NULL;
 	unsigned char *poi = NULL;
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 	bool written = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -204,6 +204,7 @@ PHP_FUNCTION(iptcembed)
 
 	if (spool < 2) {
 		if (zend_fstat(fileno(fp), &sb) != 0) {
+			fclose(fp);
 			RETURN_FALSE;
 		}
 

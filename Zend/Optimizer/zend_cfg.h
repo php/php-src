@@ -62,7 +62,6 @@ typedef struct _zend_basic_block {
 |JMP         |ADR|   |   |OP1| - |
 |JMPZ        |   |ADR|   |OP2|FOL|
 |JMPNZ       |   |ADR|   |OP2|FOL|
-|JMPZNZ      |   |ADR|ADR|OP2|EXT|
 |JMPZ_EX     |   |ADR|   |OP2|FOL|
 |JMPNZ_EX    |   |ADR|   |OP2|FOL|
 |JMP_SET     |   |ADR|   |OP2|FOL|
@@ -116,11 +115,11 @@ typedef struct _zend_cfg {
 
 BEGIN_EXTERN_C()
 
-ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg);
+ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg);
 void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg);
-ZEND_API int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg);
-ZEND_API int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg);
-ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg);
+ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg);
+ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg);
+ZEND_API void zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg);
 
 END_EXTERN_C()
 

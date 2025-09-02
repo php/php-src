@@ -8,19 +8,12 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPComplexType {
-    function __construct($s, $i, $f) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-    }
+    function __construct(public $varString, public $varInt, public $varFloat) {}
 }
 class SOAPComplexTypeComplexType {
-    function __construct($s, $i, $f, $c) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-        $this->varComplexType = $c;
-    }
+    function __construct(
+        public $varString, public $varInt, public $varFloat, public $varComplexType
+    ) {}
 }
 $struct = new SOAPComplexTypeComplexType("arg",34,12.345,new SOAPComplexType("arg",43,54.321));
 $client = new SoapClient(__DIR__."/round4_groupI_xsd.wsdl",array("trace"=>1,"exceptions"=>0));

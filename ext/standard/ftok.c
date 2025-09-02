@@ -26,7 +26,7 @@
 #include "win32/ipc.h"
 #endif
 
-#if HAVE_FTOK
+#ifdef HAVE_FTOK
 /* {{{ Convert a pathname and a project identifier to a System V IPC key */
 PHP_FUNCTION(ftok)
 {
@@ -40,7 +40,7 @@ PHP_FUNCTION(ftok)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (pathname_len == 0){
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

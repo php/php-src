@@ -18,14 +18,11 @@
 
 /* $Id$ */
 
-/* {{{ error */
 function error($message) {
     printf('Error: %s%s', $message, PHP_EOL);
     exit;
 }
-/* }}} */
 
-/* {{{ print_help */
 function print_help() {
     if (PHP_OS_FAMILY != 'Windows') {
         $file_prefix = './';
@@ -114,9 +111,7 @@ OPTIONS
 HELP;
     exit;
 }
-/* }}} */
 
-/* {{{ task */
 function task($label, $callback) {
     printf('%s... ', $label);
 
@@ -124,9 +119,7 @@ function task($label, $callback) {
 
     printf('done%s', PHP_EOL);
 }
-/* }}} */
 
-/* {{{ print_success */
 function print_success() {
     global $options;
 
@@ -148,9 +141,7 @@ function print_success() {
     printf('%smake test%2$s%2$s', $make_prefix, PHP_EOL);
     printf('Thank you for using PHP!%s', PHP_EOL);
 }
-/* }}} */
 
-/* {{{ process_args */
 function process_args($argv, $argc) {
     $options = [
             'unix'		=> true,
@@ -230,9 +221,7 @@ function process_args($argv, $argc) {
 
     return $options;
 }
-/* }}} */
 
-/* {{{ process_source_tags */
 function process_source_tags($file, $short_name) {
     global $options;
 
@@ -286,9 +275,7 @@ HEADER;
         error('Unable to save contents to file: ' . $short_name);
     }
 }
-/* }}} */
 
-/* {{{ copy_config_scripts */
 function copy_config_scripts() {
     global $options;
 
@@ -314,9 +301,7 @@ function copy_config_scripts() {
         process_source_tags($new_config_script, $config_script);
     }
 }
-/* }}} */
 
-/* {{{ copy_sources */
 function copy_sources() {
     global $options;
 
@@ -335,9 +320,7 @@ function copy_sources() {
         process_source_tags($options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $dst_file, $dst_file);
     }
 }
-/* }}} */
 
-/* {{{ copy_tests */
 function copy_tests() {
     global $options;
 
@@ -361,8 +344,6 @@ function copy_tests() {
         process_source_tags($options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $new_test, $new_test);
     }
 }
-/* }}} */
-
 
 if (PHP_SAPI != 'cli') {
     error('This script is only suited for CLI');

@@ -3,8 +3,6 @@ FB payload server satisfies connection attempt
 --EXTENSIONS--
 pdo_firebird
 sockets
---ENV--
-LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 require_once "payload_server.inc";
@@ -16,6 +14,9 @@ $dsn = "firebird:dbname=inet://$address/test";
 $username = 'SYSDBA';
 $password = 'masterkey';
 
-new PDO($dsn, $username, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+new PDO($dsn, $username, $password, [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_AUTOCOMMIT => false,
+]);
 ?>
 --EXPECT--

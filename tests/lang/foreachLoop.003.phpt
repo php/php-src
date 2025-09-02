@@ -33,7 +33,7 @@ echo "done.\n";
 --EXPECTF--
 Not an array.
 
-Warning: foreach() argument must be of type array|object, bool given in %s on line 4
+Warning: foreach() argument must be of type array|object, true given in %s on line %d
 
 Warning: foreach() argument must be of type array|object, null given in %s on line 9
 

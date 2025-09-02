@@ -2,28 +2,103 @@
 
 /** @generate-class-entries */
 
+/** @var int */
+const XSL_CLONE_AUTO = 0;
+/** @var int */
+const XSL_CLONE_NEVER = -1;
+/** @var int */
+const XSL_CLONE_ALWAYS = 1;
+
+/**
+ * @var int
+ * @cvalue XSL_SECPREF_NONE
+ */
+const XSL_SECPREF_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSL_SECPREF_READ_FILE
+ */
+const XSL_SECPREF_READ_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSL_SECPREF_WRITE_FILE
+ */
+const XSL_SECPREF_WRITE_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSL_SECPREF_CREATE_DIRECTORY
+ */
+const XSL_SECPREF_CREATE_DIRECTORY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSL_SECPREF_READ_NETWORK
+ */
+const XSL_SECPREF_READ_NETWORK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSL_SECPREF_WRITE_NETWORK
+ */
+const XSL_SECPREF_WRITE_NETWORK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSL_SECPREF_DEFAULT
+ */
+const XSL_SECPREF_DEFAULT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue LIBXSLT_VERSION
+ */
+const LIBXSLT_VERSION = UNKNOWN;
+/**
+ * @var string
+ * @cvalue LIBXSLT_DOTTED_VERSION
+ */
+const LIBXSLT_DOTTED_VERSION = UNKNOWN;
+
+#ifdef HAVE_XSL_EXSLT
+/**
+ * @var int
+ * @cvalue LIBEXSLT_VERSION
+ */
+const LIBEXSLT_VERSION = UNKNOWN;
+/**
+ * @var string
+ * @cvalue LIBEXSLT_DOTTED_VERSION
+ */
+const LIBEXSLT_DOTTED_VERSION = UNKNOWN;
+#endif
+
 class XSLTProcessor
 {
+    public bool $doXInclude = false;
+
+    public bool $cloneDocument = false;
+
+    public int $maxTemplateDepth;
+
+    public int $maxTemplateVars;
+
     /**
-     * @param DOMDocument|SimpleXMLElement $stylesheet
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $stylesheet
      * @tentative-return-type
      */
     public function importStylesheet(object $stylesheet): bool {}
 
     /**
-     * @param DOMDocument|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
-    public function transformToDoc(object $document, ?string $returnClass = null): DOMDocument|false {}
+    public function transformToDoc(object $document, ?string $returnClass = null): object|false {}
 
     /**
-     * @param DOMDocument|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToUri(object $document, string $uri): int {}
 
     /**
-     * @param DOMDocument|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToXml(object $document): string|null|false {}
@@ -43,8 +118,10 @@ class XSLTProcessor
     /** @tentative-return-type */
     public function registerPHPFunctions(array|string|null $functions = null): void {}
 
-    /** @return bool */
-    public function setProfiling(?string $filename) {} // TODO make the return type void
+    public function registerPHPFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
+
+    /** @tentative-return-type */
+    public function setProfiling(?string $filename): true {}
 
     /** @tentative-return-type */
     public function setSecurityPrefs(int $preferences): int {}

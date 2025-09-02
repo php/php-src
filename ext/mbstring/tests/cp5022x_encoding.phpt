@@ -352,6 +352,44 @@ convertInvalidString("\x1B\$B1", "%", "CP50221", "UTF-8");
 convertInvalidString("\x1B\$B1", "%", "CP50222", "UTF-8");
 
 echo "Long error markers OK\n";
+
+foreach (['CP50220', 'CP50221', 'CP50222'] as $encoding) {
+  testInvalidString("\x1B", "%", $encoding, "UTF-8");
+  testInvalidString("\x1BX", "%X", $encoding, "UTF-8");
+  testInvalidString("\x1B(", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B(X", "%(X", $encoding, "UTF-8");
+  testInvalidString("\x1B\$", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B\$(", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B\$X", "%\$X", $encoding, "UTF-8");
+  testInvalidString("\x1B\$(X", "%\$(X", $encoding, "UTF-8");
+}
+
+echo "Invalid escape sequences OK\n";
+
+// Regression tests
+if (mb_convert_encoding("\x1BC\xF5", 'UTF-16BE', 'CP50221') !== "\x00%\x00C\x00%")
+  die("Bad");
+
+// Previously, the CP50220 implementation would eat trailing null bytes
+$converted = mb_convert_encoding("ab\x00", 'UTF-16BE', 'CP50220');
+if ($converted !== "\x00a\x00b\x00\x00")
+  die("Bad handling of trailing null byte (got " . bin2hex($converted) . ")");
+
+// Previously, the CP50220 implementation would reorder error markers with
+// subsequent characters
+mb_substitute_character(0x3F);
+$converted = mb_convert_encoding("\xff\xff\x00&", 'CP50220', 'UTF-16BE');
+if ($converted !== '?&')
+  die("Bad handling of erroneous codepoint followed by good one (got " . bin2hex($converted) . ")");
+
+// In CP50220, two codepoints can be collapsed into a single kuten code in some cases
+// This should work even on a boundary between separately processed buffers
+$shouldCollapse = "\xFF\x76\xFF\x9E";
+$expected = "\x1B\$B%,\x1B(B";
+for ($i = 0; $i < 256; $i++) {
+  convertValidString(str_repeat("\x00a", $i) . $shouldCollapse, str_repeat('a', $i) . $expected, 'UTF-16BE', 'CP50220', false);
+}
+
 ?>
 --EXPECT--
 ASCII support OK
@@ -361,3 +399,4 @@ JIS X 0212 support OK
 Folding of fullwidth katakana for CP50220 OK
 Invalid Unicode is flagged when converting to CP5022x
 Long error markers OK
+Invalid escape sequences OK

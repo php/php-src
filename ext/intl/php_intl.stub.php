@@ -2,14 +2,178 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue INTL_MAX_LOCALE_LEN
+ */
+const INTL_MAX_LOCALE_LEN = UNKNOWN;
+/**
+ * @var string
+ * @cvalue U_ICU_VERSION
+ */
+const INTL_ICU_VERSION = UNKNOWN;
+#ifdef U_ICU_DATA_VERSION
+/**
+ * @var string
+ * @cvalue U_ICU_DATA_VERSION
+ */
+const INTL_ICU_DATA_VERSION = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue GRAPHEME_EXTRACT_TYPE_COUNT
+ */
+const GRAPHEME_EXTR_COUNT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GRAPHEME_EXTRACT_TYPE_MAXBYTES
+ */
+const GRAPHEME_EXTR_MAXBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GRAPHEME_EXTRACT_TYPE_MAXCHARS
+ */
+const GRAPHEME_EXTR_MAXCHARS = UNKNOWN;
+
+/**
+ * Option to prohibit processing of unassigned codepoints in the input and
+ * do not check if the input conforms to STD-3 ASCII rules.
+ * @var int
+ * @cvalue UIDNA_DEFAULT
+ */
+const IDNA_DEFAULT = UNKNOWN;
+
+/**
+ * Option to allow processing of unassigned codepoints in the input
+ * @var int
+ * @cvalue UIDNA_ALLOW_UNASSIGNED
+ */
+const IDNA_ALLOW_UNASSIGNED = UNKNOWN;
+
+/**
+ * Option to check if input conforms to STD-3 ASCII rules
+ * @var int
+ * @cvalue UIDNA_USE_STD3_RULES
+ */
+const IDNA_USE_STD3_RULES = UNKNOWN;
+
+/**
+ * Option to check for whether the input conforms to the BiDi rules.
+ * Ignored by the IDNA2003 implementation. (IDNA2003 always performs a BiDi check.)
+ * @var int
+ * @cvalue UIDNA_CHECK_BIDI
+ */
+const IDNA_CHECK_BIDI = UNKNOWN;
+
+/**
+ * Option to check for whether the input conforms to the CONTEXTJ rules.
+ * Ignored by the IDNA2003 implementation. (The CONTEXTJ check is new in IDNA2008.)
+ * @var int
+ * @cvalue UIDNA_CHECK_CONTEXTJ
+ */
+const IDNA_CHECK_CONTEXTJ = UNKNOWN;
+
+/**
+ * Option for nontransitional processing in ToASCII().
+ * By default, ToASCII() uses transitional processing.
+ * Ignored by the IDNA2003 implementation.
+ * @var int
+ * @cvalue UIDNA_NONTRANSITIONAL_TO_ASCII
+ */
+const IDNA_NONTRANSITIONAL_TO_ASCII = UNKNOWN;
+
+/**
+ * Option for nontransitional processing in ToUnicode().
+ * By default, ToUnicode() uses transitional processing.
+ * Ignored by the IDNA2003 implementation.
+ * @var int
+ * @cvalue UIDNA_NONTRANSITIONAL_TO_UNICODE
+ */
+const IDNA_NONTRANSITIONAL_TO_UNICODE = UNKNOWN;
+
+/* VARIANTS */
+
+/**
+ * @var int
+ * @cvalue INTL_IDN_VARIANT_UTS46
+ */
+const INTL_IDNA_VARIANT_UTS46 = UNKNOWN;
+
+/* PINFO ERROR CODES */
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_EMPTY_LABEL
+ */
+const IDNA_ERROR_EMPTY_LABEL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_LABEL_TOO_LONG
+ */
+const IDNA_ERROR_LABEL_TOO_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_DOMAIN_NAME_TOO_LONG
+ */
+const IDNA_ERROR_DOMAIN_NAME_TOO_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_LEADING_HYPHEN
+ */
+const IDNA_ERROR_LEADING_HYPHEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_TRAILING_HYPHEN
+ */
+const IDNA_ERROR_TRAILING_HYPHEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_HYPHEN_3_4
+ */
+const IDNA_ERROR_HYPHEN_3_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_LEADING_COMBINING_MARK
+ */
+const IDNA_ERROR_LEADING_COMBINING_MARK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_DISALLOWED
+ */
+const IDNA_ERROR_DISALLOWED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_PUNYCODE
+ */
+const IDNA_ERROR_PUNYCODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_LABEL_HAS_DOT
+ */
+const IDNA_ERROR_LABEL_HAS_DOT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_INVALID_ACE_LABEL
+ */
+const IDNA_ERROR_INVALID_ACE_LABEL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_BIDI
+ */
+const IDNA_ERROR_BIDI = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_CONTEXTJ
+ */
+const IDNA_ERROR_CONTEXTJ = UNKNOWN;
+
 class IntlException extends Exception
 {
 }
 
 /* calendar */
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function intlcal_create_instance($timezone = null, ?string $locale = null): ?IntlCalendar {}
+function intlcal_create_instance(IntlTimeZone|DateTimeZone|string|null $timezone = null, ?string $locale = null): ?IntlCalendar {}
 
 function intlcal_get_keyword_values_for_locale(string $keyword, string $locale, bool $onlyCommon): IntlIterator|false {}
 
@@ -29,19 +193,19 @@ function intlcal_set_time(IntlCalendar $calendar, float $timestamp): bool {}
 
 function intlcal_add(IntlCalendar $calendar, int $field, int $value): bool {}
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function intlcal_set_time_zone(IntlCalendar $calendar, $timezone): bool {}
+function intlcal_set_time_zone(IntlCalendar $calendar, IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
 function intlcal_after(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_before(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
-function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
+#[\Deprecated(since: '8.4', message: 'use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead')]
+function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): true {}
 
 /** @param int|bool $value */
 function intlcal_roll(IntlCalendar $calendar, int $field, $value): bool {}
 
-function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
+function intlcal_clear(IntlCalendar $calendar, ?int $field = null): true {}
 
 function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int|false {}
 
@@ -63,7 +227,7 @@ function intlcal_get_maximum(IntlCalendar $calendar, int $field): int|false {}
 
 function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int|false {}
 
-function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): bool {}
+function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): true {}
 
 function intlcal_get_minimum(IntlCalendar $calendar, int $field): int|false {}
 
@@ -83,9 +247,9 @@ function intlcal_is_equivalent_to(IntlCalendar $calendar, IntlCalendar $other): 
 
 function intlcal_is_weekend(IntlCalendar $calendar, ?float $timestamp = null): bool {}
 
-function intlcal_set_first_day_of_week(IntlCalendar $calendar, int $dayOfWeek): bool {}
+function intlcal_set_first_day_of_week(IntlCalendar $calendar, int $dayOfWeek): true {}
 
-function intlcal_set_lenient(IntlCalendar $calendar, bool $lenient): bool {}
+function intlcal_set_lenient(IntlCalendar $calendar, bool $lenient): true {}
 
 function intlcal_get_repeated_wall_time_option(IntlCalendar $calendar): int {}
 
@@ -93,9 +257,9 @@ function intlcal_equals(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_get_skipped_wall_time_option(IntlCalendar $calendar): int {}
 
-function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $option): bool {}
+function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $option): true {}
 
-function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): bool {}
+function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): true {}
 
 function intlcal_from_date_time(DateTime|string $datetime, ?string $locale = null): ?IntlCalendar {}
 
@@ -113,6 +277,7 @@ function intlcal_get_error_message(IntlCalendar $calendar): string|false {}
  * @param int $minute
  * @param int $second
  */
+#[\Deprecated(since: '8.4', message: 'use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead')]
 function intlgregcal_create_instance($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
 
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $calendar, float $timestamp): bool {}
@@ -133,7 +298,7 @@ function collator_set_attribute(Collator $object, int $attribute, int $value): b
 
 function collator_get_strength(Collator $object): int {}
 
-function collator_set_strength(Collator $object, int $strength): bool {}
+function collator_set_strength(Collator $object, int $strength): true {}
 
 function collator_sort(Collator $object, array &$array, int $flags = Collator::SORT_REGULAR): bool {}
 
@@ -161,12 +326,11 @@ function intl_error_name(int $errorCode): string {}
 
 /* dateformat */
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
 function datefmt_create(
     ?string $locale,
     int $dateType = IntlDateFormatter::FULL,
     int $timeType = IntlDateFormatter::FULL,
-    $timezone = null,
+    IntlTimeZone|DateTimeZone|string|null $timezone = null,
     IntlCalendar|int|null $calendar = null,
     ?string $pattern = null
 ): ?IntlDateFormatter {}
@@ -185,8 +349,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $formatter): IntlCalendar
 
 function datefmt_get_timezone(IntlDateFormatter $formatter): IntlTimeZone|false {}
 
-/** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): ?bool {}
+function datefmt_set_timezone(IntlDateFormatter $formatter, IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
 function datefmt_set_pattern(IntlDateFormatter $formatter, string $pattern): bool {}
 
@@ -278,6 +441,10 @@ function grapheme_strstr(string $haystack, string $needle, bool $beforeNeedle = 
 
 function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle = false): string|false {}
 
+function grapheme_str_split(string $string, int $length = 1): array|false {}
+
+function grapheme_levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1): int|false {}
+
 /** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR_COUNT, int $offset = 0, &$next = null): string|false {}
 
@@ -294,7 +461,7 @@ function idn_to_utf8(string $domain, int $flags = IDNA_DEFAULT, int $variant = I
 
 function locale_get_default(): string {}
 
-function locale_set_default(string $locale): bool {}
+function locale_set_default(string $locale): true {}
 
 function locale_get_primary_language(string $locale): ?string {}
 
@@ -332,6 +499,12 @@ function locale_lookup(array $languageTag, string $locale, bool $canonicalize = 
 
 function locale_accept_from_http(string $header): string|false {}
 
+function locale_is_right_to_left(string $locale): bool {}
+
+function locale_add_likely_subtags(string $locale): string|false {}
+
+function locale_minimize_subtags(string $locale): string|false {}
+
 /* msgformat */
 
 function msgfmt_create(string $locale, string $pattern): ?MessageFormatter {}
@@ -368,16 +541,13 @@ function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): s
 
 function normalizer_is_normalized(string $string, int $form = Normalizer::FORM_C): bool {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 56
 function normalizer_get_raw_decomposition(string $string, int $form = Normalizer::FORM_C): ?string {}
-#endif
 
 /* resourceboundle */
 
 function resourcebundle_create(?string $locale, ?string $bundle, bool $fallback = true): ?ResourceBundle {}
 
-/** @param string|int $index */
-function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = true): mixed {}
+function resourcebundle_get(ResourceBundle $bundle, string|int $index, bool $fallback = true): ResourceBundle|array|string|int|null {}
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 
@@ -397,8 +567,7 @@ function intltz_count_equivalent_ids(string $timezoneId): int|false {}
 
 function intltz_create_default(): IntlTimeZone {}
 
-/** @param IntlTimeZone|string|int|float|null $countryOrRawOffset */
-function intltz_create_enumeration($countryOrRawOffset = null): IntlIterator|false {}
+function intltz_create_enumeration(string|int|null $countryOrRawOffset = null): IntlIterator|false {}
 
 function intltz_create_time_zone(string $timezoneId): ?IntlTimeZone {}
 
@@ -437,17 +606,19 @@ function intltz_get_tz_data_version(): string|false {}
 
 function intltz_get_unknown(): IntlTimeZone {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 52
 function intltz_get_windows_id(string $timezoneId): string|false {}
 
 function intltz_get_id_for_windows_id(string $timezoneId, ?string $region = null): string|false {}
-#endif
 
 function intltz_has_same_rules(IntlTimeZone $timezone, IntlTimeZone $other): bool {}
 
 function intltz_to_date_time_zone(IntlTimeZone $timezone): DateTimeZone|false {}
 
 function intltz_use_daylight_time(IntlTimeZone $timezone): bool {}
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+function intltz_get_iana_id(string $timezoneId): string|false {}
+#endif
 
 /* transliterator */
 
@@ -465,6 +636,6 @@ function transliterator_create_inverse(Transliterator $transliterator): ?Transli
 
 function transliterator_transliterate(Transliterator|string $transliterator, string $string, int $start = 0, int $end = -1): string|false {}
 
-function transliterator_get_error_code(Transliterator $transliterator): int|false {}
+function transliterator_get_error_code(Transliterator $transliterator): int {}
 
-function transliterator_get_error_message(Transliterator $transliterator): string|false {}
+function transliterator_get_error_message(Transliterator $transliterator): string {}

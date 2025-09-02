@@ -5,7 +5,9 @@ gd
 --SKIPIF--
 <?php
 if (!function_exists('imagettftext')) die('skip imagettftext() not available');
-//die('skip freetype issues');
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php
@@ -30,8 +32,6 @@ if (isset($matches[1]) && $matches[1] > 2000) {
 } else {
     echo "The images are similar.\n";
 }
-
-imagedestroy($im);
 ?>
 --EXPECT--
 The images are similar.

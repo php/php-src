@@ -4,18 +4,16 @@ mysqli_change_user() - ROLLBACK
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!have_innodb($link))
     die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'table.inc';
 
     if (!mysqli_query($link, 'ALTER TABLE test ENGINE=InnoDB'))
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -32,7 +30,7 @@ if (!have_innodb($link))
     $num = $row['_num'];
     assert($num > 0);
 
-    if (!$res = mysqli_query($link, 'DELETE FROM test'))
+    if (false === mysqli_query($link, 'DELETE FROM test'))
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!$res = mysqli_query($link, 'SELECT COUNT(*) AS _num FROM test'))
@@ -64,7 +62,7 @@ if (!have_innodb($link))
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

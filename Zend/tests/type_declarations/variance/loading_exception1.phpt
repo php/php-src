@@ -44,5 +44,5 @@ Class A does not exist
 
 Fatal error: During inheritance of B with variance dependencies: Uncaught Exception: Class A does not exist in %s:%d
 Stack trace:
-#0 %s(%d): {closure}('A')
+#0 %s(%d): {closure:%s:%d}('A')
 #1 {main} in %s on line %d

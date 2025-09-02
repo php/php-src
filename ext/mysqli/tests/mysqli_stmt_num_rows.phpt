@@ -4,13 +4,11 @@ mysqli_stmt_num_rows()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -80,10 +78,10 @@ require_once('skipifconnectfailure.inc');
         What the test does is cover an implementation detail of the mysqlnd library.
         This implementation detail may, at any time, change without prior notice.
         On the contrary, the mysqlnd way is a reasonable one and, maybe, one fine
-        day, after Klingons visited earh, becomes the official one. Meanwhile do
+        day, after Klingons visited earth, becomes the official one. Meanwhile, do
         not rely on it.
         */
-        if ($IS_MYSQLND && (7 !== ($tmp = mysqli_stmt_num_rows($stmt))))
+        if (7 !== ($tmp = mysqli_stmt_num_rows($stmt)))
             printf("[54] Expecting int/7, got %s/%s\n", gettype($tmp), $tmp);
 
     } else {
@@ -103,7 +101,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!

@@ -46,6 +46,8 @@ typedef void OnigMatchParam;
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
+char php_mb_oniguruma_version[256];
+
 struct _zend_mb_regex_globals {
 	OnigEncoding default_mbctype;
 	OnigEncoding current_mbctype;
@@ -110,13 +112,11 @@ void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals)
 /* {{{ PHP_MINIT_FUNCTION(mb_regex) */
 PHP_MINIT_FUNCTION(mb_regex)
 {
-	char version[256];
-
 	onig_init();
 
-	snprintf(version, sizeof(version), "%d.%d.%d",
+	snprintf(php_mb_oniguruma_version, sizeof(php_mb_oniguruma_version), "%d.%d.%d",
 		ONIGURUMA_VERSION_MAJOR, ONIGURUMA_VERSION_MINOR, ONIGURUMA_VERSION_TEENY);
-	REGISTER_STRING_CONSTANT("MB_ONIGURUMA_VERSION", version, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -689,7 +689,7 @@ mb_regex_groups_iter(const OnigUChar* name, const OnigUChar* name_end, int ngrou
 	gn = onig_name_to_backref_number(reg, name, name_end, args->region);
 	beg = args->region->beg[gn];
 	end = args->region->end[gn];
-	if (beg >= 0 && beg < end && end <= args->search_len) {
+	if (beg >= 0 && beg < end && ((size_t)end <= args->search_len)) {
 		add_assoc_stringl_ex(args->groups, (char *)name, name_end - name, &args->search_str[beg], end - beg);
 	} else {
 		add_assoc_bool_ex(args->groups, (char *)name, name_end - name, 0);
@@ -721,7 +721,7 @@ static inline void mb_regex_substitute(
 	eos = replace + replace_len;
 
 	while (p < eos) {
-		clen = (int) php_mb_mbchar_bytes_ex(p, enc);
+		clen = (int) php_mb_mbchar_bytes(p, enc);
 		if (clen != 1 || p == eos || p[0] != '\\') {
 			/* skip anything that's not an ascii backslash */
 			smart_str_appendl(pbuf, p, clen);
@@ -729,7 +729,7 @@ static inline void mb_regex_substitute(
 			continue;
 		}
 		sp = p; /* save position */
-		clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+		clen = (int) php_mb_mbchar_bytes(++p, enc);
 		if (clen != 1 || p == eos) {
 			/* skip backslash followed by multibyte char */
 			smart_str_appendl(pbuf, sp, p - sp);
@@ -759,7 +759,7 @@ static inline void mb_regex_substitute(
 				break;
 			case 'k':
 			{
-				clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+				clen = (int) php_mb_mbchar_bytes(++p, enc);
 				if (clen != 1 || p == eos || (p[0] != '<' && p[0] != '\'')) {
 					/* not a backref delimiter */
 					p += clen;
@@ -772,7 +772,7 @@ static inline void mb_regex_substitute(
 				char maybe_num = 1;
 				name_end = name = p + 1;
 				while (name_end < eos) {
-					clen = (int) php_mb_mbchar_bytes_ex(name_end, enc);
+					clen = (int) php_mb_mbchar_bytes(name_end, enc);
 					if (clen != 1) {
 						name_end += clen;
 						maybe_num = 0;
@@ -900,7 +900,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (arg_pattern_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1106,12 +1106,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
 					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);
-				} else {
-					if (!EG(exception)) {
-						zend_throw_error(NULL, "Unable to call custom replacement function");
-						zval_ptr_dtor(&subpats);
-						RETURN_THROWS();
-					}
 				}
 				zval_ptr_dtor(&subpats);
 			}
@@ -1144,13 +1138,10 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 	if (err <= -2) {
 		smart_str_free(&out_buf);
-		RETVAL_FALSE;
-	} else if (out_buf.s) {
-		smart_str_0(&out_buf);
-		RETVAL_STR(out_buf.s);
-	} else {
-		RETVAL_EMPTY_STRING();
+		RETURN_FALSE;
 	}
+
+	RETURN_STR(smart_str_extract(&out_buf));
 }
 /* }}} */
 
@@ -1187,7 +1178,7 @@ PHP_FUNCTION(mb_split)
 	size_t string_len;
 
 	int err;
-	zend_long count = -1;
+	zend_ulong count = -1; /* unsigned, it's a limit and we want to prevent signed overflow */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
 		RETURN_THROWS();
@@ -1471,7 +1462,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	}
 
 	if (arg_pattern && arg_pattern_len == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

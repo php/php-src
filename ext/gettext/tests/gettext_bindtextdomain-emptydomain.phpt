@@ -15,7 +15,7 @@ try {
 
 ?>
 --EXPECT--
-bindtextdomain(): Argument #1 ($domain) cannot be empty
+bindtextdomain(): Argument #1 ($domain) must not be empty
 --CREDITS--
 Till Klampaeckel, till@php.net
 PHP Testfest Berlin 2009-05-09

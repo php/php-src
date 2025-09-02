@@ -19,14 +19,12 @@
 #include "fastcgi.h"
 #include "zlog.h"
 
-#ifdef MAX_LINE_LENGTH
-# define FPM_LOG_BUFFER MAX_LINE_LENGTH
-#else
-# define FPM_LOG_BUFFER 1024
-#endif
-
 static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
+static struct key_value_s *fpm_access_suppress_paths = NULL;
+static struct zlog_stream fpm_log_stream;
+
+static int fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc);
 
 int fpm_log_open(int reopen) /* {{{ */
 {
@@ -79,10 +77,22 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 		}
 	}
 
+	for (struct key_value_s *kv = wp->config->access_suppress_paths; kv; kv = kv->next) {
+		struct key_value_s *kvcopy = calloc(1, sizeof(*kvcopy));
+		if (kvcopy == NULL) {
+			zlog(ZLOG_ERROR, "unable to allocate memory while opening the access log");
+			return -1;
+		}
+		kvcopy->value = strdup(kv->value);
+		kvcopy->next = fpm_access_suppress_paths;
+		fpm_access_suppress_paths = kvcopy;
+	}
+
 	if (fpm_log_fd == -1) {
 		fpm_log_fd = wp->log_fd;
 	}
-
+	zlog_stream_init_ex(&fpm_log_stream, ZLOG_ACCESS_LOG, fpm_log_fd);
+	zlog_stream_set_wrapping(&fpm_log_stream, 0);
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		if (wp->log_fd > -1 && wp->log_fd != fpm_log_fd) {
@@ -97,12 +107,11 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 
 int fpm_log_write(char *log_format) /* {{{ */
 {
-	char *s, *b;
-	char buffer[FPM_LOG_BUFFER+1];
-	int token, test;
-	size_t len, len2;
+	char *s;
+	bool test, token = false;
 	struct fpm_scoreboard_proc_s proc, *proc_p;
 	struct fpm_scoreboard_s *scoreboard;
+	struct zlog_stream *stream;
 	char tmp[129];
 	char format[129];
 	time_t now_epoch;
@@ -116,9 +125,9 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 	if (!log_format) {
 		log_format = fpm_log_format;
-		test = 0;
+		test = false;
 	} else {
-		test = 1;
+		test = true;
 	}
 
 	now_epoch = time(NULL);
@@ -136,40 +145,31 @@ int fpm_log_write(char *log_format) /* {{{ */
 		}
 		proc = *proc_p;
 		fpm_scoreboard_proc_release(proc_p);
+
+		if (UNEXPECTED(fpm_access_log_suppress(&proc))) {
+			return -1;
+		}
 	}
-
-	token = 0;
-
-	memset(buffer, '\0', sizeof(buffer));
-	b = buffer;
-	len = 0;
 
 
 	s = log_format;
+	stream = &fpm_log_stream;
+	zlog_stream_start(stream);
 
 	while (*s != '\0') {
-		/* Test is we have place for 1 more char. */
-		if (len >= FPM_LOG_BUFFER) {
-			zlog(ZLOG_NOTICE, "the log buffer is full (%d). The access log request has been truncated.", FPM_LOG_BUFFER);
-			len = FPM_LOG_BUFFER;
-			break;
-		}
-
 		if (!token && *s == '%') {
-			token = 1;
+			token = true;
 			memset(format, '\0', sizeof(format)); /* reset format */
 			s++;
 			continue;
 		}
 
 		if (token) {
-			token = 0;
-			len2 = 0;
+			token = false;
 			switch (*s) {
 
 				case '%': /* '%' */
-					*b = '%';
-					len2 = 1;
+					zlog_stream_char(stream, '%');
 					break;
 
 #ifdef HAVE_TIMES
@@ -193,7 +193,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 					format[0] = '\0';
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.2f", tms_total / fpm_scoreboard_get_tick() / (proc.cpu_duration.tv_sec + proc.cpu_duration.tv_usec / 1000000.) * 100.);
+						zlog_stream_format(stream, "%.2f", tms_total / fpm_scoreboard_get_tick() / (proc.cpu_duration.tv_sec + proc.cpu_duration.tv_usec / 1000000.) * 100.);
 					}
 					break;
 #endif
@@ -202,7 +202,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 					/* seconds */
 					if (format[0] == '\0' || !strcasecmp(format, "seconds")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.3f", proc.duration.tv_sec + proc.duration.tv_usec / 1000000.);
+							zlog_stream_format(stream, "%.3f", proc.duration.tv_sec + proc.duration.tv_usec / 1000000.);
 						}
 
 					/* milliseconds */
@@ -211,13 +211,13 @@ int fpm_log_write(char *log_format) /* {{{ */
 						   !strcasecmp(format, "miliseconds") || !strcasecmp(format, "mili")
 					) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.3f", proc.duration.tv_sec * 1000. + proc.duration.tv_usec / 1000.);
+							zlog_stream_format(stream, "%.3f", proc.duration.tv_sec * 1000. + proc.duration.tv_usec / 1000.);
 						}
 
 					/* microseconds */
 					} else if (!strcasecmp(format, "microseconds") || !strcasecmp(format, "micro")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", (unsigned long)(proc.duration.tv_sec * 1000000UL + proc.duration.tv_usec));
+							zlog_stream_format(stream, "%lu", (unsigned long)(proc.duration.tv_sec * 1000000UL + proc.duration.tv_usec));
 						}
 
 					} else {
@@ -235,26 +235,26 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 					if (!test) {
 						char *env = fcgi_getenv((fcgi_request*) SG(server_context), format, strlen(format));
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", env ? env : "-");
+						zlog_stream_cstr(stream, env ? env : "-");
 					}
 					format[0] = '\0';
 					break;
 
 				case 'f': /* script */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s",  *proc.script_filename ? proc.script_filename : "-");
+						zlog_stream_cstr(stream,  *proc.script_filename ? proc.script_filename : "-");
 					}
 					break;
 
 				case 'l': /* content length */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", proc.content_length);
+						zlog_stream_format(stream, "%zu", proc.content_length);
 					}
 					break;
 
 				case 'm': /* method */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", *proc.request_method ? proc.request_method : "-");
+						zlog_stream_cstr(stream, *proc.request_method ? proc.request_method : "-");
 					}
 					break;
 
@@ -262,19 +262,19 @@ int fpm_log_write(char *log_format) /* {{{ */
 					/* seconds */
 					if (format[0] == '\0' || !strcasecmp(format, "bytes")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", proc.memory);
+							zlog_stream_format(stream, "%zu", proc.memory);
 						}
 
 					/* kilobytes */
 					} else if (!strcasecmp(format, "kilobytes") || !strcasecmp(format, "kilo")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", proc.memory / 1024);
+							zlog_stream_format(stream, "%zu", proc.memory / 1024);
 						}
 
 					/* megabytes */
 					} else if (!strcasecmp(format, "megabytes") || !strcasecmp(format, "mega")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%zu", proc.memory / 1024 / 1024);
+							zlog_stream_format(stream, "%zu", proc.memory / 1024 / 1024);
 						}
 
 					} else {
@@ -286,7 +286,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 				case 'n': /* pool name */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", scoreboard->pool[0] ? scoreboard->pool : "-");
+						zlog_stream_cstr(stream, scoreboard->pool[0] ? scoreboard->pool : "-");
 					}
 					break;
 
@@ -300,6 +300,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 						zend_llist_position pos;
 						sapi_headers_struct *sapi_headers = &SG(sapi_headers);
 						size_t format_len = strlen(format);
+						ssize_t written = 0;
 
 						h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 						while (h) {
@@ -325,14 +326,13 @@ int fpm_log_write(char *log_format) /* {{{ */
 							}
 
 							header = h->header + format_len + 2;
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", header && *header ? header : "-");
+							written += zlog_stream_cstr(stream, header && *header ? header : "-");
 
 							/* found, done */
 							break;
 						}
-						if (!len2) {
-							len2 = 1;
-							*b = '-';
+						if (!written) {
+							zlog_stream_char(stream, '-');
 						}
 					}
 					format[0] = '\0';
@@ -340,44 +340,44 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 				case 'p': /* PID */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%ld", (long)getpid());
+						zlog_stream_format(stream, "%ld", (long)getpid());
 					}
 					break;
 
 				case 'P': /* PID */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%ld", (long)getppid());
+						zlog_stream_format(stream, "%ld", (long)getppid());
 					}
 					break;
 
 				case 'q': /* query_string */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.query_string);
+						zlog_stream_cstr(stream, proc.query_string);
 					}
 					break;
 
 				case 'Q': /* '?' */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", *proc.query_string  ? "?" : "");
+						zlog_stream_cstr(stream, *proc.query_string  ? "?" : "");
 					}
 					break;
 
 				case 'r': /* request URI */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.request_uri);
+						zlog_stream_cstr(stream, proc.request_uri);
 					}
 					break;
 
 				case 'R': /* remote IP address */
 					if (!test) {
 						const char *tmp = fcgi_get_last_client_ip();
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", tmp ? tmp : "-");
+						zlog_stream_cstr(stream, tmp ? tmp : "-");
 					}
 					break;
 
 				case 's': /* status */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%d", SG(sapi_headers).http_response_code);
+						zlog_stream_format(stream, "%d", SG(sapi_headers).http_response_code);
 					}
 					break;
 
@@ -395,14 +395,14 @@ int fpm_log_write(char *log_format) /* {{{ */
 						} else {
 							strftime(tmp, sizeof(tmp) - 1, format, localtime(t));
 						}
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", tmp);
+						zlog_stream_cstr(stream, tmp);
 					}
 					format[0] = '\0';
 					break;
 
 				case 'u': /* remote user */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.auth_user);
+						zlog_stream_cstr(stream, proc.auth_user);
 					}
 					break;
 
@@ -445,32 +445,65 @@ int fpm_log_write(char *log_format) /* {{{ */
 				return -1;
 			}
 			s++;
-			if (!test) {
-				b += len2;
-				len += len2;
-			}
-			if (len >= FPM_LOG_BUFFER) {
-				zlog(ZLOG_NOTICE, "the log buffer is full (%d). The access log request has been truncated.", FPM_LOG_BUFFER);
-				len = FPM_LOG_BUFFER;
+
+			if (zlog_stream_is_over_limit(stream)) {
+				zlog(ZLOG_NOTICE, "the log buffer is over the configured limit. The access log request has been truncated.");
 				break;
 			}
 			continue;
 		}
 
+		if (zlog_stream_is_over_limit(stream)) {
+			zlog(ZLOG_NOTICE, "the log buffer is over the configured limit. The access log request has been truncated.");
+			break;
+		}
+
 		if (!test) {
 			// push the normal char to the output buffer
-			*b = *s;
-			b++;
-			len++;
+			zlog_stream_char(stream, *s);
 		}
 		s++;
 	}
 
-	if (!test && strlen(buffer) > 0) {
-		buffer[len] = '\n';
-		zend_quiet_write(fpm_log_fd, buffer, len + 1);
+	if (!test) {
+		zlog_stream_finish(stream);
 	}
 
 	return 0;
 }
 /* }}} */
+
+static int fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc)
+{
+	// Never suppress when query string is passed
+	if (proc->query_string[0] != '\0') {
+		return 0;
+	}
+
+	// Never suppress if request method is not GET or HEAD
+	if (
+		strcmp(proc->request_method, "GET") != 0
+		&& strcmp(proc->request_method, "HEAD") != 0
+	) {
+		return 0;
+	}
+
+	// Never suppress when response code does not indicate success
+	if (SG(sapi_headers).http_response_code < 200 || SG(sapi_headers).http_response_code > 299) {
+		return 0;
+	}
+
+	// Never suppress when a body has been sent
+	if (SG(request_info).content_length > 0) {
+		return 0;
+	}
+
+	// Suppress when request URI is an exact match for one of our entries
+	for (struct key_value_s *kv = fpm_access_suppress_paths; kv; kv = kv->next) {
+		if (kv->value && strcmp(kv->value, proc->request_uri) == 0) {
+			return 1;
+		}
+	}
+
+	return 0;
+}

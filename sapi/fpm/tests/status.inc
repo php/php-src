@@ -35,7 +35,36 @@ class Status
         'max active processes' => '\d+',
         'max children reached' => '\d+',
         'slow requests'        => '\d+',
+        'memory peak'          => '\d+',
     ];
+
+    /**
+     * @var Tester
+     */
+    private Tester $tester;
+
+    /**
+     * @param Tester $tester
+     */
+    public function __construct(Tester $tester)
+    {
+        $this->tester = $tester;
+    }
+
+    /**
+     * @param string $body
+     * @param string $pattern
+     * @return void
+     */
+    private function matchError(string $body, string $pattern): void
+    {
+        echo "ERROR: Expected body does not match pattern\n";
+        echo "BODY:\n";
+        var_dump($body);
+        echo "PATTERN:\n";
+        var_dump($pattern);
+        $this->tester->printLogs();
+    }
 
     /**
      * Check status page.
@@ -106,11 +135,7 @@ class Status
         $pattern .= $footer . ')';
 
         if (!preg_match($pattern, $body)) {
-            echo "ERROR: Expected body does not match pattern\n";
-            echo "BODY:\n";
-            var_dump($body);
-            echo "PATTERN:\n";
-            var_dump($pattern);
+            $this->matchError($body, $pattern);
         }
     }
 
@@ -242,14 +267,13 @@ class Status
             "# HELP phpfpm_slow_requests The number of requests that exceeded your 'request_slowlog_timeout' value\.\n" .
             "# TYPE phpfpm_slow_requests counter\n" .
             "phpfpm_slow_requests " . $fields['slow requests'] . "\n" .
+            "# HELP phpfpm_memory_peak The memory usage peak since FPM has started\.\n" .
+            "# TYPE phpfpm_memory_peak gauge\n" .
+            "phpfpm_memory_peak " . $fields['memory peak'] . "\n" .
             "# EOF)\n";
 
         if (!preg_match($pattern, $body)) {
-            echo "ERROR: Expected body does not match pattern\n";
-            echo "BODY:\n";
-            var_dump($body);
-            echo "PATTERN:\n";
-            var_dump($pattern);
+            $this->matchError($body, $pattern);
         }
     }
 }

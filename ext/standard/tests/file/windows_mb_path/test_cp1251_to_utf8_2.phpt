@@ -22,7 +22,7 @@ include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = iconv('cp1251', 'utf-8', "привет"); // cp1251 string
 $prefix = create_data("file_cp1251", $item . "7");
-$fn = $prefix . DIRECTORY_SEPARATOR . "${item}7";
+$fn = $prefix . DIRECTORY_SEPARATOR . "{$item}7";
 
 $f = fopen($fn, 'w');
 if ($f) {

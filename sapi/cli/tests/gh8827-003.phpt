@@ -8,12 +8,6 @@ if (php_sapi_name() != "cli") {
 if (PHP_OS_FAMILY == 'Windows') {
 	die("skip not for Windows");
 }
-if (PHP_DEBUG) {
-    die("skip std streams are not closeable in debug builds");
-}
-if (getenv('SKIP_REPEAT')) {
-    die("skip cannot be repeated");
-}
 ?>
 --FILE--
 <?php
@@ -40,6 +34,7 @@ file_put_contents('php://fd/2', "Goes to stderrFile\n");
 
 ob_start(function ($buffer) use ($stdoutStream) {
     fwrite($stdoutStream, $buffer);
+    return '';
 }, 1);
 
 print "stdoutFile:\n";

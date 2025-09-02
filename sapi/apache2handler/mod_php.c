@@ -34,5 +34,6 @@ AP_MODULE_DECLARE_DATA module php_module = {
 	NULL,					/* create per-server config structure */
 	NULL,					/* merge per-server config structures */
 	php_dir_cmds,			/* command apr_table_t */
-	php_ap2_register_hook	/* register hooks */
+	php_ap2_register_hook,	/* register hooks */
+	0						/* flags */
 };

@@ -20,6 +20,8 @@
 #ifndef ZEND_PTR_STACK_H
 #define ZEND_PTR_STACK_H
 
+#include "zend_alloc.h"
+
 typedef struct _zend_ptr_stack {
 	int top, max;
 	void **elements;
@@ -48,7 +50,7 @@ END_EXTERN_C()
 		do {												\
 			stack->max += PTR_STACK_BLOCK_SIZE;				\
 		} while (stack->top+count > stack->max);			\
-		stack->elements = (void **) perealloc(stack->elements, (sizeof(void *) * (stack->max)), stack->persistent);	\
+		stack->elements = (void **) safe_perealloc(stack->elements, sizeof(void *), (stack->max), 0, stack->persistent);	\
 		stack->top_element = stack->elements+stack->top;	\
 	}
 

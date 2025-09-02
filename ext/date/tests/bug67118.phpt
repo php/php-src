@@ -23,7 +23,7 @@ class mydt extends datetime
 new mydt("Funktionsansvarig rådgivning och juridik", "UTC");
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: The DateTime object has not been correctly initialized by its constructor in %s:%d
+Fatal error: Uncaught DateObjectError: Object of type mydt (inheriting DateTime) has not been correctly initialized by calling parent::__construct() in its constructor in %s:%d
 Stack trace:
 #0 %s(%d): DateTime->format('Y')
 #1 %s(%d): mydt->__construct(%s)

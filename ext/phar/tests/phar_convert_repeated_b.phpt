@@ -77,15 +77,10 @@ try {
 ?>
 --CLEAN--
 <?php
-echo __DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz' . "\n";
-
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.2.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.zip');
-
 ?>
 --EXPECT--
 =================== new PharData() ==================

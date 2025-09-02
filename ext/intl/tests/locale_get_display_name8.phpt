@@ -112,9 +112,9 @@ disp_locale=fr :  display_name=slovène #Italie, NEDIS_KIRTI#
 disp_locale=de :  display_name=Slowenisch #Italien, NEDIS_KIRTI#
 -----------------
 locale='sl_IT_nedis-a-kirti-x-xyz'
-disp_locale=en :  display_name=Slovenian #Italy, NEDIS_A_KIRTI_X_XYZ#
-disp_locale=fr :  display_name=slovène #Italie, NEDIS_A_KIRTI_X_XYZ#
-disp_locale=de :  display_name=Slowenisch #Italien, NEDIS_A_KIRTI_X_XYZ#
+disp_locale=en :  display_name=Slovenian #Italy, NEDIS_A_KIRTI(_X_XYZ)?#
+disp_locale=fr :  display_name=slovène #Italie, NEDIS_A_KIRTI(_X_XYZ)?#
+disp_locale=de :  display_name=Slowenisch #Italien, NEDIS_A_KIRTI(_X_XYZ)?#
 -----------------
 locale='sl_IT_rozaj'
 disp_locale=en :  display_name=Slovenian #Italy, Resian#
@@ -317,14 +317,14 @@ disp_locale=fr :  display_name=anglais #États-Unis, attribute=islamcal#
 disp_locale=de :  display_name=Englisch #Vereinigte Staaten, attribute=islamcal#
 -----------------
 locale='zh-CN-a-myExt-x-private'
-disp_locale=en :  display_name=Chinese #China, a=myext, Private-Use=private#
-disp_locale=fr :  display_name=chinois #Chine, a=myext, usage privé=private#
-disp_locale=de :  display_name=Chinesisch #China, a=myext, Privatnutzung=private#
+disp_locale=en :  display_name=Chinese #China(, A_MYEXT(_X_PRIVATE)?)?, a=myext, Private-Use=private#
+disp_locale=fr :  display_name=chinois #Chine(, A_MYEXT(_X_PRIVATE)?)?, a=myext, usage privé=private#
+disp_locale=de :  display_name=Chinesisch #China(, A_MYEXT(_X_PRIVATE)?)?, a=myext, Privatnutzung=private#
 -----------------
 locale='en-a-myExt-b-another'
-disp_locale=en :  display_name=English #a=myext, b=another#
-disp_locale=fr :  display_name=anglais #a=myext, b=another#
-disp_locale=de :  display_name=Englisch #a=myext, b=another#
+disp_locale=en :  display_name=English #(A_MYEXT_B_ANOTHER, )?a=myext, b=another#
+disp_locale=fr :  display_name=anglais #(A_MYEXT_B_ANOTHER, )?a=myext, b=another#
+disp_locale=de :  display_name=Englisch #(A_MYEXT_B_ANOTHER, )?a=myext, b=another#
 -----------------
 locale='de-419-DE'
 disp_locale=en :  display_name=German #Latin America, DE#
@@ -337,7 +337,7 @@ disp_locale=fr :  display_name=a #Allemagne#
 disp_locale=de :  display_name=a #Deutschland#
 -----------------
 locale='ar-a-aaa-b-bbb-a-ccc'
-disp_locale=en :  display_name=Arabic #a=aaa, b=bbb#
-disp_locale=fr :  display_name=arabe #a=aaa, b=bbb#
-disp_locale=de :  display_name=Arabisch #a=aaa, b=bbb#
+disp_locale=en :  display_name=Arabic #(A_AAA_B_BBB_A_CCC, )?a=aaa, b=bbb#
+disp_locale=fr :  display_name=arabe #(A_AAA_B_BBB_A_CCC, )?a=aaa, b=bbb#
+disp_locale=de :  display_name=Arabisch #(A_AAA_B_BBB_A_CCC, )?a=aaa, b=bbb#
 -----------------

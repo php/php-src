@@ -487,10 +487,6 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		}
 	}
 	if (ret == PASS) {
-		ZEND_ASSERT(conn->username.s != user && conn->password.s != passwd);
-		mysqlnd_set_persistent_string(&conn->username, user, user_len, conn->persistent);
-		mysqlnd_set_persistent_string(&conn->password, passwd, passwd_len, conn->persistent);
-
 		mysqlnd_set_string(&conn->last_message, NULL, 0);
 		UPSERT_STATUS_RESET(conn->upsert_status);
 		/* set charset for old servers */
@@ -746,7 +742,7 @@ static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 {
 	BCRYPT_KEY_HANDLE ret = 0;
-	LPSTR der_buf = NULL;
+	BYTE *der_buf = NULL;
 	DWORD der_len;
 	CERT_PUBLIC_KEY_INFO *key_info = NULL;
 	DWORD key_info_len;
@@ -789,7 +785,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 
 	ZeroMemory(&padding_info, sizeof padding_info);
 	padding_info.pszAlgId = BCRYPT_SHA1_ALGORITHM;
-	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, NULL, 0, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		DBG_RETURN(0);
 	}
@@ -809,7 +805,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 
 	*auth_data_len = server_public_key_len;
 	ret = malloc(*auth_data_len);
-	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, ret, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
 		DBG_RETURN(0);
@@ -912,9 +908,12 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	if (conn->vio->data->ssl) {
 		DBG_INF("simple clear text under SSL");
 		/* clear text under SSL */
-		*auth_data_len = passwd_len;
-		ret = malloc(passwd_len);
+		/* NUL termination byte required: https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_authentication_methods_clear_text_password.html
+		 * (this is similar to bug #78680, but now as GH-11440) */
+		*auth_data_len = passwd_len + 1;
+		ret = malloc(passwd_len + 1);
 		memcpy(ret, passwd, passwd_len);
+		ret[passwd_len] = '\0';
 	} else {
 		*auth_data_len = 0;
 		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, pfc_data);
@@ -924,7 +923,10 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 			char *xor_str = do_alloca(passwd_len + 1, use_heap);
 			memcpy(xor_str, passwd, passwd_len);
 			xor_str[passwd_len] = '\0';
-			mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
+			/* https://dev.mysql.com/doc/dev/mysql-server/latest/page_caching_sha2_authentication_exchanges.html
+			 * This tells us that the nonce is 20 (==SCRAMBLE_LENGTH) bytes long.
+			 * In a 5.5+ server we might get additional scramble data in php_mysqlnd_greet_read, not used by this authentication method. */
+			mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, SCRAMBLE_LENGTH);
 			ret = mysqlnd_sha256_public_encrypt(conn, server_public_key, passwd_len, auth_data_len, xor_str);
 			free_alloca(xor_str, use_heap);
 		}
@@ -1003,9 +1005,19 @@ void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * con
 static size_t
 mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
 {
-	size_t server_public_key_len = (size_t) EVP_PKEY_size(server_public_key);
-
 	DBG_ENTER("mysqlnd_caching_sha2_public_encrypt");
+
+	int pkey_size = EVP_PKEY_size(server_public_key);
+
+	if (pkey_size <= 0) {
+		EVP_PKEY_free(server_public_key);
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "invalid public key size");
+		DBG_ERR("invalid public key size");
+		DBG_RETURN(0);
+	}
+
+	size_t server_public_key_len = (size_t) pkey_size;
+
 	/*
 		Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
 		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
@@ -1046,7 +1058,7 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 
 	ZeroMemory(&padding_info, sizeof padding_info);
 	padding_info.pszAlgId = BCRYPT_SHA1_ALGORITHM;
-	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, NULL, 0, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		DBG_RETURN(0);
 	}
@@ -1065,7 +1077,7 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 	}
 
 	*crypted = emalloc(server_public_key_len);
-	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, *crypted, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
 		DBG_RETURN(0);

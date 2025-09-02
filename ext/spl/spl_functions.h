@@ -19,11 +19,6 @@
 
 #include "php.h"
 
-typedef zend_object* (*create_object_func_t)(zend_class_entry *class_type);
-
-#define REGISTER_SPL_CLASS_CONST_LONG(class_name, const_name, value) \
-	zend_declare_class_constant_long(spl_ce_ ## class_name, const_name, sizeof(const_name)-1, (zend_long)value);
-
 /* sub: whether to allow subclasses/interfaces
    allow = 0: allow all classes and interfaces
    allow > 0: allow all that match and mask ce_flags
@@ -32,9 +27,8 @@ typedef zend_object* (*create_object_func_t)(zend_class_entry *class_type);
 void spl_add_class_name(zval * list, zend_class_entry * pce, int allow, int ce_flags);
 void spl_add_interfaces(zval * list, zend_class_entry * pce, int allow, int ce_flags);
 void spl_add_traits(zval * list, zend_class_entry * pce, int allow, int ce_flags);
-int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags);
+void spl_add_classes(zend_class_entry *pce, zval *list, bool sub, int allow, int ce_flags);
 
-/* caller must efree(return) */
-zend_string *spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len);
+void spl_set_private_debug_info_property(const zend_class_entry *ce, const char *property, size_t property_len, HashTable *debug_info, zval *value);
 
 #endif /* PHP_FUNCTIONS_H */

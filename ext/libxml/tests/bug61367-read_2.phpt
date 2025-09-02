@@ -14,6 +14,8 @@ open_basedir=.
  * Note: Using error_reporting=E_ALL & ~E_NOTICE to suppress "Trying to get property of non-object" notices.
  */
 class StreamExploiter {
+    public $context;
+
     public function stream_close (  ) {
         $doc = new DOMDocument;
         $doc->resolveExternals = true;
@@ -56,6 +58,6 @@ bool(true)
 int(4)
 bool(true)
 
-Warning: DOMDocument::loadXML(): I/O warning : failed to load external entity "file:///%s/test_bug_61367-read/bad" in %s on line %d
+%s: DOMDocument::loadXML(): %Sfailed to load %s
 
 Warning: Attempt to read property "nodeValue" on null in %s on line %d

@@ -61,4 +61,4 @@ Test2::__get
 int(1)
 int(1)
 Cannot unset readonly property Test2::$prop
-Cannot unset readonly property Test3::$prop from global scope
+Cannot unset protected(set) readonly property Test3::$prop from global scope

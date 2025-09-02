@@ -2,11 +2,6 @@
 DBA Split Test
 --EXTENSIONS--
 dba
---SKIPIF--
-<?php
-    require_once __DIR__ .'/skipif.inc';
-    die("info $HND handler used");
-?>
 --FILE--
 <?php
 var_dump(dba_key_split(null));
@@ -22,8 +17,11 @@ var_dump(dba_key_split("[key1]name1[key2]name2"));
 var_dump(dba_key_split("[key1]name1"));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: dba_key_split(): Passing false or null is deprecated since 8.4 in %s on line %d
 bool(false)
+
+Deprecated: dba_key_split(): Passing false or null is deprecated since 8.4 in %s on line %d
 bool(false)
 array(2) {
   [0]=>

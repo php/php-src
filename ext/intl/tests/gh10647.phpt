@@ -1,9 +1,7 @@
 --TEST--
 Bug GH-10647 (Spoofchecker::isSuspicious $errorCode always null)
---SKIPIF--
-<?php
-if (!extension_loaded("intl")) die("skip intl extension not available");
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $error = 123;

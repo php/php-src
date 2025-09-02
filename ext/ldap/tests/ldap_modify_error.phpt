@@ -11,22 +11,23 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 // DN not found
-var_dump(ldap_modify($link, "cn=not-found,$base", array()));
+var_dump(ldap_modify($link, "cn=not-found,$base", ["dc" => "my-domain"]));
 
 // Invalid DN
-var_dump(ldap_modify($link, "weirdAttribute=val", array()));
+var_dump(ldap_modify($link, "weirdAttribute=val", ["dc" => "my-domain"]));
 
-$entry = array(
-    "objectClass"	=> array(
+$entry = [
+    "objectClass" => [
         "top",
         "dcObject",
-        "organization"),
-    "dc"			=> "my-domain",
-    "o"				=> "my-domain",
-);
+        "organization",
+    ],
+    "dc" => "my-domain",
+    "o"	 => "my-domain",
+];
 
 ldap_add($link, "dc=my-domain,$base", $entry);
 
@@ -44,7 +45,7 @@ var_dump(ldap_modify($link, "dc=my-domain,$base", $entry2));
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
 ?>

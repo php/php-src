@@ -25,11 +25,11 @@ PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context, ZEND_ATTRIBUTE_UNUSE
 
 PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned char *input, size_t len)
 {
-	uint32_t i, s[2];
+	uint32_t s[2];
 
 	s[0] = context->state & 0xffff;
 	s[1] = (context->state >> 16) & 0xffff;
-	for (i = 0; i < len; ++i) {
+	for (size_t i = 0; i < len; ++i) {
 		s[0] += input[i];
 		s[1] += s[0];
 		if (s[1]>=0x7fffffff)
@@ -52,7 +52,7 @@ PHP_HASH_API void PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *con
 	context->state = 0;
 }
 
-PHP_HASH_API int PHP_ADLER32Copy(const php_hash_ops *ops, PHP_ADLER32_CTX *orig_context, PHP_ADLER32_CTX *copy_context)
+PHP_HASH_API zend_result PHP_ADLER32Copy(const php_hash_ops *ops, const PHP_ADLER32_CTX *orig_context, PHP_ADLER32_CTX *copy_context)
 {
 	copy_context->state = orig_context->state;
 	return SUCCESS;

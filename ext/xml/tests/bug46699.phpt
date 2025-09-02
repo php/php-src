@@ -25,10 +25,9 @@ $parser = xml_parser_create_ns("ISO-8859-1","@");
 xml_set_default_handler($parser,'defaultfunc');
 xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
 xml_parse($parser, $xml);
-xml_parser_free($parser);
 ?>
---EXPECT--
-<a xmlns="http://example.com/foo" xmlns:bar="http://example.com/bar">
+--EXPECTF--
+<a xmlns="http://example.com/foo"%axmlns:bar="http://example.com/bar">
   <bar:b foo="bar">1</bar:b>
   <bar:c bar:nix="null" foo="bar">2</bar:c>
 </a>

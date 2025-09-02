@@ -5,6 +5,7 @@ open_basedir=/does_not_exist
 --SKIPIF--
 <?php
 if (!in_array("glob", stream_get_wrappers())) echo "skip";
+?>
 --FILE--
 <?php
 
@@ -29,8 +30,4 @@ Warning: opendir(): open_basedir restriction in effect. File(%s) is not within t
 Warning: opendir(%s): Failed to open directory: Operation not permitted in %s%eglob-wrapper.php on line 5
 Failed to open %s
 ** Opening glob://%s
-
-Warning: opendir(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (/does_not_exist) in %s%eglob-wrapper.php on line 5
-
-Warning: opendir(glob://%s): Failed to open directory: operation failed in %s%eglob-wrapper.php on line 5
-Failed to open glob://%s
+No files in glob://%s

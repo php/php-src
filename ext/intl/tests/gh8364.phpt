@@ -1,9 +1,7 @@
 --TEST--
 Bug GH-8364 (msgfmt_format $values may not support references)
---SKIPIF--
-<?php
-if (!extension_loaded("intl")) die("skip intl extension not available");
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $formatter = new MessageFormatter('en', 'translate {0}');

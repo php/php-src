@@ -39,6 +39,10 @@ object(DateTime)#%d (3) {
 }
 
 -- Add some properties --
+
+Deprecated: Creation of dynamic property DateTime::$property1 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property DateTime::$property2 is deprecated in %s on line %d
 object(DateTime)#%d (5) {
   ["property1"]=>
   int(99)
@@ -67,6 +71,10 @@ object(DateTime)#%d (5) {
 }
 
 -- Add some more properties --
+
+Deprecated: Creation of dynamic property DateTime::$property3 is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property DateTime::$property4 is deprecated in %s on line %d
 object(DateTime)#%d (7) {
   ["property1"]=>
   int(99)

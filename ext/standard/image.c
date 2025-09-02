@@ -17,17 +17,18 @@
 
 #include "php.h"
 #include <stdio.h>
-#if HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #include "fopen_wrappers.h"
 #include "ext/standard/fsock.h"
-#if HAVE_UNISTD_H
+#include "libavifinfo/avifinfo.h"
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include "php_image.h"
 
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
 #endif
 
@@ -50,56 +51,22 @@ PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
 PHPAPI const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01, (char)0x00};
 PHPAPI const char php_sig_riff[4] = {'R', 'I', 'F', 'F'};
 PHPAPI const char php_sig_webp[4] = {'W', 'E', 'B', 'P'};
+PHPAPI const char php_sig_ftyp[4] = {'f', 't', 'y', 'p'};
+PHPAPI const char php_sig_mif1[4] = {'m', 'i', 'f', '1'};
+PHPAPI const char php_sig_heic[4] = {'h', 'e', 'i', 'c'};
+PHPAPI const char php_sig_heix[4] = {'h', 'e', 'i', 'x'};
+
+static zend_array php_image_handlers;
+static int php_image_handler_next_id = IMAGE_FILETYPE_FIXED_COUNT;
 
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
 
-/* return info as a struct, to make expansion easier */
-
-struct gfxinfo {
-	unsigned int width;
-	unsigned int height;
-	unsigned int bits;
-	unsigned int channels;
-};
-
-/* {{{ PHP_MINIT_FUNCTION(imagetypes)
- * Register IMAGETYPE_<xxx> constants used by GetImageSize(), image_type_to_mime_type, ext/exif */
-PHP_MINIT_FUNCTION(imagetypes)
-{
-	REGISTER_LONG_CONSTANT("IMAGETYPE_GIF",     IMAGE_FILETYPE_GIF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG",    IMAGE_FILETYPE_JPEG,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_PNG",     IMAGE_FILETYPE_PNG,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_SWF",     IMAGE_FILETYPE_SWF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_PSD",     IMAGE_FILETYPE_PSD,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_BMP",     IMAGE_FILETYPE_BMP,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_TIFF_II", IMAGE_FILETYPE_TIFF_II, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_TIFF_MM", IMAGE_FILETYPE_TIFF_MM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPC",     IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
-#endif
-	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_WBMP",    IMAGE_FILETYPE_WBMP,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
-	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",    IMAGE_FILETYPE_WEBP,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_AVIF",    IMAGE_FILETYPE_AVIF,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ php_handle_gif
  * routine to handle GIF files. If only everything were that easy... ;} */
-static struct gfxinfo *php_handle_gif (php_stream * stream)
+static struct php_gfxinfo *php_handle_gif (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[5];
 
 	if (php_stream_seek(stream, 3, SEEK_CUR))
@@ -108,7 +75,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream)
 	if (php_stream_read(stream, (char*)dim, sizeof(dim)) != sizeof(dim))
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 	result->width    = (unsigned int)dim[0] | (((unsigned int)dim[1])<<8);
 	result->height   = (unsigned int)dim[2] | (((unsigned int)dim[3])<<8);
 	result->bits     = dim[4]&0x80 ? ((((unsigned int)dim[4])&0x07) + 1) : 0;
@@ -119,9 +86,9 @@ static struct gfxinfo *php_handle_gif (php_stream * stream)
 /* }}} */
 
 /* {{{ php_handle_psd */
-static struct gfxinfo *php_handle_psd (php_stream * stream)
+static struct php_gfxinfo *php_handle_psd (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[8];
 
 	if (php_stream_seek(stream, 11, SEEK_CUR))
@@ -130,7 +97,7 @@ static struct gfxinfo *php_handle_psd (php_stream * stream)
 	if (php_stream_read(stream, (char*)dim, sizeof(dim)) != sizeof(dim))
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 	result->height   =  (((unsigned int)dim[0]) << 24) + (((unsigned int)dim[1]) << 16) + (((unsigned int)dim[2]) << 8) + ((unsigned int)dim[3]);
 	result->width    =  (((unsigned int)dim[4]) << 24) + (((unsigned int)dim[5]) << 16) + (((unsigned int)dim[6]) << 8) + ((unsigned int)dim[7]);
 
@@ -139,9 +106,9 @@ static struct gfxinfo *php_handle_psd (php_stream * stream)
 /* }}} */
 
 /* {{{ php_handle_bmp */
-static struct gfxinfo *php_handle_bmp (php_stream * stream)
+static struct php_gfxinfo *php_handle_bmp (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[16];
 	int size;
 
@@ -153,12 +120,12 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream)
 
 	size   = (((unsigned int)dim[ 3]) << 24) + (((unsigned int)dim[ 2]) << 16) + (((unsigned int)dim[ 1]) << 8) + ((unsigned int) dim[ 0]);
 	if (size == 12) {
-		result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
+		result = (struct php_gfxinfo *) ecalloc (1, sizeof(struct php_gfxinfo));
 		result->width    =  (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[ 7]) << 8) + ((unsigned int) dim[ 6]);
 		result->bits     =  ((unsigned int)dim[11]);
 	} else if (size > 12 && (size <= 64 || size == 108 || size == 124)) {
-		result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
+		result = (struct php_gfxinfo *) ecalloc (1, sizeof(struct php_gfxinfo));
 		result->width    =  (((unsigned int)dim[ 7]) << 24) + (((unsigned int)dim[ 6]) << 16) + (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[11]) << 24) + (((unsigned int)dim[10]) << 16) + (((unsigned int)dim[ 9]) << 8) + ((unsigned int) dim[ 8]);
 		result->height   =  abs((int32_t)result->height);
@@ -187,16 +154,16 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 }
 /* }}} */
 
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 /* {{{ php_handle_swc */
-static struct gfxinfo *php_handle_swc(php_stream * stream)
+static struct php_gfxinfo *php_handle_swc(php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 
 	long bits;
 	unsigned char a[64];
 	unsigned long len=64, szlength;
-	int factor = 1,maxfactor = 16;
+	int factor = 1,maxfactor = 1 << 15;
 	int status = 0;
 	unsigned char *b, *buf = NULL;
 	zend_string *bufz;
@@ -228,15 +195,20 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 		/*
 		 * zlib::uncompress() wants to know the output data length
 		 * if none was given as a parameter
-		 * we try from input length * 2 up to input length * 2^8
+		 * we try from input length * 2 up to input length * 2^15
 		 * doubling it whenever it wasn't big enough
-		 * that should be eneugh for all real life cases
+		 * that should be enough for all real life cases
 		*/
 
 		do {
-			szlength = ZSTR_LEN(bufz) * (1<<factor++);
+			factor <<= 1;
+			if (ZSTR_LEN(bufz) > ULONG_MAX / factor) {
+				status = Z_MEM_ERROR;
+				break;
+			}
+			szlength = (unsigned long) (ZSTR_LEN(bufz) * factor);
 			buf = erealloc(buf, szlength);
-			status = uncompress(buf, &szlength, (unsigned char *) ZSTR_VAL(bufz), ZSTR_LEN(bufz));
+			status = uncompress(buf, &szlength, (unsigned char *) ZSTR_VAL(bufz), (unsigned long) ZSTR_LEN(bufz));
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 
 		if (bufz) {
@@ -253,7 +225,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	}
 
 	if (!status) {
-		result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
+		result = (struct php_gfxinfo *) ecalloc (1, sizeof (struct php_gfxinfo));
 		bits = php_swf_get_bits (b, 0, 5);
 		result->width = (php_swf_get_bits (b, 5 + bits, bits) -
 			php_swf_get_bits (b, 5, bits)) / 20;
@@ -270,9 +242,9 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 #endif
 
 /* {{{ php_handle_swf */
-static struct gfxinfo *php_handle_swf (php_stream * stream)
+static struct php_gfxinfo *php_handle_swf (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	long bits;
 	unsigned char a[32];
 
@@ -282,7 +254,7 @@ static struct gfxinfo *php_handle_swf (php_stream * stream)
 	if (php_stream_read(stream, (char*)a, sizeof(a)) != sizeof(a))
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc (1, sizeof (struct php_gfxinfo));
 	bits = php_swf_get_bits (a, 0, 5);
 	result->width = (php_swf_get_bits (a, 5 + bits, bits) -
 		php_swf_get_bits (a, 5, bits)) / 20;
@@ -296,9 +268,9 @@ static struct gfxinfo *php_handle_swf (php_stream * stream)
 
 /* {{{ php_handle_png
  * routine to handle PNG files */
-static struct gfxinfo *php_handle_png (php_stream * stream)
+static struct php_gfxinfo *php_handle_png (php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[9];
 /* Width:              4 bytes
  * Height:             4 bytes
@@ -315,7 +287,7 @@ static struct gfxinfo *php_handle_png (php_stream * stream)
 	if((php_stream_read(stream, (char*)dim, sizeof(dim))) < sizeof(dim))
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 	result->width  = (((unsigned int)dim[0]) << 24) + (((unsigned int)dim[1]) << 16) + (((unsigned int)dim[2]) << 8) + ((unsigned int)dim[3]);
 	result->height = (((unsigned int)dim[4]) << 24) + (((unsigned int)dim[5]) << 16) + (((unsigned int)dim[6]) << 8) + ((unsigned int)dim[7]);
 	result->bits   = (unsigned int)dim[8];
@@ -425,6 +397,20 @@ static int php_skip_variable(php_stream * stream)
 }
 /* }}} */
 
+static size_t php_read_stream_all_chunks(php_stream *stream, char *buffer, size_t length)
+{
+	size_t read_total = 0;
+	do {
+		ssize_t read_now = php_stream_read(stream, buffer, length - read_total);
+		read_total += read_now;
+		if (read_now < stream->chunk_size && read_total != length) {
+			return 0;
+		}
+	} while (read_total < length);
+
+	return read_total;
+}
+
 /* {{{ php_read_APP */
 static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 {
@@ -441,7 +427,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (size_t) length) != length) {
+	if (php_read_stream_all_chunks(stream, buffer, length) != length) {
 		efree(buffer);
 		return 0;
 	}
@@ -460,9 +446,9 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 /* {{{ php_handle_jpeg
    main loop to parse JPEG structure */
-static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
+static struct php_gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned int marker = M_PSEUDO;
 	unsigned short length, ff_read=1;
 
@@ -485,7 +471,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 			case M_SOF15:
 				if (result == NULL) {
 					/* handle SOFn block */
-					result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+					result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 					length = php_read2(stream);
 					result->bits     = php_stream_getc(stream);
 					result->height   = php_read2(stream);
@@ -588,9 +574,9 @@ static unsigned int php_read4(php_stream * stream)
 
 /* {{{ php_handle_jpc
    Main loop to parse JPEG2000 raw codestream structure */
-static struct gfxinfo *php_handle_jpc(php_stream * stream)
+static struct php_gfxinfo *php_handle_jpc(php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	int highest_bit_depth, bit_depth;
 	unsigned char first_marker_id;
 	unsigned int i;
@@ -611,14 +597,14 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 		return NULL;
 	}
 
-	result = (struct gfxinfo *)ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *)ecalloc(1, sizeof(struct php_gfxinfo));
 
 	php_read2(stream); /* Lsiz */
 	php_read2(stream); /* Rsiz */
 	result->width = php_read4(stream); /* Xsiz */
 	result->height = php_read4(stream); /* Ysiz */
 
-#if MBO_0
+#ifdef MBO_0
 	php_read4(stream); /* XOsiz */
 	php_read4(stream); /* YOsiz */
 	php_read4(stream); /* XTsiz */
@@ -659,9 +645,9 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 
 /* {{{ php_handle_jp2
    main loop to parse JPEG 2000 JP2 wrapper format structure */
-static struct gfxinfo *php_handle_jp2(php_stream *stream)
+static struct php_gfxinfo *php_handle_jp2(php_stream *stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned int box_length;
 	unsigned int box_type;
 	char jp2c_box_id[] = {(char)0x6a, (char)0x70, (char)0x32, (char)0x63};
@@ -766,10 +752,10 @@ static signed short php_ifd_get16s(void *Short, int motorola_intel)
 static int php_ifd_get32s(void *Long, int motorola_intel)
 {
 	if (motorola_intel) {
-		return  ((( char *)Long)[0] << 24) | (((unsigned char *)Long)[1] << 16)
+		return  ((unsigned)(((unsigned char *)Long)[0]) << 24) | (((unsigned char *)Long)[1] << 16)
 		      | (((unsigned char *)Long)[2] << 8 ) | (((unsigned char *)Long)[3] << 0 );
 	} else {
-		return  ((( char *)Long)[3] << 24) | (((unsigned char *)Long)[2] << 16)
+		return  ((unsigned)(((unsigned char *)Long)[3]) << 24) | (((unsigned char *)Long)[2] << 16)
 		      | (((unsigned char *)Long)[1] << 8 ) | (((unsigned char *)Long)[0] << 0 );
 	}
 }
@@ -785,9 +771,9 @@ static unsigned php_ifd_get32u(void *Long, int motorola_intel)
 
 /* {{{ php_handle_tiff
    main loop to parse TIFF structure */
-static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int motorola_intel)
+static struct php_gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int motorola_intel)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	int i, num_entries;
 	unsigned char *dir_entry;
 	size_t ifd_size, dir_size, entry_value, width=0, height=0, ifd_addr;
@@ -853,7 +839,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 	efree(ifd_data);
 	if ( width && height) {
 		/* not the same when in for-loop */
-		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+		result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 		result->height   = height;
 		result->width    = width;
 		result->bits     = 0;
@@ -865,9 +851,9 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 /* }}} */
 
 /* {{{ php_handle_psd */
-static struct gfxinfo *php_handle_iff(php_stream * stream)
+static struct php_gfxinfo *php_handle_iff(php_stream * stream)
 {
-	struct gfxinfo * result;
+	struct php_gfxinfo * result;
 	unsigned char a[10];
 	int chunkId;
 	int size;
@@ -901,7 +887,7 @@ static struct gfxinfo *php_handle_iff(php_stream * stream)
 			height = php_ifd_get16s(a+2, 1);
 			bits   = a[8] & 0xff;
 			if (width > 0 && height > 0 && bits > 0 && bits < 33) {
-				result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+				result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 				result->width    = width;
 				result->height   = height;
 				result->bits     = bits;
@@ -926,7 +912,7 @@ static struct gfxinfo *php_handle_iff(php_stream * stream)
  * int Number of columns
  * int Number of rows
  */
-static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
+static int php_get_wbmp(php_stream *stream, struct php_gfxinfo **result, int check)
 {
 	int i, width = 0, height = 0;
 
@@ -987,9 +973,9 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 /* }}} */
 
 /* {{{ php_handle_wbmp */
-static struct gfxinfo *php_handle_wbmp(php_stream * stream)
+static struct php_gfxinfo *php_handle_wbmp(php_stream * stream)
 {
-	struct gfxinfo *result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	struct php_gfxinfo *result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 
 	if (!php_get_wbmp(stream, &result, 0)) {
 		efree(result);
@@ -1001,7 +987,7 @@ static struct gfxinfo *php_handle_wbmp(php_stream * stream)
 /* }}} */
 
 /* {{{ php_get_xbm */
-static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
+static int php_get_xbm(php_stream *stream, struct php_gfxinfo **result)
 {
 	char *fline;
 	char *iname;
@@ -1048,7 +1034,7 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 
 	if (width && height) {
 		if (result) {
-			*result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+			*result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 			(*result)->width = width;
 			(*result)->height = height;
 		}
@@ -1060,18 +1046,18 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 /* }}} */
 
 /* {{{ php_handle_xbm */
-static struct gfxinfo *php_handle_xbm(php_stream * stream)
+static struct php_gfxinfo *php_handle_xbm(php_stream * stream)
 {
-	struct gfxinfo *result;
+	struct php_gfxinfo *result;
 	php_get_xbm(stream, &result);
 	return result;
 }
 /* }}} */
 
 /* {{{ php_handle_ico */
-static struct gfxinfo *php_handle_ico(php_stream * stream)
+static struct php_gfxinfo *php_handle_ico(php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	unsigned char dim[16];
 	int num_icons = 0;
 
@@ -1083,7 +1069,7 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 	if (num_icons < 1 || num_icons > 255)
 		return NULL;
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 
 	while (num_icons > 0)
 	{
@@ -1110,9 +1096,9 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 /* }}} */
 
 /* {{{ php_handle_webp */
-static struct gfxinfo *php_handle_webp(php_stream * stream)
+static struct php_gfxinfo *php_handle_webp(php_stream * stream)
 {
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
 	const char sig[3] = {'V', 'P', '8'};
 	unsigned char buf[18];
 	char format;
@@ -1133,7 +1119,7 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 			return NULL;
 	}
 
-	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	result = (struct php_gfxinfo *) ecalloc(1, sizeof(struct php_gfxinfo));
 
 	switch (format) {
 		case ' ':
@@ -1155,102 +1141,79 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 }
 /* }}} */
 
+/* {{{ User struct and stream read/skip implementations for libavifinfo API */
+struct php_avif_stream {
+	php_stream* stream;
+	uint8_t buffer[AVIFINFO_MAX_NUM_READ_BYTES];
+};
+
+static const uint8_t* php_avif_stream_read(void* stream, size_t num_bytes) {
+	struct php_avif_stream* avif_stream = (struct php_avif_stream*)stream;
+
+	if (avif_stream == NULL || avif_stream->stream == NULL) {
+		return NULL;
+	}
+	if (php_stream_read(avif_stream->stream, (char*)avif_stream->buffer, num_bytes) != num_bytes) {
+		avif_stream->stream = NULL; /* fail further calls */
+		return NULL;
+	}
+	return avif_stream->buffer;
+}
+
+static void php_avif_stream_skip(void* stream, size_t num_bytes) {
+	struct php_avif_stream* avif_stream = (struct php_avif_stream*)stream;
+
+	if (avif_stream == NULL || avif_stream->stream == NULL) {
+		return;
+	}
+	if (php_stream_seek(avif_stream->stream, num_bytes, SEEK_CUR)) {
+		avif_stream->stream = NULL; /* fail further calls */
+	}
+}
+/* }}} */
+
 /* {{{ php_handle_avif
- * There's no simple way to get this information - so, for now, this is unsupported.
- * Simply return 0 for everything.
+ * Parse AVIF features
+ *
+ * The stream must be positioned at the beginning of a box, so it does not
+ * matter whether the "ftyp" box was already read by php_is_image_avif() or not.
+ * It will read bytes from the stream until features are found or the file is
+ * declared as invalid. Around 450 bytes are usually enough.
+ * Transforms such as mirror and rotation are not applied on width and height.
  */
-static struct gfxinfo *php_handle_avif(php_stream * stream) {
-	return ecalloc(1, sizeof(struct gfxinfo));
+static struct php_gfxinfo *php_handle_avif(php_stream * stream) {
+	struct php_gfxinfo* result = NULL;
+	AvifInfoFeatures features;
+	struct php_avif_stream avif_stream;
+	avif_stream.stream = stream;
+
+	if (AvifInfoGetFeaturesStream(&avif_stream, php_avif_stream_read, php_avif_stream_skip, &features) == kAvifInfoOk) {
+		result = (struct php_gfxinfo*)ecalloc(1, sizeof(struct php_gfxinfo));
+		result->width = features.width;
+		result->height = features.height;
+		result->bits = features.bit_depth;
+		result->channels = features.num_channels;
+	}
+	return result;
 }
 /* }}} */
 
-/* {{{ php_ntohl
- * Convert a big-endian network uint32 to host order - 
- * which may be either little-endian or big-endian.
- * Thanks to Rob Pike via Joe Drago:
- * https://commandcenter.blogspot.nl/2012/04/byte-order-fallacy.html
+/*
+ * Detect whether an image is of type AVIF
+ *
+ * Only the first "ftyp" box is read.
+ * For a valid file, 12 bytes are usually read, but more might be necessary.
  */
-static uint32_t php_ntohl(uint32_t val) {
-	uint8_t data[4];
+bool php_is_image_avif(php_stream* stream) {
+	struct php_avif_stream avif_stream;
+	avif_stream.stream = stream;
 
-	memcpy(&data, &val, sizeof(data));
-	return ((uint32_t)data[3] << 0) |
-		((uint32_t)data[2] << 8) |
-		((uint32_t)data[1] << 16) |
-		((uint32_t)data[0] << 24);
+	return AvifInfoIdentifyStream(&avif_stream, php_avif_stream_read, php_avif_stream_skip) == kAvifInfoOk;
 }
-/* }}} */
-
-/* {{{ php_is_image_avif
- * detect whether an image is of type AVIF
- * 
- * An AVIF image will start off a header "box".
- * This starts with with a four-byte integer containing the number of bytes in the filetype box.
- * This must be followed by the string "ftyp".
- * Next comes a four-byte string indicating the "major brand".
- * If that's "avif" or "avis", this is an AVIF image.
- * Next, there's a four-byte "minor version" field, which we can ignore.
- * Next comes an array of four-byte strings containing "compatible brands".
- * These extend to the end of the box.
- * If any of the compatible brands is "avif" or "avis", then this is an AVIF image.
- * Otherwise, well, it's not.
- * For more, see https://mpeg.chiariglione.org/standards/mpeg-4/iso-base-media-file-format/text-isoiec-14496-12-5th-edition
- */
-bool php_is_image_avif(php_stream * stream) {
-	uint32_t header_size_reversed, header_size, i;
-	char box_type[4], brand[4];
-
-	ZEND_ASSERT(stream != NULL);
-
-	if (php_stream_read(stream, (char *) &header_size_reversed, 4) != 4) {
-		return 0;
-	}
-
-	header_size = php_ntohl(header_size_reversed);
-
-	/* If the box type isn't "ftyp", it can't be an AVIF image. */
-	if (php_stream_read(stream, box_type, 4) != 4) {
-		return 0;
-	}
-
-	if (memcmp(box_type, "ftyp", 4)) {
-		return 0;
-	}
-	
-	/* If the major brand is "avif" or "avis", it's an AVIF image. */
-	if (php_stream_read(stream, brand, 4) != 4) {
-		return 0;
-	}
-
-	if (!memcmp(brand, "avif", 4) || !memcmp(brand, "avis", 4)) {
-		return 1;
-	}
-
-	/* Skip the next four bytes, which are the "minor version". */
-	if (php_stream_read(stream, brand, 4) != 4) {
-		return 0;
-	}
-
-	/* Look for "avif" or "avis" in any member of compatible_brands[], to the end of the header.
-	   Note we've already read four groups of four bytes. */
-
-	for (i = 16; i < header_size; i += 4) {
-		if (php_stream_read(stream, brand, 4) != 4) {
-			return 0;
-		}
-
-		if (!memcmp(brand, "avif", 4) || !memcmp(brand, "avis", 4)) {
-			return 1;
-		}
-	}
-
-	return 0;
-}
-/* }}} */
 
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
-PHPAPI char * php_image_type_to_mime_type(int image_type)
+PHPAPI const char * php_image_type_to_mime_type(int image_type)
 {
 	switch( image_type) {
 		case IMAGE_FILETYPE_GIF:
@@ -1285,7 +1248,15 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/webp";
 		case IMAGE_FILETYPE_AVIF:
 			return "image/avif";
-		default:
+		case IMAGE_FILETYPE_HEIF:
+			return "image/heif";
+		default: {
+			const struct php_image_handler *handler = zend_hash_index_find_ptr(&php_image_handlers, (zend_ulong) image_type);
+			if (handler) {
+				return handler->mime_type;
+			}
+			ZEND_FALLTHROUGH;
+		}
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
 	}
@@ -1301,7 +1272,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 		Z_PARAM_LONG(p_image_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(p_image_type));
+	ZVAL_STRING(return_value, php_image_type_to_mime_type(p_image_type));
 }
 /* }}} */
 
@@ -1370,6 +1341,16 @@ PHP_FUNCTION(image_type_to_extension)
 		case IMAGE_FILETYPE_AVIF:
 			imgext = ".avif";
 			break;
+		case IMAGE_FILETYPE_HEIF:
+			imgext = ".heif";
+			break;
+		default: {
+			const struct php_image_handler *handler = zend_hash_index_find_ptr(&php_image_handlers, (zend_ulong) image_type);
+			if (handler) {
+				imgext = handler->extension;
+			}
+			break;
+		}
 	}
 
 	if (imgext) {
@@ -1454,6 +1435,11 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 		return IMAGE_FILETYPE_JP2;
 	}
 
+	if (twelve_bytes_read && !memcmp(filetype + 4, php_sig_ftyp, 4) &&
+		(!memcmp(filetype + 8, php_sig_mif1, 4) || !memcmp(filetype + 8, php_sig_heic, 4) || !memcmp(filetype + 8, php_sig_heix, 4))) {
+		return IMAGE_FILETYPE_HEIF;
+	}
+
 	if (!php_stream_rewind(stream) && php_is_image_avif(stream)) {
 		return IMAGE_FILETYPE_AVIF;
 	}
@@ -1472,6 +1458,15 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 		return IMAGE_FILETYPE_XBM;
 	}
 
+	zend_ulong h;
+	zval *zv;
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(&php_image_handlers, h, zv) {
+		const struct php_image_handler *handler = Z_PTR_P(zv);
+		if (handler->identify(stream) == SUCCESS) {
+			return (int) h;
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	return IMAGE_FILETYPE_UNKNOWN;
 }
 /* }}} */
@@ -1479,7 +1474,8 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	int itype = 0;
-	struct gfxinfo *result = NULL;
+	struct php_gfxinfo *result = NULL;
+	const char *mime_type = NULL;
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -1504,7 +1500,8 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			result = php_handle_swf(stream);
 			break;
 		case IMAGE_FILETYPE_SWC:
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+			/* TODO: with the new php_image_register_handler() APIs, this restriction could be solved */
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 			result = php_handle_swc(stream);
 #else
 			php_error_docref(NULL, E_NOTICE, "The image is a compressed SWF file, but you do not have a static version of the zlib extension enabled");
@@ -1546,19 +1543,35 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 		case IMAGE_FILETYPE_AVIF:
 			result = php_handle_avif(stream);
 			break;
-		default:
+		case IMAGE_FILETYPE_HEIF:
+			if (!php_stream_rewind(stream)) {
+				result = php_handle_avif(stream);
+			}
+			break;
+		default: {
+			struct php_image_handler* handler = zend_hash_index_find_ptr(&php_image_handlers, (zend_ulong) itype);
+			if (handler) {
+				result = handler->get_info(stream);
+				mime_type = handler->mime_type;
+				break;
+			}
+			ZEND_FALLTHROUGH;
+		}
 		case IMAGE_FILETYPE_UNKNOWN:
 			break;
 	}
 
 	if (result) {
-		char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
 		array_init(return_value);
 		add_index_long(return_value, 0, result->width);
 		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
-		snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
-		add_index_string(return_value, 3, temp);
+		if ((!result->width_unit || zend_string_equals_literal(result->width_unit, "px"))
+			&& (!result->height_unit || zend_string_equals_literal(result->height_unit, "px"))) {
+			char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
+			snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
+			add_index_string(return_value, 3, temp);
+		}
 
 		if (result->bits != 0) {
 			add_assoc_long(return_value, "bits", result->bits);
@@ -1566,7 +1579,19 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 		if (result->channels != 0) {
 			add_assoc_long(return_value, "channels", result->channels);
 		}
-		add_assoc_string(return_value, "mime", (char*)php_image_type_to_mime_type(itype));
+		add_assoc_string(return_value, "mime", mime_type ? mime_type : php_image_type_to_mime_type(itype));
+
+		if (result->width_unit) {
+			add_assoc_str(return_value, "width_unit", result->width_unit);
+		} else {
+			add_assoc_string(return_value, "width_unit", "px");
+		}
+		if (result->height_unit) {
+			add_assoc_str(return_value, "height_unit", result->height_unit);
+		} else {
+			add_assoc_string(return_value, "height_unit", "px");
+		}
+
 		efree(result);
 	} else {
 		RETURN_FALSE;
@@ -1589,7 +1614,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 		Z_PARAM_ZVAL(info)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mode == FROM_PATH && CHECK_NULL_PATH(ZSTR_VAL(input), ZSTR_LEN(input))) {
+	if (mode == FROM_PATH && zend_str_has_nul_byte(input)) {
 		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
@@ -1629,3 +1654,36 @@ PHP_FUNCTION(getimagesizefromstring)
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);
 }
 /* }}} */
+
+PHP_MINIT_FUNCTION(image)
+{
+	zend_hash_init(&php_image_handlers, 4, NULL, NULL, true);
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(image)
+{
+#ifdef ZTS
+	if (!tsrm_is_main_thread()) {
+		return SUCCESS;
+	}
+#endif
+	zend_hash_destroy(&php_image_handlers);
+	return SUCCESS;
+}
+
+extern zend_module_entry basic_functions_module;
+
+int php_image_register_handler(const struct php_image_handler *handler)
+{
+	zend_hash_index_add_ptr(&php_image_handlers, (zend_ulong) php_image_handler_next_id, (void *) handler);
+	zend_register_long_constant(handler->const_name, strlen(handler->const_name), php_image_handler_next_id, CONST_PERSISTENT, basic_functions_module.module_number);
+	Z_LVAL_P(zend_get_constant_str(ZEND_STRL("IMAGETYPE_COUNT")))++;
+	return php_image_handler_next_id++;
+}
+
+zend_result php_image_unregister_handler(int image_type)
+{
+	ZEND_ASSERT(image_type >= IMAGE_FILETYPE_FIXED_COUNT);
+	return zend_hash_index_del(&php_image_handlers, (zend_ulong) image_type);
+}

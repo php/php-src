@@ -31,7 +31,9 @@
 #ifndef MBFL_ENCODING_H
 #define MBFL_ENCODING_H
 
+#include "zend.h"
 #include "mbfl_defs.h"
+#include "mbfl_consts.h"
 
 enum mbfl_no_encoding {
 	mbfl_no_encoding_invalid = -1,
@@ -82,6 +84,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_2022jp_kddi,
 	mbfl_no_encoding_2022jpms,
 	mbfl_no_encoding_gb18030,
+	mbfl_no_encoding_gb18030_2022,
 	mbfl_no_encoding_cp1252,
 	mbfl_no_encoding_cp1254,
 	mbfl_no_encoding_8859_1,
@@ -119,8 +122,6 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_charset_max
 };
 
-typedef enum mbfl_no_encoding mbfl_encoding_id;
-
 struct _mbfl_convert_filter;
 struct mbfl_convert_vtbl {
 	enum mbfl_no_encoding from;
@@ -132,10 +133,115 @@ struct mbfl_convert_vtbl {
 	void (*filter_copy)(struct _mbfl_convert_filter *src, struct _mbfl_convert_filter *dest);
 };
 
-/*
- * encoding
- */
-typedef struct _mbfl_encoding {
+typedef struct {
+	unsigned char *out;
+	unsigned char *limit;
+	uint32_t state;
+	uint32_t errors;
+	uint32_t replacement_char;
+	unsigned int error_mode;
+	zend_string *str;
+} mb_convert_buf;
+
+typedef size_t (*mb_to_wchar_fn)(unsigned char **in, size_t *in_len, uint32_t *out, size_t out_len, unsigned int *state);
+typedef void (*mb_from_wchar_fn)(uint32_t *in, size_t in_len, mb_convert_buf *out, bool end);
+typedef bool (*mb_check_fn)(unsigned char *in, size_t in_len);
+typedef zend_string* (*mb_cut_fn)(unsigned char *str, size_t from, size_t len, unsigned char *end);
+
+/* When converting encoded text to a buffer of wchars (Unicode codepoints) using `mb_to_wchar_fn`,
+ * the buffer must be at least this size (to work with all supported text encodings) */
+#define MBSTRING_MIN_WCHAR_BUFSIZE 5
+
+static inline void mb_convert_buf_init(mb_convert_buf *buf, size_t initsize, uint32_t repl_char, unsigned int err_mode)
+{
+	buf->state = buf->errors = 0;
+	buf->str = emalloc(_ZSTR_STRUCT_SIZE(initsize));
+	buf->out = (unsigned char*)ZSTR_VAL(buf->str);
+	buf->limit = buf->out + initsize;
+	buf->replacement_char = repl_char;
+	buf->error_mode = err_mode;
+}
+
+#define MB_CONVERT_BUF_ENSURE(buf, out, limit, needed) \
+	ZEND_ASSERT(out <= limit); \
+	if ((size_t)(limit - out) < (needed)) { \
+		size_t oldsize = limit - (unsigned char*)ZSTR_VAL((buf)->str); \
+		size_t newsize = oldsize + MAX(oldsize >> 1, needed); \
+		zend_string *newstr = erealloc((buf)->str, _ZSTR_STRUCT_SIZE(newsize)); \
+		out = (unsigned char*)ZSTR_VAL(newstr) + (out - (unsigned char*)ZSTR_VAL((buf)->str)); \
+		limit = (unsigned char*)ZSTR_VAL(newstr) + newsize; \
+		(buf)->str = newstr; \
+	}
+
+#define MB_CONVERT_BUF_STORE(buf, _out, _limit) (buf)->out = _out; (buf)->limit = _limit
+
+#define MB_CONVERT_BUF_LOAD(buf, _out, _limit) _out = (buf)->out; _limit = (buf)->limit
+
+#define MB_CONVERT_ERROR(buf, out, limit, bad_cp, conv_fn) \
+	MB_CONVERT_BUF_STORE(buf, out, limit); \
+	mb_illegal_output(bad_cp, conv_fn, buf); \
+	MB_CONVERT_BUF_LOAD(buf, out, limit)
+
+static inline unsigned char* mb_convert_buf_add(unsigned char *out, char c)
+{
+	*out++ = c;
+	return out;
+}
+
+static inline unsigned char* mb_convert_buf_add2(unsigned char *out, char c1, char c2)
+{
+	*out++ = c1;
+	*out++ = c2;
+	return out;
+}
+
+static inline unsigned char* mb_convert_buf_add3(unsigned char *out, char c1, char c2, char c3)
+{
+	*out++ = c1;
+	*out++ = c2;
+	*out++ = c3;
+	return out;
+}
+
+static inline unsigned char* mb_convert_buf_add4(unsigned char *out, char c1, char c2, char c3, char c4)
+{
+	*out++ = c1;
+	*out++ = c2;
+	*out++ = c3;
+	*out++ = c4;
+	return out;
+}
+
+static inline unsigned char* mb_convert_buf_appends(unsigned char *out, const char *s)
+{
+	while (*s) {
+		*out++ = *s++;
+	}
+	return out;
+}
+
+static inline unsigned char* mb_convert_buf_appendn(unsigned char *out, const char *s, size_t n)
+{
+	while (n--) {
+		*out++ = *s++;
+	}
+	return out;
+}
+
+static inline zend_string* mb_convert_buf_result_raw(mb_convert_buf *buf)
+{
+	ZEND_ASSERT(buf->out <= buf->limit);
+	zend_string *ret = buf->str;
+	/* See `zend_string_alloc` in zend_string.h */
+	GC_SET_REFCOUNT(ret, 1);
+	GC_TYPE_INFO(ret) = GC_STRING;
+	ZSTR_H(ret) = 0;
+	ZSTR_LEN(ret) = buf->out - (unsigned char*)ZSTR_VAL(ret);
+	*(buf->out) = '\0';
+	return ret;
+}
+
+typedef struct {
 	enum mbfl_no_encoding no_encoding;
 	const char *name;
 	const char *mime_name;
@@ -144,14 +250,46 @@ typedef struct _mbfl_encoding {
 	unsigned int flag;
 	const struct mbfl_convert_vtbl *input_filter;
 	const struct mbfl_convert_vtbl *output_filter;
+	mb_to_wchar_fn to_wchar;
+	mb_from_wchar_fn from_wchar;
+	mb_check_fn check;
+	mb_cut_fn cut;
 } mbfl_encoding;
 
+extern const mbfl_encoding mbfl_encoding_utf8;
+
+static inline zend_string* mb_convert_buf_result(mb_convert_buf *buf, const mbfl_encoding *enc)
+{
+	zend_string *ret = mb_convert_buf_result_raw(buf);
+	if (enc == &mbfl_encoding_utf8 && buf->error_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8) {
+		GC_ADD_FLAGS(ret, IS_STR_VALID_UTF8);
+	}
+	return ret;
+}
+
+/* Used if we initialize an `mb_convert_buf` but then discover we don't actually
+ * want to return `zend_string` */
+static inline void mb_convert_buf_free(mb_convert_buf *buf)
+{
+	efree(buf->str);
+}
+
+static inline size_t mb_convert_buf_len(mb_convert_buf *buf)
+{
+	return buf->out - (unsigned char*)ZSTR_VAL(buf->str);
+}
+
+static inline void mb_convert_buf_reset(mb_convert_buf *buf, size_t len)
+{
+	buf->out = (unsigned char*)ZSTR_VAL(buf->str) + len;
+	ZEND_ASSERT(buf->out <= buf->limit);
+}
+
 MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
+MBFLAPI extern const mbfl_encoding *mbfl_name2encoding_ex(const char *name, size_t name_len);
 MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
-MBFLAPI extern enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);
 MBFLAPI extern const mbfl_encoding **mbfl_get_supported_encodings(void);
 MBFLAPI extern const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
-MBFLAPI extern const char *mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern const char *mbfl_encoding_preferred_mime_name(const mbfl_encoding *encoding);
 
 #endif /* MBFL_ENCODING_H */

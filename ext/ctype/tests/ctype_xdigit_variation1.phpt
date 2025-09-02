@@ -1,5 +1,5 @@
 --TEST--
-Test ctype_xdigit() function : usage variations - different data typse as $c arg
+Test ctype_xdigit() function : usage variations - different data types as $c arg
 --EXTENSIONS--
 ctype
 --FILE--

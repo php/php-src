@@ -13,13 +13,15 @@ function getContinentList() {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
+
   function __construct($wsdl, $options=array()) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
         $this->server->addFunction("getContinentList");
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): string {
     echo $request;
     ob_start();
     $this->server->handle($request);

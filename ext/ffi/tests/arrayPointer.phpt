@@ -7,7 +7,7 @@ ffi.enable=1
 --FILE--
 <?php
 error_reporting(E_ALL & ~E_DEPRECATED);
-$data = FFI::new('int');
+$data = FFI::cdef()->new('int');
 var_dump(reset($data));
 var_dump(end($data));
 var_dump(next($data));

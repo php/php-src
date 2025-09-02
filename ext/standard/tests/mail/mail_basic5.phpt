@@ -20,7 +20,9 @@ $message = 'A Message';
 echo "-- failure --\n";
 var_dump( mail($to, $subject, $message) );
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mail() : basic functionality ***
 -- failure --
+
+Warning: mail(): Sendmail exited with non-zero exit code 1 in %smail_basic5.php on line %d
 bool(false)

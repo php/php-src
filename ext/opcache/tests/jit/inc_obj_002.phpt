@@ -4,10 +4,10 @@ PRE_INC_OBJ: 002
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class Test {
     function foo() {
         $this->prop = PHP_INT_MAX - 5;

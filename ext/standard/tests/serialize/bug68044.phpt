@@ -10,5 +10,5 @@ Warning: unserialize(): %s in %sbug68044.php on line %d
 
 Warning: Insufficient data for unserializing - %d required, 1 present in %s%ebug68044.php on line 2
 
-Notice: unserialize(): Error at offset 32 of 33 bytes in %s%ebug68044.php on line 2
+Warning: unserialize(): Error at offset 32 of 33 bytes in %s on line %d
 ===DONE==

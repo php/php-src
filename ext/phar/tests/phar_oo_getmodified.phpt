@@ -26,7 +26,6 @@ var_dump($phar->getModified());
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--

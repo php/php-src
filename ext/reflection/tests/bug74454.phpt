@@ -14,4 +14,4 @@ function load_file() {
 }
 ?>
 --EXPECT--
-ParseError: syntax error, unexpected token "if", expecting "function" or "const"
+ParseError: syntax error, unexpected token "if", expecting "function"

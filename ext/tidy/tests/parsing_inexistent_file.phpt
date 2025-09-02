@@ -10,7 +10,11 @@ var_dump($tidy->parseFile("does_not_exist.html"));
 
 var_dump(tidy_parse_file("does_not_exist.html"));
 
-$tidy = new tidy("does_not_exist.html");
+try {
+    $tidy = new tidy("does_not_exist.html");
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
 Warning: tidy::parseFile(): Cannot load "does_not_exist.html" into memory in %s on line %d
@@ -18,5 +22,4 @@ bool(false)
 
 Warning: tidy_parse_file(): Cannot load "does_not_exist.html" into memory in %s on line %d
 bool(false)
-
-Warning: tidy::__construct(): Cannot load "does_not_exist.html" into memory in %s on line %d
+Cannot load "does_not_exist.html" into memory

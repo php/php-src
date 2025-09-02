@@ -8,6 +8,7 @@ exif
 * Pollute the heap. Helps trigger bug. Sometimes not needed.
 */
 class A {
+    public $a;
     function __construct() {
         $a = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa';
         $this->a = $a . $a . $a . $a . $a . $a;

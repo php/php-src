@@ -27,12 +27,8 @@
 # define PHPDBG_API
 #endif
 
-#ifndef PHP_WIN32
-#	include <stdint.h>
-#	include <stddef.h>
-#else
-#	include "main/php_stdint.h"
-#endif
+#include <stdint.h>
+#include <stddef.h>
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -60,7 +56,7 @@
 #	define strcasecmp _stricmp
 #	define strncasecmp _strnicmp
 #else
-#	include "php_config.h"
+#	include <php_config.h>
 #endif
 #ifndef O_BINARY
 #	define O_BINARY 0
@@ -94,7 +90,7 @@
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
-#define PHPDBG_ISSUES "http://bugs.php.net/report.php"
+#define PHPDBG_ISSUES "https://github.com/php/php-src/issues"
 #define PHPDBG_VERSION PHP_VERSION
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
@@ -197,8 +193,10 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
 #define phpdbg_try_access \
 	{                                                            \
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wshadow") \
 		JMP_BUF *__orig_bailout = PHPDBG_G(sigsegv_bailout); \
 		JMP_BUF __bailout;                                   \
+		ZEND_DIAGNOSTIC_IGNORED_END \
                                                                      \
 		PHPDBG_G(sigsegv_bailout) = &__bailout;              \
 		if (SETJMP(__bailout) == 0) {
@@ -247,6 +245,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #ifndef _WIN32
 	struct sigaction old_sigsegv_signal;         /* segv signal handler */
 #endif
+#ifdef HAVE_USERFAULTFD_WRITEFAULT
+    int watch_userfaultfd;                       /* userfaultfd(2) handler, 0 if unused */
+    pthread_t watch_userfault_thread;            /* thread for watch fault handling */
+#endif
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
 	HashTable watch_elements;                    /* user defined watch elements */
@@ -254,9 +256,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable watch_recreation;                  /* watch elements pending recreation of their respective watchpoints */
 	HashTable watch_free;                        /* pointers to watch for being freed */
 	HashTable *watchlist_mem;                    /* triggered watchpoints */
+	HashTable *original_watchlist_mem;           /* the original allocation for watchlist_mem, used when watchlist_mem has changed temporarily */
 	HashTable *watchlist_mem_backup;             /* triggered watchpoints backup table while iterating over it */
 	bool watchpoint_hit;                    /* a watchpoint was hit */
-	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
+	void (*original_free_function)(void * ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);      /* the original AG(mm_heap)->_free function */
 	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
 
 	char *exec;                                  /* file to execute */
@@ -270,7 +273,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
 	zend_op_array *(*init_compile_file)(zend_file_handle *file_handle, int type);
-	zend_op_array *(*compile_string)(zend_string *source_string, const char *filename);
+	zend_op_array *(*compile_string)(zend_string *source_string, const char *filename, zend_compile_position position);
 	HashTable file_sources;
 
 	zend_arena *oplog_arena;                     /* arena for storing oplog */

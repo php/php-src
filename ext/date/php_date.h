@@ -20,6 +20,23 @@
 #include "lib/timelib.h"
 #include "Zend/zend_hash.h"
 
+/* Same as SIZEOF_ZEND_LONG but using TIMELIB_LONG_MAX/MIN */
+#if TIMELIB_LONG_MAX == INT32_MAX
+# define PHP_DATE_SIZEOF_LONG 4
+#elif TIMELIB_LONG_MAX == INT64_MAX
+# define PHP_DATE_SIZEOF_LONG 8
+#else
+# error "Unknown TIMELIB LONG SIZE"
+#endif
+
+/* Same as ZEND_DOUBLE_FITS_LONG but using TIMELIB_LONG_MAX/MIN */
+#if PHP_DATE_SIZEOF_LONG == 4
+# define PHP_DATE_DOUBLE_FITS_LONG(d) (!((d) > (double)TIMELIB_LONG_MAX || (d) < (double)TIMELIB_LONG_MIN))
+#elif PHP_DATE_SIZEOF_LONG == 8
+  /* >= as (double)TIMELIB_LONG_MAX is outside signed range */
+# define PHP_DATE_DOUBLE_FITS_LONG(d) (!((d) >= (double)TIMELIB_LONG_MAX || (d) < (double)TIMELIB_LONG_MIN))
+#endif
+
 #include "php_version.h"
 #define PHP_DATE_VERSION PHP_VERSION
 
@@ -50,7 +67,7 @@ static inline php_date_obj *php_date_obj_from_obj(zend_object *obj) {
 #define Z_PHPDATE_P(zv)  php_date_obj_from_obj(Z_OBJ_P((zv)))
 
 struct _php_timezone_obj {
-	int             initialized;
+	bool            initialized;
 	int             type;
 	union {
 		timelib_tzinfo   *tz;         /* TIMELIB_ZONETYPE_ID */
@@ -72,7 +89,9 @@ static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
 struct _php_interval_obj {
 	timelib_rel_time *diff;
 	int               civil_or_wall;
-	int               initialized;
+	bool              initialized;
+	bool              from_string;
+	zend_string      *date_string;
 	zend_object       std;
 };
 
@@ -89,8 +108,9 @@ struct _php_period_obj {
 	timelib_time     *end;
 	timelib_rel_time *interval;
 	int               recurrences;
-	int               initialized;
-	int               include_start_date;
+	bool              initialized;
+	bool              include_start_date;
+	bool              include_end_date;
 	zend_object       std;
 };
 
@@ -105,7 +125,6 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 	char                    *timezone;
 	HashTable               *tzcache;
 	timelib_error_container *last_errors;
-	int                     timezone_valid;
 ZEND_END_MODULE_GLOBALS(date)
 
 #define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)
@@ -114,13 +133,14 @@ PHPAPI time_t php_time(void);
 
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(const char *string, zend_long *now);
-PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
-PHPAPI int php_idate(char format, time_t ts, int localtime);
+PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt);
+PHPAPI int php_idate(char format, time_t ts, bool localtime);
 
 #define _php_strftime php_strftime
 
-PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
-PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, int localtime);
+PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gm);
+PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime);
+PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, const php_date_obj *date_obj);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
@@ -139,7 +159,8 @@ PHPAPI zend_class_entry *php_date_get_period_ce(void);
 #define PHP_DATE_INIT_FORMAT 0x02
 
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
-PHPAPI int php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags);
-
+PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags);
+PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long sec, int usec);
+PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts);
 
 #endif /* PHP_DATE_H */

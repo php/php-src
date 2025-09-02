@@ -19,6 +19,9 @@
 #ifndef MYSQLND_CHARSET_H
 #define MYSQLND_CHARSET_H
 
+#define MYSQLND_UTF8_MB3_DEFAULT_ID 33
+#define MYSQLND_UTF8_MB4_DEFAULT_ID 45
+
 PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const charset, char * newstr,
 											 const char * escapestr, const size_t escapestr_len);
 

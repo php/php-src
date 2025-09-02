@@ -8,7 +8,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 mysqli_report(MYSQLI_REPORT_OFF);
 $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);

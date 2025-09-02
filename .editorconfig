@@ -32,3 +32,7 @@ max_line_length          = 80
 
 [*.patch]
 trim_trailing_whitespace = false
+
+[*.rst]
+indent_style             = space
+max_line_length          = 100

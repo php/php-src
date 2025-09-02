@@ -4,6 +4,7 @@ Test match jump table optimizer
 opcache.enable=1
 opcache.enable_cli=1
 opcache.opt_debug_level=0x20000
+zend_test.observer.enabled=0
 --EXTENSIONS--
 opcache
 --FILE--
@@ -43,16 +44,14 @@ test:
      ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 ECHO string("No match
-")
+0000 ECHO string("No match\n")
 0001 RETURN null
 
 test2:
      ; (lines=2, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 ECHO string("No match
-")
+0000 ECHO string("No match\n")
 0001 RETURN null
 No match
 No match

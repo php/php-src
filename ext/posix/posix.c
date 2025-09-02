@@ -15,15 +15,14 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include <unistd.h>
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_posix.h"
-#include "posix_arginfo.h"
+#include "main/php_network.h"
 
 #ifdef HAVE_POSIX
 
@@ -40,12 +39,21 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
-#ifdef HAVE_SYS_MKDEV_H
+#ifdef MAJOR_IN_MKDEV
 # include <sys/mkdev.h>
-#endif
-#ifdef HAVE_SYS_SYSMACROS_H
+#elif defined(MAJOR_IN_SYSMACROS)
 # include <sys/sysmacros.h>
 #endif
+
+#if (defined(__sun) && !defined(_LP64)) || defined(_AIX)
+#define POSIX_PID_MIN LONG_MIN
+#define POSIX_PID_MAX LONG_MAX
+#else
+#define POSIX_PID_MIN INT_MIN
+#define POSIX_PID_MAX INT_MAX
+#endif
+
+#include "posix_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);
@@ -71,82 +79,8 @@ static PHP_GINIT_FUNCTION(posix) /* {{{ */
 /* {{{ PHP_MINIT_FUNCTION(posix) */
 static PHP_MINIT_FUNCTION(posix)
 {
-	REGISTER_LONG_CONSTANT("POSIX_F_OK", F_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_X_OK", X_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_W_OK", W_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_R_OK", R_OK, CONST_CS | CONST_PERSISTENT);
-#ifdef S_IFREG
-	REGISTER_LONG_CONSTANT("POSIX_S_IFREG", S_IFREG, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFCHR
-	REGISTER_LONG_CONSTANT("POSIX_S_IFCHR", S_IFCHR, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFBLK
-	REGISTER_LONG_CONSTANT("POSIX_S_IFBLK", S_IFBLK, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFIFO
-	REGISTER_LONG_CONSTANT("POSIX_S_IFIFO", S_IFIFO, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFSOCK
-	REGISTER_LONG_CONSTANT("POSIX_S_IFSOCK", S_IFSOCK, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_AS
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_AS", RLIMIT_AS, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_CORE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_CORE", RLIMIT_CORE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_CPU
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_CPU", RLIMIT_CPU, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_DATA
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_DATA", RLIMIT_DATA, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_FSIZE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_FSIZE", RLIMIT_FSIZE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_LOCKS
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_LOCKS", RLIMIT_LOCKS, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_MEMLOCK
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_MEMLOCK", RLIMIT_MEMLOCK, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_MSGQUEUE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_MSGQUEUE", RLIMIT_MSGQUEUE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_NICE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NICE", RLIMIT_NICE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_NOFILE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NOFILE", RLIMIT_NOFILE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_NPROC
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NPROC", RLIMIT_NPROC, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_RSS
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RSS", RLIMIT_RSS, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_RTPRIO
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RTPRIO", RLIMIT_RTPRIO, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_RTTIME
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RTTIME", RLIMIT_RTTIME, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_SIGPENDING
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_SIGPENDING", RLIMIT_SIGPENDING, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_STACK
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_STACK", RLIMIT_STACK, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_KQUEUES
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_KQUEUES", RLIMIT_KQUEUES, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_NPTS
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NPTS", RLIMIT_NPTS, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef HAVE_SETRLIMIT
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_INFINITY", RLIM_INFINITY, CONST_CS | CONST_PERSISTENT);
-#endif
+	register_posix_symbols(module_number);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -192,6 +126,12 @@ ZEND_GET_MODULE(posix)
 	}	\
 	RETURN_TRUE;
 
+#define PHP_POSIX_CHECK_PID(pid, arg, lower, upper)										\
+	if (pid < lower || pid > upper) {										\
+		zend_argument_value_error(arg, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, lower, upper);	\
+		RETURN_THROWS();											\
+	}
+
 /* {{{ Send a signal to a process (POSIX.1, 3.3.2) */
 
 PHP_FUNCTION(posix_kill)
@@ -202,6 +142,8 @@ PHP_FUNCTION(posix_kill)
 		Z_PARAM_LONG(pid)
 		Z_PARAM_LONG(sig)
 	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_POSIX_CHECK_PID(pid, 1, POSIX_PID_MIN, POSIX_PID_MAX)
 
 	if (kill(pid, sig) < 0) {
 		POSIX_G(last_error) = errno;
@@ -310,10 +252,11 @@ PHP_FUNCTION(posix_getgroups)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, result);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	for (i=0; i<result; i++) {
-		add_next_index_long(return_value, gidlist[i]);
+		add_index_long(return_value, i, gidlist[i]);
 	}
 	efree(gidlist);
 }
@@ -364,6 +307,9 @@ PHP_FUNCTION(posix_setpgid)
 		Z_PARAM_LONG(pgid)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_POSIX_CHECK_PID(pid, 1, 0, POSIX_PID_MAX)
+	PHP_POSIX_CHECK_PID(pgid, 2, 0, POSIX_PID_MAX)
+
 	if (setpgid(pid, pgid) < 0) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
@@ -402,6 +348,8 @@ PHP_FUNCTION(posix_getsid)
 		Z_PARAM_LONG(val)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_POSIX_CHECK_PID(val, 1, 0, POSIX_PID_MAX)
+
 	if ((val = getsid(val)) < 0) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
@@ -431,7 +379,7 @@ PHP_FUNCTION(posix_uname)
 	add_assoc_string(return_value, "version",  u.version);
 	add_assoc_string(return_value, "machine",  u.machine);
 
-#if defined(_GNU_SOURCE) && !defined(DARWIN) && defined(HAVE_UTSNAME_DOMAINNAME)
+#if defined(_GNU_SOURCE) && defined(HAVE_STRUCT_UTSNAME_DOMAINNAME)
 	add_assoc_string(return_value, "domainname", u.domainname);
 #endif
 }
@@ -454,7 +402,7 @@ PHP_FUNCTION(posix_times)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 5);
 
 	add_assoc_long(return_value, "ticks",	ticks);			/* clock ticks */
 	add_assoc_long(return_value, "utime",	t.tms_utime);	/* user time */
@@ -490,25 +438,32 @@ PHP_FUNCTION(posix_ctermid)
 /* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
+static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *ret) /* {{{ */
 {
 	php_stream *stream;
 
 	php_stream_from_zval_no_verify(stream, zfp);
 
 	if (stream == NULL) {
-		return 0;
+		return FAILURE;
 	}
-	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)fd, 0);
-	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)fd, 0);
+
+	/* get the fd. php_socket_t is used for FDs, and is shorter than zend_long.
+	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
+	 * It is only used here so that the buffered data warning is not displayed.
+	 */
+	php_socket_t fd = -1;
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void**)&fd, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void**)&fd, 0);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
-		return 0;
+		return FAILURE;
 	}
-	return 1;
+	*ret = fd;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -517,33 +472,53 @@ PHP_FUNCTION(posix_ttyname)
 {
 	zval *z_fd;
 	char *p;
-	int fd;
+	zend_long fd = 0;
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	zend_long buflen;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(z_fd)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(z_fd)) {
-		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(z_fd, &fd)) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
+	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
+			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
+				zend_zval_value_name(z_fd));
 			fd = zval_get_long(z_fd);
+		}
+		/* fd must fit in an int and be positive */
+		if (fd < 0 || fd > INT_MAX) {
+			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
+			POSIX_G(last_error) = EBADF;
+			RETURN_FALSE;
+		}
 	}
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	buflen = sysconf(_SC_TTY_NAME_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 32;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	p = emalloc(buflen);
 
-	if (ttyname_r(fd, p, buflen)) {
-		POSIX_G(last_error) = errno;
+try_again:
+	err = ttyname_r(fd, p, buflen);
+	if (err) {
+		if (err == ERANGE) {
+			buflen *= 2;
+			p = erealloc(p, buflen);
+			goto try_again;
+		}
+		POSIX_G(last_error) = err;
 		efree(p);
 		RETURN_FALSE;
 	}
@@ -563,33 +538,42 @@ PHP_FUNCTION(posix_ttyname)
 PHP_FUNCTION(posix_isatty)
 {
 	zval *z_fd;
-	int fd;
+	zend_long fd = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(z_fd)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(z_fd)) {
-		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(z_fd, &fd)) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			fd = zval_get_long(z_fd);
+	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
+			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
+				zend_zval_value_name(z_fd));
+			RETURN_FALSE;
+		}
 	}
 
+	/* A valid file descriptor must fit in an int and be positive */
+	if (fd < 0 || fd > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
+		POSIX_G(last_error) = EBADF;
+		RETURN_FALSE;
+	}
 	if (isatty(fd)) {
 		RETURN_TRUE;
 	} else {
+		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
 /*
-	POSIX.1, 4.8.1 sysconf() - TODO
-	POSIX.1, 5.7.1 pathconf(), fpathconf() - TODO
+	POSIX.1, 4.8.1 sysconf()
+	POSIX.1, 5.7.1 pathconf(), fpathconf()
 
 	POSIX.1, 5.1.2 opendir(), readdir(), rewinddir(), closedir()
 	POSIX.1, 5.2.1 chdir()
@@ -675,7 +659,7 @@ PHP_FUNCTION(posix_mknod)
 			zend_argument_value_error(3, "cannot be 0 for the POSIX_S_IFCHR and POSIX_S_IFBLK modes");
 			RETURN_THROWS();
 		} else {
-#if defined(HAVE_MAKEDEV) || defined(makedev)
+#ifdef HAVE_MAKEDEV
 			php_dev = makedev(major, minor);
 #else
 			php_error_docref(NULL, E_WARNING, "Cannot create a block or character device, creating a normal file instead");
@@ -696,18 +680,15 @@ PHP_FUNCTION(posix_mknod)
 
 /* Takes a pointer to posix group and a pointer to an already initialized ZVAL
  * array container and fills the array with the posix group member data. */
-int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
+static void php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 {
 	zval array_members;
 	int count;
 
-	if (NULL == g)
-		return 0;
-
-	if (array_group == NULL || Z_TYPE_P(array_group) != IS_ARRAY)
-		return 0;
+	ZEND_ASSERT(Z_TYPE_P(array_group) == IS_ARRAY);
 
 	array_init(&array_members);
+	zend_hash_real_init_packed(Z_ARRVAL(array_members));
 
 	add_assoc_string(array_group, "name", g->gr_name);
 	if (g->gr_passwd) {
@@ -727,7 +708,6 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	}
 	zend_hash_str_update(Z_ARRVAL_P(array_group), "members", sizeof("members")-1, &array_members);
 	add_assoc_long(array_group, "gid", g->gr_gid);
-	return 1;
 }
 /* }}} */
 
@@ -773,6 +753,44 @@ PHP_FUNCTION(posix_access)
 
 	RETURN_TRUE;
 }
+
+#ifdef HAVE_EACCESS
+PHP_FUNCTION(posix_eaccess)
+{
+	zend_long mode = 0;
+	size_t filename_len, ret;
+	char *filename, *path;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	path = expand_filepath(filename, NULL);
+	if (!path) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+
+	if (php_check_open_basedir_ex(path, 0)) {
+		efree(path);
+		POSIX_G(last_error) = EPERM;
+		RETURN_FALSE;
+	}
+
+	ret = eaccess(path, mode);
+	efree(path);
+
+	if (ret) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+#endif
+
 /* }}} */
 
 /*
@@ -792,6 +810,7 @@ PHP_FUNCTION(posix_getgrnam)
 	struct group gbuf;
 	long buflen;
 	char *buf;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -801,19 +820,24 @@ PHP_FUNCTION(posix_getgrnam)
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	buf = emalloc(buflen);
 try_again:
 	g = &gbuf;
 
-	if (getgrnam_r(name, g, buf, buflen, &g) || g == NULL) {
-		if (errno == ERANGE) {
+	err = getgrnam_r(name, g, buf, buflen, &g);
+	if (err || g == NULL) {
+		if (err == ERANGE) {
 			buflen *= 2;
 			buf = erealloc(buf, buflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = errno;
+		POSIX_G(last_error) = err;
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -825,11 +849,7 @@ try_again:
 #endif
 	array_init(return_value);
 
-	if (!php_posix_group_to_array(g, return_value)) {
-		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "Unable to convert posix group to array");
-		RETVAL_FALSE;
-	}
+	php_posix_group_to_array(g, return_value);
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	efree(buf);
 #endif
@@ -841,7 +861,7 @@ PHP_FUNCTION(posix_getgrgid)
 {
 	zend_long gid;
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
-	int ret;
+	int err;
 	struct group _g;
 	struct group *retgrptr = NULL;
 	long grbuflen;
@@ -857,20 +877,24 @@ PHP_FUNCTION(posix_getgrgid)
 
 	grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	if (grbuflen < 1) {
-		RETURN_FALSE;
+		grbuflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	grbuflen = 1;
+#endif
 
 	grbuf = emalloc(grbuflen);
 
 try_again:
-	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
-	if (ret || retgrptr == NULL) {
-		if (errno == ERANGE) {
+	err = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
+	if (err || retgrptr == NULL) {
+		if (err == ERANGE) {
 			grbuflen *= 2;
 			grbuf = erealloc(grbuf, grbuflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = ret;
+		POSIX_G(last_error) = err;
 		efree(grbuf);
 		RETURN_FALSE;
 	}
@@ -883,23 +907,16 @@ try_again:
 #endif
 	array_init(return_value);
 
-	if (!php_posix_group_to_array(g, return_value)) {
-		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "Unable to convert posix group struct to array");
-		RETVAL_FALSE;
-	}
+	php_posix_group_to_array(g, return_value);
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	efree(grbuf);
 #endif
 }
 /* }}} */
 
-int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
+static void php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 {
-	if (NULL == pw)
-		return 0;
-	if (NULL == return_value || Z_TYPE_P(return_value) != IS_ARRAY)
-		return 0;
+	ZEND_ASSERT(Z_TYPE_P(return_value) == IS_ARRAY);
 
 	add_assoc_string(return_value, "name",      pw->pw_name);
 	add_assoc_string(return_value, "passwd",    pw->pw_passwd);
@@ -908,7 +925,6 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 	add_assoc_string(return_value, "gecos",     pw->pw_gecos);
 	add_assoc_string(return_value, "dir",       pw->pw_dir);
 	add_assoc_string(return_value, "shell",     pw->pw_shell);
-	return 1;
 }
 /* }}} */
 
@@ -922,6 +938,7 @@ PHP_FUNCTION(posix_getpwnam)
 	struct passwd pwbuf;
 	long buflen;
 	char *buf;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -931,20 +948,25 @@ PHP_FUNCTION(posix_getpwnam)
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	buf = emalloc(buflen);
-	pw = &pwbuf;
 
 try_again:
-	if (getpwnam_r(name, pw, buf, buflen, &pw) || pw == NULL) {
-		if (errno == ERANGE) {
+	pw = &pwbuf;
+	err = getpwnam_r(name, pw, buf, buflen, &pw);
+	if (err || pw == NULL) {
+		if (err == ERANGE) {
 			buflen *= 2;
 			buf = erealloc(buf, buflen);
 			goto try_again;
 		}
 		efree(buf);
-		POSIX_G(last_error) = errno;
+		POSIX_G(last_error) = err;
 		RETURN_FALSE;
 	}
 #else
@@ -955,11 +977,7 @@ try_again:
 #endif
 	array_init(return_value);
 
-	if (!php_posix_passwd_to_array(pw, return_value)) {
-		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "Unable to convert posix passwd struct to array");
-		RETVAL_FALSE;
-	}
+	php_posix_passwd_to_array(pw, return_value);
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	efree(buf);
 #endif
@@ -975,7 +993,7 @@ PHP_FUNCTION(posix_getpwuid)
 	struct passwd *retpwptr = NULL;
 	long pwbuflen;
 	char *pwbuf;
-	int ret;
+	int err;
 #endif
 	struct passwd *pw;
 
@@ -986,19 +1004,23 @@ PHP_FUNCTION(posix_getpwuid)
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (pwbuflen < 1) {
-		RETURN_FALSE;
+		pwbuflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	pwbuflen = 1;
+#endif
 	pwbuf = emalloc(pwbuflen);
 
 try_again:
-	ret = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
-	if (ret || retpwptr == NULL) {
-		if (errno == ERANGE) {
+	err = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
+	if (err || retpwptr == NULL) {
+		if (err == ERANGE) {
 			pwbuflen *= 2;
 			pwbuf = erealloc(pwbuf, pwbuflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = ret;
+		POSIX_G(last_error) = err;
 		efree(pwbuf);
 		RETURN_FALSE;
 	}
@@ -1011,11 +1033,7 @@ try_again:
 #endif
 	array_init(return_value);
 
-	if (!php_posix_passwd_to_array(pw, return_value)) {
-		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "Unable to convert posix passwd struct to array");
-		RETVAL_FALSE;
-	}
+	php_posix_passwd_to_array(pw, return_value);
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	efree(pwbuf);
 #endif
@@ -1028,7 +1046,7 @@ try_again:
 #define UNLIMITED_STRING "unlimited"
 
 /* {{{ posix_addlimit */
-static int posix_addlimit(int limit, const char *name, zval *return_value) {
+static zend_result posix_addlimit(int limit, const char *name, zval *return_value) {
 	int result;
 	struct rlimit rl;
 	char hard[80];
@@ -1129,15 +1147,43 @@ static const struct limitlist {
 PHP_FUNCTION(posix_getrlimit)
 {
 	const struct limitlist *l = NULL;
+	zend_long res;
+	bool res_is_null = true;
 
-	ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(res, res_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
-	array_init(return_value);
+	if (res_is_null) {
+		array_init(return_value);
 
-	for (l=limits; l->name; l++) {
-		if (posix_addlimit(l->limit, l->name, return_value) == FAILURE) {
-			zend_array_destroy(Z_ARR_P(return_value));
+		for (l=limits; l->name; l++) {
+			if (posix_addlimit(l->limit, l->name, return_value) == FAILURE) {
+				zend_array_destroy(Z_ARR_P(return_value));
+				RETURN_FALSE;
+			}
+		}
+	} else {
+		struct rlimit rl;
+		int result = getrlimit(res, &rl);
+		if (result < 0) {
+			POSIX_G(last_error) = errno;
 			RETURN_FALSE;
+		}
+
+		array_init_size(return_value, 2);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+		if (rl.rlim_cur == RLIM_INFINITY) {
+			add_next_index_stringl(return_value, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
+		} else {
+			add_next_index_long(return_value, rl.rlim_cur);
+		}
+
+		if (rl.rlim_max == RLIM_INFINITY) {
+			add_next_index_stringl(return_value, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
+		} else {
+			add_next_index_long(return_value, rl.rlim_max);
 		}
 	}
 }
@@ -1157,6 +1203,21 @@ PHP_FUNCTION(posix_setrlimit)
 		Z_PARAM_LONG(cur)
 		Z_PARAM_LONG(max)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (cur < -1) {
+		zend_argument_value_error(2, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (max < -1) {
+		zend_argument_value_error(3, "must be greater or equal to -1");
+		RETURN_THROWS();
+	}
+
+	if (max > -1 && cur > max) {
+		zend_argument_value_error(2, "must be lower or equal to " ZEND_LONG_FMT, max);
+		RETURN_THROWS();
+	}
 
 	rl.rlim_cur = cur;
 	rl.rlim_max = max;
@@ -1217,4 +1278,86 @@ PHP_FUNCTION(posix_initgroups)
 	RETURN_BOOL(!initgroups((const char *)name, basegid));
 }
 /* }}} */
+#endif
+
+PHP_FUNCTION(posix_sysconf)
+{
+	zend_long conf_id;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(conf_id)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(sysconf(conf_id));
+}
+
+#ifdef HAVE_PATHCONF
+PHP_FUNCTION(posix_pathconf)
+{
+	zend_long name, ret;
+	char *path;
+	size_t path_len;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(path, path_len)
+		Z_PARAM_LONG(name);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (path_len == 0) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	} else if (php_check_open_basedir(path)) {
+		php_error_docref(NULL, E_WARNING, "Invalid path supplied: %s", path);
+		RETURN_FALSE;
+	}
+
+	ret = pathconf(path, name);
+
+	if (ret < 0 && errno != 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ret);
+}
+#endif
+
+#ifdef HAVE_FPATHCONF
+PHP_FUNCTION(posix_fpathconf)
+{
+	zend_long name, ret, fd = 0;
+	zval *z_fd;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(z_fd)
+		Z_PARAM_LONG(name);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
+			zend_argument_type_error(1, "must be of type int|resource, %s given",
+				zend_zval_value_name(z_fd));
+			RETURN_THROWS();
+		}
+	}
+	/* fd must fit in an int and be positive */
+	if (fd < 0 || fd > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
+		POSIX_G(last_error) = EBADF;
+		RETURN_FALSE;
+	}
+
+	ret = fpathconf(fd, name);
+
+	if (ret < 0 && errno != 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ret);
+}
 #endif

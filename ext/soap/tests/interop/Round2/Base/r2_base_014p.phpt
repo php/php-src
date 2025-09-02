@@ -7,11 +7,7 @@ precision=14
 --FILE--
 <?php
 class SOAPStruct {
-    function __construct($s, $i, $f) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-    }
+    function __construct(public $varString, public $varInt, public $varFloat) {}
 }
 
 $client = new SoapClient(NULL,array("location"=>"test://","uri"=>"http://soapinterop.org/","trace"=>1,"exceptions"=>0));

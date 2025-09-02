@@ -7,7 +7,12 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
     public function __construct(int $size = 0) {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.4', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
     public function count(): int {}
@@ -21,8 +26,8 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
     /** @tentative-return-type */
     public function getSize(): int {}
 
-    /** @return bool */
-    public function setSize(int $size) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function setSize(int $size): true {}
 
     /**
      * @param int $index
@@ -50,5 +55,8 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
 
     public function getIterator(): Iterator {}
 
+    /**
+     * @implementation-alias SplFixedArray::toArray
+     */
     public function jsonSerialize(): array {}
 }

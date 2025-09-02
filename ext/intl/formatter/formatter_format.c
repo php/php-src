@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -104,7 +104,7 @@ PHP_FUNCTION( numfmt_format )
 			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 			break;
 		case FORMAT_TYPE_CURRENCY:
-			if (getThis()) {
+			if (hasThis()) {
 				const char *space;
 				const char *class_name = get_active_class_name(&space);
 				zend_argument_value_error(2, "cannot be NumberFormatter::TYPE_CURRENCY constant, "
@@ -114,7 +114,7 @@ PHP_FUNCTION( numfmt_format )
 			}
 			RETURN_THROWS();
 		default:
-			zend_argument_value_error(getThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
+			zend_argument_value_error(hasThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
 			RETURN_THROWS();
 	}
 
@@ -164,7 +164,7 @@ PHP_FUNCTION( numfmt_format_currency )
 
 	if( U_FAILURE( INTL_DATA_ERROR_CODE((nfo)) ) ) {
 		intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((nfo)) );
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(nfo), "Number formatting failed", 0 );
+		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(nfo), "Number formatting failed");
 		RETVAL_FALSE;
 		if (formatted != format_buf) {
 			efree(formatted);

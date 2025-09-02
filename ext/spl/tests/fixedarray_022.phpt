@@ -11,7 +11,7 @@ call_user_func(function () {
 ?>
 --EXPECTF--
 Warning: var_export does not handle circular references in %s on line 5
-SplFixedArray::__set_state(array(
+\SplFixedArray::__set_state(array(
    0 => NULL,
 ))
 object(SplFixedArray)#2 (1) refcount(4){

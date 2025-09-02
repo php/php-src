@@ -12,7 +12,7 @@ if (!function_exists('imagewebp') || !function_exists('imagecreatefromwebp'))
 ?>
 --FILE--
 <?php
-require_once __DIR__ . '/similarity.inc';
+require_once __DIR__ . '/func.inc';
 
 $filename = __DIR__ . '/webp_basic.webp';
 
@@ -30,12 +30,18 @@ imagewebp($im1, $filename);
 $im2 = imagecreatefromwebp($filename);
 imagewebp($im2, $filename);
 echo 'Is lossy conversion close enough? ';
-var_dump(calc_image_dissimilarity($im1, $im2) < 10e5);
+var_dump(mse($im1, $im2) < 500);
 
 imagewebp($im1, $filename, IMG_WEBP_LOSSLESS);
 $im_lossless = imagecreatefromwebp($filename);
 echo 'Does lossless conversion work? ';
-var_dump(calc_image_dissimilarity($im1, $im_lossless) == 0);
+var_dump(mse($im1, $im_lossless) == 0);
+
+try {
+	imagewebp($im1, $filename, -10);
+} catch (\ValueError $e) {
+	echo $e->getMessage();
+}
 
 ?>
 --CLEAN--
@@ -45,3 +51,4 @@ var_dump(calc_image_dissimilarity($im1, $im_lossless) == 0);
 --EXPECT--
 Is lossy conversion close enough? bool(true)
 Does lossless conversion work? bool(true)
+imagewebp(): Argument #3 ($quality) must be greater than or equal to -1

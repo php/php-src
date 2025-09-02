@@ -40,7 +40,7 @@ PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...) {
 	return ret;
 }
 
-static int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
+int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
 	char *msgout = NULL;
 	int msgoutlen = FAILURE;
 
@@ -143,7 +143,11 @@ PHPDBG_API int phpdbg_vprint(int type, int fd, const char *strfmt, va_list args)
 		return msglen;
 	}
 
-	len = phpdbg_process_print(fd, type, msg, msglen);
+	if (UNEXPECTED(msglen == 0)) {
+		len = 0;
+	} else {
+		len = phpdbg_process_print(fd, type, msg, msglen);
+	}
 
 	if (msg) {
 		free(msg);

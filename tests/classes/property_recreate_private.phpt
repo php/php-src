@@ -12,6 +12,7 @@ class C {
     }
 }
 
+#[AllowDynamicProperties]
 class D extends C {
     function setP() {
         $this->p = 'changed in D';
@@ -78,7 +79,7 @@ object(C)#%d (1) {
 
 Unset a private property, and attempt to recreate at global scope (expecting failure):
 
-Fatal error: Uncaught Error: Cannot access private property C::$p in %s:46
+Fatal error: Uncaught Error: Cannot access private property C::$p in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line 46
+  thrown in %s on line %d

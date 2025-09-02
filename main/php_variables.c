@@ -25,10 +25,13 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
+#include "zend_exceptions.h"
 
 /* for systems that need to override reading of environment variables */
-void _php_import_environment_variables(zval *array_ptr);
+static void _php_import_environment_variables(zval *array_ptr);
+static void _php_load_environment_variables(zval *array_ptr);
 PHPAPI void (*php_import_environment_variables)(zval *array_ptr) = _php_import_environment_variables;
+PHPAPI void (*php_load_environment_variables)(zval *array_ptr) = _php_load_environment_variables;
 
 PHPAPI void php_register_variable(const char *var, const char *strval, zval *track_vars_array)
 {
@@ -52,6 +55,54 @@ static zend_always_inline void php_register_variable_quick(const char *name, siz
 
 	zend_hash_update_ind(ht, key, val);
 	zend_string_release_ex(key, 0);
+}
+
+PHPAPI void php_register_known_variable(const char *var_name, size_t var_name_len, zval *value, zval *track_vars_array)
+{
+	HashTable *symbol_table = NULL;
+
+	ZEND_ASSERT(var_name != NULL);
+	ZEND_ASSERT(var_name_len != 0);
+	ZEND_ASSERT(track_vars_array != NULL && Z_TYPE_P(track_vars_array) == IS_ARRAY);
+
+	symbol_table = Z_ARRVAL_P(track_vars_array);
+
+#if ZEND_DEBUG
+	/* Verify the name is valid for a PHP variable */
+	ZEND_ASSERT(!(var_name_len == strlen("GLOBALS") && !memcmp(var_name, "GLOBALS", strlen("GLOBALS"))));
+	ZEND_ASSERT(!(var_name_len == strlen("this") && !memcmp(var_name, "this", strlen("this"))));
+
+	/* Assert that the variable name is not numeric */
+	zend_ulong idx;
+	ZEND_ASSERT(!ZEND_HANDLE_NUMERIC_STR(var_name, var_name_len, idx));
+	/* ensure that we don't have null bytes, spaces, dots, or array bracket in the variable name (not binary safe) */
+	const char *p = var_name;
+	for (size_t l = 0; l < var_name_len; l++) {
+		ZEND_ASSERT(*p != '\0' && *p != ' ' && *p != '.' && *p != '[');
+		p++;
+	}
+
+	/* Do not allow to register cookies this way */
+	ZEND_ASSERT(Z_TYPE(PG(http_globals)[TRACK_VARS_COOKIE]) == IS_UNDEF ||
+		Z_ARRVAL(PG(http_globals)[TRACK_VARS_COOKIE]) != symbol_table);
+#endif
+
+	php_register_variable_quick(var_name, var_name_len, value, symbol_table);
+}
+
+/* Discard variable if mangling made it start with __Host-, where pre-mangling it did not start with __Host-
+ * Discard variable if mangling made it start with __Secure-, where pre-mangling it did not start with __Secure- */
+static bool php_is_forbidden_variable_name(const char *mangled_name, size_t mangled_name_len, const char *pre_mangled_name)
+{
+	if (mangled_name_len >= sizeof("__Host-")-1 && strncmp(mangled_name, "__Host-", sizeof("__Host-")-1) == 0 && strncmp(pre_mangled_name, "__Host-", sizeof("__Host-")-1) != 0) {
+		return true;
+	}
+
+	if (mangled_name_len >= sizeof("__Secure-")-1 && strncmp(mangled_name, "__Secure-", sizeof("__Secure-")-1) == 0 && strncmp(pre_mangled_name, "__Secure-", sizeof("__Secure-")-1) != 0) {
+		return true;
+	}
+
+	return false;
 }
 
 PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *track_vars_array)
@@ -103,20 +154,6 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 		}
 	}
 	var_len = p - var;
-
-	/* Discard variable if mangling made it start with __Host-, where pre-mangling it did not start with __Host- */
-	if (strncmp(var, "__Host-", sizeof("__Host-")-1) == 0 && strncmp(var_name, "__Host-", sizeof("__Host-")-1) != 0) {
-		zval_ptr_dtor_nogc(val);
-		free_alloca(var_orig, use_heap);
-		return;
-	}
-
-	/* Discard variable if mangling made it start with __Secure-, where pre-mangling it did not start with __Secure- */
-	if (strncmp(var, "__Secure-", sizeof("__Secure-")-1) == 0 && strncmp(var_name, "__Secure-", sizeof("__Secure-")-1) != 0) {
-		zval_ptr_dtor_nogc(val);
-		free_alloca(var_orig, use_heap);
-		return;
-	}
 
 	if (var_len==0) { /* empty variable name, or variable name with a space in it */
 		zval_ptr_dtor_nogc(val);
@@ -174,7 +211,7 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 				zval_ptr_dtor_nogc(val);
 
 				/* do not output the error message to the screen,
-				 this helps us to to avoid "information disclosure" */
+				 this helps us to avoid "information disclosure" */
 				if (!PG(display_errors)) {
 					php_error_docref(NULL, E_WARNING, "Input variable nesting level exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
 				}
@@ -221,6 +258,12 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 					return;
 				}
 			} else {
+				if (php_is_forbidden_variable_name(index, index_len, var_name)) {
+					zval_ptr_dtor_nogc(val);
+					free_alloca(var_orig, use_heap);
+					return;
+				}
+
 				gpc_element_p = zend_symtable_str_find(symtable1, index, index_len);
 				if (!gpc_element_p) {
 					zval tmp;
@@ -258,6 +301,12 @@ plain_var:
 				zval_ptr_dtor_nogc(val);
 			}
 		} else {
+			if (php_is_forbidden_variable_name(index, index_len, var_name)) {
+				zval_ptr_dtor_nogc(val);
+				free_alloca(var_orig, use_heap);
+				return;
+			}
+
 			zend_ulong idx;
 
 			/*
@@ -297,7 +346,7 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 	size_t new_vlen;
 
 	if (var->ptr >= var->end) {
-		return 0;
+		return false;
 	}
 
 	start = var->ptr + var->already_scanned;
@@ -305,7 +354,7 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 	if (!vsep) {
 		if (!eof) {
 			var->already_scanned = var->end - var->ptr;
-			return 0;
+			return false;
 		} else {
 			vsep = var->end;
 		}
@@ -338,12 +387,12 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 
 	var->ptr = vsep + (vsep != var->end);
 	var->already_scanned = 0;
-	return 1;
+	return true;
 }
 
-static inline int add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
+static inline zend_result add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
 {
-	uint64_t max_vars = PG(max_input_vars);
+	uint64_t max_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
 
 	vars->ptr = ZSTR_VAL(vars->str.s);
 	vars->end = ZSTR_VAL(vars->str.s) + ZSTR_LEN(vars->str.s);
@@ -478,7 +527,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	switch (arg) {
 		case PARSE_GET:
 		case PARSE_STRING:
-			separator = PG(arg_separator).input;
+			separator = ZSTR_VAL(PG(arg_separator).input);
 			break;
 		case PARSE_COOKIE:
 			separator = ";\0";
@@ -503,8 +552,9 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			}
 		}
 
-		if (++count > PG(max_input_vars)) {
-			php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+		zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
+		if (++count > max_input_vars) {
+			php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", max_input_vars);
 			break;
 		}
 
@@ -576,7 +626,7 @@ static zend_always_inline void import_environment_variable(HashTable *ht, char *
 	}
 }
 
-void _php_import_environment_variables(zval *array_ptr)
+static void _php_import_environment_variables(zval *array_ptr)
 {
 	tsrm_env_lock();
 
@@ -599,10 +649,9 @@ void _php_import_environment_variables(zval *array_ptr)
 	tsrm_env_unlock();
 }
 
-bool php_std_auto_global_callback(char *name, uint32_t name_len)
+static void _php_load_environment_variables(zval *array_ptr)
 {
-	zend_printf("%s\n", name);
-	return 0; /* don't rearm */
+	php_import_environment_variables(array_ptr);
 }
 
 /* {{{ php_build_argv */
@@ -716,8 +765,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 			|| Z_TYPE_P(dest_entry) != IS_ARRAY) {
 			Z_TRY_ADDREF_P(src_entry);
 			if (string_key) {
-				if (!globals_check || ZSTR_LEN(string_key) != sizeof("GLOBALS") - 1
-						|| memcmp(ZSTR_VAL(string_key), "GLOBALS", sizeof("GLOBALS") - 1)) {
+				if (!globals_check || !zend_string_equals_literal(string_key, "GLOBALS")) {
 					zend_hash_update(dest, string_key, src_entry);
 				} else {
 					Z_TRY_DELREF_P(src_entry);
@@ -734,7 +782,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 /* }}} */
 
 /* {{{ php_hash_environment */
-PHPAPI int php_hash_environment(void)
+PHPAPI zend_result php_hash_environment(void)
 {
 	memset(PG(http_globals), 0, sizeof(PG(http_globals)));
 	zend_activate_auto_globals();
@@ -757,7 +805,7 @@ static bool php_auto_globals_create_get(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_GET]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_GET]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_post(zend_string *name)
@@ -776,7 +824,7 @@ static bool php_auto_globals_create_post(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_POST]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_POST]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_cookie(zend_string *name)
@@ -791,7 +839,7 @@ static bool php_auto_globals_create_cookie(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_COOKIE]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_COOKIE]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_files(zend_string *name)
@@ -803,7 +851,7 @@ static bool php_auto_globals_create_files(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_FILES]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_FILES]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 /* Ugly hack to fix HTTP_PROXY issue, see bug #72573 */
@@ -845,6 +893,7 @@ static bool php_auto_globals_create_server(zend_string *name)
 	} else {
 		zval_ptr_dtor_nogc(&PG(http_globals)[TRACK_VARS_SERVER]);
 		array_init(&PG(http_globals)[TRACK_VARS_SERVER]);
+		zend_hash_real_init_mixed(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 	}
 
 	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
@@ -856,7 +905,7 @@ static bool php_auto_globals_create_server(zend_string *name)
 	 * ignore this issue, as it would probably require larger changes. */
 	HT_ALLOW_COW_VIOLATION(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_env(zend_string *name)
@@ -872,7 +921,7 @@ static bool php_auto_globals_create_env(zend_string *name)
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_ENV]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_ENV]);
 
-	return 0; /* don't rearm */
+	return false; /* don't rearm */
 }
 
 static bool php_auto_globals_create_request(zend_string *name)
@@ -916,7 +965,7 @@ static bool php_auto_globals_create_request(zend_string *name)
 	}
 
 	zend_hash_update(&EG(symbol_table), name, &form_variables);
-	return 0;
+	return false;
 }
 
 void php_startup_auto_globals(void)

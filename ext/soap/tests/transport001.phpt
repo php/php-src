@@ -9,6 +9,7 @@ function Add($x,$y) {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -16,7 +17,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('Add');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

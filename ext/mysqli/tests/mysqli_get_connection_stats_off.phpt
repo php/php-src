@@ -7,15 +7,12 @@ mysqlnd.collect_memory_statistics="0"
 mysqli
 --SKIPIF--
 <?PHP
-require_once('skipifconnectfailure.inc');
-if (!function_exists('mysqli_get_connection_stats')) {
-    die("skip only available with mysqlnd");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
     // connect and table inc connect to mysql and create tables
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",

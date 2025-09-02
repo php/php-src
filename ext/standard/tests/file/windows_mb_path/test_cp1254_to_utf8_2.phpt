@@ -21,8 +21,8 @@ dir_cp1254
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "çokbaytlı işleri";
-$prefix = create_data("dir_cp1254", "${item}42}");
-$fn = $prefix . DIRECTORY_SEPARATOR . "${item}33";
+$prefix = create_data("dir_cp1254", "{$item}42}");
+$fn = $prefix . DIRECTORY_SEPARATOR . "{$item}33";
 
 $f = fopen($fn, 'w');
 if ($f) {

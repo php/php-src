@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class ResourceBundle implements IteratorAggregate, Countable
 {
     public function __construct(?string $locale, ?string $bundle, bool $fallback = true) {}
@@ -12,12 +13,8 @@ class ResourceBundle implements IteratorAggregate, Countable
      */
     public static function create(?string $locale, ?string $bundle, bool $fallback = true): ?ResourceBundle {}
 
-    /**
-     * @param string|int $index
-     * @tentative-return-type
-     * @alias resourcebundle_get
-     */
-    public function get($index, bool $fallback = true): mixed {}
+    /** @tentative-return-type */
+    public function get(string|int $index, bool $fallback = true): ResourceBundle|array|string|int|null {}
 
     /**
      * @tentative-return-type

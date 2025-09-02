@@ -17,7 +17,7 @@ test();
 --EXPECTF--
 Fatal error: Uncaught ErrorException: Undefined variable $test in %s:%d
 Stack trace:
-#0 %s(%d): {closure}(2, 'Undefined varia...', '%s', 8)
+#0 %s(%d): {closure:%s:%d}(2, 'Undefined varia...', '%s', 8)
 #1 %s(%d): test()
 #2 {main}
   thrown in %s on line %d

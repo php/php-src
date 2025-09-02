@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #75402 Possible Memory Leak using PDO::CURSOR_SCROLL option
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
@@ -17,7 +16,6 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $resp = new \stdClass();
 $resp->entries = [];
 
-$db->query('DROP TABLE IF EXISTS bug75402 CASCADE');
 $db->query('CREATE TABLE bug75402 (
     "id" character varying(64) NOT NULL,
     "group_id" character varying(64) NOT NULL,
@@ -83,6 +81,12 @@ if ($db) {
 }
 
 var_dump($resp);
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec('DROP TABLE IF EXISTS bug75402');
 ?>
 --EXPECT--
 object(stdClass)#2 (1) {

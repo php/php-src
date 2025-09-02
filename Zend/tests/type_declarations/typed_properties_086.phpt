@@ -3,6 +3,7 @@ Test typed properties with integer keys
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class T {
     // Class must have at least one property. Property must have a type.
     // Empty class or untyped property removes segfault

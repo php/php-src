@@ -4,14 +4,10 @@ mysqli_poll() & references
 mysqli
 --SKIPIF--
 <?php
-require_once('connect.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'connect.inc';
 
-if (!$IS_MYSQLND)
-    die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die("skip cannot connect");
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (mysqli_get_server_version($link) < 50012)
     die("skip Test needs SQL function SLEEP() available as of MySQL 5.0.12");
@@ -19,7 +15,7 @@ if (mysqli_get_server_version($link) < 50012)
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     function get_connection() {
         global $host, $user, $passwd, $db, $port, $socket;
@@ -46,7 +42,7 @@ if (mysqli_get_server_version($link) < 50012)
         // WARNING: All arrays point to the same object - this will give bogus results!
         // The behaviour is in line with stream_select(). Be warned, be careful.
         $links = $errors = $reject = array($mysqli1, $mysqli2);
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             continue;
         }
 
@@ -77,7 +73,7 @@ if (mysqli_get_server_version($link) < 50012)
         // WARNING: All arrays point to the same object - this will give bogus results!
         $links = $errors = array($mysqli1, $mysqli2);
         $reject = array($mysqli1, $mysqli2);
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             continue;
         }
         foreach ($links as $link) {
@@ -107,7 +103,7 @@ if (mysqli_get_server_version($link) < 50012)
         // WARNING: All arrays point to the same object - this will give bogus results!
         $links = array($mysqli1, $mysqli2);
         $errors = $reject = array($mysqli1, $mysqli2);
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             continue;
         }
         foreach ($links as $link) {
@@ -137,7 +133,7 @@ if (mysqli_get_server_version($link) < 50012)
             break;
         }
         $links = $errors = $reject = array($mysqli1, $mysqli2);
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             continue;
         }
         // WARNING: Due to the reference issue none of these should ever fire!
@@ -180,7 +176,7 @@ if (mysqli_get_server_version($link) < 50012)
         }
         $links = $errors = $reject = $all;
         ob_start();
-        if (0 == ($ready = mysqli_poll($links, $errors, $reject, 0, 50000))) {
+        if (0 == mysqli_poll($links, $errors, $reject, 0, 50000)) {
             $tmp = ob_get_contents();
             ob_end_clean();
             if ($tmp != '') {
@@ -197,7 +193,7 @@ if (mysqli_get_server_version($link) < 50012)
         }
     } while ($processed < 2);
 
-    $ready = mysqli_poll($links, $errors, $reject, 0, 50000);
+    mysqli_poll($links, $errors, $reject, 0, 50000);
     mysqli_close($mysqli1);
     mysqli_close($mysqli2);
 

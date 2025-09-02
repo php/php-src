@@ -223,7 +223,7 @@ static const unsigned short code_tbl[][3] = {
 	{0x038a, 0x03a3, 0x249c},
 };
 
-static const unsigned short code_ofst_tbl[] [2]= {
+static const unsigned short code_ofst_tbl[][2] = {
 	{0x03ac, 0x03c9},
 	{0x0406, 0x0420},
 	{0x0432, 0x0441},
@@ -253,7 +253,7 @@ static const unsigned short code_tbl_m[][6] = {
 	{0x0523, 0xf862, 0x8ca1, 0x56e3, 0x6cd5, 0x4eba},
 };
 
-static  int code_tbl_m_len = sizeof(code_tbl_m)/(sizeof(unsigned short)*6);
+static int code_tbl_m_len = sizeof(code_tbl_m)/(sizeof(unsigned short)*6);
 
 static const unsigned short s_form_tbl[] = {
 	0x2010,0x2016,0x2026,

@@ -12,7 +12,8 @@ O:4:"Test":2:{s:4:"\0*\0x";N;s:4:"\0*\0x";N;}
 STR;
 var_dump(unserialize($str));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property Test::$x is deprecated in %s on line %d
 object(Test)#1 (2) {
   ["foo"]=>
   NULL

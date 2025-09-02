@@ -36,15 +36,9 @@
 #include <winsock2.h>
 #include <windows.h>
 
+#include <intsafe.h>
 #include <float.h>
 
-#define HAVE_STDIOSTR_H 1
-#define HAVE_CLASS_ISTDIOSTREAM
-#define istdiostream stdiostream
-
-#if _MSC_VER < 1900
-#define snprintf _snprintf
-#endif
 #define strcasecmp(s1, s2) _stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
 

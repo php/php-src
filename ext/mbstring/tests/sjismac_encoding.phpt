@@ -87,6 +87,20 @@ findInvalidChars($fromUnicode, $invalidChars, $unused, array_fill_keys(range(0, 
 convertAllInvalidChars($invalidChars, $fromUnicode, 'UTF-16BE', 'SJIS-mac', '%');
 echo "Unicode -> SJIS-mac conversion works on all invalid characters\n";
 
+// Regression test
+convertValidString("\x20\x26\x6B\xAA", "\x81\x63\x9F\x6F", "UTF-16BE", "SJIS-mac");
+
+// Test special combining characters for MacJapanese when *not* appearing in
+// an expected combination
+convertInvalidString("\x20\x10\xF8\x7A", "\x81\x5D%", "UTF-16BE", "SJIS-mac");
+convertInvalidString("\x20\x10\x20\xDD", "\x81\x5D%", "UTF-16BE", "SJIS-mac");
+convertInvalidString("\x20\x10\xF8\x7F", "\x81\x5D%", "UTF-16BE", "SJIS-mac");
+convertInvalidString("\x21\xE6\xF8\x7E", "\x86\xD0%", "UTF-16BE", "SJIS-mac");
+
+convertInvalidString("\xF8\x60\x00\x30\x12\x34", "%%%", "UTF-16BE", "SJIS-mac");
+convertInvalidString("\xF8\x61\x00\x46\x00\x41\x12\x34", "%%%%", "UTF-16BE", "SJIS-mac");
+convertInvalidString("\xF8\x62\x00\x58\x00\x49\x00\x49\x12\x34", "%%%%%", "UTF-16BE", "SJIS-mac");
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\x81", "%", "SJIS-mac", "UTF-8");

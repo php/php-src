@@ -4,7 +4,7 @@ Test unresolvable inheritance check due to unavailable parameter type when the p
 <?php
 
 class Test extends DateTime {
-    public static function createFromFormat($format, $datetime, Wrong $timezone = null): DateTime|false {}
+    public static function createFromFormat($format, $datetime, ?Wrong $timezone = null): DateTime|false {}
 }
 
 ?>

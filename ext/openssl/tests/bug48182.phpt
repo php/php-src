@@ -12,14 +12,14 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug48182.pem.tmp';
 $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug48182-ca.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     $client = @stream_socket_accept($server, 1);
 
@@ -30,14 +30,13 @@ $serverCode = sprintf($serverCode, $certFile);
 
 $peerName = 'bug48182';
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT | STREAM_CLIENT_ASYNC_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'cafile' => '%s',
         'peer_name' => '%s'
     ]]);
 
-    phpt_wait();
     $client = stream_socket_client($serverUri, $errno, $errstr, 10, $clientFlags, $clientCtx);
 
     $data = "Sending data over to SSL server in async mode with contents like Hello World\n";

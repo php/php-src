@@ -24,8 +24,8 @@ internal_encoding=cp932
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "テストマルチバイト・パス"; // cp932 string
-$prefix = create_data("dir_cp932", "${item}42}", 932);
-$fn = $prefix . DIRECTORY_SEPARATOR . "${item}33";
+$prefix = create_data("dir_cp932", "{$item}42}", 932);
+$fn = $prefix . DIRECTORY_SEPARATOR . "{$item}33";
 
 $f = fopen($fn, 'w');
 if ($f) {

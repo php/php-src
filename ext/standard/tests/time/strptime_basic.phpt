@@ -34,9 +34,9 @@ setlocale(LC_ALL, $orig);
 --EXPECTF--
 *** Testing strptime() : basic functionality ***
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 
-Deprecated: Function strptime() is deprecated in %s on line %d
+Deprecated: Function strptime() is deprecated since 8.2, use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)
@@ -58,9 +58,9 @@ array(9) {
   string(4) " GMT"
 }
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 
-Deprecated: Function strptime() is deprecated in %s on line %d
+Deprecated: Function strptime() is deprecated since 8.2, use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)
@@ -82,9 +82,9 @@ array(9) {
   string(0) ""
 }
 
-Deprecated: Function strftime() is deprecated in %s on line %d
+Deprecated: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 
-Deprecated: Function strptime() is deprecated in %s on line %d
+Deprecated: Function strptime() is deprecated since 8.2, use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)

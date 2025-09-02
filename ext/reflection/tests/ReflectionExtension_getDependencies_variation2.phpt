@@ -8,7 +8,9 @@ $standard = new ReflectionExtension('standard');
 var_dump($standard->getDependencies());
 ?>
 --EXPECTF--
-array(1) {
+array(%d) {
+  ["uri"]=>
+  %s(8) "Required"
   ["session"]=>
   %s(8) "Optional"
 }

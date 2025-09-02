@@ -5,5 +5,5 @@ ARG_ENABLE("calendar", "calendar conversion support", "yes");
 if (PHP_CALENDAR == "yes") {
 	EXTENSION("calendar", "calendar.c dow.c french.c gregor.c jewish.c \
 		julian.c easter.c cal_unix.c");
-	AC_DEFINE('HAVE_CALENDAR', 1, 'Have calendar');
+	AC_DEFINE('HAVE_CALENDAR', 1, "Define to 1 if the PHP extension 'calendar' is available.");
 }

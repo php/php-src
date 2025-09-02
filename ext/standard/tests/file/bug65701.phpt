@@ -22,7 +22,7 @@ var_dump(filesize($dst));
 <?php
 $file_path = __DIR__ . "/bug65701/";
 foreach (scandir($file_path) as $file) {
-    if (strpos($file, "bug65701") !== false || 'WIN' == substr(PHP_OS, 0, 3)) {
+    if (!is_dir($file_path . $file)) {
         unlink($file_path . $file);
     }
 }

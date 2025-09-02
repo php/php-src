@@ -2,6 +2,599 @@
 
 /** @generate-class-entries */
 
+/* mysqli_options */
+/**
+ * @var int
+ * @cvalue MYSQL_READ_DEFAULT_GROUP
+ */
+const MYSQLI_READ_DEFAULT_GROUP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_READ_DEFAULT_FILE
+ */
+const MYSQLI_READ_DEFAULT_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_CONNECT_TIMEOUT
+ */
+const MYSQLI_OPT_CONNECT_TIMEOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_LOCAL_INFILE
+ */
+const MYSQLI_OPT_LOCAL_INFILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_LOAD_DATA_LOCAL_DIR
+ */
+const MYSQLI_OPT_LOAD_DATA_LOCAL_DIR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_INIT_COMMAND
+ */
+const MYSQLI_INIT_COMMAND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_READ_TIMEOUT
+ */
+const MYSQLI_OPT_READ_TIMEOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLND_OPT_NET_CMD_BUFFER_SIZE
+ */
+const MYSQLI_OPT_NET_CMD_BUFFER_SIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLND_OPT_NET_READ_BUFFER_SIZE
+ */
+const MYSQLI_OPT_NET_READ_BUFFER_SIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLND_OPT_INT_AND_FLOAT_NATIVE
+ */
+const MYSQLI_OPT_INT_AND_FLOAT_NATIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_SSL_VERIFY_SERVER_CERT
+ */
+const MYSQLI_OPT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue MYSQL_SERVER_PUBLIC_KEY
+ */
+const MYSQLI_SERVER_PUBLIC_KEY = UNKNOWN;
+
+/* mysqli_real_connect flags */
+/**
+ * @var int
+ * @cvalue CLIENT_SSL
+ */
+const MYSQLI_CLIENT_SSL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_COMPRESS
+ */
+const MYSQLI_CLIENT_COMPRESS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_INTERACTIVE
+ */
+const MYSQLI_CLIENT_INTERACTIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_IGNORE_SPACE
+ */
+const MYSQLI_CLIENT_IGNORE_SPACE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_NO_SCHEMA
+ */
+const MYSQLI_CLIENT_NO_SCHEMA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_FOUND_ROWS
+ */
+const MYSQLI_CLIENT_FOUND_ROWS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_SSL_VERIFY_SERVER_CERT
+ */
+const MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+ */
+const MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS
+ */
+const MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS
+ */
+const MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS = UNKNOWN;
+
+/* for mysqli_query */
+/**
+ * @var int
+ * @cvalue MYSQLI_STORE_RESULT
+ */
+const MYSQLI_STORE_RESULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_USE_RESULT
+ */
+const MYSQLI_USE_RESULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_ASYNC
+ */
+const MYSQLI_ASYNC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_STORE_RESULT_COPY_DATA
+ */
+#[\Deprecated(since: '8.4', message: 'as the mysqli_store_result() parameter is unused since 8.1')]
+const MYSQLI_STORE_RESULT_COPY_DATA = UNKNOWN;
+
+/* for mysqli_fetch_assoc */
+/**
+ * @var int
+ * @cvalue MYSQLI_ASSOC
+ */
+const MYSQLI_ASSOC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_NUM
+ */
+const MYSQLI_NUM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_BOTH
+ */
+const MYSQLI_BOTH = UNKNOWN;
+
+/* for mysqli_stmt_set_attr */
+/**
+ * @var int
+ * @cvalue STMT_ATTR_UPDATE_MAX_LENGTH
+ */
+const MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue STMT_ATTR_CURSOR_TYPE
+ */
+const MYSQLI_STMT_ATTR_CURSOR_TYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURSOR_TYPE_NO_CURSOR
+ */
+const MYSQLI_CURSOR_TYPE_NO_CURSOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURSOR_TYPE_READ_ONLY
+ */
+const MYSQLI_CURSOR_TYPE_READ_ONLY = UNKNOWN;
+
+/* column information */
+/**
+ * @var int
+ * @cvalue NOT_NULL_FLAG
+ */
+const MYSQLI_NOT_NULL_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PRI_KEY_FLAG
+ */
+const MYSQLI_PRI_KEY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UNIQUE_KEY_FLAG
+ */
+const MYSQLI_UNIQUE_KEY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MULTIPLE_KEY_FLAG
+ */
+const MYSQLI_MULTIPLE_KEY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue BLOB_FLAG
+ */
+const MYSQLI_BLOB_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UNSIGNED_FLAG
+ */
+const MYSQLI_UNSIGNED_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEROFILL_FLAG
+ */
+const MYSQLI_ZEROFILL_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue AUTO_INCREMENT_FLAG
+ */
+const MYSQLI_AUTO_INCREMENT_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TIMESTAMP_FLAG
+ */
+const MYSQLI_TIMESTAMP_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SET_FLAG
+ */
+const MYSQLI_SET_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NUM_FLAG
+ */
+const MYSQLI_NUM_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PART_KEY_FLAG
+ */
+const MYSQLI_PART_KEY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GROUP_FLAG
+ */
+const MYSQLI_GROUP_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ENUM_FLAG
+ */
+const MYSQLI_ENUM_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue BINARY_FLAG
+ */
+const MYSQLI_BINARY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NO_DEFAULT_VALUE_FLAG
+ */
+const MYSQLI_NO_DEFAULT_VALUE_FLAG = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ON_UPDATE_NOW_FLAG
+ */
+const MYSQLI_ON_UPDATE_NOW_FLAG = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_DECIMAL
+ */
+const MYSQLI_TYPE_DECIMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_TINY
+ */
+const MYSQLI_TYPE_TINY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_SHORT
+ */
+const MYSQLI_TYPE_SHORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_LONG
+ */
+const MYSQLI_TYPE_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_FLOAT
+ */
+const MYSQLI_TYPE_FLOAT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_DOUBLE
+ */
+const MYSQLI_TYPE_DOUBLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_NULL
+ */
+const MYSQLI_TYPE_NULL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_TIMESTAMP
+ */
+const MYSQLI_TYPE_TIMESTAMP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_LONGLONG
+ */
+const MYSQLI_TYPE_LONGLONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_INT24
+ */
+const MYSQLI_TYPE_INT24 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_DATE
+ */
+const MYSQLI_TYPE_DATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_TIME
+ */
+const MYSQLI_TYPE_TIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_DATETIME
+ */
+const MYSQLI_TYPE_DATETIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_YEAR
+ */
+const MYSQLI_TYPE_YEAR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_NEWDATE
+ */
+const MYSQLI_TYPE_NEWDATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_ENUM
+ */
+const MYSQLI_TYPE_ENUM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_SET
+ */
+const MYSQLI_TYPE_SET = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_TINY_BLOB
+ */
+const MYSQLI_TYPE_TINY_BLOB = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_MEDIUM_BLOB
+ */
+const MYSQLI_TYPE_MEDIUM_BLOB = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_LONG_BLOB
+ */
+const MYSQLI_TYPE_LONG_BLOB = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_BLOB
+ */
+const MYSQLI_TYPE_BLOB = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_VAR_STRING
+ */
+const MYSQLI_TYPE_VAR_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_STRING
+ */
+const MYSQLI_TYPE_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_CHAR
+ */
+const MYSQLI_TYPE_CHAR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_GEOMETRY
+ */
+const MYSQLI_TYPE_GEOMETRY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_VECTOR
+ */
+const MYSQLI_TYPE_VECTOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_JSON
+ */
+const MYSQLI_TYPE_JSON = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_NEWDECIMAL
+ */
+const MYSQLI_TYPE_NEWDECIMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_BIT
+ */
+const MYSQLI_TYPE_BIT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_SET_CHARSET_NAME
+ */
+const MYSQLI_SET_CHARSET_NAME = UNKNOWN;
+
+/* bind support */
+/**
+ * @var int
+ * @cvalue MYSQL_NO_DATA
+ */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
+const MYSQLI_NO_DATA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_DATA_TRUNCATED
+ */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
+const MYSQLI_DATA_TRUNCATED = UNKNOWN;
+
+/* reporting */
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_INDEX
+ */
+const MYSQLI_REPORT_INDEX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_ERROR
+ */
+const MYSQLI_REPORT_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_STRICT
+ */
+const MYSQLI_REPORT_STRICT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_ALL
+ */
+const MYSQLI_REPORT_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_OFF
+ */
+const MYSQLI_REPORT_OFF = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue MYSQLND_DBG_ENABLED
+ */
+const MYSQLI_DEBUG_TRACE_ENABLED = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SERVER_QUERY_NO_GOOD_INDEX_USED
+ */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
+const MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SERVER_QUERY_NO_INDEX_USED
+ */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
+const MYSQLI_SERVER_QUERY_NO_INDEX_USED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SERVER_QUERY_WAS_SLOW
+ */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
+const MYSQLI_SERVER_QUERY_WAS_SLOW = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SERVER_PS_OUT_PARAMS
+ */
+#[\Deprecated(since: '8.1', message: 'as it was unused')]
+const MYSQLI_SERVER_PS_OUT_PARAMS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue REFRESH_GRANT
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_GRANT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_LOG
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_LOG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_TABLES
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_TABLES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_HOSTS
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_HOSTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_STATUS
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_STATUS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_THREADS
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_THREADS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_SLAVE
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_REPLICA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_SLAVE
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_SLAVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_MASTER
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_MASTER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_BACKUP_LOG
+ */
+#[\Deprecated(since: '8.4', message: 'as mysqli_refresh() is deprecated')]
+const MYSQLI_REFRESH_BACKUP_LOG = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue TRANS_START_WITH_CONSISTENT_SNAPSHOT
+ */
+const MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_START_READ_WRITE
+ */
+const MYSQLI_TRANS_START_READ_WRITE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_START_READ_ONLY
+ */
+const MYSQLI_TRANS_START_READ_ONLY = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue TRANS_COR_AND_CHAIN
+ */
+const MYSQLI_TRANS_COR_AND_CHAIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_COR_AND_NO_CHAIN
+ */
+const MYSQLI_TRANS_COR_AND_NO_CHAIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_COR_RELEASE
+ */
+const MYSQLI_TRANS_COR_RELEASE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_COR_NO_RELEASE
+ */
+const MYSQLI_TRANS_COR_NO_RELEASE = UNKNOWN;
+
+/**
+ * @var bool
+ */
+#[\Deprecated(since: '8.2', message: 'as it is always false')]
+const MYSQLI_IS_MARIADB = false;
+
 final class mysqli_driver
 {
     /** @readonly */
@@ -12,8 +605,6 @@ final class mysqli_driver
 
     /** @readonly */
     public int $driver_version;
-
-    public bool $reconnect = false;
 
     public int $report_mode = 0;
 }
@@ -131,7 +722,7 @@ class mysqli
     public function __construct(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null
@@ -153,7 +744,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_change_user
      */
-    public function change_user(string $username, string $password, ?string $database): bool {}
+    public function change_user(string $username, #[\SensitiveParameter] string $password, ?string $database): bool {}
 
     /**
      * @tentative-return-type
@@ -162,11 +753,10 @@ class mysqli
     public function character_set_name(): string {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias mysqli_close
-     * @no-verify
      */
-    public function close() {} // TODO make return type void
+    public function close(): true {}
 
     /**
      * @tentative-return-type
@@ -182,7 +772,7 @@ class mysqli
     public function connect(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null
@@ -195,11 +785,11 @@ class mysqli
     public function dump_debug_info(): bool {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias mysqli_debug
      * @no-verify Should really be a static method
      */
-    public function debug(string $options) {} // TODO make return type void
+    public function debug(string $options): true {}
 
     /**
      * @tentative-return-type
@@ -208,20 +798,23 @@ class mysqli
     public function get_charset(): ?object {}
 
     /**
+     * @alias mysqli_execute_query
+     */
+    public function execute_query(string $query, ?array $params = null): mysqli_result|bool {}
+
+    /**
      * @tentative-return-type
      * @alias mysqli_get_client_info
-     * @deprecated 8.1.0
      */
+    #[\Deprecated(since: '8.1', message: 'use mysqli_get_client_info() instead')]
     public function get_client_info(): string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @return array<string, mixed>
      * @tentative-return-type
      * @alias mysqli_get_connection_stats
      */
     public function get_connection_stats(): array {}
-#endif
 
     /**
      * @tentative-return-type
@@ -236,15 +829,16 @@ class mysqli
     public function get_warnings(): mysqli_warning|false {}
 
     /**
-     * @deprecated
      * @return bool|null
      * */
+    #[\Deprecated(since: '8.1', message: 'replace calls to parent::init() with parent::__construct()')]
     public function init() {}
 
     /**
      * @tentative-return-type
      * @alias mysqli_kill
      */
+    #[\Deprecated(since: '8.4', message: 'use KILL CONNECTION/QUERY SQL statement instead')]
     public function kill(int $process_id): bool {}
 
     /**
@@ -269,15 +863,14 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_ping
      */
+    #[\Deprecated(since: '8.4', message: 'because the reconnect feature has been removed in PHP 8.2 and this method is now redundant')]
     public function ping(): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_poll
      */
     public static function poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
-#endif
 
     /**
      * @tentative-return-type
@@ -298,7 +891,7 @@ class mysqli
     public function real_connect(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null,
@@ -311,13 +904,11 @@ class mysqli
      */
     public function real_escape_string(string $string): string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_reap_async_query
      */
     public function reap_async_query(): mysqli_result|bool {}
-#endif
 
     /**
      * @tentative-return-type
@@ -376,9 +967,8 @@ class mysqli
     public function set_opt(int $option, $value): bool {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias mysqli_ssl_set
-     * @no-verify
      */
     public function ssl_set(
         ?string $key,
@@ -386,7 +976,7 @@ class mysqli
         ?string $ca_certificate,
         ?string $ca_path,
         ?string $cipher_algos
-    ) {} // TODO make return type void
+    ): true {}
 
     /**
      * @tentative-return-type
@@ -422,6 +1012,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_refresh
      */
+    #[\Deprecated(since: '8.4', message: 'use FLUSH SQL statement instead')]
     public function refresh(int $flags): bool {}
 }
 
@@ -533,7 +1124,7 @@ class mysqli_result implements IteratorAggregate
      * @tentative-return-type
      * @alias mysqli_field_seek
      */
-    public function field_seek(int $index): bool {}
+    public function field_seek(int $index): true {}
 
     /**
      * @tentative-return-type
@@ -629,11 +1220,10 @@ class mysqli_stmt
     public function bind_result(mixed &...$vars): bool {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias mysqli_stmt_close
-     * @no-verify
      */
-    public function close() {} // TODO make return type void
+    public function close(): true {}
 
     /**
      * @tentative-return-type
@@ -665,13 +1255,11 @@ class mysqli_stmt
      */
     public function result_metadata(): mysqli_result|false {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_stmt_more_results
      */
     public function more_results(): bool {}
-#endif
 
     /**
      * @tentative-return-type
@@ -715,13 +1303,11 @@ class mysqli_stmt
      */
     public function store_result(): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_stmt_get_result
      */
     public function get_result(): mysqli_result|false {}
-#endif
 }
 
 final class mysqli_warning
@@ -751,21 +1337,22 @@ function mysqli_autocommit(mysqli $mysql, bool $enable): bool {}
 
 function mysqli_begin_transaction(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
-function mysqli_change_user(mysqli $mysql, string $username, string $password, ?string $database): bool {}
+function mysqli_change_user(mysqli $mysql, string $username, #[\SensitiveParameter] string $password, ?string $database): bool {}
 
 /** @refcount 1 */
 function mysqli_character_set_name(mysqli $mysql): string {}
 
-/** @return true */
-function mysqli_close(mysqli $mysql): bool {} // TODO make return type void
+function mysqli_close(mysqli $mysql): true {}
 
 function mysqli_commit(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ */
 function mysqli_connect(
     ?string $hostname = null,
     ?string $username = null,
-    ?string $password = null,
+    #[\SensitiveParameter] ?string $password = null,
     ?string $database = null,
     ?int $port = null,
     ?string $socket = null
@@ -780,8 +1367,7 @@ function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
 
 function mysqli_dump_debug_info(mysqli $mysql): bool {}
 
-/** @return true */
-function mysqli_debug(string $options): bool {} // TODO make return type void
+function mysqli_debug(string $options): true {}
 
 function mysqli_errno(mysqli $mysql): int {}
 
@@ -797,7 +1383,10 @@ function mysqli_error_list(mysqli $mysql): array {}
 function mysqli_stmt_execute(mysqli_stmt $statement, ?array $params = null): bool {}
 
 /** @alias mysqli_stmt_execute */
+#[\Deprecated(since: '8.5', message: "use mysqli_stmt_execute() instead")]
 function mysqli_execute(mysqli_stmt $statement, ?array $params = null): bool {}
+
+function mysqli_execute_query(mysqli $mysql, string $query, ?array $params = null): mysqli_result|bool {}
 
 /** @refcount 1 */
 function mysqli_fetch_field(mysqli_result $result): object|false {}
@@ -848,13 +1437,12 @@ function mysqli_fetch_column(mysqli_result $result, int $column = 0): null|int|f
 
 function mysqli_field_count(mysqli $mysql): int {}
 
-function mysqli_field_seek(mysqli_result $result, int $index): bool {}
+function mysqli_field_seek(mysqli_result $result, int $index): true {}
 
 function mysqli_field_tell(mysqli_result $result): int {}
 
 function mysqli_free_result(mysqli_result $result): void {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /**
  * @return array<string, mixed>
  * @refcount 1
@@ -866,7 +1454,6 @@ function mysqli_get_connection_stats(mysqli $mysql): array {}
  * @refcount 1
  */
 function mysqli_get_client_stats(): array {}
-#endif
 
 /** @refcount 1 */
 function mysqli_get_charset(mysqli $mysql): ?object {}
@@ -904,6 +1491,7 @@ function mysqli_info(mysqli $mysql): ?string {}
 /** @refcount 1 */
 function mysqli_insert_id(mysqli $mysql): int|string {}
 
+#[\Deprecated(since: '8.4', message: 'use KILL CONNECTION/QUERY SQL statement instead')]
 function mysqli_kill(mysqli $mysql, int $process_id): bool {}
 
 function mysqli_more_results(mysqli $mysql): bool {}
@@ -926,16 +1514,15 @@ function mysqli_options(mysqli $mysql, int $option, $value): bool {}
  */
 function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
 
+#[\Deprecated(since: '8.4', message: 'because the reconnect feature has been removed in PHP 8.2 and this function is now redundant')]
 function mysqli_ping(mysqli $mysql): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
-#endif
 
 /** @refcount 1 */
 function mysqli_prepare(mysqli $mysql, string $query): mysqli_stmt|false {}
 
-function mysqli_report(int $flags): bool {}
+function mysqli_report(int $flags): true {}
 
 /** @refcount 1 */
 function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
@@ -944,6 +1531,7 @@ function mysqli_real_connect(
     mysqli $mysql,
     ?string $hostname = null,
     ?string $username = null,
+    #[\SensitiveParameter]
     ?string $password = null,
     ?string $database = null,
     ?int $port = null,
@@ -959,10 +1547,8 @@ function mysqli_escape_string(mysqli $mysql, string $string): string {}
 
 function mysqli_real_query(mysqli $mysql, string $query): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /** @refcount 1 */
 function mysqli_reap_async_query(mysqli $mysql): mysqli_result|bool {}
-#endif
 
 function mysqli_release_savepoint(mysqli $mysql, string $name): bool {}
 
@@ -985,8 +1571,7 @@ function mysqli_stmt_bind_param(mysqli_stmt $statement, string $types, mixed &..
 
 function mysqli_stmt_bind_result(mysqli_stmt $statement, mixed &...$vars): bool {}
 
-/** @return true */
-function mysqli_stmt_close(mysqli_stmt $statement): bool {}
+function mysqli_stmt_close(mysqli_stmt $statement): true {}
 
 function mysqli_stmt_data_seek(mysqli_stmt $statement, int $offset): void {}
 
@@ -1007,10 +1592,8 @@ function mysqli_stmt_field_count(mysqli_stmt $statement): int {}
 
 function mysqli_stmt_free_result(mysqli_stmt $statement): void {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /** @refcount 1 */
 function mysqli_stmt_get_result(mysqli_stmt $statement): mysqli_result|false {}
-#endif
 
 /** @refcount 1 */
 function mysqli_stmt_get_warnings(mysqli_stmt $statement): mysqli_warning|false {}
@@ -1021,9 +1604,7 @@ function mysqli_stmt_init(mysqli $mysql): mysqli_stmt|false {}
 /** @refcount 1 */
 function mysqli_stmt_insert_id(mysqli_stmt $statement): int|string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_stmt_more_results(mysqli_stmt $statement): bool {}
-#endif
 
 function mysqli_stmt_next_result(mysqli_stmt $statement): bool {}
 
@@ -1049,7 +1630,6 @@ function mysqli_stmt_sqlstate(mysqli_stmt $statement): string {}
 /** @refcount 1 */
 function mysqli_sqlstate(mysqli $mysql): string {}
 
-/** @return true */
 function mysqli_ssl_set(
     mysqli $mysql,
     ?string $key,
@@ -1057,7 +1637,7 @@ function mysqli_ssl_set(
     ?string $ca_certificate,
     ?string $ca_path,
     ?string $cipher_algos
-): bool {} // TODO make return type void
+): true {}
 
 /** @refcount 1 */
 function mysqli_stat(mysqli $mysql): string|false {}
@@ -1074,4 +1654,5 @@ function mysqli_use_result(mysqli $mysql): mysqli_result|false {}
 
 function mysqli_warning_count(mysqli $mysql): int {}
 
+#[\Deprecated(since: '8.4', message: 'use FLUSH SQL statement instead')]
 function mysqli_refresh(mysqli $mysql, int $flags): bool {}

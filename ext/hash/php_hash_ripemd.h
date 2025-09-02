@@ -16,7 +16,6 @@
 
 #ifndef PHP_HASH_RIPEMD_H
 #define PHP_HASH_RIPEMD_H
-#include "ext/standard/basic_functions.h"
 
 /* RIPEMD context. */
 typedef struct {

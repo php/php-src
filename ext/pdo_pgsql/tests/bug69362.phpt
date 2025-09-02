@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #69362 (PDO-pgsql fails to connect if password contains a leading single quote)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
@@ -16,7 +15,7 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 
-$user = 'pdo_test_'.rand(5, 400);
+$user = 'pdo_test69362';
 $pass = 'testpass';
 
 // Assume that if we can't create or drop a user, this test needs to be skipped
@@ -43,10 +42,8 @@ require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
-$rand = rand(5, 400);
-$user = "pdo_test_$rand";
+$user = "pdo_test69362";
 $template = "CREATE USER $user WITH PASSWORD '%s'";
-$dropUser = "DROP USER $user";
 $testQuery = 'SELECT 1 as verification';
 
 // Create temp user with leading single quote
@@ -56,10 +53,12 @@ $testConn = new PDO($config['ENV']['PDOTEST_DSN'], $user, "'mypassword");
 $result = $testConn->query($testQuery)->fetch();
 $check = $result[0];
 var_dump($check);
-
-// Remove the user
-$pdo->query($dropUser);
-
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec("DROP USER pdo_test69362");
 ?>
 --EXPECT--
 int(1)

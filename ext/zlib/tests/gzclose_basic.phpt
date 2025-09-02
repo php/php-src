@@ -7,7 +7,7 @@ zlib
 // note that gzclose is an alias to fclose. parameter checking tests will be
 // the same as fclose
 
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f, 'r');
 gzread($h, 20);
 var_dump(gzclose($h));
@@ -34,6 +34,6 @@ try {
 ?>
 --EXPECT--
 bool(true)
-gzread(): supplied resource is not a valid stream resource
+gzread(): Argument #1 ($stream) must be an open stream resource
 bool(true)
-gzread(): supplied resource is not a valid stream resource
+gzread(): Argument #1 ($stream) must be an open stream resource

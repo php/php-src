@@ -72,19 +72,6 @@ try {
 
 echo "\n";
 
-#[Attribute]
-class A4 { }
-
-$ref = new \ReflectionFunction(#[A4(1)] function () { });
-
-try {
-    $ref->getAttributes()[0]->newInstance();
-} catch (\Error $e) {
-    var_dump('ERROR 5', $e->getMessage());
-}
-
-echo "\n";
-
 class A5 { }
 
 $ref = new \ReflectionFunction(#[A5] function () { });
@@ -111,10 +98,7 @@ string(7) "ERROR 3"
 string(30) "Attribute class "A2" not found"
 
 string(7) "ERROR 4"
-string(48) "Attribute constructor of class A3 must be public"
-
-string(7) "ERROR 5"
-string(69) "Attribute class A4 does not have a constructor, cannot pass arguments"
+string(51) "Call to private A3::__construct() from global scope"
 
 string(7) "ERROR 6"
 string(55) "Attempting to use non-attribute class "A5" as attribute"

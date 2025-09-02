@@ -4,25 +4,19 @@ IntlTimeZone clone handler: error test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 class A extends IntlTimeZone {
-function __construct() {}
+    public function __construct() {}
 }
 
 $tz = new A();
-var_dump($tz);
 try {
-var_dump(clone $tz);
-} catch (Exception $e) {
-    var_dump(get_class($e), $e->getMessage());
+    $b = clone $tz;
+    var_dump($b);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-object(A)#1 (1) {
-  ["valid"]=>
-  bool(false)
-}
-string(9) "Exception"
-string(39) "Cannot clone unconstructed IntlTimeZone"
+Error: Cannot clone uninitialized IntlTimeZone

@@ -12,11 +12,13 @@ if (pack('S', 0xABCD) !== pack('v', 0xABCD)) {
 ffi.enable=1
 --FILE--
 <?php
-$x = FFI::new("int");
+$ffi = FFI::cdef();
+
+$x = $ffi->new("int");
 $x->cdata = 5;
 var_dump($x);
 var_dump(FFI::typeof($x));
-var_dump(FFI::cast("int8_t[4]", $x));
+var_dump($ffi->cast("int8_t[4]", $x));
 $p = FFI::addr($x);
 var_dump($p);
 $p[0] += 2;
@@ -28,11 +30,11 @@ var_dump(FFI::string($x, 4));
 
 echo "\n";
 
-$y = FFI::new("int[2]");
+$y = FFI::cdef()->new("int[2]");
 $y[0] = 6;
 var_dump($y[0]);
 var_dump(FFI::typeof($y[0]));
-var_dump(FFI::cast("int8_t[4]", $y[0]));
+var_dump(FFI::cdef()->cast("int8_t[4]", $y[0]));
 $p = FFI::addr($y[0]);
 var_dump($p);
 $p[0] += 2;

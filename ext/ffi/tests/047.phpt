@@ -6,11 +6,11 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-$x = FFI::new("int");
+$x = FFI::cdef()->new("int");
 $x->cdata = 42;
 var_dump($x);
 
-$x = FFI::new("int*");
+$x = FFI::cdef()->new("int*");
 try {
 	$x->cdata = 42;
     var_dump($x);
@@ -18,7 +18,7 @@ try {
 	echo $e->getMessage() . "\n";
 }
 
-$x = FFI::new("struct {int cdata;}");
+$x = FFI::cdef()->new("struct {int cdata;}");
 try {
 	$x->cdata = 42;
     var_dump($x);

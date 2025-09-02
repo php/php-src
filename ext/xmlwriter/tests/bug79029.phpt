@@ -26,7 +26,7 @@ okey
 @unlink("bug79029_3.txt");
 ?>
 --EXPECTF--
-Warning: fclose(): %d is not a valid stream resource in %sbug79029.php on line %d
+Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %sbug79029.php on line %d
 
-Warning: fclose(): %d is not a valid stream resource in %sbug79029.php on line %d
+Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %sbug79029.php on line %d
 okey

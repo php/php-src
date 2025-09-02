@@ -6,20 +6,17 @@ pdo_sqlite
 <?php
 
 $db = new PDO('sqlite::memory:');
-$db->query('CREATE TABLE IF NOT EXISTS foo (id INT AUTO INCREMENT, name TEXT)');
-$db->query('INSERT INTO foo VALUES (NULL, "PHP")');
-$db->query('INSERT INTO foo VALUES (NULL, "PHP6")');
-var_dump($db->query('SELECT * FROM foo'));
+$db->query('CREATE TABLE test_pdo_sqlite_lastinsertid (id INT AUTO INCREMENT, name TEXT)');
+$db->query('INSERT INTO test_pdo_sqlite_lastinsertid VALUES (NULL, "PHP"), (NULL, "PHP6")');
+var_dump($db->query('SELECT * FROM test_pdo_sqlite_lastinsertid'));
 var_dump($db->errorInfo());
 var_dump($db->lastInsertId());
-
-$db->query('DROP TABLE foo');
 
 ?>
 --EXPECT--
 object(PDOStatement)#2 (1) {
   ["queryString"]=>
-  string(17) "SELECT * FROM foo"
+  string(42) "SELECT * FROM test_pdo_sqlite_lastinsertid"
 }
 array(3) {
   [0]=>

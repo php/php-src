@@ -4,7 +4,7 @@ imageloadfont() function crashes
 gd
 --FILE--
 <?php
-$filename = __DIR__ .  '/font.gdf';
+$filename = __DIR__ .  '/imageloadfont_invalid.gdf';
 $bin = "\x41\x41\x41\x41\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00";
 $fp = fopen($filename, 'wb');
 fwrite($fp, $bin);

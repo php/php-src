@@ -2,6 +2,22 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue php_session_disabled
+ */
+const PHP_SESSION_DISABLED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue php_session_none
+ */
+const PHP_SESSION_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue php_session_active
+ */
+const PHP_SESSION_ACTIVE = UNKNOWN;
+
 /** @refcount 1 */
 function session_name(?string $name = null): string|false {}
 
@@ -59,9 +75,9 @@ function session_set_save_handler(
     callable $write = UNKNOWN,
     callable $destroy = UNKNOWN,
     callable $gc = UNKNOWN,
-    callable $create_sid = UNKNOWN,
-    callable $validate_sid = UNKNOWN,
-    callable $update_timestamp = UNKNOWN
+    ?callable $create_sid = null,
+    ?callable $validate_sid = null,
+    ?callable $update_timestamp = null
 ): bool {}
 
 /** @refcount 1 */

@@ -19,7 +19,7 @@ var_dump(gzinflate($truncated));
 ?>
 --EXPECTF--
 int(168890)
-int(66743)
+int(667%d)
 int(65535)
 
 Warning: gzinflate(): data error in %s on line %d

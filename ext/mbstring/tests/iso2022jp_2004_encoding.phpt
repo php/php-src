@@ -124,6 +124,12 @@ for ($i = 0; $i <= 0x7F; $i++) {
 
 echo "Encoding verification and conversion works for all ASCII characters\n";
 
+for ($i = 0x80; $i <= 0x9F; $i++) {
+	convertInvalidString("\x00" . chr($i), "%", 'UTF-16BE', 'ISO-2022-JP-2004');
+}
+
+echo "Codepoints from U+0080-009F are rejected\n";
+
 /* Try a bare ESC */
 identifyInvalidString("\x1B", 'ISO-2022-JP-2004');
 
@@ -314,17 +320,38 @@ for ($i = 0; $i < 100; $i++) {
 	testValid($testString, $convertsTo, false);
 }
 
+// Regression test: Test handling of 0x80-0x9F; these have a special meaning in EUC-JP-2004,
+// but not in ISO-2022-JP-2004
+for ($i = 0x80; $i <= 0x9F; $i++)
+	convertInvalidString(chr($i), "%", "ISO-2022-JP-2004", "UTF-8");
+
+// Regression test: Codepoint which has a special representation in EUC-JP-2004
+convertInvalidString("\xFF\x95", "%", "UTF-16BE", "ISO-2022-JP-2004");
+
+// Regression test: Old implementation did not switch properly between JIS X 0213 plane 1
+// and plane 2
+// So try a character which is in plane 1 followed by one in plane 2
+testValidString("\x30\x00\x4E\x02", "\x1B\$(Q\x21\x21\x1B\$(P\x21\x22\x1B(B", "UTF-16BE", "ISO-2022-JP-2004");
+// Try plane 2 followed by plane 1
+testValidString("\x4E\x02\x30\x00", "\x1B\$(P\x21\x22\x1B\$(Q\x21\x21\x1B(B", "UTF-16BE", "ISO-2022-JP-2004");
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\xE0", "%", "ISO-2022-JP-2004", "UTF-8");
 convertInvalidString("\x1B\$(X", "%", "ISO-2022-JP-2004", "UTF-8"); // Invalid escape
 convertInvalidString("\x1B\$B!", "%", "ISO-2022-JP-2004", "UTF-8"); // Truncated character
 
+// Test sequences of 2 Unicode codepoints which convert to a single character in ISO-2022-JP-2004
+testValidString("\x02\x54\x03\x00", "\x1B\$(Q+H\x1B(B", "UTF-16BE", "ISO-2022-JP-2004");
+// Including the case where such a codepoint is followed by one which it can't combine with
+testValidString("\x02\x54\x00A", "\x1B\$(Q+8\x1B(BA", "UTF-16BE", "ISO-2022-JP-2004");
+
 echo "All done!\n";
 
 ?>
 --EXPECT--
 Encoding verification and conversion works for all ASCII characters
+Codepoints from U+0080-009F are rejected
 Encoding verification and conversion rejects all invalid single bytes
 Encoding verification and conversion work on JISX-0208 characters
 Encoding verification and conversion work on JISX-0213:2004 plane 1 characters

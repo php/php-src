@@ -4,6 +4,7 @@ Observer: Observability of fake closures
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 --FILE--
 <?php
@@ -22,11 +23,14 @@ $closure();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_closure_%d.php' -->
-<file '%s%eobserver_closure_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
+  <!-- init Closure::fromCallable() -->
+  <Closure::fromCallable>
+  </Closure::fromCallable>
   <!-- init Foo::bar() -->
   <Foo::bar>
 Called as fake closure.
   </Foo::bar>
 DONE
-</file '%s%eobserver_closure_%d.php'>
+</file '%s'>

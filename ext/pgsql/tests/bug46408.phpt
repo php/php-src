@@ -4,7 +4,7 @@ Bug #46408 (Locale number format settings can cause pg_query_params to break wit
 pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 if (false === setlocale(LC_ALL, "de", "de_DE", "de_DE.ISO8859-1", "de_DE.ISO_8859-1", "de_DE.UTF-8")) {
     echo "skip Locale de-DE not present";
 }
@@ -12,7 +12,7 @@ if (false === setlocale(LC_ALL, "de", "de_DE", "de_DE.ISO8859-1", "de_DE.ISO_885
 --FILE--
 <?php
 
-require_once('config.inc');
+require_once('inc/config.inc');
 
 $dbh = pg_connect($conn_str);
 setlocale(LC_ALL, "de", "de_DE", "de_DE.ISO8859-1", "de_DE.ISO_8859-1", "de_DE.UTF-8");

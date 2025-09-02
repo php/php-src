@@ -71,9 +71,9 @@ echo "*** Done ***\n";
 --EXPECT--
 *** Test strncasecmp() function: with here-doc strings ***
 int(0)
-int(63)
+int(1)
 int(0)
-int(83)
+int(1)
 int(0)
 int(-1)
 int(0)

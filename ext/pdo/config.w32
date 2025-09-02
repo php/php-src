@@ -4,7 +4,12 @@ ARG_ENABLE("pdo", "Enable PHP Data Objects support", "no");
 
 if (PHP_PDO != "no") {
 	EXTENSION('pdo', 'pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c pdo_sqlstate.c', false /* force static, PHP_PDO_SHARED is broken yet somehow */);
-	ADD_EXTENSION_DEP('pdo', 'spl', true);
+	ADD_EXTENSION_DEP('pdo', 'spl');
 	ADD_MAKEFILE_FRAGMENT();
-	PHP_INSTALL_HEADERS("ext/pdo", "php_pdo.h php_pdo_driver.h php_pdo_error.h");
+	PHP_INSTALL_HEADERS("ext/pdo",
+		"pdo_sql_parser.h " +
+		"php_pdo_driver.h " +
+		"php_pdo_error.h " +
+		"php_pdo.h"
+	);
 }

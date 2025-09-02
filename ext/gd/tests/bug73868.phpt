@@ -2,6 +2,12 @@
 Bug 73868 (DOS vulnerability in gdImageCreateFromGd2Ctx())
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.3.3', '>=')) {
+        die("skip test requires GD 2.3.2 or older");
+    }
+?>
 --FILE--
 <?php
 var_dump(imagecreatefromgd2(__DIR__ . DIRECTORY_SEPARATOR . 'bug73868.gd2'));

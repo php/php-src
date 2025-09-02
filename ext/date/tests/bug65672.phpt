@@ -32,7 +32,7 @@ $period->dynamic3[] = "array";
 var_dump($period->dynamic3);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(5) "stuff"
 string(8) "modified"
 array(1) {
@@ -40,11 +40,17 @@ array(1) {
   string(5) "array"
 }
 bool(false)
+
+Deprecated: Creation of dynamic property DatePeriod@anonymous::$dynamic1 is deprecated in %s on line %d
 string(7) "dynamic"
+
+Deprecated: Creation of dynamic property DatePeriod@anonymous::$dynamic2 is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(5) "array"
 }
+
+Deprecated: Creation of dynamic property DatePeriod@anonymous::$dynamic3 is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(5) "array"

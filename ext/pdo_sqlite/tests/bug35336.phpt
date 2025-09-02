@@ -11,10 +11,10 @@ class EEE {
 }
 
 $a = new PDO("sqlite::memory:");// pool ("sqlite::memory:");
-$a->query ("CREATE TABLE test (a integer primary key, b text)");
-$b = $a->prepare("insert into test (b) values (?)");
+$a->query ("CREATE TABLE test_35336 (a integer primary key, b text)");
+$b = $a->prepare("insert into test_35336 (b) values (?)");
 $b->execute(array (5));
-$rez = $a->query ("SELECT * FROM test")->fetchAll(PDO::FETCH_CLASS, 'EEE');
+$rez = $a->query ("SELECT * FROM test_35336")->fetchAll(PDO::FETCH_CLASS, 'EEE');
 
 echo "Done\n";
 ?>

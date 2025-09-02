@@ -36,7 +36,7 @@ string(4) "blah"
 bool(true)
 string(4) "blah"
 
-Warning: session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in %s on line %d
+Warning: session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(false)
 string(4) "blah"
 bool(true)

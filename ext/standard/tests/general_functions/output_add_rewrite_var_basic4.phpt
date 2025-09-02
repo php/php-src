@@ -73,7 +73,7 @@ Test use_trans_sid=1
 <form action="http://php.net/bar.php" method="get"> </a>
 <form action="bad://php.net/bar.php" method="get"> </a>
 <form action="//www.php.net/bar.php" method="get"> </a>
---EXPECT--
+--EXPECTF--
 Without session
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>
@@ -104,6 +104,8 @@ Test use_trans_sid=0
 <form action="bad://php.net/bar.php" method="get"> </a>
 <form action="//www.php.net/bar.php" method="get"> </a>
 
+
+Deprecated: ini_set(): Enabling session.use_trans_sid INI setting is deprecated in %s on line 49
 Test use_trans_sid=1
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
 <a href="./foo.php?%3CNAME%3E=%3CVALUE%3E"> </a>

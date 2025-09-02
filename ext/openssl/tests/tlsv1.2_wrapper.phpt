@@ -16,8 +16,8 @@ $serverCode = <<<'CODE'
         'local_cert' => '%s',
     ]]);
 
-    $server = stream_socket_server('tlsv1.2://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tlsv1.2://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
     for ($i = 0; $i < (phpt_has_sslv3() ? 3 : 2); $i++) {
         @stream_socket_accept($server, 3);
@@ -32,15 +32,13 @@ $clientCode = <<<'CODE'
         'verify_peer_name' => false,
     ]]);
 
-    phpt_wait();
-
-    $client = stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = stream_socket_client("tlsv1.2://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("sslv3://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.1://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("tlsv1.1://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 CODE;
 

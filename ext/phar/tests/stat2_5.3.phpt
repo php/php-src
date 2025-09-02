@@ -33,8 +33,10 @@ __HALT_COMPILER();');
 include $fname3;
 ?>
 --CLEAN--
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+@unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
+?>
 --EXPECT--
 bool(true)
 is_link

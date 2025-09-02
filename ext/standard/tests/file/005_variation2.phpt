@@ -28,6 +28,11 @@ function stat_fn( $filename ) {
 
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
 echo "\n*** testing touch ***\n";
+
+$dir = __DIR__ . '/005_variation2';
+mkdir($dir);
+chdir($dir);
+
 $b = touch(false);
 $c = touch('');
 $d = touch(' ');
@@ -47,6 +52,7 @@ stat_fn('|');
 
 var_dump(unlink(' '));
 var_dump(unlink('|'));
+rmdir($dir);
 
 echo "Done";
 ?>

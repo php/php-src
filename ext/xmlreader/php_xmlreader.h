@@ -43,7 +43,6 @@ typedef struct _xmlreader_object {
 	/* strings must be set in input buffer as copy is required */
 	xmlParserInputBufferPtr input;
 	void *schema;
-	HashTable *prop_handler;
 	zend_object  std;
 } xmlreader_object;
 
@@ -56,8 +55,5 @@ static inline xmlreader_object *php_xmlreader_fetch_object(zend_object *obj) {
 PHP_MINIT_FUNCTION(xmlreader);
 PHP_MSHUTDOWN_FUNCTION(xmlreader);
 PHP_MINFO_FUNCTION(xmlreader);
-
-#define REGISTER_XMLREADER_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(xmlreader_class_entry, const_name, sizeof(const_name)-1, (zend_long)value);
 
 #endif	/* PHP_XMLREADER_H */

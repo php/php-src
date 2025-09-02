@@ -11,14 +11,14 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'bug68920.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     stream_socket_accept($server, 30);
     stream_socket_accept($server, 30);
@@ -28,10 +28,8 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
-
-    phpt_wait();
 
     $ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => true]]);
     $sock = stream_socket_client($serverUri, $errno, $errstr, 30, $clientFlags, $ctx);

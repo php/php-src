@@ -19,7 +19,7 @@ if ($exit_code !== 0) {
     function getNice($id)
     {
         $res = shell_exec('ps -p ' . $id .' -o "pid,nice"');
-        preg_match('/^\s*\w+\s+\w+\s*(\d+)\s+(\d+)/m', $res, $matches);
+        preg_match('/^\s*\w+\s+\w+\s*(\d+)\s+(-?\d+)/m', $res, $matches);
         if (count($matches) > 2)
             return $matches[2];
         else
@@ -30,7 +30,9 @@ if ($exit_code !== 0) {
     $niceBefore = getNice($pid);
     proc_nice($delta);
     $niceAfter = getNice($pid);
-    var_dump($niceBefore == ($niceAfter - $delta));
+    // The maximum niceness level is 19, if the process is already running at a high niceness, it cannot be increased.
+    // Decreasing is only possible for superusers.
+    var_dump(min($niceBefore + $delta, 19) == $niceAfter);
 ?>
 --EXPECT--
 bool(true)

@@ -2,35 +2,468 @@
 
 /** @generate-class-entries */
 
-namespace PgSql {
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Connection
-    {
-    }
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Result
-    {
-    }
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Lob
-    {
-    }
-
-}
-
 namespace {
+    /* libpq version */
+
+    /**
+     * @var string
+     * @cvalue pgsql_libpq_version
+     */
+    const PGSQL_LIBPQ_VERSION = UNKNOWN;
+    /**
+     * @var string
+     * @cvalue pgsql_libpq_version
+     */
+    #[\Deprecated(since: '8.0', message: 'as it is the same as PGSQL_LIBPQ_VERSION')]
+    const PGSQL_LIBPQ_VERSION_STR = UNKNOWN;
+
+    /* For connection option */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_CONNECT_FORCE_NEW
+     */
+    const PGSQL_CONNECT_FORCE_NEW = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_CONNECT_ASYNC
+     */
+    const PGSQL_CONNECT_ASYNC = UNKNOWN;
+
+    /* For pg_fetch_array() */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_ASSOC
+     */
+    const PGSQL_ASSOC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_NUM
+     */
+    const PGSQL_NUM = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_BOTH
+     */
+    const PGSQL_BOTH = UNKNOWN;
+
+    /* For pg_last_notice() */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_NOTICE_LAST
+     */
+    const PGSQL_NOTICE_LAST = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_NOTICE_ALL
+     */
+    const PGSQL_NOTICE_ALL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_NOTICE_CLEAR
+     */
+    const PGSQL_NOTICE_CLEAR = UNKNOWN;
+
+    /* For pg_connection_status() */
+
+    /**
+     * @var int
+     * @cvalue CONNECTION_BAD
+     */
+    const PGSQL_CONNECTION_BAD = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_OK
+     */
+    const PGSQL_CONNECTION_OK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_STARTED
+     */
+    const PGSQL_CONNECTION_STARTED = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_MADE
+     */
+    const PGSQL_CONNECTION_MADE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_AWAITING_RESPONSE
+     */
+    const PGSQL_CONNECTION_AWAITING_RESPONSE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_AUTH_OK
+     */
+    const PGSQL_CONNECTION_AUTH_OK = UNKNOWN;
+#ifdef CONNECTION_SSL_STARTUP
+    /**
+     * @var int
+     * @cvalue CONNECTION_SSL_STARTUP
+     */
+    const PGSQL_CONNECTION_SSL_STARTUP = UNKNOWN;
+#endif
+    /**
+     * @var int
+     * @cvalue CONNECTION_SETENV
+     */
+    const PGSQL_CONNECTION_SETENV = UNKNOWN;
+
+    /* For pg_connect_poll() */
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_FAILED
+     */
+    const PGSQL_POLLING_FAILED = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_READING
+     */
+    const PGSQL_POLLING_READING = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_WRITING
+     */
+    const PGSQL_POLLING_WRITING = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_OK
+     */
+    const PGSQL_POLLING_OK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_ACTIVE
+     */
+    const PGSQL_POLLING_ACTIVE = UNKNOWN;
+
+    /* For pg_transaction_status() */
+
+    /**
+     * @var int
+     * @cvalue PQTRANS_IDLE
+     */
+    const PGSQL_TRANSACTION_IDLE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQTRANS_ACTIVE
+     */
+    const PGSQL_TRANSACTION_ACTIVE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQTRANS_INTRANS
+     */
+    const PGSQL_TRANSACTION_INTRANS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQTRANS_INERROR
+     */
+    const PGSQL_TRANSACTION_INERROR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQTRANS_UNKNOWN
+     */
+    const PGSQL_TRANSACTION_UNKNOWN = UNKNOWN;
+
+    /* For pg_set_error_verbosity() */
+
+    /**
+     * @var int
+     * @cvalue PQERRORS_TERSE
+     */
+    const PGSQL_ERRORS_TERSE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQERRORS_DEFAULT
+     */
+    const PGSQL_ERRORS_DEFAULT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQERRORS_VERBOSE
+     */
+    const PGSQL_ERRORS_VERBOSE = UNKNOWN;
+    #ifdef HAVE_PQERRORS_SQLSTATE
+    /**
+     * @var int
+     * @cvalue PQERRORS_SQLSTATE
+     */
+    const PGSQL_ERRORS_SQLSTATE = UNKNOWN;
+    #else
+    /**
+     * @var int
+     * @cvalue PQERRORS_TERSE
+     */
+    const PGSQL_ERRORS_SQLSTATE = UNKNOWN;
+    #endif
+
+    /* For lo_seek() */
+
+    /**
+     * @var int
+     * @cvalue SEEK_SET
+     */
+    const PGSQL_SEEK_SET = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SEEK_CUR
+     */
+    const PGSQL_SEEK_CUR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SEEK_END
+     */
+    const PGSQL_SEEK_END = UNKNOWN;
+
+    /* For pg_result_status() return value type */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_STATUS_LONG
+     */
+    const PGSQL_STATUS_LONG = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_STATUS_STRING
+     */
+    const PGSQL_STATUS_STRING = UNKNOWN;
+
+    /* For pg_result_status() return value */
+
+    /**
+     * @var int
+     * @cvalue PGRES_EMPTY_QUERY
+     */
+    const PGSQL_EMPTY_QUERY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_COMMAND_OK
+     */
+    const PGSQL_COMMAND_OK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_TUPLES_OK
+     */
+    const PGSQL_TUPLES_OK = UNKNOWN;
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+    /**
+     * @var int
+     * @cvalue PGRES_TUPLES_CHUNK
+     */
+    const PGSQL_TUPLES_CHUNK = UNKNOWN;
+#endif
+    /**
+     * @var int
+     * @cvalue PGRES_COPY_OUT
+     */
+    const PGSQL_COPY_OUT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_COPY_IN
+     */
+    const PGSQL_COPY_IN = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_BAD_RESPONSE
+     */
+    const PGSQL_BAD_RESPONSE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_NONFATAL_ERROR
+     */
+    const PGSQL_NONFATAL_ERROR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_FATAL_ERROR
+     */
+    const PGSQL_FATAL_ERROR = UNKNOWN;
+
+    /* For pg_result_error_field() field codes */
+
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SEVERITY
+     */
+    const PGSQL_DIAG_SEVERITY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SQLSTATE
+     */
+    const PGSQL_DIAG_SQLSTATE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_MESSAGE_PRIMARY
+     */
+    const PGSQL_DIAG_MESSAGE_PRIMARY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_MESSAGE_DETAIL
+     */
+    const PGSQL_DIAG_MESSAGE_DETAIL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_MESSAGE_HINT
+     */
+    const PGSQL_DIAG_MESSAGE_HINT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_STATEMENT_POSITION
+     */
+    const PGSQL_DIAG_STATEMENT_POSITION = UNKNOWN;
+#ifdef PG_DIAG_INTERNAL_POSITION
+    /**
+     * @var int
+     * @cvalue PG_DIAG_INTERNAL_POSITION
+     */
+    const PGSQL_DIAG_INTERNAL_POSITION = UNKNOWN;
+#endif
+#ifdef PG_DIAG_INTERNAL_QUERY
+    /**
+     * @var int
+     * @cvalue PG_DIAG_INTERNAL_QUERY
+     */
+    const PGSQL_DIAG_INTERNAL_QUERY = UNKNOWN;
+#endif
+    /**
+     * @var int
+     * @cvalue PG_DIAG_CONTEXT
+     */
+    const PGSQL_DIAG_CONTEXT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SOURCE_FILE
+     */
+    const PGSQL_DIAG_SOURCE_FILE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SOURCE_LINE
+     */
+    const PGSQL_DIAG_SOURCE_LINE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SOURCE_FUNCTION
+     */
+    const PGSQL_DIAG_SOURCE_FUNCTION = UNKNOWN;
+#ifdef PG_DIAG_SCHEMA_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SCHEMA_NAME
+     */
+    const PGSQL_DIAG_SCHEMA_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_TABLE_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_TABLE_NAME
+     */
+    const PGSQL_DIAG_TABLE_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_COLUMN_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_COLUMN_NAME
+     */
+    const PGSQL_DIAG_COLUMN_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_DATATYPE_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_DATATYPE_NAME
+     */
+    const PGSQL_DIAG_DATATYPE_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_CONSTRAINT_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_CONSTRAINT_NAME
+     */
+    const PGSQL_DIAG_CONSTRAINT_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_SEVERITY_NONLOCALIZED
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SEVERITY_NONLOCALIZED
+     */
+    const PGSQL_DIAG_SEVERITY_NONLOCALIZED = UNKNOWN;
+#endif
+
+    /* pg_convert options */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_CONV_IGNORE_DEFAULT
+     */
+    const PGSQL_CONV_IGNORE_DEFAULT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_CONV_FORCE_NULL
+     */
+    const PGSQL_CONV_FORCE_NULL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_CONV_IGNORE_NOT_NULL
+     */
+    const PGSQL_CONV_IGNORE_NOT_NULL = UNKNOWN;
+
+    /* pg_insert/update/delete/select options */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_ESCAPE
+     */
+    const PGSQL_DML_ESCAPE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_NO_CONV
+     */
+    const PGSQL_DML_NO_CONV = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_EXEC
+     */
+    const PGSQL_DML_EXEC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_ASYNC
+     */
+    const PGSQL_DML_ASYNC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_STRING
+     */
+    const PGSQL_DML_STRING = UNKNOWN;
+#ifdef PQTRACE_SUPPPRESS_TIMESTAMPS
+    /**
+     * @var int
+     * @cvalue PQTRACE_SUPPRESS_TIMESTAMPS
+     */
+    const PGSQL_TRACE_SUPPRESS_TIMESTAMPS = UNKNOWN;
+#endif
+#ifdef PQTRACE_REGRESS_MODE
+    /**
+     * @var int
+     * @cvalue PQTRACE_REGRESS_MODE
+     */
+    const PGSQL_TRACE_REGRESS_MODE = UNKNOWN;
+#endif
+
+    /* For pg_set_error_context_visibility() */
+
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_NEVER
+     */
+    const PGSQL_SHOW_CONTEXT_NEVER = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_ERRORS
+     */
+    const PGSQL_SHOW_CONTEXT_ERRORS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_ALWAYS
+     */
+    const PGSQL_SHOW_CONTEXT_ALWAYS = UNKNOWN;
 
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
@@ -38,7 +471,7 @@ namespace {
 
     function pg_connect_poll(PgSql\Connection $connection): int {}
 
-    function pg_close(?PgSql\Connection $connection = null): bool {}
+    function pg_close(?PgSql\Connection $connection = null): true {}
 
     /** @refcount 1 */
     function pg_dbname(?PgSql\Connection $connection = null): string {}
@@ -47,8 +480,8 @@ namespace {
 
     /**
      * @alias pg_last_error
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_last_error() instead')]
     function pg_errormessage(?PgSql\Connection $connection = null): string {}
 
     /** @refcount 1 */
@@ -69,6 +502,15 @@ namespace {
      */
     function pg_version(?PgSql\Connection $connection = null): array {}
 
+    /**
+     * @return array<string, string|null>
+     * @refcount 1
+     */
+    function pg_jit(?PgSql\Connection $connection = null): array {}
+
+#ifdef HAVE_PG_SERVICE
+    function pg_service(?PgSql\Connection $connection = null): string {}
+#endif
     /**
      * @param PgSql\Connection|string $connection
      * @refcount 1
@@ -113,24 +555,24 @@ namespace {
 
     /**
      * @alias pg_num_rows
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_num_rows() instead')]
     function pg_numrows(PgSql\Result $result): int {}
 
     function pg_num_fields(PgSql\Result $result): int {}
 
     /**
      * @alias pg_num_fields
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_num_fields() instead')]
     function pg_numfields(PgSql\Result $result): int {}
 
     function pg_affected_rows(PgSql\Result $result): int {}
 
     /**
      * @alias pg_affected_rows
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_affected_rows() instead')]
     function pg_cmdtuples(PgSql\Result $result): int {}
 
     function pg_last_notice(PgSql\Connection $connection, int $mode = PGSQL_NOTICE_LAST): array|string|bool {}
@@ -142,24 +584,24 @@ namespace {
 
     /**
      * @alias pg_field_name
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_field_name() instead')]
     function pg_fieldname(PgSql\Result $result, int $field): string {}
 
     function pg_field_size(PgSql\Result $result, int $field): int {}
 
     /**
      * @alias pg_field_size
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_field_size() instead')]
     function pg_fieldsize(PgSql\Result $result, int $field): int {}
 
     function pg_field_type(PgSql\Result $result, int $field): string {}
 
     /**
      * @alias pg_field_type
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_field_type() instead')]
     function pg_fieldtype(PgSql\Result $result, int $field): string {}
 
     /** @refcount 1 */
@@ -169,12 +611,12 @@ namespace {
 
     /**
      * @alias pg_field_num
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_field_num() instead')]
     function pg_fieldnum(PgSql\Result $result, string $field): int {}
 
     /**
-     * @param string|int $row
+     * @param string|int|null $row
      * @refcount 1
      */
     function pg_fetch_result(PgSql\Result $result, $row, string|int $field = UNKNOWN): string|false|null {}
@@ -182,8 +624,8 @@ namespace {
     /**
      * @param string|int $row
      * @alias pg_fetch_result
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_fetch_result() instead')]
     function pg_result(PgSql\Result $result, $row, string|int $field = UNKNOWN): string|false|null {}
 
     /**
@@ -221,32 +663,30 @@ namespace {
 
     function pg_result_seek(PgSql\Result $result, int $row): bool {}
 
-    /** @param string|int $row */
+    /** @param string|int|null $row */
     function pg_field_prtlen(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
     /**
      * @param string|int $row
-     * @alias pg_field_prtlen
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_field_prtlen() instead')]
     function pg_fieldprtlen(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
-    /** @param string|int $row */
+    /** @param string|int|null $row */
     function pg_field_is_null(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
     /**
      * @param string|int $row
-     * @alias pg_field_is_null
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_field_is_null() instead')]
     function pg_fieldisnull(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
     function pg_free_result(PgSql\Result $result): bool {}
 
     /**
      * @alias pg_free_result
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_free_result() instead')]
     function pg_freeresult(PgSql\Result $result): bool {}
 
     /** @refcount 1 */
@@ -254,13 +694,13 @@ namespace {
 
     /**
      * @alias pg_last_oid
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_last_oid() instead')]
     function pg_getlastoid(PgSql\Result $result): string|int|false {}
 
-    function pg_trace(string $filename, string $mode = "w", ?PgSql\Connection $connection = null): bool {}
+    function pg_trace(string $filename, string $mode = "w", ?PgSql\Connection $connection = null, int $trace_mode = 0): bool {}
 
-    function pg_untrace(?PgSql\Connection $connection = null): bool {}
+    function pg_untrace(?PgSql\Connection $connection = null): true {}
 
     /**
      * @param PgSql\Connection $connection
@@ -273,8 +713,8 @@ namespace {
      * @param PgSql\Connection $connection
      * @param string|int $oid
      * @alias pg_lo_create
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_create() instead')]
     function pg_locreate($connection = UNKNOWN, $oid = UNKNOWN): string|int|false {}
 
     /**
@@ -287,8 +727,8 @@ namespace {
      * @param PgSql\Connection $connection
      * @param string|int $oid
      * @alias pg_lo_unlink
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_unlink() instead')]
     function pg_lounlink($connection, $oid = UNKNOWN): bool {}
 
     /**
@@ -302,16 +742,16 @@ namespace {
      * @param PgSql\Connection $connection
      * @param string|int $oid
      * @alias pg_lo_open
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_open() instead')]
     function pg_loopen($connection, $oid = UNKNOWN, string $mode = UNKNOWN): PgSql\Lob|false {}
 
     function pg_lo_close(PgSql\Lob $lob): bool {}
 
     /**
      * @alias pg_lo_close
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_close() instead')]
     function pg_loclose(PgSql\Lob $lob): bool {}
 
     /** @refcount 1 */
@@ -319,24 +759,24 @@ namespace {
 
     /**
      * @alias pg_lo_read
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_read() instead')]
     function pg_loread(PgSql\Lob $lob, int $length = 8192): string|false {}
 
     function pg_lo_write(PgSql\Lob $lob, string $data, ?int $length = null): int|false {}
 
     /**
      * @alias pg_lo_write
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_write() instead')]
     function pg_lowrite(PgSql\Lob $lob, string $data, ?int $length = null): int|false {}
 
     function pg_lo_read_all(PgSql\Lob $lob): int {}
 
     /**
      * @alias pg_lo_read_all
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_read_all() instead')]
     function pg_loreadall(PgSql\Lob $lob): int {}
 
     /**
@@ -352,8 +792,8 @@ namespace {
      * @param string|int $filename
      * @param string|int $oid
      * @alias pg_lo_import
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_import() instead')]
     function pg_loimport($connection, $filename = UNKNOWN, $oid = UNKNOWN): string|int|false {}
 
     /**
@@ -368,8 +808,8 @@ namespace {
      * @param string|int $oid
      * @param string|int $filename
      * @alias pg_lo_export
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_lo_export() instead')]
     function pg_loexport($connection, $oid = UNKNOWN, $filename = UNKNOWN): bool {}
 
     function pg_lo_seek(PgSql\Lob $lob, int $offset, int $whence = SEEK_CUR): bool {}
@@ -387,16 +827,16 @@ namespace {
     /**
      * @param PgSql\Connection|string $connection
      * @alias pg_set_client_encoding
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_set_client_encoding() instead')]
     function pg_setclientencoding($connection, string $encoding = UNKNOWN): int {}
 
     function pg_client_encoding(?PgSql\Connection $connection = null): string {}
 
     /**
      * @alias pg_client_encoding
-     * @deprecated
      */
+    #[\Deprecated(since: '8.0', message: 'use pg_client_encoding() instead')]
     function pg_clientencoding(?PgSql\Connection $connection = null): string {}
 
     function pg_end_copy(?PgSql\Connection $connection = null): bool {}
@@ -410,7 +850,7 @@ namespace {
      */
     function pg_copy_to(PgSql\Connection $connection, string $table_name, string $separator = "\t", string $null_as = "\\\\N"): array|false {}
 
-    function pg_copy_from(PgSql\Connection $connection, string $table_name, array $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
+    function pg_copy_from(PgSql\Connection $connection, string $table_name, array|Traversable $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
 
     /**
      * @param PgSql\Connection|string $connection
@@ -512,6 +952,55 @@ namespace {
      * @return array<int, array>|string|false
      * @refcount 1
      */
-    function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+    function pg_select(PgSql\Connection $connection, string $table_name, array $conditions = [], int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+
+    function pg_set_error_context_visibility(PgSql\Connection $connection, int $visibility): int {}
+
+#ifdef HAVE_PG_RESULT_MEMORY_SIZE
+    function pg_result_memory_size(PgSql\Result $result): int {}
+#endif
+
+    function pg_change_password(PgSql\Connection $connection, string $user, #[\SensitiveParameter] string $password): bool {}
+
+    function pg_put_copy_data(PgSql\Connection $connection, string $cmd): int {}
+    function pg_put_copy_end(PgSql\Connection $connection, ?string $error = null): int {}
+
+    /**
+     * @param resource $socket
+     */
+    function pg_socket_poll($socket, int $read, int $write, int $timeout = -1): int {}
+
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+    function pg_set_chunked_rows_size(PgSql\Connection $connection, int $size): bool {}
+#endif
+#ifdef HAVE_PG_CLOSE_STMT
+    function pg_close_stmt(Pgsql\Connection $connection, string $statement_name): PgSql\Result|false {}
+#endif
+}
+
+namespace PgSql {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Result
+    {
+    }
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Lob
+    {
+    }
 
 }

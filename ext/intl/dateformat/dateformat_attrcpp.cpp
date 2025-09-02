@@ -69,10 +69,9 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 
 	const TimeZone& tz = fetch_datefmt(dfo)->getTimeZone();
 	TimeZone *tz_clone = tz.clone();
-	if (tz_clone == NULL) {
+	if (UNEXPECTED(tz_clone == NULL)) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
-				"datefmt_get_timezone: Out of memory when cloning time zone",
-				0);
+				"Out of memory when cloning time zone");
 		RETURN_FALSE;
 	}
 
@@ -82,25 +81,52 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 /* {{{ Set formatter's timezone. */
 U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 {
-	zval		*timezone_zv;
-	TimeZone	*timezone;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	if ( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"Oz", &object, IntlDateFormatter_ce_ptr, &timezone_zv) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(object, IntlDateFormatter_ce_ptr)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-	timezone = timezone_process_timezone_argument(timezone_zv,
-			INTL_DATA_ERROR_P(dfo), "datefmt_set_timezone");
-	if (timezone == NULL) {
+	TimeZone *timezone = timezone_process_timezone_argument(
+		timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+	if (timezone == nullptr) {
 		RETURN_FALSE;
 	}
 
 	fetch_datefmt(dfo)->adoptTimeZone(timezone);
+
+	RETURN_TRUE;
+}
+
+U_CFUNC PHP_METHOD(IntlDateFormatter, setTimeZone)
+{
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
+
+	DATE_FORMAT_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	object = ZEND_THIS;
+	DATE_FORMAT_METHOD_FETCH_OBJECT;
+
+	TimeZone *timezone = timezone_process_timezone_argument(
+		timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+	if (timezone == nullptr) {
+		RETURN_FALSE;
+	}
+
+	fetch_datefmt(dfo)->adoptTimeZone(timezone);
+
+	RETURN_TRUE;
 }
 
 /* {{{ Get formatter calendar type. */
@@ -142,10 +168,9 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 	}
 
 	Calendar *cal_clone = cal->clone();
-	if (cal_clone == NULL) {
+	if (UNEXPECTED(cal_clone == NULL)) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
-				"datefmt_get_calendar_object: Out of memory when cloning "
-				"calendar", 0);
+				"Out of memory when cloning calendar");
 		RETURN_FALSE;
 	}
 
@@ -156,8 +181,8 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 /* {{{ Set formatter's calendar. */
 U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 {
-	zend_object *calendar_obj;
-	zend_long calendar_long;
+	zend_object *calendar_obj = NULL;
+	zend_long calendar_long = 0;
 	bool calendar_is_null;
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -185,7 +210,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	// must store the requested locale on object creation
 
 	if (datefmt_process_calendar_arg(calendar_obj, calendar_long, calendar_is_null, locale,
-			"datefmt_set_calendar",	INTL_DATA_ERROR_P(dfo), cal, cal_type, cal_owned) == FAILURE
+			INTL_DATA_ERROR_P(dfo), cal, cal_type, cal_owned) == FAILURE
 	) {
 		RETURN_FALSE;
 	}
@@ -193,20 +218,18 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	if (cal_owned) {
 		/* a non IntlCalendar was specified, we want to keep the timezone */
 		TimeZone *old_timezone = fetch_datefmt(dfo)->getTimeZone().clone();
-		if (old_timezone == NULL) {
+		if (UNEXPECTED(old_timezone == NULL)) {
 			intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
-					"datefmt_set_calendar: Out of memory when cloning calendar",
-					0);
+					"Out of memory when cloning calendar");
 			delete cal;
 			RETURN_FALSE;
 		}
 		cal->adoptTimeZone(old_timezone);
 	} else {
 		cal = cal->clone();
-		if (cal == NULL) {
+		if (UNEXPECTED(cal == NULL)) {
 			intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
-					"datefmt_set_calendar: Out of memory when cloning calendar",
-					0);
+					"Out of memory when cloning calendar");
 			RETURN_FALSE;
 		}
 	}

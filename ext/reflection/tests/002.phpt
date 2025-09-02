@@ -3,6 +3,7 @@ Reflection properties are read only
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class ReflectionMethodEx extends ReflectionMethod
 {
     public $foo = "xyz";

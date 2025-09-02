@@ -27,7 +27,7 @@ typedef struct {
 PHP_HASH_API void PHP_MURMUR3AInit(PHP_MURMUR3A_CTX *ctx, HashTable *args);
 PHP_HASH_API void PHP_MURMUR3AUpdate(PHP_MURMUR3A_CTX *ctx, const unsigned char *in, size_t len);
 PHP_HASH_API void PHP_MURMUR3AFinal(unsigned char digest[4], PHP_MURMUR3A_CTX *ctx);
-PHP_HASH_API int PHP_MURMUR3ACopy(const php_hash_ops *ops, PHP_MURMUR3A_CTX *orig_context, PHP_MURMUR3A_CTX *copy_context);
+PHP_HASH_API zend_result PHP_MURMUR3ACopy(const php_hash_ops *ops, const PHP_MURMUR3A_CTX *orig_context, PHP_MURMUR3A_CTX *copy_context);
 
 typedef struct {
 	uint32_t h[4];
@@ -39,7 +39,7 @@ typedef struct {
 PHP_HASH_API void PHP_MURMUR3CInit(PHP_MURMUR3C_CTX *ctx, HashTable *args);
 PHP_HASH_API void PHP_MURMUR3CUpdate(PHP_MURMUR3C_CTX *ctx, const unsigned char *in, size_t len);
 PHP_HASH_API void PHP_MURMUR3CFinal(unsigned char digest[16], PHP_MURMUR3C_CTX *ctx);
-PHP_HASH_API int PHP_MURMUR3CCopy(const php_hash_ops *ops, PHP_MURMUR3C_CTX *orig_context, PHP_MURMUR3C_CTX *copy_context);
+PHP_HASH_API zend_result PHP_MURMUR3CCopy(const php_hash_ops *ops, const PHP_MURMUR3C_CTX *orig_context, PHP_MURMUR3C_CTX *copy_context);
 
 typedef struct {
 	uint64_t h[2];
@@ -51,7 +51,7 @@ typedef struct {
 PHP_HASH_API void PHP_MURMUR3FInit(PHP_MURMUR3F_CTX *ctx, HashTable *args);
 PHP_HASH_API void PHP_MURMUR3FUpdate(PHP_MURMUR3F_CTX *ctx, const unsigned char *in, size_t len);
 PHP_HASH_API void PHP_MURMUR3FFinal(unsigned char digest[16], PHP_MURMUR3F_CTX *ctx);
-PHP_HASH_API int PHP_MURMUR3FCopy(const php_hash_ops *ops, PHP_MURMUR3F_CTX *orig_context, PHP_MURMUR3F_CTX *copy_context);
+PHP_HASH_API zend_result PHP_MURMUR3FCopy(const php_hash_ops *ops, const PHP_MURMUR3F_CTX *orig_context, PHP_MURMUR3F_CTX *copy_context);
 
 #endif /* PHP_HASH_MURMUR_H */
 

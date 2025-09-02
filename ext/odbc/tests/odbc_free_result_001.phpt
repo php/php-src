@@ -11,32 +11,40 @@ include 'config.inc';
 
 $conn = odbc_connect($dsn, $user, $pass);
 
-odbc_exec($conn, 'CREATE DATABASE odbcTEST');
+odbc_exec($conn, 'CREATE TABLE free_result (TEST INT NOT NULL)');
 
-odbc_exec($conn, 'CREATE TABLE FOO (TEST INT NOT NULL)');
-odbc_exec($conn, 'ALTER TABLE FOO ADD PRIMARY KEY (TEST)');
+odbc_exec($conn, 'INSERT INTO free_result VALUES (1), (2)');
 
-odbc_exec($conn, 'INSERT INTO FOO VALUES (1)');
-odbc_exec($conn, 'INSERT INTO FOO VALUES (2)');
+$res = odbc_exec($conn, 'SELECT * FROM free_result');
 
-$res = odbc_exec($conn, 'SELECT * FROM FOO');
-
-var_dump(odbc_fetch_row($res));
-var_dump(odbc_result($res, 'test'));
-var_dump(odbc_free_result($res));
-try {
-    var_dump(odbc_free_result($conn));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
 try {
     var_dump(odbc_fetch_row($res));
-} catch (TypeError $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump(odbc_result($res, 'test'));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(odbc_free_result($res));
 } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(odbc_free_result($conn));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(odbc_fetch_row($res));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(odbc_result($res, 'test'));
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 ?>
@@ -44,13 +52,12 @@ try {
 <?php
 require 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
-odbc_exec($conn, 'DROP TABLE FOO');
-odbc_exec($conn, 'DROP DATABASE odbcTEST');
+odbc_exec($conn, 'DROP TABLE free_result');
 ?>
 --EXPECT--
 bool(true)
 string(1) "1"
 bool(true)
-odbc_free_result(): supplied resource is not a valid ODBC result resource
-odbc_fetch_row(): supplied resource is not a valid ODBC result resource
-odbc_result(): supplied resource is not a valid ODBC result resource
+odbc_free_result(): Argument #1 ($statement) must be of type Odbc\Result, Odbc\Connection given
+ODBC result has already been closed
+ODBC result has already been closed

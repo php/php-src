@@ -4,7 +4,6 @@ spoofchecker with settings changed
 intl
 --SKIPIF--
 <?php if(!class_exists("Spoofchecker")) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '55.1') < 0) die('skip for ICU >= 55.1'); ?>
 --FILE--
 <?php
 

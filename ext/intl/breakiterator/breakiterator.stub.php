@@ -2,8 +2,51 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlBreakIterator implements IteratorAggregate
 {
+    /** @cvalue BreakIterator::DONE */
+    public const int DONE = UNKNOWN;
+
+    /** @cvalue UBRK_WORD_NONE */
+    public const int WORD_NONE = UNKNOWN;
+    /** @cvalue UBRK_WORD_NONE_LIMIT */
+    public const int WORD_NONE_LIMIT = UNKNOWN;
+    /** @cvalue UBRK_WORD_NUMBER */
+    public const int WORD_NUMBER = UNKNOWN;
+    /** @cvalue UBRK_WORD_NUMBER_LIMIT */
+    public const int WORD_NUMBER_LIMIT = UNKNOWN;
+    /** @cvalue UBRK_WORD_LETTER */
+    public const int WORD_LETTER = UNKNOWN;
+    /** @cvalue UBRK_WORD_LETTER_LIMIT */
+    public const int WORD_LETTER_LIMIT = UNKNOWN;
+    /** @cvalue UBRK_WORD_KANA */
+    public const int WORD_KANA = UNKNOWN;
+    /** @cvalue UBRK_WORD_KANA_LIMIT */
+    public const int WORD_KANA_LIMIT = UNKNOWN;
+    /** @cvalue UBRK_WORD_IDEO */
+    public const int WORD_IDEO = UNKNOWN;
+    /** @cvalue UBRK_WORD_IDEO_LIMIT */
+    public const int WORD_IDEO_LIMIT = UNKNOWN;
+
+    /** @cvalue UBRK_LINE_SOFT */
+    public const int LINE_SOFT = UNKNOWN;
+    /** @cvalue UBRK_LINE_SOFT_LIMIT */
+    public const int LINE_SOFT_LIMIT = UNKNOWN;
+    /** @cvalue UBRK_LINE_HARD */
+    public const int LINE_HARD = UNKNOWN;
+    /** @cvalue UBRK_LINE_HARD_LIMIT */
+    public const int LINE_HARD_LIMIT = UNKNOWN;
+
+    /** @cvalue UBRK_SENTENCE_TERM */
+    public const int SENTENCE_TERM = UNKNOWN;
+    /** @cvalue UBRK_SENTENCE_TERM_LIMIT */
+    public const int SENTENCE_TERM_LIMIT = UNKNOWN;
+    /** @cvalue UBRK_SENTENCE_SEP */
+    public const int SENTENCE_SEP = UNKNOWN;
+    /** @cvalue UBRK_SENTENCE_SEP_LIMIT */
+    public const int SENTENCE_SEP_LIMIT = UNKNOWN;
+
     /** @tentative-return-type */
     public static function createCharacterInstance(?string $locale = null): ?IntlBreakIterator {}
 
@@ -64,11 +107,12 @@ class IntlBreakIterator implements IteratorAggregate
     public function previous(): int {}
 
     /** @tentative-return-type */
-    public function setText(string $text): ?bool {} // TODO return false instead of null in case of failure
+    public function setText(string $text): bool {}
 
     public function getIterator(): Iterator {}
 }
 
+/** @not-serializable */
 class IntlRuleBasedBreakIterator extends IntlBreakIterator
 {
     public function __construct(string $rules, bool $compiled = false) {}
@@ -86,6 +130,7 @@ class IntlRuleBasedBreakIterator extends IntlBreakIterator
     public function getRuleStatusVec(): array|false {}
 }
 
+/** @not-serializable */
 class IntlCodePointBreakIterator extends IntlBreakIterator
 {
     /** @tentative-return-type */

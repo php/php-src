@@ -13,9 +13,9 @@ require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_odbc/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data varchar(max))')) {
-    if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data longtext)')) {
-        if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
+if (false === $db->exec('CREATE TABLE test_max_columns (id INT NOT NULL PRIMARY KEY, data varchar(max))')) {
+    if (false === $db->exec('CREATE TABLE test_max_columns (id INT NOT NULL PRIMARY KEY, data longtext)')) {
+        if (false === $db->exec('CREATE TABLE test_max_columns (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
             die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
         }
     }
@@ -26,14 +26,14 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $sizes = array(32, 64, 128, 253, 254, 255, 256, 257, 258, 512, 1024, 2048, 3998, 3999, 4000);
 
 $db->beginTransaction();
-$insert = $db->prepare('INSERT INTO TEST VALUES (?, ?)');
+$insert = $db->prepare('INSERT INTO test_max_columns VALUES (?, ?)');
 foreach ($sizes as $num) {
     $insert->execute(array($num, str_repeat('i', $num)));
 }
 $insert = null;
 $db->commit();
 
-foreach ($db->query('SELECT id, data from TEST') as $row) {
+foreach ($db->query('SELECT id, data from test_max_columns') as $row) {
     $expect = str_repeat('i', $row[0]);
     if (strcmp($expect, $row[1])) {
         echo "Failed on size $row[id]:\n";
@@ -44,6 +44,12 @@ foreach ($db->query('SELECT id, data from TEST') as $row) {
 }
 
 echo "Finished\n";
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+$db->exec("DROP TABLE IF EXISTS test_max_columns");
 ?>
 --EXPECT--
 Finished

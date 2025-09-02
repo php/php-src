@@ -2,16 +2,98 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlCalendar
 {
+    /** @cvalue UCAL_ERA */
+    public const int FIELD_ERA = UNKNOWN;
+    /** @cvalue UCAL_YEAR */
+    public const int FIELD_YEAR = UNKNOWN;
+    /** @cvalue UCAL_MONTH */
+    public const int FIELD_MONTH = UNKNOWN;
+    /** @cvalue UCAL_WEEK_OF_YEAR */
+    public const int FIELD_WEEK_OF_YEAR = UNKNOWN;
+    /** @cvalue UCAL_WEEK_OF_MONTH */
+    public const int FIELD_WEEK_OF_MONTH = UNKNOWN;
+    /** @cvalue UCAL_DATE */
+    public const int FIELD_DATE = UNKNOWN;
+    /** @cvalue UCAL_DAY_OF_YEAR */
+    public const int FIELD_DAY_OF_YEAR = UNKNOWN;
+    /** @cvalue UCAL_DAY_OF_WEEK */
+    public const int FIELD_DAY_OF_WEEK = UNKNOWN;
+    /** @cvalue UCAL_DAY_OF_WEEK_IN_MONTH */
+    public const int FIELD_DAY_OF_WEEK_IN_MONTH = UNKNOWN;
+    /** @cvalue UCAL_AM_PM */
+    public const int FIELD_AM_PM = UNKNOWN;
+    /** @cvalue UCAL_HOUR */
+    public const int FIELD_HOUR = UNKNOWN;
+    /** @cvalue UCAL_HOUR_OF_DAY */
+    public const int FIELD_HOUR_OF_DAY = UNKNOWN;
+    /** @cvalue UCAL_MINUTE */
+    public const int FIELD_MINUTE = UNKNOWN;
+    /** @cvalue UCAL_SECOND */
+    public const int FIELD_SECOND = UNKNOWN;
+    /** @cvalue UCAL_MILLISECOND */
+    public const int FIELD_MILLISECOND = UNKNOWN;
+    /** @cvalue UCAL_ZONE_OFFSET */
+    public const int FIELD_ZONE_OFFSET = UNKNOWN;
+    /** @cvalue UCAL_DST_OFFSET */
+    public const int FIELD_DST_OFFSET = UNKNOWN;
+    /** @cvalue UCAL_YEAR_WOY */
+    public const int FIELD_YEAR_WOY = UNKNOWN;
+    /** @cvalue UCAL_DOW_LOCAL */
+    public const int FIELD_DOW_LOCAL = UNKNOWN;
+    /** @cvalue UCAL_EXTENDED_YEAR */
+    public const int FIELD_EXTENDED_YEAR = UNKNOWN;
+    /** @cvalue UCAL_JULIAN_DAY */
+    public const int FIELD_JULIAN_DAY = UNKNOWN;
+    /** @cvalue UCAL_MILLISECONDS_IN_DAY */
+    public const int FIELD_MILLISECONDS_IN_DAY = UNKNOWN;
+    /** @cvalue UCAL_IS_LEAP_MONTH */
+    public const int FIELD_IS_LEAP_MONTH = UNKNOWN;
+    /** @cvalue UCAL_FIELD_COUNT */
+    public const int FIELD_FIELD_COUNT = UNKNOWN;
+    /** @cvalue UCAL_DAY_OF_MONTH */
+    public const int FIELD_DAY_OF_MONTH = UNKNOWN;
+
+    /** @cvalue UCAL_SUNDAY */
+    public const int DOW_SUNDAY = UNKNOWN;
+    /** @cvalue UCAL_MONDAY */
+    public const int DOW_MONDAY = UNKNOWN;
+    /** @cvalue UCAL_TUESDAY */
+    public const int DOW_TUESDAY = UNKNOWN;
+    /** @cvalue UCAL_WEDNESDAY */
+    public const int DOW_WEDNESDAY = UNKNOWN;
+    /** @cvalue UCAL_THURSDAY */
+    public const int DOW_THURSDAY = UNKNOWN;
+    /** @cvalue UCAL_FRIDAY */
+    public const int DOW_FRIDAY = UNKNOWN;
+    /** @cvalue UCAL_SATURDAY */
+    public const int DOW_SATURDAY = UNKNOWN;
+
+    /** @cvalue UCAL_WEEKDAY */
+    public const int DOW_TYPE_WEEKDAY = UNKNOWN;
+    /** @cvalue UCAL_WEEKEND */
+    public const int DOW_TYPE_WEEKEND = UNKNOWN;
+    /** @cvalue UCAL_WEEKEND_ONSET */
+    public const int DOW_TYPE_WEEKEND_OFFSET = UNKNOWN;
+    /** @cvalue UCAL_WEEKEND_CEASE */
+    public const int DOW_TYPE_WEEKEND_CEASE = UNKNOWN;
+
+    /** @cvalue UCAL_WALLTIME_FIRST */
+    public const int WALLTIME_FIRST = UNKNOWN;
+    /** @cvalue UCAL_WALLTIME_LAST */
+    public const int WALLTIME_LAST = UNKNOWN;
+    /** @cvalue UCAL_WALLTIME_NEXT_VALID */
+    public const int WALLTIME_NEXT_VALID = UNKNOWN;
+
     private function __construct() {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @tentative-return-type
      * @alias intlcal_create_instance
      */
-    public static function createInstance($timezone = null, ?string $locale = null): ?IntlCalendar {}
+    public static function createInstance(IntlTimeZone|DateTimeZone|string|null $timezone = null, ?string $locale = null): ?IntlCalendar {}
 
     /**
      * @tentative-return-type
@@ -44,10 +126,10 @@ class IntlCalendar
     public function before(IntlCalendar $other): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias intlcal_clear
      */
-    public function clear(?int $field = null) {} // TODO make return type void
+    public function clear(?int $field = null): true {}
 
     /**
      * @tentative-return-type
@@ -141,10 +223,10 @@ class IntlCalendar
     public function getMinimalDaysInFirstWeek(): int|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias intlcal_set_minimal_days_in_first_week
      */
-    public function setMinimalDaysInFirstWeek(int $days) {} // TODO make return void
+    public function setMinimalDaysInFirstWeek(int $days): true {}
 
     /**
      * @tentative-return-type
@@ -232,34 +314,38 @@ class IntlCalendar
     public function isSet(int $field): bool {}
 
     /**
-     * @return bool
-     * @alias intlcal_set
+     * @tentative-return-type
+     * @implementation-alias intlcal_set
      */
-    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {} // TODO make return type void
+    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): true {}
+
+    public function setDate(int $year, int $month, int $dayOfMonth): void {}
+
+    public function setDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = null): void {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias intlcal_set_first_day_of_week
      */
-    public function setFirstDayOfWeek(int $dayOfWeek) {} // TODO make return type void
+    public function setFirstDayOfWeek(int $dayOfWeek): true {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias intlcal_set_lenient
      */
-    public function setLenient(bool $lenient) {} // TODO make return type void
+    public function setLenient(bool $lenient): true {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias intlcal_set_repeated_wall_time_option
      */
-    public function setRepeatedWallTimeOption(int $option) {} // TODO make return type void
+    public function setRepeatedWallTimeOption(int $option): true {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias intlcal_set_skipped_wall_time_option
      */
-    public function setSkippedWallTimeOption(int $option) {} // TODO make return type void
+    public function setSkippedWallTimeOption(int $option): true {}
 
     /**
      * @tentative-return-type
@@ -268,11 +354,9 @@ class IntlCalendar
     public function setTime(float $timestamp): bool {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @tentative-return-type
-     * @alias intlcal_set_time_zone
      */
-    public function setTimeZone($timezone): bool {}
+    public function setTimeZone(IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
     /**
      * @tentative-return-type
@@ -281,8 +365,13 @@ class IntlCalendar
     public function toDateTime(): DateTime|false {}
 }
 
+/** @not-serializable */
 class IntlGregorianCalendar extends IntlCalendar
 {
+    public static function createFromDate(int $year, int $month, int $dayOfMonth): static {}
+
+    public static function createFromDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = null): static {}
+
     /**
      * @param DateTimeZone|IntlTimeZone|string|int|null $timezoneOrYear
      * @param string|int|null $localeOrMonth

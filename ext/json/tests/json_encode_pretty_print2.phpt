@@ -2,6 +2,7 @@
 json_encode() with JSON_PRETTY_PRINT on declared properties
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class MyClass {
     public $x;
     public $y;

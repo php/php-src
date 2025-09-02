@@ -5,33 +5,40 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
 
+$db = getDbConnection();
+
 /*We see these rows */
-$db->query("CREATE table php_test(val int)");
+$db->query("CREATE table test38955(val int)");
 $db->beginTransaction();
-$db->query("INSERT INTO php_test(val) values(1)");
-$db->query("INSERT INTO php_test(val) values(2)");
-$db->query("INSERT INTO php_test(val) values(3)");
-$db->query("INSERT INTO php_test(val) values(4)");
+$db->query("INSERT INTO test38955(val) values(1)");
+$db->query("INSERT INTO test38955(val) values(2)");
+$db->query("INSERT INTO test38955(val) values(3)");
+$db->query("INSERT INTO test38955(val) values(4)");
 $db->commit();
 
 /*We don't see these rows */
 $db->beginTransaction();
-$db->query("INSERT INTO php_test(val) values(5)");
-$db->query("INSERT INTO php_test(val) values(6)");
-$db->query("INSERT INTO php_test(val) values(7)");
-$db->query("INSERT INTO php_test(val) values(8)");
+$db->query("INSERT INTO test38955(val) values(5)");
+$db->query("INSERT INTO test38955(val) values(6)");
+$db->query("INSERT INTO test38955(val) values(7)");
+$db->query("INSERT INTO test38955(val) values(8)");
 $db->rollback();
 
-$rs = $db->query("SELECT * FROM php_test");
+$rs = $db->query("SELECT * FROM test38955");
 $rows = $rs->fetchAll(PDO::FETCH_ASSOC);
 var_dump($rows);
-
-$db->query("DROP table php_test");
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/config.inc';
+$db = getDbConnection();
+$db->exec("DROP TABLE IF EXISTS test38955");
 ?>
 --EXPECT--
 array(4) {

@@ -1,9 +1,9 @@
 --TEST--
 Bug #80839: PHP problem with JIT
 --INI--
+error_log=
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
 opcache.jit=tracing
 --EXTENSIONS--
 opcache
@@ -107,5 +107,6 @@ for ($y = 0; $y < 10; $y++) {
     }
 }
 $m = Matrix::fromArray($a);
+?>
 --EXPECT--
 These are the array bounds: 10 * 10

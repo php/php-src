@@ -1,7 +1,7 @@
 --TEST--
 Test glob() function: ensure no platform difference, variation 3
 --SKIPIF--
-<?php if( substr(PHP_OS, 0, 3) == "WIN" ) {die('skip not valid on Windows');} ?>
+<?php if( substr(PHP_OS, 0, 3) == "WIN" ) die('skip not valid directory on Windows'); ?>
 --FILE--
 <?php
 $path = __DIR__;
@@ -19,10 +19,16 @@ var_dump(glob("$path/directly_not_exists"));
 var_dump($open_basedir == ini_get('open_basedir'));
 ?>
 --EXPECT--
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
 bool(true)

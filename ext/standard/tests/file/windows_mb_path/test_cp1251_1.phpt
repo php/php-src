@@ -27,7 +27,7 @@ $item = "привет"; // cp1251 string
 $prefix = create_data("dir_cp1251", $item . "3", 1251);
 $path = $prefix . DIRECTORY_SEPARATOR . $item . "3";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));

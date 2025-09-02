@@ -1,8 +1,9 @@
 --TEST--
-Bug #46064 (Exception when creating ReflectionProperty object on dynamicly created property)
+Bug #46064 (Exception when creating ReflectionProperty object on dynamically created property)
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class x {
     public $zzz = 2;
 }
@@ -32,6 +33,7 @@ class test {
     protected $a = 1;
 }
 
+#[AllowDynamicProperties]
 class bar extends test {
     public function __construct() {
         $this->foobar = 2;

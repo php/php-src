@@ -23,3 +23,4 @@ int(0)
 @unlink(__DIR__ . '/bug69279a/2.txt');
 @unlink(__DIR__ . '/bug69279a/3.txt');
 @rmdir(__DIR__ . '/bug69279a');
+?>

@@ -1,10 +1,9 @@
 --TEST--
-JIT ASSIGN_DIM_OP 006: Cloberring array be user error handler
+JIT ASSIGN_DIM_OP 006: Clobbering array be user error handler
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 --FILE--
 <?php
 $my_var = null;
