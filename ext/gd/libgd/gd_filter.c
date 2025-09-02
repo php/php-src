@@ -1,4 +1,6 @@
 #include "gd.h"
+#include "gd_simd.h"
+#include "gd_filter_simd.h"
 
 #include "gd_intern.h"
 
@@ -612,6 +614,18 @@ int gdImageMeanRemoval(gdImagePtr im)
 
 int gdImageSmooth(gdImagePtr im, float weight)
 {
+	if (gd_have_avx()) {
+		if (gdImageSmooth_avx(im, weight)) {
+			return 1;
+		}
+	}
+
+	if (gd_have_sse2()) {
+		if (gdImageSmooth_sse2(im, weight)) {
+			return 1;
+		}
+	}
+
 	float filter[3][3] =	{{1.0,1.0,1.0},
 				{1.0,0.0,1.0},
 				{1.0,1.0,1.0}};
