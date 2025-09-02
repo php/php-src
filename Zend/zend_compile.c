@@ -6534,9 +6534,9 @@ static void zend_compile_pipe(znode *result, zend_ast *ast)
 			callable_ast, arg_list_ast);
 	}
 
+	zend_do_extended_stmt(&operand_result);
+
 	zend_compile_expr(result, fcall_ast);
-	CG(zend_lineno) = fcall_ast->lineno;
-	zend_do_extended_stmt(result);
 }
 
 static void zend_compile_match(znode *result, zend_ast *ast)
