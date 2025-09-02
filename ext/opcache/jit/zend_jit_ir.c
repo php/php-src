@@ -16,7 +16,7 @@
  *  +----------------------------------------------------------------------+
  */
 
-#include "../../../Zend/zend_types.h"
+#include "Zend/zend_types.h"
 #include "Zend/zend_type_info.h"
 #include "jit/ir/ir.h"
 #include "jit/ir/ir_builder.h"
@@ -7570,11 +7570,10 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 		op1_addr = ZEND_ADDR_REF_ZVAL(ref);
 	}
 
-	if (Z_MODE(op1_addr) == IS_CONST_ZVAL) {
-		zval *op1 = Z_ZV(op1_addr);
+	if (Z_MODE(op1_addr) == IS_CONST_ZVAL
+		&& (Z_TYPE_P(Z_ZV(op1_addr)) != IS_DOUBLE || !zend_isnan(Z_DVAL_P(Z_ZV(op1_addr))))) {
 		/* NAN Value must cause a warning to be emitted */
-		// TODO function JIT does not emit warning
-		if ((Z_TYPE_P(op1) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op1))) || zend_is_true(op1)) {
+		if (zend_is_true(Z_ZV(op1_addr))) {
 			always_true = 1;
 		} else {
 			always_false = 1;
