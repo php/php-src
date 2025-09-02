@@ -2995,6 +2995,7 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue 
 
 				end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
 				end2->op2 = cond->op3;
+				ir_bitqueue_add(worklist, end2_ref);
 
 				merge->optx = IR_OPTX(op, IR_VOID, 1);
 				merge->op1 = end2_ref;
@@ -3190,6 +3191,7 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 
 						end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
 						end2->op2 = insn->op2;
+						ir_bitqueue_add(worklist, end2_ref);
 
 						merge->optx = IR_OPTX(op, IR_VOID, 1);
 						merge->op1 = end2_ref;
