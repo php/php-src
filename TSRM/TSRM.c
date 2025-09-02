@@ -11,6 +11,7 @@
 */
 
 #include "TSRM.h"
+#include "zend_alloc.h"
 
 #ifdef ZTS
 
