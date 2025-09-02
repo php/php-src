@@ -33,6 +33,7 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
+#include "zend_vm_opcodes.h"
 
 #define TO_STRING_NOWARN(val) do { \
 	if (Z_TYPE_P(val) < IS_ARRAY) { \
@@ -267,7 +268,11 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_DO_UCALL:
 		case ZEND_DO_FCALL:
 		case ZEND_DO_FCALL_BY_NAME:
-			/* don't collect constants after any UCALL/FCALL */
+		case ZEND_FRAMELESS_ICALL_0:
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3:
+			/* don't collect constants after any UCALL/FCALL/FRAMELESS ICALL */
 			collect_constants = 0;
 			break;
 		case ZEND_STRLEN:
