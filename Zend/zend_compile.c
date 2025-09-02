@@ -28,6 +28,7 @@
 #include "zend_API.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_types.h"
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
@@ -4960,25 +4961,24 @@ static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) 
 	 * In this case, just emit ECHO and return the string length if needed. */
 	if (args->children == 1) {
 		zend_eval_const_expr(&args->child[0]);
-		if (args->child[0]->kind == ZEND_AST_ZVAL) {
-			zval *format_string = zend_ast_get_zval(args->child[0]);
-			if (Z_TYPE_P(format_string) == IS_STRING) {
-				/* Check if there are any format specifiers */
-				char *p = Z_STRVAL_P(format_string);
-				char *end = p + Z_STRLEN_P(format_string);
+		if (args->child[0]->kind != ZEND_AST_ZVAL) {
+			return FAILURE;
+		}
+		zval *format_string = zend_ast_get_zval(args->child[0]);
+		if (Z_TYPE_P(format_string) != IS_STRING) {
+			return FAILURE;
+		}
+		/* Check if there are any format specifiers */
+		if (!memchr(Z_STRVAL_P(format_string), '%', Z_STRLEN_P(format_string))) {
+			/* No format specifiers - just emit ECHO and return string length */
+			znode format_node;
+			zend_compile_expr(&format_node, args->child[0]);
+			zend_emit_op(NULL, ZEND_ECHO, &format_node, NULL);
 
-				if (!memchr(p, '%', end - p)) {
-					/* No format specifiers - just emit ECHO and return string length */
-					znode format_node;
-					zend_compile_expr(&format_node, args->child[0]);
-					zend_emit_op(NULL, ZEND_ECHO, &format_node, NULL);
-
-					/* Return the string length as a constant if the result is used */
-					result->op_type = IS_CONST;
-					ZVAL_LONG(&result->u.constant, Z_STRLEN_P(format_string));
-					return SUCCESS;
-				}
-			}
+			/* Return the string length as a constant if the result is used */
+			result->op_type = IS_CONST;
+			ZVAL_LONG(&result->u.constant, Z_STRLEN_P(format_string));
+			return SUCCESS;
 		}
 	}
 
