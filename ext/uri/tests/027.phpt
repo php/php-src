@@ -26,12 +26,8 @@ var_dump($uri1->getPort());
 var_dump($uri2->getPort());
 
 $uri1 = Uri\Rfc3986\Uri::parse("/foo");
-
-try {
-    $uri1->withPort(null); // TODO should not throw
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
-}
+$uri2 = $uri1->withPort(null);
+var_dump($uri2->getPort());
 
 try {
     $uri1->withPort(1);
@@ -68,7 +64,7 @@ int(443)
 int(8080)
 NULL
 int(80)
-The specified port is malformed
+NULL
 The specified port is malformed
 int(8080)
 int(22)
