@@ -599,6 +599,10 @@ PHP_METHOD(SQLite3, query)
 	result->column_names = NULL;
 	result->column_count = -1;
 
+	if (sqlite3_column_count(result->stmt_obj->stmt) == 0) {
+		return;
+	}
+
 	return_code = sqlite3_step(result->stmt_obj->stmt);
 
 	switch (return_code) {
