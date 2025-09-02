@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
   . Fixed bug GH-19601 (Wrong JIT stack setup on aarch64/clang). (Arnaud)
   . Fixed bug GH-19388 (Broken opcache.huge_code_pages). (Arnaud)
+  . Fixed bug GH-19657 (Build fails on non-glibc/musl/freebsd/macos/win
+    platforms). (Arnaud)
 
 - PCRE:
   . Upgraded to pcre2lib from 10.45 to 10.46. (nielsdos)
