@@ -4095,6 +4095,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 	zend_jit_trace_rec *p;
 	zend_jit_op_array_trace_extension *jit_extension;
 	int num_op_arrays = 0;
+	bool do_bailout = 0;
 	zend_jit_trace_info *t;
 	const zend_op_array *op_arrays[ZEND_JIT_TRACE_MAX_FUNCS];
 	uint8_t smart_branch_opcode;
@@ -4124,6 +4125,8 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 	JIT_G(current_trace) = trace_buffer;
 
 	checkpoint = zend_arena_checkpoint(CG(arena));
+
+	zend_try {
 
 	ssa = zend_jit_trace_build_tssa(trace_buffer, parent_trace, exit_num, script, op_arrays, &num_op_arrays);
 
@@ -7358,6 +7361,10 @@ jit_failure:
 		zend_string_release(name);
 	}
 
+	} zend_catch {
+		do_bailout = 1;
+	}  zend_end_try();
+
 jit_cleanup:
 	/* Clean up used op_arrays */
 	while (num_op_arrays > 0) {
@@ -7377,6 +7384,10 @@ jit_cleanup:
 
 	JIT_G(current_frame) = NULL;
 	JIT_G(current_trace) = NULL;
+
+	if (do_bailout) {
+		zend_bailout();
+	}
 
 	return handler;
 }
