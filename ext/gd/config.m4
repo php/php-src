@@ -220,12 +220,17 @@ dnl
 
 if test "$PHP_GD" != "no"; then
   if test "$PHP_EXTERNAL_GD" = "no"; then
+    AX_CHECK_COMPILE_FLAG([-msse2], [CFLAGS="$CFLAGS -msse2"])
+    AX_CHECK_COMPILE_FLAG([-mavx], [CFLAGS="$CFLAGS -mavx"])
+
     extra_sources=m4_normalize(["
       libgd/gd_avif.c
       libgd/gd_bmp.c
       libgd/gd_color_match.c
       libgd/gd_crop.c
       libgd/gd_filter.c
+      libgd/gd_filter_simd.c
+      libgd/gd_simd.c
       libgd/gd_gd.c
       libgd/gd_gd2.c
       libgd/gd_gif_in.c
