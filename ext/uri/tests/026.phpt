@@ -111,7 +111,7 @@ The specified host is malformed
 The specified host is malformed
 string(7) "foo.com"
 string(8) "test.com"
-The specified host is malformed
+Cannot remove the host from a URI that has a userinfo
 string(11) "example.com"
 string(8) "test.com"
 string(8) "test.com"
