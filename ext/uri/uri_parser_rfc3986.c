@@ -172,14 +172,17 @@ zend_result php_uri_parser_rfc3986_userinfo_write(struct uri_internal_t *interna
 		result = uriSetUserInfoMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
 	}
 
-	if (result != URI_SUCCESS) {
-		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified userinfo is malformed", 0);
-		return FAILURE;
+	switch (result) {
+		case URI_SUCCESS:
+			reset_normalized_uri_after_writing(internal_uri);
+			return SUCCESS;
+		case URI_ERROR_SETUSERINFO_HOST_NOT_SET:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot set a userinfo without having a host", 0);
+			return FAILURE;
+		default:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified userinfo is malformed", 0);
+			return FAILURE;
 	}
-
-	reset_normalized_uri_after_writing(internal_uri);
-
-	return SUCCESS;
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
@@ -258,14 +261,20 @@ static zend_result php_uri_parser_rfc3986_host_write(struct uri_internal_t *inte
 		result = uriSetHostAutoMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
 	}
 
-	if (result != URI_SUCCESS) {
-		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified host is malformed", 0);
-		return FAILURE;
+	switch (result) {
+		case URI_SUCCESS:
+			reset_normalized_uri_after_writing(internal_uri);
+			return SUCCESS;
+		case URI_ERROR_SETHOST_PORT_SET:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot remove the host from a URI that has a port", 0);
+			return FAILURE;
+		case URI_ERROR_SETHOST_USERINFO_SET:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot remove the host from a URI that has a userinfo", 0);
+			return FAILURE;
+		default:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified host is malformed", 0);
+			return FAILURE;
 	}
-
-	reset_normalized_uri_after_writing(internal_uri);
-
-	return SUCCESS;
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char *str, size_t len)
@@ -307,18 +316,22 @@ static zend_result php_uri_parser_rfc3986_port_write(struct uri_internal_t *inte
 	if (Z_TYPE_P(value) == IS_NULL) {
 		result = uriSetPortTextMmA(uriparser_uri, NULL, NULL, mm);
 	} else {
-		ZVAL_STR(value, zend_long_to_str(Z_LVAL_P(value)));
-		result = uriSetPortTextMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
+		zend_string *tmp = zend_long_to_str(Z_LVAL_P(value));
+		result = uriSetPortTextMmA(uriparser_uri, ZSTR_VAL(tmp), ZSTR_VAL(tmp) + ZSTR_LEN(tmp), mm);
+		zend_string_release(tmp);
 	}
 
-	if (result != URI_SUCCESS) {
-		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified port is malformed", 0);
-		return FAILURE;
+	switch (result) {
+		case URI_SUCCESS:
+			reset_normalized_uri_after_writing(internal_uri);
+			return SUCCESS;
+		case URI_ERROR_SETPORT_HOST_NOT_SET:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot set a port without having a host", 0);
+			return FAILURE;
+		default:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified port is malformed", 0);
+			return FAILURE;
 	}
-
-	reset_normalized_uri_after_writing(internal_uri);
-
-	return SUCCESS;
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)

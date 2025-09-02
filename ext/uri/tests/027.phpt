@@ -65,7 +65,7 @@ int(8080)
 NULL
 int(80)
 NULL
-The specified port is malformed
+Cannot set a port without having a host
 int(8080)
 int(22)
 NULL
