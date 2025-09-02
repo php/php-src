@@ -137,7 +137,7 @@ static void fuzzer_disable_classes(void)
 	/* Overwrite built-in constructor for InfiniteIterator as it
 	 * can cause long loops that bypass the executor step limit. */
 	/* Lowercase as this is how the CE as stored */
-	zend_class_entry *InfiniteIterator_class = zend_hash_str_find(CG(class_table), "infiniteiterator", strlen("infiniteiterator"));
+	zend_class_entry *InfiniteIterator_class = zend_hash_str_find_ptr(CG(class_table), "infiniteiterator", strlen("infiniteiterator"));
 	InfiniteIterator_class->create_object = disable_class_create_handler;
 }
 
