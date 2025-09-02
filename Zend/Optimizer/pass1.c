@@ -264,6 +264,12 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			collect_constants = 0;
 			break;
 		}
+		case ZEND_DO_UCALL:
+		case ZEND_DO_FCALL:
+		case ZEND_DO_FCALL_BY_NAME:
+			/* don't collect constants after any UCALL/FCALL */
+			collect_constants = 0;
+			break;
 		case ZEND_STRLEN:
 			if (opline->op1_type == IS_CONST &&
 					zend_optimizer_eval_strlen(&result, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
