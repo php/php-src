@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
     (ilutov)
 
+- FPM:
+  . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
+
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
