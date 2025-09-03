@@ -26,6 +26,35 @@ systemctl is-active systemd-networkd  || echo "systemd-networkd disabled"
 # Check what's managing your interface
 networkctl status $IFACE
 
+# Check network configs
+echo "Checking 10-netplan-eth0.network"
+if [ -f /run/systemd/network/10-netplan-eth0.network ]; then
+  # Check if UseDNS is already configured
+  if ! grep -q "UseDNS=" /run/systemd/network/10-netplan-eth0.network; then
+    echo "Adding UseDNS=false to DHCP section"
+    
+    # Use sed to add UseDNS=false after the [DHCP] section header
+    sed -i '/^\[DHCP\]/a UseDNS=false' /run/systemd/network/10-netplan-eth0.network
+    
+    echo "Updated configuration:"
+    cat /run/systemd/network/10-netplan-eth0.network
+    
+    # Restart systemd-networkd
+    systemctl restart systemd-networkd
+    sleep 2
+  else
+    echo "UseDNS already configured in the file"
+    grep "UseDNS" /run/systemd/network/10-netplan-eth0.network
+  fi
+  cat /run/systemd/network/10-netplan-eth0.network
+elif [ -d /run/systemd/network/ ]; then
+  echo "ls -la /run/systemd/network/"
+  ls -la /run/systemd/network/
+else
+  echo "ls -la /run/systemd/"
+  ls -la /run/systemd/
+fi
+
 # Get current DNS server
 echo "Current configuration:"
 resolvectl status "$IFACE" | grep -E 'Current DNS Server:|DNS Servers:'
