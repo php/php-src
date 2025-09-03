@@ -50,9 +50,9 @@ function iconv(string $from_encoding, string $to_encoding, string $string): stri
 #[\Deprecated(since: '5.6', message: 'use internal_encoding, input_encoding, and output_encoding INI settings instead')]
 function iconv_set_encoding(string $type, string $encoding): bool {}
 
-#[\Deprecated(since: '5.6', message: 'use internal_encoding, input_encoding, and output_encoding INI settings instead')]
 /**
  * @return array<string, string>|string|false
  * @refcount 1
  */
+#[\Deprecated(since: '5.6', message: 'use internal_encoding, input_encoding, and output_encoding INI settings instead')]
 function iconv_get_encoding(string $type = "all"): array|string|false {}
