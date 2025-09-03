@@ -538,7 +538,7 @@ optimize_type_check:
 					}
 				}
 				break;
-
+	
 			case ZEND_BOOL:
 			case ZEND_BOOL_NOT:
 			optimize_bool:
