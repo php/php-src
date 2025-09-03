@@ -635,8 +635,15 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos_ex(uint32_t idx, zval
 				&& EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
 			HT_DEC_ITERATORS_COUNT(iter->ht);
 		}
-		SEPARATE_ARRAY(array);
-		ht = Z_ARRVAL_P(array);
+
+		/* Inlined SEPARATE_ARRAY() with updating of iterator when EG(ht_iterators) grows. */
+		if (UNEXPECTED(GC_REFCOUNT(ht) > 1)) {
+			ZVAL_ARR(array, zend_array_dup(ht));
+			GC_TRY_DELREF(ht);
+			iter = EG(ht_iterators) + idx;
+			ht = Z_ARRVAL_P(array);
+		}
+
 		if (EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
 			HT_INC_ITERATORS_COUNT(ht);
 		}
