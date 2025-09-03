@@ -23,6 +23,7 @@
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
 #include "zend_exceptions.h"
+#include "zend_vm.h"
 
 #define FILE_NAME "/tmp/fuzzer.php"
 #define MAX_STEPS 1000
@@ -63,7 +64,7 @@ static void fuzzer_execute_ex(zend_execute_data *execute_data) {
 
 	while (1) {
 		fuzzer_step();
-		opline = opline->handler(execute_data, opline);
+		opline = ((zend_vm_opcode_handler_func_t) zend_get_opcode_handler_func(opline))(execute_data, opline);
 		if ((uintptr_t) opline & ZEND_VM_ENTER_BIT) {
 			opline = (const zend_op *) ((uintptr_t) opline & ~ZEND_VM_ENTER_BIT);
 			if (opline) {
