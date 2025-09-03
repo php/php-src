@@ -1,15 +1,11 @@
 --TEST--
-Test mb_substr() function : basic functionality
+Test mb_substr() function : basic functionality with ASCII characters and multibyte strings.
 --EXTENSIONS--
 mbstring
 --INI--
 internal_encoding=ISO-8859-1
 --FILE--
 <?php
-/*
- * Test Basic Functionality of mb_substr with ASCII characters and multibyte strings.
- */
-
 echo "*** Testing mb_substr() : basic functionality ***\n";
 
 $string_ascii = 'ABCDEF';
