@@ -15,5 +15,5 @@ var_dump(serialize(new Test));
 
 ?>
 --EXPECTF--
-Deprecated: The __sleep() serialization hook has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 string(28) "O:4:"Test":1:{s:1:"x";i:42;}"

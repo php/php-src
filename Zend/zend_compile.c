@@ -9352,7 +9352,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	}
 
 	if (ce->__serialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP))) {
-		zend_error(E_DEPRECATED, "The __sleep() serialization hook has been deprecated."
+		zend_error(E_DEPRECATED, "The __sleep() serialization magic method has been deprecated."
 			" Implement __serialize() instead (or in addition, if support for old PHP versions is necessary)");
 	}
 
