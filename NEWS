@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     checks). (timwolla)
   . The __sleep() and __wakeup() magic methods have been deprecated. (Girgias)
 
+- Opcache:
+  . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
+    (Arnaud)
+
 - URI:
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
     (nielsdos)
