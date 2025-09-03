@@ -43,14 +43,6 @@
 #undef iconv
 #endif
 
-#if defined(__NetBSD__)
-// unfortunately, netbsd has still the old non posix conformant signature
-// libiconv tends to match the eventual system's iconv too.
-#define ICONV_CONST const
-#else
-#define ICONV_CONST
-#endif
-
 #include "zend_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
