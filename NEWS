@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - EXIF:
   . Added support to retrieve Exif from HEIF file. (Benstone Zhang)
 
+- FPM:
+  . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
+
 - Opcache:
   . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
   . Fixed bug GH-19601 (Wrong JIT stack setup on aarch64/clang). (Arnaud)
