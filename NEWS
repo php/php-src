@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19637 (Incorrect Closure scope for FCC in constant
     expression). (timwolla)
 
+- Date:
+  . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
+    (ilutov)
+
 - EXIF:
   . Added support to retrieve Exif from HEIF file. (Benstone Zhang)
 
