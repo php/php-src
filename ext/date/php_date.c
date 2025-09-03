@@ -5555,7 +5555,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 	t->zone_type = TIMELIB_ZONETYPE_ID;
 
 	if (gmt_offset_is_null) {
-		gmt_offset = timelib_get_current_offset(t) / 3600;
+		gmt_offset = timelib_get_current_offset(t) / 3600.0;
 	}
 
 	timelib_unixtime2local(t, time);
