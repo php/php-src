@@ -1506,7 +1506,7 @@ PHP_METHOD(ZipArchive, openBuffer)
 	zip_source_t * zip_source = zip_source_buffer_create(ZSTR_VAL(buffer), ZSTR_LEN(buffer), 0, &err);
 
 	if (!zip_source) {
-		zend_throw_error(NULL, "Cannot open zip: %s", zip_error_strerror(&err));
+		zend_value_error("Cannot open zip: %s", zip_error_strerror(&err));
 		zip_error_fini(&err);
 		RETURN_THROWS();
 	}
@@ -1516,7 +1516,7 @@ PHP_METHOD(ZipArchive, openBuffer)
 	intern = zip_open_from_source(zip_source, ZIP_RDONLY, &err);
 	if (!intern) {
 		zip_source_free(zip_source);
-		zend_throw_error(NULL, "Cannot open zip: %s", zip_error_strerror(&err));
+		zend_value_error("Cannot open zip: %s", zip_error_strerror(&err));
 		zip_error_fini(&err);
 		RETURN_THROWS();
 	}
@@ -1586,7 +1586,7 @@ PHP_METHOD(ZipArchive, close)
 	// if we have a filename, we need to free it
 	if (ze_obj->filename) {
 		/* clear cache as empty zip are not created but deleted */
-		php_clear_stat_cache(1, ze_obj->filename, ze_obj->filename_len);	
+		php_clear_stat_cache(1, ze_obj->filename, ze_obj->filename_len);
 
 		efree(ze_obj->filename);
 		ze_obj->filename = NULL;
