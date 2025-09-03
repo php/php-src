@@ -126,9 +126,9 @@ static sapi_module_struct fuzzer_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static ZEND_COLD zend_object *disable_class_create_handler(zend_class_entry *class_type) /* {{{ */
+static ZEND_COLD zend_function *disable_class_get_constructor_handler(zend_object *obj) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot construct class %s, as it is disabled", ZSTR_VAL(class_type->name));
+	zend_throw_error(NULL, "Cannot construct class %s, as it is disabled", ZSTR_VAL(obj->ce->name));
 	return NULL;
 }
 
@@ -138,7 +138,11 @@ static void fuzzer_disable_classes(void)
 	 * can cause long loops that bypass the executor step limit. */
 	/* Lowercase as this is how the CE as stored */
 	zend_class_entry *InfiniteIterator_class = zend_hash_str_find_ptr(CG(class_table), "infiniteiterator", strlen("infiniteiterator"));
-	InfiniteIterator_class->create_object = disable_class_create_handler;
+
+	static zend_object_handlers handlers;
+	memcpy(&handlers, InfiniteIterator_class->default_object_handlers, sizeof(handlers));
+	handlers.get_constructor = disable_class_get_constructor_handler;
+	InfiniteIterator_class->default_object_handlers = &handlers;
 }
 
 int fuzzer_init_php(const char *extra_ini)
