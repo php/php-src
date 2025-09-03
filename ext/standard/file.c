@@ -182,6 +182,12 @@ PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 }
 /* }}} */
 
+static inline bool php_is_valid_flock_flag(zend_long s) {
+	const zend_long sb = s & ~PHP_LOCK_NB;
+	return (sb == PHP_LOCK_UN || sb == PHP_LOCK_SH ||
+		sb == PHP_LOCK_EX);
+}
+
 PHPAPI void php_flock_common(php_stream *stream, zend_long operation,
 	uint32_t operation_arg_num, zval *wouldblock, zval *return_value)
 {
@@ -189,7 +195,7 @@ PHPAPI void php_flock_common(php_stream *stream, zend_long operation,
 	int act;
 
 	act = operation & PHP_LOCK_UN;
-	if (act < 1 || act > 3) {
+	if (!php_is_valid_flock_flag(operation)) {
 		zend_argument_value_error(operation_arg_num, "must be one of LOCK_SH, LOCK_EX, or LOCK_UN");
 		RETURN_THROWS();
 	}
