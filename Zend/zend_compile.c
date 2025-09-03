@@ -4988,10 +4988,12 @@ static zend_result zend_compile_func_printf(znode *result, zend_ast_list *args) 
 		return FAILURE;
 	}
 
-	/* printf() returns the amount of bytes written, so just an ECHO of the resulting sprintf()
-	 * optimisation might not be enough. At this early stage we can't detect if the result is
-	 * actually used, so we just emit the opcodes and cleanup if they are not used in the
-	 * optimizers block pass later. */
+	/* printf() returns the amount of bytes written, so just an ECHO of the
+	 * resulting sprintf() optimisation might not be enough. At this early
+	 * stage we can't detect if the result is actually used, so we just emit
+	 * the opcodes and let them be cleaned up by the dead code elimination
+	 * pass in the Zend Optimizer if the result of the printf() is in fact
+	 * unused */
 	znode copy;
 	zend_emit_op_tmp(&copy, ZEND_COPY_TMP, &rope_result, NULL);
 	zend_emit_op(NULL, ZEND_ECHO, &rope_result, NULL);
