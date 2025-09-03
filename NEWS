@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
     (nielsdos)
 
+- Zip:
+  . Fixed bug GH-19688 (Remove pattern overflow in zip addGlob()). (nielsdos)
+
 25 Sep 2025, PHP 8.3.26
 
 - Core:
