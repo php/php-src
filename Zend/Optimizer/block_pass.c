@@ -431,53 +431,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_CASE:
 			case ZEND_CASE_STRICT:
 			case ZEND_COPY_TMP:
-				/* Check for printf optimization from `zend_compile_func_printf()`
-				 * where the result of `printf()` is actually unused and remove the
-				 * superflous COPY_TMP, STRLEN and FREE opcodes:
-				 * T1 = COPY_TMP T0
-				 * ECHO T0
-				 * T2 = STRLEN T1
-				 * FREE T2
-				 */
-				if (opline->op1_type == IS_TMP_VAR &&
-				    opline + 1 < end && (opline + 1)->opcode == ZEND_ECHO &&
-				    opline + 2 < end && (opline + 2)->opcode == ZEND_STRLEN &&
-				    opline + 3 < end && (opline + 3)->opcode == ZEND_FREE) {
-
-					zend_op *echo_op = opline + 1;
-					zend_op *strlen_op = opline + 2;
-					zend_op *free_op = opline + 3;
-
-					/* Verify the pattern:
-					 * - ECHO uses the same source as COPY_TMP
-					 * - STRLEN uses the result of COPY_TMP
-					 * - FREE uses the result of STRLEN
-					 */
-					if (echo_op->op1_type == IS_TMP_VAR &&
-					    echo_op->op1.var == opline->op1.var &&
-					    strlen_op->op1_type == IS_TMP_VAR &&
-					    strlen_op->op1.var == opline->result.var &&
-					    free_op->op1_type == IS_TMP_VAR &&
-					    free_op->op1.var == strlen_op->result.var) {
-
-						/* Remove COPY_TMP, STRLEN, and FREE */
-						MAKE_NOP(opline);
-						MAKE_NOP(strlen_op);
-						MAKE_NOP(free_op);
-
-						/* Update source tracking */
-						if (opline->result_type == IS_TMP_VAR) {
-							VAR_SOURCE(opline->result) = NULL;
-						}
-						if (strlen_op->result_type == IS_TMP_VAR) {
-							VAR_SOURCE(strlen_op->result) = NULL;
-						}
-
-						++(*opt_count);
-						break;
-					}
-				}
-
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* Variable will be deleted later by FREE, so we can't optimize it */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;

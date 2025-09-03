@@ -33,7 +33,6 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
-#include "zend_vm_opcodes.h"
 
 #define TO_STRING_NOWARN(val) do { \
 	if (Z_TYPE_P(val) < IS_ARRAY) { \
