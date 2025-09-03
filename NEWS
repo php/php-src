@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
     (ilutov)
 
+- DOM:
+  . Fixed bug GH-19612 (Mitigate libxml2 tree dictionary bug). (nielsdos)
+
 - FPM:
   . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
 
