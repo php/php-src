@@ -5059,8 +5059,9 @@ static zend_never_inline zend_result ZEND_FASTCALL zend_quick_check_constant(
 static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 		zend_function *fbc, zend_string *arg_name, void **cache_slot) {
 	/* Due to closures, the `fbc` address isn't unique if the memory address is reused.
-	 * The argument info will be however and uniquely positions the arguments. */
-	void *unique_id = fbc->common.arg_info;
+	 * The argument info will be however and uniquely positions the arguments.
+	 * We do support NULL arg_info, so we have to distinguish that from an uninitialized cache slot. */
+	void *unique_id = (void *) ((uintptr_t) fbc->common.arg_info | 1);
 
 	if (EXPECTED(*cache_slot == unique_id)) {
 		return *(uintptr_t *)(cache_slot + 1);
@@ -5073,7 +5074,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 		for (uint32_t i = 0; i < num_args; i++) {
 			zend_arg_info *arg_info = &fbc->op_array.arg_info[i];
 			if (zend_string_equals(arg_name, arg_info->name)) {
-				if (fbc->type == ZEND_INTERNAL_FUNCTION || fbc->op_array.refcount) {
+				if (fbc->op_array.refcount) {
 					*cache_slot = unique_id;
 					*(uintptr_t *)(cache_slot + 1) = i;
 				}
@@ -5085,7 +5086,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
 			size_t len = strlen(arg_info->name);
 			if (zend_string_equals_cstr(arg_name, arg_info->name, len)) {
-				if (fbc->type == ZEND_INTERNAL_FUNCTION || fbc->op_array.refcount) {
+				if (fbc->type == ZEND_INTERNAL_FUNCTION) {
 					*cache_slot = unique_id;
 					*(uintptr_t *)(cache_slot + 1) = i;
 				}
