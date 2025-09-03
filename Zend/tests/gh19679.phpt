@@ -1,5 +1,11 @@
 --TEST--
 GH-19679: zend_ssa_range_widening does not converge
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE !== 8) {
+  die('skip output depends PHP_INT_SIZE=8');
+}
+?>
 --FILE--
 <?php
 function test() {
