@@ -5,7 +5,6 @@ ivan-u7n
 --FILE--
 <?php
 
-
 function func1(string $a1 = 'a1', string $a2 = 'a2', string $a3 = 'a3') {
 	echo __FUNCTION__ . "() a1=$a1 a2=$a2 a3=$a3\n";
 }
