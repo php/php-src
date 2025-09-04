@@ -722,6 +722,36 @@ static PHP_INI_MH(OnUpdateMailLog)
 /* }}} */
 
 /* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnUpdateMailCrLfMode)
+{
+	if (new_value) {
+		const char *val = ZSTR_VAL(new_value);
+		if (ZSTR_LEN(new_value) > 0 &&
+			strcmp(val, "crlf") != 0 &&
+			strcmp(val, "lf") != 0 &&
+			strcmp(val, "mixed") != 0 &&
+			strcmp(val, "os") != 0) {
+			int err_type;
+
+			if (stage == ZEND_INI_STAGE_RUNTIME) {
+				err_type = E_WARNING;
+			} else {
+				err_type = E_ERROR;
+			}
+
+			if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+				php_error_docref(NULL, err_type, "Invalid value \"%s\" for mail.cr_lf_mode. Must be one of: \"crlf\", \"lf\", \"mixed\", \"os\"", val);
+			}
+
+			return FAILURE;
+		}
+	}
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMailForceExtra)
 {
 	/* Check that INI setting does not have any nul bytes */
@@ -826,6 +856,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
 	STD_PHP_INI_BOOLEAN("mail.add_x_header",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_x_header,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("mail.mixed_lf_and_crlf",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_mixed_lf_and_crlf,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("mail.cr_lf_mode",				"crlf",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailCrLfMode,		mail_cr_lf_mode,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
 

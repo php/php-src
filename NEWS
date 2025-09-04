@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fix GH-19610 (Deprecation warnings in functions taking as argument).
     (Girgias)
+  . Implement GH-19188: Add support for new INI mail.cr_lf_mode. (alexandre-daubois)
 
 - URI:
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
