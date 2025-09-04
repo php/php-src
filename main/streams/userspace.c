@@ -1350,14 +1350,11 @@ static ssize_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t co
 	}
 	// TODO: Warn/TypeError for invalid returns?
 	if (Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
-		zend_string *str = zval_try_get_string(&retval);
-		if (UNEXPECTED(str == NULL)) {
+		if (UNEXPECTED(!try_convert_to_string(&retval))) {
 			zval_ptr_dtor(&retval);
 			return -1;
 		}
-		convert_to_string(&retval);
-		PHP_STRLCPY(ent->d_name, ZSTR_VAL(str), sizeof(ent->d_name), ZSTR_LEN(str));
-		zend_string_release(str);
+		PHP_STRLCPY(ent->d_name, Z_STRVAL(retval), sizeof(ent->d_name), Z_STRLEN(retval));
 		ent->d_type = DT_UNKNOWN;
 
 		didread = sizeof(php_stream_dirent);
