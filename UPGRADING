@@ -376,6 +376,9 @@ PHP 8.5 UPGRADE NOTES
     - Binding a closure to the scope of an internal class
     - Rebinding the scope of a closure created from a function or method
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_closure_binding_issues
+  . Using null as an array offset or when calling array_key_exists() is now
+    deprecated. Instead an empty string should be used.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_using_values_null_as_an_array_offset_and_when_calling_array_key_exists
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are
