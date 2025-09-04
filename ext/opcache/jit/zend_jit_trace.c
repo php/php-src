@@ -132,7 +132,7 @@ static uint32_t zend_jit_exit_point_by_addr(const void *addr)
 	return (uint32_t)-1;
 }
 
-static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t flags)
+static uint32_t _zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t flags ZEND_FILE_LINE_DC)
 {
 	zend_jit_trace_info *t = &zend_jit_traces[ZEND_JIT_TRACE_NUM];
 	uint32_t exit_point;
@@ -178,7 +178,12 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t
 			  && memcmp(t->stack_map + t->exit_info[i].stack_offset, stack, stack_size * sizeof(zend_jit_trace_stack)) == 0)) {
 				if (t->exit_info[i].opline == to_opline
 				 && t->exit_info[i].flags == flags
-				 && t->exit_info[i].stack_size == stack_size) {
+				 && t->exit_info[i].stack_size == stack_size
+#if ZEND_DEBUG
+				 && strcmp(t->exit_info[i].filename, __zend_filename) == 0
+				 && t->exit_info[i].lineno == __zend_lineno
+#endif
+				) {
 					return i;
 				}
 			}
@@ -202,6 +207,10 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t
 		t->exit_info[exit_point].stack_offset = stack_offset;
 		t->exit_info[exit_point].poly_func = (zend_jit_ref_snapshot){.reg = ZREG_NONE};
 		t->exit_info[exit_point].poly_this = (zend_jit_ref_snapshot){.reg = ZREG_NONE};
+#if ZEND_DEBUG
+		t->exit_info[exit_point].filename = __zend_filename;
+		t->exit_info[exit_point].lineno = __zend_lineno;
+#endif
 	}
 
 	return exit_point;
@@ -8096,6 +8105,9 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 				fprintf(stderr, ":unknown(zval_copy(%s))", zend_reg_name(STACK_REG(stack, j)));
 			}
 		}
+#if ZEND_DEBUG
+		fprintf(stderr, " %s:%d", t->exit_info[i].filename, t->exit_info[i].lineno);
+#endif
 		fprintf(stderr, "\n");
 	}
 }
