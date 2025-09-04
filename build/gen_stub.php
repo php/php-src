@@ -1359,7 +1359,7 @@ class FuncInfo {
         $this->attributes = $attributes;
         $this->framelessFunctionInfos = $framelessFunctionInfos;
         $this->exposedDocComment = $exposedDocComment;
-        if ($return->tentativeReturnType && $this->isFinalMethod()) {
+        if ($return->tentativeReturnType && (($this->flags & Modifiers::FINAL) || ($this->classFlags & Modifiers::FINAL))) {
             throw new Exception("Tentative return inapplicable for final method");
         }
     }
@@ -1367,11 +1367,6 @@ class FuncInfo {
     public function isMethod(): bool
     {
         return $this->name instanceof MethodName;
-    }
-
-    private function isFinalMethod(): bool
-    {
-        return ($this->flags & Modifiers::FINAL) || ($this->classFlags & Modifiers::FINAL);
     }
 
     public function isInstanceMethod(): bool
