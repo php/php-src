@@ -256,14 +256,14 @@ static void dba_close_info(dba_info *info)
 		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->fp);
 		} else {
-			php_stream_close(info->fp);
+			php_stream_free(info->fp, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 		}
 	}
 	if (info->lock.fp) {
 		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->lock.fp);
 		} else {
-			php_stream_close(info->lock.fp);
+			php_stream_free(info->lock.fp, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 		}
 	}
 
@@ -516,6 +516,17 @@ static zend_always_inline zend_string *php_dba_zend_string_dup_safe(zend_string 
 		}
 		return duplicated_str;
 	}
+}
+
+/* See mysqlnd_fixup_regular_list */
+static void php_dba_fixup_regular_list(php_stream *stream)
+{
+	dtor_func_t origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
+	zend_hash_index_del(&EG(regular_list), stream->res->handle);
+	EG(regular_list).pDestructor = origin_dtor;
+	efree(stream->res);
+	stream->res = NULL;
 }
 
 /* {{{ php_dba_open */
@@ -938,6 +949,8 @@ restart:
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
+	} else {
+		php_dba_fixup_regular_list(connection->info->fp);
 	}
 
 	zend_hash_add_new(&DBA_G(connections), connection->hash, return_value);
