@@ -440,6 +440,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					zend_long blocks = zval_get_long(tmpzval);
 					if (blocks < 1 || blocks > 9) {
 						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate (" ZEND_LONG_FMT ")", blocks);
+						goto cleanup;
 					} else {
 						blockSize100k = (int) blocks;
 					}
@@ -450,6 +451,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					zend_long work = zval_get_long(tmpzval);
 					if (work < 0 || work > 250) {
 						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor (" ZEND_LONG_FMT ")", work);
+						goto cleanup;
 					} else {
 						workFactor = (int) work;
 					}
@@ -470,13 +472,16 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 
 	if (status != BZ_OK) {
 		/* Unspecified (probably strm) error, let stream-filter error do its own whining */
-		pefree(data->strm.next_in, persistent);
-		pefree(data->strm.next_out, persistent);
-		pefree(data, persistent);
-		return NULL;
+		goto cleanup;
 	}
 
 	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START);
+
+cleanup:
+	pefree(data->strm.next_in, persistent);
+	pefree(data->strm.next_out, persistent);
+	pefree(data, persistent);
+	return NULL;
 }
 
 const php_stream_filter_factory php_bz2_filter_factory = {
