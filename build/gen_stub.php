@@ -43,6 +43,17 @@ function reportFilePutContents(string $filename, string $content): void {
     }
 }
 
+if (!function_exists('array_any')) {
+    function array_any(array $array, callable $callback): bool {
+        foreach ($array as $key => $value) {
+            if ($callback($value, $key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
 /**
  * @return FileInfo[]
  */
@@ -599,23 +610,11 @@ class Type {
     }
 
     public function isScalar(): bool {
-        foreach ($this->types as $type) {
-            if (!$type->isScalar()) {
-                return false;
-            }
-        }
-
-        return true;
+        return !array_any($this->types, static fn (SimpleType $type): bool => !$type->isScalar());
     }
 
     public function isNullable(): bool {
-        foreach ($this->types as $type) {
-            if ($type->isNull()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->types, static fn (SimpleType $type): bool => $type->isNull());
     }
 
     public function tryToSimpleType(): ?SimpleType {
@@ -1237,12 +1236,10 @@ class VersionFlags {
     }
 
     public function isEmpty(): bool {
-        foreach (ALL_PHP_VERSION_IDS as $version) {
-            if ($this->flagsByVersion[$version] !== []) {
-                return false;
-            }
-        }
-        return true;
+        return !array_any(
+            ALL_PHP_VERSION_IDS,
+            fn (int $version): bool => $this->flagsByVersion[$version] !== []
+        );
     }
 
     public function generateVersionDependentFlagCode(
@@ -1439,13 +1436,10 @@ class FuncInfo {
 
     private function hasParamWithUnknownDefaultValue(): bool
     {
-        foreach ($this->args as $arg) {
-            if ($arg->defaultValue && !$arg->hasProperDefaultValue()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(
+            $this->args,
+            static fn (ArgInfo $arg): bool => $arg->defaultValue && !$arg->hasProperDefaultValue()
+        );
     }
 
     private function equalsApartFromNameAndRefcount(FuncInfo $other): bool {
@@ -1666,12 +1660,11 @@ class FuncInfo {
             $flags[] = "ZEND_ACC_DEPRECATED";
         }
 
-        foreach ($this->attributes as $attr) {
-            switch ($attr->class) {
-                case "Deprecated":
-                    $flags[] = "ZEND_ACC_DEPRECATED";
-                    break;
-            }
+        if (array_any(
+            $this->attributes,
+            static fn (AttributeInfo $attr): bool => $attr->class === "Deprecated"
+        )) {
+            $flags[] = "ZEND_ACC_DEPRECATED";
         }
 
         $flags = new VersionFlags($flags);
@@ -1680,12 +1673,11 @@ class FuncInfo {
             $flags->addForVersionsAbove("ZEND_ACC_COMPILE_TIME_EVAL", PHP_82_VERSION_ID);
         }
 
-        foreach ($this->attributes as $attr) {
-            switch ($attr->class) {
-                case "NoDiscard":
-                    $flags->addForVersionsAbove("ZEND_ACC_NODISCARD", PHP_85_VERSION_ID);
-                    break;
-            }
+        if (array_any(
+            $this->attributes,
+            static fn (AttributeInfo $attr): bool => $attr->class === "NoDiscard"
+        )) {
+            $flags->addForVersionsAbove("ZEND_ACC_NODISCARD", PHP_85_VERSION_ID);
         }
 
         return $flags;
@@ -2635,11 +2627,11 @@ class ConstInfo extends VariableLike
         ?ExposedDocComment $exposedDocComment,
         bool $isFileCacheAllowed
     ) {
-        foreach ($attributes as $attr) {
-            if ($attr->class === "Deprecated") {
-                $isDeprecated = true;
-                break;
-            }
+        if (array_any(
+            $attributes,
+            static fn (AttributeInfo $attr): bool => $attr->class === "Deprecated"
+        )) {
+            $isDeprecated = true;
         }
 
         $this->name = $name;
@@ -3758,11 +3750,11 @@ class ClassInfo {
             $flags->addForVersionsAbove("ZEND_ACC_READONLY_CLASS", PHP_82_VERSION_ID);
         }
 
-        foreach ($this->attributes as $attr) {
-            if ($attr->class === "AllowDynamicProperties") {
-                $flags->addForVersionsAbove("ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES", PHP_82_VERSION_ID);
-                break;
-            }
+        if (array_any(
+            $this->attributes,
+            static fn (AttributeInfo $attr): bool => $attr->class === "AllowDynamicProperties"
+        )) {
+            $flags->addForVersionsAbove("ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES", PHP_82_VERSION_ID);
         }
 
         return $flags;
@@ -4169,46 +4161,34 @@ class ClassInfo {
 
     private function hasConstructor(): bool
     {
-        foreach ($this->funcInfos as $funcInfo) {
-            if ($funcInfo->name->isConstructor()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(
+            $this->funcInfos,
+            static fn (FuncInfo $funcInfo): bool => $funcInfo->name->isConstructor()
+        );
     }
 
     private function hasNonPrivateConstructor(): bool
     {
-        foreach ($this->funcInfos as $funcInfo) {
-            if ($funcInfo->name->isConstructor() && !($funcInfo->flags & Modifiers::PRIVATE)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(
+            $this->funcInfos,
+            static fn (FuncInfo $funcInfo): bool => $funcInfo->name->isConstructor() && !($funcInfo->flags & Modifiers::PRIVATE)
+        );
     }
 
     private function hasDestructor(): bool
     {
-        foreach ($this->funcInfos as $funcInfo) {
-            if ($funcInfo->name->isDestructor()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(
+            $this->funcInfos,
+            static fn (FuncInfo $funcInfo): bool => $funcInfo->name->isDestructor()
+        );
     }
 
     private function hasMethods(): bool
     {
-        foreach ($this->funcInfos as $funcInfo) {
-            if (!$funcInfo->name->isConstructor() && !$funcInfo->name->isDestructor()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(
+            $this->funcInfos,
+            static fn (FuncInfo $funcInfo): bool => !$funcInfo->name->isConstructor() && !$funcInfo->name->isDestructor()
+        );
     }
 
     public function getNamespace(): ?string {
@@ -5138,7 +5118,6 @@ function parseClass(
 ): ClassInfo {
     $comments = $class->getComments();
     $alias = null;
-    $allowsDynamicProperties = false;
 
     $tags = DocCommentTag::parseDocComments($comments);
     $tagMap = DocCommentTag::makeTagMap($tags);
@@ -5154,13 +5133,10 @@ function parseClass(
     }
 
     $attributes = AttributeInfo::createFromGroups($class->attrGroups);
-    foreach ($attributes as $attribute) {
-        switch ($attribute->class) {
-            case 'AllowDynamicProperties':
-                $allowsDynamicProperties = true;
-                break 2;
-        }
-    }
+    $allowsDynamicProperties = array_any(
+        $attributes,
+        static fn (AttributeInfo $attribute): bool => $attribute->class === 'AllowDynamicProperties'
+    );
 
     if ($isStrictProperties && $allowsDynamicProperties) {
         throw new Exception("A class may not have '@strict-properties' and '#[\\AllowDynamicProperties]' at the same time.");
