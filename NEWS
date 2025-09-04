@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-14506 (Closing a userspace stream inside a userspace handler
     causes heap corruption). (nielsdos)
+  . Avoid double conversion to string in php_userstreamop_readdir(). (nielsdos)
 
 - URI:
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
