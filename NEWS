@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-19544 (GC treats ZEND_WEAKREF_TAG_MAP references as WeakMap
     references). (Arnaud, timwolla)
   . Fixed bug GH-19613 (Stale array iterator pointer). (ilutov)
+  . Fixed bug GH-19679 (zend_ssa_range_widening may fail to converge). (Arnaud)
 
 - Date:
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
