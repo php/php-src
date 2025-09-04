@@ -115,11 +115,18 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 #	define ZEND_DOUBLE_FITS_LONG(d) (!((d) >= (double)ZEND_LONG_MAX || (d) < (double)ZEND_LONG_MIN))
 #endif
 
+ZEND_API void zend_incompatible_double_to_long_error(double d);
+ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
+ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type);
+
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d);
 
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
 	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		if (zend_isnan(d)) {
+			zend_nan_coerced_to_type_warning(IS_LONG);
+		}
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
 		return zend_dval_to_lval_slow(d);
@@ -131,6 +138,9 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 {
 	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
+		if (zend_isnan(d)) {
+			zend_nan_coerced_to_type_warning(IS_LONG);
+		}
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
 		return (d > 0 ? ZEND_LONG_MAX : ZEND_LONG_MIN);
@@ -142,9 +152,6 @@ static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
 	return (double)l == d;
 }
-
-ZEND_API void zend_incompatible_double_to_long_error(double d);
-ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
 
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {
@@ -405,6 +412,9 @@ again:
 			}
 			break;
 		case IS_DOUBLE:
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
+				zend_nan_coerced_to_type_warning(_IS_BOOL);
+			}
 			if (Z_DVAL_P(op)) {
 				result = 1;
 			}
