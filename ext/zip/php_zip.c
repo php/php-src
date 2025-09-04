@@ -668,7 +668,6 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 			   can be used for simple glob() calls without further error
 			   checking.
 			*/
-			array_init(return_value);
 			return 0;
 		}
 #endif
@@ -677,7 +676,6 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
-		array_init(return_value);
 		return 0;
 	}
 
