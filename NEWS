@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
     (ilutov)
 
+- DBA:
+  . Fixed bug GH-19706 (dba stream resource mismanagement). (nielsdos)
+
 - DOM:
   . Fixed bug GH-19612 (Mitigate libxml2 tree dictionary bug). (nielsdos)
 
