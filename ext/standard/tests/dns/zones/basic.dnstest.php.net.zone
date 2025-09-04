@@ -1,0 +1,16 @@
+$TTL 86400
+@       IN      SOA     ns1.basic.dnstest.php.net. hostmaster.basic.dnstest.php.net. (
+                          2025041101 ; Serial
+                          3600       ; Refresh
+                          1800       ; Retry
+                          604800     ; Expire
+                          86400 )    ; Minimum TTL
+
+        IN      NS      ns1.basic.dnstest.php.net.
+
+ns1     IN      A       127.0.0.1
+www     IN      A       192.0.2.1
+mx1     IN      A       192.0.2.2
+        IN      MX 10   mx1.basic.dnstest.php.net.
+
+txt1    IN      TXT     "This is a test TXT record"
