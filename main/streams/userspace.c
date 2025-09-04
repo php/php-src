@@ -1222,7 +1222,6 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "Unknown option %d for " USERSTREAM_METADATA, option);
-			zval_ptr_dtor(&args[2]);
 			return ret;
 	}
 

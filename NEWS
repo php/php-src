@@ -39,6 +39,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
 
+- Streams:
+  . Remove incorrect call to zval_ptr_dtor() in user_wrapper_metadata().
+    (nielsdos)
+
 28 Aug 2025, PHP 8.4.12
 
 - Core:
