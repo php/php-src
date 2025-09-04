@@ -1,7 +1,7 @@
 /*
  * uriparser - RFC 3986 URI parsing library
  *
- * Copyright (C) 2018, Sebastian Pipping <sebastian@pipping.org>
+ * Copyright (C) 2025, Sebastian Pipping <sebastian@pipping.org>
  * All rights reserved.
  *
  * Redistribution and use in source  and binary forms, with or without
@@ -36,18 +36,18 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(URI_CONFIG_H)
-# define URI_CONFIG_H 1
+#ifndef URI_SET_HOST_BASE_H
+#define URI_SET_HOST_BASE_H 1
 
 
 
-#define PACKAGE_VERSION "@PROJECT_VERSION@"
+typedef enum UriHostTypeEnum {
+    URI_HOST_TYPE_IP4,
+    URI_HOST_TYPE_IP6,
+    URI_HOST_TYPE_IPFUTURE,
+    URI_HOST_TYPE_REGNAME
+} UriHostType;
 
-/*
-#define HAVE_WPRINTF*
-#define HAVE_REALLOCARRAY
-*/
 
 
-
-#endif  /* !defined(URI_CONFIG_H) */
+#endif /* URI_SET_HOST_BASE_H */

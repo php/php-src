@@ -1,8 +1,7 @@
 /*
  * uriparser - RFC 3986 URI parsing library
  *
- * Copyright (C) 2007, Weijia Song <songweijia@gmail.com>
- * Copyright (C) 2007, Sebastian Pipping <sebastian@pipping.org>
+ * Copyright (C) 2025, Sebastian Pipping <sebastian@pipping.org>
  * All rights reserved.
  *
  * Redistribution and use in source  and binary forms, with or without
@@ -38,76 +37,51 @@
  */
 
 /**
- * @file UriIp4.h
- * Holds the IPv4 parser interface.
- * NOTE: This header includes itself twice.
+ * @file UriVersion.c
+ * Implements a runtime version getter.
+ * NOTE: This source file includes itself twice.
  */
 
-#if (defined(URI_PASS_ANSI) && !defined(URI_IP4_TWICE_H_ANSI)) \
-	|| (defined(URI_PASS_UNICODE) && !defined(URI_IP4_TWICE_H_UNICODE)) \
-	|| (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* What encodings are enabled? */
-#include "UriDefsConfig.h"
+#include <uriparser/UriDefsConfig.h>
 #if (!defined(URI_PASS_ANSI) && !defined(URI_PASS_UNICODE))
 /* Include SELF twice */
 # ifdef URI_ENABLE_ANSI
 #  define URI_PASS_ANSI 1
-#  include "UriIp4.h"
+#  include "UriVersion.c"
 #  undef URI_PASS_ANSI
 # endif
 # ifdef URI_ENABLE_UNICODE
 #  define URI_PASS_UNICODE 1
-#  include "UriIp4.h"
+#  include "UriVersion.c"
 #  undef URI_PASS_UNICODE
 # endif
-/* Only one pass for each encoding */
-#elif (defined(URI_PASS_ANSI) && !defined(URI_IP4_TWICE_H_ANSI) \
-	&& defined(URI_ENABLE_ANSI)) || (defined(URI_PASS_UNICODE) \
-	&& !defined(URI_IP4_TWICE_H_UNICODE) && defined(URI_ENABLE_UNICODE))
+#else
 # ifdef URI_PASS_ANSI
-#  define URI_IP4_TWICE_H_ANSI 1
-#  include "UriDefsAnsi.h"
+#  include <uriparser/UriDefsAnsi.h>
 # else
-#  define URI_IP4_TWICE_H_UNICODE 1
-#  include "UriDefsUnicode.h"
+#  include <uriparser/UriDefsUnicode.h>
 #  include <wchar.h>
 # endif
 
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-
 #ifndef URI_DOXYGEN
-# include "UriBase.h"
+# include <uriparser/Uri.h>
 #endif
 
 
 
-/**
- * Converts an IPv4 text representation into four bytes.
- *
- * @param octetOutput  Output destination
- * @param first        First character of IPv4 text to parse
- * @param afterLast    Position to stop parsing at
- * @return Error code or 0 on success
- *
- * @see uriParseIpSixAddressA
- * @see uriParseIpSixAddressMmA
- */
-URI_PUBLIC int URI_FUNC(ParseIpFourAddress)(unsigned char * octetOutput,
-		const URI_CHAR * first, const URI_CHAR * afterLast);
-
-
-
-#ifdef __cplusplus
+const URI_CHAR * URI_FUNC(BaseRuntimeVersion)(void) {
+#if defined(URI_PASS_ANSI)
+	return URI_VER_ANSI;
+#elif defined(URI_PASS_UNICODE)
+	return URI_VER_UNICODE;
+#else
+# error Either URI_PASS_ANSI or URI_PASS_UNICODE must be defined
+#endif
 }
-#endif
 
 
 
-#endif
 #endif
