@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-19637 (Incorrect Closure scope for FCC in constant
     expression). (timwolla)
   . Fixed bug GH-19613 (Stale array iterator pointer). (ilutov)
+  . Fixed bug GH-19679 (zend_ssa_range_widening may fail to converge). (Arnaud)
 
 - Date:
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
