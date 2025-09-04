@@ -456,6 +456,10 @@ typedef struct _zend_jit_trace_exit_info {
 	uint32_t                stack_offset;
 	zend_jit_ref_snapshot   poly_func;
 	zend_jit_ref_snapshot   poly_this;
+#if ZEND_DEBUG
+	const char             *filename;
+	int                     lineno;
+#endif
 } zend_jit_trace_exit_info;
 
 typedef struct _zend_jit_trace_stack {
