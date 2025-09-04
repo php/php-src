@@ -653,6 +653,11 @@ PHP 8.5 UPGRADE NOTES
   . socket_set_option with multicast context throws a ValueError
     when the created socket is not of AF_INET/AF_INET6 family.
 
+- Standard:
+  . file() now correctly honors the FILE_SKIP_EMPTY_LINES flag even when
+    FILE_IGNORE_NEW_LINES is not set. Previously, FILE_SKIP_EMPTY_LINES
+    only worked when combined with FILE_IGNORE_NEW_LINES. See GH-18120.
+
 - Tidy:
   . tidy::__construct/parseFile/parseString now throws a ValueError
     if the configuration contains an invalid or set a read-only
