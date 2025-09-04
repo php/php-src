@@ -842,6 +842,9 @@ restart:
 				/* do not log errors for .lck file while in read only mode on .lck file */
 				lock_file_mode = "rb";
 				connection->info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, &opened_path);
+				if (connection->info->lock.fp && !persistent_flag) {
+					php_dba_fixup_regular_list(connection->info->lock.fp);
+				}
 				if (opened_path) {
 					zend_string_release_ex(opened_path, 0);
 				}
@@ -855,6 +858,9 @@ restart:
 			zend_string *opened_path = NULL;
 			connection->info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, &opened_path);
 			if (connection->info->lock.fp) {
+				if (!persistent_flag) {
+					php_dba_fixup_regular_list(connection->info->lock.fp);
+				}
 				if (is_db_lock) {
 					if (opened_path) {
 						/* replace the path info with the real path of the opened file */
@@ -891,6 +897,9 @@ restart:
 			connection->info->fp = connection->info->lock.fp; /* use the same stream for locking and database access */
 		} else {
 			connection->info->fp = php_stream_open_wrapper(ZSTR_VAL(connection->info->path), file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, NULL);
+			if (connection->info->fp && !persistent_flag) {
+				php_dba_fixup_regular_list(connection->info->fp);
+			}
 		}
 		if (!connection->info->fp) {
 			/* stream operation already wrote an error message */
@@ -949,8 +958,6 @@ restart:
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
-	} else {
-		php_dba_fixup_regular_list(connection->info->fp);
 	}
 
 	zend_hash_add_new(&DBA_G(connections), connection->hash, return_value);
