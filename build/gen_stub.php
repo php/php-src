@@ -1842,56 +1842,56 @@ ENDCOMMENT
             $noParamEntity = $doc->createEntityReference('no.function.parameters');
             $parametersRefSec->appendChild($noParamEntity);
             return $parametersRefSec;
-        } else {
-            $parametersContainer = $doc->createDocumentFragment();
-
-            $parametersContainer->appendChild(new DOMText("\n  "));
-            $parametersList = $doc->createElement('variablelist');
-            $parametersContainer->appendChild($parametersList);
-
-            /*
-            <varlistentry>
-             <term><parameter>name</parameter></term>
-             <listitem>
-              <simpara>
-               Description.
-              </simpara>
-             </listitem>
-            </varlistentry>
-            */
-            foreach ($this->args as $arg) {
-                $parameter = $doc->createElement('parameter', $arg->name);
-                $parameterTerm = $doc->createElement('term');
-                $parameterTerm->appendChild($parameter);
-
-                $listItemPara = $doc->createElement('simpara');
-                $listItemPara->append(
-                    "\n      ",
-                    "Description.",
-                    "\n     ",
-                );
-
-                $parameterEntryListItem = $doc->createElement('listitem');
-                $parameterEntryListItem->append(
-                    "\n     ",
-                    $listItemPara,
-                    "\n    ",
-                );
-
-                $parameterEntry = $doc->createElement('varlistentry');
-                $parameterEntry->append(
-                    "\n    ",
-                    $parameterTerm,
-                    "\n    ",
-                    $parameterEntryListItem,
-                    "\n   ",
-                );
-
-                $parametersList->appendChild(new DOMText("\n   "));
-                $parametersList->appendChild($parameterEntry);
-            }
-            $parametersList->appendChild(new DOMText("\n  "));
         }
+        $parametersContainer = $doc->createDocumentFragment();
+
+        $parametersContainer->appendChild(new DOMText("\n  "));
+        $parametersList = $doc->createElement('variablelist');
+        $parametersContainer->appendChild($parametersList);
+
+        /*
+        <varlistentry>
+            <term><parameter>name</parameter></term>
+            <listitem>
+            <simpara>
+            Description.
+            </simpara>
+            </listitem>
+        </varlistentry>
+        */
+        foreach ($this->args as $arg) {
+            $parameter = $doc->createElement('parameter', $arg->name);
+            $parameterTerm = $doc->createElement('term');
+            $parameterTerm->appendChild($parameter);
+
+            $listItemPara = $doc->createElement('simpara');
+            $listItemPara->append(
+                "\n      ",
+                "Description.",
+                "\n     ",
+            );
+
+            $parameterEntryListItem = $doc->createElement('listitem');
+            $parameterEntryListItem->append(
+                "\n     ",
+                $listItemPara,
+                "\n    ",
+            );
+
+            $parameterEntry = $doc->createElement('varlistentry');
+            $parameterEntry->append(
+                "\n    ",
+                $parameterTerm,
+                "\n    ",
+                $parameterEntryListItem,
+                "\n   ",
+            );
+
+            $parametersList->appendChild(new DOMText("\n   "));
+            $parametersList->appendChild($parameterEntry);
+        }
+        $parametersList->appendChild(new DOMText("\n  "));
+
         $parametersContainer->appendChild(new DOMText("\n "));
         $parametersRefSec->appendChild($parametersContainer);
         $parametersRefSec->appendChild(new DOMText("\n "));
@@ -2463,8 +2463,6 @@ abstract class VariableLike
     protected function getTypeCode(string $variableLikeName, string &$code): string
     {
         $variableLikeType = $this->getVariableTypeName();
-
-        $typeCode = "";
         if ($this->type) {
             $arginfoType = $this->type->toArginfoType();
             if ($arginfoType->hasClassType()) {
@@ -2491,22 +2489,17 @@ abstract class VariableLike
                     } else {
                         $code .= "\tzend_type {$variableLikeType}_{$variableLikeName}_type = ZEND_TYPE_INIT_UNION({$variableLikeType}_{$variableLikeName}_type_list, $typeMaskCode);\n";
                     }
-                    $typeCode = "{$variableLikeType}_{$variableLikeName}_type";
-                } else {
-                    $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
-                    $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
-                    $code .= "\tzend_string *{$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\")-1, 1);\n";
-
-                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName}, 0, " . $arginfoType->toTypeMask() . ")";
+                    return "{$variableLikeType}_{$variableLikeName}_type";
                 }
-            } else {
-                $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";
-            }
-        } else {
-            $typeCode = "(zend_type) ZEND_TYPE_INIT_NONE(0)";
-        }
+                $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
+                $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
+                $code .= "\tzend_string *{$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\")-1, 1);\n";
 
-        return $typeCode;
+                return "(zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName}, 0, " . $arginfoType->toTypeMask() . ")";
+            }
+            return "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";
+        }
+        return "(zend_type) ZEND_TYPE_INIT_NONE(0)";
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
@@ -3273,14 +3266,13 @@ class EnumCaseInfo {
     public function getDeclaration(array $allConstInfos): string {
         $escapedName = addslashes($this->name);
         if ($this->value === null) {
-            $code = "\n\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
-        } else {
-            $value = EvaluatedValue::createFromExpression($this->value, null, null, $allConstInfos);
-
-            $zvalName = "enum_case_{$escapedName}_value";
-            $code = "\n" . $value->initializeZval($zvalName);
-            $code .= "\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", &$zvalName);\n";
+            return "\n\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
         }
+        $value = EvaluatedValue::createFromExpression($this->value, null, null, $allConstInfos);
+
+        $zvalName = "enum_case_{$escapedName}_value";
+        $code = "\n" . $value->initializeZval($zvalName);
+        $code .= "\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", &$zvalName);\n";
 
         return $code;
     }
