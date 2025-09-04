@@ -612,7 +612,7 @@ int phpdbg_is_auto_global(char *name, int len) {
 PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_object *exception) {
 	const zend_op *op;
 	zend_op *cur;
-	uint32_t op_num, i;
+	uint32_t op_num;
 	zend_op_array *op_array = &execute_data->func->op_array;
 
 	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3 && EG(opline_before_exception)) {
@@ -623,7 +623,7 @@ PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_obj
 
 	op_num = op - op_array->opcodes;
 
-	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op <= op_num; i++) {
+	for (uint32_t i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op <= op_num; i++) {
 		uint32_t catch = op_array->try_catch_array[i].catch_op, finally = op_array->try_catch_array[i].finally_op;
 		if (op_num <= catch || op_num <= finally) {
 			if (finally) {
