@@ -480,7 +480,7 @@ static const URI_CHAR * URI_FUNC(ParseIpFuture)(URI_TYPE(ParserState) * state,
 	case _UT('v'):
 	case _UT('V'):
 	*/
-		if (first + 1 >= afterLast) {
+		if (afterLast - first < 2) {
 			URI_FUNC(StopSyntax)(state, afterLast, memory);
 			return NULL;
 		}
@@ -755,7 +755,7 @@ static const URI_CHAR * URI_FUNC(ParseIPv6address2)(
 						}
 
 						/* "::"? */
-						if (first + 1 >= afterLast) {
+						if (afterLast - first < 2) {
 							URI_FUNC(StopSyntax)(state, afterLast, memory);
 							return NULL;
 						}
@@ -773,7 +773,7 @@ static const URI_CHAR * URI_FUNC(ParseIPv6address2)(
 							setZipper = 1;
 
 							/* ":::+"? */
-							if (first + 1 >= afterLast) {
+							if (afterLast - first < 2) {
 								URI_FUNC(StopSyntax)(state, afterLast, memory);
 								return NULL; /* No ']' yet */
 							}
@@ -1583,14 +1583,14 @@ static const URI_CHAR * URI_FUNC(ParsePctEncoded)(
 	switch (*first) {
 	case _UT('%'):
 	*/
-		if (first + 1 >= afterLast) {
+		if (afterLast - first < 2) {
 			URI_FUNC(StopSyntax)(state, afterLast, memory);
 			return NULL;
 		}
 
 		switch (first[1]) {
 		case URI_SET_HEXDIG:
-			if (first + 2 >= afterLast) {
+			if (afterLast - first < 3) {
 				URI_FUNC(StopSyntax)(state, afterLast, memory);
 				return NULL;
 			}
@@ -2286,12 +2286,10 @@ int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
 
 		/* Host data - IPvFuture (may affect host text) */
 		if (uri->hostData.ipFuture.first != NULL) {
-			/* NOTE: .hostData.ipFuture may hold the very same range pointers
-			 *       as .hostText; then we need to prevent freeing memory twice. */
-			if (uri->hostText.first == uri->hostData.ipFuture.first) {
-				uri->hostText.first = NULL;
-				uri->hostText.afterLast = NULL;
-			}
+			/* NOTE: .hostData.ipFuture holds the very same range pointers
+			 *       as .hostText; we must not free memory twice. */
+			uri->hostText.first = NULL;
+			uri->hostText.afterLast = NULL;
 
 			if (uri->hostData.ipFuture.first != uri->hostData.ipFuture.afterLast) {
 				memory->free(memory, (URI_CHAR *)uri->hostData.ipFuture.first);
@@ -2332,20 +2330,7 @@ int URI_FUNC(FreeUriMembersMm)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
 	}
 
 	/* Path */
-	if (uri->pathHead != NULL) {
-		URI_TYPE(PathSegment) * segWalk = uri->pathHead;
-		while (segWalk != NULL) {
-			URI_TYPE(PathSegment) * const next = segWalk->next;
-			if (uri->owner && (segWalk->text.first != NULL)
-					&& (segWalk->text.first < segWalk->text.afterLast)) {
-				memory->free(memory, (URI_CHAR *)segWalk->text.first);
-			}
-			memory->free(memory, segWalk);
-			segWalk = next;
-		}
-		uri->pathHead = NULL;
-		uri->pathTail = NULL;
-	}
+	URI_FUNC(FreeUriPath)(uri, memory);
 
 	if (uri->owner) {
 		/* Query */
