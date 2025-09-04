@@ -6981,6 +6981,7 @@ PHP_FUNCTION(array_key_exists)
 			RETVAL_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
 			break;
 		case IS_NULL:
+			zend_error(E_DEPRECATED, "Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead");
 			RETVAL_BOOL(zend_hash_exists(ht, ZSTR_EMPTY_ALLOC()));
 			break;
 		case IS_DOUBLE:

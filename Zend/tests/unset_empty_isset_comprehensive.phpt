@@ -703,12 +703,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -730,12 +736,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -757,12 +769,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -784,12 +802,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -817,12 +841,18 @@ array(3) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(3) {
   [1]=>
@@ -841,12 +871,18 @@ array(2) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(2) {
   [2]=>
@@ -861,12 +897,18 @@ array(1) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(1) {
   [3]=>
@@ -877,12 +919,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -908,12 +956,18 @@ array(2) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(2) {
   [1]=>
@@ -928,12 +982,18 @@ array(1) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(1) {
   [2]=>
@@ -944,12 +1004,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -973,12 +1039,18 @@ array(1) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(1) {
   [2]=>
@@ -989,12 +1061,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -1018,12 +1096,18 @@ array(1) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(1) {
   ["Age"]=>
@@ -1034,12 +1118,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -1069,12 +1159,18 @@ array(4) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(4) {
   [1]=>
@@ -1097,12 +1193,18 @@ array(3) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(3) {
   ["One"]=>
@@ -1121,12 +1223,18 @@ array(2) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(2) {
   [2]=>
@@ -1141,12 +1249,18 @@ array(1) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -1157,12 +1271,18 @@ array(0) {
 }
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Undefined variable $key_val in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(true)
 array(0) {
 }
@@ -1175,11 +1295,11 @@ bool(true)
 
 *** Testing unset(), empty() & isset() with resource variables ***
 -- Iteration 1 --
-resource(%d) of type (stream)
+resource(5) of type (stream)
 bool(true)
 bool(false)
 bool(true)
-resource(%d) of type (stream)
+resource(5) of type (stream)
 bool(false)
 bool(true)
 bool(false)
@@ -1188,11 +1308,11 @@ bool(false)
 Warning: Undefined variable $resource in %s on line %d
 NULL
 -- Iteration 2 --
-resource(%d) of type (stream)
+resource(6) of type (stream)
 bool(true)
 bool(false)
 bool(true)
-resource(%d) of type (stream)
+resource(6) of type (stream)
 bool(false)
 bool(true)
 bool(false)
@@ -1207,7 +1327,7 @@ bool(false)
 bool(true)
 
 *** Testing unset(), empty() & isset() with objects ***
-object(Point)#%d (3) {
+object(Point)#1 (3) {
   ["x"]=>
   int(30)
   ["y"]=>
@@ -1229,7 +1349,7 @@ bool(false)
 
 Warning: Undefined variable $lable in %s on line %d
 bool(true)
-object(Point)#%d (3) {
+object(Point)#1 (3) {
   ["x"]=>
   int(30)
   ["y"]=>
@@ -1237,7 +1357,7 @@ object(Point)#%d (3) {
   ["lable"]=>
   string(6) "Point1"
 }
-object(Point)#%d (2) {
+object(Point)#1 (2) {
   ["y"]=>
   int(40)
   ["lable"]=>
@@ -1245,7 +1365,7 @@ object(Point)#%d (2) {
 }
 bool(false)
 bool(true)
-object(Point)#%d (0) {
+object(Point)#1 (0) {
 }
 bool(true)
 bool(false)
@@ -1266,7 +1386,7 @@ array(3) {
   [2]=>
   string(9) "testPoint"
 }
-object(Point)#%d (3) {
+object(Point)#1 (3) {
   ["x"]=>
   int(5)
   ["y"]=>
