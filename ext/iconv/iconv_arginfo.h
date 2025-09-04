@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bab63f28274e95176ffd30e39094436dc0c8b0fc */
+ * Stub hash: 2bab7d4e330ab8200a072a23d98816cef0c7ba9c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_iconv_strlen, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -93,15 +93,14 @@ static void register_iconv_symbols(int module_number)
 
 
 	zend_attribute *attribute_Deprecated_func_iconv_set_encoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "iconv_set_encoding", sizeof("iconv_set_encoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_iconv_set_encoding_0_arg0_str = zend_string_init("5.6", strlen("5.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_iconv_set_encoding_0->args[0].value, attribute_Deprecated_func_iconv_set_encoding_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_iconv_set_encoding_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_iconv_set_encoding_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_iconv_set_encoding_0_arg1_str = zend_string_init("use internal_encoding, input_encoding, and output_encoding INI settings instead", strlen("use internal_encoding, input_encoding, and output_encoding INI settings instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_iconv_set_encoding_0->args[1].value, attribute_Deprecated_func_iconv_set_encoding_0_arg1_str);
 	attribute_Deprecated_func_iconv_set_encoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_iconv_get_encoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "iconv_get_encoding", sizeof("iconv_get_encoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_iconv_get_encoding_0->args[0].value, attribute_Deprecated_func_iconv_set_encoding_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_iconv_get_encoding_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
 	attribute_Deprecated_func_iconv_get_encoding_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	ZVAL_STR_COPY(&attribute_Deprecated_func_iconv_get_encoding_0->args[1].value, attribute_Deprecated_func_iconv_set_encoding_0_arg1_str);
 	attribute_Deprecated_func_iconv_get_encoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
