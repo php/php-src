@@ -2201,11 +2201,11 @@ OUPUT_EXAMPLE
         return null;
     }
 
-    public function toArgInfoCode(?int $minPHPCompatability): string {
+    public function toArgInfoCode(?int $minPHPCompatibility): string {
         $code = $this->return->beginArgInfo(
             $this->getArgInfoName(),
             $this->numRequiredArgs,
-            $minPHPCompatability === null || $minPHPCompatability >= PHP_81_VERSION_ID
+            $minPHPCompatibility === null || $minPHPCompatibility >= PHP_81_VERSION_ID
         );
     
         foreach ($this->args as $argInfo) {
