@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19613 (Stale array iterator pointer). (ilutov)
   . Fixed bug GH-19679 (zend_ssa_range_widening may fail to converge). (Arnaud)
 
+- Bz2:
+  . Fixed bug GH-19685 (Segfault when bzip2 filter has invalid parameters).
+    (alexandre-daubois)
+
 - Date:
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
     (ilutov)
