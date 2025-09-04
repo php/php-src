@@ -540,7 +540,7 @@ class Tester
             $cmd[] = '-d' . $iniEntryName . '=' . $iniEntryValue;
         }
 
-        if (getenv('TEST_FPM_RUN_AS_ROOT')) {
+        if ($envVars['TEST_FPM_RUN_AS_ROOT'] ?? getenv('TEST_FPM_RUN_AS_ROOT')) {
             $cmd[] = '--allow-to-run-as-root';
         }
         $cmd = array_merge($cmd, $extraArgs);

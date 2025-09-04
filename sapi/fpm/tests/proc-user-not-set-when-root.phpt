@@ -2,15 +2,7 @@
 FPM: Process user setting unset when running as root
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die("skip not for Windows");
-}
-require_once "tester.inc";
-
-if (!FPM\Tester::findExecutable()) {
-    die("skip php-fpm binary not found");
-}
-
+include "skipif.inc";
 FPM\Tester::skipIfNotRoot();
 ?>
 --FILE--
@@ -33,7 +25,9 @@ pm.max_spare_servers = 3
 EOT;
 
 $tester = new FPM\Tester($cfg);
-$tester->start();
+$tester->start(envVars: [
+    'TEST_FPM_RUN_AS_ROOT' => 0,
+]);
 $tester->expectLogAlert(
     "'user' directive has not been specified when running as a root without --allow-to-run-as-root",
     'unconfined'
