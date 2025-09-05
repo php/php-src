@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
 
+- CLI:
+  . Fixed bug GH-19461 (Improve error message on listening error with IPv6
+    address). (alexandre-daubois)
+
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
