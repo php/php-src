@@ -326,15 +326,14 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 	/* Make the resulting URI independent of the 'uri_str'. */
 	uriMakeOwnerMmA(&uri, mm);
 
-	if (
-		has_text_range(&uri.portText)
-		&& port_str_to_zend_long_checked(uri.portText.first, get_text_range_length(&uri.portText)) == -1
-	) {
-		if (!silent) {
-			zend_throw_exception(uri_invalid_uri_exception_ce, "The port is out of range", 0);
-		}
+	if (has_text_range(&uri.portText) && get_text_range_length(&uri.portText) > 0) {
+		if (port_str_to_zend_long_checked(uri.portText.first, get_text_range_length(&uri.portText)) == -1) {
+			if (!silent) {
+				zend_throw_exception(uri_invalid_uri_exception_ce, "The port is out of range", 0);
+			}
 
-		goto fail;
+			goto fail;
+		}
 	}
 
 	php_uri_parser_rfc3986_uris *uriparser_uris = uriparser_create_uris();
