@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
+  . Fixed bug GH-19577 (Avoid integer overflow when using a small offset
+    and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
 
 - Streams:
   . Remove incorrect call to zval_ptr_dtor() in user_wrapper_metadata().
