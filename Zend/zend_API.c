@@ -1512,6 +1512,9 @@ ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, const ze
 	zval_ptr_dtor(&c->value);
 	ZVAL_COPY_VALUE(&c->value, &tmp);
 
+	/* may not return SUCCESS in case of an exception,
+	 * should've returned FAILURE in zval_update_constant_ex! */
+	ZEND_ASSERT(!EG(exception));
 	return SUCCESS;
 }
 
