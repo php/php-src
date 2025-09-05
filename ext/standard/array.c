@@ -6472,6 +6472,65 @@ static void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, b
 /* {{{ Returns the sum of the array entries */
 PHP_FUNCTION(array_sum)
 {
+	zval *array;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &array) == FAILURE) {
+		return;
+	}
+
+	if (HT_IS_PACKED(Z_ARRVAL_P(array)) && Z_ARRVAL_P(array)->nNumOfElements > 0) {
+		if (Z_TYPE(Z_ARRVAL_P(array)->arPacked[0]) == IS_LONG) {
+			zend_long sum = 0;
+			uint32_t i = 0;
+
+			typedef long vector_long __attribute__((vector_size(16)));
+			vector_long sum_vec = {0, 0};
+
+			for (; i + 1 < Z_ARRVAL_P(array)->nNumOfElements; i += 2) {
+				if (Z_TYPE(Z_ARRVAL_P(array)->arPacked[i]) != IS_LONG || Z_TYPE(Z_ARRVAL_P(array)->arPacked[i+1]) != IS_LONG) {
+					goto slow_path;
+				}
+				vector_long values = {Z_LVAL(Z_ARRVAL_P(array)->arPacked[i]), Z_LVAL(Z_ARRVAL_P(array)->arPacked[i+1])};
+				sum_vec += values;
+			}
+
+			sum = sum_vec[0] + sum_vec[1];
+
+			for (; i < Z_ARRVAL_P(array)->nNumOfElements; i++) {
+				if (Z_TYPE(Z_ARRVAL_P(array)->arPacked[i]) != IS_LONG) {
+					goto slow_path;
+				}
+				sum += Z_LVAL(Z_ARRVAL_P(array)->arPacked[i]);
+			}
+			RETURN_LONG(sum);
+		} else if (Z_TYPE(Z_ARRVAL_P(array)->arPacked[0]) == IS_DOUBLE) {
+			double sum = 0;
+			uint32_t i = 0;
+
+			typedef double vector_double __attribute__((vector_size(16)));
+			vector_double sum_vec = {0.0, 0.0};
+
+			for (; i + 1 < Z_ARRVAL_P(array)->nNumOfElements; i += 2) {
+				if (Z_TYPE(Z_ARRVAL_P(array)->arPacked[i]) != IS_DOUBLE || Z_TYPE(Z_ARRVAL_P(array)->arPacked[i+1]) != IS_DOUBLE) {
+					goto slow_path;
+				}
+				vector_double values = {Z_DVAL(Z_ARRVAL_P(array)->arPacked[i]), Z_DVAL(Z_ARRVAL_P(array)->arPacked[i+1])};
+				sum_vec += values;
+			}
+
+			sum = sum_vec[0] + sum_vec[1];
+
+			for (; i < Z_ARRVAL_P(array)->nNumOfElements; i++) {
+				if (Z_TYPE(Z_ARRVAL_P(array)->arPacked[i]) != IS_DOUBLE) {
+					goto slow_path;
+				}
+				sum += Z_DVAL(Z_ARRVAL_P(array)->arPacked[i]);
+			}
+			RETURN_DOUBLE(sum);
+		}
+	}
+
+slow_path:
 	php_array_binop(INTERNAL_FUNCTION_PARAM_PASSTHRU, "Addition", add_function, 0);
 }
 /* }}} */
