@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19679 (zend_ssa_range_widening may fail to converge). (Arnaud)
   . Fixed bug GH-19681 (PHP_EXPAND_PATH broken with bash 5.3.0). (Remi)
 
+- CLI:
+  . Fixed bug GH-19461 (Improve error message on listening error with IPv6
+    address). (alexandre-daubois)
+
 - Date:
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
     (ilutov)
@@ -22,10 +26,6 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
-
-- CLI:
-  . Fixed bug GH-19461 (Improve error message on listening error with IPv6
-    address). (alexandre-daubois)
 
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
