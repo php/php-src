@@ -50,6 +50,9 @@ PHP                                                                        NEWS
   . Remove incorrect call to zval_ptr_dtor() in user_wrapper_metadata().
     (nielsdos)
 
+- Zip:
+  . Fix memory leak in zip when encountering empty glob result. (nielsdos)
+
 28 Aug 2025, PHP 8.4.12
 
 - Core:
