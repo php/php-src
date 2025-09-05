@@ -6,11 +6,15 @@ uri
 <?php
 
 $uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
-$uri2 = $uri1->withScheme("http");
-$uri3 = $uri2->withScheme(null);
-
+var_dump($uri1->getRawScheme());
 var_dump($uri1->getScheme());
+
+$uri2 = $uri1->withScheme("http");
+var_dump($uri2->getRawScheme());
 var_dump($uri2->getScheme());
+
+$uri3 = $uri2->withScheme(null);
+var_dump($uri3->getRawScheme());
 var_dump($uri3->getScheme());
 
 try {
@@ -46,7 +50,10 @@ try {
 ?>
 --EXPECT--
 string(5) "https"
+string(5) "https"
 string(4) "http"
+string(4) "http"
+NULL
 NULL
 The specified scheme is malformed
 The specified scheme is malformed
