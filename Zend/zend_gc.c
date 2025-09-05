@@ -1971,7 +1971,7 @@ next:
 }
 
 /* Traverse the reference graph from all roots, marking white nodes as garbage. */
-static int gc_collect_roots(uint32_t *flags, gc_stack *stack)
+static int gc_collect_roots(uint32_t *flags, gc_stack *stack, bool full_gc)
 {
 	uint32_t idx, end;
 	zend_refcounted *ref;
@@ -1984,7 +1984,7 @@ static int gc_collect_roots(uint32_t *flags, gc_stack *stack)
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_BLACK)) {
 				GC_REF_SET_INFO(current->ref, 0); /* reset GC_ADDRESS() and keep GC_BLACK */
-				if (GC_REF_OLD(current->ref)) {
+				if (GC_REF_OLD(current->ref) && !full_gc) {
 					gc_old_root(current);
 				} else {
 					gc_remove_from_roots(&GC_G(buf), current);
@@ -2322,7 +2322,7 @@ rerun_gc:
 
 		GC_TRACE("Collecting roots");
 		zend_hrtime_t collect_start_time = zend_hrtime();
-		count = gc_collect_roots(&gc_flags, &stack);
+		count = gc_collect_roots(&gc_flags, &stack, full_gc);
 		GC_G(collect_roots_time) += zend_hrtime() - collect_start_time;
 
 		if (!GC_G(num_roots)) {
