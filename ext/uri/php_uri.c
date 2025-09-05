@@ -1061,8 +1061,9 @@ static PHP_MINIT_FUNCTION(uri)
 static PHP_MINFO_FUNCTION(uri)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "uri support", "active");
-	php_info_print_table_row(2, "uriparser library version", URI_VER_ANSI);
+	php_info_print_table_row(2, "URI support", "active");
+	php_info_print_table_row(2, "uriparser compiled version", URI_VER_ANSI);
+	php_info_print_table_row(2, "uriparser loaded version", uriBaseRuntimeVersionA());
 	php_info_print_table_end();
 }
 
