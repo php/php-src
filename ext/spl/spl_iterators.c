@@ -2115,14 +2115,27 @@ static zend_object *spl_dual_it_new(zend_class_entry *class_type)
 }
 /* }}} */
 
+/* Returns the relative position for the current iterator position. */
+static zend_long spl_limit_it_relative_pos(spl_dual_it_object *intern)
+{
+	return intern->current.pos - intern->u.limit.offset;
+}
+
+/* Returns the relative position for an arbitrary position. */
+static zend_long spl_limit_it_relative_pos_for(spl_dual_it_object *intern, zend_long pos)
+{
+	return pos - intern->u.limit.offset;
+}
+
 static inline zend_result spl_limit_it_valid(spl_dual_it_object *intern)
 {
 	/* FAILURE / SUCCESS */
-	if (intern->u.limit.count != -1 && intern->current.pos >= intern->u.limit.offset + intern->u.limit.count) {
+	if (intern->u.limit.count != -1 &&
+		spl_limit_it_relative_pos(intern) >= intern->u.limit.count) {
 		return FAILURE;
-	} else {
-		return spl_dual_it_valid(intern);
 	}
+
+	return spl_dual_it_valid(intern);
 }
 
 static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
@@ -2134,7 +2147,7 @@ static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is below the offset " ZEND_LONG_FMT, pos, intern->u.limit.offset);
 		return;
 	}
-	if (pos - intern->u.limit.offset >= intern->u.limit.count && intern->u.limit.count != -1) {
+	if (spl_limit_it_relative_pos_for(intern, pos) >= intern->u.limit.count && intern->u.limit.count != -1) {
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is behind offset " ZEND_LONG_FMT " plus count " ZEND_LONG_FMT, pos, intern->u.limit.offset, intern->u.limit.count);
 		return;
 	}
@@ -2191,7 +2204,7 @@ PHP_METHOD(LimitIterator, valid)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 /*	RETURN_BOOL(spl_limit_it_valid(intern) == SUCCESS);*/
-	RETURN_BOOL((intern->u.limit.count == -1 || intern->current.pos < intern->u.limit.offset + intern->u.limit.count) && Z_TYPE(intern->current.data) != IS_UNDEF);
+	RETURN_BOOL((intern->u.limit.count == -1 || spl_limit_it_relative_pos(intern) < intern->u.limit.count) && Z_TYPE(intern->current.data) != IS_UNDEF);
 } /* }}} */
 
 /* {{{ Move the iterator forward */
@@ -2204,7 +2217,7 @@ PHP_METHOD(LimitIterator, next)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	spl_dual_it_next(intern, 1);
-	if (intern->u.limit.count == -1 || intern->current.pos < intern->u.limit.offset + intern->u.limit.count) {
+	if (intern->u.limit.count == -1 || spl_limit_it_relative_pos(intern) < intern->u.limit.count) {
 		spl_dual_it_fetch(intern, 1);
 	}
 } /* }}} */
