@@ -45,6 +45,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fix GH-19610 (Deprecation warnings in functions taking as argument).
     (Girgias)
+  . Fixed bug GH-19577 (Avoid integer overflow when using a small offset
+    and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
 
 - Streams:
   . Fixed bug GH-14506 (Closing a userspace stream inside a userspace handler
