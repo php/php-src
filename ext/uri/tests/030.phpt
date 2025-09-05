@@ -6,11 +6,15 @@ uri
 <?php
 
 $uri1 = Uri\Rfc3986\Uri::parse("https://example.com#fragment1");
-$uri2 = $uri1->withFragment("fragment2");
-$uri3 = $uri2->withFragment(null);
-
+var_dump($uri1->getRawFragment());
 var_dump($uri1->getFragment());
+
+$uri2 = $uri1->withFragment("fragment2");
+var_dump($uri2->getRawFragment());
 var_dump($uri2->getFragment());
+
+$uri3 = $uri2->withFragment(null);
+var_dump($uri3->getRawFragment());
 var_dump($uri3->getFragment());
 
 try {
@@ -50,7 +54,10 @@ var_dump($url2->getFragment());
 ?>
 --EXPECT--
 string(9) "fragment1"
+string(9) "fragment1"
 string(9) "fragment2"
+string(9) "fragment2"
+NULL
 NULL
 The specified fragment is malformed
 The specified fragment is malformed
