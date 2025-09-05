@@ -85,10 +85,10 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 					sock_max_fd = i;
 				}
 			} else {
+				handles[n_handles] = (HANDLE)(uintptr_t)_get_osfhandle(i);
 				if (SAFE_FD_ISSET(i, rfds) && GetFileType(handles[n_handles]) == FILE_TYPE_PIPE) {
 					num_read_pipes++;
 				}
-				handles[n_handles] = (HANDLE)(uintptr_t)_get_osfhandle(i);
 				handle_slot_to_fd[n_handles] = i;
 				n_handles++;
 			}
