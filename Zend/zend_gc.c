@@ -391,7 +391,9 @@ static zend_gc_globals gc_globals;
 	} while (0)
 #else
 # define GC_BENCH_INC(counter)
+# define GC_BENCH_INC_BY(counter, n)
 # define GC_BENCH_DEC(counter)
+# define GC_BENCH_DEC_BY(counter, n)
 # define GC_BENCH_PEAK(peak, counter)
 #endif
 
