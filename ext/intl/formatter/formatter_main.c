@@ -17,6 +17,7 @@
 #endif
 
 #include <unicode/ustring.h>
+#include <unicode/uloc.h>
 
 #include "php_intl.h"
 #include "formatter_class.h"
@@ -63,11 +64,17 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 		locale = intl_locale_get_default();
 	}
 
-	/* Create an ICU number formatter. */
-	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+	char* canonicalized_locale = canonicalize_locale_string(locale);
+	const char* final_locale = canonicalized_locale ? canonicalized_locale : locale;
 
-	if(spattern) {
+	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, final_locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+
+	if (spattern) {
 		efree(spattern);
+	}
+	
+	if (canonicalized_locale) {
+		efree(canonicalized_locale);
 	}
 
 	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
