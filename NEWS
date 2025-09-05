@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
     (nielsdos)
 
+- Windows:
+  . Fix GH-19722 (_get_osfhandle asserts in debug mode when given a socket).
+    (dktapps)
+
 11 Sep 2025, PHP 8.5.0beta3
 
 - Core:
