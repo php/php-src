@@ -6709,10 +6709,12 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 {
 	reflection_object *intern;
 	property_reference *ref;
+	zend_object *obj = NULL;
 	zend_string *scope_name = ZSTR_KNOWN(ZEND_STR_STATIC);
 
-	ZEND_PARSE_PARAMETERS_START(0, 1)
+	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_NULL(obj)
 		Z_PARAM_STR_OR_NULL(scope_name)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -6721,6 +6723,14 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 	if (!prop) {
 		_DO_THROW("May not use isReadable on dynamic properties");
 		RETURN_THROWS();
+	}
+
+	if (obj) {
+		if (!instanceof_function(obj->ce, prop->ce)) {
+			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			RETURN_THROWS();
+		}
+		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
 	}
 
 	zend_class_entry *scope;
@@ -6739,6 +6749,13 @@ ZEND_METHOD(ReflectionProperty, isReadable)
 		}
 	}
 
+	if (obj) {
+		zval *prop_val = OBJ_PROP(obj, prop->offset);
+		if (Z_TYPE_P(prop_val) != IS_UNDEF && !(Z_PROP_FLAG_P(prop_val) & IS_PROP_REINITABLE)) {
+			RETURN_FALSE;
+		}
+	}
+
 	RETURN_TRUE;
 }
 
@@ -6746,28 +6763,32 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zend_object *obj;
+	zend_object *obj = NULL;
 	zend_string *scope_name = ZSTR_KNOWN(ZEND_STR_STATIC);
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_NULL(obj)
 		Z_PARAM_STR_OR_NULL(scope_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 	zend_property_info *prop = ref->prop;
 	if (!prop) {
-		_DO_THROW("May not use isReadable on dynamic properties");
+		_DO_THROW("May not use isWritable on dynamic properties");
 		RETURN_THROWS();
+	}
+
+	if (obj) {
+		if (!instanceof_function(obj->ce, prop->ce)) {
+			_DO_THROW("Given object is not an instance of the class this property was declared in");
+			RETURN_THROWS();
+		}
+		prop = reflection_property_get_effective_prop(ref, intern->ce, obj);
 	}
 
 	zend_class_entry *scope;
 	if (get_ce_from_scope_name(&scope, scope_name, execute_data) == FAILURE) {
-		RETURN_THROWS();
-	}
-	if (!instanceof_function(obj->ce, prop->ce)) {
-		_DO_THROW("Given object is not an instance of the class this property was declared in");
 		RETURN_THROWS();
 	}
 
@@ -6786,7 +6807,7 @@ ZEND_METHOD(ReflectionProperty, isWritable)
 		}
 	}
 
-	if (prop->flags & ZEND_ACC_READONLY) {
+	if (obj && (prop->flags & ZEND_ACC_READONLY)) {
 		ZEND_ASSERT(prop->offset != ZEND_VIRTUAL_PROPERTY_OFFSET);
 		zval *prop_val = OBJ_PROP(obj, prop->offset);
 		if (Z_TYPE_P(prop_val) != IS_UNDEF && !(Z_PROP_FLAG_P(prop_val) & IS_PROP_REINITABLE)) {
