@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19613 (Stale array iterator pointer). (ilutov)
   . Fixed bug GH-19679 (zend_ssa_range_widening may fail to converge). (Arnaud)
   . Fixed bug GH-19681 (PHP_EXPAND_PATH broken with bash 5.3.0). (Remi)
+  . Fixed bug GH-19720 (Assertion failure when error handler throws when
+    accessing a deprecated constant). (nielsdos)
 
 - CLI:
   . Fixed bug GH-19461 (Improve error message on listening error with IPv6
