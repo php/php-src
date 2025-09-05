@@ -30,6 +30,7 @@
 #include "uri_parser_rfc3986.h"
 #include "uri_parser_php_parse_url.h"
 #include "php_uri_arginfo.h"
+#include "uriparser/UriBase.h"
 
 zend_class_entry *uri_rfc3986_uri_ce;
 zend_object_handlers uri_rfc3986_uri_object_handlers;
@@ -1062,8 +1063,12 @@ static PHP_MINFO_FUNCTION(uri)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "URI support", "active");
+#ifdef URI_STATIC_BUILD
+	php_info_print_table_row(2, "uriparser bundled version", URI_VER_ANSI);
+#else
 	php_info_print_table_row(2, "uriparser compiled version", URI_VER_ANSI);
 	php_info_print_table_row(2, "uriparser loaded version", uriBaseRuntimeVersionA());
+#endif
 	php_info_print_table_end();
 }
 
