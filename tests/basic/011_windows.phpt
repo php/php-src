@@ -14,7 +14,8 @@ for ($i=0; $i<$argc; $i++) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Deriving $_SERVER['argc'] and $_SERVER['argv'] from $_SERVER['QUERY_STRING'] is deprecated, configure register_argc_argv=0 to suppress this message and access the query parameters via $_SERVER['QUERY_STRING'] or $_GET in %s on line %d
 0: foo=ab
 1: cd
 2: ef

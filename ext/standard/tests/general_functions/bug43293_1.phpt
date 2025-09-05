@@ -21,4 +21,5 @@ array(3) {
   [2]=>
   int(3)
 }
-bool(false)
+array(0) {
+}

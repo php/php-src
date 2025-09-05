@@ -664,7 +664,7 @@ request_order = "GP"
 ; enabled, registering these variables consumes CPU cycles and memory each time
 ; a script is executed. For security reasons, this feature should be disabled
 ; for non-CLI SAPIs.
-; Note: This directive is hardcoded to On for the CLI SAPI
+; Note: This directive is ignored for the CLI SAPI
 ; This directive is deprecated.
 ; https://php.net/register-argc-argv
 ;register_argc_argv = Off
