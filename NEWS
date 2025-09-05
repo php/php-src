@@ -61,6 +61,8 @@ PHP                                                                        NEWS
     the Uri\WhatWg\Url parser. (timwolla)
   . Reject out-of-range ports when using the Uri\Rfc3986\Uri parser.
     (timwolla)
+  . Return null instead of 0 for Uri\Rfc3986\Uri::getPort() when the
+    URI contains an empty port. (timwolla)
   . Clean up naming of internal API. (timwolla)
 
 28 Aug 2025, PHP 8.5.0beta2
