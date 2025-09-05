@@ -1685,7 +1685,7 @@ void zend_unset_timeout(void) /* {{{ */
 }
 /* }}} */
 
-static ZEND_COLD void report_class_fetch_error(zend_string *class_name, uint32_t fetch_type)
+static ZEND_COLD void report_class_fetch_error(const zend_string *class_name, uint32_t fetch_type)
 {
 	if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
 		return;
