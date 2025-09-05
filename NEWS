@@ -35,6 +35,10 @@ PHP                                                                        NEWS
 - PDO:
   . Driver specific methods in the PDO class are now deprecated. (Arnaud)
 
+- Reflection:
+  . Fix GH-19691 (getModifierNames() not reporting asymmetric visibility).
+    (DanielEScherzer)
+
 - Session:
   . Fix RC violation of session SID constant deprecation attribute. (ilutov)
 
