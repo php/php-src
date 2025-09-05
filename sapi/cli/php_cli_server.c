@@ -2562,7 +2562,11 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 
 	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr);
 	if (server_sock == SOCK_ERR) {
-		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		if (strchr(host, ':')) {
+			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on [%s]:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		} else {
+			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
+		}
 		if (errstr) {
 			zend_string_release_ex(errstr, 0);
 		}
