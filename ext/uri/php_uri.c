@@ -977,7 +977,7 @@ static void uri_free_obj_handler(zend_object *object)
 	zend_object_std_dtor(&uri_object->std);
 }
 
-zend_object *uri_clone_obj_handler(zend_object *object)
+static zend_object *uri_clone_obj_handler(zend_object *object)
 {
 	uri_object_t *uri_object = uri_object_from_obj(object);
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
