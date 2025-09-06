@@ -990,7 +990,13 @@ zend_object *uri_clone_obj_handler(zend_object *object)
 
 	new_uri_object->internal.parser = internal_uri->parser;
 
-	void *uri = internal_uri->parser->clone_uri(internal_uri->uri);
+	zend_execute_data *execute_data = EG(current_execute_data);
+	bool is_clone_op = execute_data != NULL &&
+		execute_data->func &&
+		ZEND_USER_CODE(execute_data->func->type) &&
+		execute_data->opline != NULL &&
+		execute_data->opline->opcode == ZEND_CLONE;
+	void *uri = internal_uri->parser->clone_uri(internal_uri->uri, is_clone_op == false);
 	ZEND_ASSERT(uri != NULL);
 
 	new_uri_object->internal.uri = uri;

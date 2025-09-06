@@ -576,7 +576,7 @@ static void *php_uri_parser_whatwg_parse(const char *uri_str, size_t uri_str_len
 	return php_uri_parser_whatwg_parse_ex(uri_str, uri_str_len, base_url, errors, silent);
 }
 
-static void *php_uri_parser_whatwg_clone(void *uri)
+static void *php_uri_parser_whatwg_clone(void *uri, bool is_modified_after_cloning)
 {
 	const lxb_url_t *lexbor_uri = uri;
 

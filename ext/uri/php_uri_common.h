@@ -99,9 +99,10 @@ typedef struct uri_parser_t {
 	 *
 	 * A deep-clone must be performed that copies all pointer members to a new memory address.
 	 * @param uri The input URI
+	 * @param is_modified_after_cloning If the handler is called by a wither method that modifies the URI
 	 * @return The cloned URI
 	 */
-	void *(*clone_uri)(void *uri);
+	void *(*clone_uri)(void *uri, bool is_modified_after_cloning);
 
 	/**
 	 * Recomposes a URI as a string according to the recomposition_mode and exclude_fragment parameters.
