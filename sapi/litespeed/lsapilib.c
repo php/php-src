@@ -635,8 +635,8 @@ static inline int isPipe( int fd )
 {
     char        achPeer[128];
     socklen_t   len = 128;
-    if (( getpeername( fd, (struct sockaddr *)achPeer, &len ) != 0 )&&
-        ( errno == ENOTCONN ))
+    if ((getpeername(fd, (struct sockaddr *)achPeer, &len) != 0 )
+        && (errno == ENOTCONN || errno == ENOTSOCK))
         return 0;
     else
         return 1;
