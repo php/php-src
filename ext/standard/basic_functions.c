@@ -561,7 +561,7 @@ PHP_FUNCTION(inet_pton)
 	char buffer[17];
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(address, address_len)
+		Z_PARAM_PATH(address, address_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	memset(buffer, 0, sizeof(buffer));
@@ -593,7 +593,7 @@ PHP_FUNCTION(ip2long)
 	struct in_addr ip;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(addr, addr_len)
+		Z_PARAM_PATH(addr, addr_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
@@ -2139,8 +2139,8 @@ PHP_FUNCTION(getservbyname)
 	struct servent *serv;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(name)
-		Z_PARAM_STRING(proto, proto_len)
+		Z_PARAM_PATH_STR(name)
+		Z_PARAM_PATH(proto, proto_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 
@@ -2183,7 +2183,7 @@ PHP_FUNCTION(getservbyport)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(port)
-		Z_PARAM_STRING(proto, proto_len)
+		Z_PARAM_PATH(proto, proto_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	serv = getservbyport(htons((unsigned short) port), proto);
@@ -2210,7 +2210,7 @@ PHP_FUNCTION(getprotobyname)
 	struct protoent *ent;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_PATH(name, name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ent = getprotobyname(name);
