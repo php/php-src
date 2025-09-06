@@ -4308,7 +4308,7 @@ static int exif_isobmff_parse_box(unsigned char *buf, isobmff_box_type *box)
 static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, isobmff_item_pos_type *pos)
 {
 	isobmff_box_type box, item;
-	unsigned char *box_offset, *p, *p2;
+	unsigned char *box_offset, *p;
 	int header_size, exif_id = -1, version, item_count, i;
 
 	size_t remain;
@@ -4367,10 +4367,10 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 				ADVANCE(4);
 				item_count = php_ifd_get32u(p - 4, 1);
 			}
-			for (i = 0, p2 = p; i < item_count && p < end - 16; i++, p2 += 16) {
-				if (php_ifd_get16u(p2, 1) == exif_id) {
-					pos->offset = php_ifd_get32u(p2 + 8, 1);
-					pos->size = php_ifd_get32u(p2 + 12, 1);
+			for (i = 0; i < item_count && p < end - 16; i++, p += 16) {
+				if (php_ifd_get16u(p, 1) == exif_id) {
+					pos->offset = php_ifd_get32u(p + 8, 1);
+					pos->size = php_ifd_get32u(p + 12, 1);
 					break;
 				}
 			}
