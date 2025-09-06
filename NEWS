@@ -22,6 +22,11 @@ PHP                                                                        NEWS
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
     (ilutov)
 
+- Intl:
+  . Added grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
+    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
+    grapheme_levenshtein() functions add $locale parameter (Yuya Hamada).
+
 - EXIF:
   . Added support to retrieve Exif from HEIF file. (Benstone Zhang)
 
