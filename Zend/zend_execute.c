@@ -5074,7 +5074,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 		for (uint32_t i = 0; i < num_args; i++) {
 			zend_arg_info *arg_info = &fbc->op_array.arg_info[i];
 			if (zend_string_equals(arg_name, arg_info->name)) {
-				if (!fbc->op_array.refcount) {
+				if (!fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 					*cache_slot = unique_id;
 					*(uintptr_t *)(cache_slot + 1) = i;
 				}
@@ -5094,7 +5094,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 	}
 
 	if (fbc->common.fn_flags & ZEND_ACC_VARIADIC) {
-		if (fbc->type == ZEND_INTERNAL_FUNCTION || !fbc->op_array.refcount) {
+		if (fbc->type == ZEND_INTERNAL_FUNCTION || !fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 			*cache_slot = unique_id;
 			*(uintptr_t *)(cache_slot + 1) = fbc->common.num_args;
 		}
