@@ -64,6 +64,8 @@ PHP                                                                        NEWS
     causing an exception on sort). (nielsdos)
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
+  . Fixed bug GH-19570 (unable to fseek in /dev/zero and /dev/null).
+    (nielsdos, divinity76)
 
 - Streams:
   . Fixed bug GH-19248 (Use strerror_r instead of strerror in main).
