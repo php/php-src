@@ -4311,70 +4311,63 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 	unsigned char *box_offset, *p, *p2;
 	int header_size, exif_id = -1, version, item_count, i;
 
-	for (box_offset = data + 4; box_offset + 16 < end; box_offset += box.size) {
+	size_t remain;
+#define CHECK(n) do { \
+	if (remain < (n)) { \
+		return; \
+	} \
+} while (0)
+#define ADVANCE(n) do { \
+	CHECK(n); \
+	remain -= (n); \
+	p += (n); \
+} while (0)
+
+	for (box_offset = data + 4; box_offset < end - 16; box_offset += box.size) {
 		header_size = exif_isobmff_parse_box(box_offset, &box);
 		if (box.size < header_size) {
 			return;
 		}
+		p = box_offset;
+		remain = end - p;
+
 		if (box.type == FOURCC("iinf")) {
-			p = box_offset + header_size;
-			if (p >= end) {
-				return;
-			}
-			version = p[0];
-			p += 4;
+			ADVANCE(header_size + 4);
+			version = p[-4];
 			if (version < 2) {
-				if (p + 2 >= end) {
-					return;
-				}
-				item_count = php_ifd_get16u(p, 1);
-				p += 2;
+				ADVANCE(2);
+				item_count = php_ifd_get16u(p - 2, 1);
 			} else {
-				if (p + 4 >= end) {
-					return;
-				}
-				item_count = php_ifd_get32u(p, 1);
-				p += 4;
+				ADVANCE(4);
+				item_count = php_ifd_get32u(p - 4, 1);
 			}
-			for (i = 0; i < item_count && p + 20 < end; i++) {
+			for (i = 0; i < item_count && p < end - 20; i++) {
 				header_size = exif_isobmff_parse_box(p, &item);
 				if (item.size < header_size) {
 					return;
 				}
-				if (p + header_size + 12 >= end) {
-					return;
-				}
+				CHECK(header_size + 12);
 				if (!memcmp(p + header_size + 8, "Exif", 4)) {
 					exif_id = php_ifd_get16u(p + header_size + 4, 1);
 					break;
 				}
-				p += item.size;
+				ADVANCE(item.size);
 			}
 			if (exif_id < 0) {
 				break;
 			}
 		}
 		else if (box.type == FOURCC("iloc")) {
-			p = box_offset + header_size;
-			if (p >= end) {
-				return;
-			}
-			version = p[0];
-			p += 6;
+			ADVANCE(header_size + 6);
+			version = p[-6];
 			if (version < 2) {
-				if (p + 2 >= end) {
-					return;
-				}
-				item_count = php_ifd_get16u(p, 1);
-				p += 2;
+				ADVANCE(2);
+				item_count = php_ifd_get16u(p - 2, 1);
 			} else {
-				if (p + 4 >= end) {
-					return;
-				}
-				item_count = php_ifd_get32u(p, 1);
-				p += 4;
+				ADVANCE(4);
+				item_count = php_ifd_get32u(p - 4, 1);
 			}
-			for (i = 0, p2 = p; i < item_count && p + 16 < end; i++, p2 += 16) {
+			for (i = 0, p2 = p; i < item_count && p < end - 16; i++, p2 += 16) {
 				if (php_ifd_get16u(p2, 1) == exif_id) {
 					pos->offset = php_ifd_get32u(p2 + 8, 1);
 					pos->size = php_ifd_get32u(p2 + 12, 1);
@@ -4384,6 +4377,9 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 			break;
 		}
 	}
+
+#undef ADVANCE
+#undef CHECK
 }
 
 static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf)
