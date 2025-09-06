@@ -74,6 +74,36 @@ timelib_sll timelib_iso_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d)
 	return timelib_day_of_week_ex(y, m, d, 1);
 }
 
+/* Checks if the given date is a weekend (Saturday or Sunday) */
+int timelib_is_weekend(timelib_time *time)
+{
+	timelib_sll dow;
+	
+	/* Ensure time parts are up to date */
+	if (!time->have_date) {
+		return 0;
+	}
+	
+	dow = timelib_day_of_week(time->y, time->m, time->d);
+	/* 0 = Sunday, 6 = Saturday */
+	return (dow == 0 || dow == 6);
+}
+
+/* Checks if the given date is a weekday (Monday to Friday) */
+int timelib_is_weekday(timelib_time *time)
+{
+	timelib_sll dow;
+	
+	/* Ensure time parts are up to date */
+	if (!time->have_date) {
+		return 0;
+	}
+	
+	dow = timelib_day_of_week(time->y, time->m, time->d);
+	/* 1 = Monday through 5 = Friday */
+	return (dow >= 1 && dow <= 5);
+}
+
                                 /*     jan  feb  mar  apr  may  jun  jul  aug  sep  oct  nov  dec */
 static int d_table_common[13]  = {  0,   0,  31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334 };
 static int d_table_leap[13]    = {  0,   0,  31,  60,  91, 121, 152, 182, 213, 244, 274, 305, 335 };

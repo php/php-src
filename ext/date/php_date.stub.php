@@ -328,6 +328,12 @@ interface DateTimeInterface
     public function __serialize(): array;
 
     public function __unserialize(array $data): void;
+
+    /** @tentative-return-type */
+    public function isWeekend(): bool;
+
+    /** @tentative-return-type */
+    public function isWeekday(): bool;
 }
 
 class DateTime implements DateTimeInterface
@@ -445,6 +451,12 @@ class DateTime implements DateTimeInterface
      * @alias date_diff
      */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval {}
+
+    /** @tentative-return-type */
+    public function isWeekend(): bool {}
+
+    /** @tentative-return-type */
+    public function isWeekday(): bool {}
 }
 
 class DateTimeImmutable implements DateTimeInterface
@@ -552,6 +564,12 @@ class DateTimeImmutable implements DateTimeInterface
 
     /** @return static */
     public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {} // TODO return type should be static
+
+    /** @tentative-return-type */
+    public function isWeekend(): bool {}
+
+    /** @tentative-return-type */
+    public function isWeekday(): bool {}
 }
 
 class DateTimeZone
