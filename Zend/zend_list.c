@@ -267,7 +267,7 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 	zend_rsrc_list_dtors_entry *lde;
 	zval zv;
 
-	lde = malloc(sizeof(zend_rsrc_list_dtors_entry));
+	lde = pmalloc(sizeof(zend_rsrc_list_dtors_entry));
 	lde->list_dtor_ex = ld;
 	lde->plist_dtor_ex = pld;
 	lde->module_number = module_number;

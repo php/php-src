@@ -688,7 +688,7 @@ static void free_ptr(zval *zv) {
 PHPAPI MYSQLND_DEBUG *
 mysqlnd_debug_init(const char * skip_functions[])
 {
-	MYSQLND_DEBUG *ret = calloc(1, sizeof(MYSQLND_DEBUG));
+	MYSQLND_DEBUG *ret = pcalloc(1, sizeof(MYSQLND_DEBUG));
 
 	ret->nest_level_limit = 0;
 	ret->pid = getpid();

@@ -3338,7 +3338,7 @@ static zend_result accel_post_startup(void)
 		JIT_G(enabled) = false;
 		JIT_G(on) = false;
 #endif
-		accel_shared_globals = calloc(1, sizeof(zend_accel_shared_globals));
+		accel_shared_globals = pcalloc(1, sizeof(zend_accel_shared_globals));
 	}
 
 	/* opcache.file_cache_read_only should only be enabled when all script files are read-only */

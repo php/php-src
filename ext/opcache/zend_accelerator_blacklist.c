@@ -227,7 +227,7 @@ static inline void zend_accel_blacklist_allocate(zend_blacklist *blacklist)
 {
 	if (blacklist->pos == blacklist->size) {
 		blacklist->size += ZEND_BLACKLIST_BLOCK_SIZE;
-		blacklist->entries = (zend_blacklist_entry *) realloc(blacklist->entries, sizeof(zend_blacklist_entry)*blacklist->size);
+		blacklist->entries = (zend_blacklist_entry *) prealloc(blacklist->entries, sizeof(zend_blacklist_entry)*blacklist->size);
 	}
 }
 

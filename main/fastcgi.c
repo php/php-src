@@ -253,10 +253,10 @@ static void fcgi_hash_init(fcgi_hash *h)
 {
 	memset(h->hash_table, 0, sizeof(h->hash_table));
 	h->list = NULL;
-	h->buckets = (fcgi_hash_buckets*)malloc(sizeof(fcgi_hash_buckets));
+	h->buckets = (fcgi_hash_buckets*)pmalloc(sizeof(fcgi_hash_buckets));
 	h->buckets->idx = 0;
 	h->buckets->next = NULL;
-	h->data = (fcgi_data_seg*)malloc(sizeof(fcgi_data_seg) - 1 + FCGI_HASH_SEG_SIZE);
+	h->data = (fcgi_data_seg*)pmalloc(sizeof(fcgi_data_seg) - 1 + FCGI_HASH_SEG_SIZE);
 	h->data->pos = h->data->data;
 	h->data->end = h->data->pos + FCGI_HASH_SEG_SIZE;
 	h->data->next = NULL;
@@ -309,7 +309,7 @@ static inline char* fcgi_hash_strndup(fcgi_hash *h, char *str, unsigned int str_
 
 	if (UNEXPECTED(h->data->pos + str_len + 1 >= h->data->end)) {
 		unsigned int seg_size = (str_len + 1 > FCGI_HASH_SEG_SIZE) ? str_len + 1 : FCGI_HASH_SEG_SIZE;
-		fcgi_data_seg *p = (fcgi_data_seg*)malloc(sizeof(fcgi_data_seg) - 1 + seg_size);
+		fcgi_data_seg *p = (fcgi_data_seg*)pmalloc(sizeof(fcgi_data_seg) - 1 + seg_size);
 
 		p->pos = p->data;
 		p->end = p->pos + seg_size;
@@ -341,7 +341,7 @@ static char* fcgi_hash_set(fcgi_hash *h, unsigned int hash_value, char *var, uns
 	}
 
 	if (UNEXPECTED(h->buckets->idx >= FCGI_HASH_TABLE_SIZE)) {
-		fcgi_hash_buckets *b = (fcgi_hash_buckets*)malloc(sizeof(fcgi_hash_buckets));
+		fcgi_hash_buckets *b = (fcgi_hash_buckets*)pmalloc(sizeof(fcgi_hash_buckets));
 		b->idx = 0;
 		b->next = h->buckets;
 		h->buckets = b;
@@ -772,7 +772,7 @@ int fcgi_listen(const char *path, int backlog)
 				if (*cur == ',') n++;
 				cur++;
 			}
-			allowed_clients = malloc(sizeof(sa_t) * (n+2));
+			allowed_clients = pmalloc(sizeof(sa_t) * (n+2));
 			n = 0;
 			cur = ip;
 			while (cur) {
@@ -832,7 +832,7 @@ void fcgi_set_allowed_clients(char *ip)
 			cur++;
 		}
 		if (allowed_clients) free(allowed_clients);
-		allowed_clients = malloc(sizeof(sa_t) * (n+2));
+		allowed_clients = pmalloc(sizeof(sa_t) * (n+2));
 		n = 0;
 		cur = ip;
 		while (cur) {
@@ -869,7 +869,7 @@ static void fcgi_hook_dummy(void) {
 
 fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(void), void(*on_read)(void), void(*on_close)(void))
 {
-	fcgi_request *req = calloc(1, sizeof(fcgi_request));
+	fcgi_request *req = pcalloc(1, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
 	req->fd = -1;
 	req->id = -1;
