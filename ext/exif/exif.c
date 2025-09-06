@@ -4426,6 +4426,8 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 			}
 			efree(data);
 			break;
+		} else if (box.size < 8) {
+			break;
 		}
 	}
 
