@@ -253,6 +253,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeInterface___unseri
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeInterface_isWeekend, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_DateTimeInterface_isWeekday arginfo_class_DateTimeInterface_isWeekend
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, datetime, IS_STRING, 0, "\"now\"")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
@@ -342,6 +347,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTime_diff arginfo_class_DateTimeInterface_diff
 
+#define arginfo_class_DateTime_isWeekend arginfo_class_DateTimeInterface_isWeekend
+
+#define arginfo_class_DateTime_isWeekday arginfo_class_DateTimeInterface_isWeekend
+
 #define arginfo_class_DateTimeImmutable___construct arginfo_class_DateTime___construct
 
 #define arginfo_class_DateTimeImmutable___serialize arginfo_timezone_abbreviations_list
@@ -422,6 +431,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_createFromInterface, 0, 1, DateTimeImmutable, 0)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_DateTimeImmutable_isWeekend arginfo_class_DateTimeInterface_isWeekend
+
+#define arginfo_class_DateTimeImmutable_isWeekday arginfo_class_DateTimeInterface_isWeekend
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeZone___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, timezone, IS_STRING, 0)
@@ -576,6 +589,8 @@ ZEND_METHOD(DateTime, modify);
 ZEND_METHOD(DateTime, sub);
 ZEND_METHOD(DateTime, getMicrosecond);
 ZEND_METHOD(DateTime, setMicrosecond);
+ZEND_METHOD(DateTime, isWeekend);
+ZEND_METHOD(DateTime, isWeekday);
 ZEND_METHOD(DateTimeImmutable, __construct);
 ZEND_METHOD(DateTimeImmutable, __serialize);
 ZEND_METHOD(DateTimeImmutable, __unserialize);
@@ -593,6 +608,8 @@ ZEND_METHOD(DateTimeImmutable, setTimestamp);
 ZEND_METHOD(DateTimeImmutable, setMicrosecond);
 ZEND_METHOD(DateTimeImmutable, createFromMutable);
 ZEND_METHOD(DateTimeImmutable, createFromInterface);
+ZEND_METHOD(DateTimeImmutable, isWeekend);
+ZEND_METHOD(DateTimeImmutable, isWeekday);
 ZEND_METHOD(DateTimeZone, __construct);
 ZEND_METHOD(DateTimeZone, __serialize);
 ZEND_METHOD(DateTimeZone, __unserialize);
@@ -678,6 +695,8 @@ static const zend_function_entry class_DateTimeInterface_methods[] = {
 	ZEND_RAW_FENTRY("__wakeup", NULL, arginfo_class_DateTimeInterface___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("__serialize", NULL, arginfo_class_DateTimeInterface___serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("__unserialize", NULL, arginfo_class_DateTimeInterface___unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("isWeekend", NULL, arginfo_class_DateTimeInterface_isWeekend, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("isWeekday", NULL, arginfo_class_DateTimeInterface_isWeekday, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -707,6 +726,8 @@ static const zend_function_entry class_DateTime_methods[] = {
 	ZEND_ME(DateTime, setMicrosecond, arginfo_class_DateTime_setMicrosecond, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("getTimestamp", zif_date_timestamp_get, arginfo_class_DateTime_getTimestamp, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("diff", zif_date_diff, arginfo_class_DateTime_diff, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(DateTime, isWeekend, arginfo_class_DateTime_isWeekend, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTime, isWeekday, arginfo_class_DateTime_isWeekday, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -736,6 +757,8 @@ static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_ME(DateTimeImmutable, setMicrosecond, arginfo_class_DateTimeImmutable_setMicrosecond, ZEND_ACC_PUBLIC|ZEND_ACC_NODISCARD)
 	ZEND_ME(DateTimeImmutable, createFromMutable, arginfo_class_DateTimeImmutable_createFromMutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DateTimeImmutable, createFromInterface, arginfo_class_DateTimeImmutable_createFromInterface, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DateTimeImmutable, isWeekend, arginfo_class_DateTimeImmutable_isWeekend, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeImmutable, isWeekday, arginfo_class_DateTimeImmutable_isWeekday, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

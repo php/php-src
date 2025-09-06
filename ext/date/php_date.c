@@ -2809,6 +2809,62 @@ PHP_METHOD(DateTimeImmutable, createFromTimestamp)
 }
 /* }}} */
 
+/* {{{ Checks if the given date is a weekend (Saturday or Sunday) */
+PHP_METHOD(DateTime, isWeekend)
+{
+	php_date_obj *dateobj;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(ZEND_THIS);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(ZEND_THIS));
+
+	RETURN_BOOL(timelib_is_weekend(dateobj->time));
+}
+/* }}} */
+
+/* {{{ Checks if the given date is a weekday (Monday to Friday) */
+PHP_METHOD(DateTime, isWeekday)
+{
+	php_date_obj *dateobj;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(ZEND_THIS);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(ZEND_THIS));
+
+	RETURN_BOOL(timelib_is_weekday(dateobj->time));
+}
+/* }}} */
+
+/* {{{ Checks if the given date is a weekend (Saturday or Sunday) */
+PHP_METHOD(DateTimeImmutable, isWeekend)
+{
+	php_date_obj *dateobj;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(ZEND_THIS);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(ZEND_THIS));
+
+	RETURN_BOOL(timelib_is_weekend(dateobj->time));
+}
+/* }}} */
+
+/* {{{ Checks if the given date is a weekday (Monday to Friday) */
+PHP_METHOD(DateTimeImmutable, isWeekday)
+{
+	php_date_obj *dateobj;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(ZEND_THIS);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(ZEND_THIS));
+
+	RETURN_BOOL(timelib_is_weekday(dateobj->time));
+}
+/* }}} */
+
 static bool php_date_initialize_from_hash(php_date_obj **dateobj, const HashTable *myht)
 {
 	zval             *z_date;
