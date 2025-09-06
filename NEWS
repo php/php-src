@@ -21,6 +21,11 @@ PHP                                                                        NEWS
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
     (ilutov)
 
+- Intl:
+  . Added grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
+    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
+    grapheme_levenshtein() functions add $locale parameter (Yuya Hamada).
+
 - EXIF:
   . Added support to retrieve Exif from HEIF file. (Benstone Zhang)
 
@@ -188,9 +193,6 @@ PHP                                                                        NEWS
     Moreover, some ext/date exceptions have been wrapped inside a
     IntlException now. (Girgias)
   . The intl.error_level INI setting has been deprecated. (Girgias)
-  . Added grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
-    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
-    grapheme_levenshtein() functions add $locale parameter (Yuya Hamada).
 
 - MySQLi:
   . The mysqli_execute() alias function has been deprecated. (timwolla)
