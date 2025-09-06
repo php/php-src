@@ -550,15 +550,11 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
 	URI_ASSERT_INITIALIZATION(new_internal_uri);
 
-	zval errors;
-	ZVAL_UNDEF(&errors);
 	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_write(new_internal_uri, &zv, NULL) == FAILURE)) {
-		zval_ptr_dtor(&errors);
 		zend_object_release(new_object);
 		RETURN_THROWS();
 	}
 
-	ZEND_ASSERT(Z_ISUNDEF(errors));
 	RETVAL_OBJ(new_object);
 }
 
