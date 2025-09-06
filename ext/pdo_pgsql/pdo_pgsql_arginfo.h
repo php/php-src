@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 225cbb077d441f93b7c6bdb9826ab3e8f634b79d */
+ * Stub hash: 0ea21010467d661416f0858f2bda095583ea3a36 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Pgsql_escapeIdentifier, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -105,32 +105,64 @@ static zend_class_entry *register_class_Pdo_Pgsql(zend_class_entry *class_entry_
 	zval const_TRANSACTION_IDLE_value;
 	ZVAL_LONG(&const_TRANSACTION_IDLE_value, PGSQL_TRANSACTION_IDLE);
 	zend_string *const_TRANSACTION_IDLE_name = zend_string_init_interned("TRANSACTION_IDLE", sizeof("TRANSACTION_IDLE") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_IDLE_name, &const_TRANSACTION_IDLE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_TRANSACTION_IDLE = zend_declare_typed_class_constant(class_entry, const_TRANSACTION_IDLE_name, &const_TRANSACTION_IDLE_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TRANSACTION_IDLE_name);
 
 	zval const_TRANSACTION_ACTIVE_value;
 	ZVAL_LONG(&const_TRANSACTION_ACTIVE_value, PGSQL_TRANSACTION_ACTIVE);
 	zend_string *const_TRANSACTION_ACTIVE_name = zend_string_init_interned("TRANSACTION_ACTIVE", sizeof("TRANSACTION_ACTIVE") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_ACTIVE_name, &const_TRANSACTION_ACTIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_TRANSACTION_ACTIVE = zend_declare_typed_class_constant(class_entry, const_TRANSACTION_ACTIVE_name, &const_TRANSACTION_ACTIVE_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TRANSACTION_ACTIVE_name);
 
 	zval const_TRANSACTION_INTRANS_value;
 	ZVAL_LONG(&const_TRANSACTION_INTRANS_value, PGSQL_TRANSACTION_INTRANS);
 	zend_string *const_TRANSACTION_INTRANS_name = zend_string_init_interned("TRANSACTION_INTRANS", sizeof("TRANSACTION_INTRANS") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_INTRANS_name, &const_TRANSACTION_INTRANS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_TRANSACTION_INTRANS = zend_declare_typed_class_constant(class_entry, const_TRANSACTION_INTRANS_name, &const_TRANSACTION_INTRANS_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TRANSACTION_INTRANS_name);
 
 	zval const_TRANSACTION_INERROR_value;
 	ZVAL_LONG(&const_TRANSACTION_INERROR_value, PGSQL_TRANSACTION_INERROR);
 	zend_string *const_TRANSACTION_INERROR_name = zend_string_init_interned("TRANSACTION_INERROR", sizeof("TRANSACTION_INERROR") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_INERROR_name, &const_TRANSACTION_INERROR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_TRANSACTION_INERROR = zend_declare_typed_class_constant(class_entry, const_TRANSACTION_INERROR_name, &const_TRANSACTION_INERROR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TRANSACTION_INERROR_name);
 
 	zval const_TRANSACTION_UNKNOWN_value;
 	ZVAL_LONG(&const_TRANSACTION_UNKNOWN_value, PGSQL_TRANSACTION_UNKNOWN);
 	zend_string *const_TRANSACTION_UNKNOWN_name = zend_string_init_interned("TRANSACTION_UNKNOWN", sizeof("TRANSACTION_UNKNOWN") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_TRANSACTION_UNKNOWN_name, &const_TRANSACTION_UNKNOWN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_TRANSACTION_UNKNOWN = zend_declare_typed_class_constant(class_entry, const_TRANSACTION_UNKNOWN_name, &const_TRANSACTION_UNKNOWN_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TRANSACTION_UNKNOWN_name);
+
+
+	zend_attribute *attribute_Deprecated_const_TRANSACTION_IDLE_0 = zend_add_class_constant_attribute(class_entry, const_TRANSACTION_IDLE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_TRANSACTION_IDLE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_TRANSACTION_IDLE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_TRANSACTION_IDLE_0_arg1_str = zend_string_init("as it has no effect", strlen("as it has no effect"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_TRANSACTION_IDLE_0->args[1].value, attribute_Deprecated_const_TRANSACTION_IDLE_0_arg1_str);
+	attribute_Deprecated_const_TRANSACTION_IDLE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_TRANSACTION_ACTIVE_0 = zend_add_class_constant_attribute(class_entry, const_TRANSACTION_ACTIVE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_TRANSACTION_ACTIVE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_TRANSACTION_ACTIVE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_TRANSACTION_ACTIVE_0->args[1].value, attribute_Deprecated_const_TRANSACTION_IDLE_0_arg1_str);
+	attribute_Deprecated_const_TRANSACTION_ACTIVE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_TRANSACTION_INTRANS_0 = zend_add_class_constant_attribute(class_entry, const_TRANSACTION_INTRANS, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_TRANSACTION_INTRANS_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_TRANSACTION_INTRANS_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_TRANSACTION_INTRANS_0->args[1].value, attribute_Deprecated_const_TRANSACTION_IDLE_0_arg1_str);
+	attribute_Deprecated_const_TRANSACTION_INTRANS_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_TRANSACTION_INERROR_0 = zend_add_class_constant_attribute(class_entry, const_TRANSACTION_INERROR, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_TRANSACTION_INERROR_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_TRANSACTION_INERROR_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_TRANSACTION_INERROR_0->args[1].value, attribute_Deprecated_const_TRANSACTION_IDLE_0_arg1_str);
+	attribute_Deprecated_const_TRANSACTION_INERROR_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_TRANSACTION_UNKNOWN_0 = zend_add_class_constant_attribute(class_entry, const_TRANSACTION_UNKNOWN, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_TRANSACTION_UNKNOWN_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_TRANSACTION_UNKNOWN_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_TRANSACTION_UNKNOWN_0->args[1].value, attribute_Deprecated_const_TRANSACTION_IDLE_0_arg1_str);
+	attribute_Deprecated_const_TRANSACTION_UNKNOWN_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
