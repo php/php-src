@@ -323,6 +323,10 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 	uri_object_t *uri_object;
 	if (should_update_this_object) {
 		uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+		if (uri_object->internal.uri != NULL) {
+			zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+			RETURN_THROWS();
+		}
 	} else {
 		if (EX(func)->common.fn_flags & ZEND_ACC_STATIC) {
 			object_init_ex(return_value, Z_CE_P(ZEND_THIS));
@@ -842,7 +846,12 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
-	internal_uri->parser->free(internal_uri->uri);
+	if (internal_uri->uri != NULL) {
+		/* Intentionally throw two exceptions for proper chaining. */
+		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		RETURN_THROWS();
+	}
 	internal_uri->uri = internal_uri->parser->parse(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
 	if (internal_uri->uri == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
