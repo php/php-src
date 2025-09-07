@@ -2266,7 +2266,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 		zend_throw_exception_ex(phar_ce_PharException, 0, "unable to create temporary file");
 		return NULL;
 	}
-	phar->fname = source->fname;
+	phar->fname = estrndup(source->fname, source->fname_len);
 	phar->fname_len = source->fname_len;
 	phar->is_temporary_alias = source->is_temporary_alias;
 	phar->alias = source->alias;
