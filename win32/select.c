@@ -71,7 +71,6 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 
 			if (getsockopt((SOCKET)i, SOL_SOCKET, SO_TYPE, (char*)&_type, &_len) == 0 || WSAGetLastError() != WSAENOTSOCK) {
 				/* socket */
-				handles[n_handles] = INVALID_HANDLE_VALUE;
 				if (SAFE_FD_ISSET(i, rfds)) {
 					FD_SET((uint32_t)i, &sock_read);
 				}
