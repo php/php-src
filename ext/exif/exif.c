@@ -4507,7 +4507,7 @@ static bool exif_scan_FILE_header(image_info_type *ImageInfo)
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");
 				return false;
 			}
-		} else if ((ImageInfo->FileSize > 12) &&
+		} else if ((ImageInfo->FileSize > 16) &&
 			   (!memcmp(file_header + 4, "ftyp", 4)) &&
 			   (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(file_header + 8), 4) == 4) &&
 			   ((!memcmp(file_header + 8, "heic", 4)) || (!memcmp(file_header + 8, "heix", 4)) || (!memcmp(file_header + 8, "mif1", 4)))) {
