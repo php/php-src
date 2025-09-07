@@ -832,7 +832,7 @@ PHP_FUNCTION(imagefilledellipse)
 		RETURN_THROWS();
 	}
 
-    if (w < 0 || w > INT_MAX) {
+    if (w < 0 || ZEND_LONG_INT_OVFL(w)) {
         zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
         RETURN_THROWS();
     }
