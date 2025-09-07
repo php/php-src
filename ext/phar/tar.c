@@ -1170,6 +1170,7 @@ nostub:
 	}
 
 	zend_hash_apply_with_argument(&phar->manifest, phar_tar_writeheaders, (void *) &pass);
+	/* TODO: memory leak and incorrect continuation if phar_tar_writeheaders fails? */
 
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
@@ -1191,6 +1192,12 @@ nostub:
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
 			spprintf(error, 0, "phar error: unable to create temporary file");
+
+			efree(signature);
+			if (must_close_old_file) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
 			return;
 		}
 #ifdef WORDS_BIGENDIAN
