@@ -233,9 +233,10 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
 	if (errors) {
 		zval_ptr_dtor(errors);
-		ZVAL_COPY(errors, &err);
+		ZVAL_COPY_VALUE(errors, &err);
+	} else {
+		zval_ptr_dtor(&err);
 	}
-	zval_ptr_dtor(&err);
 }
 
 static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, size_t length, void *ctx)
@@ -572,9 +573,10 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 		}
 		if (errors != NULL) {
 			zval_ptr_dtor(errors);
-			ZVAL_COPY(errors, &err);
+			ZVAL_COPY_VALUE(errors, &err);
+		} else {
+			zval_ptr_dtor(&err);
 		}
-		zval_ptr_dtor(&err);
 	}
 
 	return url;
