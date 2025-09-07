@@ -837,6 +837,11 @@ PHP_FUNCTION(imagefilledellipse)
 		Z_PARAM_LONG(color)
 	ZEND_PARSE_PARAMETERS_END();
 
+    if (w < 0 || ZEND_LONG_INT_OVFL(w)) {
+        zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
+        RETURN_THROWS();
+    }
+
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	gdImageFilledEllipse(im, cx, cy, w, h, color);
