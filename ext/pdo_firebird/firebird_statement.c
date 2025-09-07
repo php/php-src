@@ -87,7 +87,6 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 	struct tm t;
 	ISC_TIME time;
 	char timeBuf[80] = {0};
-	char timeTzBuf[124] = {0};
 	if (fb_decode_time_tz(S->H->isc_status, timeTz, &hours, &minutes, &seconds, &fractions, sizeof(timeZoneBuffer), timeZoneBuffer)) {
 		return 1;
 	}
@@ -100,8 +99,8 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 		return 1;
 	}
 
-	size_t time_tz_len = sprintf(timeTzBuf, "%s %s", timeBuf, timeZoneBuffer);
-	ZVAL_STRINGL(result, timeTzBuf, time_tz_len);
+	zend_string *time_tz_str = zend_strpprintf(0, "%s %s", timeBuf, timeZoneBuffer);
+	ZVAL_NEW_STR(result, time_tz_str);
 	return 0;
 }
 
@@ -115,7 +114,6 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 	struct tm t;
 	ISC_TIMESTAMP ts;
 	char timestampBuf[80] = {0};
-	char timestampTzBuf[124] = {0};
 	if (fb_decode_timestamp_tz(S->H->isc_status, timestampTz, &year, &month, &day, &hours, &minutes, &seconds, &fractions, sizeof(timeZoneBuffer), timeZoneBuffer)) {
 		return 1;
 	}
@@ -130,8 +128,8 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 		return 1;
 	}
 
-	size_t timestamp_tz_len = sprintf(timestampTzBuf, "%s %s", timestampBuf, timeZoneBuffer);
-	ZVAL_STRINGL(result, timestampTzBuf, timestamp_tz_len);
+	zend_string *timestamp_tz_str = zend_strpprintf(0, "%s %s", timestampBuf, timeZoneBuffer);
+	ZVAL_NEW_STR(result, timestamp_tz_str);
 	return 0;
 }
 

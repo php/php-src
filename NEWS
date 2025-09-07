@@ -9,6 +9,14 @@ PHP                                                                        NEWS
     expression). (timwolla)
   . Fixed bug GH-19613 (Stale array iterator pointer). (ilutov)
   . Fixed bug GH-19679 (zend_ssa_range_widening may fail to converge). (Arnaud)
+  . Using null as an array offset or when calling array_key_exists() is now
+    deprecated. (alexandre-daubois)
+  . Fixed bug GH-19681 (PHP_EXPAND_PATH broken with bash 5.3.0). (Remi)
+  . Marks the stack as non-executable on Haiku. (David Carlier)
+
+- CLI:
+  . Fixed bug GH-19461 (Improve error message on listening error with IPv6
+    address). (alexandre-daubois)
 
 - Date:
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
@@ -33,12 +41,23 @@ PHP                                                                        NEWS
 - PDO:
   . Driver specific methods in the PDO class are now deprecated. (Arnaud)
 
+- Reflection:
+  . Fix GH-19691 (getModifierNames() not reporting asymmetric visibility).
+    (DanielEScherzer)
+
 - Session:
   . Fix RC violation of session SID constant deprecation attribute. (ilutov)
 
 - Standard:
   . Fix GH-19610 (Deprecation warnings in functions taking as argument).
     (Girgias)
+  . Fixed bug GH-19577 (Avoid integer overflow when using a small offset
+    and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
+
+- Streams:
+  . Fixed bug GH-14506 (Closing a userspace stream inside a userspace handler
+    causes heap corruption). (nielsdos)
+  . Avoid double conversion to string in php_userstreamop_readdir(). (nielsdos)
 
 - URI:
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
@@ -48,6 +67,8 @@ PHP                                                                        NEWS
     the Uri\WhatWg\Url parser. (timwolla)
   . Reject out-of-range ports when using the Uri\Rfc3986\Uri parser.
     (timwolla)
+  . Return null instead of 0 for Uri\Rfc3986\Uri::getPort() when the
+    URI contains an empty port. (timwolla)
   . Clean up naming of internal API. (timwolla)
 
 28 Aug 2025, PHP 8.5.0beta2

@@ -131,6 +131,87 @@ OUTPUT;
 
 $EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FLOAT_OFFSETS) . '$/s';
 
+const EXPECTED_OUTPUT_NULL_OFFSETS = <<<OUTPUT
+Read before write:
+
+Warning: Trying to access array offset on null in %s on line %d
+NULL
+Write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Read:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+int(5)
+Read-Write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+isset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(true)
+empty():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(false)
+null coalesce:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+int(25)
+Reference to dimension:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Value of reference:
+int(25)
+Value of container dimension after write to reference (should be int(100) if successful):
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+int(100)
+unset():
+Nested read:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Warning: Undefined array key "" in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line %d
+NULL
+Nested write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Nested Read-Write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Nested isset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Nested empty():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(false)
+Nested null coalesce:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+int(30)
+Nested unset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+OUTPUT;
+
+$EXPECTED_OUTPUT_NULL_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_NULL_OFFSETS) . '$/s';
+
 const EXPECTED_OUTPUT_INVALID_OFFSETS = <<<OUTPUT
 Read before write:
 
@@ -272,6 +353,7 @@ foreach ($offsets as $dimension) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_NULL_OFFSETS_REGEX, $varOutput)
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_null_container_{$failuresNb}.txt", $varOutput);
@@ -299,6 +381,7 @@ foreach ($offsets as $offset) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_NULL_OFFSETS_REGEX, $varOutput)
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_null_container_{$failuresNb}.txt", $varOutput);

@@ -501,8 +501,17 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
-			offset_key = ZSTR_EMPTY_ALLOC();
-			goto str_index;
+			retval = zend_hash_find(ht, ZSTR_EMPTY_ALLOC());
+			if (!retval) {
+				ZVAL_NULL(result);
+			} else {
+				ZVAL_COPY_DEREF(result, retval);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (!retval) {
+				zend_error(E_WARNING, "Undefined array key \"\"");
+			}
+			return;
 		case IS_DOUBLE:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			if (!zend_is_long_compatible(Z_DVAL_P(dim), hval)) {
@@ -643,8 +652,16 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
-			offset_key = ZSTR_EMPTY_ALLOC();
-			goto str_index;
+			retval = zend_hash_find(ht, ZSTR_EMPTY_ALLOC());
+			if (!retval) {
+				ZVAL_NULL(result);
+			} else {
+				ZVAL_COPY_DEREF(result, retval);
+			}
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			return;
 		case IS_DOUBLE:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			if (!zend_is_long_compatible(Z_DVAL_P(dim), hval)) {
@@ -770,9 +787,17 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 				return 0;
 			}
 			ZEND_FALLTHROUGH;
-		case IS_NULL:
-			offset_key = ZSTR_EMPTY_ALLOC();
-			goto str_index;
+		case IS_NULL: {
+			int result = 0;
+			retval = zend_hash_find(ht, ZSTR_EMPTY_ALLOC());
+			if (retval) {
+				result = Z_TYPE_P(retval) > IS_NULL;
+			}
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			return result;
+		}
 		case IS_DOUBLE:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			if (!zend_is_long_compatible(Z_DVAL_P(dim), hval)) {
@@ -879,6 +904,32 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			execute_data = EG(current_execute_data);
+			opline = EX(opline);
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					if (EG(exception)) {
+						ZVAL_UNDEF(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
+				}
+				return NULL;
+			}
+			if (EG(exception)) {
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					ZVAL_UNDEF(EX_VAR(opline->result.var));
+				}
+				return NULL;
+			}
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:
@@ -1012,6 +1063,36 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			execute_data = EG(current_execute_data);
+			opline = EX(opline);
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					if (EG(exception)) {
+						ZVAL_UNDEF(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
+				}
+				if (opline->opcode == ZEND_ASSIGN_DIM
+				 && ((opline+1)->op1_type & (IS_VAR | IS_TMP_VAR))) {
+					zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				}
+				return NULL;
+			}
+			if (EG(exception)) {
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					ZVAL_UNDEF(EX_VAR(opline->result.var));
+				}
+				return NULL;
+			}
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:

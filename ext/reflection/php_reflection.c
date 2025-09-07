@@ -1713,6 +1713,15 @@ ZEND_METHOD(Reflection, getModifierNames)
 			add_next_index_stringl(return_value, "protected", sizeof("protected")-1);
 			break;
 	}
+	/* These are also mutually exclusive */
+	switch (modifiers & ZEND_ACC_PPP_SET_MASK) {
+		case ZEND_ACC_PROTECTED_SET:
+			add_next_index_stringl(return_value, "protected(set)", sizeof("protected(set)")-1);
+			break;
+		case ZEND_ACC_PRIVATE_SET:
+			add_next_index_stringl(return_value, "private(set)", sizeof("private(set)")-1);
+			break;
+	}
 
 	if (modifiers & ZEND_ACC_STATIC) {
 		add_next_index_str(return_value, ZSTR_KNOWN(ZEND_STR_STATIC));

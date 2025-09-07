@@ -2006,6 +2006,27 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_consta
 	zend_string_release(message_suffix);
 }
 
+ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
+	zend_class_entry *trait,
+	const zend_string *used_by
+) {
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (get_deprecation_suffix_from_attribute(trait->attributes, trait, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = trait->type == ZEND_INTERNAL_CLASS ? E_DEPRECATED : E_USER_DEPRECATED;
+
+	zend_error_unchecked(code, "Trait %s used by %s is deprecated%S",
+		ZSTR_VAL(trait->name),
+		ZSTR_VAL(used_by),
+		message_suffix
+	);
+
+	zend_string_release(message_suffix);
+}
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void)
 {
 	zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
@@ -2629,6 +2650,21 @@ static zend_never_inline uint8_t slow_index_convert(HashTable *ht, const zval *d
 			ZEND_FALLTHROUGH;
 		}
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				zend_array_destroy(ht);
+				return IS_NULL;
+			}
+
+			if (EG(exception)) {
+				return IS_NULL;
+			}
+
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
 		case IS_DOUBLE:
@@ -2699,6 +2735,21 @@ static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval 
 			ZEND_FALLTHROUGH;
 		}
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
+				return IS_NULL;
+			}
+			if (EG(exception)) {
+				return IS_NULL;
+			}
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
 		case IS_DOUBLE:
@@ -3192,7 +3243,22 @@ static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable 
 num_idx:
 		return zend_hash_index_find(ht, hval);
 	} else if (Z_TYPE_P(offset) == IS_NULL) {
-str_idx:
+null_undef_idx:
+		/* The array may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_TRY_ADDREF(ht);
+
+		zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			zend_array_destroy(ht);
+			return NULL;
+		}
+
+		if (EG(exception)) {
+			return NULL;
+		}
+
 		return zend_hash_find_known_hash(ht, ZSTR_EMPTY_ALLOC());
 	} else if (Z_TYPE_P(offset) == IS_FALSE) {
 		hval = 0;
@@ -3206,7 +3272,7 @@ str_idx:
 		goto num_idx;
 	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {
 		ZVAL_UNDEFINED_OP2();
-		goto str_idx;
+		goto null_undef_idx;
 	} else {
 		zend_illegal_array_offset_isset(offset);
 		return NULL;
@@ -3327,6 +3393,9 @@ num_key:
 	} else if (Z_TYPE_P(key) <= IS_NULL) {
 		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP1();
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(key) == IS_NULL);
+			zend_error(E_DEPRECATED, "Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead");
 		}
 		str = ZSTR_EMPTY_ALLOC();
 		goto str_key;

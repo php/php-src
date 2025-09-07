@@ -27,7 +27,6 @@ extern zend_class_entry *uri_invalid_uri_exception_ce;
 extern zend_class_entry *uri_whatwg_invalid_url_exception_ce;
 extern zend_class_entry *uri_whatwg_url_validation_error_type_ce;
 extern zend_class_entry *uri_whatwg_url_validation_error_ce;
-extern zend_object *uri_clone_obj_handler(zend_object *object);
 
 typedef enum {
 	URI_RECOMPOSITION_RAW_ASCII,

@@ -109,7 +109,9 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
                 }											\
         } while (0)
 #else
-#define PHP_ETH_PROTO_CHECK(protocol, family) (0)
+#define PHP_ETH_PROTO_CHECK(protocol, family)								\
+	(void)protocol;											\
+	(void)family
 #endif
 
 static PHP_GINIT_FUNCTION(sockets);

@@ -30,7 +30,7 @@
 #include "uri_parser_rfc3986.h"
 #include "uri_parser_php_parse_url.h"
 #include "php_uri_arginfo.h"
-#include "uriparser/src/UriConfig.h"
+#include "uriparser/UriBase.h"
 
 zend_class_entry *uri_rfc3986_uri_ce;
 zend_object_handlers uri_rfc3986_uri_object_handlers;
@@ -42,8 +42,6 @@ zend_class_entry *uri_invalid_uri_exception_ce;
 zend_class_entry *uri_whatwg_invalid_url_exception_ce;
 zend_class_entry *uri_whatwg_url_validation_error_type_ce;
 zend_class_entry *uri_whatwg_url_validation_error_ce;
-
-#define URIPARSER_VERSION PACKAGE_VERSION
 
 static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_REQUIRED("lexbor")
@@ -979,7 +977,7 @@ static void uri_free_obj_handler(zend_object *object)
 	zend_object_std_dtor(&uri_object->std);
 }
 
-zend_object *uri_clone_obj_handler(zend_object *object)
+static zend_object *uri_clone_obj_handler(zend_object *object)
 {
 	uri_object_t *uri_object = uri_object_from_obj(object);
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
@@ -1064,8 +1062,13 @@ static PHP_MINIT_FUNCTION(uri)
 static PHP_MINFO_FUNCTION(uri)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "uri support", "active");
-	php_info_print_table_row(2, "uriparser library version", URIPARSER_VERSION);
+	php_info_print_table_row(2, "URI support", "active");
+#ifdef URI_STATIC_BUILD
+	php_info_print_table_row(2, "uriparser bundled version", URI_VER_ANSI);
+#else
+	php_info_print_table_row(2, "uriparser compiled version", URI_VER_ANSI);
+	php_info_print_table_row(2, "uriparser loaded version", uriBaseRuntimeVersionA());
+#endif
 	php_info_print_table_end();
 }
 
