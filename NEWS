@@ -41,6 +41,10 @@ PHP                                                                        NEWS
 - PDO:
   . Driver specific methods in the PDO class are now deprecated. (Arnaud)
 
+- PDO_SQLITE:
+  . Add PDO\Sqlite::ATTR_TRANSACTION_MODE connection attribute.
+    (Samuel Štancl)
+
 - Reflection:
   . Fix GH-19691 (getModifierNames() not reporting asymmetric visibility).
     (DanielEScherzer)

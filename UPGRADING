@@ -266,6 +266,11 @@ PHP 8.5 UPGRADE NOTES
   . Added class constants Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT,
     Pdo_Sqlite::EXPLAIN_MODE_PREPARED, Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN,
     Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
+  . Added PDO\Sqlite::ATTR_TRANSACTION_MODE connection attribute with
+    possible values PDO\Sqlite::TRANSACTION_MODE_DEFERRED,
+    PDO\Sqlite::TRANSACTION_MODE_IMMEDIATE,
+    and PDO\Sqlite::TRANSACTION_MODE_EXCLUSIVE, allowing to configure
+    the transaction mode to use when calling beginTransaction().
 
 - Session:
   . session_set_cookie_params(), session_get_cookie_params(), and session_start()
