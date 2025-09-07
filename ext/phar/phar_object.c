@@ -2281,6 +2281,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 		}
 
 		if (FAILURE == phar_copy_file_contents(&newentry, phar->fp)) {
+			phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 			zend_hash_destroy(&(phar->manifest));
 			php_stream_close(phar->fp);
 			efree(phar);
@@ -2318,6 +2319,7 @@ no_copy:
 		return ret;
 	} else {
 		if(phar != NULL) {
+			phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 			zend_hash_destroy(&(phar->manifest));
 			zend_hash_destroy(&(phar->mounted_dirs));
 			zend_hash_destroy(&(phar->virtual_dirs));
