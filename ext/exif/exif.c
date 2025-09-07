@@ -4393,7 +4393,7 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 	bool ret = false;
 
 	pos.size = 0;
-	for (offset = php_ifd_get32u(buf, 1); ImageInfo->FileSize > offset + 16; offset += box.size) {
+	for (offset = php_ifd_get32u(buf, 1); ImageInfo->FileSize - 16 > offset; offset += box.size) {
 		if ((php_stream_seek(ImageInfo->infile, offset, SEEK_SET) < 0) ||
 			(exif_read_from_stream_file_looped(ImageInfo->infile, (char*)buf, 16) != 16)) {
 			break;
@@ -4431,6 +4431,9 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 				}
 			}
 			efree(data);
+			break;
+		}
+		if (offset + box.size < offset) {
 			break;
 		}
 	}
