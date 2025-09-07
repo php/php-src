@@ -541,21 +541,25 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 		ZVAL_STR(&zv, value);
 	}
 
+	zend_object *old_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	zend_object *new_object = uri_clone_obj_handler(Z_OBJ_P(ZEND_THIS));
-	ZEND_ASSERT(new_object != NULL);
+	zend_object *new_object = old_object->handlers->clone_obj(old_object);
+	if (new_object == NULL) {
+		RETURN_THROWS();
+	}
+
+	/* Assign the object early. The engine will take care of destruction in
+	 * case of an exception being thrown. */
+	RETVAL_OBJ(new_object);
 
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
 	URI_ASSERT_INITIALIZATION(new_internal_uri);
 
 	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_write(new_internal_uri, &zv, NULL) == FAILURE)) {
-		zend_object_release(new_object);
 		RETURN_THROWS();
 	}
-
-	RETVAL_OBJ(new_object);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getUsername)

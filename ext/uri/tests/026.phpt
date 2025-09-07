@@ -42,7 +42,7 @@ try {
 }
 
 try {
-    $uri3->withHost("t:s/t.com");     // t:s/t.com
+    $uri3->withHost("t:s/t.com");
 } catch (Uri\InvalidUriException $e) {
     echo $e->getMessage() . "\n";
 }
