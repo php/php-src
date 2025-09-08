@@ -94,7 +94,7 @@ PHP_FUNCTION(grapheme_strpos)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
-		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -148,7 +148,7 @@ PHP_FUNCTION(grapheme_stripos)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
-		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -214,7 +214,7 @@ PHP_FUNCTION(grapheme_strrpos)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
-		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -273,7 +273,7 @@ PHP_FUNCTION(grapheme_strripos)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(loffset)
-		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
@@ -349,7 +349,7 @@ PHP_FUNCTION(grapheme_substr)
 		Z_PARAM_LONG(lstart)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(length, no_length)
-		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (lstart < INT32_MIN || lstart > INT32_MAX) {
@@ -554,7 +554,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(part)
-		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ( !f_ignore_case ) {
@@ -936,7 +936,7 @@ PHP_FUNCTION(grapheme_levenshtein)
 		Z_PARAM_LONG(cost_ins)
 		Z_PARAM_LONG(cost_rep)
 		Z_PARAM_LONG(cost_del)
-		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (cost_ins <= 0 || cost_ins > UINT_MAX / 4) {
