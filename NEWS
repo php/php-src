@@ -61,6 +61,7 @@ PHP                                                                        NEWS
 - Streams:
   . Remove incorrect call to zval_ptr_dtor() in user_wrapper_metadata().
     (nielsdos)
+  . Fix OSS-Fuzz #385993744. (nielsdos)
 
 - Zip:
   . Fix memory leak in zip when encountering empty glob result. (nielsdos)
