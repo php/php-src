@@ -22,11 +22,6 @@ PHP                                                                        NEWS
   . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
     (ilutov)
 
-- Intl:
-  . Added grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
-    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
-    grapheme_levenshtein() functions add $locale parameter (Yuya Hamada).
-
 - EXIF:
   . Added support to retrieve Exif from HEIF file. (Benstone Zhang)
 
@@ -38,6 +33,9 @@ PHP                                                                        NEWS
     should emit warning for invalid filter usage). (alexandre-daubois)
 
 - Intl:
+  . Added grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
+    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
+    grapheme_levenshtein() functions add $locale parameter (Yuya Hamada).
   . Fixed bug GH-11952 (Fix locale strings canonicalization for IntlDateFormatter
     and NumberFormatter). (alexandre-daubois)
 
