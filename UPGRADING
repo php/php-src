@@ -499,6 +499,11 @@ PHP 8.5 UPGRADE NOTES
         PDO::sqliteCreateFunction() => Pdo\Sqlite::createFunction()
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_driver_specific_pdo_constants_and_methods
 
+- PDO_PGSQL: Constants related to transaction states have been deprecated:
+        PDO::PGSQL_TRANSACTION_IDLE, PDO::PGSQL_TRANSACTION_ACTIVE, PDO::PGSQL_TRANSACTION_INTRANS,
+        PDO::PGSQL_TRANSACTION_INERROR, PDO::PGSQL_TRANSACTION_UNKNOWN.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#extpdo_deprecations
+
 - Reflection:
   . The setAccessible() methods of various Reflection objects have been
     deprecated, as those no longer have an effect.
