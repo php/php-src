@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19579 (imagefilledellipse underflow on width argument).
     (David Carlier)
 
+- Intl:
+  . Fixed bug GH-11952 (Fix locale strings canonicalization for IntlDateFormatter
+    and NumberFormatter). (alexandre-daubois)
+
 - OpenSSL:
   . Fixed bug GH-19245 (Success error message on TLS stream accept failure).
     (Jakub Zelenka)
