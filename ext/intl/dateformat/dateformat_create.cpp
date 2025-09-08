@@ -22,6 +22,7 @@
 extern "C" {
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
+#include <unicode/uloc.h>
 
 #include "php_intl.h"
 #include "dateformat_create.h"
@@ -110,7 +111,12 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	if (locale_len == 0) {
 		locale_str = (char *) intl_locale_get_default();
 	}
-	locale = Locale::createFromName(locale_str);
+
+	char* canonicalized_locale = canonicalize_locale_string(locale_str);
+	const char* final_locale = canonicalized_locale ? canonicalized_locale : locale_str;
+	const char* stored_locale = canonicalized_locale ? canonicalized_locale : locale_str;
+
+	locale = Locale::createFromName(final_locale);
 	/* get*Name accessors being set does not preclude being bogus */
 	if (locale.isBogus() || ((locale_len == 1 && locale_str[0] != 'C') || (locale_len > 1 && strlen(locale.getISO3Language()) == 0))) {
         zend_argument_value_error(1, "\"%s\" is invalid", locale_str);
@@ -149,7 +155,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	}
 
 	DATE_FORMAT_OBJECT(dfo) = udat_open((UDateFormatStyle)time_type,
-			(UDateFormatStyle)date_type, locale_str, NULL, 0, svalue,
+			(UDateFormatStyle)date_type, final_locale, NULL, 0, svalue,
 			slength, &INTL_DATA_ERROR_CODE(dfo));
 
 	if (pattern_str && pattern_str_len > 0) {
@@ -182,9 +188,13 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	dfo->date_type			= date_type;
 	dfo->time_type			= time_type;
 	dfo->calendar			= calendar_type;
-	dfo->requested_locale	= estrdup(locale_str);
+	/* Store the canonicalized locale, or fallback to original if canonicalization failed */
+	dfo->requested_locale	= estrdup(stored_locale);
 
 error:
+	if (canonicalized_locale) {
+		efree(canonicalized_locale);
+	}
 	if (svalue) {
 		efree(svalue);
 	}

@@ -32,6 +32,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
 
+- Intl:
+  . Fixed bug GH-11952 (Fix locale strings canonicalization for IntlDateFormatter
+    and NumberFormatter). (alexandre-daubois)
+
 - Opcache:
   . Fixed bug GH-19493 (JIT variable not stored before YIELD). (Arnaud)
 
