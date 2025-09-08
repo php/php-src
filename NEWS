@@ -64,6 +64,7 @@ PHP                                                                        NEWS
   . Avoid double conversion to string in php_userstreamop_readdir(). (nielsdos)
 
 - URI:
+  . Added support for Uri\Rfc3986\Uri::with*() methods. (kocsismate)
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
   . Fixed memory management of the internal "parse_url" URI parser.
     (timwolla)

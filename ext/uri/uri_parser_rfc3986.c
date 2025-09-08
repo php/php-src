@@ -99,6 +99,13 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_reading(php_uri_parser_rfc398
 	}
 }
 
+ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_writing(uri_internal_t *internal_uri)
+{
+	php_uri_parser_rfc3986_uris *uriparser_uris = internal_uri->uri;
+
+	return &uriparser_uris->uri;
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
@@ -107,6 +114,25 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(con
 		ZVAL_STRINGL(retval, uriparser_uri->scheme.first, get_text_range_length(&uriparser_uri->scheme));
 	} else {
 		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result php_uri_parser_rfc3986_scheme_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+{
+	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	int result;
+
+	if (Z_TYPE_P(value) == IS_NULL) {
+		result = uriSetSchemeMmA(uriparser_uri, NULL, NULL, mm);
+	} else {
+		result = uriSetSchemeMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
+	}
+
+	if (result != URI_SUCCESS) {
+		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified scheme is malformed", 0);
+		return FAILURE;
 	}
 
 	return SUCCESS;
@@ -123,6 +149,29 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(const ur
 	}
 
 	return SUCCESS;
+}
+
+zend_result php_uri_parser_rfc3986_userinfo_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+{
+	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	int result;
+
+	if (Z_TYPE_P(value) == IS_NULL) {
+		result = uriSetUserInfoMmA(uriparser_uri, NULL, NULL, mm);
+	} else {
+		result = uriSetUserInfoMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
+	}
+
+	switch (result) {
+		case URI_SUCCESS:
+			return SUCCESS;
+		case URI_ERROR_SETUSERINFO_HOST_NOT_SET:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot set a userinfo without having a host", 0);
+			return FAILURE;
+		default:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified userinfo is malformed", 0);
+			return FAILURE;
+	}
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
@@ -190,6 +239,32 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const
 	return SUCCESS;
 }
 
+static zend_result php_uri_parser_rfc3986_host_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+{
+	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	int result;
+
+	if (Z_TYPE_P(value) == IS_NULL) {
+		result = uriSetHostAutoMmA(uriparser_uri, NULL, NULL, mm);
+	} else {
+		result = uriSetHostAutoMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
+	}
+
+	switch (result) {
+		case URI_SUCCESS:
+			return SUCCESS;
+		case URI_ERROR_SETHOST_PORT_SET:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot remove the host from a URI that has a port", 0);
+			return FAILURE;
+		case URI_ERROR_SETHOST_USERINFO_SET:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot remove the host from a URI that has a userinfo", 0);
+			return FAILURE;
+		default:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified host is malformed", 0);
+			return FAILURE;
+	}
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char *str, size_t len)
 {
 	if (len > MAX_LENGTH_OF_LONG) {
@@ -221,6 +296,31 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const
 	return SUCCESS;
 }
 
+static zend_result php_uri_parser_rfc3986_port_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+{
+	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	int result;
+
+	if (Z_TYPE_P(value) == IS_NULL) {
+		result = uriSetPortTextMmA(uriparser_uri, NULL, NULL, mm);
+	} else {
+		zend_string *tmp = zend_long_to_str(Z_LVAL_P(value));
+		result = uriSetPortTextMmA(uriparser_uri, ZSTR_VAL(tmp), ZSTR_VAL(tmp) + ZSTR_LEN(tmp), mm);
+		zend_string_release_ex(tmp, false);
+	}
+
+	switch (result) {
+		case URI_SUCCESS:
+			return SUCCESS;
+		case URI_ERROR_SETPORT_HOST_NOT_SET:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot set a port without having a host", 0);
+			return FAILURE;
+		default:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified port is malformed", 0);
+			return FAILURE;
+	}
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
@@ -249,6 +349,25 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(const
 	return SUCCESS;
 }
 
+static zend_result php_uri_parser_rfc3986_path_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+{
+	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	int result;
+
+	if (Z_STRLEN_P(value) == 0) {
+		result = uriSetPathMmA(uriparser_uri, NULL, NULL, mm);
+	} else {
+		result = uriSetPathMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
+	}
+
+	if (result != URI_SUCCESS) {
+		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified path is malformed", 0);
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
@@ -262,6 +381,25 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(cons
 	return SUCCESS;
 }
 
+static zend_result php_uri_parser_rfc3986_query_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+{
+	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	int result;
+
+	if (Z_TYPE_P(value) == IS_NULL) {
+		result = uriSetQueryMmA(uriparser_uri, NULL, NULL, mm);
+	} else {
+		result = uriSetQueryMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
+	}
+
+	if (result != URI_SUCCESS) {
+		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified query is malformed", 0);
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
@@ -270,6 +408,25 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(c
 		ZVAL_STRINGL(retval, uriparser_uri->fragment.first, get_text_range_length(&uriparser_uri->fragment));
 	} else {
 		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result php_uri_parser_rfc3986_fragment_write(struct uri_internal_t *internal_uri, zval *value, zval *errors)
+{
+	UriUriA *uriparser_uri = get_uri_for_writing(internal_uri);
+	int result;
+
+	if (Z_TYPE_P(value) == IS_NULL) {
+		result = uriSetFragmentMmA(uriparser_uri, NULL, NULL, mm);
+	} else {
+		result = uriSetFragmentMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
+	}
+
+	if (result != URI_SUCCESS) {
+		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified fragment is malformed", 0);
+		return FAILURE;
 	}
 
 	return SUCCESS;
@@ -414,13 +571,13 @@ const uri_parser_t php_uri_parser_rfc3986 = {
 	.uri_to_string = php_uri_parser_rfc3986_to_string,
 	.free_uri = php_uri_parser_rfc3986_free,
 	{
-		.scheme = {.read_func = php_uri_parser_rfc3986_scheme_read, .write_func = NULL},
+		.scheme = {.read_func = php_uri_parser_rfc3986_scheme_read, .write_func = php_uri_parser_rfc3986_scheme_write},
 		.username = {.read_func = php_uri_parser_rfc3986_username_read, .write_func = NULL},
 		.password = {.read_func = php_uri_parser_rfc3986_password_read, .write_func = NULL},
-		.host = {.read_func = php_uri_parser_rfc3986_host_read, .write_func = NULL},
-		.port = {.read_func = php_uri_parser_rfc3986_port_read, .write_func = NULL},
-		.path = {.read_func = php_uri_parser_rfc3986_path_read, .write_func = NULL},
-		.query = {.read_func = php_uri_parser_rfc3986_query_read, .write_func = NULL},
-		.fragment = {.read_func = php_uri_parser_rfc3986_fragment_read, .write_func = NULL},
+		.host = {.read_func = php_uri_parser_rfc3986_host_read, .write_func = php_uri_parser_rfc3986_host_write},
+		.port = {.read_func = php_uri_parser_rfc3986_port_read, .write_func = php_uri_parser_rfc3986_port_write},
+		.path = {.read_func = php_uri_parser_rfc3986_path_read, .write_func = php_uri_parser_rfc3986_path_write},
+		.query = {.read_func = php_uri_parser_rfc3986_query_read, .write_func = php_uri_parser_rfc3986_query_write},
+		.fragment = {.read_func = php_uri_parser_rfc3986_fragment_read, .write_func = php_uri_parser_rfc3986_fragment_write},
 	}
 };
