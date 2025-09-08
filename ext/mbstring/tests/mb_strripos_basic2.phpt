@@ -2,6 +2,8 @@
 Test mb_strripos() function : basic functionality
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 /*
@@ -9,8 +11,6 @@ mbstring
  */
 
 echo "*** Testing mb_strripos() : basic functionality***\n";
-
-mb_internal_encoding('UTF-8');
 
 //ascii strings
 $ascii_haystacks = array(

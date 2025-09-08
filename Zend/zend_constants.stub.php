@@ -130,17 +130,14 @@ const ZEND_VM_KIND = UNKNOWN;
 /* Special constants true/false/null.  */
 
 /**
- * @var bool
  * @undocumentable
  */
 const TRUE = true;
 /**
- * @var bool
  * @undocumentable
  */
 const FALSE = false;
 /**
- * @var null
  * @undocumentable
  */
 const NULL = null;

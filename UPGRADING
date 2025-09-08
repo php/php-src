@@ -245,6 +245,7 @@ PHP 8.5 UPGRADE NOTES
 
 - EXIF:
   . Add OffsetTime* Exif tags.
+  . Added support for HEIF/HEIC.
 
 - Intl:
   . Added class constants NumberFormatter::CURRENCY_ISO,
@@ -265,6 +266,11 @@ PHP 8.5 UPGRADE NOTES
   . Added class constants Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT,
     Pdo_Sqlite::EXPLAIN_MODE_PREPARED, Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN,
     Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
+  . Added PDO\Sqlite::ATTR_TRANSACTION_MODE connection attribute with
+    possible values PDO\Sqlite::TRANSACTION_MODE_DEFERRED,
+    PDO\Sqlite::TRANSACTION_MODE_IMMEDIATE,
+    and PDO\Sqlite::TRANSACTION_MODE_EXCLUSIVE, allowing to configure
+    the transaction mode to use when calling beginTransaction().
 
 - Session:
   . session_set_cookie_params(), session_get_cookie_params(), and session_start()
@@ -359,8 +365,7 @@ PHP 8.5 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_debuginfo_returning_null
   . The report_memleaks INI directive has been deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_report_memleaks_ini_directive
-  . Constant redeclaration is deprecated and that behavior will trigger an
-    error in PHP 9.
+  . Constant redeclaration has been deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_constant_redeclaration
   . Enacted the follow-up phase of the "Path to Saner Increment/Decrement
     operators" RFC, meaning that incrementing non-numeric strings is now
@@ -376,6 +381,9 @@ PHP 8.5 UPGRADE NOTES
     - Binding a closure to the scope of an internal class
     - Rebinding the scope of a closure created from a function or method
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_closure_binding_issues
+  . Using null as an array offset or when calling array_key_exists() is now
+    deprecated. Instead an empty string should be used.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_using_values_null_as_an_array_offset_and_when_calling_array_key_exists
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are
@@ -475,6 +483,26 @@ PHP 8.5 UPGRADE NOTES
         PDO::SQLITE_OPEN_READWRITE => Pdo\Sqlite::OPEN_READWRITE
         PDO::SQLITE_OPEN_CREATE => Pdo\Sqlite::OPEN_CREATE
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_driver_specific_pdo_constants_and_methods
+  . Driver specific methods in the PDO class have been deprecated.
+    List of affected methods and their replacement:
+        PDO::pgsqlCopyFromArray() => Pdo\Pgsql::copyFromArray()
+        PDO::pgsqlCopyFromFile() => Pdo\Pgsql::copyFromFile()
+        PDO::pgsqlCopyToArray() => Pdo\Pgsql::copyToArray()
+        PDO::pgsqlCopyToFile() => Pdo\Pgsql::copyToFile()
+        PDO::pgsqlGetNotify() => Pdo\Pgsql::getNotify()
+        PDO::pgsqlGetPid() => Pdo\Pgsql::getPid()
+        PDO::pgsqlLOBCreate() => Pdo\Pgsql::lobCreate()
+        PDO::pgsqlLOBOpen() => Pdo\Pgsql::lobOpen()
+        PDO::pgsqlLOBUnlink() => Pdo\Pgsql::lobUnlink()
+        PDO::sqliteCreateAggregate() => Pdo\Sqlite::createAggregate()
+        PDO::sqliteCreateCollation() => Pdo\Sqlite::createCollation()
+        PDO::sqliteCreateFunction() => Pdo\Sqlite::createFunction()
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_driver_specific_pdo_constants_and_methods
+
+- PDO_PGSQL: Constants related to transaction states have been deprecated:
+        PDO::PGSQL_TRANSACTION_IDLE, PDO::PGSQL_TRANSACTION_ACTIVE, PDO::PGSQL_TRANSACTION_INTRANS,
+        PDO::PGSQL_TRANSACTION_INERROR, PDO::PGSQL_TRANSACTION_UNKNOWN.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#extpdo_deprecations
 
 - Reflection:
   . The setAccessible() methods of various Reflection objects have been

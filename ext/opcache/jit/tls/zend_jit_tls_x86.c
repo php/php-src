@@ -222,6 +222,7 @@ void *zend_jit_tsrm_ls_cache_address(
 	size_t module_index,
 	size_t module_offset
 ) {
+#ifndef USE_FALLBACK
 	char *thread_pointer;
 	__asm__ __volatile__(
 		"movl   %%gs:0, %0\n"
@@ -235,5 +236,6 @@ void *zend_jit_tsrm_ls_cache_address(
 		dtv_pointer_t *dtv = *(dtv_pointer_t**)((uintptr_t)thread_pointer + DTV_OFFSET);
 		return (void*)(((dtv_pointer_t*)((char*)dtv + module_index))->val + module_offset);
 	}
+#endif
 	return NULL;
 }

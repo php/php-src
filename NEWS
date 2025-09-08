@@ -5,12 +5,49 @@ PHP                                                                        NEWS
 - Core:
   . Destructing non-array values (other than NULL) using [] or list() now
     emits a warning. (Girgias)
+  . Fixed bug GH-19637 (Incorrect Closure scope for FCC in constant
+    expression). (timwolla)
+  . Fixed bug GH-19613 (Stale array iterator pointer). (ilutov)
+  . Fixed bug GH-19679 (zend_ssa_range_widening may fail to converge). (Arnaud)
+  . Using null as an array offset or when calling array_key_exists() is now
+    deprecated. (alexandre-daubois)
+  . Fixed bug GH-19681 (PHP_EXPAND_PATH broken with bash 5.3.0). (Remi)
+  . Marks the stack as non-executable on Haiku. (David Carlier)
+
+- CLI:
+  . Fixed bug GH-19461 (Improve error message on listening error with IPv6
+    address). (alexandre-daubois)
+
+- Date:
+  . Fixed date_sunrise() and date_sunset() with partial-hour UTC offset.
+    (ilutov)
+
+- EXIF:
+  . Added support to retrieve Exif from HEIF file. (Benstone Zhang)
+
+- FPM:
+  . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
 
 - Opcache:
   . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
+  . Fixed bug GH-19601 (Wrong JIT stack setup on aarch64/clang). (Arnaud)
+  . Fixed bug GH-19388 (Broken opcache.huge_code_pages). (Arnaud)
+  . Fixed bug GH-19657 (Build fails on non-glibc/musl/freebsd/macos/win
+    platforms). (Arnaud)
 
 - PCRE:
   . Upgraded to pcre2lib from 10.45 to 10.46. (nielsdos)
+
+- PDO:
+  . Driver specific methods in the PDO class are now deprecated. (Arnaud)
+
+- PDO_SQLITE:
+  . Add PDO\Sqlite::ATTR_TRANSACTION_MODE connection attribute.
+    (Samuel Štancl)
+
+- Reflection:
+  . Fix GH-19691 (getModifierNames() not reporting asymmetric visibility).
+    (DanielEScherzer)
 
 - Session:
   . Fix RC violation of session SID constant deprecation attribute. (ilutov)
@@ -18,8 +55,16 @@ PHP                                                                        NEWS
 - Standard:
   . Fix GH-19610 (Deprecation warnings in functions taking as argument).
     (Girgias)
+  . Fixed bug GH-19577 (Avoid integer overflow when using a small offset
+    and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
+
+- Streams:
+  . Fixed bug GH-14506 (Closing a userspace stream inside a userspace handler
+    causes heap corruption). (nielsdos)
+  . Avoid double conversion to string in php_userstreamop_readdir(). (nielsdos)
 
 - URI:
+  . Added support for Uri\Rfc3986\Uri::with*() methods. (kocsismate)
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
   . Fixed memory management of the internal "parse_url" URI parser.
     (timwolla)
@@ -27,6 +72,8 @@ PHP                                                                        NEWS
     the Uri\WhatWg\Url parser. (timwolla)
   . Reject out-of-range ports when using the Uri\Rfc3986\Uri parser.
     (timwolla)
+  . Return null instead of 0 for Uri\Rfc3986\Uri::getPort() when the
+    URI contains an empty port. (timwolla)
   . Clean up naming of internal API. (timwolla)
 
 28 Aug 2025, PHP 8.5.0beta2
@@ -37,8 +84,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-19476 (pipe operator fails to correctly handle returning
     by reference). (alexandre-daubois)
   . The report_memleaks INI directive has been deprecated. (alexandre-daubois)
-  . Constant redeclaration is deprecated and this behavior will trigger an
-    error in PHP 9. (alexandre-daubois)
+  . Constant redeclaration has been deprecated. (alexandre-daubois)
   . Fixed OSS-Fuzz #439125710 (Pipe cannot be used in write context).
     (nielsdos)
   . Added support for configuring the URI parser for the FTP/FTPS as well as

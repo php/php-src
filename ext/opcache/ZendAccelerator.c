@@ -2974,10 +2974,22 @@ static void accel_globals_dtor(zend_accel_globals *accel_globals)
 #   include <sys/user.h>
 #   define MAP_HUGETLB MAP_ALIGNED_SUPER
 #  endif
+#  if __has_include(<link.h>)
+#   include <link.h>
+#  endif
+#  if __has_include(<elf.h>)
+#   include <elf.h>
+#  endif
 # endif
 
-# if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
-static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
+# define ZEND_HUGE_PAGE_SIZE (2UL * 1024 * 1024)
+
+# if (defined(__linux__) || defined(__FreeBSD__)) && (defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)) && defined(HAVE_ATTRIBUTE_ALIGNED) && defined(HAVE_ATTRIBUTE_SECTION) && __has_include(<link.h>) && __has_include(<elf.h>)
+static zend_result
+__attribute__((section(".remap_stub")))
+__attribute__((aligned(ZEND_HUGE_PAGE_SIZE)))
+zend_never_inline
+accel_remap_huge_pages(void *start, size_t size, size_t real_size)
 {
 	void *ret = MAP_FAILED;
 	void *mem;
@@ -3030,94 +3042,113 @@ static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_
 
 	// Given the MAP_FIXED flag the address can never diverge
 	ZEND_ASSERT(ret == start);
-	zend_mmap_set_name(start, size, "zend_huge_code_pages");
+
 	memcpy(start, mem, real_size);
 	mprotect(start, size, PROT_READ | PROT_EXEC);
+	zend_mmap_set_name(start, size, "zend_huge_code_pages");
 
 	munmap(mem, size);
 
 	return SUCCESS;
 }
 
+static int accel_dl_iterate_phdr_callback(struct dl_phdr_info *info, size_t size, void *data) {
+	if (info->dlpi_name == NULL || strcmp(info->dlpi_name, "") == 0) {
+		*((uintptr_t*)data) = info->dlpi_addr;
+		return 1;
+	}
+	return 0;
+}
+
+static zend_result accel_find_program_section(ElfW(Shdr) *section) {
+
+	uintptr_t base_addr;
+	if (dl_iterate_phdr(accel_dl_iterate_phdr_callback, &base_addr) != 1) {
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages: executable base address not found");
+		return FAILURE;
+	}
+
+#if defined(__linux__)
+	FILE *f = fopen("/proc/self/exe", "r");
+#elif defined(__FreeBSD__)
+	char path[4096];
+	int mib[4];
+	size_t len = sizeof(path);
+
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_PATHNAME;
+	mib[3] = -1; /* Current process */
+
+	if (sysctl(mib, 4, path, &len, NULL, 0) == -1) {
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages: sysctl(KERN_PROC_PATHNAME) failed: %s (%d)",
+				strerror(errno), errno);
+		return FAILURE;
+	}
+
+	FILE *f = fopen(path, "r");
+#endif
+	if (!f) {
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages: fopen(/proc/self/exe) failed: %s (%d)",
+				strerror(errno), errno);
+		return FAILURE;
+	}
+
+	/* Read ELF header */
+	ElfW(Ehdr) ehdr;
+	if (!fread(&ehdr, sizeof(ehdr), 1, f)) {
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages: fread() failed: %s (%d)",
+				strerror(errno), errno);
+		fclose(f);
+		return FAILURE;
+	}
+
+	/* Read section headers */
+	ElfW(Shdr) shdrs[ehdr.e_shnum];
+	if (fseek(f, ehdr.e_shoff, SEEK_SET) != 0) {
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages: fseek() failed: %s (%d)",
+				strerror(errno), errno);
+		fclose(f);
+		return FAILURE;
+	}
+	if (fread(shdrs, sizeof(shdrs[0]), ehdr.e_shnum, f) != ehdr.e_shnum) {
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages: fread() failed: %s (%d)",
+				strerror(errno), errno);
+		fclose(f);
+		return FAILURE;
+	}
+
+	fclose(f);
+
+	/* Find the program section */
+	for (ElfW(Half) idx = 0; idx < ehdr.e_shnum; idx++) {
+		ElfW(Shdr) *sh = &shdrs[idx];
+		uintptr_t start = (uintptr_t)sh->sh_addr + base_addr;
+		zend_accel_error(ACCEL_LOG_DEBUG, "considering section %016" PRIxPTR "-%016" PRIxPTR " vs %016" PRIxPTR "\n", start, start + sh->sh_size, (uintptr_t)accel_find_program_section);
+		if ((uintptr_t)accel_find_program_section >= start && (uintptr_t)accel_find_program_section < start + sh->sh_size) {
+			*section = *sh;
+			section->sh_addr = (ElfW(Addr))start;
+			return SUCCESS;
+		}
+	}
+
+	return FAILURE;
+}
+
 static void accel_move_code_to_huge_pages(void)
 {
-#if defined(__linux__)
-	FILE *f;
-	long unsigned int huge_page_size = 2 * 1024 * 1024;
-
-	f = fopen("/proc/self/maps", "r");
-	if (f) {
-		long unsigned int  start, end, offset, inode;
-		char perm[5], dev[10], name[MAXPATHLEN];
-		int ret;
-		extern char *__progname;
-		char buffer[MAXPATHLEN];
-
-		while (fgets(buffer, MAXPATHLEN, f)) {
-			ret = sscanf(buffer, "%lx-%lx %4s %lx %9s %lu %s\n", &start, &end, perm, &offset, dev, &inode, name);
-			if (ret >= 6) {
-				/* try to find the php text segment and map it into huge pages
-				   Lines without 'name' are going to be skipped */
-				if (ret > 6 && perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/' \
-					&& strstr(name, __progname)) {
-					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
-					long unsigned int  seg_end = (end & ~(huge_page_size-1L));
-					long unsigned int  real_end;
-
-					ret = fscanf(f, "%lx-", &start);
-					if (ret == 1 && start == seg_end + huge_page_size) {
-						real_end = end;
-						seg_end = start;
-					} else {
-						real_end = seg_end;
-					}
-
-					if (seg_end > seg_start) {
-						zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, name);
-						accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, real_end - seg_start, name, offset + seg_start - start);
-					}
-					break;
-				}
-			}
-		}
-		fclose(f);
+	ElfW(Shdr) section;
+	if (accel_find_program_section(&section) == FAILURE) {
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages: program section not found");
+		return;
 	}
-#elif defined(__FreeBSD__)
-	size_t s = 0;
-	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_VMMAP, getpid()};
-	long unsigned int huge_page_size = 2 * 1024 * 1024;
-	if (sysctl(mib, 4, NULL, &s, NULL, 0) == 0) {
-		s = s * 4 / 3;
-		void *addr = mmap(NULL, s, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
-		if (addr != MAP_FAILED) {
-			if (sysctl(mib, 4, addr, &s, NULL, 0) == 0) {
-				uintptr_t start = (uintptr_t)addr;
-				uintptr_t end = start + s;
-				while (start < end) {
-					struct kinfo_vmentry *entry = (struct kinfo_vmentry *)start;
-					size_t sz = entry->kve_structsize;
-					if (sz == 0) {
-						break;
-					}
-					int permflags = entry->kve_protection;
-					if ((permflags & KVME_PROT_READ) && !(permflags & KVME_PROT_WRITE) &&
-					    (permflags & KVME_PROT_EXEC) && entry->kve_path[0] != '\0') {
-						long unsigned int seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
-						long unsigned int seg_end = (end & ~(huge_page_size-1L));
-						if (seg_end > seg_start) {
-							zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, entry->kve_path);
-							accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, seg_end - seg_start, entry->kve_path, entry->kve_offset + seg_start - start);
-							// First relevant segment found is our binary
-							break;
-						}
-					}
-					start += sz;
-				}
-			}
-			munmap(addr, s);
-		}
+
+	uintptr_t start = ZEND_MM_ALIGNED_SIZE_EX(section.sh_addr, ZEND_HUGE_PAGE_SIZE);
+	uintptr_t end = (section.sh_addr + section.sh_size) & ~(ZEND_HUGE_PAGE_SIZE-1UL);
+	if (end > start) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %" PRIxPTR "-%" PRIxPTR "\n", start, end);
+		accel_remap_huge_pages((void*)start, end - start, end - start);
 	}
-#endif
 }
 # else
 static void accel_move_code_to_huge_pages(void)

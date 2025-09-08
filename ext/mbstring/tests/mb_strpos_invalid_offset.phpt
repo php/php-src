@@ -2,12 +2,13 @@
 mb_strpos() with invalid offsets
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 
 ini_set('include_path','.');
 include_once('common.inc');
-mb_internal_encoding('UTF-8') or print("mb_internal_encoding() failed\n");
 
 // Test string
 $string = '0123この文字列は日本語です。UTF-8を使っています。0123日本語は面倒臭い。';

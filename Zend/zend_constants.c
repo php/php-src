@@ -487,6 +487,9 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			CONST_PROTECT_RECURSION(c);
 			zend_deprecated_constant(c, c->name);
 			CONST_UNPROTECT_RECURSION(c);
+			if (UNEXPECTED(EG(exception))) {
+				return NULL;
+			}
 		}
 	}
 	return &c->value;

@@ -444,14 +444,9 @@ const FILE_APPEND = UNKNOWN;
  */
 const FILE_NO_DEFAULT_CONTEXT = UNKNOWN;
 
-/**
- * @var int
- */
 #[\Deprecated(since: '8.1', message: 'as the constant has no effect')]
 const FILE_TEXT = 0;
-/**
- * @var int
- */
+
 #[\Deprecated(since: '8.1', message: 'as the constant has no effect')]
 const FILE_BINARY = 0;
 

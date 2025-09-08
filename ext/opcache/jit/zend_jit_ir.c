@@ -2734,7 +2734,15 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			/* Stack must be 16 byte aligned */
 			/* TODO: select stack size ??? */
 #if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+# if defined(IR_TARGET_AARCH64)
+			/* Must save LR */
+			jit->ctx.flags |= IR_USE_FRAME_POINTER;
+			/* Same as HYBRID VM */
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 4; /* 4 spill slots */
+# else
+			/* Same as HYBRID VM, plus 1 slot for re-alignment (caller pushes return address, frame is not aligned on entry) */
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 5; /* 5 spill slots (8 bytes) or 10 spill slots (4 bytes) */
+# endif
 #elif defined(IR_TARGET_AARCH64)
 			jit->ctx.flags |= IR_USE_FRAME_POINTER;
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 16; /* 10 saved registers and 6 spill slots (8 bytes) */

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dde0b40909dbadb565d898338834de7fa689c5e9 */
+ * Stub hash: c394e14cd32587ce9ad0503e21c6c4cf5b301697 */
 
 static void register_file_symbols(int module_number)
 {

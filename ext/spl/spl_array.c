@@ -280,6 +280,7 @@ static zend_result get_hash_key(spl_hash_key *key, spl_array_object *intern, zva
 try_again:
 	switch (Z_TYPE_P(offset)) {
 	case IS_NULL:
+		zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
 		key->key = ZSTR_EMPTY_ALLOC();
 		return SUCCESS;
 	case IS_STRING:

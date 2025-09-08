@@ -1105,8 +1105,9 @@ static void php_dom_transfer_document_ref(xmlNodePtr node, php_libxml_ref_obj *n
 	}
 }
 
-/* Workaround for bug that was fixed in https://github.com/GNOME/libxml2/commit/4bc3ebf3eaba352fbbce2ef70ad00a3c7752478a */
-#if LIBXML_VERSION < 21000
+/* Workaround for bug that was fixed in https://github.com/GNOME/libxml2/commit/4bc3ebf3eaba352fbbce2ef70ad00a3c7752478a
+ * and https://github.com/GNOME/libxml2/commit/bc7ab5a2e61e4b36accf6803c5b0e245c11154b1 */
+#if LIBXML_VERSION < 21300
 static xmlChar *libxml_copy_dicted_string(xmlDictPtr src_dict, xmlDictPtr dst_dict, xmlChar *str)
 {
 	if (str == NULL) {
@@ -1123,30 +1124,43 @@ static xmlChar *libxml_copy_dicted_string(xmlDictPtr src_dict, xmlDictPtr dst_di
 
 static void libxml_fixup_name_and_content(xmlDocPtr src_doc, xmlDocPtr dst_doc, xmlNodePtr node)
 {
-	if (src_doc != NULL && dst_doc != src_doc && src_doc->dict != NULL) {
+	if (node->type == XML_ENTITY_REF_NODE) {
+		node->children = NULL; /* Break link with original document. */
+	}
+	if (src_doc != NULL && src_doc->dict != NULL) {
+		ZEND_ASSERT(dst_doc != src_doc);
 		node->name = libxml_copy_dicted_string(src_doc->dict, dst_doc->dict, BAD_CAST node->name);
 		node->content = libxml_copy_dicted_string(src_doc->dict, NULL, node->content);
 	}
 }
 
-static void libxml_fixup_name_and_content_element(xmlDocPtr src_doc, xmlDocPtr dst_doc, xmlNodePtr node)
+static void libxml_fixup_name_and_content_outer(xmlDocPtr src_doc, xmlDocPtr dst_doc, xmlNodePtr node)
 {
 	libxml_fixup_name_and_content(src_doc, dst_doc, node);
-	for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
-		libxml_fixup_name_and_content(src_doc, dst_doc, (xmlNodePtr) attr);
+
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+			libxml_fixup_name_and_content(src_doc, dst_doc, (xmlNodePtr) attr);
+			for (xmlNodePtr attr_child = attr->children; attr_child != NULL; attr_child = attr_child->next) {
+				libxml_fixup_name_and_content(src_doc, dst_doc, attr_child);
+			}
+		}
 	}
 
-	for (xmlNodePtr child = node->children; child != NULL; child = child->next) {
-		libxml_fixup_name_and_content_element(src_doc, dst_doc, child);
+	if (node->type == XML_ELEMENT_NODE || node->type == XML_ATTRIBUTE_NODE) {
+		for (xmlNodePtr child = node->children; child != NULL; child = child->next) {
+			libxml_fixup_name_and_content_outer(src_doc, dst_doc, child);
+		}
 	}
 }
 #endif
 
 bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, xmlDocPtr new_document)
 {
-	xmlDocPtr original_document = nodep->doc;
-	php_libxml_invalidate_node_list_cache_from_doc(original_document);
-	if (nodep->doc != new_document) {
+	xmlDocPtr old_doc = nodep->doc;
+
+	php_libxml_invalidate_node_list_cache_from_doc(old_doc);
+	if (old_doc != new_document) {
 		php_libxml_invalidate_node_list_cache(dom_object_new_document->document);
 
 		/* Note for ATTRIBUTE_NODE: specified is always true in ext/dom,
@@ -1156,15 +1170,17 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 			xmlSetTreeDoc(nodep, new_document);
 			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(dom_object_new_document);
 			php_dom_libxml_reconcile_modern(ns_mapper, nodep);
-#if LIBXML_VERSION < 21000
-			libxml_fixup_name_and_content_element(original_document, new_document, nodep);
-#endif
 		} else {
-			int ret = xmlDOMWrapAdoptNode(NULL, original_document, nodep, new_document, NULL, /* options, unused */ 0);
+			int ret = xmlDOMWrapAdoptNode(NULL, old_doc, nodep, new_document, NULL, /* options, unused */ 0);
 			if (UNEXPECTED(ret != 0)) {
 				return false;
 			}
 		}
+
+#if LIBXML_VERSION < 21300
+		/* Must be first before transferring the ref to ensure the old document dictionary stays alive. */
+		libxml_fixup_name_and_content_outer(old_doc, new_document, nodep);
+#endif
 
 		php_dom_transfer_document_ref(nodep, dom_object_new_document->document);
 	} else {

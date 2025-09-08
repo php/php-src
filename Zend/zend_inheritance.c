@@ -3524,6 +3524,13 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				free_alloca(traits_and_interfaces, use_heap);
 				return NULL;
 			}
+			if (UNEXPECTED(trait->ce_flags & ZEND_ACC_DEPRECATED)) {
+				zend_use_of_deprecated_trait(trait, ce->name);
+				if (UNEXPECTED(EG(exception))) {
+					free_alloca(traits_and_interfaces, use_heap);
+					return NULL;
+				}
+			}
 			for (j = 0; j < i; j++) {
 				if (traits_and_interfaces[j] == trait) {
 					/* skip duplications */
