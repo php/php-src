@@ -28,6 +28,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
 
+- Filter:
+  . Fixed bug GH-16993 (filter_var_array with FILTER_VALIDATE_INT|FILTER_NULL_ON_FAILURE
+    should emit warning for invalid filter usage). (alexandre-daubois)
+
 - Opcache:
   . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
   . Fixed bug GH-19601 (Wrong JIT stack setup on aarch64/clang). (Arnaud)
