@@ -888,7 +888,7 @@ static bool php_auto_globals_create_server(zend_string *name)
 				zend_hash_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGC), argc);
 			}
 		} else if (PG(register_argc_argv)) {
-			zend_error(E_DEPRECATED, "Deriving $_SERVER['argc'] and $_SERVER['argv'] from $_SERVER['QUERY_STRING'] is deprecated, configure register_argc_argv=0 to suppress this message and access the query parameters via $_SERVER['QUERY_STRING'] or $_GET");
+			zend_error(E_DEPRECATED, "Deriving $_SERVER['argv'] from the query string is deprecated. Configure register_argc_argv=0 to turn this message off");
 			php_build_argv(SG(request_info).query_string, &PG(http_globals)[TRACK_VARS_SERVER]);
 		}
 

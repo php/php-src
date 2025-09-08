@@ -14,7 +14,7 @@ var_dump($_SERVER['argc'], $_SERVER['argv']);
 
 ?>
 --EXPECTF--
-Deprecated: Deriving $_SERVER['argc'] and $_SERVER['argv'] from $_SERVER['QUERY_STRING'] is deprecated, configure register_argc_argv=0 to suppress this message and access the query parameters via $_SERVER['QUERY_STRING'] or $_GET in %s on line %d
+Deprecated: Deriving $_SERVER['argv'] from the query string is deprecated. Configure register_argc_argv=0 to turn this message off in %s on line %d
 int(0)
 array(0) {
 }
