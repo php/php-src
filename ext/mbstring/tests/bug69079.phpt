@@ -2,6 +2,8 @@
 Bug #69079 (enhancement for mb_substitute_character)
 --EXTENSIONS--
 mbstring
+--INI--
+error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 
