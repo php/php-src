@@ -187,7 +187,7 @@ PHP_FUNCTION(grapheme_stripos)
 	}
 
 	/* do utf16 part of the strpos */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 1 /* fIgnoreCase */, 0, locale /*last */ );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, /* fIgnoreCase */ 1, /*last */ 0, locale);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
