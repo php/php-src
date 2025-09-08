@@ -87,6 +87,8 @@ PHP                                                                        NEWS
     (timwolla)
   . Return null instead of 0 for Uri\Rfc3986\Uri::getPort() when the
     URI contains an empty port. (timwolla)
+  . Fixed creation of the InvalidUrlException when not passing an
+    errors zval to the internal whatwg parser. (timwolla)
   . Clean up naming of internal API. (timwolla)
 
 28 Aug 2025, PHP 8.5.0beta2
