@@ -2237,6 +2237,12 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	PHAR_G(last_phar) = NULL;
 	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 
+	php_stream *tmp_fp = php_stream_fopen_tmpfile();
+	if (tmp_fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0, "unable to create temporary file");
+		return NULL;
+	}
+
 	phar = (phar_archive_data *) ecalloc(1, sizeof(phar_archive_data));
 	/* set whole-archive compression and type from parameter */
 	phar->flags = flags;
@@ -2261,11 +2267,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	zend_hash_init(&phar->virtual_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
 
-	phar->fp = php_stream_fopen_tmpfile();
-	if (phar->fp == NULL) {
-		zend_throw_exception_ex(phar_ce_PharException, 0, "unable to create temporary file");
-		return NULL;
-	}
+	phar->fp = tmp_fp;
 	phar->fname = source->fname;
 	phar->fname_len = source->fname_len;
 	phar->is_temporary_alias = source->is_temporary_alias;
@@ -2289,6 +2291,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 		}
 
 		if (FAILURE == phar_copy_file_contents(&newentry, phar->fp)) {
+			phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 			zend_hash_destroy(&(phar->manifest));
 			php_stream_close(phar->fp);
 			efree(phar);
@@ -2326,13 +2329,18 @@ no_copy:
 		return ret;
 	} else {
 		if(phar != NULL) {
+			phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 			zend_hash_destroy(&(phar->manifest));
 			zend_hash_destroy(&(phar->mounted_dirs));
 			zend_hash_destroy(&(phar->virtual_dirs));
 			if (phar->fp) {
 				php_stream_close(phar->fp);
 			}
-			efree(phar->fname);
+			if (phar->fname != source->fname) {
+				/* Depending on when phar_rename_archive() errors, the new filename
+				 * may have already been assigned or it may still be the old one. */
+				efree(phar->fname);
+			}
 			efree(phar);
 		}
 		return NULL;

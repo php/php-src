@@ -28,6 +28,17 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed failed debug assertion when php_admin_value setting fails. (ilutov)
 
+- Filter:
+  . Fixed bug GH-16993 (filter_var_array with FILTER_VALIDATE_INT|FILTER_NULL_ON_FAILURE
+    should emit warning for invalid filter usage). (alexandre-daubois)
+
+- Intl:
+  . Added grapheme_strpos(), grapheme_stripos(), grapheme_strrpos(),
+    grapheme_strripos(), grapheme_strstr(), grapheme_stristr() and
+    grapheme_levenshtein() functions add $locale parameter (Yuya Hamada).
+  . Fixed bug GH-11952 (Fix locale strings canonicalization for IntlDateFormatter
+    and NumberFormatter). (alexandre-daubois)
+
 - Opcache:
   . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
   . Fixed bug GH-19601 (Wrong JIT stack setup on aarch64/clang). (Arnaud)
