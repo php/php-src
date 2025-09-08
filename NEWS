@@ -57,6 +57,8 @@ PHP                                                                        NEWS
     (Girgias)
   . Fixed bug GH-19577 (Avoid integer overflow when using a small offset
     and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
+  . Implement GH-19188: Add support for new INI mail.cr_lf_mode.
+    (alexandre-daubois)
 
 - Streams:
   . Fixed bug GH-14506 (Closing a userspace stream inside a userspace handler
