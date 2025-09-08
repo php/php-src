@@ -581,7 +581,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	}
 
 	/* need to work in utf16 */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, 0, &uchar_pos, f_ignore_case, 0, locale /*last */ );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, 0, &uchar_pos, f_ignore_case, /* last */ 0, locale);
 
 	if ( ret_pos < 0 ) {
 		RETURN_FALSE;
