@@ -2,6 +2,8 @@
 Test output of mb_strcut for text encodings which use escape sequences
 --EXTENSIONS--
 mbstring
+--INI--
+error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 

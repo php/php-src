@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_variables.h"
+#include "zend_attributes.h"
 #include "mbstring.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"

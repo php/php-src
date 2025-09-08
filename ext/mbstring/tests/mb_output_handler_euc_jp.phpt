@@ -16,5 +16,6 @@ $output = ob_get_clean();
 var_dump( $output );
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 string(73) "テスト用日本語文字列。このモジュールはPHPにマルチバイト関数を提供します。"

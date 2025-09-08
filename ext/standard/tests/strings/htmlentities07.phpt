@@ -7,7 +7,7 @@ internal_encoding=ISO-8859-1
 mbstring
 --FILE--
 <?php
-    print mb_internal_encoding()."\n";
+    print ini_get('internal_encoding')."\n";
     var_dump(htmlentities("\xe4\xf6\xfc", ENT_QUOTES, ''));
 ?>
 --EXPECT--

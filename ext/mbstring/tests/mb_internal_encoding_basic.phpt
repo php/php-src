@@ -21,7 +21,13 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing mb_internal_encoding() : basic functionality ***
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 bool(true)
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(5) "UTF-8"
 Done

@@ -17,7 +17,7 @@ var_dump(mb_strstr("あいうえおかきくけこ", "おかき", false));
 var_dump(mb_strstr("あいうえおかきくけこ", "おかき", true));
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"), false, "EUC-JP")));
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"), true, "EUC-JP")));
-mb_internal_encoding("EUC-JP");
+ini_set("internal_encoding", "EUC-JP");
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"))));
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"), false)));
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"), true)));
