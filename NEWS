@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Using null as an array offset or when calling array_key_exists() is now
     deprecated. (alexandre-daubois)
   . Fixed bug GH-19681 (PHP_EXPAND_PATH broken with bash 5.3.0). (Remi)
+  . Marks the stack as non-executable on Haiku. (David Carlier)
 
 - CLI:
   . Fixed bug GH-19461 (Improve error message on listening error with IPv6
@@ -40,6 +41,10 @@ PHP                                                                        NEWS
 - PDO:
   . Driver specific methods in the PDO class are now deprecated. (Arnaud)
 
+- PDO_SQLITE:
+  . Add PDO\Sqlite::ATTR_TRANSACTION_MODE connection attribute.
+    (Samuel Štancl)
+
 - Reflection:
   . Fix GH-19691 (getModifierNames() not reporting asymmetric visibility).
     (DanielEScherzer)
@@ -52,6 +57,8 @@ PHP                                                                        NEWS
     (Girgias)
   . Fixed bug GH-19577 (Avoid integer overflow when using a small offset
     and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
+  . Implement GH-19188: Add support for new INI mail.cr_lf_mode.
+    (alexandre-daubois)
 
 - Streams:
   . Fixed bug GH-14506 (Closing a userspace stream inside a userspace handler
@@ -59,6 +66,7 @@ PHP                                                                        NEWS
   . Avoid double conversion to string in php_userstreamop_readdir(). (nielsdos)
 
 - URI:
+  . Added support for Uri\Rfc3986\Uri::with*() methods. (kocsismate)
   . Fixed memory management of Uri\WhatWg\Url objects. (timwolla)
   . Fixed memory management of the internal "parse_url" URI parser.
     (timwolla)

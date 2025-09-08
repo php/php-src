@@ -748,9 +748,6 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	zend_result call_result = zend_call_method_if_exists(Z_OBJ(us->object), func_name, &retval, 2, args);
 	zend_string_release_ex(func_name, false);
 
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-
 	if (call_result == FAILURE) {
 		/* stream_seek is not implemented, so disable seeks for this stream */
 		stream->flags |= PHP_STREAM_FLAG_NO_SEEK;

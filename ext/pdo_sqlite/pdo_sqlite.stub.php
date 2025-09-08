@@ -39,6 +39,13 @@ class Sqlite extends \PDO
     /** @cvalue PDO_SQLITE_ATTR_EXPLAIN_STATEMENT */
     public const int ATTR_EXPLAIN_STATEMENT = UNKNOWN;
 
+    /** @cvalue PDO_SQLITE_ATTR_TRANSACTION_MODE */
+    public const int ATTR_TRANSACTION_MODE = UNKNOWN;
+
+    public const int TRANSACTION_MODE_DEFERRED = 0;
+    public const int TRANSACTION_MODE_IMMEDIATE = 1;
+    public const int TRANSACTION_MODE_EXCLUSIVE = 2;
+
 #if SQLITE_VERSION_NUMBER >= 3043000
     public const int EXPLAIN_MODE_PREPARED = 0;
     public const int EXPLAIN_MODE_EXPLAIN = 1;

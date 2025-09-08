@@ -266,6 +266,11 @@ PHP 8.5 UPGRADE NOTES
   . Added class constants Pdo_Sqlite::ATTR_EXPLAIN_STATEMENT,
     Pdo_Sqlite::EXPLAIN_MODE_PREPARED, Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN,
     Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
+  . Added PDO\Sqlite::ATTR_TRANSACTION_MODE connection attribute with
+    possible values PDO\Sqlite::TRANSACTION_MODE_DEFERRED,
+    PDO\Sqlite::TRANSACTION_MODE_IMMEDIATE,
+    and PDO\Sqlite::TRANSACTION_MODE_EXCLUSIVE, allowing to configure
+    the transaction mode to use when calling beginTransaction().
 
 - Session:
   . session_set_cookie_params(), session_get_cookie_params(), and session_start()
@@ -493,6 +498,11 @@ PHP 8.5 UPGRADE NOTES
         PDO::sqliteCreateCollation() => Pdo\Sqlite::createCollation()
         PDO::sqliteCreateFunction() => Pdo\Sqlite::createFunction()
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_driver_specific_pdo_constants_and_methods
+
+- PDO_PGSQL: Constants related to transaction states have been deprecated:
+        PDO::PGSQL_TRANSACTION_IDLE, PDO::PGSQL_TRANSACTION_ACTIVE, PDO::PGSQL_TRANSACTION_INTRANS,
+        PDO::PGSQL_TRANSACTION_INERROR, PDO::PGSQL_TRANSACTION_UNKNOWN.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#extpdo_deprecations
 
 - Reflection:
   . The setAccessible() methods of various Reflection objects have been
