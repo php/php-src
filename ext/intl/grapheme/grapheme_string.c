@@ -314,7 +314,7 @@ PHP_FUNCTION(grapheme_strripos)
 		/* else we need to continue via utf16 */
 	}
 
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL,  1 /* f_ignore_case */, 1, locale /*last */);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, /* f_ignore_case */ 1, /*last */ 1, locale);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
