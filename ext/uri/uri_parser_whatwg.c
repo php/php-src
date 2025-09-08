@@ -65,19 +65,14 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexb
  */
 static const char *fill_errors(zval *errors)
 {
-	if (errors == NULL) {
+	if (lexbor_parser.log == NULL || lexbor_plog_length(lexbor_parser.log) == 0) {
+		ZVAL_EMPTY_ARRAY(errors);
 		return NULL;
 	}
-
-	ZEND_ASSERT(Z_ISUNDEF_P(errors));
 
 	array_init(errors);
-
-	if (lexbor_parser.log == NULL) {
-		return NULL;
-	}
-
 	const char *result = NULL;
+
 	lexbor_plog_entry_t *lxb_error;
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
 		zval error;
@@ -224,7 +219,8 @@ static const char *fill_errors(zval *errors)
 
 static void throw_invalid_url_exception_during_write(zval *errors, const char *component)
 {
-	const char *reason = fill_errors(errors);
+	zval err;
+	const char *reason = fill_errors(&err);
 	zend_object *exception = zend_throw_exception_ex(
 		uri_whatwg_invalid_url_exception_ce,
 		0,
@@ -234,7 +230,13 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 		reason ? reason : "",
 		reason ? ")" : ""
 	);
-	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
+	if (errors) {
+		zval_ptr_dtor(errors);
+		ZVAL_COPY_VALUE(errors, &err);
+	} else {
+		zval_ptr_dtor(&err);
+	}
 }
 
 static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, size_t length, void *ctx)
@@ -561,11 +563,20 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 	lxb_url_parser_clean(&lexbor_parser);
 
 	lxb_url_t *url = lxb_url_parse(&lexbor_parser, lexbor_base_url, (unsigned char *) uri_str, uri_str_len);
-	const char *reason = fill_errors(errors);
 
-	if (url == NULL && !silent) {
-		zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
-		zend_update_property(exception->ce, exception, ZEND_STRL("errors"), errors);
+	if ((url == NULL && !silent) || errors != NULL) {
+		zval err;
+		const char *reason = fill_errors(&err);
+		if (url == NULL && !silent) {
+			zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
+			zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
+		}
+		if (errors != NULL) {
+			zval_ptr_dtor(errors);
+			ZVAL_COPY_VALUE(errors, &err);
+		} else {
+			zval_ptr_dtor(&err);
+		}
 	}
 
 	return url;
