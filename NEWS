@@ -52,6 +52,8 @@ PHP                                                                        NEWS
   . Fix memory leak in phar tar temporary file error handling code. (nielsdos)
   . Fix metadata leak when phar convert logic fails. (nielsdos)
   . Fix memory leak on failure in phar_convert_to_other(). (nielsdos)
+  . Fixed bug GH-19752 (Phar decompression with invalid extension
+    can cause UAF). (nielsdos)
 
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
