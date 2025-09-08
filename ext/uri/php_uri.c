@@ -1024,8 +1024,6 @@ PHPAPI void php_uri_object_handler_free(zend_object *object)
 	uri_object_t *uri_object = uri_object_from_obj(object);
 
 	uri_object->internal.parser->free_uri(uri_object->internal.uri);
-	uri_object->internal.uri = NULL;
-
 	zend_object_std_dtor(&uri_object->std);
 }
 
