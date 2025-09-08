@@ -384,6 +384,11 @@ PHP 8.5 UPGRADE NOTES
   . Using null as an array offset or when calling array_key_exists() is now
     deprecated. Instead an empty string should be used.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_using_values_null_as_an_array_offset_and_when_calling_array_key_exists
+  . Deriving $_SERVER['argc'] and $_SERVER['argv'] from the query string for non-CLI
+    SAPIs has been deprecated. Configure register_argc_argv=0 and switch to either
+    $_GET or $_SERVER['QUERY_STRING'] to access the information, after verifying
+    that the usage is safe.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_register_argc_argv_ini_directive
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are
