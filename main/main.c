@@ -725,12 +725,11 @@ static PHP_INI_MH(OnUpdateMailLog)
 static PHP_INI_MH(OnUpdateMailCrLfMode)
 {
 	if (new_value) {
-		const char *val = ZSTR_VAL(new_value);
 		if (ZSTR_LEN(new_value) > 0 &&
-			strcmp(val, "crlf") != 0 &&
-			strcmp(val, "lf") != 0 &&
-			strcmp(val, "mixed") != 0 &&
-			strcmp(val, "os") != 0) {
+			!zend_string_equals_literal(new_value, "crlf") &&
+			!zend_string_equals_literal(new_value, "lf") &&
+			!zend_string_equals_literal(new_value, "mixed") &&
+			!zend_string_equals_literal(new_value, "os")) {
 			int err_type;
 
 			if (stage == ZEND_INI_STAGE_RUNTIME) {
@@ -740,13 +739,13 @@ static PHP_INI_MH(OnUpdateMailCrLfMode)
 			}
 
 			if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-				php_error_docref(NULL, err_type, "Invalid value \"%s\" for mail.cr_lf_mode. Must be one of: \"crlf\", \"lf\", \"mixed\", \"os\"", val);
+				php_error_docref(NULL, err_type, "Invalid value \"%s\" for mail.cr_lf_mode. Must be one of: \"crlf\", \"lf\", \"mixed\", \"os\"", ZSTR_VAL(new_value));
 			}
 
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	return SUCCESS;
 }
 /* }}} */

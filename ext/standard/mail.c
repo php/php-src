@@ -495,14 +495,14 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	}
 
 	char *line_sep;
-	const char *cr_lf_mode = PG(mail_cr_lf_mode);
+	zend_string *cr_lf_mode = PG(mail_cr_lf_mode);
 	
-	if (cr_lf_mode && strcmp(cr_lf_mode, "crlf") != 0) {
-		if (strcmp(cr_lf_mode, "lf") == 0) {
+	if (cr_lf_mode && !zend_string_equals_literal(cr_lf_mode, "crlf")) {
+		if (zend_string_equals_literal(cr_lf_mode, "lf")) {
 			line_sep = "\n";
-		} else if (strcmp(cr_lf_mode, "mixed") == 0) {
+		} else if (zend_string_equals_literal(cr_lf_mode, "mixed")) {
 			line_sep = "\n";
-		} else if (strcmp(cr_lf_mode, "os") == 0) {
+		} else if (zend_string_equals_literal(cr_lf_mode, "os")) {
 #ifdef PHP_WIN32
 			line_sep = "\r\n";
 #else
@@ -609,7 +609,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 
 		fprintf(sendmail, "%s", line_sep);
 		
-		if (cr_lf_mode && strcmp(cr_lf_mode, "lf") == 0) {
+		if (cr_lf_mode && zend_string_equals_literal(cr_lf_mode, "lf")) {
 			char *converted_message = NULL;
 			size_t msg_len = strlen(message);
 			size_t new_len = 0;
