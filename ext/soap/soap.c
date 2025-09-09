@@ -453,6 +453,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	soap_globals->soap_version = SOAP_1_1;
 	soap_globals->mem_cache = NULL;
 	soap_globals->ref_map = NULL;
+	soap_globals->lang_en = NULL;
 }
 
 PHP_MSHUTDOWN_FUNCTION(soap)
@@ -3001,7 +3002,9 @@ static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fau
 	if (name != NULL) {
 		ZVAL_STR_COPY(Z_FAULT_NAME_P(obj), name);
 	}
-	ZVAL_STR_COPY(Z_FAULT_LANG_P(obj), lang);
+	if (lang != NULL) {
+		ZVAL_STR_COPY(Z_FAULT_LANG_P(obj), lang);
+	}
 }
 /* }}} */
 
