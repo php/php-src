@@ -391,6 +391,27 @@ static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, uri_str, base_url_object, is_constructor, is_constructor, NULL);
 }
 
+static bool is_list_of_whatwg_validation_errors(const HashTable *array)
+{
+	if (!zend_array_is_list(array)) {
+		return false;
+	}
+
+	ZEND_HASH_FOREACH_VAL(array, zval *val) {
+		/* Do not allow references as they may change types after checking. */
+
+		if (Z_TYPE_P(val) != IS_OBJECT) {
+			return false;
+		}
+
+		if (!instanceof_function(Z_OBJCE_P(val), uri_whatwg_url_validation_error_ce)) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
+}
+
 PHP_METHOD(Uri_Rfc3986_Uri, parse)
 {
 	create_rfc3986_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
@@ -425,6 +446,11 @@ PHP_METHOD(Uri_WhatWg_InvalidUrlException, __construct)
 		ZVAL_EMPTY_ARRAY(&tmp);
 		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), &tmp);
 	} else {
+		if (!is_list_of_whatwg_validation_errors(Z_ARR_P(errors))) {
+			zend_argument_value_error(2, "must be a list of %s", ZSTR_VAL(uri_whatwg_url_validation_error_ce->name));
+			RETURN_THROWS();
+		}
+
 		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), errors);
 	}
 	if (EG(exception)) {
