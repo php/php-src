@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.26
+?? ??? ????, PHP 8.3.27
+
+- Core:
+  . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
+    checks). (timwolla)
+
+25 Sep 2025, PHP 8.3.26
 
 - Core:
   . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
@@ -14,8 +20,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-19681 (PHP_EXPAND_PATH broken with bash 5.3.0). (Remi)
   . Fixed bug GH-19720 (Assertion failure when error handler throws when
     accessing a deprecated constant). (nielsdos)
-  . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
-    checks). (timwolla)
 
 - CLI:
   . Fixed bug GH-19461 (Improve error message on listening error with IPv6
