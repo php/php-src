@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.0beta3
+?? ??? ????, PHP 8.5.0RC1
+
+
+11 Sep 2025, PHP 8.5.0beta3
 
 - Core:
   . Destructing non-array values (other than NULL) using [] or list() now
