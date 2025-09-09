@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
     checks). (timwolla)
 
+- URI:
+  . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
+    (nielsdos)
+
 11 Sep 2025, PHP 8.5.0beta3
 
 - Core:
