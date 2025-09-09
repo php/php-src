@@ -1,5 +1,5 @@
 --TEST--
-Fix GH-11942: IntlDateFormatter should canonicalize locale strings
+GH-11942 (IntlDateFormatter should canonicalize locale strings)
 --EXTENSIONS--
 intl
 --FILE--
