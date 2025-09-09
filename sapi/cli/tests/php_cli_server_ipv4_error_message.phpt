@@ -2,6 +2,9 @@
 IPv4 address error message formatting
 --SKIPIF--
 <?php
+if (getenv("SKIP_ONLINE_TESTS")) {
+    die("skip online test");
+}
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die("skip not for Windows");
 }

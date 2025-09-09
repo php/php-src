@@ -2328,7 +2328,11 @@ no_copy:
 			if (phar->fp) {
 				php_stream_close(phar->fp);
 			}
-			efree(phar->fname);
+			if (phar->fname != source->fname) {
+				/* Depending on when phar_rename_archive() errors, the new filename
+				 * may have already been assigned or it may still be the old one. */
+				efree(phar->fname);
+			}
 			efree(phar);
 		}
 		return NULL;
