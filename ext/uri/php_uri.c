@@ -50,11 +50,6 @@ static const zend_module_dep uri_deps[] = {
 
 static zend_array uri_parsers;
 
-static const uri_parser_t *uri_parser_by_name(const char *uri_parser_name, size_t uri_parser_name_len)
-{
-	return zend_hash_str_find_ptr(&uri_parsers, uri_parser_name, uri_parser_name_len);
-}
-
 static HashTable *uri_get_debug_properties(zend_object *object)
 {
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
@@ -105,13 +100,13 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	return result;
 }
 
-PHPAPI const uri_parser_t *php_uri_get_parser(const zend_string *uri_parser_name)
+PHPAPI const uri_parser_t *php_uri_get_parser(zend_string *uri_parser_name)
 {
 	if (uri_parser_name == NULL) {
-		return uri_parser_by_name(PHP_URI_PARSER_PHP_PARSE_URL, sizeof(PHP_URI_PARSER_PHP_PARSE_URL) - 1);
+		return zend_hash_str_find_ptr(&uri_parsers, PHP_URI_PARSER_PHP_PARSE_URL, sizeof(PHP_URI_PARSER_PHP_PARSE_URL) - 1);
 	}
 
-	return uri_parser_by_name(ZSTR_VAL(uri_parser_name), ZSTR_LEN(uri_parser_name));
+	return zend_hash_find_ptr(&uri_parsers, uri_parser_name);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, bool silent)
