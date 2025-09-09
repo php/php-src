@@ -130,12 +130,17 @@ static zend_result php_uri_parser_rfc3986_scheme_write(struct uri_internal_t *in
 		result = uriSetSchemeMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
 	}
 
-	if (result != URI_SUCCESS) {
-		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified scheme is malformed", 0);
-		return FAILURE;
+	switch (result) {
+		case URI_SUCCESS:
+			return SUCCESS;
+		case URI_ERROR_SYNTAX:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified scheme is malformed", 0);
+			return FAILURE;
+		default:
+			/* This should be unreachable in practice. */
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the scheme", 0);
+			return FAILURE;
 	}
-
-	return SUCCESS;
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
@@ -168,8 +173,12 @@ zend_result php_uri_parser_rfc3986_userinfo_write(struct uri_internal_t *interna
 		case URI_ERROR_SETUSERINFO_HOST_NOT_SET:
 			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot set a userinfo without having a host", 0);
 			return FAILURE;
-		default:
+		case URI_ERROR_SYNTAX:
 			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified userinfo is malformed", 0);
+			return FAILURE;
+		default:
+			/* This should be unreachable in practice. */
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the userinfo", 0);
 			return FAILURE;
 	}
 }
@@ -259,8 +268,12 @@ static zend_result php_uri_parser_rfc3986_host_write(struct uri_internal_t *inte
 		case URI_ERROR_SETHOST_USERINFO_SET:
 			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot remove the host from a URI that has a userinfo", 0);
 			return FAILURE;
-		default:
+		case URI_ERROR_SYNTAX:
 			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified host is malformed", 0);
+			return FAILURE;
+		default:
+			/* This should be unreachable in practice. */
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the host", 0);
 			return FAILURE;
 	}
 }
@@ -315,8 +328,12 @@ static zend_result php_uri_parser_rfc3986_port_write(struct uri_internal_t *inte
 		case URI_ERROR_SETPORT_HOST_NOT_SET:
 			zend_throw_exception(uri_invalid_uri_exception_ce, "Cannot set a port without having a host", 0);
 			return FAILURE;
-		default:
+		case URI_ERROR_SYNTAX:
 			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified port is malformed", 0);
+			return FAILURE;
+		default:
+			/* This should be unreachable in practice. */
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the port", 0);
 			return FAILURE;
 	}
 }
@@ -360,12 +377,17 @@ static zend_result php_uri_parser_rfc3986_path_write(struct uri_internal_t *inte
 		result = uriSetPathMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
 	}
 
-	if (result != URI_SUCCESS) {
-		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified path is malformed", 0);
-		return FAILURE;
+	switch (result) {
+		case URI_SUCCESS:
+			return SUCCESS;
+		case URI_ERROR_SYNTAX:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified path is malformed", 0);
+			return FAILURE;
+		default:
+			/* This should be unreachable in practice. */
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the path", 0);
+			return FAILURE;
 	}
-
-	return SUCCESS;
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
@@ -392,12 +414,17 @@ static zend_result php_uri_parser_rfc3986_query_write(struct uri_internal_t *int
 		result = uriSetQueryMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
 	}
 
-	if (result != URI_SUCCESS) {
-		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified query is malformed", 0);
-		return FAILURE;
+	switch (result) {
+		case URI_SUCCESS:
+			return SUCCESS;
+		case URI_ERROR_SYNTAX:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified query is malformed", 0);
+			return FAILURE;
+		default:
+			/* This should be unreachable in practice. */
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the query", 0);
+			return FAILURE;
 	}
-
-	return SUCCESS;
 }
 
 ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
@@ -424,12 +451,17 @@ static zend_result php_uri_parser_rfc3986_fragment_write(struct uri_internal_t *
 		result = uriSetFragmentMmA(uriparser_uri, Z_STRVAL_P(value), Z_STRVAL_P(value) + Z_STRLEN_P(value), mm);
 	}
 
-	if (result != URI_SUCCESS) {
-		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified fragment is malformed", 0);
-		return FAILURE;
+	switch (result) {
+		case URI_SUCCESS:
+			return SUCCESS;
+		case URI_ERROR_SYNTAX:
+			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified fragment is malformed", 0);
+			return FAILURE;
+		default:
+			/* This should be unreachable in practice. */
+			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the fragment", 0);
+			return FAILURE;
 	}
-
-	return SUCCESS;
 }
 
 static php_uri_parser_rfc3986_uris *uriparser_create_uris(void)
@@ -445,9 +477,18 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 	UriUriA uri = {0};
 
 	/* Parse the URI. */
-	if (uriParseSingleUriExMmA(&uri, uri_str, uri_str + uri_str_len, NULL, mm) != URI_SUCCESS) {
+	int result = uriParseSingleUriExMmA(&uri, uri_str, uri_str + uri_str_len, NULL, mm);
+	if (result != URI_SUCCESS) {
 		if (!silent) {
-			zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
+			switch (result) {
+				case URI_ERROR_SYNTAX:
+					zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
+					break;
+				default:
+					/* This should be unreachable in practice. */
+					zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to parse the specified URI", 0);
+					break;
+			}
 		}
 
 		goto fail;
