@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.13
+?? ??? ????, PHP 8.4.14
+
+
+
+25 Sep 2025, PHP 8.4.13
 
 - Core:
   . Fixed bug GH-18850 (Repeated inclusion of file with __halt_compiler()
