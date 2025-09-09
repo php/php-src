@@ -16,6 +16,7 @@ pm = static
 pm.max_children = 1
 env[TEST] = test
 php_value[register_argc_argv] = on
+php_value[html_errors] = off
 EOT;
 
 $code = <<<EOT
@@ -39,21 +40,26 @@ EOT;
 $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
-$tester->request()->expectBody([
-    'bool(false)',
-    'bool(true)',
-    'string(4) "test"',
-    'bool(false)',
-    'bool(false)',
-    'string(2) "dt"',
-    'string(2) "dt"',
-]);
+$response = $tester->request();
+echo "=====", PHP_EOL;
+$response->printBody();
+echo "=====", PHP_EOL;
 $tester->terminate();
 $tester->close();
 
 ?>
 Done
---EXPECT--
+--EXPECTF--
+=====
+Deprecated: Deriving $_SERVER['argv'] from the query string is deprecated. Configure register_argc_argv=0 to turn this message off in %s on line %d
+bool(false)
+bool(true)
+string(4) "test"
+bool(false)
+bool(false)
+string(2) "dt"
+string(2) "dt"
+=====
 Done
 --CLEAN--
 <?php
