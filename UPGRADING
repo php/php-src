@@ -91,6 +91,9 @@ PHP 8.5 UPGRADE NOTES
 - ODBC:
   . ODBC now assumes that at least ODBC 3.5 functionality is available. The
     ODBCVER definition and build system flags to control it have been removed.
+  . ODBC no longer has build flags to build against specific drivers (except
+    for DB2) and removes special cases for those drivers. It is strongly
+    recommended to use a driver manager like iODBC or unixODBC on non-Windows.
 
 - Opcache:
   . The Opcache extension is now always built into the PHP binary and is always

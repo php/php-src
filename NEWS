@@ -39,6 +39,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-11952 (Fix locale strings canonicalization for IntlDateFormatter
     and NumberFormatter). (alexandre-daubois)
 
+- ODBC:
+  . Removed driver-specific build flags and support. (Calvin Buckley)
+
 - Opcache:
   . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
   . Fixed bug GH-19601 (Wrong JIT stack setup on aarch64/clang). (Arnaud)
