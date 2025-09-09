@@ -554,9 +554,13 @@ ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_rfc3986_to_string(void
 	return uri_string;
 }
 
-ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_rfc3986_free(void *uri)
+static void php_uri_parser_rfc3986_free(void *uri)
 {
 	php_uri_parser_rfc3986_uris *uriparser_uris = uri;
+
+	if (UNEXPECTED(uriparser_uris == NULL)) {
+		return;
+	}
 
 	uriFreeUriMembersMmA(&uriparser_uris->uri, mm);
 	uriFreeUriMembersMmA(&uriparser_uris->normalized_uri, mm);

@@ -122,7 +122,7 @@ typedef struct uri_parser_t {
 	/**
 	 * Frees the provided URI.
 	 *
-	 * @param uri The input URI
+	 * @param uri The URI to free. Must do nothing if NULL.
 	 */
 	void (*free_uri)(void *uri);
 
