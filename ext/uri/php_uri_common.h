@@ -59,8 +59,8 @@ typedef enum php_uri_property_name {
 } php_uri_property_name;
 
 typedef struct php_uri_property_handler {
-	php_uri_property_handler_read read_func;
-	php_uri_property_handler_write write_func;
+	php_uri_property_handler_read read;
+	php_uri_property_handler_write write;
 } php_uri_property_handler;
 
 typedef struct uri_parser_t {

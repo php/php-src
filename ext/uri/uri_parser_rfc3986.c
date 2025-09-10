@@ -616,13 +616,13 @@ const uri_parser_t php_uri_parser_rfc3986 = {
 	.uri_to_string = php_uri_parser_rfc3986_to_string,
 	.free_uri = php_uri_parser_rfc3986_free,
 	{
-		.scheme = {.read_func = php_uri_parser_rfc3986_scheme_read, .write_func = php_uri_parser_rfc3986_scheme_write},
-		.username = {.read_func = php_uri_parser_rfc3986_username_read, .write_func = NULL},
-		.password = {.read_func = php_uri_parser_rfc3986_password_read, .write_func = NULL},
-		.host = {.read_func = php_uri_parser_rfc3986_host_read, .write_func = php_uri_parser_rfc3986_host_write},
-		.port = {.read_func = php_uri_parser_rfc3986_port_read, .write_func = php_uri_parser_rfc3986_port_write},
-		.path = {.read_func = php_uri_parser_rfc3986_path_read, .write_func = php_uri_parser_rfc3986_path_write},
-		.query = {.read_func = php_uri_parser_rfc3986_query_read, .write_func = php_uri_parser_rfc3986_query_write},
-		.fragment = {.read_func = php_uri_parser_rfc3986_fragment_read, .write_func = php_uri_parser_rfc3986_fragment_write},
+		.scheme = {.read = php_uri_parser_rfc3986_scheme_read, .write = php_uri_parser_rfc3986_scheme_write},
+		.username = {.read = php_uri_parser_rfc3986_username_read, .write = NULL},
+		.password = {.read = php_uri_parser_rfc3986_password_read, .write = NULL},
+		.host = {.read = php_uri_parser_rfc3986_host_read, .write = php_uri_parser_rfc3986_host_write},
+		.port = {.read = php_uri_parser_rfc3986_port_read, .write = php_uri_parser_rfc3986_port_write},
+		.path = {.read = php_uri_parser_rfc3986_path_read, .write = php_uri_parser_rfc3986_path_write},
+		.query = {.read = php_uri_parser_rfc3986_query_read, .write = php_uri_parser_rfc3986_query_write},
+		.fragment = {.read = php_uri_parser_rfc3986_fragment_read, .write = php_uri_parser_rfc3986_fragment_write},
 	}
 };

@@ -631,13 +631,13 @@ const uri_parser_t php_uri_parser_whatwg = {
 	.uri_to_string = php_uri_parser_whatwg_to_string,
 	.free_uri = php_uri_parser_whatwg_free,
 	{
-		.scheme = {.read_func = php_uri_parser_whatwg_scheme_read, .write_func = php_uri_parser_whatwg_scheme_write},
-		.username = {.read_func = php_uri_parser_whatwg_username_read, .write_func = php_uri_parser_whatwg_username_write},
-		.password = {.read_func = php_uri_parser_whatwg_password_read, .write_func = php_uri_parser_whatwg_password_write},
-		.host = {.read_func = php_uri_parser_whatwg_host_read, .write_func = php_uri_parser_whatwg_host_write},
-		.port = {.read_func = php_uri_parser_whatwg_port_read, .write_func = php_uri_parser_whatwg_port_write},
-		.path = {.read_func = php_uri_parser_whatwg_path_read, .write_func = php_uri_parser_whatwg_path_write},
-		.query = {.read_func = php_uri_parser_whatwg_query_read, .write_func = php_uri_parser_whatwg_query_write},
-		.fragment = {.read_func = php_uri_parser_whatwg_fragment_read, .write_func = php_uri_parser_whatwg_fragment_write},
+		.scheme = {.read = php_uri_parser_whatwg_scheme_read, .write = php_uri_parser_whatwg_scheme_write},
+		.username = {.read = php_uri_parser_whatwg_username_read, .write = php_uri_parser_whatwg_username_write},
+		.password = {.read = php_uri_parser_whatwg_password_read, .write = php_uri_parser_whatwg_password_write},
+		.host = {.read = php_uri_parser_whatwg_host_read, .write = php_uri_parser_whatwg_host_write},
+		.port = {.read = php_uri_parser_whatwg_port_read, .write = php_uri_parser_whatwg_port_write},
+		.path = {.read = php_uri_parser_whatwg_path_read, .write = php_uri_parser_whatwg_path_write},
+		.query = {.read = php_uri_parser_whatwg_query_read, .write = php_uri_parser_whatwg_query_write},
+		.fragment = {.read = php_uri_parser_whatwg_fragment_read, .write = php_uri_parser_whatwg_fragment_write},
 	}
 };

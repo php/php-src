@@ -172,13 +172,13 @@ const uri_parser_t php_uri_parser_php_parse_url = {
 	.uri_to_string = NULL,
 	.free_uri = uri_parser_php_parse_url_free,
 	{
-		.scheme = {.read_func = uri_parser_php_parse_url_scheme_read, .write_func = NULL},
-		.username = {.read_func = uri_parser_php_parse_url_username_read, .write_func = NULL},
-		.password = {.read_func = uri_parser_php_parse_url_password_read, .write_func = NULL},
-		.host = {.read_func = uri_parser_php_parse_url_host_read, .write_func = NULL},
-		.port = {.read_func = uri_parser_php_parse_url_port_read, .write_func = NULL},
-		.path = {.read_func = uri_parser_php_parse_url_path_read, .write_func = NULL},
-		.query = {.read_func = uri_parser_php_parse_url_query_read, .write_func = NULL},
-		.fragment = {.read_func = uri_parser_php_parse_url_fragment_read, .write_func = NULL},
+		.scheme = {.read = uri_parser_php_parse_url_scheme_read, .write = NULL},
+		.username = {.read = uri_parser_php_parse_url_username_read, .write = NULL},
+		.password = {.read = uri_parser_php_parse_url_password_read, .write = NULL},
+		.host = {.read = uri_parser_php_parse_url_host_read, .write = NULL},
+		.port = {.read = uri_parser_php_parse_url_port_read, .write = NULL},
+		.path = {.read = uri_parser_php_parse_url_path_read, .write = NULL},
+		.query = {.read = uri_parser_php_parse_url_query_read, .write = NULL},
+		.fragment = {.read = uri_parser_php_parse_url_fragment_read, .write = NULL},
 	}
 };
