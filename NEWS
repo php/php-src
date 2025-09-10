@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.14
 
-
+- Standard:
+  . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
+    (nielsdos)
 
 25 Sep 2025, PHP 8.4.13
 

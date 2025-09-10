@@ -737,7 +737,10 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var, b
 		return 0;
 	} else if (!in_rcn_array
 	 && Z_REFCOUNT_P(var) == 1
-	 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)) {
+	 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)
+	 /* __serialize and __sleep may arbitrarily increase the refcount */
+	 && Z_OBJCE_P(var)->__serialize == NULL
+	 && zend_hash_find_known_hash(&Z_OBJCE_P(var)->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP)) == NULL) {
 		return 0;
 	}
 
