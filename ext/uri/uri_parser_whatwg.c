@@ -600,15 +600,15 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposi
 	smart_str uri_str = {0};
 
 	switch (recomposition_mode) {
-		case URI_RECOMPOSITION_RAW_UNICODE:
+		case PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE:
 			ZEND_FALLTHROUGH;
-		case URI_RECOMPOSITION_NORMALIZED_UNICODE:
+		case PHP_URI_RECOMPOSITION_MODE_NORMALIZED_UNICODE:
 			lxb_url_serialize_idna(&lexbor_idna, lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			lxb_unicode_idna_clean(&lexbor_idna);
 			break;
-		case URI_RECOMPOSITION_RAW_ASCII:
+		case PHP_URI_RECOMPOSITION_MODE_RAW_ASCII:
 			ZEND_FALLTHROUGH;
-		case URI_RECOMPOSITION_NORMALIZED_ASCII:
+		case PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII:
 			lxb_url_serialize(lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()

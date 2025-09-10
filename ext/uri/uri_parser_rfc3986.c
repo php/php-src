@@ -569,7 +569,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_rfc3986_to_string(void
 	php_uri_parser_rfc3986_uris *uriparser_uris = uri;
 	const UriUriA *uriparser_uri;
 
-	if (recomposition_mode == URI_RECOMPOSITION_RAW_ASCII || recomposition_mode == URI_RECOMPOSITION_RAW_UNICODE) {
+	if (recomposition_mode == PHP_URI_RECOMPOSITION_MODE_RAW_ASCII || recomposition_mode == PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE) {
 		uriparser_uri = &uriparser_uris->uri;
 	} else {
 		uriparser_uri = get_normalized_uri(uriparser_uris);

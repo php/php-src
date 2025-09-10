@@ -29,10 +29,10 @@ extern zend_class_entry *uri_whatwg_url_validation_error_type_ce;
 extern zend_class_entry *uri_whatwg_url_validation_error_ce;
 
 typedef enum php_uri_recomposition_mode {
-	URI_RECOMPOSITION_RAW_ASCII,
-	URI_RECOMPOSITION_RAW_UNICODE,
-	URI_RECOMPOSITION_NORMALIZED_ASCII,
-	URI_RECOMPOSITION_NORMALIZED_UNICODE,
+	PHP_URI_RECOMPOSITION_MODE_RAW_ASCII,
+	PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE,
+	PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII,
+	PHP_URI_RECOMPOSITION_MODE_NORMALIZED_UNICODE,
 } php_uri_recomposition_mode;
 
 typedef enum {
@@ -107,10 +107,10 @@ typedef struct uri_parser_t {
 	 * The returned zend_string must not be persistent.
 	 *
 	 * Recomposition_mode can be one of the following:
-	 * - URI_RECOMPOSITION_RAW_ASCII: Recomposes the raw, non-normalized variant of the URI as a string that must only contain ASCII characters
-	 * - URI_RECOMPOSITION_RAW_UNICODE: Recomposes the raw, non-normalized variant of the URI as a string that may contain Unicode codepoints
-	 * - URI_RECOMPOSITION_NORMALIZED_ASCII: Recomposes the normalized variant of the URI as a string that must only contain ASCII characters
-	 * - URI_RECOMPOSITION_NORMALIZED_UNICODE: Recomposes the normalized variant of the URI as a string that may contain Unicode codepoints
+	 * - PHP_URI_RECOMPOSITION_MODE_RAW_ASCII: Recomposes the raw, non-normalized variant of the URI as a string that must only contain ASCII characters
+	 * - PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE: Recomposes the raw, non-normalized variant of the URI as a string that may contain Unicode codepoints
+	 * - PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII: Recomposes the normalized variant of the URI as a string that must only contain ASCII characters
+	 * - PHP_URI_RECOMPOSITION_MODE_NORMALIZED_UNICODE: Recomposes the normalized variant of the URI as a string that may contain Unicode codepoints
 	 *
 	 * @param uri The input URI
 	 * @param recomposition_mode The type of recomposition
