@@ -264,6 +264,9 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_log_err_debug(string $str): void {}
 
     function zend_test_gh18756(): void {}
+
+    /** @compile-time-eval */
+    function zend_test_gh19792(): void {}
 }
 
 namespace ZendTestNS {
