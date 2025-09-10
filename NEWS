@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
     checks). (timwolla)
+  . Fixed hard_timeout with --enable-zend-max-execution-timers. (Appla)
 
 - Standard:
   . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
