@@ -624,7 +624,7 @@ ir_ref ir_const_bool(ir_ctx *ctx, bool c)
 ir_ref ir_const_char(ir_ctx *ctx, char c)
 {
 	ir_val val;
-	val.i64 = c;
+	val.i64 = (signed char)c;
 	return ir_const(ctx, val, IR_CHAR);
 }
 
