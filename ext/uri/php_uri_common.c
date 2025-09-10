@@ -19,7 +19,7 @@
 #include "Zend/zend_exceptions.h"
 #include "php_uri_common.h"
 
-const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, php_uri_property_name property_name)
+const php_uri_property_handler *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, php_uri_property_name property_name)
 {
 	switch (property_name) {
 		case PHP_URI_PROPERTY_NAME_SCHEME:
@@ -72,7 +72,7 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name prop
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
+	const php_uri_property_handler *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
 	ZEND_ASSERT(property_handler != NULL);
 
 	if (UNEXPECTED(property_handler->read_func(internal_uri, component_read_mode, return_value) == FAILURE)) {
@@ -96,7 +96,7 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_propert
 	 * case of an exception being thrown. */
 	RETVAL_OBJ(new_object);
 
-	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
+	const php_uri_property_handler *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
 	ZEND_ASSERT(property_handler != NULL);
 
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);

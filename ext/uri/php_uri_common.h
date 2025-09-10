@@ -58,10 +58,10 @@ typedef enum php_uri_property_name {
 	PHP_URI_PROPERTY_NAME_FRAGMENT,
 } php_uri_property_name;
 
-typedef struct uri_property_handler_t {
+typedef struct php_uri_property_handler {
 	uri_read_t read_func;
 	uri_write_t write_func;
-} uri_property_handler_t;
+} php_uri_property_handler;
 
 typedef struct uri_parser_t {
 	/**
@@ -127,14 +127,14 @@ typedef struct uri_parser_t {
 	void (*free_uri)(void *uri);
 
 	struct {
-		uri_property_handler_t scheme;
-		uri_property_handler_t username;
-		uri_property_handler_t password;
-		uri_property_handler_t host;
-		uri_property_handler_t port;
-		uri_property_handler_t path;
-		uri_property_handler_t query;
-		uri_property_handler_t fragment;
+		php_uri_property_handler scheme;
+		php_uri_property_handler username;
+		php_uri_property_handler password;
+		php_uri_property_handler host;
+		php_uri_property_handler port;
+		php_uri_property_handler path;
+		php_uri_property_handler query;
+		php_uri_property_handler fragment;
 	} property_handlers;
 } uri_parser_t;
 
@@ -168,7 +168,7 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
 #define PHP_URI_PARSER_PHP_PARSE_URL "parse_url"
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 
-const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, php_uri_property_name property_name);
+const php_uri_property_handler *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, php_uri_property_name property_name);
 void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode);
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
