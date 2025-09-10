@@ -9000,7 +9000,9 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 #endif
 		}
 		if (dst_reg != IR_REG_NONE) {
-			if (src_reg == IR_REG_NONE) {
+			if (IR_IS_CONST_REF(arg) ||
+			    src_reg == IR_REG_NONE ||
+			    (IR_REG_SPILLED(src_reg) && !IR_REGSET_IN(IR_REGSET_PRESERVED, IR_REG_NUM(src_reg)))) {
 				/* delay CONST->REG and MEM->REG moves to third pass */
 				do_pass3 = 1;
 			} else {
@@ -9068,7 +9070,9 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 #endif
 			}
 			if (dst_reg != IR_REG_NONE) {
-				if (src_reg == IR_REG_NONE) {
+				if (IR_IS_CONST_REF(arg) ||
+				    src_reg == IR_REG_NONE ||
+				    (IR_REG_SPILLED(src_reg) && !IR_REGSET_IN(IR_REGSET_PRESERVED, IR_REG_NUM(src_reg)))) {
 					if (IR_IS_TYPE_INT(type)) {
 						if (IR_IS_CONST_REF(arg)) {
 							if (type == IR_I8 || type == IR_I16) {

@@ -397,6 +397,15 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 				n++;
 			}
 			break;
+		case IR_INT2FP:
+		case IR_FP2INT:
+			insn = &ctx->ir_base[ref];
+			n = 0;
+			if (IR_IS_CONST_REF(insn->op1)) {
+				constraints->tmp_regs[n] = IR_TMP_REG(1, ctx->ir_base[insn->op1].type, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n++;
+			}
+			break;
 		case IR_MUL_PWR2:
 		case IR_DIV_PWR2:
 		case IR_MOD_PWR2:
@@ -404,8 +413,6 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 		case IR_SHIFT_CONST:
 		case IR_OP_INT:
 		case IR_OP_FP:
-		case IR_INT2FP:
-		case IR_FP2INT:
 		case IR_FP2FP:
 			insn = &ctx->ir_base[ref];
 			n = 0;
@@ -1398,7 +1405,7 @@ static void ir_load_local_addr(ir_ctx *ctx, ir_reg reg, ir_ref src)
 		|	add Rx(reg), Rx(base), #offset
 	} else {
 		ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, offset);
-		|	add sp, sp, Rx(IR_REG_INT_TMP)
+		|	add Rx(reg), sp, Rx(IR_REG_INT_TMP)
 	}
 }
 
@@ -1587,19 +1594,31 @@ static void ir_emit_prologue(ir_ctx *ctx)
 		offset = -(ctx->stack_frame_size+16);
 		if (aarch64_may_encode_imm7_addr_offset(offset, 8)) {
 			|	stp x29, x30, [sp, #offset]!
-		} else {
+		} else if (aarch64_may_encode_imm12(ctx->stack_frame_size+16)) {
 			|	sub sp, sp, #(ctx->stack_frame_size+16)
+			|	stp x29, x30, [sp]
+		} else {
+			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, ctx->stack_frame_size+16);
+			|	sub sp, sp, Rx(IR_REG_INT_TMP)
 			|	stp x29, x30, [sp]
 		}
 		|	mov x29, sp
 		if (ctx->call_stack_size) {
-			| sub sp, sp, #(ctx->call_stack_size)
+			if (aarch64_may_encode_imm12(ctx->call_stack_size)) {
+				|	sub sp, sp, #(ctx->call_stack_size)
+			} else {
+				ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, ctx->call_stack_size);
+				|	sub sp, sp, Rx(IR_REG_INT_TMP)
+			}
 		}
 	} else if (ctx->stack_frame_size + ctx->call_stack_size) {
 		if (ctx->fixed_stack_red_zone) {
 			IR_ASSERT(ctx->stack_frame_size + ctx->call_stack_size <= ctx->fixed_stack_red_zone);
+		} else if (aarch64_may_encode_imm12(ctx->stack_frame_size + ctx->call_stack_size)) {
+			|	sub sp, sp, #(ctx->stack_frame_size + ctx->call_stack_size)
 		} else {
-			| sub sp, sp, #(ctx->stack_frame_size + ctx->call_stack_size)
+			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, ctx->stack_frame_size + ctx->call_stack_size);
+			|	sub sp, sp, Rx(IR_REG_INT_TMP)
 		}
 	}
 	if (ctx->used_preserved_regs) {
@@ -1623,26 +1642,41 @@ static void ir_emit_prologue(ir_ctx *ctx)
 					offset -= sizeof(void*) * 2;
 					if (aarch64_may_encode_imm7_addr_offset(offset, 8)) {
 						|	stp Rx(prev), Rx(i), [Rx(fp), #offset]
-					} else {
-						IR_ASSERT(aarch64_may_encode_addr_offset(offset, 8));
+					} else if (aarch64_may_encode_addr_offset(offset + 8, 8)) {
 						|	str Rx(prev), [Rx(fp), #offset]
 						|	str Rx(i), [Rx(fp), #(offset+8)]
+					} else {
+						ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, offset);
+						|	str Rx(prev), [Rx(fp), Rx(IR_REG_INT_TMP)]
+						|	add Rx(IR_REG_INT_TMP), Rx(IR_REG_INT_TMP), #8
+						|	str Rx(i), [Rx(fp), Rx(IR_REG_INT_TMP)]
 					}
 					prev = IR_REG_NONE;
 				} else {
 					if (prev < IR_REG_FP_FIRST) {
 						offset -= sizeof(void*);
-						|	str Rx(prev), [Rx(fp), #offset]
-						offset -= sizeof(void*);
-						|	str Rd(i-IR_REG_FP_FIRST), [Rx(fp), #offset]
+						if (aarch64_may_encode_addr_offset(offset, 8)) {
+							|	str Rx(prev), [Rx(fp), #offset]
+							offset -= sizeof(void*);
+							|	str Rd(i-IR_REG_FP_FIRST), [Rx(fp), #offset]
+						} else {
+							ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, offset);
+							|	str Rx(prev), [Rx(fp), Rx(IR_REG_INT_TMP)]
+							|	sub Rx(IR_REG_INT_TMP), Rx(IR_REG_INT_TMP), #8
+							|	str Rd(i-IR_REG_FP_FIRST), [Rx(fp), Rx(IR_REG_INT_TMP)]
+						}
 					} else {
 						offset -= sizeof(void*) * 2;
 						if (aarch64_may_encode_imm7_addr_offset(offset, 8)) {
 							|	stp Rd(prev-IR_REG_FP_FIRST), Rd(i-IR_REG_FP_FIRST), [Rx(fp), #offset]
-						} else {
-							IR_ASSERT(aarch64_may_encode_addr_offset(offset, 8));
+						} else if (aarch64_may_encode_addr_offset(offset + 8, 8)) {
 							|	str Rd(prev-IR_REG_FP_FIRST), [Rx(fp), #offset]
 							|	str Rd(i-IR_REG_FP_FIRST), [Rx(fp), #(offset+8)]
+						} else {
+							ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, offset);
+							|	str Rd(prev-IR_REG_FP_FIRST), [Rx(fp), Rx(IR_REG_INT_TMP)]
+							|	add Rx(IR_REG_INT_TMP), Rx(IR_REG_INT_TMP), #8
+							|	str Rd(i-IR_REG_FP_FIRST), [Rx(fp), Rx(IR_REG_INT_TMP)]
 						}
 					}
 					prev = IR_REG_NONE;
@@ -1652,10 +1686,20 @@ static void ir_emit_prologue(ir_ctx *ctx)
 	    if (prev != IR_REG_NONE) {
 			if (prev < IR_REG_FP_FIRST) {
 				offset -= sizeof(void*);
-				|	str Rx(prev), [Rx(fp), #offset]
+				if (aarch64_may_encode_addr_offset(offset, 8)) {
+					|	str Rx(prev), [Rx(fp), #offset]
+				} else {
+					ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, offset);
+					|	str Rx(prev), [Rx(fp), Rx(IR_REG_INT_TMP)]
+				}
 			} else {
 				offset -= sizeof(void*);
-				|	str Rd(prev-IR_REG_FP_FIRST), [Rx(fp), #offset]
+				if (aarch64_may_encode_addr_offset(offset, 8)) {
+					|	str Rd(prev-IR_REG_FP_FIRST), [Rx(fp), #offset]
+				} else {
+					ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, offset);
+					|	str Rd(prev-IR_REG_FP_FIRST), [Rx(fp), Rx(IR_REG_INT_TMP)]
+				}
 			}
 		}
 	}
@@ -1685,10 +1729,14 @@ static void ir_emit_prologue(ir_ctx *ctx)
 				if (prev != IR_REG_NONE) {
 					if (aarch64_may_encode_imm7_addr_offset(offset, 8)) {
 						|	stp Rx(prev), Rx(int_reg_params[i]), [Rx(fp), #offset]
-					} else {
-						IR_ASSERT(aarch64_may_encode_addr_offset(offset, 8));
+					} else if (aarch64_may_encode_addr_offset(offset + 8, 8)) {
 						|	str Rx(prev), [Rx(fp), #offset]
 						|	str Rx(int_reg_params[i]), [Rx(fp), #(offset+8)]
+					} else {
+						ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, offset);
+						|	str Rx(prev), [Rx(fp), Rx(IR_REG_INT_TMP)]
+						|	add Rx(IR_REG_INT_TMP), Rx(IR_REG_INT_TMP), #8
+						|	str Rx(int_reg_params[i]), [Rx(fp), Rx(IR_REG_INT_TMP)]
 					}
 					prev = IR_REG_NONE;
 					offset += sizeof(void*) * 2;
@@ -1697,7 +1745,12 @@ static void ir_emit_prologue(ir_ctx *ctx)
 				}
 			}
 			if (prev != IR_REG_NONE) {
-				|	str Rx(prev), [Rx(fp), #offset]
+				if (aarch64_may_encode_addr_offset(offset + 8, 8)) {
+					|	str Rx(prev), [Rx(fp), #offset]
+				} else {
+					ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, offset);
+					|	str Rx(prev), [Rx(fp), Rx(IR_REG_INT_TMP)]
+				}
 				offset += sizeof(void*);
 			}
 		}
@@ -1782,15 +1835,22 @@ static void ir_emit_epilogue(ir_ctx *ctx)
 		}
 		if (aarch64_may_encode_imm7_addr_offset(ctx->stack_frame_size+16, 8)) {
 			|	ldp x29, x30, [sp], #(ctx->stack_frame_size+16)
-		} else {
+		} else if (aarch64_may_encode_imm12(ctx->stack_frame_size+16)) {
 			|	ldp x29, x30, [sp]
 			|	add sp, sp, #(ctx->stack_frame_size+16)
+		} else {
+			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, ctx->stack_frame_size+16);
+			|	ldp x29, x30, [sp]
+			|	add sp, sp, Rx(IR_REG_INT_TMP)
 		}
 	} else if (ctx->stack_frame_size + ctx->call_stack_size) {
 		if (ctx->fixed_stack_red_zone) {
 			IR_ASSERT(ctx->stack_frame_size + ctx->call_stack_size <= ctx->fixed_stack_red_zone);
-		} else {
+		} else if (aarch64_may_encode_imm12(ctx->stack_frame_size + ctx->call_stack_size)) {
 			| add sp, sp, #(ctx->stack_frame_size + ctx->call_stack_size)
+		} else {
+			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, ctx->stack_frame_size + ctx->call_stack_size);
+			| add sp, sp, Rx(IR_REG_INT_TMP)
 		}
 	}
 }
@@ -4808,7 +4868,9 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 			fp_param++;
 		}
 		if (dst_reg != IR_REG_NONE) {
-			if (src_reg == IR_REG_NONE) {
+			if (IR_IS_CONST_REF(arg) ||
+			    src_reg == IR_REG_NONE ||
+			    (IR_REG_SPILLED(src_reg) && !IR_REGSET_IN(IR_REGSET_PRESERVED, IR_REG_NUM(src_reg)))) {
 				/* delay CONST->REG and MEM->REG moves to third pass */
 				do_pass3 = 1;
 			} else {
@@ -4874,7 +4936,9 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 				fp_param++;
 			}
 			if (dst_reg != IR_REG_NONE) {
-				if (src_reg == IR_REG_NONE) {
+				if (IR_IS_CONST_REF(arg) ||
+				    src_reg == IR_REG_NONE ||
+				    (IR_REG_SPILLED(src_reg) && !IR_REGSET_IN(IR_REGSET_PRESERVED, IR_REG_NUM(src_reg)))) {
 					if (IR_IS_CONST_REF(arg) && IR_IS_TYPE_INT(type)) {
 						if (ir_type_size[type] == 1) {
 							type = IR_ADDR;
@@ -5473,7 +5537,8 @@ static void ir_emit_load_params(ir_ctx *ctx)
 	int32_t stack_offset = 0;
 
 	if (ctx->flags & IR_USE_FRAME_POINTER) {
-		stack_offset = sizeof(void*) * 2; /* skip old frame pointer and return address */
+		/* skip old frame pointer and return address */
+		stack_offset = sizeof(void*) * 2 + ctx->stack_frame_size + ctx->call_stack_size;
 	} else {
 		stack_offset = ctx->stack_frame_size + ctx->call_stack_size;
 	}
