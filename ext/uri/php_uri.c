@@ -62,7 +62,7 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 		return result;
 	}
 
-	const uri_parser_t *parser = internal_uri->parser;
+	const php_uri_parser *parser = internal_uri->parser;
 
 	zval tmp;
 	if (parser->property_handlers.scheme.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
@@ -100,7 +100,7 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	return result;
 }
 
-PHPAPI const uri_parser_t *php_uri_get_parser(zend_string *uri_parser_name)
+PHPAPI const php_uri_parser *php_uri_get_parser(zend_string *uri_parser_name)
 {
 	if (uri_parser_name == NULL) {
 		return zend_hash_str_find_ptr(&uri_parsers, PHP_URI_PARSER_PHP_PARSE_URL, sizeof(PHP_URI_PARSER_PHP_PARSE_URL) - 1);
@@ -109,7 +109,7 @@ PHPAPI const uri_parser_t *php_uri_get_parser(zend_string *uri_parser_name)
 	return zend_hash_find_ptr(&uri_parsers, uri_parser_name);
 }
 
-ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, bool silent)
+ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const php_uri_parser *uri_parser, const char *uri_str, size_t uri_str_len, bool silent)
 {
 	uri_internal_t *internal_uri = emalloc(sizeof(*internal_uri));
 	internal_uri->parser = uri_parser;
@@ -182,7 +182,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri)
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
-	const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, php_uri_component_read_mode read_mode, bool silent
+	const php_uri_parser *uri_parser, const char *uri_str, size_t uri_str_len, php_uri_component_read_mode read_mode, bool silent
 ) {
 	uri_internal_t *uri_internal = php_uri_parse(uri_parser, uri_str, uri_str_len, silent);
 	if (uri_internal == NULL) {
@@ -341,7 +341,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 		uri_object = Z_URI_OBJECT_P(return_value);
 	}
 
-	const uri_parser_t *uri_parser = uri_object->internal.parser;
+	const php_uri_parser *uri_parser = uri_object->internal.parser;
 
 	zval errors;
 	ZVAL_UNDEF(&errors);
@@ -1015,7 +1015,7 @@ PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
 	RETURN_ARR(uri_get_debug_properties(object));
 }
 
-PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const uri_parser_t *parser)
+PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser)
 {
 	uri_object_t *uri_object = zend_object_alloc(sizeof(*uri_object), class_type);
 
@@ -1068,7 +1068,7 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object)
 	return &new_uri_object->std;
 }
 
-PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser)
+PHPAPI zend_result php_uri_parser_register(const php_uri_parser *uri_parser)
 {
 	zend_string *key = zend_string_init_interned(uri_parser->name, strlen(uri_parser->name), true);
 

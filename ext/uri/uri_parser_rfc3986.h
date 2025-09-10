@@ -20,7 +20,7 @@
 #include <uriparser/Uri.h>
 #include "php_uri_common.h"
 
-extern const uri_parser_t php_uri_parser_rfc3986;
+extern const php_uri_parser php_uri_parser_rfc3986;
 
 typedef struct php_uri_parser_rfc3986_uris {
 	UriUriA uri;

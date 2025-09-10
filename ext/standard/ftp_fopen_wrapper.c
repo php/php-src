@@ -135,7 +135,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	char *transport;
 	int transport_len;
 
-	const uri_parser_t *uri_parser = php_stream_context_get_uri_parser("ftp", context);
+	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ftp", context);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
@@ -956,7 +956,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	int result;
 	char tmp_line[512];
 
-	const uri_parser_t *uri_parser = php_stream_context_get_uri_parser("ftp", context);
+	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ftp", context);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return 0;

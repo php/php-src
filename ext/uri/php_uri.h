@@ -39,7 +39,7 @@ typedef struct php_uri {
  * @param uri_parser The URI parser
  * @return SUCCESS in case of success, FAILURE otherwise
  */
-PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser);
+PHPAPI zend_result php_uri_parser_register(const php_uri_parser *uri_parser);
 
 /**
  * Returns the registered URI parser based on uri_parser_name.
@@ -47,9 +47,9 @@ PHPAPI zend_result php_uri_parser_register(const uri_parser_t *uri_parser);
  * @param uri_parser_name The URI parser name
  * @return The URI parser
  */
-PHPAPI const uri_parser_t *php_uri_get_parser(zend_string *uri_parser_name);
+PHPAPI const php_uri_parser *php_uri_get_parser(zend_string *uri_parser_name);
 
-ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, bool silent);
+ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const php_uri_parser *uri_parser, const char *uri_str, size_t uri_str_len, bool silent);
 
 /**
  * Retrieves the scheme component based on the read_mode and passes it to the zv ZVAL in case of success.
@@ -194,7 +194,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri);
  * @return The created php_uri struct in case of success, NULL otherwise
  */
 ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
-		const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, php_uri_component_read_mode read_mode, bool silent
+		const php_uri_parser *uri_parser, const char *uri_str, size_t uri_str_len, php_uri_component_read_mode read_mode, bool silent
 );
 
 /**

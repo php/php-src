@@ -431,7 +431,7 @@ int make_http_soap_request(
 	}
 
 	if (location != NULL && ZSTR_VAL(location)[0] != '\000') {
-		const uri_parser_t *uri_parser = php_uri_get_parser(uri_parser_class);
+		const php_uri_parser *uri_parser = php_uri_get_parser(uri_parser_class);
 		if (uri_parser == NULL) {
 			zend_argument_value_error(6, "must be a valid URI parser name");
 			return FALSE;
@@ -1148,7 +1148,7 @@ try_again:
 		char *loc;
 
 		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
-			const uri_parser_t *uri_parser = php_uri_get_parser(uri_parser_class);
+			const php_uri_parser *uri_parser = php_uri_get_parser(uri_parser_class);
 			if (uri_parser == NULL) {
 				efree(loc);
 				zend_argument_value_error(6, "must be a valid URI parser name");

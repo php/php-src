@@ -2472,7 +2472,7 @@ void php_stream_context_unset_option(php_stream_context *context,
 }
 /* }}} */
 
-PHPAPI const struct uri_parser_t *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context)
+PHPAPI const struct php_uri_parser *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context)
 {
 	if (context == NULL) {
 		return php_uri_get_parser(NULL);

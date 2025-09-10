@@ -609,7 +609,7 @@ static void php_uri_parser_rfc3986_free(void *uri)
 	efree(uriparser_uris);
 }
 
-const uri_parser_t php_uri_parser_rfc3986 = {
+const php_uri_parser php_uri_parser_rfc3986 = {
 	.name = PHP_URI_PARSER_RFC3986,
 	.parse_uri = php_uri_parser_rfc3986_parse,
 	.clone_uri = php_uri_parser_rfc3986_clone,

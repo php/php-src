@@ -2634,7 +2634,7 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		return NULL;
 	}
 
-	const uri_parser_t *uri_parser = php_stream_context_get_uri_parser("ssl", context);
+	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ssl", context);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
