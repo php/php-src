@@ -65,7 +65,7 @@ static zend_string *get_known_string_by_property_name(uri_property_name_t proper
 	}
 }
 
-void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, uri_component_read_mode_t component_read_mode)
+void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, php_uri_component_read_mode component_read_mode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 

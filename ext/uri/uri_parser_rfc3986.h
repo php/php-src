@@ -28,7 +28,7 @@ typedef struct php_uri_parser_rfc3986_uris {
 	bool normalized_uri_initialized;
 } php_uri_parser_rfc3986_uris;
 
-zend_result php_uri_parser_rfc3986_userinfo_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
+zend_result php_uri_parser_rfc3986_userinfo_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval);
 zend_result php_uri_parser_rfc3986_userinfo_write(struct uri_internal_t *internal_uri, zval *value, zval *errors);
 
 php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str, size_t uri_str_len, const php_uri_parser_rfc3986_uris *uriparser_base_url, bool silent);

@@ -64,7 +64,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_parser_t *
  * @param zv The output parameter containing the retrieved component as a ZVAL (either IS_STRING or IS_NULL).
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
-ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
 
 /**
  * Retrieves the username component based on the read_mode and passes it to the zv ZVAL in case of success.
@@ -79,7 +79,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_
  * @param zv The output parameter containing the retrieved component as a ZVAL (either IS_STRING or IS_NULL).
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
-ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_username(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_username(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
 
 /**
  * Retrieves the password component based on the read_mode and passes it to the zv ZVAL in case of success.
@@ -94,7 +94,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_username(const uri_interna
  * @param zv The output parameter containing the retrieved component as a ZVAL (either IS_STRING or IS_NULL).
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
-ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
 
 /**
  * Retrieves the host component based on the read_mode and passes it to the zv ZVAL in case of success.
@@ -109,7 +109,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_password(const uri_interna
  * @param zv The output parameter containing the retrieved component as a ZVAL (either IS_STRING or IS_NULL).
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
-ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_host(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_host(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
 
 /**
  * Retrieves the port component based on the read_mode and passes it to the zv ZVAL in case of success.
@@ -124,7 +124,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_host(const uri_internal_t 
  * @param zv The output parameter containing the retrieved component as a ZVAL (either IS_LONG or IS_NULL).
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
-ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_port(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_port(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
 
 /**
  * Retrieves the path component based on the read_mode and passes it to the zv ZVAL in case of success.
@@ -139,7 +139,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_port(const uri_internal_t 
  * @param zv The output parameter containing the retrieved component as a ZVAL (either IS_STRING or IS_NULL).
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
-ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_path(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_path(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
 
 /**
  * Retrieves the query component based on the read_mode and passes it to the zv ZVAL in case of success.
@@ -154,7 +154,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_path(const uri_internal_t 
  * @param zv The output parameter containing the retrieved component as a ZVAL (either IS_STRING or IS_NULL).
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
-ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_query(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_query(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
 
 /**
  * Retrieves the fragment component based on the read_mode and passes it to the zv ZVAL in case of success.
@@ -169,7 +169,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_query(const uri_internal_t
  * @param zv The output parameter containing the retrieved component as a ZVAL (either IS_STRING or IS_NULL).
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
-ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_fragment(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *zv);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_fragment(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
 
 /**
  * Frees the uri member within the provided internal URI.
@@ -194,7 +194,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri);
  * @return The created php_uri struct in case of success, NULL otherwise
  */
 ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
-		const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, uri_component_read_mode_t read_mode, bool silent
+		const uri_parser_t *uri_parser, const char *uri_str, size_t uri_str_len, php_uri_component_read_mode read_mode, bool silent
 );
 
 /**

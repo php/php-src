@@ -35,15 +35,15 @@ typedef enum php_uri_recomposition_mode {
 	PHP_URI_RECOMPOSITION_MODE_NORMALIZED_UNICODE,
 } php_uri_recomposition_mode;
 
-typedef enum {
+typedef enum php_uri_component_read_mode {
 	URI_COMPONENT_READ_RAW,
 	URI_COMPONENT_READ_NORMALIZED_ASCII,
 	URI_COMPONENT_READ_NORMALIZED_UNICODE,
-} uri_component_read_mode_t;
+} php_uri_component_read_mode;
 
 struct uri_internal_t;
 
-typedef zend_result (*uri_read_t)(const struct uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval);
+typedef zend_result (*uri_read_t)(const struct uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval);
 
 typedef zend_result (*uri_write_t)(struct uri_internal_t *internal_uri, zval *value, zval *errors);
 
@@ -169,7 +169,7 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 
 const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, uri_property_name_t property_name);
-void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, uri_component_read_mode_t component_read_mode);
+void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, php_uri_component_read_mode component_read_mode);
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
 void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
 void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);

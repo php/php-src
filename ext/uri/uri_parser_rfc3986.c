@@ -86,7 +86,7 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_normalized_uri(php_uri_parser_rfc3986
 	return &uriparser_uris->normalized_uri;
 }
 
-ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_reading(php_uri_parser_rfc3986_uris *uriparser_uris, uri_component_read_mode_t read_mode)
+ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_reading(php_uri_parser_rfc3986_uris *uriparser_uris, php_uri_component_read_mode read_mode)
 {
 	switch (read_mode) {
 		case URI_COMPONENT_READ_RAW:
@@ -106,7 +106,7 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_writing(uri_internal_t *inter
 	return &uriparser_uris->uri;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_scheme_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
@@ -143,7 +143,7 @@ static zend_result php_uri_parser_rfc3986_scheme_write(struct uri_internal_t *in
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
@@ -183,7 +183,7 @@ zend_result php_uri_parser_rfc3986_userinfo_write(struct uri_internal_t *interna
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
@@ -205,7 +205,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_username_read(c
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
@@ -224,7 +224,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_password_read(c
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_host_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
@@ -296,7 +296,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_long port_str_to_zend_long_checked(const char
 	return (zend_long)result;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_port_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
@@ -338,7 +338,7 @@ static zend_result php_uri_parser_rfc3986_port_write(struct uri_internal_t *inte
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_path_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
@@ -390,7 +390,7 @@ static zend_result php_uri_parser_rfc3986_path_write(struct uri_internal_t *inte
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_query_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
@@ -427,7 +427,7 @@ static zend_result php_uri_parser_rfc3986_query_write(struct uri_internal_t *int
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(const uri_internal_t *internal_uri, uri_component_read_mode_t read_mode, zval *retval)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_rfc3986_fragment_read(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *retval)
 {
 	const UriUriA *uriparser_uri = get_uri_for_reading(internal_uri->uri, read_mode);
 
