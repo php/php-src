@@ -436,7 +436,7 @@ int make_http_soap_request(
 			zend_argument_value_error(6, "must be a valid URI parser name");
 			return FALSE;
 		}
-		uri = php_uri_parse_to_struct(uri_parser, ZSTR_VAL(location), ZSTR_LEN(location), URI_COMPONENT_READ_RAW, true);
+		uri = php_uri_parse_to_struct(uri_parser, ZSTR_VAL(location), ZSTR_LEN(location), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	}
 
 	tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
@@ -1155,7 +1155,7 @@ try_again:
 				return FALSE;
 			}
 
-			php_uri *new_uri = php_uri_parse_to_struct(uri_parser, loc, strlen(loc), URI_COMPONENT_READ_RAW, true);
+			php_uri *new_uri = php_uri_parse_to_struct(uri_parser, loc, strlen(loc), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 			efree(loc);
 
 			if (new_uri != NULL) {

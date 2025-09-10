@@ -357,7 +357,7 @@ static zend_result php_uri_parser_whatwg_host_read(const struct uri_internal_t *
 		ZVAL_EMPTY_STRING(retval);
 	} else if (lexbor_uri->host.type != LXB_URL_HOST_TYPE__UNDEF) {
 		switch (read_mode) {
-			case URI_COMPONENT_READ_NORMALIZED_UNICODE: {
+			case PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: {
 				smart_str host_str = {0};
 				lxb_url_serialize_host_unicode(&lexbor_idna, &lexbor_uri->host, serialize_to_smart_str_callback, &host_str);
 				lxb_unicode_idna_clean(&lexbor_idna);
@@ -365,9 +365,9 @@ static zend_result php_uri_parser_whatwg_host_read(const struct uri_internal_t *
 				ZVAL_NEW_STR(retval, smart_str_extract(&host_str));
 				break;
 			}
-			case URI_COMPONENT_READ_NORMALIZED_ASCII:
+			case PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII:
 				ZEND_FALLTHROUGH;
-			case URI_COMPONENT_READ_RAW:
+			case PHP_URI_COMPONENT_READ_MODE_RAW:
 				ZVAL_STRINGL(retval, (const char *) lexbor_uri->host.u.domain.data, lexbor_uri->host.u.domain.length);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()

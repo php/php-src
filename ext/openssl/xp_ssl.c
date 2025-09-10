@@ -2647,7 +2647,7 @@ static char *php_openssl_get_url_name(const char *resourcename,
 
 	char * url_name = NULL;
 	zval host_zv;
-	zend_result result = php_uri_get_host(internal_uri, URI_COMPONENT_READ_RAW, &host_zv);
+	zend_result result = php_uri_get_host(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &host_zv);
 	if (result == SUCCESS && Z_TYPE(host_zv) == IS_STRING) {
 		const char * host = Z_STRVAL(host_zv);
 		size_t len = Z_STRLEN(host_zv);

@@ -89,11 +89,11 @@ ZEND_ATTRIBUTE_NONNULL static UriUriA *get_normalized_uri(php_uri_parser_rfc3986
 ZEND_ATTRIBUTE_NONNULL static UriUriA *get_uri_for_reading(php_uri_parser_rfc3986_uris *uriparser_uris, php_uri_component_read_mode read_mode)
 {
 	switch (read_mode) {
-		case URI_COMPONENT_READ_RAW:
+		case PHP_URI_COMPONENT_READ_MODE_RAW:
 			return &uriparser_uris->uri;
-		case URI_COMPONENT_READ_NORMALIZED_ASCII:
+		case PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII:
 			ZEND_FALLTHROUGH;
-		case URI_COMPONENT_READ_NORMALIZED_UNICODE:
+		case PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE:
 			return get_normalized_uri(uriparser_uris);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}

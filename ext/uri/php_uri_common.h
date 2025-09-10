@@ -36,9 +36,9 @@ typedef enum php_uri_recomposition_mode {
 } php_uri_recomposition_mode;
 
 typedef enum php_uri_component_read_mode {
-	URI_COMPONENT_READ_RAW,
-	URI_COMPONENT_READ_NORMALIZED_ASCII,
-	URI_COMPONENT_READ_NORMALIZED_UNICODE,
+	PHP_URI_COMPONENT_READ_MODE_RAW,
+	PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII,
+	PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE,
 } php_uri_component_read_mode;
 
 struct uri_internal_t;

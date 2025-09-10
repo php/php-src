@@ -24,10 +24,10 @@
 static zend_string *decode_component(zend_string *in, php_uri_component_read_mode read_mode)
 {
 	switch (read_mode) {
-	case URI_COMPONENT_READ_RAW:
+	case PHP_URI_COMPONENT_READ_MODE_RAW:
 		return zend_string_copy(in);
-	case URI_COMPONENT_READ_NORMALIZED_ASCII:
-	case URI_COMPONENT_READ_NORMALIZED_UNICODE: {
+	case PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII:
+	case PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: {
 		zend_string *out = zend_string_alloc(ZSTR_LEN(in), false);
 
 		ZSTR_LEN(out) = php_raw_url_decode_ex(ZSTR_VAL(out), ZSTR_VAL(in), ZSTR_LEN(in));

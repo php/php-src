@@ -65,35 +65,35 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	const uri_parser_t *parser = internal_uri->parser;
 
 	zval tmp;
-	if (parser->property_handlers.scheme.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.scheme.read_func(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_SCHEME), &tmp);
 	}
 
-	if (parser->property_handlers.username.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.username.read_func(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_USERNAME), &tmp);
 	}
 
-	if (parser->property_handlers.password.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.password.read_func(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PASSWORD), &tmp);
 	}
 
-	if (parser->property_handlers.host.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.host.read_func(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
 	}
 
-	if (parser->property_handlers.port.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.port.read_func(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
 	}
 
-	if (parser->property_handlers.path.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.path.read_func(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PATH), &tmp);
 	}
 
-	if (parser->property_handlers.query.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.query.read_func(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_QUERY), &tmp);
 	}
 
-	if (parser->property_handlers.fragment.read_func(internal_uri, URI_COMPONENT_READ_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handlers.fragment.read_func(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_FRAGMENT), &tmp);
 	}
 
@@ -516,12 +516,12 @@ PHP_METHOD(Uri_WhatWg_Url, __construct)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getScheme)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawScheme)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, URI_COMPONENT_READ_RAW);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withScheme)
@@ -544,12 +544,12 @@ static void rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAMETERS, php_uri_componen
 
 PHP_METHOD(Uri_Rfc3986_Uri, getUserInfo)
 {
-	rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawUserInfo)
 {
-	rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_COMPONENT_READ_RAW);
+	rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
@@ -590,32 +590,32 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getUsername)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_USERNAME, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_USERNAME, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawUsername)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_USERNAME, URI_COMPONENT_READ_RAW);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_USERNAME, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getPassword)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PASSWORD, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PASSWORD, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawPassword)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PASSWORD, URI_COMPONENT_READ_RAW);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PASSWORD, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getHost)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawHost)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, URI_COMPONENT_READ_RAW);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withHost)
@@ -625,7 +625,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withHost)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getPort)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PORT, URI_COMPONENT_READ_RAW);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PORT, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withPort)
@@ -635,12 +635,12 @@ PHP_METHOD(Uri_Rfc3986_Uri, withPort)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getPath)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PATH, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PATH, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawPath)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PATH, URI_COMPONENT_READ_RAW);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_PATH, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withPath)
@@ -650,12 +650,12 @@ PHP_METHOD(Uri_Rfc3986_Uri, withPath)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getQuery)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_QUERY, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_QUERY, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawQuery)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_QUERY, URI_COMPONENT_READ_RAW);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_QUERY, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withQuery)
@@ -665,12 +665,12 @@ PHP_METHOD(Uri_Rfc3986_Uri, withQuery)
 
 PHP_METHOD(Uri_Rfc3986_Uri, getFragment)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, getRawFragment)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, URI_COMPONENT_READ_RAW);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, PHP_URI_COMPONENT_READ_MODE_RAW);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, withFragment)
@@ -888,7 +888,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __debugInfo)
 
 PHP_METHOD(Uri_WhatWg_Url, getScheme)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_SCHEME, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, withScheme)
@@ -908,17 +908,17 @@ PHP_METHOD(Uri_WhatWg_Url, withPassword)
 
 PHP_METHOD(Uri_WhatWg_Url, getAsciiHost)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, URI_COMPONENT_READ_NORMALIZED_ASCII);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, getUnicodeHost)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, URI_COMPONENT_READ_NORMALIZED_UNICODE);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_HOST, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, getFragment)
 {
-	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, URI_COMPONENT_READ_NORMALIZED_UNICODE);
+	uri_read_component(INTERNAL_FUNCTION_PARAM_PASSTHRU, URI_PROPERTY_NAME_FRAGMENT, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, equals)

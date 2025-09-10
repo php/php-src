@@ -55,9 +55,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_parser_t *
  * Retrieves the scheme component based on the read_mode and passes it to the zv ZVAL in case of success.
  * 
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param internal_uri The internal URI whose uri member is used to retrieve the component
  * @param read_mode The read mode
@@ -70,9 +70,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_
  * Retrieves the username component based on the read_mode and passes it to the zv ZVAL in case of success.
  *
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param internal_uri The internal URI whose uri member is used to retrieve the component
  * @param read_mode The read mode
@@ -85,9 +85,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_username(const uri_interna
  * Retrieves the password component based on the read_mode and passes it to the zv ZVAL in case of success.
  *
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param internal_uri The internal URI whose uri member is used to retrieve the component
  * @param read_mode The read mode
@@ -100,9 +100,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_password(const uri_interna
  * Retrieves the host component based on the read_mode and passes it to the zv ZVAL in case of success.
  *
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param internal_uri The internal URI whose uri member is used to retrieve the component
  * @param read_mode The read mode
@@ -115,9 +115,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_host(const uri_internal_t 
  * Retrieves the port component based on the read_mode and passes it to the zv ZVAL in case of success.
  *
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param internal_uri The internal URI whose uri member is used to retrieve the component
  * @param read_mode The read mode
@@ -130,9 +130,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_port(const uri_internal_t 
  * Retrieves the path component based on the read_mode and passes it to the zv ZVAL in case of success.
  *
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param internal_uri The internal URI whose uri member is used to retrieve the component
  * @param read_mode The read mode
@@ -145,9 +145,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_path(const uri_internal_t 
  * Retrieves the query component based on the read_mode and passes it to the zv ZVAL in case of success.
  *
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param internal_uri The internal URI whose uri member is used to retrieve the component
  * @param read_mode The read mode
@@ -160,9 +160,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_query(const uri_internal_t
  * Retrieves the fragment component based on the read_mode and passes it to the zv ZVAL in case of success.
  *
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param internal_uri The internal URI whose uri member is used to retrieve the component
  * @param read_mode The read mode
@@ -182,9 +182,9 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri);
  * Creates a new php_uri struct containing all the URI components. The components are retrieved based on the read_mode parameter.
  *
  * Read_mode can be one of the following:
- * - URI_COMPONENT_READ_RAW: Retrieves the raw, non-normalized variant of the URI component
- * - URI_COMPONENT_READ_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
- * - URI_COMPONENT_READ_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
+ * - PHP_URI_COMPONENT_READ_MODE_RAW: Retrieves the raw, non-normalized variant of the URI component
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
+ * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
  * @param uri_parser The URI parser whose parse_uri() handler is called
  * @param uri_str The input string that is going to be parsed
