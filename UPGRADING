@@ -392,6 +392,10 @@ PHP 8.5 UPGRADE NOTES
     $_GET or $_SERVER['QUERY_STRING'] to access the information, after verifying
     that the usage is safe.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_register_argc_argv_ini_directive
+  . The __sleep() magic method has been deprecated. The __serialize() magic
+    method should be used instead, or at the same time if compatibility with
+    PHP 7 is required.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_sleep_and_wakeup_magic_methods
 
 - Curl:
   . The curl_close() function has been deprecated, as CurlHandle objects are
