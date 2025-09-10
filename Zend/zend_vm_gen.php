@@ -919,10 +919,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
     }
 
     /* Remove unnecessary ';' */
-    $code = preg_replace('/^\s*;\s*$/m', '', $code);
-
-    /* Remove WS */
-    $code = preg_replace('/[ \t]+\n/m', "\n", $code);
+    $code = preg_replace('/^\s*;\s*$/m', "\n", $code);
 
     out($f, $code);
 }
