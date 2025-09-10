@@ -28,12 +28,12 @@ extern zend_class_entry *uri_whatwg_invalid_url_exception_ce;
 extern zend_class_entry *uri_whatwg_url_validation_error_type_ce;
 extern zend_class_entry *uri_whatwg_url_validation_error_ce;
 
-typedef enum {
+typedef enum php_uri_recomposition_mode {
 	URI_RECOMPOSITION_RAW_ASCII,
 	URI_RECOMPOSITION_RAW_UNICODE,
 	URI_RECOMPOSITION_NORMALIZED_ASCII,
 	URI_RECOMPOSITION_NORMALIZED_UNICODE,
-} uri_recomposition_mode_t;
+} php_uri_recomposition_mode;
 
 typedef enum {
 	URI_COMPONENT_READ_RAW,
@@ -117,7 +117,7 @@ typedef struct uri_parser_t {
 	 * @param exclude_fragment Whether the fragment component should be part of the recomposed URI
 	 * @return The recomposed URI as a non-persistent zend_string
 	 */
-	zend_string *(*uri_to_string)(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment);
+	zend_string *(*uri_to_string)(void *uri, php_uri_recomposition_mode recomposition_mode, bool exclude_fragment);
 
 	/**
 	 * Frees the provided URI.

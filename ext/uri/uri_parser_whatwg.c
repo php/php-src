@@ -594,7 +594,7 @@ static void *php_uri_parser_whatwg_clone(void *uri)
 	return lxb_url_clone(lexbor_parser.mraw, lexbor_uri);
 }
 
-static zend_string *php_uri_parser_whatwg_to_string(void *uri, uri_recomposition_mode_t recomposition_mode, bool exclude_fragment)
+static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposition_mode recomposition_mode, bool exclude_fragment)
 {
 	const lxb_url_t *lexbor_uri = uri;
 	smart_str uri_str = {0};
