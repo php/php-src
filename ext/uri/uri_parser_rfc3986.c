@@ -611,10 +611,10 @@ static void php_uri_parser_rfc3986_free(void *uri)
 
 const php_uri_parser php_uri_parser_rfc3986 = {
 	.name = PHP_URI_PARSER_RFC3986,
-	.parse_uri = php_uri_parser_rfc3986_parse,
-	.clone_uri = php_uri_parser_rfc3986_clone,
-	.uri_to_string = php_uri_parser_rfc3986_to_string,
-	.free_uri = php_uri_parser_rfc3986_free,
+	.parse = php_uri_parser_rfc3986_parse,
+	.clone = php_uri_parser_rfc3986_clone,
+	.to_string = php_uri_parser_rfc3986_to_string,
+	.free = php_uri_parser_rfc3986_free,
 	{
 		.scheme = {.read = php_uri_parser_rfc3986_scheme_read, .write = php_uri_parser_rfc3986_scheme_write},
 		.username = {.read = php_uri_parser_rfc3986_username_read, .write = NULL},

@@ -91,7 +91,7 @@ typedef struct php_uri_parser {
 	 * @param errors An out parameter that stores additional error information
 	 * @param silent Whether to throw a Uri\InvalidUriException in case of failure
 	 */
-	void *(*parse_uri)(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent);
+	void *(*parse)(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent);
 
 	/**
 	 * Clones a URI to a new URI.
@@ -100,7 +100,7 @@ typedef struct php_uri_parser {
 	 * @param uri The input URI
 	 * @return The cloned URI
 	 */
-	void *(*clone_uri)(void *uri);
+	void *(*clone)(void *uri);
 
 	/**
 	 * Recomposes a URI as a string according to the recomposition_mode and exclude_fragment parameters.
@@ -117,14 +117,14 @@ typedef struct php_uri_parser {
 	 * @param exclude_fragment Whether the fragment component should be part of the recomposed URI
 	 * @return The recomposed URI as a non-persistent zend_string
 	 */
-	zend_string *(*uri_to_string)(void *uri, php_uri_recomposition_mode recomposition_mode, bool exclude_fragment);
+	zend_string *(*to_string)(void *uri, php_uri_recomposition_mode recomposition_mode, bool exclude_fragment);
 
 	/**
 	 * Frees the provided URI.
 	 *
 	 * @param uri The URI to free. Must do nothing if NULL.
 	 */
-	void (*free_uri)(void *uri);
+	void (*free)(void *uri);
 
 	struct {
 		php_uri_property_handler scheme;
@@ -135,7 +135,7 @@ typedef struct php_uri_parser {
 		php_uri_property_handler path;
 		php_uri_property_handler query;
 		php_uri_property_handler fragment;
-	} property_handlers;
+	} property_handler;
 } php_uri_parser;
 
 typedef struct uri_internal_t {

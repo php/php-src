@@ -186,7 +186,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri);
  * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII: Retrieves the normalized variant of the requested URI component that must only contain ASCII characters
  * - PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE: Retrieves the normalized variant of the requested URI component that may contain Unicode codepoints
  *
- * @param uri_parser The URI parser whose parse_uri() handler is called
+ * @param uri_parser The URI parser whose parse() handler is called
  * @param uri_str The input string that is going to be parsed
  * @param uri_str_len Length of the input string
  * @param read_mode The read mode based on which components are retrieved

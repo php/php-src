@@ -626,10 +626,10 @@ static void php_uri_parser_whatwg_free(void *uri)
 
 const php_uri_parser php_uri_parser_whatwg = {
 	.name = PHP_URI_PARSER_WHATWG,
-	.parse_uri = php_uri_parser_whatwg_parse,
-	.clone_uri = php_uri_parser_whatwg_clone,
-	.uri_to_string = php_uri_parser_whatwg_to_string,
-	.free_uri = php_uri_parser_whatwg_free,
+	.parse = php_uri_parser_whatwg_parse,
+	.clone = php_uri_parser_whatwg_clone,
+	.to_string = php_uri_parser_whatwg_to_string,
+	.free = php_uri_parser_whatwg_free,
 	{
 		.scheme = {.read = php_uri_parser_whatwg_scheme_read, .write = php_uri_parser_whatwg_scheme_write},
 		.username = {.read = php_uri_parser_whatwg_username_read, .write = php_uri_parser_whatwg_username_write},

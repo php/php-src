@@ -167,10 +167,10 @@ static void uri_parser_php_parse_url_free(void *uri)
 
 const php_uri_parser php_uri_parser_php_parse_url = {
 	.name = PHP_URI_PARSER_PHP_PARSE_URL,
-	.parse_uri = uri_parser_php_parse_url_parse,
-	.clone_uri = NULL,
-	.uri_to_string = NULL,
-	.free_uri = uri_parser_php_parse_url_free,
+	.parse = uri_parser_php_parse_url_parse,
+	.clone = NULL,
+	.to_string = NULL,
+	.free = uri_parser_php_parse_url_free,
 	{
 		.scheme = {.read = uri_parser_php_parse_url_scheme_read, .write = NULL},
 		.username = {.read = uri_parser_php_parse_url_username_read, .write = NULL},

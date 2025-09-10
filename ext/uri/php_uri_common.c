@@ -23,21 +23,21 @@ const php_uri_property_handler *uri_property_handler_from_internal_uri(const uri
 {
 	switch (property_name) {
 		case PHP_URI_PROPERTY_NAME_SCHEME:
-			return &internal_uri->parser->property_handlers.scheme;
+			return &internal_uri->parser->property_handler.scheme;
 		case PHP_URI_PROPERTY_NAME_USERNAME:
-			return &internal_uri->parser->property_handlers.username;
+			return &internal_uri->parser->property_handler.username;
 		case PHP_URI_PROPERTY_NAME_PASSWORD:
-			return &internal_uri->parser->property_handlers.password;
+			return &internal_uri->parser->property_handler.password;
 		case PHP_URI_PROPERTY_NAME_HOST:
-			return &internal_uri->parser->property_handlers.host;
+			return &internal_uri->parser->property_handler.host;
 		case PHP_URI_PROPERTY_NAME_PORT:
-			return &internal_uri->parser->property_handlers.port;
+			return &internal_uri->parser->property_handler.port;
 		case PHP_URI_PROPERTY_NAME_PATH:
-			return &internal_uri->parser->property_handlers.path;
+			return &internal_uri->parser->property_handler.path;
 		case PHP_URI_PROPERTY_NAME_QUERY:
-			return &internal_uri->parser->property_handlers.query;
+			return &internal_uri->parser->property_handler.query;
 		case PHP_URI_PROPERTY_NAME_FRAGMENT:
-			return &internal_uri->parser->property_handlers.fragment;
+			return &internal_uri->parser->property_handler.fragment;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
