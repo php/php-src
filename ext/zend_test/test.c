@@ -1528,3 +1528,12 @@ static PHP_FUNCTION(zend_test_gh18756)
 	zend_mm_gc(heap);
 	zend_mm_shutdown(heap, true, false);
 }
+
+static PHP_FUNCTION(zend_test_gh19792)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETVAL_STRING("this is a non-interned string");
+	zend_error(E_WARNING, "a warning");
+	zend_throw_error(NULL, "an exception");
+}

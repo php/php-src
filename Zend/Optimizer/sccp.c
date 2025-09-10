@@ -842,9 +842,7 @@ static inline zend_result ct_eval_func_call(
 		zval_ptr_dtor(result);
 		zend_clear_exception();
 		retval = FAILURE;
-	}
-
-	if (EG(capture_warnings_during_sccp) > 1) {
+	} else if (EG(capture_warnings_during_sccp) > 1) {
 		zval_ptr_dtor(result);
 		retval = FAILURE;
 	}
