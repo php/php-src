@@ -27,7 +27,7 @@ typedef struct php_uri {
 	zend_string *user;
 	zend_string *password;
 	zend_string *host;
-	unsigned short port;
+	zend_long port;
 	zend_string *path;
 	zend_string *query;
 	zend_string *fragment;
