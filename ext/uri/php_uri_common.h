@@ -47,7 +47,7 @@ typedef zend_result (*uri_read_t)(const struct uri_internal_t *internal_uri, php
 
 typedef zend_result (*uri_write_t)(struct uri_internal_t *internal_uri, zval *value, zval *errors);
 
-typedef enum {
+typedef enum php_uri_property_name {
 	URI_PROPERTY_NAME_SCHEME,
 	URI_PROPERTY_NAME_USERNAME,
 	URI_PROPERTY_NAME_PASSWORD,
@@ -56,7 +56,7 @@ typedef enum {
 	URI_PROPERTY_NAME_PATH,
 	URI_PROPERTY_NAME_QUERY,
 	URI_PROPERTY_NAME_FRAGMENT,
-} uri_property_name_t;
+} php_uri_property_name;
 
 typedef struct uri_property_handler_t {
 	uri_read_t read_func;
@@ -168,11 +168,11 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
 #define PHP_URI_PARSER_PHP_PARSE_URL "parse_url"
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 
-const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, uri_property_name_t property_name);
-void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name, php_uri_component_read_mode component_read_mode);
-void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
-void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
-void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, uri_property_name_t property_name);
+const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, php_uri_property_name property_name);
+void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode);
+void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
+void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
+void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 
 #define URI_ASSERT_INITIALIZATION(internal_uri) do { \
 	ZEND_ASSERT(internal_uri != NULL && internal_uri->uri != NULL); \

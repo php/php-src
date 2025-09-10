@@ -123,7 +123,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const uri_parser_t *
 	return internal_uri;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_get_property(const uri_internal_t *internal_uri, uri_property_name_t property_name, php_uri_component_read_mode read_mode, zval *zv)
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_get_property(const uri_internal_t *internal_uri, php_uri_property_name property_name, php_uri_component_read_mode read_mode, zval *zv)
 {
 	const uri_property_handler_t *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
 	if (property_handler == NULL) {
