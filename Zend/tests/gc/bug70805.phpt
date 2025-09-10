@@ -28,6 +28,7 @@ $i = 0;
 $c = new A;
 $array = array($c); //This is used to leave a room for $GLOBALS["a"]
 unset($c);
+flush(); // handle interrupts
 
 while ($i++ < 9998) {
     $t = [];
@@ -37,11 +38,13 @@ while ($i++ < 9998) {
 $t = [new C];
 $t[] = &$t;
 unset($t); // This is used to trigger C::__destruct while doing gc_collect_roots
+flush(); // handle interrupts
 
 $e = $a;
 unset($a); // This one cannot be put into roots buf because it's full, thus gc_collect_roots will be called,
            // but C::__destructor which is called in gc_collect_roots will put $a into buf
            // which will make $a be put into gc roots buf twice
+flush(); // handle interrupts
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
