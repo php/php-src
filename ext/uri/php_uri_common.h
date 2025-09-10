@@ -48,14 +48,14 @@ typedef zend_result (*uri_read_t)(const struct uri_internal_t *internal_uri, php
 typedef zend_result (*uri_write_t)(struct uri_internal_t *internal_uri, zval *value, zval *errors);
 
 typedef enum php_uri_property_name {
-	URI_PROPERTY_NAME_SCHEME,
-	URI_PROPERTY_NAME_USERNAME,
-	URI_PROPERTY_NAME_PASSWORD,
-	URI_PROPERTY_NAME_HOST,
-	URI_PROPERTY_NAME_PORT,
-	URI_PROPERTY_NAME_PATH,
-	URI_PROPERTY_NAME_QUERY,
-	URI_PROPERTY_NAME_FRAGMENT,
+	PHP_URI_PROPERTY_NAME_SCHEME,
+	PHP_URI_PROPERTY_NAME_USERNAME,
+	PHP_URI_PROPERTY_NAME_PASSWORD,
+	PHP_URI_PROPERTY_NAME_HOST,
+	PHP_URI_PROPERTY_NAME_PORT,
+	PHP_URI_PROPERTY_NAME_PATH,
+	PHP_URI_PROPERTY_NAME_QUERY,
+	PHP_URI_PROPERTY_NAME_FRAGMENT,
 } php_uri_property_name;
 
 typedef struct uri_property_handler_t {

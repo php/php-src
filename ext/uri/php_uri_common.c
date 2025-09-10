@@ -22,21 +22,21 @@
 const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, php_uri_property_name property_name)
 {
 	switch (property_name) {
-		case URI_PROPERTY_NAME_SCHEME:
+		case PHP_URI_PROPERTY_NAME_SCHEME:
 			return &internal_uri->parser->property_handlers.scheme;
-		case URI_PROPERTY_NAME_USERNAME:
+		case PHP_URI_PROPERTY_NAME_USERNAME:
 			return &internal_uri->parser->property_handlers.username;
-		case URI_PROPERTY_NAME_PASSWORD:
+		case PHP_URI_PROPERTY_NAME_PASSWORD:
 			return &internal_uri->parser->property_handlers.password;
-		case URI_PROPERTY_NAME_HOST:
+		case PHP_URI_PROPERTY_NAME_HOST:
 			return &internal_uri->parser->property_handlers.host;
-		case URI_PROPERTY_NAME_PORT:
+		case PHP_URI_PROPERTY_NAME_PORT:
 			return &internal_uri->parser->property_handlers.port;
-		case URI_PROPERTY_NAME_PATH:
+		case PHP_URI_PROPERTY_NAME_PATH:
 			return &internal_uri->parser->property_handlers.path;
-		case URI_PROPERTY_NAME_QUERY:
+		case PHP_URI_PROPERTY_NAME_QUERY:
 			return &internal_uri->parser->property_handlers.query;
-		case URI_PROPERTY_NAME_FRAGMENT:
+		case PHP_URI_PROPERTY_NAME_FRAGMENT:
 			return &internal_uri->parser->property_handlers.fragment;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
@@ -45,21 +45,21 @@ const uri_property_handler_t *uri_property_handler_from_internal_uri(const uri_i
 static zend_string *get_known_string_by_property_name(php_uri_property_name property_name)
 {
 	switch (property_name) {
-		case URI_PROPERTY_NAME_SCHEME:
+		case PHP_URI_PROPERTY_NAME_SCHEME:
 			return ZSTR_KNOWN(ZEND_STR_SCHEME);
-		case URI_PROPERTY_NAME_USERNAME:
+		case PHP_URI_PROPERTY_NAME_USERNAME:
 			return ZSTR_KNOWN(ZEND_STR_USERNAME);
-		case URI_PROPERTY_NAME_PASSWORD:
+		case PHP_URI_PROPERTY_NAME_PASSWORD:
 			return ZSTR_KNOWN(ZEND_STR_PASSWORD);
-		case URI_PROPERTY_NAME_HOST:
+		case PHP_URI_PROPERTY_NAME_HOST:
 			return ZSTR_KNOWN(ZEND_STR_HOST);
-		case URI_PROPERTY_NAME_PORT:
+		case PHP_URI_PROPERTY_NAME_PORT:
 			return ZSTR_KNOWN(ZEND_STR_PORT);
-		case URI_PROPERTY_NAME_PATH:
+		case PHP_URI_PROPERTY_NAME_PATH:
 			return ZSTR_KNOWN(ZEND_STR_PATH);
-		case URI_PROPERTY_NAME_QUERY:
+		case PHP_URI_PROPERTY_NAME_QUERY:
 			return ZSTR_KNOWN(ZEND_STR_QUERY);
-		case URI_PROPERTY_NAME_FRAGMENT:
+		case PHP_URI_PROPERTY_NAME_FRAGMENT:
 			return ZSTR_KNOWN(ZEND_STR_FRAGMENT);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
