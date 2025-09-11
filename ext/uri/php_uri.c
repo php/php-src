@@ -58,42 +58,43 @@ static HashTable *uri_get_debug_properties(zend_object *object)
 	HashTable *std_properties = zend_std_get_properties(object);
 	HashTable *result = zend_array_dup(std_properties);
 
-	if (UNEXPECTED(internal_uri->uri == NULL)) {
+	const php_uri_parser * const parser = internal_uri->parser;
+	void * const uri = internal_uri->uri;
+
+	if (UNEXPECTED(uri == NULL)) {
 		return result;
 	}
 
-	const php_uri_parser *parser = internal_uri->parser;
-
 	zval tmp;
-	if (parser->property_handler.scheme.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handler.scheme.read(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_SCHEME), &tmp);
 	}
 
-	if (parser->property_handler.username.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handler.username.read(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_USERNAME), &tmp);
 	}
 
-	if (parser->property_handler.password.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handler.password.read(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PASSWORD), &tmp);
 	}
 
-	if (parser->property_handler.host.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handler.host.read(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
 	}
 
-	if (parser->property_handler.port.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handler.port.read(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
 	}
 
-	if (parser->property_handler.path.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handler.path.read(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_PATH), &tmp);
 	}
 
-	if (parser->property_handler.query.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handler.query.read(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_QUERY), &tmp);
 	}
 
-	if (parser->property_handler.fragment.read(internal_uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
+	if (parser->property_handler.fragment.read(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &tmp) == SUCCESS) {
 		zend_hash_update(result, ZSTR_KNOWN(ZEND_STR_FRAGMENT), &tmp);
 	}
 
@@ -130,7 +131,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_get_property(const uri_interna
 		return FAILURE;
 	}
 
-	return property_handler->read(internal_uri, read_mode, zv);
+	return property_handler->read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
@@ -536,7 +537,7 @@ static void rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAMETERS, php_uri_componen
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_read(internal_uri, read_mode, return_value) == FAILURE)) {
+	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_read(internal_uri->uri, read_mode, return_value) == FAILURE)) {
 		zend_throw_error(NULL, "The userinfo component cannot be retrieved");
 		RETURN_THROWS();
 	}
@@ -583,7 +584,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
 	URI_ASSERT_INITIALIZATION(new_internal_uri);
 
-	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_write(new_internal_uri, &zv, NULL) == FAILURE)) {
+	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_write(new_internal_uri->uri, &zv, NULL) == FAILURE)) {
 		RETURN_THROWS();
 	}
 }
