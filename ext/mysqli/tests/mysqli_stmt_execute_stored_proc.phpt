@@ -24,7 +24,7 @@ if (mysqli_get_server_version($link) <= 50000) {
     if (!mysqli_query($link, 'DROP PROCEDURE IF EXISTS p'))
         printf("[009] [%d] %s.\n", mysqli_errno($link), mysqli_error($link));
 
-    if (mysqli_real_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(25)) BEGIN SELECT VERSION() INTO ver_param; END;')) {
+    if (mysqli_real_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(40)) BEGIN SELECT VERSION() INTO ver_param; END;')) {
         /* no result set, one output parameter */
         if (!$stmt = mysqli_prepare($link, 'CALL p(@version)'))
             printf("[011] Cannot prepare CALL, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -68,7 +68,7 @@ if (mysqli_get_server_version($link) <= 50000) {
         if (!mysqli_query($link, 'DROP PROCEDURE IF EXISTS p'))
             printf("[019] [%d] %s.\n", mysqli_errno($link), mysqli_error($link));
 
-        if (mysqli_real_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(25)) BEGIN SELECT VERSION() INTO ver_param; END;')) {
+        if (mysqli_real_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(40)) BEGIN SELECT VERSION() INTO ver_param; END;')) {
             // no result set, one output parameter
             if (!$stmt = mysqli_prepare($link, 'CALL p(@version)'))
                 printf("[020] Cannot prepare CALL, [%d] %s\n", mysqli_errno($link), mysqli_error($link));

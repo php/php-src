@@ -5,6 +5,7 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
+if (getenv('IS_MARIADB_TEST')) die('skip have not yet configured MariaDB to use SSL');
 ?>
 --FILE--
 <?php
