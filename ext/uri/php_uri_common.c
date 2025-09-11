@@ -73,7 +73,6 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name prop
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	const php_uri_property_handler *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
-	ZEND_ASSERT(property_handler != NULL);
 
 	if (UNEXPECTED(property_handler->read(internal_uri->uri, component_read_mode, return_value) == FAILURE)) {
 		zend_throw_error(NULL, "The %s component cannot be retrieved", ZSTR_VAL(get_known_string_by_property_name(property_name)));
@@ -97,7 +96,6 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_propert
 	RETVAL_OBJ(new_object);
 
 	const php_uri_property_handler *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
-	ZEND_ASSERT(property_handler != NULL);
 
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
 	URI_ASSERT_INITIALIZATION(new_internal_uri);
