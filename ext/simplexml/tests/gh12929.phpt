@@ -10,7 +10,7 @@ try {
     file_get_contents($scheme . "://x");
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
-    echo $e->getPrevious()->getMessage(), "\n";
+    var_dump($e->getPrevious());
 }
 
 $scheme = "foo2";
@@ -19,11 +19,11 @@ try {
     file_get_contents($scheme . "://x");
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
-    echo $e->getPrevious()->getMessage(), "\n";
+    var_dump($e->getPrevious());
 }
 ?>
 --EXPECT--
-It's not possible to assign a complex type to properties, resource given
 SimpleXMLElement is not properly initialized
-It's not possible to assign a complex type to properties, resource given
+NULL
 SimpleXMLElement is not properly initialized
+NULL
