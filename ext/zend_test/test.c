@@ -1731,3 +1731,12 @@ static PHP_FUNCTION(zend_test_opcache_preloading)
 
 	RETURN_BOOL(opcache_preloading());
 }
+
+static PHP_FUNCTION(zend_test_gh19792)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETVAL_STRING("this is a non-interned string");
+	zend_error(E_WARNING, "a warning");
+	zend_throw_error(NULL, "an exception");
+}
