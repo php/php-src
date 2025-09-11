@@ -612,14 +612,14 @@ zend_result php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int parser_name_set;
 	FETCH_STR_OPTION(parser_name, URL_OPTION_URI_PARSER_CLASS);
 
-	const uri_parser_t *uri_parser = php_uri_get_parser(parser_name_set ? parser_name : NULL);
+	const php_uri_parser *uri_parser = php_uri_get_parser(parser_name_set ? parser_name : NULL);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): \"uri_parser_class\" option has invalid value", get_active_function_name());
 		RETURN_VALIDATION_FAILED
 	}
 
 	/* Parse the URI - if it fails, we return NULL */
-	php_uri *uri = php_uri_parse_to_struct(uri_parser, Z_STRVAL_P(value), Z_STRLEN_P(value), URI_COMPONENT_READ_RAW, true);
+	php_uri *uri = php_uri_parse_to_struct(uri_parser, Z_STRVAL_P(value), Z_STRLEN_P(value), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	if (uri == NULL) {
 		RETURN_VALIDATION_FAILED
 	}
