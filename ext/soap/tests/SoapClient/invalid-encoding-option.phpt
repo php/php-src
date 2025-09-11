@@ -25,5 +25,5 @@ try {
 
 ?>
 --EXPECT--
-SoapFault: SoapClient::__construct(): Invalid 'encoding' option - 'non-sense'
-SoapFault: SoapClient::__construct(): Invalid 'encoding' option - 'non-sense'
+ValueError: SoapClient::__construct(): Argument #2 ($options) provided "encoding" option "non-sense" is invalid
+ValueError: SoapClient::__construct(): Argument #2 ($options) provided "encoding" option "non-sense" is invalid

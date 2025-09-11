@@ -48,11 +48,11 @@ try {
 ?>
 --EXPECT--
 $options not provided
-SoapFault: SoapClient::__construct(): 'location' and 'uri' options are required in nonWSDL mode
-SoapFault: SoapClient::__construct(): 'location' and 'uri' options are required in nonWSDL mode
+ValueError: SoapClient::__construct(): Argument #2 ($options) must provide "uri" and "location" options as they are required in nonWSDL mode
+ValueError: SoapClient::__construct(): Argument #2 ($options) must provide "uri" and "location" options as they are required in nonWSDL mode
 Empty $options array
-SoapFault: SoapClient::__construct(): 'uri' option is required in nonWSDL mode
-SoapFault: SoapClient::__construct(): 'uri' option is required in nonWSDL mode
+ValueError: SoapClient::__construct(): Argument #2 ($options) must provide "uri" option as it is required in nonWSDL mode
+ValueError: SoapClient::__construct(): Argument #2 ($options) must provide "uri" option as it is required in nonWSDL mode
 $options array only sets "uri" option
-SoapFault: SoapClient::__construct(): 'location' option is required in nonWSDL mode
-SoapFault: SoapClient::__construct(): 'location' option is required in nonWSDL mode
+ValueError: SoapClient::__construct(): Argument #2 ($options) must provide "location" option as it is required in nonWSDL mode
+ValueError: SoapClient::__construct(): Argument #2 ($options) must provide "location" option as it is required in nonWSDL mode
