@@ -123,7 +123,7 @@ END_EXTERN_C()
 
 #define ZSTR_ALLOCA_FREE(str, use_heap) free_alloca(str, use_heap)
 
-#define ZSTR_INIT_LITERAL(s, persistent) (zend_string_init((s), strlen(s), (persistent)))
+#define ZSTR_INIT_LITERAL(s, persistent) (zend_string_init(("" s), sizeof(s) - 1, (persistent)))
 
 /*---*/
 
@@ -402,7 +402,7 @@ static zend_always_inline bool zend_string_starts_with(const zend_string *str, c
 }
 
 #define zend_string_starts_with_literal(str, prefix) \
-	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
+	zend_string_starts_with_cstr(str, "" prefix, sizeof(prefix) - 1)
 
 static zend_always_inline bool zend_string_starts_with_cstr_ci(const zend_string *str, const char *prefix, size_t prefix_length)
 {
@@ -415,7 +415,7 @@ static zend_always_inline bool zend_string_starts_with_ci(const zend_string *str
 }
 
 #define zend_string_starts_with_literal_ci(str, prefix) \
-	zend_string_starts_with_cstr_ci(str, prefix, strlen(prefix))
+	zend_string_starts_with_cstr_ci(str, "" prefix, sizeof(prefix) - 1)
 
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)

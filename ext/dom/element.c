@@ -180,7 +180,7 @@ zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 zval *dom_get_prop_checked_offset(dom_object *obj, uint32_t offset, const char *name)
 {
 #if ZEND_DEBUG
-	zend_string *name_zstr = ZSTR_INIT_LITERAL(name, false);
+	zend_string *name_zstr = zend_string_init(name, strlen(name), false);
 	const zend_property_info *prop_info = zend_get_property_info(obj->std.ce, name_zstr, 0);
 	zend_string_release_ex(name_zstr, false);
 	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == offset);
