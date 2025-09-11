@@ -153,12 +153,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 				s = e + 3;
 				if (zend_string_equals_literal_ci(ret->scheme, "file")) {
 					if (e + 3 < ue && *(e + 3) == '/') {
-						/* support windows drive letters as in:
-						   file:///c:/somedir/file.txt
-						*/
-						if (e + 5 < ue && *(e + 5) == ':') {
-							s = e + 4;
-						}
+						/* support file:/// */
 						goto just_path;
 					}
 				}
