@@ -316,6 +316,7 @@ static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, 
 	return ret;
 }
 
+// zend_string_free frees the string as long as it is not interned and asserts the refcount is 0
 static zend_always_inline void zend_string_free(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
@@ -324,6 +325,7 @@ static zend_always_inline void zend_string_free(zend_string *s)
 	}
 }
 
+// zend_string_efree frees the string and asserts the refcount is 0, is not interned, and is not persistent
 static zend_always_inline void zend_string_efree(zend_string *s)
 {
 	ZEND_ASSERT(!ZSTR_IS_INTERNED(s));
@@ -332,15 +334,8 @@ static zend_always_inline void zend_string_efree(zend_string *s)
 	efree(s);
 }
 
-static zend_always_inline void zend_string_release(zend_string *s)
-{
-	if (!ZSTR_IS_INTERNED(s)) {
-		if (GC_DELREF(s) == 0) {
-			pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
-		}
-	}
-}
-
+// zend_string_release_ex releases the string if possible. You must know whether the string is persistent or not.
+// Use zend_string_release if you don't know whether the string is persistent.
 static zend_always_inline void zend_string_release_ex(zend_string *s, bool persistent)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
@@ -354,6 +349,12 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 			}
 		}
 	}
+}
+
+// zend_string_release releases the string if possible.
+static zend_always_inline void zend_string_release(zend_string *s)
+{
+	zend_string_release_ex(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
 }
 
 static zend_always_inline bool zend_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
