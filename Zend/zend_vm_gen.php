@@ -545,13 +545,18 @@ $opcodes = array(); // opcode handlers by code
 $helpers = array(); // opcode helpers by name
 $params  = array(); // parameters of helpers
 $opnames = array(); // opcode name to code mapping
-$line_no = 1;
+$line_nos = [];
 
 $used_extra_spec = array();
 
 // Writes $s into resulting executor
 function out($f, $s) {
-    global $line_no;
+    global $line_nos;
+
+    $line_no = &$line_nos[(int)$f];
+    if ($line_no === null) {
+        $line_no = 1;
+    }
 
     fputs($f,$s);
     $line_no += substr_count($s, "\n");
@@ -559,7 +564,12 @@ function out($f, $s) {
 
 // Resets #line directives in resulting executor
 function out_line($f) {
-    global $line_no, $executor_file;
+    global $line_nos, $executor_file;
+
+    $line_no = &$line_nos[(int)$f];
+    if ($line_no === null) {
+        $line_no = 1;
+    }
 
     fputs($f,"#line ".($line_no+1)." \"".$executor_file."\"\n");
     ++$line_no;
@@ -2839,46 +2849,46 @@ function gen_vm($def, $skel) {
 
     // Insert header
     out($f, HEADER_TEXT);
-    fputs($f,"#include <stdio.h>\n");
-    fputs($f,"#include <zend.h>\n");
-    fputs($f,"#include <zend_vm_opcodes.h>\n\n");
+    out($f,"#include <stdio.h>\n");
+    out($f,"#include <zend.h>\n");
+    out($f,"#include <zend_vm_opcodes.h>\n\n");
 
-    fputs($f,"static const char *zend_vm_opcodes_names[".($max_opcode + 1)."] = {\n");
+    out($f,"static const char *zend_vm_opcodes_names[".($max_opcode + 1)."] = {\n");
     for ($i = 0; $i <= $max_opcode; $i++) {
-        fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
+        out($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
     }
-    fputs($f, "};\n\n");
+    out($f, "};\n\n");
 
-    fputs($f,"static uint32_t zend_vm_opcodes_flags[".($max_opcode + 1)."] = {\n");
+    out($f,"static uint32_t zend_vm_opcodes_flags[".($max_opcode + 1)."] = {\n");
     for ($i = 0; $i <= $max_opcode; $i++) {
-        fprintf($f, "\t0x%08x,\n", isset($opcodes[$i]["flags"]) ? $opcodes[$i]["flags"] : 0);
+        out($f, sprintf("\t0x%08x,\n", isset($opcodes[$i]["flags"]) ? $opcodes[$i]["flags"] : 0));
     }
-    fputs($f, "};\n\n");
+    out($f, "};\n\n");
 
-    fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode) {\n");
-    fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
-    fputs($f, "\t\treturn NULL;\n");
-    fputs($f, "\t}\n");
-    fputs($f, "\treturn zend_vm_opcodes_names[opcode];\n");
-    fputs($f, "}\n");
+    out($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode) {\n");
+    out($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
+    out($f, "\t\treturn NULL;\n");
+    out($f, "\t}\n");
+    out($f, "\treturn zend_vm_opcodes_names[opcode];\n");
+    out($f, "}\n");
 
-    fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode) {\n");
-    fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
-    fputs($f, "\t\topcode = ZEND_NOP;\n");
-    fputs($f, "\t}\n");
-    fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
-    fputs($f, "}\n");
+    out($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode) {\n");
+    out($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
+    out($f, "\t\topcode = ZEND_NOP;\n");
+    out($f, "\t}\n");
+    out($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
+    out($f, "}\n");
 
-    fputs($f, "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length) {\n");
-    fputs($f, "\tuint8_t opcode;\n");
-    fputs($f, "\tfor (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {\n");
-    fputs($f, "\t\tconst char *opcode_name = zend_vm_opcodes_names[opcode];\n");
-    fputs($f, "\t\tif (opcode_name && strncmp(opcode_name, name, length) == 0) {\n");
-    fputs($f, "\t\t\treturn opcode;\n");
-    fputs($f, "\t\t}\n");
-    fputs($f, "\t}\n");
-    fputs($f, "\treturn ZEND_VM_LAST_OPCODE + 1;\n");
-    fputs($f, "}\n");
+    out($f, "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length) {\n");
+    out($f, "\tuint8_t opcode;\n");
+    out($f, "\tfor (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {\n");
+    out($f, "\t\tconst char *opcode_name = zend_vm_opcodes_names[opcode];\n");
+    out($f, "\t\tif (opcode_name && strncmp(opcode_name, name, length) == 0) {\n");
+    out($f, "\t\t\treturn opcode;\n");
+    out($f, "\t\t}\n");
+    out($f, "\t}\n");
+    out($f, "\treturn ZEND_VM_LAST_OPCODE + 1;\n");
+    out($f, "}\n");
 
     fclose($f);
     echo "zend_vm_opcodes.c generated successfully.\n";
