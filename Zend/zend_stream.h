@@ -68,6 +68,7 @@ ZEND_API void zend_stream_init_filename(zend_file_handle *handle, const char *fi
 ZEND_API void zend_stream_init_filename_ex(zend_file_handle *handle, zend_string *filename);
 ZEND_API zend_result zend_stream_open(zend_file_handle *handle);
 ZEND_API zend_result zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len);
+ZEND_API void zend_stream_close(zend_file_handle *handle);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 
 void zend_stream_init(void);
