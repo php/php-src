@@ -19,29 +19,6 @@
 #include "Zend/zend_exceptions.h"
 #include "php_uri_common.h"
 
-const php_uri_property_handler *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, php_uri_property_name property_name)
-{
-	switch (property_name) {
-		case PHP_URI_PROPERTY_NAME_SCHEME:
-			return &internal_uri->parser->property_handler.scheme;
-		case PHP_URI_PROPERTY_NAME_USERNAME:
-			return &internal_uri->parser->property_handler.username;
-		case PHP_URI_PROPERTY_NAME_PASSWORD:
-			return &internal_uri->parser->property_handler.password;
-		case PHP_URI_PROPERTY_NAME_HOST:
-			return &internal_uri->parser->property_handler.host;
-		case PHP_URI_PROPERTY_NAME_PORT:
-			return &internal_uri->parser->property_handler.port;
-		case PHP_URI_PROPERTY_NAME_PATH:
-			return &internal_uri->parser->property_handler.path;
-		case PHP_URI_PROPERTY_NAME_QUERY:
-			return &internal_uri->parser->property_handler.query;
-		case PHP_URI_PROPERTY_NAME_FRAGMENT:
-			return &internal_uri->parser->property_handler.fragment;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
-}
-
 static zend_string *get_known_string_by_property_name(php_uri_property_name property_name)
 {
 	switch (property_name) {
@@ -72,7 +49,7 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name prop
 	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
-	const php_uri_property_handler *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
+	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(internal_uri->parser, property_name);
 
 	if (UNEXPECTED(property_handler->read(internal_uri->uri, component_read_mode, return_value) == FAILURE)) {
 		zend_throw_error(NULL, "The %s component cannot be retrieved", ZSTR_VAL(get_known_string_by_property_name(property_name)));
@@ -95,7 +72,7 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_propert
 	 * case of an exception being thrown. */
 	RETVAL_OBJ(new_object);
 
-	const php_uri_property_handler *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
+	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(internal_uri->parser, property_name);
 
 	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
 	URI_ASSERT_INITIALIZATION(new_internal_uri);

@@ -166,7 +166,29 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
 #define PHP_URI_PARSER_PHP_PARSE_URL "parse_url"
 #define URI_SERIALIZED_PROPERTY_NAME "uri"
 
-const php_uri_property_handler *uri_property_handler_from_internal_uri(const uri_internal_t *internal_uri, php_uri_property_name property_name);
+static inline const php_uri_property_handler *php_uri_parser_property_handler_by_name(const php_uri_parser *parser, php_uri_property_name property_name)
+{
+	switch (property_name) {
+		case PHP_URI_PROPERTY_NAME_SCHEME:
+			return &parser->property_handler.scheme;
+		case PHP_URI_PROPERTY_NAME_USERNAME:
+			return &parser->property_handler.username;
+		case PHP_URI_PROPERTY_NAME_PASSWORD:
+			return &parser->property_handler.password;
+		case PHP_URI_PROPERTY_NAME_HOST:
+			return &parser->property_handler.host;
+		case PHP_URI_PROPERTY_NAME_PORT:
+			return &parser->property_handler.port;
+		case PHP_URI_PROPERTY_NAME_PATH:
+			return &parser->property_handler.path;
+		case PHP_URI_PROPERTY_NAME_QUERY:
+			return &parser->property_handler.query;
+		case PHP_URI_PROPERTY_NAME_FRAGMENT:
+			return &parser->property_handler.fragment;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
 void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode);
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
