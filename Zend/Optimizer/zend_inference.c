@@ -3395,7 +3395,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			/* New objects without constructors cannot escape. */
 			if (ce
-			 && !ce->constructor
+			 && (!ce->constructor || zend_is_pass_function(ce->constructor))
 			 && !ce->create_object
 			 && ce->default_object_handlers->get_constructor == zend_std_get_constructor) {
 				tmp &= ~MAY_BE_RCN;

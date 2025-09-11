@@ -4465,7 +4465,7 @@ ZEND_METHOD(ReflectionClass, getConstructor)
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->constructor) {
+	if (ce->constructor && !zend_is_pass_function(ce->constructor)) {
 		reflection_method_factory(ce, ce->constructor, NULL, return_value);
 	} else {
 		RETURN_NULL();
@@ -4531,6 +4531,10 @@ ZEND_METHOD(ReflectionClass, getMethod)
 /* {{{ _addmethod */
 static bool _addmethod(zend_function *mptr, zend_class_entry *ce, HashTable *ht, zend_long filter)
 {
+	/* Skip fake constructor */
+	if (zend_is_pass_function(mptr)) {
+		return false;
+	}
 	if ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce) {
 		return false;
 	}
@@ -4919,10 +4923,9 @@ ZEND_METHOD(ReflectionClass, isInstantiable)
 		RETURN_FALSE;
 	}
 
-	/* Basically, the class is instantiable. Though, if there is a constructor
-	 * and it is not publicly accessible, it isn't! */
-	if (!ce->constructor) {
-		RETURN_TRUE;
+	/* Internal classes that don't define a constructor are not instantiable */
+	if (ce->constructor == NULL) {
+		RETURN_FALSE;
 	}
 
 	RETURN_BOOL(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC);
@@ -5036,7 +5039,7 @@ ZEND_METHOD(ReflectionClass, newInstance)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	const zend_class_entry *old_scope = EG(fake_scope);
@@ -5045,30 +5048,34 @@ ZEND_METHOD(ReflectionClass, newInstance)
 	EG(fake_scope) = old_scope;
 
 	/* Run the constructor if there is one */
-	if (constructor) {
-		zval *params;
-		int num_args;
-		HashTable *named_params;
-
-		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
-			zval_ptr_dtor(return_value);
-			RETURN_NULL();
+	if (UNEXPECTED(constructor == NULL)) {
+		/* Normally an exception should be thrown from the get_constructor() object handler */
+		if (!EG(exception)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Class %s is an internal class that cannot be instantiated manually", ZSTR_VAL(ce->name));
 		}
+		RETURN_THROWS();
+	}
 
-		ZEND_PARSE_PARAMETERS_START(0, -1)
-			Z_PARAM_VARIADIC_WITH_NAMED(params, num_args, named_params)
-		ZEND_PARSE_PARAMETERS_END();
+	zval *params;
+	uint32_t num_args;
+	HashTable *named_params;
 
-		zend_call_known_function(
-			constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL,
-			num_args, params, named_params);
+	if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
+	}
 
-		if (EG(exception)) {
-			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
-		}
-	} else if (ZEND_NUM_ARGS()) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ZSTR_VAL(ce->name));
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC_WITH_NAMED(params, num_args, named_params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_call_known_function(
+		constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL,
+		num_args, params, named_params);
+
+	if (EG(exception)) {
+		zend_object_store_ctor_failed(Z_OBJ_P(return_value));
 	}
 }
 /* }}} */
@@ -5083,9 +5090,8 @@ ZEND_METHOD(ReflectionClass, newInstanceWithoutConstructor)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (ce->type == ZEND_INTERNAL_CLASS
-			&& ce->create_object != NULL && (ce->ce_flags & ZEND_ACC_FINAL)) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ZSTR_VAL(ce->name));
+	if (UNEXPECTED(ce->constructor == NULL)) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class that cannot be instantiated manually", ZSTR_VAL(ce->name));
 		RETURN_THROWS();
 	}
 
@@ -5098,7 +5104,6 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	int argc = 0;
 	HashTable *args = NULL;
 	zend_function *constructor;
 
@@ -5108,8 +5113,10 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 		RETURN_THROWS();
 	}
 
-	if (args) {
-		argc = zend_hash_num_elements(args);
+	/* Run the constructor if there is one */
+	if (UNEXPECTED(ce->constructor == NULL)) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class that cannot be instantiated manually", ZSTR_VAL(ce->name));
+		RETURN_THROWS();
 	}
 
 	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
@@ -5122,21 +5129,26 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 	EG(fake_scope) = old_scope;
 
 	/* Run the constructor if there is one */
-	if (constructor) {
-		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
-			zval_ptr_dtor(return_value);
-			RETURN_NULL();
+	if (UNEXPECTED(!constructor)) {
+		/* Normally an exception should be thrown from the get_constructor() object handler */
+		if (!EG(exception)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Class %s is an internal class that cannot be instantiated manually", ZSTR_VAL(ce->name));
 		}
+		RETURN_THROWS();
+	}
 
-		zend_call_known_function(
-			constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL, 0, NULL, args);
+	if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
+		zval_ptr_dtor(return_value);
+		RETURN_NULL();
+	}
 
-		if (EG(exception)) {
-			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
-		}
-	} else if (argc) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ZSTR_VAL(ce->name));
+	zend_call_known_function(
+		constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL, 0, NULL, args);
+
+	if (EG(exception)) {
+		zend_object_store_ctor_failed(Z_OBJ_P(return_value));
 	}
 }
 /* }}} */

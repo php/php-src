@@ -59,7 +59,7 @@ var_dump($e1);
 
 try {
     $e2 = $rcE->newInstanceArgs(array('x'));
-    echo "you should not see this\n";
+    echo "No explicit construct still allows instantiation\n";
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
@@ -73,4 +73,4 @@ Access to non-public constructor of class C
 Access to non-public constructor of class D
 object(E)#%d (0) {
 }
-Class E does not have a constructor, so you cannot pass any constructor arguments
+No explicit construct still allows instantiation

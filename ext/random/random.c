@@ -744,6 +744,8 @@ PHP_MINIT_FUNCTION(random)
 
 	/* Random\Engine\Mt19937 */
 	random_ce_Random_Engine_Mt19937 = register_class_Random_Engine_Mt19937(random_ce_Random_Engine);
+	/* Dummy constructor */
+	random_ce_Random_Engine_Mt19937->constructor = (zend_function *) &zend_pass_function;
 	random_ce_Random_Engine_Mt19937->create_object = php_random_engine_mt19937_new;
 	random_ce_Random_Engine_Mt19937->default_object_handlers = &random_engine_mt19937_object_handlers;
 	memcpy(&random_engine_mt19937_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -753,6 +755,8 @@ PHP_MINIT_FUNCTION(random)
 
 	/* Random\Engine\PcgOnseq128XslRr64 */
 	random_ce_Random_Engine_PcgOneseq128XslRr64 = register_class_Random_Engine_PcgOneseq128XslRr64(random_ce_Random_Engine);
+	/* Dummy constructor */
+	random_ce_Random_Engine_PcgOneseq128XslRr64->constructor = (zend_function *) &zend_pass_function;
 	random_ce_Random_Engine_PcgOneseq128XslRr64->create_object = php_random_engine_pcgoneseq128xslrr64_new;
 	random_ce_Random_Engine_PcgOneseq128XslRr64->default_object_handlers = &random_engine_pcgoneseq128xslrr64_object_handlers;
 	memcpy(&random_engine_pcgoneseq128xslrr64_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -762,6 +766,8 @@ PHP_MINIT_FUNCTION(random)
 
 	/* Random\Engine\Xoshiro256StarStar */
 	random_ce_Random_Engine_Xoshiro256StarStar = register_class_Random_Engine_Xoshiro256StarStar(random_ce_Random_Engine);
+	/* Dummy constructor */
+	random_ce_Random_Engine_Xoshiro256StarStar->constructor = (zend_function *) &zend_pass_function;
 	random_ce_Random_Engine_Xoshiro256StarStar->create_object = php_random_engine_xoshiro256starstar_new;
 	random_ce_Random_Engine_Xoshiro256StarStar->default_object_handlers = &random_engine_xoshiro256starstar_object_handlers;
 	memcpy(&random_engine_xoshiro256starstar_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -771,6 +777,8 @@ PHP_MINIT_FUNCTION(random)
 
 	/* Random\Engine\Secure */
 	random_ce_Random_Engine_Secure = register_class_Random_Engine_Secure(random_ce_Random_CryptoSafeEngine);
+	/* Dummy constructor */
+	random_ce_Random_Engine_Secure->constructor = (zend_function *) &zend_pass_function;
 	random_ce_Random_Engine_Secure->create_object = php_random_engine_secure_new;
 	random_ce_Random_Engine_Secure->default_object_handlers = &random_engine_secure_object_handlers;
 	memcpy(&random_engine_secure_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -780,6 +788,8 @@ PHP_MINIT_FUNCTION(random)
 
 	/* Random\Randomizer */
 	random_ce_Random_Randomizer = register_class_Random_Randomizer();
+	/* Dummy constructor */
+	random_ce_Random_Randomizer->constructor = (zend_function *) &zend_pass_function;
 	random_ce_Random_Randomizer->create_object = php_random_randomizer_new;
 	random_ce_Random_Randomizer->default_object_handlers = &random_randomizer_object_handlers;
 	memcpy(&random_randomizer_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));

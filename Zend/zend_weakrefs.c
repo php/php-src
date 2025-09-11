@@ -791,6 +791,8 @@ void zend_register_weakref_ce(void) /* {{{ */
 {
 	zend_ce_weakref = register_class_WeakReference();
 
+	/* Dummy constructor */
+	zend_ce_weakref->constructor = (zend_function *) &zend_pass_function;
 	zend_ce_weakref->create_object = zend_weakref_new;
 	zend_ce_weakref->default_object_handlers = &zend_weakref_handlers;
 
@@ -803,6 +805,8 @@ void zend_register_weakref_ce(void) /* {{{ */
 
 	zend_ce_weakmap = register_class_WeakMap(zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);
 
+	/* Dummy constructor */
+	zend_ce_weakmap->constructor = (zend_function *) &zend_pass_function;
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;
 	zend_ce_weakmap->default_object_handlers = &zend_weakmap_handlers;

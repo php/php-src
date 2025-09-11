@@ -1134,6 +1134,8 @@ static zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval 
 PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 {
 	spl_ce_SplHeap = register_class_SplHeap(zend_ce_iterator, zend_ce_countable);
+	/* Dummy constructor */
+	spl_ce_SplHeap->constructor = (zend_function *) &zend_pass_function;
 	spl_ce_SplHeap->create_object = spl_heap_object_new;
 	spl_ce_SplHeap->default_object_handlers = &spl_handler_SplHeap;
 	spl_ce_SplHeap->get_iterator = spl_heap_get_iterator;
@@ -1155,6 +1157,8 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_ce_SplMaxHeap->get_iterator = spl_heap_get_iterator;
 
 	spl_ce_SplPriorityQueue = register_class_SplPriorityQueue(zend_ce_iterator, zend_ce_countable);
+	/* Dummy constructor */
+	spl_ce_SplPriorityQueue->constructor = (zend_function *) &zend_pass_function;
 	spl_ce_SplPriorityQueue->create_object = spl_heap_object_new;
 	spl_ce_SplPriorityQueue->default_object_handlers = &spl_handler_SplPriorityQueue;
 	spl_ce_SplPriorityQueue->get_iterator = spl_pqueue_get_iterator;
