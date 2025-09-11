@@ -85,3 +85,16 @@
 #else
 # define HAVE_FPM_LQ 0
 #endif
+
+#if defined(HAVE_SCHED_SETAFFINITY) || defined(HAVE_CPUSET_SETAFFINITY)
+/*
+ * to expand to other platforms capable of this granularity (some BSD, solaris, ...).
+ * macOS is a specific case with an api working fine on intel architecture
+ * whereas on arm the api and semantic behind is different, since it is about
+ * Quality Of Service, i.e. binding to a group of cores for high performance
+ * vs cores for low energy consumption.
+ */
+# define HAVE_FPM_CPUAFFINITY 1
+#else
+# define HAVE_FPM_CPUAFFINITY 0
+#endif
