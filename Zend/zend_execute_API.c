@@ -1570,7 +1570,9 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		return;
 	}
 #elif defined(ZEND_MAX_EXECUTION_TIMERS)
-	zend_max_execution_timer_settime(seconds);
+	if (seconds > 0) {
+		zend_max_execution_timer_settime(seconds);
+	}
 
 	if (reset_signals) {
 		sigset_t sigset;
@@ -1657,7 +1659,9 @@ void zend_unset_timeout(void) /* {{{ */
 		tq_timer = NULL;
 	}
 #elif defined(ZEND_MAX_EXECUTION_TIMERS)
-	zend_max_execution_timer_settime(0);
+	if (EG(timeout_seconds)) {
+		zend_max_execution_timer_settime(0);
+	}
 #elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;
