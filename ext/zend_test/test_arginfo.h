@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e6374018fbb4fa793905bd5cb34e5a56b9e310fe */
+ * Stub hash: 6f76138d313c37244148004e2691ee47534f87a4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -171,6 +171,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_gh18756 arginfo_zend_test_void_return
 
+#define arginfo_zend_test_gh19792 arginfo_zend_test_void_return
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -306,6 +308,7 @@ static ZEND_FUNCTION(zend_test_cast_fread);
 static ZEND_FUNCTION(zend_test_is_zend_ptr);
 static ZEND_FUNCTION(zend_test_log_err_debug);
 static ZEND_FUNCTION(zend_test_gh18756);
+static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -412,6 +415,15 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_is_zend_ptr, arginfo_zend_test_is_zend_ptr)
 	ZEND_FE(zend_test_log_err_debug, arginfo_zend_test_log_err_debug)
 	ZEND_FE(zend_test_gh18756, arginfo_zend_test_gh18756)
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+#else
+#if (PHP_VERSION_ID >= 80200)
+	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, ZEND_ACC_COMPILE_TIME_EVAL)
+#elif (PHP_VERSION_ID >= 80000)
+	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, 0)
+#endif
+#endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

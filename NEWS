@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
     checks). (timwolla)
   . Fixed hard_timeout with --enable-zend-max-execution-timers. (Appla)
+  . Fixed bug GH-19792 (SCCP causes UAF for return value if both warning and
+    exception are triggered). (nielsdos)
 
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
