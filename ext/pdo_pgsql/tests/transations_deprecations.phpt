@@ -1,5 +1,7 @@
 --TEST--
 Test PDO::PGSQL_TRANSACTION* constants.
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {

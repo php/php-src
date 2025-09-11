@@ -1,5 +1,7 @@
 --TEST--
 GH-19752 (Phar decompression with invalid extension can cause UAF)
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 $phar = new PharData(__DIR__.'/gh19752.1');
