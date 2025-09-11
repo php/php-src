@@ -44,6 +44,9 @@ on:
       skip_wordpress:
         required: true
         type: boolean
+      variation_enable_zend_max_execution_timers:
+        required: true
+        type: boolean
 permissions:
   contents: read
 jobs:
@@ -198,6 +201,7 @@ jobs:
             zts: true
             configuration_parameters: >-
               CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"
+              ${{ inputs.variation_enable_zend_max_execution_timers && '--enable-zend-max-execution-timers' || '' }}
             run_tests_parameters: -d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0
             timeout_minutes: 360
             test_function_jit: true
