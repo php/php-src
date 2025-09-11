@@ -47,11 +47,6 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 							   int optname,
 							   zval *arg4);
 
-int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
-								 int level,
-								 int optname,
-								 zval *arg4);
-
 zend_result php_if_index_to_addr4(
         unsigned if_index,
         php_socket *php_sock,
