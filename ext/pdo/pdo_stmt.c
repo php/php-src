@@ -271,8 +271,13 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	}
 
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !Z_ISNULL_P(parameter)) {
+		zend_bool is_false = (Z_TYPE_P(parameter) == IS_FALSE);
 		if (!try_convert_to_string(parameter)) {
 			return 0;
+		}
+		/* the pgsql's driver does not handle empty string for false bound parameters */
+		if (is_false) {
+			ZVAL_STR(parameter, ZSTR_CHAR('0'));
 		}
 	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && (Z_TYPE_P(parameter) == IS_FALSE || Z_TYPE_P(parameter) == IS_TRUE)) {
 		convert_to_long(parameter);

@@ -1298,7 +1298,17 @@ PHP_FUNCTION(pg_query_params)
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
-				zend_string *param_str = zval_try_get_string(tmp);
+				zend_string *param_str;
+				/**
+				 * zval_try_get_string returns an empty zend_string
+				 * for false which is correct in general
+				 * but not adequate for bool values in the db
+				 */
+				if (Z_TYPE_P(tmp) == IS_FALSE) {
+					param_str = ZSTR_CHAR('0');
+				} else {
+					param_str = zval_try_get_string(tmp);
+				}
 				if (!param_str) {
 					_php_pgsql_free_params(params, i);
 					RETURN_THROWS();
@@ -4077,9 +4087,18 @@ PHP_FUNCTION(pg_send_query_params)
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
-				zend_string *tmp_str;
-				zend_string *str = zval_get_tmp_string(tmp, &tmp_str);
-
+				zend_string *str, *tmp_str;
+				/**
+				 * zval_get_tmp_string returns an empty zend_string
+				 * for false which is correct in general
+				 * but not adequate for bool values in the db
+				 */
+				if (Z_TYPE_P(tmp) == IS_FALSE) {
+					tmp_str = ZSTR_CHAR('0');
+					str = tmp_str;
+				} else {
+					str = zval_get_tmp_string(tmp, &tmp_str);
+				}
 				params[i] = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
 				zend_tmp_string_release(tmp_str);
 			}
