@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     checks). (timwolla)
   . The __sleep() and __wakeup() magic methods have been deprecated. (Girgias)
 
+- MBstring:
+  . Updated Unicode data tables to Unicode 17.0. (Yuya Hamada)
+
 - URI:
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
     (nielsdos)
