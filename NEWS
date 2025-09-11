@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
     (nielsdos)
+  . Fixed bug GH-19701 (Serialize/deserialize loses some data). (nielsdos)
 
 - Zip:
   . Fixed bug GH-19688 (Remove pattern overflow in zip addGlob()). (nielsdos)
