@@ -148,4 +148,24 @@ static zend_always_inline bool zend_check_method_accessible(const zend_function 
 	return true;
 }
 
+static inline zend_function *zend_get_public_constructor(const zend_class_entry *ce) {
+	if (UNEXPECTED(ce->constructor == NULL)) {
+		return NULL;
+	}
+	if (EXPECTED(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		return ce->constructor;
+	}
+	return NULL;
+}
+
+static inline zend_function *zend_get_accessible_constructor_in_scope(const zend_class_entry *ce, const zend_class_entry *scope) {
+	if (UNEXPECTED(ce->constructor == NULL)) {
+		return NULL;
+	}
+	if (EXPECTED(zend_check_method_accessible(ce->constructor, scope))) {
+		return ce->constructor;
+	}
+	return NULL;
+}
+
 #endif /* ZEND_OBJECTS_H */

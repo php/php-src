@@ -1,5 +1,5 @@
 /* This is a generated file, edit dba.stub.php instead.
- * Stub hash: d7ff53b73d3921c41ffd8279ea724bcd3a6d8542 */
+ * Stub hash: 6ba636a9b106a1ec8c4332db15f1060efafb886e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dba_popen, 0, 2, Dba\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
@@ -109,6 +109,14 @@ static zend_class_entry *register_class_Dba_Connection(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "Dba", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_Dba_Connection_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_Dba_Connection_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_Dba_Connection_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_Dba_Connection_0, true);
+	zend_string *attribute_NonInstantiableClass_class_Dba_Connection_0_arg0_str = zend_string_init("Cannot directly construct Dba\\Connection, use dba_open() or dba_popen() instead", strlen("Cannot directly construct Dba\\Connection, use dba_open() or dba_popen() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_Dba_Connection_0->args[0].value, attribute_NonInstantiableClass_class_Dba_Connection_0_arg0_str);
+
+	class_entry->constructor = NULL;
 
 	return class_entry;
 }

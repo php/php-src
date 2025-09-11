@@ -1,5 +1,5 @@
 /* This is a generated file, edit sysvshm.stub.php instead.
- * Stub hash: 792c695a705678a3779d62cef8a5136069f98dee */
+ * Stub hash: d5f2cf0533fa36b27345e610061cc4abf456da65 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shm_attach, 0, 1, SysvSharedMemory, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -58,6 +58,14 @@ static zend_class_entry *register_class_SysvSharedMemory(void)
 
 	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+	zend_string *attribute_name_NonInstantiableClass_class_SysvSharedMemory_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_SysvSharedMemory_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_SysvSharedMemory_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_SysvSharedMemory_0, true);
+	zend_string *attribute_NonInstantiableClass_class_SysvSharedMemory_0_arg0_str = zend_string_init("Cannot directly construct SysvSharedMemory, use shm_attach() instead", strlen("Cannot directly construct SysvSharedMemory, use shm_attach() instead"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_SysvSharedMemory_0->args[0].value, attribute_NonInstantiableClass_class_SysvSharedMemory_0_arg0_str);
+
+	class_entry->constructor = NULL;
 
 	return class_entry;
 }

@@ -25,6 +25,7 @@
 #include "zend_hash.h"
 #include "zend_modules.h"
 #include "zend_extensions.h"
+#include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -1845,27 +1846,38 @@ ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* 
 
 ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
 {
+	zend_function *constructor = class_type->constructor;
+	if (UNEXPECTED(constructor == NULL)) {
+		const zend_attribute *non_instantiable_class = zend_get_attribute_str(class_type->attributes, ZEND_STRL("noninstantiableclass"));
+		ZEND_ASSERT(non_instantiable_class);
+		zend_string *msg = Z_STR(non_instantiable_class->args[0].value);
+		zend_throw_error(NULL, "%s", ZSTR_VAL(msg));
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	}
+
+	if (UNEXPECTED(!(constructor->common.fn_flags & ZEND_ACC_PUBLIC))) {
+		/* Use zend_bad_constructor_call() somehow? */
+		zend_throw_error(
+			NULL,
+			"Call to %s %s::%s() from global scope",
+			zend_visibility_string(class_type->constructor->common.fn_flags),
+			ZSTR_VAL(class_type->constructor->common.scope->name),
+			ZSTR_VAL(class_type->constructor->common.function_name)
+		);
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	}
+
 	zend_result status = _object_and_properties_init(arg, class_type, NULL);
 	if (UNEXPECTED(status == FAILURE)) {
 		ZVAL_UNDEF(arg);
 		return FAILURE;
 	}
 	zend_object *obj = Z_OBJ_P(arg);
-	zend_function *constructor = obj->handlers->get_constructor(obj);
-	if (constructor == NULL) {
-		/* The constructor can be NULL for 2 different reasons:
-		 * - It is not defined
-		 * - We are not allowed to call the constructor (e.g. private, or internal opaque class)
-		 *   and an exception has been thrown
-		 * in the former case, we are (mostly) done and the object is initialized,
-		 * in the latter we need to destroy the object as initialization failed
-		 */
-		if (UNEXPECTED(EG(exception))) {
-			zval_ptr_dtor(arg);
-			ZVAL_UNDEF(arg);
-			return FAILURE;
-		}
 
+	/* Fake constructor means we don't need to call the constructor actually */
+	if (zend_is_pass_function(constructor)) {
 		/* Surprisingly, this is the only case where internal classes will allow to pass extra arguments
 		 * However, if there are named arguments (and it is not empty),
 		 * an Error must be thrown to be consistent with new ClassName() */
@@ -1884,6 +1896,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 			return SUCCESS;
 		}
 	}
+
 	/* A constructor should not return a value, however if an exception is thrown
 	 * zend_call_known_function() will set the retval to IS_UNDEF */
 	zval retval;
@@ -3509,6 +3522,11 @@ static zend_class_entry *do_register_internal_class(const zend_class_entry *orig
 
 	if (class_entry->info.internal.builtin_functions) {
 		zend_register_functions(class_entry, class_entry->info.internal.builtin_functions, &class_entry->function_table, EG(current_module)->type);
+	}
+	
+	/* Assign the pass function as a default constructor */
+	if (class_entry->constructor == NULL) {
+		class_entry->constructor = (zend_function *) &zend_pass_function;
 	}
 
 	lowercase_name = zend_string_tolower_ex(orig_class_entry->name, EG(current_module)->type == MODULE_PERSISTENT);

@@ -80,11 +80,6 @@ static zend_object *php_openssl_certificate_create_object(zend_class_entry *clas
 	return &intern->std;
 }
 
-static zend_function *php_openssl_certificate_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct OpenSSLCertificate, use openssl_x509_read() instead");
-	return NULL;
-}
-
 static void php_openssl_certificate_free_obj(zend_object *object)
 {
 	php_openssl_certificate_object *x509_object = php_openssl_certificate_from_obj(object);
@@ -111,11 +106,6 @@ static zend_object *php_openssl_request_create_object(zend_class_entry *class_ty
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *php_openssl_request_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct OpenSSLCertificateSigningRequest, use openssl_csr_new() instead");
-	return NULL;
 }
 
 static void php_openssl_request_free_obj(zend_object *object)
@@ -153,12 +143,6 @@ static zend_object *php_openssl_pkey_create_object(zend_class_entry *class_type)
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *php_openssl_pkey_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL, "Cannot directly construct OpenSSLAsymmetricKey, use openssl_pkey_new() instead");
-	return NULL;
 }
 
 static void php_openssl_pkey_free_obj(zend_object *object)
@@ -277,13 +261,6 @@ static zend_object *php_openssl_session_create_object(zend_class_entry *class_ty
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *php_openssl_session_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL,
-		"Cannot directly construct OpenSSLSession, use OpenSSLSession::import() or TLS session callbacks");
-	return NULL;
 }
 
 static void php_openssl_session_free_obj(zend_object *object)
@@ -759,7 +736,6 @@ PHP_MINIT_FUNCTION(openssl)
 	memcpy(&php_openssl_certificate_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_certificate_object_handlers.offset = offsetof(php_openssl_certificate_object, std);
 	php_openssl_certificate_object_handlers.free_obj = php_openssl_certificate_free_obj;
-	php_openssl_certificate_object_handlers.get_constructor = php_openssl_certificate_get_constructor;
 	php_openssl_certificate_object_handlers.clone_obj = NULL;
 	php_openssl_certificate_object_handlers.compare = zend_objects_not_comparable;
 
@@ -770,7 +746,6 @@ PHP_MINIT_FUNCTION(openssl)
 	memcpy(&php_openssl_request_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_request_object_handlers.offset = offsetof(php_openssl_request_object, std);
 	php_openssl_request_object_handlers.free_obj = php_openssl_request_free_obj;
-	php_openssl_request_object_handlers.get_constructor = php_openssl_request_get_constructor;
 	php_openssl_request_object_handlers.clone_obj = NULL;
 	php_openssl_request_object_handlers.compare = zend_objects_not_comparable;
 
@@ -781,7 +756,6 @@ PHP_MINIT_FUNCTION(openssl)
 	memcpy(&php_openssl_pkey_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_pkey_object_handlers.offset = offsetof(php_openssl_pkey_object, std);
 	php_openssl_pkey_object_handlers.free_obj = php_openssl_pkey_free_obj;
-	php_openssl_pkey_object_handlers.get_constructor = php_openssl_pkey_get_constructor;
 	php_openssl_pkey_object_handlers.clone_obj = NULL;
 	php_openssl_pkey_object_handlers.compare = zend_objects_not_comparable;
 
@@ -797,7 +771,6 @@ PHP_MINIT_FUNCTION(openssl)
 	memcpy(&php_openssl_session_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_session_object_handlers.offset = offsetof(php_openssl_session_object, std);
 	php_openssl_session_object_handlers.free_obj = php_openssl_session_free_obj;
-	php_openssl_session_object_handlers.get_constructor = php_openssl_session_get_constructor;
 	php_openssl_session_object_handlers.clone_obj = NULL;
 	php_openssl_session_object_handlers.compare = zend_objects_not_comparable;
 

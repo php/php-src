@@ -5704,10 +5704,7 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 
 	const zend_function *fbc = NULL;
-	if (ce
-			&& ce->default_object_handlers->get_constructor == zend_std_get_constructor
-			&& ce->constructor
-			&& is_func_accessible(ce->constructor)) {
+	if (ce && ce->constructor && is_func_accessible(ce->constructor)) {
 		fbc = ce->constructor;
 	}
 
@@ -9649,6 +9646,14 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 
 	if (toplevel) {
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
+	}
+
+	/* Add a default "pass" constructor if none are defined */
+	if (ce->constructor == NULL && (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == 0) {
+		zend_attribute *non_instantiable_class = zend_get_attribute_str(ce->attributes, ZEND_STRL("noninstantiableclass"));
+		if (!non_instantiable_class) {
+			ce->constructor = (zend_function *) &zend_pass_function;
+		}
 	}
 
 	/* We currently don't early-bind classes that implement interfaces or use traits */

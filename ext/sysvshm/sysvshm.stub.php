@@ -6,6 +6,7 @@
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct SysvSharedMemory, use shm_attach() instead")]
 final class SysvSharedMemory
 {
 }

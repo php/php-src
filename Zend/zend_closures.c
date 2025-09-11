@@ -20,6 +20,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_closures.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "zend_objects.h"
@@ -448,13 +449,6 @@ ZEND_METHOD(Closure, getCurrent)
 	RETURN_OBJ_COPY(obj);
 }
 
-static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object) /* {{{ */
-{
-	zend_throw_error(NULL, "Instantiation of class Closure is not allowed");
-	return NULL;
-}
-/* }}} */
-
 /* int return due to Object Handler API */
 static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 {
@@ -736,7 +730,6 @@ void zend_register_closure_ce(void) /* {{{ */
 
 	memcpy(&closure_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	closure_handlers.free_obj = zend_closure_free_storage;
-	closure_handlers.get_constructor = zend_closure_get_constructor;
 	closure_handlers.get_method = zend_closure_get_method;
 	closure_handlers.compare = zend_closure_compare;
 	closure_handlers.clone_obj = zend_closure_clone;

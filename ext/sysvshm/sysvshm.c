@@ -23,10 +23,11 @@
 #include <errno.h>
 
 #include "php_sysvshm.h"
-#include "sysvshm_arginfo.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
+#include "zend_attributes.h"
+#include "sysvshm_arginfo.h"
 
 /* SysvSharedMemory class */
 
@@ -44,11 +45,6 @@ static zend_object *sysvshm_create_object(zend_class_entry *class_type) {
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *sysvshm_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct SysvSharedMemory, use shm_attach() instead");
-	return NULL;
 }
 
 static void sysvshm_free_obj(zend_object *object)
@@ -100,7 +96,6 @@ PHP_MINIT_FUNCTION(sysvshm)
 	memcpy(&sysvshm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvshm_object_handlers.offset = offsetof(sysvshm_shm, std);
 	sysvshm_object_handlers.free_obj = sysvshm_free_obj;
-	sysvshm_object_handlers.get_constructor = sysvshm_get_constructor;
 	sysvshm_object_handlers.clone_obj = NULL;
 	sysvshm_object_handlers.compare = zend_objects_not_comparable;
 

@@ -121,7 +121,6 @@ static PHP_GINIT_FUNCTION(xml);
 static zend_object *xml_parser_create_object(zend_class_entry *class_type);
 static void xml_parser_free_obj(zend_object *object);
 static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n);
-static zend_function *xml_parser_get_constructor(zend_object *object);
 
 static zend_string *xml_utf8_decode(const XML_Char *, size_t, const XML_Char *);
 inline static unsigned short xml_encode_iso_8859_1(unsigned char);
@@ -225,7 +224,6 @@ PHP_MINIT_FUNCTION(xml)
 	xml_parser_object_handlers.offset = offsetof(xml_parser, std);
 	xml_parser_object_handlers.free_obj = xml_parser_free_obj;
 	xml_parser_object_handlers.get_gc = xml_parser_get_gc;
-	xml_parser_object_handlers.get_constructor = xml_parser_get_constructor;
 	xml_parser_object_handlers.clone_obj = NULL;
 	xml_parser_object_handlers.compare = zend_objects_not_comparable;
 
@@ -425,11 +423,6 @@ static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n)
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
 	return zend_std_get_properties(object);
-}
-
-static zend_function *xml_parser_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct XMLParser, use xml_parser_create() or xml_parser_create_ns() instead");
-	return NULL;
 }
 
 /* This is always called to simplify the mess to deal with BC breaks, but only set a new handler if it is initialized */

@@ -6,6 +6,7 @@
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Instantiation of class Closure is not allowed")]
 final class Closure
 {
     private function __construct() {}

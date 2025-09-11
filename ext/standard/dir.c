@@ -14,6 +14,7 @@
 
 /* {{{ includes/startup/misc */
 
+#include "zend_attributes.h"
 #include "php.h"
 #include "fopen_wrappers.h"
 #include "file.h"
@@ -51,12 +52,6 @@ static zend_object_handlers dir_class_object_handlers;
 #define Z_DIRECTORY_PATH_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
 #define Z_DIRECTORY_HANDLE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
 
-static zend_function *dir_class_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL, "Cannot directly construct Directory, use dir() instead");
-	return NULL;
-}
-
 static void php_set_default_dir(zend_resource *res)
 {
 	if (DIRG(default_dir)) {
@@ -90,7 +85,6 @@ PHP_MINIT_FUNCTION(dir)
 	dir_class_entry_ptr->default_object_handlers = &dir_class_object_handlers;
 
 	memcpy(&dir_class_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	dir_class_object_handlers.get_constructor = dir_class_get_constructor;
 	dir_class_object_handlers.clone_obj = NULL;
 	dir_class_object_handlers.compare = zend_objects_not_comparable;
 

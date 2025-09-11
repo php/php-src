@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "Zend/zend_exceptions.h"
+#include "zend_attributes.h"
 
 #include "curl_private.h"
 
@@ -283,11 +284,6 @@ static zend_object *curl_share_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *curl_share_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct CurlShareHandle, use curl_share_init() instead");
-	return NULL;
-}
-
 void curl_share_free_obj(zend_object *object)
 {
 	php_curlsh *sh = curl_share_from_obj(object);
@@ -305,7 +301,6 @@ void curl_share_register_handlers(void) {
 	memcpy(&curl_share_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_share_handlers.offset = offsetof(php_curlsh, std);
 	curl_share_handlers.free_obj = curl_share_free_obj;
-	curl_share_handlers.get_constructor = curl_share_get_constructor;
 	curl_share_handlers.clone_obj = NULL;
 	curl_share_handlers.compare = zend_objects_not_comparable;
 }
@@ -314,18 +309,12 @@ void curl_share_register_handlers(void) {
 
 static zend_object_handlers curl_share_persistent_handlers;
 
-static zend_function *curl_share_persistent_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct CurlSharePersistentHandle, use curl_share_init_persistent() instead");
-	return NULL;
-}
-
 void curl_share_persistent_register_handlers(void) {
 	curl_share_persistent_ce->create_object = curl_share_create_object;
 	curl_share_persistent_ce->default_object_handlers = &curl_share_persistent_handlers;
 
 	memcpy(&curl_share_persistent_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_share_persistent_handlers.offset = offsetof(php_curlsh, std);
-	curl_share_persistent_handlers.get_constructor = curl_share_persistent_get_constructor;
 	curl_share_persistent_handlers.clone_obj = NULL;
 	curl_share_persistent_handlers.compare = zend_objects_not_comparable;
 }

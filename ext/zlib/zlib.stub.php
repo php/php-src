@@ -147,6 +147,7 @@ const ZLIB_VERSION_ERROR = UNKNOWN;
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct InflateContext, use inflate_init() instead")]
 final class InflateContext
 {
 }
@@ -155,6 +156,7 @@ final class InflateContext
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("Cannot directly construct DeflateContext, use deflate_init() instead")]
 final class DeflateContext
 {
 }

@@ -36,7 +36,7 @@ object(PDOStatement)#2 (1) {
 }
 Property queryString is read only
 
-Fatal error: Uncaught PDOException: You may not create a PDORow manually in %spdo_036.php:%d
+Fatal error: Uncaught ReflectionException: Class PDORow cannot be instantiated manually in %s:%d
 Stack trace:
 #0 %spdo_036.php(%d): ReflectionClass->newInstance()
 #1 {main}

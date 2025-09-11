@@ -58,6 +58,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 try {
     $o = zend_object_init_with_constructor("_ZendTestTrait");
@@ -65,6 +66,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 try {
     $o = zend_object_init_with_constructor("ZendTestUnitEnum");
@@ -72,6 +74,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 try {
     $o = zend_object_init_with_constructor("AbstractClass");
@@ -79,6 +82,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 try {
     $o = zend_object_init_with_constructor("SysvMessageQueue");
@@ -86,6 +90,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 try {
     $o = zend_object_init_with_constructor("PrivateUser");
@@ -93,6 +98,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 try {
     $o = zend_object_init_with_constructor("ThrowingUser");
@@ -100,6 +106,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 
 echo "Testing param passing\n";
@@ -109,6 +116,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 try {
     $o = zend_object_init_with_constructor("TestUserWithConstructorArgs", "str", 5);
@@ -116,6 +124,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 try {
     $o = zend_object_init_with_constructor("TestUserWithConstructorArgs", 5, string_param: "str", unused_param: 15.3);
@@ -123,6 +132,7 @@ try {
     unset($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    unset($e);
 }
 
 $o = zend_object_init_with_constructor("TestUserWithConstructorArgs", 5, string_param: "str");

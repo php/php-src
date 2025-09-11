@@ -54,6 +54,6 @@ $db = @pg_connect($conn_str);
 @pg_query($db, "DROP TABLE IF EXISTS pg_fetch_object_abstract_class cascade");
 ?>
 --EXPECT--
-Error: Cannot instantiate interface I
+ValueError: pg_fetch_object(): Argument #3 ($class) must be an instantiable class
 Error: Cannot instantiate abstract class C
-Error: Cannot instantiate enum E
+ValueError: pg_fetch_object(): Argument #3 ($class) must be an instantiable class

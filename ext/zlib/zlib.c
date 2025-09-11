@@ -20,6 +20,7 @@
 #include <config.h>
 #endif
 
+#include "zend_attributes.h"
 #include "php.h"
 #include "SAPI.h"
 #include "php_ini.h"
@@ -60,11 +61,6 @@ static zend_object *inflate_context_create_object(zend_class_entry *class_type) 
 	return &intern->std;
 }
 
-static zend_function *inflate_context_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct InflateContext, use inflate_init() instead");
-	return NULL;
-}
-
 static void inflate_context_free_obj(zend_object *object)
 {
 	php_zlib_context *intern = inflate_context_from_obj(object);
@@ -94,11 +90,6 @@ static zend_object *deflate_context_create_object(zend_class_entry *class_type) 
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *deflate_context_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct DeflateContext, use deflate_init() instead");
-	return NULL;
 }
 
 static void deflate_context_free_obj(zend_object *object)
@@ -1353,7 +1344,6 @@ static PHP_MINIT_FUNCTION(zlib)
 	memcpy(&inflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	inflate_context_object_handlers.offset = offsetof(php_zlib_context, std);
 	inflate_context_object_handlers.free_obj = inflate_context_free_obj;
-	inflate_context_object_handlers.get_constructor = inflate_context_get_constructor;
 	inflate_context_object_handlers.clone_obj = NULL;
 	inflate_context_object_handlers.compare = zend_objects_not_comparable;
 
@@ -1364,7 +1354,6 @@ static PHP_MINIT_FUNCTION(zlib)
 	memcpy(&deflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	deflate_context_object_handlers.offset = offsetof(php_zlib_context, std);
 	deflate_context_object_handlers.free_obj = deflate_context_free_obj;
-	deflate_context_object_handlers.get_constructor = deflate_context_get_constructor;
 	deflate_context_object_handlers.clone_obj = NULL;
 	deflate_context_object_handlers.compare = zend_objects_not_comparable;
 

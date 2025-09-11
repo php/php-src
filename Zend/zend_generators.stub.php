@@ -6,6 +6,7 @@
  * @strict-properties
  * @not-serializable
  */
+#[\NonInstantiableClass("The \"Generator\" class is reserved for internal use and cannot be manually instantiated")]
 final class Generator implements Iterator
 {
     public function rewind(): void {}

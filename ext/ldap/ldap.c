@@ -113,11 +113,6 @@ static zend_object *ldap_link_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *ldap_link_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAP\\Connection, use ldap_connect() instead");
-	return NULL;
-}
-
 static void ldap_link_free(ldap_linkdata *ld)
 {
 	/* We use ldap_destroy rather than ldap_unbind here, because ldap_unbind
@@ -158,11 +153,6 @@ static zend_object *ldap_result_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *ldap_result_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAP\\Result, use the dedicated functions instead");
-	return NULL;
-}
-
 static void ldap_result_free(ldap_resultdata *result)
 {
 	ldap_msgfree(result->result);
@@ -191,11 +181,6 @@ static zend_object *ldap_result_entry_create_object(zend_class_entry *class_type
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *ldap_result_entry_get_constructor(zend_object *obj) {
-	zend_throw_error(NULL, "Cannot directly construct LDAP\\ResultEntry, use the dedicated functions instead");
-	return NULL;
 }
 
 static void ldap_result_entry_free_obj(zend_object *obj)
@@ -873,7 +858,6 @@ PHP_MINIT_FUNCTION(ldap)
 	memcpy(&ldap_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_link_object_handlers.offset = offsetof(ldap_linkdata, std);
 	ldap_link_object_handlers.free_obj = ldap_link_free_obj;
-	ldap_link_object_handlers.get_constructor = ldap_link_get_constructor;
 	ldap_link_object_handlers.clone_obj = NULL;
 	ldap_link_object_handlers.compare = zend_objects_not_comparable;
 
@@ -884,7 +868,6 @@ PHP_MINIT_FUNCTION(ldap)
 	memcpy(&ldap_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_result_object_handlers.offset = offsetof(ldap_resultdata, std);
 	ldap_result_object_handlers.free_obj = ldap_result_free_obj;
-	ldap_result_object_handlers.get_constructor = ldap_result_get_constructor;
 	ldap_result_object_handlers.clone_obj = NULL;
 	ldap_result_object_handlers.compare = zend_objects_not_comparable;
 
@@ -895,7 +878,6 @@ PHP_MINIT_FUNCTION(ldap)
 	memcpy(&ldap_result_entry_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_result_entry_object_handlers.offset = offsetof(ldap_result_entry, std);
 	ldap_result_entry_object_handlers.free_obj = ldap_result_entry_free_obj;
-	ldap_result_entry_object_handlers.get_constructor = ldap_result_entry_get_constructor;
 	ldap_result_entry_object_handlers.clone_obj = NULL;
 	ldap_result_entry_object_handlers.compare = zend_objects_not_comparable;
 

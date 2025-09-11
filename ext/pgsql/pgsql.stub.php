@@ -965,6 +965,7 @@ namespace PgSql {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct PgSql\\Connection, use pg_connect() or pg_pconnect() instead")]
     final class Connection
     {
     }
@@ -973,6 +974,7 @@ namespace PgSql {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct PgSql\\Result, use a dedicated function instead")]
     final class Result
     {
     }
@@ -981,6 +983,7 @@ namespace PgSql {
      * @strict-properties
      * @not-serializable
      */
+    #[\NonInstantiableClass("Cannot directly construct PgSql\\Connection, use pg_lo_open() instead")]
     final class Lob
     {
     }

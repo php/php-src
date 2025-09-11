@@ -3526,10 +3526,14 @@ class ClassInfo {
 
         $declaredStrings = [];
 
+        $isInstantiable = true;
         if (!empty($this->attributes)) {
             $code .= $php80CondStart;
 
             foreach ($this->attributes as $key => $attribute) {
+                if ($attribute->class === "NonInstantiableClass") {
+                    $isInstantiable = false;
+                }
                 $code .= $attribute->generateCode(
                     "zend_add_class_attribute(class_entry",
                     "class_{$escapedName}_$key",
@@ -3558,6 +3562,10 @@ class ClassInfo {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
+        }
+
+        if (!$isInstantiable) {
+            $code .= "\n\tclass_entry->constructor = NULL;\n";
         }
 
         $code .= "\n\treturn class_entry;\n";

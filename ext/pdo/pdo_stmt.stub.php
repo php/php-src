@@ -68,6 +68,7 @@ class PDOStatement implements IteratorAggregate
 }
 
 /** @not-serializable */
+#[\NonInstantiableClass("A PDORow class cannot be manually instantiated")]
 final class PDORow
 {
     public string $queryString;

@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_stmt.stub.php instead.
- * Stub hash: 6a5b332ba4bfeceaca6aad734d38dabb66d82c97 */
+ * Stub hash: f40ef0875271b733d862d5c0e3b23523428f2ff7 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -161,6 +161,14 @@ static zend_class_entry *register_class_PDORow(void)
 	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, true);
 	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_queryString_name, true);
+
+	zend_string *attribute_name_NonInstantiableClass_class_PDORow_0 = zend_string_init_interned("NonInstantiableClass", sizeof("NonInstantiableClass") - 1, true);
+	zend_attribute *attribute_NonInstantiableClass_class_PDORow_0 = zend_add_class_attribute(class_entry, attribute_name_NonInstantiableClass_class_PDORow_0, 1);
+	zend_string_release_ex(attribute_name_NonInstantiableClass_class_PDORow_0, true);
+	zend_string *attribute_NonInstantiableClass_class_PDORow_0_arg0_str = zend_string_init("A PDORow class cannot be manually instantiated", strlen("A PDORow class cannot be manually instantiated"), 1);
+	ZVAL_STR(&attribute_NonInstantiableClass_class_PDORow_0->args[0].value, attribute_NonInstantiableClass_class_PDORow_0_arg0_str);
+
+	class_entry->constructor = NULL;
 
 	return class_entry;
 }

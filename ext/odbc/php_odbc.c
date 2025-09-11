@@ -171,12 +171,6 @@ static zend_object *odbc_connection_create_object(zend_class_entry *class_type)
 	return &intern->std;
 }
 
-static zend_function *odbc_connection_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL, "Cannot directly construct Odbc\\Connection, use odbc_connect() or odbc_pconnect() instead");
-	return NULL;
-}
-
 static zend_result odbc_connection_cast_object(zend_object *obj, zval *result, int type)
 {
 	if (type == IS_LONG) {
@@ -207,12 +201,6 @@ static zend_object *odbc_result_create_object(zend_class_entry *class_type)
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *odbc_result_get_constructor(zend_object *object)
-{
-	zend_throw_error(NULL, "Cannot directly construct Odbc\\Result, use an appropriate odbc_* function instead");
-	return NULL;
 }
 
 static zend_result odbc_result_cast_object(zend_object *obj, zval *result, int type)
@@ -501,7 +489,6 @@ PHP_MINIT_FUNCTION(odbc)
 	memcpy(&odbc_connection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	odbc_connection_object_handlers.offset = offsetof(odbc_link, std);
 	odbc_connection_object_handlers.free_obj = odbc_connection_free_obj;
-	odbc_connection_object_handlers.get_constructor = odbc_connection_get_constructor;
 	odbc_connection_object_handlers.clone_obj = NULL;
 	odbc_connection_object_handlers.cast_object = odbc_connection_cast_object;
 	odbc_connection_object_handlers.compare = zend_objects_not_comparable;
@@ -513,7 +500,6 @@ PHP_MINIT_FUNCTION(odbc)
 	memcpy(&odbc_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	odbc_result_object_handlers.offset = offsetof(odbc_result, std);
 	odbc_result_object_handlers.free_obj = odbc_result_free_obj;
-	odbc_result_object_handlers.get_constructor = odbc_result_get_constructor;
 	odbc_result_object_handlers.clone_obj = NULL;
 	odbc_result_object_handlers.cast_object = odbc_result_cast_object;
 	odbc_result_object_handlers.compare = zend_objects_not_comparable;

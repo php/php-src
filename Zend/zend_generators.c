@@ -18,6 +18,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_attributes.h"
 #include "zend_hash.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -480,14 +481,6 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 
 	zend_object_std_init(&generator->std, class_type);
 	return (zend_object*)generator;
-}
-/* }}} */
-
-static ZEND_COLD zend_function *zend_generator_get_constructor(zend_object *object) /* {{{ */
-{
-	zend_throw_error(NULL, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
-
-	return NULL;
 }
 /* }}} */
 
@@ -1246,7 +1239,6 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_generator_handlers.dtor_obj = zend_generator_dtor_storage;
 	zend_generator_handlers.get_gc = zend_generator_get_gc;
 	zend_generator_handlers.clone_obj = NULL;
-	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
 
 	zend_ce_ClosedGeneratorException = register_class_ClosedGeneratorException(zend_ce_exception);
 }

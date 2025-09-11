@@ -140,7 +140,7 @@ static zend_arg_info zend_pass_function_arg_info[1] = {0};
 ZEND_API const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
 	{0, 0, 0},              /* arg_flags         */
-	0,                      /* fn_flags          */
+	ZEND_ACC_PUBLIC,                      /* fn_flags          */
 	NULL,                   /* name              */
 	NULL,                   /* scope             */
 	NULL,                   /* prototype         */

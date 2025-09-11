@@ -19,9 +19,10 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
-#include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
+#include "zend_attributes.h"
+#include "sysvmsg_arginfo.h"
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -78,11 +79,6 @@ static zend_object *sysvmsg_queue_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *sysvmsg_queue_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct SysvMessageQueue, use msg_get_queue() instead");
-	return NULL;
-}
-
 static void sysvmsg_queue_free_obj(zend_object *object)
 {
 	sysvmsg_queue_t *sysvmsg_queue = sysvmsg_queue_from_obj(object);
@@ -101,7 +97,6 @@ PHP_MINIT_FUNCTION(sysvmsg)
 	memcpy(&sysvmsg_queue_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvmsg_queue_object_handlers.offset = offsetof(sysvmsg_queue_t, std);
 	sysvmsg_queue_object_handlers.free_obj = sysvmsg_queue_free_obj;
-	sysvmsg_queue_object_handlers.get_constructor = sysvmsg_queue_get_constructor;
 	sysvmsg_queue_object_handlers.clone_obj = NULL;
 	sysvmsg_queue_object_handlers.compare = zend_objects_not_comparable;
 

@@ -289,6 +289,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	register_basic_functions_symbols(module_number);
 
+	/* TODO: Should manual instantiation be allowed? */
 	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
 	php_register_incomplete_class_handlers();
 

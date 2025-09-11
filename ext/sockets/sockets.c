@@ -27,6 +27,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
+#include "zend_attributes.h"
 #ifdef PHP_WIN32
 # include "windows_common.h"
 # include <windows.h>
@@ -140,11 +141,6 @@ static zend_object *socket_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *socket_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct Socket, use socket_create() instead");
-	return NULL;
-}
-
 static void socket_free_obj(zend_object *object)
 {
 	php_socket *socket = socket_from_obj(object);
@@ -191,11 +187,6 @@ static zend_object *address_info_create_object(zend_class_entry *class_type) {
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-
-static zend_function *address_info_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct AddressInfo, use socket_addrinfo_lookup() instead");
-	return NULL;
 }
 
 static void address_info_free_obj(zend_object *object)
@@ -484,7 +475,6 @@ static PHP_MINIT_FUNCTION(sockets)
 	memcpy(&socket_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	socket_object_handlers.offset = offsetof(php_socket, std);
 	socket_object_handlers.free_obj = socket_free_obj;
-	socket_object_handlers.get_constructor = socket_get_constructor;
 	socket_object_handlers.clone_obj = NULL;
 	socket_object_handlers.get_gc = socket_get_gc;
 	socket_object_handlers.compare = zend_objects_not_comparable;
@@ -496,7 +486,6 @@ static PHP_MINIT_FUNCTION(sockets)
 	memcpy(&address_info_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	address_info_object_handlers.offset = offsetof(php_addrinfo, std);
 	address_info_object_handlers.free_obj = address_info_free_obj;
-	address_info_object_handlers.get_constructor = address_info_get_constructor;
 	address_info_object_handlers.clone_obj = NULL;
 	address_info_object_handlers.compare = zend_objects_not_comparable;
 
