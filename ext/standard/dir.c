@@ -550,9 +550,13 @@ PHP_FUNCTION(scandir)
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasort);
 	} else if (flags == PHP_SCANDIR_SORT_NONE) {
 		n = php_stream_scandir(dirn, &namelist, context, NULL);
-	} else {
+	} else if (flags == PHP_SCANDIR_SORT_DESCENDING) {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasortr);
-	}
+	} else {
+        zend_argument_value_error(2, "must be one of the SCANDIR_SORT_ASCENDING, SCANDIR_SORT_DESCENDING and SCANDIR_SORT_NONE constants");
+        RETURN_THROWS();
+    }
+
 	if (n < 0) {
 		php_error_docref(NULL, E_WARNING, "(errno %d): %s", errno, strerror(errno));
 		RETURN_FALSE;

@@ -160,6 +160,9 @@ PHP 8.5 UPGRADE NOTES
   . Using a printf-family function with a formatter that did not specify the
     precision previously incorrectly reset the precision instead of treating
     it as a precision of 0. See GH-18897.
+  . Passing an invalid flag value to the second argument of scandir() will now
+    throw a ValueError. Previously, it would silently use the
+    SCANDIR_SORT_DESCENDING value.
 
 ========================================
 2. New Features
