@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC1
 
+- apache2handler:
+  . Added the apache_connection_stream() function for CGI WebSockets. (Richard Tyler Miles)
+
 - Core:
   . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
     checks). (timwolla)
