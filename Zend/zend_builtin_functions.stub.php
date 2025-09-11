@@ -41,6 +41,8 @@ function strncasecmp(string $string1, string $string2, int $length): int {}
 
 function error_reporting(?int $error_level = null): int {}
 
+function exit_status(): int {}
+
 function define(string $constant_name, mixed $value, bool $case_insensitive = false): bool {}
 
 function defined(string $constant_name): bool {}
