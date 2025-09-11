@@ -59,9 +59,6 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexb
  * Creates a Uri\WhatWg\UrlValidationError class by mapping error codes listed in
  * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum.
  * The result is passed by reference to the errors parameter.
- *
- * When errors is NULL, the caller is not interested in the additional error information,
- * so the function does nothing.
  */
 static const char *fill_errors(zval *errors)
 {
