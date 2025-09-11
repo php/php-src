@@ -553,23 +553,17 @@ $used_extra_spec = array();
 function out($f, $s) {
     global $line_nos;
 
-    $line_no = &$line_nos[(int)$f];
-    if ($line_no === null) {
-        $line_no = 1;
-    }
-
     fputs($f,$s);
-    $line_no += substr_count($s, "\n");
+
+    $line_nos[(int)$f] ??= 1;
+    $line_nos[(int)$f] += substr_count($s, "\n");
 }
 
 // Resets #line directives in resulting executor
 function out_line($f) {
     global $line_nos, $executor_file;
 
-    $line_no = &$line_nos[(int)$f];
-    if ($line_no === null) {
-        $line_no = 1;
-    }
+    $line_no = $line_nos[(int)$f] ??= 1;
 
     fputs($f,"#line ".($line_no+1)." \"".$executor_file."\"\n");
     ++$line_no;
