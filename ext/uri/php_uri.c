@@ -124,54 +124,44 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI uri_internal_t *php_uri_parse(const php_uri_parser
 	return internal_uri;
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_get_property(const uri_internal_t *internal_uri, php_uri_property_name property_name, php_uri_component_read_mode read_mode, zval *zv)
-{
-	const php_uri_property_handler *property_handler = uri_property_handler_from_internal_uri(internal_uri, property_name);
-	if (property_handler == NULL) {
-		return FAILURE;
-	}
-
-	return property_handler->read(internal_uri->uri, read_mode, zv);
-}
-
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_scheme(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, PHP_URI_PROPERTY_NAME_SCHEME, read_mode, zv);
+	return internal_uri->parser->property_handler.scheme.read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_username(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, PHP_URI_PROPERTY_NAME_USERNAME, read_mode, zv);
+	return internal_uri->parser->property_handler.username.read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_password(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, PHP_URI_PROPERTY_NAME_PASSWORD, read_mode, zv);
+	return internal_uri->parser->property_handler.password.read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_host(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, PHP_URI_PROPERTY_NAME_HOST, read_mode, zv);
+	return internal_uri->parser->property_handler.host.read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_port(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, PHP_URI_PROPERTY_NAME_PORT, read_mode, zv);
+	return internal_uri->parser->property_handler.port.read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_path(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, PHP_URI_PROPERTY_NAME_PATH, read_mode, zv);
+	return internal_uri->parser->property_handler.path.read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_query(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, PHP_URI_PROPERTY_NAME_QUERY, read_mode, zv);
+	return internal_uri->parser->property_handler.query.read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_fragment(const uri_internal_t *internal_uri, php_uri_component_read_mode read_mode, zval *zv)
 {
-	return php_uri_get_property(internal_uri, PHP_URI_PROPERTY_NAME_FRAGMENT, read_mode, zv);
+	return internal_uri->parser->property_handler.fragment.read(internal_uri->uri, read_mode, zv);
 }
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(uri_internal_t *internal_uri)
