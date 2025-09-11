@@ -5,7 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-19765 (object_properties_load() bypasses readonly property
     checks). (timwolla)
-  . The __sleep() magic method has been deprecated. (Girgias)
+  . The __sleep() and __wakeup() magic methods have been deprecated. (Girgias)
 
 - URI:
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
