@@ -563,10 +563,10 @@ function out($f, $s) {
 function out_line($f) {
     global $line_nos, $executor_file;
 
-    $line_no = $line_nos[(int)$f] ??= 1;
+    $line_nos[(int)$f] ??= 1;
+    $line_nos[(int)$f]++;
 
-    fputs($f,"#line ".($line_no+1)." \"".$executor_file."\"\n");
-    ++$line_no;
+    fputs($f,"#line ".$line_nos[(int)$f]." \"".$executor_file."\"\n");
 }
 
 function is_hot_helper($name) {
