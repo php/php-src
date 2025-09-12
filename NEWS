@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19792 (SCCP causes UAF for return value if both warning and
     exception are triggered). (nielsdos)
 
+- Curl:
+  . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
+    of the curl_copy_handle() function to clone a CurlHandle.
+
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
