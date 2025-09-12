@@ -435,6 +435,17 @@ PHP 8.5 UPGRADE NOTES
     by using the intl.use_exceptions INI setting.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_intlerror_level_ini_setting
 
+- LDAP:
+  - Specific Oracle Instant Client calls and constants have been deprecated.
+    List of affected calls:
+        ldap_connect with wallet support()
+        ldap_connect_wallet()
+    List of affected constants:
+        GSLC_SSL_NO_UATH
+        GSLC_SSL_ONEWAY_UATH
+        GSLC_SSL_TWOWAY_UATH
+    https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_building_ext_ldap_against_oracle_ldap
+
 - MySQLi:
   . The mysqli_execute() alias function has been deprecated.
     Use mysqli_stmt_execute() instead.
