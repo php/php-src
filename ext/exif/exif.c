@@ -4291,6 +4291,7 @@ static bool exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offs
 	return result;
 }
 
+/* Returns the size of the header, which must be smaller than the size of the box. */
 static int exif_isobmff_parse_box(unsigned char *buf, isobmff_box_type *box)
 {
 	box->size = php_ifd_get32u(buf, 1);
@@ -4312,6 +4313,9 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 
 	for (box_offset = data + 4; box_offset + 16 < end; box_offset += box.size) {
 		header_size = exif_isobmff_parse_box(box_offset, &box);
+		if (box.size < header_size) {
+			return;
+		}
 		if (box.type == FOURCC("iinf")) {
 			p = box_offset + header_size;
 			if (p >= end) {
@@ -4334,6 +4338,9 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 			}
 			for (i = 0; i < item_count && p + 20 < end; i++) {
 				header_size = exif_isobmff_parse_box(p, &item);
+				if (item.size < header_size) {
+					return;
+				}
 				if (p + header_size + 12 >= end) {
 					return;
 				}
@@ -4396,6 +4403,9 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 			break;
 		}
 		box_header_size = exif_isobmff_parse_box(buf, &box);
+		if (box.size < box_header_size) {
+			break;
+		}
 		if (box.type == FOURCC("meta")) {
 			limit = box.size - box_header_size;
 			if (limit < 36) {
