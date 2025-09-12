@@ -11,7 +11,7 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
-    of the curl_copy_handle() function to clone a CurlHandle.
+    of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
 
 - Standard:
   . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
