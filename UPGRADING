@@ -972,6 +972,8 @@ PHP 8.5 UPGRADE NOTES
   . The high resolution timer (`hrtime()`) on macOS now uses the recommended
     `clock_gettime_nsec_np(CLOCK_UPTIME_RAW)` API instead of
     `mach_absolute_time()`.
+  . Destructors are now invoked correctly after bailout, to match the behavior
+    of shutdown handlers.
 
 - CLI/CGI:
   . The `-z` or `--zend-extension` option has been removed as it was

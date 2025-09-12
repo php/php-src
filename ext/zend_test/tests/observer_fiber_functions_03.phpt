@@ -87,3 +87,12 @@ Fatal error: Allowed memory size of 104857600 bytes exhausted %s on line %d
 <!-- destroy: %s -->
       </Fiber::resume>
     </file '%s'>
+<!-- switching from fiber %s to %s -->
+<destroying '%s'>
+    <!-- Exception: GracefulExit -->
+  </Fiber::suspend>
+  <!-- Exception: GracefulExit -->
+</{closure:%s:%d}>
+<!-- switching from fiber %s to %s -->
+<destroyed '%s'>
+<!-- destroy: %s -->
