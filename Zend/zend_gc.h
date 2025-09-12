@@ -21,6 +21,7 @@
 #define ZEND_GC_H
 
 #include "zend_hrtime.h"
+#include "zend_types.h"
 
 #ifndef GC_BENCH
 # define GC_BENCH 0
@@ -41,9 +42,12 @@ typedef struct _zend_gc_status {
 	zend_hrtime_t collector_time;
 	zend_hrtime_t dtor_time;
 	zend_hrtime_t free_time;
+	zend_hrtime_t mark_roots_time;
+	zend_hrtime_t scan_roots_time;
+	zend_hrtime_t collect_roots_time;
 } zend_gc_status;
 
-ZEND_API extern int (*gc_collect_cycles)(void);
+ZEND_API extern int (*gc_collect_cycles)(bool force_full_gc);
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref);
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref);
@@ -61,7 +65,7 @@ void gc_bench_print(void);
 #endif
 
 /* The default implementation of the gc_collect_cycles callback. */
-ZEND_API int  zend_gc_collect_cycles(void);
+ZEND_API int  zend_gc_collect_cycles(bool force_full_gc);
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status);
 
