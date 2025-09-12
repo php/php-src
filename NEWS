@@ -11,7 +11,7 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
-    of the curl_copy_handle() function to clone a CurlHandle.
+    of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
 
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
