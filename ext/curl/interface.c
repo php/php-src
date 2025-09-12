@@ -1544,37 +1544,23 @@ out_mime:
 /* {{{ Copy a cURL handle along with all of it's preferences */
 PHP_FUNCTION(curl_copy_handle)
 {
-	php_curl	*ch;
-	CURL		*cp;
 	zval		*zid;
-	php_curl	*dupch;
-	zval		*postfields;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
 		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ch = Z_CURL_P(zid);
-
-	cp = curl_easy_duphandle(ch->cp);
-	if (!cp) {
+	zend_object *new_object = Z_OBJ_P(zid)->handlers->clone_obj(Z_OBJ_P(zid));
+	if (EG(exception)) {
+		if (new_object != NULL) {
+			OBJ_RELEASE(new_object);
+		}
+		zend_clear_exception();
 		php_error_docref(NULL, E_WARNING, "Cannot duplicate cURL handle");
 		RETURN_FALSE;
 	}
 
-	dupch = init_curl_handle_into_zval(return_value);
-	dupch->cp = cp;
-
-	_php_setup_easy_copy_handlers(dupch, ch);
-
-	postfields = &ch->postfields;
-	if (Z_TYPE_P(postfields) != IS_UNDEF) {
-		if (build_mime_structure_from_hash(dupch, postfields) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			php_error_docref(NULL, E_WARNING, "Cannot rebuild mime structure");
-			RETURN_FALSE;
-		}
-	}
+	RETURN_OBJ(new_object);
 }
 /* }}} */
 
