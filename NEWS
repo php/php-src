@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - URI:
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
     (nielsdos)
+  . Prevent modifying Uri\WhatWg\Url and Uri\Rfc3986\Uri objects by manually
+    calling __construct() or __unserialize(). (timwolla)
+  . Further clean up the internal API. (timwolla)
 
 - Windows:
   . Fix GH-19722 (_get_osfhandle asserts in debug mode when given a socket).
