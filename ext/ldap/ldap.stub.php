@@ -208,16 +208,19 @@ namespace {
      * @var int
      * @cvalue GSLC_SSL_NO_AUTH
      */
+    #[\Deprecated(since: "8.5", message: "as it is broken since PHP 8.0")]
     const GSLC_SSL_NO_AUTH = UNKNOWN;
     /**
      * @var int
      * @cvalue GSLC_SSL_ONEWAY_AUTH
      */
+    #[\Deprecated(since: "8.5", message: "as it is broken since PHP 8.0")]
     const GSLC_SSL_ONEWAY_AUTH = UNKNOWN;
     /**
      * @var int
      * @cvalue GSLC_SSL_TWOWAY_AUTH
      */
+    #[\Deprecated(since: "8.5", message: "as it is broken since PHP 8.0")]
     const GSLC_SSL_TWOWAY_AUTH = UNKNOWN;
 #endif
 
@@ -624,8 +627,10 @@ namespace {
 #endif
 
 #ifdef HAVE_ORALDAP
+    #[\Deprecated(since: "8.5", message: "as it is broken since PHP 8.0")]
     function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNKNOWN, #[\SensitiveParameter] string $password = UNKNOWN, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
+    #[\Deprecated(since: "8.5", message: "as it is broken since PHP 8.0")]
     function ldap_connect_wallet(?string $uri = null, string $wallet, #[\SensitiveParameter] string $password, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
 #endif
 #else
