@@ -1310,7 +1310,7 @@ PHP_FUNCTION(odbc_exec)
 #define ODBC_OBJECT  2
 
 /* {{{ php_odbc_fetch_hash */
-static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
+static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array, int result_type)
 {
 	int i;
 	odbc_result *result;
@@ -1319,12 +1319,20 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	char *buf = NULL;
 	zend_long pv_row = 0;
 	bool pv_row_is_null = true;
-	zval *pv_res, tmp;
+	zval *pv_res, *pv_res_arr, tmp;
 	SQLULEN crow;
 	SQLUSMALLINT RowStatus[1];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &pv_res, odbc_result_ce, &pv_row, &pv_row_is_null) == FAILURE) {
-		RETURN_THROWS();
+	if (return_array) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &pv_res, odbc_result_ce, &pv_row, &pv_row_is_null) == FAILURE) {
+			RETURN_THROWS();
+		}
+		/* So we can use pv_res_arr for both return value and passed */
+		pv_res_arr = return_value;
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|l!", &pv_res, odbc_result_ce, &pv_res_arr, &pv_row, &pv_row_is_null) == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 
 	result = Z_ODBC_RESULT_P(pv_res);
@@ -1335,6 +1343,16 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
+	}
+
+	/* If we're initializing a passed value into an array, do it before the fetch
+	 * so that an empty result set will still be an array.
+	 */
+	if (!return_array) {
+		pv_res_arr = zend_try_array_init(pv_res_arr);
+		if (!pv_res_arr) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (result->fetch_abs) {
@@ -1349,12 +1367,15 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		if (rc == SQL_ERROR) {
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
 		}
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	/* ...but if returning an array, init only if we have a result set */
+	if (return_array) {
+		array_init(pv_res_arr);
+	}
 
 	if (!pv_row_is_null && pv_row > 0 && result->fetch_abs)
 		result->fetched = (SQLLEN)pv_row;
@@ -1375,6 +1396,8 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (result->binmode == 1) {
 					sql_c_type = SQL_C_BINARY;
 				}
+
+				/* TODO: Check this is the intended behaviour */
 				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
 			case SQL_WLONGVARCHAR:
@@ -1391,7 +1414,9 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (rc == SQL_ERROR) {
 					odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
 					efree(buf);
-					zval_ptr_dtor(return_value);
+					if (return_array) {
+						zval_ptr_dtor(pv_res_arr);
+					}
 					RETURN_FALSE;
 				}
 
@@ -1425,17 +1450,22 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		}
 
 		if (result_type & ODBC_NUM) {
-			zend_hash_index_update(Z_ARRVAL_P(return_value), i, &tmp);
+			zend_hash_index_update(Z_ARRVAL_P(pv_res_arr), i, &tmp);
 		} else {
 			if (!*(result->values[i].name) && Z_TYPE(tmp) == IS_STRING) {
-				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR(tmp), &tmp);
+				zend_hash_update(Z_ARRVAL_P(pv_res_arr), Z_STR(tmp), &tmp);
 			} else {
-				zend_hash_str_update(Z_ARRVAL_P(return_value), result->values[i].name, strlen(result->values[i].name), &tmp);
+				zend_hash_str_update(Z_ARRVAL_P(pv_res_arr), result->values[i].name, strlen(result->values[i].name), &tmp);
 			}
 		}
 	}
 	if (buf) {
 		efree(buf);
+	}
+
+	/* return_value was set to an array otherwise */
+	if (!return_array) {
+		RETURN_LONG(result->numcols);
 	}
 }
 /* }}} */
@@ -1444,7 +1474,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 /* {{{ Fetch a result row as an object */
 PHP_FUNCTION(odbc_fetch_object)
 {
-	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
+	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, ODBC_OBJECT);
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	}
@@ -1454,129 +1484,14 @@ PHP_FUNCTION(odbc_fetch_object)
 /* {{{ Fetch a result row as an associative array */
 PHP_FUNCTION(odbc_fetch_array)
 {
-	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
+	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, ODBC_OBJECT);
 }
 /* }}} */
 
 /* {{{ Fetch one result row into an array */
 PHP_FUNCTION(odbc_fetch_into)
 {
-	int i;
-	odbc_result *result;
-	RETCODE rc;
-	SQLSMALLINT sql_c_type;
-	char *buf = NULL;
-	zval *pv_res, *pv_res_arr, tmp;
-	zend_long pv_row = 0;
-	bool pv_row_is_null = true;
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|l!", &pv_res, odbc_result_ce, &pv_res_arr, &pv_row, &pv_row_is_null) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	result = Z_ODBC_RESULT_P(pv_res);
-	CHECK_ODBC_RESULT(result);
-
-	/* TODO deprecate $row argument values less than 1 after PHP 8.4 */
-
-	if (result->numcols == 0) {
-		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
-		RETURN_FALSE;
-	}
-
-	pv_res_arr = zend_try_array_init(pv_res_arr);
-	if (!pv_res_arr) {
-		RETURN_THROWS();
-	}
-
-	if (result->fetch_abs) {
-		if (!pv_row_is_null && pv_row > 0) {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,(SQLLEN)pv_row,&crow,RowStatus);
-		} else {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
-		}
-	} else {
-		rc = SQLFetch(result->stmt);
-	}
-
-	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		if (rc == SQL_ERROR) {
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
-		}
-		RETURN_FALSE;
-	}
-
-	if (!pv_row_is_null && pv_row > 0 && result->fetch_abs)
-		result->fetched = (SQLLEN)pv_row;
-	else
-		result->fetched++;
-
-	for(i = 0; i < result->numcols; i++) {
-		sql_c_type = SQL_C_CHAR;
-
-		switch(result->values[i].coltype) {
-			case SQL_BINARY:
-			case SQL_VARBINARY:
-			case SQL_LONGVARBINARY:
-				if (result->binmode <= 0) {
-					ZVAL_EMPTY_STRING(&tmp);
-					break;
-				}
-				if (result->binmode == 1) sql_c_type = SQL_C_BINARY;
-
-				/* TODO: Check this is the intended behaviour */
-				ZEND_FALLTHROUGH;
-			case SQL_LONGVARCHAR:
-			case SQL_WLONGVARCHAR:
-				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
-					ZVAL_EMPTY_STRING(&tmp);
-					break;
-				}
-
-				if (buf == NULL) {
-					buf = emalloc(result->longreadlen + 1);
-				}
-				rc = SQLGetData(result->stmt, (SQLUSMALLINT)(i + 1),sql_c_type, buf, result->longreadlen + 1, &result->values[i].vallen);
-
-				if (rc == SQL_ERROR) {
-					odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
-					efree(buf);
-					RETURN_FALSE;
-				}
-				if (rc == SQL_SUCCESS_WITH_INFO) {
-					ZVAL_STRINGL(&tmp, buf, result->longreadlen);
-				} else if (rc != SQL_SUCCESS) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (retcode %u)", i + 1, rc);
-					ZVAL_FALSE(&tmp);
-				} else if (result->values[i].vallen == SQL_NULL_DATA) {
-					ZVAL_NULL(&tmp);
-					break;
-				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
-					ZVAL_FALSE(&tmp);
-				} else {
-					ZVAL_STRINGL(&tmp, buf, result->values[i].vallen);
-				}
-				break;
-
-			default:
-				if (result->values[i].vallen == SQL_NULL_DATA) {
-					ZVAL_NULL(&tmp);
-					break;
-				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
-					ZVAL_FALSE(&tmp);
-					break;
-				}
-				ZVAL_STRINGL(&tmp, result->values[i].value, result->values[i].vallen);
-				break;
-		}
-		zend_hash_index_update(Z_ARRVAL_P(pv_res_arr), i, &tmp);
-	}
-	if (buf) efree(buf);
-	RETURN_LONG(result->numcols);
+	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, ODBC_NUM);
 }
 /* }}} */
 
