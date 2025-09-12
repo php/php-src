@@ -4291,6 +4291,7 @@ static bool exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offs
 	return result;
 }
 
+/* Returns the size of the header, which must be smaller than the size of the box. */
 static int exif_isobmff_parse_box(unsigned char *buf, isobmff_box_type *box)
 {
 	box->size = php_ifd_get32u(buf, 1);
