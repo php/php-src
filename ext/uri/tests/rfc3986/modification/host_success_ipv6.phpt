@@ -1,0 +1,19 @@
+--TEST--
+Test Uri\Rfc3986\Uri component modification - host - IPv6 address
+--EXTENSIONS--
+uri
+--FILE--
+<?php
+
+$uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
+$uri2 = $uri1->withHost("[2001:db8:3333:4444:5555:6666:7777:8888]");
+
+var_dump($uri1->getRawHost());
+var_dump($uri2->getRawHost());
+var_dump($uri2->getHost());
+
+?>
+--EXPECT--
+string(11) "example.com"
+string(40) "[2001:db8:3333:4444:5555:6666:7777:8888]"
+string(40) "[2001:db8:3333:4444:5555:6666:7777:8888]"
