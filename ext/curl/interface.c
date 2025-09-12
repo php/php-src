@@ -423,7 +423,7 @@ static zend_object *curl_clone_obj(zend_object *object) {
 	clone_ch->cp = cp;
 	_php_setup_easy_copy_handlers(clone_ch, ch);
 
-	postfields = &clone_ch->postfields;
+	postfields = &ch->postfields;
 	if (Z_TYPE_P(postfields) != IS_UNDEF) {
 		if (build_mime_structure_from_hash(clone_ch, postfields) == FAILURE) {
 			zend_throw_exception(NULL, "Failed to clone CurlHandle", 0);
