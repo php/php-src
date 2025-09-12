@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Casting floats that are not representable as ints now emits a warning.
     (Girgias)
 
+- Bz2:
+  . Fixed bug GH-19810 (Broken bzopen() stream mode validation). (ilutov)
+
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
