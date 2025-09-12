@@ -84,6 +84,9 @@ PHP 8.5 UPGRADE NOTES
   . ldap_get_option() and ldap_set_option() now throw a ValueError when
     passing an invalid option.
 
+- MBstring:
+  . Unicode data tables have been updated to Unicode 17.0
+
 - MySQLi:
   . Calling the mysqli constructor on an already-constructed object
     is now no longer possible and throws an Error.
