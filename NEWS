@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - URI:
   . Fixed Uri\WhatWg\Url::withPort() when an invalid value is passed. (timwolla)
 
+- SOAP:
+  . Fixed bug GH-19773 (SIGSEGV due to uninitialized soap_globals->lang_en).
+    (nielsdos, KaseyJenkins)
+
 25 Sep 2025, PHP 8.5.0RC1
 
 - Core:
@@ -770,6 +774,5 @@ PHP                                                                        NEWS
   . Fixed bug GH-16883 (gzopen() does not use the default stream context when
     opening HTTP URLs). (nielsdos)
   . Implemented GH-17668 (zlib streams should support locking). (nielsdos)
-
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
