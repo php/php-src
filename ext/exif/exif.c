@@ -4393,12 +4393,11 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 	isobmff_box_type box;
 	isobmff_item_pos_type pos;
 	unsigned char *data;
-	off_t offset;
 	uint64_t limit;
 	int box_header_size, remain;
 	bool ret = false;
 
-	for (offset = php_ifd_get32u(buf, 1); ImageInfo->FileSize - 16 > offset; offset += box.size) {
+	for (size_t offset = php_ifd_get32u(buf, 1); ImageInfo->FileSize - 16 > offset; offset += box.size) {
 		if ((php_stream_seek(ImageInfo->infile, offset, SEEK_SET) < 0) ||
 			(exif_read_from_stream_file_looped(ImageInfo->infile, (char*)buf, 16) != 16)) {
 			break;
