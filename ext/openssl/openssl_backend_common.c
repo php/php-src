@@ -608,7 +608,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 	unsigned int n;
 	zend_string *ret;
 
-	if (!(mdtype = EVP_get_digestbyname(method))) {
+	if (!(mdtype = php_openssl_get_evp_md_by_name(method))) {
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		return NULL;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {

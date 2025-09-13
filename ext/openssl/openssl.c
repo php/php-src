@@ -2426,9 +2426,9 @@ PHP_FUNCTION(openssl_pbkdf2)
 	}
 
 	if (method_len) {
-		digest = EVP_get_digestbyname(method);
+		digest = php_openssl_get_evp_md_by_name(method);
 	} else {
-		digest = EVP_sha1();
+		digest = php_openssl_get_evp_md_by_name("SHA1");
 	}
 
 	if (!digest) {
@@ -4202,7 +4202,7 @@ PHP_FUNCTION(openssl_seal)
 		RETURN_THROWS();
 	}
 
-	cipher = EVP_get_cipherbyname(method);
+	cipher = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
@@ -4331,7 +4331,7 @@ PHP_FUNCTION(openssl_open)
 		RETURN_FALSE;
 	}
 
-	cipher = EVP_get_cipherbyname(method);
+	cipher = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
