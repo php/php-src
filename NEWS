@@ -293,6 +293,8 @@ PHP                                                                        NEWS
     opened directory has been deprecated. (Girgias)
   . Fixed bug GH-19153 (#[\Attribute] validation should error on
     trait/interface/enum/abstract class). (DanielEScherzer)
+  . Fixed GH-14402 (SplPriorityQueue, SplMinHeap, and SplMaxHeap lost their
+    data on serialize()). (alexandre-daubois)
 
 - XML:
   . The xml_parser_free() function has been deprecated. (DanielEScherzer)
