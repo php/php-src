@@ -240,7 +240,7 @@ $gb18030_BMP_Mappings = [
 findInvalidChars($toUnicode, $invalid, $truncated);
 
 function notFourByteCode($gb) {
-  return ((ord($gb) < 0x81 || ord($gb) > 0x84) && (ord($gb) < 0x90 || ord($gb) > 0xE3)) ||
+  return ((ord($gb[0]) < 0x81 || ord($gb[0]) > 0x84) && (ord($gb[0]) < 0x90 || ord($gb[0]) > 0xE3)) ||
     (strlen($gb) > 1 && (ord($gb[1]) < 0x30 || ord($gb[1]) > 0x39));
 }
 
