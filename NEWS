@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
 
+- Soap:
+  . Fixed bug GH-19784 (SoapServer memory leak). (nielsdos)
+
 - Standard:
   . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
     (nielsdos)
