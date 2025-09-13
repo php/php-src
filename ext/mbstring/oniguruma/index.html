@@ -1,0 +1,192 @@
+<html>
+<head>
+  <meta HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=x-sjis">
+  <title>Oniguruma</title>
+</head>
+<body BGCOLOR="#ffffff" VLINK="#808040" TEXT="#696969">
+
+<h1>Oniguruma</h1> (<a href="index_ja.html">Japanese</a>)
+
+<p>
+(c) K.Kosako, updated at: 2019/08/05
+</p>
+
+<dl>
+<font color="orange">
+<dt><b>What's new</b>
+</font>
+<ul>
+<li>2019/08/06: Version 6.9.3 released.</li>
+<li>2019/05/07: Version 6.9.2 released.</li>
+<li>2018/12/11: Version 6.9.1 released.</li>
+<li>2018/09/03: Version 6.9.0 released.</li>
+<li>2018/04/17: Version 6.8.2 released.</li>
+<li>2018/03/19: Version 6.8.1 released.</li>
+<li>2018/03/16: Version 6.8.0 released.</li>
+<li>2018/01/26: Version 6.7.1 released.</li>
+<li>2017/12/11: Version 6.7.0 released.</li>
+<li>2017/08/30: Version 6.6.1 released.</li>
+<li>2017/08/28: Version 6.6.0 released.</li>
+<li>2017/08/03: Version 6.5.0 released.</li>
+<li>2017/07/03: Version 6.4.0 released.</li>
+<li>2017/05/29: Version 6.3.0 released.</li>
+<li>2017/04/08: Version 6.2.0 released.</li>
+<li>2016/12/11: Version 6.1.3 released.</li>
+</ul>
+</dl>
+<hr>
+
+<p>
+Oniguruma is a regular expressions library.<br>
+The characteristics of this library is that different character encoding
+<br>for every regular expression object can be specified.
+<br>(supported APIs: GNU regex, POSIX and Oniguruma native)
+</p>
+
+<dl>
+<dt><b>Supported character encodings:</b><br>
+ASCII, UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE,<br>
+EUC-JP, EUC-TW, EUC-KR, EUC-CN,<br>
+Shift_JIS, Big5, GB18030, KOI8-R, CP1251,<br>
+ISO-8859-1, ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5,<br>
+ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-9, ISO-8859-10,<br>
+ISO-8859-11, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16<br>
+<font color="orange">
+(GB18030 encoding was contributed by KUBO Takehiro)<br>
+(CP1251 encoding was contributed by Byte)
+</font>
+</p>
+</dl>
+
+<hr>
+
+<dt><b>License:</b> BSD license.
+
+<dl>
+<dt><b>Platform:</b>
+<ul>
+<li> Unix (include Mac OS X)
+<li> Cygwin
+<li> Win32
+</ul>
+
+<br>
+<font color="red">
+Maintainer of 2.x was changed to Hannes Wyss &lt;hwyss AT ywesee.com&gt;.<br>
+About 2.x, please contact him.<br>
+</font>
+* 5.x supports Unicode Property/Script.<br>
+* 2.x supports Ruby1.6/1.8.<br>
+
+<br>
+<dt><b>Documents:</b> (version 6.1.0)
+<ul>
+ <li> <a href="doc/RE.txt">Regular Expressions</a>
+      <a href="doc/RE.ja.txt">(Japanese: EUC-JP)</a>
+ <li> <a href="doc/API.txt">Oniguruma API</a>
+      <a href="doc/API.ja.txt">(Japanese: EUC-JP)</a>
+</ul>
+
+<br>
+<dt><b>Sample Programs:</b>
+<ul>
+ <li><a href="sample/simple.c">example of the minimum</a>
+ <li><a href="sample/sql.c">example of the variable syntax and meta character (SQL-like pattern match)</a>
+</ul>
+
+<br>
+<dt><b>Site Links:</b>
+<ul>
+<li> <a href="http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/">FreeBSD ports</a>
+<li> <a href="http://www.softantenna.com/lib/1953/index.html">SoftAntenna &gt; Lib &gt;  Oniguruma</a> (Japanese page)
+</ul>
+
+<br>
+<dt><b>Links:</b>
+<ul>
+<li> <a href="http://www.perzl.org/aix/index.php?n=Main.Oniguruma">AIX Open Source Packages</a>
+<li> <a href="https://aur.archlinux.org/packages/oniguruma/">Arch Linux Package</a>
+<li> <a href="http://homepage3.nifty.com/k-takata/mysoft/bregonig.html">bregonig.dll (Win32)</a> (Japanese page)
+<li> <a href="http://www.halbiz.com/osaru/cnregex.html">cnRegex 4D Plugin (Mac OS X)</a> (Japanese page)
+<li> <a href="http://limechat.net/cocoaoniguruma/">CocoaOniguruma</a>
+<li> <a href="http://kmaebashi.com/">crowbar</a> (Japanese page)
+<li> <a href="http://oniguruma5.darwinports.com">Darwin Ports (Mac OS X)</a>
+<li> <a href="http://homepage2.nifty.com/Km/onig.htm">Delphi interface (Win32)</a> (Japanese page)
+<li> <a href="http://pyxis-project.net/ensemble/">Ensemble (Mac OS X)</a> (Japanese page)
+<li> <a href="http://www.srcw.net/FaEdit/">FaEdit (Win32)</a> (Japanese page)
+<li> <a href="http://www.tom.sfc.keio.ac.jp/~sakai/d/?date=20050209">GHC patch</a> Masahiro Sakai (Japanese Blog)
+<li> <a href="http://www.gyazsquare.com/gyazmail/index.php">GyazMail (Mac OS X)</a>
+<li> <a href="http://www5d.biglobe.ne.jp/~f-taste/knt3/jcref3.html">J-cref v3</a> (Japanese page)
+<li> <a href="http://www.artman21.net/">Jedit X (Mac OS X)</a>
+<li> <a href="http://www.chitora.jp/lhaz.html">Lhaz (Win32)</a> (Japanese page)
+<li> <a href="http://limechat.net/">LimeChat</a> (Japanese page)
+<li> <a href="http://medb.enhiro.com/">meDB</a> (Japanese page)
+<li> <a href="http://monaos.org/">Mona OS</a>
+<li> <a href="http://mongoose.jp/">mongoose</a> (Japanese page)
+<li> <a href="http://www.irori.org/tool/mregexp.html">mregexp</a> (Japanese page)
+<li> <a href="http://ochusha.sourceforge.jp/">Ochusha</a> (Japanese page)
+<li> <a href="http://sonoisa.github.com/ogrekit/About_%28English%29.html">OgreKit (Mac OS X)</a> Regular Expression Framework for Cocoa (Japanese page)
+<li> <a href="http://www.kanetaka.net/4dapi/wiki4d.dll/4dcgi/wiki.cgi?plugins-oniguruma">OnigRegexp</a> (Japanese page)
+<li> <a href="http://rubyforge.org/projects/oniguruma">Oniguruma for Ruby</a>
+<li> <a href="http://openspace.timedia.co.jp/~yasuyuki/wiliki/wiliki.cgi?Oniguruma-mysqld&l=jp">Oniguruma-mysqld</a>
+<li> <a href="http://www.void.in/wiki/OnigPP">OnigPP</a> (Japanese page)
+<li> <a href="http://www.kt.rim.or.jp/~kbk/sed/index.html">Onigsed (Win32)</a> (Japanese page)
+<li> <a href="http://glozer.net/code.html#oregexp">oregexp</a> Erlang binding
+<li> <a href="http://www.kt.rim.or.jp/~kbk/yagrep/index.html">yagrep (Win32)</a> (Japanese page)
+<li> <a href="http://www.php.gr.jp/">Japan PHP User Group</a> PHP 5.0 mb_ereg (Japanese page)
+<li> <a href="http://yatsu.info/wiki/Pufui/">Pufui (Mac OS X)</a> (Japanese page)
+<li> <a href="http://ultrapop.jp/?q2ch">q2ch</a> (Japanese page)
+<li> <a href="http://search.cpan.org/~andya/re-engine-Oniguruma">re-engine-Oniguruma</a>
+<li> <a href="http://harumune.s56.xrea.com/assari/index.php?RSSTyping">RSSTyping</a> (Japanese page)
+<li> <a href="http://tobysoft.net/wiki/index.php?Ruby%2Fruby-win32-oniguruma">ruby-win32-oniguruma</a> (Japanese page)
+<li> <a href="http://quux.s74.xrea.com/">SevenFour (Mac OS X)</a> (Japanese page)
+<li> <a href="http://storklab.cyber-ninja.jp/">Stork Lab. Products (Mac OS X)</a> (Japanese page)
+<li> <a href="http://sourceforge.jp/projects/ttssh2/">TeraTerm (Win32)</a>
+<li> <a href="http://www8.ocn.ne.jp/~sonoisa/TiddlyWikiPod/">TiddlyWikiPod (Mac OS X)</a>
+<li> <a href="http://www.cyanworks.net/mac.html">TunesTEXT (Mac OS X)</a>
+<li> <a href="https://code.google.com/p/oniguruma-visualworks/">oniguruma-visualworks</a>
+<li> <a href="http://sourceforge.jp/projects/frogger/">XML parser</a>
+<li> <a href="http://www.yokkasoft.net/">YokkaSoft (Win32)</a> (Japanese page)
+<li> <a href="http://www.hi-ho.ne.jp/kuze/tool.htm">Zed (Win32)</a> (Japanese page)
+</ul>
+
+<br>
+<dt><b>References:</b>
+<ul>
+<li> <a href="http://www.ruby-lang.org/ja/man/index.cgi?cmd=view;name=%C0%B5%B5%AC%C9%BD%B8%BD">Ruby Reference Manual Regexp</a> (Japanese page)
+<li> <a href="http://www.perl.com/doc/manual/html/pod/perlre.html">Perl regular expressions</a>
+<li> <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">java.util.regex.Pattern (J2SE 1.4.2)</a>
+<li> <a href="http://www.opengroup.org/onlinepubs/007908799/xbd/re.html">The Open Group</a>
+<li> <a href="http://regex.info/">Mastering Regular Expressions</a>
+<li> <a href="http://www.unicode.org/">Unicode Home Page</a>
+<li> <a href="http://www.kt.rim.or.jp/~kbk/regex/regex.html">Regular expressions memo</a> (Japanese page)
+<li> <a href="http://www.din.or.jp/~ohzaki/regex.htm">Regular expressions technique</a> (Japanese page)
+</ul>
+
+<br>
+</dl>
+<p>
+and I'm thankful to Akinori MUSHA.
+</p>
+
+<hr>
+<dl>
+<dt><b>Other Libraries:</b>
+<ul>
+<li> <a href="http://www.boost.org/libs/regex/doc/">Boost.Regex</a>
+<li> <a href="http://arglist.com/regex/">A copy of Henry Spencer's</a>
+<li> <a href="http://directory.fsf.org/regex.html">GNU regex</a>
+<li> <a href="http://www.pcre.org/">PCRE</a>
+<li> <a href="http://re2c.org/">re2c</a>
+<li> <a href="http://tiny-rex.sourceforge.net/">T-Rex</a>
+<li> <a href="http://laurikari.net/tre/">TRE</a>
+<li> <a href="http://svn.codehaus.org/jruby/joni/">Joni (Java)</a>
+<li> <a href="http://jregex.sourceforge.net/">JRegex (Java)</a>
+<li> <a href="http://www.cacas.org/java/gnu/regexp/">gnu.regexp for Java</a>
+<li> <a href="http://jakarta.apache.org/regexp/index.html">Jakarta Project Regexp</a>
+<li> <a href="http://jakarta.apache.org/oro/">Jakarta Project ORO</a>
+<li> <a href="http://sourceforge.jp/projects/onig4j/">Oniguruma for Java</a>
+</ul>
+</dl>
+</body>
+</html>
