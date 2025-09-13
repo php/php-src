@@ -109,6 +109,8 @@ PHP                                                                        NEWS
     and PHP_INT_MAX with LimitIterator). (alexandre-daubois)
   . Implement GH-19188: Add support for new INI mail.cr_lf_mode.
     (alexandre-daubois)
+  . Passing 1 or negative base to log() now throws a ValueError.
+    (alexandre-daubois)
 
 - Streams:
   . Fixed bug GH-14506 (Closing a userspace stream inside a userspace handler
