@@ -32,4 +32,4 @@ int(%d)
 string(19) "America/Los_Angeles"
 IntlDateFormatter::parseToCalendar(): Argument #2 ($offset) must be of type int, string given
 
-Deprecated: Implicit conversion from float %r(1\.4757395258967641E\+20|34359738352)%r to int loses precision in %s on line %d
+Warning: non-representable float %r(1\.4757395258967641E\+20|34359738352)%r was cast to int in %s on line %d
