@@ -9351,6 +9351,11 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		ce->ce_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
+	/* Add a default "pass" constructor if none are defined */
+	if (ce->constructor == NULL && (ce->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == 0) {
+		ce->constructor = (zend_function *) &zend_pass_function;
+	}
+
 	if (ce->__serialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP))) {
 		zend_error(E_DEPRECATED, "The __sleep() serialization magic method has been deprecated."
 			" Implement __serialize() instead (or in addition, if support for old PHP versions is necessary)");

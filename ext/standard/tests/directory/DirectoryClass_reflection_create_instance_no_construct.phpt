@@ -11,20 +11,7 @@ try {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
-var_dump($d);
-try {
-    var_dump($d->read());
-} catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
-
 ?>
 --EXPECT--
-bool(true)
-object(Directory)#2 (0) {
-  ["path"]=>
-  uninitialized(string)
-  ["handle"]=>
-  uninitialized(mixed)
-}
-Error: Internal directory stream has been altered
+bool(false)
+ReflectionException: Class Directory is an internal class that cannot be instantiated manually

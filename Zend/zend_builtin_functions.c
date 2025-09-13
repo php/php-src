@@ -38,6 +38,8 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_register_default_classes();
 
 	zend_standard_class_def = register_class_stdClass();
+	/* Assign dummy constructor */
+	zend_standard_class_def->constructor = (zend_function*) &zend_pass_function;
 
 	return SUCCESS;
 }

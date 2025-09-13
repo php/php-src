@@ -97,9 +97,11 @@ string(43) "Class "Class_does_not_exist" does not exist"
 object(NoCtor)#%d (0) {
 }
 ====>newInstance(25)
-string(86) "Class NoCtor does not have a constructor, so you cannot pass any constructor arguments"
+object(NoCtor)#%d (0) {
+}
 ====>newInstance(25, 42)
-string(86) "Class NoCtor does not have a constructor, so you cannot pass any constructor arguments"
+object(NoCtor)#%d (0) {
+}
 
 ====>WithCtor
 ====>newInstance()
