@@ -8,6 +8,7 @@ OK
 --EXPECTF--
 Fatal error: Uncaught TypeError: Cannot assign stdClass to property Exception::$previous of type ?Throwable in %s:%d
 Stack trace:
-#0 %s(%d): unserialize('O:12:"DateInter...')
-#1 {main}
+#0 [internal function]: Exception->__unserialize(Array)
+#1 %s(%d): unserialize('O:12:"DateInter...')
+#2 {main}
   thrown in %s on line %d

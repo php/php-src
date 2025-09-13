@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(2232) "Class [ <internal:Core> class Exception implements Stringable, Throwable ] {
+string(2406) "Class [ <internal:Core> class Exception implements Stringable, Throwable ] {
 
   - Constants [0] {
   }
@@ -58,7 +58,7 @@ string(2232) "Class [ <internal:Core> class Exception implements Stringable, Thr
     Property [ private ?Throwable $previous = NULL ]
   }
 
-  - Methods [11] {
+  - Methods [12] {
     Method [ <internal:Core> private method __clone ] {
 
       - Parameters [0] {
@@ -80,6 +80,14 @@ string(2232) "Class [ <internal:Core> class Exception implements Stringable, Thr
       - Parameters [0] {
       }
       - Tentative return [ void ]
+    }
+
+    Method [ <internal:Core> public method __unserialize ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> array $data ]
+      }
+      - Return [ void ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getMessage ] {

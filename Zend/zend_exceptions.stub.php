@@ -47,6 +47,8 @@ class Exception implements Throwable
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
+    public function __unserialize(array $data): void {}
+
     final public function getMessage(): string {}
 
     /** @return int */
@@ -110,6 +112,11 @@ class Error implements Throwable
      * @implementation-alias Exception::__wakeup
      */
     public function __wakeup(): void {}
+
+    /**
+     * @implementation-alias Exception::__unserialize
+     */
+    public function __unserialize(array $data): void {}
 
     /** @implementation-alias Exception::getMessage */
     final public function getMessage(): string {}

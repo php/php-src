@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ba1562ca8fe2fe48c40bc52d10545aa989afd86c */
+ * Stub hash: e412ae81454288565daae5ffaf9cc3941b6edbb7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -30,6 +30,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Exception___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Exception___wakeup, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Exception___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Exception_getMessage arginfo_class_Throwable_getMessage
@@ -65,6 +69,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Error___wakeup arginfo_class_Exception___wakeup
 
+#define arginfo_class_Error___unserialize arginfo_class_Exception___unserialize
+
 #define arginfo_class_Error_getMessage arginfo_class_Throwable_getMessage
 
 #define arginfo_class_Error_getCode arginfo_class_Throwable_getCode
@@ -84,6 +90,7 @@ ZEND_END_ARG_INFO()
 ZEND_METHOD(Exception, __clone);
 ZEND_METHOD(Exception, __construct);
 ZEND_METHOD(Exception, __wakeup);
+ZEND_METHOD(Exception, __unserialize);
 ZEND_METHOD(Exception, getMessage);
 ZEND_METHOD(Exception, getCode);
 ZEND_METHOD(Exception, getFile);
@@ -110,6 +117,7 @@ static const zend_function_entry class_Exception_methods[] = {
 	ZEND_ME(Exception, __clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE)
 	ZEND_ME(Exception, __construct, arginfo_class_Exception___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Exception, __wakeup, arginfo_class_Exception___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(Exception, __unserialize, arginfo_class_Exception___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Exception, getMessage, arginfo_class_Exception_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(Exception, getCode, arginfo_class_Exception_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(Exception, getFile, arginfo_class_Exception_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
@@ -131,6 +139,7 @@ static const zend_function_entry class_Error_methods[] = {
 	ZEND_RAW_FENTRY("__clone", zim_Exception___clone, arginfo_class_Error___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_RAW_FENTRY("__construct", zim_Exception___construct, arginfo_class_Error___construct, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("__wakeup", zim_Exception___wakeup, arginfo_class_Error___wakeup, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("__unserialize", zim_Exception___unserialize, arginfo_class_Error___unserialize, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getMessage", zim_Exception_getMessage, arginfo_class_Error_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
 	ZEND_RAW_FENTRY("getCode", zim_Exception_getCode, arginfo_class_Error_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
 	ZEND_RAW_FENTRY("getFile", zim_Exception_getFile, arginfo_class_Error_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)

@@ -13,6 +13,7 @@ echo unserialize($data);
 --EXPECTF--
 Fatal error: Uncaught TypeError: Cannot assign %s to property SoapFault::$faultcode of type ?string in %s:%d
 Stack trace:
-#0 %sbug73452.php(4): unserialize('O:9:"SoapFault"...')
-#1 {main}
+#0 [internal function]: Exception->__unserialize(Array)
+#1 %s(4): unserialize('O:9:"SoapFault"...')
+#2 {main}
   thrown in %s on line %d

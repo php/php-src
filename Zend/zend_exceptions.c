@@ -396,6 +396,95 @@ ZEND_METHOD(Exception, __wakeup)
 }
 /* }}} */
 
+ZEND_METHOD(Exception, __unserialize)
+{
+	HashTable *ht;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &ht) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	/* Fake strict_types as zend_update_property_ex() would coerce values compared to unserialize() */
+	EG(current_execute_data)->func->common.fn_flags |= ZEND_ACC_STRICT_TYPES;
+
+	zend_string *key = NULL;
+	zval *tmp;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, tmp) {
+		if (UNEXPECTED(key == NULL)) {
+			zend_throw_error(NULL, "Must have a string key");
+			RETURN_THROWS();
+		}
+		if (ZSTR_VAL(key)[0] == '\0') {
+			if (zend_string_equals_literal(key, "\0*\0message")) {
+				if (Z_TYPE_P(tmp) != IS_STRING) {
+					zend_type_error("Cannot assign %s to property %s::$message of type string",
+						zend_zval_type_name(tmp), ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+					RETURN_THROWS();
+				}
+				zend_update_property_num_checked(NULL, Z_OBJ_P(ZEND_THIS), ZEND_EXCEPTION_MESSAGE_OFF, ZSTR_KNOWN(ZEND_STR_MESSAGE), tmp);
+				zval_add_ref(tmp);
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
+				continue;
+			}
+			if (zend_string_equals_literal(key, "\0*\0code")) {
+				if (Z_TYPE_P(tmp) != IS_LONG) {
+					zend_type_error("Cannot assign %s to property %s::$code of type int",
+						zend_zval_type_name(tmp), ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+					RETURN_THROWS();
+				}
+				zend_update_property_num_checked(NULL, Z_OBJ_P(ZEND_THIS), ZEND_EXCEPTION_CODE_OFF, ZSTR_KNOWN(ZEND_STR_CODE), tmp);
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
+				continue;
+			}
+			if (zend_string_equals_literal(key, "\0Exception\0previous") || zend_string_equals_literal(key, "\0Error\0previous")) {
+				if (Z_TYPE_P(tmp) != IS_NULL && !instanceof_function(Z_OBJCE_P(tmp), zend_ce_throwable)) {
+					zend_type_error("Cannot assign %s to property %s::$previous of type ?Throwable",
+						zend_zval_type_name(tmp), ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+					RETURN_THROWS();
+				}
+				zend_update_property_num_checked(NULL, Z_OBJ_P(ZEND_THIS), ZEND_EXCEPTION_PREVIOUS_OFF, ZSTR_KNOWN(ZEND_STR_PREVIOUS), tmp);
+				zval_add_ref(tmp);
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
+				continue;
+			}
+			if (zend_string_equals_literal(key, "\0Exception\0trace") || zend_string_equals_literal(key, "\0Error\0trace")) {
+				if (Z_TYPE_P(tmp) != IS_ARRAY) {
+					zend_type_error("Cannot assign %s to property %s::$trace of type array",
+						zend_zval_type_name(tmp), ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+					RETURN_THROWS();
+				}
+				zend_update_property_num_checked(NULL, Z_OBJ_P(ZEND_THIS), ZEND_EXCEPTION_TRACE_OFF, ZSTR_KNOWN(ZEND_STR_TRACE), tmp);
+				zval_add_ref(tmp);
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
+				continue;
+			}
+			if (zend_string_starts_with_cstr(key, ZEND_STRL("\0*\0"))) {
+				const char *name = ZSTR_VAL(key) + sizeof("\0*\0")-1;
+				zend_update_property(NULL, Z_OBJ_P(ZEND_THIS), name, strlen(name), tmp);
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
+				continue;
+			}
+			// TODO: other private props?
+		} else {
+			zend_update_property_ex(NULL, Z_OBJ_P(ZEND_THIS), key, tmp);
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
 /* {{{ ErrorException constructor */
 ZEND_METHOD(ErrorException, __construct)
 {
