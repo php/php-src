@@ -1013,7 +1013,13 @@ PHP_METHOD(SoapServer, __construct)
 	service->soap_functions.ft = zend_new_array(0);
 
 	if (wsdl) {
-		service->sdl = get_sdl(ZEND_THIS, ZSTR_VAL(wsdl), cache_wsdl);
+		zend_try {
+			service->sdl = get_sdl(ZEND_THIS, ZSTR_VAL(wsdl), cache_wsdl);
+		} zend_catch {
+			xmlCharEncCloseFunc(service->encoding);
+			service->encoding = NULL;
+			zend_bailout();
+		} zend_end_try();
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
 				service->uri = estrdup(service->sdl->target_ns);
