@@ -4308,7 +4308,7 @@ static int exif_isobmff_parse_box(unsigned char *buf, isobmff_box_type *box)
 static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, isobmff_item_pos_type *pos)
 {
 	isobmff_box_type box, item;
-	unsigned char *box_offset, *p;
+	unsigned char *p;
 	int header_size, exif_id = -1, version, item_count, i;
 
 	size_t remain;
@@ -4323,7 +4323,8 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 	p += (n); \
 } while (0)
 
-	for (box_offset = data + 4; box_offset < end - 16; box_offset += box.size) {
+	unsigned char *box_offset = data + 4;
+	while (box_offset < end - 16) {
 		header_size = exif_isobmff_parse_box(box_offset, &box);
 		if (box.size < header_size) {
 			return;
@@ -4376,6 +4377,11 @@ static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, iso
 			}
 			break;
 		}
+
+		if (end - 16 - box_offset <= box.size) {
+			break;
+		}
+		box_offset += box.size;
 	}
 
 #undef ADVANCE
