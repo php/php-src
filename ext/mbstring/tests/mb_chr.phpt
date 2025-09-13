@@ -46,7 +46,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)
@@ -56,4 +56,6 @@ mb_chr(): Argument #2 ($encoding) must be a valid encoding, "pass" given
 mb_chr() does not support the "JIS" encoding
 mb_chr() does not support the "CP50222" encoding
 mb_chr() does not support the "UTF-7" encoding
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 mb_chr() does not support the "UTF-7" encoding
