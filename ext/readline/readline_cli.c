@@ -447,7 +447,7 @@ static char *cli_completion_generator_var(const char *text, size_t textlen, int 
 
 	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table, NULL);
 	if (retval) {
-		retval = malloc(strlen(tmp) + 2);
+		retval = pmalloc(strlen(tmp) + 2);
 		retval[0] = '$';
 		strcpy(&retval[1], tmp);
 		rl_completion_append_character = '\0';
@@ -461,7 +461,7 @@ static char *cli_completion_generator_ini(const char *text, size_t textlen, int 
 
 	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(ini_directives), NULL);
 	if (retval) {
-		retval = malloc(strlen(tmp) + 2);
+		retval = pmalloc(strlen(tmp) + 2);
 		retval[0] = '#';
 		strcpy(&retval[1], tmp);
 		rl_completion_append_character = '=';
@@ -576,7 +576,7 @@ TODO:
 		}
 		if (ce && retval) {
 			size_t len = ZSTR_LEN(ce->name) + 2 + strlen(retval) + 1;
-			char *tmp = malloc(len);
+			char *tmp = pmalloc(len);
 
 			snprintf(tmp, len, "%s::%s", ZSTR_VAL(ce->name), retval);
 			free(retval);

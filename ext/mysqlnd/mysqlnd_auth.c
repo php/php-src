@@ -575,7 +575,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 
 	/* copy scrambled pass*/
 	if (passwd && passwd_len) {
-		ret = malloc(SCRAMBLE_LENGTH);
+		ret = pmalloc(SCRAMBLE_LENGTH);
 		*auth_data_len = SCRAMBLE_LENGTH;
 		/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
 		php_mysqlnd_scramble((zend_uchar*)ret, auth_plugin_data, (zend_uchar*)passwd, passwd_len);
@@ -715,7 +715,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 	}
 
 	*auth_data_len = server_public_key_len;
-	ret = malloc(*auth_data_len);
+	ret = pmalloc(*auth_data_len);
 	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(server_public_key, NULL);
 	if (!ctx || EVP_PKEY_encrypt_init(ctx) <= 0 ||
 			EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_OAEP_PADDING) <= 0 ||
@@ -804,7 +804,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 	}
 
 	*auth_data_len = server_public_key_len;
-	ret = malloc(*auth_data_len);
+	ret = pmalloc(*auth_data_len);
 	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, (zend_uchar *) xor_str, passwd_len + 1, &padding_info,
 			NULL, 0, ret, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
 		BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
@@ -911,7 +911,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 		/* NUL termination byte required: https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_authentication_methods_clear_text_password.html
 		 * (this is similar to bug #78680, but now as GH-11440) */
 		*auth_data_len = passwd_len + 1;
-		ret = malloc(passwd_len + 1);
+		ret = pmalloc(passwd_len + 1);
 		memcpy(ret, passwd, passwd_len);
 		ret[passwd_len] = '\0';
 	} else {
@@ -1114,7 +1114,7 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 	DBG_INF("First auth step: send hashed password");
 	/* copy scrambled pass*/
 	if (passwd && passwd_len) {
-		ret = malloc(SHA256_LENGTH + 1);
+		ret = pmalloc(SHA256_LENGTH + 1);
 		*auth_data_len = SHA256_LENGTH;
 		php_mysqlnd_scramble_sha2((zend_uchar*)ret, auth_plugin_data, (zend_uchar*)passwd, passwd_len);
 		ret[SHA256_LENGTH] = '\0';

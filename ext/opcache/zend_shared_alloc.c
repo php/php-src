@@ -321,7 +321,7 @@ void zend_shared_alloc_shutdown(void)
 	smm_shared_globals = &tmp_shared_globals;
 	shared_segments_array_size = ZSMMG(shared_segments_count) * (S_H(segment_type_size)() + sizeof(void *));
 	if (shared_segments_array_size > 16) {
-		tmp_shared_segments = malloc(shared_segments_array_size);
+		tmp_shared_segments = pmalloc(shared_segments_array_size);
 	} else {
 		tmp_shared_segments = shared_segments_buf;
 	}

@@ -3531,12 +3531,12 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 		}
 
 		if (!scope) {
-			scope = malloc(sizeof(zend_ffi_scope));
+			scope = pmalloc(sizeof(zend_ffi_scope));
 			scope->symbols = FFI_G(symbols);
 			scope->tags = FFI_G(tags);
 
 			if (!FFI_G(scopes)) {
-				FFI_G(scopes) = malloc(sizeof(HashTable));
+				FFI_G(scopes) = pmalloc(sizeof(HashTable));
 				zend_hash_init(FFI_G(scopes), 0, NULL, zend_ffi_scope_hash_dtor, 1);
 			}
 

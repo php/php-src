@@ -1157,7 +1157,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define ZVAL_NEW_PERSISTENT_ARR(z) do {							\
 		zval *__z = (z);										\
 		zend_array *_arr =										\
-		(zend_array *) malloc(sizeof(zend_array));				\
+		(zend_array *) pmalloc(sizeof(zend_array));				\
 		Z_ARR_P(__z) = _arr;									\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
@@ -1198,7 +1198,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define ZVAL_NEW_PERSISTENT_RES(z, h, p, t) do {				\
 		zend_resource *_res =									\
-		(zend_resource *) malloc(sizeof(zend_resource));		\
+		(zend_resource *) pmalloc(sizeof(zend_resource));		\
 		zval *__z;												\
 		GC_SET_REFCOUNT(_res, 1);								\
 		GC_TYPE_INFO(_res) = GC_RESOURCE |						\
@@ -1252,7 +1252,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define ZVAL_NEW_PERSISTENT_REF(z, r) do {						\
 		zend_reference *_ref =									\
-		(zend_reference *) malloc(sizeof(zend_reference));		\
+		(zend_reference *) pmalloc(sizeof(zend_reference));		\
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = GC_REFERENCE |						\
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
