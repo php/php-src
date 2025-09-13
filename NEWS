@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
+  . Fix curl build failure on macOS+curl 8.16. (nielsdos)
 
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
