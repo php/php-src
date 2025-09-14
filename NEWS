@@ -14,6 +14,9 @@ PHP                                                                        NEWS
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
   . Fix curl build failure on macOS+curl 8.16. (nielsdos)
 
+- DOM:
+  . Fix macro name clash on macOS. (Ruoyu Zhong)
+
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
