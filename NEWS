@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Exif:
   . Fix OSS-Fuzz #442954659 (zero-size box in HEIF file causes infinite loop).
     (nielsdos)
+  . Fix OSS-Fuzz #442954659 (Crash in exif_scan_HEIF_header). (nielsdos)
+  . Various hardening fixes to HEIF parsing. (nielsdos)
 
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
