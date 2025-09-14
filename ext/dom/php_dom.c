@@ -2333,10 +2333,10 @@ void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, boo
 		}
 
 		case XML_ATTRIBUTE_NODE: {
-			bool free;
-			xmlChar *value = php_libxml_attr_value((const xmlAttr *) nodep, &free);
+			bool should_free;
+			xmlChar *value = php_libxml_attr_value((const xmlAttr *) nodep, &should_free);
 			RETVAL_STRING_FAST((const char *) value);
-			if (free) {
+			if (should_free) {
 				xmlFree(value);
 			}
 			return;

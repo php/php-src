@@ -201,10 +201,10 @@ PHP_METHOD(DOMAttr, isId)
 
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value)
 {
-	bool free;
-	xmlChar *attr_value = php_libxml_attr_value(attr, &free);
+	bool should_free;
+	xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
 	bool result = xmlStrEqual(attr_value, value);
-	if (free) {
+	if (should_free) {
 		xmlFree(attr_value);
 	}
 	return result;
