@@ -60,7 +60,7 @@ static size_t tsrm_reserved_pos  = 0;
 static size_t tsrm_reserved_size = 0;
 
 static MUTEX_T tsmm_mutex;	  /* thread-safe memory manager mutex */
-static RWLOCK_T tsrm_env_mutex; /* tsrm environ mutex */
+static RWLOCK_T tsrm_env_rwlock; /* tsrm environ rwlock */
 
 /* New thread handlers */
 static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler = NULL;
@@ -156,7 +156,7 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 	tsrm_reserved_pos  = 0;
 	tsrm_reserved_size = 0;
 
-	tsrm_env_mutex = tsrm_rwlock_alloc();
+	tsrm_env_rwlock = tsrm_rwlock_alloc();
 
 	return 1;
 }/*}}}*/
@@ -212,7 +212,7 @@ TSRM_API void tsrm_shutdown(void)
 	free(tsrm_tls_table);
 	free(resource_types_table);
 	tsrm_mutex_free(tsmm_mutex);
-	tsrm_rwlock_free(tsrm_env_mutex);
+	tsrm_rwlock_free(tsrm_env_rwlock);
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Shutdown TSRM"));
 	if (tsrm_error_file!=stderr) {
 		fclose(tsrm_error_file);
@@ -238,17 +238,17 @@ TSRM_API void tsrm_shutdown(void)
 /* environ lock api */
 TSRM_API void tsrm_env_lock(bool write) {
 	if (write) {
-		tsrm_rwlock_wrlock(tsrm_env_mutex);
+		tsrm_rwlock_wrlock(tsrm_env_rwlock);
 	} else {
-		tsrm_rwlock_rlock(tsrm_env_mutex);
+		tsrm_rwlock_rlock(tsrm_env_rwlock);
 	}
 }
 
 TSRM_API void tsrm_env_unlock(bool write) {
 	if (write) {
-		tsrm_rwlock_wrunlock(tsrm_env_mutex);
+		tsrm_rwlock_wrunlock(tsrm_env_rwlock);
 	} else {
-		tsrm_rwlock_runlock(tsrm_env_mutex);
+		tsrm_rwlock_runlock(tsrm_env_rwlock);
 	}
 } /* }}} */
 
