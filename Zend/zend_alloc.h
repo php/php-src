@@ -223,6 +223,9 @@ ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown);
 ZEND_API void refresh_memory_manager(void);
 ZEND_API bool is_zend_mm(void);
 ZEND_API bool is_zend_ptr(const void *ptr);
+ZEND_API void zend_mm_userinput_begin(void);
+ZEND_API void zend_mm_userinput_end(void);
+ZEND_API void zend_mm_check_in_userinput(void);
 
 ZEND_API size_t zend_memory_usage(bool real_usage);
 ZEND_API size_t zend_memory_peak_usage(bool real_usage);
