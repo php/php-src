@@ -555,6 +555,9 @@ PHP 8.5 UPGRADE NOTES
   . Passing integers outside the interval [0, 255] to chr() is now deprecated.
     This is because a byte can only hold a value within this interval.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_integers_outside_the_interval_0_255_to_chr
+  . Passing a string which is not a single byte to ord() is now deprecated,
+    this is indicative of a bug.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_passing_string_which_are_not_one_byte_long_to_ord
   . Relying locally predefined variable $http_response_header is deprecated.
     Instead one should call the http_get_last_response_headers() function.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_http_response_header_predefined_variable

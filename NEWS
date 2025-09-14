@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - MBstring:
   . Updated Unicode data tables to Unicode 17.0. (Yuya Hamada)
 
+- Standard:
+  . Passing strings which are not one byte long to ord() is now deprecated.
+    (Girgias)
+
 - URI:
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
     (nielsdos)
