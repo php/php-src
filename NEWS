@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
 
+- Date:
+  . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
+    (nielsdos)
+
 - Exif:
   . Fix OSS-Fuzz #442954659 (zero-size box in HEIF file causes infinite loop).
     (nielsdos)
