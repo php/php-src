@@ -1324,15 +1324,20 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 	SQLUSMALLINT RowStatus[1];
 
 	if (return_array) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &pv_res, odbc_result_ce, &pv_row, &pv_row_is_null) == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG_OR_NULL(pv_row, pv_row_is_null)
+		ZEND_PARSE_PARAMETERS_END();
 		/* So we can use pv_res_arr for both return value and passed */
 		pv_res_arr = return_value;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|l!", &pv_res, odbc_result_ce, &pv_res_arr, &pv_row, &pv_row_is_null) == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_START(2, 3)
+			Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+			Z_PARAM_ZVAL(pv_res_arr)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG_OR_NULL(pv_row, pv_row_is_null)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	result = Z_ODBC_RESULT_P(pv_res);
