@@ -151,12 +151,7 @@ static inline uri_object_t *uri_object_from_obj(zend_object *object) {
 	return (uri_object_t*)((char*)(object) - XtOffsetOf(uri_object_t, std));
 }
 
-static inline uri_internal_t *uri_internal_from_obj(zend_object *object) {
-	return &(uri_object_from_obj(object)->internal);
-}
-
 #define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
-#define Z_URI_INTERNAL_P(zv) uri_internal_from_obj(Z_OBJ_P((zv)))
 
 PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser);
 PHPAPI void php_uri_object_handler_free(zend_object *object);

@@ -531,7 +531,7 @@ static void rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAMETERS, php_uri_componen
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
+	uri_internal_t *internal_uri = &Z_URI_OBJECT_P(ZEND_THIS)->internal;
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_read(internal_uri->uri, read_mode, return_value) == FAILURE)) {
@@ -566,7 +566,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	}
 
 	zend_object *old_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
+	uri_internal_t *internal_uri = &Z_URI_OBJECT_P(ZEND_THIS)->internal;
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	zend_object *new_object = old_object->handlers->clone_obj(old_object);
@@ -578,7 +578,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	 * case of an exception being thrown. */
 	RETVAL_OBJ(new_object);
 
-	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
+	uri_internal_t *new_internal_uri = &uri_object_from_obj(new_object)->internal;
 	URI_ASSERT_INITIALIZATION(new_internal_uri);
 
 	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_write(new_internal_uri->uri, &zv, NULL) == FAILURE)) {
@@ -823,7 +823,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(object);
+	uri_internal_t *internal_uri = &uri_object_from_obj(object)->internal;
 	if (internal_uri->uri != NULL) {
 		/* Intentionally throw two exceptions for proper chaining. */
 		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(object->ce->name));
@@ -944,7 +944,7 @@ PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	uri_internal_t *internal_uri = &uri_object_from_obj(this_object)->internal;
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	RETURN_STR(internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE, false));
@@ -955,7 +955,7 @@ PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	uri_internal_t *internal_uri = &uri_object_from_obj(this_object)->internal;
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	RETURN_STR(internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false));
@@ -1056,7 +1056,7 @@ PHPAPI void php_uri_object_handler_free(zend_object *object)
 PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object)
 {
 	uri_object_t *uri_object = uri_object_from_obj(object);
-	uri_internal_t *internal_uri = uri_internal_from_obj(object);
+	uri_internal_t *internal_uri = &uri_object_from_obj(object)->internal;
 
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
