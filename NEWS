@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     exception are triggered). (nielsdos)
   . Fixed bug GH-19653 (Closure named argument unpacking between temporary
     closures can cause a crash). (nielsdos, Arnaud, Bob)
+  . Fixed bug GH-19839 (Incorrect HASH_FLAG_HAS_EMPTY_IND flag on userland
+    array). (ilutov)
 
 - Date:
   . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
