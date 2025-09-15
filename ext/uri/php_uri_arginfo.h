@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bf37e0babfcc453ab0c75d0e87e142dfa3b5e61e */
+ * Stub hash: f3c524798d1933a400cc9377cfbfdcbaf77b87f0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_Uri_parse, 0, 1, IS_STATIC, 1)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -317,6 +317,16 @@ static zend_class_entry *register_class_Uri_UriException(zend_class_entry *class
 
 	INIT_NS_CLASS_ENTRY(ce, "Uri", "UriException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_UriError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Uri", "UriError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
