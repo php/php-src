@@ -1965,8 +1965,13 @@ static zval* ZEND_FASTCALL zend_jit_fetch_obj_r_slow_ex(zend_object *zobj)
 	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS);
 
 	retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, cache_slot, result);
-	if (retval == result && UNEXPECTED(Z_ISREF_P(retval))) {
-		zend_unwrap_reference(retval);
+	if (UNEXPECTED(Z_ISREF_P(retval))) {
+		if (retval == result) {
+			zend_unwrap_reference(retval);
+		} else {
+			retval = Z_REFVAL_P(retval);
+		}
+		ZEND_ASSERT(!Z_REFCOUNTED_P(retval));
 	}
 	return retval;
 }

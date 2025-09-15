@@ -30,6 +30,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
+  . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
 
 - Soap:
   . Fixed bug GH-19784 (SoapServer memory leak). (nielsdos)
