@@ -682,16 +682,16 @@ static void throw_cannot_recompose_uri_to_string(zend_object *object)
 
 static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, uri_object_t *that_object, zend_object *comparison_mode)
 {
-	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *this_internal_uri = uri_internal_from_obj(this_object);
+	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
+	uri_internal_t *this_internal_uri = &this_object->internal;
 	URI_ASSERT_INITIALIZATION(this_internal_uri);
 
 	uri_internal_t *that_internal_uri = &that_object->internal;
 	URI_ASSERT_INITIALIZATION(that_internal_uri);
 
-	if (this_object->ce != that_object->std.ce &&
-		!instanceof_function(this_object->ce, that_object->std.ce) &&
-		!instanceof_function(that_object->std.ce, this_object->ce)
+	if (this_object->std.ce != that_object->std.ce &&
+		!instanceof_function(this_object->std.ce, that_object->std.ce) &&
+		!instanceof_function(that_object->std.ce, this_object->std.ce)
 	) {
 		RETURN_FALSE;
 	}
@@ -705,7 +705,7 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, uri_object_t *that_object, 
 	zend_string *this_str = this_internal_uri->parser->to_string(
 		this_internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, exclude_fragment);
 	if (this_str == NULL) {
-		throw_cannot_recompose_uri_to_string(this_object);
+		throw_cannot_recompose_uri_to_string(&this_object->std);
 		RETURN_THROWS();
 	}
 
