@@ -1320,8 +1320,6 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 	zend_long pv_row = 0;
 	bool pv_row_is_null = true;
 	zval *pv_res, *pv_res_arr, tmp;
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
 
 	if (return_array) {
 		ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1362,9 +1360,9 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 
 	if (result->fetch_abs) {
 		if (!pv_row_is_null && pv_row > 0) {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,(SQLLEN)pv_row,&crow,RowStatus);
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_ABSOLUTE, (SQLLEN)pv_row);
 		} else {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
 		}
 	} else {
 		rc = SQLFetch(result->stmt);
@@ -1372,7 +1370,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		if (rc == SQL_ERROR) {
-			odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetchScroll");
 		}
 		RETURN_FALSE;
 	}
@@ -1508,8 +1506,6 @@ PHP_FUNCTION(odbc_fetch_row)
 	zval *pv_res;
 	zend_long pv_row = 0;
 	bool pv_row_is_null = true;
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &pv_res, odbc_result_ce, &pv_row, &pv_row_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -1530,9 +1526,9 @@ PHP_FUNCTION(odbc_fetch_row)
 
 	if (result->fetch_abs) {
 		if (!pv_row_is_null) {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,(SQLLEN)pv_row,&crow,RowStatus);
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_ABSOLUTE, (SQLLEN)pv_row);
 		} else {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
 		}
 	} else {
 		rc = SQLFetch(result->stmt);
@@ -1540,7 +1536,7 @@ PHP_FUNCTION(odbc_fetch_row)
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		if (rc == SQL_ERROR) {
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetchScroll");
 		}
 		RETURN_FALSE;
 	}
@@ -1568,8 +1564,6 @@ PHP_FUNCTION(odbc_result)
 	RETCODE rc;
 	SQLLEN	fieldsize;
 	zval *pv_res;
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
@@ -1620,14 +1614,15 @@ PHP_FUNCTION(odbc_result)
 
 	if (result->fetched == 0) {
 		/* User forgot to call odbc_fetch_row(), or wants to reload the results, do it now */
-		if (result->fetch_abs)
-			rc = SQLExtendedFetch(result->stmt, SQL_FETCH_NEXT, 1, &crow,RowStatus);
-		else
+		if (result->fetch_abs) {
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
+		} else {
 			rc = SQLFetch(result->stmt);
+		}
 
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			if (rc == SQL_ERROR) {
-				odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+				odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetchScroll");
 			}
 			RETURN_FALSE;
 		}
@@ -1770,8 +1765,6 @@ PHP_FUNCTION(odbc_result_all)
 	char *pv_format = NULL;
 	size_t i, pv_format_len = 0;
 	SQLSMALLINT sql_c_type;
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s", &pv_res, odbc_result_ce, &pv_format, &pv_format_len) == FAILURE) {
 		RETURN_THROWS();
@@ -1784,10 +1777,11 @@ PHP_FUNCTION(odbc_result_all)
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
-	if (result->fetch_abs)
-		rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
-	else
+	if (result->fetch_abs) {
+		rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
+	} else {
 		rc = SQLFetch(result->stmt);
+	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		php_printf("<h2>No rows found</h2>\n");
@@ -1882,10 +1876,11 @@ PHP_FUNCTION(odbc_result_all)
 		}
 		php_printf("</tr>\n");
 
-		if (result->fetch_abs)
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
-		else
+		if (result->fetch_abs) {
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
+		} else {
 			rc = SQLFetch(result->stmt);
+		}
 	}
 	php_printf("</table>\n");
 	if (buf) efree(buf);
