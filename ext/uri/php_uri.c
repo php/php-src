@@ -346,7 +346,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 	if (base_url_object != NULL) {
 		ZEND_ASSERT(base_url_object->std.ce == uri_object->std.ce);
 		const uri_internal_t *internal_base_url = &base_url_object->internal;
-		URI_ASSERT_INITIALIZATION(internal_base_url);
+		ZEND_ASSERT(internal_base_url->uri != NULL);
 		ZEND_ASSERT(internal_base_url->parser == uri_parser);
 		base_url = internal_base_url->uri;
 	}
@@ -532,7 +532,7 @@ static void rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAMETERS, php_uri_componen
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	uri_internal_t *internal_uri = &Z_URI_OBJECT_P(ZEND_THIS)->internal;
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_read(internal_uri->uri, read_mode, return_value) == FAILURE)) {
 		zend_throw_error(NULL, "The userinfo component cannot be retrieved");
@@ -567,7 +567,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 
 	zend_object *old_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = &Z_URI_OBJECT_P(ZEND_THIS)->internal;
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	zend_object *new_object = old_object->handlers->clone_obj(old_object);
 	if (new_object == NULL) {
@@ -579,7 +579,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	RETVAL_OBJ(new_object);
 
 	uri_internal_t *new_internal_uri = &uri_object_from_obj(new_object)->internal;
-	URI_ASSERT_INITIALIZATION(new_internal_uri);
+	ZEND_ASSERT(new_internal_uri->uri != NULL);
 
 	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_write(new_internal_uri->uri, &zv, NULL) == FAILURE)) {
 		RETURN_THROWS();
@@ -685,10 +685,10 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, uri_object_t *that_object, 
 {
 	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
 	uri_internal_t *this_internal_uri = &this_object->internal;
-	URI_ASSERT_INITIALIZATION(this_internal_uri);
+	ZEND_ASSERT(this_internal_uri->uri != NULL);
 
 	uri_internal_t *that_internal_uri = &that_object->internal;
-	URI_ASSERT_INITIALIZATION(that_internal_uri);
+	ZEND_ASSERT(that_internal_uri->uri != NULL);
 
 	if (this_object->std.ce != that_object->std.ce &&
 		!instanceof_function(this_object->std.ce, that_object->std.ce) &&
@@ -744,7 +744,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 
 	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
 	uri_internal_t *internal_uri = &this_object->internal;
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	zend_string *uri_str = internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
 	if (uri_str == NULL) {
@@ -761,7 +761,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 
 	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
 	uri_internal_t *internal_uri = &this_object->internal;
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	zend_string *uri_str = internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, false);
 	if (uri_str == NULL) {
@@ -790,7 +790,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 
 	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
 	uri_internal_t *internal_uri = &this_object->internal;
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	/* Serialize state: "uri" key in the first array */
 	zend_string *uri_str = internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
@@ -945,7 +945,7 @@ PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = &uri_object_from_obj(this_object)->internal;
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	RETURN_STR(internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE, false));
 }
@@ -956,7 +956,7 @@ PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *internal_uri = &uri_object_from_obj(this_object)->internal;
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	RETURN_STR(internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false));
 }
@@ -982,7 +982,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 
 	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
 	uri_internal_t *internal_uri = &this_object->internal;
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	/* Serialize state: "uri" key in the first array */
 	zend_string *uri_str = internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
@@ -1058,7 +1058,7 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object)
 	uri_object_t *uri_object = uri_object_from_obj(object);
 	uri_internal_t *internal_uri = &uri_object_from_obj(object)->internal;
 
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	ZEND_ASSERT(internal_uri->uri != NULL);
 
 	uri_object_t *new_uri_object = uri_object_from_obj(object->ce->create_object(object->ce));
 	ZEND_ASSERT(new_uri_object->internal.parser == internal_uri->parser);

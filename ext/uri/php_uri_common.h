@@ -190,8 +190,4 @@ void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name
 void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 
-#define URI_ASSERT_INITIALIZATION(internal_uri) do { \
-	ZEND_ASSERT(internal_uri != NULL && internal_uri->uri != NULL); \
-} while (0)
-
 #endif
