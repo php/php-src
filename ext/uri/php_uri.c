@@ -675,9 +675,9 @@ PHP_METHOD(Uri_Rfc3986_Uri, withFragment)
 	uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_FRAGMENT);
 }
 
-static void throw_cannot_recompose_uri_to_string(zend_object *object)
+static void throw_cannot_recompose_uri_to_string(uri_object_t *object)
 {
-	zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->ce->name));
+	zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->std.ce->name));
 }
 
 static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, uri_object_t *that_object, zend_object *comparison_mode)
@@ -705,7 +705,7 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, uri_object_t *that_object, 
 	zend_string *this_str = this_internal_uri->parser->to_string(
 		this_internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, exclude_fragment);
 	if (this_str == NULL) {
-		throw_cannot_recompose_uri_to_string(&this_object->std);
+		throw_cannot_recompose_uri_to_string(this_object);
 		RETURN_THROWS();
 	}
 
@@ -713,7 +713,7 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, uri_object_t *that_object, 
 		that_internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, exclude_fragment);
 	if (that_str == NULL) {
 		zend_string_release(this_str);
-		throw_cannot_recompose_uri_to_string(&that_object->std);
+		throw_cannot_recompose_uri_to_string(that_object);
 		RETURN_THROWS();
 	}
 
@@ -741,8 +741,8 @@ PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
+	uri_internal_t *internal_uri = &this_object->internal;
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	zend_string *uri_str = internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
@@ -758,8 +758,8 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
+	uri_internal_t *internal_uri = &this_object->internal;
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	zend_string *uri_str = internal_uri->parser->to_string(internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, false);
@@ -787,8 +787,8 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
+	uri_internal_t *internal_uri = &this_object->internal;
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	/* Serialize state: "uri" key in the first array */
@@ -808,7 +808,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 
 	/* Serialize regular properties: second array */
-	ZVAL_ARR(&arr, this_object->handlers->get_properties(this_object));
+	ZVAL_ARR(&arr, this_object->std.handlers->get_properties(&this_object->std));
 	Z_TRY_ADDREF(arr);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 }
@@ -979,8 +979,8 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = uri_internal_from_obj(this_object);
+	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
+	uri_internal_t *internal_uri = &this_object->internal;
 	URI_ASSERT_INITIALIZATION(internal_uri);
 
 	/* Serialize state: "uri" key in the first array */
@@ -1000,7 +1000,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 
 	/* Serialize regular properties: second array */
-	ZVAL_ARR(&arr, this_object->handlers->get_properties(this_object));
+	ZVAL_ARR(&arr, this_object->std.handlers->get_properties(&this_object->std));
 	Z_ADDREF(arr);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 }
