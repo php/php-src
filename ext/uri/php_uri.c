@@ -50,12 +50,12 @@ static const zend_module_dep uri_deps[] = {
 
 static zend_array uri_parsers;
 
-static HashTable *uri_get_debug_properties(zend_object *object)
+static HashTable *uri_get_debug_properties(uri_object_t *object)
 {
-	uri_internal_t *internal_uri = uri_internal_from_obj(object);
+	uri_internal_t *internal_uri = &object->internal;
 	ZEND_ASSERT(internal_uri != NULL);
 
-	HashTable *std_properties = zend_std_get_properties(object);
+	const HashTable *std_properties = zend_std_get_properties(&object->std);
 	HashTable *result = zend_array_dup(std_properties);
 
 	const php_uri_parser * const parser = internal_uri->parser;
@@ -881,9 +881,9 @@ PHP_METHOD(Uri_Rfc3986_Uri, __debugInfo)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 
-	RETURN_ARR(uri_get_debug_properties(object));
+	RETURN_ARR(uri_get_debug_properties(uri_object));
 }
 
 PHP_METHOD(Uri_WhatWg_Url, getScheme)
@@ -1010,9 +1010,9 @@ PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 
-	RETURN_ARR(uri_get_debug_properties(object));
+	RETURN_ARR(uri_get_debug_properties(uri_object));
 }
 
 PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser)
