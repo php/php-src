@@ -1991,8 +1991,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			}
 			stack_frame = zend_new_array(8);
 			zend_hash_real_init_mixed(stack_frame);
-			zend_string *name = func->common.function_name;
-			ZVAL_STRINGL(&tmp, ZSTR_VAL(name), ZSTR_LEN(name));
+			ZVAL_STR_COPY(&tmp, func->common.function_name);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 			/* Steal file and line from the previous frame. */
 			if (call->func && ZEND_USER_CODE(call->func->common.type)) {
