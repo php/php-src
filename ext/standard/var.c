@@ -139,7 +139,7 @@ again:
 			} ZEND_HASH_FOREACH_END();
 			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
-				GC_DELREF(myht);
+				GC_DTOR_NO_REF(myht);
 			}
 			if (level > 1) {
 				php_printf("%*c", level-1, ' ');
@@ -336,7 +336,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		} ZEND_HASH_FOREACH_END();
 		if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 			GC_UNPROTECT_RECURSION(myht);
-			GC_DELREF(myht);
+			GC_DTOR_NO_REF(myht);
 		}
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');

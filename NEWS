@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-12265 (Cloning an object breaks serialization recursion).
     (nielsdos)
   . Fixed bug GH-19701 (Serialize/deserialize loses some data). (nielsdos)
+  . Fixed bug GH-19801 (leaks in var_dump() and debug_zval_dump()).
+    (alexandre-daubois)
 
 - Zip:
   . Fixed bug GH-19688 (Remove pattern overflow in zip addGlob()). (nielsdos)
