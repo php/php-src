@@ -939,12 +939,10 @@ timelib_long timelib_parse_zone(const char **ptr, int *dst, timelib_time *t, int
 {
 	timelib_tzinfo *res;
 	timelib_long            retval = 0;
-	size_t paren_count = 0;
 
 	*tz_not_found = 0;
 
 	while (**ptr == ' ' || **ptr == '\t' || **ptr == '(') {
-		paren_count += **ptr == '(';
 		++*ptr;
 	}
 	if ((*ptr)[0] == 'G' && (*ptr)[1] == 'M' && (*ptr)[2] == 'T' && ((*ptr)[3] == '+' || (*ptr)[3] == '-')) {
@@ -993,9 +991,8 @@ timelib_long timelib_parse_zone(const char **ptr, int *dst, timelib_time *t, int
 		*tz_not_found = (found == 0);
 		retval = offset;
 	}
-	while (paren_count > 0 && **ptr == ')') {
+	while (**ptr == ')') {
 		++*ptr;
-		paren_count--;
 	}
 	return retval;
 }

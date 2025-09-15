@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.30
 
-- Date:
-  . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
-    (nielsdos)
-
 - Opcache:
   . Reset global pointers to prevent use-after-free in zend_jit_status().
     (Florian Engelhardt)
