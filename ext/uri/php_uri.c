@@ -676,7 +676,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withFragment)
 
 static void throw_cannot_recompose_uri_to_string(zend_object *object)
 {
-	zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->ce->name));
+	zend_throw_exception_ex(uri_error_ce, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->ce->name));
 }
 
 static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, zend_object *comparison_mode)
