@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19653 (Closure named argument unpacking between temporary
     closures can cause a crash). (nielsdos, Arnaud, Bob)
 
+- Date:
+  . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
+    (nielsdos)
+
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
