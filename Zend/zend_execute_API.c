@@ -276,6 +276,11 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 	EG(flags) |= EG_FLAGS_IN_RESOURCE_SHUTDOWN;
 	zend_try {
 		zend_close_rsrc_list(&EG(regular_list));
+	} zend_catch {
+		/* If we have bailed, we probably executed user code (e.g. user stream API).
+		 * Avoid triggering it again when destroying the list in zend_deactivate(),
+		 * after the executor has already shut down. */
+		EG(regular_list).pDestructor = NULL;
 	} zend_end_try();
 
 	/* No PHP callback functions should be called after this point. */
