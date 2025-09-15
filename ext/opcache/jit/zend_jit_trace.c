@@ -180,7 +180,7 @@ static uint32_t _zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_
 				 && t->exit_info[i].flags == flags
 				 && t->exit_info[i].stack_size == stack_size
 #if ZEND_DEBUG
-				 && (((JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT_INFO) == 0)
+				 && (((JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT_INFO_SRC) == 0)
 					 || (strcmp(t->exit_info[i].filename, __zend_filename) == 0
 						 && t->exit_info[i].lineno == __zend_lineno))
 #endif
@@ -209,7 +209,7 @@ static uint32_t _zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_
 		t->exit_info[exit_point].poly_func = (zend_jit_ref_snapshot){.reg = ZREG_NONE};
 		t->exit_info[exit_point].poly_this = (zend_jit_ref_snapshot){.reg = ZREG_NONE};
 #if ZEND_DEBUG
-		if ((JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT_INFO) != 0) {
+		if ((JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT_INFO_SRC) != 0) {
 			t->exit_info[exit_point].filename = __zend_filename;
 			t->exit_info[exit_point].lineno = __zend_lineno;
 		} else {
@@ -8112,7 +8112,7 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 			}
 		}
 #if ZEND_DEBUG
-		if ((JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT_INFO) != 0) {
+		if ((JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT_INFO_SRC) != 0) {
 			fprintf(stderr, " %s:%d", t->exit_info[i].filename, t->exit_info[i].lineno);
 		}
 #endif
