@@ -561,11 +561,10 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 		ZVAL_STR(&zv, value);
 	}
 
-	zend_object *old_object = Z_OBJ_P(ZEND_THIS);
-	uri_object_t *old_uri_object = uri_object_from_obj(old_object);
+	uri_object_t *old_uri_object = uri_object_from_obj(Z_OBJ_P(ZEND_THIS));
 	ZEND_ASSERT(old_uri_object->uri != NULL);
 
-	zend_object *new_object = old_object->handlers->clone_obj(old_object);
+	zend_object *new_object = old_uri_object->std.handlers->clone_obj(&old_uri_object->std);
 	if (new_object == NULL) {
 		RETURN_THROWS();
 	}
@@ -735,12 +734,12 @@ PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
-	ZEND_ASSERT(this_object->uri != NULL);
+	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
 
-	zend_string *uri_str = this_object->parser->to_string(this_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
+	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
 	if (uri_str == NULL) {
-		throw_cannot_recompose_uri_to_string(this_object);
+		throw_cannot_recompose_uri_to_string(uri_object);
 		RETURN_THROWS();
 	}
 
@@ -751,12 +750,12 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
-	ZEND_ASSERT(this_object->uri != NULL);
+	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
 
-	zend_string *uri_str = this_object->parser->to_string(this_object->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, false);
+	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, false);
 	if (uri_str == NULL) {
-		throw_cannot_recompose_uri_to_string(this_object);
+		throw_cannot_recompose_uri_to_string(uri_object);
 		RETURN_THROWS();
 	}
 
@@ -779,13 +778,13 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
-	ZEND_ASSERT(this_object->uri != NULL);
+	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
 
 	/* Serialize state: "uri" key in the first array */
-	zend_string *uri_str = this_object->parser->to_string(this_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
+	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
 	if (uri_str == NULL) {
-		throw_cannot_recompose_uri_to_string(this_object);
+		throw_cannot_recompose_uri_to_string(uri_object);
 		RETURN_THROWS();
 	}
 	zval tmp;
@@ -799,7 +798,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 
 	/* Serialize regular properties: second array */
-	ZVAL_ARR(&arr, this_object->std.handlers->get_properties(&this_object->std));
+	ZVAL_ARR(&arr, uri_object->std.handlers->get_properties(&uri_object->std));
 	Z_TRY_ADDREF(arr);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 }
@@ -812,56 +811,55 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_ARRAY_HT(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_object *object = Z_OBJ_P(ZEND_THIS);
-	uri_object_t *uri_object = uri_object_from_obj(object);
+	uri_object_t *uri_object = uri_object_from_obj(Z_OBJ_P(ZEND_THIS));
 	if (uri_object->uri != NULL) {
 		/* Intentionally throw two exceptions for proper chaining. */
-		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(object->ce->name));
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(uri_object->std.ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
 	if (zend_hash_num_elements(data) != 2) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Unserialize state: "uri" key in the first array */
 	zval *arr = zend_hash_index_find(data, 0);
 	if (arr == NULL || Z_TYPE_P(arr) != IS_ARRAY) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Verify the expected number of elements inside the first array, this implicitly ensures that no additional elements are present. */
 	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) != 1) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	zval *uri_zv = zend_hash_str_find_ind(Z_ARRVAL_P(arr), ZEND_STRL(URI_SERIALIZED_PROPERTY_NAME));
 	if (uri_zv == NULL || Z_TYPE_P(uri_zv) != IS_STRING) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	uri_object->uri = uri_object->parser->parse(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
 	if (uri_object->uri == NULL) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Unserialize regular properties: second array */
 	arr = zend_hash_index_find(data, 1);
 	if (arr == NULL || Z_TYPE_P(arr) != IS_ARRAY) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 
 	/* Verify that there is no regular property in the second array, because the URI classes have no properties and they are final. */
 	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) > 0) {
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
 	}
 }
