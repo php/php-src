@@ -680,18 +680,18 @@ static void throw_cannot_recompose_uri_to_string(zend_object *object)
 	zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->ce->name));
 }
 
-static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, zend_object *comparison_mode)
+static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, uri_object_t *that_object, zend_object *comparison_mode)
 {
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
 	uri_internal_t *this_internal_uri = uri_internal_from_obj(this_object);
 	URI_ASSERT_INITIALIZATION(this_internal_uri);
 
-	uri_internal_t *that_internal_uri = uri_internal_from_obj(that_object);
+	uri_internal_t *that_internal_uri = &that_object->internal;
 	URI_ASSERT_INITIALIZATION(that_internal_uri);
 
-	if (this_object->ce != that_object->ce &&
-		!instanceof_function(this_object->ce, that_object->ce) &&
-		!instanceof_function(that_object->ce, this_object->ce)
+	if (this_object->ce != that_object->std.ce &&
+		!instanceof_function(this_object->ce, that_object->std.ce) &&
+		!instanceof_function(that_object->std.ce, this_object->ce)
 	) {
 		RETURN_FALSE;
 	}
@@ -713,7 +713,7 @@ static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, z
 		that_internal_uri->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, exclude_fragment);
 	if (that_str == NULL) {
 		zend_string_release(this_str);
-		throw_cannot_recompose_uri_to_string(that_object);
+		throw_cannot_recompose_uri_to_string(&that_object->std);
 		RETURN_THROWS();
 	}
 
@@ -734,7 +734,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, equals)
 		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, comparison_mode);
+	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, uri_object_from_obj(that_object), comparison_mode);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
@@ -935,7 +935,7 @@ PHP_METHOD(Uri_WhatWg_Url, equals)
 		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, that_object, comparison_mode);
+	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, uri_object_from_obj(that_object), comparison_mode);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
