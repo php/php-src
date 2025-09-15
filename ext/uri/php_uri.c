@@ -826,7 +826,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 	uri_internal_t *internal_uri = uri_internal_from_obj(object);
 	if (internal_uri->uri != NULL) {
 		/* Intentionally throw two exceptions for proper chaining. */
-		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(object->ce->name));
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
 		RETURN_THROWS();
 	}
