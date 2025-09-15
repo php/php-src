@@ -4088,11 +4088,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 	}
 }
 
-#define ZEND_VM_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
-			ZEND_VM_INTERRUPT(); \
-		} \
-	} while (0)
+#define ZEND_VM_INTERRUPT_CHECK()
 
 #define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
