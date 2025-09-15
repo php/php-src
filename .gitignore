@@ -131,6 +131,7 @@ config.h.in
 /sapi/cgi/php-cgi
 /sapi/fpm/php-fpm
 /sapi/phpdbg/phpdbg
+/sapi/fuzzer/php-fuzz-*
 /scripts/php-config
 /scripts/phpize
 php
@@ -293,6 +294,13 @@ tmp-php.ini
 /branch-commit-cache.json
 /junit.out.xml
 /.ccache/
+
+# ------------------------------------------------------------------------------
+# Editor configuration directories
+# ------------------------------------------------------------------------------
+/.idea/
+/.vscode/
+/.zed/
 
 # ------------------------------------------------------------------------------
 # Additional test build files

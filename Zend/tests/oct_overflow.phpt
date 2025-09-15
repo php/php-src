@@ -5,7 +5,7 @@ precision=14
 --FILE--
 <?php
 
-$doubles = array(
+$floats = array(
     076545676543223,
     032325463734,
     0777777,
@@ -13,8 +13,8 @@ $doubles = array(
     033333333333333,
     );
 
-foreach ($doubles as $d) {
-    $l = (double)$d;
+foreach ($floats as $d) {
+    $l = (float)$d;
     var_dump($l);
 }
 

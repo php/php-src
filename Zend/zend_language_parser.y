@@ -212,7 +212,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_INC "'++'"
 %token T_DEC "'--'"
 %token T_INT_CAST    "'(int)'"
-%token T_DOUBLE_CAST "'(double)'"
+%token T_DOUBLE_CAST "'(float)'"
 %token T_STRING_CAST "'(string)'"
 %token T_ARRAY_CAST  "'(array)'"
 %token T_OBJECT_CAST "'(object)'"
@@ -259,7 +259,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type_without_static argument global_var
+%type <ast> extends_from parameter optional_type_without_static argument argument_no_expr global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_dereferenceable new_non_dereferenceable anonymous_class class_name class_name_reference simple_variable
@@ -287,7 +287,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
-%type <ast> optional_parameter_list
+%type <ast> optional_parameter_list clone_argument_list non_empty_clone_argument_list
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -713,21 +713,20 @@ switch_case_list:
 
 case_list:
 		%empty { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
-	|	case_list T_CASE expr case_separator inner_statement_list
+	|	case_list T_CASE expr ':' inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
-	|	case_list T_DEFAULT case_separator inner_statement_list
+	|	case_list T_CASE expr ';' inner_statement_list
+			{ $$ = zend_ast_list_add($1, zend_ast_create_ex(ZEND_AST_SWITCH_CASE, ZEND_ALT_CASE_SYNTAX, $3, $5)); }
+	|	case_list T_DEFAULT ':' inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $4)); }
-;
-
-case_separator:
-		':'
-	|	';'
+	|	case_list T_DEFAULT ';' inner_statement_list
+			{ $$ = zend_ast_list_add($1, zend_ast_create_ex(ZEND_AST_SWITCH_CASE, ZEND_ALT_CASE_SYNTAX, NULL, $4)); }
 ;
 
 
 match:
 		T_MATCH '(' expr ')' '{' match_arm_list '}'
-			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); };
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); }
 ;
 
 match_arm_list:
@@ -914,11 +913,40 @@ non_empty_argument_list:
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
-argument:
-		expr				{ $$ = $1; }
-	|	identifier ':' expr
+/* `clone_argument_list` is necessary to resolve a parser ambiguity (shift-reduce conflict)
+ * of `clone($expr)`, which could either be parsed as a function call with `$expr` as the first
+ * argument or as a use of the `clone` language construct with an expression with useless
+ * parenthesis. Both would be valid and result in the same AST / the same semantics.
+ * `clone_argument_list` is defined in a way that an `expr` in the first position needs to
+ * be followed by a `,` which is not valid syntax for a parenthesized `expr`, ensuring
+ * that calling `clone()` with a single unnamed parameter is handled by the language construct
+ * syntax.
+ */
+clone_argument_list:
+		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
+	|	'(' non_empty_clone_argument_list possible_comma ')' { $$ = $2; }
+	|	'(' expr ',' ')' { $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $2); }
+	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create_fcc(); }
+;
+
+non_empty_clone_argument_list:
+		expr ',' argument
+			{ $$ = zend_ast_create_list(2, ZEND_AST_ARG_LIST, $1, $3); }
+	|	argument_no_expr
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
+	|	non_empty_clone_argument_list ',' argument
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
+argument_no_expr:
+		identifier ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
 	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
+;
+
+argument:
+		expr { $$ = $1; }
+	|	argument_no_expr { $$ = $1; }
 ;
 
 global_var_list:
@@ -1228,10 +1256,10 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	T_CLONE '(' T_ELLIPSIS ')' {
+	|	T_CLONE clone_argument_list {
 			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
 			name->attr = ZEND_NAME_FQ;
-			$$ = zend_ast_create(ZEND_AST_CALL, name, zend_ast_create_fcc());
+			$$ = zend_ast_create(ZEND_AST_CALL, name, $2);
 		}
 	|	T_CLONE expr {
 			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_CLONE));
@@ -1320,6 +1348,7 @@ expr:
 	|	'(' expr ')' {
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
+			if ($$->kind == ZEND_AST_ARROW_FUNC) $$->attr = ZEND_PARENTHESIZED_ARROW_FUNC;
 		}
 	|	new_dereferenceable { $$ = $1; }
 	|	new_non_dereferenceable { $$ = $1; }

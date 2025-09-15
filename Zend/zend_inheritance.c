@@ -1085,10 +1085,7 @@ static void ZEND_COLD emit_incompatible_method_error(
 				"Return type of %s should either be compatible with %s, "
 				"or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice",
 				ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
-			if (EG(exception)) {
-				zend_exception_uncaught_error(
-					"During inheritance of %s", ZSTR_VAL(parent_scope->name));
-			}
+			ZEND_ASSERT(!EG(exception));
 		}
 	} else {
 		zend_error_at(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
@@ -1566,6 +1563,10 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 						ZSTR_VAL(key),
 						ZSTR_VAL(parent_info->ce->name));
 			}
+
+			if (child_info->ce == ce) {
+				child_info->flags &= ~ZEND_ACC_OVERRIDE;
+			}
 		}
 	} else {
 		zend_function **hooks = parent_info->hooks;
@@ -1713,10 +1714,25 @@ void zend_build_properties_info_table(zend_class_entry *ce)
 		}
 	}
 
-	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, zend_string *key, prop) {
 		if (prop->ce == ce && (prop->flags & ZEND_ACC_STATIC) == 0
 		 && !(prop->flags & ZEND_ACC_VIRTUAL)) {
-			uint32_t prop_table_offset = OBJ_PROP_TO_NUM(!(prop->prototype->flags & ZEND_ACC_VIRTUAL) ? prop->prototype->offset : prop->offset);
+			const zend_property_info *root_prop = prop->prototype;
+			if (UNEXPECTED(root_prop->flags & ZEND_ACC_VIRTUAL)) {
+				/* Prototype is virtual, we need to manually hunt down the first backed property. */
+				root_prop = prop;
+				zend_class_entry *parent_ce;
+				while ((parent_ce = root_prop->ce->parent)) {
+					zend_property_info *parent_prop = zend_hash_find_ptr(&parent_ce->properties_info, key);
+					if (!parent_prop
+					 || parent_prop->prototype != prop->prototype
+					 || (parent_prop->flags & ZEND_ACC_VIRTUAL)) {
+						break;
+					}
+					root_prop = parent_prop;
+				}
+			}
+			uint32_t prop_table_offset = OBJ_PROP_TO_NUM(root_prop->offset);
 			table[prop_table_offset] = prop;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2303,13 +2319,11 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 
 void zend_inheritance_check_override(const zend_class_entry *ce)
 {
-	zend_function *f;
-
 	if (ce->ce_flags & ZEND_ACC_TRAIT) {
 		return;
 	}
 
-	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, f) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zend_function *f) {
 		if (f->common.fn_flags & ZEND_ACC_OVERRIDE) {
 			ZEND_ASSERT(f->type != ZEND_INTERNAL_FUNCTION);
 
@@ -2320,14 +2334,17 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (ce->num_hooked_props) {
-		zend_property_info *prop;
-		ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
-			if (!prop->hooks) {
-				continue;
-			}
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, zend_property_info *prop) {
+		if (prop->flags & ZEND_ACC_OVERRIDE) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR,
+				"%s::$%s has #[\\Override] attribute, but no matching parent property exists",
+				ZSTR_VAL(ce->name), zend_get_unmangled_property_name(prop->name));
+		}
+
+		if (prop->hooks) {
 			for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
-				f = prop->hooks[i];
+				zend_function *f = prop->hooks[i];
 				if (f && f->common.fn_flags & ZEND_ACC_OVERRIDE) {
 					ZEND_ASSERT(f->type != ZEND_INTERNAL_FUNCTION);
 
@@ -2337,8 +2354,8 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 						ZEND_FN_SCOPE_NAME(f), ZSTR_VAL(f->common.function_name));
 				}
 			}
-		} ZEND_HASH_FOREACH_END();
-	}
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 
@@ -3507,6 +3524,13 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				free_alloca(traits_and_interfaces, use_heap);
 				return NULL;
 			}
+			if (UNEXPECTED(trait->ce_flags & ZEND_ACC_DEPRECATED)) {
+				zend_use_of_deprecated_trait(trait, ce->name);
+				if (UNEXPECTED(EG(exception))) {
+					free_alloca(traits_and_interfaces, use_heap);
+					return NULL;
+				}
+			}
 			for (j = 0; j < i; j++) {
 				if (traits_and_interfaces[j] == trait) {
 					/* skip duplications */
@@ -3546,8 +3570,6 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 #endif
 
-	bool orig_record_errors = EG(record_errors);
-
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE && is_cacheable) {
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
 			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent, traits_and_interfaces);
@@ -3559,14 +3581,19 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 				Z_CE_P(zv) = ret;
 				return ret;
 			}
-
-			/* Make sure warnings (such as deprecations) thrown during inheritance
-			 * will be recorded in the inheritance cache. */
-			zend_begin_record_errors();
 		} else {
 			is_cacheable = 0;
 		}
 		proto = ce;
+	}
+
+	/* Delay and record warnings (such as deprecations) thrown during
+	 * inheritance, so they will be recorded in the inheritance cache.
+	 * Warnings must be delayed in all cases so that we get a consistent
+	 * behavior regardless of cacheability. */
+	bool orig_record_errors = EG(record_errors);
+	if (!orig_record_errors) {
+		zend_begin_record_errors();
 	}
 
 	zend_try {
@@ -3759,6 +3786,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	}
 
 	if (!orig_record_errors) {
+		zend_emit_recorded_errors();
 		zend_free_recorded_errors();
 	}
 	if (traits_and_interfaces) {
@@ -3919,10 +3947,12 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 		orig_linking_class = CG(current_linking_class);
 		CG(current_linking_class) = is_cacheable ? ce : NULL;
 
+		bool orig_record_errors = EG(record_errors);
+
 		zend_try{
 			CG(zend_lineno) = ce->info.user.line_start;
 
-			if (is_cacheable) {
+			if (!orig_record_errors) {
 				zend_begin_record_errors();
 			}
 
@@ -3944,12 +3974,12 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 
 			CG(current_linking_class) = orig_linking_class;
 		} zend_catch {
-			EG(record_errors) = false;
-			zend_free_recorded_errors();
+			if (!orig_record_errors) {
+				EG(record_errors) = false;
+				zend_free_recorded_errors();
+			}
 			zend_bailout();
 		} zend_end_try();
-
-		EG(record_errors) = false;
 
 		if (is_cacheable) {
 			HashTable *ht = (HashTable*)ce->inheritance_cache;
@@ -3966,6 +3996,11 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 				zend_hash_destroy(ht);
 				FREE_HASHTABLE(ht);
 			}
+		}
+
+		if (!orig_record_errors) {
+			zend_emit_recorded_errors();
+			zend_free_recorded_errors();
 		}
 
 		if (ZSTR_HAS_CE_CACHE(ce->name)) {

@@ -44,8 +44,8 @@ namespace {
     /**
      * @var int
      * @cvalue SOAP_FUNCTIONS_ALL
-     * @deprecated since 8.4
      */
+    #[\Deprecated(since: '8.4', message: 'as enabling all functions is a possible security concern')]
     const SOAP_FUNCTIONS_ALL = UNKNOWN;
 
     /**
@@ -605,7 +605,7 @@ namespace {
         public function __getLastResponseHeaders(): ?string {}
 
         /** @tentative-return-type */
-        public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false): ?string {}
+        public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false, ?string $uriParserClass = null): ?string {}
 
         /** @tentative-return-type */
         public function __setCookie(string $name, ?string $value = null): void {}

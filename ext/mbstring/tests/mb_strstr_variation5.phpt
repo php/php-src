@@ -2,11 +2,11 @@
 Test mb_strstr() function : variation - multiple needles
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 echo "*** Testing mb_strstr() : variation ***\n";
-
-mb_internal_encoding('UTF-8');
 
 //with repeated needles
 $string_ascii = 'abcdef zbcdyx';

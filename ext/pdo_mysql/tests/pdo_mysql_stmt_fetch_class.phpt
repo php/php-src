@@ -75,8 +75,8 @@ MySQLPDOTest::skip();
 
         }
 
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn off emulated prepared statements\n");
 
         $db->exec(sprintf('CREATE TABLE test_stmt_fetch_class(id INT, myobj BLOB) ENGINE=%s',
@@ -110,6 +110,10 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_stmt_fetch_class');
 ?>
 --EXPECTF--
+Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
+Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
 Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 Creating an object, serializing it and writing it to DB...
 myclass::singleton(Creating object)

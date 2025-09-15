@@ -841,7 +841,7 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 		php_stream_write(fp->new, padding, ((entry->uncompressed_filesize +511)&~511) - entry->uncompressed_filesize);
 	}
 
-	if (!entry->is_modified && entry->fp_refcount) {
+	if (entry->fp_refcount) {
 		/* open file pointers refer to this fp, do not free the stream */
 		switch (entry->fp_type) {
 			case PHAR_FP:
@@ -1170,6 +1170,7 @@ nostub:
 	}
 
 	zend_hash_apply_with_argument(&phar->manifest, phar_tar_writeheaders, (void *) &pass);
+	/* TODO: memory leak and incorrect continuation if phar_tar_writeheaders fails? */
 
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
@@ -1191,6 +1192,12 @@ nostub:
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
 			spprintf(error, 0, "phar error: unable to create temporary file");
+
+			efree(signature);
+			if (must_close_old_file) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
 			return;
 		}
 #ifdef WORDS_BIGENDIAN

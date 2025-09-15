@@ -11,7 +11,6 @@ var_dump($im instanceof GdImage);
 var_dump(imageistruecolor($im));
 var_dump(imagepalettetotruecolor($im));
 var_dump(imageistruecolor($im));
-imagedestroy($im);
 ?>
 --EXPECT--
 bool(true)

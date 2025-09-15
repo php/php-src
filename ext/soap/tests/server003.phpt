@@ -27,7 +27,7 @@ $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
 ?>
 --EXPECTF--
-Deprecated: Constant SOAP_FUNCTIONS_ALL is deprecated in %s on line %d
+Deprecated: Constant SOAP_FUNCTIONS_ALL is deprecated since 8.4, as enabling all functions is a possible security concern in %s on line %d
 
 Deprecated: SoapServer::addFunction(): Enabling all functions via SOAP_FUNCTIONS_ALL is deprecated since 8.4, due to possible security concerns. If all PHP functions should be enabled, the flattened return value of get_defined_functions() can be used in %s on line %d
 <?xml version="1.0" encoding="UTF-8"?>

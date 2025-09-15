@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5e224893a5fb72b3f93249235c2a1634233ce505 */
+ * Stub hash: 569ccba4e0a93a9ce49c81c76955413188df390e */
 
 static void register_zend_constants_symbols(int module_number)
 {
@@ -14,7 +14,7 @@ static void register_zend_constants_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("E_USER_ERROR", E_USER_ERROR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("E_USER_WARNING", E_USER_WARNING, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("E_USER_NOTICE", E_USER_NOTICE, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("E_STRICT", E_STRICT, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_E_STRICT = REGISTER_LONG_CONSTANT("E_STRICT", E_STRICT, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("E_RECOVERABLE_ERROR", E_RECOVERABLE_ERROR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("E_DEPRECATED", E_DEPRECATED, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("E_USER_DEPRECATED", E_USER_DEPRECATED, CONST_PERSISTENT);
@@ -23,21 +23,16 @@ static void register_zend_constants_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("DEBUG_BACKTRACE_IGNORE_ARGS", DEBUG_BACKTRACE_IGNORE_ARGS, CONST_PERSISTENT);
 	REGISTER_BOOL_CONSTANT("ZEND_THREAD_SAFE", ZTS_V, CONST_PERSISTENT);
 	REGISTER_BOOL_CONSTANT("ZEND_DEBUG_BUILD", ZEND_DEBUG, CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("ZEND_VM_KIND", zend_vm_kind_name[ZEND_VM_KIND], CONST_PERSISTENT);
 	REGISTER_BOOL_CONSTANT("TRUE", true, CONST_PERSISTENT);
 	REGISTER_BOOL_CONSTANT("FALSE", false, CONST_PERSISTENT);
 	REGISTER_NULL_CONSTANT("NULL", CONST_PERSISTENT);
 
-	zend_constant *const_E_STRICT = zend_hash_str_find_ptr(EG(zend_constants), "E_STRICT", sizeof("E_STRICT") - 1);
 
 	zend_attribute *attribute_Deprecated_const_E_STRICT_0 = zend_add_global_constant_attribute(const_E_STRICT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_const_E_STRICT_0_arg0;
-	zend_string *attribute_Deprecated_const_E_STRICT_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0_arg0, attribute_Deprecated_const_E_STRICT_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_E_STRICT_0->args[0].value, &attribute_Deprecated_const_E_STRICT_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_const_E_STRICT_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_const_E_STRICT_0_arg1;
 	zend_string *attribute_Deprecated_const_E_STRICT_0_arg1_str = zend_string_init("the error level was removed", strlen("the error level was removed"), 1);
-	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0_arg1, attribute_Deprecated_const_E_STRICT_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_const_E_STRICT_0->args[1].value, &attribute_Deprecated_const_E_STRICT_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_const_E_STRICT_0->args[1].value, attribute_Deprecated_const_E_STRICT_0_arg1_str);
 	attribute_Deprecated_const_E_STRICT_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }

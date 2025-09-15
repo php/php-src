@@ -56,7 +56,7 @@ var WINVER = "0x0602"; /* 8/2012 */
 var MINBISON = "3.0.0";
 
 // There's a minimum requirement for re2c..
-var MINRE2C = "0.13.4";
+var MINRE2C = "1.0.3";
 
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
@@ -2054,6 +2054,7 @@ function generate_tmp_php_ini()
 
 				/* Fallback is implied, if filecache is enabled. */
 				INI.WriteLine("opcache.file_cache=" + dir);
+				INI.WriteLine("opcache.record_warnings=1");
 				INI.WriteLine("opcache.enable=1");
 				INI.WriteLine("opcache.enable_cli=1");
 			}

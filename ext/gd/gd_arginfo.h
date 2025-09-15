@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 94822f6472750c646fc138f383278ca692b39d27 */
+ * Stub hash: 2cdc0b485d9b62bb9021973d3c8cce0169b21ac0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -191,17 +191,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgd2part, 0, 5
 	ZEND_ARG_TYPE_INFO(0, height, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_GD_BMP)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefrombmp, 0, 1, GdImage, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_imagecreatefrombmp arginfo_imagecreatefromgif
 
-#if defined(HAVE_GD_TGA)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromtga, 0, 1, GdImage, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_imagecreatefromtga arginfo_imagecreatefromgif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagexbm, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
@@ -266,13 +258,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd2, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "IMG_GD2_RAW")
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_GD_BMP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagebmp, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, file, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compressed, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagedestroy, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
@@ -619,12 +609,8 @@ ZEND_FUNCTION(imagecreatefromwbmp);
 ZEND_FUNCTION(imagecreatefromgd);
 ZEND_FUNCTION(imagecreatefromgd2);
 ZEND_FUNCTION(imagecreatefromgd2part);
-#if defined(HAVE_GD_BMP)
 ZEND_FUNCTION(imagecreatefrombmp);
-#endif
-#if defined(HAVE_GD_TGA)
 ZEND_FUNCTION(imagecreatefromtga);
-#endif
 ZEND_FUNCTION(imagexbm);
 #if defined(HAVE_GD_AVIF)
 ZEND_FUNCTION(imageavif);
@@ -642,9 +628,7 @@ ZEND_FUNCTION(imagejpeg);
 ZEND_FUNCTION(imagewbmp);
 ZEND_FUNCTION(imagegd);
 ZEND_FUNCTION(imagegd2);
-#if defined(HAVE_GD_BMP)
 ZEND_FUNCTION(imagebmp);
-#endif
 ZEND_FUNCTION(imagedestroy);
 ZEND_FUNCTION(imagecolorallocate);
 ZEND_FUNCTION(imagepalettecopy);
@@ -755,12 +739,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecreatefromgd, arginfo_imagecreatefromgd)
 	ZEND_FE(imagecreatefromgd2, arginfo_imagecreatefromgd2)
 	ZEND_FE(imagecreatefromgd2part, arginfo_imagecreatefromgd2part)
-#if defined(HAVE_GD_BMP)
 	ZEND_FE(imagecreatefrombmp, arginfo_imagecreatefrombmp)
-#endif
-#if defined(HAVE_GD_TGA)
 	ZEND_FE(imagecreatefromtga, arginfo_imagecreatefromtga)
-#endif
 	ZEND_FE(imagexbm, arginfo_imagexbm)
 #if defined(HAVE_GD_AVIF)
 	ZEND_FE(imageavif, arginfo_imageavif)
@@ -778,10 +758,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagewbmp, arginfo_imagewbmp)
 	ZEND_FE(imagegd, arginfo_imagegd)
 	ZEND_FE(imagegd2, arginfo_imagegd2)
-#if defined(HAVE_GD_BMP)
 	ZEND_FE(imagebmp, arginfo_imagebmp)
-#endif
-	ZEND_FE(imagedestroy, arginfo_imagedestroy)
+	ZEND_RAW_FENTRY("imagedestroy", zif_imagedestroy, arginfo_imagedestroy, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(imagecolorallocate, arginfo_imagecolorallocate)
 	ZEND_FE(imagepalettecopy, arginfo_imagepalettecopy)
 	ZEND_FE(imagecolorat, arginfo_imagecolorat)
@@ -945,6 +923,14 @@ static void register_gd_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PNG_FILTER_PAETH", 0x80, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS", 0x8 | 0x10 | 0x20 | 0x40 | 0x80, CONST_PERSISTENT);
 #endif
+
+
+	zend_attribute *attribute_Deprecated_func_imagedestroy_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "imagedestroy", sizeof("imagedestroy") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_imagedestroy_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_imagedestroy_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_imagedestroy_0_arg1_str = zend_string_init("as it has no effect since PHP 8.0", strlen("as it has no effect since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_imagedestroy_0->args[1].value, attribute_Deprecated_func_imagedestroy_0_arg1_str);
+	attribute_Deprecated_func_imagedestroy_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_GdImage(void)

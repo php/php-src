@@ -43,8 +43,7 @@ PHP_FUNCTION( collator_get_locale )
 
 	if (!co || !co->ucoll) {
 		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) );
-		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
-			"Object not initialized", 0 );
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ), "Object not initialized");
 		zend_throw_error(NULL, "Object not initialized");
 
 		RETURN_THROWS();

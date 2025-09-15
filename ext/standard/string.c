@@ -1026,7 +1026,11 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 		}
 
 		cptr -= ZSTR_LEN(glue);
-		memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
+		if (ZSTR_LEN(glue) == 1) {
+			*cptr = ZSTR_VAL(glue)[0];
+		} else {
+			memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
+		}
 	}
 
 	free_alloca(strings, use_heap);
@@ -2404,7 +2408,7 @@ PHP_FUNCTION(substr_replace)
 			if (repl_idx < repl_ht->nNumUsed) {
 				repl_str = zval_get_tmp_string(tmp_repl, &tmp_repl_str);
 			} else {
-				repl_str = STR_EMPTY_ALLOC();
+				repl_str = ZSTR_EMPTY_ALLOC();
 			}
 		}
 
@@ -2651,6 +2655,15 @@ PHP_FUNCTION(ord)
 		Z_PARAM_STR(str)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(ZSTR_LEN(str) != 1)) {
+		if (ZSTR_LEN(str) == 0) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Providing an empty string is deprecated");
+		} else {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Providing a string that is not one byte long is deprecated. Use ord($str[0]) instead");
+		}
+	}
 	RETURN_LONG((unsigned char) ZSTR_VAL(str)[0]);
 }
 /* }}} */
@@ -2665,6 +2678,12 @@ PHP_FUNCTION(chr)
 		Z_PARAM_LONG(c)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(c < 0 || c > 255)) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Providing a value not in-between 0 and 255 is deprecated,"
+			" this is because a byte value must be in the [0, 255] interval."
+			" The value used will be constrained using %% 256");
+	}
 	c &= 0xff;
 	RETURN_CHAR(c);
 }
@@ -4937,17 +4956,18 @@ PHP_FUNCTION(setlocale)
 	zend_string **strings = do_alloca(sizeof(zend_string *) * num_args, use_heap);
 
 	for (uint32_t i = 0; i < num_args; i++) {
-		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], false, i + 2))) {
+		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], true, i + 2))) {
 			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING, &args[i]);
 			goto out;
 		}
 	}
 
 	for (uint32_t i = 0; i < num_args; i++) {
+		zend_string *result;
 		if (Z_TYPE(args[i]) == IS_ARRAY) {
 			zval *elem;
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), elem) {
-				zend_string *result = try_setlocale_zval(cat, elem);
+				result = try_setlocale_zval(cat, elem);
 				if (EG(exception)) {
 					goto out;
 				}
@@ -4956,15 +4976,18 @@ PHP_FUNCTION(setlocale)
 					goto out;
 				}
 			} ZEND_HASH_FOREACH_END();
+			continue;
+		} else if (Z_ISNULL(args[i])) {
+			result = try_setlocale_str(cat, ZSTR_EMPTY_ALLOC());
 		} else {
-			zend_string *result = try_setlocale_str(cat, strings[i]);
-			if (EG(exception)) {
-				goto out;
-			}
-			if (result) {
-				RETVAL_STR(result);
-				goto out;
-			}
+			result = try_setlocale_str(cat, strings[i]);
+		}
+		if (EG(exception)) {
+			goto out;
+		}
+		if (result) {
+			RETVAL_STR(result);
+			goto out;
 		}
 	}
 

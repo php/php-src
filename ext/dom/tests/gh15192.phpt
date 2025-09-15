@@ -11,7 +11,7 @@ $dom = new DomDocument();
 var_dump($element);
 ?>
 --EXPECT--
-object(Dom\HTMLElement)#3 (30) {
+object(Dom\HTMLElement)#3 (31) {
   ["namespaceURI"]=>
   string(28) "http://www.w3.org/1999/xhtml"
   ["prefix"]=>
@@ -27,6 +27,8 @@ object(Dom\HTMLElement)#3 (30) {
   ["classList"]=>
   string(22) "(object value omitted)"
   ["attributes"]=>
+  string(22) "(object value omitted)"
+  ["children"]=>
   string(22) "(object value omitted)"
   ["firstElementChild"]=>
   string(22) "(object value omitted)"

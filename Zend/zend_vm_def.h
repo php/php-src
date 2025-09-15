@@ -2962,7 +2962,10 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 {
 	zend_execute_data *old_execute_data;
 	uint32_t call_info = EX_CALL_INFO();
+#if ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL
+	/* zend_leave_helper may be called with opline=call_leave_op in TAILCALL VM */
 	SAVE_OPLINE();
+#endif
 
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) == 0)) {
 		EG(current_execute_data) = EX(prev_execute_data);
@@ -4917,7 +4920,7 @@ ZEND_VM_HOT_SEND_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, CONST|UNUSED|NUM, SPE
 			ZEND_VM_C_GOTO(send_val_by_ref);
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-ZEND_VM_C_LABEL(send_val_by_ref):
+ZEND_VM_C_LABEL(send_val_by_ref):;
 		ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper, _arg_num, arg_num, _arg, arg);
 	}
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -5392,6 +5395,11 @@ ZEND_VM_C_LABEL(send_again):
 						}
 
 						name = Z_STR_P(&key);
+
+						zend_ulong tmp;
+						if (ZEND_HANDLE_NUMERIC(name, tmp)) {
+							name = NULL;
+						}
 					}
 				}
 
@@ -6006,7 +6014,8 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 	SAVE_OPLINE();
 	obj = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
 
-	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync. */
+	/* ZEND_CLONE also exists as the clone() function and both implementations must be kept in sync.
+	 * The OPcode intentionally does not support a clone-with property list to keep it simple. */
 
 	do {
 		if (OP1_TYPE == IS_CONST ||
@@ -6043,14 +6052,12 @@ ZEND_VM_COLD_CONST_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 
 	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
 		scope = EX(func)->op_array.scope;
-		if (clone->common.scope != scope) {
-			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_wrong_clone_call(clone, scope);
-				FREE_OP1();
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
+		ZEND_ASSERT(!(clone->common.fn_flags & ZEND_ACC_PUBLIC));
+		if (!zend_check_method_accessible(clone, scope)) {
+			zend_bad_method_call(clone, clone->common.function_name, scope);
+			FREE_OP1();
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
 		}
 	}
 
@@ -6158,7 +6165,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			}
 
 			bool is_constant_deprecated = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED;
-			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {			
+			if (UNEXPECTED(is_constant_deprecated) && !CONST_IS_RECURSIVE(c)) {
 				if (c->ce->type == ZEND_USER_CLASS) {
 					/* Recursion protection only applied to user constants, GH-18463 */
 					CONST_PROTECT_RECURSION(c);
@@ -6321,17 +6328,22 @@ ZEND_VM_C_LABEL(add_unpack_again):
 		zval *val;
 
 		if (HT_IS_PACKED(ht) && (zend_hash_num_elements(result_ht) == 0 || HT_IS_PACKED(result_ht))) {
-			zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
-			ZEND_HASH_FILL_PACKED(result_ht) {
-				ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
-					if (UNEXPECTED(Z_ISREF_P(val)) &&
-						UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
-						val = Z_REFVAL_P(val);
-					}
-					Z_TRY_ADDREF_P(val);
-					ZEND_HASH_FILL_ADD(val);
-				} ZEND_HASH_FOREACH_END();
-			} ZEND_HASH_FILL_END();
+			/* zend_hash_extend() skips initialization when the number of elements is 0,
+			 * but the code below expects that result_ht is initialized as packed.
+			 * We can just skip the work in that case. */
+			if (result_ht->nNumUsed + zend_hash_num_elements(ht) > 0) {
+				zend_hash_extend(result_ht, result_ht->nNumUsed + zend_hash_num_elements(ht), 1);
+				ZEND_HASH_FILL_PACKED(result_ht) {
+					ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
+						if (UNEXPECTED(Z_ISREF_P(val)) &&
+							UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
+							val = Z_REFVAL_P(val);
+						}
+						Z_TRY_ADDREF_P(val);
+						ZEND_HASH_FILL_ADD(val);
+					} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FILL_END();
+			}
 		} else {
 			zend_string *key;
 
@@ -7934,7 +7946,7 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
 		if (zv) {
 			SAVE_OPLINE();
 			ce = zend_bind_class_in_slot(zv, lcname, Z_STR_P(RT_CONSTANT(opline, opline->op2)));
-			if (!ce) {
+			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -7958,7 +7970,7 @@ ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY, CACHE_SLOT)
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			SAVE_OPLINE();
 			ce = zend_do_link_class(ce, (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL, rtd_key);
-			if (!ce) {
+			if (EG(exception)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -8261,7 +8273,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(Z_STR_P(name));
 
-	if (zend_register_constant(&c) == FAILURE) {
+	if (zend_register_constant(&c) == NULL) {
 	}
 
 	FREE_OP1();
@@ -8274,7 +8286,7 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	USE_OPLINE
 	zval *name;
 	zval *val;
-	zend_constant c;
+	zend_constant c, *registered;
 
 	SAVE_OPLINE();
 	name  = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -8293,7 +8305,8 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(Z_STR_P(name));
 
-	if (zend_register_constant(&c) == FAILURE) {
+	registered = zend_register_constant(&c);
+	if (registered == NULL) {
 		FREE_OP1();
 		FREE_OP2();
 		/* two opcodes used, second one is the data with attributes */
@@ -8301,9 +8314,7 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	}
 
 	HashTable *attributes = Z_PTR_P(GET_OP_DATA_ZVAL_PTR(BP_VAR_R));
-	zend_constant *registered = zend_get_constant_ptr(c.name);
 	ZEND_ASSERT(attributes != NULL);
-	ZEND_ASSERT(registered != NULL);
 	zend_constant_add_attributes(registered, attributes);
 
 	FREE_OP1();

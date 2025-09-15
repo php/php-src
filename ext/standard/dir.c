@@ -160,6 +160,8 @@ PHP_FUNCTION(dir)
 static php_stream* php_dir_get_directory_stream_from_user_arg(php_stream *dir_stream)
 {
 	if (dir_stream == NULL) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Passing null is deprecated, instead the last opened directory stream should be provided");
 		if (UNEXPECTED(DIRG(default_dir) == NULL)) {
 			zend_type_error("No resource supplied");
 			return NULL;
@@ -474,8 +476,7 @@ PHP_FUNCTION(glob)
 #ifdef PHP_GLOB_NOMATCH
 no_results:
 #endif
-		array_init(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 
 	array_init(return_value);

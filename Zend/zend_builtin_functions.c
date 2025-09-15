@@ -72,9 +72,12 @@ zend_result zend_startup_builtin_functions(void) /* {{{ */
 ZEND_FUNCTION(clone)
 {
 	zend_object *zobj;
+	HashTable *with = (HashTable*)&zend_empty_array;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ(zobj)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT(with)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* clone() also exists as the ZEND_CLONE OPcode and both implementations must be kept in sync. */
@@ -89,22 +92,22 @@ ZEND_FUNCTION(clone)
 		RETURN_THROWS();
 	}
 
-	if (clone && !(clone->common.fn_flags & ZEND_ACC_PUBLIC)) {
-		if (clone->common.scope != scope) {
-			if (UNEXPECTED(clone->common.fn_flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_throw_error(NULL, "Call to %s %s::__clone() from %s%s",
-					zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
-					scope ? "scope " : "global scope",
-					scope ? ZSTR_VAL(scope->name) : ""
-				);
-				RETURN_THROWS();
-			}
-		}
+	if (clone && !zend_check_method_accessible(clone, scope)) {
+		zend_bad_method_call(clone, clone->common.function_name, scope);
+		RETURN_THROWS();
 	}
 
 	zend_object *cloned;
-	cloned = zobj->handlers->clone_obj(zobj);
+	if (zend_hash_num_elements(with) > 0) {
+		if (UNEXPECTED(!zobj->handlers->clone_obj_with)) {
+			zend_throw_error(NULL, "Cloning objects of class %s with updated properties is not supported", ZSTR_VAL(ce->name));
+			RETURN_THROWS();
+		}
+
+		cloned = zobj->handlers->clone_obj_with(zobj, scope, with);
+	} else {
+		cloned = zobj->handlers->clone_obj(zobj);
+	}
 
 	ZEND_ASSERT(cloned || EG(exception));
 	if (EXPECTED(cloned)) {
@@ -592,7 +595,7 @@ register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
-	if (zend_register_constant(&c) == SUCCESS) {
+	if (zend_register_constant(&c) != NULL) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -957,13 +960,7 @@ ZEND_FUNCTION(get_class_methods)
 	scope = zend_get_executed_scope();
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, mptr) {
-		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		 || (scope &&
-			 (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
-			   zend_check_protected(mptr->common.scope, scope))
-		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
-			   scope == mptr->common.scope)))
-		) {
+		if (zend_check_method_accessible(mptr, scope)) {
 			ZVAL_STR_COPY(&method_name, mptr->common.function_name);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}
@@ -1486,15 +1483,15 @@ ZEND_FUNCTION(get_defined_functions)
 	zval internal, user;
 	zend_string *key;
 	zend_function *func;
-	bool exclude_disabled = 1;
+	bool exclude_disabled = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (exclude_disabled == 0) {
+	if (ZEND_NUM_ARGS() == 1) {
 		zend_error(E_DEPRECATED,
-			"get_defined_functions(): Setting $exclude_disabled to false has no effect");
+			"get_defined_functions(): The $exclude_disabled parameter has no effect since PHP 8.0");
 	}
 
 	array_init(&internal);
@@ -1994,8 +1991,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			}
 			stack_frame = zend_new_array(8);
 			zend_hash_real_init_mixed(stack_frame);
-			zend_string *name = func->common.function_name;
-			ZVAL_STRINGL(&tmp, ZSTR_VAL(name), ZSTR_LEN(name));
+			ZVAL_STR_COPY(&tmp, func->common.function_name);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 			/* Steal file and line from the previous frame. */
 			if (call->func && ZEND_USER_CODE(call->func->common.type)) {

@@ -20,6 +20,78 @@ namespace Uri {
     }
 }
 
+namespace Uri\Rfc3986 {
+    /** @strict-properties */
+    final readonly class Uri
+    {
+        public static function parse(string $uri, ?\Uri\Rfc3986\Uri $baseUrl = null): ?static {}
+
+        public function __construct(string $uri, ?\Uri\Rfc3986\Uri $baseUrl = null) {}
+
+        public function getScheme(): ?string {}
+
+        public function getRawScheme(): ?string {}
+
+        public function withScheme(?string $scheme): static {}
+
+        public function getUserInfo(): ?string {}
+
+        public function getRawUserInfo(): ?string {}
+
+        public function withUserInfo(#[\SensitiveParameter] ?string $userinfo): static {}
+
+        public function getUsername(): ?string {}
+
+        public function getRawUsername(): ?string {}
+
+        public function getPassword(): ?string {}
+
+        public function getRawPassword(): ?string {}
+
+        public function getHost(): ?string {}
+
+        public function getRawHost(): ?string {}
+
+        public function withHost(?string $host): static {}
+
+        public function getPort(): ?int {}
+
+        public function withPort(?int $port): static {}
+
+        public function getPath(): string {}
+
+        public function getRawPath(): string {}
+
+        public function withPath(string $path): static {}
+
+        public function getQuery(): ?string {}
+
+        public function getRawQuery(): ?string {}
+
+        public function withQuery(?string $query): static {}
+
+        public function getFragment(): ?string {}
+
+        public function getRawFragment(): ?string {}
+
+        public function withFragment(?string $fragment): static {}
+
+        public function equals(\Uri\Rfc3986\Uri $uri, \Uri\UriComparisonMode $comparisonMode = \Uri\UriComparisonMode::ExcludeFragment): bool {}
+
+        public function toString(): string {}
+
+        public function toRawString(): string {}
+
+        public function resolve(string $uri): static {}
+
+        public function __serialize(): array {}
+
+        public function __unserialize(array $data): void {}
+
+        public function __debugInfo(): array {}
+    }
+}
+
 namespace Uri\WhatWg {
     /** @strict-properties */
     class InvalidUrlException extends \Uri\InvalidUriException
@@ -85,10 +157,12 @@ namespace Uri\WhatWg {
 
         public function withScheme(string $scheme): static {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getUsername */
         public function getUsername(): ?string {}
 
         public function withUsername(?string $username): static {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getPassword */
         public function getPassword(): ?string {}
 
         public function withPassword(#[\SensitiveParameter] ?string $password): static {}
@@ -97,22 +171,31 @@ namespace Uri\WhatWg {
 
         public function getUnicodeHost(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withHost */
         public function withHost(?string $host): static {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getPort */
         public function getPort(): ?int {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withPort */
         public function withPort(?int $port): static {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getPath */
         public function getPath(): string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withPath */
         public function withPath(string $path): static {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getQuery */
         public function getQuery(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withQuery */
         public function withQuery(?string $query): static {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getFragment */
         public function getFragment(): ?string {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::withFragment */
         public function withFragment(?string $fragment): static {}
 
         public function equals(\Uri\WhatWg\Url $url, \Uri\UriComparisonMode $comparisonMode = \Uri\UriComparisonMode::ExcludeFragment): bool {}

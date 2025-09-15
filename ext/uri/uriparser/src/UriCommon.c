@@ -68,6 +68,10 @@
 
 
 
+#include <assert.h>
+
+
+
 /*extern*/ const URI_CHAR * const URI_FUNC(SafeToPointTo) = _UT("X");
 /*extern*/ const URI_CHAR * const URI_FUNC(ConstPwd) = _UT(".");
 /*extern*/ const URI_CHAR * const URI_FUNC(ConstParent) = _UT("..");
@@ -79,6 +83,32 @@ void URI_FUNC(ResetUri)(URI_TYPE(Uri) * uri) {
 		return;
 	}
 	memset(uri, 0, sizeof(URI_TYPE(Uri)));
+}
+
+
+
+int URI_FUNC(FreeUriPath)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
+	assert(uri != NULL);
+	assert(memory != NULL);
+
+	if (uri->pathHead != NULL) {
+		URI_TYPE(PathSegment) * segWalk = uri->pathHead;
+		while (segWalk != NULL) {
+			URI_TYPE(PathSegment) * const next = segWalk->next;
+			if ((uri->owner == URI_TRUE) && (segWalk->text.first != segWalk->text.afterLast)) {
+				memory->free(memory, (URI_CHAR *)segWalk->text.first);
+			}
+			segWalk->text.first = NULL;
+			segWalk->text.afterLast = NULL;
+			segWalk->next = NULL;
+			memory->free(memory, segWalk);
+			segWalk = next;
+		}
+		uri->pathHead = NULL;
+		uri->pathTail = NULL;
+	}
+
+	return URI_SUCCESS;
 }
 
 
@@ -115,6 +145,40 @@ int URI_FUNC(CompareRange)(
 	}
 
 	return diff;
+}
+
+
+
+UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
+		const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory) {
+	const int lenInChars = (int)(sourceRange->afterLast - sourceRange->first);
+	const int lenInBytes = lenInChars * sizeof(URI_CHAR);
+	URI_CHAR * dup = memory->malloc(memory, lenInBytes);
+	if (dup == NULL) {
+		return URI_FALSE;
+	}
+	memcpy(dup, sourceRange->first, lenInBytes);
+	destRange->first = dup;
+	destRange->afterLast = dup + lenInChars;
+
+	return URI_TRUE;
+}
+
+
+
+UriBool URI_FUNC(CopyRangeAsNeeded)(URI_TYPE(TextRange) * destRange,
+		const URI_TYPE(TextRange) * sourceRange, UriMemoryManager * memory) {
+	if (sourceRange->first == NULL) {
+		destRange->first = NULL;
+		destRange->afterLast = NULL;
+	} else if (sourceRange->first == sourceRange->afterLast) {
+		destRange->first = URI_FUNC(SafeToPointTo);
+		destRange->afterLast = URI_FUNC(SafeToPointTo);
+	} else {
+		return URI_FUNC(CopyRange)(destRange, sourceRange, memory);
+	}
+
+	return URI_TRUE;
 }
 
 
@@ -189,7 +253,7 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri,
 
 						if (prev == NULL) {
 							/* Last and first */
-							if (URI_FUNC(IsHostSet)(uri)) {
+							if (URI_FUNC(HasHost)(uri)) {
 								/* Replace "." with empty segment to represent trailing slash */
 								walker->text.first = URI_FUNC(SafeToPointTo);
 								walker->text.afterLast = URI_FUNC(SafeToPointTo);
@@ -430,14 +494,6 @@ unsigned char URI_FUNC(HexdigToInt)(URI_CHAR hexdig) {
 
 
 
-URI_CHAR URI_FUNC(HexToLetter)(unsigned int value) {
-	/* Uppercase recommended in section 2.1. of RFC 3986         *
-	 * https://datatracker.ietf.org/doc/html/rfc3986#section-2.1 */
-	return URI_FUNC(HexToLetterEx)(value, URI_TRUE);
-}
-
-
-
 URI_CHAR URI_FUNC(HexToLetterEx)(unsigned int value, UriBool uppercase) {
 	switch (value) {
 	case  0: return _UT('0');
@@ -463,12 +519,16 @@ URI_CHAR URI_FUNC(HexToLetterEx)(unsigned int value, UriBool uppercase) {
 
 
 /* Checks if a URI has the host component set. */
-UriBool URI_FUNC(IsHostSet)(const URI_TYPE(Uri) * uri) {
+UriBool URI_FUNC(HasHost)(const URI_TYPE(Uri) * uri) {
+	/* NOTE: .hostData.ipFuture.first is not being checked,   *
+	 *       because we do check .hostText.first and          *
+	 *       .hostData.ipFuture.first has to be identical to  *
+	 *       .hostText.first if set, and hence there is       *
+	 *       no more information to be gained.                */
 	return (uri != NULL)
 			&& ((uri->hostText.first != NULL)
 				|| (uri->hostData.ip4 != NULL)
 				|| (uri->hostData.ip6 != NULL)
-				|| (uri->hostData.ipFuture.first != NULL)
 			);
 }
 
@@ -597,11 +657,135 @@ UriBool URI_FUNC(FixAmbiguity)(URI_TYPE(Uri) * uri,
 
 
 
+static UriBool URI_FUNC(PrependNewDotSegment)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
+	assert(uri != NULL);
+	assert(memory != NULL);
+
+	{
+		URI_TYPE(PathSegment) * const segment = memory->malloc(memory, 1 * sizeof(URI_TYPE(PathSegment)));
+
+		if (segment == NULL) {
+			return URI_FALSE;  /* i.e. raise malloc error */
+		}
+
+		segment->next = uri->pathHead;
+
+		{
+			URI_TYPE(TextRange) dotRange;
+			dotRange.first = URI_FUNC(ConstPwd);
+			dotRange.afterLast = URI_FUNC(ConstPwd) + 1;
+
+			if (uri->owner == URI_TRUE) {
+				if (URI_FUNC(CopyRange)(&(segment->text), &dotRange, memory) == URI_FALSE) {
+					memory->free(memory, segment);
+					return URI_FALSE;  /* i.e. raise malloc error */
+				}
+			} else {
+				segment->text = dotRange;  /* copies all members */
+			}
+		}
+
+		uri->pathHead = segment;
+	}
+
+	return URI_TRUE;
+}
+
+
+
+/* When dropping a scheme from a URI without a host and with a colon (":")
+ * in the first path segment, a consecutive reparse would rightfully
+ * mis-classify the first path segment as a scheme due to the colon.
+ * To protect against this case, we prepend an artifical "." segment
+ * to the path in here; the function is called after the scheme has
+ * just been dropped.
+ *
+ * 0. We start with parsed URI "scheme:path1:/path2/path3".
+ * 1. We drop the scheme naively and yield "path1:/path2/path3".
+ * 2. We prepend "." and yield unambiguous "./path1:/path2/path3".
+ *
+ * From the view of the RFC 3986 grammar, this is replacing rule path-rootless
+ * by path-noscheme content.
+ *
+ * Returns URI_TRUE for (a) nothing to do or (b) successful changes.
+ * Returns URI_FALSE to signal out-of-memory.
+ */
+UriBool URI_FUNC(FixPathNoScheme)(URI_TYPE(Uri) * uri,
+		UriMemoryManager * memory) {
+	assert(uri != NULL);
+	assert(memory != NULL);
+
+	if ((uri->absolutePath == URI_TRUE)
+			|| (uri->pathHead == NULL)
+			|| (uri->scheme.first != NULL)
+			|| URI_FUNC(HasHost)(uri)) {
+		return URI_TRUE;  /* i.e. nothing to do */
+	}
+
+	/* Check for troublesome first path segment containing a colon */
+	{
+		UriBool colonFound = URI_FALSE;
+		const URI_CHAR * walker = uri->pathHead->text.first;
+
+		while (walker < uri->pathHead->text.afterLast) {
+			if (walker[0] == _UT(':')) {
+				colonFound = URI_TRUE;
+				break;
+			}
+			walker++;
+		}
+
+		assert((walker == uri->pathHead->text.afterLast) || (colonFound == URI_TRUE));
+
+		if (colonFound == URI_FALSE) {
+			return URI_TRUE;  /* i.e. nothing to do */
+		}
+	}
+
+	/* Insert "." segment in front */
+	return URI_FUNC(PrependNewDotSegment)(uri, memory);
+}
+
+
+
+/* When dropping a host from a URI without a scheme, an absolute path
+ * and and empty first path segment, a consecutive reparse would rightfully
+ * mis-classify the first path segment as a host marker due to the "//".
+ * To protect against this case, we prepend an artifical "." segment
+ * to the path in here; the function is called after the host has
+ * just been dropped.
+ *
+ * 0. We start with parsed URI "//host//path1/path2".
+ * 1. We drop the host naively and yield "//path1/path2".
+ * 2. We insert "./" and yield unambiguous "/.//path1/path2".
+ *
+ * Returns URI_TRUE for (a) nothing to do or (b) successful changes.
+ * Returns URI_FALSE to signal out-of-memory.
+ */
+UriBool URI_FUNC(EnsureThatPathIsNotMistakenForHost)(URI_TYPE(Uri) * uri,
+		UriMemoryManager * memory) {
+	assert(uri != NULL);
+	assert(memory != NULL);
+
+	if ((URI_FUNC(HasHost)(uri) == URI_TRUE)
+			|| (uri->absolutePath == URI_FALSE)
+			|| (uri->pathHead == NULL)
+			|| (uri->pathHead == uri->pathTail)  /* i.e. no second slash */
+			|| (uri->pathHead->text.first != uri->pathHead->text.afterLast)) {
+		return URI_TRUE;  /* i.e. nothing to do */
+	}
+
+	/* Insert "." segment in front */
+	return URI_FUNC(PrependNewDotSegment)(uri, memory);
+}
+
+
+
 void URI_FUNC(FixEmptyTrailSegment)(URI_TYPE(Uri) * uri,
 		UriMemoryManager * memory) {
 	/* Fix path if only one empty segment */
 	if (!uri->absolutePath
-			&& !URI_FUNC(IsHostSet)(uri)
+			&& !URI_FUNC(HasHost)(uri)
 			&& (uri->pathHead != NULL)
 			&& (uri->pathHead->next == NULL)
 			&& (uri->pathHead->text.first == uri->pathHead->text.afterLast)) {

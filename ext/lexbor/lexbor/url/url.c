@@ -1818,7 +1818,7 @@ again:
                     }
 
                     if (override_state == LXB_URL_STATE_HOSTNAME_STATE) {
-                        lxb_url_parse_return(orig_data, buf, LXB_STATUS_OK);
+                        lxb_url_parse_return(orig_data, buf, LXB_STATUS_ERROR);
                     }
 
                     status = lxb_url_host_parse(parser, begin, p, &url->host,
@@ -4804,7 +4804,7 @@ lxb_url_serialize_fragment(const lxb_url_t *url,
 }
 
 lxb_url_t *
-lxb_url_clone(lexbor_mraw_t *mraw, lxb_url_t *url)
+lxb_url_clone(lexbor_mraw_t *mraw, const lxb_url_t *url)
 {
 	lxb_status_t status;
 	lxb_url_t *new_url;

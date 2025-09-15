@@ -54,7 +54,11 @@ AC_DEFUN([PHP_EXPAND_PATH],[
     changequote({,})
     ep_dir=$(echo $1|$SED 's%/*[^/][^/]*/*$%%')
     changequote([,])
-    ep_realdir=$(cd "$ep_dir" && pwd)
+    if test -z $ep_dir ; then
+      ep_realdir=$(pwd)
+    else
+      ep_realdir=$(cd "$ep_dir" && pwd)
+    fi
     $2="$ep_realdir"/$(basename "$1")
   fi
 ])
@@ -1014,7 +1018,9 @@ dnl _PHP_CHECK_SIZEOF(type, cross-value, extra-headers [, found-action [, not-fo
 dnl
 dnl Internal helper macro.
 dnl
-AC_DEFUN([_PHP_CHECK_SIZEOF], [
+AC_DEFUN([_PHP_CHECK_SIZEOF],
+[m4_warn([obsolete],
+  [The PHP_CHECK_SIZEOF macro is obsolete. Use AC_CHECK_SIZEOF.])
   php_cache_value=php_cv_sizeof_[]$1
   AC_CACHE_VAL(php_cv_sizeof_[]$1, [
     old_LIBS=$LIBS
@@ -1055,6 +1061,9 @@ ifelse([$5],[],,[else $5])
 
 dnl
 dnl PHP_CHECK_SIZEOF(type, cross-value, extra-headers)
+dnl
+dnl Checks the size of specified "type". This macro is obsolete as of PHP 8.5 in
+dnl favor of the AC_CHECK_SIZEOF.
 dnl
 AC_DEFUN([PHP_CHECK_SIZEOF], [
   AC_MSG_CHECKING([size of $1])
@@ -1791,7 +1800,17 @@ AC_DEFUN([PHP_SETUP_ICONV], [
 
   dnl Check external libs for iconv funcs.
   AS_VAR_IF([found_iconv], [no], [
-    for i in $PHP_ICONV /usr/local /usr; do
+
+  dnl Find /opt/homebrew/opt/libiconv on macOS
+  dnl See: https://github.com/php/php-src/pull/19475
+    php_brew_prefix=no
+    AC_CHECK_PROG([BREW], [brew], [brew])
+    if test -n "$BREW"; then
+      AC_MSG_CHECKING([for homebrew prefix])
+      php_brew_prefix=$($BREW --prefix 2> /dev/null)
+    fi
+
+    for i in $PHP_ICONV $php_brew_prefix/opt/libiconv /usr/local /usr; do
       if test -r $i/include/gnu-libiconv/iconv.h; then
         ICONV_DIR=$i
         ICONV_INCLUDE_DIR=$i/include/gnu-libiconv

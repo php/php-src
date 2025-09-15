@@ -311,6 +311,9 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 
 		zend_accel_store_interned_string(copy->name);
 		zend_accel_store_interned_string(copy->lcname);
+		if (copy->validation_error) {
+			zend_accel_store_interned_string(copy->validation_error);
+		}
 
 		for (i = 0; i < copy->argc; i++) {
 			if (copy->args[i].name) {
@@ -1283,6 +1286,41 @@ void zend_update_parent_ce(zend_class_entry *ce)
 	}
 }
 
+#ifdef HAVE_JIT
+static void zend_accel_persist_jit_op_array(zend_op_array *op_array, zend_class_entry *ce)
+{
+	if (op_array->type == ZEND_USER_FUNCTION) {
+		if (op_array->scope == ce
+		 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)
+		 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+			zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
+			for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+				zend_jit_op_array(op_array->dynamic_func_defs[i], ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
+			}
+		}
+	}
+}
+
+static void zend_accel_persist_link_func_info(zend_op_array *op_array, zend_class_entry *ce)
+{
+	if (op_array->type == ZEND_USER_FUNCTION
+	 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)) {
+		if ((op_array->scope != ce
+		 || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))
+		  && (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
+		  || JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST
+		  || JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS
+		  || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE)) {
+			void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+
+			if (jit_extension) {
+				ZEND_SET_FUNC_INFO(op_array, jit_extension);
+			}
+		}
+	}
+}
+#endif
+
 static void zend_accel_persist_class_table(HashTable *class_table)
 {
 	Bucket *p;
@@ -1309,44 +1347,48 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS &&
 	    !ZCG(current_persistent_script)->corrupted) {
 	    zend_op_array *op_array;
+		zend_property_info *prop;
 
 	    ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 			if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 				ce = Z_PTR(p->val);
 				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
-					if (op_array->type == ZEND_USER_FUNCTION) {
-						if (op_array->scope == ce
-						 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)
-						 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
-							zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
-							for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
-								zend_jit_op_array(op_array->dynamic_func_defs[i], ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
+					zend_accel_persist_jit_op_array(op_array, ce);
+				} ZEND_HASH_FOREACH_END();
+
+				if (ce->num_hooked_props > 0) {
+					ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
+						if (prop->hooks) {
+							for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+								if (prop->hooks[i]) {
+									op_array = &prop->hooks[i]->op_array;
+									zend_accel_persist_jit_op_array(op_array, ce);
+								}
 							}
 						}
-					}
-				} ZEND_HASH_FOREACH_END();
+					} ZEND_HASH_FOREACH_END();
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	    ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 			if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 				ce = Z_PTR(p->val);
 				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
-					if (op_array->type == ZEND_USER_FUNCTION
-					 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)) {
-						if ((op_array->scope != ce
-						 || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))
-						  && (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
-						   || JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST
-						   || JIT_G(trigger) == ZEND_JIT_ON_HOT_COUNTERS
-						   || JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE)) {
-							void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+					zend_accel_persist_link_func_info(op_array, ce);
+				} ZEND_HASH_FOREACH_END();
 
-							if (jit_extension) {
-								ZEND_SET_FUNC_INFO(op_array, jit_extension);
+				if (ce->num_hooked_props > 0) {
+					ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop) {
+						if (prop->hooks) {
+							for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+								if (prop->hooks[i]) {
+									op_array = &prop->hooks[i]->op_array;
+									zend_accel_persist_link_func_info(op_array, ce);
+								}
 							}
 						}
-					}
-				} ZEND_HASH_FOREACH_END();
+					} ZEND_HASH_FOREACH_END();
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1355,11 +1397,11 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 
 zend_error_info **zend_persist_warnings(uint32_t num_warnings, zend_error_info **warnings) {
 	if (warnings) {
-		warnings = zend_shared_memdup_free(warnings, num_warnings * sizeof(zend_error_info *));
+		warnings = zend_shared_memdup(warnings, num_warnings * sizeof(zend_error_info *));
 		for (uint32_t i = 0; i < num_warnings; i++) {
-			warnings[i] = zend_shared_memdup_free(warnings[i], sizeof(zend_error_info));
 			zend_accel_store_string(warnings[i]->filename);
 			zend_accel_store_string(warnings[i]->message);
+			warnings[i] = zend_shared_memdup(warnings[i], sizeof(zend_error_info));
 		}
 	}
 	return warnings;

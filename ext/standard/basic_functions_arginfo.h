@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dfd7d2cfd31312f7f6c5074c10cab54e9d1fbccc */
+ * Stub hash: f6bf6cdd07080c01d3a0cb08d71409d05b1084f9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3431,7 +3431,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_set_chunk_size, arginfo_stream_set_chunk_size)
 #if (defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32))
 	ZEND_FE(stream_set_timeout, arginfo_stream_set_timeout)
-	ZEND_RAW_FENTRY("socket_set_timeout", zif_stream_set_timeout, arginfo_socket_set_timeout, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("socket_set_timeout", zif_stream_set_timeout, arginfo_socket_set_timeout, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 	ZEND_RAW_FENTRY("gettype", zif_gettype, arginfo_gettype, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("get_debug_type", zif_get_debug_type, arginfo_get_debug_type, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
@@ -3518,11 +3518,11 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", PHP_COUNT_RECURSIVE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", PHP_ASSERT_ACTIVE, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", PHP_ASSERT_CALLBACK, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("ASSERT_BAIL", PHP_ASSERT_BAIL, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("ASSERT_WARNING", PHP_ASSERT_WARNING, CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", PHP_ASSERT_EXCEPTION, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_ASSERT_ACTIVE = REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", PHP_ASSERT_ACTIVE, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_ASSERT_CALLBACK = REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", PHP_ASSERT_CALLBACK, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_ASSERT_BAIL = REGISTER_LONG_CONSTANT("ASSERT_BAIL", PHP_ASSERT_BAIL, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_ASSERT_WARNING = REGISTER_LONG_CONSTANT("ASSERT_WARNING", PHP_ASSERT_WARNING, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_ASSERT_EXCEPTION = REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", PHP_ASSERT_EXCEPTION, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL", PHP_CONNECTION_NORMAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_TIMEOUT", PHP_CONNECTION_TIMEOUT, CONST_PERSISTENT);
@@ -3645,8 +3645,9 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO", IMAGE_FILETYPE_ICO, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP", IMAGE_FILETYPE_WEBP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_AVIF", IMAGE_FILETYPE_AVIF, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_HEIF", IMAGE_FILETYPE_HEIF, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT", IMAGE_FILETYPE_COUNT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT", IMAGE_FILETYPE_FIXED_COUNT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INFO_GENERAL", PHP_INFO_GENERAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INFO_CREDITS", PHP_INFO_CREDITS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INFO_CONFIGURATION", PHP_INFO_CONFIGURATION, CONST_PERSISTENT);
@@ -3894,52 +3895,73 @@ static void register_basic_functions_symbols(int module_number)
 #if defined(HAVE_STRPTIME)
 
 	zend_attribute *attribute_Deprecated_func_strptime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strptime", sizeof("strptime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_strptime_0_arg0;
-	zend_string *attribute_Deprecated_func_strptime_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_strptime_0_arg0, attribute_Deprecated_func_strptime_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strptime_0->args[0].value, &attribute_Deprecated_func_strptime_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_strptime_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
 	attribute_Deprecated_func_strptime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_strptime_0_arg1;
 	zend_string *attribute_Deprecated_func_strptime_0_arg1_str = zend_string_init("use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead", strlen("use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_strptime_0_arg1, attribute_Deprecated_func_strptime_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strptime_0->args[1].value, &attribute_Deprecated_func_strptime_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_strptime_0->args[1].value, attribute_Deprecated_func_strptime_0_arg1_str);
 	attribute_Deprecated_func_strptime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
 
 	zend_attribute *attribute_Deprecated_func_assert_options_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "assert_options", sizeof("assert_options") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	zval attribute_Deprecated_func_assert_options_0_arg0;
-	zend_string *attribute_Deprecated_func_assert_options_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_assert_options_0_arg0, attribute_Deprecated_func_assert_options_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_assert_options_0->args[0].value, &attribute_Deprecated_func_assert_options_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_assert_options_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_func_assert_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_utf8_encode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_encode", sizeof("utf8_encode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_utf8_encode_0_arg0;
-	zend_string *attribute_Deprecated_func_utf8_encode_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0_arg0, attribute_Deprecated_func_utf8_encode_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_encode_0->args[0].value, &attribute_Deprecated_func_utf8_encode_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
 	attribute_Deprecated_func_utf8_encode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_utf8_encode_0_arg1;
 	zend_string *attribute_Deprecated_func_utf8_encode_0_arg1_str = zend_string_init("visit the php.net documentation for various alternatives", strlen("visit the php.net documentation for various alternatives"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0_arg1, attribute_Deprecated_func_utf8_encode_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_encode_0->args[1].value, &attribute_Deprecated_func_utf8_encode_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0->args[1].value, attribute_Deprecated_func_utf8_encode_0_arg1_str);
 	attribute_Deprecated_func_utf8_encode_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_utf8_decode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_decode", sizeof("utf8_decode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_utf8_decode_0_arg0;
-	zend_string *attribute_Deprecated_func_utf8_decode_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0_arg0, attribute_Deprecated_func_utf8_decode_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_decode_0->args[0].value, &attribute_Deprecated_func_utf8_decode_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
 	attribute_Deprecated_func_utf8_decode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_utf8_decode_0_arg1;
-	zend_string *attribute_Deprecated_func_utf8_decode_0_arg1_str = zend_string_init("visit the php.net documentation for various alternatives", strlen("visit the php.net documentation for various alternatives"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0_arg1, attribute_Deprecated_func_utf8_decode_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_decode_0->args[1].value, &attribute_Deprecated_func_utf8_decode_0_arg1);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_utf8_decode_0->args[1].value, attribute_Deprecated_func_utf8_encode_0_arg1_str);
 	attribute_Deprecated_func_utf8_decode_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_verify", sizeof("password_verify") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if (defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32))
+
+	zend_attribute *attribute_Deprecated_func_socket_set_timeout_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "socket_set_timeout", sizeof("socket_set_timeout") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_socket_set_timeout_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_socket_set_timeout_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_socket_set_timeout_0_arg1_str = zend_string_init("use stream_set_timeout() instead", strlen("use stream_set_timeout() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_socket_set_timeout_0->args[1].value, attribute_Deprecated_func_socket_set_timeout_0_arg1_str);
+	attribute_Deprecated_func_socket_set_timeout_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+#endif
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_ACTIVE_0 = zend_add_global_constant_attribute(const_ASSERT_ACTIVE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
+	attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str = zend_string_init("as assert_options() is deprecated", strlen("as assert_options() is deprecated"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[1].value, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
+	attribute_Deprecated_const_ASSERT_ACTIVE_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_CALLBACK_0 = zend_add_global_constant_attribute(const_ASSERT_CALLBACK, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_CALLBACK_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
+	attribute_Deprecated_const_ASSERT_CALLBACK_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_ASSERT_CALLBACK_0->args[1].value, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
+	attribute_Deprecated_const_ASSERT_CALLBACK_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_BAIL_0 = zend_add_global_constant_attribute(const_ASSERT_BAIL, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_BAIL_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
+	attribute_Deprecated_const_ASSERT_BAIL_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_ASSERT_BAIL_0->args[1].value, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
+	attribute_Deprecated_const_ASSERT_BAIL_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_WARNING_0 = zend_add_global_constant_attribute(const_ASSERT_WARNING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_WARNING_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
+	attribute_Deprecated_const_ASSERT_WARNING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_ASSERT_WARNING_0->args[1].value, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
+	attribute_Deprecated_const_ASSERT_WARNING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_ASSERT_EXCEPTION_0 = zend_add_global_constant_attribute(const_ASSERT_EXCEPTION, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
+	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].value, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
+	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)

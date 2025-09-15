@@ -118,13 +118,13 @@ bindTo(new Cls, null):
 Success!
 
 bindTo(new Cls, Cls::class):
-Cannot rebind scope of closure created from function
+Cannot rebind scope of closure created from function, this will be an error in PHP 9
 
 bindTo(null, Cls::class):
-Cannot rebind scope of closure created from function
+Cannot rebind scope of closure created from function, this will be an error in PHP 9
 
 bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+Cannot bind closure to scope of internal class stdClass, this will be an error in PHP 9
 
 bindTo(new stdClass, null):
 Success!
@@ -139,13 +139,13 @@ bindTo(new Cls, null):
 Success!
 
 bindTo(new Cls, Cls::class):
-Cannot rebind scope of closure created from function
+Cannot rebind scope of closure created from function, this will be an error in PHP 9
 
 bindTo(null, Cls::class):
-Cannot rebind scope of closure created from function
+Cannot rebind scope of closure created from function, this will be an error in PHP 9
 
 bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+Cannot bind closure to scope of internal class stdClass, this will be an error in PHP 9
 
 bindTo(new stdClass, null):
 Success!
@@ -157,25 +157,25 @@ bindTo(null, Cls::class):
 Success!
 
 bindTo(new Cls, null):
-Cannot bind an instance to a static closure
+Cannot bind an instance to a static closure, this will be an error in PHP 9
 
 bindTo(new Cls, Cls::class):
-Cannot bind an instance to a static closure
+Cannot bind an instance to a static closure, this will be an error in PHP 9
 
 bindTo(null, null):
-Cannot rebind scope of closure created from method
+Cannot rebind scope of closure created from method, this will be an error in PHP 9
 
 bindTo(null, ClsChild::class):
-Cannot rebind scope of closure created from method
+Cannot rebind scope of closure created from method, this will be an error in PHP 9
 
 bindTo(null, ClsUnrelated::class):
-Cannot rebind scope of closure created from method
+Cannot rebind scope of closure created from method, this will be an error in PHP 9
 
 (new Cls)->method()
 -------------------
 
 bindTo(null, Cls::class):
-Cannot unbind $this of method
+Cannot unbind $this of method, this will be an error in PHP 9
 
 bindTo(new Cls, Cls::class):
 Success!
@@ -184,16 +184,16 @@ bindTo(new ClsChild, Cls::class):
 Success!
 
 bindTo(new ClsUnrelated, Cls::class):
-Cannot bind method Cls::method() to object of class ClsUnrelated
+Cannot bind method Cls::method() to object of class ClsUnrelated, this will be an error in PHP 9
 
 bindTo(new Cls, null):
-Cannot rebind scope of closure created from method
+Cannot rebind scope of closure created from method, this will be an error in PHP 9
 
 bindTo(new Cls, ClsUnrelated::class):
-Cannot rebind scope of closure created from method
+Cannot rebind scope of closure created from method, this will be an error in PHP 9
 
 bindTo(new Cls, ClsChild::class):
-Cannot rebind scope of closure created from method
+Cannot rebind scope of closure created from method, this will be an error in PHP 9
 
 (new SplDoublyLinkedList)->count()
 ----------------------------------
@@ -205,19 +205,19 @@ bindTo(new SplStack, SplDoublyLinkedList::class):
 Success!
 
 bindTo(new ClsUnrelated, SplDoublyLinkedList::class):
-Cannot bind method SplDoublyLinkedList::count() to object of class ClsUnrelated
+Cannot bind method SplDoublyLinkedList::count() to object of class ClsUnrelated, this will be an error in PHP 9
 
 bindTo(null, null):
-Cannot unbind $this of method
+Cannot unbind $this of method, this will be an error in PHP 9
 
 bindTo(null, SplDoublyLinkedList::class):
-Cannot unbind $this of method
+Cannot unbind $this of method, this will be an error in PHP 9
 
 bindTo(new SplDoublyLinkedList, null):
-Cannot rebind scope of closure created from method
+Cannot rebind scope of closure created from method, this will be an error in PHP 9
 
 bindTo(new SplDoublyLinkedList, ClsUnrelated::class):
-Cannot rebind scope of closure created from method
+Cannot rebind scope of closure created from method, this will be an error in PHP 9
 
 (function() {})()
 -----------------
@@ -235,7 +235,7 @@ bindTo(null, Cls::class):
 Success!
 
 bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+Cannot bind closure to scope of internal class stdClass, this will be an error in PHP 9
 
 bindTo(new stdClass, null):
 Success!

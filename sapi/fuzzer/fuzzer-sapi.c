@@ -45,7 +45,7 @@ static const char HARDCODED_INI[] =
 	"allow_url_include=0\n"
 	"allow_url_fopen=0\n"
 	"open_basedir=/tmp\n"
-	"disable_functions=dl,mail,mb_send_mail"
+	"disable_functions=dl,mail,mb_send_mail,set_error_handler"
 	",shell_exec,exec,system,proc_open,popen,passthru,pcntl_exec"
 	",chdir,chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
 	",move_uploaded_file,rename,rmdir,symlink,tempname,touch,unlink,fopen"
@@ -56,8 +56,6 @@ static const char HARDCODED_INI[] =
 	",crypt"
 	/* openlog() has a known memory-management issue. */
 	",openlog"
-	/* Can cause long loops that bypass the executor step limit. */
-	"\ndisable_classes=InfiniteIterator"
 ;
 
 static int startup(sapi_module_struct *sapi_module)
@@ -128,6 +126,25 @@ static sapi_module_struct fuzzer_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
+static ZEND_COLD zend_function *disable_class_get_constructor_handler(zend_object *obj) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot construct class %s, as it is disabled", ZSTR_VAL(obj->ce->name));
+	return NULL;
+}
+
+static void fuzzer_disable_classes(void)
+{
+	/* Overwrite built-in constructor for InfiniteIterator as it
+	 * can cause long loops that bypass the executor step limit. */
+	/* Lowercase as this is how the CE as stored */
+	zend_class_entry *InfiniteIterator_class = zend_hash_str_find_ptr(CG(class_table), "infiniteiterator", strlen("infiniteiterator"));
+
+	static zend_object_handlers handlers;
+	memcpy(&handlers, InfiniteIterator_class->default_object_handlers, sizeof(handlers));
+	handlers.get_constructor = disable_class_get_constructor_handler;
+	InfiniteIterator_class->default_object_handlers = &handlers;
+}
+
 int fuzzer_init_php(const char *extra_ini)
 {
 #ifdef __SANITIZE_ADDRESS__
@@ -182,6 +199,8 @@ int fuzzer_request_startup(void)
 	 * don't complain about them during shutdown. */
 	SIGG(check) = 0;
 #endif
+
+	fuzzer_disable_classes();
 
 	return SUCCESS;
 }
@@ -292,11 +311,13 @@ int fuzzer_do_request_from_buffer(
 
 // Call named PHP function with N zval arguments
 void fuzzer_call_php_func_zval(const char *func_name, int nargs, zval *args) {
-	zval retval, func;
+	zval retval;
 
-	ZVAL_STRING(&func, func_name);
+	zend_function *fn = zend_hash_str_find_ptr(CG(function_table), func_name, strlen(func_name));
+	ZEND_ASSERT(fn != NULL);
+
 	ZVAL_UNDEF(&retval);
-	call_user_function(CG(function_table), NULL, &func, &retval, nargs, args);
+	zend_call_known_function(fn, NULL, NULL, &retval, nargs, args, NULL);
 
 	// TODO: check result?
 	/* to ensure retval is not broken */
@@ -304,7 +325,6 @@ void fuzzer_call_php_func_zval(const char *func_name, int nargs, zval *args) {
 
 	/* cleanup */
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func);
 }
 
 // Call named PHP function with N string arguments

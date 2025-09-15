@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include "ext/opcache/zend_accelerator_api.h"
+#include "zend_API.h"
 #include "zend_modules.h"
 #include "zend_types.h"
 #ifdef HAVE_CONFIG_H
@@ -38,6 +40,7 @@
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
 #include "zend_mm_custom_handlers.h"
+#include "ext/uri/php_uri.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -83,6 +86,13 @@ static ZEND_FUNCTION(zend_test_func)
 	zend_string_release(EX(func)->common.function_name);
 	zend_free_trampoline(EX(func));
 	EX(func) = NULL;
+}
+
+static ZEND_FUNCTION(zend_trigger_bailout)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_error(E_ERROR, "Bailout");
 }
 
 static ZEND_FUNCTION(zend_test_array_return)
@@ -372,7 +382,7 @@ static ZEND_FUNCTION(zend_weakmap_attach)
 			Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_weakrefs_hash_add(&ZT_G(global_weakmap), obj, value)) {
+	if (zend_weakrefs_hash_add(ZT_G(global_weakmap), obj, value)) {
 		Z_TRY_ADDREF_P(value);
 		RETURN_TRUE;
 	}
@@ -387,13 +397,13 @@ static ZEND_FUNCTION(zend_weakmap_remove)
 			Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(zend_weakrefs_hash_del(&ZT_G(global_weakmap), obj) == SUCCESS);
+	RETURN_BOOL(zend_weakrefs_hash_del(ZT_G(global_weakmap), obj) == SUCCESS);
 }
 
 static ZEND_FUNCTION(zend_weakmap_dump)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_ARR(zend_array_dup(&ZT_G(global_weakmap)));
+	RETURN_ARR(zend_array_dup(ZT_G(global_weakmap)));
 }
 
 static ZEND_FUNCTION(zend_get_current_func_name)
@@ -512,6 +522,28 @@ static ZEND_FUNCTION(zend_object_init_with_constructor)
 	}
 	ZEND_ASSERT(!EG(exception));
 	ZVAL_COPY_VALUE(return_value, &obj);
+}
+
+static ZEND_FUNCTION(zend_call_method_if_exists)
+{
+	zend_object *obj = NULL;
+	zend_string *method_name;
+	uint32_t num_args = 0;
+	zval *args = NULL;
+	ZEND_PARSE_PARAMETERS_START(2, -1)
+		Z_PARAM_OBJ(obj)
+		Z_PARAM_STR(method_name)
+		Z_PARAM_VARIADIC('*', args, num_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_result status = zend_call_method_if_exists(obj, method_name, return_value, num_args, args);
+	if (status == FAILURE) {
+		ZEND_ASSERT(Z_ISUNDEF_P(return_value));
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+		RETURN_NULL();
+	}
 }
 
 static ZEND_FUNCTION(zend_get_unit_enum)
@@ -691,6 +723,72 @@ static ZEND_FUNCTION(zend_test_crash)
 
 	char *invalid = (char *) 1;
 	php_printf("%s", invalid);
+}
+
+static ZEND_FUNCTION(zend_test_uri_parser)
+{
+	zend_string *uri_string;
+	zend_string *parser_name;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(uri_string)
+		Z_PARAM_STR(parser_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const php_uri_parser *parser = php_uri_get_parser(parser_name);
+	if (parser == NULL) {
+		zend_argument_value_error(1, "Unknown parser");
+		RETURN_THROWS();
+	}
+
+	uri_internal_t *uri = php_uri_parse(parser, ZSTR_VAL(uri_string), ZSTR_LEN(uri_string), false);
+	if (uri == NULL) {
+		RETURN_THROWS();
+	}
+
+	zval value;
+
+	array_init(return_value);
+	zval normalized;
+	array_init(&normalized);
+	php_uri_get_scheme(uri, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_SCHEME), &value);
+	php_uri_get_username(uri, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_USERNAME), &value);
+	php_uri_get_password(uri, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_PASSWORD), &value);
+	php_uri_get_host(uri, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_HOST), &value);
+	php_uri_get_port(uri, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_PORT), &value);
+	php_uri_get_path(uri, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_PATH), &value);
+	php_uri_get_query(uri, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_QUERY), &value);
+	php_uri_get_fragment(uri, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &value);
+	zend_hash_add(Z_ARR(normalized), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &value);
+	zend_hash_str_add(Z_ARR_P(return_value), "normalized", strlen("normalized"), &normalized);
+	zval raw;
+	array_init(&raw);
+	php_uri_get_scheme(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_SCHEME), &value);
+	php_uri_get_username(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_USERNAME), &value);
+	php_uri_get_password(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_PASSWORD), &value);
+	php_uri_get_host(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_HOST), &value);
+	php_uri_get_port(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_PORT), &value);
+	php_uri_get_path(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_PATH), &value);
+	php_uri_get_query(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_QUERY), &value);
+	php_uri_get_fragment(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
+	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &value);
+	zend_hash_str_add(Z_ARR_P(return_value), "raw", strlen("raw"), &raw);
+
+	php_uri_free(uri);
 }
 
 static bool has_opline(zend_execute_data *execute_data)
@@ -927,11 +1025,12 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 	return zend_std_get_static_method(ce, name, NULL);
 }
 
-void zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+zend_string *zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
 	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
-		zend_error(E_COMPILE_ERROR, "Only classes can be marked with #[ZendTestAttribute]");
+		return ZSTR_INIT_LITERAL("Only classes can be marked with #[ZendTestAttribute]", 0);
 	}
+	return NULL;
 }
 
 static ZEND_METHOD(_ZendTestClass, __toString)
@@ -1392,7 +1491,8 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 
 PHP_RINIT_FUNCTION(zend_test)
 {
-	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
+	ALLOC_HASHTABLE(ZT_G(global_weakmap));
+	zend_hash_init(ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	ZT_G(observer_nesting_depth) = 0;
 	zend_test_mm_custom_handlers_rinit();
 	return SUCCESS;
@@ -1400,7 +1500,8 @@ PHP_RINIT_FUNCTION(zend_test)
 
 PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
-	zend_weakrefs_hash_destroy(&ZT_G(global_weakmap));
+	zend_weakrefs_hash_destroy(ZT_G(global_weakmap));
+	FREE_HASHTABLE(ZT_G(global_weakmap));
 
 	if (ZT_G(zend_test_heap))  {
 		free(ZT_G(zend_test_heap));
@@ -1605,7 +1706,7 @@ static PHP_FUNCTION(zend_test_compile_to_ast)
 
 	zend_arena *ast_arena;
 	zend_ast *ast = zend_compile_string_to_ast(str, &ast_arena, ZSTR_EMPTY_ALLOC());
-	
+
 	zend_string *result = zend_ast_export("", ast, "");
 
 	zend_ast_destroy(ast);
@@ -1622,4 +1723,20 @@ static PHP_FUNCTION(zend_test_gh18756)
 	zend_mm_gc(heap);
 	zend_mm_gc(heap);
 	zend_mm_shutdown(heap, true, false);
+}
+
+static PHP_FUNCTION(zend_test_opcache_preloading)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_BOOL(opcache_preloading());
+}
+
+static PHP_FUNCTION(zend_test_gh19792)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETVAL_STRING("this is a non-interned string");
+	zend_error(E_WARNING, "a warning");
+	zend_throw_error(NULL, "an exception");
 }

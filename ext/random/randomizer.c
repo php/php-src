@@ -43,16 +43,9 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 			.state = state,
 		};
 
-		zend_string *mname;
-		zend_function *generate_method;
-
-		mname = ZSTR_INIT_LITERAL("generate", 0);
-		generate_method = zend_hash_find_ptr(&engine_object->ce->function_table, mname);
-		zend_string_release(mname);
-
 		/* Create compatible state */
 		state->object = engine_object;
-		state->generate_method = generate_method;
+		state->generate_method = zend_hash_str_find_ptr(&engine_object->ce->function_table, "generate", strlen("generate"));
 
 		/* Mark self-allocated for memory management */
 		randomizer->is_userland_algo = true;
@@ -196,7 +189,7 @@ PHP_METHOD(Random_Randomizer, getFloat)
 		RETVAL_DOUBLE(php_random_gammasection_open_open(randomizer->engine, min, max));
 
 		if (UNEXPECTED(isnan(Z_DVAL_P(return_value)))) {
-			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max).");
+			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max)");
 			RETURN_THROWS();
 		}
 

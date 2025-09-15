@@ -405,7 +405,6 @@ static zend_always_inline zend_result zend_register_class_alias(const char *name
 	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, 1)
 
 ZEND_API void zend_disable_functions(const char *function_list);
-ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_name_length);
 
 ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property);
@@ -494,16 +493,16 @@ static zend_always_inline HashTable *zend_class_backed_enum_table(zend_class_ent
 	}
 }
 
-ZEND_API void zend_update_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zval *value);
-ZEND_API void zend_update_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zval *value);
-ZEND_API void zend_update_property_null(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length);
-ZEND_API void zend_update_property_bool(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_long value);
-ZEND_API void zend_update_property_long(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_long value);
-ZEND_API void zend_update_property_double(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, double value);
-ZEND_API void zend_update_property_str(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_string *value);
-ZEND_API void zend_update_property_string(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, const char *value);
-ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, const char *value, size_t value_length);
-ZEND_API void zend_unset_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length);
+ZEND_API void zend_update_property_ex(const zend_class_entry *scope, zend_object *object, zend_string *name, zval *value);
+ZEND_API void zend_update_property(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zval *value);
+ZEND_API void zend_update_property_null(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length);
+ZEND_API void zend_update_property_bool(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_long value);
+ZEND_API void zend_update_property_long(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_long value);
+ZEND_API void zend_update_property_double(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, double value);
+ZEND_API void zend_update_property_str(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_string *value);
+ZEND_API void zend_update_property_string(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, const char *value);
+ZEND_API void zend_update_property_stringl(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, const char *value, size_t value_length);
+ZEND_API void zend_unset_property(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length);
 
 ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zend_string *name, zval *value);
 ZEND_API zend_result zend_update_static_property(zend_class_entry *scope, const char *name, size_t name_length, zval *value);
@@ -696,8 +695,8 @@ ZEND_API zend_result _call_user_function_impl(zval *object, zval *function_name,
 # define empty_fcall_info (zend_fcall_info) {0}
 # define empty_fcall_info_cache (zend_fcall_info_cache) {0}
 #else
-# define empty_fcall_info zend_fcall_info {0}
-# define empty_fcall_info_cache zend_fcall_info_cache {0}
+# define empty_fcall_info zend_fcall_info {}
+# define empty_fcall_info_cache zend_fcall_info_cache {}
 #endif
 
 /** Build zend_call_info/cache from a zval*
@@ -2326,7 +2325,7 @@ static zend_always_inline bool zend_parse_arg_string(zval *arg, char **dest, siz
 static zend_always_inline bool zend_parse_arg_path_str(zval *arg, zend_string **dest, bool check_null, uint32_t arg_num)
 {
 	if (!zend_parse_arg_str(arg, dest, check_null, arg_num) ||
-	    (*dest && UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(*dest), ZSTR_LEN(*dest))))) {
+	    (*dest && UNEXPECTED(zend_str_has_nul_byte(*dest)))) {
 		return 0;
 	}
 	return 1;

@@ -19,8 +19,7 @@ if test "$PHP_SODIUM" != "no"; then
   AS_IF([test "$ac_cv_sizeof_long" -eq 4], [
     SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-type-limits"
     AX_CHECK_COMPILE_FLAG([-Wno-logical-op],
-      [SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-logical-op"],,
-      [-Werror])
+      [SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-logical-op"])
   ])
 
   PHP_NEW_EXTENSION([sodium],

@@ -44,7 +44,7 @@ typedef struct _php_stream_notifier php_stream_notifier;
 struct _php_stream_notifier {
 	php_stream_notification_func func;
 	void (*dtor)(php_stream_notifier *notifier);
-	zval ptr;
+	void *ptr;
 	int mask;
 	size_t progress, progress_max; /* position for progress notification */
 };
@@ -59,12 +59,16 @@ BEGIN_EXTERN_C()
 PHPAPI int php_le_stream_context(void);
 PHPAPI void php_stream_context_free(php_stream_context *context);
 PHPAPI php_stream_context *php_stream_context_alloc(void);
-PHPAPI zval *php_stream_context_get_option(php_stream_context *context,
+PHPAPI zval *php_stream_context_get_option(const php_stream_context *context,
 		const char *wrappername, const char *optionname);
 PHPAPI void php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue);
 void php_stream_context_unset_option(php_stream_context *context,
 	const char *wrappername, const char *optionname);
+
+struct php_uri_parser;
+
+PHPAPI const struct php_uri_parser *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context);
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);
 END_EXTERN_C()

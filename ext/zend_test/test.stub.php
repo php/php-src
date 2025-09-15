@@ -208,6 +208,8 @@ namespace {
         case Baz = -1;
     }
 
+    function zend_trigger_bailout(): never {}
+
     function zend_test_array_return(): array {}
 
     /** @genstubs-expose-comment-block
@@ -293,6 +295,8 @@ namespace {
 
     function zend_object_init_with_constructor(string $class, mixed ...$args): mixed {}
 
+    function zend_call_method_if_exists(object $obj, string $method, mixed ...$args): mixed {}
+
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 
@@ -336,6 +340,13 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_compile_to_ast(string $str): string {}
 
     function zend_test_gh18756(): void {}
+
+    function zend_test_opcache_preloading(): bool {}
+
+    function zend_test_uri_parser(string $uri, string $parser): array { }
+
+    /** @compile-time-eval */
+    function zend_test_gh19792(): void {}
 }
 
 namespace ZendTestNS {

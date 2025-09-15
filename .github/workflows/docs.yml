@@ -17,7 +17,7 @@ jobs:
     if: github.repository == 'php/php-src'
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install dependencies
         run: pip install -r docs/requirements.txt
       - name: Check formatting

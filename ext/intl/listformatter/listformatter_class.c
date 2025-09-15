@@ -72,7 +72,7 @@ PHP_METHOD(IntlListFormatter, __construct)
     }
 
     if (locale_len > INTL_MAX_LOCALE_LEN) {
-        zend_argument_value_error(1, "Locale string too long, should be no longer than %d characters", INTL_MAX_LOCALE_LEN);
+        zend_argument_value_error(1, "must be less than or equal to %d characters", INTL_MAX_LOCALE_LEN);
         RETURN_THROWS();
     }
 
@@ -109,7 +109,7 @@ PHP_METHOD(IntlListFormatter, __construct)
     #endif
 
     if (U_FAILURE(status)) {
-        intl_error_set(NULL, status, "Constructor failed", 0);
+        intl_error_set(NULL, status, "Constructor failed");
         zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
         RETURN_THROWS();
     }
@@ -135,9 +135,9 @@ PHP_METHOD(IntlListFormatter, format)
     zval *val;
 
     ZEND_HASH_FOREACH_VAL(ht, val) {
-        zend_string *str_val;
+        zend_string *str_val, *tmp_str;
         
-        str_val = zval_get_string(val);
+        str_val = zval_get_tmp_string(val, &tmp_str);
         
         // Convert PHP string to UTF-16
         UChar *ustr = NULL;
@@ -145,7 +145,7 @@ PHP_METHOD(IntlListFormatter, format)
         UErrorCode status = U_ZERO_ERROR;
         
         intl_convert_utf8_to_utf16(&ustr, &ustr_len, ZSTR_VAL(str_val), ZSTR_LEN(str_val), &status);
-        zend_string_release(str_val);
+        zend_tmp_string_release(tmp_str);
 
         if (U_FAILURE(status)) {
             // We can't use goto cleanup because items and itemLengths are incompletely allocated
@@ -154,7 +154,7 @@ PHP_METHOD(IntlListFormatter, format)
             }
             efree(items);
             efree(itemLengths);
-            intl_error_set(NULL, status, "Failed to convert string to UTF-16", 0);
+            intl_error_set(NULL, status, "Failed to convert string to UTF-16");
             RETURN_FALSE;
         }
         
@@ -170,7 +170,7 @@ PHP_METHOD(IntlListFormatter, format)
     resultLength = ulistfmt_format(LISTFORMATTER_OBJECT(obj), items, itemLengths, count, NULL, 0, &status);
 
     if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
-        intl_error_set(NULL, status, "Failed to format list", 0);
+        intl_error_set(NULL, status, "Failed to format list");
         RETVAL_FALSE;
         goto cleanup;
     }
@@ -184,7 +184,7 @@ PHP_METHOD(IntlListFormatter, format)
         if (result) {
             efree(result);
         }
-        intl_error_set(NULL, status, "Failed to format list", 0);
+        intl_error_set(NULL, status, "Failed to format list");
         RETVAL_FALSE;
         goto cleanup;
     }
@@ -194,7 +194,7 @@ PHP_METHOD(IntlListFormatter, format)
     efree(result);
     
     if (!ret) {
-        intl_error_set(NULL, status, "Failed to convert result to UTF-8", 0);
+        intl_error_set(NULL, status, "Failed to convert result to UTF-8");
         RETVAL_FALSE;
     } else {
         RETVAL_NEW_STR(ret);

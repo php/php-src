@@ -83,11 +83,11 @@
 static int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri, unsigned int inMask,
 		unsigned int * outMask, UriMemoryManager * memory);
 
-static UriBool URI_FUNC(MakeRangeOwner)(unsigned int * doneMask,
+static UriBool URI_FUNC(MakeRangeOwner)(unsigned int * revertMask,
 		unsigned int maskTest, URI_TYPE(TextRange) * range,
 		UriMemoryManager * memory);
 static UriBool URI_FUNC(MakeOwnerEngine)(URI_TYPE(Uri) * uri,
-		unsigned int * doneMask, UriMemoryManager * memory);
+		unsigned int * revertMask, UriMemoryManager * memory);
 
 static void URI_FUNC(FixPercentEncodingInplace)(const URI_CHAR * first,
 		const URI_CHAR ** afterLast);
@@ -109,12 +109,9 @@ static void URI_FUNC(LowercaseInplaceExceptPercentEncoding)(const URI_CHAR * fir
 static UriBool URI_FUNC(LowercaseMalloc)(const URI_CHAR ** first,
 		const URI_CHAR ** afterLast, UriMemoryManager * memory);
 
-static void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
-		unsigned int revertMask, UriMemoryManager * memory);
 
 
-
-static URI_INLINE void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
+void URI_FUNC(PreventLeakage)(URI_TYPE(Uri) * uri,
 		unsigned int revertMask, UriMemoryManager * memory) {
 	if (revertMask & URI_NORMALIZE_SCHEME) {
 		/* NOTE: A scheme cannot be the empty string
@@ -332,10 +329,10 @@ static URI_INLINE void URI_FUNC(FixPercentEncodingEngine)(
 				write++;
 			} else {
 				/* 6.2.2.1 Case Normalization: *
-				 * lowercase percent-encodings */
+				 * uppercase percent-encodings */
 				write[0] = _UT('%');
-				write[1] = URI_FUNC(HexToLetter)(left);
-				write[2] = URI_FUNC(HexToLetter)(right);
+				write[1] = URI_FUNC(HexToLetterEx)(left, URI_TRUE);
+				write[2] = URI_FUNC(HexToLetterEx)(right, URI_TRUE);
 				write += 3;
 			}
 
@@ -400,23 +397,17 @@ static URI_INLINE UriBool URI_FUNC(FixPercentEncodingMalloc)(const URI_CHAR ** f
 
 
 
-static URI_INLINE UriBool URI_FUNC(MakeRangeOwner)(unsigned int * doneMask,
+static URI_INLINE UriBool URI_FUNC(MakeRangeOwner)(unsigned int * revertMask,
 		unsigned int maskTest, URI_TYPE(TextRange) * range,
 		UriMemoryManager * memory) {
-	if (((*doneMask & maskTest) == 0)
+	if (((*revertMask & maskTest) == 0)
 			&& (range->first != NULL)
 			&& (range->afterLast != NULL)
 			&& (range->afterLast > range->first)) {
-		const int lenInChars = (int)(range->afterLast - range->first);
-		const int lenInBytes = lenInChars * sizeof(URI_CHAR);
-		URI_CHAR * dup = memory->malloc(memory, lenInBytes);
-		if (dup == NULL) {
-			return URI_FALSE; /* Raises malloc error */
+		if (URI_FUNC(CopyRange)(range, range, memory) == URI_FALSE) {
+			return URI_FALSE;
 		}
-		memcpy(dup, range->first, lenInBytes);
-		range->first = dup;
-		range->afterLast = dup + lenInChars;
-		*doneMask |= maskTest;
+		*revertMask |= maskTest;
 	}
 	return URI_TRUE;
 }
@@ -424,24 +415,24 @@ static URI_INLINE UriBool URI_FUNC(MakeRangeOwner)(unsigned int * doneMask,
 
 
 static URI_INLINE UriBool URI_FUNC(MakeOwnerEngine)(URI_TYPE(Uri) * uri,
-		unsigned int * doneMask, UriMemoryManager * memory) {
+		unsigned int * revertMask, UriMemoryManager * memory) {
 	URI_TYPE(PathSegment) * walker = uri->pathHead;
-	if (!URI_FUNC(MakeRangeOwner)(doneMask, URI_NORMALIZE_SCHEME,
+	if (!URI_FUNC(MakeRangeOwner)(revertMask, URI_NORMALIZE_SCHEME,
 				&(uri->scheme), memory)
-			|| !URI_FUNC(MakeRangeOwner)(doneMask, URI_NORMALIZE_USER_INFO,
+			|| !URI_FUNC(MakeRangeOwner)(revertMask, URI_NORMALIZE_USER_INFO,
 				&(uri->userInfo), memory)
-			|| !URI_FUNC(MakeRangeOwner)(doneMask, URI_NORMALIZE_QUERY,
+			|| !URI_FUNC(MakeRangeOwner)(revertMask, URI_NORMALIZE_QUERY,
 				&(uri->query), memory)
-			|| !URI_FUNC(MakeRangeOwner)(doneMask, URI_NORMALIZE_FRAGMENT,
+			|| !URI_FUNC(MakeRangeOwner)(revertMask, URI_NORMALIZE_FRAGMENT,
 				&(uri->fragment), memory)) {
 		return URI_FALSE; /* Raises malloc error */
 	}
 
 	/* Host */
-	if ((*doneMask & URI_NORMALIZE_HOST) == 0) {
+	if ((*revertMask & URI_NORMALIZE_HOST) == 0) {
 		if (uri->hostData.ipFuture.first != NULL) {
 			/* IPvFuture */
-			if (!URI_FUNC(MakeRangeOwner)(doneMask, URI_NORMALIZE_HOST,
+			if (!URI_FUNC(MakeRangeOwner)(revertMask, URI_NORMALIZE_HOST,
 					&(uri->hostData.ipFuture), memory)) {
 				return URI_FALSE; /* Raises malloc error */
 			}
@@ -449,7 +440,7 @@ static URI_INLINE UriBool URI_FUNC(MakeOwnerEngine)(URI_TYPE(Uri) * uri,
 			uri->hostText.afterLast = uri->hostData.ipFuture.afterLast;
 		} else if (uri->hostText.first != NULL) {
 			/* Regname */
-			if (!URI_FUNC(MakeRangeOwner)(doneMask, URI_NORMALIZE_HOST,
+			if (!URI_FUNC(MakeRangeOwner)(revertMask, URI_NORMALIZE_HOST,
 					&(uri->hostText), memory)) {
 				return URI_FALSE; /* Raises malloc error */
 			}
@@ -457,9 +448,9 @@ static URI_INLINE UriBool URI_FUNC(MakeOwnerEngine)(URI_TYPE(Uri) * uri,
 	}
 
 	/* Path */
-	if ((*doneMask & URI_NORMALIZE_PATH) == 0) {
+	if ((*revertMask & URI_NORMALIZE_PATH) == 0) {
 		while (walker != NULL) {
-			if (!URI_FUNC(MakeRangeOwner)(doneMask, 0, &(walker->text), memory)) {
+			if (!URI_FUNC(MakeRangeOwner)(revertMask, 0, &(walker->text), memory)) {
 				/* Free allocations done so far and kill path */
 
 				/* Kill path to one before walker (if any) */
@@ -488,13 +479,13 @@ static URI_INLINE UriBool URI_FUNC(MakeOwnerEngine)(URI_TYPE(Uri) * uri,
 			}
 			walker = walker->next;
 		}
-		*doneMask |= URI_NORMALIZE_PATH;
+		*revertMask |= URI_NORMALIZE_PATH;
 	}
 
 	/* Port text, must come last so we don't have to undo that one if it fails. *
 	 * Otherwise we would need and extra enum flag for it although the port      *
 	 * cannot go unnormalized...                                                */
-	if (!URI_FUNC(MakeRangeOwner)(doneMask, 0, &(uri->portText), memory)) {
+	if (!URI_FUNC(MakeRangeOwner)(revertMask, 0, &(uri->portText), memory)) {
 		return URI_FALSE; /* Raises malloc error */
 	}
 
@@ -557,11 +548,80 @@ int URI_FUNC(NormalizeSyntax)(URI_TYPE(Uri) * uri) {
 }
 
 
+static const URI_CHAR * URI_FUNC(PastLeadingZeros)(const URI_CHAR * first, const URI_CHAR * afterLast) {
+	assert(first != NULL);
+	assert(afterLast != NULL);
+	assert(first != afterLast);
+
+	{	
+		/* Find the first non-zero character */
+		const URI_CHAR * remainderFirst = first;
+		while ((remainderFirst < afterLast) && (remainderFirst[0] == _UT('0'))) {
+			remainderFirst++;
+		}
+
+		/* Is the string /all/ zeros? */
+		if (remainderFirst == afterLast) {
+			/* Yes, and length is >=1 because we ruled out the empty string earlier;
+			 * pull back onto rightmost zero */
+			assert(remainderFirst > first);
+			remainderFirst--;
+			assert(remainderFirst[0] == _UT('0'));
+		}
+
+		return remainderFirst;
+	}
+}
+
+
+
+static void URI_FUNC(DropLeadingZerosInplace)(URI_CHAR * first, const URI_CHAR ** afterLast) {
+	assert(first != NULL);
+	assert(afterLast != NULL);
+	assert(*afterLast != NULL);
+
+	if (first == *afterLast) {
+		return;
+	}
+
+	{
+		const URI_CHAR * const remainderFirst = URI_FUNC(PastLeadingZeros)(first, *afterLast);
+
+		if (remainderFirst > first) {
+			const size_t remainderLen = *afterLast - remainderFirst;
+			memmove(first, remainderFirst, remainderLen * sizeof(URI_CHAR));
+			first[remainderLen] = _UT('\0');
+			*afterLast = first + remainderLen;
+		}
+	}
+}
+
+
+
+static void URI_FUNC(AdvancePastLeadingZeros)(
+		const URI_CHAR ** first, const URI_CHAR * afterLast) {
+	assert(first != NULL);
+	assert(*first != NULL);
+	assert(afterLast != NULL);
+
+	if (*first == afterLast) {
+		return;
+	}
+
+	{
+		const URI_CHAR * const remainderFirst = URI_FUNC(PastLeadingZeros)(*first, afterLast);
+
+		/* Cut off leading zeros */
+		*first = remainderFirst;
+	}
+}
+
+
 
 static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 		unsigned int inMask, unsigned int * outMask,
 		UriMemoryManager * memory) {
-	unsigned int doneMask = URI_NORMALIZED;
+	unsigned int revertMask = URI_NORMALIZED;
 
 	/* Not just doing inspection? -> memory manager required! */
 	if (outMask == NULL) {
@@ -611,10 +671,10 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 				URI_FUNC(LowercaseInplace)(uri->scheme.first, uri->scheme.afterLast);
 			} else {
 				if (!URI_FUNC(LowercaseMalloc)(&(uri->scheme.first), &(uri->scheme.afterLast), memory)) {
-					URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+					URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 					return URI_ERROR_MALLOC;
 				}
-				doneMask |= URI_NORMALIZE_SCHEME;
+				revertMask |= URI_NORMALIZE_SCHEME;
 			}
 		}
 
@@ -628,10 +688,10 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 				} else {
 					if (!URI_FUNC(LowercaseMalloc)(&(uri->hostData.ipFuture.first),
 							&(uri->hostData.ipFuture.afterLast), memory)) {
-						URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+						URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 						return URI_ERROR_MALLOC;
 					}
-					doneMask |= URI_NORMALIZE_HOST;
+					revertMask |= URI_NORMALIZE_HOST;
 				}
 				uri->hostText.first = uri->hostData.ipFuture.first;
 				uri->hostText.afterLast = uri->hostData.ipFuture.afterLast;
@@ -646,14 +706,35 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 							&(uri->hostText.first),
 							&(uri->hostText.afterLast),
 							memory)) {
-						URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+						URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 						return URI_ERROR_MALLOC;
 					}
-					doneMask |= URI_NORMALIZE_HOST;
+					revertMask |= URI_NORMALIZE_HOST;
 				}
 
 				URI_FUNC(LowercaseInplaceExceptPercentEncoding)(uri->hostText.first,
 						uri->hostText.afterLast);
+			}
+		}
+	}
+
+	/* Port */
+	if (outMask != NULL) {
+		/* Is there a port even? */
+		if (uri->portText.first != NULL) {
+			/* Determine whether the port is already normalized, i.e. either "", "0" or no leading zeros */
+			const size_t portLen = uri->portText.afterLast - uri->portText.first;
+			if ((portLen > 1) && (uri->portText.first[0] == _UT('0'))) {
+				*outMask |= URI_NORMALIZE_PORT;
+			}
+		}
+	} else {
+		/* Normalize the port, i.e. drop leading zeros (except for string "0") */
+		if ((inMask & URI_NORMALIZE_PORT) && (uri->portText.first != NULL)) {
+			if (uri->owner) {
+				URI_FUNC(DropLeadingZerosInplace)((URI_CHAR *)uri->portText.first, &(uri->portText.afterLast));
+			} else {
+				URI_FUNC(AdvancePastLeadingZeros)(&(uri->portText.first), uri->portText.afterLast);
 			}
 		}
 	}
@@ -672,10 +753,10 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 			} else {
 				if (!URI_FUNC(FixPercentEncodingMalloc)(&(uri->userInfo.first),
 						&(uri->userInfo.afterLast), memory)) {
-					URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+					URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 					return URI_ERROR_MALLOC;
 				}
-				doneMask |= URI_NORMALIZE_USER_INFO;
+				revertMask |= URI_NORMALIZE_USER_INFO;
 			}
 		}
 	}
@@ -720,20 +801,20 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 			while (walker != NULL) {
 				if (!URI_FUNC(FixPercentEncodingMalloc)(&(walker->text.first),
 						&(walker->text.afterLast), memory)) {
-					URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+					URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 					return URI_ERROR_MALLOC;
 				}
 				walker = walker->next;
 			}
-			doneMask |= URI_NORMALIZE_PATH;
+			revertMask |= URI_NORMALIZE_PATH;
 		}
 
 		/* 6.2.2.3 Path Segment Normalization */
 		if (!URI_FUNC(RemoveDotSegmentsEx)(uri, relative,
 				(uri->owner == URI_TRUE)
-				|| ((doneMask & URI_NORMALIZE_PATH) != 0),
+				|| ((revertMask & URI_NORMALIZE_PATH) != 0),
 				memory)) {
-			URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+			URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 			return URI_ERROR_MALLOC;
 		}
 		URI_FUNC(FixEmptyTrailSegment)(uri, memory);
@@ -760,10 +841,10 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 			} else {
 				if (!URI_FUNC(FixPercentEncodingMalloc)(&(uri->query.first),
 						&(uri->query.afterLast), memory)) {
-					URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+					URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 					return URI_ERROR_MALLOC;
 				}
-				doneMask |= URI_NORMALIZE_QUERY;
+				revertMask |= URI_NORMALIZE_QUERY;
 			}
 		}
 
@@ -774,18 +855,18 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 			} else {
 				if (!URI_FUNC(FixPercentEncodingMalloc)(&(uri->fragment.first),
 						&(uri->fragment.afterLast), memory)) {
-					URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+					URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 					return URI_ERROR_MALLOC;
 				}
-				doneMask |= URI_NORMALIZE_FRAGMENT;
+				revertMask |= URI_NORMALIZE_FRAGMENT;
 			}
 		}
 	}
 
 	/* Dup all not duped yet */
 	if ((outMask == NULL) && !uri->owner) {
-		if (!URI_FUNC(MakeOwnerEngine)(uri, &doneMask, memory)) {
-			URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+		if (!URI_FUNC(MakeOwnerEngine)(uri, &revertMask, memory)) {
+			URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 			return URI_ERROR_MALLOC;
 		}
 		uri->owner = URI_TRUE;
@@ -797,7 +878,7 @@ static URI_INLINE int URI_FUNC(NormalizeSyntaxEngine)(URI_TYPE(Uri) * uri,
 
 
 int URI_FUNC(MakeOwnerMm)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
-	unsigned int doneMask = URI_NORMALIZED;
+	unsigned int revertMask = URI_NORMALIZED;
 
 	URI_CHECK_MEMORY_MANAGER(memory);  /* may return */
 
@@ -809,8 +890,8 @@ int URI_FUNC(MakeOwnerMm)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
 		return URI_SUCCESS;
 	}
 
-	if (! URI_FUNC(MakeOwnerEngine)(uri, &doneMask, memory)) {
-		URI_FUNC(PreventLeakage)(uri, doneMask, memory);
+	if (! URI_FUNC(MakeOwnerEngine)(uri, &revertMask, memory)) {
+		URI_FUNC(PreventLeakage)(uri, revertMask, memory);
 		return URI_ERROR_MALLOC;
 	}
 

@@ -716,7 +716,7 @@ static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
 	return RT_CONSTANT(recv, recv->op2);
 }
 
-static int format_default_value(smart_str *str, zval *value) {
+static void format_default_value(smart_str *str, zval *value) {
 	if (smart_str_append_zval(str, value, SIZE_MAX) == SUCCESS) {
 		/* Nothing to do. */
 	} else if (Z_TYPE_P(value) == IS_ARRAY) {
@@ -761,7 +761,6 @@ static int format_default_value(smart_str *str, zval *value) {
 		smart_str_append(str, ast_str);
 		zend_string_release(ast_str);
 	}
-	return SUCCESS;
 }
 
 static inline bool has_internal_arg_info(const zend_function *fptr) {
@@ -808,9 +807,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 			zval *default_value = get_default_from_recv((zend_op_array*)fptr, offset);
 			if (default_value) {
 				smart_str_appends(str, " = ");
-				if (format_default_value(str, default_value) == FAILURE) {
-					return;
-				}
+				format_default_value(str, default_value);
 			}
 		}
 	}
@@ -1040,6 +1037,9 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		if (prop->flags & ZEND_ACC_READONLY) {
 			smart_str_appends(str, "readonly ");
 		}
+		if (prop->flags & ZEND_ACC_VIRTUAL) {
+			smart_str_appends(str, "virtual ");
+		}
 		if (ZEND_TYPE_IS_SET(prop->type)) {
 			zend_string *type_str = zend_type_to_string(prop->type);
 			smart_str_append(str, type_str);
@@ -1055,9 +1055,27 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		zval *default_value = property_get_default(prop);
 		if (default_value && !Z_ISUNDEF_P(default_value)) {
 			smart_str_appends(str, " = ");
-			if (format_default_value(str, default_value) == FAILURE) {
-				return;
+			format_default_value(str, default_value);
+		}
+		if (prop->hooks != NULL) {
+			smart_str_appends(str, " {");
+			const zend_function *get_hooked = prop->hooks[ZEND_PROPERTY_HOOK_GET];
+			if (get_hooked != NULL) {
+				if (get_hooked->common.fn_flags & ZEND_ACC_FINAL) {
+					smart_str_appends(str, " final get;");
+				} else {
+					smart_str_appends(str, " get;");
+				}
 			}
+			const zend_function *set_hooked = prop->hooks[ZEND_PROPERTY_HOOK_SET];
+			if (set_hooked != NULL) {
+				if (set_hooked->common.fn_flags & ZEND_ACC_FINAL) {
+					smart_str_appends(str, " final set;");
+				} else {
+					smart_str_appends(str, " set;");
+				}
+			}
+			smart_str_appends(str, " }");
 		}
 	}
 
@@ -1255,7 +1273,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 }
 /* }}} */
 
-static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
+static zend_result read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
 		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
@@ -1635,7 +1653,7 @@ static void reflection_enum_case_factory(zend_class_entry *ce, zend_string *name
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
 }
 
-static int get_parameter_default(zval *result, parameter_reference *param) {
+static zend_result get_parameter_default(zval *result, parameter_reference *param) {
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		if (param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
 			/* We don't have a way to determine the default value for this case right now. */
@@ -1693,6 +1711,15 @@ ZEND_METHOD(Reflection, getModifierNames)
 			break;
 		case ZEND_ACC_PROTECTED:
 			add_next_index_stringl(return_value, "protected", sizeof("protected")-1);
+			break;
+	}
+	/* These are also mutually exclusive */
+	switch (modifiers & ZEND_ACC_PPP_SET_MASK) {
+		case ZEND_ACC_PROTECTED_SET:
+			add_next_index_stringl(return_value, "protected(set)", sizeof("protected(set)")-1);
+			break;
+		case ZEND_ACC_PRIVATE_SET:
+			add_next_index_stringl(return_value, "private(set)", sizeof("private(set)")-1);
 			break;
 	}
 
@@ -2844,7 +2871,7 @@ ZEND_METHOD(ReflectionParameter, isCallable)
 }
 /* }}} */
 
-/* {{{ Returns whether NULL is allowed as this parameters's value */
+/* {{{ Returns whether NULL is allowed as this parameter's value */
 ZEND_METHOD(ReflectionParameter, allowsNull)
 {
 	reflection_object *intern;
@@ -4190,7 +4217,7 @@ ZEND_METHOD(ReflectionClass, getStaticProperties)
 ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 {
 	reflection_object *intern;
-	zend_class_entry *ce, *old_scope;
+	zend_class_entry *ce;
 	zend_string *name;
 	zval *prop, *def_value = NULL;
 
@@ -4204,7 +4231,7 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 		RETURN_THROWS();
 	}
 
-	old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	prop = zend_std_get_static_property(ce, name, BP_VAR_IS);
 	EG(fake_scope) = old_scope;
@@ -4231,7 +4258,7 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 {
 	reflection_object *intern;
-	zend_class_entry *ce, *old_scope;
+	zend_class_entry *ce;
 	zend_property_info *prop_info;
 	zend_string *name;
 	zval *variable_ptr, *value;
@@ -4245,7 +4272,7 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		RETURN_THROWS();
 	}
-	old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	variable_ptr =  zend_std_get_static_property_with_info(ce, name, BP_VAR_W, &prop_info);
 	EG(fake_scope) = old_scope;
@@ -4505,16 +4532,16 @@ ZEND_METHOD(ReflectionClass, getMethod)
 static bool _addmethod(zend_function *mptr, zend_class_entry *ce, HashTable *ht, zend_long filter)
 {
 	if ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce) {
-		return 0;
+		return false;
 	}
 
 	if (mptr->common.fn_flags & filter) {
 		zval method;
 		reflection_method_factory(ce, mptr, NULL, &method);
 		zend_hash_next_index_insert_new(ht, &method);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -4837,6 +4864,11 @@ ZEND_METHOD(ReflectionClass, getConstant)
 		}
 	} ZEND_HASH_FOREACH_END();
 	if ((c = zend_hash_find_ptr(constants_table, name)) == NULL) {
+		zend_error(
+			E_DEPRECATED,
+			"ReflectionClass::getConstant() for a non-existent constant is deprecated, "
+				"use ReflectionClass::hasConstant() to check if the constant exists"
+		);
 		RETURN_FALSE;
 	}
 	ZVAL_COPY_OR_DUP(return_value, &c->value);
@@ -4998,7 +5030,7 @@ ZEND_METHOD(ReflectionClass, isInstance)
 ZEND_METHOD(ReflectionClass, newInstance)
 {
 	reflection_object *intern;
-	zend_class_entry *ce, *old_scope;
+	zend_class_entry *ce;
 	zend_function *constructor;
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -5007,7 +5039,7 @@ ZEND_METHOD(ReflectionClass, newInstance)
 		return;
 	}
 
-	old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
 	EG(fake_scope) = old_scope;
@@ -5065,7 +5097,7 @@ ZEND_METHOD(ReflectionClass, newInstanceWithoutConstructor)
 ZEND_METHOD(ReflectionClass, newInstanceArgs)
 {
 	reflection_object *intern;
-	zend_class_entry *ce, *old_scope;
+	zend_class_entry *ce;
 	int argc = 0;
 	HashTable *args = NULL;
 	zend_function *constructor;
@@ -5084,7 +5116,7 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 		return;
 	}
 
-	old_scope = EG(fake_scope);
+	const zend_class_entry *old_scope = EG(fake_scope);
 	EG(fake_scope) = ce;
 	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
 	EG(fake_scope) = old_scope;
@@ -5753,6 +5785,21 @@ ZEND_METHOD(ReflectionProperty, getName)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, getMangledName)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop == NULL) {
+	    RETURN_STR_COPY(ref->unmangled_name);
+	}
+
+	RETURN_STR_COPY(ref->prop->name);
+}
+
 static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ */
 {
 	reflection_object *intern;
@@ -5908,7 +5955,7 @@ ZEND_METHOD(ReflectionProperty, getValue)
 			}
 		}
 
-		zend_class_entry *old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		member_p = Z_OBJ_P(object)->handlers->read_property(Z_OBJ_P(object),
 				ref->unmangled_name, BP_VAR_R, ref->cache_slot, &rv);
@@ -5967,7 +6014,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			Z_PARAM_ZVAL(value)
 		ZEND_PARSE_PARAMETERS_END();
 
-		zend_class_entry *old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		object->handlers->write_property(object, ref->unmangled_name, value, ref->cache_slot);
 		EG(fake_scope) = old_scope;
@@ -6026,7 +6073,7 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 
 	if (!prop || !prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
 		zval rv;
-		zend_class_entry *old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		zval *member_p = Z_OBJ_P(object)->handlers->read_property(
 				Z_OBJ_P(object), ref->unmangled_name, BP_VAR_R,
@@ -6052,7 +6099,7 @@ static void reflection_property_set_raw_value(zend_property_info *prop,
 		zend_object *object, zval *value)
 {
 	if (!prop || !prop->hooks || !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
-		zend_class_entry *old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		object->handlers->write_property(object, unmangled_name, value, cache_slot);
 		EG(fake_scope) = old_scope;
@@ -6275,7 +6322,6 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 		}
 		RETURN_FALSE;
 	} else {
-		zend_class_entry *old_scope;
 		int retval;
 
 		if (!object) {
@@ -6298,7 +6344,7 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 			}
 		}
 
-		old_scope = EG(fake_scope);
+		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		retval = Z_OBJ_HT_P(object)->has_property(Z_OBJ_P(object),
 				ref->unmangled_name, ZEND_PROPERTY_EXISTS, ref->cache_slot);
@@ -6404,7 +6450,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 	/* Get-only virtual property can never be written to. */
 	if (prop->hooks && (prop->flags & ZEND_ACC_VIRTUAL) && !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
 		zend_type never_type = ZEND_TYPE_INIT_CODE(IS_NEVER, 0, 0);
-		reflection_type_factory(never_type, return_value, 0);
+		reflection_type_factory(never_type, return_value, 1);
 		return;
 	}
 
@@ -6414,7 +6460,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 		if (!ZEND_TYPE_IS_SET(arg_info->type)) {
 			RETURN_NULL();
 		}
-		reflection_type_factory(arg_info->type, return_value, 0);
+		reflection_type_factory(arg_info->type, return_value, 1);
 		return;
 	}
 
@@ -6422,7 +6468,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 	if (!ZEND_TYPE_IS_SET(ref->prop->type)) {
 		RETURN_NULL();
 	}
-	reflection_type_factory(ref->prop->type, return_value, 0);
+	reflection_type_factory(ref->prop->type, return_value, 1);
 }
 
 /* {{{ Returns whether property has a type */
@@ -6477,11 +6523,22 @@ ZEND_METHOD(ReflectionProperty, getDefaultValue)
 	prop_info = ref->prop;
 
 	if (prop_info == NULL) {
-		return; // throw exception?
+		// Dynamic property
+		zend_error(
+			E_DEPRECATED,
+			"ReflectionProperty::getDefaultValue() for a property without a default value is deprecated, "
+				"use ReflectionProperty::hasDefaultValue() to check if the default value exists"
+		);
+		return;
 	}
 
 	prop = property_get_default(prop_info);
 	if (!prop || Z_ISUNDEF_P(prop)) {
+		zend_error(
+			E_DEPRECATED,
+			"ReflectionProperty::getDefaultValue() for a property without a default value is deprecated, "
+				"use ReflectionProperty::hasDefaultValue() to check if the default value exists"
+		);
 		return;
 	}
 
@@ -7052,7 +7109,7 @@ ZEND_METHOD(ReflectionReference, __construct)
 
 static bool is_ignorable_reference(HashTable *ht, zval *ref) {
 	if (Z_REFCOUNT_P(ref) != 1) {
-		return 0;
+		return false;
 	}
 
 	/* Directly self-referential arrays are treated as proper references
@@ -7167,10 +7224,7 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 				smart_str_appends(&str, " = ");
 			}
 
-			if (format_default_value(&str, &attr->data->args[i].value) == FAILURE) {
-				smart_str_free(&str);
-				RETURN_THROWS();
-			}
+			format_default_value(&str, &attr->data->args[i].value);
 
 			smart_str_appends(&str, " ]\n");
 		}
@@ -7276,26 +7330,61 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
+	/* This code can be reached under one of three possible conditions:
+	 * - the attribute is an internal attribute, and it had the target and
+	 *   and repetition validated already
+	 * - the attribute is an internal attribute and repetition was validated
+	 *   already, the internal validator might have been run if the target was
+	 *   correct, but any error would have been stored in
+	 *   `zend_attribute.validation_error` instead of being thrown due to the
+	 *   presence of #[DelayedTargetValidation]
+	 * - the attribute is a user attribute, and neither target nor repetition
+	 *   have been validated.
+	 */
+	uint32_t flags = zend_attribute_attribute_get_flags(marker, ce);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	/* No harm in always running target validation, for internal attributes
+	 * without #[DelayedTargetValidation] it isn't necessary but will always
+	 * succeed. */
+	if (!(attr->target & flags)) {
+		zend_string *location = zend_get_attribute_target_names(attr->target);
+		zend_string *allowed = zend_get_attribute_target_names(flags);
+
+		zend_throw_error(NULL, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+			ZSTR_VAL(attr->data->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
+		);
+
+		zend_string_release(location);
+		zend_string_release(allowed);
+
+		RETURN_THROWS();
+	}
+
+	if (attr->data->validation_error != NULL) {
+		/* Delayed validation errors should only be set for internal attributes. */
+		ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
+		/* Delayed validation errors should only be set when
+		 * #[\DelayedTargetValidation] is used. Searching for the attribute is
+		 * more expensive than just an assertion and so we don't worry about it
+		 * for non-debug builds. See discussion on GH-18817. */
+#if ZEND_DEBUG
+		zend_attribute *delayed_target_validation = zend_get_attribute_str(
+			attr->attributes,
+			"delayedtargetvalidation",
+			strlen("delayedtargetvalidation")
+		);
+		ZEND_ASSERT(delayed_target_validation != NULL);
+#endif
+		zend_throw_exception(zend_ce_error, ZSTR_VAL(attr->data->validation_error), 0);
+		RETURN_THROWS();
+	}
+
+	/* Repetition validation is done even if #[DelayedTargetValidation] is used
+	 * and so can be skipped for internal attributes. */
 	if (ce->type == ZEND_USER_CLASS) {
-		uint32_t flags = zend_attribute_attribute_get_flags(marker, ce);
-		if (EG(exception)) {
-			RETURN_THROWS();
-		}
-
-		if (!(attr->target & flags)) {
-			zend_string *location = zend_get_attribute_target_names(attr->target);
-			zend_string *allowed = zend_get_attribute_target_names(flags);
-
-			zend_throw_error(NULL, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
-				ZSTR_VAL(attr->data->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
-			);
-
-			zend_string_release(location);
-			zend_string_release(allowed);
-
-			RETURN_THROWS();
-		}
-
 		if (!(flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
 			if (zend_is_attribute_repeated(attr->attributes, attr->data)) {
 				zend_throw_error(NULL, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->data->name));

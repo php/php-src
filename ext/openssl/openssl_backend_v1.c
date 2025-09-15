@@ -44,6 +44,16 @@ void php_openssl_backend_shutdown(void)
 #endif
 }
 
+void php_openssl_backend_init_libctx(struct php_openssl_libctx *ctx)
+{
+	// Do nothing as there is no libctx
+}
+
+void php_openssl_backend_destroy_libctx(struct php_openssl_libctx *ctx)
+{
+	// Do nothing as there is no libctx
+}
+
 EVP_PKEY_CTX *php_openssl_pkey_new_from_name(const char *name, int id)
 {
 	return EVP_PKEY_CTX_new_id(id, NULL);
@@ -675,6 +685,56 @@ void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 	OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
 		aliases ? php_openssl_add_method_or_alias : php_openssl_add_method,
 		return_value);
+}
+
+CONF *php_openssl_nconf_new(void)
+{
+	return NCONF_new(NULL);
+}
+
+X509 *php_openssl_pem_read_asn1_bio_x509(BIO *in)
+{
+	return PEM_ASN1_read_bio((d2i_of_void *)d2i_X509, PEM_STRING_X509, in, NULL, NULL, NULL);
+}
+
+X509 *php_openssl_pem_read_bio_x509(BIO *in)
+{
+	return PEM_read_bio_X509(in, NULL, NULL, NULL);
+}
+
+X509_REQ *php_openssl_pem_read_bio_x509_req(BIO *in)
+{
+	return PEM_read_bio_X509_REQ(in, NULL, NULL, NULL);
+}
+
+EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in)
+{
+	return PEM_read_bio_PUBKEY(in, NULL, NULL, NULL);
+}
+
+EVP_PKEY *php_openssl_pem_read_bio_private_key(BIO *in, pem_password_cb *cb, void *u)
+{
+	return PEM_read_bio_PrivateKey(in, NULL, cb, u);
+}
+
+PKCS7 *php_openssl_pem_read_bio_pkcs7(BIO *in)
+{
+	return PEM_read_bio_PKCS7(in, NULL, NULL, NULL);
+}
+
+CMS_ContentInfo *php_openssl_pem_read_bio_cms(BIO *in)
+{
+	return PEM_read_bio_CMS(in, NULL, NULL, NULL);
+}
+
+CMS_ContentInfo *php_openssl_d2i_bio_cms(BIO *in)
+{
+	return d2i_CMS_bio(in, NULL);
+}
+
+CMS_ContentInfo *php_openssl_smime_read_cms(BIO *bio, BIO **bcont)
+{
+	return SMIME_read_CMS(bio, bcont);
 }
 
 #endif

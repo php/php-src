@@ -1,5 +1,5 @@
 --TEST--
-PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY vs access denied
+Pdo\Mysql::ATTR_LOCAL_INFILE_DIRECTORY vs access denied
 --EXTENSIONS--
 pdo_mysql
 --SKIPIF--
@@ -7,7 +7,7 @@ pdo_mysql
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 MySQLPDOTest::skipInfileNotAllowed();
-if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
+if (!defined('Pdo\Mysql::ATTR_LOCAL_INFILE_DIRECTORY')) {
     die("skip No MYSQL_ATTR_LOCAL_INFILE_DIRECTORY support");
 }
 ?>
@@ -33,8 +33,8 @@ if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
 
 	require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 	$db = MySQLPDOTest::factoryWithAttr([
-		PDO::MYSQL_ATTR_LOCAL_INFILE=>false,
-		PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY=>__DIR__."/foo/bar",
+		Pdo\Mysql::ATTR_LOCAL_INFILE=>false,
+		Pdo\Mysql::ATTR_LOCAL_INFILE_DIRECTORY=>__DIR__."/foo/bar",
 	]);
 
 	try {

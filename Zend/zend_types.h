@@ -753,6 +753,18 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 		} \
 	} while (0)
 
+#define GC_TRY_DTOR_NO_REF(p) \
+	do { \
+		zend_refcounted_h *_p = &(p)->gc; \
+		if (!(_p->u.type_info & GC_IMMUTABLE)) { \
+			if (zend_gc_delref(_p) == 0) { \
+				rc_dtor_func((zend_refcounted *)_p); \
+			} else { \
+				gc_check_possible_root_no_ref((zend_refcounted *)_p); \
+			} \
+		} \
+	} while (0)
+
 #define GC_TYPE_MASK				0x0000000f
 #define GC_FLAGS_MASK				0x000003f0
 #define GC_INFO_MASK				0xfffffc00

@@ -24,7 +24,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
+static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char*       locale;
 	char*       pattern = NULL;
@@ -41,11 +41,6 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 		Z_PARAM_STRING_OR_NULL(pattern, pattern_len)
 	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
 
-	if (error_handling != NULL) {
-		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
-		*error_handling_replaced = 1;
-	}
-
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	object = return_value;
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
@@ -57,7 +52,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
 		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
-		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: error converting pattern to UTF-16");
+		INTL_CTOR_CHECK_STATUS(nfo, "error converting pattern to UTF-16");
 	}
 
 	if(locale_len == 0) {
@@ -69,14 +64,20 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 		return FAILURE;
 	}
 
-	/* Create an ICU number formatter. */
-	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+	char* canonicalized_locale = canonicalize_locale_string(locale);
+	const char* final_locale = canonicalized_locale ? canonicalized_locale : locale;
 
-	if(spattern) {
+	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, final_locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+
+	if (spattern) {
 		efree(spattern);
 	}
+	
+	if (canonicalized_locale) {
+		efree(canonicalized_locale);
+	}
 
-	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
+	INTL_CTOR_CHECK_STATUS(nfo, "number formatter creation failed");
 	return SUCCESS;
 }
 /* }}} */
@@ -85,7 +86,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 PHP_FUNCTION( numfmt_create )
 {
 	object_init_ex( return_value, NumberFormatter_ce_ptr );
-	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, NULL) == FAILURE) {
+	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -95,18 +96,17 @@ PHP_FUNCTION( numfmt_create )
 /* {{{ NumberFormatter object constructor. */
 PHP_METHOD( NumberFormatter, __construct )
 {
-	zend_error_handling error_handling;
-	bool error_handling_replaced = 0;
+	const bool old_use_exception = INTL_G(use_exceptions);
+	const zend_long old_error_level = INTL_G(error_level);
+	INTL_G(use_exceptions) = true;
+	INTL_G(error_level) = 0;
 
 	return_value = ZEND_THIS;
-	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, &error_handling, &error_handling_replaced) == FAILURE) {
-		if (!EG(exception)) {
-			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
-		}
+	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+		ZEND_ASSERT(EG(exception));
 	}
-	if (error_handling_replaced) {
-		zend_restore_error_handling(&error_handling);
-	}
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 /* }}} */
 

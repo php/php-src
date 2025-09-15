@@ -1934,7 +1934,8 @@ static zend_result phar_copy_file_contents(phar_entry_info *entry, php_stream *f
 {
 	char *error;
 	zend_off_t offset;
-	phar_entry_info *link;
+
+	ZEND_ASSERT(!entry->link);
 
 	if (FAILURE == phar_open_entry_fp(entry, &error, 1)) {
 		if (error) {
@@ -1949,24 +1950,12 @@ static zend_result phar_copy_file_contents(phar_entry_info *entry, php_stream *f
 	}
 
 	/* copy old contents in entirety */
-	phar_seek_efp(entry, 0, SEEK_SET, 0, 1);
+	phar_seek_efp(entry, 0, SEEK_SET, 0, 0);
 	offset = php_stream_tell(fp);
-	link = phar_get_link_source(entry);
-
-	if (!link) {
-		link = entry;
-	}
-
-	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, 0), fp, link->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0), fp, entry->uncompressed_filesize, NULL)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, ZSTR_VAL(entry->filename));
 		return FAILURE;
-	}
-
-	if (entry->fp_type == PHAR_MOD) {
-		/* save for potential restore on error */
-		entry->cfp = entry->fp;
-		entry->fp = NULL;
 	}
 
 	/* set new location of file contents */
@@ -2248,6 +2237,12 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	PHAR_G(last_phar) = NULL;
 	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 
+	php_stream *tmp_fp = php_stream_fopen_tmpfile();
+	if (tmp_fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0, "unable to create temporary file");
+		return NULL;
+	}
+
 	phar = (phar_archive_data *) ecalloc(1, sizeof(phar_archive_data));
 	/* set whole-archive compression and type from parameter */
 	phar->flags = flags;
@@ -2272,11 +2267,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	zend_hash_init(&phar->virtual_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
 
-	phar->fp = php_stream_fopen_tmpfile();
-	if (phar->fp == NULL) {
-		zend_throw_exception_ex(phar_ce_PharException, 0, "unable to create temporary file");
-		return NULL;
-	}
+	phar->fp = tmp_fp;
 	phar->fname = source->fname;
 	phar->fname_len = source->fname_len;
 	phar->is_temporary_alias = source->is_temporary_alias;
@@ -2300,6 +2291,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 		}
 
 		if (FAILURE == phar_copy_file_contents(&newentry, phar->fp)) {
+			phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 			zend_hash_destroy(&(phar->manifest));
 			php_stream_close(phar->fp);
 			efree(phar);
@@ -2307,6 +2299,10 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 			return NULL;
 		}
 no_copy:
+		/* Reset file pointers, they have to be reset here such that if a copy happens the original
+		 * source fp can be accessed. */
+		newentry.fp = NULL;
+		newentry.cfp = NULL;
 		newentry.filename = zend_string_copy(newentry.filename);
 
 		phar_metadata_tracker_clone(&newentry.metadata_tracker);
@@ -2333,13 +2329,18 @@ no_copy:
 		return ret;
 	} else {
 		if(phar != NULL) {
+			phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 			zend_hash_destroy(&(phar->manifest));
 			zend_hash_destroy(&(phar->mounted_dirs));
 			zend_hash_destroy(&(phar->virtual_dirs));
 			if (phar->fp) {
 				php_stream_close(phar->fp);
 			}
-			efree(phar->fname);
+			if (phar->fname != source->fname) {
+				/* Depending on when phar_rename_archive() errors, the new filename
+				 * may have already been assigned or it may still be the old one. */
+				efree(phar->fname);
+			}
 			efree(phar);
 		}
 		return NULL;

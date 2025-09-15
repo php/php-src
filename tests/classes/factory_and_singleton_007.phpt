@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECT--
-Error: Call to protected test::__clone() from global scope
+Error: Call to protected method test::__clone() from global scope

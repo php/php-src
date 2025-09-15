@@ -23,10 +23,16 @@ on:
       run_macos_arm64:
         required: true
         type: boolean
+      run_freebsd_zts:
+        required: true
+        type: boolean
       ubuntu_version:
         required: true
         type: string
       windows_version:
+        required: true
+        type: string
+      vs_crt_version:
         required: true
         type: string
       skip_laravel:
@@ -36,6 +42,9 @@ on:
         required: true
         type: boolean
       skip_wordpress:
+        required: true
+        type: boolean
+      variation_enable_zend_max_execution_timers:
         required: true
         type: boolean
 permissions:
@@ -48,7 +57,7 @@ jobs:
     runs-on: [self-hosted, gentoo, ppc64]
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: System info
@@ -79,6 +88,8 @@ jobs:
         with:
           runTestsParameters: >-
             --asan -x
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
   ALPINE:
     if: inputs.run_alpine
     name: ALPINE_X64_ASAN_UBSAN_DEBUG_ZTS
@@ -87,7 +98,7 @@ jobs:
       image: 'alpine:3.20.1'
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: apk
@@ -126,8 +137,9 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             --asan -x
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -189,6 +201,7 @@ jobs:
             zts: true
             configuration_parameters: >-
               CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"
+              ${{ inputs.variation_enable_zend_max_execution_timers && '--enable-zend-max-execution-timers' || '' }}
             run_tests_parameters: -d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0
             timeout_minutes: 360
             test_function_jit: true
@@ -197,7 +210,7 @@ jobs:
     runs-on: ubuntu-${{ matrix.asan && inputs.asan_ubuntu_version || inputs.ubuntu_version }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: Create MSSQL container
@@ -240,14 +253,12 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
@@ -258,8 +269,9 @@ jobs:
           jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -298,7 +310,7 @@ jobs:
           FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: apt
@@ -332,14 +344,12 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
@@ -347,8 +357,9 @@ jobs:
           jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -367,7 +378,7 @@ jobs:
     runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: brew
@@ -392,13 +403,11 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
         if: matrix.os != '14' || !matrix.zts
@@ -406,8 +415,9 @@ jobs:
         with:
           jitType: function
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -443,7 +453,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: Create MSSQL container
@@ -468,9 +478,8 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         if: ${{ !cancelled() }}
         with:
           fail_ci_if_error: true
@@ -497,7 +506,7 @@ jobs:
       USE_TRACKED_ALLOC: 1
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: apt
@@ -522,7 +531,6 @@ jobs:
       - name: Enable Opcache
         run: |
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
-          echo zend_extension=opcache.so > /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
@@ -549,14 +557,17 @@ jobs:
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
           for repository in $repositories; do
-            printf "Testing amp/%s\n" "$repository"
+            echo "::group::$repository"
             git clone "https://github.com/amphp/$repository.git" "amphp-$repository" --depth 1
             cd "amphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-req=php+
+            EXIT_CODE=0
             vendor/bin/phpunit || EXIT_CODE=$?
+            echo -e "\n::endgroup::"
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
+              echo "Failed"
             fi
             cd ..
           done
@@ -580,14 +591,17 @@ jobs:
           repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
           X=0
           for repository in $repositories; do
-            printf "Testing reactphp/%s\n" "$repository"
+            echo "::group::$repository"
             git clone "https://github.com/reactphp/$repository.git" "reactphp-$repository" --depth 1
             cd "reactphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-req=php+
+            EXIT_CODE=0
             vendor/bin/phpunit || EXIT_CODE=$?
+            echo -e "\n::endgroup::"
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
+              echo "Failed"
             fi
             cd ..
           done
@@ -612,15 +626,19 @@ jobs:
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+
           php ./phpunit install
           # Test causes a heap-buffer-overflow but I cannot reproduce it locally...
-          php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "/** @group skip */\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
+          php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
           # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
-          php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("public function testCastNonTrailingCharPointer()", "/** @group skip */\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
+          php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("public function testCastNonTrailingCharPointer()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
-            php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
+            echo "::group::$component"
+            EXIT_CODE=0
+            php ./phpunit $component --exclude-group tty --exclude-group benchmark --exclude-group intl-data --exclude-group transient --exclude-group skip || EXIT_CODE=$?
+            echo -e "\n::endgroup::"
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
+              echo "Failed"
             fi
           done
           exit $X
@@ -691,7 +709,7 @@ jobs:
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: Create MSSQL container
@@ -713,21 +731,18 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-prime
       - name: Test File Cache (prime shm, use shm)
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-use
       - name: Test File Cache (prime shm, use file)
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-use
             -d opcache.file_cache_only=1
@@ -735,7 +750,6 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-prime
             -d opcache.file_cache_only=1
@@ -743,7 +757,6 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             --file-cache-use
             -d opcache.file_cache_only=1
@@ -759,7 +772,7 @@ jobs:
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: apt
@@ -837,7 +850,6 @@ jobs:
         with:
           runTestsParameters: >-
             --msan
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
@@ -851,7 +863,7 @@ jobs:
     runs-on: ubuntu-${{ inputs.ubuntu_version }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: apt
@@ -901,38 +913,38 @@ jobs:
       CXX: ccache g++
     steps:
       - name: git checkout PHP
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: php
           ref: ${{ inputs.branch }}
       - name: git checkout apcu
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: krakjoe/apcu
           path: apcu
       - name: git checkout imagick
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: Imagick/imagick
           path: imagick
       - name: git checkout memcached
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: php-memcached-dev/php-memcached
           path: memcached
       - name: git checkout redis
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
         if: false
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: xdebug/xdebug
           path: xdebug
       - name: git checkout yaml
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: php/pecl-file_formats-yaml
           path: yaml
@@ -1031,7 +1043,7 @@ jobs:
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
-      PHP_BUILD_CRT: ${{ inputs.windows_version == '2022' && 'vs17' || 'vs16' }}
+      PHP_BUILD_CRT: ${{ inputs.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
@@ -1042,7 +1054,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: Setup
@@ -1052,12 +1064,23 @@ jobs:
       - name: Test
         run: .github/scripts/windows/test.bat
   FREEBSD:
-    name: FREEBSD
+    strategy:
+      fail-fast: false
+      matrix:
+        zts: [true, false]
+        exclude:
+          - zts: ${{ !inputs.run_freebsd_zts && true || '*never*' }}
+    name: "FREEBSD_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
+    timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       - name: FreeBSD
         uses: ./.github/actions/freebsd
+        with:
+          configurationParameters: >-
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+          runExtraTests: true

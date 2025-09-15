@@ -128,7 +128,7 @@ mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
 echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\php.ini
-if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\php.ini
+echo opcache.record_warnings=1 >> %PHP_BUILD_DIR%\php.ini
 rem work-around for some spawned PHP processes requiring OpenSSL and sockets
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 echo extension=php_sockets.dll >> %PHP_BUILD_DIR%\php.ini

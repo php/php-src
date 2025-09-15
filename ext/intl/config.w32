@@ -43,25 +43,25 @@ if (PHP_INTL != "no") {
 				listformatter_class.c \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/locale", "\
-				locale.c \
-				locale_class.c \
-				locale_methods.c \
+				locale.cpp \
+				locale_class.cpp \
+				locale_methods.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/msgformat", "\
-				msgformat.c \
-				msgformat_attr.c \
-				msgformat_class.c \
-				msgformat_data.c \
-				msgformat_format.c \
+				msgformat.cpp \
+				msgformat_attr.cpp \
+				msgformat_class.cpp \
+				msgformat_data.cpp \
+				msgformat_format.cpp \
 				msgformat_helpers.cpp \
-				msgformat_parse.c \
+				msgformat_parse.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/grapheme", "\
                                 grapheme_string.c grapheme_util.c  \
                                 ", "intl");
 		ADD_SOURCES(configure_module_dirname + "/normalizer", "\
-				normalizer_class.c \
-				normalizer_normalize.c \
+				normalizer_class.cpp \
+				normalizer_normalize.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/dateformat", "\
 				dateformat.c \
@@ -78,10 +78,10 @@ if (PHP_INTL != "no") {
 				datepatterngenerator_methods.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/uchar", "\
-				uchar.c",
+				uchar.cpp",
 				"intl");
 		ADD_SOURCES(configure_module_dirname + "/idn", "\
-				idn.c",
+				idn.cpp",
 				"intl");
 		ADD_SOURCES(configure_module_dirname + "/resourcebundle", "\
 				resourcebundle.c \

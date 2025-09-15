@@ -82,7 +82,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 2: empty client cert and key from string\n";
@@ -96,7 +96,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 3: client cert and empty key from string\n";
@@ -110,7 +110,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 4: client cert and key from file\n";
@@ -124,7 +124,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 5: issuer cert from file\n";
@@ -140,7 +140,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 6: issuer cert from string\n";
@@ -156,7 +156,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
     echo "\n";
     echo "case 7: empty issuer cert from string\n";
@@ -172,7 +172,7 @@ try {
     $response = curl_exec($ch);
     check_response($response, $clientCertSubject);
     check_error($ch);
-    curl_close($ch);
+    $ch = null;
 
 } finally {
     // clean up server process

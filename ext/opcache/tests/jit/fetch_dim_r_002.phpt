@@ -30,7 +30,7 @@ $x=2;
 $y="x";
 foo($x.$y);
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
 int(3)
 int(2)
@@ -38,6 +38,8 @@ int(1)
 int(3)
 int(1)
 int(2)
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 int(4)
 int(5)
 int(5)

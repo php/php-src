@@ -458,6 +458,22 @@ static bool ir_sccp_is_equal(ir_ctx *ctx, ir_insn *_values, ir_ref a, ir_ref b)
 	return v1->val.u64 == v2->val.u64;
 }
 
+static bool ir_sccp_in_range(ir_ctx *ctx, ir_insn *_values, ir_ref a, ir_ref b, ir_ref c)
+{
+	ir_insn *v1 = IR_IS_CONST_REF(a) ? &ctx->ir_base[a] : &_values[a];
+	ir_insn *v2 = IR_IS_CONST_REF(b) ? &ctx->ir_base[b] : &_values[b];
+	ir_insn *v3 = IR_IS_CONST_REF(c) ? &ctx->ir_base[c] : &_values[c];
+
+	IR_ASSERT(!IR_IS_SYM_CONST(v1->op));
+	IR_ASSERT(!IR_IS_SYM_CONST(v2->op));
+	IR_ASSERT(!IR_IS_SYM_CONST(v3->op));
+	if (IR_IS_TYPE_SIGNED(v1->type)) {
+		return v1->val.i64 >= v2->val.i64 && v1->val.i64 <= v3->val.i64;
+	} else {
+		return v1->val.u64 >= v2->val.u64 && v1->val.u64 <= v3->val.u64;
+    }
+}
+
 #ifdef IR_SCCP_TRACE
 static void ir_sccp_trace_val(ir_ctx *ctx, ir_insn *_values, ir_ref i)
 {
@@ -676,6 +692,11 @@ static IR_NEVER_INLINE void ir_sccp_analyze(ir_ctx *ctx, ir_insn *_values, ir_bi
 							}
 						} else if (use_insn->op == IR_CASE_DEFAULT) {
 							use_case = use;
+						} else if (use_insn->op == IR_CASE_RANGE) {
+							if (ir_sccp_in_range(ctx, _values, insn->op2, use_insn->op2, use_insn->op3)) {
+								use_case = use;
+								break;
+							}
 						}
 					}
 					if (use_case) {
@@ -1732,7 +1753,20 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use, 
 	ir_ref *p, n, input;
 
 	if (IR_IS_CONST_REF(ref)) {
-		return ir_const(ctx, insn->val, type);
+		ir_val val;
+
+		switch (type) {
+			case IR_I8:  val.i64 = insn->val.i8; break;
+			case IR_U8:  val.u64 = insn->val.u8; break;
+			case IR_I16: val.i64 = insn->val.i16; break;
+			case IR_U16: val.u64 = insn->val.u16; break;
+			case IR_I32: val.i64 = insn->val.i32; break;
+			case IR_U32: val.u64 = insn->val.u32; break;
+			case IR_CHAR:val.i64 = insn->val.i8; break;
+			case IR_BOOL:val.u64 = insn->val.u8 != 0; break;
+			default: IR_ASSERT(0); val.u64 = 0;
+		}
+		return ir_const(ctx, val, type);
 	} else {
 		ir_bitqueue_add(worklist, ref);
 		switch (insn->op) {
@@ -2391,7 +2425,7 @@ static bool ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn, 
 			}
 			start_ref = end->op1;
 			start = &ctx->ir_base[start_ref];
-			if (start->op != IR_CASE_VAL && start->op != IR_CASE_DEFAULT) {
+			if (start->op != IR_CASE_VAL && start->op != IR_CASE_RANGE && start->op != IR_CASE_DEFAULT) {
 				return 0;
 			}
 			if (ctx->use_lists[start_ref].count != 1) {
@@ -2961,6 +2995,7 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue 
 
 				end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
 				end2->op2 = cond->op3;
+				ir_bitqueue_add(worklist, end2_ref);
 
 				merge->optx = IR_OPTX(op, IR_VOID, 1);
 				merge->op1 = end2_ref;
@@ -3156,6 +3191,7 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 
 						end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
 						end2->op2 = insn->op2;
+						ir_bitqueue_add(worklist, end2_ref);
 
 						merge->optx = IR_OPTX(op, IR_VOID, 1);
 						merge->op1 = end2_ref;

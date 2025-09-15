@@ -932,7 +932,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_pr
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
 	const zend_property_info *prop_info, const char *operation
 ) {
-	zend_class_entry *scope;
+	const zend_class_entry *scope;
 	if (EG(fake_scope)) {
 		scope = EG(fake_scope);
 	} else {
@@ -2006,6 +2006,27 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_consta
 	zend_string_release(message_suffix);
 }
 
+ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
+	zend_class_entry *trait,
+	const zend_string *used_by
+) {
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (get_deprecation_suffix_from_attribute(trait->attributes, trait, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = trait->type == ZEND_INTERNAL_CLASS ? E_DEPRECATED : E_USER_DEPRECATED;
+
+	zend_error_unchecked(code, "Trait %s used by %s is deprecated%S",
+		ZSTR_VAL(trait->name),
+		ZSTR_VAL(used_by),
+		message_suffix
+	);
+
+	zend_string_release(message_suffix);
+}
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void)
 {
 	zend_error(E_DEPRECATED, "Automatic conversion of false to array is deprecated");
@@ -2629,6 +2650,21 @@ static zend_never_inline uint8_t slow_index_convert(HashTable *ht, const zval *d
 			ZEND_FALLTHROUGH;
 		}
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				zend_array_destroy(ht);
+				return IS_NULL;
+			}
+
+			if (EG(exception)) {
+				return IS_NULL;
+			}
+
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
 		case IS_DOUBLE:
@@ -2699,6 +2735,21 @@ static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval 
 			ZEND_FALLTHROUGH;
 		}
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
+				return IS_NULL;
+			}
+			if (EG(exception)) {
+				return IS_NULL;
+			}
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
 		case IS_DOUBLE:
@@ -3005,7 +3056,7 @@ static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_UNSET(z
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET EXECUTE_DATA_CC);
 }
 
-static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, bool is_list, int slow EXECUTE_DATA_DC)
+static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, bool is_list, bool slow EXECUTE_DATA_DC)
 {
 	zval *retval;
 
@@ -3143,6 +3194,9 @@ try_string_offset:
 		if (ZEND_CONST_COND(dim_type == IS_CV, 1) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP2();
 		}
+		if (is_list && Z_TYPE_P(container) > IS_NULL) {
+			zend_error(E_WARNING, "Cannot use %s as array", zend_zval_type_name(container));
+		}
 		if (!is_list && type != BP_VAR_IS) {
 			zend_error(E_WARNING, "Trying to access array offset on %s",
 				zend_zval_value_name(container));
@@ -3189,7 +3243,22 @@ static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable 
 num_idx:
 		return zend_hash_index_find(ht, hval);
 	} else if (Z_TYPE_P(offset) == IS_NULL) {
-str_idx:
+null_undef_idx:
+		/* The array may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_TRY_ADDREF(ht);
+
+		zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			zend_array_destroy(ht);
+			return NULL;
+		}
+
+		if (EG(exception)) {
+			return NULL;
+		}
+
 		return zend_hash_find_known_hash(ht, ZSTR_EMPTY_ALLOC());
 	} else if (Z_TYPE_P(offset) == IS_FALSE) {
 		hval = 0;
@@ -3203,7 +3272,7 @@ str_idx:
 		goto num_idx;
 	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {
 		ZVAL_UNDEFINED_OP2();
-		goto str_idx;
+		goto null_undef_idx;
 	} else {
 		zend_illegal_array_offset_isset(offset);
 		return NULL;
@@ -3324,6 +3393,9 @@ num_key:
 	} else if (Z_TYPE_P(key) <= IS_NULL) {
 		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP1();
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(key) == IS_NULL);
+			zend_error(E_DEPRECATED, "Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead");
 		}
 		str = ZSTR_EMPTY_ALLOC();
 		goto str_key;
@@ -4121,15 +4193,6 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-}
-
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_clone_call(zend_function *clone, zend_class_entry *scope)
-{
-	zend_throw_error(NULL, "Call to %s %s::__clone() from %s%s",
-		zend_visibility_string(clone->common.fn_flags), ZSTR_VAL(clone->common.scope->name),
-		scope ? "scope " : "global scope",
-		scope ? ZSTR_VAL(scope->name) : ""
-	);
 }
 
 #if ZEND_INTENSIVE_DEBUGGING
@@ -5220,7 +5283,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 					}
 				} else if (UNEXPECTED(EG(exception))) {
 					break;
-				} else if (UNEXPECTED(strlen(ZSTR_VAL(inc_filename)) != ZSTR_LEN(inc_filename))) {
+				} else if (UNEXPECTED(zend_str_has_nul_byte(inc_filename))) {
 					zend_message_dispatcher(
 						(type == ZEND_INCLUDE_ONCE) ?
 							ZMSG_FAILED_INCLUDE_FOPEN : ZMSG_FAILED_REQUIRE_FOPEN,
@@ -5254,7 +5317,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 			break;
 		case ZEND_INCLUDE:
 		case ZEND_REQUIRE:
-			if (UNEXPECTED(strlen(ZSTR_VAL(inc_filename)) != ZSTR_LEN(inc_filename))) {
+			if (UNEXPECTED(zend_str_has_nul_byte(inc_filename))) {
 				zend_message_dispatcher(
 					(type == ZEND_INCLUDE) ?
 						ZMSG_FAILED_INCLUDE_FOPEN : ZMSG_FAILED_REQUIRE_FOPEN,
@@ -5377,7 +5440,12 @@ static zend_never_inline zend_result ZEND_FASTCALL zend_quick_check_constant(
 
 static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 		zend_function *fbc, zend_string *arg_name, void **cache_slot) {
-	if (EXPECTED(*cache_slot == fbc)) {
+	/* Due to closures, the `fbc` address isn't unique if the memory address is reused.
+	 * The argument info will be however and uniquely positions the arguments.
+	 * We do support NULL arg_info, so we have to distinguish that from an uninitialized cache slot. */
+	void *unique_id = (void *) ((uintptr_t) fbc->common.arg_info | 1);
+
+	if (EXPECTED(*cache_slot == unique_id)) {
 		return *(uintptr_t *)(cache_slot + 1);
 	}
 
@@ -5388,8 +5456,10 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 		for (uint32_t i = 0; i < num_args; i++) {
 			zend_arg_info *arg_info = &fbc->op_array.arg_info[i];
 			if (zend_string_equals(arg_name, arg_info->name)) {
-				*cache_slot = fbc;
-				*(uintptr_t *)(cache_slot + 1) = i;
+				if (!fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
+					*cache_slot = unique_id;
+					*(uintptr_t *)(cache_slot + 1) = i;
+				}
 				return i;
 			}
 		}
@@ -5399,7 +5469,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
 			size_t len = strlen(arg_info->name);
 			if (zend_string_equals_cstr(arg_name, arg_info->name, len)) {
-				*cache_slot = fbc;
+				*cache_slot = unique_id;
 				*(uintptr_t *)(cache_slot + 1) = i;
 				return i;
 			}
@@ -5407,8 +5477,10 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 	}
 
 	if (fbc->common.fn_flags & ZEND_ACC_VARIADIC) {
-		*cache_slot = fbc;
-		*(uintptr_t *)(cache_slot + 1) = fbc->common.num_args;
+		if (fbc->type == ZEND_INTERNAL_FUNCTION || !fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
+			*cache_slot = unique_id;
+			*(uintptr_t *)(cache_slot + 1) = fbc->common.num_args;
+		}
 		return fbc->common.num_args;
 	}
 

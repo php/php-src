@@ -461,6 +461,7 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
 
 	SERIALIZE_STR(attr->name);
 	SERIALIZE_STR(attr->lcname);
+	SERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
 		SERIALIZE_STR(attr->args[i].name);
@@ -1352,6 +1353,7 @@ static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_scri
 
 	UNSERIALIZE_STR(attr->name);
 	UNSERIALIZE_STR(attr->lcname);
+	UNSERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
 		UNSERIALIZE_STR(attr->args[i].name);
@@ -1871,7 +1873,14 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	zend_file_cache_unserialize_early_bindings(script, buf);
 }
 
+static zend_persistent_script file_cache_validate_success_script;
+
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
+{
+	return zend_file_cache_script_load_ex(file_handle, false);
+}
+
+zend_persistent_script *zend_file_cache_script_load_ex(zend_file_handle *file_handle, bool validate_only)
 {
 	zend_string *full_path = file_handle->opened_path;
 	int fd;
@@ -1946,6 +1955,16 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		}
 		efree(filename);
 		return NULL;
+	}
+
+	/* return here if validating */
+	if (validate_only) {
+		if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
+		}
+		close(fd);
+		efree(filename);
+		return &file_cache_validate_success_script;
 	}
 
 	checkpoint = zend_arena_checkpoint(CG(arena));

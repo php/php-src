@@ -1,8 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0d5b028a1ab8f35e8ee1b51ce3141b6ef782af28 */
+ * Stub hash: d9e331c3a1ae46f8eae07ef0d39cb9990e74a0d1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -40,7 +40,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_set_time_zone, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
-	ZEND_ARG_INFO(0, timezone)
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_after, 0, 2, _IS_BOOL, 0)
@@ -280,7 +280,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_datefmt_create, 0, 1, IntlDateFor
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dateType, IS_LONG, 0, "IntlDateFormatter::FULL")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeType, IS_LONG, 0, "IntlDateFormatter::FULL")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_LONG|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -312,7 +312,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_timezone, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, formatter, IntlDateFormatter, 0)
-	ZEND_ARG_INFO(0, timezone)
+	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_pattern, 0, 2, _IS_BOOL, 0)
@@ -462,6 +462,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_strpos, 0, 2, MAY_BE_LO
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_grapheme_stripos arginfo_grapheme_strpos
@@ -474,12 +475,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_substr, 0, 2, MAY_BE_ST
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_strstr, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, beforeNeedle, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_grapheme_stristr arginfo_grapheme_strstr
@@ -495,6 +498,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_levenshtein, 0, 2, MAY_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, insertion_cost, IS_LONG, 0, "1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, replacement_cost, IS_LONG, 0, "1")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deletion_cost, IS_LONG, 0, "1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
@@ -679,7 +683,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intltz_create_default, 0, 0, Intl
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_intltz_create_enumeration, 0, 0, IntlIterator, MAY_BE_FALSE)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, countryOrRawOffset, "null")
+	ZEND_ARG_TYPE_MASK(0, countryOrRawOffset, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intltz_create_time_zone, 0, 1, IntlTimeZone, 1)
@@ -1223,27 +1227,17 @@ static void register_php_intl_symbols(int module_number)
 
 
 	zend_attribute *attribute_Deprecated_func_intlcal_set_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlcal_set", sizeof("intlcal_set") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_intlcal_set_0_arg0;
-	zend_string *attribute_Deprecated_func_intlcal_set_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0_arg0, attribute_Deprecated_func_intlcal_set_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlcal_set_0->args[0].value, &attribute_Deprecated_func_intlcal_set_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_func_intlcal_set_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_intlcal_set_0_arg1;
 	zend_string *attribute_Deprecated_func_intlcal_set_0_arg1_str = zend_string_init("use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead", strlen("use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0_arg1, attribute_Deprecated_func_intlcal_set_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlcal_set_0->args[1].value, &attribute_Deprecated_func_intlcal_set_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0->args[1].value, attribute_Deprecated_func_intlcal_set_0_arg1_str);
 	attribute_Deprecated_func_intlcal_set_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_intlgregcal_create_instance_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlgregcal_create_instance", sizeof("intlgregcal_create_instance") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_intlgregcal_create_instance_0_arg0;
-	zend_string *attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0_arg0, attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlgregcal_create_instance_0->args[0].value, &attribute_Deprecated_func_intlgregcal_create_instance_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_func_intlgregcal_create_instance_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_intlgregcal_create_instance_0_arg1;
 	zend_string *attribute_Deprecated_func_intlgregcal_create_instance_0_arg1_str = zend_string_init("use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead", strlen("use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0_arg1, attribute_Deprecated_func_intlgregcal_create_instance_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlgregcal_create_instance_0->args[1].value, &attribute_Deprecated_func_intlgregcal_create_instance_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0->args[1].value, attribute_Deprecated_func_intlgregcal_create_instance_0_arg1_str);
 	attribute_Deprecated_func_intlgregcal_create_instance_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 

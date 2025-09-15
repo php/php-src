@@ -41,7 +41,7 @@
 
 
 
-#define PACKAGE_VERSION "0.9.8"
+#define PACKAGE_VERSION "@PROJECT_VERSION@"
 
 /*
 #define HAVE_WPRINTF*

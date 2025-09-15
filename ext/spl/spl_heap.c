@@ -50,7 +50,7 @@ typedef struct _spl_ptr_heap {
 	spl_ptr_heap_ctor_func  ctor;
 	spl_ptr_heap_dtor_func  dtor;
 	spl_ptr_heap_cmp_func   cmp;
-	int                     count;
+	size_t                  count;
 	int                     flags;
 	size_t                  max_size;
 	size_t                  elem_size;
@@ -267,8 +267,6 @@ static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_c
 /* }}} */
 
 static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
-	int i;
-
 	if (heap->count+1 > heap->max_size) {
 		size_t alloc_size = heap->max_size * heap->elem_size;
 		/* we need to allocate more memory */
@@ -280,8 +278,9 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userda
 	heap->flags |= SPL_HEAP_WRITE_LOCKED;
 
 	/* sifting up */
-	for (i = heap->count; i > 0 && heap->cmp(spl_heap_elem(heap, (i-1)/2), elem, cmp_userdata) < 0; i = (i-1)/2) {
-		spl_heap_elem_copy(heap, spl_heap_elem(heap, i), spl_heap_elem(heap, (i-1)/2));
+	size_t pos;
+	for (pos = heap->count; pos > 0 && heap->cmp(spl_heap_elem(heap, (pos-1)/2), elem, cmp_userdata) < 0; pos = (pos-1)/2) {
+		spl_heap_elem_copy(heap, spl_heap_elem(heap, pos), spl_heap_elem(heap, (pos-1)/2));
 	}
 	heap->count++;
 
@@ -292,7 +291,7 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userda
 		heap->flags |= SPL_HEAP_CORRUPTED;
 	}
 
-	spl_heap_elem_copy(heap, spl_heap_elem(heap, i), elem);
+	spl_heap_elem_copy(heap, spl_heap_elem(heap, pos), elem);
 }
 /* }}} */
 
@@ -306,8 +305,7 @@ static void *spl_ptr_heap_top(spl_ptr_heap *heap) { /* {{{ */
 /* }}} */
 
 static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
-	int i, j;
-	const int limit = (heap->count-1)/2;
+	const size_t limit = (heap->count-1)/2;
 	void *bottom;
 
 	if (heap->count == 0) {
@@ -324,16 +322,17 @@ static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void 
 
 	bottom = spl_heap_elem(heap, --heap->count);
 
-	for (i = 0; i < limit; i = j) {
+	size_t parent_idx, child_idx;
+	for (parent_idx = 0; parent_idx < limit; parent_idx = child_idx) {
 		/* Find smaller child */
-		j = i * 2 + 1;
-		if (j != heap->count && heap->cmp(spl_heap_elem(heap, j+1), spl_heap_elem(heap, j), cmp_userdata) > 0) {
-			j++; /* next child is bigger */
+		child_idx = parent_idx * 2 + 1;
+		if (child_idx != heap->count && heap->cmp(spl_heap_elem(heap, child_idx+1), spl_heap_elem(heap, child_idx), cmp_userdata) > 0) {
+			child_idx++; /* next child is bigger */
 		}
 
 		/* swap elements between two levels */
-		if(heap->cmp(bottom, spl_heap_elem(heap, j), cmp_userdata) < 0) {
-			spl_heap_elem_copy(heap, spl_heap_elem(heap, i), spl_heap_elem(heap, j));
+		if(heap->cmp(bottom, spl_heap_elem(heap, child_idx), cmp_userdata) < 0) {
+			spl_heap_elem_copy(heap, spl_heap_elem(heap, parent_idx), spl_heap_elem(heap, child_idx));
 		} else {
 			break;
 		}
@@ -346,7 +345,7 @@ static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void 
 		heap->flags |= SPL_HEAP_CORRUPTED;
 	}
 
-	void *to = spl_heap_elem(heap, i);
+	void *to = spl_heap_elem(heap, parent_idx);
 	if (to != bottom) {
 		spl_heap_elem_copy(heap, to, bottom);
 	}
@@ -355,8 +354,6 @@ static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void 
 /* }}} */
 
 static spl_ptr_heap *spl_ptr_heap_clone(spl_ptr_heap *from) { /* {{{ */
-	int i;
-
 	spl_ptr_heap *heap = emalloc(sizeof(spl_ptr_heap));
 
 	heap->dtor     = from->dtor;
@@ -370,7 +367,7 @@ static spl_ptr_heap *spl_ptr_heap_clone(spl_ptr_heap *from) { /* {{{ */
 	heap->elements = safe_emalloc(from->elem_size, from->max_size, 0);
 	memcpy(heap->elements, from->elements, from->elem_size * from->max_size);
 
-	for (i = 0; i < heap->count; ++i) {
+	for (size_t i = 0; i < heap->count; ++i) {
 		heap->ctor(spl_heap_elem(heap, i));
 	}
 
@@ -384,11 +381,9 @@ static void spl_ptr_heap_destroy(spl_ptr_heap *heap) { /* {{{ */
 		return;
 	}
 
-	int i;
-
 	heap->flags |= SPL_HEAP_WRITE_LOCKED;
 
-	for (i = 0; i < heap->count; ++i) {
+	for (size_t i = 0; i < heap->count; ++i) {
 		heap->dtor(spl_heap_elem(heap, i));
 	}
 
@@ -399,7 +394,7 @@ static void spl_ptr_heap_destroy(spl_ptr_heap *heap) { /* {{{ */
 }
 /* }}} */
 
-static int spl_ptr_heap_count(spl_ptr_heap *heap) { /* {{{ */
+static size_t spl_ptr_heap_count(spl_ptr_heap *heap) { /* {{{ */
 	return heap->count;
 }
 /* }}} */
@@ -534,7 +529,7 @@ static HashTable* spl_heap_object_get_debug_info(const zend_class_entry *ce, zen
 
 	array_init(&heap_array);
 
-	for (zend_ulong i = 0; i < intern->heap->count; ++i) {
+	for (size_t i = 0; i < intern->heap->count; ++i) {
 		if (ce == spl_ce_SplPriorityQueue) {
 			spl_pqueue_elem *pq_elem = spl_heap_elem(intern->heap, i);
 			zval elem;

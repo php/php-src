@@ -66,8 +66,10 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	/* build an array of handles for non-sockets */
 	for (i = 0; (uint32_t)i < max_fd; i++) {
 		if (SAFE_FD_ISSET(i, rfds) || SAFE_FD_ISSET(i, wfds) || SAFE_FD_ISSET(i, efds)) {
-			handles[n_handles] = (HANDLE)(uintptr_t)_get_osfhandle(i);
-			if (handles[n_handles] == INVALID_HANDLE_VALUE) {
+			int _type;
+			int _len = sizeof(_type);
+
+			if (getsockopt((SOCKET)i, SOL_SOCKET, SO_TYPE, (char*)&_type, &_len) == 0 || WSAGetLastError() != WSAENOTSOCK) {
 				/* socket */
 				if (SAFE_FD_ISSET(i, rfds)) {
 					FD_SET((uint32_t)i, &sock_read);
@@ -82,11 +84,14 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 					sock_max_fd = i;
 				}
 			} else {
-				if (SAFE_FD_ISSET(i, rfds) && GetFileType(handles[n_handles]) == FILE_TYPE_PIPE) {
-					num_read_pipes++;
+				handles[n_handles] = (HANDLE)(uintptr_t)_get_osfhandle(i);
+				if (handles[n_handles] != INVALID_HANDLE_VALUE) {
+					if (SAFE_FD_ISSET(i, rfds) && GetFileType(handles[n_handles]) == FILE_TYPE_PIPE) {
+						num_read_pipes++;
+					}
+					handle_slot_to_fd[n_handles] = i;
+					n_handles++;
 				}
-				handle_slot_to_fd[n_handles] = i;
-				n_handles++;
 			}
 		}
 	}

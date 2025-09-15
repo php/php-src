@@ -38,8 +38,6 @@
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
-#undef HAVE_ADABAS
-#undef HAVE_SOLID
 #undef HAVE_SYMLINK
 
 /* its in win32/time.c */
@@ -78,16 +76,13 @@
 /* int and long are still 32bit in 64bit compiles */
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
-/* MSVC.6/NET don't allow 'long long' or know 'intmax_t' */
+/* MSVC.6/NET don't allow 'long long' */
 #define SIZEOF_LONG_LONG 8 /* defined as __int64 */
-#define SIZEOF_INTMAX_T 0
 #define ssize_t SSIZE_T
 #ifdef _WIN64
 # define SIZEOF_SIZE_T 8
-# define SIZEOF_PTRDIFF_T 8
 #else
 # define SIZEOF_SIZE_T 4
-# define SIZEOF_PTRDIFF_T 4
 #endif
 #define SIZEOF_OFF_T 4
 #define HAVE_FNMATCH

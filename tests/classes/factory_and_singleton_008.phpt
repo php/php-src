@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECT--
-Error: Call to private test::__clone() from global scope
+Error: Call to private method test::__clone() from global scope

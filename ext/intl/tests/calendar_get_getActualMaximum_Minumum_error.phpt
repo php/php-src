@@ -1,7 +1,5 @@
 --TEST--
 IntlCalendar::get/getActualMaximum/getActualMinimum(): bad arguments
---INI--
-date.timezone=Atlantic/Azores
 --EXTENSIONS--
 intl
 --FILE--

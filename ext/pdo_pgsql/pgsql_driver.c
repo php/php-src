@@ -39,8 +39,14 @@ static bool pgsql_handle_in_transaction(pdo_dbh_t *dbh);
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
-	size_t i = strlen(message)-1;
+	size_t i = strlen(message);
 	char *tmp;
+	if (UNEXPECTED(i == 0)) {
+		tmp = pemalloc(1, persistent);
+		tmp[0] = '\0';
+		return tmp;
+	}
+	--i;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
 		--i;
@@ -378,11 +384,15 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	zend_string *quoted_str;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	size_t tmp_len;
+	int err;
 
 	switch (paramtype) {
 		case PDO_PARAM_LOB:
 			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
 			escaped = PQescapeByteaConn(H->server, (unsigned char *)ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), &tmp_len);
+			if (escaped == NULL) {
+				return NULL;
+			}
 			quotedlen = tmp_len + 1;
 			quoted = emalloc(quotedlen + 1);
 			memcpy(quoted+1, escaped, quotedlen-2);
@@ -394,7 +404,11 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 		default:
 			quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 			quoted[0] = '\'';
-			quotedlen = PQescapeStringConn(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), NULL);
+			quotedlen = PQescapeStringConn(H->server, quoted + 1, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), &err);
+			if (err) {
+				efree(quoted);
+				return NULL;
+			}
 			quoted[quotedlen + 1] = '\'';
 			quoted[quotedlen + 2] = '\0';
 			quotedlen += 2;

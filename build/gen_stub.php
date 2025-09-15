@@ -54,7 +54,7 @@ function processDirectory(string $dir, Context $context): array {
     );
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-        if (preg_match('/\.stub\.php$/', $pathName)) {
+        if (substr($pathName, -9) === '.stub.php') {
             $pathNames[] = $pathName;
         }
     }
@@ -84,7 +84,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
 
             $stubCode = file_get_contents($stubFile);
-            $stubHash = computeStubHash($stubCode);
+            $stubHash = sha1(str_replace("\r\n", "\n", $stubCode));
             $oldStubHash = extractStubHash($arginfoFile);
             if ($stubHash === $oldStubHash && !$context->forceParse) {
                 /* Stub file did not change, do not regenerate. */
@@ -151,10 +151,6 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
         echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
     }
-}
-
-function computeStubHash(string $stubCode): string {
-    return sha1(str_replace("\r\n", "\n", $stubCode));
 }
 
 function extractStubHash(string $arginfoFile): ?string {
@@ -361,77 +357,49 @@ class SimpleType {
         return $this->isBuiltin && $this->name === 'mixed';
     }
 
-    public function toTypeCode(): string {
+    private function toTypeInfo(): array {
         assert($this->isBuiltin);
+
         switch ($this->name) {
-            case "bool":
-                return "_IS_BOOL";
-            case "int":
-                return "IS_LONG";
-            case "float":
-                return "IS_DOUBLE";
-            case "string":
-                return "IS_STRING";
-            case "array":
-                return "IS_ARRAY";
-            case "object":
-                return "IS_OBJECT";
-            case "void":
-                return "IS_VOID";
-            case "callable":
-                return "IS_CALLABLE";
-            case "mixed":
-                return "IS_MIXED";
-            case "static":
-                return "IS_STATIC";
-            case "never":
-                return "IS_NEVER";
             case "null":
-                return "IS_NULL";
+                return ["IS_NULL", "MAY_BE_NULL"];
             case "false":
-                return "IS_FALSE";
+                return ["IS_FALSE", "MAY_BE_FALSE"];
             case "true":
-                return "IS_TRUE";
+                return ["IS_TRUE", "MAY_BE_TRUE"];
+            case "bool":
+                return ["_IS_BOOL", "MAY_BE_BOOL"];
+            case "int":
+                return ["IS_LONG", "MAY_BE_LONG"];
+            case "float":
+                return ["IS_DOUBLE", "MAY_BE_DOUBLE"];
+            case "string":
+                return ["IS_STRING", "MAY_BE_STRING"];
+            case "array":
+                return ["IS_ARRAY", "MAY_BE_ARRAY"];
+            case "object":
+                return ["IS_OBJECT", "MAY_BE_OBJECT"];
+            case "callable":
+                return ["IS_CALLABLE", "MAY_BE_CALLABLE"];
+            case "mixed":
+                return ["IS_MIXED", "MAY_BE_ANY"];
+            case "void":
+                return ["IS_VOID", "MAY_BE_VOID"];
+            case "static":
+                return ["IS_STATIC", "MAY_BE_STATIC"];
+            case "never":
+                return ["IS_NEVER", "MAY_BE_NEVER"];
             default:
                 throw new Exception("Not implemented: $this->name");
         }
     }
 
-    public function toTypeMask(): string {
-        assert($this->isBuiltin);
+    public function toTypeCode(): string {
+        return $this->toTypeInfo()[0];
+    }
 
-        switch ($this->name) {
-            case "null":
-                return "MAY_BE_NULL";
-            case "false":
-                return "MAY_BE_FALSE";
-            case "true":
-                return "MAY_BE_TRUE";
-            case "bool":
-                return "MAY_BE_BOOL";
-            case "int":
-                return "MAY_BE_LONG";
-            case "float":
-                return "MAY_BE_DOUBLE";
-            case "string":
-                return "MAY_BE_STRING";
-            case "array":
-                return "MAY_BE_ARRAY";
-            case "object":
-                return "MAY_BE_OBJECT";
-            case "callable":
-                return "MAY_BE_CALLABLE";
-            case "mixed":
-                return "MAY_BE_ANY";
-            case "void":
-                return "MAY_BE_VOID";
-            case "static":
-                return "MAY_BE_STATIC";
-            case "never":
-                return "MAY_BE_NEVER";
-            default:
-                throw new Exception("Not implemented: $this->name");
-        }
+    public function toTypeMask(): string {
+        return $this->toTypeInfo()[1];
     }
 
     public function toOptimizerTypeMaskForArrayKey(): string {
@@ -898,13 +866,6 @@ interface VariableLikeName {
 
 abstract class AbstractConstName implements VariableLikeName
 {
-    public function equals(AbstractConstName $const): bool
-    {
-        return $this->__toString() === $const->__toString();
-    }
-
-    abstract public function isClassConst(): bool;
-
     public function isUnknown(): bool
     {
         return strtolower($this->__toString()) === "unknown";
@@ -920,11 +881,6 @@ class ConstName extends AbstractConstName {
             $const = $namespace->toString() . '\\' . $const;
         }
         $this->const = $const;
-    }
-
-    public function isClassConst(): bool
-    {
-        return false;
     }
 
     public function isUnknown(): bool
@@ -955,11 +911,6 @@ class ClassConstName extends AbstractConstName {
     {
         $this->class = $class;
         $this->const = $const;
-    }
-
-    public function isClassConst(): bool
-    {
-        return true;
     }
 
     public function __toString(): string
@@ -1000,7 +951,6 @@ interface FunctionOrMethodName {
     public function getMethodSynopsisFilename(): string;
     public function getNameForAttributes(): string;
     public function __toString(): string;
-    public function isMethod(): bool;
     public function isConstructor(): bool;
     public function isDestructor(): bool;
 }
@@ -1009,9 +959,6 @@ class FunctionName implements FunctionOrMethodName {
     private /* readonly */ Name $name;
 
     public function __construct(Name $name) {
-        if ($name->name === '_clone') {
-            $name = new Name('clone', $name->getAttributes());
-        }
         $this->name = $name;
     }
 
@@ -1063,10 +1010,6 @@ class FunctionName implements FunctionOrMethodName {
         return $this->name->toString();
     }
 
-    public function isMethod(): bool {
-        return false;
-    }
-
     public function isConstructor(): bool {
         return false;
     }
@@ -1110,10 +1053,6 @@ class MethodName implements FunctionOrMethodName {
 
     public function __toString(): string {
         return "$this->className::$this->methodName";
-    }
-
-    public function isMethod(): bool {
-        return true;
     }
 
     public function isConstructor(): bool {
@@ -1247,6 +1186,119 @@ class ReturnInfo {
     }
 }
 
+class VersionFlags {
+
+    /**
+     * Keys are the PHP versions, values are arrays of flags
+     */
+    private array $flagsByVersion;
+
+    public function __construct(array $baseFlags) {
+        $this->flagsByVersion = [];
+        foreach (ALL_PHP_VERSION_IDS as $version) {
+            $this->flagsByVersion[$version] = $baseFlags;
+        }
+    }
+
+    public function addForVersionsAbove(string $flag, int $minimumVersionId): void {
+        $write = false;
+
+        foreach (ALL_PHP_VERSION_IDS as $version) {
+            if ($version === $minimumVersionId || $write === true) {
+                $this->flagsByVersion[$version][] = $flag;
+                $write = true;
+            }
+        }
+    }
+
+    public function isEmpty(): bool {
+        foreach (ALL_PHP_VERSION_IDS as $version) {
+            if ($this->flagsByVersion[$version] !== []) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function generateVersionDependentFlagCode(
+        string $codeTemplate,
+        ?int $phpVersionIdMinimumCompatibility,
+        ?int $phpVersionIdMaxCompatibility = null
+    ): string {
+        $flagsByPhpVersions = $this->flagsByVersion;
+        $phpVersions = ALL_PHP_VERSION_IDS;
+        sort($phpVersions);
+        $currentPhpVersion = end($phpVersions);
+
+        // No version compatibility is needed
+        if ($phpVersionIdMinimumCompatibility === null) {
+            if (empty($flagsByPhpVersions[$currentPhpVersion])) {
+                return '';
+            }
+            return sprintf($codeTemplate, implode("|", $flagsByPhpVersions[$currentPhpVersion]));
+        }
+
+        ksort($flagsByPhpVersions);
+        // Remove flags which depend on a PHP version below the minimally supported one
+        $index = array_search($phpVersionIdMinimumCompatibility, array_keys($flagsByPhpVersions));
+        if ($index === false) {
+            throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMinimumCompatibility\"");
+        }
+        $flagsByPhpVersions = array_slice($flagsByPhpVersions, $index, null, true);
+        if ($phpVersionIdMaxCompatibility !== null) {
+            // Remove flags which depend on a PHP version above the maximally supported one
+            $index = array_search($phpVersionIdMaxCompatibility, array_keys($flagsByPhpVersions));
+            if ($index === false) {
+                throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMaxCompatibility\"");
+            }
+            $flagsByPhpVersions = array_slice($flagsByPhpVersions, 0, $index, true);
+        }
+
+        // Remove version-specific flags which don't differ from the previous one
+        // Also populate '0' values
+        $previousVersionId = null;
+        foreach ($flagsByPhpVersions as $versionId => $versionFlags) {
+            if ($versionFlags === []) {
+                $versionFlags = ['0'];
+                $flagsByPhpVersions[$versionId] = ['0'];
+            }
+            if ($previousVersionId !== null && $flagsByPhpVersions[$previousVersionId] === $versionFlags) {
+                unset($flagsByPhpVersions[$versionId]);
+            } else {
+                $previousVersionId = $versionId;
+            }
+        }
+
+        $flagCount = count($flagsByPhpVersions);
+
+        // Do not add a condition unnecessarily when the only version is the same as the minimally supported one
+        if ($flagCount === 1) {
+            reset($flagsByPhpVersions);
+            $firstVersion = key($flagsByPhpVersions);
+            if ($firstVersion === $phpVersionIdMinimumCompatibility) {
+                return sprintf($codeTemplate, implode("|", reset($flagsByPhpVersions)));
+            }
+        }
+
+        // Add the necessary conditions around the code using the version-specific flags
+        $code = '';
+        $i = 0;
+        foreach (array_reverse($flagsByPhpVersions, true) as $version => $versionFlags) {
+            $if = $i === 0 ? "#if" : "#elif";
+            $endif = $i === $flagCount - 1 ? "#endif\n" : "";
+
+            $code .= "$if (PHP_VERSION_ID >= $version)\n";
+
+            $code .= sprintf($codeTemplate, implode("|", $versionFlags));
+            $code .= $endif;
+
+            $i++;
+        }
+
+        return $code;
+    }
+}
+
 class FuncInfo {
     public /* readonly */ FunctionOrMethodName $name;
     private /* readonly */ int $classFlags;
@@ -1317,10 +1369,10 @@ class FuncInfo {
 
     public function isMethod(): bool
     {
-        return $this->name->isMethod();
+        return $this->name instanceof MethodName;
     }
 
-    public function isFinalMethod(): bool
+    private function isFinalMethod(): bool
     {
         return ($this->flags & Modifiers::FINAL) || ($this->classFlags & Modifiers::FINAL);
     }
@@ -1331,7 +1383,7 @@ class FuncInfo {
     }
 
     /** @return string[] */
-    public function getModifierNames(): array
+    private function getModifierNames(): array
     {
         if (!$this->isMethod()) {
             return [];
@@ -1371,7 +1423,7 @@ class FuncInfo {
         return false;
     }
 
-    public function equalsApartFromNameAndRefcount(FuncInfo $other): bool {
+    private function equalsApartFromNameAndRefcount(FuncInfo $other): bool {
         if (count($this->args) !== count($other->args)) {
             return false;
         }
@@ -1414,27 +1466,21 @@ class FuncInfo {
             return null;
         }
 
-        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
-
         $code = '';
-
-        if (!$php84MinimumCompatibility) {
-            $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
-        }
-
+        $infos = '';
         foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
             $code .= "ZEND_FRAMELESS_FUNCTION({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity});\n";
+            $infos .= "\t{ ZEND_FRAMELESS_FUNCTION_NAME({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity}), {$framelessFunctionInfo->arity} },\n";
         }
 
         $code .= 'static const zend_frameless_function_info ' . $this->getFramelessFunctionInfosName() . "[] = {\n";
-        foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
-            $code .= "\t{ ZEND_FRAMELESS_FUNCTION_NAME({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity}), {$framelessFunctionInfo->arity} },\n";
-        }
+        $code .= $infos;
         $code .= "\t{ 0 },\n";
         $code .= "};\n";
 
+        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
         if (!$php84MinimumCompatibility) {
-            $code .= "#endif\n";
+            return "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n$code#endif\n";
         }
 
         return $code;
@@ -1445,14 +1491,6 @@ class FuncInfo {
     }
 
     public function getFunctionEntry(): string {
-        $code = "";
-
-        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
-        $isVanillaEntry = $this->alias === null && !$this->supportsCompileTimeEval && $this->exposedDocComment === null && empty($this->framelessFunctionInfos);
-        $argInfoName = $this->getArgInfoName();
-        $flagsByPhpVersions = $this->getArginfoFlagsByPhpVersions();
-        $functionEntryCode = null;
-
         if (!empty($this->framelessFunctionInfos)) {
             if ($this->isMethod()) {
                 throw new Exception('Frameless methods are not supported yet');
@@ -1465,6 +1503,10 @@ class FuncInfo {
             }
         }
 
+        $isVanillaEntry = $this->alias === null && !$this->supportsCompileTimeEval && $this->exposedDocComment === null && empty($this->framelessFunctionInfos);
+        $argInfoName = $this->getArgInfoName();
+        $flagsByPhpVersions = $this->getArginfoFlagsByPhpVersions();
+
         if ($this->isMethod()) {
             $zendName = '"' . $this->name->methodName . '"';
             if ($this->alias) {
@@ -1475,80 +1517,60 @@ class FuncInfo {
                 } else {
                     throw new Error("Cannot happen");
                 }
+            } elseif ($this->flags & Modifiers::ABSTRACT) {
+                $name = "NULL";
             } else {
-                if ($this->flags & Modifiers::ABSTRACT) {
-                    $name = "NULL";
-                } else {
-                    $name = "zim_" . $this->name->getDeclarationClassName() . "_" . $this->name->methodName;
+                $name = "zim_" . $this->name->getDeclarationClassName() . "_" . $this->name->methodName;
 
-                    if ($isVanillaEntry) {
-                        $template = "\tZEND_ME(" . $this->name->getDeclarationClassName() . ", " . $this->name->methodName . ", $argInfoName, %s)\n";
-                        $flagsCode = generateVersionDependentFlagCode(
-                            $template,
-                            $flagsByPhpVersions,
-                            $this->minimumPhpVersionIdCompatibility
-                        );
-                        $functionEntryCode = rtrim($flagsCode);
-                    }
+                if ($isVanillaEntry) {
+                    $template = "\tZEND_ME(" . $this->name->getDeclarationClassName() . ", " . $this->name->methodName . ", $argInfoName, %s)\n";
+                    $flagsCode = $flagsByPhpVersions->generateVersionDependentFlagCode(
+                        $template,
+                        $this->minimumPhpVersionIdCompatibility
+                    );
+                    return rtrim($flagsCode) . "\n";
                 }
             }
         } else if ($this->name instanceof FunctionName) {
             $functionName = $this->name->getFunctionName();
             $declarationName = $this->alias ? $this->alias->getNonNamespacedName() : $this->name->getDeclarationName();
+            $name = "zif_$declarationName";
 
             if ($this->name->getNamespace()) {
                 $namespace = addslashes($this->name->getNamespace());
                 $zendName = "ZEND_NS_NAME(\"$namespace\", \"$functionName\")";
-                $name = "zif_$declarationName";
             } else {
-                $zendName = '"' . $functionName . '"';
-                $name = "zif_$declarationName";
-
                 // Can only use ZEND_FE() if we have no flags for *all* versions
-                $hasFlags = false;
-                foreach ($flagsByPhpVersions as $flags) {
-                    if ($flags !== ['0']) {
-                        $hasFlags = true;
-                        break;
-                    }
+                if ($isVanillaEntry && $flagsByPhpVersions->isEmpty()) {
+                    return "\tZEND_FE($declarationName, $argInfoName)\n";
                 }
-                if ($isVanillaEntry && !$hasFlags) {
-                    $functionEntryCode = "\tZEND_FE($declarationName, $argInfoName)";
-                }
+                $zendName = '"' . $functionName . '"';
             }
         } else {
             throw new Error("Cannot happen");
         }
 
-        if ($functionEntryCode !== null) {
-            $code .= "$functionEntryCode\n";
-        } else {
-            if (!$php84MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
-            }
+        $docComment = $this->exposedDocComment ? '"' . $this->exposedDocComment->escape() . '"' : "NULL";
+        $framelessFuncInfosName = !empty($this->framelessFunctionInfos) ? $this->getFramelessFunctionInfosName() : "NULL";
 
-            $php84AndAboveFlags = array_slice($flagsByPhpVersions, 5, null, true);
-            $docComment = $this->exposedDocComment ? '"' . $this->exposedDocComment->escape() . '"' : "NULL";
-            $framelessFuncInfosName = !empty($this->framelessFunctionInfos) ? $this->getFramelessFunctionInfosName() : "NULL";
+        // Assume 8.4+ here, if older versions are supported this is conditional
+        $code = $flagsByPhpVersions->generateVersionDependentFlagCode(
+            "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s, $framelessFuncInfosName, $docComment)\n",
+            PHP_84_VERSION_ID
+        );
 
-            $code .= generateVersionDependentFlagCode(
-                "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s, $framelessFuncInfosName, $docComment)\n",
-                $php84AndAboveFlags,
-                PHP_84_VERSION_ID
+        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
+        if (!$php84MinimumCompatibility) {
+            $code = "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n$code";
+            $code .= "#else\n";
+
+            $code .= $flagsByPhpVersions->generateVersionDependentFlagCode(
+                "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n",
+                $this->minimumPhpVersionIdCompatibility,
+                PHP_83_VERSION_ID
             );
 
-            if (!$php84MinimumCompatibility) {
-                $code .= "#else\n";
-
-                $flags = array_slice($flagsByPhpVersions, 0, 4, true);
-                $code .= generateVersionDependentFlagCode(
-                    "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n",
-                    $flags,
-                    $this->minimumPhpVersionIdCompatibility
-                );
-
-                $code .= "#endif\n";
-            }
+            $code .= "#endif\n";
         }
 
         return $code;
@@ -1589,8 +1611,7 @@ class FuncInfo {
         $this->minimumPhpVersionIdCompatibility = $minimumPhpVersionIdCompatibility;
     }
 
-    /** @return array<int, string[]> */
-    private function getArginfoFlagsByPhpVersions(): array
+    private function getArginfoFlagsByPhpVersions(): VersionFlags
     {
         $flags = [];
 
@@ -1628,39 +1649,21 @@ class FuncInfo {
             }
         }
 
-        $php82AndAboveFlags = $flags;
+        $flags = new VersionFlags($flags);
+
         if ($this->isMethod() === false && $this->supportsCompileTimeEval) {
-            $php82AndAboveFlags[] = "ZEND_ACC_COMPILE_TIME_EVAL";
+            $flags->addForVersionsAbove("ZEND_ACC_COMPILE_TIME_EVAL", PHP_82_VERSION_ID);
         }
 
-        $php85AndAboveFlags = $php82AndAboveFlags;
         foreach ($this->attributes as $attr) {
             switch ($attr->class) {
                 case "NoDiscard":
-                    $php85AndAboveFlags[] = "ZEND_ACC_NODISCARD";
+                    $flags->addForVersionsAbove("ZEND_ACC_NODISCARD", PHP_85_VERSION_ID);
                     break;
             }
         }
 
-        if (empty($flags)) {
-            $flags[] = "0";
-        }
-        if (empty($php82AndAboveFlags)) {
-            $php82AndAboveFlags[] = "0";
-        }
-        if (empty($php85AndAboveFlags)) {
-            $php85AndAboveFlags[] = "0";
-        }
-
-        return [
-            PHP_70_VERSION_ID => $flags,
-            PHP_80_VERSION_ID => $flags,
-            PHP_81_VERSION_ID => $flags,
-            PHP_82_VERSION_ID => $php82AndAboveFlags,
-            PHP_83_VERSION_ID => $php82AndAboveFlags,
-            PHP_84_VERSION_ID => $php82AndAboveFlags,
-            PHP_85_VERSION_ID => $php85AndAboveFlags,
-        ];
+        return $flags;
     }
 
     private function generateRefSect1(DOMDocument $doc, string $role): DOMElement {
@@ -2358,11 +2361,14 @@ class EvaluatedValue
         $this->isUnknownConstValue = $isUnknownConstValue;
     }
 
-    public function initializeZval(string $zvalName): string
+    public function initializeZval(string $zvalName, bool $alreadyExists = false, string $forStringDef = ''): string
     {
         $cExpr = $this->getCExpr();
 
-        $code = "\tzval $zvalName;\n";
+        $code = '';
+        if (!$alreadyExists) {
+            $code = "\tzval $zvalName;\n";
+        }
 
         if ($this->type->isNull()) {
             $code .= "\tZVAL_NULL(&$zvalName);\n";
@@ -2382,8 +2388,11 @@ class EvaluatedValue
             if ($cExpr === '""') {
                 $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
             } else {
-                $code .= "\tzend_string *{$zvalName}_str = zend_string_init($cExpr, strlen($cExpr), 1);\n";
-                $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
+                if ($forStringDef === '') {
+                    $forStringDef = "{$zvalName}_str";
+                }
+                $code .= "\tzend_string *$forStringDef = zend_string_init($cExpr, strlen($cExpr), 1);\n";
+                $code .= "\tZVAL_STR(&$zvalName, $forStringDef);\n";
             }
         } elseif ($this->type->isArray()) {
             if ($cExpr == '[]') {
@@ -2454,10 +2463,7 @@ abstract class VariableLike
 
     abstract public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void;
 
-    /**
-     * @return array<int, string[]>
-     */
-    protected function getFlagsByPhpVersion(): array
+    protected function getFlagsByPhpVersion(): VersionFlags
     {
         $flags = "ZEND_ACC_PUBLIC";
         if ($this->flags & Modifiers::PROTECTED) {
@@ -2466,15 +2472,7 @@ abstract class VariableLike
             $flags = "ZEND_ACC_PRIVATE";
         }
 
-        return [
-            PHP_70_VERSION_ID => [$flags],
-            PHP_80_VERSION_ID => [$flags],
-            PHP_81_VERSION_ID => [$flags],
-            PHP_82_VERSION_ID => [$flags],
-            PHP_83_VERSION_ID => [$flags],
-            PHP_84_VERSION_ID => [$flags],
-            PHP_85_VERSION_ID => [$flags],
-        ];
+        return new VersionFlags([$flags]);
     }
 
     protected function getTypeCode(string $variableLikeName, string &$code): string
@@ -2575,23 +2573,6 @@ abstract class VariableLike
         }
     }
 
-    /**
-     * @param array<int, string[]> $flags
-     * @return array<int, string[]>
-     */
-    protected function addFlagForVersionsAbove(array $flags, string $flag, int $minimumVersionId): array
-    {
-        $write = false;
-
-        foreach ($flags as $version => $versionFlags) {
-            if ($version === $minimumVersionId || $write === true) {
-                $flags[$version][] = $flag;
-                $write = true;
-            }
-        }
-
-        return $flags;
-    }
 }
 
 class ConstInfo extends VariableLike
@@ -2688,41 +2669,35 @@ class ConstInfo extends VariableLike
         return $this->valueString;
     }
 
-    public function getPredefinedConstantTerm(DOMDocument $doc, int $indentationLevel): DOMElement {
+    private function getPredefinedConstantElement(
+        DOMDocument $doc,
+        int $indentationLevel,
+        string $name
+    ): DOMElement {
         $indentation = str_repeat(" ", $indentationLevel);
 
-        $termElement = $doc->createElement("term");
+        $element = $doc->createElement($name);
 
         $constantElement = $doc->createElement("constant");
         $constantElement->textContent = $this->name->__toString();
 
         $typeElement = ($this->phpDocType ?? $this->type)->getTypeForDoc($doc);
 
-        $termElement->appendChild(new DOMText("\n$indentation "));
-        $termElement->appendChild($constantElement);
-        $termElement->appendChild(new DOMText("\n$indentation ("));
-        $termElement->appendChild($typeElement);
-        $termElement->appendChild(new DOMText(")\n$indentation"));
+        $element->appendChild(new DOMText("\n$indentation "));
+        $element->appendChild($constantElement);
+        $element->appendChild(new DOMText("\n$indentation ("));
+        $element->appendChild($typeElement);
+        $element->appendChild(new DOMText(")\n$indentation"));
 
-        return $termElement;
+        return $element;
+    }
+
+    public function getPredefinedConstantTerm(DOMDocument $doc, int $indentationLevel): DOMElement {
+        return $this->getPredefinedConstantElement($doc, $indentationLevel, "term");
     }
 
     public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel): DOMElement {
-        $indentation = str_repeat(" ", $indentationLevel);
-
-        $entryElement = $doc->createElement("entry");
-
-        $constantElement = $doc->createElement("constant");
-        $constantElement->textContent = $this->name->__toString();
-        $typeElement = ($this->phpDocType ?? $this->type)->getTypeForDoc($doc);
-
-        $entryElement->appendChild(new DOMText("\n$indentation "));
-        $entryElement->appendChild($constantElement);
-        $entryElement->appendChild(new DOMText("\n$indentation ("));
-        $entryElement->appendChild($typeElement);
-        $entryElement->appendChild(new DOMText(")\n$indentation"));
-
-        return $entryElement;
+        return $this->getPredefinedConstantElement($doc, $indentationLevel, "entry");
     }
 
     public function discardInfoForOldPhpVersions(?int $phpVersionIdMinimumCompatibility): void {
@@ -2754,7 +2729,7 @@ class ConstInfo extends VariableLike
 
         // Condition will be added by generateCodeWithConditions()
 
-        if ($this->name->isClassConst()) {
+        if ($this->name instanceof ClassConstName) {
             $code = $this->getClassConstDeclaration($value, $allConstInfos);
         } else {
             $code = $this->getGlobalConstDeclaration($value);
@@ -2781,24 +2756,36 @@ class ConstInfo extends VariableLike
         if ($this->isDeprecated) {
             $flags .= " | CONST_DEPRECATED";
         }
+
+        $code = "\t";
+        if ($this->attributes !== []) {
+            if ($this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_85_VERSION_ID) {
+                // Registration only returns the constant since PHP 8.5, it's
+                // not worth the bloat to add two different registration blocks
+                // with conditions for the PHP version
+                $constVarName = 'const_' . $constName;
+                $code .= "zend_constant *$constVarName = ";
+            }
+        }
+
         if ($value->type->isNull()) {
-            return "\tREGISTER_NULL_CONSTANT(\"$constName\", $flags);\n";
+            return $code . "REGISTER_NULL_CONSTANT(\"$constName\", $flags);\n";
         }
 
         if ($value->type->isBool()) {
-            return "\tREGISTER_BOOL_CONSTANT(\"$constName\", " . ($cExpr ?: ($constValue ? "true" : "false")) . ", $flags);\n";
+            return $code . "REGISTER_BOOL_CONSTANT(\"$constName\", " . ($cExpr ?: ($constValue ? "true" : "false")) . ", $flags);\n";
         }
 
         if ($value->type->isInt()) {
-            return "\tREGISTER_LONG_CONSTANT(\"$constName\", " . ($cExpr ?: (int) $constValue) . ", $flags);\n";
+            return $code . "REGISTER_LONG_CONSTANT(\"$constName\", " . ($cExpr ?: (int) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isFloat()) {
-            return "\tREGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cExpr ?: (float) $constValue) . ", $flags);\n";
+            return $code . "REGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cExpr ?: (float) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isString()) {
-            return "\tREGISTER_STRING_CONSTANT(\"$constName\", " . ($cExpr ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
+            return $code . "REGISTER_STRING_CONSTANT(\"$constName\", " . ($cExpr ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
         }
 
         throw new Exception("Unimplemented constant type");
@@ -2809,7 +2796,8 @@ class ConstInfo extends VariableLike
     {
         $constName = $this->name->getDeclarationName();
 
-        $zvalCode = $value->initializeZval("const_{$constName}_value", $allConstInfos);
+        // TODO $allConstInfos is unused
+        $zvalCode = $value->initializeZval("const_{$constName}_value");
 
         $code = "\n" . $zvalCode;
 
@@ -2840,9 +2828,8 @@ class ConstInfo extends VariableLike
             }
             $template .= "zend_declare_typed_class_constant(class_entry, $nameCode, &const_{$constName}_value, %s, $commentCode, $typeCode);\n";
 
-            $code .= generateVersionDependentFlagCode(
+            $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode(
                 $template,
-                $this->getFlagsByPhpVersion(),
                 $this->phpVersionIdMinimumCompatibility
             );
         }
@@ -2858,9 +2845,8 @@ class ConstInfo extends VariableLike
                 $template = "\t";
             }
             $template .= "zend_declare_class_constant_ex(class_entry, $nameCode, &const_{$constName}_value, %s, $commentCode);\n";
-            $code .= generateVersionDependentFlagCode(
+            $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode(
                 $template,
-                $this->getFlagsByPhpVersion(),
                 $this->phpVersionIdMinimumCompatibility
             );
         }
@@ -2910,20 +2896,17 @@ class ConstInfo extends VariableLike
         throw new Exception("Unimplemented constant type");
     }
 
-    /**
-     * @return array<int, string[]>
-     */
-    protected function getFlagsByPhpVersion(): array
+    protected function getFlagsByPhpVersion(): VersionFlags
     {
         $flags = parent::getFlagsByPhpVersion();
 
         // $this->isDeprecated also accounts for any #[\Deprecated] attributes
         if ($this->isDeprecated) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
         }
 
         if ($this->flags & Modifiers::FINAL) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_FINAL", PHP_81_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_FINAL", PHP_81_VERSION_ID);
         }
 
         return $flags;
@@ -2943,14 +2926,7 @@ class ConstInfo extends VariableLike
     }
 }
 
-class PropertyInfo extends VariableLike
-{
-    private /* readonly */ int $classFlags;
-    public /* readonly */ PropertyName $name;
-    private /* readonly */ ?Expr $defaultValue;
-    private /* readonly */ ?string $defaultValueString;
-    private /* readonly */ bool $isDocReadonly;
-    private /* readonly */ bool $isVirtual;
+class StringBuilder {
 
     // Map possible variable names to the known string constant, see
     // ZEND_KNOWN_STRINGS
@@ -3053,7 +3029,89 @@ class PropertyInfo extends VariableLike
         "username" => "ZEND_STR_USERNAME",
         "password" => "ZEND_STR_PASSWORD",
         "clone" => "ZEND_STR_CLONE",
+        '8.0' => 'ZEND_STR_8_DOT_0',
+        '8.1' => 'ZEND_STR_8_DOT_1',
+        '8.2' => 'ZEND_STR_8_DOT_2',
+        '8.3' => 'ZEND_STR_8_DOT_3',
+        '8.4' => 'ZEND_STR_8_DOT_4',
+        '8.5' => 'ZEND_STR_8_DOT_5',
     ];
+
+    /**
+     * Get an array of three strings:
+     *   - declaration of zend_string, if needed, or empty otherwise
+     *   - usage of that zend_string, or usage with ZSTR_KNOWN()
+     *   - freeing the zend_string, if needed
+     *
+     * @param string $varName
+     * @param string $strContent
+     * @param ?int $minPHPCompatibility
+     * @param bool $interned
+     * @return string[]
+     */
+    public static function getString(
+        string $varName,
+        string $content,
+        ?int $minPHPCompatibility,
+        bool $interned = false
+    ): array {
+        // Generally strings will not be known
+        $initFn = $interned ? 'zend_string_init_interned' : 'zend_string_init';
+        $result = [
+            "\tzend_string *$varName = $initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n",
+            $varName,
+            "\tzend_string_release($varName);\n"
+        ];
+        // For attribute values that are not freed
+        if ($varName === '') {
+            $result[0] = "$initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n";
+        }
+        // If not set, use the current latest version
+        $allVersions = ALL_PHP_VERSION_IDS;
+        $minPhp = $minPHPCompatibility ?? end($allVersions);
+        if ($minPhp < PHP_80_VERSION_ID) {
+            // No known strings in 7.0
+            return $result;
+        }
+        $include = self::PHP_80_KNOWN;
+        switch ($minPhp) {
+            case PHP_85_VERSION_ID:
+                $include = array_merge($include, self::PHP_85_KNOWN);
+                // Intentional fall through
+
+            case PHP_84_VERSION_ID:
+                $include = array_merge($include, self::PHP_84_KNOWN);
+                // Intentional fall through
+
+            case PHP_83_VERSION_ID:
+            case PHP_82_VERSION_ID:
+                $include = array_merge($include, self::PHP_82_KNOWN);
+                // Intentional fall through
+
+            case PHP_81_VERSION_ID:
+                $include = array_merge($include, self::PHP_81_KNOWN);
+                break;
+        }
+        if (array_key_exists($content, $include)) {
+            $knownStr = $include[$content];
+            return [
+                '',
+                "ZSTR_KNOWN($knownStr)",
+                '',
+            ];
+        }
+        return $result;
+    }
+}
+
+class PropertyInfo extends VariableLike
+{
+    private /* readonly */ int $classFlags;
+    public /* readonly */ PropertyName $name;
+    private /* readonly */ ?Expr $defaultValue;
+    private /* readonly */ ?string $defaultValueString;
+    private /* readonly */ bool $isDocReadonly;
+    private /* readonly */ bool $isVirtual;
 
     /**
      * @param AttributeInfo[] $attributes
@@ -3135,7 +3193,11 @@ class PropertyInfo extends VariableLike
             $code .= $defaultValue->initializeZval($zvalName);
         }
 
-        [$stringInit, $nameCode, $stringRelease] = $this->getString($propertyName);
+        [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+            "property_{$propertyName}_name",
+            $propertyName,
+            $this->phpVersionIdMinimumCompatibility
+        );
         $code .= $stringInit;
 
         if ($this->exposedDocComment) {
@@ -3159,9 +3221,8 @@ class PropertyInfo extends VariableLike
             $template .= "zend_declare_property_ex(class_entry, $nameCode, &$zvalName, %s, $commentCode);\n";
         }
 
-        $code .= generateVersionDependentFlagCode(
+        $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode(
             $template,
-            $this->getFlagsByPhpVersion(),
             $this->phpVersionIdMinimumCompatibility
         );
 
@@ -3170,83 +3231,26 @@ class PropertyInfo extends VariableLike
         return $code;
     }
 
-    /**
-     * Get an array of three strings:
-     *   - declaration of zend_string, if needed, or empty otherwise
-     *   - usage of that zend_string, or usage with ZSTR_KNOWN()
-     *   - freeing the zend_string, if needed
-     *
-     * @param string $propName
-     * @return string[]
-     */
-    private function getString(string $propName): array {
-        // Generally strings will not be known
-        $nameCode = "property_{$propName}_name";
-        $result = [
-            "\tzend_string *$nameCode = zend_string_init(\"$propName\", sizeof(\"$propName\") - 1, 1);\n",
-            $nameCode,
-            "\tzend_string_release($nameCode);\n"
-        ];
-        // If not set, use the current latest version
-        $allVersions = ALL_PHP_VERSION_IDS;
-        $minPhp = $this->phpVersionIdMinimumCompatibility ?? end($allVersions);
-        if ($minPhp < PHP_80_VERSION_ID) {
-            // No known strings in 7.0
-            return $result;
-        }
-        $include = self::PHP_80_KNOWN;
-        switch ($minPhp) {
-            case PHP_85_VERSION_ID:
-                $include = array_merge($include, self::PHP_85_KNOWN);
-                // Intentional fall through
-
-            case PHP_84_VERSION_ID:
-                $include = array_merge($include, self::PHP_84_KNOWN);
-                // Intentional fall through
-
-            case PHP_83_VERSION_ID:
-            case PHP_82_VERSION_ID:
-                $include = array_merge($include, self::PHP_82_KNOWN);
-                // Intentional fall through
-
-            case PHP_81_VERSION_ID:
-                $include = array_merge($include, self::PHP_81_KNOWN);
-                break;
-        }
-        if (array_key_exists($propName, $include)) {
-            $knownStr = $include[$propName];
-            return [
-                '',
-                "ZSTR_KNOWN($knownStr)",
-                '',
-            ];
-        }
-        return $result;
-    }
-
-    /**
-     * @return array<int, string[]>
-     */
-    protected function getFlagsByPhpVersion(): array
+    protected function getFlagsByPhpVersion(): VersionFlags
     {
         $flags = parent::getFlagsByPhpVersion();
 
         if ($this->flags & Modifiers::STATIC) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_STATIC", PHP_70_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_STATIC", PHP_70_VERSION_ID);
         }
 
         if ($this->flags & Modifiers::FINAL) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_FINAL", PHP_84_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_FINAL", PHP_84_VERSION_ID);
         }
 
         if ($this->flags & Modifiers::READONLY) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_81_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_READONLY", PHP_81_VERSION_ID);
         } elseif ($this->classFlags & Modifiers::READONLY) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_82_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_READONLY", PHP_82_VERSION_ID);
         }
 
         if ($this->isVirtual) {
-            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_VIRTUAL", PHP_84_VERSION_ID);
+            $flags->addForVersionsAbove("ZEND_ACC_VIRTUAL", PHP_84_VERSION_ID);
         }
 
         return $flags;
@@ -3312,42 +3316,66 @@ class AttributeInfo {
         $this->args = $args;
     }
 
-    /** @param array<string, ConstInfo> $allConstInfos */
-    public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility): string {
-        $php82MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_82_VERSION_ID;
-        $php84MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_84_VERSION_ID;
-        /* see ZEND_KNOWN_STRINGS in Zend/strings.h */
-        $knowns = [
-            "message" => "ZEND_STR_MESSAGE",
-        ];
-        if ($php82MinimumCompatibility) {
-            $knowns["SensitiveParameter"] = "ZEND_STR_SENSITIVEPARAMETER";
-        }
-        if ($php84MinimumCompatibility) {
-            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED_CAPITALIZED";
-            $knowns["since"] = "ZEND_STR_SINCE";
-        }
-
-        $code = "\n";
+    /**
+     * @param array<string, ConstInfo> $allConstInfos
+     * @param array<string, string> &$declaredStrings Map of string content to
+     *   the name of a zend_string already created with that content
+     */
+    public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, array &$declaredStrings = []): string {
         $escapedAttributeName = strtr($this->class, '\\', '_');
-        if (isset($knowns[$escapedAttributeName])) {
-            $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, ZSTR_KNOWN({$knowns[$escapedAttributeName]}), " . count($this->args) . ");\n";
-        } else {
-            $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init_interned(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
-            $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
-            $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
-        }
+        [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+            "attribute_name_{$escapedAttributeName}_$nameSuffix",
+            addcslashes($this->class, "\\"),
+            $phpVersionIdMinimumCompatibility,
+            true
+        );
+        $code = "\n";
+        $code .= $stringInit;
+        $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, $nameCode, " . count($this->args) . ");\n";
+        $code .= $stringRelease;
+
         foreach ($this->args as $i => $arg) {
-            $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
-            $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
-            $code .= $value->initializeZval($zvalName);
-            $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
-            if ($arg->name) {
-                if (isset($knowns[$arg->name->name])) {
-                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = ZSTR_KNOWN({$knowns[$arg->name->name]});\n";
-                } else {
-                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init_interned(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+            $initValue = '';
+            if ($arg->value instanceof Node\Scalar\String_) {
+                $strVal = $arg->value->value;
+                [$strInit, $strUse, $strRelease] = StringBuilder::getString(
+                    'unused',
+                    $strVal,
+                    $phpVersionIdMinimumCompatibility
+                );
+                if ($strInit === '') {
+                    $initValue = "\tZVAL_STR(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
+                } elseif (isset($declaredStrings[$strVal])) {
+                    $strUse = $declaredStrings[$strVal];
+                    $initValue = "\tZVAL_STR_COPY(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, $strUse);\n";
                 }
+            }
+            if ($initValue === '') {
+                $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
+                $code .= $value->initializeZval(
+                    "attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value",
+                    true,
+                    "attribute_{$escapedAttributeName}_{$nameSuffix}_arg{$i}_str"
+                );
+                if ($arg->value instanceof Node\Scalar\String_) {
+                    $declaredStrings[$arg->value->value] = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg{$i}_str";
+                }
+            } else {
+                $code .= $initValue;
+            }
+            if ($arg->name) {
+                [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+                    "",
+                    $arg->name->name,
+                    $phpVersionIdMinimumCompatibility,
+                    true
+                );
+                if ($stringInit === '') {
+                    $nameCode .= ";\n";
+                } else {
+                    $nameCode = $stringInit;
+                }
+                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = $nameCode";
             }
         }
         return $code;
@@ -3480,13 +3508,17 @@ class ClassInfo {
 
         $code .= "{\n";
 
+        $flags = $this->getFlagsByPhpVersion();
+
         $classMethods = ($this->funcInfos === []) ? 'NULL' : "class_{$escapedName}_methods";
         if ($this->type === "enum") {
             $name = addslashes((string) $this->name);
             $backingType = $this->enumBackingType
                 ? $this->enumBackingType->toTypeCode() : "IS_UNDEF";
             $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, $classMethods);\n";
-            $code .= generateVersionDependentFlagCode("\tclass_entry->ce_flags = %s;\n", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
+            if (!$flags->isEmpty()) {
+                $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode("\tclass_entry->ce_flags = %s;\n", $this->phpVersionIdMinimumCompatibility);
+            }
         } else {
             $code .= "\tzend_class_entry ce, *class_entry;\n\n";
             if (count($this->name->getParts()) > 1) {
@@ -3504,7 +3536,7 @@ class ClassInfo {
                 }
 
                 $template = "\tclass_entry = zend_register_internal_class_with_flags(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ", %s);\n";
-                $entries = generateVersionDependentFlagCode($template, $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility ? max($this->phpVersionIdMinimumCompatibility, PHP_84_VERSION_ID) : null);
+                $entries = $flags->generateVersionDependentFlagCode($template, $this->phpVersionIdMinimumCompatibility ? max($this->phpVersionIdMinimumCompatibility, PHP_84_VERSION_ID) : null);
                 if ($entries !== '') {
                     $code .= $entries;
                 } else {
@@ -3515,12 +3547,16 @@ class ClassInfo {
                     $code .= "#else\n";
 
                     $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
-                    $code .= generateVersionDependentFlagCode("\tclass_entry->ce_flags |= %s;\n", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
+                    if (!$flags->isEmpty()) {
+                        $code .= $flags->generateVersionDependentFlagCode("\tclass_entry->ce_flags |= %s;\n", $this->phpVersionIdMinimumCompatibility);
+                    }
                     $code .= "#endif\n";
                 }
             } else {
                 $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
-                $code .= generateVersionDependentFlagCode("\tclass_entry->ce_flags |= %s;\n", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
+                if (!$flags->isEmpty()) {
+                    $code .= $flags->generateVersionDependentFlagCode("\tclass_entry->ce_flags |= %s;\n", $this->phpVersionIdMinimumCompatibility);
+                }
 
             }
         }
@@ -3565,60 +3601,49 @@ class ClassInfo {
         foreach ($this->propertyInfos as $property) {
             $code .= $property->getDeclaration($allConstInfos);
         }
+        // Reusable strings for wrapping conditional PHP 8.0+ code
+        if ($php80MinimumCompatibility) {
+            $php80CondStart = '';
+            $php80CondEnd = '';
+        } else {
+            $php80CondStart = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
+            $php80CondEnd = "#endif\n";
+        }
+
+        $declaredStrings = [];
 
         if (!empty($this->attributes)) {
-            if (!$php80MinimumCompatibility) {
-                $code .= "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
-            }
+            $code .= $php80CondStart;
 
             foreach ($this->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_class_attribute(class_entry",
                     "class_{$escapedName}_$key",
                     $allConstInfos,
-                    $this->phpVersionIdMinimumCompatibility
+                    $this->phpVersionIdMinimumCompatibility,
+                    $declaredStrings
                 );
             }
 
-            if (!$php80MinimumCompatibility) {
-                $code .= "#endif\n";
-            }
+            $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond)) {
-            if (!$php80MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
-            }
-
+        if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond, $declaredStrings)) {
+            $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
-
-            if (!$php80MinimumCompatibility) {
-                $code .= "#endif\n";
-            }
+            $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility)) {
-            if (!$php80MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
-            }
-
+        if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $declaredStrings)) {
+            $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
-
-            if (!$php80MinimumCompatibility) {
-                $code .= "#endif\n";
-            }
+            $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond)) {
-            if (!$php80MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")\n";
-            }
-
+        if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond, $declaredStrings)) {
+            $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
-
-            if (!$php80MinimumCompatibility) {
-                $code .= "#endif\n";
-            }
+            $code .= $php80CondEnd;
         }
 
         $code .= "\n\treturn class_entry;\n";
@@ -3636,10 +3661,7 @@ class ClassInfo {
         return $code;
     }
 
-    /**
-     * @return array<int, string[]>
-     */
-    private function getFlagsByPhpVersion(): array
+    private function getFlagsByPhpVersion(): VersionFlags
     {
         $php70Flags = [];
 
@@ -3659,44 +3681,28 @@ class ClassInfo {
             $php70Flags[] = "ZEND_ACC_DEPRECATED";
         }
 
-        $php80Flags = $php70Flags;
+        $flags = new VersionFlags($php70Flags);
 
         if ($this->isStrictProperties) {
-            $php80Flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
+            $flags->addForVersionsAbove("ZEND_ACC_NO_DYNAMIC_PROPERTIES", PHP_80_VERSION_ID);
         }
-
-        $php81Flags = $php80Flags;
 
         if ($this->isNotSerializable) {
-            $php81Flags[] = "ZEND_ACC_NOT_SERIALIZABLE";
+            $flags->addForVersionsAbove("ZEND_ACC_NOT_SERIALIZABLE", PHP_81_VERSION_ID);
         }
 
-        $php82Flags = $php81Flags;
-
         if ($this->flags & Modifiers::READONLY) {
-            $php82Flags[] = "ZEND_ACC_READONLY_CLASS";
+            $flags->addForVersionsAbove("ZEND_ACC_READONLY_CLASS", PHP_82_VERSION_ID);
         }
 
         foreach ($this->attributes as $attr) {
             if ($attr->class === "AllowDynamicProperties") {
-                $php82Flags[] = "ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES";
+                $flags->addForVersionsAbove("ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES", PHP_82_VERSION_ID);
                 break;
             }
         }
 
-        $php83Flags = $php82Flags;
-        $php84Flags = $php83Flags;
-        $php85Flags = $php84Flags;
-
-        return [
-            PHP_70_VERSION_ID => $php70Flags,
-            PHP_80_VERSION_ID => $php80Flags,
-            PHP_81_VERSION_ID => $php81Flags,
-            PHP_82_VERSION_ID => $php82Flags,
-            PHP_83_VERSION_ID => $php83Flags,
-            PHP_84_VERSION_ID => $php84Flags,
-            PHP_85_VERSION_ID => $php85Flags,
-        ];
+        return $flags;
     }
 
     public function discardInfoForOldPhpVersions(?int $phpVersionIdMinimumCompatibility): void {
@@ -4308,11 +4314,23 @@ class FileInfo {
         $stmts = $parser->parse($code);
         $nodeTraverser->traverse($stmts);
     
-        $fileTags = DocCommentTag::parseDocComments(getFileDocComments($stmts));
+        $fileTags = DocCommentTag::parseDocComments(self::getFileDocComments($stmts));
         $fileInfo = new FileInfo($fileTags);
     
         $fileInfo->handleStatements($stmts, $prettyPrinter);
         return $fileInfo;
+    }
+
+    /** @return DocComment[] */
+    private static function getFileDocComments(array $stmts): array {
+        if (empty($stmts)) {
+            return [];
+        }
+
+        return array_filter(
+            $stmts[0]->getComments(),
+            static fn ($comment): bool => $comment instanceof DocComment
+        );
     }
 
     private function handleStatements(array $stmts, PrettyPrinterAbstract $prettyPrinter): void {
@@ -4486,6 +4504,17 @@ class FileInfo {
     
         return empty($conds) ? null : implode(' && ', $conds);
     }
+
+    /** @param array<string, ConstInfo> $allConstInfos */
+    public function generateClassEntryCode(array $allConstInfos): string {
+        $code = "";
+
+        foreach ($this->classInfos as $class) {
+            $code .= "\n" . $class->getRegistration($allConstInfos);
+        }
+
+        return $code;
+    }
 }
 
 class DocCommentTag {
@@ -4533,7 +4562,7 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             // Allow for parsing extended types like callable(string):mixed in docblocks
-            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\])*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]<>]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\]|<(?&inparens)>)*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
             preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }
@@ -4845,7 +4874,32 @@ function parseConstLike(
     }
 
     if ($type === null && $phpDocType === null) {
-        throw new Exception("Missing type for constant " . $name->__toString());
+        if ($const->value instanceof Node\Scalar\Float_) {
+            $phpDocType = 'float';
+        } elseif ($const->value instanceof Node\Scalar\Int_
+            || ($const->value instanceof Expr\UnaryMinus
+                && $const->value->expr instanceof Node\Scalar\Int_
+            )
+        ) {
+            $phpDocType = 'int';
+        } elseif ($const->value instanceof Node\Scalar\String_) {
+            $phpDocType = 'string';
+        } elseif ($const->value instanceof Expr\ConstFetch
+            && $const->value->name instanceof Node\Name\FullyQualified
+            && (
+                $const->value->name->name === 'false'
+                || $const->value->name->name === 'true'
+            )
+        ) {
+            $phpDocType = 'bool';
+        } elseif ($const->value instanceof Expr\ConstFetch
+            && $const->value->name instanceof Node\Name\FullyQualified
+            && $const->value->name->name === 'null'
+        ) {
+            $phpDocType = 'null';
+        } else {
+            throw new Exception("Missing type for constant " . $name->__toString());
+        }
     }
 
     $constType = $type ? Type::fromNode($type) : null;
@@ -5039,18 +5093,6 @@ function parseClass(
     );
 }
 
-/** @return DocComment[] */
-function getFileDocComments(array $stmts): array {
-    if (empty($stmts)) {
-        return [];
-    }
-
-    return array_filter(
-        $stmts[0]->getComments(),
-        static fn ( $comment ): bool => $comment instanceof DocComment
-    );
-}
-
 /**
  * @template T
  * @param iterable<T> $infos
@@ -5178,8 +5220,9 @@ function generateArgInfoCode(
     $php80MinimumCompatibility = $fileInfo->getMinimumPhpVersionIdCompatibility() === null || $fileInfo->getMinimumPhpVersionIdCompatibility() >= PHP_80_VERSION_ID;
 
     if ($fileInfo->generateClassEntries) {
-        $attributeInitializationCode = generateFunctionAttributeInitialization($fileInfo->funcInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null);
-        $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($fileInfo->constInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null);
+        $declaredStrings = [];
+        $attributeInitializationCode = generateFunctionAttributeInitialization($fileInfo->funcInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
+        $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($fileInfo->constInfos, $allConstInfos, $fileInfo->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
         if ($attributeInitializationCode) {
             if (!$php80MinimumCompatibility) {
                 $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
@@ -5204,18 +5247,7 @@ function generateArgInfoCode(
             $code .= "}\n";
         }
 
-        $code .= generateClassEntryCode($fileInfo, $allConstInfos);
-    }
-
-    return $code;
-}
-
-/** @param array<string, ConstInfo> $allConstInfos */
-function generateClassEntryCode(FileInfo $fileInfo, array $allConstInfos): string {
-    $code = "";
-
-    foreach ($fileInfo->classInfos as $class) {
-        $code .= "\n" . $class->getRegistration($allConstInfos);
+        $code .= $fileInfo->generateClassEntryCode($allConstInfos);
     }
 
     return $code;
@@ -5228,19 +5260,13 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
         return '';
     }
 
-    $code = "\n";
-
-    if ($cond) {
-        $code .= "#if {$cond}\n";
-    }
-
     $functionEntryName = "ext_functions";
     if ($className) {
         $underscoreName = implode("_", $className->getParts());
         $functionEntryName = "class_{$underscoreName}_methods";
     }
 
-    $code .= "static const zend_function_entry {$functionEntryName}[] = {\n";
+    $code = "\nstatic const zend_function_entry {$functionEntryName}[] = {\n";
     $code .= generateCodeWithConditions($funcInfos, "", static function (FuncInfo $funcInfo) {
         return $funcInfo->getFunctionEntry();
     }, $cond);
@@ -5248,18 +5274,22 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
     $code .= "};\n";
 
     if ($cond) {
-        $code .= "#endif\n";
+        $code = "\n#if {$cond}{$code}#endif\n";
     }
 
     return $code;
 }
 
-/** @param iterable<FuncInfo> $funcInfos */
-function generateFunctionAttributeInitialization(iterable $funcInfos, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, ?string $parentCond = null): string {
+/**
+ * @param iterable<FuncInfo> $funcInfos
+ * @param array<string, string> &$declaredStrings Map of string content to
+ *   the name of a zend_string already created with that content
+ */
+function generateFunctionAttributeInitialization(iterable $funcInfos, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, ?string $parentCond = null, array &$declaredStrings = []): string {
     return generateCodeWithConditions(
         $funcInfos,
         "",
-        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, &$declaredStrings) {
             $code = null;
 
             if ($funcInfo->name instanceof MethodName) {
@@ -5268,12 +5298,22 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
                 $functionTable = "CG(function_table)";
             }
 
+            // Make sure we don't try and use strings that might only be
+            // conditionally available; string reuse is only among declarations
+            // that are always there
+            if ($funcInfo->cond) {
+                $useDeclared = [];
+            } else {
+                $useDeclared = &$declaredStrings;
+            }
+
             foreach ($funcInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_function_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1)",
                     "func_" . $funcInfo->name->getNameForAttributes() . "_$key",
                     $allConstInfos,
-                    $phpVersionIdMinimumCompatibility
+                    $phpVersionIdMinimumCompatibility,
+                    $useDeclared
                 );
             }
 
@@ -5283,7 +5323,8 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
                         "zend_add_parameter_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1), $index",
                         "func_{$funcInfo->name->getNameForAttributes()}_arg{$index}_$key",
                         $allConstInfos,
-                        $phpVersionIdMinimumCompatibility
+                        $phpVersionIdMinimumCompatibility,
+                        $useDeclared
                     );
                 }
             }
@@ -5297,37 +5338,53 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
 /**
  * @param iterable<ConstInfo> $constInfos
  * @param array<string, ConstInfo> $allConstInfos
+ * @param array<string, string> &$declaredStrings Map of string content to
+ *   the name of a zend_string already created with that content
  */
 function generateGlobalConstantAttributeInitialization(
     iterable $constInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
-    ?string $parentCond = null
+    ?string $parentCond = null,
+    array &$declaredStrings = []
 ): string {
     $isConditional = false;
     if ($phpVersionIdMinimumCompatibility !== null && $phpVersionIdMinimumCompatibility < PHP_85_VERSION_ID) {
         $isConditional = true;
-        $phpVersionIdMinimumCompatibility = PHP_85_VERSION_ID;
     }
     $code = generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional, &$declaredStrings) {
             $code = "";
 
             if ($constInfo->attributes === []) {
                 return null;
             }
+            // Make sure we don't try and use strings that might only be
+            // conditionally available; string reuse is only among declarations
+            // that are always there
+            if ($constInfo->cond) {
+                $useDeclared = [];
+            } else {
+                $useDeclared = &$declaredStrings;
+            }
             $constName = str_replace('\\', '\\\\', $constInfo->name->__toString());
             $constVarName = 'const_' . $constName;
 
-            $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            // The entire attribute block will be conditional if PHP < 8.5 is
+            // supported, but also if PHP < 8.5 is supported we need to search
+            // for the constant; see GH-19029
+            if ($isConditional) {
+                $code .= "\tzend_constant *$constVarName = zend_hash_str_find_ptr(EG(zend_constants), \"" . $constName . "\", sizeof(\"" . $constName . "\") - 1);\n";
+            }
             foreach ($constInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_global_constant_attribute($constVarName",
                     $constVarName . "_$key",
                     $allConstInfos,
-                    $phpVersionIdMinimumCompatibility
+                    PHP_85_VERSION_ID,
+                    $useDeclared
                 );
             }
 
@@ -5344,25 +5401,37 @@ function generateGlobalConstantAttributeInitialization(
 /**
  * @param iterable<ConstInfo> $constInfos
  * @param array<string, ConstInfo> $allConstInfos
+ * @param array<string, string> &$declaredStrings Map of string content to
+ *    the name of a zend_string already created with that content
  */
 function generateConstantAttributeInitialization(
     iterable $constInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
-    ?string $parentCond = null
+    ?string $parentCond = null,
+    array &$declaredStrings = []
 ): string {
     return generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, &$declaredStrings) {
             $code = null;
 
+            // Make sure we don't try and use strings that might only be
+            // conditionally available; string reuse is only among declarations
+            // that are always there
+            if ($constInfo->cond) {
+                $useDeclared = [];
+            } else {
+                $useDeclared = &$declaredStrings;
+            }
             foreach ($constInfo->attributes as $key => $attribute) {
                 $code .= $attribute->generateCode(
                     "zend_add_class_constant_attribute(class_entry, const_" . $constInfo->name->getDeclarationName(),
                     "const_" . $constInfo->name->getDeclarationName() . "_$key",
                     $allConstInfos,
-                    $phpVersionIdMinimumCompatibility
+                    $phpVersionIdMinimumCompatibility,
+                    $useDeclared
                 );
             }
 
@@ -5375,11 +5444,14 @@ function generateConstantAttributeInitialization(
 /**
  * @param iterable<PropertyInfo> $propertyInfos
  * @param array<string, ConstInfo> $allConstInfos
+ * @param array<string, string> &$declaredStrings Map of string content to
+ *    the name of a zend_string already created with that content
  */
 function generatePropertyAttributeInitialization(
     iterable $propertyInfos,
     array $allConstInfos,
-    ?int $phpVersionIdMinimumCompatibility
+    ?int $phpVersionIdMinimumCompatibility,
+    array &$declaredStrings
 ): string {
     $code = "";
     foreach ($propertyInfos as $propertyInfo) {
@@ -5388,7 +5460,8 @@ function generatePropertyAttributeInitialization(
                 "zend_add_property_attribute(class_entry, property_" . $propertyInfo->name->getDeclarationName(),
                 "property_" . $propertyInfo->name->getDeclarationName() . "_" . $key,
                 $allConstInfos,
-                $phpVersionIdMinimumCompatibility
+                $phpVersionIdMinimumCompatibility,
+                $declaredStrings
             );
         }
     }
@@ -5407,80 +5480,6 @@ function generateOptimizerInfo(array $funcMap): string {
     });
 
     $code .= "};\n";
-
-    return $code;
-}
-
-/**
- * @param array<int, string[]> $flagsByPhpVersions
- * @return string
- */
-function generateVersionDependentFlagCode(string $codeTemplate, array $flagsByPhpVersions, ?int $phpVersionIdMinimumCompatibility): string
-{
-    $phpVersions = ALL_PHP_VERSION_IDS;
-    sort($phpVersions);
-    $currentPhpVersion = end($phpVersions);
-
-    // No version compatibility is needed
-    if ($phpVersionIdMinimumCompatibility === null) {
-        if (empty($flagsByPhpVersions[$currentPhpVersion])) {
-            return '';
-        }
-
-        return sprintf($codeTemplate, implode("|", $flagsByPhpVersions[$currentPhpVersion]));
-    }
-
-    // Remove flags which depend on a PHP version below the minimally supported one
-    ksort($flagsByPhpVersions);
-    $index = array_search($phpVersionIdMinimumCompatibility, array_keys($flagsByPhpVersions));
-    if ($index === false) {
-        throw new Exception("Missing version dependent flags for PHP version ID \"$phpVersionIdMinimumCompatibility\"");
-    }
-    $flagsByPhpVersions = array_slice($flagsByPhpVersions, $index, null, true);
-
-    // Remove empty version-specific flags
-    $flagsByPhpVersions = array_filter($flagsByPhpVersions);
-
-    // There are no version-specific flags
-    if (empty($flagsByPhpVersions)) {
-        return '';
-    }
-
-    // Remove version-specific flags which don't differ from the previous one
-    $previousVersionId = null;
-    foreach ($flagsByPhpVersions as $versionId => $versionFlags) {
-        if ($previousVersionId !== null && $flagsByPhpVersions[$previousVersionId] === $versionFlags) {
-            unset($flagsByPhpVersions[$versionId]);
-        } else {
-            $previousVersionId = $versionId;
-        }
-    }
-
-    $flagCount = count($flagsByPhpVersions);
-
-    // Do not add a condition unnecessarily when the only version is the same as the minimally supported one
-    if ($flagCount === 1) {
-        reset($flagsByPhpVersions);
-        $firstVersion = key($flagsByPhpVersions);
-        if ($firstVersion === $phpVersionIdMinimumCompatibility) {
-            return sprintf($codeTemplate, implode("|", reset($flagsByPhpVersions)));
-        }
-    }
-
-    // Add the necessary conditions around the code using the version-specific flags
-    $code = '';
-    $i = 0;
-    foreach (array_reverse($flagsByPhpVersions, true) as $version => $versionFlags) {
-        $if = $i === 0 ? "#if" : "#elif";
-        $endif = $i === $flagCount - 1 ? "#endif\n" : "";
-
-        $code .= "$if (PHP_VERSION_ID >= $version)\n";
-
-        $code .= sprintf($codeTemplate, implode("|", $versionFlags));
-        $code .= $endif;
-
-        $i++;
-    }
 
     return $code;
 }
@@ -6082,7 +6081,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "5.5.0";
+    $version = "5.6.1";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
@@ -6376,7 +6375,7 @@ if ($generateOptimizerInfo) {
 
 if ($verifyManual) {
     foreach ($undocumentedConstMap as $constName => $info) {
-        if ($info->name->isClassConst() || $info->isUndocumentable) {
+        if ($info->name instanceof ClassConstName || $info->isUndocumentable) {
             continue;
         }
 

@@ -226,7 +226,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	}
 
 	if(symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"numfmt_get_symbol: invalid symbol value", 0 );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value");
 		RETURN_FALSE;
 	}
 
@@ -268,7 +268,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 	}
 
 	if (symbol >= UNUM_FORMAT_SYMBOL_COUNT || symbol < 0) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"numfmt_set_symbol: invalid symbol value", 0 );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"invalid symbol value");
 		RETURN_FALSE;
 	}
 
@@ -355,7 +355,7 @@ PHP_FUNCTION( numfmt_set_pattern )
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
 		char *msg;
 		spprintf(&msg, 0, "Error setting pattern value at line %d, offset %d", spattern_error.line, spattern_error.offset);
-		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(nfo), msg, 1);
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(nfo), msg);
 		efree(msg);
 		RETURN_FALSE;
 	}

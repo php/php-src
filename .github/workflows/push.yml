@@ -82,7 +82,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: System info
@@ -112,6 +112,7 @@ jobs:
         with:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            ${{ matrix.debug && 'CXXFLAGS="-D_GLIBCXX_ASSERTIONS"' || '' }}
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
             ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++' || '' }}
           skipSlow: ${{ matrix.asan }}
@@ -130,7 +131,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
@@ -167,7 +167,7 @@ jobs:
           FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: ccache
@@ -190,7 +190,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
   MACOS_DEBUG_NTS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
@@ -198,14 +197,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 14
+          - os: 15
             arch: ARM64
     name: MACOS_${{ matrix.arch }}_DEBUG_NTS
     runs-on: macos-${{ matrix.os }}
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: brew
         uses: ./.github/actions/brew
       - name: ccache
@@ -229,7 +228,6 @@ jobs:
         with:
           jitType: tracing
           runTestsParameters: >-
-            -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
@@ -253,7 +251,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
@@ -267,7 +265,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
@@ -299,7 +297,6 @@ jobs:
           ./configure \
             --disable-debug \
             --enable-mbstring \
-            --enable-opcache \
             --enable-option-checking=fatal \
             --enable-sockets \
             --enable-werror \
@@ -319,7 +316,6 @@ jobs:
           sudo mkdir -p /etc/php.d
           sudo chmod 777 /etc/php.d
           echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
-          echo zend_extension=opcache.so >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
       - name: Setup
@@ -331,7 +327,7 @@ jobs:
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
       - name: git checkout benchmarking-data
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: php/benchmarking-data
           ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
@@ -371,8 +367,9 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: FREEBSD
     runs-on: ubuntu-latest
+    timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: FreeBSD
         uses: ./.github/actions/freebsd

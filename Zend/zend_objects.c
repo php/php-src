@@ -123,49 +123,25 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		zend_object *old_exception;
 		const zend_op *old_opline_before_exception;
 
-		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-				/* Ensure that if we're calling a private function, we're allowed to do so.
-				 */
-				if (EG(current_execute_data)) {
-					zend_class_entry *scope = zend_get_executed_scope();
-
-					if (object->ce != scope) {
-						zend_throw_error(NULL,
-							"Call to private %s::__destruct() from %s%s",
-							ZSTR_VAL(object->ce->name),
-							scope ? "scope " : "global scope",
-							scope ? ZSTR_VAL(scope->name) : ""
-						);
-						return;
-					}
-				} else {
-					zend_error(E_WARNING,
-						"Call to private %s::__destruct() from global scope during shutdown ignored",
-						ZSTR_VAL(object->ce->name));
+		if (destructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
+			if (EG(current_execute_data)) {
+				zend_class_entry *scope = zend_get_executed_scope();
+				/* Ensure that if we're calling a protected or private function, we're allowed to do so. */
+				ZEND_ASSERT(!(destructor->common.fn_flags & ZEND_ACC_PUBLIC));
+				if (!zend_check_method_accessible(destructor, scope)) {
+					zend_throw_error(NULL,
+						"Call to %s %s::__destruct() from %s%s",
+						zend_visibility_string(destructor->common.fn_flags), ZSTR_VAL(object->ce->name),
+						scope ? "scope " : "global scope",
+						scope ? ZSTR_VAL(scope->name) : ""
+					);
 					return;
 				}
 			} else {
-				/* Ensure that if we're calling a protected function, we're allowed to do so.
-				 */
-				if (EG(current_execute_data)) {
-					zend_class_entry *scope = zend_get_executed_scope();
-
-					if (!zend_check_protected(zend_get_function_root_class(destructor), scope)) {
-						zend_throw_error(NULL,
-							"Call to protected %s::__destruct() from %s%s",
-							ZSTR_VAL(object->ce->name),
-							scope ? "scope " : "global scope",
-							scope ? ZSTR_VAL(scope->name) : ""
-						);
-						return;
-					}
-				} else {
-					zend_error(E_WARNING,
-						"Call to protected %s::__destruct() from global scope during shutdown ignored",
-						ZSTR_VAL(object->ce->name));
-					return;
-				}
+				zend_error(E_WARNING,
+					"Call to %s %s::__destruct() from global scope during shutdown ignored",
+					zend_visibility_string(destructor->common.fn_flags), ZSTR_VAL(object->ce->name));
+				return;
 			}
 		}
 
@@ -288,7 +264,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	}
 
 	if (has_clone_method) {
-		GC_ADDREF(new_object);
 		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
 
 		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
@@ -298,9 +273,53 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
 			}
 		}
-
-		OBJ_RELEASE(new_object);
 	}
+}
+
+ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const zend_class_entry *scope, const HashTable *properties)
+{
+	zend_object *new_object = old_object->handlers->clone_obj(old_object);
+
+	if (EXPECTED(!EG(exception))) {
+		/* Unlock readonly properties once more. */
+		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
+			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
+				zval* prop = OBJ_PROP_NUM(new_object, i);
+				Z_PROP_FLAG_P(prop) |= IS_PROP_REINITABLE;
+			}
+		}
+
+		const zend_class_entry *old_scope = EG(fake_scope);
+
+		EG(fake_scope) = scope;
+
+		ZEND_HASH_FOREACH_KEY_VAL(properties, zend_ulong num_key, zend_string *key, zval *val) {
+			if (UNEXPECTED(Z_ISREF_P(val))) {
+				if (Z_REFCOUNT_P(val) == 1) {
+					val = Z_REFVAL_P(val);
+				} else {
+					zend_throw_error(NULL, "Cannot assign by reference when cloning with updated properties");
+					break;
+				}
+			}
+
+			if (UNEXPECTED(key == NULL)) {
+				key = zend_long_to_str(num_key);
+				new_object->handlers->write_property(new_object, key, val, NULL);
+				zend_string_release_ex(key, false);
+			} else {
+				new_object->handlers->write_property(new_object, key, val, NULL);
+			}
+
+			if (UNEXPECTED(EG(exception))) {
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		EG(fake_scope) = old_scope;
+	}
+
+	return new_object;
 }
 
 ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)

@@ -89,6 +89,9 @@
 #ifndef __has_feature
 # define __has_feature(x) 0
 #endif
+#ifndef __has_include
+# define __has_include(x) 0
+#endif
 
 #if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
@@ -109,7 +112,10 @@
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
 #endif
 
-#ifdef PHP_HAVE_BUILTIN_UNREACHABLE
+/* use C23 unreachable() from <stddef.h> if possible */
+#ifdef unreachable
+# define _ZEND_UNREACHABLE() unreachable()
+#elif defined(PHP_HAVE_BUILTIN_UNREACHABLE)
 # define _ZEND_UNREACHABLE() __builtin_unreachable()
 #else
 # define _ZEND_UNREACHABLE() ZEND_ASSUME(0)
@@ -245,6 +251,14 @@ char *alloca();
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
+#if __STDC_VERSION__ >= 202311L || (defined(__cplusplus) && __cplusplus >= 201703L)
+# define ZEND_ATTRIBUTE_NODISCARD [[nodiscard]]
+#elif __has_attribute(__warn_unused_result__)
+# define ZEND_ATTRIBUTE_NODISCARD __attribute__((__warn_unused_result__))
+#else
+# define ZEND_ATTRIBUTE_NODISCARD
+#endif
+
 #if ZEND_GCC_VERSION >= 3000
 # define ZEND_ATTRIBUTE_CONST __attribute__((const))
 #else
@@ -316,6 +330,15 @@ char *alloca();
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
+#endif
+
+#ifdef HAVE_PRESERVE_NONE
+# define ZEND_PRESERVE_NONE __attribute__((preserve_none))
+#endif
+
+#if __has_attribute(musttail)
+# define HAVE_MUSTTAIL
+# define ZEND_MUSTTAIL __attribute__((musttail))
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
@@ -496,6 +519,8 @@ extern "C++" {
 
 #ifdef ZEND_WIN32
 #define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
+#elif defined(HAVE_MEMSET_EXPLICIT)
+#define ZEND_SECURE_ZERO(var, size) memset_explicit((var), 0, (size))
 #else
 #define ZEND_SECURE_ZERO(var, size) explicit_bzero((var), (size))
 #endif
@@ -728,6 +753,10 @@ extern "C++" {
 # define ZEND_SET_ALIGNED(alignment, decl) decl
 #endif
 
+#if __has_attribute(section)
+# define HAVE_ATTRIBUTE_SECTION
+#endif
+
 #define ZEND_SLIDE_TO_ALIGNED(alignment, ptr) (((uintptr_t)(ptr) + ((alignment)-1)) & ~((alignment)-1))
 #define ZEND_SLIDE_TO_ALIGNED16(ptr) ZEND_SLIDE_TO_ALIGNED(Z_UL(16), ptr)
 
@@ -764,7 +793,7 @@ extern "C++" {
 # define ZEND_INDIRECT_RETURN
 #endif
 
-#if __has_attribute(nonstring) && defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 15
+#if __has_attribute(nonstring) && defined(__GNUC__) && ((!defined(__clang__) && __GNUC__ >= 15) || (defined(__clang_major__) && __clang_major__ >= 20))
 # define ZEND_NONSTRING __attribute__((nonstring))
 #else
 # define ZEND_NONSTRING
@@ -794,7 +823,9 @@ extern "C++" {
 /** @deprecated */
 #define ZEND_CGG_DIAGNOSTIC_IGNORED_END ZEND_DIAGNOSTIC_IGNORED_END
 
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
+#if defined(__cplusplus)
+# define ZEND_STATIC_ASSERT(c, m) static_assert((c), m)
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
 # define ZEND_STATIC_ASSERT(c, m) _Static_assert((c), m)
 #else
 # define ZEND_STATIC_ASSERT(c, m)

@@ -3,73 +3,62 @@
 /** @generate-class-entries */
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339
  */
 const DATE_ATOM = "Y-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_COOKIE
  */
 const DATE_COOKIE = "l, d-M-Y H:i:s T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_ISO8601
  */
 const DATE_ISO8601 = "Y-m-d\\TH:i:sO";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_ISO8601_EXPANDED
  */
 const DATE_ISO8601_EXPANDED = "X-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC822
  */
 const DATE_RFC822 = "D, d M y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC850
  */
 const DATE_RFC850 = "l, d-M-y H:i:s T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC1036
  */
 const DATE_RFC1036 = "D, d M y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC1123
  */
 const DATE_RFC1123 = "D, d M Y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC7231
  */
+#[\Deprecated(since: '8.5', message: "as this format ignores the associated timezone and always uses GMT")]
 const DATE_RFC7231 = "D, d M Y H:i:s \\G\\M\\T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC2822
  */
 const DATE_RFC2822 = "D, d M Y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339
  */
 const DATE_RFC3339 = "Y-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339_EXTENDED
  */
 const DATE_RFC3339_EXTENDED = "Y-m-d\\TH:i:s.vP";
@@ -83,22 +72,22 @@ const DATE_W3C = DATE_RFC3339;
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_TIMESTAMP
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_TIMESTAMP = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_STRING
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_STRING = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_DOUBLE
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'as date_sunrise() and date_sunset() were deprecated in 8.1')]
 const SUNFUNCS_RET_DOUBLE = UNKNOWN;
 
 function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
@@ -287,7 +276,6 @@ function date_sun_info(int $timestamp, float $latitude, float $longitude): array
 
 interface DateTimeInterface
 {
-
     public const string ATOM = DATE_ATOM;
 
     public const string COOKIE = DATE_COOKIE;
@@ -304,6 +292,7 @@ interface DateTimeInterface
 
     public const string RFC1123 = DATE_RFC1123;
 
+    #[\Deprecated(since: '8.5', message: "as this format ignores the associated timezone and always uses GMT")]
     public const string RFC7231 = DATE_RFC7231;
 
     public const string RFC2822 = DATE_RFC2822;

@@ -20,11 +20,13 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "ext/uri/php_uri.h"
 #include "php_streams.h"
 #include "php_network.h"
 #include "php_ini.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
+#include "zend_exceptions.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -358,7 +360,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		zval *response_header STREAMS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
-	php_url *resource = NULL;
+	php_uri *resource = NULL;
 	int use_ssl;
 	int use_proxy = 0;
 	zend_string *tmp = NULL;
@@ -391,7 +393,12 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	resource = php_url_parse(path);
+	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("http", context);
+	if (uri_parser == NULL) {
+		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
+		return NULL;
+	}
+	resource = php_uri_parse_to_struct(uri_parser, path, strlen(path), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	if (resource == NULL) {
 		return NULL;
 	}
@@ -403,7 +410,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			(tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "proxy")) == NULL ||
 			Z_TYPE_P(tmpzval) != IS_STRING ||
 			Z_STRLEN_P(tmpzval) == 0) {
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return php_stream_open_wrapper_ex(path, mode, REPORT_ERRORS, NULL, context);
 		}
 		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
@@ -416,7 +423,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 		if (strpbrk(mode, "awx+")) {
 			php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper does not support writeable connections");
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return NULL;
 		}
 
@@ -445,7 +452,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (request_fulluri && (strchr(path, '\n') != NULL || strchr(path, '\r') != NULL)) {
 		php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper full URI path does not allow CR or LF characters");
-		php_url_free(resource);
+		php_uri_struct_free(resource);
 		zend_string_release(transport_string);
 		return NULL;
 	}
@@ -461,7 +468,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		if (d > timeoutmax) {
 			php_stream_wrapper_log_error(wrapper, options, "timeout must be lower than " ZEND_ULONG_FMT, (zend_ulong)timeoutmax);
 			zend_string_release(transport_string);
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			return NULL;
 		}
 #ifndef PHP_WIN32
@@ -638,13 +645,9 @@ finish:
 
 	/* protocol version we are speaking */
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "protocol_version")) != NULL) {
-		char *protocol_version;
-		spprintf(&protocol_version, 0, "%.1F", zval_get_double(tmpzval));
-
 		smart_str_appends(&req_buf, " HTTP/");
-		smart_str_appends(&req_buf, protocol_version);
+		smart_str_append_printf(&req_buf, "%.1F", zval_get_double(tmpzval));
 		smart_str_appends(&req_buf, "\r\n");
-		efree(protocol_version);
 	} else {
 		smart_str_appends(&req_buf, " HTTP/1.1\r\n");
 	}
@@ -746,33 +749,31 @@ finish:
 
 	/* auth header if it was specified */
 	if (((have_header & HTTP_HEADER_AUTH) == 0) && resource->user) {
-		/* make scratch large enough to hold the whole URL (over-estimate) */
-		size_t scratch_len = strlen(path) + 1;
-		char *scratch = emalloc(scratch_len);
-		zend_string *stmp;
+		smart_str scratch = {0};
 
 		/* decode the strings first */
 		php_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
 
-		strcpy(scratch, ZSTR_VAL(resource->user));
-		strcat(scratch, ":");
+		smart_str_append(&scratch, resource->user);
+		smart_str_appendc(&scratch, ':');
 
 		/* Note: password is optional! */
-		if (resource->pass) {
-			php_url_decode(ZSTR_VAL(resource->pass), ZSTR_LEN(resource->pass));
-			strcat(scratch, ZSTR_VAL(resource->pass));
+		if (resource->password) {
+			php_url_decode(ZSTR_VAL(resource->password), ZSTR_LEN(resource->password));
+			smart_str_append(&scratch, resource->password);
 		}
 
-		stmp = php_base64_encode((unsigned char*)scratch, strlen(scratch));
+		zend_string *scratch_str = smart_str_extract(&scratch);
+		zend_string *stmp = php_base64_encode((unsigned char*)ZSTR_VAL(scratch_str), ZSTR_LEN(scratch_str));
 
 		smart_str_appends(&req_buf, "Authorization: Basic ");
-		smart_str_appends(&req_buf, ZSTR_VAL(stmp));
+		smart_str_append(&req_buf, stmp);
 		smart_str_appends(&req_buf, "\r\n");
 
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
 
+		zend_string_efree(scratch_str);
 		zend_string_free(stmp);
-		efree(scratch);
 	}
 
 	/* if the user has configured who they are, send a From: line */
@@ -1094,9 +1095,9 @@ finish:
 				header_info.location = NULL;
 			}
 
-			php_url_free(resource);
+			php_uri_struct_free(resource);
 			/* check for invalid redirection URLs */
-			if ((resource = php_url_parse(new_path)) == NULL) {
+			if ((resource = php_uri_parse_to_struct(uri_parser, new_path, strlen(new_path), PHP_URI_COMPONENT_READ_MODE_RAW, true)) == NULL) {
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
 				efree(new_path);
 				goto out;
@@ -1120,7 +1121,7 @@ finish:
 			/* check for control characters in login, password & path */
 			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
 				CHECK_FOR_CNTRL_CHARS(resource->user);
-				CHECK_FOR_CNTRL_CHARS(resource->pass);
+				CHECK_FOR_CNTRL_CHARS(resource->password);
 				CHECK_FOR_CNTRL_CHARS(resource->path);
 			}
 			int new_flags = HTTP_WRAPPER_REDIRECTED;
@@ -1151,7 +1152,7 @@ out:
 	}
 
 	if (resource) {
-		php_url_free(resource);
+		php_uri_struct_free(resource);
 	}
 
 	if (stream) {

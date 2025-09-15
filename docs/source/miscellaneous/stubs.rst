@@ -223,7 +223,8 @@ The generated ``class_Atmosphere_methods`` must be used when registering the ``A
 
 Additional meta information can be attached to functions, with the following PHPDoc tags:
 
--  ``@deprecated``: Triggers the usual deprecation notice when the function/method is called.
+-  ``@deprecated``: Triggers the usual deprecation notice when the function/method is called. As of
+   PHP 8.4 the `#[Deprecated]` attribute should be used instead.
 
 -  ``@alias``: If a function/method is an alias of another function/method, then the aliased
    function/method name has to be provided as value. E.g. the function ``sizeof()`` has the ``@alias
@@ -244,7 +245,7 @@ Additional meta information can be attached to functions, with the following PHP
 
 -  ``@genstubs-expose-comment-block``: By adding this annotation at the beginning of a PHPDoc block,
    the content of the PHPDoc block will be exposed for
-   `ReflectionFunctionAbstract::getDocComment()`. This feature was added in PHP 8.4.0.
+   `ReflectionFunctionAbstract::getDocComment()`. This feature was added in PHP 8.4.
 
 .. _tentative return type: https://wiki.php.net/rfc/internal_method_return_types
 
@@ -337,7 +338,7 @@ Like functions and methods, classes also support meta information passed via PHP
 
 -  ``@genstubs-expose-comment-block``: By adding this tag at the beginning of a PHPDoc block, the
    content of the PHPDoc block will be exposed for `ReflectionClass::getDocComment()`. This feature
-   is only available as of PHP 8.4.0.
+   is only available as of PHP 8.4.
 
 This is an example with all the flags:
 
@@ -452,11 +453,12 @@ with ``@cvalue M_PI`` to the C-level constant ``M_PI`` (define by PHP's internal
 
 Constants can take the following extra meta information passed via PHPDoc tags:
 
--  ``@deprecated``: Triggers a deprecation notice when the constant is used.
+-  ``@deprecated``: Triggers a deprecation notice when the constant is used. As of PHP 8.5 the
+   `#[Deprecated]` attribute should be used instead.
 
 -  ``@genstubs-expose-comment-block``: By adding this tag at the beginning of a PHPDoc block, the
    content of the PHPDoc block will be exposed for `ReflectionClass::getDocComment()`. This feature
-   is only available as of PHP 8.4.0.
+   is only available as of PHP 8.4.
 
 ************************************
  Maintaining Backward Compatibility

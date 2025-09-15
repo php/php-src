@@ -5,7 +5,9 @@ Error trying to add attributes to multiple constants at once
 
 #[\Foo]
 const First = 1,
-    Second = 2;
+    Second = 2,
+    Third = 3,
+    Fourth = 4;
 
 ?>
 --EXPECTF--

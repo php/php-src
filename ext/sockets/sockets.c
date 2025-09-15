@@ -109,7 +109,9 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
                 }											\
         } while (0)
 #else
-#define PHP_ETH_PROTO_CHECK(protocol, family) (0)
+#define PHP_ETH_PROTO_CHECK(protocol, family)								\
+	(void)protocol;											\
+	(void)family
 #endif
 
 static PHP_GINIT_FUNCTION(sockets);
@@ -283,6 +285,19 @@ static bool php_open_listen_sock(php_socket *sock, unsigned short port, int back
 
 static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct sockaddr *la, socklen_t *la_len) /* {{{ */
 {
+#if defined(HAVE_ACCEPT4)
+	int flags = SOCK_CLOEXEC;
+	if (!in_sock->blocking) {
+		flags |= SOCK_NONBLOCK;
+	}
+
+	out_sock->bsd_socket = accept4(in_sock->bsd_socket, la, la_len, flags);
+
+	if (IS_INVALID_SOCKET(out_sock)) {
+		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
+		return 0;
+	}
+#else
 	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, la_len);
 
 	if (IS_INVALID_SOCKET(out_sock)) {
@@ -292,7 +307,7 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 
 #if !defined(PHP_WIN32)
 	/**
-	 * accept4 could had been used but not all platforms support it (e.g. Haiku, solaris < 11.4, ...)
+	 * for fewer and fewer platforms not supporting accept4 syscall we use fcntl instead,
 	 * win32, not having any concept of child process, has no need to address it.
 	 */
 	int mode;
@@ -310,6 +325,7 @@ static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct
 			return 0;
 		}
 	}
+#endif
 #endif
 
 	out_sock->error = 0;
@@ -2571,7 +2587,7 @@ PHP_FUNCTION(socket_import_stream)
 	ZEND_PARSE_PARAMETERS_END();
 	php_stream_from_zval(stream, zstream);
 
-	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void**)&socket, 1)) {
+	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void**)&socket, 1) == FAILURE) {
 		/* error supposedly already shown */
 		RETURN_FALSE;
 	}
@@ -2774,8 +2790,16 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 						zend_argument_type_error(3, "\"ai_family\" key must be of type int, %s given", zend_zval_type_name(hint));
 						RETURN_THROWS();
 					}
-					if (val < 0 || val >= AF_MAX) {
-						zend_argument_value_error(3, "\"ai_family\" key must be between 0 and %d", AF_MAX - 1);
+					// Some platforms support also PF_LOCAL/AF_UNIX (e.g. FreeBSD) but the security concerns implied
+					// make it not worth handling it (e.g. unwarranted write permissions on the socket).
+					// Note existing socket_addrinfo* api already forbid such case.
+#ifdef HAVE_IPV6
+					if (val != AF_INET && val != AF_INET6) {
+						zend_argument_value_error(3, "\"ai_family\" key must be AF_INET or AF_INET6");
+#else
+					if (val != AF_INET) {
+						zend_argument_value_error(3, "\"ai_family\" key must be AF_INET");
+#endif
 						RETURN_THROWS();
 					}
 					hints.ai_family = (int)val;
@@ -2827,7 +2851,6 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 PHP_FUNCTION(socket_addrinfo_bind)
 {
 	zval			*arg1;
-	int				retval;
 	php_addrinfo	*ai;
 	php_socket		*php_sock;
 
@@ -2836,6 +2859,8 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ai = Z_ADDRESS_INFO_P(arg1);
+
+	ZEND_ASSERT(ai->addrinfo.ai_family == AF_INET || ai->addrinfo.ai_family == AF_INET6);
 
 	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
@@ -2855,31 +2880,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	php_sock->error = 0;
 	php_sock->blocking = 1;
 
-	switch(php_sock->type) {
-		case AF_UNIX:
-			{
-				// AF_UNIX sockets via getaddrino are not implemented due to security problems
-				close(php_sock->bsd_socket);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
-			}
-
-		case AF_INET:
-#ifdef HAVE_IPV6
-		case AF_INET6:
-#endif
-			{
-				retval = bind(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen);
-				break;
-			}
-		default:
-			close(php_sock->bsd_socket);
-			zval_ptr_dtor(return_value);
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
-			RETURN_THROWS();
-	}
-
-	if (retval != 0) {
+	if (bind(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to bind address", errno);
 		close(php_sock->bsd_socket);
 		zval_ptr_dtor(return_value);
@@ -2892,7 +2893,6 @@ PHP_FUNCTION(socket_addrinfo_bind)
 PHP_FUNCTION(socket_addrinfo_connect)
 {
 	zval			*arg1;
-	int				retval;
 	php_addrinfo	*ai;
 	php_socket		*php_sock;
 
@@ -2901,6 +2901,8 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ai = Z_ADDRESS_INFO_P(arg1);
+
+	ZEND_ASSERT(ai->addrinfo.ai_family == AF_INET || ai->addrinfo.ai_family == AF_INET6);
 
 	PHP_ETH_PROTO_CHECK(ai->addrinfo.ai_protocol, ai->addrinfo.ai_family);
 
@@ -2920,31 +2922,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	php_sock->error = 0;
 	php_sock->blocking = 1;
 
-	switch(php_sock->type) {
-		case AF_UNIX:
-			{
-				// AF_UNIX sockets via getaddrino are not implemented due to security problems
-				close(php_sock->bsd_socket);
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
-			}
-
-		case AF_INET:
-#ifdef HAVE_IPV6
-		case AF_INET6:
-#endif
-			{
-				retval = connect(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen);
-				break;
-			}
-		default:
-			zend_argument_value_error(1, "socket type must be one of AF_UNIX, AF_INET, or AF_INET6");
-			close(php_sock->bsd_socket);
-			zval_ptr_dtor(return_value);
-			RETURN_THROWS();
-	}
-
-	if (retval != 0) {
+	if (connect(php_sock->bsd_socket, ai->addrinfo.ai_addr, ai->addrinfo.ai_addrlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to connect address", errno);
 		close(php_sock->bsd_socket);
 		zval_ptr_dtor(return_value);

@@ -1164,7 +1164,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 				}
 				if (op_array->try_catch_array[i].finally_end) {
 					fprintf(stderr,
-						", %04u",
+						", %04u\n",
 						op_array->try_catch_array[i].finally_end);
 				} else {
 					fprintf(stderr, ", -\n");

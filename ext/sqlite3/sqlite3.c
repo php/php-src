@@ -1987,6 +1987,16 @@ PHP_METHOD(SQLite3Result, columnType)
 }
 /* }}} */
 
+static void sqlite3result_fill_column_names_cache(php_sqlite3_result *result_obj, int nb_cols)
+{
+	result_obj->column_names = safe_emalloc(nb_cols, sizeof(zend_string*), 0);
+
+	for (int i = 0; i < nb_cols; i++) {
+		const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
+		result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
+	}
+}
+
 /* {{{ Fetch a result row as both an associative or numerically indexed array or both. */
 PHP_METHOD(SQLite3Result, fetchArray)
 {
@@ -2019,12 +2029,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 			/* Cache column names to speed up repeated fetchArray calls. */
 			if (mode & PHP_SQLITE3_ASSOC && !result_obj->column_names) {
-				result_obj->column_names = emalloc(n_cols * sizeof(zend_string*));
-
-				for (int i = 0; i < n_cols; i++) {
-					const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
-					result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
-				}
+				sqlite3result_fill_column_names_cache(result_obj, n_cols);
 			}
 
 			array_init(return_value);
@@ -2056,7 +2061,7 @@ static void sqlite3result_clear_column_names_cache(php_sqlite3_result *result) {
 
 PHP_METHOD(SQLite3Result, fetchAll)
 {
-	int i, nb_cols;
+	int nb_cols;
 	bool done = false;
 	php_sqlite3_result *result_obj;
 	zval *object = ZEND_THIS;
@@ -2071,14 +2076,8 @@ PHP_METHOD(SQLite3Result, fetchAll)
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
 	nb_cols = sqlite3_column_count(result_obj->stmt_obj->stmt);
-	if (mode & PHP_SQLITE3_ASSOC) {
-		sqlite3result_clear_column_names_cache(result_obj);
-		result_obj->column_names = emalloc(nb_cols * sizeof(zend_string*));
-
-		for (i = 0; i < nb_cols; i++) {
-			const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
-			result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
-		}
+	if (mode & PHP_SQLITE3_ASSOC && !result_obj->column_names) {
+		sqlite3result_fill_column_names_cache(result_obj, nb_cols);
 	}
 	result_obj->column_count = nb_cols;
 	array_init(return_value);
@@ -2479,9 +2478,7 @@ static zend_always_inline void php_sqlite3_fetch_one(int n_cols, php_sqlite3_res
 
 		if (mode & PHP_SQLITE3_ASSOC) {
 			if (mode & PHP_SQLITE3_NUM) {
-				if (Z_REFCOUNTED(data)) {
-					Z_ADDREF(data);
-				}
+				Z_TRY_ADDREF(data);
 			}
 			/* Note: we can't use the "add_new" variant here instead of "update" because
 			 * when the same column name is encountered, the last result should be taken. */

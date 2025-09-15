@@ -54,4 +54,4 @@ testarray: string 3
 Using a reference as an offset:
 string(12) "Hello World!"
 NULL
-    2: Cannot load resource element 'nonexisting': U_MISSING_RESOURCE_ERROR
+    2: main(): Cannot load resource element 'nonexisting': U_MISSING_RESOURCE_ERROR

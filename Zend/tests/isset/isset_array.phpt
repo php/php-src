@@ -42,6 +42,8 @@ bool(true)
 Deprecated: Implicit conversion from float 0.6 to int loses precision in %s on line %d
 bool(true)
 bool(false)
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
 bool(false)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d

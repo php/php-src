@@ -14,7 +14,7 @@ var_dump($i1);
 var_dump($i2);
 ?>
 --EXPECT--
-array(7) {
+array(9) {
   [0]=>
   int(120)
   [1]=>
@@ -29,8 +29,12 @@ array(7) {
   int(3)
   ["mime"]=>
   string(9) "image/gif"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
-array(7) {
+array(9) {
   [0]=>
   int(120)
   [1]=>
@@ -45,4 +49,8 @@ array(7) {
   int(3)
   ["mime"]=>
   string(9) "image/gif"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }

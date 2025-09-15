@@ -129,11 +129,6 @@
 ;   Development Value: 4096
 ;   Production Value: 4096
 
-; register_argc_argv
-;   Default Value: On
-;   Development Value: Off
-;   Production Value: Off
-
 ; request_order
 ;   Default Value: None
 ;   Development Value: "GP"
@@ -327,11 +322,6 @@ serialize_precision = -1
 ; https://php.net/disable-functions
 disable_functions =
 
-; This directive allows you to disable certain classes.
-; It receives a comma-delimited list of class names.
-; https://php.net/disable-classes
-disable_classes =
-
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in
 ; <span style="color: ???????"> would work.
 ; https://php.net/syntax-highlighting
@@ -438,6 +428,7 @@ max_input_time = 60
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
 memory_limit = 128M
+max_memory_limit = -1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
@@ -538,12 +529,6 @@ ignore_repeated_errors = Off
 ; https://php.net/ignore-repeated-source
 ignore_repeated_source = Off
 
-; If this parameter is set to Off, then memory leaks will not be shown (on
-; stdout or in the log). This is only effective in a debug compile, and if
-; error reporting includes E_WARNING in the allowed list
-; https://php.net/report-memleaks
-report_memleaks = On
-
 ; This setting is off by default.
 ;report_zend_debug = 0
 
@@ -622,6 +607,12 @@ report_memleaks = On
 ; Development value: 0
 ; Production value: 0
 
+; This directive controls whether PHP will output the backtrace of fatal errors.
+; Default Value: On
+; Development Value: On
+; Production Value: On
+;fatal_error_backtraces = On
+
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
@@ -671,14 +662,12 @@ request_order = "GP"
 ; that were passed when the script was invoked. These arrays are extremely
 ; useful when running scripts from the command line. When this directive is
 ; enabled, registering these variables consumes CPU cycles and memory each time
-; a script is executed. For performance reasons, this feature should be disabled
-; on production servers.
-; Note: This directive is hardcoded to On for the CLI SAPI
-; Default Value: On
-; Development Value: Off
-; Production Value: Off
+; a script is executed. For security reasons, this feature should be disabled
+; for non-CLI SAPIs.
+; Note: This directive is ignored for the CLI SAPI
+; This directive is deprecated.
 ; https://php.net/register-argc-argv
-register_argc_argv = Off
+;register_argc_argv = Off
 
 ; When enabled, the ENV, REQUEST and SERVER variables are created when they're
 ; first used (Just In Time) instead of when the script starts. If these
@@ -961,8 +950,6 @@ default_socket_timeout = 60
 ;extension=xsl
 ;extension=zip
 
-;zend_extension=opcache
-
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
 ;;;;;;;;;;;;;;;;;;;
@@ -1018,8 +1005,12 @@ cli_server.color = On
 ; This directive allows you to produce PHP errors when some error
 ; happens within intl functions. The value is the level of the error produced.
 ; Default is 0, which does not produce any errors.
+; This directive is deprecated.
 ;intl.error_level = E_WARNING
-;intl.use_exceptions = 0
+; If enabled this directive indicates that when an error occurs within an
+; intl function a IntlException should be thrown.
+; Default is Off, which means errors need to be handled manually.
+;intl.use_exceptions = On
 
 [sqlite3]
 ; Directory pointing to SQLite3 extensions
@@ -1096,6 +1087,14 @@ mail.add_x_header = Off
 ; Use mixed LF and CRLF line separators to keep compatibility with some
 ; RFC 2822 non conformant MTA.
 mail.mixed_lf_and_crlf = Off
+
+; Control line ending mode for mail messages and headers.
+; Possible values: "crlf" (default), "lf", "mixed", "os"
+; - crlf: Use CRLF line endings
+; - lf: Use LF line endings only (converts CRLF in message to LF)
+; - mixed: Same as mail.mixed_lf_and_crlf = On
+; - os: Use CRLF on Windows, LF on other systems
+mail.cr_lf_mode = crlf
 
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
@@ -1319,6 +1318,9 @@ session.use_cookies = 1
 
 ; https://php.net/session.cookie-secure
 ;session.cookie_secure =
+
+; https://php.net/session.cookie-partitioned
+;session.cookie_partitioned = 0
 
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
 ; the session id. We encourage this operation as it's very helpful in combating
@@ -1858,6 +1860,14 @@ ldap.max_links = -1
 ; this value may still be overridden on a per-stream basis via the "capath"
 ; SSL stream context option.
 ;openssl.capath=
+
+; The libctx is an OpenSSL library context. OpenSSL defines a default library
+; context, but PHP OpenSSL also defines its own library context to avoid
+; interference with other libraries using OpenSSL and to provide an independent
+; context for each thread in ZTS. Possible values:
+;  "custom"  - use a custom library context (default)
+;  "default" - use the default OpenSSL library context
+;openssl.libctx=custom
 
 [ffi]
 ; FFI API restriction. Possible values:

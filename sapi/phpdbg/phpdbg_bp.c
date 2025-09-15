@@ -1206,14 +1206,14 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num) /* {{{ */
 					name = estrdup(brake->name);
 					name_len = strlen(name);
 					if (zend_hash_num_elements(&PHPDBG_G(bp)[type]) == 1) {
-						PHPDBG_G(flags) &= ~(1<<(brake->type+1));
+						PHPDBG_G(flags) &= ~(1ull<<(brake->type+1));
 					}
 				}
 			break;
 
 			default: {
 				if (zend_hash_num_elements(table) == 1) {
-					PHPDBG_G(flags) &= ~(1<<(brake->type+1));
+					PHPDBG_G(flags) &= ~(1ull<<(brake->type+1));
 				}
 			}
 		}

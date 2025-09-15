@@ -180,6 +180,7 @@ typedef void (*zend_object_free_obj_t)(zend_object *object);
 typedef void (*zend_object_dtor_obj_t)(zend_object *object);
 
 typedef zend_object* (*zend_object_clone_obj_t)(zend_object *object);
+typedef zend_object* (*zend_object_clone_obj_with_t)(zend_object *object, const zend_class_entry *scope, const HashTable *properties);
 
 /* Get class name for display in var_dump and other debugging functions.
  * Must be defined and must return a non-NULL value. */
@@ -209,6 +210,7 @@ struct _zend_object_handlers {
 	zend_object_free_obj_t					free_obj;             /* required */
 	zend_object_dtor_obj_t					dtor_obj;             /* required */
 	zend_object_clone_obj_t					clone_obj;            /* optional */
+	zend_object_clone_obj_with_t			clone_obj_with;       /* optional */
 	zend_object_read_property_t				read_property;        /* required */
 	zend_object_write_property_t			write_property;       /* required */
 	zend_object_read_dimension_t			read_dimension;       /* required */
@@ -249,7 +251,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *ce);
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, struct _zend_property_info **prop_info);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
-ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
+ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name);
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
@@ -272,8 +274,8 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
 ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 /* Use zend_std_get_properties_ex() */
 ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
-ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc, zend_string *method_name, zend_class_entry *scope);
-ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc);
+ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope);
+ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(const zend_function *fbc);
 
 static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
 {

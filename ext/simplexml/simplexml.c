@@ -1528,10 +1528,10 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 				/* Attributes in the xmlns namespace should be treated as namespace declarations too. */
 				if (attr->ns && xmlStrEqual(attr->ns->href, (const xmlChar *) "http://www.w3.org/2000/xmlns/")) {
 					const char *prefix = attr->ns->prefix ? (const char *) attr->name : "";
-					bool free;
-					xmlChar *href = php_libxml_attr_value(attr, &free);
+					bool should_free;
+					xmlChar *href = php_libxml_attr_value(attr, &should_free);
 					sxe_add_namespace_name_raw(return_value, prefix, (const char *) href);
-					if (free) {
+					if (should_free) {
 						xmlFree(href);
 					}
 				}

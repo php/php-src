@@ -24,6 +24,7 @@
 #include "zend_types.h"
 #include "zend_map_ptr.h"
 #include "zend_alloc.h"
+#include "zend_vm_opcodes.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -96,7 +97,7 @@ typedef struct _zend_ast_znode {
 	znode node;
 } zend_ast_znode;
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(const znode *node);
 
 static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
@@ -135,7 +136,7 @@ void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr, bool allow_dynami
 typedef int (*user_opcode_handler_t) (zend_execute_data *execute_data);
 
 struct _zend_op {
-	const void *handler;
+	zend_vm_opcode_handler_t handler;
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
@@ -207,6 +208,7 @@ typedef struct _zend_oparray_context {
 	zend_string *active_property_info_name;
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
+	bool has_assigned_to_http_response_header;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
@@ -251,9 +253,15 @@ typedef struct _zend_oparray_context {
 /* Flag to differentiate cases from constants.            |     |     |     */
 /* Must not conflict with ZEND_ACC_ visibility flags      |     |     |     */
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
-#define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
+#define ZEND_CLASS_CONST_IS_CASE         (1 <<  6) /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Property Flags (unused: 13...)                         |     |     |     */
+/* deprecation flag                                       |     |     |     */
+#define ZEND_ACC_DEPRECATED              (1 << 11) /*  X  |  X  |     |  X  */
+/*                                                        |     |     |     */
+/* has #[\Override] attribute                             |     |     |     */
+#define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |  X  |     */
+/*                                                        |     |     |     */
+/* Property Flags (unused: 13-27,29...)                   |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Promoted property / parameter                          |     |     |     */
@@ -267,7 +275,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30,31)                            |     |     |     */
+/* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -285,7 +293,7 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class has magic methods __get/__set/__unset/           |     |     |     */
 /* __isset that use guards                                |     |     |     */
-#define ZEND_ACC_USE_GUARDS              (1 << 11) /*  X  |     |     |     */
+#define ZEND_ACC_USE_GUARDS              (1 << 30) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 12) /*  X  |     |     |     */
@@ -335,9 +343,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */
-/*                                                        |     |     |     */
-/* deprecation flag                                       |     |     |     */
-#define ZEND_ACC_DEPRECATED              (1 << 11) /*     |  X  |     |  X  */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
 #define ZEND_ACC_RETURN_REFERENCE        (1 << 12) /*     |  X  |     |     */
@@ -391,9 +396,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* supports opcache compile-time evaluation (funcs)       |     |     |     */
 #define ZEND_ACC_COMPILE_TIME_EVAL       (1 << 27) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* has #[\Override] attribute                             |     |     |     */
-#define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* Has IS_PTR operands that needs special cleaning; same  |     |     |     */
 /* value as ZEND_ACC_OVERRIDE but override is for class   |     |     |     */
@@ -886,7 +888,6 @@ ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_ar
 
 #ifdef ZTS
 const char *zend_get_zendtext(void);
-int zend_get_zendleng(void);
 #endif
 
 typedef zend_result (ZEND_FASTCALL *unary_op_type)(zval *, zval *);
@@ -1127,6 +1128,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_TENTATIVE_BIT) != 0)
 
 #define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce. Set in zend_compile.c for ZEND_AST_DIM nested within ZEND_AST_COALESCE. */
+#define ZEND_ALT_CASE_SYNTAX		(1 << 1) /* deprecated switch case terminated by semicolon */
 
 /* Attributes for ${} encaps var in strings (ZEND_AST_DIM or ZEND_AST_VAR node) */
 /* ZEND_AST_VAR nodes can have any of the ZEND_ENCAPS_VAR_* flags */
@@ -1205,6 +1207,9 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 
 /* Used to distinguish (parent::$prop)::get() from parent hook call. */
 #define ZEND_PARENTHESIZED_STATIC_PROP 1
+
+/* Used to disallow pipes with arrow functions that lead to confusing parse trees. */
+#define ZEND_PARENTHESIZED_ARROW_FUNC 1
 
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)

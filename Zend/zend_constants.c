@@ -136,62 +136,62 @@ void zend_register_standard_constants(void)
 	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", sizeof("NULL")-1);
 }
 
-ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
+ZEND_API zend_constant *zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
 {
 	zend_constant c;
 
 	ZVAL_NULL(&c.value);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(&c);
+	return zend_register_constant(&c);
 }
 
-ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, bool bval, int flags, int module_number)
+ZEND_API zend_constant *zend_register_bool_constant(const char *name, size_t name_len, bool bval, int flags, int module_number)
 {
 	zend_constant c;
 
 	ZVAL_BOOL(&c.value, bval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(&c);
+	return zend_register_constant(&c);
 }
 
-ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number)
+ZEND_API zend_constant *zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number)
 {
 	zend_constant c;
 
 	ZVAL_LONG(&c.value, lval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(&c);
+	return zend_register_constant(&c);
 }
 
 
-ZEND_API void zend_register_double_constant(const char *name, size_t name_len, double dval, int flags, int module_number)
+ZEND_API zend_constant *zend_register_double_constant(const char *name, size_t name_len, double dval, int flags, int module_number)
 {
 	zend_constant c;
 
 	ZVAL_DOUBLE(&c.value, dval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(&c);
+	return zend_register_constant(&c);
 }
 
 
-ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, const char *strval, size_t strlen, int flags, int module_number)
+ZEND_API zend_constant *zend_register_stringl_constant(const char *name, size_t name_len, const char *strval, size_t strlen, int flags, int module_number)
 {
 	zend_constant c;
 
 	ZVAL_STR(&c.value, zend_string_init_interned(strval, strlen, flags & CONST_PERSISTENT));
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(&c);
+	return zend_register_constant(&c);
 }
 
 
-ZEND_API void zend_register_string_constant(const char *name, size_t name_len, const char *strval, int flags, int module_number)
+ZEND_API zend_constant *zend_register_string_constant(const char *name, size_t name_len, const char *strval, int flags, int module_number)
 {
-	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number);
+	return zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number);
 }
 
 static zend_constant *zend_get_halt_offset_constant(const char *name, size_t name_len)
@@ -487,6 +487,9 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			CONST_PROTECT_RECURSION(c);
 			zend_deprecated_constant(c, c->name);
 			CONST_UNPROTECT_RECURSION(c);
+			if (UNEXPECTED(EG(exception))) {
+				return NULL;
+			}
 		}
 	}
 	return &c->value;
@@ -505,11 +508,11 @@ static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_consta
 	return ret;
 }
 
-ZEND_API zend_result zend_register_constant(zend_constant *c)
+ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 {
 	zend_string *lowercase_name = NULL;
 	zend_string *name;
-	zend_result ret = SUCCESS;
+	zend_constant *ret = NULL;
 	bool persistent = (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) != 0;
 
 #if 0
@@ -539,9 +542,9 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 	/* Check if the user is trying to define any special constant */
 	if (zend_string_equals_literal(name, "__COMPILER_HALT_OFFSET__")
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
-		|| zend_hash_add_constant(EG(zend_constants), name, c) == NULL
+		|| (ret = zend_hash_add_constant(EG(zend_constants), name, c)) == NULL
 	) {
-		zend_error(E_WARNING, "Constant %s already defined", ZSTR_VAL(name));
+		zend_error(E_WARNING, "Constant %s already defined, this will be an error in PHP 9", ZSTR_VAL(name));
 		zend_string_release(c->name);
 		if (c->filename) {
 			zend_string_release(c->filename);
@@ -550,7 +553,6 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 		if (!persistent) {
 			zval_ptr_dtor_nogc(&c->value);
 		}
-		ret = FAILURE;
 	}
 	if (lowercase_name) {
 		zend_string_release(lowercase_name);

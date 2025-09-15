@@ -85,6 +85,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "lscriu.h"
 
 #include <Zend/zend_portability.h>
+#include "main/php_main.h"
 
 #define  LSCRIU_PATH    256
 
@@ -459,6 +460,7 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
     else {
         s_restored = 1;
         LSAPI_reset_server_state();
+        php_child_init();
         /*
          Here we have restored the php process, so we should to tell (via
          semaphore) mod_lsapi that we are started and ready to receive data.
@@ -532,6 +534,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
         LSCRIU_Wait_Dump_Finish_Or_Restored(iPidParent);
         LSCRIU_Restored_Error(0, "Restored!");
         LSAPI_reset_server_state();
+        php_child_init();
         s_restored = 1;
     }
     else {

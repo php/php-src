@@ -16,7 +16,7 @@
 
 #include "php_filter.h"
 
-void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
+zend_result php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zval retval;
 	int status;
@@ -25,7 +25,7 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 		zend_type_error("%s(): Option must be a valid callback", get_active_function_name());
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
-		return;
+		return SUCCESS;
 	}
 
 	status = call_user_function(NULL, NULL, option_array, &retval, 1, value);
@@ -37,4 +37,5 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 	}
+	return SUCCESS;
 }

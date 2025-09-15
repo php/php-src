@@ -402,6 +402,7 @@ try_again:
 				zend_long lval;
 				double dval;
 				bool trailing_data = false;
+				zend_string *op_str = NULL; /* protect against error handlers */
 
 				/* For BC reasons we allow errors so that we can warn on leading numeric string */
 				type = is_numeric_string_ex(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval,
@@ -411,6 +412,9 @@ try_again:
 					return 0;
 				}
 				if (UNEXPECTED(trailing_data)) {
+					if (type != IS_LONG) {
+						op_str = zend_string_copy(Z_STR_P(op));
+					}
 					zend_error(E_WARNING, "A non-numeric value encountered");
 					if (UNEXPECTED(EG(exception))) {
 						*failed = 1;
@@ -426,11 +430,12 @@ try_again:
 					 */
 					lval = zend_dval_to_lval_cap(dval);
 					if (!zend_is_long_compatible(dval, lval)) {
-						zend_incompatible_string_to_long_error(Z_STR_P(op));
+						zend_incompatible_string_to_long_error(op_str ? op_str : Z_STR_P(op));
 						if (UNEXPECTED(EG(exception))) {
 							*failed = 1;
 						}
 					}
+					zend_tmp_string_release(op_str);
 					return lval;
 				}
 			}
@@ -2553,27 +2558,21 @@ static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 	int last=0; /* Shut up the compiler warning */
 	int ch;
 
+	zend_string *zstr = Z_STR_P(str);
+	zend_string_addref(zstr);
+	zend_error(E_DEPRECATED, "Increment on non-numeric string is deprecated, use str_increment() instead");
+	if (EG(exception)) {
+		zend_string_release(zstr);
+		return false;
+	}
+	/* A userland error handler can change the type from string to something else */
+	zval_ptr_dtor(str);
+	ZVAL_STR(str, zstr);
+
 	if (UNEXPECTED(Z_STRLEN_P(str) == 0)) {
-		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
-		if (EG(exception)) {
-			return false;
-		}
-		/* A userland error handler can change the type from string to something else */
 		zval_ptr_dtor(str);
 		ZVAL_CHAR(str, '1');
 		return true;
-	}
-
-	if (UNEXPECTED(!zend_string_only_has_ascii_alphanumeric(Z_STR_P(str)))) {
-		zend_string *zstr = Z_STR_P(str);
-		zend_string_addref(zstr);
-		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
-		if (EG(exception)) {
-			zend_string_release(zstr);
-			return false;
-		}
-		zval_ptr_dtor(str);
-		ZVAL_STR(str, zstr);
 	}
 
 	if (!Z_REFCOUNTED_P(str)) {
@@ -3417,7 +3416,19 @@ static int hash_zval_compare_function(zval *z1, zval *z2) /* {{{ */
 
 ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2) /* {{{ */
 {
-	return ht1 == ht2 ? 0 : zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0);
+	if (ht1 == ht2) {
+		return 0;
+	}
+
+	GC_TRY_ADDREF(ht1);
+	GC_TRY_ADDREF(ht2);
+
+	int ret = zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0);
+
+	GC_TRY_DTOR_NO_REF(ht1);
+	GC_TRY_DTOR_NO_REF(ht2);
+
+	return ret;
 }
 /* }}} */
 

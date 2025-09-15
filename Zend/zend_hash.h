@@ -26,9 +26,11 @@
 #include "zend_string.h"
 #include "zend_sort.h"
 
-#define HASH_KEY_IS_STRING 1
-#define HASH_KEY_IS_LONG 2
-#define HASH_KEY_NON_EXISTENT 3
+typedef enum {
+	HASH_KEY_IS_STRING = 1,
+	HASH_KEY_IS_LONG,
+	HASH_KEY_NON_EXISTENT
+} zend_hash_key_type;
 
 #define HASH_UPDATE 			(1<<0) /* Create new entry, or update the existing one. */
 #define HASH_ADD				(1<<1) /* Create new entry, or fail if it exists. */
@@ -251,9 +253,9 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *h
 
 ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_forward_ex(const HashTable *ht, HashPosition *pos);
 ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_backwards_ex(const HashTable *ht, HashPosition *pos);
-ZEND_API int   ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos);
+ZEND_API zend_hash_key_type  ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, const HashPosition *pos);
-ZEND_API int   ZEND_FASTCALL zend_hash_get_current_key_type_ex(const HashTable *ht, const HashPosition *pos);
+ZEND_API zend_hash_key_type ZEND_FASTCALL zend_hash_get_current_key_type_ex(const HashTable *ht, const HashPosition *pos);
 ZEND_API zval* ZEND_FASTCALL zend_hash_get_current_data_ex(const HashTable *ht, const HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(const HashTable *ht, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_end_ex(const HashTable *ht, HashPosition *pos);
@@ -270,13 +272,13 @@ static zend_always_inline zend_result zend_hash_move_forward(HashTable *ht) {
 static zend_always_inline zend_result zend_hash_move_backwards(HashTable *ht) {
 	return zend_hash_move_backwards_ex(ht, &ht->nInternalPointer);
 }
-static zend_always_inline int zend_hash_get_current_key(const HashTable *ht, zend_string **str_index, zend_ulong *num_index) {
+static zend_always_inline zend_hash_key_type zend_hash_get_current_key(const HashTable *ht, zend_string **str_index, zend_ulong *num_index) {
 	return zend_hash_get_current_key_ex(ht, str_index, num_index, &ht->nInternalPointer);
 }
 static zend_always_inline void zend_hash_get_current_key_zval(const HashTable *ht, zval *key) {
 	zend_hash_get_current_key_zval_ex(ht, key, &ht->nInternalPointer);
 }
-static zend_always_inline int zend_hash_get_current_key_type(const HashTable *ht) {
+static zend_always_inline zend_hash_key_type zend_hash_get_current_key_type(const HashTable *ht) {
 	return zend_hash_get_current_key_type_ex(ht, &ht->nInternalPointer);
 }
 static zend_always_inline zval* zend_hash_get_current_data(const HashTable *ht) {

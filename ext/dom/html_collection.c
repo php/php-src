@@ -46,34 +46,35 @@ static dom_named_item dom_html_collection_named_item(zend_string *key, zend_obje
 
 	/* 2. Return the first element in the collection for which at least one of the following is true: */
 	xmlNodePtr basep = dom_object_get_node(objmap->baseobj);
-	if (basep != NULL) {
-		zend_long cur = 0;
-		zend_long next = cur; /* not +1, otherwise we skip the first candidate */
-		xmlNodePtr candidate = basep->children;
-		while (candidate != NULL) {
-			candidate = dom_get_elements_by_tag_name_ns_raw(basep, candidate, objmap->ns, objmap->local, objmap->local_lower, &cur, next);
-			if (candidate == NULL) {
+	if (basep != NULL && basep->children != NULL) {
+		php_dom_obj_map_collection_iter iter = {0};
+		iter.candidate = basep->children;
+		iter.basep = basep;
+
+		while (true) {
+			objmap->handler->collection_named_item_iter(objmap, &iter);
+			if (iter.candidate == NULL) {
 				break;
 			}
+
+			ZEND_ASSERT(iter.candidate->type == XML_ELEMENT_NODE);
 
 			xmlAttrPtr attr;
 
 			/* it has an ID which is key; */
-			if ((attr = xmlHasNsProp(candidate, BAD_CAST "id", NULL)) != NULL && dom_compare_value(attr, BAD_CAST ZSTR_VAL(key))) {
+			if ((attr = xmlHasNsProp(iter.candidate, BAD_CAST "id", NULL)) != NULL && dom_compare_value(attr, BAD_CAST ZSTR_VAL(key))) {
 				ret.context_intern = objmap->baseobj;
-				ret.node = candidate;
+				ret.node = iter.candidate;
 				return ret;
 			}
 			/* it is in the HTML namespace and has a name attribute whose value is key; */
-			else if (php_dom_ns_is_fast(candidate, php_dom_ns_is_html_magic_token)) {
-				if ((attr = xmlHasNsProp(candidate, BAD_CAST "name", NULL)) != NULL && dom_compare_value(attr, BAD_CAST ZSTR_VAL(key))) {
+			else if (php_dom_ns_is_fast(iter.candidate, php_dom_ns_is_html_magic_token)) {
+				if ((attr = xmlHasNsProp(iter.candidate, BAD_CAST "name", NULL)) != NULL && dom_compare_value(attr, BAD_CAST ZSTR_VAL(key))) {
 					ret.context_intern = objmap->baseobj;
-					ret.node = candidate;
+					ret.node = iter.candidate;
 					return ret;
 				}
 			}
-
-			next = cur + 1;
 		}
 	}
 
@@ -138,6 +139,25 @@ int dom_html_collection_has_dimension(zend_object *object, zval *member, int che
 	} else {
 		ZEND_ASSERT(index.type == DOM_NODELIST_DIM_LONG);
 		return index.lval >= 0 && index.lval < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
+	}
+}
+
+HashTable *dom_html_collection_get_gc(zend_object *object, zval **table, int *n)
+{
+	dom_nnodemap_object *objmap = php_dom_obj_from_obj(object)->ptr;
+
+	if (objmap->baseobj) {
+		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+		zend_get_gc_buffer_add_obj(gc_buffer, &objmap->baseobj->std);
+		zend_get_gc_buffer_use(gc_buffer, table, n);
+
+		if (object->properties == NULL && object->ce->default_properties_count == 0) {
+			return NULL;
+		} else {
+			return zend_std_get_properties(object);
+		}
+	} else {
+		return zend_std_get_gc(object, table, n);
 	}
 }
 

@@ -1,17 +1,26 @@
 name: FreeBSD
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
+  runExtraTests:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
     - name: FreeBSD
       uses: vmactions/freebsd-vm@v1
       with:
-        release: '13.3'
+        release: '13.5'
         usesh: true
         copyback: false
         # Temporarily disable sqlite, as FreeBSD ships it with disabled double quotes. We'll need to fix our tests.
         # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269889
         prepare: |
           cd $GITHUB_WORKSPACE
+
+          OPCACHE_TLS_TESTS_DEPS="gcc"
 
           kldload accf_http
           pkg install -y \
@@ -37,9 +46,11 @@ runs:
             webp \
             libavif \
             `#sqlite3` \
-            curl
+            curl \
+            $OPCACHE_TLS_TESTS_DEPS
 
           ./buildconf -f
+          CC=clang CXX=clang++ \
           ./configure \
             --prefix=/usr/local \
             --enable-debug \
@@ -80,7 +91,9 @@ runs:
             --with-sodium \
             --enable-werror \
             --with-config-file-path=/etc \
-            --with-config-file-scan-dir=/etc/php.d
+            --with-config-file-scan-dir=/etc/php.d \
+            ${{ inputs.configurationParameters }}
+
           gmake -j2
           mkdir /etc/php.d
           gmake install > /dev/null
@@ -100,5 +113,8 @@ runs:
             --offline \
             --show-diff \
             --show-slow 1000 \
-            --set-timeout 120 \
-            -d zend_extension=opcache.so
+            --set-timeout 120
+
+          if test "${{ inputs.runExtraTests }}" = "true"; then
+            sapi/cli/php run-extra-tests.php
+          fi

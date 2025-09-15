@@ -172,7 +172,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 			} else if (insn->val.c == '\0') {
 				fprintf(f, "'\\0'");
 			} else {
-				fprintf(f, "%u", insn->val.c);
+				fprintf(f, "%u", (unsigned char)insn->val.c);
 			}
 			break;
 		case IR_I8:
@@ -247,6 +247,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_flag_S1X1    (ir_op_flag_S | 1 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_S2      (ir_op_flag_S | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_S2X1    (ir_op_flag_S | 2 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
+#define ir_op_flag_S3      (ir_op_flag_S | 3 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_SN      (ir_op_flag_S | IR_OP_FLAG_VAR_INPUTS)
 #define ir_op_flag_E       (IR_OP_FLAG_CONTROL|IR_OP_FLAG_BB_END)
 #define ir_op_flag_E1      (ir_op_flag_E | 1 | (1 << IR_OP_FLAG_OPERANDS_SHIFT))
@@ -623,7 +624,7 @@ ir_ref ir_const_bool(ir_ctx *ctx, bool c)
 ir_ref ir_const_char(ir_ctx *ctx, char c)
 {
 	ir_val val;
-	val.i64 = c;
+	val.i64 = (signed char)c;
 	return ir_const(ctx, val, IR_CHAR);
 }
 
@@ -803,7 +804,9 @@ ir_ref ir_proto(ir_ctx *ctx, uint8_t flags, ir_type ret_type, uint32_t params_co
 	proto->flags = flags;
 	proto->ret_type = ret_type;
 	proto->params_count = params_count;
-	memcpy(proto->param_types, param_types, params_count);
+	if (params_count) {
+		memcpy(proto->param_types, param_types, params_count);
+	}
 	return ir_strl(ctx, (const char *)proto, offsetof(ir_proto_t, param_types) + params_count);
 }
 
@@ -1080,7 +1083,7 @@ ir_ref ir_emit_N(ir_ctx *ctx, uint32_t opt, int32_t count)
 	ir_ref *p, ref = ctx->insns_count;
 	ir_insn *insn;
 
-	IR_ASSERT(count >= 0);
+	IR_ASSERT(count >= 0 && count < 65536);
 	while (UNEXPECTED(ref + count/4 >= ctx->insns_limit)) {
 		ir_grow_top(ctx);
 	}
@@ -2971,6 +2974,12 @@ void _ir_CASE_VAL(ir_ctx *ctx, ir_ref switch_ref, ir_ref val)
 {
 	IR_ASSERT(!ctx->control);
 	ctx->control = ir_emit2(ctx, IR_CASE_VAL, switch_ref, val);
+}
+
+void _ir_CASE_RANGE(ir_ctx *ctx, ir_ref switch_ref, ir_ref v1, ir_ref v2)
+{
+	IR_ASSERT(!ctx->control);
+	ctx->control = ir_emit3(ctx, IR_CASE_RANGE, switch_ref, v1, v2);
 }
 
 void _ir_CASE_DEFAULT(ir_ctx *ctx, ir_ref switch_ref)
