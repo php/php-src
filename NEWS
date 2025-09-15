@@ -16,6 +16,10 @@ PHP                                                                        NEWS
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
   . Fix curl build failure on macOS+curl 8.16. (nielsdos)
 
+- Date:
+  . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
+    (nielsdos)
+
 - DOM:
   . Fix macro name clash on macOS. (Ruoyu Zhong)
 
