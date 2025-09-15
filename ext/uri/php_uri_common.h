@@ -143,7 +143,8 @@ typedef struct uri_internal_t {
 } uri_internal_t;
 
 typedef struct uri_object_t {
-	uri_internal_t internal;
+	const php_uri_parser *parser;
+	void *uri;
 	zend_object std;
 } uri_object_t;
 
