@@ -2,6 +2,16 @@
 Bug #48147 (iconv with //IGNORE cuts the string)
 --EXTENSIONS--
 iconv
+--SKIPIF--
+<?php
+// POSIX 2024 standardizes "//IGNORE", but does NOT say that
+// it should ignore invalid input sequences, only untranslatable
+// ones. The GNU implementations have however historically skipped
+// invalid input sequences when it is used.
+if (ICONV_IMPL != "libiconv" && ICONV_IMPL != "glibc") {
+    die("skip iconv will not //IGNORE invalid input sequences");
+}
+?>
 --FILE--
 <?php
 $text = "aa\xC3\xC3\xC3\xB8aa";
