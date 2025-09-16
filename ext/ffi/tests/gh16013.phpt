@@ -130,7 +130,7 @@ int(10000)
 int(-100000)
 int(100000)
 float(12.34000015258789)
-object(FFI\CData:struct bug_gh16013_int_struct)#13 (1) {
+object(FFI\CData:struct bug_gh16013_int_struct)#21 (1) {
   ["field"]=>
   int(10)
 }

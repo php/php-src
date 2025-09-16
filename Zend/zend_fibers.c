@@ -559,7 +559,7 @@ static void zend_fiber_cleanup(zend_fiber_context *context)
 	fiber->caller = NULL;
 }
 
-static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
+ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
 	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_NULL && "Initial transfer value to fiber context must be NULL");
 	ZEND_ASSERT(!transfer->flags && "No flags should be set on initial transfer");
@@ -631,7 +631,7 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 }
 
 /* Handles forwarding of result / error from a transfer into the running fiber. */
-static zend_always_inline void zend_fiber_delegate_transfer_result(
+zend_always_inline void zend_fiber_delegate_transfer_result(
 	zend_fiber_transfer *transfer, INTERNAL_FUNCTION_PARAMETERS
 ) {
 	if (transfer->flags & ZEND_FIBER_TRANSFER_FLAG_ERROR) {
@@ -647,7 +647,7 @@ static zend_always_inline void zend_fiber_delegate_transfer_result(
 	}
 }
 
-static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
+zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
 	zend_fiber_context *context, zval *value, bool exception
 ) {
 	zend_fiber_transfer transfer = {
@@ -672,7 +672,7 @@ static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
 	return transfer;
 }
 
-static zend_always_inline zend_fiber_transfer zend_fiber_resume_internal(zend_fiber *fiber, zval *value, bool exception)
+zend_fiber_transfer zend_fiber_resume_internal(zend_fiber *fiber, zval *value, bool exception)
 {
 	zend_fiber *previous = EG(active_fiber);
 
