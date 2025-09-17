@@ -38,3 +38,5 @@ include 'Test://';
 Fatal error: Bail in %s on line %d
 
 Fatal error: Bail in %s on line %d
+
+Fatal error: Bail in %s on line %d
