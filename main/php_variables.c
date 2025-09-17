@@ -975,7 +975,7 @@ void php_startup_auto_globals(void)
 	zend_register_auto_global(zend_string_init_interned("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get);
 	zend_register_auto_global(zend_string_init_interned("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post);
 	zend_register_auto_global(zend_string_init_interned("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie);
-	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER), PG(auto_globals_jit), php_auto_globals_create_server);
+	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER), PG(auto_globals_jit) && (SG(request_info).argc || !PG(register_argc_argv)), php_auto_globals_create_server);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV), PG(auto_globals_jit), php_auto_globals_create_env);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_REQUEST), PG(auto_globals_jit), php_auto_globals_create_request);
 	zend_register_auto_global(zend_string_init_interned("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
