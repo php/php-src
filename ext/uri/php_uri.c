@@ -38,6 +38,7 @@ zend_class_entry *uri_whatwg_url_ce;
 zend_object_handlers uri_whatwg_uri_object_handlers;
 zend_class_entry *uri_comparison_mode_ce;
 zend_class_entry *uri_exception_ce;
+zend_class_entry *uri_error_ce;
 zend_class_entry *uri_invalid_uri_exception_ce;
 zend_class_entry *uri_whatwg_invalid_url_exception_ce;
 zend_class_entry *uri_whatwg_url_validation_error_type_ce;
@@ -675,7 +676,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withFragment)
 
 static void throw_cannot_recompose_uri_to_string(zend_object *object)
 {
-	zend_throw_exception_ex(NULL, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->ce->name));
+	zend_throw_exception_ex(uri_error_ce, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->ce->name));
 }
 
 static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, zend_object *that_object, zend_object *comparison_mode)
@@ -1105,6 +1106,7 @@ static PHP_MINIT_FUNCTION(uri)
 
 	uri_comparison_mode_ce = register_class_Uri_UriComparisonMode();
 	uri_exception_ce = register_class_Uri_UriException(zend_ce_exception);
+	uri_error_ce = register_class_Uri_UriError(zend_ce_error);
 	uri_invalid_uri_exception_ce = register_class_Uri_InvalidUriException(uri_exception_ce);
 	uri_whatwg_invalid_url_exception_ce = register_class_Uri_WhatWg_InvalidUrlException(uri_invalid_uri_exception_ce);
 	uri_whatwg_url_validation_error_ce = register_class_Uri_WhatWg_UrlValidationError();

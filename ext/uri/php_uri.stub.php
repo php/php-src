@@ -9,6 +9,11 @@ namespace Uri {
     }
 
     /** @strict-properties */
+    class UriError extends \Error
+    {
+    }
+
+    /** @strict-properties */
     class InvalidUriException extends \Uri\UriException
     {
     }

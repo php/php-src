@@ -46,6 +46,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Prevent modifying Uri\WhatWg\Url and Uri\Rfc3986\Uri objects by manually
     calling __construct() or __unserialize(). (timwolla)
+  . Add new Uri\UriError exception that is thrown for internal error
+    conditions. (timwolla)
   . Further clean up the internal API. (timwolla)
 
 - Windows:
