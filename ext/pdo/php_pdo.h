@@ -56,14 +56,20 @@ PHP_MINFO_FUNCTION(pdo);
 #define LONG_CONST(c) (zend_long) c
 
 #define PDO_CONSTRUCT_CHECK \
-	if (dbh->is_closed) { \
-		zend_throw_exception_ex(php_pdo_get_exception(), 0, "connection is closed"); \
-		RETURN_THROWS(); \
-	} \
 	if (!dbh->driver) { \
 		zend_throw_error(NULL, "PDO object is not initialized, constructor was not called"); \
 		RETURN_THROWS(); \
 	} \
+
+#define PDO_CLOSE_CHECK \
+  if (dbh->is_closed) { \
+    pdo_raise_impl_error(dbh, NULL, "01002", NULL); \
+    if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) { \
+      RETURN_THROWS(); \
+    } else { \
+      RETURN_FALSE; \
+    } \
+  } \
 
 
 #endif	/* PHP_PDO_H */

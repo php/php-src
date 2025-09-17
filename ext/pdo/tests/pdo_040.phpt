@@ -29,16 +29,15 @@ putenv("PDOTEST_ATTR=" . serialize(array(PDO::ATTR_PERSISTENT => true)));
 $pdb3 = PDOTest::factory('PDO', false);
 var_dump($pdb3->isConnected());
 $pdb4 = PDOTest::factory('PDO', false);
+$pdb4->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 var_dump($pdb4->isConnected());
 
 /* disconnect regular PDO, confirm other PDOs still connected */
 var_dump($db1->disconnect());
 var_dump($db1->isConnected());
-try {
-    $db1->beginTransaction();
-} catch (PDOException $e) {
-    echo $e->getMessage(), \PHP_EOL;
-}
+var_dump($db1->beginTransaction());
+var_dump($db1->errorCode());
+var_dump($db1->errorInfo());
 var_dump($db2->isConnected());
 var_dump($pdb3->isConnected());
 
@@ -46,17 +45,21 @@ var_dump($pdb3->isConnected());
 var_dump($pdb3->disconnect());
 var_dump($pdb3->isConnected());
 var_dump($pdb4->isConnected());
-try {
-    $pdb4->disconnect();
-} catch (PDOException $e) {
-    echo $e->getMessage(), \PHP_EOL;
-}
+var_dump($pdb4->disconnect());
 
 /* new persistent PDO should prompt new connection */
 $pdb5 = PDOTest::factory('PDO', false);
 var_dump($pdb5->isConnected());
 var_dump($pdb5->inTransaction());
 var_dump($pdb5->beginTransaction());
+
+/* new persistent connection should not be inherited */
+var_dump($pdb4->isConnected());
+try {
+	$pdb4->beginTransaction();
+} catch (PDOException $e) {
+	var_dump($e->getMessage());
+}
 
 $db1 = null;
 $db2 = null; /* trigger shutdown without explicit disconnect */
@@ -76,14 +79,27 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
-connection is closed
+
+Warning: PDO::beginTransaction(): SQLSTATE[01002]: Disconnect error in %s on line %d
+bool(false)
+string(5) "01002"
+array(3) {
+  [0]=>
+  string(5) "01002"
+  [1]=>
+  NULL
+  [2]=>
+  NULL
+}
 bool(true)
 bool(true)
 bool(true)
 bool(false)
 bool(false)
-connection is closed
+bool(true)
 bool(true)
 bool(false)
 bool(true)
+bool(false)
+string(33) "SQLSTATE[01002]: Disconnect error"
 bool(true)
