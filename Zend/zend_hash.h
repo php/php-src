@@ -1621,14 +1621,15 @@ static zend_always_inline bool zend_array_is_list(const zend_array *array)
 }
 
 
-static zend_always_inline zval *_zend_hash_append_ex(HashTable *ht, zend_string *key, zval *zv, bool interned)
+static zend_always_inline zval *_zend_hash_append_ex(HashTable *ht, zend_string *key, zval *zv, bool key_guaranteed_interned)
 {
 	uint32_t idx = ht->nNumUsed++;
 	uint32_t nIndex;
 	Bucket *p = ht->arData + idx;
 
 	ZVAL_COPY_VALUE(&p->val, zv);
-	if (!interned && !ZSTR_IS_INTERNED(key)) {
+	ZEND_ASSERT(!key_guaranteed_interned || ZSTR_IS_INTERNED(key));
+	if (!key_guaranteed_interned && !ZSTR_IS_INTERNED(key)) {
 		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
 		zend_string_hash_val(key);
@@ -1647,14 +1648,15 @@ static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *ke
 	return _zend_hash_append_ex(ht, key, zv, 0);
 }
 
-static zend_always_inline zval *_zend_hash_append_ptr_ex(HashTable *ht, zend_string *key, void *ptr, bool interned)
+static zend_always_inline zval *_zend_hash_append_ptr_ex(HashTable *ht, zend_string *key, void *ptr, bool key_guaranteed_interned)
 {
 	uint32_t idx = ht->nNumUsed++;
 	uint32_t nIndex;
 	Bucket *p = ht->arData + idx;
 
 	ZVAL_PTR(&p->val, ptr);
-	if (!interned && !ZSTR_IS_INTERNED(key)) {
+	ZEND_ASSERT(!key_guaranteed_interned || ZSTR_IS_INTERNED(key));
+	if (!key_guaranteed_interned && !ZSTR_IS_INTERNED(key)) {
 		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
 		zend_string_hash_val(key);

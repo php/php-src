@@ -2464,6 +2464,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 		target->nTableSize = HT_MIN_SIZE;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);
 	} else if (GC_FLAGS(source) & IS_ARRAY_IMMUTABLE) {
+		ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_HAS_EMPTY_IND));
 		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = source->nTableMask;
 		target->nNumUsed = source->nNumUsed;
@@ -2480,6 +2481,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 			memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
 		}
 	} else if (HT_IS_PACKED(source)) {
+		ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_HAS_EMPTY_IND));
 		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = source->nNumUsed;
@@ -2499,7 +2501,8 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 			zend_array_dup_packed_elements(source, target, 1);
 		}
 	} else {
-		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
+		/* Indirects are removed during duplication, remove HASH_FLAG_HAS_EMPTY_IND accordingly. */
+		HT_FLAGS(target) = HT_FLAGS(source) & (HASH_FLAG_MASK & ~HASH_FLAG_HAS_EMPTY_IND);
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
 		target->nInternalPointer =

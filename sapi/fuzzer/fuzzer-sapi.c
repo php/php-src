@@ -220,7 +220,9 @@ void fuzzer_request_shutdown(void)
 		zend_gc_collect_cycles();
 	} zend_end_try();
 
-	php_request_shutdown(NULL);
+	zend_try {
+		php_request_shutdown(NULL);
+	} zend_end_try();
 }
 
 /* Set up a dummy stack frame so that exceptions may be thrown. */
