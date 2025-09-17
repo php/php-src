@@ -19,10 +19,10 @@ foreach ($values as $value) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(4) "exit"
 string(3) "die"
-object(Closure)#1 (2) {
+object(Closure)#%d (2) {
   ["function"]=>
   string(4) "exit"
   ["parameter"]=>
@@ -31,7 +31,7 @@ object(Closure)#1 (2) {
     string(10) "<optional>"
   }
 }
-object(Closure)#2 (2) {
+object(Closure)#%d (2) {
   ["function"]=>
   string(4) "exit"
   ["parameter"]=>

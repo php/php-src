@@ -26,7 +26,7 @@ foo();
 
 ?>
 --EXPECTF--
-object(Closure)#1 (2) {
+object(Closure)#%d (2) {
   ["function"]=>
   string(6) "strrev"
   ["parameter"]=>
@@ -36,7 +36,7 @@ object(Closure)#1 (2) {
   }
 }
 string(3) "cba"
-object(Closure)#2 (2) {
+object(Closure)#%d (2) {
   ["function"]=>
   string(6) "strrev"
   ["parameter"]=>
@@ -46,7 +46,7 @@ object(Closure)#2 (2) {
   }
 }
 string(3) "cba"
-object(Closure)#2 (2) {
+object(Closure)#%d (2) {
   ["function"]=>
   string(6) "strrev"
   ["parameter"]=>
@@ -56,7 +56,7 @@ object(Closure)#2 (2) {
   }
 }
 string(3) "cba"
-object(Closure)#1 (2) {
+object(Closure)#%d (2) {
   ["function"]=>
   string(6) "strrev"
   ["parameter"]=>

@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0alpha1
 
+- Core:
+  . Added first-class callable cache to share instances for the duration of the
+    request. (ilutov)
+
 - Intl:
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, collapse type and identity fallback.
