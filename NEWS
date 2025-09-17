@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed hard_timeout with --enable-zend-max-execution-timers. (Appla)
   . Fixed bug GH-19839 (Incorrect HASH_FLAG_HAS_EMPTY_IND flag on userland
     array). (ilutov)
+  . Fixed bug GH-19823 (register_argc_argv deprecation emitted twice when
+    using OPcache). (timwolla)
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
