@@ -2981,6 +2981,8 @@ static PHP_MINIT_FUNCTION(session)
 
 	/* Register base class */
 	php_session_class_entry = register_class_SessionHandler(php_session_iface_entry, php_session_id_iface_entry);
+	/* Dummy constructor */
+	php_session_class_entry->constructor = (zend_function *) &zend_pass_function;
 
 	register_session_symbols(module_number);
 

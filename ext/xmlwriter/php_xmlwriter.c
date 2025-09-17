@@ -1056,6 +1056,8 @@ static PHP_MINIT_FUNCTION(xmlwriter)
 	xmlwriter_object_handlers.dtor_obj = xmlwriter_object_dtor;
 	xmlwriter_object_handlers.clone_obj = NULL;
 	xmlwriter_class_entry_ce = register_class_XMLWriter();
+	/* Dummy constructor */
+	xmlwriter_class_entry_ce->constructor = (zend_function *) &zend_pass_function;
 	xmlwriter_class_entry_ce->create_object = xmlwriter_object_new;
 	xmlwriter_class_entry_ce->default_object_handlers = &xmlwriter_object_handlers;
 

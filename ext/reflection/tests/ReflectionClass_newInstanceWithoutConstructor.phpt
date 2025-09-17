@@ -42,7 +42,7 @@ object(stdClass)#%d (0) {
 }
 object(DateTime)#%d (0) {
 }
-Class Generator is an internal class marked as final that cannot be instantiated without invoking its constructor
+Class Generator is an internal class that cannot be instantiated manually
 object(Bar)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(0) {

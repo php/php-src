@@ -860,6 +860,8 @@ PHP_MINIT_FUNCTION(dom)
 	dom_modern_domimplementation_class_entry->default_object_handlers = &dom_modern_domimplementation_object_handlers;
 
 	dom_node_class_entry = register_class_DOMNode();
+	/* Dummy constructor */
+	dom_node_class_entry->constructor = (zend_function *) &zend_pass_function;
 	dom_node_class_entry->create_object = dom_objects_new;
 	dom_node_class_entry->default_object_handlers = &dom_object_handlers;
 
@@ -885,6 +887,8 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_new_ptr(&classes, dom_node_class_entry->name, &dom_node_prop_handlers);
 
 	dom_modern_node_class_entry = register_class_Dom_Node();
+	/* Dummy constructor */
+	dom_modern_node_class_entry->constructor = (zend_function *) &zend_pass_function;
 	dom_modern_node_class_entry->create_object = dom_objects_new;
 	dom_modern_node_class_entry->default_object_handlers = &dom_object_handlers;
 
