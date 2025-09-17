@@ -740,6 +740,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						cache_size += 2 * sizeof(void *);
 					}
 					break;
+				case ZEND_CALLABLE_CONVERT:
+					if (opline->extended_value != (uint32_t)-1) {
+						opline->extended_value = cache_size;
+						cache_size += sizeof(void *);
+					}
+					break;
 			}
 			opline++;
 		}
