@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     using OPcache). (timwolla)
   . Fixed bug GH-19480 (error_log php.ini cannot be unset when open_basedir is
     configured). (nielsdos)
+  . Fixed bug GH-19719 (Allow empty statements before declare(strict_types)).
+    (nielsdos)
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead

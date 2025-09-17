@@ -7008,7 +7008,7 @@ static void zend_compile_declare(zend_ast *ast) /* {{{ */
 		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
 
-			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ 0)) {
+			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ true)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must be "
 					"the very first statement in the script");
 			}
