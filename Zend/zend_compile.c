@@ -3964,7 +3964,20 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
 		}
 
-		zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
+		zend_op *callable_convert_op = zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT, NULL, NULL);
+		/* main is not expected to run very often. */
+		if (CG(active_op_array)->function_name && (opline->opcode == ZEND_INIT_FCALL
+		 || opline->opcode == ZEND_INIT_FCALL_BY_NAME
+		 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME
+		 || (opline->opcode == ZEND_INIT_STATIC_METHOD_CALL
+		  && (opline->op1_type == IS_CONST
+		   /* Closures may change scope, hence don't cache callables. */
+		   || (opline->op1_type == IS_UNUSED && !(CG(active_op_array)->fn_flags & ZEND_ACC_CLOSURE)))
+		  && opline->op2_type == IS_CONST))) {
+			callable_convert_op->extended_value = zend_alloc_cache_slot();
+		} else {
+			callable_convert_op->extended_value = (uint32_t)-1;
+		}
 		return true;
 	}
 
