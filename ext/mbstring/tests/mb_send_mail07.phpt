@@ -7,7 +7,7 @@ mbstring
 if (!function_exists("mb_send_mail") || !mb_language("Korean")) {
     die("skip mb_send_mail() not available");
 }
-if (!@mb_internal_encoding('ISO-2022-KR')) {
+if (!@ini_set('internal_encoding','ISO-2022-KR')) {
     die("skip ISO-2022-KR encoding is not available on this platform");
 }
 ?>
@@ -24,8 +24,8 @@ readfile(__DIR__ . "/mb_send_mail07.eml");
 
 /* Korean */
 if (mb_language("korean")) {
-    mb_internal_encoding('EUC-KR');
-    mb_send_mail($to, "�׽�Ʈ ".mb_language(), "�׽�Ʈ");
+    ini_set('internal_encoding','EUC-KR');
+    mb_send_mail($to, "�׽�Ʈ ".mb_language(), "�׽�Ʈ");
     readfile(__DIR__ . "/mb_send_mail07.eml");
 }
 
