@@ -866,6 +866,9 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
+	if (Z_TYPE(closure->this_ptr) != IS_OBJECT) {
+		GC_ADD_FLAGS(&closure->std, GC_NOT_COLLECTABLE);
+	}
 }
 /* }}} */
 
