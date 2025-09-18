@@ -136,7 +136,7 @@ static zend_result php_uri_parser_rfc3986_scheme_write(void *uri, zval *value, z
 			return FAILURE;
 		default:
 			/* This should be unreachable in practice. */
-			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the scheme", 0);
+			zend_throw_exception(uri_error_ce, "Failed to update the scheme", 0);
 			return FAILURE;
 	}
 }
@@ -176,7 +176,7 @@ zend_result php_uri_parser_rfc3986_userinfo_write(void *uri, zval *value, zval *
 			return FAILURE;
 		default:
 			/* This should be unreachable in practice. */
-			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the userinfo", 0);
+			zend_throw_exception(uri_error_ce, "Failed to update the userinfo", 0);
 			return FAILURE;
 	}
 }
@@ -271,7 +271,7 @@ static zend_result php_uri_parser_rfc3986_host_write(void *uri, zval *value, zva
 			return FAILURE;
 		default:
 			/* This should be unreachable in practice. */
-			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the host", 0);
+			zend_throw_exception(uri_error_ce, "Failed to update the host", 0);
 			return FAILURE;
 	}
 }
@@ -331,7 +331,7 @@ static zend_result php_uri_parser_rfc3986_port_write(void *uri, zval *value, zva
 			return FAILURE;
 		default:
 			/* This should be unreachable in practice. */
-			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the port", 0);
+			zend_throw_exception(uri_error_ce, "Failed to update the port", 0);
 			return FAILURE;
 	}
 }
@@ -383,7 +383,7 @@ static zend_result php_uri_parser_rfc3986_path_write(void *uri, zval *value, zva
 			return FAILURE;
 		default:
 			/* This should be unreachable in practice. */
-			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the path", 0);
+			zend_throw_exception(uri_error_ce, "Failed to update the path", 0);
 			return FAILURE;
 	}
 }
@@ -420,7 +420,7 @@ static zend_result php_uri_parser_rfc3986_query_write(void *uri, zval *value, zv
 			return FAILURE;
 		default:
 			/* This should be unreachable in practice. */
-			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the query", 0);
+			zend_throw_exception(uri_error_ce, "Failed to update the query", 0);
 			return FAILURE;
 	}
 }
@@ -457,7 +457,7 @@ static zend_result php_uri_parser_rfc3986_fragment_write(void *uri, zval *value,
 			return FAILURE;
 		default:
 			/* This should be unreachable in practice. */
-			zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to update the fragment", 0);
+			zend_throw_exception(uri_error_ce, "Failed to update the fragment", 0);
 			return FAILURE;
 	}
 }
@@ -484,7 +484,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 					break;
 				default:
 					/* This should be unreachable in practice. */
-					zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to parse the specified URI", 0);
+					zend_throw_exception(uri_error_ce, "Failed to parse the specified URI", 0);
 					break;
 			}
 		}
@@ -506,7 +506,7 @@ php_uri_parser_rfc3986_uris *php_uri_parser_rfc3986_parse_ex(const char *uri_str
 						break;
 					default:
 						/* This should be unreachable in practice. */
-						zend_throw_exception(uri_invalid_uri_exception_ce, "Failed to resolve the specified URI against the base URI", 0);
+						zend_throw_exception(uri_error_ce, "Failed to resolve the specified URI against the base URI", 0);
 						break;
 				}
 			}

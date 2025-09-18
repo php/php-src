@@ -23,6 +23,7 @@ extern zend_class_entry *uri_whatwg_url_ce;
 extern zend_object_handlers uri_whatwg_uri_object_handlers;
 extern zend_class_entry *uri_comparison_mode_ce;
 extern zend_class_entry *uri_exception_ce;
+extern zend_class_entry *uri_error_ce;
 extern zend_class_entry *uri_invalid_uri_exception_ce;
 extern zend_class_entry *uri_whatwg_invalid_url_exception_ce;
 extern zend_class_entry *uri_whatwg_url_validation_error_type_ce;

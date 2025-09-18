@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     checks). (timwolla)
   . The __sleep() and __wakeup() magic methods have been deprecated. (Girgias)
   . Fixed hard_timeout with --enable-zend-max-execution-timers. (Appla)
+  . Fixed bug GH-19839 (Incorrect HASH_FLAG_HAS_EMPTY_IND flag on userland
+    array). (ilutov)
+  . Fixed bug GH-19823 (register_argc_argv deprecation emitted twice when
+    using OPcache). (timwolla)
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
@@ -22,6 +26,10 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #442954659 (Crash in exif_scan_HEIF_header). (nielsdos)
   . Various hardening fixes to HEIF parsing. (nielsdos)
 
+- FPM:
+  . Fixed GH-8157 (post_max_size evaluates .user.ini too late in php-fpm).
+    (Jakub Zelenka)
+
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
@@ -32,12 +40,16 @@ PHP                                                                        NEWS
 - Standard:
   . Passing strings which are not one byte long to ord() is now deprecated.
     (Girgias)
+  . Fixed bug GH-19801 (leaks in var_dump() and debug_zval_dump()).
+    (alexandre-daubois)
 
 - URI:
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
     (nielsdos)
   . Prevent modifying Uri\WhatWg\Url and Uri\Rfc3986\Uri objects by manually
     calling __construct() or __unserialize(). (timwolla)
+  . Add new Uri\UriError exception that is thrown for internal error
+    conditions. (timwolla)
   . Further clean up the internal API. (timwolla)
 
 - Windows:
