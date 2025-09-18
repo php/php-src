@@ -1306,11 +1306,13 @@ PHP_FUNCTION(odbc_exec)
 }
 /* }}} */
 
-#define ODBC_NUM  1
-#define ODBC_OBJECT  2
+typedef enum php_odbc_fetch_result_type_t {
+	ODBC_NUM    = 1,
+	ODBC_OBJECT = 2,
+} php_odbc_fetch_result_type_t;
 
 /* {{{ php_odbc_fetch_hash */
-static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array, int result_type)
+static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array, php_odbc_fetch_result_type_t result_type)
 {
 	int i;
 	odbc_result *result;
