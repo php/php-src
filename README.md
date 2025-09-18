@@ -16,6 +16,7 @@ blog to the most popular websites in the world. PHP is distributed under the
 
 [![Push](https://github.com/php/php-src/actions/workflows/push.yml/badge.svg)](https://github.com/php/php-src/actions/workflows/push.yml)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://issues.oss-fuzz.com/issues?q=project:php)
+[![LFX Health Score](https://insights.linuxfoundation.org/api/badge/health-score?project=php-php-src)](https://insights.linuxfoundation.org/project/php-php-src)
 
 ## Documentation
 
