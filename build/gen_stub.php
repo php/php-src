@@ -5111,7 +5111,7 @@ function generateCodeWithConditions(
             continue;
         }
 
-        if ($info->cond && $info->cond !== $parentCond) {
+        if ($info->cond !== null && $info->cond !== $parentCond) {
             if ($openCondition !== null
                 && $info->cond !== $openCondition
             ) {
