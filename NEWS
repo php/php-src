@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-19480 (error_log php.ini cannot be unset when open_basedir is
     configured). (nielsdos)
   . Fixed bug GH-20002 (Broken build on *BSD with MSAN). (outtersg)
+  . Fixed bug GH-19934 (CGI with auto_globals_jit=0 causes uouv). (ilutov)
 
 - CLI:
   . Fix useless "Failed to poll event" error logs due to EAGAIN in CLI server
