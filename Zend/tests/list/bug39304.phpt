@@ -8,5 +8,9 @@ Bug #39304 (Segmentation fault with list unpacking of string offset)
 ?>
 --EXPECTF--
 Warning: Uninitialized string offset 0 in %s on line %d
+
+Warning: Cannot use string as array in %s on line %d
+
+Warning: Cannot use string as array in %s on line %d
 NULL
 NULL

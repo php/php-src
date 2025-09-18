@@ -48,6 +48,7 @@ $_main:
 0015 RETURN int(1)
 EXCEPTION TABLE:
      0006, 0006, 0010, 0014
+
 Fatal error: Uncaught Exception: Should happen in %s:%d
 Stack trace:
 #0 {main}

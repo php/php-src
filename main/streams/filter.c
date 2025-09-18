@@ -15,10 +15,8 @@
  */
 
 #include "php.h"
-#include "php_globals.h"
 #include "php_network.h"
-#include "php_open_temporary_file.h"
-#include "ext/standard/file.h"
+#include "ext/standard/file.h"  /* For FG(stream_filters) */
 #include <stddef.h>
 #include <fcntl.h>
 
@@ -40,22 +38,22 @@ PHPAPI HashTable *_php_get_stream_filters_hash(void)
 }
 
 /* API for registering GLOBAL filters */
-PHPAPI int php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory)
+PHPAPI zend_result php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory)
 {
-	int ret;
-	zend_string *str = zend_string_init_interned(filterpattern, strlen(filterpattern), 1);
+	zend_result ret;
+	zend_string *str = zend_string_init_interned(filterpattern, strlen(filterpattern), true);
 	ret = zend_hash_add_ptr(&stream_filters_hash, str, (void*)factory) ? SUCCESS : FAILURE;
-	zend_string_release_ex(str, 1);
+	zend_string_release_ex(str, true);
 	return ret;
 }
 
-PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern)
+PHPAPI zend_result php_stream_filter_unregister_factory(const char *filterpattern)
 {
 	return zend_hash_str_del(&stream_filters_hash, filterpattern, strlen(filterpattern));
 }
 
 /* API for registering VOLATILE wrappers */
-PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory)
+PHPAPI zend_result php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory)
 {
 	if (!FG(stream_filters)) {
 		ALLOC_HASHTABLE(FG(stream_filters));
@@ -68,9 +66,9 @@ PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpatter
 
 /* Buckets */
 
-PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent)
+PHPAPI php_stream_bucket *php_stream_bucket_new(const php_stream *stream, char *buf, size_t buflen, uint8_t own_buf, uint8_t buf_persistent)
 {
-	int is_persistent = php_stream_is_persistent(stream);
+	bool is_persistent = php_stream_is_persistent(stream);
 	php_stream_bucket *bucket;
 
 	bucket = (php_stream_bucket*)pemalloc(sizeof(php_stream_bucket), is_persistent);
@@ -78,10 +76,10 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
 
 	if (is_persistent && !buf_persistent) {
 		/* all data in a persistent bucket must also be persistent */
-		bucket->buf = pemalloc(buflen, 1);
+		bucket->buf = pemalloc(buflen, true);
 		memcpy(bucket->buf, buf, buflen);
 		bucket->buflen = buflen;
-		bucket->own_buf = 1;
+		bucket->own_buf = true;
 	} else {
 		bucket->buf = buf;
 		bucket->buflen = buflen;
@@ -118,7 +116,7 @@ PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bu
 	memcpy(retval->buf, bucket->buf, retval->buflen);
 
 	retval->refcount = 1;
-	retval->own_buf = 1;
+	retval->own_buf = true;
 
 	php_stream_bucket_delref(bucket);
 
@@ -134,14 +132,14 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	(*left)->buflen = length;
 	memcpy((*left)->buf, in->buf, length);
 	(*left)->refcount = 1;
-	(*left)->own_buf = 1;
+	(*left)->own_buf = true;
 	(*left)->is_persistent = in->is_persistent;
 
 	(*right)->buflen = in->buflen - length;
 	(*right)->buf = pemalloc((*right)->buflen, in->is_persistent);
 	memcpy((*right)->buf, in->buf + length, (*right)->buflen);
 	(*right)->refcount = 1;
-	(*right)->own_buf = 1;
+	(*right)->own_buf = true;
 	(*right)->is_persistent = in->is_persistent;
 
 	return SUCCESS;
@@ -282,7 +280,7 @@ PHPAPI void php_stream_filter_free(php_stream_filter *filter)
 	pefree(filter, filter->is_persistent);
 }
 
-PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI void php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	filter->next = chain->head;
 	filter->prev = NULL;
@@ -294,8 +292,6 @@ PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stre
 	}
 	chain->head = filter;
 	filter->chain = chain;
-
-	return SUCCESS;
 }
 
 PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter)
@@ -303,7 +299,7 @@ PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_strea
 	php_stream_filter_prepend_ex(chain, filter);
 }
 
-PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	php_stream *stream = chain->stream;
 
@@ -354,6 +350,13 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 				   Reset stream's internal read buffer since the filter is "holding" it. */
 				stream->readpos = 0;
 				stream->writepos = 0;
+
+				/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
+				while (brig_out.head) {
+					bucket = brig_out.head;
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				}
 				break;
 			case PSFS_PASS_ON:
 				/* If any data is consumed, we cannot rely upon the existing read buffer,
@@ -395,7 +398,7 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 	}
 }
 
-PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
+PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish)
 {
 	php_stream_bucket_brigade brig_a = { NULL, NULL }, brig_b = { NULL, NULL }, *inp = &brig_a, *outp = &brig_b, *brig_temp;
 	php_stream_bucket *bucket;
@@ -403,7 +406,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	php_stream_filter *current;
 	php_stream *stream;
 	size_t flushed_size = 0;
-	long flags = (finish ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC);
+	int flags = (finish ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC);
 
 	if (!filter->chain || !filter->chain->stream) {
 		/* Filter is not attached to a chain, or chain is somehow not part of a stream */
@@ -480,7 +483,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	return SUCCESS;
 }
 
-PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor)
+PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor)
 {
 	if (filter->prev) {
 		filter->prev->next = filter->next;

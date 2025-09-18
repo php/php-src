@@ -1,39 +1,18 @@
 --TEST--
-Test function gzfile() by substituting argument 1 with string values.
+gzfile() with unknown file
 --EXTENSIONS--
 zlib
 --FILE--
 <?php
 
+$filename = "nonexistent_file_gzfile.txt.gz";
 
-$use_include_path = false;
-
-
-$heredoc = <<<EOT
-hello world
-EOT;
-
-$variation_array = array(
-  'string DQ' => "string",
-  'string SQ' => 'string',
-  'mixed case string' => "sTrInG",
-  'heredoc' => $heredoc
-  );
-
-
-foreach ( $variation_array as $var ) {
-  var_dump(gzfile( $var ,  $use_include_path ) );
-}
+var_dump(gzfile($filename, false));
+var_dump(gzfile($filename, true));
 ?>
 --EXPECTF--
-Warning: gzfile(string): Failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(nonexistent_file_gzfile.txt.gz): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(string): Failed to open stream: No such file or directory in %s on line %d
-bool(false)
-
-Warning: gzfile(sTrInG): Failed to open stream: No such file or directory in %s on line %d
-bool(false)
-
-Warning: gzfile(hello world): Failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(nonexistent_file_gzfile.txt.gz): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

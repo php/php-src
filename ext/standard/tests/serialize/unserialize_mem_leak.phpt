@@ -1,7 +1,5 @@
 --TEST--
 Memleaks if unserialize return a self-referenced array/object
---INI--
-report_memleaks=1
 --FILE--
 <?php
 function foo() {

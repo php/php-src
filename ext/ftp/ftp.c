@@ -1382,7 +1382,8 @@ static int my_poll(php_socket_t fd, int events, int timeout) {
 
 		if (n == -1 && php_socket_errno() == EINTR) {
 			zend_hrtime_t delta_ns = zend_hrtime() - start_ns;
-			if (delta_ns > timeout_hr) {
+			/* delta_ns == 0 is only possible with a platform that does not support a high-res timer. */
+			if (delta_ns > timeout_hr || UNEXPECTED(delta_ns == 0)) {
 #ifndef PHP_WIN32
 				errno = ETIMEDOUT;
 #endif

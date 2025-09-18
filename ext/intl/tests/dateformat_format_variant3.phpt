@@ -7,8 +7,6 @@ This test assumes wrong data wrt PDT. It is also too big and needs splitting up.
 --FILE--
 <?php
 
-//ini_set("intl.error_level", E_WARNING);
-
 /*
  * Test for the datefmt_format  function
  */
@@ -18,19 +16,17 @@ function ut_main()
 {
     $timezone = 'GMT-10:00';
 
-    $locale_arr = array (
-        'en_US'
-    );
+    $locale_entry = 'en_US';
 
-    $datetype_arr = array (
-                IntlDateFormatter::FULL,
-                IntlDateFormatter::LONG,
-                IntlDateFormatter::MEDIUM,
-                IntlDateFormatter::SHORT,
-                IntlDateFormatter::NONE
-        );
+    $datetype_arr = [
+        IntlDateFormatter::FULL,
+        IntlDateFormatter::LONG,
+        IntlDateFormatter::MEDIUM,
+        IntlDateFormatter::SHORT,
+        IntlDateFormatter::NONE
+    ];
 
-        $res_str = '';
+    $res_str = '';
 
 
     $time_arr = array (
@@ -78,25 +74,18 @@ function ut_main()
     $d1 = new DateTime("2010-01-01 01:02:03", new DateTimeZone("UTC"));
     $d2 = new DateTime("2000-12-31 03:04:05", new DateTimeZone("UTC"));
     $d2->setTimezone(new DateTimeZone("PDT"));
-    $dates = array(
-        $d1,
-        $d2,
-        new StdClass(),
-    );
 
     //Test format with input as a timestamp : integer
     foreach( $time_arr as $timestamp_entry){
         $res_str .= "\n------------\n";
         $res_str .= "\nInput timestamp is : $timestamp_entry";
         $res_str .= "\n------------\n";
-        foreach( $locale_arr as $locale_entry ){
-            foreach( $datetype_arr as $datetype_entry )
+        foreach( $datetype_arr as $datetype_entry )
     {
         $res_str .= "\nIntlDateFormatter locale= $locale_entry ,datetype = $datetype_entry ,timetype =$datetype_entry ";
         $fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN);
         $formatted = ut_datefmt_format( $fmt , $timestamp_entry);
         $res_str .= "\nFormatted timestamp is : $formatted";
-    }
     }
     }
 
@@ -105,12 +94,11 @@ function ut_main()
         $res_str .= "\n------------\n";
         $res_str .= "\nInput localtime is : ";
         foreach( $localtime_entry as $key => $value){
-                    $res_str .= "$key : '$value' , ";
+                $res_str .= "$key : '$value' , ";
         }
 
         $res_str .= "\n------------\n";
-        foreach( $locale_arr as $locale_entry ){
-            foreach( $datetype_arr as $datetype_entry )
+        foreach( $datetype_arr as $datetype_entry )
     {
         $res_str .= "\nIntlDateFormatter locale= $locale_entry ,datetype = $datetype_entry ,timetype =$datetype_entry ";
         $fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN );
@@ -122,22 +110,23 @@ function ut_main()
         }
     }
     }
-    }
 
+    $dates = array(
+        $d1,
+        $d2,
+    );
     foreach($dates as $date_entry) {
-        foreach( $locale_arr as $locale_entry ){
-            foreach( $datetype_arr as $datetype_entry ) {
-                $res_str .= "\n------------";
-                $res_str .= "\nDate is: ".var_export($date_entry, true);
-                $res_str .= "\n------------";
+        foreach( $datetype_arr as $datetype_entry ) {
+            $res_str .= "\n------------";
+            $res_str .= "\nDate is: ".var_export($date_entry, true);
+            $res_str .= "\n------------";
 
-                $fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN );
-                $formatted1 = ut_datefmt_format( $fmt , $date_entry);
-                if( intl_get_error_code() == U_ZERO_ERROR){
-                    $res_str .= "\nFormatted DateTime is : $formatted1";
-                }else{
-                    $res_str .= "\nError while formatting as: '".intl_get_error_message()."'";
-                }
+            $fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN );
+            $formatted1 = ut_datefmt_format( $fmt , $date_entry);
+            if( intl_get_error_code() == U_ZERO_ERROR){
+                $res_str .= "\nFormatted DateTime is : $formatted1";
+            }else{
+                $res_str .= "\nError while formatting as: '".intl_get_error_message()."'";
             }
         }
     }
@@ -397,28 +386,3 @@ Date is: \DateTime::__set_state(array(
 ))
 ------------
 Formatted DateTime is : 20001230 05:04 PM
-------------
-Date is: (object) array(
-)
-------------
-Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'
-------------
-Date is: (object) array(
-)
-------------
-Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'
-------------
-Date is: (object) array(
-)
-------------
-Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'
-------------
-Date is: (object) array(
-)
-------------
-Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'
-------------
-Date is: (object) array(
-)
-------------
-Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTimeInterface permitted): U_ILLEGAL_ARGUMENT_ERROR'

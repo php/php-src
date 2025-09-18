@@ -36,4 +36,4 @@ $cas->bindTo($a, 'A');
 --EXPECTF--
 Closure::bindTo(): Argument #2 ($newScope) must be of type object|string|null, array given
 
-Warning: Cannot bind an instance to a static closure in %s on line %d
+Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d

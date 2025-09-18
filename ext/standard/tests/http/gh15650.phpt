@@ -33,4 +33,4 @@ try {
 --EXPECT--
 e1=hello+world%21&e2=42
 ValueError: Unbacked enum E3 cannot be converted to a string
-TypeError: http_build_query(): Argument #1 ($data) must be of type array, E1 given
+TypeError: http_build_query(): Argument #1 ($data) must not be an enum, E1 given

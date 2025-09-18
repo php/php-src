@@ -30,7 +30,6 @@
 #if defined(__AVX2__)
 # include <immintrin.h>
 #elif defined( __SSE2__)
-# include <mmintrin.h>
 # include <emmintrin.h>
 #endif
 
@@ -635,8 +634,15 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos_ex(uint32_t idx, zval
 				&& EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
 			HT_DEC_ITERATORS_COUNT(iter->ht);
 		}
-		SEPARATE_ARRAY(array);
-		ht = Z_ARRVAL_P(array);
+
+		/* Inlined SEPARATE_ARRAY() with updating of iterator when EG(ht_iterators) grows. */
+		if (UNEXPECTED(GC_REFCOUNT(ht) > 1)) {
+			ZVAL_ARR(array, zend_array_dup(ht));
+			GC_TRY_DELREF(ht);
+			iter = EG(ht_iterators) + idx;
+			ht = Z_ARRVAL_P(array);
+		}
+
 		if (EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
 			HT_INC_ITERATORS_COUNT(ht);
 		}
@@ -1379,7 +1385,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 							q->key = p->key;
 							Z_NEXT(q->val) = HT_HASH(ht, nIndex);
 							HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(j);
-							if (UNEXPECTED(ht->nInternalPointer == i)) {
+							if (UNEXPECTED(ht->nInternalPointer > j && ht->nInternalPointer <= i)) {
 								ht->nInternalPointer = j;
 							}
 							q++;
@@ -1398,7 +1404,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 							q->key = p->key;
 							Z_NEXT(q->val) = HT_HASH(ht, nIndex);
 							HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(j);
-							if (UNEXPECTED(ht->nInternalPointer == i)) {
+							if (UNEXPECTED(ht->nInternalPointer > j && ht->nInternalPointer <= i)) {
 								ht->nInternalPointer = j;
 							}
 							if (UNEXPECTED(i >= iter_pos)) {
@@ -2458,6 +2464,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 		target->nTableSize = HT_MIN_SIZE;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);
 	} else if (GC_FLAGS(source) & IS_ARRAY_IMMUTABLE) {
+		ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_HAS_EMPTY_IND));
 		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = source->nTableMask;
 		target->nNumUsed = source->nNumUsed;
@@ -2474,6 +2481,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 			memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
 		}
 	} else if (HT_IS_PACKED(source)) {
+		ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_HAS_EMPTY_IND));
 		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = source->nNumUsed;
@@ -2493,7 +2501,8 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 			zend_array_dup_packed_elements(source, target, 1);
 		}
 	} else {
-		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
+		/* Indirects are removed during duplication, remove HASH_FLAG_HAS_EMPTY_IND accordingly. */
+		HT_FLAGS(target) = HT_FLAGS(source) & (HASH_FLAG_MASK & ~HASH_FLAG_HAS_EMPTY_IND);
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
 		target->nInternalPointer =
@@ -2843,7 +2852,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(const HashTable *
 
 
 /* This function should be made binary safe  */
-ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos)
+ZEND_API zend_hash_key_type ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos)
 {
 	uint32_t idx;
 	Bucket *p;
@@ -2890,7 +2899,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *h
 	}
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_type_ex(const HashTable *ht, const HashPosition *pos)
+ZEND_API zend_hash_key_type ZEND_FASTCALL zend_hash_get_current_key_type_ex(const HashTable *ht, const HashPosition *pos)
 {
 	uint32_t idx;
 	Bucket *p;

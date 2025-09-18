@@ -6,7 +6,7 @@ var_dump(GetImageSize(__DIR__.'/bug13213.jpg'));
 ?>
 --EXPECTF--
 Warning: getimagesize(): Corrupt JPEG data: 2 extraneous bytes before marker in %s%ebug13213.php on line %d
-array(7) {
+array(9) {
   [0]=>
   int(1)
   [1]=>
@@ -21,4 +21,8 @@ array(7) {
   int(3)
   ["mime"]=>
   string(10) "image/jpeg"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }

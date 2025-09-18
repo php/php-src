@@ -34,6 +34,7 @@
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
 #include "php_memory_streams.h"
+#include "zend_attributes.h"
 #include "zend_object_handlers.h"
 
 #ifdef HAVE_SYS_WAIT_H
@@ -443,15 +444,11 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_WEBP
 	php_info_print_table_row(2, "WebP Support", "enabled");
 #endif
-#ifdef HAVE_GD_BMP
 	php_info_print_table_row(2, "BMP Support", "enabled");
-#endif
 #ifdef HAVE_GD_AVIF
 	php_info_print_table_row(2, "AVIF Support", "enabled");
 #endif
-#ifdef HAVE_GD_TGA
 	php_info_print_table_row(2, "TGA Read Support", "enabled");
-#endif
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -496,21 +493,13 @@ PHP_FUNCTION(gd_info)
 #else
 	add_assoc_bool(return_value, "WebP Support", 0);
 #endif
-#ifdef HAVE_GD_BMP
 	add_assoc_bool(return_value, "BMP Support", 1);
-#else
-	add_assoc_bool(return_value, "BMP Support", 0);
-#endif
 #ifdef HAVE_GD_AVIF
 	add_assoc_bool(return_value, "AVIF Support", 1);
 #else
 	add_assoc_bool(return_value, "AVIF Support", 0);
 #endif
-#ifdef HAVE_GD_TGA
 	add_assoc_bool(return_value, "TGA Read Support", 1);
-#else
-	add_assoc_bool(return_value, "TGA Read Support", 0);
-#endif
 #ifdef USE_GD_JISX0208
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 1);
 #else
@@ -829,6 +818,11 @@ PHP_FUNCTION(imagefilledellipse)
 		Z_PARAM_LONG(h)
 		Z_PARAM_LONG(color)
 	ZEND_PARSE_PARAMETERS_END();
+
+    if (w < 0 || ZEND_LONG_INT_OVFL(w)) {
+        zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
+        RETURN_THROWS();
+    }
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
@@ -1335,12 +1329,8 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_WEBP
 	ret |= PHP_IMG_WEBP;
 #endif
-#ifdef HAVE_GD_BMP
 	ret |= PHP_IMG_BMP;
-#endif
-#ifdef HAVE_GD_TGA
 	ret |= PHP_IMG_TGA;
-#endif
 #ifdef HAVE_GD_AVIF
 	ret |= PHP_IMG_AVIF;
 #endif
@@ -1589,7 +1579,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		pefree(pstr, 1);
 		zend_string_release_ex(buff, 0);
 	}
-	else if (php_stream_can_cast(stream, PHP_STREAM_AS_STDIO)) {
+	else if (php_stream_can_cast(stream, PHP_STREAM_AS_STDIO) == SUCCESS) {
 		/* try and force the stream to be FILE* */
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void **) &fp, REPORT_ERRORS)) {
 			goto out_err;
@@ -1724,23 +1714,19 @@ PHP_FUNCTION(imagecreatefromgd2part)
 }
 /* }}} */
 
-#ifdef HAVE_GD_BMP
 /* {{{ Create a new image from BMP file or URL */
 PHP_FUNCTION(imagecreatefrombmp)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_BMP, "BMP", gdImageCreateFromBmp, gdImageCreateFromBmpCtx);
 }
 /* }}} */
-#endif
 
-#ifdef HAVE_GD_TGA
 /* {{{ Create a new image from TGA file or URL */
 PHP_FUNCTION(imagecreatefromtga)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_TGA, "TGA", gdImageCreateFromTga, gdImageCreateFromTgaCtx);
 }
 /* }}} */
-#endif
 
 /* {{{ _php_image_output */
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn)
@@ -2127,7 +2113,6 @@ PHP_FUNCTION(imagegd2)
 }
 /* }}} */
 
-#ifdef HAVE_GD_BMP
 /* {{{ Output BMP image to browser or file */
 PHP_FUNCTION(imagebmp)
 {
@@ -2158,7 +2143,6 @@ PHP_FUNCTION(imagebmp)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ Destroy an image - No effect as of PHP 8.0 */
 PHP_FUNCTION(imagedestroy)
@@ -2438,7 +2422,7 @@ PHP_FUNCTION(imagecolorsforindex)
 	col = index;
 
 	if ((col >= 0 && gdImageTrueColor(im)) || (!gdImageTrueColor(im) && col >= 0 && col < gdImageColorsTotal(im))) {
-		array_init(return_value);
+		array_init_size(return_value, 4);
 
 		add_assoc_long(return_value,"red",  gdImageRed(im,col));
 		add_assoc_long(return_value,"green", gdImageGreen(im,col));
@@ -3303,11 +3287,12 @@ PHP_FUNCTION(imagegetclip)
 
 	gdImageGetClip(im, &x1, &y1, &x2, &y2);
 
-	array_init(return_value);
-	add_next_index_long(return_value, x1);
-	add_next_index_long(return_value, y1);
-	add_next_index_long(return_value, x2);
-	add_next_index_long(return_value, y2);
+	array_init_size(return_value, 4);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+	add_index_long(return_value, 0, x1);
+	add_index_long(return_value, 1, y1);
+	add_index_long(return_value, 2, x2);
+	add_index_long(return_value, 3, y2);
 }
 /* }}} */
 
@@ -3398,11 +3383,12 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 8);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	/* return array with the text's bounding box */
 	for (i = 0; i < 8; i++) {
-		add_next_index_long(return_value, brect[i]);
+		add_index_long(return_value, i, brect[i]);
 	}
 }
 /* }}} */
@@ -3599,7 +3585,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 			RETURN_BOOL(gdImageScatter(im, (int)scatter_sub, (int)scatter_plus));
 		}
 
-		colors = emalloc(num_colors * sizeof(int));
+		colors = safe_emalloc(num_colors, sizeof(int), 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hash_colors), color) {
 			*(colors + i++) = (int) zval_get_long(color);
@@ -4130,7 +4116,8 @@ PHP_FUNCTION(imageaffinematrixget)
 	if (res == GD_FALSE) {
 		RETURN_FALSE;
 	} else {
-		array_init(return_value);
+		array_init_size(return_value, 6);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		for (uint8_t i = 0; i < 6; i++) {
 			add_index_double(return_value, i, affine[i]);
 		}
@@ -4196,7 +4183,8 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 6);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	for (i = 0; i < 6; i++) {
 		add_index_double(return_value, i, mr[i]);
 	}
@@ -4288,9 +4276,10 @@ PHP_FUNCTION(imageresolution)
 		RETURN_TRUE;
 	}
 
-	array_init(return_value);
-	add_next_index_long(return_value, gdImageResolutionX(im));
-	add_next_index_long(return_value, gdImageResolutionY(im));
+	zval imx, imy;
+	ZVAL_LONG(&imx, gdImageResolutionX(im));
+	ZVAL_LONG(&imy, gdImageResolutionY(im));
+	RETURN_ARR(zend_new_pair(&imx, &imy));
 }
 /* }}} */
 

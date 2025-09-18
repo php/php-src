@@ -22,9 +22,54 @@
 #include <openssl/param_build.h>
 #include <openssl/provider.h>
 
+ZEND_EXTERN_MODULE_GLOBALS(openssl)
+
 void php_openssl_backend_shutdown(void)
 {
 	(void) 0;
+}
+
+#define PHP_OPENSSL_DEFAULT_CONF_MFLAGS \
+	(CONF_MFLAGS_DEFAULT_SECTION | CONF_MFLAGS_IGNORE_MISSING_FILE | CONF_MFLAGS_IGNORE_RETURN_CODES)
+
+void php_openssl_backend_init_libctx(struct php_openssl_libctx *ctx)
+{
+	ctx->default_libctx = OSSL_LIB_CTX_get0_global_default();
+	ctx->custom_libctx = OSSL_LIB_CTX_new();
+	if (ctx->custom_libctx != NULL) {
+		/* This is not being checked because there is not much that can be done. */
+		CONF_modules_load_file_ex(ctx->custom_libctx, NULL, NULL,
+				PHP_OPENSSL_DEFAULT_CONF_MFLAGS);
+#ifdef LOAD_OPENSSL_LEGACY_PROVIDER
+		OSSL_PROVIDER_load(ctx->custom_libctx, "legacy");
+		OSSL_PROVIDER_load(ctx->custom_libctx, "default");
+#endif
+		ctx->libctx = ctx->custom_libctx;
+	} else {
+		/* If creation fails, just fallback to default */
+		ctx->libctx = ctx->default_libctx;
+	}
+	ctx->propq = NULL;
+}
+
+void php_openssl_backend_destroy_libctx(struct php_openssl_libctx *ctx)
+{
+	if (ctx->custom_libctx != NULL) {
+		OSSL_LIB_CTX_free(ctx->custom_libctx);
+	}
+	if (ctx->propq != NULL) {
+		free(ctx->propq);
+	}
+}
+
+EVP_PKEY_CTX *php_openssl_pkey_new_from_name(const char *name, int id)
+{
+	return EVP_PKEY_CTX_new_from_name(PHP_OPENSSL_LIBCTX, name, PHP_OPENSSL_PROPQ);
+}
+
+EVP_PKEY_CTX *php_openssl_pkey_new_from_pkey(EVP_PKEY *pkey)
+{
+	return  EVP_PKEY_CTX_new_from_pkey(PHP_OPENSSL_LIBCTX, pkey, PHP_OPENSSL_PROPQ);
 }
 
 EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
@@ -32,7 +77,7 @@ EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
 	BIGNUM *n = NULL, *e = NULL, *d = NULL, *p = NULL, *q = NULL;
 	BIGNUM *dmp1 = NULL, *dmq1 = NULL, *iqmp = NULL;
 	EVP_PKEY *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name("RSA", EVP_PKEY_RSA);
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
 
@@ -100,7 +145,7 @@ EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
 {
 	BIGNUM *p = NULL, *q = NULL, *g = NULL, *priv_key = NULL, *pub_key = NULL;
 	EVP_PKEY *param_key = NULL, *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_DSA, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name("DSA", EVP_PKEY_DSA);
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
 
@@ -143,9 +188,8 @@ EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
 		pkey = param_key;
 	} else {
 		*is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		EVP_PKEY_CTX_free(ctx);
-		ctx = EVP_PKEY_CTX_new(param_key, NULL);
+		ctx = php_openssl_pkey_new_from_pkey(param_key);
 		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
 			goto cleanup;
 		}
@@ -169,7 +213,7 @@ EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private)
 {
 	BIGNUM *p = NULL, *q = NULL, *g = NULL, *priv_key = NULL, *pub_key = NULL;
 	EVP_PKEY *param_key = NULL, *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_DH, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name("DH", EVP_PKEY_DH);
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
 
@@ -219,9 +263,8 @@ EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private)
 		pkey = param_key;
 	} else {
 		*is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		EVP_PKEY_CTX_free(ctx);
-		ctx = EVP_PKEY_CTX_new(param_key, NULL);
+		ctx = php_openssl_pkey_new_from_pkey(param_key);
 		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
 			goto cleanup;
 		}
@@ -252,7 +295,7 @@ EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 	unsigned char *point_q_buf = NULL;
 	EC_GROUP *group = NULL;
 	EVP_PKEY *param_key = NULL, *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
+	EVP_PKEY_CTX *ctx = php_openssl_pkey_new_from_name("EC", EVP_PKEY_EC);
 	BN_CTX *bctx = BN_CTX_new();
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
@@ -271,7 +314,7 @@ EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 			goto cleanup;
 		}
 
-		if (!(group = EC_GROUP_new_by_curve_name(nid))) {
+		if (!(group = EC_GROUP_new_by_curve_name_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ, nid))) {
 			goto cleanup;
 		}
 
@@ -407,7 +450,6 @@ EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 		pkey = param_key;
 	} else {
 		*is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		if (EVP_PKEY_keygen_init(ctx) != 1 ||
 				EVP_PKEY_CTX_set_params(ctx, params) != 1 ||
 				EVP_PKEY_generate(ctx, &pkey) != 1) {
@@ -441,7 +483,7 @@ cleanup:
 }
 #endif
 
-void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_type, zval *data) {
+void php_openssl_pkey_object_curve_25519_448(zval *return_value, const char *name, zval *data) {
 	EVP_PKEY *pkey = NULL;
 	EVP_PKEY_CTX *ctx = NULL;
 	OSSL_PARAM *params = NULL;
@@ -469,7 +511,7 @@ void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_type, z
 	}
 
 	params = OSSL_PARAM_BLD_to_param(bld);
-	ctx = EVP_PKEY_CTX_new_id(key_type, NULL);
+	ctx = php_openssl_pkey_new_from_name(name, 0);
 	if (!params || !ctx) {
 		goto cleanup;
 	}
@@ -482,7 +524,6 @@ void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_type, z
 		is_private = priv_key != NULL;
 	} else {
 		is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
 		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
 			goto cleanup;
 		}
@@ -670,6 +711,101 @@ zend_string *php_openssl_dh_compute_key(EVP_PKEY *pkey, char *pub_str, size_t pu
 	return result;
 }
 
+const EVP_MD *php_openssl_get_evp_md_by_name(const char *name)
+{
+	const EVP_MD *dp = (const EVP_MD *) OBJ_NAME_get(name, OBJ_NAME_TYPE_MD_METH);
+
+	if (dp != NULL) {
+		return dp;
+	}
+
+	return EVP_MD_fetch(PHP_OPENSSL_LIBCTX, name, PHP_OPENSSL_PROPQ);
+}
+
+static const char *php_openssl_digest_names[] = {
+	[OPENSSL_ALGO_SHA1]   = "SHA1",
+	[OPENSSL_ALGO_MD5]    = "MD5",
+#ifndef OPENSSL_NO_MD4
+	[OPENSSL_ALGO_MD4]    = "MD4",
+#endif
+#ifndef OPENSSL_NO_MD2
+	[OPENSSL_ALGO_MD2]    = "MD2",
+#endif
+	[OPENSSL_ALGO_SHA224] = "SHA224",
+	[OPENSSL_ALGO_SHA256] = "SHA256",
+	[OPENSSL_ALGO_SHA384] = "SHA384",
+	[OPENSSL_ALGO_SHA512] = "SHA512",
+#ifndef OPENSSL_NO_RMD160
+	[OPENSSL_ALGO_RMD160] = "RIPEMD160",
+#endif
+};
+
+const EVP_MD *php_openssl_get_evp_md_from_algo(zend_long algo)
+{
+	if (algo < 0 || algo >= (zend_long)(sizeof(php_openssl_digest_names) / sizeof(*php_openssl_digest_names))) {
+		return NULL;
+	}
+
+	const char *name = php_openssl_digest_names[algo];
+	if (!name) {
+		return NULL;
+	}
+
+	return php_openssl_get_evp_md_by_name(name);
+}
+
+void php_openssl_release_evp_md(const EVP_MD *md)
+{
+	if (md != NULL) {
+		// It is fine to remove const as the md is from EVP_MD_fetch
+		EVP_MD_free((EVP_MD *) md);
+	}
+}
+
+static const char *php_openssl_cipher_names[] = {
+	[PHP_OPENSSL_CIPHER_RC2_40]     = "RC2-40-CBC",
+	[PHP_OPENSSL_CIPHER_RC2_128]    = "RC2-CBC",
+	[PHP_OPENSSL_CIPHER_RC2_64]     = "RC2-64-CBC",
+	[PHP_OPENSSL_CIPHER_DES]        = "DES-CBC",
+	[PHP_OPENSSL_CIPHER_3DES]       = "DES-EDE3-CBC",
+	[PHP_OPENSSL_CIPHER_AES_128_CBC]= "AES-128-CBC",
+	[PHP_OPENSSL_CIPHER_AES_192_CBC]= "AES-192-CBC",
+	[PHP_OPENSSL_CIPHER_AES_256_CBC]= "AES-256-CBC",
+};
+
+const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *name)
+{
+	const EVP_CIPHER *cp = (const EVP_CIPHER *) OBJ_NAME_get(name, OBJ_NAME_TYPE_CIPHER_METH);
+
+	if (cp != NULL) {
+		return cp;
+	}
+
+	return EVP_CIPHER_fetch(PHP_OPENSSL_LIBCTX, name, PHP_OPENSSL_PROPQ);
+}
+
+const EVP_CIPHER *php_openssl_get_evp_cipher_from_algo(zend_long algo)
+{
+	if (algo < 0 || algo >= (zend_long)(sizeof(php_openssl_cipher_names) / sizeof(*php_openssl_cipher_names))) {
+		return NULL;
+	}
+
+	const char *name = php_openssl_cipher_names[algo];
+	if (!name) {
+		return NULL;
+	}
+
+	return php_openssl_get_evp_cipher_by_name(name);
+}
+
+void php_openssl_release_evp_cipher(const EVP_CIPHER *cipher)
+{
+	if (cipher != NULL) {
+		// It is fine to remove const as the cipher is from EVP_CIPHER_fetch
+		EVP_CIPHER_free((EVP_CIPHER *) cipher);
+	}
+}
+
 static void php_openssl_add_cipher_name(const char *name, void *arg)
 {
 	size_t len = strlen(name);
@@ -696,10 +832,137 @@ static int php_openssl_compare_func(Bucket *a, Bucket *b)
 void php_openssl_get_cipher_methods(zval *return_value, bool aliases)
 {
 	array_init(return_value);
-	EVP_CIPHER_do_all_provided(NULL,
+	EVP_CIPHER_do_all_provided(PHP_OPENSSL_LIBCTX,
 		aliases ? php_openssl_add_cipher_or_alias : php_openssl_add_cipher,
 		return_value);
 	zend_hash_sort(Z_ARRVAL_P(return_value), php_openssl_compare_func, 1);
+}
+
+CONF *php_openssl_nconf_new(void)
+{
+	return NCONF_new_ex(PHP_OPENSSL_LIBCTX, NULL);
+}
+
+X509 *php_openssl_pem_read_asn1_bio_x509(BIO *in)
+{
+	X509 *x = X509_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (x == NULL) {
+		return NULL;
+	}
+
+	if (PEM_ASN1_read_bio((d2i_of_void *)d2i_X509, PEM_STRING_X509, in, (void **) &x, NULL, NULL) == NULL) {
+		X509_free(x);
+		return NULL;
+	}
+
+	return x;
+}
+
+X509 *php_openssl_pem_read_bio_x509(BIO *in)
+{
+	X509 *x = X509_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (x == NULL) {
+		return NULL;
+	}
+
+	if (PEM_read_bio_X509(in, &x, NULL, NULL) == NULL) {
+		X509_free(x);
+		return NULL;
+	}
+
+	return x;
+}
+
+X509_REQ *php_openssl_pem_read_bio_x509_req(BIO *in)
+{
+	X509_REQ *xr = X509_REQ_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (xr == NULL) {
+		return NULL;
+	}
+
+	if (PEM_read_bio_X509_REQ(in, &xr, NULL, NULL) == NULL) {
+		X509_REQ_free(xr);
+		return NULL;
+	}
+
+	return xr;
+}
+
+EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in)
+{
+	return PEM_read_bio_PUBKEY_ex(in, NULL, NULL, NULL, PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+}
+
+EVP_PKEY *php_openssl_pem_read_bio_private_key(BIO *in, pem_password_cb *cb, void *u)
+{
+	return PEM_read_bio_PrivateKey_ex(in, NULL, cb, u, PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+}
+
+PKCS7 *php_openssl_pem_read_bio_pkcs7(BIO *in)
+{
+	PKCS7 *p = PKCS7_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (p == NULL) {
+		return NULL;
+	}
+
+	if (PEM_read_bio_PKCS7(in, &p, NULL, NULL) == NULL) {
+		PKCS7_free(p);
+		return NULL;
+	}
+
+	return p;
+}
+
+CMS_ContentInfo *php_openssl_pem_read_bio_cms(BIO *in)
+{
+	CMS_ContentInfo *ci = CMS_ContentInfo_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (ci == NULL) {
+		return NULL;
+	}
+
+	if (PEM_read_bio_CMS(in, &ci, NULL, NULL) == NULL) {
+		CMS_ContentInfo_free(ci);
+		return NULL;
+	}
+
+	return ci;
+}
+
+CMS_ContentInfo *php_openssl_d2i_bio_cms(BIO *in)
+{
+	CMS_ContentInfo *ci = CMS_ContentInfo_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (ci == NULL) {
+		return NULL;
+	}
+
+	if (d2i_CMS_bio(in, &ci) == NULL) {
+		CMS_ContentInfo_free(ci);
+		return NULL;
+	}
+
+	return ci;
+}
+
+CMS_ContentInfo *php_openssl_smime_read_cms(BIO *bio, BIO **bcont)
+{
+	CMS_ContentInfo *ci = CMS_ContentInfo_new_ex(PHP_OPENSSL_LIBCTX, PHP_OPENSSL_PROPQ);
+
+	if (ci == NULL) {
+		return NULL;
+	}
+
+	if (SMIME_read_CMS_ex(bio, 0, bcont, &ci) == NULL) {
+		CMS_ContentInfo_free(ci);
+		return NULL;
+	}
+
+	return ci;
 }
 
 #endif

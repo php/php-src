@@ -41,6 +41,7 @@ $_main:
 0011 FAST_RET T5
 EXCEPTION TABLE:
      0006, -, 0007, 0011
+
 Fatal error: Uncaught Exception: Should happen in %s:%d
 Stack trace:
 #0 {main}

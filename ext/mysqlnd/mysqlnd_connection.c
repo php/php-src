@@ -282,11 +282,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 
 	DBG_INF("Freeing memory of members");
 
-	mysqlnd_set_persistent_string(&conn->hostname, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->username, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->password, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->connect_or_select_db, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->unix_socket, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
 
@@ -658,22 +653,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		if (transport.s) {
 			mnd_sprintf_free(transport.s);
 			transport.s = NULL;
-		}
-
-		if (!conn->scheme.s) {
+		} else {
 			goto err; /* OOM */
 		}
 
-		mysqlnd_set_persistent_string(&conn->username, username.s, username.l, conn->persistent);
-		mysqlnd_set_persistent_string(&conn->password, username.s, password.l, conn->persistent);
 		conn->port				= port;
-		mysqlnd_set_persistent_string(&conn->connect_or_select_db, database.s, database.l, conn->persistent);
 
 		if (!unix_socket && !named_pipe) {
-			mysqlnd_set_persistent_string(&conn->hostname, hostname.s, hostname.l, conn->persistent);
 			{
 				char *p;
-				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname.s);
+				mnd_sprintf(&p, 0, "%s via TCP/IP", hostname.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -682,12 +671,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 				mnd_sprintf_free(p);
 			}
 		} else {
-			conn->unix_socket.s = mnd_pestrdup(socket_or_pipe.s, conn->persistent);
 			if (unix_socket) {
 				conn->host_info = mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			} else if (named_pipe) {
 				char *p;
-				mnd_sprintf(&p, 0, "%s via named pipe", conn->unix_socket.s);
+				mnd_sprintf(&p, 0, "%s via named pipe", socket_or_pipe.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -697,11 +685,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			} else {
 				php_error_docref(NULL, E_WARNING, "Impossible. Should be either socket or a pipe. Report a bug!");
 			}
-			if (!conn->unix_socket.s || !conn->host_info) {
+			if (!socket_or_pipe.s || !conn->host_info) {
 				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */
 			}
-			conn->unix_socket.l = strlen(conn->unix_socket.s);
 		}
 
 		SET_EMPTY_ERROR(conn->error_info);

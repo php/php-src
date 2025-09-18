@@ -490,20 +490,20 @@ extern "C" {
 #define ir_ADD_OFFSET(_addr, _offset)     _ir_ADD_OFFSET(_ir_CTX, (_addr), (_offset))
 
 /* Unfoldable variant of COPY */
-#define ir_HARD_COPY(_type, _op1)         ir_BINARY_OP(IR_COPY, (_type), (_op1), 1)
-#define ir_HARD_COPY_B(_op1)              ir_BINARY_OP_B(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_U8(_op1)             ir_BINARY_OP_U8(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_U16(_op1)            ir_BINARY_OP_U16(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_U32(_op1)            ir_BINARY_OP_U32(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_U64(_op1)            ir_BINARY_OP_U64(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_A(_op1)              ir_BINARY_OP_A(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_C(_op1)              ir_BINARY_OP_C(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_I8(_op1)             ir_BINARY_OP_I8(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_I16(_op1)            ir_BINARY_OP_I16(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_I32(_op1)            ir_BINARY_OP_I32(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_I64(_op1)            ir_BINARY_OP_I64(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_D(_op1)              ir_BINARY_OP_D(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_F(_op1)              ir_BINARY_OP_F(IR_COPY, (_op1), 1)
+#define ir_HARD_COPY(_type, _op1)         ir_emit2(_ir_CTX, IR_OPT(IR_COPY, (_type)), (_op1), 1)
+#define ir_HARD_COPY_B(_op1)              ir_HARD_COPY(IR_BOOL, _op1)
+#define ir_HARD_COPY_U8(_op1)             ir_HARD_COPY(IR_U8, _op1)
+#define ir_HARD_COPY_U16(_op1)            ir_HARD_COPY(IR_U16, _op1)
+#define ir_HARD_COPY_U32(_op1)            ir_HARD_COPY(IR_U32, _op1)
+#define ir_HARD_COPY_U64(_op1)            ir_HARD_COPY(IR_U64, _op1)
+#define ir_HARD_COPY_A(_op1)              ir_HARD_COPY(IR_ADDR, _op1)
+#define ir_HARD_COPY_C(_op1)              ir_HARD_COPY(IR_CHAR, _op1)
+#define ir_HARD_COPY_I8(_op1)             ir_HARD_COPY(IR_I8, _op1)
+#define ir_HARD_COPY_I16(_op1)            ir_HARD_COPY(IR_I16, _op1)
+#define ir_HARD_COPY_I32(_op1)            ir_HARD_COPY(IR_I32, _op1)
+#define ir_HARD_COPY_I64(_op1)            ir_HARD_COPY(IR_I64, _op1)
+#define ir_HARD_COPY_D(_op1)              ir_HARD_COPY(IR_DOUBLE, _op1)
+#define ir_HARD_COPY_F(_op1)              ir_HARD_COPY(IR_FLOAT, _op1)
 
 #define ir_PARAM(_type, _name, _num)      _ir_PARAM(_ir_CTX, (_type), (_name), (_num))
 #define ir_VAR(_type, _name)              _ir_VAR(_ir_CTX, (_type), (_name))
@@ -603,6 +603,7 @@ extern "C" {
 #define ir_LOOP_END()                     _ir_LOOP_END(_ir_CTX)
 #define ir_SWITCH(_val)                   _ir_SWITCH(_ir_CTX, (_val))
 #define ir_CASE_VAL(_switch, _val)        _ir_CASE_VAL(_ir_CTX, (_switch), (_val))
+#define ir_CASE_RANGE(_switch, _v1, _v2)  _ir_CASE_RANGE(_ir_CTX, (_switch), (_v1), (_v2))
 #define ir_CASE_DEFAULT(_switch)          _ir_CASE_DEFAULT(_ir_CTX, (_switch))
 #define ir_RETURN(_val)                   _ir_RETURN(_ir_CTX, (_val))
 #define ir_IJMP(_addr)                    _ir_IJMP(_ir_CTX, (_addr))
@@ -682,6 +683,7 @@ ir_ref _ir_TLS(ir_ctx *ctx, ir_ref index, ir_ref offset);
 void   _ir_UNREACHABLE(ir_ctx *ctx);
 ir_ref _ir_SWITCH(ir_ctx *ctx, ir_ref val);
 void   _ir_CASE_VAL(ir_ctx *ctx, ir_ref switch_ref, ir_ref val);
+void   _ir_CASE_RANGE(ir_ctx *ctx, ir_ref switch_ref, ir_ref v1, ir_ref v2);
 void   _ir_CASE_DEFAULT(ir_ctx *ctx, ir_ref switch_ref);
 void   _ir_RETURN(ir_ctx *ctx, ir_ref val);
 void   _ir_IJMP(ir_ctx *ctx, ir_ref addr);

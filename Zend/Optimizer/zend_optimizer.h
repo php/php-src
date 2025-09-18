@@ -98,6 +98,10 @@ ZEND_API int zend_optimizer_register_pass(zend_optimizer_pass_t pass);
 ZEND_API void zend_optimizer_unregister_pass(int idx);
 zend_result zend_optimizer_startup(void);
 zend_result zend_optimizer_shutdown(void);
+
+typedef void (*zend_op_array_func_t)(zend_op_array *, void *context);
+void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void *context);
+
 END_EXTERN_C()
 
 #endif

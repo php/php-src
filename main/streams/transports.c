@@ -130,7 +130,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	}
 
 	stream = (factory)(protocol, n,
-			(char*)name, namelen, persistent_id, options, flags, timeout,
+			name, namelen, persistent_id, options, flags, timeout,
 			context STREAMS_REL_CC);
 
 	if (stream) {

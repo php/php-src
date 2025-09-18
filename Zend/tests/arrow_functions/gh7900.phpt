@@ -23,4 +23,4 @@ try {
 ?>
 --EXPECT--
 Here
-assert(fn(): never => 42 && false)
+assert((fn(): never => 42) && false)

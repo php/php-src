@@ -23,8 +23,8 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "zend_enum.h"
 #include "php_dom.h"
+#include "obj_map.h"
 #include "namespace_compat.h"
-#include "private_data.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
 #include "token_list.h"
@@ -62,7 +62,7 @@ PHP_METHOD(DOMElement, __construct)
 	if (uri_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {
-			nodep = xmlNewNode (NULL, BAD_CAST localname);
+			nodep = xmlNewDocNode(NULL, NULL, BAD_CAST localname, NULL);
 			if (nodep != NULL && uri != NULL) {
 				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
 				xmlSetNs(nodep, nsptr);
@@ -88,7 +88,7 @@ PHP_METHOD(DOMElement, __construct)
 	        php_dom_throw_error(NAMESPACE_ERR, true);
 	        RETURN_THROWS();
 	    }
-		nodep = xmlNewNode(NULL, BAD_CAST name);
+		nodep = xmlNewDocNode(NULL, NULL, BAD_CAST name, NULL);
 	}
 
 	if (!nodep) {
@@ -177,21 +177,29 @@ zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 }
 /* }}} */
 
+zval *dom_get_prop_checked_offset(dom_object *obj, uint32_t offset, const char *name)
+{
+#if ZEND_DEBUG
+	zend_string *name_zstr = ZSTR_INIT_LITERAL(name, false);
+	const zend_property_info *prop_info = zend_get_property_info(obj->std.ce, name_zstr, 0);
+	zend_string_release_ex(name_zstr, false);
+	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == offset);
+#endif
+
+	return OBJ_PROP_NUM(&obj->std, offset);
+}
+
+zval *dom_element_class_list_zval(dom_object *obj)
+{
+	return dom_get_prop_checked_offset(obj, 1, "classList");
+}
+
 /* {{{ classList	TokenList
 URL: https://dom.spec.whatwg.org/#dom-element-classlist
 */
 zend_result dom_element_class_list_read(dom_object *obj, zval *retval)
 {
-	const uint32_t PROP_INDEX = 0;
-
-#if ZEND_DEBUG
-	zend_string *class_list_str = ZSTR_INIT_LITERAL("classList", false);
-	const zend_property_info *prop_info = zend_get_property_info(dom_modern_element_class_entry, class_list_str, 0);
-	zend_string_release_ex(class_list_str, false);
-	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
-#endif
-
-	zval *cached_token_list = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	zval *cached_token_list = dom_element_class_list_zval(obj);
 	if (Z_ISUNDEF_P(cached_token_list)) {
 		object_init_ex(cached_token_list, dom_token_list_class_entry);
 		dom_token_list_object *intern = php_dom_token_list_from_obj(Z_OBJ_P(cached_token_list));
@@ -820,7 +828,7 @@ static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, z
 
 	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, NULL);
+	php_dom_create_obj_map(intern, namednode, NULL, name, NULL, &php_dom_obj_map_by_tag_name);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagName)
@@ -833,6 +841,44 @@ PHP_METHOD(Dom_Element, getElementsByTagName)
 	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_html_collection_class_entry);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
+
+PHP_METHOD(Dom_Element, getElementsByClassName)
+{
+	dom_object *intern, *namednode;
+	zend_string *class_names;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &class_names) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(class_names) > INT_MAX) {
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_INTERN(intern);
+
+	object_init_ex(return_value, dom_html_collection_class_entry);
+	namednode = Z_DOMOBJ_P(return_value);
+
+	HashTable *token_set;
+	ALLOC_HASHTABLE(token_set);
+	zend_hash_init(token_set, 0, NULL, NULL, false);
+	dom_ordered_set_parser(token_set, ZSTR_VAL(class_names), intern->document->quirks_mode == PHP_LIBXML_QUIRKS);
+
+	if (zend_hash_num_elements(token_set) == 0) {
+		php_dom_create_obj_map(intern, namednode, NULL, NULL, NULL, &php_dom_obj_map_noop);
+
+		zend_hash_destroy(token_set);
+		FREE_HASHTABLE(token_set);
+	} else {
+		php_dom_create_obj_map(intern, namednode, NULL, NULL, NULL, &php_dom_obj_map_by_class_name);
+
+		dom_nnodemap_object *map = namednode->ptr;
+		map->array = token_set;
+		map->release_array = true;
+	}
+}
 
 /* should_free_result must be initialized to false */
 static const xmlChar *dom_get_attribute_ns(dom_object *intern, xmlNodePtr elemp, const char *uri, size_t uri_len, const char *name, bool *should_free_result)
@@ -1252,7 +1298,7 @@ static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS
 
 	object_init_ex(return_value, iter_ce);
 	namednode = Z_DOMOBJ_P(return_value);
-	dom_namednode_iter(intern, 0, namednode, NULL, name, uri);
+	php_dom_create_obj_map(intern, namednode, NULL, name, uri, &php_dom_obj_map_by_tag_name);
 }
 
 PHP_METHOD(DOMElement, getElementsByTagNameNS)

@@ -117,7 +117,7 @@ static zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *na
 	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 	if (hnd == NULL) {
 		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
-	} else {
+	} else if (cache_slot) {
 		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	}
 

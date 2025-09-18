@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e0d2498c10cba72adb97504fd13e178e090de2cd */
+ * Stub hash: 6dceb619736a3de55b84609a9e3aeb13405bbfde */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
@@ -22,7 +22,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_disable_entity_loader, 0,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, disable, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_external_entity_loader, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_external_entity_loader, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, resolver_function, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
@@ -88,15 +88,10 @@ static void register_libxml_symbols(int module_number)
 
 
 	zend_attribute *attribute_Deprecated_func_libxml_disable_entity_loader_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "libxml_disable_entity_loader", sizeof("libxml_disable_entity_loader") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zval attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0;
-	zend_string *attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[0].value, &attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0);
+	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_0));
 	attribute_Deprecated_func_libxml_disable_entity_loader_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-	zval attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1;
 	zend_string *attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1_str = zend_string_init("as external entity loading is disabled by default", strlen("as external entity loading is disabled by default"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1_str);
-	ZVAL_COPY_VALUE(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[1].value, &attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1);
+	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0->args[1].value, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg1_str);
 	attribute_Deprecated_func_libxml_disable_entity_loader_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 

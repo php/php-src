@@ -19,4 +19,4 @@ class B extends Foo
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of T::bar() must be compatible with Foo::bar($a = 'Foo') in %s on line %d
+Fatal error: Declaration of B::bar() must be compatible with Foo::bar($a = 'Foo') in %s on line %d

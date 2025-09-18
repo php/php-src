@@ -17,6 +17,7 @@ if test "$PHP_POSIX" = "yes"; then
     eaccess
     getgrgid_r
     getgroups
+    getlogin
     getpgid
     getrlimit
     getsid

@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "Zend/zend_types.h"
 #include "Zend/zend_API.h"
 
 static ZEND_COLD void undef_result_after_exception(void) {
@@ -500,8 +501,17 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
-			offset_key = ZSTR_EMPTY_ALLOC();
-			goto str_index;
+			retval = zend_hash_find(ht, ZSTR_EMPTY_ALLOC());
+			if (!retval) {
+				ZVAL_NULL(result);
+			} else {
+				ZVAL_COPY_DEREF(result, retval);
+			}
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (!retval) {
+				zend_error(E_WARNING, "Undefined array key \"\"");
+			}
+			return;
 		case IS_DOUBLE:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			if (!zend_is_long_compatible(Z_DVAL_P(dim), hval)) {
@@ -642,8 +652,16 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
-			offset_key = ZSTR_EMPTY_ALLOC();
-			goto str_index;
+			retval = zend_hash_find(ht, ZSTR_EMPTY_ALLOC());
+			if (!retval) {
+				ZVAL_NULL(result);
+			} else {
+				ZVAL_COPY_DEREF(result, retval);
+			}
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			return;
 		case IS_DOUBLE:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			if (!zend_is_long_compatible(Z_DVAL_P(dim), hval)) {
@@ -769,9 +787,17 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 				return 0;
 			}
 			ZEND_FALLTHROUGH;
-		case IS_NULL:
-			offset_key = ZSTR_EMPTY_ALLOC();
-			goto str_index;
+		case IS_NULL: {
+			int result = 0;
+			retval = zend_hash_find(ht, ZSTR_EMPTY_ALLOC());
+			if (retval) {
+				result = Z_TYPE_P(retval) > IS_NULL;
+			}
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			return result;
+		}
 		case IS_DOUBLE:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			if (!zend_is_long_compatible(Z_DVAL_P(dim), hval)) {
@@ -878,6 +904,32 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			execute_data = EG(current_execute_data);
+			opline = EX(opline);
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					if (EG(exception)) {
+						ZVAL_UNDEF(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
+				}
+				return NULL;
+			}
+			if (EG(exception)) {
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					ZVAL_UNDEF(EX_VAR(opline->result.var));
+				}
+				return NULL;
+			}
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:
@@ -1011,6 +1063,36 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			}
 			ZEND_FALLTHROUGH;
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			execute_data = EG(current_execute_data);
+			opline = EX(opline);
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					if (EG(exception)) {
+						ZVAL_UNDEF(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
+				}
+				if (opline->opcode == ZEND_ASSIGN_DIM
+				 && ((opline+1)->op1_type & (IS_VAR | IS_TMP_VAR))) {
+					zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				}
+				return NULL;
+			}
+			if (EG(exception)) {
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					ZVAL_UNDEF(EX_VAR(opline->result.var));
+				}
+				return NULL;
+			}
 			offset_key = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		case IS_DOUBLE:
@@ -1900,9 +1982,8 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
-	void **cache_slot = CACHE_ADDR(opline->extended_value);
 	bool ret = zend_check_user_type_slow(
-		&arg_info->type, arg, /* ref */ NULL, cache_slot, /* is_return_type */ false);
+		&arg_info->type, arg, /* ref */ NULL, /* is_return_type */ false);
 	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
 		return 0;
@@ -1910,7 +1991,7 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 	return ret;
 }
 
-static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
+static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info)
 {
     if (Z_TYPE_P(arg) == IS_NULL) {
 		ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
@@ -1919,7 +2000,7 @@ static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_a
 		}
 	}
 	if (UNEXPECTED(!zend_check_user_type_slow(
-			&arg_info->type, arg, /* ref */ NULL, cache_slot, /* is_return_type */ true))) {
+			&arg_info->type, arg, /* ref */ NULL, /* is_return_type */ true))) {
 		zend_verify_return_error((zend_function*)op_array, arg);
 	}
 }
@@ -2560,6 +2641,14 @@ static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 {
 	ZVAL_NEW_REF(arg, arg);
 	zend_error(E_NOTICE, "Only variables should be passed by reference");
+}
+
+static void ZEND_FASTCALL zend_jit_invalid_array_use(const zval *container)
+{
+	/* Warning should not occur on null */
+	if (Z_TYPE_P(container) != IS_NULL) {
+		zend_error(E_WARNING, "Cannot use %s as array", zend_zval_type_name(container));
+	}
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)

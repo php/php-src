@@ -163,7 +163,7 @@ PHP_FUNCTION(gethostbyaddr)
 #endif
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STR(hostname);
+		RETVAL_NEW_STR(hostname);
 	}
 }
 /* }}} */
@@ -236,7 +236,7 @@ PHP_FUNCTION(gethostbyname)
 		php_error_docref(NULL, E_WARNING, "Host name to ip failed %s", hostname);
 		RETURN_STRINGL(hostname, hostname_len);
 	} else {
-		RETURN_STR(ipaddr);
+		RETURN_NEW_STR(ipaddr);
 	}
 }
 /* }}} */

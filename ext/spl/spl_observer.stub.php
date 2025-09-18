@@ -23,12 +23,15 @@ interface SplSubject
 class SplObjectStorage implements Countable, SeekableIterator, Serializable, ArrayAccess
 {
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "use method SplObjectStorage::offsetSet() instead")]
     public function attach(object $object, mixed $info = null): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "use method SplObjectStorage::offsetUnset() instead")]
     public function detach(object $object): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: "use method SplObjectStorage::offsetExists() instead")]
     public function contains(object $object): bool {}
 
     /** @tentative-return-type */

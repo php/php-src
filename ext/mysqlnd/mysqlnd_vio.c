@@ -26,7 +26,7 @@
 #ifndef PHP_WIN32
 #include <netinet/tcp.h>
 #else
-#include <winsock.h>
+#include <winsock2.h>
 #endif
 
 

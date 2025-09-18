@@ -87,14 +87,14 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 #define STRPOS_CHECK_STATUS(status, error) \
 	if ( U_FAILURE( (status) ) ) { \
 		intl_error_set_code( NULL, (status) ); \
-		intl_error_set_custom_msg( NULL, (error), 0 ); \
+		intl_error_set_custom_msg( NULL, (error)); \
 		ret_pos = -1; \
 		goto finish; \
 	}
 
 
 /* {{{ grapheme_strpos_utf16 - strrpos using utf16*/
-int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last)
+int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last, const char* locale)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
 	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
@@ -136,7 +136,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	}
 
 	status = U_ZERO_ERROR;
-	src = usearch_open(uneedle, uneedle_len, uhaystack, uhaystack_len, "", bi, &status);
+	src = usearch_open(uneedle, uneedle_len, uhaystack, uhaystack_len, locale, bi, &status);
 	STRPOS_CHECK_STATUS(status, "Error creating search object");
 
 	if(f_ignore_case) {

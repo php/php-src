@@ -251,6 +251,13 @@ static void zend_file_cache_unserialize_func(zval                    *zv,
                                              zend_persistent_script  *script,
                                              void                    *buf);
 
+static void zend_file_cache_serialize_attribute(zval                     *zv,
+                                                zend_persistent_script   *script,
+                                                zend_file_cache_metainfo *info,
+                                                void                     *buf);
+
+static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_script *script, void *buf);
+
 static void *zend_file_cache_serialize_interned(zend_string              *str,
                                                 zend_file_cache_metainfo *info)
 {
@@ -431,6 +438,9 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 			/* Used by static properties. */
 			SERIALIZE_PTR(Z_INDIRECT_P(zv));
 			break;
+		case IS_PTR:
+			/* Used by attributes on constants, will be handled separately */
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
@@ -451,6 +461,7 @@ static void zend_file_cache_serialize_attribute(zval                     *zv,
 
 	SERIALIZE_STR(attr->name);
 	SERIALIZE_STR(attr->lcname);
+	SERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
 		SERIALIZE_STR(attr->args[i].name);
@@ -468,7 +479,7 @@ static void zend_file_cache_serialize_type(
 		UNSERIALIZE_PTR(list);
 
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(list, list_type) {
 			zend_file_cache_serialize_type(list_type, script, info, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
@@ -549,6 +560,13 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 		UNSERIALIZE_PTR(opline);
 		end = opline + op_array->last;
 		while (opline < end) {
+			if (opline->opcode == ZEND_OP_DATA
+				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
+			) {
+				zval *literal = RT_CONSTANT(opline, opline->op1);
+				SERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
+			}
+
 #if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op1.zv);
@@ -1316,6 +1334,9 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			/* Used by static properties. */
 			UNSERIALIZE_PTR(Z_INDIRECT_P(zv));
 			break;
+		case IS_PTR:
+			/* Used by attributes on constants, will be handled separately */
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
@@ -1332,6 +1353,7 @@ static void zend_file_cache_unserialize_attribute(zval *zv, zend_persistent_scri
 
 	UNSERIALIZE_STR(attr->name);
 	UNSERIALIZE_STR(attr->lcname);
+	UNSERIALIZE_STR(attr->validation_error);
 
 	for (i = 0; i < attr->argc; i++) {
 		UNSERIALIZE_STR(attr->args[i].name);
@@ -1348,7 +1370,7 @@ static void zend_file_cache_unserialize_type(
 		ZEND_TYPE_SET_PTR(*type, list);
 
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(list, list_type) {
 			zend_file_cache_unserialize_type(list_type, scope, script, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
@@ -1485,6 +1507,13 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					break;
 			}
 #endif
+
+			if (opline->opcode == ZEND_OP_DATA
+				&& (opline-1)->opcode == ZEND_DECLARE_ATTRIBUTED_CONST
+			) {
+				zval *literal = RT_CONSTANT(opline, opline->op1);
+				UNSERIALIZE_ATTRIBUTES(Z_PTR_P(literal));
+			}
 			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}
@@ -1844,7 +1873,14 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	zend_file_cache_unserialize_early_bindings(script, buf);
 }
 
+static zend_persistent_script file_cache_validate_success_script;
+
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
+{
+	return zend_file_cache_script_load_ex(file_handle, false);
+}
+
+zend_persistent_script *zend_file_cache_script_load_ex(zend_file_handle *file_handle, bool validate_only)
 {
 	zend_string *full_path = file_handle->opened_path;
 	int fd;
@@ -1919,6 +1955,16 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		}
 		efree(filename);
 		return NULL;
+	}
+
+	/* return here if validating */
+	if (validate_only) {
+		if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
+		}
+		close(fd);
+		efree(filename);
+		return &file_cache_validate_success_script;
 	}
 
 	checkpoint = zend_arena_checkpoint(CG(arena));

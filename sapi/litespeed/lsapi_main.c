@@ -591,7 +591,7 @@ static int sapi_lsapi_activate(void)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.9",
+    "LiteSpeed V8.3",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -1395,6 +1395,8 @@ void start_children( int children )
             switch( pid ) {
             case 0: /* children process */
 
+                php_child_init();
+
                 /* don't catch our signals */
                 sigaction( SIGTERM, &old_term, 0 );
                 sigaction( SIGQUIT, &old_quit, 0 );
@@ -1678,11 +1680,11 @@ PHP_FUNCTION(litespeed_response_headers)
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
     if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	    RETURN_THROWS();
+    }
 
-    if (!&SG(sapi_headers).headers) {
-        RETURN_FALSE;
+    if (!zend_llist_count(&SG(sapi_headers).headers)) {
+	    RETURN_FALSE;
     }
     array_init(return_value);
 

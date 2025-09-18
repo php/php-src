@@ -8,9 +8,9 @@ if (str_contains(getcwd(), " ")) die("skip sendmail_path ini with spaces");
 ?>
 --INI--
 sendmail_path={MAIL:{PWD}/gh7902.eml}
+internal_encoding=UTF-8
 --FILE--
 <?php
-mb_internal_encoding("UTF-8");
 mb_language("uni");
 $to = "omittedvalidaddress@example.com";
 $subject = "test mail";

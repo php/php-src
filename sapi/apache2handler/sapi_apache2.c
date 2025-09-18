@@ -466,6 +466,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 {
 	void *data = NULL;
 	const char *userdata_key = "apache2hook_post_config";
+	zend_set_dl_use_deepbind(true);
 
 	/* Apache will load, unload and then reload a DSO module. This
 	 * prevents us from starting PHP until the second load. */
@@ -751,6 +752,7 @@ zend_first_try {
 static void php_apache_child_init(apr_pool_t *pchild, server_rec *s)
 {
 	apr_pool_cleanup_register(pchild, NULL, php_apache_child_shutdown, apr_pool_cleanup_null);
+	php_child_init();
 }
 
 #ifdef ZEND_SIGNALS

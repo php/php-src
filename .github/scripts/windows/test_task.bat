@@ -58,12 +58,15 @@ if "%PLATFORM%" == "x64" (
 curl -sLo Firebird.zip %PHP_FIREBIRD_DOWNLOAD_URL%
 7z x -oC:\Firebird Firebird.zip
 set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
-set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
+set PDO_FIREBIRD_TEST_DSN=firebird:dbname=127.0.0.1:%PDO_FIREBIRD_TEST_DATABASE%
 set PDO_FIREBIRD_TEST_USER=SYSDBA
 set PDO_FIREBIRD_TEST_PASS=phpfi
+echo create user %PDO_FIREBIRD_TEST_USER% password '%PDO_FIREBIRD_TEST_PASS%';> C:\Firebird\create_user.sql
+echo commit;>> C:\Firebird\create_user.sql
 echo create database '%PDO_FIREBIRD_TEST_DATABASE%' user '%PDO_FIREBIRD_TEST_USER%' password '%PDO_FIREBIRD_TEST_PASS%';> C:\Firebird\setup.sql
 C:\Firebird\instsvc.exe install -n TestInstance
 C:\Firebird\isql -q -i C:\Firebird\setup.sql
+C:\Firebird\isql -q -i C:\Firebird\create_user.sql -user sysdba %PDO_FIREBIRD_TEST_DATABASE%
 C:\Firebird\instsvc.exe start -n TestInstance
 if %errorlevel% neq 0 exit /b 3
 path C:\Firebird;%PATH%
@@ -125,7 +128,7 @@ mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
 echo opcache.file_cache=%PHP_BUILD_DIR%\test_file_cache >> %PHP_BUILD_DIR%\php.ini
-if "%OPCACHE%" equ "1" echo zend_extension=php_opcache.dll >> %PHP_BUILD_DIR%\php.ini
+echo opcache.record_warnings=1 >> %PHP_BUILD_DIR%\php.ini
 rem work-around for some spawned PHP processes requiring OpenSSL and sockets
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 echo extension=php_sockets.dll >> %PHP_BUILD_DIR%\php.ini

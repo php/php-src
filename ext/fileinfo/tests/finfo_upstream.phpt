@@ -18,7 +18,6 @@ foreach($lst as $p) {
 	if ($i !== $exp) {
 		echo "'$p' failed\nexp: '$exp'\ngot: '$i'\n";
 	} 
-	finfo_close($finfo);
 }
 
 echo "==DONE==";

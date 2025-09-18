@@ -15,7 +15,7 @@ blog to the most popular websites in the world. PHP is distributed under the
 [PHP License v3.01](LICENSE).
 
 [![Push](https://github.com/php/php-src/actions/workflows/push.yml/badge.svg)](https://github.com/php/php-src/actions/workflows/push.yml)
-[![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:php)
+[![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://issues.oss-fuzz.com/issues?q=project:php)
 
 ## Documentation
 
@@ -42,28 +42,50 @@ a default build, you will additionally need libxml2 and libsqlite3.
 
 On Ubuntu, you can install these using:
 
-    sudo apt install -y pkg-config build-essential autoconf bison re2c \
-                        libxml2-dev libsqlite3-dev
+```shell
+sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev libsqlite3-dev
+```
 
 On Fedora, you can install these using:
 
-    sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
+```shell
+sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
+```
+
+On MacOS, you can install these using `brew`:
+
+```shell
+brew install autoconf bison re2c libiconv libxml2 sqlite
+```
+
+or with `MacPorts`:
+
+```shell
+sudo port install autoconf bison re2c libiconv libxml2 sqlite3
+```
 
 Generate configure:
 
-    ./buildconf
+```shell
+./buildconf
+```
 
 Configure your build. `--enable-debug` is recommended for development, see
 `./configure --help` for a full list of options.
 
-    # For development
-    ./configure --enable-debug
-    # For production
-    ./configure
+```shell
+# For development
+./configure --enable-debug
+# For production
+./configure
+```
 
-Build PHP. To speed up the build, specify the maximum number of jobs using `-j`:
+Build PHP. To speed up the build, specify the maximum number of jobs using the
+`-j` argument:
 
-    make -j4
+```shell
+make -j4
+```
 
 The number of jobs should usually match the number of available cores, which
 can be determined using `nproc`.
@@ -74,12 +96,20 @@ PHP ships with an extensive test suite, the command `make test` is used after
 successful compilation of the sources to run this test suite.
 
 It is possible to run tests using multiple cores by setting `-jN` in
-`TEST_PHP_ARGS`:
+`TEST_PHP_ARGS` or `TESTS`:
 
-    make TEST_PHP_ARGS=-j4 test
+```shell
+make TEST_PHP_ARGS=-j4 test
+```
 
 Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum
 number of jobs should not exceed the number of cores available.
+
+Use the `TEST_PHP_ARGS` or `TESTS` variable to test only specific directories:
+
+```shell
+make TESTS=tests/lang/ test
+```
 
 The [qa.php.net](https://qa.php.net) site provides more detailed info about
 testing and quality assurance.
@@ -88,9 +118,11 @@ testing and quality assurance.
 
 After a successful build (and test), PHP may be installed with:
 
-    make install
+```shell
+make install
+```
 
-Depending on your permissions and prefix, `make install` may need super user
+Depending on your permissions and prefix, `make install` may need superuser
 permissions.
 
 ## PHP extensions

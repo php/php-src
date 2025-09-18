@@ -28,7 +28,7 @@ if (PHP_OS == 'Linux') {
   }
 }
 elseif (PHP_OS == 'FreeBSD') {
-  $lines = explode("\n",`sysctl -a`);
+  $lines = explode("\n", shell_exec("sysctl -a"));
   $infos = array();
   foreach ($lines as $line) {
     if (!$line){

@@ -14,7 +14,6 @@ catch (\Error $ex) {
 }
 
 imagesetpixel($im, 0, 0, IMG_COLOR_STYLED);
-imagedestroy($im);
 ?>
 ====DONE====
 --EXPECT--

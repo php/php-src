@@ -41,7 +41,7 @@
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
 
-#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
+#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_TAILCALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 #error "phpdbg can only be built with CALL zend vm kind"
 #endif
 
@@ -111,7 +111,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 				array_init(&params);
 
 				while (next) {
-					char *buffered = NULL;
+					zend_string *buffered = NULL;
 
 					switch (next->type) {
 						case OP_PARAM:
@@ -125,28 +125,28 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 						break;
 
 						case METHOD_PARAM:
-							spprintf(&buffered, 0, "%s::%s", next->method.class, next->method.name);
-							add_next_index_string(&params, buffered);
+							buffered = strpprintf(0, "%s::%s", next->method.class, next->method.name);
+							add_next_index_str(&params, buffered);
 						break;
 
 						case NUMERIC_METHOD_PARAM:
-							spprintf(&buffered, 0, "%s::%s#"ZEND_LONG_FMT, next->method.class, next->method.name, next->num);
-							add_next_index_string(&params, buffered);
+							buffered = strpprintf(0, "%s::%s#"ZEND_LONG_FMT, next->method.class, next->method.name, next->num);
+							add_next_index_str(&params, buffered);
 						break;
 
 						case NUMERIC_FUNCTION_PARAM:
-							spprintf(&buffered, 0, "%s#"ZEND_LONG_FMT, next->str, next->num);
-							add_next_index_string(&params, buffered);
+							buffered = strpprintf(0, "%s#"ZEND_LONG_FMT, next->str, next->num);
+							add_next_index_str(&params, buffered);
 						break;
 
 						case FILE_PARAM:
-							spprintf(&buffered, 0, "%s:"ZEND_ULONG_FMT, next->file.name, next->file.line);
-							add_next_index_string(&params, buffered);
+							buffered = strpprintf(0, "%s:"ZEND_ULONG_FMT, next->file.name, next->file.line);
+							add_next_index_str(&params, buffered);
 						break;
 
 						case NUMERIC_FILE_PARAM:
-							spprintf(&buffered, 0, "%s:#"ZEND_ULONG_FMT, next->file.name, next->file.line);
-							add_next_index_string(&params, buffered);
+							buffered = strpprintf(0, "%s:#"ZEND_ULONG_FMT, next->file.name, next->file.line);
+							add_next_index_str(&params, buffered);
 						break;
 
 						default: {
@@ -702,6 +702,10 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 		EG(exception) = NULL;
 		msg = ZSTR_EMPTY_ALLOC();
 	} else {
+		if (UNEXPECTED(Z_ISREF(tmp))) {
+			zend_unwrap_reference(&tmp);
+		}
+		ZEND_ASSERT(Z_TYPE(tmp) == IS_STRING);
 		zend_update_property_string(zend_get_exception_base(ex), ex, ZEND_STRL("string"), Z_STRVAL(tmp));
 		zval_ptr_dtor(&tmp);
 		msg = zval_get_string(zend_read_property_ex(zend_get_exception_base(ex), ex, ZSTR_KNOWN(ZEND_STR_STRING), /* silent */ true, &rv));

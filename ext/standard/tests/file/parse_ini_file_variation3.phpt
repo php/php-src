@@ -35,7 +35,6 @@ display_startup_errors = Off
 log_errors = Off
 ignore_repeated_errors = Off
 ignore_repeated_source = Off
-report_memleaks = On
 docref_root = "/phpmanual/"
 docref_ext = .html
 
@@ -68,7 +67,7 @@ foreach($newdirs as $newdir) {
 --EXPECTF--
 *** Testing parse_ini_file() : variation ***
 New include path is : %sparse_ini_file_variation3.dir1%sparse_ini_file_variation3.dir2%sparse_ini_file_variation3.dir3%S
-array(9) {
+array(8) {
   ["error_reporting"]=>
   string(5) "30719"
   ["display_errors"]=>
@@ -81,8 +80,6 @@ array(9) {
   string(0) ""
   ["ignore_repeated_source"]=>
   string(0) ""
-  ["report_memleaks"]=>
-  string(1) "1"
   ["docref_root"]=>
   string(11) "/phpmanual/"
   ["docref_ext"]=>

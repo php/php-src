@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+namespace {
 /**
  * @var int
  * @cvalue PARSE_POST
@@ -54,6 +55,11 @@ const FILTER_FORCE_ARRAY = UNKNOWN;
  * @cvalue FILTER_NULL_ON_FAILURE
  */
 const FILTER_NULL_ON_FAILURE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FILTER_THROW_ON_FAILURE
+ */
+const FILTER_THROW_ON_FAILURE = UNKNOWN;
 
 /**
  * @var int
@@ -121,14 +127,14 @@ const FILTER_UNSAFE_RAW = UNKNOWN;
 /**
  * @var int
  * @cvalue FILTER_SANITIZE_STRING
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use htmlspecialchars() instead')]
 const FILTER_SANITIZE_STRING = UNKNOWN;
 /**
  * @var int
  * @cvalue FILTER_SANITIZE_STRING
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use htmlspecialchars() instead')]
 const FILTER_SANITIZE_STRIPPED = UNKNOWN;
 /**
  * @var int
@@ -313,3 +319,13 @@ function filter_var_array(array $array, array|int $options = FILTER_DEFAULT, boo
 function filter_list(): array {}
 
 function filter_id(string $name): int|false {}
+
+}
+
+namespace Filter {
+
+	class FilterException extends \Exception {}
+
+	class FilterFailedException extends FilterException {}
+
+}

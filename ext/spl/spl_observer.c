@@ -25,6 +25,7 @@
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
 
 #include "php_spl.h" /* For php_spl_object_hash() */
 #include "spl_observer.h"
@@ -39,6 +40,7 @@ PHPAPI zend_class_entry     *spl_ce_SplObjectStorage;
 PHPAPI zend_class_entry     *spl_ce_MultipleIterator;
 
 static zend_object_handlers spl_handler_SplObjectStorage;
+static zend_object_handlers spl_handler_MultipleIterator;
 
 /* Bit flags for marking internal functionality overridden by SplObjectStorage subclasses. */
 #define SOS_OVERRIDDEN_READ_DIMENSION  1
@@ -335,12 +337,10 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 
 	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
 		array_init(&tmp);
-		/* Incrementing the refcount of obj and inf would confuse the garbage collector.
-		 * Prefer to null the destructor */
-		Z_ARRVAL_P(&tmp)->pDestructor = NULL;
 		zval obj;
-		ZVAL_OBJ(&obj, element->obj);
+		ZVAL_OBJ_COPY(&obj, element->obj);
 		add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &obj);
+		Z_TRY_ADDREF(element->inf);
 		add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
 		zend_hash_next_index_insert(Z_ARRVAL(storage), &tmp);
 	} ZEND_HASH_FOREACH_END();
@@ -484,6 +484,20 @@ static void spl_object_storage_write_dimension(zend_object *object, zval *offset
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 	if (UNEXPECTED(offset == NULL || Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_WRITE_DIMENSION))) {
 		zend_std_write_dimension(object, offset, inf);
+		return;
+	}
+	spl_object_storage_attach_handle(intern, Z_OBJ_P(offset), inf);
+}
+
+static void spl_multiple_iterator_write_dimension(zend_object *object, zval *offset, zval *inf)
+{
+	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
+	if (UNEXPECTED(offset == NULL || Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_WRITE_DIMENSION))) {
+		zend_std_write_dimension(object, offset, inf);
+		return;
+	}
+	if (UNEXPECTED(!Z_OBJCE_P(offset)->iterator_funcs_ptr || !Z_OBJCE_P(offset)->iterator_funcs_ptr->zf_valid)) {
+		zend_type_error("Can only attach objects that implement the Iterator interface");
 		return;
 	}
 	spl_object_storage_attach_handle(intern, Z_OBJ_P(offset), inf);
@@ -1391,9 +1405,13 @@ PHP_MINIT_FUNCTION(spl_observer)
 	spl_handler_SplObjectStorage.has_dimension   = spl_object_storage_has_dimension;
 	spl_handler_SplObjectStorage.unset_dimension = spl_object_storage_unset_dimension;
 
+	memcpy(&spl_handler_MultipleIterator, &spl_handler_SplObjectStorage, sizeof(zend_object_handlers));
+
+	spl_handler_MultipleIterator.write_dimension = spl_multiple_iterator_write_dimension;
+
 	spl_ce_MultipleIterator = register_class_MultipleIterator(zend_ce_iterator);
 	spl_ce_MultipleIterator->create_object = spl_SplObjectStorage_new;
-	spl_ce_MultipleIterator->default_object_handlers = &spl_handler_SplObjectStorage;
+	spl_ce_MultipleIterator->default_object_handlers = &spl_handler_MultipleIterator;
 
 	return SUCCESS;
 }

@@ -80,13 +80,13 @@ retry:
 			if (sock->is_blocked) {
 				int retval;
 
-				sock->timeout_event = 0;
+				sock->timeout_event = false;
 
 				do {
 					retval = php_pollfd_for(sock->socket, POLLOUT, ptimeout);
 
 					if (retval == 0) {
-						sock->timeout_event = 1;
+						sock->timeout_event = true;
 						break;
 					}
 
@@ -107,8 +107,8 @@ retry:
 		if (!(stream->flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS)) {
 			estr = php_socket_strerror(err, NULL, 0);
 			php_error_docref(NULL, E_NOTICE,
-				"Send of " ZEND_LONG_FMT " bytes failed with errno=%d %s",
-				(zend_long)count, err, estr);
+				"Send of %zu bytes failed with errno=%d %s",
+				count, err, estr);
 			efree(estr);
 		}
 	}
@@ -129,7 +129,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 		return;
 	}
 
-	sock->timeout_event = 0;
+	sock->timeout_event = false;
 
 	if (has_buffered_data) {
 		/* If there is already buffered data, use no timeout. */
@@ -146,7 +146,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
 
 		if (retval == 0)
-			sock->timeout_event = 1;
+			sock->timeout_event = true;
 
 		if (retval >= 0)
 			break;
@@ -399,7 +399,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 		case PHP_STREAM_OPTION_READ_TIMEOUT:
 			sock->timeout = *(struct timeval*)ptrparam;
-			sock->timeout_event = 0;
+			sock->timeout_event = false;
 			return PHP_STREAM_OPTION_RETURN_OK;
 
 		case PHP_STREAM_OPTION_META_DATA_API:
@@ -620,12 +620,15 @@ static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *po
 	char *colon;
 	char *host = NULL;
 
-#ifdef HAVE_IPV6
-	char *p;
+	if (memchr(str, '\0', str_len)) {
+		*err = ZSTR_INIT_LITERAL("The hostname must not contain null bytes", 0);
+		return NULL;
+	}
 
+#ifdef HAVE_IPV6
 	if (*(str) == '[' && str_len > 1) {
 		/* IPV6 notation to specify raw address with port (i.e. [fe80::1]:80) */
-		p = memchr(str + 1, ']', str_len - 2);
+		char *p = memchr(str + 1, ']', str_len - 2);
 		if (!p || *(p + 1) != ':') {
 			if (get_err) {
 				*err = strpprintf(0, "Failed to parse IPv6 address \"%s\"", str);
@@ -854,7 +857,6 @@ out:
 static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t *sock,
 		php_stream_xport_param *xparam STREAMS_DC)
 {
-	int clisock;
 	bool nodelay = 0;
 	zval *tmpzval = NULL;
 
@@ -866,7 +868,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		nodelay = 1;
 	}
 
-	clisock = php_network_accept_incoming(sock->socket,
+	php_socket_t clisock = php_network_accept_incoming(sock->socket,
 		xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 		xparam->want_addr ? &xparam->outputs.addr : NULL,
 		xparam->want_addr ? &xparam->outputs.addrlen : NULL,
@@ -882,7 +884,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		clisockdata->socket = clisock;
 #ifdef __linux__
 		/* O_NONBLOCK is not inherited on Linux */
-		clisockdata->is_blocked = 1;
+		clisockdata->is_blocked = true;
 #endif
 
 		xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
@@ -960,7 +962,7 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	sock = pemalloc(sizeof(php_netstream_data_t), persistent_id ? 1 : 0);
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
-	sock->is_blocked = 1;
+	sock->is_blocked = true;
 	sock->timeout.tv_sec = FG(default_socket_timeout);
 	sock->timeout.tv_usec = 0;
 

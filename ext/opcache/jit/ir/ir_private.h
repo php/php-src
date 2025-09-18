@@ -9,6 +9,7 @@
 #define IR_PRIVATE_H
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #ifdef IR_DEBUG
 # include <assert.h>
@@ -62,7 +63,7 @@
 #define IR_MAX(a, b)          (((a) > (b)) ? (a) : (b))
 #define IR_MIN(a, b)          (((a) < (b)) ? (a) : (b))
 
-#define IR_IS_POWER_OF_TWO(x) (!((x) & ((x) - 1)))
+#define IR_IS_POWER_OF_TWO(x) ((x) && (!((x) & ((x) - 1))))
 
 #define IR_LOG2(x) ir_ntzl(x)
 
@@ -255,11 +256,9 @@ IR_ALWAYS_INLINE void ir_arena_free(ir_arena *arena)
 IR_ALWAYS_INLINE void* ir_arena_alloc(ir_arena **arena_ptr, size_t size)
 {
 	ir_arena *arena = *arena_ptr;
-	char *ptr = arena->ptr;
+	char *ptr = (char*)IR_ALIGNED_SIZE((uintptr_t)arena->ptr, 8);
 
-	size = IR_ALIGNED_SIZE(size, 8);
-
-	if (EXPECTED(size <= (size_t)(arena->end - ptr))) {
+	if (EXPECTED((ptrdiff_t)size <= (ptrdiff_t)(arena->end - ptr))) {
 		arena->ptr = ptr + size;
 	} else {
 		size_t arena_size =
@@ -283,7 +282,7 @@ IR_ALWAYS_INLINE void* ir_arena_checkpoint(ir_arena *arena)
 	return arena->ptr;
 }
 
-IR_ALWAYS_INLINE void ir_release(ir_arena **arena_ptr, void *checkpoint)
+IR_ALWAYS_INLINE void ir_arena_release(ir_arena **arena_ptr, void *checkpoint)
 {
 	ir_arena *arena = *arena_ptr;
 

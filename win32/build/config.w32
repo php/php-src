@@ -267,7 +267,11 @@ if (TARGET_ARCH == 'arm64') {
 	DEFINE('FIBER_ASM_FLAGS', '/DBOOST_CONTEXT_EXPORT=EXPORT /nologo /c /Fo');
 }
 
-ADD_FLAG('ASM_OBJS', '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj');
+var all_asm_objs = '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj';
+if (TARGET_ARCH == 'x64') {
+	all_asm_objs += ' $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj';
+}
+ADD_FLAG('ASM_OBJS', all_asm_objs);
 
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\jump_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(FIBER_ASM_ABI).obj Zend\\asm\\jump_$(FIBER_ASM_ABI).asm');
@@ -275,24 +279,20 @@ MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(
 MFO.WriteLine('$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\make_$(FIBER_ASM_ABI).obj Zend\\asm\\make_$(FIBER_ASM_ABI).asm');
 
-ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-if (VS_TOOLSET && VCVERS >= 1914) {
-	ADD_FLAG("CFLAGS_BD_ZEND", "/d2FuncCache1");
+if (TARGET_ARCH == 'x64') {
+	MFO.WriteLine('$(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj: Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
+	MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
 }
 
-/* XXX inspect this for other toolsets */
-//AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
+ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
-	php_ini_builder.c \
+	php_ini_builder.c php_glob.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c output.c internal_functions.c \
 	php_syslog.c php_odbc_utils.c safe_bcmp.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-if (VS_TOOLSET && VCVERS >= 1914) {
-	ADD_FLAG("CFLAGS_BD_MAIN", "/d2FuncCache1");
-}
 
 AC_DEFINE('HAVE_STRNLEN', 1);
 
@@ -301,19 +301,13 @@ AC_DEFINE('ZEND_CHECK_STACK_LIMIT', 1)
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");
 ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-if (VS_TOOLSET && VCVERS >= 1914) {
-	ADD_FLAG("CFLAGS_BD_MAIN_STREAMS", "/d2FuncCache1");
-}
 
-ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
+ADD_SOURCES("win32", "dllmain.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
 	getrusage.c ftok.c ioutil.c codepage.c nice.c \
 	fnmatch.c sockets.c console.c signal.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-if (VS_TOOLSET && VCVERS >= 1914) {
-	ADD_FLAG("CFLAGS_BD_WIN32", "/d2FuncCache1");
-}
 
 PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/streams/ win32/");
 PHP_INSTALL_HEADERS("Zend/Optimizer", "zend_call_graph.h zend_cfg.h zend_dfg.h zend_dump.h zend_func_info.h zend_inference.h zend_optimizer.h zend_ssa.h zend_worklist.h");

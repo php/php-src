@@ -156,7 +156,6 @@ static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 }
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
-#define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
 static zend_always_inline uint8_t is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
 	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data)
@@ -216,7 +215,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
-#if defined(HAVE_MEMRCHR) && !defined(i386)
+#if defined(HAVE_MEMRCHR) && !defined(__i386__)
 	/* On x86 memrchr() doesn't use SSE/AVX, so inlined version is faster */
 	return (const void*)memrchr(s, c, n);
 #else

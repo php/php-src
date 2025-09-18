@@ -17,6 +17,7 @@
 #include "php.h"
 #include "php_win32_globals.h"
 #include "syslog.h"
+#include "signal.h"
 
 #ifdef ZTS
 PHPAPI int php_win32_core_globals_id;
@@ -62,6 +63,8 @@ void php_win32_core_globals_dtor(void *vg)
 PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 {/*{{{*/
 	closelog();
+
+	php_win32_signal_ctrl_handler_request_shutdown();
 
 	return SUCCESS;
 }/*}}}*/

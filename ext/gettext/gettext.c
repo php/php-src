@@ -194,7 +194,7 @@ PHP_FUNCTION(bindtextdomain)
 		btd_result = bindtextdomain(ZSTR_VAL(domain), NULL);
 		if (btd_result == NULL) {
 			/* POSIX-compliant implementations can return
-			 * NULL if an error occured. On musl you will
+			 * NULL if an error occurred. On musl you will
 			 * also get NULL if the domain is not yet
 			 * bound, because musl has no default directory
 			 * to return in that case. */

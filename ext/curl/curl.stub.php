@@ -13,9 +13,9 @@
 const CURLOPT_AUTOREFERER = UNKNOWN;
 /**
  * @var int
- * @deprecated has no effect since 5.1.2
  * @cvalue CURLOPT_BINARYTRANSFER
  */
+#[\Deprecated(since: '8.4', message: 'as it had no effect since 5.1.2')]
 const CURLOPT_BINARYTRANSFER = UNKNOWN;
 /**
  * @var int
@@ -188,6 +188,11 @@ const CURLOPT_INFILE = UNKNOWN;
  * @cvalue CURLOPT_INFILESIZE
  */
 const CURLOPT_INFILESIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLOPT_INFILESIZE_LARGE
+ */
+const CURLOPT_INFILESIZE_LARGE = UNKNOWN;
 /**
  * @var int
  * @cvalue CURLOPT_INTERFACE
@@ -491,6 +496,24 @@ const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
  * @cvalue CURLOPT_DEBUGFUNCTION
  */
 const CURLOPT_DEBUGFUNCTION = UNKNOWN;
+
+#if LIBCURL_VERSION_NUM >= 0x080d00 /* Available since 8.13.0 */
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_ALL
+ */
+const CURLFOLLOW_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_OBEYCODE
+ */
+const CURLFOLLOW_OBEYCODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLFOLLOW_FIRSTONLY
+ */
+const CURLFOLLOW_FIRSTONLY = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -3031,6 +3054,13 @@ const CURL_LOCK_DATA_PSL = UNKNOWN;
  * @cvalue CURLAUTH_BEARER
  */
 const CURLAUTH_BEARER = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080600 /* Available since 8.6.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_QUEUE_TIME_T
+ */
+const CURLINFO_QUEUE_TIME_T = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLINFO_APPCONNECT_TIME_T
@@ -3079,6 +3109,13 @@ const CURLINFO_USED_PROXY = UNKNOWN;
  * @cvalue CURLINFO_POSTTRANSFER_TIME_T
  */
 const CURLINFO_POSTTRANSFER_TIME_T = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080200 /* Available since 8.2.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_CONN_ID
+ */
+const CURLINFO_CONN_ID = UNKNOWN;
 #endif
 /**
  * @var int
@@ -3302,6 +3339,13 @@ const CURLINFO_PROXY_ERROR = UNKNOWN;
  * @cvalue CURLOPT_SSL_EC_CURVES
  */
 const CURLOPT_SSL_EC_CURVES = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080e00 /* Available since 8.14.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_SSL_SIGNATURE_ALGORITHMS
+ */
+const CURLOPT_SSL_SIGNATURE_ALGORITHMS = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLPX_BAD_ADDRESS_TYPE
@@ -3696,6 +3740,7 @@ final class CurlSharePersistentHandle
     public readonly array $options;
 }
 
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function curl_close(CurlHandle $handle): void {}
 
 /** @refcount 1 */
@@ -3766,6 +3811,7 @@ function curl_setopt_array(CurlHandle $handle, array $options): bool {}
 
 function curl_setopt(CurlHandle $handle, int $option, mixed $value): bool {}
 
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function curl_share_close(CurlShareHandle $share_handle): void {}
 
 function curl_share_errno(CurlShareHandle $share_handle): int {}

@@ -6,7 +6,7 @@ pdo_mysql
 <?php
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
+if (!defined('Pdo\Mysql::ATTR_LOCAL_INFILE_DIRECTORY')) {
     die("skip No MYSQL_ATTR_LOCAL_INFILE_DIRECTORY support");
 }
 ?>
@@ -19,8 +19,8 @@ $user = PDO_MYSQL_TEST_USER;
 $pass = PDO_MYSQL_TEST_PASS;
 
 $db = new PDO($dsn, $user, $pass);
-echo var_export($db->getAttribute(PDO::MYSQL_ATTR_LOCAL_INFILE)), "\n";
-echo var_export($db->getAttribute(PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY)), "\n";
+echo var_export($db->getAttribute(Pdo\Mysql::ATTR_LOCAL_INFILE)), "\n";
+echo var_export($db->getAttribute(Pdo\Mysql::ATTR_LOCAL_INFILE_DIRECTORY)), "\n";
 echo "done!\n";
 ?>
 --EXPECT--

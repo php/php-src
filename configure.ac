@@ -128,6 +128,17 @@ AS_VAR_IF([cross_compiling], [yes],
     AC_MSG_RESULT([$BUILD_CC])],
   [BUILD_CC=$CC])
 
+dnl The macro AC_PROG_CC_C99 sets the shell variable ac_cv_prog_cc_c99 to 'no'
+dnl if the compiler does not support C99.i.e. does not support any of _Bool,
+dnl flexible arrays, inline, long long int, mixed code and declarations,
+dnl named initialization of structs, restrict, varargs macros, variable
+dnl declarations in for loops and variable length arrays.
+dnl
+dnl https://www.gnu.org/software/autoconf/manual/autoconf-2.60/html_node/C-Compiler.html
+if test "$ac_cv_prog_cc_c99" = no; then
+  AC_MSG_ERROR([C compiler would not accept C99 code])
+fi
+
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
   [for system library directory],
@@ -206,7 +217,12 @@ dnl supports it. This can help reduce the binary size and startup time.
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
                        [CFLAGS="$CFLAGS -fvisibility=hidden"])
 
+dnl to disable executable stack on haiku due
+dnl to missing elf .note.GNU-stack part
 case $host_alias in
+  *haiku*)
+    LDFLAGS="$LDFLAGS -Wl,-z,noexecstack"
+    ;;
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     ;;
@@ -451,11 +467,6 @@ AC_CHECK_TYPES([socklen_t], [], [], [
   #endif
 ])
 
-dnl These are defined elsewhere than stdio.h.
-PHP_CHECK_SIZEOF([intmax_t], [0])
-PHP_CHECK_SIZEOF([ssize_t], [8])
-PHP_CHECK_SIZEOF([ptrdiff_t], [8])
-
 dnl Check stdint types (must be after header check).
 PHP_CHECK_STDINT_TYPES
 
@@ -545,7 +556,6 @@ AC_CHECK_FUNCS(m4_normalize([
   getgrnam_r
   gethostname
   getloadavg
-  getlogin
   getprotobyname
   getprotobynumber
   getpwnam_r
@@ -557,6 +567,7 @@ AC_CHECK_FUNCS(m4_normalize([
   getwd
   glob
   gmtime_r
+  issetugid
   lchown
   localtime_r
   memcntl
@@ -564,6 +575,7 @@ AC_CHECK_FUNCS(m4_normalize([
   memmem
   mempcpy
   memrchr
+  memset_explicit
   mkstemp
   mmap
   nice
@@ -571,6 +583,7 @@ AC_CHECK_FUNCS(m4_normalize([
   poll
   pthread_jit_write_protect_np
   putenv
+  reallocarray
   scandir
   setenv
   setitimer
@@ -580,7 +593,6 @@ AC_CHECK_FUNCS(m4_normalize([
   statvfs
   std_syslog
   strcasecmp
-  strnlen
   strptime
   strtok_r
   symlink
@@ -590,6 +602,17 @@ AC_CHECK_FUNCS(m4_normalize([
   utime
   vasprintf
 ]))
+
+PHP_ARG_ENABLE([system-glob],
+  [whether to use the system glob function],
+  [AS_HELP_STRING([--enable-system-glob],
+    [Use the system glob function instead of the PHP provided replacement.])],
+  [no],
+  [no])
+
+AS_VAR_IF([PHP_SYSTEM_GLOB], [yes],
+  [AC_DEFINE([PHP_SYSTEM_GLOB], [1],
+    [Define to 1 if PHP will use the system glob function instead of php_glob.])])
 
 AC_CHECK_FUNC([inet_ntop],, [AC_MSG_FAILURE([Required inet_ntop not found.])])
 AC_CHECK_FUNC([inet_pton],, [AC_MSG_FAILURE([Required inet_pton not found.])])
@@ -1311,11 +1334,15 @@ AS_VAR_IF([program_prefix], [NONE], [program_prefix=])
 AS_VAR_IF([program_suffix], [NONE], [program_suffix=])
 
 orig_libdir=$libdir
+
+dnl First for unexpanded (default), second for expanded (from options)
 AS_CASE([$libdir],
-  ['${exec_prefix}/lib'], [libdir=$libdir/php])
+  ['${exec_prefix}/lib'], [libdir=$libdir/php],
+  [${exec_prefix}/${PHP_LIBDIR}], [libdir=$libdir/php])
 
 AS_CASE([$(eval echo $datadir)],
-  ['${prefix}/share'], [datadir=$datadir/php])
+  ['${prefix}/share'], [datadir=$datadir/php],
+  [${prefix}/share], [datadir=$datadir/php])
 
 phptempdir=$(pwd)/libs
 
@@ -1631,6 +1658,7 @@ PHP_ADD_SOURCES([main], m4_normalize([
     php_content_types.c
     php_ini_builder.c
     php_ini.c
+    php_glob.c
     php_odbc_utils.c
     php_open_temporary_file.c
     php_scandir.c

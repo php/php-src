@@ -1,5 +1,5 @@
 --TEST--
-PDO::MYSQL_ATTR_INIT_COMMAND
+Pdo\Mysql::ATTR_INIT_COMMAND
 --EXTENSIONS--
 pdo_mysql
 --SKIPIF--
@@ -22,7 +22,7 @@ error_reporting=E_ALL
 
     $create = sprintf('CREATE TABLE %s(id INT)', $table);
     var_dump($create);
-    $db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => $create));
+    $db = new PDO($dsn, $user, $pass, array(Pdo\Mysql::ATTR_INIT_COMMAND => $create));
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     $info = $db->errorInfo();

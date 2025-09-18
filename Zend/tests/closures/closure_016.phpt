@@ -42,9 +42,9 @@ Foo::__invoke
 bool(true)
 Foo::__invoke
 bool(true)
-Closure::__invoke
+{closure:foo():9}
 bool(true)
-Closure::__invoke
+{closure:foo():9}
 bool(true)
 Closure::__invoke
 bool(true)

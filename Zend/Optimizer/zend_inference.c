@@ -1623,12 +1623,16 @@ static bool zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_r
 		    r->min < var_info->range.min) {
 			r->underflow = 1;
 			r->min = ZEND_LONG_MIN;
+		} else {
+			r->min = var_info->range.min;
 		}
 		if (r->overflow ||
 		    var_info->range.overflow ||
 		    r->max > var_info->range.max) {
 			r->overflow = 1;
 			r->max = ZEND_LONG_MAX;
+		} else {
+			r->max = var_info->range.max;
 		}
 		if (var_info->range.min == r->min &&
 		    var_info->range.max == r->max &&
@@ -2409,7 +2413,7 @@ static const zend_property_info *lookup_prop_info(const zend_class_entry *ce, ze
 	/* If the class is linked, reuse the precise runtime logic. */
 	if ((ce->ce_flags & ZEND_ACC_LINKED)
 	 && (!scope || (scope->ce_flags & ZEND_ACC_LINKED))) {
-		zend_class_entry *prev_scope = EG(fake_scope);
+		const zend_class_entry *prev_scope = EG(fake_scope);
 		EG(fake_scope) = scope;
 		prop_info = zend_get_property_info(ce, name, 1);
 		EG(fake_scope) = prev_scope;

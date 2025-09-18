@@ -355,7 +355,9 @@ get_entity(void *user, const xmlChar *name)
 		if (ret == NULL)
 			ret = xmlGetDocEntity(parser->parser->myDoc, name);
 
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		if (ret == NULL || parser->parser->instate == XML_PARSER_CONTENT) {
+		ZEND_DIAGNOSTIC_IGNORED_END
 			if (ret == NULL || ret->etype == XML_INTERNAL_GENERAL_ENTITY || ret->etype == XML_INTERNAL_PARAMETER_ENTITY || ret->etype == XML_INTERNAL_PREDEFINED_ENTITY) {
 				/* Predefined entities will expand unless no cdata handler is present */
 				if (parser->h_default && ! (ret && ret->etype == XML_INTERNAL_PREDEFINED_ENTITY && parser->h_cdata)) {
@@ -689,20 +691,8 @@ XML_GetCurrentColumnNumber(XML_Parser parser)
 PHP_XML_API long
 XML_GetCurrentByteIndex(XML_Parser parser)
 {
-	/* We have to temporarily disable the encoder to satisfy the note from the manual:
-	 * "This function returns byte index according to UTF-8 encoded text disregarding if input is in another encoding."
-	 * Although that should probably be corrected at one point? (TODO) */
-	xmlCharEncodingHandlerPtr encoder = NULL;
-	xmlParserInputPtr input = parser->parser->input;
-	if (input->buf) {
-		encoder = input->buf->encoder;
-		input->buf->encoder = NULL;
-	}
-	long result = xmlByteConsumed(parser->parser);
-	if (encoder) {
-		input->buf->encoder = encoder;
-	}
-	return result;
+	return parser->parser->input->consumed +
+			(parser->parser->input->cur - parser->parser->input->base);
 }
 
 PHP_XML_API int

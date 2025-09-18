@@ -400,7 +400,7 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	phar_entry_info *entry;
 	int res;
-	zend_off_t temp;
+	zend_ulong temp;
 
 	if (data->internal_file->link) {
 		entry = phar_get_link_source(data->internal_file);
@@ -410,26 +410,28 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 
 	switch (whence) {
 		case SEEK_END :
-			temp = data->zero + entry->uncompressed_filesize + offset;
+			temp = (zend_ulong) data->zero + (zend_ulong) entry->uncompressed_filesize + (zend_ulong) offset;
 			break;
 		case SEEK_CUR :
-			temp = data->zero + data->position + offset;
+			temp = (zend_ulong) data->zero + (zend_ulong) data->position + (zend_ulong) offset;
 			break;
 		case SEEK_SET :
-			temp = data->zero + offset;
+			temp = (zend_ulong) data->zero + (zend_ulong) offset;
 			break;
 		default:
 			temp = 0;
 	}
-	if (temp > data->zero + (zend_off_t) entry->uncompressed_filesize) {
-		*newoffset = -1;
+
+	zend_off_t temp_signed = (zend_off_t) temp;
+	if (temp_signed > data->zero + (zend_off_t) entry->uncompressed_filesize) {
+		*newoffset = -1; /* FIXME: this will invalidate the ZEND_ASSERT(stream->position >= 0); assertion in streams.c */
 		return -1;
 	}
-	if (temp < data->zero) {
-		*newoffset = -1;
+	if (temp_signed < data->zero) {
+		*newoffset = -1; /* FIXME: this will invalidate the ZEND_ASSERT(stream->position >= 0); assertion in streams.c */
 		return -1;
 	}
-	res = php_stream_seek(data->fp, temp, SEEK_SET);
+	res = php_stream_seek(data->fp, temp_signed, SEEK_SET);
 	*newoffset = php_stream_tell(data->fp) - data->zero;
 	data->position = *newoffset;
 	return res;
@@ -443,12 +445,12 @@ static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t cou
 {
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
-	php_stream_seek(data->fp, data->position, SEEK_SET);
+	php_stream_seek(data->fp, data->position + data->zero, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
 		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, ZSTR_VAL(data->internal_file->filename), data->phar->fname);
 		return -1;
 	}
-	data->position = php_stream_tell(data->fp);
+	data->position = php_stream_tell(data->fp) - data->zero;
 	if (data->position > (zend_off_t)data->internal_file->uncompressed_filesize) {
 		data->internal_file->uncompressed_filesize = data->position;
 	}

@@ -3318,6 +3318,9 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	zval		*entry;				/* Hash entry */
 	uint32_t    iter_pos = zend_hash_iterators_lower_pos(in_hash, 0);
 
+	GC_ADDREF(in_hash);
+	HT_ALLOW_COW_VIOLATION(in_hash); /* Will be reset when setting the flags for in_hash */
+
 	/* Get number of entries in the input hash */
 	num_in = zend_hash_num_elements(in_hash);
 
@@ -3356,7 +3359,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 
 		/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 		if (removed != NULL) {
-			for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
+			for ( ; pos - offset < length && idx < in_hash->nNumUsed; idx++, entry++) {
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos++;
 				Z_TRY_ADDREF_P(entry);
@@ -3369,9 +3372,9 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				}
 			}
 		} else { /* otherwise just skip those entries */
-			int pos2 = pos;
+			zend_long pos2 = pos;
 
-			for ( ; pos2 < offset + length && idx < in_hash->nNumUsed; idx++, entry++) {
+			for ( ; pos2 - offset < length && idx < in_hash->nNumUsed; idx++, entry++) {
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_packed_del_val(in_hash, entry);
@@ -3430,7 +3433,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 
 		/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 		if (removed != NULL) {
-			for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++, p++) {
+			for ( ; pos - offset < length && idx < in_hash->nNumUsed; idx++, p++) {
 				if (Z_TYPE(p->val) == IS_UNDEF) continue;
 				pos++;
 				entry = &p->val;
@@ -3443,9 +3446,9 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				zend_hash_del_bucket(in_hash, p);
 			}
 		} else { /* otherwise just skip those entries */
-			int pos2 = pos;
+			zend_long pos2 = pos;
 
-			for ( ; pos2 < offset + length && idx < in_hash->nNumUsed; idx++, p++) {
+			for ( ; pos2 - offset < length && idx < in_hash->nNumUsed; idx++, p++) {
 				if (Z_TYPE(p->val) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_del_bucket(in_hash, p);
@@ -3485,6 +3488,15 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	HT_SET_ITERATORS_COUNT(&out_hash, HT_ITERATORS_COUNT(in_hash));
 	HT_SET_ITERATORS_COUNT(in_hash, 0);
 	in_hash->pDestructor = NULL;
+
+	if (UNEXPECTED(GC_DELREF(in_hash) == 0)) {
+		/* Array was completely deallocated during the operation */
+		zend_array_destroy(in_hash);
+		zend_hash_destroy(&out_hash);
+		zend_throw_error(NULL, "Array was modified during array_splice operation");
+		return;
+	}
+
 	zend_hash_destroy(in_hash);
 
 	HT_FLAGS(in_hash)          = HT_FLAGS(&out_hash);
@@ -4512,6 +4524,32 @@ PHP_FUNCTION(array_key_last)
 	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
 }
 /* }}} */
+
+PHP_FUNCTION(array_first)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_HASH_FOREACH_VAL(array, zval *zv) {
+		RETURN_COPY_DEREF(zv);
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_FUNCTION(array_last)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_HASH_REVERSE_FOREACH_VAL(array, zval *zv) {
+		RETURN_COPY_DEREF(zv);
+	} ZEND_HASH_FOREACH_END();
+}
 
 /* {{{ Return just the values from the input array */
 PHP_FUNCTION(array_values)
@@ -6025,7 +6063,7 @@ PHP_FUNCTION(array_multisort)
 	for (i = 0; i < MULTISORT_LAST; i++) {
 		parse_state[i] = 0;
 	}
-	func = ARRAYG(multisort_func) = ecalloc(argc, sizeof(bucket_compare_func_t));
+	func = ecalloc(argc, sizeof(bucket_compare_func_t));
 
 	/* Here we go through the input arguments and parse them. Each one can
 	 * be either an array or a sort flag which follows an array. If not
@@ -6041,7 +6079,7 @@ PHP_FUNCTION(array_multisort)
 			/* We see the next array, so we update the sort flags of
 			 * the previous array and reset the sort flags. */
 			if (i > 0) {
-				ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
+				func[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
 				sort_order = PHP_SORT_ASC;
 				sort_type = PHP_SORT_REGULAR;
 			}
@@ -6093,8 +6131,6 @@ PHP_FUNCTION(array_multisort)
 			MULTISORT_ABORT;
 		}
 	}
-	/* Take care of the last array sort flags. */
-	ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
 
 	/* Make sure the arrays are of the same size. */
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));
@@ -6111,6 +6147,11 @@ PHP_FUNCTION(array_multisort)
 		efree(arrays);
 		RETURN_TRUE;
 	}
+
+	/* Take care of the last array sort flags. */
+	func[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
+	bucket_compare_func_t *old_multisort_func = ARRAYG(multisort_func);
+	ARRAYG(multisort_func) = func;
 
 	/* Create the indirection array. This array is of size MxN, where
 	 * M is the number of entries in each input array and N is the number
@@ -6188,6 +6229,7 @@ clean_up:
 	efree(indirect);
 	efree(func);
 	efree(arrays);
+	ARRAYG(multisort_func) = old_multisort_func;
 }
 /* }}} */
 
@@ -6439,7 +6481,7 @@ PHP_FUNCTION(array_reduce)
 	zval args[2];
 	zval *operand;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 	zval *initial = NULL;
 	HashTable *htbl;
 
@@ -6515,7 +6557,7 @@ PHP_FUNCTION(array_filter)
 	zend_long use_type = 0;
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 	zend_ulong num_key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -6649,7 +6691,7 @@ PHP_FUNCTION(array_find)
 {
 	HashTable *array;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(array)
@@ -6665,7 +6707,7 @@ PHP_FUNCTION(array_find_key)
 {
 	HashTable *array;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(array)
@@ -6681,7 +6723,7 @@ PHP_FUNCTION(array_any)
 {
 	HashTable *array;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(array)
@@ -6697,7 +6739,7 @@ PHP_FUNCTION(array_all)
 {
 	HashTable *array;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY_HT(array)
@@ -6714,8 +6756,8 @@ PHP_FUNCTION(array_map)
 	zval *arrays = NULL;
 	int n_arrays = 0;
 	zval result;
-	zend_fcall_info fci = empty_fcall_info;
-	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
 	int i;
 	uint32_t k, maxlen = 0;
 
@@ -6939,6 +6981,7 @@ PHP_FUNCTION(array_key_exists)
 			RETVAL_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
 			break;
 		case IS_NULL:
+			zend_error(E_DEPRECATED, "Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead");
 			RETVAL_BOOL(zend_hash_exists(ht, ZSTR_EMPTY_ALLOC()));
 			break;
 		case IS_DOUBLE:
@@ -6997,6 +7040,7 @@ PHP_FUNCTION(array_chunk)
 	}
 
 	array_init_size(return_value, (uint32_t)(((num_in - 1) / size) + 1));
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	ZVAL_UNDEF(&chunk);
 
@@ -7020,9 +7064,10 @@ PHP_FUNCTION(array_chunk)
 
 		/* If reached the chunk size, add it to the result array, and reset the
 		 * pointer. */
-		if (!(++current % size)) {
+		if (++current == size) {
 			add_next_index_zval(return_value, &chunk);
 			ZVAL_UNDEF(&chunk);
+			current = 0;
 		}
 	} ZEND_HASH_FOREACH_END();
 

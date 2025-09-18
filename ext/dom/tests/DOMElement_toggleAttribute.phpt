@@ -87,7 +87,7 @@ echo "Checking toggled namespace:\n";
 var_dump($dom->documentElement->getAttribute('xmlns:anotheron'));
 
 ?>
---EXPECT--
+--EXPECTF--
 Invalid Character Error
 --- Selected attribute tests (HTML) ---
 bool(false)
@@ -95,10 +95,10 @@ bool(false)
 <html id="test"></html>
 bool(true)
 <!DOCTYPE HTML>
-<html id="test" selected></html>
+<html id="test" selected%r(="")?%r></html>
 bool(true)
 <!DOCTYPE HTML>
-<html id="test" selected></html>
+<html id="test" selected%r(="")?%r></html>
 bool(false)
 <!DOCTYPE HTML>
 <html id="test"></html>

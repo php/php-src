@@ -75,14 +75,17 @@ enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_RSA,
 	OPENSSL_KEYTYPE_DSA,
 	OPENSSL_KEYTYPE_DH,
+	OPENSSL_KEYTYPE_EC,
+	OPENSSL_KEYTYPE_X25519,
+	OPENSSL_KEYTYPE_ED25519,
+	OPENSSL_KEYTYPE_X448,
+	OPENSSL_KEYTYPE_ED448,
+
 	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-	OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1,
-	OPENSSL_KEYTYPE_X25519 = OPENSSL_KEYTYPE_DH +2,
-	OPENSSL_KEYTYPE_ED25519 = OPENSSL_KEYTYPE_DH +3,
-	OPENSSL_KEYTYPE_X448 = OPENSSL_KEYTYPE_DH +4,
-	OPENSSL_KEYTYPE_ED448 = OPENSSL_KEYTYPE_DH +5,
 };
 
+/* Cipher constants, do not forget to update php_openssl_cipher_names in
+ * openssl_backend_v3.c  if new constant added. */
 enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_RC2_40,
 	PHP_OPENSSL_CIPHER_RC2_128,
@@ -106,10 +109,10 @@ enum php_openssl_encoding {
 	ENCODING_PEM,
 };
 
-
 #define MIN_KEY_LENGTH		384
 
-/* constants used in ext/phar/util.c, keep in sync */
+/* Constants used in ext/phar/util.c, keep in sync and do not forget to update
+ * php_openssl_digest_names in openssl_backend_v3.c if new constant added. */
 #define OPENSSL_ALGO_SHA1 	1
 #define OPENSSL_ALGO_MD5	2
 #ifndef OPENSSL_NO_MD4
@@ -118,9 +121,7 @@ enum php_openssl_encoding {
 #ifndef OPENSSL_NO_MD2
 #define OPENSSL_ALGO_MD2	4
 #endif
-#if PHP_OPENSSL_API_VERSION < 0x10100
-#define OPENSSL_ALGO_DSS1	5
-#endif
+/* Number 5 was used for OPENSSL_ALGO_DSS1 which is no longer available */
 #define OPENSSL_ALGO_SHA224 6
 #define OPENSSL_ALGO_SHA256 7
 #define OPENSSL_ALGO_SHA384 8
@@ -128,6 +129,7 @@ enum php_openssl_encoding {
 #ifndef OPENSSL_NO_RMD160
 #define OPENSSL_ALGO_RMD160 10
 #endif
+
 #define DEBUG_SMIME	0
 
 #if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
@@ -188,7 +190,17 @@ X509_STORE * php_openssl_setup_verify(zval * calist, uint32_t arg_num);
 STACK_OF(X509) * php_openssl_load_all_certs_from_file(
 		char *cert_file, size_t cert_file_len, uint32_t arg_num);
 EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req);
-zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t key_size);
+zend_string *php_openssl_pkey_derive(EVP_PKEY *key, EVP_PKEY *peer_key, size_t requested_key_size);
+
+X509 *php_openssl_pem_read_asn1_bio_x509(BIO *in);
+X509 *php_openssl_pem_read_bio_x509(BIO *in);
+X509_REQ *php_openssl_pem_read_bio_x509_req(BIO *in);
+EVP_PKEY *php_openssl_pem_read_bio_public_key(BIO *in);
+EVP_PKEY *php_openssl_pem_read_bio_private_key(BIO *in, pem_password_cb *cb, void *u);
+PKCS7 *php_openssl_pem_read_bio_pkcs7(BIO *in);
+CMS_ContentInfo *php_openssl_pem_read_bio_cms(BIO *in);
+CMS_ContentInfo *php_openssl_d2i_bio_cms(BIO *in);
+CMS_ContentInfo *php_openssl_smime_read_cms(BIO *bio, BIO **bcont);
 
 #define PHP_SSL_REQ_INIT(req)		memset(req, 0, sizeof(*req))
 #define PHP_SSL_REQ_DISPOSE(req)	php_openssl_dispose_config(req)
@@ -220,31 +232,23 @@ const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo);
 int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args);
 void php_openssl_dispose_config(struct php_x509_request * req);
 
-
-#if defined(PHP_WIN32) || PHP_OPENSSL_API_VERSION >= 0x10100
-#define PHP_OPENSSL_RAND_ADD_TIME() ((void) 0)
-#else
-#define PHP_OPENSSL_RAND_ADD_TIME() php_openssl_rand_add_timeval()
-
-static inline void php_openssl_rand_add_timeval(void)  /* {{{ */
-{
-	struct timeval tv;
-
-	gettimeofday(&tv, NULL);
-	RAND_add(&tv, sizeof(tv), 0.0);
-}
-/* }}} */
-
-#endif
-
 zend_result php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded);
 zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int seeded);
 
-EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo);
+const EVP_MD *php_openssl_get_evp_md_by_name(const char *name);
+const EVP_MD *php_openssl_get_evp_md_from_algo(zend_long algo);
+void php_openssl_release_evp_md(const EVP_MD *md);
+const EVP_CIPHER * php_openssl_get_evp_cipher_by_name(const char *name);
 const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo);
+void php_openssl_release_evp_cipher(const EVP_CIPHER *cipher);
 
 void php_openssl_backend_init(void);
+void php_openssl_backend_init_common(void);
+void php_openssl_backend_gshutdown(void);
 void php_openssl_backend_shutdown(void);
+
+void php_openssl_backend_init_libctx(struct php_openssl_libctx *ctx);
+void php_openssl_backend_destroy_libctx(struct php_openssl_libctx *ctx);
 
 const char *php_openssl_get_conf_filename(void);
 
@@ -279,7 +283,7 @@ X509_REQ *php_openssl_csr_from_str(zend_string *csr_str, uint32_t arg_num);
 X509_REQ *php_openssl_csr_from_param(
 		zend_object *csr_obj, zend_string *csr_str, uint32_t arg_num);
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100 && !defined (LIBRESSL_VERSION_NUMBER)
+#if !defined (LIBRESSL_VERSION_NUMBER)
 #define PHP_OPENSSL_ASN1_INTEGER_set ASN1_INTEGER_set_int64
 #else
 #define PHP_OPENSSL_ASN1_INTEGER_set ASN1_INTEGER_set
@@ -292,10 +296,8 @@ struct php_openssl_pem_password {
 	int len;
 };
 
-int php_openssl_pem_password_cb(char *buf, int size, int rwflag, void *userdata);
 EVP_PKEY *php_openssl_pkey_from_zval(
 		zval *val, int public_key, char *passphrase, size_t passphrase_len, uint32_t arg_num);
-int php_openssl_get_evp_pkey_type(int key_type);
 EVP_PKEY *php_openssl_generate_private_key(struct php_x509_request * req);
 void php_openssl_add_bn_to_array(zval *ary, const BIGNUM *bn, const char *name);
 
@@ -315,15 +317,16 @@ void php_openssl_add_bn_to_array(zval *ary, const BIGNUM *bn, const char *name);
 		} \
 	} while (0);
 
+EVP_PKEY_CTX *php_openssl_pkey_new_from_name(const char *name, int id);
+EVP_PKEY_CTX *php_openssl_pkey_new_from_pkey(EVP_PKEY *pkey);
 
 EVP_PKEY *php_openssl_pkey_init_rsa(zval *data);
 EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private);
 BIGNUM *php_openssl_dh_pub_from_priv(BIGNUM *priv_key, BIGNUM *g, BIGNUM *p);
 EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private);
 EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private);
-void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_type, zval *data);
 #if PHP_OPENSSL_API_VERSION >= 0x30000
-void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_type, zval *data);
+void php_openssl_pkey_object_curve_25519_448(zval *return_value, const char *name, zval *data);
 #endif
 zend_long php_openssl_pkey_get_details(zval *return_value, EVP_PKEY *pkey);
 
@@ -349,14 +352,12 @@ struct php_openssl_cipher_mode {
 	int aead_ivlen_flag;
 };
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100
 static inline void php_openssl_set_aead_flags(struct php_openssl_cipher_mode *mode) {
 	mode->is_aead = true;
 	mode->aead_get_tag_flag = EVP_CTRL_AEAD_GET_TAG;
 	mode->aead_set_tag_flag = EVP_CTRL_AEAD_SET_TAG;
 	mode->aead_ivlen_flag = EVP_CTRL_AEAD_SET_IVLEN;
 }
-#endif
 
 void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EVP_CIPHER *cipher_type);
 zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
@@ -375,6 +376,6 @@ zend_result php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 
 const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method);
 
+CONF *php_openssl_nconf_new(void);
 
 #endif
-

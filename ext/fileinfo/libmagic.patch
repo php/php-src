@@ -328,8 +328,8 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 @@ -1151,6 +1075,7 @@
  			file_mdump(ma->mp);
  			file_mdump(mb->mp);
- 			return 0;
 +#endif
+ 			return 0;
  		}
  		return x > 0 ? -1 : 1;
  	}

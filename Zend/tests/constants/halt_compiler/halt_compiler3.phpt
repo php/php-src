@@ -5,4 +5,4 @@ __HALT_COMPILER(); bad define() of __COMPILER_HALT_OFFSET__ 1
 define ('__COMPILER_HALT_OFFSET__', 1);
 ?>
 --EXPECTF--
-Warning: Constant __COMPILER_HALT_OFFSET__ already defined in %s on line %d
+Warning: Constant __COMPILER_HALT_OFFSET__ already defined, this will be an error in PHP 9 in %s on line %d

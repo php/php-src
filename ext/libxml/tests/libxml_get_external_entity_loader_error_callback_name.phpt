@@ -37,4 +37,4 @@ try {
 
 ?>
 --EXPECT--
-string(73) "DOMDocument::validate(): supplied resource is not a valid stream resource"
+string(122) "DOMDocument::validate(): The user entity loader callback "Handler::handle" has returned a resource, but it is not a stream"

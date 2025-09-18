@@ -18,12 +18,12 @@ $data2 = bzcompress($string, 1, 10);
 $data3 = $data2;
 $data3[3] = 0;
 
-var_dump(bzdecompress(1,1));
+var_dump(bzdecompress(1, true));
 var_dump(bzdecompress($data3));
-var_dump(bzdecompress($data3,1));
+var_dump(bzdecompress($data3, true));
 
-var_dump(bzdecompress($data, 0));
-var_dump(bzdecompress($data, 1));
+var_dump(bzdecompress($data, false));
+var_dump(bzdecompress($data, true));
 var_dump(bzdecompress($data));
 var_dump(bzdecompress($data2));
 

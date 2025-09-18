@@ -132,6 +132,93 @@ OUTPUT;
 
 $EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FLOAT_OFFSETS) . '$/s';
 
+const EXPECTED_OUTPUT_NULL_OFFSETS = <<<OUTPUT
+Read before write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Warning: Undefined array key "" in %s on line %d
+NULL
+Write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Read:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+int(5)
+Read-Write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+isset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(true)
+empty():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(false)
+null coalesce:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+int(25)
+Reference to dimension:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Value of reference:
+int(25)
+Value of container dimension after write to reference (should be int(100) if successful):
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+int(100)
+unset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Nested read:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Warning: Undefined array key "" in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line %d
+NULL
+Nested write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Nested Read-Write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Nested isset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Nested empty():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+bool(false)
+Nested null coalesce:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+int(30)
+Nested unset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
+OUTPUT;
+
+$EXPECTED_OUTPUT_NULL_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_NULL_OFFSETS) . '$/s';
+
 const EXPECTED_OUTPUT_INVALID_OFFSETS = <<<OUTPUT
 Read before write:
 Cannot access offset of type %s on ArrayObject
@@ -175,43 +262,85 @@ $EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT
 const EXPECTED_OUTPUT_NULL_OFFSET = <<<OUTPUT
 Read before write:
 
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 8
+
 Warning: Undefined array key "" in %s on line 8
 NULL
 Write:
 Read:
 
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 22
+
 Warning: Undefined array key "" in %s on line 22
 NULL
 Read-Write:
 
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 29
+
 Warning: Undefined array key "" in %s on line 29
 isset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 36
 bool(false)
 empty():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 42
 bool(true)
 null coalesce:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 48
 string(7) "default"
 Reference to dimension:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 55
 Value of reference:
 NULL
 Value of container dimension after write to reference (should be int(100) if successful):
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 60
 int(100)
 unset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 67
 Nested read:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 74
 
 Warning: Undefined array key "" in %s on line 74
 
 Warning: Trying to access array offset on null in %s on line 74
 NULL
 Nested write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 81
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 81
 Nested Read-Write:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 88
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 88
 Nested isset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 95
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 95
 bool(true)
 Nested empty():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 101
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 101
 bool(false)
 Nested null coalesce:
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 107
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 107
 int(30)
 Nested unset():
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line 114
 
 OUTPUT;
 
@@ -323,6 +452,7 @@ foreach ($offsets as $dimension) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_NULL_OFFSETS_REGEX, $varOutput)
         && $varOutput !== EXPECTED_OUTPUT_NULL_OFFSET
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
@@ -354,6 +484,7 @@ foreach ($offsets as $offset) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_NULL_OFFSETS_REGEX, $varOutput)
         && $varOutput !== EXPECTED_OUTPUT_NULL_OFFSET
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {

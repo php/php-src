@@ -27,13 +27,15 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
+#include "zend_attributes.h"
 #include "filter_private.h"
 #include "filter_arginfo.h"
+#include "zend_exceptions.h"
 
 typedef struct filter_list_entry {
 	const char *name;
 	int    id;
-	void (*function)(PHP_INPUT_FILTER_PARAM_DECL);
+	zend_result (*function)(PHP_INPUT_FILTER_PARAM_DECL);
 } filter_list_entry;
 
 /* {{{ filter_list */
@@ -75,6 +77,9 @@ static const filter_list_entry filter_list[] = {
 
 static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len);
 static unsigned int php_sapi_filter_init(void);
+
+zend_class_entry *php_filter_exception_ce;
+zend_class_entry *php_filter_failed_exception_ce;
 
 /* {{{ filter_module_entry */
 zend_module_entry filter_module_entry = {
@@ -158,6 +163,9 @@ PHP_MINIT_FUNCTION(filter)
 	register_filter_symbols(module_number);
 
 	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
+
+	php_filter_exception_ce = register_class_Filter_FilterException(zend_ce_exception);
+	php_filter_failed_exception_ce = register_class_Filter_FilterFailedException(php_filter_exception_ce);
 
 	return SUCCESS;
 }
@@ -250,6 +258,16 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 		ce = Z_OBJCE_P(value);
 		if (!ce->__tostring) {
 			zval_ptr_dtor(value);
+			if (flags & FILTER_THROW_ON_FAILURE) {
+				zend_throw_exception_ex(
+					php_filter_failed_exception_ce,
+					0,
+					"filter validation failed: object of type %s has no __toString() method",
+					ZSTR_VAL(ce->name)
+				);
+				ZVAL_NULL(value);
+				return;
+			}
 			/* #67167: doesn't return null on failure for objects */
 			if (flags & FILTER_NULL_ON_FAILURE) {
 				ZVAL_NULL(value);
@@ -263,7 +281,29 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 	/* Here be strings */
 	convert_to_string(value);
 
-	filter_func.function(value, flags, options, charset);
+	zend_string *copy_for_throwing = NULL;
+	if (flags & FILTER_THROW_ON_FAILURE) {
+		copy_for_throwing = zend_string_copy(Z_STR_P(value));
+	}
+
+	zend_result result = filter_func.function(value, flags, options, charset);
+
+	if (flags & FILTER_THROW_ON_FAILURE) {
+		ZEND_ASSERT(copy_for_throwing != NULL);
+		if (result == FAILURE) {
+			zend_throw_exception_ex(
+				php_filter_failed_exception_ce,
+				0,
+				"filter validation failed: filter %s not satisfied by '%s'",
+				filter_func.name,
+				ZSTR_VAL(copy_for_throwing)
+			);
+			zend_string_delref(copy_for_throwing);
+			return;
+		}
+		zend_string_delref(copy_for_throwing);
+		copy_for_throwing = NULL;
+	}
 
 handle_default:
 	if (options && Z_TYPE_P(options) == IS_ARRAY &&
@@ -449,7 +489,8 @@ PHP_FUNCTION(filter_has_var)
 
 static void php_filter_call(
 	zval *filtered, zend_long filter, HashTable *filter_args_ht, zend_long filter_args_long,
-	zend_long filter_flags
+	zend_long filter_flags,
+	uint32_t options_arg_num
 ) /* {{{ */ {
 	zval *options = NULL;
 	char *charset = NULL;
@@ -491,10 +532,28 @@ static void php_filter_call(
 		}
 	}
 
+	/* Cannot use both FILTER_NULL_ON_FAILURE and FILTER_THROW_ON_FAILURE */
+	if ((filter_flags & FILTER_NULL_ON_FAILURE) && (filter_flags & FILTER_THROW_ON_FAILURE)) {
+		zval_ptr_dtor(filtered);
+		ZVAL_NULL(filtered);
+		zend_argument_value_error(
+			options_arg_num,
+			"cannot use both FILTER_NULL_ON_FAILURE and FILTER_THROW_ON_FAILURE"
+		);
+		return;
+	}
+
 	if (Z_TYPE_P(filtered) == IS_ARRAY) {
 		if (filter_flags & FILTER_REQUIRE_SCALAR) {
 			zval_ptr_dtor(filtered);
-			if (filter_flags & FILTER_NULL_ON_FAILURE) {
+			if (filter_flags & FILTER_THROW_ON_FAILURE) {
+				ZVAL_NULL(filtered);
+				zend_throw_exception(
+					php_filter_failed_exception_ce,
+					"filter validation failed: not a scalar value (got an array)",
+					0
+				);
+			} else if (filter_flags & FILTER_NULL_ON_FAILURE) {
 				ZVAL_NULL(filtered);
 			} else {
 				ZVAL_FALSE(filtered);
@@ -505,6 +564,17 @@ static void php_filter_call(
 		return;
 	}
 	if (filter_flags & FILTER_REQUIRE_ARRAY) {
+		if (filter_flags & FILTER_THROW_ON_FAILURE) {
+			zend_throw_exception_ex(
+				php_filter_failed_exception_ce,
+				0,
+				"filter validation failed: not an array (got %s)",
+				zend_zval_value_name(filtered)
+			);
+			zval_ptr_dtor(filtered);
+			ZVAL_NULL(filtered);
+			return;
+		}
 		zval_ptr_dtor(filtered);
 		if (filter_flags & FILTER_NULL_ON_FAILURE) {
 			ZVAL_NULL(filtered);
@@ -515,6 +585,10 @@ static void php_filter_call(
 	}
 
 	php_zval_filter(filtered, filter, filter_flags, options, charset);
+	/* Don't wrap in an array if we are throwing an exception */
+	if (EG(exception)) {
+		return;
+	}
 	if (filter_flags & FILTER_FORCE_ARRAY) {
 		zval tmp;
 		ZVAL_COPY_VALUE(&tmp, filtered);
@@ -529,7 +603,7 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 ) /* {{{ */ {
 	if (!op_ht) {
 		ZVAL_DUP(return_value, input);
-		php_filter_call(return_value, -1, NULL, op_long, FILTER_REQUIRE_ARRAY);
+		php_filter_call(return_value, -1, NULL, op_long, FILTER_REQUIRE_ARRAY, 2);
 	} else {
 		array_init(return_value);
 		zend_string *arg_key;
@@ -553,11 +627,23 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 				zval nval;
 				ZVAL_DEREF(tmp);
 				ZVAL_DUP(&nval, tmp);
+
+				if (Z_TYPE_P(arg_elm) != IS_ARRAY) {
+					zend_long filter_id = zval_get_long(arg_elm);
+					if (!PHP_FILTER_ID_EXISTS(filter_id)) {
+						php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, filter_id);
+					}
+				}
+
 				php_filter_call(&nval, -1,
 					Z_TYPE_P(arg_elm) == IS_ARRAY ? Z_ARRVAL_P(arg_elm) : NULL,
 					Z_TYPE_P(arg_elm) == IS_ARRAY ? 0 : zval_get_long(arg_elm),
-					FILTER_REQUIRE_SCALAR
+					FILTER_REQUIRE_SCALAR,
+					2
 				);
+				if (EG(exception)) {
+					RETURN_THROWS();
+				}
 				zend_hash_update(Z_ARRVAL_P(return_value), arg_key, &nval);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -597,11 +683,35 @@ PHP_FUNCTION(filter_input)
 		if (!filter_args_ht) {
 			filter_flags = filter_args_long;
 		} else {
-			zval *option, *opt, *def;
+			zval *option;
 			if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
 				filter_flags = zval_get_long(option);
 			}
+		}
 
+		/* Cannot use both FILTER_NULL_ON_FAILURE and FILTER_THROW_ON_FAILURE */
+		if ((filter_flags & FILTER_NULL_ON_FAILURE) && (filter_flags & FILTER_THROW_ON_FAILURE)) {
+			zend_argument_value_error(
+				4,
+				"cannot use both FILTER_NULL_ON_FAILURE and FILTER_THROW_ON_FAILURE"
+			);
+			RETURN_THROWS();
+		}
+
+		if (filter_flags & FILTER_THROW_ON_FAILURE) {
+			zend_throw_exception_ex(
+				php_filter_failed_exception_ce,
+				0,
+				"input value '%s' not found",
+				ZSTR_VAL(var)
+			);
+			RETURN_THROWS();
+		}
+
+		/* FILTER_THROW_ON_FAILURE overrides defaults, needs to be checked
+		 * before the default is used. */
+		if (filter_args_ht) {
+			zval *opt, *def;
 			if ((opt = zend_hash_str_find_deref(filter_args_ht, "options", sizeof("options") - 1)) != NULL &&
 				Z_TYPE_P(opt) == IS_ARRAY &&
 				(def = zend_hash_str_find_deref(Z_ARRVAL_P(opt), "default", sizeof("default") - 1)) != NULL
@@ -625,7 +735,7 @@ PHP_FUNCTION(filter_input)
 
 	ZVAL_DUP(return_value, tmp);
 
-	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, FILTER_REQUIRE_SCALAR);
+	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, FILTER_REQUIRE_SCALAR, 4);
 }
 /* }}} */
 
@@ -651,7 +761,7 @@ PHP_FUNCTION(filter_var)
 
 	ZVAL_DUP(return_value, data);
 
-	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, FILTER_REQUIRE_SCALAR);
+	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, FILTER_REQUIRE_SCALAR, 3);
 }
 /* }}} */
 

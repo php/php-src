@@ -53,10 +53,6 @@ ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
-/* true globals */
-ZEND_API const zend_fcall_info empty_fcall_info = {0};
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = {0};
-
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
 #endif
@@ -304,6 +300,9 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 				if (c->filename) {
 					zend_string_release_ex(c->filename, 0);
 				}
+				if (c->attributes) {
+					zend_hash_release(c->attributes);
+				}
 				efree(c);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
@@ -439,6 +438,12 @@ void shutdown_executor(void) /* {{{ */
 	zval *zv;
 #if ZEND_DEBUG
 	bool fast_shutdown = 0;
+#elif defined(__SANITIZE_ADDRESS__)
+	char *force_fast_shutdown = getenv("ZEND_ASAN_FORCE_FAST_SHUTDOWN");
+	bool fast_shutdown = (
+		is_zend_mm()
+		|| (force_fast_shutdown && ZEND_ATOL(force_fast_shutdown))
+	) && !EG(full_tables_cleanup);
 #else
 	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
 #endif
@@ -809,7 +814,6 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	zend_function *func;
 	uint32_t call_info;
 	void *object_or_called_scope;
-	zend_class_entry *orig_fake_scope;
 
 	ZVAL_UNDEF(fci->retval);
 
@@ -998,7 +1002,7 @@ cleanup_args:
 		fci_cache->function_handler = NULL;
 	}
 
-	orig_fake_scope = EG(fake_scope);
+	const zend_class_entry *orig_fake_scope = EG(fake_scope);
 	EG(fake_scope) = NULL;
 	if (func->type == ZEND_USER_FUNCTION) {
 		uint32_t orig_jit_trace_num = EG(jit_trace_num);
@@ -1126,22 +1130,20 @@ ZEND_API zend_result zend_call_method_if_exists(
 		zend_object *object, zend_string *method_name, zval *retval,
 		uint32_t param_count, zval *params)
 {
-	zend_fcall_info fci;
-	fci.size = sizeof(zend_fcall_info);
-	fci.object = object;
-	ZVAL_STR(&fci.function_name, method_name);
-	fci.retval = retval;
-	fci.param_count = param_count;
-	fci.params = params;
-	fci.named_params = NULL;
-
+	zval zval_method;
 	zend_fcall_info_cache fcc;
-	if (!zend_is_callable_ex(&fci.function_name, fci.object, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL)) {
+
+	ZVAL_STR(&zval_method, method_name);
+
+	if (UNEXPECTED(!zend_is_callable_ex(&zval_method, object, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL))) {
 		ZVAL_UNDEF(retval);
 		return FAILURE;
 	}
 
-	return zend_call_function(&fci, &fcc);
+	zend_call_known_fcc(&fcc, retval, param_count, params, NULL);
+	/* Need to free potential trampoline (__call/__callStatic) copied function handler before releasing the closure */
+	zend_release_fcall_info_cache(&fcc);
+	return SUCCESS;
 }
 
 /* 0-9 a-z A-Z _ \ 0x80-0xff */
@@ -1578,7 +1580,9 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		return;
 	}
 #elif defined(ZEND_MAX_EXECUTION_TIMERS)
-	zend_max_execution_timer_settime(seconds);
+	if (seconds > 0) {
+		zend_max_execution_timer_settime(seconds);
+	}
 
 	if (reset_signals) {
 		sigset_t sigset;
@@ -1665,7 +1669,9 @@ void zend_unset_timeout(void) /* {{{ */
 		tq_timer = NULL;
 	}
 #elif defined(ZEND_MAX_EXECUTION_TIMERS)
-	zend_max_execution_timer_settime(0);
+	if (EG(timeout_seconds)) {
+		zend_max_execution_timer_settime(0);
+	}
 #elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;

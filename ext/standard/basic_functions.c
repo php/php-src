@@ -141,6 +141,7 @@ static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
 static const zend_module_dep standard_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("uri")
 	ZEND_MOD_OPTIONAL("session")
 	ZEND_MOD_END
 };
@@ -299,11 +300,11 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)
-	BASIC_MINIT_SUBMODULE(pack)
 	BASIC_MINIT_SUBMODULE(browscap)
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(password)
+	BASIC_MINIT_SUBMODULE(image)
 
 #ifdef ZTS
 	BASIC_MINIT_SUBMODULE(localeconv)
@@ -339,9 +340,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	php_register_url_stream_wrapper("php", &php_stream_php_wrapper);
 	php_register_url_stream_wrapper("file", &php_plain_files_wrapper);
-#ifdef HAVE_GLOB
 	php_register_url_stream_wrapper("glob", &php_glob_stream_wrapper);
-#endif
 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper);
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
@@ -379,6 +378,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
 	BASIC_MSHUTDOWN_SUBMODULE(password)
+	BASIC_MSHUTDOWN_SUBMODULE(image)
 
 	return SUCCESS;
 }
@@ -828,6 +828,7 @@ PHP_FUNCTION(putenv)
 #endif
 		RETURN_TRUE;
 	} else {
+		tsrm_env_unlock();
 		free(pe.putenv_string);
 		zend_string_release(pe.key);
 #ifdef PHP_WIN32

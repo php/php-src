@@ -45,7 +45,7 @@ foreach($classes as $c) {
     if (strpos($c, "_") !== false) {
         $err++;
         $ref = new ReflectionClass($c);
-        if (!($ext = $ref->getExtensionName())) {;
+        if (!($ext = $ref->getExtensionName())) {
             $ext = $ref->isInternal() ? "<internal>" : "<user>";
         }
         if (!array_key_exists($ext, $extensions)) {

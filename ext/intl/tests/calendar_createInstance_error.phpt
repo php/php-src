@@ -4,7 +4,6 @@ IntlCalendar::createInstance: bad arguments
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 class X extends IntlTimeZone {
 function __construct() {}
@@ -17,4 +16,4 @@ try {
 }
 ?>
 --EXPECT--
-intlcal_create_instance: passed IntlTimeZone is not properly constructed
+intlcal_create_instance(): passed IntlTimeZone is not properly constructed

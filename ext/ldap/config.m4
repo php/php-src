@@ -60,15 +60,20 @@ if test "$PHP_LDAP" != "no"; then
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   AS_VAR_IF([PHP_LDAP], [yes], [
-    PKG_CHECK_MODULES([LDAP], [lber ldap])
-    PHP_LDAP_PKGCONFIG=true
-  ], [PHP_LDAP_CHECKS([$PHP_LDAP])])
+    PKG_CHECK_MODULES([LDAP], [lber ldap],
+      PHP_LDAP_PKGCONFIG=true, PHP_LDAP_PKGCONFIG=false)])
 
   AS_IF([test "$PHP_LDAP_PKGCONFIG" = true], [
     PHP_EVAL_INCLINE([$LDAP_CFLAGS])
     PHP_EVAL_LIBLINE([$LDAP_LIBS], [LDAP_SHARED_LIBADD])
   ], [
-    AS_VAR_IF([LDAP_DIR],, [AC_MSG_ERROR([Cannot find ldap.h])])
+    AS_VAR_IF([PHP_LDAP], [yes], [
+      for i in /usr/local /usr; do
+        PHP_LDAP_CHECKS([$i])
+      done
+    ], [PHP_LDAP_CHECKS([$PHP_LDAP])])
+    AC_MSG_CHECKING([for ldap.h])
+    AS_VAR_IF([LDAP_DIR],, [AC_MSG_ERROR([Cannot find ldap.h])], AC_MSG_RESULT([$LDAP_DIR]))
 
     dnl -pc removal is a hack for clang
     MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')
@@ -101,12 +106,15 @@ if test "$PHP_LDAP" != "no"; then
 
     PHP_ADD_INCLUDE([$LDAP_INCDIR])
 
-    dnl Save original values
-    _SAVE_CPPFLAGS=$CPPFLAGS
-    _SAVE_LIBS=$LIBS
-    CPPFLAGS="$CPPFLAGS -I$LDAP_INCDIR"
-    LIBS="$LIBS $LDAP_SHARED_LIBADD"
+    LDAP_CFLAGS="-I$LDAP_INCDIR"
+    LDAP_LIBS=$LDAP_SHARED_LIBADD
   ])
+
+  dnl Save original values
+  _SAVE_CFLAGS=$CFLAGS
+  _SAVE_LIBS=$LIBS
+  CFLAGS="$CFLAGS $LDAP_CFLAGS"
+  LIBS="$LIBS $LDAP_LIBS"
 
   dnl Check for 3 arg ldap_set_rebind_proc
   AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc],
@@ -134,11 +142,14 @@ if test "$PHP_LDAP" != "no"; then
     ldap_whoami_s
   ]))
 
-  AS_IF([test "$PHP_LDAP_PKGCONFIG" = false], [
-    dnl Restore original values
-    CPPFLAGS=$_SAVE_CPPFLAGS
-    LIBS=$_SAVE_LIBS
-  ])
+  dnl Sanity check
+  AC_CHECK_FUNC([ldap_sasl_bind_s],,
+    [AC_CHECK_FUNC([ldap_simple_bind_s],,
+      [AC_MSG_ERROR([LDAP library build check failed.])])])
+
+  dnl Restore original values
+  CFLAGS=$_SAVE_CFLAGS
+  LIBS=$_SAVE_LIBS
 
   dnl SASL check
   AS_VAR_IF([PHP_LDAP_SASL], [no],, [
@@ -148,11 +159,6 @@ if test "$PHP_LDAP" != "no"; then
     AC_DEFINE([HAVE_LDAP_SASL], [1],
       [Define to 1 if the ldap extension has SASL support enabled.])
   ])
-
-  dnl Sanity check
-  AC_CHECK_FUNC([ldap_sasl_bind_s],,
-    [AC_CHECK_FUNC([ldap_simple_bind_s],,
-      [AC_MSG_ERROR([LDAP library build check failed.])])])
 
   PHP_SUBST([LDAP_SHARED_LIBADD])
   AC_DEFINE([HAVE_LDAP], [1],

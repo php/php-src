@@ -22,6 +22,7 @@
 extern "C" {
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
+#include <unicode/uloc.h>
 
 #include "php_intl.h"
 #include "dateformat_create.h"
@@ -45,7 +46,7 @@ extern "C" {
 	 UDAT_PATTERN == (i))
 
 /* {{{ */
-static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
+static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object;
 	char	*locale_str;
@@ -59,7 +60,8 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	Calendar *cal = NULL;
 	zend_long	calendar_type;
 	bool		calendar_owned;
-	zval		*timezone_zv	= NULL;
+	zend_object *timezone_object = nullptr;
+	zend_string *timezone_string = nullptr;
 	TimeZone	*timezone	= NULL;
 	bool		explicit_tz;
 	char*       pattern_str		= NULL;
@@ -76,33 +78,28 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(date_type)
 		Z_PARAM_LONG(time_type)
-		Z_PARAM_ZVAL(timezone_zv)
+		Z_PARAM_OBJ_OR_STR_OR_NULL(timezone_object, timezone_string)
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
 		Z_PARAM_STRING_OR_NULL(pattern_str, pattern_str_len)
 	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
 
-	if (error_handling != NULL) {
-		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
-		*error_handling_replaced = 1;
-	}
-
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
-		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: cannot call constructor twice", 0);
+		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR, "cannot call constructor twice");
 		return FAILURE;
 	}
 
 	if (!INTL_UDATE_FMT_OK(date_type)) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid date format style", 0);
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "invalid date format style");
 		return FAILURE;
 	}
 	if (!INTL_UDATE_FMT_OK(time_type)) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid time format style", 0);
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "invalid time format style");
 		return FAILURE;
 	}
 	if (date_type == UDAT_PATTERN && time_type != UDAT_PATTERN) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: time format must be UDAT_PATTERN if date format is UDAT_PATTERN", 0);
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "time format must be UDAT_PATTERN if date format is UDAT_PATTERN");
 		return FAILURE;
 	}
 
@@ -110,28 +107,32 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	if (locale_len == 0) {
 		locale_str = (char *) intl_locale_get_default();
 	}
-	locale = Locale::createFromName(locale_str);
+
+	char* canonicalized_locale = canonicalize_locale_string(locale_str);
+	const char* final_locale = canonicalized_locale ? canonicalized_locale : locale_str;
+	const char* stored_locale = canonicalized_locale ? canonicalized_locale : locale_str;
+
+	locale = Locale::createFromName(final_locale);
 	/* get*Name accessors being set does not preclude being bogus */
 	if (locale.isBogus() || ((locale_len == 1 && locale_str[0] != 'C') || (locale_len > 1 && strlen(locale.getISO3Language()) == 0))) {
-        zend_argument_value_error(1, "\"%s\" is invalid", locale_str);
-		return FAILURE;
+		zend_argument_value_error(1, "\"%s\" is invalid", locale_str);
+		goto error;
 	}
 
 	/* process calendar */
-	if (datefmt_process_calendar_arg(calendar_obj, calendar_long, calendar_is_null, locale, "datefmt_create",
+	if (datefmt_process_calendar_arg(calendar_obj, calendar_long, calendar_is_null, locale,
 		INTL_DATA_ERROR_P(dfo), cal, calendar_type, calendar_owned) == FAILURE
 	) {
 		goto error;
 	}
 
 	/* process timezone */
-	explicit_tz = timezone_zv != NULL && Z_TYPE_P(timezone_zv) != IS_NULL;
+	explicit_tz = timezone_object != nullptr || timezone_string != nullptr;
 
 	if (explicit_tz || calendar_owned ) {
 		//we have an explicit time zone or a non-object calendar
-		timezone = timezone_process_timezone_argument(timezone_zv,
-				INTL_DATA_ERROR_P(dfo), "datefmt_create");
-		if (timezone == NULL) {
+		timezone = timezone_process_timezone_argument(timezone_object, timezone_string, INTL_DATA_ERROR_P(dfo));
+		if (timezone == nullptr) {
 			goto error;
 		}
 	}
@@ -142,20 +143,20 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 				pattern_str, pattern_str_len, &INTL_DATA_ERROR_CODE(dfo));
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
 			/* object construction -> only set global error */
-			intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo), "datefmt_create: "
-					"error converting pattern to UTF-16", 0);
+			intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo),
+					"error converting pattern to UTF-16");
 			goto error;
 		}
 	}
 
 	DATE_FORMAT_OBJECT(dfo) = udat_open((UDateFormatStyle)time_type,
-			(UDateFormatStyle)date_type, locale_str, NULL, 0, svalue,
+			(UDateFormatStyle)date_type, final_locale, NULL, 0, svalue,
 			slength, &INTL_DATA_ERROR_CODE(dfo));
 
 	if (pattern_str && pattern_str_len > 0) {
 		udat_applyPattern(DATE_FORMAT_OBJECT(dfo), true, svalue, slength);
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
-			intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo), "datefmt_create: error applying pattern", 0);
+			intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo), "error applying pattern");
 			goto error;
 		}
 	}
@@ -173,8 +174,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 			df->adoptTimeZone(timezone);
 		}
 	} else {
-		intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo),	"datefmt_create: date "
-				"formatter creation failed", 0);
+		intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo),	"date formatter creation failed");
 		goto error;
 	}
 
@@ -182,9 +182,13 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	dfo->date_type			= date_type;
 	dfo->time_type			= time_type;
 	dfo->calendar			= calendar_type;
-	dfo->requested_locale	= estrdup(locale_str);
+	/* Store the canonicalized locale, or fallback to original if canonicalization failed */
+	dfo->requested_locale	= estrdup(stored_locale);
 
 error:
+	if (canonicalized_locale) {
+		efree(canonicalized_locale);
+	}
 	if (svalue) {
 		efree(svalue);
 	}
@@ -203,7 +207,7 @@ error:
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-    if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, NULL) == FAILURE) {
+    if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -213,21 +217,18 @@ U_CFUNC PHP_FUNCTION( datefmt_create )
 /* {{{ IntlDateFormatter object constructor. */
 U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 {
-	zend_error_handling error_handling;
-	bool error_handling_replaced = 0;
+	const bool old_use_exception = INTL_G(use_exceptions);
+	const zend_long old_error_level = INTL_G(error_level);
+	INTL_G(use_exceptions) = true;
+	INTL_G(error_level) = 0;
 
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = ZEND_THIS;
-	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, &error_handling, &error_handling_replaced) == FAILURE) {
-		if (!EG(exception)) {
-			zend_string *err = intl_error_get_message(NULL);
-			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(err), intl_error_get_code(NULL));
-			zend_string_release_ex(err, 0);
-		}
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+		ZEND_ASSERT(EG(exception));
 	}
-	if (error_handling_replaced) {
-		zend_restore_error_handling(&error_handling);
-	}
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 /* }}} */

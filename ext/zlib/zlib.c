@@ -631,6 +631,7 @@ PHP_FUNCTION(gzfile)
 
 	/* Initialize return array */
 	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf, 0, sizeof(buf));
@@ -990,7 +991,7 @@ PHP_FUNCTION(inflate_add)
 			case Z_OK:
 				if (ctx->Z.avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
+					out = zend_string_extend(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
 					ctx->Z.avail_out = CHUNK_SIZE;
 					ctx->Z.next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
 					break;
@@ -1002,7 +1003,7 @@ PHP_FUNCTION(inflate_add)
 			case Z_BUF_ERROR:
 				if (flush_type == Z_FINISH && ctx->Z.avail_out == 0) {
 					/* more output buffer space needed; realloc and try again */
-					out = zend_string_realloc(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
+					out = zend_string_extend(out, ZSTR_LEN(out) + CHUNK_SIZE, 0);
 					ctx->Z.avail_out = CHUNK_SIZE;
 					ctx->Z.next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
 					break;
@@ -1038,7 +1039,7 @@ PHP_FUNCTION(inflate_add)
 	} while (1);
 
 complete:
-	out = zend_string_realloc(out, buffer_used, 0);
+	out = zend_string_truncate(out, buffer_used, 0);
 	ZSTR_VAL(out)[buffer_used] = 0;
 	RETURN_STR(out);
 }
@@ -1227,7 +1228,7 @@ PHP_FUNCTION(deflate_add)
 		if (ctx->Z.avail_out == 0) {
 			/* more output buffer space needed; realloc and try again */
 			/* adding 64 more bytes solved every issue I have seen    */
-			out = zend_string_realloc(out, ZSTR_LEN(out) + 64, 0);
+			out = zend_string_extend(out, ZSTR_LEN(out) + 64, 0);
 			ctx->Z.avail_out = 64;
 			ctx->Z.next_out = (Bytef *) ZSTR_VAL(out) + buffer_used;
 		}

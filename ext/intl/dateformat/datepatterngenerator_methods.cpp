@@ -30,7 +30,7 @@ using icu::DateTimePatternGenerator;
 using icu::Locale;
 using icu::StringPiece;
 
-static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
+static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char *locale_str;
 	size_t locale_len = 0;
@@ -44,15 +44,10 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *
 		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
 	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
 
-	if (error_handling != NULL) {
-		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
-		*error_handling_replaced = 1;
-	}
-
 	DTPATTERNGEN_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	if (dtpgo->dtpg != NULL) {
-		intl_errors_set(DTPATTERNGEN_ERROR_P(dtpgo), U_ILLEGAL_ARGUMENT_ERROR, "Cannot call constructor twice", 0);
+		intl_errors_set(DTPATTERNGEN_ERROR_P(dtpgo), U_ILLEGAL_ARGUMENT_ERROR, "Cannot call constructor twice");
 		return FAILURE;
 	}
 
@@ -68,8 +63,7 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *
 
 	if (U_FAILURE(DTPATTERNGEN_ERROR_CODE(dtpgo))) {
 		intl_error_set(NULL, DTPATTERNGEN_ERROR_CODE(dtpgo),
-				"Error creating DateTimePatternGenerator",
-				0);
+				"Error creating DateTimePatternGenerator");
 		return FAILURE;
 	}
 
@@ -79,7 +73,7 @@ static zend_result dtpg_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *
 U_CFUNC PHP_METHOD( IntlDatePatternGenerator, create )
 {
     object_init_ex( return_value, IntlDatePatternGenerator_ce_ptr );
-    if (dtpg_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, NULL) == FAILURE) {
+    if (dtpg_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -87,22 +81,19 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, create )
 
 U_CFUNC PHP_METHOD( IntlDatePatternGenerator, __construct )
 {
-	zend_error_handling error_handling;
-	bool error_handling_replaced = 0;
+	const bool old_use_exception = INTL_G(use_exceptions);
+	const zend_long old_error_level = INTL_G(error_level);
+	INTL_G(use_exceptions) = true;
+	INTL_G(error_level) = 0;
 
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = ZEND_THIS;
-	if (dtpg_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, &error_handling, &error_handling_replaced) == FAILURE) {
-		if (!EG(exception)) {
-			zend_string *err = intl_error_get_message(NULL);
-			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(err), intl_error_get_code(NULL));
-			zend_string_release_ex(err, 0);
-		}
+	if (dtpg_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+		ZEND_ASSERT(EG(exception));
 	}
-	if (error_handling_replaced) {
-		zend_restore_error_handling(&error_handling);
-	}
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
 }
 
 

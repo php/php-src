@@ -410,8 +410,16 @@ static inline ssize_t zlog_stream_unbuffered_write(
 }
 /* }}} */
 
-static inline ssize_t zlog_stream_buf_copy_cstr(
-		struct zlog_stream *stream, const char *str, size_t str_len) /* {{{ */
+void zlog_stream_start(struct zlog_stream *stream)
+{
+	stream->finished = 0;
+	stream->len = 0;
+	stream->full = 0;
+	stream->over_limit = 0;
+}
+
+static ssize_t zlog_stream_buf_copy_cstr(
+		struct zlog_stream *stream, const char *str, size_t str_len)
 {
 	ZEND_ASSERT(stream->len <= stream->buf.size);
 	if (stream->buf.size - stream->len <= str_len &&
@@ -419,25 +427,32 @@ static inline ssize_t zlog_stream_buf_copy_cstr(
 		return -1;
 	}
 
+	if (stream->buf.size - stream->len <= str_len) {
+		stream->over_limit = 1;
+		str_len = stream->buf.size - stream->len;
+	}
 	memcpy(stream->buf.data + stream->len, str, str_len);
 	stream->len += str_len;
 
 	return str_len;
 }
-/* }}} */
 
-static inline ssize_t zlog_stream_buf_copy_char(struct zlog_stream *stream, char c) /* {{{ */
+static ssize_t zlog_stream_buf_copy_char(struct zlog_stream *stream, char c)
 {
 	ZEND_ASSERT(stream->len <= stream->buf.size);
-	if (stream->buf.size - stream->len < 1 && !zlog_stream_buf_alloc_ex(stream, 1)) {
+	if (stream->buf.size == stream->len && !zlog_stream_buf_alloc_ex(stream, 1)) {
 		return -1;
+	}
+
+	if (stream->buf.size == stream->len) {
+		stream->over_limit = 1;
+		return 0;
 	}
 
 	stream->buf.data[stream->len++] = c;
 
 	return 1;
 }
-/* }}} */
 
 static ssize_t zlog_stream_buf_flush(struct zlog_stream *stream) /* {{{ */
 {
@@ -466,8 +481,8 @@ static ssize_t zlog_stream_buf_flush(struct zlog_stream *stream) /* {{{ */
 static ssize_t zlog_stream_buf_append(
 		struct zlog_stream *stream, const char *str, size_t str_len)  /* {{{ */
 {
-	int over_limit = 0;
 	size_t available_len, required_len, reserved_len;
+	int over_limit = 0;
 
 	if (stream->len == 0) {
 		stream->len = zlog_stream_prefix_ex(stream, stream->function, stream->line);
@@ -477,7 +492,7 @@ static ssize_t zlog_stream_buf_append(
 	reserved_len = stream->len + stream->msg_suffix_len + stream->msg_quote;
 	required_len = reserved_len + str_len;
 	if (required_len >= zlog_limit) {
-		over_limit = 1;
+		stream->over_limit = over_limit = 1;
 		available_len = zlog_limit - reserved_len - 1;
 	} else {
 		available_len = str_len;
@@ -521,16 +536,21 @@ static inline void zlog_stream_init_internal(
 	stream->flags = flags;
 	stream->use_syslog = fd == ZLOG_SYSLOG;
 	stream->use_fd = fd > 0;
-	stream->use_buffer = zlog_buffering || external_logger != NULL || stream->use_syslog;
-	stream->buf_init_size = capacity;
-	stream->use_stderr = fd < 0 ||
-			(
-				fd != STDERR_FILENO && fd != STDOUT_FILENO && !launched &&
-				(flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE
-			);
-	stream->prefix_buffer = (flags & ZLOG_LEVEL_MASK) >= zlog_level &&
-			(stream->use_fd || stream->use_stderr || stream->use_syslog);
 	stream->fd = fd > -1 ? fd : STDERR_FILENO;
+	stream->buf_init_size = capacity;
+	if (flags & ZLOG_ACCESS_LOG) {
+		stream->use_buffer = 1;
+		stream->use_stderr = fd < 0;
+	} else {
+		stream->use_buffer = zlog_buffering || external_logger != NULL || stream->use_syslog;
+		stream->use_stderr = fd < 0 ||
+				(
+					fd != STDERR_FILENO && fd != STDOUT_FILENO && !launched &&
+					(flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE
+				);
+		stream->prefix_buffer = (flags & ZLOG_LEVEL_MASK) >= zlog_level &&
+				(stream->use_fd || stream->use_stderr || stream->use_syslog);
+	}
 }
 /* }}} */
 
@@ -745,7 +765,7 @@ ssize_t zlog_stream_format(struct zlog_stream *stream, const char *fmt, ...) /* 
 }
 /* }}} */
 
-ssize_t zlog_stream_str(struct zlog_stream *stream, const char *str, size_t str_len) /* {{{ */
+ssize_t zlog_stream_str(struct zlog_stream *stream, const char *str, size_t str_len)
 {
 	/* do not write anything if the stream is full or str is empty */
 	if (str_len == 0 || stream->full) {
@@ -754,9 +774,7 @@ ssize_t zlog_stream_str(struct zlog_stream *stream, const char *str, size_t str_
 
 	/* reset stream if it is finished */
 	if (stream->finished) {
-		stream->finished = 0;
-		stream->len = 0;
-		stream->full = 0;
+		zlog_stream_start(stream);
 	}
 
 	if (stream->use_buffer) {
@@ -765,7 +783,25 @@ ssize_t zlog_stream_str(struct zlog_stream *stream, const char *str, size_t str_
 
 	return zlog_stream_unbuffered_write(stream, str, str_len);
 }
-/* }}} */
+
+ssize_t zlog_stream_char(struct zlog_stream *stream, char c)
+{
+	/* do not write anything if the stream is full */
+	if (stream->full) {
+		return 0;
+	}
+
+	/* reset stream if it is finished */
+	if (stream->finished) {
+		zlog_stream_start(stream);
+	}
+
+	if (stream->use_buffer) {
+		return zlog_stream_buf_copy_char(stream, c);
+	}
+	const char tmp[1] = {c};
+	return zlog_stream_direct_write(stream, tmp, 1);
+}
 
 static inline void zlog_stream_finish_buffer_suffix(struct zlog_stream *stream) /* {{{ */
 {
@@ -883,3 +919,8 @@ zlog_bool zlog_stream_close(struct zlog_stream *stream) /* {{{ */
 	return finished;
 }
 /* }}} */
+
+zlog_bool zlog_stream_is_over_limit(struct zlog_stream *stream)
+{
+	return stream->over_limit;
+}

@@ -8,7 +8,7 @@ Test array_filter() function : usage variations - built-in functions as 'callbac
 
 echo "*** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***\n";
 
-$input = array(0, 1, -1, 10, 100, 1000);
+$input = array(0, 1, 10, 100);
 
 // using built-in function 'is_int' as 'callback'
 var_dump( array_filter($input, 'is_int') );
@@ -34,33 +34,25 @@ echo "Done"
 ?>
 --EXPECT--
 *** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***
-array(6) {
+array(4) {
   [0]=>
   int(0)
   [1]=>
   int(1)
   [2]=>
-  int(-1)
-  [3]=>
   int(10)
-  [4]=>
+  [3]=>
   int(100)
-  [5]=>
-  int(1000)
 }
-array(6) {
+array(4) {
   [0]=>
   int(0)
   [1]=>
   int(1)
   [2]=>
-  int(-1)
-  [3]=>
   int(10)
-  [4]=>
+  [3]=>
   int(100)
-  [5]=>
-  int(1000)
 }
 array_filter(): Argument #2 ($callback) must be a valid callback or null, function "echo" not found or invalid function name
 array_filter(): Argument #2 ($callback) must be a valid callback or null, function "isset" not found or invalid function name

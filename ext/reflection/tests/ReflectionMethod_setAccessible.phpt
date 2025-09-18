@@ -37,7 +37,7 @@ $protected->invokeArgs(new A, array(NULL));
 $protectedStatic->invoke(NULL, NULL);
 $protectedStatic->invokeArgs(NULL, array(NULL));
 ?>
---EXPECT--
+--EXPECTF--
 A::aPrivate
 A::aPrivate
 A::aPrivateStatic
@@ -46,6 +46,14 @@ A::aProtected
 A::aProtected
 A::aProtectedStatic
 A::aProtectedStatic
+
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
+
+Deprecated: Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect in %s on line %d
 A::aPrivate
 A::aPrivate
 A::aPrivateStatic

@@ -631,7 +631,9 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 	SXE_ITER        type;
 	zval            member;
 
-	cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
 
 	sxe = php_sxe_fetch_object(object);
 	GET_NODE(sxe, node);
@@ -1401,7 +1403,8 @@ PHP_METHOD(SimpleXMLElement, asXML)
 	if (!result) {
 		RETURN_FALSE;
 	} else {
-		RETURN_NEW_STR(result);
+		/* Defense-in-depth: don't use the NEW variant in case somehow an empty string gets returned */
+		RETURN_STR(result);
 	}
 }
 /* }}} */
@@ -1525,10 +1528,10 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 				/* Attributes in the xmlns namespace should be treated as namespace declarations too. */
 				if (attr->ns && xmlStrEqual(attr->ns->href, (const xmlChar *) "http://www.w3.org/2000/xmlns/")) {
 					const char *prefix = attr->ns->prefix ? (const char *) attr->name : "";
-					bool free;
-					xmlChar *href = php_libxml_attr_value(attr, &free);
+					bool should_free;
+					xmlChar *href = php_libxml_attr_value(attr, &should_free);
 					sxe_add_namespace_name_raw(return_value, prefix, (const char *) href);
-					if (free) {
+					if (should_free) {
 						xmlFree(href);
 					}
 				}
@@ -2153,27 +2156,14 @@ static void sxe_object_free_storage(zend_object *object)
 /* {{{ php_sxe_find_fptr_count() */
 static zend_function* php_sxe_find_fptr_count(zend_class_entry *ce)
 {
-	zend_function *fptr_count = NULL;
-	zend_class_entry *parent = ce;
-	int inherited = 0;
-
-	while (parent) {
-		if (parent == ce_SimpleXMLElement) {
-			break;
-		}
-		parent = parent->parent;
-		inherited = 1;
-	}
-
-	if (inherited) {
-		/* Find count() method */
-		fptr_count = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
-		if (fptr_count->common.scope == parent) {
-			fptr_count = NULL;
+	if (ce->type == ZEND_USER_CLASS) {
+		zend_function *fptr_count = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+		if (fptr_count->common.scope != ce_SimpleXMLElement) {
+			return fptr_count;
 		}
 	}
 
-	return fptr_count;
+	return NULL;
 }
 /* }}} */
 

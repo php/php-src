@@ -930,7 +930,7 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
 	char				*bufp = buf;
 	zval				*elem;
 	uint32_t			i = 0;
-	int					num_elems;
+	uint32_t			num_elems;
 	void				*control_buf;
 	zend_llist_element	*alloc;
 	size_t				control_len,
@@ -1024,6 +1024,7 @@ static void to_zval_read_control_array(const char *msghdr_c, zval *zv, res_conte
 	uint32_t		i = 1;
 
 	array_init(zv);
+	zend_hash_real_init_packed(Z_ARRVAL_P(zv));
 
 	for (cmsg = CMSG_FIRSTHDR(msg);
 			cmsg != NULL && !ctx->err.has_error;
@@ -1101,7 +1102,7 @@ static void from_zval_write_iov_array_aux(zval *elem, unsigned i, void **args, s
 }
 static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_context *ctx)
 {
-	int				num_elem;
+	uint32_t	num_elem;
 	struct msghdr	*msg = (struct msghdr*)msghdr_c;
 
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -1360,7 +1361,7 @@ void to_zval_read_ucred(const char *data, zval *zv, res_context *ctx)
 #ifdef SCM_RIGHTS
 size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 {
-	int num_elems;
+	uint32_t num_elems;
 
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
 		do_from_zval_err(ctx, "%s", "expected an array here");
@@ -1373,7 +1374,7 @@ size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 		return (size_t)-1;
 	}
 
-	return zend_hash_num_elements(Z_ARRVAL_P(arr)) * sizeof(int);
+	return num_elems * sizeof(int);
 }
 static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, ser_context *ctx)
 {
@@ -1419,7 +1420,7 @@ void from_zval_write_fd_array(const zval *arr, char *int_arr, ser_context *ctx)
 void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 {
 	size_t			*cmsg_len;
-	int				num_elems,
+	uint32_t				num_elems,
 					i;
 	struct cmsghdr	*dummy_cmsg = 0;
 	size_t			data_offset;
@@ -1458,7 +1459,11 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 			object_init_ex(&elem, socket_ce);
 			php_socket *sock = Z_SOCKET_P(&elem);
 
-			socket_import_file_descriptor(fd, sock);
+			if (!socket_import_file_descriptor(fd, sock)) {
+				do_to_zval_err(ctx, "error getting protocol descriptor %d: getsockopt() call failed with errno %d", fd, errno);
+				zval_ptr_dtor(&elem);
+				return;
+			}
 		} else {
 			php_stream *stream = php_stream_fopen_from_fd(fd, "rw", NULL);
 			php_stream_to_zval(stream, &elem);

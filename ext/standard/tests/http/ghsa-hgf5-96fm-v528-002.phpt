@@ -33,7 +33,7 @@ $clientCode = <<<'CODE'
     ];
     $ctx = stream_context_create($opts);
     var_dump(explode("\r\n", base64_decode(file_get_contents("http://user:pwd@{{ ADDR }}", false, $ctx))));
-    var_dump($http_response_header);
+    var_dump(http_get_last_response_headers());
 CODE;
 
 include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
@@ -44,7 +44,7 @@ array(6) {
   [0]=>
   string(14) "GET / HTTP/1.1"
   [1]=>
-  string(21) "Host: 127.0.0.1:%d"
+  string(%d) "Host: 127.0.0.1:%d"
   [2]=>
   string(17) "Connection: close"
   [3]=>

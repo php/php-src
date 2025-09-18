@@ -33,7 +33,7 @@ string(18) "Cuba Standard Time"
 string(21) "Central Standard Time"
 string(21) "Pacific Standard Time"
 bool(false)
-Error: unknown system timezone: U_ILLEGAL_ARGUMENT_ERROR
+Error: IntlTimeZone::getWindowsID(): unknown system timezone: U_ILLEGAL_ARGUMENT_ERROR
 string(21) "Morocco Standard Time"
 string(23) "Singapore Standard Time"
 string(26) "W. Australia Standard Time"

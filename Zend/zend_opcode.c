@@ -112,7 +112,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+		ZEND_TYPE_LIST_FOREACH_MUTABLE(ZEND_TYPE_LIST(type), list_type) {
 			zend_type_release(*list_type, persistent);
 		} ZEND_TYPE_LIST_FOREACH_END();
 		if (!ZEND_TYPE_USES_ARENA(type)) {
@@ -580,6 +580,18 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(op_array->vars);
 	}
 
+	/* ZEND_ACC_PTR_OPS and ZEND_ACC_OVERRIDE use the same value */
+	if ((op_array->fn_flags & ZEND_ACC_PTR_OPS) && !op_array->function_name) {
+		zend_op *op = op_array->opcodes;
+		zend_op *end = op + op_array->last;
+		while (op < end) {
+			if (op->opcode == ZEND_DECLARE_ATTRIBUTED_CONST) {
+				HashTable *attributes = Z_PTR_P(RT_CONSTANT(op+1, (op+1)->op1));
+				zend_hash_release(attributes);
+			}
+			op++;
+		}
+	}
 	if (op_array->literals) {
 		zval *literal = op_array->literals;
 		zval *end = literal + op_array->last_literal;
@@ -697,7 +709,7 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 	}
 }
 
-static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const zend_op *opline) {
+static uint32_t zend_get_brk_cont_target(const zend_op *opline) {
 	int nest_levels = opline->op2.num;
 	int array_offset = opline->op1.num;
 	zend_brk_cont_element *jmp_to;
@@ -891,7 +903,8 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_MATCH_ERROR
 	 || opline->opcode == ZEND_FETCH_LIST_R
 	 || opline->opcode == ZEND_FETCH_LIST_W
-	 || opline->opcode == ZEND_COPY_TMP) {
+	 || opline->opcode == ZEND_COPY_TMP
+	 || opline->opcode == ZEND_EXT_STMT) {
 		return 1;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R
@@ -1108,7 +1121,7 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_BRK:
 			case ZEND_CONT:
 				{
-					uint32_t jmp_target = zend_get_brk_cont_target(op_array, opline);
+					uint32_t jmp_target = zend_get_brk_cont_target(opline);
 
 					if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 						zend_check_finally_breakout(op_array, opline - op_array->opcodes, jmp_target);

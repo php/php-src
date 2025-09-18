@@ -25,6 +25,10 @@
 #include "ext/date/php_date.h"
 #include "zend_smart_str.h"
 
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
 #ifdef HAVE_SYSEXITS_H
 # include <sysexits.h>
 #endif
@@ -286,7 +290,7 @@ PHP_FUNCTION(mail)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (headers_str) {
-		if (strlen(ZSTR_VAL(headers_str)) != ZSTR_LEN(headers_str)) {
+		if (UNEXPECTED(zend_str_has_nul_byte(headers_str))) {
 			zend_argument_value_error(4, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
@@ -445,7 +449,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	const char *hdr = headers;
 	char *ahdr = NULL;
 #if PHP_SIGCHILD
-	void (*sig_handler)() = NULL;
+	void (*sig_handler)(int) = NULL;
 #endif
 
 #define MAIL_RET(val) \
@@ -490,7 +494,27 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		MAIL_RET(false);
 	}
 
-	char *line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : "\r\n";
+	char *line_sep;
+	zend_string *cr_lf_mode = PG(mail_cr_lf_mode);
+	
+	if (cr_lf_mode && !zend_string_equals_literal(cr_lf_mode, "crlf")) {
+		if (zend_string_equals_literal(cr_lf_mode, "lf")) {
+			line_sep = "\n";
+		} else if (zend_string_equals_literal(cr_lf_mode, "mixed")) {
+			line_sep = "\n";
+		} else if (zend_string_equals_literal(cr_lf_mode, "os")) {
+#ifdef PHP_WIN32
+			line_sep = "\r\n";
+#else
+			line_sep = "\n";
+#endif
+		} else {
+			ZEND_ASSERT(0 && "Unexpected cr_lf_mode value");
+		}
+	} else {
+		/* CRLF is default mode, but respect mail.mixed_lf_and_crlf for backward compatibility */
+		line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : "\r\n";
+	}
 
 	if (PG(mail_x_header)) {
 		const char *tmp = zend_get_executed_filename();
@@ -562,6 +586,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	}
 
 	if (sendmail) {
+		int ret;
 #ifndef PHP_WIN32
 		if (EACCES == errno) {
 			php_error_docref(NULL, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
@@ -581,18 +606,75 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		if (hdr != NULL) {
 			fprintf(sendmail, "%s%s", hdr, line_sep);
 		}
-		fprintf(sendmail, "%s%s%s", line_sep, message, line_sep);
-		int ret = pclose(sendmail);
+
+		fprintf(sendmail, "%s", line_sep);
+		
+		if (cr_lf_mode && zend_string_equals_literal(cr_lf_mode, "lf")) {
+			char *converted_message = NULL;
+			size_t msg_len = strlen(message);
+			size_t new_len = 0;
+
+			for (size_t i = 0; i < msg_len - 1; ++i) {
+				if (message[i] == '\r' && message[i + 1] == '\n') {
+					++new_len;
+				}
+			}
+
+			if (new_len == 0) {
+				fprintf(sendmail, "%s", message);
+			} else {
+				converted_message = emalloc(msg_len - new_len + 1);
+				size_t j = 0;
+				for (size_t i = 0; i < msg_len; ++i) {
+					if (i < msg_len - 1 && message[i] == '\r' && message[i + 1] == '\n') {
+						converted_message[j++] = '\n';
+						++i; /* skip LF part */
+					} else {
+						converted_message[j++] = message[i];
+					}
+				}
+
+				converted_message[j] = '\0';
+				fprintf(sendmail, "%s", converted_message);
+				efree(converted_message);
+			}
+		} else {
+			fprintf(sendmail, "%s", message);
+		}
+		
+		fprintf(sendmail, "%s", line_sep);
+#ifdef PHP_WIN32
+		ret = pclose(sendmail);
 
 #if PHP_SIGCHILD
 		if (sig_handler) {
 			signal(SIGCHLD, sig_handler);
 		}
 #endif
-
-#ifdef PHP_WIN32
-		if (ret == -1)
 #else
+		int wstatus = pclose(sendmail);
+#if PHP_SIGCHILD
+		if (sig_handler) {
+			signal(SIGCHLD, sig_handler);
+		}
+#endif
+		/* Determine the wait(2) exit status */
+		if (wstatus == -1) {
+			php_error_docref(NULL, E_WARNING, "Sendmail pclose failed %d (%s)", errno, strerror(errno));
+			MAIL_RET(false);
+		} else if (WIFSIGNALED(wstatus)) {
+			php_error_docref(NULL, E_WARNING, "Sendmail killed by signal %d (%s)", WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
+			MAIL_RET(false);
+		} else {
+			if (WIFEXITED(wstatus)) {
+				ret = WEXITSTATUS(wstatus);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Sendmail did not exit");
+				MAIL_RET(false);
+			}
+		}
+#endif
+
 #if defined(EX_TEMPFAIL)
 		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL))
 #elif defined(EX_OK)
@@ -600,8 +682,8 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 #else
 		if (ret != 0)
 #endif
-#endif
 		{
+			php_error_docref(NULL, E_WARNING, "Sendmail exited with non-zero exit code %d", ret);
 			MAIL_RET(false);
 		} else {
 			MAIL_RET(true);

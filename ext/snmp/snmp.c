@@ -170,10 +170,6 @@ static void php_snmp_object_free_storage(zend_object *object) /* {{{ */
 {
 	php_snmp_object *intern = php_snmp_fetch_object(object);
 
-	if (!intern) {
-		return;
-	}
-
 	snmp_session_free(&(intern->session));
 
 	zend_object_std_dtor(&intern->zo);
@@ -1042,21 +1038,18 @@ static bool snmp_session_set_auth_protocol(struct snmp_session *s, zend_string *
 	}
 #endif
 
-	smart_string err = {0};
-
-	smart_string_appends(&err, "Authentication protocol must be \"SHA\"");
+	zend_value_error(
+		"Authentication protocol must be \"SHA\""
 #ifdef HAVE_SNMP_SHA256
-	smart_string_appends(&err, " or \"SHA256\"");
+		" or \"SHA256\""
 #endif
 #ifdef HAVE_SNMP_SHA512
-	smart_string_appends(&err, " or \"SHA512\"");
+		" or \"SHA512\""
 #endif
 #ifndef DISABLE_MD5
-	smart_string_appends(&err, " or \"MD5\"");
+		" or \"MD5\""
 #endif
-	smart_string_0(&err);
-	zend_value_error("%s", err.c);
-	smart_string_free(&err);
+	);
 	return false;
 }
 /* }}} */
@@ -1921,7 +1914,9 @@ static zval *php_snmp_get_property_ptr_ptr(zend_object *object, zend_string *nam
 		return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
 
-	cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
+	}
 	return NULL;
 }
 

@@ -6,13 +6,12 @@ date.timezone=Atlantic/Azores
 intl
 --FILE--
 <?php
-ini_set('intl.error_level', E_WARNING);
 $x = new IntlDateFormatter('en', 1, 1);
-var_dump($x->__construct('en', 1, 1));
+try {
+    var_dump($x->__construct('en', 1, 1));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught IntlException: IntlDateFormatter::__construct(): datefmt_create: cannot call constructor twice in %sbug62081.php:4
-Stack trace:
-#0 %sbug62081.php(4): IntlDateFormatter->__construct('en', 1, 1)
-#1 {main}
-  thrown in %sbug62081.php on line 4
+--EXPECT--
+IntlException: IntlDateFormatter::__construct(): cannot call constructor twice
