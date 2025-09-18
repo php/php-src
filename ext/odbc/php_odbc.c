@@ -1307,6 +1307,7 @@ PHP_FUNCTION(odbc_exec)
 /* }}} */
 
 typedef enum php_odbc_fetch_result_type_t {
+	ODBC_NONE   = 0,
 	ODBC_NUM    = 1,
 	ODBC_OBJECT = 2,
 } php_odbc_fetch_result_type_t;
@@ -1323,7 +1324,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 	bool pv_row_is_null = true;
 	zval *pv_res, *pv_res_arr, tmp;
 
-	if (return_array) {
+	if (return_array || result_type == ODBC_NONE) {
 		ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
 			Z_PARAM_OPTIONAL
@@ -1343,7 +1344,13 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
 
-	/* TODO deprecate $row argument values less than 1 after PHP 8.4 */
+	/* TODO deprecate $row argument values less than 1 after PHP 8.4
+	 * for functions other than odbc_fetch_row (see GH-13910)
+	 */
+	if (!result_type && !pv_row_is_null && pv_row < 1) {
+		php_error_docref(NULL, E_WARNING, "Argument #3 ($row) must be greater than or equal to 1");
+		RETURN_FALSE;
+	}
 
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
@@ -1353,7 +1360,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 	/* If we're initializing a passed value into an array, do it before the fetch
 	 * so that an empty result set will still be an array.
 	 */
-	if (!return_array) {
+	if (!return_array && result_type) {
 		pv_res_arr = zend_try_array_init(pv_res_arr);
 		if (!pv_res_arr) {
 			RETURN_THROWS();
@@ -1378,7 +1385,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 	}
 
 	/* ...but if returning an array, init only if we have a result set */
-	if (return_array) {
+	if (return_array && result_type) {
 		array_init(pv_res_arr);
 	}
 
@@ -1386,6 +1393,13 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 		result->fetched = (SQLLEN)pv_row;
 	else
 		result->fetched++;
+
+	/* For fetch_row, we don't return anything other than true,
+	 * odbc_result will be used to fetch values instead.
+	 */
+	if (result_type == ODBC_NONE) {
+		RETURN_TRUE;
+	}
 
 	for(i = 0; i < result->numcols; i++) {
 		sql_c_type = SQL_C_CHAR;
@@ -1503,53 +1517,7 @@ PHP_FUNCTION(odbc_fetch_into)
 /* {{{ Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
-	odbc_result *result;
-	RETCODE rc;
-	zval *pv_res;
-	zend_long pv_row = 0;
-	bool pv_row_is_null = true;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &pv_res, odbc_result_ce, &pv_row, &pv_row_is_null) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	result = Z_ODBC_RESULT_P(pv_res);
-	CHECK_ODBC_RESULT(result);
-
-	if (!pv_row_is_null && pv_row < 1) {
-		php_error_docref(NULL, E_WARNING, "Argument #3 ($row) must be greater than or equal to 1");
-		RETURN_FALSE;
-	}
-
-	if (result->numcols == 0) {
-		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
-		RETURN_FALSE;
-	}
-
-	if (result->fetch_abs) {
-		if (!pv_row_is_null) {
-			rc = SQLFetchScroll(result->stmt, SQL_FETCH_ABSOLUTE, (SQLLEN)pv_row);
-		} else {
-			rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
-		}
-	} else {
-		rc = SQLFetch(result->stmt);
-	}
-
-	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		if (rc == SQL_ERROR) {
-			odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetchScroll");
-		}
-		RETURN_FALSE;
-	}
-
-	if (!pv_row_is_null) {
-		result->fetched = (SQLLEN)pv_row;
-	} else {
-		result->fetched++;
-	}
-
-	RETURN_TRUE;
+	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, ODBC_NONE);
 }
 /* }}} */
 
