@@ -1312,8 +1312,8 @@ typedef enum php_odbc_fetch_result_type_t {
 	ODBC_OBJECT = 2,
 } php_odbc_fetch_result_type_t;
 
-/* {{{ php_odbc_fetch_hash */
-static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array, php_odbc_fetch_result_type_t result_type)
+/* {{{ php_odbc_fetch */
+static void php_odbc_fetch(INTERNAL_FUNCTION_PARAMETERS, bool return_array, php_odbc_fetch_result_type_t result_type)
 {
 	int i;
 	odbc_result *result;
@@ -1493,7 +1493,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, bool return_array,
 /* {{{ Fetch a result row as an object */
 PHP_FUNCTION(odbc_fetch_object)
 {
-	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, ODBC_OBJECT);
+	php_odbc_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, ODBC_OBJECT);
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	}
@@ -1503,21 +1503,21 @@ PHP_FUNCTION(odbc_fetch_object)
 /* {{{ Fetch a result row as an associative array */
 PHP_FUNCTION(odbc_fetch_array)
 {
-	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, ODBC_OBJECT);
+	php_odbc_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, ODBC_OBJECT);
 }
 /* }}} */
 
 /* {{{ Fetch one result row into an array */
 PHP_FUNCTION(odbc_fetch_into)
 {
-	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, ODBC_NUM);
+	php_odbc_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, ODBC_NUM);
 }
 /* }}} */
 
 /* {{{ Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
-	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, ODBC_NONE);
+	php_odbc_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, ODBC_NONE);
 }
 /* }}} */
 
