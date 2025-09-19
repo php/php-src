@@ -15,7 +15,7 @@
 #include "php_poll_internal.h"
 
 /* Backend registry */
-static const php_poll_backend_ops *registered_backends[16];
+static const php_poll_backend_ops *registered_backends[8];
 static int num_registered_backends = 0;
 
 /* Forward declarations for backend ops */
@@ -29,22 +29,12 @@ extern const php_poll_backend_ops php_poll_backend_kqueue_ops;
 #ifdef HAVE_EVENT_PORTS
 extern const php_poll_backend_ops php_poll_backend_eventport_ops;
 #endif
-#ifdef PHP_WIN32
-extern const php_poll_backend_ops php_poll_backend_iocp_ops;
-#endif
 extern const php_poll_backend_ops php_poll_backend_poll_ops;
 
 /* Register all available backends */
 PHPAPI void php_poll_register_backends(void)
 {
 	num_registered_backends = 0;
-
-#ifdef _WIN32
-	/* IOCP is preferred on Windows for high performance */
-	if (php_poll_backend_iocp_ops.is_available()) {
-		registered_backends[num_registered_backends++] = &php_poll_backend_iocp_ops;
-	}
-#endif
 
 #ifdef HAVE_EVENT_PORTS
 	/* Event Ports are preferred on Solaris */
