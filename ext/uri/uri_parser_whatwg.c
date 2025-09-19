@@ -614,7 +614,7 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposi
 	return smart_str_extract(&uri_str);
 }
 
-static void php_uri_parser_whatwg_free(void *uri)
+static void php_uri_parser_whatwg_destroy(void *uri)
 {
 	lxb_url_t *lexbor_uri = uri;
 
@@ -626,7 +626,7 @@ const php_uri_parser php_uri_parser_whatwg = {
 	.parse = php_uri_parser_whatwg_parse,
 	.clone = php_uri_parser_whatwg_clone,
 	.to_string = php_uri_parser_whatwg_to_string,
-	.free = php_uri_parser_whatwg_free,
+	.destroy = php_uri_parser_whatwg_destroy,
 	{
 		.scheme = {.read = php_uri_parser_whatwg_scheme_read, .write = php_uri_parser_whatwg_scheme_write},
 		.username = {.read = php_uri_parser_whatwg_username_read, .write = php_uri_parser_whatwg_username_write},

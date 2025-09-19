@@ -40,7 +40,7 @@ static void *php_uri_parser_rfc3986_memory_manager_reallocarray(UriMemoryManager
 	return safe_erealloc(ptr, nmemb, size, 0);
 }
 
-static void php_uri_parser_rfc3986_memory_manager_free(UriMemoryManager *memory_manager, void *ptr)
+static void php_uri_parser_rfc3986_memory_manager_destroy(UriMemoryManager *memory_manager, void *ptr)
 {
 	efree(ptr);
 }
@@ -50,7 +50,7 @@ static const UriMemoryManager php_uri_parser_rfc3986_memory_manager = {
 	.calloc = php_uri_parser_rfc3986_memory_manager_calloc,
 	.realloc = php_uri_parser_rfc3986_memory_manager_realloc,
 	.reallocarray = php_uri_parser_rfc3986_memory_manager_reallocarray,
-	.free = php_uri_parser_rfc3986_memory_manager_free,
+	.free = php_uri_parser_rfc3986_memory_manager_destroy,
 	.userData = NULL,
 };
 
@@ -593,7 +593,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_string *php_uri_parser_rfc3986_to_string(void
 	return uri_string;
 }
 
-static void php_uri_parser_rfc3986_free(void *uri)
+static void php_uri_parser_rfc3986_destroy(void *uri)
 {
 	php_uri_parser_rfc3986_uris *uriparser_uris = uri;
 
@@ -612,7 +612,7 @@ const php_uri_parser php_uri_parser_rfc3986 = {
 	.parse = php_uri_parser_rfc3986_parse,
 	.clone = php_uri_parser_rfc3986_clone,
 	.to_string = php_uri_parser_rfc3986_to_string,
-	.free = php_uri_parser_rfc3986_free,
+	.destroy = php_uri_parser_rfc3986_destroy,
 	{
 		.scheme = {.read = php_uri_parser_rfc3986_scheme_read, .write = php_uri_parser_rfc3986_scheme_write},
 		.username = {.read = php_uri_parser_rfc3986_username_read, .write = NULL},

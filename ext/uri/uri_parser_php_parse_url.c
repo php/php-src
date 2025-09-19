@@ -154,7 +154,7 @@ static void *uri_parser_php_parse_url_parse(const char *uri_str, size_t uri_str_
 	return url;
 }
 
-static void uri_parser_php_parse_url_free(void *uri)
+static void uri_parser_php_parse_url_destroy(void *uri)
 {
 	php_url *parse_url_uri = uri;
 
@@ -170,7 +170,7 @@ const php_uri_parser php_uri_parser_php_parse_url = {
 	.parse = uri_parser_php_parse_url_parse,
 	.clone = NULL,
 	.to_string = NULL,
-	.free = uri_parser_php_parse_url_free,
+	.destroy = uri_parser_php_parse_url_destroy,
 	{
 		.scheme = {.read = uri_parser_php_parse_url_scheme_read, .write = NULL},
 		.username = {.read = uri_parser_php_parse_url_username_read, .write = NULL},
