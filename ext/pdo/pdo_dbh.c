@@ -149,7 +149,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	ZVAL_UNDEF(&info);
-	if (dbh->methods->fetch_err) {
+	if (dbh->methods && dbh->methods->fetch_err) {
 		zval *item;
 		array_init(&info);
 
@@ -220,6 +220,21 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 	return dsn;
 }
 /* }}} */
+
+/* Fetch the registered persistent PDO object for the given key */
+static pdo_dbh_t *pdo_list_entry_from_key(const char *hashkey, size_t len)
+{
+	pdo_dbh_t *pdbh = NULL;
+	zend_resource *le;
+
+	if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashkey, len)) != NULL) {
+		if (le->type == php_pdo_list_entry()) {
+			pdbh = (pdo_dbh_t*)le->ptr;
+		}
+	}
+
+	return pdbh;
+}
 
 /* {{{ */
 PHP_METHOD(PDO, __construct)
@@ -297,8 +312,8 @@ PHP_METHOD(PDO, __construct)
 	if (options) {
 		int plen = 0;
 		char *hashkey = NULL;
-		zend_resource *le;
 		pdo_dbh_t *pdbh = NULL;
+		pdo_dbh_t **pdbh_ref = NULL;
 		zval *v;
 
 		if ((v = zend_hash_index_find_deref(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
@@ -320,36 +335,35 @@ PHP_METHOD(PDO, __construct)
 
 		if (is_persistent) {
 			/* let's see if we have one cached.... */
-			if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashkey, plen)) != NULL) {
-				if (le->type == php_pdo_list_entry()) {
-					pdbh = (pdo_dbh_t*)le->ptr;
-
-					/* is the connection still alive ? */
-					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
-						/* nope... need to kill it */
-						pdbh->refcount--;
-						zend_list_close(le);
-						pdbh = NULL;
-					}
+			pdbh = pdo_list_entry_from_key(hashkey, plen);
+			/* is the connection still alive ? */
+			if (!pdbh || pdbh->is_closed ||
+				(pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh))) {
+				/* clean up prior dbh reference */
+				if (pdbh && pdbh->persistent_resource) {
+					pdbh_ref = (pdo_dbh_t**)pdbh->persistent_resource->ptr;
+					/* clear dbh reference to forestall end-of-request actions in destructor */
+					*pdbh_ref = NULL;
+					zend_list_delete(pdbh->persistent_resource);
+					pdbh->persistent_resource = NULL;
 				}
-			}
-
-			if (pdbh) {
-				call_factory = 0;
-			} else {
 				/* need a brand new pdbh */
 				pdbh = pecalloc(1, sizeof(*pdbh), 1);
-
-				pdbh->refcount = 1;
+				pdbh_ref = emalloc(sizeof(*pdbh_ref));
+				*pdbh_ref = pdbh;
+				pdbh->persistent_resource = zend_register_resource(pdbh_ref, php_pdo_list_entry());
+				if (!pdbh->persistent_resource) {
+					php_error_docref(NULL, E_ERROR, "Failed to register resource entry");
+				}
 				pdbh->is_persistent = 1;
 				pdbh->persistent_id = pemalloc(plen + 1, 1);
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
 				pdbh->persistent_id_len = plen;
 				pdbh->def_stmt_ce = dbh->def_stmt_ce;
+			} else {
+				/* found viable dbh persisted */
+				call_factory = 0;
 			}
-		}
-
-		if (pdbh) {
 			efree(dbh);
 			/* switch over to the persistent one */
 			Z_PDO_OBJECT_P(object)->inner = pdbh;
@@ -393,6 +407,8 @@ PHP_METHOD(PDO, __construct)
 			/* register in the persistent list etc. */
 			/* we should also need to replace the object store entry,
 			   since it was created with emalloc */
+			/* if a resource is already registered, then it failed a liveness check
+			   and will be replaced, prompting destruct. */
 			if ((zend_register_persistent_resource(
 						(char*)dbh->persistent_id, dbh->persistent_id_len, dbh, php_pdo_list_entry())) == NULL) {
 				php_error_docref(NULL, E_ERROR, "Failed to register persistent entry");
@@ -422,9 +438,6 @@ options:
 	}
 
 	/* the connection failed; things will tidy up in free_storage */
-	if (is_persistent) {
-		dbh->refcount--;
-	}
 
 	/* XXX raise exception */
 	zend_restore_error_handling(&zeh);
@@ -518,6 +531,8 @@ PHP_METHOD(PDO, prepare)
 
 	PDO_DBH_CLEAR_ERR();
 
+	PDO_CLOSE_CHECK;
+
 	if (options && (value = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS)) != NULL) {
 		if (Z_TYPE_P(value) != IS_ARRAY) {
 			zend_type_error("PDO::ATTR_STATEMENT_CLASS value must be of type array, %s given",
@@ -587,6 +602,9 @@ PHP_METHOD(PDO, prepare)
 
 
 static bool pdo_is_in_transaction(pdo_dbh_t *dbh) {
+	if (dbh->is_closed) {
+		return false;
+	}
 	if (dbh->methods->in_transaction) {
 		return dbh->methods->in_transaction(dbh);
 	}
@@ -601,6 +619,8 @@ PHP_METHOD(PDO, beginTransaction)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	PDO_CONSTRUCT_CHECK;
+
+	PDO_CLOSE_CHECK;
 
 	if (pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is already an active transaction");
@@ -632,6 +652,8 @@ PHP_METHOD(PDO, commit)
 
 	PDO_CONSTRUCT_CHECK;
 
+	PDO_CLOSE_CHECK;
+
 	if (!pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
 		RETURN_THROWS();
@@ -655,6 +677,8 @@ PHP_METHOD(PDO, rollBack)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	PDO_CONSTRUCT_CHECK;
+
+	PDO_CLOSE_CHECK;
 
 	if (!pdo_is_in_transaction(dbh)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
@@ -680,7 +704,22 @@ PHP_METHOD(PDO, inTransaction)
 
 	PDO_CONSTRUCT_CHECK;
 
+	PDO_CLOSE_CHECK;
+
 	RETURN_BOOL(pdo_is_in_transaction(dbh));
+}
+/* }}} */
+
+/* {{{ Determine if connected */
+PHP_METHOD(PDO, isConnected)
+{
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	PDO_CONSTRUCT_CHECK;
+
+	RETURN_BOOL(!dbh->is_closed);
 }
 /* }}} */
 
@@ -854,6 +893,12 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 		default:;
 	}
 
+	if (!dbh->methods) {
+		pdo_raise_impl_error(dbh, NULL, "IM001",
+			"driver attributes not initialized, possibly due to disconnect");
+		return false;
+	}
+
 	if (!dbh->methods->set_attribute) {
 		goto fail;
 	}
@@ -941,6 +986,12 @@ PHP_METHOD(PDO, getAttribute)
 			break;
 	}
 
+	if (!dbh->methods) {
+		pdo_raise_impl_error(dbh, NULL, "IM001",
+			"driver attributes not initialized, possibly due to disconnect");
+		RETURN_FALSE;
+	}
+
 	if (!dbh->methods->get_attribute) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support getting attributes");
 		RETURN_FALSE;
@@ -981,6 +1032,8 @@ PHP_METHOD(PDO, exec)
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
+	PDO_CLOSE_CHECK;
+
 	ret = dbh->methods->doer(dbh, statement);
 	if (ret == -1) {
 		PDO_HANDLE_DBH_ERR();
@@ -1006,6 +1059,8 @@ PHP_METHOD(PDO, lastInsertId)
 	PDO_CONSTRUCT_CHECK;
 
 	PDO_DBH_CLEAR_ERR();
+
+	PDO_CLOSE_CHECK;
 
 	if (!dbh->methods->last_id) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()");
@@ -1068,7 +1123,8 @@ PHP_METHOD(PDO, errorInfo)
 		if(!strncmp(dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE))) goto fill_array;
 	}
 
-	if (dbh->methods->fetch_err) {
+	/* Driver-implemented error is not available once database is shutdown. */
+	if (dbh->methods && dbh->methods->fetch_err) {
 		dbh->methods->fetch_err(dbh, dbh->query_stmt, return_value);
 	}
 
@@ -1116,6 +1172,8 @@ PHP_METHOD(PDO, query)
 	}
 
 	PDO_DBH_CLEAR_ERR();
+
+	PDO_CLOSE_CHECK;
 
 	if (!pdo_stmt_instantiate(dbh, return_value, dbh->def_stmt_ce, &dbh->def_stmt_ctor_args)) {
 		RETURN_THROWS();
@@ -1184,6 +1242,9 @@ PHP_METHOD(PDO, quote)
 	PDO_CONSTRUCT_CHECK;
 
 	PDO_DBH_CLEAR_ERR();
+
+	PDO_CLOSE_CHECK;
+
 	if (!dbh->methods->quoter) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support quoting");
 		RETURN_FALSE;
@@ -1366,23 +1427,48 @@ void pdo_dbh_init(int module_number)
 	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
 }
 
-static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
+/* Disconnect from the database and free associated driver. */
+static void dbh_shutdown(pdo_dbh_t *dbh)
+{
+	if (dbh->methods) {
+		dbh->methods->closer(dbh);
+	}
+
+	/* Do not permit reference to driver methods to remain past closer(), which
+	 * is responsible for both disconnecting the db and free-ing allocations.
+	 * Ideally, this would only disconnect the database, not free the handle. */
+	dbh->methods = NULL;
+	dbh->is_closed = true;
+}
+
+/* {{{ Disconnect from the database. */
+PHP_METHOD(PDO, disconnect)
+{
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	PDO_DBH_CLEAR_ERR();
+	PDO_CONSTRUCT_CHECK;
+
+	dbh_shutdown(dbh);
+
+	PDO_HANDLE_DBH_ERR();
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* Free the database when the last pdo object referencing it is freed
+ * or when it has been registered as a php resource, i.e. is persistent,
+ * and the resource is destructed, whichever comes last. */
+static void dbh_free(pdo_dbh_t *dbh)
 {
 	int i;
 
-	if (dbh->query_stmt) {
-		zval_ptr_dtor(&dbh->query_stmt_zval);
-		dbh->query_stmt = NULL;
-	}
-
-	if (dbh->is_persistent) {
 #if ZEND_DEBUG
-		ZEND_ASSERT(!free_persistent || (dbh->refcount == 1));
+	ZEND_ASSERT(dbh->refcount == 0);
 #endif
-		if (!free_persistent && (--dbh->refcount)) {
-			return;
-		}
-	}
 
 	if (dbh->methods) {
 		dbh->methods->closer(dbh);
@@ -1402,6 +1488,12 @@ static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 		pefree((char *)dbh->persistent_id, dbh->is_persistent);
 	}
 
+	if (dbh->persistent_resource) {
+		pdo_dbh_t **dbh_ref = (pdo_dbh_t**)dbh->persistent_resource->ptr;
+		dbh->persistent_resource = NULL;
+		*dbh_ref = NULL;
+	}
+
 	if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
 		zval_ptr_dtor(&dbh->def_stmt_ctor_args);
 	}
@@ -1416,25 +1508,46 @@ static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 	pefree(dbh, dbh->is_persistent);
 }
 
+/* Whether the given database handler is presently registered as a resource. */
+static bool pdo_is_persisted(pdo_dbh_t *dbh)
+{
+	pdo_dbh_t *pdbh = NULL;
+
+	if (dbh->persistent_id != NULL) {
+		pdbh = pdo_list_entry_from_key(dbh->persistent_id, dbh->persistent_id_len);
+		return dbh == pdbh;
+	}
+
+	return false;
+}
+
 static void pdo_dbh_free_storage(zend_object *std)
 {
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(std);
 
 	/* dbh might be null if we OOMed during object initialization. */
-	if (!dbh) {
-		return;
+	if (dbh) {
+		/* stmt is not persistent, even if dbh is, so it must be freed with pdo.
+		 * Consider copying stmt error code to dbh at this point, seemingly the reason
+		 * that the stmt is even being held, or even better, to do that at the time of
+		 * error and remove the reference altogether. */
+		if (dbh->query_stmt) {
+			zval_ptr_dtor(&dbh->query_stmt_zval);
+			dbh->query_stmt = NULL;
+		}
+
+		if (!(--dbh->refcount)) {
+			/* a persisted dbh will be freed when the resource is destructed. */
+			if (!pdo_is_persisted(dbh)) {
+				if (!dbh->is_closed) {
+					dbh_shutdown(dbh);
+				}
+				dbh_free(dbh);
+			}
+		}
 	}
 
-	if (dbh->driver_data && dbh->methods && dbh->methods->rollback && pdo_is_in_transaction(dbh)) {
-		dbh->methods->rollback(dbh);
-		dbh->in_txn = false;
-	}
-
-	if (dbh->is_persistent && dbh->methods && dbh->methods->persistent_shutdown) {
-		dbh->methods->persistent_shutdown(dbh);
-	}
 	zend_object_std_dtor(std);
-	dbh_free(dbh, 0);
 }
 
 zend_object *pdo_dbh_new(zend_class_entry *ce)
@@ -1447,17 +1560,42 @@ zend_object *pdo_dbh_new(zend_class_entry *ce)
 	rebuild_object_properties(&dbh->std);
 	dbh->inner = ecalloc(1, sizeof(pdo_dbh_t));
 	dbh->inner->def_stmt_ce = pdo_dbstmt_ce;
+	dbh->inner->refcount++;
 
 	return &dbh->std;
 }
 
 /* }}} */
 
+ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_request_dtor) /* {{{ */
+{
+	if (res->ptr) {
+		pdo_dbh_t **dbh_ref = (pdo_dbh_t**)res->ptr;
+		if (*dbh_ref) {
+			pdo_dbh_t *dbh = (pdo_dbh_t*)*dbh_ref;
+			if (dbh->methods && dbh->methods->persistent_shutdown) {
+				dbh->methods->persistent_shutdown(dbh);
+			}
+			if (dbh->methods && dbh->methods->rollback && pdo_is_in_transaction(dbh)) {
+				dbh->methods->rollback(dbh);
+				dbh->in_txn = false;
+			}
+			dbh->persistent_resource = NULL;
+		}
+		efree(dbh_ref);
+		res->ptr = NULL;
+	}
+}
+/* }}} */
+
 ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
 {
 	if (res->ptr) {
 		pdo_dbh_t *dbh = (pdo_dbh_t*)res->ptr;
-		dbh_free(dbh, 1);
+		if (!dbh->refcount) {
+			/* do not free if still referenced by pdo */
+			dbh_free(dbh);
+		}
 		res->ptr = NULL;
 	}
 }

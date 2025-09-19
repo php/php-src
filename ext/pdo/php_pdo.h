@@ -61,5 +61,15 @@ PHP_MINFO_FUNCTION(pdo);
 		RETURN_THROWS(); \
 	} \
 
+#define PDO_CLOSE_CHECK \
+  if (dbh->is_closed) { \
+    pdo_raise_impl_error(dbh, NULL, "01002", NULL); \
+    if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) { \
+      RETURN_THROWS(); \
+    } else { \
+      RETURN_FALSE; \
+    } \
+  } \
+
 
 #endif	/* PHP_PDO_H */

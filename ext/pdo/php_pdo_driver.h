@@ -478,6 +478,10 @@ struct _pdo_dbh_t {
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
 	size_t persistent_id_len;
+	/* a regular resource to prompt end-of-request actions */
+	zend_resource *persistent_resource;
+
+	/* counter of _pdo_dbh_object_t referencing this handle */
 	unsigned int refcount;
 
 	/* driver specific "class" methods for the dbh and stmt */
