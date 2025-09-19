@@ -1,7 +1,7 @@
 name: Push
 on:
   push:
-    paths-ignore:
+    paths-ignore: &ignore_paths
       - docs/**
       - NEWS
       - UPGRADING
@@ -18,16 +18,7 @@ on:
       - PHP-8.4
       - master
   pull_request:
-    paths-ignore:
-      - docs/**
-      - NEWS
-      - UPGRADING
-      - UPGRADING.INTERNALS
-      - '**/README.*'
-      - CONTRIBUTING.md
-      - CODING_STANDARDS.md
-      - .cirrus.yml
-      - .circleci/**
+    paths-ignore: *ignore_paths
     branches:
       - '**'
   workflow_dispatch: ~
