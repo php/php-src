@@ -464,6 +464,12 @@ timelib_sll timelib_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
 /* Calculates the day of the ISO week from y, m, and d. 1=Monday, 7=Sunday */
 timelib_sll timelib_iso_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
 
+/* Checks if the given date is a weekend (Saturday or Sunday) */
+int timelib_is_weekend(timelib_time *time);
+
+/* Checks if the given date is a weekday (Monday to Friday) */
+int timelib_is_weekday(timelib_time *time);
+
 /* Calculates the day of the year according to y-m-d. 0=Jan 1st..364/365=Dec
  * 31st */
 timelib_sll timelib_day_of_year(timelib_sll y, timelib_sll m, timelib_sll d);
