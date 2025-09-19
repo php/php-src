@@ -119,11 +119,11 @@ typedef struct php_uri_parser {
 	zend_string *(*to_string)(void *uri, php_uri_recomposition_mode recomposition_mode, bool exclude_fragment);
 
 	/**
-	 * Frees the provided URI.
+	 * Destroy (free) the provided URI.
 	 *
 	 * @param uri The URI to free. Must do nothing if NULL.
 	 */
-	void (*free)(void *uri);
+	void (*destroy)(void *uri);
 
 	struct {
 		php_uri_property_handler scheme;
