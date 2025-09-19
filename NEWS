@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     array). (ilutov)
   . Fixed bug GH-19823 (register_argc_argv deprecation emitted twice when
     using OPcache). (timwolla)
+  . Fixed bug GH-19480 (error_log php.ini cannot be unset when open_basedir is
+    configured). (nielsdos)
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
