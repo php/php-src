@@ -2342,7 +2342,7 @@ static int php_openssl_sockop_stat(php_stream *stream, php_stream_statbuf *ssb) 
 static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_netstream_data_t *sock,
 		php_stream_xport_param *xparam STREAMS_DC)  /* {{{ */
 {
-	int clisock;
+	php_socket_t clisock;
 	bool nodelay = 0;
 	zval *tmpzval = NULL;
 
@@ -2363,7 +2363,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		&xparam->outputs.error_code,
 		nodelay);
 
-	if (clisock >= 0) {
+	if (clisock != SOCK_ERR) {
 		php_openssl_netstream_data_t *clisockdata = (php_openssl_netstream_data_t*) emalloc(sizeof(*clisockdata));
 
 		/* copy underlying tcp fields */
