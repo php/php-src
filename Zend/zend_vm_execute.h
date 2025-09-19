@@ -441,7 +441,11 @@ static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opc
 # define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)
 #endif
 #define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+#ifdef ZEND_VM_FP_GLOBAL_REG
 #define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#else
+#define ZEND_VM_LOOP_INTERRUPT() opline = (zend_op*)((uintptr_t)zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU) & ~ZEND_VM_ENTER_BIT);
+#endif
 #define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler_func(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
