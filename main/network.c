@@ -1205,26 +1205,84 @@ PHPAPI void _php_emit_fd_setsize_warning(int max_fd)
 
 PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 {
+# ifdef PHP_WIN32
+	/* Use WSAPoll for Windows */
+	WSAPOLLFD *wsafds;
+	unsigned int i;
+	int result;
+	
+	if (nfds == 0) {
+		if (timeout > 0) {
+			Sleep(timeout);
+		}
+		return 0;
+	}
+
+	/* allocate using malloc as it can be called outside the request */
+	wsafds = malloc(nfds * sizeof(WSAPOLLFD));
+	if (!wsafds) {
+		WSASetLastError(WSAENOBUFS);
+		return -1;
+	}
+	
+	/* convert php_pollfd to WSAPOLLFD */
+	for (i = 0; i < nfds; i++) {
+		wsafds[i].fd = (SOCKET)ufds[i].fd;
+		wsafds[i].events = 0;
+		wsafds[i].revents = 0;
+		
+		if (ufds[i].events & PHP_POLLREADABLE) {
+			wsafds[i].events |= POLLRDNORM | POLLRDBAND;
+		}
+		if (ufds[i].events & POLLOUT) {
+			wsafds[i].events |= POLLWRNORM;
+		}
+		if (ufds[i].events & POLLPRI) {
+			wsafds[i].events |= POLLPRI;
+		}
+	}
+
+	WSASetLastError(0);
+	result = WSAPoll(wsafds, nfds, timeout);
+	
+	if (result >= 0) {
+		/* convert results back to php_pollfd */
+		for (i = 0; i < nfds; i++) {
+			ufds[i].revents = 0;
+			
+			if (wsafds[i].revents & (POLLRDNORM | POLLRDBAND)) {
+				ufds[i].revents |= POLLIN;
+			}
+			if (wsafds[i].revents & POLLWRNORM) {
+				ufds[i].revents |= POLLOUT;
+			}
+			if (wsafds[i].revents & POLLPRI) {
+				ufds[i].revents |= POLLPRI;
+			}
+			if (wsafds[i].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+				ufds[i].revents |= POLLERR;
+			}
+		}
+	}
+	
+	free(wsafds);
+	return result;
+	
+# else
 	fd_set rset, wset, eset;
 	php_socket_t max_fd = SOCK_ERR; /* effectively unused on Windows */
 	unsigned int i;
 	int n;
 	struct timeval tv;
 
-#ifndef PHP_WIN32
 	/* check the highest numbered descriptor */
 	for (i = 0; i < nfds; i++) {
 		if (ufds[i].fd > max_fd)
 			max_fd = ufds[i].fd;
 	}
-#endif
 
 	if (!PHP_SAFE_MAX_FD(max_fd, nfds + 1)) {
-#ifdef PHP_WIN32
-		WSASetLastError(WSAEINVAL);
-#else
 		errno = ERANGE;
-#endif
 		return -1;
 	}
 
@@ -1248,12 +1306,8 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 		tv.tv_sec = timeout / 1000;
 		tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
 	}
-/* Resetting/initializing */
-#ifdef PHP_WIN32
-	WSASetLastError(0);
-#else
+	/* Resetting/initializing */
 	errno = 0;
-#endif
 	n = select(max_fd + 1, &rset, &wset, &eset, timeout >= 0 ? &tv : NULL);
 
 	if (n >= 0) {
@@ -1273,6 +1327,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 		}
 	}
 	return n;
+# endif
 }
 #endif
 
