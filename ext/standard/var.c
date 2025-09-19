@@ -1463,7 +1463,20 @@ PHP_FUNCTION(unserialize)
 		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/**
+	 * When this function is called inside Serializable::unserialize(), it becomes possible to manipulate
+	 * the object in an incomplete state before __unserialize() is invoked, so we increment serialize_lock.
+	 * This issue only occurs within Serializable::unserialize(), so once Serializable is fully deprecated,
+	 * it will be sufficient to simply call php_unserialize_with_options() on its own.
+	 */
+	bool is_in_unserialize = BG(unserialize).level > 0;
+	if (is_in_unserialize) {
+		BG(serialize_lock)++;
+	}
 	php_unserialize_with_options(return_value, buf, buf_len, options, "unserialize");
+	if (is_in_unserialize) {
+		BG(serialize_lock)--;
+	}
 }
 /* }}} */
 

@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-19701 (Serialize/deserialize loses some data). (nielsdos)
   . Fixed bug GH-19801 (leaks in var_dump() and debug_zval_dump()).
     (alexandre-daubois)
+  . Fixed bug GH-19860 (Calling unserialize() inside
+    Serializable::unserialize() allows the object to be manipulated before
+    it has been restored). (Saki Takamachi)
 
 - Zip:
   . Fixed bug GH-19688 (Remove pattern overflow in zip addGlob()). (nielsdos)
