@@ -697,12 +697,13 @@ static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) &&
-			new_value && zend_string_equals_literal(new_value, "syslog")) {
+			new_value && !zend_string_equals_literal(new_value, "syslog") && ZSTR_LEN(new_value) > 0) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -711,12 +712,13 @@ static PHP_INI_MH(OnUpdateErrorLog)
 static PHP_INI_MH(OnUpdateMailLog)
 {
 	/* Only do the open_basedir check at runtime */
-	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value) {
+	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && ZSTR_LEN(new_value) > 0) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
 /* }}} */
