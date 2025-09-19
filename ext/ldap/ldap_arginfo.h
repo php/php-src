@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: edd31d6c19c01bee6ddb04c747640c97f0bacba6 */
+ * Stub hash: 9e47a0d85336f0e149abbdf56468513c5d31780f */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -434,10 +434,10 @@ ZEND_FUNCTION(ldap_parse_exop);
 
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
-	ZEND_FE(ldap_connect, arginfo_ldap_connect)
+	ZEND_RAW_FENTRY("ldap_connect", zif_ldap_connect, arginfo_ldap_connect, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
-	ZEND_FE(ldap_connect_wallet, arginfo_ldap_connect_wallet)
+	ZEND_RAW_FENTRY("ldap_connect_wallet", zif_ldap_connect_wallet, arginfo_ldap_connect_wallet, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if !(defined(HAVE_ORALDAP))
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
@@ -593,9 +593,9 @@ static void register_ldap_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_USERNAME", LDAP_OPT_X_SASL_USERNAME, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_ORALDAP)
-	REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT);
+	zend_constant *const_GSLC_SSL_NO_AUTH = REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_GSLC_SSL_ONEWAY_AUTH = REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT | CONST_DEPRECATED);
+	zend_constant *const_GSLC_SSL_TWOWAY_AUTH = REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_DEPRECATED);
 #endif
 #if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_REQUIRE_CERT", LDAP_OPT_X_TLS_REQUIRE_CERT, CONST_PERSISTENT);
@@ -709,9 +709,23 @@ static void register_ldap_symbols(int module_number)
 
 #if defined(HAVE_ORALDAP)
 
+	zend_attribute *attribute_Deprecated_func_ldap_connect_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_ldap_connect_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_ldap_connect_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_0->args[1].value, attribute_Deprecated_func_ldap_connect_0_arg1_str);
+	attribute_Deprecated_func_ldap_connect_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 #if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+
+	zend_attribute *attribute_Deprecated_func_ldap_connect_wallet_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_wallet_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_ldap_connect_wallet_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_ldap_connect_wallet_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_ldap_connect_wallet_0->args[1].value, attribute_Deprecated_func_ldap_connect_wallet_0_arg1_str);
+	attribute_Deprecated_func_ldap_connect_wallet_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
@@ -728,6 +742,29 @@ static void register_ldap_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(HAVE_ORALDAP)
+
+	zend_attribute *attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0 = zend_add_global_constant_attribute(const_GSLC_SSL_NO_AUTH, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0->args[1].value, attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0_arg1_str);
+	attribute_Deprecated_const_GSLC_SSL_NO_AUTH_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0 = zend_add_global_constant_attribute(const_GSLC_SSL_ONEWAY_AUTH, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0->args[1].value, attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0_arg1_str);
+	attribute_Deprecated_const_GSLC_SSL_ONEWAY_AUTH_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0 = zend_add_global_constant_attribute(const_GSLC_SSL_TWOWAY_AUTH, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0_arg1_str = zend_string_init("as it is broken since PHP 8.0", strlen("as it is broken since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[1].value, attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0_arg1_str);
+	attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
 }
 
