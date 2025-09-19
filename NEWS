@@ -70,6 +70,11 @@ PHP                                                                        NEWS
 - Standard:
   . Fix shm corruption with coercion in options of unserialize(). (nielsdos)
 
+- Streams:
+  . Fixed bug GH-19798: XP_SOCKET XP_SSL (Socket stream modules): Incorrect
+    condition for Win32/Win64. (Jakub Zelenka)
+
+
 - Tidy:
   . Fixed GH-19021 (improved tidyOptGetCategory detection).
     (arjendekorte, David Carlier, Peter Kokot)
