@@ -733,7 +733,8 @@ foreach ($offsets as $dimension) {
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_TO_0_REGEX, $varOutput)
     ) {
-        file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_string_container_{$failuresNb}.txt", $varOutput);
+        echo $error, PHP_EOL, $varOutput, PHP_EOL;
+        //file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_string_container_{$failuresNb}.txt", $varOutput);
         ++$failuresNb;
         $failures[] = $error;
     }
@@ -768,7 +769,8 @@ foreach ($offsets as $offset) {
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_TO_0_REGEX, $varOutput)
     ) {
-        file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_string_container_{$failuresNb}.txt", $varOutput);
+        echo $error, PHP_EOL, $varOutput, PHP_EOL;
+        //file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_string_container_{$failuresNb}.txt", $varOutput);
         ++$failuresNb;
         $failures[] = $error;
     }
