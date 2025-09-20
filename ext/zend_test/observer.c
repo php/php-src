@@ -408,7 +408,7 @@ void zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS)
 }
 
 void zend_test_observer_ginit(zend_zend_test_globals *zend_test_globals) {
-	zend_test_globals->observer_observe_function_names = malloc(sizeof(HashTable));
+	zend_test_globals->observer_observe_function_names = pmalloc(sizeof(HashTable));
 	_zend_hash_init(zend_test_globals->observer_observe_function_names, 8, ZVAL_PTR_DTOR, 1);
 	GC_MAKE_PERSISTENT_LOCAL(zend_test_globals->observer_observe_function_names);
 }

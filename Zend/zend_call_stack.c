@@ -632,7 +632,7 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack, void **ptr)
 
 	// kinfo_getvmmap uses the same formula, only we do not want to rely on libkvm
 	len = len * 4 / 3 ;
-	*ptr = malloc(len);
+	*ptr = pmalloc(len);
 
 	if (sysctl(mib, 5, *ptr, &len, NULL, 0) != 0) {
 		return false;
