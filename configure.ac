@@ -252,13 +252,21 @@ esac
 
 dnl Detect musl libc
 AC_MSG_CHECKING([whether we are using musl libc])
-if command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1
-then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])
-else
-  AC_MSG_RESULT([no])
-fi
+AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([[
+    #ifndef _GNU_SOURCE
+    #define _GNU_SOURCE
+    #endif
+    #include <features.h>
+    #ifdef __USE_GNU
+    #error Not using musl
+    #endif
+    int main(void) { return 0; }
+  ]])],
+  [AC_MSG_RESULT([yes])
+   AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])],
+  [AC_MSG_RESULT([no])]
+)
 
 dnl Add _GNU_SOURCE compile definition because the php_config.h with definitions
 dnl by AC_USE_SYSTEM_EXTENSIONS might be included after the system headers which
