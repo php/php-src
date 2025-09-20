@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9b49f527064695c812cd204d9efc63c13681d942 */
+ * Stub hash: b6f62a97c96110bb42479f6bfd07d0266c5b723d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clone, 0, 1, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
@@ -221,7 +221,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gc_mem_caches arginfo_func_num_args
 
-#define arginfo_gc_collect_cycles arginfo_func_num_args
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_collect_cycles, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, full_gc, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_enabled, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
