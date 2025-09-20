@@ -1,0 +1,26 @@
+%{
+#include "regint.h"
+%}
+
+struct PropertyNameCtype {
+  char *name;
+  int ctype;
+};
+
+%%
+Alpha,     1
+Blank,     2
+Cntrl,     3
+Digit,     4
+Graph,     5
+Lower,     6
+Print,     7
+Punct,     8
+Space,     9
+Upper,    10
+XDigit,   11
+Word,     12
+Alnum,    13
+ASCII,    14
+Hiragana, 15
+Katakana, 16
