@@ -39,6 +39,7 @@ ZEND_API zend_object_handlers zend_enum_object_handlers;
 zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv)
 {
 	zend_object *zobj = zend_objects_new(ce);
+	GC_ADD_FLAGS(zobj, GC_NOT_COLLECTABLE);
 	ZVAL_OBJ(result, zobj);
 
 	zval *zname = OBJ_PROP_NUM(zobj, 0);
