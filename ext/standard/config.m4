@@ -437,6 +437,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     scanf.c
     sha1.c
     soundex.c
+    stream_poll.c
     streamsfuncs.c
     string.c
     strnatcmp.c
