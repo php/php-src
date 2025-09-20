@@ -2606,7 +2606,7 @@ zend_strtod
 		}
 	s0 = s;
 	y = z = 0;
-	for(nd = nf = 0; (c = *s) >= '0' && c <= '9'; nd++, s++)
+	for(nd = nf = 0; (c = *s) >= '0' && c <= '9' && nd < INT_MAX; nd++, s++)
 		if (nd < 9)
 			y = 10*y + c - '0';
 		else if (nd < DBL_DIG + 2)
