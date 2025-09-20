@@ -290,6 +290,7 @@ function copy_config_scripts() {
     }
 
     $files[] = '.gitignore';
+    $files[] = 'composer.json';
 
     foreach($files as $config_script) {
         $new_config_script = $options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $config_script;
