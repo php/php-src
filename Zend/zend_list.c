@@ -217,15 +217,25 @@ void zend_close_rsrc_list(HashTable *ht)
 	/* Reload ht->arData on each iteration, as it may be reallocated. */
 	uint32_t i = ht->nNumUsed;
 
-	while (i-- > 0) {
-		zval *p = ZEND_HASH_ELEMENT(ht, i);
-		if (Z_TYPE_P(p) != IS_UNDEF) {
-			zend_resource *res = Z_PTR_P(p);
-			if (res->type >= 0) {
-				zend_resource_dtor(res);
+retry:
+	zend_try {
+		while (i-- > 0) {
+			zval *p = ZEND_HASH_ELEMENT(ht, i);
+			if (Z_TYPE_P(p) != IS_UNDEF) {
+				zend_resource *res = Z_PTR_P(p);
+				if (res->type >= 0) {
+					zend_resource_dtor(res);
+				}
 			}
 		}
-	}
+	} zend_catch {
+		/* If we have bailed, we probably executed user code (e.g. user stream
+		 * API). Keep closing resources so they don't leak. User handlers must be
+		 * called now so they aren't called in zend_deactivate() on
+		 * zend_destroy_rsrc_list(&EG(regular_list)). At that point, the executor
+		 * has already shut down and the process would crash. */
+		goto retry;
+	} zend_end_try();
 }
 
 
