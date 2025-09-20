@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
     (nielsdos)
 
+- Bz2:
+  . Fixed bug GH-19810 (Broken bzopen() stream mode validation). (ilutov)
+
 - Exif:
   . Fix OSS-Fuzz #442954659 (zero-size box in HEIF file causes infinite loop).
     (nielsdos)
