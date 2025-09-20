@@ -1,5 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6bccdc2444e6a68ba615fc281235a4551d0b8819 */
+ * Stub hash: e62d828db8b1f30762db3b7df5e60ef4ed92f273 */
+
+#if 0
+#include <stdint.h>
+
+#include "zend_attributes.h"
+#endif
+
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
