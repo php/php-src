@@ -20,5 +20,6 @@ function test() {
 }
 var_dump(test());
 ?>
---EXPECT--
+--EXPECTF--
+Warning: non-representable float -1.8446744073709552E+19 was cast to int in %s on line %d
 int(-3)

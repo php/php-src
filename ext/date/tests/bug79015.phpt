@@ -6,6 +6,7 @@ $payload = 'O:12:"DateInterval":9:{s:1:"y";i:1;s:1:"m";i:0;s:1:"d";i:4;s:1:"h";i
 var_dump(unserialize($payload));
 ?>
 --EXPECTF--
+Warning: non-representable float 9.99999999999E+18 was cast to int in %s on line %d
 object(DateInterval)#%d (%d) {
   ["y"]=>
   int(1)

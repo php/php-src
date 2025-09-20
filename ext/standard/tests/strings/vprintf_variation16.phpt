@@ -66,10 +66,16 @@ foreach($args_array as $args) {
   $counter++;
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vprintf() : unsigned formats and signed & other types of values ***
 
 -- Iteration 1 --
+
+Warning: non-representable float 20000000000 was cast to int in %s on line %d
+
+Warning: non-representable float 2000000000000 was cast to int in %s on line %d
+
+Warning: non-representable float 22000000000000 was cast to int in %s on line %d
 2 0 10
    123456 123456 1234
    2820130816 2840207360 1177509888

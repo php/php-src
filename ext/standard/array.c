@@ -1219,7 +1219,7 @@ PHP_FUNCTION(min)
 						min_lval = Z_LVAL(args[i]);
 						min = &args[i];
 					}
-				} else if (Z_TYPE(args[i]) == IS_DOUBLE && (zend_dval_to_lval((double) min_lval) == min_lval)) {
+				} else if (Z_TYPE(args[i]) == IS_DOUBLE && (zend_dval_to_lval_silent((double) min_lval) == min_lval)) {
 					/* if min_lval can be exactly represented as a double, go to double dedicated code */
 					min_dval = (double) min_lval;
 					goto double_compare;
@@ -1239,7 +1239,7 @@ PHP_FUNCTION(min)
 						min_dval = Z_DVAL(args[i]);
 						min = &args[i];
 					}
-				} else if (Z_TYPE(args[i]) == IS_LONG && (zend_dval_to_lval((double) Z_LVAL(args[i])) == Z_LVAL(args[i]))) {
+				} else if (Z_TYPE(args[i]) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL(args[i])) == Z_LVAL(args[i]))) {
 					/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
 					if (min_dval > (double)Z_LVAL(args[i])) {
 						min_dval = (double)Z_LVAL(args[i]);
@@ -1277,7 +1277,7 @@ ZEND_FRAMELESS_FUNCTION(min, 2)
 
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_LONG)) {
 			RETURN_COPY_VALUE(lhs_lval < Z_LVAL_P(rhs) ? lhs : rhs);
-		} else if (Z_TYPE_P(rhs) == IS_DOUBLE && (zend_dval_to_lval((double) lhs_lval) == lhs_lval)) {
+		} else if (Z_TYPE_P(rhs) == IS_DOUBLE && (zend_dval_to_lval_silent((double) lhs_lval) == lhs_lval)) {
 			/* if lhs_lval can be exactly represented as a double, go to double dedicated code */
 			lhs_dval = (double) lhs_lval;
 			goto double_compare;
@@ -1290,7 +1290,7 @@ ZEND_FRAMELESS_FUNCTION(min, 2)
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
 double_compare:
 			RETURN_COPY_VALUE(lhs_dval < Z_DVAL_P(rhs) ? lhs : rhs);
-		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
+		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
 			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
 			RETURN_COPY_VALUE(lhs_dval < (double)Z_LVAL_P(rhs) ? lhs : rhs);
 		} else {
@@ -1347,7 +1347,7 @@ PHP_FUNCTION(max)
 						max_lval = Z_LVAL(args[i]);
 						max = &args[i];
 					}
-				} else if (Z_TYPE(args[i]) == IS_DOUBLE && (zend_dval_to_lval((double) max_lval) == max_lval)) {
+				} else if (Z_TYPE(args[i]) == IS_DOUBLE && (zend_dval_to_lval_silent((double) max_lval) == max_lval)) {
 					/* if max_lval can be exactly represented as a double, go to double dedicated code */
 					max_dval = (double) max_lval;
 					goto double_compare;
@@ -1367,7 +1367,7 @@ PHP_FUNCTION(max)
 						max_dval = Z_DVAL(args[i]);
 						max = &args[i];
 					}
-				} else if (Z_TYPE(args[i]) == IS_LONG && (zend_dval_to_lval((double) Z_LVAL(args[i])) == Z_LVAL(args[i]))) {
+				} else if (Z_TYPE(args[i]) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL(args[i])) == Z_LVAL(args[i]))) {
 					/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
 					if (max_dval < (double)Z_LVAL(args[i])) {
 						max_dval = (double)Z_LVAL(args[i]);
@@ -1405,7 +1405,7 @@ ZEND_FRAMELESS_FUNCTION(max, 2)
 
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_LONG)) {
 			RETURN_COPY_VALUE(lhs_lval >= Z_LVAL_P(rhs) ? lhs : rhs);
-		} else if (Z_TYPE_P(rhs) == IS_DOUBLE && (zend_dval_to_lval((double) lhs_lval) == lhs_lval)) {
+		} else if (Z_TYPE_P(rhs) == IS_DOUBLE && (zend_dval_to_lval_silent((double) lhs_lval) == lhs_lval)) {
 			/* if lhs_lval can be exactly represented as a double, go to double dedicated code */
 			lhs_dval = (double) lhs_lval;
 			goto double_compare;
@@ -1418,7 +1418,7 @@ ZEND_FRAMELESS_FUNCTION(max, 2)
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
 double_compare:
 			RETURN_COPY_VALUE(lhs_dval >= Z_DVAL_P(rhs) ? lhs : rhs);
-		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
+		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
 			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
 			RETURN_COPY_VALUE(lhs_dval >= (double)Z_LVAL_P(rhs) ? lhs : rhs);
 		} else {
@@ -2980,7 +2980,7 @@ PHP_FUNCTION(range)
 				is_step_negative = true;
 				step_double *= -1;
 			}
-			step = zend_dval_to_lval(step_double);
+			step = zend_dval_to_lval_silent(step_double);
 			if (!zend_is_long_compatible(step_double, step)) {
 				is_step_double = true;
 			}
