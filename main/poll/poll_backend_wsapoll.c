@@ -273,12 +273,6 @@ static int wsapoll_backend_wait(
 				/* Convert WSAPoll events to PHP poll events */
 				uint32_t converted_events = wsapoll_events_from_native(pfd->revents);
 
-				/* Special check if POLLERR and POLLHUP are reported */
-				if ((pfd->revents & POLLERR) && (pfd->revents & POLLHUP)) {
-					/* Clear ERROR if HUP present to match other backends */
-					converted_events &= ~PHP_POLL_ERROR;
-				}
-
 				events[event_count].fd = fd;
 				events[event_count].events = entry->events;
 				events[event_count].revents = converted_events;
