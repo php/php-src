@@ -29,7 +29,11 @@ extern const php_poll_backend_ops php_poll_backend_kqueue_ops;
 #ifdef HAVE_EVENT_PORTS
 extern const php_poll_backend_ops php_poll_backend_eventport_ops;
 #endif
+#ifdef PHP_WIN32
+extern const php_poll_backend_ops php_poll_backend_wsapoll_ops;
+#else
 extern const php_poll_backend_ops php_poll_backend_poll_ops;
+#endif
 
 /* Register all available backends */
 PHPAPI void php_poll_register_backends(void)
@@ -55,8 +59,11 @@ PHPAPI void php_poll_register_backends(void)
 	}
 #endif
 
-	/* Poll or its emulation is always available */
+#ifdef PHP_WIN32
+	registered_backends[num_registered_backends++] = &php_poll_backend_wsapoll_ops;
+#else
 	registered_backends[num_registered_backends++] = &php_poll_backend_poll_ops;
+#endif
 }
 
 /* Get backend operations */

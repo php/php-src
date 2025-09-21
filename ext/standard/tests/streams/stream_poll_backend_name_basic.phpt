@@ -1,5 +1,11 @@
 --TEST--
 Stream polling - backend name
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die ("skip not for Windows");
+}
+?>
 --FILE--
 <?php
 require_once __DIR__ . '/stream_poll.inc';
