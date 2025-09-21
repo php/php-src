@@ -1274,14 +1274,17 @@ try_string_offset:
 		switch (Z_TYPE_P(dim)) {
 			/* case IS_LONG: */
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
-					break;
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, false)) {
+					goto out;
 				}
 				ZVAL_NULL(result);
 				return;
+			case IS_DOUBLE:
+				offset = zend_dval_to_lval_silent(Z_DVAL_P(dim));
+				goto out;
 			case IS_UNDEF:
 				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
-			case IS_DOUBLE:
+				ZEND_FALLTHROUGH;
 			case IS_NULL:
 			case IS_FALSE:
 			case IS_TRUE:
@@ -1302,6 +1305,7 @@ try_string_offset:
 		offset = Z_LVAL_P(dim);
 	}
 
+out:
 	if ((zend_ulong)offset >= (zend_ulong)ZSTR_LEN(str)) {
 		if (offset < 0) {
 			/* Handle negative offset */
