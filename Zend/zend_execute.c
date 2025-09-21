@@ -3241,7 +3241,17 @@ static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable 
 	zend_ulong hval;
 
 	if (Z_TYPE_P(offset) == IS_DOUBLE) {
+		/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_TRY_ADDREF(ht);
 		hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			zend_array_destroy(ht);
+			return NULL;
+		}
+		if (EG(exception)) {
+			return NULL;
+		}
 num_idx:
 		return zend_hash_index_find(ht, hval);
 	} else if (Z_TYPE_P(offset) == IS_NULL) {
@@ -3380,7 +3390,17 @@ num_key:
 		key = Z_REFVAL_P(key);
 		goto try_again;
 	} else if (Z_TYPE_P(key) == IS_DOUBLE) {
+		/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_TRY_ADDREF(ht);
 		hval = zend_dval_to_lval_safe(Z_DVAL_P(key));
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			zend_array_destroy(ht);
+			return false;
+		}
+		if (EG(exception)) {
+			return false;
+		}
 		goto num_key;
 	} else if (Z_TYPE_P(key) == IS_FALSE) {
 		hval = 0;

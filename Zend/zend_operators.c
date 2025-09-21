@@ -415,6 +415,8 @@ try_again:
 					zend_error(E_WARNING, "A non-numeric value encountered");
 					if (UNEXPECTED(EG(exception))) {
 						*failed = 1;
+						zend_tmp_string_release(op_str);
+						return 0;
 					}
 				}
 				if (EXPECTED(type == IS_LONG)) {
@@ -425,14 +427,18 @@ try_again:
 					 * We use use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
+					if (op_str == NULL) {
+						/* zend_dval_to_lval_cap() can emit a warning so always do the copy here */
+						op_str = zend_string_copy(Z_STR_P(op));
+					}
 					lval = zend_dval_to_lval_cap(dval);
 					if (!zend_is_long_compatible(dval, lval)) {
-						zend_incompatible_string_to_long_error(op_str ? op_str : Z_STR_P(op));
+						zend_incompatible_string_to_long_error(op_str);
 						if (UNEXPECTED(EG(exception))) {
 							*failed = 1;
 						}
 					}
-					zend_tmp_string_release(op_str);
+					zend_string_release(op_str);
 					return lval;
 				}
 			}
