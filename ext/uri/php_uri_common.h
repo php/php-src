@@ -147,11 +147,11 @@ typedef struct uri_object_t {
 	zend_object std;
 } uri_object_t;
 
-static inline uri_object_t *uri_object_from_obj(const zend_object *object) {
+static inline uri_object_t *uri_object_from_obj(zend_object *object) {
 	return (uri_object_t*)((char*)(object) - XtOffsetOf(uri_object_t, std));
 }
 
-static inline uri_internal_t *uri_internal_from_obj(const zend_object *object) {
+static inline uri_internal_t *uri_internal_from_obj(zend_object *object) {
 	return &(uri_object_from_obj(object)->internal);
 }
 
