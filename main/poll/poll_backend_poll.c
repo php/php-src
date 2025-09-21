@@ -14,9 +14,11 @@
 
 #include "php_poll_internal.h"
 
+#ifndef PHP_WIN32
+
 typedef struct {
 	php_poll_fd_table *fd_table;
-	php_pollfd *temp_fds;
+	struct pollfd *temp_fds;
 	int temp_fds_capacity;
 } poll_backend_data_t;
 
@@ -76,7 +78,7 @@ static zend_result poll_backend_init(php_poll_ctx *ctx)
 		return FAILURE;
 	}
 
-	data->temp_fds = php_poll_calloc(initial_capacity, sizeof(php_pollfd), ctx->persistent);
+	data->temp_fds = php_poll_calloc(initial_capacity, sizeof(struct pollfd), ctx->persistent);
 	if (!data->temp_fds) {
 		php_poll_fd_table_cleanup(data->fd_table);
 		pefree(data, ctx->persistent);
@@ -160,13 +162,13 @@ static zend_result poll_backend_remove(php_poll_ctx *ctx, int fd)
 	return SUCCESS;
 }
 
-/* Context for building php_pollfd array */
+/* Context for building struct pollfd array */
 typedef struct {
-	php_pollfd *fds;
+	struct pollfd *fds;
 	int index;
 } poll_build_context;
 
-/* Callback to build php_pollfd array from fd_table */
+/* Callback to build struct pollfd array from fd_table */
 static bool poll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *user_data)
 {
 	poll_build_context *ctx = (poll_build_context *) user_data;
@@ -186,14 +188,10 @@ static void php_poll_msleep(int timeout_ms)
 		return;
 	}
 
-#ifdef PHP_WIN32
-	Sleep(timeout_ms);
-#else
 	struct timespec ts;
 	ts.tv_sec = timeout_ms / 1000;
 	ts.tv_nsec = (timeout_ms % 1000) * 1000000;
 	nanosleep(&ts, NULL);
-#endif
 }
 
 static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
@@ -210,8 +208,8 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 
 	/* Ensure temp_fds array is large enough */
 	if (fd_count > backend_data->temp_fds_capacity) {
-		php_pollfd *new_fds = php_poll_realloc(
-				backend_data->temp_fds, fd_count * sizeof(php_pollfd), ctx->persistent);
+		struct pollfd *new_fds = php_poll_realloc(
+				backend_data->temp_fds, fd_count * sizeof(struct pollfd), ctx->persistent);
 		if (!new_fds) {
 			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 			return -1;
@@ -220,21 +218,20 @@ static int poll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_
 		backend_data->temp_fds_capacity = fd_count;
 	}
 
-	/* Build php_pollfd array from fd_table */
+	/* Build struct pollfd array from fd_table */
 	poll_build_context build_ctx = { .fds = backend_data->temp_fds, .index = 0 };
 	php_poll_fd_table_foreach(backend_data->fd_table, poll_build_fds_callback, &build_ctx);
 
-	/* Call poll() or its emulation (Windows) */
-	int nfds = php_poll2(backend_data->temp_fds, fd_count, timeout);
+	int nfds = poll(backend_data->temp_fds, fd_count, timeout);
 
 	if (nfds <= 0) {
 		return nfds; /* Return 0 for timeout, -1 for error */
 	}
 
-	/* Process results - iterate through php_pollfd array directly */
+	/* Process results - iterate through struct pollfd array directly */
 	int event_count = 0;
 	for (int i = 0; i < fd_count && event_count < max_events; i++) {
-		php_pollfd *pfd = &backend_data->temp_fds[i];
+		struct pollfd *pfd = &backend_data->temp_fds[i];
 
 		if (pfd->revents != 0) {
 			php_poll_fd_entry *entry = php_poll_fd_table_find(backend_data->fd_table, pfd->fd);
@@ -295,3 +292,5 @@ const php_poll_backend_ops php_poll_backend_poll_ops = {
 	.get_suitable_max_events = poll_backend_get_suitable_max_events,
 	.supports_et = false,
 };
+
+#endif
