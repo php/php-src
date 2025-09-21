@@ -40,9 +40,9 @@ int(0)
 int(3)
 int(3)
 
-Warning: The float-string 1.0E+121 is not representable as an int, cast occurred in %s on line %d
+Warning: The float-string "1.0E+121" is not representable as an int, cast occurred in %s on line %d
 int(9223372036854775807)
 
-Warning: The float-string 1.0E+301 is not representable as an int, cast occurred in %s on line %d
+Warning: The float-string "1.0E+301" is not representable as an int, cast occurred in %s on line %d
 int(9223372036854775807)
 int(0)

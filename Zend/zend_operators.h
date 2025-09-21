@@ -118,7 +118,7 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 ZEND_API void zend_incompatible_double_to_long_error(double d);
 ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
 ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d);
-ZEND_API void ZEND_COLD zend_oob_string_to_long_error(double d);
+ZEND_API void ZEND_COLD zend_oob_string_to_long_error(const zend_string *s);
 
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d);
 
@@ -145,13 +145,13 @@ static zend_always_inline zend_long zend_dval_to_lval_silent(double d)
 }
 
 /* Used to convert a string float to integer during an (int) cast */
-static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
+static zend_always_inline zend_long zend_dval_to_lval_cap(double d, const zend_string *s)
 {
 	if (UNEXPECTED(!zend_finite(d))) {
-		zend_oob_string_to_long_error(d);
+		zend_oob_string_to_long_error(s);
 		return 0;
 	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
-		zend_oob_string_to_long_error(d);
+		zend_oob_string_to_long_error(s);
 		return (d > 0 ? ZEND_LONG_MAX : ZEND_LONG_MIN);
 	}
 	return (zend_long)d;

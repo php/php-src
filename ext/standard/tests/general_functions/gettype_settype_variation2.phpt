@@ -274,7 +274,7 @@ int(1)
 string(7) "integer"
 -- Iteration 20 --
 string(6) "string"
-2: The float-string 2.974394749328742E+21 is not representable as an int, cast occurred
+2: The float-string "2974394749328742328432" is not representable as an int, cast occurred
 bool(true)
 int(2147483647)
 string(7) "integer"
@@ -305,7 +305,7 @@ int(1)
 string(7) "integer"
 -- Iteration 26 --
 string(6) "string"
-2: The float-string 2.974394749328742E+21 is not representable as an int, cast occurred
+2: The float-string "2974394749328742328432" is not representable as an int, cast occurred
 bool(true)
 int(2147483647)
 string(7) "integer"
@@ -675,7 +675,7 @@ int(1)
 string(7) "integer"
 -- Iteration 20 --
 string(6) "string"
-2: The float-string 2.974394749328742E+21 is not representable as an int, cast occurred
+2: The float-string "2974394749328742328432" is not representable as an int, cast occurred
 bool(true)
 int(2147483647)
 string(7) "integer"
@@ -706,7 +706,7 @@ int(1)
 string(7) "integer"
 -- Iteration 26 --
 string(6) "string"
-2: The float-string 2.974394749328742E+21 is not representable as an int, cast occurred
+2: The float-string "2974394749328742328432" is not representable as an int, cast occurred
 bool(true)
 int(2147483647)
 string(7) "integer"
