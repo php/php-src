@@ -53,6 +53,9 @@ PHP                                                                        NEWS
 - MBstring:
   . Updated Unicode data tables to Unicode 17.0. (Yuya Hamada)
 
+- Reflection:
+  . ReflectionConstant is no longer final. (sasezaki)
+
 - Standard:
   . Passing strings which are not one byte long to ord() is now deprecated.
     (Girgias)

@@ -862,6 +862,9 @@ PHP 8.5 UPGRADE NOTES
     readline_callback_handler_install() have been changed to true, rather
     than bool.
 
+- Reflection:
+  . ReflectionConstant is no longer final.
+
 ========================================
 10. New Global Constants
 ========================================
