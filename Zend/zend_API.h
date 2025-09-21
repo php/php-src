@@ -1364,6 +1364,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 
 #define ZEND_TRY_ASSIGN_REF_ARR(zv, arr) do { \
 	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	ZEND_ASSERT(!(GC_FLAGS(arr) & GC_IMMUTABLE)); \
 	_ZEND_TRY_ASSIGN_ARR(zv, arr, 1); \
 } while (0)
 
