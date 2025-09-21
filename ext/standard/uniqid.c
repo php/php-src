@@ -30,8 +30,8 @@
 #include "ext/random/php_random.h"
 #include "ext/random/php_random_csprng.h"
 
-ZEND_TLS time_t prev_sec  = 0;
-ZEND_TLS long   prev_usec = 0;
+ZEND_TLS time_t prev_tv_sec  = 0;
+ZEND_TLS long   prev_tv_usec = 0;
 
 /* {{{ Generates a unique ID */
 PHP_FUNCTION(uniqid)
@@ -40,8 +40,8 @@ PHP_FUNCTION(uniqid)
 	bool more_entropy = 0;
 	zend_string *uniqid;
 	size_t prefix_len = 0;
-	time_t sec;
-	long nsec, usec;
+	struct timespec ts;
+	long tv_usec;
 	int isec, iusec;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
@@ -56,15 +56,15 @@ PHP_FUNCTION(uniqid)
 	 * another process, causing a pause of around 10ms.
 	 */
 	do {
-		zend_realtime_get(&sec, &nsec);
-		usec = nsec / 1000;
-	} while (sec == prev_sec && usec == prev_usec);
+		zend_realtime_spec(&ts);
+		tv_usec = ts.tv_nsec / 1000;
+	} while (ts.tv_sec == prev_tv_sec && tv_usec == prev_tv_usec);
 
-	prev_sec  = sec;
-	prev_usec = usec;
+	prev_tv_sec  = ts.tv_sec;
+	prev_tv_usec = tv_usec;
 
-	isec  = (int) sec;
-	iusec = (int) (usec % 0x100000);
+	isec  = (int) ts.tv_sec;
+	iusec = (int) (tv_usec % 0x100000);
 
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs.

@@ -16,44 +16,6 @@
 
 #include "zend_time.h"
 
-ZEND_API time_t zend_realtime_get(time_t *sec, long *nsec) {
-	if (!nsec) {
-		return time(sec);
-	}
-
-#if defined(HAVE_CLOCK_GETTIME)
-
-	struct timespec ts;
-	clock_gettime(CLOCK_REALTIME, &ts);
-	if (sec) *sec  = ts.tv_sec;
-	*nsec = ts.tv_nsec;
-	return ts.tv_sec;
-
-#elif defined(HAVE_TIMESPEC_GET)
-
-	struct timespec ts;
-	timespec_get(&ts, TIME_UTC);
-	if (sec) *sec  = ts.tv_sec;
-	*nsec = ts.tv_nsec;
-	return ts.tv_sec;
-
-#elif defined(HAVE_GETTIMEOFDAY)
-
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-
-	if (sec) *sec  = tv.tv_sec;
-	*nsec = tv.tv_usec * 1000;
-	return tv.tv_sec;
-
-#else
-
-	*nsec = 0;
-	return time(sec);
-
-#endif
-}
-
 ZEND_API void zend_realtime_spec(struct timespec *ts) {
 #if defined(HAVE_CLOCK_GETTIME)
 
