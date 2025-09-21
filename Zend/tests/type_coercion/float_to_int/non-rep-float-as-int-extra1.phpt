@@ -16,4 +16,4 @@ var_dump($b | 1);
 --EXPECTF--
 non-representable float-string 1.0E+4%d was cast to int
 Implicit conversion from float-string "1.0E+4%d" to int loses precision
-int(9223372036854775807)
+int(%d)
