@@ -1262,7 +1262,7 @@ CACHE_LIMITER_FUNC(public)
 	time_t expire_at;
 
 
-	expire_at = zend_realtime_get(NULL, NULL) + PS(cache_expire) * 60;
+	expire_at = zend_realtime_get() + PS(cache_expire) * 60;
 	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &expire_at);
 	ADD_HEADER(buf);
@@ -1385,7 +1385,7 @@ static zend_result php_session_send_cookie(void)
 	if (PS(cookie_lifetime) > 0) {
 		time_t t;
 
-		t = zend_realtime_get(NULL, NULL) + PS(cookie_lifetime);
+		t = zend_realtime_get() + PS(cookie_lifetime);
 
 		if (t > 0) {
 			date_fmt = php_format_date(ZEND_STRL("D, d M Y H:i:s \\G\\M\\T"), t, false);

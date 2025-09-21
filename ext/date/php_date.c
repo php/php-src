@@ -847,7 +847,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, bool localtime)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ts_is_null) {
-		ts = zend_realtime_get(NULL, NULL);
+		ts = zend_realtime_get();
 	}
 
 	RETURN_STR(php_format_date(ZSTR_VAL(format), ZSTR_LEN(format), ts, localtime));
@@ -1011,7 +1011,7 @@ PHP_FUNCTION(idate)
 	}
 
 	if (ts_is_null) {
-		ts = zend_realtime_get(NULL, NULL);
+		ts = zend_realtime_get();
 	}
 
 	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(strtotime)
 	now->tz_info = tzi;
 	now->zone_type = TIMELIB_ZONETYPE_ID;
 	timelib_unixtime2local(now,
-		!preset_ts_is_null ? (timelib_sll) preset_ts : (timelib_sll) zend_realtime_get(NULL, NULL));
+		!preset_ts_is_null ? (timelib_sll) preset_ts : (timelib_sll) zend_realtime_get());
 
 	t = timelib_strtotime(ZSTR_VAL(times), ZSTR_LEN(times), &error,
 		DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
@@ -1142,7 +1142,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 	/* Initialize structure with current time */
 	now = timelib_time_ctor();
 	if (gmt) {
-		timelib_unixtime2gmt(now, (timelib_sll) zend_realtime_get(NULL, NULL));
+		timelib_unixtime2gmt(now, (timelib_sll) zend_realtime_get());
 	} else {
 		tzi = get_timezone_info();
 		if (!tzi) {
@@ -1150,7 +1150,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 		}
 		now->tz_info = tzi;
 		now->zone_type = TIMELIB_ZONETYPE_ID;
-		timelib_unixtime2local(now, (timelib_sll) zend_realtime_get(NULL, NULL));
+		timelib_unixtime2local(now, (timelib_sll) zend_realtime_get());
 	}
 
 	now->h = hou;
@@ -1260,7 +1260,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 	}
 
 	if (timestamp_is_null) {
-		timestamp = (zend_long) zend_realtime_get(NULL, NULL);
+		timestamp = (zend_long) zend_realtime_get();
 	}
 
 	ts = timelib_time_ctor();
@@ -1356,7 +1356,7 @@ PHP_FUNCTION(time)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_LONG((zend_long) zend_realtime_get(NULL, NULL));
+	RETURN_LONG((zend_long) zend_realtime_get());
 }
 /* }}} */
 
@@ -1376,7 +1376,7 @@ PHP_FUNCTION(localtime)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (timestamp_is_null) {
-		timestamp = (zend_long) zend_realtime_get(NULL, NULL);
+		timestamp = (zend_long) zend_realtime_get();
 	}
 
 	tzi = get_timezone_info();
@@ -1431,7 +1431,7 @@ PHP_FUNCTION(getdate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (timestamp_is_null) {
-		timestamp = (zend_long) zend_realtime_get(NULL, NULL);
+		timestamp = (zend_long) zend_realtime_get();
 	}
 
 	tzi = get_timezone_info();

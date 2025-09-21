@@ -64,7 +64,7 @@ void fpm_request_reading_headers(void)
 #endif
 
 	now_ns = zend_monotime_fallback();
-	now_epoch = zend_realtime_get(NULL, NULL);
+	now_epoch = zend_realtime_get();
 #ifdef HAVE_TIMES
 	times(&cpu);
 #endif
