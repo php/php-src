@@ -135,47 +135,47 @@ $EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FL
 const EXPECTF_OUTPUT_FLOAT_OOB_OFFSETS = <<<OUTPUT
 Read before write:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 Warning: Undefined array key 0 in %s on line %d
 NULL
 Write:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 Read:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 int(5)
 Read-Write:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 isset():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 bool(true)
 empty():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 bool(false)
 null coalesce:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 int(25)
 Reference to dimension:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 Value of reference:
 int(25)
 Value of container dimension after write to reference (should be int(100) if successful):
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 int(100)
 unset():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 Nested read:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 Warning: Undefined array key 0 in %s on line %d
 
@@ -183,37 +183,37 @@ Warning: Trying to access array offset on null in %s on line 74
 NULL
 Nested write:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 Nested Read-Write:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 Nested isset():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 bool(true)
 Nested empty():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 bool(false)
 Nested null coalesce:
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 int(30)
 Nested unset():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 OUTPUT;
 

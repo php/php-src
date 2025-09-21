@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-non-representable float INF was cast to int
+The float INF is not representable as an int, cast occurred

@@ -27,11 +27,11 @@ new foo;
 
 ?>
 --EXPECTF--
-Warning: non-representable float 3428599296 was cast to int in %s on line %d
+Warning: The float 3428599296 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 3459455488 was cast to int in %s on line %d
+Warning: The float 3459455488 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 3459616768 was cast to int in %s on line %d
+Warning: The float 3459616768 is not representable as an int, cast occurred in %s on line %d
 array(3) {
   [-866368000]=>
   int(1)
@@ -41,10 +41,10 @@ array(3) {
   int(3)
 }
 
-Warning: non-representable float 3459455488 was cast to int in %s on line %d
+Warning: The float 3459455488 is not representable as an int, cast occurred in %s on line %d
 int(2)
 
-Warning: non-representable float 3459616768 was cast to int in %s on line %d
+Warning: The float 3459616768 is not representable as an int, cast occurred in %s on line %d
 array(1) {
   [-835350528]=>
   int(3)

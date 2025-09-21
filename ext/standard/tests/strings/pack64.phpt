@@ -47,7 +47,7 @@ Array
     [1] => 0
 )
 
-Warning: non-representable float 9.223372036854776E+18 was cast to int in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808
@@ -57,7 +57,7 @@ Array
     [1] => -1
 )
 
-Warning: non-representable float 9.223372036854776E+18 was cast to int in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808
@@ -71,7 +71,7 @@ Array
     [1] => 0
 )
 
-Warning: non-representable float 9.223372036854776E+18 was cast to int in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808
@@ -81,7 +81,7 @@ Array
     [1] => -1
 )
 
-Warning: non-representable float 9.223372036854776E+18 was cast to int in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808
@@ -95,7 +95,7 @@ Array
     [1] => 0
 )
 
-Warning: non-representable float 9.223372036854776E+18 was cast to int in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808
@@ -105,7 +105,7 @@ Array
     [1] => -1
 )
 
-Warning: non-representable float 9.223372036854776E+18 was cast to int in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808
@@ -119,7 +119,7 @@ Array
     [1] => 0
 )
 
-Warning: non-representable float 9.223372036854776E+18 was cast to int in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808
@@ -129,7 +129,7 @@ Array
     [1] => -1
 )
 
-Warning: non-representable float 9.223372036854776E+18 was cast to int in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -9223372036854775808

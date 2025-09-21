@@ -25,13 +25,13 @@ echo "Done\n";
 --EXPECTF--
 int(9223372036854775807)
 
-Warning: non-representable float %f was cast to int in %s on line %d
+Warning: The float %f is not representable as an int, cast occurred in %s on line %d
 int(-9223372036854775808)
 
-Warning: non-representable float %f was cast to int in %s on line %d
+Warning: The float %f is not representable as an int, cast occurred in %s on line %d
 int(-9223372036854775808)
 
-Warning: non-representable float %f was cast to int in %s on line %d
+Warning: The float %f is not representable as an int, cast occurred in %s on line %d
 int(0)
 int(-9223372036854775808)
 int(-9223372036854775808)

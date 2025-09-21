@@ -53,22 +53,22 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
     echo "\n", toUTF8(65), "\n", toUTF8(233), "\n", toUTF8(1252), "\n", toUTF8(20095), "\n";
 ?>
 --EXPECTF--
-Warning: non-representable float 4294967168 was cast to int in %s on line %d
+Warning: The float 4294967168 is not representable as an int, cast occurred in %s on line %d
 A
 
-Warning: non-representable float 4294967168 was cast to int in %s on line %d
+Warning: The float 4294967168 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 4294965248 was cast to int in %s on line %d
+Warning: The float 4294965248 is not representable as an int, cast occurred in %s on line %d
 é
 
-Warning: non-representable float 4294967168 was cast to int in %s on line %d
+Warning: The float 4294967168 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 4294965248 was cast to int in %s on line %d
+Warning: The float 4294965248 is not representable as an int, cast occurred in %s on line %d
 Ӥ
 
-Warning: non-representable float 4294967168 was cast to int in %s on line %d
+Warning: The float 4294967168 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 4294965248 was cast to int in %s on line %d
+Warning: The float 4294965248 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 4294901760 was cast to int in %s on line %d
+Warning: The float 4294901760 is not representable as an int, cast occurred in %s on line %d
 乿

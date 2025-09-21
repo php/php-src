@@ -23,15 +23,15 @@ var_dump($array[$string_float]);
 
 ?>
 --EXPECTF--
-Warning: non-representable float 1.0E+121 was cast to int in %s on line %d
+Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 int(0)
 
-Warning: non-representable float-string 1.0E+121 was cast to int in %s on line %d
+Warning: The float-string 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 bool(true)
 
-Warning: non-representable float 1.0E+121 was cast to int in %s on line %d
+Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 1.0E+121 was cast to int in %s on line %d
+Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 array(2) {
   [0]=>
   string(11) "Large float"
@@ -45,13 +45,13 @@ array(2) {
   string(18) "String large float"
 }
 
-Warning: non-representable float 1.0E+121 was cast to int in %s on line %d
+Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 string(1) "0"
 
 Warning: Undefined array key "1.0E+121" in %s on line %d
 NULL
 
-Warning: non-representable float 1.0E+121 was cast to int in %s on line %d
+Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 string(1) "0"
 
 Warning: Undefined array key "1.0E+121" in %s on line %d

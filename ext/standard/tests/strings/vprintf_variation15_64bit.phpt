@@ -57,7 +57,7 @@ int(22)
 
 -- Iteration 3 --
 
-Warning: non-representable float 1.0E+21 was cast to int in %s on line %d
+Warning: The float 1.0E+21 is not representable as an int, cast occurred in %s on line %d
    1234000 3875820019684212736 120
 int(34)
 

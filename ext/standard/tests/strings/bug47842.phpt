@@ -31,6 +31,6 @@ sscanf 64-bit signed int '9223372036854775807'  (2^63)-1 = 9223372036854775807
 sscanf 64-bit unsign int '18446744073709551615' (2^64)-1 = 18446744073709551615
 printf 64-bit signed int '9223372036854775807'  (2^63)-1 = 9223372036854775807
 
-Warning: non-representable float 1.8446744073709552E+19 was cast to int in %s on line %d
+Warning: The float 1.8446744073709552E+19 is not representable as an int, cast occurred in %s on line %d
 printf 64-bit signed int '18446744073709551615' (2^64)-1 = 0
 Done

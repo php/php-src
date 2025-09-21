@@ -14,5 +14,5 @@ var_dump(isset($ary[1.0E+42]));
 
 ?>
 --EXPECT--
-non-representable float 1.0E+42 was cast to int
+The float 1.0E+42 is not representable as an int, cast occurred
 bool(false)

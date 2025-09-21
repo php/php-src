@@ -53,13 +53,13 @@ int(16)
 
 -- Iteration 2 --
 
-Warning: non-representable float 12345678900 was cast to int in %s on line %d
+Warning: The float 12345678900 is not representable as an int, cast occurred in %s on line %d
 3755744308 1234 12345
 int(21)
 
 -- Iteration 3 --
 
-Warning: non-representable float 101234567000 was cast to int in %s on line %d
+Warning: The float 101234567000 is not representable as an int, cast occurred in %s on line %d
    1234000 2450319192 120
 int(25)
 

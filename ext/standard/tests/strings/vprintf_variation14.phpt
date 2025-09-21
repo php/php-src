@@ -80,11 +80,11 @@ foreach($args_array as $args) {
 
 -- Iteration 1 --
 
-Warning: non-representable float 20000000000 was cast to int in %s on line %d
+Warning: The float 20000000000 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 2000000000000 was cast to int in %s on line %d
+Warning: The float 2000000000000 is not representable as an int, cast occurred in %s on line %d
 
-Warning: non-representable float 22000000000000 was cast to int in %s on line %d
+Warning: The float 22000000000000 is not representable as an int, cast occurred in %s on line %d
 2 0 a
    1e240 x fffffb2e 4d2 
                          

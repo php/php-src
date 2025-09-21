@@ -144,13 +144,13 @@ Array
     [1] => -64434
 )
 
-Warning: non-representable float 4294967296 was cast to int in %s on line %d
+Warning: The float 4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0
 )
 
-Warning: non-representable float -4294967296 was cast to int in %s on line %d
+Warning: The float -4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0
@@ -164,13 +164,13 @@ Array
     [1] => 0
 )
 
-Warning: non-representable float 2147483650 was cast to int in %s on line %d
+Warning: The float 2147483650 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -2147483646
 )
 
-Warning: non-representable float 4294967295 was cast to int in %s on line %d
+Warning: The float 4294967295 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -1
@@ -188,13 +188,13 @@ Array
     [1] => 0
 )
 
-Warning: non-representable float 2147483650 was cast to int in %s on line %d
+Warning: The float 2147483650 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -2147483646
 )
 
-Warning: non-representable float 4294967296 was cast to int in %s on line %d
+Warning: The float 4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0
@@ -240,13 +240,13 @@ Array
     [1] => 0
 )
 
-Warning: non-representable float 2147483650 was cast to int in %s on line %d
+Warning: The float 2147483650 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -2147483646
 )
 
-Warning: non-representable float 4294967296 was cast to int in %s on line %d
+Warning: The float 4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0
@@ -316,13 +316,13 @@ Array
     [1] => 0
 )
 
-Warning: non-representable float 2147483650 was cast to int in %s on line %d
+Warning: The float 2147483650 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => -2147483646
 )
 
-Warning: non-representable float 4294967296 was cast to int in %s on line %d
+Warning: The float 4294967296 is not representable as an int, cast occurred in %s on line %d
 Array
 (
     [1] => 0

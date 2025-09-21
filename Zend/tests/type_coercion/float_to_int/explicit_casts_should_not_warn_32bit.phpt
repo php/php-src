@@ -29,20 +29,20 @@ foreach($values as $value) {
 int(3)
 int(3)
 
-Warning: non-representable float 1.0E+121 was cast to int in %s on line %d
+Warning: The float 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 int(0)
 
-Warning: non-representable float 1.0E+301 was cast to int in %s on line %d
+Warning: The float 1.0E+301 is not representable as an int, cast occurred in %s on line %d
 int(0)
 
-Warning: non-representable float NAN was cast to int in %s on line %d
+Warning: The float NAN is not representable as an int, cast occurred in %s on line %d
 int(0)
 int(3)
 int(3)
 
-Warning: non-representable float-string 1.0E+121 was cast to int in %s on line %d
+Warning: The float-string 1.0E+121 is not representable as an int, cast occurred in %s on line %d
 int(2147483647)
 
-Warning: non-representable float-string 1.0E+301 was cast to int in %s on line %d
+Warning: The float-string 1.0E+301 is not representable as an int, cast occurred in %s on line %d
 int(2147483647)
 int(0)

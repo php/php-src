@@ -23,15 +23,15 @@ echo "Done\n";
 --EXPECTF--
 int(-2147483648)
 
-Warning: non-representable float -2147483649 was cast to int in %s on line %d
+Warning: The float -2147483649 is not representable as an int, cast occurred in %s on line %d
 int(2147483647)
 
-Warning: non-representable float -2147483658 was cast to int in %s on line %d
+Warning: The float -2147483658 is not representable as an int, cast occurred in %s on line %d
 int(2147483638)
 
-Warning: non-representable float -2147483748 was cast to int in %s on line %d
+Warning: The float -2147483748 is not representable as an int, cast occurred in %s on line %d
 int(2147483548)
 
-Warning: non-representable float -2147484648 was cast to int in %s on line %d
+Warning: The float -2147484648 is not representable as an int, cast occurred in %s on line %d
 int(2147482648)
 Done

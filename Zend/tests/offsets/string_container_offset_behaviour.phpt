@@ -440,13 +440,13 @@ Warning: String offset cast occurred in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(true)
 empty():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
@@ -474,13 +474,13 @@ Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(true)
 Nested empty():
 
-Warning: non-representable float %F was cast to int in %s on line %d
+Warning: The float %F is not representable as an int, cast occurred in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)

@@ -916,11 +916,11 @@ ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string
 }
 ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d)
 {
-	zend_error_unchecked(E_WARNING, "non-representable float %.*H was cast to int", -1, d);
+	zend_error_unchecked(E_WARNING, "The float %.*H is not representable as an int, cast occurred", -1, d);
 }
 ZEND_API void ZEND_COLD zend_oob_string_to_long_error(double d)
 {
-	zend_error_unchecked(E_WARNING, "non-representable float-string %.*H was cast to int", -1, d);
+	zend_error_unchecked(E_WARNING, "The float-string %.*H is not representable as an int, cast occurred", -1, d);
 }
 
 ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict) /* {{{ */
