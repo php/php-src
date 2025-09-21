@@ -823,6 +823,13 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	uri_internal_t *internal_uri = uri_internal_from_obj(object);
+	if (internal_uri->uri != NULL) {
+		/* Intentionally throw two exceptions for proper chaining. */
+		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(object->ce->name));
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
+		RETURN_THROWS();
+	}
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
 	if (zend_hash_num_elements(data) != 2) {
@@ -849,13 +856,6 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_THROWS();
 	}
 
-	uri_internal_t *internal_uri = uri_internal_from_obj(object);
-	if (internal_uri->uri != NULL) {
-		/* Intentionally throw two exceptions for proper chaining. */
-		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
-		RETURN_THROWS();
-	}
 	internal_uri->uri = internal_uri->parser->parse(Z_STRVAL_P(uri_zv), Z_STRLEN_P(uri_zv), NULL, NULL, true);
 	if (internal_uri->uri == NULL) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(object->ce->name));
