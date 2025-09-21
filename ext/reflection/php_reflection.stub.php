@@ -904,7 +904,7 @@ final class ReflectionFiber
  * @strict-properties
  * @not-serializable
  */
-final class ReflectionConstant implements Reflector
+class ReflectionConstant implements Reflector
 {
     public string $name;
 
