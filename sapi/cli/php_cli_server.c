@@ -269,7 +269,7 @@ static bool php_cli_server_get_system_time(char *buf) {
 	time_t sec;
 	struct tm tm;
 
-	zend_realtime_get(&sec, NULL);
+	sec = zend_realtime_get();
 	if (!php_localtime_r(&sec, &tm)) {
 		return false;
 	}
@@ -385,7 +385,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 		zend_string *dt = php_format_date(
 			"D, d M Y H:i:s",
 			sizeof("D, d M Y H:i:s") - 1,
-			zend_realtime_get(NULL, NULL),
+			zend_realtime_get(),
 			0
 		);
 		smart_str_appends_ex(buffer, "Date: ", persistent);

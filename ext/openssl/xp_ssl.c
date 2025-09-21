@@ -1079,7 +1079,7 @@ static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
 
 	stream = php_openssl_get_stream_from_ssl_handle(ssl);
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	now = (zend_long)zend_realtime_get(NULL, NULL);
+	now = (zend_long)zend_realtime_get();
 
 	/* The initial handshake is never rate-limited */
 	if (sslsock->reneg->prev_handshake == 0) {

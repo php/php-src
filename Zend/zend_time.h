@@ -62,8 +62,8 @@
 
 BEGIN_EXTERN_C()
 
-/* Like time() but with up to nanosecond */
-ZEND_API time_t zend_realtime_get(time_t *sec, long *nsec);
+/* Helper macro to get current timestamp in seconds */
+#define zend_realtime_get() time(NULL)
 
 /* wrapper around clock_gettime/timestamp_get/gettimeofday/time */
 ZEND_API void zend_realtime_spec(struct timespec *ts);

@@ -79,7 +79,7 @@ int fpm_status_export_to_zval(zval *status)
 	}
 	fpm_scoreboard_release(scoreboard_p);
 
-	now_epoch = zend_realtime_get(NULL, NULL);
+	now_epoch = zend_realtime_get();
 	now_ns    = zend_monotime_fallback();
 
 	array_init(status);
