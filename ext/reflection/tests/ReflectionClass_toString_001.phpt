@@ -30,7 +30,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     Property [ public string $name ]
   }
 
-  - Methods [64] {
+  - Methods [65] {
     Method [ <internal:Reflection> private method __clone ] {
 
       - Parameters [0] {
@@ -330,6 +330,15 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
         Parameter #0 [ <optional> array $args = [] ]
       }
       - Tentative return [ ?object ]
+    }
+
+    Method [ <internal:Reflection> public method newInstanceFromData ] {
+
+      - Parameters [2] {
+        Parameter #0 [ <required> array $data ]
+        Parameter #1 [ <optional> array $args = [] ]
+      }
+      - Return [ object ]
     }
 
     Method [ <internal:Reflection> public method newLazyGhost ] {
