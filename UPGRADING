@@ -417,6 +417,10 @@ PHP 8.5 UPGRADE NOTES
     deprecated. This is because the associated timezone is ignored and always
     uses GMT.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_date_rfc7231_and_datetimeinterfacerfc7231
+  . The __wakeup() magic method of DateTimeInterface, DateTime,
+    DateTimeImmutable, DateTimeZone, DateInterval, and DatePeriod has been
+    deprecated in favour of the __unserialize() magic method.
+    Related to RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_sleep_and_wakeup_magic_methods
 
 - FileInfo:
   . The finfo_close() function has been deprecated.

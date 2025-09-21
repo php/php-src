@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
     (nielsdos)
+  . The __wakeup() magic method of DateTimeInterface, DateTime,
+    DateTimeImmutable, DateTimeZone, DateInterval, and DatePeriod has been
+    deprecated in favour of the __unserialize() magic method. (Girgias)
 
 - Exif:
   . Fix OSS-Fuzz #442954659 (zero-size box in HEIF file causes infinite loop).
