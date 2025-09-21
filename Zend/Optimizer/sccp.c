@@ -371,7 +371,7 @@ static inline zend_result fetch_array_elem(zval **result, zval *op1, zval *op2) 
 			*result = zend_hash_index_find(Z_ARR_P(op1), Z_LVAL_P(op2));
 			return SUCCESS;
 		case IS_DOUBLE: {
-			zend_long lval = zend_dval_to_lval(Z_DVAL_P(op2));
+			zend_long lval = zend_dval_to_lval_silent(Z_DVAL_P(op2));
 			if (!zend_is_long_compatible(Z_DVAL_P(op2), lval)) {
 				return FAILURE;
 			}
@@ -459,7 +459,7 @@ static inline zend_result ct_eval_del_array_elem(zval *result, const zval *key) 
 			zend_hash_index_del(Z_ARR_P(result), Z_LVAL_P(key));
 			break;
 		case IS_DOUBLE: {
-			zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
+			zend_long lval = zend_dval_to_lval_silent(Z_DVAL_P(key));
 			if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 				return FAILURE;
 			}
@@ -504,7 +504,7 @@ static inline zend_result ct_eval_add_array_elem(zval *result, zval *value, cons
 			value = zend_hash_index_update(Z_ARR_P(result), Z_LVAL_P(key), value);
 			break;
 		case IS_DOUBLE: {
-			zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
+			zend_long lval = zend_dval_to_lval_silent(Z_DVAL_P(key));
 			if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 				return FAILURE;
 			}

@@ -387,12 +387,9 @@ try_again:
 			return 1;
 		case IS_DOUBLE: {
 			double dval = Z_DVAL_P(op);
-			zend_long lval = zend_dval_to_lval(dval);
-			if (!zend_is_long_compatible(dval, lval)) {
-				zend_incompatible_double_to_long_error(dval);
-				if (UNEXPECTED(EG(exception))) {
-					*failed = 1;
-				}
+			zend_long lval = zend_dval_to_lval_safe(dval);
+			if (UNEXPECTED(EG(exception))) {
+				*failed = 1;
 			}
 			return lval;
 		}
@@ -418,6 +415,8 @@ try_again:
 					zend_error(E_WARNING, "A non-numeric value encountered");
 					if (UNEXPECTED(EG(exception))) {
 						*failed = 1;
+						zend_tmp_string_release(op_str);
+						return 0;
 					}
 				}
 				if (EXPECTED(type == IS_LONG)) {
@@ -428,14 +427,18 @@ try_again:
 					 * We use use saturating conversion to emulate strtol()'s
 					 * behaviour.
 					 */
-					lval = zend_dval_to_lval_cap(dval);
+					if (op_str == NULL) {
+						/* zend_dval_to_lval_cap() can emit a warning so always do the copy here */
+						op_str = zend_string_copy(Z_STR_P(op));
+					}
+					lval = zend_dval_to_lval_cap(dval, op_str);
 					if (!zend_is_long_compatible(dval, lval)) {
-						zend_incompatible_string_to_long_error(op_str ? op_str : Z_STR_P(op));
+						zend_incompatible_string_to_long_error(op_str);
 						if (UNEXPECTED(EG(exception))) {
 							*failed = 1;
 						}
 					}
-					zend_tmp_string_release(op_str);
+					zend_string_release(op_str);
 					return lval;
 				}
 			}
@@ -911,6 +914,14 @@ ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string
 {
 	zend_error(E_DEPRECATED, "Implicit conversion from float-string \"%s\" to int loses precision", ZSTR_VAL(s));
 }
+ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d)
+{
+	zend_error_unchecked(E_WARNING, "The float %.*H is not representable as an int, cast occurred", -1, d);
+}
+ZEND_API void ZEND_COLD zend_oob_string_to_long_error(const zend_string *s)
+{
+	zend_error_unchecked(E_WARNING, "The float-string \"%s\" is not representable as an int, cast occurred", ZSTR_VAL(s));
+}
 
 ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict) /* {{{ */
 {
@@ -952,7 +963,7 @@ try_again:
 					 * behaviour.
 					 */
 					 /* Most usages are expected to not be (int) casts */
-					lval = zend_dval_to_lval_cap(dval);
+					lval = zend_dval_to_lval_cap(dval, Z_STR_P(op));
 					if (UNEXPECTED(is_strict)) {
 						if (!zend_is_long_compatible(dval, lval)) {
 							zend_incompatible_string_to_long_error(Z_STR_P(op));
@@ -1613,15 +1624,12 @@ try_again:
 			ZVAL_LONG(result, ~Z_LVAL_P(op1));
 			return SUCCESS;
 		case IS_DOUBLE: {
-			zend_long lval = zend_dval_to_lval(Z_DVAL_P(op1));
-			if (!zend_is_long_compatible(Z_DVAL_P(op1), lval)) {
-				zend_incompatible_double_to_long_error(Z_DVAL_P(op1));
-				if (EG(exception)) {
-					if (result != op1) {
-						ZVAL_UNDEF(result);
-					}
-					return FAILURE;
+			zend_long lval = zend_dval_to_lval_safe(Z_DVAL_P(op1));
+			if (EG(exception)) {
+				if (result != op1) {
+					ZVAL_UNDEF(result);
 				}
+				return FAILURE;
 			}
 			ZVAL_LONG(result, ~lval);
 			return SUCCESS;

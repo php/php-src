@@ -23,10 +23,21 @@ if (PHP_INT_SIZE != 4)
     }
 
 ?>
---EXPECT--
+--EXPECTF--
+Warning: The float -4.000000000000001E+21 is not representable as an int, cast occurred in %s on line %d
 int(-2056257536)
+
+Warning: The float -4.0000000000000005E+21 is not representable as an int, cast occurred in %s on line %d
 int(-2055733248)
+
+Warning: The float -4.0E+21 is not representable as an int, cast occurred in %s on line %d
 int(-2055208960)
+
+Warning: The float -3.9999999999999995E+21 is not representable as an int, cast occurred in %s on line %d
 int(-2054684672)
+
+Warning: The float -3.999999999999999E+21 is not representable as an int, cast occurred in %s on line %d
 int(-2054160384)
+
+Warning: The float -2147483649.8 is not representable as an int, cast occurred in %s on line %d
 int(2147483647)

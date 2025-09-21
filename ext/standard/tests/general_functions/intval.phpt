@@ -94,13 +94,10 @@ $not_int_types = array (
   array(),
   array(0),
   array(1),
-  array(NULL),
   array(null),
   array("string"),
   array(true),
-  array(TRUE),
   array(false),
-  array(FALSE),
   array(1,2,3,4),
   array(1 => "One", "two" => 2),
 
@@ -127,12 +124,6 @@ $not_int_types = array (
   /* booleans */
   true,
   false,
-  TRUE,
-  FALSE,
-
-  /* undefined and unset vars */
-  @$unset_var,
-  @$undefined_var
 );
 
 
@@ -230,11 +221,19 @@ int(-2147483648)
 int(2147483647)
 
 *** Testing intval() on non integer types ***
+
+Warning: The float-string "-2147483649" is not representable as an int, cast occurred in %s on line %d
 int(-2147483648)
+
+Warning: The float-string "2147483648" is not representable as an int, cast occurred in %s on line %d
 int(2147483647)
 int(0)
 int(0)
+
+Warning: The float-string "020000000001" is not representable as an int, cast occurred in %s on line %d
 int(2147483647)
+
+Warning: The float-string "-020000000001" is not representable as an int, cast occurred in %s on line %d
 int(-2147483648)
 int(0)
 int(0)
@@ -256,9 +255,6 @@ int(1)
 int(1)
 int(1)
 int(1)
-int(1)
-int(1)
-int(1)
 int(0)
 int(0)
 int(0)
@@ -278,10 +274,6 @@ int(0)
 int(0)
 int(0)
 int(1)
-int(0)
-int(1)
-int(0)
-int(0)
 int(0)
 
 --- Done ---

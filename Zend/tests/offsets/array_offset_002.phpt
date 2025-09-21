@@ -13,6 +13,6 @@ x($y);
 var_dump($y);
 ?>
 --EXPECT--
-Err: Implicit conversion from float 1.0E+20 to int loses precision
+Err: The float 1.0E+20 is not representable as an int, cast occurred
 array(0) {
 }

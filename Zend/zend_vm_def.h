@@ -6751,7 +6751,17 @@ ZEND_VM_C_LABEL(num_index_dim):
 				offset = Z_REFVAL_P(offset);
 				ZEND_VM_C_GOTO(offset_again);
 			} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
+				 * Temporarily increase the refcount to detect this situation. */
+				GC_TRY_ADDREF(ht);
 				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					break;
+				}
+				if (EG(exception)) {
+					break;
+				}
 				ZEND_VM_C_GOTO(num_index_dim);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();

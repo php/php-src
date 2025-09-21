@@ -11,6 +11,6 @@ $a=[];
 ?>
 DONE
 --EXPECTF--
-Err: Implicit conversion from float %f to int loses precision
+Err: The float %f is not representable as an int, cast occurred
 Err: Undefined array key %i
 DONE
