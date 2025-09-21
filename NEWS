@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     using OPcache). (timwolla)
   . Fixed bug GH-19480 (error_log php.ini cannot be unset when open_basedir is
     configured). (nielsdos)
+  . Fixed bug GH-19719 (Allow empty statements before declare(strict_types)).
+    (nielsdos)
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
@@ -31,6 +33,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed GH-8157 (post_max_size evaluates .user.ini too late in php-fpm).
     (Jakub Zelenka)
+
+- Iconv:
+  . Extends the ICONV_CONST preprocessor for illumos/solaris. (jMichaelA)
 
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
@@ -53,6 +58,7 @@ PHP                                                                        NEWS
   . Add new Uri\UriError exception that is thrown for internal error
     conditions. (timwolla)
   . Further clean up the internal API. (timwolla)
+  . Fixed bug GH-19892 (Refcounting on zend_empty_array). (ilutov, timwolla)
 
 - Windows:
   . Fix GH-19722 (_get_osfhandle asserts in debug mode when given a socket).
