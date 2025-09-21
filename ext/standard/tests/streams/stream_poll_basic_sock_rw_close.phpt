@@ -15,7 +15,7 @@ fwrite($socket1w, "test data");
 fclose($socket1r);
 pt_expect_events(stream_poll_wait($poll_ctx, 100), [
     [
-        'events' => ['default' => STREAM_POLL_WRITE|STREAM_POLL_HUP, 'poll' => STREAM_POLL_HUP],
+        'events' => STREAM_POLL_WRITE|STREAM_POLL_ERROR|STREAM_POLL_HUP,
         'data' => 'socket2_data'
     ]
 ], $poll_ctx);
