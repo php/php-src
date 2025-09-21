@@ -230,10 +230,10 @@ int(2147483647)
 int(0)
 int(0)
 
-Warning: The float-string "20000000001" is not representable as an int, cast occurred in %s on line %d
+Warning: The float-string "020000000001" is not representable as an int, cast occurred in %s on line %d
 int(2147483647)
 
-Warning: The float-string "-20000000001" is not representable as an int, cast occurred in %s on line %d
+Warning: The float-string "-020000000001" is not representable as an int, cast occurred in %s on line %d
 int(-2147483648)
 int(0)
 int(0)
