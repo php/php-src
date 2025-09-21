@@ -58,6 +58,7 @@ PHP                                                                        NEWS
   . Add new Uri\UriError exception that is thrown for internal error
     conditions. (timwolla)
   . Further clean up the internal API. (timwolla)
+  . Fixed bug GH-19892 (Refcounting on zend_empty_array). (ilutov, timwolla)
 
 - Windows:
   . Fix GH-19722 (_get_osfhandle asserts in debug mode when given a socket).
