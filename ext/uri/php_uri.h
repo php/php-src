@@ -27,6 +27,8 @@ typedef struct php_uri {
 	zend_string *user;
 	zend_string *password;
 	zend_string *host;
+	/* port is a zend_long to match the userland port getter, which
+	 * returns the port in zval. */
 	zend_long port;
 	zend_string *path;
 	zend_string *query;
