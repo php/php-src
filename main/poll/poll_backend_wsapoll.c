@@ -66,7 +66,8 @@ static uint32_t wsapoll_events_from_native(uint32_t native)
 
 static zend_result wsapoll_backend_init(php_poll_ctx *ctx)
 {
-	wsapoll_backend_data_t *data = php_poll_calloc(1, sizeof(wsapoll_backend_data_t), ctx->persistent);
+	wsapoll_backend_data_t *data
+			= php_poll_calloc(1, sizeof(wsapoll_backend_data_t), ctx->persistent);
 	if (!data) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 		return FAILURE;
@@ -131,7 +132,8 @@ static zend_result wsapoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t event
 	return SUCCESS;
 }
 
-static zend_result wsapoll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t events, void *user_data)
+static zend_result wsapoll_backend_modify(
+		php_poll_ctx *ctx, int fd, uint32_t events, void *user_data)
 {
 	wsapoll_backend_data_t *backend_data = (wsapoll_backend_data_t *) ctx->backend_data;
 
@@ -177,14 +179,16 @@ static bool wsapoll_build_fds_callback(int fd, php_poll_fd_entry *entry, void *u
 	wsapoll_build_context *ctx = (wsapoll_build_context *) user_data;
 
 	ctx->fds[ctx->index].fd = (SOCKET) fd;
-	ctx->fds[ctx->index].events = (SHORT) wsapoll_events_to_native(entry->events & ~(PHP_POLL_ET | PHP_POLL_ONESHOT));
+	ctx->fds[ctx->index].events
+			= (SHORT) wsapoll_events_to_native(entry->events & ~(PHP_POLL_ET | PHP_POLL_ONESHOT));
 	ctx->fds[ctx->index].revents = 0;
 	ctx->index++;
 
 	return true;
 }
 
-static int wsapoll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
+static int wsapoll_backend_wait(
+		php_poll_ctx *ctx, php_poll_event *events, int max_events, int timeout)
 {
 	wsapoll_backend_data_t *backend_data = (wsapoll_backend_data_t *) ctx->backend_data;
 
@@ -199,7 +203,7 @@ static int wsapoll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int m
 	/* Ensure temp_fds array is large enough */
 	if (fd_count > backend_data->temp_fds_capacity) {
 		WSAPOLLFD *new_fds = php_poll_realloc(
-			backend_data->temp_fds, fd_count * sizeof(WSAPOLLFD), ctx->persistent);
+				backend_data->temp_fds, fd_count * sizeof(WSAPOLLFD), ctx->persistent);
 		if (!new_fds) {
 			php_poll_set_error(ctx, PHP_POLL_ERR_NOMEM);
 			return -1;
@@ -219,19 +223,19 @@ static int wsapoll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int m
 		/* WSAPoll specific error handling */
 		int wsa_error = WSAGetLastError();
 		php_poll_error error_code;
-		
+
 		switch (wsa_error) {
 			case WSAENOTSOCK:
-                /* Special case: all sockets in array are invalid
-                 * WSAPoll fails entirely, but we should clean up and return 0
-                 * This differs from Unix poll() which would report POLLNVAL per socket */
-                
-                /* Remove all invalid sockets from fd_table */
-                for (int i = 0; i < fd_count; i++) {
-                    int fd = (int) backend_data->temp_fds[i].fd;
-                    php_poll_fd_table_remove(backend_data->fd_table, fd);
-                }
-                return 0;
+				/* Special case: all sockets in array are invalid
+				 * WSAPoll fails entirely, but we should clean up and return 0
+				 * This differs from Unix poll() which would report POLLNVAL per socket */
+
+				/* Remove all invalid sockets from fd_table */
+				for (int i = 0; i < fd_count; i++) {
+					int fd = (int) backend_data->temp_fds[i].fd;
+					php_poll_fd_table_remove(backend_data->fd_table, fd);
+				}
+				return 0;
 			case WSAENOBUFS:
 				error_code = PHP_POLL_ERR_NOMEM;
 				break;
@@ -243,7 +247,7 @@ static int wsapoll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int m
 				error_code = PHP_POLL_ERR_SYSTEM;
 				break;
 		}
-		
+
 		php_poll_set_error(ctx, error_code);
 		return -1;
 	}
@@ -268,9 +272,9 @@ static int wsapoll_backend_wait(php_poll_ctx *ctx, php_poll_event *events, int m
 
 				/* Convert WSAPoll events to PHP poll events */
 				uint32_t converted_events = wsapoll_events_from_native(pfd->revents);
-				
+
 				/* Special check if POLLERR and POLLHUP are reported */
-				if ((pfd->revents & POLLERR) &&  (pfd->revents & POLLHUP)) {
+				if ((pfd->revents & POLLERR) && (pfd->revents & POLLHUP)) {
 					/* Clear ERROR if HUP present to match other backends */
 					converted_events &= ~PHP_POLL_ERROR;
 				}
