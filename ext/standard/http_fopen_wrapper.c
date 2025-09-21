@@ -446,7 +446,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			use_proxy = 1;
 			transport_string = zend_string_copy(Z_STR_P(tmpzval));
 		} else {
-			transport_string = zend_strpprintf(0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
+			transport_string = zend_strpprintf(0, "%s://%s:" ZEND_LONG_FMT, use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
 		}
 	}
 
@@ -1083,7 +1083,7 @@ finish:
 					header_info.location = NULL;
 				}
 				if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80)) {
-					spprintf(&new_path, 0, "%s://%s:%d%s", ZSTR_VAL(resource->scheme),
+					spprintf(&new_path, 0, "%s://%s:" ZEND_LONG_FMT "%s", ZSTR_VAL(resource->scheme),
 							ZSTR_VAL(resource->host), resource->port, loc_path);
 				} else {
 					spprintf(&new_path, 0, "%s://%s%s", ZSTR_VAL(resource->scheme),

@@ -746,6 +746,11 @@ static ZEND_FUNCTION(zend_test_uri_parser)
 		RETURN_THROWS();
 	}
 
+	php_uri *uri_struct = php_uri_parse_to_struct(parser, ZSTR_VAL(uri_string), ZSTR_LEN(uri_string), PHP_URI_COMPONENT_READ_MODE_RAW, false);
+	if (uri_struct == NULL) {
+		RETURN_THROWS();
+	}
+
 	zval value;
 
 	array_init(return_value);
@@ -787,7 +792,56 @@ static ZEND_FUNCTION(zend_test_uri_parser)
 	php_uri_get_fragment(uri, PHP_URI_COMPONENT_READ_MODE_RAW, &value);
 	zend_hash_add(Z_ARR(raw), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &value);
 	zend_hash_str_add(Z_ARR_P(return_value), "raw", strlen("raw"), &raw);
+	zval from_struct;
+	zval dummy;
+	array_init(&from_struct);
+	if (uri_struct->scheme) {
+		ZVAL_STR_COPY(&dummy, uri_struct->scheme);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_SCHEME), &dummy);
+	if (uri_struct->user) {
+		ZVAL_STR_COPY(&dummy, uri_struct->user);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_USERNAME), &dummy);
+	if (uri_struct->password) {
+		ZVAL_STR_COPY(&dummy, uri_struct->password);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_PASSWORD), &dummy);
+	if (uri_struct->host) {
+		ZVAL_STR_COPY(&dummy, uri_struct->host);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_HOST), &dummy);
+	ZVAL_LONG(&dummy, uri_struct->port);
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_PORT), &dummy);
+	if (uri_struct->path) {
+		ZVAL_STR_COPY(&dummy, uri_struct->path);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_PATH), &dummy);
+	if (uri_struct->query) {
+		ZVAL_STR_COPY(&dummy, uri_struct->query);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_QUERY), &dummy);
+	if (uri_struct->fragment) {
+		ZVAL_STR_COPY(&dummy, uri_struct->fragment);
+	} else {
+		ZVAL_NULL(&dummy);
+	}
+	zend_hash_add(Z_ARR(from_struct), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &dummy);
+	zend_hash_str_add(Z_ARR_P(return_value), "struct", strlen("struct"), &from_struct);
 
+	php_uri_struct_free(uri_struct);
 	php_uri_free(uri);
 }
 
