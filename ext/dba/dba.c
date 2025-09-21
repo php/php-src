@@ -1070,6 +1070,11 @@ PHP_FUNCTION(dba_fetch)
 		ZEND_PARSE_PARAMETERS_END();
 	}
 
+	if (ZEND_LONG_EXCEEDS_INT(skip)) {
+		zend_argument_value_error(3, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
+	}
+
 	info = Z_DBA_INFO_P(id);
 	CHECK_DBA_CONNECTION(info);
 
