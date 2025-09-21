@@ -15,6 +15,8 @@ PHP                                                                        NEWS
     configured). (nielsdos)
   . Fixed bug GH-19719 (Allow empty statements before declare(strict_types)).
     (nielsdos)
+  . Casting floats that are not representable as ints now emits a warning.
+    (Girgias)
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
