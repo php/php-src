@@ -3376,7 +3376,7 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
-function stream_poll_create(int|string $backend = STREAM_POLL_BACKEND_AUTO): StreamPollContext {}
+function stream_poll_create(int|string $backend = STREAM_POLL_BACKEND_AUTO, bool $raw_events = false): StreamPollContext {}
 
 /** @param resource $stream */
 function stream_poll_add(StreamPollContext $poll_ctx, $stream, int $events, mixed $data = null): void {}

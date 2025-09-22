@@ -99,19 +99,31 @@ static const php_poll_backend_ops *php_poll_get_backend_ops_by_name(const char *
 	return NULL;
 }
 
-/* Create new poll context */
-PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, bool persistent)
+static php_poll_ctx *php_poll_create_context(uint32_t flags)
 {
+	bool persistent = flags & PHP_POLL_FLAG_PERSISTENT;
 	php_poll_ctx *ctx = php_poll_calloc(1, sizeof(php_poll_ctx), persistent);
 	if (!ctx) {
 		return NULL;
 	}
 	ctx->persistent = persistent;
+	ctx->raw_events = flags & PHP_POLL_FLAG_RAW_EVENTS;
+
+	return ctx;
+}
+
+/* Create new poll context */
+PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, uint32_t flags)
+{
+	php_poll_ctx *ctx = php_poll_create_context(flags);
+	if (ctx == NULL) {
+		return NULL;
+	}
 
 	/* Get backend operations */
 	ctx->backend_ops = php_poll_get_backend_ops(preferred_backend);
 	if (!ctx->backend_ops) {
-		pefree(ctx, persistent);
+		pefree(ctx, ctx->persistent);
 		return NULL;
 	}
 	ctx->backend_type = preferred_backend;
@@ -120,18 +132,17 @@ PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, bo
 }
 
 /* Create new poll context */
-PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, bool persistent)
+PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, uint32_t flags)
 {
-	php_poll_ctx *ctx = php_poll_calloc(1, sizeof(php_poll_ctx), persistent);
-	if (!ctx) {
+	php_poll_ctx *ctx = php_poll_create_context(flags);
+	if (ctx == NULL) {
 		return NULL;
 	}
-	ctx->persistent = persistent;
 
 	/* Get backend operations */
 	ctx->backend_ops = php_poll_get_backend_ops_by_name(preferred_backend);
 	if (!ctx->backend_ops) {
-		pefree(ctx, persistent);
+		pefree(ctx, ctx->persistent);
 		return NULL;
 	}
 	ctx->backend_type = ctx->backend_ops->type;

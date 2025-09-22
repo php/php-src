@@ -99,17 +99,20 @@ PHP_FUNCTION(stream_poll_create)
 {
 	zend_long backend_long = PHP_POLL_BACKEND_AUTO;
 	zend_string *backend_str = NULL;
+	bool raw_events = false;
 	php_poll_ctx *poll_ctx;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 	Z_PARAM_OPTIONAL
 	Z_PARAM_STR_OR_LONG(backend_str, backend_long)
+	Z_PARAM_BOOL(raw_events)
 	ZEND_PARSE_PARAMETERS_END();
 
+	uint32_t flags = raw_events ? PHP_POLL_FLAG_RAW_EVENTS : 0;
 	if (backend_str == NULL) {
-		poll_ctx = php_poll_create((php_poll_backend_type) backend_long, false);
+		poll_ctx = php_poll_create((php_poll_backend_type) backend_long, flags);
 	} else {
-		poll_ctx = php_poll_create_by_name(ZSTR_VAL(backend_str), false);
+		poll_ctx = php_poll_create_by_name(ZSTR_VAL(backend_str), flags);
 	}
 	if (!poll_ctx) {
 		zend_throw_exception(
