@@ -794,7 +794,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 
 	zval arr;
 	array_init(&arr);
-	zend_hash_str_add_new(Z_ARRVAL(arr), URI_SERIALIZED_PROPERTY_NAME, sizeof(URI_SERIALIZED_PROPERTY_NAME) - 1, &tmp);
+	zend_hash_str_add_new(Z_ARRVAL(arr), PHP_URI_SERIALIZE_URI_FIELD_NAME, sizeof(PHP_URI_SERIALIZE_URI_FIELD_NAME) - 1, &tmp);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 
 	/* Serialize regular properties: second array */
@@ -838,7 +838,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_THROWS();
 	}
 
-	zval *uri_zv = zend_hash_str_find_ind(Z_ARRVAL_P(arr), ZEND_STRL(URI_SERIALIZED_PROPERTY_NAME));
+	zval *uri_zv = zend_hash_str_find_ind(Z_ARRVAL_P(arr), ZEND_STRL(PHP_URI_SERIALIZE_URI_FIELD_NAME));
 	if (uri_zv == NULL || Z_TYPE_P(uri_zv) != IS_STRING) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(uri_object->std.ce->name));
 		RETURN_THROWS();
@@ -984,7 +984,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 
 	zval arr;
 	array_init(&arr);
-	zend_hash_str_add_new(Z_ARRVAL(arr), ZEND_STRL(URI_SERIALIZED_PROPERTY_NAME), &tmp);
+	zend_hash_str_add_new(Z_ARRVAL(arr), ZEND_STRL(PHP_URI_SERIALIZE_URI_FIELD_NAME), &tmp);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &arr);
 
 	/* Serialize regular properties: second array */

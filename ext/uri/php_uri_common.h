@@ -161,7 +161,7 @@ PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
 #define PHP_URI_PARSER_RFC3986 "Uri\\Rfc3986\\Uri"
 #define PHP_URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
 #define PHP_URI_PARSER_PHP_PARSE_URL "parse_url"
-#define URI_SERIALIZED_PROPERTY_NAME "uri"
+#define PHP_URI_SERIALIZE_URI_FIELD_NAME "uri"
 
 static inline const php_uri_property_handler *php_uri_parser_property_handler_by_name(const php_uri_parser *parser, php_uri_property_name property_name)
 {
