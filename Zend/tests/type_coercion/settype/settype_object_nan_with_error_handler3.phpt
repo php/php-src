@@ -5,7 +5,7 @@ Error handler dtor NAN value, set to object 3
 
 set_error_handler(function ($errno, $errstr) {
     global $nan;
-    $nan = random_bytes(4);
+    $nan = bin2hex(random_bytes(4));
     echo $errstr, "\n";
 });
 
@@ -20,5 +20,5 @@ float(NAN)
 unexpected NAN value was coerced to object
 object(stdClass)#2 (1) {
   ["scalar"]=>
-  string(4) "%s"
+  string(8) "%s"
 }

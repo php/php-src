@@ -5,7 +5,7 @@ Error handler dtor NAN value, set to bool 3
 
 set_error_handler(function ($errno, $errstr) {
     global $nan;
-    $nan = random_bytes(4);
+    $nan = bin2hex(random_bytes(4));
     echo $errstr, "\n";
 });
 
