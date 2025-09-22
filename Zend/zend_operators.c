@@ -2420,7 +2420,6 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 							op2 = _zendi_convert_scalar_to_number_silent(op2, &op2_copy);
 							converted = true;
 						}
-						//return ZEND_UNCOMPARABLE;
 					} else if (Z_TYPE_P(op1) < IS_TRUE) {
 						return zval_is_true(op2) ? -1 : 0;
 					} else if (Z_TYPE_P(op1) == IS_TRUE) {
@@ -3593,7 +3592,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_double_to_str(double num)
 	int precision = (int) EG(precision);
 	zend_gcvt(num, precision ? precision : 1, '.', 'E', buf);
 	zend_string *str =  zend_string_init(buf, strlen(buf), 0);
-	if (UNEXPECTED(zend_string_equals_literal(str, "NAN"))) {
+	if (UNEXPECTED(zend_isnan(num))) {
 		zend_nan_coerced_to_type_warning(IS_STRING);
 	}
 	GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);

@@ -7568,8 +7568,8 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 	}
 
 	if (Z_MODE(op1_addr) == IS_CONST_ZVAL
-		&& (Z_TYPE_P(Z_ZV(op1_addr)) != IS_DOUBLE || !zend_isnan(Z_DVAL_P(Z_ZV(op1_addr))))) {
 		/* NAN Value must cause a warning to be emitted */
+		&& (Z_TYPE_P(Z_ZV(op1_addr)) != IS_DOUBLE || !zend_isnan(Z_DVAL_P(Z_ZV(op1_addr))))) {
 		if (zend_is_true(Z_ZV(op1_addr))) {
 			always_true = 1;
 		} else {
