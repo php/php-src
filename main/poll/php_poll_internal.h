@@ -62,15 +62,15 @@ typedef struct php_poll_backend_ops {
 struct php_poll_ctx {
 	const php_poll_backend_ops *backend_ops;
 	php_poll_backend_type backend_type;
-
-	bool initialized;
-	bool persistent;
+	php_poll_error last_error;
 
 	/* Optional capacity hint for backends */
 	int max_events_hint;
 
-	/* Last error */
-	php_poll_error last_error;
+	/* Flags */
+	uint32_t initialized : 1;
+	uint32_t persistent : 1;
+	uint32_t raw_events : 1;
 
 	/* Backend-specific data */
 	void *backend_data;

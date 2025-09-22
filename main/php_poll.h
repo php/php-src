@@ -28,6 +28,10 @@
 #define PHP_POLL_ONESHOT 0x20
 #define PHP_POLL_ET      0x40 /* Edge-triggered */
 
+/* Poll flags */
+#define PHP_POLL_FLAG_PERSISTENT 0x01
+#define PHP_POLL_FLAG_RAW_EVENTS 0x02
+
 /* Poll backend types */
 typedef enum {
 	PHP_POLL_BACKEND_AUTO = -1,
@@ -70,8 +74,8 @@ typedef struct php_poll_backend_ops php_poll_backend_ops;
 typedef struct php_poll_event php_poll_event;
 
 /* Public API */
-PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, bool persistent);
-PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, bool persistent);
+PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, uint32_t flags);
+PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, uint32_t flags);
 
 PHPAPI zend_result php_poll_set_max_events_hint(php_poll_ctx *ctx, int max_events);
 PHPAPI zend_result php_poll_init(php_poll_ctx *ctx);
