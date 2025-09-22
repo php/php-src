@@ -203,7 +203,7 @@ void init_executor(void) /* {{{ */
 	zend_fiber_init();
 	zend_weakrefs_init();
 
-	zend_stack_init(&EG(callable_convert_cache), sizeof(zend_object*));
+	zend_hash_init(&EG(callable_convert_cache), 8, NULL, ZVAL_PTR_DTOR, 0);
 
 	EG(active) = 1;
 }
@@ -430,7 +430,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
-		zend_stack_clean(&EG(callable_convert_cache), (void (*)(void *))callable_convert_dtor, 1);
+		zend_hash_clean(&EG(callable_convert_cache));
 
 #if ZEND_DEBUG
 		if (!CG(unclean_shutdown)) {
@@ -529,7 +529,7 @@ void shutdown_executor(void) /* {{{ */
 			efree(EG(ht_iterators));
 		}
 
-		zend_stack_destroy(&EG(callable_convert_cache));
+		zend_hash_destroy(&EG(callable_convert_cache));
 	}
 
 #if ZEND_DEBUG

@@ -39088,17 +39088,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 	zend_execute_data *call = EX(call);
 
 	if (opline->extended_value != (uint32_t)-1) {
-		int offset = (int)(uintptr_t)CACHED_PTR(opline->extended_value);
-		if (offset) {
-			offset--;
-			zend_object *closure = ((zend_object**)zend_stack_base(&EG(callable_convert_cache)))[offset];
+		zend_object *closure = CACHED_PTR(opline->extended_value);
+		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 		} else {
-			zend_closure_from_frame(EX_VAR(opline->result.var), call);
-			zend_object *closure = Z_OBJ_P(EX_VAR(opline->result.var));
-			GC_ADDREF(closure);
-			/* Offset by 1 to free 0 as empty sentinel. */
-			CACHE_PTR(opline->extended_value, (void*)(uintptr_t)(zend_stack_push(&EG(callable_convert_cache), &closure) + 1));
+			closure = zend_hash_find_ptr(&EG(callable_convert_cache), call->func->common.function_name);
+			if (closure) {
+				ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+			} else {
+				zend_closure_from_frame(EX_VAR(opline->result.var), call);
+				closure = Z_OBJ_P(EX_VAR(opline->result.var));
+				GC_ADDREF(closure);
+				zend_hash_add_ptr(&EG(callable_convert_cache), call->func->common.function_name, closure);
+			}
+			CACHE_PTR(opline->extended_value, closure);
 		}
 	} else {
 		zend_closure_from_frame(EX_VAR(opline->result.var), call);
@@ -94324,17 +94327,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_S
 	zend_execute_data *call = EX(call);
 
 	if (opline->extended_value != (uint32_t)-1) {
-		int offset = (int)(uintptr_t)CACHED_PTR(opline->extended_value);
-		if (offset) {
-			offset--;
-			zend_object *closure = ((zend_object**)zend_stack_base(&EG(callable_convert_cache)))[offset];
+		zend_object *closure = CACHED_PTR(opline->extended_value);
+		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 		} else {
-			zend_closure_from_frame(EX_VAR(opline->result.var), call);
-			zend_object *closure = Z_OBJ_P(EX_VAR(opline->result.var));
-			GC_ADDREF(closure);
-			/* Offset by 1 to free 0 as empty sentinel. */
-			CACHE_PTR(opline->extended_value, (void*)(uintptr_t)(zend_stack_push(&EG(callable_convert_cache), &closure) + 1));
+			closure = zend_hash_find_ptr(&EG(callable_convert_cache), call->func->common.function_name);
+			if (closure) {
+				ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+			} else {
+				zend_closure_from_frame(EX_VAR(opline->result.var), call);
+				closure = Z_OBJ_P(EX_VAR(opline->result.var));
+				GC_ADDREF(closure);
+				zend_hash_add_ptr(&EG(callable_convert_cache), call->func->common.function_name, closure);
+			}
+			CACHE_PTR(opline->extended_value, closure);
 		}
 	} else {
 		zend_closure_from_frame(EX_VAR(opline->result.var), call);
