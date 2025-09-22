@@ -4457,7 +4457,7 @@ static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	} else {
 		IR_ASSERT(ir_rule(ctx, insn->op2) == IR_STATIC_ALLOCA);
 		op2_reg = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
-		offset = ir_local_offset(ct, &ctx->ir_base[insn->op2]);
+		offset = ir_local_offset(ctx, &ctx->ir_base[insn->op2]);
 	}
 	|	ldr Rx(tmp_reg), [Rx(op2_reg), #offset]
 	ir_emit_load_mem(ctx, type, def_reg, IR_MEM_BO(tmp_reg, 0));
