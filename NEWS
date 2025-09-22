@@ -48,6 +48,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
+  . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
 
 - MBstring:
   . Updated Unicode data tables to Unicode 17.0. (Yuya Hamada)
