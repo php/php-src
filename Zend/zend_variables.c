@@ -25,6 +25,7 @@
 #include "zend_globals.h"
 #include "zend_constants.h"
 #include "zend_list.h"
+#include "zend_call_stack.h"
 
 #if ZEND_DEBUG
 static void ZEND_FASTCALL zend_string_destroy(zend_string *str);
@@ -54,6 +55,12 @@ static const zend_rc_dtor_func_t zend_rc_dtor_func[] = {
 ZEND_API void ZEND_FASTCALL rc_dtor_func(zend_refcounted *p)
 {
 	ZEND_ASSERT(GC_TYPE(p) <= IS_CONSTANT_AST);
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_throw_error(NULL, "Maximum call stack size reached. Infinite recursion?");
+		return;
+	}
+#endif
 	zend_rc_dtor_func[GC_TYPE(p)](p);
 }
 
