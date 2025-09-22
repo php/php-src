@@ -809,7 +809,7 @@ try_again:
 		zend_function *get = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is write-only",
+				zend_throw_error(NULL, "Cannot read from set-only virtual property %s::$%s",
 					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				return &EG(uninitialized_zval);
 			}
@@ -1150,7 +1150,7 @@ found:;
 
 		if (!set) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is read-only", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Cannot write to get-only virtual property %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
@@ -2343,7 +2343,7 @@ found:
 
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is write-only",
+				zend_throw_error(NULL, "Cannot read from set-only virtual property %s::$%s",
 					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				return 0;
 			} else {
