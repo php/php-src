@@ -5117,8 +5117,8 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			return (t1 & MAY_BE_OBJECT);
 		case ZEND_BOOL:
 		case ZEND_BOOL_NOT:
-			/* NAN Cast to bool will warn */
-			return (t1 & MAY_BE_OBJECT) || (t1 & MAY_BE_DOUBLE);
+			/* NAN Cast to bool will warn, but if we have a range it is fine */
+			return (t1 & MAY_BE_OBJECT) || ((t1 & MAY_BE_DOUBLE) && !OP1_HAS_RANGE());
 		case ZEND_BOOL_XOR:
 			return (t1 & MAY_BE_OBJECT) || (t2 & MAY_BE_OBJECT);
 		case ZEND_IS_EQUAL:
