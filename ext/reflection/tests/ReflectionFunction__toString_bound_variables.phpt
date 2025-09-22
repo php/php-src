@@ -19,10 +19,10 @@ echo (string) $rf;
 
 ?>
 --EXPECTF--
-Closure [ <user> function {closure:%s:%d} ] {
+Closure [ <user> static function {closure:%s:%d} ] {
   @@ %sReflectionFunction__toString_bound_variables.php 3 - 3
 }
-Closure [ <user> function {closure:%s:%d} ] {
+Closure [ <user> static function {closure:%s:%d} ] {
   @@ %sReflectionFunction__toString_bound_variables.php 9 - 12
 
   - Bound Variables [2] {
