@@ -46,6 +46,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-19932 (Memory leak in zip setEncryptionName()/setEncryptionIndex()).
     (David Carlier)
 
+- Zlib:
+  . Fixed bug GH-19922 (Double free on gzopen). (David Carlier)
+
 25 Sep 2025, PHP 8.3.26
 
 - Core:
