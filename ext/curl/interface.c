@@ -1842,7 +1842,7 @@ static void _php_curl_set_default_options(php_curl *ch)
 	}
 
 #ifdef ZTS
-	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1);
+	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1L);
 #endif
 }
 /* }}} */
