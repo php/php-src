@@ -16,7 +16,8 @@ function foo() {
     ++$x;
     var_dump($x);
 }
-foo(...)();
+opcache_jit_blacklist(foo(...));
+foo();
 ?>
 --EXPECT--
 int(2)
