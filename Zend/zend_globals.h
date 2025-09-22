@@ -320,6 +320,7 @@ struct _zend_executor_globals {
 	zend_strtod_state strtod_state;
 
 	HashTable callable_convert_cache;
+	zend_stack lambda_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
