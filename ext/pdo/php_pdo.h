@@ -116,5 +116,14 @@ static inline void pdo_declare_deprecated_class_constant_long(
 		goto cleanup; \
 	} \
 
+#define PDO_CLOSE_CHECK \
+  if (dbh->is_closed) { \
+    pdo_raise_impl_error(dbh, NULL, "01002", NULL); \
+    if (dbh->error_mode == PDO_ERRMODE_EXCEPTION) { \
+      RETURN_THROWS(); \
+    } else { \
+      RETURN_FALSE; \
+    } \
+  } \
 
 #endif	/* PHP_PDO_H */

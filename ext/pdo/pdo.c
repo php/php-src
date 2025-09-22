@@ -263,7 +263,7 @@ PHP_MINIT_FUNCTION(pdo)
 	zend_hash_init(&pdo_driver_hash, 0, NULL, NULL, 1);
 	zend_hash_init(&pdo_driver_specific_ce_hash, 0, NULL, NULL, 1);
 
-	le_ppdo = zend_register_list_destructors_ex(NULL, php_pdo_pdbh_dtor,
+	le_ppdo = zend_register_list_destructors_ex(php_pdo_pdbh_request_dtor, php_pdo_pdbh_dtor,
 		"PDO persistent database", module_number);
 
 	pdo_exception_ce = register_class_PDOException(spl_ce_RuntimeException);

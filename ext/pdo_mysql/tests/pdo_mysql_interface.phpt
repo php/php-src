@@ -29,6 +29,8 @@ MySQLPDOTest::skipNotTransactionalEngine();
         'quote'								=> true,
         'inTransaction'						=> true,
         'getAvailableDrivers'				=> true,
+        'disconnect'                        => true,
+        'isConnected'                       => true,
     ];
     $classname = get_class($db);
 
