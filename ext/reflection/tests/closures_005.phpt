@@ -21,7 +21,7 @@ var_dump(
     (new ReflectionMethod($foo, 'baz'))->isStatic(),);
 ?>
 --EXPECT--
-bool(false)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
