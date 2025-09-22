@@ -482,8 +482,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				 * IS_EQ(FALSE, X)     => BOOL_NOT(X)
 				 * IS_NOT_EQ(TRUE, X)  => BOOL_NOT(X)
 				 * IS_NOT_EQ(FALSE, X) => BOOL(X)
-				 * Those optimizations are not safe if the other operand end up being NAN
-				 * as BOOL/BOOL_NOT will warn which IS_EQUAL/IS_NOT_EQUAL do not.
+				 * Those optimizations are not safe if the other operand ends up being NAN
+				 * as BOOL/BOOL_NOT will warn, while IS_EQUAL/IS_NOT_EQUAL do not.
 				 */
 				break;
 			case ZEND_IS_IDENTICAL:
