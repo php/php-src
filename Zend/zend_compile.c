@@ -10234,30 +10234,6 @@ static void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	do {
-		/* TODO: Do this optimization when other side is not float as NAN will warn and we don't want that
-		if (opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL) {
-			if (left_node.op_type == IS_CONST) {
-				if (Z_TYPE(left_node.u.constant) == IS_FALSE) {
-					opcode = (opcode == ZEND_IS_NOT_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
-					zend_emit_op_tmp(result, opcode, &right_node, NULL);
-					break;
-				} else if (Z_TYPE(left_node.u.constant) == IS_TRUE) {
-					opcode = (opcode == ZEND_IS_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
-					zend_emit_op_tmp(result, opcode, &right_node, NULL);
-					break;
-				}
-			} else if (right_node.op_type == IS_CONST) {
-				if (Z_TYPE(right_node.u.constant) == IS_FALSE) {
-					opcode = (opcode == ZEND_IS_NOT_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
-					zend_emit_op_tmp(result, opcode, &left_node, NULL);
-					break;
-				} else if (Z_TYPE(right_node.u.constant) == IS_TRUE) {
-					opcode = (opcode == ZEND_IS_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
-					zend_emit_op_tmp(result, opcode, &left_node, NULL);
-					break;
-				}
-			}
-		} else */
 		if (opcode == ZEND_IS_IDENTICAL || opcode == ZEND_IS_NOT_IDENTICAL) {
 			/* convert $x === null to is_null($x) (i.e. ZEND_TYPE_CHECK opcode). Do the same thing for false/true. (covers IS_NULL, IS_FALSE, and IS_TRUE) */
 			if (left_node.op_type == IS_CONST) {
