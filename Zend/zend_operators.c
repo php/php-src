@@ -702,12 +702,15 @@ try_again:
 		case IS_LONG:
 			ZVAL_BOOL(op, Z_LVAL_P(op) ? 1 : 0);
 			break;
-		case IS_DOUBLE:
+		case IS_DOUBLE: {
+			/* We compute the new value before emitting the warning as the zval may change */
+			bool new_value = Z_DVAL_P(op) ? true : false;
 			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
 				zend_nan_coerced_to_type_warning(_IS_BOOL);
 			}
-			ZVAL_BOOL(op, Z_DVAL_P(op) ? 1 : 0);
+			ZVAL_BOOL(op, new_value);
 			break;
+		}
 		case IS_STRING:
 			{
 				zend_string *str = Z_STR_P(op);
