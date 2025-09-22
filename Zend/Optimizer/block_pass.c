@@ -437,13 +437,13 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					break;
 				}
 				if (opline->op1_type == IS_CONST &&
-					opline->op2_type == IS_CONST) {
+				    opline->op2_type == IS_CONST) {
 					goto optimize_constant_binary_op;
-					}
-				/*
-				 * CASE(TRUE, X)       => BOOL(X)
-				 * CASE(FALSE, X)      => BOOL_NOT(X)
-				 */
+				}
+		        /*
+		         * CASE(TRUE, X)       => BOOL(X)
+		         * CASE(FALSE, X)      => BOOL_NOT(X)
+		         */
 				if (opline->op1_type == IS_CONST &&
 					(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_FALSE ||
 					 Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_TRUE)) {
@@ -457,25 +457,25 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					SET_UNUSED(opline->op2);
 					++(*opt_count);
 					goto optimize_bool;
-					 } else if (opline->op2_type == IS_CONST &&
-								(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_FALSE ||
-								 Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_TRUE)) {
-					 	/* Optimization of comparison with "null" is not safe,
-						  * because ("0" == null) is not equal to !("0")
-						  */
-					 	opline->opcode =
-							 ((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP2_LITERAL(opline))) == IS_TRUE)) ?
-							 ZEND_BOOL : ZEND_BOOL_NOT;
-					 	SET_UNUSED(opline->op2);
-					 	++(*opt_count);
-					 	goto optimize_bool;
-								 }
+				} else if (opline->op2_type == IS_CONST &&
+				           (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_FALSE ||
+				            Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_TRUE)) {
+					/* Optimization of comparison with "null" is not safe,
+					 * because ("0" == null) is not equal to !("0")
+					 */
+					opline->opcode =
+						((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP2_LITERAL(opline))) == IS_TRUE)) ?
+						ZEND_BOOL : ZEND_BOOL_NOT;
+					SET_UNUSED(opline->op2);
+					++(*opt_count);
+					goto optimize_bool;
+				}
 				break;
 
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_NOT_EQUAL:
 				if (opline->op1_type == IS_CONST &&
-				    opline->op2_type == IS_CONST) {
+					opline->op2_type == IS_CONST) {
 					goto optimize_constant_binary_op;
 				}
 				/* IS_EQ(TRUE, X)      => BOOL(X)
