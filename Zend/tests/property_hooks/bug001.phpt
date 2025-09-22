@@ -27,4 +27,4 @@ try {
 ?>
 --EXPECT--
 bool(true)
-Property C::$x is read-only
+Cannot write to get-only virtual property C::$x

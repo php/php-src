@@ -1784,7 +1784,7 @@ ZEND_API void zend_verify_hooked_property(const zend_class_entry *ce, zend_prope
 	 && (prop_info->flags & ZEND_ACC_PPP_SET_MASK)
 	 && (!prop_info->hooks[ZEND_PROPERTY_HOOK_GET] || !prop_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
 		const char *prefix = !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]
-			? "Write-only" : "Read-only";
+			? "set-only" : "get-only";
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"%s virtual property %s::$%s must not specify asymmetric visibility",
 			prefix, ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
