@@ -51,7 +51,7 @@ static const zend_module_dep uri_deps[] = {
 
 static zend_array uri_parsers;
 
-static HashTable *uri_get_debug_properties(uri_object_t *object)
+static HashTable *uri_get_debug_properties(php_uri_object *object)
 {
 	const HashTable *std_properties = zend_std_get_properties(&object->std);
 	HashTable *result = zend_array_dup(std_properties);
@@ -314,11 +314,11 @@ static zend_result pass_errors_by_ref_and_free(zval *errors_zv, zval *errors)
 }
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
-		INTERNAL_FUNCTION_PARAMETERS, const zend_string *uri_str, const uri_object_t *base_url_object,
+		INTERNAL_FUNCTION_PARAMETERS, const zend_string *uri_str, const php_uri_object *base_url_object,
 		bool should_throw, bool should_update_this_object, zval *errors_zv
 ) {
 
-	uri_object_t *uri_object;
+	php_uri_object *uri_object;
 	if (should_update_this_object) {
 		uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 		if (uri_object->uri != NULL) {
@@ -381,7 +381,7 @@ static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		uri_str, base_url_object ? uri_object_from_obj(base_url_object) : NULL, is_constructor, is_constructor, NULL);
+		uri_str, base_url_object ? php_uri_object_from_obj(base_url_object) : NULL, is_constructor, is_constructor, NULL);
 }
 
 static bool is_list_of_whatwg_validation_errors(const HashTable *array)
@@ -495,7 +495,7 @@ static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		uri_str, base_url_object ? uri_object_from_obj(base_url_object) : NULL, is_constructor, is_constructor, errors);
+		uri_str, base_url_object ? php_uri_object_from_obj(base_url_object) : NULL, is_constructor, is_constructor, errors);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, parse)
@@ -527,7 +527,7 @@ static void rfc3986_userinfo_read(INTERNAL_FUNCTION_PARAMETERS, php_uri_componen
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_read(uri_object->uri, read_mode, return_value) == FAILURE)) {
@@ -561,7 +561,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 		ZVAL_STR(&zv, value);
 	}
 
-	uri_object_t *old_uri_object = uri_object_from_obj(Z_OBJ_P(ZEND_THIS));
+	php_uri_object *old_uri_object = php_uri_object_from_obj(Z_OBJ_P(ZEND_THIS));
 	ZEND_ASSERT(old_uri_object->uri != NULL);
 
 	zend_object *new_object = old_uri_object->std.handlers->clone_obj(&old_uri_object->std);
@@ -573,7 +573,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withUserInfo)
 	 * case of an exception being thrown. */
 	RETVAL_OBJ(new_object);
 
-	uri_object_t *new_uri_object = uri_object_from_obj(new_object);
+	php_uri_object *new_uri_object = php_uri_object_from_obj(new_object);
 	ZEND_ASSERT(new_uri_object->uri != NULL);
 
 	if (UNEXPECTED(php_uri_parser_rfc3986_userinfo_write(new_uri_object->uri, &zv, NULL) == FAILURE)) {
@@ -671,14 +671,14 @@ PHP_METHOD(Uri_Rfc3986_Uri, withFragment)
 	uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_FRAGMENT);
 }
 
-static void throw_cannot_recompose_uri_to_string(uri_object_t *object)
+static void throw_cannot_recompose_uri_to_string(php_uri_object *object)
 {
 	zend_throw_exception_ex(uri_error_ce, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->std.ce->name));
 }
 
-static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, uri_object_t *that_object, zend_object *comparison_mode)
+static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, php_uri_object *that_object, zend_object *comparison_mode)
 {
-	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
+	php_uri_object *this_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(this_object->uri != NULL);
 	ZEND_ASSERT(that_object->uri != NULL);
 
@@ -727,14 +727,14 @@ PHP_METHOD(Uri_Rfc3986_Uri, equals)
 		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, uri_object_from_obj(that_object), comparison_mode);
+	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_uri_object_from_obj(that_object), comparison_mode);
 }
 
 PHP_METHOD(Uri_Rfc3986_Uri, toRawString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false);
@@ -750,7 +750,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	zend_string *uri_str = uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII, false);
@@ -778,7 +778,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __serialize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	/* Serialize state: "uri" key in the first array */
@@ -811,7 +811,7 @@ static void uri_unserialize(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_ARRAY_HT(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	uri_object_t *uri_object = uri_object_from_obj(Z_OBJ_P(ZEND_THIS));
+	php_uri_object *uri_object = php_uri_object_from_obj(Z_OBJ_P(ZEND_THIS));
 	if (uri_object->uri != NULL) {
 		/* Intentionally throw two exceptions for proper chaining. */
 		zend_throw_error(NULL, "Cannot modify readonly object of class %s", ZSTR_VAL(uri_object->std.ce->name));
@@ -873,7 +873,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, __debugInfo)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 
 	RETURN_ARR(uri_get_debug_properties(uri_object));
 }
@@ -924,7 +924,7 @@ PHP_METHOD(Uri_WhatWg_Url, equals)
 		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, uri_object_from_obj(that_object), comparison_mode);
+	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_uri_object_from_obj(that_object), comparison_mode);
 }
 
 PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
@@ -932,7 +932,7 @@ PHP_METHOD(Uri_WhatWg_Url, toUnicodeString)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_object_t *uri_object = uri_object_from_obj(this_object);
+	php_uri_object *uri_object = php_uri_object_from_obj(this_object);
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	RETURN_STR(uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_UNICODE, false));
@@ -943,7 +943,7 @@ PHP_METHOD(Uri_WhatWg_Url, toAsciiString)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_object *this_object = Z_OBJ_P(ZEND_THIS);
-	uri_object_t *uri_object = uri_object_from_obj(this_object);
+	php_uri_object *uri_object = php_uri_object_from_obj(this_object);
 	ZEND_ASSERT(uri_object->uri != NULL);
 
 	RETURN_STR(uri_object->parser->to_string(uri_object->uri, PHP_URI_RECOMPOSITION_MODE_RAW_ASCII, false));
@@ -968,7 +968,7 @@ PHP_METHOD(Uri_WhatWg_Url, __serialize)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *this_object = Z_URI_OBJECT_P(ZEND_THIS);
+	php_uri_object *this_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(this_object->uri != NULL);
 
 	/* Serialize state: "uri" key in the first array */
@@ -1002,14 +1002,14 @@ PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	php_uri_object *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 
 	RETURN_ARR(uri_get_debug_properties(uri_object));
 }
 
-PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser)
+PHPAPI php_uri_object *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser)
 {
-	uri_object_t *uri_object = zend_object_alloc(sizeof(*uri_object), class_type);
+	php_uri_object *uri_object = zend_object_alloc(sizeof(*uri_object), class_type);
 
 	zend_object_std_init(&uri_object->std, class_type);
 	object_properties_init(&uri_object->std, class_type);
@@ -1032,7 +1032,7 @@ static zend_object *php_uri_object_create_whatwg(zend_class_entry *ce)
 
 PHPAPI void php_uri_object_handler_free(zend_object *object)
 {
-	uri_object_t *uri_object = uri_object_from_obj(object);
+	php_uri_object *uri_object = php_uri_object_from_obj(object);
 
 	uri_object->parser->destroy(uri_object->uri);
 	zend_object_std_dtor(&uri_object->std);
@@ -1040,11 +1040,11 @@ PHPAPI void php_uri_object_handler_free(zend_object *object)
 
 PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object)
 {
-	uri_object_t *uri_object = uri_object_from_obj(object);
+	php_uri_object *uri_object = php_uri_object_from_obj(object);
 
 	ZEND_ASSERT(uri_object->uri != NULL);
 
-	uri_object_t *new_uri_object = uri_object_from_obj(object->ce->create_object(object->ce));
+	php_uri_object *new_uri_object = php_uri_object_from_obj(object->ce->create_object(object->ce));
 	ZEND_ASSERT(new_uri_object->parser == uri_object->parser);
 
 	void *uri = uri_object->parser->clone(uri_object->uri);
@@ -1080,7 +1080,7 @@ static PHP_MINIT_FUNCTION(uri)
 	uri_rfc3986_uri_ce->create_object = php_uri_object_create_rfc3986;
 	uri_rfc3986_uri_ce->default_object_handlers = &uri_rfc3986_uri_object_handlers;
 	memcpy(&uri_rfc3986_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	uri_rfc3986_uri_object_handlers.offset = XtOffsetOf(uri_object_t, std);
+	uri_rfc3986_uri_object_handlers.offset = XtOffsetOf(php_uri_object, std);
 	uri_rfc3986_uri_object_handlers.free_obj = php_uri_object_handler_free;
 	uri_rfc3986_uri_object_handlers.clone_obj = php_uri_object_handler_clone;
 
@@ -1088,7 +1088,7 @@ static PHP_MINIT_FUNCTION(uri)
 	uri_whatwg_url_ce->create_object = php_uri_object_create_whatwg;
 	uri_whatwg_url_ce->default_object_handlers = &uri_whatwg_uri_object_handlers;
 	memcpy(&uri_whatwg_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	uri_whatwg_uri_object_handlers.offset = XtOffsetOf(uri_object_t, std);
+	uri_whatwg_uri_object_handlers.offset = XtOffsetOf(php_uri_object, std);
 	uri_whatwg_uri_object_handlers.free_obj = php_uri_object_handler_free;
 	uri_whatwg_uri_object_handlers.clone_obj = php_uri_object_handler_clone;
 

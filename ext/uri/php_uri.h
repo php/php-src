@@ -207,7 +207,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri *php_uri_parse_to_struct(
 ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_struct_free(php_uri *uri);
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
-		INTERNAL_FUNCTION_PARAMETERS, const zend_string *uri_str, const uri_object_t *base_url_object,
+		INTERNAL_FUNCTION_PARAMETERS, const zend_string *uri_str, const php_uri_object *base_url_object,
 		bool should_throw, bool should_update_this_object, zval *errors_zv
 );
 

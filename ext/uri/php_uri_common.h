@@ -142,19 +142,19 @@ typedef struct uri_internal_t {
 	void *uri;
 } uri_internal_t;
 
-typedef struct uri_object_t {
+typedef struct php_uri_object {
 	const php_uri_parser *parser;
 	void *uri;
 	zend_object std;
-} uri_object_t;
+} php_uri_object;
 
-static inline uri_object_t *uri_object_from_obj(zend_object *object) {
-	return (uri_object_t*)((char*)(object) - XtOffsetOf(uri_object_t, std));
+static inline php_uri_object *php_uri_object_from_obj(zend_object *object) {
+	return (php_uri_object*)((char*)(object) - XtOffsetOf(php_uri_object, std));
 }
 
-#define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
+#define Z_URI_OBJECT_P(zv) php_uri_object_from_obj(Z_OBJ_P((zv)))
 
-PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser);
+PHPAPI php_uri_object *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser);
 PHPAPI void php_uri_object_handler_free(zend_object *object);
 PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
 
