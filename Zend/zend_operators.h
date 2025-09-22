@@ -119,6 +119,7 @@ ZEND_API void zend_incompatible_double_to_long_error(double d);
 ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
 ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d);
 ZEND_API void ZEND_COLD zend_oob_string_to_long_error(const zend_string *s);
+ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type);
 
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d);
 
@@ -421,6 +422,9 @@ again:
 			}
 			break;
 		case IS_DOUBLE:
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
+				zend_nan_coerced_to_type_warning(_IS_BOOL);
+			}
 			if (Z_DVAL_P(op)) {
 				result = 1;
 			}

@@ -10046,6 +10046,11 @@ ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op)
 		}
 		return Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op);
 	}
+	/* Can happen when called from zend_optimizer_eval_unary_op() */
+	if (opcode == ZEND_BOOL || opcode == ZEND_BOOL_NOT) {
+		/* ZEND_BOOL/ZEND_BOOL_NOT warns when casting NAN. */
+		return Z_TYPE_P(op) == IS_DOUBLE;
+	}
 
 	return 0;
 }
@@ -10229,6 +10234,7 @@ static void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	do {
+		/* TODO: Do this optimization when other side is not float as NAN will warn and we don't want that
 		if (opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL) {
 			if (left_node.op_type == IS_CONST) {
 				if (Z_TYPE(left_node.u.constant) == IS_FALSE) {
@@ -10251,7 +10257,8 @@ static void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 					break;
 				}
 			}
-		} else if (opcode == ZEND_IS_IDENTICAL || opcode == ZEND_IS_NOT_IDENTICAL) {
+		} else */
+		if (opcode == ZEND_IS_IDENTICAL || opcode == ZEND_IS_NOT_IDENTICAL) {
 			/* convert $x === null to is_null($x) (i.e. ZEND_TYPE_CHECK opcode). Do the same thing for false/true. (covers IS_NULL, IS_FALSE, and IS_TRUE) */
 			if (left_node.op_type == IS_CONST) {
 				if (Z_TYPE(left_node.u.constant) <= IS_TRUE && Z_TYPE(left_node.u.constant) >= IS_NULL) {
@@ -12058,6 +12065,10 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 
 bool zend_try_ct_eval_cast(zval *result, uint32_t type, zval *op1)
 {
+	/* NAN warns when casting */
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op1)))) {
+		return false;
+	}
 	switch (type) {
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zval_is_true(op1));

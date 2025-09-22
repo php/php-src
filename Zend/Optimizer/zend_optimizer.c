@@ -74,6 +74,9 @@ zend_result zend_optimizer_eval_unary_op(zval *result, uint8_t opcode, zval *op1
 		}
 		return unary_op(result, op1);
 	} else { /* ZEND_BOOL */
+		if (Z_TYPE_P(op1) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op1))) {
+			return FAILURE;
+		}
 		ZVAL_BOOL(result, zend_is_true(op1));
 		return SUCCESS;
 	}

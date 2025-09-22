@@ -33,9 +33,16 @@ test2(NAN, false);
 test2(1.0, false);
 test2(0.0, false);
 ?>
---EXPECT--
+--EXPECTF--
+Warning: unexpected NAN value was coerced to bool in %s on line %d
 string(1) "1"
+
+Warning: unexpected NAN value was coerced to bool in %s on line %d
+
+Warning: unexpected NAN value was coerced to bool in %s on line %d
 bool(true)
+
+Warning: unexpected NAN value was coerced to bool in %s on line %d
 bool(false)
 
 string(1) "1"
@@ -46,10 +53,14 @@ string(1) "2"
 bool(false)
 bool(true)
 
+
+Warning: unexpected NAN value was coerced to bool in %s on line %d
 bool(true)
 bool(true)
 bool(false)
 
+
+Warning: unexpected NAN value was coerced to bool in %s on line %d
 bool(true)
 bool(true)
 bool(false)

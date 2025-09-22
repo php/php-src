@@ -40,31 +40,53 @@ foreach ($types as $type) {
 ?>
 --EXPECTF--
 float(NAN)
+
+Warning: unexpected NAN value was coerced to bool in %s on line %d
 bool(true)
+
+Warning: unexpected NAN value was coerced to string in %s on line %d
 string(3) "NAN"
 
 Warning: The float NAN is not representable as an int, cast occurred in %s on line %d
 int(0)
+
+Warning: unexpected NAN value was coerced to bool in %s on line %d
 bool(true)
+
+Warning: unexpected NAN value was coerced to string in %s on line %d
 string(3) "NAN"
+
+Warning: unexpected NAN value was coerced to array in %s on line %d
 array(1) {
   [0]=>
   float(NAN)
 }
+
+Warning: unexpected NAN value was coerced to object in %s on line %d
 object(stdClass)#%d (1) {
   ["scalar"]=>
   float(NAN)
 }
+
+Warning: unexpected NAN value was coerced to null in %s on line %d
 NULL
+
+Warning: unexpected NAN value was coerced to bool in %s on line %d
 bool(true)
 
 Warning: The float NAN is not representable as an int, cast occurred in %s on line %d
 int(0)
+
+Warning: unexpected NAN value was coerced to string in %s on line %d
 string(3) "NAN"
+
+Warning: unexpected NAN value was coerced to array in %s on line %d
 array(1) {
   [0]=>
   float(NAN)
 }
+
+Warning: unexpected NAN value was coerced to object in %s on line %d
 object(stdClass)#%d (1) {
   ["scalar"]=>
   float(NAN)
