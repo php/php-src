@@ -143,7 +143,8 @@ typedef struct uri_internal_t {
 } uri_internal_t;
 
 typedef struct uri_object_t {
-	uri_internal_t internal;
+	const php_uri_parser *parser;
+	void *uri;
 	zend_object std;
 } uri_object_t;
 
@@ -151,12 +152,7 @@ static inline uri_object_t *uri_object_from_obj(zend_object *object) {
 	return (uri_object_t*)((char*)(object) - XtOffsetOf(uri_object_t, std));
 }
 
-static inline uri_internal_t *uri_internal_from_obj(zend_object *object) {
-	return &(uri_object_from_obj(object)->internal);
-}
-
 #define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
-#define Z_URI_INTERNAL_P(zv) uri_internal_from_obj(Z_OBJ_P((zv)))
 
 PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser);
 PHPAPI void php_uri_object_handler_free(zend_object *object);
@@ -194,9 +190,5 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name prop
 void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
-
-#define URI_ASSERT_INITIALIZATION(internal_uri) do { \
-	ZEND_ASSERT(internal_uri != NULL && internal_uri->uri != NULL); \
-} while (0)
 
 #endif

@@ -46,12 +46,12 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name prop
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	uri_object_t *uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(uri_object->uri != NULL);
 
-	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(internal_uri->parser, property_name);
+	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(uri_object->parser, property_name);
 
-	if (UNEXPECTED(property_handler->read(internal_uri->uri, component_read_mode, return_value) == FAILURE)) {
+	if (UNEXPECTED(property_handler->read(uri_object->uri, component_read_mode, return_value) == FAILURE)) {
 		zend_throw_exception_ex(uri_error_ce, 0, "The %s component cannot be retrieved", ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		RETURN_THROWS();
 	}
@@ -59,11 +59,10 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name prop
 
 static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, zval *property_zv)
 {
-	zend_object *old_object = Z_OBJ_P(ZEND_THIS);
-	uri_internal_t *internal_uri = Z_URI_INTERNAL_P(ZEND_THIS);
-	URI_ASSERT_INITIALIZATION(internal_uri);
+	uri_object_t *old_uri_object = Z_URI_OBJECT_P(ZEND_THIS);
+	ZEND_ASSERT(old_uri_object->uri != NULL);
 
-	zend_object *new_object = old_object->handlers->clone_obj(old_object);
+	zend_object *new_object = old_uri_object->std.handlers->clone_obj(&old_uri_object->std);
 	if (new_object == NULL) {
 		RETURN_THROWS();
 	}
@@ -72,19 +71,19 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_propert
 	 * case of an exception being thrown. */
 	RETVAL_OBJ(new_object);
 
-	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(internal_uri->parser, property_name);
+	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(old_uri_object->parser, property_name);
 
-	uri_internal_t *new_internal_uri = uri_internal_from_obj(new_object);
-	URI_ASSERT_INITIALIZATION(new_internal_uri);
+	uri_object_t *new_uri_object = uri_object_from_obj(new_object);
+	ZEND_ASSERT(new_uri_object->uri != NULL);
 	if (UNEXPECTED(property_handler->write == NULL)) {
-		zend_readonly_property_modification_error_ex(ZSTR_VAL(old_object->ce->name),
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(old_uri_object->std.ce->name),
 			ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		RETURN_THROWS();
 	}
 
 	zval errors;
 	ZVAL_UNDEF(&errors);
-	if (UNEXPECTED(property_handler->write(new_internal_uri->uri, property_zv, &errors) == FAILURE)) {
+	if (UNEXPECTED(property_handler->write(new_uri_object->uri, property_zv, &errors) == FAILURE)) {
 		zval_ptr_dtor(&errors);
 		RETURN_THROWS();
 	}
