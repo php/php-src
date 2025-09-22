@@ -42,7 +42,7 @@ static zend_string *get_known_string_by_property_name(php_uri_property_name prop
 	}
 }
 
-void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode)
+void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -57,7 +57,7 @@ void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name prop
 	}
 }
 
-static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, zval *property_zv)
+static void php_uri_property_write_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, zval *property_zv)
 {
 	php_uri_object *old_uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(old_uri_object->uri != NULL);
@@ -91,7 +91,7 @@ static void uri_write_component_ex(INTERNAL_FUNCTION_PARAMETERS, php_uri_propert
 	ZEND_ASSERT(Z_ISUNDEF(errors));
 }
 
-void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
+void php_uri_property_write_str_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
 {
 	zend_string *value;
 
@@ -102,10 +102,10 @@ void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name
 	zval zv;
 	ZVAL_STR(&zv, value);
 
-	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
+	php_uri_property_write_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }
 
-void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
+void php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
 {
 	zend_string *value;
 
@@ -120,10 +120,10 @@ void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_prope
 		ZVAL_STR(&zv, value);
 	}
 
-	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
+	php_uri_property_write_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }
 
-void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
+void php_uri_property_write_long_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name)
 {
 	zend_long value;
 	bool value_is_null;
@@ -139,5 +139,5 @@ void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_prop
 		ZVAL_LONG(&zv, value);
 	}
 
-	uri_write_component_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
+	php_uri_property_write_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_name, &zv);
 }
