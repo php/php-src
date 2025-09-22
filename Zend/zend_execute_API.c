@@ -125,6 +125,14 @@ static int clean_non_persistent_class_full(zval *zv) /* {{{ */
 }
 /* }}} */
 
+static void callable_convert_dtor(zval *object_ptr)
+{
+	zend_object *object = Z_PTR_P(object_ptr);
+	if (zend_gc_delref(&object->gc) == 0) {
+		zend_objects_store_del(object);
+	}
+}
+
 void init_executor(void) /* {{{ */
 {
 	zend_init_fpu();
@@ -203,7 +211,7 @@ void init_executor(void) /* {{{ */
 	zend_fiber_init();
 	zend_weakrefs_init();
 
-	zend_hash_init(&EG(callable_convert_cache), 8, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&EG(callable_convert_cache), 8, NULL, callable_convert_dtor, 0);
 
 	EG(active) = 1;
 }
@@ -268,14 +276,6 @@ void shutdown_destructors(void) /* {{{ */
 	} zend_end_try();
 }
 /* }}} */
-
-void callable_convert_dtor(zend_object **object_ptr)
-{
-	zend_object *object = *object_ptr;
-	if (zend_gc_delref(&object->gc) == 0) {
-		zend_objects_store_del(object);
-	}
-}
 
 /* Free values held by the executor. */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
