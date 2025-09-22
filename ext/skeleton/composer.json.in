@@ -1,5 +1,5 @@
 {
-    "name": "<your-vendor-here>/%EXTNAME%",
+    "name": "%VENDORNAME%/%EXTNAME%",
     "type": "php-ext",
     "license": "BSD-3-Clause",
     "description": "Describe your extension here",
