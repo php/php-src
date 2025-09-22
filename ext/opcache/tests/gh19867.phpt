@@ -15,7 +15,7 @@ $_main:
      ; (lines=%d, args=0, vars=%d, tmps=%d)
      ; (after optimizer)
      ; %s
-0000 T0 = DECLARE_LAMBDA_FUNCTION 0
+0000 T0 = DECLARE_LAMBDA_FUNCTION %d 0
 0001 FREE T0
 0002 RETURN int(1)
 
@@ -23,7 +23,7 @@ $_main:
      ; (lines=%d, args=0, vars=%d, tmps=%d)
      ; (after optimizer)
      ; %s
-0000 T0 = DECLARE_LAMBDA_FUNCTION 0
+0000 T0 = DECLARE_LAMBDA_FUNCTION %d 0
 0001 RETURN T0
 
 {closure:%s:%d}:

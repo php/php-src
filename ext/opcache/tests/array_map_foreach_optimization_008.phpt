@@ -56,7 +56,7 @@ $_main:
      ; (lines=4, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:1-9
-0000 T1 = DECLARE_LAMBDA_FUNCTION 0
+0000 T1 = DECLARE_LAMBDA_FUNCTION %d 0
 0001 BIND_LEXICAL T1 CV0($n)
 0002 FREE T1
 0003 RETURN int(1)

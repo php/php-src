@@ -8941,6 +8941,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 				opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
 				opline->op2.num = func_ref;
+				opline->extended_value = (uint32_t)-1;
 			} else {
 				opline = get_next_op();
 				opline->opcode = ZEND_DECLARE_FUNCTION;
@@ -9129,6 +9130,23 @@ static zend_op_array *zend_compile_func_decl_ex(
 	}
 
 	zend_compile_stmt(stmt_ast);
+
+	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
+		zend_op_array *declaring_op_array = orig_oparray_context.op_array;
+
+		if ((op_array->fn_flags & ZEND_ACC_STATIC)
+		 && !op_array->static_variables
+		 /* Don't cache closures in main, as those would leak without a proper
+		  * cleanup mechanism. */
+		 && declaring_op_array->function_name
+		 && declaring_op_array->last) {
+			zend_op *declare_lambda_op = &declaring_op_array->opcodes[declaring_op_array->last - 1];
+			if (declare_lambda_op->opcode == ZEND_DECLARE_LAMBDA_FUNCTION) {
+				declare_lambda_op->extended_value = declaring_op_array->cache_size;
+				declaring_op_array->cache_size += sizeof(void *);
+			}
+		}
+	}
 
 	if (is_method) {
 		CG(zend_lineno) = decl->start_lineno;

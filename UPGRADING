@@ -792,6 +792,8 @@ PHP 8.6 UPGRADE NOTES
   . The TAILCALL VM is now enabled on Windows when compiling with Clang >= 19
     x86_64.
   . The performance of ZTS builds has been improved.
+  . Added stateless closure cache.
+    RFC: https://wiki.php.net/rfc/closure-optimizations#stateless_closure_caching
 
 - DOM:
   . Made splitText() faster and consume less memory.
