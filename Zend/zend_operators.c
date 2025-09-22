@@ -574,9 +574,13 @@ try_again:
 			break;
 		case IS_LONG:
 			break;
-		case IS_DOUBLE:
-			ZVAL_LONG(op, zend_dval_to_lval(Z_DVAL_P(op)));
+		case IS_DOUBLE: {
+			/* NAN might emit a warning */
+			zend_long new_value = zend_dval_to_lval(Z_DVAL_P(op));
+			zval_ptr_dtor(op);
+			ZVAL_LONG(op, new_value);
 			break;
+		}
 		case IS_STRING:
 			{
 				zend_string *str = Z_STR_P(op);
@@ -707,6 +711,7 @@ try_again:
 			bool new_value = Z_DVAL_P(op) ? true : false;
 			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
 				zend_nan_coerced_to_type_warning(_IS_BOOL);
+				zval_ptr_dtor(op);
 			}
 			ZVAL_BOOL(op, new_value);
 			break;
@@ -775,9 +780,13 @@ try_again:
 		case IS_LONG:
 			ZVAL_STR(op, zend_long_to_str(Z_LVAL_P(op)));
 			break;
-		case IS_DOUBLE:
-			ZVAL_NEW_STR(op, zend_double_to_str(Z_DVAL_P(op)));
+		case IS_DOUBLE: {
+			/* Casting NAN will cause a warning */
+			zend_string *new_value = zend_double_to_str(Z_DVAL_P(op));
+			zval_ptr_dtor(op);
+			ZVAL_NEW_STR(op, new_value);
 			break;
+		}
 		case IS_ARRAY:
 			zend_error(E_WARNING, "Array to string conversion");
 			zval_ptr_dtor(op);
