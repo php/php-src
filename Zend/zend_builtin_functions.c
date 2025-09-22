@@ -165,9 +165,14 @@ ZEND_FUNCTION(gc_mem_caches)
    Returns number of freed zvals */
 ZEND_FUNCTION(gc_collect_cycles)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
+	bool full_gc = true;
 
-	RETURN_LONG(gc_collect_cycles());
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(full_gc);
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(gc_collect_cycles(full_gc));
 }
 /* }}} */
 
@@ -231,6 +236,9 @@ ZEND_FUNCTION(gc_status)
 	add_assoc_double_ex(return_value, "collector_time", sizeof("collector_time")-1, (double) status.collector_time / ZEND_NANO_IN_SEC);
 	add_assoc_double_ex(return_value, "destructor_time", sizeof("destructor_time")-1, (double) status.dtor_time / ZEND_NANO_IN_SEC);
 	add_assoc_double_ex(return_value, "free_time", sizeof("free_time")-1, (double) status.free_time / ZEND_NANO_IN_SEC);
+	add_assoc_double_ex(return_value, "mark_roots_time", sizeof("mark_roots_time")-1, (double) status.mark_roots_time / ZEND_NANO_IN_SEC);
+	add_assoc_double_ex(return_value, "scan_roots_time", sizeof("scan_roots_time")-1, (double) status.scan_roots_time / ZEND_NANO_IN_SEC);
+	add_assoc_double_ex(return_value, "collect_roots_time", sizeof("collect_roots_time")-1, (double) status.collect_roots_time / ZEND_NANO_IN_SEC);
 }
 /* }}} */
 

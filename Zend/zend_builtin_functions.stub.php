@@ -204,7 +204,7 @@ function zend_thread_id(): int {}
 
 function gc_mem_caches(): int {}
 
-function gc_collect_cycles(): int {}
+function gc_collect_cycles(bool $full_gc = true): int {}
 
 function gc_enabled(): bool {}
 
