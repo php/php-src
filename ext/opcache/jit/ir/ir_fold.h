@@ -1703,6 +1703,11 @@ IR_FOLD(SUB_OV(_, C_ADDR))
 {
 	if (op2_insn->val.u64 == 0) {
 		/* a +/- 0 => a */
+		if (op1_insn->type != IR_OPT_TYPE(opt)) {
+			opt = IR_BITCAST | (opt & IR_OPT_TYPE_MASK);
+			op2 = IR_UNUSED;
+			IR_FOLD_RESTART;
+		}
 		IR_FOLD_COPY(op1);
 	}
 	IR_FOLD_NEXT;
@@ -1721,6 +1726,12 @@ IR_FOLD(ADD(C_ADDR, _))
 {
 	if (op1_insn->val.u64 == 0) {
 		/* 0 + a => a */
+		if (op2_insn->type != IR_OPT_TYPE(opt)) {
+			opt = IR_BITCAST | (opt & IR_OPT_TYPE_MASK);
+			op1 = op2;
+			op2 = IR_UNUSED;
+			IR_FOLD_RESTART;
+		}
 		IR_FOLD_COPY(op2);
 	}
 	IR_FOLD_NEXT;
@@ -2927,7 +2938,7 @@ IR_FOLD(SUB(C_ADDR, SUB))
 		/* c1 - (x - c2) => (c1 + c2) - x */
 		val.u64 = op1_insn->val.u64 + ctx->ir_base[op2_insn->op2].val.u64;
 		op2 = op2_insn->op1;
-		op1 = ir_const(ctx, val, op1_insn->op1);
+		op1 = ir_const(ctx, val, op1_insn->type);
 		IR_FOLD_RESTART;
 	} else if (IR_IS_CONST_REF(op2_insn->op1) && !IR_IS_SYM_CONST(ctx->ir_base[op2_insn->op1].op)) {
 		/* c1 - (c2 - x) => x + (c1 - c2) */

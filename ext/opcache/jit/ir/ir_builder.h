@@ -586,6 +586,7 @@ extern "C" {
 #define ir_VA_END(_list)                  _ir_VA_END(_ir_CTX, _list)
 #define ir_VA_COPY(_dst, _src)            _ir_VA_COPY(_ir_CTX, _dst, _src)
 #define ir_VA_ARG(_list, _type)           _ir_VA_ARG(_ir_CTX, _type, _list)
+#define ir_VA_ARG_EX(_list, _type, size)  _ir_VA_ARG_EX(_ir_CTX, _type, _list, size)
 
 #define ir_START()                        _ir_START(_ir_CTX)
 #define ir_ENTRY(_src, _num)              _ir_ENTRY(_ir_CTX, (_src), (_num))
@@ -661,6 +662,7 @@ void   _ir_VA_START(ir_ctx *ctx, ir_ref list);
 void   _ir_VA_END(ir_ctx *ctx, ir_ref list);
 void   _ir_VA_COPY(ir_ctx *ctx, ir_ref dst, ir_ref src);
 ir_ref _ir_VA_ARG(ir_ctx *ctx, ir_type type, ir_ref list);
+ir_ref _ir_VA_ARG_EX(ir_ctx *ctx, ir_type type, ir_ref list, size_t size);
 void   _ir_START(ir_ctx *ctx);
 void   _ir_ENTRY(ir_ctx *ctx, ir_ref src, ir_ref num);
 void   _ir_BEGIN(ir_ctx *ctx, ir_ref src);
