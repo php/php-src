@@ -1193,7 +1193,7 @@ static void ir_add_fusion_ranges(ir_ctx *ctx, ir_ref ref, ir_ref input, ir_block
 		n = IR_INPUT_EDGES_COUNT(flags);
 		j = 1;
 		p = insn->ops + j;
-		if (flags & IR_OP_FLAG_CONTROL) {
+		if (flags & (IR_OP_FLAG_CONTROL|IR_OP_FLAG_PINNED)) {
 			j++;
 			p++;
 		}
@@ -1340,7 +1340,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					  || (ctx->rules[ref] & IR_RULE_MASK) == IR_ALLOCA)
 					 && ctx->use_lists[ref].count > 0) {
 						insn = &ctx->ir_base[ref];
-						if (insn->op != IR_VADDR) {
+						if (insn->op != IR_VADDR && insn->op != IR_PARAM) {
 							insn->op3 = ctx->vars;
 							ctx->vars = ref;
 						}
@@ -1629,6 +1629,10 @@ static void ir_vregs_join(ir_ctx *ctx, uint32_t r1, uint32_t r2)
 		IR_LIVE_INTERVAL_COALESCED | (ival->flags & (IR_LIVE_INTERVAL_HAS_HINT_REGS|IR_LIVE_INTERVAL_HAS_HINT_REFS));
 	if (ctx->ir_base[IR_LIVE_POS_TO_REF(ctx->live_intervals[r1]->use_pos->pos)].op != IR_VLOAD) {
 		ctx->live_intervals[r1]->flags &= ~IR_LIVE_INTERVAL_MEM_LOAD;
+	}
+	if (ival->flags & IR_LIVE_INTERVAL_MEM_PARAM) {
+		IR_ASSERT(!(ctx->live_intervals[r1]->flags & IR_LIVE_INTERVAL_MEM_PARAM));
+		ctx->live_intervals[r1]->flags |= IR_LIVE_INTERVAL_MEM_PARAM;
 	}
 	ctx->live_intervals[r2] = NULL;
 

@@ -167,11 +167,24 @@ static ir_reg ir_get_param_reg(const ir_ctx *ctx, ir_ref ref)
 		if (insn->op == IR_PARAM) {
 			if (IR_IS_TYPE_INT(insn->type)) {
 				if (use == ref) {
+#if defined(IR_TARGET_X64) || defined(IR_TARGET_X86)
+					if (ctx->value_params && ctx->value_params[insn->op3 - 1].align) {
+						/* struct passed by value on stack */
+						return IR_REG_NONE;
+					} else
+#endif
 					if (int_param < int_reg_params_count) {
 						return int_reg_params[int_param];
 					} else {
 						return IR_REG_NONE;
 					}
+#if defined(IR_TARGET_X64) || defined(IR_TARGET_X86)
+				} else {
+					if (ctx->value_params && ctx->value_params[insn->op3 - 1].align) {
+						/* struct passed by value on stack */
+						continue;
+					}
+#endif
 				}
 				int_param++;
 #ifdef _WIN64
@@ -222,9 +235,12 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 	n = insn->inputs_count;
 	n = IR_MIN(n, IR_MAX_REG_ARGS + 2);
 	for (j = 3; j <= n; j++) {
-		type = ctx->ir_base[ir_insn_op(insn, j)].type;
+		ir_insn *arg = &ctx->ir_base[ir_insn_op(insn, j)];
+		type = arg->type;
 		if (IR_IS_TYPE_INT(type)) {
-			if (int_param < int_reg_params_count) {
+			if (arg->op == IR_ARGVAL) {
+				continue;
+			} else if (int_param < int_reg_params_count) {
 				regs[j] = int_reg_params[int_param];
 				count = j + 1;
 			} else {

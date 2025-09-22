@@ -660,6 +660,12 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 			}
 			if (first) {
 				fprintf(f, ";");
+			} else if (ctx->value_params
+			 && insn->op == IR_PARAM
+			 && ctx->value_params[insn->op3 - 1].align) {
+				fprintf(f, ") ByVal(%d, %d);",
+					ctx->value_params[insn->op3 - 1].size,
+					ctx->value_params[insn->op3 - 1].align);
 			} else {
 				fprintf(f, ");");
 			}
