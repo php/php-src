@@ -54,6 +54,8 @@ PHP                                                                        NEWS
     (Girgias)
   . Fixed bug GH-19801 (leaks in var_dump() and debug_zval_dump()).
     (alexandre-daubois)
+  . Fixed GH-14402 (SplPriorityQueue, SplMinHeap, and SplMaxHeap lost their
+    data on serialize()). (alexandre-daubois)
 
 - URI:
   . Fixed bug GH-19780 (InvalidUrlException should check $errors argument).
