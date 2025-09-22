@@ -234,6 +234,9 @@ static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr
 		}
 		Z_OBJ_P(result)->properties = ht;
 	} else if (Z_TYPE_P(expr) != IS_NULL) {
+		if (UNEXPECTED(Z_TYPE_P(expr) == IS_DOUBLE && zend_isnan(Z_DVAL_P(expr)))) {
+			zend_nan_coerced_to_type_warning(IS_OBJECT);
+		}
 		Z_OBJ_P(result)->properties = ht = zend_new_array(1);
 		expr = zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_SCALAR), expr);
 		if (op1_type == IS_CONST) {
@@ -248,6 +251,9 @@ static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr,
 	extern zend_class_entry *zend_ce_closure;
 	if (op1_type == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 		if (Z_TYPE_P(expr) != IS_NULL) {
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_DOUBLE && zend_isnan(Z_DVAL_P(expr)))) {
+				zend_nan_coerced_to_type_warning(IS_ARRAY);
+			}
 			ZVAL_ARR(result, zend_new_array(1));
 			expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
 			if (op1_type == IS_CONST) {

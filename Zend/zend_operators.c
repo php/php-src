@@ -574,9 +574,13 @@ try_again:
 			break;
 		case IS_LONG:
 			break;
-		case IS_DOUBLE:
-			ZVAL_LONG(op, zend_dval_to_lval(Z_DVAL_P(op)));
+		case IS_DOUBLE: {
+			/* NAN might emit a warning */
+			zend_long new_value = zend_dval_to_lval(Z_DVAL_P(op));
+			zval_ptr_dtor(op);
+			ZVAL_LONG(op, new_value);
 			break;
+		}
 		case IS_STRING:
 			{
 				zend_string *str = Z_STR_P(op);
@@ -672,6 +676,9 @@ try_again:
 
 ZEND_API void ZEND_FASTCALL convert_to_null(zval *op) /* {{{ */
 {
+	if (UNEXPECTED(Z_TYPE_P(op) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op)))) {
+		zend_nan_coerced_to_type_warning(IS_NULL);
+	}
 	zval_ptr_dtor(op);
 	ZVAL_NULL(op);
 }
@@ -699,9 +706,16 @@ try_again:
 		case IS_LONG:
 			ZVAL_BOOL(op, Z_LVAL_P(op) ? 1 : 0);
 			break;
-		case IS_DOUBLE:
-			ZVAL_BOOL(op, Z_DVAL_P(op) ? 1 : 0);
+		case IS_DOUBLE: {
+			/* We compute the new value before emitting the warning as the zval may change */
+			bool new_value = Z_DVAL_P(op) ? true : false;
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
+				zend_nan_coerced_to_type_warning(_IS_BOOL);
+				zval_ptr_dtor(op);
+			}
+			ZVAL_BOOL(op, new_value);
 			break;
+		}
 		case IS_STRING:
 			{
 				zend_string *str = Z_STR_P(op);
@@ -766,9 +780,13 @@ try_again:
 		case IS_LONG:
 			ZVAL_STR(op, zend_long_to_str(Z_LVAL_P(op)));
 			break;
-		case IS_DOUBLE:
-			ZVAL_NEW_STR(op, zend_double_to_str(Z_DVAL_P(op)));
+		case IS_DOUBLE: {
+			/* Casting NAN will cause a warning */
+			zend_string *new_value = zend_double_to_str(Z_DVAL_P(op));
+			zval_ptr_dtor(op);
+			ZVAL_NEW_STR(op, new_value);
 			break;
+		}
 		case IS_ARRAY:
 			zend_error(E_WARNING, "Array to string conversion");
 			zval_ptr_dtor(op);
@@ -813,6 +831,9 @@ ZEND_API bool ZEND_FASTCALL _try_convert_to_string(zval *op) /* {{{ */
 
 static void convert_scalar_to_array(zval *op) /* {{{ */
 {
+	if (UNEXPECTED(Z_TYPE_P(op) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op)))) {
+		zend_nan_coerced_to_type_warning(IS_ARRAY);
+	}
 	HashTable *ht = zend_new_array(1);
 	zend_hash_index_add_new(ht, 0, op);
 	ZVAL_ARR(op, ht);
@@ -895,6 +916,11 @@ try_again:
 		case IS_REFERENCE:
 			zend_unwrap_reference(op);
 			goto try_again;
+		case IS_DOUBLE:
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(op)))) {
+				zend_nan_coerced_to_type_warning(IS_OBJECT);
+			}
+			ZEND_FALLTHROUGH;
 		default: {
 			zval tmp;
 			ZVAL_COPY_VALUE(&tmp, op);
@@ -921,6 +947,11 @@ ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d)
 ZEND_API void ZEND_COLD zend_oob_string_to_long_error(const zend_string *s)
 {
 	zend_error_unchecked(E_WARNING, "The float-string \"%s\" is not representable as an int, cast occurred", ZSTR_VAL(s));
+}
+
+ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type)
+{
+	zend_error(E_WARNING, "unexpected NAN value was coerced to %s", zend_get_type_by_const(type));
 }
 
 ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict) /* {{{ */
@@ -2254,6 +2285,8 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 	double str_dval;
 	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
 
+	ZEND_ASSERT(!zend_isnan(dval));
+
 	if (type == IS_LONG) {
 		return ZEND_THREEWAY_COMPARE(dval, (double) str_lval);
 	}
@@ -2272,7 +2305,7 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 
 ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 {
-	int converted = 0;
+	bool converted = false;
 	zval op1_copy, op2_copy;
 
 	while (1) {
@@ -2379,7 +2412,27 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				}
 
 				if (!converted) {
-					if (Z_TYPE_P(op1) < IS_TRUE) {
+					/* Handle NAN */
+					if (UNEXPECTED(
+						(Z_TYPE_P(op1) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op1)))
+						|| (Z_TYPE_P(op2) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op2)))
+					)) {
+						// TODO: NAN should always be uncomparable
+						/* NAN used be cast to TRUE so handle this manually for the time being */
+						if (Z_TYPE_P(op1) < IS_TRUE) {
+							return -1;
+						} else if (Z_TYPE_P(op1) == IS_TRUE || Z_TYPE_P(op2) == IS_TRUE) {
+							return 0;
+						} else if (Z_TYPE_P(op2) < IS_TRUE) {
+							return 1;
+						} else if (Z_TYPE_P(op1) != IS_DOUBLE) {
+							op1 = _zendi_convert_scalar_to_number_silent(op1, &op1_copy);
+							converted = true;
+						} else if (Z_TYPE_P(op2) != IS_DOUBLE) {
+							op2 = _zendi_convert_scalar_to_number_silent(op2, &op2_copy);
+							converted = true;
+						}
+					} else if (Z_TYPE_P(op1) < IS_TRUE) {
 						return zval_is_true(op2) ? -1 : 0;
 					} else if (Z_TYPE_P(op1) == IS_TRUE) {
 						return zval_is_true(op2) ? 0 : 1;
@@ -2393,7 +2446,7 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 						if (EG(exception)) {
 							return 1; /* to stop comparison of arrays */
 						}
-						converted = 1;
+						converted = true;
 					}
 				} else if (Z_TYPE_P(op1)==IS_ARRAY) {
 					return 1;
@@ -3551,6 +3604,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_double_to_str(double num)
 	int precision = (int) EG(precision);
 	zend_gcvt(num, precision ? precision : 1, '.', 'E', buf);
 	zend_string *str =  zend_string_init(buf, strlen(buf), 0);
+	if (UNEXPECTED(zend_isnan(num))) {
+		zend_nan_coerced_to_type_warning(IS_STRING);
+	}
 	GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
 	return str;
 }

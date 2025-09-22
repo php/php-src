@@ -59,6 +59,8 @@ PHP 8.5 UPGRADE NOTES
     floats) to int if they cannot be represented as one. This affects explicit
     int casts and implicit int casts.
     RFC: https://wiki.php.net/rfc/warnings-php-8-5#casting_out_of_range_floats_to_int
+  . A warning is now emitted when casting NAN to other types.
+    RFC: https://wiki.php.net/rfc/warnings-php-8-5#coercing_nan_to_other_types
 
 - BZ2:
   . bzcompress() now throws a ValueError when $block_size is not between

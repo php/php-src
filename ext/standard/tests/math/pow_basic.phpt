@@ -8,40 +8,51 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-$bases = array(23,
-                -23,
-                23.1,
-                -23.1,
-                2.345e1,
-                -2.345e1,
-                0x17,
-                027,
-                "23",
-                "23.45",
-                "2.345e1",
-                PHP_INT_MAX,
-                -PHP_INT_MAX - 1);
+$bases = [
+    23,
+    -23,
+    23.1,
+    -23.1,
+    2.345e1,
+    -2.345e1,
+    0x17,
+    027,
+    "23",
+    "23.45",
+    "2.345e1",
+    PHP_INT_MAX,
+    -PHP_INT_MAX - 1,
+];
 
-$exponents = array(0,
-               1,
-               -1,
-               2,
-               -2,
-               3,
-               -3,
-               2.5,
-               -2.5,
-               500,
-               -500,
-               2147483647,
-               -2147483648);
+$exponents = [
+    0,
+    1,
+    -1,
+    2,
+    -2,
+    3,
+    -3,
+    2.5,
+    -2.5,
+    500,
+    -500,
+    2147483647,
+    -2147483648
+];
+
+function safe_to_string(int|float $number): string {
+    if (is_nan($number)) {
+        return 'NAN';
+    }
+    return $number;
+}
 
 foreach($bases as $base) {
     echo "\n\nBase = $base";
     foreach($exponents as $exponent) {
         echo "\n..... Exponent = $exponent Result = ";
         $res = pow($base, $exponent);
-        echo $res;
+        echo safe_to_string($res);
     }
     echo "\n\n";
 }

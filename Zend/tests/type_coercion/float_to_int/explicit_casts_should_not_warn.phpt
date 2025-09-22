@@ -26,6 +26,7 @@ foreach($values as $value) {
 
 ?>
 --EXPECTF--
+Warning: unexpected NAN value was coerced to string in %s on line %d
 int(3)
 int(3)
 

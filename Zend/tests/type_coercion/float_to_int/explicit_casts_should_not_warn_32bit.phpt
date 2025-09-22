@@ -1,5 +1,5 @@
 --TEST--
-Explicit (int) cast must not warn 32bit variation
+Explicit (int) cast must not warn if value is representable 32bit variation
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
@@ -26,6 +26,7 @@ foreach($values as $value) {
 
 ?>
 --EXPECTF--
+Warning: unexpected NAN value was coerced to string in %s on line %d
 int(3)
 int(3)
 
