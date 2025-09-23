@@ -19,6 +19,7 @@
 #include "phar_internal.h"
 #include "ext/standard/crc32.h"
 #include "ext/standard/php_string.h" /* For php_stristr() */
+#include "zend_time.h"
 
 #define PHAR_GET_16(var) ((uint16_t)((((uint16_t)var[0]) & 0xff) | \
 	(((uint16_t)var[1]) & 0xff) << 8))
@@ -158,7 +159,7 @@ static time_t phar_zip_d2u_time(const char *cdtime, const char *cddate) /* {{{ *
 	struct tm *tm, tmbuf;
 	time_t now;
 
-	now = time(NULL);
+	now = zend_realtime_get();
 	tm = php_localtime_r(&now, &tmbuf);
 
 	tm->tm_year = ((ddate>>9)&127) + 1980 - 1900;
@@ -1273,7 +1274,7 @@ void phar_zip_flush(phar_archive_data *phar, zend_string *user_stub, bool is_def
 
 	pass.error = &temperr;
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
-	entry.timestamp = time(NULL);
+	entry.timestamp = zend_realtime_get();
 	entry.is_modified = 1;
 	entry.is_zip = true;
 	entry.phar = phar;

@@ -1108,7 +1108,7 @@ time_t ftp_mdtm(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	tm.tm_isdst = -1;
 
 	/* figure out the GMT offset */
-	stamp = time(NULL);
+	stamp = zend_realtime_get();
 	gmt = php_gmtime_r(&stamp, &tmbuf);
 	if (!gmt) {
 		return -1;
