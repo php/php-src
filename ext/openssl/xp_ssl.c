@@ -1701,7 +1701,7 @@ static zend_result php_openssl_setup_crypto(php_stream *stream,
 	}
 
 	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
-		php_openssl_handle_ssl_error(stream, 0, 1);
+		php_openssl_handle_ssl_error(stream, 0, true);
 	}
 
 #ifdef HAVE_TLS_SNI
@@ -2020,7 +2020,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 
 				/* Get the error code from SSL, and check to see if it's an error or not. */
 				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
-				retry = php_openssl_handle_ssl_error(stream, nr_bytes, 0);
+				retry = php_openssl_handle_ssl_error(stream, nr_bytes, false);
 
 				/* If we get this (the above doesn't check) then we'll retry as well. */
 				if (errno == EAGAIN && err == SSL_ERROR_WANT_READ && read) {
