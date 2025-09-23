@@ -570,12 +570,12 @@ X509 *php_openssl_x509_from_zval(
 		zval *val, bool *free_cert, uint32_t arg_num, bool is_from_array, const char *option_name)
 {
 	if (php_openssl_is_certificate_ce(val)) {
-		*free_cert = 0;
+		*free_cert = false;
 
 		return php_openssl_certificate_from_obj(Z_OBJ_P(val))->x509;
 	}
 
-	*free_cert = 1;
+	*free_cert = true;
 
 	zend_string *str = zval_try_get_string(val);
 	if (str == NULL) {
@@ -1256,7 +1256,7 @@ EVP_PKEY *php_openssl_pkey_from_zval(
 			cert = php_openssl_x509_from_str(val_str, arg_num, false, NULL);
 
 			if (cert) {
-				free_cert = 1;
+				free_cert = true;
 			} else {
 				/* not a X509 certificate, try to retrieve public key */
 				php_openssl_errors_restore_mark();
@@ -1685,7 +1685,7 @@ zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv
 		/* BC behavior */
 		*piv_len = iv_required_len;
 		*piv = iv_new;
-		*free_iv = 1;
+		*free_iv = true;
 		return SUCCESS;
 
 	}
@@ -1697,7 +1697,7 @@ zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv
 		memcpy(iv_new, *piv, *piv_len);
 		*piv_len = iv_required_len;
 		*piv = iv_new;
-		*free_iv = 1;
+		*free_iv = true;
 		return SUCCESS;
 	}
 
@@ -1707,7 +1707,7 @@ zend_result php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv
 	memcpy(iv_new, *piv, iv_required_len);
 	*piv_len = iv_required_len;
 	*piv = iv_new;
-	*free_iv = 1;
+	*free_iv = true;
 	return SUCCESS;
 
 }
@@ -1722,7 +1722,7 @@ zend_result php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	int key_len, password_len;
 	size_t max_iv_len;
 
-	*free_password = 0;
+	*free_password = false;
 
 	max_iv_len = EVP_CIPHER_iv_length(cipher_type);
 	if (enc && *piv_len == 0 && max_iv_len > 0 && !mode->is_aead) {
@@ -1765,7 +1765,7 @@ zend_result php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 		memcpy(key, *ppassword, password_len);
 		*ppassword = (char *) key;
 		*ppassword_len = key_len;
-		*free_password = 1;
+		*free_password = true;
 	} else {
 		if (password_len > key_len && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
 			php_openssl_store_errors();
@@ -1837,7 +1837,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	EVP_CIPHER_CTX *cipher_ctx;
 	struct php_openssl_cipher_mode mode;
 	int i = 0, outlen;
-	bool free_iv = 0, free_password = 0;
+	bool free_iv = false, free_password = false;
 	zend_string *outbuf = NULL;
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(data_len, data);
@@ -1931,7 +1931,7 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	struct php_openssl_cipher_mode mode;
 	int i = 0, outlen;
 	zend_string *base64_str = NULL;
-	bool free_iv = 0, free_password = 0;
+	bool free_iv = false, free_password = false;
 	zend_string *outbuf = NULL;
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(data_len, data);
