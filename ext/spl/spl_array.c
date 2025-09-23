@@ -777,11 +777,11 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 	 * meantime. */
 	switch (purpose) {
 		case ZEND_PROP_PURPOSE_ARRAY_CAST:
-			dup = 1;
+			dup = true;
 			break;
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
-			dup = 0;
+			dup = false;
 			break;
 		default:
 			return zend_std_get_properties_for(object, purpose);

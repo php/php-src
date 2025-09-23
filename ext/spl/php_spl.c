@@ -66,7 +66,7 @@ PHP_FUNCTION(class_parents)
 {
 	zval *obj;
 	zend_class_entry *parent_class, *ce;
-	bool autoload = 1;
+	bool autoload = true;
 
 	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
@@ -99,7 +99,7 @@ PHP_FUNCTION(class_parents)
 PHP_FUNCTION(class_implements)
 {
 	zval *obj;
-	bool autoload = 1;
+	bool autoload = true;
 	zend_class_entry *ce;
 
 	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
@@ -128,7 +128,7 @@ PHP_FUNCTION(class_implements)
 PHP_FUNCTION(class_uses)
 {
 	zval *obj;
-	bool autoload = 1;
+	bool autoload = true;
 	zend_class_entry *ce;
 
 	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
