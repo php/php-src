@@ -1527,7 +1527,7 @@ static bool zend_ffi_ctype_name_append(zend_ffi_ctype_name_buf *buf, const char 
 static bool zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_type *type) /* {{{ */
 {
 	const char *name = NULL;
-	bool is_ptr = 0;
+	bool is_ptr = false;
 
 	while (1) {
 		switch (type->kind) {
@@ -1587,12 +1587,12 @@ static bool zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_typ
 				if (!zend_ffi_ctype_name_prepend(buf, "*", 1)) {
 					return 0;
 				}
-				is_ptr = 1;
+				is_ptr = true;
 				type = ZEND_FFI_TYPE(type->pointer.type);
 				break;
 			case ZEND_FFI_TYPE_FUNC:
 				if (is_ptr) {
-					is_ptr = 0;
+					is_ptr = false;
 					if (!zend_ffi_ctype_name_prepend(buf, "(", 1)
 					 || !zend_ffi_ctype_name_append(buf, ")", 1)) {
 						return 0;
@@ -1606,7 +1606,7 @@ static bool zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_typ
 				break;
 			case ZEND_FFI_TYPE_ARRAY:
 				if (is_ptr) {
-					is_ptr = 0;
+					is_ptr = false;
 					if (!zend_ffi_ctype_name_prepend(buf, "(", 1)
 					 || !zend_ffi_ctype_name_append(buf, ")", 1)) {
 						return 0;
@@ -2307,7 +2307,7 @@ static zend_object *zend_ffi_new(zend_class_entry *class_type) /* {{{ */
 	ffi->lib = NULL;
 	ffi->symbols = NULL;
 	ffi->tags = NULL;
-	ffi->persistent = 0;
+	ffi->persistent = false;
 
 	return &ffi->std;
 }
@@ -3581,7 +3581,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 		}
 		ffi->symbols = scope->symbols;
 		ffi->tags = scope->tags;
-		ffi->persistent = 1;
+		ffi->persistent = true;
 	} else {
 		ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
 		ffi->lib = handle;
@@ -5387,7 +5387,7 @@ static zend_result zend_ffi_preload(char *preload) /* {{{ */
 {
 	zend_ffi *ffi;
 	char *s = NULL, *e, *filename;
-	bool is_glob = 0;
+	bool is_glob = false;
 
 	e = preload;
 	while (*e) {
@@ -5410,14 +5410,14 @@ static zend_result zend_ffi_preload(char *preload) /* {{{ */
 						if (ret == FAILURE) {
 							return FAILURE;
 						}
-						is_glob = 0;
+						is_glob = false;
 					}
 				}
 				break;
 			case '*':
 			case '?':
 			case '[':
-				is_glob = 1;
+				is_glob = true;
 				break;
 			default:
 				if (!s) {
@@ -5998,7 +5998,7 @@ void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name
 	const zend_ffi_type *sym_type;
 	int64_t value;
 	zend_ffi_type *enum_type = ZEND_FFI_TYPE(enum_dcl->type);
-	bool overflow = 0;
+	bool overflow = false;
 	bool is_signed =
 		(enum_type->enumeration.kind == ZEND_FFI_TYPE_SINT8 ||
 		 enum_type->enumeration.kind == ZEND_FFI_TYPE_SINT16 ||
@@ -6009,36 +6009,36 @@ void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name
 	if (val->kind == ZEND_FFI_VAL_EMPTY) {
 		if (is_signed) {
 			if (*last == 0x7FFFFFFFFFFFFFFFLL) {
-				overflow = 1;
+				overflow = true;
 			}
 		} else {
 			if ((*min != 0 || *max != 0)
 			 && (uint64_t)*last == 0xFFFFFFFFFFFFFFFFULL) {
-				overflow = 1;
+				overflow = true;
 			}
 		}
 		value = *last + 1;
 	} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 		if (!is_signed && val->ch < 0) {
 			if ((uint64_t)*max > 0x7FFFFFFFFFFFFFFFULL) {
-				overflow = 1;
+				overflow = true;
 			} else {
-				is_signed = 1;
+				is_signed = true;
 			}
 		}
 		value = val->ch;
 	} else if (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64) {
 		if (!is_signed && val->i64 < 0) {
 			if ((uint64_t)*max > 0x7FFFFFFFFFFFFFFFULL) {
-				overflow = 1;
+				overflow = true;
 			} else {
-				is_signed = 1;
+				is_signed = true;
 			}
 		}
 		value = val->i64;
 	} else if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 		if (is_signed && val->u64 > 0x7FFFFFFFFFFFFFFFULL) {
-			overflow = 1;
+			overflow = true;
 		}
 		value = val->u64;
 	} else {
@@ -6185,7 +6185,7 @@ void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_
 	}
 	field->type = field_dcl->type;
 	field->is_const = (bool)(field_dcl->attr & ZEND_FFI_ATTR_CONST);
-	field->is_nested = 0;
+	field->is_nested = false;
 	field->first_bit = 0;
 	field->bits = 0;
 	field_dcl->type = field_type; /* reset "owned" flag */
@@ -6238,7 +6238,7 @@ void zend_ffi_add_anonymous_field(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_
 		}
 		new_field->type = field->type;
 		new_field->is_const = field->is_const;
-		new_field->is_nested = 1;
+		new_field->is_nested = true;
 		new_field->first_bit = field->first_bit;
 		new_field->bits = field->bits;
 		field->type = ZEND_FFI_TYPE(field->type); /* reset "owned" flag */
@@ -6353,7 +6353,7 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 	}
 	field->type = field_dcl->type;
 	field->is_const = (bool)(field_dcl->attr & ZEND_FFI_ATTR_CONST);
-	field->is_nested = 0;
+	field->is_nested = false;
 	field_dcl->type = field_type; /* reset "owned" flag */
 
 	if (name) {
