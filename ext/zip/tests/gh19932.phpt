@@ -18,7 +18,7 @@ echo "OK";
 ?>
 --CLEAN--
 <?php
-@unlink(__DIR__ . "/gh19332.zip");
+@unlink(__DIR__ . "/gh19932.zip");
 ?>
 --EXPECT--
 OK
