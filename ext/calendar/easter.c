@@ -34,7 +34,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
 	const zend_long max_year = (zend_long)(ZEND_LONG_MAX / 5) * 4;
-	bool year_is_null = 1;
+	bool year_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|l!l", &year, &year_is_null, &method) == FAILURE) {
