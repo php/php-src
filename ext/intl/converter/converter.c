@@ -343,7 +343,7 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 	                    NULL, NULL, &error);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, error);
-		ret = 0;
+		ret = false;
 	}
 
 	error = U_ZERO_ERROR;
@@ -351,7 +351,7 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 	                      NULL, NULL, &error);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, error);
-		ret = 0;
+		ret = false;
 	}
 	return ret;
 }
