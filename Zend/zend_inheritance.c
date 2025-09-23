@@ -942,7 +942,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 			num_args++;
 		}
 		for (uint32_t i = 0; i < num_args;) {
-			zend_append_type_hint(&str, scope, arg_info, 0);
+			zend_append_type_hint(&str, scope, arg_info, false);
 
 			if (ZEND_ARG_SEND_MODE(arg_info)) {
 				smart_str_appendc(&str, '&');
@@ -1039,7 +1039,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		smart_str_appends(&str, ": ");
-		zend_append_type_hint(&str, scope, fptr->common.arg_info - 1, 1);
+		zend_append_type_hint(&str, scope, fptr->common.arg_info - 1, true);
 	}
 	smart_str_0(&str);
 
@@ -2036,7 +2036,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		}
 		zend_function *func;
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
-			do_inherit_method(key, func, ce, 0, flags);
+			do_inherit_method(key, func, ce, false, flags);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -2189,7 +2189,7 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
-		do_inherit_method(key, func, ce, 1, flags);
+		do_inherit_method(key, func, ce, true, flags);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_extend(&ce->properties_info,

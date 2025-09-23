@@ -332,7 +332,7 @@ ZEND_API void zend_ini_refresh_caches(int stage) /* {{{ */
 ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage) /* {{{ */
 {
 
-	return zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
+	return zend_alter_ini_entry_ex(name, new_value, modify_type, stage, false);
 }
 /* }}} */
 
@@ -342,7 +342,7 @@ ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *v
 	zend_string *new_value;
 
 	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
-	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
+	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, false);
 	zend_string_release(new_value);
 	return ret;
 }

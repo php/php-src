@@ -94,7 +94,7 @@ ZEND_API void zend_interned_strings_init(void)
 	zend_empty_string = NULL;
 	zend_known_strings = NULL;
 
-	zend_init_interned_strings_ht(&interned_strings_permanent, 1);
+	zend_init_interned_strings_ht(&interned_strings_permanent, true);
 
 	zend_new_interned_string = zend_new_interned_string_permanent;
 	zend_string_init_interned = zend_string_init_interned_permanent;
@@ -345,7 +345,7 @@ static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_request(con
 
 ZEND_API void zend_interned_strings_activate(void)
 {
-	zend_init_interned_strings_ht(&CG(interned_strings), 0);
+	zend_init_interned_strings_ht(&CG(interned_strings), false);
 }
 
 ZEND_API void zend_interned_strings_deactivate(void)

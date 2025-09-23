@@ -195,7 +195,7 @@ ZEND_API zend_result zend_multibyte_set_script_encoding_by_string(const char *ne
 		return SUCCESS;
 	}
 
-	if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length, &list, &size, 1)) {
+	if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length, &list, &size, true)) {
 		return FAILURE;
 	}
 
