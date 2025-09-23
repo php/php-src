@@ -43,6 +43,8 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fixed bug GH-19688 (Remove pattern overflow in zip addGlob()). (nielsdos)
+  . Fixed bug GH-19932 (Memory leak in zip setEncryptionName()/setEncryptionIndex()).
+    (David Carlier)
 
 25 Sep 2025, PHP 8.3.26
 
