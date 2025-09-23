@@ -51,6 +51,9 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
 
+- OpenSSL:
+  . Fixed build when --with-openssl-legacy-provider set. (Jakub Zelenka)
+
 - MBstring:
   . Updated Unicode data tables to Unicode 17.0. (Yuya Hamada)
 
