@@ -2520,7 +2520,7 @@ PHP_FUNCTION(odbc_autocommit)
 {
 	RETCODE rc;
 	zval *pv_conn;
-	bool pv_onoff = 0;
+	bool pv_onoff = false;
 	bool pv_onoff_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b!", &pv_conn, odbc_connection_ce, &pv_onoff, &pv_onoff_is_null) == FAILURE) {
