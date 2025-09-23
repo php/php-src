@@ -26,6 +26,10 @@
 /* Common */
 #include <time.h>
 
+#if PHP_OPENSSL_API_VERSION >= 0x30000 && defined(LOAD_OPENSSL_LEGACY_PROVIDER)
+#include <openssl/provider.h>
+#endif
+
 #if (defined(PHP_WIN32) && defined(_MSC_VER))
 #define timezone _timezone	/* timezone is called _timezone in LibC */
 #endif
