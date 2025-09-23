@@ -1535,7 +1535,7 @@ ZEND_FUNCTION(gmp_setbit)
 {
 	zval *a_arg;
 	zend_long index;
-	bool set = 1;
+	bool set = true;
 	mpz_ptr gmpnum_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol|b", &a_arg, gmp_ce, &index, &set) == FAILURE) {
