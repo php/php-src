@@ -56,12 +56,12 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	size_t				hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
 	bool			persistent = false, ssl = false;
 	zend_long			port = 0, flags = 0;
-	bool           port_is_null = 1;
+	bool           port_is_null = true;
 	zend_string			*hash_key = NULL;
 	bool			new_connection = false;
 	zend_resource		*le;
 	mysqli_plist_entry *plist = NULL;
-	bool			self_alloced = 0;
+	bool			self_alloced = false;
 
 
 #if !defined(MYSQL_USE_MYSQLND)
@@ -105,7 +105,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 		}
 		if (!mysql) {
 			mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
-			self_alloced = 1;
+			self_alloced = true;
 		}
 		flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
 	} else {
