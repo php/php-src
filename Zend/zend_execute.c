@@ -746,36 +746,36 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 			if (type == IS_LONG) {
 				zend_string_release(Z_STR_P(arg));
 				ZVAL_LONG(arg, lval);
-				return 1;
+				return true;
 			}
 			if (type == IS_DOUBLE) {
 				zend_string_release(Z_STR_P(arg));
 				ZVAL_DOUBLE(arg, dval);
-				return 1;
+				return true;
 			}
 		} else if (zend_parse_arg_long_weak(arg, &lval, 0)) {
 			zval_ptr_dtor(arg);
 			ZVAL_LONG(arg, lval);
-			return 1;
+			return true;
 		} else if (UNEXPECTED(EG(exception))) {
-			return 0;
+			return false;
 		}
 	}
 	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
 		zval_ptr_dtor(arg);
 		ZVAL_DOUBLE(arg, dval);
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, &str, 0)) {
 		/* on success "arg" is converted to IS_STRING */
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, 0)) {
 		zval_ptr_dtor(arg);
 		ZVAL_BOOL(arg, bval);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 #if ZEND_DEBUG
@@ -800,18 +800,18 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 	/* Pass (uint32_t)-1 as arg_num to indicate to ZPP not to emit any deprecation notice,
 	 * this is needed because the version with side effects also uses 0 (e.g. for typed properties) */
 	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval, (uint32_t)-1)) {
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, (uint32_t)-1)) {
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_STRING) && can_convert_to_string(arg)) {
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, (uint32_t)-1)) {
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 #endif
 

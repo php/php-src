@@ -312,7 +312,7 @@ static zend_class_entry *lookup_class(zend_class_entry *scope, zend_string *name
 /* Instanceof that's safe to use on unlinked classes. */
 static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_entry *ce2) {
 	if (ce1 == ce2) {
-		return 1;
+		return true;
 	}
 
 	if (ce1->ce_flags & ZEND_ACC_LINKED) {
@@ -331,7 +331,7 @@ static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_en
 		/* It's not sufficient to only check the parent chain itself, as need to do a full
 		 * recursive instanceof in case the parent interfaces haven't been copied yet. */
 		if (parent_ce && unlinked_instanceof(parent_ce, ce2)) {
-			return 1;
+			return true;
 		}
 	}
 
@@ -342,7 +342,7 @@ static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_en
 			 * check here, as the parent interfaces might not have been fully copied yet. */
 			for (i = 0; i < ce1->num_interfaces; i++) {
 				if (unlinked_instanceof(ce1->interfaces[i], ce2)) {
-					return 1;
+					return true;
 				}
 			}
 		} else {
@@ -352,19 +352,19 @@ static bool unlinked_instanceof(const zend_class_entry *ce1, const zend_class_en
 					ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
 				/* Avoid recursing if class implements itself. */
 				if (ce && ce != ce1 && unlinked_instanceof(ce, ce2)) {
-					return 1;
+					return true;
 				}
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }
 
 static bool zend_type_permits_self(
 		const zend_type type, const zend_class_entry *scope, zend_class_entry *self) {
 	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
-		return 1;
+		return true;
 	}
 
 	/* Any types that may satisfy self must have already been loaded at this point
@@ -376,11 +376,11 @@ static bool zend_type_permits_self(
 			zend_string *name = resolve_class_name(scope, ZEND_TYPE_NAME(*single_type));
 			const zend_class_entry *ce = lookup_class(self, name);
 			if (ce && unlinked_instanceof(self, ce)) {
-				return 1;
+				return true;
 			}
 		}
 	} ZEND_TYPE_FOREACH_END();
-	return 0;
+	return false;
 }
 
 static void track_class_dependency(zend_class_entry *ce, zend_string *class_name)

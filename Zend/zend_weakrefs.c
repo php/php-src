@@ -237,7 +237,7 @@ static zend_object* zend_weakref_new(zend_class_entry *ce) {
 static zend_always_inline bool zend_weakref_find(zend_object *referent, zval *return_value) {
 	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), zend_object_to_weakref_key(referent));
 	if (!tagged_ptr) {
-		return 0;
+		return false;
 	}
 
 	void *ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
@@ -247,7 +247,7 @@ static zend_always_inline bool zend_weakref_find(zend_object *referent, zval *re
 found_weakref:
 		wr = ptr;
 		RETVAL_OBJ_COPY(&wr->std);
-		return 1;
+		return true;
 	}
 
 	if (tag == ZEND_WEAKREF_TAG_HT) {
@@ -259,7 +259,7 @@ found_weakref:
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	return 0;
+	return false;
 }
 
 static zend_always_inline void zend_weakref_create(zend_object *referent, zval *return_value) {

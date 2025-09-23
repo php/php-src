@@ -910,7 +910,7 @@ static bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 {
 	/* While we keep registering $GLOBALS as an auto-global, we do not create an
 	 * actual variable for it. Access to it handled specially by the compiler. */
-	return 0;
+	return false;
 }
 /* }}} */
 
