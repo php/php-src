@@ -2219,7 +2219,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	int persistent = options & STREAM_OPEN_PERSISTENT;
 	zend_string *path_str = NULL;
 	zend_string *resolved_path = NULL;
-	char *copy_of_path = NULL;
 
 	if (opened_path) {
 		if (options & STREAM_OPEN_FOR_ZEND_STREAM) {
@@ -2296,8 +2295,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		if (stream->orig_path) {
 			pefree(stream->orig_path, persistent);
 		}
-		copy_of_path = pestrdup(path, persistent);
-		stream->orig_path = copy_of_path;
+		stream->orig_path = pestrdup(path, persistent);
 #if ZEND_DEBUG
 		stream->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
 		stream->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
@@ -2356,11 +2354,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		}
 	}
 	php_stream_tidy_wrapper_error_log(wrapper);
-#if ZEND_DEBUG
-	if (stream == NULL && copy_of_path != NULL) {
-		pefree(copy_of_path, persistent);
-	}
-#endif
 	if (resolved_path) {
 		zend_string_release_ex(resolved_path, 0);
 	}
