@@ -1019,7 +1019,7 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 			name_valid = xmlValidateName(BAD_CAST localname, 0);
 			if (name_valid != 0) {
 				errorcode = INVALID_CHARACTER_ERR;
-				stricterror = 1;
+				stricterror = true;
 			} else {
 				attr = xmlHasProp(elemp, BAD_CAST localname);
 				if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
