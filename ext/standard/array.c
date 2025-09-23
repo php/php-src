@@ -5141,13 +5141,13 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 			val = Z_REFVAL_P(val);
 		}
 		if (key == NULL) {
-			ok = 1;
+			ok = true;
 			for (i = 1; i < argc; i++) {
 				if ((data = zend_hash_index_find(Z_ARRVAL(args[i]), h)) == NULL ||
 					(intersect_data_compare_func &&
 					intersect_data_compare_func(val, data) != 0)
 				) {
-					ok = 0;
+					ok = false;
 					break;
 				}
 			}
@@ -5156,13 +5156,13 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), h, val);
 			}
 		} else {
-			ok = 1;
+			ok = true;
 			for (i = 1; i < argc; i++) {
 				if ((data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key)) == NULL ||
 					(intersect_data_compare_func &&
 					intersect_data_compare_func(val, data) != 0)
 				) {
-					ok = 0;
+					ok = false;
 					break;
 				}
 			}
@@ -5537,13 +5537,13 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 			val = Z_REFVAL_P(val);
 		}
 		if (key == NULL) {
-			ok = 1;
+			ok = true;
 			for (i = 1; i < argc; i++) {
 				if ((data = zend_hash_index_find(Z_ARRVAL(args[i]), h)) != NULL &&
 					(!diff_data_compare_func ||
 					diff_data_compare_func(val, data) == 0)
 				) {
-					ok = 0;
+					ok = false;
 					break;
 				}
 			}
@@ -5552,13 +5552,13 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), h, val);
 			}
 		} else {
-			ok = 1;
+			ok = true;
 			for (i = 1; i < argc; i++) {
 				if ((data = zend_hash_find_known_hash(Z_ARRVAL(args[i]), key)) != NULL &&
 					(!diff_data_compare_func ||
 					diff_data_compare_func(val, data) == 0)
 				) {
-					ok = 0;
+					ok = false;
 					break;
 				}
 			}

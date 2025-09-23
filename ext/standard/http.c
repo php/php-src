@@ -109,14 +109,14 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
-		bool is_dynamic = 1;
+		bool is_dynamic = true;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
 			if (Z_ISUNDEF_P(zdata)) {
 				continue;
 			}
 
-			is_dynamic = 0;
+			is_dynamic = false;
 		}
 
 		/* handling for private & protected object properties */

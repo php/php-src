@@ -643,7 +643,7 @@ static zend_string *create_win_command_from_args(HashTable *args)
 
 		append_win_escaped_arg(&str, arg_str, !is_prog_name && is_cmd_execution);
 
-		is_prog_name = 0;
+		is_prog_name = false;
 		zend_string_release(arg_str);
 	} ZEND_HASH_FOREACH_END();
 	smart_str_0(&str);
