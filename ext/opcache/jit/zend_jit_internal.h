@@ -702,7 +702,7 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	} else  {
 		ZEND_UNREACHABLE();
 	}
-	*exit_if_true = 0;
+	*exit_if_true = false;
 	return NULL;
 }
 

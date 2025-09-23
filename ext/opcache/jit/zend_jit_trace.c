@@ -2950,7 +2950,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			 && ssa_op->op1_def >= 0
 			 && ssa->vars[ssa_op->op1_def].alias != NO_ALIAS) {
 				/* avoid register allocation in case of possibility of indirect modification*/
-				support_opline = 0;
+				support_opline = false;
 			}
 
 			if (ssa_op->op1_use >= 0
@@ -7413,7 +7413,7 @@ static zend_vm_opcode_handler_t zend_jit_trace_exit_to_vm(uint32_t trace_num, ui
 	const zend_op *opline;
 	uint32_t stack_size;
 	zend_jit_trace_stack *stack;
-	bool original_handler = 0;
+	bool original_handler = false;
 
 	if (!zend_jit_trace_exit_needs_deoptimization(trace_num, exit_num)) {
 		return zend_jit_stub_handlers[jit_stub_trace_escape];
@@ -7450,7 +7450,7 @@ static zend_vm_opcode_handler_t zend_jit_trace_exit_to_vm(uint32_t trace_num, ui
 
 			if (ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->orig_handler != opline->handler) {
 				/* prevent endless loop */
-				original_handler = 1;
+				original_handler = true;
 			}
 		}
 		zend_jit_set_ip(&ctx, opline);
