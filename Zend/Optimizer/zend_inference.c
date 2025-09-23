@@ -1862,7 +1862,7 @@ static void zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {
 			} else if (zend_inference_calc_range(op_array, ssa, j, 0, 1, &tmp)) {
 				zend_inference_init_range(op_array, ssa, j, tmp.underflow, tmp.min, tmp.max, tmp.overflow);
 			} else {
-				zend_inference_init_range(op_array, ssa, j, 1, ZEND_LONG_MIN, ZEND_LONG_MAX, 1);
+				zend_inference_init_range(op_array, ssa, j, true, ZEND_LONG_MIN, ZEND_LONG_MAX, true);
 			}
 		} else {
 			/* Find SCC entry points */
@@ -1897,7 +1897,8 @@ static void zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {
 			for (j = scc_var[scc]; j >= 0; j = next_scc_var[j]) {
 				if (!ssa->var_info[j].has_range
 				 && !(ssa->var_info[j].type & MAY_BE_REF)) {
-					zend_inference_init_range(op_array, ssa, j, 1, ZEND_LONG_MIN, ZEND_LONG_MAX, 1);
+					zend_inference_init_range(op_array, ssa, j, true, ZEND_LONG_MIN, ZEND_LONG_MAX,
+								  true);
 					FOR_EACH_VAR_USAGE(j, ADD_SCC_VAR);
 				}
 			}
@@ -4124,7 +4125,8 @@ ZEND_API zend_result zend_update_type_info(
 			const zend_op      **ssa_opcodes,
 			zend_long            optimization_level)
 {
-	return _zend_update_type_info(op_array, ssa, script, NULL, opline, ssa_op, ssa_opcodes, optimization_level, 0);
+	return _zend_update_type_info(op_array, ssa, script, NULL, opline, ssa_op, ssa_opcodes, optimization_level,
+				      false);
 }
 
 static uint32_t get_class_entry_rank(zend_class_entry *ce) {
@@ -4260,7 +4262,7 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 			}
 		} else if (ssa_vars[j].definition >= 0) {
 			i = ssa_vars[j].definition;
-			if (_zend_update_type_info(op_array, ssa, script, worklist, op_array->opcodes + i, ssa->ops + i, NULL, optimization_level, 1) == FAILURE) {
+			if (_zend_update_type_info(op_array, ssa, script, worklist, op_array->opcodes + i, ssa->ops + i, NULL, optimization_level, true) == FAILURE) {
 				return FAILURE;
 			}
 		}
@@ -4547,7 +4549,7 @@ ZEND_API void zend_init_func_return_info(
 	zend_ssa_range tmp_range = {0, 0, 0, 0};
 	bool is_instanceof = false;
 	ret->type = zend_get_return_info_from_signature_only(
-		(zend_function *) op_array, script, &ret->ce, &is_instanceof, /* use_tentative_return_info */ 1);
+		(zend_function *) op_array, script, &ret->ce, &is_instanceof, /* use_tentative_return_info */ true);
 	ret->is_instanceof = is_instanceof;
 	ret->range = tmp_range;
 	ret->has_range = 0;
