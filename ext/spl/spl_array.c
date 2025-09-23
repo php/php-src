@@ -875,7 +875,7 @@ static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *na
 			return NULL;
 		}
 		ZVAL_STR(&member, name);
-		return spl_array_get_dimension_ptr(1, intern, object->ce->name, &member, type);
+		return spl_array_get_dimension_ptr(true, intern, object->ce->name, &member, type);
 	}
 	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 } /* }}} */
@@ -1140,7 +1140,7 @@ PHP_METHOD(ArrayObject, exchangeArray)
 	}
 
 	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
-	spl_array_set_array(object, intern, array, 0L, 1);
+	spl_array_set_array(object, intern, array, 0L, true);
 }
 /* }}} */
 
@@ -1413,7 +1413,7 @@ PHP_METHOD(ArrayObject, unserialize)
 			ZVAL_NULL(array);
 			SEPARATE_ARRAY(&intern->array);
 		} else {
-			spl_array_set_array(object, intern, array, 0L, 1);
+			spl_array_set_array(object, intern, array, 0L, true);
 		}
 
 		if (*p != ';') {
@@ -1526,7 +1526,7 @@ PHP_METHOD(ArrayObject, __unserialize)
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
 			RETURN_THROWS();
 		}
-		spl_array_set_array(ZEND_THIS, intern, storage_zv, 0L, 1);
+		spl_array_set_array(ZEND_THIS, intern, storage_zv, 0L, true);
 	}
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
