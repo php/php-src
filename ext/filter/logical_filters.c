@@ -788,7 +788,7 @@ static bool _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]
 	const char *s = str;
 
 	if (!memchr(str, ':', str_len)) {
-		return 0;
+		return false;
 	}
 
 	/* check for bundled IPv4 */
@@ -799,12 +799,12 @@ static bool _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]
 		}
 
 		if (!_php_filter_validate_ipv4(ipv4, (str_len - (ipv4 - str)), ip4elm)) {
-			return 0;
+			return false;
 		}
 
 		str_len = ipv4 - str; /* length excluding ipv4 */
 		if (str_len < 2) {
-			return 0;
+			return false;
 		}
 
 		if (ipv4[-2] != ':') {
