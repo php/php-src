@@ -824,8 +824,8 @@ ZEND_FUNCTION(get_class_vars)
 	}
 
 	scope = zend_get_executed_scope();
-	add_class_vars(scope, ce, 0, return_value);
-	add_class_vars(scope, ce, 1, return_value);
+	add_class_vars(scope, ce, false, return_value);
+	add_class_vars(scope, ce, true, return_value);
 }
 /* }}} */
 

@@ -1131,13 +1131,13 @@ static zend_string *zend_resolve_non_class_name(
 static zend_string *zend_resolve_function_name(zend_string *name, uint32_t type, bool *is_fully_qualified)
 {
 	return zend_resolve_non_class_name(
-		name, type, is_fully_qualified, 0, FC(imports_function));
+		name, type, is_fully_qualified, false, FC(imports_function));
 }
 
 static zend_string *zend_resolve_const_name(zend_string *name, uint32_t type, bool *is_fully_qualified)
 {
 	return zend_resolve_non_class_name(
-		name, type, is_fully_qualified, 1, FC(imports_const));
+		name, type, is_fully_qualified, true, FC(imports_const));
 }
 
 static zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
@@ -1287,7 +1287,7 @@ ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname) /* {{{ 
 {
 	zend_function *added_func = zend_hash_add_ptr(EG(function_table), Z_STR_P(lcname), func);
 	if (UNEXPECTED(!added_func)) {
-		do_bind_function_error(Z_STR_P(lcname), &func->op_array, 0);
+		do_bind_function_error(Z_STR_P(lcname), &func->op_array, false);
 		return FAILURE;
 	}
 
@@ -2697,7 +2697,7 @@ void zend_emit_final_return(bool return_one) /* {{{ */
 			return;
 		}
 
-		zend_emit_return_type_check(NULL, return_info, 1);
+		zend_emit_return_type_check(NULL, return_info, true);
 	}
 
 	zn.op_type = IS_CONST;
@@ -3069,7 +3069,7 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 		return opline;
 	} else {
 		zend_short_circuiting_mark_inner(var_ast);
-		opline = zend_delayed_compile_var(&var_node, var_ast, type, 0);
+		opline = zend_delayed_compile_var(&var_node, var_ast, type, false);
 		if (opline) {
 			if (type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
 				opline->extended_value |= ZEND_FETCH_DIM_WRITE;
@@ -3137,7 +3137,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		 * check for a nullsafe access. */
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
-		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
+		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, false);
 		if (opline && (opline->opcode == ZEND_FETCH_DIM_W
 				|| opline->opcode == ZEND_FETCH_DIM_RW
 				|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
@@ -3437,7 +3437,7 @@ static void zend_compile_expr_with_potential_assign_to_self(
 		znode cv_node;
 
 		if (zend_try_compile_cv(&cv_node, expr_ast, BP_VAR_R) == FAILURE) {
-			zend_compile_simple_var_no_cv(expr_node, expr_ast, BP_VAR_R, 0);
+			zend_compile_simple_var_no_cv(expr_node, expr_ast, BP_VAR_R, false);
 		} else {
 			zend_emit_op_tmp(expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
 		}
@@ -3465,7 +3465,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 	switch (kind) {
 		case ZEND_AST_VAR:
 			offset = zend_delayed_compile_begin();
-			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_W, 0);
+			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_W, false);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
 			CG(zend_lineno) = zend_ast_get_lineno(var_ast);
@@ -3473,7 +3473,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_STATIC_PROP:
 			offset = zend_delayed_compile_begin();
-			zend_delayed_compile_var(result, var_ast, BP_VAR_W, 0);
+			zend_delayed_compile_var(result, var_ast, BP_VAR_W, false);
 			zend_compile_expr(&expr_node, expr_ast);
 
 			opline = zend_delayed_compile_end(offset);
@@ -3517,7 +3517,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 					zend_assert_not_short_circuited(expr_ast);
 				}
 
-				zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
+				zend_compile_var(&expr_node, expr_ast, BP_VAR_W, true);
 				/* MAKE_REF is usually not necessary for CVs. However, if there are
 				 * self-assignments, this forces the RHS to evaluate first. */
 				zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
@@ -3527,7 +3527,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 					znode cv_node;
 
 					if (zend_try_compile_cv(&cv_node, expr_ast, BP_VAR_R) == FAILURE) {
-						zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+						zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, false);
 					} else {
 						zend_emit_op_tmp(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
 					}
@@ -3562,8 +3562,8 @@ static void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	offset = zend_delayed_compile_begin();
-	zend_delayed_compile_var(&target_node, target_ast, BP_VAR_W, 1);
-	zend_compile_var(&source_node, source_ast, BP_VAR_W, 1);
+	zend_delayed_compile_var(&target_node, target_ast, BP_VAR_W, true);
+	zend_compile_var(&source_node, source_ast, BP_VAR_W, true);
 
 	if ((target_ast->kind != ZEND_AST_VAR
 	  || target_ast->child[0]->kind != ZEND_AST_ZVAL)
@@ -3632,7 +3632,7 @@ static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 	switch (kind) {
 		case ZEND_AST_VAR:
 			offset = zend_delayed_compile_begin();
-			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
+			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_RW, false);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
 			opline = zend_emit_op_tmp(result, ZEND_ASSIGN_OP, &var_node, &expr_node);
@@ -3640,7 +3640,7 @@ static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_STATIC_PROP:
 			offset = zend_delayed_compile_begin();
-			zend_delayed_compile_var(result, var_ast, BP_VAR_RW, 0);
+			zend_delayed_compile_var(result, var_ast, BP_VAR_RW, false);
 			zend_compile_expr(&expr_node, expr_ast);
 
 			opline = zend_delayed_compile_end(offset);
@@ -3799,7 +3799,7 @@ static uint32_t zend_compile_args(
 		/* Treat passing of $GLOBALS the same as passing a call.
 		 * This will error at runtime if the argument is by-ref. */
 		if (zend_is_call(arg) || is_globals_fetch(arg)) {
-			zend_compile_var(&arg_node, arg, BP_VAR_R, 0);
+			zend_compile_var(&arg_node, arg, BP_VAR_R, false);
 			if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
 				/* Function call was converted into builtin instruction */
 				if (!fbc || ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
@@ -3826,10 +3826,10 @@ static uint32_t zend_compile_args(
 		} else if (zend_is_variable(arg) && !zend_ast_is_short_circuited(arg)) {
 			if (fbc && arg_num != (uint32_t) -1) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
-					zend_compile_var(&arg_node, arg, BP_VAR_W, 1);
+					zend_compile_var(&arg_node, arg, BP_VAR_W, true);
 					opcode = ZEND_SEND_REF;
 				} else {
-					zend_compile_var(&arg_node, arg, BP_VAR_R, 0);
+					zend_compile_var(&arg_node, arg, BP_VAR_R, false);
 					opcode = (arg_node.op_type == IS_TMP_VAR) ? ZEND_SEND_VAL : ZEND_SEND_VAR;
 				}
 			} else {
@@ -3855,7 +3855,7 @@ static uint32_t zend_compile_args(
 					} else {
 						opline->op2.num = arg_num;
 					}
-					zend_compile_var(&arg_node, arg, BP_VAR_FUNC_ARG, 1);
+					zend_compile_var(&arg_node, arg, BP_VAR_FUNC_ARG, true);
 					opcode = ZEND_SEND_FUNC_ARG;
 				} while (0);
 			}
@@ -4149,7 +4149,7 @@ static zend_result zend_compile_func_defined(znode *result, zend_ast_list *args)
 		return FAILURE;
 	}
 
-	if (zend_try_ct_eval_const(&result->u.constant, name, 0)) {
+	if (zend_try_ct_eval_const(&result->u.constant, name, false)) {
 		zend_string_release_ex(name, 0);
 		zval_ptr_dtor(&result->u.constant);
 		ZVAL_TRUE(&result->u.constant);
@@ -5414,7 +5414,7 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
 		/* anon class declaration */
-		zend_compile_class_decl(&class_node, class_ast, 0);
+		zend_compile_class_decl(&class_node, class_ast, false);
 	} else {
 		zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 	}
@@ -5579,7 +5579,7 @@ static void zend_compile_unset(zend_ast *ast) /* {{{ */
 			} else if (zend_try_compile_cv(&var_node, var_ast, BP_VAR_UNSET) == SUCCESS) {
 				opline = zend_emit_op(NULL, ZEND_UNSET_CV, &var_node, NULL);
 			} else {
-				opline = zend_compile_simple_var_no_cv(NULL, var_ast, BP_VAR_UNSET, 0);
+				opline = zend_compile_simple_var_no_cv(NULL, var_ast, BP_VAR_UNSET, false);
 				opline->opcode = ZEND_UNSET_VAR;
 			}
 			return;
@@ -5589,11 +5589,11 @@ static void zend_compile_unset(zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
-			opline = zend_compile_prop(NULL, var_ast, BP_VAR_UNSET, 0);
+			opline = zend_compile_prop(NULL, var_ast, BP_VAR_UNSET, false);
 			opline->opcode = ZEND_UNSET_OBJ;
 			return;
 		case ZEND_AST_STATIC_PROP:
-			opline = zend_compile_static_prop(NULL, var_ast, BP_VAR_UNSET, 0, 0);
+			opline = zend_compile_static_prop(NULL, var_ast, BP_VAR_UNSET, false, false);
 			opline->opcode = ZEND_UNSET_STATIC_PROP;
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -5707,7 +5707,7 @@ static void zend_compile_return(zend_ast *ast) /* {{{ */
 		ZVAL_NULL(&expr_node.u.constant);
 	} else if (by_ref && zend_is_variable(expr_ast)) {
 		zend_assert_not_short_circuited(expr_ast);
-		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
+		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, true);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
 	}
@@ -5726,7 +5726,7 @@ static void zend_compile_return(zend_ast *ast) /* {{{ */
 	/* Generator return types are handled separately */
 	if (!is_generator && (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		zend_emit_return_type_check(
-			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
+			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, false);
 	}
 
 	uint32_t opnum_before_finally = get_next_op_number();
@@ -5740,7 +5740,7 @@ static void zend_compile_return(zend_ast *ast) /* {{{ */
 	 && !is_generator
 	 && (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		zend_emit_return_type_check(
-			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, 0);
+			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, false);
 	}
 
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
@@ -5989,7 +5989,7 @@ static void zend_compile_while(zend_ast *ast) /* {{{ */
 
 	opnum_jmp = zend_emit_jump(0);
 
-	zend_begin_loop(ZEND_NOP, NULL, 0);
+	zend_begin_loop(ZEND_NOP, NULL, false);
 
 	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
@@ -6012,7 +6012,7 @@ static void zend_compile_do_while(zend_ast *ast) /* {{{ */
 	znode cond_node;
 	uint32_t opnum_start, opnum_cond;
 
-	zend_begin_loop(ZEND_NOP, NULL, 0);
+	zend_begin_loop(ZEND_NOP, NULL, false);
 
 	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
@@ -6069,7 +6069,7 @@ static void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	opnum_jmp = zend_emit_jump(0);
 
-	zend_begin_loop(ZEND_NOP, NULL, 0);
+	zend_begin_loop(ZEND_NOP, NULL, false);
 
 	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
@@ -6119,7 +6119,7 @@ static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	}
 
 	if (by_ref && is_variable) {
-		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
+		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, true);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
 	}
@@ -6131,7 +6131,7 @@ static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	opnum_reset = get_next_op_number();
 	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
-	zend_begin_loop(ZEND_FE_FREE, &reset_node, 0);
+	zend_begin_loop(ZEND_FE_FREE, &reset_node, false);
 
 	opnum_fetch = get_next_op_number();
 	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
@@ -6304,7 +6304,7 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast);
 
-	zend_begin_loop(ZEND_FREE, &expr_node, 1);
+	zend_begin_loop(ZEND_FREE, &expr_node, true);
 
 	case_node.op_type = IS_TMP_VAR;
 	case_node.u.op.var = get_temporary_variable();
@@ -7001,7 +7001,7 @@ static void zend_compile_declare(zend_ast *ast) /* {{{ */
 			zval_ptr_dtor_nogc(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
-			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ 0)) {
+			if (FAILURE == zend_is_first_statement(ast, /* allow_nop */ false)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
@@ -8611,7 +8611,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 	CG(zend_lineno) = decl->end_lineno;
 
 	zend_do_extended_stmt(NULL);
-	zend_emit_final_return(0);
+	zend_emit_final_return(false);
 
 	pass_two(CG(active_op_array));
 	zend_oparray_context_end(&orig_oparray_context);
@@ -9292,7 +9292,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	ce->type = ZEND_USER_CLASS;
 	ce->name = name;
-	zend_initialize_class_data(ce, 1);
+	zend_initialize_class_data(ce, true);
 	if (!(decl->flags & ZEND_ACC_ANON_CLASS)) {
 		zend_alloc_ce_cache(ce->name);
 	}
@@ -9771,7 +9771,7 @@ static void zend_compile_namespace(zend_ast *ast) /* {{{ */
 
 	bool is_first_namespace = (!with_bracket && !FC(current_namespace))
 		|| (with_bracket && !FC(has_bracketed_namespaces));
-	if (is_first_namespace && FAILURE == zend_is_first_statement(ast, /* allow_nop */ 1)) {
+	if (is_first_namespace && FAILURE == zend_is_first_statement(ast, /* allow_nop */ true)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Namespace declaration statement has to be "
 			"the very first statement or after any declare call in the script");
 	}
@@ -9821,7 +9821,7 @@ static void zend_compile_halt_compiler(zend_ast *ast) /* {{{ */
 
 	filename = zend_get_compiled_filename();
 	name = zend_mangle_property_name(const_name, sizeof(const_name) - 1,
-		ZSTR_VAL(filename), ZSTR_LEN(filename), 0);
+		ZSTR_VAL(filename), ZSTR_LEN(filename), false);
 
 	/* Avoid repeated declaration of the __COMPILER_HALT_OFFSET__ constant in
 	 * case this file was already included. */
@@ -10412,16 +10412,16 @@ static void zend_compile_post_incdec(znode *result, zend_ast *ast) /* {{{ */
 	zend_ensure_writable_variable(var_ast);
 
 	if (var_ast->kind == ZEND_AST_PROP || var_ast->kind == ZEND_AST_NULLSAFE_PROP) {
-		zend_op *opline = zend_compile_prop(NULL, var_ast, BP_VAR_RW, 0);
+		zend_op *opline = zend_compile_prop(NULL, var_ast, BP_VAR_RW, false);
 		opline->opcode = ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC_OBJ : ZEND_POST_DEC_OBJ;
 		zend_make_tmp_result(result, opline);
 	} else if (var_ast->kind == ZEND_AST_STATIC_PROP) {
-		zend_op *opline = zend_compile_static_prop(NULL, var_ast, BP_VAR_RW, 0, 0);
+		zend_op *opline = zend_compile_static_prop(NULL, var_ast, BP_VAR_RW, false, false);
 		opline->opcode = ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC_STATIC_PROP : ZEND_POST_DEC_STATIC_PROP;
 		zend_make_tmp_result(result, opline);
 	} else {
 		znode var_node;
-		zend_op *opline = zend_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
+		zend_op *opline = zend_compile_var(&var_node, var_ast, BP_VAR_RW, false);
 		if (opline && opline->opcode == ZEND_FETCH_DIM_RW) {
 			opline->extended_value = ZEND_FETCH_DIM_INCDEC;
 		}
@@ -10439,18 +10439,18 @@ static void zend_compile_pre_incdec(znode *result, zend_ast *ast) /* {{{ */
 	zend_ensure_writable_variable(var_ast);
 
 	if (var_ast->kind == ZEND_AST_PROP || var_ast->kind == ZEND_AST_NULLSAFE_PROP) {
-		zend_op *opline = zend_compile_prop(result, var_ast, BP_VAR_RW, 0);
+		zend_op *opline = zend_compile_prop(result, var_ast, BP_VAR_RW, false);
 		opline->opcode = ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC_OBJ : ZEND_PRE_DEC_OBJ;
 		opline->result_type = IS_TMP_VAR;
 		result->op_type = IS_TMP_VAR;
 	} else if (var_ast->kind == ZEND_AST_STATIC_PROP) {
-		zend_op *opline = zend_compile_static_prop(result, var_ast, BP_VAR_RW, 0, 0);
+		zend_op *opline = zend_compile_static_prop(result, var_ast, BP_VAR_RW, false, false);
 		opline->opcode = ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC_STATIC_PROP : ZEND_PRE_DEC_STATIC_PROP;
 		opline->result_type = IS_TMP_VAR;
 		result->op_type = IS_TMP_VAR;
 	} else {
 		znode var_node;
-		zend_op *opline = zend_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
+		zend_op *opline = zend_compile_var(&var_node, var_ast, BP_VAR_RW, false);
 		if (opline && opline->opcode == ZEND_FETCH_DIM_RW) {
 			opline->extended_value = ZEND_FETCH_DIM_INCDEC;
 		}
@@ -10573,7 +10573,7 @@ static void zend_compile_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	zend_op *opline;
 	uint32_t opnum;
 
-	zend_compile_var(&expr_node, expr_ast, BP_VAR_IS, 0);
+	zend_compile_var(&expr_node, expr_ast, BP_VAR_IS, false);
 
 	opnum = get_next_op_number();
 	zend_emit_op_tmp(result, ZEND_COALESCE, &expr_node, NULL);
@@ -10620,7 +10620,7 @@ static void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	zend_hash_init(CG(memoized_exprs), 0, NULL, znode_dtor, 0);
 
 	CG(memoize_mode) = ZEND_MEMOIZE_COMPILE;
-	zend_compile_var(&var_node_is, var_ast, BP_VAR_IS, 0);
+	zend_compile_var(&var_node_is, var_ast, BP_VAR_IS, false);
 
 	coalesce_opnum = get_next_op_number();
 	zend_emit_op_tmp(result, ZEND_COALESCE, &var_node_is, NULL);
@@ -10633,7 +10633,7 @@ static void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	CG(memoize_mode) = ZEND_MEMOIZE_FETCH;
-	zend_compile_var(&var_node_w, var_ast, BP_VAR_W, 0);
+	zend_compile_var(&var_node_w, var_ast, BP_VAR_W, false);
 
 	/* Reproduce some of the zend_compile_assign() opcode fixup logic here. */
 	opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
@@ -10735,7 +10735,7 @@ static void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 	if (value_ast) {
 		if (returns_by_ref && zend_is_variable(value_ast)) {
 			zend_assert_not_short_circuited(value_ast);
-			zend_compile_var(&value_node, value_ast, BP_VAR_W, 1);
+			zend_compile_var(&value_node, value_ast, BP_VAR_W, true);
 		} else {
 			zend_compile_expr(&value_node, value_ast);
 		}
@@ -10868,7 +10868,7 @@ static void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 			} else if (zend_try_compile_cv(&var_node, var_ast, BP_VAR_IS) == SUCCESS) {
 				opline = zend_emit_op(result, ZEND_ISSET_ISEMPTY_CV, &var_node, NULL);
 			} else {
-				opline = zend_compile_simple_var_no_cv(result, var_ast, BP_VAR_IS, 0);
+				opline = zend_compile_simple_var_no_cv(result, var_ast, BP_VAR_IS, false);
 				opline->opcode = ZEND_ISSET_ISEMPTY_VAR;
 			}
 			break;
@@ -10878,11 +10878,11 @@ static void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
-			opline = zend_compile_prop(result, var_ast, BP_VAR_IS, 0);
+			opline = zend_compile_prop(result, var_ast, BP_VAR_IS, false);
 			opline->opcode = ZEND_ISSET_ISEMPTY_PROP_OBJ;
 			break;
 		case ZEND_AST_STATIC_PROP:
-			opline = zend_compile_static_prop(result, var_ast, BP_VAR_IS, 0, 0);
+			opline = zend_compile_static_prop(result, var_ast, BP_VAR_IS, false, false);
 			opline->opcode = ZEND_ISSET_ISEMPTY_STATIC_PROP;
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -10905,7 +10905,7 @@ static void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 	if (expr_ast->kind == ZEND_AST_VAR) {
 		/* For @$var we need to force a FETCH instruction, otherwise the CV access will
 		 * happen outside the silenced section. */
-		zend_compile_simple_var_no_cv(result, expr_ast, BP_VAR_R, 0 );
+		zend_compile_simple_var_no_cv(result, expr_ast, BP_VAR_R, false );
 	} else {
 		zend_compile_expr(result, expr_ast);
 	}
@@ -10983,7 +10983,7 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 
 		if (by_ref) {
 			zend_ensure_writable_variable(value_ast);
-			zend_compile_var(&value_node, value_ast, BP_VAR_W, 1);
+			zend_compile_var(&value_node, value_ast, BP_VAR_W, true);
 		} else {
 			zend_compile_expr(&value_node, value_ast);
 		}
@@ -11053,11 +11053,11 @@ static void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 	if (is_fully_qualified || !FC(current_namespace)) {
 		opline->op1.num = 0;
 		opline->op2.constant = zend_add_const_name_literal(
-			resolved_name, 0);
+			resolved_name, false);
 	} else {
 		opline->op1.num = IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE;
 		opline->op2.constant = zend_add_const_name_literal(
-			resolved_name, 1);
+			resolved_name, true);
 	}
 	opline->extended_value = zend_alloc_cache_slot();
 }
@@ -11669,7 +11669,7 @@ void zend_compile_top_stmt(zend_ast *ast) /* {{{ */
 		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
 	} else if (ast->kind == ZEND_AST_CLASS) {
 		CG(zend_lineno) = ast->lineno;
-		zend_compile_class_decl(NULL, ast, 1);
+		zend_compile_class_decl(NULL, ast, true);
 		CG(zend_lineno) = ((zend_ast_decl *) ast)->end_lineno;
 	} else {
 		zend_compile_stmt(ast);
@@ -11762,7 +11762,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_use_trait(ast);
 			break;
 		case ZEND_AST_CLASS:
-			zend_compile_class_decl(NULL, ast, 0);
+			zend_compile_class_decl(NULL, ast, false);
 			break;
 		case ZEND_AST_GROUP_USE:
 			zend_compile_group_use(ast);
@@ -11827,7 +11827,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
 		case ZEND_AST_STATIC_CALL:
 		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
-			zend_compile_var(result, ast, BP_VAR_R, 0);
+			zend_compile_var(result, ast, BP_VAR_R, false);
 			return;
 		case ZEND_AST_ASSIGN:
 			zend_compile_assign(result, ast);
@@ -11968,14 +11968,14 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
-			return zend_compile_simple_var(result, ast, type, 0);
+			return zend_compile_simple_var(result, ast, type, false);
 		case ZEND_AST_DIM:
 			return zend_compile_dim(result, ast, type, by_ref);
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 			return zend_compile_prop(result, ast, type, by_ref);
 		case ZEND_AST_STATIC_PROP:
-			return zend_compile_static_prop(result, ast, type, by_ref, 0);
+			return zend_compile_static_prop(result, ast, type, by_ref, false);
 		case ZEND_AST_CALL:
 			zend_compile_call(result, ast, type);
 			return NULL;
@@ -12019,7 +12019,7 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
-			return zend_compile_simple_var(result, ast, type, 1);
+			return zend_compile_simple_var(result, ast, type, true);
 		case ZEND_AST_DIM:
 			return zend_delayed_compile_dim(result, ast, type, by_ref);
 		case ZEND_AST_PROP:
@@ -12032,9 +12032,9 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 			return opline;
 		}
 		case ZEND_AST_STATIC_PROP:
-			return zend_compile_static_prop(result, ast, type, by_ref, 1);
+			return zend_compile_static_prop(result, ast, type, by_ref, true);
 		default:
-			return zend_compile_var(result, ast, type, 0);
+			return zend_compile_var(result, ast, type, false);
 	}
 }
 /* }}} */

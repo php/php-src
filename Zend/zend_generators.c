@@ -281,7 +281,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 	if (EXPECTED(!ex) || EXPECTED(!(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK))
 			|| CG(unclean_shutdown)) {
-		zend_generator_close(generator, 0);
+		zend_generator_close(generator, false);
 		return;
 	}
 
@@ -351,7 +351,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 		try_catch_offset--;
 	}
 
-	zend_generator_close(generator, 0);
+	zend_generator_close(generator, false);
 }
 /* }}} */
 
@@ -359,7 +359,7 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) object;
 
-	zend_generator_close(generator, 0);
+	zend_generator_close(generator, false);
 
 	if (generator->func && (generator->func->common.fn_flags & ZEND_ACC_CLOSURE)) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(generator->func));
@@ -856,7 +856,7 @@ try_again:
 	 * its calling frame (see above in if (check_yield_from). */
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		if (generator == orig_generator) {
-			zend_generator_close(generator, 0);
+			zend_generator_close(generator, false);
 			if (!EG(current_execute_data)) {
 				zend_throw_exception_internal(NULL);
 			} else if (EG(current_execute_data)->func &&

@@ -1821,7 +1821,7 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 
 static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return zend_get_call_trampoline_func(ce, method_name, 0);
+	return zend_get_call_trampoline_func(ce, method_name, false);
 }
 /* }}} */
 
@@ -1915,7 +1915,7 @@ exit:
 
 static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return zend_get_call_trampoline_func(ce, method_name, 1);
+	return zend_get_call_trampoline_func(ce, method_name, true);
 }
 /* }}} */
 

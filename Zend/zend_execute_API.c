@@ -1430,14 +1430,14 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 	   function. */
 	if (EG(hard_timeout) > 0) {
 		zend_atomic_bool_store_ex(&EG(timed_out), false);
-		zend_set_timeout_ex(EG(hard_timeout), 1);
+		zend_set_timeout_ex(EG(hard_timeout), true);
 		/* XXX Abused, introduce an additional flag if the value needs to be kept. */
 		EG(hard_timeout) = 0;
 	}
 # endif
 #else
 	zend_atomic_bool_store_ex(&EG(timed_out), false);
-	zend_set_timeout_ex(0, 1);
+	zend_set_timeout_ex(0, true);
 #endif
 
 	zend_error_noreturn(E_ERROR, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
@@ -1522,7 +1522,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 #ifndef ZTS
 	if (EG(hard_timeout) > 0) {
 		/* Set hard timeout */
-		zend_set_timeout_ex(EG(hard_timeout), 1);
+		zend_set_timeout_ex(EG(hard_timeout), true);
 	}
 #endif
 }
