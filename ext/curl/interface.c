@@ -1689,7 +1689,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			lval = zval_get_long(zvalue);
 			if (lval == 1) {
 				php_error_docref(NULL, E_NOTICE, "CURLOPT_SSL_VERIFYHOST no longer accepts the value 1, value 2 will be used instead");
-				error = curl_easy_setopt(ch->cp, option, 2);
+				error = curl_easy_setopt(ch->cp, option, 2L);
 				break;
 			}
 			ZEND_FALLTHROUGH;
@@ -2260,7 +2260,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 
 		case CURLOPT_FOLLOWLOCATION:
 			lval = zend_is_true(zvalue);
-			error = curl_easy_setopt(ch->cp, option, lval);
+			error = curl_easy_setopt(ch->cp, option, (long) lval);
 			break;
 
 		case CURLOPT_HEADERFUNCTION:
