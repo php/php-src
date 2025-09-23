@@ -905,14 +905,14 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_FETCH_LIST_W
 	 || opline->opcode == ZEND_COPY_TMP
 	 || opline->opcode == ZEND_EXT_STMT) {
-		return 1;
+		return true;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R
 		&& opline->opcode != ZEND_FE_FETCH_RW
 		&& opline->opcode != ZEND_VERIFY_RETURN_TYPE
 		&& opline->opcode != ZEND_BIND_LEXICAL
 		&& opline->opcode != ZEND_ROPE_ADD);
-	return 0;
+	return false;
 }
 
 /* Live ranges must be sorted by increasing start opline */

@@ -2627,7 +2627,7 @@ ZEND_API bool is_zend_mm(void)
 #if ZEND_MM_CUSTOM
 	return !AG(mm_heap)->use_custom_heap;
 #else
-	return 1;
+	return true;
 #endif
 }
 

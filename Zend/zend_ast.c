@@ -1575,9 +1575,9 @@ static ZEND_COLD bool zend_ast_valid_var_char(char ch)
 	    (c < '0' || c > '9') &&
 	    (c < 'A' || c > 'Z') &&
 	    (c < 'a' || c > 'z')) {
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
@@ -1586,13 +1586,13 @@ static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
 	size_t i;
 
 	if (len == 0) {
-		return 0;
+		return false;
 	}
 	c = (unsigned char)s[0];
 	if (c != '_' && c < 127 &&
 	    (c < 'A' || c > 'Z') &&
 	    (c < 'a' || c > 'z')) {
-		return 0;
+		return false;
 	}
 	for (i = 1; i < len; i++) {
 		c = (unsigned char)s[i];
@@ -1600,10 +1600,10 @@ static ZEND_COLD bool zend_ast_valid_var_name(const char *s, size_t len)
 		    (c < '0' || c > '9') &&
 		    (c < 'A' || c > 'Z') &&
 		    (c < 'a' || c > 'z')) {
-			return 0;
+			return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 static ZEND_COLD bool zend_ast_var_needs_braces(char ch)
