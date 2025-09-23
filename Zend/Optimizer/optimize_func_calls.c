@@ -237,7 +237,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				call_stack[call].func = NULL;
 				call_stack[call].opline = NULL;
-				call_stack[call].try_inline = 0;
+				call_stack[call].try_inline = false;
 				call_stack[call].func_arg_num = (uint32_t)-1;
 				break;
 			case ZEND_FETCH_FUNC_ARG:
@@ -265,7 +265,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 								&& opline->op2_type == IS_UNUSED) {
 							/* FETCH_DIM_FUNC_ARG supports UNUSED op2, while FETCH_DIM_R does not.
 							 * Performing the replacement would create an invalid opcode. */
-							call_stack[call - 1].try_inline = 0;
+							call_stack[call - 1].try_inline = false;
 							break;
 						}
 
@@ -279,7 +279,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_SEND_VAL_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -291,7 +291,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_CHECK_FUNC_ARG:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					call_stack[call - 1].func_arg_num = (uint32_t)-1;
 					break;
 				}
@@ -305,7 +305,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				/* Don't transform SEND_FUNC_ARG if any FETCH opcodes weren't transformed. */
 				if (call_stack[call - 1].last_check_func_arg_opline == NULL) {
 					if (opline->op2_type == IS_CONST) {
-						call_stack[call - 1].try_inline = 0;
+						call_stack[call - 1].try_inline = false;
 					}
 					break;
 				}
@@ -314,7 +314,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				ZEND_FALLTHROUGH;
 			case ZEND_SEND_VAR_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -329,7 +329,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_SEND_VAR_NO_REF_EX:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 
@@ -347,14 +347,14 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_SEND_VAR:
 			case ZEND_SEND_REF:
 				if (opline->op2_type == IS_CONST) {
-					call_stack[call - 1].try_inline = 0;
+					call_stack[call - 1].try_inline = false;
 					break;
 				}
 				break;
 			case ZEND_SEND_UNPACK:
 			case ZEND_SEND_USER:
 			case ZEND_SEND_ARRAY:
-				call_stack[call - 1].try_inline = 0;
+				call_stack[call - 1].try_inline = false;
 				break;
 			default:
 				break;
