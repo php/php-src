@@ -39092,14 +39092,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 		} else {
-			closure = zend_hash_find_ptr(&EG(callable_convert_cache), call->func->common.function_name);
+			closure = zend_hash_index_find_ptr(&EG(callable_convert_cache), (zend_ulong)(uintptr_t)call->func);
 			if (closure) {
 				ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 			} else {
 				zend_closure_from_frame(EX_VAR(opline->result.var), call);
 				closure = Z_OBJ_P(EX_VAR(opline->result.var));
 				GC_ADDREF(closure);
-				zend_hash_add_ptr(&EG(callable_convert_cache), call->func->common.function_name, closure);
+				zend_hash_index_add_ptr(&EG(callable_convert_cache), (zend_ulong)(uintptr_t)call->func, closure);
 			}
 			CACHE_PTR(opline->extended_value, closure);
 		}
@@ -94331,14 +94331,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_S
 		if (closure) {
 			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 		} else {
-			closure = zend_hash_find_ptr(&EG(callable_convert_cache), call->func->common.function_name);
+			closure = zend_hash_index_find_ptr(&EG(callable_convert_cache), (zend_ulong)(uintptr_t)call->func);
 			if (closure) {
 				ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
 			} else {
 				zend_closure_from_frame(EX_VAR(opline->result.var), call);
 				closure = Z_OBJ_P(EX_VAR(opline->result.var));
 				GC_ADDREF(closure);
-				zend_hash_add_ptr(&EG(callable_convert_cache), call->func->common.function_name, closure);
+				zend_hash_index_add_ptr(&EG(callable_convert_cache), (zend_ulong)(uintptr_t)call->func, closure);
 			}
 			CACHE_PTR(opline->extended_value, closure);
 		}
