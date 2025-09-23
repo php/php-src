@@ -83,6 +83,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-19892 (Refcounting on zend_empty_array). (ilutov, timwolla)
   . Fixed handling of port numbers > 65535 with the internal
     `php_uri_parse_to_struct()` API. (timwolla)
+  . Fix Uri\WhatWg\Url::withHost(). (timwolla)
 
 - Windows:
   . Fix GH-19722 (_get_osfhandle asserts in debug mode when given a socket).
