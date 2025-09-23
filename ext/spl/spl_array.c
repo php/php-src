@@ -621,13 +621,13 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 
 		if (!zend_is_true(&rv)) {
 			zval_ptr_dtor(&rv);
-			return 0;
+			return false;
 		}
 		zval_ptr_dtor(&rv);
 
 		/* For isset calls we don't need to check the value, so return early */
 		if (!check_empty) {
-			return 1;
+			return true;
 		} else if (intern->fptr_offset_get) {
 			value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv);
 		}
@@ -639,7 +639,7 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 
 		if (get_hash_key(&key, intern, offset) == FAILURE) {
 			zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
-			return 0;
+			return false;
 		}
 
 		if (key.key) {
@@ -650,13 +650,13 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 		}
 
 		if (!tmp) {
-			return 0;
+			return false;
 		}
 
 		/* check_empty is only equal to 2 if it is called from offsetExists on this class,
 		 * where it needs to report an offset exists even if the value is null */
 		if (check_empty == 2) {
-			return 1;
+			return true;
 		}
 
 		if (check_empty && check_inherited && intern->fptr_offset_get) {
