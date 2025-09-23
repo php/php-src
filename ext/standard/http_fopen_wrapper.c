@@ -111,11 +111,11 @@ static bool check_has_header(const char *headers, const char *header) {
 	const char *s = headers;
 	while ((s = strstr(s, header))) {
 		if (s == headers || (*(s-1) == '\n' && *(s-2) == '\r')) {
-			return 1;
+			return true;
 		}
 		s++;
 	}
-	return 0;
+	return false;
 }
 
 static zend_result php_stream_handle_proxy_authorization_header(const char *s, smart_str *header)

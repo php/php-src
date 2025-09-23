@@ -1348,15 +1348,15 @@ static bool _is_basename_start(const char *start, const char *pos)
 	    && *(pos-1) != '/'
 	    && *(pos-1) != '\\') {
 		if (pos - start == 1) {
-			return 1;
+			return true;
 		} else if (*(pos-2) == '/' || *(pos-2) == '\\') {
-			return 1;
+			return true;
 		} else if (*(pos-2) == ':'
 			&& _is_basename_start(start, pos - 2)) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 #endif
 
@@ -5040,7 +5040,7 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 	char *norm;
 
 	if (len == 0) {
-		return 0;
+		return false;
 	}
 
 	norm = emalloc(len+1);
