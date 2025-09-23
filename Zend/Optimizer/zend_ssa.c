@@ -52,10 +52,10 @@ static bool will_rejoin(
 		/* The other successor dominates this predecessor,
 		 * so we will get the original value from it. */
 		if (dominates(cfg->blocks, other_successor, predecessor)) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const zend_ssa *ssa, int from, int to, int var) /* {{{ */
@@ -65,7 +65,7 @@ static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const z
 
 	if (!DFG_ISSET(dfg->in, dfg->size, to, var)) {
 		/* Variable is not live, certainly won't benefit from pi */
-		return 0;
+		return false;
 	}
 
 	/* Make sure that both successors of the from block aren't the same. Pi nodes are associated
@@ -73,13 +73,13 @@ static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const z
 	from_block = &ssa->cfg.blocks[from];
 	ZEND_ASSERT(from_block->successors_count == 2);
 	if (from_block->successors[0] == from_block->successors[1]) {
-		return 0;
+		return false;
 	}
 
 	to_block = &ssa->cfg.blocks[to];
 	if (to_block->predecessors_count == 1) {
 		/* Always place pi if one predecessor (an if branch) */
-		return 1;
+		return true;
 	}
 
 	/* Check whether we will rejoin with the original value coming from the other successor,
