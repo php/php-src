@@ -539,8 +539,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
 	char *lock_name;
 #ifdef PHP_WIN32
-	bool restarted = 0;
-	bool need_creation = 0;
+	bool restarted = false;
+	bool need_creation = false;
 #endif
 
 	zend_string *path;
@@ -923,7 +923,7 @@ restart:
 
 				lock_file_mode = "r+b";
 
-				restarted = 1;
+				restarted = true;
 				goto restart;
 #endif
 			}
@@ -1277,7 +1277,7 @@ PHP_FUNCTION(dba_sync)
 /* {{{ List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
-	bool full_info = 0;
+	bool full_info = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
 		RETURN_THROWS();
