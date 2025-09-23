@@ -159,10 +159,10 @@ PHP_FUNCTION(phar_file_get_contents) /* {{{ */
 {
 	zend_string *filename;
 	zend_string *contents;
-	bool use_include_path = 0;
+	bool use_include_path = false;
 	zend_long offset = -1;
 	zend_long maxlen;
-	bool maxlen_is_null = 1;
+	bool maxlen_is_null = true;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -235,7 +235,7 @@ skip_phar:
 PHP_FUNCTION(phar_readfile) /* {{{ */
 {
 	zend_string *filename;
-	bool use_include_path = 0;
+	bool use_include_path = false;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -281,7 +281,7 @@ PHP_FUNCTION(phar_fopen) /* {{{ */
 	zend_string *filename;
 	char *mode;
 	size_t mode_len;
-	bool use_include_path = 0;
+	bool use_include_path = false;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
