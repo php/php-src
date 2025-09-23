@@ -137,10 +137,10 @@ typedef struct php_uri_parser {
 	} property_handler;
 } php_uri_parser;
 
-typedef struct uri_internal_t {
+typedef struct php_uri_internal {
 	const php_uri_parser *parser;
 	void *uri;
-} uri_internal_t;
+} php_uri_internal;
 
 typedef struct php_uri_object {
 	const php_uri_parser *parser;
