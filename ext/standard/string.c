@@ -5091,7 +5091,7 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 
 PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t allow_len) /* {{{ */
 {
-	return php_strip_tags_ex(rbuf, len, allow, allow_len, 0);
+	return php_strip_tags_ex(rbuf, len, allow, allow_len, false);
 }
 /* }}} */
 

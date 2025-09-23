@@ -1023,7 +1023,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, HashTable *ht, 
 	if (php_var_serialize_get_sleep_props(&props, struc, ht) == SUCCESS) {
 		php_var_serialize_class_name(buf, struc);
 		php_var_serialize_nested_data(
-			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash, GC_REFCOUNT(&props) > 1);
+			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ false, var_hash,
+			GC_REFCOUNT(&props) > 1);
 	}
 	zend_hash_destroy(&props);
 }
@@ -1299,8 +1300,8 @@ again:
 			smart_str_appendl(buf, "a:", 2);
 			myht = Z_ARRVAL_P(struc);
 			php_var_serialize_nested_data(
-				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ 0, var_hash,
-					!is_root && (in_rcn_array || GC_REFCOUNT(myht) > 1));
+				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ false, var_hash,
+				!is_root && (in_rcn_array || GC_REFCOUNT(myht) > 1));
 			return;
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
