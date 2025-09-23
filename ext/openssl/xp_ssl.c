@@ -391,26 +391,26 @@ static bool php_openssl_x509_fingerprint_match(X509 *peer, zval *val)
 
 		if (!zend_hash_num_elements(Z_ARRVAL_P(val))) {
 			php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
-			return 0;
+			return false;
 		}
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), key, current) {
 			if (key == NULL || Z_TYPE_P(current) != IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
-				return 0;
+				return false;
 			}
 			if (php_openssl_x509_fingerprint_cmp(peer, ZSTR_VAL(key), Z_STRVAL_P(current)) != 0) {
-				return 0;
+				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		return 1;
+		return true;
 	} else {
 		php_error_docref(NULL, E_WARNING,
 			"Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
 	}
 
-	return 0;
+	return false;
 }
 
 static bool php_openssl_matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
@@ -420,18 +420,18 @@ static bool php_openssl_matches_wildcard_name(const char *subjectname, const cha
 	size_t suffix_len, subject_len;
 
 	if (strcasecmp(subjectname, certname) == 0) {
-		return 1;
+		return true;
 	}
 
 	/* wildcard, if present, must only be present in the left-most component */
 	if (!(wildcard = strchr(certname, '*')) || memchr(certname, '.', wildcard - certname)) {
-		return 0;
+		return false;
 	}
 
 	/* 1) prefix, if not empty, must match subject */
 	prefix_len = wildcard - certname;
 	if (prefix_len && strncasecmp(subjectname, certname, prefix_len) != 0) {
-		return 0;
+		return false;
 	}
 
 	suffix_len = strlen(wildcard + 1);
@@ -444,7 +444,7 @@ static bool php_openssl_matches_wildcard_name(const char *subjectname, const cha
 			memchr(subjectname + prefix_len, '.', subject_len - suffix_len - prefix_len) == NULL;
 	}
 
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -491,7 +491,7 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 				OPENSSL_free(cert_name);
 				sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
 
-				return 1;
+				return true;
 			}
 			OPENSSL_free(cert_name);
 		} else if (san->type == GEN_IPADD) {
@@ -505,7 +505,7 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 				if (strcasecmp(subject_name, (const char*)ipbuffer) == 0) {
 					sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
 
-					return 1;
+					return true;
 				}
 			}
 #ifdef HAVE_IPV6_SAN
@@ -515,7 +515,7 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 				if (strcasecmp((const char*)subject_name_ipv6_expanded, (const char*)ipbuffer) == 0) {
 					sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
 
-					return 1;
+					return true;
 				}
 			}
 #endif
@@ -524,7 +524,7 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 
 	sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
 
-	return 0;
+	return false;
 }
 /* }}} */
 
