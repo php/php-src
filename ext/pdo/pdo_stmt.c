@@ -92,7 +92,7 @@ static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_p
 /* trigger callback hook for parameters */
 static bool dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type) /* {{{ */
 {
-	bool ret = 1, is_param = 1;
+	bool ret = true, is_param = true;
 	struct pdo_bound_param_data *param;
 	HashTable *ht;
 
@@ -110,14 +110,14 @@ iterate:
 	if (ht) {
 		ZEND_HASH_FOREACH_PTR(ht, param) {
 			if (!stmt->methods->param_hook(stmt, param, event_type)) {
-				ret = 0;
+				ret = false;
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (ret && is_param) {
 		ht = stmt->bound_columns;
-		is_param = 0;
+		is_param = false;
 		goto iterate;
 	}
 
