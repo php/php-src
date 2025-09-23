@@ -1635,16 +1635,16 @@ PHPAPI zend_result php_session_reset_id(void)
 	}
 
 	/* Apply trans sid if sid cookie is not set */
-	apply_trans_sid = 0;
+	apply_trans_sid = false;
 	if (APPLY_TRANS_SID) {
-		apply_trans_sid = 1;
+		apply_trans_sid = true;
 		if (PS(use_cookies) &&
 			(data = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_COOKIE")))) {
 			ZVAL_DEREF(data);
 			if (Z_TYPE_P(data) == IS_ARRAY &&
 				(potential_session_id = zend_hash_find(Z_ARRVAL_P(data), PS(session_name)))) {
 				ZVAL_DEREF(potential_session_id);
-				apply_trans_sid = 0;
+				apply_trans_sid = false;
 			}
 		}
 	}
@@ -2113,7 +2113,7 @@ PHP_FUNCTION(session_set_save_handler)
 	/* OOP Version */
 	if (ZEND_NUM_ARGS() <= 2) {
 		zval *obj = NULL;
-		bool register_shutdown = 1;
+		bool register_shutdown = true;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
 			RETURN_THROWS();
@@ -2336,7 +2336,7 @@ PHP_FUNCTION(session_id)
 /* Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 PHP_FUNCTION(session_regenerate_id)
 {
-	bool del_ses = 0;
+	bool del_ses = false;
 	zend_string *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &del_ses) == FAILURE) {
@@ -2535,7 +2535,7 @@ PHP_FUNCTION(session_cache_limiter)
 PHP_FUNCTION(session_cache_expire)
 {
 	zend_long expires;
-	bool expires_is_null = 1;
+	bool expires_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &expires, &expires_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -3088,7 +3088,7 @@ static void php_session_rfc1867_early_find_sid(php_session_rfc1867_progress *pro
 	if (PS(use_cookies)) {
 		sapi_module.treat_data(PARSE_COOKIE, NULL, NULL);
 		if (early_find_sid_in(&progress->sid, TRACK_VARS_COOKIE, progress)) {
-			progress->apply_trans_sid = 0;
+			progress->apply_trans_sid = false;
 			return;
 		}
 	}
