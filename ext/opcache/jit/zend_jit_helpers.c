@@ -1979,7 +1979,7 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 		&arg_info->type, arg, /* ref */ NULL, /* is_return_type */ false);
 	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
-		return 0;
+		return false;
 	}
 	return ret;
 }
