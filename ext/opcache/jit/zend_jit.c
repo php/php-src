@@ -210,38 +210,38 @@ static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 		case ZEND_CASE:
 		case ZEND_CASE_STRICT:
 			if (op1_min == op1_max && op2_min == op2_max && op1_min == op2_min) {
-				*result = 1;
+				*result = true;
 				return 1;
 			} else if (op1_max < op2_min || op1_min > op2_max) {
-				*result = 0;
+				*result = false;
 				return 1;
 			}
 			return 0;
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_NOT_IDENTICAL:
 			if (op1_min == op1_max && op2_min == op2_max && op1_min == op2_min) {
-				*result = 0;
+				*result = false;
 				return 1;
 			} else if (op1_max < op2_min || op1_min > op2_max) {
-				*result = 1;
+				*result = true;
 				return 1;
 			}
 			return 0;
 		case ZEND_IS_SMALLER:
 			if (op1_max < op2_min) {
-				*result = 1;
+				*result = true;
 				return 1;
 			} else if (op1_min >= op2_max) {
-				*result = 0;
+				*result = false;
 				return 1;
 			}
 			return 0;
 		case ZEND_IS_SMALLER_OR_EQUAL:
 			if (op1_max <= op2_min) {
-				*result = 1;
+				*result = true;
 				return 1;
 			} else if (op1_min > op2_max) {
-				*result = 0;
+				*result = false;
 				return 1;
 			}
 			return 0;
@@ -1238,13 +1238,13 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 			    ((ra[i].flags & ZREG_LOAD) ||
 			     ((ra[i].flags & ZREG_STORE) && ssa->vars[i].definition >= 0)) &&
 			    ssa->vars[i].use_chain < 0) {
-			    bool may_remove = 1;
+			    bool may_remove = true;
 				zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
 
 				while (phi) {
 					if (ra[phi->ssa_var].ref &&
 					    !(ra[phi->ssa_var].flags & ZREG_LOAD)) {
-						may_remove = 0;
+						may_remove = false;
 						break;
 					}
 					phi = zend_ssa_next_use_phi(ssa, i, phi);
@@ -1299,13 +1299,13 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 				 && (ra[i].flags & ZREG_STORE)
 				 && (ssa->vars[i].use_chain < 0
 				  || zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0)) {
-					bool may_remove = 1;
+					bool may_remove = true;
 					zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
 
 					while (phi) {
 						if (ra[phi->ssa_var].ref &&
 						    !(ra[phi->ssa_var].flags & ZREG_LOAD)) {
-							may_remove = 0;
+							may_remove = false;
 							break;
 						}
 						phi = zend_ssa_next_use_phi(ssa, i, phi);
@@ -1425,7 +1425,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	zend_vm_opcode_handler_t handler;
 	int call_level = 0;
 	void *checkpoint = NULL;
-	bool recv_emitted = 0;   /* emitted at least one RECV opcode */
+	bool recv_emitted = false;   /* emitted at least one RECV opcode */
 	uint8_t smart_branch_opcode;
 	uint32_t target_label, target_label2;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info, op1_mem_info;
@@ -1490,7 +1490,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							zend_jit_recv_entry(&ctx, b);
 						}
 					}
-					recv_emitted = 1;
+					recv_emitted = true;
 				} else if (opline->opcode == ZEND_RECV) {
 					if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 						/* skip */
@@ -1500,7 +1500,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					} else if (recv_emitted) {
 						zend_jit_recv_entry(&ctx, b);
 					} else {
-						recv_emitted = 1;
+						recv_emitted = true;
 					}
 				} else {
 					if (recv_emitted) {
@@ -1883,8 +1883,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						ce = NULL;
-						ce_is_instanceof = 0;
-						on_this = 0;
+						ce_is_instanceof = false;
+						on_this = false;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
@@ -1893,7 +1893,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
-							on_this = 1;
+							on_this = true;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -1934,8 +1934,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						ce = NULL;
-						ce_is_instanceof = 0;
-						on_this = 0;
+						ce_is_instanceof = false;
+						on_this = false;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
@@ -1944,7 +1944,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
-							on_this = 1;
+							on_this = true;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -1978,8 +1978,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						ce = NULL;
-						ce_is_instanceof = 0;
-						on_this = 0;
+						ce_is_instanceof = false;
+						on_this = false;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
@@ -1988,7 +1988,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
 							op1_addr = 0;
-							on_this = 1;
+							on_this = true;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -2450,8 +2450,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_FETCH_OBJ_IS:
 					case ZEND_FETCH_OBJ_W:
 						ce = NULL;
-						ce_is_instanceof = 0;
-						on_this = 0;
+						ce_is_instanceof = false;
+						on_this = false;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							op1_addr = 0;
@@ -2460,7 +2460,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (ce) {
 								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
-							on_this = 1;
+							on_this = true;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -2630,8 +2630,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						ce = NULL;
-						ce_is_instanceof = 0;
-						on_this = 0;
+						ce_is_instanceof = false;
+						on_this = false;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							op1_addr = 0;
@@ -2640,7 +2640,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (ce) {
 								ce_is_instanceof = !(ce->ce_flags & ZEND_ACC_FINAL);
 							}
-							on_this = 1;
+							on_this = true;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -2907,13 +2907,13 @@ done:
 	if (jit->return_inputs) {
 		zend_jit_common_return(jit);
 
-		bool left_frame = 0;
+		bool left_frame = false;
 		if (op_array->last_var > 100) {
 			/* To many CVs to unroll */
 			if (!zend_jit_free_cvs(&ctx)) {
 				goto jit_failure;
 			}
-			left_frame = 1;
+			left_frame = true;
 		}
 		if (!left_frame) {
 			int j;
@@ -2923,7 +2923,7 @@ done:
 
 				if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 					if (!left_frame) {
-						left_frame = 1;
+						left_frame = true;
 					    if (!zend_jit_leave_frame(&ctx)) {
 							goto jit_failure;
 					    }
