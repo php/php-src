@@ -800,7 +800,7 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 				memcpy(*dict, ZSTR_VAL(str), ZSTR_LEN(str));
 				*dictlen = ZSTR_LEN(str);
 
-				return 1;
+				return true;
 			}
 
 			case IS_ARRAY: {
@@ -852,10 +852,10 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 
 			default:
 				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_zval_value_name(option_buffer));
-				return 0;
+				return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 /* {{{ Initialize an incremental inflate context with the specified encoding */
