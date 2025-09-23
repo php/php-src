@@ -53,11 +53,6 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #include <openssl/cms.h>
-#if PHP_OPENSSL_API_VERSION >= 0x30000
-#include <openssl/core_names.h>
-#include <openssl/param_build.h>
-#include <openssl/provider.h>
-#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(openssl)
 

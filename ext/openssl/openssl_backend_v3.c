@@ -24,6 +24,18 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(openssl)
 
+void php_openssl_backend_init(void)
+{
+#if PHP_OPENSSL_API_VERSION >= 0x30000 && defined(LOAD_OPENSSL_LEGACY_PROVIDER)
+	OSSL_PROVIDER_load(NULL, "legacy");
+	OSSL_PROVIDER_load(NULL, "default");
+#endif
+
+	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
+
+	php_openssl_backend_init_common();
+}
+
 void php_openssl_backend_shutdown(void)
 {
 	(void) 0;

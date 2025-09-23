@@ -473,23 +473,8 @@ zend_result php_openssl_write_rand_file(const char * file, int egdsocket, int se
 	return SUCCESS;
 }
 
-void php_openssl_backend_init(void)
+void php_openssl_backend_init_common(void)
 {
-#ifdef LIBRESSL_VERSION_NUMBER
-	OPENSSL_config(NULL);
-	SSL_library_init();
-	OpenSSL_add_all_ciphers();
-	OpenSSL_add_all_digests();
-	OpenSSL_add_all_algorithms();
-	SSL_load_error_strings();
-#else
-#if PHP_OPENSSL_API_VERSION >= 0x30000 && defined(LOAD_OPENSSL_LEGACY_PROVIDER)
-	OSSL_PROVIDER_load(NULL, "legacy");
-	OSSL_PROVIDER_load(NULL, "default");
-#endif
-	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
-#endif
-
 	/* Determine default SSL configuration file */
 	char *config_filename = getenv("OPENSSL_CONF");
 	if (config_filename == NULL) {
