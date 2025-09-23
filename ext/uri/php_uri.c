@@ -32,17 +32,17 @@
 #include "php_uri_arginfo.h"
 #include "uriparser/UriBase.h"
 
-zend_class_entry *uri_rfc3986_uri_ce;
+zend_class_entry *php_uri_ce_rfc3986_uri;
 zend_object_handlers uri_rfc3986_uri_object_handlers;
-zend_class_entry *uri_whatwg_url_ce;
+zend_class_entry *php_uri_ce_whatwg_url;
 zend_object_handlers uri_whatwg_uri_object_handlers;
-zend_class_entry *uri_comparison_mode_ce;
-zend_class_entry *uri_exception_ce;
-zend_class_entry *uri_error_ce;
-zend_class_entry *uri_invalid_uri_exception_ce;
-zend_class_entry *uri_whatwg_invalid_url_exception_ce;
-zend_class_entry *uri_whatwg_url_validation_error_type_ce;
-zend_class_entry *uri_whatwg_url_validation_error_ce;
+zend_class_entry *php_uri_ce_comparison_mode;
+zend_class_entry *php_uri_ce_exception;
+zend_class_entry *php_uri_ce_error;
+zend_class_entry *php_uri_ce_invalid_uri_exception;
+zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
+zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
+zend_class_entry *php_uri_ce_whatwg_url_validation_error;
 
 static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_REQUIRED("lexbor")
@@ -377,7 +377,7 @@ static void create_rfc3986_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH_STR(uri_str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, uri_rfc3986_uri_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, php_uri_ce_rfc3986_uri)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_uri_instantiate_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU,
@@ -397,7 +397,7 @@ static bool is_list_of_whatwg_validation_errors(const HashTable *array)
 			return false;
 		}
 
-		if (!instanceof_function(Z_OBJCE_P(val), uri_whatwg_url_validation_error_ce)) {
+		if (!instanceof_function(Z_OBJCE_P(val), php_uri_ce_whatwg_url_validation_error)) {
 			return false;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -437,14 +437,14 @@ PHP_METHOD(Uri_WhatWg_InvalidUrlException, __construct)
 	if (errors == NULL) {
 		zval tmp;
 		ZVAL_EMPTY_ARRAY(&tmp);
-		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), &tmp);
+		zend_update_property(php_uri_ce_whatwg_invalid_url_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), &tmp);
 	} else {
 		if (!is_list_of_whatwg_validation_errors(Z_ARR_P(errors))) {
-			zend_argument_value_error(2, "must be a list of %s", ZSTR_VAL(uri_whatwg_url_validation_error_ce->name));
+			zend_argument_value_error(2, "must be a list of %s", ZSTR_VAL(php_uri_ce_whatwg_url_validation_error->name));
 			RETURN_THROWS();
 		}
 
-		zend_update_property(uri_whatwg_invalid_url_exception_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), errors);
+		zend_update_property(php_uri_ce_whatwg_invalid_url_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errors"), errors);
 	}
 	if (EG(exception)) {
 		RETURN_THROWS();
@@ -459,23 +459,23 @@ PHP_METHOD(Uri_WhatWg_UrlValidationError, __construct)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(context)
-		Z_PARAM_OBJECT_OF_CLASS(type, uri_whatwg_url_validation_error_type_ce)
+		Z_PARAM_OBJECT_OF_CLASS(type, php_uri_ce_whatwg_url_validation_error_type)
 		Z_PARAM_BOOL(failure)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property_str(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("context"), context);
+	zend_update_property_str(php_uri_ce_whatwg_url_validation_error, Z_OBJ_P(ZEND_THIS), ZEND_STRL("context"), context);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
-	zend_update_property_ex(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_TYPE), type);
+	zend_update_property_ex(php_uri_ce_whatwg_url_validation_error, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_TYPE), type);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
 	zval failure_zv;
 	ZVAL_BOOL(&failure_zv, failure);
-	zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("failure"), &failure_zv);
+	zend_update_property(php_uri_ce_whatwg_url_validation_error, Z_OBJ_P(ZEND_THIS), ZEND_STRL("failure"), &failure_zv);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
@@ -490,7 +490,7 @@ static void create_whatwg_uri(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH_STR(uri_str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, uri_whatwg_url_ce)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(base_url_object, php_uri_ce_whatwg_url)
 		Z_PARAM_ZVAL(errors)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -673,7 +673,7 @@ PHP_METHOD(Uri_Rfc3986_Uri, withFragment)
 
 static void throw_cannot_recompose_uri_to_string(php_uri_object *object)
 {
-	zend_throw_exception_ex(uri_error_ce, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->std.ce->name));
+	zend_throw_exception_ex(php_uri_ce_error, 0, "Cannot recompose %s to a string", ZSTR_VAL(object->std.ce->name));
 }
 
 static void uri_equals(INTERNAL_FUNCTION_PARAMETERS, php_uri_object *that_object, zend_object *comparison_mode)
@@ -722,9 +722,9 @@ PHP_METHOD(Uri_Rfc3986_Uri, equals)
 	zend_object *comparison_mode = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_OBJ_OF_CLASS(that_object, uri_rfc3986_uri_ce)
+		Z_PARAM_OBJ_OF_CLASS(that_object, php_uri_ce_rfc3986_uri)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce)
+		Z_PARAM_OBJ_OF_CLASS(comparison_mode, php_uri_ce_comparison_mode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_uri_object_from_obj(that_object), comparison_mode);
@@ -919,9 +919,9 @@ PHP_METHOD(Uri_WhatWg_Url, equals)
 	zend_object *comparison_mode = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_OBJ_OF_CLASS(that_object, uri_whatwg_url_ce)
+		Z_PARAM_OBJ_OF_CLASS(that_object, php_uri_ce_whatwg_url)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS(comparison_mode, uri_comparison_mode_ce)
+		Z_PARAM_OBJ_OF_CLASS(comparison_mode, php_uri_ce_comparison_mode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	uri_equals(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_uri_object_from_obj(that_object), comparison_mode);
@@ -1076,29 +1076,29 @@ PHPAPI zend_result php_uri_parser_register(const php_uri_parser *uri_parser)
 
 static PHP_MINIT_FUNCTION(uri)
 {
-	uri_rfc3986_uri_ce = register_class_Uri_Rfc3986_Uri();
-	uri_rfc3986_uri_ce->create_object = php_uri_object_create_rfc3986;
-	uri_rfc3986_uri_ce->default_object_handlers = &uri_rfc3986_uri_object_handlers;
+	php_uri_ce_rfc3986_uri = register_class_Uri_Rfc3986_Uri();
+	php_uri_ce_rfc3986_uri->create_object = php_uri_object_create_rfc3986;
+	php_uri_ce_rfc3986_uri->default_object_handlers = &uri_rfc3986_uri_object_handlers;
 	memcpy(&uri_rfc3986_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	uri_rfc3986_uri_object_handlers.offset = XtOffsetOf(php_uri_object, std);
 	uri_rfc3986_uri_object_handlers.free_obj = php_uri_object_handler_free;
 	uri_rfc3986_uri_object_handlers.clone_obj = php_uri_object_handler_clone;
 
-	uri_whatwg_url_ce = register_class_Uri_WhatWg_Url();
-	uri_whatwg_url_ce->create_object = php_uri_object_create_whatwg;
-	uri_whatwg_url_ce->default_object_handlers = &uri_whatwg_uri_object_handlers;
+	php_uri_ce_whatwg_url = register_class_Uri_WhatWg_Url();
+	php_uri_ce_whatwg_url->create_object = php_uri_object_create_whatwg;
+	php_uri_ce_whatwg_url->default_object_handlers = &uri_whatwg_uri_object_handlers;
 	memcpy(&uri_whatwg_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	uri_whatwg_uri_object_handlers.offset = XtOffsetOf(php_uri_object, std);
 	uri_whatwg_uri_object_handlers.free_obj = php_uri_object_handler_free;
 	uri_whatwg_uri_object_handlers.clone_obj = php_uri_object_handler_clone;
 
-	uri_comparison_mode_ce = register_class_Uri_UriComparisonMode();
-	uri_exception_ce = register_class_Uri_UriException(zend_ce_exception);
-	uri_error_ce = register_class_Uri_UriError(zend_ce_error);
-	uri_invalid_uri_exception_ce = register_class_Uri_InvalidUriException(uri_exception_ce);
-	uri_whatwg_invalid_url_exception_ce = register_class_Uri_WhatWg_InvalidUrlException(uri_invalid_uri_exception_ce);
-	uri_whatwg_url_validation_error_ce = register_class_Uri_WhatWg_UrlValidationError();
-	uri_whatwg_url_validation_error_type_ce = register_class_Uri_WhatWg_UrlValidationErrorType();
+	php_uri_ce_comparison_mode = register_class_Uri_UriComparisonMode();
+	php_uri_ce_exception = register_class_Uri_UriException(zend_ce_exception);
+	php_uri_ce_error = register_class_Uri_UriError(zend_ce_error);
+	php_uri_ce_invalid_uri_exception = register_class_Uri_InvalidUriException(php_uri_ce_exception);
+	php_uri_ce_whatwg_invalid_url_exception = register_class_Uri_WhatWg_InvalidUrlException(php_uri_ce_invalid_uri_exception);
+	php_uri_ce_whatwg_url_validation_error = register_class_Uri_WhatWg_UrlValidationError();
+	php_uri_ce_whatwg_url_validation_error_type = register_class_Uri_WhatWg_UrlValidationErrorType();
 
 	zend_hash_init(&uri_parsers, 4, NULL, NULL, true);
 

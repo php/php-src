@@ -73,8 +73,8 @@ static const char *fill_errors(zval *errors)
 	lexbor_plog_entry_t *lxb_error;
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
 		zval error;
-		object_init_ex(&error, uri_whatwg_url_validation_error_ce);
-		zend_update_property_string(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZEND_STRL("context"), (const char *) lxb_error->data);
+		object_init_ex(&error, php_uri_ce_whatwg_url_validation_error);
+		zend_update_property_string(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("context"), (const char *) lxb_error->data);
 
 		const char *error_str;
 		zval failure;
@@ -199,10 +199,10 @@ static const char *fill_errors(zval *errors)
 		}
 
 		zval error_type;
-		ZVAL_OBJ(&error_type, zend_enum_get_case_cstr(uri_whatwg_url_validation_error_type_ce, error_str));
-		zend_update_property_ex(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZSTR_KNOWN(ZEND_STR_TYPE), &error_type);
+		ZVAL_OBJ(&error_type, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_validation_error_type, error_str));
+		zend_update_property_ex(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZSTR_KNOWN(ZEND_STR_TYPE), &error_type);
 
-		zend_update_property(uri_whatwg_url_validation_error_ce, Z_OBJ(error), ZEND_STRL("failure"), &failure);
+		zend_update_property(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("failure"), &failure);
 
 		if (Z_TYPE(failure) == IS_TRUE) {
 			result = error_str;
@@ -219,7 +219,7 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 	zval err;
 	const char *reason = fill_errors(&err);
 	zend_object *exception = zend_throw_exception_ex(
-		uri_whatwg_invalid_url_exception_ce,
+		php_uri_ce_whatwg_invalid_url_exception,
 		0,
 		"The specified %s is malformed%s%s%s",
 		component,
@@ -565,7 +565,7 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 		zval err;
 		const char *reason = fill_errors(&err);
 		if (url == NULL && !silent) {
-			zend_object *exception = zend_throw_exception_ex(uri_whatwg_invalid_url_exception_ce, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
+			zend_object *exception = zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URI is malformed%s%s%s", reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
 			zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
 		}
 		if (errors != NULL) {

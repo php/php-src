@@ -17,17 +17,17 @@
 #ifndef PHP_URI_COMMON_H
 #define PHP_URI_COMMON_H
 
-extern zend_class_entry *uri_rfc3986_uri_ce;
+extern zend_class_entry *php_uri_ce_rfc3986_uri;
 extern zend_object_handlers uri_rfc3986_uri_object_handlers;
-extern zend_class_entry *uri_whatwg_url_ce;
+extern zend_class_entry *php_uri_ce_whatwg_url;
 extern zend_object_handlers uri_whatwg_uri_object_handlers;
-extern zend_class_entry *uri_comparison_mode_ce;
-extern zend_class_entry *uri_exception_ce;
-extern zend_class_entry *uri_error_ce;
-extern zend_class_entry *uri_invalid_uri_exception_ce;
-extern zend_class_entry *uri_whatwg_invalid_url_exception_ce;
-extern zend_class_entry *uri_whatwg_url_validation_error_type_ce;
-extern zend_class_entry *uri_whatwg_url_validation_error_ce;
+extern zend_class_entry *php_uri_ce_comparison_mode;
+extern zend_class_entry *php_uri_ce_exception;
+extern zend_class_entry *php_uri_ce_error;
+extern zend_class_entry *php_uri_ce_invalid_uri_exception;
+extern zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
+extern zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
+extern zend_class_entry *php_uri_ce_whatwg_url_validation_error;
 
 typedef enum php_uri_recomposition_mode {
 	PHP_URI_RECOMPOSITION_MODE_RAW_ASCII,

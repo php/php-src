@@ -52,7 +52,7 @@ void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property
 	const php_uri_property_handler *property_handler = php_uri_parser_property_handler_by_name(uri_object->parser, property_name);
 
 	if (UNEXPECTED(property_handler->read(uri_object->uri, component_read_mode, return_value) == FAILURE)) {
-		zend_throw_exception_ex(uri_error_ce, 0, "The %s component cannot be retrieved", ZSTR_VAL(get_known_string_by_property_name(property_name)));
+		zend_throw_exception_ex(php_uri_ce_error, 0, "The %s component cannot be retrieved", ZSTR_VAL(get_known_string_by_property_name(property_name)));
 		RETURN_THROWS();
 	}
 }
