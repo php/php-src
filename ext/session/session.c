@@ -3261,7 +3261,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			add_assoc_long_ex(&progress->current_file, ZEND_STRL("error"), 0);
 
 			add_assoc_bool_ex(&progress->current_file, ZEND_STRL("done"), 0);
-			add_assoc_long_ex(&progress->current_file, ZEND_STRL("start_time"), (zend_long)time(NULL));
+			add_assoc_long_ex(&progress->current_file, ZEND_STRL("start_time"), (zend_long)zend_realtime_get());
 			add_assoc_long_ex(&progress->current_file, ZEND_STRL("bytes_processed"), 0);
 
 			add_next_index_zval(&progress->files, &progress->current_file);
