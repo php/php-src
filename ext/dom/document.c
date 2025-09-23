@@ -752,7 +752,7 @@ PHP_METHOD(DOMDocument, importNode)
 	xmlDocPtr docp;
 	xmlNodePtr nodep, retnodep;
 	dom_object *intern, *nodeobj;
-	bool recursive = 0;
+	bool recursive = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, dom_node_class_entry, &recursive) == FAILURE) {
 		RETURN_THROWS();
@@ -802,7 +802,7 @@ static void dom_modern_document_import_node(INTERNAL_FUNCTION_PARAMETERS, zend_c
 	xmlDocPtr docp;
 	xmlNodePtr nodep, retnodep;
 	dom_object *intern, *nodeobj;
-	bool recursive = 0;
+	bool recursive = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, node_ce, &recursive) != SUCCESS) {
 		RETURN_THROWS();

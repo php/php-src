@@ -1463,7 +1463,7 @@ PHP_METHOD(DOMNode, cloneNode)
 	zval *id;
 	xmlNode *n, *node;
 	dom_object *intern;
-	bool recursive = 0;
+	bool recursive = false;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &recursive) == FAILURE) {
