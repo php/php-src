@@ -7453,7 +7453,7 @@ static zend_vm_opcode_handler_t zend_jit_trace_exit_to_vm(uint32_t trace_num, ui
 			&zend_jit_traces[trace_num].exit_info[exit_num],
 			stack, stack_size, NULL, NULL,
 			zend_jit_traces[trace_num].constants,
-			0)) {
+			false)) {
 		goto jit_failure;
 	}
 
