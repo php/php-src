@@ -1014,6 +1014,10 @@ PHP 8.5 UPGRADE NOTES
     return SQL_NO_TOTAL in SQLGetData are also better handled as well.
     This should improve compatibility and performance. See GH-10809, GH-10733.
 
+- MBstring
+  . Oniguruma maintenance was end at 2025-04-25. So re-bundle Oniguruma.
+    This changes temporary, mbregex functions should be removed soon.
+
 ========================================
 14. Performance Improvements
 ========================================
