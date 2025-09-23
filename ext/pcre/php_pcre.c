@@ -1132,12 +1132,12 @@ static zend_always_inline bool is_known_valid_utf8(
 		zend_string *subject_str, PCRE2_SIZE start_offset) {
 	if (!ZSTR_IS_VALID_UTF8(subject_str)) {
 		/* We don't know whether the string is valid UTF-8 or not. */
-		return 0;
+		return false;
 	}
 
 	if (start_offset == ZSTR_LEN(subject_str)) {
 		/* Degenerate case: Offset points to end of string. */
-		return 1;
+		return true;
 	}
 
 	/* Check that the offset does not point to an UTF-8 continuation byte. */
