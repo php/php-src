@@ -706,7 +706,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 	spl_fixedarray array;
 	spl_fixedarray_object *intern;
 	int num;
-	bool save_indexes = 1;
+	bool save_indexes = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|b", &data, &save_indexes) == FAILURE) {
 		RETURN_THROWS();

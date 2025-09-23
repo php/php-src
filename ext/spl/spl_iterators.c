@@ -222,7 +222,7 @@ static zend_result spl_recursive_it_valid_ex(spl_recursive_it_object *object, zv
 	if (object->endIteration && object->in_iteration) {
 		zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->endIteration, "endIteration", NULL);
 	}
-	object->in_iteration = 0;
+	object->in_iteration = false;
 	return FAILURE;
 }
 
@@ -460,7 +460,7 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 	if (!EG(exception) && object->beginIteration && !object->in_iteration) {
 		zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->beginIteration, "beginIteration", NULL);
 	}
-	object->in_iteration = 1;
+	object->in_iteration = true;
 	spl_recursive_it_move_forward_ex(object, zthis);
 }
 
@@ -614,7 +614,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->mode = mode;
 	intern->flags = (int)flags;
 	intern->max_depth = -1;
-	intern->in_iteration = 0;
+	intern->in_iteration = false;
 	intern->ce = Z_OBJCE_P(object);
 
 	intern->beginIteration = zend_hash_str_find_ptr(&intern->ce->function_table, "beginiteration", sizeof("beginiteration") - 1);
@@ -740,7 +740,7 @@ PHP_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
 	zend_long level;
-	bool level_is_null = 1;
+	bool level_is_null = true;
 	zval *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &level, &level_is_null) == FAILURE) {
