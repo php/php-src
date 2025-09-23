@@ -136,7 +136,7 @@ ZEND_API uint32_t zend_get_func_info(
 	uint32_t ret = 0;
 	const zend_function *callee_func = call_info->callee_func;
 	*ce = NULL;
-	*ce_is_instanceof = 0;
+	*ce_is_instanceof = false;
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
 		uint32_t internal_ret = zend_get_internal_func_info(callee_func, call_info, ssa);

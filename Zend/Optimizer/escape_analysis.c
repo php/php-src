@@ -393,12 +393,12 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 		return SUCCESS;
 	}
 
-	has_allocations = 0;
+	has_allocations = false;
 	for (i = op_array->last_var; i < ssa_vars_count; i++) {
 		if (ssa_vars[i].definition >= 0
 		  && (ssa->var_info[i].type & (MAY_BE_ARRAY|MAY_BE_OBJECT))
 		  && is_allocation_def(op_array, ssa, ssa_vars[i].definition, i, script)) {
-			has_allocations = 1;
+			has_allocations = true;
 			break;
 		}
 	}
@@ -470,7 +470,7 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 		bool changed;
 
 		do {
-			changed = 0;
+			changed = false;
 			for (i = 0; i < ssa_vars_count; i++) {
 				if (ssa_vars[i].use_chain >= 0) {
 					root = ees[i];
@@ -506,13 +506,13 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 								if (ssa_vars[root].escape_state == ESCAPE_STATE_GLOBAL_ESCAPE) {
 									num_non_escaped--;
 									if (num_non_escaped == 0) {
-										changed = 0;
+										changed = false;
 									} else {
-										changed = 1;
+										changed = true;
 									}
 									break;
 								} else {
-									changed = 1;
+									changed = true;
 								}
 							}
 						} FOREACH_USE_END();

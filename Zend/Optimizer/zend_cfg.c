@@ -280,7 +280,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 	int blocks_count = 0;
 	zend_basic_block *blocks;
 	zval *zv;
-	bool extra_entry_block = 0;
+	bool extra_entry_block = false;
 
 	cfg->flags = build_flags & (ZEND_CFG_STACKLESS|ZEND_CFG_RECV_ENTRY);
 
@@ -445,7 +445,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 	/* If the entry block has predecessors, we may need to split it */
 	if ((build_flags & ZEND_CFG_NO_ENTRY_PREDECESSORS)
 			&& op_array->last > 0 && block_map[0] > 1) {
-		extra_entry_block = 1;
+		extra_entry_block = true;
 	}
 
 	if (op_array->last_try_catch) {

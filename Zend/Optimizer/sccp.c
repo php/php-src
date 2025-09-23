@@ -718,7 +718,7 @@ static inline zend_result ct_eval_in_array(zval *result, uint32_t extended_value
 		if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 			res = zend_hash_index_exists(ht, Z_LVAL_P(op1));
 		} else {
-			res = 0;
+			res = false;
 		}
 	} else if (Z_TYPE_P(op1) <= IS_FALSE) {
 		res = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
@@ -726,11 +726,11 @@ static inline zend_result ct_eval_in_array(zval *result, uint32_t extended_value
 		zend_string *key;
 		zval key_tmp;
 
-		res = 0;
+		res = false;
 		ZEND_HASH_MAP_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
-				res = 1;
+				res = true;
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();

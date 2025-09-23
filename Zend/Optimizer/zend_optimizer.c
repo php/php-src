@@ -901,7 +901,7 @@ const zend_class_constant *zend_fetch_class_const_info(
 zend_function *zend_optimizer_get_called_func(
 		zend_script *script, zend_op_array *op_array, zend_op *opline, bool *is_prototype)
 {
-	*is_prototype = 0;
+	*is_prototype = false;
 	switch (opline->opcode) {
 		case ZEND_INIT_FCALL:
 		{

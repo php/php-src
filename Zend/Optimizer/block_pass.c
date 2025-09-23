@@ -949,14 +949,14 @@ optimize_const_unary_op:
 					src = VAR_SOURCE(opline->op1);
 					if (src && src->opcode == ZEND_QM_ASSIGN) {
 						zend_op *op = src + 1;
-						bool optimize = 1;
+						bool optimize = true;
 
 						while (op < opline) {
 							if ((op->op1_type == opline->op1_type
 							  && op->op1.var == opline->op1.var)
 							 || (op->op2_type == opline->op1_type
 							  && op->op2.var == opline->op1.var)) {
-								optimize = 0;
+								optimize = false;
 								break;
 							}
 							op++;
@@ -1566,14 +1566,14 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_BLOCK_PASS_VARS) {
-		bool printed = 0;
+		bool printed = false;
 		uint32_t i;
 
 		for (i = op_array->last_var; i< op_array->T; i++) {
 			if (zend_bitset_in(used_ext, i)) {
 				if (!printed) {
 					fprintf(stderr, "NON-LOCAL-VARS: %d", i);
-					printed = 1;
+					printed = true;
 				} else {
 					fprintf(stderr, ", %d", i);
 				}

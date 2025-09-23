@@ -414,19 +414,19 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 			 && call_info->callee_func
 			 && zend_string_equals_literal_ci(call_info->callee_func->common.function_name, "in_array")) {
 
-				bool strict = 0;
+				bool strict = false;
 				bool has_opdata = op->opcode == ZEND_FRAMELESS_ICALL_3;
 				ZEND_ASSERT(!call_info->is_prototype);
 
 				if (has_opdata) {
 					if (zend_is_true(CT_CONSTANT_EX(op_array, (op + 1)->op1.constant))) {
-						strict = 1;
+						strict = true;
 					}
 				}
 
 				if (op->op2_type == IS_CONST
 				 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op->op2.constant)) == IS_ARRAY) {
-					bool ok = 1;
+					bool ok = true;
 
 					HashTable *src = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, op->op2.constant));
 					HashTable *dst;
@@ -443,7 +443,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 								zend_hash_index_add(dst, Z_LVAL_P(val), &tmp);
 							} else {
 								zend_array_destroy(dst);
-								ok = 0;
+								ok = false;
 								break;
 							}
 						} ZEND_HASH_FOREACH_END();
@@ -451,7 +451,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 						ZEND_HASH_FOREACH_VAL(src, val) {
 							if (Z_TYPE_P(val) != IS_STRING || ZEND_HANDLE_NUMERIC(Z_STR_P(val), idx)) {
 								zend_array_destroy(dst);
-								ok = 0;
+								ok = false;
 								break;
 							}
 							zend_hash_add(dst, Z_STR_P(val), &tmp);
@@ -711,12 +711,12 @@ static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 		uint32_t op_num;
 		zend_op *opline;
 		zend_ssa_op *ssa_op;
-		bool can_follow = 1;
+		bool can_follow = true;
 
 		while (next_block_num < ssa->cfg.blocks_count
 			&& !(ssa->cfg.blocks[next_block_num].flags & ZEND_BB_REACHABLE)) {
 			if (ssa->cfg.blocks[next_block_num].flags & ZEND_BB_UNREACHABLE_FREE) {
-				can_follow = 0;
+				can_follow = false;
 			}
 			next_block_num++;
 		}
