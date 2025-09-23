@@ -741,7 +741,7 @@ static ZEND_FUNCTION(zend_test_uri_parser)
 		RETURN_THROWS();
 	}
 
-	uri_internal_t *uri = php_uri_parse(parser, ZSTR_VAL(uri_string), ZSTR_LEN(uri_string), false);
+	php_uri_internal *uri = php_uri_parse(parser, ZSTR_VAL(uri_string), ZSTR_LEN(uri_string), false);
 	if (uri == NULL) {
 		RETURN_THROWS();
 	}

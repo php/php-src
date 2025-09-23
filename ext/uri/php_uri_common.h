@@ -17,17 +17,15 @@
 #ifndef PHP_URI_COMMON_H
 #define PHP_URI_COMMON_H
 
-extern zend_class_entry *uri_rfc3986_uri_ce;
-extern zend_object_handlers uri_rfc3986_uri_object_handlers;
-extern zend_class_entry *uri_whatwg_url_ce;
-extern zend_object_handlers uri_whatwg_uri_object_handlers;
-extern zend_class_entry *uri_comparison_mode_ce;
-extern zend_class_entry *uri_exception_ce;
-extern zend_class_entry *uri_error_ce;
-extern zend_class_entry *uri_invalid_uri_exception_ce;
-extern zend_class_entry *uri_whatwg_invalid_url_exception_ce;
-extern zend_class_entry *uri_whatwg_url_validation_error_type_ce;
-extern zend_class_entry *uri_whatwg_url_validation_error_ce;
+extern zend_class_entry *php_uri_ce_rfc3986_uri;
+extern zend_class_entry *php_uri_ce_whatwg_url;
+extern zend_class_entry *php_uri_ce_comparison_mode;
+extern zend_class_entry *php_uri_ce_exception;
+extern zend_class_entry *php_uri_ce_error;
+extern zend_class_entry *php_uri_ce_invalid_uri_exception;
+extern zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
+extern zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
+extern zend_class_entry *php_uri_ce_whatwg_url_validation_error;
 
 typedef enum php_uri_recomposition_mode {
 	PHP_URI_RECOMPOSITION_MODE_RAW_ASCII,
@@ -137,31 +135,31 @@ typedef struct php_uri_parser {
 	} property_handler;
 } php_uri_parser;
 
-typedef struct uri_internal_t {
+typedef struct php_uri_internal {
 	const php_uri_parser *parser;
 	void *uri;
-} uri_internal_t;
+} php_uri_internal;
 
-typedef struct uri_object_t {
+typedef struct php_uri_object {
 	const php_uri_parser *parser;
 	void *uri;
 	zend_object std;
-} uri_object_t;
+} php_uri_object;
 
-static inline uri_object_t *uri_object_from_obj(zend_object *object) {
-	return (uri_object_t*)((char*)(object) - XtOffsetOf(uri_object_t, std));
+static inline php_uri_object *php_uri_object_from_obj(zend_object *object) {
+	return (php_uri_object*)((char*)(object) - XtOffsetOf(php_uri_object, std));
 }
 
-#define Z_URI_OBJECT_P(zv) uri_object_from_obj(Z_OBJ_P((zv)))
+#define Z_URI_OBJECT_P(zv) php_uri_object_from_obj(Z_OBJ_P((zv)))
 
-PHPAPI uri_object_t *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser);
+PHPAPI php_uri_object *php_uri_object_create(zend_class_entry *class_type, const php_uri_parser *parser);
 PHPAPI void php_uri_object_handler_free(zend_object *object);
 PHPAPI zend_object *php_uri_object_handler_clone(zend_object *object);
 
 #define PHP_URI_PARSER_RFC3986 "Uri\\Rfc3986\\Uri"
 #define PHP_URI_PARSER_WHATWG "Uri\\WhatWg\\Url"
 #define PHP_URI_PARSER_PHP_PARSE_URL "parse_url"
-#define URI_SERIALIZED_PROPERTY_NAME "uri"
+#define PHP_URI_SERIALIZE_URI_FIELD_NAME "uri"
 
 static inline const php_uri_property_handler *php_uri_parser_property_handler_by_name(const php_uri_parser *parser, php_uri_property_name property_name)
 {
@@ -186,9 +184,9 @@ static inline const php_uri_property_handler *php_uri_parser_property_handler_by
 	}
 }
 
-void uri_read_component(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode);
-void uri_write_component_str(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
-void uri_write_component_str_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
-void uri_write_component_long_or_null(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
+void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode);
+void php_uri_property_write_str_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
+void php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
+void php_uri_property_write_long_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 
 #endif

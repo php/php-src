@@ -2640,7 +2640,7 @@ static char *php_openssl_get_url_name(const char *resourcename,
 		return NULL;
 	}
 
-	uri_internal_t *internal_uri = php_uri_parse(uri_parser, resourcename, resourcenamelen, true);
+	php_uri_internal *internal_uri = php_uri_parse(uri_parser, resourcename, resourcenamelen, true);
 	if (internal_uri == NULL) {
 		return NULL;
 	}

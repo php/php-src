@@ -148,7 +148,7 @@ static void *uri_parser_php_parse_url_parse(const char *uri_str, size_t uri_str_
 
 	php_url *url = php_url_parse_ex2(uri_str, uri_str_len, &has_port);
 	if (url == NULL && !silent) {
-		zend_throw_exception(uri_invalid_uri_exception_ce, "The specified URI is malformed", 0);
+		zend_throw_exception(php_uri_ce_invalid_uri_exception, "The specified URI is malformed", 0);
 	}
 
 	return url;
