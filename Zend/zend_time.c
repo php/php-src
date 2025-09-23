@@ -33,7 +33,7 @@ ZEND_API void zend_realtime_spec(struct timespec *ts) {
 
 #else
 
-	ts->tv_sec  = time(NULL);
+	ts->tv_sec  = zend_realtime_get();
 	ts->tv_nsec = 0;
 
 #endif
