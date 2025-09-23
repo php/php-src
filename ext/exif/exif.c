@@ -2104,7 +2104,7 @@ static inline char *exif_offset_info_try_get(
 static inline bool exif_offset_info_contains(
 		const exif_offset_info *info, const char *start, size_t length) {
 	if (ptr_offset_overflows(start, length)) {
-		return 0;
+		return false;
 	}
 
 	/* start and valid_start are both inclusive, end and valid_end are both exclusive,
