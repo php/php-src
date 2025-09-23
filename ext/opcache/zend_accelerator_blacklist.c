@@ -343,7 +343,7 @@ bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify
 	pcre2_match_context *mctx = php_pcre_mctx();
 
 	if (regexp_list_it == NULL) {
-		return 0;
+		return false;
 	}
 	while (regexp_list_it != NULL) {
 		pcre2_match_data *match_data = php_pcre_create_match_data(0, regexp_list_it->re);
