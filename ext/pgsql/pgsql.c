@@ -4922,7 +4922,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 
 	array_init(&meta);
 	/* table_name is escaped by php_pgsql_meta_data */
-	if (php_pgsql_meta_data(pg_link, table_name, &meta, 0) == FAILURE) {
+	if (php_pgsql_meta_data(pg_link, table_name, &meta, false) == FAILURE) {
 		zval_ptr_dtor(&meta);
 		return FAILURE;
 	}
