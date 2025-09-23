@@ -1207,9 +1207,9 @@ phpdbg_main:
 			case 'z':
 				zend_extensions_len++;
 				if (zend_extensions_list) {
-					zend_extensions_list = realloc(zend_extensions_list, sizeof(char*) * zend_extensions_len);
+					zend_extensions_list = prealloc(zend_extensions_list, sizeof(char*) * zend_extensions_len);
 				} else {
-					zend_extensions_list = malloc(sizeof(char*) * zend_extensions_len);
+					zend_extensions_list = pmalloc(sizeof(char*) * zend_extensions_len);
 				}
 				zend_extensions_list[zend_extensions_len-1] = strdup(php_optarg);
 			break;
@@ -1677,7 +1677,7 @@ phpdbg_out:
 
 		/* backup globals when cleaning */
 		if ((cleaning > 0) && !quit_immediately) {
-			settings = calloc(1, sizeof(zend_phpdbg_globals));
+			settings = pcalloc(1, sizeof(zend_phpdbg_globals));
 
 			php_phpdbg_globals_ctor(settings);
 

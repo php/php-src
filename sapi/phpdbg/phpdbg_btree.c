@@ -25,7 +25,7 @@
 #ifdef _Win32
 # undef pemalloc
 # undef pefree
-# define pemalloc(size, persistent) malloc(size)
+# define pemalloc(size, persistent) pmalloc(size)
 # define pefree(ptr, persistent) free(ptr)
 #endif
 

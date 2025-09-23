@@ -62,7 +62,7 @@ static inline char *php_ini_builder_finish(struct php_ini_builder *b)
 static inline void php_ini_builder_realloc(struct php_ini_builder *b, size_t delta)
 {
 	/* reserve enough space for the null terminator */
-	b->value = realloc(b->value, b->length + delta + 1);
+	b->value = prealloc(b->value, b->length + delta + 1);
 }
 
 /**

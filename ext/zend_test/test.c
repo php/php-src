@@ -898,7 +898,7 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 	if (int_value == 1) {
 		// `zend_mm_heap` is a private struct, so we have not way to find the
 		// actual size, but 4096 bytes should be enough
-		ZT_G(zend_test_heap) = malloc(4096);
+		ZT_G(zend_test_heap) = pmalloc(4096);
 		memset(ZT_G(zend_test_heap), 0, 4096);
 		zend_mm_set_custom_handlers(
 			ZT_G(zend_test_heap),
@@ -986,7 +986,7 @@ static ZEND_FUNCTION(zend_test_cast_fread)
 	}
 
 	size_t size = 10240; /* Must be large enough to trigger the issue */
-	char *buf = malloc(size);
+	char *buf = pmalloc(size);
 	bool bail = false;
 	zend_try {
 		(void) !fread(buf, 1, size, fp);
@@ -1361,11 +1361,11 @@ static zend_type create_test_dnf_type(void) {
 	zend_string *class_Countable = zend_string_init_interned("Countable", sizeof("Countable") - 1, true);
 	zend_alloc_ce_cache(class_Countable);
 	//
-	zend_type_list *intersection_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	zend_type_list *intersection_list = pmalloc(ZEND_TYPE_LIST_SIZE(2));
 	intersection_list->num_types = 2;
 	intersection_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Traversable, 0, 0);
 	intersection_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Countable, 0, 0);
-	zend_type_list *union_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	zend_type_list *union_list = pmalloc(ZEND_TYPE_LIST_SIZE(2));
 	union_list->num_types = 2;
 	union_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Iterator, 0, 0);
 	union_list->types[1] = (zend_type) ZEND_TYPE_INIT_INTERSECTION(intersection_list, 0);

@@ -715,18 +715,18 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->compiled_filename = NULL;
 	compiler_globals->zend_lineno = 0;
 
-	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
+	compiler_globals->function_table = (HashTable *) pmalloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->function_table, 1024, NULL, ZEND_FUNCTION_DTOR, 1);
 	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL);
 	compiler_globals->copied_functions_count = zend_hash_num_elements(compiler_globals->function_table);
 
-	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
+	compiler_globals->class_table = (HashTable *) pmalloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->class_table, 64, NULL, ZEND_CLASS_DTOR, 1);
 	zend_hash_copy(compiler_globals->class_table, global_class_table, zend_class_add_ref);
 
 	zend_set_default_compile_time_values();
 
-	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
+	compiler_globals->auto_globals = (HashTable *) pmalloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->auto_globals, 8, NULL, auto_global_dtor, 1);
 	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, auto_global_copy_ctor);
 
@@ -1004,10 +1004,10 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
 	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO) - 1;
 
-	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
-	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
-	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
-	GLOBAL_CONSTANTS_TABLE = (HashTable *) malloc(sizeof(HashTable));
+	GLOBAL_FUNCTION_TABLE = (HashTable *) pmalloc(sizeof(HashTable));
+	GLOBAL_CLASS_TABLE = (HashTable *) pmalloc(sizeof(HashTable));
+	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) pmalloc(sizeof(HashTable));
+	GLOBAL_CONSTANTS_TABLE = (HashTable *) pmalloc(sizeof(HashTable));
 
 	zend_hash_init(GLOBAL_FUNCTION_TABLE, 1024, NULL, ZEND_FUNCTION_DTOR, 1);
 	zend_hash_init(GLOBAL_CLASS_TABLE, 64, NULL, ZEND_CLASS_DTOR, 1);
@@ -1027,8 +1027,8 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 	compiler_globals_dtor(compiler_globals);
 	compiler_globals->in_compilation = 0;
-	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
-	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
+	compiler_globals->function_table = (HashTable *) pmalloc(sizeof(HashTable));
+	compiler_globals->class_table = (HashTable *) pmalloc(sizeof(HashTable));
 
 	*compiler_globals->function_table = *GLOBAL_FUNCTION_TABLE;
 	*compiler_globals->class_table = *GLOBAL_CLASS_TABLE;
@@ -1296,11 +1296,11 @@ ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ *
 						+ strlen(extension->copyright)
 						+ strlen(extension->author));
 
-	new_info = (char *) malloc(new_info_length + 1);
+	new_info = (char *) pmalloc(new_info_length + 1);
 
 	snprintf(new_info, new_info_length, "    with %s v%s, %s, by %s\n", extension->name, extension->version, extension->copyright, extension->author);
 
-	zend_version_info = (char *) realloc(zend_version_info, zend_version_info_length+new_info_length + 1);
+	zend_version_info = (char *) prealloc(zend_version_info, zend_version_info_length+new_info_length + 1);
 	strncat(zend_version_info, new_info, new_info_length);
 	zend_version_info_length += new_info_length;
 	free(new_info);

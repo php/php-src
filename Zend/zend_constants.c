@@ -121,7 +121,7 @@ void clean_module_constants(int module_number)
 
 void zend_startup_constants(void)
 {
-	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
+	EG(zend_constants) = (HashTable *) pmalloc(sizeof(HashTable));
 	zend_hash_init(EG(zend_constants), 128, NULL, ZEND_CONSTANT_DTOR, 1);
 }
 

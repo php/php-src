@@ -696,7 +696,7 @@ void php_init_config(void)
 
 		if (total_l) {
 			size_t php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
-			php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
+			php_ini_scanned_files = (char *) prealloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
 			if (!php_ini_scanned_files_len) {
 				*php_ini_scanned_files = '\0';
 			}

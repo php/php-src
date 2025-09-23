@@ -151,6 +151,6 @@ void openlog(const char *ident, int logopt, int facility)
 
 	PW32G(log_source) = RegisterEventSource(NULL, "PHP-" PHP_VERSION);
 	header_len = strlen(ident) + 2 + 11;
-	PW32G(log_header) = malloc(header_len*sizeof(char));
+	PW32G(log_header) = pmalloc(header_len*sizeof(char));
 	sprintf_s(PW32G(log_header), header_len, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
 }

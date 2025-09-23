@@ -140,7 +140,7 @@ static bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_
 void config_entry_ctor(zval *zv)
 {
 	php_dir_entry *pe = (php_dir_entry*)Z_PTR_P(zv);
-	php_dir_entry *npe = malloc(sizeof(php_dir_entry));
+	php_dir_entry *npe = pmalloc(sizeof(php_dir_entry));
 
 	memcpy(npe, pe, sizeof(php_dir_entry));
 	ZVAL_PTR(zv, npe);

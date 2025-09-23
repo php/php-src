@@ -36,7 +36,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	}
 
 	char *args[2];
-	char *data = malloc(Size+1);
+	char *data = pmalloc(Size+1);
 	memcpy(data, Data, Size);
 	data[Size] = '\0';
 

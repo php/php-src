@@ -9007,7 +9007,7 @@ static void zend_jit_trace_reset_caches(void)
 	JIT_G(tracing) = 0;
 #ifdef ZTS
 	if (!JIT_G(exit_counters)) {
-		JIT_G(exit_counters) = calloc(JIT_G(max_exit_counters), 1);
+		JIT_G(exit_counters) = pcalloc(JIT_G(max_exit_counters), 1);
 	}
 #endif
 }

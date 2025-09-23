@@ -1600,7 +1600,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 	ce_num = ce->num_interfaces;
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
-		ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
+		ce->interfaces = (zend_class_entry **) prealloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
 	} else {
 		ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
 	}
@@ -2238,7 +2238,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	} else {
 		if (ce->num_interfaces >= current_iface_num) {
 			if (ce->type == ZEND_INTERNAL_CLASS) {
-				ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
+				ce->interfaces = (zend_class_entry **) prealloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
 			} else {
 				ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
 			}

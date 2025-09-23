@@ -98,7 +98,7 @@ static void free_ini_entry(zval *zv) /* {{{ */
  */
 ZEND_API void zend_ini_startup(void) /* {{{ */
 {
-	registered_zend_ini_directives = (HashTable *) malloc(sizeof(HashTable));
+	registered_zend_ini_directives = (HashTable *) pmalloc(sizeof(HashTable));
 
 	EG(ini_directives) = registered_zend_ini_directives;
 	EG(modified_ini_directives) = NULL;

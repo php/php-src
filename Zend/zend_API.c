@@ -2530,7 +2530,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 			dl_loaded_count++;
 		}
 	} ZEND_HASH_FOREACH_END();
-	module_request_startup_handlers = (zend_module_entry**)realloc(
+	module_request_startup_handlers = (zend_module_entry**)prealloc(
 		module_request_startup_handlers,
 	    sizeof(zend_module_entry*) *
 		(startup_count + 1 +
@@ -2542,7 +2542,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	module_post_deactivate_handlers = module_request_shutdown_handlers + shutdown_count + 1;
 	module_post_deactivate_handlers[post_deactivate_count] = NULL;
 	/* Cannot reuse module_request_startup_handlers because it is freed in zend_destroy_modules, which happens before zend_unload_modules. */
-	modules_dl_loaded = realloc(modules_dl_loaded, sizeof(zend_module_entry*) * (dl_loaded_count + 1));
+	modules_dl_loaded = prealloc(modules_dl_loaded, sizeof(zend_module_entry*) * (dl_loaded_count + 1));
 	modules_dl_loaded[dl_loaded_count] = NULL;
 	startup_count = 0;
 
@@ -2569,7 +2569,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	class_cleanup_handlers = (zend_class_entry**)realloc(
+	class_cleanup_handlers = (zend_class_entry**)prealloc(
 		class_cleanup_handlers,
 		sizeof(zend_class_entry*) *
 		(class_count + 1));
@@ -3094,7 +3094,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		}
 		lowercase_name = zend_string_tolower_ex(internal_function->function_name, type == MODULE_PERSISTENT);
 		lowercase_name = zend_new_interned_string(lowercase_name);
-		reg_function = malloc(sizeof(zend_internal_function));
+		reg_function = pmalloc(sizeof(zend_internal_function));
 		memcpy(reg_function, &function, sizeof(zend_internal_function));
 		if (zend_hash_add_ptr(target_function_table, lowercase_name, reg_function) == NULL) {
 			unload=1;
@@ -3112,8 +3112,8 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						zend_flf_capacity *= 2;
 					}
 					/* +1 for NULL terminator */
-					zend_flf_handlers = realloc(zend_flf_handlers, (zend_flf_capacity + 1) * sizeof(void *));
-					zend_flf_functions = realloc(zend_flf_functions, (zend_flf_capacity + 1) * sizeof(zend_function *));
+					zend_flf_handlers = prealloc(zend_flf_handlers, (zend_flf_capacity + 1) * sizeof(void *));
+					zend_flf_functions = prealloc(zend_flf_functions, (zend_flf_capacity + 1) * sizeof(zend_function *));
 				}
 				zend_flf_handlers[zend_flf_count] = flf_info->handler;
 				zend_flf_functions[zend_flf_count] = (zend_function *)reg_function;
@@ -3161,7 +3161,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 
 			/* Treat return type as an extra argument */
 			num_args++;
-			new_arg_info = malloc(sizeof(zend_internal_arg_info) * num_args);
+			new_arg_info = pmalloc(sizeof(zend_internal_arg_info) * num_args);
 			memcpy(new_arg_info, arg_info, sizeof(zend_internal_arg_info) * num_args);
 			reg_function->arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
@@ -3187,7 +3187,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						new_arg_info[i].type.type_mask |= _ZEND_TYPE_NAME_BIT;
 					} else {
 						/* Union type */
-						zend_type_list *list = malloc(ZEND_TYPE_LIST_SIZE(num_types));
+						zend_type_list *list = pmalloc(ZEND_TYPE_LIST_SIZE(num_types));
 						list->num_types = num_types;
 						ZEND_TYPE_SET_LIST(new_arg_info[i].type, list);
 						ZEND_TYPE_FULL_MASK(new_arg_info[i].type) |= _ZEND_TYPE_UNION_BIT;
@@ -3498,7 +3498,7 @@ ZEND_API int zend_next_free_module(void) /* {{{ */
 
 static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class_entry, uint32_t ce_flags) /* {{{ */
 {
-	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
+	zend_class_entry *class_entry = pmalloc(sizeof(zend_class_entry));
 	zend_string *lowercase_name;
 	*class_entry = *orig_class_entry;
 

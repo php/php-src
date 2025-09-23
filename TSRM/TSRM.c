@@ -11,6 +11,7 @@
 */
 
 #include "TSRM.h"
+#include "zend_alloc.h"
 
 #ifdef ZTS
 
@@ -254,12 +255,12 @@ static void tsrm_update_active_threads(void)
 			if (p->count < id_count) {
 				int j;
 
-				p->storage = (void *) realloc(p->storage, sizeof(void *)*id_count);
+				p->storage = (void *) prealloc(p->storage, sizeof(void *)*id_count);
 				for (j=p->count; j<id_count; j++) {
 					if (resource_types_table[j].fast_offset) {
 						p->storage[j] = (void *) (((char*)p) + resource_types_table[j].fast_offset);
 					} else {
-						p->storage[j] = (void *) malloc(resource_types_table[j].size);
+						p->storage[j] = (void *) pmalloc(resource_types_table[j].size);
 					}
 					if (resource_types_table[j].ctor) {
 						resource_types_table[j].ctor(p->storage[j]);
@@ -378,10 +379,10 @@ static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource
 static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_T thread_id)
 {/*{{{*/
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id));
-	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_size);
+	(*thread_resources_ptr) = (tsrm_tls_entry *) pmalloc(TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_size);
 	(*thread_resources_ptr)->storage = NULL;
 	if (id_count > 0) {
-		(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
+		(*thread_resources_ptr)->storage = (void **) pmalloc(sizeof(void *)*id_count);
 	}
 	(*thread_resources_ptr)->count = id_count;
 	(*thread_resources_ptr)->thread_id = thread_id;
@@ -400,7 +401,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 			if (resource_types_table[i].fast_offset) {
 				(*thread_resources_ptr)->storage[i] = (void *) (((char*)(*thread_resources_ptr)) + resource_types_table[i].fast_offset);
 			} else {
-				(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
+				(*thread_resources_ptr)->storage[i] = (void *) pmalloc(resource_types_table[i].size);
 			}
 			if (resource_types_table[i].ctor) {
 				resource_types_table[i].ctor((*thread_resources_ptr)->storage[i]);
@@ -618,10 +619,10 @@ TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 {/*{{{*/
 	MUTEX_T mutexp;
 #ifdef TSRM_WIN32
-	mutexp = malloc(sizeof(CRITICAL_SECTION));
+	mutexp = pmalloc(sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(mutexp);
 #else
-	mutexp = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
+	mutexp = (pthread_mutex_t *)pmalloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(mutexp,NULL);
 #endif
 #ifdef THR_DEBUG

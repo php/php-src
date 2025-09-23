@@ -1469,10 +1469,10 @@ void phpdbg_setup_watchpoints(void) {
 	zend_hash_init(&PHPDBG_G(watch_free), 8, NULL, NULL, 0);
 
 	/* put these on a separate page, to avoid conflicts with other memory */
-	PHPDBG_G(watchlist_mem) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
+	PHPDBG_G(watchlist_mem) = pmalloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
 	PHPDBG_G(original_watchlist_mem) = PHPDBG_G(watchlist_mem);
 	zend_hash_init(PHPDBG_G(watchlist_mem), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
-	PHPDBG_G(watchlist_mem_backup) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
+	PHPDBG_G(watchlist_mem_backup) = pmalloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
 	zend_hash_init(PHPDBG_G(watchlist_mem_backup), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
 
 	PHPDBG_G(watch_tmp) = NULL;
