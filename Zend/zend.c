@@ -641,7 +641,7 @@ static FILE *zend_fopen_wrapper(zend_string *filename, zend_string **opened_path
 /* }}} */
 
 #ifdef ZTS
-static bool short_tags_default      = 1;
+static bool short_tags_default = true;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
 # define short_tags_default			1
@@ -817,7 +817,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->saved_fpu_cw = 0;
 #endif
 	executor_globals->saved_fpu_cw_ptr = NULL;
-	executor_globals->active = 0;
+	executor_globals->active = false;
 	executor_globals->bailout = NULL;
 	executor_globals->error_handling  = EH_NORMAL;
 	executor_globals->exception_class = NULL;
@@ -1026,7 +1026,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	executor_globals = ts_resource(executor_globals_id);
 
 	compiler_globals_dtor(compiler_globals);
-	compiler_globals->in_compilation = 0;
+	compiler_globals->in_compilation = false;
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 

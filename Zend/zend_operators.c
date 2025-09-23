@@ -377,7 +377,7 @@ static zend_always_inline zend_result zendi_try_convert_scalar_to_number(zval *o
 
 static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(const zval *op, bool *failed) /* {{{ */
 {
-	*failed = 0;
+	*failed = false;
 try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
@@ -389,7 +389,7 @@ try_again:
 			double dval = Z_DVAL_P(op);
 			zend_long lval = zend_dval_to_lval_safe(dval);
 			if (UNEXPECTED(EG(exception))) {
-				*failed = 1;
+				*failed = true;
 			}
 			return lval;
 		}
@@ -405,7 +405,7 @@ try_again:
 				type = is_numeric_string_ex(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval,
 					/* allow errors */ true, NULL, &trailing_data);
 				if (type == 0) {
-					*failed = 1;
+					*failed = true;
 					return 0;
 				}
 				if (UNEXPECTED(trailing_data)) {
@@ -414,7 +414,7 @@ try_again:
 					}
 					zend_error(E_WARNING, "A non-numeric value encountered");
 					if (UNEXPECTED(EG(exception))) {
-						*failed = 1;
+						*failed = true;
 						zend_tmp_string_release(op_str);
 						return 0;
 					}
@@ -435,7 +435,7 @@ try_again:
 					if (!zend_is_long_compatible(dval, lval)) {
 						zend_incompatible_string_to_long_error(op_str);
 						if (UNEXPECTED(EG(exception))) {
-							*failed = 1;
+							*failed = true;
 						}
 					}
 					zend_string_release(op_str);
@@ -447,7 +447,7 @@ try_again:
 				zval dst;
 				if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), &dst, IS_LONG) == FAILURE
 						|| EG(exception)) {
-					*failed = 1;
+					*failed = true;
 					return 0;
 				}
 				ZEND_ASSERT(Z_TYPE(dst) == IS_LONG);
@@ -455,7 +455,7 @@ try_again:
 			}
 		case IS_RESOURCE:
 		case IS_ARRAY:
-			*failed = 1;
+			*failed = true;
 			return 0;
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);

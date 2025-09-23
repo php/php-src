@@ -524,11 +524,11 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 			(i + 1 == len && path[i] == '.')) {
 			/* remove double slashes and '.' */
 			len = EXPECTED(i > 0) ? i - 1 : 0;
-			is_dir = 1;
+			is_dir = true;
 			continue;
 		} else if (i + 2 == len && path[i] == '.' && path[i+1] == '.') {
 			/* remove '..' and previous directory */
-			is_dir = 1;
+			is_dir = true;
 			if (link_is_dir) {
 				*link_is_dir = 1;
 			}

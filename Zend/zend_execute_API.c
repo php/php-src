@@ -874,7 +874,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	for (i=0; i<fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);
 		zval *arg = &fci->params[i];
-		bool must_wrap = 0;
+		bool must_wrap = false;
 		if (UNEXPECTED(Z_ISUNDEF_P(arg))) {
 			/* Allow forwarding undef slots. This is only used by Closure::__invoke(). */
 			ZVAL_UNDEF(param);
@@ -888,7 +888,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 					/* By-value send is not allowed -- emit a warning,
 					 * and perform the call with the value wrapped in a reference. */
 					zend_param_must_be_ref(func, i + 1);
-					must_wrap = 1;
+					must_wrap = true;
 					if (UNEXPECTED(EG(exception))) {
 						ZEND_CALL_NUM_ARGS(call) = i;
 cleanup_args:
@@ -922,13 +922,13 @@ cleanup_args:
 		zend_string *name;
 		zval *arg;
 		uint32_t arg_num = ZEND_CALL_NUM_ARGS(call) + 1;
-		bool have_named_params = 0;
+		bool have_named_params = false;
 		ZEND_HASH_FOREACH_STR_KEY_VAL(fci->named_params, name, arg) {
-			bool must_wrap = 0;
+			bool must_wrap = false;
 			zval *target;
 			if (name) {
 				void *cache_slot[2] = {NULL, NULL};
-				have_named_params = 1;
+				have_named_params = true;
 				target = zend_handle_named_arg(&call, name, &arg_num, cache_slot);
 				if (!target) {
 					goto cleanup_args;
@@ -950,7 +950,7 @@ cleanup_args:
 						/* By-value send is not allowed -- emit a warning,
 						 * and perform the call with the value wrapped in a reference. */
 						zend_param_must_be_ref(func, arg_num);
-						must_wrap = 1;
+						must_wrap = true;
 						if (UNEXPECTED(EG(exception))) {
 							goto cleanup_args;
 						}

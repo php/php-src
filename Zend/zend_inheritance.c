@@ -475,7 +475,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 		zend_class_entry *fe_scope, zend_string *fe_class_name,
 		zend_class_entry *proto_scope, const zend_type proto_type) {
 	zend_class_entry *fe_ce = NULL;
-	bool have_unresolved = 0;
+	bool have_unresolved = false;
 
 	/* If the parent has 'object' as a return type, any class satisfies the co-variant check */
 	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_OBJECT) {
@@ -484,7 +484,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 		 * are not classes (such as typedefs). */
 		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 		if (!fe_ce) {
-			have_unresolved = 1;
+			have_unresolved = true;
 		} else {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
@@ -495,7 +495,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_CALLABLE) {
 		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 		if (!fe_ce) {
-			have_unresolved = 1;
+			have_unresolved = true;
 		} else if (fe_ce == zend_ce_closure) {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
@@ -506,7 +506,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 	if ((ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_STATIC) && (fe_scope->ce_flags & ZEND_ACC_FINAL)) {
 		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
 		if (!fe_ce) {
-			have_unresolved = 1;
+			have_unresolved = true;
 		} else if (fe_ce == fe_scope) {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
@@ -530,7 +530,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 					}
 					continue;
 				case INHERITANCE_UNRESOLVED:
-					have_unresolved = 1;
+					have_unresolved = true;
 					continue;
 				case INHERITANCE_SUCCESS:
 					if (!is_intersection) {
@@ -562,7 +562,7 @@ static inheritance_status zend_is_class_subtype_of_type(
 		}
 
 		if (!fe_ce || !proto_ce) {
-			have_unresolved = 1;
+			have_unresolved = true;
 			continue;
 		}
 		if (unlinked_instanceof(fe_ce, proto_ce)) {
