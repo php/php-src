@@ -281,7 +281,7 @@ PHP_FUNCTION(com_get_active_object)
 	char *module_name;
 	size_t module_name_len;
 	zend_long code_page;
-	bool code_page_is_null = 1;
+	bool code_page_is_null = true;
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
 	HRESULT res;
