@@ -33,9 +33,7 @@
 #include "uriparser/UriBase.h"
 
 zend_class_entry *php_uri_ce_rfc3986_uri;
-zend_object_handlers uri_rfc3986_uri_object_handlers;
 zend_class_entry *php_uri_ce_whatwg_url;
-zend_object_handlers uri_whatwg_uri_object_handlers;
 zend_class_entry *php_uri_ce_comparison_mode;
 zend_class_entry *php_uri_ce_exception;
 zend_class_entry *php_uri_ce_error;
@@ -43,6 +41,9 @@ zend_class_entry *php_uri_ce_invalid_uri_exception;
 zend_class_entry *php_uri_ce_whatwg_invalid_url_exception;
 zend_class_entry *php_uri_ce_whatwg_url_validation_error_type;
 zend_class_entry *php_uri_ce_whatwg_url_validation_error;
+
+static zend_object_handlers object_handlers_rfc3986_uri;
+static zend_object_handlers object_handlers_whatwg_uri;
 
 static const zend_module_dep uri_deps[] = {
 	ZEND_MOD_REQUIRED("lexbor")
@@ -1078,19 +1079,19 @@ static PHP_MINIT_FUNCTION(uri)
 {
 	php_uri_ce_rfc3986_uri = register_class_Uri_Rfc3986_Uri();
 	php_uri_ce_rfc3986_uri->create_object = php_uri_object_create_rfc3986;
-	php_uri_ce_rfc3986_uri->default_object_handlers = &uri_rfc3986_uri_object_handlers;
-	memcpy(&uri_rfc3986_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	uri_rfc3986_uri_object_handlers.offset = XtOffsetOf(php_uri_object, std);
-	uri_rfc3986_uri_object_handlers.free_obj = php_uri_object_handler_free;
-	uri_rfc3986_uri_object_handlers.clone_obj = php_uri_object_handler_clone;
+	php_uri_ce_rfc3986_uri->default_object_handlers = &object_handlers_rfc3986_uri;
+	memcpy(&object_handlers_rfc3986_uri, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	object_handlers_rfc3986_uri.offset = XtOffsetOf(php_uri_object, std);
+	object_handlers_rfc3986_uri.free_obj = php_uri_object_handler_free;
+	object_handlers_rfc3986_uri.clone_obj = php_uri_object_handler_clone;
 
 	php_uri_ce_whatwg_url = register_class_Uri_WhatWg_Url();
 	php_uri_ce_whatwg_url->create_object = php_uri_object_create_whatwg;
-	php_uri_ce_whatwg_url->default_object_handlers = &uri_whatwg_uri_object_handlers;
-	memcpy(&uri_whatwg_uri_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	uri_whatwg_uri_object_handlers.offset = XtOffsetOf(php_uri_object, std);
-	uri_whatwg_uri_object_handlers.free_obj = php_uri_object_handler_free;
-	uri_whatwg_uri_object_handlers.clone_obj = php_uri_object_handler_clone;
+	php_uri_ce_whatwg_url->default_object_handlers = &object_handlers_whatwg_uri;
+	memcpy(&object_handlers_whatwg_uri, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	object_handlers_whatwg_uri.offset = XtOffsetOf(php_uri_object, std);
+	object_handlers_whatwg_uri.free_obj = php_uri_object_handler_free;
+	object_handlers_whatwg_uri.clone_obj = php_uri_object_handler_clone;
 
 	php_uri_ce_comparison_mode = register_class_Uri_UriComparisonMode();
 	php_uri_ce_exception = register_class_Uri_UriException(zend_ce_exception);

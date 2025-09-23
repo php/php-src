@@ -18,9 +18,7 @@
 #define PHP_URI_COMMON_H
 
 extern zend_class_entry *php_uri_ce_rfc3986_uri;
-extern zend_object_handlers uri_rfc3986_uri_object_handlers;
 extern zend_class_entry *php_uri_ce_whatwg_url;
-extern zend_object_handlers uri_whatwg_uri_object_handlers;
 extern zend_class_entry *php_uri_ce_comparison_mode;
 extern zend_class_entry *php_uri_ce_exception;
 extern zend_class_entry *php_uri_ce_error;
