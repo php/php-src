@@ -284,7 +284,7 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 			smart_str prefix = {0};
 
 			if (node_ptr == node) {
-				return 0;
+				return false;
 			}
 			if (SOAP_GLOBAL(soap_version) == SOAP_1_1) {
 				attr = get_attribute(attr, "id");
@@ -322,12 +322,12 @@ static bool soap_check_zval_ref(zval *data, xmlNodePtr node) {
 				set_ns_prop(node, SOAP_1_2_ENC_NAMESPACE, "ref", id);
 			}
 			smart_str_free(&prefix);
-			return 1;
+			return true;
 		} else {
 			zend_hash_index_update_ptr(SOAP_GLOBAL(ref_map), (zend_ulong)data, node);
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
@@ -341,11 +341,11 @@ static bool soap_check_xml_ref(zval *data, xmlNodePtr node)
 			    Z_COUNTED_P(data) != Z_COUNTED_P(data_ptr)) {
 				zval_ptr_dtor(data);
 				ZVAL_COPY(data, data_ptr);
-				return 1;
+				return true;
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
 static void soap_add_xml_ref(zval *data, xmlNodePtr node)
