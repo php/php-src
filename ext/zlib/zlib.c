@@ -805,7 +805,7 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 
 			case IS_ARRAY: {
 				HashTable *dictionary = Z_ARR_P(option_buffer);
-				bool result = 1;
+				bool result = true;
 
 				if (zend_hash_num_elements(dictionary) > 0) {
 					zend_string **strings = safe_emalloc(zend_hash_num_elements(dictionary), sizeof(zend_string *), 0);
@@ -815,18 +815,18 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
 						zend_string *string = zval_try_get_string(cur);
 						if (string == NULL) {
-							result = 0;
+							result = false;
 							break;
 						}
 						*dictlen += ZSTR_LEN(string) + 1;
 						strings[total++] = string;
 						if (ZSTR_LEN(string) == 0) {
-							result = 0;
+							result = false;
 							zend_argument_value_error(2, "must not contain empty strings");
 							break;
 						}
 						if (zend_str_has_nul_byte(string)) {
-							result = 0;
+							result = false;
 							zend_argument_value_error(2, "must not contain strings with null bytes");
 							break;
 						}
