@@ -2339,7 +2339,7 @@ zend_result phar_open_executed_filename(char *alias, size_t alias_len, char **er
 		return FAILURE;
 	}
 
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, 0, REPORT_ERRORS, NULL, 0) == SUCCESS) {
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, false, REPORT_ERRORS, NULL, 0) == SUCCESS) {
 		return SUCCESS;
 	}
 

@@ -546,7 +546,7 @@ static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		return -1;
 	}
 
-	phar_dostat(data->phar, data->internal_file, ssb, 0);
+	phar_dostat(data->phar, data->internal_file, ssb, false);
 	return 0;
 }
 /* }}} */
@@ -594,7 +594,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	}
 	if (*internal_file == '\0') {
 		/* root directory requested */
-		phar_dostat(phar, NULL, ssb, 1);
+		phar_dostat(phar, NULL, ssb, true);
 		php_url_free(resource);
 		return SUCCESS;
 	}
@@ -605,12 +605,12 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	internal_file_len = strlen(internal_file);
 	/* search through the manifest of files, and if we have an exact match, it's a file */
 	if (NULL != (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len))) {
-		phar_dostat(phar, entry, ssb, 0);
+		phar_dostat(phar, entry, ssb, false);
 		php_url_free(resource);
 		return SUCCESS;
 	}
 	if (zend_hash_str_exists(&(phar->virtual_dirs), internal_file, internal_file_len)) {
-		phar_dostat(phar, NULL, ssb, 1);
+		phar_dostat(phar, NULL, ssb, true);
 		php_url_free(resource);
 		return SUCCESS;
 	}
@@ -646,7 +646,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 				if (NULL == (entry = zend_hash_str_find_ptr(&phar->manifest, internal_file, internal_file_len))) {
 					goto free_resource;
 				}
-				phar_dostat(phar, entry, ssb, 0);
+				phar_dostat(phar, entry, ssb, false);
 				php_url_free(resource);
 				return SUCCESS;
 			}
