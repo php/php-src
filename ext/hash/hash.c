@@ -583,7 +583,7 @@ PHP_FUNCTION(hash_hmac)
 		RETURN_THROWS();
 	}
 
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 0);
+	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, false);
 }
 /* }}} */
 
@@ -600,7 +600,7 @@ PHP_FUNCTION(hash_hmac_file)
 		RETURN_THROWS();
 	}
 
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 1);
+	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, true);
 }
 /* }}} */
 
@@ -1227,9 +1227,9 @@ PHP_FUNCTION(mhash)
 	}
 
 	if (key) {
-		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, 1, 0);
+		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, true, false);
 	} else {
-		php_hash_do_hash(return_value, algo, data, data_len, 1, 0, NULL);
+		php_hash_do_hash(return_value, algo, data, data_len, true, false, NULL);
 	}
 
 	if (algo) {
