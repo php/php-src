@@ -1190,7 +1190,7 @@ PHP_METHOD(PDO, query)
 	pdo_stmt_t *stmt;
 	zend_string *statement;
 	zend_long fetch_mode;
-	bool fetch_mode_is_null = 1;
+	bool fetch_mode_is_null = true;
 	zval *args = NULL;
 	uint32_t num_args = 0;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
