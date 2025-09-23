@@ -3916,12 +3916,12 @@ void zend_jit_deactivate(void)
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
-		zend_jit_check_funcs(EG(function_table), 0);
+		zend_jit_check_funcs(EG(function_table), false);
 		ZEND_HASH_MAP_REVERSE_FOREACH_PTR(EG(class_table), ce) {
 			if (ce->type == ZEND_INTERNAL_CLASS) {
 				break;
 			}
-			zend_jit_check_funcs(&ce->function_table, 1);
+			zend_jit_check_funcs(&ce->function_table, true);
 		} ZEND_HASH_FOREACH_END();
 
 		zend_jit_protect();
