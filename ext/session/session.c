@@ -487,7 +487,7 @@ static zend_result php_session_initialize(void)
 	}
 
 	/* GC must be done after read */
-	php_session_gc(0);
+	php_session_gc(false);
 
 	if (PS(session_vars)) {
 		zend_string_release_ex(PS(session_vars), 0);
@@ -2741,7 +2741,7 @@ PHP_FUNCTION(session_gc)
 		RETURN_FALSE;
 	}
 
-	num = php_session_gc(1);
+	num = php_session_gc(true);
 	if (num < 0) {
 		RETURN_FALSE;
 	}
@@ -3247,7 +3247,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 
 				progress->post_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->data), ZEND_STRL("bytes_processed"));
 
-				php_rinit_session(0);
+				php_rinit_session(false);
 				PS(id) = zend_string_copy(Z_STR(progress->sid));
 				if (progress->apply_trans_sid) {
 					/* Enable trans sid by modifying flags */
@@ -3274,7 +3274,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			progress->current_file_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->current_file), ZEND_STRL("bytes_processed"));
 
 			Z_LVAL_P(progress->current_file_bytes_processed) =  data->post_bytes_processed;
-			php_session_rfc1867_update(progress, 0);
+			php_session_rfc1867_update(progress, false);
 		}
 		break;
 		case MULTIPART_EVENT_FILE_DATA: {
@@ -3287,7 +3287,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
-			php_session_rfc1867_update(progress, 0);
+			php_session_rfc1867_update(progress, false);
 		}
 		break;
 		case MULTIPART_EVENT_FILE_END: {
@@ -3306,7 +3306,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
-			php_session_rfc1867_update(progress, 0);
+			php_session_rfc1867_update(progress, false);
 		}
 		break;
 		case MULTIPART_EVENT_END: {
@@ -3320,7 +3320,7 @@ static zend_result php_session_rfc1867_callback(unsigned int event, void *event_
 						SEPARATE_ARRAY(&progress->data);
 						add_assoc_bool_ex(&progress->data, ZEND_STRL("done"), 1);
 						Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
-						php_session_rfc1867_update(progress, 1);
+						php_session_rfc1867_update(progress, true);
 					}
 				}
 				php_rshutdown_session_globals();
