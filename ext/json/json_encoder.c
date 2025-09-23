@@ -164,7 +164,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			if (need_comma) {
 				smart_str_appendc(buf, ',');
 			} else {
-				need_comma = 1;
+				need_comma = true;
 			}
 
 			php_json_pretty_print_char(buf, options, '\n');
@@ -250,7 +250,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				if (need_comma) {
 					smart_str_appendc(buf, ',');
 				} else {
-					need_comma = 1;
+					need_comma = true;
 				}
 
 				php_json_pretty_print_char(buf, options, '\n');
@@ -279,7 +279,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 					if (need_comma) {
 						smart_str_appendc(buf, ',');
 					} else {
-						need_comma = 1;
+						need_comma = true;
 					}
 
 					php_json_pretty_print_char(buf, options, '\n');
@@ -296,7 +296,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 					if (need_comma) {
 						smart_str_appendc(buf, ',');
 					} else {
-						need_comma = 1;
+						need_comma = true;
 					}
 
 					php_json_pretty_print_char(buf, options, '\n');
