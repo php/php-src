@@ -969,14 +969,14 @@ fail:
 /* {{{ Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
-	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
-	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
