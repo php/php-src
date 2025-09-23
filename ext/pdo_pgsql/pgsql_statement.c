@@ -219,7 +219,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 		PQclear(S->result);
 
 		/* the cursor was declared correctly */
-		S->is_prepared = 1;
+		S->is_prepared = true;
 
 		/* fetch to be able to get the number of tuples later, but don't advance the cursor pointer */
 		spprintf(&q, 0, "FETCH FORWARD 0 FROM %s", S->cursor_name);
@@ -240,7 +240,7 @@ stmt_retry:
 				case PGRES_COMMAND_OK:
 				case PGRES_TUPLES_OK:
 					/* it worked */
-					S->is_prepared = 1;
+					S->is_prepared = true;
 					PQclear(S->result);
 					S->result = NULL;
 					break;
