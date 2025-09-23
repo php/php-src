@@ -244,7 +244,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 	switch(err) {
 		case SSL_ERROR_ZERO_RETURN:
 			/* SSL terminated (but socket may still be active) */
-			retry = 0;
+			retry = false;
 			break;
 		case SSL_ERROR_WANT_READ:
 		case SSL_ERROR_WANT_WRITE:
@@ -261,7 +261,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 					}
 					SSL_set_shutdown(sslsock->ssl_handle, SSL_SENT_SHUTDOWN|SSL_RECEIVED_SHUTDOWN);
 					stream->eof = 1;
-					retry = 0;
+					retry = false;
 				} else {
 					char *estr = php_socket_strerror(php_socket_errno(), NULL, 0);
 
@@ -269,7 +269,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 							"SSL: %s", estr);
 
 					efree(estr);
-					retry = 0;
+					retry = false;
 				}
 				break;
 			}
@@ -285,7 +285,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 							"SSL_R_NO_SHARED_CIPHER: no suitable shared cipher could be used.  "
 							"This could be because the server is missing an SSL certificate "
 							"(local_cert context option)");
-					retry = 0;
+					retry = false;
 					break;
 
 				default:
@@ -310,7 +310,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 					}
 			}
 
-			retry = 0;
+			retry = false;
 			errno = 0;
 	}
 	return retry;
@@ -532,7 +532,7 @@ static bool php_openssl_matches_common_name(X509 *peer, const char *subject_name
 {
 	char buf[1024];
 	X509_NAME *cert_name;
-	bool is_match = 0;
+	bool is_match = false;
 	int cert_name_len;
 
 	cert_name = X509_get_subject_name(peer);
@@ -543,7 +543,7 @@ static bool php_openssl_matches_common_name(X509 *peer, const char *subject_name
 	} else if ((size_t)cert_name_len != strlen(buf)) {
 		php_error_docref(NULL, E_WARNING, "Peer certificate CN=`%.*s' is malformed", cert_name_len, buf);
 	} else if (php_openssl_matches_wildcard_name(subject_name, buf)) {
-		is_match = 1;
+		is_match = true;
 	} else {
 		php_error_docref(NULL, E_WARNING,
 			"Peer certificate CN=`%.*s' did not match expected CN=`%s'",
@@ -679,7 +679,7 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
 	zval *val;
-	bool is_self_signed = 0;
+	bool is_self_signed = false;
 
 
 	stream = (php_stream*)arg;
@@ -740,7 +740,7 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		/* check if the cert is self-signed */
 		if (cert_chain_ctx->cChain > 0 && cert_chain_ctx->rgpChain[0]->cElement > 0
 			&& (cert_chain_ctx->rgpChain[0]->rgpElement[0]->TrustStatus.dwInfoStatus & CERT_TRUST_IS_SELF_SIGNED) != 0) {
-			is_self_signed = 1;
+			is_self_signed = true;
 		}
 
 		/* check the depth */
@@ -2220,7 +2220,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		php_stream_xport_param *xparam STREAMS_DC)  /* {{{ */
 {
 	int clisock;
-	bool nodelay = 0;
+	bool nodelay = false;
 	zval *tmpzval = NULL;
 
 	xparam->outputs.client = NULL;
@@ -2228,7 +2228,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 	if (PHP_STREAM_CONTEXT(stream) &&
 		(tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
 		zend_is_true(tmpzval)) {
-		nodelay = 1;
+		nodelay = true;
 	}
 
 	clisock = php_network_accept_incoming(sock->s.socket,
