@@ -1898,7 +1898,7 @@ static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 	zval zv;
 
 	/* first we add the date and time in ISO format */
-	ZVAL_STR(&zv, date_format("x-m-d H:i:s.u", sizeof("x-m-d H:i:s.u")-1, dateobj->time, 1));
+	ZVAL_STR(&zv, date_format("x-m-d H:i:s.u", sizeof("x-m-d H:i:s.u")-1, dateobj->time, true));
 	zend_hash_str_update(props, "date", sizeof("date")-1, &zv);
 
 	/* then we add the timezone name (or similar) */
