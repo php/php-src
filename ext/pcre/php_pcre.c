@@ -1687,10 +1687,10 @@ matched:
 			walk = ZSTR_VAL(replace_str);
 			replace_end = walk + ZSTR_LEN(replace_str);
 			walk_last = 0;
-			simple_string = 1;
+			simple_string = true;
 			while (walk < replace_end) {
 				if ('\\' == *walk || '$' == *walk) {
-					simple_string = 0;
+					simple_string = false;
 					if (walk_last == '\\') {
 						walk++;
 						walk_last = 0;
