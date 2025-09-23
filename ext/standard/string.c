@@ -5036,7 +5036,7 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 	char c, *n;
 	const char *t;
 	int state = 0;
-	bool done = 0;
+	bool done = false;
 	char *norm;
 
 	if (len == 0) {
@@ -5059,7 +5059,7 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 				*(n++) = c;
 				break;
 			case '>':
-				done =1;
+				done = true;
 				break;
 			default:
 				if (!isspace((int)c)) {
@@ -5071,7 +5071,7 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 					}
 				} else {
 					if (state == 1)
-						done=1;
+						done = true;
 				}
 				break;
 		}
@@ -5080,9 +5080,9 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 	*(n++) = '>';
 	*n = '\0';
 	if (strstr(set, norm)) {
-		done=1;
+		done = true;
 	} else {
-		done=0;
+		done = false;
 	}
 	efree(norm);
 	return done;

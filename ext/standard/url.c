@@ -93,7 +93,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char const *s, *e, *p, *pp, *ue;
 
-	*has_port = 0;
+	*has_port = false;
 	s = str;
 	ue = s + length;
 
@@ -183,7 +183,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			port_buf[pp - p] = '\0';
 			port = ZEND_STRTOL(port_buf, &end, 10);
 			if (port >= 0 && port <= 65535 && end != port_buf) {
-				*has_port = 1;
+				*has_port = true;
 				ret->port = (unsigned short) port;
 				if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 				    s += 2;
@@ -249,7 +249,7 @@ parse_host:
 				port_buf[e - p] = '\0';
 				port = ZEND_STRTOL(port_buf, &end, 10);
 				if (port >= 0 && port <= 65535 && end != port_buf) {
-					*has_port = 1;
+					*has_port = true;
 					ret->port = (unsigned short)port;
 				} else {
 					php_url_free(ret);
