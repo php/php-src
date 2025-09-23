@@ -2418,7 +2418,7 @@ lazy_init:
 		if (!value || (Z_PROP_FLAG_P(value) & IS_PROP_LAZY)) {
 			zobj = zend_lazy_object_init(zobj);
 			if (!zobj) {
-				result = 0;
+				result = false;
 				goto exit;
 			}
 
@@ -2436,7 +2436,7 @@ lazy_init:
 		}
 	}
 
-	result = 0;
+	result = false;
 	goto exit;
 }
 /* }}} */
