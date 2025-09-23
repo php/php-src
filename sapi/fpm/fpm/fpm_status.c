@@ -475,7 +475,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				}
 		}
 
-		now_epoch = time(NULL);
+		now_epoch = zend_realtime_get();
 		if (has_start_time) {
 			strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard_p->start_epoch));
 			spprintf(&buffer, 0, short_syntax,
