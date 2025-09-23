@@ -1193,7 +1193,7 @@ static bool ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, con
 			return false;
 		}
 		if (strpbrk(args, "\r\n")) {
-			return 0;
+			return false;
 		}
 		size = slprintf(data, sizeof(data), "%s %s\r\n", cmd, args);
 	} else {
