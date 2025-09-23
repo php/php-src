@@ -4552,7 +4552,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	zend_class_entry *ce;
 	zend_function *mptr;
 	zend_long filter;
-	bool filter_is_null = 1;
+	bool filter_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4730,7 +4730,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 	zend_string *key;
 	zend_property_info *prop_info;
 	zend_long filter;
-	bool filter_is_null = 1;
+	bool filter_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4786,7 +4786,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 	zend_class_constant *constant;
 	zval val;
 	zend_long filter;
-	bool filter_is_null = 1;
+	bool filter_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4820,7 +4820,7 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 	zend_string *name;
 	zend_class_constant *constant;
 	zend_long filter;
-	bool filter_is_null = 1;
+	bool filter_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
