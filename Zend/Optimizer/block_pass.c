@@ -42,9 +42,9 @@ bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int
 			if (copy) {
 				Z_TRY_ADDREF_P(result);
 			}
-			return 1;
+			return true;
 		} else {
-			return 0;
+			return false;
 		}
 	}
 
@@ -52,9 +52,9 @@ bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int
 	c = zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
 	if (c) {
 		ZVAL_COPY_VALUE(result, &c->value);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 /* Data dependencies macros */

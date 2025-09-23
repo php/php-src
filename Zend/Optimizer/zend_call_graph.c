@@ -176,12 +176,12 @@ static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_
 	bool ret = false;
 
 	if (op_array == root) {
-		return 1;
+		return true;
 	}
 
 	func_info = ZEND_FUNC_INFO(op_array);
 	if (zend_bitset_in(visited, func_info->num)) {
-		return 0;
+		return false;
 	}
 	zend_bitset_incl(visited, func_info->num);
 	call_info = func_info->caller_info;

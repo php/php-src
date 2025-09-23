@@ -37,10 +37,10 @@ static zend_always_inline bool in_hitlist(zend_op *target, zend_op **jmp_hitlist
 
 	for (i = 0; i < jmp_hitlist_count; i++) {
 		if (jmp_hitlist[i] == target) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 #define CHECK_LOOP(target) \

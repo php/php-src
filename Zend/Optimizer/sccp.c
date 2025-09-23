@@ -244,7 +244,7 @@ static bool can_replace_op1(
 		case ZEND_SEND_ARRAY:
 		case ZEND_SEND_USER:
 		case ZEND_FE_RESET_RW:
-			return 0;
+			return false;
 		/* Do not accept CONST */
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
@@ -254,7 +254,7 @@ static bool can_replace_op1(
 		case ZEND_MAKE_REF:
 		case ZEND_UNSET_CV:
 		case ZEND_ISSET_ISEMPTY_CV:
-			return 0;
+			return false;
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
 			return !(opline->extended_value & ZEND_ARRAY_ELEMENT_REF);
@@ -262,18 +262,18 @@ static bool can_replace_op1(
 			return !(op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE);
 		case ZEND_VERIFY_RETURN_TYPE:
 			// TODO: This would require a non-local change ???
-			return 0;
+			return false;
 		case ZEND_OP_DATA:
 			return (opline - 1)->opcode != ZEND_ASSIGN_OBJ_REF &&
 				(opline - 1)->opcode != ZEND_ASSIGN_STATIC_PROP_REF;
 		default:
 			if (ssa_op->op1_def != -1) {
 				ZEND_UNREACHABLE();
-				return 0;
+				return false;
 			}
 	}
 
-	return 1;
+	return true;
 }
 
 static bool can_replace_op2(
@@ -284,9 +284,9 @@ static bool can_replace_op2(
 		case ZEND_BIND_LEXICAL:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-			return 0;
+			return false;
 	}
-	return 1;
+	return true;
 }
 
 static bool try_replace_op1(
@@ -295,11 +295,11 @@ static bool try_replace_op1(
 		zval zv;
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, &zv)) {
-			return 1;
+			return true;
 		}
 		zval_ptr_dtor_nogc(&zv);
 	}
-	return 0;
+	return false;
 }
 
 static bool try_replace_op2(
@@ -308,11 +308,11 @@ static bool try_replace_op2(
 		zval zv;
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline, &zv)) {
-			return 1;
+			return true;
 		}
 		zval_ptr_dtor_nogc(&zv);
 	}
-	return 0;
+	return false;
 }
 
 static inline zend_result ct_eval_binary_op(zval *result, uint8_t binop, zval *op1, zval *op2) {
