@@ -729,7 +729,7 @@ static zend_result _php_mb_ini_mbstring_http_input_set(const char *new_value, si
 		list = (const mbfl_encoding**)pecalloc(1, sizeof(mbfl_encoding*), 1);
 		*list = &mbfl_encoding_pass;
 		size = 1;
-	} else if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ 1, /* arg_num */ 0) || size == 0) {
+	} else if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ true, /* arg_num */ 0) || size == 0) {
 		return FAILURE;
 	}
 	if (MBSTRG(http_input_list)) {
