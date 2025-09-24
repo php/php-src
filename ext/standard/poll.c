@@ -532,14 +532,13 @@ PHP_METHOD(PollContext, add)
 
 	/* Add to poll context */
 	if (php_poll_add(intern->ctx, (int) fd, (uint32_t) events, watcher) != SUCCESS) {
-		/* Clean up the partially initialized watcher */
-		OBJ_RELEASE(&handle->std);
-		zval_ptr_dtor(&watcher->data);
-		zval_ptr_dtor(return_value);
-		ZVAL_NULL(return_value);
-
-		zend_throw_exception(
-				php_poll_exception_class_entry, "Failed to add handle to polling context", 0);
+		if (php_poll_get_error(intern->ctx) == PHP_POLL_ERR_EXISTS) {
+			zend_throw_exception(
+					php_poll_exception_class_entry, "Handle already added", 0);
+		} else {
+			zend_throw_exception(
+				php_poll_exception_class_entry, "Failed to add handle", 0);
+		}
 		RETURN_THROWS();
 	}
 

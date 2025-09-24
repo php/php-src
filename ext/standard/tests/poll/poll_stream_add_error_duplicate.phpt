@@ -16,4 +16,4 @@ try {
 }
 ?>
 --EXPECT--
-ERROR: Stream already added
+ERROR: Handle already added
