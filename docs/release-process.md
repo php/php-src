@@ -976,6 +976,11 @@ feature development that cannot go into the new version.
 > minor improvements and bug fixes. All major improvements and new features must
 > wait.
 
+8. Update the `.github/nightly_matrix.php` file with the new branch. As CI
+   configuration is maintained on the lowest supported branch, you will need
+   to upmerge that commit 5 times to get it to `master`. For example:
+
+   * [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/197921a8aa7b2f9af103b439bf913e23d6ed1b98)
 
 ## Preparing for the initial stable version (PHP X.Y.0)
 
