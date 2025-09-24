@@ -99,7 +99,7 @@ function pt_print_events($watchers, $read_data = false): void {
             die('Invalid event type');
         }
         echo "Event[$i]: " . $watcher->getTriggeredEvents() . ", user data: " . $watcher->getData();
-        if ($read_data && $watcher->hasTriggered(POLL_READ)) {
+        if ($read_data && $watcher->hasTriggered(POLL_EVENT_READ)) {
             $data = fread($watcher->getHandle()->getStream(), 1024);
             echo ", read data: '$data'";
         }
@@ -173,7 +173,7 @@ function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): 
 
                 // If read data is expected, check it
                 if (isset($exp_event['read'])) {
-                    $read_data = fread($watcher[$act_idx]->getHandle()->getStream(), 1024);
+                    $read_data = fread($watchers[$act_idx]->getHandle()->getStream(), 1024);
                     if ($read_data !== $exp_event['read']) {
                         continue; // Read data doesn't match
                     }
@@ -226,34 +226,34 @@ function pt_resolve_backend_specific_value($backend_map, $current_backend) {
 
 function pt_event_flags_to_string($flags): string {
     $names = [];
-    if ($flags & POLL_READ) $names[] = 'READ';
-    if ($flags & POLL_WRITE) $names[] = 'WRITE';
-    if ($flags & POLL_ERROR) $names[] = 'ERROR';
-    if ($flags & POLL_HUP) $names[] = 'HUP';
+    if ($flags & POLL_EVENT_READ) $names[] = 'READ';
+    if ($flags & POLL_EVENT_WRITE) $names[] = 'WRITE';
+    if ($flags & POLL_EVENT_ERROR) $names[] = 'ERROR';
+    if ($flags & POLL_EVENT_HUP) $names[] = 'HUP';
 
     return empty($names) ? 'NONE:' . $flags : implode('|', $names);
 }
 
-function pt_print_mismatched_events($actual_events, $expected_events, $matched = [], $backend_name = null): void {
+function pt_print_mismatched_events($actual_watchers, $expected_watchers, $matched = [], $backend_name = null): void {
     echo "Actual events:\n";
-    foreach ($actual_events as $i => $event) {
+    foreach ($actual_watchers as $i => $watcher) {
         $match_status = isset($matched[$i]) ? " [MATCHED]" : " [UNMATCHED]";
-        $event_names = pt_event_flags_to_string($event->events);
-        echo "  Event[$i]: $event_names, user data: " . $event->data . $match_status . "\n";
+        $watcher_names = pt_event_flags_to_string($watcher->getTriggeredEvents());
+        echo "  Event[$i]: $watcher_names, user data: " . $watcher->getData() . $match_status . "\n";
     }
 
     echo "Expected events:\n";
-    foreach ($expected_events as $i => $exp_event) {
+    foreach ($expected_watchers as $i => $exp_event) {
         $was_matched = in_array($i, $matched);
         $match_status = $was_matched ? " [MATCHED]" : " [UNMATCHED]";
 
-        $events_value = $exp_event['events'];
-        if (is_array($events_value) && $backend_name !== null) {
-            $events_value = pt_resolve_backend_specific_value($events_value, $backend_name);
+        $watchers_value = $exp_event['events'];
+        if (is_array($watchers_value) && $backend_name !== null) {
+            $watchers_value = pt_resolve_backend_specific_value($watchers_value, $backend_name);
         }
 
-        $event_names = pt_event_flags_to_string($events_value);
-        echo "  Event[$i]: $event_names, user data: " . $exp_event['data'];
+        $watcher_names = pt_event_flags_to_string($watchers_value);
+        echo "  Event[$i]: $watcher_names, user data: " . $exp_event['data'];
         if (isset($exp_event['read'])) {
             echo ", read data: '" . $exp_event['read'] . "'";
         }
