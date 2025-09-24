@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <limits.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -1320,7 +1321,11 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 	bool retry = 0;
 	SSL *handle = NULL;
 	php_socket_t fd;
-	size_t sent;
+	int sent;
+	int len;
+
+	/* SSL_write takes int; clamp to INT_MAX to avoid truncation */
+	len = (size > (size_t)INT_MAX) ? INT_MAX : (int)size;
 
 	if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
 		handle = ftp->ssl_handle;
@@ -1329,11 +1334,11 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 		handle = ftp->data->ssl_handle;
 		fd = ftp->data->fd;
 	} else {
-		return my_send_wrapper_with_restart(s, buf, size, 0);
+		return (int)my_send_wrapper_with_restart(s, buf, (size_t)len, 0);
 	}
 
 	do {
-		sent = SSL_write(handle, buf, size);
+		sent = SSL_write(handle, buf, len);
 		err = SSL_get_error(handle, sent);
 
 		switch (err) {
@@ -1368,7 +1373,8 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 	} while (retry);
 	return sent;
 #else
-	return my_send_wrapper_with_restart(s, buf, size, 0);
+	size_t plain_len = size > (size_t)INT_MAX ? (size_t)INT_MAX : size;
+	return (int)my_send_wrapper_with_restart(s, buf, plain_len, 0);
 #endif
 }
 
