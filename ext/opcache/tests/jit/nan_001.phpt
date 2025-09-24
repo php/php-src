@@ -14,11 +14,11 @@ for ($i = 0; $i < 3; $i++) {
 }	
 ?>
 --EXPECTF--
-Warning: unexpected NAN value was coerced to bool in %s on line %d
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true
 
-Warning: unexpected NAN value was coerced to bool in %s on line %d
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true
 
-Warning: unexpected NAN value was coerced to bool in %s on line %d
+Warning: unexpected NAN value was coerced to bool in %s on line 4
 nan is true
