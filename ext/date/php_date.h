@@ -129,7 +129,8 @@ ZEND_END_MODULE_GLOBALS(date)
 
 #define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)
 
-PHPAPI time_t php_time(void);
+/* DEPRECATED, use zend_realtime_get() instead */
+#define php_time() zend_realtime_get()
 
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(const char *string, zend_long *now);

@@ -2,17 +2,19 @@
 
 #include "php.h"
 #include "zend_long.h"
+#include "zend_time.h"
 #include "SAPI.h"
+
 #include <stdio.h>
 
 #include "fpm_config.h"
 #include "fpm_scoreboard.h"
 #include "fpm_status.h"
-#include "fpm_clock.h"
 #include "zlog.h"
 #include "fpm_atomic.h"
 #include "fpm_conf.h"
 #include "fpm_php.h"
+
 #include "ext/standard/html.h"
 #include "ext/json/php_json.h"
 
@@ -50,7 +52,7 @@ int fpm_status_export_to_zval(zval *status)
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
 	zval fpm_proc_stats, fpm_proc_stat;
 	time_t now_epoch;
-	struct timeval duration, now;
+	uint64_t duration_ns, now_ns;
 	double cpu;
 	int i;
 
@@ -77,8 +79,8 @@ int fpm_status_export_to_zval(zval *status)
 	}
 	fpm_scoreboard_release(scoreboard_p);
 
-	now_epoch = time(NULL);
-	fpm_clock_get(&now);
+	now_epoch = zend_realtime_get();
+	now_ns    = zend_monotime_fallback();
 
 	array_init(status);
 	add_assoc_string(status, "pool", scoreboard.pool);
@@ -104,10 +106,10 @@ int fpm_status_export_to_zval(zval *status)
 		}
 		proc_p = &procs[i];
 		/* prevent NaN */
-		if (procs[i].cpu_duration.tv_sec == 0 && procs[i].cpu_duration.tv_usec == 0) {
+		if (!procs[i].cpu_duration_ns) {
 			cpu = 0.;
 		} else {
-			cpu = (procs[i].last_request_cpu.tms_utime + procs[i].last_request_cpu.tms_stime + procs[i].last_request_cpu.tms_cutime + procs[i].last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (procs[i].cpu_duration.tv_sec + procs[i].cpu_duration.tv_usec / 1000000.) * 100.;
+			cpu = (procs[i].last_request_cpu.tms_utime + procs[i].last_request_cpu.tms_stime + procs[i].last_request_cpu.tms_cutime + procs[i].last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (procs[i].cpu_duration_ns / (double)ZEND_NANO_IN_SEC) * 100.;
 		}
 
 		array_init(&fpm_proc_stat);
@@ -117,11 +119,11 @@ int fpm_status_export_to_zval(zval *status)
 		add_assoc_long(&fpm_proc_stat, "start-since", now_epoch - procs[i].start_epoch);
 		add_assoc_long(&fpm_proc_stat, "requests", procs[i].requests);
 		if (procs[i].request_stage == FPM_REQUEST_ACCEPTING) {
-			duration = procs[i].duration;
+			duration_ns = procs[i].duration_ns;
 		} else {
-			timersub(&now, &procs[i].accepted, &duration);
+			duration_ns = now_ns - procs[i].accepted_ns;
 		}
-		add_assoc_long(&fpm_proc_stat, "request-duration", duration.tv_sec * 1000000UL + duration.tv_usec);
+		add_assoc_long(&fpm_proc_stat, "request-duration", duration_ns / 1000);
 		add_assoc_string(&fpm_proc_stat, "request-method", procs[i].request_method[0] != '\0' ? procs[i].request_method : "-");
 		add_assoc_string(&fpm_proc_stat, "request-uri", procs[i].request_uri);
 		add_assoc_string(&fpm_proc_stat, "query-string", procs[i].query_string);
@@ -490,7 +492,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				}
 		}
 
-		now_epoch = time(NULL);
+		now_epoch = zend_realtime_get();
 		if (has_start_time) {
 			strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard_p->start_epoch));
 			spprintf(&buffer, 0, short_syntax,
@@ -541,10 +543,10 @@ int fpm_status_handle_request(void) /* {{{ */
 			int first;
 			zend_string *tmp_query_string;
 			char *query_string;
-			struct timeval duration, now;
+			uint64_t duration_ns, now_ns;
 			float cpu;
 
-			fpm_clock_get(&now);
+			now_ns = zend_monotime_fallback();
 
 			if (full_pre) {
 				PUTS(full_pre);
@@ -590,16 +592,16 @@ int fpm_status_handle_request(void) /* {{{ */
 				}
 
 				/* prevent NaN */
-				if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
+				if (proc->cpu_duration_ns == 0) {
 					cpu = 0.;
 				} else {
-					cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
+					cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration_ns / (double)ZEND_NANO_IN_SEC) * 100.;
 				}
 
 				if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
-					duration = proc->duration;
+					duration_ns = proc->duration_ns;
 				} else {
-					timersub(&now, &proc->accepted, &duration);
+					duration_ns = now_ns - proc->accepted_ns;
 				}
 				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&proc->start_epoch));
 				spprintf(&buffer, 0, full_syntax,
@@ -608,7 +610,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					time_buffer,
 					(unsigned long) (now_epoch - proc->start_epoch),
 					proc->requests,
-					(unsigned long) (duration.tv_sec * 1000000UL + duration.tv_usec),
+					(unsigned long) (duration_ns / 1000),
 					proc->request_method[0] != '\0' ? proc->request_method : "-",
 					proc->request_uri[0] != '\0' ? proc->request_uri : "-",
 					query_string ? "?" : "",
