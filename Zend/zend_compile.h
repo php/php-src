@@ -461,7 +461,7 @@ const char *zend_visibility_string(uint32_t fn_flags);
 /* Stored in zend_property_info.offset, not returned by zend_get_property_offset(). */
 #define ZEND_VIRTUAL_PROPERTY_OFFSET ((uint32_t)-1)
 
-zend_property_hook_kind zend_get_property_hook_kind_from_name(zend_string *name);
+zend_property_hook_kind zend_get_property_hook_kind_from_name(const zend_string *name);
 
 typedef struct _zend_property_info {
 	uint32_t offset; /* property offset for object properties or
@@ -880,9 +880,9 @@ void shutdown_compiler(void);
 void zend_init_compiler_data_structures(void);
 
 void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_array *op_array);
-void zend_oparray_context_end(zend_oparray_context *prev_context);
+void zend_oparray_context_end(const zend_oparray_context *prev_context);
 void zend_file_context_begin(zend_file_context *prev_context);
-void zend_file_context_end(zend_file_context *prev_context);
+void zend_file_context_end(const zend_file_context *prev_context);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename, zend_compile_position position);
@@ -933,8 +933,8 @@ uint32_t zend_modifier_list_to_flags(zend_modifier_target target, zend_ast *modi
 bool zend_handle_encoding_declaration(zend_ast *ast);
 
 ZEND_API zend_class_entry *zend_bind_class_in_slot(
-		zval *class_table_slot, zval *lcname, zend_string *lc_parent_name);
-ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname);
+		zval *class_table_slot, const zval *lcname, zend_string *lc_parent_name);
+ZEND_API zend_result do_bind_function(zend_function *func, const zval *lcname);
 ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
 
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
@@ -963,7 +963,7 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_type_release(zend_type type, bool persistent);
-ZEND_API zend_string *zend_create_member_string(zend_string *class_name, zend_string *member_name);
+ZEND_API zend_string *zend_create_member_string(const zend_string *class_name, const zend_string *member_name);
 
 
 ZEND_API ZEND_COLD void zend_user_exception_handler(void);
@@ -1005,7 +1005,7 @@ ZEND_API bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(const zend_string *name);
-ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc, bool result_used);
+ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, const zend_function *fbc, bool result_used);
 ZEND_API bool zend_is_smart_branch(const zend_op *opline);
 
 typedef bool (*zend_auto_global_callback)(zend_string *name);

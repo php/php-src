@@ -359,7 +359,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(ui
 	}
 }
 
-static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, zend_function *func)
+static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, const zend_function *func)
 {
 	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args + func->common.T;
 
