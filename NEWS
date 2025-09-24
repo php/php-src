@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC2
 
+- Opcache
+  . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
 
 25 Sep 2025, PHP 8.5.0RC1
 
