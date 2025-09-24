@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4f9ed6765bca3d40b2181e5a3e5ab9f95f171e6a */
+ * Stub hash: 900953be32e526a0bdba88d0a1b78eb11f809609 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PollHandle_getFileDescriptor, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -54,7 +54,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PollContext___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, backend, MAY_BE_LONG|MAY_BE_STRING, "POLL_BACKEND_AUTO")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compat, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_PollContext_add, 0, 2, PollWatcher, 0)
