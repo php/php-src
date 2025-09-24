@@ -3748,7 +3748,9 @@ ZEND_METHOD(ReflectionMethod, getModifiers)
 {
 	reflection_object *intern;
 	zend_function *mptr;
-	uint32_t keep_flags = ZEND_ACC_PPP_MASK
+	/* Keep in mind that all userland-exposed flags should fit in the low 32-bits
+	 * for 32-bit architectures. Shuffle ZEND_ACC_* flags around accordingly. */
+	zend_fn_flags keep_flags = ZEND_ACC_PPP_MASK
 		| ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL;
 
 	ZEND_PARSE_PARAMETERS_NONE();

@@ -118,7 +118,7 @@ struct _zend_compiler_globals {
 	                              /* and don't use them as lead/trail units     */
 
 	zend_string *doc_comment;
-	uint32_t extra_fn_flags;
+	zend_fn_flags extra_fn_flags;
 
 	uint32_t compiler_options; /* set of ZEND_COMPILE_* constants */
 

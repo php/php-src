@@ -4629,7 +4629,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		// JIT: if (function->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) {
 		ZEND_ASSERT(rx != IR_UNUSED);
 		ir_ref if_trampoline_or_generator = ir_IF(ir_AND_U32(
-			ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
+			ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags)))),
 			ir_CONST_U32(ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)));
 		ir_IF_TRUE(if_trampoline_or_generator);
 		ir_END_list(data.ir_end_inputs);
@@ -8440,7 +8440,7 @@ static int zend_jit_free_trampoline(zend_jit_ctx *jit, ir_ref func)
 {
 	// JIT: if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 	ir_ref if_trampoline = ir_IF(ir_AND_U32(
-		ir_LOAD_U32(ir_ADD_OFFSET(func, offsetof(zend_function, common.fn_flags))),
+		ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func, offsetof(zend_function, common.fn_flags)))),
 		ir_CONST_U32(ZEND_ACC_CALL_VIA_TRAMPOLINE)));
 
 	ir_IF_TRUE(if_trampoline);
@@ -8665,7 +8665,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		//      (closure->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
 		call_info = ir_OR_U32(
 			ir_AND_U32(
-				ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.common.fn_flags))),
+				ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.common.fn_flags)))),
 				ir_CONST_U32(ZEND_ACC_FAKE_CLOSURE)),
 			ir_CONST_U32(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE));
 		// JIT: if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
@@ -9117,7 +9117,7 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 	if (!func) {
 		// JIT: if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
 		if_static = ir_IF(ir_AND_U32(
-			ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
+			ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags)))),
 			ir_CONST_U32(ZEND_ACC_STATIC)));
 		ir_IF_TRUE_cold(if_static);
 	}
@@ -9288,7 +9288,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 		if (!func) {
 			// JIT: if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
 			if_static = ir_IF(ir_AND_U32(
-				ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
+				ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags)))),
 				ir_CONST_U32(ZEND_ACC_STATIC)));
 			ir_IF_FALSE_cold(if_static);
 		}
@@ -10104,7 +10104,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				func_ref = ir_LOAD_A(jit_CALL(rx, func));
 				ir_GUARD_NOT(
 					ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+						ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags)))),
 						ir_CONST_U32(ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD)),
 					ir_CONST_ADDR(exit_addr));
 			}
@@ -10136,7 +10136,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
 
 				if_deprecated_nodiscard = ir_IF(ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+						ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags)))),
 						ir_CONST_U32(ZEND_ACC_DEPRECATED|no_discard)));
 				ir_IF_TRUE_cold(if_deprecated_nodiscard);
 
@@ -10349,7 +10349,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				if (!func) {
 					// JIT: if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0))
 					ir_ref if_has_type_hints = ir_IF(ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+						ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags)))),
 						ir_CONST_U32(ZEND_ACC_HAS_TYPE_HINTS)));
 					ir_IF_TRUE(if_has_type_hints);
 					ir_END_list(merge_inputs);

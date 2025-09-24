@@ -552,7 +552,7 @@ class PrintAccFlagsCommand(gdb.Command):
 
     def invoke (self, arg, from_tty):
         arg = int(gdb.parse_and_eval(arg))
-        print(ZendAccFlags.format_flags(arg, self.type))
+        print(ZendAccFlags.format_flags(arg, self.type, size=32))
 
 PrintAccFlagsCommand('fn')
 PrintAccFlagsCommand('ce')
@@ -710,10 +710,10 @@ class ZendAccFlags:
         return self._flags[name]
 
     @classmethod
-    def format_flags(self, flags, type):
+    def format_flags(self, flags, type, size):
         flags = int(flags)
         names = []
-        for i in range(0, 31):
+        for i in range(0, size - 1):
             if (flags & (1 << i)) != 0:
                 name = self.flag_name(i, type)
                 if name == None:
@@ -724,19 +724,19 @@ class ZendAccFlags:
 
     @classmethod
     def format_fn_flags(self, flags):
-        return self.format_flags(flags, 'fn')
+        return self.format_flags(flags, 'fn', 64)
 
     @classmethod
     def format_ce_flags(self, flags):
-        return self.format_flags(flags, 'ce')
+        return self.format_flags(flags, 'ce', 32)
 
     @classmethod
     def format_prop_flags(self, flags):
-        return self.format_flags(flags, 'prop')
+        return self.format_flags(flags, 'prop', 32)
 
     @classmethod
     def format_const_flags(self, flags):
-        return self.format_flags(flags, 'const')
+        return self.format_flags(flags, 'const', 32)
 
     @classmethod
     def _load(self):
@@ -751,7 +751,7 @@ class ZendAccFlags:
         with open(filename, 'r') as file:
             content = file.read()
 
-            pattern = re.compile(r'#define (ZEND_ACC_[^\s]+)\s+\(1U?\s+<<\s+(\d+)\)\s+/\*\s+(X?)\s+\|\s+(X?)\s+\|\s+(X?)\s+\|\s+(X?)\s+\*/')
+            pattern = re.compile(r'#define (ZEND_ACC_[^\s]+)\s+\(1[uU]?[lL]?[lL]?\s+<<\s+(\d+)\)\s+/\*\s+(X?)\s+\|\s+(X?)\s+\|\s+(X?)\s+\|\s+(X?)\s+\*/')
             matches = pattern.findall(content)
             for name, bit, cls, func, prop, const in matches:
                 flags[name] = ZendAccFlag(cls == 'X', func == 'X', prop == 'X', const == 'X', int(bit))

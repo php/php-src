@@ -341,7 +341,7 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 30)                            |     |     |     */
+/* Function Flags (unused: 30,32-63)                      |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
@@ -443,7 +443,7 @@ static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t vi
 // Must not clash with ZEND_SHORT_CIRCUITING_CHAIN_MASK
 #define ZEND_JMP_NULL_BP_VAR_IS 4
 
-const char *zend_visibility_string(uint32_t fn_flags);
+const char *zend_visibility_string(uint32_t flags);
 
 #define ZEND_PROPERTY_HOOK_COUNT 2
 #define ZEND_PROPERTY_HOOK_STRUCT_SIZE (sizeof(zend_function*) * ZEND_PROPERTY_HOOK_COUNT)
@@ -512,11 +512,13 @@ typedef struct _zend_internal_function_info {
 	const char *default_value;
 } zend_internal_function_info;
 
+typedef uint64_t zend_fn_flags;
+
 struct _zend_op_array {
 	/* Common elements */
 	uint8_t type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-	uint32_t fn_flags;
+	zend_fn_flags fn_flags;
 	zend_string *function_name;
 	zend_class_entry *scope;
 	zend_function *prototype;
@@ -575,7 +577,7 @@ typedef struct _zend_internal_function {
 	/* Common elements */
 	uint8_t type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-	uint32_t fn_flags;
+	zend_fn_flags fn_flags;
 	zend_string* function_name;
 	zend_class_entry *scope;
 	zend_function *prototype;
@@ -604,7 +606,7 @@ union _zend_function {
 	struct {
 		uint8_t type;  /* never used */
 		uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-		uint32_t fn_flags;
+		zend_fn_flags fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
 		zend_function *prototype;
