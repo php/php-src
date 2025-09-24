@@ -455,7 +455,6 @@ PHP_METHOD(PollContext, __construct)
 {
 	zend_long backend_long = PHP_POLL_BACKEND_AUTO;
 	zend_string *backend_str = NULL;
-	bool compat = false;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
