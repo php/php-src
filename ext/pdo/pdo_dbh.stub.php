@@ -179,6 +179,8 @@ class PDO
     /** @tentative-return-type */
     public function commit(): bool {}
 
+    public function disconnect(): bool {}
+
     /** @tentative-return-type */
     public function errorCode(): ?string {}
 
@@ -196,6 +198,8 @@ class PDO
 
     /** @tentative-return-type */
     public function inTransaction(): bool {}
+
+    public function isConnected(): bool {}
 
     /** @tentative-return-type */
     public function lastInsertId(?string $name = null): string|false {}

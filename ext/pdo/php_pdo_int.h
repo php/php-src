@@ -30,6 +30,7 @@ void pdo_dbh_init(int module_number);
 void pdo_stmt_init(void);
 
 extern const zend_function_entry pdo_dbh_functions[];
+extern ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_request_dtor);
 extern ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor);
 
 extern zend_object *pdo_dbstmt_new(zend_class_entry *ce);
