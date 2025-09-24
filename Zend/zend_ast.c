@@ -558,7 +558,7 @@ static zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *s
 	return zend_fetch_class_with_scope(zend_ast_get_str(ast), (ast->attr >> ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT) | ZEND_FETCH_CLASS_EXCEPTION, scope);
 }
 
-ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
+static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 	zval *result,
 	zend_ast *ast,
 	zend_class_entry *scope,
@@ -589,7 +589,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
 	return r;
 }
 
-ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
+static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 	zval *result,
 	zend_ast *ast,
 	zend_class_entry *scope,
