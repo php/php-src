@@ -457,20 +457,17 @@ PHP_METHOD(PollContext, __construct)
 	zend_string *backend_str = NULL;
 	bool compat = false;
 
-	ZEND_PARSE_PARAMETERS_START(0, 2)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG(backend_str, backend_long)
-		Z_PARAM_BOOL(compat)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZV(getThis());
 
-	uint32_t flags = compat ? 0 : PHP_POLL_FLAG_RAW_EVENTS;
-
 	if (backend_str == NULL) {
-		intern->ctx = php_poll_create((php_poll_backend_type) backend_long, flags);
+		intern->ctx = php_poll_create((php_poll_backend_type) backend_long, 0);
 	} else {
-		intern->ctx = php_poll_create_by_name(ZSTR_VAL(backend_str), flags);
+		intern->ctx = php_poll_create_by_name(ZSTR_VAL(backend_str), 0);
 	}
 
 	if (!intern->ctx) {
