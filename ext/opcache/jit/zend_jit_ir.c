@@ -7742,6 +7742,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 		ir_ref is_nan = ir_NE(dval, dval);
 		ir_ref if_val = ir_IF(is_nan);
 		ir_IF_TRUE_cold(if_val);
+			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_nan_coerced_to_type_warning));
 		ir_MERGE_WITH_EMPTY_FALSE(if_val);
 
