@@ -279,6 +279,7 @@ PHP_METHOD(StreamPollHandle, getStream)
 		RETURN_NULL();
 	}
 
+	GC_ADDREF(data->stream->res);
 	php_stream_to_zval(data->stream, return_value);
 }
 
