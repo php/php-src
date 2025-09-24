@@ -107,7 +107,7 @@ static php_poll_ctx *php_poll_create_context(uint32_t flags)
 		return NULL;
 	}
 	ctx->persistent = persistent;
-	ctx->raw_events = flags & PHP_POLL_FLAG_RAW_EVENTS;
+	ctx->raw_events = (flags & PHP_POLL_FLAG_RAW_EVENTS) != 0;
 
 	return ctx;
 }
