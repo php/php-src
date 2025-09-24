@@ -1,14 +1,18 @@
 <?php
 // stream Poll Testing helper
 
-function pt_new_stream_poll(): StreamPollContext {
-    $backend = getenv('STREAM_POLL_TEST_BACKEND');
-    return stream_poll_create($backend === false ? STREAM_POLL_BACKEND_AUTO : $backend);
+function pt_new_stream_poll(): PollContext {
+    $backend = getenv('POLL_TEST_BACKEND');
+    return new PollContext($backend === false ? POLL_BACKEND_AUTO : $backend);
+}
+
+function pt_stream_poll_add($poll_ctx, $stream, $events, $data = null): PollWatcher {
+    return $poll_ctx->add(new StreamPollHandle($stream), $events, $data);
 }
 
 function pt_skip_for_backend($backend, $msg): void {
     $backends_to_skip = is_array($backend) ? $backend : array($backend);
-    $current_backend = stream_poll_backend_name(pt_new_stream_poll());
+    $current_backend = pt_new_stream_poll()->getBackendName();
     if (in_array($current_backend, $backends_to_skip)) {
         die("skip backend $current_backend $msg\n");
     }
@@ -85,26 +89,26 @@ function pt_write_sleep($stream, $data, $delay = 10000): int|false {
     return $result;
 }
 
-function pt_print_events($events, $read_data = false): void {
-    if (!is_array($events)) {
+function pt_print_events($watchers, $read_data = false): void {
+    if (!is_array($watchers)) {
         die("Events must be an array\n");
     }
-    echo "Events count: " . count($events) . "\n";
-    foreach ($events as $i => $event) {
-        if (!$event instanceof StreamPollEvent) {
+    echo "Events count: " . count($watchers) . "\n";
+    foreach ($watchers as $i => $watcher) {
+        if (!$watcher instanceof PollWatcher) {
             die('Invalid event type');
         }
-        echo "Event[$i]: " . $event->events . ", user data: " . $event->data;
-        if ($read_data && $event->events & STREAM_POLL_READ) {
-            $data = fread($event->stream, 1024);
+        echo "Event[$i]: " . $watcher->getTriggeredEvents() . ", user data: " . $watcher->getData();
+        if ($read_data && $watcher->hasTriggered(POLL_READ)) {
+            $data = fread($watcher->getHandle()->getStream(), 1024);
             echo ", read data: '$data'";
         }
         echo "\n";
     }
 }
 
-function pt_expect_events($events, $expected, $poll_ctx = null): void {
-    if (!is_array($events)) {
+function pt_expect_events($watchers, $expected, ?PollContext $poll_ctx = null): void {
+    if (!is_array($watchers)) {
         die("Events must be an array\n");
     }
 
@@ -112,28 +116,28 @@ function pt_expect_events($events, $expected, $poll_ctx = null): void {
         die("Expected events must be an array\n");
     }
 
-    $event_count = count($events);
+    $event_count = count($watchers);
     $expected_count = count($expected);
 
     // Get current backend name for backend-specific expectations
-    $backend_name = $poll_ctx ? stream_poll_backend_name($poll_ctx) : 'unknown';
+    $backend_name = $poll_ctx ? $poll_ctx->getBackendName() : 'unknown';
 
     if ($event_count !== $expected_count) {
         echo "Event count mismatch: got $event_count, expected $expected_count\n";
-        pt_print_mismatched_events($events, $expected, [], $backend_name);
+        pt_print_mismatched_events($watchers, $expected, [], $backend_name);
         return;
     }
 
     // Convert events to comparable format for matching
     $actual_events = [];
-    foreach ($events as $event) {
-        if (!$event instanceof StreamPollEvent) {
+    foreach ($watchers as $watcher) {
+        if (!$watcher instanceof PollWatcher) {
             die('Invalid event type');
         }
 
         $event_data = [
-            'events' => $event->events,
-            'data' => $event->data
+            'events' => $watcher->getTriggeredEvents(),
+            'data' => $watcher->getData(),
         ];
 
         $actual_events[] = $event_data;
@@ -169,7 +173,7 @@ function pt_expect_events($events, $expected, $poll_ctx = null): void {
 
                 // If read data is expected, check it
                 if (isset($exp_event['read'])) {
-                    $read_data = fread($events[$act_idx]->stream, 1024);
+                    $read_data = fread($watcher[$act_idx]->getHandle()->getStream(), 1024);
                     if ($read_data !== $exp_event['read']) {
                         continue; // Read data doesn't match
                     }
@@ -191,7 +195,7 @@ function pt_expect_events($events, $expected, $poll_ctx = null): void {
         echo "Events matched - count: $event_count\n";
     } else {
         echo "Events did not match:\n";
-        pt_print_mismatched_events($events, $expected, $matched, $backend_name);
+        pt_print_mismatched_events($watchers, $expected, $matched, $backend_name);
     }
 }
 
@@ -222,10 +226,10 @@ function pt_resolve_backend_specific_value($backend_map, $current_backend) {
 
 function pt_event_flags_to_string($flags): string {
     $names = [];
-    if ($flags & STREAM_POLL_READ) $names[] = 'READ';
-    if ($flags & STREAM_POLL_WRITE) $names[] = 'WRITE';
-    if ($flags & STREAM_POLL_ERROR) $names[] = 'ERROR';
-    if ($flags & STREAM_POLL_HUP) $names[] = 'HUP';
+    if ($flags & POLL_READ) $names[] = 'READ';
+    if ($flags & POLL_WRITE) $names[] = 'WRITE';
+    if ($flags & POLL_ERROR) $names[] = 'ERROR';
+    if ($flags & POLL_HUP) $names[] = 'HUP';
 
     return empty($names) ? 'NONE:' . $flags : implode('|', $names);
 }
