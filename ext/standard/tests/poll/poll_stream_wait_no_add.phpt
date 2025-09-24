@@ -1,10 +1,10 @@
 --TEST--
-Stream polling - only wait
+Poll stream - only wait
 --FILE--
 <?php
-require_once __DIR__ . '/stream_poll.inc';
+require_once __DIR__ . '/poll.inc';
 $poll_ctx = pt_new_stream_poll();
-$events = stream_poll_wait($poll_ctx, 0);
+$events = $poll_ctx->wait(0);
 pt_print_events($events);
 
 ?>

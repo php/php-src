@@ -16,6 +16,9 @@
 #define PHP_POLL_H
 
 #include "php.h"
+#include "php_network.h"
+
+/* ----- Public generic API ----- */
 
 /* clang-format off */
 
@@ -73,7 +76,6 @@ typedef struct php_poll_ctx php_poll_ctx;
 typedef struct php_poll_backend_ops php_poll_backend_ops;
 typedef struct php_poll_event php_poll_event;
 
-/* Public API */
 PHPAPI php_poll_ctx *php_poll_create(php_poll_backend_type preferred_backend, uint32_t flags);
 PHPAPI php_poll_ctx *php_poll_create_by_name(const char *preferred_backend, uint32_t flags);
 
@@ -100,5 +102,56 @@ PHPAPI void php_poll_register_backends(void);
 
 /* Error string for the error */
 PHPAPI const char *php_poll_error_string(php_poll_error error);
+
+/* ----- Public extension API ----- */
+
+typedef struct php_poll_handle_ops php_poll_handle_ops;
+typedef struct php_poll_handle_object php_poll_handle_object;
+
+/* Handle operations structure - extensions can provide their own */
+struct php_poll_handle_ops {
+	/**
+	 * Get file descriptor for this handle
+	 * @param handle The handle object
+	 * @return File descriptor or SOCK_ERR if invalid/not applicable
+	 */
+	php_socket_t (*get_fd)(php_poll_handle_object *handle);
+
+	/**
+	 * Check if handle is still valid
+	 * @param handle The handle object
+	 * @return true if valid, false if invalid
+	 */
+	int (*is_valid)(php_poll_handle_object *handle);
+
+	/**
+	 * Cleanup handle-specific data
+	 * @param handle The handle object
+	 */
+	void (*cleanup)(php_poll_handle_object *handle);
+};
+
+/* Base poll handle object structure */
+struct php_poll_handle_object {
+	php_poll_handle_ops *ops;
+	void *handle_data;
+	zend_object std;
+};
+
+#define PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(obj) \
+	((php_poll_handle_object *) ((char *) (obj) - XtOffsetOf(php_poll_handle_object, std)))
+
+#define PHP_POLL_HANDLE_OBJ_FROM_ZV(zv) PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(Z_OBJ_P(zv))
+
+/* Default operations */
+extern php_poll_handle_ops php_poll_handle_default_ops;
+
+/* Utility functions for extensions */
+PHPAPI php_poll_handle_object *php_poll_handle_object_create(
+		size_t obj_size, zend_class_entry *ce, php_poll_handle_ops *ops);
+PHPAPI void php_poll_handle_object_free(zend_object *obj);
+
+/* Get file descriptor from any poll handle */
+PHPAPI php_socket_t php_poll_handle_get_fd(php_poll_handle_object *handle);
 
 #endif /* PHP_POLL_H */

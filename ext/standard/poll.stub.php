@@ -6,37 +6,37 @@
  * @var int
  * @cvalue PHP_POLL_READ
  */
-const POLL_READ = UNKNOWN;
+const POLL_EVENT_READ = UNKNOWN;
 /**
  * @var int
  * @cvalue PHP_POLL_WRITE
  */
-const POLL_WRITE = UNKNOWN;
+const POLL_EVENT_WRITE = UNKNOWN;
 /**
  * @var int
  * @cvalue PHP_POLL_ERROR
  */
-const POLL_ERROR = UNKNOWN;
+const POLL_EVENT_ERROR = UNKNOWN;
 /**
  * @var int
  * @cvalue PHP_POLL_HUP
  */
-const POLL_HUP = UNKNOWN;
+const POLL_EVENT_HUP = UNKNOWN;
 /**
  * @var int
  * @cvalue PHP_POLL_RDHUP
  */
-const POLL_RDHUP = UNKNOWN;
+const POLL_EVENT_RDHUP = UNKNOWN;
 /**
  * @var int
  * @cvalue PHP_POLL_ONESHOT
  */
-const POLL_ONESHOT = UNKNOWN;
+const POLL_EVENT_ONESHOT = UNKNOWN;
 /**
  * @var int
  * @cvalue PHP_POLL_ET
  */
-const POLL_ET = UNKNOWN;
+const POLL_EVENT_ET = UNKNOWN;
 
 /**
  * @var int

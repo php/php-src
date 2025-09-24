@@ -44,7 +44,7 @@ PHP_MINFO_FUNCTION(basic);
 
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini);
 
-PHP_MINIT_FUNCTION(stream_poll);
+PHP_MINIT_FUNCTION(poll);
 PHP_MINIT_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(browscap);
