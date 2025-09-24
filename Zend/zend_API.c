@@ -430,7 +430,7 @@ ZEND_API ZEND_COLD void zend_argument_must_not_be_empty_error(uint32_t arg_num)
 	zend_argument_value_error(arg_num, "must not be empty");
 }
 
-ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, zend_class_entry *old_ce)
+ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, const zend_class_entry *old_ce)
 {
 	if (old_ce->type == ZEND_INTERNAL_CLASS) {
 		zend_error(type, "Cannot redeclare %s %s",
@@ -445,7 +445,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	}
 }
 
-ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, zend_class_entry *old_ce)
+ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_class_entry *old_ce)
 {
 	zend_class_redeclaration_error_ex(type, old_ce->name, old_ce);
 }
