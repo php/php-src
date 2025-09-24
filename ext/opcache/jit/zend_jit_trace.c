@@ -493,7 +493,7 @@ static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num,
 	 && func->type == ZEND_INTERNAL_FUNCTION
 	 && (func->internal_function.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0
 	 && arg_num < func->internal_function.num_args) {
-		const zend_internal_arg_info *arg_info = &func->internal_function.arg_info[arg_num];
+		const zend_arg_info *arg_info = &func->internal_function.arg_info[arg_num];
 
 		if (ZEND_ARG_SEND_MODE(arg_info) == ZEND_SEND_BY_VAL
 		 && ZEND_TYPE_IS_SET(arg_info->type)

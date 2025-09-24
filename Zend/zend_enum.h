@@ -30,6 +30,7 @@ extern ZEND_API zend_class_entry *zend_ce_unit_enum;
 extern ZEND_API zend_class_entry *zend_ce_backed_enum;
 extern ZEND_API zend_object_handlers zend_enum_object_handlers;
 
+void zend_enum_startup(void);
 void zend_register_enum_ce(void);
 void zend_enum_add_interfaces(zend_class_entry *ce);
 zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce);

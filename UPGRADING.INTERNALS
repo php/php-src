@@ -14,6 +14,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Core:
+  . zend_internal_function.arg_info is now a zend_arg_info*, like in
+    zend_op_array.
+
 ========================
 2. Build system changes
 ========================

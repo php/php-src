@@ -3689,21 +3689,10 @@ static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 
 static uint32_t zend_get_arg_num(zend_function *fn, zend_string *arg_name) {
 	// TODO: Caching?
-	if (fn->type == ZEND_USER_FUNCTION) {
-		for (uint32_t i = 0; i < fn->common.num_args; i++) {
-			zend_arg_info *arg_info = &fn->op_array.arg_info[i];
-			if (zend_string_equals(arg_info->name, arg_name)) {
-				return i + 1;
-			}
-		}
-	} else {
-		ZEND_ASSERT(fn->common.num_args == 0 || fn->internal_function.arg_info);
-		for (uint32_t i = 0; i < fn->common.num_args; i++) {
-			zend_internal_arg_info *arg_info = &fn->internal_function.arg_info[i];
-			size_t len = strlen(arg_info->name);
-			if (zend_string_equals_cstr(arg_name, arg_info->name, len)) {
-				return i + 1;
-			}
+	for (uint32_t i = 0; i < fn->common.num_args; i++) {
+		zend_arg_info *arg_info = &fn->op_array.arg_info[i];
+		if (zend_string_equals(arg_info->name, arg_name)) {
+			return i + 1;
 		}
 	}
 
@@ -4694,7 +4683,7 @@ static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *ar
 		if (i < args->children) {
 			zend_compile_expr(&arg_zvs[i], args->child[i]);
 		} else {
-			zend_internal_arg_info *arg_info = (zend_internal_arg_info *)&fbc->common.arg_info[i];
+			zend_arg_info *arg_info = &fbc->common.arg_info[i];
 			arg_zvs[i].op_type = IS_CONST;
 			if (zend_get_default_from_internal_arg_info(&arg_zvs[i].u.constant, arg_info) == FAILURE) {
 				ZEND_UNREACHABLE();
@@ -7839,6 +7828,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		arg_info = &arg_infos[i];
 		arg_info->name = zend_string_copy(name);
 		arg_info->type = (zend_type) ZEND_TYPE_INIT_NONE(0);
+		arg_info->default_value = NULL;
 
 		if (attributes_ast) {
 			zend_compile_attributes(
