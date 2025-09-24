@@ -5148,7 +5148,7 @@ ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv) /* {{{ */
+ZEND_API zval *zend_read_property_ex(const zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv) /* {{{ */
 {
 	zval *value;
 	const zend_class_entry *old_scope = EG(fake_scope);
@@ -5162,7 +5162,7 @@ ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *objec
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv) /* {{{ */
+ZEND_API zval *zend_read_property(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv) /* {{{ */
 {
 	zval *value;
 	zend_string *str;
