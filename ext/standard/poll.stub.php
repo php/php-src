@@ -113,7 +113,7 @@ final class PollWatcher
 
 final class PollContext
 {
-    public function __construct(int|string $backend = POLL_BACKEND_AUTO, bool $compat = false) {}
+    public function __construct(int|string $backend = POLL_BACKEND_AUTO) {}
 
     public function add(PollHandle $handle, int $events, mixed $data = null): PollWatcher {}
 
