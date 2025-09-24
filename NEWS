@@ -87,6 +87,8 @@ PHP                                                                        NEWS
   . Fixed handling of port numbers > 65535 with the internal
     `php_uri_parse_to_struct()` API. (timwolla)
   . Fix Uri\WhatWg\Url::withHost(). (timwolla)
+  . Fixed bug GH-19944 (validate Uri\WhatWg\Url::withPort() boundaries).
+    (alexandre-daubois)
 
 - Windows:
   . Fix GH-19722 (_get_osfhandle asserts in debug mode when given a socket).

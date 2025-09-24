@@ -214,6 +214,26 @@ static const char *fill_errors(zval *errors)
 	return result;
 }
 
+static void create_port_out_of_range_error(zval *error_array, const char *context)
+{
+	array_init(error_array);
+
+	zval error;
+	object_init_ex(&error, php_uri_ce_whatwg_url_validation_error);
+	zend_update_property_string(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("context"), context);
+
+	zval error_type;
+	zend_object *enum_obj = zend_enum_get_case_cstr(php_uri_ce_whatwg_url_validation_error_type, "PortOutOfRange");
+	ZVAL_OBJ(&error_type, enum_obj);
+	zend_update_property(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("type"), &error_type);
+
+	zval failure;
+	ZVAL_TRUE(&failure);
+	zend_update_property(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("failure"), &failure);
+
+	add_index_zval(error_array, 0, &error);
+}
+
 static void throw_invalid_url_exception_during_write(zval *errors, const char *component)
 {
 	zval err;
@@ -227,6 +247,27 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 		reason ? reason : "",
 		reason ? ")" : ""
 	);
+	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
+	if (errors) {
+		zval_ptr_dtor(errors);
+		ZVAL_COPY_VALUE(errors, &err);
+	} else {
+		zval_ptr_dtor(&err);
+	}
+}
+
+static void throw_port_out_of_range_exception(zval *errors, const char *context)
+{
+	zval err;
+	create_port_out_of_range_error(&err, context);
+
+	zend_object *exception = zend_throw_exception_ex(
+		php_uri_ce_whatwg_invalid_url_exception,
+		0,
+		"The specified %s is malformed (PortOutOfRange)",
+		"port"
+	);
+
 	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &err);
 	if (errors) {
 		zval_ptr_dtor(errors);
@@ -409,6 +450,17 @@ static zend_result php_uri_parser_whatwg_port_write(void *uri, zval *value, zval
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
+
+	if (Z_TYPE_P(value) == IS_LONG) {
+		zend_long port = Z_LVAL_P(value);
+		if (port < 0 || port > 65535) {
+			char context[32];
+			snprintf(context, sizeof(context), ZEND_LONG_FMT, port);
+			throw_port_out_of_range_exception(errors, context);
+
+			return FAILURE;
+		}
+	}
 
 	zval_long_or_null_to_lexbor_str(value, &str);
 
