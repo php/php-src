@@ -39,7 +39,7 @@ $d = $staticScoped->bindTo(new A, 'A');
 
 echo "Done.\n";
 ?>
---EXPECTF--
+--EXPECT--
 Before binding
 bool(false)
 bool(false)
@@ -55,10 +55,6 @@ bool(false)
 bool(false)
 
 After binding, null scope, with instance
-
-Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
-
-Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
 After binding, with scope, no instance
 bool(true)
 bool(false)
@@ -67,8 +63,4 @@ bool(true)
 bool(false)
 
 After binding, with scope, with instance
-
-Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
-
-Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d
 Done.

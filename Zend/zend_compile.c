@@ -345,6 +345,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_arra
 	CG(context).in_jmp_frameless_branch = false;
 	CG(context).active_property_info_name = NULL;
 	CG(context).active_property_hook_kind = (zend_property_hook_kind)-1;
+	CG(context).closure_may_use_this = false;
 }
 /* }}} */
 
@@ -4022,6 +4023,8 @@ static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast 
 			zend_string *method = zend_string_init(colon + 1, ZSTR_LEN(str) - (colon - ZSTR_VAL(str)) - 1, 0);
 			zend_op *opline = get_next_op();
 
+			CG(context).closure_may_use_this = true;
+
 			opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 			opline->op1_type = IS_CONST;
 			opline->op1.constant = zend_add_class_name_literal(class);
@@ -4731,6 +4734,12 @@ static uint32_t zend_compile_frameless_icall(znode *result, zend_ast_list *args,
 static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno, uint32_t type) /* {{{ */
 {
 	int name_constants = zend_add_ns_func_name_literal(Z_STR(name_node->u.constant));
+	zend_string *lc_func_name = Z_STR_P(CT_CONSTANT_EX(CG(active_op_array), name_constants + 2));
+
+	if (zend_string_equals_literal(lc_func_name, "call_user_func")
+	 || zend_string_equals_literal(lc_func_name, "call_user_func_array")) {
+		CG(context).closure_may_use_this = true;
+	}
 
 	/* Find frameless function with same name. */
 	zend_function *frameless_function = NULL;
@@ -4738,7 +4747,6 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 	 && !zend_args_contain_unpack_or_named(zend_ast_get_list(args_ast))
 	 /* Avoid blowing up op count with nested frameless branches. */
 	 && !CG(context).in_jmp_frameless_branch) {
-		zend_string *lc_func_name = Z_STR_P(CT_CONSTANT_EX(CG(active_op_array), name_constants + 2));
 		frameless_function = zend_hash_find_ptr(CG(function_table), lc_func_name);
 	}
 
@@ -5166,6 +5174,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		zend_compile_expr(&name_node, name_ast);
 		zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno);
+		CG(context).closure_may_use_this = true;
 		return;
 	}
 
@@ -5198,6 +5207,9 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
 			return;
+		} else if (fbc && (zend_string_equals_literal(lcname, "call_user_func")
+		  || zend_string_equals_literal(lcname, "call_user_func_array"))) {
+			CG(context).closure_may_use_this = true;
 		}
 
 		if (!fbc
@@ -5355,6 +5367,8 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 			method_node.op_type = IS_UNUSED;
 		}
 	}
+
+	CG(context).closure_may_use_this = true;
 
 	opline = get_next_op();
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
@@ -8413,6 +8427,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 				opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
 				opline->op2.num = func_ref;
+				opline->extended_value = (uint32_t)-1;
 			} else {
 				opline = get_next_op();
 				opline->opcode = ZEND_DECLARE_FUNCTION;
@@ -8594,6 +8609,27 @@ static zend_op_array *zend_compile_func_decl_ex(
 	}
 
 	zend_compile_stmt(stmt_ast);
+
+	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
+		/* Attempt to infer static for closures that don't use $this. */
+		if (!(op_array->fn_flags & ZEND_ACC_USES_THIS)
+		 && !CG(context).closure_may_use_this
+		 && !info.varvars_used) {
+			op_array->fn_flags |= ZEND_ACC_STATIC;
+		}
+
+		zend_op_array *declaring_op_array = orig_oparray_context.op_array;
+
+		if ((op_array->fn_flags & ZEND_ACC_STATIC)
+		 && !op_array->static_variables
+		 && declaring_op_array->last) {
+			zend_op *declare_lambda_op = &declaring_op_array->opcodes[declaring_op_array->last - 1];
+			if (declare_lambda_op->opcode == ZEND_DECLARE_LAMBDA_FUNCTION) {
+				declare_lambda_op->extended_value = declaring_op_array->cache_size;
+				declaring_op_array->cache_size += sizeof(void *);
+			}
+		}
+	}
 
 	if (is_method) {
 		CG(zend_lineno) = decl->start_lineno;
@@ -11924,6 +11960,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_ARROW_FUNC:
+			CG(context).closure_may_use_this = true;
 			zend_compile_func_decl(result, ast, FUNC_DECL_LEVEL_NESTED);
 			return;
 		case ZEND_AST_THROW:
