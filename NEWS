@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC5
 
+- Core:
+  . Fixed bug GH-17951 (memory_limit is not always limited by max_memory_limit).
+    (manuelm)
 
 06 Nov 2025, PHP 8.5.0RC4
 
