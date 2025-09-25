@@ -447,12 +447,12 @@ ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const cha
 
 ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, const zend_string *name, zend_class_entry *scope);
 ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type);
-ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_type);
+ZEND_API HashTable *zend_separate_class_constants_table(const zend_class_entry *class_type);
 
-static zend_always_inline HashTable *zend_class_constants_table(zend_class_entry *ce) {
+static zend_always_inline const HashTable *zend_class_constants_table(const zend_class_entry *ce) {
 	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS) && ZEND_MAP_PTR(ce->mutable_data)) {
-		zend_class_mutable_data *mutable_data =
-			(zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
+		const zend_class_mutable_data *mutable_data =
+			(const zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 		if (mutable_data && mutable_data->constants_table) {
 			return mutable_data->constants_table;
 		} else {
@@ -463,10 +463,10 @@ static zend_always_inline HashTable *zend_class_constants_table(zend_class_entry
 	}
 }
 
-static zend_always_inline zval *zend_class_default_properties_table(zend_class_entry *ce) {
+static zend_always_inline zval *zend_class_default_properties_table(const zend_class_entry *ce) {
 	if ((ce->ce_flags & ZEND_ACC_HAS_AST_PROPERTIES) && ZEND_MAP_PTR(ce->mutable_data)) {
-		zend_class_mutable_data *mutable_data =
-			(zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
+		const zend_class_mutable_data *mutable_data =
+			(const zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 		return mutable_data->default_properties_table;
 	} else {
 		return ce->default_properties_table;
@@ -483,10 +483,10 @@ static zend_always_inline void zend_class_set_backed_enum_table(zend_class_entry
 	}
 }
 
-static zend_always_inline HashTable *zend_class_backed_enum_table(zend_class_entry *ce)
+static zend_always_inline HashTable *zend_class_backed_enum_table(const zend_class_entry *ce)
 {
 	if (ZEND_MAP_PTR(ce->mutable_data) && ce->type == ZEND_USER_CLASS) {
-		zend_class_mutable_data *mutable_data = (zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
+		const zend_class_mutable_data *mutable_data = (const zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 		return mutable_data->backed_enum_table;
 	} else {
 		return ce->backed_enum_table;
