@@ -519,7 +519,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 						PDO_DBG_RETURN(1);
 
 					case IS_LONG:
-						b->buffer_type = MYSQL_TYPE_LONG;
+						b->buffer_type = MYSQL_TYPE_LONGLONG;
 						b->buffer = &Z_LVAL_P(parameter);
 						PDO_DBG_RETURN(1);
 
