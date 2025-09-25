@@ -13,10 +13,10 @@ spl_autoload_register(function ($class) {
 
 class Foo
 {
-    function __serialize()
+    function __sleep()
     {
         new Bar;
-        return [];
+        return array();
     }
 }
 

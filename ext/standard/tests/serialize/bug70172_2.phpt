@@ -48,7 +48,7 @@ function ptr2str($ptr)
 }
 ?>
 --EXPECTF--
-Deprecated: obj implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 array(2) {
   [0]=>
   object(obj2)#%d (1) {

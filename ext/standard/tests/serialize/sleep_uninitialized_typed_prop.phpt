@@ -32,8 +32,7 @@ var_dump(unserialize(serialize($t)) == $t);
 
 var_dump($t);
 ?>
---EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+--EXPECT--
 string(15) "O:4:"Test":0:{}"
 bool(true)
 bool(true)
