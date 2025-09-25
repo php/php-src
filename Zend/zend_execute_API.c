@@ -125,6 +125,14 @@ static int clean_non_persistent_class_full(zval *zv) /* {{{ */
 }
 /* }}} */
 
+static void callable_convert_dtor(zval *object_ptr)
+{
+	zend_object *object = Z_PTR_P(object_ptr);
+	if (zend_gc_delref(&object->gc) == 0) {
+		zend_objects_store_del(object);
+	}
+}
+
 void init_executor(void) /* {{{ */
 {
 	zend_init_fpu();
@@ -202,6 +210,8 @@ void init_executor(void) /* {{{ */
 	zend_max_execution_timer_init();
 	zend_fiber_init();
 	zend_weakrefs_init();
+
+	zend_hash_init(&EG(callable_convert_cache), 8, NULL, callable_convert_dtor, 0);
 
 	EG(active) = 1;
 }
@@ -420,6 +430,8 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
+		zend_hash_clean(&EG(callable_convert_cache));
+
 #if ZEND_DEBUG
 		if (!CG(unclean_shutdown)) {
 			gc_collect_cycles();
@@ -516,6 +528,8 @@ void shutdown_executor(void) /* {{{ */
 		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
 			efree(EG(ht_iterators));
 		}
+
+		zend_hash_destroy(&EG(callable_convert_cache));
 	}
 
 #if ZEND_DEBUG
