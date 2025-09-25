@@ -373,12 +373,6 @@ static char* sapi_cli_read_cookies(void) /* {{{ */
 }
 /* }}} */
 
-static int sapi_cli_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s) /* {{{ */
-{
-	return 0;
-}
-/* }}} */
-
 static int sapi_cli_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 {
 	/* We do nothing here, this function is needed to prevent that the fallback
@@ -430,7 +424,7 @@ static sapi_module_struct cli_sapi_module = {
 
 	php_error,						/* error handler */
 
-	sapi_cli_header_handler,		/* header handler */
+	NULL,							/* header handler */
 	sapi_cli_send_headers,			/* send headers handler */
 	sapi_cli_send_header,			/* send header handler */
 
