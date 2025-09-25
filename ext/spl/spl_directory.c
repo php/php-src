@@ -2166,6 +2166,29 @@ PHP_METHOD(SplFileObject, valid)
 	if (!intern->u.file.stream) {
 		RETURN_FALSE;
 	}
+
+	/* For empty files, php_stream_eof() might not return TRUE until after a read attempt.
+	 * If we're at the beginning and haven't read anything, check EOF directly after ensuring
+	 * a read has been attempted (only on seekable streams). */
+	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval) &&
+		intern->u.file.current_line_num == 0) {
+
+		if (intern->u.file.stream->ops->seek &&
+			(intern->u.file.stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+
+			if (php_stream_eof(intern->u.file.stream)) {
+				RETURN_FALSE;
+			}
+
+			if (php_stream_tell(intern->u.file.stream) == 0) {
+				php_stream_statbuf ssb;
+				if (php_stream_stat(intern->u.file.stream, &ssb) == 0 && ssb.sb.st_size == 0) {
+					RETURN_FALSE;
+				}
+			}
+		}
+	}
+
 	RETURN_BOOL(!php_stream_eof(intern->u.file.stream));
 } /* }}} */
 
