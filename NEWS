@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed GH-19885 (dba_fetch() overflow on skip argument). (David Carlier)
 
+- GD:
+  . FIxed GH-19955 (imagefttext() memory leak). (David Carlier)
+
 - SimpleXML:
   . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
     (nielsdos)
