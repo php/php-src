@@ -229,7 +229,7 @@ static void zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static ZEND_COLD void zend_throw_or_error(int fetch_type, zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
+static ZEND_COLD void zend_throw_or_error(uint32_t fetch_type, zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
