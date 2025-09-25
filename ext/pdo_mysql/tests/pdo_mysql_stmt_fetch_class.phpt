@@ -110,8 +110,6 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_stmt_fetch_class');
 ?>
 --EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
 Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 Creating an object, serializing it and writing it to DB...
 myclass::singleton(Creating object)
