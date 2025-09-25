@@ -75,8 +75,6 @@ function check(myObjC $obj) {
 ?>
 --EXPECTF--
 Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
-Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 SCRIPT START
 check successful
 start serialize/unserialize

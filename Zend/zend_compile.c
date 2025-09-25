@@ -9359,10 +9359,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		zend_error(E_DEPRECATED, "The __sleep() serialization magic method has been deprecated."
 			" Implement __serialize() instead (or in addition, if support for old PHP versions is necessary)");
 	}
-	if (ce->__unserialize == NULL && zend_hash_exists(&ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP))) {
-		zend_error(E_DEPRECATED, "The __wakeup() serialization magic method has been deprecated."
-			" Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary)");
-	}
 
 	/* We currently don't early-bind classes that implement interfaces or use traits */
 	if (!ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
