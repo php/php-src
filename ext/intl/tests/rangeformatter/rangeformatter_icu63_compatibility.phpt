@@ -1,5 +1,7 @@
 --TEST--
 Test IntlNumberRangeFormatter::createFromSkeleton throws error for ICU < 63
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
 if (version_compare(INTL_ICU_VERSION, '63.0') >= 0) {
