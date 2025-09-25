@@ -21,8 +21,6 @@ var_dump(serialize(new Test));
 
 ?>
 --EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
 Warning: serialize(): "pub" returned as member variable from __sleep() but does not exist in %s on line %d
 
 Warning: serialize(): "prot" returned as member variable from __sleep() but does not exist in %s on line %d

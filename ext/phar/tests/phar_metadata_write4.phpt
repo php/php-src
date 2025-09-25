@@ -68,7 +68,6 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php.copy.php');
 ?>
 --EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 In __destruct 1
 string(1) "a"
 Loading metadata for 'a' without allowed_classes
