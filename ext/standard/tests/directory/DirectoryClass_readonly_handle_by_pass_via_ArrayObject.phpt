@@ -28,7 +28,8 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
 resource(3) of type (stream)
 Error: Internal directory stream has been altered
 Error: Typed property Directory::$handle must not be accessed before initialization

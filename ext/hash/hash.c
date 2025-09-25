@@ -577,13 +577,13 @@ PHP_FUNCTION(hash_hmac)
 	zend_string *algo;
 	char *data, *key;
 	size_t data_len, key_len;
-	bool raw_output = 0;
+	bool raw_output = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 0);
+	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, false);
 }
 /* }}} */
 
@@ -594,13 +594,13 @@ PHP_FUNCTION(hash_hmac_file)
 	zend_string *algo;
 	char *data, *key;
 	size_t data_len, key_len;
-	bool raw_output = 0;
+	bool raw_output = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 1);
+	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, true);
 }
 /* }}} */
 
@@ -778,7 +778,7 @@ PHP_FUNCTION(hash_final)
 {
 	zval *zhash;
 	php_hashcontext_object *hash;
-	bool raw_output = 0;
+	bool raw_output = false;
 	zend_string *digest;
 	size_t digest_len;
 
@@ -989,7 +989,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
 	zend_long loops, i, j, iterations, digest_length = 0, length = 0;
 	size_t pass_len, salt_len = 0;
-	bool raw_output = 0;
+	bool raw_output = false;
 	const php_hash_ops *ops;
 	void *context;
 	HashTable *args = NULL;
@@ -1178,6 +1178,7 @@ static void mhash_init(INIT_FUNC_ARGS)
 	int len;
 	int algo_number = 0;
 
+	zend_string *deprecation_reason = zend_string_init("as the mhash*() functions were deprecated", strlen("as the mhash*() functions were deprecated"), 1);
 	for (algo_number = 0; algo_number < MHASH_NUM_ALGOS; algo_number++) {
 		struct mhash_bc_entry algorithm = mhash_to_hash[algo_number];
 		if (algorithm.mhash_name == NULL) {
@@ -1185,8 +1186,18 @@ static void mhash_init(INIT_FUNC_ARGS)
 		}
 
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name);
-		zend_register_long_constant(buf, len, algorithm.value, CONST_PERSISTENT|CONST_DEPRECATED, module_number);
+		zend_constant *mhash_const = zend_register_long_constant(buf, len, algorithm.value, CONST_PERSISTENT|CONST_DEPRECATED, module_number);
+
+		zend_attribute *deprecation_attrib = zend_add_global_constant_attribute(mhash_const, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+		ZVAL_STR(&deprecation_attrib->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+		deprecation_attrib->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+		ZVAL_STR_COPY(&deprecation_attrib->args[1].value, deprecation_reason);
+		deprecation_attrib->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 	}
+	/* Each of the attributes uses ZVAL_STR_COPY instead of trying to special
+	 * case one of them to use ZVAL_STR, but that means there is one more
+	 * reference that needs to be decremented. */
+	zend_string_release(deprecation_reason);
 
 	/* TODO: this cause #69823 zend_register_internal_module(&mhash_module_entry); */
 }
@@ -1216,9 +1227,9 @@ PHP_FUNCTION(mhash)
 	}
 
 	if (key) {
-		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, 1, 0);
+		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, true, false);
 	} else {
-		php_hash_do_hash(return_value, algo, data, data_len, 1, 0, NULL);
+		php_hash_do_hash(return_value, algo, data, data_len, true, false, NULL);
 	}
 
 	if (algo) {

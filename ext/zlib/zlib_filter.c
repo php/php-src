@@ -238,7 +238,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 		status = Z_OK;
 		while (status == Z_OK) {
 			status = deflate(&(data->strm), (flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FINISH : Z_SYNC_FLUSH));
-			data->finished = 1;
+			data->finished = true;
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
@@ -335,7 +335,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 		}
 
 		/* RFC 1951 Inflate */
-		data->finished = '\0';
+		data->finished = false;
 		status = inflateInit2(&(data->strm), windowBits);
 		fops = &php_zlib_inflate_ops;
 	} else if (strcasecmp(filtername, "zlib.deflate") == 0) {
@@ -399,7 +399,7 @@ factory_setlevel:
 			}
 		}
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);
-		data->finished = 1;
+		data->finished = true;
 		fops = &php_zlib_deflate_ops;
 	} else {
 		status = Z_DATA_ERROR;

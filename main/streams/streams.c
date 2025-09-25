@@ -28,6 +28,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
+#include "ext/uri/php_uri.h"
 #include <stddef.h>
 #include <fcntl.h>
 #include "php_streams_int.h"
@@ -630,6 +631,12 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* when a filter needs feeding, there is no brig_out to deal with.
 					 * we simply continue the loop; if the caller needs more data,
 					 * we will read again, otherwise out job is done here */
+
+					/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
+					while ((bucket = brig_outp->head)) {
+						php_stream_bucket_unlink(bucket);
+						php_stream_bucket_delref(bucket);
+					}
 					break;
 
 				case PSFS_ERR_FATAL:
@@ -1263,14 +1270,22 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 				php_stream_bucket_delref(bucket);
 			}
 			break;
-		case PSFS_FEED_ME:
-			/* need more data before we can push data through to the stream */
-			break;
 
 		case PSFS_ERR_FATAL:
 			/* some fatal error.  Theoretically, the stream is borked, so all
 			 * further writes should fail. */
-			return (ssize_t) -1;
+			consumed = (ssize_t) -1;
+			ZEND_FALLTHROUGH;
+
+		case PSFS_FEED_ME:
+			/* need more data before we can push data through to the stream */
+			/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
+			while (brig_inp->head) {
+				bucket = brig_inp->head;
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
+			break;
 	}
 
 	return consumed;
@@ -2456,6 +2471,24 @@ void php_stream_context_unset_option(php_stream_context *context,
 	zend_hash_str_del(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname));
 }
 /* }}} */
+
+PHPAPI const struct php_uri_parser *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context)
+{
+	if (context == NULL) {
+		return php_uri_get_parser(NULL);
+	}
+
+	zval *uri_parser_name = php_stream_context_get_option(context, wrappername, "uri_parser_class");
+	if (uri_parser_name == NULL || Z_TYPE_P(uri_parser_name) == IS_NULL) {
+		return php_uri_get_parser(NULL);
+	}
+
+	if (Z_TYPE_P(uri_parser_name) != IS_STRING) {
+		return NULL;
+	}
+
+	return php_uri_get_parser(Z_STR_P(uri_parser_name));
+}
 
 /* {{{ php_stream_dirent_alphasort */
 PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b)

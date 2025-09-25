@@ -859,7 +859,7 @@ static int fpm_conf_process_all_pools(void)
 
 		/* alert if user is not set; only if we are root and fpm is not running with --allow-to-run-as-root */
 		if (!wp->config->user && !geteuid() && !fpm_globals.run_as_root) {
-			zlog(ZLOG_ALERT, "[pool %s] user has not been defined", wp->config->name);
+			zlog(ZLOG_ALERT, "[pool %s] 'user' directive has not been specified when running as a root without --allow-to-run-as-root", wp->config->name);
 			return -1;
 		}
 

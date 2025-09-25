@@ -134,6 +134,8 @@ $db->query('DROP TABLE IF EXISTS test_copy_from CASCADE');
 --EXPECTF--
 Preparing test file and array for CopyFrom tests
 Testing pgsqlCopyFromArray() with default parameters
+
+Deprecated: Method PDO::pgsqlCopyFromArray() is deprecated since 8.5, use Pdo\Pgsql::copyFromArray() instead in %s on line %d
 bool(true)
 array(6) {
   ["a"]=>
@@ -178,6 +180,8 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromArray() with different field separator and not null indicator
+
+Deprecated: Method PDO::pgsqlCopyFromArray() is deprecated since 8.5, use Pdo\Pgsql::copyFromArray() instead in %s on line %d
 bool(true)
 array(6) {
   ["a"]=>
@@ -222,6 +226,8 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromArray() with only selected fields
+
+Deprecated: Method PDO::pgsqlCopyFromArray() is deprecated since 8.5, use Pdo\Pgsql::copyFromArray() instead in %s on line %d
 bool(true)
 array(6) {
   ["a"]=>
@@ -266,8 +272,12 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromArray() with error
+
+Deprecated: Method PDO::pgsqlCopyFromArray() is deprecated since 8.5, use Pdo\Pgsql::copyFromArray() instead in %s on line %d
 Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyFromFile() with default parameters
+
+Deprecated: Method PDO::pgsqlCopyFromFile() is deprecated since 8.5, use Pdo\Pgsql::copyFromFile() instead in %s on line %d
 bool(true)
 array(6) {
   ["a"]=>
@@ -312,6 +322,8 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromFile() with different field separator and not null indicator
+
+Deprecated: Method PDO::pgsqlCopyFromFile() is deprecated since 8.5, use Pdo\Pgsql::copyFromFile() instead in %s on line %d
 bool(true)
 array(6) {
   ["a"]=>
@@ -356,6 +368,8 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromFile() with only selected fields
+
+Deprecated: Method PDO::pgsqlCopyFromFile() is deprecated since 8.5, use Pdo\Pgsql::copyFromFile() instead in %s on line %d
 bool(true)
 array(6) {
   ["a"]=>
@@ -400,6 +414,10 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromFile() with error
+
+Deprecated: Method PDO::pgsqlCopyFromFile() is deprecated since 8.5, use Pdo\Pgsql::copyFromFile() instead in %s on line %d
 Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyFromFile() with non existing file
+
+Deprecated: Method PDO::pgsqlCopyFromFile() is deprecated since 8.5, use Pdo\Pgsql::copyFromFile() instead in %s on line %d
 Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file

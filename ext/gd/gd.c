@@ -34,6 +34,7 @@
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
 #include "php_memory_streams.h"
+#include "zend_attributes.h"
 #include "zend_object_handlers.h"
 
 #ifdef HAVE_SYS_WAIT_H
@@ -817,6 +818,11 @@ PHP_FUNCTION(imagefilledellipse)
 		Z_PARAM_LONG(h)
 		Z_PARAM_LONG(color)
 	ZEND_PARSE_PARAMETERS_END();
+
+    if (w < 0 || ZEND_LONG_INT_OVFL(w)) {
+        zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
+        RETURN_THROWS();
+    }
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 

@@ -1,7 +1,7 @@
 name: Push
 on:
   push:
-    paths-ignore:
+    paths-ignore: &ignore_paths
       - docs/**
       - NEWS
       - UPGRADING
@@ -18,16 +18,7 @@ on:
       - PHP-8.4
       - master
   pull_request:
-    paths-ignore:
-      - docs/**
-      - NEWS
-      - UPGRADING
-      - UPGRADING.INTERNALS
-      - '**/README.*'
-      - CONTRIBUTING.md
-      - CODING_STANDARDS.md
-      - .cirrus.yml
-      - .circleci/**
+    paths-ignore: *ignore_paths
     branches:
       - '**'
   workflow_dispatch: ~
@@ -82,7 +73,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: System info
@@ -112,6 +103,7 @@ jobs:
         with:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            ${{ matrix.debug && 'CXXFLAGS="-D_GLIBCXX_ASSERTIONS"' || '' }}
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
             ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang CXX=clang++' || '' }}
           skipSlow: ${{ matrix.asan }}
@@ -166,7 +158,7 @@ jobs:
           FIREBIRD_PASSWORD: test
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: ccache
@@ -203,7 +195,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: brew
         uses: ./.github/actions/brew
       - name: ccache
@@ -239,7 +231,7 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
       PHP_BUILD_CRT: vs17
       PLATFORM: x64
       THREAD_SAFE: "1"
@@ -250,7 +242,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
@@ -264,7 +256,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
@@ -326,7 +318,7 @@ jobs:
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
       - name: git checkout benchmarking-data
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: php/benchmarking-data
           ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
@@ -366,8 +358,9 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: FREEBSD
     runs-on: ubuntu-latest
+    timeout-minutes: 50
     steps:
       - name: git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: FreeBSD
         uses: ./.github/actions/freebsd

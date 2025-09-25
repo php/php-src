@@ -240,21 +240,21 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 	/* Rename def to use if possible. Mark variable as not defined otherwise. */
 	if (ssa_op->op1_def >= 0) {
 		if (ssa_op->op1_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->op1_def, ssa_op->op1_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->op1_def, ssa_op->op1_use, true);
 		}
 		ssa->vars[ssa_op->op1_def].definition = -1;
 		ssa_op->op1_def = -1;
 	}
 	if (ssa_op->op2_def >= 0) {
 		if (ssa_op->op2_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->op2_def, ssa_op->op2_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->op2_def, ssa_op->op2_use, true);
 		}
 		ssa->vars[ssa_op->op2_def].definition = -1;
 		ssa_op->op2_def = -1;
 	}
 	if (ssa_op->result_def >= 0) {
 		if (ssa_op->result_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->result_def, ssa_op->result_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->result_def, ssa_op->result_use, true);
 		}
 		ssa->vars[ssa_op->result_def].definition = -1;
 		ssa_op->result_def = -1;

@@ -628,7 +628,6 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 			   can be used for simple glob() calls without further error
 			   checking.
 			*/
-			array_init(return_value);
 			return 0;
 		}
 #endif
@@ -637,7 +636,6 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
-		array_init(return_value);
 		return 0;
 	}
 
@@ -1744,7 +1742,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					basename = php_basename(Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), NULL, 0);
 					file_stripped = ZSTR_VAL(basename);
 					file_stripped_len = ZSTR_LEN(basename);
-				} else if (opts.remove_path && !memcmp(Z_STRVAL_P(zval_file), opts.remove_path, opts.remove_path_len)) {
+				} else if (opts.remove_path && Z_STRLEN_P(zval_file) > opts.remove_path_len && !memcmp(Z_STRVAL_P(zval_file), opts.remove_path, opts.remove_path_len)) {
 					if (IS_SLASH(Z_STRVAL_P(zval_file)[opts.remove_path_len])) {
 						file_stripped = Z_STRVAL_P(zval_file) + opts.remove_path_len + 1;
 						file_stripped_len = Z_STRLEN_P(zval_file) - opts.remove_path_len - 1;
@@ -3087,7 +3085,7 @@ PHP_METHOD(ZipArchive, registerCancelCallback)
 PHP_METHOD(ZipArchive, isCompressionMethodSupported)
 {
 	zend_long method;
-	bool enc = 1;
+	bool enc = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|b", &method, &enc) == FAILURE) {
 		return;
@@ -3100,7 +3098,7 @@ PHP_METHOD(ZipArchive, isCompressionMethodSupported)
 PHP_METHOD(ZipArchive, isEncryptionMethodSupported)
 {
 	zend_long method;
-	bool enc = 1;
+	bool enc = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|b", &method, &enc) == FAILURE) {
 		return;

@@ -496,7 +496,7 @@ static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	zend_internal_iterator *intern = emalloc(sizeof(zend_internal_iterator));
 	zend_object_std_init(&intern->std, ce);
 	intern->iter = NULL;
-	intern->rewind_called = 0;
+	intern->rewind_called = false;
 	return &intern->std;
 }
 
@@ -537,7 +537,7 @@ static zend_internal_iterator *zend_internal_iterator_fetch(zval *This) {
 static zend_result zend_internal_iterator_ensure_rewound(zend_internal_iterator *intern) {
 	if (!intern->rewind_called) {
 		zend_object_iterator *iter = intern->iter;
-		intern->rewind_called = 1;
+		intern->rewind_called = true;
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter);
 			if (UNEXPECTED(EG(exception))) {
@@ -630,7 +630,7 @@ ZEND_METHOD(InternalIterator, rewind) {
 		RETURN_THROWS();
 	}
 
-	intern->rewind_called = 1;
+	intern->rewind_called = true;
 	if (!intern->iter->funcs->rewind) {
 		/* Allow calling rewind() if no iteration has happened yet,
 		 * even if the iterator does not support rewinding. */

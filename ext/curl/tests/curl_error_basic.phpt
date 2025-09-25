@@ -33,8 +33,6 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 curl_exec($ch);
 var_dump(curl_error($ch));
-curl_close($ch);
-
 ?>
 --EXPECTF--
 == Testing curl_error with a fake URL ==

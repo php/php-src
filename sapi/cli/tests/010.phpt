@@ -31,7 +31,7 @@ hello';
 
 file_put_contents($filename_txt, $txt);
 
-var_dump(`cat $filename_txt_escaped | $php -n -F $filename_escaped`);
+var_dump(shell_exec("cat $filename_txt_escaped | $php -n -F $filename_escaped"));
 
 ?>
 --CLEAN--

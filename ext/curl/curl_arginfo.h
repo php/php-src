@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 682d257b0235e5f6f81ffe3ddf563f384125a271 */
+ * Stub hash: 2a2772e99deea07c0bc148e9715e6a960230cf4d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -185,7 +185,7 @@ ZEND_FUNCTION(curl_strerror);
 ZEND_FUNCTION(curl_version);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(curl_close, arginfo_curl_close)
+	ZEND_RAW_FENTRY("curl_close", zif_curl_close, arginfo_curl_close, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(curl_copy_handle, arginfo_curl_copy_handle)
 	ZEND_FE(curl_errno, arginfo_curl_errno)
 	ZEND_FE(curl_error, arginfo_curl_error)
@@ -214,7 +214,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_reset, arginfo_curl_reset)
 	ZEND_FE(curl_setopt_array, arginfo_curl_setopt_array)
 	ZEND_FE(curl_setopt, arginfo_curl_setopt)
-	ZEND_FE(curl_share_close, arginfo_curl_share_close)
+	ZEND_RAW_FENTRY("curl_share_close", zif_curl_share_close, arginfo_curl_share_close, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(curl_share_errno, arginfo_curl_share_errno)
 	ZEND_FE(curl_share_init, arginfo_curl_share_init)
 	ZEND_FE(curl_share_setopt, arginfo_curl_share_setopt)
@@ -985,6 +985,19 @@ static void register_curl_symbols(int module_number)
 #endif
 	REGISTER_LONG_CONSTANT("CURLOPT_SAFE_UPLOAD", CURLOPT_SAFE_UPLOAD, CONST_PERSISTENT);
 
+
+	zend_attribute *attribute_Deprecated_func_curl_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "curl_close", sizeof("curl_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_curl_close_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_curl_close_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_curl_close_0_arg1_str = zend_string_init("as it has no effect since PHP 8.0", strlen("as it has no effect since PHP 8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_curl_close_0->args[1].value, attribute_Deprecated_func_curl_close_0_arg1_str);
+	attribute_Deprecated_func_curl_close_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_curl_share_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "curl_share_close", sizeof("curl_share_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_curl_share_close_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_5));
+	attribute_Deprecated_func_curl_share_close_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_curl_share_close_0->args[1].value, attribute_Deprecated_func_curl_close_0_arg1_str);
+	attribute_Deprecated_func_curl_share_close_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0 = zend_add_global_constant_attribute(const_CURLOPT_BINARYTRANSFER, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));

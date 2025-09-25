@@ -66,6 +66,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_functi
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(const zend_function *fbc);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_constant *c, const zend_string *constant_name);
+ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(zend_class_entry *trait, const zend_string *used_by);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void);
 ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim);
@@ -233,6 +234,9 @@ static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr
 		}
 		Z_OBJ_P(result)->properties = ht;
 	} else if (Z_TYPE_P(expr) != IS_NULL) {
+		if (UNEXPECTED(Z_TYPE_P(expr) == IS_DOUBLE && zend_isnan(Z_DVAL_P(expr)))) {
+			zend_nan_coerced_to_type_warning(IS_OBJECT);
+		}
 		Z_OBJ_P(result)->properties = ht = zend_new_array(1);
 		expr = zend_hash_add_new(ht, ZSTR_KNOWN(ZEND_STR_SCALAR), expr);
 		if (op1_type == IS_CONST) {
@@ -247,6 +251,9 @@ static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr,
 	extern zend_class_entry *zend_ce_closure;
 	if (op1_type == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 		if (Z_TYPE_P(expr) != IS_NULL) {
+			if (UNEXPECTED(Z_TYPE_P(expr) == IS_DOUBLE && zend_isnan(Z_DVAL_P(expr)))) {
+				zend_nan_coerced_to_type_warning(IS_ARRAY);
+			}
 			ZVAL_ARR(result, zend_new_array(1));
 			expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
 			if (op1_type == IS_CONST) {

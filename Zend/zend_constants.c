@@ -487,6 +487,9 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			CONST_PROTECT_RECURSION(c);
 			zend_deprecated_constant(c, c->name);
 			CONST_UNPROTECT_RECURSION(c);
+			if (UNEXPECTED(EG(exception))) {
+				return NULL;
+			}
 		}
 	}
 	return &c->value;
@@ -541,7 +544,7 @@ ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
 		|| (ret = zend_hash_add_constant(EG(zend_constants), name, c)) == NULL
 	) {
-		zend_error(E_WARNING, "Constant %s already defined", ZSTR_VAL(name));
+		zend_error(E_WARNING, "Constant %s already defined, this will be an error in PHP 9", ZSTR_VAL(name));
 		zend_string_release(c->name);
 		if (c->filename) {
 			zend_string_release(c->filename);

@@ -6,7 +6,7 @@ pdo_dblib
 <?php
 require __DIR__ . '/config.inc';
 $db = getDbConnection();
-if (in_array($db->getAttribute(PDO::DBLIB_ATTR_TDS_VERSION), ['4.2', '4.6', '5.0', '6.0', '7.0', '7.1', '7.2'])) die('skip feature unsupported by this TDS version');
+if (in_array($db->getAttribute(Pdo\Dblib::ATTR_TDS_VERSION), ['4.2', '4.6', '5.0', '6.0', '7.0', '7.1', '7.2'])) die('skip feature unsupported by this TDS version');
 ?>
 --FILE--
 <?php
@@ -16,13 +16,13 @@ $db = getDbConnection();
 
 $sql = "SELECT convert(datetime2, '10231017 10:22:44.1355318') AS [d]";
 
-var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_CONVERT));
+var_dump($db->getAttribute(Pdo\Dblib::ATTR_DATETIME_CONVERT));
 
 $stmt = $db->query($sql);
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 
-$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_CONVERT, 1);
-var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_CONVERT));
+$db->setAttribute(Pdo\Dblib::ATTR_DATETIME_CONVERT, 1);
+var_dump($db->getAttribute(Pdo\Dblib::ATTR_DATETIME_CONVERT));
 $stmt = $db->query($sql);
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 

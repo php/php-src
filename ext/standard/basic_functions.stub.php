@@ -260,87 +260,70 @@ const PHP_QUERY_RFC1738 = UNKNOWN;
 const PHP_QUERY_RFC3986 = UNKNOWN;
 
 /**
- * @var float
  * @cvalue M_E
  */
 const M_E = 2.718281828459045;
 /**
- * @var float
  * @cvalue M_LOG2E
  */
 const M_LOG2E = 1.4426950408889634074;
 /**
- * @var float
  * @cvalue M_LOG10E
  */
 const M_LOG10E = 0.43429448190325182765;
 /**
- * @var float
  * @cvalue M_LN2
  */
 const M_LN2 = 0.69314718055994530942;
 /**
- * @var float
  * @cvalue M_LN10
  */
 const M_LN10 = 2.30258509299404568402;
 /**
- * @var float
  * @cvalue M_PI
  */
 const M_PI = 3.14159265358979323846;
 /**
- * @var float
  * @cvalue M_PI_2
  */
 const M_PI_2 = 1.57079632679489661923;
 /**
- * @var float
  * @cvalue M_PI_4
  */
 const M_PI_4 = 0.78539816339744830962;
 /**
- * @var float
  * @cvalue M_1_PI
  */
 const M_1_PI = 0.31830988618379067154;
 /**
- * @var float
  * @cvalue M_2_PI
  */
 const M_2_PI = 0.63661977236758134308;
 /**
- * @var float
  * @cvalue M_SQRTPI
  */
 const M_SQRTPI = 1.77245385090551602729;
 /**
- * @var float
  * @cvalue M_2_SQRTPI
  */
 const M_2_SQRTPI = 1.12837916709551257390;
 /**
- * @var float
  * @cvalue M_LNPI
  */
 const M_LNPI = 1.14472988584940017414;
 /**
- * @var float
  * @cvalue M_EULER
  */
 const M_EULER = 0.57721566490153286061;
 /**
- * @var float
  * @cvalue M_SQRT2
  */
 const M_SQRT2 = 1.41421356237309504880;
 /**
- * @var float
  * @cvalue M_SQRT1_2
  */
 const M_SQRT1_2 = 0.70710678118654752440;
 /**
- * @var float
  * @cvalue M_SQRT3
  */
 const M_SQRT3 = 1.73205080756887729352;
@@ -383,17 +366,11 @@ const PHP_ROUND_HALF_ODD = UNKNOWN;
  * @cvalue PHP_MAX_SALT_LEN
  */
 const CRYPT_SALT_LENGTH = UNKNOWN;
-/** @var int */
 const CRYPT_STD_DES = 1;
-/** @var int */
 const CRYPT_EXT_DES = 1;
-/** @var int */
 const CRYPT_MD5 = 1;
-/** @var int */
 const CRYPT_BLOWFISH = 1;
-/** @var int */
 const CRYPT_SHA256 = 1;
-/** @var int */
 const CRYPT_SHA512 = 1;
 
 /* dns.c */
@@ -2697,7 +2674,6 @@ function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING,
 
 /**
  * @return array<int, string>|false
- * @refcount 1
  */
 function glob(string $pattern, int $flags = 0): array|false {}
 

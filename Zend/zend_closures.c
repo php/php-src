@@ -81,46 +81,46 @@ static bool zend_valid_closure_binding(
 	bool is_fake_closure = (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0;
 	if (newthis) {
 		if (func->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_WARNING, "Cannot bind an instance to a static closure");
-			return 0;
+			zend_error(E_WARNING, "Cannot bind an instance to a static closure, this will be an error in PHP 9");
+			return false;
 		}
 
 		if (is_fake_closure && func->common.scope &&
 				!instanceof_function(Z_OBJCE_P(newthis), func->common.scope)) {
 			/* Binding incompatible $this to an internal method is not supported. */
-			zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s",
+			zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s, this will be an error in PHP 9",
 					ZSTR_VAL(func->common.scope->name),
 					ZSTR_VAL(func->common.function_name),
 					ZSTR_VAL(Z_OBJCE_P(newthis)->name));
-			return 0;
+			return false;
 		}
 	} else if (is_fake_closure && func->common.scope
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-		zend_error(E_WARNING, "Cannot unbind $this of method");
-		return 0;
+		zend_error(E_WARNING, "Cannot unbind $this of method, this will be an error in PHP 9");
+		return false;
 	} else if (!is_fake_closure && !Z_ISUNDEF(closure->this_ptr)
 			&& (func->common.fn_flags & ZEND_ACC_USES_THIS)) {
-		zend_error(E_WARNING, "Cannot unbind $this of closure using $this");
-		return 0;
+		zend_error(E_WARNING, "Cannot unbind $this of closure using $this, this will be an error in PHP 9");
+		return false;
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {
 		/* rebinding to internal class is not allowed */
-		zend_error(E_WARNING, "Cannot bind closure to scope of internal class %s",
+		zend_error(E_WARNING, "Cannot bind closure to scope of internal class %s, this will be an error in PHP 9",
 				ZSTR_VAL(scope->name));
-		return 0;
+		return false;
 	}
 
 	if (is_fake_closure && scope != func->common.scope) {
 		if (func->common.scope == NULL) {
-			zend_error(E_WARNING, "Cannot rebind scope of closure created from function");
+			zend_error(E_WARNING, "Cannot rebind scope of closure created from function, this will be an error in PHP 9");
 		} else {
-			zend_error(E_WARNING, "Cannot rebind scope of closure created from method");
+			zend_error(E_WARNING, "Cannot rebind scope of closure created from method, this will be an error in PHP 9");
 		}
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -866,6 +866,9 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_clas
 
 	closure = (zend_closure *)Z_OBJ_P(res);
 	closure->func.common.fn_flags |= ZEND_ACC_FAKE_CLOSURE;
+	if (Z_TYPE(closure->this_ptr) != IS_OBJECT) {
+		GC_ADD_FLAGS(&closure->std, GC_NOT_COLLECTABLE);
+	}
 }
 /* }}} */
 

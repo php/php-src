@@ -1,5 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 781677c7ada9095af9c964cf86ce6ba63a52a930 */
+ * Stub hash: a8dae89983ccbcd5dd36d1cdee736d40af4fd33c */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -127,6 +130,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_zend_ini_str arginfo_zend_get_current_func_name
 
+#define arginfo_zend_test_zstr_init_literal arginfo_zend_get_current_func_name
+
 #if defined(ZEND_CHECK_STACK_LIMIT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_call_stack_get, 0, 0, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
@@ -186,6 +191,13 @@ ZEND_END_ARG_INFO()
 #define arginfo_zend_test_gh18756 arginfo_zend_test_void_return
 
 #define arginfo_zend_test_opcache_preloading arginfo_zend_test_is_pcre_bundled
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_uri_parser, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, parser, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_gh19792 arginfo_zend_test_void_return
 
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
@@ -272,6 +284,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_void_return
 
+static ZEND_FUNCTION(zend_trigger_bailout);
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
 static ZEND_FUNCTION(zend_test_void_return);
@@ -305,6 +318,7 @@ static ZEND_FUNCTION(zend_call_method_if_exists);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
+static ZEND_FUNCTION(zend_test_zstr_init_literal);
 #if defined(ZEND_CHECK_STACK_LIMIT)
 static ZEND_FUNCTION(zend_test_zend_call_stack_get);
 static ZEND_FUNCTION(zend_test_zend_call_stack_use_all);
@@ -328,6 +342,8 @@ static ZEND_FUNCTION(zend_test_log_err_debug);
 static ZEND_FUNCTION(zend_test_compile_to_ast);
 static ZEND_FUNCTION(zend_test_gh18756);
 static ZEND_FUNCTION(zend_test_opcache_preloading);
+static ZEND_FUNCTION(zend_test_uri_parser);
+static ZEND_FUNCTION(zend_test_gh19792);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -358,6 +374,7 @@ static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 
 static const zend_function_entry ext_functions[] = {
+	ZEND_FE(zend_trigger_bailout, arginfo_zend_trigger_bailout)
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_nullable_array_return", zif_zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return, ZEND_ACC_COMPILE_TIME_EVAL, NULL, "/**\n     * \"Lorem ipsum\"\n     * @see https://www.php.net\n     * @since 8.3\n     */")
@@ -433,6 +450,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
+	ZEND_FE(zend_test_zstr_init_literal, arginfo_zend_test_zstr_init_literal)
 #if defined(ZEND_CHECK_STACK_LIMIT)
 	ZEND_FE(zend_test_zend_call_stack_get, arginfo_zend_test_zend_call_stack_get)
 	ZEND_FE(zend_test_zend_call_stack_use_all, arginfo_zend_test_zend_call_stack_use_all)
@@ -456,6 +474,16 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_compile_to_ast, arginfo_zend_test_compile_to_ast)
 	ZEND_FE(zend_test_gh18756, arginfo_zend_test_gh18756)
 	ZEND_FE(zend_test_opcache_preloading, arginfo_zend_test_opcache_preloading)
+	ZEND_FE(zend_test_uri_parser, arginfo_zend_test_uri_parser)
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+#else
+#if (PHP_VERSION_ID >= 80200)
+	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, ZEND_ACC_COMPILE_TIME_EVAL)
+#elif (PHP_VERSION_ID >= 80000)
+	ZEND_RAW_FENTRY("zend_test_gh19792", zif_zend_test_gh19792, arginfo_zend_test_gh19792, 0)
+#endif
+#endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else

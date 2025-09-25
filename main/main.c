@@ -413,41 +413,6 @@ static PHP_INI_MH(OnSetLogFilter)
 }
 /* }}} */
 
-/* {{{ php_disable_classes */
-static void php_disable_classes(void)
-{
-	char *s = NULL, *e;
-
-	if (!*(INI_STR("disable_classes"))) {
-		return;
-	}
-
-	e = PG(disable_classes) = strdup(INI_STR("disable_classes"));
-
-	while (*e) {
-		switch (*e) {
-			case ' ':
-			case ',':
-				if (s) {
-					*e = '\0';
-					zend_disable_class(s, e-s);
-					s = NULL;
-				}
-				break;
-			default:
-				if (!s) {
-					s = e;
-				}
-				break;
-		}
-		e++;
-	}
-	if (s) {
-		zend_disable_class(s, e-s);
-	}
-}
-/* }}} */
-
 /* {{{ php_binary_init */
 static void php_binary_init(void)
 {
@@ -698,6 +663,19 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 }
 /* }}} */
 
+static PHP_INI_MH(OnUpdateReportMemleaks)
+{
+	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	bool new_bool_value = zend_ini_parse_bool(new_value);
+
+	if (!new_bool_value) {
+		php_error_docref(NULL, E_DEPRECATED, "Directive 'report_memleaks' is deprecated");
+	}
+
+	*p = new_bool_value;
+	return SUCCESS;
+}
+
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
@@ -717,14 +695,15 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateErrorLog)
 {
-	/* Only do the safemode/open_basedir check at runtime */
+	/* Only do the open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) &&
-			new_value && zend_string_equals_literal(new_value, "syslog")) {
+			new_value && !zend_string_equals_literal(new_value, "syslog") && ZSTR_LEN(new_value) > 0) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -732,13 +711,43 @@ static PHP_INI_MH(OnUpdateErrorLog)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateMailLog)
 {
-	/* Only do the safemode/open_basedir check at runtime */
-	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value) {
+	/* Only do the open_basedir check at runtime */
+	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && ZSTR_LEN(new_value) > 0) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnUpdateMailCrLfMode)
+{
+	if (new_value) {
+		if (ZSTR_LEN(new_value) > 0 &&
+			!zend_string_equals_literal(new_value, "crlf") &&
+			!zend_string_equals_literal(new_value, "lf") &&
+			!zend_string_equals_literal(new_value, "mixed") &&
+			!zend_string_equals_literal(new_value, "os")) {
+			int err_type;
+
+			if (stage == ZEND_INI_STAGE_RUNTIME) {
+				err_type = E_WARNING;
+			} else {
+				err_type = E_ERROR;
+			}
+
+			if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+				php_error_docref(NULL, err_type, "Invalid value \"%s\" for mail.cr_lf_mode. Must be one of: \"crlf\", \"lf\", \"mixed\", \"os\"", ZSTR_VAL(new_value));
+			}
+
+			return FAILURE;
+		}
+	}
+	OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	return SUCCESS;
 }
 /* }}} */
@@ -801,11 +810,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_source",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_source,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_ALL,		OnUpdateBool,			report_memleaks,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_ALL,		OnUpdateReportMemleaks,	report_memleaks,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("report_zend_debug",	"0",		PHP_INI_ALL,		OnUpdateBool,			report_zend_debug,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateLong,	output_buffering,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateString,	output_handler,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("register_argc_argv",	"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
 
@@ -848,6 +857,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
 	STD_PHP_INI_BOOLEAN("mail.add_x_header",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_x_header,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("mail.mixed_lf_and_crlf",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_mixed_lf_and_crlf,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("mail.cr_lf_mode",				"crlf",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailCrLfMode,		mail_cr_lf_mode,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
 
@@ -859,7 +869,6 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("mail.force_extra_parameters",NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnChangeMailForceExtra)
 	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
-	PHP_INI_ENTRY("disable_classes",			"",			PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("max_file_uploads",			"20",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
 	PHP_INI_ENTRY("max_multipart_body_parts",	"-1",			PHP_INI_SYSTEM|PHP_INI_PERDIR,		NULL)
 
@@ -2092,9 +2101,6 @@ static void core_globals_dtor(php_core_globals *core_globals)
 	ZEND_ASSERT(!core_globals->last_error_message);
 	ZEND_ASSERT(!core_globals->last_error_file);
 
-	if (core_globals->disable_classes) {
-		free(core_globals->disable_classes);
-	}
 	if (core_globals->php_binary) {
 		free(core_globals->php_binary);
 	}
@@ -2359,9 +2365,8 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		}
 	}
 
-	/* disable certain classes and functions as requested by php.ini */
+	/* disable certain functions as requested by php.ini */
 	zend_disable_functions(INI_STR("disable_functions"));
-	php_disable_classes();
 
 	/* make core report what it should */
 	if ((module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core")-1)) != NULL) {
@@ -2390,7 +2395,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[18]; /* Remember to change this if the number of directives change */
+			const char *directives[19]; /* Remember to change this if the number of directives change */
 		} directives[2] = {
 			{
 				E_DEPRECATED,
@@ -2421,6 +2426,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 					"safe_mode_protected_env_vars",
 					"zend.ze1_compatibility_mode",
 					"track_errors",
+					"disable_classes",
 					NULL
 				}
 			}

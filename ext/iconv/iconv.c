@@ -43,7 +43,7 @@
 #undef iconv
 #endif
 
-#if defined(__NetBSD__)
+#if defined(__NetBSD__) || (defined(__sun) && defined(__SVR4))
 // unfortunately, netbsd has still the old non posix conformant signature
 // libiconv tends to match the eventual system's iconv too.
 #define ICONV_CONST const
@@ -1825,7 +1825,7 @@ PHP_FUNCTION(iconv_substr)
 	size_t charset_len;
 	zend_string *str;
 	zend_long offset, length = 0;
-	bool len_is_null = 1;
+	bool len_is_null = true;
 
 	php_iconv_err_t err;
 
@@ -2571,7 +2571,6 @@ static const php_stream_filter_ops php_iconv_stream_filter_ops = {
 /* {{{ php_iconv_stream_filter_create */
 static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, uint8_t persistent)
 {
-	php_stream_filter *retval = NULL;
 	php_iconv_stream_filter *inst;
 	const char *from_charset = NULL, *to_charset = NULL;
 	size_t from_charset_len, to_charset_len;
@@ -2602,12 +2601,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 		return NULL;
 	}
 
-	if (NULL == (retval = php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent))) {
-		php_iconv_stream_filter_dtor(inst);
-		pefree(inst, persistent);
-	}
-
-	return retval;
+	return php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent);
 }
 /* }}} */
 

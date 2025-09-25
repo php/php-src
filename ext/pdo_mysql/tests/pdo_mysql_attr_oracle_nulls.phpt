@@ -47,7 +47,7 @@ MySQLPDOTest::skip();
         $have_procedures = false;
 
     $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
-    $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+    $db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
 
     if ($have_procedures && (false !== $db->exec("DROP PROCEDURE IF EXISTS {$procedure}")) &&
         (false !== $db->exec("CREATE PROCEDURE {$procedure}() BEGIN SELECT NULL as z, '' AS a, ' ' AS b, TRIM(' ') as c, ' d' AS d, ' e' AS e; END;"))) {

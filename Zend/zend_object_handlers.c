@@ -223,6 +223,8 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 			return Z_ARRVAL(retval);
 		}
 	} else if (Z_TYPE(retval) == IS_NULL) {
+		zend_error(E_DEPRECATED, "Returning null from %s::__debugInfo() is deprecated, return an empty array instead",
+			ZSTR_VAL(ce->name));
 		*is_temp = 1;
 		ht = zend_new_array(0);
 		return ht;
@@ -807,7 +809,7 @@ try_again:
 		zend_function *get = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is write-only",
+				zend_throw_error(NULL, "Cannot read from set-only virtual property %s::$%s",
 					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				return &EG(uninitialized_zval);
 			}
@@ -1148,7 +1150,7 @@ found:;
 
 		if (!set) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is read-only", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Cannot write to get-only virtual property %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
@@ -1819,7 +1821,7 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 
 static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return zend_get_call_trampoline_func(ce, method_name, 0);
+	return zend_get_call_trampoline_func(ce, method_name, false);
 }
 /* }}} */
 
@@ -1913,7 +1915,7 @@ exit:
 
 static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return zend_get_call_trampoline_func(ce, method_name, 1);
+	return zend_get_call_trampoline_func(ce, method_name, true);
 }
 /* }}} */
 
@@ -2341,7 +2343,7 @@ found:
 
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is write-only",
+				zend_throw_error(NULL, "Cannot read from set-only virtual property %s::$%s",
 					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				return 0;
 			} else {
@@ -2416,7 +2418,7 @@ lazy_init:
 		if (!value || (Z_PROP_FLAG_P(value) & IS_PROP_LAZY)) {
 			zobj = zend_lazy_object_init(zobj);
 			if (!zobj) {
-				result = 0;
+				result = false;
 				goto exit;
 			}
 
@@ -2434,7 +2436,7 @@ lazy_init:
 		}
 	}
 
-	result = 0;
+	result = false;
 	goto exit;
 }
 /* }}} */

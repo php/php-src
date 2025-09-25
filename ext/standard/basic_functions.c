@@ -141,6 +141,7 @@ static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
 static const zend_module_dep standard_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("uri")
 	ZEND_MOD_OPTIONAL("session")
 	ZEND_MOD_END
 };
@@ -1987,10 +1988,8 @@ PHP_FUNCTION(ini_set)
 	/* open basedir check */
 	if (PG(open_basedir)) {
 		if (
-			zend_string_equals_literal(varname, "error_log")
-			|| zend_string_equals_literal(varname, "java.class.path")
+			zend_string_equals_literal(varname, "java.class.path")
 			|| zend_string_equals_literal(varname, "java.home")
-			|| zend_string_equals_literal(varname, "mail.log")
 			|| zend_string_equals_literal(varname, "java.library.path")
 			|| zend_string_equals_literal(varname, "vpopmail.directory")
 		) {

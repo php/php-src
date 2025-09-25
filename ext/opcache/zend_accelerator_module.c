@@ -159,10 +159,23 @@ static ZEND_INI_MH(OnEnable)
 	    stage == ZEND_INI_STAGE_DEACTIVATE) {
 		return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	} else {
-		/* It may be only temporary disabled */
+		/* It may be only temporarily disabled */
 		bool *p = (bool *) ZEND_INI_GET_ADDR();
 		if (zend_ini_parse_bool(new_value)) {
-			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
+			if (*p) {
+				/* Do not warn if OPcache is enabled, as the update would be a noop anyways. */
+				return SUCCESS;
+			}
+
+			if (stage == ZEND_INI_STAGE_ACTIVATE) {
+				if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled. Are you using php_admin_value[opcache.enable]=1 in an individual pool's configuration?");
+				} else {
+					zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled (it may be only disabled until the end of request)");
+				}
+			} else {
+				zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporarily enabled (it may be only disabled until the end of request)");
+			}
 			return FAILURE;
 		} else {
 			*p = 0;
@@ -657,7 +670,7 @@ ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
 	zval memory_usage, statistics, scripts;
-	bool fetch_scripts = 1;
+	bool fetch_scripts = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
 		RETURN_THROWS();
@@ -924,7 +937,7 @@ ZEND_FUNCTION(opcache_reset)
 ZEND_FUNCTION(opcache_invalidate)
 {
 	zend_string *script_name;
-	bool force = 0;
+	bool force = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &script_name, &force) == FAILURE) {
 		RETURN_THROWS();

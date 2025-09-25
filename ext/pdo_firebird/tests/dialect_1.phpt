@@ -14,7 +14,7 @@ require("testdb.inc");
 
 $dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$dbh->setAttribute(PDO::FB_ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
+$dbh->setAttribute(Pdo\Firebird::ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
 
 $sql =
 'SELECT

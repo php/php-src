@@ -246,7 +246,7 @@ void phar_destroy_phar_data(phar_archive_data *phar) /* {{{ */
 bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 {
 	if (phar->is_persistent) {
-		return 0;
+		return false;
 	}
 
 	if (--phar->refcount < 0) {
@@ -254,7 +254,7 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 		|| zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
 			phar_destroy_phar_data(phar);
 		}
-		return 1;
+		return true;
 	} else if (!phar->refcount) {
 		/* invalidate phar cache */
 		PHAR_G(last_phar) = NULL;
@@ -277,10 +277,10 @@ bool phar_archive_delref(phar_archive_data *phar) /* {{{ */
 			if (zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
 				phar_destroy_phar_data(phar);
 			}
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 /* }}}*/
 
@@ -2117,10 +2117,10 @@ static bool php_check_dots(const char *element, size_t n) /* {{{ */
 {
 	for(n-- ; n != SIZE_MAX; --n) {
 		if (element[n] != '.') {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -2339,7 +2339,7 @@ zend_result phar_open_executed_filename(char *alias, size_t alias_len, char **er
 		return FAILURE;
 	}
 
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, 0, REPORT_ERRORS, NULL, 0) == SUCCESS) {
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, false, REPORT_ERRORS, NULL, 0) == SUCCESS) {
 		return SUCCESS;
 	}
 

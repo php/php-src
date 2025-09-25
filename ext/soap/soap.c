@@ -233,9 +233,9 @@ static void soap_url_object_free(zend_object *obj)
 {
 	soap_url_object *url_obj = soap_url_object_fetch(obj);
 
-	if (url_obj->url) {
-		php_url_free(url_obj->url);
-		url_obj->url = NULL;
+	if (url_obj->uri) {
+		php_uri_struct_free(url_obj->uri);
+		url_obj->uri = NULL;
 	}
 
 	zend_object_std_dtor(&url_obj->std);
@@ -765,7 +765,7 @@ PHP_METHOD(SoapVar, __construct)
 {
 	zval *data, *this_ptr;
 	zend_long type;
-	bool type_is_null = 1;
+	bool type_is_null = true;
 	zend_string *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z!l!|S!S!S!S!", &data, &type, &type_is_null, &stype, &ns, &name, &namens) == FAILURE) {
@@ -1013,7 +1013,13 @@ PHP_METHOD(SoapServer, __construct)
 	service->soap_functions.ft = zend_new_array(0);
 
 	if (wsdl) {
-		service->sdl = get_sdl(ZEND_THIS, ZSTR_VAL(wsdl), cache_wsdl);
+		zend_try {
+			service->sdl = get_sdl(ZEND_THIS, ZSTR_VAL(wsdl), cache_wsdl);
+		} zend_catch {
+			xmlCharEncCloseFunc(service->encoding);
+			service->encoding = NULL;
+			zend_bailout();
+		} zend_end_try();
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
 				service->uri = estrdup(service->sdl->target_ns);
@@ -1963,7 +1969,7 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 /* {{{ */
 PHP_FUNCTION(use_soap_error_handler)
 {
-	bool handler = 1;
+	bool handler = true;
 
 	ZVAL_BOOL(return_value, SOAP_GLOBAL(use_soap_error_handler));
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &handler) == SUCCESS) {
@@ -2545,7 +2551,7 @@ static void soap_client_call_common(
 		if (soap_headers) {
 			if (!free_soap_headers) {
 				soap_headers = zend_array_dup(soap_headers);
-				free_soap_headers = 1;
+				free_soap_headers = true;
 			}
 			ZEND_HASH_FOREACH_VAL(default_headers, tmp) {
 				if(Z_TYPE_P(tmp) == IS_OBJECT) {
@@ -2555,7 +2561,7 @@ static void soap_client_call_common(
 			} ZEND_HASH_FOREACH_END();
 		} else {
 			soap_headers = Z_ARRVAL_P(tmp);
-			free_soap_headers = 0;
+			free_soap_headers = false;
 		}
 	}
 
@@ -2784,28 +2790,28 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 /* {{{ SoapClient::__doRequest() */
 PHP_METHOD(SoapClient, __doRequest)
 {
-	zend_string *buf;
-	char      *location, *action;
-	size_t     location_size, action_size;
+	zend_string *buf, *location, *uri_parser_class = NULL;
+	char       *action;
+	size_t     action_size;
 	zend_long  version;
-	bool  one_way = 0;
+	bool  one_way = false;
 	zval      *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSsl|bS!",
 	    &buf,
-	    &location, &location_size,
+	    &location,
 	    &action, &action_size,
-	    &version, &one_way) == FAILURE) {
+	    &version, &one_way, &uri_parser_class) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (SOAP_GLOBAL(features) & SOAP_WAIT_ONE_WAY_CALLS) {
-		one_way = 0;
+		one_way = false;
 	}
 	if (one_way) {
-		if (make_http_soap_request(this_ptr, buf, location, action, version, NULL)) {
+		if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_class, NULL)) {
 			RETURN_EMPTY_STRING();
 		}
-	} else if (make_http_soap_request(this_ptr, buf, location, action, version,
+	} else if (make_http_soap_request(this_ptr, buf, location, action, version, uri_parser_class,
 	    return_value)) {
 		return;
 	}

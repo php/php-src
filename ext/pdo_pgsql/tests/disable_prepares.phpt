@@ -28,7 +28,7 @@ $stmt->execute();
 $first = $stmt->fetchAll();
 
 $stmt3 = $db->prepare("SELECT (?)::int4", array(
-    PDO::PGSQL_ATTR_DISABLE_PREPARES => true));
+    Pdo\Pgsql::ATTR_DISABLE_PREPARES => true));
 $stmt3->execute(array(3));
 var_dump($stmt3->fetch());
 $stmt3->execute(array(4));

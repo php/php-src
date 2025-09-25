@@ -119,13 +119,13 @@ typedef uintptr_t zend_jit_addr;
 static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_addr addr2)
 {
 	if (addr1 == addr2) {
-		return 1;
+		return true;
 	} else if (Z_MODE(addr1) == IS_REG && Z_MODE(addr2) == IS_REG) {
 		return Z_SSA_VAR(addr1) == Z_SSA_VAR(addr2);
 	} else if (Z_MODE(addr1) == IS_REF_ZVAL && Z_MODE(addr2) == IS_REF_ZVAL) {
 		return Z_IR_REF(addr1) == Z_IR_REF(addr2);
 	}
-	return 0;
+	return false;
 }
 
 typedef struct _zend_jit_op_array_extension {
@@ -197,10 +197,6 @@ extern const zend_op *zend_jit_halt_op;
 		handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 		return; \
 	} while(0)
-# define ZEND_OPCODE_TAIL_CALL_EX(handler, arg) do { \
-		handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX arg); \
-		return; \
-	} while(0)
 # define ZEND_VM_ENTER_BIT 0
 #else
 # define EXECUTE_DATA_D                       zend_execute_data* execute_data
@@ -212,17 +208,21 @@ extern const zend_op *zend_jit_halt_op;
 # define OPLINE_DC                            , OPLINE_D
 # define OPLINE_CC                            , OPLINE_C
 # define ZEND_OPCODE_HANDLER_RET              const zend_op *
+# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+#  define ZEND_OPCODE_TAIL_CALL(handler)       do { \
+		ZEND_MUSTTAIL return (handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
+	} while(0)
+# define ZEND_OPCODE_RETURN()                  ZEND_OPCODE_TAIL_CALL((zend_vm_opcode_handler_t)opline->handler)
+# else
+#  define ZEND_OPCODE_TAIL_CALL(handler)       do { \
+		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
+	} while(0)
+# define ZEND_OPCODE_RETURN()                 return opline
+# endif
 # define ZEND_OPCODE_HANDLER_ARGS             EXECUTE_DATA_D OPLINE_DC
 # define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU    EXECUTE_DATA_C OPLINE_CC
 # define ZEND_OPCODE_HANDLER_ARGS_EX          EXECUTE_DATA_D OPLINE_DC,
 # define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX EXECUTE_DATA_C OPLINE_CC,
-# define ZEND_OPCODE_RETURN()                 return opline
-# define ZEND_OPCODE_TAIL_CALL(handler)       do { \
-		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
-	} while(0)
-# define ZEND_OPCODE_TAIL_CALL_EX(handler, arg) do { \
-		return handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX arg); \
-	} while(0)
 # define ZEND_VM_ENTER_BIT 1ULL
 #endif
 
@@ -230,11 +230,16 @@ extern const zend_op *zend_jit_halt_op;
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info);
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(ZEND_OPCODE_HANDLER_ARGS_EX uint32_t call_info);
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(ZEND_OPCODE_HANDLER_ARGS);
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_leave_func_helper_tailcall(ZEND_OPCODE_HANDLER_ARGS);
+#endif
 
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS);
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS);
 
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
+ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_func_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
+ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_loop_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
+#endif
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper(ZEND_OPCODE_HANDLER_ARGS);
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_copy_extra_args_helper_no_skip_recv(ZEND_OPCODE_HANDLER_ARGS);
@@ -451,6 +456,10 @@ typedef struct _zend_jit_trace_exit_info {
 	uint32_t                stack_offset;
 	zend_jit_ref_snapshot   poly_func;
 	zend_jit_ref_snapshot   poly_this;
+#if ZEND_DEBUG
+	const char             *filename;
+	int                     lineno;
+#endif
 } zend_jit_trace_exit_info;
 
 typedef struct _zend_jit_trace_stack {
@@ -666,9 +675,11 @@ struct _zend_jit_trace_stack_frame {
 		(frame)->_info |= TRACE_FRAME_MASK_ALWAYS_RELEASE_THIS; \
 	} while (0)
 
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_ret_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
+#if ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_func_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
+ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_ret_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
+ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_jit_loop_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
+#endif
 
 int ZEND_FASTCALL zend_jit_trace_hot_root(zend_execute_data *execute_data, const zend_op *opline);
 zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *execute_data,
@@ -695,7 +706,7 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	} else  {
 		ZEND_UNREACHABLE();
 	}
-	*exit_if_true = 0;
+	*exit_if_true = false;
 	return NULL;
 }
 

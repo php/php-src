@@ -463,7 +463,7 @@ lxb_url_serialize_fragment(const lxb_url_t *url,
  * @return a new URL object if successful, otherwise NULL value.
  */
 LXB_API lxb_url_t *
-lxb_url_clone(lexbor_mraw_t *mraw, lxb_url_t *url);
+lxb_url_clone(lexbor_mraw_t *mraw, const lxb_url_t *url);
 
 /*
  * Inline functions.

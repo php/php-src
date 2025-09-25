@@ -1145,10 +1145,10 @@ continue_dir:
 			/* open file pointers refer to this fp, do not free the stream */
 			switch (entry->fp_type) {
 				case PHAR_FP:
-					p->free_fp = 0;
+					p->free_fp = false;
 					break;
 				case PHAR_UFP:
-					p->free_ufp = 0;
+					p->free_ufp = false;
 				default:
 					break;
 			}
@@ -1422,7 +1422,7 @@ fperror:
 		goto fperror;
 	}
 
-	pass.free_fp = pass.free_ufp = 1;
+	pass.free_fp = pass.free_ufp = true;
 	memset(&eocd, 0, sizeof(eocd));
 
 	memcpy(eocd.signature, "PK\5\6", 4);

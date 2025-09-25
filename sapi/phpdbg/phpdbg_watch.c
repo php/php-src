@@ -139,7 +139,7 @@ bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *newPtr) 
 	switch (type) {
 		case WATCH_ON_BUCKET:
 			if (memcmp(&((Bucket *) oldPtr)->h, &((Bucket *) newPtr)->h, sizeof(Bucket) - sizeof(zval) /* hash+key comparison */) != 0) {
-				return 2;
+				return true;
 			}
 			/* Fall through to also compare the value from the bucket. */
 			ZEND_FALLTHROUGH;
@@ -154,7 +154,7 @@ bool phpdbg_check_watch_diff(phpdbg_watchtype type, void *oldPtr, void *newPtr) 
 		case WATCH_ON_HASHDATA:
 			ZEND_UNREACHABLE();
 	}
-	return 0;
+	return false;
 }
 
 void phpdbg_print_watch_diff(phpdbg_watchtype type, zend_string *name, void *oldPtr, void *newPtr) {
@@ -280,9 +280,9 @@ static inline void phpdbg_deactivate_watchpoint(phpdbg_watchpoint_t *watch) {
 
 /* Note that consecutive pages need to be merged in order to avoid watchpoints spanning page boundaries to have part of their data in the one page, part in the other page */
 #ifdef _WIN32
-int phpdbg_watchpoint_segfault_handler(void *addr) {
+zend_result phpdbg_watchpoint_segfault_handler(void *addr) {
 #else
-int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context) {
+zend_result phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context) {
 #endif
 
 	void *page = phpdbg_get_page_boundary(
@@ -562,12 +562,12 @@ bool phpdbg_is_recursively_watched(void *ptr, phpdbg_watch_element *element) {
 	do {
 		element = next;
 		if (element->watch->addr.ptr == ptr) {
-			return 1;
+			return true;
 		}
 		next = element->parent;
 	} while (!(element->flags & PHPDBG_WATCH_RECURSIVE_ROOT));
 
-	return 0;
+	return false;
 }
 
 void phpdbg_add_recursive_watch_from_ht(phpdbg_watch_element *element, zend_long idx, zend_string *str, zval *zv) {
@@ -721,7 +721,7 @@ bool phpdbg_try_re_adding_watch_element(zval *parent, phpdbg_watch_element *elem
 	HashTable *ht = HT_FROM_ZVP(parent);
 
 	if (!ht) {
-		return 0;
+		return false;
 	} else if (element->flags & (PHPDBG_WATCH_ARRAY | PHPDBG_WATCH_OBJECT)) {
 		char *htPtr = ((char *) ht) + HT_WATCH_OFFSET;
 		char *oldPtr = ((char *) &element->backup.ht) + HT_WATCH_OFFSET;
@@ -742,7 +742,7 @@ bool phpdbg_try_re_adding_watch_element(zval *parent, phpdbg_watch_element *elem
 			}
 
 			if (!phpdbg_try_re_adding_watch_element(next, element->child)) {
-				return 0;
+				return false;
 			}
 		} else if (phpdbg_check_watch_diff(WATCH_ON_ZVAL, &element->backup.zv, zv)) {
 			phpdbg_print_watch_diff(WATCH_ON_ZVAL, element->str, &element->backup.zv, zv);
@@ -752,10 +752,10 @@ bool phpdbg_try_re_adding_watch_element(zval *parent, phpdbg_watch_element *elem
 		phpdbg_add_bucket_watch_element((Bucket *) zv, element);
 		phpdbg_watch_parent_ht(element);
 	} else {
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 void phpdbg_automatic_dequeue_free(phpdbg_watch_element *element) {

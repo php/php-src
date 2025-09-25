@@ -9,6 +9,7 @@ function skipFunction($function): bool {
         /* terminates script */
      || $function === 'exit'
      || $function === 'die'
+     || $function === 'zend_trigger_bailout'
         /* intentionally violate invariants */
      || $function === 'zend_create_unterminated_string'
      || $function === 'zend_test_array_return'

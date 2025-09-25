@@ -589,9 +589,6 @@ const MYSQLI_TRANS_COR_RELEASE = UNKNOWN;
  */
 const MYSQLI_TRANS_COR_NO_RELEASE = UNKNOWN;
 
-/**
- * @var bool
- */
 #[\Deprecated(since: '8.2', message: 'as it is always false')]
 const MYSQLI_IS_MARIADB = false;
 

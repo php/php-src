@@ -21,6 +21,10 @@
 // Fix build on Windows/old versions of ICU
 #include <stdio.h>
 
+extern "C" {
+#include <zend_attributes.h>
+}
+
 #include "common_enum.h"
 #include "common_arginfo.h"
 

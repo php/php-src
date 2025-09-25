@@ -503,7 +503,7 @@ ZEND_FUNCTION(error_reporting)
 
 static bool validate_constant_array_argument(HashTable *ht, int argument_number) /* {{{ */
 {
-	bool ret = 1;
+	bool ret = true;
 	zval *val;
 
 	GC_PROTECT_RECURSION(ht);
@@ -512,10 +512,10 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 		if (Z_TYPE_P(val) == IS_ARRAY && Z_REFCOUNTED_P(val)) {
 			if (Z_IS_RECURSIVE_P(val)) {
 				zend_argument_value_error(argument_number, "cannot be a recursive array");
-				ret = 0;
+				ret = false;
 				break;
 			} else if (!validate_constant_array_argument(Z_ARRVAL_P(val), argument_number)) {
-				ret = 0;
+				ret = false;
 				break;
 			}
 		}
@@ -824,8 +824,8 @@ ZEND_FUNCTION(get_class_vars)
 	}
 
 	scope = zend_get_executed_scope();
-	add_class_vars(scope, ce, 0, return_value);
-	add_class_vars(scope, ce, 1, return_value);
+	add_class_vars(scope, ce, false, return_value);
+	add_class_vars(scope, ce, true, return_value);
 }
 /* }}} */
 
@@ -1631,7 +1631,7 @@ static void add_zendext_info(zend_extension *ext, void *arg) /* {{{ */
 /* {{{ Return an array containing names of loaded extensions */
 ZEND_FUNCTION(get_loaded_extensions)
 {
-	bool zendext = 0;
+	bool zendext = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &zendext) == FAILURE) {
 		RETURN_THROWS();
@@ -1654,7 +1654,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 /* {{{ Return an array containing the names and values of all defined constants */
 ZEND_FUNCTION(get_defined_constants)
 {
-	bool categorize = 0;
+	bool categorize = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &categorize) == FAILURE) {
 		RETURN_THROWS();
@@ -1892,7 +1892,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 {
 	zend_execute_data *call, *last_call = NULL;
 	zend_object *object;
-	bool fake_frame = 0;
+	bool fake_frame = false;
 	int lineno, frameno = 0;
 	zend_function *func;
 	zend_string *filename;
@@ -1991,8 +1991,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			}
 			stack_frame = zend_new_array(8);
 			zend_hash_real_init_mixed(stack_frame);
-			zend_string *name = func->common.function_name;
-			ZVAL_STRINGL(&tmp, ZSTR_VAL(name), ZSTR_LEN(name));
+			ZVAL_STR_COPY(&tmp, func->common.function_name);
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
 			/* Steal file and line from the previous frame. */
 			if (call->func && ZEND_USER_CODE(call->func->common.type)) {
@@ -2129,7 +2128,7 @@ not_frameless_call:
 			}
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
-			bool build_filename_arg = 1;
+			bool build_filename_arg = true;
 			zend_string *pseudo_function_name;
 			uint32_t include_kind = 0;
 			if (prev && prev->func && ZEND_USER_CODE(prev->func->common.type) && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
@@ -2139,7 +2138,7 @@ not_frameless_call:
 			switch (include_kind) {
 				case ZEND_EVAL:
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_EVAL);
-					build_filename_arg = 0;
+					build_filename_arg = false;
 					break;
 				case ZEND_INCLUDE:
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_INCLUDE);
@@ -2161,7 +2160,7 @@ not_frameless_call:
 					}
 
 					pseudo_function_name = ZSTR_KNOWN(ZEND_STR_UNKNOWN);
-					build_filename_arg = 0;
+					build_filename_arg = false;
 					break;
 			}
 
@@ -2195,9 +2194,9 @@ skip_frame:
 		 && prev->func
 		 && ZEND_USER_CODE(prev->func->common.type)
 		 && prev->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
-			fake_frame = 1;
+			fake_frame = true;
 		} else {
-			fake_frame = 0;
+			fake_frame = false;
 			include_filename = filename;
 			last_call = call;
 			call = prev;
@@ -2267,9 +2266,9 @@ ZEND_FUNCTION(get_extension_funcs)
 	if (module->functions) {
 		/* avoid BC break, if functions list is empty, will return an empty array */
 		array_init(return_value);
-		array = 1;
+		array = true;
 	} else {
-		array = 0;
+		array = false;
 	}
 
 	ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), zif) {
@@ -2277,7 +2276,7 @@ ZEND_FUNCTION(get_extension_funcs)
 			&& zif->internal_function.module == module) {
 			if (!array) {
 				array_init(return_value);
-				array = 1;
+				array = true;
 			}
 			add_next_index_str(return_value, zend_string_copy(zif->common.function_name));
 		}

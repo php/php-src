@@ -208,6 +208,7 @@ typedef struct _zend_oparray_context {
 	zend_string *active_property_info_name;
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
+	bool has_assigned_to_http_response_header;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
@@ -254,7 +255,13 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 <<  6) /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Property Flags (unused: 13...)                         |     |     |     */
+/* deprecation flag                                       |     |     |     */
+#define ZEND_ACC_DEPRECATED              (1 << 11) /*  X  |  X  |     |  X  */
+/*                                                        |     |     |     */
+/* has #[\Override] attribute                             |     |     |     */
+#define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |  X  |     */
+/*                                                        |     |     |     */
+/* Property Flags (unused: 13-27,29...)                   |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Promoted property / parameter                          |     |     |     */
@@ -268,7 +275,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30,31)                            |     |     |     */
+/* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -286,7 +293,7 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class has magic methods __get/__set/__unset/           |     |     |     */
 /* __isset that use guards                                |     |     |     */
-#define ZEND_ACC_USE_GUARDS              (1 << 11) /*  X  |     |     |     */
+#define ZEND_ACC_USE_GUARDS              (1 << 30) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 12) /*  X  |     |     |     */
@@ -336,9 +343,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */
-/*                                                        |     |     |     */
-/* deprecation flag                                       |     |     |     */
-#define ZEND_ACC_DEPRECATED              (1 << 11) /*     |  X  |     |  X  */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
 #define ZEND_ACC_RETURN_REFERENCE        (1 << 12) /*     |  X  |     |     */
@@ -393,9 +397,6 @@ typedef struct _zend_oparray_context {
 /* supports opcache compile-time evaluation (funcs)       |     |     |     */
 #define ZEND_ACC_COMPILE_TIME_EVAL       (1 << 27) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* has #[\Override] attribute                             |     |     |     */
-#define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
-/*                                                        |     |     |     */
 /* Has IS_PTR operands that needs special cleaning; same  |     |     |     */
 /* value as ZEND_ACC_OVERRIDE but override is for class   |     |     |     */
 /* methods and this is for the top level op array         |     |     |     */
@@ -442,7 +443,7 @@ static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t vi
 // Must not clash with ZEND_SHORT_CIRCUITING_CHAIN_MASK
 #define ZEND_JMP_NULL_BP_VAR_IS 4
 
-char *zend_visibility_string(uint32_t fn_flags);
+const char *zend_visibility_string(uint32_t fn_flags);
 
 #define ZEND_PROPERTY_HOOK_COUNT 2
 #define ZEND_PROPERTY_HOOK_STRUCT_SIZE (sizeof(zend_function*) * ZEND_PROPERTY_HOOK_COUNT)
@@ -1206,6 +1207,9 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 
 /* Used to distinguish (parent::$prop)::get() from parent hook call. */
 #define ZEND_PARENTHESIZED_STATIC_PROP 1
+
+/* Used to disallow pipes with arrow functions that lead to confusing parse trees. */
+#define ZEND_PARENTHESIZED_ARROW_FUNC 1
 
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)

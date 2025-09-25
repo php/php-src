@@ -21,7 +21,6 @@ foreach ([
 	curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
 	var_dump(curl_setopt($ch, CURLOPT_FOLLOWLOCATION, $follow));
 	var_dump(curl_exec($ch));
-	curl_close($ch);
 }
 ?>
 --EXPECTF--

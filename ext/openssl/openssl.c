@@ -53,11 +53,6 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #include <openssl/cms.h>
-#if PHP_OPENSSL_API_VERSION >= 0x30000
-#include <openssl/core_names.h>
-#include <openssl/param_build.h>
-#include <openssl/provider.h>
-#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
@@ -2426,9 +2421,9 @@ PHP_FUNCTION(openssl_pbkdf2)
 	}
 
 	if (method_len) {
-		digest = EVP_get_digestbyname(method);
+		digest = php_openssl_get_evp_md_by_name(method);
 	} else {
-		digest = EVP_sha1();
+		digest = php_openssl_get_evp_md_by_name("SHA1");
 	}
 
 	if (!digest) {
@@ -3201,6 +3196,7 @@ PHP_FUNCTION(openssl_cms_encrypt)
 	X509 * cert;
 	const EVP_CIPHER *cipher = NULL;
 	zend_long cipherid = PHP_OPENSSL_CIPHER_DEFAULT;
+	zend_string *cipher_str = NULL;
 	zend_string * strindex;
 	char * infilename = NULL;
 	size_t infilename_len;
@@ -3210,11 +3206,16 @@ PHP_FUNCTION(openssl_cms_encrypt)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppza!|lll", &infilename, &infilename_len,
-				  &outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags, &encoding, &cipherid) == FAILURE) {
-		RETURN_THROWS();
-	}
-
+	ZEND_PARSE_PARAMETERS_START(4, 7)
+		Z_PARAM_PATH(infilename, infilename_len)
+		Z_PARAM_PATH(outfilename, outfilename_len)
+		Z_PARAM_ZVAL(zrecipcerts)
+		Z_PARAM_ARRAY_OR_NULL(zheaders)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+		Z_PARAM_LONG(encoding)
+		Z_PARAM_STR_OR_LONG(cipher_str, cipherid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	infile = php_openssl_bio_new_file(
 			infilename, infilename_len, 1, PHP_OPENSSL_BIO_MODE_R(flags));
@@ -3273,7 +3274,11 @@ PHP_FUNCTION(openssl_cms_encrypt)
 	}
 
 	/* sanity check the cipher */
-	cipher = php_openssl_get_evp_cipher_from_algo(cipherid);
+	if (cipher_str) {
+		cipher = php_openssl_get_evp_cipher_by_name(ZSTR_VAL(cipher_str));
+	} else {
+		cipher = php_openssl_get_evp_cipher_from_algo(cipherid);
+	}
 	if (cipher == NULL) {
 		/* shouldn't happen */
 		php_error_docref(NULL, E_WARNING, "Failed to get cipher");
@@ -4192,7 +4197,7 @@ PHP_FUNCTION(openssl_seal)
 		RETURN_THROWS();
 	}
 
-	cipher = EVP_get_cipherbyname(method);
+	cipher = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
@@ -4321,7 +4326,7 @@ PHP_FUNCTION(openssl_open)
 		RETURN_FALSE;
 	}
 
-	cipher = EVP_get_cipherbyname(method);
+	cipher = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
@@ -4365,7 +4370,7 @@ PHP_FUNCTION(openssl_open)
 /* {{{ Return array of available digest algorithms */
 PHP_FUNCTION(openssl_get_md_methods)
 {
-	bool aliases = 0;
+	bool aliases = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &aliases) == FAILURE) {
 		RETURN_THROWS();
@@ -4377,7 +4382,7 @@ PHP_FUNCTION(openssl_get_md_methods)
 /* {{{ Return array of available cipher algorithms */
 PHP_FUNCTION(openssl_get_cipher_methods)
 {
-	bool aliases = 0;
+	bool aliases = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &aliases) == FAILURE) {
 		RETURN_THROWS();
@@ -4419,7 +4424,7 @@ PHP_FUNCTION(openssl_get_curve_names)
 /* {{{ Computes digest hash value for given data using given method, returns raw or binhex encoded string */
 PHP_FUNCTION(openssl_digest)
 {
-	bool raw_output = 0;
+	bool raw_output = false;
 	char *data, *method;
 	size_t data_len, method_len;
 	const EVP_MD *mdtype;

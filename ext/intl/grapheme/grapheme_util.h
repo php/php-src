@@ -25,8 +25,8 @@ zend_long grapheme_ascii_check(const unsigned char *day, size_t len);
 void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len);
 zend_long grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset);
 
-int32_t grapheme_strrpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int f_ignore_case);
-int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int *puchar_pos, int f_ignore_case, int last);
+int32_t grapheme_strrpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int f_ignore_case, const char *locale);
+int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int *puchar_pos, int f_ignore_case, int last, const char *locale);
 
 int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len );
 

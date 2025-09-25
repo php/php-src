@@ -303,12 +303,12 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 
 static zend_object *spl_fixedarray_new(zend_class_entry *class_type)
 {
-	return spl_fixedarray_object_new_ex(class_type, NULL, 0);
+	return spl_fixedarray_object_new_ex(class_type, NULL, false);
 }
 
 static zend_object *spl_fixedarray_object_clone(zend_object *old_object)
 {
-	zend_object *new_object = spl_fixedarray_object_new_ex(old_object->ce, old_object, 1);
+	zend_object *new_object = spl_fixedarray_object_new_ex(old_object->ce, old_object, true);
 
 	zend_objects_clone_members(new_object, old_object);
 
@@ -706,7 +706,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 	spl_fixedarray array;
 	spl_fixedarray_object *intern;
 	int num;
-	bool save_indexes = 1;
+	bool save_indexes = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|b", &data, &save_indexes) == FAILURE) {
 		RETURN_THROWS();
@@ -815,7 +815,7 @@ PHP_METHOD(SplFixedArray, offsetExists)
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
-	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex, 0));
+	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex, false));
 }
 
 /* Returns the value at the specified $index. */

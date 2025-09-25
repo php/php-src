@@ -99,6 +99,20 @@ const char *intl_locale_get_default( void )
 	return INTL_G(default_locale);
 }
 
+char* canonicalize_locale_string(const char* locale) {
+	char canonicalized[ULOC_FULLNAME_CAPACITY];
+	UErrorCode status = U_ZERO_ERROR;
+	int32_t canonicalized_len;
+
+	canonicalized_len = uloc_canonicalize(locale, canonicalized, sizeof(canonicalized), &status);
+
+	if (U_FAILURE(status) || canonicalized_len <= 0) {
+		return NULL;
+	}
+
+	return estrdup(canonicalized);
+}
+
 static PHP_INI_MH(OnUpdateErrorLevel)
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();

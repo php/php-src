@@ -42,9 +42,9 @@ bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int
 			if (copy) {
 				Z_TRY_ADDREF_P(result);
 			}
-			return 1;
+			return true;
 		} else {
-			return 0;
+			return false;
 		}
 	}
 
@@ -52,9 +52,9 @@ bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int
 	c = zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
 	if (c) {
 		ZVAL_COPY_VALUE(result, &c->value);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 /* Data dependencies macros */
@@ -420,6 +420,14 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
+			case ZEND_EXT_STMT:
+				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+					/* Variable will be deleted later by FREE, so we can't optimize it */
+					Tsource[VAR_NUM(opline->op1.var)] = NULL;
+					break;
+				}
+				break;
+
 			case ZEND_CASE:
 			case ZEND_CASE_STRICT:
 			case ZEND_COPY_TMP:
@@ -428,18 +436,11 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
 					break;
 				}
-				ZEND_FALLTHROUGH;
-
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_NOT_EQUAL:
 				if (opline->op1_type == IS_CONST &&
 				    opline->op2_type == IS_CONST) {
 					goto optimize_constant_binary_op;
 				}
-		        /* IS_EQ(TRUE, X)      => BOOL(X)
-		         * IS_EQ(FALSE, X)     => BOOL_NOT(X)
-		         * IS_NOT_EQ(TRUE, X)  => BOOL_NOT(X)
-		         * IS_NOT_EQ(FALSE, X) => BOOL(X)
+		        /*
 		         * CASE(TRUE, X)       => BOOL(X)
 		         * CASE(FALSE, X)      => BOOL_NOT(X)
 		         */
@@ -469,6 +470,21 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					++(*opt_count);
 					goto optimize_bool;
 				}
+				break;
+
+			case ZEND_IS_EQUAL:
+			case ZEND_IS_NOT_EQUAL:
+				if (opline->op1_type == IS_CONST &&
+					opline->op2_type == IS_CONST) {
+					goto optimize_constant_binary_op;
+				}
+				/* IS_EQ(TRUE, X)      => BOOL(X)
+				 * IS_EQ(FALSE, X)     => BOOL_NOT(X)
+				 * IS_NOT_EQ(TRUE, X)  => BOOL_NOT(X)
+				 * IS_NOT_EQ(FALSE, X) => BOOL(X)
+				 * Those optimizations are not safe if the other operand ends up being NAN
+				 * as BOOL/BOOL_NOT will warn, while IS_EQUAL/IS_NOT_EQUAL do not.
+				 */
 				break;
 			case ZEND_IS_IDENTICAL:
 				if (opline->op1_type == IS_CONST &&
@@ -933,14 +949,14 @@ optimize_const_unary_op:
 					src = VAR_SOURCE(opline->op1);
 					if (src && src->opcode == ZEND_QM_ASSIGN) {
 						zend_op *op = src + 1;
-						bool optimize = 1;
+						bool optimize = true;
 
 						while (op < opline) {
 							if ((op->op1_type == opline->op1_type
 							  && op->op1.var == opline->op1.var)
 							 || (op->op2_type == opline->op1_type
 							  && op->op2.var == opline->op1.var)) {
-								optimize = 0;
+								optimize = false;
 								break;
 							}
 							op++;
@@ -1550,14 +1566,14 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_BLOCK_PASS_VARS) {
-		bool printed = 0;
+		bool printed = false;
 		uint32_t i;
 
 		for (i = op_array->last_var; i< op_array->T; i++) {
 			if (zend_bitset_in(used_ext, i)) {
 				if (!printed) {
 					fprintf(stderr, "NON-LOCAL-VARS: %d", i);
-					printed = 1;
+					printed = true;
 				} else {
 					fprintf(stderr, ", %d", i);
 				}

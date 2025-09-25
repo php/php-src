@@ -227,6 +227,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_flag_d0      ir_op_flag_d
 #define ir_op_flag_d1      (ir_op_flag_d | 1 | (1 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_d1X1    (ir_op_flag_d | 1 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
+#define ir_op_flag_d1X2    (ir_op_flag_d | 1 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_d2      (ir_op_flag_d | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_d2C     (ir_op_flag_d | IR_OP_FLAG_COMMUTATIVE | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_d3      (ir_op_flag_d | 3 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
@@ -270,6 +271,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_flag_s3      (ir_op_flag_s | 3 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_x1      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 1 | (1 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_x2      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
+#define ir_op_flag_x2X1    (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 2 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_x3      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 3 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_xN      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | IR_OP_FLAG_VAR_INPUTS)
 #define ir_op_flag_a1      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 1 | (1 << IR_OP_FLAG_OPERANDS_SHIFT))
@@ -392,6 +394,8 @@ void ir_init(ir_ctx *ctx, uint32_t flags, ir_ref consts_limit, ir_ref insns_limi
 	ctx->insns_limit = insns_limit;
 	ctx->consts_count = -(IR_TRUE - 1);
 	ctx->consts_limit = consts_limit;
+	ctx->const_hash = ctx->_const_hash;
+	ctx->const_hash_mask = IR_CONST_HASH_SIZE - 1;
 	ctx->fold_cse_limit = IR_UNUSED + 1;
 	ctx->flags = flags;
 
@@ -414,6 +418,9 @@ void ir_free(ir_ctx *ctx)
 {
 	ir_insn *buf = ctx->ir_base - ctx->consts_limit;
 	ir_mem_free(buf);
+	if (ctx->value_params) {
+		ir_mem_free(ctx->value_params);
+	}
 	if (ctx->strtab.data) {
 		ir_strtab_free(&ctx->strtab);
 	}
@@ -468,6 +475,10 @@ void ir_free(ir_ctx *ctx)
 		ir_list_free((ir_list*)ctx->osr_entry_loads);
 		ir_mem_free(ctx->osr_entry_loads);
 	}
+
+	if (ctx->const_hash_mask != IR_CONST_HASH_SIZE - 1) {
+		ir_mem_free(ctx->const_hash);
+	}
 }
 
 ir_ref ir_unique_const_addr(ir_ctx *ctx, uintptr_t addr)
@@ -479,71 +490,63 @@ ir_ref ir_unique_const_addr(ir_ctx *ctx, uintptr_t addr)
 	insn->val.u64 = addr;
 	/* don't insert into constants chain */
 	insn->prev_const = IR_UNUSED;
-#if 0
-	insn->prev_const = ctx->prev_const_chain[IR_ADDR];
-	ctx->prev_const_chain[IR_ADDR] = ref;
-#endif
-#if 0
-	ir_insn *prev_insn, *next_insn;
-	ir_ref next;
-
-	prev_insn = NULL;
-	next = ctx->prev_const_chain[IR_ADDR];
-	while (next) {
-		next_insn = &ctx->ir_base[next];
-		if (UNEXPECTED(next_insn->val.u64 >= addr)) {
-			break;
-		}
-		prev_insn = next_insn;
-		next = next_insn->prev_const;
-	}
-
-	if (prev_insn) {
-		insn->prev_const = prev_insn->prev_const;
-		prev_insn->prev_const = ref;
-	} else {
-		insn->prev_const = ctx->prev_const_chain[IR_ADDR];
-		ctx->prev_const_chain[IR_ADDR] = ref;
-	}
-#endif
 
 	return ref;
 }
 
+IR_ALWAYS_INLINE uintptr_t ir_const_hash(ir_val val, uint32_t optx)
+{
+	return (val.u64 ^ (val.u64 >> 32) ^ optx);
+}
+
+static IR_NEVER_INLINE void ir_const_hash_rehash(ir_ctx *ctx)
+{
+	ir_insn *insn;
+	ir_ref ref;
+	uintptr_t hash;
+
+	if (ctx->const_hash_mask != IR_CONST_HASH_SIZE - 1) {
+		ir_mem_free(ctx->const_hash);
+	}
+	ctx->const_hash_mask = (ctx->const_hash_mask + 1) * 2 - 1;
+	ctx->const_hash = ir_mem_calloc(ctx->const_hash_mask + 1, sizeof(ir_ref));
+	for (ref = IR_TRUE - 1; ref > -ctx->consts_count; ref--) {
+		insn = &ctx->ir_base[ref];
+		hash = ir_const_hash(insn->val, insn->optx) & ctx->const_hash_mask;
+		insn->prev_const = ctx->const_hash[hash];
+		ctx->const_hash[hash] = ref;
+	}
+}
+
 ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx)
 {
-	ir_insn *insn, *prev_insn;
+	ir_insn *insn;
 	ir_ref ref, prev;
+	uintptr_t hash;
 
 	if (type == IR_BOOL) {
 		return val.u64 ? IR_TRUE : IR_FALSE;
 	} else if (type == IR_ADDR && val.u64 == 0) {
 		return IR_NULL;
 	}
-	prev_insn = NULL;
-	ref = ctx->prev_const_chain[type];
+
+	hash = ir_const_hash(val, optx) & ctx->const_hash_mask;
+	ref = ctx->const_hash[hash];
 	while (ref) {
 		insn = &ctx->ir_base[ref];
-		if (UNEXPECTED(insn->val.u64 >= val.u64)) {
-			if (insn->val.u64 == val.u64) {
-				if (insn->optx == optx) {
-					return ref;
-				}
-			} else {
-				break;
-			}
+		if (insn->val.u64 == val.u64 && insn->optx == optx) {
+			return ref;
 		}
-		prev_insn = insn;
 		ref = insn->prev_const;
 	}
 
-	if (prev_insn) {
-		prev = prev_insn->prev_const;
-		prev_insn->prev_const = -ctx->consts_count;
-	} else {
-		prev = ctx->prev_const_chain[type];
-		ctx->prev_const_chain[type] = -ctx->consts_count;
+	if ((uintptr_t)ctx->consts_count > ctx->const_hash_mask) {
+		ir_const_hash_rehash(ctx);
+		hash = ir_const_hash(val, optx) & ctx->const_hash_mask;
 	}
+
+	prev = ctx->const_hash[hash];
+	ctx->const_hash[hash] = -ctx->consts_count;
 
 	ref = ir_next_const(ctx);
 	insn = &ctx->ir_base[ref];
@@ -624,7 +627,7 @@ ir_ref ir_const_bool(ir_ctx *ctx, bool c)
 ir_ref ir_const_char(ir_ctx *ctx, char c)
 {
 	ir_val val;
-	val.i64 = c;
+	val.i64 = (signed char)c;
 	return ir_const(ctx, val, IR_CHAR);
 }
 
@@ -2092,10 +2095,10 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(ir_ctx *ctx, ir_ref ref, ir_typ
 				if (insn->type == type) {
 					return ref; /* load forwarding (L2L) */
 				} else if (ir_type_size[insn->type] == ir_type_size[type]) {
-					return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), ref); /* load forwarding with bitcast (L2L) */
+					return ref; /* load forwarding with bitcast (L2L) */
 				} else if (ir_type_size[insn->type] > ir_type_size[type]
 						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(insn->type)) {
-					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), ref); /* partial load forwarding (L2L) */
+					return ref; /* partial load forwarding (L2L) */
 				}
 			}
 		} else if (insn->op == IR_VSTORE) {
@@ -2105,10 +2108,10 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(ir_ctx *ctx, ir_ref ref, ir_typ
 				if (type2 == type) {
 					return insn->op3; /* store forwarding (S2L) */
 				} else if (ir_type_size[type2] == ir_type_size[type]) {
-					return ir_fold1(ctx, IR_OPT(IR_BITCAST, type), insn->op3); /* store forwarding with bitcast (S2L) */
+					return insn->op3; /* store forwarding with bitcast (S2L) */
 				} else if (ir_type_size[type2] > ir_type_size[type]
 						&& IR_IS_TYPE_INT(type) && IR_IS_TYPE_INT(type2)) {
-					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), insn->op3); /* partial store forwarding (S2L) */
+					return insn->op3; /* partial store forwarding (S2L) */
 				} else {
 					break;
 				}
@@ -3212,6 +3215,13 @@ ir_ref _ir_VA_ARG(ir_ctx *ctx, ir_type type, ir_ref list)
 {
 	IR_ASSERT(ctx->control);
 	return ctx->control = ir_emit2(ctx, IR_OPT(IR_VA_ARG, type), ctx->control, list);
+}
+
+ir_ref _ir_VA_ARG_EX(ir_ctx *ctx, ir_type type, ir_ref list, size_t size)
+{
+	IR_ASSERT(ctx->control);
+	IR_ASSERT(size <= 0x7fffffff);
+	return ctx->control = ir_emit3(ctx, IR_OPT(IR_VA_ARG, type), ctx->control, list, (ir_ref)size);
 }
 
 ir_ref _ir_BLOCK_BEGIN(ir_ctx *ctx)

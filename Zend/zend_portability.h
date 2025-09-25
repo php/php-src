@@ -89,6 +89,9 @@
 #ifndef __has_feature
 # define __has_feature(x) 0
 #endif
+#ifndef __has_include
+# define __has_include(x) 0
+#endif
 
 #if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
@@ -248,6 +251,14 @@ char *alloca();
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
+#if __STDC_VERSION__ >= 202311L || (defined(__cplusplus) && __cplusplus >= 201703L)
+# define ZEND_ATTRIBUTE_NODISCARD [[nodiscard]]
+#elif __has_attribute(__warn_unused_result__)
+# define ZEND_ATTRIBUTE_NODISCARD __attribute__((__warn_unused_result__))
+#else
+# define ZEND_ATTRIBUTE_NODISCARD
+#endif
+
 #if ZEND_GCC_VERSION >= 3000
 # define ZEND_ATTRIBUTE_CONST __attribute__((const))
 #else
@@ -319,6 +330,15 @@ char *alloca();
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
+#endif
+
+#ifdef HAVE_PRESERVE_NONE
+# define ZEND_PRESERVE_NONE __attribute__((preserve_none))
+#endif
+
+#if __has_attribute(musttail)
+# define HAVE_MUSTTAIL
+# define ZEND_MUSTTAIL __attribute__((musttail))
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
@@ -731,6 +751,10 @@ extern "C++" {
 # define ZEND_SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
 #else
 # define ZEND_SET_ALIGNED(alignment, decl) decl
+#endif
+
+#if __has_attribute(section)
+# define HAVE_ATTRIBUTE_SECTION
 #endif
 
 #define ZEND_SLIDE_TO_ALIGNED(alignment, ptr) (((uintptr_t)(ptr) + ((alignment)-1)) & ~((alignment)-1))

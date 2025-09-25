@@ -141,9 +141,9 @@ PHP_METHOD(UConverter, fromUCallback) {
 static inline bool php_converter_check_limits(php_converter_object *objval, zend_long available, zend_long needed) {
 	if (available < needed) {
 		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR, "Buffer overrun " ZEND_LONG_FMT " bytes needed, " ZEND_LONG_FMT " available", needed, available);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
@@ -336,14 +336,14 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 		/* Short-circuit having to go through method calls and data marshalling
 		 * when we're using default behavior
 		 */
-		return 1;
+		return true;
 	}
 
 	ucnv_setToUCallBack(cnv, (UConverterToUCallback)php_converter_to_u_callback, (const void*)objval,
 	                    NULL, NULL, &error);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, error);
-		ret = 0;
+		ret = false;
 	}
 
 	error = U_ZERO_ERROR;
@@ -351,7 +351,7 @@ static inline bool php_converter_set_callbacks(php_converter_object *objval, UCo
 	                      NULL, NULL, &error);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, error);
-		ret = 0;
+		ret = false;
 	}
 	return ret;
 }

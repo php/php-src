@@ -256,14 +256,14 @@ static void dba_close_info(dba_info *info)
 		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->fp);
 		} else {
-			php_stream_close(info->fp);
+			php_stream_free(info->fp, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 		}
 	}
 	if (info->lock.fp) {
 		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->lock.fp);
 		} else {
-			php_stream_close(info->lock.fp);
+			php_stream_free(info->lock.fp, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 		}
 	}
 
@@ -516,6 +516,17 @@ static zend_always_inline zend_string *php_dba_zend_string_dup_safe(zend_string 
 	}
 }
 
+/* See mysqlnd_fixup_regular_list */
+static void php_dba_fixup_regular_list(php_stream *stream)
+{
+	dtor_func_t origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
+	zend_hash_index_del(&EG(regular_list), stream->res->handle);
+	EG(regular_list).pDestructor = origin_dtor;
+	efree(stream->res);
+	stream->res = NULL;
+}
+
 /* {{{ php_dba_open */
 static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 {
@@ -528,8 +539,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
 	char *lock_name;
 #ifdef PHP_WIN32
-	bool restarted = 0;
-	bool need_creation = 0;
+	bool restarted = false;
+	bool need_creation = false;
 #endif
 
 	zend_string *path;
@@ -827,6 +838,9 @@ restart:
 				/* do not log errors for .lck file while in read only mode on .lck file */
 				lock_file_mode = "rb";
 				connection->info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, NULL);
+				if (connection->info->lock.fp && !persistent_flag) {
+					php_dba_fixup_regular_list(connection->info->lock.fp);
+				}
 			}
 			if (!connection->info->lock.fp) {
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
@@ -837,6 +851,9 @@ restart:
 			zend_string *opened_path = NULL;
 			connection->info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, &opened_path);
 			if (connection->info->lock.fp) {
+				if (!persistent_flag) {
+					php_dba_fixup_regular_list(connection->info->lock.fp);
+				}
 				if (is_db_lock) {
 					if (opened_path) {
 						/* replace the path info with the real path of the opened file */
@@ -873,6 +890,9 @@ restart:
 			connection->info->fp = connection->info->lock.fp; /* use the same stream for locking and database access */
 		} else {
 			connection->info->fp = php_stream_open_wrapper(ZSTR_VAL(connection->info->path), file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, NULL);
+			if (connection->info->fp && !persistent_flag) {
+				php_dba_fixup_regular_list(connection->info->fp);
+			}
 		}
 		if (!connection->info->fp) {
 			/* stream operation already wrote an error message */
@@ -903,7 +923,7 @@ restart:
 
 				lock_file_mode = "r+b";
 
-				restarted = 1;
+				restarted = true;
 				goto restart;
 #endif
 			}
@@ -949,14 +969,14 @@ fail:
 /* {{{ Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
-	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
-	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
@@ -1040,6 +1060,11 @@ PHP_FUNCTION(dba_fetch)
 			Z_PARAM_OPTIONAL
 			Z_PARAM_LONG(skip)
 		ZEND_PARSE_PARAMETERS_END();
+	}
+
+	if (ZEND_LONG_EXCEEDS_INT(skip)) {
+		zend_argument_value_error(3, "must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_THROWS();
 	}
 
 	info = Z_DBA_INFO_P(id);
@@ -1252,7 +1277,7 @@ PHP_FUNCTION(dba_sync)
 /* {{{ List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
-	bool full_info = 0;
+	bool full_info = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
 		RETURN_THROWS();

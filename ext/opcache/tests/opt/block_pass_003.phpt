@@ -1,5 +1,5 @@
 --TEST--
-Block Pass 003: Inorrect constant substitution in FETCH_LIST_R
+Block Pass 003: Incorrect constant substitution in FETCH_LIST_R
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -16,5 +16,44 @@ function test() {
 test();
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
+
+Warning: Cannot use int as array in %s on line %d
 DONE

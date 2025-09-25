@@ -13,7 +13,7 @@ jobs:
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Set fetch-depth to 0 to clone the full repository
           # including all branches. This is required to find
@@ -64,4 +64,5 @@ jobs:
       skip_laravel: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
       skip_symfony: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
       skip_wordpress: ${{ matrix.branch.version[0] == 8 && matrix.branch.version[1] == 1 }}
+      variation_enable_zend_max_execution_timers: ${{ (matrix.branch.version[0] == 8 && matrix.branch.version[1] >= 3) || matrix.branch.version[0] >= 9 }}
     secrets: inherit

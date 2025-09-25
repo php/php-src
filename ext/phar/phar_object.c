@@ -403,7 +403,7 @@ PHP_METHOD(Phar, running)
 	zend_string *fname;
 	char *arch, *entry;
 	size_t arch_len, entry_len;
-	bool retphar = 1;
+	bool retphar = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &retphar) == FAILURE) {
 		RETURN_THROWS();
@@ -1060,7 +1060,7 @@ PHP_METHOD(Phar, isValidPharFilename)
 	size_t fname_len;
 	size_t ext_len;
 	int is_executable;
-	bool executable = 1;
+	bool executable = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &fname, &fname_len, &executable) == FAILURE) {
 		RETURN_THROWS();
@@ -1393,7 +1393,7 @@ struct _phar_t {
 static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 {
 	zval *value;
-	bool close_fp = 1;
+	bool close_fp = true;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
 	size_t str_key_len, base_len = ZSTR_LEN(p_obj->base);
 	phar_entry_data *data;
@@ -1455,7 +1455,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				return ZEND_HASH_APPLY_STOP;
 			}
 
-			close_fp = 0;
+			close_fp = false;
 			opened = ZSTR_INIT_LITERAL("[stream]", 0);
 			goto after_open_fp;
 		case IS_OBJECT:
@@ -1714,7 +1714,7 @@ after_open_fp:
 PHP_METHOD(Phar, buildFromDirectory)
 {
 	char *error;
-	bool apply_reg = 0;
+	bool apply_reg = false;
 	zval arg, arg2, iter, iteriter, regexiter;
 	struct _phar_t pass;
 	zend_string *dir, *regex = NULL;
@@ -1767,7 +1767,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	zval_ptr_dtor(&iter);
 
 	if (regex && ZSTR_LEN(regex) > 0) {
-		apply_reg = 1;
+		apply_reg = true;
 
 		if (SUCCESS != object_init_ex(&regexiter, spl_ce_RegexIterator)) {
 			zval_ptr_dtor(&iteriter);
@@ -2237,6 +2237,12 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	PHAR_G(last_phar) = NULL;
 	PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
 
+	php_stream *tmp_fp = php_stream_fopen_tmpfile();
+	if (tmp_fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0, "unable to create temporary file");
+		return NULL;
+	}
+
 	phar = (phar_archive_data *) ecalloc(1, sizeof(phar_archive_data));
 	/* set whole-archive compression and type from parameter */
 	phar->flags = flags;
@@ -2261,11 +2267,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	zend_hash_init(&phar->virtual_dirs, sizeof(char *),
 		zend_get_hash_value, NULL, 0);
 
-	phar->fp = php_stream_fopen_tmpfile();
-	if (phar->fp == NULL) {
-		zend_throw_exception_ex(phar_ce_PharException, 0, "unable to create temporary file");
-		return NULL;
-	}
+	phar->fp = tmp_fp;
 	phar->fname = source->fname;
 	phar->fname_len = source->fname_len;
 	phar->is_temporary_alias = source->is_temporary_alias;
@@ -2289,6 +2291,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 		}
 
 		if (FAILURE == phar_copy_file_contents(&newentry, phar->fp)) {
+			phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 			zend_hash_destroy(&(phar->manifest));
 			php_stream_close(phar->fp);
 			efree(phar);
@@ -2326,13 +2329,18 @@ no_copy:
 		return ret;
 	} else {
 		if(phar != NULL) {
+			phar_metadata_tracker_free(&phar->metadata_tracker, phar->is_persistent);
 			zend_hash_destroy(&(phar->manifest));
 			zend_hash_destroy(&(phar->mounted_dirs));
 			zend_hash_destroy(&(phar->virtual_dirs));
 			if (phar->fp) {
 				php_stream_close(phar->fp);
 			}
-			efree(phar->fname);
+			if (phar->fname != source->fname) {
+				/* Depending on when phar_rename_archive() errors, the new filename
+				 * may have already been assigned or it may still be the old one. */
+				efree(phar->fname);
+			}
 			efree(phar);
 		}
 		return NULL;
@@ -2352,7 +2360,7 @@ PHP_METHOD(Phar, convertToExecutable)
 	uint32_t flags;
 	zend_object *ret;
 	zend_long format, method;
-	bool format_is_null = 1, method_is_null = 1;
+	bool format_is_null = true, method_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l!s!", &format, &format_is_null, &method, &method_is_null, &ext, &ext_len) == FAILURE) {
 		RETURN_THROWS();
@@ -2463,7 +2471,7 @@ PHP_METHOD(Phar, convertToData)
 	uint32_t flags;
 	zend_object *ret;
 	zend_long format, method;
-	bool format_is_null = 1, method_is_null = 1;
+	bool format_is_null = true, method_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l!s!", &format, &format_is_null, &method, &method_is_null, &ext, &ext_len) == FAILURE) {
 		RETURN_THROWS();
@@ -4566,7 +4574,7 @@ PHP_METHOD(PharFileInfo, getCompressedSize)
 PHP_METHOD(PharFileInfo, isCompressed)
 {
 	zend_long method;
-	bool method_is_null = 1;
+	bool method_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &method, &method_is_null) == FAILURE) {
 		RETURN_THROWS();
