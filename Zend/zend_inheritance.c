@@ -200,7 +200,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
+const char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 {
 	if (fn_flags & ZEND_ACC_PUBLIC) {
 		return "public";

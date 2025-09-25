@@ -443,7 +443,7 @@ static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t vi
 // Must not clash with ZEND_SHORT_CIRCUITING_CHAIN_MASK
 #define ZEND_JMP_NULL_BP_VAR_IS 4
 
-char *zend_visibility_string(uint32_t fn_flags);
+const char *zend_visibility_string(uint32_t fn_flags);
 
 #define ZEND_PROPERTY_HOOK_COUNT 2
 #define ZEND_PROPERTY_HOOK_STRUCT_SIZE (sizeof(zend_function*) * ZEND_PROPERTY_HOOK_COUNT)
