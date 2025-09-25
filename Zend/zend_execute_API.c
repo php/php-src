@@ -270,9 +270,6 @@ void shutdown_destructors(void) /* {{{ */
 /* Free values held by the executor. */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 {
-	zend_string *key;
-	zval *zv;
-
 	EG(flags) |= EG_FLAGS_IN_RESOURCE_SHUTDOWN;
 	zend_try {
 		zend_close_rsrc_list(&EG(regular_list));
@@ -282,12 +279,15 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 	EG(active) = 0;
 
 	if (!fast_shutdown) {
+		zval *zv;
+
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 
 		/* Constants may contain objects, destroy them before the object store. */
 		if (EG(full_tables_cleanup)) {
 			zend_hash_reverse_apply(EG(zend_constants), clean_non_persistent_constant_full);
 		} else {
+			zend_string *key;
 			ZEND_HASH_MAP_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
 				zend_constant *c = Z_PTR_P(zv);
 				if (_idx == EG(persistent_constants_count)) {
@@ -434,8 +434,6 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 
 void shutdown_executor(void) /* {{{ */
 {
-	zend_string *key;
-	zval *zv;
 #if ZEND_DEBUG
 	bool fast_shutdown = 0;
 #elif defined(__SANITIZE_ADDRESS__)
@@ -477,6 +475,8 @@ void shutdown_executor(void) /* {{{ */
 			zend_hash_reverse_apply(EG(function_table), clean_non_persistent_function_full);
 			zend_hash_reverse_apply(EG(class_table), clean_non_persistent_class_full);
 		} else {
+			zend_string *key;
+			zval *zv;
 			ZEND_HASH_MAP_REVERSE_FOREACH_STR_KEY_VAL(EG(function_table), key, zv) {
 				zend_function *func = Z_PTR_P(zv);
 				if (_idx == EG(persistent_functions_count)) {
@@ -808,7 +808,6 @@ zend_result _call_user_function_impl(zval *object, zval *function_name, zval *re
 
 zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /* {{{ */
 {
-	uint32_t i;
 	zend_execute_data *call;
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
@@ -871,7 +870,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		}
 	}
 
-	for (i=0; i<fci->param_count; i++) {
+	for (uint32_t i = 0; i < fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);
 		zval *arg = &fci->params[i];
 		bool must_wrap = false;
