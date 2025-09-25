@@ -496,8 +496,13 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 
 		/* attempt to bind */
 
-#ifdef SO_REUSEADDR
-		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&sockoptval, sizeof(sockoptval));
+		if (sockopts & STREAM_SOCKOP_SO_REUSEADDR) {
+			setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&sockoptval, sizeof(sockoptval));
+		}
+#ifdef PHP_WIN32
+		else {
+			setsockopt(sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (char*)&sockoptval, sizeof(sockoptval));
+		}
 #endif
 #ifdef IPV6_V6ONLY
 		if (sockopts & STREAM_SOCKOP_IPV6_V6ONLY) {
