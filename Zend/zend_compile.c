@@ -9998,7 +9998,9 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	/* Operation which cast float/float-strings to integers might produce incompatible float to int errors */
 	if (opcode == ZEND_SL || opcode == ZEND_SR || opcode == ZEND_BW_OR
 			|| opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR) {
-		return !zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2);
+		if (!zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2)) {
+			return 1;
+		}
 	}
 
 	if (opcode == ZEND_DIV && zval_get_double(op2) == 0.0) {
@@ -10009,7 +10011,9 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	/* Mod is an operation that will cast float/float-strings to integers which might
 	   produce float to int incompatible errors, and also cannot be divided by 0 */
 	if (opcode == ZEND_MOD) {
-		return  !zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2) || zval_get_long(op2) == 0;
+		if (!zend_is_op_long_compatible(op1) || !zend_is_op_long_compatible(op2) || zval_get_long(op2) == 0) {
+			return 1;
+		}
 	}
 
 	if ((opcode == ZEND_POW) && zval_get_double(op1) == 0 && zval_get_double(op2) < 0) {
