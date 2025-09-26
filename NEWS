@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-20002 (Broken build on *BSD with MSAN). (outtersg)
   . Fixed bug GH-19352 (Cross-compilation with musl C library).
     (henderkes, Peter Kokot)
+  . Revert deprecation of __sleep() and __wakeup().
+    They're now soft-deprecated. (Nicolas Grekas)
 
 - BcMath:
   . Fixed bug GH-20006 (Power of 0 of BcMath number causes UB). (nielsdos)
