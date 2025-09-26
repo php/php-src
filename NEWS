@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC2
 
+- Core:
+  . Revert deprecation of __sleep() and __wakeup().
+    They're now soft-deprecated. (Nicolas Grekas)
+
 - Opcache
   . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
 
