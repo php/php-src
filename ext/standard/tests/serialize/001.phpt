@@ -1,5 +1,5 @@
 --TEST--
-serialize()/unserialize()/var_dump()
+serialize()/unserialize()/var_dump() using __sleep() and __wakeup()
 --INI--
 serialize_precision=100
 --FILE--
