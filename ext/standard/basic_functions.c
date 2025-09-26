@@ -292,6 +292,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_basic_functions_symbols(module_number);
 
 	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
+	/* Dummy constructor, should it be allowed to manually instantiate? */
+	php_ce_incomplete_class->constructor = (zend_function *) &zend_pass_function;
 	php_register_incomplete_class_handlers();
 
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);

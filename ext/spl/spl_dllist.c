@@ -1254,6 +1254,8 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_ce_SplDoublyLinkedList = register_class_SplDoublyLinkedList(
 		zend_ce_iterator, zend_ce_countable, zend_ce_arrayaccess, zend_ce_serializable
 	);
+	/* Dummy constructor */
+	spl_ce_SplDoublyLinkedList->constructor = (zend_function *) &zend_pass_function;
 	spl_ce_SplDoublyLinkedList->create_object = spl_dllist_object_new;
 	spl_ce_SplDoublyLinkedList->default_object_handlers = &spl_handler_SplDoublyLinkedList;
 	spl_ce_SplDoublyLinkedList->get_iterator = spl_dllist_get_iterator;

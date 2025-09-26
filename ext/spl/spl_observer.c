@@ -1387,9 +1387,15 @@ PHP_METHOD(MultipleIterator, key)
 PHP_MINIT_FUNCTION(spl_observer)
 {
 	spl_ce_SplObserver = register_class_SplObserver();
+	/* Dummy constructor */
+	spl_ce_SplObserver->constructor = (zend_function *) &zend_pass_function;
 	spl_ce_SplSubject = register_class_SplSubject();
+	/* Dummy constructor */
+	spl_ce_SplSubject->constructor = (zend_function *) &zend_pass_function;
 
 	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, spl_ce_SeekableIterator, zend_ce_serializable, zend_ce_arrayaccess);
+	/* Dummy constructor */
+	spl_ce_SplObjectStorage->constructor = (zend_function *) &zend_pass_function;
 	spl_ce_SplObjectStorage->create_object = spl_SplObjectStorage_new;
 	spl_ce_SplObjectStorage->default_object_handlers = &spl_handler_SplObjectStorage;
 
