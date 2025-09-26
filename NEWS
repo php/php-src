@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.5.0RC2
 
+- Core:
+  . Fix OSS-Fuzz #447521098 (Fatal error during sccp shift eval). (ilutov)
+
 - Opcache
   . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
 
