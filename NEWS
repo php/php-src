@@ -44,6 +44,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
     (Arnaud)
   . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
+  . Fixed bug GH-19889 (race condition in zend_runtime_jit(),
+    zend_jit_hot_func()). (Arnaud)
 
 - Phar:
   . Fix memory leak and invalid continuation after tar header writing fails.
