@@ -19,6 +19,7 @@
 #include "Zend/zend_portability.h"
 #include "Zend/zend_types.h"
 #include "Zend/zend_API.h"
+#include "Zend/zend_sanitizers.h"
 
 static ZEND_COLD void undef_result_after_exception(void) {
 	const zend_op *opline = EG(opline_before_exception);
@@ -307,6 +308,18 @@ static zend_execute_data* ZEND_FASTCALL zend_jit_int_extend_stack_helper(uint32_
 	ZEND_CALL_INFO(call) = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_ALLOCATED;
 	return call;
 }
+
+#ifdef __SANITIZE_ADDRESS__
+static void ZEND_FASTCALL zend_jit_poison_memory_region_helper(void *addr, size_t size)
+{
+	ZEND_POISON_MEMORY_REGION(addr, size);
+}
+
+static void ZEND_FASTCALL zend_jit_unpoison_memory_region_helper(void *addr, size_t size)
+{
+	ZEND_UNPOISON_MEMORY_REGION(addr, size);
+}
+#endif
 
 static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *str)
 {
