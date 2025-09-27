@@ -450,12 +450,12 @@ ZEND_API void ZEND_FASTCALL zend_free_extra_named_params(zend_array *extra_named
 
 /* services */
 ZEND_API const char *get_active_class_name(const char **space);
-ZEND_API const char *get_active_function_name(void);
-ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
-ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
-ZEND_API zend_function *zend_active_function_ex(zend_execute_data *execute_data);
+ZEND_ATTRIBUTE_PURE ZEND_API const char *get_active_function_name(void);
+ZEND_ATTRIBUTE_PURE ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
+ZEND_ATTRIBUTE_PURE ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
+ZEND_ATTRIBUTE_PURE ZEND_API zend_function *zend_active_function_ex(const zend_execute_data *execute_data);
 
-static zend_always_inline zend_function *zend_active_function(void)
+ZEND_ATTRIBUTE_PURE static zend_always_inline zend_function *zend_active_function(void)
 {
 	zend_function *func = EG(current_execute_data)->func;
 	if (ZEND_USER_CODE(func->type)) {
@@ -467,11 +467,11 @@ static zend_always_inline zend_function *zend_active_function(void)
 
 ZEND_API zend_string *get_active_function_or_method_name(void);
 ZEND_API zend_string *get_function_or_method_name(const zend_function *func);
-ZEND_API const char *zend_get_executed_filename(void);
-ZEND_API zend_string *zend_get_executed_filename_ex(void);
-ZEND_API uint32_t zend_get_executed_lineno(void);
-ZEND_API zend_class_entry *zend_get_executed_scope(void);
-ZEND_API bool zend_is_executing(void);
+ZEND_ATTRIBUTE_PURE ZEND_API const char *zend_get_executed_filename(void);
+ZEND_ATTRIBUTE_PURE ZEND_API zend_string *zend_get_executed_filename_ex(void);
+ZEND_ATTRIBUTE_PURE ZEND_API uint32_t zend_get_executed_lineno(void);
+ZEND_ATTRIBUTE_PURE ZEND_API zend_class_entry *zend_get_executed_scope(void);
+ZEND_ATTRIBUTE_PURE ZEND_API bool zend_is_executing(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num);
 
 ZEND_API void zend_set_timeout(zend_long seconds, bool reset_signals);

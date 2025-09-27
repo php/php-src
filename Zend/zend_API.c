@@ -116,7 +116,7 @@ ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property)
 }
 
 /* Argument parsing API -- andrei */
-ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
+ZEND_ATTRIBUTE_CONST ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 {
 	switch(type) {
 		case IS_FALSE:
@@ -152,7 +152,7 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 }
 /* }}} */
 
-ZEND_API const char *zend_zval_value_name(const zval *arg)
+ZEND_ATTRIBUTE_PURE ZEND_API const char *zend_zval_value_name(const zval *arg)
 {
 	ZVAL_DEREF(arg);
 
@@ -171,7 +171,7 @@ ZEND_API const char *zend_zval_value_name(const zval *arg)
 	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 
-ZEND_API const char *zend_zval_type_name(const zval *arg)
+ZEND_ATTRIBUTE_PURE ZEND_API const char *zend_zval_type_name(const zval *arg)
 {
 	ZVAL_DEREF(arg);
 
@@ -3703,7 +3703,7 @@ ZEND_API void zend_disable_functions(const char *function_list) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline zend_class_entry *get_scope(zend_execute_data *frame)
+ZEND_ATTRIBUTE_PURE static zend_always_inline zend_class_entry *get_scope(const zend_execute_data *frame)
 {
 	return frame && frame->func ? frame->func->common.scope : NULL;
 }
