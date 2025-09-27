@@ -88,7 +88,7 @@ static void zend_handle_sigsegv(void) /* {{{ */
 /* }}} */
 #endif
 
-static void zend_extension_activator(zend_extension *extension) /* {{{ */
+static void zend_extension_activator(const zend_extension *extension) /* {{{ */
 {
 	if (extension->activate) {
 		extension->activate();
@@ -96,7 +96,7 @@ static void zend_extension_activator(zend_extension *extension) /* {{{ */
 }
 /* }}} */
 
-static void zend_extension_deactivator(zend_extension *extension) /* {{{ */
+static void zend_extension_deactivator(const zend_extension *extension) /* {{{ */
 {
 	if (extension->deactivate) {
 		extension->deactivate();
@@ -113,14 +113,14 @@ static int clean_non_persistent_constant_full(zval *zv) /* {{{ */
 
 static int clean_non_persistent_function_full(zval *zv) /* {{{ */
 {
-	zend_function *function = Z_PTR_P(zv);
+	const zend_function *function = Z_PTR_P(zv);
 	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
 static int clean_non_persistent_class_full(zval *zv) /* {{{ */
 {
-	zend_class_entry *ce = Z_PTR_P(zv);
+	const zend_class_entry *ce = Z_PTR_P(zv);
 	return (ce->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
@@ -229,7 +229,7 @@ static void zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static ZEND_COLD void zend_throw_or_error(int fetch_type, zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
+static ZEND_COLD void zend_throw_or_error(uint32_t fetch_type, zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
@@ -270,9 +270,6 @@ void shutdown_destructors(void) /* {{{ */
 /* Free values held by the executor. */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 {
-	zend_string *key;
-	zval *zv;
-
 	EG(flags) |= EG_FLAGS_IN_RESOURCE_SHUTDOWN;
 	zend_try {
 		zend_close_rsrc_list(&EG(regular_list));
@@ -282,12 +279,15 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 	EG(active) = 0;
 
 	if (!fast_shutdown) {
+		zval *zv;
+
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 
 		/* Constants may contain objects, destroy them before the object store. */
 		if (EG(full_tables_cleanup)) {
 			zend_hash_reverse_apply(EG(zend_constants), clean_non_persistent_constant_full);
 		} else {
+			zend_string *key;
 			ZEND_HASH_MAP_REVERSE_FOREACH_STR_KEY_VAL(EG(zend_constants), key, zv) {
 				zend_constant *c = Z_PTR_P(zv);
 				if (_idx == EG(persistent_constants_count)) {
@@ -434,8 +434,6 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 
 void shutdown_executor(void) /* {{{ */
 {
-	zend_string *key;
-	zval *zv;
 #if ZEND_DEBUG
 	bool fast_shutdown = 0;
 #elif defined(__SANITIZE_ADDRESS__)
@@ -477,6 +475,8 @@ void shutdown_executor(void) /* {{{ */
 			zend_hash_reverse_apply(EG(function_table), clean_non_persistent_function_full);
 			zend_hash_reverse_apply(EG(class_table), clean_non_persistent_class_full);
 		} else {
+			zend_string *key;
+			zval *zv;
 			ZEND_HASH_MAP_REVERSE_FOREACH_STR_KEY_VAL(EG(function_table), key, zv) {
 				zend_function *func = Z_PTR_P(zv);
 				if (_idx == EG(persistent_functions_count)) {
@@ -536,7 +536,7 @@ void shutdown_executor(void) /* {{{ */
 /* return class name and "::" or "". */
 ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 {
-	zend_function *func;
+	const zend_function *func;
 
 	if (!zend_is_executing()) {
 		if (space) {
@@ -551,7 +551,7 @@ ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 		case ZEND_USER_FUNCTION:
 		case ZEND_INTERNAL_FUNCTION:
 		{
-			zend_class_entry *ce = func->common.scope;
+			const zend_class_entry *ce = func->common.scope;
 
 			if (space) {
 				*space = ce ? "::" : "";
@@ -569,7 +569,7 @@ ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 
 ZEND_API const char *get_active_function_name(void) /* {{{ */
 {
-	zend_function *func;
+	const zend_function *func;
 
 	if (!zend_is_executing()) {
 		return NULL;
@@ -579,7 +579,7 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 
 	switch (func->type) {
 		case ZEND_USER_FUNCTION: {
-				zend_string *function_name = func->common.function_name;
+				const zend_string *function_name = func->common.function_name;
 
 				if (function_name) {
 					return ZSTR_VAL(function_name);
@@ -597,7 +597,7 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_function *zend_active_function_ex(zend_execute_data *execute_data)
+ZEND_API zend_function *zend_active_function_ex(const zend_execute_data *execute_data)
 {
 	zend_function *func = EX(func);
 
@@ -636,7 +636,7 @@ ZEND_API const char *get_active_function_arg_name(uint32_t arg_num) /* {{{ */
 		return NULL;
 	}
 
-	zend_function *func = zend_active_function();
+	const zend_function *func = zend_active_function();
 
 	return get_function_arg_name(func, arg_num);
 }
@@ -658,7 +658,7 @@ ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t a
 
 ZEND_API const char *zend_get_executed_filename(void) /* {{{ */
 {
-	zend_string *filename = zend_get_executed_filename_ex();
+	const zend_string *filename = zend_get_executed_filename_ex();
 	return filename != NULL ? ZSTR_VAL(filename) : "[no active file]";
 }
 /* }}} */
@@ -670,7 +670,7 @@ ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 		return filename_override;
 	}
 
-	zend_execute_data *ex = EG(current_execute_data);
+	const zend_execute_data *ex = EG(current_execute_data);
 
 	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 		ex = ex->prev_execute_data;
@@ -690,7 +690,7 @@ ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 		return lineno_override;
 	}
 
-	zend_execute_data *ex = EG(current_execute_data);
+	const zend_execute_data *ex = EG(current_execute_data);
 
 	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 		ex = ex->prev_execute_data;
@@ -739,7 +739,7 @@ ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *p, zend_c
 
 		if (ast->kind == ZEND_AST_CONSTANT) {
 			zend_string *name = zend_ast_get_constant_name(ast);
-			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
+			const zval *zv = zend_get_constant_ex(name, scope, ast->attr);
 			if (UNEXPECTED(zv == NULL)) {
 				return FAILURE;
 			}
@@ -808,7 +808,6 @@ zend_result _call_user_function_impl(zval *object, zval *function_name, zval *re
 
 zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /* {{{ */
 {
-	uint32_t i;
 	zend_execute_data *call;
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
@@ -871,7 +870,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		}
 	}
 
-	for (i=0; i<fci->param_count; i++) {
+	for (uint32_t i = 0; i < fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);
 		zval *arg = &fci->params[i];
 		bool must_wrap = false;
@@ -1158,7 +1157,7 @@ static const uint32_t valid_chars[8] = {
 	0xffffffff,
 };
 
-ZEND_API bool zend_is_valid_class_name(zend_string *name) {
+ZEND_API bool zend_is_valid_class_name(const zend_string *name) {
 	for (size_t i = 0; i < ZSTR_LEN(name); i++) {
 		unsigned char c = ZSTR_VAL(name)[i];
 		if (!ZEND_BIT_TEST(valid_chars, c)) {
@@ -1298,7 +1297,7 @@ ZEND_API zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex) /* {{{ */
+ZEND_API zend_class_entry *zend_get_called_scope(const zend_execute_data *ex) /* {{{ */
 {
 	while (ex) {
 		if (Z_TYPE(ex->This) == IS_OBJECT) {
@@ -1316,7 +1315,7 @@ ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex) /* {{{ *
 }
 /* }}} */
 
-ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex) /* {{{ */
+ZEND_API zend_object *zend_get_this_object(const zend_execute_data *ex) /* {{{ */
 {
 	while (ex) {
 		if (Z_TYPE(ex->This) == IS_OBJECT) {
@@ -1689,7 +1688,7 @@ void zend_unset_timeout(void) /* {{{ */
 }
 /* }}} */
 
-static ZEND_COLD void report_class_fetch_error(zend_string *class_name, uint32_t fetch_type)
+static ZEND_COLD void report_class_fetch_error(const zend_string *class_name, uint32_t fetch_type)
 {
 	if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
 		return;
@@ -1858,7 +1857,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 
 ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ */
 {
-	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op_array *op_array = &execute_data->func->op_array;
 	HashTable *ht = execute_data->symbol_table;
 
 	/* copy real values from symbol table into CV slots and create
@@ -1873,7 +1872,7 @@ ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ *
 
 			if (zv) {
 				if (Z_TYPE_P(zv) == IS_INDIRECT) {
-					zval *val = Z_INDIRECT_P(zv);
+					const zval *val = Z_INDIRECT_P(zv);
 
 					ZVAL_COPY_VALUE(var, val);
 				} else {
@@ -1893,7 +1892,7 @@ ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ *
 
 ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data) /* {{{ */
 {
-	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op_array *op_array = &execute_data->func->op_array;
 	HashTable *ht = execute_data->symbol_table;
 
 	/* copy real values from CV slots into symbol table */
@@ -1927,7 +1926,7 @@ ZEND_API zend_result zend_set_local_var(zend_string *name, zval *value, bool for
 	if (execute_data) {
 		if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_ulong h = zend_string_hash_val(name);
-			zend_op_array *op_array = &execute_data->func->op_array;
+			const zend_op_array *op_array = &execute_data->func->op_array;
 
 			if (EXPECTED(op_array->last_var)) {
 				zend_string **str = op_array->vars;
@@ -1970,7 +1969,7 @@ ZEND_API zend_result zend_set_local_var_str(const char *name, size_t len, zval *
 	if (execute_data) {
 		if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_ulong h = zend_hash_func(name, len);
-			zend_op_array *op_array = &execute_data->func->op_array;
+			const zend_op_array *op_array = &execute_data->func->op_array;
 			if (EXPECTED(op_array->last_var)) {
 				zend_string **str = op_array->vars;
 				zend_string **end = str + op_array->last_var;
