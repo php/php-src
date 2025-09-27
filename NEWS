@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Opcache
   . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
 
+- URI:
+  . Fixed Uri\WhatWg\Url::withPort() when an invalid value is passed. (timwolla)
+
 25 Sep 2025, PHP 8.5.0RC1
 
 - Core:
