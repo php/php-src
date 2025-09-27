@@ -1906,7 +1906,7 @@ again:
             {
                 if (begin == p) {
                     if (override_state != LXB_URL_STATE__UNDEF) {
-                        lxb_url_parse_return(orig_data, buf, LXB_STATUS_OK);
+                        lxb_url_parse_return(orig_data, buf, LXB_STATUS_ERROR);
                     }
 
                     state = LXB_URL_STATE_PATH_START_STATE;
