@@ -1056,7 +1056,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
-			for (int i = 0; i < op_array->last_live_range; i++) {
+			for (uint32_t i = 0; i < op_array->last_live_range; i++) {
 				fprintf(stderr,
 					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
@@ -1083,7 +1083,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
-			for (int i = 0; i < op_array->last_try_catch; i++) {
+			for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
 				fprintf(stderr, "        BB%u",
 					cfg->map[op_array->try_catch_array[i].try_op]);
 				if (op_array->try_catch_array[i].catch_op) {
@@ -1116,7 +1116,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
-			for (int i = 0; i < op_array->last_live_range; i++) {
+			for (uint32_t i = 0; i < op_array->last_live_range; i++) {
 				fprintf(stderr,
 					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
@@ -1143,7 +1143,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
-			for (int i = 0; i < op_array->last_try_catch; i++) {
+			for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
 				fprintf(stderr,
 					"     %04u",
 					op_array->try_catch_array[i].try_op);

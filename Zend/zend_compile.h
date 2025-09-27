@@ -197,8 +197,8 @@ typedef struct _zend_oparray_context {
 	struct _zend_oparray_context *prev;
 	zend_op_array *op_array;
 	uint32_t   opcodes_size;
-	int        vars_size;
-	int        literals_size;
+	uint32_t   vars_size;
+	uint32_t   literals_size;
 	uint32_t   fast_call_var;
 	uint32_t   try_catch_offset;
 	int        current_brk_cont;
@@ -530,9 +530,9 @@ struct _zend_op_array {
 	const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
 	/* END of common elements */
 
-	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
-	int last_var;       /* number of CV variables */
-	uint32_t last;      /* number of opcodes */
+	uint32_t cache_size; /* number of run_time_cache_slots * sizeof(void*) */
+	int last_var;        /* number of CV variables */
+	uint32_t last;       /* number of opcodes */
 
 	zend_op *opcodes;
 	ZEND_MAP_PTR_DEF(HashTable *, static_variables_ptr);
@@ -541,8 +541,8 @@ struct _zend_op_array {
 
 	uint32_t *refcount;
 
-	int last_live_range;
-	int last_try_catch;
+	uint32_t last_live_range;
+	uint32_t last_try_catch;
 	zend_live_range *live_range;
 	zend_try_catch_element *try_catch_array;
 
@@ -550,7 +550,7 @@ struct _zend_op_array {
 	uint32_t line_start;
 	uint32_t line_end;
 
-	int last_literal;
+	uint32_t last_literal;
 	uint32_t num_dynamic_func_defs;
 	zval *literals;
 

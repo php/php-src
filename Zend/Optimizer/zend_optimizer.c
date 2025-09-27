@@ -210,9 +210,9 @@ void zend_optimizer_convert_to_free_op1(zend_op_array *op_array, zend_op *opline
 	}
 }
 
-int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv)
+uint32_t zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv)
 {
-	int i = op_array->last_literal;
+	uint32_t i = op_array->last_literal;
 	op_array->last_literal++;
 	op_array->literals = (zval*)erealloc(op_array->literals, op_array->last_literal * sizeof(zval));
 	ZVAL_COPY_VALUE(&op_array->literals[i], zv);
@@ -220,7 +220,7 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv)
 	return i;
 }
 
-static inline int zend_optimizer_add_literal_string(zend_op_array *op_array, zend_string *str) {
+static inline uint32_t zend_optimizer_add_literal_string(zend_op_array *op_array, zend_string *str) {
 	zval zv;
 	ZVAL_STR(&zv, str);
 	zend_string_hash_val(str);

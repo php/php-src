@@ -1125,7 +1125,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 
 	/* adjust exception jump targets & remove unused try_catch_array entries */
 	if (op_array->last_try_catch) {
-		int i, j;
+		uint32_t i, j;
 		uint32_t *map;
 		ALLOCA_FLAG(use_heap);
 
@@ -1165,7 +1165,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 				while (opline < end) {
 					if (opline->opcode == ZEND_FAST_RET &&
 					    opline->op2.num != (uint32_t)-1 &&
-					    opline->op2.num < (uint32_t)j) {
+					    opline->op2.num < j) {
 						opline->op2.num = map[opline->op2.num];
 					}
 					opline++;
