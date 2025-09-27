@@ -20,7 +20,6 @@ extern "C" {
 
 #if U_ICU_VERSION_MAJOR_NUM >= 63
 #include <unicode/numberrangeformatter.h>
-#include <unicode/unumberrangeformatter.h>
 #include <unicode/numberformatter.h>
 #include <unicode/unistr.h>
 #include "../intl_convertcpp.h"
