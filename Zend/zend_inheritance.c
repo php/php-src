@@ -200,27 +200,27 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-const char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
+const char *zend_visibility_string(uint32_t flags) /* {{{ */
 {
-	if (fn_flags & ZEND_ACC_PUBLIC) {
+	if (flags & ZEND_ACC_PUBLIC) {
 		return "public";
-	} else if (fn_flags & ZEND_ACC_PRIVATE) {
+	} else if (flags & ZEND_ACC_PRIVATE) {
 		return "private";
 	} else {
-		ZEND_ASSERT(fn_flags & ZEND_ACC_PROTECTED);
+		ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
 		return "protected";
 	}
 }
 /* }}} */
 
-static const char *zend_asymmetric_visibility_string(uint32_t fn_flags) /* {{{ */
+static const char *zend_asymmetric_visibility_string(uint32_t flags) /* {{{ */
 {
-	if (fn_flags & ZEND_ACC_PRIVATE_SET) {
+	if (flags & ZEND_ACC_PRIVATE_SET) {
 		return "private(set)";
-	} else if (fn_flags & ZEND_ACC_PROTECTED_SET) {
+	} else if (flags & ZEND_ACC_PROTECTED_SET) {
 		return "protected(set)";
 	} else {
-		ZEND_ASSERT(!(fn_flags & ZEND_ACC_PUBLIC_SET));
+		ZEND_ASSERT(!(flags & ZEND_ACC_PUBLIC_SET));
 		return "omitted";
 	}
 }
@@ -1126,8 +1126,8 @@ static inheritance_status do_inheritance_check_on_method(
 		zend_function *parent, zend_class_entry *parent_scope,
 		zend_class_entry *ce, zval *child_zv, uint32_t flags) /* {{{ */
 {
-	uint32_t child_flags;
-	uint32_t parent_flags = parent->common.fn_flags;
+	zend_fn_flags child_flags;
+	zend_fn_flags parent_flags = parent->common.fn_flags;
 	zend_function *proto;
 
 #define SEPARATE_METHOD() do { \
@@ -1408,7 +1408,7 @@ static void inherit_property_hook(
 
 	child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
 
-	uint32_t parent_flags = parent->common.fn_flags;
+	zend_fn_flags parent_flags = parent->common.fn_flags;
 	if (parent_flags & ZEND_ACC_PRIVATE) {
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 		return;
@@ -2440,7 +2440,7 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 }
 /* }}} */
 
-static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, const zend_function *fn_copy, const zend_string *name)
+static void zend_traits_check_private_final_inheritance(zend_fn_flags original_fn_flags, const zend_function *fn_copy, const zend_string *name)
 {
 	/* If the function was originally already private+final, then it will have
 	 * already been warned about. Only emit this error when the used trait method
