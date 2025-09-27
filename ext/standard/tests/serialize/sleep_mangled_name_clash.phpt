@@ -12,7 +12,5 @@ $s = serialize(new Test);
 var_dump(str_replace("\0", '\0', $s));
 ?>
 --EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
 Warning: serialize(): "priv" is returned from __sleep() multiple times in %s on line %d
 string(37) "O:4:"Test":1:{s:10:"\0Test\0priv";N;}"

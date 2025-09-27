@@ -38,8 +38,7 @@ var_dump($s = serialize($obj));
 var_dump(unserialize($s));
 
 ?>
---EXPECTF--
-Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+--EXPECT--
 string(126) "O:6:"Wakeup":1:{s:4:"data";a:1:{i:0;O:11:"Unserialize":1:{i:0;O:6:"Wakeup":1:{s:4:"data";a:1:{i:0;O:11:"Unserialize":0:{}}}}}}"
 __unserialize() called
 array(0) {

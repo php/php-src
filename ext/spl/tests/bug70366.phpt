@@ -34,7 +34,6 @@ function ptr2str($ptr)
 }
 ?>
 --EXPECTF--
-Deprecated: The __wakeup() serialization magic method has been deprecated. Implement __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 array(5) {
   [0]=>
   int(1)
