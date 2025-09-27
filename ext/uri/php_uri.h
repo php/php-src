@@ -51,8 +51,6 @@ PHPAPI zend_result php_uri_parser_register(const php_uri_parser *uri_parser);
  */
 PHPAPI const php_uri_parser *php_uri_get_parser(zend_string *uri_parser_name);
 
-ZEND_ATTRIBUTE_NONNULL PHPAPI php_uri_internal *php_uri_parse(const php_uri_parser *uri_parser, const char *uri_str, size_t uri_str_len, bool silent);
-
 /**
  * Retrieves the scheme component based on the read_mode and passes it to the zv ZVAL in case of success.
  * 
@@ -172,13 +170,6 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_query(const php_uri_intern
  * @return SUCCESS in case of success, FAILURE otherwise.
  */
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_uri_get_fragment(const php_uri_internal *internal_uri, php_uri_component_read_mode read_mode, zval *zv);
-
-/**
- * Frees the uri member within the provided internal URI.
- *
- * @param internal_uri The internal URI
- */
-ZEND_ATTRIBUTE_NONNULL PHPAPI void php_uri_free(php_uri_internal *internal_uri);
 
 /**
  * Creates a new php_uri struct containing all the URI components. The components are retrieved based on the read_mode parameter.
