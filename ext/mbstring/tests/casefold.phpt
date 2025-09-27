@@ -12,7 +12,8 @@ output_handler=
     print mb_strtoupper( "הכן\n" );
     print mb_convert_case( "הכן\n", MB_CASE_TITLE );
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 abcdefghijklmnopqrstuvwxyz
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
 ִֻֿ
