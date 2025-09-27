@@ -36,6 +36,7 @@
 #include "pgsql_driver_arginfo.h"
 
 static bool pgsql_handle_in_transaction(pdo_dbh_t *dbh);
+void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode);
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
@@ -108,6 +109,37 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	return errcode;
 }
 /* }}} */
+
+static zend_always_inline void pgsql_finish_running_stmt(pdo_pgsql_db_handle *H)
+{
+	if (H->running_stmt) {
+		pgsql_stmt_finish(H->running_stmt, 0);
+	}
+}
+
+static zend_always_inline void pgsql_discard_running_stmt(pdo_pgsql_db_handle *H)
+{
+	if (H->running_stmt) {
+		pgsql_stmt_finish(H->running_stmt, FIN_DISCARD);
+	}
+
+	PGresult *pgsql_result;
+	bool first = true;
+	while ((pgsql_result = PQgetResult(H->server))) {
+		/* We should not arrive here, where libpq has a result to deliver without us
+		 * having registered a running statement:
+		 * every result discarding should go through the unified pgsql_stmt_finish,
+		 * but maybe there still is an internal query that we omitted to adapt.
+		 * So instead of asserting let's just emit an informational notice,
+		 * and consume anyway (results consumption is handle-wise, so we have no formal
+		 * need for the statement). */
+		if (first) {
+			php_error_docref(NULL, E_NOTICE, "Internal error: unable to link a libpq result to consume, to its origin statement");
+			first = false;
+		}
+		PQclear(pgsql_result);
+	}
+}
 
 static void _pdo_pgsql_notice(void *context, const char *message) /* {{{ */
 {
@@ -258,6 +290,10 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 			PQfinish(H->server);
 			H->server = NULL;
 		}
+		if (H->cached_table_name) {
+			efree(H->cached_table_name);
+			H->cached_table_name = NULL;
+		}
 		if (H->einfo.errmsg) {
 			pefree(H->einfo.errmsg, dbh->is_persistent);
 			H->einfo.errmsg = NULL;
@@ -351,6 +387,7 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 
 	bool in_trans = pgsql_handle_in_transaction(dbh);
 
+	pgsql_finish_running_stmt(H);
 	if (!(res = PQexec(H->server, ZSTR_VAL(sql)))) {
 		/* fatal error */
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
@@ -426,6 +463,7 @@ static zend_string *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const zend_string *
 	PGresult *res;
 	ExecStatusType status;
 
+	pgsql_finish_running_stmt(H);
 	if (name == NULL) {
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
@@ -589,6 +627,7 @@ static bool pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 	PGresult *res;
 	bool ret = true;
 
+	pgsql_finish_running_stmt(H);
 	res = PQexec(H->server, cmd);
 
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
@@ -696,9 +735,8 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 	/* Obtain db Handle */
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	while ((pgsql_result = PQgetResult(H->server))) {
-		PQclear(pgsql_result);
-	}
+	pgsql_discard_running_stmt(H);
+
 	pgsql_result = PQexec(H->server, query);
 
 	efree(query);
@@ -820,9 +858,8 @@ void pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	while ((pgsql_result = PQgetResult(H->server))) {
-		PQclear(pgsql_result);
-	}
+	pgsql_discard_running_stmt(H);
+
 	pgsql_result = PQexec(H->server, query);
 
 	efree(query);
@@ -916,9 +953,7 @@ void pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	while ((pgsql_result = PQgetResult(H->server))) {
-		PQclear(pgsql_result);
-	}
+	pgsql_discard_running_stmt(H);
 
 	/* using pre-9.0 syntax as PDO_pgsql is 7.4+ compatible */
 	if (pg_fields) {
@@ -1007,9 +1042,7 @@ void pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	while ((pgsql_result = PQgetResult(H->server))) {
-		PQclear(pgsql_result);
-	}
+	pgsql_discard_running_stmt(H);
 
 	/* using pre-9.0 syntax as PDO_pgsql is 7.4+ compatible */
 	if (pg_fields) {
@@ -1461,6 +1494,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 
 	H->attached = 1;
 	H->pgoid = -1;
+	H->cached_table_oid = InvalidOid;
 
 	dbh->methods = &pgsql_methods;
 	dbh->alloc_own_columns = 1;
