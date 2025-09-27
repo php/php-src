@@ -381,8 +381,8 @@ static PHP_INI_MH(OnChangeMaxMemoryLimit)
 		return FAILURE;
 	}
 
-	PG(memory_limit) = value;
 	PG(max_memory_limit) = value;
+	zend_alter_ini_entry(ZSTR_INIT_LITERAL("memory_limit", 1), new_value, PHP_INI_ALL, stage);
 
 	return SUCCESS;
 }
