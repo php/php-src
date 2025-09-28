@@ -136,6 +136,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added zend_compile_ast().
   . Added zend_check_type_ex().
   . Added zend_create_partial_closure().
+  . Added a new IO copy API in <php_io.h>. php_io_copy() copies bytes between
+    file descriptors using the most efficient platform primitive available
+    (sendfile, splice, copy_file_range, TransmitFile), and is now used by
+    php_stream_copy_to_stream_ex(). The mmap-based copy fallback was removed.
 
 ========================
 2. Build system changes
