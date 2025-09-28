@@ -697,15 +697,24 @@ static int php_userstreamop_close(php_stream *stream, int close_handle)
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_CLOSE, sizeof(USERSTREAM_CLOSE)-1);
 
-	call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
+	zend_try {
+		call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
+		zval_ptr_dtor(&retval);
+		zval_ptr_dtor(&func_name);
 
-	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func_name);
+		zval_ptr_dtor(&us->object);
+		ZVAL_UNDEF(&us->object);
 
-	zval_ptr_dtor(&us->object);
-	ZVAL_UNDEF(&us->object);
+		efree(us);
+	} zend_catch {
+		zval_ptr_dtor(&retval);
+		zval_ptr_dtor(&func_name);
 
-	efree(us);
+		zval_ptr_dtor(&us->object);
+		ZVAL_UNDEF(&us->object);
+
+		efree(us);
+	} zend_end_try();
 
 	return 0;
 }
