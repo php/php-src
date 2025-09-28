@@ -16,4 +16,3 @@ try {
 ?>
 --EXPECT--
 The specified scheme is malformed
-

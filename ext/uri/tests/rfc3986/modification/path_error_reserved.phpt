@@ -8,7 +8,7 @@ uri
 $uri = Uri\Rfc3986\Uri::parse("https://example.com");
 
 try {
-    $uri->withPath("@foo");
+    $uri->withPath("/[foo]");
 } catch (Uri\InvalidUriException $e) {
     echo $e->getMessage() . "\n";
 }
