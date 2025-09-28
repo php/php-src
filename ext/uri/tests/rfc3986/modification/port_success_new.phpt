@@ -6,7 +6,7 @@ uri
 <?php
 
 $uri1 = Uri\Rfc3986\Uri::parse("https://example.com");
-$uri2 = $uri1->withPort(433);
+$uri2 = $uri1->withPort(443);
 
 var_dump($uri1->getPort());
 var_dump($uri2->getPort());
@@ -14,4 +14,4 @@ var_dump($uri2->getPort());
 ?>
 --EXPECT--
 NULL
-int(433)
+int(443)

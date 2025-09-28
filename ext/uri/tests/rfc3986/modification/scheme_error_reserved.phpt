@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - scheme - URL encoded characters
+Test Uri\Rfc3986\Uri component modification - scheme - reserved characters
 --EXTENSIONS--
 uri
 --FILE--
