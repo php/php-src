@@ -1628,7 +1628,7 @@ PHP_METHOD(SimpleXMLElement, getName)
 	node = php_sxe_get_first_node_non_destructive(sxe, node);
 	if (node) {
 		namelen = xmlStrlen(node->name);
-		RETURN_STRINGL((char*)node->name, namelen);
+		RETURN_STRINGL_FAST((const char *) node->name, namelen);
 	} else {
 		RETURN_EMPTY_STRING();
 	}
