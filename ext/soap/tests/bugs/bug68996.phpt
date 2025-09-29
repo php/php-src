@@ -56,4 +56,4 @@ handleFormatted($s, $HTTP_RAW_POST_DATA);
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode/><faultstring>some msg</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
 <?xml version="1.0" encoding="UTF-8"?>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"><env:Body><env:Fault><env:Code><env:Value/></env:Code><env:Reason><env:Text xml:lang="">some msg</env:Text></env:Reason></env:Fault></env:Body></env:Envelope>
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"><env:Body><env:Fault><env:Code><env:Value/></env:Code><env:Reason><env:Text xml:lang="en">some msg</env:Text></env:Reason></env:Fault></env:Body></env:Envelope>
