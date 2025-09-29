@@ -154,6 +154,7 @@ struct _zend_class_entry {
 	};
 	int refcount;
 	uint32_t ce_flags;
+	uint32_t ce_flags2;
 
 	int default_properties_count;
 	int default_static_members_count;

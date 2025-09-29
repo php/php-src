@@ -84,6 +84,7 @@ void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
 	op_array->last_try_catch = 0;
 
 	op_array->fn_flags = 0;
+	op_array->fn_flags2 = 0;
 
 	op_array->last_literal = 0;
 	op_array->literals = NULL;
