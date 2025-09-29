@@ -32,6 +32,9 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
 
+- GD:
+  . FIxed GH-19955 (imagefttext() memory leak). (David Carlier)
+
 - SimpleXML:
   . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
     (nielsdos)
