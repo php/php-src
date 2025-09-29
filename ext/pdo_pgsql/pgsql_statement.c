@@ -56,14 +56,14 @@
 #define FLOAT8LABEL "float8"
 #define FLOAT8OID 701
 
+#define FIN_DISCARD 0x1
+#define FIN_CLOSE   0x2
+#define FIN_ABORT   0x4
 
 
-void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
+
+static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 {
-	if (!S) {
-		return;
-	}
-
 	pdo_pgsql_db_handle *H = S->H;
 
 	if (S->is_running_unbuffered && S->result && (fin_mode & FIN_ABORT)) {
@@ -113,10 +113,9 @@ void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		}
 
 		S->is_prepared = false;
-	}
-
-	if (H->running_stmt == S && (fin_mode & (FIN_CLOSE|FIN_ABORT))) {
-		H->running_stmt = NULL;
+		if (H->running_stmt == S) {
+			H->running_stmt = NULL;
+		}
 	}
 }
 
@@ -189,8 +188,9 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	 * and returns a PGRES_FATAL_ERROR when PQgetResult gets called for stmt 2 if DEALLOCATE
 	 * was called for stmt 1 inbetween
 	 * (maybe it will change with pipeline mode in libpq 14?) */
-	if (H->running_stmt && H->running_stmt->is_unbuffered) {
+	if (S->is_unbuffered && H->running_stmt) {
 		pgsql_stmt_finish(H->running_stmt, FIN_CLOSE);
+		H->running_stmt = NULL;
 	}
 	/* ensure that we free any previous unfetched results */
 	pgsql_stmt_finish(S, 0);
@@ -702,28 +702,11 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 	return 1;
 }
 
-static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, pdo_pgsql_db_handle *H)
+static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGconn *conn)
 {
-	PGconn *conn = H->server;
 	char *table_name = NULL;
 	PGresult *tmp_res;
 	char *querystr = NULL;
-
-	if (oid == H->cached_table_oid) {
-		return H->cached_table_name;
-	}
-
-	if (H->running_stmt && H->running_stmt->is_unbuffered) {
-		/* in single-row mode, libpq forbids passing a new query
-		 * while we're still flushing the current one's result */
-		return NULL;
-	}
-
-	if (H->cached_table_name) {
-		efree(H->cached_table_name);
-		H->cached_table_name = NULL;
-		H->cached_table_oid = InvalidOid;
-	}
 
 	spprintf(&querystr, 0, "SELECT RELNAME FROM PG_CLASS WHERE OID=%d", oid);
 
@@ -741,8 +724,6 @@ static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, pdo_p
 		return 0;
 	}
 
-	H->cached_table_oid = oid;
-	H->cached_table_name = estrdup(table_name);
 	table_name = estrdup(table_name);
 
 	PQclear(tmp_res);
@@ -771,9 +752,10 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
 	table_oid = PQftable(S->result, colno);
 	add_assoc_long(return_value, "pgsql:table_oid", table_oid);
-	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H);
+	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
 	if (table_name) {
-		add_assoc_string(return_value, "table", S->H->cached_table_name);
+		add_assoc_string(return_value, "table", table_name);
+		efree(table_name);
 	}
 
 	switch (S->cols[colno].pgsql_type) {
@@ -812,10 +794,6 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 			break;
 		default:
 			/* Fetch metadata from Postgres system catalogue */
-			if (S->H->running_stmt && S->H->running_stmt->is_unbuffered) {
-				/* libpq forbids calling a query while we're still reading the preceding one's */
-				break;
-			}
 			spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
 			res = PQexec(S->H->server, q);
 			efree(q);

@@ -132,17 +132,6 @@ $res = []; while (($re = $stmt->fetch())) $res[] = $re; display($res);
 $stmt->execute([ 0 ]);
 $res = []; for ($i = -1; ++$i < 2;) $res[] = $stmt->fetch(); display($res);
 display($pdo->query("select * from t2")->fetchAll());
-
-// Metadata calls the server for some operations (notably table oid-to-name conversion).
-// This will break libpq (that forbids a second PQexec before we consumed the first one).
-// Instead of either letting libpq return an error, or blindly forbid this call, we expect
-// being transparently provided at least attributes which do not require a server roundtrip.
-// And good news: column name is one of those "local" attributes.
-echo "=== meta ===\n";
-$stmt = $pdo->query("select * from t limit 2");
-echo "Starting with column " . $stmt->getColumnMeta(0)['name'] . ":\n";
-display($stmt->fetchAll());
-
 ?>
 --EXPECTF--
 === non regression ===
@@ -192,7 +181,3 @@ multiple calls to the same prepared statement, some interrupted before having re
 0
 1
 678	ok
-=== meta ===
-Starting with column n:
-0	original
-1	non original

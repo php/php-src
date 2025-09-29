@@ -7,8 +7,4 @@ PHP                                                                        NEWS
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
 
-- PDO_PGSQL:
-  . Fixed Pdo\Pgsql::getColumnMeta() when Pdo\Pgsql::setAttribute(PDO::ATTR_PREFETCH, 0).
-    (outtersg)
-
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
