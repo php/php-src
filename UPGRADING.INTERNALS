@@ -17,6 +17,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . ZSTR_INIT_LITERAL(), zend_string_starts_with_literal(), and
     zend_string_starts_with_literal_ci() now support strings containing NUL
     bytes. Passing non-literal char* is no longer supported.
+  . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
 
 ========================
 2. Build system changes

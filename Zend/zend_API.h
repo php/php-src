@@ -1066,7 +1066,6 @@ static zend_always_inline bool zend_char_has_nul_byte(const char *s, size_t know
 #define RETURN_THROWS()					do { ZEND_ASSERT(EG(exception)); (void) return_value; return; } while (0)
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties(Z_OBJ_P(p)) : NULL)))
-#define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)
 
 /* For compatibility */
 #define ZEND_MINIT			ZEND_MODULE_STARTUP_N
