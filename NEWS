@@ -5,7 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fix OSS-Fuzz #447521098 (Fatal error during sccp shift eval). (ilutov)
 
-- Opcache
+- Opcache:
   . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
 
 - SOAP:
