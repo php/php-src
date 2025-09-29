@@ -15,17 +15,17 @@ PHP                                                                        NEWS
   . Fixed bug GH-19480 (error_log php.ini cannot be unset when open_basedir is
     configured). (nielsdos)
 
+- Curl:
+  . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
+    of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
+  . Fix curl build failure on macOS+curl 8.16. (nielsdos)
+
 - Date:
   . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
     (nielsdos)
 
 - DBA:
   . Fixed GH-19885 (dba_fetch() overflow on skip argument). (David Carlier)
-
-- Curl:
-  . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
-    of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
-  . Fix curl build failure on macOS+curl 8.16. (nielsdos)
 
 - SimpleXML:
   . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
