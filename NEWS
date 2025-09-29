@@ -27,6 +27,10 @@ PHP                                                                        NEWS
     of the curl_copy_handle() function to clone a CurlHandle. (timwolla)
   . Fix curl build failure on macOS+curl 8.16. (nielsdos)
 
+- SimpleXML:
+  . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
+    (nielsdos)
+
 - Soap:
   . Fixed bug GH-19784 (SoapServer memory leak). (nielsdos)
 
