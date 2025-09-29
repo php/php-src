@@ -2183,7 +2183,14 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 
 			/* See GH-17246: we disable GC so that user code cannot be executed during the optimizer run. */
 			bool orig_gc_state = gc_enable(false);
-			persistent_script = cache_script_in_shared_memory(persistent_script, key, &from_shared_memory);
+			zend_try {
+				persistent_script = cache_script_in_shared_memory(persistent_script, key, &from_shared_memory);
+			} zend_catch {
+				SHM_PROTECT();
+				HANDLE_UNBLOCK_INTERRUPTIONS();
+				zend_free_recorded_errors();
+				zend_bailout();
+			} zend_end_try();
 			gc_enable(orig_gc_state);
 		}
 
