@@ -32,6 +32,10 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
 
+- SimpleXML:
+  . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
+    (nielsdos)
+
 - Soap:
   . Fixed bug GH-19784 (SoapServer memory leak). (nielsdos)
 
