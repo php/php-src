@@ -5,15 +5,15 @@ PHP                                                                        NEWS
 - Opcache
   . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
 
+- SOAP:
+  . Fixed bug GH-19773 (SIGSEGV due to uninitialized soap_globals->lang_en).
+    (nielsdos, KaseyJenkins)
+
 - URI:
   . Fixed Uri\WhatWg\Url::withPort() when an invalid value is passed.
     (timwolla)
   . Fixed Uri\WhatWg\Url::parse() when resolving a relative URL
     against a base URL with query or fragment. (timwolla)
-
-- SOAP:
-  . Fixed bug GH-19773 (SIGSEGV due to uninitialized soap_globals->lang_en).
-    (nielsdos, KaseyJenkins)
 
 25 Sep 2025, PHP 8.5.0RC1
 
