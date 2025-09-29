@@ -14,8 +14,6 @@ PHP                                                                        NEWS
     array). (ilutov)
   . Fixed bug GH-19480 (error_log php.ini cannot be unset when open_basedir is
     configured). (nielsdos)
-  . Fixed bug GH-16319 (Prevent crash when displaying fiber backtrace with
-    a null filename). (alexandre-daubois)
 
 - Date:
   . Fixed GH-17159: "P" format for ::createFromFormat swallows string literals.
