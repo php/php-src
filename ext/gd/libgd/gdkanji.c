@@ -368,6 +368,8 @@ do_convert (unsigned char *to, unsigned char *from, const char *code)
       else
 	error ("something happen");
       strcpy ((char *) to, (const char *) from);
+      if (iconv_close (cd) != 0)
+      	error ("iconv_close() error");
       return;
     }
 
