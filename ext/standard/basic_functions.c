@@ -336,6 +336,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 	BASIC_MINIT_SUBMODULE(exec)
 
+	BASIC_MINIT_SUBMODULE(stream_errors)
 	BASIC_MINIT_SUBMODULE(user_streams)
 
 	php_register_url_stream_wrapper("php", &php_stream_php_wrapper);

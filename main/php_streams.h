@@ -248,6 +248,8 @@ struct _php_stream  {
 #endif
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
+
+	zend_llist *error_list;
 }; /* php_stream */
 
 #define PHP_STREAM_CONTEXT(stream) \
@@ -539,6 +541,7 @@ PHPAPI ssize_t _php_stream_passthru(php_stream * src STREAMS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC)
 END_EXTERN_C()
 
+#include "streams/php_stream_errors.h"
 #include "streams/php_stream_transport.h"
 #include "streams/php_stream_plain_wrapper.h"
 #include "streams/php_stream_glob_wrapper.h"
