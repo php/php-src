@@ -27,17 +27,17 @@ PHP                                                                        NEWS
 - DOM:
   . Fix macro name clash on macOS. (Ruoyu Zhong)
 
-- Opcache:
-  . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
-    (Arnaud)
-  . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
-
 - GD:
-  . FIxed GH-19955 (imagefttext() memory leak). (David Carlier)
+  . Fixed GH-19955 (imagefttext() memory leak). (David Carlier)
 
 - MySQLnd:
   . Fixed bug #67563 (mysqli compiled with mysqlnd does not take ipv6 adress
     as parameter). (nielsdos)
+
+- Opcache:
+  . Fixed bug GH-19669 (assertion failure in zend_jit_trace_type_to_info_ex).
+    (Arnaud)
+  . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
 
 - SimpleXML:
   . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
