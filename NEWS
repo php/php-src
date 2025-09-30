@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fix OSS-Fuzz #447521098 (Fatal error during sccp shift eval). (ilutov)
 
+- BcMath:
+  . Fixed bug GH-20006 (Power of 0 of BcMath number causes UB). (nielsdos)
+
 - Opcache:
   . Fixed segfault in function JIT due to NAN to bool warning. (Girgias)
 
