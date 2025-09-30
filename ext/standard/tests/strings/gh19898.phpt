@@ -6,8 +6,8 @@ memory_limit=-1
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
-str_repeat("1", (int)str_repeat("1", 2147483648));
-echo "OK"
+(int)str_repeat("1", 2147483648);
+echo "OK";
 ?>
 --EXPECT--
 OK

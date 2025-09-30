@@ -2606,11 +2606,15 @@ zend_strtod
 		}
 	s0 = s;
 	y = z = 0;
-	for(nd = nf = 0; (c = *s) >= '0' && c <= '9' && nd < INT_MAX; nd++, s++)
+	for(nd = nf = 0; (c = *s) >= '0' && c <= '9'; nd++, s++)
 		if (nd < 9)
 			y = 10*y + c - '0';
 		else if (nd < DBL_DIG + 2)
 			z = 10*z + c - '0';
+		else if (nd == INT_MAX) {
+			errno = ERANGE;
+			goto ret;
+		}
 	nd0 = nd;
 	bc.dp0 = bc.dp1 = s - s0;
 	for(s1 = s; s1 > s0 && *--s1 == '0'; )
