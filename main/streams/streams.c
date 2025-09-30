@@ -141,141 +141,6 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 
 /* }}} */
 
-static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
-{
-	if (!FG(wrapper_errors)) {
-		return NULL;
-	} else {
-		return (zend_llist*) zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
-	}
-}
-
-/* {{{ wrapper error reporting */
-static void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption)
-{
-	char *tmp;
-	char *msg;
-	char errstr[256];
-	int free_msg = 0;
-
-	if (EG(exception)) {
-		/* Don't emit additional warnings if an exception has already been thrown. */
-		return;
-	}
-
-	tmp = estrdup(path);
-	if (wrapper) {
-		zend_llist *err_list = php_get_wrapper_errors_list(wrapper);
-		if (err_list) {
-			size_t l = 0;
-			int brlen;
-			int i;
-			int count = (int)zend_llist_count(err_list);
-			const char *br;
-			const char **err_buf_p;
-			zend_llist_position pos;
-
-			if (PG(html_errors)) {
-				brlen = 7;
-				br = "<br />\n";
-			} else {
-				brlen = 1;
-				br = "\n";
-			}
-
-			for (err_buf_p = zend_llist_get_first_ex(err_list, &pos), i = 0;
-					err_buf_p;
-					err_buf_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-				l += strlen(*err_buf_p);
-				if (i < count - 1) {
-					l += brlen;
-				}
-			}
-			msg = emalloc(l + 1);
-			msg[0] = '\0';
-			for (err_buf_p = zend_llist_get_first_ex(err_list, &pos), i = 0;
-					err_buf_p;
-					err_buf_p = zend_llist_get_next_ex(err_list, &pos), i++) {
-				strcat(msg, *err_buf_p);
-				if (i < count - 1) {
-					strcat(msg, br);
-				}
-			}
-
-			free_msg = 1;
-		} else {
-			if (wrapper == &php_plain_files_wrapper) {
-				msg = php_socket_strerror_s(errno, errstr, sizeof(errstr));
-			} else {
-				msg = "operation failed";
-			}
-		}
-	} else {
-		msg = "no suitable wrapper could be found";
-	}
-
-	php_strip_url_passwd(tmp);
-	php_error_docref1(NULL, tmp, E_WARNING, "%s: %s", caption, msg);
-	efree(tmp);
-	if (free_msg) {
-		efree(msg);
-	}
-}
-
-static void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper)
-{
-	if (wrapper && FG(wrapper_errors)) {
-		zend_hash_str_del(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
-	}
-}
-
-static void wrapper_error_dtor(void *error)
-{
-	efree(*(char**)error);
-}
-
-static void wrapper_list_dtor(zval *item) {
-	zend_llist *list = (zend_llist*)Z_PTR_P(item);
-	zend_llist_destroy(list);
-	efree(list);
-}
-
-PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...)
-{
-	va_list args;
-	char *buffer = NULL;
-
-	va_start(args, fmt);
-	vspprintf(&buffer, 0, fmt, args);
-	va_end(args);
-
-	if ((options & REPORT_ERRORS) || wrapper == NULL) {
-		php_error_docref(NULL, E_WARNING, "%s", buffer);
-		efree(buffer);
-	} else {
-		zend_llist *list = NULL;
-		if (!FG(wrapper_errors)) {
-			ALLOC_HASHTABLE(FG(wrapper_errors));
-			zend_hash_init(FG(wrapper_errors), 8, NULL, wrapper_list_dtor, 0);
-		} else {
-			list = zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
-		}
-
-		if (!list) {
-			zend_llist new_list;
-			zend_llist_init(&new_list, sizeof(buffer), wrapper_error_dtor, 0);
-			list = zend_hash_str_update_mem(FG(wrapper_errors), (const char*)&wrapper,
-					sizeof(wrapper), &new_list, sizeof(new_list));
-		}
-
-		/* append to linked list */
-		zend_llist_add_element(list, &buffer);
-	}
-}
-
-
-/* }}} */
-
 /* allocate a new stream for a particular ops */
 PHPAPI php_stream *_php_stream_alloc(const php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC) /* {{{ */
 {
@@ -1877,10 +1742,16 @@ void php_shutdown_stream_hashes(void)
 		FG(stream_filters) = NULL;
 	}
 
-	if (FG(wrapper_errors)) {
-		zend_hash_destroy(FG(wrapper_errors));
-		efree(FG(wrapper_errors));
-		FG(wrapper_errors) = NULL;
+	if (FG(wrapper_logged_errors)) {
+		zend_hash_destroy(FG(wrapper_logged_errors));
+		efree(FG(wrapper_logged_errors));
+		FG(wrapper_logged_errors) = NULL;
+	}
+
+	if (FG(wrapper_stored_errors)) {
+		zend_hash_destroy(FG(wrapper_stored_errors));
+		efree(FG(wrapper_stored_errors));
+		FG(wrapper_stored_errors) = NULL;
 	}
 }
 
