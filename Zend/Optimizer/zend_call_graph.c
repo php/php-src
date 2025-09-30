@@ -200,7 +200,7 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 	zend_op_array *op_array;
 	zend_func_info *func_info;
 	zend_call_info *call_info;
-	int set_len = zend_bitset_len(call_graph->op_arrays_count);
+	uint32_t set_len = zend_bitset_len(call_graph->op_arrays_count);
 	zend_bitset visited;
 	ALLOCA_FLAG(use_heap);
 
