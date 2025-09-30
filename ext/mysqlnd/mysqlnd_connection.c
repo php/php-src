@@ -513,6 +513,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 }
 /* }}} */
 
+/* ipv6 addresses have at least two colons, which is how we can differentiate between domain names and addresses */
+static bool mysqlnd_fast_is_ipv6_address(const char *s)
+{
+	const char *first_colon = strchr(s, ':');
+	if (!first_colon) {
+		return false;
+	}
+	return strchr(first_colon + 1, ':') != NULL;
+}
+
 /* {{{ mysqlnd_conn_data::get_scheme */
 static MYSQLND_STRING
 MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, bool * unix_socket, bool * named_pipe)
@@ -542,7 +552,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 		if (!port) {
 			port = 3306;
 		}
-		transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s:%u", hostname.s, port);
+
+		/* ipv6 addresses are in the format [address]:port */
+		if (hostname.s[0] != '[' && mysqlnd_fast_is_ipv6_address(hostname.s)) {
+			transport.l = mnd_sprintf(&transport.s, 0, "tcp://[%s]:%u", hostname.s, port);
+		} else {
+			transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s:%u", hostname.s, port);
+		}
 	}
 	DBG_INF_FMT("transport=%s", transport.s? transport.s:"OOM");
 	DBG_RETURN(transport);
