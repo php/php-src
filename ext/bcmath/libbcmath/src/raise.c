@@ -193,7 +193,12 @@ bc_raise_status bc_raise(bc_num base, long exponent, bc_num *result, size_t scal
 
 	if (bc_is_zero(base)) {
 		/* If the exponent is negative, it divides by 0 */
-		return is_neg ? BC_RAISE_STATUS_DIVIDE_BY_ZERO : BC_RAISE_STATUS_OK;
+		if (is_neg) {
+			return BC_RAISE_STATUS_DIVIDE_BY_ZERO;
+		}
+		bc_free_num (result);
+		*result = bc_copy_num(BCG(_zero_));
+		return BC_RAISE_STATUS_OK;
 	}
 
 	/* check overflow */
