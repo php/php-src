@@ -1696,6 +1696,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
 		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD));
+	func->fn_flags2 = 0;
 	/* Attributes outlive the trampoline because they are created by the compiler. */
 	func->attributes = fbc->common.attributes;
 	if (is_static) {
@@ -1797,6 +1798,7 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
+	func->common.fn_flags2 = 0;
 	func->common.function_name = zend_string_concat3(
 		"$", 1, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name),
 		kind == ZEND_PROPERTY_HOOK_GET ? "::get" : "::set", 5);

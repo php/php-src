@@ -4367,12 +4367,14 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	zend_string *function_name = op_array->function_name;
 	zend_class_entry *scope = op_array->scope;
 	uint32_t fn_flags = op_array->fn_flags;
+	uint32_t fn_flags2 = op_array->fn_flags2;
 	zend_function *prototype = op_array->prototype;
 	HashTable *ht = op_array->static_variables;
 	*op_array = *orig_op_array;
 	op_array->function_name = function_name;
 	op_array->scope = scope;
 	op_array->fn_flags = fn_flags;
+	op_array->fn_flags2 = fn_flags2;
 	op_array->prototype = prototype;
 	op_array->static_variables = ht;
 }

@@ -1727,11 +1727,13 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 				ZEND_ASSERT(orig_op_array != NULL);
 				if (orig_op_array != op_array) {
 					uint32_t fn_flags = op_array->fn_flags;
+					uint32_t fn_flags2 = op_array->fn_flags2;
 					zend_function *prototype = op_array->prototype;
 					HashTable *ht = op_array->static_variables;
 
 					*op_array = *orig_op_array;
 					op_array->fn_flags = fn_flags;
+					op_array->fn_flags2 = fn_flags2;
 					op_array->prototype = prototype;
 					op_array->static_variables = ht;
 				}

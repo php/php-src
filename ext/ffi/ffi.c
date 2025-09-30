@@ -2190,6 +2190,7 @@ static zend_result zend_ffi_cdata_get_closure(zend_object *obj, zend_class_entry
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
+	func->common.fn_flags2 = 0;
 	func->common.function_name = ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE);
 	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
 	func->common.num_args = 0;
@@ -2969,6 +2970,7 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
+	func->common.fn_flags2 = 0;
 	func->common.function_name = zend_string_copy(name);
 	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
 	func->common.num_args = 0;

@@ -341,6 +341,11 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Class Flags 2 (ce_flags2) (unused: 0-31)               |     |     |     */
+/* =========================                              |     |     |     */
+/*                                                        |     |     |     */
+/* #define ZEND_ACC2_EXAMPLE             (1 << 0)      X  |     |     |     */
+/*                                                        |     |     |     */
 /* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
@@ -407,6 +412,11 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
+/*                                                        |     |     |     */
+/* Function Flags 2 (fn_flags2) (unused: 0-31)            |     |     |     */
+/* ============================                           |     |     |     */
+/*                                                        |     |     |     */
+/* #define ZEND_ACC2_EXAMPLE             (1 << 0)         |  X  |     |     */
 
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 #define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)
@@ -527,6 +537,7 @@ struct _zend_op_array {
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
+	uint32_t fn_flags2;
 	const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
 	/* END of common elements */
 
@@ -586,6 +597,7 @@ typedef struct _zend_internal_function {
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
+	uint32_t fn_flags2;
 	const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
 	/* END of common elements */
 
@@ -615,6 +627,7 @@ union _zend_function {
 		ZEND_MAP_PTR_DEF(void **, run_time_cache);
 		zend_string *doc_comment;
 		uint32_t T;         /* number of temporary variables */
+		uint32_t fn_flags2;
 		const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
 	} common;
 
