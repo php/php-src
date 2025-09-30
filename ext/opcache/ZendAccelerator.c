@@ -2211,7 +2211,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 
 		/* We may have switched to an existing persistent script that was persisted in
 		 * the meantime. Make sure to use its warnings if available. */
-		if (persistent_script->num_warnings) {
+		if (ZCG(accel_directives).record_warnings) {
 			EG(record_errors) = false;
 			zend_emit_recorded_errors_ex(persistent_script->num_warnings, persistent_script->warnings);
 		} else {
