@@ -1954,9 +1954,21 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval *orig_op1 = op1;
+	zval orig_result = {0};
 	zend_string *op1_string, *op2_string;
 	bool free_op1_string = false;
 	bool free_op2_string = false;
+	bool result_is_orig = (result == orig_op1);
+
+	/* Save the original result value and protect it from being freed during conversion.
+	 * We add a reference because destructors can modify the zval in-place, and we need
+	 * to ensure we can properly clean up the original value. */
+	if (result_is_orig) {
+		ZVAL_COPY_VALUE(&orig_result, result);
+		if (Z_REFCOUNTED(orig_result)) {
+			Z_ADDREF(orig_result);
+		}
+	}
 
 	do {
 		if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
@@ -1973,6 +1985,9 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 			op1_string = zval_get_string_func(op1);
 			if (UNEXPECTED(EG(exception))) {
 				zend_string_release(op1_string);
+				if (result_is_orig && Z_REFCOUNTED(orig_result)) {
+					i_zval_ptr_dtor(&orig_result);
+				}
 				if (orig_op1 != result) {
 					ZVAL_UNDEF(result);
 				}
@@ -2008,6 +2023,9 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 			if (UNEXPECTED(EG(exception))) {
 				zend_string_release(op1_string);
 				zend_string_release(op2_string);
+				if (result_is_orig && Z_REFCOUNTED(orig_result)) {
+					i_zval_ptr_dtor(&orig_result);
+				}
 				if (orig_op1 != result) {
 					ZVAL_UNDEF(result);
 				}
@@ -2020,9 +2038,6 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 has_op2_string:;
 	if (UNEXPECTED(ZSTR_LEN(op1_string) == 0)) {
 		if (EXPECTED(result != op2 || Z_TYPE_P(result) != IS_STRING)) {
-			if (result == orig_op1) {
-				i_zval_ptr_dtor(result);
-			}
 			if (free_op2_string) {
 				/* transfer ownership of op2_string */
 				ZVAL_STR(result, op2_string);
@@ -2033,9 +2048,6 @@ has_op2_string:;
 		}
 	} else if (UNEXPECTED(ZSTR_LEN(op2_string) == 0)) {
 		if (EXPECTED(result != op1 || Z_TYPE_P(result) != IS_STRING)) {
-			if (result == orig_op1) {
-				i_zval_ptr_dtor(result);
-			}
 			if (free_op1_string) {
 				/* transfer ownership of op1_string */
 				ZVAL_STR(result, op1_string);
@@ -2054,6 +2066,9 @@ has_op2_string:;
 		if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 			if (free_op1_string) zend_string_release(op1_string);
 			if (free_op2_string) zend_string_release(op2_string);
+			if (result_is_orig && Z_REFCOUNTED(orig_result)) {
+				i_zval_ptr_dtor(&orig_result);
+			}
 			zend_throw_error(NULL, "String size overflow");
 			if (orig_op1 != result) {
 				ZVAL_UNDEF(result);
@@ -2065,7 +2080,9 @@ has_op2_string:;
 			/* Destroy the old result first to drop the refcount, such that $x .= ...; may happen in-place. */
 			if (free_op1_string) {
 				/* op1_string will be used as the result, so we should not free it */
-				i_zval_ptr_dtor(result);
+				if (!result_is_orig) {
+					i_zval_ptr_dtor(result);
+				}
 				/* Set it to NULL in case that the extension will throw an out-of-memory error.
 				 * Otherwise the shutdown sequence will try to free this again. */
 				ZVAL_NULL(result);
@@ -2093,6 +2110,10 @@ has_op2_string:;
 		ZVAL_NEW_STR(result, result_str);
 		memcpy(ZSTR_VAL(result_str) + op1_len, ZSTR_VAL(op2_string), op2_len);
 		ZSTR_VAL(result_str)[result_len] = '\0';
+	}
+
+	if (result_is_orig && Z_REFCOUNTED(orig_result)) {
+		i_zval_ptr_dtor(&orig_result);
 	}
 
 	if (free_op1_string) zend_string_release(op1_string);
