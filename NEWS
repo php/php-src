@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug #67563 (mysqli compiled with mysqlnd does not take ipv6 adress
     as parameter). (nielsdos)
 
+- Phar:
+  . Fix memory leak and invalid continuation after tar header writing fails.
+    (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
     (nielsdos)
