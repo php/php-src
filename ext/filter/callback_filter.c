@@ -19,7 +19,7 @@
 zend_result php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zval retval;
-	zend_fcall_info_cache fcc = {};
+	zend_fcall_info_cache fcc;
 
 	if (!option_array || !zend_is_callable_ex(option_array, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL)) {
 		zend_type_error("%s(): Option must be a valid callback", get_active_function_name());
