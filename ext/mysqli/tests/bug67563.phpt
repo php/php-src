@@ -27,8 +27,8 @@ $hosts = ['::1', "[::1]:$port"];
 
 foreach ($hosts as $host) {
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-        printf("[001] Cannot connect to the server using host=%s, user=pamtest, passwd=pamtest dbname=%s, port=%s, socket=%s\n",
-            $host, $db, $port, $socket);
+        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=%s dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $passwd, $db, $port, $socket);
     } else {
         $link->close();
     }
