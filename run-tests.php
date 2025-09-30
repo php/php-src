@@ -651,6 +651,10 @@ function main(): void
         }
     }
 
+    if (!stream_isatty(STDIN) || !stream_isatty(STDOUT) || !stream_isatty(STDERR)) {
+        $environment['SKIP_IO_CAPTURE_TESTS'] = '1';
+    }
+
     if ($selected_tests && count($test_files) === 0) {
         echo "No tests found.\n";
         return;
