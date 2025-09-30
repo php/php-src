@@ -19,13 +19,15 @@ max_execution_time=240
 <?php
 require_once 'connect.inc';
 
-$host = '::1';
+$hosts = ['::1', "[::1]:$port"];
 
-if (!$link = my_mysqli_connect($host, 'pamtest', 'pamtest', $db, $port, $socket)) {
-    printf("[001] Cannot connect to the server using host=%s, user=pamtest, passwd=pamtest dbname=%s, port=%s, socket=%s\n",
-        $host, $db, $port, $socket);
-} else {
-    $link->close();
+foreach ($hosts as $host) {
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("[001] Cannot connect to the server using host=%s, user=pamtest, passwd=pamtest dbname=%s, port=%s, socket=%s\n",
+            $host, $db, $port, $socket);
+    } else {
+        $link->close();
+    }
 }
 
 print "done!";
