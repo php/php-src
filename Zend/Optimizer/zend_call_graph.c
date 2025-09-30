@@ -169,9 +169,9 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 	free_alloca(call_stack, use_heap);
 }
 
-static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_array, zend_bitset visited)
+static bool zend_is_indirectly_recursive(const zend_op_array *root, const zend_op_array *op_array, zend_bitset visited)
 {
-	zend_func_info *func_info;
+	const zend_func_info *func_info;
 	zend_call_info *call_info;
 	bool ret = false;
 
@@ -197,7 +197,7 @@ static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_
 
 static void zend_analyze_recursion(zend_call_graph *call_graph)
 {
-	zend_op_array *op_array;
+	const zend_op_array *op_array;
 	zend_func_info *func_info;
 	zend_call_info *call_info;
 	uint32_t set_len = zend_bitset_len(call_graph->op_arrays_count);
@@ -259,7 +259,7 @@ ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script, z
 }
 /* }}} */
 
-ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, const zend_op_array *op_array) /* {{{ */
+ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, const zend_func_info *info, const zend_op_array *op_array) /* {{{ */
 {
 	zend_call_info **map, *call;
 	if (!info->callee_info) {
