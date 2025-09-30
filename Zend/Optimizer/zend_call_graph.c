@@ -200,13 +200,12 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 	zend_op_array *op_array;
 	zend_func_info *func_info;
 	zend_call_info *call_info;
-	int i;
 	int set_len = zend_bitset_len(call_graph->op_arrays_count);
 	zend_bitset visited;
 	ALLOCA_FLAG(use_heap);
 
 	visited = ZEND_BITSET_ALLOCA(set_len, use_heap);
-	for (i = 0; i < call_graph->op_arrays_count; i++) {
+	for (uint32_t i = 0; i < call_graph->op_arrays_count; i++) {
 		op_array = call_graph->op_arrays[i];
 		func_info = call_graph->func_infos + i;
 		call_info = func_info->caller_info;
@@ -252,9 +251,7 @@ ZEND_API void zend_build_call_graph(zend_arena **arena, zend_script *script, zen
 
 ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph) /* {{{ */
 {
-	int i;
-
-	for (i = 0; i < call_graph->op_arrays_count; i++) {
+	for (uint32_t i = 0; i < call_graph->op_arrays_count; i++) {
 		zend_analyze_calls(arena, script, 0, call_graph->op_arrays[i], call_graph->func_infos + i);
 	}
 	zend_analyze_recursion(call_graph);

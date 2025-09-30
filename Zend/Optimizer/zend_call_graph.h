@@ -54,7 +54,7 @@ struct _zend_func_info {
 };
 
 typedef struct _zend_call_graph {
-	int                     op_arrays_count;
+	uint32_t                op_arrays_count;
 	zend_op_array         **op_arrays;
 	zend_func_info         *func_infos;
 } zend_call_graph;
