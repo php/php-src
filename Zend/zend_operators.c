@@ -2080,9 +2080,7 @@ has_op2_string:;
 			/* Destroy the old result first to drop the refcount, such that $x .= ...; may happen in-place. */
 			if (free_op1_string) {
 				/* op1_string will be used as the result, so we should not free it */
-				if (!result_is_orig) {
-					i_zval_ptr_dtor(result);
-				}
+				i_zval_ptr_dtor(result);
 				/* Set it to NULL in case that the extension will throw an out-of-memory error.
 				 * Otherwise the shutdown sequence will try to free this again. */
 				ZVAL_NULL(result);
