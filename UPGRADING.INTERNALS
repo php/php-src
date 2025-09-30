@@ -18,6 +18,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_string_starts_with_literal_ci() now support strings containing NUL
     bytes. Passing non-literal char* is no longer supported.
   . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
+  . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
+    added, given the primary flags were running out of bits.
 
 ========================
 2. Build system changes
