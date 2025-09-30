@@ -508,6 +508,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 
 			RETURN_TRUE;
 		} else {
+			xmlRelaxNGFree(schema);
 			php_error_docref(NULL, E_WARNING, "Schema contains errors");
 			RETURN_FALSE;
 		}
