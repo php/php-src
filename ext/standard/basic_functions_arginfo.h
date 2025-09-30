@@ -3973,7 +3973,7 @@ static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 
 	zend_string *attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
 	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0);
+	zend_string_release_ex(attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0, true);
 
 	return class_entry;
 }

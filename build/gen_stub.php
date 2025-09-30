@@ -3060,11 +3060,11 @@ class StringBuilder {
         $result = [
             "\tzend_string *$varName = $initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n",
             $varName,
-            "\tzend_string_release($varName);\n"
+            "\tzend_string_release_ex($varName, true);\n"
         ];
         // For attribute values that are not freed
         if ($varName === '') {
-            $result[0] = "$initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n";
+            $result[0] = "$initFn(\"$content\", sizeof(\"$content\") - 1, true);\n";
         }
         // If not set, use the current latest version
         $allVersions = ALL_PHP_VERSION_IDS;

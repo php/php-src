@@ -1048,7 +1048,7 @@ static zend_class_entry *register_class_CurlSharePersistentHandle(void)
 	ZVAL_UNDEF(&property_options_default_value);
 	zend_string *property_options_name = zend_string_init("options", sizeof("options") - 1, 1);
 	zend_declare_typed_property(class_entry, property_options_name, &property_options_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-	zend_string_release(property_options_name);
+	zend_string_release_ex(property_options_name, true);
 
 	return class_entry;
 }
