@@ -272,13 +272,12 @@ ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info
 
 	map = zend_arena_calloc(arena, sizeof(zend_call_info *), op_array->last);
 	for (call = info->callee_info; call; call = call->next_callee) {
-		int i;
 		map[call->caller_init_opline - op_array->opcodes] = call;
 		if (call->caller_call_opline) {
 			map[call->caller_call_opline - op_array->opcodes] = call;
 		}
 		if (!call->is_frameless) {
-			for (i = 0; i < call->num_args; i++) {
+			for (uint32_t i = 0; i < call->num_args; i++) {
 				if (call->arg_info[i].opline) {
 					map[call->arg_info[i].opline - op_array->opcodes] = call;
 				}

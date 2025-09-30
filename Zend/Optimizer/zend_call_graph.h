@@ -39,7 +39,7 @@ struct _zend_call_info {
 	bool               named_args;   /* Function has named arguments */
 	bool               is_prototype; /* An overridden child method may be called */
 	bool               is_frameless; /* A frameless function sends arguments through operands */
-	int                     num_args;	/* Number of arguments, excluding named and variadic arguments */
+	uint32_t           num_args;	/* Number of arguments, excluding named and variadic arguments */
 	zend_send_arg_info      arg_info[1];
 };
 
