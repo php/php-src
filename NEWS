@@ -28,7 +28,7 @@ PHP                                                                        NEWS
   . Fixed GH-19885 (dba_fetch() overflow on skip argument). (David Carlier)
 
 - GD:
-  . FIxed GH-19955 (imagefttext() memory leak). (David Carlier)
+  . Fixed GH-19955 (imagefttext() memory leak). (David Carlier)
 
 - MySQLnd:
   . Fixed bug #67563 (mysqli compiled with mysqlnd does not take ipv6 adress
