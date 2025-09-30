@@ -53,6 +53,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-19801 (leaks in var_dump() and debug_zval_dump()).
     (alexandre-daubois)
 
+- XMLReader:
+  . Fixed bug GH-20009 (XMLReader leak on RelaxNG schema failure). (nielsdos)
+
 - Zip:
   . Fixed bug GH-19688 (Remove pattern overflow in zip addGlob()). (nielsdos)
   . Fixed bug GH-19932 (Memory leak in zip setEncryptionName()/setEncryptionIndex()).
