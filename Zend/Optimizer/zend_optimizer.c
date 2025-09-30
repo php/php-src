@@ -1609,7 +1609,7 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 		zend_call_graph call_graph;
 		zend_build_call_graph(&ctx.arena, script, &call_graph);
 
-		int i;
+		uint32_t i;
 		zend_func_info *func_info;
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
