@@ -19,7 +19,7 @@ $descriptorspec = array(
 );
 
 $process = proc_open(
-    PHP_BINARY . ' -S "192.168.1.999:8080"',
+    PHP_BINARY . ' -dlog_errors=0 -S "192.168.1.999:8080"',
     $descriptorspec,
     $pipes
 );
