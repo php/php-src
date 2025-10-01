@@ -1172,13 +1172,13 @@ nostub:
 	zend_hash_apply_with_argument(&phar->manifest, phar_tar_writeheaders, (void *) &pass);
 
 	if (error && *error) {
-		if (closeoldfile) {
+		if (must_close_old_file) {
 			php_stream_close(oldfile);
 		}
 
 		/* on error in the hash iterator above, error is set */
 		php_stream_close(newfile);
-		return EOF;
+		return;
 	}
 
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
