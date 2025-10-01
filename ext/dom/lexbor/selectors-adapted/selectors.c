@@ -13,7 +13,7 @@
 #include <Zend/zend_API.h>
 #include <php.h>
 
-#include "lexbor/selectors-adapted/selectors.h"
+#include "selectors.h"
 #include "../../namespace_compat.h"
 #include "../../domexception.h"
 #include "../../php_dom.h"
