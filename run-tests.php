@@ -428,7 +428,7 @@ function main(): void
                     if ($test_list) {
                         foreach ($test_list as $test) {
                             $matches = [];
-                            if (preg_match('/^#.*\[(.*)\]\:\s+(.*)$/', $test, $matches)) {
+                            if (preg_match('/^#.*\[(.*)]:\s+(.*)$/', $test, $matches)) {
                                 $redir_tests[] = [$matches[1], $matches[2]];
                             } elseif (strlen($test)) {
                                 $test_files[] = trim($test);
@@ -1764,7 +1764,7 @@ function show_file_block(string $file, string $block, ?string $section = null): 
         }
         if ($section === 'DIFF' && $colorize) {
             // '-' is Light Red for removal, '+' is Light Green for addition
-            $block = preg_replace('/^[0-9]+\-\s.*$/m', "\e[1;31m\\0\e[0m", $block);
+            $block = preg_replace('/^[0-9]+-\s.*$/m', "\e[1;31m\\0\e[0m", $block);
             $block = preg_replace('/^[0-9]+\+\s.*$/m', "\e[1;32m\\0\e[0m", $block);
         }
 
