@@ -500,8 +500,11 @@ ZEND_API zend_string *zend_string_concat3(
 	return res;
 }
 
-/* strlcpy and strlcat are not intercepted by msan, so we need to do it ourselves. */
-#if __has_feature(memory_sanitizer)
+/* strlcpy and strlcat are not always intercepted by msan, so we need to do it
+ * ourselves.
+ * Apply a simple heuristic to tell if the platform needs it,
+ * see https://github.com/php/php-src/issues/20002 */
+#if __has_feature(memory_sanitizer) && !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__APPLE__)
 static size_t (*libc_strlcpy)(char *__restrict, const char *__restrict, size_t);
 size_t strlcpy(char *__restrict dest, const char *__restrict src, size_t n)
 {
