@@ -53,6 +53,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
     preloading). (Arnaud, welcomycozyhom)
 
+- OpenSSL:
+  . Implemented GH-20310 (No critical extension indication in
+    openssl_x509_parse() output). (StephenWall)
+
 - PDO_PGSQL:
   . Clear session-local state disconnect-equivalent processing.
     (KentarouTakeda)

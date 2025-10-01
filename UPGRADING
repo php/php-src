@@ -70,6 +70,10 @@ PHP 8.6 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- OpenSSL:
+  . Output of openssl_x509_parse() contains criticalExtensions listing all
+    critical certificate extensions.
+
 - Phar:
   . Phar::mungServer() now supports reference values.
 
