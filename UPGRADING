@@ -64,6 +64,10 @@ PHP 8.6 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- Mysqli:
+  . mysqli.default_port now checks the validity of the value which should be
+    between 0 and 65545 included.
+
 - Opcache:
   . opcache.jit_debug accepts a new flag: ZEND_JIT_DEBUG_TRACE_EXIT_INFO_SRC.
     When used along with ZEND_JIT_DEBUG_TRACE_EXIT_INFO, the source of exit
