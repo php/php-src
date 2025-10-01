@@ -29,6 +29,8 @@ runs:
           ldap-utils \
           openssl \
           slapd \
+          bind9 \
+          bind9utils \
           language-pack-de \
           libgmp-dev \
           libicu-dev \
