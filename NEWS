@@ -14,6 +14,7 @@ PHP                                                                        NEWS
     array). (ilutov)
   . Fixed bug GH-19480 (error_log php.ini cannot be unset when open_basedir is
     configured). (nielsdos)
+  . Fixed bug GH-20002 (Broken build on *BSD with MSAN). (outtersg)
 
 - Curl:
   . Fix cloning of CURLOPT_POSTFIELDS when using the clone operator instead
