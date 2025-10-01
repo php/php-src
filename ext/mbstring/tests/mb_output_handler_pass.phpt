@@ -20,8 +20,14 @@ ob_start('mb_output_handler');
 mb_http_output("pass");
 var_dump("\xff");
 ?>
---EXPECT--
+--EXPECTF--
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 string(4) "pass"
 string(1) "ÿ"
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 string(1) "?"
+
+Deprecated: Function mb_http_output() is deprecated since 8.5, use output_encoding INI settings instead in %s on line %d
 string(1) "ÿ"

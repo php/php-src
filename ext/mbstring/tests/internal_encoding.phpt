@@ -46,23 +46,38 @@ var_dump(mb_strlen("\xc3\xb6"));
 
 ?>
 --EXPECTF--
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(10) "ISO-8859-1"
 int(2)
 
 Deprecated: ini_set(): Use of mbstring.internal_encoding is deprecated in %s on line %d
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(5) "UTF-8"
 int(1)
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(5) "UTF-8"
 int(1)
 
 Deprecated: ini_set(): Use of mbstring.internal_encoding is deprecated in %s on line %d
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(10) "ISO-8859-2"
 int(2)
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(5) "UTF-8"
 int(1)
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(5) "UTF-8"
 int(1)
 
 Deprecated: ini_set(): Use of mbstring.internal_encoding is deprecated in %s on line %d
+
+Deprecated: Function mb_internal_encoding() is deprecated since 8.5, use internal_encoding INI settings instead in %s on line %d
 string(10) "ISO-8859-3"
 int(2)
