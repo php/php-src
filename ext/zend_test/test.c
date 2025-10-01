@@ -1448,6 +1448,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_class = register_class__ZendTestClass(zend_test_interface);
 	register_ZendTestClass_dnf_property(zend_test_class);
+	/* Assign dummy constructor */
+	zend_test_class->constructor = (zend_function*) &zend_pass_function;
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 
@@ -1483,6 +1485,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_mark_internal_attribute(zend_test_attribute_with_arguments);
 
 	zend_test_class_with_method_with_parameter_attribute = register_class_ZendTestClassWithMethodWithParameterAttribute();
+	/* Assign dummy constructor */
+	zend_test_class_with_method_with_parameter_attribute->constructor = (zend_function*) &zend_pass_function;
 	zend_test_child_class_with_method_with_parameter_attribute = register_class_ZendTestChildClassWithMethodWithParameterAttribute(zend_test_class_with_method_with_parameter_attribute);
 
 	zend_test_class_with_property_attribute = register_class_ZendTestClassWithPropertyAttribute();
@@ -1492,11 +1496,17 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	zend_test_forbid_dynamic_call = register_class_ZendTestForbidDynamicCall();
+	/* Assign dummy constructor */
+	zend_test_forbid_dynamic_call->constructor = (zend_function*) &zend_pass_function;
 
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
+	/* Assign dummy constructor */
+	zend_test_ns_foo_class->constructor = (zend_function*) &zend_pass_function;
 	zend_test_ns_unlikely_compile_error_class = register_class_ZendTestNS_UnlikelyCompileError();
 	zend_test_ns_not_unlikely_compile_error_class = register_class_ZendTestNS_NotUnlikelyCompileError();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
+	/* Assign dummy constructor */
+	zend_test_ns2_foo_class->constructor = (zend_function*) &zend_pass_function;
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
@@ -1504,6 +1514,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_int_enum = register_class_ZendTestIntEnum();
 
 	zend_test_magic_call = register_class__ZendTestMagicCall();
+	/* Assign dummy constructor */
+	zend_test_magic_call->constructor = (zend_function*) &zend_pass_function;
 
 	register_class__ZendTestMagicCallForward();
 

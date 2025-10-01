@@ -514,6 +514,8 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_exception_class_entry = register_class_mysqli_sql_exception(spl_ce_RuntimeException);
 
 	mysqli_driver_class_entry = register_class_mysqli_driver();
+	/* Dummy constructor */
+	mysqli_driver_class_entry->constructor = (zend_function *) &zend_pass_function;
 	mysqli_driver_class_entry->create_object = mysqli_objects_new;
 	zend_hash_init(&mysqli_driver_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_driver_properties, mysqli_driver_property_entries);

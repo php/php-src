@@ -1373,6 +1373,8 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_object_handlers.get_debug_info = xmlreader_get_debug_info;
 
 	xmlreader_class_entry = register_class_XMLReader();
+	/* Dummy constructor */
+	xmlreader_class_entry->constructor = (zend_function *) &zend_pass_function;
 	xmlreader_class_entry->create_object = xmlreader_objects_new;
 	xmlreader_class_entry->default_object_handlers = &xmlreader_object_handlers;
 

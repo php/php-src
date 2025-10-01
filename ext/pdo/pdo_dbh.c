@@ -628,7 +628,15 @@ PHP_METHOD(PDO, prepare)
 			zend_type_error("PDO::ATTR_STATEMENT_CLASS class must be derived from PDOStatement");
 			RETURN_THROWS();
 		}
-		if (dbstmt_ce->constructor && !(dbstmt_ce->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
+		if (UNEXPECTED(dbstmt_ce->constructor == NULL)) {
+			zend_throw_error(
+				NULL,
+				"Class %s cannot be used as a user-supplied statement class as it cannot be instantiated",
+				ZSTR_VAL(dbstmt_ce->name));
+			RETURN_THROWS();
+		}
+		/* Ignore default constructor as it will always be public */
+		if (!zend_is_pass_function(dbstmt_ce->constructor) && !(dbstmt_ce->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
 			zend_type_error("User-supplied statement class cannot have a public constructor");
 			RETURN_THROWS();
 		}

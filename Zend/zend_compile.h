@@ -647,6 +647,13 @@ struct _zend_execute_data {
 	zend_array          *extra_named_params;
 };
 
+/* export zend_pass_function to allow comparisons against it */
+extern ZEND_API const zend_internal_function zend_pass_function;
+
+static zend_always_inline bool zend_is_pass_function(const zend_function *fn) {
+	return fn == (const zend_function*) &zend_pass_function;
+}
+
 #define ZEND_CALL_HAS_THIS           IS_OBJECT_EX
 
 /* Top 16 bits of Z_TYPE_INFO(EX(This)) are used as call_info flags */

@@ -3122,8 +3122,12 @@ PHP_FUNCTION(iterator_apply)
 PHP_MINIT_FUNCTION(spl_iterators)
 {
 	spl_ce_RecursiveIterator = register_class_RecursiveIterator(zend_ce_iterator);
+	/* Dummy constructor */
+	spl_ce_RecursiveIterator->constructor = (zend_function *) &zend_pass_function;
 
 	spl_ce_OuterIterator = register_class_OuterIterator(zend_ce_iterator);
+	/* Dummy constructor */
+	spl_ce_OuterIterator->constructor = (zend_function *) &zend_pass_function;
 
 	spl_ce_RecursiveIteratorIterator = register_class_RecursiveIteratorIterator(spl_ce_OuterIterator);
 	spl_ce_RecursiveIteratorIterator->create_object = spl_RecursiveIteratorIterator_new;
@@ -3190,6 +3194,8 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	spl_ce_RecursiveRegexIterator->create_object = spl_dual_it_new;
 
 	spl_ce_EmptyIterator = register_class_EmptyIterator(zend_ce_iterator);
+	/* Dummy constructor */
+	spl_ce_EmptyIterator->constructor = (zend_function *) &zend_pass_function;
 
 	spl_ce_RecursiveTreeIterator = register_class_RecursiveTreeIterator(spl_ce_RecursiveIteratorIterator);
 	spl_ce_RecursiveTreeIterator->create_object = spl_RecursiveTreeIterator_new;

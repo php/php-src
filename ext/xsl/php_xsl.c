@@ -276,6 +276,8 @@ PHP_MINIT_FUNCTION(xsl)
 	xsl_object_handlers.unset_property = xsl_objects_unset_property;
 
 	xsl_xsltprocessor_class_entry = register_class_XSLTProcessor();
+	/* Dummy constructor */
+	xsl_xsltprocessor_class_entry->constructor = (zend_function *) &zend_pass_function;
 	xsl_xsltprocessor_class_entry->create_object = xsl_objects_new;
 	xsl_xsltprocessor_class_entry->default_object_handlers = &xsl_object_handlers;
 
