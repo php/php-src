@@ -26,6 +26,7 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fix macro name clash on macOS. (Ruoyu Zhong)
+  . Fixed bug GH-20022 (docker-php-ext-install DOM failed). (nielsdos)
 
 - GD:
   . Fixed GH-19955 (imagefttext() memory leak). (David Carlier)
