@@ -34,15 +34,15 @@ echo "Test completed without crash\n";
       {main} %s
   -->
   <Fiber::start>
-    <!-- init {closure}() -->
+    <!-- init {closure:%s:%d}() -->
     <!--
-        {closure}()
+        {closure:%s:%d}()
         {main} [no active file]
         Fiber::start()
         {main} %s
     -->
-    <{closure}>
-    </{closure}>
+    <{closure:%s:%d}>
+    </{closure:%s:%d}>
   </Fiber::start>
 Test completed without crash
 </file %s>
