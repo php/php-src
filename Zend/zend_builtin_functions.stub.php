@@ -10,6 +10,8 @@ class stdClass
 /** @refcount 1 */
 function clone(object $object, array $withProperties = []): object {}
 
+function _array(mixed ...$entries): array {}
+
 function exit(string|int $status = 0): never {}
 
 /** @alias exit */
