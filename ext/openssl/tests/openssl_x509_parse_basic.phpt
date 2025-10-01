@@ -19,17 +19,17 @@ var_dump(openssl_x509_parse($cert, false));
 bool(true)
 array(16) {
   ["name"]=>
-  string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
+  string(96) "/CN=Henrique do N. Angelo/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/emailAddress=hnangelo@php.net"
   ["subject"]=>
   array(5) {
+    ["CN"]=>
+    string(21) "Henrique do N. Angelo"
     ["C"]=>
     string(2) "BR"
     ["ST"]=>
     string(17) "Rio Grande do Sul"
     ["L"]=>
     string(12) "Porto Alegre"
-    ["CN"]=>
-    string(21) "Henrique do N. Angelo"
     ["emailAddress"]=>
     string(16) "hnangelo@php.net"
   }
@@ -37,31 +37,31 @@ array(16) {
   string(8) "%s"
   ["issuer"]=>
   array(5) {
+    ["CN"]=>
+    string(21) "Henrique do N. Angelo"
     ["C"]=>
     string(2) "BR"
     ["ST"]=>
     string(17) "Rio Grande do Sul"
     ["L"]=>
     string(12) "Porto Alegre"
-    ["CN"]=>
-    string(21) "Henrique do N. Angelo"
     ["emailAddress"]=>
     string(16) "hnangelo@php.net"
   }
   ["version"]=>
   int(2)
   ["serialNumber"]=>
-  string(20) "12593567369101004962"
+  string(42) "0x5EE94A5F3A71AF7DEC57FD8BC08D3ECA1A540198"
   ["serialNumberHex"]=>
-  string(16) "AEC556CC723750A2"
+  string(40) "5EE94A5F3A71AF7DEC57FD8BC08D3ECA1A540198"
   ["validFrom"]=>
-  string(13) "080630102843Z"
+  string(13) "251002180630Z"
   ["validTo"]=>
-  string(13) "080730102843Z"
+  string(13) "261002180630Z"
   ["validFrom_time_t"]=>
-  int(1214821723)
+  int(1759428390)
   ["validTo_time_t"]=>
-  int(1217413723)
+  int(1790964390)
   ["signatureTypeSN"]=>
   string(8) "RSA-SHA1"
   ["signatureTypeLN"]=>
@@ -153,30 +153,30 @@ array(16) {
     }
   }
   ["extensions"]=>
-  array(3) {
+  array(4) {
     ["subjectKeyIdentifier"]=>
     string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
     ["authorityKeyIdentifier"]=>
-    string(%d) "keyid:DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D
-DirName:/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net
-serial:AE:C5:56:CC:72:37:50:A2%A"
+    string(%d) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
+    ["basicConstraints:critical"]=>
+    bool(true)
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
   }
 }
 array(16) {
   ["name"]=>
-  string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"
+  string(96) "/CN=Henrique do N. Angelo/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/emailAddress=hnangelo@php.net"
   ["subject"]=>
   array(5) {
+    ["commonName"]=>
+    string(21) "Henrique do N. Angelo"
     ["countryName"]=>
     string(2) "BR"
     ["stateOrProvinceName"]=>
     string(17) "Rio Grande do Sul"
     ["localityName"]=>
     string(12) "Porto Alegre"
-    ["commonName"]=>
-    string(21) "Henrique do N. Angelo"
     ["emailAddress"]=>
     string(16) "hnangelo@php.net"
   }
@@ -184,31 +184,31 @@ array(16) {
   string(8) "%s"
   ["issuer"]=>
   array(5) {
+    ["commonName"]=>
+    string(21) "Henrique do N. Angelo"
     ["countryName"]=>
     string(2) "BR"
     ["stateOrProvinceName"]=>
     string(17) "Rio Grande do Sul"
     ["localityName"]=>
     string(12) "Porto Alegre"
-    ["commonName"]=>
-    string(21) "Henrique do N. Angelo"
     ["emailAddress"]=>
     string(16) "hnangelo@php.net"
   }
   ["version"]=>
   int(2)
   ["serialNumber"]=>
-  string(20) "12593567369101004962"
+  string(42) "0x5EE94A5F3A71AF7DEC57FD8BC08D3ECA1A540198"
   ["serialNumberHex"]=>
-  string(16) "AEC556CC723750A2"
+  string(40) "5EE94A5F3A71AF7DEC57FD8BC08D3ECA1A540198"
   ["validFrom"]=>
-  string(13) "080630102843Z"
+  string(13) "251002180630Z"
   ["validTo"]=>
-  string(13) "080730102843Z"
+  string(13) "261002180630Z"
   ["validFrom_time_t"]=>
-  int(1214821723)
+  int(1759428390)
   ["validTo_time_t"]=>
-  int(1217413723)
+  int(1790964390)
   ["signatureTypeSN"]=>
   string(8) "RSA-SHA1"
   ["signatureTypeLN"]=>
@@ -300,13 +300,13 @@ array(16) {
     }
   }
   ["extensions"]=>
-  array(3) {
+  array(4) {
     ["subjectKeyIdentifier"]=>
     string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
     ["authorityKeyIdentifier"]=>
-    string(%d) "keyid:DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D
-DirName:/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net
-serial:AE:C5:56:CC:72:37:50:A2%A"
+    string(%d) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
+    ["basicConstraints:critical"]=>
+    bool(true)
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
   }
