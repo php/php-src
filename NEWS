@@ -39,6 +39,10 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-19831 (function JIT may not deref property value). (Arnaud)
 
+- Phar:
+  . Fix memory leak and invalid continuation after tar header writing fails.
+    (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-19988 (zend_string_init with NULL pointer in simplexml (UB)).
     (nielsdos)
