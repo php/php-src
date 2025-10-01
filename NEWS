@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fix OSS-Fuzz #447521098 (Fatal error during sccp shift eval). (ilutov)
+  . Fixed bug GH-20002 (Broken build on *BSD with MSAN). (outtersg)
 
 - BcMath:
   . Fixed bug GH-20006 (Power of 0 of BcMath number causes UB). (nielsdos)
