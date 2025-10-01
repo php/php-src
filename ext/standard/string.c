@@ -1026,7 +1026,11 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 		}
 
 		cptr -= ZSTR_LEN(glue);
-		memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
+		if (ZSTR_LEN(glue) == 1) {
+			*cptr = ZSTR_VAL(glue)[0];
+		} else {
+			memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
+		}
 	}
 
 	free_alloca(strings, use_heap);
@@ -1344,15 +1348,15 @@ static bool _is_basename_start(const char *start, const char *pos)
 	    && *(pos-1) != '/'
 	    && *(pos-1) != '\\') {
 		if (pos - start == 1) {
-			return 1;
+			return true;
 		} else if (*(pos-2) == '/' || *(pos-2) == '\\') {
-			return 1;
+			return true;
 		} else if (*(pos-2) == ':'
 			&& _is_basename_start(start, pos - 2)) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 #endif
 
@@ -2651,6 +2655,15 @@ PHP_FUNCTION(ord)
 		Z_PARAM_STR(str)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(ZSTR_LEN(str) != 1)) {
+		if (ZSTR_LEN(str) == 0) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Providing an empty string is deprecated");
+		} else {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Providing a string that is not one byte long is deprecated. Use ord($str[0]) instead");
+		}
+	}
 	RETURN_LONG((unsigned char) ZSTR_VAL(str)[0]);
 }
 /* }}} */
@@ -5023,11 +5036,11 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 	char c, *n;
 	const char *t;
 	int state = 0;
-	bool done = 0;
+	bool done = false;
 	char *norm;
 
 	if (len == 0) {
-		return 0;
+		return false;
 	}
 
 	norm = emalloc(len+1);
@@ -5046,7 +5059,7 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 				*(n++) = c;
 				break;
 			case '>':
-				done =1;
+				done = true;
 				break;
 			default:
 				if (!isspace((int)c)) {
@@ -5058,7 +5071,7 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 					}
 				} else {
 					if (state == 1)
-						done=1;
+						done = true;
 				}
 				break;
 		}
@@ -5067,9 +5080,9 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 	*(n++) = '>';
 	*n = '\0';
 	if (strstr(set, norm)) {
-		done=1;
+		done = true;
 	} else {
-		done=0;
+		done = false;
 	}
 	efree(norm);
 	return done;
@@ -5078,7 +5091,7 @@ static bool php_tag_find(char *tag, size_t len, const char *set) {
 
 PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t allow_len) /* {{{ */
 {
-	return php_strip_tags_ex(rbuf, len, allow, allow_len, 0);
+	return php_strip_tags_ex(rbuf, len, allow, allow_len, false);
 }
 /* }}} */
 

@@ -204,7 +204,8 @@ static void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const
 			free_msg = 1;
 		} else {
 			if (wrapper == &php_plain_files_wrapper) {
-				msg = strerror(errno); /* TODO: not ts on linux */
+				char errstr[256];
+				msg = php_socket_strerror_s(errno, errstr, sizeof(errstr));
 			} else {
 				msg = "operation failed";
 			}
@@ -631,6 +632,12 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* when a filter needs feeding, there is no brig_out to deal with.
 					 * we simply continue the loop; if the caller needs more data,
 					 * we will read again, otherwise out job is done here */
+
+					/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
+					while ((bucket = brig_outp->head)) {
+						php_stream_bucket_unlink(bucket);
+						php_stream_bucket_delref(bucket);
+					}
 					break;
 
 				case PSFS_ERR_FATAL:
@@ -1264,14 +1271,22 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 				php_stream_bucket_delref(bucket);
 			}
 			break;
-		case PSFS_FEED_ME:
-			/* need more data before we can push data through to the stream */
-			break;
 
 		case PSFS_ERR_FATAL:
 			/* some fatal error.  Theoretically, the stream is borked, so all
 			 * further writes should fail. */
-			return (ssize_t) -1;
+			consumed = (ssize_t) -1;
+			ZEND_FALLTHROUGH;
+
+		case PSFS_FEED_ME:
+			/* need more data before we can push data through to the stream */
+			/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
+			while (brig_inp->head) {
+				bucket = brig_inp->head;
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
+			break;
 	}
 
 	return consumed;
@@ -2203,7 +2218,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	int persistent = options & STREAM_OPEN_PERSISTENT;
 	zend_string *path_str = NULL;
 	zend_string *resolved_path = NULL;
-	char *copy_of_path = NULL;
 
 	if (opened_path) {
 		if (options & STREAM_OPEN_FOR_ZEND_STREAM) {
@@ -2280,8 +2294,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		if (stream->orig_path) {
 			pefree(stream->orig_path, persistent);
 		}
-		copy_of_path = pestrdup(path, persistent);
-		stream->orig_path = copy_of_path;
+		stream->orig_path = pestrdup(path, persistent);
 #if ZEND_DEBUG
 		stream->open_filename = __zend_orig_filename ? __zend_orig_filename : __zend_filename;
 		stream->open_lineno = __zend_orig_lineno ? __zend_orig_lineno : __zend_lineno;
@@ -2340,11 +2353,6 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		}
 	}
 	php_stream_tidy_wrapper_error_log(wrapper);
-#if ZEND_DEBUG
-	if (stream == NULL && copy_of_path != NULL) {
-		pefree(copy_of_path, persistent);
-	}
-#endif
 	if (resolved_path) {
 		zend_string_release_ex(resolved_path, 0);
 	}
@@ -2458,7 +2466,7 @@ void php_stream_context_unset_option(php_stream_context *context,
 }
 /* }}} */
 
-PHPAPI const struct uri_parser_t *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context)
+PHPAPI const struct php_uri_parser *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context)
 {
 	if (context == NULL) {
 		return php_uri_get_parser(NULL);

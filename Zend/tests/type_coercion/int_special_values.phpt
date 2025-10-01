@@ -17,14 +17,18 @@ foreach($values as $value) {
     echo PHP_EOL;
 }
 ?>
---EXPECT--
+--EXPECTF--
 float(0)
 int(0)
 
 float(INF)
+
+Warning: The float INF is not representable as an int, cast occurred in %s on line %d
 int(0)
 
 float(-INF)
+
+Warning: The float -INF is not representable as an int, cast occurred in %s on line %d
 int(0)
 
 float(0)
@@ -34,4 +38,6 @@ float(-0)
 int(0)
 
 float(NAN)
+
+Warning: The float NAN is not representable as an int, cast occurred in %s on line %d
 int(0)

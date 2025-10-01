@@ -18,5 +18,10 @@ $obj->a->sqliteCreateCollation('col', function() use ($obj) {});
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
+Deprecated: Method PDO::sqliteCreateFunction() is deprecated since 8.5, use Pdo\Sqlite::createFunction() instead in %s on line %d
+
+Deprecated: Method PDO::sqliteCreateAggregate() is deprecated since 8.5, use Pdo\Sqlite::createAggregate() instead in %s on line %d
+
+Deprecated: Method PDO::sqliteCreateCollation() is deprecated since 8.5, use Pdo\Sqlite::createCollation() instead in %s on line %d
 ===DONE===

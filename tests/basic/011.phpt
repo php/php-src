@@ -18,7 +18,8 @@ for ($i=0; $i<$argc; $i++) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Deriving $_SERVER['argv'] from the query string is deprecated. Configure register_argc_argv=0 to turn this message off in %s on line %d
 0: ab
 1: cd
 2: ef

@@ -298,9 +298,9 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 			char exp_char = fmt == 'G' || fmt == 'H' ? 'E' : 'e';
 			/* We use &num_buf[ 1 ], so that we have room for the sign. */
 			s = zend_gcvt(number, precision, decimal_point, exp_char, &num_buf[1]);
-			is_negative = 0;
+			is_negative = false;
 			if (*s == '-') {
-				is_negative = 1;
+				is_negative = true;
 				s = &num_buf[1];
 			} else if (always_sign) {
 				num_buf[0] = '+';

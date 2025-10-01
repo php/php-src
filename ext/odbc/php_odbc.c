@@ -253,10 +253,6 @@ static void odbc_result_free(odbc_result *res)
 
 	/* If aborted via timer expiration, don't try to call any unixODBC function */
 	if (res->stmt && !(PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35)
-		SQLTransact(res->conn_ptr->henv, res->conn_ptr->hdbc,
-					(SQLUSMALLINT) SQL_COMMIT);
-#endif
 		SQLFreeStmt(res->stmt,SQL_DROP);
 		/* We don't want the connection to be closed after the last statement has been closed
 		 * Connections will be closed on shutdown
@@ -694,14 +690,6 @@ void odbc_bindcols(odbc_result *result)
 			case SQL_WLONGVARCHAR:
 				result->values[i].value = NULL;
 				break;
-
-#ifdef HAVE_ADABAS
-			case SQL_TIMESTAMP:
-				result->values[i].value = (char *)emalloc(27);
-				SQLBindCol(result->stmt, (SQLUSMALLINT)(i+1), SQL_C_CHAR, result->values[i].value,
-							27, &result->values[i].vallen);
-				break;
-#endif /* HAVE_ADABAS */
 			case SQL_CHAR:
 			case SQL_VARCHAR:
 			case SQL_WCHAR:
@@ -796,17 +784,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30)
-	/* this seems to be necessary for Solid2.3 ( tested by
-	 * tammy@synchronis.com) and Solid 3.0 (tested by eric@terra.telemediair.nl)
-	 * Solid does not seem to declare a SQLINTEGER, but it does declare a
-	 * SQL_INTEGER which does not work (despite being the same type as a SDWORD.
-	 * Solid 3.5 does not have this issue.
-	 */
-	SDWORD len;
-#else
 	SQLLEN len;
-#endif
 	zval *pv_res;
 	zend_long pv_num;
 
@@ -886,9 +864,7 @@ PHP_FUNCTION(odbc_prepare)
 	odbc_result *result = NULL;
 	RETCODE rc;
 	int i;
-#ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLUINTEGER      scrollopts;
-#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &pv_conn, odbc_connection_ce, &query, &query_len) == FAILURE) {
 		RETURN_THROWS();
@@ -916,9 +892,6 @@ PHP_FUNCTION(odbc_prepare)
 		RETURN_FALSE;
 	}
 
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	/* Solid doesn't have ExtendedFetch, if DriverManager is used, get Info,
-	   whether Driver supports ExtendedFetch */
 	rc = SQLGetInfo(conn->hdbc, SQL_FETCH_DIRECTION, (void *) &scrollopts, sizeof(scrollopts), NULL);
 	if (rc == SQL_SUCCESS) {
 		if ((result->fetch_abs = (scrollopts & SQL_FD_FETCH_ABSOLUTE))) {
@@ -930,7 +903,6 @@ PHP_FUNCTION(odbc_prepare)
 	} else {
 		result->fetch_abs = 0;
 	}
-#endif
 
 	rc = SQLPrepare(result->stmt, (SQLCHAR *) query, SQL_NTS);
 	switch (rc) {
@@ -1079,9 +1051,6 @@ PHP_FUNCTION(odbc_execute)
 									  (void *)(intptr_t)params[i-1].fp, 0,
 									  &params[i-1].vallen);
 			} else {
-#ifdef HAVE_DBMAKER
-				precision = params[i-1].vallen;
-#endif
 				if (otype == IS_NULL) {
 					params[i-1].vallen = SQL_NULL_DATA;
 				}
@@ -1209,7 +1178,6 @@ PHP_FUNCTION(odbc_cursor)
 }
 /* }}} */
 
-#ifdef HAVE_SQLDATASOURCES
 /* {{{ Return information about the currently connected data source */
 PHP_FUNCTION(odbc_data_source)
 {
@@ -1265,7 +1233,6 @@ PHP_FUNCTION(odbc_data_source)
 
 }
 /* }}} */
-#endif /* HAVE_SQLDATASOURCES */
 
 /* {{{ Prepare and execute an SQL statement */
 /* XXX Use flags */
@@ -1276,9 +1243,7 @@ PHP_FUNCTION(odbc_exec)
 	size_t query_len;
 	odbc_result *result = NULL;
 	RETCODE rc;
-#ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLUINTEGER      scrollopts;
-#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os", &pv_conn, odbc_connection_ce, &query, &query_len) == FAILURE) {
 		RETURN_THROWS();
@@ -1303,9 +1268,6 @@ PHP_FUNCTION(odbc_exec)
 		RETURN_FALSE;
 	}
 
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	/* Solid doesn't have ExtendedFetch, if DriverManager is used, get Info,
-	   whether Driver supports ExtendedFetch */
 	rc = SQLGetInfo(conn->hdbc, SQL_FETCH_DIRECTION, (void *) &scrollopts, sizeof(scrollopts), NULL);
 	if (rc == SQL_SUCCESS) {
 		if ((result->fetch_abs = (scrollopts & SQL_FD_FETCH_ABSOLUTE))) {
@@ -1317,7 +1279,6 @@ PHP_FUNCTION(odbc_exec)
 	} else {
 		result->fetch_abs = 0;
 	}
-#endif
 
 	rc = SQLExecDirect(result->stmt, (SQLCHAR *) query, SQL_NTS);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO && rc != SQL_NO_DATA_FOUND) {
@@ -1345,12 +1306,14 @@ PHP_FUNCTION(odbc_exec)
 }
 /* }}} */
 
-#ifdef PHP_ODBC_HAVE_FETCH_HASH
-#define ODBC_NUM  1
-#define ODBC_OBJECT  2
+typedef enum php_odbc_fetch_result_type_t {
+	ODBC_NONE   = 0,
+	ODBC_NUM    = 1,
+	ODBC_OBJECT = 2,
+} php_odbc_fetch_result_type_t;
 
-/* {{{ php_odbc_fetch_hash */
-static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
+/* {{{ php_odbc_fetch */
+static void php_odbc_fetch(INTERNAL_FUNCTION_PARAMETERS, bool return_array, php_odbc_fetch_result_type_t result_type)
 {
 	int i;
 	odbc_result *result;
@@ -1359,62 +1322,84 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	char *buf = NULL;
 	zend_long pv_row = 0;
 	bool pv_row_is_null = true;
-	zval *pv_res, tmp;
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
-#endif
+	zval *pv_res, *pv_res_arr, tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &pv_res, odbc_result_ce, &pv_row, &pv_row_is_null) == FAILURE) {
-		RETURN_THROWS();
+	if (return_array || result_type == ODBC_NONE) {
+		ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG_OR_NULL(pv_row, pv_row_is_null)
+		ZEND_PARSE_PARAMETERS_END();
+		/* So we can use pv_res_arr for both return value and passed */
+		pv_res_arr = return_value;
+	} else {
+		ZEND_PARSE_PARAMETERS_START(2, 3)
+			Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
+			Z_PARAM_ZVAL(pv_res_arr)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG_OR_NULL(pv_row, pv_row_is_null)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
 
-	/* TODO deprecate $row argument values less than 1 after PHP 8.4 */
-
-#ifndef HAVE_SQL_EXTENDED_FETCH
-	if (!pv_row_is_null && pv_row > 0) {
-		php_error_docref(NULL, E_WARNING, "Extended fetch functionality is not available, argument #3 ($row) is ignored");
+	/* TODO deprecate $row argument values less than 1 after PHP 8.4
+	 * for functions other than odbc_fetch_row (see GH-13910)
+	 */
+	if (!result_type && !pv_row_is_null && pv_row < 1) {
+		php_error_docref(NULL, E_WARNING, "Argument #3 ($row) must be greater than or equal to 1");
+		RETURN_FALSE;
 	}
-#endif
 
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
 
-#ifdef HAVE_SQL_EXTENDED_FETCH
+	/* If we're initializing a passed value into an array, do it before the fetch
+	 * so that an empty result set will still be an array.
+	 */
+	if (!return_array && result_type) {
+		pv_res_arr = zend_try_array_init(pv_res_arr);
+		if (!pv_res_arr) {
+			RETURN_THROWS();
+		}
+	}
+
 	if (result->fetch_abs) {
 		if (!pv_row_is_null && pv_row > 0) {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,(SQLLEN)pv_row,&crow,RowStatus);
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_ABSOLUTE, (SQLLEN)pv_row);
 		} else {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
 		}
-	} else
-#endif
-	rc = SQLFetch(result->stmt);
+	} else {
+		rc = SQLFetch(result->stmt);
+	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		if (rc == SQL_ERROR) {
-#ifdef HAVE_SQL_EXTENDED_FETCH
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
-#else
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
-#endif
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetchScroll");
 		}
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	/* ...but if returning an array, init only if we have a result set */
+	if (return_array && result_type) {
+		array_init(pv_res_arr);
+	}
 
-#ifdef HAVE_SQL_EXTENDED_FETCH
 	if (!pv_row_is_null && pv_row > 0 && result->fetch_abs)
 		result->fetched = (SQLLEN)pv_row;
 	else
-#endif
 		result->fetched++;
+
+	/* For fetch_row, we don't return anything other than true,
+	 * odbc_result will be used to fetch values instead.
+	 */
+	if (result_type == ODBC_NONE) {
+		RETURN_TRUE;
+	}
 
 	for(i = 0; i < result->numcols; i++) {
 		sql_c_type = SQL_C_CHAR;
@@ -1430,6 +1415,8 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (result->binmode == 1) {
 					sql_c_type = SQL_C_BINARY;
 				}
+
+				/* TODO: Check this is the intended behaviour */
 				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
 			case SQL_WLONGVARCHAR:
@@ -1446,7 +1433,9 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (rc == SQL_ERROR) {
 					odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
 					efree(buf);
-					zval_ptr_dtor(return_value);
+					if (return_array) {
+						zval_ptr_dtor(pv_res_arr);
+					}
 					RETURN_FALSE;
 				}
 
@@ -1480,17 +1469,22 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		}
 
 		if (result_type & ODBC_NUM) {
-			zend_hash_index_update(Z_ARRVAL_P(return_value), i, &tmp);
+			zend_hash_index_update(Z_ARRVAL_P(pv_res_arr), i, &tmp);
 		} else {
 			if (!*(result->values[i].name) && Z_TYPE(tmp) == IS_STRING) {
-				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR(tmp), &tmp);
+				zend_hash_update(Z_ARRVAL_P(pv_res_arr), Z_STR(tmp), &tmp);
 			} else {
-				zend_hash_str_update(Z_ARRVAL_P(return_value), result->values[i].name, strlen(result->values[i].name), &tmp);
+				zend_hash_str_update(Z_ARRVAL_P(pv_res_arr), result->values[i].name, strlen(result->values[i].name), &tmp);
 			}
 		}
 	}
 	if (buf) {
 		efree(buf);
+	}
+
+	/* return_value was set to an array otherwise */
+	if (!return_array) {
+		RETURN_LONG(result->numcols);
 	}
 }
 /* }}} */
@@ -1499,7 +1493,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 /* {{{ Fetch a result row as an object */
 PHP_FUNCTION(odbc_fetch_object)
 {
-	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
+	php_odbc_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, ODBC_OBJECT);
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	}
@@ -1509,214 +1503,21 @@ PHP_FUNCTION(odbc_fetch_object)
 /* {{{ Fetch a result row as an associative array */
 PHP_FUNCTION(odbc_fetch_array)
 {
-	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
+	php_odbc_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, ODBC_OBJECT);
 }
 /* }}} */
-#endif
 
 /* {{{ Fetch one result row into an array */
 PHP_FUNCTION(odbc_fetch_into)
 {
-	int i;
-	odbc_result *result;
-	RETCODE rc;
-	SQLSMALLINT sql_c_type;
-	char *buf = NULL;
-	zval *pv_res, *pv_res_arr, tmp;
-	zend_long pv_row = 0;
-	bool pv_row_is_null = true;
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
-#endif /* HAVE_SQL_EXTENDED_FETCH */
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz|l!", &pv_res, odbc_result_ce, &pv_res_arr, &pv_row, &pv_row_is_null) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	result = Z_ODBC_RESULT_P(pv_res);
-	CHECK_ODBC_RESULT(result);
-
-	/* TODO deprecate $row argument values less than 1 after PHP 8.4 */
-
-#ifndef HAVE_SQL_EXTENDED_FETCH
-	if (!pv_row_is_null && pv_row > 0) {
-		php_error_docref(NULL, E_WARNING, "Extended fetch functionality is not available, argument #3 ($row) is ignored");
-	}
-#endif
-
-	if (result->numcols == 0) {
-		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
-		RETURN_FALSE;
-	}
-
-	pv_res_arr = zend_try_array_init(pv_res_arr);
-	if (!pv_res_arr) {
-		RETURN_THROWS();
-	}
-
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	if (result->fetch_abs) {
-		if (!pv_row_is_null && pv_row > 0) {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,(SQLLEN)pv_row,&crow,RowStatus);
-		} else {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
-		}
-	} else
-#endif
-		rc = SQLFetch(result->stmt);
-
-	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		if (rc == SQL_ERROR) {
-#ifdef HAVE_SQL_EXTENDED_FETCH
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
-#else
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
-#endif
-		}
-		RETURN_FALSE;
-	}
-
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	if (!pv_row_is_null && pv_row > 0 && result->fetch_abs)
-		result->fetched = (SQLLEN)pv_row;
-	else
-#endif
-		result->fetched++;
-
-	for(i = 0; i < result->numcols; i++) {
-		sql_c_type = SQL_C_CHAR;
-
-		switch(result->values[i].coltype) {
-			case SQL_BINARY:
-			case SQL_VARBINARY:
-			case SQL_LONGVARBINARY:
-				if (result->binmode <= 0) {
-					ZVAL_EMPTY_STRING(&tmp);
-					break;
-				}
-				if (result->binmode == 1) sql_c_type = SQL_C_BINARY;
-
-				/* TODO: Check this is the intended behaviour */
-				ZEND_FALLTHROUGH;
-			case SQL_LONGVARCHAR:
-			case SQL_WLONGVARCHAR:
-				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
-					ZVAL_EMPTY_STRING(&tmp);
-					break;
-				}
-
-				if (buf == NULL) {
-					buf = emalloc(result->longreadlen + 1);
-				}
-				rc = SQLGetData(result->stmt, (SQLUSMALLINT)(i + 1),sql_c_type, buf, result->longreadlen + 1, &result->values[i].vallen);
-
-				if (rc == SQL_ERROR) {
-					odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
-					efree(buf);
-					RETURN_FALSE;
-				}
-				if (rc == SQL_SUCCESS_WITH_INFO) {
-					ZVAL_STRINGL(&tmp, buf, result->longreadlen);
-				} else if (rc != SQL_SUCCESS) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (retcode %u)", i + 1, rc);
-					ZVAL_FALSE(&tmp);
-				} else if (result->values[i].vallen == SQL_NULL_DATA) {
-					ZVAL_NULL(&tmp);
-					break;
-				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
-					ZVAL_FALSE(&tmp);
-				} else {
-					ZVAL_STRINGL(&tmp, buf, result->values[i].vallen);
-				}
-				break;
-
-			default:
-				if (result->values[i].vallen == SQL_NULL_DATA) {
-					ZVAL_NULL(&tmp);
-					break;
-				} else if (result->values[i].vallen == SQL_NO_TOTAL) {
-					php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", i + 1);
-					ZVAL_FALSE(&tmp);
-					break;
-				}
-				ZVAL_STRINGL(&tmp, result->values[i].value, result->values[i].vallen);
-				break;
-		}
-		zend_hash_index_update(Z_ARRVAL_P(pv_res_arr), i, &tmp);
-	}
-	if (buf) efree(buf);
-	RETURN_LONG(result->numcols);
+	php_odbc_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, ODBC_NUM);
 }
 /* }}} */
 
 /* {{{ Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
-	odbc_result *result;
-	RETCODE rc;
-	zval *pv_res;
-	zend_long pv_row = 0;
-	bool pv_row_is_null = true;
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
-#endif
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!", &pv_res, odbc_result_ce, &pv_row, &pv_row_is_null) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	result = Z_ODBC_RESULT_P(pv_res);
-	CHECK_ODBC_RESULT(result);
-
-#ifndef HAVE_SQL_EXTENDED_FETCH
-	if (!pv_row_is_null) {
-		php_error_docref(NULL, E_WARNING, "Extended fetch functionality is not available, argument #3 ($row) is ignored");
-	}
-#else
-	if (!pv_row_is_null && pv_row < 1) {
-		php_error_docref(NULL, E_WARNING, "Argument #3 ($row) must be greater than or equal to 1");
-		RETURN_FALSE;
-	}
-#endif
-
-	if (result->numcols == 0) {
-		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
-		RETURN_FALSE;
-	}
-
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	if (result->fetch_abs) {
-		if (!pv_row_is_null) {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,(SQLLEN)pv_row,&crow,RowStatus);
-		} else {
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
-		}
-	} else
-#endif
-		rc = SQLFetch(result->stmt);
-
-	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		if (rc == SQL_ERROR) {
-#ifdef HAVE_SQL_EXTENDED_FETCH
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
-#else
-		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
-#endif
-		}
-		RETURN_FALSE;
-	}
-
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	if (!pv_row_is_null) {
-		result->fetched = (SQLLEN)pv_row;
-	} else
-#endif
-		result->fetched++;
-
-	RETURN_TRUE;
+	php_odbc_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, ODBC_NONE);
 }
 /* }}} */
 
@@ -1733,10 +1534,6 @@ PHP_FUNCTION(odbc_result)
 	RETCODE rc;
 	SQLLEN	fieldsize;
 	zval *pv_res;
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
-#endif
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_OBJECT_OF_CLASS(pv_res, odbc_result_ce)
@@ -1787,20 +1584,15 @@ PHP_FUNCTION(odbc_result)
 
 	if (result->fetched == 0) {
 		/* User forgot to call odbc_fetch_row(), or wants to reload the results, do it now */
-#ifdef HAVE_SQL_EXTENDED_FETCH
-		if (result->fetch_abs)
-			rc = SQLExtendedFetch(result->stmt, SQL_FETCH_NEXT, 1, &crow,RowStatus);
-		else
-#endif
+		if (result->fetch_abs) {
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
+		} else {
 			rc = SQLFetch(result->stmt);
+		}
 
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			if (rc == SQL_ERROR) {
-#ifdef HAVE_SQL_EXTENDED_FETCH
-			odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
-#else
-			odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
-#endif
+				odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetchScroll");
 			}
 			RETURN_FALSE;
 		}
@@ -1943,10 +1735,6 @@ PHP_FUNCTION(odbc_result_all)
 	char *pv_format = NULL;
 	size_t i, pv_format_len = 0;
 	SQLSMALLINT sql_c_type;
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	SQLULEN crow;
-	SQLUSMALLINT RowStatus[1];
-#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s", &pv_res, odbc_result_ce, &pv_format, &pv_format_len) == FAILURE) {
 		RETURN_THROWS();
@@ -1959,12 +1747,11 @@ PHP_FUNCTION(odbc_result_all)
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
-#ifdef HAVE_SQL_EXTENDED_FETCH
-	if (result->fetch_abs)
-		rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
-	else
-#endif
+	if (result->fetch_abs) {
+		rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
+	} else {
 		rc = SQLFetch(result->stmt);
+	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		php_printf("<h2>No rows found</h2>\n");
@@ -2059,12 +1846,11 @@ PHP_FUNCTION(odbc_result_all)
 		}
 		php_printf("</tr>\n");
 
-#ifdef HAVE_SQL_EXTENDED_FETCH
-		if (result->fetch_abs)
-			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
-		else
-#endif
+		if (result->fetch_abs) {
+			rc = SQLFetchScroll(result->stmt, SQL_FETCH_NEXT, 1);
+		} else {
 			rc = SQLFetch(result->stmt);
+		}
 	}
 	php_printf("</table>\n");
 	if (buf) efree(buf);
@@ -2133,18 +1919,6 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 		return false;
 	}
 
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30)
-	SQLSetConnectOption((link->connection->hdbc, SQL_TRANSLATE_OPTION,
-			SQL_SOLID_XLATOPT_NOCNV);
-#endif
-#ifdef HAVE_OPENLINK
-	{
-		char dsnbuf[1024];
-		short dsnbuflen;
-
-		rc = SQLDriverConnect(link->connection->hdbc, NULL, db, SQL_NTS,	dsnbuf, sizeof(dsnbuf) - 1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
-	}
-#else
 	if (cur_opt != SQL_CUR_DEFAULT) {
 		rc = SQLSetConnectAttr(link->connection->hdbc, SQL_ATTR_ODBC_CURSORS, (SQLPOINTER) (intptr_t) cur_opt, 0);
 		if (rc != SQL_SUCCESS) {  /* && rc != SQL_SUCCESS_WITH_INFO ? */
@@ -2154,9 +1928,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	}
 /*  Possible fix for bug #10250
  *  Needs testing on UnixODBC < 2.0.5 though. */
-#if defined(HAVE_EMPRESS) || defined(HAVE_UNIXODBC) || defined(PHP_WIN32) || defined (HAVE_IODBC)
-/* *  Uncomment the line above, and comment line below to fully test
- * #ifdef HAVE_EMPRESS */
+#if defined(HAVE_UNIXODBC) || defined(PHP_WIN32) || defined (HAVE_IODBC)
 	{
 		int     direct = 0;
 		SQLCHAR dsnbuf[1024];
@@ -2241,7 +2013,6 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	}
 #else
 	rc = SQLConnect(link->connection->hdbc, (SQLCHAR *) db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
-#endif
 #endif
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SQLConnect");
@@ -2447,7 +2218,6 @@ PHP_FUNCTION(odbc_num_rows)
 }
 /* }}} */
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 /* {{{ Checks if multiple results are available */
 PHP_FUNCTION(odbc_next_result)
 {
@@ -2494,7 +2264,6 @@ PHP_FUNCTION(odbc_next_result)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ Get number of columns in a result */
 PHP_FUNCTION(odbc_num_fields)
@@ -2636,7 +2405,7 @@ PHP_FUNCTION(odbc_autocommit)
 {
 	RETCODE rc;
 	zval *pv_conn;
-	bool pv_onoff = 0;
+	bool pv_onoff = false;
 	bool pv_onoff_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b!", &pv_conn, odbc_connection_ce, &pv_onoff, &pv_onoff_is_null) == FAILURE) {
@@ -2924,7 +2693,6 @@ PHP_FUNCTION(odbc_columns)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
 PHP_FUNCTION(odbc_columnprivileges)
 {
@@ -2984,9 +2752,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_DBMAKER || HAVE_SOLID*/
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier to either a list of foreign keys in the specified table or a list of foreign keys in other tables that refer to the primary key in the specified table */
 PHP_FUNCTION(odbc_foreignkeys)
 {
@@ -3001,7 +2767,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 		RETURN_THROWS();
 	}
 
-#if defined(HAVE_DBMAKER) || defined(HAVE_IBMDB2)
+#if defined(HAVE_IBMDB2)
 #define EMPTY_TO_NULL(xstr) \
 	if ((int)strlen((xstr)) == 0) (xstr) = NULL
 
@@ -3060,7 +2826,6 @@ PHP_FUNCTION(odbc_foreignkeys)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_SOLID */
 
 /* {{{ Returns a result identifier containing information about data types supported by the data source */
 PHP_FUNCTION(odbc_gettypeinfo)
@@ -3177,7 +2942,6 @@ PHP_FUNCTION(odbc_primarykeys)
 }
 /* }}} */
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
 PHP_FUNCTION(odbc_procedurecolumns)
 {
@@ -3237,9 +3001,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_SOLID */
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier containing the list of procedure names in a datasource */
 PHP_FUNCTION(odbc_procedures)
 {
@@ -3297,7 +3059,6 @@ PHP_FUNCTION(odbc_procedures)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_SOLID */
 
 /* {{{ Returns a result identifier containing either the optimal set of columns that uniquely identifies a row in the table or columns that are automatically updated when any value in the row is updated by a transaction */
 PHP_FUNCTION(odbc_specialcolumns)
@@ -3432,7 +3193,6 @@ PHP_FUNCTION(odbc_statistics)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier containing a list of tables and the privileges associated with each table */
 PHP_FUNCTION(odbc_tableprivileges)
 {
@@ -3490,6 +3250,5 @@ PHP_FUNCTION(odbc_tableprivileges)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_DBMAKER */
 
 #endif /* HAVE_UODBC */

@@ -1875,6 +1875,7 @@ static ir_ref ir_ext_const(ir_ctx *ctx, ir_insn *val_insn, ir_op op, ir_type typ
 		case IR_I8:
 		case IR_U8:
 		case IR_BOOL:
+		case IR_CHAR:
 			if (op == IR_SEXT) {
 				new_val.i64 = (int64_t)val_insn->val.i8;
 			} else {
@@ -1928,7 +1929,7 @@ static ir_ref ir_ext_ref(ir_ctx *ctx, ir_ref var_ref, ir_ref src_ref, ir_op op, 
 	return ref;
 }
 
-static uint32_t _ir_estimated_control(ir_ctx *ctx, ir_ref val)
+static uint32_t _ir_estimated_control(ir_ctx *ctx, ir_ref val, ir_ref loop)
 {
 	ir_insn *insn;
 	ir_ref n, *p, input, result, ctrl;
@@ -1953,7 +1954,8 @@ static uint32_t _ir_estimated_control(ir_ctx *ctx, ir_ref val)
 	result = 1;
 	for (; n > 0; p++, n--) {
 		input = *p;
-		ctrl = _ir_estimated_control(ctx, input);
+		ctrl = _ir_estimated_control(ctx, input, loop);
+		if (ctrl >= loop) return ctrl;
 		if (ctrl > result) { // TODO: check dominance depth instead of order
 			result = ctrl;
 		}
@@ -1963,7 +1965,7 @@ static uint32_t _ir_estimated_control(ir_ctx *ctx, ir_ref val)
 
 static bool ir_is_loop_invariant(ir_ctx *ctx, ir_ref ref, ir_ref loop)
 {
-	ref = _ir_estimated_control(ctx, ref);
+	ref = _ir_estimated_control(ctx, ref, loop);
 	return ref < loop; // TODO: check dominance instead of order
 }
 
@@ -2995,6 +2997,7 @@ static bool ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqueue 
 
 				end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
 				end2->op2 = cond->op3;
+				ir_bitqueue_add(worklist, end2_ref);
 
 				merge->optx = IR_OPTX(op, IR_VOID, 1);
 				merge->op1 = end2_ref;
@@ -3190,6 +3193,7 @@ static bool ir_try_split_if_cmp(ir_ctx *ctx, ir_ref ref, ir_insn *insn, ir_bitqu
 
 						end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
 						end2->op2 = insn->op2;
+						ir_bitqueue_add(worklist, end2_ref);
 
 						merge->optx = IR_OPTX(op, IR_VOID, 1);
 						merge->op1 = end2_ref;

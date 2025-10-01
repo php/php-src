@@ -6751,7 +6751,17 @@ ZEND_VM_C_LABEL(num_index_dim):
 				offset = Z_REFVAL_P(offset);
 				ZEND_VM_C_GOTO(offset_again);
 			} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+				/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
+				 * Temporarily increase the refcount to detect this situation. */
+				GC_TRY_ADDREF(ht);
 				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					break;
+				}
+				if (EG(exception)) {
+					break;
+				}
 				ZEND_VM_C_GOTO(num_index_dim);
 			} else if (Z_TYPE_P(offset) == IS_NULL) {
 				key = ZSTR_EMPTY_ALLOC();
@@ -8154,7 +8164,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	}
 
 	uint32_t throw_op_num = throw_op - EX(func)->op_array.opcodes;
-	int i, current_try_catch_offset = -1;
+	uint32_t current_try_catch_offset = -1;
 
 	if ((throw_op->opcode == ZEND_FREE || throw_op->opcode == ZEND_FE_FREE)
 		&& throw_op->extended_value & ZEND_FREE_ON_RETURN) {
@@ -8165,7 +8175,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		const zend_live_range *range = find_live_range(
 			&EX(func)->op_array, throw_op_num, throw_op->op1.var);
 		/* free op1 of the corresponding RETURN */
-		for (i = throw_op_num; i < range->end; i++) {
+		for (uint32_t i = throw_op_num; i < range->end; i++) {
 			if (EX(func)->op_array.opcodes[i].opcode == ZEND_FREE
 			 || EX(func)->op_array.opcodes[i].opcode == ZEND_FE_FREE) {
 				/* pass */
@@ -8181,7 +8191,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	}
 
 	/* Find the innermost try/catch/finally the exception was thrown in */
-	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
+	for (uint32_t i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		zend_try_catch_element *try_catch = &EX(func)->op_array.try_catch_array[i];
 		if (try_catch->try_op > throw_op_num) {
 			/* further blocks will not be relevant... */

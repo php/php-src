@@ -670,7 +670,7 @@ ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
 	zval memory_usage, statistics, scripts;
-	bool fetch_scripts = 1;
+	bool fetch_scripts = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
 		RETURN_THROWS();
@@ -937,7 +937,7 @@ ZEND_FUNCTION(opcache_reset)
 ZEND_FUNCTION(opcache_invalidate)
 {
 	zend_string *script_name;
-	bool force = 0;
+	bool force = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &script_name, &force) == FAILURE) {
 		RETURN_THROWS();

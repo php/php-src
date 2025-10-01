@@ -156,6 +156,7 @@ string(0) ""
 *** Trying int(9223372036854775807)
 string(19) "9223372036854775807"
 *** Trying float(NAN)
+E_WARNING: unexpected NAN value was coerced to string on line %d
 string(3) "NAN"
 *** Trying bool(true)
 string(1) "1"
@@ -193,6 +194,7 @@ bool(false)
 *** Trying int(9223372036854775807)
 bool(true)
 *** Trying float(NAN)
+E_WARNING: unexpected NAN value was coerced to bool on line %d
 bool(true)
 *** Trying bool(true)
 bool(true)

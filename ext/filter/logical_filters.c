@@ -612,14 +612,14 @@ zend_result php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int parser_name_set;
 	FETCH_STR_OPTION(parser_name, URL_OPTION_URI_PARSER_CLASS);
 
-	const uri_parser_t *uri_parser = php_uri_get_parser(parser_name_set ? parser_name : NULL);
+	const php_uri_parser *uri_parser = php_uri_get_parser(parser_name_set ? parser_name : NULL);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): \"uri_parser_class\" option has invalid value", get_active_function_name());
 		RETURN_VALIDATION_FAILED
 	}
 
 	/* Parse the URI - if it fails, we return NULL */
-	php_uri *uri = php_uri_parse_to_struct(uri_parser, Z_STRVAL_P(value), Z_STRLEN_P(value), URI_COMPONENT_READ_RAW, true);
+	php_uri *uri = php_uri_parse_to_struct(uri_parser, Z_STRVAL_P(value), Z_STRLEN_P(value), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	if (uri == NULL) {
 		RETURN_VALIDATION_FAILED
 	}
@@ -788,7 +788,7 @@ static bool _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]
 	const char *s = str;
 
 	if (!memchr(str, ':', str_len)) {
-		return 0;
+		return false;
 	}
 
 	/* check for bundled IPv4 */
@@ -799,12 +799,12 @@ static bool _php_filter_validate_ipv6(const char *str, size_t str_len, int ip[8]
 		}
 
 		if (!_php_filter_validate_ipv4(ipv4, (str_len - (ipv4 - str)), ip4elm)) {
-			return 0;
+			return false;
 		}
 
 		str_len = ipv4 - str; /* length excluding ipv4 */
 		if (str_len < 2) {
-			return 0;
+			return false;
 		}
 
 		if (ipv4[-2] != ':') {

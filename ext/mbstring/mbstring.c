@@ -313,7 +313,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 		list = (const mbfl_encoding **)pecalloc(size, sizeof(mbfl_encoding*), persistent);
 		entry = list;
 		n = 0;
-		included_auto = 0;
+		included_auto = false;
 		p1 = tmpstr;
 		while (1) {
 			const char *comma = memchr(p1, ',', endp - p1);
@@ -333,7 +333,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 					const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
 					const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
 					size_t i;
-					included_auto = 1;
+					included_auto = true;
 					for (i = 0; i < identify_list_size; i++) {
 						*entry++ = mbfl_no2encoding(*src++);
 						n++;
@@ -379,7 +379,7 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 	size_t size = zend_hash_num_elements(target_hash) + MBSTRG(default_detect_order_list_size);
 	const mbfl_encoding **list = ecalloc(size, sizeof(mbfl_encoding*));
 	const mbfl_encoding **entry = list;
-	bool included_auto = 0;
+	bool included_auto = false;
 	size_t n = 0;
 	zval *hash_entry;
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
@@ -396,7 +396,7 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 				const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
 				size_t j;
 
-				included_auto = 1;
+				included_auto = true;
 				for (j = 0; j < identify_list_size; j++) {
 					*entry++ = mbfl_no2encoding(*src++);
 					n++;
@@ -729,7 +729,7 @@ static zend_result _php_mb_ini_mbstring_http_input_set(const char *new_value, si
 		list = (const mbfl_encoding**)pecalloc(1, sizeof(mbfl_encoding*), 1);
 		*list = &mbfl_encoding_pass;
 		size = 1;
-	} else if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ 1, /* arg_num */ 0) || size == 0) {
+	} else if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ true, /* arg_num */ 0) || size == 0) {
 		return FAILURE;
 	}
 	if (MBSTRG(http_input_list)) {

@@ -301,6 +301,7 @@ namespace {
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 
     function zend_test_zend_ini_str(): string {}
+    function zend_test_zstr_init_literal(): string {}
 
 #ifdef ZEND_CHECK_STACK_LIMIT
     function zend_test_zend_call_stack_get(): ?array {}
@@ -344,6 +345,9 @@ function zend_test_override_libxml_global_state(): void {}
     function zend_test_opcache_preloading(): bool {}
 
     function zend_test_uri_parser(string $uri, string $parser): array { }
+
+    /** @compile-time-eval */
+    function zend_test_gh19792(): void {}
 }
 
 namespace ZendTestNS {

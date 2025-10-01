@@ -697,12 +697,13 @@ static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the open_basedir check at runtime */
 	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) &&
-			new_value && zend_string_equals_literal(new_value, "syslog")) {
+			new_value && !zend_string_equals_literal(new_value, "syslog") && ZSTR_LEN(new_value) > 0) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -711,12 +712,42 @@ static PHP_INI_MH(OnUpdateErrorLog)
 static PHP_INI_MH(OnUpdateMailLog)
 {
 	/* Only do the open_basedir check at runtime */
-	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value) {
+	if ((stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) && new_value && ZSTR_LEN(new_value) > 0) {
 		if (PG(open_basedir) && php_check_open_basedir(ZSTR_VAL(new_value))) {
 			return FAILURE;
 		}
 	}
-	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	char **p = (char **) ZEND_INI_GET_ADDR();
+	*p = new_value && ZSTR_LEN(new_value) > 0 ? ZSTR_VAL(new_value) : NULL;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnUpdateMailCrLfMode)
+{
+	if (new_value) {
+		if (ZSTR_LEN(new_value) > 0 &&
+			!zend_string_equals_literal(new_value, "crlf") &&
+			!zend_string_equals_literal(new_value, "lf") &&
+			!zend_string_equals_literal(new_value, "mixed") &&
+			!zend_string_equals_literal(new_value, "os")) {
+			int err_type;
+
+			if (stage == ZEND_INI_STAGE_RUNTIME) {
+				err_type = E_WARNING;
+			} else {
+				err_type = E_ERROR;
+			}
+
+			if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+				php_error_docref(NULL, err_type, "Invalid value \"%s\" for mail.cr_lf_mode. Must be one of: \"crlf\", \"lf\", \"mixed\", \"os\"", ZSTR_VAL(new_value));
+			}
+
+			return FAILURE;
+		}
+	}
+	OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	return SUCCESS;
 }
 /* }}} */
@@ -826,6 +857,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
 	STD_PHP_INI_BOOLEAN("mail.add_x_header",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_x_header,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("mail.mixed_lf_and_crlf",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_mixed_lf_and_crlf,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("mail.cr_lf_mode",				"crlf",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailCrLfMode,		mail_cr_lf_mode,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
 

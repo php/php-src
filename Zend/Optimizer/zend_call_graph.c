@@ -146,7 +146,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_SEND_USER:
 				if (call_info) {
 					if (opline->op2_type == IS_CONST) {
-						call_info->named_args = 1;
+						call_info->named_args = true;
 						break;
 					}
 
@@ -160,7 +160,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_SEND_ARRAY:
 			case ZEND_SEND_UNPACK:
 				if (call_info) {
-					call_info->send_unpack = 1;
+					call_info->send_unpack = true;
 				}
 				break;
 		}
@@ -173,22 +173,22 @@ static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_
 {
 	zend_func_info *func_info;
 	zend_call_info *call_info;
-	bool ret = 0;
+	bool ret = false;
 
 	if (op_array == root) {
-		return 1;
+		return true;
 	}
 
 	func_info = ZEND_FUNC_INFO(op_array);
 	if (zend_bitset_in(visited, func_info->num)) {
-		return 0;
+		return false;
 	}
 	zend_bitset_incl(visited, func_info->num);
 	call_info = func_info->caller_info;
 	while (call_info) {
 		if (zend_is_indirectly_recursive(root, call_info->caller_op_array, visited)) {
-			call_info->recursive = 1;
-			ret = 1;
+			call_info->recursive = true;
+			ret = true;
 		}
 		call_info = call_info->next_caller;
 	}
@@ -216,12 +216,12 @@ static void zend_analyze_recursion(zend_call_graph *call_graph)
 				continue;
 			}
 			if (call_info->caller_op_array == op_array) {
-				call_info->recursive = 1;
+				call_info->recursive = true;
 				func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_DIRECTLY;
 			} else {
 				memset(visited, 0, sizeof(zend_ulong) * set_len);
 				if (zend_is_indirectly_recursive(op_array, call_info->caller_op_array, visited)) {
-					call_info->recursive = 1;
+					call_info->recursive = true;
 					func_info->flags |= ZEND_FUNC_RECURSIVE | ZEND_FUNC_RECURSIVE_INDIRECTLY;
 				}
 			}

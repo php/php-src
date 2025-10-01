@@ -310,6 +310,8 @@ typedef enum _ir_type {
 	_(PHI,          pN,   reg, def, def) /* SSA Phi function            */ \
 	_(COPY,         d1X1, def, opt, ___) /* COPY (last foldable op)     */ \
 	_(PI,           p2,   reg, def, ___) /* e-SSA Pi constraint ???     */ \
+	_(ARGVAL,       d1X2, def, num, num) /* pass struct arg by value    */ \
+	                                     /* (op2 - size, op3 - align)   */ \
 	/* (USE, RENAME)                                                    */ \
 	\
 	/* data ops                                                         */ \
@@ -343,7 +345,8 @@ typedef enum _ir_type {
 	_(VA_START,     x2,   src, def, ___) /* va_start(va_list)           */ \
 	_(VA_END,       x2,   src, def, ___) /* va_end(va_list)             */ \
 	_(VA_COPY,      x3,   src, def, def) /* va_copy(dst, stc)           */ \
-	_(VA_ARG,       x2,   src, def, ___) /* va_arg(va_list)             */ \
+	_(VA_ARG,       x2X1, src, def, opt) /* va_arg(va_list)             */ \
+	                                     /* op3 - (size<<3)+log2(align) */ \
 	\
 	/* guards                                                           */ \
 	_(GUARD,        c3,   src, def, def) /* IF without second successor */ \
@@ -583,12 +586,22 @@ typedef struct _ir_code_buffer {
 	void *pos;
 } ir_code_buffer;
 
+typedef struct {
+	int   size;
+	int   align;
+	int   offset;
+} ir_value_param;
+
+#define IR_CONST_HASH_SIZE 64
+
 struct _ir_ctx {
 	ir_insn           *ir_base;                 /* two directional array - instructions grow down, constants grow up */
 	ir_ref             insns_count;             /* number of instructions stored in instructions buffer */
 	ir_ref             insns_limit;             /* size of allocated instructions buffer (it's extended when overflow) */
 	ir_ref             consts_count;            /* number of constants stored in constants buffer */
 	ir_ref             consts_limit;            /* size of allocated constants buffer (it's extended when overflow) */
+	uintptr_t          const_hash_mask;
+	ir_ref            *const_hash;
 	uint32_t           flags;                   /* IR context flags (see IR_* defines above) */
 	uint32_t           flags2;                  /* IR context private flags (see IR_* defines in ir_private.h) */
 	ir_type            ret_type;                /* Function return type */
@@ -596,6 +609,7 @@ struct _ir_ctx {
 	int32_t            status;                  /* non-zero error code (see IR_ERROR_... macros), app may use negative codes */
 	ir_ref             fold_cse_limit;          /* CSE finds identical insns backward from "insn_count" to "fold_cse_limit" */
 	ir_insn            fold_insn;               /* temporary storage for folding engine */
+	ir_value_param    *value_params;            /* information about "by-val" struct parameters */
 	ir_hashtab        *binding;
 	ir_use_list       *use_lists;               /* def->use lists for each instruction */
 	ir_ref            *use_edges;               /* the actual uses: use = ctx->use_edges[ctx->use_lists[def].refs + n] */
@@ -655,7 +669,7 @@ struct _ir_ctx {
 	ir_loader         *loader;
 	ir_strtab          strtab;
 	ir_ref             prev_insn_chain[IR_LAST_FOLDABLE_OP + 1];
-	ir_ref             prev_const_chain[IR_LAST_TYPE];
+	ir_ref             _const_hash[IR_CONST_HASH_SIZE];
 };
 
 /* Basic IR Construction API (implementation in ir.c) */
@@ -896,6 +910,7 @@ int ir_load_llvm_asm(ir_loader *loader, const char *filename);
 #define IR_SAVE_SAFE_NAMES (1<<5) /* add '@' prefix to symbol names */
 
 void ir_print_proto(const ir_ctx *ctx, ir_ref proto, FILE *f);
+void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f);
 void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f);
 
 /* IR debug dump API (implementation in ir_dump.c) */

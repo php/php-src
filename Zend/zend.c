@@ -553,7 +553,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 				GC_PROTECT_RECURSION(Z_ARRVAL_P(expr));
 			}
-			print_hash(buf, Z_ARRVAL_P(expr), indent, 0);
+			print_hash(buf, Z_ARRVAL_P(expr), indent, false);
 			GC_TRY_UNPROTECT_RECURSION(Z_ARRVAL_P(expr));
 			break;
 		case IS_OBJECT:
@@ -583,12 +583,12 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 
 				if ((properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG)) == NULL) {
-					print_hash(buf, (HashTable*) &zend_empty_array, indent, 1);
+					print_hash(buf, (HashTable*) &zend_empty_array, indent, true);
 					break;
 				}
 
 				ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
-				print_hash(buf, properties, indent, 1);
+				print_hash(buf, properties, indent, true);
 				ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 
 				zend_release_properties(properties);
@@ -641,7 +641,7 @@ static FILE *zend_fopen_wrapper(zend_string *filename, zend_string **opened_path
 /* }}} */
 
 #ifdef ZTS
-static bool short_tags_default      = 1;
+static bool short_tags_default = true;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
 # define short_tags_default			1
@@ -817,7 +817,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->saved_fpu_cw = 0;
 #endif
 	executor_globals->saved_fpu_cw_ptr = NULL;
-	executor_globals->active = 0;
+	executor_globals->active = false;
 	executor_globals->bailout = NULL;
 	executor_globals->error_handling  = EH_NORMAL;
 	executor_globals->exception_class = NULL;
@@ -910,7 +910,7 @@ static bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 {
 	/* While we keep registering $GLOBALS as an auto-global, we do not create an
 	 * actual variable for it. Access to it handled specially by the compiler. */
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -1026,7 +1026,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	executor_globals = ts_resource(executor_globals_id);
 
 	compiler_globals_dtor(compiler_globals);
-	compiler_globals->in_compilation = 0;
+	compiler_globals->in_compilation = false;
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 

@@ -44,6 +44,9 @@ on:
       skip_wordpress:
         required: true
         type: boolean
+      variation_enable_zend_max_execution_timers:
+        required: true
+        type: boolean
 permissions:
   contents: read
 jobs:
@@ -198,6 +201,7 @@ jobs:
             zts: true
             configuration_parameters: >-
               CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"
+              ${{ inputs.variation_enable_zend_max_execution_timers && '--enable-zend-max-execution-timers' || '' }}
             run_tests_parameters: -d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0
             timeout_minutes: 360
             test_function_jit: true
@@ -1038,7 +1042,7 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
       PHP_BUILD_CRT: ${{ inputs.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"

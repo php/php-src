@@ -329,7 +329,7 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 		if (ZSTR_LEN(host) > ZSTR_LEN(domain)) {
 			return strcmp(ZSTR_VAL(host)+ZSTR_LEN(host)-ZSTR_LEN(domain), ZSTR_VAL(domain)) == 0;
 		} else {
-			return 0;
+			return false;
 		}
 	} else {
 		return zend_string_equals(host,domain);
@@ -338,7 +338,7 @@ static bool in_domain(const zend_string *host, const zend_string *domain)
 
 int make_http_soap_request(
 	zval *this_ptr, zend_string *buf, zend_string *location, char *soapaction,
-	int soap_version, const zend_string *uri_parser_class, zval *return_value
+	int soap_version, zend_string *uri_parser_class, zval *return_value
 ) {
 	zend_string *request;
 	smart_str soap_headers = {0};
@@ -363,9 +363,9 @@ int make_http_soap_request(
 	char *http_msg = NULL;
 	bool old_allow_url_fopen;
 	php_stream_context *context = NULL;
-	bool has_authorization = 0;
-	bool has_proxy_authorization = 0;
-	bool has_cookies = 0;
+	bool has_authorization = false;
+	bool has_proxy_authorization = false;
+	bool has_cookies = false;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -431,12 +431,12 @@ int make_http_soap_request(
 	}
 
 	if (location != NULL && ZSTR_VAL(location)[0] != '\000') {
-		const uri_parser_t *uri_parser = php_uri_get_parser(uri_parser_class);
+		const php_uri_parser *uri_parser = php_uri_get_parser(uri_parser_class);
 		if (uri_parser == NULL) {
 			zend_argument_value_error(6, "must be a valid URI parser name");
 			return FALSE;
 		}
-		uri = php_uri_parse_to_struct(uri_parser, ZSTR_VAL(location), ZSTR_LEN(location), URI_COMPONENT_READ_RAW, true);
+		uri = php_uri_parse_to_struct(uri_parser, ZSTR_VAL(location), ZSTR_LEN(location), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	}
 
 	tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
@@ -460,7 +460,7 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
-		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL, SOAP_GLOBAL(lang_en));
+		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL, soap_lang_en);
 		smart_str_free(&soap_headers_z);
 		efree(http_msg);
 		return FALSE;
@@ -474,7 +474,7 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
-		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL, SOAP_GLOBAL(lang_en));
+		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL, soap_lang_en);
 		smart_str_free(&soap_headers_z);
 		efree(http_msg);
 		return FALSE;
@@ -487,7 +487,7 @@ try_again:
 		if (request != buf) {
 			zend_string_release_ex(request, 0);
 		}
-		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL, SOAP_GLOBAL(lang_en));
+		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL, soap_lang_en);
 		PG(allow_url_fopen) = old_allow_url_fopen;
 		smart_str_free(&soap_headers_z);
 		efree(http_msg);
@@ -540,7 +540,7 @@ try_again:
 			if (request != buf) {
 				zend_string_release_ex(request, 0);
 			}
-			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL, SOAP_GLOBAL(lang_en));
+			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL, soap_lang_en);
 			PG(allow_url_fopen) = old_allow_url_fopen;
 			smart_str_free(&soap_headers_z);
 			efree(http_msg);
@@ -680,7 +680,7 @@ try_again:
 		if (Z_TYPE_P(login) == IS_STRING) {
 			zval *digest = Z_CLIENT_DIGEST_P(this_ptr);
 
-			has_authorization = 1;
+			has_authorization = true;
 			if (Z_TYPE_P(digest) == IS_ARRAY) {
 				char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
 				unsigned char nonce[16];
@@ -858,7 +858,7 @@ try_again:
 		if (zend_hash_num_elements(Z_ARRVAL_P(cookies)) != 0 && !HT_IS_PACKED(Z_ARRVAL_P(cookies))) {
 			zval *data;
 			zend_string *key;
-			has_cookies = 1;
+			has_cookies = true;
 			bool first_cookie = true;
 			smart_str_append_const(&soap_headers, "Cookie: ");
 			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
@@ -911,14 +911,14 @@ try_again:
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
 			ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
-			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL, SOAP_GLOBAL(lang_en));
+			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL, soap_lang_en);
 			smart_str_free(&soap_headers_z);
 			efree(http_msg);
 			return FALSE;
 		}
 		smart_str_free(&soap_headers);
 	} else {
-		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL, SOAP_GLOBAL(lang_en));
+		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL, soap_lang_en);
 		smart_str_free(&soap_headers_z);
 		efree(http_msg);
 		return FALSE;
@@ -935,7 +935,7 @@ try_again:
 				ZVAL_NULL(Z_CLIENT_HTTPSOCKET_P(this_ptr));
 				php_stream_close(stream);
 				ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
-				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL, SOAP_GLOBAL(lang_en));
+				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL, soap_lang_en);
 				smart_str_free(&soap_headers_z);
 				efree(http_msg);
 				return FALSE;
@@ -1124,7 +1124,7 @@ try_again:
 		php_stream_close(stream);
 		zend_string_release_ex(http_headers, 0);
 		ZVAL_NULL(Z_CLIENT_USE_PROXY_P(this_ptr));
-		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL, SOAP_GLOBAL(lang_en));
+		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL, soap_lang_en);
 		if (http_msg) {
 			efree(http_msg);
 		}
@@ -1148,14 +1148,14 @@ try_again:
 		char *loc;
 
 		if ((loc = get_http_header_value(ZSTR_VAL(http_headers), "Location:")) != NULL) {
-			const uri_parser_t *uri_parser = php_uri_get_parser(uri_parser_class);
+			const php_uri_parser *uri_parser = php_uri_get_parser(uri_parser_class);
 			if (uri_parser == NULL) {
 				efree(loc);
 				zend_argument_value_error(6, "must be a valid URI parser name");
 				return FALSE;
 			}
 
-			php_uri *new_uri = php_uri_parse_to_struct(uri_parser, loc, strlen(loc), URI_COMPONENT_READ_RAW, true);
+			php_uri *new_uri = php_uri_parse_to_struct(uri_parser, loc, strlen(loc), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 			efree(loc);
 
 			if (new_uri != NULL) {
@@ -1190,7 +1190,7 @@ try_again:
 				uri = new_uri;
 
 				if (--redirect_max < 1) {
-					add_soap_fault(this_ptr, "HTTP", "Redirection limit reached, aborting", NULL, NULL, SOAP_GLOBAL(lang_en));
+					add_soap_fault(this_ptr, "HTTP", "Redirection limit reached, aborting", NULL, NULL, soap_lang_en);
 					smart_str_free(&soap_headers_z);
 					efree(http_msg);
 					return FALSE;
@@ -1326,7 +1326,7 @@ try_again:
 			if (http_msg) {
 				efree(http_msg);
 			}
-			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL, SOAP_GLOBAL(lang_en));
+			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL, soap_lang_en);
 			return FALSE;
 		}
 		zend_call_known_function(decompression_fn, NULL, NULL, &retval, 1, params, NULL);
@@ -1338,7 +1338,7 @@ try_again:
 			efree(content_encoding);
 			zend_string_release_ex(http_headers, 0);
 			zend_string_release_ex(http_body, 0);
-			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL, SOAP_GLOBAL(lang_en));
+			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL, soap_lang_en);
 			if (http_msg) {
 				efree(http_msg);
 			}
@@ -1372,7 +1372,7 @@ try_again:
 		if (error) {
 			zval_ptr_dtor(return_value);
 			ZVAL_UNDEF(return_value);
-			add_soap_fault(this_ptr, "HTTP", http_msg, NULL, NULL, SOAP_GLOBAL(lang_en));
+			add_soap_fault(this_ptr, "HTTP", http_msg, NULL, NULL, soap_lang_en);
 			efree(http_msg);
 			return FALSE;
 		}

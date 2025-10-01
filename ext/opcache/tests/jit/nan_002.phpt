@@ -9,13 +9,13 @@ opcache.protect_memory=1
 <?php
 function test(float $a) {
     if ($a) var_dump("1");
-    if (!$a) var_dump("2");    
+    if (!$a) var_dump("2");
     var_dump((bool) $a);
     var_dump(!$a);
     echo "\n";
 }
 function test1(float $a, bool $b) {
-    var_dump($a && $b); //JMPNZ_EX 
+    var_dump($a && $b); //JMPNZ_EX
 }
 function test2(float $a, bool $b) {
     var_dump($a || $b); // JMPZ_EX
@@ -33,9 +33,16 @@ test2(NAN, false);
 test2(1.0, false);
 test2(0.0, false);
 ?>
---EXPECT--
+--EXPECTF--
+Warning: unexpected NAN value was coerced to bool in %s on line 3
 string(1) "1"
+
+Warning: unexpected NAN value was coerced to bool in %s on line 4
+
+Warning: unexpected NAN value was coerced to bool in %s on line 5
 bool(true)
+
+Warning: unexpected NAN value was coerced to bool in %s on line 6
 bool(false)
 
 string(1) "1"
@@ -46,10 +53,14 @@ string(1) "2"
 bool(false)
 bool(true)
 
+
+Warning: unexpected NAN value was coerced to bool in %s on line 10
 bool(true)
 bool(true)
 bool(false)
 
+
+Warning: unexpected NAN value was coerced to bool in %s on line 13
 bool(true)
 bool(true)
 bool(false)

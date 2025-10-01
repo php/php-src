@@ -43,7 +43,7 @@
 #undef iconv
 #endif
 
-#if defined(__NetBSD__)
+#if defined(__NetBSD__) || (defined(__sun) && defined(__SVR4))
 // unfortunately, netbsd has still the old non posix conformant signature
 // libiconv tends to match the eventual system's iconv too.
 #define ICONV_CONST const
@@ -1825,7 +1825,7 @@ PHP_FUNCTION(iconv_substr)
 	size_t charset_len;
 	zend_string *str;
 	zend_long offset, length = 0;
-	bool len_is_null = 1;
+	bool len_is_null = true;
 
 	php_iconv_err_t err;
 

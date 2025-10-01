@@ -84,6 +84,7 @@ void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
 	op_array->last_try_catch = 0;
 
 	op_array->fn_flags = 0;
+	op_array->fn_flags2 = 0;
 
 	op_array->last_literal = 0;
 	op_array->literals = NULL;
@@ -135,7 +136,7 @@ void zend_free_internal_arg_info(zend_internal_function *function) {
 			num_args++;
 		}
 		for (i = 0 ; i < num_args; i++) {
-			zend_type_release(arg_info[i].type, /* persistent */ 1);
+			zend_type_release(arg_info[i].type, /* persistent */ true);
 		}
 		free(arg_info);
 	}
@@ -396,7 +397,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 					if (prop_info->attributes) {
 						zend_hash_release(prop_info->attributes);
 					}
-					zend_type_release(prop_info->type, /* persistent */ 0);
+					zend_type_release(prop_info->type, /* persistent */ false);
 					if (prop_info->hooks) {
 						for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
 							if (prop_info->hooks[i]) {
@@ -463,7 +464,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
-					zend_type_release(prop_info->type, /* persistent */ 1);
+					zend_type_release(prop_info->type, /* persistent */ true);
 					if (prop_info->attributes) {
 						zend_hash_release(prop_info->attributes);
 					}
@@ -639,7 +640,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release_ex(arg_info[i].name, 0);
 			}
-			zend_type_release(arg_info[i].type, /* persistent */ 0);
+			zend_type_release(arg_info[i].type, /* persistent */ false);
 		}
 		efree(arg_info);
 	}
@@ -686,9 +687,7 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 
 static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num, uint32_t dst_num)
 {
-	int i;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
+	for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
 		if ((op_num < op_array->try_catch_array[i].finally_op ||
 					op_num >= op_array->try_catch_array[i].finally_end)
 				&& (dst_num >= op_array->try_catch_array[i].finally_op &&
@@ -905,14 +904,14 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_FETCH_LIST_W
 	 || opline->opcode == ZEND_COPY_TMP
 	 || opline->opcode == ZEND_EXT_STMT) {
-		return 1;
+		return true;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R
 		&& opline->opcode != ZEND_FE_FETCH_RW
 		&& opline->opcode != ZEND_VERIFY_RETURN_TYPE
 		&& opline->opcode != ZEND_BIND_LEXICAL
 		&& opline->opcode != ZEND_ROPE_ADD);
-	return 0;
+	return false;
 }
 
 /* Live ranges must be sorted by increasing start opline */

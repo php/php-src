@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.5.0-dev"
+#define ZEND_VERSION "4.6.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -154,6 +154,7 @@ struct _zend_class_entry {
 	};
 	int refcount;
 	uint32_t ce_flags;
+	uint32_t ce_flags2;
 
 	int default_properties_count;
 	int default_static_members_count;

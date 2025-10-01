@@ -1713,6 +1713,15 @@ ZEND_METHOD(Reflection, getModifierNames)
 			add_next_index_stringl(return_value, "protected", sizeof("protected")-1);
 			break;
 	}
+	/* These are also mutually exclusive */
+	switch (modifiers & ZEND_ACC_PPP_SET_MASK) {
+		case ZEND_ACC_PROTECTED_SET:
+			add_next_index_stringl(return_value, "protected(set)", sizeof("protected(set)")-1);
+			break;
+		case ZEND_ACC_PRIVATE_SET:
+			add_next_index_stringl(return_value, "private(set)", sizeof("private(set)")-1);
+			break;
+	}
 
 	if (modifiers & ZEND_ACC_STATIC) {
 		add_next_index_str(return_value, ZSTR_KNOWN(ZEND_STR_STATIC));
@@ -2823,7 +2832,7 @@ ZEND_METHOD(ReflectionParameter, getType)
 	if (!ZEND_TYPE_IS_SET(param->arg_info->type)) {
 		RETURN_NULL();
 	}
-	reflection_type_factory(param->arg_info->type, return_value, 1);
+	reflection_type_factory(param->arg_info->type, return_value, true);
 }
 /* }}} */
 
@@ -3168,7 +3177,7 @@ static void append_type(zval *return_value, zend_type type) {
 		ZEND_TYPE_FULL_MASK(type) &= ~_ZEND_TYPE_ITERABLE_BIT;
 	}
 
-	reflection_type_factory(type, &reflection_type, 0);
+	reflection_type_factory(type, &reflection_type, false);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &reflection_type);
 }
 
@@ -3670,7 +3679,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getReturnType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, 1);
+	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, true);
 }
 /* }}} */
 
@@ -3702,7 +3711,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getTentativeReturnType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, 1);
+	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, true);
 }
 /* }}} */
 
@@ -3905,7 +3914,7 @@ ZEND_METHOD(ReflectionClassConstant, getType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(ref->type, return_value, 1);
+	reflection_type_factory(ref->type, return_value, true);
 }
 
 /* Returns whether class constant has a type */
@@ -4305,8 +4314,8 @@ ZEND_METHOD(ReflectionClass, getDefaultProperties)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		RETURN_THROWS();
 	}
-	add_class_vars(ce, 1, return_value);
-	add_class_vars(ce, 0, return_value);
+	add_class_vars(ce, true, return_value);
+	add_class_vars(ce, false, return_value);
 }
 /* }}} */
 
@@ -4543,7 +4552,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	zend_class_entry *ce;
 	zend_function *mptr;
 	zend_long filter;
-	bool filter_is_null = 1;
+	bool filter_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4721,7 +4730,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 	zend_string *key;
 	zend_property_info *prop_info;
 	zend_long filter;
-	bool filter_is_null = 1;
+	bool filter_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4777,7 +4786,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 	zend_class_constant *constant;
 	zval val;
 	zend_long filter;
-	bool filter_is_null = 1;
+	bool filter_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -4811,7 +4820,7 @@ ZEND_METHOD(ReflectionClass, getReflectionConstants)
 	zend_string *name;
 	zend_class_constant *constant;
 	zend_long filter;
-	bool filter_is_null = 1;
+	bool filter_is_null = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -6419,7 +6428,7 @@ ZEND_METHOD(ReflectionProperty, getType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(ref->prop->type, return_value, 1);
+	reflection_type_factory(ref->prop->type, return_value, true);
 }
 /* }}} */
 
@@ -6441,7 +6450,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 	/* Get-only virtual property can never be written to. */
 	if (prop->hooks && (prop->flags & ZEND_ACC_VIRTUAL) && !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
 		zend_type never_type = ZEND_TYPE_INIT_CODE(IS_NEVER, 0, 0);
-		reflection_type_factory(never_type, return_value, 1);
+		reflection_type_factory(never_type, return_value, true);
 		return;
 	}
 
@@ -6451,7 +6460,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 		if (!ZEND_TYPE_IS_SET(arg_info->type)) {
 			RETURN_NULL();
 		}
-		reflection_type_factory(arg_info->type, return_value, 1);
+		reflection_type_factory(arg_info->type, return_value, true);
 		return;
 	}
 
@@ -6459,7 +6468,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 	if (!ZEND_TYPE_IS_SET(ref->prop->type)) {
 		RETURN_NULL();
 	}
-	reflection_type_factory(ref->prop->type, return_value, 1);
+	reflection_type_factory(ref->prop->type, return_value, true);
 }
 
 /* {{{ Returns whether property has a type */
@@ -6839,7 +6848,7 @@ ZEND_METHOD(ReflectionExtension, getClasses)
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
-		add_extension_class(ce, key, return_value, module, 1);
+		add_extension_class(ce, key, return_value, module, true);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -6857,7 +6866,7 @@ ZEND_METHOD(ReflectionExtension, getClassNames)
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
-		add_extension_class(ce, key, return_value, module, 0);
+		add_extension_class(ce, key, return_value, module, false);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -7500,7 +7509,7 @@ ZEND_METHOD(ReflectionEnum, getBackingType)
 		RETURN_NULL();
 	} else {
 		zend_type type = ZEND_TYPE_INIT_CODE(ce->enum_backing_type, 0, 0);
-		reflection_type_factory(type, return_value, 0);
+		reflection_type_factory(type, return_value, false);
 	}
 }
 

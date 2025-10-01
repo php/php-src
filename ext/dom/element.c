@@ -122,7 +122,7 @@ zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 	bool uppercase = php_dom_follow_spec_intern(obj) && php_dom_ns_is_html_and_document_is_html(nodep);
 
 	zend_string *result = dom_node_get_node_name_attribute_or_element((const xmlNode *) nodep, uppercase);
-	ZVAL_NEW_STR(retval, result);
+	ZVAL_STR(retval, result);
 
 	return SUCCESS;
 }
@@ -180,7 +180,7 @@ zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 zval *dom_get_prop_checked_offset(dom_object *obj, uint32_t offset, const char *name)
 {
 #if ZEND_DEBUG
-	zend_string *name_zstr = ZSTR_INIT_LITERAL(name, false);
+	zend_string *name_zstr = zend_string_init(name, strlen(name), false);
 	const zend_property_info *prop_info = zend_get_property_info(obj->std.ce, name_zstr, 0);
 	zend_string_release_ex(name_zstr, false);
 	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == offset);
@@ -375,7 +375,7 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	}
 
 	for (xmlAttrPtr attr = nodep->properties; attr; attr = attr->next) {
-		ZVAL_NEW_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false));
+		ZVAL_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false));
 		zend_hash_next_index_insert(ht, &tmp);
 	}
 }
@@ -1019,7 +1019,7 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 			name_valid = xmlValidateName(BAD_CAST localname, 0);
 			if (name_valid != 0) {
 				errorcode = INVALID_CHARACTER_ERR;
-				stricterror = 1;
+				stricterror = true;
 			} else {
 				attr = xmlHasProp(elemp, BAD_CAST localname);
 				if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {

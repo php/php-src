@@ -30,11 +30,11 @@ void zend_dump_ht(HashTable *ht)
 	zend_ulong index;
 	zend_string *key;
 	zval *val;
-	bool first = 1;
+	bool first = true;
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, index, key, val) {
 		if (first) {
-			first = 0;
+			first = false;
 		} else {
 			fprintf(stderr, ", ");
 		}
@@ -188,36 +188,36 @@ static void zend_dump_range(const zend_ssa_range *r)
 
 static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_instanceof, uint32_t dump_flags)
 {
-	bool first = 1;
+	bool first = true;
 
 	fprintf(stderr, " [");
 	if (info & MAY_BE_GUARD) {
 		fprintf(stderr, "!");
 	}
 	if (info & MAY_BE_UNDEF) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
 	}
 	if (info & MAY_BE_INDIRECT) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "ind");
 	}
 	if (info & MAY_BE_REF) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "ref");
 	}
 	if (dump_flags & ZEND_DUMP_RC_INFERENCE) {
 		if (info & MAY_BE_RC1) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "rc1");
 		}
 		if (info & MAY_BE_RCN) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "rcn");
 		}
 	}
 	if (info & MAY_BE_CLASS) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "class");
 		if (ce) {
 			if (is_instanceof) {
@@ -227,37 +227,37 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			}
 		}
 	} else if ((info & MAY_BE_ANY) == MAY_BE_ANY) {
-		if (first) first = 0; else fprintf(stderr, ", ");
+		if (first) first = false; else fprintf(stderr, ", ");
 		fprintf(stderr, "any");
 	} else {
 		if (info & MAY_BE_NULL) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "null");
 		}
 		if ((info & MAY_BE_FALSE) && (info & MAY_BE_TRUE)) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "bool");
 		} else if (info & MAY_BE_FALSE) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "false");
 		} else if (info & MAY_BE_TRUE) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "true");
 		}
 		if (info & MAY_BE_LONG) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "long");
 		}
 		if (info & MAY_BE_DOUBLE) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "double");
 		}
 		if (info & MAY_BE_STRING) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "string");
 		}
 		if (info & MAY_BE_ARRAY) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			if (info & MAY_BE_PACKED_GUARD) {
 				fprintf(stderr, "!");
 			}
@@ -268,18 +268,18 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			} else if (MAY_BE_HASH_ONLY(info)) {
 				fprintf(stderr, "hash ");
 			} else if ((info & MAY_BE_ARRAY_KEY_ANY) != MAY_BE_ARRAY_KEY_ANY && (info & MAY_BE_ARRAY_KEY_ANY) != 0) {
-				bool afirst = 1;
+				bool afirst = true;
 				fprintf(stderr, "[");
 				if (info & MAY_BE_ARRAY_EMPTY) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "empty");
 				}
 				if (MAY_BE_PACKED(info)) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "packed");
 				}
 				if (MAY_BE_HASH(info)) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "hash");
 				}
 				fprintf(stderr, "] ");
@@ -288,71 +288,71 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			if ((info & (MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING)) != 0 &&
 			    ((info & MAY_BE_ARRAY_KEY_LONG) == 0 ||
 			     (info & MAY_BE_ARRAY_KEY_STRING) == 0)) {
-				bool afirst = 1;
+				bool afirst = true;
 				fprintf(stderr, " [");
 				if (info & MAY_BE_ARRAY_KEY_LONG) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "long");
 				}
 				if (info & MAY_BE_ARRAY_KEY_STRING) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "string");
 					}
 				fprintf(stderr, "]");
 			}
 			if (info & (MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF)) {
-				bool afirst = 1;
+				bool afirst = true;
 				fprintf(stderr, " of [");
 				if ((info & MAY_BE_ARRAY_OF_ANY) == MAY_BE_ARRAY_OF_ANY) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "any");
 				} else {
 					if (info & MAY_BE_ARRAY_OF_NULL) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "null");
 					}
 					if (info & MAY_BE_ARRAY_OF_FALSE) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "false");
 					}
 					if (info & MAY_BE_ARRAY_OF_TRUE) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "true");
 					}
 					if (info & MAY_BE_ARRAY_OF_LONG) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "long");
 					}
 					if (info & MAY_BE_ARRAY_OF_DOUBLE) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "double");
 					}
 					if (info & MAY_BE_ARRAY_OF_STRING) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "string");
 					}
 					if (info & MAY_BE_ARRAY_OF_ARRAY) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "array");
 					}
 					if (info & MAY_BE_ARRAY_OF_OBJECT) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "object");
 					}
 					if (info & MAY_BE_ARRAY_OF_RESOURCE) {
-						if (afirst) afirst = 0; else fprintf(stderr, ", ");
+						if (afirst) afirst = false; else fprintf(stderr, ", ");
 						fprintf(stderr, "resource");
 					}
 				}
 				if (info & MAY_BE_ARRAY_OF_REF) {
-					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					if (afirst) afirst = false; else fprintf(stderr, ", ");
 					fprintf(stderr, "ref");
 				}
 				fprintf(stderr, "]");
 			}
 		}
 		if (info & MAY_BE_OBJECT) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "object");
 			if (ce) {
 				if (is_instanceof) {
@@ -363,7 +363,7 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			}
 		}
 		if (info & MAY_BE_RESOURCE) {
-			if (first) first = 0; else fprintf(stderr, ", ");
+			if (first) first = false; else fprintf(stderr, ", ");
 			fprintf(stderr, "resource");
 		}
 	}
@@ -1056,7 +1056,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
-			for (int i = 0; i < op_array->last_live_range; i++) {
+			for (uint32_t i = 0; i < op_array->last_live_range; i++) {
 				fprintf(stderr,
 					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
@@ -1083,7 +1083,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
-			for (int i = 0; i < op_array->last_try_catch; i++) {
+			for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
 				fprintf(stderr, "        BB%u",
 					cfg->map[op_array->try_catch_array[i].try_op]);
 				if (op_array->try_catch_array[i].catch_op) {
@@ -1116,7 +1116,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
-			for (int i = 0; i < op_array->last_live_range; i++) {
+			for (uint32_t i = 0; i < op_array->last_live_range; i++) {
 				fprintf(stderr,
 					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
@@ -1143,7 +1143,7 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
-			for (int i = 0; i < op_array->last_try_catch; i++) {
+			for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
 				fprintf(stderr,
 					"     %04u",
 					op_array->try_catch_array[i].try_op);
@@ -1216,14 +1216,14 @@ void zend_dump_ssa_variables(const zend_op_array *op_array, const zend_ssa *ssa,
 
 static void zend_dump_var_set(const zend_op_array *op_array, const char *name, zend_bitset set)
 {
-	bool first = 1;
+	bool first = true;
 	uint32_t i;
 
 	fprintf(stderr, "    ; %s = {", name);
 	for (i = 0; i < op_array->last_var + op_array->T; i++) {
 		if (zend_bitset_in(set, i)) {
 			if (first) {
-				first = 0;
+				first = false;
 			} else {
 				fprintf(stderr, ", ");
 			}

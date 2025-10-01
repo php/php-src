@@ -506,6 +506,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           uri
 PRIMARY MAINTAINER   Máté Kocsis <kocsismate@php.net> (2025 - 2025)
+                     Tim Düsterhus <timwolla@php.net> (2025 - 2025)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               8.5.0

@@ -332,7 +332,7 @@ ZEND_API void zend_ini_refresh_caches(int stage) /* {{{ */
 ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage) /* {{{ */
 {
 
-	return zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
+	return zend_alter_ini_entry_ex(name, new_value, modify_type, stage, false);
 }
 /* }}} */
 
@@ -342,7 +342,7 @@ ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *v
 	zend_string *new_value;
 
 	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
-	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
+	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, false);
 	zend_string_release(new_value);
 	return ret;
 }
@@ -515,7 +515,7 @@ ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool
 	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
 	if (ini_entry) {
 		if (exists) {
-			*exists = 1;
+			*exists = true;
 		}
 
 		if (orig && ini_entry->modified) {
@@ -525,7 +525,7 @@ ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool
 		}
 	} else {
 		if (exists) {
-			*exists = 0;
+			*exists = false;
 		}
 		return NULL;
 	}
@@ -534,7 +534,7 @@ ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool
 
 ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig) /* {{{ */
 {
-	bool exists = 1;
+	bool exists = true;
 	zend_string *return_value;
 
 	return_value = zend_ini_str_ex(name, name_length, orig, &exists);

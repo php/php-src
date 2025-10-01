@@ -282,9 +282,9 @@ static int xml_parse_helper(xml_parser *parser, const char *data, size_t data_le
 	ZEND_DIAGNOSTIC_IGNORED_END
 #endif
 
-	parser->isparsing = 1;
+	parser->isparsing = true;
 	int ret = XML_Parse(parser->parser, (const XML_Char *) data, data_len, is_final);
-	parser->isparsing = 0;
+	parser->isparsing = false;
 	return ret;
 }
 
@@ -682,7 +682,7 @@ void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Cha
 
 			/* Because toffset may change, we should use the original tag name */
 			parser->ltags[parser->level - 1] = zend_string_copy(tag_name);
-			parser->lastwasopen = 1;
+			parser->lastwasopen = true;
 
 			attributes = (const XML_Char **) attrs;
 
@@ -775,7 +775,7 @@ void xml_endElementHandler(void *userData, const XML_Char *name)
 			}
 		}
 
-		parser->lastwasopen = 0;
+		parser->lastwasopen = false;
 	}
 
 	zend_string_release_ex(tag_name, 0);
@@ -815,7 +815,7 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		return;
 	}
 
-	bool doprint = 0;
+	bool doprint = false;
 	zend_string *decoded_value;
 	decoded_value = xml_utf8_decode(s, len, parser->target_encoding);
 	if (parser->skipwhite) {
@@ -826,7 +826,7 @@ void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 				case '\n':
 					continue;
 				default:
-					doprint = 1;
+					doprint = true;
 					break;
 			}
 			if (doprint) {
@@ -1128,8 +1128,8 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	                                     &php_xml_mem_hdlrs, (XML_Char*)ns_param);
 
 	parser->target_encoding = encoding;
-	parser->case_folding = 1;
-	parser->isparsing = 0;
+	parser->case_folding = true;
+	parser->isparsing = false;
 	parser->parsehuge = false; /* It's the default for BC & DoS protection */
 
 	XML_SetUserData(parser->parser, parser);
@@ -1410,7 +1410,7 @@ PHP_FUNCTION(xml_parse)
 	zval *pind;
 	char *data;
 	size_t data_len;
-	bool isFinal = 0;
+	bool isFinal = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &pind, xml_parser_ce, &data, &data_len, &isFinal) == FAILURE) {
 		RETURN_THROWS();

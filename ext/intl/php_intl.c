@@ -42,6 +42,7 @@
 #include "locale/locale_class.h"
 
 #include "listformatter/listformatter_class.h"
+#include "rangeformatter/rangeformatter_class.h"
 
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
@@ -96,6 +97,20 @@ const char *intl_locale_get_default( void )
 		return uloc_getDefault();
 	}
 	return INTL_G(default_locale);
+}
+
+char* canonicalize_locale_string(const char* locale) {
+	char canonicalized[ULOC_FULLNAME_CAPACITY];
+	UErrorCode status = U_ZERO_ERROR;
+	int32_t canonicalized_len;
+
+	canonicalized_len = uloc_canonicalize(locale, canonicalized, sizeof(canonicalized), &status);
+
+	if (U_FAILURE(status) || canonicalized_len <= 0) {
+		return NULL;
+	}
+
+	return estrdup(canonicalized);
 }
 
 static PHP_INI_MH(OnUpdateErrorLevel)
@@ -174,6 +189,9 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'ListFormatter' PHP class */
 	listformatter_register_class(  );
+
+	/* Register 'NumberRangeFormatter' PHP class */
+	rangeformatter_register_class( );
 
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );

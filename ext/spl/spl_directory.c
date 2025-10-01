@@ -493,7 +493,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(zend_string *fil
 static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, spl_filesystem_object *source, int type, zend_class_entry *ce, zval *return_value) /* {{{ */
 {
 	spl_filesystem_object *intern;
-	bool use_include_path = 0;
+	bool use_include_path = false;
 	zval arg1, arg2;
 	zend_error_handling error_handling;
 
@@ -2014,7 +2014,7 @@ PHP_METHOD(SplFileObject, __construct)
 	zend_string *file_name = NULL;
 	zend_string *open_mode = ZSTR_CHAR('r');
 	zval *stream_context = NULL;
-	bool use_include_path = 0;
+	bool use_include_path = false;
 	size_t path_len;
 	zend_error_handling error_handling;
 

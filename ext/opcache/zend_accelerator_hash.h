@@ -86,9 +86,9 @@ int zend_accel_hash_unlink(
 static inline bool zend_accel_hash_is_full(zend_accel_hash *accel_hash)
 {
 	if (accel_hash->num_entries == accel_hash->max_num_entries) {
-		return 1;
+		return true;
 	} else {
-		return 0;
+		return false;
 	}
 }
 

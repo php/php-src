@@ -845,10 +845,10 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 		/* open file pointers refer to this fp, do not free the stream */
 		switch (entry->fp_type) {
 			case PHAR_FP:
-				fp->free_fp = 0;
+				fp->free_fp = false;
 				break;
 			case PHAR_UFP:
-				fp->free_ufp = 0;
+				fp->free_ufp = false;
 			default:
 				break;
 		}
@@ -1118,8 +1118,8 @@ nostub:
 	pass.old = oldfile;
 	pass.new = newfile;
 	pass.error = error;
-	pass.free_fp = 1;
-	pass.free_ufp = 1;
+	pass.free_fp = true;
+	pass.free_ufp = true;
 
 	if (phar_metadata_tracker_has_data(&phar->metadata_tracker, phar->is_persistent)) {
 		phar_entry_info *mentry;
@@ -1171,6 +1171,16 @@ nostub:
 
 	zend_hash_apply_with_argument(&phar->manifest, phar_tar_writeheaders, (void *) &pass);
 
+	if (error && *error) {
+		if (must_close_old_file) {
+			php_stream_close(oldfile);
+		}
+
+		/* on error in the hash iterator above, error is set */
+		php_stream_close(newfile);
+		return;
+	}
+
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
 		if (FAILURE == phar_create_signature(phar, newfile, &signature, &signature_length, error)) {
@@ -1191,6 +1201,12 @@ nostub:
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
 			spprintf(error, 0, "phar error: unable to create temporary file");
+
+			efree(signature);
+			if (must_close_old_file) {
+				php_stream_close(oldfile);
+			}
+			php_stream_close(newfile);
 			return;
 		}
 #ifdef WORDS_BIGENDIAN

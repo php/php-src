@@ -366,10 +366,23 @@ PHP_FUNCTION(bzopen)
 		php_stream_from_zval(stream, file);
 		stream_mode_len = strlen(stream->mode);
 
-		if (stream_mode_len != 1 && !(stream_mode_len == 2 && memchr(stream->mode, 'b', 2))) {
-			php_error_docref(NULL, E_WARNING, "Cannot use stream opened in mode '%s'", stream->mode);
-			RETURN_FALSE;
-		} else if (stream_mode_len == 1 && stream->mode[0] != 'r' && stream->mode[0] != 'w' && stream->mode[0] != 'a' && stream->mode[0] != 'x') {
+		char primary_stream_mode;
+		if (stream_mode_len == 1) {
+			primary_stream_mode = stream->mode[0];
+		} else if (stream_mode_len == 2) {
+			char secondary_stream_mode = 0;
+			if (stream->mode[0] != 'b') {
+				primary_stream_mode = stream->mode[0];
+				secondary_stream_mode = stream->mode[1];
+			} else {
+				primary_stream_mode = stream->mode[1];
+				secondary_stream_mode = stream->mode[0];
+			}
+			if (secondary_stream_mode != 'b') {
+				goto unsupported_mode;
+			}
+		} else {
+unsupported_mode:
 			php_error_docref(NULL, E_WARNING, "Cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
 		}
@@ -377,16 +390,14 @@ PHP_FUNCTION(bzopen)
 		switch(mode[0]) {
 			case 'r':
 				/* only "r" and "rb" are supported */
-				if (stream->mode[0] != mode[0] && !(stream_mode_len == 2 && stream->mode[1] != mode[0])) {
+				if (primary_stream_mode != 'r') {
 					php_error_docref(NULL, E_WARNING, "Cannot read from a stream opened in write only mode");
 					RETURN_FALSE;
 				}
 				break;
 			case 'w':
 				/* support only "w"(b), "a"(b), "x"(b) */
-				if (stream->mode[0] != mode[0] && !(stream_mode_len == 2 && stream->mode[1] != mode[0])
-					&& stream->mode[0] != 'a' && !(stream_mode_len == 2 && stream->mode[1] != 'a')
-					&& stream->mode[0] != 'x' && !(stream_mode_len == 2 && stream->mode[1] != 'x')) {
+				if (!strchr("wax", primary_stream_mode)) {
 					php_error_docref(NULL, E_WARNING, "cannot write to a stream opened in read only mode");
 					RETURN_FALSE;
 				}

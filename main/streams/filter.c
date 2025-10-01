@@ -171,6 +171,7 @@ PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_st
 
 PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket)
 {
+	/* TODO: this was added as a bad workaround for bug #35916 and should be removed in the future. */
 	if (brigade->tail == bucket) {
 		return;
 	}
@@ -350,6 +351,13 @@ PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, p
 				   Reset stream's internal read buffer since the filter is "holding" it. */
 				stream->readpos = 0;
 				stream->writepos = 0;
+
+				/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
+				while (brig_out.head) {
+					bucket = brig_out.head;
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				}
 				break;
 			case PSFS_PASS_ON:
 				/* If any data is consumed, we cannot rely upon the existing read buffer,

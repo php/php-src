@@ -52,10 +52,10 @@ static bool will_rejoin(
 		/* The other successor dominates this predecessor,
 		 * so we will get the original value from it. */
 		if (dominates(cfg->blocks, other_successor, predecessor)) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const zend_ssa *ssa, int from, int to, int var) /* {{{ */
@@ -65,7 +65,7 @@ static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const z
 
 	if (!DFG_ISSET(dfg->in, dfg->size, to, var)) {
 		/* Variable is not live, certainly won't benefit from pi */
-		return 0;
+		return false;
 	}
 
 	/* Make sure that both successors of the from block aren't the same. Pi nodes are associated
@@ -73,13 +73,13 @@ static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const z
 	from_block = &ssa->cfg.blocks[from];
 	ZEND_ASSERT(from_block->successors_count == 2);
 	if (from_block->successors[0] == from_block->successors[1]) {
-		return 0;
+		return false;
 	}
 
 	to_block = &ssa->cfg.blocks[to];
 	if (to_block->predecessors_count == 1) {
 		/* Always place pi if one predecessor (an if branch) */
-		return 1;
+		return true;
 	}
 
 	/* Check whether we will rejoin with the original value coming from the other successor,
@@ -1540,7 +1540,7 @@ void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
 	for (phi = next_ssa_block->phis; phi; phi = phi->next) {
 		if (phi->pi >= 0) {
 			if (phi->pi == from) {
-				zend_ssa_rename_var_uses(ssa, phi->ssa_var, phi->sources[0], /* update_types */ 0);
+				zend_ssa_rename_var_uses(ssa, phi->ssa_var, phi->sources[0], /* update_types */ false);
 				zend_ssa_remove_phi(ssa, phi);
 			}
 		} else {
@@ -1671,15 +1671,15 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 
 		/* If the op already uses the new var, don't add the op to the use
 		 * list again. Instead move the use_chain to the correct operand. */
-		bool add_to_use_chain = 1;
+		bool add_to_use_chain = true;
 		if (ssa_op->result_use == new) {
-			add_to_use_chain = 0;
+			add_to_use_chain = false;
 		} else if (ssa_op->op1_use == new) {
 			if (ssa_op->result_use == old) {
 				ssa_op->res_use_chain = ssa_op->op1_use_chain;
 				ssa_op->op1_use_chain = -1;
 			}
-			add_to_use_chain = 0;
+			add_to_use_chain = false;
 		} else if (ssa_op->op2_use == new) {
 			if (ssa_op->result_use == old) {
 				ssa_op->res_use_chain = ssa_op->op2_use_chain;
@@ -1688,7 +1688,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 				ssa_op->op1_use_chain = ssa_op->op2_use_chain;
 				ssa_op->op2_use_chain = -1;
 			}
-			add_to_use_chain = 0;
+			add_to_use_chain = false;
 		}
 
 		/* Perform the actual renaming */
@@ -1723,7 +1723,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 	/* Update phi use chains */
 	FOREACH_PHI_USE(old_var, phi) {
 		int j;
-		bool after_first_new_source = 0;
+		bool after_first_new_source = false;
 
 		/* If the phi already uses the new var, find its use chain, as we may
 		 * need to move it to a different source operand. */
@@ -1737,7 +1737,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 
 		for (j = 0; j < ssa->cfg.blocks[phi->block].predecessors_count; j++) {
 			if (phi->sources[j] == new) {
-				after_first_new_source = 1;
+				after_first_new_source = true;
 			} else if (phi->sources[j] == old) {
 				phi->sources[j] = new;
 
@@ -1751,7 +1751,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 						phi->use_chains[j] = new_var->phi_use_chain;
 						new_var->phi_use_chain = phi;
 					}
-					after_first_new_source = 1;
+					after_first_new_source = true;
 				} else {
 					phi->use_chains[j] = NULL;
 				}

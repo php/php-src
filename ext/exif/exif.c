@@ -2104,7 +2104,7 @@ static inline char *exif_offset_info_try_get(
 static inline bool exif_offset_info_contains(
 		const exif_offset_info *info, const char *start, size_t length) {
 	if (ptr_offset_overflows(start, length)) {
-		return 0;
+		return false;
 	}
 
 	/* start and valid_start are both inclusive, end and valid_end are both exclusive,
@@ -4291,6 +4291,7 @@ static bool exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offs
 	return result;
 }
 
+/* Returns the size of the header, which must be smaller than the size of the box. */
 static int exif_isobmff_parse_box(unsigned char *buf, isobmff_box_type *box)
 {
 	box->size = php_ifd_get32u(buf, 1);
@@ -4307,76 +4308,84 @@ static int exif_isobmff_parse_box(unsigned char *buf, isobmff_box_type *box)
 static void exif_isobmff_parse_meta(unsigned char *data, unsigned char *end, isobmff_item_pos_type *pos)
 {
 	isobmff_box_type box, item;
-	unsigned char *box_offset, *p, *p2;
+	unsigned char *p;
 	int header_size, exif_id = -1, version, item_count, i;
 
-	for (box_offset = data + 4; box_offset + 16 < end; box_offset += box.size) {
+	size_t remain;
+#define CHECK(n) do { \
+	if (remain < (n)) { \
+		return; \
+	} \
+} while (0)
+#define ADVANCE(n) do { \
+	CHECK(n); \
+	remain -= (n); \
+	p += (n); \
+} while (0)
+
+	unsigned char *box_offset = data + 4;
+	while (box_offset < end - 16) {
 		header_size = exif_isobmff_parse_box(box_offset, &box);
+		if (box.size < header_size) {
+			return;
+		}
+		p = box_offset;
+		remain = end - p;
+
 		if (box.type == FOURCC("iinf")) {
-			p = box_offset + header_size;
-			if (p >= end) {
-				return;
-			}
-			version = p[0];
-			p += 4;
+			ADVANCE(header_size + 4);
+			version = p[-4];
 			if (version < 2) {
-				if (p + 2 >= end) {
-					return;
-				}
-				item_count = php_ifd_get16u(p, 1);
-				p += 2;
+				ADVANCE(2);
+				item_count = php_ifd_get16u(p - 2, 1);
 			} else {
-				if (p + 4 >= end) {
-					return;
-				}
-				item_count = php_ifd_get32u(p, 1);
-				p += 4;
+				ADVANCE(4);
+				item_count = php_ifd_get32u(p - 4, 1);
 			}
-			for (i = 0; i < item_count && p + 20 < end; i++) {
+			for (i = 0; i < item_count && p < end - 20; i++) {
 				header_size = exif_isobmff_parse_box(p, &item);
-				if (p + header_size + 12 >= end) {
+				if (item.size < header_size) {
 					return;
 				}
+				CHECK(header_size + 12);
 				if (!memcmp(p + header_size + 8, "Exif", 4)) {
 					exif_id = php_ifd_get16u(p + header_size + 4, 1);
 					break;
 				}
-				p += item.size;
+				ADVANCE(item.size);
 			}
 			if (exif_id < 0) {
 				break;
 			}
 		}
 		else if (box.type == FOURCC("iloc")) {
-			p = box_offset + header_size;
-			if (p >= end) {
-				return;
-			}
-			version = p[0];
-			p += 6;
+			ADVANCE(header_size + 6);
+			version = p[-6];
 			if (version < 2) {
-				if (p + 2 >= end) {
-					return;
-				}
-				item_count = php_ifd_get16u(p, 1);
-				p += 2;
+				ADVANCE(2);
+				item_count = php_ifd_get16u(p - 2, 1);
 			} else {
-				if (p + 4 >= end) {
-					return;
-				}
-				item_count = php_ifd_get32u(p, 1);
-				p += 4;
+				ADVANCE(4);
+				item_count = php_ifd_get32u(p - 4, 1);
 			}
-			for (i = 0, p2 = p; i < item_count && p + 16 < end; i++, p2 += 16) {
-				if (php_ifd_get16u(p2, 1) == exif_id) {
-					pos->offset = php_ifd_get32u(p2 + 8, 1);
-					pos->size = php_ifd_get32u(p2 + 12, 1);
+			for (i = 0; i < item_count && p < end - 16; i++, p += 16) {
+				if (php_ifd_get16u(p, 1) == exif_id) {
+					pos->offset = php_ifd_get32u(p + 8, 1);
+					pos->size = php_ifd_get32u(p + 12, 1);
 					break;
 				}
 			}
 			break;
 		}
+
+		if (end - 16 - box_offset <= box.size) {
+			break;
+		}
+		box_offset += box.size;
 	}
+
+#undef ADVANCE
+#undef CHECK
 }
 
 static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf)
@@ -4384,18 +4393,19 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 	isobmff_box_type box;
 	isobmff_item_pos_type pos;
 	unsigned char *data;
-	off_t offset;
 	uint64_t limit;
 	int box_header_size, remain;
 	bool ret = false;
 
-	pos.size = 0;
-	for (offset = php_ifd_get32u(buf, 1); ImageInfo->FileSize > offset + 16; offset += box.size) {
+	for (size_t offset = php_ifd_get32u(buf, 1); ImageInfo->FileSize - 16 > offset; offset += box.size) {
 		if ((php_stream_seek(ImageInfo->infile, offset, SEEK_SET) < 0) ||
 			(exif_read_from_stream_file_looped(ImageInfo->infile, (char*)buf, 16) != 16)) {
 			break;
 		}
 		box_header_size = exif_isobmff_parse_box(buf, &box);
+		if (box.size < box_header_size) {
+			break;
+		}
 		if (box.type == FOURCC("meta")) {
 			limit = box.size - box_header_size;
 			if (limit < 36) {
@@ -4406,11 +4416,13 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 			if (remain) {
 				memcpy(data, buf + box_header_size, remain);
 			}
+			memset(&pos, 0, sizeof(pos));
 			if (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(data + remain), limit - remain) == limit - remain) {
 				exif_isobmff_parse_meta(data, data + limit, &pos);
 			}
 			if ((pos.size) &&
-				(ImageInfo->FileSize >= pos.offset + pos.size) &&
+				(pos.size < ImageInfo->FileSize) &&
+				(ImageInfo->FileSize - pos.size >= pos.offset) &&
 				(php_stream_seek(ImageInfo->infile, pos.offset + 2, SEEK_SET) >= 0)) {
 				if (limit >= pos.size - 2) {
 					limit = pos.size - 2;
@@ -4425,6 +4437,9 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 				}
 			}
 			efree(data);
+			break;
+		}
+		if (offset + box.size < offset) {
 			break;
 		}
 	}
@@ -4497,7 +4512,7 @@ static bool exif_scan_FILE_header(image_info_type *ImageInfo)
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");
 				return false;
 			}
-		} else if ((ImageInfo->FileSize > 12) &&
+		} else if ((ImageInfo->FileSize > 16) &&
 			   (!memcmp(file_header + 4, "ftyp", 4)) &&
 			   (exif_read_from_stream_file_looped(ImageInfo->infile, (char*)(file_header + 8), 4) == 4) &&
 			   ((!memcmp(file_header + 8, "heic", 4)) || (!memcmp(file_header + 8, "heix", 4)) || (!memcmp(file_header + 8, "mif1", 4)))) {

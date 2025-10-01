@@ -111,11 +111,11 @@ static bool check_has_header(const char *headers, const char *header) {
 	const char *s = headers;
 	while ((s = strstr(s, header))) {
 		if (s == headers || (*(s-1) == '\n' && *(s-2) == '\r')) {
-			return 1;
+			return true;
 		}
 		s++;
 	}
-	return 0;
+	return false;
 }
 
 static zend_result php_stream_handle_proxy_authorization_header(const char *s, smart_str *header)
@@ -159,7 +159,7 @@ static void php_stream_http_response_header_info_init(
 		php_stream_http_response_header_info *header_info)
 {
 	memset(header_info, 0, sizeof(php_stream_http_response_header_info));
-	header_info->follow_location = 1;
+	header_info->follow_location = true;
 }
 
 /* Trim white spaces from response header line and update its length */
@@ -283,7 +283,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			 * response_code not in (300, 301, 302, 303 and 307)
 			 * see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1
 			 * RFC 7238 defines 308: http://tools.ietf.org/html/rfc7238 */
-			header_info->follow_location = 0;
+			header_info->follow_location = false;
 		}
 		size_t last_header_value_len = strlen(last_header_value);
 		if (last_header_value_len > HTTP_HEADER_MAX_LOCATION_SIZE) {
@@ -393,12 +393,12 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	const uri_parser_t *uri_parser = php_stream_context_get_uri_parser("http", context);
+	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("http", context);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
 	}
-	resource = php_uri_parse_to_struct(uri_parser, path, strlen(path), URI_COMPONENT_READ_RAW, true);
+	resource = php_uri_parse_to_struct(uri_parser, path, strlen(path), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	if (resource == NULL) {
 		return NULL;
 	}
@@ -446,7 +446,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			use_proxy = 1;
 			transport_string = zend_string_copy(Z_STR_P(tmpzval));
 		} else {
-			transport_string = zend_strpprintf(0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
+			transport_string = zend_strpprintf(0, "%s://%s:" ZEND_LONG_FMT, use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
 		}
 	}
 
@@ -603,7 +603,7 @@ finish:
 		redirect_max = (int)zval_get_long(tmpzval);
 	}
 
-	custom_request_method = 0;
+	custom_request_method = false;
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "method")) != NULL) {
 		if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 			/* As per the RFC, automatically redirected requests MUST NOT use other methods than
@@ -612,7 +612,7 @@ finish:
 				|| zend_string_equals_literal(Z_STR_P(tmpzval), "GET")
 				|| zend_string_equals_literal(Z_STR_P(tmpzval), "HEAD")
 			) {
-				custom_request_method = 1;
+				custom_request_method = true;
 				smart_str_append(&req_buf, Z_STR_P(tmpzval));
 				smart_str_appendc(&req_buf, ' ');
 			}
@@ -1083,7 +1083,7 @@ finish:
 					header_info.location = NULL;
 				}
 				if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80)) {
-					spprintf(&new_path, 0, "%s://%s:%d%s", ZSTR_VAL(resource->scheme),
+					spprintf(&new_path, 0, "%s://%s:" ZEND_LONG_FMT "%s", ZSTR_VAL(resource->scheme),
 							ZSTR_VAL(resource->host), resource->port, loc_path);
 				} else {
 					spprintf(&new_path, 0, "%s://%s%s", ZSTR_VAL(resource->scheme),
@@ -1097,7 +1097,7 @@ finish:
 
 			php_uri_struct_free(resource);
 			/* check for invalid redirection URLs */
-			if ((resource = php_uri_parse_to_struct(uri_parser, new_path, strlen(new_path), URI_COMPONENT_READ_RAW, true)) == NULL) {
+			if ((resource = php_uri_parse_to_struct(uri_parser, new_path, strlen(new_path), PHP_URI_COMPONENT_READ_MODE_RAW, true)) == NULL) {
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
 				efree(new_path);
 				goto out;

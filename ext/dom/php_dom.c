@@ -2261,7 +2261,7 @@ static bool dom_nodemap_or_nodelist_process_offset_as_named(zval *offset, zend_l
 		if (0 == (is_numeric_string_type = is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), lval, &dval, true))) {
 			return true;
 		} else if (is_numeric_string_type == IS_DOUBLE) {
-			*lval = zend_dval_to_lval_cap(dval);
+			*lval = zend_dval_to_lval_cap(dval, Z_STR_P(offset));
 		}
 	} else {
 		*lval = zval_get_long(offset);
@@ -2333,10 +2333,10 @@ void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, boo
 		}
 
 		case XML_ATTRIBUTE_NODE: {
-			bool free;
-			xmlChar *value = php_libxml_attr_value((const xmlAttr *) nodep, &free);
+			bool should_free;
+			xmlChar *value = php_libxml_attr_value((const xmlAttr *) nodep, &should_free);
 			RETVAL_STRING_FAST((const char *) value);
-			if (free) {
+			if (should_free) {
 				xmlFree(value);
 			}
 			return;

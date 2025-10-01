@@ -513,8 +513,8 @@ ZEND_API zend_result zend_update_static_property_double(zend_class_entry *scope,
 ZEND_API zend_result zend_update_static_property_string(zend_class_entry *scope, const char *name, size_t name_length, const char *value);
 ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope, const char *name, size_t name_length, const char *value, size_t value_length);
 
-ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv);
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv);
+ZEND_API zval *zend_read_property_ex(const zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv);
+ZEND_API zval *zend_read_property(const zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool silent, zval *rv);
 
 ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, bool silent);
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, bool silent);
@@ -1066,7 +1066,6 @@ static zend_always_inline bool zend_char_has_nul_byte(const char *s, size_t know
 #define RETURN_THROWS()					do { ZEND_ASSERT(EG(exception)); (void) return_value; return; } while (0)
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties(Z_OBJ_P(p)) : NULL)))
-#define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)
 
 /* For compatibility */
 #define ZEND_MINIT			ZEND_MODULE_STARTUP_N
@@ -1364,6 +1363,7 @@ ZEND_API zend_result zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval
 
 #define ZEND_TRY_ASSIGN_REF_ARR(zv, arr) do { \
 	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	ZEND_ASSERT(!(GC_FLAGS(arr) & GC_IMMUTABLE)); \
 	_ZEND_TRY_ASSIGN_ARR(zv, arr, 1); \
 } while (0)
 

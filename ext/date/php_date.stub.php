@@ -3,74 +3,62 @@
 /** @generate-class-entries */
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339
  */
 const DATE_ATOM = "Y-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_COOKIE
  */
 const DATE_COOKIE = "l, d-M-Y H:i:s T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_ISO8601
  */
 const DATE_ISO8601 = "Y-m-d\\TH:i:sO";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_ISO8601_EXPANDED
  */
 const DATE_ISO8601_EXPANDED = "X-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC822
  */
 const DATE_RFC822 = "D, d M y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC850
  */
 const DATE_RFC850 = "l, d-M-y H:i:s T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC1036
  */
 const DATE_RFC1036 = "D, d M y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC1123
  */
 const DATE_RFC1123 = "D, d M Y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC7231
  */
 #[\Deprecated(since: '8.5', message: "as this format ignores the associated timezone and always uses GMT")]
 const DATE_RFC7231 = "D, d M Y H:i:s \\G\\M\\T";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC2822
  */
 const DATE_RFC2822 = "D, d M Y H:i:s O";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339
  */
 const DATE_RFC3339 = "Y-m-d\\TH:i:sP";
 
 /**
- * @var string
  * @cvalue DATE_FORMAT_RFC3339_EXTENDED
  */
 const DATE_RFC3339_EXTENDED = "Y-m-d\\TH:i:s.vP";
@@ -335,6 +323,7 @@ interface DateTimeInterface
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void;
 
     public function __serialize(): array;
@@ -351,6 +340,7 @@ class DateTime implements DateTimeInterface
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -468,6 +458,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -644,6 +635,7 @@ class DateTimeZone
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -670,6 +662,7 @@ class DateInterval
     public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -746,6 +739,7 @@ class DatePeriod implements IteratorAggregate
     public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.5', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     /** @tentative-return-type */

@@ -83,7 +83,7 @@ zend_result dom_attr_name_read(dom_object *obj, zval *retval)
 
 	if (php_dom_follow_spec_intern(obj)) {
 		zend_string *str = dom_node_get_node_name_attribute_or_element((xmlNodePtr) attrp, false);
-		ZVAL_NEW_STR(retval, str);
+		ZVAL_STR(retval, str);
 	} else {
 		ZVAL_STRING(retval, (char *) attrp->name);
 	}
@@ -201,10 +201,10 @@ PHP_METHOD(DOMAttr, isId)
 
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value)
 {
-	bool free;
-	xmlChar *attr_value = php_libxml_attr_value(attr, &free);
+	bool should_free;
+	xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
 	bool result = xmlStrEqual(attr_value, value);
-	if (free) {
+	if (should_free) {
 		xmlFree(attr_value);
 	}
 	return result;

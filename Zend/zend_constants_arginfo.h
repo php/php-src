@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bf2f959978bd6cbd7353ca7bfbb95718cdd51cff */
+ * Stub hash: 569ccba4e0a93a9ce49c81c76955413188df390e */
 
 static void register_zend_constants_symbols(int module_number)
 {

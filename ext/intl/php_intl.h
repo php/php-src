@@ -68,6 +68,7 @@ PHP_RSHUTDOWN_FUNCTION(intl);
 PHP_MINFO_FUNCTION(intl);
 
 const char *intl_locale_get_default( void );
+char *canonicalize_locale_string(const char* locale);
 
 #define PHP_INTL_VERSION PHP_VERSION
 

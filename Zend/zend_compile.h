@@ -197,8 +197,8 @@ typedef struct _zend_oparray_context {
 	struct _zend_oparray_context *prev;
 	zend_op_array *op_array;
 	uint32_t   opcodes_size;
-	int        vars_size;
-	int        literals_size;
+	uint32_t   vars_size;
+	uint32_t   literals_size;
 	uint32_t   fast_call_var;
 	uint32_t   try_catch_offset;
 	int        current_brk_cont;
@@ -255,6 +255,9 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 <<  6) /*     |     |     |  X  */
 /*                                                        |     |     |     */
+/* deprecation flag                                       |     |     |     */
+#define ZEND_ACC_DEPRECATED              (1 << 11) /*  X  |  X  |     |  X  */
+/*                                                        |     |     |     */
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
@@ -272,7 +275,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30,31)                            |     |     |     */
+/* Class Flags (unused: 31)                               |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -290,7 +293,7 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class has magic methods __get/__set/__unset/           |     |     |     */
 /* __isset that use guards                                |     |     |     */
-#define ZEND_ACC_USE_GUARDS              (1 << 11) /*  X  |     |     |     */
+#define ZEND_ACC_USE_GUARDS              (1 << 30) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 12) /*  X  |     |     |     */
@@ -338,11 +341,13 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Class Flags 2 (ce_flags2) (unused: 0-31)               |     |     |     */
+/* =========================                              |     |     |     */
+/*                                                        |     |     |     */
+/* #define ZEND_ACC2_EXAMPLE             (1 << 0)      X  |     |     |     */
+/*                                                        |     |     |     */
 /* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */
-/*                                                        |     |     |     */
-/* deprecation flag                                       |     |     |     */
-#define ZEND_ACC_DEPRECATED              (1 << 11) /*     |  X  |     |  X  */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
 #define ZEND_ACC_RETURN_REFERENCE        (1 << 12) /*     |  X  |     |     */
@@ -407,6 +412,11 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
+/*                                                        |     |     |     */
+/* Function Flags 2 (fn_flags2) (unused: 0-31)            |     |     |     */
+/* ============================                           |     |     |     */
+/*                                                        |     |     |     */
+/* #define ZEND_ACC2_EXAMPLE             (1 << 0)         |  X  |     |     */
 
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 #define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)
@@ -443,7 +453,7 @@ static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t vi
 // Must not clash with ZEND_SHORT_CIRCUITING_CHAIN_MASK
 #define ZEND_JMP_NULL_BP_VAR_IS 4
 
-char *zend_visibility_string(uint32_t fn_flags);
+const char *zend_visibility_string(uint32_t fn_flags);
 
 #define ZEND_PROPERTY_HOOK_COUNT 2
 #define ZEND_PROPERTY_HOOK_STRUCT_SIZE (sizeof(zend_function*) * ZEND_PROPERTY_HOOK_COUNT)
@@ -527,12 +537,13 @@ struct _zend_op_array {
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
+	uint32_t fn_flags2;
 	const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
 	/* END of common elements */
 
-	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
-	int last_var;       /* number of CV variables */
-	uint32_t last;      /* number of opcodes */
+	uint32_t cache_size; /* number of run_time_cache_slots * sizeof(void*) */
+	int last_var;        /* number of CV variables */
+	uint32_t last;       /* number of opcodes */
 
 	zend_op *opcodes;
 	ZEND_MAP_PTR_DEF(HashTable *, static_variables_ptr);
@@ -541,8 +552,8 @@ struct _zend_op_array {
 
 	uint32_t *refcount;
 
-	int last_live_range;
-	int last_try_catch;
+	uint32_t last_live_range;
+	uint32_t last_try_catch;
 	zend_live_range *live_range;
 	zend_try_catch_element *try_catch_array;
 
@@ -550,7 +561,7 @@ struct _zend_op_array {
 	uint32_t line_start;
 	uint32_t line_end;
 
-	int last_literal;
+	uint32_t last_literal;
 	uint32_t num_dynamic_func_defs;
 	zval *literals;
 
@@ -586,6 +597,7 @@ typedef struct _zend_internal_function {
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
+	uint32_t fn_flags2;
 	const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
 	/* END of common elements */
 
@@ -615,6 +627,7 @@ union _zend_function {
 		ZEND_MAP_PTR_DEF(void **, run_time_cache);
 		zend_string *doc_comment;
 		uint32_t T;         /* number of temporary variables */
+		uint32_t fn_flags2;
 		const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
 	} common;
 

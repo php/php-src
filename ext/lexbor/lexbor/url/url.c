@@ -1906,7 +1906,7 @@ again:
             {
                 if (begin == p) {
                     if (override_state != LXB_URL_STATE__UNDEF) {
-                        lxb_url_parse_return(orig_data, buf, LXB_STATUS_OK);
+                        lxb_url_parse_return(orig_data, buf, LXB_STATUS_ERROR);
                     }
 
                     state = LXB_URL_STATE_PATH_START_STATE;
@@ -4246,7 +4246,8 @@ lxb_url_host_set_h(lxb_url_t *url, lxb_url_parser_t *parser,
     lxb_url_parser_t self_parser;
     const lxb_char_t tmp[1] = "";
 
-    if (url->host.type == LXB_URL_HOST_TYPE_OPAQUE) {
+    /* If this’s URL has an opaque path, then return. */
+    if (url->path.opaque) {
         return LXB_STATUS_OK;
     }
 

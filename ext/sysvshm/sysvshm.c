@@ -131,7 +131,7 @@ PHP_FUNCTION(shm_attach)
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
 	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
-	bool shm_size_is_null = 1;
+	bool shm_size_is_null = true;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key, &shm_size, &shm_size_is_null, &shm_flag)) {
 		RETURN_THROWS();

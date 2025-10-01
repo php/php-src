@@ -809,7 +809,7 @@ try_again:
 		zend_function *get = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is write-only",
+				zend_throw_error(NULL, "Cannot read from set-only virtual property %s::$%s",
 					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				return &EG(uninitialized_zval);
 			}
@@ -1150,7 +1150,7 @@ found:;
 
 		if (!set) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is read-only", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Cannot write to get-only virtual property %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
@@ -1696,6 +1696,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 		| ZEND_ACC_PUBLIC
 		| ZEND_ACC_VARIADIC
 		| (fbc->common.fn_flags & (ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_NODISCARD));
+	func->fn_flags2 = 0;
 	/* Attributes outlive the trampoline because they are created by the compiler. */
 	func->attributes = fbc->common.attributes;
 	if (is_static) {
@@ -1797,6 +1798,7 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
+	func->common.fn_flags2 = 0;
 	func->common.function_name = zend_string_concat3(
 		"$", 1, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name),
 		kind == ZEND_PROPERTY_HOOK_GET ? "::get" : "::set", 5);
@@ -1821,7 +1823,7 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 
 static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return zend_get_call_trampoline_func(ce, method_name, 0);
+	return zend_get_call_trampoline_func(ce, method_name, false);
 }
 /* }}} */
 
@@ -1915,7 +1917,7 @@ exit:
 
 static zend_always_inline zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
-	return zend_get_call_trampoline_func(ce, method_name, 1);
+	return zend_get_call_trampoline_func(ce, method_name, true);
 }
 /* }}} */
 
@@ -2343,7 +2345,7 @@ found:
 
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Property %s::$%s is write-only",
+				zend_throw_error(NULL, "Cannot read from set-only virtual property %s::$%s",
 					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 				return 0;
 			} else {
@@ -2418,7 +2420,7 @@ lazy_init:
 		if (!value || (Z_PROP_FLAG_P(value) & IS_PROP_LAZY)) {
 			zobj = zend_lazy_object_init(zobj);
 			if (!zobj) {
-				result = 0;
+				result = false;
 				goto exit;
 			}
 
@@ -2436,7 +2438,7 @@ lazy_init:
 		}
 	}
 
-	result = 0;
+	result = false;
 	goto exit;
 }
 /* }}} */

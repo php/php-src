@@ -80,6 +80,7 @@ lexbor_str_destroy(lexbor_str_t *str, lexbor_mraw_t *mraw, bool destroy_obj)
     }
 
     if (str->data != NULL) {
+        lexbor_str_clean(str);
         str->data = lexbor_mraw_free(mraw, str->data);
     }
 

@@ -2209,7 +2209,14 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		SHM_PROTECT();
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
-		zend_emit_recorded_errors();
+		/* We may have switched to an existing persistent script that was persisted in
+		 * the meantime. Make sure to use its warnings if available. */
+		if (ZCG(accel_directives).record_warnings) {
+			EG(record_errors) = false;
+			zend_emit_recorded_errors_ex(persistent_script->num_warnings, persistent_script->warnings);
+		} else {
+			zend_emit_recorded_errors();
+		}
 		zend_free_recorded_errors();
 	} else {
 
@@ -4360,12 +4367,14 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	zend_string *function_name = op_array->function_name;
 	zend_class_entry *scope = op_array->scope;
 	uint32_t fn_flags = op_array->fn_flags;
+	uint32_t fn_flags2 = op_array->fn_flags2;
 	zend_function *prototype = op_array->prototype;
 	HashTable *ht = op_array->static_variables;
 	*op_array = *orig_op_array;
 	op_array->function_name = function_name;
 	op_array->scope = scope;
 	op_array->fn_flags = fn_flags;
+	op_array->fn_flags2 = fn_flags2;
 	op_array->prototype = prototype;
 	op_array->static_variables = ht;
 }

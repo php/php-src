@@ -244,7 +244,7 @@ static bool can_replace_op1(
 		case ZEND_SEND_ARRAY:
 		case ZEND_SEND_USER:
 		case ZEND_FE_RESET_RW:
-			return 0;
+			return false;
 		/* Do not accept CONST */
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
@@ -254,7 +254,7 @@ static bool can_replace_op1(
 		case ZEND_MAKE_REF:
 		case ZEND_UNSET_CV:
 		case ZEND_ISSET_ISEMPTY_CV:
-			return 0;
+			return false;
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
 			return !(opline->extended_value & ZEND_ARRAY_ELEMENT_REF);
@@ -262,18 +262,18 @@ static bool can_replace_op1(
 			return !(op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE);
 		case ZEND_VERIFY_RETURN_TYPE:
 			// TODO: This would require a non-local change ???
-			return 0;
+			return false;
 		case ZEND_OP_DATA:
 			return (opline - 1)->opcode != ZEND_ASSIGN_OBJ_REF &&
 				(opline - 1)->opcode != ZEND_ASSIGN_STATIC_PROP_REF;
 		default:
 			if (ssa_op->op1_def != -1) {
 				ZEND_UNREACHABLE();
-				return 0;
+				return false;
 			}
 	}
 
-	return 1;
+	return true;
 }
 
 static bool can_replace_op2(
@@ -284,9 +284,9 @@ static bool can_replace_op2(
 		case ZEND_BIND_LEXICAL:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-			return 0;
+			return false;
 	}
-	return 1;
+	return true;
 }
 
 static bool try_replace_op1(
@@ -295,11 +295,11 @@ static bool try_replace_op1(
 		zval zv;
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, &zv)) {
-			return 1;
+			return true;
 		}
 		zval_ptr_dtor_nogc(&zv);
 	}
-	return 0;
+	return false;
 }
 
 static bool try_replace_op2(
@@ -308,11 +308,11 @@ static bool try_replace_op2(
 		zval zv;
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline, &zv)) {
-			return 1;
+			return true;
 		}
 		zval_ptr_dtor_nogc(&zv);
 	}
-	return 0;
+	return false;
 }
 
 static inline zend_result ct_eval_binary_op(zval *result, uint8_t binop, zval *op1, zval *op2) {
@@ -334,6 +334,10 @@ static inline zend_result ct_eval_bool_cast(zval *result, zval *op) {
 
 		ZVAL_TRUE(result);
 		return SUCCESS;
+	}
+	/* NAN warns when casting */
+	if (Z_TYPE_P(op) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op))) {
+		return FAILURE;
 	}
 
 	ZVAL_BOOL(result, zend_is_true(op));
@@ -371,7 +375,7 @@ static inline zend_result fetch_array_elem(zval **result, zval *op1, zval *op2) 
 			*result = zend_hash_index_find(Z_ARR_P(op1), Z_LVAL_P(op2));
 			return SUCCESS;
 		case IS_DOUBLE: {
-			zend_long lval = zend_dval_to_lval(Z_DVAL_P(op2));
+			zend_long lval = zend_dval_to_lval_silent(Z_DVAL_P(op2));
 			if (!zend_is_long_compatible(Z_DVAL_P(op2), lval)) {
 				return FAILURE;
 			}
@@ -459,7 +463,7 @@ static inline zend_result ct_eval_del_array_elem(zval *result, const zval *key) 
 			zend_hash_index_del(Z_ARR_P(result), Z_LVAL_P(key));
 			break;
 		case IS_DOUBLE: {
-			zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
+			zend_long lval = zend_dval_to_lval_silent(Z_DVAL_P(key));
 			if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 				return FAILURE;
 			}
@@ -504,7 +508,7 @@ static inline zend_result ct_eval_add_array_elem(zval *result, zval *value, cons
 			value = zend_hash_index_update(Z_ARR_P(result), Z_LVAL_P(key), value);
 			break;
 		case IS_DOUBLE: {
-			zend_long lval = zend_dval_to_lval(Z_DVAL_P(key));
+			zend_long lval = zend_dval_to_lval_silent(Z_DVAL_P(key));
 			if (!zend_is_long_compatible(Z_DVAL_P(key), lval)) {
 				return FAILURE;
 			}
@@ -714,7 +718,7 @@ static inline zend_result ct_eval_in_array(zval *result, uint32_t extended_value
 		if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 			res = zend_hash_index_exists(ht, Z_LVAL_P(op1));
 		} else {
-			res = 0;
+			res = false;
 		}
 	} else if (Z_TYPE_P(op1) <= IS_FALSE) {
 		res = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
@@ -722,11 +726,11 @@ static inline zend_result ct_eval_in_array(zval *result, uint32_t extended_value
 		zend_string *key;
 		zval key_tmp;
 
-		res = 0;
+		res = false;
 		ZEND_HASH_MAP_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
-				res = 1;
+				res = true;
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -838,9 +842,7 @@ static inline zend_result ct_eval_func_call_ex(
 		zval_ptr_dtor(result);
 		zend_clear_exception();
 		retval = FAILURE;
-	}
-
-	if (EG(capture_warnings_during_sccp) > 1) {
+	} else if (EG(capture_warnings_during_sccp) > 1) {
 		zval_ptr_dtor(result);
 		retval = FAILURE;
 	}

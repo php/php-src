@@ -135,13 +135,13 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	char *transport;
 	int transport_len;
 
-	const uri_parser_t *uri_parser = php_stream_context_get_uri_parser("ftp", context);
+	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ftp", context);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return NULL;
 	}
 
-	resource = php_uri_parse_to_struct(uri_parser, path, strlen(path), URI_COMPONENT_READ_RAW, true);
+	resource = php_uri_parse_to_struct(uri_parser, path, strlen(path), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	if (resource == NULL || resource->path == NULL) {
 		if (resource && presource) {
 			*presource = resource;
@@ -155,7 +155,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	if (resource->port == 0)
 		resource->port = 21;
 
-	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", ZSTR_VAL(resource->host), resource->port);
+	transport_len = (int)spprintf(&transport, 0, "tcp://%s:" ZEND_LONG_FMT, ZSTR_VAL(resource->host), resource->port);
 	stream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
 	efree(transport);
 	if (stream == NULL) {
@@ -421,7 +421,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	php_stream *reuseid=NULL;
 	size_t file_size = 0;
 	zval *tmpzval;
-	bool allow_overwrite = 0;
+	bool allow_overwrite = false;
 	int8_t read_write = 0;
 	char *transport;
 	int transport_len;
@@ -956,18 +956,18 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	int result;
 	char tmp_line[512];
 
-	const uri_parser_t *uri_parser = php_stream_context_get_uri_parser("ftp", context);
+	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ftp", context);
 	if (uri_parser == NULL) {
 		zend_value_error("%s(): Provided stream context has invalid value for the \"uri_parser_class\" option", get_active_function_name());
 		return 0;
 	}
 
-	resource_from = php_uri_parse_to_struct(uri_parser, url_from, strlen(url_from), URI_COMPONENT_READ_RAW, true);
+	resource_from = php_uri_parse_to_struct(uri_parser, url_from, strlen(url_from), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	if (!resource_from) {
 		return 0;
 	}
 
-	resource_to = php_uri_parse_to_struct(uri_parser, url_to, strlen(url_to), URI_COMPONENT_READ_RAW, true);
+	resource_to = php_uri_parse_to_struct(uri_parser, url_to, strlen(url_to), PHP_URI_COMPONENT_READ_MODE_RAW, true);
 	if (!resource_to) {
 		goto rename_errexit;
 	}

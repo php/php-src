@@ -2,6 +2,8 @@
 Test mb_ereg_match() function : basic functionality
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --SKIPIF--
 <?php
 function_exists('mb_ereg_match') or die("skip mb_ereg_match() is not available in this build");
@@ -12,7 +14,6 @@ function_exists('mb_ereg_match') or die("skip mb_ereg_match() is not available i
  * Test basic functionality of mb_ereg_match
  */
 
-mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
 echo "*** Testing mb_ereg_match() : basic functionality ***\n";

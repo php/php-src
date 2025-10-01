@@ -1988,10 +1988,8 @@ PHP_FUNCTION(ini_set)
 	/* open basedir check */
 	if (PG(open_basedir)) {
 		if (
-			zend_string_equals_literal(varname, "error_log")
-			|| zend_string_equals_literal(varname, "java.class.path")
+			zend_string_equals_literal(varname, "java.class.path")
 			|| zend_string_equals_literal(varname, "java.home")
-			|| zend_string_equals_literal(varname, "mail.log")
 			|| zend_string_equals_literal(varname, "java.library.path")
 			|| zend_string_equals_literal(varname, "vpopmail.directory")
 		) {

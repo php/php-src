@@ -153,6 +153,7 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	NULL,                   /* run_time_cache    */
 	NULL,                   /* doc_comment       */
 	0,                      /* T                 */
+	0,                      /* fn_flags2         */
 	NULL,                   /* prop_info */
 	ZEND_FN(pass),          /* handler           */
 	NULL,                   /* module            */
@@ -746,36 +747,36 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 			if (type == IS_LONG) {
 				zend_string_release(Z_STR_P(arg));
 				ZVAL_LONG(arg, lval);
-				return 1;
+				return true;
 			}
 			if (type == IS_DOUBLE) {
 				zend_string_release(Z_STR_P(arg));
 				ZVAL_DOUBLE(arg, dval);
-				return 1;
+				return true;
 			}
 		} else if (zend_parse_arg_long_weak(arg, &lval, 0)) {
 			zval_ptr_dtor(arg);
 			ZVAL_LONG(arg, lval);
-			return 1;
+			return true;
 		} else if (UNEXPECTED(EG(exception))) {
-			return 0;
+			return false;
 		}
 	}
 	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, 0)) {
 		zval_ptr_dtor(arg);
 		ZVAL_DOUBLE(arg, dval);
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, &str, 0)) {
 		/* on success "arg" is converted to IS_STRING */
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, 0)) {
 		zval_ptr_dtor(arg);
 		ZVAL_BOOL(arg, bval);
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 #if ZEND_DEBUG
@@ -800,18 +801,18 @@ static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, 
 	/* Pass (uint32_t)-1 as arg_num to indicate to ZPP not to emit any deprecation notice,
 	 * this is needed because the version with side effects also uses 0 (e.g. for typed properties) */
 	if ((type_mask & MAY_BE_LONG) && zend_parse_arg_long_weak(arg, &lval, (uint32_t)-1)) {
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval, (uint32_t)-1)) {
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_STRING) && can_convert_to_string(arg)) {
-		return 1;
+		return true;
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval, (uint32_t)-1)) {
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 #endif
 
@@ -1051,7 +1052,7 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 
 	uint32_t type_mask = ZEND_TYPE_FULL_MASK(info->type);
 	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC|MAY_BE_NEVER|MAY_BE_VOID)));
-	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
+	return zend_verify_scalar_type_hint(type_mask, property, strict, false);
 }
 
 static zend_always_inline bool i_zend_verify_property_type(const zend_property_info *info, zval *property, bool strict)
@@ -1246,7 +1247,7 @@ static zend_always_inline bool zend_verify_recv_arg_type(const zend_function *zf
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 
 	if (ZEND_TYPE_IS_SET(cur_arg_info->type)
-			&& UNEXPECTED(!zend_check_type(&cur_arg_info->type, arg, zf->common.scope, 0, 0))) {
+			&& UNEXPECTED(!zend_check_type(&cur_arg_info->type, arg, zf->common.scope, false, false))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, arg);
 		return 0;
 	}
@@ -1258,7 +1259,7 @@ static zend_always_inline bool zend_verify_variadic_arg_type(
 		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *arg)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
-	if (UNEXPECTED(!zend_check_type(&arg_info->type, arg, zf->common.scope, 0, 0))) {
+	if (UNEXPECTED(!zend_check_type(&arg_info->type, arg, zf->common.scope, false, false))) {
 		zend_verify_arg_error(zf, arg_info, arg_num, arg);
 		return 0;
 	}
@@ -1283,7 +1284,7 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
 		}
 
 		if (ZEND_TYPE_IS_SET(cur_arg_info->type)
-				&& UNEXPECTED(!zend_check_type(&cur_arg_info->type, arg, fbc->common.scope, 0, /* is_internal */ 1))) {
+				&& UNEXPECTED(!zend_check_type(&cur_arg_info->type, arg, fbc->common.scope, false, /* is_internal */ true))) {
 			return 0;
 		}
 		arg++;
@@ -1489,7 +1490,7 @@ ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *re
 		return 1;
 	}
 
-	if (UNEXPECTED(!zend_check_type(&ret_info->type, ret, NULL, 1, /* is_internal */ 1))) {
+	if (UNEXPECTED(!zend_check_type(&ret_info->type, ret, NULL, true, /* is_internal */ true))) {
 		zend_verify_internal_return_error(zf, ret);
 		return 0;
 	}
@@ -1732,10 +1733,13 @@ try_again:
 			zend_illegal_string_offset(dim, type);
 			return 0;
 		}
+		case IS_DOUBLE:
+			/* Suppress potential double warning */
+			zend_error(E_WARNING, "String offset cast occurred");
+			return zend_dval_to_lval_silent(Z_DVAL_P(dim));
 		case IS_UNDEF:
 			ZVAL_UNDEFINED_OP2();
 			ZEND_FALLTHROUGH;
-		case IS_DOUBLE:
 		case IS_NULL:
 		case IS_FALSE:
 		case IS_TRUE:
@@ -2000,6 +2004,27 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_constant(const zend_consta
 
 	zend_error_unchecked(code, "Constant %s is deprecated%S",
 		ZSTR_VAL(constant_name),
+		message_suffix
+	);
+
+	zend_string_release(message_suffix);
+}
+
+ZEND_API ZEND_COLD void zend_use_of_deprecated_trait(
+	zend_class_entry *trait,
+	const zend_string *used_by
+) {
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
+
+	if (get_deprecation_suffix_from_attribute(trait->attributes, trait, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = trait->type == ZEND_INTERNAL_CLASS ? E_DEPRECATED : E_USER_DEPRECATED;
+
+	zend_error_unchecked(code, "Trait %s used by %s is deprecated%S",
+		ZSTR_VAL(trait->name),
+		ZSTR_VAL(used_by),
 		message_suffix
 	);
 
@@ -2629,24 +2654,36 @@ static zend_never_inline uint8_t slow_index_convert(HashTable *ht, const zval *d
 			ZEND_FALLTHROUGH;
 		}
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				zend_array_destroy(ht);
+				return IS_NULL;
+			}
+
+			if (EG(exception)) {
+				return IS_NULL;
+			}
+
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
 		case IS_DOUBLE:
-			value->lval = zend_dval_to_lval(Z_DVAL_P(dim));
-			if (!zend_is_long_compatible(Z_DVAL_P(dim), value->lval)) {
-				/* The array may be destroyed while throwing the notice.
-				 * Temporarily increase the refcount to detect this situation. */
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-					GC_ADDREF(ht);
-				}
-				zend_incompatible_double_to_long_error(Z_DVAL_P(dim));
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-					zend_array_destroy(ht);
-					return IS_NULL;
-				}
-				if (EG(exception)) {
-					return IS_NULL;
-				}
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+				GC_ADDREF(ht);
+			}
+			value->lval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				zend_array_destroy(ht);
+				return IS_NULL;
+			}
+			if (EG(exception)) {
+				return IS_NULL;
 			}
 			return IS_LONG;
 		case IS_RESOURCE:
@@ -2699,26 +2736,38 @@ static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval 
 			ZEND_FALLTHROUGH;
 		}
 		case IS_NULL:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			GC_TRY_ADDREF(ht);
+
+			zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
+				return IS_NULL;
+			}
+			if (EG(exception)) {
+				return IS_NULL;
+			}
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
 		case IS_DOUBLE:
-			value->lval = zend_dval_to_lval(Z_DVAL_P(dim));
-			if (!zend_is_long_compatible(Z_DVAL_P(dim), value->lval)) {
-				/* The array may be destroyed while throwing the notice.
-				 * Temporarily increase the refcount to detect this situation. */
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-					GC_ADDREF(ht);
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+				GC_ADDREF(ht);
+			}
+			value->lval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
 				}
-				zend_incompatible_double_to_long_error(Z_DVAL_P(dim));
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
-					if (!GC_REFCOUNT(ht)) {
-						zend_array_destroy(ht);
-					}
-					return IS_NULL;
-				}
-				if (EG(exception)) {
-					return IS_NULL;
-				}
+				return IS_NULL;
+			}
+			if (EG(exception)) {
+				return IS_NULL;
 			}
 			return IS_LONG;
 		case IS_RESOURCE:
@@ -3078,6 +3127,11 @@ try_string_offset:
 							return;
 						}
 					}
+					/* To prevent double warning */
+					if (Z_TYPE_P(dim) == IS_DOUBLE) {
+						offset = zend_dval_to_lval_silent(Z_DVAL_P(dim));
+						goto out;
+					}
 					break;
 				case IS_REFERENCE:
 					dim = Z_REFVAL_P(dim);
@@ -3188,11 +3242,36 @@ static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable 
 	zend_ulong hval;
 
 	if (Z_TYPE_P(offset) == IS_DOUBLE) {
+		/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_TRY_ADDREF(ht);
 		hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			zend_array_destroy(ht);
+			return NULL;
+		}
+		if (EG(exception)) {
+			return NULL;
+		}
 num_idx:
 		return zend_hash_index_find(ht, hval);
 	} else if (Z_TYPE_P(offset) == IS_NULL) {
-str_idx:
+null_undef_idx:
+		/* The array may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_TRY_ADDREF(ht);
+
+		zend_error(E_DEPRECATED, "Using null as an array offset is deprecated, use an empty string instead");
+
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			zend_array_destroy(ht);
+			return NULL;
+		}
+
+		if (EG(exception)) {
+			return NULL;
+		}
+
 		return zend_hash_find_known_hash(ht, ZSTR_EMPTY_ALLOC());
 	} else if (Z_TYPE_P(offset) == IS_FALSE) {
 		hval = 0;
@@ -3206,7 +3285,7 @@ str_idx:
 		goto num_idx;
 	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {
 		ZVAL_UNDEFINED_OP2();
-		goto str_idx;
+		goto null_undef_idx;
 	} else {
 		zend_illegal_array_offset_isset(offset);
 		return NULL;
@@ -3312,7 +3391,17 @@ num_key:
 		key = Z_REFVAL_P(key);
 		goto try_again;
 	} else if (Z_TYPE_P(key) == IS_DOUBLE) {
+		/* The array may be destroyed while throwing a warning in case the float is not representable as an int.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_TRY_ADDREF(ht);
 		hval = zend_dval_to_lval_safe(Z_DVAL_P(key));
+		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+			zend_array_destroy(ht);
+			return false;
+		}
+		if (EG(exception)) {
+			return false;
+		}
 		goto num_key;
 	} else if (Z_TYPE_P(key) == IS_FALSE) {
 		hval = 0;
@@ -3327,6 +3416,9 @@ num_key:
 	} else if (Z_TYPE_P(key) <= IS_NULL) {
 		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP1();
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(key) == IS_NULL);
+			zend_error(E_DEPRECATED, "Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead");
 		}
 		str = ZSTR_EMPTY_ALLOC();
 		goto str_key;
@@ -5371,7 +5463,12 @@ static zend_never_inline zend_result ZEND_FASTCALL zend_quick_check_constant(
 
 static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 		zend_function *fbc, zend_string *arg_name, void **cache_slot) {
-	if (EXPECTED(*cache_slot == fbc)) {
+	/* Due to closures, the `fbc` address isn't unique if the memory address is reused.
+	 * The argument info will be however and uniquely positions the arguments.
+	 * We do support NULL arg_info, so we have to distinguish that from an uninitialized cache slot. */
+	void *unique_id = (void *) ((uintptr_t) fbc->common.arg_info | 1);
+
+	if (EXPECTED(*cache_slot == unique_id)) {
 		return *(uintptr_t *)(cache_slot + 1);
 	}
 
@@ -5380,10 +5477,12 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)
 			|| EXPECTED(fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
 		for (uint32_t i = 0; i < num_args; i++) {
-			zend_arg_info *arg_info = &fbc->op_array.arg_info[i];
+			zend_arg_info *arg_info = &fbc->common.arg_info[i];
 			if (zend_string_equals(arg_name, arg_info->name)) {
-				*cache_slot = fbc;
-				*(uintptr_t *)(cache_slot + 1) = i;
+				if (fbc->type == ZEND_USER_FUNCTION && (!fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE))) {
+					*cache_slot = unique_id;
+					*(uintptr_t *)(cache_slot + 1) = i;
+				}
 				return i;
 			}
 		}
@@ -5393,7 +5492,7 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
 			size_t len = strlen(arg_info->name);
 			if (zend_string_equals_cstr(arg_name, arg_info->name, len)) {
-				*cache_slot = fbc;
+				*cache_slot = unique_id;
 				*(uintptr_t *)(cache_slot + 1) = i;
 				return i;
 			}
@@ -5401,8 +5500,13 @@ static zend_always_inline uint32_t zend_get_arg_offset_by_name(
 	}
 
 	if (fbc->common.fn_flags & ZEND_ACC_VARIADIC) {
-		*cache_slot = fbc;
-		*(uintptr_t *)(cache_slot + 1) = fbc->common.num_args;
+		if ((fbc->type == ZEND_USER_FUNCTION
+		  && (!fbc->op_array.refcount || !(fbc->op_array.fn_flags & ZEND_ACC_CLOSURE)))
+		 || (fbc->type == ZEND_INTERNAL_FUNCTION
+		  && !(fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO))) {
+			*cache_slot = unique_id;
+			*(uintptr_t *)(cache_slot + 1) = fbc->common.num_args;
+		}
 		return fbc->common.num_args;
 	}
 
