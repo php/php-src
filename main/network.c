@@ -1036,6 +1036,28 @@ PHPAPI socklen_t php_sockaddr_size(php_sockaddr_storage *addr)
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+char *php_socket_strerror_s(long err, char *buf, size_t bufsize)
+{
+	if (buf == NULL) {
+		char ebuf[1024];
+		errno_t res = strerror_s(ebuf, sizeof(ebuf), err);
+		if (res == 0) {
+			buf = estrdup(ebuf);
+		} else {
+			buf = estrdup("Unknown error");
+		}
+	} else {
+		errno_t res = strerror_s(buf, bufsize, err);
+		if (res != 0) {
+			strncpy(buf, "Unknown error", bufsize);
+			buf[bufsize?(bufsize-1):0] = 0;
+		}
+	}
+	return buf;
+}
+#endif
+
 /* Given a socket error code, if buf == NULL:
  *   emallocs storage for the error message and returns
  * else
@@ -1045,16 +1067,40 @@ PHPAPI socklen_t php_sockaddr_size(php_sockaddr_storage *addr)
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 {
 #ifndef PHP_WIN32
-	char *errstr;
-
-	errstr = strerror(err);
+# ifdef HAVE_STRERROR_R
+	if (buf == NULL) {
+		char ebuf[1024];
+#  ifdef STRERROR_R_CHAR_P
+		char *errstr = strerror_r(err, ebuf, sizeof(ebuf));
+		buf = estrdup(errstr);
+#  else
+		errno_t res = strerror_r(err, ebuf, sizeof(ebuf));
+		if (res == 0) {
+			buf = estrdup(ebuf);
+		} else {
+			buf = estrdup("Unknown error");
+		}
+#  endif
+	} else {
+#  ifdef STRERROR_R_CHAR_P
+		buf = strerror_r(err, buf, bufsize);
+#  else
+		errno_t res = strerror_r(err, buf, bufsize);
+		if (res != 0) {
+			strncpy(buf, "Unknown error", bufsize);
+			buf[bufsize?(bufsize-1):0] = 0;
+		}
+#  endif
+	}
+# else
+	char *errstr = strerror(err);
 	if (buf == NULL) {
 		buf = estrdup(errstr);
 	} else {
 		strncpy(buf, errstr, bufsize);
 		buf[bufsize?(bufsize-1):0] = 0;
 	}
-	return buf;
+# endif
 #else
 	char *sysbuf = php_win32_error_to_msg(err);
 	if (!sysbuf[0]) {
@@ -1069,9 +1115,8 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 	}
 
 	php_win32_error_msg_free(sysbuf);
-
-	return buf;
 #endif
+	return buf;
 }
 /* }}} */
 
@@ -1079,9 +1124,22 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 PHPAPI zend_string *php_socket_error_str(long err)
 {
 #ifndef PHP_WIN32
-	char *errstr;
-
-	errstr = strerror(err);
+# ifdef HAVE_STRERROR_R
+	char ebuf[1024];
+#  ifdef STRERROR_R_CHAR_P
+	char *errstr = strerror_r(err, ebuf, sizeof(ebuf));
+#  else
+	const char *errstr;
+	errno_t res = strerror_r(err, ebuf, sizeof(ebuf));
+	if (res == 0) {
+		errstr = ebuf;
+	} else {
+		errstr = "Unknown error";
+	}
+#  endif
+# else
+	char *errstr = strerror(err);
+# endif
 	return zend_string_init(errstr, strlen(errstr), 0);
 #else
 	zend_string *ret;
