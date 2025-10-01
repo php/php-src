@@ -57,6 +57,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-19801 (leaks in var_dump() and debug_zval_dump()).
     (alexandre-daubois)
 
+- Streams:
+  . Fixed bug GH-19248 (Use strerror_r instead of strerror in main).
+    (Jakub Zelenka)
+
 - XMLReader:
   . Fixed bug GH-20009 (XMLReader leak on RelaxNG schema failure). (nielsdos)
 

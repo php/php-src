@@ -678,9 +678,10 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 
 		if (sock->socket == SOCK_ERR) {
 			if (xparam->want_errortext) {
+				char errstr[256];
 				xparam->outputs.error_text = strpprintf(0, "Failed to create unix%s socket %s",
 						stream->ops == &php_stream_unix_socket_ops ? "" : "datagram",
-						strerror(errno));
+						php_socket_strerror_s(errno, errstr, sizeof(errstr)));
 			}
 			return -1;
 		}
