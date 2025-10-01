@@ -1279,12 +1279,8 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 {
 	int ret = 0;
-	if (stream->ops->write == NULL) {
-		php_error_docref(NULL, E_NOTICE, "Stream is not writable");
-		return 0;
-	}
 
-	if (stream->writefilters.head) {
+	if (stream->writefilters.head && stream->ops->write) {
 		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC );
 	}
 

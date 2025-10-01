@@ -5,8 +5,7 @@ zlib
 --FILE--
 <?php
 $fh = fopen('data://text/plain,', 'w+',);
-$v_249671 = stream_filter_append($fh, 'zlib.deflate',2,);
+var_dump(stream_filter_append($fh, 'zlib.deflate',STREAM_FILTER_WRITE));
 ?>
 --EXPECTF--
-
-Notice: PHP Request Shutdown: Stream is not writable in Unknown on line %d
+resource(%d) of type (stream filter)
