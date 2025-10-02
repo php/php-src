@@ -501,6 +501,8 @@ function openssl_csr_get_subject(OpenSSLCertificateSigningRequest|string $csr, b
 
 function openssl_csr_get_public_key(OpenSSLCertificateSigningRequest|string $csr, bool $short_names = true): OpenSSLAsymmetricKey|false {}
 
+function openssl_csr_parse(OpenSSLCertificateSigningRequest|string $csr, bool $short_names = true): array|false {}
+
 function openssl_pkey_new(?array $options = null): OpenSSLAsymmetricKey|false {}
 
 /**

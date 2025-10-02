@@ -1998,6 +1998,185 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 }
 /* }}} */
 
+/* {{{ Returns an array of the fields/values of the Certificate Request */
+PHP_FUNCTION(openssl_csr_parse)
+{
+	X509_REQ * csr = NULL;
+	zend_object *csr_obj;
+	zend_string *csr_str;
+	int i, sig_nid;
+	bool useshortnames = 1;
+	zval subitem;
+	X509_EXTENSION *extension;
+	X509_NAME *subject_name;
+	char *csr_name;
+	char *extname;
+	BIO *bio_out;
+	BUF_MEM *bio_buf;
+	char buf[256];
+	STACK_OF(X509_EXTENSION) *exts;
+	char *crit_name = NULL;
+	int crit_len = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(useshortnames)
+	ZEND_PARSE_PARAMETERS_END();
+
+	csr = php_openssl_csr_from_param(csr_obj, csr_str, 1);
+	if (csr == NULL) {
+		// TODO Add Warning?
+		RETURN_FALSE;
+	}
+	array_init(return_value);
+
+	subject_name = X509_REQ_get_subject_name(csr);
+	csr_name = X509_NAME_oneline(subject_name, NULL, 0);
+	if (csr_name) {
+		add_assoc_string(return_value, "name", csr_name);
+		OPENSSL_free(csr_name);
+	}
+
+	php_openssl_add_assoc_name_entry(return_value, "subject", subject_name, useshortnames);
+	/* hash as used in CA directories to lookup csr by subject name */
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%08lx", X509_NAME_hash_ex(subject_name, NULL, NULL, NULL));
+		add_assoc_string(return_value, "hash", buf);
+	}
+
+	add_assoc_long(return_value, "version", X509_REQ_get_version(csr));
+
+	sig_nid = X509_REQ_get_signature_nid(csr);
+	add_assoc_string(return_value, "signatureTypeSN", (char*)OBJ_nid2sn(sig_nid));
+	add_assoc_string(return_value, "signatureTypeLN", (char*)OBJ_nid2ln(sig_nid));
+	add_assoc_long(return_value, "signatureTypeNID", sig_nid);
+
+	array_init(&subitem);
+	int attrcnt = X509_REQ_get_attr_count(csr);
+	if (attrcnt > 0) {
+	    for (i = 0; i < attrcnt; i++) {
+		X509_ATTRIBUTE *attr = X509_REQ_get_attr(csr,i);
+		char unknown[] = "Unknown";
+		if (attr) {
+		    char objbuf[80];
+		    /* Adapted from openssl's "req" app */
+		    ASN1_TYPE *at;
+		    ASN1_BIT_STRING *bs = NULL;
+		    ASN1_OBJECT *aobj;
+		    int j, type = 0, count = 1, ii = 0;
+
+		    aobj = X509_ATTRIBUTE_get0_object(attr);
+		    if (X509_REQ_extension_nid(OBJ_obj2nid(aobj)))
+			continue;
+		    if ((j = i2t_ASN1_OBJECT(objbuf, sizeof(objbuf), aobj)) > 0) {
+			ii = 0;
+			count = X509_ATTRIBUTE_count(attr);
+			if (count == 0) {
+			    RETURN_FALSE;
+			}
+get_next:
+			at = X509_ATTRIBUTE_get0_type(attr, ii);
+			type = at->type;
+			bs = at->value.asn1_string;
+		    } else {
+			strcpy(objbuf, unknown);
+		    }
+		    switch (type) {
+			case V_ASN1_PRINTABLESTRING:
+			case V_ASN1_T61STRING:
+			case V_ASN1_NUMERICSTRING:
+			case V_ASN1_UTF8STRING:
+			case V_ASN1_IA5STRING:
+			    add_assoc_stringl(&subitem, objbuf, bs->data, bs->length);
+			    break;
+			default:
+			    add_assoc_stringl(&subitem, objbuf, unknown, sizeof(unknown));
+			    break;
+		    }
+		    if (++ii < count)
+			goto get_next;
+
+		}
+	    }
+	    add_assoc_zval(return_value, "attributes", &subitem);
+	}
+
+	array_init(&subitem);
+	exts = X509_REQ_get_extensions(csr);
+	if (exts) {
+		int count = sk_X509_EXTENSION_num(exts);
+		for (i = 0; i < count; i++) {
+			int nid;
+			extension = sk_X509_EXTENSION_value(exts, i);
+			nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
+			if (nid != NID_undef) {
+				extname = (char *)OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
+			} else {
+				OBJ_obj2txt(buf, sizeof(buf)-1, X509_EXTENSION_get_object(extension), 1);
+				extname = buf;
+			}
+			if (X509_EXTENSION_get_critical(extension)) {
+				int new_len = strlen(extname) + 10;
+				if (new_len > crit_len) {
+					if (crit_name) {
+						efree(crit_name);
+					}
+					crit_len = new_len;
+					crit_name = emalloc(crit_len);
+				}
+				if (crit_name) {
+					strcpy(crit_name, extname);
+					strcat(crit_name, ":critical");
+					add_assoc_bool(&subitem, crit_name, 1);
+				}
+			}
+			bio_out = BIO_new(BIO_s_mem());
+			if (bio_out == NULL) {
+				php_openssl_store_errors();
+				goto err_subitem;
+			}
+			if (nid == NID_subject_alt_name) {
+				if (openssl_x509v3_subjectAltName(bio_out, extension) == 0) {
+					BIO_get_mem_ptr(bio_out, &bio_buf);
+					add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
+				} else {
+					BIO_free(bio_out);
+					goto err_subitem;
+				}
+			}
+			else if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
+				BIO_get_mem_ptr(bio_out, &bio_buf);
+				add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
+			} else {
+				php_openssl_add_assoc_asn1_string(&subitem, extname, X509_EXTENSION_get_data(extension));
+			}
+			BIO_free(bio_out);
+		}
+		add_assoc_zval(return_value, "extensions", &subitem);
+		if (crit_name) {
+		    efree(crit_name);
+		}
+	}
+	if (csr) {
+	    X509_REQ_free(csr);
+	}
+	return;
+
+err_subitem:
+	zval_ptr_dtor(&subitem);
+	if (crit_name) {
+	    efree(crit_name);
+	}
+	zend_array_destroy(Z_ARR_P(return_value));
+	if (csr) {
+	    X509_REQ_free(csr);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* }}} */
 
 /* {{{ EVP Public/Private key functions */
