@@ -104,9 +104,9 @@ static zend_class_entry *register_class_LibXMLError(void)
 
 	zval property_level_default_value;
 	ZVAL_UNDEF(&property_level_default_value);
-	zend_string *property_level_name = zend_string_init("level", sizeof("level") - 1, 1);
+	zend_string *property_level_name = zend_string_init("level", sizeof("level") - 1, true);
 	zend_declare_typed_property(class_entry, property_level_name, &property_level_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_level_name);
+	zend_string_release_ex(property_level_name, true);
 
 	zval property_code_default_value;
 	ZVAL_UNDEF(&property_code_default_value);
@@ -114,9 +114,9 @@ static zend_class_entry *register_class_LibXMLError(void)
 
 	zval property_column_default_value;
 	ZVAL_UNDEF(&property_column_default_value);
-	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, 1);
+	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, true);
 	zend_declare_typed_property(class_entry, property_column_name, &property_column_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_column_name);
+	zend_string_release_ex(property_column_name, true);
 
 	zval property_message_default_value;
 	ZVAL_UNDEF(&property_message_default_value);

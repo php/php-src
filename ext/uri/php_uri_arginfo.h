@@ -374,9 +374,9 @@ static zend_class_entry *register_class_Uri_WhatWg_InvalidUrlException(zend_clas
 
 	zval property_errors_default_value;
 	ZVAL_UNDEF(&property_errors_default_value);
-	zend_string *property_errors_name = zend_string_init("errors", sizeof("errors") - 1, 1);
+	zend_string *property_errors_name = zend_string_init("errors", sizeof("errors") - 1, true);
 	zend_declare_typed_property(class_entry, property_errors_name, &property_errors_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-	zend_string_release(property_errors_name);
+	zend_string_release_ex(property_errors_name, true);
 
 	return class_entry;
 }
@@ -455,9 +455,9 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationError(void)
 
 	zval property_context_default_value;
 	ZVAL_UNDEF(&property_context_default_value);
-	zend_string *property_context_name = zend_string_init("context", sizeof("context") - 1, 1);
+	zend_string *property_context_name = zend_string_init("context", sizeof("context") - 1, true);
 	zend_declare_typed_property(class_entry, property_context_name, &property_context_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_context_name);
+	zend_string_release_ex(property_context_name, true);
 
 	zval property_type_default_value;
 	ZVAL_UNDEF(&property_type_default_value);
@@ -466,9 +466,9 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlValidationError(void)
 
 	zval property_failure_default_value;
 	ZVAL_UNDEF(&property_failure_default_value);
-	zend_string *property_failure_name = zend_string_init("failure", sizeof("failure") - 1, 1);
+	zend_string *property_failure_name = zend_string_init("failure", sizeof("failure") - 1, true);
 	zend_declare_typed_property(class_entry, property_failure_name, &property_failure_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
-	zend_string_release(property_failure_name);
+	zend_string_release_ex(property_failure_name, true);
 
 	return class_entry;
 }
