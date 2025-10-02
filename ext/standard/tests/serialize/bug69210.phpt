@@ -34,10 +34,7 @@ echo $si . "\n";
 var_dump(unserialize($ss));
 var_dump(unserialize($si));
 ?>
---EXPECTF--
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
-
-Deprecated: The __sleep() serialization magic method has been deprecated. Implement __serialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+--EXPECT--
 O:10:"testString":1:{s:1:"a";b:1;}
 O:11:"testInteger":1:{s:1:"a";b:1;}
 object(testString)#3 (1) {
