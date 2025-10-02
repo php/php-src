@@ -1090,7 +1090,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 		char *errstr = strerror_r(err, ebuf, sizeof(ebuf));
 		buf = estrdup(errstr);
 #  else
-		errno_t res = strerror_r(err, ebuf, sizeof(ebuf));
+		int res = (int) strerror_r(err, ebuf, sizeof(ebuf));
 		if (res == 0) {
 			buf = estrdup(ebuf);
 		} else {
@@ -1101,7 +1101,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 #  ifdef STRERROR_R_CHAR_P
 		buf = strerror_r(err, buf, bufsize);
 #  else
-		errno_t res = strerror_r(err, buf, bufsize);
+		int res = (int) strerror_r(err, buf, bufsize);
 		if (res != 0) {
 			strncpy(buf, "Unknown error", bufsize);
 			buf[bufsize?(bufsize-1):0] = 0;
@@ -1146,7 +1146,7 @@ PHPAPI zend_string *php_socket_error_str(long err)
 	char *errstr = strerror_r(err, ebuf, sizeof(ebuf));
 #  else
 	const char *errstr;
-	errno_t res = strerror_r(err, ebuf, sizeof(ebuf));
+	int res = (int) strerror_r(err, ebuf, sizeof(ebuf));
 	if (res == 0) {
 		errstr = ebuf;
 	} else {
