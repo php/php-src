@@ -198,13 +198,13 @@ ZEND_API uint32_t zend_get_func_info(
 	return ret;
 }
 
-static void zend_func_info_add(const func_info_t *func_infos, size_t n)
+static void zend_func_info_add(const func_info_t *new_func_infos, size_t n)
 {
 	for (size_t i = 0; i < n; i++) {
-		zend_string *key = zend_string_init_interned(func_infos[i].name, func_infos[i].name_len, 1);
+		zend_string *key = zend_string_init_interned(new_func_infos[i].name, new_func_infos[i].name_len, 1);
 
-		if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
-			fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", func_infos[i].name);
+		if (zend_hash_add_ptr(&func_info, key, (void**)&new_func_infos[i]) == NULL) {
+			fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", new_func_infos[i].name);
 		}
 
 		zend_string_release_ex(key, 1);
