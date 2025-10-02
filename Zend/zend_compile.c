@@ -8092,6 +8092,8 @@ typedef struct {
 	bool varvars_used;
 } closure_info;
 
+static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast);
+
 static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 	if (!ast) {
 		return;
@@ -8136,7 +8138,15 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 	} else if (ast->kind == ZEND_AST_ARROW_FUNC) {
 		/* For arrow functions recursively check the expression. */
 		zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
-		find_implicit_binds_recursively(info, closure_ast->child[2]);
+		closure_info inner_info;
+		find_implicit_binds(&inner_info, closure_ast->child[0], closure_ast->child[2]);
+		if (inner_info.varvars_used) {
+			info->varvars_used = true;
+		}
+		if (zend_hash_num_elements(&inner_info.uses)) {
+			zend_hash_copy(&info->uses, &inner_info.uses, NULL);
+		}
+		zend_hash_destroy(&inner_info.uses);
 	} else if (!zend_ast_is_special(ast)) {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
