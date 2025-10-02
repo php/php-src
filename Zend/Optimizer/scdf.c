@@ -158,7 +158,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 				scdf_mark_edge_feasible(scdf, i, block->successors[0]);
 			} else {
 				zend_op *opline = NULL;
-				int j, end = block->start + block->len;
+				uint32_t j, end = block->start + block->len;
 				for (j = block->start; j < end; j++) {
 					opline = &scdf->op_array->opcodes[j];
 					zend_bitset_excl(scdf->instr_worklist, j);
