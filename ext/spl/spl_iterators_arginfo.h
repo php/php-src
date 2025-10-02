@@ -891,7 +891,7 @@ static zend_class_entry *register_class_RegexIterator(zend_class_entry *class_en
 
 	zval property_replacement_default_value;
 	ZVAL_NULL(&property_replacement_default_value);
-	zend_string *property_replacement_name = zend_string_init("replacement", sizeof("replacement") - 1, 1);
+	zend_string *property_replacement_name = zend_string_init_interned("replacement", sizeof("replacement") - 1, 1);
 	zend_declare_typed_property(class_entry, property_replacement_name, &property_replacement_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_replacement_name);
 

@@ -3196,7 +3196,8 @@ class PropertyInfo extends VariableLike
         [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
             "property_{$propertyName}_name",
             $propertyName,
-            $this->phpVersionIdMinimumCompatibility
+            $this->phpVersionIdMinimumCompatibility,
+            true
         );
         $code .= $stringInit;
 

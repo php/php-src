@@ -149,7 +149,7 @@ static zend_class_entry *register_class_Attribute(void)
 
 	zval property_flags_default_value;
 	ZVAL_UNDEF(&property_flags_default_value);
-	zend_string *property_flags_name = zend_string_init("flags", sizeof("flags") - 1, 1);
+	zend_string *property_flags_name = zend_string_init_interned("flags", sizeof("flags") - 1, 1);
 	zend_declare_typed_property(class_entry, property_flags_name, &property_flags_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_flags_name);
 
