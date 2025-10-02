@@ -131,7 +131,7 @@ static zend_ssa_phi *add_pi(
 
 static void pi_range(
 		zend_ssa_phi *phi, int min_var, int max_var, zend_long min, zend_long max,
-		char underflow, char overflow, char negative) /* {{{ */
+		bool underflow, bool overflow, bool negative) /* {{{ */
 {
 	zend_ssa_range_constraint *constraint = &phi->constraint.range;
 	constraint->min_var = min_var;
@@ -148,16 +148,16 @@ static void pi_range(
 /* }}} */
 
 static inline void pi_range_equals(zend_ssa_phi *phi, int var, zend_long val) {
-	pi_range(phi, var, var, val, val, 0, 0, 0);
+	pi_range(phi, var, var, val, val, false, false, false);
 }
 static inline void pi_range_not_equals(zend_ssa_phi *phi, int var, zend_long val) {
-	pi_range(phi, var, var, val, val, 0, 0, 1);
+	pi_range(phi, var, var, val, val, false, false, true);
 }
 static inline void pi_range_min(zend_ssa_phi *phi, int var, zend_long val) {
-	pi_range(phi, var, -1, val, ZEND_LONG_MAX, 0, 1, 0);
+	pi_range(phi, var, -1, val, ZEND_LONG_MAX, false, true, false);
 }
 static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
-	pi_range(phi, -1, var, ZEND_LONG_MIN, val, 1, 0, 0);
+	pi_range(phi, -1, var, ZEND_LONG_MIN, val, true, false, false);
 }
 
 static void pi_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
