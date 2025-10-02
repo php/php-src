@@ -37,7 +37,7 @@ typedef struct _optimizer_call_info {
 	uint32_t       func_arg_num;
 } optimizer_call_info;
 
-static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opline)
+static void zend_delete_call_instructions(const zend_op_array *op_array, zend_op *opline)
 {
 	int call = 0;
 
@@ -76,7 +76,7 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 	}
 }
 
-static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_op *opline, zend_function *func)
+static void zend_try_inline_call(zend_op_array *op_array, const zend_op *fcall, zend_op *opline, const zend_function *func)
 {
 	const uint32_t no_discard = RETURN_VALUE_USED(opline) ? 0 : ZEND_ACC_NODISCARD;
 
@@ -153,7 +153,7 @@ static bool has_known_send_mode(const optimizer_call_info *info, uint32_t arg_nu
 void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = op_array->opcodes;
-	zend_op *end = opline + op_array->last;
+	const zend_op *end = opline + op_array->last;
 	int call = 0;
 	void *checkpoint;
 	optimizer_call_info *call_stack;
