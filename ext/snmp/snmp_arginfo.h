@@ -342,49 +342,49 @@ static zend_class_entry *register_class_SNMP(void)
 
 	zval property_info_default_value;
 	ZVAL_UNDEF(&property_info_default_value);
-	zend_string *property_info_name = zend_string_init("info", sizeof("info") - 1, 1);
+	zend_string *property_info_name = zend_string_init("info", sizeof("info") - 1, true);
 	zend_declare_typed_property(class_entry, property_info_name, &property_info_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release_ex(property_info_name, true);
 
 	zval property_max_oids_default_value;
 	ZVAL_UNDEF(&property_max_oids_default_value);
-	zend_string *property_max_oids_name = zend_string_init("max_oids", sizeof("max_oids") - 1, 1);
+	zend_string *property_max_oids_name = zend_string_init("max_oids", sizeof("max_oids") - 1, true);
 	zend_declare_typed_property(class_entry, property_max_oids_name, &property_max_oids_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
 	zend_string_release_ex(property_max_oids_name, true);
 
 	zval property_valueretrieval_default_value;
 	ZVAL_UNDEF(&property_valueretrieval_default_value);
-	zend_string *property_valueretrieval_name = zend_string_init("valueretrieval", sizeof("valueretrieval") - 1, 1);
+	zend_string *property_valueretrieval_name = zend_string_init("valueretrieval", sizeof("valueretrieval") - 1, true);
 	zend_declare_typed_property(class_entry, property_valueretrieval_name, &property_valueretrieval_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_valueretrieval_name, true);
 
 	zval property_quick_print_default_value;
 	ZVAL_UNDEF(&property_quick_print_default_value);
-	zend_string *property_quick_print_name = zend_string_init("quick_print", sizeof("quick_print") - 1, 1);
+	zend_string *property_quick_print_name = zend_string_init("quick_print", sizeof("quick_print") - 1, true);
 	zend_declare_typed_property(class_entry, property_quick_print_name, &property_quick_print_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_quick_print_name, true);
 
 	zval property_enum_print_default_value;
 	ZVAL_UNDEF(&property_enum_print_default_value);
-	zend_string *property_enum_print_name = zend_string_init("enum_print", sizeof("enum_print") - 1, 1);
+	zend_string *property_enum_print_name = zend_string_init("enum_print", sizeof("enum_print") - 1, true);
 	zend_declare_typed_property(class_entry, property_enum_print_name, &property_enum_print_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_enum_print_name, true);
 
 	zval property_oid_output_format_default_value;
 	ZVAL_UNDEF(&property_oid_output_format_default_value);
-	zend_string *property_oid_output_format_name = zend_string_init("oid_output_format", sizeof("oid_output_format") - 1, 1);
+	zend_string *property_oid_output_format_name = zend_string_init("oid_output_format", sizeof("oid_output_format") - 1, true);
 	zend_declare_typed_property(class_entry, property_oid_output_format_name, &property_oid_output_format_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_oid_output_format_name, true);
 
 	zval property_oid_increasing_check_default_value;
 	ZVAL_UNDEF(&property_oid_increasing_check_default_value);
-	zend_string *property_oid_increasing_check_name = zend_string_init("oid_increasing_check", sizeof("oid_increasing_check") - 1, 1);
+	zend_string *property_oid_increasing_check_name = zend_string_init("oid_increasing_check", sizeof("oid_increasing_check") - 1, true);
 	zend_declare_typed_property(class_entry, property_oid_increasing_check_name, &property_oid_increasing_check_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_oid_increasing_check_name, true);
 
 	zval property_exceptions_enabled_default_value;
 	ZVAL_UNDEF(&property_exceptions_enabled_default_value);
-	zend_string *property_exceptions_enabled_name = zend_string_init("exceptions_enabled", sizeof("exceptions_enabled") - 1, 1);
+	zend_string *property_exceptions_enabled_name = zend_string_init("exceptions_enabled", sizeof("exceptions_enabled") - 1, true);
 	zend_declare_typed_property(class_entry, property_exceptions_enabled_name, &property_exceptions_enabled_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_exceptions_enabled_name, true);
 

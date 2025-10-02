@@ -74,7 +74,7 @@ static zend_class_entry *register_class_Transliterator(void)
 
 	zval property_id_default_value;
 	ZVAL_UNDEF(&property_id_default_value);
-	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, true);
 	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release_ex(property_id_name, true);
 

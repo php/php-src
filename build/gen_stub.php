@@ -3058,7 +3058,7 @@ class StringBuilder {
         // Generally strings will not be known
         $initFn = $interned ? 'zend_string_init_interned' : 'zend_string_init';
         $result = [
-            "\tzend_string *$varName = $initFn(\"$content\", sizeof(\"$content\") - 1, 1);\n",
+            "\tzend_string *$varName = $initFn(\"$content\", sizeof(\"$content\") - 1, true);\n",
             $varName,
             "\tzend_string_release_ex($varName, true);\n"
         ];
