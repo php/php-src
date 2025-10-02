@@ -1,7 +1,5 @@
 --TEST--
 Filter errors: convert.base64-decode
---SKIPIF--
-<?php require 'filter_errors.inc'; filter_errors_skipif('convert.base64-decode'); ?>
 --FILE--
 <?php
 require 'filter_errors.inc';
