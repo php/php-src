@@ -71,8 +71,7 @@ void scdf_mark_edge_feasible(scdf_ctx *scdf, int from, int to) {
 		/* Block is already executable, only a new edge became feasible.
 		 * Reevaluate phi nodes to account for changed source operands. */
 		const zend_ssa_block *ssa_block = &scdf->ssa->blocks[to];
-		zend_ssa_phi *phi;
-		for (phi = ssa_block->phis; phi; phi = phi->next) {
+		for (const zend_ssa_phi *phi = ssa_block->phis; phi; phi = phi->next) {
 			zend_bitset_excl(scdf->phi_var_worklist, phi->ssa_var);
 			scdf->handlers.visit_phi(scdf, phi);
 		}
@@ -109,7 +108,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 	) {
 		int i;
 		while ((i = zend_bitset_pop_first(scdf->phi_var_worklist, scdf->phi_var_worklist_len)) >= 0) {
-			zend_ssa_phi *phi = ssa->vars[i].definition_phi;
+			const zend_ssa_phi *phi = ssa->vars[i].definition_phi;
 			ZEND_ASSERT(phi);
 			if (zend_bitset_in(scdf->executable_blocks, phi->block)) {
 				scdf->handlers.visit_phi(scdf, phi);
@@ -145,12 +144,9 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 			DEBUG_PRINT("Pop block %d from worklist\n", i);
 			zend_bitset_incl(scdf->executable_blocks, i);
 
-			{
-				zend_ssa_phi *phi;
-				for (phi = ssa_block->phis; phi; phi = phi->next) {
-					zend_bitset_excl(scdf->phi_var_worklist, phi->ssa_var);
-					scdf->handlers.visit_phi(scdf, phi);
-				}
+			for (const zend_ssa_phi *phi = ssa_block->phis; phi; phi = phi->next) {
+				zend_bitset_excl(scdf->phi_var_worklist, phi->ssa_var);
+				scdf->handlers.visit_phi(scdf, phi);
 			}
 
 			if (block->len == 0) {

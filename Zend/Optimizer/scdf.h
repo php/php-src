@@ -39,7 +39,7 @@ typedef struct _scdf_ctx {
 		void (*visit_instr)(
 			struct _scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_op);
 		void (*visit_phi)(
-			struct _scdf_ctx *scdf, zend_ssa_phi *phi);
+			struct _scdf_ctx *scdf, const zend_ssa_phi *phi);
 		void (*mark_feasible_successors)(
 			struct _scdf_ctx *scdf, int block_num, zend_basic_block *block,
 			zend_op *opline, zend_ssa_op *ssa_op);

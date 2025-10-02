@@ -2037,7 +2037,7 @@ static void join_phi_values(zval *a, zval *b, bool escape) {
 	}
 }
 
-static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
+static void sccp_visit_phi(scdf_ctx *scdf, const zend_ssa_phi *phi) {
 	sccp_ctx *ctx = (sccp_ctx *) scdf;
 	zend_ssa *ssa = scdf->ssa;
 	ZEND_ASSERT(phi->ssa_var >= 0);
