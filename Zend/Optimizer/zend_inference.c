@@ -2464,7 +2464,7 @@ static const zend_property_info *zend_fetch_static_prop_info(const zend_script *
 	if (opline->op1_type == IS_CONST) {
 		zend_class_entry *ce = NULL;
 		if (opline->op2_type == IS_UNUSED) {
-			int fetch_type = opline->op2.num & ZEND_FETCH_CLASS_MASK;
+			uint32_t fetch_type = opline->op2.num & ZEND_FETCH_CLASS_MASK;
 			switch (fetch_type) {
 				case ZEND_FETCH_CLASS_SELF:
 				case ZEND_FETCH_CLASS_STATIC:
