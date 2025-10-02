@@ -237,7 +237,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	len = strlen(filtername);
 
 	/* determine the classname/class entry */
-	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), (char*)filtername, len))) {
+	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), filtername, len))) {
 		char *period;
 
 		/* Userspace Filters using ambiguous wildcards could cause problems.
@@ -285,7 +285,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	filter = php_stream_filter_alloc(&userfilter_ops, NULL, 0);
 
 	/* filtername */
-	add_property_string(&obj, "filtername", (char*)filtername);
+	add_property_string(&obj, "filtername", filtername);
 
 	/* and the parameters, if any */
 	if (filterparams) {
