@@ -689,10 +689,10 @@ static zend_class_entry *register_class__ZendTestInterface(void)
 
 	zval const_DUMMY_value;
 	ZVAL_LONG(&const_DUMMY_value, 0);
-	zend_string *const_DUMMY_name = zend_string_init_interned("DUMMY", sizeof("DUMMY") - 1, 1);
+	zend_string *const_DUMMY_name = zend_string_init_interned("DUMMY", sizeof("DUMMY") - 1, true);
 	zend_string *const_DUMMY_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.2\n         */", 98, 1);
 	zend_declare_class_constant_ex(class_entry, const_DUMMY_name, &const_DUMMY_value, ZEND_ACC_PUBLIC, const_DUMMY_comment);
-	zend_string_release(const_DUMMY_name);
+	zend_string_release_ex(const_DUMMY_name, true);
 
 	return class_entry;
 }
@@ -712,53 +712,53 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 
 	zval const_TYPED_CLASS_CONST1_value;
 	ZVAL_EMPTY_ARRAY(&const_TYPED_CLASS_CONST1_value);
-	zend_string *const_TYPED_CLASS_CONST1_name = zend_string_init_interned("TYPED_CLASS_CONST1", sizeof("TYPED_CLASS_CONST1") - 1, 1);
+	zend_string *const_TYPED_CLASS_CONST1_name = zend_string_init_interned("TYPED_CLASS_CONST1", sizeof("TYPED_CLASS_CONST1") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST1_name, &const_TYPED_CLASS_CONST1_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 #else
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST1_name, &const_TYPED_CLASS_CONST1_value, ZEND_ACC_PUBLIC, NULL);
 #endif
-	zend_string_release(const_TYPED_CLASS_CONST1_name);
+	zend_string_release_ex(const_TYPED_CLASS_CONST1_name, true);
 
 	zval const_TYPED_CLASS_CONST2_value;
 	ZVAL_LONG(&const_TYPED_CLASS_CONST2_value, 42);
-	zend_string *const_TYPED_CLASS_CONST2_name = zend_string_init_interned("TYPED_CLASS_CONST2", sizeof("TYPED_CLASS_CONST2") - 1, 1);
+	zend_string *const_TYPED_CLASS_CONST2_name = zend_string_init_interned("TYPED_CLASS_CONST2", sizeof("TYPED_CLASS_CONST2") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST2_name, &const_TYPED_CLASS_CONST2_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_ARRAY));
 #else
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST2_name, &const_TYPED_CLASS_CONST2_value, ZEND_ACC_PUBLIC, NULL);
 #endif
-	zend_string_release(const_TYPED_CLASS_CONST2_name);
+	zend_string_release_ex(const_TYPED_CLASS_CONST2_name, true);
 
 	zval const_TYPED_CLASS_CONST3_value;
 	ZVAL_LONG(&const_TYPED_CLASS_CONST3_value, 1);
-	zend_string *const_TYPED_CLASS_CONST3_name = zend_string_init_interned("TYPED_CLASS_CONST3", sizeof("TYPED_CLASS_CONST3") - 1, 1);
+	zend_string *const_TYPED_CLASS_CONST3_name = zend_string_init_interned("TYPED_CLASS_CONST3", sizeof("TYPED_CLASS_CONST3") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_declare_typed_class_constant(class_entry, const_TYPED_CLASS_CONST3_name, &const_TYPED_CLASS_CONST3_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
 #else
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST3_name, &const_TYPED_CLASS_CONST3_value, ZEND_ACC_PUBLIC, NULL);
 #endif
-	zend_string_release(const_TYPED_CLASS_CONST3_name);
+	zend_string_release_ex(const_TYPED_CLASS_CONST3_name, true);
 
 	zval const_ZEND_TEST_DEPRECATED_value;
 	ZVAL_LONG(&const_ZEND_TEST_DEPRECATED_value, 42);
-	zend_string *const_ZEND_TEST_DEPRECATED_name = zend_string_init_interned("ZEND_TEST_DEPRECATED", sizeof("ZEND_TEST_DEPRECATED") - 1, 1);
+	zend_string *const_ZEND_TEST_DEPRECATED_name = zend_string_init_interned("ZEND_TEST_DEPRECATED", sizeof("ZEND_TEST_DEPRECATED") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #else
 	zend_declare_class_constant_ex(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
 #endif
-	zend_string_release(const_ZEND_TEST_DEPRECATED_name);
+	zend_string_release_ex(const_ZEND_TEST_DEPRECATED_name, true);
 
 	zval const_ZEND_TEST_DEPRECATED_ATTR_value;
 	ZVAL_LONG(&const_ZEND_TEST_DEPRECATED_ATTR_value, 42);
-	zend_string *const_ZEND_TEST_DEPRECATED_ATTR_name = zend_string_init_interned("ZEND_TEST_DEPRECATED_ATTR", sizeof("ZEND_TEST_DEPRECATED_ATTR") - 1, 1);
+	zend_string *const_ZEND_TEST_DEPRECATED_ATTR_name = zend_string_init_interned("ZEND_TEST_DEPRECATED_ATTR", sizeof("ZEND_TEST_DEPRECATED_ATTR") - 1, true);
 #if (PHP_VERSION_ID >= 80300)
 	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #else
 	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_class_constant_ex(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
 #endif
-	zend_string_release(const_ZEND_TEST_DEPRECATED_ATTR_name);
+	zend_string_release_ex(const_ZEND_TEST_DEPRECATED_ATTR_name, true);
 
 	zval property__StaticProp_default_value;
 	ZVAL_NULL(&property__StaticProp_default_value);
@@ -916,9 +916,9 @@ static zend_class_entry *register_class_ZendAttributeTest(void)
 
 	zval const_TEST_CONST_value;
 	ZVAL_LONG(&const_TEST_CONST_value, 1);
-	zend_string *const_TEST_CONST_name = zend_string_init_interned("TEST_CONST", sizeof("TEST_CONST") - 1, 1);
+	zend_string *const_TEST_CONST_name = zend_string_init_interned("TEST_CONST", sizeof("TEST_CONST") - 1, true);
 	zend_class_constant *const_TEST_CONST = zend_declare_class_constant_ex(class_entry, const_TEST_CONST_name, &const_TEST_CONST_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_TEST_CONST_name);
+	zend_string_release_ex(const_TEST_CONST_name, true);
 
 	zval property_testProp_default_value;
 	ZVAL_NULL(&property_testProp_default_value);

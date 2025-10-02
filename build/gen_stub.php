@@ -2801,7 +2801,7 @@ class ConstInfo extends VariableLike
 
         $code = "\n" . $zvalCode;
 
-        $code .= "\tzend_string *const_{$constName}_name = zend_string_init_interned(\"$constName\", sizeof(\"$constName\") - 1, 1);\n";
+        $code .= "\tzend_string *const_{$constName}_name = zend_string_init_interned(\"$constName\", sizeof(\"$constName\") - 1, true);\n";
         $nameCode = "const_{$constName}_name";
 
         if ($this->exposedDocComment) {
@@ -2855,7 +2855,7 @@ class ConstInfo extends VariableLike
             $code .= "#endif\n";
         }
 
-        $code .= "\tzend_string_release(const_{$constName}_name);\n";
+        $code .= "\tzend_string_release_ex(const_{$constName}_name, true);\n";
 
         return $code;
     }
