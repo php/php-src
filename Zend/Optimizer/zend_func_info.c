@@ -57,7 +57,7 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 	 && (call_info->num_args == 2 || call_info->num_args == 3)
 	 && ssa
 	 && !(ssa->cfg.flags & ZEND_SSA_TSSA)) {
-		zend_op_array *op_array = call_info->caller_op_array;
+		const zend_op_array *op_array = call_info->caller_op_array;
 		uint32_t t1 = _ssa_op1_info(op_array, ssa, call_info->arg_info[0].opline,
 			ssa->ops ? &ssa->ops[call_info->arg_info[0].opline - op_array->opcodes] : NULL);
 		uint32_t t2 = _ssa_op1_info(op_array, ssa, call_info->arg_info[1].opline,
@@ -116,7 +116,7 @@ uint32_t zend_get_internal_func_info(
 		return 0;
 	}
 
-	func_info_t *info = Z_PTR_P(zv);
+	const func_info_t *info = Z_PTR_P(zv);
 	if (info->info_func) {
 		return call_info ? info->info_func(call_info, ssa) : 0;
 	} else {
@@ -178,7 +178,7 @@ ZEND_API uint32_t zend_get_func_info(
 	} else {
 		if (!call_info->is_prototype) {
 			// FIXME: the order of functions matters!!!
-			zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)callee_func);
+			const zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)callee_func);
 			if (info) {
 				ret = info->return_info.type;
 				*ce = info->return_info.ce;
