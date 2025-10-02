@@ -237,7 +237,7 @@ esac
 dnl Detect C library.
 PHP_C_STANDARD_LIBRARY
 AS_VAR_IF([php_cv_c_standard_library], [musl],
-  [AC_DEFINE([__MUSL__], [1], [Define when using musl libc.])])
+  [AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])])
 
 dnl Add _GNU_SOURCE compile definition because the php_config.h with definitions
 dnl by AC_USE_SYSTEM_EXTENSIONS might be included after the system headers which
